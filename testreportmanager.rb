@@ -6,7 +6,7 @@ require './schoolfactory'
 
 puts "\n" * 10
 
-# making some more changes here
+# making some more changes here, and some more
 school_name = 'St Johns Primary'
 
 ENV[SchoolFactory::ENV_SCHOOL_DATA_SOURCE] = SchoolFactory::BATH_HACKED_SCHOOL_DATA
