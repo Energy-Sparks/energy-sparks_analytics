@@ -1,0 +1,354 @@
+---
+"Lewis House":
+  :name: "Lewis House"
+  :postcode: BA1 1JG
+  :meters:
+  - :mpan: '2200030031840'
+    :meter_type: :electricity
+    :name: "##Lewis House Electricity Supply 1"
+  - :mpan: '2200041933781'
+    :meter_type: :electricity
+    :name: Lewis House (New HH)
+  - :mprn: '14297301'
+    :meter_type: :gas
+    :name: Lewis House 2nd Floor
+    :philipwashere:
+      - :storageheater: 44.5
+        :solarpv: 22.4
+        :emailaddress: philip.haile@hotmail.co.uk
+  - :mprn: '14296905'
+    :meter_type: :gas
+    :name: Lewis House 1st Floor
+  - :mprn: '4223280500'
+    :meter_type: :gas
+    :name: Lewis House Lower Ground Floor UPS Room
+  - :mprn: '14297503'
+    :meter_type: :gas
+    :name: Lewis House 4th Floor
+  - :mprn: '14297402'
+    :meter_type: :gas
+    :name: Lewis House 3rd Floor
+Bishop Sutton Primary School:
+  :name: Bishop Sutton Primary
+  :postcode: BS39 5XD
+  :meters:
+  - :mpan: '2200012833349'
+    :meter_type: :electricity
+    :name: Bishop Sutton Primary School Electricity
+  - :mpan: '2200012833358'
+    :meter_type: :electricity
+    :name: Bishop Sutton Primary School Electricity
+  - :mprn: '8891205403'
+    :meter_type: :gas
+    :name: Bishop Sutton Primary School Gas Supply
+Castle Primary School:
+  :name: Castle Primary School
+  :postcode: BS31 2TS
+  :floor_area: 2_000.0
+  :pupils: 400
+  :type: :primary
+  :meters:
+  - :mpan: '2200015105145'
+    :meter_type: :electricity
+    :name: Castle Primary School Electricity Supply
+    :deprecated: true
+  - :mpan: '2200015105163'
+    :meter_type: :electricity
+    :name: "##Castle Primary School Electricity Supply"
+    :deprecated: true
+  - :mpan: '2200041803451'
+    :meter_type: :electricity
+    :name: Keynsham Childrens Centre - Castle School Annexe
+    :floor_area: 200.0
+    :pupils: 40
+  - :mpan: '2200042676990'
+    :meter_type: :electricity
+    :name: Castle Primary School (HH) (New Supply)
+    :floor_area: 1_800.0
+    :pupils: 360
+  - :mprn: '4186869705'
+    :meter_type: :gas
+    :name: Castle Primary Gas Supply
+    :floor_area: 2_000.0
+    :pupils: 400
+"Nothgate House":
+  :name: "Nothgate House"
+  :postcode: BA1 1LN
+  :meters:
+  - :mpan: '2200012354782'
+    :meter_type: :electricity
+    :name: "##Nothgate House Electricity Supply 3"
+  - :mpan: '2200012354834'
+    :meter_type: :electricity
+    :name: "##Northgate House Electricity Supply 1"
+  - :mpan: '2200012354791'
+    :meter_type: :electricity
+    :name: "##Northgate House Electricity Supply 2"
+"Paulton Library":
+  :name: "Paulton Library"
+  :postcode: BS39 7QG
+  :meters:
+  - :mpan: '2200011960152'
+    :meter_type: :electricity
+    :name: "## OLD Paulton Library Electricity Supply 1"
+  - :mpan: '2200011969128'
+    :meter_type: :electricity
+    :name: Paulton Library & Hub (1-2 Hill Court)
+  - :mprn: '4226357603'
+    :meter_type: :gas
+    :name: "##OLD Paulton Library Gas Supply"
+Saltford C of E Primary School:
+  :name: Saltford C of E Primary School
+  :postcode: BS31 3DW
+  :meters:
+  - :mpan: '2200015066648'
+    :meter_type: :electricity
+    :name: Saltford C of E Primary School (Tiddlers pre-school only)
+  - :mpan: '2200030015420'
+    :meter_type: :electricity
+    :name: Saltford C of E Primary School (P272 HH)
+  - :mprn: '47939506'
+    :meter_type: :gas
+    :name: Saltford C of E Primary School
+Twerton Infant School:
+  :name: Twerton Infant School
+  :postcode: BA2 1QR
+  :meters:
+  - :mpan: '2200012581120'
+    :meter_type: :electricity
+    :name: Twerton Infant School Electricity Supply
+  - :mpan: '2200012581130'
+    :meter_type: :electricity
+    :name: Twerton Infant School Electricity Supply
+  - :mprn: '4223705708'
+    :meter_type: :gas
+    :name: Twerton Infant School
+Pensford Primary:
+  :name: Pensford Primary
+  :postcode: BS39 4AA
+  :meters:
+  - :mpan: '2200012062827'
+    :meter_type: :electricity
+    :name: Pensford Primary Electricity Supply 4
+  - :mpan: '2200012062836'
+    :meter_type: :electricity
+    :name: Pensford Primary Electricity Supply 3
+  - :mpan: '2200012062845'
+    :meter_type: :electricity
+    :name: Pensford Primary Electricity Supply 2
+  - :mpan: '2200012062854'
+    :meter_type: :electricity
+    :name: Pensford Primary School - Kitchen
+Midsomer Norton Library:
+  :name: Midsomer Norton Library
+  :postcode: BA3 2DA
+  :meters:
+  - :mpan: '2200011916330'
+    :meter_type: :electricity
+    :name: Midsomer Norton Library (P272 HH)
+  - :mprn: '4224801709'
+    :meter_type: :gas
+    :name: Midsomer Norton Library Gas Supply
+Stanton Drew Primary School:
+  :name: Stanton Drew Primary School
+  :postcode: BS39 4EQ
+  :meters:
+  - :mpan: '2200013463696'
+    :meter_type: :electricity
+    :name: Stanton Drew Primary School (P272 HH)
+Weston Library:
+  :name: Weston Library
+  :postcode: BA1 4BU
+  :meters:
+  - :mpan: '2200012586713'
+    :meter_type: :electricity
+    :name: Weston Library Electricity Supply 1
+St Johns Primary:
+  :name: St Johns Primary
+  :postcode: BA2 3NR
+  :meters:
+  - :mpan: '2200041706127'
+    :meter_type: :electricity
+    :name: St Johns Primary (P272 HH)
+  - :mpan: '2200041851650'
+    :meter_type: :electricity
+    :name: St Johns Primary Oldfield Lane BATH BA2
+  - :mprn: '9206222810'
+    :meter_type: :gas
+    :name: St Johns Catholic Primary School Bath
+Roundhill School:
+  :name: Roundhill School
+  :postcode: BA2 1LG
+  :meters:
+  - :mpan: '2200012559589'
+    :meter_type: :electricity
+    :name: Junior School Electricity - Corridor 2 heating
+  - :mpan: '2200012559570'
+    :meter_type: :electricity
+    :name: Junior School Electricity - Kitchen
+  - :mpan: '2200012559533'
+    :meter_type: :electricity
+    :name: Infants School - Hot Water
+  - :mpan: '2200012559542'
+    :meter_type: :electricity
+    :name: Infants School - Main School 2
+  - :mpan: '2200012559524'
+    :meter_type: :electricity
+    :name: Infants School - Kitchen
+  - :mpan: '2200012559598'
+    :meter_type: :electricity
+    :name: Junior School Electricity - Corridor 1
+  - :mpan: '2200012559551'
+    :meter_type: :electricity
+    :name: Infants School - Main School 1
+  - :mprn: '75665806'
+    :meter_type: :gas
+    :name: Infant School - Boilers/Heating
+  - :mprn: '50974602'
+    :meter_type: :gas
+    :name: Junior School Gas - Kitchen
+  - :mprn: '50974703'
+    :meter_type: :gas
+    :name: Junior School Gas Supply 2
+  - :mprn: '50974804'
+    :meter_type: :gas
+    :name: Infant School - The Hub
+  - :mprn: '75665705'
+    :meter_type: :gas
+    :name: Infant School - Kitchen & Heaters
+Swallow Street Stores & Workshop:
+  :name: Swallow Street Stores & Workshop
+  :postcode: BA1 1NH
+  :meters:
+  - :mpan: '2200012350565'
+    :meter_type: :electricity
+    :name: Swallow Street Stores & Workshop Electri
+Paulton Junior School:
+  :name: Paulton Junior School
+  :postcode: BS39 7QY
+  :floor_area: 2_000.0
+  :pupils: 400
+  :meters:
+  - :mpan: '2200011955152'
+    :meter_type: :electricity
+    :name: Paulton Junior School Electricity Supply
+  - :mprn: '13678903'
+    :meter_type: :gas
+    :name: Paulton Junior School Gas Supply
+Moorland Rd Library:
+  :name: Moorland Rd Library
+  :postcode: BA2 3PL
+  :meters:
+  - :mpan: '2200012736715'
+    :meter_type: :electricity
+    :name: Moorland Rd Library
+Saltford Library:
+  :name: Saltford Library
+  :postcode: BS31 3DJ
+  :meters:
+  - :mpan: '2200015072039'
+    :meter_type: :electricity
+    :name: Saltford Library Electricity Supply 1
+Radstock Library:
+  :name: Radstock Library
+  :postcode: BA3 3QQ
+  :meters:
+  - :mpan: '2200011984302'
+    :meter_type: :electricity
+    :name: Radstock Library
+Hollies Car Park Barrier:
+  :name: Hollies Car Park Barrier
+  :postcode: BA3 2DP
+  :meters:
+  - :mpan: '2200041777466'
+    :meter_type: :electricity
+    :name: Hollies Car Park Barrier
+  - :mpan: '2200030033768'
+    :meter_type: :electricity
+    :name: Hollies (P272 HH)
+  - :mprn: '67645209'
+    :meter_type: :gas
+    :name: Hollies Gas Supply
+Haycombe Cemetery Chapel:
+  :name: Haycombe Cemetery Chapel
+  :postcode: BA2 2RQ
+  :meters:
+  - :mpan: '2200012700277'
+    :meter_type: :electricity
+    :name: Haycombe Cemetery Chapel Electricity Sup
+  - :mpan: '2200030027940'
+    :meter_type: :electricity
+    :name: Haycombe Crematorium (P272 HH)
+  - :mprn: '9696503'
+    :meter_type: :gas
+    :name: Haycombe Cemetery Chapel Gas Supply 1
+  - :mprn: '9696604'
+    :meter_type: :gas
+    :name: Haycombe Crematorium Gas Supply 2
+Guildhall:
+  :name: Guildhall
+  :postcode: BA1 5AW
+  :meters:
+  - :mpan: '2200030370866'
+    :meter_type: :electricity
+    :name: Guildhall Electricity Supply 1 (HH)
+  - :mprn: '9684305'
+    :meter_type: :gas
+    :name: Guildhall Gas - Catering (Basement)
+  - :mprn: '9684204'
+    :meter_type: :gas
+    :name: Guildhall - Boilers
+Freshford C of E Primary:
+  :name: Freshford C of E Primary
+  :postcode: BA2 7WE
+  :meters:
+  - :mpan: '2000006183919'
+    :meter_type: :electricity
+    :name: Freshford C of E Primary Electricity Sup
+  - :mprn: '67095200'
+    :meter_type: :gas
+    :name: Freshford C of E Primary School Gas Supp
+Keynsham Library & One Stop Shop:
+  :name: Keynsham Library & One Stop Shop
+  :postcode: BS31 1FS
+  :meters:
+  - :mpan: '2200042345238'
+    :meter_type: :electricity
+    :name: Keynsham Library & One Stop Shop (P272 HH)
+Marksbury C of E Primary School:
+  :name: Marksbury C of E Primary School
+  :postcode: BA2 9HS
+  :meters:
+  - :mpan: '2200011879013'
+    :meter_type: :electricity
+    :name: Marksbury C of E Primary School Electric
+Royal Victoria Park Nursery:
+  :name: Royal Victoria Park Nursery
+  :postcode: BA1 2QN
+  :meters:
+  - :mpan: '2200012484348'
+    :meter_type: :electricity
+    :name: Royal Victoria Park Nursery Electricity
+Bath Central Library:
+  :name: Bath Central Library
+  :postcode: BA1 5AL
+  :meters:
+  - :mpan: '2200030362020'
+    :meter_type: :electricity
+    :name: Bath Central Library Electricity (HH)
+  - :mprn: '45749603'
+    :meter_type: :gas
+    :name: Bath Central Library Gas Supply
+Westfield Primary:
+  :name: Westfield Primary
+  :postcode: BA3 3XX
+  :meters:
+  - :mpan: '2200041713807'
+    :meter_type: :electricity
+    :name: Westfield Childrens Centre (Now Schools Responsibility)
+  - :mprn: '9219585408'
+    :meter_type: :gas
+    :name: "##(SCHOOL'S RESPONSIBILITY) Westfield Childrens Centre"
+  - :mprn: '51015307'
+    :meter_type: :gas
+    :name: Westfield Primary School Gas Supply 2

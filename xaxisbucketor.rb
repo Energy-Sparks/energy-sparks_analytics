@@ -78,8 +78,7 @@ class XBucketMonth < XBucketBase
       @x_axis_bucket_date_ranges.push([first_day_of_month, last_day_of_month])
       first_day_of_month = first_day_of_month.next_month.beginning_of_month
     end
-    puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-    puts @x_axis_bucket_date_ranges.inspect
+    @x_axis_bucket_date_ranges.last[1] = data_end_date if @x_axis_bucket_date_ranges.last[1] > data_end_date
   end
 end
 
@@ -168,11 +167,16 @@ class XBucketIntraday < XBucketBase
   def create_x_axis
     (0..47).each do |halfhour_index|
       @x_axis.push(key(nil, halfhour_index))
+      # this is a slight fudge as the 1/2 hour buckets technically have not date
+      # range, but this allows the upstream kWh to kW converted to know the date
+      # range in order to convert from kWh to kW generically without having to
+      # look up the date ranges seperately
+      @x_axis_bucket_date_ranges.push([data_start_date, data_end_date])
     end
     # this bit is a slight fudge as the x_axis doesn't have date buckets, only 30 minute times
-    (data_start_date..data_end_date).each do |date|
-      @x_axis_bucket_date_ranges.push([date, date])
-    end
+    # (data_start_date..data_end_date).each do |date|
+    #  @x_axis_bucket_date_ranges.push([date, date])
+    # end
   end
 end
 

@@ -73,7 +73,7 @@ class Temperatures < HalfHourlyData
     (start_date..end_date).each do |date|
       total_temperature += average_temperature(date)
     end
-    total_temperature / (start_date - end_date + 1)
+    total_temperature / (end_date - start_date + 1)
   end
 
   def average_degree_days_in_date_range(start_date, end_date, base_temp)

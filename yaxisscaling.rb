@@ -4,6 +4,7 @@
 #             per 200 pupils (primary representation), per 1000 pupils (secondary)
 #
 # ultimately it might have to support some degree day normalisation
+# TODO (PH,5Jun2018) this class doesn't really know whether its a global class or an instance at the moment
 require './building'
 
 class YAxisScaling
@@ -19,6 +20,29 @@ class YAxisScaling
     unit_scale = scale_unit_from_kwh(unit, fuel_type)
     factor = scaling_factor(scaling_factor_type, building)
     value * factor * unit_scale
+  end
+
+  def self.unit_description(unit, scaling_factor_type)
+    puts "Y axis scaling for #{unit} #{scaling_factor_type}"
+    factor_type_description = {
+      none:             nil,
+      per_pupil:        'per pupil',
+      per_floor_area:   'per floor area (m2)',
+      per_200_pupils:   'per 200 pupil (average size primary school)',
+      per_1000_pupils:  'per 1000 pupil (average size secondary school)'
+    }
+    unit_description = {
+      kwh:            'kWh',
+      kw:             'kW',
+      co2:            'CO2 (kg)',
+      £:              'pounds',
+      library_books:  'library books'
+    }
+    if scaling_factor_type.nil? || scaling_factor_type == :none
+      unit_description[unit]
+    else
+      unit_description[unit] + '/' + factor_type_description[scaling_factor_type]
+    end
   end
 
   def scaling_factor(scaling_factor_type, building)

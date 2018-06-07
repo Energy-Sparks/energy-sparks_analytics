@@ -109,7 +109,7 @@ class Holidays
     @holidays.reverse.each do |hol|
       # identify summer holiday by length, then month (England e.g. Mon 9 Jul 2018 - Wed 4 Sep 2018  Scotland e.g. Mon 1 Jul 2019 - 13 Aug 2019
 
-      days_in_holiday = (hol.end_date - hol.start_date).to_i
+      days_in_holiday = (hol.end_date - hol.start_date + 1).to_i
       if days_in_holiday > 4 * 7 && date > hol.end_date
         return hol
       end
@@ -120,23 +120,19 @@ class Holidays
   # returns a list of academic years between 2 dates - iterates backwards from most recent end of summer holiday
   def academic_years(start_date, end_date)
     acy_years = []
-    running_date = end_date
 
-    last_summer_hol = find_summer_holiday_before(running_date)
-    running_date = last_summer_hol.start_date - 1 # move running date back to day before summer holiday
+    last_summer_hol = find_summer_holiday_before(end_date)
 
-    until !last_summer_hol.nil do
+    until last_summer_hol.nil? do
       previous_summer_hol = find_summer_holiday_before(last_summer_hol.start_date - 1)
       return acy_years if previous_summer_hol.nil?
       return acy_years if previous_summer_hol.end_date < start_date
 
       year_name = previous_summer_hol.end_date.year.to_s + '/' + last_summer_hol.start_date.year.to_s
-      acy_years.push(SchoolDatePeriod.new(:academic_year, year_name, previous_summer_hol.end_date, last_summer_hol.end_date))
+      acy_years.push(SchoolDatePeriod.new(:academic_year, year_name, previous_summer_hol.end_date + 1, last_summer_hol.end_date))
 
-      last_summer_hol = find_summer_holiday_before(running_date)
-      running_date = last_summer_hol.start_date - 1
+      last_summer_hol = previous_summer_hol
     end
-
     acy_years
   end
 

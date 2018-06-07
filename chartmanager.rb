@@ -40,14 +40,200 @@ class ChartManager
     # data_types:         an array e.g. [:metereddata, :predictedheat] - assumes :metereddata if not present
     #
     # rubocop:disable Style/HashSyntax, Layout/SpaceInsideHashLiteralBraces
+
     benchmark:  {
       name:             'Benchmark Comparison',
-      series_breakdown: :fuel,
       chart1_type:      :bar,
       chart1_subtype:   :stacked,
-      x_axis:           :academicyear,
-      yaxis_units:      :£
+      meter_definition: :all,
+      x_axis:           :year,
+      series_breakdown: :fuel,
+      yaxis_units:      :£,
+      yaxis_scaling:    :none
+      # timescale:        :year
     },
+    daytype_breakdown: {
+      name:             'Day Type: Gas',
+      chart1_type:      :pie,
+      meter_definition: :allheat,
+      x_axis:           :nodatebuckets,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      timescale:        :year
+    },
+    group_by_week_gas: {
+      name:             'By Week: Gas',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :£,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays
+    },
+    group_by_week_gas_kw: {
+      name:             'By Week: Gas',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays
+    },
+    group_by_week_gas_kwh: {
+      name:             'By Week: Gas',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays
+    },
+    group_by_week_gas_kwh_pupil: {
+      name:             'By Week: Gas',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :per_pupil,
+      y2_axis:          :degreedays
+    },
+    group_by_week_gas_co2_floor_area: {
+      name:             'By Week: Gas',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :co2,
+      yaxis_scaling:    :per_floor_area,
+      y2_axis:          :degreedays
+    },
+    group_by_week_gas_library_books: {
+      name:             'By Week: Gas',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :library_books,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays
+    },
+    group_by_week_electricity: {
+      name:             'By Week: Electricity',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allelectricity,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      # timescale:        :year,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays
+    },
+    gas_latest_years:  {
+      name:             'Gas Use Over Last Few Years (to date)',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      series_breakdown: :daytype,
+      x_axis:           :year,
+      meter_definition: :allheat,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    gas_latest_academic_years:  {
+      name:             'Gas Use Over Last Few Academic Years',
+      chart1_type:      :bar,
+      chart1_subtype:   :stacked,
+      series_breakdown: :daytype,
+      x_axis:           :academicyear,
+      meter_definition: :allheat,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    gas_by_day_of_week:  {
+      name:             'Gas Use By Day of the Week (last year)',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      series_breakdown: :daytype,
+      x_axis:           :dayofweek,
+      timescale:        :year,
+      meter_definition: :allheat,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    electricity_by_day_of_week:  {
+      name:             'Electricity Use By Day of the Week (last year)',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      series_breakdown: :daytype,
+      x_axis:           :dayofweek,
+      timescale:        :year,
+      meter_definition: :allelectricity,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :per_200_pupils
+    },
+    electricity_by_month_acyear_0_1:  {
+      name:             'Electricity Use By Month (previous 2 academic years)',
+      chart1_type:      :column,
+      # chart1_subtype:   :stacked,
+      series_breakdown: :none,
+      x_axis:           :month,
+      timescale:        [{:academicyear => 0}, {:academicyear => -1}],
+      meter_definition: :allelectricity,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    thermostatic: {
+      name:             'Thermostatic',
+      chart1_type:      :scatter,
+      meter_definition: :allheat,
+      timescale:        :year,
+      series_breakdown: %i[heating heatingmodeltrendlines degreedays],
+      x_axis:           :day,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    cusum: {
+      name:             'CUSUM',
+      chart1_type:      :line,
+      meter_definition: :allheat,
+      series_breakdown: :cusum,
+      x_axis:           :day,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    baseload: {
+      name:             'Baseload kW',
+      chart1_type:      :line,
+      series_breakdown: :baseload,
+      meter_definition: :allelectricity,
+      x_axis:           :day,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    intraday_line:  {
+      name:             'Intraday',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{:year => 0}, {:year => -1}],
+      x_axis:           :intraday,
+      meter_definition: :allelectricity,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    }
+=begin
+
     electricity_year:  {
       name:             'Electricity Use Over Last Few Years',
       chart1_type:      :bar,
@@ -66,26 +252,6 @@ class ChartManager
       x_axis:           :academicyear,
       fuel:             :electricity,
       yaxis_units:      :£
-    },
-    daytype_breakdown: {
-      name:             'Day Type',
-      chart1_type:      :pie,
-      # chart1_subtype:   :stacked,
-      series_breakdown: :daytype,
-      yaxis_units:      :£,
-      meter_definition: :allheat,
-      x_axis:           :nodatebuckets,
-      timescale:        :year
-    },
-    group_by_week: {
-      name:             'By Week',
-      chart1_type:      :column,
-      chart1_subtype:   :stacked,
-      meter_definition: :allheat,
-      series_breakdown: :daytype,
-      x_axis:           :week,
-      yaxis_units:      :£,
-      y2_axis:          :degreedays # :temperature
     },
     group_by_week_electric: {
       name:             'By Week Electric',
@@ -195,6 +361,7 @@ class ChartManager
       yaxis_scaling:    :none
     }
     # rubocop:enable Style/HashSyntax, Layout/SpaceInsideHashLiteralBraces
+=end
   }
   # rubocop:enable Style/ClassVars, Style/SymbolArray
 
@@ -246,8 +413,9 @@ class ChartManager
     graph_definition[:x_data]         = aggregator.bucketed_data
     graph_definition[:chart1_type]    = chart_config[:chart1_type]
     graph_definition[:chart1_subtype] = chart_config[:chart1_subtype]
-    graph_definition[:yaxis_units]    = chart_config[:yaxis_units]
-    graph_definition[:yaxis_scaling]  = chart_config[:yaxis_scaling]
+    # graph_definition[:yaxis_units]    = chart_config[:yaxis_units]
+    # graph_definition[:yaxis_scaling]  = chart_config[:yaxis_scaling]
+    graph_definition[:y_axis_label]   = chart_config[:y_axis_label]
 
     if chart_config.key?(:y2_axis)
       graph_definition[:y2_chart_type] = :line

@@ -179,6 +179,7 @@ class ExcelCharts
     chart1 = new_chart(graph_definition[:chart1_type], graph_definition[:chart1_subtype])
 
     chart1.set_title(name: graph_definition[:title])
+    chart1.set_y_axis(name: graph_definition[:y_axis_label])
     puts "setting title to #{graph_definition[:title]}"
 
     if graph_definition[:chart1_type] == :pie # special case for pie charts, need to swap axis

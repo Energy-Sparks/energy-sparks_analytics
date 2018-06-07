@@ -57,6 +57,8 @@ class SeriesNames
   DEGREEDAYS      = 'Degree Days'.freeze
   TEMPERATURE     = 'Temperature'.freeze
   PREDICTEDHEAT   = 'Predicted Heat'.freeze
+  CUSUM           = 'CUSUM'.freeze
+  BASELOAD        = 'BASELOAD'.freeze
 
   NONE            = 'Energy'.freeze
 
@@ -106,6 +108,12 @@ class SeriesDataManager
     if @breakdown_list.include?(:none)
       @series_buckets.push(SeriesNames::NONE)
     end
+    if @breakdown_list.include?(:cusum)
+      @series_buckets.push(SeriesNames::CUSUM)
+    end
+    if @breakdown_list.include?(:baseload)
+      @series_buckets.push(SeriesNames::BASELOAD)
+    end
     if @y2_axis_list.include?(:degreedays) || @breakdown_list.include?(:degreedays)
       @series_buckets.push(SeriesNames::DEGREEDAYS)
     end
@@ -144,6 +152,19 @@ class SeriesDataManager
           calculate_model if @heating_model.nil?
           breakdown = heating_breakdown([dates[0], dates[1]], @meters[0], @meters[1])
         end
+        if @breakdown_list.include?(:cusum)
+          calculate_model if @heating_model.nil?
+          model_kwh = @heating_model.predicted_kwh_daterange(dates[0], dates[1], @building.temperatures)
+          actual_kwh = meter.amr_data.kwh_date_range(dates[0], dates[1])
+          breakdown[SeriesNames::CUSUM] = model_kwh - actual_kwh
+        end
+        if @breakdown_list.include?(:baseload)
+          baseload = meter.amr_data.baseload_kwh_date_range(dates[0], dates[1]) * 24 # TODO(PH,6Jun2018) rationalise kW as *24 to offset /24 in aggregator
+          breakdown[SeriesNames::BASELOAD] = baseload
+        end
+        if @breakdown_list.include?(:none)
+          breakdown[SeriesNames::NONE] = meter.amr_data.kwh_date_range(dates[0], dates[1])
+        end
         if @breakdown_list.include?(:heatingmodeltrendlines)
           calculate_model if @heating_model.nil?
           breakdown = breakdown.merge(predicted_heating_breakdown([dates[0], dates[1]], @meters[0], @meters[1]))
@@ -151,7 +172,7 @@ class SeriesDataManager
         if @y2_axis_list.include?(:degreedays) || @breakdown_list.include?(:degreedays)
           breakdown[SeriesNames::DEGREEDAYS] = @building.temperatures.degrees_days_average_in_range(15.5, dates[0], dates[1])
         end
-        if @y2_axis_list.include?(:temperatures) || @breakdown_list.include?(:temperatures)
+        if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
           breakdown[SeriesNames::TEMPERATURE] = @building.temperatures.average_temperature_in_date_range(dates[0], dates[1])
         end
         if @data_types.include?(:predictedheat)

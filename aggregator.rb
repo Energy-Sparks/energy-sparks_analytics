@@ -3,6 +3,7 @@ require 'active_support/core_ext/numeric/conversions'
 require 'active_support/core_ext/date/calculations'
 require './seriesdatamanager'
 require './xaxisbucketor'
+require './yaxisscaling'
 # aggregator - aggregates energy data in a form which can be used for generating charts
 #
 #     x_axis:   primarily date based: bucketing by year, month, week, day, 1/2 hour, none (implies intraday 1/2 hour but not bucketed)
@@ -11,7 +12,7 @@ require './xaxisbucketor'
 #     y2_axis:  temperature or degree day data - averaged or calculated, not aggregated
 #
 class Aggregator
-  attr_reader :bucketed_data, :total_kwh, :series_sums, :x_axis, :y2_axis, :data_labels
+  attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis, :data_labels
 
   def initialize(building, chart_config)
     @building = building
@@ -20,7 +21,15 @@ class Aggregator
   end
 
   def title_summary
-    @total_kwh.round.to_s(:delimited) + ' kWh'
+    if @chart_config[:yaxis_units] == :kw
+      ''
+    else
+      @total_of_unit.round.to_s(:delimited) + y_axis_label
+    end
+  end
+
+  def y_axis_label
+    YAxisScaling.unit_description(@chart_config[:yaxis_units], @chart_config[:yaxis_scaling])
   end
 
   def aggregate
@@ -75,6 +84,8 @@ class Aggregator
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
     aggregate_by_series
+
+    @chart_config[:y_axis_label] = y_axis_label
   end
 
   # charts can be specified as working over a single time period
@@ -109,7 +120,9 @@ class Aggregator
     # loop through date groups on the x-axis; calculate aggregate data for each series in date range
 
     if chart_config[:x_axis] == :intraday
-      aggregate_by_halfhour(bucketed_data, bucketed_data_count)
+      start_date = @series_manager.periods[0].start_date
+      end_date = @series_manager.periods[0].end_date
+      aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
     else
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
@@ -132,11 +145,13 @@ private
     end
   end
 
-  def aggregate_by_halfhour(bucketed_data, bucketed_data_count)
-    @xbucketor.x_axis_bucket_date_ranges.each do |date_range| # 1 day at a time
+  def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
+    @chart_config[:x_axis]
+    # @xbucketor.x_axis_bucket_date_ranges.each do |date_range| # 1 day at a time
+    (start_date..end_date).each do |date|
       (0..47).each do |halfhour_index|
-        x_index = @xbucketor.index(date_range[0], halfhour_index)
-        multi_day_breakdown = @series_manager.get_data([:halfhour, date_range[0], halfhour_index])
+        x_index = @xbucketor.index(nil, halfhour_index)
+        multi_day_breakdown = @series_manager.get_data([:halfhour, date, halfhour_index])
         multi_day_breakdown.each do |key, value|
           add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
         end
@@ -183,11 +198,11 @@ private
   # for additional series total information which can be added to the chart legend and title
   def aggregate_by_series
     @series_sums = {}
-    @total_kwh = 0.0
-    @bucketed_data.each do |series_name, kwhs|
-      kwh = kwhs.inject(:+)
-      @series_sums[series_name] = kwh
-      @total_kwh += kwh
+    @total_of_unit = 0.0
+    @bucketed_data.each do |series_name, units|
+      unit = units.inject(:+)
+      @series_sums[series_name] = unit
+      @total_of_unit += unit
     end
   end
 
@@ -203,7 +218,17 @@ private
   def scale_y_axis_to_kw
     @bucketed_data.each do |series_name, data|
       (0..data.length - 1).each do |index|
-        @bucketed_data[series_name][index] /= @bucketed_data_count[series_name][index]
+        date_range = @xbucketor.x_axis_bucket_date_ranges[index]
+        days = date_range[1] - date_range[0] + 1.0
+        if @chart_config[:x_axis] == :intraday
+          # intraday kwh data gets bucketed into 48 x 1/2 hour buckets
+          # kw = kwh in bucket / dates in bucket * 2 (kWh per 1/2 hour)
+          puts "y_axis stuff #{days}"
+          @bucketed_data[series_name][index] = 2 * @bucketed_data[series_name][index] / days
+        else
+          hours = days * 24
+          @bucketed_data[series_name][index] /= hours
+        end
       end
     end
   end

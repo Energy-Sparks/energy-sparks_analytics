@@ -20,11 +20,15 @@ class AMRData < HalfHourlyData
   end
 
   def average_baseload_kw_date_range(date1, date2)
+    baseload_kwh_date_range(date1, date2) / (date2 - date1 + 1)
+  end
+
+  def baseload_kwh_date_range(date1, date2)
     total = 0.0
     (date1..date2).each do |date|
       total += baseload_kw(date)
     end
-    total / (date2 - date1 + 1)
+    total
   end
 
   def one_day_kwh(date)
