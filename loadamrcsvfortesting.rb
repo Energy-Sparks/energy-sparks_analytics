@@ -1,9 +1,9 @@
 require 'date'
 require 'roo-xls'
 require './amrdata'
-require './school'
-require './building'
-require './meter'
+require './app/models/school'
+require './app/models/building'
+require './app/models/meter'
 require './validateamrdata'
 # this is a scrappy bit of code only to be used while testing, and nnot in production
 # so ignore all lint errors
@@ -259,7 +259,7 @@ class LoadMeterDataFromCSV
     total_kwh = 0.0
     min_date = Date.new(2050,1,1)
     max_date = Date.new(2000,1,1)
-  
+
     if sheet.last_row == nil
       puts "Empty Sheet #{sheet_name}"
       return

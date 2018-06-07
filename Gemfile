@@ -6,3 +6,6 @@ gem 'statsample'
 gem 'mechanize'
 gem 'write_xlsx'
 gem 'roo-xls'
+
+# Useful for debugging
+gem 'pry-byebug'

@@ -24,9 +24,9 @@ require 'awesome_print'
 require 'soda'
 require 'yaml'
 require 'benchmark'
-require './school'
-require './meter'
-require './building'
+require './app/models/school'
+require './app/models/meter'
+require './app/models/building'
 
 def meter_number_column(type)
   type == 'electricity' ? 'mpan' : 'mprn'

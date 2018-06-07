@@ -34,9 +34,9 @@
 #
 require 'awesome_print'
 require './yaxisscaling'
-require './school'
-require './meter'
-require './building'
+require './app/models/school'
+require './app/models/meter'
+require './app/models/building'
 
 # single location containing text name of each series which appears in chart legend
 class SeriesNames

@@ -5,7 +5,7 @@
 #
 # ultimately it might have to support some degree day normalisation
 # TODO (PH,5Jun2018) this class doesn't really know whether its a global class or an instance at the moment
-require './building'
+require './app/models/building'
 
 class YAxisScaling
   attr_reader :units, :scaling_factors
