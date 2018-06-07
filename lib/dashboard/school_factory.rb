@@ -8,7 +8,6 @@
 #
 # - the aim is to largely lazy load data on demand
 #
-
 class SchoolFactory
   BATH_HACKED_SCHOOL_DATA = 'bath:hacked'.freeze
   EXCEL_SCHOOL_DATA = 'excel'.freeze
