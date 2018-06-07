@@ -1,6 +1,3 @@
-require 'logger'
-require_relative 'halfhourlydata'
-
 class SolarPV < HalfHourlyData
   def initialize(type)
     super(type)

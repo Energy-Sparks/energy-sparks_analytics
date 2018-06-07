@@ -1,8 +1,3 @@
-require_relative 'amrdata'
-require 'rubygems'
-require 'interpolate'
-require 'benchmark'
-
 class ElectricitySimulator
   attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions, :calc_components_results, :solar_insolence, :school
   def initialize(period, holidays, temperatures, solarinsolence, school)

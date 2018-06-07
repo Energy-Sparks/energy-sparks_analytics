@@ -14,8 +14,12 @@ GEM
     domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
     extendmatrix (0.4)
+    html-table (1.5.1)
+      strongtyping
+      structured_warnings (~> 0.3.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
+    interpolate (0.3.0)
     mechanize (2.7.6)
       domain_name (~> 0.5, >= 0.5.1)
       http-cookie (~> 1.0)
@@ -67,6 +71,7 @@ GEM
       spreadsheet (> 0.9.0)
     rserve-client (0.3.5)
     ruby-ole (1.2.12.1)
+    ruby-sun-times (0.1.5)
     rubyvis (0.6.1)
     rubyzip (1.2.1)
     spreadsheet (1.1.7)
@@ -82,6 +87,8 @@ GEM
       rserve-client (~> 0.3)
       rubyvis (~> 0.6.1)
       spreadsheet (~> 1.1)
+    strongtyping (2.0.7)
+    structured_warnings (0.3.0)
     text-table (1.2.4)
     unf (0.1.4)
       unf_ext
@@ -97,9 +104,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  html-table
+  interpolate
   mechanize
   pry-byebug
   roo-xls
+  ruby-sun-times
   statsample
   write_xlsx
 

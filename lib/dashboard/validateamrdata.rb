@@ -1,7 +1,4 @@
-require_relative 'amrdata'
-require_relative 'models'
-require_relative 'holidays'
-require 'awesome_print'
+
 # validates AMR data
 # - checks for missing data
 #   - if there is too big a gap it reduces the start and end dates for the amr data

@@ -1,9 +1,4 @@
-require_relative 'benchmarkmetrics'
-require_relative 'app/models/school'
-require_relative 'building'
-require_relative 'meter'
-require_relative 'chartmanager'
-require_relative 'yahooweatherforecast'
+
 require 'html-table'
 # rubocop:disable Metrics/LineLength, Style/FormatStringToken, Style/FormatString, Lint/UnneededDisable
 #

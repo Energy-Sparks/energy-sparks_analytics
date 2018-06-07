@@ -1,8 +1,3 @@
-require_relative 'datetimehelper'
-require_relative 'holidays'
-require 'statsample'
-require_relative 'datetimehelper'
-
 module EnergySparks
   module Maths
     def self.sum(a)

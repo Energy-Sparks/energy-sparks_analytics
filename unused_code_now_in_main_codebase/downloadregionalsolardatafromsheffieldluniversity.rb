@@ -335,11 +335,11 @@ def download_data_for_climate_zones
   end
 end
 
-download_data_for_climate_zones
+# download_data_for_climate_zones
 
-puts "=============Consolidated Error/Warning Messages============="
-@errors.each do |error_msg|
-  puts error_msg
-end
+# puts "=============Consolidated Error/Warning Messages============="
+# @errors.each do |error_msg|
+#   puts error_msg
+# end
 
 # rubocop:enable Lint/UnneededDisable

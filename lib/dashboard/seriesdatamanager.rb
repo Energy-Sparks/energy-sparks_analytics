@@ -32,11 +32,6 @@
 #   - single half hour for example in intraday reporting
 #   - time periods - on date boundaries only
 #
-require 'awesome_print'
-require_relative 'yaxisscaling'
-require_relative '../app/models/school'
-require_relative '../app/models/meter'
-require_relative '../app/models/building'
 
 # single location containing text name of each series which appears in chart legend
 class SeriesNames

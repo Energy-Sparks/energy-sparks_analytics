@@ -4,7 +4,7 @@
 #           - this is the correct model
 require './app/models/building'
 require './app/models/meter'
-require_relative '../../lib/validateamrdata'
+require_relative '../../lib/dashboard.rb'
 
 class School < Building
   # Energy Sparks activerecord fields:

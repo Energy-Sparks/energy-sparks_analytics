@@ -7,7 +7,8 @@
 #           schedule if a meter covers a community sports centre which is
 #           used out of core school hours
 #           - also holds modelling data
-require_relative '../../lib/scheduledatamanager'
+#require_relative '../../lib/scheduledatamanager'
+require_relative '../../lib/dashboard.rb'
 
 class Building
   attr_reader :name, :address, :floor_area, :pupils, :heat_meters, :electricity_meters

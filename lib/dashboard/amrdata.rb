@@ -1,6 +1,3 @@
-require 'logger'
-require 'statsample'
-require_relative 'halfhourlydata'
 
 class AMRData < HalfHourlyData
   def initialize(type)

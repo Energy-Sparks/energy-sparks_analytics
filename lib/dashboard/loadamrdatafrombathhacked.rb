@@ -20,13 +20,9 @@
 require 'net/http'
 require 'json'
 require 'date'
-require 'awesome_print'
 require 'soda'
 require 'yaml'
 require 'benchmark'
-require_relative '../app/models/school'
-require_relative '../app/models/meter'
-require_relative '../app/models/building'
 
 def meter_number_column(type)
   type == 'electricity' ? 'mpan' : 'mprn'
@@ -47,6 +43,8 @@ class LoadSchools
       _16_30 _17_00 _17_30 _18_00 _18_30 _19_00 _19_30 _20_00
       _20_30 _21_00 _21_30 _22_00 _22_30 _23_00 _23_30 _24_00
     )
+
+    cached_meter_readings_directory = ENV['CACHED_METER_READINGS_DIRECTORY'] || './MeterReadings/'
 
     load_schools(ENV['CACHED_METER_READINGS_DIRECTORY'] + 'schoolsandmeters.yml')
   end

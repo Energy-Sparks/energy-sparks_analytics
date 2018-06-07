@@ -1,7 +1,6 @@
 # implement X Axis bucketing as a series of derived classes
 #  - probably more tranparent and debugable than lamda's or procs, and mixins are too static
-require 'active_support'
-require 'active_support/core_ext/date/calculations'
+
 class XBucketBase
   attr_reader :x_axis, :x_axis_bucket_date_ranges
   def initialize(type, periods)

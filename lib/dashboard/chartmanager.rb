@@ -1,10 +1,5 @@
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
-#
-require_relative 'aggregator'
-require 'benchmark'
-require 'awesome_print'
-
 class ChartManager
   attr_reader :standard_charts, :school
 

@@ -1,6 +1,4 @@
-require 'date'
 require 'open-uri'
-
 # WEATHER UNDERGROUND TEMPERATURE AND SOLAR DATA LOADER
 #
 # loads temperature and weather data from Weather Underground via a URL
@@ -102,7 +100,7 @@ def interpolate_rawdata_onto_30minute_boundaries(station_name, rawdata, start_da
 
   start_time = start_date.to_datetime
   end_time = end_date.to_datetime
-  
+
   date_times = rawdata.keys
   mins30step = (1.to_f/48)
 
@@ -155,7 +153,7 @@ def process_area(area)
   max_temp = area[:max_temperature]
   min_temp = area[:min_temperature]
   max_solar = area[:max_solar_insolence]
-  
+
   # load the raw data from webpages for each station (one day at a time)
   rawstationdata = {}
   area[:weather_stations_for_temperature].each do |station_name, weight|
@@ -183,7 +181,7 @@ def process_area(area)
   solar_insolence = {}
   if area[:method] == :weighted_average  # for every 30 minutes in period loop through all the station data averaging
     mins30step = (1.to_f/48)
-  
+
     loop_count = 0
     start_date.to_datetime.step(end_date.to_datetime, mins30step).each do |datetime|
       avg_sum_temp = 0.0
@@ -191,7 +189,7 @@ def process_area(area)
 
       avg_sum_solar = 0.0
       sample_weight_solar = 0.0
-      
+
       processeddata.each do |station_name, data|
         # average temperatures
         if !data[0][loop_count].nil?
@@ -199,7 +197,7 @@ def process_area(area)
           avg_sum_temp += data[0][loop_count] * temp_weight
           sample_weight_temp += temp_weight
         end
-        
+
         # average solar insolence
         if !data[1][loop_count].nil? && area[:weather_stations_for_solar].key?(station_name)
           solar_weight = area[:weather_stations_for_solar][station_name]
@@ -207,7 +205,7 @@ def process_area(area)
           sample_weight_solar += solar_weight
         end
       end
-      
+
       avg_temp = sample_weight_temp> 0.0 ? (avg_sum_temp / sample_weight_temp).round(2) : nil
       avg_solar = sample_weight_solar > 0.0 ? (avg_sum_solar / sample_weight_solar).round(2) : nil
       temperatures[datetime] = avg_temp
@@ -231,7 +229,7 @@ end
 def write_csv(filename, data, orientation)
   # implemented using file operations as roo & write_xlsx don't seem to support writing csv and spreadsheet/csv have BOM issues on Ruby 2.5
   puts "Writing csv file #{filename}: #{data.length} items in format #{orientation}"
-  File.open(filename, 'w') do |file|  
+  File.open(filename, 'w') do |file|
     if orientation == :landscape
       dates = unique_list_of_dates_from_datetimes(data.keys)
       dates.each do |date|
@@ -253,19 +251,19 @@ def write_csv(filename, data, orientation)
         line << datetime.strftime('%Y-%m-%d %H:%M:%S') << ',' << value.to_s << '\n'
         file.puts(line)
       end
-    end  
+    end
   end
 end
 
 # MAIN
 
-@areas.each do |area|
-  temperatures, solar_insolence = process_area(area)
+# @areas.each do |area|
+#   temperatures, solar_insolence = process_area(area)
 
-  write_csv(area[:temperature_csv_file_name], temperatures, area[:csv_format])
-  write_csv(area[:solar_csv_file_name], solar_insolence, area[:csv_format])
+#   write_csv(area[:temperature_csv_file_name], temperatures, area[:csv_format])
+#   write_csv(area[:solar_csv_file_name], solar_insolence, area[:csv_format])
 
-end
+# end
 
 
 

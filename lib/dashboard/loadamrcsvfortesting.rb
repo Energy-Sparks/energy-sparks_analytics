@@ -1,10 +1,6 @@
 require 'date'
 require 'roo-xls'
-require_relative 'amrdata'
-require_relative '../app/models/school'
-require_relative '../app/models/building'
-require_relative '../app/models/meter'
-require_relative 'validateamrdata'
+
 # this is a scrappy bit of code only to be used while testing, and nnot in production
 # so ignore all lint errors
 # rubocop:disable all

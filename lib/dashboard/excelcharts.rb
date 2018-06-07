@@ -1,6 +1,4 @@
 require 'write_xlsx'
-require_relative 'halfhourlydata'
-require 'awesome_print'
 
 # takes a hash of aggregated AMR data and adds it as a chart to an excel spreadsheet for testing purposes
 class ExcelCharts

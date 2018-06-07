@@ -1,5 +1,5 @@
 # Report Manager - manages groups of charts
-require_relative 'chartmanager'
+# require_relative 'chartmanager'
 
 class ReportManager
   attr_reader :standard_reports

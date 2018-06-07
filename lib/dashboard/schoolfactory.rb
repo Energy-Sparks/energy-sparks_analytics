@@ -8,8 +8,6 @@
 #
 # - the aim is to largely lazy load data on demand
 #
-require_relative 'loadamrcsvfortesting'
-require_relative 'loadamrdatafrombathhacked'
 
 class SchoolFactory
   BATH_HACKED_SCHOOL_DATA = 'bath:hacked'.freeze

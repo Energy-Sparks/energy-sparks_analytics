@@ -6,6 +6,8 @@ gem 'statsample'
 gem 'mechanize'
 gem 'write_xlsx'
 gem 'roo-xls'
-
+gem 'html-table'
+gem 'interpolate'
+gem 'ruby-sun-times'
 # Useful for debugging
 gem 'pry-byebug'

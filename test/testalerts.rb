@@ -1,7 +1,6 @@
 # test new report manager
 
-require './metersandschools'
-require './alerts'
+require_relative '../lib/dashboard.rb'
 
 def banner(title)
   len_before = ((80 - title.length) / 2).floor

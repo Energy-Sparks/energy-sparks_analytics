@@ -1,9 +1,3 @@
-require 'active_support'
-require 'active_support/core_ext/numeric/conversions'
-require 'active_support/core_ext/date/calculations'
-require_relative 'seriesdatamanager'
-require_relative 'xaxisbucketor'
-require_relative 'yaxisscaling'
 # aggregator - aggregates energy data in a form which can be used for generating charts
 #
 #     x_axis:   primarily date based: bucketing by year, month, week, day, 1/2 hour, none (implies intraday 1/2 hour but not bucketed)

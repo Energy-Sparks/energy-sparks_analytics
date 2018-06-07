@@ -1,8 +1,5 @@
 # test report manager
-require './lib/chartmanager'
-require './lib/excelcharts'
-require './lib/reportmanager'
-require './lib/schoolfactory'
+require_relative '../lib/dashboard.rb'
 
 puts "\n" * 10
 
