@@ -27,7 +27,7 @@ charts = chart_manager.run_standard_charts
 reportmanager = ReportManager.new(school)
 worksheets = reportmanager.run_reports(reportmanager.standard_reports)
 
-excel = ExcelCharts.new('.\\Results\\' + school_name + '- charts test.xlsx')
+excel = ExcelCharts.new('./Results/' + school_name + '- charts test.xlsx')
 
 worksheets.each do |worksheet_name, charts|
   excel.add_charts(worksheet_name, charts)

@@ -23,7 +23,7 @@ class ScheduleDataManager
     check_area_name(area_name)
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
       hol_data = HolidayData.new
-      HolidayLoader.new('.\InputData\Holidays.csv', hol_data)
+      HolidayLoader.new('./InputData/Holidays.csv', hol_data)
       puts "Loaded #{hol_data.length} holidays"
       hols = Holidays.new(hol_data)
       @@holiday_data[area_name] = hols
@@ -35,7 +35,7 @@ class ScheduleDataManager
     check_area_name(area_name)
     unless @@temperature_data.key?(area_name) # lazy load data if not already loaded
       temp_data = Temperatures.new('temperatures')
-      TemperaturesLoader.new('.\InputData\temperatures.csv', temp_data)
+      TemperaturesLoader.new('./InputData/temperatures.csv', temp_data)
       puts "Loaded #{temp_data.length} days of temperatures"
       @@temperature_data[area_name] = temp_data
     end
@@ -46,7 +46,7 @@ class ScheduleDataManager
     check_area_name(area_name)
     unless @@solar_irradiance_data.key?(area_name) # lazy load data if not already loaded
       solar_data = SolarIrradiance.new('solar irradiance')
-      SolarIrradianceLoader.new('.\InputData\solarirradiation.csv', solar_data)
+      SolarIrradianceLoader.new('./InputData/solarirradiation.csv', solar_data)
       puts "Loaded #{solar_data.length} days of solar irradiance data"
       @@solar_irradiance_data[area_name] = solar_data
     end
@@ -57,7 +57,7 @@ class ScheduleDataManager
     check_area_name(area_name)
     unless @@solar_pv_data.key?(area_name) # lazy load data if not already loaded
       solar_data = SolarPV.new('solar pv')
-      SolarPVLoader.new('.\InputData\pv data Bath.csv', solar_data)
+      SolarPVLoader.new('./InputData/pv data Bath.csv', solar_data)
       puts "Loaded #{solar_data.length} days of solar pv data"
       @@solar_pv_data[area_name] = solar_data
     end
