@@ -1,8 +1,8 @@
 # test report manager
-require './chartmanager'
-require './excelcharts'
-require './reportmanager'
-require './schoolfactory'
+require './lib/chartmanager'
+require './lib/excelcharts'
+require './lib/reportmanager'
+require './lib/schoolfactory'
 
 puts "\n" * 10
 
