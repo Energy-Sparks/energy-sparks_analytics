@@ -42,24 +42,18 @@ class Building
 
   # JAMES: TODO(JJ,3Jun2018): I gather you may have done something on this when working on holidays?
   def open_time
-    # rubocop:disable Style/DateTime
     # - use DateTime and not Time as orders of magnitude faster on Windows
     DateTime.new(0, 1, 1, 7, 0, 0) # hard code for moment, but needs to be stored on database, and potentially by day
-    # rubocop:enable Style/DateTime
   end
 
   def close_time
-    # rubocop:disable Style/DateTime
     # - use DateTime and not Time as orders of magnitude faster on Windows
     DateTime.new(0, 1, 1, 16, 30, 0)
-    # rubocop:enable Style/DateTime
   end
 
   def school_day_in_hours(time)
-    # rubocop:disable Style/DateTime
     # - use DateTime and not Time as orders of magnitude faster on Windows
     time_only = DateTime.new(0, 1, 1, time.hour, time.min, time.sec)
-    # rubocop:enable Style/DateTime
     time_only >= open_time && time_only < close_time
   end
 

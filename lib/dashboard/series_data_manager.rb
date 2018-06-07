@@ -240,10 +240,8 @@ private
           daytype_data[SeriesNames::WEEKEND] += meter.amr_data.one_day_kwh(date) * factor
         else
           (0..47).each do |halfhour_index|
-            # rubocop:disable Style/DateTime
             # Time is an order of magnitude slower than DateTime on Windows
             dt = DateTime.new(date.year, date.month, date.day, (halfhour_index / 2).floor.to_i, (halfhour_index % 2).even? ? 0 : 30, 0)
-            # rubocop:enable Style/DateTime
             daytype_type = @building.school_day_in_hours(dt) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
             daytype_data[daytype_type] += meter.amr_data.kwh(date, halfhour_index) * factor
           end

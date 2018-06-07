@@ -3,8 +3,7 @@
 class ChartManager
   attr_reader :standard_charts, :school
 
-  # rubocop:disable Style/ClassVars, Style/SymbolArray
-  @@standard_charts = [
+  STANDARD_CHARTS = [
     :day,
     :group_by_month,
     :group_by_week,
@@ -17,9 +16,9 @@ class ChartManager
     :summer_hot_water,
     :intraday_aggregate,
     :intraday
-  ]
+  ].freeze
 
-  @@standard_chart_configuration = {
+  STANDARD_CHART_CONFIGURATION = {
     #
     # chart confif parameters:
     # name:               As appears in title of chart; passed through back to output with addition data e.g. total kWh
@@ -34,8 +33,6 @@ class ChartManager
     # yaxis_units:        :£ etc. TODO PG,23May2018) - complete documentation
     # data_types:         an array e.g. [:metereddata, :predictedheat] - assumes :metereddata if not present
     #
-    # rubocop:disable Style/HashSyntax, Layout/SpaceInsideHashLiteralBraces
-
     benchmark:  {
       name:             'Benchmark Comparison',
       chart1_type:      :bar,
@@ -184,7 +181,7 @@ class ChartManager
       # chart1_subtype:   :stacked,
       series_breakdown: :none,
       x_axis:           :month,
-      timescale:        [{:academicyear => 0}, {:academicyear => -1}],
+      timescale:        [{ academicyear: 0 }, { academicyear: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
@@ -221,7 +218,7 @@ class ChartManager
       name:             'Intraday',
       chart1_type:      :line,
       series_breakdown: :none,
-      timescale:        [{:year => 0}, {:year => -1}],
+      timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
       yaxis_units:      :kw,
@@ -355,10 +352,9 @@ class ChartManager
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     }
-    # rubocop:enable Style/HashSyntax, Layout/SpaceInsideHashLiteralBraces
+
 =end
-  }
-  # rubocop:enable Style/ClassVars, Style/SymbolArray
+  }.freeze
 
   def initialize(school)
     @school = school
@@ -366,14 +362,14 @@ class ChartManager
 
   def run_standard_charts
     chart_definitions = []
-    @@standard_charts.each do |chart_param|
+    STANDARD_CHARTS.each do |chart_param|
       chart_definitions.push(run_standard_chart(chart_param))
     end
     chart_definitions
   end
 
   def run_standard_chart(chart_param)
-    chart_config = @@standard_chart_configuration[chart_param]
+    chart_config = STANDARD_CHART_CONFIGURATION[chart_param]
     chart_definition = run_chart(chart_config)
     chart_definition
   end

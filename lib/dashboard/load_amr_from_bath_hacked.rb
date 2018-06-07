@@ -44,7 +44,7 @@ class LoadSchools
       _20_30 _21_00 _21_30 _22_00 _22_30 _23_00 _23_30 _24_00
     )
 
-    cached_meter_readings_directory = ENV['CACHED_METER_READINGS_DIRECTORY'] || './MeterReadings/'
+    ENV['CACHED_METER_READINGS_DIRECTORY'] ||= './MeterReadings/'
 
     load_schools(ENV['CACHED_METER_READINGS_DIRECTORY'] + 'schoolsandmeters.yml')
   end

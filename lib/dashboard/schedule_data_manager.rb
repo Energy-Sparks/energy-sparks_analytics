@@ -13,7 +13,7 @@ class ScheduleDataManager
   @@solar_pv_data = {}
   # rubocop:enable Style/ClassVars
   BATH_AREA_NAME = 'Bath'.freeze
-  INPUT_DATA_DIR = './InputData'
+  INPUT_DATA_DIR = './InputData'.freeze
 
   def self.holidays(area_name)
     check_area_name(area_name)

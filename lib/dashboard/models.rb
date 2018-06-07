@@ -170,9 +170,7 @@ module AnalyseHeatingAndHotWater
               days_kwh.push(kwh_today)
             end
           rescue StandardError => _e
-            # rubocop:disable Style/FormatStringToken
             missing_dates.push(date.strftime('%a%d%b%Y'))
-            # rubocop:enable Style/FormatStringToken
           end
         end
       end
