@@ -1,0 +1,133 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (5.2.0)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+    awesome_print (1.8.0)
+    backports (3.11.3)
+    byebug (10.0.2)
+    clbustos-rtf (0.4.2)
+    coderay (1.1.2)
+    concurrent-ruby (1.0.5)
+    connection_pool (2.2.2)
+    daru (0.1.6)
+      backports
+    dirty-memoize (0.0.4)
+    distribution (0.7.3)
+    domain_name (0.5.20180417)
+      unf (>= 0.0.5, < 1.0.0)
+    extendmatrix (0.4)
+    html-table (1.5.1)
+      strongtyping
+      structured_warnings (~> 0.3.0)
+    http-cookie (1.0.3)
+      domain_name (~> 0.5)
+    i18n (1.0.1)
+      concurrent-ruby (~> 1.0)
+    interpolate (0.3.0)
+    mechanize (2.7.6)
+      domain_name (~> 0.5, >= 0.5.1)
+      http-cookie (~> 1.0)
+      mime-types (>= 1.17.2)
+      net-http-digest_auth (~> 1.1, >= 1.1.1)
+      net-http-persistent (>= 2.5.2)
+      nokogiri (~> 1.6)
+      ntlm-http (~> 0.1, >= 0.1.1)
+      webrobots (>= 0.0.9, < 0.2)
+    method_source (0.9.0)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2016.0521)
+    mini_portile2 (2.3.0)
+    minimization (0.2.3)
+      text-table (~> 1.2)
+    minitest (5.11.3)
+    net-http-digest_auth (1.4.1)
+    net-http-persistent (3.0.0)
+      connection_pool (~> 2.2)
+    nokogiri (1.8.2)
+      mini_portile2 (~> 2.3.0)
+    ntlm-http (0.1.1)
+    prawn (0.8.4)
+      prawn-core (>= 0.8.4, < 0.9)
+      prawn-layout (>= 0.8.4, < 0.9)
+      prawn-security (>= 0.8.4, < 0.9)
+    prawn-core (0.8.4)
+    prawn-layout (0.8.4)
+    prawn-security (0.8.4)
+    prawn-svg (0.9.1.11)
+      prawn (>= 0.8.4)
+    pry (0.11.3)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
+    pry-byebug (3.6.0)
+      byebug (~> 10.0)
+      pry (~> 0.10)
+    reportbuilder (1.4.2)
+      clbustos-rtf (~> 0.4.0)
+      prawn (~> 0.8.4)
+      prawn-svg (~> 0.9.1)
+      text-table (~> 1.2)
+    roo (2.7.1)
+      nokogiri (~> 1)
+      rubyzip (~> 1.1, < 2.0.0)
+    roo-xls (1.2.0)
+      nokogiri
+      roo (>= 2.0.0, < 3)
+      spreadsheet (> 0.9.0)
+    rserve-client (0.3.5)
+    ruby-ole (1.2.12.1)
+    ruby-sun-times (0.1.5)
+    rubyvis (0.6.1)
+    rubyzip (1.2.1)
+    spreadsheet (1.1.7)
+      ruby-ole (>= 1.0)
+    statsample (2.1.0)
+      awesome_print (~> 1.6)
+      daru (~> 0.1.6)
+      dirty-memoize (~> 0.0.4)
+      distribution (~> 0.7)
+      extendmatrix (~> 0.4)
+      minimization (~> 0.2)
+      reportbuilder (~> 1.4)
+      rserve-client (~> 0.3)
+      rubyvis (~> 0.6.1)
+      spreadsheet (~> 1.1)
+    strongtyping (2.0.7)
+    structured_warnings (0.3.0)
+    text-table (1.2.4)
+    thread_safe (0.3.6)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
+    unf (0.1.4)
+      unf_ext
+    unf_ext (0.0.7.5)
+    webrobots (0.1.2)
+    write_xlsx (0.85.5)
+      rubyzip (>= 1.0.0)
+      zip-zip
+    zip-zip (0.3)
+      rubyzip (>= 1.0.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activesupport
+  html-table
+  interpolate
+  mechanize
+  pry-byebug
+  roo-xls
+  ruby-sun-times
+  statsample
+  write_xlsx
+
+RUBY VERSION
+   ruby 2.5.1p57
+
+BUNDLED WITH
+   1.16.1
