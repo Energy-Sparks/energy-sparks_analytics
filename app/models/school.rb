@@ -5,8 +5,7 @@
 require_relative '../../lib/dashboard.rb'
 
 class School
-  # Energy Sparks activerecord fields:
-  # These are objects from the actual school record
+  # Energy Sparks existing activerecord fields:
   attr_reader :name, :address, :floor_area, :number_of_pupils
   attr_reader :calendar_id, :competition_role, :created_at, :electricity_dataset, :enrolled
   attr_reader :gas_dataset, :id, :level, :postcode, :sash_id, :school_type, :slug, :update_at

@@ -18,13 +18,13 @@ class SchoolWithAggregatedData
   attr_reader :name, :address, :floor_area, :number_of_pupils
   attr_reader :school_type
 
-  attr_reader :ar_school
+  attr_reader :school
 
-  def initialize(ar_school)
-    @name = ar_school.name
-    @address = ar_school.address
-    @floor_area = ar_school.floor_area
-    @number_of_pupils = ar_school.number_of_pupils
+  def initialize(school)
+    @name = school.name
+    @address = school.address
+    @floor_area = school.floor_area
+    @number_of_pupils = school.number_of_pupils
     @heat_meters = []
     @electricity_meters = []
     @heating_models = {}

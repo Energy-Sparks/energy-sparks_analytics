@@ -1,9 +1,7 @@
-
-# Temporary name!
 # This should take a wrapped up school object and populate
 # it with aggregated data
 
-class SuperAggregateDataService
+class AggregateDataService
   attr_reader :school_with_aggregated_data
 
   def initialize(school_with_aggregated_data)

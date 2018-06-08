@@ -48,8 +48,7 @@ class SchoolFactory
     min_date = Date.new(2013, 9, 1)
     school_without_aggregated_data = @backhacked_school_definitions.load_school(school_name, min_date, true)
 
-    school_with_aggregated_data = SuperAggregateDataService.new(school_without_aggregated_data).validate_and_aggregate_meter_data
-
+    school_with_aggregated_data = AggregateDataService.new(school_without_aggregated_data).validate_and_aggregate_meter_data
     school_with_aggregated_data
   end
 
