@@ -57,8 +57,6 @@ class SuperAggregateDataService
     @electricity_meters.push(meter)
   end
 
-  private
-
   def validate_meter_data
     validate_meter_list(@heat_meters)
     validate_meter_list(@electricity_meters)

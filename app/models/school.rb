@@ -14,12 +14,12 @@ class School #< Building
   attr_reader :gas_dataset, :id, :level, :name, :postcode, :sash_id, :school_type, :slug, :update_at
   attr_reader :urn, :website
 
-  def initialize(name, address = nil, floor_area = nil, pupils = nil, school_type = nil)
+  def initialize(name, address = nil, floor_area = nil, number_of_pupils = nil, school_type = nil)
     @school_type = school_type
     @name = name
     @address = address
     @floor_area = floor_area
-    @pupils = pupils
+    @number_of_pupils = number_of_pupils
     @school_type = school_type
   end
 
