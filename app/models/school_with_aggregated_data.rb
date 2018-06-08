@@ -13,7 +13,6 @@
 #           - also holds modelling data
 
 class SchoolWithAggregatedData
-
   attr_reader :heat_meters, :electricity_meters
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models
   attr_reader :name, :address, :floor_area, :number_of_pupils
@@ -21,7 +20,7 @@ class SchoolWithAggregatedData
 
   attr_reader :ar_school
 
- def initialize(ar_school)
+  def initialize(ar_school)
     @name = ar_school.name
     @address = ar_school.address
     @floor_area = ar_school.floor_area
@@ -33,7 +32,7 @@ class SchoolWithAggregatedData
     # Normally these would come from the school, hard coded at the mo
     @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
     @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-    @solar_irradiance_schedule_name =  ScheduleDataManager::BATH_AREA_NAME
+    @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
     @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
   end
 
@@ -44,7 +43,6 @@ class SchoolWithAggregatedData
   def add_electricity_meter(meter)
     @electricity_meters.push(meter)
   end
-
 
   # JAMES: TODO(JJ,3Jun2018): I gather you may have done something on this when working on holidays?
   def open_time
@@ -88,5 +86,4 @@ class SchoolWithAggregatedData
     @heating_models[:basic]
     #  @heating_on_periods = @model.calculate_heating_periods(@period)
   end
-
 end

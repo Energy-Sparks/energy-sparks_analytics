@@ -11,9 +11,7 @@
 #           schedule if a meter covers a community sports centre which is
 #           used out of core school hours
 #           - also holds modelling data
-
 class SuperAggregateDataService
-
   attr_reader :school_with_aggregated_data
 
   def initialize(school_with_aggregated_data)
