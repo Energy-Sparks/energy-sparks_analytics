@@ -8,44 +8,12 @@
 #           used out of core school hours
 #           - also holds modelling data
 
-#  address                     :text
-#  calendar_area_id            :integer
-#  calendar_id                 :integer
-#  competition_role            :integer
-#  created_at                  :datetime         not null
-#  electricity_dataset         :string
-#  enrolled                    :boolean          default(FALSE)
-#  floor_area                  :decimal(, )
-#  gas_dataset                 :string
-#  id                          :integer          not null, primary key
-#  level                       :integer          default(0)
-#  met_office_area_id          :integer
-#  name                        :string
-#  number_of_pupils            :integer
-#  postcode                    :string
-#  sash_id                     :integer
-#  school_type                 :integer
-#  slug                        :string
-#  solar_irradiance_area_id    :integer
-#  solar_pv_tuos_area_id       :integer
-#  temperature_area_id         :integer
-#  updated_at                  :datetime         not null
-#  urn                         :integer          not null
-#  weather_underground_area_id :integer
-#  website                     :string
-#
-
-
-
-
-
-
 require_relative '../../lib/dashboard.rb'
 
 class Building
 
-  # These are objects from the actual school record
-  attr_reader :name, :address, :floor_area, :number_of_pupils, :heat_meters, :electricity_meters
+  # Not currently added
+  attr_reader :heat_meters, :electricity_meters
   attr_reader :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models
 
   def initialize(name, address, floor_area, number_of_pupils,
