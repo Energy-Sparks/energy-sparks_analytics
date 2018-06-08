@@ -24,8 +24,8 @@ require 'soda'
 require 'yaml'
 require 'benchmark'
 require 'pry-byebug'
-require_relative '../../app/services/super_aggregate_data_service'
-require_relative '../../app/models/school_with_aggregated_data'
+require_relative '../../../app/services/super_aggregate_data_service'
+require_relative '../../../app/models/school_with_aggregated_data'
 
 def meter_number_column(type)
   type == 'electricity' ? 'mpan' : 'mprn'

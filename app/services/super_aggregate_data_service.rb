@@ -1,16 +1,8 @@
-# Was a building - pulled in to a service for now which can then
-# be broken up into maintainable parts
 
+# Temporary name!
+# This should take a wrapped up school object and populate
+# it with aggregated data
 
-# building: potentially a misnomer, holds data associated with a group
-#           of buildings, which could be a whole school or the area
-#           covered by a single meter
-#           primarily a placeholder for data associated with a school
-#           or group of buildings, potentially different to the parent
-#           school, so for example a different holiday and open/close time
-#           schedule if a meter covers a community sports centre which is
-#           used out of core school hours
-#           - also holds modelling data
 class SuperAggregateDataService
   attr_reader :school_with_aggregated_data
 
@@ -28,6 +20,8 @@ class SuperAggregateDataService
     # Return populated with aggregated data
     @school_with_aggregated_data
   end
+
+private
 
   def validate_meter_data
     validate_meter_list(@heat_meters)

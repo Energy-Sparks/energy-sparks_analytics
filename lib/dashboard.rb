@@ -1,41 +1,10 @@
-# Files in dashboard directory
-%w(
-half_hourly_data
-aggregator
-alerts
-amr_data
-benchmark_metrics
-boiler_control
-building_heat_hw_simulator
-chart_manager
-datetime_helper
-electricity_simulator
-excel_charts
-holidays
-load_amr_csv_for_testing
-load_amr_from_bath_hacked
-models
-report_manager
-schedule_data_manager
-school_factory
-series_data_manager
-solar_irradiance
-solar_pv
-temperatures
-validate_amr_data
-x_axis_bucketor
-y_axis_scaling
-yahoo_weather_forecast
-).each do |file|
-  require_relative "dashboard/#{file}.rb"
-end
+require 'require_all'
 
 # Ultimately based on AR models
-require_relative '../app/models/school'
-#require_relative '../app/models/building'
-require_relative '../app/models/meter'
-require_relative '../app/services/super_aggregate_data_service'
+require_all 'app/**/*.rb'
 
+# load all ruby files in the directory "lib" and its subdirectories
+require_all 'lib/dashboard/**/*.rb'
 
 # From gems
 require 'logger'
