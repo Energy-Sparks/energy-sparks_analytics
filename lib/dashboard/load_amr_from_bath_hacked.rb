@@ -23,6 +23,7 @@ require 'date'
 require 'soda'
 require 'yaml'
 require 'benchmark'
+require_relative '../../app/services/super_aggregate_data_service'
 
 def meter_number_column(type)
   type == 'electricity' ? 'mpan' : 'mprn'
@@ -54,10 +55,12 @@ class LoadSchools
     school_data = @schools[school_name]
     school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:type])
 
-    meter_readings = load_school_meter_data(school_name, min_date, use_cached_data)
-    create_meters_and_amr_data(school, meter_readings)
+    sads = SuperAggregateDataService.new(school, school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:type] )
 
-    school
+    meter_readings = load_school_meter_data(school_name, min_date, use_cached_data)
+    create_meters_and_amr_data(sads, meter_readings)
+
+    sads
   end
 
 private

@@ -1,3 +1,7 @@
+# Was a building - pulled in to a service for now which can then
+# be broken up into maintainable parts
+
+
 # building: potentially a misnomer, holds data associated with a group
 #           of buildings, which could be a whole school or the area
 #           covered by a single meter
@@ -8,19 +12,21 @@
 #           used out of core school hours
 #           - also holds modelling data
 
-require_relative '../../lib/dashboard.rb'
+class SuperAggregateDataService
 
-class Building
-
-  # Not currently added
   attr_reader :heat_meters, :electricity_meters
   attr_reader :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models
+  attr_reader :name, :address, :floor_area, :number_of_pupils
+  attr_reader :school_type
 
-  def initialize(name, address, floor_area, number_of_pupils,
+  attr_reader :ar_school
+
+ def initialize(ar_school, name, address, floor_area, number_of_pupils, school_type,
                   holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
                   temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
                   solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
-                  solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME)
+                  solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+                  )
     @name = name
     @address = address
     @floor_area = floor_area
@@ -32,8 +38,15 @@ class Building
     @temperature_schedule_name = temperature_schedule_name
     @solar_irradiance_schedule_name =  solar_irradiance_schedule_name
     @solar_pv_schedule_name = solar_pv_schedule_name
+    pp "init"
+    pp @holiday_schedule_name
   end
 
+  def validate_and_aggregate_meter_data
+    validate_meter_data
+    aggregate_heat_meters
+    aggregate_electricity_meters
+  end
 
   def add_heat_meter(meter)
     @heat_meters.push(meter)
@@ -44,6 +57,19 @@ class Building
   end
 
   private
+
+  def validate_meter_data
+    validate_meter_list(@heat_meters)
+    validate_meter_list(@electricity_meters)
+  end
+
+  def validate_meter_list(list_of_meters)
+    puts "Validating #{list_of_meters.length} meters"
+    list_of_meters.each do |meter|
+      validate_meter = ValidateAMRData.new(meter, 30, holidays, temperatures)
+      validate_meter.validate
+    end
+  end
 
   # JAMES: TODO(JJ,3Jun2018): I gather you may have done something on this when working on holidays?
   def open_time

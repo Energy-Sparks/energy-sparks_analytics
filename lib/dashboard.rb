@@ -32,8 +32,10 @@ end
 
 # Ultimately based on AR models
 require_relative '../app/models/school'
-require_relative '../app/models/building'
+#require_relative '../app/models/building'
 require_relative '../app/models/meter'
+require_relative '../app/services/super_aggregate_data_service'
+
 
 # From gems
 require 'logger'

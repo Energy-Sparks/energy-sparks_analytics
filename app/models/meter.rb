@@ -17,11 +17,12 @@ class Meter
     puts "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{pupils}"
   end
 
+  # Matches ES AR version
   def display_name
-    if name.present?
-      name
-    else
-      meter_no.present? ? meter_no : meter_type.to_s # note additional case compared with Energy Sparks code
-    end
+    name.present? ? "#{meter_no} (#{name})" : display_meter_number
+  end
+
+  def display_meter_number
+    meter_no.present? ? meter_no : meter_type.to_s
   end
 end
