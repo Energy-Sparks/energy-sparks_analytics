@@ -13,7 +13,7 @@ class Meter
     @id = identifier
     @name = name
     @floor_area = floor_area
-    @pupils = pupils
+    @number_of_pupils = pupils
     puts "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{pupils}"
   end
 

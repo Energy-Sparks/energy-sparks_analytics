@@ -7,14 +7,48 @@
 #           schedule if a meter covers a community sports centre which is
 #           used out of core school hours
 #           - also holds modelling data
-#require_relative '../../lib/scheduledatamanager'
+
+#  address                     :text
+#  calendar_area_id            :integer
+#  calendar_id                 :integer
+#  competition_role            :integer
+#  created_at                  :datetime         not null
+#  electricity_dataset         :string
+#  enrolled                    :boolean          default(FALSE)
+#  floor_area                  :decimal(, )
+#  gas_dataset                 :string
+#  id                          :integer          not null, primary key
+#  level                       :integer          default(0)
+#  met_office_area_id          :integer
+#  name                        :string
+#  number_of_pupils            :integer
+#  postcode                    :string
+#  sash_id                     :integer
+#  school_type                 :integer
+#  slug                        :string
+#  solar_irradiance_area_id    :integer
+#  solar_pv_tuos_area_id       :integer
+#  temperature_area_id         :integer
+#  updated_at                  :datetime         not null
+#  urn                         :integer          not null
+#  weather_underground_area_id :integer
+#  website                     :string
+#
+
+
+
+
+
+
 require_relative '../../lib/dashboard.rb'
 
 class Building
-  attr_reader :name, :address, :floor_area, :pupils, :heat_meters, :electricity_meters
+
+  # These are objects from the actual school record
+  attr_reader :name, :address, :floor_area, :number_of_pupils, :heat_meters, :electricity_meters
   attr_reader :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models
 
-  def initialize(name, address, floor_area, pupils,
+  def initialize(name, address, floor_area, number_of_pupils,
                   holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
                   temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
                   solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
@@ -22,7 +56,7 @@ class Building
     @name = name
     @address = address
     @floor_area = floor_area
-    @pupils = pupils
+    @number_of_pupils = number_of_pupils
     @heat_meters = []
     @electricity_meters = []
     @heating_models = {}
@@ -32,6 +66,7 @@ class Building
     @solar_pv_schedule_name = solar_pv_schedule_name
   end
 
+
   def add_heat_meter(meter)
     @heat_meters.push(meter)
   end
@@ -39,6 +74,8 @@ class Building
   def add_electricity_meter(meter)
     @electricity_meters.push(meter)
   end
+
+  private
 
   # JAMES: TODO(JJ,3Jun2018): I gather you may have done something on this when working on holidays?
   def open_time
@@ -124,8 +161,8 @@ class Building
       else
         floor_area = nil
       end
-      if !pupils.nil? && !meter.pupils.nil?
-        pupils += meter.pupils
+      if !pupils.nil? && !meter.number_of_pupils.nil?
+        pupils += meter.number_of_pupils
       else
         pupils = nil
       end

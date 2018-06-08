@@ -346,7 +346,7 @@ class ElectricitySimulator
 
     percent_of_pupils_using_hot_water = @appliance_definitions[:electric_hot_water][:percent_of_pupils]
     standby_power = @appliance_definitions[:electric_hot_water][:standby_power]
-    pupils = school.pupils * percent_of_pupils_using_hot_water
+    pupils = school.number_of_pupils * percent_of_pupils_using_hot_water
     litres_per_day_for_school = pupils * @appliance_definitions[:electric_hot_water][:litres_per_day_per_pupil]
     delta_t = 38 - 15 # assumes hot water delievered at 38C from 15C water
     heat_capacityk_wh_per_day = litres_per_day_for_school * delta_t * 4.2 * 1000 / 3600000 # heat capacity of water 4.2J/g/K, 3600000J in a k_wh
