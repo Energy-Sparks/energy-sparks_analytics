@@ -21,16 +21,17 @@ class SuperAggregateDataService
 
   attr_reader :ar_school
 
- def initialize(ar_school, name, address, floor_area, number_of_pupils, school_type,
+ def initialize(ar_school,
                   holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
                   temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
                   solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME,
                   solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
                   )
-    @name = name
-    @address = address
-    @floor_area = floor_area
-    @number_of_pupils = number_of_pupils
+
+    @name = ar_school.name
+    @address = ar_school.address
+    @floor_area = ar_school.floor_area
+    @number_of_pupils = ar_school.number_of_pupils
     @heat_meters = []
     @electricity_meters = []
     @heating_models = {}
@@ -38,8 +39,8 @@ class SuperAggregateDataService
     @temperature_schedule_name = temperature_schedule_name
     @solar_irradiance_schedule_name =  solar_irradiance_schedule_name
     @solar_pv_schedule_name = solar_pv_schedule_name
-    pp "init"
-    pp @holiday_schedule_name
+
+    pp self
   end
 
   def validate_and_aggregate_meter_data
