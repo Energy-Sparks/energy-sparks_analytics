@@ -39,8 +39,6 @@ class SuperAggregateDataService
     @temperature_schedule_name = temperature_schedule_name
     @solar_irradiance_schedule_name =  solar_irradiance_schedule_name
     @solar_pv_schedule_name = solar_pv_schedule_name
-
-    pp self
   end
 
   def validate_and_aggregate_meter_data

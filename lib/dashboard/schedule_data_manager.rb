@@ -16,7 +16,6 @@ class ScheduleDataManager
   INPUT_DATA_DIR = './InputData'.freeze
 
   def self.holidays(area_name)
-    pp area_name
     check_area_name(area_name)
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
       hol_data = HolidayData.new
