@@ -1,5 +1,7 @@
 # test report manager
 require_relative '../lib/dashboard.rb'
+require_all 'lib/dashboard'
+
 
 puts "\n" * 10
 

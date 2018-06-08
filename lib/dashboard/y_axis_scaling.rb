@@ -50,7 +50,7 @@ class YAxisScaling
     when :none
       factor = 1.0
     when :per_pupil
-      factor = 1.0 / building.pupils
+      factor = 1.0 / building.number_of_pupils
     when :per_floor_area
       factor = 1.0 / building.floor_area
     when :per_200_pupils

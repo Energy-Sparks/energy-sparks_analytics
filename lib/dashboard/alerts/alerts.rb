@@ -29,7 +29,7 @@ class AlertAnalysisBase
   end
 
   def pupils
-    @school.pupils
+    @school.number_of_pupils
   end
 
   def floor_area
@@ -366,7 +366,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertAnalysisBase
 
   def analyse(asof_date)
     annual_kwh = kwh(asof_date - 365, asof_date)
-    annual_kwh_per_pupil_benchmark = BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @school.pupils
+    annual_kwh_per_pupil_benchmark = BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @school.number_of_pupils
     annual_kwh_per_floor_area_benchmark = BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_M2 * @school.floor_area
 
     report = AlertReport.new(:annualelectricitybenchmark)
@@ -427,7 +427,7 @@ class AlertGasAnnualVersusBenchmark < AlertAnalysisBase
 
   def analyse(asof_date)
     annual_kwh = kwh(asof_date - 365, asof_date)
-    annual_kwh_per_pupil_benchmark = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_PUPIL * @school.pupils
+    annual_kwh_per_pupil_benchmark = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_PUPIL * @school.number_of_pupils
     annual_kwh_per_floor_area_benchmark = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * @school.floor_area
 
     report = AlertReport.new(:annualgasbenchmark)

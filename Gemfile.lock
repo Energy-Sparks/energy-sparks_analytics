@@ -71,6 +71,7 @@ GEM
       prawn (~> 0.8.4)
       prawn-svg (~> 0.9.1)
       text-table (~> 1.2)
+    require_all (2.0.0)
     roo (2.7.1)
       nokogiri (~> 1)
       rubyzip (~> 1.1, < 2.0.0)
@@ -121,6 +122,7 @@ DEPENDENCIES
   interpolate
   mechanize
   pry-byebug
+  require_all
   roo-xls
   ruby-sun-times
   statsample

@@ -23,6 +23,9 @@ require 'date'
 require 'soda'
 require 'yaml'
 require 'benchmark'
+require 'pry-byebug'
+require_relative '../../../app/services/super_aggregate_data_service'
+require_relative '../../../app/models/school_with_aggregated_data'
 
 def meter_number_column(type)
   type == 'electricity' ? 'mpan' : 'mprn'
@@ -52,18 +55,22 @@ class LoadSchools
   def load_school(school_name, min_date, use_cached_data)
     puts "Loading school #{school_name}"
     school_data = @schools[school_name]
-    school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:type])
+
+    school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
+
+    swad = SchoolWithAggregatedData.new(school)
 
     meter_readings = load_school_meter_data(school_name, min_date, use_cached_data)
-    create_meters_and_amr_data(school, meter_readings)
+    create_meters_and_amr_data(swad, meter_readings)
 
-    school
+    swad
   end
 
 private
 
   def create_meters_and_amr_data(school, meter_readings)
     school_data = @schools[school.name]
+
     school_data[:meters].each do |meter_data|
       meter_type = meter_data[:meter_type]
       identifier_type = meter_type == :electricity ? :mpan : :mprn

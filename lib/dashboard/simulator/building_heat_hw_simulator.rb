@@ -48,7 +48,7 @@ class BuildingHeatHWSimulator
     occupied_electrical_gain = (20.0 / 1000) * school.floor_area
     # un_occupied_electrical_gain = (2.5 / 1000) * school.floor_area
 
-    pupil_gain = (60.0 / 1000.0) * school.pupils
+    pupil_gain = (60.0 / 1000.0) * school.number_of_pupils
 
     wall_length = 4 * Math.sqrt(school.floor_area)
     wall_height = 3
