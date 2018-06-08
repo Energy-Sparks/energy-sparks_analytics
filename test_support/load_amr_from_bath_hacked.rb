@@ -21,11 +21,12 @@ require 'net/http'
 require 'json'
 require 'date'
 require 'soda'
+require 'soda/client'
 require 'yaml'
 require 'benchmark'
 require 'pry-byebug'
-require_relative '../../../app/services/aggregate_data_service'
-require_relative '../../../app/models/school_with_aggregated_data'
+require_relative '../app/services/aggregate_data_service'
+require_relative '../app/models/meter_collection'
 
 def meter_number_column(type)
   type == 'electricity' ? 'mpan' : 'mprn'
@@ -58,18 +59,18 @@ class LoadSchools
 
     school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
 
-    swad = SchoolWithAggregatedData.new(school)
+    meter_collection = MeterCollection.new(school)
 
     meter_readings = load_school_meter_data(school_name, min_date, use_cached_data)
-    create_meters_and_amr_data(swad, meter_readings)
+    create_meters_and_amr_data(meter_collection, meter_readings)
 
-    swad
+    meter_collection
   end
 
 private
 
-  def create_meters_and_amr_data(school, meter_readings)
-    school_data = @schools[school.name]
+  def create_meters_and_amr_data(meter_collection, meter_readings)
+    school_data = @schools[meter_collection.name]
 
     school_data[:meters].each do |meter_data|
       meter_type = meter_data[:meter_type]
@@ -80,17 +81,17 @@ private
         puts "Not creating deprecated meter #{identifier}"
       else
         puts "Creating meter #{identifier}"
-        meter = create_meter(school, meter_data, meter_readings)
+        meter = create_meter(meter_collection, meter_data, meter_readings)
         if meter_data[:meter_type] == :electricity
-          school.add_electricity_meter(meter)
+          meter_collection.add_electricity_meter(meter)
         else
-          school.add_heat_meter(meter)
+          meter_collection.add_heat_meter(meter)
         end
       end
     end
   end
 
-  def create_meter(school, meter_data, meter_readings)
+  def create_meter(meter_collection, meter_data, meter_readings)
     # take meta data for meter from schoolsandmeters.yml file
     # (association of a school with a list of meters)
     ap(meter_data)
@@ -102,7 +103,7 @@ private
     # associated with school [identifier] = amr_data
     amr_data = meter_readings[identifier]
     # and combine it to make a meter
-    meter = Meter.new(school, amr_data, meter_type, identifier, name, meter_data[:floor_area], meter_data[:pupils])
+    meter = Meter.new(meter_collection, amr_data, meter_type, identifier, name, meter_data[:floor_area], meter_data[:pupils])
     meter
   end
 

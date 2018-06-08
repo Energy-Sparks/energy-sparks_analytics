@@ -1,7 +1,8 @@
 # meter: holds basic information descrbing a meter and hald hourly AMR data associated with it
 class Meter
-  # Extra fields
+  # Extra fields - potentially a concern or mix-in
   attr_reader :building, :amr_data, :fuel_type, :floor_area, :number_of_pupils
+
   # Energy Sparks activerecord fields:
   attr_reader :active, :created_at, :id, :meter_no, :meter_type, :name, :school, :updated_at
   # enum meter_type: [:electricity, :gas]

@@ -2,6 +2,8 @@
 #         currently derives from Building
 #           - TODO(PH,JJ,3Jun18) - at some point decide whether
 #           - this is the correct model
+#
+# JJ - this will ultimately just be an ActiveModel/ActiveRecord School
 require_relative '../../lib/dashboard.rb'
 
 class School

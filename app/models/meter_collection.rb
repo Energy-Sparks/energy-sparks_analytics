@@ -1,6 +1,4 @@
-# Was a building - pulled in to a service for now which can then
-# be broken up into maintainable parts
-
+# Was a building!
 
 # building: potentially a misnomer, holds data associated with a group
 #           of buildings, which could be a whole school or the area
@@ -12,13 +10,17 @@
 #           used out of core school hours
 #           - also holds modelling data
 
-class SchoolWithAggregatedData
+class MeterCollection
   attr_reader :heat_meters, :electricity_meters
-  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models
-  attr_reader :name, :address, :floor_area, :number_of_pupils
-  attr_reader :school_type
 
-  attr_reader :school
+  # From school/building
+  attr_reader :floor_area, :number_of_pupils
+
+  # Currently, but not always
+  attr_reader :school_type, :school, :name, :address
+
+  # These are things which will be populated
+  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models
 
   def initialize(school)
     @name = school.name

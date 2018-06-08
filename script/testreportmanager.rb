@@ -1,9 +1,10 @@
 # test report manager
+require 'require_all'
 require_relative '../lib/dashboard.rb'
-require_all 'lib/dashboard'
-
+require_all 'test_support'
 
 puts "\n" * 10
+pp "Running Test Report Manager"
 
 # making some more changes here, and some more
 school_name = 'Paulton Junior School' # ''
@@ -16,6 +17,10 @@ $SCHOOL_FACTORY = SchoolFactory.new
 school = $SCHOOL_FACTORY.load_school(school_name)
 
 # school.load_meters
+
+# File.open( 'paulton-junior-school-aggregated.yaml', 'w' ) do |out|
+#   YAML.dump(school, out )
+# end
 
 =begin
 chart_manager = ChartManager.new(school)

@@ -1,13 +1,12 @@
-# This should take a wrapped up school object and populate
-# it with aggregated data
-
+# This should take a meter collection and populate
+# it with aggregated & validated data
 class AggregateDataService
-  attr_reader :school_with_aggregated_data
+  attr_reader :meter_collection
 
-  def initialize(school_with_aggregated_data)
-    @school_with_aggregated_data = school_with_aggregated_data
-    @heat_meters = @school_with_aggregated_data.heat_meters
-    @electricity_meters = @school_with_aggregated_data.electricity_meters
+  def initialize(meter_collection)
+    @meter_collection   = meter_collection
+    @heat_meters        = @meter_collection.heat_meters
+    @electricity_meters = @meter_collection.electricity_meters
   end
 
   def validate_and_aggregate_meter_data
@@ -16,7 +15,7 @@ class AggregateDataService
     aggregate_electricity_meters
 
     # Return populated with aggregated data
-    @school_with_aggregated_data
+    @meter_collection
   end
 
 private
@@ -29,23 +28,22 @@ private
   def validate_meter_list(list_of_meters)
     puts "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
-      validate_meter = ValidateAMRData.new(meter, 30, @school_with_aggregated_data.holidays, @school_with_aggregated_data.temperatures)
-  #    binding.pry
+      validate_meter = ValidateAMRData.new(meter, 30, @meter_collection.holidays, @meter_collection.temperatures)
       validate_meter.validate
     end
   end
 
   def aggregate_heat_meters
-    @school_with_aggregated_data.aggregated_heat_meters = aggregate_meters(@heat_meters, :gas)
+    @meter_collection.aggregated_heat_meters = aggregate_meters(@heat_meters, :gas)
   end
 
   def aggregate_electricity_meters
-    @school_with_aggregated_data.aggregated_electricity_meters = aggregate_meters(@electricity_meters, :electricity)
+    @meter_collection.aggregated_electricity_meters = aggregate_meters(@electricity_meters, :electricity)
   end
 
   def heating_model(period)
     unless @heating_models.key?(:basic)
-      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters.amr_data, @school_with_aggregated_data.holidays, @school_with_aggregated_data.temperatures)
+      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters.amr_data, @meter_collection.holidays, @meter_collection.temperatures)
       @heating_models[:basic].calculate_regression_model(period)
     end
     @heating_models[:basic]
