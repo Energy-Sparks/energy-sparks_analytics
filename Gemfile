@@ -13,6 +13,7 @@ gem 'html-table'
 gem 'interpolate'
 gem 'ruby-sun-times'
 gem 'soda-ruby', :require => 'soda'
+gem 'structured_warnings'
 
 # Useful for debugging
 gem 'pry-byebug'

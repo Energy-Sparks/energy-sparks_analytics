@@ -1,10 +1,10 @@
 require 'require_all'
 
 # Ultimately based on AR models
-require_all 'app/**/*.rb'
+require_rel '../app/**/*.rb'
 
 # load all ruby files in the directory "lib" and its subdirectories
-require_all 'lib/dashboard/**/*.rb'
+require_rel '../lib/dashboard/**/*.rb'
 
 # From gems
 require 'logger'
