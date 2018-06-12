@@ -9,7 +9,7 @@ class BuildingHeatHWSimulator
     @calc_components_results = {}
 
     @building = {
-      building: Building.new("Test School", "Bath", 1100.0, 200.0),
+      building: MeterCollection.new("Test School", "Bath", 1100.0, 200.0),
       thermal_mass: "Medium Weight",
       surface_area_to_volume_ratio: "Compact",
       boiler: { max_power: 200.0, # needs converting to function of floor area

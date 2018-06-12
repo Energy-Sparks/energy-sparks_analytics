@@ -8,8 +8,8 @@
 class Aggregator
   attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis, :data_labels
 
-  def initialize(building, chart_config)
-    @building = building
+  def initialize(meter_collection, chart_config)
+    @meter_collection = meter_collection
     @chart_config = chart_config
     @data_labels = nil
   end
@@ -96,7 +96,7 @@ class Aggregator
   end
 
   def aggregate_period(chart_config)
-    @series_manager = SeriesDataManager.new(@building, chart_config)
+    @series_manager = SeriesDataManager.new(@meter_collection, chart_config)
     @series_names = @series_manager.series_bucket_names
     puts "Aggregating these series #{@series_names}"
     puts "Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"

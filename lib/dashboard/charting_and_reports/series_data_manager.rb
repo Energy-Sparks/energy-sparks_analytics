@@ -63,8 +63,8 @@ end
 class SeriesDataManager
   attr_reader :first_meter_date, :last_meter_date, :first_chart_date, :last_chart_date, :periods
 
-  def initialize(building, chart_configuration)
-    @building = building
+  def initialize(meter_collection, chart_configuration)
+    @meter_collection = meter_collection
     @meter_definition = chart_configuration[:meter_definition]
     @breakdown_list = convert_variable_to_array(chart_configuration[:series_breakdown])
     @y2_axis_list = convert_variable_to_array(chart_configuration[:y2_axis])
@@ -149,7 +149,7 @@ class SeriesDataManager
         end
         if @breakdown_list.include?(:cusum)
           calculate_model if @heating_model.nil?
-          model_kwh = @heating_model.predicted_kwh_daterange(dates[0], dates[1], @building.temperatures)
+          model_kwh = @heating_model.predicted_kwh_daterange(dates[0], dates[1], @meter_collection.temperatures)
           actual_kwh = meter.amr_data.kwh_date_range(dates[0], dates[1])
           breakdown[SeriesNames::CUSUM] = model_kwh - actual_kwh
         end
@@ -165,14 +165,14 @@ class SeriesDataManager
           breakdown = breakdown.merge(predicted_heating_breakdown([dates[0], dates[1]], @meters[0], @meters[1]))
         end
         if @y2_axis_list.include?(:degreedays) || @breakdown_list.include?(:degreedays)
-          breakdown[SeriesNames::DEGREEDAYS] = @building.temperatures.degrees_days_average_in_range(15.5, dates[0], dates[1])
+          breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(15.5, dates[0], dates[1])
         end
         if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
-          breakdown[SeriesNames::TEMPERATURE] = @building.temperatures.average_temperature_in_date_range(dates[0], dates[1])
+          breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(dates[0], dates[1])
         end
         if @data_types.include?(:predictedheat)
           calculate_model if @heating_model.nil?
-          model_kwh = @heating_model.predicted_kwh_daterange(dates[0], dates[1], @building.temperatures)
+          model_kwh = @heating_model.predicted_kwh_daterange(dates[0], dates[1], @meter_collection.temperatures)
           breakdown[SeriesNames::PREDICTEDHEAT] = model_kwh
         end
       end
@@ -187,7 +187,7 @@ private
 
   def scaling_factor(_value, fuel_type)
     y_scaling = YAxisScaling.new # perhaps shouldn't be class, maybe just a method?
-    y_scaling.scale_from_kwh(1.0, @chart_configuration[:yaxis_units], @chart_configuration[:yaxis_scaling], fuel_type, @building)
+    y_scaling.scale_from_kwh(1.0, @chart_configuration[:yaxis_units], @chart_configuration[:yaxis_scaling], fuel_type, @meter_collection)
   end
 
   # combinatorially combine 2 arrays of series names
@@ -209,8 +209,8 @@ private
 
   def calculate_model
     # model calculated using the latest year's regression data,deliberately ignores chart request
-    periods = @building.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
-    @heating_model = @building.heating_model(periods[0])
+    periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
+    @heating_model = @meter_collection.heating_model(periods[0])
     @heating_model.calculate_heating_periods(first_chart_date, last_chart_date)
   end
 
@@ -234,7 +234,7 @@ private
     }
     (date_range[0]..date_range[1]).each do |date|
       begin
-        if @building.holidays.holiday?(date)
+        if @meter_collection.holidays.holiday?(date)
           daytype_data[SeriesNames::HOLIDAY] += meter.amr_data.one_day_kwh(date) * factor
         elsif DateTimeHelper.weekend?(date)
           daytype_data[SeriesNames::WEEKEND] += meter.amr_data.one_day_kwh(date) * factor
@@ -242,7 +242,7 @@ private
           (0..47).each do |halfhour_index|
             # Time is an order of magnitude slower than DateTime on Windows
             dt = DateTime.new(date.year, date.month, date.day, (halfhour_index / 2).floor.to_i, (halfhour_index % 2).even? ? 0 : 30, 0)
-            daytype_type = @building.school_day_in_hours(dt) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
+            daytype_type = @meter_collection.school_day_in_hours(dt) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
             daytype_data[daytype_type] += meter.amr_data.kwh(date, halfhour_index) * factor
           end
         end
@@ -293,7 +293,7 @@ private
     (date_range[0]..date_range[1]).each do |date|
       begin
         type = @heating_model.heating_on?(date) ? SeriesNames::HEATINGDAYMODEL : SeriesNames::NONHEATINGDAYMODEL
-        avg_temp = @building.temperatures.average_temperature(date)
+        avg_temp = @meter_collection.temperatures.average_temperature(date)
         heating_data[type] += @heating_model.predicted_kwh(date, avg_temp) * factor
       rescue StandardError => e
         puts "Missing or nil predicted heating data on #{date}"
@@ -327,10 +327,10 @@ private
     if @chart_configuration.key?(:timescale) && @chart_configuration[:timescale].is_a?(Symbol)
       case @chart_configuration[:timescale]
       when :academicyear
-        periods = @building.holidays.academic_years(@first_meter_date, @last_meter_date)
+        periods = @meter_collection.holidays.academic_years(@first_meter_date, @last_meter_date)
         @periods = [periods[0]]
       when :year
-        periods = @building.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
+        periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
         @periods = [periods[0]]
       when :week
         period = SchoolDatePeriod.new(:week, 'current week', @last_meter_date - 6, @last_meter_date)
@@ -342,7 +342,7 @@ private
       hash_key, hash_value = @chart_configuration[:timescale].first
       case hash_key
       when :academicyear
-        periods = @building.holidays.academic_years(@first_meter_date, @last_meter_date)
+        periods = @meter_collection.holidays.academic_years(@first_meter_date, @last_meter_date)
         if hash_value.is_a?(Integer)
           raise 'Error: expecting zero of negative number for academic year specification' if hash_value > 0
           raise "Error: data not available for #{hash_value}th academic year" if hash_value.magnitude > periods.length - 1
@@ -353,12 +353,12 @@ private
       when :year
         if hash_value.is_a?(Integer)
           raise 'Error: expecting zero of negative number for year specification' if hash_value > 0
-          periods = @building.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
+          periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
           raise "Error: data not available for #{hash_value}th academic year" if hash_value.magnitude > periods.length - 1
           @periods = [periods[hash_value.magnitude]]
         elsif hash_value.is_a?(Date)
           end_date = hash_value > @last_meter_date ? @last_meter_date : hash_value
-          @periods = @building.holidays.years_to_date(@first_meter_date, end_date, false)
+          @periods = @meter_collection.holidays.years_to_date(@first_meter_date, end_date, false)
         else
           raise "Expecting an integer or date as an parameter for a year specification got a #{hash_value.class.name}"
         end
@@ -384,9 +384,9 @@ private
         raise "Unsupported time period for charting #{@chart_configuration[:timescale]}"
       end
     elsif @chart_configuration[:x_axis] == :year
-      @periods = @building.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
+      @periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
     elsif @chart_configuration[:x_axis] == :academicyear
-      @periods = @building.holidays.academic_years(@first_meter_date, @last_meter_date)
+      @periods = @meter_collection.holidays.academic_years(@first_meter_date, @last_meter_date)
     else
       @periods = [SchoolDatePeriod.new(:chartperiod, 'One Period for Chart', @first_meter_date, @last_meter_date)]
     end
@@ -433,13 +433,13 @@ private
     case meter_type
     when :all
       # treat all meters as being the same, needs to be processed at final stage as kWh addition different from CO2 addition
-      @meters = [@building.aggregated_electricity_meters, @building.aggregated_heat_meters]
+      @meters = [@meter_collection.aggregated_electricity_meters, @meter_collection.aggregated_heat_meters]
     when :allheat
       # aggregate all heat meters
-      @meters = [nil, @building.aggregated_heat_meters]
+      @meters = [nil, @meter_collection.aggregated_heat_meters]
     when :allelectricity
       # aggregate all electricity meters
-      @meters = [@building.aggregated_electricity_meters, nil]
+      @meters = [@meter_collection.aggregated_electricity_meters, nil]
     when :onemeter
       case meter.type
       when :electricity

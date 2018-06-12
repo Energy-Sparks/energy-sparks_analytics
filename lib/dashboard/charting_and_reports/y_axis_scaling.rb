@@ -15,9 +15,9 @@ class YAxisScaling
     # rubocop:enable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
   end
 
-  def scale_from_kwh(value, unit, scaling_factor_type, fuel_type, building)
+  def scale_from_kwh(value, unit, scaling_factor_type, fuel_type, meter_collection)
     unit_scale = scale_unit_from_kwh(unit, fuel_type)
-    factor = scaling_factor(scaling_factor_type, building)
+    factor = scaling_factor(scaling_factor_type, meter_collection)
     value * factor * unit_scale
   end
 
@@ -44,19 +44,19 @@ class YAxisScaling
     end
   end
 
-  def scaling_factor(scaling_factor_type, building)
+  def scaling_factor(scaling_factor_type, meter_collection)
     factor = nil
     case scaling_factor_type
     when :none
       factor = 1.0
     when :per_pupil
-      factor = 1.0 / building.number_of_pupils
+      factor = 1.0 / meter_collection.number_of_pupils
     when :per_floor_area
-      factor = 1.0 / building.floor_area
+      factor = 1.0 / meter_collection.floor_area
     when :per_200_pupils
-      factor = scaling_factor(:per_pupil, building) * 200.0
+      factor = scaling_factor(:per_pupil, meter_collection) * 200.0
     when :per_1000_pupils
-      factor = scaling_factor(:per_pupil, building) * 1000.0
+      factor = scaling_factor(:per_pupil, meter_collection) * 1000.0
     else
       raise "Error: unknown scaling factor #{scaling_factor_type}" unless scaling_factor_type.nil?
       raise 'Error: nil scaling factor'
