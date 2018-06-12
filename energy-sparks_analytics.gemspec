@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/BathHacked/energy_sparks"
   s.description = "Energy sparks - analytics - for charting"
   s.authors     = ['Philip Haile', 'James Jefferies']
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- rspec/*`.split("\n")
+  # s.files         = `git ls-files`.split("\n")
+  # s.test_files    = `git ls-files -- rspec/*`.split("\n")
   s.require_paths = ["lib"]
   s.required_ruby_version = '>= 2.5.0'
 
@@ -36,7 +36,3 @@ Gem::Specification.new do |s|
   s.add_dependency 'pry-byebug', '~> 3.6.0'
   s.add_dependency 'rspec', '~> 3.7.0'
 end
-
-
-
-

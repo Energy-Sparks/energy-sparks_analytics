@@ -30,6 +30,7 @@ class MeterCollection
     @heat_meters = []
     @electricity_meters = []
     @heating_models = {}
+    @school = school
 
     if Object.const_defined?('ScheduleDataManager')
       pp "Assuming run in it's own codebase"
@@ -72,10 +73,10 @@ class MeterCollection
 
   # held at building level as a school building e.g. a community swimming pool may have a different holiday schedule
   def holidays
-    if Object.const_defined?('ScheduleDataManager')
-      ScheduleDataManager.holidays(@holiday_schedule_name)
+    if @school.respond_to?(:calendar)
+      ScheduleDataManager.holidays(@holiday_schedule_name, @school.calendar_id)
     else
-
+      ScheduleDataManager.holidays(@holiday_schedule_name)
     end
   end
 

@@ -16,18 +16,25 @@ class ScheduleDataManager
   INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../../../InputData/')
 
   def self.holidays(area_name, calendar_id = nil)
-    if calendar_id
-      pp "Running in rails land"
-    else
-      check_area_name(area_name)
-      unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
+
+    unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
+      if calendar_id
+        pp "Running in rails land"
+        calendar_event_type_id = nil # set this
+        pp "#{Calendar.find(calendar_id)}"
+        @@holiday_data[area_name] = Calendar.find(calendar_id).holidays.map do |holiday|
+          SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date, calendar_event_type_id)
+        end
+      else
+        check_area_name(area_name)
         hol_data = HolidayData.new
-        HolidayLoader.new("#{INPUT_DATA_DIR}/Holidays.csv", hol_data, calendar_id)
+        HolidayLoader.new("#{INPUT_DATA_DIR}/Holidays.csv", hol_data)
         puts "Loaded #{hol_data.length} holidays"
         hols = Holidays.new(hol_data)
         @@holiday_data[area_name] = hols
       end
     end
+    # Always return cache
     @@holiday_data[area_name]
   end
 
