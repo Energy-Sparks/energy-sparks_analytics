@@ -2,7 +2,7 @@
 
 class SchoolDatePeriod
   attr_reader :type, :title, :start_date, :end_date, :calendar_event_type_id
-  def initialize(type, title, start_date, end_date, calendar_event_type_id)
+  def initialize(type, title, start_date, end_date, calendar_event_type_id = nil)
     @type = type
     @title = title
     @start_date = start_date
