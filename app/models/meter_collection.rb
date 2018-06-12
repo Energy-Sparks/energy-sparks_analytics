@@ -33,7 +33,7 @@ class MeterCollection
     @school = school
 
     if Object.const_defined?('ScheduleDataManager')
-      pp "Assuming run in it's own codebase"
+      pp "Running standalone, not in Rails environment"
 
       # Normally these would come from the school, hard coded at the mo
       @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
@@ -41,7 +41,7 @@ class MeterCollection
       @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
       @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
     else
-      pp "Assuming run in rails environment"
+      pp "Running in Rails environment"
       throw ArgumentException if school.meters.empty?
     end
   end
