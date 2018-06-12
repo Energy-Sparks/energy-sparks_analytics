@@ -15,11 +15,11 @@ class ScheduleDataManager
   BATH_AREA_NAME = 'Bath'.freeze
   INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData/')
 
-  def self.holidays(area_name)
+  def self.holidays(area_name, calendar_id)
     check_area_name(area_name)
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
       hol_data = HolidayData.new
-      HolidayLoader.new("#{INPUT_DATA_DIR}/Holidays.csv", hol_data)
+      HolidayLoader.new("#{INPUT_DATA_DIR}/Holidays.csv", hol_data, calendar_id)
       puts "Loaded #{hol_data.length} holidays"
       hols = Holidays.new(hol_data)
       @@holiday_data[area_name] = hols
