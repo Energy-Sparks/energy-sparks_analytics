@@ -26,16 +26,16 @@ class SchoolFactory
 
   # creates a 'school' by loading data from a source of data (socrata, excel etc.)
   # defined by environment variable ENV_SCHOOL_DATA_SOURCE
-  def load_school(identifier)
+  def load_school(identifier, validate_and_aggregate = true)
     if identifier.is_a?(String) # reference by name
       source = ENV[ENV_SCHOOL_DATA_SOURCE]
 
       if @school_cache[source].key?(identifier)
         @school_cache[source][identifier]
       elsif source == BATH_HACKED_SCHOOL_DATA
-        @school_cache[source][identifier] = load_data_from_back_hacked(identifier)
+        @school_cache[source][identifier] = load_data_from_back_hacked(identifier, validate_and_aggregate)
       elsif source == EXCEL_SCHOOL_DATA
-        @school_cache[source][identifier] = load_data_from_excel(identifier)
+        @school_cache[source][identifier] = load_data_from_excel(identifier, validate_and_aggregate)
       else
         raise 'Error: ENV_SCHOOL_DATA_SOURCE not set so cant load school/meter data' if source.nil?
         raise "Error: ENV_SCHOOL_DATA_SOURCE set to unknown value #{source}"
@@ -46,20 +46,24 @@ class SchoolFactory
     end
   end
 
-  def load_data_from_back_hacked(school_name)
+  def load_data_from_back_hacked(school_name, validate_and_aggregate)
     @backhacked_school_definitions = LoadSchools.new if @backhacked_school_definitions.nil?
     min_date = Date.new(2013, 9, 1)
     school_without_aggregated_data = @backhacked_school_definitions.load_school(school_name, min_date, true)
 
-    school_with_aggregated_data = AggregateDataService.new(school_without_aggregated_data).validate_and_aggregate_meter_data
+    school_with_aggregated_data = AggregateDataService.new(school_without_aggregated_data)
+    school_with_aggregated_data.validate_and_aggregate_meter_data if validate_and_aggregate
+
     school_with_aggregated_data
   end
 
-  def load_data_from_excel(school_name)
+  def load_data_from_excel(school_name, validate_and_aggregate)
     school = school.new(school_name)
     loader = LoadMeterDataFromCSV.new(school)
     loader.load_meters
-    school.validate_and_aggregate_meter_data
+    if validate_and_aggregate
+      school.validate_and_aggregate_meter_data
+    end
     school
   end
 end
