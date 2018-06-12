@@ -59,7 +59,7 @@ class LoadSchools
     puts "Loading school #{school_name}"
     school_data = @schools[school_name]
 
-    school = SchoolAnalysis.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
+    school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
 
     meter_collection = MeterCollection.new(school)
 
@@ -105,7 +105,7 @@ private
     # associated with school [identifier] = amr_data
     amr_data = meter_readings[identifier]
     # and combine it to make a meter
-    meter = MeterAnalysis.new(meter_collection, amr_data, meter_type, identifier, name, meter_data[:floor_area], meter_data[:pupils])
+    meter = Meter.new(meter_collection, amr_data, meter_type, identifier, name, meter_data[:floor_area], meter_data[:pupils])
     meter
   end
 
