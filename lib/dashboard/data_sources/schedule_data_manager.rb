@@ -19,10 +19,8 @@ class ScheduleDataManager
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
       if calendar_id
         pp "Running in rails land"
-        calendar_event_type_id = nil # set this
-        pp "#{Calendar.find(calendar_id)}"
         @@holiday_data[area_name] = Calendar.find(calendar_id).holidays.map do |holiday|
-          SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date, calendar_event_type_id)
+          SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date)
         end
       else
         check_area_name(area_name)
@@ -44,8 +42,8 @@ class ScheduleDataManager
       temp_data = Temperatures.new('temperatures')
       if temperature_area_id
         data_feed = DataFeed.where(type: "DataFeeds::WeatherUnderground", area_id: temperature_area_id).first
-        data_feed.data_feed_readings.where(feed_type: :temperature).to_a.group_by_day { |a| a.at }.map do |key, value|
-          temp_data.add(key, value.map { |v| v.value })
+        data_feed.data_feed_readings.where(feed_type: :temperature).to_a.group_by_day(&:at).map do |key, value|
+          temp_data.add(key, value.map(&:value))
         end
       else
         TemperaturesLoader.new("#{INPUT_DATA_DIR}/temperatures.csv", temp_data)

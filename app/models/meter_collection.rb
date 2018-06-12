@@ -82,14 +82,13 @@ class MeterCollection
 
   def temperatures
     if i_am_running_in_rails?
-      temperature_area_id = @school.temperature_area_id || DataFeed.where(type: "DataFeeds::WeatherUnderground").first.area_id
+      temperature_area_id = @school.temperature_area_id || DataFeed.find_by(type: "DataFeeds::WeatherUnderground").area_id
 
       pp temperature_area_id
       ScheduleDataManager.temperatures(@temperature_schedule_name, temperature_area_id)
     else
       ScheduleDataManager.temperatures(@temperature_schedule_name)
     end
-
   end
 
   def solar_insolance
