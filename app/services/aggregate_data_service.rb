@@ -91,7 +91,7 @@ private
     end
     name = meter_names.join(' + ')
     id = ids.join(' + ')
-    combined_meter = Meter.new(self, combined_amr_data, type, id, name, floor_area, pupils)
+    combined_meter = MeterAnalysis.new(self, combined_amr_data, type, id, name, floor_area, pupils)
 
     puts "Creating combined meter data #{combined_amr_data.start_date} to #{combined_amr_data.end_date}"
     puts "with floor area #{floor_area} and #{pupils}"

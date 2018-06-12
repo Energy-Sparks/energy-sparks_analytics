@@ -11,7 +11,7 @@ school_name = 'Bathwick St Marys'
 
 ENV['ENERGYSPARKSDATASOURCE'] = 'csv'
 
-school = School.new(school_name, 'Bath BA2', 1000.0, 100, :primary)
+school = SchoolAnalysis.new(school_name, 'Bath BA2', 1000.0, 100, :primary)
 
 school.load_meters
 

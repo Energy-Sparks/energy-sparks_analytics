@@ -6,7 +6,7 @@
 # JJ - this will ultimately just be an ActiveModel/ActiveRecord School
 require_relative '../../lib/dashboard.rb'
 
-class School
+class SchoolAnalysis
   # Energy Sparks existing activerecord fields:
   attr_reader :name, :address, :floor_area, :number_of_pupils
   attr_reader :calendar_id, :competition_role, :created_at, :electricity_dataset, :enrolled

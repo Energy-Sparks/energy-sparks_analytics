@@ -31,11 +31,18 @@ class MeterCollection
     @electricity_meters = []
     @heating_models = {}
 
-    # Normally these would come from the school, hard coded at the mo
-    @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-    @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-    @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-    @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+    if Object.const_defined?('ScheduleDataManager')
+      pp "Assuming run in it's own codebase"
+
+      # Normally these would come from the school, hard coded at the mo
+      @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+      @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+      @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+      @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+    else
+      pp "Assuming run in rails environment"
+      throw ArgumentException if school.meters.empty?
+    end
   end
 
   def add_heat_meter(meter)
@@ -65,7 +72,11 @@ class MeterCollection
 
   # held at building level as a school building e.g. a community swimming pool may have a different holiday schedule
   def holidays
-    ScheduleDataManager.holidays(@holiday_schedule_name)
+    if Object.const_defined?('ScheduleDataManager')
+      ScheduleDataManager.holidays(@holiday_schedule_name)
+    else
+
+    end
   end
 
   def temperatures
