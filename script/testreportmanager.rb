@@ -1,7 +1,7 @@
 # test report manager
 require 'require_all'
 require_relative '../lib/dashboard.rb'
-require_all 'test_support'
+require_rel '../test_support'
 
 puts "\n" * 10
 pp "Running Test Report Manager"
@@ -10,7 +10,7 @@ pp "Running Test Report Manager"
 school_name = 'Paulton Junior School' # ''
 
 ENV[SchoolFactory::ENV_SCHOOL_DATA_SOURCE] = SchoolFactory::BATH_HACKED_SCHOOL_DATA
-ENV['CACHED_METER_READINGS_DIRECTORY'] = './MeterReadings/'
+#ENV['CACHED_METER_READINGS_DIRECTORY'] = File.join(File.dirname(__FILE__), '/MeterReadings/')
 
 $SCHOOL_FACTORY = SchoolFactory.new
 
@@ -31,7 +31,7 @@ charts = chart_manager.run_standard_charts
 reportmanager = ReportManager.new(school)
 worksheets = reportmanager.run_reports(reportmanager.standard_reports)
 
-excel = ExcelCharts.new('./Results/' + school_name + '- charts test.xlsx')
+excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + school_name + '- charts test.xlsx')
 
 worksheets.each do |worksheet_name, charts|
   excel.add_charts(worksheet_name, charts)

@@ -152,6 +152,7 @@ DEPENDENCIES
   ruby-sun-times
   soda-ruby
   statsample
+  structured_warnings
   write_xlsx
 
 RUBY VERSION

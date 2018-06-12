@@ -1,16 +1,17 @@
 # require 'roo'
 
 class SchoolDatePeriod
-  attr_reader :type, :name, :start_date, :end_date
-  def initialize(type, name, start_date, end_date)
+  attr_reader :type, :title, :start_date, :end_date, :calendar_event_type_id
+  def initialize(type, title, start_date, end_date, calendar_event_type_id = nil)
     @type = type
-    @name = name
+    @title = title
     @start_date = start_date
     @end_date = end_date
+    @calendar_event_type_id = @calendar_event_type_id
   end
 
   def to_s
-    "" << @name << ' (' << start_date.strftime("%a %d %b %Y") << ' to ' << end_date.strftime("%a %d %b %Y") << ')'
+    "" << @title << ' (' << start_date.strftime("%a %d %b %Y") << ' to ' << end_date.strftime("%a %d %b %Y") << ')'
   end
 
   def days
@@ -44,21 +45,23 @@ class SchoolDatePeriod
   end
 
   def to_a
-    [type, name, start_date, end_date]
+    [type, title, start_date, end_date]
   end
 end
 
 # holds holiday data as an array of hashes - one hash for each holiday period
 class HolidayData < Array
-  def add(name, start_date, end_date)
-    self.push(SchoolDatePeriod.new(:holiday, name, start_date, end_date))
+  def add(title, start_date, end_date)
+    self.push(SchoolDatePeriod.new(:holiday, title, start_date, end_date))
   end
 end
 
 # loads holiday data (from a CSV file), assumes added in date order!
 class HolidayLoader
-  def initialize(csv_file, holiday_data)
+  def initialize(csv_file, holiday_data, calendar_id)
     read_csv(csv_file, holiday_data)
+    # Get data from database
+    # Calendar.find(calendar_id).holidays.each | ar_holiday|
   end
 
   def read_csv(csv_file, holidays)
@@ -66,10 +69,10 @@ class HolidayLoader
     datareadings = Roo::CSV.new(csv_file)
     count = 0
     datareadings.each do |reading|
-      name = reading[0]
+      title = reading[0]
       start_date = Date.parse reading[1]
       end_date = Date.parse reading[2]
-      holidays.add(name, start_date, end_date)
+      holidays.add(title, start_date, end_date)
       count += 1
     end
     puts "Read #{count} rows"
@@ -100,7 +103,7 @@ class Holidays
     raise 'Deprecated'
   end
 
-  # returns a hash defining a holiday :name => name, :start_date => start_date, :end_date => end_date} or nil
+  # returns a hash defining a holiday :title => title, :start_date => start_date, :end_date => end_date} or nil
   def find_holiday(date)
     SchoolDatePeriod.find_period_for_date(date, @holidays)
   end
