@@ -50,7 +50,7 @@ class LoadSchools
 
     ENV['CACHED_METER_READINGS_DIRECTORY'] ||= File.join(File.dirname(__FILE__), '../MeterReadings/')
 
-    puts  File.join(File.dirname(__FILE__), '../MeterReadings/')
+    puts File.join(File.dirname(__FILE__), '../MeterReadings/')
 
     load_schools(ENV['CACHED_METER_READINGS_DIRECTORY'] + 'schoolsandmeters.yml')
   end
@@ -59,7 +59,7 @@ class LoadSchools
     puts "Loading school #{school_name}"
     school_data = @schools[school_name]
 
-    school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
+    school = SchoolAnalysis.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
 
     meter_collection = MeterCollection.new(school)
 
@@ -105,7 +105,7 @@ private
     # associated with school [identifier] = amr_data
     amr_data = meter_readings[identifier]
     # and combine it to make a meter
-    meter = Meter.new(meter_collection, amr_data, meter_type, identifier, name, meter_data[:floor_area], meter_data[:pupils])
+    meter = MeterAnalysis.new(meter_collection, amr_data, meter_type, identifier, name, meter_data[:floor_area], meter_data[:pupils])
     meter
   end
 
@@ -193,86 +193,3 @@ private
     amr_data
   end
 end
-
-=begin
-class SchoolsLoader
-  attr_reader :schools
-  def initialize
-    @schools = LoadSchools.new
-  end
-
-  def load_school(name)
-      meter_data = @@schools.load_school(name, Date.new(2010, 9, 1), true)
-
-      @@schools[name][:meters].each do |meter_data|
-        meter_data.each do |meter_information|
-          meter_type = meter_information[:meter_type]
-          name = meter_information[:name]
-          identifier_type = meter_type == :electricity ? :mpam : :mprn
-          identifier = meter_information[:identifier_type]
-          amr_data = meter_data
-        meter = Meter.new(initialize(building, amr_data, type, identifier = nil, name = nil))
-        end
-  end
-end
-=end
-
-=begin
-# class which is only to be used once to create a yml database of schools and meters
-# for testing purposes
-class BackHackedDownloadSchoolToMeterRelationship
-
-  def initialize
-    ENV['SOCRATA_STORE'] = 'data.bathhacked.org'
-    ENV['SOCRATA_TOKEN'] = 'gQ5Dw0rIF7I8ij40m8W6ulHj4' # this needs hiding, from Energy Sparks github
-    ENV['SOCRATA_LIMIT'] = '2000'
-  end
-
-  def query(meter_no, type, since_date = nil)
-    column = meter_number_column(type)
-    where = '(' + "#{column}='#{meter_no}'" + ')'
-    where << " AND date >='#{since_date.iso8601}'" if since_date
-    {
-        "$select"=> "location, #{column}, postcode, sum(totalunits), count(_00_30)",
-        # "$where" => where,
-        "$group" => "location, #{column}, postcode"
-        # "$order" => "date ASC"
-    }
-  end
-
-  def download_data
-    query = query('2200030370866', 'electricity')
-
-    client = SODA::Client.new(domain: ENV["SOCRATA_STORE"], app_token: ENV["SOCRATA_TOKEN"])
-
-    @school = {}
-    client.get('fqa5-b8ri', query).each do |i|
-      if !@school.key?(i['postcode'])
-        @school[i['postcode']] = { :name => i['location'], :postcode => i['postcode'], :meters => []}
-      end
-      @school[i['postcode']][:meters].push({ :mpan => i['mpan'], :meter_type => :electricity, :name => i['location'] })
-    end
-
-    query = query('2200030370866', 'gas')
-    puts "2nd query", query
-    client.get("rd4k-3gss", query).each do |i|
-      if !@school.key?(i['postcode'])
-        @school[i['postcode']] = { :name => i['location'], :postcode => i['postcode'], :meters => []}
-      end
-      @school[i['postcode']][:meters].push({ :mprn => i['mprn'], :meter_type => :gas, :name => i['location'] })
-    end
-
-    @postcodes = @school.keys
-    @postcodes.each do |postcode|
-      s = @school[postcode]
-      @school[s[:name]] = @school.delete(postcode)
-    end
-
-    # ap(@school)
-
-    # File.write('./schoolsandmeters1.yml', @school.to_yaml)
-
-    dd = YAML::load_file(ENV['CACHED_METER_READINGS_DIRECTORY'] + 'schoolsandmeters.yml')
-  end
-end
-=end

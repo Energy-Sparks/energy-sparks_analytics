@@ -32,18 +32,19 @@ class MeterCollection
     @heating_models = {}
     @school = school
 
-    if Object.const_defined?('ScheduleDataManager')
-      pp "Running standalone, not in Rails environment"
-
-      # Normally these would come from the school, hard coded at the mo
-      @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-      @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-      @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-      @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-    else
+    if i_am_running_in_rails?
       pp "Running in Rails environment"
       throw ArgumentException if school.meters.empty?
+    else
+      pp "Running standalone, not in Rails environment"
     end
+
+    # Normally these would come from the school, hard coded at the mo
+    @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+    @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+    @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+    @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+
   end
 
   def add_heat_meter(meter)
@@ -83,8 +84,6 @@ class MeterCollection
   def temperatures
     if i_am_running_in_rails?
       temperature_area_id = @school.temperature_area_id || DataFeed.find_by(type: "DataFeeds::WeatherUnderground").area_id
-
-      pp temperature_area_id
       ScheduleDataManager.temperatures(@temperature_schedule_name, temperature_area_id)
     else
       ScheduleDataManager.temperatures(@temperature_schedule_name)
@@ -92,11 +91,21 @@ class MeterCollection
   end
 
   def solar_insolance
-    ScheduleDataManager.solar_irradiation(@solar_irradiance_schedule_name)
+    if i_am_running_in_rails?
+      solar_irradiance_area_id = @school.solar_irradiance_area_id || DataFeed.find_by(type: "DataFeeds::WeatherUnderground").area_id
+      ScheduleDataManager.solar_irradiance(@solar_irradiance_schedule_name, solar_irradiance_area_id)
+    else
+      ScheduleDataManager.solar_irradiance(@solar_irradiance_schedule_name)
+    end
   end
 
   def solar_pv
-    ScheduleDataManager.solar_pv(@solar_pv_schedule_name)
+    if i_am_running_in_rails?
+      solar_pv_tuos_area_id = @school.solar_pv_tuos_area_id || DataFeed.find_by(type: "DataFeeds::SolarPvTuos").area_id
+      ScheduleDataManager.solar_pv(@solar_pv_schedule_name, solar_pv_tuos_area_id)
+    else
+      ScheduleDataManager.solar_pv(@solar_pv_schedule_name)
+    end
   end
 
   def heating_model(period)
