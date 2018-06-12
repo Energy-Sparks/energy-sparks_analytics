@@ -35,16 +35,33 @@ class ScheduleDataManager
     @@holiday_data[area_name]
   end
 
+  def self.process_feed_data(output_data, data_feed_type, area_id, feed_type)
+    data_feed = DataFeed.find_by(type: data_feed_type, area_id: area_id)
+    # data_feed.data_feed_readings.where(feed_type: feed_type).to_a.group_by_day(&:at).map do |key, value|
+    #   output_data.add(key, value.map(&:value))
+    # end
+
+    query = <<-SQL
+      SELECT date_trunc('day', at) AS day, array_agg(value) AS values
+      FROM data_feed_readings
+      WHERE feed_type = #{DataFeedReading.feed_types[feed_type]}
+      AND data_feed_id = #{data_feed.id}
+      GROUP BY date_trunc('day', at)
+      SQL
+
+    result = ActiveRecord::Base.connection.execute(query)
+    result.each do |row|
+      output_data.add(Date.parse(row["day"]), row["values"].delete('{}').split(',').map(&:to_f))
+    end
+  end
+
   def self.temperatures(area_name, temperature_area_id = nil)
     check_area_name(area_name)
     unless @@temperature_data.key?(area_name) # lazy load data if not already loaded
 
       temp_data = Temperatures.new('temperatures')
       if temperature_area_id
-        data_feed = DataFeed.find_by(type: "DataFeeds::WeatherUnderground", area_id: temperature_area_id)
-        data_feed.data_feed_readings.where(feed_type: :temperature).to_a.group_by_day(&:at).map do |key, value|
-          temp_data.add(key, value.map(&:value))
-        end
+        process_feed_data(temp_data, "DataFeeds::WeatherUnderground", temperature_area_id, :temperature)
       else
         TemperaturesLoader.new("#{INPUT_DATA_DIR}/temperatures.csv", temp_data)
         puts "Loaded #{temp_data.length} days of temperatures"
@@ -60,10 +77,7 @@ class ScheduleDataManager
     unless @@solar_irradiance_data.key?(area_name) # lazy load data if not already loaded
       solar_data = SolarIrradiance.new('solar irradiance')
       if solar_irradiance_area_id
-        data_feed = DataFeed.find_by(type: "DataFeeds::WeatherUnderground", area_id: solar_irradiance_area_id)
-        data_feed.data_feed_readings.where(feed_type: :solar_irradiation).to_a.group_by_day(&:at).map do |key, value|
-          solar_data.add(key, value.map(&:value))
-        end
+        process_feed_data(solar_data, "DataFeeds::WeatherUnderground", solar_irradiance_area_id, :solar_irradiation)
       else
         SolarIrradianceLoader.new("#{INPUT_DATA_DIR}/solarirradiation.csv", solar_data)
         puts "Loaded #{solar_data.length} days of solar irradiance data"
@@ -78,10 +92,7 @@ class ScheduleDataManager
     unless @@solar_pv_data.key?(area_name) # lazy load data if not already loaded
       solar_data = SolarPV.new('solar pv')
       if solar_pv_tuos_area_id
-        data_feed = DataFeed.find_by(type: "DataFeeds::SolarPvTuos", area_id: solar_pv_tuos_area_id)
-        data_feed.data_feed_readings.where(feed_type: :solar_pv).to_a.group_by_day(&:at).map do |key, value|
-          solar_data.add(key, value.map(&:value))
-        end
+        process_feed_data(solar_data, "DataFeeds::SolarPvTuos", solar_pv_tuos_area_id, :solar_pv)
       else
         SolarPVLoader.new("#{INPUT_DATA_DIR}/pv data Bath.csv", solar_data)
         puts "Loaded #{solar_data.length} days of solar pv data"

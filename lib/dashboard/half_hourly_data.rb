@@ -19,7 +19,6 @@ class HalfHourlyData < Hash
     self[date] = half_hourly_data_x48
 
     data_count = validate_data(half_hourly_data_x48)
-
     if data_count != 48
       puts "Missing data: #{date}: only #{data_count} of 48"
     end
@@ -39,7 +38,7 @@ class HalfHourlyData < Hash
     total = 0
     data_count = 0
     (0..47).each do |i|
-      if half_hourly_data_x48[i].is_a?(Float) || half_hourly_data_x48[i].is_a?(Integer)
+      if half_hourly_data_x48[i].is_a?(Float) || half_hourly_data_x48[i].is_a?(Integer) || half_hourly_data_x48[i].is_a?(BigDecimal)
         total = total + half_hourly_data_x48[i]
         data_count = data_count + 1
       end
