@@ -15,7 +15,7 @@ class ScheduleDataManager
   BATH_AREA_NAME = 'Bath'.freeze
   INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../../../InputData/')
 
-  def self.holidays(area_name, calendar_id = nil)
+  def self.holidays(area_name = nil, calendar_id = nil)
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
       if calendar_id
         pp "Running in rails land"
@@ -37,12 +37,9 @@ class ScheduleDataManager
 
   def self.process_feed_data(output_data, data_feed_type, area_id, feed_type)
     data_feed = DataFeed.find_by(type: data_feed_type, area_id: area_id)
-    # data_feed.data_feed_readings.where(feed_type: feed_type).to_a.group_by_day(&:at).map do |key, value|
-    #   output_data.add(key, value.map(&:value))
-    # end
 
     query = <<-SQL
-      SELECT date_trunc('day', at) AS day, array_agg(value) AS values
+      SELECT date_trunc('day', at) AS day, array_agg(value ORDER BY at ASC) AS values
       FROM data_feed_readings
       WHERE feed_type = #{DataFeedReading.feed_types[feed_type]}
       AND data_feed_id = #{data_feed.id}
@@ -55,14 +52,15 @@ class ScheduleDataManager
     end
   end
 
-  def self.temperatures(area_name, temperature_area_id = nil)
-    check_area_name(area_name)
+  def self.temperatures(area_name = nil, temperature_area_id = nil)
+
     unless @@temperature_data.key?(area_name) # lazy load data if not already loaded
 
       temp_data = Temperatures.new('temperatures')
       if temperature_area_id
         process_feed_data(temp_data, "DataFeeds::WeatherUnderground", temperature_area_id, :temperature)
       else
+        check_area_name(area_name)
         TemperaturesLoader.new("#{INPUT_DATA_DIR}/temperatures.csv", temp_data)
         puts "Loaded #{temp_data.length} days of temperatures"
       end
@@ -72,13 +70,13 @@ class ScheduleDataManager
     @@temperature_data[area_name]
   end
 
-  def self.solar_irradiance(area_name, solar_irradiance_area_id = nil)
-    check_area_name(area_name)
+  def self.solar_irradiance(area_name = nil, solar_irradiance_area_id = nil)
     unless @@solar_irradiance_data.key?(area_name) # lazy load data if not already loaded
       solar_data = SolarIrradiance.new('solar irradiance')
       if solar_irradiance_area_id
         process_feed_data(solar_data, "DataFeeds::WeatherUnderground", solar_irradiance_area_id, :solar_irradiation)
       else
+        check_area_name(area_name)
         SolarIrradianceLoader.new("#{INPUT_DATA_DIR}/solarirradiation.csv", solar_data)
         puts "Loaded #{solar_data.length} days of solar irradiance data"
       end
@@ -87,13 +85,13 @@ class ScheduleDataManager
     @@solar_irradiance_data[area_name]
   end
 
-  def self.solar_pv(area_name, solar_pv_tuos_area_id = nil)
-    check_area_name(area_name)
+  def self.solar_pv(area_name = nil, solar_pv_tuos_area_id = nil)
     unless @@solar_pv_data.key?(area_name) # lazy load data if not already loaded
       solar_data = SolarPV.new('solar pv')
       if solar_pv_tuos_area_id
         process_feed_data(solar_data, "DataFeeds::SolarPvTuos", solar_pv_tuos_area_id, :solar_pv)
       else
+        check_area_name(area_name)
         SolarPVLoader.new("#{INPUT_DATA_DIR}/pv data Bath.csv", solar_data)
         puts "Loaded #{solar_data.length} days of solar pv data"
       end
