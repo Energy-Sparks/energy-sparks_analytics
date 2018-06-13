@@ -17,19 +17,19 @@ class ScheduleDataManager
 
   def self.holidays(area_name = nil, calendar_id = nil)
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
+      hol_data = HolidayData.new
       if calendar_id
         pp "Running in rails land"
-        @@holiday_data[area_name] = Calendar.find(calendar_id).holidays.map do |holiday|
-          SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date)
+        Calendar.find(calendar_id).holidays.map do |holiday|
+          hol_data << SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date)
         end
       else
         check_area_name(area_name)
-        hol_data = HolidayData.new
         HolidayLoader.new("#{INPUT_DATA_DIR}/Holidays.csv", hol_data)
         puts "Loaded #{hol_data.length} holidays"
-        hols = Holidays.new(hol_data)
-        @@holiday_data[area_name] = hols
       end
+      hols = Holidays.new(hol_data)
+      @@holiday_data[area_name] = hols
     end
     # Always return cache
     @@holiday_data[area_name]
