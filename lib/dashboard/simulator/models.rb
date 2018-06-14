@@ -27,9 +27,9 @@ module AnalyseHeatingAndHotWater
   #
   class HotwaterModel
     attr_reader :buckets, :analysis_period, :efficiency
-    def initialize(building)
-      @building = building
-      @school_day_kwh, @holiday_kwh, @weekend_kwh, @analysis_period, @first_holiday_date = analyse_hotwater_around_summer_holidays(building.holidays, building.aggregated_heating_meters)
+    def initialize(meter_collection)
+      @meter_collection = meter_collection
+      @school_day_kwh, @holiday_kwh, @weekend_kwh, @analysis_period, @first_holiday_date = analyse_hotwater_around_summer_holidays(meter_collection.holidays, meter_collection.aggregated_heating_meters)
       @efficiency = (@school_day_kwh - @holiday_kwh) / @school_day_kwh
       # puts "Analysing hot water system efficiency school day use #{@school_day_kwh} holiday use #{@holiday_kwh} efficiency #{@efficiency}"
       # aggregate_split_day_buckets)archive
@@ -45,7 +45,7 @@ module AnalyseHeatingAndHotWater
       @total_kwh = 0.0
 
       (@analysis_period.start_date..@analysis_period.end_date).each do |date|
-        todays_total = @building.aggregated_heating_meters.amr_data.one_day_kwh(date)
+        todays_total = @meter_collection.aggregated_heating_meters.amr_data.one_day_kwh(date)
 
         x_index = (date - @analysis_period.start_date).to_i
 

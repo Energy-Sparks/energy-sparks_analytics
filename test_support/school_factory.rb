@@ -49,12 +49,15 @@ class SchoolFactory
   def load_data_from_back_hacked(school_name, validate_and_aggregate)
     @backhacked_school_definitions = LoadSchools.new if @backhacked_school_definitions.nil?
     min_date = Date.new(2013, 9, 1)
-    school_without_aggregated_data = @backhacked_school_definitions.load_school(school_name, min_date, true)
+    school_as_meter_collection = @backhacked_school_definitions.load_school(school_name, min_date, true)
 
-    school_with_aggregated_data = AggregateDataService.new(school_without_aggregated_data)
-    school_with_aggregated_data.validate_and_aggregate_meter_data if validate_and_aggregate
-
-    school_with_aggregated_data
+    if validate_and_aggregate
+      # Get the school data, validate and aggregate the meter data
+      AggregateDataService.new(school_as_meter_collection).validate_and_aggregate_meter_data
+    else
+      # This is a school wrapped as a meter collection, without aggregated data
+      school_as_meter_collection
+    end
   end
 
   def load_data_from_excel(school_name, validate_and_aggregate)

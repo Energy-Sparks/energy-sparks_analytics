@@ -32,12 +32,20 @@ class MeterCollection
     @solar_pv_meters = []
     @storage_heater_meters = []
     @heating_models = {}
+    @school = school
 
-    # Normally these would come from the school, hard coded at the mo
-    @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-    @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-    @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-    @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+    if Object.const_defined?('ScheduleDataManager')
+      pp "Running standalone, not in Rails environment"
+
+      # Normally these would come from the school, hard coded at the mo
+      @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+      @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+      @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+      @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+    else
+      pp "Running in Rails environment"
+      throw ArgumentException if school.meters.empty?
+    end
   end
 
   def add_heat_meter(meter)
@@ -67,11 +75,22 @@ class MeterCollection
 
   # held at building level as a school building e.g. a community swimming pool may have a different holiday schedule
   def holidays
-    ScheduleDataManager.holidays(@holiday_schedule_name)
+    if i_am_running_in_rails?
+      ScheduleDataManager.holidays(@holiday_schedule_name, @school.calendar_id)
+    else
+      ScheduleDataManager.holidays(@holiday_schedule_name)
+    end
   end
 
   def temperatures
-    ScheduleDataManager.temperatures(@temperature_schedule_name)
+    if i_am_running_in_rails?
+      temperature_area_id = @school.temperature_area_id || DataFeed.find_by(type: "DataFeeds::WeatherUnderground").area_id
+
+      pp temperature_area_id
+      ScheduleDataManager.temperatures(@temperature_schedule_name, temperature_area_id)
+    else
+      ScheduleDataManager.temperatures(@temperature_schedule_name)
+    end
   end
 
   def solar_insolance
@@ -89,5 +108,11 @@ class MeterCollection
     end
     @heating_models[:basic]
     #  @heating_on_periods = @model.calculate_heating_periods(@period)
+  end
+
+private
+
+  def i_am_running_in_rails?
+    @school.respond_to?(:calendar)
   end
 end

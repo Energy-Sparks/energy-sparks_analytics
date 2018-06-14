@@ -129,9 +129,3 @@ class Temperatures < HalfHourlyData
     d_days / (end_date - start_date + 1)
   end
 end
-
-class TemperaturesLoader < HalfHourlyLoader
-  def initialize(csv_file, temperatures)
-    super(csv_file, 0, 1, 0, temperatures)
-  end
-end

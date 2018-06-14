@@ -1,10 +1,10 @@
---- &1 !ruby/object:SchoolWithAggregatedData
+--- &1 !ruby/object:MeterCollection
 name: Paulton Junior School
 address: BS39 7QY
 floor_area: 2000.0
 number_of_pupils: 400
 heat_meters:
-- &2 !ruby/object:Meter
+- &2 !ruby/object:MeterAnalysis
   amr_data: !ruby/hash-with-ivars:AMRData
     elements:
       2013-11-13:
@@ -68692,10 +68692,10 @@ heat_meters:
   fuel_type: :gas
   id: '13678903'
   name: Paulton Junior School Gas Supply
-  floor_area: 
-  number_of_pupils: 
+  floor_area:
+  number_of_pupils:
 electricity_meters:
-- &3 !ruby/object:Meter
+- &3 !ruby/object:MeterAnalysis
   amr_data: !ruby/hash-with-ivars:AMRData
     elements:
       2013-09-01:
@@ -153822,8 +153822,8 @@ electricity_meters:
   fuel_type: :electricity
   id: '2200011955152'
   name: Paulton Junior School Electricity Supply
-  floor_area: 
-  number_of_pupils: 
+  floor_area:
+  number_of_pupils:
 heating_models: {}
 holiday_schedule_name: Bath
 temperature_schedule_name: Bath

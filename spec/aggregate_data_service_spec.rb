@@ -1,7 +1,6 @@
 require 'spec_helper'
 require_relative '../lib/dashboard'
 require_relative '../test_support/school_factory'
-require_relative '../test_support/schedule_data_manager'
 require 'roo'
 
 describe 'aggregate data service' do

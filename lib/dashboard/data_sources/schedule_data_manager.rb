@@ -13,26 +13,44 @@ class ScheduleDataManager
   @@solar_pv_data = {}
   # rubocop:enable Style/ClassVars
   BATH_AREA_NAME = 'Bath'.freeze
-  INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData/')
+  INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../../../InputData/')
 
   def self.holidays(area_name, calendar_id = nil)
-    check_area_name(area_name)
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
-      hol_data = HolidayData.new
-      HolidayLoader.new("#{INPUT_DATA_DIR}/Holidays.csv", hol_data, calendar_id)
-      puts "Loaded #{hol_data.length} holidays"
-      hols = Holidays.new(hol_data)
-      @@holiday_data[area_name] = hols
+      if calendar_id
+        pp "Running in rails land"
+        @@holiday_data[area_name] = Calendar.find(calendar_id).holidays.map do |holiday|
+          SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date)
+        end
+      else
+        check_area_name(area_name)
+        hol_data = HolidayData.new
+        HolidayLoader.new("#{INPUT_DATA_DIR}/Holidays.csv", hol_data)
+        puts "Loaded #{hol_data.length} holidays"
+        hols = Holidays.new(hol_data)
+        @@holiday_data[area_name] = hols
+      end
     end
+    # Always return cache
     @@holiday_data[area_name]
   end
 
-  def self.temperatures(area_name)
+  def self.temperatures(area_name, temperature_area_id = nil)
     check_area_name(area_name)
     unless @@temperature_data.key?(area_name) # lazy load data if not already loaded
+
       temp_data = Temperatures.new('temperatures')
-      TemperaturesLoader.new("#{INPUT_DATA_DIR}/temperatures.csv", temp_data)
-      puts "Loaded #{temp_data.length} days of temperatures"
+      if temperature_area_id
+        data_feed = DataFeed.where(type: "DataFeeds::WeatherUnderground", area_id: temperature_area_id).first
+        data_feed.data_feed_readings.where(feed_type: :temperature).to_a.group_by_day(&:at).map do |key, value|
+          temp_data.add(key, value.map(&:value))
+        end
+      else
+        TemperaturesLoader.new("#{INPUT_DATA_DIR}/temperatures.csv", temp_data)
+        puts "Loaded #{temp_data.length} days of temperatures"
+      end
+      pp temp_data.keys
+      # temp_data is an object of type Temperatures
       @@temperature_data[area_name] = temp_data
     end
     @@temperature_data[area_name]

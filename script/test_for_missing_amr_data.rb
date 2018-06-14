@@ -61,13 +61,13 @@ $SCHOOL_FACTORY = SchoolFactory.new
 
 list_of_schools.each do |school_name|
   puts school_name
-  school = $SCHOOL_FACTORY.load_school(school_name, false)
-  puts school.methods.grep(/ete/)
-  school.meter_collection.heat_meters.each do |heat_meter|
+  meter_collection = $SCHOOL_FACTORY.load_school(school_name, false)
+  puts meter_collection.methods.grep(/ete/)
+  meter_collection.heat_meters.each do |heat_meter|
     # puts "Got #{heat_meter.meter_type} #{heat_meter.id}"
     list_missing_amr_data(school_name, heat_meter)
   end
-  school.meter_collection.electricity_meters.each do |electricity_meter|
+  meter_collection.electricity_meters.each do |electricity_meter|
     # puts "Got #{electricity_meter.meter_type} #{electricity_meter.id}"
     list_missing_amr_data(school_name,electricity_meter)
   end

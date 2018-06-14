@@ -1,4 +1,5 @@
 require_relative '../half_hourly_data'
+require_relative '../half_hourly_loader'
 
 class AMRData < HalfHourlyData
   def initialize(type)
