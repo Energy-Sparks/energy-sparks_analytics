@@ -104,9 +104,43 @@ private
     # and combine it with amr data loaded from individual meter data
     # associated with school [identifier] = amr_data
     amr_data = meter_readings[identifier]
+
+    solar_pv = solar_pv_definition(meter_data)
+    puts solar_pv.inspect
+    storage_heater = storage_heater_definition(meter_data)
+    puts storage_heater.inspect
     # and combine it to make a meter
-    meter = Meter.new(meter_collection, amr_data, meter_type, identifier, name, meter_data[:floor_area], meter_data[:pupils])
+    meter = Meter.new(meter_collection, amr_data, meter_type, identifier,
+              name, meter_data[:floor_area], meter_data[:pupils], solar_pv, storage_heater)
     meter
+  end
+
+  def storage_heater_definition(meter_data)
+    if meter_data[:storage_heater]
+      StorageHeaters.create_storage_heaters_from_yaml_storage_heater_definition(meter_data[:storage_heater])
+    else
+      nil
+    end
+  end
+
+  def solar_pv_definition(meter_data)
+    if meter_data[:solar_pv]
+      pv = SolarPVInstallation.new
+      puts meter_data.inspect
+      meter_data[:solar_pv].each do |pv_install|
+        panel_set = SolarPVInstallation::SolarPVPanelSet.new(
+                      pv_install[:installation_date],
+                      pv_install[:kwp],
+                      pv_install[:tilt],
+                      pv_install[:orientation],
+                      pv_install[:shading]
+                    )
+        pv.add_panels(panel_set)
+      end
+      pv
+    else
+      nil
+    end
   end
 
   def load_school_meter_data(name, min_date, use_cached_data)

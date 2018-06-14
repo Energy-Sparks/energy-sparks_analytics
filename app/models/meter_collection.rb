@@ -11,7 +11,7 @@
 #           - also holds modelling data
 
 class MeterCollection
-  attr_reader :heat_meters, :electricity_meters
+  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters
 
   # From school/building
   attr_reader :floor_area, :number_of_pupils
@@ -29,6 +29,8 @@ class MeterCollection
     @number_of_pupils = school.number_of_pupils
     @heat_meters = []
     @electricity_meters = []
+    @solar_pv_meters = []
+    @storage_heater_meters = []
     @heating_models = {}
 
     # Normally these would come from the school, hard coded at the mo

@@ -12,7 +12,9 @@ class AggregateDataService
   def validate_and_aggregate_meter_data
     validate_meter_data
     aggregate_heat_meters
+    create_storage_heater_meters # create before electric aggregation
     aggregate_electricity_meters
+    create_solar_pv_meters
 
     # Return populated with aggregated data
     @meter_collection
@@ -31,6 +33,98 @@ private
       validate_meter = ValidateAMRData.new(meter, 30, @meter_collection.holidays, @meter_collection.temperatures)
       validate_meter.validate
     end
+  end
+
+  # if the electricity meter has a storage heater, split the meter
+  # into 2 one with storage heater only kwh, the other with the remainder
+  def create_storage_heater_meters
+    @electricity_meters.each do |electricity_meter|
+      next if electricity_meter.storage_heaters.nil?
+
+      puts 'Disaggregating electricity meter into 1x storage heater only and 1 x remainder'
+
+      electric_only_amr, storage_heater_amr = electricity_meter.storage_heaters.disaggregate_amr_data(electricity_meter.amr_data)
+    
+      electric_only_meter = create_modified_meter_copy(
+        electricity_meter,
+        electric_only_amr,
+        :electricity,
+        electricity_meter.id + ' minus storage heater',
+        electricity_meter.name + ' minus storage heater'
+      )
+
+      storage_heater_meter = create_modified_meter_copy(
+        electricity_meter,
+        storage_heater_amr,
+        :storage_heater,
+        electricity_meter.id + ' storage heater only',
+        electricity_meter.name + ' storage heater only'
+      )
+
+      # find and replace existing electric meter with one without storage heater
+      for i in 0..@electricity_meters.length - 1 do
+        if @electricity_meters[i].id == electricity_meter.id
+          @electricity_meters[i] = electric_only_meter
+          break
+        end
+      end
+      @meter_collection.storage_heater_meters.push(storage_heater_meter)
+    end
+  end
+
+  # creates artificial PV meters, if solar pv present by scaling
+  # 1/2 hour yield data from Sheffield University by the kWp(s) of
+  # the PV installation; note the kWh is negative as its a producer
+  # rather than a consumer
+  def create_solar_pv_meters
+    @electricity_meters.each do |electricity_meter|
+      next if electricity_meter.solar_pv_installation.nil?
+
+      puts 'Creating an artificial solar pv meter and associated amr data'
+
+      solar_amr = create_solar_pv_amr_data(
+                    electricity_meter.amr_data,
+                    electricity_meter.solar_pv_installation
+                  )
+
+      solar_pv_meter = create_modified_meter_copy(
+        electricity_meter,
+        solar_amr,
+        :solar_pv,
+        'solarpvid',
+        electricity_meter.solar_pv_installation.to_s
+      )
+      @meter_collection.solar_pv_meters.push(solar_pv_meter)
+    end
+  end
+
+  def create_modified_meter_copy(meter, amr_data, type, identifier, name)
+    Meter.new(
+      meter_collection,
+      amr_data, 
+      type, 
+      identifier,
+      name,
+      meter.floor_area,
+      meter.number_of_pupils,
+      meter.solar_pv_installation,
+      meter.storage_heaters
+    )
+  end
+
+  def create_solar_pv_amr_data(electricity_amr, solar_pv_installation)
+    solar_amr = AMRData.new(:solar_pv)
+    (electricity_amr.start_date..electricity_amr.end_date).each do |date|
+      if date >= meter_collection.solar_pv.start_date
+        scale_factor = solar_pv_installation.capacity_kwp_on_date(date)
+        days_pv_yield = meter_collection.solar_pv[date]
+        producer = -1.0 # negate kWh as producer rather than consumer
+        scaled_pv_kwh = days_pv_yield.map { |i| i * scale_factor * producer }
+        solar_amr.add(date, scaled_pv_kwh)
+      end
+    end
+    puts "Created new solar pv meter with #{solar_amr.length} days of data"
+    solar_amr
   end
 
   def aggregate_heat_meters
