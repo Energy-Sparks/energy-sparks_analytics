@@ -16,7 +16,7 @@ $SCHOOL_FACTORY = SchoolFactory.new
 school = $SCHOOL_FACTORY.load_school(school_name)
 
 chart_manager = ChartManager.new(school)
-charts = chart_manager.run_standard_charts
+charts = chart_manager.run_standard_chart(:group_by_week_electricity)
 
 charts.each do |chart|
   puts chart.inspect
