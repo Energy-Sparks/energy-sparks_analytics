@@ -141,6 +141,12 @@ class ExcelCharts
     add_chart(worksheet, graph_definition, 0, 0)
   end
 
+  # the write_xlsx gem seems to produce corrupt Excel
+  # if text contains a £ symbol
+  def clean_text(text)
+    text.tr('£', '$')
+  end
+
   def add_chart(worksheet, graph_definition, data_col_offset, chart_row_offset)
     chart2 = nil
     chart3 = nil
@@ -176,8 +182,8 @@ class ExcelCharts
 
     chart1 = new_chart(graph_definition[:chart1_type], graph_definition[:chart1_subtype])
 
-    chart1.set_title(name: graph_definition[:title])
-    chart1.set_y_axis(name: graph_definition[:y_axis_label])
+    chart1.set_title(name: clean_text(graph_definition[:title]))
+    chart1.set_y_axis(name: clean_text(graph_definition[:y_axis_label]))
     puts "setting title to #{graph_definition[:title]}"
 
     if graph_definition[:chart1_type] == :pie # special case for pie charts, need to swap axis

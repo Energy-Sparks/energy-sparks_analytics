@@ -216,7 +216,7 @@ class LoadMeterDataFromCSV
     'Junior School Gas - Kitchen' =>  [ {  src: 'Bath Hacked', type: 'xlsx', workbook: ' BathGas.xlsx', fuel: 'Gas', worksheet: 'Junior School Gas - Kitchen'}],
     'Junior School Gas Supply 2' =>  [ {  src: 'Bath Hacked', type: 'xlsx', workbook: ' BathGas.xlsx', fuel: 'Gas', worksheet: 'Junior School Gas Supply 2'}],
     'Paulton Junior School Gas Supp' =>  [ {  src: 'Bath Hacked', type: 'xlsx', workbook: ' BathGas.xlsx', fuel: 'Gas', worksheet: 'Paulton Junior School Gas Supp'}],
-    'Saltford C of E Primary School' =>  [ {  src: 'Bath Hacked', type: 'xlsx', workbook: ' BathGas.xlsx', fuel: 'Gas', worksheet: 'Saltford C of E Primary School'}],
+ #   'Saltford C of E Primary School' =>  [ {  src: 'Bath Hacked', type: 'xlsx', workbook: ' BathGas.xlsx', fuel: 'Gas', worksheet: 'Saltford C of E Primary School'}],
     'St Johns Catholic Primary Scho' =>  [ {  src: 'Bath Hacked', type: 'xlsx', workbook: ' BathGas.xlsx', fuel: 'Gas', worksheet: 'St Johns Catholic Primary Scho'}],
     'Twerton Infant School' =>  [ {  src: 'Bath Hacked', type: 'xlsx', workbook: ' BathGas.xlsx', fuel: 'Gas', worksheet: 'Twerton Infant School'}],
     '##Castle Primary School Electr' =>  [ {  src: 'Bath Hacked', type: 'xlsx', workbook: ' BathElectricity.xlsx', fuel: 'Electricity', worksheet: '##Castle Primary School Electr'}],

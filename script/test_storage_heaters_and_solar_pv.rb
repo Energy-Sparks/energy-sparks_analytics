@@ -16,10 +16,10 @@ $SCHOOL_FACTORY = SchoolFactory.new
 school = $SCHOOL_FACTORY.load_school(school_name)
 
 puts "SCHOOL IS A #{school.class.name}"
-puts "Floor area is #{school.meter_collection.floor_area}"
+puts "Floor area is #{school.floor_area}"
 # puts school.meter_collection.methods
 # exit
-reportmanager = ReportManager.new(school.meter_collection)
+reportmanager = ReportManager.new(school)
 
 reports = {
   'Main Dashboard' => %i[intraday_line] # thermostatic cusum baseload intraday_line]
@@ -34,4 +34,3 @@ worksheets.each do |worksheet_name, charts|
 end
 
 excel.close
-

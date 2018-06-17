@@ -32,7 +32,11 @@ class XBucketBase
 
   def compact_date_range_description
     format = '%a%d%b%y'
-    data_start_date.strftime(format) + '-' + data_end_date.strftime(format)
+    if data_start_date != data_end_date
+      data_start_date.strftime(format) + '-' + data_end_date.strftime(format)
+    else
+      data_start_date.strftime(format)
+    end
   end
 
   # Factory Method for creating the right type of x bucketing object

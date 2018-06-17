@@ -11,7 +11,8 @@ class AMRData < HalfHourlyData
   end
 
   def baseload_kw(date)
-    baseload_kw_between_half_hour_indices(date, 41, 47)
+    statistical_baseload_kw(date)
+    # baseload_kw_between_half_hour_indices(date, 41, 47)
   end
 
   def baseload_kw_between_half_hour_indices(date, hhi1, hhi2)
@@ -41,7 +42,7 @@ class AMRData < HalfHourlyData
     days_data = self[date] # 48 x 1/2 hour kWh
     sorted_kwh = days_data.clone.sort
     lowest_sorted_kwh = sorted_kwh[0..7]
-    average_kwh = lowest_sorted_kwh.inject{ |sum, el| sum + el }.to_f / lowest_sorted_kwh.size
+    average_kwh = lowest_sorted_kwh.inject { |sum, el| sum + el }.to_f / lowest_sorted_kwh.size
     average_kwh * 2.0 # convert to kW
   end
 

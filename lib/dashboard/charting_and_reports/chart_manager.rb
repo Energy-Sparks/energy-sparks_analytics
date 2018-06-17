@@ -34,21 +34,55 @@ class ChartManager
     # data_types:         an array e.g. [:metereddata, :predictedheat] - assumes :metereddata if not present
     #
     benchmark:  {
-      name:             'Benchmark Comparison',
+      name:             'Benchmark Comparison (Annual Electricity and Gas Consumption)',
       chart1_type:      :bar,
       chart1_subtype:   :stacked,
       meter_definition: :all,
       x_axis:           :year,
       series_breakdown: :fuel,
       yaxis_units:      :£,
-      yaxis_scaling:    :none
+      yaxis_scaling:    :none,
+      inject:           :benchmark
       # timescale:        :year
     },
-    daytype_breakdown: {
-      name:             'Day Type: Gas',
+    benchmark_electric:  {
+      name:             'Benchmark Comparison (Annual Electricity Consumption)',
+      chart1_type:      :bar,
+      chart1_subtype:   :stacked,
+      meter_definition: :all,
+      x_axis:           :year,
+      series_breakdown: :fuel,
+      yaxis_units:      :£,
+      yaxis_scaling:    :none,
+      inject:           :benchmark
+      # timescale:        :year
+    },
+    daytype_breakdown_gas: {
+      name:             'Breakdown by type of day/time: Gas',
       chart1_type:      :pie,
       meter_definition: :allheat,
       x_axis:           :nodatebuckets,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      timescale:        :year
+    },
+    daytype_breakdown_electricity: {
+      name:             'Breakdown by type of day/time: Electricity',
+      chart1_type:      :pie,
+      meter_definition: :allelectricity,
+      x_axis:           :nodatebuckets,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      timescale:        :year
+    },
+    group_by_week_electricity: {
+      name:             'By Week: Electricity',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allelectricity,
+      x_axis:           :week,
       series_breakdown: :daytype,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
@@ -61,9 +95,10 @@ class ChartManager
       meter_definition: :allheat,
       x_axis:           :week,
       series_breakdown: :daytype,
-      yaxis_units:      :£,
+      yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      y2_axis:          :degreedays
+      y2_axis:          :degreedays,
+      timescale:        :year
     },
     group_by_week_gas_kw: {
       name:             'By Week: Gas',
@@ -120,18 +155,6 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :degreedays
     },
-    group_by_week_electricity: {
-      name:             'By Week: Electricity',
-      chart1_type:      :column,
-      chart1_subtype:   :stacked,
-      meter_definition: :allelectricity,
-      x_axis:           :week,
-      series_breakdown: :daytype,
-      # timescale:        :year,
-      yaxis_units:      :kwh,
-      yaxis_scaling:    :none,
-      y2_axis:          :degreedays
-    },
     gas_latest_years:  {
       name:             'Gas Use Over Last Few Years (to date)',
       chart1_type:      :column,
@@ -154,7 +177,7 @@ class ChartManager
       yaxis_scaling:    :none
     },
     gas_by_day_of_week:  {
-      name:             'Gas Use By Day of the Week (last year)',
+      name:             'Gas Use By Day of the Week (this year)',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       series_breakdown: :daytype,
@@ -165,7 +188,7 @@ class ChartManager
       yaxis_scaling:    :none
     },
     electricity_by_day_of_week:  {
-      name:             'Electricity Use By Day of the Week (last year)',
+      name:             'Electricity Use By Day of the Week (this year)',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       series_breakdown: :daytype,
@@ -182,6 +205,17 @@ class ChartManager
       series_breakdown: :none,
       x_axis:           :month,
       timescale:        [{ academicyear: 0 }, { academicyear: -1 }],
+      meter_definition: :allelectricity,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    electricity_by_month_year_0_1:  {
+      name:             'Electricity Use By Month (last 2 years)',
+      chart1_type:      :column,
+      # chart1_subtype:   :stacked,
+      series_breakdown: :none,
+      x_axis:           :month,
+      timescale:        [{ year: 0 }, { year: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
@@ -214,13 +248,78 @@ class ChartManager
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
-    intraday_line:  {
-      name:             'Intraday',
+    baseload_lastyear: {
+      name:             'Baseload kW - last year',
+      chart1_type:      :line,
+      series_breakdown: :baseload,
+      meter_definition: :allelectricity,
+      timescale:        :year,
+      x_axis:           :day,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    intraday_line_school_days:  {
+      name:             'Intraday (school days)',
       chart1_type:      :line,
       series_breakdown: :none,
       timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
+      filter:           :occupied,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    intraday_line_school_days_last5weeks:  {
+      name:             'Intraday (Last 5 weeks comparison - school day)',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{ week: 0 }, { week: -1 }, { week: -2 }, { week: -3 }, { week: -4 }],
+      x_axis:           :intraday,
+      meter_definition: :allelectricity,
+      filter:           :occupied,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    intraday_line_school_days_6months:  {
+      name:             'Intraday (Comparison 6 months apart)',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{ week: 0 }, { week: -20 }],
+      x_axis:           :intraday,
+      meter_definition: :allelectricity,
+      filter:           :occupied,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    intraday_line_school_last7days:  {
+      name:             'Intraday (last 7 days)',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{ day: 0 }, { day: -1 }, { day: -2 }, { day: -3 }, { day: -4 }, { day: -5 }, { day: -6 }],
+      x_axis:           :intraday,
+      meter_definition: :allelectricity,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    intraday_line_holidays:  {
+      name:             'Intraday (holidays)',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{ year: 0 }, { year: -1 }],
+      x_axis:           :intraday,
+      meter_definition: :allelectricity,
+      filter:           :holidays,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    intraday_line_weekends:  {
+      name:             'Intraday (weekends)',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{ year: 0 }, { year: -1 }],
+      x_axis:           :intraday,
+      meter_definition: :allelectricity,
+      filter:           :weekends,
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     }
@@ -370,11 +469,11 @@ class ChartManager
 
   def run_standard_chart(chart_param)
     chart_config = STANDARD_CHART_CONFIGURATION[chart_param]
-    chart_definition = run_chart(chart_config)
+    chart_definition = run_chart(chart_config, chart_param)
     chart_definition
   end
 
-  def run_chart(chart_config)
+  def run_chart(chart_config, chart_param)
     # puts 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red })
 
@@ -385,7 +484,7 @@ class ChartManager
       puts Benchmark.measure { aggregator.aggregate }
       # rubocop:enable Lint/AmbiguousBlockAssociation
 
-      graph_data = configure_graph(aggregator, chart_config)
+      graph_data = configure_graph(aggregator, chart_config, chart_param)
 
       graph_data
     rescue StandardError => e
@@ -395,7 +494,7 @@ class ChartManager
     end
   end
 
-  def configure_graph(aggregator, chart_config)
+  def configure_graph(aggregator, chart_config, chart_param)
     graph_definition = {}
 
     graph_definition[:title]          = chart_config[:name] + ' ' + aggregator.title_summary
@@ -407,6 +506,7 @@ class ChartManager
     # graph_definition[:yaxis_units]    = chart_config[:yaxis_units]
     # graph_definition[:yaxis_scaling]  = chart_config[:yaxis_scaling]
     graph_definition[:y_axis_label]   = chart_config[:y_axis_label]
+    graph_definition[:config_name]    = chart_param
 
     if chart_config.key?(:y2_axis)
       graph_definition[:y2_chart_type] = :line
@@ -414,6 +514,14 @@ class ChartManager
     end
     if !aggregator.data_labels.nil?
       graph_definition[:data_labels] = aggregator.data_labels
+    end
+
+    advice = DashboardChartAdviceBase.advice_factory(chart_param, @school, chart_config, graph_definition, chart_param)
+
+    unless advice.nil?
+      advice.generate_advice
+      graph_definition[:advice_header] = advice.header_advice
+      graph_definition[:advice_footer] = advice.footer_advice
     end
     graph_definition
   end
