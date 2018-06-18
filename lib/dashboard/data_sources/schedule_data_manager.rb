@@ -64,6 +64,7 @@ class ScheduleDataManager
         TemperaturesLoader.new("#{INPUT_DATA_DIR}/temperatures.csv", temp_data)
         puts "Loaded #{temp_data.length} days of temperatures"
       end
+
       # temp_data is an object of type Temperatures
       @@temperature_data[area_name] = temp_data
     end

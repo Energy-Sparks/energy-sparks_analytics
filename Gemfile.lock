@@ -54,6 +54,8 @@ GEM
       connection_pool (~> 2.2)
     nokogiri (1.8.2)
       mini_portile2 (~> 2.3.0)
+    nokogiri (1.8.2-x64-mingw32)
+      mini_portile2 (~> 2.3.0)
     ntlm-http (0.1.1)
     prawn (0.8.4)
       prawn-core (>= 0.8.4, < 0.9)
@@ -129,6 +131,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.5)
+    unf_ext (0.0.7.5-x64-mingw32)
     webrobots (0.1.2)
     write_xlsx (0.85.5)
       rubyzip (>= 1.0.0)
@@ -138,6 +141,7 @@ GEM
 
 PLATFORMS
   ruby
+  x64-mingw32
 
 DEPENDENCIES
   activesupport

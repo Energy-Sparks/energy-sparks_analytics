@@ -15,15 +15,15 @@ class Aggregator
   end
 
   def title_summary
-    if @chart_config[:yaxis_units] == :kw
+    if @chart_config[:yaxis_units] == :kw || @chart_config[:inject] == :benchmark
       ''
     else
-      @total_of_unit.round.to_s(:delimited) + y_axis_label
+      y_axis_label(@total_of_unit)
     end
   end
 
-  def y_axis_label
-    YAxisScaling.unit_description(@chart_config[:yaxis_units], @chart_config[:yaxis_scaling])
+  def y_axis_label(value)
+    YAxisScaling.unit_description(@chart_config[:yaxis_units], @chart_config[:yaxis_scaling], value)
   end
 
   def aggregate
@@ -71,6 +71,8 @@ class Aggregator
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
 
+    inject_benchmarks if @chart_config[:inject] == :benchmark
+
     create_y2_axis_data if @chart_config.key?(:y2_axis)
 
     reorganise_buckets if @chart_config[:chart1_type] == :scatter
@@ -79,7 +81,7 @@ class Aggregator
 
     aggregate_by_series
 
-    @chart_config[:y_axis_label] = y_axis_label
+    @chart_config[:y_axis_label] = y_axis_label(nil)
   end
 
   # charts can be specified as working over a single time period
@@ -130,19 +132,48 @@ private
   # e.g. 'school day in hours' v. 'school day out of hours'
   # returns a hash of this breakdown to the kWh values
   def aggregate_by_day(bucketed_data, bucketed_data_count)
-    @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
-      x_index = @xbucketor.index(date_range[0], nil)
-      multi_day_breakdown = @series_manager.get_data([:daterange, date_range])
-      multi_day_breakdown.each do |key, value|
-        add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+    if @chart_config.key?(:filter)
+      # this is slower, as it needs to loop through a day at a time
+      # TODO(PH,17Jun2018) push down and optimise in series_data_manager
+      @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
+        x_index = @xbucketor.index(date_range[0], nil)
+        (date_range[0]..date_range[1]).each do |date|
+          next unless match_filter_by_day(date)
+          multi_day_breakdown = @series_manager.get_data([:daterange, [date, date]])
+          multi_day_breakdown.each do |key, value|
+            add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+          end
+        end
+      end
+    else
+      @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
+        x_index = @xbucketor.index(date_range[0], nil)
+        multi_day_breakdown = @series_manager.get_data([:daterange, date_range])
+        multi_day_breakdown.each do |key, value|
+          add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+        end
       end
     end
   end
 
+  def match_filter_by_day(date)
+    filter = @chart_config.key?(:filter) ? @chart_config[:filter] : nil
+    holidays = @meter_collection.holidays
+    case filter
+    when :occupied
+      !(DateTimeHelper.weekend?(date) || holidays.holiday?(date))
+    when :holidays
+      holidays.holiday?(date)
+    when :weekends
+      DateTimeHelper.weekend?(date)
+    else
+      true
+    end
+  end
+
   def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
-    @chart_config[:x_axis]
-    # @xbucketor.x_axis_bucket_date_ranges.each do |date_range| # 1 day at a time
     (start_date..end_date).each do |date|
+      next if @chart_config.key?(:filter) && !match_filter_by_day(date)
       (0..47).each do |halfhour_index|
         x_index = @xbucketor.index(nil, halfhour_index)
         multi_day_breakdown = @series_manager.get_data([:halfhour, date, halfhour_index])
@@ -217,14 +248,42 @@ private
         if @chart_config[:x_axis] == :intraday
           # intraday kwh data gets bucketed into 48 x 1/2 hour buckets
           # kw = kwh in bucket / dates in bucket * 2 (kWh per 1/2 hour)
-          puts "y_axis stuff #{days}"
-          @bucketed_data[series_name][index] = 2 * @bucketed_data[series_name][index] / days
+          count = @bucketed_data_count[series_name][index]
+          # rubocop:disable Style/ConditionalAssignment
+          if count > 0
+            @bucketed_data[series_name][index] = 2 * @bucketed_data[series_name][index] / count
+          else
+            @bucketed_data[series_name][index] = 0
+          end
+          # rubocop:enable Style/ConditionalAssignment
         else
           hours = days * 24
           @bucketed_data[series_name][index] /= hours
         end
       end
     end
+  end
+
+  def inject_benchmarks
+    @x_axis.push('National Benchmark')
+    @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
+    @bucketed_data['gas'].push(benchmark_gas_usage_in_units)
+
+    @x_axis.push('Regional Benchmark')
+    @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
+    @bucketed_data['gas'].push(benchmark_gas_usage_in_units * 0.9)
+  end
+
+  def benchmark_electricity_usage_in_units
+    e_benchmark_kwh = BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils
+    y_scaling = YAxisScaling.new
+    y_scaling.scale_from_kwh(e_benchmark_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :electricity, @meter_collection)
+  end
+
+  def benchmark_gas_usage_in_units
+    g_benchmark_kwh = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * @meter_collection.floor_area
+    y_scaling = YAxisScaling.new
+    y_scaling.scale_from_kwh(g_benchmark_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :electricity, @meter_collection)
   end
 
   def create_empty_bucket_series

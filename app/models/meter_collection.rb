@@ -11,7 +11,7 @@
 #           - also holds modelling data
 
 class MeterCollection
-  attr_reader :heat_meters, :electricity_meters
+  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters
 
   # From school/building
   attr_reader :floor_area, :number_of_pupils
@@ -28,8 +28,15 @@ class MeterCollection
     @floor_area = school.floor_area
     @number_of_pupils = school.number_of_pupils
 
+    @heat_meters = []
+    @electricity_meters = []
+    @solar_pv_meters = []
+    @storage_heater_meters = []
     @heating_models = {}
     @school = school
+
+    @cached_open_time = DateTime.new(0, 1, 1, 7, 0, 0) # for speed
+    @cached_close_time = DateTime.new(0, 1, 1, 16, 30, 0) # for speed
 
     if i_am_running_in_rails?
       pp "Running in Rails environment"
@@ -88,13 +95,11 @@ class MeterCollection
 
   # JAMES: TODO(JJ,3Jun2018): I gather you may have done something on this when working on holidays?
   def open_time
-    # - use DateTime and not Time as orders of magnitude faster on Windows
-    DateTime.new(0, 1, 1, 7, 0, 0) # hard code for moment, but needs to be stored on database, and potentially by day
+    @cached_open_time
   end
 
   def close_time
-    # - use DateTime and not Time as orders of magnitude faster on Windows
-    DateTime.new(0, 1, 1, 16, 30, 0)
+    @cached_close_time
   end
 
   def school_day_in_hours(time)
