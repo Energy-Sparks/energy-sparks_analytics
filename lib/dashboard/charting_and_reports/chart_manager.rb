@@ -42,8 +42,8 @@ class ChartManager
       series_breakdown: :fuel,
       yaxis_units:      :£,
       yaxis_scaling:    :none,
-      inject:           :benchmark
-      # timescale:        :year
+      inject:           :benchmark,
+      timescale:        :year
     },
     benchmark_electric:  {
       name:             'Benchmark Comparison (Annual Electricity Consumption)',
@@ -54,8 +54,8 @@ class ChartManager
       series_breakdown: :fuel,
       yaxis_units:      :£,
       yaxis_scaling:    :none,
-      inject:           :benchmark
-      # timescale:        :year
+      inject:           :benchmark,
+      timescale:        :year
     },
     daytype_breakdown_gas: {
       name:             'Breakdown by type of day/time: Gas',
