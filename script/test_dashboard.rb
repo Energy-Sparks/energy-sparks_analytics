@@ -226,5 +226,5 @@ end
 #
 # do_all_schools
 
-do_one_school('Bishop Sutton Primary School', , :main_dashboard_electric_and_gas, :benchmark))
+do_one_school('Bishop Sutton Primary School', :main_dashboard_electric_and_gas, :benchmark)
 
