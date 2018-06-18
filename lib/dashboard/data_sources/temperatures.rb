@@ -10,7 +10,11 @@ class Temperatures < HalfHourlyData
   def average_temperature(date)
     avg_temp = 0.0
     (0..47).each do |i|
-      avg_temp += data(date, i) / 48
+      if data(date, i).nil?
+        p "No data for #{date} index #{i}"
+      else
+        avg_temp += data(date, i) / 48
+      end
     end
     avg_temp
   end
