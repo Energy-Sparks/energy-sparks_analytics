@@ -20,16 +20,24 @@ class DashboardEnergyAdvice
   end
 end
 
+
+  
 class DashboardChartAdviceBase
-  attr_reader :header_advice, :footer_advice
+  attr_reader :header_advice, :footer_advice, :body_start, :body_end
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    puts "GGGGGGG", chart_data
     @school = school
     @chart_definition = chart_definition
     @chart_data = chart_data
     @chart_symbol = chart_symbol
     @header_advice = nil
     @footer_advice = nil
+    if ENV['School Dashboard Advice'] == 'Include Header and Body'
+      @body_start = '<html><head>'
+      @body_end = '</html></head>'
+    else
+      @body_start = ''
+      @body_end = ''
+    end
   end
 
   def self.advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
@@ -57,6 +65,14 @@ protected
       '<html><h2>Error generating advice</h2></html>'
     end
   end
+  
+  def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
+    scaling = YAxisScaling.new
+    kwh_conv = scaling.scale_unit_from_kwh(:£, fuel_type_sym)
+    kwh = YAxisScaling.scale_num(pounds / kwh_conv)
+
+    '&pound;' + YAxisScaling.scale_num(pounds) + ' (' + kwh + 'kWh)'
+  end
 end
 
 class BenchmarkComparisonAdvice < DashboardChartAdviceBase
@@ -73,8 +89,8 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     gas_comparison = comparison('gas', :gas)
 
     header_template = %{
-      <html>
-        <head><h1>Energy Dashboard for <%= @school.name %></title></h1>
+      <%= @body_start %>
+        <h1>Energy Dashboard for <%= @school.name %></title></h1>
         <body>
           <p>
             <%= @school.name %> is a <%= @school.school_type %> school near <%= @school.address %>
@@ -87,8 +103,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
             The electricity usage <%= electric_comparison %>.
             The gas usage <%= gas_comparison %>:
           </p>
-        </body>
-      </html>
+      <%= @body_end %>
     }.gsub(/^  /, '')
 
     @header_advice = generate_html(header_template, binding)
@@ -96,14 +111,84 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     footer_template = %{
       <html>
         <p>
-        However, the best performing schools used 30% less fuel than the regional average.
-        It is also important to realise even at older schools it is possible to make
-        significant energy reductions and are often more energy efficient than newer schools.
+          Your gas usage is <%= percent_regional_gas_str %> of the regional average which
+          <% if percent_gas_of_regional_average < 0.7 %>
+            is very good.
+          <% elsif percent_gas_of_regional_average < 1.0 %>
+            while although good, could be improved, better schools achieve 70% of the regional average,
+            which would save you <%= pound_gas_saving_versus_benchmark %> per year.
+          <% else %>
+            is above average, the school should aim to reduce this,
+            which would save you <%= pound_gas_saving_versus_benchmark %> per year if you matched the usage of exemplar schools.
+          <% end %>
+          Your electricity usage is <%= percent_regional_electricity_str %> of the regional average which
+          <% if percent_electricity_of_regional_average < 0.7 %>
+            is very good.
+          <% elsif percent_electricity_of_regional_average < 1.0 %>
+            while although good, could be improved, better schools achieve 70% of the regional average,
+              which would save you <%= pound_electricity_saving_versus_benchmark %> per year.
+          <% else %>
+            is above average, the school should aim to reduce this,
+            which would save you <%= pound_electricity_saving_versus_benchmark %> per year if you matched the usage of exemplar schools.
+          <% end %>
+          <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
+            Well done you energy usage is very low and you should be congratulated for being an exemplar school.
+          <% else %>
+            There is very no difference in energy consumption between older and newer schools in terms of
+            energy consumption. The best schools from an energy efficiency perspective are those which
+            manage there energy best, minimising out of hours usage and through good energy behaviour.
+          <% end %>
         </p>
       </html>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+  end
+
+  def actual_electricity_usage
+    @chart_data[:x_data]['electricity'][0]
+  end
+
+  def actual_gas_usage
+    @chart_data[:x_data]['gas'][0]
+  end
+
+  def percent_gas_of_regional_average
+    actual_gas_usage / benchmark_gas_usage
+  end
+
+  def percent_electricity_of_regional_average
+    actual_electricity_usage / benchmark_electricity_usage
+  end
+
+  def percent_regional_gas_str
+    percent(percent_gas_of_regional_average)
+  end
+
+  def percent_regional_electricity_str
+    percent(percent_electricity_of_regional_average)
+  end
+
+  def benchmark_electricity_usage
+    @chart_data[:x_data]['electricity'][-1]
+  end
+
+  def percent(value)
+    (value * 100.0).round(0).to_s + '%'
+  end
+
+  def pound_gas_saving_versus_benchmark
+    pounds = actual_gas_usage - benchmark_gas_usage
+    pounds_to_pounds_and_kwh(pounds, :gas)
+  end
+
+  def pound_electricity_saving_versus_benchmark
+    pounds = actual_electricity_usage - benchmark_electricity_usage
+    pounds_to_pounds_and_kwh(pounds, :electricity)
+  end
+
+  def benchmark_gas_usage
+    @chart_data[:x_data]['gas'][-1]
   end
 
   def comparison(type_str, type_sym)
@@ -117,12 +202,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   def get_energy_usage(type_str, type_sym, index)
     pounds = @chart_data[:x_data][type_str][index]
-
-    scaling = YAxisScaling.new
-    kwh_conv = scaling.scale_unit_from_kwh(:£, type_sym)
-    kwh = YAxisScaling.scale_num(pounds / kwh_conv)
-
-    '&pound;' + YAxisScaling.scale_num(pounds) + ' (' + kwh + 'kWh)'
+    pounds_to_pounds_and_kwh(pounds, type_sym)
   end
 end
 
