@@ -89,7 +89,12 @@ class Aggregator
   # convert single hashes into an array with a single value
   def time_periods
     periods = []
-    if @chart_config[:timescale].is_a?(Array)
+    if !@chart_config.key?(:timescale)
+      # if no time periods specified signal to series_data_manager
+      # to use as much of the available data as possible i.e.
+      # an unlimited timeperiod, seems to cause problems on Macs if not?
+      periods.push(nil)
+    elsif @chart_config[:timescale].is_a?(Array)
       periods = @chart_config[:timescale]
     else
       periods.push(@chart_config[:timescale])
