@@ -1,6 +1,6 @@
 # provides guidance on chart colour
 require 'chroma'
-require './lib/dashboard/charting_and_reports/interpret_chart' # PH don't know why this is necessary?
+
 class ChartColour < InterpretChart
   def initialize(chart_data)
     # super(chart_data)
