@@ -31,8 +31,10 @@ Gem::Specification.new do |s|
   s.add_dependency 'ruby-sun-times', '~> 0.1.5'
   s.add_dependency 'soda-ruby', '~> 0.2.25'
   s.add_dependency 'structured_warnings', '~> 0.3.0'
+  s.add_dependency 'chroma', '~> 0.2.0'
 
   # Useful for debugging
   s.add_dependency 'pry-byebug', '~> 3.6.0'
+  # For testing
   s.add_dependency 'rspec', '~> 3.7.0'
 end
