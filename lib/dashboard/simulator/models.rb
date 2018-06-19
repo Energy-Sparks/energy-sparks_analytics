@@ -176,7 +176,7 @@ module AnalyseHeatingAndHotWater
       end
 
       if !missing_dates.empty?
-        puts 'Warning: missing dates during regression modelling'
+        puts "Warning: missing dates during regression modelling for #{regression_model_name}"
         # rubocop:disable Naming/VariableNumber
         missing_dates.each_slice(10) do |group_of_10|
           puts group_of_10.to_s
@@ -211,6 +211,10 @@ module AnalyseHeatingAndHotWater
     end
 
     def regression(key, regression_model_name, x1, y1, degreeday_base_temperature)
+      if x1.empty?
+        puts "Error: empty data set for calculating regression"
+        return RegressionModel.new(key, "Error: zero vector", 0.0, 0.0, 0.0, degreeday_base_temperature)
+      end
       x = Daru::Vector.new(x1)
       y = Daru::Vector.new(y1)
       sr = Statsample::Regression.simple(x, y)

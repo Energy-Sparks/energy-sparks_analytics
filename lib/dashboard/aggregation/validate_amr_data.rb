@@ -136,6 +136,7 @@ class ValidateAMRData
         return [day_before, adjusted_substitute_heating_kwh(date, day_before)]
       end
     end
+    puts "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)}"
     nil
   end
 
@@ -149,7 +150,8 @@ class ValidateAMRData
   end
 
   def within_temperature_range?(day_temp, substitute_temp)
-    (day_temp - substitute_temp).magnitude < MAXGASAVGTEMPDIFF
+    criteria = MAXGASAVGTEMPDIFF * (day_temp < 20.0 ? 1.0 : 1.5) # relax criteria in summer
+    (day_temp - substitute_temp).magnitude < criteria
   end
 
   def adjusted_substitute_heating_kwh(missing_day, substitute_day)
@@ -158,6 +160,10 @@ class ValidateAMRData
     kwh_prediction_for_missing_day = @heating_model.predicted_kwh(missing_day, @temperatures.average_temperature(missing_day))
     kwh_prediction_for_substitute_day = @heating_model.predicted_kwh(substitute_day, @temperatures.average_temperature(substitute_day))
     prediction_ratio = kwh_prediction_for_missing_day / kwh_prediction_for_substitute_day
+    if prediction_ratio < 0
+      puts "Warning: negative predicated data for missing day #{missing_day} from #{substitute_day} setting to zero"
+      prediction_ratio = 0.0
+    end
     substitute_data = Array.new(48, 0.0)
     (0..47).each do |halfhour_index|
       # scale substitutes missing day data by ratio of predicted kwh's (not ideal as will scale baseload as well)

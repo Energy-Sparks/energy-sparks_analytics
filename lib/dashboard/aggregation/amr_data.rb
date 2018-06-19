@@ -11,11 +11,39 @@ class AMRData < HalfHourlyData
   end
 
   def baseload_kw(date)
-    total = 0.0
-    (41..47).each do |halfhour_index|
-      total += data(date, halfhour_index)
+    statistical_baseload_kw(date)
+    # baseload_kw_between_half_hour_indices(date, 41, 47)
+  end
+
+  def baseload_kw_between_half_hour_indices(date, hhi1, hhi2)
+    total_kwh = 0.0
+    count = 0
+    if hhi2 > hhi1 # same day
+      (hhi1..hhi2).each do |halfhour_index|
+        total_kwh += data(date, halfhour_index)
+        count += 1
+      end
+    else
+      (hhi1..48).each do |halfhour_index| # before midnight
+        total_kwh += data(date, halfhour_index)
+        count += 1
+      end
+      (0..hhi2).each do |halfhour_index| # after midnight
+        total_kwh += data(date, halfhour_index)
+        count += 1
+      end
     end
-    total * 2.0 / 7.0
+    total_kwh * 2.0 / count
+  end
+
+  # alternative heuristic for baseload calculation (for storage heaters)
+  # find the average of the bottom 8 samples (4 hours) in a day
+  def statistical_baseload_kw(date)
+    days_data = self[date] # 48 x 1/2 hour kWh
+    sorted_kwh = days_data.clone.sort
+    lowest_sorted_kwh = sorted_kwh[0..7]
+    average_kwh = lowest_sorted_kwh.inject { |sum, el| sum + el }.to_f / lowest_sorted_kwh.size
+    average_kwh * 2.0 # convert to kW
   end
 
   def average_baseload_kw_date_range(date1, date2)

@@ -64,6 +64,10 @@ class HalfHourlyData < Hash
 
   def one_day_total(date)
     unless @cache_days_totals.key?(date) # perforance optimisation, needs rebenchmarking to check its an actual speedup
+      if self[date].nil?
+        puts "Error: missing data for #{self.class.name} on date #{date} returning zero"
+        return 0.0
+      end
       total = self[date].inject(:+)
       @cache_days_totals[date] = total
       return total
