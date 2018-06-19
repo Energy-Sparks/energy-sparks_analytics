@@ -42,6 +42,8 @@ class MeterCollection
       pp "Running in Rails environment"
       @heat_meters = school.heat_meters
       @electricity_meters = school.electricity_meters
+      # Stored as big decimal
+      @floor_area = school.floor_area.to_f
 
       @heat_meters.each do |heat_meter|
         heat_meter.amr_data = add_amr_data(heat_meter)
@@ -60,6 +62,8 @@ class MeterCollection
       @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
       @heat_meters = []
       @electricity_meters = []
+
+      @floor_area = school.floor_area
 
       pp "Running standalone, not in Rails environment"
     end
