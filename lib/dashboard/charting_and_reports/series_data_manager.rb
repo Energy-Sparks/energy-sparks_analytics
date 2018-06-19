@@ -278,12 +278,21 @@ private
     }
     (date_range[0]..date_range[1]).each do |date|
       begin
-        fuel_data['gas'] += gas_meter.amr_data.one_day_kwh(date) * gas_factor
-        fuel_data['electricity'] += electricity_meter.amr_data.one_day_kwh(date) * electric_factor
+        if gas_meter.nil?
+          fuel_data['gas'] += 0.0
+        else
+          fuel_data['gas'] += gas_meter.amr_data.one_day_kwh(date) * gas_factor
+        end
+        if electricity_meter.nil?
+          fuel_data['electricity'] += 0.0
+        else
+          fuel_data['electricity'] += electricity_meter.amr_data.one_day_kwh(date) * electric_factor
+        end
         # fuel_data['solar pv'] += solar_pv_meter.amr_data.one_day_kwh(date) * solar_pv_factor
         # fuel_data['storage heaters'] += storage_meter.amr_data.one_day_kwh(date) * storage_heater_factor
-      rescue StandardError => _e
+      rescue Exception => e
         puts "Missing or nil data on #{date}"
+        puts e
       end
     end
     fuel_data
@@ -443,12 +452,12 @@ private
     if !@meters[1].nil? && @meters[1].amr_data.start_date > meter_date
       meter_date = @meters[1].amr_data.start_date
     end
-    @start_date = meter_date
+    meter_date
   end
 
   def calculate_last_meter_date
     meter_date = Date.new(2040, 1, 1)
-    if !@meters[0].nil?
+    unless @meters[0].nil?
       meter_date = @meters[0].amr_data.end_date
     end
     if !@meters[1].nil? && @meters[1].amr_data.end_date < meter_date
