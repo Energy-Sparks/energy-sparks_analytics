@@ -71,7 +71,7 @@ class MeterCollection
       GROUP BY date_trunc('day', read_at)
     SQL
 
-    result = ActiveRecord::Base.connection.execute(query)
+    result = ActiveRecord::Base.connection.exec_query(query)
     result.each do |row|
       amr_data.add(Date.parse(row["day"]), row["values"].delete('{}').split(',').map(&:to_f))
     end
