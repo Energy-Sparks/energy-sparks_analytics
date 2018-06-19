@@ -6,6 +6,28 @@ class ExcelCharts
     @filename = filename
     @workbook = WriteXLSX.new(@filename)
     @bold = @workbook.add_format(bold: 1)
+    @colour_cache = {} # Excel only has 56 colours, so we need to set custom colours and cache them
+  end
+
+  def custom_colour(hex_colour)
+    if @colour_cache.key?(hex_colour)
+      @colour_cache[hex_colour]
+    else
+      colour_num = 63 - @colour_cache.length
+      new_colour_name = 'custom-colour-' + colour_num.to_s
+      r, g, b = hex_colour_to_rgb(hex_colour)
+      @workbook.set_custom_color(colour_num, r, g, b)
+      puts "Setting #{new_colour_name} to #{r} #{g} #{b}"
+      @colour_cache[hex_colour] = new_colour_name
+      new_colour_name
+    end
+  end
+
+  def hex_colour_to_rgb(hex)
+    r = hex[1..2].hex
+    g = hex[3..4].to_i(16)
+    b = hex[5..6].to_i(16)
+    [r, g, b]
   end
 
   def column_letter(col_num)
@@ -66,7 +88,7 @@ class ExcelCharts
     end
   end
 
-  def add_data_and_chart_to_excel_worksheet(worksheet, worksheet_name, column_number, xaxis_data, data, chart, second_y_axis)
+  def add_data_and_chart_to_excel_worksheet(worksheet, worksheet_name, column_number, xaxis_data, data, chart, second_y_axis, auto_colour)
     start_column_number = column_number
     first_data_column = start_column_number
     max_data_rows = 0
@@ -80,9 +102,11 @@ class ExcelCharts
       first_data_column += 1
     end
 
+    column_number_to_name_map = {}
     data.each do |column_name, column_data|
       # puts "Adding column data #{column_name} at #{column_number}"
       worksheet.write(0, column_number, column_name)
+      column_number_to_name_map[column_number] = column_name
       worksheet.write_col(1, column_number, column_data)
       max_data_rows = column_data.length
       column_number += 1
@@ -92,21 +116,41 @@ class ExcelCharts
     last_data_column = first_data_column + data.length - 1
     # puts "Looping setting y_axis data between #{first_data_column} and #{last_data_column} setting series data versus x_axis in col #{start_column_number}"
     (first_data_column..last_data_column).each do |col_num|
+      col_name = column_number_to_name_map[col_num]
+      colour_hex = @colours.series_colour(col_name)
       name_range = cell_reference(worksheet_name, col_num, 1, col_num, 1)
       value_range = cell_reference(worksheet_name, col_num, 2, col_num, max_data_rows + 1)
       if second_y_axis
         # puts "Adding on 2nd Y axis: name: to #{name_range} values to #{value_range}"
-        chart.add_series(
-          y2_axis: 1,
-          name: name_range, # name of series(appears in legend)
-          values: value_range
-        )
-      else
+        if auto_colour
+          chart.add_series(
+            y2_axis: 1,
+            name: name_range, # name of series(appears in legend)
+            values: value_range
+          )
+        else
+          chart.add_series(
+            y2_axis: 1,
+            name: name_range, # name of series(appears in legend)
+            values: value_range,
+            fill: { color: colour_hex },
+            line: { color: colour_hex }
+          )
+        end
+      elsif auto_colour
         # puts "Adding primary series data: name #{name_range} categories #{category_range} values #{value_range}"
         chart.add_series(
           name: name_range,
           categories: category_range, # x axis data
           values: value_range
+        )
+      else
+        chart.add_series(
+          name: name_range,
+          categories: category_range, # x axis data
+          values: value_range,
+          fill: { color: colour_hex },
+          line: { color: colour_hex }
         )
       end
     end
@@ -150,6 +194,8 @@ class ExcelCharts
   def add_chart(worksheet, graph_definition, data_col_offset, chart_row_offset)
     chart2 = nil
     chart3 = nil
+
+    @colours = ChartColour.new(graph_definition)
 
     ap(graph_definition, limit: 5, color: { float: :red })
 
@@ -195,12 +241,13 @@ class ExcelCharts
       end
     end
 
-    column_number = add_data_and_chart_to_excel_worksheet(worksheet, worksheet.name, data_col_offset, main_axisx, main_axisdata, chart1, false)
+    column_number = add_data_and_chart_to_excel_worksheet(
+      worksheet, worksheet.name, data_col_offset, main_axisx, main_axisdata, chart1, false, graph_definition[:chart1_type] == :pie)
 
     # second set of data but on secondary y axis, but sharing the same xaxis
     if graph_definition.key?(:y2_chart_type)
       chart2 = new_chart(graph_definition[:y2_chart_type], graph_definition[:y2_chart_subtype])
-      _column_number = add_data_and_chart_to_excel_worksheet(worksheet, worksheet.name, column_number, nil, graph_definition[:y2_data], chart2, true)
+      _column_number = add_data_and_chart_to_excel_worksheet(worksheet, worksheet.name, column_number, nil, graph_definition[:y2_data], chart2, true, false)
     end
 
     # third set of data, sharing the primary yaxis, but having its own xaxis data = used to define a trendline overlaying a scatter plot

@@ -3,14 +3,6 @@ require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 
-=begin
-'Test 1'         => %i[benchmark daytype_breakdown group_by_week_gas group_by_week_electricity],
-'Test 2'         => %i[group_by_week_gas_kwh_pupil gas_latest_years gas_latest_academic_years],
-'Test 3'         => %i[gas_by_day_of_week electricity_by_day_of_week electricity_by_month_acyear_0_1],
-'Test 4'         => %i[thermostatic cusum baseload intraday_line],
-'Test 5'         => %i[gas_kw group_by_week_gas_kwh group_by_week_gas_kwh_pupil group_by_week_gas_co2_floor_area group_by_week_gas_library_books]
-=end
-
 def banner(title)
   cols = 120
   len_before = ((cols - title.length) / 2).floor
@@ -18,7 +10,7 @@ def banner(title)
   '=' * len_before + title + '=' * len_after
 end
 
-dashboard_page_groups = {
+@dashboard_page_groups = {
   main_dashboard_electric:  {
                               name:   'Main Dashboard',
                               charts: %i[benchmark_electric]
@@ -80,7 +72,7 @@ dashboard_page_groups = {
                             }
 }
 
-school_report_groups = {
+@school_report_groups = {
   electric_only:
                       %i[ main_dashboard_electric
                           electricity_year
@@ -106,7 +98,7 @@ school_report_groups = {
                           recent_electric_and_gas]
 }
 
-schools = {
+@schools = {
   'Bishop Sutton Primary School'      => :electric_and_gas,
   'Castle Primary School'             => :electric_and_gas,
   'Freshford C of E Primary'          => :electric_and_gas,
@@ -122,44 +114,96 @@ schools = {
 }
 
 ENV[SchoolFactory::ENV_SCHOOL_DATA_SOURCE] = SchoolFactory::BATH_HACKED_SCHOOL_DATA
+ENV['School Dashboard Advice'] = 'Include Header and Body'
 $SCHOOL_FACTORY = SchoolFactory.new
 
 puts "\n" * 8
-schools.each do |school_name, report_config|
-  worksheet_charts = {}
-  puts banner("School: #{school_name} - running reports: #{report_config}")
+
+@benchmarks = []
+
+def do_all_schools
+  @schools.keys do |school_name|
+    do_one_school(school_name)
+  end
+end
+
+def load_school(school_name)
+  puts banner("School: #{school_name}")
   school = $SCHOOL_FACTORY.load_school(school_name)
+end
+
+def do_one_school(school_name, filter_page_name = nil, filter_chart = nil)
+  report_config = @schools[school_name]
+  puts "Doing this report configuration #{report_config}"
+  worksheet_charts = {}
+
+  school = load_school(school_name)
 
   chart_manager = ChartManager.new(school)
 
-  benchmarks = []
-  report_groups = school_report_groups[report_config]
-  report_groups.each do |report_pages|
-    page_config = dashboard_page_groups[report_pages]
-    puts "\tRunning report page  #{page_config[:name]}"
-    worksheet_charts[page_config[:name]] = [] unless worksheet_charts.key?(page_config[:name])
+  do_all_pages_for_school(school, school_name, chart_manager, worksheet_charts, report_config, filter_page_name, filter_chart)
 
-    page_config[:charts].each do |chart_name|
-      puts banner(chart_name.to_s)
-      chart = nil
-      bm = Benchmark.measure {
-        chart = chart_manager.run_standard_chart(chart_name)
-      }
-      benchmarks.push(sprintf("%30.30s = %s", chart_name, bm.to_s))
-      ap(chart, limit: 20, color: { float: :red })
-      unless chart.nil?
-        worksheet_charts[page_config[:name]].push(chart)
-      end
-      puts "\t\tChart = #{chart}"
+  @benchmarks.each do |bm|
+    puts bm
+  end
+  @benchmarks = []
+end
+
+
+def do_all_pages_for_school(school, school_name, chart_manager, worksheet_charts,
+                            report_config, filter_page_name, filter_chart)
+  report_groups = @school_report_groups[report_config]
+
+  report_groups.each do |report_page|
+    next if !filter_page_name.nil? && report_page != filter_page_name
+    do_one_page(school, report_page, chart_manager, worksheet_charts, filter_chart)
+    puts "\n" * 3
+    puts "got #{worksheet_charts.length} pages"
+    puts "\n" * 3
+  end
+
+  do_excel(school_name, worksheet_charts)
+  do_html(school_name, worksheet_charts)
+end
+
+def do_one_page(school, report_page, chart_manager, worksheet_charts, filter_chart = nil)
+  page_config = @dashboard_page_groups[report_page]
+  puts "\tRunning report page  #{page_config[:name]}"
+  worksheet_charts[page_config[:name]] = [] unless worksheet_charts.key?(page_config[:name])
+  page_config[:charts].each do |chart_name|
+    next if !filter_chart.nil? && chart_name != filter_chart
+    chart = do_one_chart(chart_name, chart_manager)
+    unless chart.nil?
+      worksheet_charts[page_config[:name]].push(chart)
+      puts "Added chart to #{page_config[:name]}"
     end
   end
+  puts "\n" * 3
+  puts "got #{page_config[:name]} has #{worksheet_charts[page_config[:name]].length} charts"
+  puts "\n" * 3
+end
+
+def do_one_chart(chart_name, chart_manager)
+  puts banner(chart_name.to_s)
+  chart = nil
+  bm = Benchmark.measure {
+    chart = chart_manager.run_standard_chart(chart_name)
+  }
+  @benchmarks.push(sprintf("%30.30s = %s", chart_name, bm.to_s))
+  ap(chart, limit: 20, color: { float: :red })
+  chart
+end
+
+def do_excel(school_name, worksheet_charts)
   excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + school_name + '- charts test.xlsx')
   worksheet_charts.each do |worksheet_name, charts|
     excel.add_charts(worksheet_name, charts)
   end
 
   excel.close
+end
 
+def do_html(school_name, worksheet_charts)
   html_file = HtmlFileWriter.new(school_name)
   worksheet_charts.each do |worksheet_name, charts|
     html_file.write_header(worksheet_name)
@@ -168,8 +212,19 @@ schools.each do |school_name, report_config|
     end
   end
   html_file.close
-
-  benchmarks.each do |bm|
-    puts bm
-  end
 end
+
+# example testing choices:
+#
+#   1. do_all_schools
+#
+#   2. do_one_school('Bishop Sutton Primary School')
+#
+#   3. do_one_school('Bishop Sutton Primary School', :main_dashboard_electric_and_gas)
+#
+#   4. do_one_school('Bishop Sutton Primary School', :main_dashboard_electric_and_gas, :benchmark)
+#
+# do_all_schools
+
+do_one_school('Bishop Sutton Primary School', :main_dashboard_electric_and_gas, :benchmark)
+
