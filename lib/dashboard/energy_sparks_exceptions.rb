@@ -9,3 +9,6 @@ class EnergySparksUnexpectedStateException < StandardError
   #   super.initialize(message)
   # end
 end
+
+class EnergySparksMissingPeriodForSpecifiedPeriodChart < StandardError
+end

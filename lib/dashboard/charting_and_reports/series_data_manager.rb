@@ -371,7 +371,7 @@ private
         periods = @meter_collection.holidays.academic_years(@first_meter_date, @last_meter_date)
         if hash_value.is_a?(Integer)
           raise 'Error: expecting zero of negative number for academic year specification' if hash_value > 0
-          raise "Error: data not available for #{hash_value}th academic year" if hash_value.magnitude > periods.length - 1
+          raise EnergySparksMissingPeriodForSpecifiedPeriodChart.new("Error: data not available for #{hash_value}th academic year") if hash_value.magnitude > periods.length - 1
           @periods = [periods[hash_value.magnitude]]
         else
           raise "Expecting an integer as an parameter for an academic year specification got a #{hash_value.class.name}"
@@ -380,7 +380,7 @@ private
         if hash_value.is_a?(Integer)
           raise 'Error: expecting zero of negative number for year specification' if hash_value > 0
           periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
-          raise "Error: data not available for #{hash_value}th academic year" if hash_value.magnitude > periods.length - 1
+          raise EnergySparksMissingPeriodForSpecifiedPeriodChart.new("Error: data not available for #{hash_value}th year") if hash_value.magnitude > periods.length - 1
           @periods = [periods[hash_value.magnitude]]
         elsif hash_value.is_a?(Date)
           end_date = hash_value > @last_meter_date ? @last_meter_date : hash_value
