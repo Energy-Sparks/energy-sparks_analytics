@@ -21,7 +21,7 @@ class DashboardEnergyAdvice
 end
 
 
-  
+
 class DashboardChartAdviceBase
   attr_reader :header_advice, :footer_advice, :body_start, :body_end
   def initialize(school, chart_definition, chart_data, chart_symbol)
@@ -65,7 +65,7 @@ protected
       '<html><h2>Error generating advice</h2></html>'
     end
   end
-  
+
   def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
     scaling = YAxisScaling.new
     kwh_conv = scaling.scale_unit_from_kwh(:£, fuel_type_sym)
@@ -88,28 +88,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     electric_comparison = comparison('electricity', :electricity)
     gas_comparison = comparison('gas', :gas)
 
-    header_template = %{
-      <%= @body_start %>
-        <h1>Energy Dashboard for <%= @school.name %></title></h1>
-        <body>
-          <p>
-            <%= @school.name %> is a <%= @school.school_type %> school near <%= @school.address %>
-            with <%= @school.number_of_pupils %> pupils
-            and a floor area of <%= @school.floor_area %>m<sup>2</sup>.
-          </p>
-          <p>
-            The school spent <%= electric_usage %> on electricity
-            and <%= gas_usage %> on gas last year.
-            The electricity usage <%= electric_comparison %>.
-            The gas usage <%= gas_comparison %>:
-          </p>
-      <%= @body_end %>
-    }.gsub(/^  /, '')
+    header_template = %{<p>The school spent <%= electric_usage %> on electricity and <%= gas_usage %> on gas last year.</p><p>The electricity usage <%= electric_comparison %>.</p><p>The gas usage <%= gas_comparison %>: </p>}
 
     @header_advice = generate_html(header_template, binding)
 
     footer_template = %{
-      <html>
         <p>
           Your gas usage is <%= percent_regional_gas_str %> of the regional average which
           <% if percent_gas_of_regional_average < 0.7 %>
@@ -139,8 +122,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
             manage there energy best, minimising out of hours usage and through good energy behaviour.
           <% end %>
         </p>
-      </html>
-    }.gsub(/^  /, '')
+    }
 
     @footer_advice = generate_html(footer_template, binding)
   end
