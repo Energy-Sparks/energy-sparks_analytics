@@ -14,7 +14,10 @@ gem 'interpolate'
 gem 'ruby-sun-times'
 gem 'soda-ruby', :require => 'soda'
 gem 'structured_warnings'
+gem 'chroma'
 
 # Useful for debugging
 gem 'pry-byebug'
+
+# For tests
 gem 'rspec'
