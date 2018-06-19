@@ -196,37 +196,27 @@ class ThermostaticAdvice < DashboardChartAdviceBase
   def generate_advice
     puts @school.name
     header_template = %{
-      <html>
-        <head><h2>Thermostatic analysis</title></h2>
-        <body>
-          <p>
-            The scatter chart below shows a thermostatic analysis of the school's heating system.
-            The y axis shows the energy consumption in kWh on any given day.
-            The x axis the number of degrees days (the inverse of temperature - so how cold it is
-            <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a> .
-            Each point represents a single day, the colours represent different types of days
-            .e.g. a day in the winter when the building is occupied and the heating is on.
-          </p>
-          <p>
-            If the heating has good thermostatic control then the points at the top of
-            chart when the heating is on and the school occupied should be close to the trend line.
-            This is because the amount of heating required on a single day is linearly proportional to
-            the difference between the inside and outside temperature, and any variation from the
-            trend line would suggest thermostatic control isn't working too well.
-          </p>
-        </body>
-      </html>
-    }.gsub(/^  /, '')
+      <h3>Thermostatic analysis</title></h3>
+      <p>
+        The scatter chart below shows a thermostatic analysis of the school's heating system.
+        The y axis shows the energy consumption in kWh on any given day.
+        The x axis the number of degrees days (the inverse of temperature - so how cold it is
+        <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a> .
+        Each point represents a single day, the colours represent different types of days.
+        e.g. a day in the winter when the building is occupied and the heating is on.
+      </p>
+      <p>
+        If the heating has good thermostatic control then the points at the top of
+        chart when the heating is on and the school occupied should be close to the trend line.
+        This is because the amount of heating required on a single day is linearly proportional to
+        the difference between the inside and outside temperature, and any variation from the
+        trend line would suggest thermostatic control isn't working too well.
+      </p>
+    }
 
     @header_advice = generate_html(header_template, binding)
 
-    footer_template = %{
-      <html>
-        <p>
-          Looking at the model
-        </p>
-      </html>
-    }.gsub(/^  /, '')
+    footer_template = %{<p> </p>}
 
     @footer_advice = generate_html(footer_template, binding)
   end
