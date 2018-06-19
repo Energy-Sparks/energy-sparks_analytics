@@ -48,12 +48,23 @@ class Aggregator
     periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
       chartconfig_copy = @chart_config.clone
       chartconfig_copy[:timescale] = period
-      bucketed_period_data.push(aggregate_period(chartconfig_copy))
+      begin
+        bucketed_period_data.push(aggregate_period(chartconfig_copy))
+      rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
+        puts e
+        puts 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+      rescue StandardError => e
+        puts e
+      end
     end
 
     # take the resulting buckets, 1 for each time period
 
-    if bucketed_period_data.length > 1 # and update the series names if there is more than one period
+    # and update the series names if there is more than one period
+    # or if more than one was asked for but not enough data
+    # (EnergySparksMissingPeriodForSpecifiedPeriodChart) for user diagnostics
+    # so the user can see the remaining periods and the dates are not removed
+    if bucketed_period_data.length > 1 || periods.length > 1 
       @bucketed_data = {}
       @bucketed_data_count = {}
       bucketed_period_data.each do |period_data|
