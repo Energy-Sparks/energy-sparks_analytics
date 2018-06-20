@@ -44,6 +44,8 @@ class DashboardChartAdviceBase
       BenchmarkComparisonAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :thermostatic
       ThermostaticAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :cusum
+      CusumAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_electricity
       ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_gas
@@ -520,6 +522,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
     r2_status = alert_description.detail[0].content
     a = alert.a.round(0)
     b = alert.b.round(0)
+    base_temp = alert.base_temp
 
     url = 'http://blog.minitab.com/blog/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit'
     footer_template = %{
@@ -547,16 +550,72 @@ class ThermostaticAdvice < DashboardChartAdviceBase
           </blockquote>
           Degree days is calculated as follows
           <blockquote>
-          degree_days = max(20 - average_temperature_for_day, 0)
+          degree_days = max(<%= base_temp %> - average_temperature_for_day, 0)
           </blockquote>
-          So for your school if the average outside temperature is 12C (8 degree days )
+          So for your school if the average outside temperature is 12C (8 degree days)
           the predicted gas consumption for the school would be
-          <%= (a + b * (20 - 12)).round(0) %> kWh for the day. Where as if the outside
+          <%= (a + b * (base_temp - 12)).round(0) %> kWh for the day. Where as if the outside
           temperature was colder at 4C the gas consumption would be
-          <%= (a + b * (20 - 4)).round(0) %> kWh. See if you can read these values
+          <%= (a + b * (base_temp - 4)).round(0) %> kWh. See if you can read these values
           off the trend line of the graph above (degree days on the x axis and the answer -
           the predicted daily gas consumption on the y-axis). Does your reading match
           with the answers for 12C and 4C above?
+        </p>
+      </html>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class CusumAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    puts @school.name
+    header_template = %{
+      <html>
+        <head><h2>Cusum analysis</title></h2>
+        <body>
+          <p> 
+          <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">Cusum (culmulative sum) graphs</a>
+          shows how the school's actual gas consumption differs
+          from the predicted gas consumption (see the explanation about the
+          formula for the trend line in the thermostatic graph above).
+          </p>
+          <p>
+          The graph is used my energy assessors to help them understand why a school's heating system
+          might not be working well. It also allows them to see if changes in a school like
+          a new more efficient boiler or reduced classroom temperatures has reduced gas consumption
+          as it removes the variability caused by outside temperature from the graph.
+          </p>
+        </body>
+      </html>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    alert = AlertThermostaticControl.new(@school) 
+    alert_description = alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
+    a = alert.a.round(0)
+    b = alert.b.round(0)
+
+    footer_template = %{
+      <html>
+        <p>
+          Each point is calculated by subtracting the school's actual
+          gas consumption from the value calculated from the trend
+          line in the thermostatic scatter plot above. i.e.
+          <blockquote>
+            cusum_value = actual_gas_consumption - predicted_gas_consumption
+          </blockquote>
+          which for this school is
+          <blockquote>
+            cusum_value = actual_gas_consumption - <%= a %> + <%= b %> * degree_days
+          <blockquote>
         </p>
       </html>
     }.gsub(/^  /, '')

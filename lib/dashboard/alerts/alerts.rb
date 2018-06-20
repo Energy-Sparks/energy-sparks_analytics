@@ -863,7 +863,7 @@ end
 
 #======================== Poor thermostatic control ==============
 class AlertThermostaticControl < AlertGasModelBase
-  attr_reader :a, :b, :r2
+  attr_reader :a, :b, :r2, :base_temp
   MIN_R2 = 0.8
   def initialize(school)
     super(school)
@@ -879,6 +879,7 @@ class AlertThermostaticControl < AlertGasModelBase
     @a = @heating_model.models[:heating_occupied].a
     @b = @heating_model.models[:heating_occupied].b
     @r2 = @heating_model.models[:heating_occupied].r2
+    @base_temp = @heating_model.models[:heating_occupied].base_temperature
 
     if @r2 < MIN_R2
       report.summary = 'Thermostatic control of the school is poor'
