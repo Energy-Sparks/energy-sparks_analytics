@@ -52,6 +52,10 @@ class DashboardChartAdviceBase
       ElectricityWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :group_by_week_gas
       GasWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :electricity_by_day_of_week
+      ElectricityDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :gas_by_day_of_week
+      GasDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
     end
   end
 
@@ -65,10 +69,11 @@ protected
     begin
       rhtml = ERB.new(template)
       rhtml.result(binding)
+      # rhtml.gsub('£', '&pound;')
     rescue StandardError => e
       puts "Error generating html for {self.class.name}"
       puts e.message
-      '<html><h2>Error generating advice</h2></html>'
+      '<h2>Error generating advice</h2>'
     end
   end
 
@@ -413,9 +418,9 @@ class WeeklyAdvice < DashboardChartAdviceBase
             consume 1,500 watts of electricity, to a single more efficient server consuming 500 watts
             would reduce power consumption by 1,000 watts (1.0 kW) on every day of the year.
             This would save 1kW x 24 hours per day x 365 days per year = 8,760 kWh. Each kWh of electricity
-            costs about 12p, so this would save 8,760 x 12p = £1,050 per year. If the new server lasted
-            5 years then that would be a £5,250 saving to the school which is far more than the
-            likely £750 cost of the new server!
+            costs about 12p, so this would save 8,760 x 12p = &pound;1,050 per year. If the new server lasted
+            5 years then that would be a &pound;5,250 saving to the school which is far more than the
+            likely &pound;750 cost of the new server!
         <% end %>
       </p>
       <%= @body_end %>
@@ -468,5 +473,82 @@ class ThermostaticAdvice < DashboardChartAdviceBase
     footer_template = %{<p> </p>}
 
     @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class DayOfWeekAdvice < DashboardChartAdviceBase
+  attr_reader :fuel_type, :fuel_type_str
+  ELECTRICITY_WEEKEND_PERCENT_BENCHMARK = 0.15
+  ELECTRICITY_WEEKEND_PERCENT_EXEMPLAR = 0.10
+  GAS_WEEKEND_PERCENT_BENCHMARK = 0.05
+  GAS_WEEKEND_PERCENT_EXEMPLAR = 0.01
+  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @fuel_type = fuel_type
+    @fuel_type_str = @fuel_type.to_s
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <body>
+          <p>
+            The graph below shows your <%= @fuel_type_str %> broken down by
+            day of the week over the last year:
+          <p>
+            
+          </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        <% if fuel_type == :gas %>
+          For most schools there should be no gas usage at weekends. The only reason gas might
+          be used is for frost protection in very cold weather, and averaged across the whole
+          year this should be a very small proportion of weekly usage.
+          </p>
+          <p>
+          For schools made of heavy materials (thermally massive e.g. concrete block - known as
+          masonary) sometimes
+          there is more gas consumption on a Monday and Tuesday than Wednesday, Thursday and
+          Friday, as additional energy is required to heat a school up after the heating
+          is left off at weekends. This energy is being absorbed into the masonary.
+          </p>
+          </p>
+          Can you see this pattern at your school from the graph above?<br>
+          However, its still much more efficient to turn the heating off over the
+          weekend, and use a little bit more energy on Monday and Tuesday than it is
+          to leave the heating on all weekend.
+        <% else %>
+          There will be some electricity usage at weekends from appliances and devices
+          left on, but the school should aim to minimise these. Schools with low weekend
+          electricity consumption aim to switch as many appliances off as possible
+          on a Friday afternoon, sometimes providing the caretaker or cleaning
+          staff with a checklist as to what they should be turning off.
+        <% end %>
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class ElectricityDayOfWeekAdvice < DayOfWeekAdvice
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol, :electricity)
+  end
+end
+
+#==============================================================================
+class GasDayOfWeekAdvice < DayOfWeekAdvice
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol, :gas)
   end
 end
