@@ -12,6 +12,7 @@ module BenchmarkMetrics
   BENCHMARK_GAS_USAGE_PER_M2 = 115_000.0 / 1_200.0
 
   def self.recommended_baseload_for_pupils(pupils, school_type)
+    school_type = school_type.to_sym if school_type.instance_of? String
     case school_type
     when :primary, :infant, :junior, :special
       if pupils < 150
@@ -27,7 +28,7 @@ module BenchmarkMetrics
       else
         10 + 10 * (pupils - 400) / 400
       end
-      
+
     else
       raise 'Unknown type of school ' + school_type
     end
