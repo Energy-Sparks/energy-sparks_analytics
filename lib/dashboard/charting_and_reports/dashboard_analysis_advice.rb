@@ -438,13 +438,14 @@ class WeeklyAdvice < DashboardChartAdviceBase
           it is unnecessary to leave the boiler on all holiday. If the school boiler doesn't have automatic
           'frost protection' then the thermostat at the school should be turned down as low as possible
           to 8C - this will save 70% of the gas compared with leaving the thermostat at 20C.
-        <% else %>
+        <% else %> 
           The colouring on the graph also highlights electricity usage over holidays in red.
           Holiday usage is normally caused by appliances and computers being left on (called 'baseload').
           The school should aim to reduce this baseload (which also occurs at weekends
           and overnight during school days) as this will have a big impact on a school's energy costs.
           Sometime this can be achieved by switching appliances off on Fridays before weekends and holidays,
           and sometimes by replacing older appliances consuming electricity by more efficient ones.
+          
           </p>
           <p>
             For example replacing 2 old ICT servers which run a schools computer network which perhaps
