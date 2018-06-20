@@ -58,8 +58,14 @@ class DashboardChartAdviceBase
       GasDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :baseload
       ElectricityBaseloadAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :electricity_by_month_year_0_1, :intraday_line_school_days, :intraday_line_holidays, :intraday_line_weekends
-      ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :electricity_by_month_year_0_1
+      ElectricityMonthOnMonth2yearAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :intraday_line_school_days
+      ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :school_days)
+    when :intraday_line_holidays
+      ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :holidays)
+    when :intraday_line_weekends
+      ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :weekends)
     end
   end
 
@@ -401,15 +407,15 @@ class WeeklyAdvice < DashboardChartAdviceBase
       <%= @body_start %>
         <body>
           <p>
-            The graph below shows how your <%= @fuel_type_str %> use varies throughout the year.
-            It highlights how energy consumption generally increases in the winter and is lower in the summer.
+            The graph below shows how your <%= @fuel_type_str %> consumption varies throughout the year.
+            It highlights how <%= @fuel_type_str %> consumption generally increases in the winter and is lower in the summer.
           </p>
             <% if fuel_type == :gas %>
-              The blue line on the graph shows the number of 'degrees days' which is a measure
-              of how cold it was during each week (the inverse of temperature - an
+              The blue line on the graph shows the number of 'degrees days' which is a measure of how cold
+              it was during each week  (the inverse of temperature - an
                 <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a>) .
-              If the heating boiler is working well at a school the blue line should track the gas usage quite closely. 
-              Look along the graph, does the usage (bars) track the degree days well?
+                If the heating boiler is working well at your school the blue line should track the gas usage quite closely.
+                Look along the graph, does the usage (bars) track the degree days well?
             <% else %>
             <% end %>
           <p>
@@ -425,19 +431,18 @@ class WeeklyAdvice < DashboardChartAdviceBase
       <p>
         <% if fuel_type == :gas %>
           The colouring on the graph also demonstrates whether heating and hot water were left on in the holidays.
-          Try looking along the graph for the holidays highlighted in red - during which holidays was gas being
-          consumed? Generally has heating and hot water should be turned off during holidays (<energy expert link>).
-          It isn't necessary to leave everything on, and if someone is working in the school it is more
-          efficient just to heat that room (fan heater) than the whole school. More than half of schools leave
-          their heating on on Christmas Day - did your school do this, and was there anyone at school then?
+          Try looking along the graph for the holidays highlighted in red - during which holidays was gas being consumed?
+          Generally gas heating and hot water should be turned off during holidays. It isn't necessary to leave everything on,
+          and if someone is working in the school it is more efficient just to heat that room (fan heater) than the whole school.
+          More than half of schools leave their heating on on Christmas Day - did your school do this, and was there anyone at school then?
         </p>
         <p>
-          Sometimes the school building manager or caretaker is concerned about the school getting too
-          cold and causing frost damage. This is a very rare event, and because most school boilers can
-          be programmed to automatically (called 'frost protection') turn on in very cold weather
-          it is unnecessary to leave the boiler on all holiday. If the school boiler doesn't have automatic
-          'frost protection' then the thermostat at the school should be turned down as low as possible
-          to 8C - this will save 70% of the gas compared with leaving the thermostat at 20C.
+          Sometimes the school building manager or caretaker is concerned about the school getting too cold
+          and causing frost damage. This is a very rare event, and because most school boilers can be programmed
+          to automatically turn on in very cold weather  (called 'frost protection') it is unnecessary
+          to leave the boiler on all holiday. If the school boiler doesn't have automatic
+          'frost protection' then the thermostat at the school should be turned down as low as possible to 8C
+          - this will save 70% of the gas compared with leaving the thermostat at 20C.
         <% else %> 
           The colouring on the graph also highlights electricity usage over holidays in red.
           Holiday usage is normally caused by appliances and computers being left on (called 'baseload').
@@ -445,7 +450,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
           and overnight during school days) as this will have a big impact on a school's energy costs.
           Sometime this can be achieved by switching appliances off on Fridays before weekends and holidays,
           and sometimes by replacing older appliances consuming electricity by more efficient ones.
-          
+
           </p>
           <p>
             For example replacing 2 old ICT servers which run a schools computer network which perhaps
@@ -490,7 +495,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
           <p>
             The scatter chart below shows a thermostatic analysis of the school's heating system.
             The y axis shows the energy consumption in kWh on any given day.
-            The x axis the number of degrees days (the inverse of temperature - so how cold it is
+            The x axis the number of degrees days (the inverse of temperature) - so how cold it is
             <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a> .
             Each point represents a single day, the colours represent different types of days
             .e.g. a day in the winter when the building is occupied and the heating is on.
@@ -552,22 +557,23 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
       <%= @body_start %>
       <p>
         <% if fuel_type == :gas %>
-          For most schools there should be no gas usage at weekends. The only reason gas might
-          be used is for frost protection in very cold weather, and averaged across the whole
-          year this should be a very small proportion of weekly usage.
+          For most schools there should be no gas usage at weekends. The only reason gas
+          might be used is for frost protection in very cold weather,
+          and averaged across the whole year this should be a very small
+          proportion of weekly usage
           </p>
           <p>
-          For schools made of heavy materials (thermally massive e.g. concrete block - known as
-          masonary) sometimes
-          there is more gas consumption on a Monday and Tuesday than Wednesday, Thursday and
-          Friday, as additional energy is required to heat a school up after the heating
-          is left off at weekends. This energy is being absorbed into the masonary.
+          For schools made of thermally massive materials e.g. masonry or concrete blocks
+          sometimes there is more gas consumption on a Monday and Tuesday than Wednesday,
+          Thursday and Friday, as additional energy is required to heat a school up after
+          the heating is left off at weekends.
+          This energy is being absorbed into the masonry
           </p>
           </p>
           Can you see this pattern at your school from the graph above?<br>
-          However, its still much more efficient to turn the heating off over the
-          weekend, and use a little bit more energy on Monday and Tuesday than it is
-          to leave the heating on all weekend.
+          However, it's still much more efficient to turn the heating off over the weekend,
+          and use a little bit more energy on Monday and Tuesday than it is to leave
+          the heating on all weekend. 
         <% else %>
           There will be some electricity usage at weekends from appliances and devices
           left on, but the school should aim to minimise these. Schools with low weekend
@@ -649,6 +655,121 @@ end
 
 #==============================================================================
 class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
+  attr_reader :type
+  def initialize(school, chart_definition, chart_data, chart_symbol, type)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @type = type
+    case @type
+    when :school_days
+      @period = 'on school days'
+    when :weekends
+      @period = 'at the weekend'
+    when :holidays
+      @period = 'during the holidays'
+    end
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      This graph compares the average power consumption
+      at the school during the last 2 years <%= @period %>.
+      <% if type == :school_days %>
+      It shows the peak power usage at the school (normally during
+        the middle of the day) and the overnight power consumption.
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      
+      <% if type == :school_days %>
+      <p>
+      It is useful in diagnosing what changes have happened over the
+      the last year which may have changed electricity consumption.
+      </p>
+      <p>
+      At most schools the overnight consumption between 7:00pm in the
+      evening and 6:00am in the morning is relatively constant. Is this
+      the case at you school? There are a few reasons why there might
+      be a small change during the night e.g. central heating boiler
+      pumps sometimes on cold nights in the winter (frost protection)
+      but any significant change should be investigated as you might be
+      able to save electricity and costs through fixing the problem.
+      </p>
+      <p>
+      During the day electricity power consumption rises rapidly and
+      often peaks around midday.
+      </p>
+      <p>
+      See if you can spot some of the following typical characteristics in the
+      chart:
+      <ul>
+      <li>
+        Electricity consumption starting to increase from about 7:00am
+        when the the school opens, and lights and computers are switched
+        on rapidly increasing consumption. What time does your school
+        open and who is first to arrive?
+      </li>
+      <li>
+          Its often possible to see when cleaners arrive at the school,
+          in some schools its in the morning before school opens,
+          at others its in the evening after school closes. Can you
+          spot the cleaners on the chart? Its common for cleaners to
+          switch all the school lights on; its possible to save electricity
+          by asking them to only turn the lights on in the rooms they are cleaning
+      </li>
+      <li>
+        The highest point on the charts is often around lunchtime
+        when all the school lights and computers are switched on.
+        You can often see a peak between 11:30am and 1:00pm when
+        hot plates are switched on for school meals. Can you see
+        a jump in consumption of between 2kW and 4kW at this time
+        which might be the hot plates?
+      </li>
+      <li>
+          After the school closes there should be a gradual reduction
+          in electricity consumption as teachers leave and lights
+          and computers are switched off
+      </li>
+      <li>
+          Sometimes there is a regular evening event which increases consumption
+      </li>
+      </ul>
+      </p>
+      <% elsif type == :weekends || type == :holidays %>
+      <p>
+          The graph above shows <%= @period %> consumption. At most schools this
+          should be relatively constant <%= @period %>, unless:
+          <ul>
+          <li>
+          The school is occupied <%= @period %> when consumption might increase
+          during the day
+          </li>
+          <li>
+          The school has solar panels which might cause consumption to drop
+          during the middle of the day when the sun is out
+          </li>
+          <li>
+          The school has security lights which causes consumption to rise
+          overnight when the sun goes down
+          </li>
+          </ul>
+          Can you see any of these characteristics at your school
+          in the graph above?
+        </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class ElectricityMonthOnMonth2yearAdvice < DashboardChartAdviceBase
   attr_reader :fuel_type, :fuel_type_str
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
@@ -657,7 +778,7 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      Advice pending
+      The graph below compares monthly electricity consumption over the two years.
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -666,6 +787,13 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
       <p>
+      Its sometimes a useful comparison, however you need to be careful when
+      comparing months with holidays, particularly Easter, which some years
+      is in March and other times in April.
+      </p>
+      <p>
+      Try comparing the monthly consumption over the last 2 years
+      to see if there are any difference you can explains?
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -673,3 +801,4 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
     @footer_advice = generate_html(footer_template, binding)
   end
 end
+ElectricityMonthOnMonth2yearAdvice
