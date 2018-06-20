@@ -299,7 +299,7 @@ private
   def benchmark_gas_usage_in_units
     g_benchmark_kwh = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * @meter_collection.floor_area
     y_scaling = YAxisScaling.new
-    y_scaling.scale_from_kwh(g_benchmark_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :electricity, @meter_collection)
+    y_scaling.scale_from_kwh(g_benchmark_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :gas, @meter_collection)
   end
 
   def create_empty_bucket_series
