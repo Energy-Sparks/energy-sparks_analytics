@@ -48,6 +48,10 @@ class DashboardChartAdviceBase
       ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_gas
       GasDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :group_by_week_electricity
+      ElectricityWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :group_by_week_gas
+      GasWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)
     end
   end
 
@@ -338,7 +342,6 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     end
     [kwh_in_hours, kwh_out_of_hours]
   end
-
 end
 
 #==============================================================================
@@ -349,6 +352,99 @@ class ElectricityDaytypeAdvice < FuelDaytypeAdvice
 end
 #==============================================================================
 class GasDaytypeAdvice < FuelDaytypeAdvice
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol, :gas)
+  end
+end
+
+#==============================================================================
+class WeeklyAdvice < DashboardChartAdviceBase
+  attr_reader :fuel_type, :fuel_type_str
+  BENCHMARK_PERCENT = 0.5
+  EXEMPLAR_PERCENT = 0.25
+  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @fuel_type = fuel_type
+    @fuel_type_str = @fuel_type.to_s
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <body>
+          <p>
+            The graph below shows your <%= @fuel_type_str %> over the last year.
+            Its shows how <%= @fuel_type_str %> varies throughout the year.
+            It highlights how energy consumption generally increases in the
+            winter and is lower in the summer.
+          </p>
+            <% if fuel_type == :gas %>
+              The blue line on the graph shows the number of 'degrees days' which is a measure
+              of how cold it was during each week (the inverse of temperature - an
+                <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a>) .
+              If the heating boiler is working well at a school the blue line should track the gas usage quite closely. 
+              Look along the graph, does the usage (bars) track the degree days well?
+            <% else %>
+            <% end %>
+          <p>
+            
+          </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        The colouring on the graph also demonstrates whether
+        <% if fuel_type == :gas %>
+          The colouring on the graph also demonstrates whether heating and hot water were left on in the holidays.
+          Try looking along the graph for the holidays highlighted in red - during which holidays was gas being
+          consumed? Generally has heating and hot water should be turned off during holidays (<energy expert link>).
+          It isn't necessary to leave everything on, and if someone is working in the school it is more
+          efficient just to heat that room (fan heater) than the whole school. More than half of schools leave
+          their heating on on Christmas Day - did your school do this, and was there anyone at school then?
+        </p>
+        <p>
+          Sometimes the school building manager or caretaker is concerned about the school getting too
+          cold and causing frost damage. This is a very rare event, and because most school boilers can
+          be programmed to automatically (called 'frost protection') turn on in very cold weather
+          it is unnecessary to leave the boiler on all holiday. If the school boiler doesn't have automatic
+          'frost protection' then the thermostat at the school should be turned down as low as possible
+          to 8C - this will save 70% of the gas compared with leaving the thermostat at 20C.
+        <% else %>
+          The colouring of the graph highlights electricity usage over holidays in red. Holiday usage
+          is normally caused by appliances and computers being left on (called 'baseload'). The school
+          should aim to reduce this baseload (which also occurs at weekends and overnight during school days) as
+          reducing will have a big impact on a school's energy costs. Sometime this can be achieved by
+          switching appliances off on Fridays before weekends and holidays, and sometimes by replacing
+          consumers of electricity by more efficient ones.
+          </p>
+          <p>
+            For example replacing 2 old ICT servers which run a schools computer network which perhaps
+            consume 1,500 watts of electricity, to a single more efficient server consuming 500 watts
+            would reduce power consumption by 1,000 watts (1.0 kW) on every day of the year.
+            This would save 1kW x 24 hours per day x 365 days per year = 8,760 kWh. Each kWh of electricity
+            costs about 12p, so this would save 8,760 x 12p = £1,050 per year. If the new server lasted
+            5 years then that would be a £5,250 saving to the school which is far more than the
+            likely £750 cost of the new server!
+        <% end %>
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class ElectricityWeeklyAdvice < WeeklyAdvice
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol, :electricity)
+  end
+end
+#==============================================================================
+class GasWeeklyAdvice < WeeklyAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol, :gas)
   end
