@@ -29,15 +29,34 @@ class AlertAnalysisBase
   end
 
   def pupils
-    @school.number_of_pupils
+    if @school.respond_to?(:number_of_pupils) && @school.number_of_pupils > 0
+      @school.number_of_pupils
+    elsif @school.respond_to?(:school) && !@school.school.number_of_pupils > 0
+      @school.school.number_of_pupils
+    else
+      throw EnergySparksBadDataException.new('Unable to find number of pupils for alerts')
+    end
   end
 
   def floor_area
-    @school.floor_area
+    if @school.respond_to?(:floor_area) && !@school.floor_area.nil? && @school.floor_area > 0.0
+      @school.floor_area
+    elsif @school.respond_to?(:school) && !@school.school.floor_area.nil? && @school.school.floor_area > 0.0
+      @school.school.floor_area
+    else
+      throw EnergySparksBadDataException.new('Unable to find number of floor_area for alerts')
+    end
   end
 
   def school_type
     @school.school_type
+    if @school.respond_to?(:school_type) && !@school.school_type.nil?
+      @school.school_type
+    elsif @school.respond_to?(:school) && !@school.school.school_type.nil?
+      @school.school.school_type
+    else
+      throw EnergySparksBadDataException.new('Unable to find number of school_type for alerts')
+    end
   end
 
   # returns a list of the last n 'school_days' before and including the asof_date
@@ -106,31 +125,32 @@ end
 
 #======================== Electricity Baseload Analysis Versus Benchmark =====
 class AlertElectricityBaseloadVersusBenchmark < AlertAnalysisBase
+  attr_reader :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
   def initialize(school)
     super(school)
   end
 
   def analyse(asof_date)
-    avg_baseload = average_baseload(asof_date - 365, asof_date)
-    benchmark_per_pupil = BenchmarkMetrics.recommended_baseload_for_pupils(pupils, school_type)
-    benchmark_per_floor_area = BenchmarkMetrics.recommended_baseload_for_floor_area(floor_area, school_type)
+    @avg_baseload = average_baseload(asof_date - 365, asof_date)
+    @benchmark_per_pupil = BenchmarkMetrics.recommended_baseload_for_pupils(pupils, school_type)
+    @benchmark_per_floor_area = BenchmarkMetrics.recommended_baseload_for_floor_area(floor_area, school_type)
 
     report = AlertReport.new(:baseloadbenchmark)
     report.term = :longterm
     report.add_book_mark_to_base_url('ElectricityBaseload')
 
-    if avg_baseload > benchmark_per_pupil || avg_baseload > benchmark_per_floor_area
+    if @avg_baseload > @benchmark_per_pupil || @avg_baseload > @benchmark_per_floor_area
       report.summary = 'Your electricity baseload is too high'
-      text = commentary(avg_baseload, 'too high', benchmark_per_pupil, benchmark_per_floor_area)
+      text = commentary(@avg_baseload, 'too high', @benchmark_per_pupil, @benchmark_per_floor_area)
       description1 = AlertDescriptionDetail.new(:text, text)
 
-      per_pupil_ratio = avg_baseload / benchmark_per_pupil
-      per_floor_area_ratio = avg_baseload / benchmark_per_floor_area
+      per_pupil_ratio = @avg_baseload / @benchmark_per_pupil
+      per_floor_area_ratio = @avg_baseload / @benchmark_per_floor_area
       report.rating = AlertReport::MAX_RATING * (per_pupil_ratio > per_floor_area_ratio ? (1.0 / per_pupil_ratio) : (1.0 / per_floor_area_ratio))
       report.status = :poor
     else
       report.summary = 'Your electricity baseload is good'
-      text = commentary(avg_baseload, 'good', benchmark_per_pupil, benchmark_per_floor_area)
+      text = commentary(@avg_baseload, 'good', @benchmark_per_pupil, @benchmark_per_floor_area)
       description1 = AlertDescriptionDetail.new(:text, text)
       report.rating = 10.0
       report.status = :good
@@ -141,8 +161,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertAnalysisBase
 
   def commentary(baseload, comparative_text, pupil_benchmark, floor_area_benchmark)
     text =  sprintf('Your baseload over the last year of %.1f kW is %s, ', baseload, comparative_text)
-    text += sprintf('compared with benchmarks of %.1f kW (pupil based) ', pupil_benchmark)
-    text += sprintf('and %.1f kW (floor area based) ', floor_area_benchmark)
+    text += sprintf('compared with average usage at other schools of %.1f kW (pupil based) ', pupil_benchmark)
+    text += sprintf('and %.1f kW (floor area based).', floor_area_benchmark)
     text
   end
 

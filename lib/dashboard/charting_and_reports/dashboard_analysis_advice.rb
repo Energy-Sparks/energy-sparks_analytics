@@ -56,6 +56,10 @@ class DashboardChartAdviceBase
       ElectricityDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :gas_by_day_of_week
       GasDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :baseload
+      ElectricityBaseloadAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :electricity_by_month_year_0_1, :intraday_line_school_days, :intraday_line_holidays, :intraday_line_weekends
+      ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol)
     end
   end
 
@@ -154,9 +158,10 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
             Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
           <% else %>
-            There is very no difference in energy consumption between older and newer schools in terms of
-            energy consumption. The best schools from an energy efficiency perspective are those which
-            manage there energy best, minimising out of hours usage and through good energy behaviour.
+            There is very little difference in energy consumption between older and newer schools
+            in terms of energy consumption. The best schools from an energy efficiency perspective
+            are those which manage their energy best,
+            minimising out of hours usage and demonstrating good energy behaviour.  
           <% end %>
         </p>
       </html>
@@ -396,10 +401,8 @@ class WeeklyAdvice < DashboardChartAdviceBase
       <%= @body_start %>
         <body>
           <p>
-            The graph below shows your <%= @fuel_type_str %> over the last year.
-            Its shows how <%= @fuel_type_str %> varies throughout the year.
-            It highlights how energy consumption generally increases in the
-            winter and is lower in the summer.
+            The graph below shows how your <%= @fuel_type_str %> use varies throughout the year.
+            It highlights how energy consumption generally increases in the winter and is lower in the summer.
           </p>
             <% if fuel_type == :gas %>
               The blue line on the graph shows the number of 'degrees days' which is a measure
@@ -420,7 +423,6 @@ class WeeklyAdvice < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
       <p>
-        The colouring on the graph also demonstrates whether
         <% if fuel_type == :gas %>
           The colouring on the graph also demonstrates whether heating and hot water were left on in the holidays.
           Try looking along the graph for the holidays highlighted in red - during which holidays was gas being
@@ -437,12 +439,12 @@ class WeeklyAdvice < DashboardChartAdviceBase
           'frost protection' then the thermostat at the school should be turned down as low as possible
           to 8C - this will save 70% of the gas compared with leaving the thermostat at 20C.
         <% else %>
-          The colouring of the graph highlights electricity usage over holidays in red. Holiday usage
-          is normally caused by appliances and computers being left on (called 'baseload'). The school
-          should aim to reduce this baseload (which also occurs at weekends and overnight during school days) as
-          reducing will have a big impact on a school's energy costs. Sometime this can be achieved by
-          switching appliances off on Fridays before weekends and holidays, and sometimes by replacing
-          consumers of electricity by more efficient ones.
+          The colouring on the graph also highlights electricity usage over holidays in red.
+          Holiday usage is normally caused by appliances and computers being left on (called 'baseload').
+          The school should aim to reduce this baseload (which also occurs at weekends
+          and overnight during school days) as this will have a big impact on a school's energy costs.
+          Sometime this can be achieved by switching appliances off on Fridays before weekends and holidays,
+          and sometimes by replacing older appliances consuming electricity by more efficient ones.
           </p>
           <p>
             For example replacing 2 old ICT servers which run a schools computer network which perhaps
@@ -591,5 +593,82 @@ end
 class GasDayOfWeekAdvice < DayOfWeekAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol, :gas)
+  end
+end
+
+#==============================================================================
+class ElectricityBaseloadAdvice < DashboardChartAdviceBase
+  attr_reader :fuel_type, :fuel_type_str
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @fuel_type = fuel_type
+    @fuel_type_str = @fuel_type.to_s
+  end
+
+  def generate_advice
+    alert = AlertElectricityBaseloadVersusBenchmark.new(@school) 
+    alert_description = alert.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
+    # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
+    ap(alert_description)
+puts alert_description.detail[0].content
+    header_template = %{
+      <%= @body_start %>
+        <body>
+          <p>
+            The graph below shows how the the school's electricity 'baseload'
+            (out of hours electricity consumption) has varied over time:
+          </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        <%= alert_description.summary %>.
+        <%= alert_description.detail[0].content %>
+        Reducing a school's baseload is often the fastest way of reducing a school's energy costs
+        and reducing its carbon footprint. For each 1kW reduction in baseload, the school will save
+        £1,050 per year, and reduce its carbon footprint by 2,400 kg.
+      </p>
+      <p>
+        Look carefully at the graph above, how has the baseload changed over time?
+        Does it change seasonally (from summer to winter)? There should be very
+        little difference between summer and winter electricity baseload, unless
+        there is something not working properly at the school, for example
+        electrical heating accidently left on?
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
+  attr_reader :fuel_type, :fuel_type_str
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      Advice pending
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
   end
 end

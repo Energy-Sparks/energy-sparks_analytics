@@ -59,8 +59,11 @@ class LoadSchools
     puts "Loading school #{school_name}"
     school_data = @schools[school_name]
 
+puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+puts school_data[:school_type]
+puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
     school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
-
+puts "school type = #{school.school_type}"
     meter_collection = MeterCollection.new(school)
 
     meter_readings = load_school_meter_data(school_name, min_date, use_cached_data)
