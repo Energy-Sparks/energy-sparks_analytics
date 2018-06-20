@@ -2,6 +2,7 @@
 # primarily bound up with specific charts, indexed by the symbol which represents
 # the chart in chart_manager.rb e.g. :benchmark
 # generates advice with different levels of expertise
+require 'html-table'
 require 'erb'
 
 class DashboardEnergyAdvice
@@ -15,13 +16,10 @@ class DashboardEnergyAdvice
     else
       raise EnergySparksUnexpectedStateException.new("Dashboard advice requested for unsupported chart #{chart_symbol}")
     end
-
     advice.generate_advice(:energy_expert)
   end
 end
 
-
-  
 class DashboardChartAdviceBase
   attr_reader :header_advice, :footer_advice, :body_start, :body_end
   def initialize(school, chart_definition, chart_data, chart_symbol)
@@ -46,6 +44,10 @@ class DashboardChartAdviceBase
       BenchmarkComparisonAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :thermostatic
       ThermostaticAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :daytype_breakdown_electricity
+      ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :daytype_breakdown_gas
+      GasDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     end
   end
 
@@ -65,7 +67,11 @@ protected
       '<html><h2>Error generating advice</h2></html>'
     end
   end
-  
+
+  def percent(value)
+    (value * 100.0).round(0).to_s + '%'
+  end
+
   def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
     scaling = YAxisScaling.new
     kwh_conv = scaling.scale_unit_from_kwh(:£, fuel_type_sym)
@@ -75,6 +81,7 @@ protected
   end
 end
 
+#==============================================================================
 class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
@@ -119,7 +126,8 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
             which would save you <%= pound_gas_saving_versus_benchmark %> per year.
           <% else %>
             is above average, the school should aim to reduce this,
-            which would save you <%= pound_gas_saving_versus_benchmark %> per year if you matched the usage of exemplar schools.
+            which would save you <%= pound_gas_saving_versus_benchmark %> per year
+            if you matched the usage of energy efficient schools.
           <% end %>
           Your electricity usage is <%= percent_regional_electricity_str %> of the regional average which
           <% if percent_electricity_of_regional_average < 0.7 %>
@@ -129,10 +137,13 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
               which would save you <%= pound_electricity_saving_versus_benchmark %> per year.
           <% else %>
             is above average, the school should aim to reduce this,
-            which would save you <%= pound_electricity_saving_versus_benchmark %> per year if you matched the usage of exemplar schools.
+            which would save you <%= pound_electricity_saving_versus_benchmark %> per year
+            if you matched the usage of energy efficient schools.
           <% end %>
+        </p>
+        <p>
           <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
-            Well done you energy usage is very low and you should be congratulated for being an exemplar school.
+            Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
           <% else %>
             There is very no difference in energy consumption between older and newer schools in terms of
             energy consumption. The best schools from an energy efficiency perspective are those which
@@ -173,10 +184,6 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     @chart_data[:x_data]['electricity'][-1]
   end
 
-  def percent(value)
-    (value * 100.0).round(0).to_s + '%'
-  end
-
   def pound_gas_saving_versus_benchmark
     pounds = actual_gas_usage - benchmark_gas_usage
     pounds_to_pounds_and_kwh(pounds, :gas)
@@ -204,8 +211,167 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     pounds = @chart_data[:x_data][type_str][index]
     pounds_to_pounds_and_kwh(pounds, type_sym)
   end
+
 end
 
+#==============================================================================
+class FuelDaytypeAdvice < DashboardChartAdviceBase
+  attr_reader :fuel_type, :fuel_type_str
+  BENCHMARK_PERCENT = 0.5
+  EXEMPLAR_PERCENT = 0.25
+  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @fuel_type = fuel_type
+    @fuel_type_str = @fuel_type.to_s
+  end
+
+  def generate_advice
+    kwh_in_hours, kwh_out_of_hours = in_out_of_hours_consumption(@chart_data)
+    percent_value = kwh_out_of_hours / (kwh_in_hours + kwh_out_of_hours)
+    percent_str = percent(percent_value)
+    saving_percent = percent_value - 0.25
+    saving_kwh = (kwh_in_hours + kwh_out_of_hours) * saving_percent
+    saving_£ = YAxisScaling.convert(:kwh, :£, @fuel_type, saving_kwh)
+
+    table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type)
+
+    header_template = %{
+      <%= @body_start %>
+        <body>
+          <p>
+            <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
+          </p>
+          <p>
+            <%= table_info %>
+          </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+        <p>
+          which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
+                of <%= percent(BENCHMARK_PERCENT) %>.
+          <% if percent_value > EXEMPLAR_PERCENT %>
+            The best schools only
+            consume <%= percent(EXEMPLAR_PERCENT) %> out of hours.
+            Reducing the school's out of hours usage to <%= percent(EXEMPLAR_PERCENT) %> 
+            would save &pound;<%= saving_£ %> per year.
+          <% else %>
+            which is very good, and is one of the best schools.
+          <% end %>
+        </p>
+        <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+
+  def adjective(percent, percent_benchmark, above_sense = true, the = true)
+    diff = (percent - percent_benchmark) * (above_sense ? 1 : -1)
+    the_average = (the ? ' the' : '') + ' average'
+    if diff < 0.05 && diff > -0.05
+      'about' + the_average
+    elsif diff >= 0.05 && diff < 0.1
+      'above' + the_average
+    elsif diff >= 0.1
+      'well above' + the_average
+    elsif diff <= -0.05 && diff > -0.1
+      'below' + the_average
+    else
+      'well below' + the_average
+    end
+  end
+
+  def html_table_from_graph_data(data, fuel_type = :electricity, totals_row = true)
+    total = 0.0
+    data.each_value do |value|
+      total += value[0]
+    end
+    template = %{
+    <style>
+      tr:nth-child(even) {background-color: #e4f0c2;}
+      .tg .tg-numeric{text-align:right}
+      th {
+        background-color: #4CAF50;
+        color: white;
+      }
+      .estbtrbold {
+        font-weight: bold;
+      } 
+    </style>
+    <centre>
+      <table class="tg">
+        <tr>
+          <th> Type &#47; Time of Day </th>
+          <th> kWh &#47; year </th>
+          <th> &pound; &#47;year </th>
+          <th> CO2 kg &#47;year </th>
+          <th> Library Books &#47;year </th>
+          <th> Percent </th>
+        </tr>
+        <% data.each do |row, value| %>
+          <tr>
+            <td><%= row %></td>
+            <% val = value[0] %>
+            <% pct = val / total %>
+            <td class="tg-numeric"><%= YAxisScaling.scale_num(val) %></td>
+            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
+            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
+            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
+            <td class="tg-numeric"><%= percent(pct) %></td>
+          </tr>
+        <% end %>
+
+        <% if totals_row %>
+          <tr class="estbtrbold">
+            <td><b>Total</b></td>
+            <td class="tg-numeric"><%= YAxisScaling.scale_num(total) %></td>
+            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :£, fuel_type, total) %></td>
+            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, total) %></td>
+            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, total) %></td>
+            <td></td>
+          </tr>
+        <% end %>
+      </tr>
+      </table>
+      </centre>
+    }.gsub(/^  /, '')
+
+    generate_html(template, binding)
+  end
+
+  # copied from alerts code, needs rationalising
+  def in_out_of_hours_consumption(breakdown)
+    kwh_in_hours = 0.0
+    kwh_out_of_hours = 0.0
+    breakdown[:x_data].each do |daytype, consumption|
+      if daytype == SeriesNames::SCHOOLDAYOPEN
+        kwh_in_hours += consumption[0]
+      else
+        kwh_out_of_hours += consumption[0]
+      end
+    end
+    [kwh_in_hours, kwh_out_of_hours]
+  end
+
+end
+
+#==============================================================================
+class ElectricityDaytypeAdvice < FuelDaytypeAdvice
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol, :electricity)
+  end
+end
+#==============================================================================
+class GasDaytypeAdvice < FuelDaytypeAdvice
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol, :gas)
+  end
+end
+#==============================================================================
 class ThermostaticAdvice < DashboardChartAdviceBase
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
