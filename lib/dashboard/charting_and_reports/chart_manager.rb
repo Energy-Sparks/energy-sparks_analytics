@@ -516,6 +516,8 @@ class ChartManager
       graph_definition[:data_labels] = aggregator.data_labels
     end
 
+    graph_definition[:configuration] = chart_config
+
     advice = DashboardChartAdviceBase.advice_factory(chart_param, @school, chart_config, graph_definition, chart_param)
 
     unless advice.nil?

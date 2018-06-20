@@ -13,7 +13,11 @@ end
 @dashboard_page_groups = {
   main_dashboard_electric:  {
                               name:   'Main Dashboard',
-                              charts: %i[benchmark_electric]
+                              charts: %i[
+                                benchmark
+                                daytype_breakdown_electricity
+                                group_by_week_electricity
+                              ]
                             },
   electricity_year:         {
                               name:   'Electricity Year',
@@ -103,12 +107,12 @@ end
   'Castle Primary School'             => :electric_and_gas,
   'Freshford C of E Primary'          => :electric_and_gas,
   'Marksbury C of E Primary School'   => :electric_only,
-  'Paulton Junior School'             => :electric_and_gas_and_pv,
+  'Paulton Junior School'             => :electric_and_gas,
   'Pensford Primary'                  => :electric_only,
   'Roundhill School'                  => :electric_and_gas,
   'Saltford C of E Primary School'    => :electric_and_gas,
   'St Johns Primary'                  => :electric_and_gas,
-  'Stanton Drew Primary School'       => :electric_and_gas_and_storage_heater,
+  'Stanton Drew Primary School'       => :electric_only,
   'Twerton Infant School'             => :electric_and_gas,
   'Westfield Primary'                 => :electric_and_gas
 }
@@ -122,7 +126,8 @@ puts "\n" * 8
 @benchmarks = []
 
 def do_all_schools
-  @schools.keys do |school_name|
+  @schools.keys.each do |school_name|
+    puts "And here"
     do_one_school(school_name)
   end
 end
@@ -149,7 +154,6 @@ def do_one_school(school_name, filter_page_name = nil, filter_chart = nil)
   @benchmarks = []
 end
 
-
 def do_all_pages_for_school(school, school_name, chart_manager, worksheet_charts,
                             report_config, filter_page_name, filter_chart)
   report_groups = @school_report_groups[report_config]
@@ -157,9 +161,6 @@ def do_all_pages_for_school(school, school_name, chart_manager, worksheet_charts
   report_groups.each do |report_page|
     next if !filter_page_name.nil? && report_page != filter_page_name
     do_one_page(school, report_page, chart_manager, worksheet_charts, filter_chart)
-    puts "\n" * 3
-    puts "got #{worksheet_charts.length} pages"
-    puts "\n" * 3
   end
 
   do_excel(school_name, worksheet_charts)
@@ -168,19 +169,15 @@ end
 
 def do_one_page(school, report_page, chart_manager, worksheet_charts, filter_chart = nil)
   page_config = @dashboard_page_groups[report_page]
-  puts "\tRunning report page  #{page_config[:name]}"
+  puts banner("Running report page  #{page_config[:name]}")
   worksheet_charts[page_config[:name]] = [] unless worksheet_charts.key?(page_config[:name])
   page_config[:charts].each do |chart_name|
     next if !filter_chart.nil? && chart_name != filter_chart
     chart = do_one_chart(chart_name, chart_manager)
     unless chart.nil?
       worksheet_charts[page_config[:name]].push(chart)
-      puts "Added chart to #{page_config[:name]}"
     end
   end
-  puts "\n" * 3
-  puts "got #{page_config[:name]} has #{worksheet_charts[page_config[:name]].length} charts"
-  puts "\n" * 3
 end
 
 def do_one_chart(chart_name, chart_manager)
@@ -224,7 +221,10 @@ end
 #
 #   4. do_one_school('Bishop Sutton Primary School', :main_dashboard_electric_and_gas, :benchmark)
 #
-# do_all_schools
+do_one_school('Paulton Junior School')
+
+# do_one_school('Paulton Junior School', :electricity_longterm, :baseload)
 
 do_one_school('Paulton Junior School', :main_dashboard_electric_and_gas)
+
 

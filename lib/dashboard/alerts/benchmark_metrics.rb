@@ -13,7 +13,7 @@ module BenchmarkMetrics
 
   def self.recommended_baseload_for_pupils(pupils, school_type)
     case school_type
-    when :primary, :infant
+    when :primary, :infant, :junior, :special
       if pupils < 150
         1.5
       elsif pupils < 300
@@ -27,6 +27,7 @@ module BenchmarkMetrics
       else
         10 + 10 * (pupils - 400) / 400
       end
+      
     else
       raise 'Unknown type of school ' + school_type
     end
@@ -34,7 +35,7 @@ module BenchmarkMetrics
 
   def self.recommended_baseload_for_floor_area(floor_area, school_type)
     case school_type
-    when :primary, :infant
+    when :primary, :infant, :junior, :special
       if floor_area < 1000
         1.5
       elsif floor_area < 1600

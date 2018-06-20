@@ -53,13 +53,19 @@ class LoadSchools
     puts File.join(File.dirname(__FILE__), '../MeterReadings/')
 
     load_schools(ENV['CACHED_METER_READINGS_DIRECTORY'] + 'schoolsandmeters.yml')
+
   end
 
   def load_school(school_name, min_date, use_cached_data)
     puts "Loading school #{school_name}"
     school_data = @schools[school_name]
 
+    puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+    puts school_data[:school_type]
+    puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+
     school = SchoolAnalysis.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
+    puts "school type = #{school.school_type}"
 
     meter_collection = MeterCollection.new(school)
 
