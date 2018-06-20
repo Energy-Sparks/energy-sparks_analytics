@@ -513,10 +513,50 @@ class ThermostaticAdvice < DashboardChartAdviceBase
 
     @header_advice = generate_html(header_template, binding)
 
+    alert = AlertThermostaticControl.new(@school) 
+    alert_description = alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
+    # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
+    ap(alert_description)
+    r2_status = alert_description.detail[0].content
+    a = alert.a.round(0)
+    b = alert.b.round(0)
+
+    url = 'http://blog.minitab.com/blog/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit'
     footer_template = %{
       <html>
         <p>
-          Looking at the model
+        One measure of how well the thermostatic control at the school is working is
+        the mathematical value R^2
+        (<a href="<%= url %>" target="_blank">explanation here</a>)
+        which is a measure of how far the points are
+        from the trend line. A perfect R^2 of 1.0 would mean all the points were on the line,
+        if points appear as a cloud with no apparent pattern (random) then the R^2 would
+        be close to 1.0. For heating systems in schools a good value is 0.8.
+        </p>
+        <p>
+          <%= r2_status  %>
+        </p>
+        <p>
+        For energy experts, the formula which defines the trend line is very interesting.
+        It predicts how the gas consumption varies with how cold it is (degree days).
+        </p>
+        <p>
+          In the example above the formula is:
+          <blockquote>
+            predicted_heating_requirement = <%= a %> + <%= b %> * degree_days
+          </blockquote>
+          Degree days is calculated as follows
+          <blockquote>
+          degree_days = max(20 - average_temperature_for_day, 0)
+          </blockquote>
+          So for your school if the average outside temperature is 12C (8 degree days )
+          the predicted gas consumption for the school would be
+          <%= (a + b * (20 - 12)).round(0) %> kWh for the day. Where as if the outside
+          temperature was colder at 4C the gas consumption would be
+          <%= (a + b * (20 - 4)).round(0) %> kWh. See if you can read these values
+          off the trend line of the graph above (degree days on the x axis and the answer -
+          the predicted daily gas consumption on the y-axis). Does your reading match
+          with the answers for 12C and 4C above?
         </p>
       </html>
     }.gsub(/^  /, '')
