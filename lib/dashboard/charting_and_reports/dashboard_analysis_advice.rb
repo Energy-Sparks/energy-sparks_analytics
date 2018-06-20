@@ -277,55 +277,44 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
       total += value[0]
     end
     template = %{
-    <style>
-      tr:nth-child(even) {background-color: #e4f0c2;}
-      .tg .tg-numeric{text-align:right}
-      th {
-        background-color: #4CAF50;
-        color: white;
-      }
-      .estbtrbold {
-        font-weight: bold;
-      }
-    </style>
-    <centre>
-      <table class="tg">
-        <tr>
-          <th> Type &#47; Time of Day </th>
-          <th> kWh &#47; year </th>
-          <th> &pound; &#47;year </th>
-          <th> CO2 kg &#47;year </th>
-          <th> Library Books &#47;year </th>
-          <th> Percent </th>
-        </tr>
-        <% data.each do |row, value| %>
+      <table class="table table-striped table-sm">
+        <thead>
           <tr>
-            <td><%= row %></td>
-            <% val = value[0] %>
-            <% pct = val / total %>
-            <td class="tg-numeric"><%= YAxisScaling.scale_num(val) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
-            <td class="tg-numeric"><%= percent(pct) %></td>
+            <th scope="col">Type &#47; Time of Day </th>
+            <th scope="col">kWh &#47; year </th>
+            <th scope="col">&pound; &#47;year </th>
+            <th scope="col">CO2 kg &#47;year </th>
+            <th scope="col">Library Books &#47;year </th>
+            <th scope="col">Percent </th>
           </tr>
-        <% end %>
+        </thead>
+        <tbody>
+          <% data.each do |row, value| %>
+            <tr>
+              <td><%= row %></td>
+              <% val = value[0] %>
+              <% pct = val / total %>
+              <td class="text-right"><%= YAxisScaling.scale_num(val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
+              <td class="text-right"><%= percent(pct) %></td>
+            </tr>
+          <% end %>
 
-        <% if totals_row %>
-          <tr class="estbtrbold">
-            <td><b>Total</b></td>
-            <td class="tg-numeric"><%= YAxisScaling.scale_num(total) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :£, fuel_type, total) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, total) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, total) %></td>
-            <td></td>
-          </tr>
-        <% end %>
-      </tr>
+          <% if totals_row %>
+            <tr class="table-success">
+              <td><b>Total</b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.scale_num(total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :£, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :co2, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, total) %></b></td>
+              <td></td>
+            </tr>
+          <% end %>
+        </tbody>
       </table>
-      </centre>
-    }.gsub(/^  /, '')
-
+    }
     generate_html(template, binding)
   end
 
@@ -371,24 +360,22 @@ class WeeklyAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-        <body>
           <p>
             The graph below shows your <%= @fuel_type_str %> over the last year.
             Its shows how <%= @fuel_type_str %> varies throughout the year.
             It highlights how energy consumption generally increases in the
             winter and is lower in the summer.
           </p>
-            <% if fuel_type == :gas %>
-              The blue line on the graph shows the number of 'degrees days' which is a measure
-              of how cold it was during each week (the inverse of temperature - an
-                <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a>) .
-              If the heating boiler is working well at a school the blue line should track the gas usage quite closely. 
-              Look along the graph, does the usage (bars) track the degree days well?
-            <% else %>
-            <% end %>
-          <p>
-            
-          </p>
+          <% if fuel_type == :gas %>
+            <p>
+            The blue line on the graph shows the number of 'degrees days' which is a measure
+            of how cold it was during each week (the inverse of temperature - an
+              <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a>) .
+            If the heating boiler is working well at a school the blue line should track the gas usage quite closely.
+            Look along the graph, does the usage (bars) track the degree days well?
+            </p>
+          <% else %>
+          <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
