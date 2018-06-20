@@ -53,6 +53,7 @@ class LoadSchools
     puts  File.join(File.dirname(__FILE__), '../MeterReadings/')
 
     load_schools(ENV['CACHED_METER_READINGS_DIRECTORY'] + 'schoolsandmeters.yml')
+    
   end
 
   def load_school(school_name, min_date, use_cached_data)

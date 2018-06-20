@@ -154,6 +154,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertAnalysisBase
       description1 = AlertDescriptionDetail.new(:text, text)
       report.rating = 10.0
       report.status = :good
+      
     end
     report.add_detail(description1)
     add_report(report)
