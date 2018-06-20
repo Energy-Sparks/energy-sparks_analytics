@@ -78,6 +78,7 @@ class YAxisScaling
     end
   end
 
+  
   def scaling_factor(scaling_factor_type, meter_collection)
     factor = nil
     case scaling_factor_type
@@ -96,6 +97,24 @@ class YAxisScaling
       raise 'Error: nil scaling factor'
     end
     factor
+  end
+
+  # the whole of this class should really be self
+  # TODO(PH,19Jun2018) convert remainder of class to self
+  def self.convert(from_unit, to_unit, fuel_type, from_value, round = true)
+    y_axis_scaling = YAxisScaling.new
+    from_scaling = y_axis_scaling.scale_unit_from_kwh(from_unit, fuel_type)
+    to_scaling = y_axis_scaling.scale_unit_from_kwh(to_unit, fuel_type)
+    val = from_value * to_scaling / from_scaling 
+    round ? scale_num(val) : val
+  end
+
+  def self.convert_multiple(from_unit, to_units, fuel_type, from_value, round = true)
+    converted_values = []
+    to_units.each do |to_unit|
+      converted_values.push(convert(from_unit, to_unit, fuel_type, from_value))
+    end
+    converted_values
   end
 
   # convert from kwh to a different unit
@@ -124,11 +143,11 @@ class YAxisScaling
     when :£
       case fuel_type
       when :electricity, :storage_heater
-        unit_scale = 0.12 # 12p/kWh long term average
+        unit_scale = BenchmarkMetrics::ELECTRICITY_PRICE # 12p/kWh long term average
       when :gas, :heat # TODO(PH,1Jun2018) - rationalise heat versus gas
-        unit_scale = 0.03 # 3p/kWh long term average
+        unit_scale = BenchmarkMetrics::GAS_PRICE # 3p/kWh long term average
       when :oil
-        unit_scale = 0.05 # 5p/kWh long term average
+        unit_scale = BenchmarkMetrics::OIL_PRICE # 5p/kWh long term average
       when :solar_pv
         unit_scale = -1 * scale_unit_from_kwh(:£, :electricity)
       else
