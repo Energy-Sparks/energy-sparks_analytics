@@ -228,13 +228,12 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
 
     header_template = %{
       <%= @body_start %>
-        <body>
-          <p>
-            <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
-          </p>
-          <p>
-            <%= table_info %>
-          </p>
+        <p>
+          <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
+        </p>
+        <p>
+          <%= table_info %>
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -284,13 +283,13 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     template = %{
       <table class="table table-striped table-sm">
         <thead>
-          <tr>
+          <tr class="thead-dark">
             <th scope="col">Type &#47; Time of Day </th>
-            <th scope="col">kWh &#47; year </th>
-            <th scope="col">&pound; &#47;year </th>
-            <th scope="col">CO2 kg &#47;year </th>
-            <th scope="col">Library Books &#47;year </th>
-            <th scope="col">Percent </th>
+            <th scope="col" class="text-center">kWh &#47; year </th>
+            <th scope="col" class="text-center">&pound; &#47;year </th>
+            <th scope="col" class="text-center">CO2 kg &#47;year </th>
+            <th scope="col" class="text-center">Library Books &#47;year </th>
+            <th scope="col" class="text-center">Percent </th>
           </tr>
         </thead>
         <tbody>
@@ -450,7 +449,6 @@ class ThermostaticAdvice < DashboardChartAdviceBase
   def generate_advice
     puts @school.name
     header_template = %{
-      <h3>Thermostatic analysis</title></h3>
       <p>
         The scatter chart below shows a thermostatic analysis of the school's heating system.
         The y axis shows the energy consumption in kWh on any given day.
@@ -492,13 +490,10 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-        <body>
-          <p>
-            The graph below shows your <%= @fuel_type_str %> broken down by
-            day of the week over the last year:
-          <p>
-            
-          </p>
+        <p>
+          The graph below shows your <%= @fuel_type_str %> broken down by
+          day of the week over the last year:
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -514,12 +509,10 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
           </p>
           <p>
           For schools made of heavy materials (thermally massive e.g. concrete block - known as
-          masonary) sometimes
-          there is more gas consumption on a Monday and Tuesday than Wednesday, Thursday and
-          Friday, as additional energy is required to heat a school up after the heating
+          masonary) sometimes there is more gas consumption on a Monday and Tuesday than Wednesday, Thursday and Friday, as additional energy is required to heat a school up after the heating
           is left off at weekends. This energy is being absorbed into the masonary.
           </p>
-          </p>
+          <p>
           Can you see this pattern at your school from the graph above?<br>
           However, its still much more efficient to turn the heating off over the
           weekend, and use a little bit more energy on Monday and Tuesday than it is
