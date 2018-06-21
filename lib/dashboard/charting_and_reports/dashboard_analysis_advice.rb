@@ -854,8 +854,9 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
       </p>
       <% elsif type == :weekends || type == :holidays %>
       <p>
-          The graph above shows <%= @period %> consumption. At most schools this
+          The graph above shows consumption <%= @period %>. At most schools this
           should be relatively constant <%= @period %>, unless:
+      </p>
           <ul>
           <li>
           The school is occupied <%= @period %> when consumption might increase
@@ -870,6 +871,7 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
           overnight when the sun goes down
           </li>
           </ul>
+        <p>
           Can you see any of these characteristics at your school
           in the graph above?
         </p>
