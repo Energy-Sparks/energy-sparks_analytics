@@ -29,9 +29,10 @@ class DashboardChartAdviceBase
     @chart_symbol = chart_symbol
     @header_advice = nil
     @footer_advice = nil
-    if ENV['School Dashboard Advice'] == 'Include Header and Body'
+    @add_extra_markup = ENV['School Dashboard Advice'] == 'Include Header and Body'
+    if @add_extra_markup
       @body_start = '<html><head>'
-      @body_end = '</html></head>'
+      @body_end = '</head></html>'
     else
       @body_start = ''
       @body_end = ''
@@ -120,61 +121,61 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
     header_template = %{
       <%= @body_start %>
+      <% if @add_extra_markup %>
         <h1>Energy Dashboard for <%= @school.name %></title></h1>
         <body>
-          <p>
-            <%= @school.name %> is a <%= @school.school_type %> school near <%= @school.address %>
-            with <%= @school.number_of_pupils %> pupils
-            and a floor area of <%= @school.floor_area %>m<sup>2</sup>.
-          </p>
-          <p>
-            The school spent <%= electric_usage %> on electricity
-            and <%= gas_usage %> on gas last year.
-            The electricity usage <%= electric_comparison %>.
-            The gas usage <%= gas_comparison %>:
-          </p>
+      <% end %>
+      <p>
+        <%= @school.name %> is a <%= @school.school_type %> school near <%= @school.address %>
+        with <%= @school.number_of_pupils %> pupils
+        and a floor area of <%= @school.floor_area %>m<sup>2</sup>.
+      </p>
+      <p>
+        The school spent <%= electric_usage %> on electricity
+        and <%= gas_usage %> on gas last year.
+        The electricity usage <%= electric_comparison %>.
+        The gas usage <%= gas_comparison %>:
+      </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
     @header_advice = generate_html(header_template, binding)
 
     footer_template = %{
-      <html>
-        <p>
-          Your gas usage is <%= percent_regional_gas_str %> of the regional average which
-          <% if percent_gas_of_regional_average < 0.7 %>
-            is very good.
-          <% elsif percent_gas_of_regional_average < 1.0 %>
-            while although good, could be improved, better schools achieve 70% of the regional average,
-            which would save you <%= pound_gas_saving_versus_benchmark %> per year.
-          <% else %>
-            is above average, the school should aim to reduce this,
-            which would save you <%= pound_gas_saving_versus_benchmark %> per year
-            if you matched the usage of energy efficient schools.
-          <% end %>
-          Your electricity usage is <%= percent_regional_electricity_str %> of the regional average which
-          <% if percent_electricity_of_regional_average < 0.7 %>
-            is very good.
-          <% elsif percent_electricity_of_regional_average < 1.0 %>
-            while although good, could be improved, better schools achieve 70% of the regional average,
-              which would save you <%= pound_electricity_saving_versus_benchmark %> per year.
-          <% else %>
-            is above average, the school should aim to reduce this,
-            which would save you <%= pound_electricity_saving_versus_benchmark %> per year
-            if you matched the usage of energy efficient schools.
-          <% end %>
-        </p>
-        <p>
-          <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
-            Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
-          <% else %>
-            There is very little difference in energy consumption between older and newer schools
-            in terms of energy consumption. The best schools from an energy efficiency perspective
-            are those which manage their energy best,
-            minimising out of hours usage and demonstrating good energy behaviour.  
-          <% end %>
-        </p>
-      </html>
+      <p>
+        Your gas usage is <%= percent_regional_gas_str %> of the regional average which
+        <% if percent_gas_of_regional_average < 0.7 %>
+          is very good.
+        <% elsif percent_gas_of_regional_average < 1.0 %>
+          while although good, could be improved, better schools achieve 70% of the regional average,
+          which would save you <%= pound_gas_saving_versus_benchmark %> per year.
+        <% else %>
+          is above average, the school should aim to reduce this,
+          which would save you <%= pound_gas_saving_versus_benchmark %> per year
+          if you matched the usage of energy efficient schools.
+        <% end %>
+        Your electricity usage is <%= percent_regional_electricity_str %> of the regional average which
+        <% if percent_electricity_of_regional_average < 0.7 %>
+          is very good.
+        <% elsif percent_electricity_of_regional_average < 1.0 %>
+          while although good, could be improved, better schools achieve 70% of the regional average,
+            which would save you <%= pound_electricity_saving_versus_benchmark %> per year.
+        <% else %>
+          is above average, the school should aim to reduce this,
+          which would save you <%= pound_electricity_saving_versus_benchmark %> per year
+          if you matched the usage of energy efficient schools.
+        <% end %>
+      </p>
+      <p>
+        <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
+          Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
+        <% else %>
+          There is very little difference in energy consumption between older and newer schools
+          in terms of energy consumption. The best schools from an energy efficiency perspective
+          are those which manage their energy best,
+          minimising out of hours usage and demonstrating good energy behaviour.
+        <% end %>
+      </p>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
@@ -261,20 +262,21 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
 
     header_template = %{
       <%= @body_start %>
-        <body>
-          <p>
-            <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
-          </p>
+        <p>
+          <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
+        </p>
+        <p>
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
           <% if percent_value > EXEMPLAR_PERCENT %>
             The best schools only
             consume <%= percent(EXEMPLAR_PERCENT) %> out of hours.
-            Reducing the school's out of hours usage to <%= percent(EXEMPLAR_PERCENT) %> 
+            Reducing the school's out of hours usage to <%= percent(EXEMPLAR_PERCENT) %>
             would save &pound;<%= saving_£ %> per year.
           <% else %>
             which is very good, and is one of the best schools.
           <% end %>
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -322,7 +324,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
       }
       .estbtrbold {
         font-weight: bold;
-      } 
+      }
     </style>
     <centre>
       <table class="tg">
@@ -421,7 +423,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
             <% else %>
             <% end %>
           <p>
-            
+
           </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -445,7 +447,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
           to leave the boiler on all holiday. If the school boiler doesn't have automatic
           'frost protection' then the thermostat at the school should be turned down as low as possible to 8C
           - this will save 70% of the gas compared with leaving the thermostat at 20C.
-        <% else %> 
+        <% else %>
           The colouring on the graph also highlights electricity usage over holidays in red.
           Holiday usage is normally caused by appliances and computers being left on (called 'baseload').
           The school should aim to reduce this baseload (which also occurs at weekends
@@ -515,7 +517,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
 
     @header_advice = generate_html(header_template, binding)
 
-    alert = AlertThermostaticControl.new(@school) 
+    alert = AlertThermostaticControl.new(@school)
     alert_description = alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
     # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
     ap(alert_description)
@@ -598,7 +600,7 @@ class CusumAdvice < DashboardChartAdviceBase
 
     @header_advice = generate_html(header_template, binding)
 
-    alert = AlertThermostaticControl.new(@school) 
+    alert = AlertThermostaticControl.new(@school)
     alert_description = alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
     a = alert.a.round(0)
     b = alert.b.round(0)
@@ -645,7 +647,7 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
             The graph below shows your <%= @fuel_type_str %> broken down by
             day of the week over the last year:
           <p>
-            
+
           </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -672,7 +674,7 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
           Can you see this pattern at your school from the graph above?<br>
           However, it's still much more efficient to turn the heating off over the weekend,
           and use a little bit more energy on Monday and Tuesday than it is to leave
-          the heating on all weekend. 
+          the heating on all weekend.
         <% else %>
           There will be some electricity usage at weekends from appliances and devices
           left on, but the school should aim to minimise these. Schools with low weekend
@@ -712,7 +714,7 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
-    alert = AlertElectricityBaseloadVersusBenchmark.new(@school) 
+    alert = AlertElectricityBaseloadVersusBenchmark.new(@school)
     alert_description = alert.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
     # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
     ap(alert_description)
@@ -784,7 +786,7 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-      
+
       <% if type == :school_days %>
       <p>
       It is useful in diagnosing what changes have happened over the
