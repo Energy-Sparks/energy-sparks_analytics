@@ -88,10 +88,12 @@ class MeterCollection
   end
 
   def add_heat_meter(meter)
+    meter.meter_type = meter.meter_type.to_sym if meter.meter_type.instance_of? String
     @heat_meters.push(meter)
   end
 
   def add_electricity_meter(meter)
+     meter.meter_type = meter.meter_type.to_sym if meter.meter_type.instance_of? String
     @electricity_meters.push(meter)
   end
 

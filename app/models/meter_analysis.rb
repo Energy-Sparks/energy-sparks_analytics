@@ -15,7 +15,7 @@ class MeterAnalysis
                   solar_pv_installation = nil, storage_heater_config = nil)
     @amr_data = amr_data
     @building = building
-    @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
+    @meter_type = type.to_sym # think Energy Sparks variable naming is a minomer (PH,31May2018)
     @fuel_type = type
     @id = identifier
     @name = name

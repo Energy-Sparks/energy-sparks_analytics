@@ -30,6 +30,8 @@ profiles
 *.DS_Store
 **/*csv
 
+*.log
+
 # RubyMine
 .idea
 

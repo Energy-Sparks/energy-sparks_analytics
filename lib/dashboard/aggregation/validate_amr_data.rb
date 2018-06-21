@@ -56,9 +56,9 @@ class ValidateAMRData
     puts "Looking for missing amr data between #{@amr_data.start_date} #{@amr_data.end_date}"
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if !@amr_data.key?(date)
-        if @meter.meter_type == :electricity
+        if @meter.meter_type == :electricity || @meter.meter_type == 'electricity'
           missing_days[date] = substitute_missing_electricity_data(date)
-        elsif @meter.meter_type == :gas
+        elsif @meter.meter_type == :gas || @meter.meter_type == 'gas'
           missing_days[date] = substitute_missing_gas_data(date)
         end
       end
