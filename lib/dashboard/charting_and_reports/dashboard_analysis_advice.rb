@@ -539,15 +539,14 @@ class ThermostaticAdvice < DashboardChartAdviceBase
         For energy experts, the formula which defines the trend line is very interesting.
         It predicts how the gas consumption varies with how cold it is (degree days).
         </p>
+        <p>In the example above the formula is:</p>
+
+        <blockquote>predicted_heating_requirement = <%= a %> + <%= b %> * degree_days</blockquote>
+
+        <p>Degree days is calculated as follows</p>
+
+        <blockquote>degree_days = max(<%= base_temp %> - average_temperature_for_day, 0)</blockquote>
         <p>
-          In the example above the formula is:
-          <blockquote>
-            predicted_heating_requirement = <%= a %> + <%= b %> * degree_days
-          </blockquote>
-          Degree days is calculated as follows
-          <blockquote>
-          degree_days = max(<%= base_temp %> - average_temperature_for_day, 0)
-          </blockquote>
           So for your school if the average outside temperature is 12C (8 degree days)
           the predicted gas consumption for the school would be
           <%= (a + b * (base_temp - 12)).round(0) %> kWh for the day. Where as if the outside
@@ -576,22 +575,20 @@ class CusumAdvice < DashboardChartAdviceBase
         <html>
           <head><h2>Cusum analysis</h2>
           <body>
-      <% else %>
-        <h3>Cusum analysis</h3
       <% end %>
 
-          <p>
-          <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">Cusum (culmulative sum) graphs</a>
-          shows how the school's actual gas consumption differs
-          from the predicted gas consumption (see the explanation about the
-          formula for the trend line in the thermostatic graph above).
-          </p>
-          <p>
-          The graph is used my energy assessors to help them understand why a school's heating system
-          might not be working well. It also allows them to see if changes in a school like
-          a new more efficient boiler or reduced classroom temperatures has reduced gas consumption
-          as it removes the variability caused by outside temperature from the graph.
-          </p>
+        <p>
+        <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">Cusum (culmulative sum) graphs</a>
+        shows how the school's actual gas consumption differs
+        from the predicted gas consumption (see the explanation about the
+        formula for the trend line in the thermostatic graph above).
+        </p>
+        <p>
+        The graph is used my energy assessors to help them understand why a school's heating system
+        might not be working well. It also allows them to see if changes in a school like
+        a new more efficient boiler or reduced classroom temperatures has reduced gas consumption
+        as it removes the variability caused by outside temperature from the graph.
+        </p>
 
       <% if @add_extra_markup %>
           </body>
@@ -614,14 +611,12 @@ class CusumAdvice < DashboardChartAdviceBase
           Each point is calculated by subtracting the school's actual
           gas consumption from the value calculated from the trend
           line in the thermostatic scatter plot above. i.e.
-          <blockquote>
-            cusum_value = actual_gas_consumption - predicted_gas_consumption
-          </blockquote>
-          which for this school is
-          <blockquote>
-            cusum_value = actual_gas_consumption - <%= a %> + <%= b %> * degree_days
-          </blockquote>
         </p>
+        <blockquote>cusum_value = actual_gas_consumption - predicted_gas_consumption</blockquote>
+
+        <p>which for this school is</p>
+
+        <blockquote>cusum_value = actual_gas_consumption - <%= a %> + <%= b %> * degree_days</blockquote>
       <% if @add_extra_markup %>
         </html>
       <% end %>
