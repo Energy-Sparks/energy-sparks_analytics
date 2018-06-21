@@ -264,8 +264,6 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
       <%= @body_start %>
         <p>
           <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
-        </p>
-        <p>
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
           <% if percent_value > EXEMPLAR_PERCENT %>

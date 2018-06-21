@@ -221,9 +221,8 @@ end
 #
 #   4. do_one_school('Bishop Sutton Primary School', :main_dashboard_electric_and_gas, :benchmark)
 #
-do_one_school('Paulton Junior School')
 
-# do_one_school('Paulton Junior School', :electricity_longterm, :baseload)
+do_one_school('Paulton Junior School')
 
 do_one_school('Paulton Junior School', :main_dashboard_electric_and_gas)
 
