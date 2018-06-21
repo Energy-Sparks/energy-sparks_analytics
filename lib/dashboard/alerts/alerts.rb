@@ -50,10 +50,11 @@ class AlertAnalysisBase
 
   def school_type
     @school.school_type
+
     if @school.respond_to?(:school_type) && !@school.school_type.nil?
-      @school.school_type
+      @school.school_type.school_type.instance_of?(String) ? @school.school_type.to_sym : @school.school_type
     elsif @school.respond_to?(:school) && !@school.school.school_type.nil?
-      @school.school.school_type
+      @school.school.school_type.instance_of?(String) ? @school.school.school_type.to_sym : @school.school.school_type
     else
       throw EnergySparksBadDataException.new('Unable to find number of school_type for alerts')
     end

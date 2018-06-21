@@ -19,7 +19,6 @@ class ScheduleDataManager
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
       hol_data = HolidayData.new
       if calendar_id
-        pp "Running in rails land"
         Calendar.find(calendar_id).holidays.map do |holiday|
           hol_data << SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date)
         end

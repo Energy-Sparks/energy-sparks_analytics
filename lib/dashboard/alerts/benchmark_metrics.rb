@@ -35,6 +35,7 @@ module BenchmarkMetrics
   end
 
   def self.recommended_baseload_for_floor_area(floor_area, school_type)
+    school_type = school_type.to_sym if school_type.instance_of? String
     case school_type
     when :primary, :infant, :junior, :special
       if floor_area < 1000

@@ -53,7 +53,6 @@ class MeterCollection
       @electricity_meters.each do |electricity_meter|
         electricity_meter.amr_data = add_amr_data(electricity_meter)
       end
-
       throw ArgumentException if school.meters.empty?
     else
       # Normally these would come from the school, hard coded at the mo
@@ -68,8 +67,6 @@ class MeterCollection
 
       pp "Running standalone, not in Rails environment"
     end
-
-
   end
 
   def add_amr_data(meter)
