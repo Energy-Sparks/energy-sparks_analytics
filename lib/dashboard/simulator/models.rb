@@ -288,7 +288,7 @@ module AnalyseHeatingAndHotWater
         heating_period = SchoolDatePeriod.new(:heatingperiod, 'N/A', heating_start_date, end_date)
         @heating_on_periods.push(heating_period)
       end
-      # puts "Heating periods", @heating_on_periods.inspect
+      puts "Heating periods", @heating_on_periods.inspect
       @heating_on_periods
     end
 

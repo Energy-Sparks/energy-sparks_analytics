@@ -603,13 +603,14 @@ class CusumAdvice < DashboardChartAdviceBase
     alert = AlertThermostaticControl.new(@school)
     alert_description = alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
     a = alert.a.round(0)
-    b = alert.b.round(0)
+    b = alert.b.round(0) * 1.0
 
     footer_template = %{
       <% if @add_extra_markup %>
         <html>
       <% end %>
 <% if false %>
+
         <p>
           Each point is calculated by subtracting the school's actual
           gas consumption from the value calculated from the trend

@@ -181,7 +181,7 @@ class SeriesDataManager
         breakdown = breakdown.merge(predicted_heating_breakdown([dates[0], dates[1]], @meters[0], @meters[1]))
       end
       if @y2_axis_list.include?(:degreedays) || @breakdown_list.include?(:degreedays)
-        breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(15.5, dates[0], dates[1])
+        breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(20.0, dates[0], dates[1])
       end
       if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
         breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(dates[0], dates[1])
