@@ -536,6 +536,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
           <%= r2_status  %>
         </p>
         <p>
+<% if false %>
         For energy experts, the formula which defines the trend line is very interesting.
         It predicts how the gas consumption varies with how cold it is (degree days).
         </p>
@@ -555,6 +556,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
           off the trend line of the graph above (degree days on the x axis and the answer -
           the predicted daily gas consumption on the y-axis). Does your reading match
           with the answers for 12C and 4C above?
+<% end %>
         </p>
     }.gsub(/^  /, '')
 
@@ -601,12 +603,14 @@ class CusumAdvice < DashboardChartAdviceBase
     alert = AlertThermostaticControl.new(@school)
     alert_description = alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
     a = alert.a.round(0)
-    b = alert.b.round(0)
+    b = alert.b.round(0) * 1.0
 
     footer_template = %{
       <% if @add_extra_markup %>
         <html>
       <% end %>
+<% if false %>
+
         <p>
           Each point is calculated by subtracting the school's actual
           gas consumption from the value calculated from the trend
@@ -617,6 +621,7 @@ class CusumAdvice < DashboardChartAdviceBase
         <p>which for this school is</p>
 
         <blockquote>cusum_value = actual_gas_consumption - <%= a %> + <%= b %> * degree_days</blockquote>
+<% end %>
       <% if @add_extra_markup %>
         </html>
       <% end %>

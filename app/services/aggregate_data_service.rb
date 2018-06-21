@@ -158,8 +158,10 @@ private
       @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters.amr_data, @meter_collection.holidays, @meter_collection.temperatures)
       @heating_models[:basic].calculate_regression_model(period)
     end
-    @heating_models[:basic]
-    #  @heating_on_periods = @model.calculate_heating_periods(@period)
+    # PH 21Jun2016 - commented this back in
+    puts "Calculating model 21Jun18 debug", @period.inspect
+    @heating_on_periods = @model.calculate_heating_periods(@period)
+    @heating_models[:basic] 
   end
 
   def aggregate_amr_data(amr_data_list, type)
