@@ -58,7 +58,7 @@ class DashboardChartAdviceBase
       ElectricityDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :gas_by_day_of_week
       GasDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :baseload
+    when :baseload, :baseload_lastyear
       ElectricityBaseloadAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :electricity_by_month_year_0_1
       ElectricityMonthOnMonth2yearAdvice.new(school, chart_definition, chart_data, chart_symbol)
@@ -68,6 +68,8 @@ class DashboardChartAdviceBase
       ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :holidays)
     when :intraday_line_weekends
       ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :weekends)
+    when :intraday_line_school_days_last5weeks, :intraday_line_school_days_6months, :intraday_line_school_last7days
+      ElectricityShortTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     end
   end
 
@@ -263,19 +265,8 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
           <p>
             <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
           </p>
-          <p>
-            <%= table_info %>
-          </p>
-      <%= @body_end %>
-    }.gsub(/^  /, '')
-
-    @header_advice = generate_html(header_template, binding)
-
-    footer_template = %{
-      <%= @body_start %>
-        <p>
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
-                of <%= percent(BENCHMARK_PERCENT) %>.
+          of <%= percent(BENCHMARK_PERCENT) %>.
           <% if percent_value > EXEMPLAR_PERCENT %>
             The best schools only
             consume <%= percent(EXEMPLAR_PERCENT) %> out of hours.
@@ -284,8 +275,17 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
           <% else %>
             which is very good, and is one of the best schools.
           <% end %>
-        </p>
-        <%= @body_end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+      <%= table_info %>
+      </p>
+      <%= @body_end %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
@@ -580,7 +580,7 @@ class CusumAdvice < DashboardChartAdviceBase
       <html>
         <head><h2>Cusum analysis</title></h2>
         <body>
-          <p> 
+          <p>
           <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">Cusum (culmulative sum) graphs</a>
           shows how the school's actual gas consumption differs
           from the predicted gas consumption (see the explanation about the
@@ -615,7 +615,7 @@ class CusumAdvice < DashboardChartAdviceBase
           which for this school is
           <blockquote>
             cusum_value = actual_gas_consumption - <%= a %> + <%= b %> * degree_days
-          <blockquote>
+          </blockquote>
         </p>
       </html>
     }.gsub(/^  /, '')
@@ -900,4 +900,68 @@ class ElectricityMonthOnMonth2yearAdvice < DashboardChartAdviceBase
     @footer_advice = generate_html(footer_template, binding)
   end
 end
-ElectricityMonthOnMonth2yearAdvice
+
+#==============================================================================
+class ElectricityShortTermIntradayAdvice < DashboardChartAdviceBase
+  attr_reader :fuel_type, :fuel_type_str
+  def initialize(school, chart_definition, chart_data, chart_symbol, chart_type)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @chart_type = chart_type
+    case @chart_type
+    when :intraday_line_school_days_last5weeks
+      @period = 'last 5 weeks'
+    when :intraday_line_school_days_6months
+      @period = '2 weeks 6 months apart'
+    when :intraday_line_school_last7days
+      @period = 'last 7 days'
+    end
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <p>
+      The graph below shows how the consumption varaies
+      during the day over the last <%= @period %>.
+      </p>
+      <p>
+      You can use this type of graph to understand how the schools electricity usage changes
+      over time, between differing days of the week, or over longer periods.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <% case @chart_type
+          when :intraday_line_school_days_last5weeks %>
+      <p>
+      This graph shows the change in average school day electricity consumption
+      over the last 5 weeks. Take a look at the graphs and compare the
+      different weeks. If there are changes from one week to the next can
+      you think of a reason why these might have occurred? One of the most
+      obvious changes might be if one of these weeks was a holiday when
+      you would see much lower power consumption.
+      <\p>
+      <p>
+      It can be useful to understand why there has been a change in consumption
+      as you can learn from this, by understanding what affects your electricity
+      consumption to reduce consumption permanently, or at least stop it from
+      increasing.
+      </p>
+      <% when :intraday_line_school_days_6months %>
+      This graph compares 2 weeks average consumption during the day 6 months apart.
+      <p>
+      </p>
+      <% when :intraday_line_school_last7days %>
+      <p>
+      </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
