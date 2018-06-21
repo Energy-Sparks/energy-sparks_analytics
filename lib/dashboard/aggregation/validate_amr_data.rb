@@ -171,7 +171,9 @@ class ValidateAMRData
       #                   : scales base load differently- very low priority requirement
       substitute_data[halfhour_index] = @amr_data.kwh(substitute_day, halfhour_index) * prediction_ratio
     end
-    puts "Gas Adjustment For Missing Data: replacing #{missing_day} with #{substitute_day} sub kWh = #{kwh_prediction_for_missing_day} missing replacement = #{kwh_prediction_for_substitute_day}"
+    puts "Gas Adjustment For Missing Data: replacing #{missing_day} with #{substitute_day}"
+    puts "sub kWh = #{kwh_prediction_for_missing_day} missing replacement  #{kwh_prediction_for_substitute_day}"
+    puts "actual #{@amr_data.one_day_kwh(substitute_day)} temp diff #{_temp_diff} ratio = #{prediction_ratio}"
     substitute_data
   end
 
