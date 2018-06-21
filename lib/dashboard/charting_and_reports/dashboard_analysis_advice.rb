@@ -86,9 +86,9 @@ protected
       rhtml.result(binding)
       # rhtml.gsub('£', '&pound;')
     rescue StandardError => e
-      puts "Error generating html for {self.class.name}"
+      puts "Error generating html for #{self.class.name}"
       puts e.message
-      '<h2>Error generating advice</h2>'
+      '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
     end
   end
 
@@ -482,7 +482,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
   def generate_advice
     puts @school.name
     header_template = %{
-      <% if add_extra_markup %>
+      <% if @add_extra_markup %>
         <html>
           <head><h2>Thermostatic analysis</h2>
           <body>
@@ -504,7 +504,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
               trend line would suggest thermostatic control isn't working too well.
             </p>
 
-      <% if add_extra_markup %>
+      <% if @add_extra_markup %>
           </body>
       <% end %>
       </html>
@@ -572,7 +572,7 @@ class CusumAdvice < DashboardChartAdviceBase
   def generate_advice
     puts @school.name
     header_template = %{
-      <% if add_extra_markup %>
+      <% if @add_extra_markup %>
         <html>
           <head><h2>Cusum analysis</h2>
           <body>
@@ -593,7 +593,7 @@ class CusumAdvice < DashboardChartAdviceBase
           as it removes the variability caused by outside temperature from the graph.
           </p>
 
-      <% if add_extra_markup %>
+      <% if @add_extra_markup %>
           </body>
         </html>
       <% end %>
@@ -607,7 +607,7 @@ class CusumAdvice < DashboardChartAdviceBase
     b = alert.b.round(0)
 
     footer_template = %{
-      <% if add_extra_markup %>
+      <% if @add_extra_markup %>
         <html>
       <% end %>
         <p>
@@ -622,7 +622,7 @@ class CusumAdvice < DashboardChartAdviceBase
             cusum_value = actual_gas_consumption - <%= a %> + <%= b %> * degree_days
           </blockquote>
         </p>
-      <% if add_extra_markup %>
+      <% if @add_extra_markup %>
         </html>
       <% end %>
     }.gsub(/^  /, '')
@@ -647,7 +647,7 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      <% if add_extra_markup %>
+      <% if @add_extra_markup %>
         <body>
       <% end %>
         <p>
@@ -725,10 +725,10 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
     alert_description = alert.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
     # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
     ap(alert_description)
-puts alert_description.detail[0].content
+    puts alert_description.detail[0].content
     header_template = %{
       <%= @body_start %>
-      <% if add_extra_markup %>
+      <% if @add_extra_markup %>
         <body>
       <% end %>
           <p>
