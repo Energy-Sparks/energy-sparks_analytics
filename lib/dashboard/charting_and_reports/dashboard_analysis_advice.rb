@@ -315,53 +315,43 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
       total += value[0]
     end
     template = %{
-    <style>
-      tr:nth-child(even) {background-color: #e4f0c2;}
-      .tg .tg-numeric{text-align:right}
-      th {
-        background-color: #4CAF50;
-        color: white;
-      }
-      .estbtrbold {
-        font-weight: bold;
-      }
-    </style>
-    <centre>
-      <table class="tg">
-        <tr>
-          <th> Type &#47; Time of Day </th>
-          <th> kWh &#47; year </th>
-          <th> &pound; &#47;year </th>
-          <th> CO2 kg &#47;year </th>
-          <th> Library Books &#47;year </th>
-          <th> Percent </th>
-        </tr>
-        <% data.each do |row, value| %>
-          <tr>
-            <td><%= row %></td>
-            <% val = value[0] %>
-            <% pct = val / total %>
-            <td class="tg-numeric"><%= YAxisScaling.scale_num(val) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
-            <td class="tg-numeric"><%= percent(pct) %></td>
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr class="thead-dark">
+            <th scope="col">Type &#47; Time of Day </th>
+            <th scope="col" class="text-center">kWh &#47; year </th>
+            <th scope="col" class="text-center">&pound; &#47;year </th>
+            <th scope="col" class="text-center">CO2 kg &#47;year </th>
+            <th scope="col" class="text-center">Library Books &#47;year </th>
+            <th scope="col" class="text-center">Percent </th>
           </tr>
-        <% end %>
+        </thead>
+        <tbody>
+          <% data.each do |row, value| %>
+            <tr>
+              <td><%= row %></td>
+              <% val = value[0] %>
+              <% pct = val / total %>
+              <td class="text-right"><%= YAxisScaling.scale_num(val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
+              <td class="text-right"><%= percent(pct) %></td>
+            </tr>
+          <% end %>
 
-        <% if totals_row %>
-          <tr class="estbtrbold">
-            <td><b>Total</b></td>
-            <td class="tg-numeric"><%= YAxisScaling.scale_num(total) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :£, fuel_type, total) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, total) %></td>
-            <td class="tg-numeric"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, total) %></td>
-            <td></td>
-          </tr>
-        <% end %>
-      </tr>
+          <% if totals_row %>
+            <tr class="table-success">
+              <td><b>Total</b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.scale_num(total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :£, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :co2, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, total) %></b></td>
+              <td></td>
+            </tr>
+          <% end %>
+        </tbody>
       </table>
-      </centre>
     }.gsub(/^  /, '')
 
     generate_html(template, binding)
@@ -409,22 +399,21 @@ class WeeklyAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-        <body>
-          <p>
-            The graph below shows how your <%= @fuel_type_str %> consumption varies throughout the year.
-            It highlights how <%= @fuel_type_str %> consumption generally increases in the winter and is lower in the summer.
-          </p>
-            <% if fuel_type == :gas %>
-              The blue line on the graph shows the number of 'degrees days' which is a measure of how cold
-              it was during each week  (the inverse of temperature - an
-                <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a>) .
-                If the heating boiler is working well at your school the blue line should track the gas usage quite closely.
-                Look along the graph, does the usage (bars) track the degree days well?
-            <% else %>
-            <% end %>
-          <p>
+        <p>
+          The graph below shows how your <%= @fuel_type_str %> consumption varies throughout the year.
+          It highlights how <%= @fuel_type_str %> consumption generally increases in the winter and is lower in the summer.
+        </p>
 
+        <% if fuel_type == :gas %>
+          <p>
+            The blue line on the graph shows the number of 'degrees days' which is a measure of how cold
+            it was during each week  (the inverse of temperature - an
+              <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a>) .
+              If the heating boiler is working well at your school the blue line should track the gas usage quite closely.
+              Look along the graph, does the usage (bars) track the degree days well?
           </p>
+        <% else %>
+        <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -434,6 +423,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
       <%= @body_start %>
       <p>
         <% if fuel_type == :gas %>
+        <p>
           The colouring on the graph also demonstrates whether heating and hot water were left on in the holidays.
           Try looking along the graph for the holidays highlighted in red - during which holidays was gas being consumed?
           Generally gas heating and hot water should be turned off during holidays. It isn't necessary to leave everything on,
@@ -447,14 +437,15 @@ class WeeklyAdvice < DashboardChartAdviceBase
           to leave the boiler on all holiday. If the school boiler doesn't have automatic
           'frost protection' then the thermostat at the school should be turned down as low as possible to 8C
           - this will save 70% of the gas compared with leaving the thermostat at 20C.
+        </p>
         <% else %>
+          <p>
           The colouring on the graph also highlights electricity usage over holidays in red.
           Holiday usage is normally caused by appliances and computers being left on (called 'baseload').
           The school should aim to reduce this baseload (which also occurs at weekends
           and overnight during school days) as this will have a big impact on a school's energy costs.
           Sometime this can be achieved by switching appliances off on Fridays before weekends and holidays,
           and sometimes by replacing older appliances consuming electricity by more efficient ones.
-
           </p>
           <p>
             For example replacing 2 old ICT servers which run a schools computer network which perhaps
@@ -464,8 +455,8 @@ class WeeklyAdvice < DashboardChartAdviceBase
             costs about 12p, so this would save 8,760 x 12p = &pound;1,050 per year. If the new server lasted
             5 years then that would be a &pound;5,250 saving to the school which is far more than the
             likely &pound;750 cost of the new server!
+          </p>
         <% end %>
-      </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -493,25 +484,31 @@ class ThermostaticAdvice < DashboardChartAdviceBase
   def generate_advice
     puts @school.name
     header_template = %{
-      <html>
-        <head><h2>Thermostatic analysis</title></h2>
-        <body>
-          <p>
-            The scatter chart below shows a thermostatic analysis of the school's heating system.
-            The y axis shows the energy consumption in kWh on any given day.
-            The x axis the number of degrees days (the inverse of temperature) - so how cold it is
-            <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a> .
-            Each point represents a single day, the colours represent different types of days
-            .e.g. a day in the winter when the building is occupied and the heating is on.
-          </p>
-          <p>
-            If the heating has good thermostatic control then the points at the top of
-            chart when the heating is on and the school occupied should be close to the trend line.
-            This is because the amount of heating required on a single day is linearly proportional to
-            the difference between the inside and outside temperature, and any variation from the
-            trend line would suggest thermostatic control isn't working too well.
-          </p>
-        </body>
+      <% if add_extra_markup %>
+        <html>
+          <head><h2>Thermostatic analysis</h2>
+          <body>
+      <% end %>
+
+            <p>
+              The scatter chart below shows a thermostatic analysis of the school's heating system.
+              The y axis shows the energy consumption in kWh on any given day.
+              The x axis the number of degrees days (the inverse of temperature) - so how cold it is
+              <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a> .
+              Each point represents a single day, the colours represent different types of days
+              .e.g. a day in the winter when the building is occupied and the heating is on.
+            </p>
+            <p>
+              If the heating has good thermostatic control then the points at the top of
+              chart when the heating is on and the school occupied should be close to the trend line.
+              This is because the amount of heating required on a single day is linearly proportional to
+              the difference between the inside and outside temperature, and any variation from the
+              trend line would suggest thermostatic control isn't working too well.
+            </p>
+
+      <% if add_extra_markup %>
+          </body>
+      <% end %>
       </html>
     }.gsub(/^  /, '')
 
@@ -526,9 +523,8 @@ class ThermostaticAdvice < DashboardChartAdviceBase
     b = alert.b.round(0)
     base_temp = alert.base_temp
 
-    url = 'http://blog.minitab.com/blog/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit'
+    url = 'http://blog.minitab.com/blog/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit'.freeze
     footer_template = %{
-      <html>
         <p>
         One measure of how well the thermostatic control at the school is working is
         the mathematical value R^2
@@ -563,7 +559,6 @@ class ThermostaticAdvice < DashboardChartAdviceBase
           the predicted daily gas consumption on the y-axis). Does your reading match
           with the answers for 12C and 4C above?
         </p>
-      </html>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
@@ -579,9 +574,14 @@ class CusumAdvice < DashboardChartAdviceBase
   def generate_advice
     puts @school.name
     header_template = %{
-      <html>
-        <head><h2>Cusum analysis</title></h2>
-        <body>
+      <% if add_extra_markup %>
+        <html>
+          <head><h2>Cusum analysis</h2>
+          <body>
+      <% else %>
+        <h3>Cusum analysis</h3
+      <% end %>
+
           <p>
           <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">Cusum (culmulative sum) graphs</a>
           shows how the school's actual gas consumption differs
@@ -594,8 +594,11 @@ class CusumAdvice < DashboardChartAdviceBase
           a new more efficient boiler or reduced classroom temperatures has reduced gas consumption
           as it removes the variability caused by outside temperature from the graph.
           </p>
-        </body>
-      </html>
+
+      <% if add_extra_markup %>
+          </body>
+        </html>
+      <% end %>
     }.gsub(/^  /, '')
 
     @header_advice = generate_html(header_template, binding)
@@ -606,7 +609,9 @@ class CusumAdvice < DashboardChartAdviceBase
     b = alert.b.round(0)
 
     footer_template = %{
-      <html>
+      <% if add_extra_markup %>
+        <html>
+      <% end %>
         <p>
           Each point is calculated by subtracting the school's actual
           gas consumption from the value calculated from the trend
@@ -619,7 +624,9 @@ class CusumAdvice < DashboardChartAdviceBase
             cusum_value = actual_gas_consumption - <%= a %> + <%= b %> * degree_days
           </blockquote>
         </p>
-      </html>
+      <% if add_extra_markup %>
+        </html>
+      <% end %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
@@ -642,13 +649,13 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
+      <% if add_extra_markup %>
         <body>
-          <p>
-            The graph below shows your <%= @fuel_type_str %> broken down by
-            day of the week over the last year:
-          <p>
-
-          </p>
+      <% end %>
+        <p>
+          The graph below shows your <%= @fuel_type_str %> broken down by
+          day of the week over the last year:
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -656,8 +663,8 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-      <p>
         <% if fuel_type == :gas %>
+          <p>
           For most schools there should be no gas usage at weekends. The only reason gas
           might be used is for frost protection in very cold weather,
           and averaged across the whole year this should be a very small
@@ -670,19 +677,21 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
           the heating is left off at weekends.
           This energy is being absorbed into the masonry
           </p>
-          </p>
+          <p>
           Can you see this pattern at your school from the graph above?<br>
           However, it's still much more efficient to turn the heating off over the weekend,
           and use a little bit more energy on Monday and Tuesday than it is to leave
           the heating on all weekend.
+          </p>
         <% else %>
+          <p>
           There will be some electricity usage at weekends from appliances and devices
           left on, but the school should aim to minimise these. Schools with low weekend
           electricity consumption aim to switch as many appliances off as possible
           on a Friday afternoon, sometimes providing the caretaker or cleaning
           staff with a checklist as to what they should be turning off.
+          </p>
         <% end %>
-      </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -721,7 +730,9 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
 puts alert_description.detail[0].content
     header_template = %{
       <%= @body_start %>
+      <% if add_extra_markup %>
         <body>
+      <% end %>
           <p>
             The graph below shows how the the school's electricity 'baseload'
             (out of hours electricity consumption) has varied over time:
@@ -773,12 +784,14 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
+      <p>
       This graph compares the average power consumption
       at the school during the last 2 years <%= @period %>.
       <% if type == :school_days %>
       It shows the peak power usage at the school (normally during
         the middle of the day) and the overnight power consumption.
       <% end %>
+      </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -879,7 +892,7 @@ class ElectricityMonthOnMonth2yearAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      The graph below compares monthly electricity consumption over the two years.
+      <p>The graph below compares monthly electricity consumption over the two years.</p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -946,20 +959,19 @@ class ElectricityShortTermIntradayAdvice < DashboardChartAdviceBase
       you think of a reason why these might have occurred? One of the most
       obvious changes might be if one of these weeks was a holiday when
       you would see much lower power consumption.
-      <\p>
+      </p>
       <p>
       It can be useful to understand why there has been a change in consumption
       as you can learn from this, by understanding what affects your electricity
       consumption to reduce consumption permanently, or at least stop it from
       increasing.
       </p>
+
       <% when :intraday_line_school_days_6months %>
-      This graph compares 2 weeks average consumption during the day 6 months apart.
       <p>
+        This graph compares 2 weeks average consumption during the day 6 months apart.
       </p>
       <% when :intraday_line_school_last7days %>
-      <p>
-      </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
