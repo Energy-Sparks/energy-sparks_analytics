@@ -88,6 +88,7 @@ class Holidays
 
   # currently in Class Holidays, but doesn't use holidays, so could be self, mirrors academic_years method above
   def years_to_date(start_date, end_date, move_to_saturday_boundary)
+
     yrs_to_date = []
 
     last_date_of_period = end_date
@@ -100,7 +101,11 @@ class Holidays
 
     first_date_of_period = last_date_of_period - 52 * 7 + 1
 
-    while first_date_of_period >= start_date
+    # If first time around, even if less than a year, carry on.
+    first_time = true
+
+    while first_date_of_period >= start_date || first_time
+
       # add a new period to the return array
       year_description = "year to " << last_date_of_period.strftime("%a %d %b %y")
       yrs_to_date.push(SchoolDatePeriod.new(:year_to_date, year_description, first_date_of_period, last_date_of_period))
@@ -108,6 +113,7 @@ class Holidays
       # move back 52 weeks
       last_date_of_period = first_date_of_period - 1
       first_date_of_period = last_date_of_period - 52 * 7 + 1
+      first_time = false
     end
 
     yrs_to_date

@@ -59,7 +59,7 @@ class HalfHourlyData < Hash
 
   # half_hour_index is 0 to 47, i.e. the index for the half hour within the day
   def data(date, half_hour_index)
-    self[date][half_hour_index]
+    self[date][half_hour_index] if self[date]
   end
 
   def one_day_total(date)

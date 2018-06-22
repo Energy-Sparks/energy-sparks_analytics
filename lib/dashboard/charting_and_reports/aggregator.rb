@@ -59,12 +59,11 @@ class Aggregator
     end
 
     # take the resulting buckets, 1 for each time period
-
     # and update the series names if there is more than one period
     # or if more than one was asked for but not enough data
     # (EnergySparksMissingPeriodForSpecifiedPeriodChart) for user diagnostics
     # so the user can see the remaining periods and the dates are not removed
-    if bucketed_period_data.length > 1 || periods.length > 1 
+    if bucketed_period_data.length > 1 || periods.length > 1
       @bucketed_data = {}
       @bucketed_data_count = {}
       bucketed_period_data.each do |period_data|
@@ -157,6 +156,10 @@ private
           next unless match_filter_by_day(date)
           multi_day_breakdown = @series_manager.get_data([:daterange, [date, date]])
           multi_day_breakdown.each do |key, value|
+            if value.nan?
+              puts "WARNING: replacing nan with a 0.0"
+              value = 0.0
+            end
             add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
           end
         end
@@ -166,6 +169,10 @@ private
         x_index = @xbucketor.index(date_range[0], nil)
         multi_day_breakdown = @series_manager.get_data([:daterange, date_range])
         multi_day_breakdown.each do |key, value|
+          if value.nan?
+            puts "WARNING: replacing nan with a 0.0"
+            value = 0.0
+          end
           add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
         end
       end

@@ -67,7 +67,7 @@ class YAxisScaling
   end
 
   def self.scale_num(number)
-    if number.nil?
+    if number.nil? || number.nan?
       '' # specific case where no value specified
     elsif number < 50
       number.round(2).to_s
@@ -78,7 +78,7 @@ class YAxisScaling
     end
   end
 
-  
+
   def scaling_factor(scaling_factor_type, meter_collection)
     factor = nil
     case scaling_factor_type
@@ -105,7 +105,7 @@ class YAxisScaling
     y_axis_scaling = YAxisScaling.new
     from_scaling = y_axis_scaling.scale_unit_from_kwh(from_unit, fuel_type)
     to_scaling = y_axis_scaling.scale_unit_from_kwh(to_unit, fuel_type)
-    val = from_value * to_scaling / from_scaling 
+    val = from_value * to_scaling / from_scaling
     round ? scale_num(val) : val
   end
 
