@@ -95,7 +95,7 @@ class MeterCollection
     end
   end
 
-  def solar_insolance
+  def solar_irradiation
     ScheduleDataManager.solar_irradiation(@solar_irradiance_schedule_name)
   end
 

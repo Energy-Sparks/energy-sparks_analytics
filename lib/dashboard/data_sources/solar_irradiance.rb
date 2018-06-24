@@ -3,8 +3,8 @@ class SolarIrradiance < HalfHourlyData
     super(type)
   end
 
-  def get_solar_irradiance(date, half_hour_index)
-    getData(date, half_hour_index)
+  def solar_irradiance(date, half_hour_index)
+    data(date, half_hour_index)
   end
 end
 

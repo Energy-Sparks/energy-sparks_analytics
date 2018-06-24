@@ -4,6 +4,12 @@ class Temperatures < HalfHourlyData
   end
 
   def get_temperature(date, half_hour_index)
+    puts 'Warning: deprecated interface get_temperature'
+    puts Thread.current.backtrace.join("\n")
+    temperature(date, half_hour_index)
+  end
+
+  def temperature(date, half_hour_index)
     data(date, half_hour_index)
   end
 
@@ -111,12 +117,12 @@ class Temperatures < HalfHourlyData
 
   # used for simulator air con calculations
   def cooling_degree_days_at_time(date, base_temp, half_hour_index)
-    temperature = getTemperature(date, half_hour_index)
+    temp = temperature(date, half_hour_index)
 
-    if temperature >= base_temp
-      return temperature - base_temp
+    if temp >= base_temp
+      temp - base_temp
     else
-      return 0.0
+      0.0
     end
   end
 
