@@ -40,7 +40,7 @@ class MeterCollection
     @cached_close_time = DateTime.new(0, 1, 1, 16, 30, 0) # for speed
 
     if i_am_running_in_rails?
-      pp "Running in Rails environment"
+      pp "Running in Rails environment version: #{Dashboard::VERSION}"
       @heat_meters = school.heat_meters
       @electricity_meters = school.electricity_meters
       # Stored as big decimal
@@ -65,7 +65,7 @@ class MeterCollection
 
       @floor_area = school.floor_area
 
-      pp "Running standalone, not in Rails environment"
+      pp "Running standalone, not in Rails environment version: #{Dashboard::VERSION}"
     end
   end
 
