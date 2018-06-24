@@ -16,14 +16,23 @@ class ElectricitySimulator
     @total = empty_amr_data_set('Simulator Totals')
 # rubocop:disable all
     time = Benchmark.measure {
+      puts 'lighting'
       puts Benchmark.measure { simulate_lighting }
+      puts 'ict'
       puts Benchmark.measure { simulate_ict }
+      puts 'boiler pump'
       puts Benchmark.measure { simulate_boiler_pump }
+      puts 'security lighting'
       puts Benchmark.measure { simulate_security_lighting }
+      puts 'kitchen'
       puts Benchmark.measure { simulate_kitchen }
+      puts 'hot water'
       puts Benchmark.measure { simulate_hot_water }
+      puts 'air con'
       puts Benchmark.measure { simulate_air_con }
+      puts 'unaccounted for baseload'
       puts Benchmark.measure { simulate_unaccounted_for_baseload }
+      puts 'aggregate results'
       puts Benchmark.measure { aggregate_results }
     }
 # rubocop:enable all
@@ -141,22 +150,20 @@ class ElectricitySimulator
     totals = empty_amr_data_set("Totals")
     @calc_components_results.each do |key, value|
       (totals.start_date..totals.end_date).each do |date|
-        (0..47).each do |half_hour_index|
-          totals[date][half_hour_index] += value[date][half_hour_index]
-        end
+        totals[date] = [totals[date], value[date]].transpose.map(&:sum)
       end
       sub_total = component_total(value)
       puts "Component #{key} = #{sub_total} k_wh"
     end
+    total_total = component_total(totals)
+    puts "Total simulation #{total_total}  kwh"
     @calc_components_results["Totals"] = totals
   end
 
   def component_total(component)
     total = 0.0
     (component.start_date..component.end_date).each do |date|
-      (0..47).each do |half_hour_index|
-        total += component[date][half_hour_index]
-      end
+      total += component[date].inject(:+)
     end
     total
   end
@@ -169,6 +176,7 @@ class ElectricitySimulator
 
     peak_power =  @appliance_definitions[:lighting][:lumens_per_m2] * school.floor_area / 1000 / @appliance_definitions[:lighting][:lumens_per_watt]
 
+    @cache_irradiance_for_speed = nil
     (lighting_data.start_date..lighting_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
         if !@holidays.holiday?(date) && !weekend?(date)
@@ -193,15 +201,17 @@ class ElectricitySimulator
 
   # converts from 2 arrays of floats/fixed representing the x and y axis to a hash of points ( x >= y) for compatibility by the Interpolate gem
   def interpolate_y_value(xarr, yarr, x_value)
-    points = {}
-    count = 0
-    xarr.each do |x|
-      points[x] = yarr[count]
-      count += 1
-    end
+    if @cache_irradiance_for_speed.nil?
+      points = {}
+      count = 0
+      xarr.each do |x|
+        points[x] = yarr[count]
+        count += 1
+      end
 
-    inter = Interpolate::Points.new(points)
-    inter.at(x_value)
+      @cache_irradiance_for_speed = Interpolate::Points.new(points)
+    end
+    @cache_irradiance_for_speed.at(x_value)
   end
 
   #=======================================================================================================================================================================
@@ -214,10 +224,9 @@ class ElectricitySimulator
 
     @appliance_definitions[:ict].each_value do |ict_appliance_group|
       (server_data.start_date..server_data.end_date).each do |date| # arbitrary use the date list for te servers to iterate on, but the inner work applies via the case statement to desktops or laptops
+        on_today = !(@holidays.holiday?(date) && ict_appliance_group.key?(:holidays) && !ict_appliance_group[:holidays])
+        on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])       
         (0..47).each do |half_hour_index|
-          on_today = !(@holidays.holiday?(date) && ict_appliance_group.key?(:holidays) && !ict_appliance_group[:holidays])
-          on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])
-
           if on_today
             if ict_appliance_group.key?(:usage_percent_by_time_of_day)
               percent_on = ict_appliance_group[:usage_percent_by_time_of_day][half_hour_index]
@@ -256,9 +265,9 @@ class ElectricitySimulator
 
     (boiler_pump_data.start_date..boiler_pump_data.end_date).each do |date|
       in_season = in_heating_season(@appliance_definitions[:boiler_pumps][:heating_season_start_dates], @appliance_definitions[:boiler_pumps][:heating_season_end_dates], date)
-      (0..47).each do |half_hour_index|
-        if in_season && !(@holidays.holiday?(date) && !heating_on_during_holidays) && !(weekend?(date) && !heating_on_during_weekends)
-
+      heating_on = in_season && !(@holidays.holiday?(date) && !heating_on_during_holidays) && !(weekend?(date) && !heating_on_during_weekends)
+      if heating_on
+        (0..47).each do |half_hour_index|
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
@@ -404,10 +413,12 @@ class ElectricitySimulator
   end
 
   def convert_half_hour_index_to_time(half_hour_index)
+    @cached_time_convert ||= {}
+    return @cached_time_convert[half_hour_index] if @cached_time_convert.key?(half_hour_index)
     hour = (half_hour_index / 2).floor.to_i
     mins = 30 * (half_hour_index.odd? ? 1 : 0)
     time = hour == 24 ? Time.new(2010, 1, 2, 0, mins, 0) : Time.new(2010, 1, 1, hour, mins, 0)
-    time
+    @cached_time_convert[half_hour_index] = time
   end
   #=======================================================================================================================================================================
   # KITCHEN SIMULATION
