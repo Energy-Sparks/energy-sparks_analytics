@@ -53,13 +53,20 @@ end
 
 reports = nil
 
+=begin
 suppress_output {
-  reports = DashboardReports.new
-  reports.do_one_school('Paulton Junior School', :simulator)
+   reports = DashboardReports.new
+   reports.do_one_school('Paulton Junior School', :simulator)
 }
+=end
+
+reports = DashboardReports.new
 
 school = reports.load_school('Paulton Junior School')
 
 simulator = ElectricitySimulator.new(school)
 
 simulator.simulate(simulator.default_simulator_parameters)
+
+reports.do_one_school('Paulton Junior School', :simulator)
+

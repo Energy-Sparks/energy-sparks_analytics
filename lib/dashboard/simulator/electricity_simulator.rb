@@ -1,7 +1,9 @@
 class ElectricitySimulator
-  attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions, :calc_components_results, :solar_irradiation, :school
+  attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions
+  attr_reader :calc_components_results, :solar_irradiation, :school, :existing_electricity_meter
   def initialize(school)
     electricity_meter_data = school.aggregated_electricity_meters.amr_data
+    @existing_electricity_meter = school.aggregated_electricity_meters
     @holidays = school.holidays
     @period = @holidays.years_to_date(electricity_meter_data.start_date, electricity_meter_data.end_date, false)[0]
     @temperatures = school.temperatures
@@ -14,6 +16,7 @@ class ElectricitySimulator
     @appliance_definitions = appliance_definitions
     # puts appliance_definitions.inspect
     @total = empty_amr_data_set('Simulator Totals')
+    total_amr_data = nil
 # rubocop:disable all
     time = Benchmark.measure {
       puts 'lighting'
@@ -33,10 +36,12 @@ class ElectricitySimulator
       puts 'unaccounted for baseload'
       puts Benchmark.measure { simulate_unaccounted_for_baseload }
       puts 'aggregate results'
-      puts Benchmark.measure { aggregate_results }
+      puts Benchmark.measure { total_amr_data = aggregate_results }
     }
 # rubocop:enable all
     puts "Overall time #{time}"
+
+    @school.electricity_simulation_meter = create_meters(total_amr_data)
   end
 
   def empty_amr_data_set(type)
@@ -145,6 +150,32 @@ class ElectricitySimulator
     data
   end
 
+
+
+  def create_meters(total_amr_data)
+    electricity_simulation_meter = create_new_meter(total_amr_data, :electricity, 'sim 1', 'Electrical Simulator')
+    @calc_components_results.each do |key, value|
+      meter = create_new_meter(value, key, key, key)
+      electricity_simulation_meter.sub_meters.push(meter)
+    end
+    puts "Created #{electricity_simulation_meter.sub_meters.length} sub meters"
+    electricity_simulation_meter
+  end
+
+  def create_new_meter(amr_data, type, identifier, name)
+    Meter.new(
+      @existing_electricity_meter,
+      amr_data,
+      type,
+      identifier,
+      name,
+      @existing_electricity_meter.floor_area,
+      @existing_electricity_meter.number_of_pupils,
+      @existing_electricity_meter.solar_pv_installation,
+      @existing_electricity_meter.storage_heater_config
+    )
+  end
+
   def aggregate_results
     puts "Aggregating results"
     totals = empty_amr_data_set("Totals")
@@ -157,7 +188,7 @@ class ElectricitySimulator
     end
     total_total = component_total(totals)
     puts "Total simulation #{total_total}  kwh"
-    @calc_components_results["Totals"] = totals
+    totals
   end
 
   def component_total(component)

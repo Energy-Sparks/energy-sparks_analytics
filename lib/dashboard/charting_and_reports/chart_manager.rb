@@ -88,6 +88,17 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    group_by_week_electricity_simulator: {
+      name:             'By Week: Electricity Simulator',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :electricity_simulator,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      timescale:        :year
+    },
     group_by_week_gas: {
       name:             'By Week: Gas',
       chart1_type:      :column,

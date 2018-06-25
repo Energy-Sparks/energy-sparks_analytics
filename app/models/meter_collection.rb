@@ -11,7 +11,7 @@
 #           - also holds modelling data
 
 class MeterCollection
-  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters
+  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters 
 
   # From school/building
   attr_reader :floor_area, :number_of_pupils
@@ -20,7 +20,7 @@ class MeterCollection
   attr_reader :school_type, :school, :name, :address
 
   # These are things which will be populated
-  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models
+  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
 
   def initialize(school)
     @name = school.name

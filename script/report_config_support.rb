@@ -73,6 +73,7 @@ class DashboardReports
                                   name:   'Simulator Test',
                                   charts: %i[
                                     group_by_week_electricity
+                                    group_by_week_electricity_simulator
                                   ]
                                 }
     }
