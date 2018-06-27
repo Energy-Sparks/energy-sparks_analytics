@@ -423,17 +423,71 @@ class ChartManager
       yaxis_units:      :kw,
       yaxis_scaling:    :none,
       y2_axis:          :temperature
-    }
-=begin
+    },
+    thermostatic_control_large_diurnal_range_1:  {
+      name:             'Thermostatic Control Large Diurnal Range Assessment 1',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ diurnal: 0 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    thermostatic_control_large_diurnal_range_2:  {
+      name:             'Thermostatic Control Large Diurnal Range Assessment 2',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ diurnal: -1 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    thermostatic_control_large_diurnal_range_3:  {
+      name:             'Thermostatic Control Large Diurnal Range Assessment 3',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ diurnal: -2 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    thermostatic_control_medium_diurnal_range:  {
+      name:             'Thermostatic Control Medium Diurnal Range Assessment 3',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ diurnal: -20 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    optimum_start:  {
+      name:             'Optimum Start Control Check',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{ day: Date.new(2018, 3, 16) }, { day: Date.new(2018, 3, 6) } ], # fixed dates: one relatively mild, one relatively cold
+      x_axis:           :intraday,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
     hotwater: {
-      name:             'Hot Water',
+      name:             'Hot Water Analysis',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       series_breakdown: :hotwater,
       x_axis:           :day,
+      meter_definition: :allheat,
       yaxis_units:      :kwh
     }
-=end
   }.freeze
 
   def initialize(school)

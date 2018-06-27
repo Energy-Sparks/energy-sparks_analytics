@@ -55,6 +55,10 @@ class SeriesNames
   CUSUM           = 'CUSUM'.freeze
   BASELOAD        = 'BASELOAD'.freeze
 
+  USEFULHOTWATERUSAGE = 'Hot Water Usage'.freeze
+  WASTEDHOTWATERUSAGE = 'Wasted Hot Water Usage'.freeze
+  HOTWATERSERIESNAMES = [WASTEDHOTWATERUSAGE.freeze, USEFULHOTWATERUSAGE.freeze].freeze
+
   NONE            = 'Energy'.freeze
 
   # plus dynamically generated names, for example meter names
@@ -70,6 +74,7 @@ class SeriesDataManager
     @y2_axis_list = convert_variable_to_array(chart_configuration[:y2_axis])
     @data_types = convert_variable_to_array(chart_configuration[:data_types])
     @heating_model = nil
+    @hotwater_model = nil
     @periods = nil
     @chart_configuration = chart_configuration
     configure_manager
@@ -106,6 +111,9 @@ class SeriesDataManager
     end
     if @breakdown_list.include?(:submeter)
       @series_buckets += submeter_names
+    end
+    if @breakdown_list.include?(:hotwater)
+      @series_buckets += SeriesNames::HOTWATERSERIESNAMES
     end
     if @breakdown_list.include?(:meter)
       @series_buckets += meter_names
@@ -221,6 +229,12 @@ class SeriesDataManager
         actual_kwh = meter.amr_data.kwh_date_range(dates[0], dates[1])
         breakdown[SeriesNames::CUSUM] = model_kwh - actual_kwh
       end
+      if @breakdown_list.include?(:hotwater)
+        hotwater_model = calculate_hotwater_model
+        useful_kwh, wasted_kwh = hotwater_model.kwh_daterange(dates[0], dates[1])
+        breakdown[SeriesNames::USEFULHOTWATERUSAGE] = useful_kwh
+        breakdown[SeriesNames::WASTEDHOTWATERUSAGE] = wasted_kwh
+      end
       if @breakdown_list.include?(:baseload)
         baseload = meter.amr_data.baseload_kwh_date_range(dates[0], dates[1]) * 24 # TODO(PH,6Jun2018) rationalise kW as *24 to offset /24 in aggregator
         breakdown[SeriesNames::BASELOAD] = baseload
@@ -284,6 +298,11 @@ private
     periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
     @heating_model = @meter_collection.heating_model(periods[0])
     @heating_model.calculate_heating_periods(first_chart_date, last_chart_date)
+  end
+
+  def calculate_hotwater_model
+    @hotwater_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@meter_collection) if @hotwater_model.nil?
+    @hotwater_model
   end
 
    # TODO(PH,22May2018) meter selection needs revisiting
@@ -546,6 +565,20 @@ private
           raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
         end
         @periods = [period]
+      when :diurnal
+        if hash_value.is_a?(Integer) # hash_value weeks back from latest week
+          raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for dirunal range specification') if hash_value > 0
+          days = @meter_collection.temperatures.largest_diurnal_ranges(@first_meter_date, @last_meter_date, true, false, @meter_collection.holidays, false)
+          index = hash_value.magnitude
+          if index > days.length - 1
+            raise EnergySparksBadChartSpecification.new("Not enough diurnal range days #{days.length} for chart specification index #{index}")
+          else
+            period = SchoolDatePeriod.new(:day, 'diurnal day', days[index], days[index])
+          end
+        else
+          raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
+        end
+        @periods = [period]
       else
         raise "Unsupported time period for charting #{@chart_configuration[:timescale]}"
       end
@@ -553,6 +586,10 @@ private
       @periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
     elsif @chart_configuration[:x_axis] == :academicyear
       @periods = @meter_collection.holidays.academic_years(@first_meter_date, @last_meter_date)
+    elsif @chart_configuration[:series_breakdown] == :hotwater
+      hotwater_model = calculate_hotwater_model
+      period = SchoolDatePeriod.new(nil, 'summer hot water', hotwater_model.analysis_period_start_date, hotwater_model.analysis_period_end_date)
+      @periods = [period]
     else
       @periods = [SchoolDatePeriod.new(:chartperiod, 'One Period for Chart', @first_meter_date, @last_meter_date)]
     end

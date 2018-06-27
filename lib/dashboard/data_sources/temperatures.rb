@@ -2,6 +2,7 @@ class Temperatures < HalfHourlyData
   FROSTPROTECTIONTEMPERATURE = 4.0
   def initialize(type)
     super(type)
+    @cached_min_max = {}
   end
 
   def get_temperature(date, half_hour_index)
@@ -23,6 +24,7 @@ class Temperatures < HalfHourlyData
   end
 
   def temperature_range(start_date, end_date)
+    return @cached_min_max[start_date..end_date] if @cached_min_max.key?(start_date..end_date)
     min_temp = 100.0
     max_temp = -100.0
     (start_date..end_date).each do |date|
@@ -32,6 +34,7 @@ class Temperatures < HalfHourlyData
         max_temp = temp > max_temp ? temp : max_temp
       end
     end
+    @cached_min_max[start_date..end_date] = [min_temp, max_temp]
     [min_temp, max_temp]
   end
 
@@ -61,6 +64,29 @@ class Temperatures < HalfHourlyData
       end
     end
     frost_dates
+  end
+
+  # find days with highest idurnal ranges, for thermostatic analysis
+  def largest_diurnal_ranges(start_date, end_date, winter = false,  weekend = nil, holidays = nil, is_holiday = nil)
+    # get a list of diurnal ranges
+    diurnal_ranges = {} # diurnal temperature date = [list of dates with that range] i.e. deal with duplicates
+    end_date.downto(start_date) do |date| # reverse order so recent more prominent
+      next if !weekend.nil? && weekend != DateTimeHelper.weekend?(date)
+      next if winter && ![11, 12, 1, 2, 3].include?(date.month)
+      next if !is_holiday.nil? && !holidays.nil? && holidays.holiday?(date) != is_holiday
+      min_temp, max_temp = temperature_range(date, date)
+      diurnal_range = max_temp - min_temp
+      diurnal_ranges[diurnal_range] = Array.new unless diurnal_ranges.key?(diurnal_range)
+      diurnal_ranges[diurnal_range].push(date)
+    end
+
+    # flatten list and return dates in order of biggest diurnal ranges
+    descending_diurnal_ranges_dates = []
+    descending_diurnal_ranges = diurnal_ranges.keys.sort.reverse
+    descending_diurnal_ranges.each do |diurnal_range|
+      descending_diurnal_ranges_dates.concat(diurnal_ranges[diurnal_range])
+    end
+    descending_diurnal_ranges_dates
   end
 
   def temperature_datetime(datetime)

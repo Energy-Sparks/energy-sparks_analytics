@@ -219,7 +219,6 @@ private
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
-puts "DATATIME1" * 10
     (start_date..end_date).each do |date|
       next if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype) && !match_filter_by_day(date)
       (0..47).each do |halfhour_index|

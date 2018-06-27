@@ -69,9 +69,26 @@ class DashboardReports
                                   name:   'Recent Electricity & Gas',
                                   charts: %i[benchmark]
                                 },
+ 
+      old_boiler_control: {
+                                  name: 'Boiler Control',
+                                  charts: %i[
+                                    frost_1
+                                    frost_2
+                                    frost_3
+                                    thermostatic_control_large_diurnal_range_1
+                                    thermostatic_control_large_diurnal_range_1
+                                    thermostatic_control_large_diurnal_range_2
+                                    thermostatic_control_large_diurnal_range_3
+                                    thermostatic_control_medium_diurnal_range
+                                    optimum_start
+                                  ]
+                                },
       boiler_control: {
                                   name: 'Boiler Control',
-                                  charts: %i[frost_1 frost_2 frost_3]
+                                  charts: %i[
+                                    hotwater
+                                  ]
                                 },
       simulator:  {
                                   name:   'Simulator Test',

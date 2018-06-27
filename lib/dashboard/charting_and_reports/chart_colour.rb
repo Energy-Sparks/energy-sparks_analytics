@@ -61,6 +61,10 @@ private
       '#00ff00'.paint # lime
     when /heat/ # heating day
       'red'.paint
+    when /wasted hot water usage/ # non heating day
+      'red'.paint # lime
+    when /hot water usage/ # heating day
+      'blue'.paint
     when /cusum/ # heating day
       '#ff6600'.paint # orange
     when /degree/, /temperature/ # degree days, temperature
