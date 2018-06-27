@@ -13,7 +13,9 @@ ENV['ENERGYSPARKSDATASOURCE'] = 'csv'
 
 school = School.new(school_name, 'Bath BA2', 1000.0, 100, :primary)
 
-school.load_meters
+#school.load_meters
+school = $SCHOOL_FACTORY.load_school(school_name)
+
 
 analysis_asof_date = Date.new(2012, 11, 8)
 

@@ -117,7 +117,7 @@ class ValidateAMRData
     (1..@max_search_range_for_corrected_data).each do |days_offset|
       # look for similar day after the missing date
       day_after = date + days_offset
-      if day_after <= @amr_data.end_date && @amr_data.key?(day_after)
+      if day_after <= @amr_data.end_date && @amr_data.key?(day_after) && @amr_data[day_after].count == 48 &&
         temperature_after = average_temperature(day_after)
         if heating_on == @heating_model.heating_on?(day_after) &&
             within_temperature_range?(avg_temperature, temperature_after) &&
@@ -129,7 +129,7 @@ class ValidateAMRData
       day_before = date - days_offset
       temperature_before = average_temperature(day_before)
       if day_before >= @amr_data.start_date &&
-          @amr_data.key?(day_before) &&
+          @amr_data.key?(day_before) && @amr_data[day_before].count == 48 &&
           heating_on == @heating_model.heating_on?(day_before) &&
           within_temperature_range?(avg_temperature, temperature_before) &&
           daytype(day_before) == missing_daytype
