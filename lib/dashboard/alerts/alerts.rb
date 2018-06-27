@@ -49,13 +49,14 @@ class AlertAnalysisBase
   end
 
   def school_type
+    binding.pry
     @school.school_type
     if @school.respond_to?(:school_type) && !@school.school_type.nil?
       @school.school_type
     elsif @school.respond_to?(:school) && !@school.school.school_type.nil?
       @school.school.school_type
     else
-      throw EnergySparksBadDataException.new('Unable to find number of school_type for alerts')
+      throw EnergySparksBadDataException.new("Unable to find number of school_type for alerts #{@school.school_type} #{@school.school.school_type}")
     end
   end
 
