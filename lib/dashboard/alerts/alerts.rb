@@ -49,13 +49,14 @@ class AlertAnalysisBase
   end
 
   def school_type
+    binding.pry
     @school.school_type
     if @school.respond_to?(:school_type) && !@school.school_type.nil?
       @school.school_type
     elsif @school.respond_to?(:school) && !@school.school.school_type.nil?
       @school.school.school_type
     else
-      throw EnergySparksBadDataException.new('Unable to find number of school_type for alerts')
+      throw EnergySparksBadDataException.new("Unable to find number of school_type for alerts #{@school.school_type} #{@school.school.school_type}")
     end
   end
 
@@ -284,7 +285,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   end
 
   def analyse(_asof_date)
-    breakdown = out_of_hours_energy_consumption
+    breakdown = out_of_hours_energy_consumption(@fuel)
 
     kwh_in_hours, kwh_out_of_hours = in_out_of_hours_consumption(breakdown)
     percent = kwh_out_of_hours / (kwh_in_hours + kwh_out_of_hours)
@@ -341,20 +342,21 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     [kwh_in_hours, kwh_out_of_hours]
   end
 
-  def out_of_hours_energy_consumption
+  def out_of_hours_energy_consumption(fuel)
     daytype_breakdown = {
       name:             'Day Type',
       chart1_type:      :pie,
       series_breakdown: :daytype,
-      yaxis_units:      :money,
-      meter_definition: @meter_definition,
+      yaxis_units:      :£,
+      yaxis_scaling:    :none,
+      meter_definition: fuel == :electricity ? :allelectricity : :allheat,
       x_axis:           :nodatebuckets,
       timescale:        :year
     }
 
     # use the chart manager (and aggregator) to produce the breakdown
     chart = ChartManager.new(@school)
-    result = chart.run_chart(daytype_breakdown)
+    result = chart.run_chart(daytype_breakdown, :daytype_breakdown)
 
     puts result.inspect
     result
@@ -404,8 +406,8 @@ class AlertElectricityAnnualVersusBenchmark < AlertAnalysisBase
       report.rating = AlertReport::MAX_RATING * (per_pupil_ratio > per_floor_area_ratio ? (1.0 / per_pupil_ratio) : (1.0 / per_floor_area_ratio))
       report.status = :poor
     else
-      report.summary = 'Your electricity baseload is good'
-      text = commentary(avg_baseload, 'good', annual_kwh_per_pupil_benchmark, annual_kwh_per_floor_area_benchmark)
+      report.summary = 'Your annual electricity usage is good'
+      text = commentary(annual_kwh, 'good', annual_kwh_per_pupil_benchmark, annual_kwh_per_floor_area_benchmark)
       description1 = AlertDescriptionDetail.new(:text, text)
       report.rating = 10.0
       report.status = :good
@@ -467,7 +469,7 @@ class AlertGasAnnualVersusBenchmark < AlertAnalysisBase
       report.status = :poor
     else
       report.summary = 'Your gas consumption is good'
-      text = commentary(avg_baseload, 'good', annual_kwh_per_pupil_benchmark, annual_kwh_per_floor_area_benchmark)
+      text = commentary(annual_kwh, 'good', annual_kwh_per_pupil_benchmark, annual_kwh_per_floor_area_benchmark)
       description1 = AlertDescriptionDetail.new(:text, text)
       report.rating = 10.0
       report.status = :good
@@ -488,7 +490,7 @@ class AlertGasAnnualVersusBenchmark < AlertAnalysisBase
   end
 
   def kwh(date1, date2)
-    amr_data = @school.aggregated_heating_meters.amr_data
+    amr_data = @school.aggregated_heat_meters.amr_data
     amr_data.kwh_date_range(date1, date2)
   end
 end
@@ -514,7 +516,7 @@ class AlertGasModelBase < AlertAnalysisBase
   end
 
   def days_energy_consumption(date)
-    amr_data = @school.aggregated_heating_meters.amr_data
+    amr_data = @school.aggregated_heat_meters.amr_data
     amr_data.one_day_kwh(date)
   end
 
@@ -547,8 +549,8 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     predicted_changein_kwh = predicted_kwh_this_week - predicted_kwh_last_week
     predicted_percent_increase_in_usage = predicted_changein_kwh / predicted_kwh_last_week
 
-    actual_kwh_this_week = @school.aggregated_heating_meters.amr_data.kwh_date_list(this_weeks_school_days)
-    actual_kwh_last_week = @school.aggregated_heating_meters.amr_data.kwh_date_list(last_weeks_school_days)
+    actual_kwh_this_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(this_weeks_school_days)
+    actual_kwh_last_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(last_weeks_school_days)
     actual_changein_kwh = actual_kwh_this_week - actual_kwh_last_week
     actual_percent_increase_in_usage = actual_changein_kwh / actual_kwh_last_week
 
@@ -635,8 +637,8 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     total_kwh = 0.0
     dates.each do |date|
       (0..47).each do |halfhour_index|
-        if @school.temperatures.get_temperature(date, halfhour_index) > frost_protection_temperature
-          total_kwh += @school.aggregated_heating_meters.amr_data.kwh(date, halfhour_index)
+        if @school.temperatures.temperature(date, halfhour_index) > frost_protection_temperature
+          total_kwh += @school.aggregated_heat_meters.amr_data.kwh(date, halfhour_index)
         end
       end
     end
@@ -843,11 +845,11 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   # calculate when the heating comes on, using an untested heuristic to
   # determine when the heating has come on (usage > average daily usage)
   def calculate_heating_on_time(asof_date, frost_protection_temperature)
-    daily_kwh = @school.aggregated_heating_meters.amr_data.one_day_kwh(asof_date)
+    daily_kwh = @school.aggregated_heat_meters.amr_data.one_day_kwh(asof_date)
     average_half_hourly_kwh = daily_kwh / 48.0
     (0..47).each do |halfhour_index|
-      if @school.temperatures.get_temperature(asof_date, halfhour_index) > frost_protection_temperature &&
-          @school.aggregated_heating_meters.amr_data.kwh(asof_date, halfhour_index) > average_half_hourly_kwh
+      if @school.temperatures.temperature(asof_date, halfhour_index) > frost_protection_temperature &&
+          @school.aggregated_heat_meters.amr_data.kwh(asof_date, halfhour_index) > average_half_hourly_kwh
         return halfhour_index
       end
     end

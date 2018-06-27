@@ -1,21 +1,24 @@
 # test new report manager
-
+require 'require_all'
 require_relative '../lib/dashboard.rb'
+require_rel '../test_support'
 
 def banner(title)
   len_before = ((80 - title.length) / 2).floor
   len_after = 80 - title.length - len_before
   '=' * len_before + title + '*' * len_after
 end
-school_name = 'Bathwick St Marys'
+school_name = 'Paulton Junior School'
 
-ENV['ENERGYSPARKSDATASOURCE'] = 'csv'
+ENV[SchoolFactory::ENV_SCHOOL_DATA_SOURCE] = SchoolFactory::BATH_HACKED_SCHOOL_DATA
+ENV['School Dashboard Advice'] = 'Include Header and Body'
+$SCHOOL_FACTORY = SchoolFactory.new
 
-school = School.new(school_name, 'Bath BA2', 1000.0, 100, :primary)
+puts banner("School: #{school_name}")
+school = $SCHOOL_FACTORY.load_school(school_name)
 
-school.load_meters
 
-analysis_asof_date = Date.new(2012, 11, 8)
+analysis_asof_date = Date.new(2018, 2, 2)
 
 puts
 puts banner('Electricity Baseload Alert (v benchmark)')
