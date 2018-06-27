@@ -1,4 +1,5 @@
 class Temperatures < HalfHourlyData
+  FROSTPROTECTIONTEMPERATURE = 4.0
   def initialize(type)
     super(type)
   end
@@ -34,6 +35,34 @@ class Temperatures < HalfHourlyData
     [min_temp, max_temp]
   end
 
+  def halfhours_below_temperature(start_date, end_date, temperature_level, day_of_week = nil, holidays = nil, is_holiday = nil)
+    halfhour_count = 0
+    (start_date..end_date).each do |date|
+      next if !is_holiday.nil? && !holidays.nil? && holidays.holiday?(date) == is_holiday
+      next if !day_of_week.nil? && day_of_week != date.wday
+      (0..47).each do |i|
+        halfhour_count += 1 if temperature(date, i) <= temperature_level
+      end
+    end
+    halfhour_count
+  end
+
+  # find days with longest number of half hours below 4C, deal with duplicate stats
+  def frost_days(start_date, end_date, day_of_week = nil,  holidays = nil, is_holiday = nil)
+    frostdates_by_num_halfhours = Array.new(49){Array.new} # zero half hours, plus 48, up to all day = 48, so 49 buckets
+    end_date.downto(start_date) do |date| # reverse order so recent more prominent
+      halfhours = halfhours_below_temperature(date, date, FROSTPROTECTIONTEMPERATURE, day_of_week, holidays, is_holiday)
+      frostdates_by_num_halfhours[halfhours].push(date) if halfhours > 0
+    end
+    frost_dates = []
+    47.downto(0) do |halfhours|
+      frostdates_by_num_halfhours[halfhours].each do |date|
+        frost_dates.push(date)
+      end
+    end
+    frost_dates
+  end
+
   def temperature_datetime(datetime)
     date, half_hour_index = DateTimeHelper.date_and_half_hour_index(datetime)
     temperature(date, half_hour_index)
@@ -48,13 +77,17 @@ class Temperatures < HalfHourlyData
 
   def degree_hours(date, base_temp)
     dh = 0.0
-    (0..47).each do |i|
-      t = data(date, i)
-      if t <= base_temp
-        dh = dh + base_temp - t
-      end
+    (0..47).each do |halfhour_index|
+      dh += degree_hour(date, halfhour_index, base_temp)
     end
     dh / 48
+  end
+
+  def degree_hour(date, halfhour_index, base_temp)
+    dh = 0.0
+    t = data(date, halfhour_index)
+    dh = base_temp - t if t <= base_temp
+    dh
   end
 
   def degree_days(date, base_temp)

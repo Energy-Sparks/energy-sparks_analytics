@@ -7,24 +7,6 @@ require './script/report_config_support.rb'
 puts "========================================================================================"
 puts  "electrical simulation"
 
-=begin
-# old code
-
-fromeSchool = School.new("Trinity School", "Frome BA11", 1100, 300)
-
-simulator = ElectricitySimulator.new(mostRecentAcademicYear, holidays, temperatures, solarinsolence, fromeSchool)
-
-simulator.simulate(applianceDefinitions)
-
-excel.addData("Boiler Pumps", 					simulator.calcComponentsResults["Boiler Pumps"])
-excel.addData("Security Lighting", 				simulator.calcComponentsResults["Security Lighting"])
-excel.addData("Kitchen", 						simulator.calcComponentsResults["Kitchen"])
-excel.addData("Air Conditioning", 				simulator.calcComponentsResults["Air Conditioning"])
-excel.addData("Unaccounted For Baseload", 		simulator.calcComponentsResults["Unaccounted For Baseload"])
-
-# puts simulator.calcComponentsResults
-
-=end
 
 def suppress_output
   begin
@@ -62,11 +44,13 @@ suppress_output {
 
 reports = DashboardReports.new
 
-school = reports.load_school('Paulton Junior School')
+school_name = 'Paulton Junior School'
 
-simulator = ElectricitySimulator.new(school)
+school = reports.load_school(school_name)
 
-simulator.simulate(simulator.default_simulator_parameters)
+# simulator = ElectricitySimulator.new(school)
 
-reports.do_one_school('Paulton Junior School', :simulator)
+# simulator.simulate(simulator.default_simulator_parameters)
+
+reports.do_one_school(school_name, :boiler_control)
 

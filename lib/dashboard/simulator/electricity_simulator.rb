@@ -134,7 +134,7 @@ class ElectricitySimulator
       },
       floodLighting:  {},
       unaccounted_for_baseload: {
-        baseload: 2.5
+        baseload: (school.floor_area / 1_000.0) * 0.5
       },
       solar_pv: {}
     }
@@ -154,8 +154,8 @@ class ElectricitySimulator
 
   def create_meters(total_amr_data)
     electricity_simulation_meter = create_new_meter(total_amr_data, :electricity, 'sim 1', 'Electrical Simulator')
-    @calc_components_results.each do |key, value|
-      meter = create_new_meter(value, key, key, key)
+    @calc_components_results.reverse_each do |key, value| # reverse as improves bar chart breakdown order a little
+      meter = create_new_meter(value, :electricity, key, key)
       electricity_simulation_meter.sub_meters.push(meter)
     end
     puts "Created #{electricity_simulation_meter.sub_meters.length} sub meters"

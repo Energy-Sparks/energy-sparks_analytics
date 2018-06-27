@@ -69,11 +69,20 @@ class DashboardReports
                                   name:   'Recent Electricity & Gas',
                                   charts: %i[benchmark]
                                 },
+      boiler_control: {
+                                  name: 'Boiler Control',
+                                  charts: %i[frost_1 frost_2 frost_3]
+                                },
       simulator:  {
                                   name:   'Simulator Test',
                                   charts: %i[
-                                    group_by_week_electricity
-                                    group_by_week_electricity_simulator
+                                    group_by_week_electricity_dd
+                                    group_by_week_electricity_simulator_daytype
+                                    group_by_week_electricity_simulator_appliance
+                                    electricity_simulator_pie
+                                    intraday_line_school_days_6months_simulator
+                                    intraday_line_school_days_6months
+                                    intraday_line_school_days_6months_simulator_submeters
                                   ]
                                 }
     }
@@ -89,7 +98,8 @@ class DashboardReports
                               electric_and_gas_year
                               electricity_longterm
                               gas_thermostatic
-                              recent_electric],
+                              recent_electric
+                              boiler_control],
       electric_and_gas_and_pv:
                           %i[ main_dashboard_electric_and_gas
                               electric_and_gas_year
@@ -102,17 +112,17 @@ class DashboardReports
                               electricity_longterm
                               gas_thermostatic
                               recent_electric_and_gas],
-      simulator:
-                           %i[simulator]
+      simulator:          %i[ simulator ],
+      boiler_control:     %i[ boiler_control]
     }
 
     @schools = {
       'Bishop Sutton Primary School'      => :electric_and_gas,
-      'Castle Primary School'             => :electric_and_gas,
+      'Castle Primary School'             => :boiler_control,
       'Freshford C of E Primary'          => :electric_and_gas,
       'Marksbury C of E Primary School'   => :electric_only,
-      'Paulton Junior School'             => :simulator,
-      'Pensford Primary'                  => :electric_only,
+      'Paulton Junior School'             => :boiler_control,
+      'Pensford Primary'                  => :simulator,
       'Roundhill School'                  => :electric_and_gas,
       'Saltford C of E Primary School'    => :electric_and_gas,
       'St Johns Primary'                  => :electric_and_gas,

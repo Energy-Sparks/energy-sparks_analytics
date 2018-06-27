@@ -12,3 +12,6 @@ end
 
 class EnergySparksMissingPeriodForSpecifiedPeriodChart < StandardError
 end
+
+class EnergySparksBadChartSpecification < StandardError
+end

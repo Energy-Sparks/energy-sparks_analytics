@@ -104,6 +104,12 @@ class SeriesDataManager
     if @breakdown_list.include?(:heatingmodeltrendlines)
       @series_buckets += SeriesNames::HEATINGMODELSERIESNAMES
     end
+    if @breakdown_list.include?(:submeter)
+      @series_buckets += submeter_names
+    end
+    if @breakdown_list.include?(:meter)
+      @series_buckets += meter_names
+    end
     if @breakdown_list.include?(:none)
       @series_buckets.push(SeriesNames::NONE)
     end
@@ -138,6 +144,37 @@ class SeriesDataManager
     end
   end
 
+  def submeter_names
+    meter = select_one_meter
+    submeter_names = []
+    meter.sub_meters.each do |submeter|
+      submeter_names.push(submeter.name)
+    end
+    submeter_names
+  end
+
+  def meter_names
+    names = []
+    if !@meters[0].nil? # indication of heat meters only
+      names += meter_names_from_list(@meter_collection.electricity_meters)
+      names += meter_names_from_list(@meter_collection.solar_pv_meters)
+    end
+    if !@meters[1].nil? # indication of heat meters only
+      names += meter_names_from_list(@meter_collection.heat_meters)
+      names += meter_names_from_list(@meter_collection.storage_heater_meters)
+    end
+    names
+  end
+
+  def meter_names_from_list(list_of_meters)
+    list = []
+    list_of_meters.each do |meter|
+      list.push(meter.display_name)
+      puts 'Adding meter #{meter.display_name}'
+    end
+    list
+  end
+
   def get_data_private(time_period)
     # TODO(PH,22May2018): support combinations of series as per above series_bucket_names method
 
@@ -150,8 +187,23 @@ class SeriesDataManager
         breakdown = daytype_breakdown([dates, dates], meter)
         raise "Currently not implemented, use :daterange instead same day to same day in range"
       end
-    when :halfhour
-      breakdown[SeriesNames::NONE] = meter.amr_data.kwh(dates, halfhour_index)
+    when :halfhour, :datetime
+      date = dates # a single date in an intraday case, so disambiguate
+      if @breakdown_list.include?(:submeter)
+        meter.sub_meters.each do |submeter|
+          breakdown[submeter.name] = submeter.amr_data.kwh(date, halfhour_index)
+        end
+      elsif @breakdown_list.include?(:meter)
+        breakdown = breakdown_to_meter_level(date, date, halfhour_index)
+      else
+        breakdown[SeriesNames::NONE] = meter.amr_data.kwh(date, halfhour_index)
+      end
+      if @y2_axis_list.include?(:degreedays) || @breakdown_list.include?(:degreedays)
+        breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degree_hour(date, halfhour_index, 20.0)
+      end
+      if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
+        breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.temperature(date, halfhour_index)
+      end
     when :daterange
       if @breakdown_list.include?(:daytype)
         breakdown = daytype_breakdown([dates[0], dates[1]], meter)
@@ -172,6 +224,14 @@ class SeriesDataManager
       if @breakdown_list.include?(:baseload)
         baseload = meter.amr_data.baseload_kwh_date_range(dates[0], dates[1]) * 24 # TODO(PH,6Jun2018) rationalise kW as *24 to offset /24 in aggregator
         breakdown[SeriesNames::BASELOAD] = baseload
+      end
+      if @breakdown_list.include?(:submeter)
+        meter.sub_meters.each do |submeter|
+          breakdown[submeter.name] = submeter.amr_data.kwh_date_range(dates[0], dates[1])
+        end
+      end
+      if @breakdown_list.include?(:meter)
+        breakdown = breakdown_to_meter_level(dates[0], dates[1])
       end
       if @breakdown_list.include?(:none)
         breakdown[SeriesNames::NONE] = meter.amr_data.kwh_date_range(dates[0], dates[1])
@@ -263,6 +323,50 @@ private
       end
     end
     daytype_data
+  end
+
+  def breakdown_to_meter_level(start_date, end_date, halfhour_index = nil)
+    breakdown = {}
+    meter_names.each do |meter_name|
+      breakdown[meter_name] = 0.0
+    end
+    unless @meters[0].nil # indication of electricity only
+      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.electricity_meters, start_date, end_date, halfhour_index))
+      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.solar_pv_meters, start_date, end_date, halfhour_index))
+    end
+    unless @meters[1].nil? # indication of heat meters only
+      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.heat_meters, start_date, end_date, halfhour_index))
+      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.storage_heater_meters, start_date, end_date, halfhour_index))
+    end
+  end
+
+  def breakdown_one_meter_type(list_of_meters, start_date, end_date, halfhour_index = nil)
+    breakdown = {}
+    unless list_of_meters.nil?
+      list_of_meters.each do |meter|
+        if halfhour_index.nil?
+          breakdown[meter.display_name] = meter.amr_data.kwh_date_range(start_date, end_date)
+        else
+          breakdown[meter.display_name] = 0.0
+          (start_date..end_date).each do |date|
+            breakdown[meter.display_name] = meter.amr_data.kwh(date, halfhour_index)
+          end
+        end
+      end
+    end
+    breakdown
+  end
+
+  def merge_breakdown(breakdown1, breakdown2)
+    breakdown = breakdown1.clone
+    breakdown2.each do |series_name, kwh|
+      if breakdown.key?(series_name)
+        breakdown[series_name] += breakdown2[series_name]
+      else
+        breakdown[series_name]  = breakdown2[series_name]
+      end
+    end
+    breakdown
   end
 
   def fuel_breakdown(date_range, electricity_meter, gas_meter)
@@ -408,7 +512,7 @@ private
         @periods = [period]
       when :day
         if hash_value.is_a?(Integer) # hash_value weeks back from latest week
-          raise 'Error: expecting zero of negative number for day specification' if hash_value > 0
+          raise 'Error: expecting zero or negative number for day specification' if hash_value > 0
           start_date = @last_meter_date - hash_value.magnitude
           end_date = start_date
           if start_date < @first_meter_date
@@ -422,6 +526,24 @@ private
           period = SchoolDatePeriod.new(:day, 'one day', start_date, end_date)
         else
           raise "Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}"
+        end
+        @periods = [period]
+      when :frostday, :frostday_3
+        if hash_value.is_a?(Integer) # hash_value weeks back from latest week
+          raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for frostday specification') if hash_value > 0
+          days = @meter_collection.temperatures.frost_days(@first_meter_date, @last_meter_date, 0, @meter_collection.holidays)
+          index = hash_value.magnitude
+          if index > days.length - 1
+            raise EnergySparksBadChartSpecification.new("Not enough frost days #{days.length} for chart specification index #{index}")
+          elsif hash_key == :frostday
+            period = SchoolDatePeriod.new(:day, 'frost day', days[index], days[index])
+          else hash_key == :frostday_3
+            start_date = days[index] <= @first_meter_date ? days[index] :  days[index] - 1
+            end_date = days[index] >= @last_meter_date ? days[index] :  days[index] + 1
+            period = SchoolDatePeriod.new(:day, 'frost day, before and after', start_date, end_date)
+          end
+        else
+          raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
         end
         @periods = [period]
       else
@@ -476,28 +598,16 @@ private
     case meter_type
     when :all
       # treat all meters as being the same, needs to be processed at final stage as kWh addition different from CO2 addition
-      @meters = [@meter_collection.aggregated_electricity_meters, @meter_collection.aggregated_heat_meters]
+      meters = [@meter_collection.aggregated_electricity_meters, @meter_collection.aggregated_heat_meters]
     when :allheat
       # aggregate all heat meters
-      @meters = [nil, @meter_collection.aggregated_heat_meters]
+      meters = [nil, @meter_collection.aggregated_heat_meters]
     when :allelectricity
       # aggregate all electricity meters
-      @meters = [@meter_collection.aggregated_electricity_meters, nil]
+      meters = [@meter_collection.aggregated_electricity_meters, nil]
     when :electricity_simulator
-      @meters = [@meter_collection.electricity_simulation_meter, nil]
-    when :onemeter
-      case meter.type
-      when :electricity
-        @meters = [meter, nil]
-      when :gas, :heat # TODO(PH, 21May2018) Ambiguity within code between heat and gas
-        @meters = [nil, meter]
-      else
-        if meter.nil?
-          raise "Error: unexpected nil meter"
-        else
-          raise "Error: unknown meter type #{meter.type}"
-        end
-      end
+      meters = [@meter_collection.electricity_simulation_meter, nil]
     end
+    @meters = meters
   end
 end

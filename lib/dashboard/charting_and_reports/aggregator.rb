@@ -78,11 +78,25 @@ class Aggregator
           @bucketed_data_count[new_series_name] = x_data
         end
       end
+=begin
+    elsif @chart_config[:x_axis] == :intraday && bucketed_period_data.length == 1
+      bucketed_data, bucketed_data_count, time_description = bucketed_period_data.first
+      bucketed_data_count.each do |series_name, x_data|
+        new_series_name = series_name + ':' + time_description
+        @bucketed_data_count[new_series_name] = x_data
+      end
+=end
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
 
     inject_benchmarks if @chart_config[:inject] == :benchmark
+
+    if @chart_config[:filter]
+      if !@chart_config[:filter].key?(:daytype) || @chart_config[:filter].length > 1
+        remove_filtered_series
+      end
+    end
 
     create_y2_axis_data if @chart_config.key?(:y2_axis)
 
@@ -135,6 +149,10 @@ class Aggregator
       start_date = @series_manager.periods[0].start_date
       end_date = @series_manager.periods[0].end_date
       aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
+    elsif chart_config[:x_axis] == :datetime
+      start_date = @series_manager.periods[0].start_date
+      end_date = @series_manager.periods[0].end_date
+      aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
     else
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
@@ -148,7 +166,7 @@ private
   # e.g. 'school day in hours' v. 'school day out of hours'
   # returns a hash of this breakdown to the kWh values
   def aggregate_by_day(bucketed_data, bucketed_data_count)
-    if @chart_config.key?(:filter)
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype)
       # this is slower, as it needs to loop through a day at a time
       # TODO(PH,17Jun2018) push down and optimise in series_data_manager
       @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
@@ -173,7 +191,7 @@ private
   end
 
   def match_filter_by_day(date)
-    filter = @chart_config.key?(:filter) ? @chart_config[:filter] : nil
+    filter = @chart_config[:filter][:daytype]
     holidays = @meter_collection.holidays
     case filter
     when :occupied
@@ -189,10 +207,24 @@ private
 
   def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
     (start_date..end_date).each do |date|
-      next if @chart_config.key?(:filter) && !match_filter_by_day(date)
+      next if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype) && !match_filter_by_day(date)
       (0..47).each do |halfhour_index|
         x_index = @xbucketor.index(nil, halfhour_index)
         multi_day_breakdown = @series_manager.get_data([:halfhour, date, halfhour_index])
+        multi_day_breakdown.each do |key, value|
+          add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+        end
+      end
+    end
+  end
+
+  def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
+puts "DATATIME1" * 10
+    (start_date..end_date).each do |date|
+      next if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype) && !match_filter_by_day(date)
+      (0..47).each do |halfhour_index|
+        x_index = @xbucketor.index(date, halfhour_index)
+        multi_day_breakdown = @series_manager.get_data([:datetime, date, halfhour_index])
         multi_day_breakdown.each do |key, value|
           add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
         end
@@ -212,6 +244,38 @@ private
 
     # insert dates back in as 'silent' y2_axis
     @data_labels = x_axis
+  end
+
+  # pattern matches on series_names, removing any from list which don't match
+  def remove_filtered_series
+    keep_key_list = []
+    puts "Y" * 140
+    puts "Filtering #{@bucketed_data.keys}"
+    puts @chart_config[:filter].inspect if @chart_config.key?(:filter)
+    keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:submeter]) if @chart_config[:filter].key?(:submeter)
+    keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:meter]) if @chart_config[:filter].key?(:meter)
+    keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:heating]) if @chart_config[:filter].key?(:heating)
+    keep_key_list += SeriesNames::DEGREEDAYS if @bucketed_data.key?(SeriesNames::DEGREEDAYS)
+    keep_key_list += SeriesNames::TEMPERATURE if @bucketed_data.key?(SeriesNames::TEMPERATURE)
+
+    remove_list = []
+    @bucketed_data.each_key do |series_name|
+      remove_list.push(series_name) unless keep_key_list.include?(series_name)
+    end
+
+    remove_list.each do |remove_series_name|
+      @bucketed_data.delete(remove_series_name)
+    end
+    puts "Filtered #{@bucketed_data.keys}"
+  end
+
+  def pattern_match_list_with_list(list, pattern_list)
+    filtered_list = []
+    pattern_list.each do |pattern|
+      pattern_matched_list = list.select{ |i| i == pattern } # TODO(PH,26Jun2018) decide whether to pattern match /Lighting/ =['Lighting', 'Security Lighting']
+      filtered_list += pattern_matched_list unless pattern_matched_list.empty?
+    end
+    filtered_list
   end
 
   def create_y2_axis_data
