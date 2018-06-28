@@ -5,95 +5,9 @@ require_rel '../test_support'
 
 class DashboardReports
   def initialize
-    @dashboard_page_groups = {  # dashboard page groups: defined page, and charts on that page
-      main_dashboard_electric:  {
-                                  name:   'Main Dashboard',
-                                  charts: %i[
-                                    benchmark
-                                    daytype_breakdown_electricity
-                                    group_by_week_electricity
-                                  ]
-                                },
-      electricity_detail:      {
-                                  name:   'Electricity Detail',
-                                  charts: %i[
-                                    daytype_breakdown_electricity
-                                    group_by_week_electricity
-                                    electricity_by_day_of_week
-                                    baseload
-                                    electricity_by_month_year_0_1
-                                    intraday_line_school_days
-                                    intraday_line_holidays
-                                    intraday_line_weekends
-                                    intraday_line_school_days_last5weeks
-                                    intraday_line_school_days_6months
-                                    intraday_line_school_last7days
-                                    baseload_lastyear
-                                  ]
-                                },
-      gas_detail:               {
-                                  name:   'Gas Detail',
-                                  charts: %i[
-                                    daytype_breakdown_gas
-                                    group_by_week_gas
-                                    gas_by_day_of_week
-                                  ]
-                                },
-      main_dashboard_electric_and_gas: {
-                                  name:   'Main Dashboard',
-                                  charts: %i[
-                                    benchmark
-                                    daytype_breakdown_electricity
-                                    daytype_breakdown_gas
-                                    group_by_week_electricity
-                                    group_by_week_gas
-                                  ]
-                                },
-      boiler_control:           {
-                                  name: 'Advanced Boiler Control',
-                                  charts: %i[
-                                    group_by_week_gas
-                                    frost_1
-                                    frost_2
-                                    frost_3
-                                    thermostatic
-                                    cusum
-                                    thermostatic_control_large_diurnal_range_1
-                                    thermostatic_control_large_diurnal_range_2
-                                    thermostatic_control_large_diurnal_range_3
-                                    thermostatic_control_medium_diurnal_range
-                                    optimum_start
-                                    hotwater
-                                  ]
-                                },
-      simulator:                {
-                                  name:   'Simulator Test',
-                                  charts: %i[
-                                    group_by_week_electricity_dd
-                                    group_by_week_electricity_simulator_daytype
-                                    group_by_week_electricity_simulator_appliance
-                                    electricity_simulator_pie
-                                    intraday_line_school_days_6months_simulator
-                                    intraday_line_school_days_6months
-                                    intraday_line_school_days_6months_simulator_submeters
-                                  ]
-                                }
-    }
 
-    @school_report_groups = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
-      electric_only:
-                          %i[ 
-                              main_dashboard_electric
-                              electricity_detail
-                          ],
-      electric_and_gas:
-                          %i[ 
-                              main_dashboard_electric_and_gas
-                              electricity_detail
-                              gas_detail
-                              boiler_control
-                          ]
-    }
+    # @dashboard_page_groups = now in lib/dashboard/charting_and_reports/dashboard_configuration.rb
+    # @school_report_groups = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
 
     @schools = {
       'Bishop Sutton Primary School'      => :electric_and_gas,
@@ -174,7 +88,7 @@ class DashboardReports
     @worksheet_charts = {}
 
     report_config = @schools[@school_name]
-    report_groups = @school_report_groups[report_config]
+    report_groups = DashboardConfiguration::DASHBOARD_FUEL_TYPES[report_config]
 
     report_groups.each do |report_page|
       do_one_page(report_page, false)
@@ -190,7 +104,7 @@ class DashboardReports
 
   def do_one_page(page_config_name, reset_worksheets = true)
     @worksheet_charts = {} if reset_worksheets
-    page_config = @dashboard_page_groups[page_config_name]
+    page_config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[page_config_name]
     do_one_page_internal(page_config[:name], page_config[:charts])
   end
 
@@ -218,7 +132,7 @@ class DashboardReports
     html_file.close
   end
 
-  def do_one_page_internal(page_name, list_of_charts) 
+  def do_one_page_internal(page_name, list_of_charts)
     puts self.class.banner("Running report page  #{page_name}")
     @worksheet_charts[page_name] = []
     list_of_charts.each do |chart_name|
