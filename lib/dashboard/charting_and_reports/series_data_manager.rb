@@ -569,6 +569,8 @@ private
         if hash_value.is_a?(Integer) # hash_value weeks back from latest week
           raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for dirunal range specification') if hash_value > 0
           days = @meter_collection.temperatures.largest_diurnal_ranges(@first_meter_date, @last_meter_date, true, false, @meter_collection.holidays, false)
+
+          days = days.reject { |day| day < Date.today - 3.years }
           index = hash_value.magnitude
           if index > days.length - 1
             raise EnergySparksBadChartSpecification.new("Not enough diurnal range days #{days.length} for chart specification index #{index}")
