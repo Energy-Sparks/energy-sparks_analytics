@@ -49,7 +49,6 @@ class AlertAnalysisBase
   end
 
   def school_type
-    binding.pry
     @school.school_type
     if @school.respond_to?(:school_type) && !@school.school_type.nil?
       @school.school_type
