@@ -5,7 +5,7 @@ require_rel '../test_support'
 
 class DashboardReports
   def initialize
-    @dashboard_page_groups = {
+    @dashboard_page_groups = {  # dashboard page groups: defined page, and charts on that page
       main_dashboard_electric:  {
                                   name:   'Main Dashboard',
                                   charts: %i[
@@ -14,12 +14,8 @@ class DashboardReports
                                     group_by_week_electricity
                                   ]
                                 },
-      electricity_year:         {
-                                  name:   'Electricity Year',
-                                  charts: %i[benchmark_electric]
-                                },
-      electricity_longterm:      {
-                                  name:   'Electricity Analysis -long term',
+      electricity_detail:      {
+                                  name:   'Electricity Detail',
                                   charts: %i[
                                     daytype_breakdown_electricity
                                     group_by_week_electricity
@@ -29,26 +25,18 @@ class DashboardReports
                                     intraday_line_school_days
                                     intraday_line_holidays
                                     intraday_line_weekends
-                                  ]
-                                },
-      gas_thermostatic:      {
-                                  name:   'Gas Detail (thermostatic)',
-                                  charts: %i[
-                                    daytype_breakdown_gas
-                                    group_by_week_gas
-                                    gas_by_day_of_week
-                                    thermostatic
-                                    cusum
-                                  ]
-                                },
-      recent_electric:          {
-                                  name:   'Electricity Recent',
-                                  charts: %i[
-                                    intraday_line_school_days
                                     intraday_line_school_days_last5weeks
                                     intraday_line_school_days_6months
                                     intraday_line_school_last7days
                                     baseload_lastyear
+                                  ]
+                                },
+      gas_detail:               {
+                                  name:   'Gas Detail',
+                                  charts: %i[
+                                    daytype_breakdown_gas
+                                    group_by_week_gas
+                                    gas_by_day_of_week
                                   ]
                                 },
       main_dashboard_electric_and_gas: {
@@ -61,36 +49,24 @@ class DashboardReports
                                     group_by_week_gas
                                   ]
                                 },
-      electric_and_gas_year:    {
-                                  name:   'Electricity & Gas Year',
-                                  charts: %i[benchmark]
-                                },
-      recent_electric_and_gas:  {
-                                  name:   'Recent Electricity & Gas',
-                                  charts: %i[benchmark]
-                                },
- 
-      old_boiler_control: {
-                                  name: 'Boiler Control',
+      boiler_control:           {
+                                  name: 'Advanced Boiler Control',
                                   charts: %i[
+                                    group_by_week_gas
                                     frost_1
                                     frost_2
                                     frost_3
-                                    thermostatic_control_large_diurnal_range_1
+                                    thermostatic
+                                    cusum
                                     thermostatic_control_large_diurnal_range_1
                                     thermostatic_control_large_diurnal_range_2
                                     thermostatic_control_large_diurnal_range_3
                                     thermostatic_control_medium_diurnal_range
                                     optimum_start
-                                  ]
-                                },
-      boiler_control: {
-                                  name: 'Boiler Control',
-                                  charts: %i[
                                     hotwater
                                   ]
                                 },
-      simulator:  {
+      simulator:                {
                                   name:   'Simulator Test',
                                   charts: %i[
                                     group_by_week_electricity_dd
@@ -104,42 +80,28 @@ class DashboardReports
                                 }
     }
 
-    @school_report_groups = {
+    @school_report_groups = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
       electric_only:
-                          %i[ main_dashboard_electric
-                              electricity_year
-                              electricity_longterm
-                              recent_electric],
+                          %i[ 
+                              main_dashboard_electric
+                              electricity_detail
+                          ],
       electric_and_gas:
-                          %i[ main_dashboard_electric_and_gas
-                              electric_and_gas_year
-                              electricity_longterm
-                              gas_thermostatic
-                              recent_electric
-                              boiler_control],
-      electric_and_gas_and_pv:
-                          %i[ main_dashboard_electric_and_gas
-                              electric_and_gas_year
-                              electricity_longterm
-                              gas_thermostatic
-                              recent_electric_and_gas],
-      electric_and_gas_and_storage_heater:
-                          %i[ main_dashboard_electric_and_gas
-                              electric_and_gas_year
-                              electricity_longterm
-                              gas_thermostatic
-                              recent_electric_and_gas],
-      simulator:          %i[ simulator ],
-      boiler_control:     %i[ boiler_control]
+                          %i[ 
+                              main_dashboard_electric_and_gas
+                              electricity_detail
+                              gas_detail
+                              boiler_control
+                          ]
     }
 
     @schools = {
       'Bishop Sutton Primary School'      => :electric_and_gas,
-      'Castle Primary School'             => :boiler_control,
+      'Castle Primary School'             => :electric_and_gas,
       'Freshford C of E Primary'          => :electric_and_gas,
       'Marksbury C of E Primary School'   => :electric_only,
-      'Paulton Junior School'             => :boiler_control,
-      'Pensford Primary'                  => :simulator,
+      'Paulton Junior School'             => :electric_and_gas,
+      'Pensford Primary'                  => :electric_only,
       'Roundhill School'                  => :electric_and_gas,
       'Saltford C of E Primary School'    => :electric_and_gas,
       'St Johns Primary'                  => :electric_and_gas,
@@ -153,98 +115,128 @@ class DashboardReports
     ENV['School Dashboard Advice'] = 'Include Header and Body'
     $SCHOOL_FACTORY = SchoolFactory.new
 
+    @chart_manager = nil
+
     puts "\n" * 8
   end
 
-  def do_all_schools
+  def self.suppress_output
+    begin
+      original_stdout = $stdout.clone
+      $stdout.reopen(File.new('./Results/suppressed_log.txt', 'w'))
+      retval = yield
+    rescue StandardError => e
+      $stdout.reopen(original_stdout)
+      raise e
+    ensure
+      $stdout.reopen(original_stdout)
+    end
+    retval
+  end
+
+  def do_all_schools(suppress_debug = false)
     @schools.keys.each do |school_name|
-      puts "And here"
-      do_one_school(school_name)
+      load_school(school_name, suppress_debug)
+      do_all_standard_pages_for_school
     end
   end
 
-  def banner(title)
+  def self.banner(title)
     cols = 120
     len_before = ((cols - title.length) / 2).floor
     len_after = cols - title.length - len_before
     '=' * len_before + title + '=' * len_after
   end
 
-  def load_school(school_name)
-    puts banner("School: #{school_name}")
-    $SCHOOL_FACTORY.load_school(school_name)
+  def load_school(school_name, suppress_debug = false)
+    puts self.class.banner("School: #{school_name}")
+    @school_name = school_name
+    if suppress_debug
+      puts 'Loading school data.....output suppressed'
+      self.class.suppress_output {
+        @school = $SCHOOL_FACTORY.load_school(school_name)
+      }
+    else
+      @school = $SCHOOL_FACTORY.load_school(school_name)
+    end
+    @chart_manager = ChartManager.new(@school)
+    @school # needed to run simulator
   end
 
-  def do_one_school(school_name, filter_page_name = nil, filter_chart = nil)
-    report_config = @schools[school_name]
-    puts "Doing this report configuration #{report_config}"
-    worksheet_charts = {}
-
-    school = load_school(school_name)
-
-    chart_manager = ChartManager.new(school)
-
-    do_all_pages_for_school(school_name, chart_manager, worksheet_charts, report_config, filter_page_name, filter_chart)
-
+  def report_benchmarks
     @benchmarks.each do |bm|
       puts bm
     end
     @benchmarks = []
   end
 
-  def do_all_pages_for_school(school_name, chart_manager, worksheet_charts,
-                              report_config, filter_page_name, filter_chart)
+  def do_all_standard_pages_for_school
+    @worksheet_charts = {}
+
+    report_config = @schools[@school_name]
     report_groups = @school_report_groups[report_config]
 
     report_groups.each do |report_page|
-      next if !filter_page_name.nil? && report_page != filter_page_name
-      do_one_page(report_page, chart_manager, worksheet_charts, filter_chart)
+      do_one_page(report_page, false)
     end
 
-    do_excel(school_name, worksheet_charts)
-    do_html(school_name, worksheet_charts)
+    save_excel_and_html
   end
 
-  def do_one_page(report_page, chart_manager, worksheet_charts, filter_chart = nil)
-    page_config = @dashboard_page_groups[report_page]
-    puts banner("Running report page  #{page_config[:name]}")
-    worksheet_charts[page_config[:name]] = [] unless worksheet_charts.key?(page_config[:name])
-    page_config[:charts].each do |chart_name|
-      next if !filter_chart.nil? && chart_name != filter_chart
-      chart = do_one_chart(chart_name, chart_manager)
-      unless chart.nil?
-        worksheet_charts[page_config[:name]].push(chart)
-      end
-    end
+  def save_excel_and_html
+    write_excel
+    write_html
   end
 
-  def do_one_chart(chart_name, chart_manager)
-    puts banner(chart_name.to_s)
-    chart = nil
-    bm = Benchmark.measure {
-      chart = chart_manager.run_standard_chart(chart_name)
-    }
-    @benchmarks.push(sprintf("%30.30s = %s", chart_name, bm.to_s))
-    ap(chart, limit: 20, color: { float: :red })
-    chart
+  def do_one_page(page_config_name, reset_worksheets = true)
+    @worksheet_charts = {} if reset_worksheets
+    page_config = @dashboard_page_groups[page_config_name]
+    do_one_page_internal(page_config[:name], page_config[:charts])
   end
 
-  def do_excel(school_name, worksheet_charts)
-    excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + school_name + '- charts test.xlsx')
-    worksheet_charts.each do |worksheet_name, charts|
+  def do_chart_list(page_name, list_of_charts)
+    @worksheet_charts = {}
+    do_one_page_internal(page_name, list_of_charts)
+  end
+
+  def write_excel
+    excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + @school_name + '- charts test.xlsx')
+    @worksheet_charts.each do |worksheet_name, charts|
       excel.add_charts(worksheet_name, charts)
     end
     excel.close
   end
 
-  def do_html(school_name, worksheet_charts)
-    html_file = HtmlFileWriter.new(school_name)
-    worksheet_charts.each do |worksheet_name, charts|
+  def write_html
+    html_file = HtmlFileWriter.new(@school_name)
+    @worksheet_charts.each do |worksheet_name, charts|
       html_file.write_header(worksheet_name)
       charts.each do |chart|
         html_file.write_header_footer(chart[:config_name], chart[:advice_header], chart[:advice_footer])
       end
     end
     html_file.close
+  end
+
+  def do_one_page_internal(page_name, list_of_charts) 
+    puts self.class.banner("Running report page  #{page_name}")
+    @worksheet_charts[page_name] = []
+    list_of_charts.each do |chart_name|
+      chart = do_one_chart_internal(chart_name)
+      unless chart.nil?
+        @worksheet_charts[page_name].push(chart)
+      end
+    end
+  end
+
+  def do_one_chart_internal(chart_name)
+    puts self.class.banner(chart_name.to_s)
+    chart = nil
+    bm = Benchmark.measure {
+      chart = @chart_manager.run_standard_chart(chart_name)
+    }
+    @benchmarks.push(sprintf("%40.40s = %s", chart_name, bm.to_s))
+    ap(chart, limit: 20, color: { float: :red })
+    chart
   end
 end
