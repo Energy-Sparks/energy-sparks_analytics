@@ -49,7 +49,6 @@ class AlertAnalysisBase
   end
 
   def school_type
-    # binding.pry PH 28Jun2018 commented this out temporarily, as ruby crashing into 'pry' unrecoverably? stalled test code, difficult to ctrl-C out of?????
     @school.school_type
     if @school.respond_to?(:school_type) && !@school.school_type.nil?
       @school.school_type
