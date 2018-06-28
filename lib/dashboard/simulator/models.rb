@@ -26,43 +26,45 @@ module AnalyseHeatingAndHotWater
   # HOT WATER ANALYSIS
   #
   class HotwaterModel
-    attr_reader :buckets, :analysis_period, :efficiency
+    attr_reader :buckets, :analysis_period, :efficiency, :analysis_period_start_date
+    attr_reader :analysis_period_end_date, :annual_hotwater_kwh_estimate
+    attr_reader :avg_school_day_gas_consumption, :avg_holiday_day_gas_consumption, :avg_weekend_day_gas_consumption
     def initialize(meter_collection)
       @meter_collection = meter_collection
-      @school_day_kwh, @holiday_kwh, @weekend_kwh, @analysis_period, @first_holiday_date = analyse_hotwater_around_summer_holidays(meter_collection.holidays, meter_collection.aggregated_heating_meters)
+      @holidays = @meter_collection.holidays
+      @school_day_kwh, @holiday_kwh, @weekend_kwh, @analysis_period, @first_holiday_date = analyse_hotwater_around_summer_holidays(meter_collection.holidays, meter_collection.aggregated_heat_meters)
       @efficiency = (@school_day_kwh - @holiday_kwh) / @school_day_kwh
+      @analysis_period_start_date = @analysis_period.start_date
+      @analysis_period_end_date = @analysis_period.end_date
       # puts "Analysing hot water system efficiency school day use #{@school_day_kwh} holiday use #{@holiday_kwh} efficiency #{@efficiency}"
       # aggregate_split_day_buckets)archive
     end
 
-    def aggregate_split_day_buckets_archive
-      @series_bucket_names = ['Weekend', 'School Day Heat Loss', 'School Day Useful Usage', 'Holidays Heat Loss']
-      @buckets = {}
-      @series_bucket_names.each do |bucket_name|
-        @buckets[bucket_name] = Array.new(@analysis_period.end_date - @analysis_period.start_date + 1, 0.0)
+    def kwh_daterange(start_date, end_date)
+      total_useful_kwh = 0.0
+      total_wasted_kwh = 0.0
+      (start_date..end_date).each do |date|
+        useful_kwh, wasted_kwh = kwh(date)
+        total_useful_kwh += useful_kwh
+        total_wasted_kwh += wasted_kwh
       end
+      [total_useful_kwh, total_wasted_kwh]
+    end
 
-      @total_kwh = 0.0
+    def kwh(date)
+      useful_kwh = 0.0
+      wasted_kwh = 0.0
+      todays_kwh = @meter_collection.aggregated_heat_meters.amr_data.one_day_kwh(date)
 
-      (@analysis_period.start_date..@analysis_period.end_date).each do |date|
-        todays_total = @meter_collection.aggregated_heating_meters.amr_data.one_day_kwh(date)
-
-        x_index = (date - @analysis_period.start_date).to_i
-
-        if date <= @first_holiday_date
-          if DateTimeHelper.weekend?(date)
-            @buckets['Weekend'][x_index] = todays_total
-          elsif todays_total < @holiday_kwh
-            @buckets['School Day Heat Loss'][x_index] = todays_total # usage below threshold defined by holiday, just report usage
-          else
-            # excess over holiday average deemed to be 'useful hot water consumption'
-            @buckets['School Day Heat Loss'][x_index] = @holiday_kwh
-            @buckets['School Day Useful Usage'][x_index] = todays_total - @holiday_kwh
-          end
-        else
-          @buckets['Holidays Heat Loss'][x_index] = todays_total
-        end
+      if @holidays.holiday?(date) || DateTimeHelper.weekend?(date)
+        wasted_kwh = todays_kwh
+      elsif todays_kwh > @holiday_kwh
+        wasted_kwh = @holiday_kwh
+        useful_kwh = todays_kwh - @holiday_kwh
+      else
+        wasted_kwh = todays_kwh
       end
+      [useful_kwh, wasted_kwh]
     end
 
     def analyse_hotwater_around_summer_holidays(holidays, meter)
@@ -89,7 +91,21 @@ module AnalyseHeatingAndHotWater
           count_school_day_gas_consumption += 1.0
         end
       end
-      [sum_school_day_gas_consumption / count_school_day_gas_consumption, sum_holiday_weekday_gas_consumption / count_holiday_weekday_gas_consumption, sum_weekend_gas_consumption / count_weekend_gas_consumption, analysis_period, first_holiday_date]
+      @avg_school_day_gas_consumption = sum_school_day_gas_consumption / count_school_day_gas_consumption
+      @avg_holiday_day_gas_consumption = sum_holiday_weekday_gas_consumption / count_holiday_weekday_gas_consumption
+      @avg_weekend_day_gas_consumption = sum_weekend_gas_consumption / count_weekend_gas_consumption
+
+      weeks_holiday = 13
+      school_weeks = 52 - 13
+      @annual_hotwater_kwh_estimate = avg_school_day_gas_consumption * school_weeks * 5
+      @annual_hotwater_kwh_estimate += avg_weekend_day_gas_consumption * school_weeks * 2
+      @annual_hotwater_kwh_estimate += avg_holiday_day_gas_consumption * weeks_holiday * 7
+
+      puts "Estimated Annual Hot Water Consumption = #{@annual_hotwater_kwh_estimate.round(0)} kwh"
+      puts "Estimated Average School Day HW = #{@avg_school_day_gas_consumption.round(0)} kwh"
+      puts "Estimated Average Weekend Day HW = #{@avg_weekend_day_gas_consumption.round(0)} kwh"
+      puts "Estimated Average Holiday Day HW = #{@avg_holiday_day_gas_consumption.round(0)} kwh"
+      [@avg_school_day_gas_consumption, @avg_holiday_day_gas_consumption, @avg_weekend_day_gas_consumption, analysis_period, first_holiday_date]
     end
 
     # the analysis relies on having hot water running exclusively before and during the holidays
@@ -99,7 +115,7 @@ module AnalyseHeatingAndHotWater
 
       last_summer_hol = holidays.find_summer_holiday_before(running_date)
 
-      [SchoolDatePeriod.new(:date_range, 'Summer Hot Water', last_summer_hol.start_date - 21, last_summer_hol.start_date + 14), last_summer_hol.start_date]
+      [SchoolDatePeriod.new(:date_range, 'Summer Hot Water', last_summer_hol.start_date - 21, last_summer_hol.start_date + 21), last_summer_hol.start_date]
     end
   end
 

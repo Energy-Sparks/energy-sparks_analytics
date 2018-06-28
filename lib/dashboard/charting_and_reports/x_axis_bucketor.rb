@@ -56,6 +56,8 @@ class XBucketBase
       XBucketYearToDate.new(type, periods)
     when :intraday
       XBucketIntraday.new(type, periods)
+    when :datetime
+      XBucketDateTime.new(type, periods)
     when :nodatebuckets
       XBucketSingle.new(type, periods)
     else
@@ -172,16 +174,38 @@ class XBucketIntraday < XBucketBase
   def create_x_axis
     (0..47).each do |halfhour_index|
       @x_axis.push(key(nil, halfhour_index))
-      # this is a slight fudge as the 1/2 hour buckets technically have not date
+      # this is a slight fudge as the 1/2 hour buckets technically have no date
       # range, but this allows the upstream kWh to kW converted to know the date
       # range in order to convert from kWh to kW generically without having to
       # look up the date ranges seperately
       @x_axis_bucket_date_ranges.push([data_start_date, data_end_date])
     end
-    # this bit is a slight fudge as the x_axis doesn't have date buckets, only 30 minute times
-    # (data_start_date..data_end_date).each do |date|
-    #  @x_axis_bucket_date_ranges.push([date, date])
-    # end
+  end
+end
+
+class XBucketDateTime < XBucketBase
+  DTKEYFORMAT = '%a %d-%b-%Y %H:%M'
+  def initialize(type, periods)
+    super(type, periods)
+  end
+
+  def key(date, halfhour_index)
+    datetime = DateTimeHelper.datetime(date, halfhour_index)
+    datetime.strftime(DTKEYFORMAT)
+  end
+
+  def index(date, halfhour_index)
+    ((date - data_start_date) * 48) + halfhour_index
+  end
+
+  def create_x_axis
+    (data_start_date..data_end_date).each do |date|
+      (0..47).each do |halfhour_index|
+        dt_start = DateTimeHelper.datetime(date, halfhour_index)
+        @x_axis_bucket_date_ranges.push([dt_start, dt_start])
+        @x_axis.push(dt_start.strftime(DTKEYFORMAT))
+      end
+    end
   end
 end
 

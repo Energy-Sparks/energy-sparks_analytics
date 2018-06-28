@@ -1,9 +1,17 @@
 class Temperatures < HalfHourlyData
+  FROSTPROTECTIONTEMPERATURE = 4.0
   def initialize(type)
     super(type)
+    @cached_min_max = {}
   end
 
   def get_temperature(date, half_hour_index)
+    puts 'Warning: deprecated interface get_temperature'
+    puts Thread.current.backtrace.join("\n")
+    temperature(date, half_hour_index)
+  end
+
+  def temperature(date, half_hour_index)
     data(date, half_hour_index)
   end
 
@@ -20,6 +28,7 @@ class Temperatures < HalfHourlyData
   end
 
   def temperature_range(start_date, end_date)
+    return @cached_min_max[start_date..end_date] if @cached_min_max.key?(start_date..end_date)
     min_temp = 100.0
     max_temp = -100.0
     (start_date..end_date).each do |date|
@@ -29,7 +38,59 @@ class Temperatures < HalfHourlyData
         max_temp = temp > max_temp ? temp : max_temp
       end
     end
+    @cached_min_max[start_date..end_date] = [min_temp, max_temp]
     [min_temp, max_temp]
+  end
+
+  def halfhours_below_temperature(start_date, end_date, temperature_level, day_of_week = nil, holidays = nil, is_holiday = nil)
+    halfhour_count = 0
+    (start_date..end_date).each do |date|
+      next if !is_holiday.nil? && !holidays.nil? && holidays.holiday?(date) == is_holiday
+      next if !day_of_week.nil? && day_of_week != date.wday
+      (0..47).each do |i|
+        halfhour_count += 1 if temperature(date, i) <= temperature_level
+      end
+    end
+    halfhour_count
+  end
+
+  # find days with longest number of half hours below 4C, deal with duplicate stats
+  def frost_days(start_date, end_date, day_of_week = nil,  holidays = nil, is_holiday = nil)
+    frostdates_by_num_halfhours = Array.new(49){Array.new} # zero half hours, plus 48, up to all day = 48, so 49 buckets
+    end_date.downto(start_date) do |date| # reverse order so recent more prominent
+      halfhours = halfhours_below_temperature(date, date, FROSTPROTECTIONTEMPERATURE, day_of_week, holidays, is_holiday)
+      frostdates_by_num_halfhours[halfhours].push(date) if halfhours > 0
+    end
+    frost_dates = []
+    47.downto(0) do |halfhours|
+      frostdates_by_num_halfhours[halfhours].each do |date|
+        frost_dates.push(date)
+      end
+    end
+    frost_dates
+  end
+
+  # find days with highest idurnal ranges, for thermostatic analysis
+  def largest_diurnal_ranges(start_date, end_date, winter = false,  weekend = nil, holidays = nil, is_holiday = nil)
+    # get a list of diurnal ranges
+    diurnal_ranges = {} # diurnal temperature date = [list of dates with that range] i.e. deal with duplicates
+    end_date.downto(start_date) do |date| # reverse order so recent more prominent
+      next if !weekend.nil? && weekend != DateTimeHelper.weekend?(date)
+      next if winter && ![11, 12, 1, 2, 3].include?(date.month)
+      next if !is_holiday.nil? && !holidays.nil? && holidays.holiday?(date) != is_holiday
+      min_temp, max_temp = temperature_range(date, date)
+      diurnal_range = max_temp - min_temp
+      diurnal_ranges[diurnal_range] = Array.new unless diurnal_ranges.key?(diurnal_range)
+      diurnal_ranges[diurnal_range].push(date)
+    end
+
+    # flatten list and return dates in order of biggest diurnal ranges
+    descending_diurnal_ranges_dates = []
+    descending_diurnal_ranges = diurnal_ranges.keys.sort.reverse
+    descending_diurnal_ranges.each do |diurnal_range|
+      descending_diurnal_ranges_dates.concat(diurnal_ranges[diurnal_range])
+    end
+    descending_diurnal_ranges_dates
   end
 
   def temperature_datetime(datetime)
@@ -46,13 +107,17 @@ class Temperatures < HalfHourlyData
 
   def degree_hours(date, base_temp)
     dh = 0.0
-    (0..47).each do |i|
-      t = data(date, i)
-      if t <= base_temp
-        dh = dh + base_temp - t
-      end
+    (0..47).each do |halfhour_index|
+      dh += degree_hour(date, halfhour_index, base_temp)
     end
     dh / 48
+  end
+
+  def degree_hour(date, halfhour_index, base_temp)
+    dh = 0.0
+    t = data(date, halfhour_index)
+    dh = base_temp - t if t <= base_temp
+    dh
   end
 
   def degree_days(date, base_temp)
@@ -115,12 +180,12 @@ class Temperatures < HalfHourlyData
 
   # used for simulator air con calculations
   def cooling_degree_days_at_time(date, base_temp, half_hour_index)
-    temperature = getTemperature(date, half_hour_index)
+    temp = temperature(date, half_hour_index)
 
-    if temperature >= base_temp
-      return temperature - base_temp
+    if temp >= base_temp
+      temp - base_temp
     else
-      return 0.0
+      0.0
     end
   end
 

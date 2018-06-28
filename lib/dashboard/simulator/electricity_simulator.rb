@@ -1,10 +1,13 @@
 class ElectricitySimulator
-  attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions, :calc_components_results, :solar_insolence, :school
-  def initialize(period, holidays, temperatures, solarinsolence, school)
-    @period = period
-    @holidays = holidays
-    @temperatures = temperatures
-    @solar_insolence = solarinsolence
+  attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions
+  attr_reader :calc_components_results, :solar_irradiation, :school, :existing_electricity_meter
+  def initialize(school)
+    electricity_meter_data = school.aggregated_electricity_meters.amr_data
+    @existing_electricity_meter = school.aggregated_electricity_meters
+    @holidays = school.holidays
+    @period = @holidays.years_to_date(electricity_meter_data.start_date, electricity_meter_data.end_date, false)[0]
+    @temperatures = school.temperatures
+    @solar_irradiation = school.solar_irradiation
     @school = school
     @calc_components_results = {}
   end
@@ -12,21 +15,130 @@ class ElectricitySimulator
   def simulate(appliance_definitions)
     @appliance_definitions = appliance_definitions
     # puts appliance_definitions.inspect
-    @total = create_emptyAMRData("Final Totals")
+    @total = empty_amr_data_set('Simulator Totals')
+    total_amr_data = nil
 # rubocop:disable all
     time = Benchmark.measure {
+      puts 'lighting'
       puts Benchmark.measure { simulate_lighting }
-      puts Benchmark.measure { simulateICT }
+      puts 'ict'
+      puts Benchmark.measure { simulate_ict }
+      puts 'boiler pump'
       puts Benchmark.measure { simulate_boiler_pump }
+      puts 'security lighting'
       puts Benchmark.measure { simulate_security_lighting }
+      puts 'kitchen'
       puts Benchmark.measure { simulate_kitchen }
+      puts 'hot water'
       puts Benchmark.measure { simulate_hot_water }
+      puts 'air con'
       puts Benchmark.measure { simulate_air_con }
+      puts 'unaccounted for baseload'
       puts Benchmark.measure { simulate_unaccounted_for_baseload }
-      puts Benchmark.measure { aggregate_results }
+      puts 'aggregate results'
+      puts Benchmark.measure { total_amr_data = aggregate_results }
     }
 # rubocop:enable all
     puts "Overall time #{time}"
+
+    @school.electricity_simulation_meter = create_meters(total_amr_data)
+  end
+
+  def empty_amr_data_set(type)
+    AMRData.create_empty_dataset(type, @period.start_date, @period.end_date)
+  end
+
+  def default_simulator_parameters
+    appliance_definitions = {
+      lighting:
+      {
+        lumens_per_watt: 50.0,
+        lumens_per_m2: 450.0,
+        percent_on_as_function_of_solar_irradiance: {
+          solar_irradiance: [0, 100, 200, 300, 400, 500, 600,  700, 800, 900, 1000, 1100, 1200],
+          percent_of_peak: [0.9, 0.8, 0.7, 0.6, 0.5, 0.2, 0.2, 0.15, 0.1, 0.1,  0.1,  0.1,  0.1],
+        },
+        occupancy_by_half_hour:
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      ict: {
+        'Servers1' => {
+          type: 					          :server,
+          number:					          2.0,
+          power_watts_each:	        300.0,
+          air_con_overhead_pecent:	0.2
+        },
+        'Servers2' => {
+          type: 					          :server,
+          number:					          1.0,
+          power_watts_each:			    500.0,
+          air_con_overhead_pecent:	0.3
+        },
+        'Desktops' => {
+          type: 						            :desktop,
+          number:						            20,
+          power_watts_each:				      100,
+          standby_watts_each:			      10,
+          usage_percent_by_time_of_day:	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          weekends:					            true, # left on standy at weekends
+          holidays:					            false # left on standby during holidays
+        },
+        'Laptops' => {
+          type: 						            :laptop,
+          number:						            20,
+          power_watts_each:			        30,
+          standby_watts_each:			      2
+        }
+      },
+      boiler_pumps: {
+        heating_season_start_dates: 	[Date.new(2016, 10, 1),  Date.new(2017, 11, 5)],
+        heating_season_end_dates: 		[Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
+        start_time:					          Time.new(2010,  1,  1,  5, 30, 0),		# Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
+        end_time:					            Time.new(2010,  1,  1,  17, 0, 0),		# ditto
+        pump_power:					          0.5,
+        weekends:					            false,
+        holidays:					            true,
+        frost_protection_temp:		    4
+      },
+      security_lighting: {
+        control_type:       'Sunrise/Sunset',	# "Sunrise/Sunset" or "Ambient" or "Fixed Times"
+        sunrise_times:    	['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
+        sunset_times:     	['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
+        fixed_start_time:   '19:15',
+        fixed_end_time: 	  '07:20',
+        ambient_threshold:  50.0,
+        power:	            3.0
+      },
+      electrical_heating: {},
+      kitchen: {
+        start_time:  Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
+        end_time:    Time.new(2010,  1,  1,  17, 0, 0), # ditto
+        power:       4.0
+      },
+      summer_air_conn: {
+        start_time:               Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
+        end_time:                 Time.new(2010,  1,  1,  17, 0, 0), # ditto
+        weekends:				          true,
+        holidays:				          false,
+        balancepoint_temperature: 19, # centigrade
+        power_per_degreeday:		  0.5	# colling degree days > balancePointTemperature
+      },
+      electric_hot_water:	{
+        start_time:               Time.new(2010, 1, 1, 9, 0, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
+        end_time:                 Time.new(2010, 1, 1, 16, 30, 0), # ditto
+        weekends:			            true,
+        holidays:				          false,
+        percent_of_pupils:		    0.5, # often a its only a proportion of the pupils at a school has electric hot water, the rest are provided by ga
+        litres_per_day_per_pupil: 5.0, # assumes at 38C versus ambient of 15C, to give a deltaT of 23C
+        standby_power:			      0.1 # outside start and end times, but dependent on whether switched off during weekends and holidays, see other parameters
+      },
+      floodLighting:  {},
+      unaccounted_for_baseload: {
+        baseload: (school.floor_area / 1_000.0) * 0.5
+      },
+      solar_pv: {}
+    }
+    appliance_definitions
   end
 
   def create_empty_amr_data(type)
@@ -38,27 +150,51 @@ class ElectricitySimulator
     data
   end
 
+
+
+  def create_meters(total_amr_data)
+    electricity_simulation_meter = create_new_meter(total_amr_data, :electricity, 'sim 1', 'Electrical Simulator')
+    @calc_components_results.reverse_each do |key, value| # reverse as improves bar chart breakdown order a little
+      meter = create_new_meter(value, :electricity, key, key)
+      electricity_simulation_meter.sub_meters.push(meter)
+    end
+    puts "Created #{electricity_simulation_meter.sub_meters.length} sub meters"
+    electricity_simulation_meter
+  end
+
+  def create_new_meter(amr_data, type, identifier, name)
+    Meter.new(
+      @existing_electricity_meter,
+      amr_data,
+      type,
+      identifier,
+      name,
+      @existing_electricity_meter.floor_area,
+      @existing_electricity_meter.number_of_pupils,
+      @existing_electricity_meter.solar_pv_installation,
+      @existing_electricity_meter.storage_heater_config
+    )
+  end
+
   def aggregate_results
     puts "Aggregating results"
-    totals = create_emptyAMRData("Totals")
+    totals = empty_amr_data_set("Totals")
     @calc_components_results.each do |key, value|
-      (totals.get_first_date..totals.get_last_date).each do |date|
-        (0..47).each do |half_hour_index|
-          totals[date][half_hour_index] += value[date][half_hour_index]
-        end
+      (totals.start_date..totals.end_date).each do |date|
+        totals[date] = [totals[date], value[date]].transpose.map(&:sum)
       end
       sub_total = component_total(value)
       puts "Component #{key} = #{sub_total} k_wh"
     end
-    @calc_components_results["Totals"] = totals
+    total_total = component_total(totals)
+    puts "Total simulation #{total_total}  kwh"
+    totals
   end
 
   def component_total(component)
     total = 0.0
-    (component.get_first_date..component.get_last_date).each do |date|
-      (0..47).each do |half_hour_index|
-        total += component[date][half_hour_index]
-      end
+    (component.start_date..component.end_date).each do |date|
+      total += component[date].inject(:+)
     end
     total
   end
@@ -67,17 +203,18 @@ class ElectricitySimulator
   # LIGHTING SIMULATION
   #  - is a function of occupancy * external anbient lighting * peak power (which is itself a function of the lighting efficacy (efficiency of lighting * its brightness (per floor area) * the floor area )
   def simulate_lighting
-    lighting_data = create_emptyAMRData("Lighting")
+    lighting_data = empty_amr_data_set("Lighting")
 
-    peak_power =  @appliance_definitions[:lighting][:lumens_perM2] * school.floor_area / 1000 / @appliance_definitions[:lighting][:lumens_per_watt]
+    peak_power =  @appliance_definitions[:lighting][:lumens_per_m2] * school.floor_area / 1000 / @appliance_definitions[:lighting][:lumens_per_watt]
 
-    (lighting_data.get_first_date..lighting_data.get_last_date).each do |date|
+    @cache_irradiance_for_speed = nil
+    (lighting_data.start_date..lighting_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
-        if !@holidays.is_holiday(date) && !is_weekend(date)
+        if !@holidays.holiday?(date) && !weekend?(date)
 
-          solar_insol = @solar_insolence.get_solar_insolence(date, half_hour_index)
-          percent_of_peak = interpolateYValue(@appliance_definitions[:lighting][:percent_on_as_function_of_solar_insolance][:solar_insolance],
-                          @appliance_definitions[:lighting][:percent_on_as_function_of_solar_insolance][:percent_of_peak],
+          solar_insol = @solar_irradiation.solar_irradiance(date, half_hour_index)
+          percent_of_peak = interpolate_y_value(@appliance_definitions[:lighting][:percent_on_as_function_of_solar_irradiance][:solar_irradiance],
+                          @appliance_definitions[:lighting][:percent_on_as_function_of_solar_irradiance][:percent_of_peak],
                           solar_insol)
 
           occupancy = @appliance_definitions[:lighting][:occupancy_by_half_hour][half_hour_index]
@@ -95,31 +232,32 @@ class ElectricitySimulator
 
   # converts from 2 arrays of floats/fixed representing the x and y axis to a hash of points ( x >= y) for compatibility by the Interpolate gem
   def interpolate_y_value(xarr, yarr, x_value)
-    points = {}
-    count = 0
-    xarr.each do |x|
-      points[x] = yarr[count]
-      count += 1
-    end
+    if @cache_irradiance_for_speed.nil?
+      points = {}
+      count = 0
+      xarr.each do |x|
+        points[x] = yarr[count]
+        count += 1
+      end
 
-    inter = Interpolate::Points.new(points)
-    inter.at(x_value)
+      @cache_irradiance_for_speed = Interpolate::Points.new(points)
+    end
+    @cache_irradiance_for_speed.at(x_value)
   end
 
   #=======================================================================================================================================================================
   # ICT SIMULATION
   #  - note this unlike the other appliance simulators produces 3 data sets - 1 for each type of server, desktop and laptop - i_pad/tablets are ignored as very low k_wh, but can be included a a laptop
   def simulate_ict
-    server_data = create_emptyAMRData("Servers")
-    desktop_data = create_emptyAMRData("Desktops")
-    laptop_data = create_emptyAMRData("Laptops")
+    server_data = empty_amr_data_set("Servers")
+    desktop_data = empty_amr_data_set("Desktops")
+    laptop_data = empty_amr_data_set("Laptops")
 
-    @appliance_definitions[:ict].value do |ict_appliance_group|
-      (server_data.get_first_date..server_data.get_last_date).each do |date| # arbitrary use the date list for te servers to iterate on, but the inner work applies via the case statement to desktops or laptops
+    @appliance_definitions[:ict].each_value do |ict_appliance_group|
+      (server_data.start_date..server_data.end_date).each do |date| # arbitrary use the date list for te servers to iterate on, but the inner work applies via the case statement to desktops or laptops
+        on_today = !(@holidays.holiday?(date) && ict_appliance_group.key?(:holidays) && !ict_appliance_group[:holidays])
+        on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])       
         (0..47).each do |half_hour_index|
-          on_today = !(@holidays.is_holiday(date) && ict_appliance_group.key?(:holidays) && !ict_appliance_group[:holidays])
-          on_today &&= !(is_weekend(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])
-
           if on_today
             if ict_appliance_group.key?(:usage_percent_by_time_of_day)
               percent_on = ict_appliance_group[:usage_percent_by_time_of_day][half_hour_index]
@@ -150,17 +288,17 @@ class ElectricitySimulator
   #=======================================================================================================================================================================
   # BOILER PUMP SIMULATION
   def simulate_boiler_pump
-    boiler_pump_data = create_emptyAMRData("Boiler Pumps")
+    boiler_pump_data = empty_amr_data_set("Boiler Pumps")
 
     pump_power = @appliance_definitions[:boiler_pumps][:pump_power]
     heating_on_during_weekends = @appliance_definitions[:boiler_pumps][:weekends]
     heating_on_during_holidays = @appliance_definitions[:boiler_pumps][:holidays]
 
-    (boiler_pump_data.get_first_date..boiler_pump_data.get_last_date).each do |date|
+    (boiler_pump_data.start_date..boiler_pump_data.end_date).each do |date|
       in_season = in_heating_season(@appliance_definitions[:boiler_pumps][:heating_season_start_dates], @appliance_definitions[:boiler_pumps][:heating_season_end_dates], date)
-      (0..47).each do |half_hour_index|
-        if in_season && !(@holidays.is_holiday(date) && !heating_on_during_holidays) && !(is_weekend(date) && !heating_on_during_weekends)
-
+      heating_on = in_season && !(@holidays.holiday?(date) && !heating_on_during_holidays) && !(weekend?(date) && !heating_on_during_weekends)
+      if heating_on
+        (0..47).each do |half_hour_index|
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
@@ -184,7 +322,7 @@ class ElectricitySimulator
     @calc_components_results["Boiler Pumps"] = boiler_pump_data
   end
 
-  def is_weekend(date)
+  def weekend?(date)
     date.saturday? || date.sunday?
   end
 
@@ -218,7 +356,7 @@ class ElectricitySimulator
   #=======================================================================================================================================================================
   # SECURITY LIGHTING SIMULATION
   def simulate_security_lighting
-    lighting_data = create_emptyAMRData("Security Lighting")
+    lighting_data = empty_amr_data_set("Security Lighting")
 
     power = @appliance_definitions[:security_lighting][:power]
 
@@ -231,7 +369,7 @@ class ElectricitySimulator
       puts "control type #{control_type}"
       case control_type
       when "Sunrise/Sunset"
-        (lighting_data.get_first_date..lighting_data.get_last_date).each do |date|
+        (lighting_data.start_date..lighting_data.end_date).each do |date|
           month = date.month - 1
           sunrise_str = @appliance_definitions[:security_lighting][:sunrise_times][month]
           sunset_str = @appliance_definitions[:security_lighting][:sunset_times][month]
@@ -251,9 +389,9 @@ class ElectricitySimulator
           end
         end
       when "Ambient"
-        (lighting_data.get_first_date..lighting_data.get_last_date).each do |date|
+        (lighting_data.start_date..lighting_data.end_date).each do |date|
           (0..47).each do |half_hour_index|
-            solar_insol = @solar_insolence.get_solar_insolence(date, half_hour_index)
+            solar_insol = @solar_irradiation.get_solar_irradiance(date, half_hour_index)
             if solar_insol < @appliance_definitions[:security_lighting][:ambient_threshold]
               lighting_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
             end
@@ -265,7 +403,7 @@ class ElectricitySimulator
         fixed_end_time_string = @appliance_definitions[:security_lighting][:fixed_end_time]
         endtime = convert_time_string_to_time(fixed_end_time_string)
 
-        (lighting_data.get_first_date..lighting_data.get_last_date).each do |date|
+        (lighting_data.start_date..lighting_data.end_date).each do |date|
           (0..47).each do |half_hour_index|
             amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
             amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
@@ -306,25 +444,27 @@ class ElectricitySimulator
   end
 
   def convert_half_hour_index_to_time(half_hour_index)
+    @cached_time_convert ||= {}
+    return @cached_time_convert[half_hour_index] if @cached_time_convert.key?(half_hour_index)
     hour = (half_hour_index / 2).floor.to_i
     mins = 30 * (half_hour_index.odd? ? 1 : 0)
     time = hour == 24 ? Time.new(2010, 1, 2, 0, mins, 0) : Time.new(2010, 1, 1, hour, mins, 0)
-    time
+    @cached_time_convert[half_hour_index] = time
   end
   #=======================================================================================================================================================================
   # KITCHEN SIMULATION
 
   def simulate_kitchen
-    kitchen_data = create_emptyAMRData("Kitchen")
+    kitchen_data = empty_amr_data_set("Kitchen")
 
     power = @appliance_definitions[:kitchen][:power]
 
     start_time = @appliance_definitions[:kitchen][:start_time]
     end_time = @appliance_definitions[:kitchen][:end_time]
 
-    (kitchen_data.get_first_date..kitchen_data.get_last_date).each do |date|
+    (kitchen_data.start_date..kitchen_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
-        if !@holidays.is_holiday(date) && !is_weekend(date)
+        if !@holidays.holiday?(date) && !weekend?(date)
 
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
@@ -342,7 +482,7 @@ class ElectricitySimulator
   # HOT WATER SIMULATION
 
   def simulate_hot_water
-    hot_water_data = create_emptyAMRData("Hot Water")
+    hot_water_data = empty_amr_data_set("Hot Water")
 
     percent_of_pupils_using_hot_water = @appliance_definitions[:electric_hot_water][:percent_of_pupils]
     standby_power = @appliance_definitions[:electric_hot_water][:standby_power]
@@ -356,9 +496,9 @@ class ElectricitySimulator
     start_time = @appliance_definitions[:electric_hot_water][:start_time]
     end_time = @appliance_definitions[:electric_hot_water][:end_time]
 
-    (hot_water_data.get_first_date..hot_water_data.get_last_date).each do |date|
+    (hot_water_data.start_date..hot_water_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
-        if !@holidays.is_holiday(date) && !is_weekend(date)
+        if !@holidays.holiday?(date) && !weekend?(date)
 
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
@@ -373,9 +513,9 @@ class ElectricitySimulator
           if overlap < 0.5
             hot_water_data[date][half_hour_index] += standby_power * (0.5 - overlap)
           end
-        elsif is_weekend(date) && @appliance_definitions[:electric_hot_water][:weekends]
+        elsif weekend?(date) && @appliance_definitions[:electric_hot_water][:weekends]
           hot_water_data[date][half_hour_index] = standby_power * 0.5 # power kW to 1/2 hour k_wh
-        elsif @holidays.is_holiday(date) && @appliance_definitions[:electric_hot_water][:holidays]
+        elsif @holidays.holiday?(date) && @appliance_definitions[:electric_hot_water][:holidays]
           hot_water_data[date][half_hour_index] = standby_power * 0.5 # power kW to 1/2 hour k_wh
         end
       end
@@ -386,19 +526,19 @@ class ElectricitySimulator
   #=======================================================================================================================================================================
   # SUMMER AIRCON SIMULATION
   def simulate_air_con
-    air_con_data = create_emptyAMRData("Air Conditioning")
+    air_con_data = empty_amr_data_set("Air Conditioning")
 
     # power_per_degree_day = @appliance_definitions[:summer_air_conn][:power_per_degreeday]
     # cooling_balance_point_temperature = @appliance_definitions[:summer_air_conn][:balance_point_temperature]
 
     cooling_on_during_weekends = @appliance_definitions[:summer_air_conn][:weekends]
-    # cooling_on_during_holidays = @appliance_definitions[:summer_air_conn][:holidays]
+    cooling_on_during_holidays = @appliance_definitions[:summer_air_conn][:holidays]
 
-    base_temp = @appliance_definitions[:summer_air_conn][:balance_point_temperature]
+    base_temp = @appliance_definitions[:summer_air_conn][:balancepoint_temperature]
 
-    (air_con_data.get_first_date..air_con_data.get_last_date).each do |date|
+    (air_con_data.start_date..air_con_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
-        if !(@holidays.is_holiday(date) && !cooling_on_during_holidays) && !(is_weekend(date) && !cooling_on_during_weekends)
+        if !(@holidays.holiday?(date) && !cooling_on_during_holidays) && !(weekend?(date) && !cooling_on_during_weekends)
 
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
@@ -424,10 +564,10 @@ class ElectricitySimulator
   #=======================================================================================================================================================================
   # UNACCOUNTED FOR BASELOAD SIMULATION
   def simulate_unaccounted_for_baseload
-    unaccounted_for_baseload_data = create_emptyAMRData("Unaccounted For Baseload")
+    unaccounted_for_baseload_data = empty_amr_data_set("Unaccounted For Baseload")
     baseload = @appliance_definitions[:unaccounted_for_baseload][:baseload]
 
-    (unaccounted_for_baseload_data.get_first_date..unaccounted_for_baseload_data.get_last_date).each do |date|
+    (unaccounted_for_baseload_data.start_date..unaccounted_for_baseload_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
         unaccounted_for_baseload_data[date][half_hour_index] = (baseload / 2) # power kW to 1/2 hour k_wh
       end

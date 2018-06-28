@@ -61,10 +61,34 @@ private
       '#00ff00'.paint # lime
     when /heat/ # heating day
       'red'.paint
+    when /wasted hot water usage/ # non heating day
+      'red'.paint # lime
+    when /hot water usage/ # heating day
+      'blue'.paint
     when /cusum/ # heating day
       '#ff6600'.paint # orange
     when /degree/, /temperature/ # degree days, temperature
       'black'.paint
+    when /hot water/
+      '#ff3300'.paint
+    when /lighting/
+      '#ffff99'.paint
+    when /servers/
+      '#00b33c'.paint
+    when /desktops/
+      '#66ff99'.paint
+    when /laptops/
+      '#ccffdd'.paint
+    when /boiler pumps/
+      '#000099'.paint
+    when /security lighting/
+      '#cccc00'.paint
+    when /kitchen/
+      '#ff3399'.paint
+    when /air conditioning/
+      '#999966'.paint
+    when /baseload/
+      '#993399'.paint
     else
       'black'.paint
     end

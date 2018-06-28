@@ -20,7 +20,7 @@ class MeterCollection
   attr_reader :school_type, :school, :name, :address
 
   # These are things which will be populated
-  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models
+  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
 
   def initialize(school)
     @name = school.name
@@ -130,12 +130,12 @@ class MeterCollection
     end
   end
 
-  def solar_insolance
+  def solar_irradiation
     if i_am_running_in_rails?
       solar_irradiance_area_id = @school.solar_irradiance_area_id || DataFeed.find_by(type: "DataFeeds::WeatherUnderground").area_id
-      ScheduleDataManager.solar_irradiance(nil, solar_irradiance_area_id)
+      ScheduleDataManager.solar_irradiation(nil, solar_irradiance_area_id)
     else
-      ScheduleDataManager.solar_irradiance(@solar_irradiance_schedule_name)
+      ScheduleDataManager.solar_irradiation(@solar_irradiance_schedule_name)
     end
   end
 

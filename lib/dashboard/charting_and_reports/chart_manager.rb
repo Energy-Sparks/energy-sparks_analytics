@@ -265,7 +265,7 @@ class ChartManager
       timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           :occupied,
+      filter:            { daytype: :occupied },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -276,7 +276,7 @@ class ChartManager
       timescale:        [{ week: 0 }, { week: -1 }, { week: -2 }, { week: -3 }, { week: -4 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           :occupied,
+      filter:            { daytype: :occupied },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -287,7 +287,7 @@ class ChartManager
       timescale:        [{ week: 0 }, { week: -20 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           :occupied,
+      filter:            { daytype: :occupied },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -308,7 +308,7 @@ class ChartManager
       timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           :holidays,
+      filter:           { daytype: :holidays },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -319,140 +319,175 @@ class ChartManager
       timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           :weekends,
+      filter:           { daytype: :weekends },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
-    }
-=begin
-
-    electricity_year:  {
-      name:             'Electricity Use Over Last Few Years',
-      chart1_type:      :bar,
-      chart1_subtype:   :stacked,
-      series_breakdown: :daytype,
-      x_axis:           :year,
-      fuel:             :electricity,
-      y2_axis:          :temperature,
-      yaxis_units:      :£
     },
-    electricity_acyear:  {
-      name:             'Electricity Use Over Last Few Academic Years',
-      chart1_type:      :bar,
-      chart1_subtype:   :stacked,
-      series_breakdown: :daytype,
-      x_axis:           :academicyear,
-      fuel:             :electricity,
-      yaxis_units:      :£
-    },
-    group_by_week_electric: {
-      name:             'By Week Electric',
+    group_by_week_electricity_dd: {
+      name:             'By Week: Electricity',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
-      series_breakdown: :daytype,
-      x_axis:           :week,
-      fuel:             :electricity,
-      yaxis_units:      :£
-    },
-    day_of_week:  {
-      name:             'Energy Use by Day of Week',
-      chart1_type:      :column,
-      chart1_subtype:   :stacked,
-      series_breakdown: :daytype,
-      x_axis:           :dayofweek,
       meter_definition: :allelectricity,
-      timescale:        :academicyear,
-      yaxis_units:      :£,
-      yaxis_scaling:    :per_200_pupils
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays,
+      timescale:        :year
     },
-    group_by_month: {
-      name:             'By Month',
-      meter_definition: :allheat,
+    group_by_week_electricity_simulator_daytype: {
+      name:             'By Week: Electricity Simulator',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
+      meter_definition: :electricity_simulator,
+      x_axis:           :week,
       series_breakdown: :daytype,
-      x_axis:           :month,
-      yaxis_units:      :£,
+      yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      timescale:        :year,
-      y2_axis:          :degreedays
+      y2_axis:          :degreedays,
+      timescale:        :year
     },
-    group_by_month_2_schools: {
-      schools:          ['St Johns Primary', 'Castle Primary School'],
-      name:             'By Month',
-      meter_definition: :allheat,
+    group_by_week_electricity_simulator_appliance: {
+      name:             'By Week: Electricity Simulator',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
-      series_breakdown: :daytype,
-      x_axis:           :month,
-      yaxis_units:      :£,
+      meter_definition: :electricity_simulator,
+      x_axis:           :week,
+      series_breakdown: :submeter,
+      filter:            { submeter: [ 'Lighting'] },
+      yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      timescale:        :year,
-      y2_axis:          :degreedays
+      timescale:        :year
     },
-    day: {
-      name:             'By Day',
-      chart1_type:      :column,
-      chart1_subtype:   :stacked,
-      meter_definition: :all,
-      series_breakdown: :daytype,
-      x_axis:           :day,
-      yaxis_units:      :£,
-      y2_axis:          :degreedays
-    },
-    last_week_by_day: {
-      name:             'Last Week By Day',
-      chart1_type:      :column,
-      # chart1_subtype:   :stacked,
-      meter_definition: :all,
-      series_breakdown: :fuel,
-      x_axis:           :day,
-      yaxis_units:      :£,
+    electricity_simulator_pie: {
+      name:             'By Week: Electricity Simulator',
+      chart1_type:      :pie,
+      meter_definition: :electricity_simulator,
+      x_axis:           :nodatebuckets,
+      series_breakdown: :submeter,
+      yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      timescale:        [{:week => 0}, {:week => -1}, {:week => -2}], # , # , {:week => -1} {:week => -1}, # {:week => Date.new(2012, 11, 12)},
-      y2_axis:          :degreedays
+      timescale:        :year
     },
-    baseload: {
-      name:             'By Day',
+    intraday_line_school_days_6months_simulator:  {
+      name:             'Intraday (Comparison 6 months apart) Simulator',
       chart1_type:      :line,
-      series_breakdown: :baseload,
-      fuel:             :electricity,
-      x_axis:           :day,
-      yaxis_units:      :kwh
+      series_breakdown: :none,
+      timescale:        [{ week: 0 }, { week: -20 }],
+      x_axis:           :intraday,
+      meter_definition: :electricity_simulator,
+      filter:            { daytype: :occupied },
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
     },
-    thermostatic: {
-      name:             'Thermostatic',
-      chart1_type:      :scatter,
-      meter_definition: :allheat,
-      series_breakdown: %i[heating heatingmodeltrendlines degreedays],
-      x_axis:           :day,
-      yaxis_units:      :kwh
-    },
-    cusum: {
-      name:             'CUSUM',
+    intraday_line_school_days_6months_simulator_submeters:  {
+      name:             'Intraday (Comparison 6 months apart) Simulator',
       chart1_type:      :line,
-      series_breakdown: :cusum_heating,
-      x_axis:           :day,
-      yaxis_units:      :kwh
+      series_breakdown: :submeter,
+      timescale:        [{ week: 0 }, { week: -20 }],
+      x_axis:           :intraday,
+      meter_definition: :electricity_simulator,
+      filter:            { daytype: :occupied },
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    frost_1:  {
+      name:             'Frost Protection Example Sunday 1',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ frostday_3: 0 }], # 1 day either side of frosty day i.e. 3 days
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    frost_2:  {
+      name:             'Frost Protection Example Sunday 2',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ frostday_3: -2 }], # skip -1 for moment, as 12-2-2017 has no gas data at most schools TODO(PH,27Jun2017) - fix gas data algorithm
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    frost_3:  {
+      name:             'Frost Protection Example Sunday 3',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ frostday_3: -3 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    thermostatic_control_large_diurnal_range_1:  {
+      name:             'Thermostatic Control Large Diurnal Range Assessment 1',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ diurnal: 0 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    thermostatic_control_large_diurnal_range_2:  {
+      name:             'Thermostatic Control Large Diurnal Range Assessment 2',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ diurnal: -1 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    thermostatic_control_large_diurnal_range_3:  {
+      name:             'Thermostatic Control Large Diurnal Range Assessment 3',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ diurnal: -2 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    thermostatic_control_medium_diurnal_range:  {
+      name:             'Thermostatic Control Medium Diurnal Range Assessment 3',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ diurnal: -20 }],
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    optimum_start:  {
+      name:             'Optimum Start Control Check',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{ day: Date.new(2018, 3, 16) }, { day: Date.new(2018, 3, 6) } ], # fixed dates: one relatively mild, one relatively cold
+      x_axis:           :intraday,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
     },
     hotwater: {
-      name:             'Hot Water',
+      name:             'Hot Water Analysis',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       series_breakdown: :hotwater,
       x_axis:           :day,
-      yaxis_units:      :kwh
-    },
-    intraday_line:  {
-      name:             'Intraday',
-      chart1_type:      :line,
-      series_breakdown: :none,
-      x_axis:           :intraday,
       meter_definition: :allheat,
-      yaxis_units:      :kw,
-      yaxis_scaling:    :none
+      yaxis_units:      :kwh
     }
-
-=end
   }.freeze
 
   def initialize(school)

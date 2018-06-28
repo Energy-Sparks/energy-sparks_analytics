@@ -70,7 +70,7 @@ class ScheduleDataManager
     @@temperature_data[area_name]
   end
 
-  def self.solar_irradiance(area_name = nil, solar_irradiance_area_id = nil)
+  def self.solar_irradiation(area_name = nil, solar_irradiance_area_id = nil)
     unless @@solar_irradiance_data.key?(area_name) # lazy load data if not already loaded
       solar_data = SolarIrradiance.new('solar irradiance')
       if solar_irradiance_area_id

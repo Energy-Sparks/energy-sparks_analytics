@@ -77,6 +77,14 @@ class AMRData < HalfHourlyData
     end
     total_kwh
   end
+
+  def self.create_empty_dataset(type, start_date, end_date)
+    data = AMRData.new(type)
+    (start_date..end_date).each do |date|
+      data.add(date, Array.new(48, 0.0))
+    end
+    data
+  end
 end
 
 class AMRLoader < HalfHourlyLoader
