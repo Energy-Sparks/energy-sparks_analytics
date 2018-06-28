@@ -19,7 +19,7 @@ class ScheduleDataManager
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
       hol_data = HolidayData.new
       if calendar_id
-        Calendar.find(calendar_id).holidays.map do |holiday|
+        Calendar.find(calendar_id).holidays.order(:start_date).map do |holiday|
           hol_data << SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date)
         end
       else
@@ -43,6 +43,7 @@ class ScheduleDataManager
       WHERE feed_type = #{DataFeedReading.feed_types[feed_type]}
       AND data_feed_id = #{data_feed.id}
       GROUP BY date_trunc('day', at)
+      ORDER BY day ASC
       SQL
 
     result = ActiveRecord::Base.connection.execute(query)
