@@ -15,8 +15,8 @@ require 'open-uri'
 @areas = [
   {
     name: 'Bath',
-    start_date:  Date.new(2018, 4, 4), # may be better in controlling program
-    end_date: Date.new(2018, 6, 1), # ditto, inclusive
+    start_date:  Date.new(2018, 6, 18), # may be better in controlling program
+    end_date: Date.new(2018, 6, 27), # ditto, inclusive
     method:    :weighted_average,
     max_minutes_between_samples: 120, # ignore data where samples from station are too far apart
     max_temperature: 38.0,

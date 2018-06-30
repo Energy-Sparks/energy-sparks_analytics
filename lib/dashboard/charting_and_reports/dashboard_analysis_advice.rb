@@ -71,6 +71,8 @@ class DashboardChartAdviceBase
       ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :weekends)
     when :intraday_line_school_days_last5weeks, :intraday_line_school_days_6months, :intraday_line_school_last7days
       ElectricityShortTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when :frost_1,  :frost_2,  :frost_3
+      HeatingFrostAdviceAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     end
   end
 
@@ -536,7 +538,6 @@ class ThermostaticAdvice < DashboardChartAdviceBase
           <%= r2_status  %>
         </p>
         <p>
-<% if false %>
         For energy experts, the formula which defines the trend line is very interesting.
         It predicts how the gas consumption varies with how cold it is (degree days).
         </p>
@@ -556,7 +557,6 @@ class ThermostaticAdvice < DashboardChartAdviceBase
           off the trend line of the graph above (degree days on the x axis and the answer -
           the predicted daily gas consumption on the y-axis). Does your reading match
           with the answers for 12C and 4C above?
-<% end %>
         </p>
     }.gsub(/^  /, '')
 
@@ -936,7 +936,7 @@ class ElectricityShortTermIntradayAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
       <p>
-      The graph below shows how the consumption varaies
+      The graph below shows how the consumption varies
       during the day over the last <%= @period %>.
       </p>
       <p>
@@ -979,3 +979,103 @@ class ElectricityShortTermIntradayAdvice < DashboardChartAdviceBase
     @footer_advice = generate_html(footer_template, binding)
   end
 end
+
+#==============================================================================
+class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
+  attr_reader :fuel_type, :fuel_type_str
+  def initialize(school, chart_definition, chart_data, chart_symbol, chart_type)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @chart_type = chart_type
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :frost_1 %>
+        <p>
+        'Frost Protection' is a feature built into most school boiler controllers
+        which turns the heating on when it is cold outside in order to prevent
+        frost damage to hot and cold water pipework.
+        </p>
+        <p>
+        A well programmed control will turn the boiler on if a number of conditions are met, typically:
+        <ul>
+          <li>The outside temperature is below 4C (the point at which water starts to freeze and expand)</li>
+          <li>And, the internal temperature is below 8C</li>
+          <li>And, for some controllers if the temperature of the water in the central heating system is below 2C</li>
+        </ul>
+        Typically this means the 'frost protection' only turns the heating on if it is cold outside, AND
+        the heating has been off for at least 24 hours - as it normally takes this long for a school to
+        cool down and the internal temperature of the school to drop below 8C. So, in general in very cold weather
+        the heating would probably not come on a Saturday, but on a Sunday when the school has cooled down
+        sufficiently.
+        </p>
+        <p>
+        Although 'frost protection' uses energy and therefore it costs money to run, it is cheaper than
+        the damage which might be caused from burst pipes. Some schools don't have frost protection
+        configured for their boilers, and although this saves money for most of the year, it is common
+        for these schools to leave their heating on during winter holidays, which is signifcantly more expensive
+        than if frost protection is allowed to provide the protection automatically.
+        <p>
+        <p>
+        The 3 graphs below which are for the coldest weekends of recent years, attempt to demonstate whether
+        <ol type="a">
+        <li>Frost protection is configured for your school, and</li>
+        <li>whether it is configured correctly and running efficiently</li>
+        </ol>
+        </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :frost_1 %>
+      <p>
+        The graph shows both the gas consumption (blue bars), and the outside temperature
+        (dark blue line) on a cold weekend (Saturday through to Monday).
+        If frost protection is working the heating (gas consumption) should come on when
+        the temperature drops below 4C - but not immediately on the Saturday as the
+        'thermal mass' of the building will mean the internal temperature stays above 8C
+        for at least 24 hours after the school closed on a Friday.
+      </p>
+      <p>
+        If the outside temperature rises above 4C, the heating should go off. The amount
+        of gas consumption (blue bars) should be about half the consumption of a school
+        day (e.g. the Monday), as the heating requirement is roughly proportional
+        to the difference between the inside and outside temperatures, and because 
+        the school is only being heated to 8C rather than the 20C of a school
+        day then much less energy will be used.
+      </p>
+      <p>
+      Can you see any of these chracteristics on the graph above, or the two other example
+      graphs for your school below?
+      </p>
+      <% end %>
+      <% if @chart_type == :frost_3 %>
+        <p>
+        The graphs can be difficult to interpret sometimes, so if you are uncertain about what
+        you are seeing please contact us <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a>
+        and we will look for you, and let you know what we think?
+        think.
+        </p>
+        <p>
+        A working frost protection system can save a school money:
+        <ul>
+          <li>Without frost protection, a school either risks pipework damage, or
+              is forced to leave their heating on at maximum power over cold weeks and holidays</li>
+          <li>Sometimes, they are missed condigured, so come on when the temperature is above 4C outside,
+          or are configured to come on and bring the school up to too high a temperature e.g. 20C</li>
+        </ul>
+        </p>
+      <% end %>  
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+

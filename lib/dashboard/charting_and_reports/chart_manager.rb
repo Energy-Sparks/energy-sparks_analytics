@@ -100,6 +100,17 @@ class ChartManager
       y2_axis:          :degreedays,
       timescale:        :year
     },
+    group_by_week_gas_unlimited: {
+      name:             'By Week: Gas',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays
+    },
     group_by_week_gas_kw: {
       name:             'By Week: Gas',
       chart1_type:      :column,
@@ -221,10 +232,22 @@ class ChartManager
       yaxis_scaling:    :none
     },
     thermostatic: {
-      name:             'Thermostatic',
+      name:             'Thermostatic (Heating Season, School Day)',
       chart1_type:      :scatter,
       meter_definition: :allheat,
       timescale:        :year,
+      filter:            { daytype: :occupied, heating: true },
+      series_breakdown: %i[heating heatingmodeltrendlines degreedays],
+      x_axis:           :day,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    thermostatic_non_heating: {
+      name:             'Thermostatic (Non Heating Season, School Day)',
+      chart1_type:      :scatter,
+      meter_definition: :allheat,
+      timescale:        :year,
+      filter:            { daytype: :occupied, heating: false },
       series_breakdown: %i[heating heatingmodeltrendlines degreedays],
       x_axis:           :day,
       yaxis_units:      :kwh,
@@ -406,7 +429,7 @@ class ChartManager
       name:             'Frost Protection Example Sunday 2',
       chart1_type:      :column,
       series_breakdown: :none,
-      timescale:        [{ frostday_3: -2 }], # skip -1 for moment, as 12-2-2017 has no gas data at most schools TODO(PH,27Jun2017) - fix gas data algorithm
+      timescale:        [{ frostday_3: -1 }], # skip -1 for moment, as 12-2-2017 has no gas data at most schools TODO(PH,27Jun2017) - fix gas data algorithm
       x_axis:           :datetime,
       meter_definition: :allheat,
       yaxis_units:      :kw,
@@ -417,7 +440,7 @@ class ChartManager
       name:             'Frost Protection Example Sunday 3',
       chart1_type:      :column,
       series_breakdown: :none,
-      timescale:        [{ frostday_3: -3 }],
+      timescale:        [{ frostday_3: -2 }],
       x_axis:           :datetime,
       meter_definition: :allheat,
       yaxis_units:      :kw,

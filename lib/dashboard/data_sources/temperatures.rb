@@ -58,7 +58,7 @@ class Temperatures < HalfHourlyData
       frostdates_by_num_halfhours[halfhours].push(date) if halfhours > 0
     end
     frost_dates = []
-    47.downto(0) do |halfhours|
+    48.downto(0) do |halfhours|
       frostdates_by_num_halfhours[halfhours].each do |date|
         frost_dates.push(date)
       end

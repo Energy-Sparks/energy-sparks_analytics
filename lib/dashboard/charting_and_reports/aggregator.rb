@@ -78,29 +78,19 @@ class Aggregator
           @bucketed_data_count[new_series_name] = x_data
         end
       end
-=begin
-    elsif @chart_config[:x_axis] == :intraday && bucketed_period_data.length == 1
-      bucketed_data, bucketed_data_count, time_description = bucketed_period_data.first
-      bucketed_data_count.each do |series_name, x_data|
-        new_series_name = series_name + ':' + time_description
-        @bucketed_data_count[new_series_name] = x_data
-      end
-=end
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
 
     inject_benchmarks if @chart_config[:inject] == :benchmark
 
-    if @chart_config[:filter]
-      if !@chart_config[:filter].key?(:daytype) || @chart_config[:filter].length > 1
-        remove_filtered_series
-      end
-    end
+    remove_filtered_series if @chart_config.key?(:filter) && @chart_config[:series_breakdown] != :none
 
     create_y2_axis_data if @chart_config.key?(:y2_axis)
 
     reorganise_buckets if @chart_config[:chart1_type] == :scatter
+
+    remove_zero_data if @chart_config[:chart1_type] == :scatter
 
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
@@ -166,7 +156,7 @@ private
   # e.g. 'school day in hours' v. 'school day out of hours'
   # returns a hash of this breakdown to the kWh values
   def aggregate_by_day(bucketed_data, bucketed_data_count)
-    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype)
+    if @chart_config.key?(:filter) && (@chart_config[:filter].key?(:daytype) || @chart_config[:filter].key?(:daytype))
       # this is slower, as it needs to loop through a day at a time
       # TODO(PH,17Jun2018) push down and optimise in series_data_manager
       @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
@@ -191,6 +181,19 @@ private
   end
 
   def match_filter_by_day(date)
+    return true unless @chart_config.key?(:filter)
+    match_daytype = true
+    match_daytype = match_occupied_type_filter_by_day(date) if @chart_config[:filter].key?(:daytype)
+    match_heating = true
+    match_heating = match_filter_by_heatingdayday(date) if @chart_config[:filter].key?(:heating)
+    match_daytype && match_heating
+  end
+
+  def match_filter_by_heatingdayday(date)
+    @chart_config[:filter][:heating] == @series_manager.heating_model.heating_on?(date)
+  end
+
+  def match_occupied_type_filter_by_day(date)
     filter = @chart_config[:filter][:daytype]
     holidays = @meter_collection.holidays
     case filter
@@ -207,7 +210,7 @@ private
 
   def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
     (start_date..end_date).each do |date|
-      next if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype) && !match_filter_by_day(date)
+      next if !match_filter_by_day(date)
       (0..47).each do |halfhour_index|
         x_index = @xbucketor.index(nil, halfhour_index)
         multi_day_breakdown = @series_manager.get_data([:halfhour, date, halfhour_index])
@@ -220,7 +223,7 @@ private
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
     (start_date..end_date).each do |date|
-      next if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype) && !match_filter_by_day(date)
+      next if !match_filter_by_day(date)
       (0..47).each do |halfhour_index|
         x_index = @xbucketor.index(date, halfhour_index)
         multi_day_breakdown = @series_manager.get_data([:datetime, date, halfhour_index])
@@ -244,18 +247,44 @@ private
     # insert dates back in as 'silent' y2_axis
     @data_labels = x_axis
   end
+  
+  # remove zero data - issue with filtered scatter charts, and the difficulty or representing ni (NaN) in Excel charts
+  # the issue is the xbuckector doesn't know in advance the data is to be filtered based on the data
+  # but the charting products can;t distinguish between empty data and zero data
+  def remove_zero_data
+    indices_of_data_to_be_removed = []
+    (0..@x_axis.length - 1).each do |index|
+      indices_of_data_to_be_removed.push(index) if @x_axis[index] == 0
+    end
+
+    indices_of_data_to_be_removed.reverse.each do |index| # reverse order to works on self
+      @x_axis.delete_at(index)
+      @bucketed_data.each_key do |series_name|
+        if @bucketed_data.key?(series_name) && !@bucketed_data[series_name].nil?
+          @bucketed_data[series_name].delete_at(index)
+          @bucketed_data_count[series_name].delete_at(index)
+        else
+          puts "Error: expecting non nil series name #{series_name}"
+        end
+      end
+    end
+  end
 
   # pattern matches on series_names, removing any from list which don't match
   def remove_filtered_series
     keep_key_list = []
     puts "Y" * 140
+    ap(@bucketed_data, limit: 20, color: { float: :red })
     puts "Filtering #{@bucketed_data.keys}"
     puts @chart_config[:filter].inspect if @chart_config.key?(:filter)
     keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:submeter]) if @chart_config[:filter].key?(:submeter)
     keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:meter]) if @chart_config[:filter].key?(:meter)
-    keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:heating]) if @chart_config[:filter].key?(:heating)
-    keep_key_list += SeriesNames::DEGREEDAYS if @bucketed_data.key?(SeriesNames::DEGREEDAYS)
-    keep_key_list += SeriesNames::TEMPERATURE if @bucketed_data.key?(SeriesNames::TEMPERATURE)
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:heating)
+      filter = @chart_config[:filter][:heating] ? [SeriesNames::HEATINGDAY, SeriesNames::HEATINGDAYMODEL] : [SeriesNames::NONHEATINGDAY, SeriesNames::NONHEATINGDAYMODEL]
+      keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filter)
+    end
+    keep_key_list.push(SeriesNames::DEGREEDAYS) if @bucketed_data.key?(SeriesNames::DEGREEDAYS)
+    keep_key_list.push(SeriesNames::TEMPERATURE) if @bucketed_data.key?(SeriesNames::TEMPERATURE)
 
     remove_list = []
     @bucketed_data.each_key do |series_name|
@@ -265,6 +294,8 @@ private
     remove_list.each do |remove_series_name|
       @bucketed_data.delete(remove_series_name)
     end
+    puts "Z" * 140
+    ap(@bucketed_data, limit: 20, color: { float: :red })
     puts "Filtered #{@bucketed_data.keys}"
   end
 

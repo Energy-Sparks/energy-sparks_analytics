@@ -60,11 +60,11 @@ class LoadSchools
     puts "Loading school #{school_name}"
     school_data = @schools[school_name]
 
-puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
-puts school_data[:school_type]
-puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+    puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+    puts school_data[:school_type]
+    puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
     school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
-puts "school type = #{school.school_type}"
+    puts "school type = #{school.school_type}"
     meter_collection = MeterCollection.new(school)
 
     meter_readings = load_school_meter_data(school_name, min_date, use_cached_data)
@@ -113,22 +113,43 @@ private
     puts solar_pv.inspect
     storage_heater = storage_heater_definition(meter_data)
     puts storage_heater.inspect
-    # and combine it to make a meter
-    meter = Meter.new(meter_collection, amr_data, meter_type, identifier,
-              name, meter_data[:floor_area], meter_data[:pupils], solar_pv, storage_heater)
+    meter_correction = meter_correction_definition(meter_data)
+    meter = Meter.new(
+      meter_collection,
+      amr_data,
+      meter_type,
+      identifier,
+      name,
+      meter_data[:floor_area],
+      meter_data[:pupils],
+      solar_pv,
+      storage_heater,
+      meter_correction
+    )
     meter
   end
 
   def storage_heater_definition(meter_data)
-    if meter_data[:storage_heater]
+    if meter_data.key?(:storage_heater)
       StorageHeaters.create_storage_heaters_from_yaml_storage_heater_definition(meter_data[:storage_heater])
     else
       nil
     end
   end
 
+  def meter_correction_definition(meter_data)
+    if meter_data.key?(:meter_correction)
+      puts "Got meter correction definition", meter_data[:meter_correction]
+      meter_data[:meter_correction]
+    elsif meter_data[:meter_type] == :gas # for all gas meters in Bath schools insert missing weekend data with zero
+      meter_data[:meter_correction] = { auto_insert_missing_readings: :weekends }
+    else
+      nil
+    end
+  end
+
   def solar_pv_definition(meter_data)
-    if meter_data[:solar_pv]
+    if meter_data.key?(:solar_pv)
       pv = SolarPVInstallation.new
       puts meter_data.inspect
       meter_data[:solar_pv].each do |pv_install|
