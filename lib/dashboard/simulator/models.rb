@@ -26,6 +26,9 @@ module AnalyseHeatingAndHotWater
   # HOT WATER ANALYSIS
   #
   class HotwaterModel
+    HEATCAPACITYWATER = 4.2 # J/g/K
+    PUPILUSAGELITRES = 5
+    HWTEMPERATURE = 35 # C
     attr_reader :buckets, :analysis_period, :efficiency, :analysis_period_start_date
     attr_reader :analysis_period_end_date, :annual_hotwater_kwh_estimate
     attr_reader :avg_school_day_gas_consumption, :avg_holiday_day_gas_consumption, :avg_weekend_day_gas_consumption
@@ -49,6 +52,14 @@ module AnalyseHeatingAndHotWater
         total_wasted_kwh += wasted_kwh
       end
       [total_useful_kwh, total_wasted_kwh]
+    end
+
+    def benchmark_one_day_pupil_kwh
+      HEATCAPACITYWATER * PUPILUSAGELITRES * (HWTEMPERATURE - 10) * 1000.0 / 3_600_000.0
+    end
+
+    def benchmark_annual_pupil_kwh
+      39 * 5 * benchmark_one_day_pupil_kwh
     end
 
     def kwh(date)

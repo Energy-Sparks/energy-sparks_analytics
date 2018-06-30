@@ -34,7 +34,7 @@ class ChartManager
     # data_types:         an array e.g. [:metereddata, :predictedheat] - assumes :metereddata if not present
     #
     benchmark:  {
-      name:             'Benchmark Comparison (Annual Electricity and Gas Consumption)',
+      name:             'Annual Electricity and Gas Consumption Comparison with other schools in your region',
       chart1_type:      :bar,
       chart1_subtype:   :stacked,
       meter_definition: :all,
@@ -88,6 +88,17 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    group_by_week_electricity_unlimited: {
+      name:             'By Week: Electricity (multi-year)',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      zoomable:         true,
+      meter_definition: :allelectricity,
+      x_axis:           :week,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
     group_by_week_gas: {
       name:             'By Week: Gas',
       chart1_type:      :column,
@@ -101,9 +112,10 @@ class ChartManager
       timescale:        :year
     },
     group_by_week_gas_unlimited: {
-      name:             'By Week: Gas',
+      name:             'By Week: Gas (multi-year)',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
+      zoomable:         true,
       meter_definition: :allheat,
       x_axis:           :week,
       series_breakdown: :daytype,

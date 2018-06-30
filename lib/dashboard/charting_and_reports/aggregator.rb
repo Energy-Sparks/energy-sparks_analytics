@@ -355,7 +355,7 @@ private
       (0..data.length - 1).each do |index|
         date_range = @xbucketor.x_axis_bucket_date_ranges[index]
         days = date_range[1] - date_range[0] + 1.0
-        if @chart_config[:x_axis] == :intraday
+        if @chart_config[:x_axis] == :intraday || @chart_config[:x_axis] == :datetime
           # intraday kwh data gets bucketed into 48 x 1/2 hour buckets
           # kw = kwh in bucket / dates in bucket * 2 (kWh per 1/2 hour)
           count = @bucketed_data_count[series_name][index]

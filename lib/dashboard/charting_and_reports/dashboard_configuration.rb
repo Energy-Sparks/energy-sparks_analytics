@@ -13,6 +13,7 @@ class DashboardConfiguration
                                   charts: %i[
                                     daytype_breakdown_electricity
                                     group_by_week_electricity
+                                    group_by_week_electricity_unlimited
                                     electricity_by_day_of_week
                                     baseload
                                     electricity_by_month_year_0_1
@@ -30,6 +31,7 @@ class DashboardConfiguration
                                   charts: %i[
                                     daytype_breakdown_gas
                                     group_by_week_gas
+                                    group_by_week_gas_unlimited
                                     gas_by_day_of_week
                                   ]
                                 },

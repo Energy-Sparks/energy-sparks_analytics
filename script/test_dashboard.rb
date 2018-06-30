@@ -6,7 +6,7 @@ require './script/report_config_support.rb'
 
 reports = DashboardReports.new
 
-reports.load_school('St Johns Primary', true)
+reports.load_school('Paulton Junior School', true)
 
 # testing examples
 #
@@ -31,7 +31,9 @@ reports.load_school('St Johns Primary', true)
 
 # reports.do_chart_list('Boiler Control', [ :thermostatic_control_medium_diurnal_range ] )
 
-reports.do_all_schools
+# reports.do_one_page(:boiler_control)
+
+reports.do_all_schools(true)
 
 reports.save_excel_and_html
 
