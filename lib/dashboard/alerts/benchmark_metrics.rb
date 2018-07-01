@@ -10,6 +10,8 @@ module BenchmarkMetrics
   BENCHMARK_ELECTRICITY_USAGE_PER_M2 = 50_000.0 / 1_200.0
   BENCHMARK_GAS_USAGE_PER_PUPIL = 115_000.0 / 200.0
   BENCHMARK_GAS_USAGE_PER_M2 = 115_000.0 / 1_200.0
+  EXEMPLAR_GAS_USAGE_PER_M2 = 80.0
+  EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175
 
   def self.recommended_baseload_for_pupils(pupils, school_type)
     case school_type

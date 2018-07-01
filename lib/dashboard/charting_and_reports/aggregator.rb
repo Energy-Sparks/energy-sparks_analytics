@@ -375,13 +375,29 @@ private
   end
 
   def inject_benchmarks
-    @x_axis.push('National Benchmark')
+    @x_axis.push('National Average')
     @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
     @bucketed_data['gas'].push(benchmark_gas_usage_in_units)
 
-    @x_axis.push('Regional Benchmark')
+    @x_axis.push('Regional Average')
     @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
     @bucketed_data['gas'].push(benchmark_gas_usage_in_units * 0.9)
+
+    @x_axis.push('Exemplar School')
+    @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units)
+    @bucketed_data['gas'].push(exemplar_gas_usage_in_units * 0.9)
+  end
+
+  def exemplar_electricity_usage_in_units
+    e_exemplar_kwh = BenchmarkMetrics::EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils
+    y_scaling = YAxisScaling.new
+    y_scaling.scale_from_kwh(e_exemplar_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :electricity, @meter_collection)
+  end
+
+  def exemplar_gas_usage_in_units
+    g_exemplar_kwh = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * @meter_collection.floor_area
+    y_scaling = YAxisScaling.new
+    y_scaling.scale_from_kwh(g_exemplar_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :gas, @meter_collection)
   end
 
   def benchmark_electricity_usage_in_units

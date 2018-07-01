@@ -51,6 +51,8 @@ class DashboardChartAdviceBase
       ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_gas
       GasDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :gas_heating_season_intraday
+      GasHeatingIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :group_by_week_electricity
       ElectricityWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :group_by_week_electricity_unlimited, :group_by_week_gas_unlimited
@@ -427,6 +429,44 @@ class WeeklyLongTermAdvice < DashboardChartAdviceBase
     @footer_advice = generate_html(footer_template, binding)
   end
 end
+
+#==============================================================================
+class GasHeatingIntradayAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+        This graph shows how the gas consumption of the school varies on school days when the heating is on in the winter:
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+        <p>
+        Its a useful graph for determining how well controlled the timing of the boiler is?
+        A well timed boiler should only come on on average at about 6:00am in the morning
+        to get the school up to temperature by 8:00am, and then turn off again about half
+        and hour before the school closes.
+        </p>
+        <p>
+        Does you school's boiler control in the graph above do this?
+        Is the timing of the boiler 'well controlled'?
+        If it isn't you might need to speak to your building manager or caretaker and
+        ask why? There its lots of advice on our dashboard advice webpage about this.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
 #==============================================================================
 class WeeklyAdvice < DashboardChartAdviceBase
   attr_reader :fuel_type, :fuel_type_str
@@ -1337,7 +1377,7 @@ class HotWaterAdvice < DashboardChartAdviceBase
       <%= @body_start %>
       <% if @chart_type == :hotwater %>
         <p>
-        Hot water is schools is generally provised by a central gas boiler which then circulates
+        Hot water is schools is generally provided by a central gas boiler which then circulates
         the hot water around the school, or by more local electrically powered immersion
         or point of use heaters.
         </p>
@@ -1347,7 +1387,7 @@ class HotWaterAdvice < DashboardChartAdviceBase
         school. These systems are often quite inefficient, because they circulate hot water
         permanently in a loop around the school so hot water is immediately available
         when someone turns on a tap rather than having to wait for the hot water to come
-        all the way from the boiler room. The cirulatory pipework used to do this is often
+        all the way from the boiler room. The circulatory pipework used to do this is often
         poorly insulated, and loses heat, often these types of systems are only 20% efficient
         compared with direct point of use water heaters which are often over 90% efficient.
         </p>

@@ -243,6 +243,17 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
+    gas_heating_season_intraday: {
+      name:             'Intraday Gas Consumption (during heating season)',
+      chart1_type:      :column,
+      meter_definition: :allheat,
+      timescale:        :year,
+      filter:            { daytype: :occupied, heating: true },
+      series_breakdown: :none,
+      x_axis:           :intraday,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
     thermostatic: {
       name:             'Thermostatic (Heating Season, School Day)',
       chart1_type:      :scatter,

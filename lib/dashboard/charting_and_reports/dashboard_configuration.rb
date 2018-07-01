@@ -33,6 +33,7 @@ class DashboardConfiguration
                                     group_by_week_gas
                                     group_by_week_gas_unlimited
                                     gas_by_day_of_week
+                                    gas_heating_season_intraday
                                   ]
                                 },
       main_dashboard_electric_and_gas: {
