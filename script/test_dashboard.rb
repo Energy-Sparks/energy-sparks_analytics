@@ -33,9 +33,9 @@ reports.load_school('Paulton Junior School', true)
 
 # reports.do_one_page(:boiler_control)
 
-reports.do_all_schools(true)
+# reports.do_all_schools(true)
 
-# reports.do_all_standard_pages_for_school
+reports.do_all_standard_pages_for_school
 
 # reports.do_chart_list('Boiler Control', [ :gas_heating_season_intraday ] )
 
