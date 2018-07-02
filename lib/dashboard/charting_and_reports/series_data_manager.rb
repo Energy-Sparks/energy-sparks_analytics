@@ -534,6 +534,14 @@ private
           raise "Expecting an integer or date as an parameter for a week specification got a #{hash_value.class.name}"
         end
         @periods = [period]
+      when :schoolweek
+        if hash_value.is_a?(Integer)
+          sunday, saturday = @meter_collection.holidays.nth_school_week(@last_meter_date, hash_value)
+          period = SchoolDatePeriod.new(:schoolweek, 'current week', sunday, saturday)
+          @periods = [period]
+        else
+          raise EnergySparksBadChartSpecification.new('Expecting integer for :schoolweek timescale configuration')
+        end
       when :day
         if hash_value.is_a?(Integer) # hash_value weeks back from latest week
           raise 'Error: expecting zero or negative number for day specification' if hash_value > 0

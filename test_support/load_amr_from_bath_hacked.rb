@@ -36,7 +36,7 @@ class LoadSchools
   def initialize
     ENV['SOCRATA_STORE'] = 'data.bathhacked.org'
     ENV['SOCRATA_TOKEN'] = 'gQ5Dw0rIF7I8ij40m8W6ulHj4'
-    ENV['SOCRATA_LIMIT'] = '2000'
+    ENV['SOCRATA_LIMIT'] = '4000'
     @client = SODA::Client.new(domain: ENV['SOCRATA_STORE'], app_token: ENV['SOCRATA_TOKEN'])
 
     @halfhours = %w(
@@ -137,17 +137,6 @@ private
     end
   end
 
-  def meter_correction_definition(meter_data)
-    if meter_data.key?(:meter_correction)
-      puts "Got meter correction definition", meter_data[:meter_correction]
-      meter_data[:meter_correction]
-    elsif meter_data[:meter_type] == :gas # for all gas meters in Bath schools insert missing weekend data with zero
-      meter_data[:meter_correction] = { auto_insert_missing_readings: :weekends }
-    else
-      nil
-    end
-  end
-
   def solar_pv_definition(meter_data)
     if meter_data.key?(:solar_pv)
       pv = SolarPVInstallation.new
@@ -224,6 +213,17 @@ private
       meter_readings[identifier] = download_meter_readings(identifier, meter_type, min_date)
     end
     meter_readings
+  end
+
+  def meter_correction_definition(meter_data)
+    if meter_data.key?(:meter_correction)
+      puts "Got meter correction definition", meter_data[:meter_correction]
+      meter_data[:meter_correction]
+    elsif meter_data[:meter_type] == :gas # for all gas meters in Bath schools insert missing weekend data with zero
+      meter_data[:meter_correction] = { auto_insert_missing_readings: :weekends }
+    else
+      nil
+    end
   end
 
   def query(meter_no, type, since_date = nil)

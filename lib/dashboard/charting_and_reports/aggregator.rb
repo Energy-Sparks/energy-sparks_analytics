@@ -222,6 +222,7 @@ private
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
+  puts "JJJJJJ"
     (start_date..end_date).each do |date|
       next if !match_filter_by_day(date)
       (0..47).each do |halfhour_index|
@@ -277,7 +278,13 @@ private
     ap(@bucketed_data, limit: 20, color: { float: :red })
     puts "Filtering #{@bucketed_data.keys}"
     puts @chart_config[:filter].inspect if @chart_config.key?(:filter)
-    keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:submeter]) if @chart_config[:filter].key?(:submeter)
+    if @chart_config[:series_breakdown] == :submeter
+      if @chart_config[:filter].key?(:submeter)
+        keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:submeter])
+      else
+        keep_key_list += @bucketed_data.keys # TODO(PH,2Jul2018) may not be generic enough?
+      end
+    end
     keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:meter]) if @chart_config[:filter].key?(:meter)
     if @chart_config.key?(:filter) && @chart_config[:filter].key?(:heating)
       filter = @chart_config[:filter][:heating] ? [SeriesNames::HEATINGDAY, SeriesNames::HEATINGDAYMODEL] : [SeriesNames::NONHEATINGDAY, SeriesNames::NONHEATINGDAYMODEL]

@@ -48,7 +48,7 @@ class SchoolFactory
 
   def load_data_from_back_hacked(school_name, validate_and_aggregate)
     @backhacked_school_definitions = LoadSchools.new if @backhacked_school_definitions.nil?
-    min_date = Date.new(2013, 9, 1)
+    min_date = Date.new(2008, 9, 1)
     school_as_meter_collection = @backhacked_school_definitions.load_school(school_name, min_date, true)
 
     if validate_and_aggregate

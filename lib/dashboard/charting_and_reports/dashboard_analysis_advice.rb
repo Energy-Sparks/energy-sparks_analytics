@@ -231,12 +231,12 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def pound_gas_saving_versus_benchmark
-    pounds = actual_gas_usage - benchmark_gas_usage
+    pounds = actual_gas_usage - benchmark_gas_usage * 0.7
     pounds_to_pounds_and_kwh(pounds, :gas)
   end
 
   def pound_electricity_saving_versus_benchmark
-    pounds = actual_electricity_usage - benchmark_electricity_usage
+    pounds = actual_electricity_usage - benchmark_electricity_usage * 0.7
     pounds_to_pounds_and_kwh(pounds, :electricity)
   end
 
