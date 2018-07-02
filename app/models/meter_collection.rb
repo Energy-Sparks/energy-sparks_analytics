@@ -17,7 +17,7 @@ class MeterCollection
   attr_reader :floor_area, :number_of_pupils
 
   # Currently, but not always
-  attr_reader :school_type, :school, :name, :address
+  attr_reader :school_type, :school, :name, :address, :postcode
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
@@ -25,6 +25,7 @@ class MeterCollection
   def initialize(school)
     @name = school.name
     @address = school.address
+    @postcode = school.postcode
     @floor_area = school.floor_area
     @number_of_pupils = school.number_of_pupils
     @heat_meters = []

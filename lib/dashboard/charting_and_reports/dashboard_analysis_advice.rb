@@ -135,6 +135,8 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     electric_usage = get_energy_usage('electricity', :electricity, 0)
     gas_usage = get_energy_usage('gas', :gas, 0)
 
+    address = @school.postcode.nil? ? @school.address : @school.postcode
+
     electric_comparison = comparison('electricity', :electricity)
     gas_comparison = comparison('gas', :gas)
 
@@ -145,7 +147,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <body>
       <% end %>
       <p>
-        <%= @school.name %> is a <%= @school.school_type %> school near <%= @school.address %>
+        <%= @school.name %> is a <%= @school.school_type %> school near <%= address %>
         with <%= @school.number_of_pupils %> pupils
         and a floor area of <%= @school.floor_area %>m<sup>2</sup>.
       </p>
