@@ -164,7 +164,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertAnalysisBase
   def commentary(baseload, comparative_text, pupil_benchmark, floor_area_benchmark)
     text =  sprintf('Your baseload over the last year of %.1f kW is %s, ', baseload, comparative_text)
     text += sprintf('compared with average usage at other schools of %.1f kW (pupil based) ', pupil_benchmark)
-    text += sprintf('and %.1f kW (floor area based).', floor_area_benchmark)
+    text += sprintf('and %.1f kW (for a similar floor area).', floor_area_benchmark)
     text
   end
 
@@ -885,13 +885,13 @@ class AlertThermostaticControl < AlertGasModelBase
 
     if @r2 < MIN_R2
       report.summary = 'Thermostatic control of the school is poor'
-      text = 'The thermostatic control of the heating at the school appears poor '
+      text = 'The thermostatic control of the heating at your school appears poor '
       text += sprintf('at an R2 of %.2f, ', @r2)
       text += sprintf('the school should aim to improve this to above %.2f', MIN_R2)
       report.rating = @r2 * 10.0
       report.status = :poor
     else
-      report.summary = 'Thermostatic control of the school is good'
+      report.summary = 'Thermostatic control at your school is good'
       text = 'The thermostatic control of the heating is good  '
       text += sprintf('at an R2 of %.2f', @r2)
       report.rating = 10.0

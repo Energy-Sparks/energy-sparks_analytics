@@ -3,6 +3,7 @@ class MeterAnalysis
   # Extra fields - potentially a concern or mix-in
   attr_reader :building, :fuel_type, :floor_area, :number_of_pupils
   attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters
+  attr_reader :meter_correction_rules
   attr_accessor :amr_data
 
   # Energy Sparks activerecord fields:
@@ -12,7 +13,8 @@ class MeterAnalysis
 
   def initialize(building, amr_data, type, identifier, name,
                   floor_area = nil, number_of_pupils = nil,
-                  solar_pv_installation = nil, storage_heater_config = nil)
+                  solar_pv_installation = nil, storage_heater_config = nil,
+                  meter_correction_rules = nil)
     @amr_data = amr_data
     @building = building
     @meter_type = type.to_sym # think Energy Sparks variable naming is a minomer (PH,31May2018)
@@ -23,6 +25,7 @@ class MeterAnalysis
     @number_of_pupils = number_of_pupils
     @solar_pv_installation = solar_pv_installation
     @storage_heater_config = storage_heater_config
+    @meter_correction_rules = meter_correction_rules
     @sub_meters = []
     puts "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
   end

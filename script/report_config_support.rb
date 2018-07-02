@@ -18,6 +18,7 @@ class DashboardReports
       'Pensford Primary'                  => :electric_only,
       'Roundhill School'                  => :electric_and_gas,
       'Saltford C of E Primary School'    => :electric_and_gas,
+      'St Marks Secondary'                => :electric_and_gas,
       'St Johns Primary'                  => :electric_and_gas,
       'Stanton Drew Primary School'       => :electric_only,
       'Twerton Infant School'             => :electric_and_gas,

@@ -269,6 +269,11 @@ class SeriesDataManager
     breakdown
   end
 
+  def heating_model
+    calculate_model if @heating_model.nil?
+    @heating_model
+  end
+
 private
 
   def scaling_factor(_value, fuel_type)

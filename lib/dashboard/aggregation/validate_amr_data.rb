@@ -19,15 +19,80 @@ class ValidateAMRData
     @max_search_range_for_corrected_data = 100
     @bad_data = 0
     @data_problems = {}
+    unless @meter.meter_correction_rules.nil?
+      puts "$" * 300 if meter.meter_correction_rules
+      puts "Meter Correction Rules"
+      puts @meter.meter_correction_rules.inspect
+    end
   end
 
   def validate
     puts "=" * 150
     puts "Validating meter data of type #{@meter.meter_type} #{@meter.name} #{@meter.id}"
     # ap(@meter, limit: 5, :color => {:float  => :red})
+    meter_corrections unless @meter.meter_correction_rules.nil?
     check_for_long_gaps_in_data
     fill_in_missing_data
+    final_report_for_missing_data_set_to_small_negative
     puts "=" * 150
+  end
+
+  def meter_corrections
+    puts '-' * 80
+    puts 'Manually defined meter corrections'
+    if @meter.meter_correction_rules.key?(:readings_start_date)
+      puts "Fixing start date to #{@meter.meter_correction_rules[:readings_start_date]}"
+      @amr_data.set_min_date(@meter.meter_correction_rules[:readings_start_date])
+    end
+    if @meter.meter_correction_rules.key?(:auto_insert_missing_readings)
+     if @meter.meter_correction_rules[:auto_insert_missing_readings] == :weekends
+      replace_missing_weekend_data_with_zero
+     else
+      val = @meter.meter_correction_rules[auto_insert_missing_readings]
+      raise EnergySparksMeterSpecification.new("unknown auto_insert_missing_readings meter attribute #{val}")
+     end
+    end
+  end
+
+  def final_report_for_missing_data_set_to_small_negative
+    puts '>' * 100
+    puts 'At the end of the meter validation process the following amr data is still missing (setting to -0.5555):'
+    missing_dates = []
+    (@amr_data.start_date..@amr_data.end_date).each do |date|
+      if !@amr_data.key?(date)
+        missing_dates.push(date)
+      end
+    end
+    print_array_of_dates_in_columns(missing_dates, 4, STDERR)
+    print_array_of_dates_in_columns(missing_dates, 4, STDOUT)
+    missing_dates.each do |date|
+      @amr_data.add(date, Array.new(48, -0.5555))
+    end
+    puts '>' * 100
+  end
+
+  def replace_missing_weekend_data_with_zero
+    puts "Setting missing weekend dates to zero"
+    replaced_dates = []
+    (@amr_data.start_date..@amr_data.end_date).each do |date|
+      if DateTimeHelper.weekend?(date) && !@amr_data.key?(date)
+        replaced_dates.push(date)
+        @amr_data.add(date, Array.new(48, 0.0))
+      end
+    end
+    puts 'Replaced the following weekend dates:'
+    print_array_of_dates_in_columns(replaced_dates, 8)
+  end
+
+  # quick and dirty implementation TODO(PH,20Jun2018) - could be improved
+  def print_array_of_dates_in_columns(dates, number_of_columns, output = STDOUT)
+    count = 0
+    dates.each do |date|
+      output.print date.strftime('%a %d %b %Y') + ' '
+      output.puts if count % number_of_columns == (number_of_columns - 1)
+      count += 1
+    end
+    output.puts
   end
 
   def check_for_long_gaps_in_data
@@ -110,15 +175,20 @@ class ValidateAMRData
   # iterate put from missing data, looking for a similar day without missing data
   # then adjust for temperature
   def substitute_missing_gas_data(date)
+    puts "GOTTTT Here #{date}"
+    debug = date.year == 2017 && date.month == 2 && date.day == 12
     create_heating_model if @heating_model.nil?
     heating_on = @heating_model.heating_on?(date)
     missing_daytype = daytype(date)
     avg_temperature = average_temperature(date)
+    puts "Got Checked Missing Date #{date} heat on #{heating_on} day type #{missing_daytype} temperature #{avg_temperature}" if debug
     (1..@max_search_range_for_corrected_data).each do |days_offset|
       # look for similar day after the missing date
       day_after = date + days_offset
-      if day_after <= @amr_data.end_date && @amr_data.key?(day_after) && @amr_data[day_after].count == 48 &&
+      puts "Trying #{day_after} got amr data: #{@amr_data.key?(day_after)}" if debug
+      if day_after <= @amr_data.end_date && @amr_data.key?(day_after) && @amr_data[day_after].count == 48
         temperature_after = average_temperature(day_after)
+        puts "Temperature = #{temperature_after} heat on #{@heating_model.heating_on?(day_after)} heat on #{daytype(day_after)}" if debug
         if heating_on == @heating_model.heating_on?(day_after) &&
             within_temperature_range?(avg_temperature, temperature_after) &&
             daytype(day_after) == missing_daytype
@@ -136,7 +206,7 @@ class ValidateAMRData
         return [day_before, adjusted_substitute_heating_kwh(date, day_before)]
       end
     end
-    puts "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)}"
+    puts "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype}"
     nil
   end
 

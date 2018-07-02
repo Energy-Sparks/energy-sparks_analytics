@@ -15,3 +15,6 @@ end
 
 class EnergySparksBadChartSpecification < StandardError
 end
+
+class EnergySparksMeterSpecification < StandardError
+end

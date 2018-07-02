@@ -26,6 +26,9 @@ module AnalyseHeatingAndHotWater
   # HOT WATER ANALYSIS
   #
   class HotwaterModel
+    HEATCAPACITYWATER = 4.2 # J/g/K
+    PUPILUSAGELITRES = 5
+    HWTEMPERATURE = 35 # C
     attr_reader :buckets, :analysis_period, :efficiency, :analysis_period_start_date
     attr_reader :analysis_period_end_date, :annual_hotwater_kwh_estimate
     attr_reader :avg_school_day_gas_consumption, :avg_holiday_day_gas_consumption, :avg_weekend_day_gas_consumption
@@ -49,6 +52,14 @@ module AnalyseHeatingAndHotWater
         total_wasted_kwh += wasted_kwh
       end
       [total_useful_kwh, total_wasted_kwh]
+    end
+
+    def benchmark_one_day_pupil_kwh
+      HEATCAPACITYWATER * PUPILUSAGELITRES * (HWTEMPERATURE - 10) * 1000.0 / 3_600_000.0
+    end
+
+    def benchmark_annual_pupil_kwh
+      39 * 5 * benchmark_one_day_pupil_kwh
     end
 
     def kwh(date)
@@ -273,28 +284,36 @@ module AnalyseHeatingAndHotWater
       heating_start_date = start_date
 
       puts "Calculating Heating Periods between #{start_date} and #{end_date}"
+      puts "=" * 100
+      puts "Deliberate backtrace to find caller:"
+      puts "=" * 100
+      puts Thread.current.backtrace.join("\n")
+      puts "=" * 100
+      
+      degreedays_at_18c = @base_degreedays_temperature - 18
+      degreedays_at_18c = 0.0 if degreedays_at_18c < 0.0
+      @halfway_kwh = @models[:heating_occupied].predicted_kwh_degreedays(degreedays_at_18c)
 
+      puts "Setting half way kwh - i.e. split between heating and non heating days to #{@halfway_kwh.round(0)} kWh per day"
+
+      previous_date = start_date
       (start_date..end_date).each do |date|
         begin
           kwh_today = @amr_data.one_day_kwh(date)
+          puts "Got specific kwh #{kwh_today} on #{date} temperature #{@temperatures.average_temperature(date)}" if kwh_today > 120 && kwh_today < 121
           # degreedays_today = @temperatures.degree_days(date, @base_degreedays_temperature)
           occupied = !DateTimeHelper.weekend?(date) && !@holidays.holiday?(date)
 
-          # degreedays_at_15_5_c = @temperatures.degree_days(date, 15.5)
-          @halfway_kwh = @models[:heating_occupied].predicted_kwh_degreedays(0) # degreedays_at_15_5_c)
-          @halfway_kwh = 300.0 # TODO(PH,30May2018) - this needs fixing
-
-        # use an average of the predicted heating and non-heated models to attempt to differentiate between
-        # heated and non heated days
-        #  halfway_kwh =  (@models[:heating_occupied].predicted_kwh_degreedays(degreedays_today) + @models[:nonheating_occupied].predicted_kwh_degreedays(degreedays_today)) / 2.0
-        # halfway_kwh = 300.0
-          if kwh_today > @halfway_kwh && !heating_on && occupied
-            heating_on = true
-            heating_start_date = date
-          elsif kwh_today <= @halfway_kwh && heating_on && occupied
-            heating_on = false
-            heating_period = SchoolDatePeriod.new(:heatingperiod, 'N/A', heating_start_date, date)
-            @heating_on_periods.push(heating_period)
+          if !DateTimeHelper.weekend?(date) # skip weekends, i.e. workout heating day ranges for school days and holidays only
+            if kwh_today > @halfway_kwh && !heating_on
+              heating_on = true
+              heating_start_date = date
+            elsif kwh_today <= @halfway_kwh && heating_on
+              heating_on = false
+              heating_period = SchoolDatePeriod.new(:heatingperiod, 'N/A', heating_start_date, previous_date)
+              @heating_on_periods.push(heating_period)
+            end
+            previous_date = date
           end
         rescue StandardError => e
           puts "Unable to calculate heating period for date #{date}", e
@@ -304,7 +323,13 @@ module AnalyseHeatingAndHotWater
         heating_period = SchoolDatePeriod.new(:heatingperiod, 'N/A', heating_start_date, end_date)
         @heating_on_periods.push(heating_period)
       end
-      puts "Heating periods", @heating_on_periods.inspect
+      puts "Heating periods"
+      @heating_on_periods.each do |period|
+        sd = period.start_date.strftime('%a %d %b %Y')
+        ed = period.end_date.strftime('%a %d %b %Y')
+        puts sprintf("       %15.15s to %15.15s", sd, ed)
+      end
+
       @heating_on_periods
     end
 
