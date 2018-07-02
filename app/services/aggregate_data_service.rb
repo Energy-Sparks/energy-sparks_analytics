@@ -161,7 +161,7 @@ private
     # PH 21Jun2016 - commented this back in
     puts "Calculating model 21Jun18 debug", @period.inspect
     @heating_on_periods = @model.calculate_heating_periods(@period)
-    @heating_models[:basic] 
+    @heating_models[:basic]
   end
 
   def aggregate_amr_data(amr_data_list, type)
@@ -177,7 +177,7 @@ private
       amr_data_list.each do |amr_data|
         (0..47).each do |half_hour_index|
           if amr_data.key?(date)
-            combined_data[half_hour_index] += amr_data[date][half_hour_index]
+            combined_data[half_hour_index] += amr_data[date][half_hour_index] if amr_data[date].count == 48
           end
         end
       end
