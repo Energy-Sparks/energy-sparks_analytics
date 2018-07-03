@@ -74,16 +74,22 @@ class MeterCollection
     amr_data = AMRData.new(meter.meter_type)
     readings = []
 
-    query = <<-SQL
-      SELECT date_trunc('day', read_at) AS day, array_agg(value ORDER BY read_at ASC) AS values
-      FROM meter_readings
-      WHERE meter_id = #{meter.id}
-      GROUP BY date_trunc('day', read_at)
-    SQL
+    if meter.any_aggregated?
+      meter.aggregated_meter_readings.order(:when).each do |amr|
+        amr_data.add(amr.when, amr.readings.map(&:to_f))
+      end
+    else
+      query = <<-SQL
+        SELECT date_trunc('day', read_at) AS day, array_agg(value ORDER BY read_at ASC) AS values
+        FROM meter_readings
+        WHERE meter_id = #{meter.id}
+        GROUP BY date_trunc('day', read_at)
+      SQL
 
-    result = ActiveRecord::Base.connection.exec_query(query)
-    result.each do |row|
-      amr_data.add(Date.parse(row["day"]), row["values"].delete('{}').split(',').map(&:to_f))
+      result = ActiveRecord::Base.connection.exec_query(query)
+      result.each do |row|
+        amr_data.add(Date.parse(row["day"]), row["values"].delete('{}').split(',').map(&:to_f))
+      end
     end
     amr_data
   end

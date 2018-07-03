@@ -280,8 +280,10 @@ class ValidateAMRData
   # iterate put from missing data, looking for a similar day without missing data
   # then adjust for temperature
   def substitute_missing_gas_data(date)
-    puts "GOTTTT Here #{date}"
-    debug = date.year == 2017 && date.month == 2 && date.day == 12
+    #puts "GOTTTT Here #{date}"
+    #debug = date.year == 2017 && date.month == 2 && date.day == 12
+    debug = false
+
     create_heating_model if @heating_model.nil?
     heating_on = @heating_model.heating_on?(date)
     missing_daytype = daytype(date)
