@@ -3,9 +3,12 @@
 # which already holds this data stays in sync with postgress
 class MeterAdjustments
   def self.meter_adjustment(meter)
+    meter_identifier = meter.mpan_mprn || meter.id
+    meter_identifier = meter_identifier.to_s
 
-    case meter.id
+    case meter_identifier
     when '13685103' # St Marks Orchard Lodge
+
       meter.meter_correction_rules = min_start_date_rule(Date.new(2015, 1, 1))
       puts 'Applying meter correction rules to #{meter.id}:'
       puts meter.meter_correction_rules.inspect
@@ -20,7 +23,7 @@ class MeterAdjustments
     when '13678903', '50974602', '50974703', '50974804', '75665705' # Roundhill
       meter.meter_correction_rules = rescale_amr_data_rule(Date.new(2009, 1, 1), Date.new(2012, 1, 1), 1/31.1)
       puts 'Applying meter correction rules to #{meter.id}:'
-      puts meter.meter_correction_rules.inspect 
+      puts meter.meter_correction_rules.inspect
     end
   end
 
