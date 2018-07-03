@@ -66,6 +66,41 @@ class Holidays
     end
     nil
   end
+  
+  # iterate backwards to find nth school week before date, skipping holidays
+  # last week = 0, previous school week = -1, iterates on Sunday-Saturday boundary
+  def nth_school_week(asof_date, nth_week_number, min_days_in_school_week = 3)
+    raise EnergySparksBadChartSpecification.new("Badly specified nth_school_week #{nth_week_number} must be zero or negative") if nth_week_number > 0
+    raise EnergySparksBadChartSpecification.new("Badly specified min_days_in_school_week #{min_days_in_school_week} must be > 0") if min_days_in_school_week <= 0
+    limit = 2000
+    week_count = nth_week_number.magnitude
+    saturday = asof_date.saturday? ? asof_date : nearest_previous_saturday(asof_date)
+    loop do
+      monday = saturday - 5
+      friday = saturday - 1
+      holiday_days_in_week = holidaydays_in_range(monday, friday)
+      week_count -= 1 unless holiday_days_in_week > (5 - min_days_in_school_week)
+      break if week_count < 0
+      saturday = saturday - 7
+      limit -= 1
+      raise EnergySparksUnexpectedStateException.new('Gone too many times around loop looking for school weeks, not sure why error has occurred') if limit <= 0
+    end
+    [saturday - 6, saturday]
+  end
+
+  # was originally included in ActiveSupport code base, may be lost in rails integration
+  # not sure whethe it includes current Saturday, assume not, so if date is already a Saturday, returns date - 7
+  def nearest_previous_saturday(date)
+    date - (date.wday + 1)
+  end
+
+  def holidaydays_in_range(start_date, end_date)
+    count = 0
+    (start_date..end_date).each do |date|
+      count += 1 if holiday?(date)
+    end
+    count
+  end
 
   # returns a list of academic years between 2 dates - iterates backwards from most recent end of summer holiday
   def academic_years(start_date, end_date)
