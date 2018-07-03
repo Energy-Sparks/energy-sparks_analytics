@@ -506,7 +506,6 @@ class WeeklyAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-      <p>
         <% if fuel_type == :gas %>
         <p>
           The colouring on the graph also demonstrates whether heating and hot water
@@ -586,7 +585,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
             The heating system can adjust for internal heat gains due to people, electrical equipment and
             sunshine warming the building. It can also adjust for losses due to ventilation. Poor thermostatic
             control is likely to cause poor thermal comfort (uses feel too hot or too cold), and excessive gas
-            consumption as the  thermal comfort is often maintained by leaving windows open. 
+            consumption as the  thermal comfort is often maintained by leaving windows open.
           </p>
           <p>
             Unfortunately, many schools have poor thermostatic control. This can be due
@@ -792,7 +791,7 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
           For example, concrete has a high capacity to store heat and is referred to as a
           'high thermal mass' material. Insulation foam,
           by contrast, has very little heat storage capacity
-          and is referred to as having 'low thermal mass'. 
+          and is referred to as having 'low thermal mass'.
           </p>
           <p>
           Can you see this pattern at your school from the graph above?<br>
@@ -803,11 +802,13 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
           <p>
           If the graph shows  high weekend gas consumption, ask your caretaker or building manager
           to check your heating system controls. You may have:
+          </p>
           <ul>
             <li>incorrect or faulty frost protection</li>
             <li>lack a 7 day timer so it is not possible to  turn the heating off at weekends</li>
             <li>incorrect boiler settings</li>
           </ul>
+          <p>
           By eliminating weekend gas consumption at your school you could save up to
           <%= kwh_to_pounds_and_kwh(weekend_saving_kwh, :gas) %> per year.
           </p>
@@ -872,7 +873,7 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
       <% end %>
           <p>
             Electricity baseload is the electricity needed to provide power to appliances that keep running at all times.
-            It can be measured by looking at your school's out of  hours electricity consumption.   
+            It can be measured by looking at your school's out of  hours electricity consumption.
             The graph below shows how your school's electricity 'baseload'
             has varied over time:
           </p>
@@ -960,6 +961,7 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
       <p>
       See if you can spot some of the following typical characteristics in the
       chart:
+      </p>
       <ul>
       <li>
         Electricity consumption starting to increase from about 7:00am
@@ -992,7 +994,6 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
           Sometimes there is a regular evening event which increases consumption
       </li>
       </ul>
-      </p>
       <% elsif type == :weekends || type == :holidays %>
       <p>
           The graph above shows consumption <%= @period %>. At most schools this
@@ -1053,7 +1054,7 @@ class ElectricityMonthOnMonth2yearAdvice < DashboardChartAdviceBase
       <p>
       This graph allows you to see long term trends in energy use.
       It can be a quick way to spot whether  energy saving behaviour
-      and lighting and equipment updates are having an impact on your electricity consumption. 
+      and lighting and equipment updates are having an impact on your electricity consumption.
       You need to be careful when comparing months with holidays, particularly Easter,
       which some years is in March and other times in April.
       </p>
@@ -1150,11 +1151,13 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         </p>
         <p>
         A well programmed control will turn the boiler on if a number of conditions are met, typically:
+        </p>
         <ul>
           <li>The outside temperature is below 4C (the point at which water starts to freeze and expand)</li>
           <li>And, the internal temperature is below 8C</li>
           <li>And, for some controllers if the temperature of the water in the central heating system is below 2C</li>
         </ul>
+        <p>
         Typically, this means the 'frost protection' only turns the heating on if it is cold outside, AND
         the heating has been off for at least 24 hours - as it normally takes this long for a school to
         cool down and the internal temperature of the school to drop below 8C. So, in general in very cold weather
@@ -1167,14 +1170,14 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         configured for their boilers, and although this saves money for most of the year, it is common
         for these schools to leave their heating on during winter holidays, which is signifcantly more expensive
         than if frost protection is allowed to provide the protection automatically.
-        <p>
+        </p>
         <p>
         The 3 graphs below which are for the coldest weekends of recent years, attempt to demonstate whether
+        </p>
         <ol type="a">
         <li>Frost protection is configured for your school, and</li>
         <li>whether it is configured correctly and running efficiently</li>
         </ol>
-        </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1196,7 +1199,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         If the outside temperature rises above 4C, the heating should go off. The amount
         of gas consumption (blue bars) should be about half the consumption of a school
         day (e.g. the Monday), as the heating requirement is roughly proportional
-        to the difference between the inside and outside temperatures, and because 
+        to the difference between the inside and outside temperatures, and because
         the school is only being heated to 8C rather than the 20C of a school
         day then much less energy will be used.
       </p>
@@ -1208,20 +1211,20 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
       <% if @chart_type == :frost_3 %>
         <p>
         The graphs can be difficult to interpret sometimes, so if you are uncertain about what
-        you are seeing please contact us <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a> 
+        you are seeing please contact us <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a>
         and we will look for you, and let you know what we think.
         think.
         </p>
         <p>
         A working frost protection system can save a school money:
+        </p>
         <ul>
           <li>Without frost protection, a school either risks pipework damage, or
               is forced to leave their heating on at maximum power over cold weeks and holidays</li>
           <li>Sometimes, frost protection is mis-configured, so comes on when the temperature is above 4C outside,
           or is configured to come on and bring the school up to too high a temperature e.g. 20C.</li>
         </ul>
-        </p>
-      <% end %>  
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1230,7 +1233,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
 end
 
 #==============================================================================
-# for charts: :thermostatic_control_large_diurnal_range_1,  
+# for charts: :thermostatic_control_large_diurnal_range_1,
 #             :thermostatic_control_large_diurnal_range_2
 #             :thermostatic_control_large_diurnal_range_3
 class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
@@ -1285,7 +1288,7 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
         Do any of these charts indicate there is poor thermostatic control? You would see this
         if the gas consumption varied little during the day?
         </p>
-      <% end %>  
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1305,7 +1308,7 @@ class HeatingOptimumStartAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :optimum_start %>
-        <h3>Optimum Start Control? Or, is your boiler turning on too early or being left on too late??</h3>
+        <h4>Optimum Start Control? Or, is your boiler turning on too early or being left on too late??</h4>
         <p>
         Most modern commercial boilers used in schools support 'optimum start control' - this is
         where the boiler controller learns over time how long it takes to heat up a school
@@ -1350,7 +1353,7 @@ class HeatingOptimumStartAdvice < DashboardChartAdviceBase
       Is the heating also turning off at a reasonable time, perhaps half an hour before school closing time?
       The school could save energy by ensuring the boiler turns off at the right time.
       </p>
-      <% end %> 
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1377,7 +1380,7 @@ class HotWaterAdvice < DashboardChartAdviceBase
     baths_savings = AnalyseHeatingAndHotWater::HotwaterModel.baths_of_hotwater(annual_benchmark_saving)
     baths_savings = (baths_savings / 100.0).round(0) * 100.0
     baths_per_pupil = (baths_savings / @school.number_of_pupils).round(0)
-    
+
     efficiency = hotwater_model.efficiency
 
     header_template = %{
@@ -1424,20 +1427,18 @@ class HotWaterAdvice < DashboardChartAdviceBase
       </p>
       <p>
         The Energy Sparks automated analysis suggests the following:
-        <ul>
-          <li>An average school day consumption of <%= YAxisScaling.scale_num(avg_school_day_gas_consumption) %> kWh</li>
-          <li>An average weekend day consumption of <%= YAxisScaling.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
-          <li>An average holiday day consumption of <%= YAxisScaling.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
-          <li>Likely overall efficiency: <%= percent(efficiency * 0.6) %></li>
-          <li>Estimate of annual cost for hot water: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
-          <li>Benchmark annual usage for school of same size <%= YAxisScaling.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
-          <li>If the school matched the annual benchmark consumption it would save the equivalent of <%= baths_savings %> baths
-          of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
-        </ul>
       </p>
-      <p>
-
-      <% end %> 
+      <ul>
+        <li>An average school day consumption of <%= YAxisScaling.scale_num(avg_school_day_gas_consumption) %> kWh</li>
+        <li>An average weekend day consumption of <%= YAxisScaling.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
+        <li>An average holiday day consumption of <%= YAxisScaling.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
+        <li>Likely overall efficiency: <%= percent(efficiency * 0.6) %></li>
+        <li>Estimate of annual cost for hot water: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
+        <li>Benchmark annual usage for school of same size <%= YAxisScaling.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
+        <li>If the school matched the annual benchmark consumption it would save the equivalent of <%= baths_savings %> baths
+        of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
+      </ul>
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1449,5 +1450,5 @@ class HotWaterAdvice < DashboardChartAdviceBase
       @hotwater_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@school)
     end
     @hotwater_model
-  end 
+  end
 end
