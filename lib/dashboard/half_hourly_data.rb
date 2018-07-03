@@ -20,6 +20,8 @@ class HalfHourlyData < Hash
 
     data_count = validate_data(half_hourly_data_x48)
 
+    @cache_days_totals.delete(date)
+    
     if data_count != 48
       puts "Missing data: #{date}: only #{data_count} of 48"
     end

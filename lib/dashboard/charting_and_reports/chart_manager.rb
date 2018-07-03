@@ -57,6 +57,27 @@ class ChartManager
       inject:           :benchmark
       # timescale:        :year
     },
+    gas_longterm_trend: {
+      name:             'Gas: long term trends',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :year,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays
+    },
+    electricity_longterm_trend: {
+      name:             'Electricity: long term trends',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allelectricity,
+      x_axis:           :year,
+      series_breakdown: :daytype,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
     daytype_breakdown_gas: {
       name:             'Breakdown by type of day/time: Gas',
       chart1_type:      :pie,

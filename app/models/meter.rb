@@ -3,8 +3,7 @@ class Meter
   # Extra fields - potentially a concern or mix-in
   attr_reader :building, :fuel_type, :floor_area, :number_of_pupils
   attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters
-  attr_reader :meter_correction_rules
-  attr_accessor :amr_data
+  attr_accessor :amr_data, :meter_correction_rules
 
   # Energy Sparks activerecord fields:
   attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at

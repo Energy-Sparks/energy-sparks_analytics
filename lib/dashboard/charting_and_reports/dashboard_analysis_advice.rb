@@ -452,7 +452,7 @@ class GasHeatingIntradayAdvice < DashboardChartAdviceBase
       <%= @body_start %>
         <p>
         Its a useful graph for determining how well controlled the timing of the boiler is?
-        A well timed boiler should only come on on average at about 6:00am in the morning
+        A well timed boiler should only come on at about 6:00am in the morning
         to get the school up to temperature by 8:00am, and then turn off again about half
         and hour before the school closes.
         </p>
@@ -460,7 +460,7 @@ class GasHeatingIntradayAdvice < DashboardChartAdviceBase
         Does you school's boiler control in the graph above do this?
         Is the timing of the boiler 'well controlled'?
         If it isn't you might need to speak to your building manager or caretaker and
-        ask why? There its lots of advice on our dashboard advice webpage about this.
+        ask why? There is lots of advice on our dashboard advice webpage about this.
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1155,7 +1155,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
           <li>And, the internal temperature is below 8C</li>
           <li>And, for some controllers if the temperature of the water in the central heating system is below 2C</li>
         </ul>
-        Typically this means the 'frost protection' only turns the heating on if it is cold outside, AND
+        Typically, this means the 'frost protection' only turns the heating on if it is cold outside, AND
         the heating has been off for at least 24 hours - as it normally takes this long for a school to
         cool down and the internal temperature of the school to drop below 8C. So, in general in very cold weather
         the heating would probably not come on a Saturday, but on a Sunday when the school has cooled down
@@ -1201,15 +1201,15 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         day then much less energy will be used.
       </p>
       <p>
-      Can you see any of these chracteristics on the graph above, or the two other example
+      Can you see any of these characteristics in the graph above, or the two other example
       graphs for your school below?
       </p>
       <% end %>
       <% if @chart_type == :frost_3 %>
         <p>
         The graphs can be difficult to interpret sometimes, so if you are uncertain about what
-        you are seeing please contact us <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a>
-        and we will look for you, and let you know what we think?
+        you are seeing please contact us <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a> 
+        and we will look for you, and let you know what we think.
         think.
         </p>
         <p>
@@ -1217,8 +1217,8 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         <ul>
           <li>Without frost protection, a school either risks pipework damage, or
               is forced to leave their heating on at maximum power over cold weeks and holidays</li>
-          <li>Sometimes, they are missed condigured, so come on when the temperature is above 4C outside,
-          or are configured to come on and bring the school up to too high a temperature e.g. 20C</li>
+          <li>Sometimes, frost protection is mis-configured, so comes on when the temperature is above 4C outside,
+          or is configured to come on and bring the school up to too high a temperature e.g. 20C.</li>
         </ul>
         </p>
       <% end %>  
@@ -1254,7 +1254,7 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
         signifcantly. It is common, particularly in Spring for outside temperatures to increase by
         more than 10C during the day (called a large diurnal temperature range, typically caused
         by a cold ground temperatures after the winter reducing overnight temperatures,
-        and warm Spring subshine during the day).
+        and warm Spring sunshine during the day).
         In theory if outside temperatures rise by 10C, then the heating loss through a building's
         fabric (walls, windows etc.) will more than halve (as the heat loss is proportional
         to the difference between outside and inside temperatures). If the school has good thermostatic
@@ -1275,14 +1275,14 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
       <%= @body_start %>
       <% if @chart_type == :thermostatic_control_large_diurnal_range_1 %>
       <p>
-        We can't automate this analysis, so you will need to look at the chart for yuorself and
+        We can't automate this analysis, so you will need to look at the chart for you and
         decide: as the outside temperature rises (dark blue line), does the school's gas consumption
         drop signifcantly?
       </p>
       <% end %>
       <% if @chart_type == :thermostatic_control_large_diurnal_range_3 %>
         <p>
-        Do any of these charts indicate there is more thermostatic control? You would see this
+        Do any of these charts indicate there is poor thermostatic control? You would see this
         if the gas consumption varied little during the day?
         </p>
       <% end %>  
@@ -1305,7 +1305,7 @@ class HeatingOptimumStartAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :optimum_start %>
-        <h3>Optimum Start Control? And, is your boiler turning on too early being elft on too late?</h3>
+        <h3>Optimum Start Control? Or, is your boiler turning on too early or being left on too late??</h3>
         <p>
         Most modern commercial boilers used in schools support 'optimum start control' - this is
         where the boiler controller learns over time how long it takes to heat up a school
@@ -1344,7 +1344,7 @@ class HeatingOptimumStartAdvice < DashboardChartAdviceBase
       This graph is also useful in determining whether your boiler is starting at a reasonable
       time in the morning. It depends a little on the school, but for these 2 days you might expect
       the boiler to start at 5:30am on the colder day and perhaps 06:30am on the milder day. Is this
-      the case for yor school?
+      the case for your school?
       </p>
       <p>
       Is the heating also turning off at a reasonable time, perhaps half an hour before school closing time?
@@ -1371,7 +1371,12 @@ class HotWaterAdvice < DashboardChartAdviceBase
     avg_holiday_day_gas_consumption = hotwater_model.avg_holiday_day_gas_consumption
     avg_weekend_day_gas_consumption = hotwater_model.avg_weekend_day_gas_consumption
     annual_hotwater_kwh_estimate = hotwater_model.annual_hotwater_kwh_estimate
-    benchmark_hotwater_kwh = hotwater_model.benchmark_annual_pupil_kwh * @school.number_of_pupils
+    benchmark_hotwater_kwh = AnalyseHeatingAndHotWater::HotwaterModel.benchmark_annual_pupil_kwh * @school.number_of_pupils
+    annual_benchmark_saving = (annual_hotwater_kwh_estimate - benchmark_hotwater_kwh)
+    _litres_savings = AnalyseHeatingAndHotWater::HotwaterModel.litres_of_hotwater(annual_benchmark_saving)
+    baths_savings = AnalyseHeatingAndHotWater::HotwaterModel.baths_of_hotwater(annual_benchmark_saving)
+    baths_savings = (baths_savings / 100.0).round(0) * 100.0
+    baths_per_pupil = (baths_savings / @school.number_of_pupils).round(0)
     
     efficiency = hotwater_model.efficiency
 
@@ -1390,13 +1395,13 @@ class HotWaterAdvice < DashboardChartAdviceBase
         permanently in a loop around the school so hot water is immediately available
         when someone turns on a tap rather than having to wait for the hot water to come
         all the way from the boiler room. The circulatory pipework used to do this is often
-        poorly insulated, and loses heat, often these types of systems are only 20% efficient
+        poorly insulated, and loses heat. Often these types of systems are only 20% efficient
         compared with direct point of use water heaters which are often over 90% efficient.
         </p>
         <p>
         The graph below attempts to analyse your school's hot water system by looking
         at the heating over the course of the summer, just before and during the start
-        of the summer holidays. If the hot water has been accidently left on during the summer
+        of the summer holidays. If the hot water has been accidentally left on during the summer
         holidays, it is possible to see how efficient the hot water system is by
         comparing the difference in consumption between occupied and unoccupied days.
         </p>
@@ -1421,11 +1426,13 @@ class HotWaterAdvice < DashboardChartAdviceBase
         The Energy Sparks automated analysis suggests the following:
         <ul>
           <li>An average school day consumption of <%= YAxisScaling.scale_num(avg_school_day_gas_consumption) %> kWh</li>
-          <li>An average weekend consumption of <%= YAxisScaling.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
-          <li>An average holiday consumption of <%= YAxisScaling.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
-          <li>Efficiency: <%= percent(efficiency) %></li>
-          <li>Estimate of annual cost: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
-          <li>Benchmark usage for school of same size <%= YAxisScaling.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
+          <li>An average weekend day consumption of <%= YAxisScaling.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
+          <li>An average holiday day consumption of <%= YAxisScaling.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
+          <li>Likely overall efficiency: <%= percent(efficiency * 0.6) %></li>
+          <li>Estimate of annual cost for hot water: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
+          <li>Benchmark annual usage for school of same size <%= YAxisScaling.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
+          <li>If the school matched the annual benchmark consumption it would save the equivalent of <%= baths_savings %> baths
+          of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
         </ul>
       </p>
       <p>
