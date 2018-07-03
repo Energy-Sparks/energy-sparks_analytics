@@ -35,10 +35,10 @@ class DashboardReports
     puts "\n" * 8
   end
 
-  def self.suppress_output
+  def self.suppress_output(school_name)
     begin
       original_stdout = $stdout.clone
-      $stdout.reopen(File.new('./Results/suppressed_log.txt', 'w'))
+      $stdout.reopen(File.new('./Results/' + school_name + 'loading log.txt', 'w'))
       retval = yield
     rescue StandardError => e
       $stdout.reopen(original_stdout)
@@ -68,7 +68,7 @@ class DashboardReports
     @school_name = school_name
     if suppress_debug
       puts 'Loading school data.....output suppressed'
-      self.class.suppress_output {
+      self.class.suppress_output(school_name) {
         @school = $SCHOOL_FACTORY.load_school(school_name)
       }
     else

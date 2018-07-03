@@ -1,3 +1,4 @@
+require_relative '../data_sources/school_date_period' # PH(03Jul2018) - James this probably needs fixing, there is a ruby loading order issue
 # holds holiday data as an array of hashes - one hash for each holiday period
 class HolidayData < Array
   def add(title, start_date, end_date)
@@ -31,18 +32,22 @@ end
 class Holidays
   def initialize(holiday_data)
     @holidays = holiday_data
-    @cached_holiday_lookup = {}
+    @cached_holiday_lookup = {} # for speed, 
   end
 
   def holiday?(date)
+    !holiday(date).nil?
+  end
+
+  # returns a holiday period corresponding to a date, nil if not a date
+  def holiday(date)
     # check cache, as lookup currently loops through list of holidays
     # speeds up this function for 48x365 loopup report by 0.5s (0.6s to 0.1s)
     if @cached_holiday_lookup.key?(date)
       return @cached_holiday_lookup[date]
     end
-    holiday = find_holiday(date) != nil
-    @cached_holiday_lookup[date] = holiday
-    holiday
+    @cached_holiday_lookup[date] = find_holiday(date)
+    @cached_holiday_lookup[date]
   end
 
   def is_weekend(date)
@@ -61,6 +66,18 @@ class Holidays
 
       days_in_holiday = (hol.end_date - hol.start_date + 1).to_i
       if days_in_holiday > 4 * 7 && date > hol.end_date
+        return hol
+      end
+    end
+    nil
+  end
+
+  def find_summer_holiday_after(date)
+    @holidays.each do |hol|
+      # identify summer holiday by length, then month (England e.g. Mon 9 Jul 2018 - Wed 4 Sep 2018  Scotland e.g. Mon 1 Jul 2019 - 13 Aug 2019
+
+      days_in_holiday = (hol.end_date - hol.start_date + 1).to_i
+      if days_in_holiday > 4 * 7 && date < hol.start_date
         return hol
       end
     end
@@ -114,7 +131,8 @@ class Holidays
       return acy_years if previous_summer_hol.end_date < start_date
 
       year_name = previous_summer_hol.end_date.year.to_s + '/' + last_summer_hol.start_date.year.to_s
-      acy_years.push(SchoolDatePeriod.new(:academic_year, year_name, previous_summer_hol.end_date + 1, last_summer_hol.end_date))
+      AcademicYear.new(previous_summer_hol.end_date + 1, last_summer_hol.end_date)
+      acy_years.push(AcademicYear.new(previous_summer_hol.end_date + 1, last_summer_hol.end_date, @holidays))
 
       last_summer_hol = previous_summer_hol
     end
@@ -152,5 +170,111 @@ class Holidays
     end
 
     yrs_to_date
+  end
+
+
+  class AcademicYear < SchoolDatePeriod
+    attr_reader :holidays_in_year
+    def initialize(start_date, end_date, full_holiday_schedule)
+      year_name = start_date.year.to_s + '/' + end_date.year.to_s
+      super(:academic_year, year_name, start_date, end_date)
+      @holidays_in_year = find_holidays_in_year(full_holiday_schedule)
+    end
+    
+    def find_holidays_in_year(full_holiday_schedule)
+      hols = []
+      full_holiday_schedule.each do |hol|
+        if hol.start_date >= start_date && hol.end_date <= end_date
+          hols.push(hol)
+        end
+      end
+      hols
+    end
+  end
+
+  def academic_year(date)
+    summer_hol_before = find_summer_holiday_before(date)
+    summer_hol_after = find_summer_holiday_after(date)
+    if summer_hol_before.nil? || summer_hol_after.nil?
+      puts "Warning: unable to find academic year for date #{date}"
+      nil
+    else  
+      acy_year = AcademicYear.new(summer_hol_before.end_date + 1, summer_hol_after.end_date, @holidays)
+      puts "Found academic year for date #{date} - year from #{acy_year.start_date} #{acy_year.end_date}"
+      acy_year
+    end
+  end
+
+  # returns current academic year if n = 0, next if n = 1, 2 before if n = -2
+  def nth_academic_year_from_date(n, date, raise_exception = true)
+    this_year = academic_year(date)
+    raise EnergySparksUnexpectedStateException.new("Cannnot find current academic year for date #{date}") if this_year.nil?
+    # slightly crude way of doing this
+    mid_point_of_year = this_year.start_date + 180
+    day_in_middle_of_wanted_year = mid_point_of_year + n * 365
+    wanted_year = academic_year(day_in_middle_of_wanted_year)
+    raise EnergySparksUnexpectedStateException.new("Cannnot find #{n}th academic year for date #{date}") if wanted_year.nil? && raise_exception
+    wanted_year
+  end
+
+  def find_holiday_in_academic_year(academic_year, holiday_type)
+    hol = find_holiday_in_academic_year_private(academic_year, holiday_type)
+    if hol.nil?
+      puts "Unable to find holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date}"
+    else
+      puts "Found holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date} from #{hol.start_date} to #{hol.end_date}"
+    end
+    hol
+  end
+
+  # for holidays types see code
+  def find_holiday_in_academic_year_private(academic_year, holiday_type)
+    academic_year.holidays_in_year.each do |hol|
+      case holiday_type
+      when :xmas
+        return hol if hol.start_date.month == 12 && hol.days > 5
+      when :spring_half_term
+        return hol if (hol.start_date.month == 2 || (hol.start_date.month == 1 && hol.end_date.month == 2)) && hol.days > 3
+      when :easter
+        return hol if (hol.start_date.month == 3 || hol.start_date.month == 4) && hol.days > 4
+      when :mayday
+        return hol if hol.start_date.month == 5 && hol.days <= 2
+      when :summer_half_term
+        return hol if hol.start_date.month == 5 && hol.days > 2
+      when :summer
+        return hol if (hol.start_date.month == 6 || hol.start_date.month == 7) && hol.days > 10
+      when :autumn_half_term
+        return hol if hol.start_date.month == 10 && hol.days > 3
+      else
+        raise EnergySparksUnexpectedStateException.new("Unknown holiday type #{holiday_type}")
+      end
+    end
+    nil
+  end
+
+  # returns which holiday this is, not self as may eventually
+  # have to reference its own holiday schedule
+  # would be best if list were an enumeration, but these aren't supported outside rails
+  def type(date)
+    case date.month
+    when 1, 12
+      :xmas
+    when 2
+      :spring_half_term
+    when 3, 4
+      :easter
+    when 5
+      if date.day < 15
+        :mayday
+      else
+        :summer_half_term
+      end
+    when 7, 8, 9
+      :summer
+    when 10, 11
+      :autumn_half_term
+    else
+      nil
+    end
   end
 end

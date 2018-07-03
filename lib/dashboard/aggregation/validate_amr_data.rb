@@ -24,6 +24,11 @@ class ValidateAMRData
       puts "Meter Correction Rules"
       puts @meter.meter_correction_rules.inspect
     end
+    add_meter_correction_rules
+  end
+
+  def add_meter_correction_rules
+    MeterAdjustments.meter_adjustment(@meter)
   end
 
   def validate
@@ -33,6 +38,7 @@ class ValidateAMRData
     meter_corrections unless @meter.meter_correction_rules.nil?
     check_for_long_gaps_in_data
     fill_in_missing_data
+    correct_holidays_with_adjacent_academic_years
     final_report_for_missing_data_set_to_small_negative
     puts "=" * 150
   end
@@ -40,6 +46,13 @@ class ValidateAMRData
   def meter_corrections
     puts '-' * 80
     puts 'Manually defined meter corrections'
+    if @meter.meter_correction_rules.key?(:rescale_amr_data)
+      scale_amr_data(
+        @meter.meter_correction_rules[:rescale_amr_data][:start_date],
+        @meter.meter_correction_rules[:rescale_amr_data][:end_date],
+        @meter.meter_correction_rules[:rescale_amr_data][:scale]
+      )
+    end
     if @meter.meter_correction_rules.key?(:readings_start_date)
       puts "Fixing start date to #{@meter.meter_correction_rules[:readings_start_date]}"
       @amr_data.set_min_date(@meter.meter_correction_rules[:readings_start_date])
@@ -54,9 +67,101 @@ class ValidateAMRData
     end
   end
 
+  # typically is imperial to metric meter readings aren't corrected to kWh properly at source
+  def scale_amr_data(start_date, end_date, scale)
+    puts "Scaling data between #{start_date} and #{end_date} by #{scale} - imperial to SI conversion?"
+    (start_date..end_date).each do |date|
+      if @amr_data.key?(date)
+        data_x48 = @amr_data[date]
+        (0..47).each do |halfhour_index|
+          data_x48[halfhour_index] *= scale
+        end
+        @amr_data.add(date, data_x48)
+      end
+    end
+  end
+
+  def correct_holidays_with_adjacent_academic_years
+    missing_holiday_dates = []
+    (@amr_data.start_date..@amr_data.end_date).each do |date|
+      missing_holiday_dates.push(date) if !@amr_data.key?(date) && @holidays.holiday?(date)
+    end
+
+    missing_holiday_dates.each do |date|
+      puts "Searching for matching missing holiday data for #{date} from subsequent or previous academic years"
+      begin
+        holiday_type = @holidays.type(date)
+        hol = similar_holiday(date, holiday_type, 1) # try following academic year
+        if hol.nil? || hol.end_date > @amr_data.end_date # assume temperatures always have more data than amr, so don't test
+          puts "Warning: no holiday data for following year trying previous year" if hol.nil?
+          puts 'Trying previous holiday as no amr data for the subsequent holiday period' if !hol.nil? && hol.end_date > @amr_data.end_date
+          puts 'Trying previous year instead'
+          hol = similar_holiday(date, holiday_type, -1) # try previous academic year
+        end
+        if hol.nil? || hol.end_date > @amr_data.end_date || hol.start_date < @amr_data.start_date
+          puts "Warning: unable to find suitable replacement holiday periods for #{date}"
+          if hol.nil?
+            puts 'Because cannot find suitable holiday'
+          elsif hol.end_date > @amr_data.end_date || hol.start_date < @amr_data.start_date
+            puts 'Because no amr data for holiday'
+          else
+            puts 'Because of an unknown reason'
+          end
+        else
+          puts "Planning on correcting with #{hol.start_date} #{hol.end_date}"
+          adjusted_date = find_similar_day_of_the_week(hol, date.wday)
+          if @meter.meter_type == :electricity
+            put "Correcting missing electricity holiday on #{date} with data from #{adjusted_date}"
+            @amr_data.add(date, @amr_data[adjusted_date])
+          elsif @meter.meter_type == :gas
+            # perhaps would be better if substitute similar weekday had matching temperatures?
+            # probably better this way if thermally massive building?
+            if @amr_data.key?(adjusted_date)
+              puts "Correcting missing gas holiday on #{date} with data from #{adjusted_date}"
+              @amr_data.add(date, adjusted_substitute_heating_kwh(date, adjusted_date))
+            else
+              puts "Warning: unable to find substitute holiday data for #{date} as substitute data #{adjusted_date} has no AMR data"
+              puts "Warning: setting this date #{date} to zero"
+              @amr_data.add(date, Array.new(48, 0.0)) # have to assume if no replacement holiday reading gas was completely off
+            end
+          end
+        end
+      rescue EnergySparksUnexpectedStateException => e
+        puts "Comment: deliberately rescued missing holiday data exception for date #{date}"
+        puts e.message
+      end
+    end
+  end
+
+  def find_similar_day_of_the_week(holiday_period, day_of_week)
+    (holiday_period.start_date..holiday_period.end_date).each do |date|
+      return date if date.wday == day_of_week
+    end
+    holiday_period.start_date # worst case just return the 1st day
+  end
+
+  def similar_holiday(date, holiday_type, year_offset)
+    unless holiday_type.nil?
+      nth_academic_year = @holidays.nth_academic_year_from_date(year_offset, date, false)
+      unless nth_academic_year.nil?
+        hols = @holidays.find_holiday_in_academic_year(nth_academic_year, holiday_type)
+        if hols.nil?
+          puts "Unable to find holiday of type #{holiday_type} and date #{date}  and offset #{year_offset}"
+          return nil
+        else
+          puts "Got similar holiday for date #{hols.start_date} #{hols.end_date}"
+          return hols
+        end
+      else
+        return nil
+      end
+    end
+  end
+
   def final_report_for_missing_data_set_to_small_negative
     puts '>' * 100
-    puts 'At the end of the meter validation process the following amr data is still missing (setting to -0.5555):'
+    puts "For meter of type #{@meter.meter_type} #{@meter.name} #{@meter.id}:"
+    puts 'At the end of the meter validation process the following amr data is still missing (setting to 0.0123456):'
     missing_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if !@amr_data.key?(date)
@@ -66,7 +171,7 @@ class ValidateAMRData
     print_array_of_dates_in_columns(missing_dates, 4, STDERR)
     print_array_of_dates_in_columns(missing_dates, 4, STDOUT)
     missing_dates.each do |date|
-      @amr_data.add(date, Array.new(48, -0.5555))
+      @amr_data.add(date, Array.new(48, 0.0123456))
     end
     puts '>' * 100
   end
