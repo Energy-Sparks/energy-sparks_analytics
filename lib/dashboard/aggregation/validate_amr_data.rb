@@ -35,8 +35,8 @@ class ValidateAMRData
     puts "=" * 150
     puts "Validating meter data of type #{@meter.meter_type} #{@meter.name} #{@meter.id}"
     # ap(@meter, limit: 5, :color => {:float  => :red})
-    meter_corrections unless @meter.meter_correction_rules.nil?
     check_for_long_gaps_in_data
+    meter_corrections unless @meter.meter_correction_rules.nil?
     fill_in_missing_data
     correct_holidays_with_adjacent_academic_years
     final_report_for_missing_data_set_to_small_negative
@@ -201,6 +201,7 @@ class ValidateAMRData
   end
 
   def check_for_long_gaps_in_data
+    puts "Checking for long gaps"
     gap_count = 0
     first_bad_date = Date.new(2050, 1, 1)
     (@amr_data.start_date..@amr_data.end_date).reverse_each do |date|
@@ -217,6 +218,7 @@ class ValidateAMRData
         msg += ' as gap of more than ' + @max_days_missing_data.to_s + ' days '
         msg += (@amr_data.keys.index(min_date) - 1).to_s + ' days of data ignored'
         @data_problems['Too much missing data'] = msg
+  puts msg
       end
     end
   end
