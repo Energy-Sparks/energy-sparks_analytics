@@ -132,13 +132,13 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   def generate_advice
     puts @school.name
-    electric_usage = get_energy_usage('electricity', :electricity, 0)
-    gas_usage = get_energy_usage('gas', :gas, 0)
+    electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
+    gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
 
     address = @school.postcode.nil? ? @school.address : @school.postcode
 
-    electric_comparison = comparison('electricity', :electricity)
-    gas_comparison = comparison('gas', :gas)
+    electric_comparison_regional = comparison('electricity', :electricity, index_of_data("Regional Average"))
+    gas_comparison_regional = comparison('gas', :gas, index_of_data("Regional Average"))
 
     header_template = %{
       <%= @body_start %>
@@ -154,8 +154,8 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
       <p>
         Your school spent <%= electric_usage %> on electricity
         and <%= gas_usage %> on gas last year.
-        The electricity usage <%= electric_comparison %>.
-        The gas usage <%= gas_comparison %>:
+        The electricity usage <%= electric_comparison_regional %>.
+        The gas usage <%= gas_comparison_regional %>:
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -164,28 +164,32 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <p>
-        Your gas usage is <%= percent_regional_gas_str %> of the regional average which
-        <% if percent_gas_of_regional_average < 0.7 %>
+      <% if actual_gas_usage > 0 %>
+        Your gas usage is <%= percent(percent_gas_of_regional_average) %> of the regional average which
+        <% if actual_gas_usage < exemplar_gas_usage %>
           is very good.
-        <% elsif percent_gas_of_regional_average < 1.0 %>
-          while although good, could be improved, better schools achieve 70% of the regional average,
-          which would save you <%= pound_gas_saving_versus_benchmark %> per year.
         <% else %>
-          is above average, the school should aim to reduce this,
-          which would save you <%= pound_gas_saving_versus_benchmark %> per year
-          if you matched the usage of energy efficient schools.
+          <% if actual_gas_usage < average_regional_gas_usage %>
+            while although good, could be improved
+          <% else %>
+            is above average, the school should aim to reduce this,
+          <% end %>
+          which would save you <%= pound_gas_saving_versus_exemplar %> per year if you matched the most energy efficient (exemplar) schools.
         <% end %>
-        Your electricity usage is <%= percent_regional_electricity_str %> of the regional average which
-        <% if percent_electricity_of_regional_average < 0.7 %>
+      <% end %>
+      <% if actual_electricity_usage > 0 %>
+        Your electricity usage is <%= percent(percent_electricity_of_regional_average) %> of the regional average which
+        <% if actual_electricity_usage < exemplar_electricity_usage %>
           is very good.
-        <% elsif percent_electricity_of_regional_average < 1.0 %>
-          while although good, could be improved, better schools achieve 70% of the regional average,
-            which would save you <%= pound_electricity_saving_versus_benchmark %> per year.
         <% else %>
-          is above average, the school should aim to reduce this,
-          which would save you <%= pound_electricity_saving_versus_benchmark %> per year
-          if you matched the usage of energy efficient schools.
+          <% if actual_electricity_usage < average_regional_electricity_usage %>
+            while although good, could be improved
+          <% else %>
+            is above average, the school should aim to reduce this,
+          <% end %>
+          which would save you <%= pound_electricity_saving_versus_exemplar %> per year if you matched the most energy efficient (exemplar) schools.
         <% end %>
+      <% end %>
       </p>
       <p>
         <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
@@ -203,50 +207,50 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def actual_electricity_usage
-    @chart_data[:x_data]['electricity'][0]
+    @chart_data[:x_data]['electricity'][index_of_most_recent_date]
   end
 
   def actual_gas_usage
-    @chart_data[:x_data]['gas'][0]
+    @chart_data[:x_data]['gas'][index_of_most_recent_date]
+  end
+
+  def average_regional_electricity_usage
+    @chart_data[:x_data]['electricity'][index_of_data("Regional Average")]
+  end
+
+  def average_regional_gas_usage
+    @chart_data[:x_data]['gas'][index_of_data("Regional Average")]
+  end
+
+  def exemplar_electricity_usage
+    @chart_data[:x_data]['electricity'][index_of_data("Exemplar School")]
+  end
+
+  def exemplar_gas_usage
+    @chart_data[:x_data]['gas'][index_of_data("Exemplar School")]
   end
 
   def percent_gas_of_regional_average
-    actual_gas_usage / benchmark_gas_usage
+    actual_gas_usage / average_regional_gas_usage
   end
 
   def percent_electricity_of_regional_average
-    actual_electricity_usage / benchmark_electricity_usage
+    actual_electricity_usage / average_regional_electricity_usage
   end
 
-  def percent_regional_gas_str
-    percent(percent_gas_of_regional_average)
-  end
-
-  def percent_regional_electricity_str
-    percent(percent_electricity_of_regional_average)
-  end
-
-  def benchmark_electricity_usage
-    @chart_data[:x_data]['electricity'][-1]
-  end
-
-  def pound_gas_saving_versus_benchmark
-    pounds = actual_gas_usage - benchmark_gas_usage * 0.7
+  def pound_gas_saving_versus_exemplar
+    pounds = actual_gas_usage - exemplar_gas_usage
     pounds_to_pounds_and_kwh(pounds, :gas)
   end
 
-  def pound_electricity_saving_versus_benchmark
-    pounds = actual_electricity_usage - benchmark_electricity_usage * 0.7
+  def pound_electricity_saving_versus_exemplar
+    pounds = actual_electricity_usage - exemplar_electricity_usage
     pounds_to_pounds_and_kwh(pounds, :electricity)
   end
 
-  def benchmark_gas_usage
-    @chart_data[:x_data]['gas'][-1]
-  end
-
-  def comparison(type_str, type_sym)
-    spent = get_energy_usage(type_str, type_sym, -1)
-    if @chart_data[:x_data][type_str][0] > @chart_data[:x_data][type_str][-1]
+  def comparison(type_str, type_sym, with)
+    spent = get_energy_usage(type_str, type_sym, with)
+    if @chart_data[:x_data][type_str][index_of_most_recent_date] > @chart_data[:x_data][type_str][with]
       'is more than similar regional schools which spent ' + spent
     else
       'is less than similar regional schools which spent ' + spent
@@ -258,6 +262,26 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     pounds_to_pounds_and_kwh(pounds, type_sym)
   end
 
+  def index_of_data(name)
+    @chart_data[:x_axis].find_index(name)
+  end
+
+  def index_of_most_recent_date
+    converted_to_date_or_nil = []
+    @chart_data[:x_axis].each do |series_name|
+      converted_to_date_or_nil.push(parse_axis_date(series_name))
+    end
+    sorted_list = converted_to_date_or_nil.sort { |a,b| a && b ? b <=> a : b ? 1 : -1 } # newest date 1st, nils at end
+    converted_to_date_or_nil.find_index(sorted_list[0])
+  end
+
+  def parse_axis_date(series_name)
+    begin
+      Date.Parse(series_name)
+    rescue StandardError => _e
+      nil
+    end
+  end
 end
 
 #==============================================================================
