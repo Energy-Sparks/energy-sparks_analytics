@@ -586,12 +586,12 @@ class ChartManager
     chart_definition
   end
 
-  def run_chart(chart_config, chart_param)
+  def run_chart(chart_config, chart_param, show_reconciliation_values = true)
     # puts 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red })
 
     begin
-      aggregator = Aggregator.new(@school, chart_config)
+      aggregator = Aggregator.new(@school, chart_config, show_reconciliation_values)
 
       # rubocop:disable Lint/AmbiguousBlockAssociation
       puts Benchmark.measure { aggregator.aggregate }

@@ -8,7 +8,8 @@
 class Aggregator
   attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis, :data_labels
 
-  def initialize(meter_collection, chart_config)
+  def initialize(meter_collection, chart_config, show_reconciliation_values)
+    @show_reconciliation_values = show_reconciliation_values
     @meter_collection = meter_collection
     @chart_config = chart_config
     @data_labels = nil
@@ -17,7 +18,7 @@ class Aggregator
   def title_summary
     if @chart_config[:yaxis_units] == :kw || @chart_config[:inject] == :benchmark
       ''
-    else
+    elsif show_reconciliation_values
       y_axis_label(@total_of_unit)
     end
   end
@@ -255,7 +256,7 @@ private
     # insert dates back in as 'silent' y2_axis
     @data_labels = x_axis
   end
-  
+
   # remove zero data - issue with filtered scatter charts, and the difficulty or representing ni (NaN) in Excel charts
   # the issue is the xbuckector doesn't know in advance the data is to be filtered based on the data
   # but the charting products can;t distinguish between empty data and zero data
