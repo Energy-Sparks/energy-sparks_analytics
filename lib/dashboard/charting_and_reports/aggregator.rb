@@ -18,7 +18,7 @@ class Aggregator
   def title_summary
     if @chart_config[:yaxis_units] == :kw || @chart_config[:inject] == :benchmark
       ''
-    elsif show_reconciliation_values
+    elsif @show_reconciliation_values
       y_axis_label(@total_of_unit)
     end
   end

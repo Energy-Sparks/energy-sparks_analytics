@@ -296,9 +296,9 @@ module AnalyseHeatingAndHotWater
       puts "=" * 100
       puts "Deliberate backtrace to find caller:"
       puts "=" * 100
-      puts Thread.current.backtrace.join("\n")
-      puts "=" * 100
-      
+      # puts Thread.current.backtrace.join("\n")
+      # puts "=" * 100
+
       degreedays_at_18c = @base_degreedays_temperature - 18
       degreedays_at_18c = 0.0 if degreedays_at_18c < 0.0
       @halfway_kwh = @models[:heating_occupied].predicted_kwh_degreedays(degreedays_at_18c)
