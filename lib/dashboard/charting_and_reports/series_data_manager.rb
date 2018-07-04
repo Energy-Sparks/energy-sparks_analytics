@@ -57,7 +57,7 @@ class SeriesNames
 
   USEFULHOTWATERUSAGE = 'Hot Water Usage'.freeze
   WASTEDHOTWATERUSAGE = 'Wasted Hot Water Usage'.freeze
-  HOTWATERSERIESNAMES = [WASTEDHOTWATERUSAGE.freeze, USEFULHOTWATERUSAGE.freeze].freeze
+  HOTWATERSERIESNAMES = [USEFULHOTWATERUSAGE.freeze, WASTEDHOTWATERUSAGE.freeze].freeze
 
   NONE            = 'Energy'.freeze
 
