@@ -52,8 +52,8 @@ class ElectricitySimulator
     appliance_definitions = {
       lighting:
       {
-        lumens_per_watt: 50.0,
-        lumens_per_m2: 450.0,
+        lumens_per_watt: 50.0, # 1
+        lumens_per_m2: 450.0,# 1
         percent_on_as_function_of_solar_irradiance: {
           solar_irradiance: [0, 100, 200, 300, 400, 500, 600,  700, 800, 900, 1000, 1100, 1200],
           percent_of_peak: [0.9, 0.8, 0.7, 0.6, 0.5, 0.2, 0.2, 0.15, 0.1, 0.1,  0.1,  0.1,  0.1],
@@ -64,30 +64,30 @@ class ElectricitySimulator
       ict: {
         'Servers1' => {
           type: 					          :server,
-          number:					          2.0,
-          power_watts_each:	        300.0,
+          number:					          2.0, # 1
+          power_watts_each:	        300.0, # 1
           air_con_overhead_pecent:	0.2
         },
-        'Servers2' => {
+        'Servers2' => { #### Example use only, not required immediately
           type: 					          :server,
-          number:					          1.0,
-          power_watts_each:			    500.0,
+          number:					          1.0, # 1
+          power_watts_each:			    500.0,# 1
           air_con_overhead_pecent:	0.3
         },
         'Desktops' => {
           type: 						            :desktop,
-          number:						            20,
-          power_watts_each:				      100,
-          standby_watts_each:			      10,
+          number:						            20, # 1
+          power_watts_each:				      100, # 1
+          standby_watts_each:			      10, # 1
           usage_percent_by_time_of_day:	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
           weekends:					            true, # left on standy at weekends
           holidays:					            false # left on standby during holidays
         },
         'Laptops' => {
           type: 						            :laptop,
-          number:						            20,
-          power_watts_each:			        30,
-          standby_watts_each:			      2
+          number:						            20, # 1
+          power_watts_each:			        30, # 1
+          standby_watts_each:			      2 # 1
         }
       },
       boiler_pumps: {
@@ -95,27 +95,27 @@ class ElectricitySimulator
         heating_season_end_dates: 		[Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
         start_time:					          Time.new(2010,  1,  1,  5, 30, 0),		# Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
         end_time:					            Time.new(2010,  1,  1,  17, 0, 0),		# ditto
-        pump_power:					          0.5,
+        pump_power:					          0.5, # 1 kw
         weekends:					            false,
         holidays:					            true,
         frost_protection_temp:		    4
       },
       security_lighting: {
-        control_type:       'Sunrise/Sunset',	# "Sunrise/Sunset" or "Ambient" or "Fixed Times"
+        control_type:       'Sunrise/Sunset',	# "Sunrise/Sunset" or "Ambient" or "Fixed Times"  # Choose one of these with radio button
         sunrise_times:    	['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
         sunset_times:     	['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
         fixed_start_time:   '19:15',
         fixed_end_time: 	  '07:20',
         ambient_threshold:  50.0,
-        power:	            3.0
+        power:	            3.0 #
       },
       electrical_heating: {},
-      kitchen: {
+      kitchen: {  # 1 all three of these - time of day rathern than 2010
         start_time:  Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
         end_time:    Time.new(2010,  1,  1,  17, 0, 0), # ditto
-        power:       4.0
+        power:       4.0 #
       },
-      summer_air_conn: {
+      summer_air_conn: { # 1 set power to zero for no aie conn
         start_time:               Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
         end_time:                 Time.new(2010,  1,  1,  17, 0, 0), # ditto
         weekends:				          true,
@@ -134,7 +134,7 @@ class ElectricitySimulator
       },
       floodLighting:  {},
       unaccounted_for_baseload: {
-        baseload: (school.floor_area / 1_000.0) * 0.5
+        baseload: (school.floor_area / 1_000.0) * 0.5 # 1 single number - useful
       },
       solar_pv: {}
     }
@@ -256,7 +256,7 @@ class ElectricitySimulator
     @appliance_definitions[:ict].each_value do |ict_appliance_group|
       (server_data.start_date..server_data.end_date).each do |date| # arbitrary use the date list for te servers to iterate on, but the inner work applies via the case statement to desktops or laptops
         on_today = !(@holidays.holiday?(date) && ict_appliance_group.key?(:holidays) && !ict_appliance_group[:holidays])
-        on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])       
+        on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])
         (0..47).each do |half_hour_index|
           if on_today
             if ict_appliance_group.key?(:usage_percent_by_time_of_day)
