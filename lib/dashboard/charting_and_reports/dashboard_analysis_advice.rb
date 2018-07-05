@@ -1146,6 +1146,9 @@ class ElectricityShortTermIntradayAdvice < DashboardChartAdviceBase
       <% when :intraday_line_school_days_6months %>
       <p>
         This graph compares 2 weeks average consumption during the day 6 months apart.
+        Its interesting as it allows you to see the difference between usage at 2 different times
+        of the year, differences can include for example the amount of lighting consumption
+        which impacts the peak usage during the day.
       </p>
       <% when :intraday_line_school_last7days %>
       <% end %>
