@@ -4,6 +4,12 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
+module Logging
+  @logger = Logger.new('log/loggy-mc-logface.log')
+
+  logger.level = :debug
+end
+
 puts "========================================================================================"
 puts  "electrical simulation"
 
