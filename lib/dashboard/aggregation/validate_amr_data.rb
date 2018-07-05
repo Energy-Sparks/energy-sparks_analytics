@@ -317,7 +317,7 @@ class ValidateAMRData
         return [day_before, adjusted_substitute_heating_kwh(date, day_before)]
       end
     end
-    logger.error "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype}"
+    logger.debug "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype}"
     nil
   end
 
