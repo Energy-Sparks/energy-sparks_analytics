@@ -21,7 +21,7 @@ class Temperatures < HalfHourlyData
     avg_temp = 0.0
     (0..47).each do |i|
       if data(date, i).nil?
-        p "No data for #{date} index #{i}"
+        logger.debug "No data for #{date} index #{i}"
       else
         avg_temp += data(date, i) / 48
       end
