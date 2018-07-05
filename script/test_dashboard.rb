@@ -4,6 +4,11 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
+module Logging
+  @logger = Logger.new('log/test-dashboard.log')
+  logger.level = :warn
+end
+
 reports = DashboardReports.new
 
 reports.load_school('St Marks Secondary', true)

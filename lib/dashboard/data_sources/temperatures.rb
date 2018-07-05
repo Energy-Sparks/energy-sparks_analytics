@@ -1,4 +1,6 @@
 class Temperatures < HalfHourlyData
+  include Logging
+
   FROSTPROTECTIONTEMPERATURE = 4.0
   def initialize(type)
     super(type)
@@ -6,8 +8,8 @@ class Temperatures < HalfHourlyData
   end
 
   def get_temperature(date, half_hour_index)
-    puts 'Warning: deprecated interface get_temperature'
-    puts Thread.current.backtrace.join("\n")
+    logger.error 'Warning: deprecated interface get_temperature'
+    logger.error Thread.current.backtrace.join("\n")
     temperature(date, half_hour_index)
   end
 
@@ -171,7 +173,7 @@ class Temperatures < HalfHourlyData
       if frost_degree_hours > 0
         before = (base_temp - avg_temperature)
         after = (base_temp - avg_temperature) + frost_degree_hours / 8.0
-        puts "mod deg days #{date} : #{before} becomes #{after}"
+        logger.debug "mod deg days #{date} : #{before} becomes #{after}"
       end
       return (base_temp - avg_temperature) + 0.0 * frost_degree_hours / 8.0
     else

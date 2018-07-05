@@ -4,6 +4,8 @@ require 'csv'
 # generally data held in derived classes e.g. temperatures, solar insolence, AMR data
 # hash of date => 48 x float values
 class HalfHourlyData < Hash
+  include Logging
+
   attr_reader :type, :validated
   def initialize(type)
     @min_date = Date.new(4000, 1, 1)
@@ -22,7 +24,7 @@ class HalfHourlyData < Hash
     @cache_days_totals.delete(date)
 
     if data_count != 48
-      puts "Missing data: #{date}: only #{data_count} of 48"
+      logger.debug "Missing data: #{date}: only #{data_count} of 48"
     end
   end
 
@@ -67,7 +69,7 @@ class HalfHourlyData < Hash
   def one_day_total(date)
     unless @cache_days_totals.key?(date) # performance optimisation, needs rebenchmarking to check its an actual speedup
       if self[date].nil?
-        puts "Error: missing data for #{self.class.name} on date #{date} returning zero"
+        logger.error "Error: missing data for #{self.class.name} on date #{date} returning zero"
         return 0.0
       end
       total = self[date].inject(:+)
@@ -104,7 +106,7 @@ class HalfHourlyData < Hash
 
   # returns an array of DatePeriod - 1 for each acedemic years, with most recent year first
   def academic_years(holidays)
-    puts "Warning: depricated from this location please use version in Class Holidays"
+    logger.warn "Warning: depricated from this location please use version in Class Holidays"
     holidays.academic_years(start_date, end_date)
   end
 

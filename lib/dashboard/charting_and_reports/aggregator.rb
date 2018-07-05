@@ -6,6 +6,8 @@
 #     y2_axis:  temperature or degree day data - averaged or calculated, not aggregated
 #
 class Aggregator
+  include Logging
+
   attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis, :data_labels
 
   def initialize(meter_collection, chart_config, show_reconciliation_values)
@@ -35,13 +37,13 @@ class Aggregator
     bucketed_period_data = []
 
     if @chart_config.key?(:schools) # TODO(PH,3Jun2018) - complete implementation, issue aligning xbuckets
-      puts 'got more than one school'
+      logger.debug 'got more than one school'
       @chart_config[:schools].each do |school_name|
-        puts ">" * 200
-        puts school_name
+        logger.debug ">" * 200
+        logger.debug school_name
         school = $SCHOOL_FACTORY.load_school(school_name)
-        puts school.name
-        puts ">" * 200
+        logger.debug school.name
+        logger.debug ">" * 200
       end
     end
 
@@ -52,10 +54,10 @@ class Aggregator
       begin
         bucketed_period_data.push(aggregate_period(chartconfig_copy))
       rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-        puts e
-        puts 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+        logger.error e
+        logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
       rescue StandardError => e
-        puts e
+        logger.error e
       end
     end
 
@@ -120,8 +122,8 @@ class Aggregator
   def aggregate_period(chart_config)
     @series_manager = SeriesDataManager.new(@meter_collection, chart_config)
     @series_names = @series_manager.series_bucket_names
-    puts "Aggregating these series #{@series_names}"
-    puts "Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"
+    logger.info "Aggregating these series #{@series_names}"
+    logger.info "Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"
 
     if @series_manager.periods.empty?
       raise "Error: not enough data available to create requested chart"
@@ -129,7 +131,7 @@ class Aggregator
     @xbucketor = XBucketBase.create_bucketor(chart_config[:x_axis], @series_manager.periods)
     @xbucketor.create_x_axis
     @x_axis = @xbucketor.x_axis
-    puts "Breaking down into #{@xbucketor.x_axis.length} X axis (date/time range) buckets"
+    logger.debug "Breaking down into #{@xbucketor.x_axis.length} X axis (date/time range) buckets"
 
     bucketed_data, bucketed_data_count = create_empty_bucket_series
 
@@ -230,7 +232,7 @@ private
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
-  puts "JJJJJJ"
+  logger.debug "JJJJJJ"
     (start_date..end_date).each do |date|
       next if !match_filter_by_day(date)
       (0..47).each do |halfhour_index|
@@ -273,7 +275,7 @@ private
           @bucketed_data[series_name].delete_at(index)
           @bucketed_data_count[series_name].delete_at(index)
         else
-          puts "Error: expecting non nil series name #{series_name}"
+          logger.error "Error: expecting non nil series name #{series_name}"
         end
       end
     end
@@ -282,10 +284,10 @@ private
   # pattern matches on series_names, removing any from list which don't match
   def remove_filtered_series
     keep_key_list = []
-    puts "Y" * 140
+    logger.debug "Y" * 140
     ap(@bucketed_data, limit: 20, color: { float: :red })
-    puts "Filtering #{@bucketed_data.keys}"
-    puts @chart_config[:filter].inspect if @chart_config.key?(:filter)
+    logger.info "Filtering #{@bucketed_data.keys}"
+    logger.debug @chart_config[:filter].inspect if @chart_config.key?(:filter)
     if @chart_config[:series_breakdown] == :submeter
       if @chart_config[:filter].key?(:submeter)
         keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:submeter])
@@ -309,9 +311,9 @@ private
     remove_list.each do |remove_series_name|
       @bucketed_data.delete(remove_series_name)
     end
-    puts "Z" * 140
-    ap(@bucketed_data, limit: 20, color: { float: :red })
-    puts "Filtered #{@bucketed_data.keys}"
+    logger.debug "Z" * 140
+    logger.ap(@bucketed_data, limit: 20, color: { float: :red })
+    logger.debug "Filtered #{@bucketed_data.keys}"
   end
 
   def pattern_match_list_with_list(list, pattern_list)
@@ -327,7 +329,7 @@ private
     # move bucketed data to y2 axis if configured that way
     # does via pattern matching of names to support multiple
     # dated y2 axis series
-    puts "Moving #{@chart_config[:y2_axis]} onto Y2 axis"
+    logger.debug "Moving #{@chart_config[:y2_axis]} onto Y2 axis"
 
     # rubocop:disable Style/ConditionalAssignment
     y2_axis_names = []
@@ -357,7 +359,7 @@ private
   end
 
   def add_to_bucket(bucketed_data, bucketed_data_count, series_name, x_index, value)
-    puts "Unknown series name #{series_name} not in #{bucketed_data.keys}" if !bucketed_data.key?(series_name)
+    logger.debug "Unknown series name #{series_name} not in #{bucketed_data.keys}" if !bucketed_data.key?(series_name)
     bucketed_data[series_name][x_index] += value
     bucketed_data_count[series_name][x_index] += 1 # required to calculate kW
   end
@@ -428,7 +430,7 @@ private
   end
 
   def create_empty_bucket_series
-    puts "Creating empty data buckets #{@series_names} x #{@x_axis.length}"
+    logger.debug "Creating empty data buckets #{@series_names} x #{@x_axis.length}"
     bucketed_data = {}
     bucketed_data_count = {}
     @series_names.each do |series_name|

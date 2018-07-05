@@ -1,6 +1,8 @@
 require_relative '../data_sources/school_date_period' # PH(03Jul2018) - James this probably needs fixing, there is a ruby loading order issue
 # holds holiday data as an array of hashes - one hash for each holiday period
 class HolidayData < Array
+  include Logging
+
   def add(title, start_date, end_date)
     self.push(SchoolDatePeriod.new(:holiday, title, start_date, end_date))
   end
@@ -8,12 +10,14 @@ end
 
 # loads holiday data (from a CSV file), assumes added in date order!
 class HolidayLoader
+  include Logging
+
   def initialize(csv_file, holiday_data)
     read_csv(csv_file, holiday_data)
   end
 
   def read_csv(csv_file, holidays)
-    puts "Reading Holiday data from '#{csv_file}'"
+    logger.debug "Reading Holiday data from '#{csv_file}'"
     datareadings = Roo::CSV.new(csv_file)
     count = 0
     datareadings.each do |reading|
@@ -23,16 +27,18 @@ class HolidayLoader
       holidays.add(title, start_date, end_date)
       count += 1
     end
-    puts "Read #{count} rows"
-    puts "Read #{holidays.length} rows"
+    logger.debug "Read #{count} rows"
+    logger.debug "Read #{holidays.length} rows"
   end
 end
 
 # contains holidays, plus functionality for determining whether a date is a holiday
 class Holidays
+  include Logging
+
   def initialize(holiday_data)
     @holidays = holiday_data
-    @cached_holiday_lookup = {} # for speed, 
+    @cached_holiday_lookup = {} # for speed,
   end
 
   def holiday?(date)
@@ -83,7 +89,7 @@ class Holidays
     end
     nil
   end
-  
+
   # iterate backwards to find nth school week before date, skipping holidays
   # last week = 0, previous school week = -1, iterates on Sunday-Saturday boundary
   def nth_school_week(asof_date, nth_week_number, min_days_in_school_week = 3)
@@ -174,13 +180,15 @@ class Holidays
 
 
   class AcademicYear < SchoolDatePeriod
+    include Logging
+
     attr_reader :holidays_in_year
     def initialize(start_date, end_date, full_holiday_schedule)
       year_name = start_date.year.to_s + '/' + end_date.year.to_s
       super(:academic_year, year_name, start_date, end_date)
       @holidays_in_year = find_holidays_in_year(full_holiday_schedule)
     end
-    
+
     def find_holidays_in_year(full_holiday_schedule)
       hols = []
       full_holiday_schedule.each do |hol|
@@ -196,11 +204,11 @@ class Holidays
     summer_hol_before = find_summer_holiday_before(date)
     summer_hol_after = find_summer_holiday_after(date)
     if summer_hol_before.nil? || summer_hol_after.nil?
-      puts "Warning: unable to find academic year for date #{date}"
+      logger.debug "Warning: unable to find academic year for date #{date}"
       nil
-    else  
+    else
       acy_year = AcademicYear.new(summer_hol_before.end_date + 1, summer_hol_after.end_date, @holidays)
-      puts "Found academic year for date #{date} - year from #{acy_year.start_date} #{acy_year.end_date}"
+      logger.debug "Found academic year for date #{date} - year from #{acy_year.start_date} #{acy_year.end_date}"
       acy_year
     end
   end
@@ -220,9 +228,9 @@ class Holidays
   def find_holiday_in_academic_year(academic_year, holiday_type)
     hol = find_holiday_in_academic_year_private(academic_year, holiday_type)
     if hol.nil?
-      puts "Unable to find holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date}"
+      logger.debug "Unable to find holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date}"
     else
-      puts "Found holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date} from #{hol.start_date} to #{hol.end_date}"
+      logger.debug "Found holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date} from #{hol.start_date} to #{hol.end_date}"
     end
     hol
   end

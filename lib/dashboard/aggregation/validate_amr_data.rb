@@ -5,6 +5,8 @@
 #   - if there are smaller gaps it attempts to fill them in using nearby data
 #   - and if its heat/gas data then it adjusts for temperature
 class ValidateAMRData
+  include Logging
+
   FSTRDEF = '%a %d %b %Y'.freeze # fixed format for reporting dates for error messages
   MAXGASAVGTEMPDIFF = 5 # max average temperature difference over which to adjust temperatures
   attr_reader :data_problems
@@ -20,9 +22,9 @@ class ValidateAMRData
     @bad_data = 0
     @data_problems = {}
     unless @meter.meter_correction_rules.nil?
-      puts "$" * 300 if meter.meter_correction_rules
-      puts "Meter Correction Rules"
-      puts @meter.meter_correction_rules.inspect
+      logger.debug "$" * 300 if meter.meter_correction_rules
+      logger.debug "Meter Correction Rules"
+      logger.debug @meter.meter_correction_rules.inspect
     end
     add_meter_correction_rules
   end
@@ -32,20 +34,20 @@ class ValidateAMRData
   end
 
   def validate
-    puts "=" * 150
-    puts "Validating meter data of type #{@meter.meter_type} #{@meter.name} #{@meter.id}"
+    logger.debug "=" * 150
+    logger.debug "Validating meter data of type #{@meter.meter_type} #{@meter.name} #{@meter.id}"
     # ap(@meter, limit: 5, :color => {:float  => :red})
     check_for_long_gaps_in_data
     meter_corrections unless @meter.meter_correction_rules.nil?
     fill_in_missing_data
     correct_holidays_with_adjacent_academic_years
     final_report_for_missing_data_set_to_small_negative
-    puts "=" * 150
+    logger.debug "=" * 150
   end
 
   def meter_corrections
-    puts '-' * 80
-    puts 'Manually defined meter corrections'
+    logger.debug '-' * 80
+    logger.debug 'Manually defined meter corrections'
     if @meter.meter_correction_rules.key?(:rescale_amr_data)
       scale_amr_data(
         @meter.meter_correction_rules[:rescale_amr_data][:start_date],
@@ -54,7 +56,7 @@ class ValidateAMRData
       )
     end
     if @meter.meter_correction_rules.key?(:readings_start_date)
-      puts "Fixing start date to #{@meter.meter_correction_rules[:readings_start_date]}"
+      logger.debug "Fixing start date to #{@meter.meter_correction_rules[:readings_start_date]}"
       @amr_data.set_min_date(@meter.meter_correction_rules[:readings_start_date])
     end
     if @meter.meter_correction_rules.key?(:auto_insert_missing_readings)
@@ -69,7 +71,7 @@ class ValidateAMRData
 
   # typically is imperial to metric meter readings aren't corrected to kWh properly at source
   def scale_amr_data(start_date, end_date, scale)
-    puts "Scaling data between #{start_date} and #{end_date} by #{scale} - imperial to SI conversion?"
+    logger.debug "Scaling data between #{start_date} and #{end_date} by #{scale} - imperial to SI conversion?"
     (start_date..end_date).each do |date|
       if @amr_data.key?(date)
         data_x48 = @amr_data[date]
@@ -88,47 +90,47 @@ class ValidateAMRData
     end
 
     missing_holiday_dates.each do |date|
-      puts "Searching for matching missing holiday data for #{date} from subsequent or previous academic years"
+      logger.debug "Searching for matching missing holiday data for #{date} from subsequent or previous academic years"
       begin
         holiday_type = @holidays.type(date)
         hol = similar_holiday(date, holiday_type, 1) # try following academic year
         if hol.nil? || hol.end_date > @amr_data.end_date # assume temperatures always have more data than amr, so don't test
-          puts "Warning: no holiday data for following year trying previous year" if hol.nil?
-          puts 'Trying previous holiday as no amr data for the subsequent holiday period' if !hol.nil? && hol.end_date > @amr_data.end_date
-          puts 'Trying previous year instead'
+          logger.debug "Warning: no holiday data for following year trying previous year" if hol.nil?
+          logger.debug 'Trying previous holiday as no amr data for the subsequent holiday period' if !hol.nil? && hol.end_date > @amr_data.end_date
+          logger.debug 'Trying previous year instead'
           hol = similar_holiday(date, holiday_type, -1) # try previous academic year
         end
         if hol.nil? || hol.end_date > @amr_data.end_date || hol.start_date < @amr_data.start_date
-          puts "Warning: unable to find suitable replacement holiday periods for #{date}"
+          logger.debug "Warning: unable to find suitable replacement holiday periods for #{date}"
           if hol.nil?
-            puts 'Because cannot find suitable holiday'
+            logger.debug 'Because cannot find suitable holiday'
           elsif hol.end_date > @amr_data.end_date || hol.start_date < @amr_data.start_date
-            puts 'Because no amr data for holiday'
+            logger.debug 'Because no amr data for holiday'
           else
-            puts 'Because of an unknown reason'
+            logger.debug 'Because of an unknown reason'
           end
         else
-          puts "Planning on correcting with #{hol.start_date} #{hol.end_date}"
+          logger.debug "Planning on correcting with #{hol.start_date} #{hol.end_date}"
           adjusted_date = find_similar_day_of_the_week(hol, date.wday)
           if @meter.meter_type == :electricity
-            put "Correcting missing electricity holiday on #{date} with data from #{adjusted_date}"
+            logger.debug "Correcting missing electricity holiday on #{date} with data from #{adjusted_date}"
             @amr_data.add(date, @amr_data[adjusted_date])
           elsif @meter.meter_type == :gas
             # perhaps would be better if substitute similar weekday had matching temperatures?
             # probably better this way if thermally massive building?
             if @amr_data.key?(adjusted_date)
-              puts "Correcting missing gas holiday on #{date} with data from #{adjusted_date}"
+              logger.debug "Correcting missing gas holiday on #{date} with data from #{adjusted_date}"
               @amr_data.add(date, adjusted_substitute_heating_kwh(date, adjusted_date))
             else
-              puts "Warning: unable to find substitute holiday data for #{date} as substitute data #{adjusted_date} has no AMR data"
-              puts "Warning: setting this date #{date} to zero"
+              logger.debug "Warning: unable to find substitute holiday data for #{date} as substitute data #{adjusted_date} has no AMR data"
+              logger.debug "Warning: setting this date #{date} to zero"
               @amr_data.add(date, Array.new(48, 0.0)) # have to assume if no replacement holiday reading gas was completely off
             end
           end
         end
       rescue EnergySparksUnexpectedStateException => e
-        puts "Comment: deliberately rescued missing holiday data exception for date #{date}"
-        puts e.message
+        logger.error "Comment: deliberately rescued missing holiday data exception for date #{date}"
+        logger.error e.message
       end
     end
   end
@@ -146,10 +148,10 @@ class ValidateAMRData
       unless nth_academic_year.nil?
         hols = @holidays.find_holiday_in_academic_year(nth_academic_year, holiday_type)
         if hols.nil?
-          puts "Unable to find holiday of type #{holiday_type} and date #{date}  and offset #{year_offset}"
+          logger.warn "Unable to find holiday of type #{holiday_type} and date #{date}  and offset #{year_offset}"
           return nil
         else
-          puts "Got similar holiday for date #{hols.start_date} #{hols.end_date}"
+          logger.debug "Got similar holiday for date #{hols.start_date} #{hols.end_date}"
           return hols
         end
       else
@@ -159,9 +161,9 @@ class ValidateAMRData
   end
 
   def final_report_for_missing_data_set_to_small_negative
-    puts '>' * 100
-    puts "For meter of type #{@meter.meter_type} #{@meter.name} #{@meter.id}:"
-    puts 'At the end of the meter validation process the following amr data is still missing (setting to 0.0123456):'
+    logger.info '>' * 100
+    logger.info "For meter of type #{@meter.meter_type} #{@meter.name} #{@meter.id}:"
+    logger.info 'At the end of the meter validation process the following amr data is still missing (setting to 0.0123456):'
     missing_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if !@amr_data.key?(date)
@@ -173,11 +175,11 @@ class ValidateAMRData
     missing_dates.each do |date|
       @amr_data.add(date, Array.new(48, 0.0123456))
     end
-    puts '>' * 100
+    logger.info '>' * 100
   end
 
   def replace_missing_weekend_data_with_zero
-    puts "Setting missing weekend dates to zero"
+    logger.debug "Setting missing weekend dates to zero"
     replaced_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if DateTimeHelper.weekend?(date) && !@amr_data.key?(date)
@@ -185,7 +187,7 @@ class ValidateAMRData
         @amr_data.add(date, Array.new(48, 0.0))
       end
     end
-    puts 'Replaced the following weekend dates:'
+    logger.debug 'Replaced the following weekend dates:'
     print_array_of_dates_in_columns(replaced_dates, 8)
   end
 
@@ -201,7 +203,7 @@ class ValidateAMRData
   end
 
   def check_for_long_gaps_in_data
-    puts "Checking for long gaps"
+    logger.debug "Checking for long gaps"
     gap_count = 0
     first_bad_date = Date.new(2050, 1, 1)
     (@amr_data.start_date..@amr_data.end_date).reverse_each do |date|
@@ -218,14 +220,14 @@ class ValidateAMRData
         msg += ' as gap of more than ' + @max_days_missing_data.to_s + ' days '
         msg += (@amr_data.keys.index(min_date) - 1).to_s + ' days of data ignored'
         @data_problems['Too much missing data'] = msg
-  puts msg
+        logger.debug msg
       end
     end
   end
 
   def fill_in_missing_data
     missing_days = {}
-    puts "Looking for missing amr data between #{@amr_data.start_date} #{@amr_data.end_date}"
+    logger.debug "Looking for missing amr data between #{@amr_data.start_date} #{@amr_data.end_date}"
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if !@amr_data.key?(date)
         if @meter.meter_type == :electricity || @meter.meter_type == 'electricity'
@@ -250,9 +252,9 @@ class ValidateAMRData
     end
 
     if !list_of_date_substitutions.empty?
-      puts "The following date substitutions are being made for missing data:"
+      logger.debug "The following date substitutions are being made for missing data:"
       list_of_date_substitutions.each_slice(4) do |group_of_four|
-        puts group_of_four.to_s
+        logger.debug group_of_four.to_s
       end
     end
   end
@@ -282,22 +284,22 @@ class ValidateAMRData
   # iterate put from missing data, looking for a similar day without missing data
   # then adjust for temperature
   def substitute_missing_gas_data(date)
-    #puts "GOTTTT Here #{date}"
-    #debug = date.year == 2017 && date.month == 2 && date.day == 12
+    logger.debug "GOTTTT Here #{date}"
+    debug = date.year == 2017 && date.month == 2 && date.day == 12
     debug = false
-
     create_heating_model if @heating_model.nil?
     heating_on = @heating_model.heating_on?(date)
     missing_daytype = daytype(date)
     avg_temperature = average_temperature(date)
-    puts "Got Checked Missing Date #{date} heat on #{heating_on} day type #{missing_daytype} temperature #{avg_temperature}" if debug
+
+    logger.debug "Got Checked Missing Date #{date} heat on #{heating_on} day type #{missing_daytype} temperature #{avg_temperature}" if debug
     (1..@max_search_range_for_corrected_data).each do |days_offset|
       # look for similar day after the missing date
       day_after = date + days_offset
-      puts "Trying #{day_after} got amr data: #{@amr_data.key?(day_after)}" if debug
+      logger.debug "Trying #{day_after} got amr data: #{@amr_data.key?(day_after)}" if debug
       if day_after <= @amr_data.end_date && @amr_data.key?(day_after) && @amr_data[day_after].count == 48
         temperature_after = average_temperature(day_after)
-        puts "Temperature = #{temperature_after} heat on #{@heating_model.heating_on?(day_after)} heat on #{daytype(day_after)}" if debug
+        logger.debug "Temperature = #{temperature_after} heat on #{@heating_model.heating_on?(day_after)} heat on #{daytype(day_after)}" if debug
         if heating_on == @heating_model.heating_on?(day_after) &&
             within_temperature_range?(avg_temperature, temperature_after) &&
             daytype(day_after) == missing_daytype
@@ -315,7 +317,7 @@ class ValidateAMRData
         return [day_before, adjusted_substitute_heating_kwh(date, day_before)]
       end
     end
-    puts "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype}"
+    logger.error "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype}"
     nil
   end
 
@@ -323,7 +325,7 @@ class ValidateAMRData
     begin
       @temperatures.average_temperature(date)
     rescue StandardError => _e
-      puts "Warning: problem generating missing gas data, as no temperature data for #{date}"
+      logger.error "Warning: problem generating missing gas data, as no temperature data for #{date}"
       raise
     end
   end
@@ -340,7 +342,7 @@ class ValidateAMRData
     kwh_prediction_for_substitute_day = @heating_model.predicted_kwh(substitute_day, @temperatures.average_temperature(substitute_day))
     prediction_ratio = kwh_prediction_for_missing_day / kwh_prediction_for_substitute_day
     if prediction_ratio < 0
-      puts "Warning: negative predicated data for missing day #{missing_day} from #{substitute_day} setting to zero"
+      logger.debug "Warning: negative predicated data for missing day #{missing_day} from #{substitute_day} setting to zero"
       prediction_ratio = 0.0
     end
     substitute_data = Array.new(48, 0.0)
@@ -350,9 +352,9 @@ class ValidateAMRData
       #                   : scales base load differently- very low priority requirement
       substitute_data[halfhour_index] = @amr_data.kwh(substitute_day, halfhour_index) * prediction_ratio
     end
-    puts "Gas Adjustment For Missing Data: replacing #{missing_day} with #{substitute_day}"
-    puts "sub kWh = #{kwh_prediction_for_missing_day} missing replacement  #{kwh_prediction_for_substitute_day}"
-    puts "actual #{@amr_data.one_day_kwh(substitute_day)} temp diff #{_temp_diff} ratio = #{prediction_ratio}"
+    logger.debug "Gas Adjustment For Missing Data: replacing #{missing_day} with #{substitute_day}"
+    logger.debug "sub kWh = #{kwh_prediction_for_missing_day} missing replacement  #{kwh_prediction_for_substitute_day}"
+    logger.debug "actual #{@amr_data.one_day_kwh(substitute_day)} temp diff #{_temp_diff} ratio = #{prediction_ratio}"
     substitute_data
   end
 

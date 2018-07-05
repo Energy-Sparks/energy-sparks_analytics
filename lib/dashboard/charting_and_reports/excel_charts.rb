@@ -2,6 +2,8 @@ require 'write_xlsx'
 
 # takes a hash of aggregated AMR data and adds it as a chart to an excel spreadsheet for testing purposes
 class ExcelCharts
+  include Logging
+
   def initialize(filename)
     @filename = filename
     @workbook = WriteXLSX.new(@filename)
@@ -17,7 +19,7 @@ class ExcelCharts
       new_colour_name = 'custom-colour-' + colour_num.to_s
       r, g, b = hex_colour_to_rgb(hex_colour)
       @workbook.set_custom_color(colour_num, r, g, b)
-      puts "Setting #{new_colour_name} to #{r} #{g} #{b}"
+      logger.debug "Setting #{new_colour_name} to #{r} #{g} #{b}"
       @colour_cache[hex_colour] = new_colour_name
       new_colour_name
     end
@@ -96,7 +98,7 @@ class ExcelCharts
     # excel_data = []
 
     unless xaxis_data.nil?
-      # puts "Writing x_axis data to 1,#{start_column_number}"
+      # logger.debug "Writing x_axis data to 1,#{start_column_number}"
       worksheet.write_col(1, start_column_number, xaxis_data)
       column_number += 1
       first_data_column += 1
@@ -104,7 +106,7 @@ class ExcelCharts
 
     column_number_to_name_map = {}
     data.each do |column_name, column_data|
-      # puts "Adding column data #{column_name} at #{column_number}"
+      # logger.debug "Adding column data #{column_name} at #{column_number}"
       worksheet.write(0, column_number, column_name)
       column_number_to_name_map[column_number] = column_name
       worksheet.write_col(1, column_number, column_data)
@@ -114,14 +116,14 @@ class ExcelCharts
 
     category_range = cell_reference(worksheet_name, start_column_number, 2, start_column_number, max_data_rows + 1)
     last_data_column = first_data_column + data.length - 1
-    # puts "Looping setting y_axis data between #{first_data_column} and #{last_data_column} setting series data versus x_axis in col #{start_column_number}"
+    # logger.debug "Looping setting y_axis data between #{first_data_column} and #{last_data_column} setting series data versus x_axis in col #{start_column_number}"
     (first_data_column..last_data_column).each do |col_num|
       col_name = column_number_to_name_map[col_num]
       colour_hex = @colours.series_colour(col_name)
       name_range = cell_reference(worksheet_name, col_num, 1, col_num, 1)
       value_range = cell_reference(worksheet_name, col_num, 2, col_num, max_data_rows + 1)
       if second_y_axis
-        # puts "Adding on 2nd Y axis: name: to #{name_range} values to #{value_range}"
+        # logger.debug "Adding on 2nd Y axis: name: to #{name_range} values to #{value_range}"
         if auto_colour
           chart.add_series(
             y2_axis: 1,
@@ -138,7 +140,7 @@ class ExcelCharts
           )
         end
       elsif auto_colour
-        # puts "Adding primary series data: name #{name_range} categories #{category_range} values #{value_range}"
+        # logger.debug "Adding primary series data: name #{name_range} categories #{category_range} values #{value_range}"
         chart.add_series(
           name: name_range,
           categories: category_range, # x axis data
@@ -170,7 +172,7 @@ class ExcelCharts
   def add_charts(worksheet_name, charts)
     data_col_offset = 10
     chart_row_offset = 1
-    puts "Adding a new worksheet: #{worksheet_name}"
+    logger.debug "Adding a new worksheet: #{worksheet_name}"
     worksheet = @workbook.add_worksheet(worksheet_name)
     charts.each do |chart|
       add_chart(worksheet, chart, data_col_offset, chart_row_offset)
@@ -180,7 +182,7 @@ class ExcelCharts
   end
 
   def add_graph_and_data(worksheet_name, graph_definition)
-    puts "creating new worksheet #{worksheet_name}"
+    logger.debug "creating new worksheet #{worksheet_name}"
     worksheet = @workbook.add_worksheet(worksheet_name)
     add_chart(worksheet, graph_definition, 0, 0)
   end
@@ -230,7 +232,7 @@ class ExcelCharts
 
     chart1.set_title(name: clean_text(graph_definition[:title]))
     chart1.set_y_axis(name: clean_text(graph_definition[:y_axis_label]))
-    puts "setting title to #{graph_definition[:title]}"
+    logger.debug "setting title to #{graph_definition[:title]}"
 
     if graph_definition[:chart1_type] == :pie # special case for pie charts, need to swap axis
       main_axisx = graph_definition[:x_data].keys
@@ -258,7 +260,7 @@ class ExcelCharts
     # end
 
     if !chart2.nil?
-      puts "CHART COMBINE"
+      logger.debug "CHART COMBINE"
       chart1.combine(chart2)
     end
 
@@ -273,7 +275,7 @@ class ExcelCharts
   end
 
   def cell_reference(worksheet_name, col_num_start, row_number_start, col_num_end, row_number_end)
-    # puts Writexlsx::Utility::xl_range(row_number_start, row_number_end, col_num_start, col_num_end, true, true, true, true)
+    # logger.debug Writexlsx::Utility::xl_range(row_number_start, row_number_end, col_num_start, col_num_end, true, true, true, true)
     if col_num_start == col_num_end && row_number_start == row_number_end
       '=' + encapsulate_worksheet_name(worksheet_name) + '!' + single_cell_reference(col_num_start, row_number_start, true, true)
     else

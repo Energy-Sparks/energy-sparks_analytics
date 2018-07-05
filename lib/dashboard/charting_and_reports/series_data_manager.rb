@@ -65,6 +65,8 @@ class SeriesNames
 end
 
 class SeriesDataManager
+  include Logging
+
   attr_reader :first_meter_date, :last_meter_date, :first_chart_date, :last_chart_date, :periods
 
   def initialize(meter_collection, chart_configuration)
@@ -146,9 +148,9 @@ class SeriesDataManager
       _timetype, dates, _halfhour_index = time_period
       start_date_str = dates[0].strftime('%d %m %Y')
       end_date_str = dates[1].strftime('%d %m %Y')
-      puts "Error: getting data for time period #{start_date_str} to #{end_date_str}"
-      puts ee.message
-      puts ee.backtrace
+      logger.error "Error: getting data for time period #{start_date_str} to #{end_date_str}"
+      logger.error ee.message
+      logger.error ee.backtrace
     end
   end
 
@@ -178,7 +180,7 @@ class SeriesDataManager
     list = []
     list_of_meters.each do |meter|
       list.push(meter.display_name)
-      puts 'Adding meter #{meter.display_name}'
+      logger.debug 'Adding meter #{meter.display_name}'
     end
     list
   end
@@ -343,7 +345,7 @@ private
           end
         end
       rescue StandardError => _e
-        puts "Unable to aggregate data for #{date} - exception raise"
+        logger.error "Unable to aggregate data for #{date} - exception raise"
       end
     end
     daytype_data
@@ -419,8 +421,8 @@ private
         # fuel_data['solar pv'] += solar_pv_meter.amr_data.one_day_kwh(date) * solar_pv_factor
         # fuel_data['storage heaters'] += storage_meter.amr_data.one_day_kwh(date) * storage_heater_factor
       rescue Exception => e
-        puts "Missing or nil data on #{date}"
-        puts e
+        logger.error "Missing or nil data on #{date}"
+        logger.error e
       end
     end
     fuel_data
@@ -434,8 +436,8 @@ private
         type = @heating_model.heating_on?(date) ? SeriesNames::HEATINGDAY : SeriesNames::NONHEATINGDAY
         heating_data[type] += heat_meter.amr_data.one_day_kwh(date) * factor
       rescue StandardError => e
-        puts e.message
-        puts "Warning: unable to calculate heating breakdown on #{date}"
+        logger.error e.message
+        logger.error "Warning: unable to calculate heating breakdown on #{date}"
       end
     end
     heating_data
@@ -450,9 +452,9 @@ private
         avg_temp = @meter_collection.temperatures.average_temperature(date)
         heating_data[type] += @heating_model.predicted_kwh(date, avg_temp) * factor
       rescue StandardError => e
-        puts "Missing or nil predicted heating data on #{date}"
-        puts e
-        puts e.backtrace
+        logger.error "Missing or nil predicted heating data on #{date}"
+        logger.error e
+        logger.error e.backtrace
       end
     end
     heating_data

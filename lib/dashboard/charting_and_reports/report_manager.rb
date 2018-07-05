@@ -2,6 +2,7 @@
 # require_relative 'chartmanager'
 
 class ReportManager
+  include Logging
   attr_reader :standard_reports
   def initialize(school)
     @school = school
@@ -46,7 +47,7 @@ class ReportManager
   def run_reports(reports)
     worksheet_charts = {}
     reports.each do |page_name, list_of_charts| # aka a web page containing a series of graphs
-      puts "Creating a webpage/excel worksheet #{page_name}"
+      logger.debug "Creating a webpage/excel worksheet #{page_name}"
       list_of_charts.each do |chart_type|
         worksheet_charts[page_name] = [] unless worksheet_charts.key?(page_name)
         chart = create_chart(chart_type)
@@ -59,7 +60,7 @@ class ReportManager
   end
 
   def create_chart(chart_type)
-    puts "Running chart ===========================#{chart_type}==========================="
+    logger.info "Running chart ===========================#{chart_type}==========================="
     @chart_manager.run_standard_chart(chart_type)
   end
 end

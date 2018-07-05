@@ -16,7 +16,7 @@ class ElectricitySimulator
 
   def simulate(appliance_definitions)
     @appliance_definitions = appliance_definitions
-    # puts appliance_definitions.inspect
+    # logger.debug appliance_definitions.inspect
     @total = empty_amr_data_set('Simulator Totals')
     total_amr_data = nil
 # rubocop:disable all

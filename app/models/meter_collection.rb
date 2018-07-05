@@ -11,6 +11,8 @@
 #           - also holds modelling data
 
 class MeterCollection
+  include Logging
+
   attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters
 
   # From school/building
@@ -56,6 +58,8 @@ class MeterCollection
       end
       throw ArgumentException if school.meters.empty?
     else
+      logger.info "Running standalone, not in Rails environment"
+
       # Normally these would come from the school, hard coded at the mo
       @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
       @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
@@ -90,6 +94,7 @@ class MeterCollection
       result.each do |row|
         amr_data.add(Date.parse(row["day"]), row["values"].delete('{}').split(',').map(&:to_f))
       end
+      throw ArgumentException if school.meters.empty?
     end
     amr_data
   end
