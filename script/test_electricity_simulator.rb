@@ -19,7 +19,7 @@ simulator = ElectricitySimulator.new(school)
 
 simulator.simulate(simulator.default_simulator_parameters)
 
-reports.do_chart_list('Boiler Control', [ :intraday_line_school_days_6months_simulator_submeters ] )
+reports.do_chart_list('Boiler Control', [ :electricity_simulator_pie, :intraday_line_school_days_6months_simulator_submeters, :group_by_week_electricity_simulator_appliance ] )
 
 # reports.do_one_page(:simulator)
 
