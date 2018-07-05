@@ -11,7 +11,9 @@
 #           - also holds modelling data
 
 class MeterCollection
-  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters 
+  include Logging
+
+  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters
 
   # From school/building
   attr_reader :floor_area, :number_of_pupils
@@ -40,7 +42,7 @@ class MeterCollection
     @cached_close_time = DateTime.new(0, 1, 1, 16, 30, 0) # for speed
 
     if Object.const_defined?('ScheduleDataManager')
-      pp "Running standalone, not in Rails environment"
+      logger.info "Running standalone, not in Rails environment"
 
       # Normally these would come from the school, hard coded at the mo
       @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
@@ -48,7 +50,7 @@ class MeterCollection
       @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
       @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
     else
-      pp "Running in Rails environment"
+      logger.info "Running in Rails environment"
       throw ArgumentException if school.meters.empty?
     end
   end

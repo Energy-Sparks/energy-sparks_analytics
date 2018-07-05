@@ -6,6 +6,8 @@ require 'roo-xls'
 # rubocop:disable all
 
 class LoadMeterDataFromCSV
+  include Logging
+
   @@schools = {
       'Bathampton' =>  [ {  src: '2013 Energy Survey', type: 'xls', workbook: 'Bathampton.xls', fuel: 'Electricity', worksheet: 'E1 AMR'},
       {  src: '2013 Energy Survey', type: 'xls', workbook: 'Bathampton.xls', fuel: 'Gas', worksheet: 'G1 AMR'}],
@@ -257,7 +259,7 @@ class LoadMeterDataFromCSV
     max_date = Date.new(2000,1,1)
 
     if sheet.last_row == nil
-      puts "Empty Sheet #{sheet_name}"
+      logger.debug "Empty Sheet #{sheet_name}"
       return
     end
 
@@ -281,7 +283,7 @@ class LoadMeterDataFromCSV
 
     gas_meters, electric_meters = load_all_meters_for_school
 
-    puts "Got #{gas_meters.length} gas meters and #{electric_meters.length} electicity meters"
+    logger.debug "Got #{gas_meters.length} gas meters and #{electric_meters.length} electicity meters"
 
     gas_meters.each do |name, data|
       meter = Meter.new(name, data, :gas)
@@ -299,7 +301,7 @@ class LoadMeterDataFromCSV
   def load_all_meters_for_school
     electricity_meters = {}
     gas_meters = {}
-    puts "Loading data for #{@school.name}"
+    logger.debug "Loading data for #{@school.name}"
     meters_for_school = @@schools[@school.name]
     meters_for_school.each do |meter|
         extension = meter[:type]
@@ -322,8 +324,8 @@ class LoadMeterDataFromCSV
         else
           gas_meters[meter[:worksheet]] = data
         end
-        puts meter.inspect
-        puts "Got #{data.length} dates"
+        logger.debug meter.inspect
+        logger.debug "Got #{data.length} dates"
     end
     [gas_meters, electricity_meters]
   end

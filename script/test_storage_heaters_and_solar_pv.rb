@@ -3,7 +3,12 @@ require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 
-puts "\n" * 10
+module Logging
+  @logger = Logger.new('log/test-storage-heaters-and-solar-pv.log')
+  logger.level = :warn
+end
+
+Logging.logger.debug "\n" * 10
 pp "Running Test Storage Heaters and Solar PV"
 
 school_name = 'Stanton Drew Primary School' # ''
@@ -15,9 +20,9 @@ $SCHOOL_FACTORY = SchoolFactory.new
 
 school = $SCHOOL_FACTORY.load_school(school_name)
 
-puts "SCHOOL IS A #{school.class.name}"
-puts "Floor area is #{school.floor_area}"
-# puts school.meter_collection.methods
+Logging.logger.debug "SCHOOL IS A #{school.class.name}"
+Logging.logger.debug "Floor area is #{school.floor_area}"
+# logger.debug school.meter_collection.methods
 # exit
 reportmanager = ReportManager.new(school)
 

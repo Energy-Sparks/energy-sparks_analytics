@@ -26,6 +26,8 @@ module AnalyseHeatingAndHotWater
   # HOT WATER ANALYSIS
   #
   class HotwaterModel
+    include Logging
+
     HEATCAPACITYWATER = 4.2 # J/g/K
     PUPILUSAGELITRES = 5
     HWTEMPERATURE = 35 # C
@@ -40,7 +42,7 @@ module AnalyseHeatingAndHotWater
       @efficiency = (@school_day_kwh - @holiday_kwh) / @school_day_kwh
       @analysis_period_start_date = @analysis_period.start_date
       @analysis_period_end_date = @analysis_period.end_date
-      # puts "Analysing hot water system efficiency school day use #{@school_day_kwh} holiday use #{@holiday_kwh} efficiency #{@efficiency}"
+      # logger.debug "Analysing hot water system efficiency school day use #{@school_day_kwh} holiday use #{@holiday_kwh} efficiency #{@efficiency}"
       # aggregate_split_day_buckets)archive
     end
 
@@ -121,10 +123,10 @@ module AnalyseHeatingAndHotWater
       @annual_hotwater_kwh_estimate += avg_weekend_day_gas_consumption * school_weeks * 2
       @annual_hotwater_kwh_estimate += avg_holiday_day_gas_consumption * weeks_holiday * 7
 
-      puts "Estimated Annual Hot Water Consumption = #{@annual_hotwater_kwh_estimate.round(0)} kwh"
-      puts "Estimated Average School Day HW = #{@avg_school_day_gas_consumption.round(0)} kwh"
-      puts "Estimated Average Weekend Day HW = #{@avg_weekend_day_gas_consumption.round(0)} kwh"
-      puts "Estimated Average Holiday Day HW = #{@avg_holiday_day_gas_consumption.round(0)} kwh"
+      logger.debug "Estimated Annual Hot Water Consumption = #{@annual_hotwater_kwh_estimate.round(0)} kwh"
+      logger.debug "Estimated Average School Day HW = #{@avg_school_day_gas_consumption.round(0)} kwh"
+      logger.debug "Estimated Average Weekend Day HW = #{@avg_weekend_day_gas_consumption.round(0)} kwh"
+      logger.debug "Estimated Average Holiday Day HW = #{@avg_holiday_day_gas_consumption.round(0)} kwh"
       [@avg_school_day_gas_consumption, @avg_holiday_day_gas_consumption, @avg_weekend_day_gas_consumption, analysis_period, first_holiday_date]
     end
 
@@ -143,6 +145,8 @@ module AnalyseHeatingAndHotWater
   # HEATING MODEL REGRESSION ANALYSIS
   #
   class HeatingModel
+    include Logging
+
     # holds the basic data for a simple linear regression model:
     #   'predicted daily kWh heating' = A + B x 'Degree Days'
     #  - there are variations in derived models which calculate this in a different or more sophisticated way
@@ -212,10 +216,10 @@ module AnalyseHeatingAndHotWater
       end
 
       if !missing_dates.empty?
-        puts "Warning: missing dates during regression modelling for #{regression_model_name}"
+        logger.debug "Warning: missing dates during regression modelling for #{regression_model_name}"
         # rubocop:disable Naming/VariableNumber
         missing_dates.each_slice(10) do |group_of_10|
-          puts group_of_10.to_s
+          logger.debug group_of_10.to_s
         end
         # rubocop:enable Naming/VariableNumber
       end
@@ -224,7 +228,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def regression_above_below_limit_currently_unused(period, above, occupied, limit, day_of_week_filter)
-      puts "regression_above_below_limit #{period} #{above} #{occupied} #{limit} #{day_of_week_filter}"
+      logger.debug "regression_above_below_limit #{period} #{above} #{occupied} #{limit} #{day_of_week_filter}"
       degree_days = []
       days_kwh = []
 
@@ -248,7 +252,7 @@ module AnalyseHeatingAndHotWater
 
     def regression(key, regression_model_name, x1, y1, degreeday_base_temperature)
       if x1.empty?
-        puts "Error: empty data set for calculating regression"
+        logger.error "Error: empty data set for calculating regression"
         return RegressionModel.new(key, "Error: zero vector", 0.0, 0.0, 0.0, degreeday_base_temperature)
       end
       x = Daru::Vector.new(x1)
@@ -261,6 +265,8 @@ module AnalyseHeatingAndHotWater
   # the simplest model
   # assumes predicted_kwh = A + B * degreedays for all heating or non heating days (different parameters)
   class BasicRegressionHeatingModel < HeatingModel
+    include Logging
+
     attr_reader :models, :heating_on_periods
     def initialize(amr_data, holidays, temperatures)
       super(amr_data, holidays, temperatures)
@@ -283,7 +289,7 @@ module AnalyseHeatingAndHotWater
       @models[:heating_unoccupied] = regression_filtered(:wintermonthsunoccupied, 'Heating (unoccupied)', false, period, [11, 12, 1, 2, 3], alldays, @base_degreedays_temperature)
       @models[:nonheating_occupied] = regression_filtered(:summermonthsoccupied, 'Un-heated (occupied)', true, period, [6, 7], weekdays, @base_degreedays_temperature)
       @models[:nonheating_unoccupied] = regression_filtered(:summermonthsunoccupied, 'Un-heated (unoccupied)', false, period, [6, 7], alldays, @base_degreedays_temperature)
-      puts @models.inspect
+      logger.debug @models.inspect
     end
 
     # scan through the daily consumption data, using the regression information to determine the heating periods
@@ -292,24 +298,24 @@ module AnalyseHeatingAndHotWater
       heating_on = false
       heating_start_date = start_date
 
-      puts "Calculating Heating Periods between #{start_date} and #{end_date}"
-      puts "=" * 100
-      puts "Deliberate backtrace to find caller:"
-      puts "=" * 100
-      puts Thread.current.backtrace.join("\n")
-      puts "=" * 100
-      
+      logger.debug "Calculating Heating Periods between #{start_date} and #{end_date}"
+      logger.debug "=" * 100
+      logger.debug "Deliberate backtrace to find caller:"
+      logger.debug "=" * 100
+      logger.debug Thread.current.backtrace.join("\n")
+      logger.debug "=" * 100
+
       degreedays_at_18c = @base_degreedays_temperature - 18
       degreedays_at_18c = 0.0 if degreedays_at_18c < 0.0
       @halfway_kwh = @models[:heating_occupied].predicted_kwh_degreedays(degreedays_at_18c)
 
-      puts "Setting half way kwh - i.e. split between heating and non heating days to #{@halfway_kwh.round(0)} kWh per day"
+      logger.debug "Setting half way kwh - i.e. split between heating and non heating days to #{@halfway_kwh.round(0)} kWh per day"
 
       previous_date = start_date
       (start_date..end_date).each do |date|
         begin
           kwh_today = @amr_data.one_day_kwh(date)
-          puts "Got specific kwh #{kwh_today} on #{date} temperature #{@temperatures.average_temperature(date)}" if kwh_today > 120 && kwh_today < 121
+          logger.debug "Got specific kwh #{kwh_today} on #{date} temperature #{@temperatures.average_temperature(date)}" if kwh_today > 120 && kwh_today < 121
           # degreedays_today = @temperatures.degree_days(date, @base_degreedays_temperature)
           occupied = !DateTimeHelper.weekend?(date) && !@holidays.holiday?(date)
 
@@ -325,18 +331,18 @@ module AnalyseHeatingAndHotWater
             previous_date = date
           end
         rescue StandardError => e
-          puts "Unable to calculate heating period for date #{date}", e
+          logger.error "Unable to calculate heating period for date #{date}", e
         end
       end
       if heating_on
         heating_period = SchoolDatePeriod.new(:heatingperiod, 'N/A', heating_start_date, end_date)
         @heating_on_periods.push(heating_period)
       end
-      puts "Heating periods"
+      logger.debug "Heating periods"
       @heating_on_periods.each do |period|
         sd = period.start_date.strftime('%a %d %b %Y')
         ed = period.end_date.strftime('%a %d %b %Y')
-        puts sprintf("       %15.15s to %15.15s", sd, ed)
+        logger.debug sprintf("       %15.15s to %15.15s", sd, ed)
       end
 
       @heating_on_periods

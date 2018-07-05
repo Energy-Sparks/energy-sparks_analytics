@@ -98,8 +98,8 @@ protected
       rhtml.result(binding)
       # rhtml.gsub('£', '&pound;')
     rescue StandardError => e
-      puts "Error generating html for #{self.class.name}"
-      puts e.message
+      logger.error "Error generating html for #{self.class.name}"
+      logger.error e.message
       '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
     end
   end
@@ -118,8 +118,8 @@ protected
 
   def kwh_to_pounds_and_kwh(kwh, fuel_type_sym)
     pounds = YAxisScaling.convert(:kwh, :£, fuel_type_sym, kwh, false)
-    puts pounds.inspect
-    puts kwh.inspect
+    logger.debug pounds.inspect
+    logger.debug kwh.inspect
     '&pound;' + YAxisScaling.scale_num(pounds) + ' (' + YAxisScaling.scale_num(kwh) + 'kWh)'
   end
 end
@@ -131,7 +131,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
-    puts @school.name
+    logger.info @school.name
     electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
     gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
 
@@ -595,7 +595,7 @@ class ThermostaticAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
-    puts @school.name
+    logger.info @school.name
     header_template = %{
       <% if @add_extra_markup %>
         <html>
@@ -707,7 +707,7 @@ class CusumAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
-    puts @school.name
+    logger.debug @school.name
     header_template = %{
       <% if @add_extra_markup %>
         <html>
@@ -889,7 +889,7 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
     alert_description = alert.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
     # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
     ap(alert_description)
-    puts alert_description.detail[0].content
+    logger.debug alert_description.detail[0].content
     header_template = %{
       <%= @body_start %>
       <% if @add_extra_markup %>

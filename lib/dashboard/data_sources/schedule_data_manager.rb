@@ -6,6 +6,8 @@
 #
 # supported schedules are: holidays, temperatures, solar insolance, solar PV
 class ScheduleDataManager
+  include Logging
+
   # rubocop:disable Style/ClassVars
   @@holiday_data = {} # all indexed by area
   @@temperature_data = {}
@@ -72,7 +74,7 @@ class ScheduleDataManager
     unless @@solar_pv_data.key?(area_name) # lazy load data if not already loaded
       solar_data = SolarPV.new('solar pv')
       SolarPVLoader.new("#{INPUT_DATA_DIR}/pv data Bath.csv", solar_data)
-      puts "Loaded #{solar_data.length} days of solar pv data"
+      logger.debug "Loaded #{solar_data.length} days of solar pv data"
       @@solar_pv_data[area_name] = solar_data
     end
     @@solar_pv_data[area_name]

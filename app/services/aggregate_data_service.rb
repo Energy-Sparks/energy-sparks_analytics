@@ -1,6 +1,8 @@
 # This should take a meter collection and populate
 # it with aggregated & validated data
 class AggregateDataService
+  include Logging
+
   attr_reader :meter_collection
 
   def initialize(meter_collection)
@@ -28,7 +30,7 @@ private
   end
 
   def validate_meter_list(list_of_meters)
-    puts "Validating #{list_of_meters.length} meters"
+    logger.info "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
       validate_meter = ValidateAMRData.new(meter, 30, @meter_collection.holidays, @meter_collection.temperatures)
       validate_meter.validate
@@ -41,7 +43,7 @@ private
     @electricity_meters.each do |electricity_meter|
       next if electricity_meter.storage_heater_config.nil?
 
-      puts 'Disaggregating electricity meter into 1x storage heater only and 1 x remainder'
+      logger.info 'Disaggregating electricity meter into 1x storage heater only and 1 x remainder'
 
       electric_only_amr, storage_heater_amr = electricity_meter.storage_heater_config.disaggregate_amr_data(electricity_meter.amr_data)
 
@@ -73,7 +75,7 @@ private
     @electricity_meters.each do |electricity_meter|
       next if electricity_meter.solar_pv_installation.nil?
 
-      puts 'Creating an artificial solar pv meter and associated amr data'
+      logger.info 'Creating an artificial solar pv meter and associated amr data'
 
       solar_amr = create_solar_pv_amr_data(
         electricity_meter.amr_data,
@@ -141,7 +143,7 @@ private
         solar_amr.add(date, scaled_pv_kwh)
       end
     end
-    puts "Created new solar pv meter with #{solar_amr.length} days of data"
+    logger.info "Created new solar pv meter with #{solar_amr.length} days of data"
     solar_amr
   end
 
@@ -159,9 +161,9 @@ private
       @heating_models[:basic].calculate_regression_model(period)
     end
     # PH 21Jun2016 - commented this back in
-    puts "Calculating model 21Jun18 debug", @period.inspect
+    # logger.debug "Calculating model 21Jun18 debug", @period.inspect
     @heating_on_periods = @model.calculate_heating_periods(@period)
-    @heating_models[:basic] 
+    @heating_models[:basic]
   end
 
   def aggregate_amr_data(amr_data_list, type)
@@ -169,7 +171,7 @@ private
       return amr_data_list.first # optimisaton if only 1 meter, then its its own aggregate
     end
     min_date, max_date = combined_amr_data_date_range(amr_data_list)
-    puts "Aggregating data between #{min_date} #{max_date}"
+    logger.info "Aggregating data between #{min_date} #{max_date}"
 
     combined_amr_data = AMRData.new(type)
     (min_date..max_date).each do |date|
@@ -244,8 +246,8 @@ private
       combined_pupils
     )
 
-    puts "Creating combined meter data #{combined_amr_data.start_date} to #{combined_amr_data.end_date}"
-    puts "with floor area #{combined_floor_area} and #{combined_pupils} pupils"
+    logger.info "Creating combined meter data #{combined_amr_data.start_date} to #{combined_amr_data.end_date}"
+    logger.info "with floor area #{combined_floor_area} and #{combined_pupils} pupils"
     combined_meter
   end
 
