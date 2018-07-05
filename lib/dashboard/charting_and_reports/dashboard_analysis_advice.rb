@@ -21,6 +21,8 @@ class DashboardEnergyAdvice
 end
 
 class DashboardChartAdviceBase
+  include Logging
+
   attr_reader :header_advice, :footer_advice, :body_start, :body_end
   def initialize(school, chart_definition, chart_data, chart_symbol)
     @school = school
@@ -126,6 +128,8 @@ end
 
 #==============================================================================
 class BenchmarkComparisonAdvice < DashboardChartAdviceBase
+  include Logging
+
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
   end
@@ -590,6 +594,8 @@ class GasWeeklyAdvice < WeeklyAdvice
 end
 #==============================================================================
 class ThermostaticAdvice < DashboardChartAdviceBase
+  include Logging
+
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
   end
@@ -702,6 +708,7 @@ end
 
 #==============================================================================
 class CusumAdvice < DashboardChartAdviceBase
+  include Logging
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
   end
@@ -877,6 +884,8 @@ end
 
 #==============================================================================
 class ElectricityBaseloadAdvice < DashboardChartAdviceBase
+  include Logging
+
   attr_reader :fuel_type, :fuel_type_str
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
