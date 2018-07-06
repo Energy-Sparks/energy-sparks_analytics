@@ -166,8 +166,9 @@ class ElectricitySimulator
     server_data = empty_amr_data_set("Servers")
     desktop_data = empty_amr_data_set("Desktops")
     laptop_data = empty_amr_data_set("Laptops")
-
+    binding.pry
     @appliance_definitions[:ict].each_value do |ict_appliance_group|
+      next unless ict_appliance_group.instance_of? Hash
       (server_data.start_date..server_data.end_date).each do |date| # arbitrary use the date list for te servers to iterate on, but the inner work applies via the case statement to desktops or laptops
         on_today = !(@holidays.holiday?(date) && ict_appliance_group.key?(:holidays) && !ict_appliance_group[:holidays])
         on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])
