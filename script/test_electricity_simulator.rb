@@ -31,3 +31,6 @@ reports.do_chart_list('Boiler Control', [ :electricity_simulator_pie, :intraday_
 reports.save_excel_and_html
 
 reports.report_benchmarks
+
+definitions = ElectricitySimulatorConfiguration::APPLIANCE_DEFINITIONS
+Logging.logger.warn  "HERE: #{definitions[:unaccounted_for_baseload]}"

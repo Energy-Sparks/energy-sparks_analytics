@@ -304,7 +304,7 @@ private
       @bucketed_data.delete(remove_series_name)
     end
     logger.debug "Z" * 140
-    logger.ap(@bucketed_data, limit: 20, color: { float: :red })
+    logger.debug ap(@bucketed_data, limit: 20, color: { float: :red })
     logger.debug "Filtered #{@bucketed_data.keys}"
   end
 
