@@ -3,6 +3,7 @@ class ElectricitySimulatorConfiguration
    APPLIANCE_DEFINITIONS = {
     lighting:
     {
+      title: 'Lighting',
       lumens_per_watt: 50.0, # 1
       lumens_per_m2: 450.0,# 1
       percent_on_as_function_of_solar_irradiance: {
@@ -13,6 +14,7 @@ class ElectricitySimulatorConfiguration
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     },
     ict: {
+      title: 'ICT',
       'Servers1' => {
         type:                     :server,
         number:                   2.0, # 1
@@ -42,6 +44,7 @@ class ElectricitySimulatorConfiguration
       }
     },
     boiler_pumps: {
+      title: 'Boiler pumps',
       heating_season_start_dates:   [Date.new(2016, 10, 1),  Date.new(2017, 11, 5)],
       heating_season_end_dates:     [Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
       start_time:                   Time.new(2010,  1,  1,  5, 30, 0),    # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
@@ -52,6 +55,7 @@ class ElectricitySimulatorConfiguration
       frost_protection_temp:        4
     },
     security_lighting: {
+      title: 'Security lighting',
       control_type:       'Sunrise/Sunset', # "Sunrise/Sunset" or "Ambient" or "Fixed Times"  # Choose one of these with radio button
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
       sunset_times:       ['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
@@ -60,13 +64,17 @@ class ElectricitySimulatorConfiguration
       ambient_threshold:  50.0,
       power:              3.0 #
     },
-    electrical_heating: {},
+    electrical_heating: {
+      title: 'Electrical heating',
+    },
     kitchen: {  # 1 all three of these - time of day rathern than 2010
+      title: 'Kitchen',
       start_time:  Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
       end_time:    Time.new(2010,  1,  1,  17, 0, 0), # ditto
       power:       4.0 #
     },
     summer_air_conn: { # 1 set power to zero for no aie conn
+      title: 'Summer air conditioning',
       start_time:               Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
       end_time:                 Time.new(2010,  1,  1,  17, 0, 0), # ditto
       weekends:                 true,
@@ -75,6 +83,7 @@ class ElectricitySimulatorConfiguration
       power_per_degreeday:      0.5 # colling degree days > balancePointTemperature
     },
     electric_hot_water: {
+      title: 'Electric hot water',
       start_time:               Time.new(2010, 1, 1, 9, 0, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
       end_time:                 Time.new(2010, 1, 1, 16, 30, 0), # ditto
       weekends:                 true,
@@ -83,10 +92,19 @@ class ElectricitySimulatorConfiguration
       litres_per_day_per_pupil: 5.0, # assumes at 38C versus ambient of 15C, to give a deltaT of 23C
       standby_power:            0.1 # outside start and end times, but dependent on whether switched off during weekends and holidays, see other parameters
     },
-    floodLighting:  {},
+    flood_lighting:  {
+      title: 'Flood lighting',
+    },
     unaccounted_for_baseload: {
+      title: 'Unaccounted for baseload',
       baseload: 1 # 1 single number - useful
     },
-    solar_pv: {}
+    solar_pv: {
+      title: 'Solar PV'
+    }
   }
+
+  def self.new
+    APPLIANCE_DEFINITIONS.clone
+  end
 end
