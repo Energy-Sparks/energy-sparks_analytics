@@ -165,7 +165,7 @@ class ElectricitySimulator
     server_data = empty_amr_data_set("Servers")
     desktop_data = empty_amr_data_set("Desktops")
     laptop_data = empty_amr_data_set("Laptops")
-    binding.pry
+
     @appliance_definitions[:ict].each_value do |ict_appliance_group|
       next unless ict_appliance_group.instance_of? Hash
       (server_data.start_date..server_data.end_date).each do |date| # arbitrary use the date list for te servers to iterate on, but the inner work applies via the case statement to desktops or laptops
@@ -275,7 +275,7 @@ class ElectricitySimulator
     power = @appliance_definitions[:security_lighting][:power]
 
     if power >= 0.0
-      control_type = @appliance_definitions[:security_lighting][:control_type]
+      control_type = @appliance_definitions[:security_lighting][:control_type].first
 
       midnight0 = convert_half_hour_index_to_time(0)
       midnight24 = convert_half_hour_index_to_time(48)
