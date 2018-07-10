@@ -33,6 +33,8 @@ def meter_number_column(type)
 end
 
 class LoadSchools
+  include Logging
+
   def initialize
     ENV['SOCRATA_STORE'] = 'data.bathhacked.org'
     ENV['SOCRATA_TOKEN'] = 'gQ5Dw0rIF7I8ij40m8W6ulHj4'
@@ -50,21 +52,20 @@ class LoadSchools
 
     ENV['CACHED_METER_READINGS_DIRECTORY'] ||= File.join(File.dirname(__FILE__), '../MeterReadings/')
 
-    puts  File.join(File.dirname(__FILE__), '../MeterReadings/')
+    logger.debug  File.join(File.dirname(__FILE__), '../MeterReadings/')
 
     load_schools(ENV['CACHED_METER_READINGS_DIRECTORY'] + 'schoolsandmeters.yml')
-    
   end
 
   def load_school(school_name, min_date, use_cached_data)
-    puts "Loading school #{school_name}"
+    logger.debug "Loading school #{school_name}"
     school_data = @schools[school_name]
 
-    puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
-    puts school_data[:school_type]
-    puts "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+    logger.debug "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
+    logger.debug school_data[:school_type]
+    logger.debug "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"
     school = School.new(school_name, school_data[:postcode], school_data[:floor_area], school_data[:pupils], school_data[:school_type])
-    puts "school type = #{school.school_type}"
+    logger.debug "school type = #{school.school_type}"
     meter_collection = MeterCollection.new(school)
 
     meter_readings = load_school_meter_data(school_name, min_date, use_cached_data)
@@ -82,11 +83,11 @@ private
       meter_type = meter_data[:meter_type]
       identifier_type = meter_type == :electricity ? :mpan : :mprn
       identifier = meter_data[identifier_type]
-      puts "hash keys #{meter_data.keys}"
+      logger.debug "hash keys #{meter_data.keys}"
       if meter_data.key?(:deprecated) && meter_data[:deprecated] == true
-        puts "Not creating deprecated meter #{identifier}"
+        logger.debug "Not creating deprecated meter #{identifier}"
       else
-        puts "Creating meter #{identifier}"
+        logger.debug "Creating meter #{identifier}"
         meter = create_meter(meter_collection, meter_data, meter_readings)
         if meter_data[:meter_type] == :electricity
           meter_collection.add_electricity_meter(meter)
@@ -110,9 +111,9 @@ private
     amr_data = meter_readings[identifier]
 
     solar_pv = solar_pv_definition(meter_data)
-    puts solar_pv.inspect
+    logger.debug solar_pv.inspect
     storage_heater = storage_heater_definition(meter_data)
-    puts storage_heater.inspect
+    logger.debug storage_heater.inspect
     meter_correction = meter_correction_definition(meter_data)
     meter = Meter.new(
       meter_collection,
@@ -140,7 +141,7 @@ private
   def solar_pv_definition(meter_data)
     if meter_data.key?(:solar_pv)
       pv = SolarPVInstallation.new
-      puts meter_data.inspect
+      logger.debug meter_data.inspect
       meter_data[:solar_pv].each do |pv_install|
         panel_set = SolarPVInstallation::SolarPVPanelSet.new(
                       pv_install[:installation_date],
@@ -168,19 +169,19 @@ private
 
     cached_filename = directory_name + name + '.yml'
     if use_cached_data && File.exist?(cached_filename)
-      puts "Loading meter readings from Local Cache for #{name} from #{cached_filename}"
+      logger.debug "Loading meter readings from Local Cache for #{name} from #{cached_filename}"
       timing = Benchmark.measure {
         meter_readings = download_from_cache_file(cached_filename)
       }
     else
-      puts "Loading meter readings from Bath Hacked Datastore for #{name}"
+      logger.debug "Loading meter readings from Bath Hacked Datastore for #{name}"
       timing = Benchmark.measure {
         meter_readings = download_from_bath_hacked(school_data, min_date)
       }
       File.write(cached_filename, meter_readings.to_yaml) if use_cached_data
     end
     summarise_meter_readings(meter_readings)
-    puts "Load time #{timing}"
+    logger.debug "Load time #{timing}"
     meter_readings # [identifier] = AMRData{date} => [48 x float]
   end
 
@@ -189,7 +190,7 @@ private
   end
 
   def load_schools(filename)
-    puts "Loading school and meter definitions from #{filename}"
+    logger.debug "Loading school and meter definitions from #{filename}"
     @schools = YAML::load_file(filename)
 
     @schools.sort.each do |name, school|
@@ -201,7 +202,7 @@ private
 
   def summarise_meter_readings(meter_readings)
     meter_readings.each do |identifier, data|
-      puts "#{identifier} #{data.length} dates from #{data.keys.first} to #{data.keys.last}"
+      logger.debug "#{identifier} #{data.length} dates from #{data.keys.first} to #{data.keys.last}"
     end
   end
 
@@ -217,7 +218,7 @@ private
 
   def meter_correction_definition(meter_data)
     if meter_data.key?(:meter_correction)
-      puts "Got meter correction definition", meter_data[:meter_correction]
+      logger.debug "Got meter correction definition", meter_data[:meter_correction]
       meter_data[:meter_correction]
     elsif meter_data[:meter_type] == :gas # for all gas meters in Bath schools insert missing weekend data with zero
       meter_data[:meter_correction] = { auto_insert_missing_readings: :weekends }
@@ -313,7 +314,7 @@ class BackHackedDownloadSchoolToMeterRelationship
     end
 
     query = query('2200030370866', 'gas')
-    puts "2nd query", query
+    logger.debug "2nd query", query
     client.get("rd4k-3gss", query).each do |i|
       if !@school.key?(i['postcode'])
         @school[i['postcode']] = { :name => i['location'], :postcode => i['postcode'], :meters => []}

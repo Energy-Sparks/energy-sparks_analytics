@@ -4,6 +4,8 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 
 class DashboardReports
+  include Logging
+
   def initialize
 
     # @dashboard_page_groups = now in lib/dashboard/charting_and_reports/dashboard_configuration.rb
@@ -32,7 +34,7 @@ class DashboardReports
 
     @chart_manager = nil
 
-    puts "\n" * 8
+    logger.debug "\n" * 8
   end
 
   def self.suppress_output(school_name)
@@ -64,10 +66,10 @@ class DashboardReports
   end
 
   def load_school(school_name, suppress_debug = false)
-    puts self.class.banner("School: #{school_name}")
+    logger.debug self.class.banner("School: #{school_name}")
     @school_name = school_name
     if suppress_debug
-      puts 'Loading school data.....output suppressed'
+      logger.debug 'Loading school data.....output suppressed'
       self.class.suppress_output(school_name) {
         @school = $SCHOOL_FACTORY.load_school(school_name)
       }
@@ -80,7 +82,7 @@ class DashboardReports
 
   def report_benchmarks
     @benchmarks.each do |bm|
-      puts bm
+      logger.debug bm
     end
     @benchmarks = []
   end
@@ -134,7 +136,7 @@ class DashboardReports
   end
 
   def do_one_page_internal(page_name, list_of_charts)
-    puts self.class.banner("Running report page  #{page_name}")
+    logger.debug self.class.banner("Running report page  #{page_name}")
     @worksheet_charts[page_name] = []
     list_of_charts.each do |chart_name|
       chart = do_one_chart_internal(chart_name)
@@ -145,7 +147,7 @@ class DashboardReports
   end
 
   def do_one_chart_internal(chart_name)
-    puts self.class.banner(chart_name.to_s)
+    logger.debug self.class.banner(chart_name.to_s)
     chart = nil
     bm = Benchmark.measure {
       chart = @chart_manager.run_standard_chart(chart_name)

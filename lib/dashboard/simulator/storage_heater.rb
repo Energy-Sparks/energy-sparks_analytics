@@ -3,6 +3,8 @@
 # with different time controls, or a change in their
 # setup over time
 class StorageHeaters
+  include Logging
+
   def initialize
     @storage_heaters = []
   end
@@ -69,7 +71,7 @@ class StorageHeaters
     total_kwh = amr_data.kwh_date_range(amr_data.start_date, amr_data.end_date)
     sh_kwh = storage_heater_amr_data.kwh_date_range(amr_data.start_date, amr_data.end_date)
     eo_kwh = electricity_only_amr_data.kwh_date_range(amr_data.start_date, amr_data.end_date)
-    puts "Splitting meter for storage heater: original #{total_kwh} kwh => storage heater #{sh_kwh} + remainder = #{eo_kwh}"
+    logger.debug "Splitting meter for storage heater: original #{total_kwh} kwh => storage heater #{sh_kwh} + remainder = #{eo_kwh}"
     [electricity_only_amr_data, storage_heater_amr_data]
   end
 

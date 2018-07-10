@@ -7,6 +7,7 @@
 # TODO (PH,5Jun2018) this class doesn't really know whether its a global class or an instance at the moment
 
 class YAxisScaling
+  include Logging
   attr_reader :units, :scaling_factors
   def initialize
     # rubocop:disable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
@@ -23,7 +24,7 @@ class YAxisScaling
 
   def self.unit_description(unit, scaling_factor_type, value)
     val_str = value.nil? ? 'NA' : value
-    puts "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}"
+    logger.debug "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}"
     factor_type_description = {
       none:             nil,
       per_pupil:        'per pupil',
@@ -78,7 +79,6 @@ class YAxisScaling
     end
   end
 
-  
   def scaling_factor(scaling_factor_type, meter_collection)
     factor = nil
     case scaling_factor_type
@@ -105,7 +105,7 @@ class YAxisScaling
     y_axis_scaling = YAxisScaling.new
     from_scaling = y_axis_scaling.scale_unit_from_kwh(from_unit, fuel_type)
     to_scaling = y_axis_scaling.scale_unit_from_kwh(to_unit, fuel_type)
-    val = from_value * to_scaling / from_scaling 
+    val = from_value * to_scaling / from_scaling
     round ? scale_num(val) : val
   end
 

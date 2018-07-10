@@ -1,4 +1,6 @@
 class ElectricitySimulator
+  include Logging
+
   attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions
   attr_reader :calc_components_results, :solar_irradiation, :school, :existing_electricity_meter
   def initialize(school)
@@ -14,32 +16,32 @@ class ElectricitySimulator
 
   def simulate(appliance_definitions)
     @appliance_definitions = appliance_definitions
-    # puts appliance_definitions.inspect
+    # logger.debug appliance_definitions.inspect
     @total = empty_amr_data_set('Simulator Totals')
     total_amr_data = nil
 # rubocop:disable all
     time = Benchmark.measure {
-      puts 'lighting'
-      puts Benchmark.measure { simulate_lighting }
-      puts 'ict'
-      puts Benchmark.measure { simulate_ict }
-      puts 'boiler pump'
-      puts Benchmark.measure { simulate_boiler_pump }
-      puts 'security lighting'
-      puts Benchmark.measure { simulate_security_lighting }
-      puts 'kitchen'
-      puts Benchmark.measure { simulate_kitchen }
-      puts 'hot water'
-      puts Benchmark.measure { simulate_hot_water }
-      puts 'air con'
-      puts Benchmark.measure { simulate_air_con }
-      puts 'unaccounted for baseload'
-      puts Benchmark.measure { simulate_unaccounted_for_baseload }
-      puts 'aggregate results'
-      puts Benchmark.measure { total_amr_data = aggregate_results }
+      logger.info 'lighting'
+      logger.info Benchmark.measure { simulate_lighting }
+      logger.info 'ict'
+      logger.info Benchmark.measure { simulate_ict }
+      logger.info 'boiler pump'
+      logger.info Benchmark.measure { simulate_boiler_pump }
+      logger.info 'security lighting'
+      logger.info Benchmark.measure { simulate_security_lighting }
+      logger.info 'kitchen'
+      logger.info Benchmark.measure { simulate_kitchen }
+      logger.info 'hot water'
+      logger.info Benchmark.measure { simulate_hot_water }
+      logger.info 'air con'
+      logger.info Benchmark.measure { simulate_air_con }
+      logger.info 'unaccounted for baseload'
+      logger.info Benchmark.measure { simulate_unaccounted_for_baseload }
+      logger.info 'aggregate results'
+      logger.info Benchmark.measure { total_amr_data = aggregate_results }
     }
 # rubocop:enable all
-    puts "Overall time #{time}"
+    logger.info "Overall time #{time}"
 
     @school.electricity_simulation_meter = create_meters(total_amr_data)
   end
@@ -146,7 +148,7 @@ class ElectricitySimulator
     (period.start_date..period.end_date).each do |date|
       data.add(date, Array.new(48, 0.0))
     end
-    puts "Creating empty #{type} simulator data, #{data.length} elements"
+    logger.debug "Creating empty #{type} simulator data, #{data.length} elements"
     data
   end
 
@@ -158,7 +160,7 @@ class ElectricitySimulator
       meter = create_new_meter(value, :electricity, key, key)
       electricity_simulation_meter.sub_meters.push(meter)
     end
-    puts "Created #{electricity_simulation_meter.sub_meters.length} sub meters"
+    logger.debug "Created #{electricity_simulation_meter.sub_meters.length} sub meters"
     electricity_simulation_meter
   end
 
@@ -177,17 +179,17 @@ class ElectricitySimulator
   end
 
   def aggregate_results
-    puts "Aggregating results"
+    logger.debug "Aggregating results"
     totals = empty_amr_data_set("Totals")
     @calc_components_results.each do |key, value|
       (totals.start_date..totals.end_date).each do |date|
         totals[date] = [totals[date], value[date]].transpose.map(&:sum)
       end
       sub_total = component_total(value)
-      puts "Component #{key} = #{sub_total} k_wh"
+      logger.debug "Component #{key} = #{sub_total} k_wh"
     end
     total_total = component_total(totals)
-    puts "Total simulation #{total_total}  kwh"
+    logger.debug "Total simulation #{total_total}  kwh"
     totals
   end
 
@@ -256,7 +258,7 @@ class ElectricitySimulator
     @appliance_definitions[:ict].each_value do |ict_appliance_group|
       (server_data.start_date..server_data.end_date).each do |date| # arbitrary use the date list for te servers to iterate on, but the inner work applies via the case statement to desktops or laptops
         on_today = !(@holidays.holiday?(date) && ict_appliance_group.key?(:holidays) && !ict_appliance_group[:holidays])
-        on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])       
+        on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])
         (0..47).each do |half_hour_index|
           if on_today
             if ict_appliance_group.key?(:usage_percent_by_time_of_day)
@@ -366,7 +368,7 @@ class ElectricitySimulator
       midnight0 = convert_half_hour_index_to_time(0)
       midnight24 = convert_half_hour_index_to_time(48)
 
-      puts "control type #{control_type}"
+      logger.debug "control type #{control_type}"
       case control_type
       when "Sunrise/Sunset"
         (lighting_data.start_date..lighting_data.end_date).each do |date|

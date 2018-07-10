@@ -271,7 +271,7 @@ end
 
 #======================== Base: Out of hours usage ============================
 class AlertOutOfHoursBaseUsage < AlertAnalysisBase
-  include HTML
+  include HTML, Logging
   def initialize(school, fuel, benchmark_out_of_hours_percent,
                  fuel_cost, alert_type, bookmark, meter_definition)
     super(school)
@@ -357,7 +357,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     chart = ChartManager.new(@school)
     result = chart.run_chart(daytype_breakdown, :daytype_breakdown)
 
-    puts result.inspect
+    logger.debug result.inspect
     result
   end
 end

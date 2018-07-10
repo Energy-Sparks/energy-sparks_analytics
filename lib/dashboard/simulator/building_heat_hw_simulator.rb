@@ -1,4 +1,6 @@
 class BuildingHeatHWSimulator
+  include Logging
+
   attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions, :calc_components_results, :solar_insolence, :school
   def initialize(period, holidays, temperatures, solarinsolence, school)
     @period = period
@@ -39,7 +41,7 @@ class BuildingHeatHWSimulator
     (period.start_date..period.end_date).each do |date|
       data.add(date, Array.new(48, 0.0))
     end
-    puts "Creating empty #{type} simulator data, #{data.length} elements"
+    logger.debug "Creating empty #{type} simulator data, #{data.length} elements"
     data
   end
 
@@ -74,22 +76,22 @@ class BuildingHeatHWSimulator
     recommend_ventilation_per_pupil = 5.0 # l/s
 
     # thermal_mass_per_m2_wall = 0.1 * heat_capacity_concrete + 0.5 * 0.1 * heat_capacity_concrete # assume all of inner leaf and half of outer
-    puts "dims #{gross_wall_area} #{net_wall_area} #{window_area} #{u_value_floor}"
+    logger.debug "dims #{gross_wall_area} #{net_wall_area} #{window_area} #{u_value_floor}"
     fabric_loss_kw_per_k = u_value_wall * net_wall_area
     fabric_loss_kw_per_k += u_value_window * window_area
     fabric_loss_kw_per_k += u_value_ceiling * school.floor_area
     fabric_loss_kw_per_k += u_value_floor * school.floor_area
     fabric_loss_kw_per_k /= 1000.0
 
-    puts "fabric loss #{fabric_loss_kw_per_k}"
+    logger.debug "fabric loss #{fabric_loss_kw_per_k}"
 
     uncontrolled_ventilationk_w_per_k = air_permeability_at_50_pa * shelterfactor * volume * heat_capacity_air
     controlled_ventilationk_w_per_k = (recommend_ventilation_per_pupil / 1000) * 3600.0 * heat_capacity_air
 
     thermal_mass_kwh__per_k = wall_length * 2 * wall_height * thermal_mass_perM2Wall # assume internal wall volume sinimar to external i.e. x2
-    puts "thermal mass #{thermal_mass_kwh__per_k}"
+    logger.debug "thermal mass #{thermal_mass_kwh__per_k}"
     total_kwh = create_emptyAMRData('Some Component')
-    puts @building.inspect# rub
+    logger.debug @building.inspect# rub
     power = @building[:boiler][:max_power] # need to be careful whether this is used net or gross of efficiency
     max_radiator_power_kw = @building[:radiator_output_per_m2] * school.floor_area
 
@@ -115,7 +117,7 @@ class BuildingHeatHWSimulator
           net_losses_kw = losses_kw - gains_kw
 
           if half_hour_index >= 9 * 2 && half_hour_index <= 16 * 2
-            # puts "date #{date} hhindex #{half_hour_index} internal temp #{internal_temp} external temp #{external_temp} net losses #{losses_kw}"
+            # logger.debug "date #{date} hhindex #{half_hour_index} internal temp #{internal_temp} external temp #{external_temp} net losses #{losses_kw}"
             heating_kwh = period_in_hours * max_radiator_power_kw
 
             if internal_temp < @building[:boiler][:control][:room_set_point]
@@ -128,7 +130,7 @@ class BuildingHeatHWSimulator
           change_in_thermal_mass_t = loss_kwh / thermal_mass_kwh__per_k
           internal_temp -= change_in_thermal_mass_t
 
-          puts "date #{date} hhindex #{half_hour_index} internal temp #{internal_temp.round(1)} external temp #{external_temp.round(1)} internal gain #{gains_kw.round(1)} losses #{losses_kw.round(1)} net losses #{net_losses_kw.round(1)} rad gain #{max_radiator_power_kw.round(1)}"
+          logger.debug "date #{date} hhindex #{half_hour_index} internal temp #{internal_temp.round(1)} external temp #{external_temp.round(1)} internal gain #{gains_kw.round(1)} losses #{losses_kw.round(1)} net losses #{net_losses_kw.round(1)} rad gain #{max_radiator_power_kw.round(1)}"
           total_kwh[date][half_hour_index] = power * 0.5
 
         end

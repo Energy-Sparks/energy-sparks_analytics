@@ -1,6 +1,7 @@
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
+  include Logging
   attr_reader :standard_charts, :school
 
   STANDARD_CHARTS = [
@@ -587,22 +588,22 @@ class ChartManager
   end
 
   def run_chart(chart_config, chart_param)
-    # puts 'Chart configuration:'
+    # logger.debug 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red })
 
     begin
       aggregator = Aggregator.new(@school, chart_config)
 
       # rubocop:disable Lint/AmbiguousBlockAssociation
-      puts Benchmark.measure { aggregator.aggregate }
+      logger.info Benchmark.measure { aggregator.aggregate }
       # rubocop:enable Lint/AmbiguousBlockAssociation
 
       graph_data = configure_graph(aggregator, chart_config, chart_param)
 
       graph_data
     rescue StandardError => e
-      puts "Unable to create chart", e
-      puts e.backtrace
+      logger.error "Unable to create chart #{e}"
+      logger.error e.backtrace
       nil
     end
   end
