@@ -21,6 +21,8 @@ class DashboardEnergyAdvice
 end
 
 class DashboardChartAdviceBase
+  include Logging
+
   attr_reader :header_advice, :footer_advice, :body_start, :body_end
   def initialize(school, chart_definition, chart_data, chart_symbol)
     @school = school
@@ -98,8 +100,8 @@ protected
       rhtml.result(binding)
       # rhtml.gsub('£', '&pound;')
     rescue StandardError => e
-      puts "Error generating html for #{self.class.name}"
-      puts e.message
+      logger.error "Error generating html for #{self.class.name}"
+      logger.error e.message
       '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
     end
   end
@@ -118,20 +120,22 @@ protected
 
   def kwh_to_pounds_and_kwh(kwh, fuel_type_sym)
     pounds = YAxisScaling.convert(:kwh, :£, fuel_type_sym, kwh, false)
-    puts pounds.inspect
-    puts kwh.inspect
+    logger.debug pounds.inspect
+    logger.debug kwh.inspect
     '&pound;' + YAxisScaling.scale_num(pounds) + ' (' + YAxisScaling.scale_num(kwh) + 'kWh)'
   end
 end
 
 #==============================================================================
 class BenchmarkComparisonAdvice < DashboardChartAdviceBase
+  include Logging
+
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
   end
 
   def generate_advice
-    puts @school.name
+    logger.info @school.name
     electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
     gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
 
@@ -590,12 +594,14 @@ class GasWeeklyAdvice < WeeklyAdvice
 end
 #==============================================================================
 class ThermostaticAdvice < DashboardChartAdviceBase
+  include Logging
+
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
   end
 
   def generate_advice
-    puts @school.name
+    logger.info @school.name
     header_template = %{
       <% if @add_extra_markup %>
         <html>
@@ -702,12 +708,13 @@ end
 
 #==============================================================================
 class CusumAdvice < DashboardChartAdviceBase
+  include Logging
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
   end
 
   def generate_advice
-    puts @school.name
+    logger.debug @school.name
     header_template = %{
       <% if @add_extra_markup %>
         <html>
@@ -877,6 +884,8 @@ end
 
 #==============================================================================
 class ElectricityBaseloadAdvice < DashboardChartAdviceBase
+  include Logging
+
   attr_reader :fuel_type, :fuel_type_str
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
@@ -889,7 +898,7 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
     alert_description = alert.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
     # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
     ap(alert_description)
-    puts alert_description.detail[0].content
+    logger.debug alert_description.detail[0].content
     header_template = %{
       <%= @body_start %>
       <% if @add_extra_markup %>
@@ -1146,6 +1155,9 @@ class ElectricityShortTermIntradayAdvice < DashboardChartAdviceBase
       <% when :intraday_line_school_days_6months %>
       <p>
         This graph compares 2 weeks average consumption during the day 6 months apart.
+        Its interesting as it allows you to see the difference between usage at 2 different times
+        of the year, differences can include for example the amount of lighting consumption
+        which impacts the peak usage during the day.
       </p>
       <% when :intraday_line_school_last7days %>
       <% end %>

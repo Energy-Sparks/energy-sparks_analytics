@@ -1,5 +1,7 @@
 # meter: holds basic information descrbing a meter and hald hourly AMR data associated with it
 class MeterAnalysis
+  include Logging
+
   # Extra fields - potentially a concern or mix-in
   attr_reader :building, :fuel_type, :floor_area, :number_of_pupils
   attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters
@@ -27,7 +29,7 @@ class MeterAnalysis
     @meter_correction_rules = meter_correction_rules
     @sub_meters = []
     @active = true
-    puts "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+    logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
   end
 
   # Matches ES AR version

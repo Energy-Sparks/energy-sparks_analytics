@@ -29,7 +29,7 @@ class ChartColour < InterpretChart
 
     (0..4).each do |i|
       colour = col.series_colour('some solar pv some time', :rgb, i, 5)
-      puts colour.paint.to_rgb
+      logger.debug colour.paint.to_rgb
     end
   end
 

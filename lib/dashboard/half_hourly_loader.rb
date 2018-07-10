@@ -1,4 +1,6 @@
 class HalfHourlyLoader
+  include Logging
+
   def initialize(csv_file, date_column, data_start_column, header_rows, data)
     @data_start_column = data_start_column
     @date_column = date_column
@@ -7,7 +9,7 @@ class HalfHourlyLoader
   end
 
   def read_csv(csv_file, data)
-    puts "Reading #{data.type} data from '#{csv_file} date column = #{@date_column} data starts at col #{@data_start_column} skipping #{@header_rows} header rows"
+    logger.debug "Reading #{data.type} data from '#{csv_file} date column = #{@date_column} data starts at col #{@data_start_column} skipping #{@header_rows} header rows"
     datareadings = Roo::CSV.new(csv_file)
     line_count = 0
     skip_rows = @header_rows
@@ -20,14 +22,14 @@ class HalfHourlyLoader
           rowdata = rowdata.map(&:to_f)
           data.add(date, rowdata)
         rescue StandardError => e
-          puts e.message
-          puts e.backtrace.join("\n")
-          puts "Unable to read data on line #{line_count} of file #{csv_file} date value #{reading[@date_column]}"
+          logger.debug e.message
+          logger.debug e.backtrace.join("\n")
+          logger.debug "Unable to read data on line #{line_count} of file #{csv_file} date value #{reading[@date_column]}"
         end
       else
         skip_rows -= 1
       end
     end
-    puts "Read hash #{data.length} rows"
+    logger.debug "Read hash #{data.length} rows"
   end
 end

@@ -30,7 +30,6 @@ module BenchmarkMetrics
       else
         10 + 10 * (pupils - 400) / 400
       end
-
     else
       raise 'Unknown type of school ' + school_type
     end

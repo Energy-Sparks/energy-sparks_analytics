@@ -7,6 +7,7 @@
 # TODO (PH,5Jun2018) this class doesn't really know whether its a global class or an instance at the moment
 
 class YAxisScaling
+  include Logging
   attr_reader :units, :scaling_factors
   def initialize
     # rubocop:disable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
@@ -77,7 +78,6 @@ class YAxisScaling
       number.round(0).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
     end
   end
-
 
   def scaling_factor(scaling_factor_type, meter_collection)
     factor = nil

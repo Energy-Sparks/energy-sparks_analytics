@@ -4,9 +4,14 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
+module Logging
+  @logger = Logger.new('log/test-dashboard.log')
+  logger.level = :warn
+end
+
 reports = DashboardReports.new
 
-reports.load_school('Roundhill School', true)
+reports.load_school('St Marks Secondary', true)
 
 # testing examples
 #
@@ -23,7 +28,7 @@ do_one_school('Paulton Junior School', :main_dashboard_electric_and_gas)
 # comment excel/html out if calling reports.do_all_schools or reports.do_all_standard_pages_for_school
 # as done automatically:
 
-reports.do_all_schools(true)
+   reports.do_one_page(:main_dashboard_electric_and_gas)
 
 reports.save_excel_and_html
 
