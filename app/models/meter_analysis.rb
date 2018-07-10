@@ -6,7 +6,7 @@ class MeterAnalysis
   attr_accessor :amr_data, :meter_correction_rules
 
   # Energy Sparks activerecord fields:
-  attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at
+  attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
   attr_accessor :id, :name
   # enum meter_type: [:electricity, :gas]
 
@@ -26,6 +26,7 @@ class MeterAnalysis
     @storage_heater_config = storage_heater_config
     @meter_correction_rules = meter_correction_rules
     @sub_meters = []
+    @active = true
     puts "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
   end
 

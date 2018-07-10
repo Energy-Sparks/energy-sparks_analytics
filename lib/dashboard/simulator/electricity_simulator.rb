@@ -163,7 +163,7 @@ class ElectricitySimulator
   end
 
   def create_new_meter(amr_data, type, identifier, name)
-    Meter.new(
+    MeterAnalysis.new(
       @existing_electricity_meter,
       amr_data,
       type,
@@ -256,7 +256,7 @@ class ElectricitySimulator
     @appliance_definitions[:ict].each_value do |ict_appliance_group|
       (server_data.start_date..server_data.end_date).each do |date| # arbitrary use the date list for te servers to iterate on, but the inner work applies via the case statement to desktops or laptops
         on_today = !(@holidays.holiday?(date) && ict_appliance_group.key?(:holidays) && !ict_appliance_group[:holidays])
-        on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])       
+        on_today &&= !(weekend?(date) && ict_appliance_group.key?(:weekends) && !ict_appliance_group[:weekends])
         (0..47).each do |half_hour_index|
           if on_today
             if ict_appliance_group.key?(:usage_percent_by_time_of_day)
