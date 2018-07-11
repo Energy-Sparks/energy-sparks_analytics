@@ -114,6 +114,6 @@ class ElectricitySimulatorConfiguration
   }
 
   def self.new
-    APPLIANCE_DEFINITIONS.clone
+    APPLIANCE_DEFINITIONS.deep_dup
   end
 end
