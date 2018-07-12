@@ -3,7 +3,7 @@ class ElectricitySimulatorConfiguration
    APPLIANCE_DEFINITIONS = {
     lighting:
     {
-      title: 'Lighting',
+      title: 'Internal Lighting',
       editable: [:lumens_per_watt, :lumens_per_m2],
       lumens_per_watt: 50.0,
       lumens_per_m2: 450.0,
