@@ -9,7 +9,7 @@ module Logging
   logger.level = :warn
 end
 
-reports = DashboardReports.new
+reports = ReportConfigSupport.new
 
 reports.load_school('St Marks Secondary', true)
 
