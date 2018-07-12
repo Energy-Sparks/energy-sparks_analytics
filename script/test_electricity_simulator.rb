@@ -14,7 +14,7 @@ puts  "electrical simulation"
 
 suppress_school_loading_output = true
 
-reports = DashboardReports.new
+reports = ReportConfigSupport.new
 
 school_name = 'Twerton Infant School'
 

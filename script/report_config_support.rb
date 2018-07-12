@@ -3,7 +3,7 @@ require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 
-class DashboardReports
+class ReportConfigSupport
   include Logging
 
   def initialize
