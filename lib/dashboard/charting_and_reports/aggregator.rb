@@ -72,11 +72,11 @@ class Aggregator
       bucketed_period_data.each do |period_data|
         bucketed_data, bucketed_data_count, time_description = period_data
         bucketed_data.each do |series_name, x_data|
-          new_series_name = series_name + ':' + time_description
+          new_series_name = series_name.to_s + ':' + time_description
           @bucketed_data[new_series_name] = x_data
         end
         bucketed_data_count.each do |series_name, x_data|
-          new_series_name = series_name + ':' + time_description
+          new_series_name = series_name.to_s + ':' + time_description
           @bucketed_data_count[new_series_name] = x_data
         end
       end

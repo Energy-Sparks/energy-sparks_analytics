@@ -24,6 +24,7 @@ GEM
     extendmatrix (0.4)
     ffi (1.9.25)
     ffi (1.9.25-x64-mingw32)
+    hash_diff (1.0.0)
     hashie (3.5.7)
     html-table (1.5.1)
       strongtyping
@@ -148,6 +149,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   chroma
+  hash_diff
   html-table
   interpolate
   mechanize

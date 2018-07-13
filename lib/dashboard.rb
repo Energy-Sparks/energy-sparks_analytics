@@ -35,6 +35,7 @@ require 'net/http'
 require 'json'
 require 'date'
 require 'awesome_print'
+require 'hash_diff'
 
 require 'interpolate'
 require 'benchmark'
