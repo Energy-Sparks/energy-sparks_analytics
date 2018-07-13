@@ -16,21 +16,21 @@ class ElectricitySimulatorConfiguration
     },
     ict: {
       title: 'ICT',
-      'Servers1' => {
+      servers1: {
         editable:                 [:number, :power_watts_each],
         type:                     :server,
         number:                   2.0,
         power_watts_each:         300.0,
         air_con_overhead_pecent:  0.2
       },
-      'Servers2' => { #### Example use only, not required immediately
+      servers2: { #### Example use only, not required immediately
         editable:                 [:number, :power_watts_each],
         type:                     :server,
         number:                   1.0,
         power_watts_each:         500.0,
         air_con_overhead_pecent:  0.3
       },
-      'Desktops' => {
+       desktops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :desktop,
         number:                       20,
@@ -40,7 +40,7 @@ class ElectricitySimulatorConfiguration
         weekends:                     true, # left on standy at weekends
         holidays:                     false # left on standby during holidays
       },
-      'Laptops' => {
+      laptops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :laptop,
         number:                       20,

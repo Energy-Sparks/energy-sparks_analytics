@@ -16,7 +16,7 @@ class ElectricitySimulator
 
   def simulate(appliance_definitions)
     @appliance_definitions = appliance_definitions
-    # logger.debug appliance_definitions.inspect
+    logger.debug appliance_definitions.inspect
     @total = empty_amr_data_set('Simulator Totals')
     total_amr_data = nil
 # rubocop:disable all
@@ -44,6 +44,9 @@ class ElectricitySimulator
     logger.info "Overall time #{time}"
 
     @school.electricity_simulation_meter = create_meters(total_amr_data)
+    logger.warn "Hash diff of default and what has passed through:"
+    hash_diff = HashDiff::Comparison.new( default_simulator_parameters, appliance_definitions )
+    logger.warn hash_diff.diff
   end
 
   def empty_amr_data_set(type)
@@ -51,7 +54,7 @@ class ElectricitySimulator
   end
 
   def default_simulator_parameters
-    definitions = ElectricitySimulatorConfiguration::APPLIANCE_DEFINITIONS.clone
+    definitions = ElectricitySimulatorConfiguration::APPLIANCE_DEFINITIONS.deep_dup
     definitions[:unaccounted_for_baseload] = {  baseload: (school.floor_area / 1_000.0) * 0.5 } # 1 single number - useful
     definitions
   end
@@ -162,9 +165,9 @@ class ElectricitySimulator
   # ICT SIMULATION
   #  - note this unlike the other appliance simulators produces 3 data sets - 1 for each type of server, desktop and laptop - i_pad/tablets are ignored as very low k_wh, but can be included a a laptop
   def simulate_ict
-    server_data = empty_amr_data_set("Servers")
-    desktop_data = empty_amr_data_set("Desktops")
-    laptop_data = empty_amr_data_set("Laptops")
+    server_data = empty_amr_data_set(:servers)
+    desktop_data = empty_amr_data_set(:desktops)
+    laptop_data = empty_amr_data_set(:laptops)
 
     @appliance_definitions[:ict].each_value do |ict_appliance_group|
       next unless ict_appliance_group.instance_of? Hash
@@ -194,9 +197,9 @@ class ElectricitySimulator
       end
     end
 
-    @calc_components_results["Servers"] = server_data
-    @calc_components_results["Desktops"] = desktop_data
-    @calc_components_results["Laptops"] = laptop_data
+    @calc_components_results[:servers] = server_data
+    @calc_components_results[:desktops] = desktop_data
+    @calc_components_results[:laptops] = laptop_data
   end
 
   #=======================================================================================================================================================================
