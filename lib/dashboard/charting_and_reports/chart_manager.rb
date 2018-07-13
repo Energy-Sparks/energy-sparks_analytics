@@ -593,7 +593,7 @@ class ChartManager
     ap(chart_config, limit: 20, color: { float: :red })
 
     begin
-      aggregator = Aggregator.new(@school, chart_config, show_reconciliation_values)
+      aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)
 
       # rubocop:disable Lint/AmbiguousBlockAssociation
       logger.info Benchmark.measure { aggregator.aggregate }
