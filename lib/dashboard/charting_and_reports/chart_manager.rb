@@ -569,8 +569,9 @@ class ChartManager
     }
   }.freeze
 
-  def initialize(school)
+  def initialize(school, show_reconciliation_values = true)
     @school = school
+    @show_reconciliation_values = show_reconciliation_values
   end
 
   def run_standard_charts
@@ -587,7 +588,7 @@ class ChartManager
     chart_definition
   end
 
-  def run_chart(chart_config, chart_param, show_reconciliation_values = true)
+  def run_chart(chart_config, chart_param)
     # logger.debug 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red })
 
