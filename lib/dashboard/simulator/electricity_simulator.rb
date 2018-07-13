@@ -44,9 +44,6 @@ class ElectricitySimulator
     logger.info "Overall time #{time}"
 
     @school.electricity_simulation_meter = create_meters(total_amr_data)
-    logger.warn "Hash diff of default and what has passed through:"
-    hash_diff = HashDiff::Comparison.new( default_simulator_parameters, appliance_definitions )
-    logger.warn hash_diff.diff
   end
 
   def empty_amr_data_set(type)

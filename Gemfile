@@ -15,7 +15,6 @@ gem 'ruby-sun-times'
 gem 'soda-ruby', :require => 'soda'
 gem 'structured_warnings'
 gem 'chroma'
-gem 'hash_diff'
 
 # Useful for debugging
 gem 'pry-byebug'
