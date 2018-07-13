@@ -285,7 +285,7 @@ class ElectricitySimulator
 
       logger.debug "control type #{control_type}"
       case control_type
-      when "Sunrise/Sunset"
+      when :sunrise_sunset
         (lighting_data.start_date..lighting_data.end_date).each do |date|
           month = date.month - 1
           sunrise_str = @appliance_definitions[:security_lighting][:sunrise_times][month]
@@ -305,7 +305,7 @@ class ElectricitySimulator
             lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
           end
         end
-      when "Ambient"
+      when :ambient
         (lighting_data.start_date..lighting_data.end_date).each do |date|
           (0..47).each do |half_hour_index|
             solar_insol = @solar_irradiation.get_solar_irradiance(date, half_hour_index)
@@ -314,7 +314,7 @@ class ElectricitySimulator
             end
           end
         end
-      when "Fixed Times" # note the end time is early morning, so less than the start time which is early evening
+      when :fixed_times # note the end time is early morning, so less than the start time which is early evening
         fixed_start_time_string = @appliance_definitions[:security_lighting][:fixed_start_time]
         starttime = convert_time_string_to_time(fixed_start_time_string)
         fixed_end_time_string = @appliance_definitions[:security_lighting][:fixed_end_time]

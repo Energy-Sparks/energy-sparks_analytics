@@ -63,7 +63,7 @@ class ElectricitySimulatorConfiguration
     security_lighting: {
       title: 'Security lighting',
       editable:                     [:power, :control_type],
-      control_type:       ['Sunrise/Sunset', 'Ambient', 'Fixed Times'],  # Choose one of these with radio button
+      control_type:       [:sunrise_sunset, :ambient, :fixed_times],  # Choose one of these with radio button
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
       sunset_times:       ['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
       fixed_start_time:   '19:15',
