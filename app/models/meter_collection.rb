@@ -109,6 +109,14 @@ class MeterCollection
     @electricity_meters.push(meter)
   end
 
+  def is_open?(time)
+    if @school.respond_to?('is_open?')
+      @school.is_open?(time)
+    else
+      school_day_in_hours(time)
+    end
+  end
+
   # JAMES: TODO(JJ,3Jun2018): I gather you may have done something on this when working on holidays?
   def open_time
     @cached_open_time
