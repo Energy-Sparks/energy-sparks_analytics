@@ -52,7 +52,7 @@ class ElectricitySimulator
 
   def default_simulator_parameters
     definitions = ElectricitySimulatorConfiguration::APPLIANCE_DEFINITIONS.deep_dup
-    definitions[:unaccounted_for_baseload] = {  baseload: (school.floor_area / 1_000.0) * 0.5 } # 1 single number - useful
+    definitions[:unaccounted_for_baseload][:baseload] = (school.floor_area / 1_000.0) * 0.5 # 1 single number - useful
     definitions
   end
 

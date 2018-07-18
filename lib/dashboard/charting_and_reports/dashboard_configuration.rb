@@ -1,7 +1,7 @@
 class DashboardConfiguration
   DASHBOARD_PAGE_GROUPS = {  # dashboard page groups: defined page, and charts on that page
     main_dashboard_electric:  {
-                                name:   'Main Dashboard',
+                                name:   'Overview',
                                 charts: %i[
                                   benchmark
                                   daytype_breakdown_electricity
@@ -39,7 +39,7 @@ class DashboardConfiguration
                                 ]
                               },
     main_dashboard_electric_and_gas: {
-                                name:   'Main Dashboard',
+                                name:   'Overview',
                                 charts: %i[
                                   benchmark
                                   daytype_breakdown_electricity
