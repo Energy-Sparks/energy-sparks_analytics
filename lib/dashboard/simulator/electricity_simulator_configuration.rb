@@ -50,7 +50,7 @@ class ElectricitySimulatorConfiguration
     },
     boiler_pumps: {
       title: 'Boiler pumps',
-      editable:                     [:pump_power],
+      editable:                     [:pump_power, :start_time, :end_time, :weekends, :holidays, :frost_protection_temp],
       heating_season_start_dates:   [Date.new(2016, 10, 1),  Date.new(2017, 11, 5)],
       heating_season_end_dates:     [Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
       start_time:                   Time.new(2010,  1,  1,  5, 30, 0),    # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
