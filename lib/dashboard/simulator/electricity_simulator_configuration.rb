@@ -48,18 +48,6 @@ class ElectricitySimulatorConfiguration
         standby_watts_each:           2
       }
     },
-    boiler_pumps: {
-      title: 'Boiler pumps',
-      editable:                     [:pump_power, :start_time, :end_time, :weekends, :holidays, :frost_protection_temp],
-      heating_season_start_dates:   [Date.new(2016, 10, 1),  Date.new(2017, 11, 5)],
-      heating_season_end_dates:     [Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
-      start_time:                   Time.new(2010,  1,  1,  5, 30, 0),    # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:                     Time.new(2010,  1,  1,  17, 0, 0),    # ditto
-      pump_power:                   0.5, # 1 kw
-      weekends:                     false,
-      holidays:                     true,
-      frost_protection_temp:        4
-    },
     security_lighting: {
       title: 'Security lighting',
       editable:           [:power, :control_type, :fixed_start_time, :fixed_end_time, :power, :ambient_threshold],
@@ -101,6 +89,18 @@ class ElectricitySimulatorConfiguration
       percent_of_pupils:        0.5, # often a its only a proportion of the pupils at a school has electric hot water, the rest are provided by ga
       litres_per_day_per_pupil: 5.0, # assumes at 38C versus ambient of 15C, to give a deltaT of 23C
       standby_power:            0.1 # outside start and end times, but dependent on whether switched off during weekends and holidays, see other parameters
+    },
+    boiler_pumps: {
+      title: 'Boiler pumps',
+      editable:                     [:pump_power, :start_time, :end_time, :weekends, :holidays, :frost_protection_temp],
+      heating_season_start_dates:   [Date.new(2016, 10, 1),  Date.new(2017, 11, 5)],
+      heating_season_end_dates:     [Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
+      start_time:                   Time.new(2010,  1,  1,  5, 30, 0),    # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
+      end_time:                     Time.new(2010,  1,  1,  17, 0, 0),    # ditto
+      pump_power:                   0.5, # 1 kw
+      weekends:                     false,
+      holidays:                     true,
+      frost_protection_temp:        4
     },
     flood_lighting:  {
       title: 'Flood lighting',
