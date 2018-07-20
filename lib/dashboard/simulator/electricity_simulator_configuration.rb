@@ -16,22 +16,16 @@ class ElectricitySimulatorConfiguration
     },
     ict: {
       title: 'ICT',
-      servers1: {
-        editable:                 [:number, :power_watts_each],
+      editable:                     [servers: [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent], desktops: [:number, :power_watts_each, :weekends, :holidays], laptops: [:number, :power_watts_each, :standby_watts_each]],
+      servers: {
         type:                     :server,
         number:                   2.0,
         power_watts_each:         300.0,
-        air_con_overhead_pecent:  0.2
-      },
-      servers2: { #### Example use only, not required immediately
-        editable:                 [:number, :power_watts_each],
-        type:                     :server,
-        number:                   1.0,
-        power_watts_each:         500.0,
-        air_con_overhead_pecent:  0.3
+        air_con_overhead_pecent:  0.2,
+        weekends:                 true,
+        holidays:                 false,
       },
        desktops: {
-        editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :desktop,
         number:                       20,
         power_watts_each:             100,
@@ -41,7 +35,6 @@ class ElectricitySimulatorConfiguration
         holidays:                     false # left on standby during holidays
       },
       laptops: {
-        editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :laptop,
         number:                       20,
         power_watts_each:             30,
