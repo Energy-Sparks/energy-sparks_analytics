@@ -1,9 +1,9 @@
 #======================== Base: Out of hours usage ============================
 require_relative 'alert_analysis_base.rb'
-require 'html-table'
+require 'erb'
 
 class AlertOutOfHoursBaseUsage < AlertAnalysisBase
-  include HTML, Logging
+  include Logging
 
   def initialize(school, fuel, benchmark_out_of_hours_percent,
                  fuel_cost, alert_type, bookmark, meter_definition)
@@ -36,8 +36,8 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       description2 = AlertDescriptionDetail.new(:chart, breakdown)
       report.add_detail(description2)
       table_data = convert_breakdown_to_html_compliant_array(breakdown)
-      table = Table.new(table_data) # or could use gem Markaby
-      description3 = AlertDescriptionDetail.new(:html, table.html)
+
+      description3 = AlertDescriptionDetail.new(:html, html_table_from_data(table_data))
       report.add_detail(description3)
       report.rating = 2.0
       report.status = :poor
@@ -55,8 +55,9 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   def convert_breakdown_to_html_compliant_array(breakdown)
     html_table = []
     breakdown[:x_data].each do |daytype, consumption|
-      formatted_consumption = sprintf('%.0f kWh/£%.0f', consumption[0], consumption[0] * @fuel_cost)
-      html_table.push([daytype, formatted_consumption])
+      formatted_consumption = sprintf('%.0f kWh', consumption[0])
+      formatted_cost = sprintf('£%.0f', consumption[0] * @fuel_cost)
+      html_table.push([daytype, formatted_consumption, formatted_cost])
     end
     html_table
   end
@@ -93,4 +94,41 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     logger.debug result.inspect
     result
   end
+
+  def generate_html(template, binding)
+    begin
+      rhtml = ERB.new(template)
+      rhtml.result(binding)
+    rescue StandardError => e
+      logger.error "Error generating html for #{self.class.name}"
+      logger.error e.message
+      '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
+    end
+  end
+
+  def html_table_from_data(data)
+    template = %{
+      <table class="table table-striped table-sm" id="alert-table-#{@alert_type}">
+        <thead>
+          <tr class="thead-dark">
+            <th scope="col">Out of hours</th>
+            <th scope="col" class="text-center">Energy usage</th>
+            <th scope="col" class="text-center">Cost &pound;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% data.each do |row, usage, cost| %>
+            <tr>
+              <td><%= row %></td>
+              <td class="text-right"><%= usage %></td>
+              <td class="text-right"><%= cost %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    }.gsub(/^  /, '')
+
+    generate_html(template, binding)
+  end
+
 end

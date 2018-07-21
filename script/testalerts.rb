@@ -3,6 +3,11 @@ require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 
+module Logging
+  @logger = Logger.new('log/test-alerts.log')
+  logger.level = :warn
+end
+
 def banner(title)
   len_before = ((80 - title.length) / 2).floor
   len_after = 80 - title.length - len_before
