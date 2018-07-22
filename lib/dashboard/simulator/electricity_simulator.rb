@@ -255,14 +255,23 @@ class ElectricitySimulator
       end
     end
 
-    @calc_components_results[:servers] = server_data
-    @calc_components_results[:desktops] = desktop_data
-    @calc_components_results[:laptops] = laptop_data
+    @calc_components_results['Servers'] = server_data
+    @calc_components_results['Desktops'] = desktop_data
+    @calc_components_results['Laptops'] = laptop_data
   end
 
   #=======================================================================================================================================================================
   # BOILER PUMP SIMULATION
+
   def simulate_boiler_pump
+    if @school.aggregated_heat_meters.nil?
+      simulate_boiler_pump_using_manual_simulator_configuration
+    else
+      simulate_boiler_pump_using_gas_data
+    end
+  end
+
+  def simulate_boiler_pump_using_manual_simulator_configuration
     boiler_pump_data = empty_amr_data_set("Boiler Pumps")
 
     pump_power = @appliance_definitions[:boiler_pumps][:pump_power]
@@ -290,6 +299,20 @@ class ElectricitySimulator
           end
 
           boiler_pump_data[date][half_hour_index] = pump_power * overlap # automatically in k_wh as conversion kW * time in hours
+        end
+      end
+    end
+    @calc_components_results["Boiler Pumps"] = boiler_pump_data
+  end
+
+  def simulate_boiler_pump_using_gas_data
+    boiler_pump_data = empty_amr_data_set("Boiler Pumps")
+    pump_power = @appliance_definitions[:boiler_pumps][:pump_power]
+    (boiler_pump_data.start_date..boiler_pump_data.end_date).each do |date|
+      if @school.aggregated_heat_meters.amr_data.key?(date)
+        (0..47).each do |half_hour_index|
+          gas_power_consumption = @school.aggregated_heat_meters.amr_data.kwh(date,half_hour_index) * 2.0
+          boiler_pump_data[date][half_hour_index] = pump_power / 2.0 if (gas_power_consumption > 15.0)
         end
       end
     end
@@ -386,7 +409,6 @@ class ElectricitySimulator
         raise Not_implemented_error.new("Simulator Security Light Control Type" << control_type)
       end
     end
-
     @calc_components_results["Security Lighting"] = lighting_data
   end
 
@@ -418,7 +440,7 @@ class ElectricitySimulator
     return @cached_time_convert[half_hour_index] if @cached_time_convert.key?(half_hour_index)
     hour = (half_hour_index / 2).floor.to_i
     mins = 30 * (half_hour_index.odd? ? 1 : 0)
-    time = hour == 24 ? TimeOfDay.new(0, mins) : TimeOfDay.new(hour, mins)
+    time = TimeOfDay.new(hour, mins)
     @cached_time_convert[half_hour_index] = time
   end
   #=======================================================================================================================================================================

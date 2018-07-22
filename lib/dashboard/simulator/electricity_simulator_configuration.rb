@@ -30,22 +30,24 @@ class ElectricitySimulatorConfiguration
         power_watts_each:         500.0,
         air_con_overhead_pecent:  0.3
       },
-       desktops: {
+      desktops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :desktop,
         number:                       20,
         power_watts_each:             100,
         standby_watts_each:           10,
         usage_percent_by_time_of_day: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        weekends:                     true, # left on standy at weekends
-        holidays:                     false # left on standby during holidays
+        weekends:                     true, # left on standby at weekends
+        holidays:                     false # turned off during holidays
       },
       laptops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :laptop,
         number:                       20,
         power_watts_each:             30,
-        standby_watts_each:           2
+        standby_watts_each:           2,
+        weekends:                     true, # left on standby at weekends
+        holidays:                     false # turned off during holidays
       }
     },
     boiler_pumps: {
@@ -80,7 +82,7 @@ class ElectricitySimulatorConfiguration
         balancepoint_temperature: 15, # centigrade
         power_per_degreeday:      0.5 # kW/C
     },
-    kitchen: {  # 1 all three of these - time of day rathern than 2010
+    kitchen: {
       title: 'Kitchen',
       editable:                 [:power],
       start_time:               TimeOfDay.new(8, 0),
@@ -89,12 +91,13 @@ class ElectricitySimulatorConfiguration
     },
     summer_air_conn: { # 1 set power to zero for no aie conn
       title: 'Summer air conditioning',
+      editable:                 [:power_per_degreeday],
       start_time:               TimeOfDay.new(5, 30),
-      end_time:                 TimeOfDay.new(17, 0),
+      end_time:                 TimeOfDay.new(23, 30),
       weekends:                 true,
-      holidays:                 false,
-      balancepoint_temperature: 19, # centigrade
-      power_per_degreeday:      0.5 # cooling degree days > balancePointTemperature
+      holidays:                 true,
+      balancepoint_temperature: 16, # centigrade
+      power_per_degreeday:      0.4 # cooling degree days > balancePointTemperature
     },
     electric_hot_water: {
       title: 'Electric hot water',

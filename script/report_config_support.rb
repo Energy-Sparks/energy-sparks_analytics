@@ -139,6 +139,7 @@ class ReportConfigSupport
     logger.debug self.class.banner("Running report page  #{page_name}")
     @worksheet_charts[page_name] = []
     list_of_charts.each do |chart_name|
+      next if chart_name.is_a?(Hash)
       chart = do_one_chart_internal(chart_name)
       unless chart.nil?
         @worksheet_charts[page_name].push(chart)

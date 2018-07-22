@@ -67,14 +67,60 @@ class DashboardConfiguration
                               },
     simulator:                {
                                 name:   'Simulator Test',
+                                charts: [
+                                  :electricity_simulator_pie,
+                                   {
+                                    type: :simulator_group_by_week_comparison,
+                                    name: 'Comparison of Simulator and Actual Electricity Consumption by Week of the Year',
+                                    advice_text: true,
+                                    chart_group: {
+                                      link_y_axis: true,
+                                      layout: :horizontal,
+                                      charts: %i[
+                                        group_by_week_electricity_simulator_daytype
+                                        group_by_week_electricity
+                                      ]
+                                    }
+                                  },
+                                  :group_by_week_electricity_dd,
+                                  :group_by_week_electricity_simulator_daytype,
+                                  :group_by_week_electricity_simulator_appliance,
+
+                                  :intraday_line_school_days_6months_simulator,
+                                  :intraday_line_school_days_6months,
+                                  :intraday_line_school_days_6months_simulator_submeters
+                                ]
+                              },
+      simulator_detail:       {
+                                name: 'Simulator - Appliance Breakdown',
                                 charts: %i[
-                                  group_by_week_electricity_dd
-                                  group_by_week_electricity_simulator_daytype
-                                  group_by_week_electricity_simulator_appliance
-                                  electricity_simulator_pie
-                                  intraday_line_school_days_6months_simulator
-                                  intraday_line_school_days_6months
-                                  intraday_line_school_days_6months_simulator_submeters
+                                  electricity_simulator_pie_detail_page
+
+                                  group_by_week_electricity_simulator_lighting
+                                  intraday_electricity_simulator_lighting_kwh
+                                  intraday_electricity_simulator_lighting_kw
+
+                                  group_by_week_electricity_simulator_ict
+                                  intraday_electricity_simulator_ict
+                                  group_by_week_electricity_simulator_electrical_heating
+
+                                  group_by_week_electricity_simulator_security_lighting
+                                  intraday_electricity_simulator_security_lighting_kwh
+
+                                  group_by_week_electricity_air_conditioning
+                                  intraday_electricity_simulator_air_conditioning_kwh
+
+                                  group_by_week_electricity_flood_lighting
+                                  intraday_electricity_simulator_flood_lighting_kwh
+
+                                  group_by_week_electricity_kitchen
+                                  intraday_electricity_simulator_kitchen_kwh
+
+                                  group_by_week_electricity_simulator_boiler_pump
+                                  intraday_electricity_simulator_boiler_pump_kwh
+
+                                  group_by_week_electricity_simulator_solar_pv
+                                  intraday_electricity_simulator_solar_pv_kwh
                                 ]
                               }
   }.freeze

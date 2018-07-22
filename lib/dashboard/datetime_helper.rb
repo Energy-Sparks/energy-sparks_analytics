@@ -1,13 +1,22 @@
 # Date and timer help functions
 
-# time of day
+# time of day (differentiates between 00:00 and 24:00)
 class TimeOfDay < Time
   def initialize(hour, minutes)
+    if hour.nil? || minutes.nil? || hour < 0 || hour > 24 || minutes < 0 || minutes >= 60 || (hour == 24 && minutes != 0)
+      raise EnergySparksUnexpectedStateException.new("Unexpected time of day setting #{hour}:#{minutes}")
+    end
     super(1970, 1, 1, hour, minutes, 0)
   end
 
   def to_s
-    self.strftime('%H:%M')
+    if day == 1
+      self.strftime('%H:%M')
+    elsif day == 2 && hour == 0
+      self.strftime('24:%M')
+    else
+      '??:??'
+    end
   end
 end
 
