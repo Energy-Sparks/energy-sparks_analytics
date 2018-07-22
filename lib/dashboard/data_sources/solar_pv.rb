@@ -3,8 +3,8 @@ class SolarPV < HalfHourlyData
     super(type)
   end
 
-  def get_solar_pv_yield(date, half_hour_index)
-    getData(date, half_hour_index)
+  def solar_pv_yield(date, half_hour_index)
+    data(date, half_hour_index)
   end
 end
 

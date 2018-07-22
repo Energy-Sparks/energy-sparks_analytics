@@ -51,10 +51,8 @@ class ElectricitySimulatorConfiguration
     boiler_pumps: {
       title: 'Boiler pumps',
       editable:                     [:pump_power],
-      heating_season_start_dates:   [Date.new(2016, 10, 1),  Date.new(2017, 11, 5)],
-      heating_season_end_dates:     [Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
-      start_time:                   Time.new(2010,  1,  1,  5, 30, 0),    # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:                     Time.new(2010,  1,  1,  17, 0, 0),    # ditto
+      start_time:                   TimeOfDay.new(5, 30),
+      end_time:                     TimeOfDay.new(17, 0),
       pump_power:                   0.5, # 1 kw
       weekends:                     false,
       holidays:                     true,
@@ -72,28 +70,36 @@ class ElectricitySimulatorConfiguration
       power:              3.0
     },
     electrical_heating: {
-      title: 'Electrical heating',
+        title: 'Electrical heating',
+        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time],
+        start_time:               TimeOfDay.new(5, 30),
+        end_time:                 TimeOfDay.new(17, 0),
+        fixed_power:              4.0,
+        weekends:                 false,
+        holidays:                 false,
+        balancepoint_temperature: 15, # centigrade
+        power_per_degreeday:      0.5 # kW/C
     },
     kitchen: {  # 1 all three of these - time of day rathern than 2010
       title: 'Kitchen',
-      editable:                     [:power],
-      start_time:  Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:    Time.new(2010,  1,  1,  17, 0, 0), # ditto
-      power:       4.0 #
+      editable:                 [:power],
+      start_time:               TimeOfDay.new(8, 0),
+      end_time:                 TimeOfDay.new(13, 0),
+      power:       4.0
     },
     summer_air_conn: { # 1 set power to zero for no aie conn
       title: 'Summer air conditioning',
-      start_time:               Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:                 Time.new(2010,  1,  1,  17, 0, 0), # ditto
+      start_time:               TimeOfDay.new(5, 30),
+      end_time:                 TimeOfDay.new(17, 0),
       weekends:                 true,
       holidays:                 false,
       balancepoint_temperature: 19, # centigrade
-      power_per_degreeday:      0.5 # colling degree days > balancePointTemperature
+      power_per_degreeday:      0.5 # cooling degree days > balancePointTemperature
     },
     electric_hot_water: {
       title: 'Electric hot water',
-      start_time:               Time.new(2010, 1, 1, 9, 0, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:                 Time.new(2010, 1, 1, 16, 30, 0), # ditto
+      start_time:               TimeOfDay.new(9, 0),
+      end_time:                 TimeOfDay.new(16, 30),
       weekends:                 true,
       holidays:                 false,
       percent_of_pupils:        0.5, # often a its only a proportion of the pupils at a school has electric hot water, the rest are provided by ga
@@ -102,14 +108,37 @@ class ElectricitySimulatorConfiguration
     },
     flood_lighting:  {
       title: 'Flood lighting',
+      editable:                 [:power],
+      power:    35.0,
+      ambient_light_threshold: 200, # lumens/m2
+      bookings: [
+        {
+          weekday:      2,
+          start_time:   TimeOfDay.new(18, 30),
+          end_time:     TimeOfDay.new(20, 15),
+          holidays:     false,
+          start_date:   TimeOfYear.new(10, 1),
+          end_date:     TimeOfYear.new(3, 30)
+        },
+        {
+          weekday:      0,
+          start_time:   TimeOfDay.new(18, 0),
+          end_time:     TimeOfDay.new(19, 20),
+          holidays:     true,
+          start_date:   TimeOfYear.new(2, 22),
+          end_date:     TimeOfYear.new(5, 10)
+        }
+      ]
     },
     unaccounted_for_baseload: {
       title: 'Unaccounted for baseload',
       editable: [:baseload],
-      baseload: 1 # 1 single number - useful
+      baseload: 1.0 # 1 single number - useful
     },
     solar_pv: {
-      title: 'Solar PV'
+      title: 'Solar PV',
+      editable: [:kwp],
+      kwp:  4.0
     }
   }
 

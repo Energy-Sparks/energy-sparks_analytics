@@ -176,7 +176,7 @@ class ExcelCharts
     worksheet = @workbook.add_worksheet(worksheet_name)
     charts.each do |chart|
       add_chart(worksheet, chart, data_col_offset, chart_row_offset)
-      data_col_offset += 10
+      data_col_offset += 40
       chart_row_offset += 20
     end
   end

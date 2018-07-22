@@ -1,7 +1,6 @@
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
-  include Logging
   attr_reader :standard_charts, :school
 
   STANDARD_CHARTS = [
@@ -433,7 +432,7 @@ class ChartManager
       meter_definition: :electricity_simulator,
       x_axis:           :week,
       series_breakdown: :submeter,
-      filter:            { submeter: [ 'Lighting'] },
+      filter:            { submeter: [ 'Flood Lighting'] },
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       timescale:        :year
@@ -588,22 +587,22 @@ class ChartManager
   end
 
   def run_chart(chart_config, chart_param)
-    # logger.debug 'Chart configuration:'
+    # puts 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red })
 
     begin
       aggregator = Aggregator.new(@school, chart_config)
 
       # rubocop:disable Lint/AmbiguousBlockAssociation
-      logger.info Benchmark.measure { aggregator.aggregate }
+      puts Benchmark.measure { aggregator.aggregate }
       # rubocop:enable Lint/AmbiguousBlockAssociation
 
       graph_data = configure_graph(aggregator, chart_config, chart_param)
 
       graph_data
     rescue StandardError => e
-      logger.error "Unable to create chart #{e}"
-      logger.error e.backtrace
+      puts "Unable to create chart", e
+      puts e.backtrace
       nil
     end
   end

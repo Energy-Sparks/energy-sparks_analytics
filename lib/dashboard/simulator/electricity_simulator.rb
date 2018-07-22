@@ -1,4 +1,5 @@
 class ElectricitySimulator
+  OUTSIDE_TEMPERATURE_FOR_CALCULATED_HEATING_PERIOD = 11
   include Logging
 
   attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions
@@ -10,8 +11,51 @@ class ElectricitySimulator
     @period = @holidays.years_to_date(electricity_meter_data.start_date, electricity_meter_data.end_date, false)[0]
     @temperatures = school.temperatures
     @solar_irradiation = school.solar_irradiation
+    @solar_pv = school.solar_pv
     @school = school
+    calculate_heating_periods
     @calc_components_results = {}
+  end
+
+  def calculate_heating_periods
+    if @school.aggregated_heat_meters.nil?
+      calculate_heating_periods_from_temperatures
+    else
+      calculate_model
+    end
+  end
+
+  def heating_on?(date)
+    if @school.aggregated_heat_meters.nil?
+      @calculated_heating_dates.key?(date)
+    else
+      @heating_model.heating_on?(date)
+    end
+  end 
+
+  # calculate heating periods on the basis of temperature in the abscence of a heating meter
+  def calculate_heating_periods_from_temperatures
+    @calculated_heating_dates = {}
+    sunday = DateTimeHelper::next_weekday(@period.start_date, 0)
+
+    while sunday + 7 < @existing_electricity_meter.amr_data.end_date
+      temp = @school.temperatures.average_temperature_in_date_range(sunday, sunday + 6)
+      if temp < OUTSIDE_TEMPERATURE_FOR_CALCULATED_HEATING_PERIOD
+        (sunday..sunday+6).each do |date|
+          @calculated_heating_dates[date] = true
+        end
+      end
+      sunday += 7 
+    end
+  end
+
+  def calculate_model
+    # TODO(PH,21Jul2018): should really check heating meter data up to date as electrical meter data
+    start_date = @school.aggregated_heat_meters.amr_data.start_date
+    end_date = @school.aggregated_heat_meters.amr_data.end_date
+    periods = @school.holidays.years_to_date(start_date, end_date, false)
+    @heating_model = @school.heating_model(periods[0])
+    @heating_model.calculate_heating_periods(start_date, end_date)
   end
 
   def simulate(appliance_definitions)
@@ -35,8 +79,14 @@ class ElectricitySimulator
       logger.info Benchmark.measure { simulate_hot_water }
       logger.info 'air con'
       logger.info Benchmark.measure { simulate_air_con }
+      logger.info 'flood lighting'
+      logger.info Benchmark.measure { simulate_flood_lighting }
+      logger.info 'electrical heating'
+      logger.info Benchmark.measure { simulate_electrical_heating }
       logger.info 'unaccounted for baseload'
       logger.info Benchmark.measure { simulate_unaccounted_for_baseload }
+      logger.info 'solar pv'
+      logger.info Benchmark.measure { simulate_solar_pv }
       logger.info 'aggregate results'
       logger.info Benchmark.measure { total_amr_data = aggregate_results }
     }
@@ -209,15 +259,14 @@ class ElectricitySimulator
     heating_on_during_holidays = @appliance_definitions[:boiler_pumps][:holidays]
 
     (boiler_pump_data.start_date..boiler_pump_data.end_date).each do |date|
-      in_season = in_heating_season(@appliance_definitions[:boiler_pumps][:heating_season_start_dates], @appliance_definitions[:boiler_pumps][:heating_season_end_dates], date)
-      heating_on = in_season && !(@holidays.holiday?(date) && !heating_on_during_holidays) && !(weekend?(date) && !heating_on_during_weekends)
+      heating_on = heating_on?(date) && !(@holidays.holiday?(date) && !heating_on_during_holidays) && !(weekend?(date) && !heating_on_during_weekends)
       if heating_on
         (0..47).each do |half_hour_index|
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
           # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
-          overlap = hours_overlap_between_two_date_ranges(amr_bucket_start_time, amr_bucket_end_time, @appliance_definitions[:boiler_pumps][:start_time], @appliance_definitions[:boiler_pumps][:end_time])
+          overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, @appliance_definitions[:boiler_pumps][:start_time], @appliance_definitions[:boiler_pumps][:end_time])
 
           frost_protect_temp = @appliance_definitions[:boiler_pumps][:frost_protection_temp]
 
@@ -254,13 +303,6 @@ class ElectricitySimulator
     false
   end
 
-  # def within_boiler_on_times(start_time, end_time, half_hour_index)
-  #  start_time_index = convert_time_to_half_hour_index(start_time)
-  #  end_time_index = convert_time_to_half_hour_index(end_time)
-  #
-  #  return half_hour_index >= start_time_index && half_hour_index <= end_time_index
-  # end
-
   def convert_time_to_half_hour_index(time)
     hour = time.hour.to_i
     half_hour_index = time.min >= 30
@@ -296,8 +338,8 @@ class ElectricitySimulator
             amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
             # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
-            overlap = hours_overlap_between_two_date_ranges(amr_bucket_start_time, amr_bucket_end_time, midnight0, sunrise)
-            overlap += hours_overlap_between_two_date_ranges(amr_bucket_start_time, amr_bucket_end_time, sunset, midnight24)
+            overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, midnight0, sunrise)
+            overlap += hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, sunset, midnight24)
 
             lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
           end
@@ -305,7 +347,7 @@ class ElectricitySimulator
       when :ambient
         (lighting_data.start_date..lighting_data.end_date).each do |date|
           (0..47).each do |half_hour_index|
-            solar_insol = @solar_irradiation.get_solar_irradiance(date, half_hour_index)
+            solar_insol = @solar_irradiation.irradiance(date, half_hour_index)
             if solar_insol < @appliance_definitions[:security_lighting][:ambient_threshold]
               lighting_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
             end
@@ -323,8 +365,8 @@ class ElectricitySimulator
             amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
             # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
-            overlap = hours_overlap_between_two_date_ranges(amr_bucket_start_time, amr_bucket_end_time, midnight0, endtime)
-            overlap += hours_overlap_between_two_date_ranges(amr_bucket_start_time, amr_bucket_end_time, starttime, midnight24)
+            overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, midnight0, endtime)
+            overlap += hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, starttime, midnight24)
 
             lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
           end
@@ -338,10 +380,13 @@ class ElectricitySimulator
   end
 
   def convert_time_string_to_time(time_str)
-    Time.new(2010, 1, 1, time_str[0, 2].to_i, time_str[3, 2].to_i, 0)
+    TimeOfDay.new(time_str[0, 2].to_i, time_str[3, 2].to_i)
   end
 
-  def hours_overlap_between_two_date_ranges(start_time1, end_time1, start_time2, end_time2)
+  def hours_overlap_between_two_time_ranges(start_time1, end_time1, start_time2, end_time2)
+    if !start_time1.is_a?(TimeOfDay) || !end_time1.is_a?(TimeOfDay) || !start_time2.is_a?(TimeOfDay) || !end_time2.is_a?(TimeOfDay)
+      raise EnergySparksUnexpectedStateException.new("Not all parameters of overlap calculations are TimeOfDay")
+    end
     overlap = 0.0
     if end_time1 < start_time2 || start_time1 > end_time2 # no overlap
       return 0.0
@@ -362,7 +407,7 @@ class ElectricitySimulator
     return @cached_time_convert[half_hour_index] if @cached_time_convert.key?(half_hour_index)
     hour = (half_hour_index / 2).floor.to_i
     mins = 30 * (half_hour_index.odd? ? 1 : 0)
-    time = hour == 24 ? Time.new(2010, 1, 2, 0, mins, 0) : Time.new(2010, 1, 1, hour, mins, 0)
+    time = hour == 24 ? TimeOfDay.new(0, mins) : TimeOfDay.new(hour, mins)
     @cached_time_convert[half_hour_index] = time
   end
   #=======================================================================================================================================================================
@@ -384,7 +429,7 @@ class ElectricitySimulator
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
           # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
-          overlap = hours_overlap_between_two_date_ranges(amr_bucket_start_time, amr_bucket_end_time, start_time, end_time)
+          overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, start_time, end_time)
 
           kitchen_data[date][half_hour_index] = power * overlap # automatically in k_wh as conversion kW * time in hours
         end
@@ -418,7 +463,7 @@ class ElectricitySimulator
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
           # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
-          overlap = hours_overlap_between_two_date_ranges(amr_bucket_start_time, amr_bucket_end_time, start_time, end_time)
+          overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, start_time, end_time)
 
           hot_water_data[date][half_hour_index] = average_power * overlap # automatically in k_wh as conversion kW * time in hours
 
@@ -436,6 +481,77 @@ class ElectricitySimulator
     end
     @calc_components_results["Hot Water"] = hot_water_data
   end
+
+  #=======================================================================================================================================================================
+  # ELECTRICAL HEATING
+  def simulate_electrical_heating
+    electric_heating_data = empty_amr_data_set('Electrical Heating')
+    config = @appliance_definitions[:electrical_heating] 
+
+    (electric_heating_data.start_date..electric_heating_data.end_date).each do |date|
+      if heating_on?(date) && !(@holidays.holiday?(date) && !config[:holidays]) && !(weekend?(date) && !config[:weekends])
+        (0..47).each do |half_hour_index|
+          power = config[:fixed_power]
+          amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
+          amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
+
+          overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, config[:start_time], config[:end_time])
+
+          degree_days = @temperatures.degree_hour(date, half_hour_index, config[:balancepoint_temperature])
+          if degree_days > 0
+            heating_power = config[:power_per_degreeday] * degree_days
+            power += heating_power
+          end
+
+          electric_heating_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
+        end
+      end
+    end
+    # ap(electric_heating_data, limit: 20, color: { float: :red })
+    @calc_components_results['Electrical Heating'] = electric_heating_data
+  end
+
+  #=======================================================================================================================================================================
+  # FLOOD LIGHTING
+  def simulate_flood_lighting
+    flood_lighting_data = empty_amr_data_set("Flood Lighting")
+    config = @appliance_definitions[:flood_lighting]
+
+    if config[:power] >= 0.0
+      (flood_lighting_data.start_date..flood_lighting_data.end_date).each do |date|
+        config[:bookings].each do |booking|
+          time_of_year = TimeOfYear.new(date.month, date.day)
+          if time_of_year_in_range(booking[:start_date], booking[:end_date], time_of_year)
+            if booking[:weekday] == date.wday && (booking[:holidays] || !@school.holidays.holiday?(date))
+              (0..47).each do |half_hour_index|
+                irradiance = @solar_irradiation.irradiance(date, half_hour_index)
+                if irradiance < config[:ambient_light_threshold]
+                  overlap = hours_overlap_between_two_time_ranges(
+                              convert_half_hour_index_to_time(half_hour_index),
+                              convert_half_hour_index_to_time(half_hour_index + 1),
+                              booking[:start_time],
+                              booking[:end_time]
+                  )            
+                  flood_lighting_data[date][half_hour_index] += config[:power] * overlap # overlap fn(T) so converts to kWh
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    @calc_components_results["Flood Lighting"] = flood_lighting_data
+  end
+
+  def time_of_year_in_range(r1, r2, toy)
+     if r2 >= r1 # range starts and ends before Dec 31
+      toy >= r1 && toy <= r2
+     else # range starts before Dec 31 and ends after Dec 31
+      toy >= r1 || toy <= r2
+     end
+  end
+
 
   #=======================================================================================================================================================================
   # SUMMER AIRCON SIMULATION
@@ -457,9 +573,9 @@ class ElectricitySimulator
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
-          overlap = hours_overlap_between_two_date_ranges(amr_bucket_start_time, amr_bucket_end_time, @appliance_definitions[:summer_air_conn][:start_time], @appliance_definitions[:summer_air_conn][:end_time])
+          overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, @appliance_definitions[:summer_air_conn][:start_time], @appliance_definitions[:summer_air_conn][:end_time])
 
-          degree_days = @temperatures.cooling_degree_days_at_time(date, base_temp, half_hour_index)
+          degree_days = @temperatures.cooling_degree_days_at_time(date, half_hour_index, base_temp)
 
           if degree_days > 0 # to speed up code
 
@@ -487,6 +603,23 @@ class ElectricitySimulator
       end
     end
     @calc_components_results["Unaccounted For Baseload"] = unaccounted_for_baseload_data
+  end
+
+  #=======================================================================================================================================================================
+  # SOLAR PV
+  def simulate_solar_pv
+    solar_pv_data = empty_amr_data_set("Solar PV")
+    kwp = @appliance_definitions[:solar_pv][:kwp]
+
+    if kwp > 0.0
+      (solar_pv_data.start_date..solar_pv_data.end_date).each do |date|
+        puts "PV yield on #{date}"
+        (0..47).each do |half_hour_index|
+          solar_pv_data[date][half_hour_index] = -1.0 * kwp * @solar_pv.solar_pv_yield(date, half_hour_index)
+        end
+      end
+    end
+    @calc_components_results["Solar PV"] = solar_pv_data
   end
   #=======================================================================================================================================================================
   # ANOTHER SIMULATION
