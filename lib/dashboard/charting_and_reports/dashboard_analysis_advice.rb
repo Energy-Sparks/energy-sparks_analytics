@@ -41,6 +41,13 @@ class DashboardChartAdviceBase
     end
   end
 
+  def self.advice_factory_group(chart_type, school, chart_definition, charts)
+    case chart_type
+    when :simulator_group_by_week_comparison
+      SimulatorByWeekComparisonAdvice.new(school, chart_definition, charts, chart_type)
+    end
+  end
+
   def self.advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
     case chart_type
     when :benchmark
@@ -85,6 +92,10 @@ class DashboardChartAdviceBase
       HeatingOptimumStartAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     when :hotwater
       HotWaterAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when :electricity_simulator_pie
+      ElectricitySimulatorBreakdownAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :electricity_simulator_pie_detail_page
+      ElectricitySimulatorDetailBreakdownAdvice.new(school, chart_definition, chart_data, chart_symbol)
     end
   end
 
@@ -123,6 +134,64 @@ protected
     logger.debug pounds.inspect
     logger.debug kwh.inspect
     '&pound;' + YAxisScaling.scale_num(pounds) + ' (' + YAxisScaling.scale_num(kwh) + 'kWh)'
+  end
+
+  def html_table_from_graph_data(data, fuel_type = :electricity, totals_row = true, column1_description = '', sort = 0)
+    total = 0.0
+
+    if sort == 0
+      sorted_data = data
+    elsif sort > 0
+      sorted_data = data.sort_by {|_key, value| value[0]}
+    else
+      sorted_data = data.sort_by {|_key, value| value[0]}
+      sorted_data = sorted_data.reverse
+    end
+
+    data.each_value do |value|
+      total += value[0]
+    end
+    template = %{
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr class="thead-dark">
+            <th scope="col"> <%= column1_description %> </th>
+            <th scope="col" class="text-center">kWh &#47; year </th>
+            <th scope="col" class="text-center">&pound; &#47;year </th>
+            <th scope="col" class="text-center">CO2 kg &#47;year </th>
+            <th scope="col" class="text-center">Library Books &#47;year </th>
+            <th scope="col" class="text-center">Percent </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% sorted_data.each do |row, value| %>
+            <tr>
+              <td><%= row %></td>
+              <% val = value[0] %>
+              <% pct = val / total %>
+              <td class="text-right"><%= YAxisScaling.scale_num(val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
+              <td class="text-right"><%= percent(pct) %></td>
+            </tr>
+          <% end %>
+
+          <% if totals_row %>
+            <tr class="table-success">
+              <td><b>Total</b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.scale_num(total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :£, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :co2, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, total) %></b></td>
+              <td></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    }.gsub(/^  /, '')
+
+    generate_html(template, binding)
   end
 end
 
@@ -307,7 +376,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     saving_kwh = (kwh_in_hours + kwh_out_of_hours) * saving_percent
     saving_£ = YAxisScaling.convert(:kwh, :£, @fuel_type, saving_kwh)
 
-    table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type)
+    table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
 
     header_template = %{
       <%= @body_start %>
@@ -354,54 +423,6 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     else
       'well below' + the_average
     end
-  end
-
-  def html_table_from_graph_data(data, fuel_type = :electricity, totals_row = true)
-    total = 0.0
-    data.each_value do |value|
-      total += value[0]
-    end
-    template = %{
-      <table class="table table-striped table-sm">
-        <thead>
-          <tr class="thead-dark">
-            <th scope="col">Type &#47; Time of Day </th>
-            <th scope="col" class="text-center">kWh &#47; year </th>
-            <th scope="col" class="text-center">&pound; &#47;year </th>
-            <th scope="col" class="text-center">CO2 kg &#47;year </th>
-            <th scope="col" class="text-center">Library Books &#47;year </th>
-            <th scope="col" class="text-center">Percent </th>
-          </tr>
-        </thead>
-        <tbody>
-          <% data.each do |row, value| %>
-            <tr>
-              <td><%= row %></td>
-              <% val = value[0] %>
-              <% pct = val / total %>
-              <td class="text-right"><%= YAxisScaling.scale_num(val) %></td>
-              <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
-              <td class="text-right"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
-              <td class="text-right"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
-              <td class="text-right"><%= percent(pct) %></td>
-            </tr>
-          <% end %>
-
-          <% if totals_row %>
-            <tr class="table-success">
-              <td><b>Total</b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.scale_num(total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :£, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :co2, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, total) %></b></td>
-              <td></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    }.gsub(/^  /, '')
-
-    generate_html(template, binding)
   end
 
   # copied from alerts code, needs rationalising
@@ -1486,5 +1507,143 @@ class HotWaterAdvice < DashboardChartAdviceBase
       @hotwater_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@school)
     end
     @hotwater_model
+  end
+end
+
+#==============================================================================
+class ElectricitySimulatorBreakdownAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+
+    table_info = html_table_from_graph_data(@chart_data[:x_data], :electricity, true, 'Appliance Type', -1)
+
+    header_template = %{
+      <%= @body_start %>
+        <h1>Electricity Simulator Results</h1>
+        <p>
+          Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
+          Initially, it does this automatucally based on the existing smart meter data, and a knowledge of the consumption
+          of appliances at other schools where we have undertaken a physically audit of appliances in the past.
+          As such it is an 'educated guess' at how electricity is consumed in a school,
+          and can be refined by an audit of a school's appliances which could be performed by pupils.
+        </p>
+        <p>
+          The simulator is designed to help make more rational decisions when replacing appliances, for example it allows
+          via the configuration editor you to answer the question 'How much would I save if I installed more energy efficient lighting?', or
+          'How much would I save if I replaced the school's ICT servers with more efficient ones?
+        </p>
+        <p>
+          For each appliance type, using a variety of external data (e.g. temperature, sunshine data and solar PV data) and
+          occupancy patterns it assesses realistic usages for every <sup>1</sup>/<sup>2</sup> hour
+          for each appliance type. The results are presented below.
+        </p>
+        <p>
+        The data presented is for the current year to date:
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        <%= table_info %>
+      <p>
+      </p>
+        If you are using the simulator to make a decision about an investment in more efficient equipment, you
+        should multiply the annual savings by the life of the investment typically 5 to 15 years.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class ElectricitySimulatorDetailBreakdownAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+
+    table_info = html_table_from_graph_data(@chart_data[:x_data], :electricity, true, 'Appliance Type', -1)
+
+    header_template = %{
+      <%= @body_start %>
+        <h1>Electricity Simulator Results Detailed Breakdown</h1>
+        <p>
+          Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
+          Initially, it does this automatucally based on the existing smart meter data, and a knowledge of the consumption
+          of appliances at other schools where we have undertaken a physically audit of appliances in the past.
+          As such it is an 'educated guess' at how electricity is consumed in a school,
+          and can be refined by an audit of a school's appliances which could be performed by pupils.
+        </p>
+        <p>
+          The simulator is designed to help make more rational decisions when replacing appliances, for example it allows
+          via the configuration editor you to answer the question 'How much would I save if I installed more energy efficient lighting?', or
+          'How much would I save if I replaced the school's ICT servers with more efficient ones?
+        </p>
+        <p>
+          For each appliance type, using a variety of external data (e.g. temperature, sunshine data and solar PV data) and
+          occupancy patterns it assesses realistic usages for every <sup>1</sup>/<sup>2</sup> hour
+          for each appliance type. The results are presented below.
+        </p>
+        <p>
+          The data presented is for the current year to date:
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        <%= table_info %>
+      <p>
+      <p>
+        If you are using the simulator to make a decision about an investment in more efficient equipment, you
+        should multiply the annual savings by the life of the investment typically 5 to 15 years.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class SimulatorByWeekComparisonAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, charts, chart_symbol)
+    super(school, chart_definition, charts, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <h1>Comparison of Weekly Electricity Consumption (Actual versus Simulator)</h1>
+        <p>
+          The two graphs below show the real electricity consumption from the school's electricity smart meter(s)
+          versus the consumption predicted by Energy Spark's Electricity Simulator.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        Please compare the 2 charts above.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
   end
 end

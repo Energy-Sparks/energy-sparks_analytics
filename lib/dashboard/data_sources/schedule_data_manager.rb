@@ -98,7 +98,6 @@ class ScheduleDataManager
         SolarPVLoader.new("#{INPUT_DATA_DIR}/pv data Bath.csv", solar_data)
         logger.debug "Loaded #{solar_data.length} days of solar pv data"
       end
-
       @@solar_pv_data[area_name] = solar_data
     end
     @@solar_pv_data[area_name]

@@ -6,6 +6,10 @@ class SolarIrradiance < HalfHourlyData
   def solar_irradiance(date, half_hour_index)
     data(date, half_hour_index)
   end
+
+  def irradiance(date, half_hour_index)
+    data(date, half_hour_index)
+  end
 end
 
 class SolarIrradianceLoader < HalfHourlyLoader
