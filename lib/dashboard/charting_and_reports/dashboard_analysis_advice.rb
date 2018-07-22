@@ -41,6 +41,13 @@ class DashboardChartAdviceBase
     end
   end
 
+  def self.advice_factory_group(chart_type, school, chart_definition, charts)
+    case chart_type
+    when :simulator_group_by_week_comparison
+      SimulatorByWeekComparisonAdvice.new(school, chart_definition, charts, chart_type)
+    end
+  end
+
   def self.advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
     case chart_type
     when :benchmark
@@ -1587,7 +1594,8 @@ class ElectricitySimulatorDetailBreakdownAdvice < DashboardChartAdviceBase
           for each appliance type. The results are presented below.
         </p>
         <p>
-        The data presented is for the current year to date:
+          The data presented is for the current year to date:
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1598,9 +1606,40 @@ class ElectricitySimulatorDetailBreakdownAdvice < DashboardChartAdviceBase
       <p>
         <%= table_info %>
       <p>
-      </p>
+      <p>
         If you are using the simulator to make a decision about an investment in more efficient equipment, you
         should multiply the annual savings by the life of the investment typically 5 to 15 years.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class SimulatorByWeekComparisonAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, charts, chart_symbol)
+    super(school, chart_definition, charts, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <h1>Comparison of Weekly Electricity Consumption (Actual versus Simulator)</h1>
+        <p>
+          The two graphs below show the real electricity consumption from the school's electricity smart meter(s)
+          versus the consumption predicted by Energy Spark's Electricity Simulator.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        Please compare the 2 charts above.
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')

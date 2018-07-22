@@ -696,6 +696,39 @@ class ChartManager
     chart_definitions
   end
 
+  def run_chart_group(chart_param)
+    if chart_param.is_a?(Symbol)
+      run_standard_chart(chart_param)
+    elsif chart_param.is_a?(Hash)
+      run_composite_chart(chart_param)
+    end
+  end
+
+  def run_composite_chart(chart_group)
+    puts "Running composite chart group #{chart_group[:name]}"
+    chart_group_result = {}
+    chart_group_result[:config] = chart_group
+    chart_group_result[:charts] = []
+    chart_group[:chart_group][:charts].each do |chart_param|
+      chart = run_standard_chart(chart_param)
+      ap(chart, limit: 20, color: { float: :red })
+      chart_group_result[:charts].push(chart)
+    end
+
+    if chart_group[:advice_text]
+      advice = DashboardChartAdviceBase.advice_factory_group(chart_group[:type], @school, chart_group, chart_group_result[:charts])
+
+      unless advice.nil?
+        advice.generate_advice
+        chart_group_result[:advice_header] = advice.header_advice
+        chart_group_result[:advice_footer] = advice.footer_advice
+      end
+    end
+    
+    ap(chart_group_result, limit: 20, color: { float: :red })
+    chart_group_result
+  end
+
   def run_standard_chart(chart_param)
     chart_config = STANDARD_CHART_CONFIGURATION[chart_param].dup
     while chart_config.key?(:inherits_from)
@@ -710,7 +743,7 @@ class ChartManager
 
   def run_chart(chart_config, chart_param)
     # puts 'Chart configuration:'
-    ap(chart_config, limit: 100, color: { float: :red })
+    ap(chart_config, limit: 20, color: { float: :red })
 
     begin
       aggregator = Aggregator.new(@school, chart_config)
