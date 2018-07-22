@@ -17,6 +17,17 @@ class ElectricitySimulator
     @calc_components_results = {}
   end
 
+  # fit default parameters to actual AMR data
+  def fit
+    # TODO(PH,21Jul2018):
+    # Fit baseload fn(school size) => server usage, remainder unaccounted for baseload, some hot water, other standby
+    # Fit lighting: min lumens/watt 45, any winter excess assumed to be electrical heating
+    # Fit kitchen: excess morning usage
+    # Fit hot water: check for summer gas usage, define any underspend as electric
+    # Fit security lighting: weekend additional overnight usage (adjust unaccounted for baseload down (? - depends on whether use stat algorithm)
+    # Fit solar pv: only if zero summer weekend usage?
+  end
+
   def calculate_heating_periods
     if @school.aggregated_heat_meters.nil?
       calculate_heating_periods_from_temperatures
@@ -507,7 +518,6 @@ class ElectricitySimulator
         end
       end
     end
-    # ap(electric_heating_data, limit: 20, color: { float: :red })
     @calc_components_results['Electrical Heating'] = electric_heating_data
   end
 
@@ -613,7 +623,6 @@ class ElectricitySimulator
 
     if kwp > 0.0
       (solar_pv_data.start_date..solar_pv_data.end_date).each do |date|
-        puts "PV yield on #{date}"
         (0..47).each do |half_hour_index|
           solar_pv_data[date][half_hour_index] = -1.0 * kwp * @solar_pv.solar_pv_yield(date, half_hour_index)
         end
