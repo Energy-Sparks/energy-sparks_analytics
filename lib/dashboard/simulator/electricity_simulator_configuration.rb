@@ -1,8 +1,7 @@
 class ElectricitySimulatorConfiguration
 
    APPLIANCE_DEFINITIONS = {
-    lighting:
-    {
+    lighting: {
       title: 'Lighting',
       editable: [:lumens_per_watt, :lumens_per_m2],
       lumens_per_watt: 50.0,
@@ -142,7 +141,7 @@ class ElectricitySimulatorConfiguration
     solar_pv: {
       title: 'Solar PV',
       editable: [:kwp],
-      kwp:  4.0
+      kwp:  4.0,
       baseload: 1.0 # 1 single number - useful
     }
   }
