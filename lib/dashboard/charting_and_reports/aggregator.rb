@@ -72,11 +72,11 @@ class Aggregator
       bucketed_period_data.each do |period_data|
         bucketed_data, bucketed_data_count, time_description = period_data
         bucketed_data.each do |series_name, x_data|
-          new_series_name = series_name + ':' + time_description
+          new_series_name = series_name.to_s + ':' + time_description
           @bucketed_data[new_series_name] = x_data
         end
         bucketed_data_count.each do |series_name, x_data|
-          new_series_name = series_name + ':' + time_description
+          new_series_name = series_name.to_s + ':' + time_description
           @bucketed_data_count[new_series_name] = x_data
         end
       end
@@ -96,9 +96,27 @@ class Aggregator
 
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
+    reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order)
+
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
+  end
+
+  def reverse_series_name_order(format)
+    if format.is_a?(Symbol) && format == :reverse
+      @bucketed_data = @bucketed_data.to_a.reverse.to_h
+      @bucketed_data_count = @bucketed_data.to_a.reverse.to_h
+    elsif format.is_a?(Array) # TODO(PH,22Jul2018): written but not tested, by be useful in future
+      data = {}
+      count = {}
+      format.each do |series_name|
+        data[series_name] = @bucketed_data[series_name]
+        count[series_name] = @bucketed_data_count[series_name]
+      end
+      @bucketed_data = data
+      @bucketed_data_count = count
+    end
   end
 
   # charts can be specified as working over a single time period

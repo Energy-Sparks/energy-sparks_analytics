@@ -1,7 +1,6 @@
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
-  include Logging
   attr_reader :standard_charts, :school
 
   STANDARD_CHARTS = [
@@ -433,11 +432,124 @@ class ChartManager
       meter_definition: :electricity_simulator,
       x_axis:           :week,
       series_breakdown: :submeter,
-      filter:            { submeter: [ 'Lighting'] },
+      filter:            { submeter: [ 'Flood Lighting'] },
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    group_by_week_electricity_simulator_ict: {
+      name:             'By Week: Electricity Simulator (ICT Servers, Desktops, Laptops)',
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      filter:            { submeter: [ 'Laptops', 'Desktops', 'Servers' ] },
+      series_name_order: :reverse
+    },
+
+    group_by_week_electricity_simulator_electrical_heating: {
+      name:             'By Week: Electricity Simulator (Heating using Electricity)',
+      inherits_from:    :group_by_week_gas,
+      meter_definition: :electricity_simulator,
+      series_breakdown: :submeter,
+      filter:            { submeter: [ 'Electrical Heating' ] }
+    },
+    intraday_electricity_simulator_ict: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (ICT Servers, Desktops, Laptops)',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      series_breakdown: :submeter,
+      timescale:        :year,
+      x_axis:           :intraday,
+      meter_definition: :electricity_simulator,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      filter:            { daytype: :occupied, submeter: [ 'Laptops', 'Desktops', 'Servers' ] },
+      series_name_order: :reverse
+    },
+    #==============================SIMULATOR LIGHTING DETAIL==============================
+    group_by_week_electricity_simulator_lighting: {
+      name:             'By Week: Electricity Simulator (Lighting)',
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      filter:            { submeter: [ 'Lighting' ] }
+    },
+    intraday_electricity_simulator_lighting_kwh: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (Lighting)',
+      inherits_from:    :intraday_electricity_simulator_ict,
+      filter:            { daytype: :occupied, submeter: ['Lighting'] }
+    },
+    intraday_electricity_simulator_lighting_kw: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (Lighting)',
+      inherits_from:    :intraday_electricity_simulator_lighting_kwh,
+      yaxis_units:      :kw,
+      filter:            { daytype: :occupied, submeter: ['Lighting'] }
+    },
+    #==============================SIMUALATOR BOILER PUMP DETAIL==============================
+    group_by_week_electricity_simulator_boiler_pump: {
+      name:             'By Week: Electricity Simulator (Boiler Pumps)',
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      filter:            { submeter: ['Boiler Pumps'] }
+    },
+    intraday_electricity_simulator_boiler_pump_kwh: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (Boiler Pumps)',
+      inherits_from:    :intraday_electricity_simulator_ict,
+      filter:            { submeter: ['Boiler Pumps'] }
+    },
+    #==============================SIMUALATOR SECURITY LIGHTING DETAIL==============================
+    group_by_week_electricity_simulator_security_lighting: {
+      name:             'By Week: Electricity Simulator (Security Lighting)',
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      filter:            { submeter: ['Security Lighting'] }
+    },
+    intraday_electricity_simulator_security_lighting_kwh: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (Security Lighting)',
+      inherits_from:    :intraday_electricity_simulator_ict,
+      filter:            { submeter: ['Security Lighting'] }
+    },
+    #==============================AIR CONDITIONING================================================
+    group_by_week_electricity_air_conditioning: {
+      name:             'By Week: Electricity Simulator (Air Conditioning)',
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      filter:            { submeter: ['Air Conditioning'] },
+      y2_axis:          :temperature
+    },
+    intraday_electricity_simulator_air_conditioning_kwh: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (Air Conditioning)',
+      inherits_from:    :intraday_electricity_simulator_ict,
+      filter:            { submeter: [ 'Air Conditioning' ] }
+    },
+    #==============================FLOOD LIGHTING================================================
+    group_by_week_electricity_flood_lighting: {
+      name:             'By Week: Electricity Simulator (Flood Lighting)',
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      filter:            { submeter: ['Flood Lighting'] },
+    },
+    intraday_electricity_simulator_flood_lighting_kwh: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (Flood Lighting)',
+      inherits_from:    :intraday_electricity_simulator_ict,
+      filter:            { submeter: ['Flood Lighting'] }
+    },
+    #==============================KITCHEN================================================
+    group_by_week_electricity_kitchen: {
+      name:             'By Week: Electricity Simulator (Kitchen)',
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      filter:            { submeter: ['Kitchen'] },
+    },
+    intraday_electricity_simulator_kitchen_kwh: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (Kitchen)',
+      inherits_from:    :intraday_electricity_simulator_ict,
+      filter:            { submeter: ['Kitchen'] }
+    },
+    #==============================SOLAR PV================================================
+    group_by_week_electricity_simulator_solar_pv: {
+      name:             'By Month: Electricity Simulator (Solar PV)',
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      x_axis:           :month,
+      filter:            { submeter: ['Solar PV'] }
+    },
+    intraday_electricity_simulator_solar_pv_kwh: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (Solar PV)',
+      inherits_from:    :intraday_electricity_simulator_ict,
+      filter:            { submeter: ['Solar PV'] }
+    },
+
     electricity_simulator_pie: {
       name:             'By Week: Electricity Simulator',
       chart1_type:      :pie,
@@ -447,6 +559,9 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       timescale:        :year
+    },
+    electricity_simulator_pie_detail_page: {
+      inherits_from:    :electricity_simulator_pie,
     },
     intraday_line_school_days_6months_simulator:  {
       name:             'Intraday (Comparison 6 months apart) Simulator',
@@ -581,29 +696,68 @@ class ChartManager
     chart_definitions
   end
 
+  def run_chart_group(chart_param)
+    if chart_param.is_a?(Symbol)
+      run_standard_chart(chart_param)
+    elsif chart_param.is_a?(Hash)
+      run_composite_chart(chart_param)
+    end
+  end
+
+  def run_composite_chart(chart_group)
+    puts "Running composite chart group #{chart_group[:name]}"
+    chart_group_result = {}
+    chart_group_result[:config] = chart_group
+    chart_group_result[:charts] = []
+    chart_group[:chart_group][:charts].each do |chart_param|
+      chart = run_standard_chart(chart_param)
+      ap(chart, limit: 20, color: { float: :red })
+      chart_group_result[:charts].push(chart)
+    end
+
+    if chart_group[:advice_text]
+      advice = DashboardChartAdviceBase.advice_factory_group(chart_group[:type], @school, chart_group, chart_group_result[:charts])
+
+      unless advice.nil?
+        advice.generate_advice
+        chart_group_result[:advice_header] = advice.header_advice
+        chart_group_result[:advice_footer] = advice.footer_advice
+      end
+    end
+    
+    ap(chart_group_result, limit: 20, color: { float: :red })
+    chart_group_result
+  end
+
   def run_standard_chart(chart_param)
-    chart_config = STANDARD_CHART_CONFIGURATION[chart_param]
+    chart_config = STANDARD_CHART_CONFIGURATION[chart_param].dup
+    while chart_config.key?(:inherits_from)
+      base_chart_config_param = chart_config[:inherits_from]
+      base_chart_config = STANDARD_CHART_CONFIGURATION[base_chart_config_param].dup
+      chart_config.delete(:inherits_from)
+      chart_config = base_chart_config.merge(chart_config)
+    end
     chart_definition = run_chart(chart_config, chart_param)
     chart_definition
   end
 
   def run_chart(chart_config, chart_param)
-    # logger.debug 'Chart configuration:'
+    # puts 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red })
 
     begin
       aggregator = Aggregator.new(@school, chart_config)
 
       # rubocop:disable Lint/AmbiguousBlockAssociation
-      logger.info Benchmark.measure { aggregator.aggregate }
+      puts Benchmark.measure { aggregator.aggregate }
       # rubocop:enable Lint/AmbiguousBlockAssociation
 
       graph_data = configure_graph(aggregator, chart_config, chart_param)
 
       graph_data
     rescue StandardError => e
-      logger.error "Unable to create chart #{e}"
-      logger.error e.backtrace
+      puts "Unable to create chart", e
+      puts e.backtrace
       nil
     end
   end

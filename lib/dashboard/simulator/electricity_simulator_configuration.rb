@@ -16,21 +16,21 @@ class ElectricitySimulatorConfiguration
     },
     ict: {
       title: 'ICT',
-      'Servers1' => {
+      servers1: {
         editable:                 [:number, :power_watts_each],
         type:                     :server,
         number:                   2.0,
         power_watts_each:         300.0,
         air_con_overhead_pecent:  0.2
       },
-      'Servers2' => { #### Example use only, not required immediately
+      servers2: { #### Example use only, not required immediately
         editable:                 [:number, :power_watts_each],
         type:                     :server,
         number:                   1.0,
         power_watts_each:         500.0,
         air_con_overhead_pecent:  0.3
       },
-      'Desktops' => {
+      desktops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :desktop,
         number:                       20,
@@ -40,12 +40,13 @@ class ElectricitySimulatorConfiguration
         weekends:                     true, # left on standy at weekends
         holidays:                     false # left on standby during holidays
       },
-      'Laptops' => {
+      laptops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :laptop,
         number:                       20,
         power_watts_each:             30,
-        standby_watts_each:           2
+        weekends:                     true, # left on standby at weekends
+        holidays:                     false # turned off during holidays
       }
     },
     boiler_pumps: {
@@ -53,8 +54,8 @@ class ElectricitySimulatorConfiguration
       editable:                     [:pump_power],
       heating_season_start_dates:   [Date.new(2016, 10, 1),  Date.new(2017, 11, 5)],
       heating_season_end_dates:     [Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
-      start_time:                   Time.new(2010,  1,  1,  5, 30, 0),    # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:                     Time.new(2010,  1,  1,  17, 0, 0),    # ditto
+      start_time:                   TimeOfDay.new(5, 30),
+      end_time:                     TimeOfDay.new(17, 0),
       pump_power:                   0.5, # 1 kw
       weekends:                     false,
       holidays:                     true,
@@ -63,7 +64,7 @@ class ElectricitySimulatorConfiguration
     security_lighting: {
       title: 'Security lighting',
       editable:                     [:power, :control_type],
-      control_type:       ['Sunrise/Sunset', 'Ambient', 'Fixed Times'],  # Choose one of these with radio button
+      control_type:       [:sunrise_sunset, :ambient, :fixed_times],  # Choose one of these with radio button
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
       sunset_times:       ['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
       fixed_start_time:   '19:15',
@@ -72,28 +73,37 @@ class ElectricitySimulatorConfiguration
       power:              3.0
     },
     electrical_heating: {
-      title: 'Electrical heating',
+        title: 'Electrical heating',
+        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time],
+        start_time:               TimeOfDay.new(5, 30),
+        end_time:                 TimeOfDay.new(17, 0),
+        fixed_power:              4.0,
+        weekends:                 false,
+        holidays:                 false,
+        balancepoint_temperature: 15, # centigrade
+        power_per_degreeday:      0.5 # kW/C
     },
     kitchen: {  # 1 all three of these - time of day rathern than 2010
       title: 'Kitchen',
       editable:                     [:power],
-      start_time:  Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:    Time.new(2010,  1,  1,  17, 0, 0), # ditto
+      start_time:               TimeOfDay.new(8, 0),
+      end_time:                 TimeOfDay.new(13, 0),
       power:       4.0 #
     },
     summer_air_conn: { # 1 set power to zero for no aie conn
       title: 'Summer air conditioning',
-      start_time:               Time.new(2010,  1,  1,  5, 30, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:                 Time.new(2010,  1,  1,  17, 0, 0), # ditto
+      editable:                 [:power_per_degreeday],
+      start_time:               TimeOfDay.new(5, 30),
+      end_time:                 TimeOfDay.new(23, 30),
       weekends:                 true,
-      holidays:                 false,
-      balancepoint_temperature: 19, # centigrade
-      power_per_degreeday:      0.5 # colling degree days > balancePointTemperature
+      holidays:                 true,
+      balancepoint_temperature: 16, # centigrade
+      power_per_degreeday:      0.4 # cooling degree days > balancePointTemperature
     },
     electric_hot_water: {
       title: 'Electric hot water',
-      start_time:               Time.new(2010, 1, 1, 9, 0, 0), # Ruby doesn't have a time class, just DateTime, so the 2010/1/1 should be ignored
-      end_time:                 Time.new(2010, 1, 1, 16, 30, 0), # ditto
+      start_time:               TimeOfDay.new(9, 0),
+      end_time:                 TimeOfDay.new(16, 30),
       weekends:                 true,
       holidays:                 false,
       percent_of_pupils:        0.5, # often a its only a proportion of the pupils at a school has electric hot water, the rest are provided by ga
@@ -102,6 +112,27 @@ class ElectricitySimulatorConfiguration
     },
     flood_lighting:  {
       title: 'Flood lighting',
+      editable:                 [:power],
+      power:    35.0,
+      ambient_light_threshold: 200, # lumens/m2
+      bookings: [
+        {
+          weekday:      2,
+          start_time:   TimeOfDay.new(18, 30),
+          end_time:     TimeOfDay.new(20, 15),
+          holidays:     false,
+          start_date:   TimeOfYear.new(10, 1),
+          end_date:     TimeOfYear.new(3, 30)
+        },
+        {
+          weekday:      0,
+          start_time:   TimeOfDay.new(18, 0),
+          end_time:     TimeOfDay.new(19, 20),
+          holidays:     true,
+          start_date:   TimeOfYear.new(2, 22),
+          end_date:     TimeOfYear.new(5, 10)
+        }
+      ]
     },
     unaccounted_for_baseload: {
       title: 'Unaccounted for baseload',
@@ -109,11 +140,14 @@ class ElectricitySimulatorConfiguration
       baseload: 1 # 1 single number - useful
     },
     solar_pv: {
-      title: 'Solar PV'
+      title: 'Solar PV',
+      editable: [:kwp],
+      kwp:  4.0
+      baseload: 1.0 # 1 single number - useful
     }
   }
 
   def self.new
-    APPLIANCE_DEFINITIONS.clone
+    APPLIANCE_DEFINITIONS.deep_dup
   end
 end

@@ -35,9 +35,11 @@ class ExcelCharts
   def column_letter(col_num)
     letter = ''
     # rubocop:disable Naming/VariableNumber
-    multiples_of_26 = (col_num / 26).floor.to_i
+    multiples_of_26_x_26 = (col_num / (26 * 26)).floor.to_i
+    multiples_of_26 = (col_num / 26).floor.to_i % 26 # TODO(PH,22Jul2018) currently breaks between Z* and AA* - not sure why?
     remainder_of_26 = (col_num % 26).to_i
     # rubocop:enable Naming/VariableNumber
+    letter += ('A'.ord + multiples_of_26_x_26 - 1).chr if multiples_of_26_x_26 > 0
     letter += ('A'.ord + multiples_of_26 - 1).chr if multiples_of_26 > 0
     letter += ('A'.ord + remainder_of_26).chr
     letter
@@ -176,7 +178,7 @@ class ExcelCharts
     worksheet = @workbook.add_worksheet(worksheet_name)
     charts.each do |chart|
       add_chart(worksheet, chart, data_col_offset, chart_row_offset)
-      data_col_offset += 10
+      data_col_offset += 40
       chart_row_offset += 20
     end
   end

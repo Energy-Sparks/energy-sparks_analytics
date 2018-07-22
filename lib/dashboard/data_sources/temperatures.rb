@@ -177,7 +177,7 @@ class Temperatures < HalfHourlyData
   end
 
   # used for simulator air con calculations
-  def cooling_degree_days_at_time(date, base_temp, half_hour_index)
+  def cooling_degree_days_at_time(date, half_hour_index, base_temp)
     temp = temperature(date, half_hour_index)
 
     if temp >= base_temp

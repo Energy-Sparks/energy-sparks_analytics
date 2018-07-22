@@ -3,7 +3,7 @@ require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 
-class DashboardReports
+class ReportConfigSupport
   include Logging
 
   def initialize
@@ -139,21 +139,32 @@ class DashboardReports
     logger.debug self.class.banner("Running report page  #{page_name}")
     @worksheet_charts[page_name] = []
     list_of_charts.each do |chart_name|
-      chart = do_one_chart_internal(chart_name)
-      unless chart.nil?
-        @worksheet_charts[page_name].push(chart)
+      charts = do_charts_internal(chart_name)
+      unless charts.nil?
+        charts.each do |chart|
+          ap(chart, limit: 20, color: { float: :red })
+          @worksheet_charts[page_name].push(chart)
+        end
       end
     end
   end
 
-  def do_one_chart_internal(chart_name)
-    logger.debug self.class.banner(chart_name.to_s)
-    chart = nil
+  def do_charts_internal(chart_name)
+    if chart_name.is_a?(Symbol)
+      logger.debug self.class.banner(chart_name.to_s)
+    else
+      logger.debug "Running Composite Chart #{chart_name[:name]}"
+    end
+    chart_results = nil
     bm = Benchmark.measure {
-      chart = @chart_manager.run_standard_chart(chart_name)
+      chart_results = @chart_manager.run_chart_group(chart_name)
     }
     @benchmarks.push(sprintf("%40.40s = %s", chart_name, bm.to_s))
-    ap(chart, limit: 20, color: { float: :red })
-    chart
+    
+    if chart_name.is_a?(Symbol)
+      [chart_results]
+    else
+      chart_results[:charts]
+    end
   end
 end
