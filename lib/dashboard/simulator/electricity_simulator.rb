@@ -294,7 +294,7 @@ class ElectricitySimulator
           # 0.5 hour period if frost protection required - in an ideal world the frost protection setting would be further interpolated by the temperatures at
           # the start and end of each bucket, to get an more accurate intercept, however this is moot given we are ignoring thermal mass
 
-          if overlap > 0.5 && @temperatures.get_temperature(date, half_hour_index) <= frost_protect_temp
+          if overlap > 0.5 && @temperatures.temperature(date, half_hour_index) <= frost_protect_temp
             overlap = 0.5 # i.e. half and hour
           end
 

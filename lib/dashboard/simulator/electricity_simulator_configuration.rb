@@ -1,3 +1,7 @@
+require_relative '../time_of_day.rb'
+require_relative '../time_of_year.rb'
+
+
 class ElectricitySimulatorConfiguration
 
    APPLIANCE_DEFINITIONS = {

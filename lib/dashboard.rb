@@ -38,9 +38,7 @@ require 'awesome_print'
 
 require 'interpolate'
 require 'benchmark'
-require 'date'
 require 'open-uri'
-require 'logger'
 require 'statsample'
 
 require 'html-table'
