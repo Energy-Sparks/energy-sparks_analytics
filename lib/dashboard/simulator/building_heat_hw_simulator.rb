@@ -95,7 +95,7 @@ class BuildingHeatHWSimulator
     power = @building[:boiler][:max_power] # need to be careful whether this is used net or gross of efficiency
     max_radiator_power_kw = @building[:radiator_output_per_m2] * school.floor_area
 
-    internal_temp = @temperatures.get_temperature(total_kwh.get_first_date, 0) # assume internal temp = external on first day
+    internal_temp = @temperatures.temperature(total_kwh.get_first_date, 0) # assume internal temp = external on first day
     # boiler_start_time = convert_time_string_to_time(@building[:boiler][:control][:occupancy_start_time])
     # boiler_end_time = convert_time_string_to_time(@building[:boiler][:control][:occupancy_end_time])
 
@@ -105,7 +105,7 @@ class BuildingHeatHWSimulator
 
         if !@holidays.is_holiday(date) && !is_weekend(date)
 
-          external_temp = @temperatures.get_temperature(date, half_hour_index)
+          external_temp = @temperatures.temperature(date, half_hour_index)
           delta_t = internal_temp - external_temp
 
           gains_kw = occupied_electrical_gain + pupil_gain
