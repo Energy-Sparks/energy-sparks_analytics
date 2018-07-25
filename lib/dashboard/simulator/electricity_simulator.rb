@@ -42,7 +42,7 @@ class ElectricitySimulator
     else
       @heating_model.heating_on?(date)
     end
-  end 
+  end
 
   # calculate heating periods on the basis of temperature in the abscence of a heating meter
   def calculate_heating_periods_from_temperatures
@@ -56,7 +56,7 @@ class ElectricitySimulator
           @calculated_heating_dates[date] = true
         end
       end
-      sunday += 7 
+      sunday += 7
     end
   end
 
@@ -311,7 +311,8 @@ class ElectricitySimulator
     (boiler_pump_data.start_date..boiler_pump_data.end_date).each do |date|
       if @school.aggregated_heat_meters.amr_data.key?(date)
         (0..47).each do |half_hour_index|
-          gas_power_consumption = @school.aggregated_heat_meters.amr_data.kwh(date,half_hour_index) * 2.0
+          amr_gas_usage = @school.aggregated_heat_meters.amr_data.kwh(date,half_hour_index) || 0.0
+          gas_power_consumption = amr_gas_usage * 2.0
           boiler_pump_data[date][half_hour_index] = pump_power / 2.0 if (gas_power_consumption > 15.0)
         end
       end
@@ -519,7 +520,7 @@ class ElectricitySimulator
   # ELECTRICAL HEATING
   def simulate_electrical_heating
     electric_heating_data = empty_amr_data_set('Electrical Heating')
-    config = @appliance_definitions[:electrical_heating] 
+    config = @appliance_definitions[:electrical_heating]
 
     (electric_heating_data.start_date..electric_heating_data.end_date).each do |date|
       if heating_on?(date) && !(@holidays.holiday?(date) && !config[:holidays]) && !(weekend?(date) && !config[:weekends])
@@ -563,7 +564,7 @@ class ElectricitySimulator
                               convert_half_hour_index_to_time(half_hour_index + 1),
                               booking[:start_time],
                               booking[:end_time]
-                  )            
+                  )
                   flood_lighting_data[date][half_hour_index] += config[:power] * overlap # overlap fn(T) so converts to kWh
                 end
               end
@@ -646,7 +647,8 @@ class ElectricitySimulator
     if kwp > 0.0
       (solar_pv_data.start_date..solar_pv_data.end_date).each do |date|
         (0..47).each do |half_hour_index|
-          solar_pv_data[date][half_hour_index] = -1.0 * kwp * @solar_pv.solar_pv_yield(date, half_hour_index)
+          pv_yield = @solar_pv.solar_pv_yield(date, half_hour_index) || 0.0
+          solar_pv_data[date][half_hour_index] = -1.0 * kwp * pv_yield
         end
       end
     end
