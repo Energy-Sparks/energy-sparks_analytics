@@ -54,8 +54,8 @@ class ElectricitySimulatorConfiguration
       control_type:       [:sunrise_sunset, :ambient, :fixed_times],  # Choose one of these with radio button
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
       sunset_times:       ['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
-      fixed_start_time:   Time.new(2010,  1,  1,  19, 15, 0),
-      fixed_end_time:     Time.new(2010,  1,  1,  7, 20, 0),
+      fixed_start_time:   TimeOfDay.new(19, 15),
+      fixed_end_time:     TimeOfDay.new(7, 20),
       ambient_threshold:  50.0,
       power:              3.0
     },
@@ -112,7 +112,7 @@ class ElectricitySimulatorConfiguration
     },
     flood_lighting:  {
       title: 'Flood lighting',
-      editable:                 [:power],
+      editable:                 [:power, :ambient_light_threshold, bookings: [:weekday, :start_time, :end_time, :holidays, :start_date, :end_date]],
       power:    35.0,
       ambient_light_threshold: 200, # lumens/m2
       bookings: [
