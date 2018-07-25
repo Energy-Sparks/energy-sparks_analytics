@@ -143,7 +143,6 @@ class ElectricitySimulatorConfiguration
       title: 'Solar PV',
       editable: [:kwp],
       kwp:  4.0,
-      baseload: 1.0 # 1 single number - useful
     }
   }
 
