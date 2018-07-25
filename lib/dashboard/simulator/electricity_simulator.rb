@@ -311,7 +311,8 @@ class ElectricitySimulator
     (boiler_pump_data.start_date..boiler_pump_data.end_date).each do |date|
       if @school.aggregated_heat_meters.amr_data.key?(date)
         (0..47).each do |half_hour_index|
-          gas_power_consumption = @school.aggregated_heat_meters.amr_data.kwh(date,half_hour_index) * 2.0
+          amr_gas_usage = @school.aggregated_heat_meters.amr_data.kwh(date,half_hour_index) || 0.0
+          gas_power_consumption = amr_gas_usage * 2.0
           boiler_pump_data[date][half_hour_index] = pump_power / 2.0 if (gas_power_consumption > 15.0)
         end
       end
@@ -647,12 +648,8 @@ class ElectricitySimulator
     if kwp > 0.0
       (solar_pv_data.start_date..solar_pv_data.end_date).each do |date|
         (0..47).each do |half_hour_index|
-          solar_pv_yield =  @solar_pv.solar_pv_yield(date, half_hour_index)
-          if solar_pv_yield
-            logger.warn "Missing solar pv for #{date}"
-            solar_pv_yield = 0.0
-          end
-          solar_pv_data[date][half_hour_index] = -1.0 * kwp * solar_pv_yield
+          pv_yield = @solar_pv.solar_pv_yield(date, half_hour_index) || 0.0
+          solar_pv_data[date][half_hour_index] = -1.0 * kwp * pv_yield
         end
       end
     end
