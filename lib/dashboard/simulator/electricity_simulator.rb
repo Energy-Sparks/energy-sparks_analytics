@@ -643,10 +643,16 @@ class ElectricitySimulator
     solar_pv_data = empty_amr_data_set("Solar PV")
     kwp = @appliance_definitions[:solar_pv][:kwp]
 
+
     if kwp > 0.0
       (solar_pv_data.start_date..solar_pv_data.end_date).each do |date|
         (0..47).each do |half_hour_index|
-          solar_pv_data[date][half_hour_index] = -1.0 * kwp * @solar_pv.solar_pv_yield(date, half_hour_index)
+          solar_pv_yield =  @solar_pv.solar_pv_yield(date, half_hour_index)
+          if solar_pv_yield
+            logger.warn "Missing solar pv for #{date}"
+            solar_pv_yield = 0.0
+          end
+          solar_pv_data[date][half_hour_index] = -1.0 * kwp * solar_pv_yield
         end
       end
     end
