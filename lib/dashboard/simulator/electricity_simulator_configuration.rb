@@ -19,10 +19,10 @@ class ElectricitySimulatorConfiguration
     },
     ict: {
       title: 'ICT',
-      editable:                     [servers: [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type], desktops: [:number, :power_watts_each, :weekends, :holidays, :type], laptops: [:number, :power_watts_each, :standby_watts_each, :type]],
+      editable:                     [servers: [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type], desktops: [:number, :power_watts_each, :weekends, :holidays, :type, :standby_watts_each], laptops: [:number, :power_watts_each, :type]],
       servers: {
         type:                     :server,
-        number:                   2.0,
+        number:                   2,
         power_watts_each:         300.0,
         air_con_overhead_pecent:  0.2,
         weekends:                 true,
@@ -31,7 +31,7 @@ class ElectricitySimulatorConfiguration
       desktops: {
         type:                         :desktop,
         number:                       20,
-        power_watts_each:             100,
+        power_watts_each:             100.0,
         standby_watts_each:           10,
         usage_percent_by_time_of_day: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         weekends:                     true, # left on standy at weekends
@@ -40,7 +40,7 @@ class ElectricitySimulatorConfiguration
       laptops: {
         type:                         :laptop,
         number:                       20,
-        power_watts_each:             30,
+        power_watts_each:             30.0,
         weekends:                     true, # left on standby at weekends
         holidays:                     false # turned off during holidays
       }
@@ -58,7 +58,7 @@ class ElectricitySimulatorConfiguration
     },
     electrical_heating: {
         title: 'Electrical heating',
-        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time],
+        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time, :balancepoint_temperature],
         start_time:               TimeOfDay.new(5, 30),
         end_time:                 TimeOfDay.new(17, 0),
         fixed_power:              4.0,
