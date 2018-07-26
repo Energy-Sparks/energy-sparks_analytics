@@ -29,6 +29,7 @@ simulator.simulate(simulator.default_simulator_parameters)
 # reports.do_chart_list('Boiler Control', [ :intraday_electricity_simulator_solar_pv_kwh] )
 
 reports.do_one_page(:simulator)
+# reports.do_one_page(:simulator_detail)
 
 reports.save_excel_and_html
 

@@ -413,18 +413,6 @@ class ChartManager
       y2_axis:          :degreedays,
       timescale:        :year
     },
-    group_by_week_electricity_simulator_daytype: {
-      name:             'By Week: Electricity Simulator',
-      chart1_type:      :column,
-      chart1_subtype:   :stacked,
-      meter_definition: :electricity_simulator,
-      x_axis:           :week,
-      series_breakdown: :daytype,
-      yaxis_units:      :kwh,
-      yaxis_scaling:    :none,
-      y2_axis:          :degreedays,
-      timescale:        :year
-    },
     group_by_week_electricity_simulator_appliance: {
       name:             'By Week: Electricity Simulator',
       chart1_type:      :column,
@@ -550,8 +538,9 @@ class ChartManager
       filter:            { submeter: ['Solar PV'] }
     },
 
+    # MAIN SIMULATOR DASHBOARD CHARTS
     electricity_simulator_pie: {
-      name:             'By Week: Electricity Simulator',
+      name:             'Electricity Simulator (Simulated Usage Breakdown Over the Last Year)',
       chart1_type:      :pie,
       meter_definition: :electricity_simulator,
       x_axis:           :nodatebuckets,
@@ -563,6 +552,28 @@ class ChartManager
     electricity_simulator_pie_detail_page: {
       inherits_from:    :electricity_simulator_pie,
     },
+
+    group_by_week_electricity_actual_for_simulator_comparison: {
+      name:             'By Week: Electricity (Actual Usage)',
+      inherits_from:    :group_by_week_electricity
+    },
+    group_by_week_electricity_simulator: {
+      name:             'By Week: Electricity (Simulator)',
+      inherits_from:    :group_by_week_electricity_actual_for_simulator_comparison,
+      meter_definition: :electricity_simulator
+    },
+
+
+    electricity_by_day_of_week_actual_for_simulator_comparison:  {
+      name:             'Electricity Use By Day of the Week (Actual Usage over last year)',
+      inherits_from:    :electricity_by_day_of_week,
+    },
+    electricity_by_day_of_week_simulator:  {
+      name:             'Electricity Use By Day of the Week (Actual Usage over last year)',
+      inherits_from:    :electricity_by_day_of_week,
+      meter_definition: :electricity_simulator
+    },
+
     intraday_line_school_days_6months_simulator:  {
       name:             'Intraday (Comparison 6 months apart) Simulator',
       chart1_type:      :line,

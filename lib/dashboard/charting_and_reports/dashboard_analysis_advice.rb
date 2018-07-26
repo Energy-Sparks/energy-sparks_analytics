@@ -45,6 +45,8 @@ class DashboardChartAdviceBase
     case chart_type
     when :simulator_group_by_week_comparison
       SimulatorByWeekComparisonAdvice.new(school, chart_definition, charts, chart_type)
+    when :simulator_group_by_day_of_week_comparison
+      SimulatorByDayOfWeekComparisonAdvice.new(school, chart_definition, charts, chart_type)
     end
   end
 
@@ -96,6 +98,14 @@ class DashboardChartAdviceBase
       ElectricitySimulatorBreakdownAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :electricity_simulator_pie_detail_page
       ElectricitySimulatorDetailBreakdownAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :group_by_week_electricity_actual_for_simulator_comparison
+      SimulatorByWeekActual.new(school, chart_definition, chart_data, chart_symbol)
+    when :group_by_week_electricity_simulator
+      SimulatorByWeekSimulator.new(school, chart_definition, chart_data, chart_symbol)
+    when :electricity_by_day_of_week_simulator
+      SimulatorByDayOfWeekActual.new(school, chart_definition, chart_data, chart_symbol)
+    when :electricity_by_day_of_week_actual_for_simulator_comparison
+      SimulatorByDayOfWeekSimulator.new(school, chart_definition, chart_data, chart_symbol)
     end
   end
 
@@ -1640,6 +1650,158 @@ class SimulatorByWeekComparisonAdvice < DashboardChartAdviceBase
       <%= @body_start %>
       <p>
         Please compare the 2 charts above.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class SimulatorByDayOfWeekComparisonAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, charts, chart_symbol)
+    super(school, chart_definition, charts, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <h1>Comparison of Day of the Week Electricity Consumption (Actual versus Simulator)</h1>
+        <p>
+          The two graphs below show the real electricity consumption from the school's electricity smart meter(s)
+          versus the consumption predicted by Energy Spark's Electricity Simulator for the last year
+          broken down by the day of the week.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        Please compare the 2 charts above.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class SimulatorByWeekActual < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        The graph above is the real smart meter data from your school grouped on a weekly basis over the last year.
+        Your should compare it with the graph to the left which is the simulated smart meter data.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class SimulatorByWeekSimulator < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        The graph above is the simulated smart meter data from your school grouped on a weekly basis over the last year.
+        Your should compare it with the graph to the right which is calculated actual smart meter data.
+        Ideally, both of these graphs should look very similar; the simulator configuration
+        should be used to make them converge and look the same in terms of (seasonal) usage throughout the year.
+        </p>
+        <p>
+        So matching winter with winter usage and summer with summer usage by changing the simulator configuration
+        information for different types of appliances should help line up these two graphs. Lighting and electrical
+        heating typically have the biggest impact on seasonal differences.
+        </p>
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+#==============================================================================
+class SimulatorByDayOfWeekActual < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        The graph above is the real smart meter data from your school grouped day of the week over the last year.
+        Your should compare it with the graph to the left which is the simulated smart meter data.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class SimulatorByDayOfWeekSimulator < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        The graph above is the simulated smart meter data from your school grouped by day of the week over the last year.
+        Your should compare it with the graph to the right which is calculated actual smart meter data.
+        Ideally, both of these graphs should look very similar; the simulator configuration
+        should be used to make them converge and look the same in terms of usage on each day of the week.
+        </p>
+        <p>
+        So matching the actual usage and the simulated usage involves changing configuration of items which either
+        dominate the weekend usage (baseload - ICT Servers, Security Lights) versus weekday usage (Lighting etc.)
+        </p>
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
