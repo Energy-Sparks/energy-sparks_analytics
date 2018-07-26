@@ -134,7 +134,7 @@ class ElectricitySimulatorConfiguration
     unaccounted_for_baseload: {
       title: 'Unaccounted for baseload',
       editable: [:baseload],
-      baseload: 1 # 1 single number - useful
+      baseload: 1.0 # 1 single number - useful
     },
     solar_pv: {
       title: 'Solar PV',

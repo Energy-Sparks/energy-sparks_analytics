@@ -95,6 +95,19 @@ class DashboardConfiguration
                                       ]
                                     }
                                   },
+                                  {
+                                    type: :simulator_group_by_time_of_day_comparison,
+                                    name: 'Comparison of Simulator and Actual Electricity Consumption by Time Of Day for the Last Year',
+                                    advice_text: true,
+                                    chart_group: {
+                                      link_y_axis: true,
+                                      layout: :horizontal,
+                                      charts: %i[
+                                        intraday_electricity_simulator_actual_for_comparison
+                                        intraday_electricity_simulator_simulator_for_comparison
+                                      ]
+                                    }
+                                  },
                                   :group_by_week_electricity_dd
                                 ]
                               },
@@ -129,12 +142,12 @@ class DashboardConfiguration
                                   group_by_week_electricity_simulator_solar_pv
                                   intraday_electricity_simulator_solar_pv_kwh
 
-                                  group_by_week_electricity_simulator_daytype
-                                  group_by_week_electricity_simulator_appliance
-
                                   intraday_line_school_days_6months_simulator
                                   intraday_line_school_days_6months
                                   intraday_line_school_days_6months_simulator_submeters
+
+                                  intraday_electricity_simulator_actual_for_comparison
+                                  intraday_electricity_simulator_simulator_for_comparison
                                 ]
                               }
   }.freeze

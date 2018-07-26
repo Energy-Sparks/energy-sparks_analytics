@@ -47,6 +47,8 @@ class DashboardChartAdviceBase
       SimulatorByWeekComparisonAdvice.new(school, chart_definition, charts, chart_type)
     when :simulator_group_by_day_of_week_comparison
       SimulatorByDayOfWeekComparisonAdvice.new(school, chart_definition, charts, chart_type)
+    when :simulator_group_by_time_of_day_comparison
+      SimulatorByTimeOfDayComparisonAdvice.new(school, chart_definition, charts, chart_type)
     end
   end
 
@@ -106,6 +108,40 @@ class DashboardChartAdviceBase
       SimulatorByDayOfWeekActual.new(school, chart_definition, chart_data, chart_symbol)
     when :electricity_by_day_of_week_actual_for_simulator_comparison
       SimulatorByDayOfWeekSimulator.new(school, chart_definition, chart_data, chart_symbol)
+    when :intraday_electricity_simulator_actual_for_comparison
+      SimulatorByTimeOfDayActual.new(school, chart_definition, chart_data, chart_symbol)
+    when :intraday_electricity_simulator_simulator_for_comparison
+      SimulatorByTimeOfDaySimulator.new(school, chart_definition, chart_data, chart_symbol)
+    when  :group_by_week_electricity_simulator_lighting,
+          :intraday_electricity_simulator_lighting_kwh,
+          :intraday_electricity_simulator_lighting_kw
+          SimulatorLightingAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :group_by_week_electricity_simulator_ict,
+          :intraday_electricity_simulator_ict,
+          SimulatorICTAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :group_by_week_electricity_simulator_electrical_heating
+          SimulatorElectricalHeatingAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :group_by_week_electricity_simulator_security_lighting
+          :intraday_electricity_simulator_security_lighting_kwh
+          SimulatorSecurityLightingAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :group_by_week_electricity_air_conditioning,
+          :intraday_electricity_simulator_air_conditioning_kwh
+          SimulatorAirConAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :group_by_week_electricity_flood_lighting,
+          :intraday_electricity_simulator_flood_lighting_kwh
+          SimulatorFloodLightingAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :group_by_week_electricity_kitchen,
+          :intraday_electricity_simulator_kitchen_kwh
+          SimulatorKitchenAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :group_by_week_electricity_simulator_boiler_pump,
+          :intraday_electricity_simulator_boiler_pump_kwh
+          SimulatorBoilerPumpAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :group_by_week_electricity_simulator_solar_pv,
+          :intraday_electricity_simulator_solar_pv_kwh
+          SimulatorSolarAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :intraday_line_school_days_6months_simulator,
+          :intraday_line_school_days_6months_simulator_submeters
+          SimulatorMiscOtherAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     end
   end
 
@@ -1547,7 +1583,7 @@ class ElectricitySimulatorBreakdownAdvice < DashboardChartAdviceBase
         </p>
         <p>
           For each appliance type, using a variety of external data (e.g. temperature, sunshine data and solar PV data) and
-          occupancy patterns it assesses realistic usages for every <sup>1</sup>/<sup>2</sup> hour
+          occupancy patterns it assesses realistic usages for every &frac12; hour
           for each appliance type. The results are presented below.
         </p>
         <p>
@@ -1600,7 +1636,7 @@ class ElectricitySimulatorDetailBreakdownAdvice < DashboardChartAdviceBase
         </p>
         <p>
           For each appliance type, using a variety of external data (e.g. temperature, sunshine data and solar PV data) and
-          occupancy patterns it assesses realistic usages for every <sup>1</sup>/<sup>2</sup> hour
+          occupancy patterns it assesses realistic usages for every &frac12; hour
           for each appliance type. The results are presented below.
         </p>
         <p>
@@ -1690,6 +1726,37 @@ class SimulatorByDayOfWeekComparisonAdvice < DashboardChartAdviceBase
   end
 end
 #==============================================================================
+class SimulatorByTimeOfDayComparisonAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, charts, chart_symbol)
+    super(school, chart_definition, charts, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <h1>Comparison of Time of Day Electricity Consumption (Actual versus Simulator)</h1>
+        <p>
+          The two graphs below show the real electricity consumption from the school's electricity smart meter(s)
+          versus the consumption predicted by Energy Spark's Electricity Simulator for the last year
+          broken down by the time of day.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        Please compare the 2 charts above.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
 class SimulatorByWeekActual < DashboardChartAdviceBase
   def initialize(school, chart_definition, chart_data, chart_symbol)
     super(school, chart_definition, chart_data, chart_symbol)
@@ -1707,7 +1774,7 @@ class SimulatorByWeekActual < DashboardChartAdviceBase
       <%= @body_start %>
       <p>
         The graph above is the real smart meter data from your school grouped on a weekly basis over the last year.
-        Your should compare it with the graph to the left which is the simulated smart meter data.
+        You should compare it with the graph to the left which is the simulated smart meter data.
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1733,7 +1800,7 @@ class SimulatorByWeekSimulator < DashboardChartAdviceBase
       <%= @body_start %>
       <p>
         The graph above is the simulated smart meter data from your school grouped on a weekly basis over the last year.
-        Your should compare it with the graph to the right which is calculated actual smart meter data.
+        You should compare it with the graph to the right which is calculated actual smart meter data.
         Ideally, both of these graphs should look very similar; the simulator configuration
         should be used to make them converge and look the same in terms of (seasonal) usage throughout the year.
         </p>
@@ -1768,7 +1835,7 @@ class SimulatorByDayOfWeekActual < DashboardChartAdviceBase
       <%= @body_start %>
       <p>
         The graph above is the real smart meter data from your school grouped day of the week over the last year.
-        Your should compare it with the graph to the left which is the simulated smart meter data.
+        You should compare it with the graph to the left which is the simulated smart meter data.
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1794,18 +1861,135 @@ class SimulatorByDayOfWeekSimulator < DashboardChartAdviceBase
       <%= @body_start %>
       <p>
         The graph above is the simulated smart meter data from your school grouped by day of the week over the last year.
-        Your should compare it with the graph to the right which is calculated actual smart meter data.
+        You should compare it with the graph to the right which is calculated actual smart meter data.
         Ideally, both of these graphs should look very similar; the simulator configuration
         should be used to make them converge and look the same in terms of usage on each day of the week.
-        </p>
-        <p>
+      </p>
+      <p>
         So matching the actual usage and the simulated usage involves changing configuration of items which either
         dominate the weekend usage (baseload - ICT Servers, Security Lights) versus weekday usage (Lighting etc.)
-        </p>
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
   end
+end
+
+#==============================================================================
+class SimulatorByTimeOfDayActual < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        The graph above is the real smart meter data from your school grouped time of day over the last year.
+        You should compare it with the graph to the left which is the simulated smart meter data.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class SimulatorByTimeOfDaySimulator < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        The graph above is the simulated smart meter data from your school grouped by time of day over the last year.
+        You should compare it with the graph to the right which is calculated actual smart meter data.
+        Ideally, both of these graphs should look very similar; the simulator configuration
+        should be used to make them converge and look the similar in terms of usage by time of day.
+      </p>
+      <p>
+        This is quite similar to the charts on the simulator configuration editor pages, but covers usage
+        across the whole of the year.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+
+
+#==============================================================================
+class SimulatorApplianceAdviceBase < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol, chart_type)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @chart_type = chart_type
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <h2>Advice for chart <%= @chart_type %> using <%= self.class.name %></h2>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        Please look at the chart above.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class SimulatorLightingAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorICTAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorElectricalHeatingAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorAirConAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorFloodLightingAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorBoilerPumpAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorSolarAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class SimulatorMiscOtherAdvice < SimulatorApplianceAdviceBase
 end
