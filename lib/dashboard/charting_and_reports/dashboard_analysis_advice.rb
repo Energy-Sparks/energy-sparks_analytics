@@ -1627,8 +1627,8 @@ class ElectricitySimulatorDetailBreakdownAdvice < DashboardChartAdviceBase
         <h1>Electricity Simulator Results Detailed Breakdown</h1>
         <p>
           Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
-          Initially, it does this automatucally based on the existing smart meter data, and a knowledge of the consumption
-          of appliances at other schools where we have undertaken a physically audit of appliances in the past.
+          Initially, it does this automatically based on the existing smart meter data, and a knowledge of the consumption
+          of appliances at other schools where we have undertaken a physical audit of appliances in the past.
           As such it is an 'educated guess' at how electricity is consumed in a school,
           and can be refined by an audit of a school's appliances which could be performed by pupils.
         </p>
@@ -1949,7 +1949,9 @@ class SimulatorApplianceAdviceBase < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      <h2>Advice for chart <%= @chart_type %> using <%= self.class.name %></h2>
+      <% if @add_extra_markup %>
+        <h2>Advice for chart <%= @chart_type %> using <%= self.class.name %></h2>
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -2012,10 +2014,10 @@ class SimulatorLightingAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_lighting_kw %>
-      <p> 
+      <p>
         Look at the three charts above, do you think they represent the lighting usage in your school?
       </p>
-      <p> 
+      <p>
         What happens if you upgrade the school's lighting to more efficient lighting?
       </p>
       <p>
@@ -2091,13 +2093,13 @@ class SimulatorICTAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_ict %>
-      <p> 
+      <p>
         Look at the three charts above, do you think they represent the ICT usage in your school?
       </p>
-      <p> 
-        What happens if you upgrade the school's servers to more efficient servers?
       <p>
+        What happens if you upgrade the school's servers to more efficient servers?
       </p>
+      <p>
         You can see the impact by going to the simulator ICT configuration and
         changing wattage of number of servers, desktops or laptops.
         What happens if you make some changes - reducing the watts or the
@@ -2134,7 +2136,7 @@ class SimulatorElectricalHeatingAdvice < SimulatorApplianceAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-      <p> 
+      <p>
       Electrical heating using fan heaters can be very expensive compared with
       gas - perhaps 5 times more expensive. However, this depends if the fan
       heater is just being used to heat a localised area or a whole room.
@@ -2187,7 +2189,7 @@ class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_security_lighting_kwh %>
-      <p> 
+      <p>
       Do you know how the lighting is controlled at your school? And, what type of
       lighting is it? Is it LED lighting - which is generally the most efficient?
       </p>
@@ -2216,7 +2218,7 @@ class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
         Where cooking takes place on site its important that the kitchen doesn't turn
         hobs and ovens on too early. They often turn everything on as soon as they arrive
         at the school every day at 8:00am, but don't use the appliances until much later
-        perhaps 11:00am, so wasting electricity between 8:00am and 11:00am. 
+        perhaps 11:00am, so wasting electricity between 8:00am and 11:00am.
         </p>
         <p>
         To improve this, it is worth speaking to the kitchen staff about their procedures
@@ -2231,8 +2233,8 @@ class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_kitchen_kwh %>
-      <p> 
-      You could also consider asking them whether they can clean and turn off fridges 
+      <p>
+      You could also consider asking them whether they can clean and turn off fridges
       and freezers over long holidays. Or, they could consolidate the contents of
       all their fridges/freezers and turn some of them off. Particularly over the
       summer holidays, there should be no reason why fridges are left on.
