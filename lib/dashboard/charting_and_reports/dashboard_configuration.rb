@@ -77,18 +77,25 @@ class DashboardConfiguration
                                       link_y_axis: true,
                                       layout: :horizontal,
                                       charts: %i[
-                                        group_by_week_electricity_simulator_daytype
-                                        group_by_week_electricity
+                                        group_by_week_electricity_simulator
+                                        group_by_week_electricity_actual_for_simulator_comparison
                                       ]
                                     }
                                   },
-                                  :group_by_week_electricity_dd,
-                                  :group_by_week_electricity_simulator_daytype,
-                                  :group_by_week_electricity_simulator_appliance,
-
-                                  :intraday_line_school_days_6months_simulator,
-                                  :intraday_line_school_days_6months,
-                                  :intraday_line_school_days_6months_simulator_submeters
+                                  {
+                                    type: :simulator_group_by_day_of_week_comparison,
+                                    name: 'Comparison of Simulator and Actual Electricity Consumption by Day of the Week for the Last Year',
+                                    advice_text: true,
+                                    chart_group: {
+                                      link_y_axis: true,
+                                      layout: :horizontal,
+                                      charts: %i[
+                                        electricity_by_day_of_week_simulator
+                                        electricity_by_day_of_week_actual_for_simulator_comparison
+                                      ]
+                                    }
+                                  },
+                                  :group_by_week_electricity_dd
                                 ]
                               },
       simulator_detail:       {
@@ -121,6 +128,13 @@ class DashboardConfiguration
 
                                   group_by_week_electricity_simulator_solar_pv
                                   intraday_electricity_simulator_solar_pv_kwh
+
+                                  group_by_week_electricity_simulator_daytype
+                                  group_by_week_electricity_simulator_appliance
+
+                                  intraday_line_school_days_6months_simulator
+                                  intraday_line_school_days_6months
+                                  intraday_line_school_days_6months_simulator_submeters
                                 ]
                               }
   }.freeze
