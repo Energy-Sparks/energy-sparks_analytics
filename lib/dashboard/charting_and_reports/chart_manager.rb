@@ -712,7 +712,7 @@ class ChartManager
     chart_group_result[:charts] = []
     chart_group[:chart_group][:charts].each do |chart_param|
       chart = run_standard_chart(chart_param)
-      ap(chart, limit: 20, color: { float: :red })
+      ap(chart, limit: 20, color: { float: :red }) if logger.debug?
       chart_group_result[:charts].push(chart)
     end
 
@@ -725,8 +725,8 @@ class ChartManager
         chart_group_result[:advice_footer] = advice.footer_advice
       end
     end
-    
-    ap(chart_group_result, limit: 20, color: { float: :red })
+
+    ap(chart_group_result, limit: 20, color: { float: :red }) if logger.debug?
     chart_group_result
   end
 
@@ -744,7 +744,7 @@ class ChartManager
 
   def run_chart(chart_config, chart_param)
     # puts 'Chart configuration:'
-    ap(chart_config, limit: 20, color: { float: :red })
+    ap(chart_config, limit: 20, color: { float: :red }) if logger.debug?
 
     begin
       aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)

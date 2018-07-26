@@ -26,7 +26,7 @@ class ElectricitySimulatorConfiguration
         power_watts_each:         300.0,
         air_con_overhead_pecent:  0.2,
         weekends:                 true,
-        holidays:                 false,
+        holidays:                 true,
       },
       desktops: {
         type:                         :desktop,
