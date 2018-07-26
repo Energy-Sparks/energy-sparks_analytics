@@ -161,9 +161,9 @@ class ValidateAMRData
   end
 
   def final_report_for_missing_data_set_to_small_negative
-    logger.info '>' * 100
-    logger.info "For meter of type #{@meter.meter_type} #{@meter.name} #{@meter.id}:"
-    logger.info 'At the end of the meter validation process the following amr data is still missing (setting to 0.0123456):'
+    logger.debug '>' * 100
+    logger.debug "For meter of type #{@meter.meter_type} #{@meter.name} #{@meter.id}:"
+    logger.debug 'At the end of the meter validation process the following amr data is still missing (setting to 0.0123456):'
     missing_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if !@amr_data.key?(date)
@@ -175,7 +175,7 @@ class ValidateAMRData
     missing_dates.each do |date|
       @amr_data.add(date, Array.new(48, 0.0123456))
     end
-    logger.info '>' * 100
+    logger.debug '>' * 100
   end
 
   def replace_missing_weekend_data_with_zero

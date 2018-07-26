@@ -24,7 +24,7 @@ class YAxisScaling
 
   def self.unit_description(unit, scaling_factor_type, value)
     val_str = value.nil? ? 'NA' : value
-    puts "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}"
+    Logging.logger.debug "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}"
     factor_type_description = {
       none:             nil,
       per_pupil:        'per pupil',

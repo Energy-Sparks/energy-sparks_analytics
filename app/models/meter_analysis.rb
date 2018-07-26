@@ -29,7 +29,7 @@ class MeterAnalysis
     @meter_correction_rules = meter_correction_rules
     @sub_meters = []
     @active = true
-    logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+    logger.debug "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
   end
 
   # Matches ES AR version
