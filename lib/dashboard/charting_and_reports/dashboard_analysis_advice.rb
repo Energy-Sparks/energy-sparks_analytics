@@ -1974,8 +1974,8 @@ class SimulatorLightingAdvice < SimulatorApplianceAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      <h2>Simulator Lighting Charts:</h2>
       <% if @chart_type == :group_by_week_electricity_simulator_lighting %>
+        <h2>Simulator Lighting Charts:</h2>
         <p>
         The 3 charts below show the electricity consumption predicted by the simulator for internal lighting in the school.
         Most of this lighting is likely to be in classrooms.
@@ -2042,8 +2042,8 @@ class SimulatorICTAdvice < SimulatorApplianceAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      <h2>Simulator ICT (Servers, Desktops, Laptops) Charts:</h2>
       <% if @chart_type == :group_by_week_electricity_simulator_ict %>
+        <h2>Simulator ICT (Servers, Desktops, Laptops) Charts:</h2>
         <p>
         The 3 charts below show the electricity consumption predicted by the simulator for ICT in the school.
         </p>
@@ -2158,24 +2158,27 @@ class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      <h2>Heating Using Electricity:</h2>
-      <p>
-      Security Lighting (the lights around the perimeter of a school) which
-      come on at night can be quite expensive to maintain. Their energy consumption
-      depends on how they are controlled (switched on and off) and the efficiency
-      of the lighting itself.
-      </p>
-      <p>
-      For the maximum energy efficiency Energy Sparks generally recommends PIR
-      based security lighting, which only comes on when movement is detected as
-      it can reduce consumption by more than 90% - it can also be more secure
-      as intruders are often more likely to be detered if lighting suddenly switches
-      on, rather than is on all the time, as neighbours and passers by are more
-      likely to notice.
-      </p>
-      <p>
-      In addition switching to LED lighting often has very short paybacks because
-      security lighting on a timer is on for about half the hours in a year.
+      <% if @chart_type == :group_by_week_electricity_simulator_security_lighting %>
+        <h2>Security Lighting:</h2>
+        <p>
+        Security Lighting (the lights around the perimeter of a school) which
+        come on at night can be quite expensive to maintain. Their energy consumption
+        depends on how they are controlled (switched on and off) and the efficiency
+        of the lighting itself.
+        </p>
+        <p>
+        For the maximum energy efficiency Energy Sparks generally recommends PIR
+        based security lighting, which only comes on when movement is detected as
+        it can reduce consumption by more than 90% - it can also be more secure
+        as intruders are often more likely to be detered if lighting suddenly switches
+        on, rather than is on all the time, as neighbours and passers by are more
+        likely to notice.
+        </p>
+        <p>
+        In addition switching to LED lighting often has very short paybacks because
+        security lighting on a timer is on for about half the hours in a year.
+        </p>
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
