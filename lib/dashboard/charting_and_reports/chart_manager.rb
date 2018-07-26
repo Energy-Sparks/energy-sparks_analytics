@@ -1,6 +1,7 @@
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
+  include Logging
   attr_reader :standard_charts, :school
 
   STANDARD_CHARTS = [
