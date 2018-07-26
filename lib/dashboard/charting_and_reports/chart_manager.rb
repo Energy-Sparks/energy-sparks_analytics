@@ -439,16 +439,27 @@ class ChartManager
       series_breakdown: :submeter,
       filter:            { submeter: [ 'Electrical Heating' ] }
     },
-    intraday_electricity_simulator_ict: {
-      name:             'Annual: School Day by Time of Day: Electricity Simulator (ICT Servers, Desktops, Laptops)',
+    intraday_electricity_simulator_actual_for_comparison: {
+      name:             'Annual: School Day by Time of Day (Actual)',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
-      series_breakdown: :submeter,
+      series_breakdown: :none,
       timescale:        :year,
       x_axis:           :intraday,
-      meter_definition: :electricity_simulator,
+      meter_definition: :allelectricity,
       yaxis_units:      :kwh,
-      yaxis_scaling:    :none,
+      yaxis_scaling:    :none
+    },
+    intraday_electricity_simulator_simulator_for_comparison: {
+      name:             'Annual: School Day by Time of Day (Simulator)',
+      inherits_from:    :intraday_electricity_simulator_actual_for_comparison,
+      meter_definition: :electricity_simulator
+    },
+    intraday_electricity_simulator_ict: {
+      name:             'Annual: School Day by Time of Day: Electricity Simulator (ICT Servers, Desktops, Laptops)',
+      inherits_from:    :intraday_electricity_simulator_actual_for_comparison,
+      series_breakdown: :submeter,
+      meter_definition: :electricity_simulator,
       filter:            { daytype: :occupied, submeter: [ 'Laptops', 'Desktops', 'Servers' ] },
       series_name_order: :reverse
     },
