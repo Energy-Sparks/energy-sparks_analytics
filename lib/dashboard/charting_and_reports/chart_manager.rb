@@ -581,7 +581,7 @@ class ChartManager
       inherits_from:    :electricity_by_day_of_week,
     },
     electricity_by_day_of_week_simulator:  {
-      name:             'Electricity Use By Day of the Week (Actual Usage over last year)',
+      name:             'Electricity Use By Day of the Week (Simulator Usage over last year)',
       inherits_from:    :electricity_by_day_of_week,
       meter_definition: :electricity_simulator
     },
