@@ -103,8 +103,8 @@ class DashboardConfiguration
                                       link_y_axis: true,
                                       layout: :horizontal,
                                       charts: %i[
-                                        intraday_electricity_simulator_actual_for_comparison
                                         intraday_electricity_simulator_simulator_for_comparison
+                                        intraday_electricity_simulator_actual_for_comparison
                                       ]
                                     }
                                   },

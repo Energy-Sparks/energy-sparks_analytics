@@ -1965,30 +1965,112 @@ class SimulatorApplianceAdviceBase < DashboardChartAdviceBase
 end
 #==============================================================================
 class SimulatorLightingAdvice < SimulatorApplianceAdviceBase
+  # group_by_week_electricity_simulator_lighting
+  # intraday_electricity_simulator_lighting_kwh
+  # intraday_electricity_simulator_lighting_kw
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <h2>Simulator Lighting Charts:</h2>
+      <% if @chart_type == :group_by_week_electricity_simulator_lighting %>
+        <p>
+        The 3 charts below show the electricity consumption predicted by the simulator for internal lighting in the school.
+        Most of this lighting is likely to be in classrooms.
+        </p>
+        <p>
+        The first chart groups the lighting usage by week across the whole year.
+        Can you think why lighting usage might vary by season of the year?
+        </p>
+      <% end %>
+      <% if @chart_type == :intraday_electricity_simulator_lighting_kwh %>
+        <p>
+        The next two charts show the usage by time of day. The first shows the
+        energy use across the year by time of day.
+        </p>
+        <p>
+        Does this look about right for your school? Does the lighting usage gradually increase
+        when the first person arrives at the school in the morning, then decrease as people
+        leave the school in the evening? If you think the lighting pattern doesn't
+        look right for your school you can change it in the configuration, but please
+        check that the side by side comparison charts broken down by time of day
+        on the main simulator results page still look similar if you change the configuration?
+        </p>
+      <% end %>
+      <% if @chart_type == :intraday_electricity_simulator_lighting_kw %>
+        <p>
+        The next two charts show the usage by time of day. The final lighting chart shows the
+        average power consumption by time of day across the year.
+        </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :intraday_electricity_simulator_lighting_kw %>
+      <p> 
+        Look at the three charts above, do you think they represent the lighting usage in your school?
+      </p>
+      <p> 
+        What happens if you upgrade the school's lighting to more efficient lighting?
+      <p>
+      </p>
+        You can see the impact by going to the simulator lighting configuration and
+        changing the lumens/watt setting. Lumens is a measure of lighting output, watts
+        is a measure of electrical power. The higher the lumens/watt the more efficient
+        lighting is. This can range from 10 lumens/watt for old fashioned incandescent
+        lighting to modern LED lighting at 110 lumens/watt. Most schools have florescent
+        lighting, older T8 (1" diameter tubes (the 8 is the number of eighths on an inch)) lighting
+        is 40 to 50 lumens/watt, more modern T5 florescent tubes are 90 lumens/watt.
+      </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end
 #==============================================================================
 class SimulatorICTAdvice < SimulatorApplianceAdviceBase
+  # group_by_week_electricity_simulator_ict
+  # intraday_electricity_simulator_ict
 end
 #==============================================================================
 class SimulatorElectricalHeatingAdvice < SimulatorApplianceAdviceBase
+  # group_by_week_electricity_simulator_electrical_heating
 end
 #==============================================================================
 class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
+  # group_by_week_electricity_simulator_security_lighting
+  # intraday_electricity_simulator_security_lighting_kwh
 end
 #==============================================================================
 class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
+  # group_by_week_electricity_kitchen
+  # intraday_electricity_simulator_kitchen_kwh
 end
 #==============================================================================
 class SimulatorAirConAdvice < SimulatorApplianceAdviceBase
+  # group_by_week_electricity_air_conditioning
+  # intraday_electricity_simulator_air_conditioning_kwh
 end
 #==============================================================================
 class SimulatorFloodLightingAdvice < SimulatorApplianceAdviceBase
+    # group_by_week_electricity_flood_lighting
+  # intraday_electricity_simulator_flood_lighting_kwh
 end
 #==============================================================================
 class SimulatorBoilerPumpAdvice < SimulatorApplianceAdviceBase
+  # group_by_week_electricity_simulator_boiler_pump
+  # intraday_electricity_simulator_boiler_pump_kwh
 end
 #==============================================================================
 class SimulatorSolarAdvice < SimulatorApplianceAdviceBase
+    # group_by_week_electricity_simulator_solar_pv
+  # intraday_electricity_simulator_solar_pv_kwh
+
 end
 #==============================================================================
 class SimulatorMiscOtherAdvice < SimulatorApplianceAdviceBase
