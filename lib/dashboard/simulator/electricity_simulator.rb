@@ -243,11 +243,11 @@ class ElectricitySimulator
             end
 
             case ict_appliance_group[:type]
-            when :server
+            when 'server' || :server
               server_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
-            when :desktop
+            when 'desktop' || :desktop
               desktop_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
-            when :laptop
+            when 'laptop' || :laptop
               laptop_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
             end
           end
