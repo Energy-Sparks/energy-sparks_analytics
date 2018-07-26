@@ -1925,7 +1925,7 @@ class SimulatorByTimeOfDaySimulator < DashboardChartAdviceBase
         The graph above is the simulated smart meter data from your school grouped by time of day over the last year.
         You should compare it with the graph to the right which is calculated actual smart meter data.
         Ideally, both of these graphs should look very similar; the simulator configuration
-        should be used to make them converge and look the similar in terms of usage by time of day.
+        should be used to make them converge and look the same in terms of usage by time of day.
       </p>
       <p>
         This is quite similar to the charts on the simulator configuration editor pages, but covers usage
@@ -2017,8 +2017,8 @@ class SimulatorLightingAdvice < SimulatorApplianceAdviceBase
       </p>
       <p> 
         What happens if you upgrade the school's lighting to more efficient lighting?
-      <p>
       </p>
+      <p>
         You can see the impact by going to the simulator lighting configuration and
         changing the lumens/watt setting. Lumens is a measure of lighting output, watts
         is a measure of electrical power. The higher the lumens/watt the more efficient
@@ -2113,11 +2113,85 @@ end
 #==============================================================================
 class SimulatorElectricalHeatingAdvice < SimulatorApplianceAdviceBase
   # group_by_week_electricity_simulator_electrical_heating
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <h2>Heating Using Electricity:</h2>
+      <p>
+      Energy Sparks electricity simulator attempts to calculate how much
+      electricity is used for heating in a school. However, its quite
+      difficult for the simulator to estimate this accurately, and
+      requires as physical audit of the school to provide accurate values.
+      This will involve someone from the school auditing what electrical
+      equipment is used for heating in a school in the winter - these
+      would typically be electric fan heaters, but sometimes also
+      air source heat pumps.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p> 
+      Electrical heating using fan heaters can be very expensive compared with
+      gas - perhaps 5 times more expensive. However, this depends if the fan
+      heater is just being used to heat a localised area or a whole room.
+      Generally we would advise against using fan heaters in schools if possible
+      as each heater might be cost &#163; 2 per day per heater, or cost &#163; 150
+      across the course of a winter - probably 10 times more than the fan heater
+      cost to buy. The only time we recommend fan heaters is for use in holidays
+      if there are very few people in a school and it saves turning on the heating
+      for a whole school.
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end
 #==============================================================================
 class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
   # group_by_week_electricity_simulator_security_lighting
   # intraday_electricity_simulator_security_lighting_kwh
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <h2>Heating Using Electricity:</h2>
+      <p>
+      Security Lighting (the lights around the perimeter of a school) which
+      come on at night can be quite expensive to maintain. Their energy consumption
+      depends on how they are controlled (switched on and off) and the efficiency
+      of the lighting itself.
+      </p>
+      <p>
+      For the maximum energy efficiency Energy Sparks generally recommends PIR
+      based security lighting, which only comes on when movement is detected as
+      it can reduce consumption by more than 90% - it can also be more secure
+      as intruders are often more likely to be detered if lighting suddenly switches
+      on, rather than is on all the time, as neighbours and passers by are more
+      likely to notice.
+      </p>
+      <p>
+      In addition switching to LED lighting often has very short paybacks because
+      security lighting on a timer is on for about half the hours in a year.
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p> 
+      Do you know how the lighting is controlled at your school? And, what type of
+      lighting is it? Is it LED lighting - which is generally the most efficient?
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end
 #==============================================================================
 class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
