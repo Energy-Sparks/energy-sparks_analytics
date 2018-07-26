@@ -121,7 +121,9 @@ class DashboardConfiguration
                                   intraday_electricity_simulator_lighting_kw
 
                                   group_by_week_electricity_simulator_ict
+                                  electricity_by_day_of_week_simulator_ict
                                   intraday_electricity_simulator_ict
+
                                   group_by_week_electricity_simulator_electrical_heating
 
                                   group_by_week_electricity_simulator_security_lighting

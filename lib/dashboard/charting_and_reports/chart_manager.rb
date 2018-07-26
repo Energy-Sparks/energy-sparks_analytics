@@ -464,6 +464,15 @@ class ChartManager
       filter:            { daytype: :occupied, submeter: [ 'Laptops', 'Desktops', 'Servers' ] },
       series_name_order: :reverse
     },
+    electricity_by_day_of_week_simulator_ict: {
+      name:             'Annual: Usage by Day of Week: Electricity Simulator (ICT Servers, Desktops, Laptops)',
+      inherits_from:    :electricity_by_day_of_week_simulator,
+      series_breakdown: :submeter,
+      meter_definition: :electricity_simulator,
+      filter:            { submeter: [ 'Laptops', 'Desktops', 'Servers' ] },
+      series_name_order: :reverse
+    },
+    
     #==============================SIMULATOR LIGHTING DETAIL==============================
     group_by_week_electricity_simulator_lighting: {
       name:             'By Week: Electricity Simulator (Lighting)',
