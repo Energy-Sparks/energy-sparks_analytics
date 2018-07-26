@@ -1621,7 +1621,9 @@ class ElectricitySimulatorDetailBreakdownAdvice < DashboardChartAdviceBase
 
     header_template = %{
       <%= @body_start %>
+      <% if @add_extra_markup %>
         <h1>Electricity Simulator Results Detailed Breakdown</h1>
+      <% end %>
         <p>
           Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
           Initially, it does this automatucally based on the existing smart meter data, and a knowledge of the consumption
@@ -1672,7 +1674,7 @@ class SimulatorByWeekComparisonAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-        <h1>Comparison of Weekly Electricity Consumption (Actual versus Simulator)</h1>
+        <h3>Comparison of Weekly Electricity Consumption (Actual versus Simulator)</h3>
         <p>
           The two graphs below show the real electricity consumption from the school's electricity smart meter(s)
           versus the consumption predicted by Energy Spark's Electricity Simulator.
@@ -1703,7 +1705,7 @@ class SimulatorByDayOfWeekComparisonAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-        <h1>Comparison of Day of the Week Electricity Consumption (Actual versus Simulator)</h1>
+        <h3>Comparison of Day of the Week Electricity Consumption (Actual versus Simulator)</h3>
         <p>
           The two graphs below show the real electricity consumption from the school's electricity smart meter(s)
           versus the consumption predicted by Energy Spark's Electricity Simulator for the last year
@@ -1734,7 +1736,7 @@ class SimulatorByTimeOfDayComparisonAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-        <h1>Comparison of Time of Day Electricity Consumption (Actual versus Simulator)</h1>
+        <h3>Comparison of Time of Day Electricity Consumption (Actual versus Simulator)</h3>
         <p>
           The two graphs below show the real electricity consumption from the school's electricity smart meter(s)
           versus the consumption predicted by Energy Spark's Electricity Simulator for the last year
@@ -2010,10 +2012,10 @@ class SimulatorLightingAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_lighting_kw %>
-      <p> 
+      <p>
         Look at the three charts above, do you think they represent the lighting usage in your school?
       </p>
-      <p> 
+      <p>
         What happens if you upgrade the school's lighting to more efficient lighting?
       <p>
       </p>
