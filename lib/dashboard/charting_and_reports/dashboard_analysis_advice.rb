@@ -2186,10 +2186,12 @@ class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
 
     footer_template = %{
       <%= @body_start %>
+      <% if @chart_type == :intraday_electricity_simulator_security_lighting_kwh %>
       <p> 
       Do you know how the lighting is controlled at your school? And, what type of
       lighting is it? Is it LED lighting - which is generally the most efficient?
       </p>
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -2200,27 +2202,175 @@ end
 class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
   # group_by_week_electricity_kitchen
   # intraday_electricity_simulator_kitchen_kwh
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :group_by_week_electricity_kitchen %>
+        <h2>Kitchen:</h2>
+        <p>
+        Energy Sparks is not very good at automatically determining the kitchen
+        usage patterns from the smart meter data, and so this usage should be best
+        acheived by a physical audit.
+        </p>
+        <p>
+        Where cooking takes place on site its important that the kitchen doesn't turn
+        hobs and ovens on too early. They often turn everything on as soon as they arrive
+        at the school every day at 8:00am, but don't use the appliances until much later
+        perhaps 11:00am, so wasting electricity between 8:00am and 11:00am. 
+        </p>
+        <p>
+        To improve this, it is worth speaking to the kitchen staff about their procedures
+        - do they know for example how long ovens take to heat up (typically 10 to 15 minutes).
+        </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :intraday_electricity_simulator_kitchen_kwh %>
+      <p> 
+      You could also consider asking them whether they can clean and turn off fridges 
+      and freezers over long holidays. Or, they could consolidate the contents of
+      all their fridges/freezers and turn some of them off. Particularly over the
+      summer holidays, there should be no reason why fridges are left on.
+      </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end
 #==============================================================================
 class SimulatorAirConAdvice < SimulatorApplianceAdviceBase
   # group_by_week_electricity_air_conditioning
   # intraday_electricity_simulator_air_conditioning_kwh
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :group_by_week_electricity_air_conditioning %>
+        <h2>Air Conditioning:</h2>
+        <p>
+        If you have air conditioning in your school, please contact Energy Sparks
+        for advice on how to configure the simulator correctly as it needs
+        specialist knowledge.
+        </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :intraday_electricity_simulator_air_conditioning_kwh %>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end
 #==============================================================================
 class SimulatorFloodLightingAdvice < SimulatorApplianceAdviceBase
-    # group_by_week_electricity_flood_lighting
+  # group_by_week_electricity_flood_lighting
   # intraday_electricity_simulator_flood_lighting_kwh
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :group_by_week_electricity_flood_lighting %>
+        <h2>Flood Lighting</h2>
+        <p>
+        Flood lighting can be very expensive to run as the lights consume significant
+        amounts of power, often more than the rest of the appliances in a school put
+        together. There aren't many solutions for making them more efficient. Our
+        main advice would be to make sure you are charging users an economic rate
+        to cover the costs.
+        </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :intraday_electricity_simulator_flood_lighting_kwh %>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end
 #==============================================================================
 class SimulatorBoilerPumpAdvice < SimulatorApplianceAdviceBase
   # group_by_week_electricity_simulator_boiler_pump
   # intraday_electricity_simulator_boiler_pump_kwh
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :group_by_week_electricity_simulator_boiler_pump %>
+        <h2>Boiler Pumps</h2>
+        <p>
+        Boiler pumps used for central heating and hot water can be signifcant
+        consumers of electricity in a school. However, there is little you
+        can do to make them more efficient unless the pumps in your school
+        are old - more modern pumps have built in controls to optimise
+        the flow rates and can save electricity. You can often see the
+        consumption of boiler pumps if the electricity usage at the school
+        jumps in the early morning on the winter - look at some of the
+        dashboard graphs to see if you can spot this?
+        </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :intraday_electricity_simulator_boiler_pump_kwh %>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end
 #==============================================================================
 class SimulatorSolarAdvice < SimulatorApplianceAdviceBase
     # group_by_week_electricity_simulator_solar_pv
   # intraday_electricity_simulator_solar_pv_kwh
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :group_by_week_electricity_simulator_solar_pv %>
+        <h2>Solar PV</h2>
+        <p>
+        By installing solar PV (photovoltaics) it is possible to reduce the mains electricity consumption
+        at a school. The simulator represents solar PV as negative energy. It can be fun to play with
+        the solar PV configuration to see the impact solar PV might have at your school?
+        </p>
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
 
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <% if @chart_type == :intraday_electricity_simulator_solar_pv_kwh %>
+        At what time of year and time of the day do you get the most energy from solat PV panels?
+      <% end %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end
 #==============================================================================
 class SimulatorMiscOtherAdvice < SimulatorApplianceAdviceBase
