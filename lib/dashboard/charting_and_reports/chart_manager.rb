@@ -429,7 +429,7 @@ class ChartManager
     group_by_week_electricity_simulator_ict: {
       name:             'By Week: Electricity Simulator (ICT Servers, Desktops, Laptops)',
       inherits_from:    :group_by_week_electricity_simulator_appliance,
-      filter:            { submeter: [ :laptops, :desktops, :servers ] },
+      filter:            { submeter: [ 'Laptops', 'Desktops', 'Servers' ] },
       series_name_order: :reverse
     },
 
