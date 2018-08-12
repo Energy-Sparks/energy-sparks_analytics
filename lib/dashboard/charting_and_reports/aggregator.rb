@@ -295,7 +295,7 @@ private
   def remove_filtered_series
     keep_key_list = []
     logger.debug "Y" * 140
-    ap(@bucketed_data, limit: 20, color: { float: :red })
+    ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
     logger.info "Filtering #{@bucketed_data.keys}"
     logger.debug @chart_config[:filter].inspect if @chart_config.key?(:filter)
     if @chart_config[:series_breakdown] == :submeter
@@ -322,7 +322,7 @@ private
       @bucketed_data.delete(remove_series_name)
     end
     logger.debug "Z" * 140
-    logger.debug ap(@bucketed_data, limit: 20, color: { float: :red })
+    logger.debug ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
     logger.debug "Filtered #{@bucketed_data.keys}"
   end
 

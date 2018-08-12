@@ -550,12 +550,12 @@ class ChartManager
       name:             'By Month: Electricity Simulator (Solar PV)',
       inherits_from:    :group_by_week_electricity_simulator_appliance,
       x_axis:           :month,
-      filter:            { submeter: ['Solar PV'] }
+      filter:            { submeter: ['Solar PV Internal Consumption', 'Solar PV Export'] }
     },
     intraday_electricity_simulator_solar_pv_kwh: {
       name:             'Annual: School Day by Time of Day: Electricity Simulator (Solar PV)',
       inherits_from:    :intraday_electricity_simulator_ict,
-      filter:            { submeter: ['Solar PV'] }
+      filter:            { submeter: ['Solar PV Internal Consumption', 'Solar PV Export'] }
     },
 
     # MAIN SIMULATOR DASHBOARD CHARTS
@@ -742,7 +742,7 @@ class ChartManager
     chart_group_result[:charts] = []
     chart_group[:chart_group][:charts].each do |chart_param|
       chart = run_standard_chart(chart_param)
-      ap(chart, limit: 20, color: { float: :red })
+      ap(chart, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
       chart_group_result[:charts].push(chart)
     end
 
@@ -756,7 +756,7 @@ class ChartManager
       end
     end
     
-    ap(chart_group_result, limit: 20, color: { float: :red })
+    ap(chart_group_result, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
     chart_group_result
   end
 
@@ -774,14 +774,15 @@ class ChartManager
 
   def run_chart(chart_config, chart_param)
     # puts 'Chart configuration:'
-    ap(chart_config, limit: 20, color: { float: :red })
+    ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
     begin
       aggregator = Aggregator.new(@school, chart_config)
 
       # rubocop:disable Lint/AmbiguousBlockAssociation
-      puts Benchmark.measure { aggregator.aggregate }
+      # puts Benchmark.measure { aggregator.aggregate }
       # rubocop:enable Lint/AmbiguousBlockAssociation
+      aggregator.aggregate
 
       graph_data = configure_graph(aggregator, chart_config, chart_param)
 

@@ -32,7 +32,7 @@ private
   def validate_meter_list(list_of_meters)
     logger.info "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
-      validate_meter = ValidateAMRData.new(meter, 30, @meter_collection.holidays, @meter_collection.temperatures)
+      validate_meter = ValidateAMRData.new(meter, 50, @meter_collection.holidays, @meter_collection.temperatures)
       validate_meter.validate
     end
   end

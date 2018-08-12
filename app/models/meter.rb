@@ -4,8 +4,8 @@ class Meter
 
   # Extra fields - potentially a concern or mix-in
   attr_reader :building, :fuel_type, :floor_area, :number_of_pupils
-  attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters
-  attr_accessor :amr_data, :meter_correction_rules
+  attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters, :meter_correction_rules
+  attr_accessor :amr_data 
 
   # Energy Sparks activerecord fields:
   attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at
@@ -14,8 +14,8 @@ class Meter
 
   def initialize(building, amr_data, type, identifier, name,
                   floor_area = nil, number_of_pupils = nil,
-                  solar_pv_installation = nil, storage_heater_config = nil,
-                  meter_correction_rules = nil)
+                  solar_pv_installation = nil,
+                  storage_heater_config = nil)
     @amr_data = amr_data
     @building = building
     @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
@@ -26,9 +26,14 @@ class Meter
     @number_of_pupils = number_of_pupils
     @solar_pv_installation = solar_pv_installation
     @storage_heater_config = storage_heater_config
-    @meter_correction_rules = meter_correction_rules
+    @meter_correction_rules = []
     @sub_meters = []
     logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+  end
+
+  def add_correction_rule(rule)
+    throw EnergySparksUnexpectedStateException.new('Unexpected nil correction') if rule.nil?
+    @meter_correction_rules.push(rule)
   end
 
   # Matches ES AR version

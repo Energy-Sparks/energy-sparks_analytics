@@ -124,9 +124,9 @@ private
       meter_data[:floor_area],
       meter_data[:pupils],
       solar_pv,
-      storage_heater,
-      meter_correction
+      storage_heater
     )
+    meter.add_correction_rule(meter_correction) unless meter_correction.nil?
     meter
   end
 
@@ -167,26 +167,51 @@ private
     directory_name = ENV['CACHED_METER_READINGS_DIRECTORY']
     Dir.mkdir(directory_name) unless File.exist?(directory_name)
 
-    cached_filename = directory_name + name + '.yml'
-    if use_cached_data && File.exist?(cached_filename)
-      logger.debug "Loading meter readings from Local Cache for #{name} from #{cached_filename}"
+    yaml_cached_filename = directory_name + name + '.yml'
+    marshal_cached_filename = directory_name + name + '.marshal'
+
+    if use_cached_data && File.exist?(marshal_cached_filename)
+      logger.debug "Loading meter readings from Local Marshal Cache for #{name} from #{marshal_cached_filename}"
       timing = Benchmark.measure {
-        meter_readings = download_from_cache_file(cached_filename)
+        meter_readings = download_from_marshal_cache_file(marshal_cached_filename)
       }
+      logger.debug "Marshal load time:"
+      logger.debug timing
+    elsif use_cached_data && File.exist?(yaml_cached_filename)
+      logger.debug "Loading meter readings from Local YAML Cache for #{name} from #{yaml_cached_filename}"
+      timing = Benchmark.measure {
+        meter_readings = download_from_yaml_cache_file(yaml_cached_filename)
+      }
+      save_marshal_cache_file(marshal_cached_filename, meter_readings)
+
     else
       logger.debug "Loading meter readings from Bath Hacked Datastore for #{name}"
       timing = Benchmark.measure {
         meter_readings = download_from_bath_hacked(school_data, min_date)
       }
-      File.write(cached_filename, meter_readings.to_yaml) if use_cached_data
+      if use_cached_data
+        File.write(yaml_cached_filename, meter_readings.to_yaml)
+        save_marshal_cache_file(marshal_cached_filename, meter_readings)
+      end
     end
     summarise_meter_readings(meter_readings)
     logger.debug "Load time #{timing}"
     meter_readings # [identifier] = AMRData{date} => [48 x float]
   end
 
-  def download_from_cache_file(cached_filename)
+  def download_from_yaml_cache_file(cached_filename)
     YAML::load_file(cached_filename)
+  end
+
+  def save_marshal_cache_file(filename, obj)
+    File.open(filename, 'wb') do |f|
+      f.write Marshal.dump(obj)
+    end
+  end
+
+  def download_from_marshal_cache_file(cached_filename)
+    logger.debug "Opening #{cached_filename}"
+    Marshal.load(File.open(cached_filename))
   end
 
   def load_schools(filename)
@@ -221,7 +246,7 @@ private
       logger.debug "Got meter correction definition", meter_data[:meter_correction]
       meter_data[:meter_correction]
     elsif meter_data[:meter_type] == :gas # for all gas meters in Bath schools insert missing weekend data with zero
-      meter_data[:meter_correction] = { auto_insert_missing_readings: :weekends }
+      meter_data[:meter_correction] = { auto_insert_missing_readings: { type: :weekends} }
     else
       nil
     end

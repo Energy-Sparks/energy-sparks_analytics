@@ -217,7 +217,11 @@ protected
               <% val = value[0] %>
               <% pct = val / total %>
               <td class="text-right"><%= YAxisScaling.scale_num(val) %></td>
-              <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
+              <% if row.match(/export/i) %>
+                <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, :solar_export, val) %></td>
+              <% else %>
+                <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
+              <% end %>
               <td class="text-right"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
               <td class="text-right"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
               <td class="text-right"><%= percent(pct) %></td>
@@ -1276,7 +1280,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         than if frost protection is allowed to provide the protection automatically.
         </p>
         <p>
-        The 3 graphs below which are for the coldest weekends of recent years, attempt to demonstate whether
+        The 3 graphs below which are for the coldest weekends of recent years, attempt to demonstrate whether
         </p>
         <ol type="a">
         <li>Frost protection is configured for your school, and</li>
@@ -1315,9 +1319,8 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
       <% if @chart_type == :frost_3 %>
         <p>
         The graphs can be difficult to interpret sometimes, so if you are uncertain about what
-        you are seeing please contact us <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a>
+        you are seeing please <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a>
         and we will look for you, and let you know what we think.
-        think.
         </p>
         <p>
         A working frost protection system can save a school money:
@@ -2366,7 +2369,9 @@ class SimulatorSolarAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_solar_pv_kwh %>
+        <p>
         At what time of year and time of the day do you get the most energy from solat PV panels?
+        </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')

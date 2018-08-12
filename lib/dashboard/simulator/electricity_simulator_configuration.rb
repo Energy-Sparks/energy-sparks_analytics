@@ -25,7 +25,7 @@ class ElectricitySimulatorConfiguration
         type:                     :server,
         number:                   2.0,
         power_watts_each:         300.0,
-        air_con_overhead_pecent:  0.2
+        air_con_overhead_percent: 0.2
       },
       servers2: { #### Example use only, not required immediately
         editable:                 [:number, :power_watts_each],
@@ -62,6 +62,7 @@ class ElectricitySimulatorConfiguration
       pump_power:                   0.5, # 1 kw
       weekends:                     false,
       holidays:                     true,
+      boiler_gas_power_on_criteria: 15.0,
       frost_protection_temp:        4
     },
     security_lighting: {
@@ -83,8 +84,8 @@ class ElectricitySimulatorConfiguration
         fixed_power:              4.0,
         weekends:                 false,
         holidays:                 false,
-        balancepoint_temperature: 15, # centigrade
-        power_per_degreeday:      0.5 # kW/C
+        balancepoint_temperature: 15.5, # centigrade
+        power_per_degreeday:      0.25 # kW/C
     },
     kitchen: {
       title: 'Kitchen',
@@ -93,7 +94,7 @@ class ElectricitySimulatorConfiguration
       end_time:                 TimeOfDay.new(13, 0),
       power:       4.0
     },
-    summer_air_conn: { # 1 set power to zero for no aie conn
+    summer_air_conn: { # 1 set power to zero for no air conn
       title: 'Summer air conditioning',
       editable:                 [:power_per_degreeday],
       start_time:               TimeOfDay.new(5, 30),

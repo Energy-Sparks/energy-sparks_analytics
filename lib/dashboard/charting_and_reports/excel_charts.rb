@@ -201,7 +201,7 @@ class ExcelCharts
 
     @colours = ChartColour.new(graph_definition)
 
-    ap(graph_definition, limit: 5, color: { float: :red })
+    ap(graph_definition, limit: 5, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
     main_axisx = graph_definition[:x_axis].clone
     main_axisdata = graph_definition[:x_data].clone

@@ -2,6 +2,7 @@
 #
 module BenchmarkMetrics
   ELECTRICITY_PRICE = 0.12
+  SOLAR_EXPORT_PRICE = 0.05
   GAS_PRICE = 0.03
   OIL_PRICE = 0.05
   PERCENT_ELECTRICITY_OUT_OF_HOURS_BENCHMARK = 0.3
@@ -32,6 +33,31 @@ module BenchmarkMetrics
     else
       raise 'Unknown type of school ' + school_type
     end
+  end
+
+  def self.typical_servers_for_pupils(pupils, school_type)
+    servers = 1
+    power = 500.0
+    case school_type
+    when :primary, :infant, :junior, :special
+      if pupils < 100
+        servers = 2
+      elsif pupils < 300
+        servers = 3
+      else
+        servers = 3 +  (pupils / 300).floor
+      end
+    when :secondary
+      power = 1000.0
+      if pupils < 400
+        servers = 4
+      elsif pupils < 1000
+        servers = 8
+      else
+        servers = 8 +  ((pupils  - 1000)/ 250).floor
+      end
+    end
+    [servers, power]
   end
 
   def self.recommended_baseload_for_floor_area(floor_area, school_type)
