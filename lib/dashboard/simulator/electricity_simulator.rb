@@ -15,6 +15,8 @@ class ElectricitySimulator
     @school = school
     calculate_heating_periods
     @calc_components_results = {}
+
+    logger.info "Initialise simulator for period: #{electricity_meter_data.start_date} and end date: #{electricity_meter_data.end_date}"
   end
 
   # fit default parameters to actual AMR data
@@ -51,7 +53,10 @@ class ElectricitySimulator
 
     while sunday + 7 < @existing_electricity_meter.amr_data.end_date
       temp = @school.temperatures.average_temperature_in_date_range(sunday, sunday + 6)
-      if temp < OUTSIDE_TEMPERATURE_FOR_CALCULATED_HEATING_PERIOD
+
+      if temp.nil?
+        logger.warn "Temp is nil for #{sunday} to #{sunday + 6}"
+      elsif temp < OUTSIDE_TEMPERATURE_FOR_CALCULATED_HEATING_PERIOD
         (sunday..sunday+6).each do |date|
           @calculated_heating_dates[date] = true
         end
@@ -598,6 +603,8 @@ class ElectricitySimulator
     cooling_on_during_holidays = @appliance_definitions[:summer_air_conn][:holidays]
 
     base_temp = @appliance_definitions[:summer_air_conn][:balancepoint_temperature]
+
+    logger.warn "In simulate air con, with start date: #{air_con_data.start_date} and end date #{air_con_data.end_date}"
 
     (air_con_data.start_date..air_con_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
