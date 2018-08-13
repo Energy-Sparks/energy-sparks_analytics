@@ -377,7 +377,8 @@ class ElectricitySimulator
     power = @appliance_definitions[:security_lighting][:power]
 
     if power >= 0.0
-      control_type = @appliance_definitions[:security_lighting][:control_type].first
+      control_type = @appliance_definitions[:security_lighting][:control_type]
+      return lighting_data if control_type.is_a?(Array) # backwards compatibility,original default was an array
 
       midnight0 = convert_half_hour_index_to_time(0)
       midnight24 = convert_half_hour_index_to_time(48)
@@ -431,8 +432,11 @@ class ElectricitySimulator
             lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
           end
         end
+      when :pir_sensor
+        # do nothing
       else
-        raise Not_implemented_error.new("Simulator Security Light Control Type" << control_type)
+        raise EnergySparksUnexpectedStateException.new("Simulator Security Light Control Type #{control_type}") if !control_type.nil?
+        raise EnergySparksUnexpectedStateException.new('Simulator Security Light Control Type is nil') if control_type.nil?
       end
     end
     @calc_components_results["Security Lighting"] = lighting_data
