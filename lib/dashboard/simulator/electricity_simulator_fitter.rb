@@ -355,6 +355,9 @@ class ElectricitySimulator
   def fit_unaccounted_for_baseload(config)
     amr_data = @existing_electricity_meter.amr_data
     baseload = amr_data.average_overnight_baseload_kw_date_range(@period.start_date, @period.end_date)
+    if @appliance_definitions[:kitchen].key?(:average_refridgeration_power)
+      baseload += @appliance_definitions[:kitchen][:average_refridgeration_power] / 2.0 # kW to kWh per 0.5 hour
+    end
     unaccounted_for_baseload = baseload - ict_baseload(config)
     unaccounted_for_baseload = [unaccounted_for_baseload, 0.0].max
     config[:unaccounted_for_baseload][:baseload] = unaccounted_for_baseload

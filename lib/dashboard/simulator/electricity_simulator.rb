@@ -473,12 +473,23 @@ class ElectricitySimulator
   # KITCHEN SIMULATION
 
   def simulate_kitchen
+    warming_oven_power = nil
+    warming_oven_start_time = nil
+    warming_oven_end_time = nil
+
     kitchen_data = empty_amr_data_set("Kitchen")
 
     power = check_positive(@appliance_definitions[:kitchen][:power])
 
     start_time = @appliance_definitions[:kitchen][:start_time]
     end_time = @appliance_definitions[:kitchen][:end_time]
+
+    has_warming_oven = @appliance_definitions[:kitchen].key?(:warmer_oven_power) # uses as version control as well
+    if has_warming_oven
+      warming_oven_start_time = @appliance_definitions[:kitchen][:warmer_oven_start_time]
+      warming_oven_end_time = @appliance_definitions[:kitchen][:warmer_oven_end_time]
+      warming_oven_power = @appliance_definitions[:kitchen][:warmer_oven_power]
+    end
 
     (kitchen_data.start_date..kitchen_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
@@ -491,6 +502,20 @@ class ElectricitySimulator
           overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, start_time, end_time)
 
           kitchen_data[date][half_hour_index] = power * overlap # automatically in k_wh as conversion kW * time in hours
+
+          if has_warming_oven
+            # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
+            overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, warming_oven_start_time, warming_oven_end_time)
+  
+            kitchen_data[date][half_hour_index] += warming_oven_power * overlap # automatically in k_wh as conversion kW * time in hours  
+          end
+        end
+      end
+    end
+    if @appliance_definitions[:kitchen].key?(:average_refridgeration_power)
+      (kitchen_data.start_date..kitchen_data.end_date).each do |date|
+        (0..47).each do |half_hour_index|
+          kitchen_data[date][half_hour_index] += @appliance_definitions[:kitchen][:average_refridgeration_power] / 2.0 # kW to kWh per 0.5 hour
         end
       end
     end

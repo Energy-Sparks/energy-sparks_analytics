@@ -92,7 +92,11 @@ class ElectricitySimulatorConfiguration
       editable:                 [:power],
       start_time:               TimeOfDay.new(8, 0),
       end_time:                 TimeOfDay.new(13, 0),
-      power:       4.0
+      power:                    3.0,
+      average_refridgeration_power: 0.4,
+      warmer_oven_power:          2.0,
+      warmer_oven_start_time:    TimeOfDay.new(11, 30),
+      warmer_oven_end_time:      TimeOfDay.new(13, 0)
     },
     summer_air_conn: { # 1 set power to zero for no air conn
       title: 'Summer air conditioning',
