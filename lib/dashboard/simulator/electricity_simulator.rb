@@ -1,5 +1,6 @@
 class ElectricitySimulator
   OUTSIDE_TEMPERATURE_FOR_CALCULATED_HEATING_PERIOD = 11
+  HEATING_DEGREEDAY_BALANCEPOINT_TEMPERATURE = 15.5
   include Logging
 
   attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions
@@ -19,23 +20,16 @@ class ElectricitySimulator
     logger.info "Initialise simulator for period: #{electricity_meter_data.start_date} and end date: #{electricity_meter_data.end_date}"
   end
 
-  # fit default parameters to actual AMR data
-  def fit
-    # TODO(PH,21Jul2018):
-    # Fit baseload fn(school size) => server usage, remainder unaccounted for baseload, some hot water, other standby
-    # Fit lighting: min lumens/watt 45, any winter excess assumed to be electrical heating
-    # Fit kitchen: excess morning usage
-    # Fit hot water: check for summer gas usage, define any underspend as electric
-    # Fit security lighting: weekend additional overnight usage (adjust unaccounted for baseload down (? - depends on whether use stat algorithm)
-    # Fit solar pv: only if zero summer weekend usage?
-  end
-
   def calculate_heating_periods
     if @school.aggregated_heat_meters.nil?
       calculate_heating_periods_from_temperatures
     else
       calculate_model
     end
+  end
+
+  def check_positive(val)
+    val < 0.0 ? Float::NAN : val
   end
 
   def heating_on?(date)
@@ -113,12 +107,17 @@ class ElectricitySimulator
   end
 
   def empty_amr_data_set(type)
-    AMRData.create_empty_dataset(type, @period.start_date, @period.end_date)
+    empty_amr_data_set_internal(type, @period.start_date, @period.end_date)
+  end
+
+  def empty_amr_data_set_internal(type, start_date, end_date)
+    AMRData.create_empty_dataset(type, start_date, end_date)
   end
 
   def default_simulator_parameters
     definitions = ElectricitySimulatorConfiguration::APPLIANCE_DEFINITIONS.deep_dup
-    definitions[:unaccounted_for_baseload][:baseload] = (school.floor_area / 1_000.0) * 0.5 # 1 single number - useful
+    definitions[:unaccounted_for_baseload] = {  baseload: (school.floor_area / 1_000.0) * 0.5 } # 1 single number - useful
+    definitions[:boiler_pumps][:pump_power] = 0.5 * school.floor_area / 1_000.0 # 0.5W/m2 in kW
     definitions
   end
 
@@ -157,7 +156,7 @@ class ElectricitySimulator
 
   def aggregate_results
     logger.debug "Aggregating results"
-    totals = empty_amr_data_set("Totals")
+    totals = empty_amr_data_set('Totals')
     @calc_components_results.each do |key, value|
       (totals.start_date..totals.end_date).each do |date|
         totals[date] = [totals[date], value[date]].transpose.map(&:sum)
@@ -184,7 +183,9 @@ class ElectricitySimulator
   def simulate_lighting
     lighting_data = empty_amr_data_set("Lighting")
 
-    peak_power =  @appliance_definitions[:lighting][:lumens_per_m2] * school.floor_area / 1000 / @appliance_definitions[:lighting][:lumens_per_watt]
+    lumens_per_watt = @appliance_definitions[:lighting][:lumens_per_watt]
+    lumens_per_m2 = @appliance_definitions[:lighting][:lumens_per_m2]
+    peak_power = check_positive(lumens_per_m2 * school.floor_area / 1000 / lumens_per_watt)
 
     @cache_irradiance_for_speed = nil
     (lighting_data.start_date..lighting_data.end_date).each do |date|
@@ -207,6 +208,14 @@ class ElectricitySimulator
     end
     component_total(lighting_data)
     @calc_components_results["Lighting"] = lighting_data
+  end
+
+  def sumproduct_lighting_occupancy_hours(lighting_config)
+    total = 0.0
+    (0..47).each do |halfhour_index|
+      total += lighting_config[:occupancy_by_half_hour][halfhour_index]
+    end
+    total / 2.0 # TODO(PH, 9Aug2018) confirm in right units i.e. divide by 2.0?
   end
 
   # converts from 2 arrays of floats/fixed representing the x and y axis to a hash of points ( x >= y) for compatibility by the Interpolate gem
@@ -247,6 +256,8 @@ class ElectricitySimulator
               power = ict_appliance_group[:number] * ict_appliance_group[:power_watts_each] / 1000.0
             end
 
+            power = check_positive(power)
+
             case ict_appliance_group[:type]
             when 'server', :server
               server_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
@@ -265,6 +276,19 @@ class ElectricitySimulator
     @calc_components_results['Laptops'] = laptop_data
   end
 
+  def ict_baseload(config)
+    power_w = 0.0
+    config[:ict].each_value do |ict_appliance_group|
+      next unless ict_appliance_group.instance_of? Hash
+      if !ict_appliance_group.key?(:holidays) || ict_appliance_group[:holidays]
+        power_w += ict_appliance_group[:number] * ict_appliance_group[:power_watts_each]
+      else
+        power_w += ict_appliance_group[:number] * ict_appliance_group[:standby_watts_each]
+      end
+    end
+    power_w / 1000.0
+  end
+
   #=======================================================================================================================================================================
   # BOILER PUMP SIMULATION
 
@@ -279,7 +303,7 @@ class ElectricitySimulator
   def simulate_boiler_pump_using_manual_simulator_configuration
     boiler_pump_data = empty_amr_data_set("Boiler Pumps")
 
-    pump_power = @appliance_definitions[:boiler_pumps][:pump_power]
+    pump_power = check_positive(@appliance_definitions[:boiler_pumps][:pump_power])
     heating_on_during_weekends = @appliance_definitions[:boiler_pumps][:weekends]
     heating_on_during_holidays = @appliance_definitions[:boiler_pumps][:holidays]
 
@@ -312,13 +336,14 @@ class ElectricitySimulator
 
   def simulate_boiler_pump_using_gas_data
     boiler_pump_data = empty_amr_data_set("Boiler Pumps")
-    pump_power = @appliance_definitions[:boiler_pumps][:pump_power]
+    pump_power = check_positive(@appliance_definitions[:boiler_pumps][:pump_power])
+    pump__gas_on_criteria = @appliance_definitions[:boiler_pumps][:boiler_gas_power_on_criteria]
     (boiler_pump_data.start_date..boiler_pump_data.end_date).each do |date|
       if @school.aggregated_heat_meters.amr_data.key?(date)
         (0..47).each do |half_hour_index|
           amr_gas_usage = @school.aggregated_heat_meters.amr_data.kwh(date,half_hour_index) || 0.0
           gas_power_consumption = amr_gas_usage * 2.0
-          boiler_pump_data[date][half_hour_index] = pump_power / 2.0 if (gas_power_consumption > 15.0)
+          boiler_pump_data[date][half_hour_index] = pump_power / 2.0 if (gas_power_consumption > pump__gas_on_criteria)
         end
       end
     end
@@ -357,7 +382,8 @@ class ElectricitySimulator
     power = @appliance_definitions[:security_lighting][:power]
 
     if power >= 0.0
-      control_type = @appliance_definitions[:security_lighting][:control_type].first
+      control_type = @appliance_definitions[:security_lighting][:control_type]
+      return lighting_data if control_type.is_a?(Array) # backwards compatibility,original default was an array
 
       midnight0 = convert_half_hour_index_to_time(0)
       midnight24 = convert_half_hour_index_to_time(48)
@@ -411,8 +437,11 @@ class ElectricitySimulator
             lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
           end
         end
+      when :pir_sensor
+        # do nothing
       else
-        raise Not_implemented_error.new("Simulator Security Light Control Type" << control_type)
+        raise EnergySparksUnexpectedStateException.new("Simulator Security Light Control Type #{control_type}") if !control_type.nil?
+        raise EnergySparksUnexpectedStateException.new('Simulator Security Light Control Type is nil') if control_type.nil?
       end
     end
     @calc_components_results["Security Lighting"] = lighting_data
@@ -453,12 +482,23 @@ class ElectricitySimulator
   # KITCHEN SIMULATION
 
   def simulate_kitchen
+    warming_oven_power = nil
+    warming_oven_start_time = nil
+    warming_oven_end_time = nil
+
     kitchen_data = empty_amr_data_set("Kitchen")
 
-    power = @appliance_definitions[:kitchen][:power]
+    power = check_positive(@appliance_definitions[:kitchen][:power])
 
     start_time = @appliance_definitions[:kitchen][:start_time]
     end_time = @appliance_definitions[:kitchen][:end_time]
+
+    has_warming_oven = @appliance_definitions[:kitchen].key?(:warmer_oven_power) # uses as version control as well
+    if has_warming_oven
+      warming_oven_start_time = @appliance_definitions[:kitchen][:warmer_oven_start_time]
+      warming_oven_end_time = @appliance_definitions[:kitchen][:warmer_oven_end_time]
+      warming_oven_power = @appliance_definitions[:kitchen][:warmer_oven_power]
+    end
 
     (kitchen_data.start_date..kitchen_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
@@ -471,6 +511,20 @@ class ElectricitySimulator
           overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, start_time, end_time)
 
           kitchen_data[date][half_hour_index] = power * overlap # automatically in k_wh as conversion kW * time in hours
+
+          if has_warming_oven
+            # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
+            overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, warming_oven_start_time, warming_oven_end_time)
+  
+            kitchen_data[date][half_hour_index] += warming_oven_power * overlap # automatically in k_wh as conversion kW * time in hours  
+          end
+        end
+      end
+    end
+    if @appliance_definitions[:kitchen].key?(:average_refridgeration_power)
+      (kitchen_data.start_date..kitchen_data.end_date).each do |date|
+        (0..47).each do |half_hour_index|
+          kitchen_data[date][half_hour_index] += @appliance_definitions[:kitchen][:average_refridgeration_power] / 2.0 # kW to kWh per 0.5 hour
         end
       end
     end
@@ -483,7 +537,7 @@ class ElectricitySimulator
     hot_water_data = empty_amr_data_set("Hot Water")
 
     percent_of_pupils_using_hot_water = @appliance_definitions[:electric_hot_water][:percent_of_pupils]
-    standby_power = @appliance_definitions[:electric_hot_water][:standby_power]
+    standby_power = check_positive(@appliance_definitions[:electric_hot_water][:standby_power])
     pupils = school.number_of_pupils * percent_of_pupils_using_hot_water
     litres_per_day_for_school = pupils * @appliance_definitions[:electric_hot_water][:litres_per_day_per_pupil]
     delta_t = 38 - 15 # assumes hot water delievered at 38C from 15C water
@@ -524,29 +578,39 @@ class ElectricitySimulator
   #=======================================================================================================================================================================
   # ELECTRICAL HEATING
   def simulate_electrical_heating
-    electric_heating_data = empty_amr_data_set('Electrical Heating')
+    @calc_components_results['Electrical Heating'] = simulate_electrical_heating_internal(
+      @appliance_definitions[:electrical_heating][:power_per_degreeday],
+      @appliance_definitions[:electrical_heating][:balancepoint_temperature],
+      @appliance_definitions[:electrical_heating][:fixed_power],
+      @period.start_date,
+      @period.end_date
+      )
+  end
+
+  def simulate_electrical_heating_internal(power_per_degreeday, balancepoint_temperature, fixed_power, start_date, end_date)
+    electric_heating_data = empty_amr_data_set_internal('Electrical Heating', start_date, end_date)
     config = @appliance_definitions[:electrical_heating]
 
-    (electric_heating_data.start_date..electric_heating_data.end_date).each do |date|
+    (start_date..end_date).each do |date|
       if heating_on?(date) && !(@holidays.holiday?(date) && !config[:holidays]) && !(weekend?(date) && !config[:weekends])
         (0..47).each do |half_hour_index|
-          power = config[:fixed_power]
+          power = check_positive(fixed_power)
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
           overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, config[:start_time], config[:end_time])
 
-          degree_days = @temperatures.degree_hour(date, half_hour_index, config[:balancepoint_temperature])
+          degree_days = @temperatures.degree_hour(date, half_hour_index, balancepoint_temperature)
           if degree_days > 0
-            heating_power = config[:power_per_degreeday] * degree_days
+            heating_power = power_per_degreeday * degree_days
             power += heating_power
           end
 
-          electric_heating_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
+          electric_heating_data[date][half_hour_index] += check_positive(power * overlap) # automatically in k_wh as conversion kW * time in hours
         end
       end
     end
-    @calc_components_results['Electrical Heating'] = electric_heating_data
+    electric_heating_data
   end
 
   #=======================================================================================================================================================================
@@ -570,7 +634,7 @@ class ElectricitySimulator
                               booking[:start_time],
                               booking[:end_time]
                   )
-                  flood_lighting_data[date][half_hour_index] += config[:power] * overlap # overlap fn(T) so converts to kWh
+                  flood_lighting_data[date][half_hour_index] += check_positive(config[:power]) * overlap # overlap fn(T) so converts to kWh
                 end
               end
             end
@@ -589,8 +653,6 @@ class ElectricitySimulator
       toy >= r1 || toy <= r2
      end
   end
-
-
   #=======================================================================================================================================================================
   # SUMMER AIRCON SIMULATION
   def simulate_air_con
@@ -619,7 +681,7 @@ class ElectricitySimulator
 
           if degree_days > 0 # to speed up code
 
-            power_by_degree_day = @appliance_definitions[:summer_air_conn][:power_per_degreeday]
+            power_by_degree_day = check_positive(@appliance_definitions[:summer_air_conn][:power_per_degreeday])
 
             air_con_power = power_by_degree_day * degree_days
 
@@ -635,7 +697,7 @@ class ElectricitySimulator
   # UNACCOUNTED FOR BASELOAD SIMULATION
   def simulate_unaccounted_for_baseload
     unaccounted_for_baseload_data = empty_amr_data_set("Unaccounted For Baseload")
-    baseload = @appliance_definitions[:unaccounted_for_baseload][:baseload]
+    baseload = check_positive(@appliance_definitions[:unaccounted_for_baseload][:baseload])
 
     (unaccounted_for_baseload_data.start_date..unaccounted_for_baseload_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
@@ -648,19 +710,40 @@ class ElectricitySimulator
   #=======================================================================================================================================================================
   # SOLAR PV
   def simulate_solar_pv
-    solar_pv_data = empty_amr_data_set("Solar PV")
-    kwp = @appliance_definitions[:solar_pv][:kwp]
+    # calculate the electricity usage without the solar PV
+    saved_kwp = @appliance_definitions[:solar_pv][:kwp]
+    @appliance_definitions[:solar_pv][:kwp] = 0.0
+    totals_ex_pv = aggregate_results
+    @appliance_definitions[:solar_pv][:kwp] = saved_kwp
+    @calc_components_results['Solar PV Internal Consumption'], @calc_components_results['Solar PV Export'] = simulate_solar_pv_internal(@appliance_definitions[:solar_pv][:kwp], @period.start_date, @period.end_date, totals_ex_pv)
+  end
+
+  def simulate_solar_pv_internal(kwp, start_date, end_date, totals_ex_pv = nil)
+    solar_pv_data = empty_amr_data_set_internal('Solar PV Internal Consumption', start_date, end_date)
+    solar_pv_data_export = empty_amr_data_set_internal('Solar PV Export', start_date, end_date) unless totals_ex_pv.nil?
+
+    kwp = check_positive(@appliance_definitions[:solar_pv][:kwp])
 
 
     if kwp > 0.0
       (solar_pv_data.start_date..solar_pv_data.end_date).each do |date|
         (0..47).each do |half_hour_index|
-          pv_yield = @solar_pv.solar_pv_yield(date, half_hour_index) || 0.0
-          solar_pv_data[date][half_hour_index] = -1.0 * kwp * pv_yield
+          pv_yield = @solar_pv.solar_pv_yield(date, half_hour_index)
+          if totals_ex_pv.nil?
+            solar_pv_data[date][half_hour_index] = -1.0 * kwp * pv_yield
+          else # work out whether exporting or not
+            pv_kwh = -1.0 * kwp * pv_yield
+            if totals_ex_pv[date][half_hour_index] + pv_kwh < 0
+              solar_pv_data[date][half_hour_index] = -1.0 * totals_ex_pv[date][half_hour_index] # internal consumption
+              solar_pv_data_export[date][half_hour_index] = totals_ex_pv[date][half_hour_index] + pv_kwh
+            else
+              solar_pv_data[date][half_hour_index] = pv_kwh
+            end
+          end
         end
       end
     end
-    @calc_components_results["Solar PV"] = solar_pv_data
+    totals_ex_pv.nil? ? solar_pv_data : [solar_pv_data, solar_pv_data_export]
   end
   #=======================================================================================================================================================================
   # ANOTHER SIMULATION

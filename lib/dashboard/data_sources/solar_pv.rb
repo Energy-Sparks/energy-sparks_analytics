@@ -18,7 +18,7 @@ class SolarPVInstallation
   class SolarPVPanelSet
     attr_reader :installation_date, :kwp, :tilt, :orientation, :shading
     def initialize(installation_date, kwp, tilt, orientation, shading)
-      @installation_date =installation_date
+      @installation_date = installation_date
       @kwp = kwp
       @tilt = tilt
       @orientation = orientation

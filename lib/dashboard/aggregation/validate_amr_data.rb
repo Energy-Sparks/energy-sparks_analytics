@@ -46,26 +46,41 @@ class ValidateAMRData
   end
 
   def meter_corrections
+    unless @meter.meter_correction_rules.nil?
+      @meter.meter_correction_rules.each do |rule|
+        apply_one_meter_correction(rule)
+      end
+    end
+  end
+
+  def apply_one_meter_correction(rule)
     logger.debug '-' * 80
     logger.debug 'Manually defined meter corrections'
-    if @meter.meter_correction_rules.key?(:rescale_amr_data)
+    if rule.key?(:rescale_amr_data)
       scale_amr_data(
-        @meter.meter_correction_rules[:rescale_amr_data][:start_date],
-        @meter.meter_correction_rules[:rescale_amr_data][:end_date],
-        @meter.meter_correction_rules[:rescale_amr_data][:scale]
+        rule[:rescale_amr_data][:start_date],
+        rule[:rescale_amr_data][:end_date],
+        rule[:rescale_amr_data][:scale]
       )
     end
-    if @meter.meter_correction_rules.key?(:readings_start_date)
-      logger.debug "Fixing start date to #{@meter.meter_correction_rules[:readings_start_date]}"
-      @amr_data.set_min_date(@meter.meter_correction_rules[:readings_start_date])
+    if rule.key?(:readings_start_date)
+      logger.debug "Fixing start date to #{rule[:readings_start_date]}"
+      @amr_data.set_min_date(rule[:readings_start_date])
     end
-    if @meter.meter_correction_rules.key?(:auto_insert_missing_readings)
-     if @meter.meter_correction_rules[:auto_insert_missing_readings] == :weekends
-      replace_missing_weekend_data_with_zero
-     else
-      val = @meter.meter_correction_rules[auto_insert_missing_readings]
-      raise EnergySparksMeterSpecification.new("unknown auto_insert_missing_readings meter attribute #{val}")
-     end
+    if rule.key?(:auto_insert_missing_readings)
+      if (rule[:auto_insert_missing_readings].is_a?(Symbol) && # backwards compatibility
+          rule[:auto_insert_missing_readings] == :weekends) ||
+          rule[:auto_insert_missing_readings][:type]== :weekends
+        replace_missing_weekend_data_with_zero
+      elsif rule[:auto_insert_missing_readings][:type] == :date_range
+        replace_missing_data_with_zero(
+          rule[:auto_insert_missing_readings][:start_date],
+          rule[:auto_insert_missing_readings][:end_date]
+        )
+      else
+        val = rule[:auto_insert_missing_readings]
+        raise EnergySparksMeterSpecification.new("unknown auto_insert_missing_readings meter attribute #{val}")
+      end
     end
   end
 
@@ -191,6 +206,21 @@ class ValidateAMRData
     print_array_of_dates_in_columns(replaced_dates, 8)
   end
 
+  def replace_missing_data_with_zero(start_date, end_date)
+    logger.debug "Setting missing data between #{start_date.strftime('%a %d %b %Y')} and #{end_date.strftime('%a %d %b %Y')} to zero"
+    replaced_dates = []
+    start_date = start_date.nil? ? @amr_data.start_date : start_date
+    end_date = end_date.nil? ? @amr_data.end_date : end_date
+    (start_date..end_date).each do |date|
+      if !@amr_data.key?(date)
+        replaced_dates.push(date)
+        @amr_data.add(date, Array.new(48, 0.0))
+      end
+    end
+    logger.debug 'Replaced the following dates:'
+    print_array_of_dates_in_columns(replaced_dates, 8)
+  end
+
   # quick and dirty implementation TODO(PH,20Jun2018) - could be improved
   def print_array_of_dates_in_columns(dates, number_of_columns, output = STDOUT)
     count = 0
@@ -200,6 +230,19 @@ class ValidateAMRData
       count += 1
     end
     output.puts
+  end
+
+  def in_meter_correction_period?(date)
+    @meter.meter_correction_rules.each do |rule|
+      if rule.key?(:auto_insert_missing_readings) &&
+         rule[:auto_insert_missing_readings][:type] == :date_range
+        if date >= rule[:auto_insert_missing_readings][:start_date] &&
+            date <= rule[:auto_insert_missing_readings][:end_date]
+          return true
+        end
+      end
+    end
+    false
   end
 
   def check_for_long_gaps_in_data
@@ -213,7 +256,7 @@ class ValidateAMRData
       else
         gap_count = 0
       end
-      if gap_count > @max_days_missing_data
+      if gap_count > @max_days_missing_data && !in_meter_correction_period?(date)
         min_date = first_bad_date + 1
         @amr_data.set_min_date(min_date)
         msg =  'Ignoring all data before ' + min_date.strftime(FSTRDEF)

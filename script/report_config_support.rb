@@ -5,7 +5,7 @@ require_rel '../test_support'
 
 class ReportConfigSupport
   include Logging
-
+  attr_reader :schools
   def initialize
 
     # @dashboard_page_groups = now in lib/dashboard/charting_and_reports/dashboard_configuration.rb
@@ -82,7 +82,7 @@ class ReportConfigSupport
 
   def report_benchmarks
     @benchmarks.each do |bm|
-      logger.debug bm
+      puts bm
     end
     @benchmarks = []
   end
@@ -142,7 +142,7 @@ class ReportConfigSupport
       charts = do_charts_internal(chart_name)
       unless charts.nil?
         charts.each do |chart|
-          ap(chart, limit: 20, color: { float: :red })
+          ap(chart, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
           @worksheet_charts[page_name].push(chart)
         end
       end
@@ -156,6 +156,7 @@ class ReportConfigSupport
       logger.debug "Running Composite Chart #{chart_name[:name]}"
     end
     chart_results = nil
+    puts "Chart: #{chart_name}"
     bm = Benchmark.measure {
       chart_results = @chart_manager.run_chart_group(chart_name)
     }

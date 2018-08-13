@@ -46,10 +46,13 @@ class ElectricitySimulatorConfiguration
         holidays:                     false # turned off during holidays
       }
     },
+<<<<<<< HEAD
     security_lighting: {
       title: 'Security lighting',
       editable:           [:power, :control_type, :fixed_start_time, :fixed_end_time, :power, :ambient_threshold],
       control_type:       [:sunrise_sunset, :ambient, :fixed_times],  # Choose one of these with radio button
+      control_type:       :sunrise_sunset,
+      control_type_choices: [:sunrise_sunset, :ambient, :fixed_times, :pir_sensor],
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
       sunset_times:       ['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
       fixed_start_time:   TimeOfDay.new(19, 15),
@@ -60,22 +63,26 @@ class ElectricitySimulatorConfiguration
     electrical_heating: {
         title: 'Electrical heating',
         editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time, :balancepoint_temperature],
-        start_time:               TimeOfDay.new(5, 30),
+        start_time:               TimeOfDay.new(8, 30),
         end_time:                 TimeOfDay.new(17, 0),
         fixed_power:              4.0,
         weekends:                 false,
         holidays:                 false,
-        balancepoint_temperature: 15, # centigrade
-        power_per_degreeday:      0.5 # kW/C
+        balancepoint_temperature: 15.5, # centigrade
+        power_per_degreeday:      0.25 # kW/C
     },
     kitchen: {  # 1 all three of these - time of day rathern than 2010
       title: 'Kitchen',
       editable:    [:power, :start_time, :end_time],
       start_time:               TimeOfDay.new(8, 0),
       end_time:                 TimeOfDay.new(13, 0),
-      power:       4.0 #
+      power:                    3.0,
+      average_refridgeration_power: 0.4,
+      warmer_oven_power:          2.0,
+      warmer_oven_start_time:    TimeOfDay.new(11, 30),
+      warmer_oven_end_time:      TimeOfDay.new(13, 0)
     },
-    summer_air_conn: { # 1 set power to zero for no aie conn
+    summer_air_conn: { # 1 set power to zero for no air conn
       title: 'Summer air conditioning',
       editable:                 [:weekends, :start_time, :end_time, :holidays, :balancepoint_temperature, :power_per_degreeday],
       start_time:               TimeOfDay.new(5, 30),
@@ -106,6 +113,7 @@ class ElectricitySimulatorConfiguration
       pump_power:                   0.5, # 1 kw
       weekends:                     false,
       holidays:                     true,
+      boiler_gas_power_on_criteria: 15.0,
       frost_protection_temp:        4
     },
     flood_lighting:  {

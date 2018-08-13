@@ -45,6 +45,10 @@ class Holidays
     !holiday(date).nil?
   end
 
+  def occupied?(date)
+    !weekend?(date) && !holiday?(date)
+  end
+
   # returns a holiday period corresponding to a date, nil if not a date
   def holiday(date)
     # check cache, as lookup currently loops through list of holidays
@@ -59,6 +63,10 @@ class Holidays
   def is_weekend(date)
     date.saturday? || date.sunday?
     raise 'Deprecated'
+  end
+
+  def weekend?(date)
+    date.saturday? || date.sunday?
   end
 
   # returns a hash defining a holiday :title => title, :start_date => start_date, :end_date => end_date} or nil

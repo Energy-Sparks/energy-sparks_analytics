@@ -24,7 +24,7 @@ class YAxisScaling
 
   def self.unit_description(unit, scaling_factor_type, value)
     val_str = value.nil? ? 'NA' : value
-    Logging.logger.debug "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}"
+    # logger.debug "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}" TODO(PH,8Aug2018) - can't work out how to convert this puts to logger in class instance
     factor_type_description = {
       none:             nil,
       per_pupil:        'per pupil',
@@ -68,11 +68,11 @@ class YAxisScaling
   end
 
   def self.scale_num(number)
-    if number.nil? || number.nan?
+    if number.nil?
       '' # specific case where no value specified
-    elsif number < 50
+    elsif number.magnitude < 50
       number.round(2).to_s
-    elsif number < 1000
+    elsif number.magnitude < 1000
       number.round(0).to_s
     else
       number.round(0).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
@@ -144,6 +144,8 @@ class YAxisScaling
       case fuel_type
       when :electricity, :storage_heater
         unit_scale = BenchmarkMetrics::ELECTRICITY_PRICE # 12p/kWh long term average
+      when :solar_export
+        unit_scale = BenchmarkMetrics::SOLAR_EXPORT_PRICE # 5p/kWh
       when :gas, :heat # TODO(PH,1Jun2018) - rationalise heat versus gas
         unit_scale = BenchmarkMetrics::GAS_PRICE # 3p/kWh long term average
       when :oil

@@ -143,15 +143,19 @@ class DashboardConfiguration
 
                                   group_by_week_electricity_simulator_solar_pv
                                   intraday_electricity_simulator_solar_pv_kwh
-
+                                ]
+                              },
+        simulator_debug:      {     
+                                name: 'Simulator - Appliance Breakdown',
+                                charts: %i[       
                                   intraday_line_school_days_6months_simulator
                                   intraday_line_school_days_6months
                                   intraday_line_school_days_6months_simulator_submeters
 
                                   intraday_electricity_simulator_actual_for_comparison
                                   intraday_electricity_simulator_simulator_for_comparison
-                                ]
-                              }
+                                ] 
+                              }               
   }.freeze
 
   DASHBOARD_FUEL_TYPES = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
