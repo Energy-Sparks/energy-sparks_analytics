@@ -24,7 +24,7 @@ class YAxisScaling
 
   def self.unit_description(unit, scaling_factor_type, value)
     val_str = value.nil? ? 'NA' : value
-    # logger.debug "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}" TODO(PH,8Aug2018) - can't work out how to convert this puts to logger in class instance
+    Logging.logger.debug "Y axis scaling for unit =#{unit} type = #{scaling_factor_type} value = #{val_str}"
     factor_type_description = {
       none:             nil,
       per_pupil:        'per pupil',

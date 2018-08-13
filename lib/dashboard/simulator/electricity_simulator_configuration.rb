@@ -19,8 +19,8 @@ class ElectricitySimulatorConfiguration
     },
     ict: {
       title: 'ICT',
-      editable:                     [servers: [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type], desktops: [:number, :power_watts_each, :weekends, :holidays, :type, :standby_watts_each], laptops: [:number, :power_watts_each, :type]],
       servers: {
+        editable:                 [servers: [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type], desktops: [:number, :power_watts_each, :weekends, :holidays, :type, :standby_watts_each], laptops: [:number, :power_watts_each, :type]],
         type:                     :server,
         number:                   2,
         power_watts_each:         300.0,
@@ -28,6 +28,13 @@ class ElectricitySimulatorConfiguration
         weekends:                 true,
         holidays:                 true,
       },
+      # servers2: { #### Example use only, not required immediately
+      #   editable:                 [:number, :power_watts_each],
+      #   type:                     :server,
+      #   number:                   1.0,
+      #   power_watts_each:         500.0,
+      #   air_con_overhead_pecent:  0.3
+      # },
       desktops: {
         type:                         :desktop,
         number:                       20,
@@ -46,11 +53,9 @@ class ElectricitySimulatorConfiguration
         holidays:                     false # turned off during holidays
       }
     },
-<<<<<<< HEAD
     security_lighting: {
       title: 'Security lighting',
       editable:           [:power, :control_type, :fixed_start_time, :fixed_end_time, :power, :ambient_threshold],
-      control_type:       [:sunrise_sunset, :ambient, :fixed_times],  # Choose one of these with radio button
       control_type:       :sunrise_sunset,
       control_type_choices: [:sunrise_sunset, :ambient, :fixed_times, :pir_sensor],
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
@@ -73,7 +78,7 @@ class ElectricitySimulatorConfiguration
     },
     kitchen: {  # 1 all three of these - time of day rathern than 2010
       title: 'Kitchen',
-      editable:    [:power, :start_time, :end_time],
+      editable:                 [:power, :start_time, :end_time, :average_refridgeration_power, :warmer_oven_power, :warmer_oven_start_time, :warmer_oven_end_time],
       start_time:               TimeOfDay.new(8, 0),
       end_time:                 TimeOfDay.new(13, 0),
       power:                    3.0,
@@ -106,8 +111,6 @@ class ElectricitySimulatorConfiguration
     boiler_pumps: {
       title: 'Boiler pumps',
       editable:                     [:pump_power, :start_time, :end_time, :weekends, :holidays, :frost_protection_temp],
-      heating_season_start_dates:   [Date.new(2016, 10, 1),  Date.new(2017, 11, 5)],
-      heating_season_end_dates:     [Date.new(2017,  5, 14),  Date.new(2018, 5, 1)],
       start_time:                   TimeOfDay.new(5, 30),
       end_time:                     TimeOfDay.new(17, 0),
       pump_power:                   0.5, # 1 kw

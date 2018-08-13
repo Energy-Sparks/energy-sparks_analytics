@@ -472,7 +472,7 @@ class ChartManager
       filter:            { submeter: [ 'Laptops', 'Desktops', 'Servers' ] },
       series_name_order: :reverse
     },
-    
+
     #==============================SIMULATOR LIGHTING DETAIL==============================
     group_by_week_electricity_simulator_lighting: {
       name:             'By Week: Electricity Simulator (Lighting)',
@@ -757,13 +757,8 @@ class ChartManager
         chart_group_result[:advice_footer] = advice.footer_advice
       end
     end
-<<<<<<< HEAD
 
-    ap(chart_group_result, limit: 20, color: { float: :red }) if logger.debug?
-=======
-    
     ap(chart_group_result, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
->>>>>>> master
     chart_group_result
   end
 
