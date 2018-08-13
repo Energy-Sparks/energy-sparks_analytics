@@ -111,7 +111,7 @@ class ElectricitySimulator
 
   def default_simulator_parameters
     definitions = ElectricitySimulatorConfiguration::APPLIANCE_DEFINITIONS.deep_dup
-    definitions[:unaccounted_for_baseload] = {  baseload: (school.floor_area / 1_000.0) * 0.5 } # 1 single number - useful
+    definitions[:unaccounted_for_baseload][:baseload] = (school.floor_area / 1_000.0) * 0.5 # 1 single number - useful
     definitions[:boiler_pumps][:pump_power] = 0.5 * school.floor_area / 1_000.0 # 0.5W/m2 in kW
     definitions
   end
@@ -510,8 +510,8 @@ class ElectricitySimulator
           if has_warming_oven
             # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
             overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, warming_oven_start_time, warming_oven_end_time)
-  
-            kitchen_data[date][half_hour_index] += warming_oven_power * overlap # automatically in k_wh as conversion kW * time in hours  
+
+            kitchen_data[date][half_hour_index] += warming_oven_power * overlap # automatically in k_wh as conversion kW * time in hours
           end
         end
       end

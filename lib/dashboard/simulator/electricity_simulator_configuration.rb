@@ -21,19 +21,19 @@ class ElectricitySimulatorConfiguration
     ict: {
       title: 'ICT',
       servers1: {
-        editable:                 [:number, :power_watts_each],
+        editable:                 [servers: [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type], desktops: [:number, :power_watts_each, :weekends, :holidays, :type, :standby_watts_each], laptops: [:number, :power_watts_each, :type]],
         type:                     :server,
         number:                   2.0,
         power_watts_each:         300.0,
         air_con_overhead_percent: 0.2
       },
-      servers2: { #### Example use only, not required immediately
-        editable:                 [:number, :power_watts_each],
-        type:                     :server,
-        number:                   1.0,
-        power_watts_each:         500.0,
-        air_con_overhead_pecent:  0.3
-      },
+      # servers2: { #### Example use only, not required immediately
+      #   editable:                 [:number, :power_watts_each],
+      #   type:                     :server,
+      #   number:                   1.0,
+      #   power_watts_each:         500.0,
+      #   air_con_overhead_pecent:  0.3
+      # },
       desktops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :desktop,
@@ -54,20 +54,9 @@ class ElectricitySimulatorConfiguration
         holidays:                     false # turned off during holidays
       }
     },
-    boiler_pumps: {
-      title: 'Boiler pumps',
-      editable:                     [:pump_power],
-      start_time:                   TimeOfDay.new(5, 30),
-      end_time:                     TimeOfDay.new(17, 0),
-      pump_power:                   0.5, # 1 kw
-      weekends:                     false,
-      holidays:                     true,
-      boiler_gas_power_on_criteria: 15.0,
-      frost_protection_temp:        4
-    },
     security_lighting: {
       title: 'Security lighting',
-      editable:           [:power, :control_type],
+      editable:           [:power, :control_type, :fixed_start_time, :fixed_end_time, :power, :ambient_threshold],
       control_type:       :sunrise_sunset,
       control_type_choices: [:sunrise_sunset, :ambient, :fixed_times, :pir_sensor],
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
@@ -79,7 +68,7 @@ class ElectricitySimulatorConfiguration
     },
     electrical_heating: {
         title: 'Electrical heating',
-        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time],
+        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time, :balancepoint_temperature],
         start_time:               TimeOfDay.new(8, 30),
         end_time:                 TimeOfDay.new(17, 0),
         fixed_power:              4.0,
@@ -90,7 +79,7 @@ class ElectricitySimulatorConfiguration
     },
     kitchen: {
       title: 'Kitchen',
-      editable:                 [:power],
+      editable:                 [:power, :start_time, :end_time, :average_refridgeration_power, :warmer_oven_power, :warmer_oven_start_time, :warmer_oven_end_time],
       start_time:               TimeOfDay.new(8, 0),
       end_time:                 TimeOfDay.new(13, 0),
       power:                    3.0,
@@ -101,7 +90,7 @@ class ElectricitySimulatorConfiguration
     },
     summer_air_conn: { # 1 set power to zero for no air conn
       title: 'Summer air conditioning',
-      editable:                 [:power_per_degreeday],
+      editable:                 [:weekends, :start_time, :end_time, :holidays, :balancepoint_temperature, :power_per_degreeday],
       start_time:               TimeOfDay.new(5, 30),
       end_time:                 TimeOfDay.new(23, 30),
       weekends:                 true,
@@ -111,6 +100,7 @@ class ElectricitySimulatorConfiguration
     },
     electric_hot_water: {
       title: 'Electric hot water',
+      editable:                 [:weekends, :start_time, :end_time, :holidays, :percent_of_pupils, :litres_per_day_per_pupil, :standby_power],
       start_time:               TimeOfDay.new(9, 0),
       end_time:                 TimeOfDay.new(16, 30),
       weekends:                 true,
@@ -119,9 +109,20 @@ class ElectricitySimulatorConfiguration
       litres_per_day_per_pupil: 5.0, # assumes at 38C versus ambient of 15C, to give a deltaT of 23C
       standby_power:            0.1 # outside start and end times, but dependent on whether switched off during weekends and holidays, see other parameters
     },
+    boiler_pumps: {
+      title: 'Boiler pumps',
+      editable:                     [:pump_power, :start_time, :end_time, :weekends, :holidays, :frost_protection_temp],
+      start_time:                   TimeOfDay.new(5, 30),
+      end_time:                     TimeOfDay.new(17, 0),
+      pump_power:                   0.5, # 1 kw
+      weekends:                     false,
+      holidays:                     true,
+      boiler_gas_power_on_criteria: 15.0,
+      frost_protection_temp:        4
+    },
     flood_lighting:  {
       title: 'Flood lighting',
-      editable:                 [:power],
+      editable:                 [:power, :ambient_light_threshold, bookings: [:weekday, :start_time, :end_time, :holidays, :start_date, :end_date]],
       power:    35.0,
       ambient_light_threshold: 200, # lumens/m2
       bookings: [
