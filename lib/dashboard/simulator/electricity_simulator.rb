@@ -488,11 +488,11 @@ class ElectricitySimulator
     start_time = @appliance_definitions[:kitchen][:start_time]
     end_time = @appliance_definitions[:kitchen][:end_time]
 
-    has_warming_oven = @appliance_definitions[:kitchen].key?(:warmer_oven_power) # uses as version control as well
+    has_warming_oven = @appliance_definitions[:kitchen].key?(:warming_oven_power) # uses as version control as well
     if has_warming_oven
-      warming_oven_start_time = @appliance_definitions[:kitchen][:warmer_oven_start_time]
-      warming_oven_end_time = @appliance_definitions[:kitchen][:warmer_oven_end_time]
-      warming_oven_power = @appliance_definitions[:kitchen][:warmer_oven_power]
+      warming_oven_start_time = @appliance_definitions[:kitchen][:warming_oven_start_time]
+      warming_oven_end_time = @appliance_definitions[:kitchen][:warming_oven_end_time]
+      warming_oven_power = @appliance_definitions[:kitchen][:warming_oven_power]
     end
 
     (kitchen_data.start_date..kitchen_data.end_date).each do |date|
