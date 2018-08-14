@@ -71,6 +71,11 @@ class ElectricitySimulator
   def simulate(appliance_definitions)
     @appliance_definitions = appliance_definitions
     logger.debug appliance_definitions.inspect
+
+    puts "\n" * 3
+    ap HashDiff.diff(appliance_definitions, ElectricitySimulatorConfiguration.new)
+    puts "\n" * 3
+
     @total = empty_amr_data_set('Simulator Totals')
     total_amr_data = nil
 # rubocop:disable all

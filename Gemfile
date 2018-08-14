@@ -18,6 +18,7 @@ gem 'chroma'
 
 # Useful for debugging
 gem 'pry-byebug'
+gem 'hashdiff'
 
 # For tests
 gem 'rspec'
