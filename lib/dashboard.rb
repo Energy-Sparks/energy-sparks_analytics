@@ -42,6 +42,7 @@ require 'open-uri'
 require 'statsample'
 
 require 'html-table'
+require 'hashdiff'
 
 require 'active_support'
 require 'active_support/core_ext/date/calculations'
