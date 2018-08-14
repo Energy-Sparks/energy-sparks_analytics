@@ -73,6 +73,8 @@ class ElectricitySimulator
     logger.debug appliance_definitions.inspect
 
     puts "\n" * 3
+    puts "Hash difference between default config and what has been sent through:"
+    puts "\n" * 2
     ap HashDiff.diff(appliance_definitions, ElectricitySimulatorConfiguration.new)
     puts "\n" * 3
 
