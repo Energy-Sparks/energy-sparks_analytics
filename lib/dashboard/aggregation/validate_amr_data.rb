@@ -233,6 +233,7 @@ class ValidateAMRData
   end
 
   def in_meter_correction_period?(date)
+    return false if @meter.meter_correction_rules.nil?
     @meter.meter_correction_rules.each do |rule|
       if rule.key?(:auto_insert_missing_readings) &&
          rule[:auto_insert_missing_readings][:type] == :date_range
