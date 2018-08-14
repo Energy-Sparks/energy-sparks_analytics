@@ -105,7 +105,7 @@ class ElectricitySimulatorConfiguration
       end_time:                 TimeOfDay.new(16, 30),
       weekends:                 true,
       holidays:                 false,
-      percent_of_pupils:        0.5, # often a its only a proportion of the pupils at a school has electric hot water, the rest are provided by ga
+      percent_of_pupils:        50.0, # often a its only a proportion of the pupils at a school has electric hot water, the rest are provided by ga
       litres_per_day_per_pupil: 5.0, # assumes at 38C versus ambient of 15C, to give a deltaT of 23C
       standby_power:            0.1 # outside start and end times, but dependent on whether switched off during weekends and holidays, see other parameters
     },

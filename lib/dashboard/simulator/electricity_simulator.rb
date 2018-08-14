@@ -531,7 +531,7 @@ class ElectricitySimulator
   def simulate_hot_water
     hot_water_data = empty_amr_data_set("Hot Water")
 
-    percent_of_pupils_using_hot_water = @appliance_definitions[:electric_hot_water][:percent_of_pupils]
+    percent_of_pupils_using_hot_water = @appliance_definitions[:electric_hot_water][:percent_of_pupils] / 100.0
     standby_power = check_positive(@appliance_definitions[:electric_hot_water][:standby_power])
     pupils = school.number_of_pupils * percent_of_pupils_using_hot_water
     litres_per_day_for_school = pupils * @appliance_definitions[:electric_hot_water][:litres_per_day_per_pupil]
