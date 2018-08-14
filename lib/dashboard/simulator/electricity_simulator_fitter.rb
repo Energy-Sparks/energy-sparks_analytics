@@ -77,7 +77,7 @@ class ElectricitySimulator
           end
         end
       end
-    end 
+    end
     [kw, sol_yield, dt]
   end
 
@@ -114,11 +114,11 @@ class ElectricitySimulator
     days_kwh, degree_days, irradiation, dates = fit_lighting_electric_heating_extract_data(config)
 
     r2, lighting_sensitivity_wrt_irradiation, heating_sensitivity_wrt_degreedays, constant = fit_lighting_electric_heating_regression_analysis(days_kwh, degree_days, irradiation)
-    
+
     fit_lighting_electric_heating_debug(
-      r2, 
-      lighting_sensitivity_wrt_irradiation, 
-      heating_sensitivity_wrt_degreedays, 
+      r2,
+      lighting_sensitivity_wrt_irradiation,
+      heating_sensitivity_wrt_degreedays,
       constant,
       dates,
       days_kwh,
@@ -158,7 +158,7 @@ class ElectricitySimulator
     # puts lr.summary
     [lr.r2, lr.coeffs[:lighting_ir], lr.coeffs[:heating_dd], lr.constant]
   end
-  
+
   def fit_lighting_electric_heating_debug(r2, lighting_coeff, heating_coeff, constant, dates, days_kwh, degree_days, irradiation)
     begin
       file = File.open('Results/' + @school.name + ' ' + 'sim light heating corr.csv', 'w')
@@ -345,7 +345,7 @@ class ElectricitySimulator
     num_servers, power = BenchmarkMetrics.typical_servers_for_pupils(@school.school_type, @school.number_of_pupils)
     config[:ict][:servers1][:number] = num_servers
     config[:ict][:servers1][:power_watts_each] = power
-    config[:ict][:servers2][:number] = 0
+    config[:ict][:servers2][:number] = 0 if config[:ict].key?(:servers2)
   end
 
   #============================================================================================
