@@ -578,13 +578,13 @@ class ElectricitySimulator
       @appliance_definitions[:electrical_heating][:balancepoint_temperature],
       @appliance_definitions[:electrical_heating][:fixed_power],
       @period.start_date,
-      @period.end_date
+      @period.end_date,
+      @appliance_definitions[:electrical_heating]
       )
   end
 
-  def simulate_electrical_heating_internal(power_per_degreeday, balancepoint_temperature, fixed_power, start_date, end_date)
+  def simulate_electrical_heating_internal(power_per_degreeday, balancepoint_temperature, fixed_power, start_date, end_date, config)
     electric_heating_data = empty_amr_data_set_internal('Electrical Heating', start_date, end_date)
-    config = @appliance_definitions[:electrical_heating]
 
     (start_date..end_date).each do |date|
       if heating_on?(date) && !(@holidays.holiday?(date) && !config[:holidays]) && !(weekend?(date) && !config[:weekends])

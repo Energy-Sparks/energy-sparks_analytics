@@ -31,14 +31,11 @@ list_of_schools.each do |school_name|
   simulator = ElectricitySimulator.new(school)
 
   bm = Benchmark.measure {
-    simulator.simulate(simulator.default_simulator_parameters)
+ #   simulator.simulate(simulator.default_simulator_parameters)
   }
   puts "Simulator took: #{bm.to_s}"
 
-  puts 'Actual:'
-  actual_stats = simulator.actual_data_statistics
-  puts 'Simulator'
-  simulator_stats = simulator.simulator_data_statistics
+
 
   fitted_parameters = nil
   bm = Benchmark.measure {
@@ -51,6 +48,10 @@ list_of_schools.each do |school_name|
      simulator.simulate(fitted_parameters)
   }
   puts "Simulator took: #{bm.to_s}"
+
+  puts 'Actual:'
+  actual_stats = simulator.actual_data_statistics
+  puts 'Simulator'
   simulator_stats = simulator.simulator_data_statistics
 
   reports.do_one_page(:simulator)

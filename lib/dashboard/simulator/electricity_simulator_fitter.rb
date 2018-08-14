@@ -190,7 +190,8 @@ class ElectricitySimulator
         HEATING_DEGREEDAY_BALANCEPOINT_TEMPERATURE,
         fixed_power,
         amr_data.start_date,
-        amr_data.end_date
+        amr_data.end_date,
+        config[:electrical_heating]
       )
       @working_amr_data.minus_self(heating_amr_simulated_data, 0.0)
     end
@@ -343,8 +344,8 @@ class ElectricitySimulator
   # ICT FITTER
   def fit_ict(config)
     num_servers, power = BenchmarkMetrics.typical_servers_for_pupils(@school.school_type, @school.number_of_pupils)
-    config[:ict][:servers1][:number] = num_servers
-    config[:ict][:servers1][:power_watts_each] = power
+    config[:ict][:servers][:number] = num_servers
+    config[:ict][:servers][:power_watts_each] = power
     config[:ict][:servers2][:number] = 0 if config[:ict].key?(:servers2)
   end
 
