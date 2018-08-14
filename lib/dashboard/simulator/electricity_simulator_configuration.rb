@@ -21,7 +21,7 @@ class ElectricitySimulatorConfiguration
     ict: {
       title: 'ICT',
       editable:                 [servers: [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type], desktops: [:number, :power_watts_each, :weekends, :holidays, :type, :standby_watts_each], laptops: [:number, :power_watts_each, :type]],
-      servers1: {
+      servers: {
         editable:                 [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type],
         type:                     :server,
         number:                   2.0,
