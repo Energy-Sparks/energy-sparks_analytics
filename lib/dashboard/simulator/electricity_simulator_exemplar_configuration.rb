@@ -13,7 +13,7 @@ class ElectricitySimulator
     config[:ict][:desktops][:number] = 0
     config[:ict][:laptops][:number] += desktops
     config[:ict][:laptops][:power_watts_each] = 20
-     
+
     config[:security_lighting][:control_type] = :pir_sensor
 
     config[:electrical_heating][:fixed_power] = 0.0
@@ -26,7 +26,7 @@ class ElectricitySimulator
     config[:kitchen][:warming_oven_end_time] = TimeOfDay.new(12, 30)
 
     config[:summer_air_conn][:power_per_degreeday] = 0.0
-    
+
     config[:electric_hot_water][:percent_of_pupils] = 100.0 # i.e. point of use, not gas
     config[:electric_hot_water][:standby_power] = 0.05
     config[:electric_hot_water][:weekends] = false
