@@ -19,7 +19,7 @@ class MeterCollection
   attr_reader :floor_area, :number_of_pupils
 
   # Currently, but not always
-  attr_reader :school_type, :school, :name, :address, :postcode
+  attr_reader :school, :name, :address, :postcode
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
@@ -97,6 +97,10 @@ class MeterCollection
       throw ArgumentException if school.meters.empty?
     end
     amr_data
+  end
+
+  def school_type
+    @school.nil? ? nil : @school.school_type
   end
 
   def add_heat_meter(meter)

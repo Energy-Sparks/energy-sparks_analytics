@@ -126,9 +126,9 @@ class ElectricitySimulator
       irradiation
     ) if false
 
-    fit_lighting_electric_heating_extract_heating_conponent(config, heating_sensitivity_wrt_degreedays)
+    fit_lighting_electric_heating_extract_heating_component(config, heating_sensitivity_wrt_degreedays)
 
-    fit_lighting_electric_heating_extract_lighting_conponent(config, lighting_sensitivity_wrt_irradiation, irradiation)
+    fit_lighting_electric_heating_extract_lighting_component(config, lighting_sensitivity_wrt_irradiation, irradiation)
   end
 
   def fit_lighting_electric_heating_extract_data(config)
@@ -174,7 +174,7 @@ class ElectricitySimulator
     end
   end
 
-  def fit_lighting_electric_heating_extract_heating_conponent(config, heating_sensitivity_wrt_degreedays)
+  def fit_lighting_electric_heating_extract_heating_component(config, heating_sensitivity_wrt_degreedays)
     amr_data = @working_amr_data
     # extract heating information
     fixed_power = 0.0
@@ -197,7 +197,7 @@ class ElectricitySimulator
     end
   end
 
-  def fit_lighting_electric_heating_extract_lighting_conponent(config, lighting_sensitivity_wrt_irradiation, irradiation)
+  def fit_lighting_electric_heating_extract_lighting_component(config, lighting_sensitivity_wrt_irradiation, irradiation)
     # extract lighting information
     # - this is a little complicated as the regression coefficient is negative
     # - i.e. the brighter it is outside the less lighting is on
@@ -224,7 +224,7 @@ class ElectricitySimulator
     logger.info "Lighting watts per m2: #{watts_per_m2}"
     efficacy_lumens_per_watt = config[:lighting][:lumens_per_m2] / watts_per_m2
     logger.info "Lighting efficacy: #{efficacy_lumens_per_watt}"
-    if efficacy_lumens_per_watt > 15 && efficacy_lumens_per_watt < 200 # a slight fudge
+    if efficacy_lumens_per_watt > 15 && efficacy_lumens_per_watt < 110 # a slight fudge
       config[:lighting][:lumens_per_watt] = efficacy_lumens_per_watt
     end
   end
@@ -343,10 +343,39 @@ class ElectricitySimulator
   #============================================================================================
   # ICT FITTER
   def fit_ict(config)
+    fit_servers(config)
+    fit_desktops_laptops(config)
+  end
+
+  def fit_servers(config)
     num_servers, power = BenchmarkMetrics.typical_servers_for_pupils(@school.school_type, @school.number_of_pupils)
     config[:ict][:servers][:number] = num_servers
     config[:ict][:servers][:power_watts_each] = power
-    config[:ict][:servers2][:number] = 0 if config[:ict].key?(:servers2)
+  end
+
+  def fit_desktops_laptops(config)
+    teachers = (@school.number_of_pupils / 20 ).round
+    case @school.school_type
+    when :primary, :infant, :junior, :special
+      num_intakes = (@school.number_of_pupils / (6 * 30)).ceil
+      # 1 head, 2 admin staff per intake classes (+1) + 1 per teacher
+      admin_staff = 2 * num_intakes + 1
+      config[:ict][:desktops][:number] = 1 + admin_staff + teachers
+      # 30 per intake, but only on 50% of time
+      config[:ict][:laptops][:number] = (num_intakes * 30 * 0.5).round
+    when :secondary
+      num_classrooms = (@school.number_of_pupils / 20).ceil
+      num_admin_staff = 2 + (@school.number_of_pupils / 125).ceil
+      num_computer_labs = (@school.number_of_pupils / 300).ceil
+      # often 'computer labs' in secondaries use lighterweight more energy efficient desktops
+      num_lab_desktops = num_computer_labs * 25
+      config[:ict][:desktops][:number] = num_classrooms + num_computer_labs + num_admin_staff
+      config[:ict][:desktops][:power_watts_each] = (150 * num_admin_staff + 100 * num_classrooms + 70 * num_lab_desktops) / (num_admin_staff + num_classrooms + num_lab_desktops)
+      config[:ict][:laptops][:number] = (config[:ict][:desktops][:number] / 10).ceil
+    else
+      raise EnergySparksUnexpectedStateException.new("Unknown school type #{@school.school_type}") if !@school.school_type.nil?
+      raise EnergySparksUnexpectedStateException.new('Nil school type') if @school.school_type.nil?
+    end
   end
 
   #============================================================================================

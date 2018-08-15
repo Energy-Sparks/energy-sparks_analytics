@@ -241,7 +241,7 @@ class ChartManager
       timescale:        :year,
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
-      yaxis_scaling:    :per_200_pupils
+      yaxis_scaling:    :none
     },
     electricity_by_month_acyear_0_1:  {
       name:             'Electricity Use By Month (previous 2 academic years)',
@@ -583,8 +583,6 @@ class ChartManager
       inherits_from:    :group_by_week_electricity_actual_for_simulator_comparison,
       meter_definition: :electricity_simulator
     },
-
-
     electricity_by_day_of_week_actual_for_simulator_comparison:  {
       name:             'Electricity Use By Day of the Week (Actual Usage over last year)',
       inherits_from:    :electricity_by_day_of_week,

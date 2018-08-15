@@ -32,11 +32,12 @@ module BenchmarkMetrics
         10 + 10 * (pupils - 400) / 400
       end
     else
-      raise 'Unknown type of school ' + school_type
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in benchmark baseload request") if !school_type.nil?
+      raise EnergySparksUnexpectedStateException.new('Nil type of school in benchmark baseload request') if school_type.nil?
     end
   end
 
-  def self.typical_servers_for_pupils(pupils, school_type)
+  def self.typical_servers_for_pupils(school_type, pupils)
     servers = 1
     power = 500.0
     case school_type
@@ -46,7 +47,7 @@ module BenchmarkMetrics
       elsif pupils < 300
         servers = 3
       else
-        servers = 3 +  (pupils / 300).floor
+        servers = 3 + (pupils / 300).floor
       end
     when :secondary
       power = 1000.0
@@ -55,8 +56,11 @@ module BenchmarkMetrics
       elsif pupils < 1000
         servers = 8
       else
-        servers = 8 +  ((pupils  - 1000)/ 250).floor
+        servers = 8 + ((pupils - 1000)/ 250).floor
       end
+    else
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in typical servers request") if !school_type.nil?
+      raise EnergySparksUnexpectedStateException.new('Nil type of school in typical servers request') if school_type.nil?
     end
     [servers, power]
   end
@@ -79,7 +83,8 @@ module BenchmarkMetrics
         10 + 10 * (floor_area - 1000) / 1000
       end
     else
-      raise 'Unknown type of school ' + school_type
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request") if !school_type.nil?
+      raise EnergySparksUnexpectedStateException.new('Nil type of school in baseload floor area request') if school_type.nil?
     end
   end
 end
