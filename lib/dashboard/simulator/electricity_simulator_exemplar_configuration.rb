@@ -1,6 +1,8 @@
 class ElectricitySimulator
   # return configuration for an exemplar school
   def exemplar(config)
+    config = config.deep_dup
+
     config[:lighting][:lumens_per_watt] = 100 # LEDs
     config[:lighting][:lumens_per_m2] = 300
 
