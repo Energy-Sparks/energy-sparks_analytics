@@ -162,8 +162,8 @@ class XBucketIntraday < XBucketBase
   end
 
   def key(_date, halfhour_index)
-    hour = (halfhour_index / 2).to_s
-    minutes = (halfhour_index / 2).floor.odd? ? '30' : '00'
+    hour = (halfhour_index / 2).floor.to_s
+    minutes = halfhour_index.odd? ? '30' : '00'
     hour + ':' + minutes # hH:MM
   end
 
