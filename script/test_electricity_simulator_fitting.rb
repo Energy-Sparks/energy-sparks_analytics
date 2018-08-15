@@ -37,7 +37,8 @@ list_of_schools.each do |school_name|
 
   fitted_parameters = nil
   bm = Benchmark.measure {
-    fitted_parameters = simulator.fit(simulator.default_simulator_parameters)
+    # fitted_parameters = simulator.fit(simulator.default_simulator_parameters)
+    fitted_parameters = simulator.exemplar(simulator.default_simulator_parameters)
   }
   puts "Fitting took: #{bm.to_s}"
 

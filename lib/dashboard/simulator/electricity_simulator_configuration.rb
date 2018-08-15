@@ -44,6 +44,7 @@ class ElectricitySimulatorConfiguration
         number:                       20,
         power_watts_each:             30,
         standby_watts_each:           2,
+        usage_percent_by_time_of_day: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         weekends:                     false, # left on standby at weekends
         holidays:                     false # turned off during holidays
       }
