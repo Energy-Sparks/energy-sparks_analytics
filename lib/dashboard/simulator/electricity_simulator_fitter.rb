@@ -355,7 +355,9 @@ class ElectricitySimulator
 
   def fit_desktops_laptops(config)
     teachers = (@school.number_of_pupils / 20 ).round
-    case @school.school_type
+    school_type = @school.school_type.instance_of?(String) ? @school.school_type.to_sym : @school.school_type
+
+    case school_type
     when :primary, :infant, :junior, :special
       num_intakes = (@school.number_of_pupils / (6 * 30)).ceil
       # 1 head, 2 admin staff per intake classes (+1) + 1 per teacher
@@ -373,8 +375,8 @@ class ElectricitySimulator
       config[:ict][:desktops][:power_watts_each] = (150 * num_admin_staff + 100 * num_classrooms + 70 * num_lab_desktops) / (num_admin_staff + num_classrooms + num_lab_desktops)
       config[:ict][:laptops][:number] = (config[:ict][:desktops][:number] / 10).ceil
     else
-      raise EnergySparksUnexpectedStateException.new("Unknown school type #{@school.school_type}") if !@school.school_type.nil?
-      raise EnergySparksUnexpectedStateException.new('Nil school type') if @school.school_type.nil?
+      raise EnergySparksUnexpectedStateException.new("Unknown school type #{school_type}") if !itschool_type.nil?
+      raise EnergySparksUnexpectedStateException.new('Nil school type') if school_type.nil?
     end
   end
 
