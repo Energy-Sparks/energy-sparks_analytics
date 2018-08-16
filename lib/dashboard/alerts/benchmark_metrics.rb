@@ -38,6 +38,7 @@ module BenchmarkMetrics
   end
 
   def self.typical_servers_for_pupils(school_type, pupils)
+    school_type = school_type.to_sym if school_type.instance_of? String
     servers = 1
     power = 500.0
     case school_type
