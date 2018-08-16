@@ -14,7 +14,7 @@ class ElectricitySimulator
     config[:ict][:laptops][:number] += desktops
     config[:ict][:laptops][:power_watts_each] = 20
 
-    config[:security_lighting][:control_type] = :pir_sensor
+    config[:security_lighting][:control_type] = :movement_sensor
 
     config[:electrical_heating][:fixed_power] = 0.0
     config[:electrical_heating][:power_per_degreeday] = 0.0

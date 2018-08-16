@@ -427,10 +427,8 @@ class ElectricitySimulator
           end
         end
       when :fixed_times # note the end time is early morning, so less than the start time which is early evening
-        fixed_start_time_string = @appliance_definitions[:security_lighting][:fixed_start_time]
-        starttime = convert_time_string_to_time(fixed_start_time_string)
-        fixed_end_time_string = @appliance_definitions[:security_lighting][:fixed_end_time]
-        endtime = convert_time_string_to_time(fixed_end_time_string)
+        fixed_start_time = @appliance_definitions[:security_lighting][:fixed_start_time]
+        fixed_end_time = @appliance_definitions[:security_lighting][:fixed_end_time]
 
         (lighting_data.start_date..lighting_data.end_date).each do |date|
           (0..47).each do |half_hour_index|
@@ -438,13 +436,13 @@ class ElectricitySimulator
             amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
             # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
-            overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, midnight0, endtime)
-            overlap += hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, starttime, midnight24)
+            overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, midnight0, fixed_end_time)
+            overlap += hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, fixed_start_time, midnight24)
 
             lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
           end
         end
-      when :pir_sensor
+      when :movement_sensor
         # do nothing
       else
         raise EnergySparksUnexpectedStateException.new("Simulator Security Light Control Type #{control_type}") if !control_type.nil?
