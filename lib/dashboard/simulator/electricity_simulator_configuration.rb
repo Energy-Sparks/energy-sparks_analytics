@@ -62,7 +62,7 @@ class ElectricitySimulatorConfiguration
     },
     electrical_heating: {
         title: 'Electrical heating',
-        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time, :balancepoint_temperature :weekends, :holidays],
+        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time, :balancepoint_temperature, :weekends, :holidays],
         start_time:               TimeOfDay.new(8, 30),
         end_time:                 TimeOfDay.new(17, 0),
         fixed_power:              4.0,
