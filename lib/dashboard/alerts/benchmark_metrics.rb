@@ -15,6 +15,7 @@ module BenchmarkMetrics
   EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175
 
   def self.recommended_baseload_for_pupils(pupils, school_type)
+    school_type = school_type.to_sym if school_type.instance_of? String
     case school_type
     when :primary, :infant, :junior, :special
       if pupils < 150
@@ -37,6 +38,7 @@ module BenchmarkMetrics
   end
 
   def self.typical_servers_for_pupils(school_type, pupils)
+    school_type = school_type.to_sym if school_type.instance_of? String
     servers = 1
     power = 500.0
     case school_type
@@ -65,6 +67,7 @@ module BenchmarkMetrics
   end
 
   def self.recommended_baseload_for_floor_area(floor_area, school_type)
+    school_type = school_type.to_sym if school_type.instance_of? String
     case school_type
     when :primary, :infant, :junior, :special
       if floor_area < 1000
