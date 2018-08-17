@@ -206,18 +206,16 @@ class ValidateAMRData
     print_array_of_dates_in_columns(replaced_dates, 8)
   end
 
-  def replace_missing_data_with_zero(start_date, end_date)
-    logger.debug "Setting missing data between #{start_date.strftime('%a %d %b %Y')} and #{end_date.strftime('%a %d %b %Y')} to zero"
+  def replace_missing_weekend_data_with_zero
+    logger.debug "Setting missing weekend dates to zero"
     replaced_dates = []
-    start_date = start_date.nil? ? @amr_data.start_date : start_date
-    end_date = end_date.nil? ? @amr_data.end_date : end_date
-    (start_date..end_date).each do |date|
-      if !@amr_data.key?(date)
+    (@amr_data.start_date..@amr_data.end_date).each do |date|
+      if DateTimeHelper.weekend?(date) && (!@amr_data.key?(date) || @amr_data[date].size < 48)
         replaced_dates.push(date)
         @amr_data.add(date, Array.new(48, 0.0))
       end
     end
-    logger.debug 'Replaced the following dates:'
+    logger.debug 'Replaced the following weekend dates:'
     print_array_of_dates_in_columns(replaced_dates, 8)
   end
 
