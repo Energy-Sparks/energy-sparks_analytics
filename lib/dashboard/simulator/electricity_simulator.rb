@@ -442,7 +442,7 @@ class ElectricitySimulator
             lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
           end
         end
-      when :movement_sensor
+      when :movement_sensor, :pir_sensor
         # do nothing
       else
         raise EnergySparksUnexpectedStateException.new("Simulator Security Light Control Type #{control_type}") if !control_type.nil?
