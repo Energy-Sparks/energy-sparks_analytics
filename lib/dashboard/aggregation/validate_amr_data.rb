@@ -92,7 +92,7 @@ class ValidateAMRData
       if @amr_data.key?(date)
         data_x48 = @amr_data[date]
         (0..47).each do |halfhour_index|
-          data_x48[halfhour_index] *= scale
+          data_x48[halfhour_index] *= scale 
         end
         @amr_data.add(date, data_x48)
       end
