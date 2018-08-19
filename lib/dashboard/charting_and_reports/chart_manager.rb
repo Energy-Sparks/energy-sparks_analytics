@@ -147,7 +147,7 @@ class ChartManager
     group_by_week_gas_unlimited_meter_filter_debug: {
       inherits_from:    :group_by_week_gas_unlimited,
       series_breakdown: :meter
-      # filter:            { meter: [ 'Electrical Heating' ] }
+      # filter:            { meter: [ 'Electrical Heating' ] } 
     },
     group_by_week_gas_kw: {
       name:             'By Week: Gas',
