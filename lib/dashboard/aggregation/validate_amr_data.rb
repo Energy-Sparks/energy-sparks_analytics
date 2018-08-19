@@ -87,6 +87,7 @@ class ValidateAMRData
   # typically is imperial to metric meter readings aren't corrected to kWh properly at source
   def scale_amr_data(start_date, end_date, scale)
     logger.debug "Scaling data between #{start_date} and #{end_date} by #{scale} - imperial to SI conversion?"
+    start_date = @amr_data.start_date if @amr_data.start_date > start_date # case where another correction has changed data prior to confiured correction
     (start_date..end_date).each do |date|
       if @amr_data.key?(date)
         data_x48 = @amr_data[date]
@@ -264,6 +265,7 @@ class ValidateAMRData
         msg += (@amr_data.keys.index(min_date) - 1).to_s + ' days of data ignored'
         @data_problems['Too much missing data'] = msg
         logger.debug msg
+        break
       end
     end
   end
