@@ -5,13 +5,13 @@ require_rel '../test_support'
 require './script/report_config_support.rb'
 
 module Logging
-  @logger = Logger.new('log/test-dashboard.log')
-  logger.level = :warn
+  @logger = Logger.new('Results/test-dashboard ' + Time.now.strftime('%H %M') + '.log')
+  logger.level = :debug
 end
 
 reports = ReportConfigSupport.new
 
-reports.load_school('Castle Primary School', true)
+reports.load_school('Roundhill School', true)
 
 # testing examples
 #
@@ -23,7 +23,9 @@ reports.load_school('Castle Primary School', true)
 # comment excel/html out if calling reports.do_all_schools or reports.do_all_standard_pages_for_school
 # as done automatically:
 
-reports.do_all_standard_pages_for_school
+# reports.do_all_standard_pages_for_school
+
+reports.do_chart_list('Boiler Control', [ :optimum_start, :group_by_week_gas_unlimited_meter_filter_debug ])
 
 reports.save_excel_and_html
 

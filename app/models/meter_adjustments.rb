@@ -18,7 +18,7 @@ class MeterAdjustments
     when '13678903' # Paulton Junior Gas
       meter.add_correction_rule(min_start_date_rule(Date.new(2014, 9, 30)))
       logger.info "Applying meter correction rules to #{meter.id}:"
-    when '13678903', '50974602', '50974703', '50974804', '75665705' # Roundhill
+    when '75665806' #  '50974602', '50974703', '50974804', '75665705' # Roundhill
       meter.add_correction_rule(rescale_amr_data_rule(Date.new(2009, 1, 1), Date.new(2012, 1, 1), 1/31.1))
       logger.info "Applying meter correction rules to #{meter.id}:"
     end

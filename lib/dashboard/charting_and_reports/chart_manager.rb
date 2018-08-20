@@ -145,6 +145,11 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :degreedays
     },
+    group_by_week_gas_unlimited_meter_filter_debug: {
+      inherits_from:    :group_by_week_gas_unlimited,
+      series_breakdown: :meter
+      # filter:            { meter: [ 'Electrical Heating' ] } 
+    },
     group_by_week_gas_kw: {
       name:             'By Week: Gas',
       chart1_type:      :column,
