@@ -92,7 +92,7 @@ class ValidateAMRData
       if @amr_data.key?(date)
         data_x48 = @amr_data[date]
         (0..47).each do |halfhour_index|
-          data_x48[halfhour_index] *= scale 
+          data_x48[halfhour_index] *= scale
         end
         @amr_data.add(date, data_x48)
       end
@@ -222,6 +222,7 @@ class ValidateAMRData
 
   # quick and dirty implementation TODO(PH,20Jun2018) - could be improved
   def print_array_of_dates_in_columns(dates, number_of_columns, output = STDOUT)
+    return unless Rails.logger.debug?
     count = 0
     dates.each do |date|
       output.print date.strftime('%a %d %b %Y') + ' '
