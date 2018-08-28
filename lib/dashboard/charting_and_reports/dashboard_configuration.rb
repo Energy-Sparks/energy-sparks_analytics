@@ -155,8 +155,16 @@ class DashboardConfiguration
                                   intraday_electricity_simulator_actual_for_comparison
                                   intraday_electricity_simulator_simulator_for_comparison
                                 ] 
-                              }               
-  }.freeze
+                              },
+        test:                 {     
+                                name: 'Useful Charts for Testing',
+                                charts: %i[
+                                  group_by_week_gas_unlimited_meter_filter_debug
+                                  electricity_longterm_trend
+                                  gas_longterm_trend
+                                ]
+                              }
+}.freeze
 
   DASHBOARD_FUEL_TYPES = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
     electric_only:

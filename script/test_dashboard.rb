@@ -11,7 +11,7 @@ end
 
 reports = ReportConfigSupport.new
 
-reports.load_school('Roundhill School', true)
+reports.load_school('Castle Primary School', true)
 
 # testing examples
 #
@@ -25,7 +25,7 @@ reports.load_school('Roundhill School', true)
 
 # reports.do_all_standard_pages_for_school
 
-reports.do_chart_list('Boiler Control', [ :optimum_start, :group_by_week_gas_unlimited_meter_filter_debug ])
+reports.do_one_page(:test)
 
 reports.save_excel_and_html
 

@@ -66,7 +66,8 @@ class ChartManager
       series_breakdown: :daytype,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      y2_axis:          :degreedays
+      y2_axis:          :degreedays,
+      reverse_xaxis:    true
     },
     electricity_longterm_trend: {
       name:             'Electricity: long term trends',
@@ -76,7 +77,8 @@ class ChartManager
       x_axis:           :year,
       series_breakdown: :daytype,
       yaxis_units:      :kwh,
-      yaxis_scaling:    :none
+      yaxis_scaling:    :none,
+      reverse_xaxis:    true
     },
     daytype_breakdown_gas: {
       name:             'Breakdown by type of day/time: Gas',
@@ -145,6 +147,7 @@ class ChartManager
       y2_axis:          :degreedays
     },
     group_by_week_gas_unlimited_meter_filter_debug: {
+      name:             'By Week: Gas (Meter Breakdown)',
       inherits_from:    :group_by_week_gas_unlimited,
       series_breakdown: :meter
       # filter:            { meter: [ 'Electrical Heating' ] } 
