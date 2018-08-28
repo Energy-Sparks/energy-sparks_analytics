@@ -246,7 +246,6 @@ private
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
-  logger.debug "JJJJJJ"
     (start_date..end_date).each do |date|
       next if !match_filter_by_day(date)
       (0..47).each do |halfhour_index|
