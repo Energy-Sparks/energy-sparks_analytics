@@ -185,7 +185,10 @@ class Temperatures < HalfHourlyData
   def cooling_degree_days_at_time(date, half_hour_index, base_temp)
     temp = temperature(date, half_hour_index)
     # Patch for when temp comes back as nil
-    return 0.0 if temp.nil?
+    if temp.nil?
+      logger.warn "Temp is nil for #{date} and half hour index: #{half_hour_index} and base temp: #{base_temp} returning 0.0"
+      return 0.0
+    end
 
     if temp >= base_temp
       temp - base_temp
