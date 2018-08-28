@@ -365,6 +365,7 @@ private
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.heat_meters, start_date, end_date, halfhour_index))
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.storage_heater_meters, start_date, end_date, halfhour_index))
     end
+    breakdown
   end
 
   def breakdown_one_meter_type(list_of_meters, start_date, end_date, halfhour_index = nil)

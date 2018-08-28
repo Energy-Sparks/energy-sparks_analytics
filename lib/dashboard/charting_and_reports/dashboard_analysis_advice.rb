@@ -327,10 +327,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
           Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
         <% else %>
-          There is very little difference in energy consumption between older and newer schools
-          in terms of energy consumption. The best schools from an energy efficiency perspective
-          are those which manage their energy best,
-          minimising out of hours usage and demonstrating good energy behaviour.
+        Whether you have old or new school buildings, good energy management and best
+        practice in operation can save significant amounts of energy. With good management
+        an old building can use signifcantly less energy than a poorly managed new buildings.
+        Improving controls, upgrading to more efficienet lighting and other measures are
+        applicable to all school buildings.
         <% end %>
       </p>
     }.gsub(/^  /, '')
@@ -549,7 +550,7 @@ class GasHeatingIntradayAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
         <p>
-        This graph shows how the gas consumption of the school varies on school days when the heating is on in the winter:
+        This graph shows how the gas consumption of the school varies on school days when the heating is on in the winter (aggregated across the whole year):
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1553,6 +1554,10 @@ class HotWaterAdvice < DashboardChartAdviceBase
         <li>If the school matched the annual benchmark consumption it would save the equivalent of <%= baths_savings %> baths
         of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
       </ul>
+      <p>
+        The Energy Sparks analysis above is based on looking at data patterns and should be seen as a reasonable
+        estimate for the efficiency of your hot water system.
+      </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')

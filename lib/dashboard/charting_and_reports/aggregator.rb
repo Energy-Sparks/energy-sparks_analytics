@@ -92,7 +92,9 @@ class Aggregator
 
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
-    reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order)
+    reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order) && @chart_config[:series_name_order] == :reverse
+
+    reverse_x_axis if @chart_config.key?(:reverse_xaxis) && @chart_config[:reverse_xaxis] == true
 
     aggregate_by_series
 
@@ -112,6 +114,21 @@ class Aggregator
       end
       @bucketed_data = data
       @bucketed_data_count = count
+    end
+  end
+
+  def reverse_x_axis
+    @x_axis = @x_axis.reverse
+
+    @bucketed_data.each_key do |series_name|
+      @bucketed_data[series_name] = @bucketed_data[series_name].reverse
+      @bucketed_data_count[series_name] = @bucketed_data_count[series_name].reverse
+    end
+
+    unless @y2_axis.nil?
+      @y2_axis.each_key do |series_name|
+        @y2_axis[series_name] = @y2_axis[series_name].reverse
+      end
     end
   end
 
