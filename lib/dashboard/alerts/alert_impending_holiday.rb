@@ -3,6 +3,7 @@ require_relative 'alert_analysis_base.rb'
 
 class AlertImpendingHoliday < AlertAnalysisBase
   WEEKDAYS_HOLIDAY_LOOKAHEAD_PERIOD = 2
+  NO_ACTION_REQUIRED_SUMMARY = 'There is no upcoming holiday, no action needs to be taken'.freeze
 
   def initialize(school)
     super(school)
@@ -21,7 +22,7 @@ class AlertImpendingHoliday < AlertAnalysisBase
       report.rating = 2.0
       report.status = :poor
     else
-      report.summary = 'There is no upcoming holiday, no action needs to be taken'
+      report.summary = NO_ACTION_REQUIRED_SUMMARY
       text = ''
       report.rating = 10.0
       report.status = :good
