@@ -122,6 +122,12 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
+    group_by_week_electricity_unlimited_meter_filter_debug: {
+      name:             'By Week: Electricity (Meter Breakdown)',
+      meter_definition: :allelectricity,
+      inherits_from:    :group_by_week_gas_unlimited_meter_filter_debug,
+      series_breakdown: :meter
+    },
     group_by_week_gas: {
       name:             'By Week: Gas',
       chart1_type:      :column,

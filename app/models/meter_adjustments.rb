@@ -22,6 +22,12 @@ class MeterAdjustments
       meter.add_correction_rule(rescale_amr_data_rule(Date.new(2009, 1, 1), Date.new(2012, 1, 1), 1/31.1))
       logger.info "Applying meter correction rules to #{meter.id}:"
     end
+
+    case meter.id
+    when '75665806', '50974602', '50974703', '50974804', '75665705' # Roundhill
+      meter.add_correction_rule(set_all_missing_data_to_zero(Date.new(2016, 1, 1), Date.new(2018, 8, 12)))
+      logger.info "Applying meter missing data to #{meter.id}:"
+    end
     logger.debug meter.meter_correction_rules.inspect
   end
 

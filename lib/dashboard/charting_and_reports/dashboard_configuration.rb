@@ -160,6 +160,7 @@ class DashboardConfiguration
                                 name: 'Useful Charts for Testing',
                                 charts: %i[
                                   group_by_week_gas_unlimited_meter_filter_debug
+                                  group_by_week_electricity_unlimited_meter_filter_debug
                                   electricity_longterm_trend
                                   gas_longterm_trend
                                 ]
