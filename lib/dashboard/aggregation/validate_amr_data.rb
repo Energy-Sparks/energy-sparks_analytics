@@ -21,12 +21,14 @@ class ValidateAMRData
     @max_search_range_for_corrected_data = 100
     @bad_data = 0
     @data_problems = {}
+    add_meter_correction_rules
+
     unless @meter.meter_correction_rules.nil?
       logger.debug "$" * 300 if meter.meter_correction_rules
       logger.debug "Meter Correction Rules"
       logger.debug @meter.meter_correction_rules.inspect
     end
-    add_meter_correction_rules
+
   end
 
   def add_meter_correction_rules
@@ -207,16 +209,18 @@ class ValidateAMRData
     print_array_of_dates_in_columns(replaced_dates, 8)
   end
 
-  def replace_missing_weekend_data_with_zero
-    logger.debug "Setting missing weekend dates to zero"
+  def replace_missing_data_with_zero(start_date, end_date)
+    logger.debug "Setting missing data between #{start_date.strftime('%a %d %b %Y')} and #{end_date.strftime('%a %d %b %Y')} to zero"
     replaced_dates = []
-    (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if DateTimeHelper.weekend?(date) && (!@amr_data.key?(date) || @amr_data[date].size < 48)
+    start_date = start_date.nil? ? @amr_data.start_date : start_date
+    end_date = end_date.nil? ? @amr_data.end_date : end_date
+    (start_date..end_date).each do |date|
+      if !@amr_data.key?(date)
         replaced_dates.push(date)
         @amr_data.add(date, Array.new(48, 0.0))
       end
     end
-    logger.debug 'Replaced the following weekend dates:'
+    logger.debug 'Replaced the following dates:'
     print_array_of_dates_in_columns(replaced_dates, 8)
   end
 

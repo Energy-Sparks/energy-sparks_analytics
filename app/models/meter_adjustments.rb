@@ -5,7 +5,7 @@ class MeterAdjustments
   extend Logging
 
   def self.meter_adjustment(meter)
-    case meter.id
+    case meter.meter_no.to_s
     when '13685103' # St Marks Orchard Lodge
       meter.add_correction_rule(min_start_date_rule(Date.new(2015, 1, 1)))
       logger.info "Applying meter correction rules to #{meter.id}:"
@@ -23,7 +23,7 @@ class MeterAdjustments
       logger.info "Applying meter correction rules to #{meter.id}:"
     end
 
-    case meter.id
+    case meter.meter_no.to_s
     when '75665806', '50974602', '50974703', '50974804', '75665705' # Roundhill
       meter.add_correction_rule(set_all_missing_data_to_zero(Date.new(2016, 1, 1), Date.new(2018, 8, 12)))
       logger.info "Applying meter missing data to #{meter.id}:"
