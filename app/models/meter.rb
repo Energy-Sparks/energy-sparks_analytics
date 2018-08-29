@@ -5,10 +5,10 @@ class Meter
   # Extra fields - potentially a concern or mix-in
   attr_reader :building, :fuel_type, :floor_area, :number_of_pupils
   attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters, :meter_correction_rules
-  attr_accessor :amr_data 
+  attr_accessor :amr_data
 
   # Energy Sparks activerecord fields:
-  attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at
+  attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
   attr_accessor :id, :name
   # enum meter_type: [:electricity, :gas]
 
@@ -21,6 +21,7 @@ class Meter
     @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
     @fuel_type = type
     @id = identifier
+    @mpan_mprn = identifier.to_i
     @name = name
     @floor_area = floor_area
     @number_of_pupils = number_of_pupils
