@@ -226,7 +226,7 @@ class ValidateAMRData
 
   # quick and dirty implementation TODO(PH,20Jun2018) - could be improved
   def print_array_of_dates_in_columns(dates, number_of_columns, output = STDOUT)
-    return unless Rails.logger.debug?
+    return unless logger.debug?
     count = 0
     dates.each do |date|
       output.print date.strftime('%a %d %b %Y') + ' '
