@@ -2098,7 +2098,7 @@ class SimulatorICTAdvice < SimulatorApplianceAdviceBase
         </p>
       <% end %>
       <% if @chart_type == :electricity_by_day_of_week_simulator_ict %>
-        The next chart shows ICT usage by day of the week:
+        <p>The next chart shows ICT usage by day of the week:</p>
       <% end %>
       <% if @chart_type == :intraday_electricity_simulator_ict %>
         <p>
