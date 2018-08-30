@@ -118,6 +118,7 @@ class SeriesDataManager
       @series_buckets += SeriesNames::HOTWATERSERIESNAMES
     end
     if @breakdown_list.include?(:meter)
+      puts "Meter Breakdown", meter_names.inspect
       @series_buckets += meter_names
     end
     if @breakdown_list.include?(:none)
@@ -356,7 +357,7 @@ private
     meter_names.each do |meter_name|
       breakdown[meter_name] = 0.0
     end
-    unless @meters[0].nil # indication of electricity only
+    unless @meters[0].nil? # indication of electricity only 
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.electricity_meters, start_date, end_date, halfhour_index))
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.solar_pv_meters, start_date, end_date, halfhour_index))
     end
@@ -364,6 +365,7 @@ private
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.heat_meters, start_date, end_date, halfhour_index))
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.storage_heater_meters, start_date, end_date, halfhour_index))
     end
+    breakdown
   end
 
   def breakdown_one_meter_type(list_of_meters, start_date, end_date, halfhour_index = nil)

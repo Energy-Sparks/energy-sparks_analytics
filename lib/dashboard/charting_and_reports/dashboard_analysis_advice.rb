@@ -164,6 +164,14 @@ protected
     end
   end
 
+  def link(url, text_before, click_text, text_after)
+    "#{text_before}<a href=\"#{url}\" target=\"_blank\">#{click_text}</a>#{text_after}" 
+  end
+
+  def sim_link(bookmark, text_before = 'For further information ', click_text = 'click here', text_after = '.')
+    link('https://blog.energysparks.uk/electricity-simulator/' + bookmark, text_before, click_text, text_after)
+  end
+
   def percent(value)
     (value * 100.0).round(0).to_s + '%'
   end
@@ -319,10 +327,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
           Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
         <% else %>
-          There is very little difference in energy consumption between older and newer schools
-          in terms of energy consumption. The best schools from an energy efficiency perspective
-          are those which manage their energy best,
-          minimising out of hours usage and demonstrating good energy behaviour.
+        Whether you have old or new school buildings, good energy management and best
+        practice in operation can save significant amounts of energy. With good management
+        an old building can use signifcantly less energy than a poorly managed new buildings.
+        Improving controls, upgrading to more efficienet lighting and other measures are
+        applicable to all school buildings.
         <% end %>
       </p>
     }.gsub(/^  /, '')
@@ -542,7 +551,7 @@ class GasHeatingIntradayAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
         <p>
-        This graph shows how the gas consumption of the school varies on school days when the heating is on in the winter:
+        This graph shows how the gas consumption of the school varies on school days when the heating is on in the winter (aggregated across the whole year):
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1284,7 +1293,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         The 3 graphs below which are for the coldest weekends of recent years, attempt to demonstrate whether
         </p>
         <ol type="a">
-        <li>Frost protection is configured for your school, and</li>
+        <li>Frost protection is configured for your school and</li>
         <li>whether it is configured correctly and running efficiently</li>
         </ol>
       <% end %>
@@ -1546,6 +1555,10 @@ class HotWaterAdvice < DashboardChartAdviceBase
         <li>If the school matched the annual benchmark consumption it would save the equivalent energy needed to heat  <%= baths_savings %> baths
         of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
       </ul>
+      <p>
+        The Energy Sparks analysis above is based on looking at data patterns and should be seen as a reasonable
+        estimate for the efficiency of your hot water system.
+      </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1579,7 +1592,7 @@ class ElectricitySimulatorBreakdownAdvice < DashboardChartAdviceBase
         Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
         Initially, it does this automatically based on the existing smart meter data, and a knowledge of the consumption
         of appliances at other schools where we have undertaken a physical audit of appliances in the past.
-        As such it is an 'educated guess' at how electricity is consumed in a school, and can be refined by an audit of a school's
+        As such it is an 'educated guess' at how electricity is consumed in a school and can be refined by an audit of a school's
         appliances which could be performed by pupils.
         </p>
         <p>
@@ -1609,6 +1622,7 @@ class ElectricitySimulatorBreakdownAdvice < DashboardChartAdviceBase
         If you are using the simulator to make a decision about an investment in more efficient equipment, you
         should multiply the annual savings by the life of the investment typically 5 to 15 years.
       </p>
+      <p> <%= sim_link('') %> </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1633,7 +1647,7 @@ class ElectricitySimulatorDetailBreakdownAdvice < DashboardChartAdviceBase
           Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
           Initially, it does this automatically based on the existing smart meter data, and a knowledge of the consumption
           of appliances at other schools where we have undertaken a physical audit of appliances in the past.
-          As such it is an 'educated guess' at how electricity is consumed in a school,
+          As such it is an 'educated guess' at how electricity is consumed in a school
           and can be refined by an audit of a school's appliances which could be performed by pupils.
         </p>
         <p>
@@ -1808,7 +1822,7 @@ class SimulatorByWeekSimulator < DashboardChartAdviceBase
       <p>
         The graph above is the simulated smart meter data from your school grouped on a weekly basis over the last year.
         You should compare it with the graph to the right which is calculated actual smart meter data.
-        Ideally, both of these graphs should look very similar; the simulator configuration
+        Ideally, both graphs should look very similar; the simulator configuration
         should be used to make them converge and look the same in terms of (seasonal) usage throughout the year.
         </p>
         <p>
@@ -1869,7 +1883,7 @@ class SimulatorByDayOfWeekSimulator < DashboardChartAdviceBase
       <p>
         The graph above is the simulated smart meter data from your school grouped by day of the week over the last year.
         You should compare it with the graph to the right which is calculated actual smart meter data.
-        Ideally, both of these graphs should look very similar; the simulator configuration
+        Ideally, both graphs should look very similar; the simulator configuration
         should be used to make them converge and look the same in terms of usage on each day of the week.
       </p>
       <p>
@@ -1928,11 +1942,11 @@ class SimulatorByTimeOfDaySimulator < DashboardChartAdviceBase
       <p>
         The graph above is the simulated smart meter data from your school grouped by time of day over the last year.
         You should compare it with the graph to the right which is calculated actual smart meter data.
-        Ideally, both of these graphs should look very similar; the simulator configuration
+        Ideally, both graphs should look very similar; the simulator configuration
         should be used to make them converge and look the same in terms of usage by time of day.
       </p>
       <p>
-        This is quite similar to the charts on the simulator configuration editor pages, but covers usage
+        This is quite similar to the charts on the simulator configuration editor pages but covers usage
         across the whole of the year.
       </p>
       <%= @body_end %>
@@ -2033,6 +2047,7 @@ class SimulatorLightingAdvice < SimulatorApplianceAdviceBase
         lighting, older T8 (1" diameter tubes (the 8 is the number of eighths on an inch)) lighting
         is 40 to 50 lumens/watt, more modern T5 florescent tubes are 90 lumens/watt.
       </p>
+      <p> <%= sim_link('#lighting') %> </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -2057,14 +2072,14 @@ class SimulatorICTAdvice < SimulatorApplianceAdviceBase
         ICT (Servers, Desktops, Laptops, Network hardware) is used throughout most schools and
         is often the largest or the second largest consumer of electricity after lighting.
         Over the last 20 year's school's electricity consumption has increased significantly
-        and most of this increase is from greater use of ICT. In the last 2 or 3 year's
+        and most of this increase is from greater use of ICT. In the last 2 or 3 years
         at most schools this consumption has started do drop as older less efficient ICT
         equipment is replaced with more modern faster more efficient ICT.
         </p>
         <p>
         There are two main ways you can reduce ICT electricity consumption,
         you can ensure desktops and laptops are turned off when not in use by
-        setting a standby policy e.g. go to standby after 15 minutes of inactivitity,
+        setting a standby policy e.g. go to standby after 15 minutes of inactivity,
         and for servers, to replace the servers with more modern more efficient
         ones or by moving your servers to the cloud, both of which can
         pay your capital investment (purchase costs) in as little as a year as
@@ -2105,10 +2120,11 @@ class SimulatorICTAdvice < SimulatorApplianceAdviceBase
       </p>
       <p>
         You can see the impact by going to the simulator ICT configuration and
-        changing wattage of number of servers, desktops or laptops.
+        changing wattage of number of servers, desktops, or laptops.
         What happens if you make some changes - reducing the watts or the
-        number of servers, desktops or laptops? What happens if you increase them?
+        number of servers, desktops, or laptops? What happens if you increase them?
       </p>
+      <p> <%= sim_link('#ict') %> </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -2125,8 +2141,8 @@ class SimulatorElectricalHeatingAdvice < SimulatorApplianceAdviceBase
       <h2>Heating Using Electricity:</h2>
       <p>
       Energy Sparks electricity simulator attempts to calculate how much
-      electricity is used for heating in a school. However, its quite
-      difficult for the simulator to estimate this accurately, and
+      electricity is used for heating in a school. However, it is quite
+      difficult for the simulator to estimate this accurately and
       requires as physical audit of the school to provide accurate values.
       This will involve someone from the school auditing what electrical
       equipment is used for heating in a school in the winter - these
@@ -2144,13 +2160,14 @@ class SimulatorElectricalHeatingAdvice < SimulatorApplianceAdviceBase
       Electrical heating using fan heaters can be very expensive compared with
       gas - perhaps 5 times more expensive. However, this depends if the fan
       heater is just being used to heat a localised area or a whole room.
-      Generally we would advise against using fan heaters in schools if possible
+      Generally, we would advise against using fan heaters in schools if possible
       as each heater might be cost &#163; 2 per day per heater, or cost &#163; 150
       across the course of a winter - probably 10 times more than the fan heater
       cost to buy. The only time we recommend fan heaters is for use in holidays
       if there are very few people in a school and it saves turning on the heating
       for a whole school.
       </p>
+      <p> <%= sim_link('#electricheating') %> </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -2176,12 +2193,12 @@ class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
         For the maximum energy efficiency Energy Sparks generally recommends PIR
         based security lighting, which only comes on when movement is detected as
         it can reduce consumption by more than 90% - it can also be more secure
-        as intruders are often more likely to be detered if lighting suddenly switches
-        on, rather than is on all the time, as neighbours and passers by are more
+        as intruders are often more likely to be deterred if lighting suddenly switches
+        on, rather than is on all the time, as neighbours and passers-by are more
         likely to notice.
         </p>
         <p>
-        In addition switching to LED lighting often has very short paybacks because
+        In addition, switching to LED lighting often has very short paybacks because
         security lighting on a timer is on for about half the hours in a year.
         </p>
       <% end %>
@@ -2197,6 +2214,7 @@ class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
       Do you know how the lighting is controlled at your school? And, what type of
       lighting is it? Is it LED lighting - which is generally the most efficient?
       </p>
+      <p> <%= sim_link('#securitylights') %> </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -2215,11 +2233,11 @@ class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
         <h2>Kitchen:</h2>
         <p>
         Energy Sparks is not very good at automatically determining the kitchen
-        usage patterns from the smart meter data, and so this usage should be best
-        acheived by a physical audit.
+        usage patterns from the smart meter data, and so this usage would be best
+        achieved by a physical audit.
         </p>
         <p>
-        Where cooking takes place on site its important that the kitchen doesn't turn
+        Where cooking takes place on site it is important that the kitchen doesn't turn
         hobs and ovens on too early. They often turn everything on as soon as they arrive
         at the school every day at 8:00am, but don't use the appliances until much later
         perhaps 11:00am, so wasting electricity between 8:00am and 11:00am.
@@ -2243,6 +2261,7 @@ class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
       all their fridges/freezers and turn some of them off. Particularly over the
       summer holidays, there should be no reason why fridges are left on.
       </p>
+      <p> <%= sim_link('#kitchen') %> </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -2273,6 +2292,7 @@ class SimulatorAirConAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_air_conditioning_kwh %>
+        <p> <%= sim_link('#aircon') %> </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -2305,6 +2325,7 @@ class SimulatorFloodLightingAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_flood_lighting_kwh %>
+        <p> <%= sim_link('#floodlighting') %> </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -2322,7 +2343,7 @@ class SimulatorBoilerPumpAdvice < SimulatorApplianceAdviceBase
       <% if @chart_type == :group_by_week_electricity_simulator_boiler_pump %>
         <h2>Boiler Pumps</h2>
         <p>
-        Boiler pumps used for central heating and hot water can be signifcant
+        Boiler pumps used for central heating and hot water can be significant
         consumers of electricity in a school. However, there is little you
         can do to make them more efficient unless the pumps in your school
         are old - more modern pumps have built in controls to optimise
@@ -2340,6 +2361,7 @@ class SimulatorBoilerPumpAdvice < SimulatorApplianceAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_boiler_pump_kwh %>
+        <p> <%= sim_link('#boilerpumps') %> </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -2361,6 +2383,10 @@ class SimulatorSolarAdvice < SimulatorApplianceAdviceBase
         at a school. The simulator represents solar PV as negative energy. It can be fun to play with
         the solar PV configuration to see the impact solar PV might have at your school?
         </p>
+        <p>
+        The graphs below show how much solar PV is consumed onsite, and how much is exported offsite.
+        Generally, unless a school has a large amount of solar PV, exporting of electricity (when the PV
+        is generating more than the school is consuming) only occurs on sunny days when the school is unoccupied.
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -2371,8 +2397,10 @@ class SimulatorSolarAdvice < SimulatorApplianceAdviceBase
       <%= @body_start %>
       <% if @chart_type == :intraday_electricity_simulator_solar_pv_kwh %>
         <p>
-        At what time of year and time of the day do you get the most energy from solat PV panels?
+        At what time of year and time of the day do you get the most energy from solar PV panels?
+        Which month of the year is most solar PV electricity exported to the grid? And, why?
         </p>
+        <p> <%= sim_link('#solarpv') %> </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')

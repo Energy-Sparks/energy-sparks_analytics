@@ -22,19 +22,12 @@ class ElectricitySimulatorConfiguration
       title: 'ICT',
       editable:                 [servers: [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type], desktops: [:number, :power_watts_each, :weekends, :holidays, :type, :standby_watts_each], laptops: [:number, :power_watts_each, :weekends, :holidays, :type, :standby_watts_each]],
       servers: {
-        editable:                 [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_pecent, :type],
+        editable:                 [:number, :power_watts_each, :weekends, :holidays, :air_con_overhead_percent, :type],
         type:                     :server,
         number:                   2.0,
         power_watts_each:         300.0,
         air_con_overhead_percent: 0.2
       },
-      # servers2: { #### Example use only, not required immediately
-      #   editable:                 [:number, :power_watts_each],
-      #   type:                     :server,
-      #   number:                   1.0,
-      #   power_watts_each:         500.0,
-      #   air_con_overhead_pecent:  0.3
-      # },
       desktops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :desktop,
@@ -51,6 +44,7 @@ class ElectricitySimulatorConfiguration
         number:                       20,
         power_watts_each:             30,
         standby_watts_each:           2,
+        usage_percent_by_time_of_day: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         weekends:                     false, # left on standby at weekends
         holidays:                     false # turned off during holidays
       }
@@ -59,7 +53,7 @@ class ElectricitySimulatorConfiguration
       title: 'Security lighting',
       editable:           [:power, :control_type, :fixed_start_time, :fixed_end_time, :power, :ambient_threshold],
       control_type:       :sunrise_sunset,
-      control_type_choices: [:sunrise_sunset, :ambient, :fixed_times, :pir_sensor],
+      control_type_choices: [:sunrise_sunset, :ambient, :fixed_times, :movement_sensor],
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
       sunset_times:       ['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
       fixed_start_time:   '19:15',
@@ -69,7 +63,7 @@ class ElectricitySimulatorConfiguration
     },
     electrical_heating: {
         title: 'Electrical heating',
-        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time, :balancepoint_temperature],
+        editable:                 [:fixed_power, :power_per_degreeday, :start_time, :end_time, :balancepoint_temperature, :weekends, :holidays],
         start_time:               TimeOfDay.new(8, 30),
         end_time:                 TimeOfDay.new(17, 0),
         fixed_power:              4.0,
