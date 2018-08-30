@@ -1590,6 +1590,7 @@ class ElectricitySimulatorBreakdownAdvice < DashboardChartAdviceBase
         <% if @add_extra_markup %>
         <h1>Electricity Simulator Results</h1>
         <% end %>
+        <p>
         The Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
         Initially, it does this automatically based on the existing smart meter data, and a knowledge of the consumption
         of appliances at other schools where we have undertaken a physical audit of appliances in the past.
