@@ -165,7 +165,7 @@ protected
   end
 
   def link(url, text_before, click_text, text_after)
-    "#{text_before}<a href=\"#{url}\" target=\"_blank\">#{click_text}</a>#{text_after}" 
+    "#{text_before}<a href=\"#{url}\" target=\"_blank\">#{click_text}</a>#{text_after}"
   end
 
   def sim_link(bookmark, text_before = 'For further information ', click_text = 'click here', text_after = '.')
@@ -329,8 +329,8 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <% else %>
         Whether you have old or new school buildings, good energy management and best
         practice in operation can save significant amounts of energy. With good management
-        an old building can use signifcantly less energy than a poorly managed new buildings.
-        Improving controls, upgrading to more efficienet lighting and other measures are
+        an old building can use significantly less energy than a poorly managed new building.
+        Improving controls, upgrading to more efficient lighting and other measures are
         applicable to all school buildings.
         <% end %>
       </p>
