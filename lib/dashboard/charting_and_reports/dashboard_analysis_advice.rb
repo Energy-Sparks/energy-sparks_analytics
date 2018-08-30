@@ -432,6 +432,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
         <p>
+          This chart shows when you have used electricity over the past year.
           <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
@@ -1030,11 +1031,11 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
       <p>
-      This graph compares the average power consumption
+      This graph compares the average electricity consumption
       at the school during the last 2 years <%= @period %>.
       <% if type == :school_days %>
-      It shows the peak power usage at the school (normally during
-        the middle of the day) and the overnight power consumption.
+      It shows the peak electricity usage at the school (normally during
+        the middle of the day) and the overnight electricity consumption.
       <% end %>
       </p>
       <%= @body_end %>
@@ -1194,7 +1195,7 @@ class ElectricityShortTermIntradayAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
       <p>
-      The graph below shows how the consumption varies
+      The graph below shows how the electricity consumption varies
       during the day over <%= @period %>.
       </p>
       <p>
@@ -1540,9 +1541,9 @@ class HotWaterAdvice < DashboardChartAdviceBase
         <li>An average weekend day consumption of <%= YAxisScaling.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
         <li>An average holiday day consumption of <%= YAxisScaling.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
         <li>Likely overall efficiency: <%= percent(efficiency * 0.6) %></li>
-        <li>Estimate of annual cost for hot water: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
+        <li>Estimate of annual cost for hot water heating: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
         <li>Benchmark annual usage for school of same size <%= YAxisScaling.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
-        <li>If the school matched the annual benchmark consumption it would save the equivalent of <%= baths_savings %> baths
+        <li>If the school matched the annual benchmark consumption it would save the equivalent energy needed to heat  <%= baths_savings %> baths
         of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
       </ul>
       <% end %>
