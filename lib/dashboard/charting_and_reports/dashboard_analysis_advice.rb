@@ -1619,8 +1619,8 @@ class ElectricitySimulatorBreakdownAdvice < DashboardChartAdviceBase
       <%= @body_start %>
       <p>
         <%= table_info %>
-      <p>
       </p>
+      <p>
         If you are using the simulator to make a decision about an investment in more efficient equipment, you
         should multiply the annual savings by the life of the investment typically 5 to 15 years.
       </p>
