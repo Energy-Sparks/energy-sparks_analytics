@@ -441,7 +441,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
         <p>
-          This chart shows when you have used electricity over the past year.
+          This chart shows when you have used <% @fuel_type_str %> over the past year.
           <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
