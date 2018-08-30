@@ -595,6 +595,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
       <%= @body_start %>
         <p>
           The graph below shows how your <%= @fuel_type_str %> consumption varies throughout the year.
+          Each bar represents a whole week and the split between holiday, weekend and school day open and closed consumption for that week.
           It highlights how <%= @fuel_type_str %> consumption generally increases in the winter and is lower in the summer.
         </p>
 
@@ -1586,10 +1587,10 @@ class ElectricitySimulatorBreakdownAdvice < DashboardChartAdviceBase
 
     header_template = %{
       <%= @body_start %>
+        <% if @add_extra_markup %>
         <h1>Electricity Simulator Results</h1>
-        <p>
-        Electricity Simulator Results
-        Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
+        <% end %>
+        The Energy Sparks Electricity Simulator breaks down the electricity use within a school to different appliance types.
         Initially, it does this automatically based on the existing smart meter data, and a knowledge of the consumption
         of appliances at other schools where we have undertaken a physical audit of appliances in the past.
         As such it is an 'educated guess' at how electricity is consumed in a school and can be refined by an audit of a school's
@@ -1995,7 +1996,9 @@ class SimulatorLightingAdvice < SimulatorApplianceAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :group_by_week_electricity_simulator_lighting %>
-        <h2>Simulator Lighting Charts:</h2>
+        <% if @add_extra_markup %>
+          <h2>Simulator Lighting Charts:</h2>
+        <% end %>
         <p>
         The 3 charts below show the electricity consumption predicted by the simulator for internal lighting in the school.
         Most of this lighting is likely to be in classrooms.
@@ -2064,7 +2067,9 @@ class SimulatorICTAdvice < SimulatorApplianceAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :group_by_week_electricity_simulator_ict %>
-        <h2>Simulator ICT (Servers, Desktops, Laptops) Charts:</h2>
+        <% if @add_extra_markup %>
+          <h2>Simulator ICT (Servers, Desktops, Laptops) Charts:</h2>
+        <% end %>
         <p>
         The 3 charts below show the electricity consumption predicted by the simulator for ICT in the school.
         </p>
@@ -2138,7 +2143,9 @@ class SimulatorElectricalHeatingAdvice < SimulatorApplianceAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      <h2>Heating Using Electricity:</h2>
+      <% if @add_extra_markup %>
+        <h2>Heating Using Electricity:</h2>
+      <% end %>
       <p>
       Energy Sparks electricity simulator attempts to calculate how much
       electricity is used for heating in a school. However, it is quite
@@ -2182,7 +2189,9 @@ class SimulatorSecurityLightingAdvice < SimulatorApplianceAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :group_by_week_electricity_simulator_security_lighting %>
-        <h2>Security Lighting:</h2>
+        <% if @add_extra_markup %>
+          <h2>Security Lighting:</h2>
+        <% end %>
         <p>
         Security Lighting (the lights around the perimeter of a school) which
         come on at night can be quite expensive to maintain. Their energy consumption
@@ -2230,7 +2239,9 @@ class SimulatorKitchenAdvice < SimulatorApplianceAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :group_by_week_electricity_kitchen %>
-        <h2>Kitchen:</h2>
+        <% if @add_extra_markup %>
+          <h2>Kitchen:</h2>
+        <% end %>
         <p>
         Energy Sparks is not very good at automatically determining the kitchen
         usage patterns from the smart meter data, and so this usage would be best
@@ -2277,7 +2288,9 @@ class SimulatorAirConAdvice < SimulatorApplianceAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :group_by_week_electricity_air_conditioning %>
-        <h2>Air Conditioning:</h2>
+        <% if @add_extra_markup %>
+          <h2>Air Conditioning:</h2>
+        <% end %>
         <p>
         If you have air conditioning in your school, please contact Energy Sparks
         for advice on how to configure the simulator correctly as it needs
@@ -2308,7 +2321,9 @@ class SimulatorFloodLightingAdvice < SimulatorApplianceAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :group_by_week_electricity_flood_lighting %>
-        <h2>Flood Lighting</h2>
+        <% if @add_extra_markup %>
+          <h2>Flood Lighting</h2>
+        <% end %>
         <p>
         Flood lighting can be very expensive to run as the lights consume significant
         amounts of power, often more than the rest of the appliances in a school put
@@ -2341,7 +2356,9 @@ class SimulatorBoilerPumpAdvice < SimulatorApplianceAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :group_by_week_electricity_simulator_boiler_pump %>
-        <h2>Boiler Pumps</h2>
+        <% if @add_extra_markup %>
+          <h2>Boiler Pumps</h2>
+        <% end %>
         <p>
         Boiler pumps used for central heating and hot water can be significant
         consumers of electricity in a school. However, there is little you
@@ -2377,7 +2394,9 @@ class SimulatorSolarAdvice < SimulatorApplianceAdviceBase
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :group_by_week_electricity_simulator_solar_pv %>
-        <h2>Solar PV</h2>
+        <% if @add_extra_markup %>
+          <h2>Solar PV</h2>
+        <% end %>
         <p>
         By installing solar PV (photovoltaics) it is possible to reduce the mains electricity consumption
         at a school. The simulator represents solar PV as negative energy. It can be fun to play with
