@@ -441,13 +441,12 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
         <p>
-          This chart shows when you have used <% @fuel_type_str %> over the past year.
-          <%= percent(percent_value) %> of your <% @fuel_type_str %> usage is out of hours:
+          This chart shows when you have used <%= @fuel_type_str %> over the past year.
+          <%= percent(percent_value) %> of your <%= @fuel_type_str %> usage is out of hours:
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
           <% if percent_value > EXEMPLAR_PERCENT %>
-            The best schools only
-            consume <%= percent(EXEMPLAR_PERCENT) %> out of hours.
+            The best schools only consume <%= percent(EXEMPLAR_PERCENT) %> out of hours.
             Reducing your school's out of hours usage to <%= percent(EXEMPLAR_PERCENT) %>
             would save &pound;<%= saving_£ %> per year.
           <% else %>
