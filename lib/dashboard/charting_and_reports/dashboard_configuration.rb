@@ -164,7 +164,14 @@ class DashboardConfiguration
                                   electricity_longterm_trend
                                   gas_longterm_trend
                                 ]
-                              }
+                              },
+        heating_model_fitting:                 {     
+          name: 'Heating Model Fitting',
+          charts: %i[
+            thermostatic
+            cusum
+          ]
+        }
 }.freeze
 
   DASHBOARD_FUEL_TYPES = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools

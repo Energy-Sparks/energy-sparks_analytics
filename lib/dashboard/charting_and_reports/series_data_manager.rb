@@ -147,9 +147,13 @@ class SeriesDataManager
       get_data_private(time_period)
     rescue StandardError => ee
       _timetype, dates, _halfhour_index = time_period
-      start_date_str = dates[0].strftime('%d %m %Y')
-      end_date_str = dates[1].strftime('%d %m %Y')
-      logger.error "Error: getting data for time period #{start_date_str} to #{end_date_str}"
+      if !dates.is_a?(Array) || dates[0].nil? || dates[1].nil?
+        logger.error "Error: getting data for time period #{time_period}"
+      else
+        start_date_str = dates[0].strftime('%d %m %Y')
+        end_date_str = dates[1].strftime('%d %m %Y')
+        logger.error "Error: getting data for time period #{start_date_str} to #{end_date_str}"
+      end
       logger.error ee.message
       logger.error ee.backtrace
     end
@@ -177,11 +181,11 @@ class SeriesDataManager
     names
   end
 
+  # TODO(PH,16Sep2018) - this function is called repetatively - list should be cached
   def meter_names_from_list(list_of_meters)
     list = []
     list_of_meters.each do |meter|
       list.push(meter.display_name)
-      logger.debug 'Adding meter #{meter.display_name}'
     end
     list
   end
@@ -372,13 +376,18 @@ private
     breakdown = {}
     unless list_of_meters.nil?
       list_of_meters.each do |meter|
-        if halfhour_index.nil?
-          breakdown[meter.display_name] = meter.amr_data.kwh_date_range(start_date, end_date)
-        else
-          breakdown[meter.display_name] = 0.0
-          (start_date..end_date).each do |date|
-            breakdown[meter.display_name] = meter.amr_data.kwh(date, halfhour_index)
+        begin
+          if halfhour_index.nil?
+            breakdown[meter.display_name] = meter.amr_data.kwh_date_range(start_date, end_date)
+          else
+            breakdown[meter.display_name] = 0.0
+            (start_date..end_date).each do |date|
+              breakdown[meter.display_name] = meter.amr_data.kwh(date, halfhour_index)
+            end
           end
+        rescue Exception => e
+          logger.error "Failure getting meter breakdown data for #{meter.display_name} between #{start_date} and #{end_date}"
+          logger.error e.message
         end
       end
     end

@@ -32,9 +32,17 @@ class Meter
     logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
   end
 
+  def set_meter_no(meter_no)
+    @meter_no = meter_no
+  end
+
   def add_correction_rule(rule)
     throw EnergySparksUnexpectedStateException.new('Unexpected nil correction') if rule.nil?
     @meter_correction_rules.push(rule)
+  end
+
+  def insert_correction_rules_first(rules)
+    @meter_correction_rules = rules + @meter_correction_rules
   end
 
   # Matches ES AR version

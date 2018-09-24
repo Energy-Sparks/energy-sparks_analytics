@@ -6,8 +6,31 @@ class AMRData < HalfHourlyData
     super(type)
   end
 
+  def add(date, one_days_data)
+    throw EnergySparksUnexpectedStateException.new('AMR Data must not be nil') if one_days_data.nil?
+    throw EnergySparksUnexpectedStateException.new("AMR Data now held as OneDayAMRReading not #{one_days_data.class.name}") unless one_days_data.is_a?(OneDayAMRReading)
+    throw EnergySparksUnexpectedStateException.new("AMR Data date mismatch not #{date} v. #{one_days_data.date}") if date != one_days_data.date
+    set_min_max_date(date)
+
+    self[date] = one_days_data
+
+    @cache_days_totals.delete(date)
+  end
+
+  def data(date, halfhour_index)
+    thrown EnergySparksUnexpectedStateException.new('Deprecated call to amr_data.data()')
+  end
+
+  def days_kwh_x48(date)
+    self[date].kwh_data_x48
+  end
+
   def kwh(date, halfhour_index)
-    data(date, halfhour_index)
+    self[date].kwh_halfhour(halfhour_index)
+  end
+
+  def one_day_kwh(date)
+    self[date].one_day_kwh
   end
 
   def baseload_kw(date)
@@ -54,7 +77,7 @@ class AMRData < HalfHourlyData
   # alternative heuristic for baseload calculation (for storage heaters)
   # find the average of the bottom 8 samples (4 hours) in a day
   def statistical_baseload_kw(date)
-    days_data = self[date] # 48 x 1/2 hour kWh
+    days_data = days_kwh_x48(date) # 48 x 1/2 hour kWh
     sorted_kwh = days_data.clone.sort
     lowest_sorted_kwh = sorted_kwh[0..7]
     average_kwh = lowest_sorted_kwh.inject { |sum, el| sum + el }.to_f / lowest_sorted_kwh.size
@@ -62,7 +85,7 @@ class AMRData < HalfHourlyData
   end
 
   def statistical_peak_kw(date)
-    days_data = self[date] # 48 x 1/2 hour kWh
+    days_data = days_kwh_x48(date) # 48 x 1/2 hour kWh
     sorted_kwh = days_data.clone.sort
     highest_sorted_kwh = sorted_kwh[45..47]
     average_kwh = highest_sorted_kwh.inject { |sum, el| sum + el }.to_f / highest_sorted_kwh.size
@@ -79,10 +102,6 @@ class AMRData < HalfHourlyData
       total += baseload_kw(date)
     end
     total
-  end
-
-  def one_day_kwh(date)
-    one_day_total(date)
   end
 
   def kwh_date_range(date1, date2)
@@ -107,5 +126,46 @@ class AMRData < HalfHourlyData
       data.add(date, Array.new(48, 0.0))
     end
     data
+  end
+
+  def summarise_bad_data
+    date, one_days_data = self.first
+    logger.info '=' * 80
+    logger.info "Bad data for meter #{one_days_data.meter_id}"
+    logger.info "Valid data between #{start_date} and #{end_date}"
+    key, _value = self.first
+    if key < start_date
+      logger.info "Ignored data between #{key} and #{start_date} - because of long gaps"
+    end
+    bad_data_stats = bad_data_count
+    percent_bad = 100.0
+    if bad_data_count.key?('ORIG')
+      percent_bad = (100.0 * (length - bad_data_count['ORIG'].length)/length).round(1)
+    end
+    logger.info "bad data summary: #{percent_bad}% substituted"
+    bad_data_count.each do |type, dates|
+      type_description = sprintf('%-60.60s', OneDayAMRReading::AMR_TYPES[type][:name])
+      logger.info " #{type}: #{type_description} * #{dates.length}"
+      if type != 'ORIG'
+        cpdp = CompactDatePrint.new(dates)
+        cpdp.log
+      end
+    end
+  end
+
+  private
+ 
+  # go through amr_data creating 'histogram' of type of amr_data by type (original data v. substituted)
+  # returns {type} = [list of dates of that type]
+  def bad_data_count
+    bad_data_type_count = {}
+    (start_date..end_date).each do |date|
+      one_days_data = self[date]
+      unless bad_data_type_count.key?(one_days_data.type)
+        bad_data_type_count[one_days_data.type] = []
+      end
+      bad_data_type_count[one_days_data.type].push(date)
+    end
+    bad_data_type_count
   end
 end

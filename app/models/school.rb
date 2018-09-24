@@ -11,7 +11,8 @@ class School
   attr_reader :name, :address, :floor_area, :number_of_pupils
   attr_reader :calendar_id, :competition_role, :created_at, :electricity_dataset, :enrolled
   attr_reader :gas_dataset, :id, :level, :postcode, :sash_id, :school_type, :slug, :update_at
-  attr_reader :urn, :website
+  attr_reader :website
+  attr_accessor :urn
 
   def initialize(name, address = nil, floor_area = nil, number_of_pupils = nil, school_type = nil)
     @school_type = school_type

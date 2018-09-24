@@ -28,13 +28,8 @@ class Aggregator
     YAxisScaling.unit_description(@chart_config[:yaxis_units], @chart_config[:yaxis_scaling], value)
   end
 
-  def aggregate
-    # the normal case is a single time period, but for comparison purposes
-    # multiple time periods are supported, this is achieved by iterating
-    # 1 time period at a time, aggregating, then updating the series names
-    periods = time_periods
-    bucketed_period_data = []
-
+  # parked until implemented
+  def dummy_load_schools
     if @chart_config.key?(:schools) # TODO(PH,3Jun2018) - complete implementation, issue aligning xbuckets
       logger.debug 'got more than one school'
       @chart_config[:schools].each do |school_name|
@@ -45,6 +40,10 @@ class Aggregator
         logger.debug ">" * 200
       end
     end
+  end
+
+  def aggregate_multiple_charts(periods)
+    bucketed_period_data = []
 
     # iterate through the time periods aggregating
     periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
@@ -59,27 +58,33 @@ class Aggregator
         logger.error e
       end
     end
+    bucketed_period_data
+  end
 
-    # take the resulting buckets, 1 for each time period
-
-    # and update the series names if there is more than one period
-    # or if more than one was asked for but not enough data
-    # (EnergySparksMissingPeriodForSpecifiedPeriodChart) for user diagnostics
-    # so the user can see the remaining periods and the dates are not removed
-    if bucketed_period_data.length > 1 || periods.length > 1
-      @bucketed_data = {}
-      @bucketed_data_count = {}
-      bucketed_period_data.each do |period_data|
-        bucketed_data, bucketed_data_count, time_description = period_data
-        bucketed_data.each do |series_name, x_data|
-          new_series_name = series_name.to_s + ':' + time_description
-          @bucketed_data[new_series_name] = x_data
-        end
-        bucketed_data_count.each do |series_name, x_data|
-          new_series_name = series_name.to_s + ':' + time_description
-          @bucketed_data_count[new_series_name] = x_data
-        end
+  def merge_multiple_charts(bucketed_period_data)
+    @bucketed_data = {}
+    @bucketed_data_count = {}
+    bucketed_period_data.each do |period_data|
+      bucketed_data, bucketed_data_count, time_description = period_data
+      bucketed_data.each do |series_name, x_data|
+        new_series_name = series_name.to_s + ':' + time_description
+        @bucketed_data[new_series_name] = x_data
       end
+      bucketed_data_count.each do |series_name, x_data|
+        new_series_name = series_name.to_s + ':' + time_description
+        @bucketed_data_count[new_series_name] = x_data
+      end
+    end
+    [@bucketed_data, @bucketed_data_count]
+  end
+
+  def aggregate
+    periods = time_periods
+
+    bucketed_period_data = aggregate_multiple_charts(periods)
+
+    if bucketed_period_data.length > 1 || periods.length > 1
+      @bucketed_data, @bucketed_data_count = merge_multiple_charts(bucketed_period_data)
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
@@ -259,7 +264,6 @@ private
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
-  logger.debug "JJJJJJ"
     (start_date..end_date).each do |date|
       next if !match_filter_by_day(date)
       (0..47).each do |halfhour_index|

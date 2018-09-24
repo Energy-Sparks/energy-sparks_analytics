@@ -22,7 +22,9 @@ class ReportConfigSupport
       'Saltford C of E Primary School'    => :electric_and_gas,
       'St Marks Secondary'                => :electric_and_gas,
       'St Johns Primary'                  => :electric_and_gas,
+      'St Saviours Junior'                => :electric_and_gas,
       'Stanton Drew Primary School'       => :electric_only,
+      'Trinity First School'              => :electric_and_gas,
       'Twerton Infant School'             => :electric_and_gas,
       'Westfield Primary'                 => :electric_and_gas
     }
@@ -63,6 +65,12 @@ class ReportConfigSupport
     len_before = ((cols - title.length) / 2).floor
     len_after = cols - title.length - len_before
     '=' * len_before + title + '=' * len_after
+  end
+
+  def setup_school(school, school_name)
+    @school_name = school_name
+    @school = school
+    @chart_manager = ChartManager.new(@school)
   end
 
   def load_school(school_name, suppress_debug = false)

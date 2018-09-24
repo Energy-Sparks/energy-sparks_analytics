@@ -210,7 +210,7 @@ class Holidays
       nil
     else
       acy_year = AcademicYear.new(summer_hol_before.end_date + 1, summer_hol_after.end_date, @holidays)
-      logger.debug "Found academic year for date #{date} - year from #{acy_year.start_date} #{acy_year.end_date}"
+      # logger.debug "Found academic year for date #{date} - year from #{acy_year.start_date} #{acy_year.end_date}"
       acy_year
     end
   end
@@ -231,8 +231,6 @@ class Holidays
     hol = find_holiday_in_academic_year_private(academic_year, holiday_type)
     if hol.nil?
       logger.debug "Unable to find holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date}"
-    else
-      logger.debug "Found holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date} from #{hol.start_date} to #{hol.end_date}"
     end
     hol
   end

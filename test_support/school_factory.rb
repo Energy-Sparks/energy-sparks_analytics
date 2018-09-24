@@ -24,16 +24,20 @@ class SchoolFactory
     @backhacked_school_definitions = nil
   end
 
+  def load_school(identifier, validate_and_aggregate = true)
+    load_school_with_control(identifier, validate_and_aggregate, validate_and_aggregate)
+  end
+
   # creates a 'school' by loading data from a source of data (socrata, excel etc.)
   # defined by environment variable ENV_SCHOOL_DATA_SOURCE
-  def load_school(identifier, validate_and_aggregate = true)
+  def load_school_with_control(identifier, validate = true, aggregate = true)
     if identifier.is_a?(String) # reference by name
       source = ENV[ENV_SCHOOL_DATA_SOURCE]
 
       if @school_cache[source].key?(identifier)
         @school_cache[source][identifier]
       elsif source == BATH_HACKED_SCHOOL_DATA
-        @school_cache[source][identifier] = load_data_from_back_hacked(identifier, validate_and_aggregate)
+        @school_cache[source][identifier] = load_data_from_back_hacked(identifier, validate, aggregate)
       elsif source == EXCEL_SCHOOL_DATA
         @school_cache[source][identifier] = load_data_from_excel(identifier, validate_and_aggregate)
       else
@@ -46,18 +50,50 @@ class SchoolFactory
     end
   end
 
-  def load_data_from_back_hacked(school_name, validate_and_aggregate)
+ 
+  def load_data_from_back_hacked(school_name, validate, aggregate)
     @backhacked_school_definitions = LoadSchools.new if @backhacked_school_definitions.nil?
     min_date = Date.new(2008, 9, 1)
     school_as_meter_collection = @backhacked_school_definitions.load_school(school_name, min_date, true)
 
-    if validate_and_aggregate
+    if validate && aggregate
       # Get the school data, validate and aggregate the meter data
       AggregateDataService.new(school_as_meter_collection).validate_and_aggregate_meter_data
+    elsif validate
+      AggregateDataService.new(school_as_meter_collection).validate_meter_data
+      all_meters = school_as_meter_collection.heat_meters
+      all_meters = all_meters + school_as_meter_collection.electricity_meters
+      amr_data = []
+      all_meters.each do |meter|
+        amr_data += meter.amr_data.values
+      end
+      puts "Got #{amr_data.length} items of meter data"
+
+      yml_filename = yml_filename(school_name)
+      File.write(yaml_cached_filename, amr_data.to_yaml)
     else
       # This is a school wrapped as a meter collection, without aggregated data
       school_as_meter_collection
     end
+  end
+
+  def load_and_compare(school_name)
+    existing_meter_readings = nil
+
+    yaml_cached_filename = yml_filename(school_name)
+
+    if File.exist?(yaml_cached_filename)
+      puts "Loading existing data from #{yaml_cached_filename}"
+      existing_meter_readings = YAML::load_file(yaml_cached_filename)
+      puts "Got #{existing_meter_readings.length}"
+    end
+  end
+
+  def yml_filename(school_name)
+    directory_name = ENV['CACHED_METER_READINGS_DIRECTORY']
+    Dir.mkdir(directory_name) unless File.exist?(directory_name)
+
+    directory_name + school_name + ' - energy sparks amr data analytics db.yml'
   end
 
   def load_data_from_excel(school_name, validate_and_aggregate)

@@ -7,6 +7,9 @@ end
 class EnergySparksUnexpectedStateException < StandardError
 end
 
+class EnergySparksBadAMRDataTypeException < StandardError
+end
+
 class EnergySparksMissingPeriodForSpecifiedPeriodChart < StandardError
 end
 

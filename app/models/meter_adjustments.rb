@@ -7,8 +7,8 @@ class MeterAdjustments
   def self.meter_adjustment(meter)
     case meter.mpan_mprn
     when 13685103 # St Marks Orchard Lodge
-      meter.add_correction_rule(min_start_date_rule(Date.new(2015, 1, 1)))
-      logger.info "Applying meter correction rules to #{meter.id}:"
+      # meter.add_correction_rule(min_start_date_rule(Date.new(2015, 1, 1)))
+      # logger.info "Applying meter correction rules to #{meter.id}:"
     when 9206222810 # St Johns Primary
       meter.add_correction_rule(min_start_date_rule(Date.new(2017, 2, 21)))
       logger.info "Applying meter correction rules to #{meter.id}:"
@@ -18,9 +18,9 @@ class MeterAdjustments
     when 13678903 # Paulton Junior Gas
       meter.add_correction_rule(min_start_date_rule(Date.new(2014, 9, 30)))
       logger.info "Applying meter correction rules to #{meter.id}:"
-    when 75665806 #  '50974602', '50974703', '50974804', '75665705' # Roundhill
-      meter.add_correction_rule(rescale_amr_data_rule(Date.new(2009, 1, 1), Date.new(2012, 1, 1), 1/31.1))
-      logger.info "Applying meter correction rules to #{meter.id}:"
+    # when 75665806 #  '50974602', '50974703', '50974804', '75665705' # Roundhill
+      # meter.add_correction_rule(rescale_amr_data_rule(Date.new(2009, 1, 1), Date.new(2012, 1, 1), 1/31.1))
+      # logger.info "Applying meter correction rules to #{meter.id}:"
     end
 
     case meter.mpan_mprn
@@ -49,6 +49,16 @@ class MeterAdjustments
     correction = {
       auto_insert_missing_readings: {
         type:       :date_range,
+        start_date: start_date,
+        end_date:   end_date
+      }
+    }
+    correction
+  end
+
+  def self.set_bad_data_to_zero(start_date = nil, end_date = nil)
+    correction = {
+      set_bad_data_to_zero: {
         start_date: start_date,
         end_date:   end_date
       }

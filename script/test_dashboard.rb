@@ -11,7 +11,7 @@ end
 
 reports = ReportConfigSupport.new
 
-reports.load_school('Roundhill School', true)
+reports.load_school('Castle Primary School', true)
 
 # testing examples
 #
@@ -23,9 +23,9 @@ reports.load_school('Roundhill School', true)
 # comment excel/html out if calling reports.do_all_schools or reports.do_all_standard_pages_for_school
 # as done automatically:
 
-# reports.do_all_standard_pages_for_school
-
-reports.do_one_page(:test)
+reports.do_all_standard_pages_for_school
+# reports.do_one_page(:main_dashboard_electric_and_gas)
+# reports.do_one_page(:test)
 
 reports.save_excel_and_html
 

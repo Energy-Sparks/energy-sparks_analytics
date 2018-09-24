@@ -36,6 +36,7 @@ class MeterCollection
     @storage_heater_meters = []
     @heating_models = {}
     @school = school
+    @meter_identifier_lookup = {} # [mpan or mprn] => meter
 
 
     @cached_open_time = DateTime.new(0, 1, 1, 7, 0, 0) # for speed
@@ -55,16 +56,49 @@ class MeterCollection
     end
   end
 
+  def meter?(identifier)
+    return @meter_identifier_lookup[identifier] if @meter_identifier_lookup.key?(identifier)
+
+    all_meters.each do |meter|
+      if meter.id == identifier
+        @meter_identifier_lookup[identifier] = meter
+        return meter
+      end
+    end
+    @meter_identifier_lookup[identifier] = nil
+  end
+
+  def all_meters
+    meter_groups = [
+      @heat_meters, 
+      @electricity_meters, 
+      @solar_pv_meters, 
+      @storage_heater_meters,
+      @aggregated_heat_meters,
+      @aggregated_electricity_meters
+    ]
+
+    meter_list = []
+    meter_groups.each do |meter_group|
+      unless meter_group.nil?
+        meter_list += meter_group.is_a?(Meter) ? [meter_group] : meter_group
+      end
+    end
+    meter_list
+  end
+
   def school_type
     @school.nil? ? nil : @school.school_type
   end
 
   def add_heat_meter(meter)
     @heat_meters.push(meter)
+    @meter_identifier_lookup[meter.id] = meter
   end
 
   def add_electricity_meter(meter)
     @electricity_meters.push(meter)
+    @meter_identifier_lookup[meter.id] = meter
   end
 
   # JAMES: TODO(JJ,3Jun2018): I gather you may have done something on this when working on holidays?

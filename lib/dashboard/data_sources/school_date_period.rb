@@ -44,6 +44,19 @@ class SchoolDatePeriod
     nil
   end
 
+  def self.info_compact(periods, columns = 3, with_count = true, date_format = '%a %d%b%y')
+    periods.each_slice(columns).to_a.each do |group_period|
+      line = '  '
+      group_period.each do |period|
+        d1 = period.start_date.strftime(date_format)
+        d2 = period.end_date.strftime(date_format)
+        length = period.end_date - period.start_date + 1
+        line += " #{d1} to #{d2}" + (with_count ? sprintf(' * %3d', length) : '')
+      end
+      Logging.logger.info line
+    end
+  end
+
   def to_a
     [type, title, start_date, end_date]
   end
