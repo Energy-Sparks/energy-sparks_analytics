@@ -51,6 +51,9 @@ class SeriesNames
 
   DEGREEDAYS      = 'Degree Days'.freeze
   TEMPERATURE     = 'Temperature'.freeze
+  IRRADIANCE      = 'Solar Irradiance'.freeze
+  GRIDCARBON      = 'Grid Carbon Intensity'.freeze
+
   PREDICTEDHEAT   = 'Predicted Heat'.freeze
   CUSUM           = 'CUSUM'.freeze
   BASELOAD        = 'BASELOAD'.freeze
@@ -60,6 +63,29 @@ class SeriesNames
   HOTWATERSERIESNAMES = [WASTEDHOTWATERUSAGE.freeze, USEFULHOTWATERUSAGE.freeze].freeze
 
   NONE            = 'Energy'.freeze
+
+  def self.y2_axis_key(axis_sym, throw_exception = true)
+    case axis_sym
+    when :degreedays
+      DEGREEDAYS
+    when :temperature
+      TEMPERATURE
+    when :irradiance
+      IRRADIANCE
+    when :gridcarbon
+      GRIDCARBON
+    else
+      if throw_exception
+        if axis_sym.nil?
+          throw EnergySparksBadChartSpecification.new('nil y2 axis specification')
+        else
+          throw EnergySparksBadChartSpecification.new("unknown y2 axis specification #{axis_sym}")
+        end
+      else
+        nil
+      end
+    end
+  end
 
   # plus dynamically generated names, for example meter names
 end
@@ -135,6 +161,12 @@ class SeriesDataManager
     end
     if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
       @series_buckets.push(SeriesNames::TEMPERATURE)
+    end
+    if @y2_axis_list.include?(:irradiance) || @breakdown_list.include?(:irradiance)
+      @series_buckets.push(SeriesNames::IRRADIANCE)
+    end
+    if @y2_axis_list.include?(:gridcarbon) || @breakdown_list.include?(:gridcarbon)
+      @series_buckets.push(SeriesNames::GRIDCARBON)
     end
     if @data_types.include?(:predictedheat) # not sure this is the best final resting place for this test?
       @series_buckets.push(SeriesNames::PREDICTEDHEAT)
@@ -219,6 +251,12 @@ class SeriesDataManager
       if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
         breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.temperature(date, halfhour_index)
       end
+      if @y2_axis_list.include?(:irradiance) || @breakdown_list.include?(:irradiance)
+        breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.solar_irradiance(date, halfhour_index)
+      end
+      if @y2_axis_list.include?(:gridcarbon) || @breakdown_list.include?(:gridcarbon)
+        breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.grid_carbon_intensity(date, halfhour_index)
+      end
     when :daterange
       if @breakdown_list.include?(:daytype)
         breakdown = daytype_breakdown([dates[0], dates[1]], meter)
@@ -266,6 +304,12 @@ class SeriesDataManager
       end
       if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
         breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(dates[0], dates[1])
+      end
+      if @y2_axis_list.include?(:irradiance) || @breakdown_list.include?(:irradiance)
+        breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.average_in_date_range(dates[0], dates[1])
+      end
+      if @y2_axis_list.include?(:gridcarbon) || @breakdown_list.include?(:gridcarbon)
+        breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.average_in_date_range(dates[0], dates[1])
       end
       if @data_types.include?(:predictedheat)
         calculate_model if @heating_model.nil?

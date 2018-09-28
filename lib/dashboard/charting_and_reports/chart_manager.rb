@@ -724,6 +724,16 @@ class ChartManager
       x_axis:           :day,
       meter_definition: :allheat,
       yaxis_units:      :kwh
+    },
+    irradiance_test:  {
+      name:             'Solar Irradiance Y2 axis check',
+      inherits_from:    :optimum_start,
+      y2_axis:          :irradiance
+    },
+    gridcarbon_test:  {
+      name:             'Grid Carbon Y2 axis check',
+      inherits_from:    :optimum_start,
+      y2_axis:          :gridcarbon
     }
   }.freeze
 

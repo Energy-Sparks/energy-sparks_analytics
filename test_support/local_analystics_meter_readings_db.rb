@@ -47,7 +47,7 @@ class LocalAnalyticsMeterReadingDB
         f.write Marshal.dump(meter_readings)
       end
     else
-      logger.info("No local marshal or yml file for #{school_name} to load metere readings from")
+      logger.info("No local marshal or yml file for #{school_name} to load meter readings from")
       return
     end
 

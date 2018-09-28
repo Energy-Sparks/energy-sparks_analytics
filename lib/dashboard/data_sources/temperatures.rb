@@ -18,11 +18,11 @@ class Temperatures < HalfHourlyData
   end
 
   def average_temperature(date)
-    avg_temp = 0.0
-    (0..47).each do |i|
-      avg_temp += data(date, i) / 48
-    end
-    avg_temp
+    average(date)
+  end
+
+  def average_temperature_in_date_range(start_date, end_date)
+    average_in_date_range(start_date, end_date)
   end
 
   def temperature_range(start_date, end_date)
@@ -127,17 +127,6 @@ class Temperatures < HalfHourlyData
     else
       return 0.0
     end
-  end
-
-  def average_temperature_in_date_range(start_date, end_date)
-    if start_date < self.start_date || end_date > self.end_date
-      return nil # NAN blows up write_xlsx
-    end
-    total_temperature = 0.0
-    (start_date..end_date).each do |date|
-      total_temperature += average_temperature(date)
-    end
-    total_temperature / (end_date - start_date + 1)
   end
 
   def average_degree_days_in_date_range(start_date, end_date, base_temp)

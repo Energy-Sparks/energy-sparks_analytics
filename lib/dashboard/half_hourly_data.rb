@@ -29,6 +29,21 @@ class HalfHourlyData < Hash
     end
   end
 
+  def average(date)
+    self[date].inject{ |sum, el| sum + el }.to_f / self[date].size
+  end
+
+  def average_in_date_range(start_date, end_date)
+    if start_date < self.start_date || end_date > self.end_date
+      return nil # NAN blows up write_xlsx
+    end
+    total = 0.0
+    (start_date..end_date).each do |date|
+      total += average(date)
+    end
+    total / (end_date - start_date + 1)
+  end
+
   def missing_dates
     dates = []
     (@min_date..@max_date).each do |date|

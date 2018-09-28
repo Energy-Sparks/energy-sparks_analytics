@@ -333,6 +333,8 @@ private
     end
     keep_key_list.push(SeriesNames::DEGREEDAYS) if @bucketed_data.key?(SeriesNames::DEGREEDAYS)
     keep_key_list.push(SeriesNames::TEMPERATURE) if @bucketed_data.key?(SeriesNames::TEMPERATURE)
+    keep_key_list.push(SeriesNames::IRRADIANCE) if @bucketed_data.key?(SeriesNames::IRRADIANCE)
+    keep_key_list.push(SeriesNames::GRIDCARBON) if @bucketed_data.key?(SeriesNames::GRIDCARBON)
 
     remove_list = []
     @bucketed_data.each_key do |series_name|
@@ -364,11 +366,8 @@ private
 
     # rubocop:disable Style/ConditionalAssignment
     y2_axis_names = []
-    if @chart_config[:y2_axis] == :degreedays
-      y2_axis_names = @bucketed_data.keys.grep(/#{SeriesNames::DEGREEDAYS}/)
-    else
-      y2_axis_names = @bucketed_data.keys.grep(/#{SeriesNames::TEMPERATURE}/)
-    end
+    key_name = SeriesNames.y2_axis_key(@chart_config[:y2_axis])
+    y2_axis_names = @bucketed_data.keys.grep(/#{key_name}/)
     # rubocop:enable Style/ConditionalAssignment
     @y2_axis = {}
     y2_axis_names.each do |series_name|

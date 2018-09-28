@@ -148,6 +148,10 @@ class MeterCollection
     ScheduleDataManager.solar_pv(@solar_pv_schedule_name)
   end
 
+  def grid_carbon_intensity
+    ScheduleDataManager.uk_grid_carbon_intensity
+  end
+
   def heating_model(period)
     unless @heating_models.key?(:basic)
       @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters.amr_data, holidays, temperatures)

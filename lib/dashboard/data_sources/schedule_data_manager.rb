@@ -13,6 +13,7 @@ class ScheduleDataManager
   @@temperature_data = {}
   @@solar_irradiance_data = {}
   @@solar_pv_data = {}
+  @@uk_grid_carbon_intensity_data = nil
   # rubocop:enable Style/ClassVars
   BATH_AREA_NAME = 'Bath'.freeze
   INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../../../InputData/')
@@ -90,6 +91,16 @@ class ScheduleDataManager
       @@solar_pv_data[area_name] = solar_data
     end
     @@solar_pv_data[area_name]
+  end
+
+  def self.uk_grid_carbon_intensity
+    if @@uk_grid_carbon_intensity_data.nil?
+      filename = INPUT_DATA_DIR + 'uk_carbon_intensity.csv'
+      @@uk_grid_carbon_intensity_data = GridCarbonIntensity.new
+      GridCarbonLoader.new(filename, @@uk_grid_carbon_intensity_data)
+      puts "Loaded #{@@uk_grid_carbon_intensity_data.length} days of uk grid carbon intensity data"
+    end
+    @@uk_grid_carbon_intensity_data
   end
 
   def self.check_area_name(area)
