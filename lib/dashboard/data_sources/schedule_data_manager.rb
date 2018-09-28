@@ -26,8 +26,10 @@ class ScheduleDataManager
         end
       else
         check_area_name(area_name)
+        area = AreaNames.key_from_name(area_name)
         hol_data = HolidayData.new
-        HolidayLoader.new("#{INPUT_DATA_DIR}/Holidays.csv", hol_data)
+        filename = self.full_filepath(AreaNames.holiday_schedule_filename(area))
+        HolidayLoader.new(filename, hol_data)
         puts "Loaded #{hol_data.length} holidays"
         hols = Holidays.new(hol_data)
         @@holiday_data[area_name] = hols
@@ -35,6 +37,10 @@ class ScheduleDataManager
     end
     # Always return cache
     @@holiday_data[area_name]
+  end
+
+  def self.full_filepath(filename)
+    "#{INPUT_DATA_DIR}/" + filename
   end
 
   def self.temperatures(area_name, temperature_area_id = nil)
@@ -48,7 +54,9 @@ class ScheduleDataManager
           temp_data.add(key, value.map(&:value))
         end
       else
-        TemperaturesLoader.new("#{INPUT_DATA_DIR}/temperatures.csv", temp_data)
+        area = AreaNames.key_from_name(area_name)
+        filename = self.full_filepath(AreaNames.temperature_filename(area))      
+        TemperaturesLoader.new(filename, temp_data)
         puts "Loaded #{temp_data.length} days of temperatures"
       end
       # pp temp_data.keys
@@ -61,8 +69,10 @@ class ScheduleDataManager
   def self.solar_irradiation(area_name)
     check_area_name(area_name)
     unless @@solar_irradiance_data.key?(area_name) # lazy load data if not already loaded
+      area = AreaNames.key_from_name(area_name)
+      filename = self.full_filepath(AreaNames.solar_irradiance_filename(area))    
       solar_data = SolarIrradiance.new('solar irradiance')
-      SolarIrradianceLoader.new("#{INPUT_DATA_DIR}/solarirradiation.csv", solar_data)
+      SolarIrradianceLoader.new(filename, solar_data)
       puts "Loaded #{solar_data.length} days of solar irradiance data"
       @@solar_irradiance_data[area_name] = solar_data
     end
@@ -72,17 +82,83 @@ class ScheduleDataManager
   def self.solar_pv(area_name)
     check_area_name(area_name)
     unless @@solar_pv_data.key?(area_name) # lazy load data if not already loaded
+      area = AreaNames.key_from_name(area_name)
+      filename = self.full_filepath(AreaNames.solar_pv_filename(area)) 
       solar_data = SolarPV.new('solar pv')
-      SolarPVLoader.new("#{INPUT_DATA_DIR}/pv data Bath.csv", solar_data)
+      SolarPVLoader.new(filename, solar_data)
       puts "Loaded #{solar_data.length} days of solar pv data"
       @@solar_pv_data[area_name] = solar_data
     end
     @@solar_pv_data[area_name]
   end
 
-  def self.check_area_name(area_name)
-    unless area_name == BATH_AREA_NAME
-      raise 'Loading this data for other areas is not implemented yet'
+  def self.check_area_name(area)
+    unless AreaNames.check_valid_area(area)
+      raise EnergySparksUnexpectedSchoolDataConfiguration.new('Unexpected area configuration ' + area)
     end
   end
+end
+
+class AreaNames
+  def self.key_from_name(name)
+    AREA_NAMES.each do |key, area_data|
+      return key if area_data[:name] == name
+    end
+    nil
+  end
+
+  def self.check_valid_area(area)
+    AREA_NAMES.each_value do |area_data|
+      return true if area_data[:name] == name
+    end
+  end
+
+  def self.temperature_filename(key)
+    AREA_NAMES[key][:temperature_filename]
+  end
+
+  def self.solar_irradiance_filename(key)
+    AREA_NAMES[key][:solar_ir_filename]
+  end
+
+  def self.solar_pv_filename(key)
+    AREA_NAMES[key][:solar_pv_filename]
+  end
+
+  def self.holiday_schedule_filename(key)
+    AREA_NAMES[key][:holiday_calendar]
+  end
+
+  private
+
+  AREA_NAMES = { # mapping from areas to csv data files for analytics non-db code
+    bath: {
+      name:                 'Bath',
+      temperature_filename: 'Bath temperaturedata.csv',
+      solar_ir_filename:    'Bath solardata.csv',
+      solar_pv_filename:    'pv data Bath.csv',
+      holiday_calendar:     'Holidays.csv'
+    },
+    frome: {
+      name:                 'Frome',
+      temperature_filename: 'Frome temperaturedata.csv',
+      solar_ir_filename:    'Frome solardata.csv',
+      solar_pv_filename:    'pv data Frome.csv',
+      holiday_calendar:     'Holidays.csv'
+    },
+    bristol: {
+      name:                 'Bristol',
+      temperature_filename: 'Bristol temperaturedata.csv',
+      solar_ir_filename:    'Bristol solardata.csv',
+      solar_pv_filename:    'pv data Bristol.csv',
+      holiday_calendar:     'Holidays.csv'
+    },
+    sheffield: {
+      name:                 'Sheffield',
+      temperature_filename: 'Sheffield temperaturedata.csv',
+      solar_ir_filename:    'Sheffield solardata.csv',
+      solar_pv_filename:    'pv data Sheffield.csv',
+      holiday_calendar:     'Holidays.csv'
+    }
+  }.freeze
 end

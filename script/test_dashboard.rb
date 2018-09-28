@@ -4,14 +4,16 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
+=begin
 module Logging
   @logger = Logger.new('Results/test-dashboard ' + Time.now.strftime('%H %M') + '.log')
   logger.level = :debug
 end
+=end
 
 reports = ReportConfigSupport.new
 
-reports.load_school('Castle Primary School', true)
+reports.load_school('St Marks Secondary', true)
 
 # testing examples
 #

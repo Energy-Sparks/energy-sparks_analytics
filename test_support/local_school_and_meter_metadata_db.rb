@@ -82,10 +82,10 @@ class AnalysticsSchoolAndMeterMetaData
       school_metadata[:postcode],
       school_metadata[:floor_area],
       school_metadata[:pupils],
-      school_metadata[:school_type]
+      school_metadata[:school_type],
+      school_metadata[:area],
+      school_metadata[:urn]
     )
-
-    school.urn = school_metadata[:urn] if school_metadata.key?(:urn)
 
     school
   end

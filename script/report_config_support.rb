@@ -75,15 +75,15 @@ class ReportConfigSupport
 
   def load_school(school_name, suppress_debug = false)
     logger.debug self.class.banner("School: #{school_name}")
+
     @school_name = school_name
-    if suppress_debug
-      logger.debug 'Loading school data.....output suppressed'
-      self.class.suppress_output(school_name) {
-        @school = $SCHOOL_FACTORY.load_school(school_name)
-      }
-    else
-      @school = $SCHOOL_FACTORY.load_school(school_name)
-    end
+
+    school_metadata = AnalysticsSchoolAndMeterMetaData.new
+    @school = school_metadata.school(school_name)
+
+    readings_db = LocalAnalyticsMeterReadingDB.new(@school)
+    readings_db.load_meter_readings
+
     @chart_manager = ChartManager.new(@school)
     @school # needed to run simulator
   end

@@ -19,7 +19,7 @@ class MeterCollection
   attr_reader :floor_area, :number_of_pupils
 
   # Currently, but not always
-  attr_reader :school, :name, :address, :postcode
+  attr_reader :school, :name, :address, :postcode, :urn, :area_name
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
@@ -37,7 +37,7 @@ class MeterCollection
     @heating_models = {}
     @school = school
     @meter_identifier_lookup = {} # [mpan or mprn] => meter
-
+    @area_name = school.area_name
 
     @cached_open_time = DateTime.new(0, 1, 1, 7, 0, 0) # for speed
     @cached_close_time = DateTime.new(0, 1, 1, 16, 30, 0) # for speed
@@ -54,6 +54,10 @@ class MeterCollection
       logger.info "Running in Rails environment"
       throw ArgumentException if school.meters.empty?
     end
+  end
+
+  def set_urn(urn)
+    @urn = urn
   end
 
   def meter?(identifier)

@@ -26,7 +26,6 @@ class OneDayAMRReading
   end
 
   def kwh_halfhour(half_hour_index)
-    puts "G:#{@kwh_data_x48.class.name}" if !@kwh_data_x48.is_a?(Array)
     @kwh_data_x48[half_hour_index]
   end
 
