@@ -3,9 +3,9 @@ class Meter
   include Logging
 
   # Extra fields - potentially a concern or mix-in
-  attr_reader :building, :fuel_type, :floor_area, :number_of_pupils
+  attr_reader :building, :fuel_type
   attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters, :meter_correction_rules
-  attr_accessor :amr_data
+  attr_accessor :amr_data,  :floor_area, :number_of_pupils
 
   # Energy Sparks activerecord fields:
   attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
@@ -32,6 +32,10 @@ class Meter
     logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
   end
 
+  def to_s
+    @mpan_mprn.to_s + ':' + @fuel_type.to_s + 'x' + (@amr_data.nil? ? '0' : @amr_data.length.to_s)
+  end
+
   def set_meter_no(meter_no)
     @meter_no = meter_no
   end
@@ -52,5 +56,15 @@ class Meter
 
   def display_meter_number
     meter_no.present? ? meter_no : meter_type.to_s
+  end
+
+  def self.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type)
+    if fuel_type == :electricity || fuel_type == :aggregated_electricity
+      (90000000000000 + urn.to_i).to_s
+    elsif fuel_type == :gas || fuel_type == :aggregated_heat
+      (80000000000000 + urn.to_i).to_s
+    else
+      throw EnergySparksUnexpectedStateException.new('Unexpected fuel_type')
+    end
   end
 end

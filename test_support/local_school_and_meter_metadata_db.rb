@@ -39,7 +39,12 @@ class AnalysticsSchoolAndMeterMetaData
     @schools_metadata.sort.each do |name, school_metadata|
       gas_meters_metadata = school_metadata[:meters].select { |v| v[:meter_type] == :gas }
       electric_meters_metadata = school_metadata[:meters].select { |v| v[:meter_type] == :electricity }
-      logger.debug sprintf("\t\t%-40.40s %10.10s gas x %d electricity x %d\n", name, @schools_metadata[:postcode], gas_meters_metadata.length, electric_meters_metadata.length)
+      aggregate_electric_meters_metadata = school_metadata[:meters].select { |v| v[:meter_type] == :aggregated_heat }
+      aggregate_heat_meters_metadata = school_metadata[:meters].select { |v| v[:meter_type] == :aggregated_electricity }
+      aggregate_electric_meters_metadata = school_metadata[:meters].select { |v| v[:meter_type] == :aggregated_heat }
+      logger.debug sprintf("\t\t%-40.40s %10.10s gas x %d electricity x %d aggregated heat x %d aggregated electric %d\n",
+                    name, @schools_metadata[:postcode], gas_meters_metadata.length, electric_meters_metadata.length,
+                    aggregate_heat_meters_metadata.length, aggregate_electric_meters_metadata.length)
       @meter_collections[name] = create_meter_collection(name, school_metadata, school_metadata[:meters])
     end
   end
@@ -58,6 +63,25 @@ class AnalysticsSchoolAndMeterMetaData
       meter_collection.add_electricity_meter(electricity_meter)
     end
 
+    aggregated_heat_meters = create_meters(meter_collection, school_metadata[:meters], :aggregated_heat)
+    if !aggregated_heat_meters.nil? && aggregated_heat_meters.length > 1
+      logger.error 'More than one aggregate heat meter encountered loading metadata'
+    end
+    aggregated_heat_meters.each do |aggregate_heat_meter|
+      meter_collection.add_aggregate_heat_meter(aggregate_heat_meter)
+    end
+
+    aggregated_electricity_meters = create_meters(meter_collection, school_metadata[:meters], :aggregated_electricity)
+    if !aggregated_electricity_meters.nil? && aggregated_electricity_meters.length > 1
+      logger.error 'More than one aggregate electricityeat meter encountered loading metadata'
+    end
+    aggregated_electricity_meters.each do |aggregated_electricity_meter|
+      meter_collection.add_aggregate_electricity_meter(aggregated_electricity_meter)
+    end
+
+    create_missing_aggregate_meters(meter_collection, school_metadata)
+
+    logger.info "Created meter collection #{meter_collection.to_s}"
     meter_collection
   end
 
@@ -67,15 +91,47 @@ class AnalysticsSchoolAndMeterMetaData
     meters_of_fuel_type = meter_metadata.select { |v| v[:meter_type] == fuel_type }
 
     meters_of_fuel_type.each do |meter_data|
-      meter_list.push(create_empty_meter(meter_collection, meter_data))
+      meter_list.push(create_empty_meter_from_meta_data(meter_collection, meter_data))
     end
 
     meter_list
   end
 
+  # sometimes aggregate meters are already defined (in metadata)
+  # sometimes if there is only one meter of a fuel type, 
+  #  the aggregate meter is a reference to the underlying single fule type meter
+  # sometimes one needs to be created on the fly, with a mpan/mprn of the URN + 8000** or 90****
+  def create_missing_aggregate_meters(meter_collection, meter_data)
+    if meter_collection.aggregated_electricity_meters.nil?
+      if !meter_collection.electricity_meters.nil? && meter_collection.electricity_meters.length > 1
+        # for the moment only create a combined meter if multiple underlying meters of same type
+        meter_collection.aggregated_electricity_meters = create_empty_combined_meter(meter_collection, 'Combined Electricity Meter', :aggregated_electricity, meter_data)
+      end
+    end
+    if meter_collection.aggregated_heat_meters.nil?
+      if !meter_collection.heat_meters.nil? && meter_collection.heat_meters.length > 1
+        # for the moment only create a combined meter if multiple underlying meters of same type
+        meter_collection.aggregated_heat_meters = create_empty_combined_meter(meter_collection, 'Combined Heat Meter', :aggregated_heat, meter_data)
+      end
+    end
+  end
+
+  def create_empty_combined_meter(meter_collection, name, fuel_type, meter_data)
+    create_empty_meter(
+      meter_collection,
+      name, 
+      Meter.synthetic_combined_meter_mpan_mprn_from_urn(meter_data[:urn], fuel_type), 
+      fuel_type, 
+      meter_data[:floor_area],
+      meter_data[:pupils],
+      meter_data.key?(:meter_no) ? meter_data[:meter_no] : nil
+    )
+  end
+
   def create_school(school_name)
-    logger.debug "Creating School: #{school_name}"
     school_metadata = @schools_metadata[school_name]
+
+    logger.debug "Creating School: #{school_name} #{school_metadata[:postcode]}"
 
     school = School.new(
       school_name,
@@ -84,17 +140,29 @@ class AnalysticsSchoolAndMeterMetaData
       school_metadata[:pupils],
       school_metadata[:school_type],
       school_metadata[:area],
-      school_metadata[:urn]
+      school_metadata[:urn],
+      school_metadata[:postcode]
     )
 
     school
   end
 
-  def create_empty_meter(meter_collection, meter_data)
+  def create_empty_meter_from_meta_data(meter_collection, meter_data)
     fuel_type = meter_data[:meter_type]
-    identifier_type = fuel_type == :electricity ? :mpan : :mprn
-    identifier = meter_data[identifier_type]
-    name = meter_data[:name]
+    identifier_type = (fuel_type == :electricity || fuel_type == :aggregated_electricity) ? :mpan : :mprn
+
+    create_empty_meter(
+      meter_collection, 
+      meter_data[:name], 
+      meter_data[identifier_type], 
+      fuel_type, 
+      meter_data[:floor_area],
+      meter_data[:pupils],
+      meter_data.key?(:meter_no) ? meter_data[:meter_no] : nil
+    )
+  end
+
+  def create_empty_meter(meter_collection, name, identifier, fuel_type, floor_area, pupils, meter_no)
 
     logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
 
@@ -104,14 +172,13 @@ class AnalysticsSchoolAndMeterMetaData
       fuel_type,
       identifier,
       name,
-      meter_data[:floor_area],
-      meter_data[:pupils],
+      floor_area,
+      pupils,
       nil, # solar pv
       nil # storage heater
     )
 
-    meter.set_meter_no(meter_data[:meter_no]) if meter_data.key?(:meter_no)
+    meter.set_meter_no(meter_no) unless meter_no.nil?
     meter
   end
 end
-

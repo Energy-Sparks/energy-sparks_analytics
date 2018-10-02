@@ -155,11 +155,11 @@ class AggregateDataService
   end
 
   def aggregate_heat_meters
-    @meter_collection.aggregated_heat_meters = aggregate_main_meters(@heat_meters, :gas)
+    @meter_collection.aggregated_heat_meters = aggregate_main_meters(@meter_collection.aggregated_heat_meters, @heat_meters, :gas)
   end
 
   def aggregate_electricity_meters
-    @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@electricity_meters, :electricity)
+    @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
   end
 
   def heating_model(period)
@@ -181,6 +181,8 @@ class AggregateDataService
     min_date, max_date = combined_amr_data_date_range(meters)
     logger.info "Aggregating data between #{min_date} #{max_date}"
 
+    mpan_mprn = 'NEEDSFIXING'
+    mpan_mprn = Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
     combined_amr_data = AMRData.new(type)
     (min_date..max_date).each do |date|
       combined_data = Array.new(48, 0.0)
@@ -191,7 +193,7 @@ class AggregateDataService
           end
         end
       end
-      days_data = OneDayAMRReading.new('NEEDSFIXING', date, 'ORIG', nil, DateTime.now, combined_data)
+      days_data = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, combined_data)
       combined_amr_data.add(date, days_data)
     end
     combined_amr_data
@@ -221,14 +223,14 @@ class AggregateDataService
     [name, id, floor_area, pupils]
   end
 
-  def aggregate_main_meters(list_of_meters, type)
+  def aggregate_main_meters(combined_meter, list_of_meters, type)
     logger.info "Aggregating #{list_of_meters.length} meters"
-    combined_meter = aggregate_meters(list_of_meters, type)
+    combined_meter = aggregate_meters(combined_meter, list_of_meters, type)
     combine_sub_meters(combined_meter, list_of_meters)
     combined_meter
   end
 
-  def aggregate_meters(list_of_meters, type)
+  def aggregate_meters(combined_meter, list_of_meters, type)
     return nil if list_of_meters.nil? || list_of_meters.empty?
     if list_of_meters.length == 1
       logger.info "Single meter of type #{type} - using as combined meter rather than creating new one"
@@ -241,15 +243,22 @@ class AggregateDataService
 
     combined_name, combined_id, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
 
-    combined_meter = Meter.new(
-      self,
-      combined_amr_data,
-      type,
-      combined_id,
-      combined_name,
-      combined_floor_area,
-      combined_pupils
-    )
+    if combined_meter.nil?
+      combined_meter = Meter.new(
+        self,
+        combined_amr_data,
+        type,
+        combined_id,
+        combined_name,
+        combined_floor_area,
+        combined_pupils
+      )
+    else
+      logger.info "Combined meter #{combined_meter.mpan_mprn} already created"
+      combined_meter.floor_area = combined_floor_area if combined_meter.floor_area.nil? || combined_meter.floor_area == 0
+      combined_meter.number_of_pupils = combined_pupils if combined_meter.number_of_pupils.nil? || combined_meter.number_of_pupils == 0
+      combined_meter.amr_data = combined_amr_data
+    end
 
     logger.info "Creating combined meter data #{combined_amr_data.start_date} to #{combined_amr_data.end_date}"
     logger.info "with floor area #{combined_floor_area} and #{combined_pupils} pupils"
@@ -259,9 +268,9 @@ class AggregateDataService
   def log_meter_dates(list_of_meters)
     logger.info 'Combining the following meters'
     list_of_meters.each do |meter|
-      MeterAttributes.attributes(meter.id, :aggregation)
+      MeterAttributes.attributes(meter, :aggregation)
       logger.info sprintf('%-24.24s %-18.18s %s to %s', meter.display_name, meter.id, meter.amr_data.start_date.to_s, meter.amr_data.end_date)
-      aggregation_rules = MeterAttributes.attributes(meter.id.to_i, :aggregation)
+      aggregation_rules = MeterAttributes.attributes(meter, :aggregation)
       unless aggregation_rules.nil?
         logger.info "                Meter has aggregation rules #{aggregation_rules}"
       end
@@ -294,7 +303,7 @@ class AggregateDataService
     start_dates = []
     end_dates = []
     meters.each do |meter|
-      aggregation_rules = MeterAttributes.attributes(meter.id.to_i, :aggregation)
+      aggregation_rules = MeterAttributes.attributes(meter, :aggregation)
       if aggregation_rules.nil?
         start_dates.push(meter.amr_data.start_date)
       elsif !(aggregation_rules.include?(:ignore_start_date) ||

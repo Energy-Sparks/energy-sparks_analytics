@@ -7,10 +7,18 @@ require 'date'
 class MeterAttributes
   extend Logging
 
-  def self.attributes(mpan_or_mprn, type)
-    return nil unless METER_ATTRIBUTE_DEFINITIONS.key?(mpan_or_mprn)
-    return nil unless METER_ATTRIBUTE_DEFINITIONS[mpan_or_mprn].key?(type)
-    METER_ATTRIBUTE_DEFINITIONS[mpan_or_mprn][type]
+  def self.attributes(meter, type)
+    mpan_mprn = meter.mpan_mprn.to_i # treat as integer even if loaded as string
+    return nil unless METER_ATTRIBUTE_DEFINITIONS.key?(mpan_mprn)
+    return nil unless METER_ATTRIBUTE_DEFINITIONS[mpan_mprn].key?(type)
+
+    butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn][type]
+
+    # fill in weekends for all Bath derived data
+    if type == :meter_corrections && meter.building.area_name == 'Bath'
+      butes.push( {auto_insert_missing_readings: { type: :weekends}})
+    end
+    butes
   end
 
   METER_ATTRIBUTE_DEFINITIONS = {
@@ -59,6 +67,21 @@ class MeterAttributes
       meter_corrections: [ :set_all_missing_to_zero ],
       function: [ :hotwater_only ]
     },
+    # ==============================Castle Primary=============================
+    2200015105145 => {
+      aggregation:  [
+        :deprecated_include_but_ignore_end_date,
+        :deprecated_include_but_ignore_start_date
+      ] 
+    },
+    2200015105163 => {
+      aggregation:  [
+        :deprecated_include_but_ignore_end_date,
+        :deprecated_include_but_ignore_start_date
+      ] 
+    },
+    2200041803451 => { aggregation:  [:deprecated_include_but_ignore_end_date] },
+    2200042676990 => { aggregation:  [:ignore_start_date] }, # succeeds meters above
     # ==============================St Saviours Juniors========================
     4234023603 => { # current gas meter
       aggregation:  [ :ignore_start_date ]
@@ -101,6 +124,47 @@ class MeterAttributes
         :deprecated_include_but_ignore_end_date,
         :deprecated_include_but_ignore_start_date
       ]
+    },
+    # ==============================Marksbury==================================
+    2200011879013 => {
+      meter_corrections: [
+        {
+          set_bad_data_to_zero: {
+            start_date: Date.new(2011, 10, 6),
+            end_date:   Date.new(2015, 10, 17)
+          }
+        }
+      ]
+    },
+    # ==============================Paulton Junior=============================
+    13678903 => {
+      meter_corrections: [
+        {
+          set_bad_data_to_zero: {
+            start_date: Date.new(2016, 4, 27),
+            end_date:   Date.new(2016, 4, 27)
+          },
+        },
+        {
+          readings_start_date: Date.new(2014, 9, 30)
+        }
+      ]
+    },
+    # ==============================Roundhill==================================
+    75665806 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2009, 1, 1),
+            end_date: Date.new(2009, 1, 1),
+            scale:  (1.0 / 31.1) # incorrectly scaled imperial/metric data
+          }
+        }
+      ]
+    },
+    # ==============================St Johns===============================
+    9206222810 => {
+      meter_corrections: [ { readings_start_date: Date.new(2017, 2, 21) } ]
     }
   }.freeze
   private_constant :METER_ATTRIBUTE_DEFINITIONS

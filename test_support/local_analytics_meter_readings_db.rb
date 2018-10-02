@@ -7,23 +7,46 @@ require_relative '../app/models/meter_collection'
 # - loads and stores data into a meter_collection 
 # - uses schoolsandmeters.yml to determine meter_collection metadata
 
-class LocalAnalyticsMeterReadingDB
+class LocalAnalyticsMeterReadingDB < MeterReadingsDownloadBase
   include Logging
 
-  def initialize(school)
-    @meter_collection = school
+  def initialize(meter_collection)
+    super(meter_collection)
   end
 
   def load_meter_readings
     load_meter_collection(@meter_collection.name)
-    AggregateDataService.new(@meter_collection).validate_and_aggregate_meter_data
+    AggregateDataService.new(@meter_collection).aggregate_heat_and_electricity_meters
+  end
+
+  def save_meter_readings
+    save_meter_collection(@meter_collection.name)
   end
 
   private
-
+=begin
   def meterreadings_cache_directory
     ENV['CACHED_METER_READINGS_DIRECTORY'] ||= File.join(File.dirname(__FILE__), '../MeterReadings/')
     ENV['CACHED_METER_READINGS_DIRECTORY'] 
+  end
+=end
+  def save_meter_collection(school_name)
+    yml_filename = meter_readings_yml_filename(school_name)
+    marshal_filename = meter_readings_marshal_filename(school_name)
+
+    all_meter_readings = []
+
+    all_meters = @meter_collection.all_meters
+
+    all_meters.each do |meter|
+      all_meter_readings.concat(meter.amr_data.values)
+    end
+
+    logger.info "Saving #{all_meter_readings.length} meter readings to YML #{yml_filename}"
+    File.open(yml_filename, 'w') { |f| f.write(YAML.dump(all_meter_readings)) }
+
+    logger.info "Saving #{all_meter_readings.length} meter readings to marshal #{marshal_filename}"
+    File.open(marshal_filename, 'wb') { |f| f.write(Marshal.dump(all_meter_readings)) }
   end
 
   def load_meter_collection(school_name)
@@ -65,13 +88,17 @@ class LocalAnalyticsMeterReadingDB
       id_count[meter_id] += 1
       meter = @meter_collection.meter?(meter_id)
       if meter.nil?
-        logger.error "Meter #{meter_id} not found"
+        logger.error "Meter #{meter_id} not found (1)"
       else
         meter.amr_data.add(meter_reading.date, meter_reading)
       end
     end
     id_count.each do |identifier, count|
       logger.debug "loaded #{count} meter readings for #{identifier}"
+    end
+
+    @meter_collection.all_meters.each do |meter|
+      meter.amr_data.set_long_gap_boundary
     end
   end
 

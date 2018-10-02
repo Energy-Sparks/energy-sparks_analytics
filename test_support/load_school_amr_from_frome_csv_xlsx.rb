@@ -1,17 +1,18 @@
 require_relative '../app/services/aggregate_data_service'
 require_relative '../app/models/meter_collection'
+require_relative './meterreadings_download_csv_base'
 require 'roo'
 # creates meter_collection from csv file for Bath school
-class LoadSchoolFromFromeFiles
+class LoadSchoolFromFromeFiles < MeterReadingsDownloadCSVBase
   include Logging
 
-  def initialize(meter_collection, school_name, delimiter = ',')
+  def initialize(meter_collection)
+    super(meter_collection)
     @meter_collection = meter_collection
-    @school_name = school_name
-    @delimiter = delimiter
+    @delimiter = ','
   end
 
-  def load_data
+  def load_meter_readings
     logger.info "Loading data from #{meterreadings_cache_directory}"
 
     (@meter_collection.heat_meters + @meter_collection.electricity_meters).each do |meter|
@@ -25,7 +26,7 @@ class LoadSchoolFromFromeFiles
     end
 
     logger.info 'Completed loading of data from csv/xlsx files'
-    AggregateDataService.new(@meter_collection).validate_and_aggregate_meter_data
+    # AggregateDataService.new(@meter_collection).validate_and_aggregate_meter_data
   end
 
   private
@@ -85,33 +86,7 @@ class LoadSchoolFromFromeFiles
   end
 
   def list_of_files(meter_no)
-    Dir["#{meterreadings_cache_directory}/#{meter_no}*"]
-  end
-
-  def process_readings(type, column_names, lines)
-    lines.each do |line|
-      meter_id, fuel_type, name, one_days_data = process_line(type, column_names, line)
-      unless meter_id.nil?
-        add_reading_to_meter_collection(meter_id, fuel_type, name, one_days_data)
-      end
-    end
-  end
-
-  def add_reading_to_meter_collection(_meter_id, _fuel_type, _name, one_days_data)
-    meter = @meter_collection.meter?(one_days_data.meter_id)
-    if meter.nil?
-      logger.error "Can't find meter #{one_days_data.meter_id.to_s}"
-    else
-      meter.amr_data.add(one_days_data.date, one_days_data)
-    end
-  end
-
-  def column_index(column_names, name)
-    column_names.index(name)
-  end
-
-  def substitute_unwanted_characters(line)
-    line.gsub('"', '')
+    Dir["#{directory}/#{meter_no}*"]
   end
 
   def process_line(type, column_names, line_data)
@@ -161,10 +136,5 @@ class LoadSchoolFromFromeFiles
       return false
     end
     true
-  end
-
-  def meterreadings_cache_directory
-    ENV['CACHED_METER_READINGS_DIRECTORY'] ||= File.join(File.dirname(__FILE__), '../MeterReadings/')
-    ENV['CACHED_METER_READINGS_DIRECTORY'] + '/' + subdirectory
   end
 end

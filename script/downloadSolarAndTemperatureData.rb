@@ -396,9 +396,11 @@ def assess_data(station_name, data, start_date, end_date)
   puts "Missing Dates:"
   cpmd = CompactDatePrint.new(missing_dates)
   cpmd.log
-  puts "Not enough samples on date:"
-  cpldc = CompactDatePrint.new(too_low_date_count)
-  cpldc.log
+  if !too_low_date_count.empty?
+    puts "Not enough samples on date:"
+    cpldc = CompactDatePrint.new(too_low_date_count)
+    cpldc.log
+  end
 end
 
 def simple_interpolate(val1, val0, t1, t0, tx, debug = false)
@@ -627,12 +629,13 @@ end
 
 def last_downloaded_date(temperature_filename, solar_filename)
   temp_data = Temperatures.new('temperatures')
-  temp_filename = "#{INPUT_DATA_DIR}/{temperature_filename}"
-  solar_filename = "#{INPUT_DATA_DIR}/{solar_filename}"
 
-  return nil if !File.file?(temp_filename)
-  TemperaturesLoader.new(temp_filename, temp_data)
-  puts "Loaded #{temp_data.length} days of temperatures from #{temp_filename}"
+  if !File.file?(temperature_filename)
+    puts "Unable to find file #{temperature_filename}"    
+    return nil 
+  end
+  TemperaturesLoader.new(temperature_filename, temp_data)
+  puts "Loaded #{temp_data.length} days of temperatures from #{temperature_filename}"
   last_date = temp_data.keys.last
   puts "last date of previous download = #{last_date}"
   last_date
@@ -648,8 +651,11 @@ parse_command_line
 @areas.each do |area|
   next if @one_region != false && area[:name] != @one_region
 
+  temp_filename = "#{INPUT_DATA_DIR}/" + area[:temperature_csv_file_name]
+  solar_filename = "#{INPUT_DATA_DIR}/" + area[:solar_csv_file_name]
+
   if @fixed_dates.nil? # if dates not specified append data onto existing download
-    start_date = last_downloaded_date(area[:temperature_csv_file_name], area[:solar_csv_file_name])
+    start_date = last_downloaded_date(temp_filename, solar_filename)
     unless start_date.nil?
       area[:start_date] =  start_date + 1
       area[:end_date] = Date.today - 1
@@ -661,6 +667,6 @@ parse_command_line
 
   temperatures, solar_insolence = process_area(area)
 
-  write_csv("#{INPUT_DATA_DIR}/" + area[:temperature_csv_file_name], temperatures, area[:csv_format], !@fixed_dates)
-  write_csv("#{INPUT_DATA_DIR}/" + area[:solar_csv_file_name], solar_insolence, area[:csv_format], !@fixed_dates)
+  write_csv(temp_filename, temperatures, area[:csv_format], !@fixed_dates)
+  write_csv(solar_filename, solar_insolence, area[:csv_format], !@fixed_dates)
 end

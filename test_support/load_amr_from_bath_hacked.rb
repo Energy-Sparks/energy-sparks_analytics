@@ -27,19 +27,20 @@ require 'benchmark'
 require 'pry-byebug'
 require_relative '../app/services/aggregate_data_service'
 require_relative '../app/models/meter_collection'
+require_relative './meterreadings_download_baseclass.rb'
 
 def meter_number_column(type)
   type == 'electricity' ? 'mpan' : 'mprn'
 end
 
-class BathHackedSocrataDownload
+class BathHackedSocrataDownload < MeterReadingsDownloadBase
   include Logging
 
   attr_accessor :min_date
 
-  def initialize(school, min_date = Date.new(2008, 9, 1))
-    @meter_collection = school
-    @min_date = min_date
+  def initialize(meter_collection)
+    super(meter_collection)
+    @min_date = Date.new(2008, 9, 1)
 
     ENV['SOCRATA_STORE'] = 'data.bathhacked.org'
     ENV['SOCRATA_TOKEN'] = 'gQ5Dw0rIF7I8ij40m8W6ulHj4'

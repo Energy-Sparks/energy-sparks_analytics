@@ -128,6 +128,18 @@ class AMRData < HalfHourlyData
     data
   end
 
+  # long gaps are demarketed by a single LGAP meter reading - the last day of the gap
+  # data held in the database doesn't store the date as part of its meta data so its
+  # set here by calling this function after all meter readings are loaded
+  def set_long_gap_boundary
+    lgap_date = nil
+    (start_date..end_date).each do |date|
+      one_days_data = self[date]
+      lgap_date = date if !one_days_data.nil? && (one_days_data.type == 'LGAP' || one_days_data.type == 'FIXS')
+    end
+    set_min_date(lgap_date) unless lgap_date.nil?
+  end
+
   def summarise_bad_data
     date, one_days_data = self.first
     logger.info '=' * 80

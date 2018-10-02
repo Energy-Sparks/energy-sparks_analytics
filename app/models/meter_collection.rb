@@ -36,8 +36,11 @@ class MeterCollection
     @storage_heater_meters = []
     @heating_models = {}
     @school = school
+    @urn = school.urn
     @meter_identifier_lookup = {} # [mpan or mprn] => meter
     @area_name = school.area_name
+    @aggregated_heat_meters = nil
+    @aggregated_electricity_meters = nil
 
     @cached_open_time = DateTime.new(0, 1, 1, 7, 0, 0) # for speed
     @cached_close_time = DateTime.new(0, 1, 1, 16, 30, 0) # for speed
@@ -46,18 +49,18 @@ class MeterCollection
       logger.info "Running standalone, not in Rails environment"
 
       # Normally these would come from the school, hard coded at the mo
-      @holiday_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-      @temperature_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-      @solar_irradiance_schedule_name = ScheduleDataManager::BATH_AREA_NAME
-      @solar_pv_schedule_name = ScheduleDataManager::BATH_AREA_NAME
+      @holiday_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
+      @temperature_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
+      @solar_irradiance_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
+      @solar_pv_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
     else
       logger.info "Running in Rails environment"
       throw ArgumentException if school.meters.empty?
     end
   end
 
-  def set_urn(urn)
-    @urn = urn
+  def to_s
+    'Meter Collection:' + name + ':' + all_meters.join(';')
   end
 
   def meter?(identifier)
@@ -102,6 +105,16 @@ class MeterCollection
 
   def add_electricity_meter(meter)
     @electricity_meters.push(meter)
+    @meter_identifier_lookup[meter.id] = meter
+  end
+
+  def add_aggregate_heat_meter(meter)
+    @aggregated_heat_meters = meter
+    @meter_identifier_lookup[meter.id] = meter
+  end
+
+  def add_aggregate_electricity_meter(meter)
+    @aggregated_electricity_meters = meter
     @meter_identifier_lookup[meter.id] = meter
   end
 

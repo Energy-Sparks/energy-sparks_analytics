@@ -35,6 +35,7 @@ class ReportConfigSupport
     $SCHOOL_FACTORY = SchoolFactory.new
 
     @chart_manager = nil
+    @school_metadata = nil
 
     logger.debug "\n" * 8
   end
@@ -78,8 +79,9 @@ class ReportConfigSupport
 
     @school_name = school_name
 
-    school_metadata = AnalysticsSchoolAndMeterMetaData.new
-    @school = school_metadata.school(school_name)
+    @school_metadata = AnalysticsSchoolAndMeterMetaData.new if @school_metadata.nil?
+    
+    @school = @school_metadata.school(school_name)
 
     readings_db = LocalAnalyticsMeterReadingDB.new(@school)
     readings_db.load_meter_readings

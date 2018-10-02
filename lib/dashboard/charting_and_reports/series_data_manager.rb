@@ -106,6 +106,7 @@ class SeriesDataManager
     @periods = nil
     @chart_configuration = chart_configuration
     configure_manager
+    logger.info "Series Name Manager: Chart Creation for #{meter_collection}"
   end
 
   def convert_variable_to_array(value)
@@ -124,7 +125,14 @@ class SeriesDataManager
         if meter.nil?
           @series_buckets.push('gas') # TODO(PH,17Jun2018) meter selection needs fixing
         else
-          @series_buckets.push(meter.fuel_type.to_s)
+          fuel_type = meter.fuel_type.to_s
+
+          # aggregated meters can either be of aggregated type, or if only one meter then non-aggregate version
+          # TODO(PH,29Sep2018) consider whether to what symbology to use for aggregate meters on loading?
+          fuel_type = 'electricity' if fuel_type == 'aggregated_electricity'
+          fuel_type = 'gas' if fuel_type == 'aggregated_heat'
+
+          @series_buckets.push(fuel_type)
         end
       end
     end
@@ -144,7 +152,6 @@ class SeriesDataManager
       @series_buckets += SeriesNames::HOTWATERSERIESNAMES
     end
     if @breakdown_list.include?(:meter)
-      puts "Meter Breakdown", meter_names.inspect
       @series_buckets += meter_names
     end
     if @breakdown_list.include?(:none)

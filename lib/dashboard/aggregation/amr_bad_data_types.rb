@@ -2,6 +2,8 @@ class OneDayAMRReading
   # rubocop:enable Metrics/LineLength
   AMR_TYPES = {
     'ORIG'  => { name: 'Original - uncorrected good data',                  description: 'Good quality original reading'},
+    'LGAP'  => { name: 'Too much missing data prior to this date',          description: 'Prior data including this day ignored'},
+    'FIXS'  => { name: 'Setting fixed start date - bad data before',        description: 'Prior data before date ignored'},
     'MWKE'  => { name: 'Missing Weekend - set to zero',                     description: 'Missing data replaced with zeros'},
     'MHOL'  => { name: 'Missing Holiday',                                   description: 'Missing data replaced with zeros'},
     'MDTZ'  => { name: 'Missing data date range set to zero',               description: 'Missing data replaced with zeros'},
