@@ -249,6 +249,8 @@ class SeriesDataManager
         end
       elsif @breakdown_list.include?(:meter)
         breakdown = breakdown_to_meter_level(date, date, halfhour_index)
+      elsif @breakdown_list.include?(:fuel)
+        breakdown = fuel_breakdown_halfhour(date, halfhour_index)
       else
         breakdown[SeriesNames::NONE] = meter.amr_data.kwh(date, halfhour_index)
       end
@@ -487,6 +489,23 @@ private
         logger.error e
       end
     end
+    fuel_data
+  end
+
+  def fuel_breakdown_halfhour(date, halfhour_index)
+    electric_factor = scaling_factor(1.0, :electricity)
+    electricity_meter = @meters[0]
+    electric_val = electricity_meter.nil? ? 0.0 : (electricity_meter.amr_data.kwh(date, halfhour_index) * electric_factor)
+
+    gas_factor = scaling_factor(1.0, :gas)
+    gas_meter = @meters[1]
+    gas_val = gas_meter.nil? ? 0.0 : (gas_meter.amr_data.kwh(date, halfhour_index) * gas_factor)
+
+    fuel_data = {
+      'electricity' => electric_val,
+      'gas' => gas_val
+    }
+
     fuel_data
   end
 

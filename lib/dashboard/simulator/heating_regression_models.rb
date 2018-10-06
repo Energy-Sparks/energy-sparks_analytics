@@ -171,6 +171,7 @@ module AnalyseHeatingAndHotWater
     # returning a list of the heating periods
     def calculate_heating_periods(start_date, end_date)
       heating_on = false
+      @heating_on_periods = []
       heating_start_date = start_date
 
       logger.debug "Calculating Heating Periods between #{start_date} and #{end_date}"
