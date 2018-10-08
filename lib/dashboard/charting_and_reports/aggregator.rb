@@ -8,7 +8,8 @@
 class Aggregator
   include Logging
 
-  attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis, :data_labels
+  attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis
+  attr_reader :x_axis_bucket_date_ranges, :data_labels
 
   def initialize(meter_collection, chart_config)
     @meter_collection = meter_collection
@@ -128,6 +129,7 @@ class Aggregator
 
   def reverse_x_axis
     @x_axis = @x_axis.reverse
+    @x_axis_bucket_date_ranges = @x_axis_bucket_date_ranges.reverse
 
     @bucketed_data.each_key do |series_name|
       @bucketed_data[series_name] = @bucketed_data[series_name].reverse
@@ -171,6 +173,7 @@ class Aggregator
     @xbucketor = XBucketBase.create_bucketor(chart_config[:x_axis], @series_manager.periods)
     @xbucketor.create_x_axis
     @x_axis = @xbucketor.x_axis
+    @x_axis_bucket_date_ranges = @xbucketor.x_axis_bucket_date_ranges
     logger.debug "Breaking down into #{@xbucketor.x_axis.length} X axis (date/time range) buckets"
 
     bucketed_data, bucketed_data_count = create_empty_bucket_series
@@ -198,7 +201,8 @@ private
   # e.g. 'school day in hours' v. 'school day out of hours'
   # returns a hash of this breakdown to the kWh values
   def aggregate_by_day(bucketed_data, bucketed_data_count)
-    if @chart_config.key?(:filter) && (@chart_config[:filter].key?(:daytype) || @chart_config[:filter].key?(:daytype))
+    count = 0
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype)
       # this is slower, as it needs to loop through a day at a time
       # TODO(PH,17Jun2018) push down and optimise in series_data_manager
       @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
@@ -208,6 +212,7 @@ private
           multi_day_breakdown = @series_manager.get_data([:daterange, [date, date]])
           multi_day_breakdown.each do |key, value|
             add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+            count += 1
           end
         end
       end
@@ -217,9 +222,11 @@ private
         multi_day_breakdown = @series_manager.get_data([:daterange, date_range])
         multi_day_breakdown.each do |key, value|
           add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+          count += 1
         end
       end
     end
+    logger.info "aggregate_by_day:  aggegated #{count} items"
   end
 
   def match_filter_by_day(date)
@@ -284,16 +291,18 @@ private
     # replace dates on x axis with degree days, but retain them for future point labelling
     x_axis = @x_axis
     @x_axis = @bucketed_data[dd_or_temp_key]
+    @x_axis_bucket_date_ranges = @xbucketor.x_axis_bucket_date_ranges # may not work? PH 7Oct2018
     @bucketed_data.delete(dd_or_temp_key)
 
     # insert dates back in as 'silent' y2_axis
     @data_labels = x_axis
   end
 
-  # remove zero data - issue with filtered scatter charts, and the difficulty or representing ni (NaN) in Excel charts
+  # remove zero data - issue with filtered scatter charts, and the difficulty or representing nan (NaN) in Excel charts
   # the issue is the xbuckector doesn't know in advance the data is to be filtered based on the data
-  # but the charting products can;t distinguish between empty data and zero data
+  # but the charting products can't distinguish between empty data and zero data
   def remove_zero_data
+    count = 0  
     indices_of_data_to_be_removed = []
     (0..@x_axis.length - 1).each do |index|
       indices_of_data_to_be_removed.push(index) if @x_axis[index] == 0
@@ -310,14 +319,14 @@ private
         end
       end
     end
+    logger.info "Removing zero data: removed #{indices_of_data_to_be_removed.length} items"
   end
 
   # pattern matches on series_names, removing any from list which don't match
   def remove_filtered_series
     keep_key_list = []
-    logger.debug "Y" * 140
     ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-    logger.info "Filtering #{@bucketed_data.keys}"
+    logger.info "Filtering start #{@bucketed_data.keys}"
     logger.debug @chart_config[:filter].inspect if @chart_config.key?(:filter)
     if @chart_config[:series_breakdown] == :submeter
       if @chart_config[:filter].key?(:submeter)
@@ -330,6 +339,14 @@ private
     if @chart_config.key?(:filter) && @chart_config[:filter].key?(:heating)
       filter = @chart_config[:filter][:heating] ? [SeriesNames::HEATINGDAY, SeriesNames::HEATINGDAYMODEL] : [SeriesNames::NONHEATINGDAY, SeriesNames::NONHEATINGDAYMODEL]
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filter)
+    end
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:fuel)
+      filtered_fuel = @chart_config[:filter][:fuel]
+      keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, [filtered_fuel])
+    end
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype)
+      filtered_daytype = @chart_config[:filter][:daytype]
+      keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, [filtered_daytype])
     end
     keep_key_list.push(SeriesNames::DEGREEDAYS) if @bucketed_data.key?(SeriesNames::DEGREEDAYS)
     keep_key_list.push(SeriesNames::TEMPERATURE) if @bucketed_data.key?(SeriesNames::TEMPERATURE)
@@ -344,9 +361,8 @@ private
     remove_list.each do |remove_series_name|
       @bucketed_data.delete(remove_series_name)
     end
-    logger.debug "Z" * 140
     logger.debug ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-    logger.debug "Filtered #{@bucketed_data.keys}"
+    logger.debug "Filtered End #{@bucketed_data.keys}"
   end
 
   def pattern_match_list_with_list(list, pattern_list)

@@ -5,7 +5,8 @@ require_rel '../test_support'
 
 class ReportConfigSupport
   include Logging
-  attr_reader :schools
+  attr_reader :schools, :chart_manager
+  attr_accessor :worksheet_charts
   def initialize
 
     # @dashboard_page_groups = now in lib/dashboard/charting_and_reports/dashboard_configuration.rb

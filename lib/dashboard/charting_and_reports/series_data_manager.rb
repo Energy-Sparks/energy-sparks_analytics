@@ -251,6 +251,8 @@ class SeriesDataManager
         breakdown = breakdown_to_meter_level(date, date, halfhour_index)
       elsif @breakdown_list.include?(:fuel)
         breakdown = fuel_breakdown_halfhour(date, halfhour_index)
+      elsif @breakdown_list.include?(:daytype)
+        breakdown = daytype_breakdown_halfhour(date, halfhour_index, meter)
       else
         breakdown[SeriesNames::NONE] = meter.amr_data.kwh(date, halfhour_index)
       end
@@ -406,6 +408,30 @@ private
         logger.error "Unable to aggregate data for #{date} - exception raise"
       end
     end
+    daytype_data
+  end
+
+  def daytype_breakdown_halfhour(date, halfhour_index, meter)
+    factor = scaling_factor(1.0, meter.fuel_type) # lookup once for performance
+    val = meter.amr_data.kwh(date, halfhour_index) * factor
+
+    daytype_data = {
+      SeriesNames::HOLIDAY => 0.0,
+      SeriesNames::WEEKEND => 0.0,
+      SeriesNames::SCHOOLDAYOPEN => 0.0,
+      SeriesNames::SCHOOLDAYCLOSED => 0.0
+    }
+
+    if @meter_collection.holidays.holiday?(date)
+      daytype_data[SeriesNames::HOLIDAY] = val
+    elsif DateTimeHelper.weekend?(date)
+      daytype_data[SeriesNames::WEEKEND] = val
+    else
+      dt = DateTimeHelper.datetime(date, halfhour_index)
+      daytype_type = @meter_collection.school_day_in_hours(dt) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
+      daytype_data[daytype_type] = val
+    end
+
     daytype_data
   end
 
@@ -589,7 +615,7 @@ private
         end
       when :year
         if hash_value.is_a?(Integer)
-          raise 'Error: expecting zero of negative number for year specification' if hash_value > 0
+          raise 'Error: expecting zero or negative number for year specification' if hash_value > 0
           periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
           raise EnergySparksMissingPeriodForSpecifiedPeriodChart.new("Error: data not available for #{hash_value}th year") if hash_value.magnitude > periods.length - 1
           @periods = [periods[hash_value.magnitude]]
@@ -624,6 +650,13 @@ private
           @periods = [period]
         else
           raise EnergySparksBadChartSpecification.new('Expecting integer for :schoolweek timescale configuration')
+        end
+      when :daterange # used in chart drilldown
+        if hash_value.is_a?(Array) && hash_value.length == 2
+          period = SchoolDatePeriod.new(:daterange, 'date range', hash_value[0], hash_value[1])
+          @periods = [period]
+        else
+          raise EnergySparksBadChartSpecification.new('Expecting array of 2 dates for :daterange :timescale chart definition')
         end
       when :day
         if hash_value.is_a?(Integer) # hash_value weeks back from latest week

@@ -1,12 +1,16 @@
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
-  attr_reader :standard_charts, :school
+  include Logging
+
+  attr_reader :school
 
   def initialize(school)
     @school = school
   end
 
+=begin
+# TODO(PH,7Oct2018) - remove if not used soon after
   def run_standard_charts
     chart_definitions = []
     STANDARD_CHARTS.each do |chart_param|
@@ -14,6 +18,7 @@ class ChartManager
     end
     chart_definitions
   end
+=end
 
   def run_chart_group(chart_param)
     if chart_param.is_a?(Symbol)
@@ -48,31 +53,120 @@ class ChartManager
     chart_group_result
   end
 
-  def run_standard_chart(chart_param)
-    chart_config = STANDARD_CHART_CONFIGURATION[chart_param].dup
+  def drilldown(old_chart_name, chart_config_original, series_name, x_axis_range)
+    
+
+    chart_config = resolve_chart_inheritance(chart_config_original)
+
+    if chart_config[:series_breakdown] == :baseload || 
+       chart_config[:series_breakdown] == :cusum ||
+       chart_config[:series_breakdown] == :hotwater ||
+       chart_config[:chart1_type]      == :scatter
+       # these special case may need reviewing if we decide to aggregate
+       # these types of graphs by anything other than days
+       # therefore create a single date datetime drilldown
+
+       chart_config[:chart1_type] = :column
+       chart_config[:series_breakdown] = :none
+    else
+      puts "Starting drilldown chart config:"
+      ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
+
+      chart_config.delete(:inject)
+
+      unless series_name.nil?
+        new_filter = drilldown_series_name(chart_config, series_name)
+        chart_config = chart_config.merge(new_filter)
+      end
+
+      chart_config[:chart1_type] = :column if chart_config[:chart1_type] == :bar
+    end
+
+    unless x_axis_range.nil?
+      new_timescale_x_axis = drilldown_daterange(chart_config, x_axis_range)
+      chart_config = chart_config.merge(new_timescale_x_axis)
+    end
+
+    new_chart_name = (old_chart_name.to_s + '_drilldown').to_sym
+
+    chart_config[:name] += (series_name.nil? && x_axis_range.nil?) ? ' no drilldown' : ' drilldown'
+
+    puts "Final drilldown chart config: #{chart_config}"
+    ap(chart_config, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
+
+    [new_chart_name, chart_config]
+  end
+
+  def drilldown_series_name(chart_config, series_name)
+    existing_filter = chart_config.key?(:filter) ? chart_config[:filter] : {}
+    existing_filter[chart_config[:series_breakdown]] = series_name
+    new_filter = { filter: existing_filter }
+  end
+
+  def drilldown_daterange(chart_config, x_axis_range)
+    new_x_axis = x_axis_drilldown(chart_config[:x_axis])
+    if new_x_axis.nil?
+      throw EnergySparksBadChartSpecification.new("Illegal drilldown requested for #{chart_config[:name]}  call drilldown_available first")
+    end
+
+    date_range_config = {
+      timescale: { daterange: [x_axis_range[0], x_axis_range[1]]},
+      x_axis: new_x_axis
+    }
+  end
+
+  def drilldown_available(chart_config)
+    !x_axis_drilldown(chart_config[:x_axis]).nil?
+  end
+
+  def x_axis_drilldown(existing_x_axis_config)
+    case existing_x_axis_config
+    when :year, :academicyear
+      :week
+    when :month, :week
+      :day
+    when :day
+      :datetime
+    when :datetime, :dayofweek, :intraday, :nodatebuckets
+      nil
+    else
+      throw EnergySparksBadChartSpecification.new("Unhandled x_axis drilldown config #{existing_x_axis_config}")
+    end
+  end
+
+  # recursively inherit previous chart definitions config
+  def resolve_chart_inheritance(chart_config_original)
+    chart_config = chart_config_original.dup
     while chart_config.key?(:inherits_from)
       base_chart_config_param = chart_config[:inherits_from]
       base_chart_config = STANDARD_CHART_CONFIGURATION[base_chart_config_param].dup
       chart_config.delete(:inherits_from)
       chart_config = base_chart_config.merge(chart_config)
     end
+    chart_config
+  end
+
+  def run_standard_chart(chart_param)
+    chart_config = resolve_chart_inheritance(STANDARD_CHART_CONFIGURATION[chart_param])
     chart_definition = run_chart(chart_config, chart_param)
     chart_definition
   end
 
   def run_chart(chart_config, chart_param)
+    logger.info '>' * 120
     # puts 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
     begin
       aggregator = Aggregator.new(@school, chart_config)
 
-      # rubocop:disable Lint/AmbiguousBlockAssociation
-      # puts Benchmark.measure { aggregator.aggregate }
-      # rubocop:enable Lint/AmbiguousBlockAssociation
       aggregator.aggregate
 
       graph_data = configure_graph(aggregator, chart_config, chart_param)
+
+      ap(graph_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
+      
+      logger.info '<' * 120
 
       graph_data
     rescue StandardError => e
@@ -88,6 +182,7 @@ class ChartManager
     graph_definition[:title]          = chart_config[:name] + ' ' + aggregator.title_summary
 
     graph_definition[:x_axis]         = aggregator.x_axis
+    graph_definition[:x_axis_ranges]  = aggregator.x_axis_bucket_date_ranges
     graph_definition[:x_data]         = aggregator.bucketed_data
     graph_definition[:chart1_type]    = chart_config[:chart1_type]
     graph_definition[:chart1_subtype] = chart_config[:chart1_subtype]

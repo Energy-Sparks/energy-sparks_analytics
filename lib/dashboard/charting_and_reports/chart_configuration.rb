@@ -25,25 +25,7 @@ class ChartManager
       series_breakdown: :fuel,
       yaxis_units:      :£,
       yaxis_scaling:    :none,
-      inject:           :benchmark,
-      drilldown:        nil
-      # timescale:        :year
-    },
-    benchmark_drildown:  {
-      name:             'Weekly Electricity and Gas Consumption',
-      chart1_type:      :column,
-      x_axis:           :week,
-      inject:           nil,
-      timescale:        :year,
-      inherits_from:    :benchmark
-    },
-    benchmark_drildown_drilldown:  {
-      name:             'Intraweek Electricity and Gas Consumption',
-      chart1_type:      :column,
-      x_axis:           :datetime,
-      inject:           nil,
-      timescale:        :week,
-      inherits_from:    :benchmark
+      inject:           :benchmark
     },
     benchmark_electric:  {
       name:             'Benchmark Comparison (Annual Electricity Consumption)',
