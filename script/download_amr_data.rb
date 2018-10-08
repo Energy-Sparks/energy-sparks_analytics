@@ -32,7 +32,8 @@ end
   'Stanton Drew Primary School'       => :bathhacked,
   'Trinity First School'              => :fromecsv,
   'Twerton Infant School'             => :bathhacked,
-  'Westfield Primary'                 => :bathhacked
+  'Westfield Primary'                 => :bathhacked,
+  'Bankwood Primary School'           => :sheffieldcsv
 }
 
 def parse_command_line

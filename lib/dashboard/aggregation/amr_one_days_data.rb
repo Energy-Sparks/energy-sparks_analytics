@@ -9,6 +9,7 @@
 # i.e. the flattened database representation is made hierarchical for that day for performance reasons
 class OneDayAMRReading
   include Comparable
+  include Logging
 
   attr_reader :meter_id, :date, :type, :substitute_date, :upload_datetime
   attr_reader :one_day_kwh, :kwh_data_x48
@@ -53,6 +54,10 @@ class OneDayAMRReading
       if kwh_halfhour(i).is_a?(Float) || kwh_halfhour(i).is_a?(Integer)
         data_count += 1
       end
+    end
+    if data_count != 48
+      logger.info "Incomplete AMR data expecting 48 readings, got #{data_count} for date #{@date}"
+      logger.info @kwh_data_x48
     end
     data_count
   end

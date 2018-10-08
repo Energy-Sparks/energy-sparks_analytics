@@ -27,7 +27,8 @@ class ReportConfigSupport
       'Stanton Drew Primary School'       => :electric_only,
       'Trinity First School'              => :electric_and_gas,
       'Twerton Infant School'             => :electric_and_gas,
-      'Westfield Primary'                 => :electric_and_gas
+      'Westfield Primary'                 => :electric_and_gas,
+      'Bankwood Primary School'           => :electric_and_gas
     }
     @benchmarks = []
 

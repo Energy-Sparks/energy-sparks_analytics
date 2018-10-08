@@ -31,6 +31,8 @@ class MeterReadingsDownloadBase
       LoadSchoolFromFromeFiles.new(meter_collection)
     when :analytics_db
       LocalAnalyticsMeterReadingDB.new(meter_collection)
+    when :sheffieldcsv
+      LoadSchoolFromSheffieldCSV.new(meter_collection)
     else
       throw EnergySparksUnexpectedStateException.new('Unknown download type') if download_type.nil?
       throw EnergySparksUnexpectedStateException.new("Unknown download type #{download_type}") if !download_type.nil?
