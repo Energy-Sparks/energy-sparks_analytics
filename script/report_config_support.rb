@@ -6,7 +6,8 @@ require_rel '../test_support'
 class ReportConfigSupport
   include Logging
   attr_reader :schools, :chart_manager
-  attr_accessor :worksheet_charts
+  attr_accessor :worksheet_charts, :excel_name 
+
   def initialize
 
     # @dashboard_page_groups = now in lib/dashboard/charting_and_reports/dashboard_configuration.rb
@@ -32,7 +33,6 @@ class ReportConfigSupport
     }
     @benchmarks = []
 
-    ENV[SchoolFactory::ENV_SCHOOL_DATA_SOURCE] = SchoolFactory::BATH_HACKED_SCHOOL_DATA
     ENV['School Dashboard Advice'] = 'Include Header and Body'
     $SCHOOL_FACTORY = SchoolFactory.new
 
@@ -78,17 +78,14 @@ class ReportConfigSupport
 
   def load_school(school_name, suppress_debug = false)
     logger.debug self.class.banner("School: #{school_name}")
+    @excel_name = school_name
 
     @school_name = school_name
 
-    @school_metadata = AnalysticsSchoolAndMeterMetaData.new if @school_metadata.nil?
-    
-    @school = @school_metadata.school(school_name)
-
-    readings_db = LocalAnalyticsMeterReadingDB.new(@school)
-    readings_db.load_meter_readings
+    @school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
 
     @chart_manager = ChartManager.new(@school)
+    
     @school # needed to run simulator
   end
 
@@ -129,7 +126,7 @@ class ReportConfigSupport
   end
 
   def write_excel
-    excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + @school_name + '- charts test.xlsx')
+    excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + @excel_name + '- charts test.xlsx')
     @worksheet_charts.each do |worksheet_name, charts|
       excel.add_charts(worksheet_name, charts)
     end

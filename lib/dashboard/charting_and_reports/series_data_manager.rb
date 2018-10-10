@@ -732,6 +732,10 @@ private
     @last_chart_date = periods.first.end_date # years in reverse chronological order
   end
 
+  def y2_axis_uses_temperatures
+    @chart_configuration.key?(:y2_axis) && (@chart_configuration[:y2_axis] == :degreedays ||  @chart_configuration[:y2_axis] == :temperature)
+  end
+
   def calculate_first_meter_date
     meter_date = Date.new(1995, 1, 1)
     unless @meters[0].nil?
@@ -740,6 +744,11 @@ private
     if !@meters[1].nil? && @meters[1].amr_data.start_date > meter_date
       meter_date = @meters[1].amr_data.start_date
     end
+    if y2_axis_uses_temperatures && @meter_collection.temperatures.start_date > meter_date
+      logger.info "Reducing meter range because temperature axis with less data on chart #{meter_date} versus #{@meter_collection.temperatures.start_date}"
+      meter_date = @meter_collection.temperatures.start_date # this may not be strict enough?
+    end
+    meter_date = @chart_configuration[:min_combined_school_date] if @chart_configuration.key?(:min_combined_school_date)
     meter_date
   end
 
@@ -751,6 +760,11 @@ private
     if !@meters[1].nil? && @meters[1].amr_data.end_date < meter_date
       meter_date = @meters[1].amr_data.end_date
     end
+    if y2_axis_uses_temperatures && @meter_collection.temperatures.end_date < meter_date
+      logger.info "Reducing meter range because temperature axis with less data on chart #{meter_date} versus #{@meter_collection.temperatures.start_date}"
+      meter_date = @meter_collection.temperatures.end_date # this may not be strict enough?
+    end
+    meter_date = @chart_configuration[:max_combined_school_date] if @chart_configuration.key?(:max_combined_school_date)
     meter_date
   end
 

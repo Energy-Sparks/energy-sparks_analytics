@@ -29,63 +29,23 @@ class Aggregator
     YAxisScaling.unit_description(@chart_config[:yaxis_units], @chart_config[:yaxis_scaling], value)
   end
 
-  # parked until implemented
-  def dummy_load_schools
-    if @chart_config.key?(:schools) # TODO(PH,3Jun2018) - complete implementation, issue aligning xbuckets
-      logger.debug 'got more than one school'
-      @chart_config[:schools].each do |school_name|
-        logger.debug ">" * 200
-        logger.debug school_name
-        school = $SCHOOL_FACTORY.load_school(school_name)
-        logger.debug school.name
-        logger.debug ">" * 200
-      end
-    end
-  end
-
-  def aggregate_multiple_charts(periods)
-    bucketed_period_data = []
-
-    # iterate through the time periods aggregating
-    periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-      chartconfig_copy = @chart_config.clone
-      chartconfig_copy[:timescale] = period
-      begin
-        bucketed_period_data.push(aggregate_period(chartconfig_copy))
-      rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-        logger.error e
-        logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
-      rescue StandardError => e
-        logger.error e
-      end
-    end
-    bucketed_period_data
-  end
-
-  def merge_multiple_charts(bucketed_period_data)
-    @bucketed_data = {}
-    @bucketed_data_count = {}
-    bucketed_period_data.each do |period_data|
-      bucketed_data, bucketed_data_count, time_description = period_data
-      bucketed_data.each do |series_name, x_data|
-        new_series_name = series_name.to_s + ':' + time_description
-        @bucketed_data[new_series_name] = x_data
-      end
-      bucketed_data_count.each do |series_name, x_data|
-        new_series_name = series_name.to_s + ':' + time_description
-        @bucketed_data_count[new_series_name] = x_data
-      end
-    end
-    [@bucketed_data, @bucketed_data_count]
-  end
-
   def aggregate
+    bucketed_period_data = nil
+    schools = nil
+    if @chart_config.key?(:schools)
+      schools = load_schools(@chart_config[:schools])
+    end
     periods = time_periods
 
-    bucketed_period_data = aggregate_multiple_charts(periods)
+    if false || schools.nil?
+      bucketed_period_data = aggregate_multiple_charts(periods)
+    else
+      determine_multi_school_chart_date_range(schools, @chart_config)
+      bucketed_period_data = run_charts_for_multiple_schools(schools, periods)
+    end
 
     if bucketed_period_data.length > 1 || periods.length > 1
-      @bucketed_data, @bucketed_data_count = merge_multiple_charts(bucketed_period_data)
+      @bucketed_data, @bucketed_data_count = merge_multiple_charts(bucketed_period_data, schools)
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
@@ -109,6 +69,106 @@ class Aggregator
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
+  end
+
+  private
+
+  # parked until implemented
+  def load_schools(school_list)
+    puts "LOADING SCHOOLS " * 10
+    # school = $SCHOOL_FACTORY.load_school(school_name)
+    schools = []
+    school_list.each do |school_attribute|
+      identifier_type, identifier = school_attribute.first
+      puts "School: #{identifier_type} #{identifier}"
+      school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(identifier_type, identifier, :analytics_db)
+      schools.push(school)
+    end
+    schools
+  end
+
+  def determine_multi_school_chart_date_range(schools, chart_config)
+    logger.info '-' * 120
+    logger.info "Determining maximum chart range for #{schools.length} schools:"
+    min_date = nil
+    max_date = nil
+
+    schools.each do |school|
+      series_manager = SeriesDataManager.new(school, chart_config)
+      logger.info "    #{school.name} from #{series_manager.first_meter_date} to  #{series_manager.last_meter_date}"
+      min_date = series_manager.first_meter_date if min_date.nil? || series_manager.first_meter_date > min_date
+      max_date = series_manager.last_meter_date  if max_date.nil? || series_manager.last_meter_date  < max_date
+    end
+
+    chart_config[:min_combined_school_date] = min_date
+    chart_config[:max_combined_school_date]  = max_date
+
+    logger.info "Combined school charts date range #{min_date} to #{max_date}"
+    logger.info '-' * 120
+  end
+
+  def run_charts_for_multiple_schools(schools, periods)
+    bucketed_period_data = []
+
+    saved_meter_collection = @meter_collection
+
+    # iterate through the time periods aggregating
+    schools.each do |school| # do in reverse so final iteration represents the x-axis dates
+      @meter_collection = school
+      periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
+        chartconfig_copy = @chart_config.clone
+        chartconfig_copy[:timescale] = period
+        begin
+          bucketed_period_data.push(aggregate_period(chartconfig_copy))
+        rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
+          logger.error e
+          logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+        rescue StandardError => e
+          logger.error e
+        end
+      end
+    end
+
+    @meter_collection = saved_meter_collection
+
+    bucketed_period_data
+  end
+
+  def aggregate_multiple_charts(periods)
+    bucketed_period_data = []
+
+    # iterate through the time periods aggregating
+    periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
+      chartconfig_copy = @chart_config.clone
+      chartconfig_copy[:timescale] = period
+      begin
+        bucketed_period_data.push(aggregate_period(chartconfig_copy))
+      rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
+        logger.error e
+        logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+      rescue StandardError => e
+        logger.error e
+      end
+    end
+    bucketed_period_data
+  end
+
+  def merge_multiple_charts(bucketed_period_data, schools)
+    @bucketed_data = {}
+    @bucketed_data_count = {}
+    bucketed_period_data.each do |period_data|
+      bucketed_data, bucketed_data_count, time_description, school_name = period_data
+      school_name = schools.length <= 1 ? '' : (':' + school_name)
+      bucketed_data.each do |series_name, x_data|
+        new_series_name = series_name.to_s + ':' + time_description + school_name
+        @bucketed_data[new_series_name] = x_data
+      end
+      bucketed_data_count.each do |series_name, x_data|
+        new_series_name = series_name.to_s + ':' + time_description + school_name
+        @bucketed_data_count[new_series_name] = x_data
+      end
+    end
+    [@bucketed_data, @bucketed_data_count]
   end
 
   def reverse_series_name_order(format)
@@ -192,7 +252,7 @@ class Aggregator
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
 
-    [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description]
+    [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description, @meter_collection.name]
   end
 
 private

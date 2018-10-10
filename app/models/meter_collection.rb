@@ -46,7 +46,7 @@ class MeterCollection
     @cached_close_time = DateTime.new(0, 1, 1, 16, 30, 0) # for speed
 
     if Object.const_defined?('ScheduleDataManager')
-      logger.info "Running standalone, not in Rails environment"
+      logger.info 'Running standalone, not in Rails environment'
 
       # Normally these would come from the school, hard coded at the mo
       @holiday_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
@@ -54,8 +54,22 @@ class MeterCollection
       @solar_irradiance_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
       @solar_pv_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
     else
-      logger.info "Running in Rails environment"
+      logger.info 'Running in Rails environment'
       throw ArgumentException if school.meters.empty?
+    end
+  end
+
+  def matches_identifier?(identifier, identifier_type)
+    case identifier_type
+    when :name
+      identifier == name
+    when :urn
+      identifier == urn
+    when :postcode
+      identifier == postcode
+    else
+      throw EnergySparksUnexpectedStateException.new("Unexpected nil school identifier_type") if identifier_type.nil?
+      throw EnergySparksUnexpectedStateException.new("Unknown or implement school identifier lookup #{identifier_type}")
     end
   end
 

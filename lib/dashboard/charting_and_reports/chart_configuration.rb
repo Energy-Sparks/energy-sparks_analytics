@@ -93,6 +93,44 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    group_by_week_electricity_school_comparison: {
+      inherits_from:    :group_by_week_electricity,
+      name:             'By Week: Electricity - School Comparison',
+      series_breakdown: :none,
+      chart1_subtype:   nil,
+      yaxis_scaling:    :per_floor_area,
+      schools: [
+        { urn: 109089 },  # Paulton Junior
+        { urn: 109328 },  # St Marks
+        { urn: 109005 },  # St Johns
+        { urn: 109081 }   # Castle
+      ]
+    },
+    electricity_longterm_trend_school_comparison: {
+      inherits_from:    :electricity_longterm_trend,
+      name:             'Electricity: long term trends school comparison',
+      series_breakdown: :none,
+      chart1_subtype:   nil,
+      yaxis_scaling:    :per_floor_area,
+      schools: [
+        { urn: 109089 },  # Paulton Junior
+        { urn: 109328 },  # St Marks
+        { urn: 109005 },  # St Johns
+        { urn: 109081 }   # Castle
+      ]
+    },
+    intraday_line_school_days_school_comparison: {
+      inherits_from:    :intraday_line_school_days,
+      name:             'Electricity: comparison of last 2 years and school comparison',
+      series_breakdown: :none,
+      yaxis_scaling:    :per_200_pupils,
+      schools: [
+        { urn: 109089 },  # Paulton Junior
+        { urn: 109328 },  # St Marks
+        { urn: 109005 },  # St Johns
+        { urn: 109081 }   # Castle
+      ]
+    },
     group_by_week_electricity_unlimited: {
       name:             'By Week: Electricity (multi-year)',
       chart1_type:      :column,

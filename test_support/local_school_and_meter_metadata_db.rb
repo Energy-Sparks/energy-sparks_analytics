@@ -12,11 +12,18 @@ class AnalysticsSchoolAndMeterMetaData
     load_schools_metadata 
   end
 
-  def school(school_name)
-    @meter_collections[school_name]
+  def school(identifier, identifier_type = :name)
+    find_school(identifier, identifier_type)
   end
 
   private
+
+  def find_school(identifier, identifier_type)
+    @meter_collections.each_value do |meter_collection|
+      return meter_collection if meter_collection.matches_identifier?(identifier, identifier_type)
+    end
+    nil
+  end
 
   def meterreadings_cache_directory
     ENV['CACHED_METER_READINGS_DIRECTORY'] ||= File.join(File.dirname(__FILE__), '../MeterReadings/')
