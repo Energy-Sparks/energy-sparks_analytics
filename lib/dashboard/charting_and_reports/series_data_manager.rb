@@ -598,6 +598,9 @@ private
       when :week
         period = SchoolDatePeriod.new(:week, 'current week', @last_meter_date - 6, @last_meter_date)
         @periods = [period]
+      when :day
+        period = SchoolDatePeriod.new(:day, 'latest day', @last_meter_date, @last_meter_date)
+        @periods = [period]
       else
         raise "Unsupported time period for charting #{@chart_configuration[:timescale]}"
       end
@@ -622,6 +625,11 @@ private
         elsif hash_value.is_a?(Date)
           end_date = hash_value > @last_meter_date ? @last_meter_date : hash_value
           @periods = @meter_collection.holidays.years_to_date(@first_meter_date, end_date, false)
+        elsif hash_value.is_a?(Range)
+          raise 'Error: expecting zero or negative number for year specification' if hash_value.last > 0
+          periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
+          raise EnergySparksMissingPeriodForSpecifiedPeriodChart.new("Error: data not available for #{hash_value.first}th year") if hash_value.first.magnitude > periods.length - 1
+          @periods = [SchoolDatePeriod.merge_two_periods(periods[hash_value.last.magnitude], periods[hash_value.first.magnitude])]
         else
           raise "Expecting an integer or date as an parameter for a year specification got a #{hash_value.class.name}"
         end
@@ -639,13 +647,22 @@ private
           end_date = hash_value + 6 > @last_meter_date ? @last_meter_date : hash_value + 6
           start_date = end_date - 6
           period = SchoolDatePeriod.new(:week, 'current week', start_date, end_date)
+        elsif hash_value.is_a?(Range)
+          raise 'Error: expecting zero or negative number for week specification' if hash_value.last > 0
+          end_date = @last_meter_date - 7 * hash_value.last.magnitude
+          start_date = @last_meter_date - 7 * hash_value.first.magnitude - 6
+          if start_date < @first_meter_date
+            raise "Error: date request for week of data out of range start date #{start_date} before first meter data #{@first_meter_date}"
+          else
+            period = SchoolDatePeriod.new(:week, 'range of weeks', start_date, end_date)
+          end
         else
           raise "Expecting an integer or date as an parameter for a week specification got a #{hash_value.class.name}"
         end
         @periods = [period]
       when :schoolweek
         if hash_value.is_a?(Integer)
-          sunday, saturday = @meter_collection.holidays.nth_school_week(@last_meter_date, hash_value)
+          sunday, saturday, _week_count = @meter_collection.holidays.nth_school_week(@last_meter_date, hash_value)
           period = SchoolDatePeriod.new(:schoolweek, 'current week', sunday, saturday)
           @periods = [period]
         else
@@ -672,6 +689,15 @@ private
           start_date = hash_value
           end_date = start_date
           period = SchoolDatePeriod.new(:day, 'one day', start_date, end_date)
+        elsif hash_value.is_a?(Range)
+          raise 'Error: expecting zero or negative number for day specification' if hash_value.last > 0
+          end_date = @last_meter_date - 1 * hash_value.last.magnitude
+          start_date = @last_meter_date - 1 * hash_value.first.magnitude
+          if start_date < @first_meter_date
+            raise "Error: date request for day of data out of range start date #{start_date} before first meter data #{@first_meter_date}"
+          else
+            period = SchoolDatePeriod.new(:day, 'range of days', start_date, end_date)
+          end
         else
           raise "Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}"
         end

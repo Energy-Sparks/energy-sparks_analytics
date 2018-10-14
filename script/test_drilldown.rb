@@ -88,7 +88,7 @@ chart_list_for_page = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:main_dashbo
 chart_list_for_page += DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:electricity_detail][:charts]
 chart_list_for_page += DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:gas_detail][:charts]
 chart_list_for_page += DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:boiler_control][:charts]
-chart_list_for_page =  [:hotwater]
+# chart_list_for_page =  [:electricity_by_month_year_0_1]
 
 total_charts = 0
 

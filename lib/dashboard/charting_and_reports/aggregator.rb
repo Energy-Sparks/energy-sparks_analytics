@@ -29,20 +29,22 @@ class Aggregator
     YAxisScaling.unit_description(@chart_config[:yaxis_units], @chart_config[:yaxis_scaling], value)
   end
 
+  def initialise_schools_date_range
+    schools = @chart_config.key?(:schools) ? load_schools(@chart_config[:schools]) : [ @meter_collection ]
+
+    determine_multi_school_chart_date_range(schools, @chart_config)
+
+    [@chart_config, schools]
+  end
+
   def aggregate
     bucketed_period_data = nil
-    schools = nil
-    if @chart_config.key?(:schools)
-      schools = load_schools(@chart_config[:schools])
-    end
+
+    _chart_config, schools = initialise_schools_date_range
+
     periods = time_periods
 
-    if false || schools.nil?
-      bucketed_period_data = aggregate_multiple_charts(periods)
-    else
-      determine_multi_school_chart_date_range(schools, @chart_config)
-      bucketed_period_data = run_charts_for_multiple_schools(schools, periods)
-    end
+    bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods)
 
     if bucketed_period_data.length > 1 || periods.length > 1
       @bucketed_data, @bucketed_data_count = merge_multiple_charts(bucketed_period_data, schools)
@@ -101,13 +103,14 @@ class Aggregator
     end
 
     chart_config[:min_combined_school_date] = min_date
-    chart_config[:max_combined_school_date]  = max_date
+    chart_config[:max_combined_school_date] = max_date
 
-    logger.info "Combined school charts date range #{min_date} to #{max_date}"
+    description = schools.length > 1 ? 'Combined school charts' : 'School chart'
+    logger.info description + " date range #{min_date} to #{max_date}"
     logger.info '-' * 120
   end
 
-  def run_charts_for_multiple_schools(schools, periods)
+  def run_charts_for_multiple_schools_and_time_periods(schools, periods)
     bucketed_period_data = []
 
     saved_meter_collection = @meter_collection
@@ -158,7 +161,7 @@ class Aggregator
     @bucketed_data_count = {}
     bucketed_period_data.each do |period_data|
       bucketed_data, bucketed_data_count, time_description, school_name = period_data
-      school_name = schools.length <= 1 ? '' : (':' + school_name)
+      school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + school_name)
       bucketed_data.each do |series_name, x_data|
         new_series_name = series_name.to_s + ':' + time_description + school_name
         @bucketed_data[new_series_name] = x_data
@@ -286,7 +289,7 @@ private
         end
       end
     end
-    logger.info "aggregate_by_day:  aggegated #{count} items"
+    logger.info "aggregate_by_day:  aggregated #{count} items"
   end
 
   def match_filter_by_day(date)

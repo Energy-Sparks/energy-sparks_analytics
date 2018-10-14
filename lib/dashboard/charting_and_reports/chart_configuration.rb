@@ -93,6 +93,24 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    electricity_by_day:  {
+      inherits_from:    :group_by_week_electricity,
+      name:             'By Day: Electricity',
+      x_axis:           :day,
+      timescale:        :week
+    },
+    electricity_by_datetime:  {
+      inherits_from:    :group_by_week_electricity,
+      name:             'By Time: Electricity',
+      x_axis:           :datetime,
+      timescale:        :day
+    },
+    electricity_by_datetime_line_kw:  {
+      inherits_from:    :electricity_by_datetime,
+      chart1_type:      :line,
+      series_breakdown: :none,
+      yaxis_units:      :kw
+    },
     group_by_week_electricity_school_comparison: {
       inherits_from:    :group_by_week_electricity,
       name:             'By Week: Electricity - School Comparison',
@@ -105,6 +123,10 @@ class ChartManager
         { urn: 109005 },  # St Johns
         { urn: 109081 }   # Castle
       ]
+    },
+    group_by_week_electricity_school_comparison_line: {
+      inherits_from:    :group_by_week_electricity_school_comparison,
+      chart1_type:      :line
     },
     electricity_longterm_trend_school_comparison: {
       inherits_from:    :electricity_longterm_trend,

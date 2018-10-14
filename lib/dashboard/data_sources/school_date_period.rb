@@ -18,6 +18,16 @@ class SchoolDatePeriod
     @end_date - @start_date
   end
 
+  def self.merge_two_periods(period_1, period_2)
+    if period_1.start_date >= period_2.start_date && period_1.end_date >= period_2.end_date
+      SchoolDatePeriod.new(period_1.type, period_1.title + 'merged', period_2.start_date, period_1.end_date)
+    elsif period_2.start_date >= period_1.start_date && period_2.end_date >= period_1.end_date
+      SchoolDatePeriod.new(period_2.type, period_2.title + 'merged', period_1.start_date, period_2.end_date)
+    else
+      throw EnergySparksUnexpectedStateException.new('Expected School Period merge request for overlapping date ranges')
+    end
+  end
+
   def self.find_period_for_date(date, periods)
     periods.each do |period|
       if date.nil? || period.nil? || period.start_date.nil? || period.end_date.nil?
