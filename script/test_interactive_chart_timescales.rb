@@ -29,7 +29,8 @@ def test_timescale_manipulation_on_standard_chart(existing_chart_config, existin
   new_chart_config = existing_chart_config.dup
 
   @tests.each do |test|
-    new_chart_config = chart_manager.adjust_timescale(existing_chart_name, new_chart_config, test[:command], test[:amount])
+    manipulator = ChartManagerTimescaleManipulation.factory(test[:command],  new_chart_config, chart_manager.school)
+    new_chart_config = manipulator.adjust_timescale(test[:amount])
     new_chart_config[:name] = name + test[:name] + ' units'
     chart_result = chart_manager.run_chart(new_chart_config, existing_chart_name)
     if chart_result.nil?
