@@ -93,6 +93,11 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    group_by_week_electricity_test_range: {
+      inherits_from:    :group_by_week_electricity,
+      name:             'By Day: Electricity Range Test',
+      timescale:        {year: -3..-1}
+    },
     electricity_by_day:  {
       inherits_from:    :group_by_week_electricity,
       name:             'By Day: Electricity',
