@@ -5,6 +5,7 @@ require_rel '../test_support'
 require './script/report_config_support.rb'
 # MAIN
 
+=begin
 class Hash
   def to_params
     params = ''
@@ -42,6 +43,8 @@ class Hash
     h
   end
 end
+
+=end
 
 reports = ReportConfigSupport.new
 
