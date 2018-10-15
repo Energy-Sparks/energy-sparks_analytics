@@ -1,11 +1,9 @@
-# Chart Manager - aggregates data for graphing - producing 'Charts'
-#                - which include basic data for graphing, comments, alerts
+# Chart Manager drilldown
+# - given and existing chart, and drilldown, returns a drilldown chart
 class ChartManager
   include Logging
 
   def drilldown(old_chart_name, chart_config_original, series_name, x_axis_range)
-    
-
     chart_config = resolve_chart_inheritance(chart_config_original)
 
     if chart_config[:series_breakdown] == :baseload || 
