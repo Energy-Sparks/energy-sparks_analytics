@@ -59,14 +59,14 @@ def list_missing_amr_data(school_name, meter)
   Logging.logger.debug "#{school_name}: #{meter.meter_type} #{meter.id} processing data from  #{amr_data.start_date}  to #{amr_data.end_date} #{days_data} days data #{missing_dates.length} missing"
   summarise_missing_dates(missing_dates) if missing_dates.length > 0
 end
-ENV[SchoolFactory::ENV_SCHOOL_DATA_SOURCE] = SchoolFactory::BATH_HACKED_SCHOOL_DATA
+
 ENV['CACHED_METER_READINGS_DIRECTORY'] = './MeterReadings/'
 
 $SCHOOL_FACTORY = SchoolFactory.new
 
 list_of_schools.each do |school_name|
   Logging.logger.debug school_name
-  meter_collection = $SCHOOL_FACTORY.load_school(school_name, false)
+  meter_collection = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
   Logging.logger.debug meter_collection.methods.grep(/ete/)
   meter_collection.heat_meters.each do |heat_meter|
     # logger.debug "Got #{heat_meter.meter_type} #{heat_meter.id}"

@@ -28,6 +28,13 @@ list_of_schools.each do |school_name|
 
   next if school.aggregated_heat_meters.nil?
 
+  fitter = HeatingRegressionModelFitter.new(school)
+
+  fitter.run_temperature_balance_point_fit_on_simple_model_for_all_meters
+
+  break
+
+=begin
   heat_amr_data = school.aggregated_heat_meters.amr_data
 
   bm = Benchmark.measure {
@@ -64,11 +71,14 @@ list_of_schools.each do |school_name|
         puts "heavy: t = #{temperature} sd = #{sd.round(0)} mean = #{mean.round(0)}"
       end
     end
+=end
   }
 
   puts "Fitting took: #{bm.to_s}"
 
   reports.do_one_page(:heating_model_fitting)
+
+  reports.excel_name = 'Heat Model Fitting'
 
   reports.save_excel_and_html
 

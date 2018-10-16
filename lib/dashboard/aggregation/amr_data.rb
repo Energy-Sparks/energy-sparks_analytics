@@ -18,19 +18,36 @@ class AMRData < HalfHourlyData
   end
 
   def data(date, halfhour_index)
-    thrown EnergySparksUnexpectedStateException.new('Deprecated call to amr_data.data()')
+    throw EnergySparksUnexpectedStateException.new('Deprecated call to amr_data.data()')
   end
 
   def days_kwh_x48(date)
     self[date].kwh_data_x48
   end
 
+  def set_days_kwh_x48(date, days_kwh_data_x48)
+    self[date].set_days_kwh_x48(days_kwh_data_x48)
+  end
+
   def kwh(date, halfhour_index)
     self[date].kwh_halfhour(halfhour_index)
   end
 
+  def set_kwh(date, halfhour_index, kwh)
+    self[date].set_kwh_halfhour(halfhour_index, kwh)
+  end
+
+  def add_to_kwh(date, halfhour_index, kwh)
+    self[date].set_kwh_halfhour(halfhour_index, kwh + kwh(date, halfhour_index))
+  end
+
   def one_day_kwh(date)
     self[date].one_day_kwh
+  end
+
+   # called from inherited half_hourly)data.one_day_total(date), shouldn't use generally
+  def one_day_total(date)
+    one_day_kwh(date)
   end
 
   def baseload_kw(date)
@@ -58,16 +75,16 @@ class AMRData < HalfHourlyData
     count = 0
     if hhi2 > hhi1 # same day
       (hhi1..hhi2).each do |halfhour_index|
-        total_kwh += data(date, halfhour_index)
+        total_kwh += kwh(date, halfhour_index)
         count += 1
       end
     else
       (hhi1..48).each do |halfhour_index| # before midnight
-        total_kwh += data(date, halfhour_index)
+        total_kwh += kwh(date, halfhour_index)
         count += 1
       end
       (0..hhi2).each do |halfhour_index| # after midnight
-        total_kwh += data(date, halfhour_index)
+        total_kwh += kwh(date, halfhour_index)
         count += 1
       end
     end
@@ -123,7 +140,7 @@ class AMRData < HalfHourlyData
   def self.create_empty_dataset(type, start_date, end_date)
     data = AMRData.new(type)
     (start_date..end_date).each do |date|
-      data.add(date, Array.new(48, 0.0))
+      data.add(date, OneDayAMRReading.new('Unknown', date, 'ORIG', nil, DateTime.now, Array.new(48, 0.0)))
     end
     data
   end
@@ -161,6 +178,24 @@ class AMRData < HalfHourlyData
       if type != 'ORIG'
         cpdp = CompactDatePrint.new(dates)
         cpdp.log
+      end
+    end
+  end
+  
+    # take one set (dd_data) of half hourly data from self
+  # - avoiding performance hit of taking a copy
+  # caller expected to ensure start and end dates reasonable
+  def minus_self(dd_data, min_value = nil)
+    sd = start_date > dd_data.start_date ? start_date : dd_data.start_date
+    ed = end_date < dd_data.end_date ? end_date : dd_data.end_date
+    (sd..ed).each do |date|
+      (0..47).each do |halfhour_index|
+        updated_kwh = kwh(date, halfhour_index) - dd_data.kwh(date, halfhour_index)
+        if min_value.nil?
+          set_kwh(date, halfhour_index, updated_kwh)
+        else
+          set_kwh(date, halfhour_index, updated_kwh > min_value ? updated_kwh : min_value)
+        end
       end
     end
   end

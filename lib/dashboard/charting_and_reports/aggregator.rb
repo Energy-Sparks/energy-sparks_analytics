@@ -228,7 +228,7 @@ class Aggregator
     @series_manager = SeriesDataManager.new(@meter_collection, chart_config)
     @series_names = @series_manager.series_bucket_names
     logger.info "Aggregating these series #{@series_names}"
-    logger.info "Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"
+    logger.info "aggregate_period Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"
 
     if @series_manager.periods.empty?
       raise "Error: not enough data available to create requested chart"
@@ -238,7 +238,7 @@ class Aggregator
     @x_axis = @xbucketor.x_axis
     @x_axis_bucket_date_ranges = @xbucketor.x_axis_bucket_date_ranges
     logger.debug "Breaking down into #{@xbucketor.x_axis.length} X axis (date/time range) buckets"
-
+    logger.debug "x_axis between #{@xbucketor.data_start_date} and #{@xbucketor.data_end_date} "
     bucketed_data, bucketed_data_count = create_empty_bucket_series
 
     # loop through date groups on the x-axis; calculate aggregate data for each series in date range

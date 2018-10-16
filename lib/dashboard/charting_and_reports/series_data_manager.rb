@@ -193,8 +193,8 @@ class SeriesDataManager
         end_date_str = dates[1].strftime('%d %m %Y')
         logger.error "Error: getting data for time period #{start_date_str} to #{end_date_str}"
       end
-      logger.error ee.message
-      logger.error ee.backtrace
+      logger.info ee.message
+      logger.info ee.backtrace
     end
   end
 

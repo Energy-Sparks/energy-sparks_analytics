@@ -4,11 +4,11 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
-school_name = 'Twerton Infant School'
+school_name = 'St Marks Secondary'
 
 module Logging
-  @logger = Logger.new('Results/test-simulator ' + Time.now.strftime('%H %M') + '.log')
-  logger.level = :error # :debug
+  @logger = Logger.new('log/test-simulator ' + Time.now.strftime('%H %M') + '.log')
+  logger.level = :debug # :debug
 end
 ENV['AWESOMEPRINT'] = 'off'
 
