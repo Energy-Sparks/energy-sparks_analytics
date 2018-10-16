@@ -33,7 +33,7 @@ chart_list_for_page.each do |chart_name|
   chart_config = reports.chart_manager.resolve_chart_inheritance(chart_config)
   chart_result = reports.chart_manager.run_chart(chart_config, chart_name)
   original_chart_results.push(chart_result)
-  puts 'Params:', chart_config.to_params
+  puts 'Params:', chart_config.to_params_es
 
   chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name]
   chart_config.delete(:min_combined_school_date)

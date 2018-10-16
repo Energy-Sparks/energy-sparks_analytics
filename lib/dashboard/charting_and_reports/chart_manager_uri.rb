@@ -19,7 +19,7 @@ class ChartManager
     chart_config = chart_config_orig.deep_dup
     chart_config.delete(:min_combined_school_date)
     chart_config.delete(:max_combined_school_date)
-    encoded = chart_config.to_params.gsub(' ', '+')
+    encoded = chart_config.to_params_es.gsub(' ', '+')
     encoded = move_back_to_original_hash_position('timescale', chart_config, encoded)
     encoded = move_back_to_original_hash_position('filter', chart_config, encoded)
     decoded = decode_uri(encoded)
@@ -127,7 +127,7 @@ class ChartManager
 end
 
 class Hash
-  def to_params
+  def to_params_es
     params = ''
     stack = []
 
