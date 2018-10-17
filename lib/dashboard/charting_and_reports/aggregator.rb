@@ -8,7 +8,8 @@
 class Aggregator
   include Logging
 
-  attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis, :data_labels
+  attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis
+  attr_reader :x_axis_bucket_date_ranges, :data_labels
 
   def initialize(meter_collection, chart_config, show_reconciliation_values)
     @show_reconciliation_values = show_reconciliation_values
@@ -25,57 +26,25 @@ class Aggregator
     YAxisScaling.unit_description(@chart_config[:yaxis_units], @chart_config[:yaxis_scaling], value)
   end
 
+  def initialise_schools_date_range
+    schools = @chart_config.key?(:schools) ? load_schools(@chart_config[:schools]) : [ @meter_collection ]
+
+    determine_multi_school_chart_date_range(schools, @chart_config)
+
+    [@chart_config, schools]
+  end
+
   def aggregate
-    # the normal case is a single time period, but for comparison purposes
-    # multiple time periods are supported, this is achieved by iterating
-    # 1 time period at a time, aggregating, then updating the series names
+    bucketed_period_data = nil
+
+    _chart_config, schools = initialise_schools_date_range
+
     periods = time_periods
-    bucketed_period_data = []
 
-    if @chart_config.key?(:schools) # TODO(PH,3Jun2018) - complete implementation, issue aligning xbuckets
-      logger.debug 'got more than one school'
-      @chart_config[:schools].each do |school_name|
-        logger.debug ">" * 200
-        logger.debug school_name
-        school = $SCHOOL_FACTORY.load_school(school_name)
-        logger.debug school.name
-        logger.debug ">" * 200
-      end
-    end
+    bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods)
 
-    # iterate through the time periods aggregating
-    periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-      chartconfig_copy = @chart_config.clone
-      chartconfig_copy[:timescale] = period
-      begin
-        bucketed_period_data.push(aggregate_period(chartconfig_copy))
-      rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-        logger.error e
-        logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
-      rescue StandardError => e
-        logger.error e
-      end
-    end
-
-    # take the resulting buckets, 1 for each time period
-    # and update the series names if there is more than one period
-    # or if more than one was asked for but not enough data
-    # (EnergySparksMissingPeriodForSpecifiedPeriodChart) for user diagnostics
-    # so the user can see the remaining periods and the dates are not removed
     if bucketed_period_data.length > 1 || periods.length > 1
-      @bucketed_data = {}
-      @bucketed_data_count = {}
-      bucketed_period_data.each do |period_data|
-        bucketed_data, bucketed_data_count, time_description = period_data
-        bucketed_data.each do |series_name, x_data|
-          new_series_name = series_name.to_s + ':' + time_description
-          @bucketed_data[new_series_name] = x_data
-        end
-        bucketed_data_count.each do |series_name, x_data|
-          new_series_name = series_name.to_s + ':' + time_description
-          @bucketed_data_count[new_series_name] = x_data
-        end
-      end
+      @bucketed_data, @bucketed_data_count = merge_multiple_charts(bucketed_period_data, schools)
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
@@ -101,6 +70,107 @@ class Aggregator
     @chart_config[:y_axis_label] = y_axis_label(nil)
   end
 
+  private
+
+  # parked until implemented
+  def load_schools(school_list)
+    puts "LOADING SCHOOLS " * 10
+    # school = $SCHOOL_FACTORY.load_school(school_name)
+    schools = []
+    school_list.each do |school_attribute|
+      identifier_type, identifier = school_attribute.first
+      puts "School: #{identifier_type} #{identifier}"
+      school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(identifier_type, identifier, :analytics_db)
+      schools.push(school)
+    end
+    schools
+  end
+
+  def determine_multi_school_chart_date_range(schools, chart_config)
+    logger.info '-' * 120
+    logger.info "Determining maximum chart range for #{schools.length} schools:"
+    min_date = nil
+    max_date = nil
+
+    schools.each do |school|
+      series_manager = SeriesDataManager.new(school, chart_config)
+      logger.info "    #{school.name} from #{series_manager.first_meter_date} to  #{series_manager.last_meter_date}"
+      min_date = series_manager.first_meter_date if min_date.nil? || series_manager.first_meter_date > min_date
+      max_date = series_manager.last_meter_date  if max_date.nil? || series_manager.last_meter_date  < max_date
+    end
+
+    chart_config[:min_combined_school_date] = min_date
+    chart_config[:max_combined_school_date] = max_date
+
+    description = schools.length > 1 ? 'Combined school charts' : 'School chart'
+    logger.info description + " date range #{min_date} to #{max_date}"
+    logger.info '-' * 120
+  end
+
+  def run_charts_for_multiple_schools_and_time_periods(schools, periods)
+    bucketed_period_data = []
+
+    saved_meter_collection = @meter_collection
+
+    # iterate through the time periods aggregating
+    schools.each do |school| # do in reverse so final iteration represents the x-axis dates
+      @meter_collection = school
+      periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
+        chartconfig_copy = @chart_config.clone
+        chartconfig_copy[:timescale] = period
+        begin
+          bucketed_period_data.push(aggregate_period(chartconfig_copy))
+        rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
+          logger.error e
+          logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+        rescue StandardError => e
+          logger.error e
+        end
+      end
+    end
+
+    @meter_collection = saved_meter_collection
+
+    bucketed_period_data
+  end
+
+  def aggregate_multiple_charts(periods)
+    bucketed_period_data = []
+
+    # iterate through the time periods aggregating
+    periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
+      chartconfig_copy = @chart_config.clone
+      chartconfig_copy[:timescale] = period
+      begin
+        bucketed_period_data.push(aggregate_period(chartconfig_copy))
+      rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
+        logger.error e
+        logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+      rescue StandardError => e
+        logger.error e
+      end
+    end
+    bucketed_period_data
+  end
+
+  def merge_multiple_charts(bucketed_period_data, schools)
+    @bucketed_data = {}
+    @bucketed_data_count = {}
+    bucketed_period_data.each do |period_data|
+      bucketed_data, bucketed_data_count, time_description, school_name = period_data
+      school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + school_name)
+      bucketed_data.each do |series_name, x_data|
+        new_series_name = series_name.to_s + ':' + time_description + school_name
+        @bucketed_data[new_series_name] = x_data
+      end
+      bucketed_data_count.each do |series_name, x_data|
+        new_series_name = series_name.to_s + ':' + time_description + school_name
+        @bucketed_data_count[new_series_name] = x_data
+      end
+    end
+    [@bucketed_data, @bucketed_data_count]
+  end
+
   def reverse_series_name_order(format)
     if format.is_a?(Symbol) && format == :reverse
       @bucketed_data = @bucketed_data.to_a.reverse.to_h
@@ -119,6 +189,7 @@ class Aggregator
 
   def reverse_x_axis
     @x_axis = @x_axis.reverse
+    @x_axis_bucket_date_ranges = @x_axis_bucket_date_ranges.reverse
 
     @bucketed_data.each_key do |series_name|
       @bucketed_data[series_name] = @bucketed_data[series_name].reverse
@@ -154,7 +225,7 @@ class Aggregator
     @series_manager = SeriesDataManager.new(@meter_collection, chart_config)
     @series_names = @series_manager.series_bucket_names
     logger.info "Aggregating these series #{@series_names}"
-    logger.info "Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"
+    logger.info "aggregate_period Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"
 
     if @series_manager.periods.empty?
       raise "Error: not enough data available to create requested chart"
@@ -162,8 +233,9 @@ class Aggregator
     @xbucketor = XBucketBase.create_bucketor(chart_config[:x_axis], @series_manager.periods)
     @xbucketor.create_x_axis
     @x_axis = @xbucketor.x_axis
+    @x_axis_bucket_date_ranges = @xbucketor.x_axis_bucket_date_ranges
     logger.debug "Breaking down into #{@xbucketor.x_axis.length} X axis (date/time range) buckets"
-
+    logger.debug "x_axis between #{@xbucketor.data_start_date} and #{@xbucketor.data_end_date} "
     bucketed_data, bucketed_data_count = create_empty_bucket_series
 
     # loop through date groups on the x-axis; calculate aggregate data for each series in date range
@@ -180,7 +252,7 @@ class Aggregator
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
 
-    [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description]
+    [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description, @meter_collection.name]
   end
 
 private
@@ -189,7 +261,8 @@ private
   # e.g. 'school day in hours' v. 'school day out of hours'
   # returns a hash of this breakdown to the kWh values
   def aggregate_by_day(bucketed_data, bucketed_data_count)
-    if @chart_config.key?(:filter) && (@chart_config[:filter].key?(:daytype) || @chart_config[:filter].key?(:daytype))
+    count = 0
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype)
       # this is slower, as it needs to loop through a day at a time
       # TODO(PH,17Jun2018) push down and optimise in series_data_manager
       @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
@@ -203,6 +276,7 @@ private
               value = 0.0
             end
             add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+            count += 1
           end
         end
       end
@@ -216,9 +290,11 @@ private
             value = 0.0
           end
           add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+          count += 1
         end
       end
     end
+    logger.info "aggregate_by_day:  aggregated #{count} items"
   end
 
   def match_filter_by_day(date)
@@ -283,16 +359,18 @@ private
     # replace dates on x axis with degree days, but retain them for future point labelling
     x_axis = @x_axis
     @x_axis = @bucketed_data[dd_or_temp_key]
+    @x_axis_bucket_date_ranges = @xbucketor.x_axis_bucket_date_ranges # may not work? PH 7Oct2018
     @bucketed_data.delete(dd_or_temp_key)
 
     # insert dates back in as 'silent' y2_axis
     @data_labels = x_axis
   end
 
-  # remove zero data - issue with filtered scatter charts, and the difficulty or representing ni (NaN) in Excel charts
+  # remove zero data - issue with filtered scatter charts, and the difficulty or representing nan (NaN) in Excel charts
   # the issue is the xbuckector doesn't know in advance the data is to be filtered based on the data
-  # but the charting products can;t distinguish between empty data and zero data
+  # but the charting products can't distinguish between empty data and zero data
   def remove_zero_data
+    count = 0
     indices_of_data_to_be_removed = []
     (0..@x_axis.length - 1).each do |index|
       indices_of_data_to_be_removed.push(index) if @x_axis[index] == 0
@@ -309,14 +387,14 @@ private
         end
       end
     end
+    logger.info "Removing zero data: removed #{indices_of_data_to_be_removed.length} items"
   end
 
   # pattern matches on series_names, removing any from list which don't match
   def remove_filtered_series
     keep_key_list = []
-    logger.debug "Y" * 140
     ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-    logger.info "Filtering #{@bucketed_data.keys}"
+    logger.info "Filtering start #{@bucketed_data.keys}"
     logger.debug @chart_config[:filter].inspect if @chart_config.key?(:filter)
     if @chart_config[:series_breakdown] == :submeter
       if @chart_config[:filter].key?(:submeter)
@@ -330,8 +408,18 @@ private
       filter = @chart_config[:filter][:heating] ? [SeriesNames::HEATINGDAY, SeriesNames::HEATINGDAYMODEL] : [SeriesNames::NONHEATINGDAY, SeriesNames::NONHEATINGDAYMODEL]
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filter)
     end
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:fuel)
+      filtered_fuel = @chart_config[:filter][:fuel]
+      keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, [filtered_fuel])
+    end
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype)
+      filtered_daytype = @chart_config[:filter][:daytype]
+      keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, [filtered_daytype])
+    end
     keep_key_list.push(SeriesNames::DEGREEDAYS) if @bucketed_data.key?(SeriesNames::DEGREEDAYS)
     keep_key_list.push(SeriesNames::TEMPERATURE) if @bucketed_data.key?(SeriesNames::TEMPERATURE)
+    keep_key_list.push(SeriesNames::IRRADIANCE) if @bucketed_data.key?(SeriesNames::IRRADIANCE)
+    keep_key_list.push(SeriesNames::GRIDCARBON) if @bucketed_data.key?(SeriesNames::GRIDCARBON)
 
     remove_list = []
     @bucketed_data.each_key do |series_name|
@@ -341,9 +429,8 @@ private
     remove_list.each do |remove_series_name|
       @bucketed_data.delete(remove_series_name)
     end
-    logger.debug "Z" * 140
     logger.debug ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-    logger.debug "Filtered #{@bucketed_data.keys}"
+    logger.debug "Filtered End #{@bucketed_data.keys}"
   end
 
   def pattern_match_list_with_list(list, pattern_list)
@@ -363,11 +450,8 @@ private
 
     # rubocop:disable Style/ConditionalAssignment
     y2_axis_names = []
-    if @chart_config[:y2_axis] == :degreedays
-      y2_axis_names = @bucketed_data.keys.grep(/#{SeriesNames::DEGREEDAYS}/)
-    else
-      y2_axis_names = @bucketed_data.keys.grep(/#{SeriesNames::TEMPERATURE}/)
-    end
+    key_name = SeriesNames.y2_axis_key(@chart_config[:y2_axis])
+    y2_axis_names = @bucketed_data.keys.grep(/#{key_name}/)
     # rubocop:enable Style/ConditionalAssignment
     @y2_axis = {}
     y2_axis_names.each do |series_name|

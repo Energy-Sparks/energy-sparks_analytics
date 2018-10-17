@@ -5,13 +5,14 @@ require_rel '../test_support'
 require './script/report_config_support.rb'
 
 module Logging
-  @logger = Logger.new('Results/test-dashboard ' + Time.now.strftime('%H %M') + '.log')
+  @logger = Logger.new('log/test-dashboard ' + Time.now.strftime('%H %M') + '.log')
   logger.level = :debug
 end
 
+
 reports = ReportConfigSupport.new
 
-reports.load_school('Roundhill School', true)
+reports.load_school('St Marks Secondary', true)
 
 # testing examples
 #
@@ -24,8 +25,10 @@ reports.load_school('Roundhill School', true)
 # as done automatically:
 
 # reports.do_all_standard_pages_for_school
+# reports.do_one_page(:main_dashboard_electric_and_gas)
+# reports.do_one_page(:test)
 
-reports.do_one_page(:test)
+reports.do_all_schools(true)
 
 reports.save_excel_and_html
 

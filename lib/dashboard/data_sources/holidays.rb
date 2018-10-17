@@ -100,13 +100,14 @@ class Holidays
 
   # iterate backwards to find nth school week before date, skipping holidays
   # last week = 0, previous school week = -1, iterates on Sunday-Saturday boundary
-  def nth_school_week(asof_date, nth_week_number, min_days_in_school_week = 3)
+  def nth_school_week(asof_date, nth_week_number, min_days_in_school_week = 3, min_date = nil)
     raise EnergySparksBadChartSpecification.new("Badly specified nth_school_week #{nth_week_number} must be zero or negative") if nth_week_number > 0
     raise EnergySparksBadChartSpecification.new("Badly specified min_days_in_school_week #{min_days_in_school_week} must be > 0") if min_days_in_school_week <= 0
     limit = 2000
     week_count = nth_week_number.magnitude
     saturday = asof_date.saturday? ? asof_date : nearest_previous_saturday(asof_date)
     loop do
+      break if !min_date.nil? && saturday <= min_date
       monday = saturday - 5
       friday = saturday - 1
       holiday_days_in_week = holidaydays_in_range(monday, friday)
@@ -116,11 +117,31 @@ class Holidays
       limit -= 1
       raise EnergySparksUnexpectedStateException.new('Gone too many times around loop looking for school weeks, not sure why error has occurred') if limit <= 0
     end
-    [saturday - 6, saturday]
+    [saturday - 6, saturday, week_count]
+  end
+
+  # doesn't really fit here, but for the moment can't think of a better place
+  # mix of class and instance 'holiday' access isn't ideal
+  def self.periods_in_date_range(start_date, end_date, period_type, holidays)
+    case period_type
+    when :year
+      ((end_date - start_date + 1) / 365.0).floor
+    when :academicyear
+      academic_years(start_date, end_date).length
+    when :week
+      ((end_date - start_date + 1) / 7.0).floor
+    when :day, :datetime
+      end_date - start_date + 1
+    when :school_week
+      _sunday, _saturday, week_count = holidays.nth_school_week(end_date, -1000, 3, start_date)
+      1000 - week_count
+    else
+      throw EnergySparksUnexpectedStateException.new("Unsupported period type #{period_type} for periods_in_date_range request")
+    end
   end
 
   # was originally included in ActiveSupport code base, may be lost in rails integration
-  # not sure whethe it includes current Saturday, assume not, so if date is already a Saturday, returns date - 7
+  # not sure whether it includes current Saturday, assume not, so if date is already a Saturday, returns date - 7
   def nearest_previous_saturday(date)
     date - (date.wday + 1)
   end
@@ -216,7 +237,7 @@ class Holidays
       nil
     else
       acy_year = AcademicYear.new(summer_hol_before.end_date + 1, summer_hol_after.end_date, @holidays)
-      logger.debug "Found academic year for date #{date} - year from #{acy_year.start_date} #{acy_year.end_date}"
+      # logger.debug "Found academic year for date #{date} - year from #{acy_year.start_date} #{acy_year.end_date}"
       acy_year
     end
   end
@@ -237,8 +258,6 @@ class Holidays
     hol = find_holiday_in_academic_year_private(academic_year, holiday_type)
     if hol.nil?
       logger.debug "Unable to find holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date}"
-    else
-      logger.debug "Found holiday of type #{holiday_type} in academic year #{academic_year.start_date} to #{academic_year.end_date} from #{hol.start_date} to #{hol.end_date}"
     end
     hol
   end

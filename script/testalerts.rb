@@ -15,12 +15,11 @@ def banner(title)
 end
 school_name = 'Paulton Junior School'
 
-ENV[SchoolFactory::ENV_SCHOOL_DATA_SOURCE] = SchoolFactory::BATH_HACKED_SCHOOL_DATA
 ENV['School Dashboard Advice'] = 'Include Header and Body'
 $SCHOOL_FACTORY = SchoolFactory.new
 
 puts banner("School: #{school_name}")
-school = $SCHOOL_FACTORY.load_school(school_name)
+school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
 
 
 analysis_asof_date = Date.new(2018, 2, 2)

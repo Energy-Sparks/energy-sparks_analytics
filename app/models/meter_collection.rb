@@ -19,7 +19,7 @@ class MeterCollection
   attr_reader :floor_area, :number_of_pupils
 
   # Currently, but not always
-  attr_reader :school, :name, :address, :postcode
+  attr_reader :school, :name, :address, :postcode, :urn, :area_name
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
@@ -37,7 +37,11 @@ class MeterCollection
     @storage_heater_meters = []
     @heating_models = {}
     @school = school
-
+    @urn = school.urn
+    @meter_identifier_lookup = {} # [mpan or mprn] => meter
+    @area_name = school.area_name
+    @aggregated_heat_meters = nil
+    @aggregated_electricity_meters = nil
 
     @cached_open_time = DateTime.new(0, 1, 1, 7, 0, 0) # for speed
     @cached_close_time = DateTime.new(0, 1, 1, 16, 30, 0) # for speed
@@ -94,9 +98,59 @@ class MeterCollection
       result.each do |row|
         amr_data.add(Date.parse(row["day"]), row["values"].delete('{}').split(',').map(&:to_f))
       end
+
       throw ArgumentException if school.meters.empty?
     end
     amr_data
+  end
+
+  def matches_identifier?(identifier, identifier_type)
+    case identifier_type
+    when :name
+      identifier == name
+    when :urn
+      identifier == urn
+    when :postcode
+      identifier == postcode
+    else
+      throw EnergySparksUnexpectedStateException.new("Unexpected nil school identifier_type") if identifier_type.nil?
+      throw EnergySparksUnexpectedStateException.new("Unknown or implement school identifier lookup #{identifier_type}")
+    end
+  end
+
+  def to_s
+    'Meter Collection:' + name + ':' + all_meters.join(';')
+  end
+
+  def meter?(identifier)
+    return @meter_identifier_lookup[identifier] if @meter_identifier_lookup.key?(identifier)
+
+    all_meters.each do |meter|
+      if meter.id == identifier
+        @meter_identifier_lookup[identifier] = meter
+        return meter
+      end
+    end
+    @meter_identifier_lookup[identifier] = nil
+  end
+
+  def all_meters
+    meter_groups = [
+      @heat_meters,
+      @electricity_meters,
+      @solar_pv_meters,
+      @storage_heater_meters,
+      @aggregated_heat_meters,
+      @aggregated_electricity_meters
+    ]
+
+    meter_list = []
+    meter_groups.each do |meter_group|
+      unless meter_group.nil?
+        meter_list += meter_group.is_a?(Meter) ? [meter_group] : meter_group
+      end
+    end
+    meter_list
   end
 
   def school_type
@@ -106,11 +160,23 @@ class MeterCollection
   def add_heat_meter(meter)
     meter.meter_type = meter.meter_type.to_sym if meter.meter_type.instance_of? String
     @heat_meters.push(meter)
+    @meter_identifier_lookup[meter.id] = meter
   end
 
   def add_electricity_meter(meter)
      meter.meter_type = meter.meter_type.to_sym if meter.meter_type.instance_of? String
     @electricity_meters.push(meter)
+    @meter_identifier_lookup[meter.id] = meter
+  end
+
+  def add_aggregate_heat_meter(meter)
+    @aggregated_heat_meters = meter
+    @meter_identifier_lookup[meter.id] = meter
+  end
+
+  def add_aggregate_electricity_meter(meter)
+    @aggregated_electricity_meters = meter
+    @meter_identifier_lookup[meter.id] = meter
   end
 
   def is_open?(time)
@@ -170,6 +236,10 @@ class MeterCollection
     else
       ScheduleDataManager.solar_pv(@solar_pv_schedule_name)
     end
+  end
+
+  def grid_carbon_intensity
+    ScheduleDataManager.uk_grid_carbon_intensity
   end
 
   def heating_model(period)

@@ -5,7 +5,9 @@ require_rel '../test_support'
 
 class ReportConfigSupport
   include Logging
-  attr_reader :schools
+  attr_reader :schools, :chart_manager
+  attr_accessor :worksheet_charts, :excel_name 
+
   def initialize
 
     # @dashboard_page_groups = now in lib/dashboard/charting_and_reports/dashboard_configuration.rb
@@ -22,17 +24,20 @@ class ReportConfigSupport
       'Saltford C of E Primary School'    => :electric_and_gas,
       'St Marks Secondary'                => :electric_and_gas,
       'St Johns Primary'                  => :electric_and_gas,
+      'St Saviours Junior'                => :electric_and_gas,
       'Stanton Drew Primary School'       => :electric_only,
+      'Trinity First School'              => :electric_and_gas,
       'Twerton Infant School'             => :electric_and_gas,
-      'Westfield Primary'                 => :electric_and_gas
+      'Westfield Primary'                 => :electric_and_gas,
+      'Bankwood Primary School'           => :electric_and_gas
     }
     @benchmarks = []
 
-    ENV[SchoolFactory::ENV_SCHOOL_DATA_SOURCE] = SchoolFactory::BATH_HACKED_SCHOOL_DATA
     ENV['School Dashboard Advice'] = 'Include Header and Body'
     $SCHOOL_FACTORY = SchoolFactory.new
 
     @chart_manager = nil
+    @school_metadata = nil
 
     logger.debug "\n" * 8
   end
@@ -65,18 +70,22 @@ class ReportConfigSupport
     '=' * len_before + title + '=' * len_after
   end
 
+  def setup_school(school, school_name)
+    @school_name = school_name
+    @school = school
+    @chart_manager = ChartManager.new(@school)
+  end
+
   def load_school(school_name, suppress_debug = false)
     logger.debug self.class.banner("School: #{school_name}")
+    @excel_name = school_name
+
     @school_name = school_name
-    if suppress_debug
-      logger.debug 'Loading school data.....output suppressed'
-      self.class.suppress_output(school_name) {
-        @school = $SCHOOL_FACTORY.load_school(school_name)
-      }
-    else
-      @school = $SCHOOL_FACTORY.load_school(school_name)
-    end
+
+    @school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
+
     @chart_manager = ChartManager.new(@school)
+    
     @school # needed to run simulator
   end
 
@@ -117,7 +126,7 @@ class ReportConfigSupport
   end
 
   def write_excel
-    excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + @school_name + '- charts test.xlsx')
+    excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + @excel_name + '- charts test.xlsx')
     @worksheet_charts.each do |worksheet_name, charts|
       excel.add_charts(worksheet_name, charts)
     end

@@ -7,7 +7,7 @@ class TimeOfYear
   def initialize(month, day_of_month)
     @relative_time = Time.new(1970, month, day_of_month, 0, 0, 0)
     @month = month
-    @day_of_month = @day_of_month
+    @day_of_month = day_of_month
   end
 
   def day
@@ -15,7 +15,7 @@ class TimeOfYear
   end
 
   def to_s
-    self.strftime('%d %b')
+    @relative_time.strftime('%d %b')
   end
 
   def <=>(other)

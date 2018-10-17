@@ -7,6 +7,15 @@ end
 class EnergySparksUnexpectedStateException < StandardError
 end
 
+class EnergySparksUnexpectedSchoolDataConfiguration < StandardError
+end
+
+class EnergySparksBadAMRDataTypeException < StandardError
+end
+
+class EnergySparksAbstractBaseClass < StandardError
+end
+
 class EnergySparksMissingPeriodForSpecifiedPeriodChart < StandardError
 end
 

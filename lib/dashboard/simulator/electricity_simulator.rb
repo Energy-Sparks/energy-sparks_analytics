@@ -10,6 +10,8 @@ class ElectricitySimulator
     @existing_electricity_meter = school.aggregated_electricity_meters
     @holidays = school.holidays
     @period = @holidays.years_to_date(electricity_meter_data.start_date, electricity_meter_data.end_date, false)[0]
+    # TODO(PH, 16Oct2018) - fudge to extend simulation to align to Saturday date boundaries for weekly charts - resolve
+    @period = SchoolDatePeriod.new(@period.type, @period.title, @period.start_date - 7, @period.end_date)
     @temperatures = school.temperatures
     @solar_irradiation = school.solar_irradiation
     @solar_pv = school.solar_pv
@@ -78,6 +80,8 @@ class ElectricitySimulator
     ap HashDiff.diff(appliance_definitions, ElectricitySimulatorConfiguration.new)
     puts "\n" * 3
 
+    logger.info "Running smilulation between #{@period.start_date} #{@period.end_date}"
+
     @total = empty_amr_data_set('Simulator Totals')
     total_amr_data = nil
 # rubocop:disable all
@@ -107,6 +111,7 @@ class ElectricitySimulator
       logger.info 'aggregate results'
       logger.info Benchmark.measure { total_amr_data = aggregate_results }
     }
+    log_component_totals
 # rubocop:enable all
     logger.info "Overall time #{time}"
 
@@ -131,7 +136,8 @@ class ElectricitySimulator
   def create_empty_amr_data(type)
     data = AMRData.new(type)
     (period.start_date..period.end_date).each do |date|
-      data.add(date, Array.new(48, 0.0))
+      zero_data = Array.new(48, 0.0)
+      data.add(date, OneDayAMRReading.new('unknown', date, 'ORIG', nil, DateTime.now, zero_data))
     end
     logger.debug "Creating empty #{type} simulator data, #{data.length} elements"
     data
@@ -166,7 +172,8 @@ class ElectricitySimulator
     totals = empty_amr_data_set('Totals')
     @calc_components_results.each do |key, value|
       (totals.start_date..totals.end_date).each do |date|
-        totals[date] = [totals[date], value[date]].transpose.map(&:sum)
+        halfhour_kwh_x48_total = [totals.days_kwh_x48(date), value.days_kwh_x48(date)].transpose.map(&:sum)
+        totals.set_days_kwh_x48(date, halfhour_kwh_x48_total)
       end
       sub_total = component_total(value)
       logger.debug "Component #{key} = #{sub_total} k_wh"
@@ -179,9 +186,17 @@ class ElectricitySimulator
   def component_total(component)
     total = 0.0
     (component.start_date..component.end_date).each do |date|
-      total += component[date].inject(:+)
+      total += component.one_day_kwh(date)
     end
     total
+  end
+
+  def log_component_totals
+    @calc_components_results.each do |key, component|
+      formatted_key = sprintf('%-35.35s', key)
+      formatted_total = sprintf('%8.0f kWh', component_total(component))
+      logger.info "#{formatted_key} #{formatted_total}"
+    end
   end
 
   #=======================================================================================================================================================================
@@ -208,12 +223,11 @@ class ElectricitySimulator
 
           power = peak_power * percent_of_peak * occupancy
 
-          lighting_data[date][half_hour_index] = power * 0.5 # # power kW to 1/2 hour k_wh
+          lighting_data.set_kwh(date, half_hour_index, power * 0.5) # # power kW to 1/2 hour k_wh
 
         end
       end
     end
-    component_total(lighting_data)
     @calc_components_results["Lighting"] = lighting_data
   end
 
@@ -267,11 +281,11 @@ class ElectricitySimulator
 
             case ict_appliance_group[:type]
             when 'server', :server
-              server_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
+              server_data.add_to_kwh(date, half_hour_index, power / 2) # power kW to 1/2 hour k_wh
             when 'desktop', :desktop
-              desktop_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
+              desktop_data.add_to_kwh(date, half_hour_index, power / 2) # power kW to 1/2 hour k_wh
             when 'laptop', :laptop
-              laptop_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
+              laptop_data.add_to_kwh(date, half_hour_index, power / 2) # power kW to 1/2 hour k_wh
             end
           end
         end
@@ -334,7 +348,7 @@ class ElectricitySimulator
             overlap = 0.5 # i.e. half and hour
           end
 
-          boiler_pump_data[date][half_hour_index] = pump_power * overlap # automatically in k_wh as conversion kW * time in hours
+          boiler_pump_data.set_kwh(date, half_hour_index, pump_power * overlap) # automatically in k_wh as conversion kW * time in hours
         end
       end
     end
@@ -350,7 +364,7 @@ class ElectricitySimulator
         (0..47).each do |half_hour_index|
           amr_gas_usage = @school.aggregated_heat_meters.amr_data.kwh(date,half_hour_index) || 0.0
           gas_power_consumption = amr_gas_usage * 2.0
-          boiler_pump_data[date][half_hour_index] = pump_power / 2.0 if (gas_power_consumption > pump__gas_on_criteria)
+          boiler_pump_data.set_kwh(date, half_hour_index, pump_power / 2.0) if (gas_power_consumption > pump__gas_on_criteria)
         end
       end
     end
@@ -414,7 +428,7 @@ class ElectricitySimulator
             overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, midnight0, sunrise)
             overlap += hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, sunset, midnight24)
 
-            lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
+            lighting_data.add_to_kwh(date, half_hour_index, power * overlap) # automatically in k_wh as conversion kW * time in hours
           end
         end
       when :ambient
@@ -422,7 +436,7 @@ class ElectricitySimulator
           (0..47).each do |half_hour_index|
             solar_insol = @solar_irradiation.irradiance(date, half_hour_index)
             if solar_insol < @appliance_definitions[:security_lighting][:ambient_threshold]
-              lighting_data[date][half_hour_index] += power / 2 # power kW to 1/2 hour k_wh
+              lighting_data.add_to_kwh(date, half_hour_index, power / 2) # power kW to 1/2 hour k_wh
             end
           end
         end
@@ -439,7 +453,7 @@ class ElectricitySimulator
             overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, midnight0, fixed_end_time)
             overlap += hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, fixed_start_time, midnight24)
 
-            lighting_data[date][half_hour_index] += power * overlap # automatically in k_wh as conversion kW * time in hours
+            lighting_data.add_to_kwh(date, half_hour_index, power * overlap) # automatically in k_wh as conversion kW * time in hours
           end
         end
       when :movement_sensor, :pir_sensor
@@ -515,13 +529,13 @@ class ElectricitySimulator
           # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
           overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, start_time, end_time)
 
-          kitchen_data[date][half_hour_index] = power * overlap # automatically in k_wh as conversion kW * time in hours
+          kitchen_data.set_kwh(date, half_hour_index, power * overlap) # automatically in k_wh as conversion kW * time in hours
 
           if has_warming_oven
             # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
             overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, warming_oven_start_time, warming_oven_end_time)
 
-            kitchen_data[date][half_hour_index] += warming_oven_power * overlap # automatically in k_wh as conversion kW * time in hours
+            kitchen_data.add_to_kwh(date, half_hour_index, warming_oven_power * overlap) # automatically in k_wh as conversion kW * time in hours
           end
         end
       end
@@ -529,7 +543,7 @@ class ElectricitySimulator
     if @appliance_definitions[:kitchen].key?(:average_refridgeration_power)
       (kitchen_data.start_date..kitchen_data.end_date).each do |date|
         (0..47).each do |half_hour_index|
-          kitchen_data[date][half_hour_index] += @appliance_definitions[:kitchen][:average_refridgeration_power] / 2.0 # kW to kWh per 0.5 hour
+          kitchen_data.add_to_kwh(date, half_hour_index, @appliance_definitions[:kitchen][:average_refridgeration_power] / 2.0) # kW to kWh per 0.5 hour
         end
       end
     end
@@ -563,17 +577,17 @@ class ElectricitySimulator
           # fractionally calculate overlap to get correct k_wh on non-half hour boundary overlap
           overlap = hours_overlap_between_two_time_ranges(amr_bucket_start_time, amr_bucket_end_time, start_time, end_time)
 
-          hot_water_data[date][half_hour_index] = average_power * overlap # automatically in k_wh as conversion kW * time in hours
+          hot_water_data.set_kwh(date, half_hour_index, average_power * overlap) # automatically in k_wh as conversion kW * time in hours
 
           # standby power out of schools hours
 
           if overlap < 0.5
-            hot_water_data[date][half_hour_index] += standby_power * (0.5 - overlap)
+            hot_water_data.add_to_kwh(date, half_hour_index, standby_power * (0.5 - overlap))
           end
         elsif weekend?(date) && @appliance_definitions[:electric_hot_water][:weekends]
-          hot_water_data[date][half_hour_index] = standby_power * 0.5 # power kW to 1/2 hour k_wh
+          hot_water_data.set_kwh(date, half_hour_index, standby_power * 0.5) # power kW to 1/2 hour k_wh
         elsif @holidays.holiday?(date) && @appliance_definitions[:electric_hot_water][:holidays]
-          hot_water_data[date][half_hour_index] = standby_power * 0.5 # power kW to 1/2 hour k_wh
+          hot_water_data.set_kwh(date, half_hour_index, standby_power * 0.5) # power kW to 1/2 hour k_wh
         end
       end
     end
@@ -611,7 +625,7 @@ class ElectricitySimulator
             power += heating_power
           end
 
-          electric_heating_data[date][half_hour_index] += check_positive(power * overlap) # automatically in k_wh as conversion kW * time in hours
+          electric_heating_data.add_to_kwh(date, half_hour_index, check_positive(power * overlap)) # automatically in k_wh as conversion kW * time in hours
         end
       end
     end
@@ -639,7 +653,7 @@ class ElectricitySimulator
                               booking[:start_time],
                               booking[:end_time]
                   )
-                  flood_lighting_data[date][half_hour_index] += check_positive(config[:power]) * overlap # overlap fn(T) so converts to kWh
+                  flood_lighting_data.add_to_kwh(date, half_hour_index, check_positive(config[:power]) * overlap) # overlap fn(T) so converts to kWh
                 end
               end
             end
@@ -690,7 +704,7 @@ class ElectricitySimulator
 
             air_con_power = power_by_degree_day * degree_days
 
-            air_con_data[date][half_hour_index] = air_con_power * overlap # automatically in k_wh as conversion kW * time in hours
+            air_con_data.set_kwh(date, half_hour_index, air_con_power * overlap) # automatically in k_wh as conversion kW * time in hours
           end
         end
       end
@@ -706,7 +720,7 @@ class ElectricitySimulator
 
     (unaccounted_for_baseload_data.start_date..unaccounted_for_baseload_data.end_date).each do |date|
       (0..47).each do |half_hour_index|
-        unaccounted_for_baseload_data[date][half_hour_index] = (baseload / 2) # power kW to 1/2 hour k_wh
+        unaccounted_for_baseload_data.set_kwh(date, half_hour_index, (baseload / 2)) # power kW to 1/2 hour k_wh
       end
     end
     @calc_components_results["Unaccounted For Baseload"] = unaccounted_for_baseload_data
@@ -738,11 +752,11 @@ class ElectricitySimulator
             solar_pv_data[date][half_hour_index] = -1.0 * kwp * pv_yield
           else # work out whether exporting or not
             pv_kwh = -1.0 * kwp * pv_yield
-            if totals_ex_pv[date][half_hour_index] + pv_kwh < 0
-              solar_pv_data[date][half_hour_index] = -1.0 * totals_ex_pv[date][half_hour_index] # internal consumption
-              solar_pv_data_export[date][half_hour_index] = totals_ex_pv[date][half_hour_index] + pv_kwh
+            if totals_ex_pv.kwh(date, half_hour_index) + pv_kwh < 0
+              solar_pv_data.set_kwh(date, half_hour_index, -1.0 * totals_ex_pv.kwh(date, half_hour_index)) # internal consumption
+              solar_pv_data_export.set_kwh(date, half_hour_index, totals_ex_pv.kwh(date, half_hour_index)  + pv_kwh)
             else
-              solar_pv_data[date][half_hour_index] = pv_kwh
+              solar_pv_data.set_kwh(date, half_hour_index, pv_kwh)
             end
           end
         end

@@ -18,6 +18,16 @@ class SchoolDatePeriod
     @end_date - @start_date
   end
 
+  def self.merge_two_periods(period_1, period_2)
+    if period_1.start_date >= period_2.start_date && period_1.end_date >= period_2.end_date
+      SchoolDatePeriod.new(period_1.type, period_1.title + 'merged', period_2.start_date, period_1.end_date)
+    elsif period_2.start_date >= period_1.start_date && period_2.end_date >= period_1.end_date
+      SchoolDatePeriod.new(period_2.type, period_2.title + 'merged', period_1.start_date, period_2.end_date)
+    else
+      throw EnergySparksUnexpectedStateException.new('Expected School Period merge request for overlapping date ranges')
+    end
+  end
+
   def self.find_period_for_date(date, periods)
     periods.each do |period|
       if date.nil? || period.nil? || period.start_date.nil? || period.end_date.nil?
@@ -42,6 +52,19 @@ class SchoolDatePeriod
       count += 1
     end
     nil
+  end
+
+  def self.info_compact(periods, columns = 3, with_count = true, date_format = '%a %d%b%y')
+    periods.each_slice(columns).to_a.each do |group_period|
+      line = '  '
+      group_period.each do |period|
+        d1 = period.start_date.strftime(date_format)
+        d2 = period.end_date.strftime(date_format)
+        length = period.end_date - period.start_date + 1
+        line += " #{d1} to #{d2}" + (with_count ? sprintf(' * %3d', length) : '')
+      end
+      Logging.logger.info line
+    end
   end
 
   def to_a
