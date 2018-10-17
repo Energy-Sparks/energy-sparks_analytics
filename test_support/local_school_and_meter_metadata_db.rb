@@ -140,7 +140,7 @@ class AnalysticsSchoolAndMeterMetaData
 
     logger.debug "Creating School: #{school_name} #{school_metadata[:postcode]}"
 
-    school = School.new(
+    school = SchoolAnalysis.new(
       school_name,
       school_metadata[:postcode],
       school_metadata[:floor_area],
