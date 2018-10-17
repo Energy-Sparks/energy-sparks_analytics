@@ -71,6 +71,7 @@ class ScheduleDataManager
     unless @@temperature_data.key?(area_name) # lazy load data if not already loaded
 
       temp_data = Temperatures.new('temperatures')
+
       if temperature_area_id
         process_feed_data(temp_data, "DataFeeds::WeatherUnderground", temperature_area_id, :temperature)
       else
@@ -87,15 +88,19 @@ class ScheduleDataManager
   end
 
   def self.solar_irradiation(area_name = nil, solar_irradiance_area_id = nil)
+
+    check_area_name(area_name)
+
     unless @@solar_irradiance_data.key?(area_name) # lazy load data if not already loaded
-      area = AreaNames.key_from_name(area_name)
-      filename = self.full_filepath(AreaNames.solar_irradiance_filename(area))
+
       solar_data = SolarIrradiance.new('solar irradiance')
 
       if solar_irradiance_area_id
         process_feed_data(solar_data, "DataFeeds::WeatherUnderground", solar_irradiance_area_id, :solar_irradiation)
       else
-        check_area_name(area_name)
+        area = AreaNames.key_from_name(area_name)
+        filename = self.full_filepath(AreaNames.solar_irradiance_filename(area))
+
         SolarIrradianceLoader.new(filename, solar_data)
         puts "Loaded #{solar_data.length} days of solar irradiance data"
       end
@@ -106,15 +111,19 @@ class ScheduleDataManager
   end
 
   def self.solar_pv(area_name = nil, solar_pv_tuos_area_id = nil)
+
+    check_area_name(area_name)
+
     unless @@solar_pv_data.key?(area_name) # lazy load data if not already loaded
-      area = AreaNames.key_from_name(area_name)
-      filename = self.full_filepath(AreaNames.solar_pv_filename(area))
+
       solar_data = SolarPV.new('solar pv')
 
       if solar_pv_tuos_area_id
         process_feed_data(solar_data, "DataFeeds::SolarPvTuos", solar_pv_tuos_area_id, :solar_pv)
       else
-        check_area_name(area_name)
+        area = AreaNames.key_from_name(area_name)
+        filename = self.full_filepath(AreaNames.solar_pv_filename(area))
+
         SolarPVLoader.new(filename, solar_data)
         puts "Loaded #{solar_data.length} days of solar pv data"
       end
