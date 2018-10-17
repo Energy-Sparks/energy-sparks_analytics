@@ -17,6 +17,10 @@ class Temperatures < HalfHourlyData
     data(date, half_hour_index)
   end
 
+    def average_temperature_in_date_range(start_date, end_date)
+      average_in_date_range(start_date, end_date)
+    end
+
   def average_temperature(date)
     avg_temp = 0.0
     (0..47).each do |i|
