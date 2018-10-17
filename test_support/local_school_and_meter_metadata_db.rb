@@ -9,7 +9,7 @@ class AnalysticsSchoolAndMeterMetaData
 
   def initialize
     @meter_collections = {} # [school_name] => meter_collection
-    load_schools_metadata 
+    load_schools_metadata
   end
 
   def school(identifier, identifier_type = :name)
@@ -27,7 +27,7 @@ class AnalysticsSchoolAndMeterMetaData
 
   def meterreadings_cache_directory
     ENV['CACHED_METER_READINGS_DIRECTORY'] ||= File.join(File.dirname(__FILE__), '../MeterReadings/')
-    ENV['CACHED_METER_READINGS_DIRECTORY'] 
+    ENV['CACHED_METER_READINGS_DIRECTORY']
   end
 
   def school_metadata_filename
@@ -105,7 +105,7 @@ class AnalysticsSchoolAndMeterMetaData
   end
 
   # sometimes aggregate meters are already defined (in metadata)
-  # sometimes if there is only one meter of a fuel type, 
+  # sometimes if there is only one meter of a fuel type,
   #  the aggregate meter is a reference to the underlying single fule type meter
   # sometimes one needs to be created on the fly, with a mpan/mprn of the URN + 8000** or 90****
   def create_missing_aggregate_meters(meter_collection, meter_data)
@@ -126,9 +126,9 @@ class AnalysticsSchoolAndMeterMetaData
   def create_empty_combined_meter(meter_collection, name, fuel_type, meter_data)
     create_empty_meter(
       meter_collection,
-      name, 
-      Meter.synthetic_combined_meter_mpan_mprn_from_urn(meter_data[:urn], fuel_type), 
-      fuel_type, 
+      name,
+      MeterAnalysis.synthetic_combined_meter_mpan_mprn_from_urn(meter_data[:urn], fuel_type),
+      fuel_type,
       meter_data[:floor_area],
       meter_data[:pupils],
       meter_data.key?(:meter_no) ? meter_data[:meter_no] : nil
@@ -159,10 +159,10 @@ class AnalysticsSchoolAndMeterMetaData
     identifier_type = (fuel_type == :electricity || fuel_type == :aggregated_electricity) ? :mpan : :mprn
 
     create_empty_meter(
-      meter_collection, 
-      meter_data[:name], 
-      meter_data[identifier_type], 
-      fuel_type, 
+      meter_collection,
+      meter_data[:name],
+      meter_data[identifier_type],
+      fuel_type,
       meter_data[:floor_area],
       meter_data[:pupils],
       meter_data.key?(:meter_no) ? meter_data[:meter_no] : nil
@@ -173,7 +173,7 @@ class AnalysticsSchoolAndMeterMetaData
 
     logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
 
-    meter = Meter.new(
+    meter = MeterAnalysis.new(
       meter_collection,
       AMRData.new(fuel_type),
       fuel_type,

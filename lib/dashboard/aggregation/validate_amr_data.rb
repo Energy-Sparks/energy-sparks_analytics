@@ -398,7 +398,7 @@ class ValidateAMRData
       day_before = date - days_offset
       temperature_before = average_temperature(day_before)
       if day_before >= @amr_data.start_date &&
-          @amr_data.key?(day_before) && @amr_data[day_before].count == 48 &&
+          @amr_data.key?(day_before) &&
           heating_on == @heating_model.heating_on?(day_before) &&
           within_temperature_range?(avg_temperature, temperature_before) &&
           daytype(day_before) == missing_daytype

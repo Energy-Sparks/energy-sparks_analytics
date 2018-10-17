@@ -181,7 +181,7 @@ class AMRData < HalfHourlyData
       end
     end
   end
-  
+
     # take one set (dd_data) of half hourly data from self
   # - avoiding performance hit of taking a copy
   # caller expected to ensure start and end dates reasonable
@@ -201,7 +201,7 @@ class AMRData < HalfHourlyData
   end
 
   private
- 
+
   # go through amr_data creating 'histogram' of type of amr_data by type (original data v. substituted)
   # returns {type} = [list of dates of that type]
   def bad_data_count

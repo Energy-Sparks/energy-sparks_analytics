@@ -15,7 +15,7 @@ class MeterAttributes
     butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn][type]
 
     # fill in weekends for all Bath derived data
-    if type == :meter_corrections && meter.building.area_name == 'Bath'
+    if type == :meter_corrections && meter.meter_collection.area_name == 'Bath'
       butes.push( {auto_insert_missing_readings: { type: :weekends}})
     end
     butes
@@ -72,13 +72,13 @@ class MeterAttributes
       aggregation:  [
         :deprecated_include_but_ignore_end_date,
         :deprecated_include_but_ignore_start_date
-      ] 
+      ]
     },
     2200015105163 => {
       aggregation:  [
         :deprecated_include_but_ignore_end_date,
         :deprecated_include_but_ignore_start_date
-      ] 
+      ]
     },
     2200041803451 => { aggregation:  [:deprecated_include_but_ignore_end_date] },
     2200042676990 => { aggregation:  [:ignore_start_date] }, # succeeds meters above
@@ -114,10 +114,10 @@ class MeterAttributes
       ]
     },
     2200012408791 => { # deprecated electricity meter
-      aggregation:  [ :deprecated_include_but_ignore_end_date ] 
+      aggregation:  [ :deprecated_include_but_ignore_end_date ]
     },
     2200012408782 => { # deprecated electricity meter
-      aggregation:  [ :deprecated_include_but_ignore_end_date ] 
+      aggregation:  [ :deprecated_include_but_ignore_end_date ]
     },
     2200012408816 => { # deprecated electricity meter
       aggregation:  [

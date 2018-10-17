@@ -25,6 +25,7 @@ class MeterCollection
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
 
   def initialize(school)
+
     @name = school.name
     @address = school.address
     @postcode = school.postcode
@@ -39,7 +40,8 @@ class MeterCollection
     @school = school
     @urn = school.urn
     @meter_identifier_lookup = {} # [mpan or mprn] => meter
-    @area_name = school.area_name
+    # Hard code for now
+    @area_name = 'Bath'
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
 
@@ -84,7 +86,7 @@ class MeterCollection
 
     if meter.any_aggregated?
       meter.aggregated_meter_readings.order(:when).each do |amr|
-        amr_data.add(amr.when, amr.readings.map(&:to_f))
+        amr_data.add(amr.when, OneDayAMRReading.new('Unknown', amr.when, 'ORIG', nil, DateTime.now, amr.readings.map(&:to_f)))
       end
     else
       query = <<-SQL
@@ -96,7 +98,11 @@ class MeterCollection
 
       result = ActiveRecord::Base.connection.exec_query(query)
       result.each do |row|
-        amr_data.add(Date.parse(row["day"]), row["values"].delete('{}').split(',').map(&:to_f))
+        reading_date = Date.parse(row["day"])
+        array_of_readings = row["values"].delete('{}').split(',').map(&:to_f)
+        if array_of_readings.size == 48
+          amr_data.add(reading_date, OneDayAMRReading.new('Unknown', reading_date, 'ORIG', nil, DateTime.now, array_of_readings))
+        end
       end
 
       throw ArgumentException if school.meters.empty?
@@ -147,7 +153,7 @@ class MeterCollection
     meter_list = []
     meter_groups.each do |meter_group|
       unless meter_group.nil?
-        meter_list += meter_group.is_a?(Meter) ? [meter_group] : meter_group
+        meter_list += (meter_group.is_a?(Meter) || meter_group.is_a?(MeterAnalysis)) ? [meter_group] : meter_group
       end
     end
     meter_list

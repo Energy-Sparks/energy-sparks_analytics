@@ -145,29 +145,29 @@ class DashboardConfiguration
                                   intraday_electricity_simulator_solar_pv_kwh
                                 ]
                               },
-        simulator_debug:      {     
+        simulator_debug:      {
                                 name: 'Simulator - Appliance Breakdown',
-                                charts: %i[       
+                                charts: %i[
                                   intraday_line_school_days_6months_simulator
                                   intraday_line_school_days_6months
                                   intraday_line_school_days_6months_simulator_submeters
 
                                   intraday_electricity_simulator_actual_for_comparison
                                   intraday_electricity_simulator_simulator_for_comparison
-                                ] 
+                                ]
                               },
-        test:                 {     
+        test:                 {
                                 name: 'Useful Charts for Testing',
                                 charts: %i[
                                   group_by_week_gas_unlimited_meter_filter_debug
                                   group_by_week_electricity_unlimited_meter_filter_debug
                                   electricity_longterm_trend
                                   gas_longterm_trend
-                                  irradiance_test
-                                  gridcarbon_test
                                 ]
+                                # irradiance_test
+                                # gridcarbon_test
                               },
-        heating_model_fitting:                 {     
+        heating_model_fitting:                 {
           name: 'Heating Model Fitting',
           charts: %i[
             thermostatic

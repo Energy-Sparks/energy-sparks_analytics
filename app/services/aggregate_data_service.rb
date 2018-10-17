@@ -126,7 +126,7 @@ class AggregateDataService
   end
 
   def create_modified_meter_copy(meter, amr_data, type, identifier, name)
-    Meter.new(
+    MeterAnalysis.new(
       meter_collection,
       amr_data,
       type,
@@ -182,7 +182,7 @@ class AggregateDataService
     logger.info "Aggregating data between #{min_date} #{max_date}"
 
     mpan_mprn = 'NEEDSFIXING'
-    mpan_mprn = Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
+    mpan_mprn = MeterAnalysis.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
     combined_amr_data = AMRData.new(type)
     (min_date..max_date).each do |date|
       combined_data = Array.new(48, 0.0)
