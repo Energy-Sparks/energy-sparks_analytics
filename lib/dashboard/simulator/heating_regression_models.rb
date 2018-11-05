@@ -68,6 +68,41 @@ module AnalyseHeatingAndHotWater
       raise Not_implemented_error.new('Failed attempt to call heating_on? on abstract base class of HeatingModel')
     end
 
+    def predicted_kwh(date, temperature)
+      raise Not_implemented_error.new('Failed attempt to call heating_on? on abstract base class of HeatingModel')
+    end
+
+    def save_raw_data_to_csv_for_debug(filename)
+      header = ['Date', 'DOY', 'Occupied', 'HeatingOn', 'AvgTemp', 'DegreeDays', 'TotalkWh', 'PredictedkWh'] + Range.new(0, 47).to_a
+      filepath = File.join(File.dirname(__FILE__), '../../../log/' + filename)
+      File.open(filepath, 'w') do |file| 
+        file.puts header.join(',')
+        (@amr_data.start_date..@amr_data.end_date).each do |date|
+          one_days_data = @amr_data[date]
+          line = []
+          if one_days_data.nil?
+            line.push(date)
+            line.push('No AMR data for this date')
+          else
+            line.push(date)
+            line.push(date.strftime('%a'))
+            line.push(occupied?(date))
+            line.push(heating_on?(date))
+            line.push(@temperatures.average_temperature(date))
+            line.push(@temperatures.degree_days(date, base_degreedays_temperature))
+            line.push(one_days_data.one_day_kwh)
+            line.push(predicted_kwh(date, @temperatures.average_temperature(date)))
+            line += one_days_data.kwh_data_x48
+          end
+          file.puts line.join(',')
+        end
+      end
+    end 
+    
+    def occupied?(date)
+      !DateTimeHelper.weekend?(date) && !@holidays.holiday?(date)
+    end
+
     def regression_filtered(key, regression_model_name, occupied, period, list_of_months, list_of_days, degreeday_base_temperature)
       degree_days = []
       days_kwh = []
@@ -128,6 +163,13 @@ module AnalyseHeatingAndHotWater
         logger.error "Error: empty data set for calculating regression"
         return RegressionModel.new(key, "Error: zero vector", 0.0, 0.0, 0.0, degreeday_base_temperature)
       end
+      if degreeday_base_temperature == 18
+        num = 0
+        x1.each do |q|
+          puts "#{q.round(2)}, #{y1[num].round(2)}"
+          num += 1
+        end
+      end
       x = Daru::Vector.new(x1)
       y = Daru::Vector.new(y1)
       sr = Statsample::Regression.simple(x, y)
@@ -141,7 +183,7 @@ module AnalyseHeatingAndHotWater
     include Logging
 
     attr_reader :models, :heating_on_periods
-    attr_accessor :base_degreedays_temperature
+    attr_accessor :base_degreedays_temperature, :halfway_kwh
 
     def initialize(amr_data, holidays, temperatures)
       super(amr_data, holidays, temperatures)
@@ -169,7 +211,7 @@ module AnalyseHeatingAndHotWater
 
     # scan through the daily consumption data, using the regression information to determine the heating periods
     # returning a list of the heating periods
-    def calculate_heating_periods(start_date, end_date)
+    def calculate_heating_periods(start_date, end_date, log_heating_days = true)
       heating_on = false
       @heating_on_periods = []
       heating_start_date = start_date
@@ -181,7 +223,6 @@ module AnalyseHeatingAndHotWater
       @halfway_kwh = @models[:heating_occupied].predicted_kwh_degreedays(degreedays_at_18c)
 
       logger.debug "Setting half way kwh - i.e. split between heating and non heating days to #{@halfway_kwh.round(0)} kWh per day"
-
       previous_date = start_date
       missing_dates = []
       (start_date..end_date).each do |date|
@@ -218,10 +259,21 @@ module AnalyseHeatingAndHotWater
         heating_period = SchoolDatePeriod.new(:heatingperiod, 'N/A', heating_start_date, end_date)
         @heating_on_periods.push(heating_period)
       end
-      logger.debug "Heating periods:"
-      SchoolDatePeriod.info_compact(@heating_on_periods)
+      if log_heating_days
+        logger.debug "Heating periods:"
+        SchoolDatePeriod.info_compact(@heating_on_periods)
+      end
 
       @heating_on_periods
+    end
+
+    def heating_on_days
+      return 0 if @heating_on_periods.nil? || @heating_on_periods.empty?
+      day_count = 0
+      @heating_on_periods.each do |period|
+        day_count += period.end_date - period.start_date + 1
+      end
+      day_count
     end
 
     def heating_on?(date)

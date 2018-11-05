@@ -60,8 +60,10 @@ class ChartManager
     chart_definition
   end
 
-  def run_chart(chart_config, chart_param)
+  def run_chart(chart_config, chart_param, resolve_inheritance = true)
     logger.info '>' * 120
+    chart_config = resolve_chart_inheritance(chart_config) if resolve_inheritance
+    
     # puts 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 

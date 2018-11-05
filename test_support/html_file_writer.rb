@@ -23,6 +23,10 @@ class HtmlFileWriter
     end
   end
 
+  def write(html)
+    @file.write(html)
+  end
+
   def close
     @file.close
   end

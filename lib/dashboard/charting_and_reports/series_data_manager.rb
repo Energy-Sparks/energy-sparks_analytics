@@ -152,7 +152,7 @@ class SeriesDataManager
       @series_buckets += SeriesNames::HOTWATERSERIESNAMES
     end
     if @breakdown_list.include?(:meter)
-      @series_buckets += meter_names
+      @series_buckets = combinatorially_combine(@series_buckets, meter_names) # was += meter_names
     end
     if @breakdown_list.include?(:none)
       @series_buckets.push(SeriesNames::NONE)
@@ -795,25 +795,23 @@ private
   end
 
   def configure_meters
-    if @meter_definition.is_a?(Array)
-      meter_type, meter = @meter_definition
-    else
-      meter_type = @meter_definition
+    if @meter_definition.is_a?(Symbol)
+      case @meter_definition
+      when :all
+        # treat all meters as being the same, needs to be processed at final stage as kWh addition different from CO2 addition
+        @meters = [@meter_collection.aggregated_electricity_meters, @meter_collection.aggregated_heat_meters]
+      when :allheat
+        # aggregate all heat meters
+        @meters = [nil, @meter_collection.aggregated_heat_meters]
+      when :allelectricity
+        # aggregate all electricity meters
+        @meters = [@meter_collection.aggregated_electricity_meters, nil]
+      when :electricity_simulator
+        @meters = [@meter_collection.electricity_simulation_meter, nil]
+      end
+    elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
+      meter = @meter_collection.meter?(@meter_definition)
+      @meters = [meter, nil]
     end
-
-    case meter_type
-    when :all
-      # treat all meters as being the same, needs to be processed at final stage as kWh addition different from CO2 addition
-      meters = [@meter_collection.aggregated_electricity_meters, @meter_collection.aggregated_heat_meters]
-    when :allheat
-      # aggregate all heat meters
-      meters = [nil, @meter_collection.aggregated_heat_meters]
-    when :allelectricity
-      # aggregate all electricity meters
-      meters = [@meter_collection.aggregated_electricity_meters, nil]
-    when :electricity_simulator
-      meters = [@meter_collection.electricity_simulation_meter, nil]
-    end
-    @meters = meters
   end
 end

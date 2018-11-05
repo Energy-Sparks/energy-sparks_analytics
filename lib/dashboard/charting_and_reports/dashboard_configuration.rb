@@ -165,6 +165,7 @@ class DashboardConfiguration
                                   gas_longterm_trend
                                   irradiance_test
                                   gridcarbon_test
+                                  cusum_weekly
                                 ]
                               },
         heating_model_fitting:                 {     

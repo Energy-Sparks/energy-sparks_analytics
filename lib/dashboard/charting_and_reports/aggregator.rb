@@ -116,7 +116,7 @@ class Aggregator
     saved_meter_collection = @meter_collection
 
     # iterate through the time periods aggregating
-    schools.each do |school| # do in reverse so final iteration represents the x-axis dates
+    schools.each do |school|
       @meter_collection = school
       periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
         chartconfig_copy = @chart_config.clone
@@ -159,19 +159,33 @@ class Aggregator
   def merge_multiple_charts(bucketed_period_data, schools)
     @bucketed_data = {}
     @bucketed_data_count = {}
+    time_count, school_count = count_time_periods_and_school_names(bucketed_period_data)
     bucketed_period_data.each do |period_data|
       bucketed_data, bucketed_data_count, time_description, school_name = period_data
+      time_description  = time_count <= 1 ? '' : (':' + time_description)
       school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + school_name)
+      school_name = '' if school_count <= 1
       bucketed_data.each do |series_name, x_data|
-        new_series_name = series_name.to_s + ':' + time_description + school_name
+        new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data[new_series_name] = x_data
       end
       bucketed_data_count.each do |series_name, x_data|
-        new_series_name = series_name.to_s + ':' + time_description + school_name
+        new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data_count[new_series_name] = x_data
       end
     end
     [@bucketed_data, @bucketed_data_count]
+  end
+
+  def count_time_periods_and_school_names(bucketed_period_data)
+    time_period_descriptions = {}
+    school_names = {}
+    bucketed_period_data.each do |period_data|
+      bucketed_data, bucketed_data_count, time_description, school_name = period_data
+      time_period_descriptions[time_description] = true
+      school_names[school_name] = true
+    end
+    [time_period_descriptions.keys.length, school_names.keys.length]
   end
 
   def reverse_series_name_order(format)
@@ -501,6 +515,9 @@ private
   end
 
   def inject_benchmarks
+    puts "Got here"
+    ap(@x_axis)
+    ap(@bucketed_data)
     @x_axis.push('National Average')
     @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
     @bucketed_data['gas'].push(benchmark_gas_usage_in_units)

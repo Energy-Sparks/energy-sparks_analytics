@@ -82,6 +82,17 @@ class MeterAttributes
     },
     2200041803451 => { aggregation:  [:deprecated_include_but_ignore_end_date] },
     2200042676990 => { aggregation:  [:ignore_start_date] }, # succeeds meters above
+    4186869705 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2014, 11, 3),
+            end_date: Date.new(2014, 11, 19),
+            scale:  0.25 # arbitrary scaling down of data PH doesn't understand
+          }
+        }
+      ]
+    },
     # ==============================St Saviours Juniors========================
     4234023603 => { # current gas meter
       aggregation:  [ :ignore_start_date ]

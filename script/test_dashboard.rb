@@ -28,6 +28,8 @@ reports.load_school('St Marks Secondary', true)
 # reports.do_one_page(:main_dashboard_electric_and_gas)
 # reports.do_one_page(:test)
 
+# reports.do_chart_list('Boiler Control', [:cusum, :cusum_weekly, :benchmark, :benchmark_school_comparison, :electricity_longterm_trend_school_comparison] )
+
 reports.do_all_schools(true)
 
 reports.save_excel_and_html
