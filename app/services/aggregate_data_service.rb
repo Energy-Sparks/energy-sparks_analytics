@@ -233,8 +233,9 @@ class AggregateDataService
   def aggregate_meters(combined_meter, list_of_meters, type)
     return nil if list_of_meters.nil? || list_of_meters.empty?
     if list_of_meters.length == 1
-      logger.info "Single meter of type #{type} - using as combined meter rather than creating new one"
-      return list_of_meters.first
+      meter = list_of_meters.first
+      logger.info "Single meter of type #{type} - using as combined meter from #{meter.amr_data.start_date} to #{meter.amr_data.end_date} rather than creating new one"
+      return meter
     end
 
     log_meter_dates(list_of_meters)

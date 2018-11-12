@@ -130,11 +130,13 @@ class ChartManager
       ]
     },
     benchmark_school_comparison: {
-      name:             'Benchmark - School Comparison - Annual ELectricity and Gas',
+      name:             'Benchmark - School Comparison - Annual Electricity and Gas',
       inherits_from:    :benchmark,
       yaxis_scaling:    :per_floor_area,
       chart1_subtype:   nil,
-#      timescale:        :year,
+      sort_by:          [ { school: :asc }, { time: :asc } ],
+      group_by:         [:fuel, :school],
+      # timescale:        :year,
 # inject:           nil,
       schools: [
         { urn: 109089 },  # Paulton Junior
