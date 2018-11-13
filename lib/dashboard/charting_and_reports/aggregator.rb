@@ -41,13 +41,19 @@ class Aggregator
 
     periods = time_periods
 
-    bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods)
+    sort_by = @chart_config.key?(:sort_by) ? @chart_config[:sort_by] : nil
+
+    bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
 
     if bucketed_period_data.length > 1 || periods.length > 1
       @bucketed_data, @bucketed_data_count = merge_multiple_charts(bucketed_period_data, schools)
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
+
+    group_by = @chart_config.key?(:group_by) ? @chart_config[:group_by] : nil
+
+    group_chart(group_by) unless group_by.nil? 
 
     inject_benchmarks if @chart_config[:inject] == :benchmark
 
@@ -72,16 +78,73 @@ class Aggregator
 
   private
 
-  # parked until implemented
+  #=================regrouping of chart data ======================================
+  # converts a flat structure e.g. :
+  #     "electricity:Castle Primary School"=>[5.544020340000004, 2.9061917400000006, 0.45056400000000013], 
+  #     "gas:Castle Primary School"=>[1.555860000000001, 1.4714710106863198, 1.405058200146572]
+  # into a hierarchical 'grouped' structure e.g.
+  #   {"electricity"=>
+  #     {"Castle Primary School"=>[5.544020340000004, 2.9061917400000006, 0.45056400000000013],
+  #      "Paulton Junior School"=>[2.47196688, 3.4770422399999985, 2.320555619999999],
+  # to better represent the grouping of clustered/grouped/stacked charts to downstream graphing/display
+
+  def group_chart(group_by)
+    @bucketed_data = regroup_bucketed_data(@bucketed_data, group_by)
+    @bucketed_data_count = regroup_bucketed_data(@bucketed_data_count, group_by)
+    @x_axis = regroup_xaxis(bucketed_data, @x_axis)
+  end
+
+  # rubocop:enable MethodComplexity 
+  def regroup_bucketed_data(bucketed_data, group_by)
+    logger.info "Reorganising grouping of chart bucketed data, grouping by #{group_by.inspect}"
+    logger.info "Original bucketed data: #{bucketed_data.inspect}"
+
+    grouped_bucketed_data = Hash.new{ |h, k| h[k] = Hash.new(&h.default_proc)}
+    final_hash = {}
+
+    bucketed_data.each do |main_key, data|
+      sub_keys = main_key.split(':')
+      case  sub_keys.length
+      when 1
+        grouped_bucketed_data[sub_keys[0]] = data
+      when 2
+        grouped_bucketed_data[sub_keys[0]][sub_keys[1]] = data
+      when 3
+        grouped_bucketed_data[sub_keys[0]][sub_keys[1]][sub_keys[2]] = data
+      else
+        throw EnergySparksBadChartSpecification.new("Bad grouping specification too much grouping depth #{sub_keys.length}")
+      end
+    end
+    logger.info  "Reorganised bucketed data: #{grouped_bucketed_data.inspect}"
+    grouped_bucketed_data
+  end
+
+  def regroup_xaxis(bucketed_data, x_axis)
+    puts "Old xaxis: #{x_axis.inspect}"
+    puts "Old buckets: #{bucketed_data.inspect}"
+    new_x_axis = {}
+    puts bucketed_data.class.name
+    bucketed_data.each do |series_name, school_data| # electricity|gas =>  school => [array of kwh 1 per year]
+      puts "L", series_name.class.name, school_data.class.name
+      school_data.each do |school_name, _kwhs|
+        new_x_axis[school_name] = x_axis
+      end
+    end
+    puts "New xaxis: #{new_x_axis.inspect}"
+  end
+  # rubocop:disable MethodComplexity
+  #=============================================================================
   def load_schools(school_list)
-    puts "LOADING SCHOOLS " * 10
     # school = $SCHOOL_FACTORY.load_school(school_name)
     schools = []
     school_list.each do |school_attribute|
       identifier_type, identifier = school_attribute.first
-      puts "School: #{identifier_type} #{identifier}"
-      school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(identifier_type, identifier, :analytics_db)
-      schools.push(school)
+      
+      bm = Benchmark.measure {
+        school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(identifier_type, identifier, :analytics_db)
+        schools.push(school)
+      }
+      logger.info "Loaded School: #{identifier_type} #{identifier} in #{bm.to_s}"
     end
     schools
   end
@@ -107,31 +170,90 @@ class Aggregator
     logger.info '-' * 120
   end
 
-  def run_charts_for_multiple_schools_and_time_periods(schools, periods)
-    bucketed_period_data = []
-
+  def run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by = nil)
     saved_meter_collection = @meter_collection
-
+    aggregations = []
     # iterate through the time periods aggregating
-    schools.each do |school| # do in reverse so final iteration represents the x-axis dates
+    schools.each do |school|
       @meter_collection = school
       periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-        chartconfig_copy = @chart_config.clone
-        chartconfig_copy[:timescale] = period
-        begin
-          bucketed_period_data.push(aggregate_period(chartconfig_copy))
-        rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-          logger.error e
-          logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
-        rescue StandardError => e
-          logger.error e
-        end
+        aggregation = run_one_aggregation(@chart_config, period)
+        aggregations.push(
+          {
+            school:       school,
+            period:       period,
+            aggregation:  aggregation
+          }
+        ) unless aggregation.nil?
       end
     end
+
+    aggregations = sort_aggregations(aggregations, sort_by) unless sort_by.nil?
+
+    bucketed_period_data = aggregations.map{ |aggregation_description| aggregation_description[:aggregation] }
 
     @meter_collection = saved_meter_collection
 
     bucketed_period_data
+  end
+
+  # sorting config example:      sort_by:          [ { school: :desc }, { time: :asc } ]
+  # messy, could be simplified?
+  def sort_aggregations(aggregations, sort_by)
+    logger.info "About to sort #{aggregations.length} aggregations by #{sort_by}"
+    aggregations.sort! { |x, y| 
+      if sort_by.length == 1
+        if sort_by[0].key?(:school)
+          school_compare(x, y, sort_by[0][:school])
+        elsif sort_by[0].key?(:time)
+          period_compare(x, y, sort_by[0][:period])
+        else
+          throw EnergySparksBadChartSpecification.new("Bad sort specification #{sort_by}")
+        end
+      else
+        if sort_by[0].key?(:school)
+          if x[:school].name == y[:school].name
+            period_compare(x, y, sort_by[1][:period])
+          else
+            school_compare(x, y, sort_by[0][:school])
+          end
+        elsif sort_by[0].key?(:time)
+          if x[:period].start_date == y[:period].start_date
+            school_compare(x, y, sort_by[1][:school])
+          else
+            period_compare(x, y, sort_by[0][:period])
+          end
+        else
+          throw EnergySparksBadChartSpecification.new("Bad sort specification 2 #{sort_by}")
+        end
+      end 
+    }
+    aggregations
+  end
+
+  def period_compare(p1, p2, direction_definition)
+    direction = direction_definition == :asc ? 1 : -1
+    direction * ((p1[:period].nil? ? 0 : p1[:period].start_date) <=> (p2[:period].nil? ? 0 : p2[:period].start_date))
+  end
+
+  def school_compare(s1, s2, direction_definition)
+    direction = direction_definition == :asc ? 1 : -1
+    direction * (s1[:school].name <=> s2[:school].name)
+  end
+
+  def run_one_aggregation(chart_config, period)
+    aggregation = nil
+    chartconfig_copy = chart_config.clone
+    chartconfig_copy[:timescale] = period
+    begin
+      aggregation = aggregate_period(chartconfig_copy)
+    rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
+      logger.error e
+      logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+    rescue StandardError => e
+      logger.error e
+    end
+    aggregation
   end
 
   def aggregate_multiple_charts(periods)
@@ -156,19 +278,33 @@ class Aggregator
   def merge_multiple_charts(bucketed_period_data, schools)
     @bucketed_data = {}
     @bucketed_data_count = {}
+    time_count, school_count = count_time_periods_and_school_names(bucketed_period_data)
     bucketed_period_data.each do |period_data|
-      bucketed_data, bucketed_data_count, time_description, school_name = period_data
+      bucketed_data, bucketed_data_count, time_description, school_name, x_axis, x_axis_date_ranges = period_data
+      time_description  = time_count <= 1 ? '' : (':' + time_description)
       school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + school_name)
+      school_name = '' if school_count <= 1
       bucketed_data.each do |series_name, x_data|
-        new_series_name = series_name.to_s + ':' + time_description + school_name
+        new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data[new_series_name] = x_data
       end
       bucketed_data_count.each do |series_name, x_data|
-        new_series_name = series_name.to_s + ':' + time_description + school_name
+        new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data_count[new_series_name] = x_data
       end
     end
     [@bucketed_data, @bucketed_data_count]
+  end
+
+  def count_time_periods_and_school_names(bucketed_period_data)
+    time_period_descriptions = {}
+    school_names = {}
+    bucketed_period_data.each do |period_data|
+      bucketed_data, bucketed_data_count, time_description, school_name = period_data
+      time_period_descriptions[time_description] = true
+      school_names[school_name] = true
+    end
+    [time_period_descriptions.keys.length, school_names.keys.length]
   end
 
   def reverse_series_name_order(format)
@@ -252,7 +388,7 @@ class Aggregator
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
 
-    [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description, @meter_collection.name]
+    [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description, @meter_collection.name, @x_axis, @x_axis_bucket_date_ranges]
   end
 
 private
@@ -466,9 +602,31 @@ private
     @series_sums = {}
     @total_of_unit = 0.0
     @bucketed_data.each do |series_name, units|
-      unit = units.inject(:+)
-      @series_sums[series_name] = unit
-      @total_of_unit += unit
+      @series_sums[series_name] = all_values(units)
+    end
+    @total_of_unit += all_values(@bucketed_data)
+  end
+
+  def all_values(obj)
+    float_data = []
+    find_all_floats(float_data, obj)
+    float_data.inject(:+)
+  end
+
+  # recursive search through hash/array for all float values
+  def find_all_floats(float_data, obj) 
+    if obj.is_a?(Hash)
+      obj.each_value do |val|
+        find_all_floats(float_data, val)
+      end
+    elsif obj.is_a?(Array)
+      obj.each do |val|
+        find_all_floats(float_data, val)
+      end
+    elsif obj.is_a?(Float)
+      float_data.push(obj)
+    else
+      logger.info "Unexpected type #{val.class.name} to sum"
     end
   end
 
@@ -506,17 +664,35 @@ private
   end
 
   def inject_benchmarks
-    @x_axis.push('National Average')
-    @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
-    @bucketed_data['gas'].push(benchmark_gas_usage_in_units)
+    logger.info 'Injecting national, regional and exemplar bencmark data'
+    ap(@x_axis)
+    ap(@bucketed_data)
+    
+    if @bucketed_data['electricity'].is_a?(Array)
+      @x_axis.push('National Average')
+      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
+      @bucketed_data['gas'].push(benchmark_gas_usage_in_units)
 
-    @x_axis.push('Regional Average')
-    @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
-    @bucketed_data['gas'].push(benchmark_gas_usage_in_units * 0.9)
+      @x_axis.push('Regional Average')
+      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
+      @bucketed_data['gas'].push(benchmark_gas_usage_in_units * 0.9)
 
-    @x_axis.push('Exemplar School')
-    @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units)
-    @bucketed_data['gas'].push(exemplar_gas_usage_in_units * 0.9)
+      @x_axis.push('Exemplar School')
+      @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units)
+      @bucketed_data['gas'].push(exemplar_gas_usage_in_units * 0.9)
+    else
+      @x_axis.push('National Average')
+      @bucketed_data['electricity']['National Average'] = benchmark_electricity_usage_in_units
+      @bucketed_data['gas']['National Average'] = benchmark_gas_usage_in_units
+
+      @x_axis.push('Regional Average')
+      @bucketed_data['electricity']['Regional Average'] = benchmark_electricity_usage_in_units
+      @bucketed_data['gas']['Regional Average'] = benchmark_gas_usage_in_units * 0.9
+
+      @x_axis.push('Exemplar School')
+      @bucketed_data['electricity']['Exemplar School'] = exemplar_electricity_usage_in_units
+      @bucketed_data['gas']['Exemplar School'] = exemplar_gas_usage_in_units * 0.9
+    end
   end
 
   def exemplar_electricity_usage_in_units

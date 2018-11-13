@@ -1,11 +1,9 @@
+require_relative '../charting_and_reports/multimedia.rb'
 # simple placeholder class for holding detail of description results
 # type:   :text (a string), :html (snippet), :chart (chart as an example of alert issue)
 
-class AlertDescriptionDetail
-  attr_reader :type, :content
-
+class AlertDescriptionDetail < MultiMediaDetail
   def initialize(type, content)
-    @type = type
-    @content = content
+    super(type, content)
   end
 end

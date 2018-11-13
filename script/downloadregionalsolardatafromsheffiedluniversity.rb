@@ -25,8 +25,8 @@ require 'json'
 require 'date'
 require 'sun_times'
 
-@start_date = Date.new(2018, 9, 24)
-@end_date = Date.new(2018, 10, 14)
+@start_date = Date.new(2018, 10, 15)
+@end_date = Date.new(2018, 11, 6)
 
 @climate_zones = {    # probably not the same climate zones as the other inputs, more critical they are local, so schools to west of Bath may need their own 'climate zone'
   'Bath' => { latitude: 51.39,
@@ -72,6 +72,7 @@ def make_url(region_id, start_date, end_date)
   url += 'extra_fields=capacity_mwp,site_count&'
   url += 'start=' + date_to_url_format(start_date, true) + '&'
   url += 'end=' + date_to_url_format(end_date, false)
+  puts url
   url
 end
 

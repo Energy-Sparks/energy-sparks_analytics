@@ -12,7 +12,7 @@ end
 
 reports = ReportConfigSupport.new
 
-reports.load_school('St Marks Secondary', true)
+reports.load_school('Bishop Sutton Primary School', true)
 
 # testing examples
 #
@@ -28,6 +28,10 @@ reports.load_school('St Marks Secondary', true)
 # reports.do_one_page(:main_dashboard_electric_and_gas)
 # reports.do_one_page(:test)
 
+# reports.do_chart_list('Boiler Control', [:electricity_longterm_trend_school_comparison, :group_by_week_electricity_school_comparison, :intraday_line_school_days_school_comparison] )
+# reports.do_chart_list('Boiler Control', [:cusum, :cusum_weekly, :benchmark, :benchmark_school_comparison, :electricity_longterm_trend_school_comparison], :intraday_line_school_days_last5weeks )
+
+# reports.do_chart_list('School Compare', [ :benchmark_school_comparison ])
 reports.do_all_schools(true)
 
 reports.save_excel_and_html

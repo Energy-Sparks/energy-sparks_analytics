@@ -29,6 +29,17 @@ class SchoolDatePeriod
   end
 
   def self.find_period_for_date(date, periods)
+    period = nil
+    if periods.length > 1 && periods[0].start_date < periods[1].start_date
+      period = periods.bsearch {|p| date < p.start_date ? -1 : date > p.end_date ? 1 : 0 }
+    else  # reverse sorted array
+      period = periods.bsearch {|p| date < p.start_date ? 1 : date > p.end_date ? -1 : 0 }
+    end
+    period
+  end
+
+
+  def self.find_period_for_date_deprecated(date, periods)
     periods.each do |period|
       if date.nil? || period.nil? || period.start_date.nil? || period.end_date.nil?
         raise "Bad date" + date + period

@@ -163,6 +163,9 @@ class DashboardConfiguration
                                   group_by_week_electricity_unlimited_meter_filter_debug
                                   electricity_longterm_trend
                                   gas_longterm_trend
+                                  irradiance_test
+                                  gridcarbon_test
+                                  cusum_weekly
                                 ]
                                 # irradiance_test
                                 # gridcarbon_test

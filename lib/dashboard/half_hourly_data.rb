@@ -139,22 +139,4 @@ class HalfHourlyData < Hash
     end
     date
   end
-
-  # take one set (dd_data) of half hourly data from self
-  # - avoiding performance hit of taking a copy
-  # caller expected to ensure start and end dates reasonable
-  def minus_self(dd_data, min_value = nil)
-    sd = start_date > dd_data.start_date ? start_date : dd_data.start_date
-    ed = end_date < dd_data.end_date ? end_date : dd_data.end_date
-    (sd..ed).each do |date|
-      (0..47).each do |halfhour_index|
-        if min_value.nil?
-          self[date][halfhour_index] -= dd_data.data(date, halfhour_index)
-        else
-          new_val = self[date][halfhour_index] - dd_data.data(date, halfhour_index)
-          self[date][halfhour_index] = new_val > min_value ? new_val : min_value
-        end
-      end
-    end
-  end
 end

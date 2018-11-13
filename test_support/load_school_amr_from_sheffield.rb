@@ -76,7 +76,7 @@ class LoadSchoolFromSheffieldCSV < MeterReadingsDownloadCSVBase
   def process_line_npower(_type, _column_names, line)
     line_data = substitute_unwanted_characters(line).split(@delimiter)
     date = Date.parse(line_data[column_index(@column_names, 'ConsumptionDate')])
-    fuel_type = :gas
+    fuel_type = :electricity
     mpan_or_mprn = line_data[column_index(@column_names, 'MPAN')].to_s
     halfhour_kwh_x48 = line_data[column_index(@column_names, 'kWh_1')..column_index(@column_names, 'kWh_48')].map(&:to_f)
 

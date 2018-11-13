@@ -34,8 +34,8 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
     name: 'Bath',
     latitude: 51.39,
     longitude: -2.37,
-    start_date:  Date.new(2018, 9, 20), # may be better in controlling program
-    end_date: Date.new(2018, 9, 26), # ditto, inclusive
+    start_date:  Date.new(2018, 9, 26), # may be better in controlling program
+    end_date: Date.new(2018, 10, 21), # ditto, inclusive
     method:    :weighted_average,
     max_minutes_between_samples: 120, # ignore data where samples from station are too far apart
     max_temperature: 38.0,

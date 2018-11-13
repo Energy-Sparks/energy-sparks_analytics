@@ -129,6 +129,22 @@ class ChartManager
         { urn: 109081 }   # Castle
       ]
     },
+    benchmark_school_comparison: {
+      name:             'Benchmark - School Comparison - Annual Electricity and Gas',
+      inherits_from:    :benchmark,
+      yaxis_scaling:    :per_floor_area,
+      chart1_subtype:   nil,
+      sort_by:          [ { school: :asc }, { time: :asc } ],
+      group_by:         [:fuel, :school],
+      # timescale:        :year,
+# inject:           nil,
+      schools: [
+        { urn: 109089 },  # Paulton Junior
+        { urn: 109328 },  # St Marks
+        { urn: 109005 },  # St Johns
+        { urn: 109081 }   # Castle
+      ]
+    },
     group_by_week_electricity_school_comparison_line: {
       inherits_from:    :group_by_week_electricity_school_comparison,
       chart1_type:      :line
@@ -204,6 +220,12 @@ class ChartManager
       inherits_from:    :group_by_week_gas_unlimited,
       series_breakdown: :meter
       # filter:            { meter: [ 'Electrical Heating' ] } 
+    },
+    group_by_year_gas_unlimited_meter_breakdown_heating_model_fitter: {
+      name:             'Gas meter breakdown by year',
+      inherits_from:    :group_by_week_gas_unlimited,
+      x_axis:           :year,
+      series_breakdown: :meter
     },
     group_by_week_gas_kw: {
       name:             'By Week: Gas',
@@ -336,6 +358,18 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
+    gas_intraday_schoolday_last_year: { # used by heating regression fitter
+      name:             'Intra-school day gas consumption profile',
+      inherits_from:    :gas_heating_season_intraday,
+      series_breakdown: :none,
+      filter:           { daytype: :occupied }
+    },
+    meter_breakdown_pie_1_year: { # used by heating regression fitter
+      name:             'Breakdown by meter (this year): Gas',
+      inherits_from:    :daytype_breakdown_gas,
+      x_axis:           :nodatebuckets,
+      series_breakdown: :meter,
+    },
     thermostatic: {
       name:             'Thermostatic (Heating Season, School Day)',
       chart1_type:      :scatter,
@@ -360,10 +394,21 @@ class ChartManager
     },
     cusum: {
       name:             'CUSUM',
-      chart1_type:      :line,
+      chart1_type:      :column,
       meter_definition: :allheat,
       series_breakdown: :cusum,
       x_axis:           :day,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    cusum_weekly: {
+      name:             'Weekly CUSUM - divergence from modelled gas consumption',
+      chart1_type:      :column,
+      meter_definition: :allheat,
+      series_breakdown: :cusum,
+      timescale:        :year,
+      x_axis:           :week,
+      y2_axis:          :degreedays,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
