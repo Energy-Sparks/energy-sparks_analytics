@@ -90,6 +90,11 @@ class ValidateAMRData
         rule[:set_bad_data_to_zero][:start_date],
         rule[:set_bad_data_to_zero][:end_date]
       )
+    elsif rule.key?(:set_missing_data_to_zero)
+      zero_missing_data_in_date_range(
+        rule[:set_missing_data_to_zero][:start_date],
+        rule[:set_missing_data_to_zero][:end_date]
+      )
     elsif rule.key?(:auto_insert_missing_readings)
       if (rule[:auto_insert_missing_readings].is_a?(Symbol) && # backwards compatibility
           rule[:auto_insert_missing_readings] == :weekends) ||
@@ -266,6 +271,7 @@ class ValidateAMRData
   end
 
   def replace_missing_data_with_zero(start_date, end_date)
+    logger.info "Replacing missing data between #{start_date} and #{end_date} with zero"
     replaced_dates = []
     start_date = start_date.nil? ? @amr_data.start_date : start_date
     end_date = end_date.nil? ? @amr_data.end_date : end_date
@@ -285,6 +291,17 @@ class ValidateAMRData
       if @amr_data.key?(date)
         zero_data = Array.new(48, 0.0)
         zero_data_day = OneDayAMRReading.new(meter_id, date, 'ZDTR', nil, DateTime.now, zero_data)
+        @amr_data.add(date, zero_data_day)
+      end
+    end
+  end
+
+  def zero_missing_data_in_date_range(start_date, end_date)
+    logger.info "Setting missing data between #{start_date} and #{end_date} to zero"
+    (start_date..end_date).each do |date|
+      if !@amr_data.key?(date)
+        zero_data = Array.new(48, 0.0)
+        zero_data_day = OneDayAMRReading.new(meter_id, date, 'ZMDR', nil, DateTime.now, zero_data)
         @amr_data.add(date, zero_data_day)
       end
     end

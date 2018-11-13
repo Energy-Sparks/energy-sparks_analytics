@@ -734,6 +734,35 @@ private
           raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
         end
         @periods = [period]
+      when :optimum_start # hardcoded fudge for the moment
+puts "Got here optimum start"
+puts hash_value.class.name
+        if hash_value.is_a?(Integer) # hash_value weeks back from latest week
+          raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for optimum start range specification') if hash_value > 0
+          index = hash_value.magnitude
+          day1 = Date.new(2018, 3, 6)
+          day2 = Date.new(2018, 3, 16) 
+          if @first_meter_date <= day1  && @last_meter_date >= day2
+            if index == 0
+              @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day1, day1)]
+            elsif index == 1
+              @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day2, day2)]
+            end
+          else
+            day1 = Date.new(2017, 3, 6)
+            day2 = Date.new(2017, 3, 16)
+            if @first_meter_date <= day1  && @last_meter_date >= day2
+              if index == 0
+                @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day1, day1)]
+              elsif index == 1
+                @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day2, day2)]
+              end
+            end
+          end
+        else
+          raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
+        end
+       
       else
         raise "Unsupported time period for charting #{@chart_configuration[:timescale]}"
       end

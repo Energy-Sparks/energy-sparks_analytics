@@ -33,7 +33,20 @@ end
   'Trinity First School'              => :fromecsv,
   'Twerton Infant School'             => :bathhacked,
   'Westfield Primary'                 => :bathhacked,
-  'Bankwood Primary School'           => :sheffieldcsv
+  'Bankwood Primary School'           => :sheffieldcsv,
+  'Ecclesall Primary School'          => :sheffieldcsv,
+  'Ecclesfield Primary School'        => :sheffieldcsv,
+  'Hunters Bar School'                => :sheffieldcsv,
+  'Lowfields Primary School'          => :sheffieldcsv,
+  'Meersbrook Primary School'         => :sheffieldcsv,
+  'Mundella Primary School'           => :sheffieldcsv,
+  'Phillimore School'                 => :sheffieldcsv,
+  'Shortbrook School'                 => :sheffieldcsv,
+  'Valley Park School'                => :sheffieldcsv,
+  'Walkley School Tennyson School'    => :sheffieldcsv,
+  'Whiteways Primary'                 => :sheffieldcsv,
+  'Woodthorpe Primary School'         => :sheffieldcsv,
+  'Wybourn Primary School'            => :sheffieldcsv
 }
 
 def parse_command_line

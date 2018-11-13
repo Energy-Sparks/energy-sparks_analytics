@@ -62,6 +62,13 @@ class MeterAttributes
         }
       ]
     },
+    # ==============================Hunters Bar=============================
+    6512204 => {
+      aggregation:  [
+        :deprecated_include_but_ignore_end_date,
+        :deprecated_include_but_ignore_start_date
+      ] 
+    },
     # ==============================Marksbury==================================
     2200011879013 => {
       meter_corrections: [
@@ -72,6 +79,20 @@ class MeterAttributes
           }
         }
       ]
+    },
+    # ==============================Mundella Primary School=============================
+    9091095306 => {
+      meter_corrections: [
+        {
+          set_missing_data_to_zero: { # blank data in this range, perhaps shouldn't be zeroed, but largely holidays?
+            start_date: Date.new(2016, 7, 12),
+            end_date:   Date.new(2016, 9, 16)
+          }
+        }
+      ],
+      aggregation:  [
+        :deprecated_include_but_ignore_start_date
+      ] 
     },
     # ==============================Paulton Junior=============================
     13678903 => {

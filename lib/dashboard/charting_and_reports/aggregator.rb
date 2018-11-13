@@ -662,8 +662,9 @@ private
     logger.info 'Injecting national, regional and exemplar bencmark data'
     ap(@x_axis)
     ap(@bucketed_data)
-    
-    if @bucketed_data['electricity'].is_a?(Array)
+puts @bucketed_data.inspect
+    if (@bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)) ||
+       (@bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array))
       @x_axis.push('National Average')
       @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
       @bucketed_data['gas'].push(benchmark_gas_usage_in_units)

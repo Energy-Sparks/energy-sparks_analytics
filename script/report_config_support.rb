@@ -28,8 +28,21 @@ class ReportConfigSupport
       'Stanton Drew Primary School'       => :electric_only,
       'Trinity First School'              => :electric_and_gas,
       'Twerton Infant School'             => :electric_and_gas,
-      'Westfield Primary'                 => :electric_and_gas
-   #   'Bankwood Primary School'           => :electric_and_gas
+      'Westfield Primary'                 => :electric_and_gas,
+      'Bankwood Primary School'           => :electric_and_gas,
+      'Ecclesall Primary School'          => :electric_and_gas,
+      'Ecclesfield Primary School'        => :electric_and_gas,
+      'Hunters Bar School'                => :electric_and_gas,
+      'Lowfields Primary School'          => :electric_only,
+      'Meersbrook Primary School'         => :electric_and_gas,
+      'Mundella Primary School'           => :electric_and_gas,
+      'Phillimore School'                 => :electric_and_gas,
+      'Shortbrook School'                 => :electric_and_gas,
+      'Valley Park School'                => :electric_only,
+      'Walkley School Tennyson School'    => :gas_only,
+      'Whiteways Primary'                 => :electric_and_gas,
+      'Woodthorpe Primary School'         => :electric_and_gas,
+      'Wybourn Primary School'            => :electric_only
     }
     @benchmarks = []
 
@@ -153,7 +166,7 @@ class ReportConfigSupport
       unless charts.nil?
         charts.each do |chart|
           ap(chart, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-          @worksheet_charts[page_name].push(chart)
+          @worksheet_charts[page_name].push(chart) unless chart.nil?
         end
       end
     end
@@ -171,7 +184,7 @@ class ReportConfigSupport
       chart_results = @chart_manager.run_chart_group(chart_name)
     }
     @benchmarks.push(sprintf("%40.40s = %s", chart_name, bm.to_s))
-    
+    logger.error "Nil chart result from #{chart_name}" if chart_results.nil?
     if chart_name.is_a?(Symbol)
       [chart_results]
     else
