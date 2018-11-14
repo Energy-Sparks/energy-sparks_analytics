@@ -14,6 +14,7 @@ class ReportConfigSupport
     # @school_report_groups = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
 
     @schools = {
+    # Bath
       'Bishop Sutton Primary School'      => :electric_and_gas,
       'Castle Primary School'             => :electric_and_gas,
       'Freshford C of E Primary'          => :electric_and_gas,
@@ -26,9 +27,9 @@ class ReportConfigSupport
       'St Johns Primary'                  => :electric_and_gas,
       'St Saviours Junior'                => :electric_and_gas,
       'Stanton Drew Primary School'       => :electric_only,
-      'Trinity First School'              => :electric_and_gas,
       'Twerton Infant School'             => :electric_and_gas,
       'Westfield Primary'                 => :electric_and_gas,
+    # Sheffield
       'Bankwood Primary School'           => :electric_and_gas,
       'Ecclesall Primary School'          => :electric_and_gas,
       'Ecclesfield Primary School'        => :electric_and_gas,
@@ -42,7 +43,18 @@ class ReportConfigSupport
       'Walkley School Tennyson School'    => :gas_only,
       'Whiteways Primary'                 => :electric_and_gas,
       'Woodthorpe Primary School'         => :electric_and_gas,
-      'Wybourn Primary School'            => :electric_only
+      'Wybourn Primary School'            => :electric_only,
+    # Frome
+      'Christchurch First School'         => :gas_only,
+      'Critchill School'                  => :electric_and_gas,
+      'Frome College'                     => :electric_only,
+      'Hayesdown First School'            => :electric_only,
+      'Oakfield School'                   => :electric_and_gas,
+      'Selwood Academy'                   => :electric_and_gas,
+      'St Johns First School'             => :electric_and_gas,
+      'St Louis First School'             => :electric_and_gas,
+      'Trinity First School'              => :electric_and_gas,
+      'Vallis First School'               => :electric_and_gas
     }
     @benchmarks = []
 

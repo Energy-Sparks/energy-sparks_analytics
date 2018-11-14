@@ -30,7 +30,6 @@ end
   'St Johns Primary'                  => :bathhacked,
   'St Saviours Junior'                => :bathhacked,
   'Stanton Drew Primary School'       => :bathhacked,
-  'Trinity First School'              => :fromecsv,
   'Twerton Infant School'             => :bathhacked,
   'Westfield Primary'                 => :bathhacked,
   'Bankwood Primary School'           => :sheffieldcsv,
@@ -46,7 +45,17 @@ end
   'Walkley School Tennyson School'    => :sheffieldcsv,
   'Whiteways Primary'                 => :sheffieldcsv,
   'Woodthorpe Primary School'         => :sheffieldcsv,
-  'Wybourn Primary School'            => :sheffieldcsv
+  'Wybourn Primary School'            => :sheffieldcsv,
+  'Christchurch First School'         => :fromecsv,
+  'Frome College'                     => :fromecsv,
+  'Critchill School'                  => :fromecsv,
+  'Hayesdown First School'            => :fromecsv,
+  'Oakfield School'                   => :fromecsv,
+  'Selwood Academy'                   => :fromecsv,
+  'St Johns First School'             => :fromecsv,
+  'St Louis First School'             => :fromecsv,
+  'Trinity First School'              => :fromecsv,
+  'Vallis First School'               => :fromecsv
 }
 
 def parse_command_line

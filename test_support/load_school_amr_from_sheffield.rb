@@ -28,7 +28,7 @@ class LoadSchoolFromSheffieldCSV < MeterReadingsDownloadCSVBase
       gas: [
                     'gas amr data for Hunters Bar 6512204.csv',
                     'gas amr data for Hunters Bar School 6511101.csv',
-      ]         
+      ]
     },
     'Lowfields Primary School' => {
       electricity:  'electricity amr data for Lowfields Primary School.csv'
@@ -81,7 +81,7 @@ class LoadSchoolFromSheffieldCSV < MeterReadingsDownloadCSVBase
   end
 
   def load_meter_readings
-    gas_filenames = meter_filenames(@meter_collection.name, :gas)
+    gas_filenames = meter_filenames(@@sheffield_filenames, @meter_collection.name, :gas)
 
     unless gas_filenames.nil?
       gas_filenames.each do |gas_filename|
@@ -89,7 +89,7 @@ class LoadSchoolFromSheffieldCSV < MeterReadingsDownloadCSVBase
       end
     end
 
-    electricity_filenames = meter_filenames(@meter_collection.name, :electricity)
+    electricity_filenames = meter_filenames(@@sheffield_filenames, @meter_collection.name, :electricity)
     unless electricity_filenames.nil?
       electricity_filenames.each do |electricity_filename|
         load_npower_readings(directory + electricity_filename)
@@ -98,17 +98,6 @@ class LoadSchoolFromSheffieldCSV < MeterReadingsDownloadCSVBase
   end
 
   private
-
-  def meter_filenames(school_name, fuel_type)
-    filename_definition =  @@sheffield_filenames[school_name]
-    if filename_definition.key?(fuel_type)
-      filenames = filename_definition[fuel_type]
-      filenames = [filenames] if filenames.is_a?(String)
-      filenames
-    else
-      nil
-    end
-  end
 
   def load_british_gas_readings(gas_filename)
     logger.info "Loading data from #{gas_filename}"

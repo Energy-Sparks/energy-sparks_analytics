@@ -12,7 +12,7 @@ end
 
 reports = ReportConfigSupport.new
 
-reports.load_school('Wybourn Primary School', true)
+reports.load_school('Vallis First School', true)
 
 # testing examples
 #
