@@ -12,7 +12,7 @@ end
 
 reports = ReportConfigSupport.new
 
-reports.load_school('Bishop Sutton Primary School', true)
+reports.load_school('Vallis First School', true)
 
 # testing examples
 #
@@ -32,7 +32,8 @@ reports.load_school('Bishop Sutton Primary School', true)
 # reports.do_chart_list('Boiler Control', [:cusum, :cusum_weekly, :benchmark, :benchmark_school_comparison, :electricity_longterm_trend_school_comparison], :intraday_line_school_days_last5weeks )
 
 # reports.do_chart_list('School Compare', [ :benchmark_school_comparison ])
-reports.do_all_schools(true)
+# reports.do_all_schools(true)
+reports.do_all_standard_pages_for_school
 
 reports.save_excel_and_html
 

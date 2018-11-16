@@ -8,6 +8,14 @@ class DashboardConfiguration
                                   group_by_week_electricity
                                 ]
                               },
+    main_dashboard_gas:  {
+                                name:   'Main Dashboard',
+                                charts: %i[
+                                  benchmark
+                                  daytype_breakdown_gas
+                                  group_by_week_gas
+                                ]
+                              },
     electricity_detail:      {
                                 name:   'Electricity Detail',
                                 charts: %i[
@@ -184,6 +192,12 @@ class DashboardConfiguration
                         %i[
                             main_dashboard_electric
                             electricity_detail
+                        ],
+    gas_only:
+                        %i[
+                            main_dashboard_gas
+                            gas_detail
+                            boiler_control
                         ],
     electric_and_gas:
                         %i[

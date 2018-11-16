@@ -801,7 +801,7 @@ class ChartManager
       name:             'Optimum Start Control Check',
       chart1_type:      :line,
       series_breakdown: :none,
-      timescale:        [{ day: Date.new(2018, 3, 16) }, { day: Date.new(2018, 3, 6) } ], # fixed dates: one relatively mild, one relatively cold
+      timescale:        [{ optimum_start: 0}, { optimum_start: -1 } ], # fixed dates: one relatively mild, one relatively cold
       x_axis:           :intraday,
       meter_definition: :allheat,
       yaxis_units:      :kw,

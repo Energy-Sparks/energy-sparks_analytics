@@ -6,12 +6,70 @@ require 'roo'
 class LoadSchoolFromFromeFiles < MeterReadingsDownloadCSVBase
   include Logging
 
+  @@frome_filenames = {
+    'Christchurch First School' => {
+      gas: [ 'E200 CHRISTCHURCH FIRST SCHOOL 13605606.csv' ]
+    },
+    'Frome College' => {
+      electricity: [ 'E201 FROME COLLEGE 2000027481429.csv' ]
+    },
+    'Critchill School' => {
+      electricity: [ 'E214 FROME CRITCHILL SCHOOL 2000025766279.csv' ],
+      gas: [ 'E214 FROME CRITCHILL SCHOOL 13610902.csv' ]
+    },
+    'Hayesdown First School' => {
+      electricity: [ 'E204 HAYESDOWN FIRST SCHOOL 2000054408180.csv' ]
+    },
+    'Oakfield School' => {
+      electricity: [ 'E208 Oakfield School 2000027949134.csv' ],
+      gas: [ 'E208 Oakfield School 13610307.csv', 'E208 Oakfield School 13610408.csv' ]
+    },
+    'Selwood Academy' => {
+      electricity: [ 'E212 Selwood Academy 2000051663623.csv' ],
+      gas: [ 'E212 Selwood Academy 74020900.csv', 'E212 Selwood Academy 77409304.csv' ]
+    },
+    'St Johns First School' => {
+      electricity: [ 'E210 ST JOHNS FIRST SCHOOL 2000025929961.csv' ],
+      gas: [ 'E210 ST JOHNS FIRST SCHOOL 13610610.csv', 'E210 ST JOHNS FIRST SCHOOL 13610801.csv' ]
+    },
+    'St Louis First School' => {
+      electricity: [ 'E211 ST LOUIS FIRST SCHOOL 2000025706400.csv'],
+      gas: [ 'E211 ST LOUIS FIRST SCHOOL 19161200.csv' ]
+    },
+    'Trinity First School' => {
+      electricity: [ 'E206 TRINITY FIRST SCHOOL 2000025766288.csv' ]
+    },
+    'Vallis First School' => {
+      electricity: [ 'E216 VALLIS FIRST SCHOOL 2000025901813.csv' ],
+      gas: [ 'E216 VALLIS FIRST SCHOOL 13625803.csv', 'E216 VALLIS FIRST SCHOOL 13625904.csv' ]
+    }
+
+  }
   def initialize(meter_collection)
     super(meter_collection)
     @meter_collection = meter_collection
     @delimiter = ','
   end
 
+  def load_meter_readings
+    gas_filenames = meter_filenames(@@frome_filenames, @meter_collection.name, :gas)
+
+    unless gas_filenames.nil?
+      gas_filenames.each do |gas_filename|
+        type, column_names, data = load_file( directory + gas_filename)
+        process_readings(type, column_names, data)
+      end
+    end
+
+    electricity_filenames = meter_filenames(@@frome_filenames, @meter_collection.name, :electricity)
+    unless electricity_filenames.nil?
+      electricity_filenames.each do |electricity_filename|
+        type, column_names, data = load_file( directory + electricity_filename)
+        process_readings(type, column_names, data)
+      end
+    end
+  end
+=begin
   def load_meter_readings
     logger.info "Loading data from #{meterreadings_cache_directory}"
 
@@ -28,7 +86,7 @@ class LoadSchoolFromFromeFiles < MeterReadingsDownloadCSVBase
     logger.info 'Completed loading of data from csv/xlsx files'
     # AggregateDataService.new(@meter_collection).validate_and_aggregate_meter_data
   end
-
+=end
   private
 
   def load_file(filename)
@@ -104,10 +162,18 @@ class LoadSchoolFromFromeFiles < MeterReadingsDownloadCSVBase
       # date = Date.parse(line_data[column_index(column_names, 'Reading Date')])
     end
 
+    if halfhour_kwh_x48.length == 47 && [Date.new(2018, 11, 6), Date.new(2018, 11, 11)].include?(date)
+      halfhour_kwh_x48.push(halfhour_kwh_x48.last) # the data set seems to have the last half hour missing
+    end
+
     logger.error "Got out of date range #{date}" if date > Date.new(2020, 1, 1)
 
     if halfhour_kwh_x48.nil? || halfhour_kwh_x48.empty? || !check_date(date)
       logger.info "Warning: missing meter readings for #{mpan_or_mprn} on #{date}"
+      [nil, nil, nil, nil]
+    elsif halfhour_kwh_x48.length != 48
+      logger.info "Warning: shortage of meter readings on day for #{mpan_or_mprn} on #{date} count #{halfhour_kwh_x48.length}"
+      logger.info "#{line_data}"
       [nil, nil, nil, nil]
     else
       one_days_data = OneDayAMRReading.new(mpan_or_mprn, date, 'ORIG', nil, DateTime.now, halfhour_kwh_x48)

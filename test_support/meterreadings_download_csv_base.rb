@@ -29,6 +29,17 @@ class MeterReadingsDownloadCSVBase < MeterReadingsDownloadBase
     end
   end
 
+  def meter_filenames(list_of_files, school_name, fuel_type)
+    filename_definition = list_of_files[school_name]
+    if filename_definition.key?(fuel_type)
+      filenames = filename_definition[fuel_type]
+      filenames = [filenames] if filenames.is_a?(String)
+      filenames
+    else
+      nil
+    end
+  end
+
   def add_reading_to_meter_collection(meter_id, fuel_type, name, one_days_data)
     meter = @meter_collection.meter?(one_days_data.meter_id)
     if meter.nil?
@@ -62,5 +73,3 @@ class MeterReadingsDownloadCSVBase < MeterReadingsDownloadBase
     )
   end
 end
-
-
