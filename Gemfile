@@ -4,7 +4,7 @@ ruby '2.5.1'
 
 gem 'require_all'
 gem 'activesupport'
-gem 'statsample'
+gem 'statsample', git: 'https://github.com/SciRuby/statsample', branch: 'master'
 gem 'mechanize'
 gem 'write_xlsx'
 gem 'roo'
