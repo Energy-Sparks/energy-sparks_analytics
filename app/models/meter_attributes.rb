@@ -21,7 +21,7 @@ class MeterAttributes
     butes
   end
 
-  METER_ATTRIBUTE_DEFINITIONS = { 
+  METER_ATTRIBUTE_DEFINITIONS = {
     # ==============================Bishop Sutton==============================
     2200012833349 => {
       aggregation:  [
@@ -41,13 +41,13 @@ class MeterAttributes
       aggregation:  [
         :deprecated_include_but_ignore_end_date,
         :deprecated_include_but_ignore_start_date
-      ] 
+      ]
     },
     2200015105163 => {
       aggregation:  [
         :deprecated_include_but_ignore_end_date,
         :deprecated_include_but_ignore_start_date
-      ] 
+      ]
     },
     2200041803451 => { aggregation:  [:deprecated_include_but_ignore_end_date] },
     2200042676990 => { aggregation:  [:ignore_start_date] }, # succeeds meters above
@@ -67,7 +67,7 @@ class MeterAttributes
       aggregation:  [
         :deprecated_include_but_ignore_end_date,
         :deprecated_include_but_ignore_start_date
-      ] 
+      ]
     },
     # ==============================Marksbury==================================
     2200011879013 => {
@@ -92,7 +92,7 @@ class MeterAttributes
       ],
       aggregation:  [
         :deprecated_include_but_ignore_start_date
-      ] 
+      ]
     },
     # ==============================Paulton Junior=============================
     13678903 => {
@@ -169,21 +169,6 @@ class MeterAttributes
       meter_corrections: [ :set_all_missing_to_zero ],
       function: [ :hotwater_only ]
     },
-    # ==============================Castle Primary=============================
-    2200015105145 => {
-      aggregation:  [
-        :deprecated_include_but_ignore_end_date,
-        :deprecated_include_but_ignore_start_date
-      ]
-    },
-    2200015105163 => {
-      aggregation:  [
-        :deprecated_include_but_ignore_end_date,
-        :deprecated_include_but_ignore_start_date
-      ]
-    },
-    2200041803451 => { aggregation:  [:deprecated_include_but_ignore_end_date] },
-    2200042676990 => { aggregation:  [:ignore_start_date] }, # succeeds meters above
     # ==============================St Saviours Juniors========================
     4234023603 => { # current gas meter
       aggregation:  [ :ignore_start_date ]
