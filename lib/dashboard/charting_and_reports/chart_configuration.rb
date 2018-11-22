@@ -219,7 +219,7 @@ class ChartManager
       name:             'By Week: Gas (Meter Breakdown)',
       inherits_from:    :group_by_week_gas_unlimited,
       series_breakdown: :meter
-      # filter:            { meter: [ 'Electrical Heating' ] } 
+      # filter:            { meter: [ 'Electrical Heating' ] }
     },
     group_by_year_gas_unlimited_meter_breakdown_heating_model_fitter: {
       name:             'Gas meter breakdown by year',
@@ -331,6 +331,7 @@ class ChartManager
       # chart1_subtype:   :stacked,
       series_breakdown: :none,
       x_axis:           :month,
+      x_axis_units:     :month,
       timescale:        [{ academicyear: 0 }, { academicyear: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
@@ -342,6 +343,7 @@ class ChartManager
       # chart1_subtype:   :stacked,
       series_breakdown: :none,
       x_axis:           :month,
+      x_axis_units:     :month,
       timescale:        [{ year: 0 }, { year: -1 }],
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,

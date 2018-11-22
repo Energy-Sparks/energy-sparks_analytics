@@ -64,7 +64,7 @@ class ChartManager
   def run_chart(chart_config, chart_param, resolve_inheritance = true)
     logger.info '>' * 120
     chart_config = resolve_chart_inheritance(chart_config) if resolve_inheritance
-    
+
     # puts 'Chart configuration:'
     ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
@@ -92,7 +92,12 @@ class ChartManager
 
     graph_definition[:title]          = chart_config[:name] + ' ' + aggregator.title_summary
 
-    graph_definition[:x_axis]         = aggregator.x_axis
+    graph_definition[:x_axis] = if chart_config[:x_axis_units] == :month
+                                  aggregator.x_axis.map { |month_year| Date.parse(month_year).strftime("%b")}
+                                else
+                                  aggregator.x_axis
+                                end
+
     graph_definition[:x_axis_ranges]  = aggregator.x_axis_bucket_date_ranges
     graph_definition[:x_data]         = aggregator.bucketed_data
     graph_definition[:chart1_type]    = chart_config[:chart1_type]

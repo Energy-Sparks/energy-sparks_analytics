@@ -8,10 +8,10 @@ class DashboardConfiguration
                                   group_by_week_electricity
                                 ]
                               },
+    # Benchmark currently not working for Gas only
     main_dashboard_gas:  {
                                 name:   'Main Dashboard',
                                 charts: %i[
-                                  benchmark
                                   daytype_breakdown_gas
                                   group_by_week_gas
                                 ]
