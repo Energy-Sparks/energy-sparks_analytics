@@ -302,7 +302,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           is very good.
         <% else %>
           <% if actual_gas_usage < average_regional_gas_usage %>
-            while although good, could be improved
+            although good, could be improved
           <% else %>
             is above average, the school should aim to reduce this,
           <% end %>
@@ -315,7 +315,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           is very good.
         <% else %>
           <% if actual_electricity_usage < average_regional_electricity_usage %>
-            while although good, could be improved
+            although good, could be improved
           <% else %>
             is above average, the school should aim to reduce this,
           <% end %>

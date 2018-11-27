@@ -60,7 +60,7 @@ class SeriesNames
 
   USEFULHOTWATERUSAGE = 'Hot Water Usage'.freeze
   WASTEDHOTWATERUSAGE = 'Wasted Hot Water Usage'.freeze
-  HOTWATERSERIESNAMES = [WASTEDHOTWATERUSAGE.freeze, USEFULHOTWATERUSAGE.freeze].freeze
+  HOTWATERSERIESNAMES = [USEFULHOTWATERUSAGE, WASTEDHOTWATERUSAGE].freeze
 
   NONE            = 'Energy'.freeze
 
@@ -440,7 +440,7 @@ private
     meter_names.each do |meter_name|
       breakdown[meter_name] = 0.0
     end
-    unless @meters[0].nil? # indication of electricity only 
+    unless @meters[0].nil? # indication of electricity only
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.electricity_meters, start_date, end_date, halfhour_index))
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.solar_pv_meters, start_date, end_date, halfhour_index))
     end
@@ -741,7 +741,7 @@ puts hash_value.class.name
           raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for optimum start range specification') if hash_value > 0
           index = hash_value.magnitude
           day1 = Date.new(2018, 3, 6)
-          day2 = Date.new(2018, 3, 16) 
+          day2 = Date.new(2018, 3, 16)
           if @first_meter_date <= day1  && @last_meter_date >= day2
             if index == 0
               @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day1, day1)]
@@ -762,7 +762,7 @@ puts hash_value.class.name
         else
           raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
         end
-       
+
       else
         raise "Unsupported time period for charting #{@chart_configuration[:timescale]}"
       end

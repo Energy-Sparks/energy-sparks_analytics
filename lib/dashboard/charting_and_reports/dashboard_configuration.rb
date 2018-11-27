@@ -1,17 +1,17 @@
 class DashboardConfiguration
   DASHBOARD_PAGE_GROUPS = {  # dashboard page groups: defined page, and charts on that page
     main_dashboard_electric:  {
-                                name:   'Main Dashboard',
+                                name:   'Overview',
                                 charts: %i[
                                   benchmark
                                   daytype_breakdown_electricity
                                   group_by_week_electricity
                                 ]
                               },
+    # Benchmark currently not working for Gas only
     main_dashboard_gas:  {
                                 name:   'Main Dashboard',
                                 charts: %i[
-                                  benchmark
                                   daytype_breakdown_gas
                                   group_by_week_gas
                                 ]
@@ -47,7 +47,7 @@ class DashboardConfiguration
                                 ]
                               },
     main_dashboard_electric_and_gas: {
-                                name:   'Main Dashboard',
+                                name:   'Overview',
                                 charts: %i[
                                   benchmark
                                   daytype_breakdown_electricity
@@ -153,18 +153,18 @@ class DashboardConfiguration
                                   intraday_electricity_simulator_solar_pv_kwh
                                 ]
                               },
-        simulator_debug:      {     
+        simulator_debug:      {
                                 name: 'Simulator - Appliance Breakdown',
-                                charts: %i[       
+                                charts: %i[
                                   intraday_line_school_days_6months_simulator
                                   intraday_line_school_days_6months
                                   intraday_line_school_days_6months_simulator_submeters
 
                                   intraday_electricity_simulator_actual_for_comparison
                                   intraday_electricity_simulator_simulator_for_comparison
-                                ] 
+                                ]
                               },
-        test:                 {     
+        test:                 {
                                 name: 'Useful Charts for Testing',
                                 charts: %i[
                                   group_by_week_gas_unlimited_meter_filter_debug
@@ -176,7 +176,7 @@ class DashboardConfiguration
                                   cusum_weekly
                                 ]
                               },
-        heating_model_fitting:                 {     
+        heating_model_fitting:                 {
           name: 'Heating Model Fitting',
           charts: %i[
             thermostatic
