@@ -102,10 +102,14 @@ class MeterCollection
     meter_list = []
     meter_groups.each do |meter_group|
       unless meter_group.nil?
-        meter_list += meter_group.is_a?(Dashboard::Meter) ? [meter_group] : meter_group
+        meter_list += meter?(meter_group) ? [meter_group] : meter_group
       end
     end
     meter_list
+  end
+
+  def meter?(meter_group)
+    (Object.const_defined?('Meter') && meter_group.is_a?(Meter)) || meter_group.is_a?(Dashboard::Meter)
   end
 
   def school_type
