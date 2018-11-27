@@ -14,10 +14,7 @@ class AggregateDataService
   def validate_and_aggregate_meter_data
     logger.info 'Validating and Aggregating Meters'
     validate_meter_data
-    aggregate_heat_meters
-    create_storage_heater_sub_meters # create before electric aggregation
-    create_solar_pv_sub_meters
-    aggregate_electricity_meters
+    aggregate_heat_and_electricity_meters_including_storage_and_solar_pv
 
     # Return populated with aggregated data
     @meter_collection
@@ -31,6 +28,14 @@ class AggregateDataService
 
   def aggregate_heat_and_electricity_meters
     aggregate_heat_meters
+    aggregate_electricity_meters
+  end
+
+  def aggregate_heat_and_electricity_meters_including_storage_and_solar_pv
+    logger.info 'Aggregating meters including storage and solar pv'
+    aggregate_heat_meters
+    create_storage_heater_sub_meters # create before electric aggregation
+    create_solar_pv_sub_meters
     aggregate_electricity_meters
   end
 
