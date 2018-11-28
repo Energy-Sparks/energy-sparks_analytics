@@ -22,7 +22,10 @@ class OneDayAMRReading
     @type = type
     @substitute_date = substitute_date
     @kwh_data_x48 = kwh_data_x48
-    throw EnergySparksBadAMRDataTypeException.new('Error: expecting all 48 half hour kWh values to be float or integer') if validate_data != 48
+    valid = validate_data
+    if valid != 48
+      throw EnergySparksBadAMRDataTypeException.new("Error: expecting all 48 half hour kWh values to be float or integer (#{valid})")
+    end
     @one_day_kwh = kwh_data_x48.inject(:+)
   end
 
@@ -37,6 +40,10 @@ class OneDayAMRReading
 
   def set_days_kwh_x48(days_kwh_data_x48)
     @kwh_data_x48 = days_kwh_data_x48
+  end
+
+  def set_type(type)
+    @type = type
   end
 
   def check_type(type)

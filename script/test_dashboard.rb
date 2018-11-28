@@ -13,7 +13,7 @@ end
 reports = ReportConfigSupport.new
 
 # reports.load_school('Ecclesfield Primary School', true)
-reports.load_school('Critchill School', true)
+reports.load_school('Frome College', true)
 
 # testing examples
 #

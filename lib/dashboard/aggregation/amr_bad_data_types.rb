@@ -3,6 +3,8 @@ class OneDayAMRReading
   AMR_TYPES = {
     'ORIG'  => { name: 'Original - uncorrected good data',                  description: 'Good quality original reading'},
     'LGAP'  => { name: 'Too much missing data prior to this date',          description: 'Prior data including this day ignored'},
+    'CMP1'  => { name: 'Correct partially missing (zero) data on this date',description: 'Electricity data but some zero, not PV, interpolated missing'},
+    'CMP2'  => { name: 'Correct partially missing (zero) data on this date',description: 'Electricity data but some zero, not PV, substituted whole day'},
     'FIXS'  => { name: 'Setting fixed start date - bad data before',        description: 'Prior data before date ignored'},
     'MWKE'  => { name: 'Missing Weekend - set to zero',                     description: 'Missing data replaced with zeros'},
     'MHOL'  => { name: 'Missing Holiday',                                   description: 'Missing data replaced with zeros'},
@@ -26,7 +28,7 @@ class OneDayAMRReading
     'SUMZ'  => { name: 'Missing summer gas heating data set to zero',       description: 'Missing heating only meter data set to zero in summer'},
     'ALLZ'  => { name: 'Missing gas data set to zero',                      description: 'Set all data to zero'},
     'ZMDR'  => { name: 'Set missing data in date range to zero',            description: 'Set missing data in date range to zero'},
-    'ZDTR'  => { name: 'Set bad data in date range to zero',                description: 'Set bad data in date range to zero'},
+    'ZDTR'  => { name: 'Set bad data in date range to zero',                description: 'Set bad data in date range to zero'}
   }.freeze
   # rubocop:disable Metrics/LineLength
 end

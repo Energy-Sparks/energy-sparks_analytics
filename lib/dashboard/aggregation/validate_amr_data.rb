@@ -71,8 +71,11 @@ class ValidateAMRData
     logger.debug '-' * 80
     logger.debug "Manually defined meter corrections: #{rule}"
     if rule.is_a?(Symbol) && rule == :set_all_missing_to_zero
-      logger.debug "Setting all missing data to zero}"
+      logger.debug 'Setting all missing data to zero'
       set_all_missing_data_to_zero
+    elsif rule.is_a?(Symbol) && rule == :correct_zero_partial_data
+      logger.debug 'Correcting partially missing (zero) data'
+      correct_zero_partial_data
     elsif rule.key?(:rescale_amr_data)
       scale_amr_data(
         rule[:rescale_amr_data][:start_date],
@@ -135,6 +138,71 @@ class ValidateAMRData
     year_count.each do |year, count|
       logger.info "set during #{year} * #{count} to zero"
     end
+  end
+
+  # the Frome/Somerset csv feed has a small amount of zero data in its electricity csv feeds
+  # sometimes its just a few points, sometimes its a whole day (with BST/GMT offset issues!)
+  def correct_zero_partial_data
+    # do this is a particular order to avoid substitiing partial data
+    # with partial data
+    max_missing_readings = 6
+
+    missing_dates = remove_readings_with_too_many_missing_partial_readings(max_missing_readings)
+
+    interpolate_partial_missing_data(max_missing_readings)
+
+    substitute_partial_missing_data_with_whole_day(missing_dates)
+  end
+
+  def interpolate_partial_missing_data(max_missing_readings)
+    (@amr_data.start_date..@amr_data.end_date).each do |date|
+      if @amr_data.key?(date)
+        days_kwh_x48 = @amr_data.days_kwh_x48(date)
+        num_zero_values = days_kwh_x48.count(0.0)
+        if num_zero_values > 0 && num_zero_values <= max_missing_readings
+          days_kwh_x48 = interpolate_zero_readings(days_kwh_x48)
+          updated_data = OneDayAMRReading.new(meter_id, date, 'CMP1', nil, DateTime.now, days_kwh_x48)
+          @amr_data.add(date, updated_data)
+        end
+      end
+    end
+  end
+
+  def substitute_partial_missing_data_with_whole_day(missing_dates)
+    missing_dates.each do |date|
+      date, updated_one_day_reading = substitute_missing_electricity_data(date)
+      updated_one_day_reading.set_type('CMP2')
+      @amr_data.add(date, updated_one_day_reading.deep_dup)
+    end
+  end
+
+  def remove_readings_with_too_many_missing_partial_readings(max_missing_readings)
+    missing_dates = []
+    (@amr_data.start_date..@amr_data.end_date).each do |date|
+      if @amr_data.key?(date) && @amr_data.days_kwh_x48(date).count(0.0 ) > max_missing_readings
+        missing_dates.push(date)
+      end
+    end
+    missing_dates.each do |date|
+      @amr_data.delete(date)
+    end
+    missing_dates
+  end
+
+  def interpolate_zero_readings(days_kwh_x48)
+    interpolation_data = {}
+
+    days_kwh_x48.each_index do |halfhour_index|
+      interpolation_data[halfhour_index] = days_kwh_x48[halfhour_index] if days_kwh_x48[halfhour_index] != 0.0
+    end
+
+    interpolation = Interpolate::Points.new(interpolation_data) 
+
+    days_kwh_x48.each_index do |halfhour_index|
+      days_kwh_x48[halfhour_index] = interpolation.at(halfhour_index) if days_kwh_x48[halfhour_index] == 0.0
+    end
+
+    days_kwh_x48
   end
 
   def set_missing_data_to_zero_on_heating_meter_during_summer(start_toy, end_toy)
@@ -432,7 +500,7 @@ class ValidateAMRData
   def create_substituted_electricity_data(date, adjusted_date)
     amr_day_type = day_type_to_amr_type_letter(daytype(date))
     sub_type = 'ES' + amr_day_type + '1'
-    substitute_data = @amr_data.days_kwh_x48(adjusted_date)
+    substitute_data = @amr_data.days_kwh_x48(adjusted_date).deep_dup
     OneDayAMRReading.new(meter_id, date, sub_type, adjusted_date, DateTime.now, substitute_data)
   end
 

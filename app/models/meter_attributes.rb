@@ -69,6 +69,10 @@ class MeterAttributes
         }
       ]
     },
+    # ==============================Frome College============================
+    2000027481429 => {
+      meter_corrections: [ :correct_zero_partial_data ]
+    },
     # ==============================Hunters Bar=============================
     6512204 => {
       aggregation:  [
