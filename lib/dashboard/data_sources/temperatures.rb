@@ -5,6 +5,7 @@ class Temperatures < HalfHourlyData
   def initialize(type)
     super(type)
     @cached_min_max = {}
+    @cached_average_on_date = {}
   end
 
   def get_temperature(date, half_hour_index)
@@ -18,7 +19,10 @@ class Temperatures < HalfHourlyData
   end
 
   def average_temperature(date)
-    average(date)
+    if @cached_average_on_date.key?(date) # for performance temps only not baseclass
+      return @cached_average_on_date[date]
+    end
+    @cached_average_on_date[date] = average(date)
   end
 
   def average_temperature_in_date_range(start_date, end_date)

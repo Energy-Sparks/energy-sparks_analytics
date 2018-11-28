@@ -36,10 +36,13 @@ class LocalAnalyticsMeterReadingDB < MeterReadingsDownloadBase
 
     all_meter_readings = []
 
-    all_meters = @meter_collection.all_meters
+    # all_meters = @meter_collection.all_meters
+    all_meters = @meter_collection.electricity_meters + @meter_collection.heat_meters
 
     all_meters.each do |meter|
-      all_meter_readings.concat(meter.amr_data.values)
+      # sort so debugging data in YAML easier
+      readings = meter.amr_data.values.sort_by {|reading| reading.date}
+      all_meter_readings.concat(readings)
     end
 
     logger.info "Saving #{all_meter_readings.length} meter readings to YML #{yml_filename}"

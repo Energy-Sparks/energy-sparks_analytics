@@ -121,18 +121,11 @@ class SeriesDataManager
   def series_bucket_names
     @series_buckets = []
     if @breakdown_list.include?(:fuel)
+      @series_buckets.push('electricity')
+      @series_buckets.push('gas')
       @meters.each do |meter|
-        if meter.nil?
-          @series_buckets.push('gas') # TODO(PH,17Jun2018) meter selection needs fixing
-        else
-          fuel_type = meter.fuel_type.to_s
-
-          # aggregated meters can either be of aggregated type, or if only one meter then non-aggregate version
-          # TODO(PH,29Sep2018) consider whether to what symbology to use for aggregate meters on loading?
-          fuel_type = 'electricity' if fuel_type == 'aggregated_electricity'
-          fuel_type = 'gas' if fuel_type == 'aggregated_heat'
-
-          @series_buckets.push(fuel_type)
+        if !meter.nil? && ['aggregated_electricity', 'aggregated_heat', 'electricity', 'gas'].include?(meter.fuel_type.to_s)
+          @series_buckets.push(meter.fuel_type.to_s)
         end
       end
     end
@@ -735,8 +728,6 @@ private
         end
         @periods = [period]
       when :optimum_start # hardcoded fudge for the moment
-puts "Got here optimum start"
-puts hash_value.class.name
         if hash_value.is_a?(Integer) # hash_value weeks back from latest week
           raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for optimum start range specification') if hash_value > 0
           index = hash_value.magnitude

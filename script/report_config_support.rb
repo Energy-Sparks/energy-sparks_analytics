@@ -31,7 +31,7 @@ class ReportConfigSupport
       'Westfield Primary'                 => :electric_and_gas,
     # Sheffield
       'Bankwood Primary School'           => :electric_and_gas,
-      'Ecclesall Primary School'          => :electric_and_gas,
+ #     'Ecclesall Primary School'          => :electric_and_gas,
       'Ecclesfield Primary School'        => :electric_and_gas,
       'Hunters Bar School'                => :electric_and_gas,
       'Lowfields Primary School'          => :electric_only,
@@ -64,6 +64,7 @@ class ReportConfigSupport
     @chart_manager = nil
     @school_metadata = nil
     @worksheet_charts = {}
+    @failed_reports = []
 
     logger.debug "\n" * 8
   end
@@ -87,6 +88,15 @@ class ReportConfigSupport
       load_school(school_name, suppress_debug)
       do_all_standard_pages_for_school
     end
+    report_failed_charts
+  end
+
+  def report_failed_charts
+    puts '=' * 100
+    puts 'Failed charts'
+    @failed_reports.each do |school_name, chart_name|
+      puts sprintf('%-25.25s %-45.45s', school_name, chart_name)
+    end
   end
 
   def self.banner(title)
@@ -104,6 +114,9 @@ class ReportConfigSupport
 
   def load_school(school_name, suppress_debug = false)
     logger.debug self.class.banner("School: #{school_name}")
+
+    puts self.class.banner("School: #{school_name}")
+
     @excel_name = school_name
 
     @school_name = school_name
@@ -195,8 +208,11 @@ class ReportConfigSupport
     bm = Benchmark.measure {
       chart_results = @chart_manager.run_chart_group(chart_name)
     }
-    @benchmarks.push(sprintf("%40.40s = %s", chart_name, bm.to_s))
-    logger.error "Nil chart result from #{chart_name}" if chart_results.nil?
+    @benchmarks.push(sprintf("%20.20s %40.40s = %s", @school.name, chart_name, bm.to_s))
+    if chart_results.nil?
+      @failed_reports.push([@school.name, chart_name])
+      puts "Nil chart result from #{chart_name}"
+    end
     if chart_name.is_a?(Symbol)
       [chart_results]
     else

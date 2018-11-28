@@ -52,6 +52,13 @@ class MeterAttributes
     2200041803451 => { aggregation:  [:deprecated_include_but_ignore_end_date] },
     2200042676990 => { aggregation:  [:ignore_start_date] }, # succeeds meters above
     4186869705 => {
+      heating_model: {
+ #       calculation_start_date: nil,
+ #       calculation_end_date:   nil,
+        heating_day_determination_method:  { fixed__minimum_per_day: 250 },
+        heating_balance_point_temperature:  16.0,
+        model: :thermally_heavy,
+      },
       meter_corrections: [
         {
           rescale_amr_data: {
