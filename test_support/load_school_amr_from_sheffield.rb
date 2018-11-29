@@ -5,7 +5,7 @@ class LoadSchoolFromSheffieldCSV < MeterReadingsDownloadCSVBase
   include Logging
 
   @@sheffield_filenames = {
-    'Bankwood Primary' => {
+    'Bankwood Primary School' => {
       electricity: [ 
         'Npower (ELEC) Historical HHD for Bankwood Primary 031018.csv',
         'electricity amr data for Bankwood Primary School.csv'

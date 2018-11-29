@@ -16,6 +16,7 @@ class HeatingRegressionModelFitter
       @body_start = ''
       @body_end = ''
     end
+    @debug = false
   end
 
   def fit
@@ -25,7 +26,7 @@ class HeatingRegressionModelFitter
       chart standard_chart(:meter_breakdown_pie_1_year)
       analyse_meters
     }
-    puts doc
+    # puts doc
     puts bm.to_s
     @doc
   end
@@ -75,6 +76,7 @@ class HeatingRegressionModelFitter
   end
 
   def analyse_optimal_heating_regression_model(meter)
+#   html_current_meter_attributes(meter)
     html header(3, 'Determing optimal regression model for this heating meter')
     html paragraph('First we analyse whether there is a gradual reduction in consumption by day of the week:')
     chart_results = run_standard_chart_with_for_one_meter(:gas_by_day_of_week, meter, @meter_collection.heat_meters.length)
@@ -173,10 +175,10 @@ class HeatingRegressionModelFitter
     generate_html(template, binding)
   end
 
-  def horizontal_line
+  def horizontal_line(thickness = 20)
     template = %{ 
       <%= @body_start %>
-      <hr>
+      <hr size=<%= thickness %> noshade>
       <%= @body_end %>
     }.gsub(/^  /, '')
     generate_html(template, binding)
@@ -207,6 +209,7 @@ class HeatingRegressionModelFitter
   end
 
   def run_temperature_balance_point_fit_on_simple_model(meter)
+
     html paragraph('Two charts:')
     html paragraph('The first is an intraday profile - does this look reasonable for heating?')
     chart run_standard_chart_with_for_one_meter(:gas_intraday_schoolday_last_year, meter, meter_collection.heat_meters.length)
@@ -216,55 +219,129 @@ class HeatingRegressionModelFitter
     html paragraph(advice_text)
     chart run_standard_chart_with_for_one_meter(:group_by_week_gas, meter, meter_collection.heat_meters.length)
 
-    heat_amr_data = meter.amr_data
-    start_date = heat_amr_data.start_date
-    end_date = heat_amr_data.end_date
-    period = SchoolDatePeriod.new(:fitting, 'Meter Period', start_date, end_date)
+    period = meter_period(meter)
 
     puts "-" * 90
     puts "calculating simple model for #{meter.name}"
-    simple_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(heat_amr_data, @meter_collection.holidays, @meter_collection.temperatures)
- 
-    cusum_variances = []
-    temperatures = []
-    results = []
+    simple_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(meter, @meter_collection.holidays, @meter_collection.temperatures)
+    thermally_massive_model = AnalyseHeatingAndHotWater::HeatingModelWithThermalMass.new(meter, @meter_collection.holidays, @meter_collection.temperatures)
 
-    for temperature in (8..30).step(1.0)
-      simple_model.base_degreedays_temperature = temperature
-      simple_model.calculate_regression_model(period)
-      simple_model.calculate_heating_periods(start_date, end_date, false)
+    temps = [8, 9, 10, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 21, 22, 25, 30]
+    delimination_methods = [
+      # [:fixed_winter_months, nil, nil, 'Fixed winter months'],
+      [:prediction_at_fixed_degreedays, nil, 'Minimum heating day set to predicted kWh at base temperature'],
+      [:percent_regression_model_prediction, 0.5, 'Minimum heating day set to 50% of kWh predicted by model at T' ]
+    ]
 
-      r2 = simple_model.models[:heating_occupied].r2
-      a = simple_model.models[:heating_occupied].a
-      b = simple_model.models[:heating_occupied].b
-      bt = simple_model.models[:heating_occupied].base_temperature
-      h_way = simple_model.halfway_kwh.round(0)
-      hd = simple_model.heating_on_days.to_i
-      sd, mean = simple_model.cusum_standard_deviation_average
-      
-      if sd.nan? || mean.nan?
-        puts "simple: t = #{temperature} NaN"
-      else
-        temperatures.push(temperature)
-        cusum_variances.push(sd)
-        results.push({ base_temperature: bt.round(1), cusum_variance: sd.round(0), mean_cusum: mean.round(0),
-          a: a.round(2), b: b.round(2), r2: r2.round(3), heat_days: hd, halfway_kwh: h_way})
-        logger.info "simple: t = #{bt.round(1)} sd = #{sd.round(0)} mean = #{mean.round(0)} a = #{a.round(2)} b = #{b.round(2)} r2 = #{r2.round(3)} heat days = #{hd} half way = #{h_way}"
-      end
-
-      simple_model.save_raw_data_to_csv_for_debug('regression model debug ' + meter.name + '.csv') if temperature == 18
+    unless MeterAttributes.attributes(meter, :heating_model).dig(:heating_model, :heating_day_determination_method).nil?
+      configuration = MeterAttributes.attributes(meter, :heating_model).dig(:heating_model, :heating_day_determination_method)
+      delimination_methods.push([])
     end
 
-    html html_table(results)
+    cusum_variances = []
+    temperatures = []
+
+    [simple_model, thermally_massive_model].each do |model|
+      delimination_methods.each do |delimination_method, delimination_parameter, delimination_description|
+        temps.each do |temperature|
+          model.base_degreedays_temperature = temperature
+          model.full_regression_model_calculation(period, temperature, delimination_method, delimination_parameter)
+
+          sd, mean, actual, predicted, detail = model.cusum_standard_deviation_average
+
+          html horizontal_line(5)
+          html header(3, "#{model.name} Model at degree day base temperature of #{temperature}")
+          html html_table(['type'] + detail[:summer_weekend].keys, hash_to_array_of_arrays(detail))
+
+          if sd.nan? || mean.nan?
+            puts "simple: t = #{temperature} NaN"
+          else
+            temperatures.push([temperature, model.name, delimination_description])
+            cusum_variances.push(sd)
+          end
+
+          if @debug
+            filename = debug_csv_filename(model.name, temperature, delimination_description)
+            puts filename
+            model.save_raw_data_to_csv_for_debug(filename)
+          end
+        end
+      end
+    end
 
     minimum_variance_index = cusum_variances.index(cusum_variances.min)
-    optimum = results[minimum_variance_index]
-    text = "Minimum variance occurs at a temperature of #{temperatures[minimum_variance_index]}."\
-           "This indicates an optimal simple model of X = #{optimum[:a]} + #{optimum[:b]} * DD at base T #{optimum[:base_temperature]} "
-    meter_attributes_entry_description(meter, :simple, optimum[:a], optimum[:b], optimum[:base_temperature])
+    temperature, model_name, delimination_description = temperatures[minimum_variance_index]
+
+    text = "Minimum variance occurs at a temperature of #{temperature} and model type #{model_name} and heating day delimination method #{delimination_description}"
     html paragraph(text)
     logger.info text
-    @halfway_kwh
+  end
+
+  def debug_csv_filename(model_name, base_temperature, delimination_description)
+    # shorten name because of OneDrive 240char max filepath/name limit
+    model_name = 'Massive Model' if model_name == 'Thermally Massive Heating Model'
+    File.join(
+      File.dirname(__FILE__), '../../../log/' + model_name +
+      ' ' + base_temperature.to_s + ' ' + delimination_description + '.csv'
+    )
+  end
+
+  def meter_period(meter)
+    heat_amr_data = meter.amr_data
+    start_date = heat_amr_data.start_date
+    end_date = heat_amr_data.end_date
+    SchoolDatePeriod.new(:fitting, 'Meter Period', start_date, end_date)
+  end
+
+  def array_of_hashs_to_array_of_hash_values(arr)
+    rows = []
+    arr.each do |hash|
+      rows.push(hash.values)
+    end
+    rows
+  end
+
+  def hash_to_array_of_arrays(hash)
+    rows = []
+    hash.each do |hash, value|
+      rows.push([hash] + value.values)
+    end
+    rows
+  end
+
+  def html_current_meter_attributes(meter)
+    model_attributes = MeterAttributes.attributes(meter, :heating_model)
+    html header(2, 'Existing heating model configuration')
+    unless model_attributes.nil?
+      html paragraph(date_key_description(model_attributes, :calculation_start_date, 'start'))
+      html paragraph(date_key_description(model_attributes, :calculation_end_date, 'end'))
+      html paragraph("Degree day base temperature is #{model_attributes[:regression_model][:degreeday_base_temperature]}C")
+      regression_parameters = extract_regression_model_parameters_from_meter_configuration(model_attributes[:regression_model])
+      html html_table(['day', 'Kwh per DD/day', 'Fixed kwh/day', 'r2'], regression_parameters)
+      html paragraph("Heating day determination: #{model_attributes[:heating_day_determination]}")
+      if model_attributes.key?(:hotwater_model)
+        hw = model_attributes[:hotwater_model]
+        html paragraph("Hot water model: #{hw[:kwh_per_degree_day_per_day]} kWh/dd/day + #{hw[:fixed_offset_kwh_per_day]} kWh/day")
+      else
+        html paragraph('No hot water model')
+      end
+    else
+      html paragraph('Nothing currently configured for meter')
+    end
+  end
+
+  def extract_regression_model_parameters_from_meter_configuration(config)
+    filtered_parameters = %w[ monday tuesday wednesday thursday friday every_day ]
+    config.select! { |k, _v| filtered_parameters.include?(k.to_s.downcase) }
+    config.map { |k, v| [k.to_s] + v.values }
+  end
+
+  def date_key_description(hash, key, type)
+    if hash.key?(key) && !hash[key].nil?
+      "Fixed data #{type} date defined = #{hash[key]}"
+    else
+      "No fixed calculation #{type} date is defined"
+    end
   end
 
   def meter_attributes_entry_description(meter, type, a, b, base_temperature)
@@ -278,21 +355,21 @@ class HeatingRegressionModelFitter
     puts config.to_s
   end
 
-  def html_table(results)
+  def html_table(header, rows)
     template = %{
       <p>
         <table class="table table-striped table-sm">
           <thead>
             <tr class="thead-dark">
-              <% results[0].keys.each do |header| %>
-                <th scope="col"> <%= header.to_s %> </th>
+              <% header.each do |header_titles| %>
+                <th scope="col"> <%= header_titles.to_s %> </th>
               <% end %>
             </tr>
           </thead>
           <tbody>
-            <% results.each do |row| %>
+            <% rows.each do |row| %>
               <tr>
-                <% row.values.each do |val| %>
+                <% row.each do |val| %>
                   <td> <%= val %> </td>
                 <% end %>
               </tr>
@@ -321,22 +398,4 @@ class HeatingRegressionModelFitter
       '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
     end
   end
-
-=begin
-    puts "-" * 90
-    puts "calculating heavy thermal mass model"
-    thermal_mass_model = AnalyseHeatingAndHotWater::HeatingModelWithThermalMass.new(heat_amr_data, school.holidays, school.temperatures)
- 
-    for temperature in (8..30).step(0.5)
-      thermal_mass_model.base_degreedays_temperature = temperature
-      thermal_mass_model.calculate_regression_model(period)
-      sd, mean = thermal_mass_model.cusum_standard_deviation_average
-      if sd.nan? || mean.nan?
-        puts "heavy: t = #{temperature} NaN"
-      else
-        puts "heavy: t = #{temperature} sd = #{sd.round(0)} mean = #{mean.round(0)}"
-      end
-    end
-=end
-
 end

@@ -17,6 +17,11 @@ class AMRData < HalfHourlyData
     @cache_days_totals.delete(date)
   end
 
+  def delete(date)
+    super(date)
+    @cache_days_totals.delete(date)
+  end
+
   def data(date, halfhour_index)
     throw EnergySparksUnexpectedStateException.new('Deprecated call to amr_data.data()')
   end

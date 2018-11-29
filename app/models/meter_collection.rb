@@ -174,7 +174,7 @@ class MeterCollection
 
   def heating_model(period)
     unless @heating_models.key?(:basic)
-      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters.amr_data, holidays, temperatures)
+      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters, holidays, temperatures)
       @heating_models[:basic].calculate_regression_model(period)
     end
     @heating_models[:basic]

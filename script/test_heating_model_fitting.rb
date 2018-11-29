@@ -19,7 +19,7 @@ puts  "Heating Model Fitting"
 suppress_school_loading_output = true
 
 school_name = 'St Marks Secondary'
-school_name = 'Castle Primary School'
+# school_name = 'Castle Primary School'
 
 reports = ReportConfigSupport.new
 
@@ -28,7 +28,7 @@ list_of_schools = reports.schools.keys
 list_of_schools.each do |school_name|
 
   school_name = 'St Marks Secondary'
-  school_name = 'Castle Primary School'
+ school_name = 'Castle Primary School'
 
   puts "Processing #{school_name}"
 

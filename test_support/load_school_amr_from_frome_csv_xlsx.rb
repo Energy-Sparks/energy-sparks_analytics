@@ -37,7 +37,8 @@ class LoadSchoolFromFromeFiles < MeterReadingsDownloadCSVBase
       gas: [ 'E211 ST LOUIS FIRST SCHOOL 19161200.csv' ]
     },
     'Trinity First School' => {
-      electricity: [ 'E206 TRINITY FIRST SCHOOL 2000025766288.csv' ]
+      electricity: ['E206 TRINITY FIRST SCHOOL 2000025766288.csv'],
+      gas: ['10545307 01-01-2016 to 31-12-2016.xlsx', '10545307 01-01-2017 to 31-12-2017.xlsx', '10545307 01-01-2018 to 19-03-2018.csv']
     },
     'Vallis First School' => {
       electricity: [ 'E216 VALLIS FIRST SCHOOL 2000025901813.csv' ],

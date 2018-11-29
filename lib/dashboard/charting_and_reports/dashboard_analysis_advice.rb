@@ -1011,7 +1011,7 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
         Does it change seasonally (from summer to winter)? There should be very
         little difference between summer and winter electricity baseload, unless
         there is something not working properly at the school, for example
-        electrical heating left on accidently?
+        electrical heating left on accidentally?
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')

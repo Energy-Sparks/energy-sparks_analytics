@@ -657,9 +657,11 @@ private
 
   def inject_benchmarks
     logger.info 'Injecting national, regional and exemplar bencmark data'
+=begin
     ap(@x_axis)
     ap(@bucketed_data)
-puts @bucketed_data.inspect
+    puts "Bucketed data: #{@bucketed_data.inspect}"
+=end
     if (@bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)) ||
        (@bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array))
       @x_axis.push('National Average')

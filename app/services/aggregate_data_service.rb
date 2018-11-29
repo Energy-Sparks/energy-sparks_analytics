@@ -169,7 +169,7 @@ class AggregateDataService
 
   def heating_model(period)
     unless @heating_models.key?(:basic)
-      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters.amr_data, @meter_collection.holidays, @meter_collection.temperatures)
+      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters, @meter_collection.holidays, @meter_collection.temperatures)
       @heating_models[:basic].calculate_regression_model(period)
     end
     # PH 21Jun2016 - commented this back in

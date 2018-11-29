@@ -16,10 +16,10 @@ class AlertThermostaticControl < AlertGasModelBase
     report.add_book_mark_to_base_url('ThermostaticControl')
     report.term = :longterm
 
-    @a = @heating_model.models[:heating_occupied].a
-    @b = @heating_model.models[:heating_occupied].b
-    @r2 = @heating_model.models[:heating_occupied].r2
-    @base_temp = @heating_model.models[:heating_occupied].base_temperature
+    @a = @heating_model.models[:heating_occupied_all_days].a
+    @b = @heating_model.models[:heating_occupied_all_days].b
+    @r2 = @heating_model.models[:heating_occupied_all_days].r2
+    @base_temp = @heating_model.models[:heating_occupied_all_days].base_temperature
 
     if @r2 < MIN_R2
       report.summary = 'Thermostatic control of the school is poor'
