@@ -12,6 +12,7 @@ class DashboardConfiguration
     main_dashboard_gas:  {
                                 name:   'Main Dashboard',
                                 charts: %i[
+                                  benchmark
                                   daytype_breakdown_gas
                                   group_by_week_gas
                                 ]
