@@ -125,7 +125,18 @@ class MeterAttributes
         {
           rescale_amr_data: {
             start_date: Date.new(2009, 1, 1),
-            end_date: Date.new(2009, 1, 1),
+            end_date: Date.new(2013, 9, 1),
+            scale:  (1.0 / 31.1) # incorrectly scaled imperial/metric data
+          }
+        }
+      ]
+    },
+    50974703 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2009, 1, 1),
+            end_date: Date.new(2011, 7, 25),
             scale:  (1.0 / 31.1) # incorrectly scaled imperial/metric data
           }
         }
