@@ -141,7 +141,7 @@ class ElectricitySimulator
   end
 
   def create_new_meter(amr_data, type, identifier, name)
-    Meter.new(
+    Dashboard::Meter.new(
       @existing_electricity_meter,
       amr_data,
       type,
@@ -267,11 +267,11 @@ class ElectricitySimulator
             power = check_positive(power)
 
             case ict_appliance_group[:type]
-            when :server
+            when :server, 'server'
               server_data.add_to_kwh(date, half_hour_index, power / 2) # power kW to 1/2 hour k_wh
-            when :desktop
+            when :desktop, 'desktop'
               desktop_data.add_to_kwh(date, half_hour_index, power / 2) # power kW to 1/2 hour k_wh
-            when :laptop
+            when :laptop, 'laptop'
               laptop_data.add_to_kwh(date, half_hour_index, power / 2) # power kW to 1/2 hour k_wh
             end
           end
@@ -443,7 +443,7 @@ class ElectricitySimulator
             lighting_data.add_to_kwh(date, half_hour_index, power * overlap) # automatically in k_wh as conversion kW * time in hours
           end
         end
-      when :movement_sensor
+      when :movement_sensor, :pir_sensor
         # do nothing
       else
         raise EnergySparksUnexpectedStateException.new("Simulator Security Light Control Type #{control_type}") if !control_type.nil?

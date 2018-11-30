@@ -20,21 +20,14 @@ class ScheduleDataManager
 
   def self.holidays(area_name, calendar_id = nil)
     unless @@holiday_data.key?(area_name) # lazy load data if not already loaded
-      if calendar_id
-        pp "Running in rails land"
-        @@holiday_data[area_name] = Calendar.find(calendar_id).holidays.map do |holiday|
-          SchoolDatePeriod.new(:holiday, holiday.title, holiday.start_date, holiday.end_date)
-        end
-      else
-        check_area_name(area_name)
-        area = AreaNames.key_from_name(area_name)
-        hol_data = HolidayData.new
-        filename = self.full_filepath(AreaNames.holiday_schedule_filename(area))
-        HolidayLoader.new(filename, hol_data)
-        puts "Loaded #{hol_data.length} holidays"
-        hols = Holidays.new(hol_data)
-        @@holiday_data[area_name] = hols
-      end
+      check_area_name(area_name)
+      area = AreaNames.key_from_name(area_name)
+      hol_data = HolidayData.new
+      filename = self.full_filepath(AreaNames.holiday_schedule_filename(area))
+      HolidayLoader.new(filename, hol_data)
+      puts "Loaded #{hol_data.length} holidays"
+      hols = Holidays.new(hol_data)
+      @@holiday_data[area_name] = hols
     end
     # Always return cache
     @@holiday_data[area_name]
@@ -49,17 +42,12 @@ class ScheduleDataManager
     unless @@temperature_data.key?(area_name) # lazy load data if not already loaded
 
       temp_data = Temperatures.new('temperatures')
-      if temperature_area_id
-        data_feed = DataFeed.where(type: "DataFeeds::WeatherUnderground", area_id: temperature_area_id).first
-        data_feed.data_feed_readings.where(feed_type: :temperature).to_a.group_by_day(&:at).map do |key, value|
-          temp_data.add(key, value.map(&:value))
-        end
-      else
-        area = AreaNames.key_from_name(area_name)
-        filename = self.full_filepath(AreaNames.temperature_filename(area))      
-        TemperaturesLoader.new(filename, temp_data)
-        puts "Loaded #{temp_data.length} days of temperatures"
-      end
+
+      area = AreaNames.key_from_name(area_name)
+      filename = self.full_filepath(AreaNames.temperature_filename(area))
+      TemperaturesLoader.new(filename, temp_data)
+      puts "Loaded #{temp_data.length} days of temperatures"
+
       # pp temp_data.keys
       # temp_data is an object of type Temperatures
       @@temperature_data[area_name] = temp_data
@@ -71,7 +59,7 @@ class ScheduleDataManager
     check_area_name(area_name)
     unless @@solar_irradiance_data.key?(area_name) # lazy load data if not already loaded
       area = AreaNames.key_from_name(area_name)
-      filename = self.full_filepath(AreaNames.solar_irradiance_filename(area))    
+      filename = self.full_filepath(AreaNames.solar_irradiance_filename(area))
       solar_data = SolarIrradiance.new('solar irradiance')
       SolarIrradianceLoader.new(filename, solar_data)
       puts "Loaded #{solar_data.length} days of solar irradiance data"
@@ -84,7 +72,7 @@ class ScheduleDataManager
     check_area_name(area_name)
     unless @@solar_pv_data.key?(area_name) # lazy load data if not already loaded
       area = AreaNames.key_from_name(area_name)
-      filename = self.full_filepath(AreaNames.solar_pv_filename(area)) 
+      filename = self.full_filepath(AreaNames.solar_pv_filename(area))
       solar_data = SolarPV.new('solar pv')
       SolarPVLoader.new(filename, solar_data)
       puts "Loaded #{solar_data.length} days of solar pv data"

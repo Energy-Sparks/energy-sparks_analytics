@@ -31,9 +31,13 @@ profiles
 *.DS_Store
 **/*csv
 
+*.log
+
 # RubyMine
 .idea
 
 InputData/*
 MeterReadings/*
 Results/*
+OldInputData/*
+OldMeterReadings/*

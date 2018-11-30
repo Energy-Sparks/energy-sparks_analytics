@@ -14,10 +14,7 @@ class AggregateDataService
   def validate_and_aggregate_meter_data
     logger.info 'Validating and Aggregating Meters'
     validate_meter_data
-    aggregate_heat_meters
-    create_storage_heater_sub_meters # create before electric aggregation
-    create_solar_pv_sub_meters
-    aggregate_electricity_meters
+    aggregate_heat_and_electricity_meters_including_storage_and_solar_pv
 
     # Return populated with aggregated data
     @meter_collection
@@ -31,6 +28,14 @@ class AggregateDataService
 
   def aggregate_heat_and_electricity_meters
     aggregate_heat_meters
+    aggregate_electricity_meters
+  end
+
+  def aggregate_heat_and_electricity_meters_including_storage_and_solar_pv
+    logger.info 'Aggregating meters including storage and solar pv'
+    aggregate_heat_meters
+    create_storage_heater_sub_meters # create before electric aggregation
+    create_solar_pv_sub_meters
     aggregate_electricity_meters
   end
 
@@ -126,7 +131,7 @@ class AggregateDataService
   end
 
   def create_modified_meter_copy(meter, amr_data, type, identifier, name)
-    Meter.new(
+    Dashboard::Meter.new(
       meter_collection,
       amr_data,
       type,
@@ -182,7 +187,7 @@ class AggregateDataService
     logger.info "Aggregating data between #{min_date} #{max_date}"
 
     mpan_mprn = 'NEEDSFIXING'
-    mpan_mprn = Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
+    mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
     combined_amr_data = AMRData.new(type)
     (min_date..max_date).each do |date|
       combined_data = Array.new(48, 0.0)
@@ -245,7 +250,7 @@ class AggregateDataService
     combined_name, combined_id, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
 
     if combined_meter.nil?
-      combined_meter = Meter.new(
+      combined_meter = Dashboard::Meter.new(
         self,
         combined_amr_data,
         type,

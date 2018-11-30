@@ -286,12 +286,12 @@ class LoadMeterDataFromCSV
     logger.debug "Got #{gas_meters.length} gas meters and #{electric_meters.length} electicity meters"
 
     gas_meters.each do |name, data|
-      meter = Meter.new(name, data, :gas)
+      meter = Dashboard::Meter.new(name, data, :gas)
       @school.add_heat_meter(meter)
     end
 
     electric_meters.each do |name, data|
-      meter = Meter.new(name, data, :electricity)
+      meter = Dashboard::Meter.new(name, data, :electricity)
       @school.add_electricity_meter(meter)
     end
   end

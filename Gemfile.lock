@@ -1,3 +1,21 @@
+GIT
+  remote: https://github.com/SciRuby/statsample
+  revision: fd9a88d92196fc419e8080f0989faf6fe9563e80
+  ref: fd9a88d92196fc419e8080f0989faf6fe9563e80
+  branch: master
+  specs:
+    statsample (2.1.0)
+      awesome_print (~> 1.6)
+      daru (~> 0.1.6)
+      dirty-memoize (~> 0.0.4)
+      distribution (~> 0.7)
+      extendmatrix (~> 0.4)
+      minimization (~> 0.2)
+      reportbuilder (~> 1.4)
+      rserve-client (~> 0.3)
+      rubyvis (~> 0.6.1)
+      spreadsheet (~> 1.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -7,7 +25,7 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     awesome_print (1.8.0)
-    backports (3.11.3)
+    backports (3.11.4)
     byebug (10.0.2)
     chroma (0.2.0)
     clbustos-rtf (0.4.2)
@@ -24,6 +42,7 @@ GEM
     extendmatrix (0.4)
     ffi (1.9.25)
     ffi (1.9.25-x64-mingw32)
+    hashdiff (0.3.7)
     hashie (3.5.7)
     html-table (1.5.1)
       strongtyping
@@ -111,17 +130,6 @@ GEM
       sys-uname (~> 1.0.2)
     spreadsheet (1.1.7)
       ruby-ole (>= 1.0)
-    statsample (2.1.0)
-      awesome_print (~> 1.6)
-      daru (~> 0.1.6)
-      dirty-memoize (~> 0.0.4)
-      distribution (~> 0.7)
-      extendmatrix (~> 0.4)
-      minimization (~> 0.2)
-      reportbuilder (~> 1.4)
-      rserve-client (~> 0.3)
-      rubyvis (~> 0.6.1)
-      spreadsheet (~> 1.1)
     strongtyping (2.0.7)
     structured_warnings (0.3.0)
     sys-uname (1.0.3)
@@ -148,6 +156,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   chroma
+  hashdiff
   html-table
   interpolate
   mechanize
@@ -158,7 +167,7 @@ DEPENDENCIES
   rspec
   ruby-sun-times
   soda-ruby
-  statsample
+  statsample!
   structured_warnings
   write_xlsx
 
@@ -166,4 +175,4 @@ RUBY VERSION
    ruby 2.5.1p57
 
 BUNDLED WITH
-   1.16.1
+   1.16.6
