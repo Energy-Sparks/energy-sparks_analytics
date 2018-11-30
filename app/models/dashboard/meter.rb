@@ -10,13 +10,14 @@ module Dashboard
 
     # Energy Sparks activerecord fields:
     attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
-    attr_accessor :id, :name
+    attr_accessor :id, :name, :external_meter_id
     # enum meter_type: [:electricity, :gas]
 
     def initialize(building, amr_data, type, identifier, name,
                     floor_area = nil, number_of_pupils = nil,
                     solar_pv_installation = nil,
-                    storage_heater_config = nil)
+                    storage_heater_config = nil,
+                    external_meter_id = nil)
       @amr_data = amr_data
       @building = building
       @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
@@ -30,6 +31,7 @@ module Dashboard
       @storage_heater_config = storage_heater_config
       @meter_correction_rules = []
       @sub_meters = []
+      @external_meter_id = external_meter_id
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
     end
 
