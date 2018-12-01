@@ -5,8 +5,9 @@ class ChartManager
 
   attr_reader :school
 
-  def initialize(school)
+  def initialize(school, show_reconciliation_values = true)
     @school = school
+    @show_reconciliation_values = show_reconciliation_values
   end
 
   def run_chart_group(chart_param)
@@ -62,20 +63,21 @@ class ChartManager
 
   def run_chart(chart_config, chart_param, resolve_inheritance = true)
     logger.info '>' * 120
+    logger.info chart_config[:name]
+    logger.info '>' * 120
+
     chart_config = resolve_chart_inheritance(chart_config) if resolve_inheritance
-    
-    # puts 'Chart configuration:'
+
     ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
     begin
-      aggregator = Aggregator.new(@school, chart_config)
+      aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)
 
       aggregator.aggregate
 
       graph_data = configure_graph(aggregator, chart_config, chart_param)
 
       ap(graph_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-      
       logger.info '<' * 120
 
       graph_data

@@ -11,18 +11,15 @@ class Aggregator
   attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis
   attr_reader :x_axis_bucket_date_ranges, :data_labels
 
-  def initialize(meter_collection, chart_config)
+  def initialize(meter_collection, chart_config, show_reconciliation_values)
+    @show_reconciliation_values = show_reconciliation_values
     @meter_collection = meter_collection
     @chart_config = chart_config
     @data_labels = nil
   end
 
   def title_summary
-    if @chart_config[:yaxis_units] == :kw || @chart_config[:inject] == :benchmark
-      ''
-    else
-      y_axis_label(@total_of_unit)
-    end
+    @show_reconciliation_values ? y_axis_label(@total_of_unit) : ''
   end
 
   def y_axis_label(value)
@@ -56,7 +53,7 @@ class Aggregator
 
     group_by = @chart_config.key?(:group_by) ? @chart_config[:group_by] : nil
 
-    group_chart(group_by) unless group_by.nil? 
+    group_chart(group_by) unless group_by.nil?
 
     inject_benchmarks if @chart_config[:inject] == :benchmark
 
@@ -83,7 +80,7 @@ class Aggregator
 
   #=================regrouping of chart data ======================================
   # converts a flat structure e.g. :
-  #     "electricity:Castle Primary School"=>[5.544020340000004, 2.9061917400000006, 0.45056400000000013], 
+  #     "electricity:Castle Primary School"=>[5.544020340000004, 2.9061917400000006, 0.45056400000000013],
   #     "gas:Castle Primary School"=>[1.555860000000001, 1.4714710106863198, 1.405058200146572]
   # into a hierarchical 'grouped' structure e.g.
   #   {"electricity"=>
@@ -97,7 +94,7 @@ class Aggregator
     @x_axis = regroup_xaxis(bucketed_data, @x_axis)
   end
 
-  # rubocop:enable MethodComplexity 
+  # rubocop:enable MethodComplexity
   def regroup_bucketed_data(bucketed_data, group_by)
     logger.info "Reorganising grouping of chart bucketed data, grouping by #{group_by.inspect}"
     logger.info "Original bucketed data: #{bucketed_data.inspect}"
@@ -138,7 +135,22 @@ class Aggregator
   # rubocop:disable MethodComplexity
   #=============================================================================
   def load_schools(school_list)
+<<<<<<< HEAD
     AverageSchoolAggregator.load_schools(school_list)
+=======
+    # school = $SCHOOL_FACTORY.load_school(school_name)
+    schools = []
+    school_list.each do |school_attribute|
+      identifier_type, identifier = school_attribute.first
+
+      bm = Benchmark.measure {
+        school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(identifier_type, identifier, :analytics_db)
+        schools.push(school)
+      }
+      logger.info "Loaded School: #{identifier_type} #{identifier} in #{bm.to_s}"
+    end
+    schools
+>>>>>>> a4b135f2404c1effab6db98c0ea655a09dac68a1
   end
 
   def determine_multi_school_chart_date_range(schools, chart_config)
@@ -193,7 +205,7 @@ class Aggregator
   # messy, could be simplified?
   def sort_aggregations(aggregations, sort_by)
     logger.info "About to sort #{aggregations.length} aggregations by #{sort_by}"
-    aggregations.sort! { |x, y| 
+    aggregations.sort! { |x, y|
       if sort_by.length == 1
         if sort_by[0].key?(:school)
           school_compare(x, y, sort_by[0][:school])
@@ -218,7 +230,7 @@ class Aggregator
         else
           throw EnergySparksBadChartSpecification.new("Bad sort specification 2 #{sort_by}")
         end
-      end 
+      end
     }
     aggregations
   end
@@ -490,7 +502,7 @@ private
   # the issue is the xbuckector doesn't know in advance the data is to be filtered based on the data
   # but the charting products can't distinguish between empty data and zero data
   def remove_zero_data
-    count = 0  
+    count = 0
     indices_of_data_to_be_removed = []
     (0..@x_axis.length - 1).each do |index|
       indices_of_data_to_be_removed.push(index) if @x_axis[index] == 0
@@ -598,7 +610,7 @@ private
   end
 
   # recursive search through hash/array for all float values
-  def find_all_floats(float_data, obj) 
+  def find_all_floats(float_data, obj)
     if obj.is_a?(Hash)
       obj.each_value do |val|
         find_all_floats(float_data, val)

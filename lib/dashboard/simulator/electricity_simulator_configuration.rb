@@ -26,13 +26,15 @@ class ElectricitySimulatorConfiguration
         type:                     :server,
         number:                   2.0,
         power_watts_each:         300.0,
-        air_con_overhead_percent: 0.2
+        air_con_overhead_percent: 0.2,
+        weekends:                 true,
+        holidays:                 true,
       },
       desktops: {
         editable:                     [:number, :power_watts_each, :standby_watts_each],
         type:                         :desktop,
         number:                       20,
-        power_watts_each:             100,
+        power_watts_each:             100.0,
         standby_watts_each:           10,
         usage_percent_by_time_of_day: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.05, 0.1, 0.3, 0.5, 0.8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         weekends:                     false, # left on standby at weekends
@@ -56,8 +58,8 @@ class ElectricitySimulatorConfiguration
       control_type_choices: [:sunrise_sunset, :ambient, :fixed_times, :movement_sensor],
       sunrise_times:      ['08:05', '07:19', '06:19', '06:10', '05:14', '04:50', '05:09', '05:54', '06:43', '07:00', '07:26', '08:06'], # by month - in string format as more compact than new Time - which it needs converting to
       sunset_times:       ['16:33', '17:27', '18:16', '20:08', '20:56', '21:30', '21:21', '20:32', '19:24', '18:17', '16:21', '16:03'], # ideally front end calculates based on GEO location
-      fixed_start_time:   '19:15',
-      fixed_end_time:     '07:20',
+      fixed_start_time:   TimeOfDay.new(19, 15),
+      fixed_end_time:     TimeOfDay.new(7, 20),
       ambient_threshold:  50.0,
       power:              3.0
     },

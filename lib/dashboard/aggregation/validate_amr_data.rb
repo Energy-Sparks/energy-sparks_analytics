@@ -54,9 +54,17 @@ class ValidateAMRData
 
   def process_meter_attributes
     corrections = MeterAttributes.attributes(@meter, :meter_corrections)
-    unless corrections.nil?
+    if corrections.nil?
+      auto_insert_for_gas_if_no_other_rules
+    else
       @meter.insert_correction_rules_first(corrections)
     end
+  end
+
+  def auto_insert_for_gas_if_no_other_rules
+    return unless @type.to_sym == :gas
+    logger.info "Adding auto insert missing readings as we're a gas meter & no other corrections"
+    @meter.insert_correction_rules_first([{ auto_insert_missing_readings: { type: :weekends } }])
   end
 
   def meter_corrections
@@ -196,7 +204,7 @@ class ValidateAMRData
       interpolation_data[halfhour_index] = days_kwh_x48[halfhour_index] if days_kwh_x48[halfhour_index] != 0.0
     end
 
-    interpolation = Interpolate::Points.new(interpolation_data) 
+    interpolation = Interpolate::Points.new(interpolation_data)
 
     days_kwh_x48.each_index do |halfhour_index|
       days_kwh_x48[halfhour_index] = interpolation.at(halfhour_index) if days_kwh_x48[halfhour_index] == 0.0
