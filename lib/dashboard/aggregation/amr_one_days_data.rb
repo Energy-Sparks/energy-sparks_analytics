@@ -31,7 +31,7 @@ class OneDayAMRReading
 
   def +(other)
     OneDayAMRReading.new(
-      @meter_id + other.meter_id,
+      @meter_id,
       @date,
       'AGGR',
       nil,
@@ -45,14 +45,15 @@ class OneDayAMRReading
   end
 
   def self.scale(one_days_reading, scale_factor)
-    OneDayAMRReading.new(
+    scaled = OneDayAMRReading.new(
       one_days_reading.meter_id,
       one_days_reading.date,
       one_days_reading.type,
       one_days_reading.substitute_date,
-      one_days_reading.substitute_date,
+      DateTime.now,
       one_days_reading.kwh_data_x48.map { |x| x * scale_factor }
     )
+    scaled
   end
 
   def kwh_halfhour(half_hour_index)
@@ -78,6 +79,10 @@ class OneDayAMRReading
     elsif !AMR_TYPES.key?(type)
       throw EnergySparksBadAMRDataTypeException.new("Unexpected AMR bad data type #{type}")
     end
+  end
+
+  def set_meter_id(meter_id)
+    @meter_id = meter_id
   end
 
   def to_s

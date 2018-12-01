@@ -135,7 +135,19 @@ class Aggregator
   # rubocop:disable MethodComplexity
   #=============================================================================
   def load_schools(school_list)
-    AverageSchoolAggregator.load_schools(school_list)
+    average = false
+    if school_list.include?(:average)
+      school_list = school_list.select{ |school| !school.is_a?(Symbol)} # remove symbols from list
+      average = true
+    end
+    schools = AnalyticsLoadSchools.load_schools(school_list)
+    if average
+      config = AverageSchoolAggregator.simple_config(school_list, nil, nil, 1200, 200)
+      school_averager = AverageSchoolAggregator.new(config)
+      school_averager.calculate()
+      schools.push(school_averager.school)
+    end
+    schools
   end
 
   def determine_multi_school_chart_date_range(schools, chart_config)

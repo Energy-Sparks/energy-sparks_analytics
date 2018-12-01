@@ -6,7 +6,7 @@ require 'require_all'
 class AverageSchoolAggregator
   include Logging
 
-  attr_reader :aggregation_definition
+  attr_reader :aggregation_definition, :school
 
   # aggregation_definition example:
   #
@@ -20,89 +20,106 @@ class AverageSchoolAggregator
   #               { urn: 109328 },  # St Marks
   #               { urn: 109005 },  # St Johns
   #               { urn: 109081 }   # Castle
-  #   ]  
+  #   ]
   # }
   def initialize(aggregation_definition)
     @aggregation_definition = aggregation_definition
   end
 
+  def self.simple_config(list_of_schools, name, urn, floor_area, pupils)
+    config = {
+      name:       name,
+      urn:        urn,
+      floor_area: floor_area,
+      pupils:     pupils,
+      schools:    list_of_schools
+    }
+    config
+  end
+
   def calculate
-    schools = self.class.load_schools(@aggregation_definition[:schools])
+    schools = AnalyticsLoadSchools.load_schools(@aggregation_definition[:schools])
 
     average_school = create_meter_collection(
-      @aggregation_definition[:name],
-      @aggregation_definition[:urn],
+      concatenate_name(schools),
+      aggregate_urn(schools),
       @aggregation_definition[:floor_area],
-      @aggregation_definition[:pupils]
+      @aggregation_definition[:pupils],
+      schools[0].area_name
     )
 
     bm = Benchmark.measure {
-      average_amr_data(average_school, schools, :aggregated_electricity)
-      average_amr_data(average_school, schools, :aggregated_heat)
+      average_amr_data(average_school, schools, :electricity, @aggregation_definition[:pupils])
+      average_amr_data(average_school, schools, :gas, @aggregation_definition[:floor_area])
+      AggregateDataService.new(average_school).aggregate_heat_and_electricity_meters
     }
     logger.info("Created average school from #{schools.length} schools in #{bm.to_s}")
-  end
-
-  def self.load_schools(school_list)
-    # school = $SCHOOL_FACTORY.load_school(school_name)
-    schools = []
-    school_list.each do |school_attribute|
-      identifier_type, identifier = school_attribute.first
-      
-      bm = Benchmark.measure {
-        school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(identifier_type, identifier, :analytics_db)
-        schools.push(school)
-      }
-      Logging.logger.info "Loaded School: #{identifier_type} #{identifier} in #{bm.to_s}"
-    end
-    schools
+    @school = average_school
   end
 
   private
 
+  def concatenate_name(schools)
+    if @aggregation_definition.key?(:name) && !@aggregation_definition[:name].nil?
+      @aggregation_definition[:name]
+    else
+    'Average of: ' + schools.map{ |school| school.name}.join(',')
+    end
+  end
+
+  def aggregate_urn(schools)
+    if @aggregation_definition.key?(:urn) && !@aggregation_definition[:urn].nil?
+      @aggregation_definition[:urn]
+    else
+      schools.map { |school| school.urn }.inject(:+)
+    end
+  end
+
   # average, scaled back to average school's floor_area (gas) or pupils (electricity)
-  def average_amr_data(average_school, schools, fuel_type)
-    amr_data_count = {}
+  def average_amr_data(average_school, schools, fuel_type, scale_up)
+    amr_data_count = Hash.new(0.0)
     average_school_meter = aggregated_meter(average_school, fuel_type)
     average_amr_data = average_school_meter.amr_data
     
-
     schools.each do |school|
       meter = aggregated_meter(school, fuel_type)
       amr_data = meter.amr_data
-      scaling_factor = fuel_type == :aggregated_electricity ? (1 / school.number_of_pupils) : (1 / school.floor_area)
+      scaling_factor = fuel_type == :electricity ? (scale_up.to_f / school.number_of_pupils) : (scale_up.to_f / school.floor_area)
 
       (amr_data.start_date..amr_data.end_date).each do |date|
         average_amr_data.add(date, OneDayAMRReading.zero_reading(0, date, 'AGGR')) if !average_amr_data.key?(date)
         average_amr_data[date] += OneDayAMRReading.scale(amr_data[date], scaling_factor)
-        amr_data_count[date] = 0 if !amr_data_count.key?(date)
         amr_data_count[date] += 1
       end
     end
 
-    scaling_factor = fuel_type == :aggregated_electricity ? (1 / average_school.number_of_pupils) : (1 / average_school.floor_area)
-
     (average_amr_data.start_date..average_amr_data.end_date).each do |date|
-      average_amr_data.add(date, OneDayAMRReading.scale(average_amr_data[date], scaling_factor / amr_data_count[date]))
+      one_days_data =OneDayAMRReading.scale(average_amr_data[date], 1.0 / amr_data_count[date])
+      one_days_data.set_meter_id(average_school_meter.mpan_mprn.to_s)
+      average_amr_data.add(date, one_days_data)
     end
   end
 
   def aggregated_meter(meter_collection, fuel_type)
-    fuel_type == :aggregated_electricity ? meter_collection.aggregated_electricity_meters : meter_collection.aggregated_heat_meters
+    fuel_type == :electricity ? meter_collection.electricity_meters[0] : meter_collection.heat_meters[0]
   end
 
-  def create_meter_collection(name, urn, floor_area, pupils)
+  def create_meter_collection(name, urn, floor_area, pupils, area_name)
     logger.debug "Creating School: #{name}"
 
     na = 'Not Applicable'
 
-    school = Dashboard::School.new(name, na, floor_area, pupils, :primary, na, urn, na)
+    school = Dashboard::School.new(name, na, floor_area, pupils, :primary, area_name, urn, na)
 
     meter_collection = MeterCollection.new(school)
 
-    meter_collection.aggregated_electricity_meters = create_empty_meter(meter_collection, name + ' Electricity', :aggregated_electricity, floor_area, pupils, urn)
+    meter_collection.add_electricity_meter(
+      create_empty_meter(meter_collection, name + ' Electricity', :electricity, floor_area, pupils, urn)
+      )
     
-    meter_collection.aggregated_heat_meters = create_empty_meter(meter_collection, name + ' Gas', :aggregated_heat, floor_area, pupils, urn)
+    meter_collection.add_heat_meter(
+      create_empty_meter(meter_collection, name + ' Gas', :gas, floor_area, pupils, urn)
+      )
 
     meter_collection
   end
