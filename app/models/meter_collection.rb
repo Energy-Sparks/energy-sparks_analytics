@@ -102,7 +102,7 @@ class MeterCollection
     meter_list = []
     meter_groups.each do |meter_group|
       unless meter_group.nil?
-        meter_list += meter_group.is_a?(Meter) ? [meter_group] : meter_group
+        meter_list += meter_group.is_a?(Dashboard::Meter) ? [meter_group] : meter_group
       end
     end
     meter_list

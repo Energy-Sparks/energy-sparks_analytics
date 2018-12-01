@@ -96,7 +96,7 @@ class AverageSchoolAggregator
 
     na = 'Not Applicable'
 
-    school = School.new(name, na, floor_area, pupils, :primary, na, urn, na)
+    school = Dashboard::School.new(name, na, floor_area, pupils, :primary, na, urn, na)
 
     meter_collection = MeterCollection.new(school)
 
@@ -108,11 +108,11 @@ class AverageSchoolAggregator
   end
 
   def create_empty_meter(meter_collection, name, fuel_type, floor_area, pupils, urn)
-    identifier = Meter.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type)
+    identifier = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type)
 
     logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
 
-    meter = Meter.new(
+    meter = Dashboard::Meter.new(
       meter_collection,
       AMRData.new(fuel_type),
       fuel_type,
