@@ -29,6 +29,32 @@ class OneDayAMRReading
     @one_day_kwh = kwh_data_x48.inject(:+)
   end
 
+  def +(other)
+    OneDayAMRReading.new(
+      @meter_id + other.meter_id,
+      @date,
+      'AGGR',
+      nil,
+      DateTime.now,
+      [@kwh_data_x48, other.kwh_data_x48].transpose.map {|x| x.reduce(:+)}
+    )
+  end
+
+  def self.zero_reading(id, date, type, value = 0.0)
+    OneDayAMRReading.new(id, date, type, nil, DateTime.now, Array.new(48, value))
+  end
+
+  def self.scale(one_days_reading, scale_factor)
+    OneDayAMRReading.new(
+      one_days_reading.meter_id,
+      one_days_reading.date,
+      one_days_reading.type,
+      one_days_reading.substitute_date,
+      one_days_reading.substitute_date,
+      one_days_reading.kwh_data_x48.map { |x| x * scale_factor }
+    )
+  end
+
   def kwh_halfhour(half_hour_index)
     @kwh_data_x48[half_hour_index]
   end
@@ -64,13 +90,7 @@ class OneDayAMRReading
 
   def validate_data
     return 0 if !@kwh_data_x48.is_a?(Array)
-    total = 0
-    data_count = 0
-    (0..47).each do |i|
-      if kwh_halfhour(i).is_a?(Float) || kwh_halfhour(i).is_a?(Integer)
-        data_count += 1
-      end
-    end
+    data_count = @kwh_data_x48.count{ |kwh| kwh.is_a?(Float) || kwh.is_a?(Integer)}
     if data_count != 48
       logger.info "Incomplete AMR data expecting 48 readings, got #{data_count} for date #{@date}"
       logger.info @kwh_data_x48
