@@ -1,12 +1,13 @@
 require 'require_all'
+require_relative 'virtual_school.rb'
 # Given a list of 'average school's creates an average school
 # also generates an exemplar school
 #
 
-class AverageSchoolAggregator
+class AverageSchoolAggregator < VirtualSchool
   include Logging
 
-  attr_reader :aggregation_definition, :school
+  attr_reader :aggregation_definition
 
   # aggregation_definition example:
   #
@@ -23,6 +24,13 @@ class AverageSchoolAggregator
   #   ]
   # }
   def initialize(aggregation_definition)
+    super(
+      aggregation_definition[:name],
+      aggregation_definition[:urn],
+      aggregation_definition[:floor_area],
+      aggregation_definition[:pupils],
+      nil # area name needs setting from 1st school in list
+    )
     @aggregation_definition = aggregation_definition
   end
 
@@ -40,24 +48,25 @@ class AverageSchoolAggregator
   def calculate
     schools = AnalyticsLoadSchools.load_schools(@aggregation_definition[:schools])
 
-    average_school = create_meter_collection(
-      concatenate_name(schools),
-      aggregate_urn(schools),
-      @aggregation_definition[:floor_area],
-      @aggregation_definition[:pupils],
-      schools[0].area_name
-    )
+    @name = concatenate_name(schools)
+    @urn = aggregate_urn(schools)
+    @area_name = schools[0].area_name
 
-    bm = Benchmark.measure {
-      average_amr_data(average_school, schools, :electricity, @aggregation_definition[:pupils])
-      average_amr_data(average_school, schools, :gas, @aggregation_definition[:floor_area])
-      AggregateDataService.new(average_school).aggregate_heat_and_electricity_meters
-    }
-    logger.info("Created average school from #{schools.length} schools in #{bm.to_s}")
-    @school = average_school
+    create_school
+
+    create_average_amr_data(schools)
   end
 
   private
+
+  def create_average_amr_data(schools)
+    bm = Benchmark.measure {
+      average_amr_data(school, schools, :electricity, number_of_pupils)
+      average_amr_data(school, schools, :gas, floor_area)
+      AggregateDataService.new(school).aggregate_heat_and_electricity_meters
+    }
+    logger.info("Created average school from #{schools.length} schools in #{bm.to_s}")
+  end
 
   def concatenate_name(schools)
     if @aggregation_definition.key?(:name) && !@aggregation_definition[:name].nil?
@@ -84,10 +93,10 @@ class AverageSchoolAggregator
     schools.each do |school|
       meter = aggregated_meter(school, fuel_type)
       amr_data = meter.amr_data
-      scaling_factor = fuel_type == :electricity ? (scale_up.to_f / school.number_of_pupils) : (scale_up.to_f / school.floor_area)
+      scaling_factor = fuel_type == :electricity ? (scale_up.to_f / number_of_pupils) : (scale_up.to_f / floor_area)
 
       (amr_data.start_date..amr_data.end_date).each do |date|
-        average_amr_data.add(date, OneDayAMRReading.zero_reading(0, date, 'AGGR')) if !average_amr_data.key?(date)
+        average_amr_data.add(date, OneDayAMRReading.zero_reading(0, date, 'AGGR')) unless average_amr_data.key?(date)
         average_amr_data[date] += OneDayAMRReading.scale(amr_data[date], scaling_factor)
         amr_data_count[date] += 1
       end
@@ -102,43 +111,5 @@ class AverageSchoolAggregator
 
   def aggregated_meter(meter_collection, fuel_type)
     fuel_type == :electricity ? meter_collection.electricity_meters[0] : meter_collection.heat_meters[0]
-  end
-
-  def create_meter_collection(name, urn, floor_area, pupils, area_name)
-    logger.debug "Creating School: #{name}"
-
-    na = 'Not Applicable'
-
-    school = Dashboard::School.new(name, na, floor_area, pupils, :primary, area_name, urn, na)
-
-    meter_collection = MeterCollection.new(school)
-
-    meter_collection.add_electricity_meter(
-      create_empty_meter(meter_collection, name + ' Electricity', :electricity, floor_area, pupils, urn)
-      )
-    
-    meter_collection.add_heat_meter(
-      create_empty_meter(meter_collection, name + ' Gas', :gas, floor_area, pupils, urn)
-      )
-
-    meter_collection
-  end
-
-  def create_empty_meter(meter_collection, name, fuel_type, floor_area, pupils, urn)
-    identifier = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type)
-
-    logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
-
-    meter = Dashboard::Meter.new(
-      meter_collection,
-      AMRData.new(fuel_type),
-      fuel_type,
-      identifier,
-      name,
-      floor_area,
-      pupils,
-      nil, # solar pv
-      nil # storage heater
-    )
   end
 end
