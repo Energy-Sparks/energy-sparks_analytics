@@ -54,7 +54,9 @@ class ReportConfigSupport
       'St Johns First School'             => :electric_and_gas,
       'St Louis First School'             => :electric_and_gas,
       'Trinity First School'              => :electric_and_gas,
-      'Vallis First School'               => :electric_and_gas
+      'Vallis First School'               => :electric_and_gas,
+    # Average and Exemplar
+      'Average School'                    => :electric_and_gas,
     }
     @benchmarks = []
 

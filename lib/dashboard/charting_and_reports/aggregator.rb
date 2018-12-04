@@ -135,16 +135,17 @@ class Aggregator
   # rubocop:disable MethodComplexity
   #=============================================================================
   def load_schools(school_list)
-    # school = $SCHOOL_FACTORY.load_school(school_name)
-    schools = []
-    school_list.each do |school_attribute|
-      identifier_type, identifier = school_attribute.first
-
-      bm = Benchmark.measure {
-        school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(identifier_type, identifier, :analytics_db)
-        schools.push(school)
-      }
-      logger.info "Loaded School: #{identifier_type} #{identifier} in #{bm.to_s}"
+    average = false
+    if school_list.include?(:average)
+      school_list = school_list.select{ |school| !school.is_a?(Symbol)} # remove symbols from list
+      average = true
+    end
+    schools = AnalyticsLoadSchools.load_schools(school_list)
+    if average
+      config = AverageSchoolAggregator.simple_config(school_list, nil, nil, 1200, 200)
+      school_averager = AverageSchoolAggregator.new(config)
+      school_averager.calculate()
+      schools.push(school_averager.school)
     end
     schools
   end

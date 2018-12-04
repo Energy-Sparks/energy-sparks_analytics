@@ -47,3 +47,32 @@ class ElectricitySimulator
     config
   end
 end
+
+class SimpleExemplarElectricalSimulator < ElectricitySimulator
+  def initialize(school)
+  end
+
+  def floor_area
+    1000.0 # school.floor_area
+  end
+
+  def number_of_pupils
+    200 # school.number_of_pupils
+  end
+
+  def solar_pv_installation
+    nil # @existing_electricity_meter.solar_pv_installation
+  end
+
+  def storage_heater_config
+    nil # @existing_electricity_meter.storage_heater_config
+  end
+
+  def simulation_start_date
+    Date.new(2017,9,1) # @period.start_date
+  end
+
+  def simulation_end_date
+    Date.new(2018,9,10) # @period.end_date
+  end
+end

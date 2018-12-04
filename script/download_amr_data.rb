@@ -19,7 +19,7 @@ end
 
 @school_data_sources = {
   'Bishop Sutton Primary School'      => :bathhacked,
-  'Castle Primary School'             => :bathhacked,
+  'Castle Primary School'             => :bathcsv,
   'Freshford C of E Primary'          => :bathhacked,
   'Marksbury C of E Primary School'   => :bathhacked,
   'Paulton Junior School'             => :bathhacked,

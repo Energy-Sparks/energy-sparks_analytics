@@ -55,6 +55,14 @@ class AMRData < HalfHourlyData
     one_day_kwh(date)
   end
 
+  def total
+    t = 0.0
+    (start_date..end_date).each do |date|
+      t += one_day_kwh(date)
+    end
+    t
+  end
+
   def baseload_kw(date)
     statistical_baseload_kw(date)
   end

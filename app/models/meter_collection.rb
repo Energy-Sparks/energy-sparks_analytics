@@ -91,9 +91,9 @@ class MeterCollection
 
   def all_meters
     meter_groups = [
-      @heat_meters,
-      @electricity_meters,
-      @solar_pv_meters,
+      @heat_meters, 
+      @electricity_meters, 
+      @solar_pv_meters, 
       @storage_heater_meters,
       @aggregated_heat_meters,
       @aggregated_electricity_meters
@@ -102,14 +102,10 @@ class MeterCollection
     meter_list = []
     meter_groups.each do |meter_group|
       unless meter_group.nil?
-        meter_list += meter_of_some_kind?(meter_group) ? [meter_group] : meter_group
+        meter_list += meter_group.is_a?(Dashboard::Meter) ? [meter_group] : meter_group
       end
     end
     meter_list
-  end
-
-  def meter_of_some_kind?(meter_group)
-    (Object.const_defined?('Meter') && meter_group.is_a?(Meter)) || meter_group.is_a?(Dashboard::Meter)
   end
 
   def school_type
@@ -153,11 +149,22 @@ class MeterCollection
 
   # held at building level as a school building e.g. a community swimming pool may have a different holiday schedule
   def holidays
-    ScheduleDataManager.holidays(@holiday_schedule_name)
+    if i_am_running_in_rails?
+      ScheduleDataManager.holidays(@holiday_schedule_name, @school.calendar_id)
+    else
+      ScheduleDataManager.holidays(@holiday_schedule_name)
+    end
   end
 
   def temperatures
-    ScheduleDataManager.temperatures(@temperature_schedule_name)
+    if i_am_running_in_rails?
+      temperature_area_id = @school.temperature_area_id || DataFeed.find_by(type: "DataFeeds::WeatherUnderground").area_id
+
+      pp temperature_area_id
+      ScheduleDataManager.temperatures(@temperature_schedule_name, temperature_area_id)
+    else
+      ScheduleDataManager.temperatures(@temperature_schedule_name)
+    end
   end
 
   def solar_irradiation
@@ -179,5 +186,11 @@ class MeterCollection
     end
     @heating_models[:basic]
     #  @heating_on_periods = @model.calculate_heating_periods(@period)
+  end
+
+private
+
+  def i_am_running_in_rails?
+    @school.respond_to?(:calendar)
   end
 end
