@@ -116,8 +116,8 @@ class ElectricitySimulator
     end
   end
 
-  def check_positive(val)
-    val < 0.0 ? Float::NAN : val
+  def check_positive(val, default = Float::NAN)
+    val < 0.0 ? default : val
   end
 
   def heating_on?(date)
@@ -632,7 +632,7 @@ class ElectricitySimulator
     (start_date..end_date).each do |date|
       if heating_on?(date) && !(holiday?(date) && !config[:holidays]) && !(weekend?(date) && !config[:weekends])
         (0..47).each do |half_hour_index|
-          power = check_positive(fixed_power)
+          power = check_positive(fixed_power, 0.0)
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
@@ -644,7 +644,7 @@ class ElectricitySimulator
             power += heating_power
           end
 
-          electric_heating_data.add_to_kwh(date, half_hour_index, check_positive(power * overlap)) # automatically in k_wh as conversion kW * time in hours
+          electric_heating_data.add_to_kwh(date, half_hour_index, check_positive(power * overlap, 0.0)) # automatically in k_wh as conversion kW * time in hours
         end
       end
     end
