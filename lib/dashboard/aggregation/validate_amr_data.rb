@@ -10,9 +10,10 @@ class ValidateAMRData
   FSTRDEF = '%a %d %b %Y'.freeze # fixed format for reporting dates for error messages
   MAXGASAVGTEMPDIFF = 5 # max average temperature difference over which to adjust temperatures
   attr_reader :data_problems, :meter_id
-  def initialize(meter, max_days_missing_data, holidays, temperatures)
+  def initialize(meter, max_days_missing_data, holidays, temperatures, meter_corrections)
     @amr_data = meter.amr_data
     @meter = meter
+    @meter_corrections = meter_corrections
     @meter_id = @meter.mpan_mprn
     @type = meter.meter_type
     @holidays = holidays
@@ -53,11 +54,10 @@ class ValidateAMRData
   private
 
   def process_meter_attributes
-    corrections = MeterAttributes.attributes(@meter, :meter_corrections)
-    if corrections.nil?
+    if meter_corrections.nil?
       auto_insert_for_gas_if_no_other_rules
     else
-      @meter.insert_correction_rules_first(corrections)
+      @meter.insert_correction_rules_first(meter_corrections)
     end
   end
 
