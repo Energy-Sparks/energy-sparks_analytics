@@ -6,7 +6,7 @@ require './script/report_config_support.rb'
 
 # school_name = 'Westfield Primary' 
 module Logging
-  @logger = Logger.new('Results/test-simulator ' + Time.now.strftime('%H %M') + '.log')
+  @logger = Logger.new('Results/test-simulator-fit ' + Time.now.strftime('%H %M') + '.log')
   @logger.level = :debug # :debug
 end
 ENV['AWESOMEPRINT'] = 'off'
@@ -22,7 +22,7 @@ list_of_schools = reports.schools.keys
 
 list_of_schools.each do |school_name|
   school = nil
-  school_name = 'Twerton Infant School'
+  school_name = 'St Marks Secondary'
   puts "Processing #{school_name}"
   bm = Benchmark.measure {
     school = reports.load_school(school_name, suppress_school_loading_output)
@@ -38,8 +38,9 @@ list_of_schools.each do |school_name|
   fitted_parameters = nil
   parameters = nil
   bm = Benchmark.measure {
-    fitted_parameters = simulator.fit(simulator.default_simulator_parameters)
-    parameters = simulator.exemplar(simulator.default_simulator_parameters)
+    # call one or the other of these
+    parameters = simulator.fit(simulator.default_simulator_parameters)
+    # parameters = simulator.exemplar(simulator.default_simulator_parameters)
   }
   puts "Fitting took: #{bm.to_s}"
 
@@ -56,6 +57,8 @@ list_of_schools.each do |school_name|
 
   reports.do_one_page(:simulator)
   reports.do_one_page(:simulator_detail, false)
+
+  reports.excel_name = school_name + ' - simulator fitter'
 
   reports.save_excel_and_html
 

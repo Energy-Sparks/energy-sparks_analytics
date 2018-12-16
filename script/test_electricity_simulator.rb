@@ -29,8 +29,12 @@ bm = Benchmark.measure {
 puts "Simulator took: #{bm.to_s}"
 
 # reports.do_one_page(:simulator)
+
+# reports.do_chart_list('Test', [:electricity_by_day_of_week_simulator ]
 reports.do_one_page(:simulator)
 reports.do_one_page(:simulator_detail, false)
+
+reports.excel_name = school_name + ' - simulator'
 
 reports.save_excel_and_html
 

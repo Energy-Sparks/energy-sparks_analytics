@@ -13,7 +13,7 @@ class ElectricitySimulator
 
     modified_config = appliance_definitions.clone
     modified_config = fit_set_unlikely_appliances_to_zero(modified_config)
-    # fit_solar_pv(modified_config)
+    fit_solar_pv(modified_config)
     fit_lighting_electric_heating(modified_config)
     fit_boiler_pumps(modified_config)
     fit_ict(modified_config)
@@ -21,6 +21,7 @@ class ElectricitySimulator
 
     # TODO(PH,21Jul2018):
     # kitchen, summer air con, electric HW, security lighting
+puts "Solar PVPV config #{modified_config[:solar_pv][:kwp]}"
     modified_config
   end
 
@@ -57,6 +58,8 @@ class ElectricitySimulator
     @working_amr_data.minus_self(solar_amr_simulated_data, 0.0)
   end
 
+  # look at day time holiday usage, if consumption is 20% below baseload but positive
+  # correlate this reduced consumption against the sheffield derived synthetic pv yield for the school
   def fit_solar_extract_data_for_analysis(config)
     kw = []
     sol_yield = []
@@ -70,7 +73,7 @@ class ElectricitySimulator
           hh_kw = @working_amr_data.kwh(date, halfhour_index) * 2
           # only assess if yield > 100W/m2/kWp TODO(PH,24Jul2018) check yield per hr or half hr
           # and mains consumption > 200w - so not exporting (if export data is lost)
-          if pv_yield > 0.1 && hh_kw > 0.1 && hh_kw < baseload * 1.2
+          if pv_yield > 0.1 && hh_kw > 0.1 && hh_kw < baseload * 0.8
             kw.push(hh_kw)
             sol_yield.push(pv_yield)
             dt.push(DateTimeHelper.datetime(date, halfhour_index))

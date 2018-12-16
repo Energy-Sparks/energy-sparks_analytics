@@ -24,6 +24,12 @@ module DateTimeHelper
     DateTime.new(date.year, date.month, date.day, hour, minute, 0)
   end
 
+  def self.time_of_day(halfhour_index)
+    hour = (halfhour_index / 2).round
+    minute = halfhour_index % 2 == 1 ? 30 : 0
+    TimeOfDay.new(hour, minute)
+  end
+
   def self.date_and_half_hour_index(datetime)
     date = Date.new(datetime.year, datetime.month, datetime.day)
     index = datetime.hour * 2 + (datetime.minute % 30)

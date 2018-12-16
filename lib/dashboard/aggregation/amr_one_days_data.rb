@@ -67,6 +67,7 @@ class OneDayAMRReading
 
   def set_days_kwh_x48(days_kwh_data_x48)
     @kwh_data_x48 = days_kwh_data_x48
+    @one_day_kwh = days_kwh_data_x48.inject(:+)
   end
 
   def set_type(type)

@@ -13,8 +13,8 @@ end
 reports = ReportConfigSupport.new
 
 # reports.load_school('Ecclesfield Primary School', true)
-reports.load_school('Average School', true)
-
+# reports.load_school('Average School', true)
+reports.load_school('Trinity First School', true)
 # testing examples
 #
 #   reports.do_all_schools(true)
@@ -36,6 +36,7 @@ reports.load_school('Average School', true)
 # reports.do_all_schools(true)
 # reports.do_chart_list('Meter breakdown', [:group_by_week_gas_unlimited_meter_filter_debug])
 reports.do_all_standard_pages_for_school
+# reports.do_all_schools(true)
 
 reports.save_excel_and_html
 

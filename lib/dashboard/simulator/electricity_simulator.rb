@@ -7,18 +7,13 @@ class ElectricitySimulator
   attr_reader :calc_components_results, :solar_irradiation, :school, :existing_electricity_meter
 
   def initialize(school)
-    electricity_meter_data = school.aggregated_electricity_meters.amr_data
-    @existing_electricity_meter = school.aggregated_electricity_meters
-    @holidays = school.holidays
-    @period = @holidays.years_to_date(electricity_meter_data.start_date, electricity_meter_data.end_date, false)[0]
-    # TODO(PH, 16Oct2018) - fudge to extend simulation to align to Saturday date boundaries for weekly charts - resolve
-    @period = SchoolDatePeriod.new(@period.type, @period.title, simulation_start_date - 7, simulation_end_date)
-    @temperatures = school.temperatures
-    @solar_irradiation = school.solar_irradiation
-    @solar_pv = school.solar_pv
     @school = school
-    calculate_heating_periods
     @calc_components_results = {}
+
+    initialize_meter_derived_data(school)
+    set_schedule_data(school)
+    set_start_end_date
+    calculate_heating_periods
   end
 
   def simulate(appliance_definitions)
@@ -70,6 +65,24 @@ class ElectricitySimulator
 
   protected
 
+  def initialize_meter_derived_data(school)
+    @existing_electricity_meter = school.aggregated_electricity_meters
+    @electricity_meter_data = @existing_electricity_meter.amr_data
+  end
+
+  def set_start_end_date
+    last_year = @holidays.years_to_date(@electricity_meter_data.start_date, @electricity_meter_data.end_date, false)[0]
+    # TODO(PH, 16Oct2018) - fudge to extend simulation to align to Saturday date boundaries for weekly charts - resolve
+    @period = SchoolDatePeriod.new(last_year.type, '1 year electrical simulator', last_year.start_date - 7, last_year.end_date)
+  end
+
+  def set_schedule_data(school)
+    @holidays = school.holidays
+    @temperatures = school.temperatures
+    @solar_irradiation = school.solar_irradiation
+    @solar_pv = school.solar_pv
+  end
+
   def floor_area
     school.floor_area
   end
@@ -94,6 +107,14 @@ class ElectricitySimulator
     @period.end_date
   end
 
+  def calculate_heating_periods
+    if @school.aggregated_heat_meters.nil?
+      calculate_heating_periods_from_temperatures
+    else
+      calculate_model
+    end
+  end
+
   private
 
   def holiday?(date)
@@ -108,16 +129,8 @@ class ElectricitySimulator
     !holiday?(date) && !weekend?(date)
   end
 
-  def calculate_heating_periods
-    if @school.aggregated_heat_meters.nil?
-      calculate_heating_periods_from_temperatures
-    else
-      calculate_model
-    end
-  end
-
-  def check_positive(val)
-    val < 0.0 ? Float::NAN : val
+  def check_positive(val, default = Float::NAN)
+    val < 0.0 ? default : val
   end
 
   def heating_on?(date)
@@ -133,7 +146,7 @@ class ElectricitySimulator
     @calculated_heating_dates = {}
     sunday = DateTimeHelper::next_weekday(simulation_start_date, 0)
 
-    while sunday + 7 < @existing_electricity_meter.amr_data.end_date
+    while sunday + 7 < simulation_end_date
       temp = @school.temperatures.average_temperature_in_date_range(sunday, sunday + 6)
       if temp < OUTSIDE_TEMPERATURE_FOR_CALCULATED_HEATING_PERIOD
         (sunday..sunday+6).each do |date|
@@ -632,7 +645,7 @@ class ElectricitySimulator
     (start_date..end_date).each do |date|
       if heating_on?(date) && !(holiday?(date) && !config[:holidays]) && !(weekend?(date) && !config[:weekends])
         (0..47).each do |half_hour_index|
-          power = check_positive(fixed_power)
+          power = check_positive(fixed_power, 0.0)
           amr_bucket_start_time = convert_half_hour_index_to_time(half_hour_index)
           amr_bucket_end_time = convert_half_hour_index_to_time(half_hour_index + 1)
 
@@ -644,7 +657,7 @@ class ElectricitySimulator
             power += heating_power
           end
 
-          electric_heating_data.add_to_kwh(date, half_hour_index, check_positive(power * overlap)) # automatically in k_wh as conversion kW * time in hours
+          electric_heating_data.add_to_kwh(date, half_hour_index, check_positive(power * overlap, 0.0)) # automatically in k_wh as conversion kW * time in hours
         end
       end
     end
@@ -758,10 +771,10 @@ class ElectricitySimulator
     solar_pv_data = empty_amr_data_set_internal('Solar PV Internal Consumption', start_date, end_date)
     solar_pv_data_export = empty_amr_data_set_internal('Solar PV Export', start_date, end_date) unless totals_ex_pv.nil?
 
-    kwp = check_positive(@appliance_definitions[:solar_pv][:kwp])
+    kwp = check_positive(kwp)
 
     if kwp > 0.0
-      (solar_pv_data.start_date..solar_pv_data.end_date).each do |date|
+      (simulation_start_date..simulation_end_date).each do |date|
         (0..47).each do |half_hour_index|
           pv_yield = @solar_pv.solar_pv_yield(date, half_hour_index)
           if totals_ex_pv.nil?
