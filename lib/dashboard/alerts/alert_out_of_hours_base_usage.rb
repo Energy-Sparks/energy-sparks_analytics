@@ -82,7 +82,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
         series_breakdown: :daytype,
         yaxis_units: :£,
         yaxis_scaling: :none,
-        meter_definition: fuel == :electricity ? :allelectricity : :allheat,
+        meter_definition: fuel.to_sym == :electricity ? :allelectricity : :allheat,
         x_axis: :nodatebuckets,
         timescale: :year
     }
