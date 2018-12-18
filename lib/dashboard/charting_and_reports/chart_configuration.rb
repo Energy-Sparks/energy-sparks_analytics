@@ -595,8 +595,8 @@ class ChartManager
     #==============================SIMULATOR LIGHTING DETAIL==============================
     group_by_week_electricity_simulator_lighting: {
       name:             'By Week: Electricity Simulator (Lighting)',
-      inherits_from:    :group_by_week_electricity_simulator_appliance
-      # filter:            { submeter: [ 'Lighting' ] }
+      inherits_from:    :group_by_week_electricity_simulator_appliance,
+      filter:            { submeter: [ 'Lighting' ] }
     },
     intraday_electricity_simulator_lighting_kwh: {
       name:             'Annual: School Day by Time of Day: Electricity Simulator (Lighting)',

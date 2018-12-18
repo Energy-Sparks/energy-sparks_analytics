@@ -42,8 +42,8 @@ class MeterCollection
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
 
-    @cached_open_time = DateTime.new(0, 1, 1, 7, 0, 0) # for speed
-    @cached_close_time = DateTime.new(0, 1, 1, 16, 30, 0) # for speed
+    @cached_open_time = TimeOfDay.new(7, 0) # for speed
+    @cached_close_time = TimeOfDay.new(16, 30) # for speed
 
     if Object.const_defined?('ScheduleDataManager')
       logger.info 'Running standalone, not in Rails environment'
@@ -141,10 +141,8 @@ class MeterCollection
     @cached_close_time
   end
 
-  def school_day_in_hours(time)
-    # - use DateTime and not Time as orders of magnitude faster on Windows
-    time_only = DateTime.new(0, 1, 1, time.hour, time.min, time.sec)
-    time_only >= open_time && time_only < close_time
+  def school_day_in_hours(time_of_day)
+    time_of_day >= open_time && time_of_day < close_time
   end
 
   # held at building level as a school building e.g. a community swimming pool may have a different holiday schedule
