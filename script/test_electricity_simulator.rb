@@ -41,4 +41,4 @@ reports.save_excel_and_html
 reports.report_benchmarks
 
 definitions = ElectricitySimulatorConfiguration::APPLIANCE_DEFINITIONS
-Logging.logger.warn  "HERE: #{definitions[:unaccounted_for_baseload]}"
+Logging.logger.warn "HERE: #{definitions[:unaccounted_for_baseload]}"
