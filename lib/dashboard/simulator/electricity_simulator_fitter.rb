@@ -21,7 +21,6 @@ class ElectricitySimulator
 
     # TODO(PH,21Jul2018):
     # kitchen, summer air con, electric HW, security lighting
-puts "Solar PVPV config #{modified_config[:solar_pv][:kwp]}"
     modified_config
   end
 

@@ -434,7 +434,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     percent_str = percent(percent_value)
     saving_percent = percent_value - 0.25
     saving_kwh = (kwh_in_hours + kwh_out_of_hours) * saving_percent
-    saving_£ = YAxisScaling.convert(:kwh, :£, @fuel_type, saving_kwh)
+    saving_£ = YAxisScaling.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving_kwh)
 
     table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
 
