@@ -1,7 +1,7 @@
 #======================== Change in Daily Electricity Consumption =============
-require_relative 'alert_analysis_base.rb'
+require_relative 'alert_electricity_baseload_versus_benchmark.rb'
 
-class AlertChangeInDailyElectricityShortTerm < AlertAnalysisBase
+class AlertChangeInDailyElectricityShortTerm < AlertElectricityBaseloadVersusBenchmark
   MAXDAILYCHANGE = 1.15
 
   def initialize(school)
@@ -18,9 +18,10 @@ class AlertChangeInDailyElectricityShortTerm < AlertAnalysisBase
     report.add_book_mark_to_base_url('ElectricityChange')
 
     if last_weeks_consumption > week_befores_consumption * MAXDAILYCHANGE
+      last_weeks_baseload = average_baseload(asof_date - 7, asof_date)
       report.summary = 'Your daily electricity consumption has increased'
       text = sprintf('Your electricity consumption has increased from %.0f kWh ', week_befores_consumption)
-      text += sprintf('last week (5 school days following %s) ', beginning_of_last_week.strptime('%d %m'))
+      text += sprintf('last week (5 school days following %s) ', beginning_of_last_week.strftime('%d %m'))
       text += sprintf('to %.0f kWh ', last_weeks_consumption)
       text += sprintf('this week (5 school days following %s)', beginning_of_week)
       text += sprintf('over the last year to %.1f last week. ', last_weeks_baseload)
