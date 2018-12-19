@@ -19,14 +19,19 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
 
     if heating_on
       halfhour_index = calculate_heating_on_time(asof_date, FROST_PROTECTION_TEMPERATURE)
-      time_str = halfhour_index_to_timestring(halfhour_index)
-
-      if halfhour_index < MAX_HALFHOURS_HEATING_ON
+      if halfhour_index.nil?
+        report.summary = 'Heating times: insufficient data at the moment'
+        text = 'We can not work out when your heating is coming on at the moment'
+        report.rating = 10.0
+        report.status = :good
+      elsif halfhour_index < MAX_HALFHOURS_HEATING_ON
+        time_str = halfhour_index_to_timestring(halfhour_index)
         report.summary = 'Your heating is coming on too early'
         text = 'Your heating came on at ' + time_str + ' on ' + asof_date.strftime('%d %b %Y')
         report.rating = 2.0
         report.status = :poor
       else
+        time_str = halfhour_index_to_timestring(halfhour_index)
         report.summary = 'Your heating is coming on at a reasonable time in the morning'
         text = 'Your heating came on at ' + time_str + ' on ' + asof_date.strftime('%d %b %Y')
         report.rating = 10.0
