@@ -25,8 +25,8 @@ require 'json'
 require 'date'
 require 'sun_times'
 
-@start_date = Date.new(2018, 10, 15)
-@end_date = Date.new(2018, 11, 25)
+@start_date = Date.new(2018, 11, 25)
+@end_date = Date.new(2018, 12, 10)
 
 @climate_zones = {    # probably not the same climate zones as the other inputs, more critical they are local, so schools to west of Bath may need their own 'climate zone'
   'Bath' => { latitude: 51.39,

@@ -50,6 +50,13 @@ end
 
 class SimpleExemplarElectricalSimulator < ElectricitySimulator
   def initialize(school)
+    super(school)
+  end
+
+  def initialize_meter_derived_data(_school); end
+  def set_start_end_date; end
+  def calculate_heating_periods
+    calculate_heating_periods_from_temperatures
   end
 
   def floor_area
@@ -69,10 +76,10 @@ class SimpleExemplarElectricalSimulator < ElectricitySimulator
   end
 
   def simulation_start_date
-    Date.new(2017,9,1) # @period.start_date
+    Date.new(2017, 9, 1) # @period.start_date
   end
 
   def simulation_end_date
-    Date.new(2018,9,10) # @period.end_date
+    Date.new(2018, 9, 10) # @period.end_date
   end
 end

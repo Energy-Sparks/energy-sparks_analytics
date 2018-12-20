@@ -185,7 +185,7 @@ protected
   end
 
   def kwh_to_pounds_and_kwh(kwh, fuel_type_sym)
-    pounds = YAxisScaling.convert(:kwh, :£, fuel_type_sym, kwh, false)
+    pounds = YAxisScaling.convert(@chart_definition[:yaxis_units], :£, fuel_type_sym, kwh, false)
     logger.debug pounds.inspect
     logger.debug kwh.inspect
     '&pound;' + YAxisScaling.scale_num(pounds) + ' (' + YAxisScaling.scale_num(kwh) + 'kWh)'
@@ -202,6 +202,8 @@ protected
       sorted_data = data.sort_by {|_key, value| value[0]}
       sorted_data = sorted_data.reverse
     end
+
+    units = @chart_definition[:yaxis_units]
 
     data.each_value do |value|
       total += value[0]
@@ -226,12 +228,12 @@ protected
               <% pct = val / total %>
               <td class="text-right"><%= YAxisScaling.scale_num(val) %></td>
               <% if row.match(/export/i) %>
-                <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, :solar_export, val) %></td>
+                <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val) %></td>
               <% else %>
-                <td class="text-right"><%= YAxisScaling.convert(:kwh, :£, fuel_type, val) %></td>
+                <td class="text-right"><%= YAxisScaling.convert(units, :£, fuel_type, val) %></td>
               <% end %>
-              <td class="text-right"><%= YAxisScaling.convert(:kwh, :co2, fuel_type, val) %></td>
-              <td class="text-right"><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(units, :co2, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(units, :library_books, fuel_type, val) %></td>
               <td class="text-right"><%= percent(pct) %></td>
             </tr>
           <% end %>
@@ -240,9 +242,9 @@ protected
             <tr class="table-success">
               <td><b>Total</b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.scale_num(total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :£, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :co2, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(:kwh, :library_books, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :£, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :co2, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :library_books, fuel_type, total) %></b></td>
               <td></td>
             </tr>
           <% end %>
@@ -434,7 +436,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     percent_str = percent(percent_value)
     saving_percent = percent_value - 0.25
     saving_kwh = (kwh_in_hours + kwh_out_of_hours) * saving_percent
-    saving_£ = YAxisScaling.convert(:kwh, :£, @fuel_type, saving_kwh)
+    saving_£ = YAxisScaling.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving_kwh)
 
     table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
 
