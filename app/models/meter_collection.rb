@@ -24,7 +24,7 @@ class MeterCollection
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
 
-  def initialize(school)
+  def initialize(school, meter_attributes = MeterAttributes)
     @name = school.name
     @address = school.address
     @postcode = school.postcode
@@ -41,6 +41,7 @@ class MeterCollection
     @area_name = school.area_name
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
+    @meter_attributes = meter_attributes
 
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
@@ -168,7 +169,7 @@ class MeterCollection
 
   def heating_model(period)
     unless @heating_models.key?(:basic)
-      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters, holidays, temperatures)
+      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters, holidays, temperatures, @meter_attributes)
       @heating_models[:basic].calculate_regression_model(period)
     end
     @heating_models[:basic]

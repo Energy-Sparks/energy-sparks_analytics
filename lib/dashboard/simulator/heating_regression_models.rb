@@ -1,6 +1,6 @@
 # Analyse heating, hot water and kitchen
 module AnalyseHeatingAndHotWater
-  
+
   #====================================================================================================================
   # HEATING MODEL REGRESSION ANALYSIS
   #
@@ -28,7 +28,7 @@ module AnalyseHeatingAndHotWater
     #  - estimate of hot water usage from summer sampling, can be used for annual estimates
     #  - alert system: for temperature compensating week on week comparison to alert to increased usage
     #  - fitting process: finding the most accurate model, least CUSUM stdev to support above requirements
-    
+
     # this is the basic model for holding the linerar regression parameters
     class RegressionModel
       attr_reader :key, :long_name, :a, :b, :r2, :base_temperature, :samples
@@ -66,11 +66,12 @@ module AnalyseHeatingAndHotWater
     attr_accessor :base_degreedays_temperature, :halfway_kwh
     attr_accessor :heating_day_determination_method, :heating_day_determination_method_parameter
 
-    def initialize(meter, holidays, temperatures)
+    def initialize(meter, holidays, temperatures, meter_attributes)
       @amr_data = meter.amr_data
       @meter = meter
       @holidays = holidays
       @temperatures = temperatures
+      @meter_attributes = meter_attributes
       @base_degreedays_temperature = 20.0
       @super_debug = false
       @heating_day_determination_method = :prediction_at_fixed_degreedays
@@ -79,7 +80,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def process_meter_attributes
-      model_params = MeterAttributes.attributes(@meter, :heating_model)
+      model_params = @meter_attributes.attributes(@meter, :heating_model)
       unless model_params.nil?
         model_params.each do |param, value|
           case param
@@ -131,7 +132,7 @@ module AnalyseHeatingAndHotWater
         actual_kwh = @amr_data.one_day_kwh(date)
 
         [model_type, :all].each do |type|
-          results[type][:actual_kwh].push(actual_kwh) 
+          results[type][:actual_kwh].push(actual_kwh)
           results[type][:predicted_kwh].push(predicted_kwh)
         end
       end
@@ -170,7 +171,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def format_cusum_results(type, results)
-      sprintf('%26.26s: sd: %4.0f mean: %3.0f act: %8.0f pred: %8.0f x %4d', type, results[:standard_deviation], 
+      sprintf('%26.26s: sd: %4.0f mean: %3.0f act: %8.0f pred: %8.0f x %4d', type, results[:standard_deviation],
         results[:mean], results[:total_actual_kwh], results[:total_predicted_kwh], results[:samples])
     end
 
@@ -193,7 +194,7 @@ module AnalyseHeatingAndHotWater
     def save_raw_data_to_csv_for_debug(filename)
       header = ['Date', 'Month', 'DOY', 'Occupied', 'HeatingOn', 'AvgTemp', 'DegreeDays', 'MinHeatkWh',
                 'ModelType', 'baseTemp', 'a', 'b', 'TotalkWh', 'PredictedkWh'] + Range.new(0, 47).to_a + Range.new(0, 47).to_a
-      File.open(filename, 'w') do |file| 
+      File.open(filename, 'w') do |file|
         file.puts header.join(',')
         (@amr_data.start_date..@amr_data.end_date).each do |date|
           one_days_data = @amr_data[date]
@@ -314,7 +315,7 @@ module AnalyseHeatingAndHotWater
 
     def save_raw_regression_data_to_csv_for_debug(filename, x1, y1, a, b, r2)
       filepath = File.join(File.dirname(__FILE__), '../../../log/' + filename)
-      File.open(filepath, 'w') do |file| 
+      File.open(filepath, 'w') do |file|
         file.puts "#{a}, #{b}, #{r2}"
         file.puts
         x1.length.times do |i|
@@ -328,8 +329,8 @@ module AnalyseHeatingAndHotWater
   class BasicRegressionHeatingModel < HeatingModel
     include Logging
 
-    def initialize(amr_data, holidays, temperatures)
-      super(amr_data, holidays, temperatures)
+    def initialize(amr_data, holidays, temperatures, meter_attributes = MeterAttributes)
+      super(amr_data, holidays, temperatures, meter_attributes)
       @models = {}
       @heating_on_periods = []
       @day_to_model_map = {} # [date] = model()
@@ -591,8 +592,8 @@ module AnalyseHeatingAndHotWater
 #   history is available and the small daily sample size might have a high error term?
 #
   class HeatingModelWithThermalMass < BasicRegressionHeatingModel
-    def initialize(amr_data, holidays, temperatures)
-      super(amr_data, holidays, temperatures)
+    def initialize(amr_data, holidays, temperatures, meter_attributes = MeterAttributes)
+      super(amr_data, holidays, temperatures, meter_attributes)
       @heating_days_of_week_parameters = {
         heating_occupied_monday:    1,
         heating_occupied_tuesday:   2,

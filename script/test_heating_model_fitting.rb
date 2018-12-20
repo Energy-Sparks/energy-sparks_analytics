@@ -4,7 +4,7 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
-# school_name = 'Westfield Primary' 
+# school_name = 'Westfield Primary'
 module Logging
   # @logger = Logger.new('Results/test-simulator ' + Time.now.strftime('%H %M') + '.log')
   @logger = Logger.new(STDOUT)

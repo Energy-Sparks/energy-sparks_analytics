@@ -547,7 +547,7 @@ class ValidateAMRData
   end
 
   def create_heating_model
-    @heating_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@meter, @holidays, @temperatures)
+    @heating_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@meter, @holidays, @temperatures, @meter_attributes)
     @heating_model.calculate_regression_model(SchoolDatePeriod.new(:validation, 'Validation Period', @amr_data.start_date, @amr_data.end_date))
     @heating_model.calculate_heating_periods(@amr_data.start_date, @amr_data.end_date)
   end
