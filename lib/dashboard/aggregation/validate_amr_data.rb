@@ -14,7 +14,6 @@ class ValidateAMRData
     @amr_data = meter.amr_data
     @meter = meter
     @meter_attributes = meter_attributes
-    @meter_corrections = @meter_attributes.attributes(@meter, :meter_corrections)
     @meter_id = @meter.mpan_mprn
     @type = meter.meter_type
     @holidays = holidays
@@ -55,10 +54,11 @@ class ValidateAMRData
   private
 
   def process_meter_attributes
-    if meter_corrections.nil?
+    meter_attributes_corrections = @meter_attributes.attributes(@meter, :meter_corrections)
+    if meter_attributes_corrections.nil?
       auto_insert_for_gas_if_no_other_rules
     else
-      @meter.insert_correction_rules_first(meter_corrections)
+      @meter.insert_correction_rules_first(meter_attributes_corrections)
     end
   end
 
