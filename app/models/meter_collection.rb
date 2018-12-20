@@ -168,6 +168,8 @@ class MeterCollection
   end
 
   def heating_model(period)
+    # This is a temporary fix until the ES codebase comes in line with the MeterAttributes change TODO: JJ
+    @meter_attributes = MeterAttributes if @meter_attributes.nil?
     unless @heating_models.key?(:basic)
       @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters, holidays, temperatures, @meter_attributes)
       @heating_models[:basic].calculate_regression_model(period)
