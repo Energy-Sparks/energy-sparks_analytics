@@ -48,7 +48,7 @@ class AlertGasAnnualVersusBenchmark < AlertAnalysisBase
     annual_cost = annual_kwh * BenchmarkMetrics::GAS_PRICE
     benchmark_pupil_cost = pupil_benchmark * BenchmarkMetrics::GAS_PRICE
     benchmark_m2_cost = floor_area_benchmark * BenchmarkMetrics::GAS_PRICE
-    text = 'Your annual gas usage is ' + comparative_text + '. '
+    text = ''
     text += sprintf('Your gas usage over the last year of %.0f kWh/£%.0f is %s, ', annual_kwh, annual_cost, comparative_text)
     text += sprintf('compared with benchmarks of %.0f kWh/£%.0f (pupil based) ', pupil_benchmark, benchmark_pupil_cost)
     text += sprintf('and %.0f kWh/£%.0f (floor area based) ', floor_area_benchmark, benchmark_m2_cost)
