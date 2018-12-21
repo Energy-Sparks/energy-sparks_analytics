@@ -30,7 +30,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       report.summary = 'You have a high percentage of your ' + @fuel + ' usage outside school hours'
       text = sprintf('%.0f percent of your ' + @fuel, 100.0 * percent)
       text += ' is used out of hours which is high compared with exemplar schools '
-      text += sprintf('which use only %.0f percent out of hours', 100.0 * @benchmark_out_of_hours_percent)
+      text += sprintf('which use only %.0f percent out of hours.', 100.0 * @benchmark_out_of_hours_percent)
       description1 = AlertDescriptionDetail.new(:text, text)
       report.add_detail(description1)
       description2 = AlertDescriptionDetail.new(:chart, breakdown)

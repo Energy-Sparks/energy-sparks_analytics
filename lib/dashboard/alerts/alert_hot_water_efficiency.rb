@@ -19,13 +19,13 @@ class AlertHotWaterEfficiency < AlertGasModelBase
     if efficiency < MIN_EFFICIENCY
       report.summary = 'Inefficient hot water system'
       text = 'Your hot water system appears to be only '
-      text += sprintf('%.0f percent efficient', efficiency * 100.0)
+      text += sprintf('%.0f percent efficient.', efficiency * 100.0)
       report.rating = 10.0 * (efficiency / 0.85)
       report.status = :poor
     else
       report.summary = 'Your hot water system is efficient'
       text = 'Your hot water system appears is '
-      text += sprintf('%.0f percent efficient, which is very good', efficiency * 100.0)
+      text += sprintf('%.0f percent efficient, which is very good.', efficiency * 100.0)
       report.rating = 10.0
       report.status = :good
     end
