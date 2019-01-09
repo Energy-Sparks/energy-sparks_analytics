@@ -51,7 +51,8 @@ class AlertHeatingOnOff < AlertGasModelBase
     forecast_limit_days = FORECAST_DAYS_LOOKAHEAD
     @yahoo_forecast.forecast.each do |date, temperatures|
       _low, avg_temp, _high = temperatures
-      display += date.strftime('%A') + '(' + avg_temp.to_s + 'C) '
+      # The &#176; is the HTML code for degrees celcius
+      display += date.strftime("%d %B") + ' (' + avg_temp.to_s + '&#176;) '
       forecast_limit_days -= 1
       return display if forecast_limit_days.zero?
     end

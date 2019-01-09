@@ -1,7 +1,7 @@
 #======================== Change in Daily Electricity Consumption =============
-require_relative 'alert_analysis_base.rb'
+require_relative 'alert_electricity_baseload_versus_benchmark.rb'
 
-class AlertChangeInDailyElectricityShortTerm < AlertAnalysisBase
+class AlertChangeInDailyElectricityShortTerm < AlertElectricityBaseloadVersusBenchmark
   MAXDAILYCHANGE = 1.15
 
   def initialize(school)
@@ -18,14 +18,15 @@ class AlertChangeInDailyElectricityShortTerm < AlertAnalysisBase
     report.add_book_mark_to_base_url('ElectricityChange')
 
     if last_weeks_consumption > week_befores_consumption * MAXDAILYCHANGE
+      last_weeks_baseload = average_baseload(asof_date - 7, asof_date)
       report.summary = 'Your daily electricity consumption has increased'
       text = sprintf('Your electricity consumption has increased from %.0f kWh ', week_befores_consumption)
-      text += sprintf('last week (5 school days following %s) ', beginning_of_last_week.strptime('%d %m'))
+      text += sprintf('last week (5 school days following %s) ', beginning_of_last_week.to_formatted_s(:long_ordinal))
       text += sprintf('to %.0f kWh ', last_weeks_consumption)
-      text += sprintf('this week (5 school days following %s)', beginning_of_week)
+      text += sprintf('this week (5 school days following %s) ', beginning_of_week.to_formatted_s(:long_ordinal))
       text += sprintf('over the last year to %.1f last week. ', last_weeks_baseload)
       cost = BenchmarkMetrics::ELECTRICITY_PRICE * 195.0 * (last_weeks_consumption - week_befores_consumption) / days_in_week
-      text += sprintf('If this continues it will costs you an additional £%.0f over the next year', cost)
+      text += sprintf('If this continues it will costs you an additional £%.0f over the next year.', cost)
       description1 = AlertDescriptionDetail.new(:text, text)
       report.rating = 2.0
       report.status = :poor
@@ -34,7 +35,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertAnalysisBase
       text = sprintf('Your weekly school day electricity consumption was %.0f kWh (£%.0f) this week ',
                      last_weeks_consumption,
                      last_weeks_consumption * BenchmarkMetrics::ELECTRICITY_PRICE)
-      text += sprintf('compared with %.0f kWh (£%.0f) last week',
+      text += sprintf('compared with %.0f kWh (£%.0f) last week.',
                       week_befores_consumption,
                       week_befores_consumption * BenchmarkMetrics::ELECTRICITY_PRICE)
       description1 = AlertDescriptionDetail.new(:text, text)
