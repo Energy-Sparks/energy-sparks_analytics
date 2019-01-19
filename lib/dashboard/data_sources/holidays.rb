@@ -49,6 +49,10 @@ class Holidays
     !weekend?(date) && !holiday?(date)
   end
 
+  def last
+    @holidays.last
+  end
+
   # returns a holiday period corresponding to a date, nil if not a date
   def holiday(date)
     # check cache, as lookup currently loops through list of holidays

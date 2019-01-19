@@ -6,4 +6,8 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
     super(school, 'gas', BenchmarkMetrics::PERCENT_GAS_OUT_OF_HOURS_BENCHMARK,
           BenchmarkMetrics::GAS_PRICE, :gasoutofhours, 'GasOutOfHours', :allheat)
   end
+
+  def maximum_alert_date
+    @school.aggregated_heat_meters.amr_data.end_date
+  end
 end

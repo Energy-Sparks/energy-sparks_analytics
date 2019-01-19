@@ -840,6 +840,64 @@ class ChartManager
       name:             'Grid Carbon Y2 axis check',
       inherits_from:    :optimum_start,
       y2_axis:          :gridcarbon
+    },
+    #==============================================================
+    sprint2_last_2_weeks_electricity_by_datetime: {
+      name:             'Compare last 2 weeks by time of day - line chart (Electricity)',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }],
+      x_axis:           :datetime,
+      meter_definition: :allelectricity,
+      yaxis_units:      :£,
+      yaxis_scaling:    :none
+    },
+    sprint2_last_2_weeks_electricity_by_datetime_column: {
+      name:             'Compare last 2 weeks by time of day - line chart (Electricity)',
+      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
+      chart1_type:      :column
+    },
+    sprint2_last_2_weeks_electricity_by_day_line: {
+      name:             'Compare last 2 weeks by day - line chart (Electricity)',
+      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
+      x_axis:           :day
+    },
+    sprint2_last_2_weeks_electricity_by_day_column: {
+      name:             'Compare last 2 weeks by day - column chart (Electricity)',
+      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
+      chart1_type:      :column
+    },
+
+    sprint2_last_2_weeks_gas_by_datetime: {
+      name:             'Compare last 2 weeks by time of day - line chart (Gas)',
+      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
+      meter_definition: :allheat
+    },
+    sprint2_last_2_weeks_gas_by_datetime_column: {
+      name:             'Compare last 2 weeks by time of day - line chart (Gas)',
+      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime_column,
+      meter_definition: :allheat
+    },
+    sprint2_last_2_weeks_gas_by_day_line: {
+      name:             'Compare last 2 weeks by day - line chart (Gas)',
+      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
+      meter_definition: :allheat
+    },
+    sprint2_last_2_weeks_gas_by_day_column: {
+      name:             'Compare last 2 weeks by day - column chart (Gas)',
+      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_column,
+      meter_definition: :allheat
+    },
+    sprint2_gas_comparison:  {
+      name:             'Comparison of out of hour',
+      chart1_type:      :bar,
+      chart1_subtype:   :stacked,
+      meter_definition: :all,
+      timescale:        :year,
+      x_axis:           :year,
+      series_breakdown: :daytype,
+      yaxis_units:      :£,
+      yaxis_scaling:    :none
     }
   }.freeze
 end

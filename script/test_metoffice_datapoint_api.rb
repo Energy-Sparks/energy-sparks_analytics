@@ -17,7 +17,7 @@ locations = {
 
 nearest_weather_station = MetOfficeDatapointWeatherForecast.find_nearest_weather_station(51.39, -2.37)
 
-forecast = MetOfficeDatapointWeatherForecast.new(nearest_weather_station['id'])
+forecast = MetOfficeDatapointWeatherForecast.new(nearest_weather_station['id'].to_i)
 # puts forecast.forecast
 
 locations.each do |name, latitude_longitude|
@@ -26,7 +26,8 @@ locations.each do |name, latitude_longitude|
   Logging.logger.info ''
 
   nearest_weather_station = MetOfficeDatapointWeatherForecast.find_nearest_weather_station(latitude_longitude[0], latitude_longitude[1])
-  forecast = MetOfficeDatapointWeatherForecast.new(nearest_weather_station['id'])
+  forecast = MetOfficeDatapointWeatherForecast.new(nearest_weather_station['id'].to_i)
+  Logging.logger.info nearest_weather_station['id']
   forecast.forecast.each do |date, forecast_temperatures|
     Logging.logger.info "    #{date} = #{forecast_temperatures}"
   end

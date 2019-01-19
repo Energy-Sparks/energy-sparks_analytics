@@ -7,49 +7,46 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
   def initialize(school, fuel, benchmark_out_of_hours_percent,
                  fuel_cost, alert_type, bookmark, meter_definition)
-    super(school)
+    super(school, alert_type)
     @fuel = fuel
     @benchmark_out_of_hours_percent = benchmark_out_of_hours_percent
     @fuel_cost = fuel_cost
-    @alert_type = alert_type
     @bookmark = bookmark
     @meter_definition = meter_definition
   end
 
-  def analyse(_asof_date)
+  def analyse_private(_asof_date)
     breakdown = out_of_hours_energy_consumption(@fuel)
 
     kwh_in_hours, kwh_out_of_hours = in_out_of_hours_consumption(breakdown)
     percent = kwh_out_of_hours / (kwh_in_hours + kwh_out_of_hours)
 
-    report = AlertReport.new(@alert_type)
-    report.term = :longterm
-    report.add_book_mark_to_base_url(@bookmark)
+    @analysis_report.term = :longterm
+    @analysis_report.add_book_mark_to_base_url(@bookmark)
 
     if percent > @benchmark_out_of_hours_percent
-      report.summary = 'You have a high percentage of your ' + @fuel + ' usage outside school hours'
+      @analysis_report.summary = 'You have a high percentage of your ' + @fuel + ' usage outside school hours'
       text = sprintf('%.0f percent of your ' + @fuel, 100.0 * percent)
       text += ' is used out of hours which is high compared with exemplar schools '
       text += sprintf('which use only %.0f percent out of hours.', 100.0 * @benchmark_out_of_hours_percent)
       description1 = AlertDescriptionDetail.new(:text, text)
-      report.add_detail(description1)
+      @analysis_report.add_detail(description1)
       description2 = AlertDescriptionDetail.new(:chart, breakdown)
-      report.add_detail(description2)
+      @analysis_report.add_detail(description2)
       table_data = convert_breakdown_to_html_compliant_array(breakdown)
 
       description3 = AlertDescriptionDetail.new(:html, html_table_from_data(table_data))
-      report.add_detail(description3)
-      report.rating = 2.0
-      report.status = :poor
+      @analysis_report.add_detail(description3)
+      @analysis_report.rating = 2.0
+      @analysis_report.status = :poor
     else
-      report.summary = 'Your out of hours ' + @fuel + ' consumption is good'
+      @analysis_report.summary = 'Your out of hours ' + @fuel + ' consumption is good'
       text = sprintf('Your out of hours ' + @fuel + ' consumption is good at %.0f percent', 100.0 * percent)
       description1 = AlertDescriptionDetail.new(:text, text)
-      report.add_detail(description1)
-      report.rating = 10.0
-      report.status = :good
+      @analysis_report.add_detail(description1)
+      @analysis_report.rating = 10.0
+      @analysis_report.status = :good
     end
-    add_report(report)
   end
 
   def convert_breakdown_to_html_compliant_array(breakdown)

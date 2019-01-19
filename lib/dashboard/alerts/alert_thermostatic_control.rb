@@ -6,15 +6,14 @@ class AlertThermostaticControl < AlertGasModelBase
   MIN_R2 = 0.8
 
   def initialize(school)
-    super(school)
+    super(school, :thermostaticcontrol)
   end
 
-  def analyse(asof_date)
+  def analyse_private(asof_date)
     calculate_model(asof_date)
 
-    report = AlertReport.new(:thermostaticcontrol)
-    report.add_book_mark_to_base_url('ThermostaticControl')
-    report.term = :longterm
+    @analysis_report.add_book_mark_to_base_url('ThermostaticControl')
+    @analysis_report.term = :longterm
 
     @a = @heating_model.models[:heating_occupied_all_days].a
     @b = @heating_model.models[:heating_occupied_all_days].b
@@ -22,22 +21,21 @@ class AlertThermostaticControl < AlertGasModelBase
     @base_temp = @heating_model.models[:heating_occupied_all_days].base_temperature
 
     if @r2 < MIN_R2
-      report.summary = 'Thermostatic control of the school is poor'
+      @analysis_report.summary = 'Thermostatic control of the school is poor'
       text = 'The thermostatic control of the heating at your school appears poor '
       text += sprintf('at an R2 of %.2f, ', @r2)
       text += sprintf('the school should aim to improve this to above %.2f', MIN_R2)
-      report.rating = @r2 * 10.0
-      report.status = :poor
+      @analysis_report.rating = @r2 * 10.0
+      @analysis_report.status = :poor
     else
-      report.summary = 'Thermostatic control at your school is good'
+      @analysis_report.summary = 'Thermostatic control at your school is good'
       text = 'The thermostatic control of the heating is good  '
       text += sprintf('at an R2 of %.2f', @r2)
-      report.rating = 10.0
-      report.status = :good
+      @analysis_report.rating = 10.0
+      @analysis_report.status = :good
     end
 
     description1 = AlertDescriptionDetail.new(:text, text)
-    report.add_detail(description1)
-    add_report(report)
+    @analysis_report.add_detail(description1)
   end
 end

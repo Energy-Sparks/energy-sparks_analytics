@@ -2,10 +2,11 @@
 require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
+require './script/report_config_support.rb'
 
 module Logging
-  @logger = Logger.new('log/test-alerts.log')
-  logger.level = :warn
+  @logger = Logger.new('log/test-alerts ' + Time.now.strftime('%H %M') + '.log')
+  @logger.level = :warn
 end
 
 def banner(title)
@@ -18,11 +19,11 @@ school_name = 'Paulton Junior School'
 ENV['School Dashboard Advice'] = 'Include Header and Body'
 $SCHOOL_FACTORY = SchoolFactory.new
 
-puts banner("School: #{school_name}")
-school = $SCHOOL_FACTORY.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
+reports = ReportConfigSupport.new
 
+school = reports.load_school(school_name, true)
 
-analysis_asof_date = Date.new(2018, 2, 2)
+analysis_asof_date = Date.new(2018, 3, 16)
 
 puts
 puts banner('Electricity Baseload Alert (v benchmark)')

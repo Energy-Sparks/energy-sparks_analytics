@@ -35,8 +35,8 @@ reports.load_school('Trinity First School', true)
 # reports.do_chart_list('School Compare', [ :benchmark_school_comparison ])
 # reports.do_all_schools(true)
 # reports.do_chart_list('Meter breakdown', [:group_by_week_gas_unlimited_meter_filter_debug])
-reports.do_all_standard_pages_for_school
-# reports.do_all_schools(true)
+# reports.do_all_standard_pages_for_school
+reports.do_all_schools(true)
 
 reports.save_excel_and_html
 

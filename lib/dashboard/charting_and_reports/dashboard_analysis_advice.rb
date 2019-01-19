@@ -160,6 +160,7 @@ protected
     rescue StandardError => e
       logger.error "Error generating html for #{self.class.name}"
       logger.error e.message
+      logger.error e.backtrace
       '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
     end
   end
@@ -172,23 +173,35 @@ protected
     link('https://blog.energysparks.uk/electricity-simulator/' + bookmark, text_before, click_text, text_after)
   end
 
+  def equivalence_tool_tip_html(equivalence_text, calculation_text)
+    '<div title="' + calculation_text + '">' + equivalence_text + '</div>'
+  end
+
+  def random_equivalence_text(kwh, fuel_type)
+    equiv_type, conversion_type = EnergyEquivalences.random_equivalence_type_and_via_type
+    _val, equivalence, calc, in_text, out_text = EnergyEquivalences.convert(kwh, :kwh, fuel_type, equiv_type, equiv_type, conversion_type)
+    equivalence_tool_tip_html(equivalence, in_text + out_text + calc)
+  end
+
   def percent(value)
     (value * 100.0).round(0).to_s + '%'
   end
 
-  def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
-    scaling = YAxisScaling.new
-    kwh_conv = scaling.scale_unit_from_kwh(:£, fuel_type_sym)
-    kwh = YAxisScaling.scale_num(pounds / kwh_conv)
+  def pounds_to_kwh(pounds, fuel_type_sym)
+    pounds / ConvertKwh.scale_unit_from_kwh(:£, fuel_type_sym)
+  end
 
-    '&pound;' + YAxisScaling.scale_num(pounds) + ' (' + kwh + 'kWh)'
+  def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
+    kwh = pounds_to_kwh(pounds, fuel_type_sym)
+    kwh_text = FormatEnergyUnit.scale_num(kwh)
+    '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + kwh_text + 'kWh)'
   end
 
   def kwh_to_pounds_and_kwh(kwh, fuel_type_sym)
     pounds = YAxisScaling.convert(@chart_definition[:yaxis_units], :£, fuel_type_sym, kwh, false)
     logger.debug pounds.inspect
     logger.debug kwh.inspect
-    '&pound;' + YAxisScaling.scale_num(pounds) + ' (' + YAxisScaling.scale_num(kwh) + 'kWh)'
+    '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + FormatEnergyUnit.scale_num(kwh) + 'kWh)'
   end
 
   def html_table_from_graph_data(data, fuel_type = :electricity, totals_row = true, column1_description = '', sort = 0)
@@ -226,7 +239,7 @@ protected
               <td><%= row %></td>
               <% val = value[0] %>
               <% pct = val / total %>
-              <td class="text-right"><%= YAxisScaling.scale_num(val) %></td>
+              <td class="text-right"><%= FormatEnergyUnit.scale_num(val) %></td>
               <% if row.match(/export/i) %>
                 <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val) %></td>
               <% else %>
@@ -241,7 +254,7 @@ protected
           <% if totals_row %>
             <tr class="table-success">
               <td><b>Total</b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.scale_num(total) %></b></td>
+              <td class="text-right table-success"><b><%= FormatEnergyUnit.scale_num(total) %></b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :£, fuel_type, total) %></b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :co2, fuel_type, total) %></b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :library_books, fuel_type, total) %></b></td>
@@ -322,6 +335,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
             is above average, the school should aim to reduce this,
           <% end %>
           which would save you <%= pound_electricity_saving_versus_exemplar %> per year if you matched the most energy efficient (exemplar) schools.
+          <% random_equivalence_text(kwh_electricity_saving_versus_exemplar, :electricity) %>
         <% end %>
       <% end %>
       </p>
@@ -383,6 +397,10 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     pounds_to_pounds_and_kwh(pounds, :electricity)
   end
 
+  def kwh_electricity_saving_versus_exemplar
+    pounds_to_kwh(actual_electricity_usage - exemplar_electricity_usage, :electricity)
+  end
+
   def comparison(type_str, type_sym, with)
     spent = get_energy_usage(type_str, type_sym, with)
     if @chart_data[:x_data][type_str][index_of_most_recent_date] > @chart_data[:x_data][type_str][with]
@@ -431,12 +449,13 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
-    kwh_in_hours, kwh_out_of_hours = in_out_of_hours_consumption(@chart_data)
-    percent_value = kwh_out_of_hours / (kwh_in_hours + kwh_out_of_hours)
+    in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
+    percent_value = out_of_hours / (in_hours + out_of_hours)
     percent_str = percent(percent_value)
     saving_percent = percent_value - 0.25
-    saving_kwh = (kwh_in_hours + kwh_out_of_hours) * saving_percent
-    saving_£ = YAxisScaling.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving_kwh)
+    saving = (in_hours + out_of_hours) * saving_percent
+    saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
+    saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
 
     table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
 
@@ -450,7 +469,11 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
           <% if percent_value > EXEMPLAR_PERCENT %>
             The best schools only consume <%= percent(EXEMPLAR_PERCENT) %> out of hours.
             Reducing your school's out of hours usage to <%= percent(EXEMPLAR_PERCENT) %>
-            would save &pound;<%= saving_£ %> per year.
+            would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
+            <%# increase loop size to test %>
+            <% 1.times do |_i| %>
+              <%= random_equivalence_text(saving_kwh, @fuel_type) %>
+            <% end %>
           <% else %>
             which is very good, and is one of the best schools.
           <% end %>
@@ -489,16 +512,16 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
 
   # copied from alerts code, needs rationalising
   def in_out_of_hours_consumption(breakdown)
-    kwh_in_hours = 0.0
-    kwh_out_of_hours = 0.0
+    in_hours = 0.0
+    out_of_hours = 0.0
     breakdown[:x_data].each do |daytype, consumption|
       if daytype == SeriesNames::SCHOOLDAYOPEN
-        kwh_in_hours += consumption[0]
+        in_hours += consumption[0]
       else
-        kwh_out_of_hours += consumption[0]
+        out_of_hours += consumption[0]
       end
     end
-    [kwh_in_hours, kwh_out_of_hours]
+    [in_hours, out_of_hours]
   end
 end
 
@@ -741,7 +764,8 @@ class ThermostaticAdvice < DashboardChartAdviceBase
     @header_advice = generate_html(header_template, binding)
 
     alert = AlertThermostaticControl.new(@school)
-    alert_description = alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
+    alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
+    alert_description = alert.analysis_report
     # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
     ap(alert_description)
     r2_status = alert_description.detail[0].content
@@ -828,7 +852,8 @@ class CusumAdvice < DashboardChartAdviceBase
     @header_advice = generate_html(header_template, binding)
 
     alert = AlertThermostaticControl.new(@school)
-    alert_description = alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
+    alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
+    alert_description = alert.analysis_report
     a = alert.a.round(0)
     b = alert.b.round(0) * 1.0
 
@@ -979,10 +1004,9 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
 
   def generate_advice
     alert = AlertElectricityBaseloadVersusBenchmark.new(@school)
-    alert_description = alert.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
+    alert.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
+    alert_description = alert.analysis_report
     # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
-    ap(alert_description)
-    logger.debug alert_description.detail[0].content
     header_template = %{
       <%= @body_start %>
       <% if @add_extra_markup %>
@@ -1548,12 +1572,12 @@ class HotWaterAdvice < DashboardChartAdviceBase
         The Energy Sparks automated analysis suggests the following:
       </p>
       <ul>
-        <li>An average school day consumption of <%= YAxisScaling.scale_num(avg_school_day_gas_consumption) %> kWh</li>
-        <li>An average weekend day consumption of <%= YAxisScaling.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
-        <li>An average holiday day consumption of <%= YAxisScaling.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
+        <li>An average school day consumption of <%= FormatEnergyUnit.scale_num(avg_school_day_gas_consumption) %> kWh</li>
+        <li>An average weekend day consumption of <%= FormatEnergyUnit.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
+        <li>An average holiday day consumption of <%= FormatEnergyUnit.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
         <li>Likely overall efficiency: <%= percent(efficiency * 0.6) %></li>
         <li>Estimate of annual cost for hot water heating: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
-        <li>Benchmark annual usage for school of same size <%= YAxisScaling.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
+        <li>Benchmark annual usage for school of same size <%= FormatEnergyUnit.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
         <li>If the school matched the annual benchmark consumption it would save the equivalent energy needed to heat  <%= baths_savings %> baths
         of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
       </ul>

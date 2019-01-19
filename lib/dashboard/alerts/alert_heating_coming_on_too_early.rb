@@ -6,47 +6,45 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   MAX_HALFHOURS_HEATING_ON = 10
 
   def initialize(school)
-    super(school)
+    super(school, :heatingcomingontooearly)
   end
 
-  def analyse(asof_date)
+  def analyse_private(asof_date)
     calculate_model(asof_date)
     heating_on = @heating_model.heating_on?(asof_date) # potential timing problem if AMR data not up to date
 
-    report = AlertReport.new(:heatingcomingontooearly)
-    report.add_book_mark_to_base_url('HeatingComingOnTooEarly')
-    report.term = :shortterm
+    @analysis_report.add_book_mark_to_base_url('HeatingComingOnTooEarly')
+    @analysis_report.term = :shortterm
 
     if heating_on
       halfhour_index = calculate_heating_on_time(asof_date, FROST_PROTECTION_TEMPERATURE)
       if halfhour_index.nil?
-        report.summary = 'Heating times: insufficient data at the moment'
+        @analysis_report.summary = 'Heating times: insufficient data at the moment'
         text = 'We can not work out when your heating is coming on at the moment.'
-        report.rating = 10.0
-        report.status = :good
+        @analysis_report.rating = 10.0
+        @analysis_report.status = :good
       elsif halfhour_index < MAX_HALFHOURS_HEATING_ON
         time_str = halfhour_index_to_timestring(halfhour_index)
-        report.summary = 'Your heating is coming on too early'
+        @analysis_report.summary = 'Your heating is coming on too early'
         text = 'Your heating came on at ' + time_str + ' on ' + asof_date.strftime('%d %b %Y') + '.'
-        report.rating = 2.0
-        report.status = :poor
+        @analysis_report.rating = 2.0
+        @analysis_report.status = :poor
       else
         time_str = halfhour_index_to_timestring(halfhour_index)
-        report.summary = 'Your heating is coming on at a reasonable time in the morning'
+        @analysis_report.summary = 'Your heating is coming on at a reasonable time in the morning'
         text = 'Your heating came on at ' + time_str + ' on ' + asof_date.strftime('%d %b %Y') + '.'
-        report.rating = 10.0
-        report.status = :good
+        @analysis_report.rating = 10.0
+        @analysis_report.status = :good
       end
     else
-      report.summary = 'Check on time heating system is coming on'
+      @analysis_report.summary = 'Check on time heating system is coming on'
       text = 'Your heating system is currently not turned on.'
-      report.rating = 10.0
-      report.status = :good
+      @analysis_report.rating = 10.0
+      @analysis_report.status = :good
     end
 
     description1 = AlertDescriptionDetail.new(:text, text)
-    report.add_detail(description1)
-    add_report(report)
+    @analysis_report.add_detail(description1)
   end
 
   # calculate when the heating comes on, using an untested heuristic to

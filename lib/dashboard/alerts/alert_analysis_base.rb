@@ -12,19 +12,56 @@
 #
 
 class AlertAnalysisBase
+  include Logging
   attr_reader :analysis_report
 
-  def initialize(school)
+  def initialize(school, report_type)
     @school = school
-    @report = nil
+    @analysis_report = AlertReport.new(report_type)
   end
 
-  def analyse(_asof_date)
-    raise 'Error: incorrect attempt to use abstract base class'
+  def analyse(asof_date)
+    begin
+      @analysis_report.max_asofdate = maximum_alert_date
+      analyse_private(asof_date)
+    rescue StandardError => e
+      text = "Unexpected Internal Error: please report to hello@energysparks.uk\n"
+      text += e.message
+      text += e.backtrace.join("\n")
+      description1 = AlertDescriptionDetail.new(:text, text)
+      @analysis_report.add_detail(description1)
+      @analysis_report.status = :failed
+    end
   end
 
   def add_report(report)
-    @analysis_report = report
+    raise EnergySparksUnexpectedStateException.new('add_report now deprecated from AlertAnalysisBase')
+  end
+
+  def maximum_alert_date
+    raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class ' + name)
+  end
+
+  def self.valid_alerts(school, asof_date)
+    valid_alerts = all_available_alerts(school)
+
+    valid_alerts.each do |alert|
+      alert.analyse(asof_date)
+      results = alert.analysis_report
+      puts '=' * 80
+      puts results
+    end
+  end
+
+  def self.analyse_all(school, asof_date)
+    valid_alerts = all_available_alerts(school)
+
+    valid_alerts.each do |alert|
+      alert.analyse(asof_date)
+      results = alert.analysis_report
+      puts "\n" * 3
+      puts results
+    end
   end
 
   def pupils
@@ -70,5 +107,30 @@ class AlertAnalysisBase
       asof_date -= 1
     end
     list_of_school_days.sort
+  end
+
+  private
+
+  def analyse_private(asof_date)
+    raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class')
+  end
+
+  def self.all_available_alerts(school)
+    alerts = [
+      AlertElectricityBaseloadVersusBenchmark.new(school),
+      AlertChangeInElectricityBaseloadShortTerm.new(school),
+      AlertChangeInDailyElectricityShortTerm.new(school),
+      AlertOutOfHoursElectricityUsage.new(school),
+      AlertElectricityAnnualVersusBenchmark.new(school),
+      AlertGasAnnualVersusBenchmark.new(school),
+      AlertOutOfHoursGasUsage.new(school),
+      AlertChangeInDailyGasShortTerm.new(school),
+      AlertWeekendGasConsumptionShortTerm.new(school),
+      AlertImpendingHoliday.new(school),
+      AlertHeatingOnOff.new(school),
+      AlertHotWaterEfficiency.new(school),
+      AlertHeatingComingOnTooEarly.new(school),
+      AlertThermostaticControl.new(school)
+    ]
   end
 end

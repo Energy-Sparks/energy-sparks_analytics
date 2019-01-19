@@ -8,10 +8,10 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
   MAX_CHANGE_IN_PERCENT = 0.15
 
   def initialize(school)
-    super(school)
+    super(school, :changeingasconsumption)
   end
 
-  def analyse(asof_date)
+  def analyse_private(asof_date)
     calculate_model(asof_date)
 
     this_weeks_school_days = last_n_school_days(asof_date, 5)
@@ -32,29 +32,27 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
 
     difference_in_actual_versus_predicted_change_percent = actual_percent_increase_in_usage - predicted_percent_increase_in_usage
 
-    report = AlertReport.new(:changeingasconsumption)
-    report.term = :shortterm
-    report.add_book_mark_to_base_url('GasChange')
+    @analysis_report.term = :shortterm
+    @analysis_report.add_book_mark_to_base_url('GasChange')
 
     comparison_commentary = sprintf('This week your gas consumption was %.0f kWh/£%.0f (predicted %.0f kWh) ', actual_kwh_this_week, this_week_cost, predicted_kwh_this_week)
     comparison_commentary += sprintf('compared with %.0f kWh/£%.0f (predicted %.0f kWh) last week.', actual_kwh_last_week, last_week_cost, predicted_kwh_last_week)
 
     if difference_in_actual_versus_predicted_change_percent > MAX_CHANGE_IN_PERCENT
-      report.summary = 'Your weekly gas consumption has increased more than expected'
+      @analysis_report.summary = 'Your weekly gas consumption has increased more than expected'
       text = comparison_commentary
       cost = BenchmarkMetrics::GAS_PRICE * (actual_changein_kwh - predicted_changein_kwh)
       text += sprintf('This has cost the school about £%.0f', cost)
       description1 = AlertDescriptionDetail.new(:text, text)
-      report.rating = 2.0
-      report.status = :poor
+      @analysis_report.rating = 2.0
+      @analysis_report.status = :poor
     else
-      report.summary = 'Your weekly gas consumption is good'
+      @analysis_report.summary = 'Your weekly gas consumption is good'
       text = comparison_commentary
       description1 = AlertDescriptionDetail.new(:text, text)
-      report.rating = 10.0
-      report.status = :good
+      @analysis_report.rating = 10.0
+      @analysis_report.status = :good
     end
-    report.add_detail(description1)
-    add_report(report)
+    @analysis_report.add_detail(description1)
   end
 end

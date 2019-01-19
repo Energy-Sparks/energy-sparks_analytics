@@ -132,7 +132,8 @@ class XBucketWeek < XBucketBase
   def initialize(type, periods)
     super(type, periods)
     first_day_of_period = data_start_date
-    @first_sunday = first_day_of_period - first_day_of_period.wday # move to Sunday boundaries so holiday/weekend bucketing looks ok
+    # move to next Sunday boundaries so holiday/weekend bucketing looks ok
+    @first_sunday = first_day_of_period + ((7 - first_day_of_period.wday) % 7)
     @key_string = "%d %b %Y"
   end
 

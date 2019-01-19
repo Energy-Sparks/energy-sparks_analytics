@@ -128,36 +128,52 @@ class AreaNames
     AREA_NAMES[key][:holiday_calendar]
   end
 
+  def self.yahoo_location_name(key)
+    AREA_NAMES[key][:yahoo_weather_forecast_id]
+  end
+
+  def self.met_office_weather_station_id(key)
+    AREA_NAMES[key][:met_office_forecast_id]
+  end
+
   private
 
   AREA_NAMES = { # mapping from areas to csv data files for analytics non-db code
     bath: {
-      name:                 'Bath',
-      temperature_filename: 'Bath temperaturedata.csv',
-      solar_ir_filename:    'Bath solardata.csv',
-      solar_pv_filename:    'pv data Bath.csv',
-      holiday_calendar:     'Holidays.csv'
+      name:                       'Bath',
+      temperature_filename:       'Bath temperaturedata.csv',
+      solar_ir_filename:          'Bath solardata.csv',
+      solar_pv_filename:          'pv data Bath.csv',
+      holiday_calendar:           'Holidays.csv',
+      yahoo_weather_forecast_id:  'bath, uk',
+      met_office_forecast_id:     310026
     },
     frome: {
-      name:                 'Frome',
-      temperature_filename: 'Frome temperaturedata.csv',
-      solar_ir_filename:    'Frome solardata.csv',
-      solar_pv_filename:    'pv data Frome.csv',
-      holiday_calendar:     'Holidays.csv'
+      name:                       'Frome',
+      temperature_filename:       'Frome temperaturedata.csv',
+      solar_ir_filename:          'Frome solardata.csv',
+      solar_pv_filename:          'pv data Frome.csv',
+      holiday_calendar:           'Holidays.csv',
+      yahoo_weather_forecast_id:  'frome, uk', # untested 16Jan2019 post withdrawal of free API
+      met_office_forecast_id:     351523
     },
     bristol: {
-      name:                 'Bristol',
-      temperature_filename: 'Bristol temperaturedata.csv',
-      solar_ir_filename:    'Bristol solardata.csv',
-      solar_pv_filename:    'pv data Bristol.csv',
-      holiday_calendar:     'Holidays.csv'
+      name:                       'Bristol',
+      temperature_filename:       'Bristol temperaturedata.csv',
+      solar_ir_filename:          'Bristol solardata.csv',
+      solar_pv_filename:          'pv data Bristol.csv',
+      holiday_calendar:           'Holidays.csv',
+      yahoo_weather_forecast_id:  'bristol, uk', # untested 16Jan2019 post withdrawal of free API
+      met_office_forecast_id:     310004 
     },
     sheffield: {
-      name:                 'Sheffield',
-      temperature_filename: 'Sheffield temperaturedata.csv',
-      solar_ir_filename:    'Sheffield solardata.csv',
-      solar_pv_filename:    'pv data Sheffield.csv',
-      holiday_calendar:     'Holidays.csv'
+      name:                       'Sheffield',
+      temperature_filename:       'Sheffield temperaturedata.csv',
+      solar_ir_filename:          'Sheffield solardata.csv',
+      solar_pv_filename:          'pv data Sheffield.csv',
+      holiday_calendar:           'Holidays.csv',
+      yahoo_weather_forecast_id:  'sheffield, uk', # untested 16Jan2019 post withdrawal of free API
+      met_office_forecast_id:     353467
     }
   }.freeze
 end

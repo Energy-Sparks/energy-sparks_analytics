@@ -10,7 +10,7 @@
 class AlertReport
   ALERT_HELP_URL = 'http://blog.energysparks.uk/alerts'.freeze
   MAX_RATING = 10.0
-  attr_accessor :type, :summary, :term, :help_url, :detail, :rating, :status
+  attr_accessor :type, :summary, :term, :help_url, :detail, :rating, :status, :max_asofdate
 
   def initialize(type)
     @type = type
@@ -36,6 +36,7 @@ class AlertReport
       out += sprintf("%-20s%s\n", '', info.content)
     end
     out += sprintf("%-20s%s\n", 'Status:', @status)
+    out += "Max as of date: #{max_asofdate}"
     out
   end
 end

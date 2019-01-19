@@ -1,11 +1,11 @@
 #================= Base Class for Gas Alerts including model usage=============
-require_relative 'alert_analysis_base.rb'
+require_relative 'alert_gas_only_base.rb'
 
-class AlertGasModelBase < AlertAnalysisBase
+class AlertGasModelBase < AlertGasOnlyBase
   MAX_CHANGE_IN_PERCENT = 0.15
 
-  def initialize(school)
-    super(school)
+  def initialize(school, report_type)
+    super(school, report_type)
     @heating_model = nil
   end
 
