@@ -10,9 +10,10 @@ class ValidateAMRData
   FSTRDEF = '%a %d %b %Y'.freeze # fixed format for reporting dates for error messages
   MAXGASAVGTEMPDIFF = 5 # max average temperature difference over which to adjust temperatures
   attr_reader :data_problems, :meter_id
-  def initialize(meter, max_days_missing_data, holidays, temperatures)
+  def initialize(meter, max_days_missing_data, holidays, temperatures, meter_attributes)
     @amr_data = meter.amr_data
     @meter = meter
+    @meter_attributes = meter_attributes
     @meter_id = @meter.mpan_mprn
     @type = meter.meter_type
     @holidays = holidays
@@ -53,11 +54,11 @@ class ValidateAMRData
   private
 
   def process_meter_attributes
-    corrections = MeterAttributes.attributes(@meter, :meter_corrections)
-    if corrections.nil?
+    meter_attributes_corrections = @meter_attributes.attributes(@meter, :meter_corrections)
+    if meter_attributes_corrections.nil?
       auto_insert_for_gas_if_no_other_rules
     else
-      @meter.insert_correction_rules_first(corrections)
+      @meter.insert_correction_rules_first(meter_attributes_corrections)
     end
   end
 
@@ -547,7 +548,7 @@ class ValidateAMRData
   end
 
   def create_heating_model
-    @heating_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@meter, @holidays, @temperatures)
+    @heating_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@meter, @holidays, @temperatures, @meter_attributes)
     @heating_model.calculate_regression_model(SchoolDatePeriod.new(:validation, 'Validation Period', @amr_data.start_date, @amr_data.end_date))
     @heating_model.calculate_heating_periods(@amr_data.start_date, @amr_data.end_date)
   end

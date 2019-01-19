@@ -4,8 +4,9 @@ class HeatingRegressionModelFitter
   include Logging
 
   attr_reader :meter_collection, :doc
-  def initialize(meter_collection)
+  def initialize(meter_collection, meter_attributes = MeterAttributes)
     @meter_collection = meter_collection
+    @meter_attributes = meter_attributes
     @doc = MultiMediaPage.new
     @chart_manager = ChartManager.new(@meter_collection)
     @add_extra_markup = ENV['School Dashboard Advice'] == 'Include Header and Body'
@@ -56,7 +57,7 @@ class HeatingRegressionModelFitter
       html horizontal_line
       html meter_title(meter)
 
-      meter_function = MeterAttributes.attributes(meter, :function)
+      meter_function = @meter_attributes.attributes(meter, :function)
 
       if !meter_function.nil? && meter_function.include?(:hotwater_only)
         document_hotwater_only(meter)
@@ -96,7 +97,7 @@ class HeatingRegressionModelFitter
   end
 
   def meter_title(meter)
-    template = %{ 
+    template = %{
       <%= @body_start %>
       <h2>Analysing meter <%= meter.name %> (<%= meter.mpan_mprn.to_s %>)</h2>
       <%= @body_end %>
@@ -115,7 +116,7 @@ class HeatingRegressionModelFitter
   end
 
   def html_section(start_tag, text, end_tag)
-    template = %{ 
+    template = %{
       <%= @body_start %>
       <%= start_tag %><%= text %><%= end_tag %>
       <%= @body_end %>
@@ -161,7 +162,7 @@ class HeatingRegressionModelFitter
       <%= @body_start %>
       <h1>Heating regression model analysis for <%= meter_collection.name %></h1>
       <p>
-        <%= meter_collection.name %> 
+        <%= meter_collection.name %>
         <% if meter_collection.heat_meters.length == 1 %>
           has 1 gas meter which has consumed the following over the last few years:
         <% else %>
@@ -176,7 +177,7 @@ class HeatingRegressionModelFitter
   end
 
   def horizontal_line(thickness = 20)
-    template = %{ 
+    template = %{
       <%= @body_start %>
       <hr size=<%= thickness %> noshade>
       <%= @body_end %>
@@ -223,8 +224,8 @@ class HeatingRegressionModelFitter
 
     puts "-" * 90
     puts "calculating simple model for #{meter.name}"
-    simple_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(meter, @meter_collection.holidays, @meter_collection.temperatures)
-    thermally_massive_model = AnalyseHeatingAndHotWater::HeatingModelWithThermalMass.new(meter, @meter_collection.holidays, @meter_collection.temperatures)
+    simple_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(meter, @meter_collection.holidays, @meter_collection.temperatures, @meter_attributes)
+    thermally_massive_model = AnalyseHeatingAndHotWater::HeatingModelWithThermalMass.new(meter, @meter_collection.holidays, @meter_collection.temperatures, @meter_attributes)
 
     temps = [8, 9, 10, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 21, 22, 25, 30]
     delimination_methods = [
@@ -233,8 +234,8 @@ class HeatingRegressionModelFitter
       [:percent_regression_model_prediction, 0.5, 'Minimum heating day set to 50% of kWh predicted by model at T' ]
     ]
 
-    unless MeterAttributes.attributes(meter, :heating_model).dig(:heating_model, :heating_day_determination_method).nil?
-      configuration = MeterAttributes.attributes(meter, :heating_model).dig(:heating_model, :heating_day_determination_method)
+    unless @meter_attributes.attributes(meter, :heating_model).dig(:heating_model, :heating_day_determination_method).nil?
+      configuration = @meter_attributes.attributes(meter, :heating_model).dig(:heating_model, :heating_day_determination_method)
       delimination_methods.push([])
     end
 
@@ -310,7 +311,7 @@ class HeatingRegressionModelFitter
   end
 
   def html_current_meter_attributes(meter)
-    model_attributes = MeterAttributes.attributes(meter, :heating_model)
+    model_attributes = @meter_attributes.attributes(meter, :heating_model)
     html header(2, 'Existing heating model configuration')
     unless model_attributes.nil?
       html paragraph(date_key_description(model_attributes, :calculation_start_date, 'start'))
@@ -347,7 +348,7 @@ class HeatingRegressionModelFitter
   def meter_attributes_entry_description(meter, type, a, b, base_temperature)
     html paragraph('Please add the following configuration to the meter attributes table:')
     config = {
-      meter.mpan_mprn => { 
+      meter.mpan_mprn => {
         heating_model: { type: type, a: a, b: b, base_temperature: base_temperature }
       }
     }

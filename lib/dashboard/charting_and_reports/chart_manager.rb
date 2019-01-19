@@ -55,12 +55,19 @@ class ChartManager
     chart_config
   end
 
+  # Used by ES Web application
   def run_standard_chart(chart_param)
-    chart_config = resolve_chart_inheritance(STANDARD_CHART_CONFIGURATION[chart_param])
+    chart_config = get_chart_config(chart_param)
     chart_definition = run_chart(chart_config, chart_param)
     chart_definition
   end
 
+  # Used by ES Web application
+  def get_chart_config(chart_param)
+    resolve_chart_inheritance(STANDARD_CHART_CONFIGURATION[chart_param])
+  end
+
+  # Used by ES Web application
   def run_chart(chart_config, chart_param, resolve_inheritance = true)
     logger.info '>' * 120
     logger.info chart_config[:name]
