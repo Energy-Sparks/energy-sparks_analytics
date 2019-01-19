@@ -117,7 +117,7 @@ module AnalyseHeatingAndHotWater
       results = {}
       results_hash = {
         actual_kwh:    [],
-        predicted_kwh: [],
+        predicted_kwh: []
       }
       results[:all] = results_hash.deep_dup
 
@@ -188,6 +188,19 @@ module AnalyseHeatingAndHotWater
 
     def name
       raise Not_implemented_error.new('Failed attempt to call name() on abstract base class of HeatingModel')
+    end
+
+    def kwh_saving_for_1_C_thermostat_reduction(start_date, end_date)
+      total_kwh = 0.0
+      (start_date..end_date).each do |date|
+        if heating_on?(date) && !weekend?(date)
+          kwh_sensitivity = @models[model_type?(date)].b
+          offset = @models[model_type?(date)].a
+          # puts "#{date} #{kwh_sensitivity} #{offset} #{base_degreedays_temperature}"
+          total_kwh += kwh_sensitivity
+        end
+      end
+      total_kwh
     end
 
     def save_raw_data_to_csv_for_debug(filename)

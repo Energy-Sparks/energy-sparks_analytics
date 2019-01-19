@@ -130,7 +130,8 @@ class AlertAnalysisBase
       AlertHeatingOnOff.new(school),
       AlertHotWaterEfficiency.new(school),
       AlertHeatingComingOnTooEarly.new(school),
-      AlertThermostaticControl.new(school)
+      AlertThermostaticControl.new(school),
+      AlertHeatingSensitivityAdvice.new(school)
     ]
   end
 end

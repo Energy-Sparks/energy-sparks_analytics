@@ -1,4 +1,4 @@
-# test new report manager
+# test alerts
 require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
@@ -6,7 +6,7 @@ require './script/report_config_support.rb'
 
 module Logging
   @logger = Logger.new('log/test-alerts ' + Time.now.strftime('%H %M') + '.log')
-  @logger.level = :warn
+  logger.level = :warn
 end
 
 def banner(title)
@@ -14,7 +14,8 @@ def banner(title)
   len_after = 80 - title.length - len_before
   '=' * len_before + title + '*' * len_after
 end
-school_name = 'Paulton Junior School'
+school_name = 'St Marks Secondary'
+# school_name = 'Trinity First School'
 
 ENV['School Dashboard Advice'] = 'Include Header and Body'
 $SCHOOL_FACTORY = SchoolFactory.new
@@ -135,4 +136,12 @@ puts banner('thermostatic control')
 alert_baseload = AlertThermostaticControl.new(school)
 alert_baseload.analyse(analysis_asof_date)
 results = alert_baseload.analysis_report
+puts results
+
+puts
+puts banner('temperature sensitivity')
+
+temperature_sensitivity_alert = AlertHeatingSensitivityAdvice.new(school)
+temperature_sensitivity_alert.analyse(analysis_asof_date)
+results = temperature_sensitivity_alert.analysis_report
 puts results
