@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
-ruby '2.5.1'
+ruby '2.5.3'
 
 gem 'require_all'
-gem 'activesupport'
+gem 'activesupport', '6.0.0.beta1'
 
 # Previous releases of statsample overrode the definition of Array#sum with dodgy results
 # Master currently has a fix...
