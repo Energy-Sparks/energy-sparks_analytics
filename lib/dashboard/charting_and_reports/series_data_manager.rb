@@ -392,8 +392,8 @@ private
         else
           (0..47).each do |halfhour_index|
             # Time is an order of magnitude slower than DateTime on Windows
-            dt = DateTimeHelper.time_of_day(halfhour_index)
-            daytype_type = @meter_collection.school_day_in_hours(dt) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
+            time_of_day = DateTimeHelper.time_of_day(halfhour_index)
+            daytype_type = @meter_collection.is_school_usually_open?(date, time_of_day) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
             daytype_data[daytype_type] += meter.amr_data.kwh(date, halfhour_index) * factor
           end
         end
@@ -420,8 +420,8 @@ private
     elsif DateTimeHelper.weekend?(date)
       daytype_data[SeriesNames::WEEKEND] = val
     else
-      dt = DateTimeHelper.time_of_day(halfhour_index)
-      daytype_type = @meter_collection.school_day_in_hours(dt) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
+      time_of_day = DateTimeHelper.time_of_day(halfhour_index)
+      daytype_type = @meter_collection.is_school_usually_open?(date, time_of_day) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
       daytype_data[daytype_type] = val
     end
 
