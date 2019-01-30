@@ -36,6 +36,4 @@ Gem::Specification.new do |s|
 
   # Useful for debugging
   s.add_dependency 'pry-byebug', '~> 3.6.0'
-  # For testing
-  s.add_dependency 'rspec', '~> 3.8.2'
 end
