@@ -32,7 +32,7 @@ class BuildingHeatHWSimulator
   end
 
   def create_empty_data(type)
-    data = {} 
+    data = {}
     (simulation_start_date..simulation_end_date).each do |date|
       data[date] = Array.new(48 * simulation_frequency, 0.0)
     end
@@ -41,7 +41,8 @@ class BuildingHeatHWSimulator
   end
 
   def occupied_date_time?(date, day_index)
-    occupied?(date) && school.school_day_in_hours(time_of_day(day_index))
+    # Note - is_school_usually_open? is currently defined at meter collection level
+    occupied?(date) && school.is_school_usually_open?(date, time_of_day(day_index))
   end
 
   def occupied?(date)
@@ -221,7 +222,7 @@ class BuildingHeatHWSimulator
   end
 
   def admittance_kw(delta_t)
-    ad = total_internal_external_wall_area * construction_heat_admittance_kw_per_m2_per_k(:dense_masonary_cavity_wet_plaster) 
+    ad = total_internal_external_wall_area * construction_heat_admittance_kw_per_m2_per_k(:dense_masonary_cavity_wet_plaster)
     ad += school.floor_area * construction_heat_admittance_kw_per_m2_per_k(:dense_masonary_cavity_wet_plaster) * 0.5
     ad * delta_t
   end
@@ -243,14 +244,14 @@ class BuildingHeatHWSimulator
     losses_kw_per_k =   air_heat_loss_kw(uncontrolled_air_permeability_m3_per_hr(nil, nil), 1.0) +
                         air_heat_loss_kw(controlled_air_permeability_m3_per_hr(nil, nil), 1.0) +
                         fabric_loss_kw_per_k
-    set_point_temperature - (gains_kw / losses_kw_per_k)      
+    set_point_temperature - (gains_kw / losses_kw_per_k)
   end
 
   def balance_point_unoccupied
     gains_kw = unoccupied_electrical_gain_kw
     losses_kw_per_k =   air_heat_loss_kw(uncontrolled_air_permeability_m3_per_hr(nil, nil), 1.0) +
                         fabric_loss_kw_per_k
-    set_point_temperature - (gains_kw / losses_kw_per_k) 
+    set_point_temperature - (gains_kw / losses_kw_per_k)
   end
 
   LOG_DEFINITION = {
@@ -340,7 +341,7 @@ class BuildingHeatHWSimulator
         #     e.g. 3 kW - 1.6dK - 0.6dK = 0; dK = 3/(1.6 + 0.6) = 1.4C i.e. at 20C - 1.4C = Tbp = 18.6C external
         #          FYI: the occupied balance point is e.g.
         #          36 kW - 1.6dK - 0.6dK - 1.2dK; dK = 10.6K => Tbp = 9.6C external
-        #   -         
+        #   -
         # if negative i.e. providing heat:
         #   - it can't be more than the net internal loss (-tve gain)
         admittance = admittance_kw(internal_temp - wall_temp)
@@ -397,7 +398,7 @@ rate_of_wall_heating_per_hour = 1.0
   def save_raw_data_to_csv_for_debug(filename, meta_data_log)
     filepath = File.join(File.dirname(__FILE__), '../../../log/' + filename)
 
-    File.open(filepath, 'w') do |file| 
+    File.open(filepath, 'w') do |file|
       meta_data_log.each do |key, value|
         file.puts("#{key},#{value}")
       end
@@ -413,7 +414,7 @@ rate_of_wall_heating_per_hour = 1.0
         end
       end
     end
-  end  
+  end
 
   def self.default_configuration_deprecated(school)
     building = {
