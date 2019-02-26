@@ -174,7 +174,7 @@ protected
   end
 
   def equivalence_tool_tip_html(equivalence_text, calculation_text)
-    "<p>#{equivalence_text} <button class=\"btn btn-secondary\" data-toggle=\"popover\" data-container=\"body\" data-placement=\"top\" data-title=\"How we calculate this\" data-content=\"#{calculation_text}\"> See how we calculate this</button></p>" +
+    "<p>#{equivalence_text} <button class=\"btn btn-secondary\" data-toggle=\"popover\" data-container=\"body\" data-placement=\"top\" data-title=\"How we calculate this\" data-content=\"#{calculation_text}\"> See how we calculate this</button></p>"
   end
 
   def random_equivalence_text(kwh, fuel_type)
