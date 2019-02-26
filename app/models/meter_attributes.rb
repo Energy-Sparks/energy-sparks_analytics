@@ -82,6 +82,14 @@ class MeterAttributes
         :deprecated_include_but_ignore_start_date
       ]
     },
+    # ==============================King Edwards =============================
+    6517203  => {
+      meter_corrections: [
+        {
+          readings_start_date: Date.new(2018, 2, 15)
+        }
+      ]
+    },
     # ==============================Marksbury==================================
     2200011879013 => {
       meter_corrections: [
