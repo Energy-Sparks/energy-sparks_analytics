@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '2.5.3'
 
 gem 'require_all'
-gem 'activesupport', '6.0.0.beta1'
+gem 'activesupport', '6.0.0.beta2'
 
 # Previous releases of statsample overrode the definition of Array#sum with dodgy results
 # Master currently has a fix...
