@@ -232,6 +232,7 @@ protected
     data.each_value do |value|
       total += value[0]
     end
+
     template = %{
       <table class="table table-striped table-sm">
         <thead>
@@ -250,7 +251,7 @@ protected
               <td><%= row %></td>
               <% val = value[0] %>
               <% pct = val / total %>
-              <td class="text-right"><%= FormatEnergyUnit.scale_num(val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(units, :kwh, fuel_type, val) %></td>
               <% if row.match(/export/i) %>
                 <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val) %></td>
               <% else %>
@@ -265,7 +266,7 @@ protected
           <% if totals_row %>
             <tr class="table-success">
               <td><b>Total</b></td>
-              <td class="text-right table-success"><b><%= FormatEnergyUnit.scale_num(total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :kwh, fuel_type, total) %></b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :£, fuel_type, total) %></b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :co2, fuel_type, total) %></b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :library_books, fuel_type, total) %></b></td>

@@ -454,10 +454,19 @@ def create_fuel_breakdown
         elsif DateTimeHelper.weekend?(date)
           daytype_data[SeriesNames::WEEKEND] += amr_data_one_day(meter, date) * factor
         else
+<<<<<<< HEAD
           open_kwh, close_kwh = intraday_breakdown(meter, date, factor)
           daytype_data[SeriesNames::SCHOOLDAYOPEN] += open_kwh
           daytype_data[SeriesNames::SCHOOLDAYCLOSED] += close_kwh
 
+=======
+          (0..47).each do |halfhour_index|
+            # Time is an order of magnitude slower than DateTime on Windows
+            time_of_day = DateTimeHelper.time_of_day(halfhour_index)
+            daytype_type = @meter_collection.is_school_usually_open?(date, time_of_day) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
+            daytype_data[daytype_type] += meter.amr_data.kwh(date, halfhour_index) * factor
+          end
+>>>>>>> 51ae9db10917f06131697c68c80f6dab82ccf3da
         end
       rescue StandardError => e
         logger.error "Unable to aggregate data for #{date} - exception raise"
@@ -515,8 +524,8 @@ def create_fuel_breakdown
     elsif DateTimeHelper.weekend?(date)
       daytype_data[SeriesNames::WEEKEND] = val
     else
-      dt = DateTimeHelper.time_of_day(halfhour_index)
-      daytype_type = @meter_collection.school_day_in_hours(dt) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
+      time_of_day = DateTimeHelper.time_of_day(halfhour_index)
+      daytype_type = @meter_collection.is_school_usually_open?(date, time_of_day) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
       daytype_data[daytype_type] = val
     end
 

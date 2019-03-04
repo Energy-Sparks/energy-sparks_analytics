@@ -154,17 +154,10 @@ class MeterCollection
     @meter_identifier_lookup[meter.id] = meter
   end
 
-  # JAMES: TODO(JJ,3Jun2018): I gather you may have done something on this when working on holidays?
-  def open_time
-    @cached_open_time
-  end
-
-  def close_time
-    @cached_close_time
-  end
-
-  def school_day_in_hours(time_of_day)
-    time_of_day >= open_time && time_of_day < close_time
+  # This is overridden in the energysparks code at the moment, to use the actual open/close times
+  # It replaces school_day_in_hours(time_of_day)
+  def is_school_usually_open?(_date, time_of_day)
+    time_of_day >= @cached_open_time && time_of_day < @cached_close_time
   end
 
   # held at building level as a school building e.g. a community swimming pool may have a different holiday schedule
