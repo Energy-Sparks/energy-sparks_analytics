@@ -59,7 +59,7 @@ class LoadSchoolFromSheffieldCSV < MeterReadingsDownloadCSVBase
     'Valley Park School' => {
       electricity: 'electricity amr data for Valley Park School.csv'
     },
-    'Walkley School Tennyson School' => {
+    'Walkley Tennyson School' => {
       gas:          'gas amr data for Walkley School Tennyson School 6500803.csv'
     },
     'Whiteways Primary' => {

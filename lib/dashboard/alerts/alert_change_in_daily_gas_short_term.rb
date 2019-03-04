@@ -5,6 +5,7 @@
 require_relative 'alert_gas_model_base.rb'
 
 class AlertChangeInDailyGasShortTerm < AlertGasModelBase
+  include Logging
   MAX_CHANGE_IN_PERCENT = 0.15
 
   def initialize(school)
@@ -53,6 +54,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
       @analysis_report.rating = 10.0
       @analysis_report.status = :good
     end
+
     @analysis_report.add_detail(description1)
   end
 end

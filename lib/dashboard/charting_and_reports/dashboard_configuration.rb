@@ -72,6 +72,7 @@ class DashboardConfiguration
                                   thermostatic_control_medium_diurnal_range
                                   optimum_start
                                   hotwater
+                                  heating_on_off_by_week
                                 ]
                               },
     simulator:                {
@@ -177,15 +178,49 @@ class DashboardConfiguration
                                   cusum_weekly
                                 ]
                               },
-        heating_model_fitting:                 {
-          name: 'Heating Model Fitting',
-          charts: %i[
-            thermostatic
-            cusum
-          ]
-        }
+        heating_model_fitting: {
+                                name: 'Heating Model Fitting',
+                                charts: %i[
+                                  group_by_week_gas_model_fitting_one_year
+                                  group_by_week_gas_model_fitting_unlimited
+                                  gas_by_day_of_week_model_fitting
+                                  gas_longterm_trend_model_fitting
+                                  thermostatic_regression_simple_school_day
+                                  thermostatic_regression_simple_all
+                                  thermostatic_regression_thermally_massive_school_day
+                                  thermostatic_regression_thermally_massive_all
+                                  cusum_weekly_best_model
+                                  thermostatic_winter_holiday_best
+                                  thermostatic_winter_weekend_best
+                                  thermostatic_summer_school_day_holiday_best
+                                  thermostatic_summer_weekend_best
+                                  thermostatic_non_best
+                                  cusum_simple
+                                  cusum_thermal_mass
+                                  heating_on_off_by_week
+                                  thermostatic_model_categories_pie_chart
+                                  heating_on_off_pie_chart
+                                ]
+                              }
 }.freeze
 
+=begin
+                                  thermostatic_regression_simple
+                                  thermostatic_regression_thermal_mass
+                                  thermostatic_regression_best
+                                  thermostatic_none
+                                  thermostatic_winter_occupied
+                                  thermostatic_winter_weekend
+                                  thermostatic_winter_holiday
+                                  thermostatic_summer_occupied
+                                  thermostatic_summer_weekend
+                                  thermostatic_summer_holiday
+                                  
+                                  thermostatic_model_by_week
+                                  heating_on_off_by_week
+                                  group_by_week_gas
+                                  cusum_weekly
+=end
   DASHBOARD_FUEL_TYPES = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
     electric_only:
                         %i[

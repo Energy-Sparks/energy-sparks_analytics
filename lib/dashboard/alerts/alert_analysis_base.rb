@@ -20,10 +20,15 @@ class AlertAnalysisBase
     @analysis_report = AlertReport.new(report_type)
   end
 
-  def analyse(asof_date)
+  def analyse(asof_date, use_max_meter_date_if_less_than_asof_date = false)
     begin
       @analysis_report.max_asofdate = maximum_alert_date
-      analyse_private(asof_date)
+      if valid_alert?
+        date = use_max_meter_date_if_less_than_asof_date ? [maximum_alert_date, asof_date].min : asof_date
+        analyse_private(date)
+      else
+        invalid_alert_report # gas alert for electric only school or electic alert for gas only school
+      end
     rescue StandardError => e
       text = "Unexpected Internal Error: please report to hello@energysparks.uk\n"
       text += e.message
@@ -32,6 +37,15 @@ class AlertAnalysisBase
       @analysis_report.add_detail(description1)
       @analysis_report.status = :failed
     end
+  end
+
+  def invalid_alert_report
+    text =  'The alert is not valid for this school'
+    text += 'The alert is not valid probably because the alert is specific for a fuel type (gas/electricity) '
+    text += 'for which smart meter data is not available'
+    description1 = AlertDescriptionDetail.new(:text, text)
+    @analysis_report.add_detail(description1)
+    @analysis_report.status = :failed
   end
 
   def add_report(report)
@@ -109,6 +123,21 @@ class AlertAnalysisBase
     list_of_school_days.sort
   end
 
+  def valid_alert?
+    (!@school.aggregated_heat_meters.nil? && needs_gas_data?) ||
+      (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?)
+  end
+
+  protected
+
+  def needs_gas_data?
+    true
+  end
+
+  def needs_electricity_data?
+    true
+  end
+
   private
 
   def analyse_private(asof_date)
@@ -131,7 +160,10 @@ class AlertAnalysisBase
       AlertHotWaterEfficiency.new(school),
       AlertHeatingComingOnTooEarly.new(school),
       AlertThermostaticControl.new(school),
-      AlertHeatingSensitivityAdvice.new(school)
+      AlertHeatingSensitivityAdvice.new(school),
+      AlertHeatingOnSchoolDays.new(school),
+      AlertHeatingOnNonSchoolDays.new(school),
+      AlertHotWaterInsulationAdvice.new(school)
     ]
   end
 end

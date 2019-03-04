@@ -658,7 +658,7 @@ parse_command_line
     start_date = last_downloaded_date(temp_filename, solar_filename)
     unless start_date.nil?
       area[:start_date] =  start_date + 1
-      area[:end_date] = Date.today - 1
+      area[:end_date] = Date.today#  was -1 until 1Mar2019
     end
   else
     area[:start_date] =  @start_date

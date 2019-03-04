@@ -1,12 +1,7 @@
 # originally amr_data was inherited from half_hourly_data which was a hash to 48 x halfhourly readings
 # to better represent whether the data has been artificially created as a result of bad or missing
 # data OneDayAMRReading replaces the 48 x halfhourly readings
-# 'type' is the higher level meta data (AMR_TYPES) describing the substitution if any
-# additionally shadow data is held in some circumstances, so in the example of imperial to metric
-# scaled gas data, the modified version is held as the primary data source, plus the original
-# so the primary database key is meter_id, date, type => datax48
-# internally in OneDayAMRReading the working data is held in :data_x48, plus the shadow data
-# i.e. the flattened database representation is made hierarchical for that day for performance reasons
+# type is the type of correction, original data = 'ORIG', a list of types (primary key/constaint) is held in AMR_TYPES
 class OneDayAMRReading
   include Comparable
   include Logging

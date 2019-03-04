@@ -5,7 +5,7 @@ require_rel '../test_support'
 
 class ReportConfigSupport
   include Logging
-  attr_reader :schools, :chart_manager
+  attr_reader :schools, :chart_manager, :school
   attr_accessor :worksheet_charts, :excel_name 
 
   def initialize
@@ -27,20 +27,27 @@ class ReportConfigSupport
       'St Johns Primary'                  => :electric_and_gas,
       'St Saviours Junior'                => :electric_and_gas,
       'Stanton Drew Primary School'       => :electric_only,
+      'St Martins Garden Primary School'  => :electric_and_gas,
+      'St Michaels Junior Church School'  => :electric_and_gas,
       'Twerton Infant School'             => :electric_and_gas,
       'Westfield Primary'                 => :electric_and_gas,
     # Sheffield
+      'Athelstan Primary School'          => :electric_and_gas,
       'Bankwood Primary School'           => :electric_and_gas,
+      'Ballifield Community Primary School' => :electric_and_gas,
+      'Coit Primary School'               => :gas_only,
  #     'Ecclesall Primary School'          => :electric_and_gas,
       'Ecclesfield Primary School'        => :electric_and_gas,
       'Hunters Bar School'                => :electric_and_gas,
+      'King Edward VII Upper School'      => :electric_and_gas,
       'Lowfields Primary School'          => :electric_only,
       'Meersbrook Primary School'         => :electric_and_gas,
       'Mundella Primary School'           => :electric_and_gas,
       'Phillimore School'                 => :electric_and_gas,
       'Shortbrook School'                 => :electric_and_gas,
       'Valley Park School'                => :electric_only,
-      'Walkley School Tennyson School'    => :gas_only,
+      'Watercliffe Meadow Primary'        => :electric_and_gas,
+      'Walkley Tennyson School'           => :gas_only,
       'Whiteways Primary'                 => :electric_and_gas,
       'Woodthorpe Primary School'         => :electric_and_gas,
       'Wybourn Primary School'            => :electric_only,
@@ -140,7 +147,17 @@ class ReportConfigSupport
   def do_all_standard_pages_for_school
     @worksheet_charts = {}
 
+    meter_collection_config = @school.report_group
+    
     report_config = @schools[@school_name]
+
+    if report_config != meter_collection_config
+      puts "|" * 100
+      puts "\n" * 10
+      puts "Mismatch in report config #{report_config} versus #{meter_collection_config}"
+    end
+    report_config = meter_collection_config if report_config.nil?
+    
     report_groups = DashboardConfiguration::DASHBOARD_FUEL_TYPES[report_config]
 
     report_groups.each do |report_page|
@@ -153,12 +170,14 @@ class ReportConfigSupport
   def save_excel_and_html
     write_excel
     write_html
+    @worksheet_charts = {}
   end
 
-  def do_one_page(page_config_name, reset_worksheets = true)
+  def do_one_page(page_config_name, reset_worksheets = true, chart_override = nil, name_override = nil)
     @worksheet_charts = {} if reset_worksheets
     page_config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[page_config_name]
-    do_one_page_internal(page_config[:name], page_config[:charts])
+    worksheet_tab_name = name_override.nil? ? page_config[:name] : name_override.to_s
+    do_one_page_internal(worksheet_tab_name, page_config[:charts], chart_override)
   end
 
   def do_chart_list(page_name, list_of_charts)
@@ -185,11 +204,11 @@ class ReportConfigSupport
     html_file.close
   end
 
-  def do_one_page_internal(page_name, list_of_charts)
+  def do_one_page_internal(page_name, list_of_charts, chart_override = nil)
     logger.debug self.class.banner("Running report page  #{page_name}")
     @worksheet_charts[page_name] = []
     list_of_charts.each do |chart_name|
-      charts = do_charts_internal(chart_name)
+      charts = do_charts_internal(chart_name, chart_override)
       unless charts.nil?
         charts.each do |chart|
           ap(chart, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
@@ -199,16 +218,15 @@ class ReportConfigSupport
     end
   end
 
-  def do_charts_internal(chart_name)
+  def do_charts_internal(chart_name, chart_override)
     if chart_name.is_a?(Symbol)
       logger.debug self.class.banner(chart_name.to_s)
     else
       logger.debug "Running Composite Chart #{chart_name[:name]}"
     end
     chart_results = nil
-    puts "Chart: #{chart_name}"
     bm = Benchmark.measure {
-      chart_results = @chart_manager.run_chart_group(chart_name)
+      chart_results = @chart_manager.run_chart_group(chart_name, chart_override)
     }
     @benchmarks.push(sprintf("%20.20s %40.40s = %s", @school.name, chart_name, bm.to_s))
     if chart_results.nil?

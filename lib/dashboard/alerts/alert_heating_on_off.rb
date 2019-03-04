@@ -22,12 +22,15 @@ class AlertHeatingOnOff < AlertGasModelBase
 
     area_name = @school.area_name
 
+=begin
+    # commented out 4Mar2019 PH - yahoo forecast deprecated?
     @forecast_data = YahooWeatherForecast.new(area_name)
     if @forecast_data.forecast.nil? || @forecast_data.forecast.empty?
       Logging.logger.info 'Warning: yahoo weather forecast not working, switching to met office (less data)'
       @forecast_data = MetOfficeDatapointWeatherForecast.new(area_name)
     end
-    @forecast_data
+=end
+    @forecast_data = MetOfficeDatapointWeatherForecast.new(area_name)
   end
 
   def analyse_private(asof_date)

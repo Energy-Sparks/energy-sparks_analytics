@@ -10,6 +10,19 @@ class TimeOfYear
     @day_of_month = day_of_month
   end
 
+  def self.to_toy(date)
+    TimeOfYear.new(date.month, date.day)
+  end
+
+  # within period inclusive, dealing with end of yer
+  def self.within_period(toy, start_toy_period, end_toy_period)
+    if start_toy_period < end_toy_period # within same year
+      toy >= start_toy_period && toy <= end_toy_period
+    else
+      toy >= start_toy_period || toy <= end_toy_period
+    end
+  end
+
   def day
     relative_time.day
   end

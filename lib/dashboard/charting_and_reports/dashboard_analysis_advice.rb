@@ -143,6 +143,8 @@ class DashboardChartAdviceBase
     when  :intraday_line_school_days_6months_simulator,
           :intraday_line_school_days_6months_simulator_submeters
           SimulatorMiscOtherAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    else
+      DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
     end
   end
 
@@ -163,6 +165,15 @@ protected
       logger.error e.backtrace
       '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
     end
+  end
+
+  def nil_advice
+    footer_template = %{
+      <%= @body_start %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    generate_html(footer_template, binding)
   end
 
   def link(url, text_before, click_text, text_after)
@@ -267,6 +278,61 @@ protected
     }.gsub(/^  /, '')
 
     generate_html(template, binding)
+  end
+end
+
+#==============================================================================
+
+class HeatingAnalysisBase < DashboardChartAdviceBase
+  include Logging
+
+  attr_reader :heating_model
+
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+    @heating_model = calculate_model
+  end
+
+  def a
+    heating_model.average_heating_school_day_a
+  end
+
+  def b
+    heating_model.average_heating_school_day_b
+  end
+
+  def r2
+    heating_model.average_heating_school_day_r2
+  end
+
+  def r2_rating_adjective
+    AnalyseHeatingAndHotWater::HeatingModel.r2_rating_adjective(r2)
+  end
+
+  def base_temperature
+    heating_model.average_base_temperature
+  end
+
+  def predicted_kwh(temperature)
+    a + b * temperature
+  end
+
+  def insulation_hotwater_heat_loss_estimate
+    loss_kwh, percent_loss = heating_model.hot_water_poor_insulation_cost_kwh(one_year_before_last_meter_date, last_meter_date)
+    loss_kwh
+  end
+
+  def last_meter_date
+    @school.aggregated_heat_meters.amr_data.end_date
+  end
+
+  def one_year_before_last_meter_date
+    start_date = [last_meter_date - 364, @school.aggregated_heat_meters.amr_data.end_date].min
+  end
+
+  def calculate_model
+    period = SchoolDatePeriod.new(:analysis, 'Current Year', one_year_before_last_meter_date, last_meter_date)
+    @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, period)
   end
 end
 
@@ -701,7 +767,7 @@ class GasWeeklyAdvice < WeeklyAdvice
   end
 end
 #==============================================================================
-class ThermostaticAdvice < DashboardChartAdviceBase
+class ThermostaticAdvice < HeatingAnalysisBase
   include Logging
 
   def initialize(school, chart_definition, chart_data, chart_symbol)
@@ -742,11 +808,8 @@ class ThermostaticAdvice < DashboardChartAdviceBase
           <p>
             The scatter chart below shows a thermostatic analysis of your school's heating system.
             The y axis shows the energy consumption in kWh on any given day.
-            The x axis the number of degrees days. This is inverse of temperature,
+            The x axis the outside temperature. This is inverse of temperature,
             the higher the degree days the colder the temperature.
-            <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a> .
-            Each point represents a single day, the colours represent different types of days
-            .e.g. a day in the winter when the building is occupied and the heating is on.
           </p>
           <p>
             If the heating has good thermostatic control then the points at the top of
@@ -754,6 +817,27 @@ class ThermostaticAdvice < DashboardChartAdviceBase
             This is because the amount of heating required on a single day is linearly proportional to
             the difference between the inside and outside temperature, and any variation from the
             trend line would suggest thermostatic control isn't working too well.
+          </p>
+          <p>
+            Two sets of data are provided on the chart. The points associated with the group at the top of
+            the chart are those for winter school day heating. As it gets warmer the daily gas consumption drops.
+          </p>
+          <p>
+            The second set of data at the bottom of the chart is for gas consumption in the summer when the
+            heating is not on; typically this is from hot water and kitchen consumption. The slope of this line
+            is often an indicaton of how well insulated the hot water system is; of the consumption increases
+            as it gets colder it suggests a lack of insulation. An estimate of this loss across the last
+            year is <%= kwh_to_pounds_and_kwh(insulation_hotwater_heat_loss_estimate, :gas)  %>.
+          </p>
+          <p>
+            The outside temperature at which the two trendlines cross is generally a good indication
+            of the schools 'balance point temperature', this is the outside temperature where there are enough
+            internal gains to offset heating losses i.e. below this temperature the heating should be
+            turned on to maintain the internal temperature. A value below 18C is generally good. a value
+            above this might indicate either the school is very poorly insulated, or more likely the
+            internal temperature settings may be too high, for a school, you might expect the internal
+            temperature to be about 5C higher than the balance point temperature. General recommedations
+            for internal classroom temperatures are about 19C.
           </p>
 
       <% if @add_extra_markup %>
@@ -764,50 +848,39 @@ class ThermostaticAdvice < DashboardChartAdviceBase
 
     @header_advice = generate_html(header_template, binding)
 
-    alert = AlertThermostaticControl.new(@school)
-    alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
-    alert_description = alert.analysis_report
-    # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
-    ap(alert_description)
-    r2_status = alert_description.detail[0].content
-    a = alert.a.round(0)
-    b = alert.b.round(0)
-    base_temp = alert.base_temp
-
     url = 'http://blog.minitab.com/blog/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit'.freeze
     footer_template = %{
         <p>
-        One measure of how well the thermostatic control at the school is working is
-        the mathematical value R<sup>2</sup>
-        (<a href="<%= url %>" target="_blank">explanation here</a>)
-        which is a measure of how far the points are
-        from the trend line. A perfect R<sup>2</sup> of 1.0 would mean all the points were on the line,
-        if points appear as a cloud with no apparent pattern (random) then the R<sup>2</sup> would
-        be close to 1.0. For heating systems in schools a good value is 0.8.
+          One measure of how well the thermostatic control at the school is working is
+          the mathematical value R<sup>2</sup>
+          (<a href="<%= url %>" target="_blank">explanation here</a>)
+          which is a measure of how far the points are
+          from the trend line. A perfect R<sup>2</sup> of 1.0 would mean all the points were on the line,
+          if points appear as a cloud with no apparent pattern (random) then the R<sup>2</sup> would
+          be close to 1.0. For heating systems in schools a good value is 0.8.
         </p>
         <p>
-          <%= r2_status  %>
+          Your school's r2 of <%= r2.round(2) %> is <%= r2_rating_adjective %>.
         </p>
         <p>
-        For energy experts, the formula which defines the trend line is very interesting.
-        It predicts how the gas consumption varies with how cold it is (degree days).
+          For energy experts, the formula which defines the trend line is very interesting.
+          It predicts how the gas consumption varies with outside temperature.
         </p>
         <p>In the example above the formula is:</p>
 
-        <blockquote>predicted_heating_requirement = <%= a %> + <%= b %> * degree_days</blockquote>
+        <blockquote>predicted_heating_requirement = <%= a.round(0) %> + <%= b.round(1) %> * outside temperature</blockquote>
 
-        <p>Degree days is calculated as follows</p>
+        <p>Outside temperature is calculated as follows</p>
 
-        <blockquote>degree_days = max(<%= base_temp %> - average_temperature_for_day, 0)</blockquote>
+        <blockquote>temperature = min(<%= base_temperature.round(1) %>, the days average temperature)</blockquote>
         <p>
-          So for your school if the average outside temperature is 12C (8 degree days)
+          So for your school if the average outside temperature is 12C
           the predicted gas consumption for the school would be
-          <%= (a + b * (base_temp - 12)).round(0) %> kWh for the day. Where as if the outside
+          <%= a.round(0) %> + <%= b.round(1) %> * 12.0  = <%= predicted_kwh(12.0).round(0) %> kWh for the day. Where as if the outside
           temperature was colder at 4C the gas consumption would be
-          <%= (a + b * (base_temp - 4)).round(0) %> kWh. See if you can read these values
+          <%= a.round(0) %> + <%= b.round(1) %> * 4.0  = <%= predicted_kwh(4.0).round(0) %> kWh. See if you can read these values
           off the trend line of the graph above (degree days on the x axis and the answer -
-          the predicted daily gas consumption on the y-axis). Does your reading match
-          with the answers for 12C and 4C above?
+          the predicted daily gas consumption on the y-axis).
         </p>
     }.gsub(/^  /, '')
 
@@ -1514,6 +1587,11 @@ class HotWaterAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
+    if @school.aggregated_heat_meters.heating_only?
+      no_hotwater_advice
+      return
+    end
+
     avg_school_day_gas_consumption = hotwater_model.avg_school_day_gas_consumption
     avg_holiday_day_gas_consumption = hotwater_model.avg_holiday_day_gas_consumption
     avg_weekend_day_gas_consumption = hotwater_model.avg_weekend_day_gas_consumption
@@ -1525,7 +1603,7 @@ class HotWaterAdvice < DashboardChartAdviceBase
     baths_savings = (baths_savings / 100.0).round(0) * 100.0
     baths_per_pupil = (baths_savings / @school.number_of_pupils).round(0)
 
-    efficiency = hotwater_model.efficiency
+    efficiency = hotwater_model.overall_efficiency
 
     header_template = %{
       <%= @body_start %>
@@ -1576,7 +1654,7 @@ class HotWaterAdvice < DashboardChartAdviceBase
         <li>An average school day consumption of <%= FormatEnergyUnit.scale_num(avg_school_day_gas_consumption) %> kWh</li>
         <li>An average weekend day consumption of <%= FormatEnergyUnit.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
         <li>An average holiday day consumption of <%= FormatEnergyUnit.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
-        <li>Likely overall efficiency: <%= percent(efficiency * 0.6) %></li>
+        <li>Likely overall efficiency: <%= percent(efficiency) %></li>
         <li>Estimate of annual cost for hot water heating: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
         <li>Benchmark annual usage for school of same size <%= FormatEnergyUnit.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
         <li>If the school matched the annual benchmark consumption it would save the equivalent energy needed to heat  <%= baths_savings %> baths
@@ -1598,6 +1676,20 @@ class HotWaterAdvice < DashboardChartAdviceBase
       @hotwater_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@school)
     end
     @hotwater_model
+  end
+
+  def no_hotwater_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          <strong>This school appears to not use gas for hot water, so no advice is provided.</strong>
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    @footer_advice = nil_advice
   end
 end
 

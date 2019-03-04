@@ -85,7 +85,7 @@ class EnergyEquivalences
   KETTLE_£ = KETTLE_KWH * UK_ELECTRIC_GRID_£_KWH
   KETTLE_CO2_KG = KETTLE_KWH * UK_ELECTRIC_GRID_CO2_KG_KWH
   ONE_KETTLE_DESCRIPTION_TO_KWH =\
-  WATER_ENERGY_DECRIPTION = WATER_ENERGY_DESCRIPTION +
+          WATER_ENERGY_DESCRIPTION +
           "It takes #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} of energy to heat 1 litre of water by 1C. "\
           "A kettle contains about #{X.format(:litre, KETTLE_LITRES)} of water, which is heated by 85C from 15C to 100C. "\
           "Therefore it takes #{X.format(:litre, KETTLE_LITRES)} &times; 85C &times; #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} "\
@@ -127,7 +127,7 @@ class EnergyEquivalences
       conversions: {
         kwh:  {
           rate:         1.0,
-          description:  '',
+          description:  ''
         },
         co2:  {
           rate:         UK_GAS_CO2_KG_KWH,
@@ -266,7 +266,7 @@ class EnergyEquivalences
       conversions: {
         £:  {
           rate:         LIBRARY_BOOK_£,
-          description:  "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}. "\
+          description:  "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}."
         }
       }
     },
@@ -275,7 +275,7 @@ class EnergyEquivalences
       conversions: {
         £:  {
           rate:         TEACHING_ASSISTANT_£_HOUR,
-          description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour. "\
+          description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour."
         }
       }
     },

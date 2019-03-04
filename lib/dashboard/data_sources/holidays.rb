@@ -90,6 +90,16 @@ class Holidays
     nil
   end
 
+  def find_all_summer_holidays_date_range(start_date, end_date)
+    summer_holidays = []
+    summer_holiday = find_summer_holiday_before(end_date)
+    while !summer_holiday.nil? do
+      summer_holidays.push(summer_holiday)
+      summer_holiday = find_summer_holiday_before(summer_holiday.start_date - 1)
+    end
+    summer_holidays
+  end
+
   def find_summer_holiday_after(date)
     @holidays.each do |hol|
       # identify summer holiday by length, then month (England e.g. Mon 9 Jul 2018 - Wed 4 Sep 2018  Scotland e.g. Mon 1 Jul 2019 - 13 Aug 2019

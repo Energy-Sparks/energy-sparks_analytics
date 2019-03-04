@@ -30,7 +30,7 @@ headings = ['Types',  'Sub Type',   'Value 1', 'Value 2', 'Value 3']
 
 data = [
 
-  ['Type 1', 'Sub Type A', 5000,      8000,      6000],
+  ['Type 1', 'Sub Type A', 5000,      8000,      Float::NAN],
 
   ['',       'Sub Type B', 2000,      3000,      4000],
 
