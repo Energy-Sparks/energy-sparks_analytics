@@ -68,6 +68,7 @@ class AMRData < HalfHourlyData
   end
 
   def overnight_baseload_kw(date)
+    raise EnergySparksNotEnoughDataException.new("Missing electric data (2) for #{date}") if !self.key?(date)
     baseload_kw_between_half_hour_indices(date, 41, 47)
   end
 
@@ -78,6 +79,7 @@ class AMRData < HalfHourlyData
   def overnight_baseload_kwh_date_range(date1, date2)
     total = 0.0
     (date1..date2).each do |date|
+      raise EnergySparksNotEnoughDataException.new("Missing electric data for #{date}") if !self.key?(date)
       total += overnight_baseload_kw(date)
     end
     total
@@ -135,11 +137,28 @@ class AMRData < HalfHourlyData
   end
 
   def kwh_date_range(date1, date2)
+    return one_day_kwh(date1) if date1 == date2
     total_kwh = 0.0
     (date1..date2).each do |date|
       total_kwh += one_day_kwh(date)
     end
     total_kwh
+  end
+
+  def kwh_period(period)
+    kwh_date_range(period.start_date, period.end_date)
+  end
+
+  def average_in_date_range(date1, date2)
+    kwh_date_range(date1, date2) / (date2 - date1 + 1)
+  end
+
+  def average_in_date_range_ignore_missing(date1, date2)
+    kwhs = []
+    (date1..date2).each do |date|
+      kwhs.push(one_day_kwh(date)) if date_exists?(date)
+    end
+    kwhs.empty? ? 0.0 : (kwhs.inject(:+) / kwhs.length)
   end
 
   def kwh_date_list(dates)
@@ -158,16 +177,25 @@ class AMRData < HalfHourlyData
     data
   end
 
-  # long gaps are demarketed by a single LGAP meter reading - the last day of the gap
+  # long gaps are demarked by a single LGAP meter reading - the last day of the gap
   # data held in the database doesn't store the date as part of its meta data so its
   # set here by calling this function after all meter readings are loaded
   def set_long_gap_boundary
-    lgap_date = nil
+    override_start_date = nil
+    override_end_date = nil
     (start_date..end_date).each do |date|
       one_days_data = self[date]
-      lgap_date = date if !one_days_data.nil? && (one_days_data.type == 'LGAP' || one_days_data.type == 'FIXS')
+      override_start_date = date if !one_days_data.nil? && (one_days_data.type == 'LGAP' || one_days_data.type == 'FIXS')
+      override_end_date = date if !one_days_data.nil? && one_days_data.type == 'FIXE'
     end
-    set_min_date(lgap_date) unless lgap_date.nil?
+    unless override_start_date.nil?
+      logger.info "Overriding start_date of amr data from #{self.start_date} to #{override_start_date}"
+      set_min_date(override_start_date)
+    end
+    unless override_end_date.nil?
+      logger.info "Overriding end_date of amr data from #{self.end_date} to #{override_end_date}"
+      set_max_date(override_end_date) unless override_end_date.nil?
+    end
   end
 
   def summarise_bad_data

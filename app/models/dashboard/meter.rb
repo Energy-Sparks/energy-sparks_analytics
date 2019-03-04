@@ -4,8 +4,9 @@ module Dashboard
     include Logging
 
     # Extra fields - potentially a concern or mix-in
-    attr_reader :building, :fuel_type
-    attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters, :meter_correction_rules
+    attr_reader :fuel_type, :meter_collection
+    attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters
+    attr_reader :meter_correction_rules, :model_cache
     attr_accessor :amr_data,  :floor_area, :number_of_pupils
 
     # Energy Sparks activerecord fields:
@@ -13,13 +14,14 @@ module Dashboard
     attr_accessor :id, :name, :external_meter_id
     # enum meter_type: [:electricity, :gas]
 
-    def initialize(building, amr_data, type, identifier, name,
+    def initialize(meter_collection, amr_data, type, identifier, name,
                     floor_area = nil, number_of_pupils = nil,
                     solar_pv_installation = nil,
                     storage_heater_config = nil,
-                    external_meter_id = nil)
+                    external_meter_id = nil,
+                    meter_attributes = MeterAttributes)
       @amr_data = amr_data
-      @building = building
+      @meter_collection = meter_collection
       @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
       @fuel_type = type
       @id = identifier
@@ -32,6 +34,8 @@ module Dashboard
       @meter_correction_rules = []
       @sub_meters = []
       @external_meter_id = external_meter_id
+      @meter_attributes = meter_attributes
+      @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
     end
 
@@ -39,8 +43,50 @@ module Dashboard
       @mpan_mprn.to_s + ':' + @fuel_type.to_s + 'x' + (@amr_data.nil? ? '0' : @amr_data.length.to_s)
     end
 
+    def attributes(type)
+      @meter_attributes.attributes(self, type)
+    end
+
+    def all_attributes
+      @meter_attributes.attributes(self)
+    end
+
+    def non_heating_only?
+      function_includes?(:hotwater_only, :kitchen_only)
+    end
+
+    def kitchen_only?
+      # wouldn't expect weekend or holiday use
+      function_includes?(:kitchen_only)
+    end
+
+    def hot_water_only?
+      function_includes?(:hotwater_only)
+    end
+
+    def heating_only?
+      function_includes?(:heating_only)
+    end
+
+    private def function_includes?(*function_list)
+      function = @meter_attributes.attributes(self, :function)
+      !function.nil? && !(function_list & function).empty?
+    end
+
+    def heating_model(period, model_type = :best)
+      @model_cache.create_and_fit_model(model_type, period)
+    end
+
     def meter_collection
-      school || @building
+      school || @meter_collection
+    end
+
+    def heat_meter?
+      [:gas, :storage_heater, :aggregated_heat].include?(fuel_type)
+    end
+
+    def electricity_meter?
+      [:electricity, :solar_pv, :aggregated_electricity].include?(fuel_type)
     end
 
     def set_meter_no(meter_no)

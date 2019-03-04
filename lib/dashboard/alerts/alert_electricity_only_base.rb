@@ -21,4 +21,8 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
     avg_baseload = average_baseload(start_date, asof_date)
     [avg_baseload, asof_date - start_date]
   end
+
+  def needs_gas_data?
+    false
+  end
 end

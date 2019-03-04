@@ -19,10 +19,7 @@ class Temperatures < HalfHourlyData
   end
 
   def average_temperature(date)
-    if @cached_average_on_date.key?(date) # for performance temps only not baseclass
-      return @cached_average_on_date[date]
-    end
-    @cached_average_on_date[date] = average(date)
+    average(date)
   end
 
   def average_temperature_in_date_range(start_date, end_date)
@@ -131,21 +128,6 @@ class Temperatures < HalfHourlyData
     else
       return 0.0
     end
-  end
-
-  def average_degree_days_in_date_range(start_date, end_date, base_temp)
-    if start_date < self.start_date || end_date > self.end_date
-      return nil # NAN blows up write_xlsx
-    end
-    total_degree_days = 0.0
-    (start_date..end_date).each do |date|
-      avg_temperature = average_temperature(date)
-
-      if avg_temperature <= base_temp
-        total_degree_days += base_temp - avg_temperature
-      end
-    end
-    total_degree_days / (end_date - start_date + 1)
   end
 
   def modified_degree_days(date, base_temp)

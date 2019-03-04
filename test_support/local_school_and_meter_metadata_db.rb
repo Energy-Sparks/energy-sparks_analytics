@@ -7,13 +7,23 @@ require_relative '../app/models/meter_collection'
 class AnalysticsSchoolAndMeterMetaData
   include Logging
 
+  attr_reader :meter_collections
+  
   def initialize
     @meter_collections = {} # [school_name] => meter_collection
     load_schools_metadata
   end
 
   def school(identifier, identifier_type = :name)
-    find_school(identifier, identifier_type)
+    if identifier_type == :mpan_mprn
+      find_school_from_meter(identifier)
+    else
+      find_school(identifier, identifier_type)
+    end
+  end
+
+  def all_schools
+    @meter_collections
   end
 
   private
@@ -21,6 +31,13 @@ class AnalysticsSchoolAndMeterMetaData
   def find_school(identifier, identifier_type)
     @meter_collections.each_value do |meter_collection|
       return meter_collection if meter_collection.matches_identifier?(identifier, identifier_type)
+    end
+    nil
+  end
+
+  def find_school_from_meter(mpan_mprn)
+    @meter_collections.each_value do |meter_collection|
+      return meter_collection if meter_collection.meter?(mpan_mprn)
     end
     nil
   end
@@ -37,6 +54,20 @@ class AnalysticsSchoolAndMeterMetaData
   # load all metadata for known schools - basically school name, area, pupils, postcode, plus a list of meters etc.
   def load_schools_metadata
     load_schools(school_metadata_filename)
+    check_for_duplicate_urns
+  end
+
+  def check_for_duplicate_urns
+    urn_to_name_map = {}
+    @meter_collections.each_value do |meter_collection|
+      urn = meter_collection.urn
+      name = meter_collection.name
+      if urn_to_name_map.key?(urn)
+        puts "Fatal Error: schoolsandmeters.yml has duplicate urn #{urn} school #{name}, already has same urn for #{urn_to_name_map[urn]}"
+        exit
+      end
+      urn_to_name_map[meter_collection.urn] = meter_collection.name
+    end
   end
 
   def load_schools(filename)

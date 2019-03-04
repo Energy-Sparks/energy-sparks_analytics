@@ -19,12 +19,12 @@ class MeterCollection
   attr_reader :floor_area, :number_of_pupils
 
   # Currently, but not always
-  attr_reader :school, :name, :address, :postcode, :urn, :area_name
+  attr_reader :school, :name, :address, :postcode, :urn, :area_name, :model_cache
 
   # These are things which will be populated
-  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :heating_models, :electricity_simulation_meter
+  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :electricity_simulation_meter
 
-  def initialize(school, meter_attributes = MeterAttributes)
+  def initialize(school)
     @name = school.name
     @address = school.address
     @postcode = school.postcode
@@ -34,14 +34,12 @@ class MeterCollection
     @electricity_meters = []
     @solar_pv_meters = []
     @storage_heater_meters = []
-    @heating_models = {}
     @school = school
     @urn = school.urn
     @meter_identifier_lookup = {} # [mpan or mprn] => meter
     @area_name = school.area_name
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
-    @meter_attributes = meter_attributes
 
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
@@ -79,10 +77,11 @@ class MeterCollection
   end
 
   def meter?(identifier)
+    identifier = identifier.to_s # ids coulld be integer or string
     return @meter_identifier_lookup[identifier] if @meter_identifier_lookup.key?(identifier)
 
     all_meters.each do |meter|
-      if meter.id == identifier
+      if meter.id.to_s == identifier
         @meter_identifier_lookup[identifier] = meter
         return meter
       end
@@ -106,7 +105,29 @@ class MeterCollection
         meter_list += meter_group.is_a?(Dashboard::Meter) ? [meter_group] : meter_group
       end
     end
-    meter_list
+    meter_list.uniq{ |meter| meter.mpan_mprn } # for single meter schools aggregate and meter can be one and the same
+  end
+
+  def report_group
+    heat_report = !all_heat_meters.nil?
+    electric_report = !all_electricity_meters.nil?
+    if heat_report && electric_report
+      :electric_and_gas
+    elsif heat_report
+      :gas_only
+    elsif electric_report
+      :electric_only
+    else
+      nil
+    end
+  end
+
+  def all_heat_meters
+    all_meters.select { |meter| meter.heat_meter? }
+  end
+
+  def all_electricity_meters
+    all_meters.select { |meter| meter.electricity_meter? }
   end
 
   def school_type
@@ -165,16 +186,5 @@ class MeterCollection
 
   def grid_carbon_intensity
     ScheduleDataManager.uk_grid_carbon_intensity
-  end
-
-  def heating_model(period)
-    # This is a temporary fix until the ES codebase comes in line with the MeterAttributes change TODO: JJ
-    @meter_attributes = MeterAttributes if @meter_attributes.nil?
-    unless @heating_models.key?(:basic)
-      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters, holidays, temperatures, @meter_attributes)
-      @heating_models[:basic].calculate_regression_model(period)
-    end
-    @heating_models[:basic]
-    #  @heating_on_periods = @model.calculate_heating_periods(@period)
   end
 end

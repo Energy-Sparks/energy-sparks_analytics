@@ -19,11 +19,19 @@ class Aggregator
   end
 
   def title_summary
-    @show_reconciliation_values ? y_axis_label(@total_of_unit) : ''
+    if @total_of_unit.is_a?(Float) && @total_of_unit.nan?
+      'NaN total'
+    else
+      @show_reconciliation_values ? y_axis_label(@total_of_unit) : ''
+    end
   end
 
   def y_axis_label(value)
     YAxisScaling.unit_description(@chart_config[:yaxis_units], @chart_config[:yaxis_scaling], value)
+  end
+
+  def valid
+    !@bucketed_data.nil? && !@bucketed_data.empty?
   end
 
   def initialise_schools_date_range
@@ -59,11 +67,12 @@ class Aggregator
 
     remove_filtered_series if @chart_config.key?(:filter) && @chart_config[:series_breakdown] != :none
 
-    create_y2_axis_data if @chart_config.key?(:y2_axis)
+    create_y2_axis_data if @chart_config.key?(:y2_axis) && !@chart_config[:y2_axis].nil?
 
     reorganise_buckets if @chart_config[:chart1_type] == :scatter
 
-    remove_zero_data if @chart_config[:chart1_type] == :scatter
+    # deprecated 28Feb2019
+    # remove_zero_data if @chart_config[:chart1_type] == :scatter
 
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
@@ -74,6 +83,8 @@ class Aggregator
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
+
+    swap_NaN_for_nil if true || Object.const_defined?('Rails')
   end
 
   private
@@ -120,17 +131,12 @@ class Aggregator
   end
 
   def regroup_xaxis(bucketed_data, x_axis)
-    puts "Old xaxis: #{x_axis.inspect}"
-    puts "Old buckets: #{bucketed_data.inspect}"
     new_x_axis = {}
-    puts bucketed_data.class.name
     bucketed_data.each do |series_name, school_data| # electricity|gas =>  school => [array of kwh 1 per year]
-      puts "L", series_name.class.name, school_data.class.name
       school_data.each do |school_name, _kwhs|
         new_x_axis[school_name] = x_axis
       end
     end
-    puts "New xaxis: #{new_x_axis.inspect}"
   end
   # rubocop:disable MethodComplexity
   #=============================================================================
@@ -249,15 +255,15 @@ class Aggregator
     begin
       aggregation = aggregate_period(chartconfig_copy)
     rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-      logger.error e
-      logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+      logger.warn e
+      logger.warn 'Warning: chart specification calls for more fixed date periods than available in AMR data(1)'
     rescue StandardError => e
       logger.error e
     end
     aggregation
   end
 
-  def aggregate_multiple_charts(periods)
+  def aggregate_multiple_charts_deprecated(periods)
     bucketed_period_data = []
 
     # iterate through the time periods aggregating
@@ -267,8 +273,8 @@ class Aggregator
       begin
         bucketed_period_data.push(aggregate_period(chartconfig_copy))
       rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-        logger.error e
-        logger.error 'Warning: chart specification calls for more fixed date periods than available in AMR data'
+        logger.warn e
+        logger.warn 'Warning: chart specification calls for more fixed date periods than available in AMR data(2)'
       rescue StandardError => e
         logger.error e
       end
@@ -282,7 +288,7 @@ class Aggregator
     time_count, school_count = count_time_periods_and_school_names(bucketed_period_data)
     bucketed_period_data.each do |period_data|
       bucketed_data, bucketed_data_count, time_description, school_name, x_axis, x_axis_date_ranges = period_data
-      time_description  = time_count <= 1 ? '' : (':' + time_description)
+      time_description = time_count <= 1 ? '' : (':' + time_description)
       school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + school_name)
       school_name = '' if school_count <= 1
       bucketed_data.each do |series_name, x_data|
@@ -388,11 +394,83 @@ class Aggregator
     else
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
-
+    post_process_aggregation(chart_config, bucketed_data, bucketed_data_count)
     [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description, @meter_collection.name, @x_axis, @x_axis_bucket_date_ranges]
   end
 
-private
+  private
+
+  # the analystics code treats missing and incorrectly calculated numbers as NaNs
+  # unforunately the front end (Rails) prefers nil, so post process the entire
+  # result set if running for rails to swap NaN for nil
+  # analytics more performant in mainly using NaNs, as fewer tests required
+  # e.g. total += value versus if total.nil? ? total = value : (value.nil? ? nil : total + value)
+  def swap_NaN_for_nil
+    return if @bucketed_data.nil?
+    @bucketed_data.each do |series_name, result_data|
+      @bucketed_data[series_name] = result_data.map { |x| x.nan? ? nil : x } unless result_data.is_a?(Symbol)
+    end
+  end
+
+  def post_process_aggregation(chart_config, bucketed_data, bucketed_data_count)
+    create_trend_lines(chart_config, bucketed_data, bucketed_data_count) if @series_manager.trendlines?
+  end
+
+  # - process trendlines post aggregation as potentially faster, if line
+  #   is represented by fewer points
+  # - only works for model_type breakdowns for the moment. and only for 'daily' bucketing
+  # - ignore bucketed data count as probably doesn;t apply to scatter plots with trendlines for the moment
+  def create_trend_lines(chart_config, bucketed_data, _bucketed_data_count)
+    if Object.const_defined?('Rails')
+      add_trendlines_for_rails_all_points(bucketed_data)
+    elsif false && Object.const_defined?('Rails')
+      add_trendlines_for_rails_2_points(bucketed_data)
+    else
+      analystics_excel_trendlines(bucketed_data)
+    end 
+  end
+
+  def analystics_excel_trendlines(bucketed_data)
+    @series_manager.trendlines.each do |trendline_series_name|
+      model_type_for_trendline = SeriesDataManager.series_name_for_trendline(trendline_series_name)
+      trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline)
+      bucketed_data[trendline_name_with_parameters] = model_type_for_trendline # set model symbol
+    end
+  end
+
+  def add_trendlines_for_rails_all_points(bucketed_data)
+    @series_manager.trendlines.each do |trendline_series_name|
+      model_type_for_trendline = SeriesDataManager.series_name_for_trendline(trendline_series_name)
+      trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline)
+      bucketed_data[trendline_name_with_parameters] = Array.new(@x_axis.length, Float::NAN)
+      @x_axis.each_with_index do |date, index|
+        model_type = @series_manager.model_type?(date)
+        if model_type == model_type_for_trendline
+          bucketed_data[trendline_name_with_parameters][index] = @series_manager.predicted_amr_data_one_day(date)
+        end
+      end
+    end
+  end
+
+  # find 2 extreme points for each model, add interpolated regression points
+  def add_trendlines_for_rails_2_points(bucketed_data)
+    series_model_types = bucketed_data.keys & @series_manager.heating_model_types
+    temperatures = bucketed_data['Temperature'] # problematic assumption?
+    series_model_types.each do |model_type|
+      model_temperatures_and_index = bucketed_data[model_type].each_with_index.map { | kwh, index| kwh.nan? ? nil : [temperatures[index], index, @x_axis[index]] }.compact
+      min, max = model_temperatures_and_index.minmax_by { |temp, _index, _date| temp }
+      trendline = add_regression_parameters_to_trendline_symbol(SeriesDataManager.trendline_for_series_name(model_type), model_type)
+      bucketed_data[trendline] = Array.new(@x_axis.length, Float::NAN)
+      bucketed_data[trendline][min[1]] = @series_manager.predicted_amr_data_one_day(min[2])
+      bucketed_data[trendline][max[1]] = @series_manager.predicted_amr_data_one_day(max[2])
+    end
+  end
+
+  def add_regression_parameters_to_trendline_symbol(trendline_symbol, model_type)
+    model = @series_manager.model(model_type)
+    parameters = model.nil? ? ' =no model' : sprintf(' =%.0f + %.1fT r2 = %.2f x %d', model.a, model.b, model.r2, model.samples)
+    (trendline_symbol.to_s + parameters).to_sym
+  end
 
   # aggregate by whole date range, the 'series_manager' deals with any spliting within a day
   # e.g. 'school day in hours' v. 'school day out of hours'
@@ -432,11 +510,19 @@ private
     match_daytype = match_occupied_type_filter_by_day(date) if @chart_config[:filter].key?(:daytype)
     match_heating = true
     match_heating = match_filter_by_heatingdayday(date) if @chart_config[:filter].key?(:heating)
-    match_daytype && match_heating
+    match_model = true
+    match_model = match_filter_by_model_type(date) if @chart_config[:filter].key?(:model_type)
+    match_daytype && match_heating && match_model
   end
 
   def match_filter_by_heatingdayday(date)
     @chart_config[:filter][:heating] == @series_manager.heating_model.heating_on?(date)
+  end
+
+  def match_filter_by_model_type(date)
+    model_list = @chart_config[:filter][:model_type]
+    model_list = [ model_list ] if model_list.is_a?(Symbol) # convert to array if not an array
+    model_list.include?(@series_manager.heating_model.model_type?(date))
   end
 
   def match_occupied_type_filter_by_day(date)
@@ -455,16 +541,33 @@ private
   end
 
   def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
-    (start_date..end_date).each do |date|
-      next if !match_filter_by_day(date)
-      (0..47).each do |halfhour_index|
-        x_index = @xbucketor.index(nil, halfhour_index)
-        multi_day_breakdown = @series_manager.get_data([:halfhour, date, halfhour_index])
-        multi_day_breakdown.each do |key, value|
-          add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+    if bucketed_data.length == 1 && bucketed_data.keys[0] = SeriesNames::NONE
+      aggregate_by_halfhour_simple_fast(start_date, end_date, bucketed_data, bucketed_data_count)
+    else
+      (start_date..end_date).each do |date|
+        next if !match_filter_by_day(date)
+        (0..47).each do |halfhour_index|
+          x_index = @xbucketor.index(nil, halfhour_index)
+          multi_day_breakdown = @series_manager.get_data([:halfhour, date, halfhour_index])
+          multi_day_breakdown.each do |key, value|
+            add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
+          end
         end
       end
     end
+  end
+
+  def aggregate_by_halfhour_simple_fast(start_date, end_date, bucketed_data, bucketed_data_count)
+    count = 0
+    total = Array.new(48, 0)
+    (start_date..end_date).each do |date|
+      next unless match_filter_by_day(date)
+      data = @series_manager.get_one_days_data_x48(date)
+      total = [total, data].transpose.map{|a| a.sum}
+      count += 1
+    end
+    bucketed_data[SeriesNames::NONE] = total
+    bucketed_data_count[SeriesNames::NONE]= Array.new(48, count)
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
@@ -522,9 +625,13 @@ private
   # pattern matches on series_names, removing any from list which don't match
   def remove_filtered_series
     keep_key_list = []
+    if !@chart_config.key?(:filter)
+      logger.info 'No filters set'
+      return
+    end
     ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
     logger.info "Filtering start #{@bucketed_data.keys}"
-    logger.debug @chart_config[:filter].inspect if @chart_config.key?(:filter)
+    logger.debug "Filters are: #{@chart_config[:filter].inspect}" 
     if @chart_config[:series_breakdown] == :submeter
       if @chart_config[:filter].key?(:submeter)
         keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:submeter])
@@ -536,6 +643,13 @@ private
     if @chart_config.key?(:filter) && @chart_config[:filter].key?(:heating)
       filter = @chart_config[:filter][:heating] ? [SeriesNames::HEATINGDAY, SeriesNames::HEATINGDAYMODEL] : [SeriesNames::NONHEATINGDAY, SeriesNames::NONHEATINGDAYMODEL]
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filter)
+    end
+    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:model_type)
+      # for model filters, copy in any trendlines for those models to avoid filtering 
+      model_filter = [@chart_config[:filter][:model_type]].flatten(1)
+      trendline_filters = model_filter.map { |model_name| SeriesDataManager.trendline_for_series_name(model_name) }
+      trendline_filters_with_parameters = pattern_match_two_symbol_lists(trendline_filters, @bucketed_data.keys)
+      keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, model_filter + trendline_filters_with_parameters)
     end
     if @chart_config.key?(:filter) && @chart_config[:filter].key?(:fuel)
       filtered_fuel = @chart_config[:filter][:fuel]
@@ -558,8 +672,16 @@ private
     remove_list.each do |remove_series_name|
       @bucketed_data.delete(remove_series_name)
     end
-    logger.debug ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
+    # logger.debug ap(@bucketed_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
     logger.debug "Filtered End #{@bucketed_data.keys}"
+  end
+
+  # e.g. [:trendline_model_xyz] with [:trendline_model_xyz_a45_b67_r282] => [:trendline_model_xyz_a45_b67_r282]
+  # only check for 'included in' not proper regexp
+  # gets around problem with modifying bucket symbols before filtering
+  def pattern_match_two_symbol_lists(match_symbol_list, symbol_list)
+    matched_pairs = match_symbol_list.product(symbol_list).select { |match, sym| sym.to_s.include?(match.to_s) }
+    matched_pairs.map { |match, symbol| symbol }
   end
 
   def pattern_match_list_with_list(list, pattern_list)
@@ -592,22 +714,26 @@ private
   # once the aggregation process is complete, add up the aggregated data per series
   # for additional series total information which can be added to the chart legend and title
   def aggregate_by_series
-    @series_sums = {}
-    @total_of_unit = 0.0
-    @bucketed_data.each do |series_name, units|
-      @series_sums[series_name] = all_values(units)
+    if @bucketed_data.nil?
+      @total_of_unit = Float::NAN
+    else
+      @series_sums = {}
+      @total_of_unit = 0.0
+      @bucketed_data.each do |series_name, data|
+        @series_sums[series_name] = data.map { |x| x.nil? || x.nan? ? 0.0 : x }.sum unless data.is_a?(Symbol)
+      end
+      @total_of_unit = @series_sums.values.sum
     end
-    @total_of_unit += all_values(@bucketed_data)
   end
 
-  def all_values(obj)
+  def all_values_deprecated(obj)
     float_data = []
     find_all_floats(float_data, obj)
-    float_data.inject(:+)
+    float_data.empty? ? 0.0 : float_data.inject(:+)
   end
 
   # recursive search through hash/array for all float values
-  def find_all_floats(float_data, obj)
+  def find_all_floats_deprecated(float_data, obj)
     if obj.is_a?(Hash)
       obj.each_value do |val|
         find_all_floats(float_data, val)
@@ -617,7 +743,7 @@ private
         find_all_floats(float_data, val)
       end
     elsif obj.is_a?(Float)
-      float_data.push(obj)
+      float_data.push(obj) unless obj.nan?
     else
       logger.info "Unexpected type #{val.class.name} to sum"
     end
@@ -658,11 +784,6 @@ private
 
   def inject_benchmarks
     logger.info 'Injecting national, regional and exemplar bencmark data'
-=begin
-    ap(@x_axis)
-    ap(@bucketed_data)
-    puts "Bucketed data: #{@bucketed_data.inspect}"
-=end
     if (@bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)) ||
        (@bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array))
       @x_axis.push('National Average')

@@ -96,7 +96,7 @@ class AverageSchoolAggregator < VirtualSchool
       scaling_factor = fuel_type == :electricity ? (scale_up.to_f / number_of_pupils) : (scale_up.to_f / floor_area)
 
       (amr_data.start_date..amr_data.end_date).each do |date|
-        average_amr_data.add(date, OneDayAMRReading.zero_reading(0, date, 'AGGR')) unless average_amr_data.key?(date)
+        average_amr_data.add(date, OneDayAMRReading.zero_reading(0, date, 'AGGR')) unless average_amr_data.date_exists?(date)
         average_amr_data[date] += OneDayAMRReading.scale(amr_data[date], scaling_factor)
         amr_data_count[date] += 1
       end

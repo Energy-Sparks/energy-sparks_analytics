@@ -10,10 +10,9 @@ class ValidateAMRData
   FSTRDEF = '%a %d %b %Y'.freeze # fixed format for reporting dates for error messages
   MAXGASAVGTEMPDIFF = 5 # max average temperature difference over which to adjust temperatures
   attr_reader :data_problems, :meter_id
-  def initialize(meter, max_days_missing_data, holidays, temperatures, meter_attributes)
+  def initialize(meter, max_days_missing_data, holidays, temperatures)
     @amr_data = meter.amr_data
     @meter = meter
-    @meter_attributes = meter_attributes
     @meter_id = @meter.mpan_mprn
     @type = meter.meter_type
     @holidays = holidays
@@ -54,7 +53,7 @@ class ValidateAMRData
   private
 
   def process_meter_attributes
-    meter_attributes_corrections = @meter_attributes.attributes(@meter, :meter_corrections)
+    meter_attributes_corrections = @meter.attributes(:meter_corrections)
     if meter_attributes_corrections.nil?
       auto_insert_for_gas_if_no_other_rules
     else
@@ -97,6 +96,12 @@ class ValidateAMRData
       fix_start_date = rule[:readings_start_date]
       @amr_data.add(fix_start_date, OneDayAMRReading.new(meter_id, fix_start_date, 'FIXS', nil, DateTime.now, substitute_data))
       @amr_data.set_min_date(rule[:readings_start_date])
+    elsif rule.key?(:readings_end_date)
+      logger.debug "Fixing end date to #{rule[:readings_end_date]}"
+      substitute_data = Array.new(48, 0.0)
+      fix_end_date = rule[:readings_end_date]
+      @amr_data.add(fix_end_date, OneDayAMRReading.new(meter_id, fix_end_date, 'FIXE', nil, DateTime.now, substitute_data))
+      @amr_data.set_max_date(rule[:readings_end_date])
     elsif rule.key?(:set_bad_data_to_zero)
       zero_data_in_date_range(
         rule[:set_bad_data_to_zero][:start_date],
@@ -135,7 +140,7 @@ class ValidateAMRData
     end_date = @amr_data.end_date > @run_date ? @amr_data.end_date : @run_date
     (@amr_data.start_date..end_date).each do |date|
       toy = TimeOfYear.new(date.month, date.day)
-      if !@amr_data.key?(date) && toy >= start_toy && toy <= end_toy
+      if @amr_data.date_missing?(date) && toy >= start_toy && toy <= end_toy
         zero_data = Array.new(48, 0.0)
         data = OneDayAMRReading.new(meter_id, date, type, nil, DateTime.now, zero_data)
         @amr_data.add(date, data)
@@ -165,7 +170,7 @@ class ValidateAMRData
 
   def interpolate_partial_missing_data(max_missing_readings)
     (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if @amr_data.key?(date)
+      if @amr_data.date_exists?(date)
         days_kwh_x48 = @amr_data.days_kwh_x48(date)
         num_zero_values = days_kwh_x48.count(0.0)
         if num_zero_values > 0 && num_zero_values <= max_missing_readings
@@ -188,7 +193,7 @@ class ValidateAMRData
   def remove_readings_with_too_many_missing_partial_readings(max_missing_readings)
     missing_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if @amr_data.key?(date) && @amr_data.days_kwh_x48(date).count(0.0 ) > max_missing_readings
+      if @amr_data.date_exists?(date) && @amr_data.days_kwh_x48(date).count(0.0 ) > max_missing_readings
         missing_dates.push(date)
       end
     end
@@ -231,7 +236,7 @@ class ValidateAMRData
     logger.info "Rescaling data between #{start_date} and #{end_date} by #{scale}"
     start_date = @amr_data.start_date if @amr_data.start_date > start_date # case where another correction has changed data prior to confiured correction
     (start_date..end_date).each do |date|
-      if @amr_data.key?(date)
+      if @amr_data.date_exists?(date)
         new_data_x48 = []
         (0..47).each do |halfhour_index|
           new_data_x48.push(@amr_data.kwh(date, halfhour_index) * scale)
@@ -245,7 +250,7 @@ class ValidateAMRData
   def correct_holidays_with_adjacent_academic_years
     missing_holiday_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
-      missing_holiday_dates.push(date) if !@amr_data.key?(date) && @holidays.holiday?(date)
+      missing_holiday_dates.push(date) if @amr_data.date_missing?(date) && @holidays.holiday?(date)
     end
 
     missing_holiday_dates.each do |date|
@@ -287,7 +292,7 @@ class ValidateAMRData
   def find_matching_holiday_day(amr_data, list_of_holidays, day_of_week)
     list_of_holidays.each do |holiday_period|
       (holiday_period.start_date..holiday_period.end_date).each do |date|
-        return date if date.wday == day_of_week && amr_data.key?(date)
+        return date if date.wday == day_of_week && amr_data.date_exists?(date)
       end
     end
     nil
@@ -324,7 +329,7 @@ class ValidateAMRData
   def final_missing_data_set_to_small_negative
     missing_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if !@amr_data.key?(date)
+      if @amr_data.date_missing?(date)
         missing_dates.push(date)
       end
     end
@@ -338,7 +343,7 @@ class ValidateAMRData
   def replace_missing_weekend_data_with_zero
     replaced_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if DateTimeHelper.weekend?(date) && !@amr_data.key?(date)
+      if DateTimeHelper.weekend?(date) && @amr_data.date_missing?(date)
         replaced_dates.push(date)
         zero_data = Array.new(48, 0.0)
         missing_weekend_data = OneDayAMRReading.new(meter_id, date, 'MWKE', nil, DateTime.now, zero_data)
@@ -353,7 +358,7 @@ class ValidateAMRData
     start_date = start_date.nil? ? @amr_data.start_date : start_date
     end_date = end_date.nil? ? @amr_data.end_date : end_date
     (start_date..end_date).each do |date|
-      if !@amr_data.key?(date)
+      if @amr_data.date_missing?(date)
         replaced_dates.push(date)
         zero_data = Array.new(48, 0.0)
         missing_data_zero_in_date_range = OneDayAMRReading.new(meter_id, date, 'MDTZ', nil, DateTime.now, zero_data)
@@ -365,7 +370,7 @@ class ValidateAMRData
   def zero_data_in_date_range(start_date, end_date)
     logger.info "Overwriting bad data between #{start_date} and #{end_date} with zero"
     (start_date..end_date).each do |date|
-      if @amr_data.key?(date)
+      if @amr_data.date_exists?(date)
         zero_data = Array.new(48, 0.0)
         zero_data_day = OneDayAMRReading.new(meter_id, date, 'ZDTR', nil, DateTime.now, zero_data)
         @amr_data.add(date, zero_data_day)
@@ -376,7 +381,7 @@ class ValidateAMRData
   def zero_missing_data_in_date_range(start_date, end_date)
     logger.info "Setting missing data between #{start_date} and #{end_date} to zero"
     (start_date..end_date).each do |date|
-      if !@amr_data.key?(date)
+      if @amr_data.date_missing?(date)
         zero_data = Array.new(48, 0.0)
         zero_data_day = OneDayAMRReading.new(meter_id, date, 'ZMDR', nil, DateTime.now, zero_data)
         @amr_data.add(date, zero_data_day)
@@ -401,7 +406,7 @@ class ValidateAMRData
     gap_count = 0
     first_bad_date = Date.new(2050, 1, 1)
     (@amr_data.start_date..@amr_data.end_date).reverse_each do |date|
-      if !@amr_data.key?(date)
+      if @amr_data.date_missing?(date)
         first_bad_date = date if gap_count.zero?
         gap_count += 1
       else
@@ -424,7 +429,7 @@ class ValidateAMRData
   def fill_in_missing_data
     missing_days = {}
     (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if !@amr_data.key?(date)
+      if @amr_data.date_missing?(date)
         if @meter.meter_type == :electricity
           missing_days[date] = substitute_missing_electricity_data(date)
         elsif @meter.meter_type == :gas
@@ -449,14 +454,14 @@ class ValidateAMRData
       # look for similar day after the missing date
       day_after = date + days_offset
       if day_after <= @amr_data.end_date &&
-          @amr_data.key?(day_after) &&
+          @amr_data.date_exists?(day_after) &&
           daytype(day_after) == missing_daytype
         return [date, create_substituted_electricity_data(date, day_after)]
       end
       # look for similar day before the missing date
       day_before = date - days_offset
       if day_before >= @amr_data.start_date &&
-         @amr_data.key?(day_before) &&
+         @amr_data.date_exists?(day_before) &&
          daytype(day_before) == missing_daytype
         return [date, create_substituted_electricity_data(date, day_before)]
       end
@@ -468,7 +473,7 @@ class ValidateAMRData
   # then adjust for temperature
   def substitute_missing_gas_data(date)
     create_heating_model if @heating_model.nil?
-    heating_on = @heating_model.heating_on?(date)
+    heating_on = @heating_model.heat_on_missing_data?(date)
     missing_daytype = daytype(date)
     avg_temperature = average_temperature(date)
 
@@ -476,9 +481,9 @@ class ValidateAMRData
       # look for similar day after the missing date
       day_after = date + days_offset
 
-      if day_after <= @amr_data.end_date && @amr_data.key?(day_after)
+      if day_after <= @amr_data.end_date && @amr_data.date_exists?(day_after)
         temperature_after = average_temperature(day_after)
-        if heating_on == @heating_model.heating_on?(day_after) &&
+        if heating_on == @heating_model.heat_on_missing_data?(day_after) &&
             within_temperature_range?(avg_temperature, temperature_after) &&
             daytype(day_after) == missing_daytype
           return [date, create_substituted_gas_data(date, day_after)]
@@ -488,14 +493,14 @@ class ValidateAMRData
       day_before = date - days_offset
       temperature_before = average_temperature(day_before)
       if day_before >= @amr_data.start_date &&
-          @amr_data.key?(day_before) &&
-          heating_on == @heating_model.heating_on?(day_before) &&
+          @amr_data.date_exists?(day_before) &&
+          heating_on == @heating_model.heat_on_missing_data?(day_before) &&
           within_temperature_range?(avg_temperature, temperature_before) &&
           daytype(day_before) == missing_daytype
         return [date, create_substituted_gas_data(date, day_before)]
       end
     end
-    logger.debug "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype}"
+    logger.debug "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype} heating? #{heating_on}"
     [date, nil]
   end
 
@@ -528,10 +533,10 @@ class ValidateAMRData
   end
 
   def adjusted_substitute_heating_kwh(missing_day, substitute_day)
-    _temp_diff = @temperatures.average_temperature(missing_day) - @temperatures.average_temperature(substitute_day)
-
-    kwh_prediction_for_missing_day = @heating_model.predicted_kwh(missing_day, @temperatures.average_temperature(missing_day))
+    kwh_prediction_for_missing_day = @heating_model.predicted_kwh(missing_day, @temperatures.average_temperature(missing_day), substitute_day)
     kwh_prediction_for_substitute_day = @heating_model.predicted_kwh(substitute_day, @temperatures.average_temperature(substitute_day))
+
+    # using an adjustment of kWhs * (A + BTm)/(A + BTs), an alternative could be kWhs + B(Tm - Ts)
     prediction_ratio = kwh_prediction_for_missing_day / kwh_prediction_for_substitute_day
     if prediction_ratio < 0
       logger.debug "Warning: negative predicated data for missing day #{missing_day} from #{substitute_day} setting to zero"
@@ -539,18 +544,15 @@ class ValidateAMRData
     end
     substitute_data = Array.new(48, 0.0)
     (0..47).each do |halfhour_index|
-      # scale substitutes missing day data by ratio of predicted kwh's (not ideal as will scale baseload as well)
-      # TODO(PH,28May2018): at some point do more sophisticated adjustment, which potentially
-      #                   : scales base load differently- very low priority requirement
       substitute_data[halfhour_index] = @amr_data.kwh(substitute_day, halfhour_index) * prediction_ratio
     end
     substitute_data
   end
 
   def create_heating_model
-    @heating_model = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@meter, @holidays, @temperatures, @meter_attributes)
-    @heating_model.calculate_regression_model(SchoolDatePeriod.new(:validation, 'Validation Period', @amr_data.start_date, @amr_data.end_date))
-    @heating_model.calculate_heating_periods(@amr_data.start_date, @amr_data.end_date)
+    @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(@meter)
+    period_of_all_meter_readings = SchoolDatePeriod.new(:validation, 'Validation Period', @amr_data.start_date, @amr_data.end_date)
+    @heating_model = @model_cache.create_and_fit_model(:best, period_of_all_meter_readings, true)
   end
 
   def daytype(date)

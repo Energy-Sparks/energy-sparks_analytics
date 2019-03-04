@@ -6,6 +6,7 @@ class OneDayAMRReading
     'CMP1'  => { name: 'Correct partially missing (zero) data on this date',description: 'Electricity data but some zero, not PV, interpolated missing'},
     'CMP2'  => { name: 'Correct partially missing (zero) data on this date',description: 'Electricity data but some zero, not PV, substituted whole day'},
     'FIXS'  => { name: 'Setting fixed start date - bad data before',        description: 'Prior data before date ignored'},
+    'FIXE'  => { name: 'Setting fixed end date; bad data after/deprecated', description: 'Data after date ignored'},
     'MWKE'  => { name: 'Missing Weekend - set to zero',                     description: 'Missing data replaced with zeros'},
     'MHOL'  => { name: 'Missing Holiday',                                   description: 'Missing data replaced with zeros'},
     'MDTZ'  => { name: 'Missing data date range set to zero',               description: 'Missing data replaced with zeros'},

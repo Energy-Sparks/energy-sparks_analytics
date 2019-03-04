@@ -66,7 +66,7 @@ class EnergyEquivalences
         "1 shower uses #{X.format(:litre, SHOWER_LITRES)} of water, which is heated from 15C to 40C (25C rise). " +
         WATER_ENERGY_DESCRIPTION +
         "It therefore takes #{X.format(:litre, SHOWER_LITRES)} * #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} * " +
-        "#{SHOWER_TEMPERATURE_RAISE} = #{X.format(:kwh, SHOWER_KWH_GROSS)} to heat 1 litre of water by 20C. " +
+        "#{SHOWER_TEMPERATURE_RAISE} = #{X.format(:kwh, SHOWER_KWH_GROSS)} to heat 1 litre of water by 25C. " +
         "However gas boilers are only #{GAS_BOILER_EFFICIENCY * 100.0}percent efficient, so " +
         "#{X.format(:kwh, SHOWER_KWH_GROSS)} / #{GAS_BOILER_EFFICIENCY} " +
         "= #{X.format(:kwh, SHOWER_KWH_NET)} of gas is required. ".freeze
@@ -85,7 +85,7 @@ class EnergyEquivalences
   KETTLE_£ = KETTLE_KWH * UK_ELECTRIC_GRID_£_KWH
   KETTLE_CO2_KG = KETTLE_KWH * UK_ELECTRIC_GRID_CO2_KG_KWH
   ONE_KETTLE_DESCRIPTION_TO_KWH =\
-  WATER_ENERGY_DECRIPTION = WATER_ENERGY_DESCRIPTION +
+          WATER_ENERGY_DESCRIPTION +
           "It takes #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} of energy to heat 1 litre of water by 1C. "\
           "A kettle contains about #{X.format(:litre, KETTLE_LITRES)} of water, which is heated by 85C from 15C to 100C. "\
           "Therefore it takes #{X.format(:litre, KETTLE_LITRES)} * 85C * #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} "\
@@ -127,7 +127,7 @@ class EnergyEquivalences
       conversions: {
         kwh:  {
           rate:         1.0,
-          description:  '',
+          description:  ''
         },
         co2:  {
           rate:         UK_GAS_CO2_KG_KWH,
@@ -245,7 +245,7 @@ class EnergyEquivalences
         £:  {
           rate:         SMARTPHONE_CHARGE_£,
           description:  "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. "\
-                        "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)}. "\
+                        "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_CO2_KG_KWH)}. "\
                         "Therefore charging one smartphone costs #{X.format(:£, SMARTPHONE_CHARGE_£)}"
         }
       }
@@ -266,7 +266,7 @@ class EnergyEquivalences
       conversions: {
         £:  {
           rate:         LIBRARY_BOOK_£,
-          description:  "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}."\
+          description:  "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}."
         }
       }
     },
@@ -275,7 +275,7 @@ class EnergyEquivalences
       conversions: {
         £:  {
           rate:         TEACHING_ASSISTANT_£_HOUR,
-          description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour."\
+          description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour."
         }
       }
     },
