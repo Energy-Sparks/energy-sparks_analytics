@@ -110,25 +110,17 @@ class MeterAttributes
         :deprecated_include_but_ignore_start_date
       ]
     },
-<<<<<<< HEAD
     # ==============================King Edward VI =============================
-=======
-    # ==============================King Edwards =============================
->>>>>>> 51ae9db10917f06131697c68c80f6dab82ccf3da
     6517203  => {
       meter_corrections: [
         {
           readings_start_date: Date.new(2018, 2, 15)
         }
-<<<<<<< HEAD
       ],
       heating_model: {
         max_summer_daily_heating_kwh:     2000,
         reason: 'Automated process set too high at about 6800'
       }
-=======
-      ]
->>>>>>> 51ae9db10917f06131697c68c80f6dab82ccf3da
     },
     # ==============================Marksbury==================================
     2200011879013 => {
