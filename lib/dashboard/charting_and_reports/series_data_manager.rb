@@ -124,10 +124,10 @@ class SeriesDataManager
 
   def series_bucket_names
     buckets = []
-  
+
     [@breakdown_list + @y2_axis_list].flatten.each do |breakdown|
       case breakdown
-      when :heating;                buckets = combinatorially_combine(buckets, SeriesNames::HEATINGSERIESNAMES) 
+      when :heating;                buckets = combinatorially_combine(buckets, SeriesNames::HEATINGSERIESNAMES)
       when :daytype;                buckets = combinatorially_combine(buckets, SeriesNames::DAYTYPESERIESNAMES)
       when :meter;                  buckets = combinatorially_combine(buckets, meter_names)
 
@@ -177,7 +177,7 @@ class SeriesDataManager
   def degreeday_base_temperature
     heating_model.average_base_temperature
   end
-  
+
   def self.series_name_for_trendline(trendline_name)
     trendline_name.to_s.sub('trendline_', '' ).to_sym
   end
@@ -337,7 +337,7 @@ class SeriesDataManager
   def amr_data_date_range(meter, start_date, end_date)
     if @adjust_by_temperature && meter.fuel_type == :gas
       a, b, r2, base_t, model_name, heating_on = daily_high_thermal_mass_heating_model.regression_model_parameters(start_date)
-      
+
       puts "a #{a.round(0)} b #{b.round(0)} bT #{base_t} nm #{model_name} heat on #{heating_on}"
       avg_temp = @meter_collection.temperatures.average_temperature(start_date)
       pred_kwh = daily_high_thermal_mass_heating_model.predicted_kwh(start_date, 10.0)
@@ -454,19 +454,9 @@ def create_fuel_breakdown
         elsif DateTimeHelper.weekend?(date)
           daytype_data[SeriesNames::WEEKEND] += amr_data_one_day(meter, date) * factor
         else
-<<<<<<< HEAD
           open_kwh, close_kwh = intraday_breakdown(meter, date, factor)
           daytype_data[SeriesNames::SCHOOLDAYOPEN] += open_kwh
           daytype_data[SeriesNames::SCHOOLDAYCLOSED] += close_kwh
-
-=======
-          (0..47).each do |halfhour_index|
-            # Time is an order of magnitude slower than DateTime on Windows
-            time_of_day = DateTimeHelper.time_of_day(halfhour_index)
-            daytype_type = @meter_collection.is_school_usually_open?(date, time_of_day) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
-            daytype_data[daytype_type] += meter.amr_data.kwh(date, halfhour_index) * factor
-          end
->>>>>>> 51ae9db10917f06131697c68c80f6dab82ccf3da
         end
       rescue StandardError => e
         logger.error "Unable to aggregate data for #{date} - exception raise"
