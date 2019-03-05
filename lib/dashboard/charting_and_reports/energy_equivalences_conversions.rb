@@ -20,7 +20,7 @@ class EnergyEquivalences
 
   UK_ELECTRIC_GRID_CO2_KG_KWH = 0.280
   UK_ELECTRIC_GRID_£_KWH = BenchmarkMetrics::ELECTRICITY_PRICE
-  
+
   UK_GAS_CO2_KG_KWH = 0.210
   UK_GAS_£_KWH = BenchmarkMetrics::GAS_PRICE
   GAS_BOILER_EFFICIENCY = 0.7
@@ -114,11 +114,11 @@ class EnergyEquivalences
         co2:  {
           rate:         UK_ELECTRIC_GRID_CO2_KG_KWH,
           description:  "In 2018 the UK electricity grid emitted #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)} "\
-                        "for every 1 kWh of electricity supplied."
+                        "for every 1 kWh of electricity supplied. "
         },
         £:  {
           rate:         UK_ELECTRIC_GRID_£_KWH,
-          description:  "Electricity costs schools about £#{UK_ELECTRIC_GRID_£_KWH} per kWh."
+          description:  "Electricity costs schools about £#{UK_ELECTRIC_GRID_£_KWH} per kWh. "
         }
       }
     },
@@ -131,11 +131,11 @@ class EnergyEquivalences
         },
         co2:  {
           rate:         UK_GAS_CO2_KG_KWH,
-          description:  "The carbon intensity gas is #{UK_GAS_CO2_KG_KWH}kg/kWh",
+          description:  "The carbon intensity of gas is #{UK_GAS_CO2_KG_KWH}kg/kWh. ",
         },
         £:  {
           rate:         UK_GAS_£_KWH,
-          description:  "Gas costs schools about £#{UK_GAS_£_KWH} per kWh",
+          description:  "Gas costs schools about £#{UK_GAS_£_KWH} per kWh. ",
         }
       }
     },
@@ -162,8 +162,8 @@ class EnergyEquivalences
         kwh:  {
           rate:         HOMES_KWH_YEAR,
           description:  "A average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity "\
-                        "and #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas per year. "\
-                        "so a total of #{X.format(:kwh, HOMES_KWH_YEAR)}"
+                        "and #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas per year, "\
+                        "so a total of #{X.format(:kwh, HOMES_KWH_YEAR)}. "
         },
         co2:  {
           rate:         HOMES_CO2_YEAR,
@@ -198,7 +198,7 @@ class EnergyEquivalences
           rate:         SHOWER_CO2_KG,
           description:  SHOWER_DESCRIPTION_TO_KWH +
                         "Burning 1 kwh of gas (normal source of heat for showers) emits #{X.format(:kg, UK_GAS_CO2_KG_KWH)} CO2. "\
-                        "Therefore 1 shower uses #{X.format(:kg, SHOWER_CO2_KG)} CO2."
+                        "Therefore 1 shower uses #{X.format(:kg, SHOWER_CO2_KG)} CO2. "
         },
         £:  {
           rate:         SHOWER_£,
@@ -219,13 +219,13 @@ class EnergyEquivalences
           rate:         KETTLE_CO2_KG,
           description:  ONE_KETTLE_DESCRIPTION_TO_KWH +
                         "And, heating 1 kettle emits #{X.format(:kwh, KETTLE_KWH)} &times; #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)}"\
-                        " = #{X.format(:co2, KETTLE_CO2_KG)}."
+                        " = #{X.format(:co2, KETTLE_CO2_KG)}. "
         },
         £:  {
           rate:         KETTLE_£,
           description:  ONE_KETTLE_DESCRIPTION_TO_KWH +
                         "Thus it costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)} &times; #{X.format(:kwh, KETTLE_KWH)} = "\
-                        "#{X.format(:£, KETTLE_£)} to boil a kettle"
+                        "#{X.format(:£, KETTLE_£)} to boil a kettle. "
         }
       }
     },
@@ -240,13 +240,13 @@ class EnergyEquivalences
           rate:         SMARTPHONE_CHARGE_CO2_KG,
           description:  "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. "\
                         "Generating 1 kWh of electricity produces #{X.format(:co2, UK_ELECTRIC_GRID_£_KWH)}. "\
-                        "Therefore charging one smartphone produces #{X.format(:co2, SMARTPHONE_CHARGE_CO2_KG)}"
+                        "Therefore charging one smartphone produces #{X.format(:co2, SMARTPHONE_CHARGE_CO2_KG)}. "
         },
         £:  {
           rate:         SMARTPHONE_CHARGE_£,
           description:  "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. "\
-                        "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_CO2_KG_KWH)}. "\
-                        "Therefore charging one smartphone costs #{X.format(:£, SMARTPHONE_CHARGE_£)}"
+                        "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)}. "\
+                        "Therefore charging one smartphone costs #{X.format(:£, SMARTPHONE_CHARGE_£)}. "
         }
       }
     },
@@ -257,7 +257,7 @@ class EnergyEquivalences
           rate:         TREE_CO2_KG,
           description:  "An average tree absorbs #{X.format(:co2, TREE_CO2_KG_YEAR)} per year. "\
                         "And if the tree lives to #{TREE_LIFE_YEARS} years it will absorb "\
-                        "#{X.format(:co2, TREE_CO2_KG)}"
+                        "#{X.format(:co2, TREE_CO2_KG)}. "
         }
       }
     },

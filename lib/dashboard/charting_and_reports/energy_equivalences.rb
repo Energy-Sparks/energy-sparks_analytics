@@ -63,8 +63,8 @@ class EnergyEquivalences
   def self.calculation_description(from_value, from_unit, from_unit_conversion, to_unit_conversion, to_value, to_unit, via_unit)
     "Therefore " +
     "#{FormatEnergyUnit.format(from_unit, from_value)} " +
-    (from_unit_conversion == 1.0 ? '' : " * #{FormatEnergyUnit.format(via_unit, from_unit_conversion)}/#{from_unit}") +
-    " / #{FormatEnergyUnit.format(via_unit, to_unit_conversion)}/#{to_unit} "\
+    (from_unit_conversion == 1.0 ? '' : " &times; #{FormatEnergyUnit.format(via_unit, from_unit_conversion)}/#{from_unit}") +
+    " &divide; #{FormatEnergyUnit.format(via_unit, to_unit_conversion)}/#{to_unit.to_s.humanize} "\
     "= #{FormatEnergyUnit.format(to_unit, to_value)} "\
   end
 
