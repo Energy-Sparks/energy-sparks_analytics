@@ -154,6 +154,14 @@ class MeterCollection
     @meter_identifier_lookup[meter.id] = meter
   end
 
+  def open_time
+    @cached_open_time
+  end
+
+  def close_time
+    @cached_close_time
+  end
+
   # This is overridden in the energysparks code at the moment, to use the actual open/close times
   # It replaces school_day_in_hours(time_of_day)
   def is_school_usually_open?(_date, time_of_day)
