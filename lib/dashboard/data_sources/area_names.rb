@@ -44,7 +44,7 @@ class AreaNames
       temperature_filename:       'Bath temperaturedata.csv',
       solar_ir_filename:          'Bath solardata.csv',
       solar_pv_filename:          'pv data Bath.csv',
-      holiday_calendar:           'Holidays.csv',
+      holiday_calendar:           'Bath holidays.csv',
       yahoo_weather_forecast_id:  'bath, uk',
       met_office_forecast_id:     310026
     },
@@ -71,7 +71,7 @@ class AreaNames
       temperature_filename:       'Sheffield temperaturedata.csv',
       solar_ir_filename:          'Sheffield solardata.csv',
       solar_pv_filename:          'pv data Sheffield.csv',
-      holiday_calendar:           'Holidays.csv',
+      holiday_calendar:           'Sheffield holidays.csv',
       yahoo_weather_forecast_id:  'sheffield, uk', # untested 16Jan2019 post withdrawal of free API
       met_office_forecast_id:     353467
     }
