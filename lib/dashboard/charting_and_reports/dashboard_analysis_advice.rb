@@ -88,6 +88,16 @@ class DashboardChartAdviceBase
       ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :weekends)
     when :intraday_line_school_days_last5weeks, :intraday_line_school_days_6months, :intraday_line_school_last7days
       ElectricityShortTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when :last_2_weeks_gas
+      Last2WeeksDailyGasTemperatureAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :last_2_weeks_gas_degreedays
+      Last2WeeksDailyGasDegreeDaysAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :last_2_weeks_gas_comparison_temperature_compensated
+      Last2WeeksDailyGasComparisonTemperatureCompensatedAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :last_4_weeks_gas_temperature_compensated
+      Last4WeeksDailyGasComparisonTemperatureCompensatedAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :last_7_days_intraday_gas
+      Last7DaysIntradayGas.new(school, chart_definition, chart_data, chart_symbol)
     when :frost_1,  :frost_2,  :frost_3
       HeatingFrostAdviceAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     when :thermostatic_control_large_diurnal_range_1,  :thermostatic_control_large_diurnal_range_2,  :thermostatic_control_large_diurnal_range_3
@@ -2556,4 +2566,189 @@ class SimulatorSolarAdvice < SimulatorApplianceAdviceBase
 end
 #==============================================================================
 class SimulatorMiscOtherAdvice < SimulatorApplianceAdviceBase
+end
+#==============================================================================
+class Last2WeeksDailyGasTemperatureAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          The remainder of the charts on this page are designed to allow you to see
+          the detail of your recent gas consumption. This is particularly useful if
+          you are trying to make improvements in the control of your boiler to save energy.
+        </p>
+        <p>
+          This first chart shows the daily gas consumption over the last 2 weeks
+          including the outside temperature:
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <p>
+        Typically, your gas consumption should vary with outside temperature,
+        the colder it is the more gas you will consume, for example normally
+        twice as much gas might be consumed if the outside temperature is 0C,
+        versus 10C. So, sometimes it can be difficult to see from this chart
+        whether changes you have been making to the boiler have made a difference
+        because outside temperature might be a more dominant effect. The next two
+        charts try to isolate the effect of outside temperature
+      </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class Last2WeeksDailyGasDegreeDaysAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          This chart is identical to the previous chart but replaces temperature
+          with degree days. Degree days &hyphen; how cold it is, increases as it gets colder
+          and makes it easier to see gas consumption increasing with coldness
+          (an explanation of degree days appears above under &apos;By Week: Gas&apos;).
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+        <p>
+          You should be able to see the gas consumption increasing and decreasing
+          with degree days. Any change from this tracking (correlation) might be
+          the impact of recent changes being made to boiler control, or because you
+          have poor thermostatic control in your school. This means your heating controls
+          are not adjusting the boiler in response to changes in temperature.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class Last2WeeksDailyGasComparisonTemperatureCompensatedAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          This chart automatically adjusts the school’s gas consumption for outside temperature,
+          removing the effect of changes in outside temperature. This should make it easier to
+          see the impact of changes you might be making in boiler control:
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+        <p>
+          The quality of the adjustment for outside temperatures may not be perfect as it
+          is dependent on the quality of the school&apos;s thermostatic control (see the thermostatic
+          chart on the Advanced Boiler Control page for an explanation). But, it should give you
+          a much better idea if you are making progress with reducing gas consumption, and the
+          long&hyphen;term impact of any changes you might have made? For example, a reduction on the
+          chart from one week to the next of 10&percnt; might indicate a long&hyphen;term annual reduction of
+          10% in your heating costs.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class Last4WeeksDailyGasComparisonTemperatureCompensatedAdvice < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          This chart is temperature compensated as per the chart above, but shows a
+          longer&hyphen;term view of any changes in the school’s gas consumption:
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class Last7DaysIntradayGas < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          This chart allows you to see when your boiler has been turning on and off
+          over the last week and how much power (gas)
+          it has been consuming in &apos;kilowatts&apos; (kW):
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+        <p>
+          By clicking the legend at the bottom of the screen, you can turn the lines
+          on the chart on and off for individual days &hyphen; making it easier to understand
+          what is going on at the school.
+        </p>
+        <p>
+          In a school with a heating system that is working well (good boiler, good pipework
+          for heat distribution, large enough radiators, and reasonable insulation),
+          you might expect the heating to turn on at about 6am, and peak for the next
+          2 hours while the school is being heated up, and then gradually reduce during the day.
+          In most schools the heat generated by electrical equipment and 30 pupils in a class room
+          would suggest classrooms need very little additional heating from the school&apos;s boiler,
+          once the pupils arrive.
+        </p>
+        <p>
+          If the boiler has &apos;optimal start control&apos; configured, you might notice the start time of
+          the boiler changing automatically &hyphen; from perhaps 6:30am in milder weather to earlier
+          e.g. 4:30pm in colder weather. In very cold weather you might notice the heating coming on &apos;at random&apos;
+          – this is most likely frost protection &hyphen; the boiler turning the heating system on to stop
+          the school&apos;s pipework freezing.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
 end

@@ -162,8 +162,7 @@ class ElectricitySimulator
     start_date = @school.aggregated_heat_meters.amr_data.start_date
     end_date = @school.aggregated_heat_meters.amr_data.end_date
     periods = @school.holidays.years_to_date(start_date, end_date, false)
-    @heating_model = @school.heating_model(periods[0])
-    @heating_model.calculate_heating_periods(start_date, end_date)
+    @heating_model = @school.aggregated_heat_meters.heating_model(periods[0])
   end
 
   def empty_amr_data_set(type)

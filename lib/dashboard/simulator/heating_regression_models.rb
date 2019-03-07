@@ -867,6 +867,33 @@ module AnalyseHeatingAndHotWater
       @heating_on_periods
     end
 
+    def regression_model_parameters(date)
+      model = @models[model_type?(date)]
+      {
+        a:                model.a,
+        b:                model.b,
+        r2:               model.r2,
+        base_temperature: model.base_temperature,
+        model_name:       model.key,
+        heating_on:       heating_on?(date)
+      }
+    end
+
+    def temperature_compensated_one_day_gas_kwh(date, temperature)
+      model = @models[model_type?(date)]
+      actual_kwh = @amr_data.one_day_kwh(date)
+      actual_temperature = temperatures.average_temperature(date)
+      actual_kwh + model.b * (temperature - actual_temperature)
+    end
+
+    def temperature_compensated_date_range_gas_kwh(start_date, end_date, temperature)
+      total_adjusted_kwh = 0.0
+      (start_date..end_date).each do |date|
+        total_adjusted_kwh += temperature_compensated_one_day_gas_kwh(date, temperature)
+      end
+      total_adjusted_kwh
+    end
+
     def predicted_kwh(date, temperature, substitute_model_date = nil)
       model = @models[model_type?(substitute_model_date.nil? ? date : substitute_model_date)]
       if model.nil?

@@ -175,7 +175,17 @@ class SeriesDataManager
   end
 
   def degreeday_base_temperature
-    heating_model.average_base_temperature
+    begin
+      heating_model.average_base_temperature
+    rescue StandardError => _e
+      # TODO(PH, 7Mar2019) - this is a little dangerous as it might give a false
+      # impression of the base temperature, the problem lies in the simulator
+      # which adds degree days onto the by weekly electricity daytype breakdown
+      # chart to provide some indication whether a school has electrical heating
+      # the existing call to the modelling infrastructure doesn't work if the
+      # school has no gas data, need to resolve as part of the storage heater development?
+      20.0
+    end
   end
 
   def self.series_name_for_trendline(trendline_name)
@@ -263,20 +273,25 @@ class SeriesDataManager
   def getdata_by_halfhour(meter, date, halfhour_index)
     breakdown = {}
 
-    [@breakdown_list + @y2_axis_list].flatten.each do |breakdown_type|
+    @breakdown_list.each do |breakdown_type|
       case breakdown_type
       when :submeter;     breakdown.merge!(submeter_datetime_breakdown(meter, date, halfhour_index))
       when :meter;        breakdown.merge!(breakdown_to_meter_level(date, date, halfhour_index))
       when :fuel;         breakdown.merge!(fuel_breakdown_halfhour(date, halfhour_index))
       when :daytype;      breakdown.merge!(daytype_breakdown_halfhour(date, halfhour_index, meter))
+      else;               breakdown[SeriesNames::NONE] = amr_data_by_half_hour(meter, date, halfhour_index)
+      end
+    end
 
+    @y2_axis_list.each do |breakdown_type|
+      case breakdown_type
       when :degreedays;   breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degree_hour(date, halfhour_index, degreeday_base_temperature)
       when :temperature;  breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.temperature(date, halfhour_index)
       when :irradiance;   breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.solar_irradiance(date, halfhour_index)
       when :gridcarbon;   breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.grid_carbon_intensity(date, halfhour_index)
-      else;               breakdown[SeriesNames::NONE] = amr_data_by_half_hour(meter, date, halfhour_index)
       end
     end
+
     breakdown
   end
 
@@ -336,20 +351,7 @@ class SeriesDataManager
 
   def amr_data_date_range(meter, start_date, end_date)
     if @adjust_by_temperature && meter.fuel_type == :gas
-      a, b, r2, base_t, model_name, heating_on = daily_high_thermal_mass_heating_model.regression_model_parameters(start_date)
-
-      puts "a #{a.round(0)} b #{b.round(0)} bT #{base_t} nm #{model_name} heat on #{heating_on}"
-      avg_temp = @meter_collection.temperatures.average_temperature(start_date)
-      pred_kwh = daily_high_thermal_mass_heating_model.predicted_kwh(start_date, 10.0)
-      pred_kwh_at_T = daily_high_thermal_mass_heating_model.predicted_kwh(start_date, avg_temp)
-      act_kwh = meter.amr_data.one_day_kwh(start_date)
-      temperature_adjustment = avg_temp > base_t ? 0.0 : (@adjust_by_temperature_value - avg_temp)
-      adj_kwh = temperature_adjustment * b
-      kwh_adj = act_kwh - adj_kwh
-      puts  "S: #{@adjust_by_temperature_value} actual kWh #{act_kwh.round(0)} actual T #{avg_temp.round(1)}"\
-            " pred kWh at 10.0 #{pred_kwh.round(0)} pred at T #{pred_kwh_at_T.round(0)}"
-      puts "N: dT: #{temperature_adjustment.round(2)} dKWh #{adj_kwh.round(0)} actkWh #{act_kwh.round(0)} adjKWH #{kwh_adj.round(0)}"
-      kwh_adj
+      heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value)
     else
       meter.amr_data.kwh_date_range(start_date, end_date)
     end

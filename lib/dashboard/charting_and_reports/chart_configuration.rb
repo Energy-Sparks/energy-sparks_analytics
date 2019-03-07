@@ -1048,6 +1048,100 @@ class ChartManager
       inherits_from:    :optimum_start,
       y2_axis:          :gridcarbon
     },
+    last_2_weeks_gas_comparison: {
+      name:             'Comparison of last 2 weeks gas consumption',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }],
+      x_axis:           :day,
+      meter_definition: :allheat,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    last_2_weeks_gas: {
+      name:             'Last 2 weeks gas consumption (with temperature)',
+      timescale:        { week: -1..0 },
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    last_2_weeks_gas_degreedays: {
+      name:             'Last 2 weeks gas consumption (with degree days)',
+      y2_axis:          :degreedays,
+      timescale:        { week: -1..0 },
+      inherits_from:    :last_2_weeks_gas
+    },
+    last_2_weeks_gas_comparison_temperature_compensated: {
+      name:             'Comparison of last 2 weeks gas consumption - adjusted for outside temperature',
+      adjust_by_temperature:  10.0,
+      y2_axis:          nil,
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    teachers_landing_page_gas: {
+      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
+    },
+    teachers_landing_page_electricity: {
+      name:             'Comparison of last 2 weeks electricity consumption',
+      meter_definition: :allelectricity,
+      inherits_from:    :teachers_landing_page_gas
+    },
+    last_4_weeks_gas_temperature_compensated: {
+      name:             'Last 4 weeks gas consumption - adjusted for outside temperature',
+      adjust_by_temperature:  10.0,
+      timescale:        [{ day: -27...0 }],
+      y2_axis:          nil,
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    last_7_days_intraday_gas:  {
+      inherits_from:    :intraday_line_school_last7days,
+      name:             'Intraday (last 7 days) gas',
+      meter_definition: :allheat
+    },
+=begin
+    last_2_weeks_gas_comparison_datetime: {
+      name:             'Last 2 weeks gas consumption week',
+      x_axis:           :datetime,
+      chart1_type:      :line,
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    last_2_weeks_gas_datetime: {
+      name:             'Last 2 weeks gas consumption week',
+      x_axis:           :datetime,
+      chart1_type:      :line,
+      inherits_from:    :last_2_weeks_gas
+    },
+    last_2_weeks_gas_temperature_compensated: {
+      name:             'Last 2 weeks gas consumption - adjusted for outside temperature',
+      timescale:        { week: -1..0 },
+      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
+    },
+    last_8_weeks_gas_comparison: {
+      name:             'Comparison of 2 months gas consumption',
+      x_axis:           :day,
+      timescale:        [{ week: -4..0 }, { week: -9..-5 }],
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    last_8_weeks_gas_comparison_temperature_compensated: {
+      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
+      timescale:        [{ week: -4..0 }, { week: -9..-5 }],
+      x_axis:           :day,
+      y2_axis:          nil,
+      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
+    },
+    last_8_weeks_gas_comparison_temperature_compensated_line: {
+      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
+      chart1_type:      :line,
+      inherits_from:    :last_8_weeks_gas_comparison_temperature_compensated
+    },
+    last_28_days_gas_comparison_temperature_compensated_line: {
+      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
+      timescale:        [{ day: -27...0 }, { day: -55..-28 }],
+      inherits_from:    :last_8_weeks_gas_comparison_temperature_compensated
+    },
+    last_28_days_gas_comparison_temperature_compensated_column: {
+      chart1_type:      :line,
+      inherits_from:    :last_28_days_gas_comparison_temperature_compensated_line
+    },
+=end
     #==============================================================
     sprint2_last_2_weeks_electricity_by_datetime: {
       name:             'Compare last 2 weeks by time of day - line chart (Electricity)',
@@ -1074,7 +1168,6 @@ class ChartManager
       inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
       chart1_type:      :column
     },
-
     sprint2_last_2_weeks_gas_by_datetime: {
       name:             'Compare last 2 weeks by time of day - line chart (Gas)',
       inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
@@ -1090,16 +1183,6 @@ class ChartManager
       inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
       meter_definition: :allheat
     },
-    sprint2_last_2_weeks_gas_by_day_column: {
-      name:             'Compare last 2 weeks by day - column chart (Gas)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_column,
-      meter_definition: :allheat
-    },
-    last_2_week_gas_comparison_with_adjusted_temperature: {
-      name: 'Comparison of last 2 weeks by gas consumption - adjusted for outside temperature',
-      adjust_by_temperature:  10.0,
-      inherits_from:    :sprint2_last_2_weeks_gas_by_day_column
-    },
     sprint2_gas_comparison:  {
       name:             'Comparison of out of hour',
       chart1_type:      :bar,
@@ -1110,11 +1193,6 @@ class ChartManager
       series_breakdown: :daytype,
       yaxis_units:      :£,
       yaxis_scaling:    :none
-    },
-    last_7_days_intraday_gas:  {
-      inherits_from:    :intraday_line_school_last7days,
-      name:             'Intraday (last 7 days) gas',
-      meter_definition: :allheat
     }
   }.freeze
 end

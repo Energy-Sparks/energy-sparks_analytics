@@ -45,6 +45,11 @@ class DashboardConfiguration
                                   gas_longterm_trend
                                   gas_by_day_of_week
                                   gas_heating_season_intraday
+                                  last_2_weeks_gas
+                                  last_2_weeks_gas_degreedays
+                                  last_2_weeks_gas_comparison_temperature_compensated
+                                  last_4_weeks_gas_temperature_compensated
+                                  last_7_days_intraday_gas
                                 ]
                               },
     main_dashboard_electric_and_gas: {

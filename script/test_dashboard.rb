@@ -15,7 +15,7 @@ profile = false
 
 reports = ReportConfigSupport.new
 
-# reports.load_school('Stanton Drew Primary School', true)
+reports.load_school('St Marks Secondary', true)
 
 # testing examples
 #
@@ -26,6 +26,8 @@ reports = ReportConfigSupport.new
 #
 
 RubyProf.start if profile
+
+# reports.do_all_standard_pages_for_school
 
 reports.do_all_schools(true)
 
