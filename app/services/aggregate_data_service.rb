@@ -257,7 +257,7 @@ class AggregateDataService
 
     if combined_meter.nil?
       combined_meter = Dashboard::Meter.new(
-        self,
+        @meter_collection,
         combined_amr_data,
         type,
         combined_id,
