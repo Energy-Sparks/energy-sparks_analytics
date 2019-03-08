@@ -256,11 +256,13 @@ class AggregateDataService
     combined_name, combined_id, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
 
     if combined_meter.nil?
+      mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type) unless @meter_collection.urn.nil?
+
       combined_meter = Dashboard::Meter.new(
         @meter_collection,
         combined_amr_data,
         type,
-        combined_id,
+        mpan_mprn,
         combined_name,
         combined_floor_area,
         combined_pupils
