@@ -40,6 +40,9 @@ class FormatEnergyUnit
   def self.scale_num(number)
     if number.nil?
       '' # specific case where no value specified
+          
+    elsif number.magnitude == 0.0
+      '0.0'  
     elsif number.magnitude < 0.01
       sprintf '%.6f', number
     elsif number.magnitude < 0

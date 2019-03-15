@@ -10,7 +10,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
 
   def analyse_private(asof_date)
     calculate_hot_water_model(asof_date)
-    efficiency = @hot_water_model.efficiency
+    efficiency = @hot_water_model.overall_efficiency
 
     @analysis_report.add_book_mark_to_base_url('HotWaterEfficiency')
     @analysis_report.term = :longterm

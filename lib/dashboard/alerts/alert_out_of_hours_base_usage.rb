@@ -77,7 +77,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
         name: 'Day Type',
         chart1_type: :pie,
         series_breakdown: :daytype,
-        yaxis_units: :£,
+        yaxis_units: :kwh,
         yaxis_scaling: :none,
         meter_definition: fuel.to_sym == :electricity ? :allelectricity : :allheat,
         x_axis: :nodatebuckets,

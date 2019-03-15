@@ -303,7 +303,7 @@ class ElectricitySimulator
 
   def boiler_start_time(date, boiler_gas_on_criteria)
     on_time_hh_index = nil
-    if heating_on?(date) && @school.aggregated_heat_meters.amr_data.key?(date)
+    if heating_on?(date) && @school.aggregated_heat_meters.amr_data.date_exists?(date)
       (0..47).each do |halfhour_index|
         if @school.aggregated_heat_meters.amr_data.kwh(date, halfhour_index) * 2.0 > boiler_gas_on_criteria
           on_time_hh_index = halfhour_index
@@ -316,7 +316,7 @@ class ElectricitySimulator
 
   def boiler_end_time(date, boiler_gas_off_criteria)
     on_time_hh_index = nil
-    if heating_on?(date) && @school.aggregated_heat_meters.amr_data.key?(date)
+    if heating_on?(date) && @school.aggregated_heat_meters.amr_data.date_exists?(date)
       47.downto(0).each do |halfhour_index|
         if @school.aggregated_heat_meters.amr_data.kwh(date, halfhour_index) * 2.0 > boiler_gas_off_criteria
           on_time_hh_index = halfhour_index
@@ -333,7 +333,7 @@ class ElectricitySimulator
     total = 0.0
     count = 0
     (@period.start_date..@period.end_date).each do |date|
-      if heating_on?(date) && @school.aggregated_heat_meters.amr_data.key?(date)
+      if heating_on?(date) && @school.aggregated_heat_meters.amr_data.date_exists?(date)
         kw_peak = @school.aggregated_heat_meters.amr_data.statistical_peak_kw(date)
         total += kw_peak
         count += 1

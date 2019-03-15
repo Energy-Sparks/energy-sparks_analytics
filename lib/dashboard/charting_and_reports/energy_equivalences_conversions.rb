@@ -40,17 +40,17 @@ class EnergyEquivalences
   ICE_DESCRIPTION_TO_KWH =\
         ICE_CAR_EFFICIENCY +
         "Each litre of petrol contains #{X.format(:kwh, LITRE_PETROL_KWH)} of energy, thus it takes "\
-        "#{X.format(:litre, ICE_LITRES_PER_100KM)} * #{X.format(:kwh, LITRE_PETROL_KWH)}/l / 100 km = "\
+        "#{X.format(:litre, ICE_LITRES_PER_100KM)} &times; #{X.format(:kwh, LITRE_PETROL_KWH)}/l &divide; 100 km = "\
         "#{X.format(:kwh, ICE_KWH_KM)} for a car to travel 1 km. "
   ICE_DESCRIPTION_CO2_KG =\
         ICE_CAR_EFFICIENCY +
         "Each litre of petrol contains #{X.format(:co2, LITRE_PETROL_CO2_KG)}, thus the car emits "\
-        "#{X.format(:litre, ICE_LITRES_PER_100KM)} * #{X.format(:kg, LITRE_PETROL_CO2_KG)}/l "\
-        " / 100 km = #{X.format(:co2, ICE_CO2_KM)} when it travels 1 km. "
+        "#{X.format(:litre, ICE_LITRES_PER_100KM)} &times; #{X.format(:kg, LITRE_PETROL_CO2_KG)}/l "\
+        " &divide; 100 km = #{X.format(:co2, ICE_CO2_KM)} when it travels 1 km. "
   ICE_DESCRIPTION_TO_£ =\
         ICE_CAR_EFFICIENCY +
-        "A litre of petrol costs about #{X.format(:£, LITRE_PETROL_£)}"
-        "so it costs #{X.format(:litre, ICE_LITRES_PER_100KM)} * #{X.format(:£, LITRE_PETROL_£)} / 100km "\
+        "A litre of petrol costs about #{X.format(:£, LITRE_PETROL_£)} "\
+        "so it costs #{X.format(:litre, ICE_LITRES_PER_100KM)} &times; #{X.format(:£, LITRE_PETROL_£)} &divide; 100km "\
         "= #{X.format(:£, ICE_£_KM)} to travel 1 km "\
         "(In reality if you include the costs of maintenance, servicing, depreciation "\
         "it can cost about £0.30/km to travel by car). "
@@ -65,10 +65,10 @@ class EnergyEquivalences
   SHOWER_DESCRIPTION_TO_KWH =\
         "1 shower uses #{X.format(:litre, SHOWER_LITRES)} of water, which is heated from 15C to 40C (25C rise). " +
         WATER_ENERGY_DESCRIPTION +
-        "It therefore takes #{X.format(:litre, SHOWER_LITRES)} * #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} * " +
+        "It therefore takes #{X.format(:litre, SHOWER_LITRES)} &times; #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} &times; " +
         "#{SHOWER_TEMPERATURE_RAISE} = #{X.format(:kwh, SHOWER_KWH_GROSS)} to heat 1 litre of water by 20C. " +
         "However gas boilers are only #{GAS_BOILER_EFFICIENCY * 100.0} &percnt; efficient, so " +
-        "#{X.format(:kwh, SHOWER_KWH_GROSS)} / #{GAS_BOILER_EFFICIENCY} " +
+        "#{X.format(:kwh, SHOWER_KWH_GROSS)} &divide; #{GAS_BOILER_EFFICIENCY} " +
         "= #{X.format(:kwh, SHOWER_KWH_NET)} of gas is required. ".freeze
 
   UK_DOMESTIC_GAS_£_KWH = 0.05
@@ -85,10 +85,10 @@ class EnergyEquivalences
   KETTLE_£ = KETTLE_KWH * UK_ELECTRIC_GRID_£_KWH
   KETTLE_CO2_KG = KETTLE_KWH * UK_ELECTRIC_GRID_CO2_KG_KWH
   ONE_KETTLE_DESCRIPTION_TO_KWH =\
-  WATER_ENERGY_DECRIPTION = WATER_ENERGY_DESCRIPTION +
+          WATER_ENERGY_DESCRIPTION +
           "It takes #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} of energy to heat 1 litre of water by 1C. "\
           "A kettle contains about #{X.format(:litre, KETTLE_LITRES)} of water, which is heated by 85C from 15C to 100C. "\
-          "Therefore it takes #{X.format(:litre, KETTLE_LITRES)} * 85C * #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} "\
+          "Therefore it takes #{X.format(:litre, KETTLE_LITRES)} &times; 85C &times; #{X.format(:kwh, WATER_ENERGY_KWH_LITRE_PER_K)} "\
           "= #{X.format(:kwh, KETTLE_KWH)} of energy to boil 1 kettle. ".freeze
 
   SMARTPHONE_CHARGE_kWH = 3.6 * 2.0 / 1000.0 # 3.6V * 2.0 Ah / 1000
@@ -127,15 +127,15 @@ class EnergyEquivalences
       conversions: {
         kwh:  {
           rate:         1.0,
-          description:  '',
+          description:  ''
         },
         co2:  {
           rate:         UK_GAS_CO2_KG_KWH,
-          description:  "The carbon intensity of gas is #{UK_GAS_CO2_KG_KWH}kg/kWh ",
+          description:  "The carbon intensity of gas is #{UK_GAS_CO2_KG_KWH}kg/kWh. ",
         },
         £:  {
           rate:         UK_GAS_£_KWH,
-          description:  "Gas costs schools about £#{UK_GAS_£_KWH} per kWh ",
+          description:  "Gas costs schools about £#{UK_GAS_£_KWH} per kWh. ",
         }
       }
     },
@@ -170,9 +170,9 @@ class EnergyEquivalences
           description:  "A average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity "\
                         "and #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas per year. "\
                         "The carbon intensity of 1 kWh of electricity = #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)}/kWh and "\
-                        "gas #{X.format(:co2, UK_GAS_CO2_KG_KWH)} / kWh. "\
-                        "Therefore 1 home emits #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} * #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)} + "\
-                        "#{X.format(:kwh, HOMES_GAS_KWH_YEAR)} * #{X.format(:co2, UK_GAS_CO2_KG_KWH)} = "\
+                        "gas #{X.format(:co2, UK_GAS_CO2_KG_KWH)}/kWh. "\
+                        "Therefore 1 home emits #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} &times; #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)} + "\
+                        "#{X.format(:kwh, HOMES_GAS_KWH_YEAR)} &times; #{X.format(:co2, UK_GAS_CO2_KG_KWH)} = "\
                         "#{X.format(:co2, HOMES_CO2_YEAR)} per year. "
         },
         £:  {
@@ -181,8 +181,8 @@ class EnergyEquivalences
                         "and #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas per year. "\
                         "For homes the cost of 1 kWh of electricity = #{X.format(:£, UK_DOMESTIC_ELECTRICITY_£_KWH)}/kWh and "\
                         "gas #{X.format(:£, UK_DOMESTIC_GAS_£_KWH)}/kWh. "\
-                        "Therefore 1 home costs #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} * #{X.format(:£, UK_DOMESTIC_ELECTRICITY_£_KWH)} + "\
-                        "#{X.format(:kwh, HOMES_GAS_KWH_YEAR)} * #{X.format(:£, UK_DOMESTIC_GAS_£_KWH)} = "\
+                        "Therefore 1 home costs #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} &times; #{X.format(:£, UK_DOMESTIC_ELECTRICITY_£_KWH)} + "\
+                        "#{X.format(:kwh, HOMES_GAS_KWH_YEAR)} &times; #{X.format(:£, UK_DOMESTIC_GAS_£_KWH)} = "\
                         "#{X.format(:£, HOMES_£_YEAR)} in energy per year. "
         }
       }
@@ -204,7 +204,7 @@ class EnergyEquivalences
           rate:         SHOWER_£,
           description:  SHOWER_DESCRIPTION_TO_KWH +
                         "1 kwh of gas costs #{X.format(:£, UK_GAS_£_KWH)}. "\
-                        "Therefore 1 shower costs #{X.format(:kwh, SHOWER_KWH_NET)} * #{X.format(:£, UK_GAS_£_KWH)} = #{X.format(:£, SHOWER_£)} of gas. "
+                        "Therefore 1 shower costs #{X.format(:kwh, SHOWER_KWH_NET)} &times; #{X.format(:£, UK_GAS_£_KWH)} = #{X.format(:£, SHOWER_£)} of gas. "
         }
       }
     },
@@ -218,13 +218,13 @@ class EnergyEquivalences
         co2:  {
           rate:         KETTLE_CO2_KG,
           description:  ONE_KETTLE_DESCRIPTION_TO_KWH +
-                        "And, heating 1 kettle emits #{X.format(:kwh, KETTLE_KWH)} * #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)}"\
+                        "And, heating 1 kettle emits #{X.format(:kwh, KETTLE_KWH)} &times; #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)}"\
                         " = #{X.format(:co2, KETTLE_CO2_KG)}. "
         },
         £:  {
           rate:         KETTLE_£,
           description:  ONE_KETTLE_DESCRIPTION_TO_KWH +
-                        "Thus it costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)} * #{X.format(:kwh, KETTLE_KWH)} = "\
+                        "Thus it costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)} &times; #{X.format(:kwh, KETTLE_KWH)} = "\
                         "#{X.format(:£, KETTLE_£)} to boil a kettle. "
         }
       }
@@ -266,7 +266,7 @@ class EnergyEquivalences
       conversions: {
         £:  {
           rate:         LIBRARY_BOOK_£,
-          description:  "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}. "\
+          description:  "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}."
         }
       }
     },
@@ -275,7 +275,7 @@ class EnergyEquivalences
       conversions: {
         £:  {
           rate:         TEACHING_ASSISTANT_£_HOUR,
-          description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour. "\
+          description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour."
         }
       }
     },

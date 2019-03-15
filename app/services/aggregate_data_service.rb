@@ -47,7 +47,7 @@ class AggregateDataService
   def validate_meter_list(list_of_meters)
     logger.info "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
-      validate_meter = ValidateAMRData.new(meter, 50, @meter_collection.holidays, @meter_collection.temperatures, @meter_attributes)
+      validate_meter = ValidateAMRData.new(meter, 50, @meter_collection.holidays, @meter_collection.temperatures)
       validate_meter.validate
     end
   end
@@ -171,6 +171,7 @@ class AggregateDataService
   end
 
   def heating_model(period)
+=begin
     unless @heating_models.key?(:basic)
       @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters, @meter_collection.holidays, @meter_collection.temperatures, @meter_attributes)
       @heating_models[:basic].calculate_regression_model(period)
@@ -179,6 +180,8 @@ class AggregateDataService
     # logger.debug "Calculating model 21Jun18 debug", @period.inspect
     @heating_on_periods = @model.calculate_heating_periods(@period)
     @heating_models[:basic]
+=end
+    raise EnergySparksDeprecatedException.new('Not expecting aggregate data service to be calling models')
   end
 
   def aggregate_amr_data(meters, type)
@@ -196,7 +199,7 @@ class AggregateDataService
       combined_data = Array.new(48, 0.0)
       meters.each do |meter|
         (0..47).each do |half_hour_index|
-          if meter.amr_data.key?(date)
+          if meter.amr_data.date_exists?(date)
             combined_data[half_hour_index] += meter.amr_data.kwh(date, half_hour_index)
           end
         end
@@ -253,11 +256,13 @@ class AggregateDataService
     combined_name, combined_id, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
 
     if combined_meter.nil?
+      mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type) unless @meter_collection.urn.nil?
+
       combined_meter = Dashboard::Meter.new(
-        self,
+        @meter_collection,
         combined_amr_data,
         type,
-        combined_id,
+        mpan_mprn,
         combined_name,
         combined_floor_area,
         combined_pupils
@@ -277,9 +282,8 @@ class AggregateDataService
   def log_meter_dates(list_of_meters)
     logger.info 'Combining the following meters'
     list_of_meters.each do |meter|
-      @meter_attributes.attributes(meter, :aggregation)
       logger.info sprintf('%-24.24s %-18.18s %s to %s', meter.display_name, meter.id, meter.amr_data.start_date.to_s, meter.amr_data.end_date)
-      aggregation_rules = @meter_attributes.attributes(meter, :aggregation)
+      aggregation_rules = meter.attributes(:aggregation)
       unless aggregation_rules.nil?
         logger.info "                Meter has aggregation rules #{aggregation_rules}"
       end

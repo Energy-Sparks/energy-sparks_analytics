@@ -162,8 +162,7 @@ class ElectricitySimulator
     start_date = @school.aggregated_heat_meters.amr_data.start_date
     end_date = @school.aggregated_heat_meters.amr_data.end_date
     periods = @school.holidays.years_to_date(start_date, end_date, false)
-    @heating_model = @school.heating_model(periods[0])
-    @heating_model.calculate_heating_periods(start_date, end_date)
+    @heating_model = @school.aggregated_heat_meters.heating_model(periods[0])
   end
 
   def empty_amr_data_set(type)
@@ -434,7 +433,7 @@ class ElectricitySimulator
     pump_power = check_positive(@appliance_definitions[:boiler_pumps][:pump_power])
     pump__gas_on_criteria = @appliance_definitions[:boiler_pumps][:boiler_gas_power_on_criteria]
     (boiler_pump_data.start_date..boiler_pump_data.end_date).each do |date|
-      if @school.aggregated_heat_meters.amr_data.key?(date)
+      if @school.aggregated_heat_meters.amr_data.date_exists?(date)
         (0..47).each do |half_hour_index|
           amr_gas_usage = @school.aggregated_heat_meters.amr_data.kwh(date,half_hour_index) || 0.0
           gas_power_consumption = amr_gas_usage * 2.0

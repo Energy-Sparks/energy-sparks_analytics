@@ -7,23 +7,41 @@ require 'date'
 class MeterAttributes
   extend Logging
 
-  def self.attributes(meter, type)
+  def self.attributes(meter, type = nil)
     mpan_mprn = meter.mpan_mprn.to_i # treat as integer even if loaded as string
     return nil unless METER_ATTRIBUTE_DEFINITIONS.key?(mpan_mprn)
     return nil unless METER_ATTRIBUTE_DEFINITIONS[mpan_mprn].key?(type)
 
-    butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn][type]
+    butes = nil
+    if type.nil?
+      butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn]
+    else
+      butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn][type]
+    end
 
     # fill in weekends for all Bath derived data
     # Note - meter.meter_collection.area_name drops to school or meter collection
     # accordingly
-    if type == :meter_corrections && meter.meter_collection.area_name.include?('Bath')
-      butes.push( {auto_insert_missing_readings: { type: :weekends}})
+    if meter.meter_collection.area_name.include?('Bath')
+      weekend_correction = {auto_insert_missing_readings: { type: :weekends}}
+      if type == :meter_corrections
+        butes.push(weekend_correction)
+      elsif type.nil?
+        butes[:meter_corrections] = [] unless butes.key?(:meter_corrections)
+        butes[:meter_corrections].push(weekend_correction)
+      end
     end
     butes
   end
 
   METER_ATTRIBUTE_DEFINITIONS = {
+    # ==============================Athlestan=============================
+    2148244308  => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     800,
+        reason: 'Automated process set too high at about 1500'
+      }
+    },
     # ==============================Bishop Sutton==============================
     2200012833349 => {
       aggregation:  [
@@ -34,9 +52,15 @@ class MeterAttributes
         no_heating_in_summer_set_missing_to_zero: {
           start_toy: TimeOfYear.new(5,25),
           end_toy:   TimeOfYear.new(10, 15)
-        }
+        },
+        readings_end_date: Date.new(2016, 9, 30)
       ],
       function: [ :heating_only ]
+    },
+    2200012833358 => {
+      meter_corrections: [
+        readings_end_date: Date.new(2017, 9, 30)
+      ]
     },
     # ==============================Castle Primary=============================
     2200015105145 => {
@@ -55,11 +79,8 @@ class MeterAttributes
     2200042676990 => { aggregation:  [:ignore_start_date] }, # succeeds meters above
     4186869705 => {
       heating_model: {
- #       calculation_start_date: nil,
- #       calculation_end_date:   nil,
-        heating_day_determination_method:  { fixed__minimum_per_day: 250 },
-        heating_balance_point_temperature:  16.0,
-        model: :thermally_heavy,
+        max_summer_daily_heating_kwh:     400,
+        reason: 'Automated process set too high at about 600'
       },
       meter_corrections: [
         {
@@ -70,6 +91,13 @@ class MeterAttributes
           }
         }
       ]
+    },
+    # ==============================Eccleshall=============================
+    2155853706  => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     400,
+        reason: 'Automated process set too high at about 1000'
+      }
     },
     # ==============================Frome College============================
     2000027481429 => {
@@ -82,22 +110,24 @@ class MeterAttributes
         :deprecated_include_but_ignore_start_date
       ]
     },
-    # ==============================King Edwards =============================
+    # ==============================King Edward VI =============================
     6517203  => {
       meter_corrections: [
         {
           readings_start_date: Date.new(2018, 2, 15)
         }
-      ]
+      ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     2000,
+        reason: 'Automated process set too high at about 6800'
+      }
     },
     # ==============================Marksbury==================================
     2200011879013 => {
       meter_corrections: [
         {
-          set_bad_data_to_zero: {
-            start_date: Date.new(2011, 10, 6),
-            end_date:   Date.new(2015, 10, 17)
-          }
+          readings_start_date: Date.new(2011, 10, 20),
+          reason: 'For some reason all data was set as an attibute to zero historically, changed 3Mar2019 PH'
         }
       ]
     },
@@ -127,7 +157,11 @@ class MeterAttributes
         {
           readings_start_date: Date.new(2014, 9, 30)
         }
-      ]
+      ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     150,
+        reason: 'Automated process set too high at about 400'
+      }
     },
     # ==============================Roundhill==================================
     75665806 => {
@@ -139,7 +173,11 @@ class MeterAttributes
             scale:  (1.0 / 31.1) # incorrectly scaled imperial/metric data
           }
         }
-      ]
+      ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     80,
+        reason: 'There seems to be some occasional noise, which is unidentified but not heating PH(4Mar2019)'
+      }
     },
     50974703 => {
       meter_corrections: [
@@ -150,11 +188,56 @@ class MeterAttributes
             scale:  (1.0 / 31.1) # incorrectly scaled imperial/metric data
           }
         }
-      ]
+      ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     330,
+        reason: 'Difficult to split heating and HW, auto split around 800 PH(4Mar2019)'
+      }
+    },
+    50974602 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2010, 9, 4),
+            end_date: Date.new(2011, 9, 4),
+            scale:  (1.0 / 31.1) # incorrectly scaled imperial/metric data
+          }
+        }
+      ],
+      reason: 'may need to be set to heating model, as kitchen seems outside temperature dependent, 2x reduction in usage post Jul 2018 PH(4Mar2019)'
+    },
+    75665705 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2010, 9, 4),
+            end_date: Date.new(2011, 9, 4),
+            scale:  (1.0 / 31.1) # incorrectly scaled imperial/metric data
+          }
+        }
+      ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     90,
+        reason: 'Auto fitter slightly high at 105 PH(4Mar2019)'
+      }
+    },
+    80000000109005 => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     600,
+        reason: 'Auto fitter high at 1400 PH(4Mar2019)'
+      }
     },
     # ==============================St Johns===============================
     9206222810 => {
-      meter_corrections: [ { readings_start_date: Date.new(2017, 2, 21) } ]
+      meter_corrections: [ { readings_start_date: Date.new(2017, 2, 21) } ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     250,
+        reason: 'Automated process set too high at about 450'
+      }
+    },
+    # ==============================St Louis===============================
+    19161200 => {
+      function: [ :heating_only ]
     },
     # ==============================St Marks===================================
     8841599005 => { # gas Heating 1
@@ -163,8 +246,8 @@ class MeterAttributes
           start_toy: TimeOfYear.new(4, 1),
           end_toy:   TimeOfYear.new(9, 30)
         }
-      ],
-      function: [ :heating_only ]
+      ]
+      # function: [ :heating_only ]
     },
     13684909 => { # gas Heating 2
       meter_corrections: [
@@ -200,6 +283,12 @@ class MeterAttributes
     13685002 => { # gas hot water
       meter_corrections: [ :set_all_missing_to_zero ],
       function: [ :hotwater_only ]
+    },
+    80000000109328 => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     850,
+        reason: 'Automated process set too high at about 1500'
+      }
     },
     # ==============================St Saviours Juniors========================
     4234023603 => { # current gas meter
@@ -243,7 +332,81 @@ class MeterAttributes
         :deprecated_include_but_ignore_end_date,
         :deprecated_include_but_ignore_start_date
       ]
-    }
+    },
+    # ==============================St Martins========================
+    80000000133290 => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     650,
+        reason: 'Automated process set too high at about 1400'
+      }
+    },
+    # ==============================Saltford========================
+    47939506 => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     100,
+        reason:                           'heating only since 2018, cant set as not so in past: PH 4Mar2019'
+      },
+=begin
+      # example of tested manual model override, for which support required
+      # when atributes are absorbed into front end
+      heating_model: {
+        max_summer_daily_heating_kwh:     400,
+        # override_best_model_type:         :simple_regression_temperature,
+        override_model: {
+          type:   :simple_regression_temperature,
+          regression_models: {
+            heating_occupied_all_days:  { a: 20000, b: -45, base_temperature: 20.0 },
+            weekend_heating:            { a: 252, b: -11, base_temperature: 20.0 },
+            holiday_heating:            { a: 300, b: -20, base_temperature: 20.0 },
+            none:                       { a: 0, b: 0, base_temperature: 20.0 },
+            summer_occupied_all_days:   { a: 100, b: 0, base_temperature: 20.0 },
+            weekend_hotwater_only:      { a: 80, b: 0, base_temperature: 20.0 },
+            holiday_hotwater_only:      { a: 90, b: 0, base_temperature: 20.0 }
+          }
+        },
+        reason: 'Saltford has strange gas consumption data, this is a test'
+      },
+=end
+      # function: [:heating_only] - although its currently heating only (2018-19) it wasn't in the past
+    },
+    # ==============================Stanton Drew========================
+    2200013463696 => {
+      meter_corrections: [
+        {
+          readings_start_date: Date.new(2010, 6, 25),
+          reason: 'Probably not needed, LGAP lost during testing of bulk upload PH 4Mar2019, suggest remove on further review'
+        }
+      ],
+    },
+    # ==============================Twerton========================
+    4223705708 => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     250,
+        reason: 'Automated process set too high at about 350'
+      }
+    },
+    # ==============================Whiteways========================
+    2163409301 => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     1000,
+        reason: 'Automated process set too high at about 1200'
+      }
+    },
+    # ==============================Woodthorpe========================
+    9120550903 => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     500,
+        reason: 'Automated process set too high at about 750'
+      }
+    },
+    # ==============================Wycliffe========================
+    9209120604 => {
+      heating_model: {
+        max_summer_daily_heating_kwh:     350,
+        reason: 'Automated process set too high at about 550'
+      }
+    },
+
   }.freeze
   private_constant :METER_ATTRIBUTE_DEFINITIONS
 end

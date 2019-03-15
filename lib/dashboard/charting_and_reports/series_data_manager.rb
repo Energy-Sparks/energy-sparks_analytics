@@ -93,7 +93,7 @@ end
 class SeriesDataManager
   include Logging
 
-  attr_reader :first_meter_date, :last_meter_date, :first_chart_date, :last_chart_date, :periods
+  attr_reader :first_meter_date, :last_meter_date, :first_chart_date, :last_chart_date, :periods, :adjust_by_temperature
 
   def initialize(meter_collection, chart_configuration)
     @meter_collection = meter_collection
@@ -102,9 +102,14 @@ class SeriesDataManager
     @y2_axis_list = convert_variable_to_array(chart_configuration[:y2_axis])
     @data_types = convert_variable_to_array(chart_configuration[:data_types])
     @heating_model = nil
+    @high_thermal_mass_heating_model = nil
     @hotwater_model = nil
     @periods = nil
     @chart_configuration = chart_configuration
+    # set true/false for performance
+    @adjust_by_temperature = @chart_configuration.key?(:adjust_by_temperature)
+    @adjust_by_temperature_value = @chart_configuration[:adjust_by_temperature] if @adjust_by_temperature
+    @model_type = chart_configuration.key?(:model) ? chart_configuration[:model] : :best
     configure_manager
     logger.info "Series Name Manager: Chart Creation for #{meter_collection}"
   end
@@ -117,61 +122,78 @@ class SeriesDataManager
     end
   end
 
-  # list of series buckets: supports combinations => potential combinatorial explosion!
   def series_bucket_names
-    @series_buckets = []
-    if @breakdown_list.include?(:fuel)
-      @series_buckets.push('electricity')
-      @series_buckets.push('gas')
-      @meters.each do |meter|
-        if !meter.nil? && ['aggregated_electricity', 'aggregated_heat', 'electricity', 'gas'].include?(meter.fuel_type.to_s)
-          @series_buckets.push(meter.fuel_type.to_s)
-        end
+    buckets = []
+
+    [@breakdown_list + @y2_axis_list].flatten.each do |breakdown|
+      case breakdown
+      when :heating;                buckets = combinatorially_combine(buckets, SeriesNames::HEATINGSERIESNAMES)
+      when :daytype;                buckets = combinatorially_combine(buckets, SeriesNames::DAYTYPESERIESNAMES)
+      when :meter;                  buckets = combinatorially_combine(buckets, meter_names)
+
+      when :model_type;             buckets += heating_model_types
+      when :fuel;                   buckets = create_fuel_breakdown
+      when :submeter;               buckets += submeter_names
+
+      when :hotwater;               buckets += SeriesNames::HOTWATERSERIESNAMES
+
+      when :none;                   buckets.push(SeriesNames::NONE)
+      when :cusum;                  buckets.push(SeriesNames::CUSUM)
+      when :baseload;               buckets.push(SeriesNames::BASELOAD)
+      when :predictedheat;          buckets.push(SeriesNames::PREDICTEDHEAT)
+      when :degreedays;             buckets.push(SeriesNames::DEGREEDAYS)
+      when :temperature;            buckets.push(SeriesNames::TEMPERATURE)
+      when :irradiance;             buckets.push(SeriesNames::IRRADIANCE)
+      when :gridcarbon;             buckets.push(SeriesNames::GRIDCARBON)
+      else
+        # TODO(PH,6Feb2019) - y2 sometimes comes through as nil - not clear why this is happening upstream
+        throw EnergySparksBadChartSpecification.new("Unknown series_definition #{breakdown}") unless breakdown.nil?
       end
     end
-    if @breakdown_list.include?(:heating)
-      @series_buckets = combinatorially_combine(@series_buckets, SeriesNames::HEATINGSERIESNAMES)
+
+    @series_buckets = buckets
+  end
+
+  def trendlines
+    @chart_configuration[:trendlines].map { |series_name| self.class.trendline_for_series_name(series_name) }
+  end
+
+  def self.trendline_for_series_name(series_name)
+    ('trendline_' + series_name.to_s).to_sym
+  end
+
+  def heating_model_types
+    heating_model.all_heating_model_types
+  end
+
+  def model_series?(series_name)
+    heating_model_types.include?(series_name)
+  end
+
+  def heating_model_series?(series_name) # duplicate of above>
+    heating_model_types.include?(series_name)
+  end
+
+  def degreeday_base_temperature
+    begin
+      heating_model.average_base_temperature
+    rescue StandardError => _e
+      # TODO(PH, 7Mar2019) - this is a little dangerous as it might give a false
+      # impression of the base temperature, the problem lies in the simulator
+      # which adds degree days onto the by weekly electricity daytype breakdown
+      # chart to provide some indication whether a school has electrical heating
+      # the existing call to the modelling infrastructure doesn't work if the
+      # school has no gas data, need to resolve as part of the storage heater development?
+      20.0
     end
-    if @breakdown_list.include?(:daytype)
-      @series_buckets = combinatorially_combine(@series_buckets, SeriesNames::DAYTYPESERIESNAMES)
-    end
-    if @breakdown_list.include?(:heatingmodeltrendlines)
-      @series_buckets += SeriesNames::HEATINGMODELSERIESNAMES
-    end
-    if @breakdown_list.include?(:submeter)
-      @series_buckets += submeter_names
-    end
-    if @breakdown_list.include?(:hotwater)
-      @series_buckets += SeriesNames::HOTWATERSERIESNAMES
-    end
-    if @breakdown_list.include?(:meter)
-      @series_buckets = combinatorially_combine(@series_buckets, meter_names) # was += meter_names
-    end
-    if @breakdown_list.include?(:none)
-      @series_buckets.push(SeriesNames::NONE)
-    end
-    if @breakdown_list.include?(:cusum)
-      @series_buckets.push(SeriesNames::CUSUM)
-    end
-    if @breakdown_list.include?(:baseload)
-      @series_buckets.push(SeriesNames::BASELOAD)
-    end
-    if @y2_axis_list.include?(:degreedays) || @breakdown_list.include?(:degreedays)
-      @series_buckets.push(SeriesNames::DEGREEDAYS)
-    end
-    if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
-      @series_buckets.push(SeriesNames::TEMPERATURE)
-    end
-    if @y2_axis_list.include?(:irradiance) || @breakdown_list.include?(:irradiance)
-      @series_buckets.push(SeriesNames::IRRADIANCE)
-    end
-    if @y2_axis_list.include?(:gridcarbon) || @breakdown_list.include?(:gridcarbon)
-      @series_buckets.push(SeriesNames::GRIDCARBON)
-    end
-    if @data_types.include?(:predictedheat) # not sure this is the best final resting place for this test?
-      @series_buckets.push(SeriesNames::PREDICTEDHEAT)
-    end
-    @series_buckets
+  end
+
+  def self.series_name_for_trendline(trendline_name)
+    trendline_name.to_s.sub('trendline_', '' ).to_sym
+  end
+
+  def trendlines?
+    @chart_configuration.key?(:trendlines)
   end
 
   def get_data(time_period)
@@ -186,8 +208,7 @@ class SeriesDataManager
         end_date_str = dates[1].strftime('%d %m %Y')
         logger.error "Error: getting data for time period #{start_date_str} to #{end_date_str}"
       end
-      logger.info ee.message
-      logger.info ee.backtrace
+      logger.info ee
     end
   end
 
@@ -223,113 +244,144 @@ class SeriesDataManager
   end
 
   def get_data_private(time_period)
-    # TODO(PH,22May2018): support combinations of series as per above series_bucket_names method
-
     timetype, dates, halfhour_index = time_period
     meter = select_one_meter
     breakdown = {}
     case timetype
-    when :oneday
-      if @breakdown_list.include?(:daytype)
-        breakdown = daytype_breakdown([dates, dates], meter)
-        raise "Currently not implemented, use :daterange instead same day to same day in range"
-      end
     when :halfhour, :datetime
-      date = dates # a single date in an intraday case, so disambiguate
-      if @breakdown_list.include?(:submeter)
-        meter.sub_meters.each do |submeter|
-          breakdown[submeter.name] = submeter.amr_data.kwh(date, halfhour_index)
-        end
-      elsif @breakdown_list.include?(:meter)
-        breakdown = breakdown_to_meter_level(date, date, halfhour_index)
-      elsif @breakdown_list.include?(:fuel)
-        breakdown = fuel_breakdown_halfhour(date, halfhour_index)
-      elsif @breakdown_list.include?(:daytype)
-        breakdown = daytype_breakdown_halfhour(date, halfhour_index, meter)
-      else
-        breakdown[SeriesNames::NONE] = meter.amr_data.kwh(date, halfhour_index)
-      end
-      if @y2_axis_list.include?(:degreedays) || @breakdown_list.include?(:degreedays)
-        breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degree_hour(date, halfhour_index, 20.0)
-      end
-      if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
-        breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.temperature(date, halfhour_index)
-      end
-      if @y2_axis_list.include?(:irradiance) || @breakdown_list.include?(:irradiance)
-        breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.solar_irradiance(date, halfhour_index)
-      end
-      if @y2_axis_list.include?(:gridcarbon) || @breakdown_list.include?(:gridcarbon)
-        breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.grid_carbon_intensity(date, halfhour_index)
-      end
+      breakdown = getdata_by_halfhour(meter, dates, halfhour_index)
     when :daterange
-      if @breakdown_list.include?(:daytype)
-        breakdown = daytype_breakdown([dates[0], dates[1]], meter)
+      breakdown = getdata_by_daterange(meter, dates[0], dates[1])
+    end
+    breakdown
+  end
+
+  def get_one_days_data_x48(date)
+    amr_data_one_day_readings(select_one_meter, date)
+  end
+
+  # implemented for aggregator post aggregaton trend line calculation
+  # perhaps shou;d be better integrated into SeriesDataManager getter methods?
+  def model_type?(date)
+    heating_model.model_type?(date)
+  end
+
+  def model(regression_model_type)
+    heating_model.model(regression_model_type)
+  end
+
+  def getdata_by_halfhour(meter, date, halfhour_index)
+    breakdown = {}
+
+    @breakdown_list.each do |breakdown_type|
+      case breakdown_type
+      when :submeter;     breakdown.merge!(submeter_datetime_breakdown(meter, date, halfhour_index))
+      when :meter;        breakdown.merge!(breakdown_to_meter_level(date, date, halfhour_index))
+      when :fuel;         breakdown.merge!(fuel_breakdown_halfhour(date, halfhour_index))
+      when :daytype;      breakdown.merge!(daytype_breakdown_halfhour(date, halfhour_index, meter))
+      else;               breakdown[SeriesNames::NONE] = amr_data_by_half_hour(meter, date, halfhour_index)
       end
-      if @breakdown_list.include?(:fuel)
-        breakdown = fuel_breakdown([dates[0], dates[1]], @meters[0], @meters[1])
+    end
+
+    @y2_axis_list.each do |breakdown_type|
+      case breakdown_type
+      when :degreedays;   breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degree_hour(date, halfhour_index, degreeday_base_temperature)
+      when :temperature;  breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.temperature(date, halfhour_index)
+      when :irradiance;   breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.solar_irradiance(date, halfhour_index)
+      when :gridcarbon;   breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.grid_carbon_intensity(date, halfhour_index)
       end
-      if @breakdown_list.include?(:heating)
-        calculate_model if @heating_model.nil?
-        breakdown = heating_breakdown([dates[0], dates[1]], @meters[0], @meters[1])
-      end
-      if @breakdown_list.include?(:cusum)
-        calculate_model if @heating_model.nil?
-        model_kwh = @heating_model.predicted_kwh_daterange(dates[0], dates[1], @meter_collection.temperatures)
-        actual_kwh = meter.amr_data.kwh_date_range(dates[0], dates[1])
-        breakdown[SeriesNames::CUSUM] = model_kwh - actual_kwh
-      end
-      if @breakdown_list.include?(:hotwater)
-        hotwater_model = calculate_hotwater_model
-        useful_kwh, wasted_kwh = hotwater_model.kwh_daterange(dates[0], dates[1])
-        breakdown[SeriesNames::USEFULHOTWATERUSAGE] = useful_kwh
-        breakdown[SeriesNames::WASTEDHOTWATERUSAGE] = wasted_kwh
-      end
-      if @breakdown_list.include?(:baseload)
-        baseload = meter.amr_data.baseload_kwh_date_range(dates[0], dates[1]) * 24 # TODO(PH,6Jun2018) rationalise kW as *24 to offset /24 in aggregator
-        breakdown[SeriesNames::BASELOAD] = baseload
-      end
-      if @breakdown_list.include?(:submeter)
-        meter.sub_meters.each do |submeter|
-          breakdown[submeter.name] = submeter.amr_data.kwh_date_range(dates[0], dates[1])
-        end
-      end
-      if @breakdown_list.include?(:meter)
-        breakdown = breakdown_to_meter_level(dates[0], dates[1])
-      end
-      if @breakdown_list.include?(:none)
-        breakdown[SeriesNames::NONE] = meter.amr_data.kwh_date_range(dates[0], dates[1])
-      end
-      if @breakdown_list.include?(:heatingmodeltrendlines)
-        calculate_model if @heating_model.nil?
-        breakdown = breakdown.merge(predicted_heating_breakdown([dates[0], dates[1]], @meters[0], @meters[1]))
-      end
-      if @y2_axis_list.include?(:degreedays) || @breakdown_list.include?(:degreedays)
-        breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(20.0, dates[0], dates[1])
-      end
-      if @y2_axis_list.include?(:temperature) || @breakdown_list.include?(:temperature)
-        breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(dates[0], dates[1])
-      end
-      if @y2_axis_list.include?(:irradiance) || @breakdown_list.include?(:irradiance)
-        breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.average_in_date_range(dates[0], dates[1])
-      end
-      if @y2_axis_list.include?(:gridcarbon) || @breakdown_list.include?(:gridcarbon)
-        breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.average_in_date_range(dates[0], dates[1])
-      end
-      if @data_types.include?(:predictedheat)
-        calculate_model if @heating_model.nil?
-        model_kwh = @heating_model.predicted_kwh_daterange(dates[0], dates[1], @meter_collection.temperatures)
-        breakdown[SeriesNames::PREDICTEDHEAT] = model_kwh
+    end
+
+    breakdown
+  end
+
+  def getdata_by_daterange(meter, d1, d2)
+    breakdown = {}
+    [@breakdown_list + @y2_axis_list].flatten.each do |breakdown_type|
+      case breakdown_type
+      when :daytype;    breakdown = daytype_breakdown([d1, d2], meter)
+      when :fuel;       breakdown = fuel_breakdown([d1, d2], @meters[0], @meters[1])
+      when :heating;    breakdown = heating_breakdown([d1, d2], @meters[0], @meters[1])
+      when :model_type; breakdown = heating_model_breakdown([d1, d2], @meters[0], @meters[1])
+      when :meter;      breakdown = breakdown_to_meter_level(d1, d2)
+
+      when :hotwater; breakdown.merge!(hotwater_breakdown(d1, d2))
+      when :submeter; breakdown.merge!(submeter_breakdown(meter, d1, d2))
+
+      when :none;           breakdown[SeriesNames::NONE] = amr_data_date_range(meter, d1, d2)
+      when :baseload;       breakdown[SeriesNames::BASELOAD] = meter.amr_data.baseload_kwh_date_range(d1, d2)
+      when :cusum;          breakdown[SeriesNames::CUSUM] = cusum(meter, d1, d2)
+      when :degreedays;     breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2)
+      when :temperature;    breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(d1, d2)
+      when :irradiance;     breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.average_in_date_range(d1, d2)
+      when :gridcarbon;     breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.average_in_date_range(d1, d2)
+      when :predictedheat;  breakdown[SeriesNames::PREDICTEDHEAT] = heating_model.predicted_kwh_daterange(d1, d2, @meter_collection.temperatures)
       end
     end
     breakdown
   end
 
+  def amr_data_by_half_hour(meter, date, halfhour_index)
+    if @adjust_by_temperature
+      puts 'Q', @adjust_by_temperature_value
+    end
+    meter.amr_data.kwh(date, halfhour_index)
+  end
+
+  def amr_data_one_day_readings(meter, date)
+    if @adjust_by_temperature
+      puts 'RE', @adjust_by_temperature_value
+    end
+    meter.amr_data.days_kwh_x48(date)
+  end
+
+  def amr_data_one_day(meter, date)
+    if @adjust_by_temperature
+      puts 'R', @adjust_by_temperature_value
+    end
+    meter.amr_data.one_day_kwh(date)
+  end
+
+  def predicted_amr_data_one_day(date)
+    if @adjust_by_temperature
+      puts 'V', @adjust_by_temperature_value
+    end
+    heating_model.predicted_kwh(date, @meter_collection.temperatures.average_temperature(date))
+  end
+
+  def amr_data_date_range(meter, start_date, end_date)
+    if @adjust_by_temperature && meter.fuel_type == :gas
+      heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value)
+    else
+      meter.amr_data.kwh_date_range(start_date, end_date)
+    end
+  end
+
+  def daily_high_thermal_mass_heating_model
+    @high_thermal_mass_heating_model = calculate_high_thermal_mass_model if @high_thermal_mass_heating_model.nil?
+  end
+
   def heating_model
-    calculate_model if @heating_model.nil?
+    @heating_model = calculate_model if @heating_model.nil?
     @heating_model
   end
 
 private
+
+def create_fuel_breakdown
+=begin
+    # commented out 4Mar2019 after aggregate version of fuels starting accreting into buckets
+    buckets = []
+    buckets.push('electricity')
+    buckets.push('gas')
+    @meters.each do |meter|
+      if !meter.nil? && ['aggregated_electricity', 'aggregated_heat', 'electricity', 'gas'].include?(meter.fuel_type.to_s)
+        buckets.push(meter.fuel_type.to_s)
+      end
+    end
+=end
+    buckets = ['electricity', 'gas']
+  end
 
   def scaling_factor(_value, fuel_type)
     y_scaling = YAxisScaling.new # perhaps shouldn't be class, maybe just a method?
@@ -354,10 +406,18 @@ private
   end
 
   def calculate_model
+    calculate_model_by_type(@model_type)
+  end
+
+  def calculate_high_thermal_mass_model
+    @high_thermal_mass_heating_model = calculate_model_by_type(:thermal_mass_regression_temperature)
+  end
+
+  def calculate_model_by_type(model_type)
     # model calculated using the latest year's regression data,deliberately ignores chart request
-    periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
-    @heating_model = @meter_collection.heating_model(periods[0])
-    @heating_model.calculate_heating_periods(first_chart_date, last_chart_date)
+    last_year = SchoolDatePeriod.year_to_date(:year_to_date, 'validate amr', @last_meter_date, @first_meter_date)
+    meter = select_one_meter([:gas, :storage_heater])
+    meter.heating_model(last_year, model_type)
   end
 
   def calculate_hotwater_model
@@ -366,9 +426,15 @@ private
   end
 
    # TODO(PH,22May2018) meter selection needs revisiting
-  def select_one_meter
+  def select_one_meter(preferred_fuel_types = nil)
     if @meters[0].nil?
       @meters[1]
+    elsif !preferred_fuel_types.nil?
+      if !@meters[0].nil? &&  [preferred_fuel_types].flatten.include?(@meters[0].fuel_type)
+        @meters[0]
+      else
+        @meters[1]
+      end
     else
       @meters[0]
     end
@@ -386,27 +452,57 @@ private
     (date_range[0]..date_range[1]).each do |date|
       begin
         if @meter_collection.holidays.holiday?(date)
-          daytype_data[SeriesNames::HOLIDAY] += meter.amr_data.one_day_kwh(date) * factor
+          daytype_data[SeriesNames::HOLIDAY] += amr_data_one_day(meter, date) * factor
         elsif DateTimeHelper.weekend?(date)
-          daytype_data[SeriesNames::WEEKEND] += meter.amr_data.one_day_kwh(date) * factor
+          daytype_data[SeriesNames::WEEKEND] += amr_data_one_day(meter, date) * factor
         else
-          (0..47).each do |halfhour_index|
-            # Time is an order of magnitude slower than DateTime on Windows
-            time_of_day = DateTimeHelper.time_of_day(halfhour_index)
-            daytype_type = @meter_collection.is_school_usually_open?(date, time_of_day) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
-            daytype_data[daytype_type] += meter.amr_data.kwh(date, halfhour_index) * factor
-          end
+          open_kwh, close_kwh = intraday_breakdown(meter, date, factor)
+          daytype_data[SeriesNames::SCHOOLDAYOPEN] += open_kwh
+          daytype_data[SeriesNames::SCHOOLDAYCLOSED] += close_kwh
         end
-      rescue StandardError => _e
+      rescue StandardError => e
         logger.error "Unable to aggregate data for #{date} - exception raise"
+        raise e
       end
     end
     daytype_data
   end
 
+  def close_to(v1, v2, max_diff)
+    if v1 == 0 && v2 == 0
+      return true
+    else
+      return ((v1 - v2) / v1) < max_diff
+    end
+  end
+
+  # for speed aggregate single day breakdown using ranges
+  # does fractional calculation if open/close time not on 30 minute boundary (TODO (PH, 6Feb2019) currently untested)
+  def intraday_breakdown(meter, date, factor)
+    open_halfhour_index, open_excess_minutes_percent = @meter_collection.open_time.to_halfhour_index_with_fraction
+    close_halfhour_index, close_excess_minutes_percent = @meter_collection.close_time.to_halfhour_index_with_fraction
+    one_day_readings = amr_data_one_day_readings(meter, date)
+    close_kwh = one_day_readings[0...open_halfhour_index].inject(:+)
+    close_kwh += one_day_readings[open_halfhour_index] * open_excess_minutes_percent if open_excess_minutes_percent > 0
+    if close_excess_minutes_percent == 0
+      close_kwh += one_day_readings[close_halfhour_index...48].inject(:+)
+    else
+      close_kwh += one_day_readings[close_halfhour_index] * (1.0 - close_excess_minutes_percent)
+      close_kwh += one_day_readings[(close_halfhour_index + 1)...48].inject(:+)
+    end
+
+    # PH 6Feb2019: - rounding is probably not necessary, put in to improve backtesting comparison
+    # of this new function, as order of addition created differences in floating point rounding
+    # at the 10 sf level. could be removed if required
+    close_kwh = close_kwh.round(3)
+    open_kwh = (amr_data_one_day(meter, date) - close_kwh).round(3)
+
+    [open_kwh * factor, close_kwh * factor]
+  end
+
   def daytype_breakdown_halfhour(date, halfhour_index, meter)
     factor = scaling_factor(1.0, meter.fuel_type) # lookup once for performance
-    val = meter.amr_data.kwh(date, halfhour_index) * factor
+    val = amr_data_by_half_hour(meter, date, halfhour_index) * factor
 
     daytype_data = {
       SeriesNames::HOLIDAY => 0.0,
@@ -426,6 +522,37 @@ private
     end
 
     daytype_data
+  end
+
+  def cusum(meter, date1, date2)
+    model_kwh = heating_model.predicted_kwh_daterange(date1, date2, @meter_collection.temperatures)
+    actual_kwh = amr_data_date_range(meter, date1, date2)
+    model_kwh - actual_kwh
+  end
+
+  def hotwater_breakdown(date1, date2)
+    breakdown = {}
+    hotwater_model = calculate_hotwater_model
+    useful_kwh, wasted_kwh = hotwater_model.kwh_daterange(date1, date2)
+    breakdown[SeriesNames::USEFULHOTWATERUSAGE] = useful_kwh
+    breakdown[SeriesNames::WASTEDHOTWATERUSAGE] = wasted_kwh
+    breakdown
+  end
+
+  def submeter_datetime_breakdown(meter, date, halfhour_index)
+    breakdown = {}
+    meter.sub_meters.each do |submeter|
+      breakdown[submeter.name] = amr_data_by_half_hour(submeter, date, halfhour_index)
+    end
+    breakdown
+  end
+
+  def submeter_breakdown(meter, date1, date2)
+    breakdown = {}
+    meter.sub_meters.each do |submeter|
+      breakdown[submeter.name] = amr_data_date_range(submeter, date1, date2)
+    end
+    breakdown
   end
 
   def breakdown_to_meter_level(start_date, end_date, halfhour_index = nil)
@@ -450,16 +577,16 @@ private
       list_of_meters.each do |meter|
         begin
           if halfhour_index.nil?
-            breakdown[meter.display_name] = meter.amr_data.kwh_date_range(start_date, end_date)
+            breakdown[meter.display_name] = amr_data_date_range(meter, start_date, end_date)
           else
             breakdown[meter.display_name] = 0.0
             (start_date..end_date).each do |date|
-              breakdown[meter.display_name] = meter.amr_data.kwh(date, halfhour_index)
+              breakdown[meter.display_name] = amr_data_by_half_hour(meter, date, halfhour_index)
             end
           end
         rescue Exception => e
           logger.error "Failure getting meter breakdown data for #{meter.display_name} between #{start_date} and #{end_date}"
-          logger.error e.message
+          logger.error e
         end
       end
     end
@@ -494,15 +621,15 @@ private
         if gas_meter.nil?
           fuel_data['gas'] += 0.0
         else
-          fuel_data['gas'] += gas_meter.amr_data.one_day_kwh(date) * gas_factor
+          fuel_data['gas'] += amr_data_one_day(gas_meter, date) * gas_factor
         end
         if electricity_meter.nil?
           fuel_data['electricity'] += 0.0
         else
-          fuel_data['electricity'] += electricity_meter.amr_data.one_day_kwh(date) * electric_factor
+          fuel_data['electricity'] += amr_data_one_day(electricity_meter, date) * electric_factor
         end
-        # fuel_data['solar pv'] += solar_pv_meter.amr_data.one_day_kwh(date) * solar_pv_factor
-        # fuel_data['storage heaters'] += storage_meter.amr_data.one_day_kwh(date) * storage_heater_factor
+        # fuel_data['solar pv'] += amr_data_one_day(solar_pv_meter, date) * solar_pv_factor
+        # fuel_data['storage heaters'] += amr_data_one_day(storage_meter, date) * storage_heater_factor
       rescue Exception => e
         logger.error "Missing or nil data on #{date}"
         logger.error e
@@ -514,11 +641,11 @@ private
   def fuel_breakdown_halfhour(date, halfhour_index)
     electric_factor = scaling_factor(1.0, :electricity)
     electricity_meter = @meters[0]
-    electric_val = electricity_meter.nil? ? 0.0 : (electricity_meter.amr_data.kwh(date, halfhour_index) * electric_factor)
+    electric_val = electricity_meter.nil? ? 0.0 : (amr_data_by_half_hour(electricity_meter, date, halfhour_index) * electric_factor)
 
     gas_factor = scaling_factor(1.0, :gas)
     gas_meter = @meters[1]
-    gas_val = gas_meter.nil? ? 0.0 : (gas_meter.amr_data.kwh(date, halfhour_index) * gas_factor)
+    gas_val = gas_meter.nil? ? 0.0 : (amr_data_by_half_hour(gas_meter, date, halfhour_index) * gas_factor)
 
     fuel_data = {
       'electricity' => electric_val,
@@ -533,14 +660,39 @@ private
     heating_data = { SeriesNames::HEATINGDAY => 0.0, SeriesNames::NONHEATINGDAY => 0.0 }
     (date_range[0]..date_range[1]).each do |date|
       begin
-        type = @heating_model.heating_on?(date) ? SeriesNames::HEATINGDAY : SeriesNames::NONHEATINGDAY
-        heating_data[type] += heat_meter.amr_data.one_day_kwh(date) * factor
+        type = heating_model.heating_on?(date) ? SeriesNames::HEATINGDAY : SeriesNames::NONHEATINGDAY
+        heating_data[type] += amr_data_one_day(heat_meter, date) * factor
       rescue StandardError => e
-        logger.error e.message
+        logger.error e
         logger.error "Warning: unable to calculate heating breakdown on #{date}"
       end
     end
     heating_data
+  end
+
+  # this breakdown uses NaN to indicate missing data, so Excel doesn't plot it
+  def heating_model_breakdown(date_range, _electricity_meter, heat_meter)
+    factor = scaling_factor(1.0, heat_meter.fuel_type) # lookup once for performance
+    breakdown = {}
+    regression_regimes = heating_model_types
+    regression_regimes.each do |regime|
+      breakdown[regime] = Float::NAN
+    end
+
+    (date_range[0]..date_range[1]).each do |date|
+      begin
+        type = heating_model.model_type?(date)
+        if breakdown[type].nil? || breakdown[type].nan?
+          breakdown[type] = amr_data_one_day(heat_meter, date) * factor
+        else
+          breakdown[type] += amr_data_one_day(heat_meter, date) * factor
+        end
+      rescue StandardError => e
+        logger.error e
+        logger.error "Warning: unable to calculate heating model type breakdown on #{date}"
+      end
+    end
+    breakdown
   end
 
   def predicted_heating_breakdown(date_range, _electricity_meter, heat_meter)
@@ -548,13 +700,12 @@ private
     heating_data = { SeriesNames::HEATINGDAYMODEL => 0.0, SeriesNames::NONHEATINGDAYMODEL => 0.0 }
     (date_range[0]..date_range[1]).each do |date|
       begin
-        type = @heating_model.heating_on?(date) ? SeriesNames::HEATINGDAYMODEL : SeriesNames::NONHEATINGDAYMODEL
+        type = heating_model.heating_on?(date) ? SeriesNames::HEATINGDAYMODEL : SeriesNames::NONHEATINGDAYMODEL
         avg_temp = @meter_collection.temperatures.average_temperature(date)
-        heating_data[type] += @heating_model.predicted_kwh(date, avg_temp) * factor
+        heating_data[type] += heating_model.predicted_kwh(date, avg_temp) * factor
       rescue StandardError => e
         logger.error "Missing or nil predicted heating data on #{date}"
         logger.error e
-        logger.error e.backtrace
       end
     end
     heating_data
@@ -815,6 +966,8 @@ private
   end
 
   def configure_meters
+    logger.info "Configuring meter #{@meter_definition}"
+    # typically meter[0] is an electricity meter (electricity, solar_pv), and meter[1] is a heating meter (gas, storage)
     if @meter_definition.is_a?(Symbol)
       case @meter_definition
       when :all
@@ -830,8 +983,9 @@ private
         @meters = [@meter_collection.electricity_simulation_meter, nil]
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
+      # specified meter - typically by mpan or mprn
       meter = @meter_collection.meter?(@meter_definition)
-      @meters = [meter, nil]
+      @meters = meter.heat_meter? ? [nil, meter] : [meter, nil]
     end
   end
 end

@@ -5,6 +5,7 @@ require 'csv'
 # hash of date => 48 x float values
 class HalfHourlyData < Hash
   include Logging
+  alias_method :parent_key?, :key?
 
   attr_reader :type, :validated
   def initialize(type)
@@ -13,6 +14,7 @@ class HalfHourlyData < Hash
     @validated = false
     @type = type
     @cache_days_totals = {} # speed optimisation cache[date] = total of 48x 1/2hour data
+    @cache_averages = {} # speed optimisation
   end
 
   def add(date, half_hourly_data_x48)
@@ -23,6 +25,7 @@ class HalfHourlyData < Hash
     data_count = validate_data(half_hourly_data_x48)
 
     @cache_days_totals.delete(date)
+    @cache_averages.delete(date)
 
     if data_count != 48
       logger.debug "Missing data: #{date}: only #{data_count} of 48"
@@ -30,7 +33,10 @@ class HalfHourlyData < Hash
   end
 
   def average(date)
-    self[date].inject{ |sum, el| sum + el }.to_f / self[date].size
+    return @cache_averages[date] if @cache_averages.key?(date)
+    avg = self[date].inject{ |sum, el| sum + el }.to_f / self[date].size
+    @cache_averages[date] = avg
+    avg
   end
 
   def average_in_date_range(start_date, end_date)
@@ -44,10 +50,25 @@ class HalfHourlyData < Hash
     total / (end_date - start_date + 1)
   end
 
+  def date_missing?(date)
+    !parent_key?(date)
+  end
+
+  def date_exists?(date)
+    parent_key?(date)
+  end
+
+  def key?(date)
+    # think better to avoid direct access to underlying Hash, to allow for future design changes
+    # raise EnergySparksDeprecatedException.new('key?(date) deprecated for HalfHourlyData use date_missing?(date) instead')
+    logger.warn "HalfHourlyData.key?() called on #{class_name} for date #{date}, is being deprecated in favour of date_missing?/date_exists?"
+    parent_key?(date)
+  end
+
   def missing_dates
     dates = []
     (@min_date..@max_date).each do |date|
-      if !self.key?(date)
+      if !date_missing?(date)
         dates.push(date)
       end
     end
@@ -55,16 +76,7 @@ class HalfHourlyData < Hash
   end
 
   def validate_data(half_hourly_data_x48)
-    total = 0
-    data_count = 0
-    (0..47).each do |i|
-      if half_hourly_data_x48[i].is_a?(Float) || half_hourly_data_x48[i].is_a?(Integer)
-        total = total + half_hourly_data_x48[i]
-        data_count = data_count + 1
-      end
-    end
-
-    data_count
+    half_hourly_data_x48.count{ |val| val.is_a?(Float) || val.is_a?(Integer) }
   end
 
   # first and last dates maintained manually as the data is held in a hash for speed of access by date

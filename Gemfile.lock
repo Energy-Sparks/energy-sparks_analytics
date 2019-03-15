@@ -121,6 +121,7 @@ GEM
       rspec-support (~> 3.7.0)
     rspec-support (3.7.1)
     ruby-ole (1.2.12.1)
+    ruby-prof (0.17.0)
     ruby-sun-times (0.1.5)
     rubyvis (0.6.1)
     rubyzip (1.2.2)
@@ -165,6 +166,7 @@ DEPENDENCIES
   roo
   roo-xls
   rspec
+  ruby-prof
   ruby-sun-times
   soda-ruby
   statsample!

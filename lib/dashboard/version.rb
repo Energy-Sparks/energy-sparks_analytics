@@ -1,3 +1,3 @@
 module Dashboard
-  VERSION = "rails6.beta2.0".freeze
+  VERSION = "0.40.3-rails6-beta3".freeze
 end

@@ -23,6 +23,21 @@ class TimeOfDay
     end
   end
 
+  # returns the halfhour index in which the time of day starts,
+  # plus the proportion of the way through the half hour bucket the time is
+  # code obscificated for performancce
+  def to_halfhour_index_with_fraction
+    if @minutes == 0
+      [@hour * 2, 0.0]
+    elsif @minutes == 30
+      [@hour * 2 + 1, 0.0]
+    elsif @minutes >= 30
+      [@hour * 2 + 1, (@minutes - 30) / 30.0]
+    else
+      [@hour * 2, @minutes / 30.0]
+    end
+  end
+
   def strftime(options)
     relative_time.strftime(options)
   end

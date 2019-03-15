@@ -10,4 +10,8 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
   def maximum_alert_date
     @school.aggregated_heat_meters.amr_data.end_date
   end
+
+  def needs_electricity_data?
+    false
+  end
 end

@@ -53,7 +53,7 @@ def list_missing_amr_data(school_name, meter)
   amr_data = meter.amr_data
   # Logging.logger.debug "processing data from  #{amr_data.start_date}  to #{amr_data.end_date}"
   (amr_data.start_date..amr_data.end_date).each do |date|
-    missing_dates.push(date) if !amr_data.key?(date)
+    missing_dates.push(date) if amr_data.date_missing?(date)
   end
   days_data = (amr_data.end_date - amr_data.start_date + 1).to_i # force  integer not rational
   Logging.logger.debug "#{school_name}: #{meter.meter_type} #{meter.id} processing data from  #{amr_data.start_date}  to #{amr_data.end_date} #{days_data} days data #{missing_dates.length} missing"

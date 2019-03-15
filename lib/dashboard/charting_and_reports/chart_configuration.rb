@@ -382,9 +382,45 @@ class ChartManager
       name:             'Breakdown by meter (this year): Gas',
       inherits_from:    :daytype_breakdown_gas,
       x_axis:           :nodatebuckets,
-      series_breakdown: :meter,
+      series_breakdown: :meter
+    },
+    group_by_week_gas_model_fitting_one_year: { # aliased for different advice
+      name:             'By Week: Gas (1 year)',
+      inherits_from:    :group_by_week_gas_unlimited,
+      timescale:        :year
+    },
+    group_by_week_gas_model_fitting_unlimited: { # aliased for different advice
+      name:             'By Week: Gas (all data)',
+      inherits_from:    :group_by_week_gas_unlimited
+    },
+    gas_by_day_of_week_model_fitting: {
+      inherits_from:    :gas_by_day_of_week
+    },
+    gas_longterm_trend_model_fitting: {
+      inherits_from:    :gas_longterm_trend
+    },
+    thermostatic_regression: {
+      name:             'Thermostatic (Regression_Model Testing)',
+      chart1_type:      :scatter,
+      meter_definition: :allheat,
+      timescale:        :year,
+      series_breakdown: %i[model_type temperature],
+      # model:            :simple_regression_temperature,
+      # trendlines:       true,
+      x_axis:           :day,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    thermostatic_regression_simple_school_day: {
+      name:             'Thermostatic (School Day) - simple model',
+      inherits_from:    :thermostatic_regression,
+      series_breakdown: %i[model_type temperature],
+      trendlines:       %i[heating_occupied_all_days summer_occupied_all_days],
+      filter:           { model_type: %i[heating_occupied_all_days summer_occupied_all_days] },
+      model:            :simple_regression_temperature
     },
     thermostatic: {
+=begin
       name:             'Thermostatic (Heating Season, School Day)',
       chart1_type:      :scatter,
       meter_definition: :allheat,
@@ -394,7 +430,175 @@ class ChartManager
       x_axis:           :day,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
+=end
+      inherits_from:    :thermostatic_regression_simple_school_day,
+      name:             'Thermostatic (Temperature v. Daily Consumption - current year)',
     },
+    thermostatic_regression_simple_all: {
+      name:             'Thermostatic (All Categories) - simple model',
+      inherits_from:    :thermostatic_regression,
+      model:            :simple_regression_temperature,
+      trendlines:       %i[
+                          heating_occupied_all_days
+                          weekend_heating
+                          holiday_heating
+                          summer_occupied_all_days
+                          holiday_hotwater_only
+                          weekend_hotwater_only
+                        ],
+    },
+    thermostatic_regression_thermally_massive_school_day: {
+      name:             'Thermostatic (School Day) - thermally massive model',
+      inherits_from:    :thermostatic_regression_simple_school_day,
+      model:            :thermal_mass_regression_temperature
+    },
+    thermostatic_regression_thermally_massive_all: {
+      name:             'Thermostatic (All Categories) - thermally massive model',
+      inherits_from:    :thermostatic_regression_simple_all,
+      model:            :thermal_mass_regression_temperature,
+      trendlines:       %i[
+        heating_occupied_monday
+        heating_occupied_tuesday
+        heating_occupied_wednesday
+        heating_occupied_thursday
+        heating_occupied_friday
+        weekend_heating
+        holiday_heating
+        summer_occupied_all_days
+        holiday_hotwater_only
+        weekend_hotwater_only
+      ],
+    },
+    cusum_weekly_best_model: {
+      inherits_from:    :cusum_weekly,
+      model:            :best,
+      timescale:        nil
+    },
+    thermostatic_winter_holiday_best: {
+      name:             'Thermostatic (Winter Holiday)',
+      inherits_from:    :thermostatic_regression,
+      model:            :best,
+      filter:           { model_type: :holiday_heating },
+      trendlines:       %i[ holiday_heating ]
+    },
+    thermostatic_winter_weekend_best: {
+      name:             'Thermostatic (Winter Weekend)',
+      inherits_from:    :thermostatic_winter_holiday_best,
+      filter:           { model_type: :weekend_heating },
+      trendlines:       %i[ weekend_heating ]
+    },
+    thermostatic_summer_school_day_holiday_best: {
+      name:             'Thermostatic (Summer Weekend and Holiday)',
+      inherits_from:    :thermostatic_winter_holiday_best,
+      filter:           { model_type: %i[summer_occupied_all_days holiday_hotwater_only] },
+      trendlines:       %i[ summer_occupied_all_days holiday_hotwater_only ]
+    },
+    thermostatic_summer_weekend_best: {
+      name:             'Thermostatic (Summer Weekend and Holiday)',
+      inherits_from:    :thermostatic_winter_holiday_best,
+      filter:           { model_type: :weekend_hotwater_only },
+      trendlines:       %i[ weekend_hotwater_only ]
+    },
+    thermostatic_non_best: {
+      name:             'Thermostatic (Days of minimal consumption)',
+      inherits_from:    :thermostatic_winter_holiday_best,
+      filter:           { model_type: :none }
+    },
+    cusum_simple: {
+      name:             'CUSUM: simple model',
+      inherits_from:    :cusum,
+      model:            :simple_regression_temperature
+    },
+    cusum_thermal_mass: {
+      name:             'CUSUM: thermal mass model model',
+      inherits_from:    :cusum_simple,
+      model:            :thermal_mass_regression_temperature
+    },
+    thermostatic_model_by_week: {
+      name:             'Thermostatic model type by week',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allheat,
+      x_axis:           :week,
+      series_breakdown: :model_type,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :degreedays
+    },
+    heating_on_off_by_week: {
+      name:             'Heating season analysis',
+      inherits_from:    :thermostatic_model_by_week,
+      timescale:        :year,
+      model:            :best,
+      series_breakdown: :heating
+    },
+    thermostatic_model_categories_pie_chart: {
+      name:             'Categorised consumption by model',
+      inherits_from:    :thermostatic_model_by_week,
+      model:            :best,
+      chart1_type:      :pie,
+      chart1_subtype:   nil,
+      y2_chart_type:    nil,
+      y2_axis:          nil,
+      x_axis:           :nodatebuckets
+    },
+    heating_on_off_pie_chart: {
+      name:             'Heating versus non-heating day gas consumption',
+      inherits_from:    :heating_on_off_by_week,
+      model:            :best,
+      chart1_type:      :pie,
+      chart1_subtype:   nil,
+      y2_chart_type:    nil,
+      y2_axis:          nil,
+      x_axis:           :nodatebuckets
+    },
+=begin
+    thermostatic_regression_simple: {
+      name:             'Thermostatic (Winter - School Day) - simple model',
+      inherits_from:    :thermostatic_regression,
+      model:            :simple_regression_temperature
+    },
+    thermostatic_regression_thermal_mass: {
+      name:             'Thermostatic (Winter - School Day) - thermal mass model',
+      inherits_from:    :thermostatic_regression,
+      model:            :thermal_mass_regression_temperature
+    },
+    thermostatic_regression_best: {
+      name:             'Thermostatic (Winter - School Day) - best model',
+      inherits_from:    :thermostatic_regression,
+      model:            :best
+    },
+    thermostatic_winter_occupied: {
+      name:             'Thermostatic (Winter - School Day)',
+      inherits_from:    :thermostatic_regression,
+      filter:           { model_type: %i[heating_occupied_all_days heating_occupied_monday heating_occupied_tuesday heating_occupied_wednesday heating_occupied_thursday heating_occupied_friday] }
+    },
+    thermostatic_winter_weekend: {
+      name:             'Thermostatic (Winter Weekend)',
+      inherits_from:    :thermostatic_regression,
+      filter:           { model_type: :weekend_heating }
+    },
+    thermostatic_summer_occupied: {
+      name:             'Thermostatic (Summer - School Days)',
+      inherits_from:    :thermostatic_regression,
+      filter:           { model_type: :summer_occupied_all_days }
+    },
+    thermostatic_summer_weekend: {
+      name:             'Thermostatic (Summer Weekend)',
+      inherits_from:    :thermostatic_regression,
+      filter:           { model_type: :weekend_hotwater_only }
+    },
+    thermostatic_summer_holiday: {
+      name:             'Thermostatic (Summer Holiday)',
+      inherits_from:    :thermostatic_regression,
+      filter:           { model_type: :holiday_hotwater_only }
+    },
+    thermostatic_none: {
+      name:             'Thermostatic (Not heating or hot water)',
+      inherits_from:    :thermostatic_regression,
+      filter:           { model_type: :none }
+    },
+=end
     thermostatic_non_heating: {
       name:             'Thermostatic (Non Heating Season, School Day)',
       chart1_type:      :scatter,
@@ -402,15 +606,6 @@ class ChartManager
       timescale:        :year,
       filter:            { daytype: :occupied, heating: false },
       series_breakdown: %i[heating heatingmodeltrendlines degreedays],
-      x_axis:           :day,
-      yaxis_units:      :kwh,
-      yaxis_scaling:    :none
-    },
-    cusum: {
-      name:             'CUSUM',
-      chart1_type:      :column,
-      meter_definition: :allheat,
-      series_breakdown: :cusum,
       x_axis:           :day,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
@@ -425,6 +620,18 @@ class ChartManager
       y2_axis:          :degreedays,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
+    },
+    cusum: {
+      inherits_from:    :cusum_weekly
+=begin
+      name:             'CUSUM',
+      chart1_type:      :column,
+      meter_definition: :allheat,
+      series_breakdown: :cusum,
+      x_axis:           :day,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+=end
     },
     baseload: {
       name:             'Baseload kW',
@@ -841,6 +1048,100 @@ class ChartManager
       inherits_from:    :optimum_start,
       y2_axis:          :gridcarbon
     },
+    last_2_weeks_gas_comparison: {
+      name:             'Comparison of last 2 weeks gas consumption',
+      chart1_type:      :column,
+      series_breakdown: :none,
+      timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }],
+      x_axis:           :day,
+      meter_definition: :allheat,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    last_2_weeks_gas: {
+      name:             'Last 2 weeks gas consumption (with temperature)',
+      timescale:        { week: -1..0 },
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    last_2_weeks_gas_degreedays: {
+      name:             'Last 2 weeks gas consumption (with degree days)',
+      y2_axis:          :degreedays,
+      timescale:        { week: -1..0 },
+      inherits_from:    :last_2_weeks_gas
+    },
+    last_2_weeks_gas_comparison_temperature_compensated: {
+      name:             'Comparison of last 2 weeks gas consumption - adjusted for outside temperature',
+      adjust_by_temperature:  10.0,
+      y2_axis:          nil,
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    teachers_landing_page_gas: {
+      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
+    },
+    teachers_landing_page_electricity: {
+      name:             'Comparison of last 2 weeks electricity consumption',
+      meter_definition: :allelectricity,
+      inherits_from:    :teachers_landing_page_gas
+    },
+    last_4_weeks_gas_temperature_compensated: {
+      name:             'Last 4 weeks gas consumption - adjusted for outside temperature',
+      adjust_by_temperature:  10.0,
+      timescale:        [{ day: -27...0 }],
+      y2_axis:          nil,
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    last_7_days_intraday_gas:  {
+      inherits_from:    :intraday_line_school_last7days,
+      name:             'Intraday (last 7 days) gas',
+      meter_definition: :allheat
+    },
+=begin
+    last_2_weeks_gas_comparison_datetime: {
+      name:             'Last 2 weeks gas consumption week',
+      x_axis:           :datetime,
+      chart1_type:      :line,
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    last_2_weeks_gas_datetime: {
+      name:             'Last 2 weeks gas consumption week',
+      x_axis:           :datetime,
+      chart1_type:      :line,
+      inherits_from:    :last_2_weeks_gas
+    },
+    last_2_weeks_gas_temperature_compensated: {
+      name:             'Last 2 weeks gas consumption - adjusted for outside temperature',
+      timescale:        { week: -1..0 },
+      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
+    },
+    last_8_weeks_gas_comparison: {
+      name:             'Comparison of 2 months gas consumption',
+      x_axis:           :day,
+      timescale:        [{ week: -4..0 }, { week: -9..-5 }],
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    last_8_weeks_gas_comparison_temperature_compensated: {
+      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
+      timescale:        [{ week: -4..0 }, { week: -9..-5 }],
+      x_axis:           :day,
+      y2_axis:          nil,
+      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
+    },
+    last_8_weeks_gas_comparison_temperature_compensated_line: {
+      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
+      chart1_type:      :line,
+      inherits_from:    :last_8_weeks_gas_comparison_temperature_compensated
+    },
+    last_28_days_gas_comparison_temperature_compensated_line: {
+      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
+      timescale:        [{ day: -27...0 }, { day: -55..-28 }],
+      inherits_from:    :last_8_weeks_gas_comparison_temperature_compensated
+    },
+    last_28_days_gas_comparison_temperature_compensated_column: {
+      chart1_type:      :line,
+      inherits_from:    :last_28_days_gas_comparison_temperature_compensated_line
+    },
+=end
     #==============================================================
     sprint2_last_2_weeks_electricity_by_datetime: {
       name:             'Compare last 2 weeks by time of day - line chart (Electricity)',
@@ -867,7 +1168,6 @@ class ChartManager
       inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
       chart1_type:      :column
     },
-
     sprint2_last_2_weeks_gas_by_datetime: {
       name:             'Compare last 2 weeks by time of day - line chart (Gas)',
       inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
@@ -881,11 +1181,6 @@ class ChartManager
     sprint2_last_2_weeks_gas_by_day_line: {
       name:             'Compare last 2 weeks by day - line chart (Gas)',
       inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
-      meter_definition: :allheat
-    },
-    sprint2_last_2_weeks_gas_by_day_column: {
-      name:             'Compare last 2 weeks by day - column chart (Gas)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_column,
       meter_definition: :allheat
     },
     sprint2_gas_comparison:  {

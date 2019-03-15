@@ -30,6 +30,7 @@ end
   'St Johns Primary'                  => :bathhacked,
   'St Saviours Junior'                => :bathhacked,
   'Stanton Drew Primary School'       => :bathhacked,
+  'St Michaels Junior Church School'  => :downloadfromfrontend,
   'Twerton Infant School'             => :bathhacked,
   'Westfield Primary'                 => :bathhacked,
   'Bankwood Primary School'           => :sheffieldcsv,
@@ -42,8 +43,8 @@ end
   'Phillimore School'                 => :sheffieldcsv,
   'Shortbrook School'                 => :sheffieldcsv,
   'Valley Park School'                => :sheffieldcsv,
-  'Walkley School Tennyson School'    => :sheffieldcsv,
-  'Whiteways Primary'                 => :sheffieldcsv,
+  'Walkley Tennyson School'           => :sheffieldcsv,
+  'Whiteways Primary'                 => :downloadfromfrontend,
   'Woodthorpe Primary School'         => :sheffieldcsv,
   'Wybourn Primary School'            => :sheffieldcsv,
   'Christchurch First School'         => :fromecsv,
@@ -116,6 +117,7 @@ def report_results(school_name, meter_collection)
   reports = ReportConfigSupport.new
 
   reports.setup_school(meter_collection, school_name)
+  reports.excel_name = school_name
 
   reports.do_all_standard_pages_for_school
 

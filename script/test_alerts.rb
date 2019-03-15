@@ -6,142 +6,71 @@ require './script/report_config_support.rb'
 
 module Logging
   @logger = Logger.new('log/test-alerts ' + Time.now.strftime('%H %M') + '.log')
-  logger.level = :warn
+  logger.level = :debug
 end
 
-def banner(title)
+def banner(title= '')
   len_before = ((80 - title.length) / 2).floor
   len_after = 80 - title.length - len_before
-  '=' * len_before + title + '*' * len_after
+  '=' * len_before + title + '=' * len_after
 end
+
 school_name = 'St Marks Secondary'
-# school_name = 'Trinity First School'
+# school_name = 'St Michaels Junior Church School'
+
+school_names = AnalysticsSchoolAndMeterMetaData.new.meter_collections.keys
 
 ENV['School Dashboard Advice'] = 'Include Header and Body'
 $SCHOOL_FACTORY = SchoolFactory.new
 
+alert_calculation_time = {}
+school_calculation_time = {}
+
 reports = ReportConfigSupport.new
 
-school = reports.load_school(school_name, true)
+failed_alerts = []
 
-analysis_asof_date = Date.new(2018, 3, 16)
+school_names.sort.each do |school_name|
+  # next if school_name != 'Coit Primary School'
+  puts banner
+  puts banner
+  puts banner(school_name)
+  puts banner
+  puts banner
 
-puts
-puts banner('Electricity Baseload Alert (v benchmark)')
+  school = reports.load_school(school_name, true)
 
-alert_baseload = AlertElectricityBaseloadVersusBenchmark.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
+  asof_date = Date.new(2019, 2, 15)
 
-puts
-puts banner('Electricity Baseload Alert (change)')
+  alerts = AlertAnalysisBase.all_available_alerts(school)
 
-alert_baseload = AlertChangeInElectricityBaseloadShortTerm.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
+  bm1 = Benchmark.realtime {
+    alerts.each do |alert|
+      next unless alert.valid_alert?
+      results = 'No results'
+      puts banner(alert.class.name)
+      bm2 = Benchmark.realtime {
+        alert.analyse(asof_date, true)
+        results = alert.analysis_report
+        if results.status == :failed
+          failed_alerts.push(sprintf('%-32.32s: %s', school_name, alert.class.name))
+        end
+      }
+      (alert_calculation_time[alert.class.name] ||= []).push(bm2)
+      puts results
+    end
+  }
+  (school_calculation_time[school_name] ||= []).push(bm1)
+end
 
-puts
-puts banner('Electricity Daily Alert (change)')
+alert_calculation_time.each do |type, data|
+  puts sprintf('%-35.35s %.6f', type, data.sum/data.length)
+end
 
-alert_baseload = AlertChangeInDailyElectricityShortTerm.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
+school_calculation_time.each do |type, data|
+  puts sprintf('%-35.35s %.6f', type, data.sum)
+end
 
-puts
-puts banner('Out of Hours Electricity Usage')
-
-alert_baseload = AlertOutOfHoursElectricityUsage.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('Annual Electricity Usage versus benchmark')
-
-alert_baseload = AlertElectricityAnnualVersusBenchmark.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('Annual Gas Usage versus benchmark')
-
-alert_baseload = AlertGasAnnualVersusBenchmark.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('Out of Hours Gas Usage')
-
-alert_baseload = AlertOutOfHoursGasUsage.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('Gas Daily Alert (change)')
-
-alert_baseload = AlertChangeInDailyGasShortTerm.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('Weekend gas consumption')
-
-alert_baseload = AlertWeekendGasConsumptionShortTerm.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('Upcoming holiday')
-
-alert_baseload = AlertImpendingHoliday.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('Heating On/Off based on forecast')
-
-alert_baseload = AlertHeatingOnOff.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('Hot water system efficiency')
-
-alert_baseload = AlertHotWaterEfficiency.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('heating coming on too early')
-
-alert_baseload = AlertHeatingComingOnTooEarly.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('thermostatic control')
-
-alert_baseload = AlertThermostaticControl.new(school)
-alert_baseload.analyse(analysis_asof_date)
-results = alert_baseload.analysis_report
-puts results
-
-puts
-puts banner('temperature sensitivity')
-
-temperature_sensitivity_alert = AlertHeatingSensitivityAdvice.new(school)
-temperature_sensitivity_alert.analyse(analysis_asof_date)
-results = temperature_sensitivity_alert.analysis_report
-puts results
+failed_alerts.each do |fail|
+    puts fail
+end
