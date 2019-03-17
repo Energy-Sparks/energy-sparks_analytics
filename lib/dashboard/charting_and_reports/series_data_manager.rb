@@ -417,6 +417,7 @@ def create_fuel_breakdown
     # model calculated using the latest year's regression data,deliberately ignores chart request
     last_year = SchoolDatePeriod.year_to_date(:year_to_date, 'validate amr', @last_meter_date, @first_meter_date)
     meter = select_one_meter([:gas, :storage_heater])
+    logger.info "Calculating heating model for #{meter.id} - SeriesDataManager::calculate_model_by_type"
     meter.heating_model(last_year, model_type)
   end
 

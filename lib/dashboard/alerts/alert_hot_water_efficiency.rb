@@ -8,8 +8,14 @@ class AlertHotWaterEfficiency < AlertGasModelBase
     super(school, :hotwaterefficiency)
   end
 
-  def analyse_private(asof_date)
+  private def calculate(asof_date)
+    super(asof_date)
     calculate_hot_water_model(asof_date)
+  end
+
+  def analyse_private(asof_date)
+    calculate(asof_date)
+    
     efficiency = @hot_water_model.overall_efficiency
 
     @analysis_report.add_book_mark_to_base_url('HotWaterEfficiency')

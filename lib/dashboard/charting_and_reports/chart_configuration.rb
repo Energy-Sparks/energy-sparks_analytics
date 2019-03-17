@@ -72,6 +72,9 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    alert_daytype_breakdown_gas: {
+      inherits_from: :daytype_breakdown_gas
+    },
     daytype_breakdown_electricity: {
       name:             'Breakdown by type of day/time: Electricity',
       chart1_type:      :pie,
@@ -81,6 +84,9 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       timescale:        :year
+    },
+    alert_daytype_breakdown_electricity: {
+      inherits_from: :daytype_breakdown_electricity
     },
     group_by_week_electricity: {
       name:             'By Week: Electricity',
@@ -652,6 +658,9 @@ class ChartManager
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
+    alert_1_year_baseload: {
+      inherits_from:    :baseload_lastyear,
+    },
     intraday_line_school_days:  {
       name:             'Intraday (school days) - comparison of last 2 years',
       chart1_type:      :line,
@@ -1079,10 +1088,23 @@ class ChartManager
     teachers_landing_page_gas: {
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
+    alert_last_2_weeks_gas_comparison_temperature_compensated: {
+      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
+    },
     teachers_landing_page_electricity: {
       name:             'Comparison of last 2 weeks electricity consumption',
       meter_definition: :allelectricity,
       inherits_from:    :teachers_landing_page_gas
+    },
+    alert_week_on_week_electricity_daily_electricity_comparison_chart: {
+      # used by short term change alert
+      inherits_from:    :teachers_landing_page_electricity
+    },
+    alert_intraday_line_school_days_last5weeks: {
+      inherits_from:    :intraday_line_school_days_last5weeks
+    },
+    alert_intraday_line_school_last7days: {
+      inherits_from:    :intraday_line_school_days_last5weeks
     },
     last_4_weeks_gas_temperature_compensated: {
       name:             'Last 4 weeks gas consumption - adjusted for outside temperature',

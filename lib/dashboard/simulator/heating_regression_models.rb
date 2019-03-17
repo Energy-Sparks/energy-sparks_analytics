@@ -11,6 +11,7 @@ module AnalyseHeatingAndHotWater
     include Logging
     def initialize(meter)
       @meter = meter
+      logger.info "Creating model cache for meter #{meter.id}"
       @processed_model_overrides = false
       @models = {}
     end
@@ -242,6 +243,10 @@ module AnalyseHeatingAndHotWater
 
     def self.r2_rating_out_of_10(r2)
       find_r2_rating(r2, :rating_value)
+    end
+
+    def self.average_schools_r2
+      0.62
     end
 
     def self.find_r2_rating(r2, parameter)
@@ -705,6 +710,10 @@ module AnalyseHeatingAndHotWater
       logger.info "Weekend model:  #{@models[HEATINGWEEKENDMODEL]}"
       logger.info "Holiday model:  #{@models[HEATINGHOLIDAYMODEL]}"
       weekend_days + holidays
+    end
+
+    def number_of_heating_days
+      number_of_heating_school_days + number_of_non_school_heating_days
     end
 
     def calculate_base_temperature_by_parameter(winter_model_parameter)

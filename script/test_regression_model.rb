@@ -27,7 +27,7 @@ list_of_schools.reverse.each do |school_name|
   # next if school_name != 'St Marks Secondary'
 
   # next if ['Saltford C of E Primary School', 'Hunters Bar School', 'Roundhill School'].include?(school_name)
-  # next if !['Coit Primary School'].include?(school_name)
+  next if !['St Saviours Junior'].include?(school_name)
 
   if reports.schools[school_name] == :electric_only
     puts '=' * 100, "Unable to analyse #{school_name} as no gas", "\n" * 4
