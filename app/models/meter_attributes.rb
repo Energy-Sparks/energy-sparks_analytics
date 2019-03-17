@@ -274,6 +274,9 @@ class MeterAttributes
           end_toy:   TimeOfYear.new(9, 30)
         }
       ],
+      aggregation:  [ # 17Mar2019 think Orchard Lodge no longer occupied, no gas consumption?
+        :deprecated_include_but_ignore_end_date
+      ],
       function: [ :heating_only ]
     },
     13685204 => { # gas kitchen

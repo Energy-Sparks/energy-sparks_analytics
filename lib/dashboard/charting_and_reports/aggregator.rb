@@ -295,9 +295,9 @@ class Aggregator
         new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data[new_series_name] = x_data
       end
-      bucketed_data_count.each do |series_name, x_data|
+      bucketed_data_count.each do |series_name, count_data|
         new_series_name = series_name.to_s + time_description + school_name
-        @bucketed_data_count[new_series_name] = x_data
+        @bucketed_data_count[new_series_name] = count_data
       end
     end
     [@bucketed_data, @bucketed_data_count]
@@ -567,7 +567,7 @@ class Aggregator
       count += 1
     end
     bucketed_data[SeriesNames::NONE] = total
-    bucketed_data_count[SeriesNames::NONE]= Array.new(48, count)
+    bucketed_data_count[SeriesNames::NONE] = Array.new(48, count)
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
@@ -775,8 +775,7 @@ class Aggregator
           end
           # rubocop:enable Style/ConditionalAssignment
         else
-          hours = days * 24
-          @bucketed_data[series_name][index] /= hours
+          @bucketed_data[series_name][index] /= @bucketed_data_count[series_name][index]
         end
       end
     end

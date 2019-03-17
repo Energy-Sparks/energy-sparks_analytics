@@ -29,7 +29,7 @@ RubyProf.start if profile
 
 # reports.do_all_standard_pages_for_school
 
-reports.do_all_standard_pages_for_school
+reports.do_all_schools(true)
 
 if profile
   prof_result = RubyProf.stop

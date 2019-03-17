@@ -170,7 +170,7 @@ class ReportConfigSupport
   def save_excel_and_html
     write_excel
     write_html
-    @worksheet_charts = {}
+    # @worksheet_charts = {}
   end
 
   def do_one_page(page_config_name, reset_worksheets = true, chart_override = nil, name_override = nil)
