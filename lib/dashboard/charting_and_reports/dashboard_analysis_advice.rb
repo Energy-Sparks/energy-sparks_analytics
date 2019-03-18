@@ -356,12 +356,14 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   def generate_advice
     logger.info @school.name
+    
     electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
     gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
+    gas_only = electric_usage.nil?
 
     address = @school.postcode.nil? ? @school.address : @school.postcode
 
-    electric_comparison_regional = comparison('electricity', :electricity, index_of_data("Regional Average"))
+    electric_comparison_regional = comparison('electricity', :electricity, index_of_data("Regional Average")) unless gas_only
     gas_comparison_regional = comparison('gas', :gas, index_of_data("Regional Average"))
 
     header_template = %{
@@ -376,10 +378,15 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         and a floor area of <%= @school.floor_area %>m<sup>2</sup>.
       </p>
       <p>
-        Your school spent <%= electric_usage %> on electricity
-        and <%= gas_usage %> on gas last year.
-        The electricity usage <%= electric_comparison_regional %>.
-        The gas usage <%= gas_comparison_regional %>:
+        <% if gas_only %>
+          Your school spent <%= gas_usage %> on gas last year.
+          The gas usage <%= gas_comparison_regional %>:
+        <% else %>
+          Your school spent <%= electric_usage %> on electricity
+          and <%= gas_usage %> on gas last year.
+          The electricity usage <%= electric_comparison_regional %>.
+          The gas usage <%= gas_comparison_regional %>:
+        <% end %>
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -488,6 +495,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def get_energy_usage(type_str, type_sym, index)
+    return nil unless @chart_data[:x_data].key?(type_str) && @chart_data[:x_data][type_str].sum > 0.0
     pounds = @chart_data[:x_data][type_str][index]
     pounds_to_pounds_and_kwh(pounds, type_sym)
   end

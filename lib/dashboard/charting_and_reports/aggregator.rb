@@ -802,18 +802,22 @@ class Aggregator
 
   def inject_benchmarks
     logger.info 'Injecting national, regional and exemplar bencmark data'
-    if (@bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)) ||
-       (@bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array))
+    has_gas = @bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array)
+    has_electricity = @bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)
+
+    if has_gas || has_electricity
+      electricity_data = has_electricity ? @bucketed_data['electricity'].sum > 0.0 : false
+      gas_only = has_gas && !has_electricity # for gas only schools don;t display electric benchmark, but not vice versa (electric heated schools)
       @x_axis.push('National Average')
-      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
+      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(benchmark_gas_usage_in_units)
 
       @x_axis.push('Regional Average')
-      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
+      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(benchmark_gas_usage_in_units * 0.9)
 
       @x_axis.push('Exemplar School')
-      @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units)
+      @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(exemplar_gas_usage_in_units * 0.9)
     else
       @x_axis.push('National Average')
