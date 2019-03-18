@@ -2737,7 +2737,7 @@ class Last7DaysIntradayGas < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
         <p>
-          By clicking the legend at the bottom of the screen, you can turn the lines
+          By clicking the legend at the bottom of the chart, you can turn the lines
           on the chart on and off for individual days &hyphen; making it easier to understand
           what is going on at the school.
         </p>
