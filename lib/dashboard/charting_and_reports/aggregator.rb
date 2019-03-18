@@ -9,7 +9,7 @@ class Aggregator
   include Logging
 
   attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis
-  attr_reader :x_axis_bucket_date_ranges, :data_labels
+  attr_reader :x_axis_bucket_date_ranges, :data_labels, :x_axis_label
 
   def initialize(meter_collection, chart_config, show_reconciliation_values)
     @show_reconciliation_values = show_reconciliation_values
@@ -70,6 +70,8 @@ class Aggregator
     create_y2_axis_data if @chart_config.key?(:y2_axis) && !@chart_config[:y2_axis].nil?
 
     reorganise_buckets if @chart_config[:chart1_type] == :scatter
+
+    add_x_axis_label if @chart_config[:chart1_type] == :scatter
 
     # deprecated 28Feb2019
     # remove_zero_data if @chart_config[:chart1_type] == :scatter
@@ -596,6 +598,11 @@ class Aggregator
 
     # insert dates back in as 'silent' y2_axis
     @data_labels = x_axis
+  end
+
+  # called only for scatter charts
+  def add_x_axis_label
+    @x_axis_label = @bucketed_data.key?(SeriesNames::DEGREEDAYS) ? SeriesNames::DEGREEDAYS : SeriesNames::TEMPERATURE
   end
 
   # remove zero data - issue with filtered scatter charts, and the difficulty or representing nan (NaN) in Excel charts

@@ -411,8 +411,6 @@ class ChartManager
       meter_definition: :allheat,
       timescale:        :year,
       series_breakdown: %i[model_type temperature],
-      # model:            :simple_regression_temperature,
-      # trendlines:       true,
       x_axis:           :day,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
