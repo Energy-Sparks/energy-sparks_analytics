@@ -843,11 +843,9 @@ class ThermostaticAdvice < HeatingAnalysisBase
             The outside temperature at which the two trendlines cross is generally a good indication
             of the schools 'balance point temperature', this is the outside temperature where there are enough
             internal gains to offset heating losses i.e. below this temperature the heating should be
-            turned on to maintain the internal temperature. A value below 18C is generally good. a value
-            above this might indicate either the school is very poorly insulated, or more likely the
-            internal temperature settings may be too high, for a school, you might expect the internal
-            temperature to be about 5C higher than the balance point temperature. General recommedations
-            for internal classroom temperatures are about 19C.
+            turned on to maintain the internal temperature.
+            A value below 18C is generally good. A value above this might indicate either the school
+            is very poorly insulated, or more likely the internal temperature settings may be too high.
           </p>
 
       <% if @add_extra_markup %>
@@ -891,6 +889,11 @@ class ThermostaticAdvice < HeatingAnalysisBase
           <%= a.round(0) %> + <%= b.round(1) %> * 4.0  = <%= predicted_kwh(4.0).round(0) %> kWh. See if you can read these values
           off the trend line of the graph above (degree days on the x axis and the answer -
           the predicted daily gas consumption on the y-axis).
+        </p>
+        <p>
+            The values for the trend line and the text above will vary slightly as the model used in the text
+            is more complicated than the one used by the chart, and if expressed in the chart would make it
+            more difficult to read.
         </p>
     }.gsub(/^  /, '')
 
