@@ -23,6 +23,7 @@ module Dashboard
       @amr_data = amr_data
       @meter_collection = meter_collection
       @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
+      check_fuel_type(fuel_type)
       @fuel_type = type
       @id = identifier
       @mpan_mprn = identifier.to_i
@@ -37,6 +38,10 @@ module Dashboard
       @meter_attributes = meter_attributes
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+    end
+
+    private def check_fuel_type(fuel_type)
+      throw EnergySparksUnexpectedStateException.new("Unexpected fuel type #{fuel_type}") if [:electricity, :gas].include?(fuel_type)
     end
 
     def to_s

@@ -388,6 +388,11 @@ def create_fuel_breakdown
     y_scaling.scale_from_kwh(1.0, @chart_configuration[:yaxis_units], @chart_configuration[:yaxis_scaling], fuel_type, @meter_collection)
   end
 
+  # single lookup for aggregator for performance
+  public def aggregator_scaling_factor
+    scaling_factor(nil, select_one_meter.fuel_type)
+  end
+
   # combinatorially combine 2 arrays of series names
   def combinatorially_combine(set_one, set_two)
     if set_one.empty?
@@ -497,7 +502,6 @@ def create_fuel_breakdown
     # at the 10 sf level. could be removed if required
     close_kwh = close_kwh.round(3)
     open_kwh = (amr_data_one_day(meter, date) - close_kwh).round(3)
-
     [open_kwh * factor, close_kwh * factor]
   end
 

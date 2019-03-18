@@ -378,6 +378,10 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
+    gas_heating_season_intraday_£: { # temporary chart 18Mar19 to bug fix non £ scaling intradat kWh charts
+      inherits_from: :gas_heating_season_intraday,
+      yaxis_units: :£
+    },
     gas_intraday_schoolday_last_year: { # used by heating regression fitter
       name:             'Intra-school day gas consumption profile',
       inherits_from:    :gas_heating_season_intraday,

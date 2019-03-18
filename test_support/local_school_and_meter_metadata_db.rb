@@ -149,7 +149,7 @@ class AnalysticsSchoolAndMeterMetaData
     if meter_collection.aggregated_heat_meters.nil?
       if !meter_collection.heat_meters.nil? && meter_collection.heat_meters.length > 1
         # for the moment only create a combined meter if multiple underlying meters of same type
-        meter_collection.aggregated_heat_meters = create_empty_combined_meter(meter_collection, 'Combined Heat Meter', :aggregated_heat, meter_data)
+        meter_collection.aggregated_heat_meters = create_empty_combined_meter(meter_collection, 'Combined Heat Meter', :gas, meter_data)
       end
     end
   end

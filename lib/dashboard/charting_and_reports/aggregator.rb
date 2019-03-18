@@ -571,15 +571,16 @@ class Aggregator
   end
 
   def aggregate_by_halfhour_simple_fast(start_date, end_date, bucketed_data, bucketed_data_count)
-    count = 0
     total = Array.new(48, 0)
+    count = 0
     (start_date..end_date).each do |date|
       next unless match_filter_by_day(date)
       data = @series_manager.get_one_days_data_x48(date)
       total = [total, data].transpose.map{|a| a.sum}
       count += 1
     end
-    bucketed_data[SeriesNames::NONE] = total
+    scaling_factor = @series_manager.aggregator_scaling_factor
+    bucketed_data[SeriesNames::NONE] = scaling_factor == 1.0 ? total : total.map { |hh_kwh| hh_kwh * scaling_factor }
     bucketed_data_count[SeriesNames::NONE] = Array.new(48, count)
   end
 
