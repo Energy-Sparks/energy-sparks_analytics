@@ -27,9 +27,9 @@ reports.load_school('St Marks Secondary', true)
 
 RubyProf.start if profile
 
-# reports.do_all_standard_pages_for_school
+# reports.do_chart_list('Boiler Control', [:teachers_landing_page_gas, :teachers_landing_page_electricity])
 
-reports.do_all_schools(true)
+reports.do_all_standard_pages_for_school
 
 if profile
   prof_result = RubyProf.stop

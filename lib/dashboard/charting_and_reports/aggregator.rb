@@ -82,6 +82,8 @@ class Aggregator
 
     reverse_x_axis if @chart_config.key?(:reverse_xaxis) && @chart_config[:reverse_xaxis] == true
 
+    reformat_x_axis if @chart_config.key?(:x_axis_reformat) && !@chart_config[:x_axis_reformat].nil?
+
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
@@ -345,6 +347,15 @@ class Aggregator
       @y2_axis.each_key do |series_name|
         @y2_axis[series_name] = @y2_axis[series_name].reverse
       end
+    end
+  end
+
+  def reformat_x_axis
+    format = @chart_config[:x_axis_reformat]
+    if format.is_a?(Hash) && format.key?(:date)
+      @x_axis.map! { |date| date.strftime(format[:date]) }
+    else
+      raise EnergySparksBadChartSpecification.new("Unexpected x axis reformat chart configuration #{format}")
     end
   end
 

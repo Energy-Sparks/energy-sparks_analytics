@@ -1059,6 +1059,7 @@ class ChartManager
       name:             'Comparison of last 2 weeks gas consumption',
       chart1_type:      :column,
       series_breakdown: :none,
+      x_axis_reformat:  { date: '%A' },
       timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }],
       x_axis:           :day,
       meter_definition: :allheat,
@@ -1069,12 +1070,14 @@ class ChartManager
     last_2_weeks_gas: {
       name:             'Last 2 weeks gas consumption (with temperature)',
       timescale:        { week: -1..0 },
+      x_axis_reformat:  nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
     last_2_weeks_gas_degreedays: {
       name:             'Last 2 weeks gas consumption (with degree days)',
       y2_axis:          :degreedays,
       timescale:        { week: -1..0 },
+      x_axis_reformat:  nil,
       inherits_from:    :last_2_weeks_gas
     },
     last_2_weeks_gas_comparison_temperature_compensated: {
@@ -1109,6 +1112,7 @@ class ChartManager
       adjust_by_temperature:  10.0,
       timescale:        [{ day: -27...0 }],
       y2_axis:          nil,
+      x_axis_reformat:  nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
     last_7_days_intraday_gas:  {

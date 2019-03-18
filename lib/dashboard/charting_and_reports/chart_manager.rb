@@ -113,7 +113,7 @@ class ChartManager
     graph_definition[:x_axis]         = aggregator.x_axis
     graph_definition[:x_axis_ranges]  = aggregator.x_axis_bucket_date_ranges
     graph_definition[:x_data]         = aggregator.bucketed_data
-    graph_definition[:x_axis_label]        = aggregator.x_axis_label unless aggregator.x_axis_label.nil?
+    graph_definition[:x_axis_label]   = aggregator.x_axis_label unless aggregator.x_axis_label.nil?
     graph_definition[:chart1_type]    = chart_config[:chart1_type]
     graph_definition[:chart1_subtype] = chart_config[:chart1_subtype]
     graph_definition[:y_axis_label]   = chart_config[:y_axis_label]
