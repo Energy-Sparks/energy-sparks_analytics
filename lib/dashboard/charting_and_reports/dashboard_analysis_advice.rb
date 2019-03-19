@@ -424,14 +424,16 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
       <% end %>
       </p>
       <p>
-        <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
+        <% if gas_only && percent_gas_of_regional_average < 0.7 %>
+          Well done you gas usage is very low and you should be congratulated for being an energy efficient school.
+        <% elsif percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
           Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
         <% else %>
-        Whether you have old or new school buildings, good energy management and best
-        practice in operation can save significant amounts of energy. With good management
-        an old building can use significantly less energy than a poorly managed new building.
-        Improving controls, upgrading to more efficient lighting and other measures are
-        applicable to all school buildings.
+          Whether you have old or new school buildings, good energy management and best
+          practice in operation can save significant amounts of energy. With good management
+          an old building can use significantly less energy than a poorly managed new building.
+          Improving controls, upgrading to more efficient lighting and other measures are
+          applicable to all school buildings.
         <% end %>
       </p>
     }.gsub(/^  /, '')
