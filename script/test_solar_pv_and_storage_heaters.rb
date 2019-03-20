@@ -16,7 +16,7 @@ profile = false
 reports = ReportConfigSupport.new
 
 # reports.load_school('Coit Primary School', true)
-reports.load_school('Christchurch First School', true)
+reports.load_school('Stanton Drew Primary School', true)
 
 # testing examples
 #
@@ -30,7 +30,7 @@ RubyProf.start if profile
 
 # reports.do_chart_list('Boiler Control', [:gas_heating_season_intraday, :gas_heating_season_intraday_£])
 
-reports.do_all_schools(true)
+reports.do_one_page(:storage_heaters)
 
 if profile
   prof_result = RubyProf.stop

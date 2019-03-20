@@ -23,6 +23,7 @@ class AggregateDataService
 
   # This is called by the EnergySparks codebase
   def aggregate_heat_and_electricity_meters_including_storage_and_solar_pv
+    raise EnergySparksDeprecatedException.new('Deprecated call to aggregate_heat_and_electricity_meters_including_storage_and_solar_pv')
     logger.info 'Aggregating meters including storage and solar pv'
     aggregate_heat_meters
     create_storage_heater_sub_meters # create before electric aggregation
@@ -40,6 +41,7 @@ class AggregateDataService
   def aggregate_heat_and_electricity_meters
     aggregate_heat_meters
     aggregate_electricity_meters
+    disaggregate_storage_heaters if @meter_collection.storage_heaters?
   end
 
   private
@@ -54,13 +56,13 @@ class AggregateDataService
 
   # if the electricity meter has a storage heater, split the meter
   # into 2 one with storage heater only kwh, the other with the remainder
-  def create_storage_heater_sub_meters
+  def disaggregate_storage_heaters
     @electricity_meters.each do |electricity_meter|
-      next if electricity_meter.storage_heater_config.nil?
+      next if electricity_meter.storage_heater_setup.nil?
 
       logger.info 'Disaggregating electricity meter into 1x storage heater only and 1 x remainder'
 
-      electric_only_amr, storage_heater_amr = electricity_meter.storage_heater_config.disaggregate_amr_data(electricity_meter.amr_data)
+      electric_only_amr, storage_heater_amr = electricity_meter.storage_heater_setup.disaggregate_amr_data(electricity_meter.amr_data, electricity_meter.mpan_mprn)
 
       electric_only_meter = create_modified_meter_copy(
         electricity_meter,
@@ -79,6 +81,7 @@ class AggregateDataService
         electricity_meter.name + ' storage heater only'
       )
       electricity_meter.sub_meters.push(storage_heater_meter)
+      @meter_collection.storage_heater_meter = storage_heater_meter
     end
   end
 
@@ -143,7 +146,7 @@ class AggregateDataService
       meter.floor_area,
       meter.number_of_pupils,
       meter.solar_pv_installation,
-      meter.storage_heater_config
+      meter.storage_heater_setup
     )
   end
 

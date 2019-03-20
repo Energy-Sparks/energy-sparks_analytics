@@ -30,7 +30,9 @@ class OneDayAMRReading
     'ALLZ'  => { name: 'Missing gas data set to zero',                      description: 'Set all data to zero'},
     'ZMDR'  => { name: 'Set missing data in date range to zero',            description: 'Set missing data in date range to zero'},
     'ZDTR'  => { name: 'Set bad data in date range to zero',                description: 'Set bad data in date range to zero'},
-    'AGGR'  => { name: 'Aggregate meter data',                              description: 'Internally aggregated from more than one meter'}
+    'AGGR'  => { name: 'Aggregate meter data',                              description: 'Internally aggregated from more than one meter'},
+    'STOR'  => { name: 'Extracted storage heater data (good)',              description: 'Synthetic storage heater data extracted from main meter'},
+    'STEX'  => { name: 'Remaining data post storage heater extraction-good',description: 'Synthetic reminaing data after storage heater data extracted from main meter'},
   }.freeze
   # rubocop:disable Metrics/LineLength
 end

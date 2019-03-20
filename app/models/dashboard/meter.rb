@@ -5,7 +5,7 @@ module Dashboard
 
     # Extra fields - potentially a concern or mix-in
     attr_reader :fuel_type, :meter_collection
-    attr_reader :solar_pv_installation, :storage_heater_config, :sub_meters
+    attr_reader :solar_pv_installation, :storage_heater_setup, :sub_meters
     attr_reader :meter_correction_rules, :model_cache
     attr_accessor :amr_data,  :floor_area, :number_of_pupils
 
@@ -17,7 +17,7 @@ module Dashboard
     def initialize(meter_collection, amr_data, type, identifier, name,
                     floor_area = nil, number_of_pupils = nil,
                     solar_pv_installation = nil,
-                    storage_heater_config = nil,
+                    storage_heater_config = nil, # now redundant PH 20Mar2019
                     external_meter_id = nil,
                     meter_attributes = MeterAttributes)
       @amr_data = amr_data
@@ -31,13 +31,19 @@ module Dashboard
       @floor_area = floor_area
       @number_of_pupils = number_of_pupils
       @solar_pv_installation = solar_pv_installation
-      @storage_heater_config = storage_heater_config
       @meter_correction_rules = []
       @sub_meters = []
       @external_meter_id = external_meter_id
       @meter_attributes = meter_attributes
+      process_meter_attributes
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+    end
+
+    private def process_meter_attributes
+      unless @meter_attributes.attributes(self, :storage_heaters).nil?
+        @storage_heater_setup = StorageHeater.new(@meter_attributes.attributes(self, :storage_heaters))
+      end
     end
 
     private def check_fuel_type(fuel_type)
@@ -54,6 +60,10 @@ module Dashboard
 
     def all_attributes
       @meter_attributes.attributes(self)
+    end
+
+    def storage_heater?
+      !@storage_heater_setup.nil?
     end
 
     def non_heating_only?

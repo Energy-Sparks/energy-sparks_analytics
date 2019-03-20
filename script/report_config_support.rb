@@ -26,7 +26,7 @@ class ReportConfigSupport
       'St Marks Secondary'                => :electric_and_gas,
       'St Johns Primary'                  => :electric_and_gas,
       'St Saviours Junior'                => :electric_and_gas,
-      'Stanton Drew Primary School'       => :electric_only,
+      'Stanton Drew Primary School'       => :electric_and_storage_heaters,
       'St Martins Garden Primary School'  => :electric_and_gas,
       'St Michaels Junior Church School'  => :electric_and_gas,
       'Twerton Infant School'             => :electric_and_gas,

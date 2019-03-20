@@ -154,7 +154,8 @@ class DashboardChartAdviceBase
           :intraday_line_school_days_6months_simulator_submeters
           SimulatorMiscOtherAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     else
-      DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
+      res = DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
+      DashboardEnergyAdvice.storage_heater_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
     end
   end
 
@@ -298,9 +299,14 @@ class HeatingAnalysisBase < DashboardChartAdviceBase
 
   attr_reader :heating_model
 
-  def initialize(school, chart_definition, chart_data, chart_symbol)
+  def initialize(school, chart_definition, chart_data, chart_symbol, meter_type = :aggregated_heat)
     super(school, chart_definition, chart_data, chart_symbol)
+    @meter_type = meter_type
     @heating_model = calculate_model
+  end
+
+  def heat_meter
+    @meter_type == :aggregated_heat ? @school.aggregated_heat_meters : (@school.storage_heater_meter.nil? ? nil : @school.storage_heater_meter)
   end
 
   def a
@@ -333,16 +339,16 @@ class HeatingAnalysisBase < DashboardChartAdviceBase
   end
 
   def last_meter_date
-    @school.aggregated_heat_meters.amr_data.end_date
+    heat_meter.amr_data.end_date
   end
 
   def one_year_before_last_meter_date
-    start_date = [last_meter_date - 364, @school.aggregated_heat_meters.amr_data.end_date].min
+    start_date = [last_meter_date - 364, heat_meter.amr_data.end_date].min
   end
 
   def calculate_model
     period = SchoolDatePeriod.new(:analysis, 'Current Year', one_year_before_last_meter_date, last_meter_date)
-    @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, period)
+    heat_meter.model_cache.create_and_fit_model(:best, period)
   end
 end
 
@@ -790,8 +796,8 @@ end
 class ThermostaticAdvice < HeatingAnalysisBase
   include Logging
 
-  def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol)
+  def initialize(school, chart_definition, chart_data, chart_symbol, meter_type = :aggregated_heat)
+    super(school, chart_definition, chart_data, chart_symbol, meter_type)
   end
 
   def generate_advice

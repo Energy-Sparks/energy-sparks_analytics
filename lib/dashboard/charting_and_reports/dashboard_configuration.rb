@@ -205,7 +205,26 @@ class DashboardConfiguration
                                   heating_on_off_by_week
                                   thermostatic_model_categories_pie_chart
                                   heating_on_off_pie_chart
-                                ]
+                                ],
+                               },
+        storage_heaters:      {
+                                  name: 'Storage Heaters',
+                                  charts: %i[
+                                    storage_heater_group_by_week
+                                    storage_heater_group_by_week_long_term
+                                    storage_heater_by_day_of_week
+                                    storage_heater_intraday_current_year
+                                    storage_heater_intraday_current_year_kw
+                                    intraday_line_school_last7days_storage_heaters
+                                    storage_heater_thermostatic
+                                    heating_on_off_by_week_storage_heater
+                                  ],
+                              },
+        solar_pv:             {
+                                name: 'Solar PV',
+                                charts: %i[
+                                  solar_pv_group_by_week
+                                ],
                               }
 }.freeze
 
@@ -244,6 +263,12 @@ class DashboardConfiguration
                             electricity_detail
                             gas_detail
                             boiler_control
-                        ]
+                        ],
+    electric_and_storage_heaters:
+                        %i[
+                            main_dashboard_electric
+                            electricity_detail
+                            storage_heaters
+                        ],
   }.freeze
 end

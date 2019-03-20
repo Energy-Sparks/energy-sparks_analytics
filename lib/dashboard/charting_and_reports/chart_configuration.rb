@@ -99,6 +99,53 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    storage_heater_group_by_week: {
+      name:               'Storage heater by week of the year',
+      inherits_from:      :group_by_week_electricity,
+      meter_definition:   :storage_heater_meter,
+      y2_axis:            :degreedays
+    },
+    storage_heater_by_day_of_week: {
+      name:               'Storage heater by day of the week (year to date)',
+      inherits_from:      :gas_by_day_of_week,
+      meter_definition:   :storage_heater_meter
+    },
+    storage_heater_group_by_week_long_term: {
+      name:               'Storage heater by day of the week (all years)',
+      inherits_from:      :storage_heater_group_by_week,
+      timescale:          nil
+    },
+    storage_heater_thermostatic: {
+      name:               'Storage heater thermostatic control by day of the week (year to date)',
+      inherits_from:      :thermostatic,
+      meter_definition:   :storage_heater_meter
+    },
+    storage_heater_intraday_current_year: {
+      name:               'Storage heater intraday profile (kwh) for year to date',
+      inherits_from:      :gas_heating_season_intraday,
+      meter_definition:   :storage_heater_meter
+    },
+    storage_heater_intraday_current_year_kw: {
+      name:               'Storage heater intraday profile (kw) for year to date',
+      chart1_type:        :line,
+      inherits_from:      :storage_heater_intraday_current_year,
+      yaxis_units:        :kw
+    },
+    intraday_line_school_last7days_storage_heaters:  {
+      inherits_from:    :intraday_line_school_last7days,
+      name:             'Intraday (last 7 days) storage heaters',
+      meter_definition: :storage_heater_meter
+    },
+    heating_on_off_by_week_storage_heater: {
+      inherits_from:    :heating_on_off_by_week,
+      name:             'Heating on/off periods',
+      meter_definition: :storage_heater_meter
+    },
+    solar_pv_group_by_week: {
+      name:               'Solar PV by week of the year',
+      inherits_from:      :storage_heater_group_by_week,
+      filter:             { submeter: [ 'Solar PV'] },
+    },
     group_by_week_electricity_test_range: {
       inherits_from:    :group_by_week_electricity,
       name:             'By Day: Electricity Range Test',

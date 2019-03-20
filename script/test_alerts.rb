@@ -31,7 +31,7 @@ reports = ReportConfigSupport.new
 failed_alerts = []
 
 school_names.sort.each do |school_name|
-  # next if school_name != 'Trinity First School'
+  next if school_name != 'Freshford C of E Primary'
   puts banner
   puts banner
   puts banner(school_name)
@@ -46,7 +46,7 @@ school_names.sort.each do |school_name|
 
   bm1 = Benchmark.realtime {
     alerts_classes.each do |alert_class|
-      next if false && ![
+      next if ![
         AlertChangeInDailyElectricityShortTerm,
         AlertChangeInDailyGasShortTerm,
         AlertChangeInElectricityBaseloadShortTerm,
@@ -64,7 +64,8 @@ school_names.sort.each do |school_name|
         alert.analyse(asof_date, true)
 =begin
         puts ">>>>All template variables:"
-        alert.print_all_formatted_template_variable_values
+        ap(alert_class.front_end_template_variables)
+
         puts ">>>>Raw template variables:"
         ap(alert.raw_template_variables)
         puts ">>>>html results:"

@@ -22,7 +22,7 @@ class MeterCollection
   attr_reader :school, :name, :address, :postcode, :urn, :area_name, :model_cache
 
   # These are things which will be populated
-  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :electricity_simulation_meter
+  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :electricity_simulation_meter, :storage_heater_meter
 
   def initialize(school)
     @name = school.name
@@ -128,6 +128,10 @@ class MeterCollection
 
   def all_electricity_meters
     all_meters.select { |meter| meter.electricity_meter? }
+  end
+
+  def storage_heaters?
+    all_meters.any?{ |meter| meter.storage_heater? }
   end
 
   def school_type

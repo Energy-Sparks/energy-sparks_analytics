@@ -50,6 +50,10 @@ class AMRData < HalfHourlyData
     self[date].one_day_kwh
   end
 
+  def clone_one_days_data(date)
+    self[date].deep_dup
+  end
+  
    # called from inherited half_hourly)data.one_day_total(date), shouldn't use generally
   def one_day_total(date)
     one_day_kwh(date)

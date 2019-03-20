@@ -176,7 +176,8 @@ class SeriesDataManager
 
   def degreeday_base_temperature
     begin
-      heating_model.average_base_temperature
+      base = heating_model.average_base_temperature
+      [[base, 10.0].min, 30.0].max # temporarily limit range of base temperature TODO(PH,20Mar2019) fix
     rescue StandardError => _e
       # TODO(PH, 7Mar2019) - this is a little dangerous as it might give a false
       # impression of the base temperature, the problem lies in the simulator
@@ -660,13 +661,14 @@ def create_fuel_breakdown
     fuel_data
   end
 
-  def heating_breakdown(date_range, _electricity_meter, heat_meter)
-    factor = scaling_factor(1.0, heat_meter.fuel_type) # lookup once for performance
+  def heating_breakdown(date_range, electricity_meter, heat_meter)
+    meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
+    factor = scaling_factor(1.0, meter.fuel_type) # lookup once for performance
     heating_data = { SeriesNames::HEATINGDAY => 0.0, SeriesNames::NONHEATINGDAY => 0.0 }
     (date_range[0]..date_range[1]).each do |date|
       begin
         type = heating_model.heating_on?(date) ? SeriesNames::HEATINGDAY : SeriesNames::NONHEATINGDAY
-        heating_data[type] += amr_data_one_day(heat_meter, date) * factor
+        heating_data[type] += amr_data_one_day(meter, date) * factor
       rescue StandardError => e
         logger.error e
         logger.error "Warning: unable to calculate heating breakdown on #{date}"
@@ -676,8 +678,10 @@ def create_fuel_breakdown
   end
 
   # this breakdown uses NaN to indicate missing data, so Excel doesn't plot it
-  def heating_model_breakdown(date_range, _electricity_meter, heat_meter)
-    factor = scaling_factor(1.0, heat_meter.fuel_type) # lookup once for performance
+  def heating_model_breakdown(date_range, electricity_meter, heat_meter)
+    # puts "non heat meter #{electricity_meter} #{electricity_meter.storage_heater?}"
+    meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
+    factor = scaling_factor(1.0, meter.fuel_type) # lookup once for performance
     breakdown = {}
     regression_regimes = heating_model_types
     regression_regimes.each do |regime|
@@ -688,9 +692,9 @@ def create_fuel_breakdown
       begin
         type = heating_model.model_type?(date)
         if breakdown[type].nil? || breakdown[type].nan?
-          breakdown[type] = amr_data_one_day(heat_meter, date) * factor
+          breakdown[type] = amr_data_one_day(meter, date) * factor
         else
-          breakdown[type] += amr_data_one_day(heat_meter, date) * factor
+          breakdown[type] += amr_data_one_day(meter, date) * factor
         end
       rescue StandardError => e
         logger.error e
@@ -986,6 +990,8 @@ def create_fuel_breakdown
         @meters = [@meter_collection.aggregated_electricity_meters, nil]
       when :electricity_simulator
         @meters = [@meter_collection.electricity_simulation_meter, nil]
+      when :storage_heater_meter
+        @meters = [@meter_collection.storage_heater_meter, nil]
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
       # specified meter - typically by mpan or mprn

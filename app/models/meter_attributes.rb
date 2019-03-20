@@ -1,4 +1,5 @@
 require_relative '../../lib/dashboard/time_of_year.rb'
+require_relative '../../lib/dashboard/time_of_day.rb'
 require 'awesome_print'
 require 'date'
 # temporary class to enhance meter data model prior to this data being
@@ -9,8 +10,9 @@ class MeterAttributes
 
   def self.attributes(meter, type = nil)
     mpan_mprn = meter.mpan_mprn.to_i # treat as integer even if loaded as string
+
     return nil unless METER_ATTRIBUTE_DEFINITIONS.key?(mpan_mprn)
-    return nil unless METER_ATTRIBUTE_DEFINITIONS[mpan_mprn].key?(type)
+    return nil if !type.nil? && !METER_ATTRIBUTE_DEFINITIONS[mpan_mprn].key?(type)
 
     butes = nil
     if type.nil?
@@ -91,6 +93,10 @@ class MeterAttributes
           }
         }
       ]
+    },
+    # ==============================Critchall============================
+    2000025766279 => {
+      meter_corrections: [ :correct_zero_partial_data ]
     },
     # ==============================Eccleshall=============================
     2155853706  => {
@@ -378,8 +384,29 @@ class MeterAttributes
         {
           readings_start_date: Date.new(2010, 6, 25),
           reason: 'Probably not needed, LGAP lost during testing of bulk upload PH 4Mar2019, suggest remove on further review'
-        }
+        },
       ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     25,
+        reason: 'Staton Drew has strange bifurcation, suggesting half the storage heaters are switched off much earlier in the year'
+      },
+      tariff: {
+        type:             :economy_7 # this isn't really the case for Stanton Drew as runs off flat tariff but it will do for testing
+      },
+      storage_heaters: [  # and array so you can change the config for different time periods
+        {                 # the contents of the hash are all optional, so can set the config to storage_heaters: nil for simplicity
+          start_date:         Date.new(2010, 1, 1),   # not strictly necessary, included for testing purposes, if missing assumes 'forever'
+          end_date:           Date.new(2025, 1, 1),   # not strictly necessary, included for testing purposes, if missing assumes 'forever'
+          power_kw:           22.0,                   # not strictly necessary, included for testing purposes
+          charge_start_time:  TimeOfDay.new(0, 30),   # optional
+          charge_end_time:    TimeOfDay.new(6, 30),   # optional
+          days_of_week:       ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Saturday'] # suspect this isn't required/not supported
+        }
+      ]
+    },
+    # ==============================Trinity============================
+    2000025766288 => {
+      meter_corrections: [ :correct_zero_partial_data ]
     },
     # ==============================Twerton========================
     4223705708 => {
