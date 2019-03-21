@@ -19,7 +19,7 @@ class ReportConfigSupport
       'Castle Primary School'             => :electric_and_gas,
       'Freshford C of E Primary'          => :electric_and_gas,
       'Marksbury C of E Primary School'   => :electric_only,
-      'Paulton Junior School'             => :electric_and_gas,
+      'Paulton Junior School'             => :electric_and_gas_and_solar_pv,
       'Pensford Primary'                  => :electric_only,
       'Roundhill School'                  => :electric_and_gas,
       'Saltford C of E Primary School'    => :electric_and_gas,

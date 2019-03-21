@@ -801,8 +801,10 @@ class Aggregator
   end
 
   def inject_benchmarks
-    logger.info 'Injecting national, regional and exemplar bencmark data'
+    logger.info "Injecting national, regional and exemplar bencmark data: for #{@bucketed_data.keys}"
     has_gas = @bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array)
+    has_storage_heater = @bucketed_data.key?(SeriesNames::STORAGEHEATERS)
+    has_solar_pv = @bucketed_data.key?(SeriesNames::SOLARPV)
     has_electricity = @bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)
 
     if has_gas || has_electricity
@@ -811,14 +813,20 @@ class Aggregator
       @x_axis.push('National Average')
       @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(benchmark_gas_usage_in_units)
+      @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
+      @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
 
       @x_axis.push('Regional Average')
       @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(benchmark_gas_usage_in_units * 0.9)
+      @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
+      @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
 
       @x_axis.push('Exemplar School')
       @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(exemplar_gas_usage_in_units * 0.9)
+      @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
+      @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
     else
       @x_axis.push('National Average')
       @bucketed_data['electricity']['National Average'] = benchmark_electricity_usage_in_units

@@ -54,6 +54,9 @@ class SeriesNames
   IRRADIANCE      = 'Solar Irradiance'.freeze
   GRIDCARBON      = 'Grid Carbon Intensity'.freeze
 
+  STORAGEHEATERS  = 'storage heaters'
+  SOLARPV         = 'solar pv (consumed onsite)'      
+
   PREDICTEDHEAT   = 'Predicted Heat'.freeze
   CUSUM           = 'CUSUM'.freeze
   BASELOAD        = 'BASELOAD'.freeze
@@ -369,19 +372,11 @@ class SeriesDataManager
 
 private
 
-def create_fuel_breakdown
-=begin
-    # commented out 4Mar2019 after aggregate version of fuels starting accreting into buckets
-    buckets = []
-    buckets.push('electricity')
-    buckets.push('gas')
-    @meters.each do |meter|
-      if !meter.nil? && ['aggregated_electricity', 'aggregated_heat', 'electricity', 'gas'].include?(meter.fuel_type.to_s)
-        buckets.push(meter.fuel_type.to_s)
-      end
-    end
-=end
+  def create_fuel_breakdown
     buckets = ['electricity', 'gas']
+    buckets.push(SeriesNames::STORAGEHEATERS) if @meter_collection.storage_heaters?
+    buckets.push(SeriesNames::SOLARPV) if @meter_collection.solar_pv_panels?
+    buckets
   end
 
   def scaling_factor(_value, fuel_type)
@@ -612,16 +607,18 @@ def create_fuel_breakdown
   end
 
   def fuel_breakdown(date_range, electricity_meter, gas_meter)
+    has_storage_heaters = @meter_collection.storage_heaters?
+    has_solar_pv_panels = @meter_collection.solar_pv_panels?
     electric_factor = scaling_factor(1.0, :electricity) # lookup once for performance
+    storage_factor = electric_factor * 8.0 / 12.5
     gas_factor = scaling_factor(1.0, :gas) # lookup once for performance
-    # solar_pv_factor = scaling_factor(1.0, :solar_pv)
-    # storage_heater_factor = scaling_factor(1.0, :storage_heater)
     fuel_data = {
       'electricity' => 0.0,
       'gas' => 0.0
-      # 'solar pv' => 0.0,
-      # 'storage heaters' => 0.0
     }
+    fuel_data[SeriesNames::STORAGEHEATERS] = 0.0 if has_storage_heaters
+    fuel_data[SeriesNames::SOLARPV] = 0.0 if has_solar_pv_panels
+
     (date_range[0]..date_range[1]).each do |date|
       begin
         if gas_meter.nil?
@@ -634,8 +631,8 @@ def create_fuel_breakdown
         else
           fuel_data['electricity'] += amr_data_one_day(electricity_meter, date) * electric_factor
         end
-        # fuel_data['solar pv'] += amr_data_one_day(solar_pv_meter, date) * solar_pv_factor
-        # fuel_data['storage heaters'] += amr_data_one_day(storage_meter, date) * storage_heater_factor
+        fuel_data[SeriesNames::STORAGEHEATERS] += @meter_collection.storage_heater_meter.amr_data.one_day_kwh(date) * storage_factor if has_storage_heaters
+        fuel_data[SeriesNames::SOLARPV] += -1.0 * @meter_collection.solar_pv_meter.amr_data.one_day_kwh(date) * electric_factor if has_solar_pv_panels
       rescue Exception => e
         logger.error "Missing or nil data on #{date}"
         logger.error e
@@ -646,6 +643,7 @@ def create_fuel_breakdown
 
   def fuel_breakdown_halfhour(date, halfhour_index)
     electric_factor = scaling_factor(1.0, :electricity)
+    storage_factor = electric_factor * 8.0 / 12.5
     electricity_meter = @meters[0]
     electric_val = electricity_meter.nil? ? 0.0 : (amr_data_by_half_hour(electricity_meter, date, halfhour_index) * electric_factor)
 
@@ -658,6 +656,8 @@ def create_fuel_breakdown
       'gas' => gas_val
     }
 
+    fuel_data[SeriesNames::STORAGEHEATERS] = @meter_collection.storage_heater_meter.amr_data.kwh(date, halfhour_index) * electric_factor if @meter_collection.storage_heaters?
+    fuel_data[SeriesNames::SOLARPV] += -1.0 * @meter_collection.solar_pv_meter.amr_data.kwh(date, halfhour_index) * storage_factor if @meter_collection.solar_pv_panels?
     fuel_data
   end
 
@@ -992,6 +992,8 @@ def create_fuel_breakdown
         @meters = [@meter_collection.electricity_simulation_meter, nil]
       when :storage_heater_meter
         @meters = [@meter_collection.storage_heater_meter, nil]
+      when :solar_pv_meter
+        @meters = [@meter_collection.solar_pv_meter, nil]
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
       # specified meter - typically by mpan or mprn

@@ -16,7 +16,8 @@ profile = false
 reports = ReportConfigSupport.new
 
 # reports.load_school('Coit Primary School', true)
-reports.load_school('Christchurch First School', true)
+# reports.load_school('Paulton Junior School', true)
+reports.load_school('Stanton Drew Primary School', true)
 
 # testing examples
 #

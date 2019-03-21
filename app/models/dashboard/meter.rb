@@ -5,7 +5,7 @@ module Dashboard
 
     # Extra fields - potentially a concern or mix-in
     attr_reader :fuel_type, :meter_collection
-    attr_reader :solar_pv_installation, :storage_heater_setup, :sub_meters
+    attr_reader :solar_pv_setup, :storage_heater_setup, :sub_meters
     attr_reader :meter_correction_rules, :model_cache
     attr_accessor :amr_data,  :floor_area, :number_of_pupils
 
@@ -44,6 +44,9 @@ module Dashboard
       unless @meter_attributes.attributes(self, :storage_heaters).nil?
         @storage_heater_setup = StorageHeater.new(@meter_attributes.attributes(self, :storage_heaters))
       end
+      unless @meter_attributes.attributes(self, :solar_pv).nil?
+        @solar_pv_setup = SolarPVPanels.new(@meter_attributes.attributes(self, :solar_pv))
+      end
     end
 
     private def check_fuel_type(fuel_type)
@@ -64,6 +67,10 @@ module Dashboard
 
     def storage_heater?
       !@storage_heater_setup.nil?
+    end
+
+    def solar_pv_panels?
+      !@solar_pv_setup.nil?
     end
 
     def non_heating_only?

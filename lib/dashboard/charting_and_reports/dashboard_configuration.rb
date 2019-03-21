@@ -224,6 +224,8 @@ class DashboardConfiguration
                                 name: 'Solar PV',
                                 charts: %i[
                                   solar_pv_group_by_week
+                                  group_by_week_electricity
+                                  solar_pv_group_by_week_by_submeter
                                 ],
                               }
 }.freeze
@@ -269,6 +271,14 @@ class DashboardConfiguration
                             main_dashboard_electric
                             electricity_detail
                             storage_heaters
+                        ],
+    electric_and_gas_and_solar_pv:
+                        %i[
+                            main_dashboard_electric_and_gas
+                            electricity_detail
+                            gas_detail
+                            boiler_control
+                            solar_pv
                         ],
   }.freeze
 end

@@ -144,7 +144,14 @@ class ChartManager
     solar_pv_group_by_week: {
       name:               'Solar PV by week of the year',
       inherits_from:      :storage_heater_group_by_week,
-      filter:             { submeter: [ 'Solar PV'] },
+      y2_axis:            :irradiance,
+      meter_definition:   :solar_pv_meter
+    },
+    solar_pv_group_by_week_by_submeter: {
+      name:               'Solar PV by week of the year',
+      inherits_from:      :solar_pv_group_by_week,
+      meter_definition: :allelectricity,
+      series_breakdown:   :submeter
     },
     group_by_week_electricity_test_range: {
       inherits_from:    :group_by_week_electricity,

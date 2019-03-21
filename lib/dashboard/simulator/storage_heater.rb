@@ -119,7 +119,6 @@ class StorageHeater
     end
 
     private def parse_meter_attributes_configuration_for_period(period_config)
-      @config = []
       start_date = (!period_config.nil? && period_config.key?(:start_date)) ? period_config[:start_date] : MIN_DEFAULT_START_DATE
       end_date   = (!period_config.nil? && period_config.key?(:end_date) )  ? period_config[:end_date]   : MAX_DEFAULT_END_DATE
       {

@@ -22,7 +22,7 @@ class AggregateDataService
   end
 
   # This is called by the EnergySparks codebase
-  def aggregate_heat_and_electricity_meters_including_storage_and_solar_pv
+  def aggregate_heat_and_electricity_meters_including_storage_and_solar_pv_deprecated
     raise EnergySparksDeprecatedException.new('Deprecated call to aggregate_heat_and_electricity_meters_including_storage_and_solar_pv')
     logger.info 'Aggregating meters including storage and solar pv'
     aggregate_heat_meters
@@ -42,6 +42,7 @@ class AggregateDataService
     aggregate_heat_meters
     aggregate_electricity_meters
     disaggregate_storage_heaters if @meter_collection.storage_heaters?
+    create_solar_pv_sub_meters if @meter_collection.solar_pv_panels?
   end
 
   private
@@ -62,16 +63,20 @@ class AggregateDataService
 
       logger.info 'Disaggregating electricity meter into 1x storage heater only and 1 x remainder'
 
+      # create a new sub meter with the original amr data as a sub meter
+      # replace the existing electricity meters amr_date with just the non storag heater amr_data
       electric_only_amr, storage_heater_amr = electricity_meter.storage_heater_setup.disaggregate_amr_data(electricity_meter.amr_data, electricity_meter.mpan_mprn)
 
-      electric_only_meter = create_modified_meter_copy(
+      original_electricity_meter_copy = create_modified_meter_copy(
         electricity_meter,
-        electric_only_amr,
+        electricity_meter.amr_data,
         :electricity,
-        electricity_meter.id + ' minus storage heater',
-        electricity_meter.name + ' minus storage heater'
+        electricity_meter.id,
+        electricity_meter.name
       )
-      electricity_meter.sub_meters.push(electric_only_meter)
+      electricity_meter.sub_meters.push(original_electricity_meter_copy)
+      
+      electricity_meter.amr_data = electric_only_amr
 
       storage_heater_meter = create_modified_meter_copy(
         electricity_meter,
@@ -91,21 +96,22 @@ class AggregateDataService
   # rather than a consumer
   def create_solar_pv_sub_meters
     @electricity_meters.each do |electricity_meter|
-      next if electricity_meter.solar_pv_installation.nil?
+      next if electricity_meter.solar_pv_setup.nil?
 
       logger.info 'Creating an artificial solar pv meter and associated amr data'
 
-      solar_amr = create_solar_pv_amr_data(
+      solar_amr = electricity_meter.solar_pv_setup.create_solar_pv_amr_data(
         electricity_meter.amr_data,
-        electricity_meter.solar_pv_installation
+        @meter_collection,
+        electricity_meter.mpan_mprn
       )
 
       solar_pv_meter = create_modified_meter_copy(
         electricity_meter,
         solar_amr,
         :solar_pv,
-        'solarpvid',
-        electricity_meter.solar_pv_installation.to_s
+        electricity_meter.id.to_i + 10000000, # TODO(PH,21Mar2019) - need proper synthetic id
+        'Electricity consumed from solar PV panels'
       )
 
       electricity_meter.sub_meters.push(solar_pv_meter)
@@ -117,7 +123,7 @@ class AggregateDataService
         electricity_meter.amr_data,
         :electricity,
         electricity_meter.id,
-        electricity_meter.name
+        'Electricity consumed from mains'
       )
 
       electricity_meter.sub_meters.push(original_electric_meter)
@@ -126,13 +132,14 @@ class AggregateDataService
       # combined original mains consumption data plus the solar pv data
 
       electric_plus_pv_amr_data = aggregate_amr_data(
-        [electricity_meter.amr_data, solar_amr],
+        [electricity_meter, solar_pv_meter],
         :electricity
         )
 
       electricity_meter.amr_data = electric_plus_pv_amr_data
       electricity_meter.id += ' plus pv'
       electricity_meter.name += ' plus pv'
+      @meter_collection.solar_pv_meter = solar_pv_meter
     end
   end
 
@@ -145,24 +152,9 @@ class AggregateDataService
       name,
       meter.floor_area,
       meter.number_of_pupils,
-      meter.solar_pv_installation,
+      meter.solar_pv_setup,
       meter.storage_heater_setup
     )
-  end
-
-  def create_solar_pv_amr_data(electricity_amr, solar_pv_installation)
-    solar_amr = AMRData.new(:solar_pv)
-    (electricity_amr.start_date..electricity_amr.end_date).each do |date|
-      if date >= meter_collection.solar_pv.start_date
-        scale_factor = solar_pv_installation.capacity_kwp_on_date(date)
-        days_pv_yield = meter_collection.solar_pv[date]
-        producer = 1.0 # positive kWh despite producer rather than consumer
-        scaled_pv_kwh = days_pv_yield.map { |i| i * scale_factor * producer }
-        solar_amr.add(date, scaled_pv_kwh)
-      end
-    end
-    logger.info "Created new solar pv meter with #{solar_amr.length} days of data"
-    solar_amr
   end
 
   def aggregate_heat_meters
@@ -171,20 +163,6 @@ class AggregateDataService
 
   def aggregate_electricity_meters
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
-  end
-
-  def heating_model(period)
-=begin
-    unless @heating_models.key?(:basic)
-      @heating_models[:basic] = AnalyseHeatingAndHotWater::BasicRegressionHeatingModel.new(@aggregated_heat_meters, @meter_collection.holidays, @meter_collection.temperatures, @meter_attributes)
-      @heating_models[:basic].calculate_regression_model(period)
-    end
-    # PH 21Jun2016 - commented this back in
-    # logger.debug "Calculating model 21Jun18 debug", @period.inspect
-    @heating_on_periods = @model.calculate_heating_periods(@period)
-    @heating_models[:basic]
-=end
-    raise EnergySparksDeprecatedException.new('Not expecting aggregate data service to be calling models')
   end
 
   def aggregate_amr_data(meters, type)
