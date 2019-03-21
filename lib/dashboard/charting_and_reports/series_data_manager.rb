@@ -355,7 +355,7 @@ class SeriesDataManager
 
   def amr_data_date_range(meter, start_date, end_date)
     if @adjust_by_temperature && meter.fuel_type == :gas
-      heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value)
+      heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value, 0.0)
     else
       meter.amr_data.kwh_date_range(start_date, end_date)
     end

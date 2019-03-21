@@ -895,12 +895,12 @@ module AnalyseHeatingAndHotWater
       actual_kwh + model.b * (temperature - actual_temperature)
     end
 
-    def temperature_compensated_date_range_gas_kwh(start_date, end_date, temperature)
+    def temperature_compensated_date_range_gas_kwh(start_date, end_date, temperature, floor_at = nil)
       total_adjusted_kwh = 0.0
       (start_date..end_date).each do |date|
         total_adjusted_kwh += temperature_compensated_one_day_gas_kwh(date, temperature)
       end
-      total_adjusted_kwh
+      floor_at.nil? ? total_adjusted_kwh : [total_adjusted_kwh, floor_at].max
     end
 
     def predicted_kwh(date, temperature, substitute_model_date = nil)
