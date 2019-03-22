@@ -73,8 +73,8 @@ class AggregateDataService
         electricity_meter,
         storage_heater_amr,
         :storage_heater,
-        electricity_meter.id + ' storage heater only',
-        electricity_meter.name + ' storage heater only'
+        "#{electricity_meter.id} storage heater only",
+        "#{electricity_meter.name} storage heater only"
       )
       electricity_meter.sub_meters.push(storage_heater_meter)
       @meter_collection.storage_heater_meter = storage_heater_meter
