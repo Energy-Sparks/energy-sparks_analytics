@@ -1,3 +1,3 @@
 module Dashboard
-  VERSION = "0.40.6".freeze
+  VERSION = "0.41.0".freeze
 end
