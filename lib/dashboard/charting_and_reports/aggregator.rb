@@ -580,7 +580,7 @@ class Aggregator
       total = [total, data].transpose.map{|a| a.sum}
       count += 1
     end
-    # Change Line Below 22Mar2019
+    # Change Line Below 22Mar2019 - change
     scaling_factor = @chart_config[:yaxis_units] == :kw ? 1.0 : @series_manager.aggregator_scaling_factor
     bucketed_data[SeriesNames::NONE] = scaling_factor == 1.0 ? total : total.map { |hh_kwh| hh_kwh * scaling_factor }
     bucketed_data_count[SeriesNames::NONE] = Array.new(48, count)
