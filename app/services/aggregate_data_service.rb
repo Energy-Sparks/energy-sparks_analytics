@@ -12,23 +12,14 @@ class AggregateDataService
     @electricity_meters = @meter_collection.electricity_meters
   end
 
+  # This is called by the EnergySparks codebase
   def validate_and_aggregate_meter_data
     logger.info 'Validating and Aggregating Meters'
     validate_meter_data
-    aggregate_heat_and_electricity_meters_including_storage_and_solar_pv
+    aggregate_heat_and_electricity_meters
 
     # Return populated with aggregated data
     @meter_collection
-  end
-
-  # This is called by the EnergySparks codebase
-  def aggregate_heat_and_electricity_meters_including_storage_and_solar_pv_deprecated
-    raise EnergySparksDeprecatedException.new('Deprecated call to aggregate_heat_and_electricity_meters_including_storage_and_solar_pv')
-    logger.info 'Aggregating meters including storage and solar pv'
-    aggregate_heat_meters
-    create_storage_heater_sub_meters # create before electric aggregation
-    create_solar_pv_sub_meters
-    aggregate_electricity_meters
   end
 
   # This is called by the EnergySparks codebase
@@ -75,7 +66,7 @@ class AggregateDataService
         electricity_meter.name
       )
       electricity_meter.sub_meters.push(original_electricity_meter_copy)
-      
+
       electricity_meter.amr_data = electric_only_amr
 
       storage_heater_meter = create_modified_meter_copy(
