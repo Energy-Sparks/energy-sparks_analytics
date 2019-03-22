@@ -116,7 +116,7 @@ class AlertAnalysisBase
   private def convert_range_template_data_to_high_low(template_data, lookup, raw_data)
     new_data = {}
     template_data.each do |type, data| # front end want ranges as seperate high/low symbol-value pairs
-      if [:£_range, :years_range].include?(lookup[type][:units])
+      if [:£_range, :years_range].include?(lookup[type][:units]) && !raw_data[type].nil?
         new_type = lookup[type][:units] == :£_range ? :£ : :years
         new_data[self.class.convert_range_symbol_to_high(type)] = FormatUnit.format(new_type, raw_data[type].first, :text, true)
         new_data[self.class.convert_range_symbol_to_low(type)]  = FormatUnit.format(new_type, raw_data[type].last,  :text, true)
