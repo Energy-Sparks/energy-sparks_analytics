@@ -554,7 +554,8 @@ class Aggregator
   end
 
   def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
-    if bucketed_data.length == 1 && bucketed_data.keys[0] = SeriesNames::NONE
+    # Change Line Below 22Mar2019
+    if bucketed_data.length == 1 && bucketed_data.keys[0] == SeriesNames::NONE
       aggregate_by_halfhour_simple_fast(start_date, end_date, bucketed_data, bucketed_data_count)
     else
       (start_date..end_date).each do |date|
@@ -579,7 +580,8 @@ class Aggregator
       total = [total, data].transpose.map{|a| a.sum}
       count += 1
     end
-    scaling_factor = @series_manager.aggregator_scaling_factor
+    # Change Line Below 22Mar2019
+    scaling_factor = @chart_config[:yaxis_units] == :kw ? 1.0 : @series_manager.aggregator_scaling_factor
     bucketed_data[SeriesNames::NONE] = scaling_factor == 1.0 ? total : total.map { |hh_kwh| hh_kwh * scaling_factor }
     bucketed_data_count[SeriesNames::NONE] = Array.new(48, count)
   end
