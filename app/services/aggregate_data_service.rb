@@ -128,8 +128,8 @@ class AggregateDataService
         )
 
       electricity_meter.amr_data = electric_plus_pv_amr_data
-      electricity_meter.id += ' plus pv'
-      electricity_meter.name += ' plus pv'
+      electricity_meter.id = "#{electricity_meter.id} plus pv"
+      electricity_meter.name = "#{electricity_meter.name} plus pv"
       @meter_collection.solar_pv_meter = solar_pv_meter
     end
   end
