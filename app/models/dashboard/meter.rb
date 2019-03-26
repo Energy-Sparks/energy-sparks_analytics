@@ -4,9 +4,9 @@ module Dashboard
     include Logging
 
     # Extra fields - potentially a concern or mix-in
-    attr_reader :fuel_type, :meter_collection
+    attr_reader :fuel_type
     attr_reader :solar_pv_setup, :storage_heater_setup, :sub_meters
-    attr_reader :meter_correction_rules, :model_cache
+    attr_reader :model_cache, :attributes
     attr_accessor :amr_data,  :floor_area, :number_of_pupils
 
     # Energy Sparks activerecord fields:
@@ -19,7 +19,7 @@ module Dashboard
                     solar_pv_installation = nil,
                     storage_heater_config = nil, # now redundant PH 20Mar2019
                     external_meter_id = nil,
-                    meter_attributes = MeterAttributes)
+                    attributes = nil)
       @amr_data = amr_data
       @meter_collection = meter_collection
       @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
@@ -31,21 +31,25 @@ module Dashboard
       @floor_area = floor_area
       @number_of_pupils = number_of_pupils
       @solar_pv_installation = solar_pv_installation
-      @meter_correction_rules = []
       @sub_meters = []
       @external_meter_id = external_meter_id
-      @meter_attributes = meter_attributes
+      @attributes = attributes || MeterAttributes.attributes(self)
       process_meter_attributes
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
     end
 
     private def process_meter_attributes
-      unless @meter_attributes.attributes(self, :storage_heaters).nil?
-        @storage_heater_setup = StorageHeater.new(@meter_attributes.attributes(self, :storage_heaters))
+      if @attributes && @attributes.key?(:storage_heaters)
+        @storage_heater_setup = StorageHeater.new(@attributes[:storage_heaters])
       end
-      unless @meter_attributes.attributes(self, :solar_pv).nil?
-        @solar_pv_setup = SolarPVPanels.new(@meter_attributes.attributes(self, :solar_pv))
+      if @attributes && @attributes.key?(:solar_pv)
+        @solar_pv_setup = SolarPVPanels.new(@attributes[:solar_pv])
+      end
+
+      unless (@attributes && @attributes.key?(:meter_corrections)) || @fuel_type.to_sym == :electricity
+        # Gas with no othercorrections
+        @attributes = { meter_corrections: [{ auto_insert_missing_readings: { type: :weekends } }] }
       end
     end
 
@@ -57,12 +61,8 @@ module Dashboard
       @mpan_mprn.to_s + ':' + @fuel_type.to_s + 'x' + (@amr_data.nil? ? '0' : @amr_data.length.to_s)
     end
 
-    def attributes(type)
-      @meter_attributes.attributes(self, type)
-    end
-
-    def all_attributes
-      @meter_attributes.attributes(self)
+    def meter_correction_rules
+      @attributes[:meter_corrections]
     end
 
     def storage_heater?
@@ -91,7 +91,7 @@ module Dashboard
     end
 
     private def function_includes?(*function_list)
-      function = @meter_attributes.attributes(self, :function)
+      function = @attributes[:function]
       !function.nil? && !(function_list & function).empty?
     end
 
@@ -113,15 +113,6 @@ module Dashboard
 
     def set_meter_no(meter_no)
       @meter_no = meter_no
-    end
-
-    def add_correction_rule(rule)
-      throw EnergySparksUnexpectedStateException.new('Unexpected nil correction') if rule.nil?
-      @meter_correction_rules.push(rule)
-    end
-
-    def insert_correction_rules_first(rules)
-      @meter_correction_rules = rules + @meter_correction_rules
     end
 
     # Matches ES AR version

@@ -31,7 +31,7 @@ class VirtualSchool
     meter_collection.add_electricity_meter(
       create_empty_meter(meter_collection, name + ' Electricity', :electricity)
     )
-    
+
     meter_collection.add_heat_meter(
       create_empty_meter(meter_collection, name + ' Gas', :gas)
     )
@@ -53,7 +53,8 @@ class VirtualSchool
       floor_area,
       number_of_pupils,
       nil, # solar pv
-      nil # storage heater
+      nil, # storage heater
+      nil  # Meter attributes hash for this meter
     )
   end
 

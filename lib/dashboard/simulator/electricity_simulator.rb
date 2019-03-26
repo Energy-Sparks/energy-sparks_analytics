@@ -203,7 +203,8 @@ class ElectricitySimulator
       floor_area,
       number_of_pupils,
       solar_pv_installation,
-      storage_heater_config
+      storage_heater_config,
+      nil # Meter attributes hash for this meter
     )
   end
 

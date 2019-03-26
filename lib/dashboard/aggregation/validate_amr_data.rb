@@ -23,15 +23,6 @@ class ValidateAMRData
     @bad_data = 0
     @run_date = Date.today - 4 # TODO(PH,16Sep2019): needs rethink
     @data_problems = {}
-    unless @meter.meter_correction_rules.nil?
-      logger.debug "Meter Correction Rules"
-      logger.debug @meter.meter_correction_rules.inspect
-    end
-    add_meter_correction_rules
-  end
-
-  def add_meter_correction_rules
-    MeterAdjustments.meter_adjustment(@meter)
   end
 
   def validate
@@ -39,7 +30,7 @@ class ValidateAMRData
     logger.debug "Validating meter data of type #{@meter.meter_type} #{@meter.name} #{@meter.id}"
     logger.debug "Meter data from #{@meter.amr_data.start_date} to #{@meter.amr_data.end_date}"
     # ap(@meter, limit: 5, :color => {:float  => :red})
-    process_meter_attributes
+
     meter_corrections unless @meter.meter_correction_rules.nil?
     check_for_long_gaps_in_data
     # meter_corrections unless @meter.meter_correction_rules.nil?
@@ -51,21 +42,6 @@ class ValidateAMRData
   end
 
   private
-
-  def process_meter_attributes
-    meter_attributes_corrections = @meter.attributes(:meter_corrections)
-    if meter_attributes_corrections.nil?
-      auto_insert_for_gas_if_no_other_rules
-    else
-      @meter.insert_correction_rules_first(meter_attributes_corrections)
-    end
-  end
-
-  def auto_insert_for_gas_if_no_other_rules
-    return unless @type.to_sym == :gas
-    logger.info "Adding auto insert missing readings as we're a gas meter & no other corrections"
-    @meter.insert_correction_rules_first([{ auto_insert_missing_readings: { type: :weekends } }])
-  end
 
   def meter_corrections
     unless @meter.meter_correction_rules.nil?

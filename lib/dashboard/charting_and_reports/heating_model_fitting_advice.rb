@@ -312,13 +312,13 @@ class DashboardEnergyAdvice
         <p>
             <strong>Meter Attributes</strong>
         </p>
-        <% if heat_meter.all_attributes.nil? %>
+        <% if heat_meter.attributes.nil? %>
           <p>
             The meter has no 'attributes' set for this meter.
           </p>
         <% else %>
           <p>
-            The meter has the following attributes configured for it: <%= heat_meter.all_attributes.awesome_inspect %>.
+            The meter has the following attributes configured for it: <%= heat_meter.attributes.awesome_inspect %>.
           </p>
         <% end %>
         <p>

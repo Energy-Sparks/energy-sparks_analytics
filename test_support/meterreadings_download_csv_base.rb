@@ -69,7 +69,8 @@ class MeterReadingsDownloadCSVBase < MeterReadingsDownloadBase
       @meter_collection.floor_area,
       @meter_collection.number_of_pupils,
       nil, # solar pv
-      nil # storage heater
+      nil, # storage heater
+      nil  # meter attributes hash for this meter
     )
   end
 end

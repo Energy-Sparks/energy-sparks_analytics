@@ -2,8 +2,8 @@
 class SolarPVPanels
   include Logging
 
-  def initialize(meter_attributes_config)
-    @solar_pv_panel_config = SolarPVPanelConfiguration.new(meter_attributes_config)
+  def initialize(solar_pv_attributes)
+    @solar_pv_panel_config = SolarPVPanelConfiguration.new(solar_pv_attributes)
   end
 
   def kwp(date)
@@ -34,9 +34,9 @@ class SolarPVPanels
     MIN_DEFAULT_START_DATE = Date.new(2011, 1, 1)
     MAX_DEFAULT_END_DATE   = Date.new(2050, 1, 1)
 
-    def initialize(meter_attributes_config)
+    def initialize(solar_pv_attributes)
       @config_by_date_range = {} # date_range = config
-      parse_meter_attributes_configuration(meter_attributes_config)
+      parse_solar_pv_attributes(solar_pv_attributes)
     end
 
     def kwp(date)
@@ -49,20 +49,20 @@ class SolarPVPanels
       kwp(date)
     end
 
-    private def parse_meter_attributes_configuration(meter_attributes_config)
-      puts "solar pv config #{meter_attributes_config}"
-      if meter_attributes_config.is_a?(Array)
-        meter_attributes_config.each do |period_config|
-          @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(period_config))
+    private def parse_solar_pv_attributes(solar_pv_attributes)
+      puts "solar pv config #{solar_pv_attributes}"
+      if solar_pv_attributes.is_a?(Array)
+        solar_pv_attributes.each do |period_config|
+          @config_by_date_range.merge!(parse_solar_pv_attributes_for_period(period_config))
         end
-      elsif meter_attributes_config.is_a?(Hash)
-        @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(meter_attributes_config))
+      elsif solar_pv_attributes.is_a?(Hash)
+        @config_by_date_range.merge!(parse_solar_pv_attributes_for_period(solar_pv_attributes))
       else
         raise EnergySparksMeterSpecification.new('Unexpected meter attributes for solar pv, expecting array of hashes or 1 hash')
       end
     end
 
-    private def parse_meter_attributes_configuration_for_period(period_config)
+    private def parse_solar_pv_attributes_for_period(period_config)
       start_date = (!period_config.nil? && period_config.key?(:start_date)) ? period_config[:start_date] : MIN_DEFAULT_START_DATE
       end_date   = (!period_config.nil? && period_config.key?(:end_date) )  ? period_config[:end_date]   : MAX_DEFAULT_END_DATE
 

@@ -5,8 +5,8 @@
 class StorageHeater
   include Logging
 
-  def initialize(meter_attributes_config)
-    @storage_heater_config = StorageHeaterConfiguration.new(meter_attributes_config)
+  def initialize(storage_heater_attributes)
+    @storage_heater_config = StorageHeaterConfiguration.new(storage_heater_attributes)
   end
 
   private def capacity_at_time_of_day_deprecated(date, halfhour_index)
@@ -85,9 +85,9 @@ class StorageHeater
     MIN_DEFAULT_START_DATE = Date.new(2009, 1, 1)
     MAX_DEFAULT_END_DATE   = Date.new(2050, 1, 1)
 
-    def initialize(meter_attributes_config)
+    def initialize(storage_heater_attributes)
       @config_by_date_range = {} # date_range = config
-      parse_meter_attributes_configuration(meter_attributes_config)
+      parse_storage_heater_attributes(storage_heater_attributes)
     end
 
     def in_operation?(date)
@@ -102,23 +102,23 @@ class StorageHeater
       15 # TODO PH 20Mar2019 - put in config or config default times
     end
 
-    private def parse_meter_attributes_configuration(meter_attributes_config)
-      # puts "Storage heater attributes are #{meter_attributes_config}"
-      # ap(meter_attributes_config)
-      if meter_attributes_config.nil?
-        @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(nil))
-      elsif meter_attributes_config.is_a?(Array)
-        meter_attributes_config.each do |period_config|
-          @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(period_config))
+    private def parse_storage_heater_attributes(storage_heater_attributes)
+      puts "Storage heater attributes are #{storage_heater_attributes}"
+      ap(storage_heater_attributes)
+      if storage_heater_attributes.nil?
+        @config_by_date_range.merge!(parse_storage_heater_attributes_for_period(nil))
+      elsif storage_heater_attributes.is_a?(Array)
+        storage_heater_attributes.each do |period_config|
+          @config_by_date_range.merge!(parse_storage_heater_attributes_for_period(period_config))
         end
-      elsif meter_attributes_config.is_a?(Hash)
-        @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(meter_attributes_config))
+      elsif storage_heater_attributes.is_a?(Hash)
+        @config_by_date_range.merge!(parse_storage_heater_attributes_for_period(storage_heater_attributes))
       else
         raise EnergySparksMeterSpecification.new('Unexpected meter attributes for storage heater, expecting array of hashes or hash')
       end
     end
 
-    private def parse_meter_attributes_configuration_for_period(period_config)
+    private def parse_storage_heater_attributes_for_period(period_config)
       start_date = (!period_config.nil? && period_config.key?(:start_date)) ? period_config[:start_date] : MIN_DEFAULT_START_DATE
       end_date   = (!period_config.nil? && period_config.key?(:end_date) )  ? period_config[:end_date]   : MAX_DEFAULT_END_DATE
       {

@@ -60,7 +60,6 @@ class BathHackedSocrataDownload < MeterReadingsDownloadBase
   def load_meter_readings
     logger.info "Downloading meter readings from Bath Hacked/Socrata for #{@meter_collection.name} from #{@min_date}"
     (@meter_collection.heat_meters + @meter_collection.electricity_meters).each do |meter|
-      meter.add_correction_rule({ auto_insert_missing_readings: { type: :weekends} }) if meter.meter_type == :gas
       meter_readings = download_meter_readings(meter.id, meter.fuel_type, @min_date)
       meter_readings.each do |meter_reading|
         meter.amr_data.add(meter_reading.date, meter_reading)

@@ -213,7 +213,7 @@ def remove_corrected_meter_readings(meter)
     stats[one_days_reading.type] += 1
     if one_days_reading.type != 'ORIG'
       if one_days_reading.type == 'S31M' # reverse scaling
-        scalings = meter.attributes(:meter_corrections).select { |correction| correction.key?(:rescale_amr_data) } if scalings.nil?
+        scalings = meter.attributes[:meter_corrections].select { |correction| correction.key?(:rescale_amr_data) } if scalings.nil?
         scalings.each do |scaling|
           scale = scaling[:rescale_amr_data]
           if date >= scale[:start_date] && date <= scale[:end_date]

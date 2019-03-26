@@ -56,7 +56,7 @@ class HeatingRegressionModelFitter
       html horizontal_line
       html meter_title(meter)
 
-      meter_function = meter.attributes(:function)
+      meter_function = meter.attributes[:function]
 
       if !meter_function.nil? && meter_function.include?(:hotwater_only)
         document_hotwater_only(meter)

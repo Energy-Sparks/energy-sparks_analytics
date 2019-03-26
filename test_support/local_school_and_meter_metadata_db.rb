@@ -8,7 +8,7 @@ class AnalysticsSchoolAndMeterMetaData
   include Logging
 
   attr_reader :meter_collections
-  
+
   def initialize
     @meter_collections = {} # [school_name] => meter_collection
     load_schools_metadata
@@ -213,7 +213,8 @@ class AnalysticsSchoolAndMeterMetaData
       floor_area,
       pupils,
       nil, # solar pv
-      nil # storage heater
+      nil, # storage heater
+      nil  # Meter attributes hash for this meter
     )
 
     meter.set_meter_no(meter_no) unless meter_no.nil?

@@ -5,9 +5,8 @@ class AggregateDataService
 
   attr_reader :meter_collection
 
-  def initialize(meter_collection, meter_attributes = MeterAttributes)
+  def initialize(meter_collection)
     @meter_collection   = meter_collection
-    @meter_attributes   = meter_attributes
     @heat_meters        = @meter_collection.heat_meters
     @electricity_meters = @meter_collection.electricity_meters
   end
@@ -144,7 +143,8 @@ class AggregateDataService
       meter.floor_area,
       meter.number_of_pupils,
       meter.solar_pv_setup,
-      meter.storage_heater_setup
+      meter.storage_heater_setup,
+      nil # Meter attributes hash for this meter
     )
   end
 
@@ -255,7 +255,7 @@ class AggregateDataService
     logger.info 'Combining the following meters'
     list_of_meters.each do |meter|
       logger.info sprintf('%-24.24s %-18.18s %s to %s', meter.display_name, meter.id, meter.amr_data.start_date.to_s, meter.amr_data.end_date)
-      aggregation_rules = meter.attributes(:aggregation)
+      aggregation_rules = meter.attributes[:aggregation]
       unless aggregation_rules.nil?
         logger.info "                Meter has aggregation rules #{aggregation_rules}"
       end
@@ -288,7 +288,7 @@ class AggregateDataService
     start_dates = []
     end_dates = []
     meters.each do |meter|
-      aggregation_rules = @meter_attributes.attributes(meter, :aggregation)
+      aggregation_rules = meter.attributes[:aggregation]
       if aggregation_rules.nil?
         start_dates.push(meter.amr_data.start_date)
       elsif !(aggregation_rules.include?(:ignore_start_date) ||
