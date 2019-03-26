@@ -171,7 +171,7 @@ class MeterAttributes
     },
     2200011955152 => {
       solar_pv: [  # and array to cope with multiple installations at different times at the same school e.g. Newbridge
-        {               
+        {
           start_date:         Date.new(2014, 1, 1),
           # end_date:          Date.new(2025, 1, 1),
           kwp:                6.0, # appears to have 22 panels on bing satellite - for 2016 extension

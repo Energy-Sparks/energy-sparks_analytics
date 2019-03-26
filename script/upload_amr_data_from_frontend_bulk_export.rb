@@ -130,7 +130,7 @@ class ReconcileMeters
     def initialize(mpan_mprn, meter_type, name = 'Unknown Primary School')
       @meter = meter_type == :electricity ? { mpan: mpan_mprn } : { mprn: mpan_mprn }
       @meter.merge!(
-        { 
+        {
           meter_type: meter_type,
           name: name + (meter_type == :electricity ? ' Electricity Supply' : ' Gas Supply')
         }

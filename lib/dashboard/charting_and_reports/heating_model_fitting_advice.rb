@@ -68,7 +68,7 @@ class DashboardEnergyAdvice
         }.gsub(/^  /, '')
 
         @header_advice = generate_html(header_template, binding)
- 
+
         @footer_advice = nil_advice
       end
     end
@@ -140,7 +140,7 @@ class DashboardEnergyAdvice
 
     def school_name;            @school.name end
     def floor_area;             @school.floor_area end
-    def pupils;                 @school.number_of_pupils end        
+    def pupils;                 @school.number_of_pupils end
 
     def current_year(min_days = 200)
       end_date = heat_amr.end_date
@@ -273,7 +273,7 @@ class DashboardEnergyAdvice
           </table>
         </p>
       }.gsub(/^  /, '')
-  
+
       generate_html(template, binding)
     end
   end
@@ -373,7 +373,7 @@ class DashboardEnergyAdvice
         <ul>
           <li>
             Trying to identify periods when the heating is on or off:
-          
+
             <ol type="a">
               <li>
                   Which starts by looking at the summer gas consumption when you would
@@ -719,7 +719,7 @@ class DashboardEnergyAdvice
           </p>
         <%= @body_end %>
       }.gsub(/^  /, '')
-      
+
       footer_template2 = regression_parameters_html_table(thermally_massive_model)
 
       @footer_advice  = generate_html(footer_template1, binding)
@@ -753,7 +753,7 @@ class DashboardEnergyAdvice
         <%= @body_start %>
           <% if overridden_model? %>
             <p>
-              <strong>******** The automatically fitted models have been overridden >********</strong> 
+              <strong>******** The automatically fitted models have been overridden >********</strong>
             </p>
             <p>
               The reason for doing this was <%= best_model.reason %>
@@ -849,7 +849,7 @@ class DashboardEnergyAdvice
 
     def generate_valid_advice
       header_template = %{
-        <%= @body_start %>    
+        <%= @body_start %>
           <p>
             <strong>Summer holiday and school day hot water and kitchen</strong>
           </p>
@@ -961,7 +961,7 @@ class DashboardEnergyAdvice
           <h3>
               CUSUM Analysis - simple model
           </h3>
-          <p> 
+          <p>
               <a
                   href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf"
                   target="_blank"

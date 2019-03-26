@@ -65,7 +65,7 @@ module AnalyseHeatingAndHotWater
 
       model
     end
-    
+
     def regression_filtered(key, regression_model_name, occupied, period, list_of_months, heating_on_test, days_of_week, degreeday_base_temperature, min_kwh = 20.0, max_kwh = nil)
       degree_days = []
       days_kwh = []
