@@ -54,7 +54,7 @@ module Dashboard
 
       unless (@attributes.key?(:meter_corrections)) || @fuel_type.to_sym == :electricity
         # Gas with no othercorrections
-        @attributes = { meter_corrections: [{ auto_insert_missing_readings: { type: :weekends } }] }
+        @attributes[:meter_corrections] = [{ auto_insert_missing_readings: { type: :weekends }}]
       end
     end
 
