@@ -50,7 +50,7 @@ class SolarPVPanels
     end
 
     private def parse_solar_pv_attributes(solar_pv_attributes)
-      puts "solar pv config #{solar_pv_attributes}"
+      # puts "solar pv config #{solar_pv_attributes}"
       if solar_pv_attributes.is_a?(Array)
         solar_pv_attributes.each do |period_config|
           @config_by_date_range.merge!(parse_solar_pv_attributes_for_period(period_config))

@@ -33,21 +33,26 @@ module Dashboard
       @solar_pv_installation = solar_pv_installation
       @sub_meters = []
       @external_meter_id = external_meter_id
-      @attributes = attributes || MeterAttributes.attributes(self)
+      @attributes = attributes || set_meter_attributes_if_empty
       process_meter_attributes
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
     end
 
+    private def set_meter_attributes_if_empty
+      return {} if MeterAttributes.attributes(self).nil?
+      MeterAttributes.attributes(self)
+    end
+
     private def process_meter_attributes
-      if @attributes && @attributes.key?(:storage_heaters)
+      if @attributes.key?(:storage_heaters)
         @storage_heater_setup = StorageHeater.new(@attributes[:storage_heaters])
       end
-      if @attributes && @attributes.key?(:solar_pv)
+      if @attributes.key?(:solar_pv)
         @solar_pv_setup = SolarPVPanels.new(@attributes[:solar_pv])
       end
 
-      unless (@attributes && @attributes.key?(:meter_corrections)) || @fuel_type.to_sym == :electricity
+      unless (@attributes.key?(:meter_corrections)) || @fuel_type.to_sym == :electricity
         # Gas with no othercorrections
         @attributes = { meter_corrections: [{ auto_insert_missing_readings: { type: :weekends } }] }
       end

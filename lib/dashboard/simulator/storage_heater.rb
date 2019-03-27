@@ -103,8 +103,8 @@ class StorageHeater
     end
 
     private def parse_storage_heater_attributes(storage_heater_attributes)
-      puts "Storage heater attributes are #{storage_heater_attributes}"
-      ap(storage_heater_attributes)
+      # puts "Storage heater attributes are #{storage_heater_attributes}"
+      # ap(storage_heater_attributes)
       if storage_heater_attributes.nil?
         @config_by_date_range.merge!(parse_storage_heater_attributes_for_period(nil))
       elsif storage_heater_attributes.is_a?(Array)
