@@ -203,8 +203,7 @@ class ElectricitySimulator
       floor_area: floor_area,
       number_of_pupils: number_of_pupils,
       solar_pv_installation: solar_pv_installation,
-      storage_heater_config: storage_heater_config,
-      meter_attributes: @existing_electricity_meter.meter_attributes
+      storage_heater_config: storage_heater_config
     )
   end
 
