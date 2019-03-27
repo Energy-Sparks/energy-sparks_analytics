@@ -4,7 +4,7 @@ module Dashboard
     include Logging
 
     # Extra fields - potentially a concern or mix-in
-    attr_reader :fuel_type
+    attr_reader :fuel_type, :meter_collection
     attr_reader :solar_pv_setup, :storage_heater_setup, :sub_meters
     attr_reader :model_cache, :attributes
     attr_accessor :amr_data,  :floor_area, :number_of_pupils
