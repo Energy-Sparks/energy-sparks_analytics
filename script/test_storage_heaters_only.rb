@@ -18,8 +18,10 @@ reports.load_school('Stanton Drew Primary School', true)
 
 RubyProf.start if profile
 
-reports.do_all_standard_pages_for_school
-#reports.do_one_page(:storage_heaters)
+#reports.do_all_standard_pages_for_school
+reports.do_one_page(:storage_heaters)
+
+
 
 if profile
   prof_result = RubyProf.stop

@@ -233,8 +233,8 @@ class HeatingRegressionModelFitter
       [:percent_regression_model_prediction, 0.5, 'Minimum heating day set to 50% of kWh predicted by model at T' ]
     ]
 
-    unless meter.attributes(:heating_model).nil? || meter.attributes(:heating_model).dig(:heating_model, :heating_day_determination_method).nil?
-      configuration = meter.attributes(:heating_model).dig(:heating_model, :heating_day_determination_method)
+    unless meter.attributes[:heating_model].nil? || meter.attributes[:heating_model].dig(:heating_model, :heating_day_determination_method).nil?
+      configuration = meter.attributes[:heating_model].dig(:heating_model, :heating_day_determination_method)
       delimination_methods.push([])
     end
 
@@ -310,7 +310,7 @@ class HeatingRegressionModelFitter
   end
 
   def html_current_meter_attributes(meter)
-    model_attributes = meter.attributes(:heating_model)
+    model_attributes = meter.attributes[:heating_model]
     html header(2, 'Existing heating model configuration')
     unless model_attributes.nil?
       html paragraph(date_key_description(model_attributes, :calculation_start_date, 'start'))

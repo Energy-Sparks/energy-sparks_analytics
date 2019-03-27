@@ -69,7 +69,7 @@ module AnalyseHeatingAndHotWater
 
       def initialize(meter)
         @meter = meter
-        overrides = meter.attributes(:heating_model)
+        overrides = meter.attributes[:heating_model]
         unless overrides.nil?
           @max_summer_hotwater_kwh = overrides.fetch(:max_summer_daily_heating_kwh, nil)
           @override_best_model_type = overrides.fetch(:override_best_model_type, nil)
@@ -81,7 +81,7 @@ module AnalyseHeatingAndHotWater
           @override_regression_model = nil
           @reason = nil
         end
-        @function = meter.attributes(:function)
+        @function = meter.attributes[:function]
       end
 
       def override_max_summer_hotwater_kwh
@@ -382,7 +382,7 @@ module AnalyseHeatingAndHotWater
            occupied?(date)
            avg_temp = temperatures.average_temperature(date)
            total_kwh += temperature_sensitivity_kwh_per_c * [20.0 - avg_temp, 0.0].max
-           base_hot_water_usage += base_hotwater_usage_at_20c 
+           base_hot_water_usage += base_hotwater_usage_at_20c
         end
       end
       sensivitity_kwh = [total_kwh, 0.0].max
@@ -544,7 +544,7 @@ module AnalyseHeatingAndHotWater
         'School Heating Days'         =>    [number_of_heating_school_days, :integer],
         'Non School Day Heating Days' =>    [number_of_non_school_heating_days, :integer],
         'Days of meter readings'      =>    [(@amr_data.end_date - @amr_data.start_date + 1).to_i, :integer],
-        'Model calculation time (ms)' =>    [(@model_calculation_time * 1000.0).to_i, :integer], 
+        'Model calculation time (ms)' =>    [(@model_calculation_time * 1000.0).to_i, :integer],
       }
       @models.each do |model_type, model|
         results[model_type] = model.configuration
@@ -640,7 +640,7 @@ module AnalyseHeatingAndHotWater
         kitchen_model(date)
       elsif @meter.hot_water_only?
         summer_model(date)
-      else 
+      else
         heating_on?(date) ? winter_model(date) : summer_model(date)
       end
     end
@@ -779,7 +779,7 @@ module AnalyseHeatingAndHotWater
         error = x1.empty? ? 'Warning: zero vector' : 'Warning: vector of length 1'
         return RegressionModelTemperature.new(model_name, error, 0.0, 0.0, 0.0, 0, nil, nil)
       end
-      
+
       x = Daru::Vector.new(x1)
       y = Daru::Vector.new(y1)
       sr = Statsample::Regression.simple(x, y)
@@ -983,7 +983,7 @@ module AnalyseHeatingAndHotWater
     def valid_heating_models
       SCHOOLDAYHEATINGMODELTYPES.select { |doy| !@models[doy].nil? }
     end
-    
+
     def number_of_heating_school_days
       SCHOOLDAYHEATINGMODELTYPES.map { |doy| @models[doy].samples }.inject(:+)
     end
