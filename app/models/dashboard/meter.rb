@@ -41,7 +41,6 @@ module Dashboard
     end
 
     private def process_meter_attributes
-      binding.pry if mpan_mprn.to_i == 2200011955152
       if @meter_attributes.key?(:storage_heaters)
         @storage_heater_setup = StorageHeater.new(attributes(:storage_heaters))
       end
