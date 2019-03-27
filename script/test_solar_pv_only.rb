@@ -18,8 +18,7 @@ reports.load_school('Paulton Junior School', true)
 
 RubyProf.start if profile
 
-#reports.do_all_standard_pages_for_school
-reports.do_one_page(:solar_pv)
+reports.do_all_standard_pages_for_school
 
 if profile
   prof_result = RubyProf.stop

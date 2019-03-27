@@ -144,6 +144,7 @@ class AggregateDataService
       number_of_pupils: meter.number_of_pupils,
       solar_pv_installation: meter.solar_pv_setup,
       storage_heater_config: meter.storage_heater_setup,
+      meter_attributes: meter.meter_attributes
     )
   end
 

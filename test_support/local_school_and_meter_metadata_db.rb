@@ -202,7 +202,7 @@ class AnalysticsSchoolAndMeterMetaData
 
   def create_empty_meter(meter_collection, name, identifier, fuel_type, floor_area, pupils, meter_no)
 
-    logger.info "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
+    logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
     meter_attributes = MeterAttributes.for(identifier, meter_collection.area_name)
 
     meter = Dashboard::Meter.new(
