@@ -8,11 +8,11 @@ require 'date'
 class MeterAttributes
   extend Logging
 
-  def self.for(mpan_mprn, area_name)
+  def self.for(mpan_mprn, area_name, fuel_type)
     mpan_mprn = mpan_mprn.to_i
     attributes = METER_ATTRIBUTE_DEFINITIONS.key?(mpan_mprn) ? METER_ATTRIBUTE_DEFINITIONS[mpan_mprn] : {}
 
-    if area_name.include?('Bath')
+    if area_name.include?('Bath') && fuel_type == :gas
       weekend_correction = { auto_insert_missing_readings: { type: :weekends }}
 
       if attributes.key?(:meter_corrections)
