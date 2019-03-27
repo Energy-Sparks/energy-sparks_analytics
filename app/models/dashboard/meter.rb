@@ -24,7 +24,7 @@ module Dashboard
       @meter_collection = meter_collection
       @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
       check_fuel_type(fuel_type)
-      @fuel_type = type
+      @fuel_type = type.to_sym
       @id = identifier
       @mpan_mprn = identifier.to_i
       @name = name
@@ -40,8 +40,8 @@ module Dashboard
     end
 
     private def set_meter_attributes_if_empty
-      return {} if MeterAttributes.attributes(self).nil?
-      MeterAttributes.attributes(self)
+      return {} unless MeterAttributes::METER_ATTRIBUTE_DEFINITIONS.key?(@mpan_mprn)
+      MeterAttributes::METER_ATTRIBUTE_DEFINITIONS[@mpan_mprn]
     end
 
     private def process_meter_attributes
@@ -52,10 +52,17 @@ module Dashboard
         @solar_pv_setup = SolarPVPanels.new(@attributes[:solar_pv])
       end
 
-      unless (@attributes.key?(:meter_corrections)) || @fuel_type.to_sym == :electricity
-        # Gas with no othercorrections
-        @attributes[:meter_corrections] = [{ auto_insert_missing_readings: { type: :weekends }}]
+      unless @attributes.key?(:meter_corrections)
+        @attributes[:meter_corrections] = []
       end
+
+      if fuel_type == :gas && (no_meter_corrections_or_bath?)
+        @attributes[:meter_corrections] << { auto_insert_missing_readings: { type: :weekends }}
+      end
+    end
+
+    private def no_meter_corrections_or_bath?
+      @attributes[:meter_corrections].empty? || @meter_collection.area_name.include?('Bath')
     end
 
     private def check_fuel_type(fuel_type)

@@ -6,35 +6,6 @@ require 'date'
 # stored in the database, and ensure PH's YAML meter representation
 # which already holds this data stays in sync with postgres
 class MeterAttributes
-  extend Logging
-
-  def self.attributes(meter, type = nil)
-    mpan_mprn = meter.mpan_mprn.to_i # treat as integer even if loaded as string
-
-    return nil unless METER_ATTRIBUTE_DEFINITIONS.key?(mpan_mprn)
-    return nil if !type.nil? && !METER_ATTRIBUTE_DEFINITIONS[mpan_mprn].key?(type)
-
-    butes = nil
-    if type.nil?
-      butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn]
-    else
-      butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn][type]
-    end
-
-    # fill in weekends for all Bath derived data
-    # Note - meter.meter_collection.area_name drops to school or meter collection
-    # accordingly
-    if meter.meter_collection.area_name.include?('Bath')
-      weekend_correction = {auto_insert_missing_readings: { type: :weekends}}
-      if type == :meter_corrections
-        butes.push(weekend_correction)
-      elsif type.nil?
-        butes[:meter_corrections] = [] unless butes.key?(:meter_corrections)
-        butes[:meter_corrections].push(weekend_correction)
-      end
-    end
-    butes
-  end
 
   METER_ATTRIBUTE_DEFINITIONS = {
     # ==============================Athlestan=============================
@@ -451,5 +422,4 @@ class MeterAttributes
     },
 
   }.freeze
-  private_constant :METER_ATTRIBUTE_DEFINITIONS
 end
