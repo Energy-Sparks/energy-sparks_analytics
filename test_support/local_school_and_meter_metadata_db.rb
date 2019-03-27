@@ -8,7 +8,7 @@ class AnalysticsSchoolAndMeterMetaData
   include Logging
 
   attr_reader :meter_collections
-  
+
   def initialize
     @meter_collections = {} # [school_name] => meter_collection
     load_schools_metadata
@@ -202,18 +202,18 @@ class AnalysticsSchoolAndMeterMetaData
 
   def create_empty_meter(meter_collection, name, identifier, fuel_type, floor_area, pupils, meter_no)
 
-    logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
+    logger.info "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
+    meter_attributes = MeterAttributes.for(identifier, meter_collection.area_name)
 
     meter = Dashboard::Meter.new(
-      meter_collection,
-      AMRData.new(fuel_type),
-      fuel_type,
-      identifier,
-      name,
-      floor_area,
-      pupils,
-      nil, # solar pv
-      nil # storage heater
+      meter_collection: meter_collection,
+      amr_data: AMRData.new(fuel_type),
+      type: fuel_type,
+      identifier: identifier,
+      name: name,
+      floor_area: floor_area,
+      number_of_pupils: pupils,
+      meter_attributes: meter_attributes
     )
 
     meter.set_meter_no(meter_no) unless meter_no.nil?

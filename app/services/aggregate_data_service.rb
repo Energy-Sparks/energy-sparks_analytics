@@ -5,9 +5,8 @@ class AggregateDataService
 
   attr_reader :meter_collection
 
-  def initialize(meter_collection, meter_attributes = MeterAttributes)
+  def initialize(meter_collection)
     @meter_collection   = meter_collection
-    @meter_attributes   = meter_attributes
     @heat_meters        = @meter_collection.heat_meters
     @electricity_meters = @meter_collection.electricity_meters
   end
@@ -136,15 +135,15 @@ class AggregateDataService
 
   def create_modified_meter_copy(meter, amr_data, type, identifier, name)
     Dashboard::Meter.new(
-      meter_collection,
-      amr_data,
-      type,
-      identifier,
-      name,
-      meter.floor_area,
-      meter.number_of_pupils,
-      meter.solar_pv_setup,
-      meter.storage_heater_setup
+      meter_collection: meter_collection,
+      amr_data: amr_data,
+      type: type,
+      identifier: identifier,
+      name: name,
+      floor_area: meter.floor_area,
+      number_of_pupils: meter.number_of_pupils,
+      solar_pv_installation: meter.solar_pv_setup,
+      storage_heater_config: meter.storage_heater_setup,
     )
   end
 
@@ -231,13 +230,13 @@ class AggregateDataService
       mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type) unless @meter_collection.urn.nil?
 
       combined_meter = Dashboard::Meter.new(
-        @meter_collection,
-        combined_amr_data,
-        type,
-        mpan_mprn,
-        combined_name,
-        combined_floor_area,
-        combined_pupils
+        meter_collection: @meter_collection,
+        amr_data: combined_amr_data,
+        type: type,
+        identifier: mpan_mprn,
+        name: combined_name,
+        floor_area: combined_floor_area,
+        number_of_pupils: combined_pupils
       )
     else
       logger.info "Combined meter #{combined_meter.mpan_mprn} already created"
@@ -288,7 +287,7 @@ class AggregateDataService
     start_dates = []
     end_dates = []
     meters.each do |meter|
-      aggregation_rules = @meter_attributes.attributes(meter, :aggregation)
+      aggregation_rules = meter.attributes(:aggregation)
       if aggregation_rules.nil?
         start_dates.push(meter.amr_data.start_date)
       elsif !(aggregation_rules.include?(:ignore_start_date) ||
