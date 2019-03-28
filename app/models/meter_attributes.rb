@@ -169,19 +169,19 @@ class MeterAttributes
         reason: 'Automated process set too high at about 400'
       }
     },
-    2200011955152 => {
-      solar_pv: [  # and array to cope with multiple installations at different times at the same school e.g. Newbridge
-        {               
-          start_date:         Date.new(2014, 1, 1),
-          # end_date:          Date.new(2025, 1, 1),
-          kwp:                6.0, # appears to have 22 panels on bing satellite - for 2016 extension
-          orientation:        0,
-          tilt:               30,
-          shading:            0,
-          fit_£_per_kwh:      0.30
-        }
-      ]
-    },
+    #2200011955152 => {
+      #solar_pv: [  # and array to cope with multiple installations at different times at the same school e.g. Newbridge
+        #{               
+          #start_date:         Date.new(2014, 1, 1),
+          ## end_date:          Date.new(2025, 1, 1),
+          #kwp:                6.0, # appears to have 22 panels on bing satellite - for 2016 extension
+          #orientation:        0,
+          #tilt:               30,
+          #shading:            0,
+          #fit_£_per_kwh:      0.30
+        #}
+      #]
+    #},
     # ==============================Roundhill==================================
     75665806 => {
       meter_corrections: [
@@ -398,24 +398,24 @@ class MeterAttributes
           readings_start_date: Date.new(2010, 6, 25),
           reason: 'Probably not needed, LGAP lost during testing of bulk upload PH 4Mar2019, suggest remove on further review'
         },
-      ],
-      heating_model: {
-        max_summer_daily_heating_kwh:     25,
-        reason: 'Staton Drew has strange bifurcation, suggesting half the storage heaters are switched off much earlier in the year'
-      },
-      tariff: {
-        type:             :economy_7 # this isn't really the case for Stanton Drew as runs off flat tariff but it will do for testing
-      },
-      storage_heaters: [  # an array so you can change the config for different time periods
-        {                 # the contents of the hash are all optional, so can set the config to storage_heaters: nil for simplicity
-          start_date:         Date.new(2010, 1, 1),   # not strictly necessary, included for testing purposes, if missing assumes 'forever'
-          end_date:           Date.new(2025, 1, 1),   # not strictly necessary, included for testing purposes, if missing assumes 'forever'
-          power_kw:           22.0,                   # not strictly necessary, included for testing purposes
-          charge_start_time:  TimeOfDay.new(0, 30),   # optional
-          charge_end_time:    TimeOfDay.new(6, 30),   # optional
-          days_of_week:       ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Saturday'] # suspect this isn't required/not supported
-        }
       ]
+      #heating_model: {
+        #max_summer_daily_heating_kwh:     25,
+        #reason: 'Staton Drew has strange bifurcation, suggesting half the storage heaters are switched off much earlier in the year'
+      #},
+      #tariff: {
+        #type:             :economy_7 # this isn't really the case for Stanton Drew as runs off flat tariff but it will do for testing
+      #},
+      #storage_heaters: [  # an array so you can change the config for different time periods
+        #{                 # the contents of the hash are all optional, so can set the config to storage_heaters: nil for simplicity
+          #start_date:         Date.new(2010, 1, 1),   # not strictly necessary, included for testing purposes, if missing assumes 'forever'
+          #end_date:           Date.new(2025, 1, 1),   # not strictly necessary, included for testing purposes, if missing assumes 'forever'
+          #power_kw:           22.0,                   # not strictly necessary, included for testing purposes
+          #charge_start_time:  TimeOfDay.new(0, 30),   # optional
+          #charge_end_time:    TimeOfDay.new(6, 30),   # optional
+          #days_of_week:       ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Saturday'] # suspect this isn't required/not supported
+        #}
+      #]
     },
     # ==============================Trinity============================
     2000025766288 => {
