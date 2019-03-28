@@ -6,7 +6,7 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
   def initialize(school)
     super(school, 'gas', BenchmarkMetrics::PERCENT_GAS_OUT_OF_HOURS_BENCHMARK,
           BenchmarkMetrics::GAS_PRICE, :gasoutofhours, 'GasOutOfHours', :allheat,
-          0.3, 0.65)
+          0.3, 0.7)
   end
 
   def maximum_alert_date
