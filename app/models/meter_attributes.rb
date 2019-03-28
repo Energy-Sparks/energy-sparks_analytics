@@ -389,7 +389,7 @@ class MeterAttributes
           readings_start_date: Date.new(2010, 6, 25),
           reason: 'Probably not needed, LGAP lost during testing of bulk upload PH 4Mar2019, suggest remove on further review'
         },
-      ],
+      ]
       heating_model: {
         max_summer_daily_heating_kwh:     25,
         reason: 'Staton Drew has strange bifurcation, suggesting half the storage heaters are switched off much earlier in the year'
