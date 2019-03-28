@@ -57,19 +57,19 @@ class MeterReadingsDownloadCSVBase < MeterReadingsDownloadBase
 
   def create_empty_meter(identifier, fuel_type, name)
     identifier_type = fuel_type == :electricity ? :mpan : :mprn
-
     logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
+    meter_attributes = MeterAttributes.for(identifier, @meter_collection.area_name, fuel_type)
 
-    meter = Meter.new(
-      @meter_collection,
-      AMRData.new(fuel_type),
-      fuel_type,
-      identifier,
-      name,
-      @meter_collection.floor_area,
-      @meter_collection.number_of_pupils,
-      nil, # solar pv
-      nil # storage heater
+    meter = Dashboard::Meter.new(
+      meter_collection: meter_collection,
+      amr_data: AMRData.new(fuel_type),
+      type: fuel_type,
+      identifier: identifier,
+      name: name,
+      floor_area: @meter_collection.floor_area,
+      number_of_pupils: @meter_collection.number_of_pupils,
+      meter_attributes: meter_attributes
     )
+
   end
 end
