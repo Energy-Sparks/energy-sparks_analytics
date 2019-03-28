@@ -6,7 +6,7 @@ module Dashboard
     # Extra fields - potentially a concern or mix-in
     attr_reader :fuel_type, :meter_collection, :meter_attributes
     attr_reader :solar_pv_setup, :storage_heater_setup, :sub_meters
-    attr_reader :model_cache
+    attr_reader :meter_correction_rules, :model_cache
     attr_accessor :amr_data,  :floor_area, :number_of_pupils
 
     # Energy Sparks activerecord fields:
@@ -113,6 +113,10 @@ module Dashboard
 
     def set_meter_no(meter_no)
       @meter_no = meter_no
+    end
+
+    def insert_correction_rules_first(rules)
+      @meter_correction_rules = rules + @meter_correction_rules
     end
 
     # Matches ES AR version
