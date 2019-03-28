@@ -23,15 +23,6 @@ class ValidateAMRData
     @bad_data = 0
     @run_date = Date.today - 4 # TODO(PH,16Sep2019): needs rethink
     @data_problems = {}
-    unless @meter.meter_correction_rules.nil?
-      logger.debug "Meter Correction Rules"
-      logger.debug @meter.meter_correction_rules.inspect
-    end
-    add_meter_correction_rules
-  end
-
-  def add_meter_correction_rules
-    MeterAdjustments.meter_adjustment(@meter)
   end
 
   def validate
