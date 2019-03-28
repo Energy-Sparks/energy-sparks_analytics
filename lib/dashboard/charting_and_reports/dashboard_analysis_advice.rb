@@ -534,11 +534,11 @@ end
 class FuelDaytypeAdvice < DashboardChartAdviceBase
   attr_reader :fuel_type, :fuel_type_str
   BENCHMARK_PERCENT = 0.5
-  EXEMPLAR_PERCENT = 0.25
-  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type)
+  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type, exemplar_percentage)
     super(school, chart_definition, chart_data, chart_symbol)
     @fuel_type = fuel_type
     @fuel_type_str = @fuel_type.to_s
+    @exemplar_percentage = exemplar_percentage
   end
 
   def generate_advice
@@ -546,7 +546,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     percent_value = out_of_hours / (in_hours + out_of_hours)
     percent_str = percent(percent_value)
     saving_percent = percent_value - 0.25
-    saving = (in_hours + out_of_hours) * saving_percent
+    saving = (in_hours + out_of_hours) * @exemplar_percentage
     saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
     saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
 
@@ -560,8 +560,8 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
           <% if percent_value > EXEMPLAR_PERCENT %>
-            The best schools only consume <%= percent(EXEMPLAR_PERCENT) %> out of hours.
-            Reducing your school's out of hours usage to <%= percent(EXEMPLAR_PERCENT) %>
+            The best schools only consume <%= percent(@exemplar_percentage) %> out of hours.
+            Reducing your school's out of hours usage to <%= percent(@exemplar_percentage) %>
             would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
             <%# increase loop size to test %>
             <% 1.times do |_i| %>
@@ -621,13 +621,13 @@ end
 #==============================================================================
 class ElectricityDaytypeAdvice < FuelDaytypeAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol, :electricity)
+    super(school, chart_definition, chart_data, chart_symbol, :electricity, 0.35)
   end
 end
 #==============================================================================
 class GasDaytypeAdvice < FuelDaytypeAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol, :gas)
+    super(school, chart_definition, chart_data, chart_symbol, :gas, 0.3)
   end
 end
 
