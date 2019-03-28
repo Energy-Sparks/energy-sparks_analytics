@@ -27,6 +27,23 @@ class ChartManager
       yaxis_scaling:    :none,
       inject:           :benchmark
     },
+    benchmark_co2: {
+      inherits_from:    :benchmark,
+      name:             'Your schools carbon emissions from electricity and gas over last few years',
+      yaxis_units:      :co2
+    },
+    last_2_weeks_carbon_emissions: {
+      name:             'Last 2 weeks carbon emissions at your school from electricity and gas',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      timescale:        { week: -1..0 },
+      meter_definition: :all,
+      x_axis:           :day,
+      series_breakdown: :fuel,
+      yaxis_units:      :co2,
+      yaxis_scaling:    :none
+    },
+    
     benchmark_electric:  {
       name:             'Benchmark Comparison (Annual Electricity Consumption)',
       chart1_type:      :bar,
@@ -51,6 +68,17 @@ class ChartManager
       y2_axis:          :degreedays,
       reverse_xaxis:    true
     },
+    gas_longterm_trend_kwh_with_carbon: {
+      inherits_from:    :gas_longterm_trend,
+      series_breakdown: :none,
+      y2_axis:          :gascarbon
+    },
+    gas_longterm_trend_carbon: {
+      inherits_from:    :gas_longterm_trend,
+      series_breakdown: :none,
+      yaxis_units:      :co2,
+      y2_axis:          :gascarbon
+    },
     electricity_longterm_trend: {
       name:             'Electricity: long term trends',
       chart1_type:      :column,
@@ -61,6 +89,17 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       reverse_xaxis:    true
+    },
+    electricity_longterm_trend_kwh_with_carbon: {
+      inherits_from:    :electricity_longterm_trend,
+      series_breakdown: :none,
+      y2_axis:          :gridcarbon
+    },
+    electricity_longterm_trend_carbon: {
+      inherits_from:    :electricity_longterm_trend,
+      series_breakdown: :none,
+      yaxis_units:      :co2,
+      y2_axis:          :gridcarbon
     },
     daytype_breakdown_gas: {
       name:             'Breakdown by type of day/time: Gas',
@@ -276,6 +315,12 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :degreedays,
       timescale:        :year
+    },
+    group_by_week_carbon: {
+      name:             'Carbon emissions from gas heating, hot water and kitchen usage over the last year',
+      inherits_from:    :group_by_week_gas,
+      series_breakdown: :none,
+      yaxis_units:      :co2
     },
     group_by_week_gas_unlimited: {
       name:             'By Week: Gas (multi-year)',
@@ -770,6 +815,14 @@ class ChartManager
       meter_definition: :allelectricity,
       yaxis_units:      :kw,
       yaxis_scaling:    :none
+    },
+    electricity_intraday_line_school_last7days_co2_commentary: {
+      inherits_from: :intraday_line_school_last7days
+    },
+    electricity_intraday_line_school_last7days_carbon: {
+      inherits_from:    :intraday_line_school_last7days,
+      yaxis_units:      :co2,
+      y2_axis:          :gridcarbon
     },
     intraday_line_holidays:  {
       name:             'Intraday (holidays)',

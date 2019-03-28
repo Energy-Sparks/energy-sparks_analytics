@@ -31,7 +31,7 @@ class OneDayAMRReading
       'AGGR',
       nil,
       DateTime.now,
-      [@kwh_data_x48, other.kwh_data_x48].transpose.map {|x| x.reduce(:+)}
+      AMRData.fast_add_x48_x_x48(@kwh_data_x48, other.kwh_data_x48)
     )
   end
 
@@ -46,7 +46,7 @@ class OneDayAMRReading
       one_days_reading.type,
       one_days_reading.substitute_date,
       DateTime.now,
-      one_days_reading.kwh_data_x48.map { |x| x * scale_factor }
+      fast_multiply_x48_x_scalar(one_days_reading, scale_factor)
     )
     scaled
   end

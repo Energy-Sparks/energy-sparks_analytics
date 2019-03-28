@@ -34,9 +34,24 @@ class AggregateDataService
     aggregate_electricity_meters
     disaggregate_storage_heaters if @meter_collection.storage_heaters?
     create_solar_pv_sub_meters if @meter_collection.solar_pv_panels?
+    # defer this to as late as possible
+    calculate_amr_data_carbon_emissions
   end
 
   private
+
+  def calculate_amr_data_carbon_emissions
+    bm = Benchmark.realtime {
+      @meter_collection.all_electricity_meters.each do |electricity_meter|
+        electricity_meter.amr_data.set_carbon_emissions(electricity_meter.id, nil, @meter_collection.grid_carbon_intensity)
+      end
+      @meter_collection.all_heat_meters.each do |gas_meter|
+        # doesn't work for storage heater or solar PV meters, yet TODO(PH, 24Mar2019)
+        gas_meter.amr_data.set_carbon_emissions(gas_meter.id, EnergyEquivalences::UK_GAS_CO2_KG_KWH, nil)
+      end
+    }
+    logger.info "Calculated carbon emissions in #{bm.round(2)} seconds"
+  end
 
   def validate_meter_list(list_of_meters)
     logger.info "Validating #{list_of_meters.length} meters"

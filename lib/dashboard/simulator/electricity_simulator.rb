@@ -92,11 +92,11 @@ class ElectricitySimulator
   end
 
   def solar_pv_installation
-    @existing_electricity_meter.solar_pv_installation
+    @existing_electricity_meter.solar_pv_setup
   end
 
   def storage_heater_config
-    @existing_electricity_meter.storage_heater_config
+    @existing_electricity_meter.storage_heater_setup
   end
 
   def simulation_start_date

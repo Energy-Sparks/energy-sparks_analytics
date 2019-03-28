@@ -2,6 +2,7 @@
 require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
+require 'hashdiff'
 
 class ReportConfigSupport
   include Logging
@@ -74,6 +75,7 @@ class ReportConfigSupport
     @school_metadata = nil
     @worksheet_charts = {}
     @failed_reports = []
+    @differing_results = []
 
     logger.debug "\n" * 8
   end
@@ -106,6 +108,12 @@ class ReportConfigSupport
     @failed_reports.each do |school_name, chart_name|
       puts sprintf('%-25.25s %-45.45s', school_name, chart_name)
     end
+    puts '-' * 100
+    puts 'Differing charts'
+    @differing_results.each do |difference|
+      puts difference
+    end
+    puts '_' * 120
   end
 
   def self.banner(title)
@@ -144,7 +152,7 @@ class ReportConfigSupport
     @benchmarks = []
   end
 
-  def do_all_standard_pages_for_school
+  def do_all_standard_pages_for_school(chart_override = nil, name_override = nil)
     @worksheet_charts = {}
 
     meter_collection_config = @school.report_group
@@ -161,7 +169,7 @@ class ReportConfigSupport
     report_groups = DashboardConfiguration::DASHBOARD_FUEL_TYPES[report_config]
 
     report_groups.each do |report_page|
-      do_one_page(report_page, false)
+      do_one_page(report_page, false, chart_override, name_override)
     end
 
     save_excel_and_html
@@ -209,6 +217,7 @@ class ReportConfigSupport
     @worksheet_charts[page_name] = []
     list_of_charts.each do |chart_name|
       charts = do_charts_internal(chart_name, chart_override)
+      save_and_compare_chart_data(chart_name, charts) if defined?(@@energysparksanalyticsautotest)
       unless charts.nil?
         charts.each do |chart|
           ap(chart, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
@@ -216,6 +225,56 @@ class ReportConfigSupport
         end
       end
     end
+  end
+
+  def save_and_compare_chart_data(chart_name, charts)
+    if chart_name.is_a?(Hash)
+      puts 'Unable to save and compare composite chart'
+      return
+    end
+    save_chart(@@energysparksanalyticsautotest[:new_data], chart_name, charts)
+    previous_chart = load_chart(@@energysparksanalyticsautotest[:original_data], chart_name)
+    if previous_chart.nil?
+      puts "Chart comparison: for #{@school_name}:#{chart_name} is missing from benchmark chart list"
+      return
+    end
+    compare_charts(chart_name, previous_chart, charts)
+  end
+
+  def compare_charts(chart_name, old_data, new_data)
+    diff = old_data == new_data
+    unless diff # HashDiff is horribly slow, so only run if necessary
+      puts "+" * 120
+      puts "Chart #{chart_name} differs"
+      h_diff = HashDiff.diff(old_data, new_data, use_lcs: false) # use_lcs is O(N) otherwise and takes hours!!!!!
+      ap(h_diff)
+      @differing_results.push(sprintf('%30.30s %20.20s %s', @school_name, chart_name, h_diff))
+      puts "+" * 120
+    end
+  end
+
+  def load_chart(path, chart_name)
+    yaml_filename = yml_filepath(path, chart_name)
+    return nil unless File.file?(yaml_filename)
+    meter_readings = YAML::load_file(yaml_filename)
+  end
+
+  def save_chart(path, chart_name, data)
+    yaml_filename = yml_filepath(path, chart_name)
+    File.open(yaml_filename, 'w') { |f| f.write(YAML.dump(data)) }
+  end
+
+  def yml_filepath(path, chart_name)
+    full_path ||= File.join(File.dirname(__FILE__), path)
+    Dir.mkdir(full_path) unless File.exists?(full_path)
+    extension = @@energysparksanalyticsautotest.key?(:name_extension) ? ('- ' + @@energysparksanalyticsautotest[:name_extension].to_s) : ''
+    yaml_filename = full_path + @school_name + '-' + chart_name.to_s + extension + '.yaml'
+    yaml_filename.length > 259 ? shorten_filename(yaml_filename) : yaml_filename
+  end
+
+  # deal with Windows 260 character filepath limit
+  def shorten_filename(yaml_filename)
+    yaml_filename.gsub(/ School/,'').gsub(/ Community/,'')
   end
 
   def do_charts_internal(chart_name, chart_override)

@@ -73,11 +73,19 @@ class EnergyEquivalences
   end
 
   def self.random_equivalence_type_and_via_type
-    non_gas_electric_equivalences = ENERGY_EQUIVALENCES.reject {|k, _v| [:electricity, :gas].include? k }
-    random_type = non_gas_electric_equivalences.keys[rand(non_gas_electric_equivalences.length)]
-    equivalence = ENERGY_EQUIVALENCES[random_type]
-    random_via_type = equivalence[:conversions].keys[rand(equivalence[:conversions].length)]
-    [random_type, random_via_type]
+    if defined?(@@energysparksanalyticsautotest) # don't want random numbers for testing
+      non_gas_electric_equivalences = ENERGY_EQUIVALENCES.reject {|k, _v| [:electricity, :gas].include? k }
+      random_type = non_gas_electric_equivalences.keys[0]
+      equivalence = ENERGY_EQUIVALENCES[random_type]
+      random_via_type = equivalence[:conversions].keys[1]
+      [random_type, random_via_type]
+    else
+      non_gas_electric_equivalences = ENERGY_EQUIVALENCES.reject {|k, _v| [:electricity, :gas].include? k }
+      random_type = non_gas_electric_equivalences.keys[rand(non_gas_electric_equivalences.length)]
+      equivalence = ENERGY_EQUIVALENCES[random_type]
+      random_via_type = equivalence[:conversions].keys[rand(equivalence[:conversions].length)]
+      [random_type, random_via_type]
+    end
   end
 
   def self.equivalence_conversion_rate_and_decription(type, via_unit)

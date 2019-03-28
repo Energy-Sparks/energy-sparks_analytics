@@ -15,7 +15,7 @@ def banner(title= '')
   '=' * len_before + title + '=' * len_after
 end
 
-school_name = 'St Marks Secondary'
+school_name = 'St Louis First School'
 # school_name = 'St Michaels Junior Church School'
 
 school_names = AnalysticsSchoolAndMeterMetaData.new.meter_collections.keys
@@ -31,7 +31,7 @@ reports = ReportConfigSupport.new
 failed_alerts = []
 
 school_names.sort.each do |school_name|
-  next if school_name != 'Freshford C of E Primary'
+  next if school_name != 'St Louis First School'
   puts banner
   puts banner
   puts banner(school_name)
@@ -47,12 +47,15 @@ school_names.sort.each do |school_name|
   bm1 = Benchmark.realtime {
     alerts_classes.each do |alert_class|
       next if ![
+=begin
         AlertChangeInDailyElectricityShortTerm,
         AlertChangeInDailyGasShortTerm,
         AlertChangeInElectricityBaseloadShortTerm,
         AlertHotWaterInsulationAdvice,
         AlertOutOfHoursElectricityUsage,
-        AlertOutOfHoursGasUsage
+        AlertOutOfHoursGasUsage,
+=end
+        AlertWeekendGasConsumptionShortTerm
       ].include?(alert_class)
 
       alert = alert_class.new(school)
@@ -62,6 +65,15 @@ school_names.sort.each do |school_name|
       bm2 = Benchmark.realtime {
 
         alert.analyse(asof_date, true)
+
+        puts ">>>>All template variables:"
+        ap(alert_class.front_end_template_variables)
+        puts ">>>>front end text results:"
+        ap(alert.front_end_template_data)
+        puts ">>>>front end chart results:"
+        ap(alert.front_end_template_charts)
+        puts ">>>>front end table results:"
+        ap(alert.front_end_template_tables)
 =begin
         puts ">>>>All template variables:"
         ap(alert_class.front_end_template_variables)

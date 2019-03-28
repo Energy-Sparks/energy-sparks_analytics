@@ -2,11 +2,51 @@ require_relative '../half_hourly_data'
 require_relative '../half_hourly_loader'
 
 class AMRData < HalfHourlyData
+  attr_reader :economic_tariff, :grid_carbon, :carbon_emissions
+
   def initialize(type)
     super(type)
+    @lock_updates = false
+  end
+
+  def set_economic_tariff(economic_tariff)
+    @economic_tariff = economic_tariff
+  end
+
+  def set_carbon_emissions(meter_id_for_debug, flat_rate, grid_carbon)
+    @grid_carbon = grid_carbon # needed for updates
+    @carbon_emissions = CarbonEmissions.new(meter_id_for_debug, self, flat_rate, grid_carbon)
+    @lock_updates = true
+  end
+
+  class CarbonEmissions < HalfHourlyData
+    attr_reader :flat_type, :flat_rate, :meter_id
+    def initialize(meter_id_for_debug, amr_data, flat_rate, grid_carbon_schedule)
+      super(:amr_data_carbon_emissions)
+      @meter_id = meter_id_for_debug
+      calculate_carbon_emissions(amr_data, flat_rate, grid_carbon_schedule)
+    end
+
+    # either flat_rate or grid_carbon is set, the other to nil
+    private def calculate_carbon_emissions(amr_data, flat_rate, grid_carbon)
+      (amr_data.start_date..amr_data.end_date).each do |date|
+        emissions = nil
+        if flat_rate.nil?
+          emissions = AMRData.fast_multiply_x48_x_x48(amr_data.days_kwh_x48(date, :kwh), grid_carbon.one_days_data_x48(date))
+        else
+          emissions = AMRData.fast_multiply_x48_x_scalar(amr_data.days_kwh_x48(date, :kwh), flat_rate)
+        end
+        add(date, emissions)
+      end
+      total_emissions = total_in_period(start_date, end_date) / 1_000.0
+      rate_type = flat_rate.nil? ? 'grid schedule' : 'flat rate'
+      info = "Created carbon emissions for meter #{meter_id}, #{self.length} days from #{start_date} to #{end_date}, #{total_emissions.round(0)} tonnes CO2 emissions, using #{rate_type}"
+      logger.info info
+    end
   end
 
   def add(date, one_days_data)
+    throw EnergySparksUnexpectedStateException.new('Updates locked - no updates allowed') if @lock_updates
     throw EnergySparksUnexpectedStateException.new('AMR Data must not be nil') if one_days_data.nil?
     throw EnergySparksUnexpectedStateException.new("AMR Data now held as OneDayAMRReading not #{one_days_data.class.name}") unless one_days_data.is_a?(OneDayAMRReading)
     throw EnergySparksUnexpectedStateException.new("AMR Data date mismatch not #{date} v. #{one_days_data.date}") if date != one_days_data.date
@@ -26,16 +66,40 @@ class AMRData < HalfHourlyData
     throw EnergySparksUnexpectedStateException.new('Deprecated call to amr_data.data()')
   end
 
-  def days_kwh_x48(date)
-    self[date].kwh_data_x48
+  def days_kwh_x48(date, type = :kwh)
+    kwhs = self[date].kwh_data_x48
+    return kwhs if type == :kwh
+    if type == :economic_cost
+      rates = @economic_tariff.tariff_day_x48(date)
+      return fast_multiply_x48_x_x48(kwhs, rates)
+    end
+    return @carbon_emissions.one_days_data_x48(date) if type == :co2
+  end
+
+  def self.fast_multiply_x48_x_x48(a, b)
+    c = Array.new(48, 0.0)
+    (0..47).each { |x| c[x] = a[x] * b[x] }
+    c
+  end
+
+  def self.fast_add_x48_x_x48(a, b)
+    c = Array.new(48, 0.0)
+    (0..47).each { |x| c[x] = a[x] + b[x] }
+    c
+  end
+
+  def self.fast_multiply_x48_x_scalar(a, scalar)
+    a.map { |v| v * scalar }
   end
 
   def set_days_kwh_x48(date, days_kwh_data_x48)
     self[date].set_days_kwh_x48(days_kwh_data_x48)
   end
 
-  def kwh(date, halfhour_index)
-    self[date].kwh_halfhour(halfhour_index)
+  def kwh(date, halfhour_index, type = :kwh)
+    return self[date].kwh_halfhour(halfhour_index) if type == :kwh
+    return self[date].kwh_halfhour(halfhour_index) * @economic_tariff.tariff_time(date, halfhour_index) if type == :economic_cost
+    return @carbon_emissions.one_days_data_x48(date)[halfhour_index] if type == :co2
   end
 
   def set_kwh(date, halfhour_index, kwh)
@@ -46,8 +110,10 @@ class AMRData < HalfHourlyData
     self[date].set_kwh_halfhour(halfhour_index, kwh + kwh(date, halfhour_index))
   end
 
-  def one_day_kwh(date)
-    self[date].one_day_kwh
+  def one_day_kwh(date, type = :kwh)
+    return self[date].one_day_kwh  if type == :kwh
+    return self[date].one_day_kwh * @economic_tariff.tariff_day(date) if type == :economic_cost
+    return @carbon_emissions.one_day_total(date) if type == :co2
   end
 
   def clone_one_days_data(date)
@@ -55,16 +121,49 @@ class AMRData < HalfHourlyData
   end
   
    # called from inherited half_hourly)data.one_day_total(date), shouldn't use generally
-  def one_day_total(date)
-    one_day_kwh(date)
+  def one_day_total(date, type = :kwh)
+    one_day_kwh(date, type)
   end
 
-  def total
+  def total(type = :kwh)
     t = 0.0
     (start_date..end_date).each do |date|
-      t += one_day_kwh(date)
+      t += one_day_kwh(date, type)
     end
     t
+  end
+
+  def kwh_date_range(date1, date2, type = :kwh)
+    return one_day_kwh(date1) if date1 == date2
+    total_kwh = 0.0
+    (date1..date2).each do |date|
+      total_kwh += one_day_kwh(date, type)
+    end
+    total_kwh
+  end
+
+  def kwh_period(period)
+    kwh_date_range(period.start_date, period.end_date)
+  end
+
+  def average_in_date_range(date1, date2, type = :kwh)
+    kwh_date_range(date1, date2, type) / (date2 - date1 + 1)
+  end
+
+  def average_in_date_range_ignore_missing(date1, date2, type = :kwh)
+    kwhs = []
+    (date1..date2).each do |date|
+      kwhs.push(one_day_kwh(date, type)) if date_exists?(date)
+    end
+    kwhs.empty? ? 0.0 : (kwhs.inject(:+) / kwhs.length)
+  end
+
+  def kwh_date_list(dates, type = :kwh)
+    total_kwh = 0.0
+    dates.each do |date|
+      total_kwh += one_day_kwh(date, type)
+    end
+    total_kwh
   end
 
   def baseload_kw(date)
@@ -138,39 +237,6 @@ class AMRData < HalfHourlyData
       total += baseload_kw(date)
     end
     total
-  end
-
-  def kwh_date_range(date1, date2)
-    return one_day_kwh(date1) if date1 == date2
-    total_kwh = 0.0
-    (date1..date2).each do |date|
-      total_kwh += one_day_kwh(date)
-    end
-    total_kwh
-  end
-
-  def kwh_period(period)
-    kwh_date_range(period.start_date, period.end_date)
-  end
-
-  def average_in_date_range(date1, date2)
-    kwh_date_range(date1, date2) / (date2 - date1 + 1)
-  end
-
-  def average_in_date_range_ignore_missing(date1, date2)
-    kwhs = []
-    (date1..date2).each do |date|
-      kwhs.push(one_day_kwh(date)) if date_exists?(date)
-    end
-    kwhs.empty? ? 0.0 : (kwhs.inject(:+) / kwhs.length)
-  end
-
-  def kwh_date_list(dates)
-    total_kwh = 0.0
-    dates.each do |date|
-      total_kwh += one_day_kwh(date)
-    end
-    total_kwh
   end
 
   def self.create_empty_dataset(type, start_date, end_date)

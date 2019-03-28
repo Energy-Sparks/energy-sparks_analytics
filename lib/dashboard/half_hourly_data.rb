@@ -94,6 +94,10 @@ class HalfHourlyData < Hash
     self[date][half_hour_index]
   end
 
+  def one_days_data_x48(date)
+    self[date]
+  end
+
   def one_day_total(date)
     unless @cache_days_totals.key?(date) # performance optimisation, needs rebenchmarking to check its an actual speedup
       if self[date].nil?

@@ -63,7 +63,7 @@ class Aggregator
 
     group_chart(group_by) unless group_by.nil?
 
-    inject_benchmarks if @chart_config[:inject] == :benchmark
+    inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
 
     remove_filtered_series if @chart_config.key?(:filter) && @chart_config[:series_breakdown] != :none
 
@@ -576,13 +576,11 @@ class Aggregator
     count = 0
     (start_date..end_date).each do |date|
       next unless match_filter_by_day(date)
-      data = @series_manager.get_one_days_data_x48(date)
-      total = [total, data].transpose.map{|a| a.sum}
+      data = @series_manager.get_one_days_data_x48(date, @series_manager.kwh_cost_or_co2)
+      total = AMRData.fast_add_x48_x_x48(total, data)
       count += 1
     end
-    # Change Line Below 22Mar2019 - change
-    scaling_factor = @chart_config[:yaxis_units] == :kw ? 1.0 : @series_manager.aggregator_scaling_factor
-    bucketed_data[SeriesNames::NONE] = scaling_factor == 1.0 ? total : total.map { |hh_kwh| hh_kwh * scaling_factor }
+    bucketed_data[SeriesNames::NONE] = total
     bucketed_data_count[SeriesNames::NONE] = Array.new(48, count)
   end
 
@@ -680,10 +678,7 @@ class Aggregator
       filtered_daytype = @chart_config[:filter][:daytype]
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, [filtered_daytype])
     end
-    keep_key_list.push(SeriesNames::DEGREEDAYS) if @bucketed_data.key?(SeriesNames::DEGREEDAYS)
-    keep_key_list.push(SeriesNames::TEMPERATURE) if @bucketed_data.key?(SeriesNames::TEMPERATURE)
-    keep_key_list.push(SeriesNames::IRRADIANCE) if @bucketed_data.key?(SeriesNames::IRRADIANCE)
-    keep_key_list.push(SeriesNames::GRIDCARBON) if @bucketed_data.key?(SeriesNames::GRIDCARBON)
+    keep_key_list += pattern_match_y2_axis_names
 
     remove_list = []
     @bucketed_data.each_key do |series_name|
@@ -716,20 +711,22 @@ class Aggregator
 
   def create_y2_axis_data
     # move bucketed data to y2 axis if configured that way
-    # does via pattern matching of names to support multiple
-    # dated y2 axis series
-    logger.debug "Moving #{@chart_config[:y2_axis]} onto Y2 axis"
-
-    # rubocop:disable Style/ConditionalAssignment
-    y2_axis_names = []
-    key_name = SeriesNames.y2_axis_key(@chart_config[:y2_axis])
-    y2_axis_names = @bucketed_data.keys.grep(/#{key_name}/)
-    # rubocop:enable Style/ConditionalAssignment
     @y2_axis = {}
-    y2_axis_names.each do |series_name|
+    logger.debug "Moving #{@chart_config[:y2_axis]} onto Y2 axis"
+    pattern_match_y2_axis_names.each do |series_name|
       @y2_axis[series_name] = @bucketed_data[series_name]
       @bucketed_data.delete(series_name)
     end
+  end
+
+  # need to deal with case where multiple merged charts and date or school suffix has been added to the end of the series name
+  def pattern_match_y2_axis_names
+    matched = []
+    SeriesNames::Y2SERIESYMBOLTONAMEMAP.values.each do |y2_series_name|
+      base_name_length = y2_series_name.length
+      matched += @bucketed_data.keys.select{ |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
+    end
+    matched
   end
 
   # once the aggregation process is complete, add up the aggregated data per series
@@ -844,28 +841,28 @@ class Aggregator
     end
   end
 
-  def exemplar_electricity_usage_in_units
-    e_exemplar_kwh = BenchmarkMetrics::EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils
+  def scale_benchmarks(benchmark_usage_kwh, fuel_type)
+    puts "before: #{benchmark_usage_kwh} #{fuel_type}"
     y_scaling = YAxisScaling.new
-    y_scaling.scale_from_kwh(e_exemplar_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :electricity, @meter_collection)
+    val = y_scaling.scale_from_kwh(benchmark_usage_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], fuel_type, @meter_collection)
+    puts "after: #{val}"
+    val
+  end
+
+  def exemplar_electricity_usage_in_units
+    scale_benchmarks(BenchmarkMetrics::EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils, :electricity)
   end
 
   def exemplar_gas_usage_in_units
-    g_exemplar_kwh = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * @meter_collection.floor_area
-    y_scaling = YAxisScaling.new
-    y_scaling.scale_from_kwh(g_exemplar_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :gas, @meter_collection)
+    scale_benchmarks(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * @meter_collection.floor_area, :gas)
   end
 
   def benchmark_electricity_usage_in_units
-    e_benchmark_kwh = BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils
-    y_scaling = YAxisScaling.new
-    y_scaling.scale_from_kwh(e_benchmark_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :electricity, @meter_collection)
+    scale_benchmarks(BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils, :electricity)
   end
 
   def benchmark_gas_usage_in_units
-    g_benchmark_kwh = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * @meter_collection.floor_area
-    y_scaling = YAxisScaling.new
-    y_scaling.scale_from_kwh(g_benchmark_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], :gas, @meter_collection)
+    scale_benchmarks(BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * @meter_collection.floor_area, :gas)
   end
 
   def create_empty_bucket_series

@@ -24,7 +24,7 @@ class ConvertKwh
       end
     when :£
       case fuel_type
-      when :electricity, :storage_heater
+      when :electricity, :storage_heater, :aggregated_electricity
         unit_scale = BenchmarkMetrics::ELECTRICITY_PRICE # 12p/kWh long term average
       when :solar_export
         unit_scale = BenchmarkMetrics::SOLAR_EXPORT_PRICE # 5p/kWh

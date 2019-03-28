@@ -7,7 +7,8 @@ module Dashboard
     attr_reader :fuel_type, :meter_collection
     attr_reader :solar_pv_setup, :storage_heater_setup, :sub_meters
     attr_reader :meter_correction_rules, :model_cache
-    attr_accessor :amr_data,  :floor_area, :number_of_pupils
+    attr_reader :economic_tariff
+    attr_accessor :amr_data, :floor_area, :number_of_pupils
 
     # Energy Sparks activerecord fields:
     attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
@@ -25,6 +26,8 @@ module Dashboard
       @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
       check_fuel_type(fuel_type)
       @fuel_type = type
+      @economic_tariff = Tariffs.tariff_factory(@fuel_type == :gas ? :economic_electricity_gas : :economic_electricity_standard)
+      set_economic_amr_tariff
       @id = identifier
       @mpan_mprn = identifier.to_i
       @name = name
@@ -38,6 +41,20 @@ module Dashboard
       process_meter_attributes
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+    end
+
+    def amr_data=(amr_data)
+      @amr_data = amr_data
+      set_economic_amr_tariff
+    end
+
+    private def set_economic_amr_tariff
+      @amr_data.set_economic_tariff(@economic_tariff) unless @economic_tariff.nil?
+    end
+
+    # set this here rather than lazy loading in AMRdata instance, so first access isn't slow
+    def set_amr_data_carbon_intensity
+      @amr_data.set_carbon_emissions(@meter_collection.grid_carbon_intensity)
     end
 
     private def process_meter_attributes

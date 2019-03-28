@@ -130,6 +130,10 @@ class MeterCollection
     all_meters.select { |meter| meter.electricity_meter? }
   end
 
+  def gas_only?
+    all_meters.select { |meter| meter.electricity_meter? }.empty?
+  end
+
   def storage_heaters?
     @has_storage_heaters ||= all_meters.any?{ |meter| meter.storage_heater? }
   end

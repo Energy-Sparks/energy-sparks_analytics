@@ -227,6 +227,20 @@ class DashboardConfiguration
                                   group_by_week_electricity
                                   solar_pv_group_by_week_by_submeter
                                 ],
+                              },
+        carbon_emissions:   {
+                                name: 'Carbon Emissions',
+                                charts: %i[
+                                  benchmark_co2
+                                  group_by_week_carbon
+                                  electricity_longterm_trend_kwh_with_carbon
+                                  electricity_longterm_trend_carbon
+                                  electricity_intraday_line_school_last7days_co2_commentary
+                                  electricity_intraday_line_school_last7days_carbon
+                                  gas_longterm_trend_kwh_with_carbon
+                                  gas_longterm_trend_carbon
+                                  last_2_weeks_carbon_emissions
+                                ],
                               }
 }.freeze
 

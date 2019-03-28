@@ -5,6 +5,11 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
+@@energysparksanalyticsautotest = {
+  original_data: '../TestResults/Charts/Base/',
+  new_data:      '../TestResults/Charts/New/'
+}
+
 module Logging
   @logger = Logger.new('log/test-regression_model ' + Time.now.strftime('%H %M') + '.log')
   # @logger = Logger.new(STDOUT)
@@ -27,7 +32,7 @@ list_of_schools.reverse.each do |school_name|
   # next if school_name != 'St Marks Secondary'
 
   # next if ['Saltford C of E Primary School', 'Hunters Bar School', 'Roundhill School'].include?(school_name)
-  next if !['St Saviours Junior'].include?(school_name)
+  # next if !['St Saviours Junior'].include?(school_name)
 
   if reports.schools[school_name] == :electric_only
     puts '=' * 100, "Unable to analyse #{school_name} as no gas", "\n" * 4
@@ -46,6 +51,8 @@ list_of_schools.reverse.each do |school_name|
     meter_name = meter.mpan_mprn.to_s
     # next if meter_name != '75665806'
     meter_name += meter.name[0..10] unless meter.name.nil?
+
+    @@energysparksanalyticsautotest[:name_extension] = meter.mpan_mprn
     reports.do_one_page(:heating_model_fitting, false, {meter_definition: meter.mpan_mprn}, meter.mpan_mprn)
     unless meter.model_cache.results(:best).nil?
       model_result_keys, model_results = meter.model_cache.results(:best).model_configuration_csv_format

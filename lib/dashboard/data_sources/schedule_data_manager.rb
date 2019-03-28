@@ -83,10 +83,15 @@ class ScheduleDataManager
 
   def self.uk_grid_carbon_intensity
     if @@uk_grid_carbon_intensity_data.nil?
-      filename = INPUT_DATA_DIR + 'uk_carbon_intensity.csv'
-      @@uk_grid_carbon_intensity_data = GridCarbonIntensity.new
-      GridCarbonLoader.new(filename, @@uk_grid_carbon_intensity_data)
-      puts "Loaded #{@@uk_grid_carbon_intensity_data.length} days of uk grid carbon intensity data"
+      if Object.const_defined?('Rails')
+        @@uk_grid_carbon_intensity_data = CO2Parameterised.create_uk_grid_carbon_intensity_from_parameterised_data
+      else
+        filename = INPUT_DATA_DIR + 'uk_carbon_intensity.csv'
+        @@uk_grid_carbon_intensity_data = GridCarbonIntensity.new
+        GridCarbonLoader.new(filename, @@uk_grid_carbon_intensity_data)
+        puts "Loaded #{@@uk_grid_carbon_intensity_data.length} days of uk grid carbon intensity data"
+        CO2Parameterised.fill_in_missing_uk_grid_carbon_intensity_data_with_parameterised(@@uk_grid_carbon_intensity_data)
+      end
     end
     @@uk_grid_carbon_intensity_data
   end
