@@ -8,32 +8,23 @@ require 'date'
 class MeterAttributes
   extend Logging
 
-  def self.attributes(meter, type = nil)
-    mpan_mprn = meter.mpan_mprn.to_i # treat as integer even if loaded as string
+  def self.for(mpan_mprn, area_name, fuel_type)
+    mpan_mprn = mpan_mprn.to_i
+    attributes = METER_ATTRIBUTE_DEFINITIONS.key?(mpan_mprn) ? METER_ATTRIBUTE_DEFINITIONS[mpan_mprn] : {}
 
-    return nil unless METER_ATTRIBUTE_DEFINITIONS.key?(mpan_mprn)
-    return nil if !type.nil? && !METER_ATTRIBUTE_DEFINITIONS[mpan_mprn].key?(type)
+    if area_name.include?('Bath') && fuel_type == :gas
+      weekend_correction = { auto_insert_missing_readings: { type: :weekends }}
 
-    butes = nil
-    if type.nil?
-      butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn]
-    else
-      butes = METER_ATTRIBUTE_DEFINITIONS[mpan_mprn][type]
-    end
-
-    # fill in weekends for all Bath derived data
-    # Note - meter.meter_collection.area_name drops to school or meter collection
-    # accordingly
-    if meter.meter_collection.area_name.include?('Bath')
-      weekend_correction = {auto_insert_missing_readings: { type: :weekends}}
-      if type == :meter_corrections
-        butes.push(weekend_correction)
-      elsif type.nil?
-        butes[:meter_corrections] = [] unless butes.key?(:meter_corrections)
-        butes[:meter_corrections].push(weekend_correction)
+      if attributes.key?(:meter_corrections)
+        meter_corrections_array = attributes[:meter_corrections]
+        unless meter_corrections_array.detect { |h| h.is_a?(Hash) && h.key?(:auto_insert_missing_readings) }
+          meter_corrections_array << weekend_correction
+        end
+      else
+        meter_corrections_array = [weekend_correction]
       end
     end
-    butes
+    attributes
   end
 
   METER_ATTRIBUTE_DEFINITIONS = {
@@ -171,7 +162,7 @@ class MeterAttributes
     },
     2200011955152 => {
       solar_pv: [  # and array to cope with multiple installations at different times at the same school e.g. Newbridge
-        {               
+        {
           start_date:         Date.new(2014, 1, 1),
           # end_date:          Date.new(2025, 1, 1),
           kwp:                6.0, # appears to have 22 panels on bing satellite - for 2016 extension
@@ -451,5 +442,4 @@ class MeterAttributes
     },
 
   }.freeze
-  private_constant :METER_ATTRIBUTE_DEFINITIONS
 end

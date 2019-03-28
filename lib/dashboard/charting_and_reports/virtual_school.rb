@@ -31,7 +31,7 @@ class VirtualSchool
     meter_collection.add_electricity_meter(
       create_empty_meter(meter_collection, name + ' Electricity', :electricity)
     )
-    
+
     meter_collection.add_heat_meter(
       create_empty_meter(meter_collection, name + ' Gas', :gas)
     )
@@ -45,16 +45,13 @@ class VirtualSchool
     logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{meter_name}"
 
     meter = Dashboard::Meter.new(
-      meter_collection,
-      AMRData.new(fuel_type),
-      fuel_type,
-      identifier,
-      meter_name,
-      floor_area,
-      number_of_pupils,
-      nil, # solar pv
-      nil # storage heater
+      meter_collection: meter_collection,
+      amr_data: AMRData.new(fuel_type),
+      type: fuel_type,
+      identifier: identifier,
+      name: meter_name,
+      floor_area: floor_area,
+      number_of_pupils: number_of_pupils,
     )
   end
-
 end

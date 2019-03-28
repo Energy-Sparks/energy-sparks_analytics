@@ -195,15 +195,15 @@ class ElectricitySimulator
 
   def create_new_meter(amr_data, type, identifier, name)
     Dashboard::Meter.new(
-      @existing_electricity_meter,
-      amr_data,
-      type,
-      identifier,
-      name,
-      floor_area,
-      number_of_pupils,
-      solar_pv_installation,
-      storage_heater_config
+      meter_collection: @existing_electricity_meter,
+      amr_data: amr_data,
+      type: type,
+      identifier: identifier,
+      name: name,
+      floor_area: floor_area,
+      number_of_pupils: number_of_pupils,
+      solar_pv_installation: solar_pv_installation,
+      storage_heater_config: storage_heater_config
     )
   end
 

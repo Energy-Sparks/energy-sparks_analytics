@@ -27,7 +27,11 @@ reports = ReportConfigSupport.new
 
 # reports.load_school('Coit Primary School', true)
 # reports.load_school('Paulton Junior School', true)
+<<<<<<< HEAD
 reports.load_school('St Marks Secondary', true)
+=======
+# reports.load_school('Hunters Bar School', true)
+>>>>>>> e3e5c7fe149c520d8526f8d50522651197447d8c
 
 # testing examples
 #
