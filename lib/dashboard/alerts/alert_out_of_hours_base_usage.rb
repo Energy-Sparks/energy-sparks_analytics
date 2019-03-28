@@ -61,10 +61,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       weekends_percent:         { description: 'Annual weekend percent usage',            units: :percent },
       out_of_hours_percent:     { description: 'Percent of kwh usage out of school hours',units: :percent},
 
-      holidays_£:         { description: 'Annual school day open cost usage',   units: :£ },
-      weekends_£:         { description: 'Annual school day closed cost usage', units: :£ },
-      schoolday_open_£:   { description: 'Annual holiday cost usage',           units: :£ },
-      schoolday_closed_£: { description: 'Annual weekend cost usage',           units: :£ },
+      schoolday_open_£:         { description: 'Annual school day open cost usage',   units: :£ },
+      schoolday_closed_£:       { description: 'Annual school day closed cost usage', units: :£ },
+      holidays_£:               { description: 'Annual holiday cost usage',           units: :£ },
+      weekends_£:               { description: 'Annual weekend cost usage',           units: :£ },
 
       good_out_of_hours_use_percent: {
         description: 'Good/Exemplar out of hours use percent (suggested benchmark comparison)',
