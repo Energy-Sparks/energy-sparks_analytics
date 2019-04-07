@@ -362,7 +362,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   def generate_advice
     logger.info @school.name
-    
+
     electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
     gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
     gas_only = electric_usage.nil?
@@ -559,7 +559,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
           <%= percent(percent_value) %> of your <%= @fuel_type_str %> usage is out of hours:
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
-          <% if percent_value > EXEMPLAR_PERCENT %>
+          <% if percent_value > @exemplar_percentage %>
             The best schools only consume <%= percent(@exemplar_percentage) %> out of hours.
             Reducing your school's out of hours usage to <%= percent(@exemplar_percentage) %>
             would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
