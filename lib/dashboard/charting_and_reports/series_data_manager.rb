@@ -136,6 +136,7 @@ class SeriesDataManager
       when :model_type;             buckets += heating_model_types
       when :fuel;                   buckets = create_fuel_breakdown
       when :submeter;               buckets += submeter_names
+      when :accounting_cost;        buckets += accounting_bill_component_names
 
       when :hotwater;               buckets += SeriesNames::HOTWATERSERIESNAMES
 
@@ -226,13 +227,24 @@ class SeriesDataManager
 
   def meter_names
     names = []
-    if !@meters[0].nil? # indication of heat meters only
+    if !@meters[0].nil? # indication of solar pv meters only
       names += meter_names_from_list(@meter_collection.electricity_meters)
       names += meter_names_from_list(@meter_collection.solar_pv_meters)
     end
     if !@meters[1].nil? # indication of heat meters only
       names += meter_names_from_list(@meter_collection.heat_meters)
       names += meter_names_from_list(@meter_collection.storage_heater_meters)
+    end
+    names
+  end
+
+  def accounting_bill_component_names
+    names = []
+    @meters.each do |meter|
+      next if meter.nil?
+      meter.amr_data.accounting_tariff.bill_component_types.each do |bill_component_type|
+        names.push(bill_component_type) unless names.include?(bill_component_type)
+      end
     end
     names
   end
@@ -278,11 +290,12 @@ class SeriesDataManager
 
     @breakdown_list.each do |breakdown_type|
       case breakdown_type
-      when :submeter;     breakdown.merge!(submeter_datetime_breakdown(meter, date, halfhour_index))
-      when :meter;        breakdown.merge!(breakdown_to_meter_level(date, date, halfhour_index))
-      when :fuel;         breakdown.merge!(fuel_breakdown_halfhour(date, halfhour_index))
-      when :daytype;      breakdown.merge!(daytype_breakdown_halfhour(date, halfhour_index, meter))
-      else;               breakdown[SeriesNames::NONE] = amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2)
+      when :submeter;         breakdown.merge!(submeter_datetime_breakdown(meter, date, halfhour_index))
+      when :meter;            breakdown.merge!(breakdown_to_meter_level(date, date, halfhour_index))
+      when :fuel;             breakdown.merge!(fuel_breakdown_halfhour(date, halfhour_index))
+      when :daytype;          breakdown.merge!(daytype_breakdown_halfhour(date, halfhour_index, meter))
+      when :accounting_cost;  breakdown.merge!(breakdown_to_bill_components_halfhour(date, halfhour_index, meter))
+      else;                   breakdown[SeriesNames::NONE] = amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2)
       end
     end
 
@@ -303,11 +316,12 @@ class SeriesDataManager
     breakdown = {}
     [@breakdown_list + @y2_axis_list].flatten.each do |breakdown_type|
       case breakdown_type
-      when :daytype;    breakdown = daytype_breakdown([d1, d2], meter)
-      when :fuel;       breakdown = fuel_breakdown([d1, d2], @meters[0], @meters[1])
-      when :heating;    breakdown = heating_breakdown([d1, d2], @meters[0], @meters[1])
-      when :model_type; breakdown = heating_model_breakdown([d1, d2], @meters[0], @meters[1])
-      when :meter;      breakdown = breakdown_to_meter_level(d1, d2)
+      when :daytype;          breakdown = daytype_breakdown([d1, d2], meter)
+      when :fuel;             breakdown = fuel_breakdown([d1, d2], @meters[0], @meters[1])
+      when :heating;          breakdown = heating_breakdown([d1, d2], @meters[0], @meters[1])
+      when :model_type;       breakdown = heating_model_breakdown([d1, d2], @meters[0], @meters[1])
+      when :meter;            breakdown = breakdown_to_meter_level(d1, d2)
+      when :accounting_cost;  breakdown = breakdown_to_bill_components_date_range(d1, d2)
 
       when :hotwater; breakdown.merge!(hotwater_breakdown(d1, d2))
       when :submeter; breakdown.merge!(submeter_breakdown(meter, d1, d2))
@@ -356,11 +370,12 @@ class SeriesDataManager
   end
 
   def kwh_cost_or_co2
-    puts "kwh co2 cost type: #{@chart_configuration[:yaxis_units]}"
+# puts "kwh co2 cost type: #{@chart_configuration[:yaxis_units]}"
     case @chart_configuration[:yaxis_units]
-    when :£;     :economic_cost
-    when :co2;   :co2
-    else;        :kwh end
+    when :£;               :economic_cost
+    when :accounting_cost; :accounting_cost
+    when :co2;             :co2
+    else;                  :kwh end
   end
 
 private
@@ -509,6 +524,10 @@ private
     daytype_data
   end
 
+  private def breakdown_to_bill_components_halfhour(date, halfhour_index, meter)
+    meter.amr_data.accounting_tariff.cost_data_halfhour_broken_down(date, halfhour_index)
+  end
+
   def cusum(meter, date1, date2)
     model_kwh = heating_model.predicted_kwh_daterange(date1, date2, @meter_collection.temperatures)
     actual_kwh = amr_data_date_range(meter, date1, date2, :kwh)
@@ -554,6 +573,20 @@ private
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.storage_heater_meters, start_date, end_date, halfhour_index))
     end
     breakdown
+  end
+
+  private def breakdown_to_bill_components_date_range(start_date, end_date)
+    bill_components = Hash.new(0.0)
+    @meters.each do |meter|
+      next if meter.nil?
+      (start_date..end_date).each do |date|
+        components = meter.amr_data.accounting_tariff.bill_component_costs_for_day(date)
+        components.each do |type, value|
+          bill_components[type] += value
+        end
+      end
+    end
+    bill_components
   end
 
   def breakdown_one_meter_type(list_of_meters, start_date, end_date, halfhour_index = nil)

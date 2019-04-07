@@ -19,7 +19,7 @@ class MeterCollection
   attr_reader :floor_area, :number_of_pupils
 
   # Currently, but not always
-  attr_reader :school, :name, :address, :postcode, :urn, :area_name, :model_cache
+  attr_reader :school, :name, :address, :postcode, :urn, :area_name, :model_cache, :default_energy_purchaser
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter
@@ -38,6 +38,7 @@ class MeterCollection
     @urn = school.urn
     @meter_identifier_lookup = {} # [mpan or mprn] => meter
     @area_name = school.area_name
+    @default_energy_purchaser = @area_name # use the area name for the moment
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
 

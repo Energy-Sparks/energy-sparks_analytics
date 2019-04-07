@@ -466,6 +466,76 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
+    electricity_cost_comparison_last_2_years: {
+      inherits_from:    :electricity_by_month_year_0_1,
+      yaxis_units:      :£
+    },
+    electricity_cost_comparison_last_2_years_accounting: {
+      inherits_from:    :electricity_cost_comparison_last_2_years,
+      yaxis_units:      :accounting_cost
+    },
+    electricity_cost_comparison_last_2_years_accounting_breakdown: {
+      name:             'Electricity accounting cost by month for the last year',
+      inherits_from:    :electricity_cost_comparison_last_2_years_accounting,
+      series_breakdown: :accounting_cost
+    },
+    electricity_cost_1_year_accounting_breakdown: {
+      name:             'Electricity accounting cost breakdown by month for the last year (stacked)',
+      inherits_from:    :electricity_cost_comparison_last_2_years_accounting_breakdown,
+      chart1_subtype:   :stacked,
+      timescale:        :year
+    },
+    electricity_cost_comparison_1_year_accounting_breakdown_by_week: {
+      name:             'Electricity accounting cost breakdown by week for the last year',
+      inherits_from:    :electricity_cost_1_year_accounting_breakdown,
+      x_axis:           :week
+    },
+    gas_cost_comparison_1_year_accounting_breakdown_by_week: {
+      name:             'Gas accounting cost breakdown by week for the last year',
+      meter_definition: :allheat,
+      inherits_from:    :electricity_cost_1_year_accounting_breakdown,
+      x_axis:           :week,
+      y2_axis:          :degreedays
+    },
+    gas_cost_comparison_1_year_economic_breakdown_by_week: {
+      name:             'Gas economic cost breakdown by week for the last year',
+      inherits_from:    :gas_cost_comparison_1_year_accounting_breakdown_by_week,
+      series_breakdown: :none,
+      yaxis_units:      :£,
+      x_axis:           :week
+    },
+    electricity_2_week_accounting_breakdown: {
+      name:             'Electricity accounting cost breakdown by day for last 2 weeks',
+      inherits_from:    :electricity_cost_comparison_1_year_accounting_breakdown_by_week,
+      timescale:        [{ day: -13...0 }],
+      x_axis:           :day
+    },
+    electricity_1_year_intraday_accounting_breakdown: {
+      name:             'Electricity costs for last year by time of day (accounting costs)',
+      inherits_from:    :gas_heating_season_intraday,
+      meter_definition: :allelectricity,
+      filter:           nil,
+      series_breakdown: :accounting_cost,
+      yaxis_units:      :£,
+      chart1_subtype:   :stacked
+    },
+    electricity_1_year_intraday_kwh_breakdown: {
+      name:             'Electricity kWh usage intraday for last year for comparison with accounting version above',
+      inherits_from:    :electricity_1_year_intraday_accounting_breakdown,
+      series_breakdown: :none,
+      yaxis_units:      :kwh
+    },
+    gas_1_year_intraday_accounting_breakdown: {
+      name:             'Gas costs for last year by time of day (accounting costs)',
+      inherits_from:    :electricity_1_year_intraday_accounting_breakdown,
+      meter_definition: :allheat
+    },
+    gas_1_year_intraday_kwh_breakdown: {
+      name:             'Gas kWh usage intraday for last year for comparison with accounting version above',
+      inherits_from:    :gas_1_year_intraday_accounting_breakdown,
+      series_breakdown: :none,
+      yaxis_units:      :kwh
+    },
     gas_heating_season_intraday: {
       name:             'Intraday Gas Consumption (during heating season)',
       chart1_type:      :column,

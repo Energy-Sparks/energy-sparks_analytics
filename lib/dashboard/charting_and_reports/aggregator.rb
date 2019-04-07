@@ -65,7 +65,7 @@ class Aggregator
 
     inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
 
-    remove_filtered_series if @chart_config.key?(:filter) && @chart_config[:series_breakdown] != :none
+    remove_filtered_series if chart_has_filter && @chart_config[:series_breakdown] != :none
 
     create_y2_axis_data if @chart_config.key?(:y2_axis) && !@chart_config[:y2_axis].nil?
 
@@ -84,6 +84,8 @@ class Aggregator
 
     reformat_x_axis if @chart_config.key?(:x_axis_reformat) && !@chart_config[:x_axis_reformat].nil?
 
+    
+
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
@@ -92,6 +94,10 @@ class Aggregator
   end
 
   private
+
+  def chart_has_filter
+    @chart_config.key?(:filter) && !@chart_config[:filter].nil?
+  end
 
   #=================regrouping of chart data ======================================
   # converts a flat structure e.g. :
@@ -427,6 +433,7 @@ class Aggregator
 
   def post_process_aggregation(chart_config, bucketed_data, bucketed_data_count)
     create_trend_lines(chart_config, bucketed_data, bucketed_data_count) if @series_manager.trendlines?
+    scale_x_data(bucketed_data) if @chart_config.key?(:yaxis_scaling) && !@chart_config[:yaxis_scaling].nil? && @chart_config[:yaxis_scaling] != :none
   end
 
   # - process trendlines post aggregation as potentially faster, if line
@@ -490,7 +497,7 @@ class Aggregator
   # returns a hash of this breakdown to the kWh values
   def aggregate_by_day(bucketed_data, bucketed_data_count)
     count = 0
-    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype)
+    if chart_has_filter && @chart_config[:filter].key?(:daytype)
       # this is slower, as it needs to loop through a day at a time
       # TODO(PH,17Jun2018) push down and optimise in series_data_manager
       @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
@@ -518,7 +525,7 @@ class Aggregator
   end
 
   def match_filter_by_day(date)
-    return true unless @chart_config.key?(:filter)
+    return true unless chart_has_filter
     match_daytype = true
     match_daytype = match_occupied_type_filter_by_day(date) if @chart_config[:filter].key?(:daytype)
     match_heating = true
@@ -644,7 +651,7 @@ class Aggregator
   # pattern matches on series_names, removing any from list which don't match
   def remove_filtered_series
     keep_key_list = []
-    if !@chart_config.key?(:filter)
+    if !chart_has_filter
       logger.info 'No filters set'
       return
     end
@@ -838,6 +845,20 @@ class Aggregator
       @x_axis.push('Exemplar School')
       @bucketed_data['electricity']['Exemplar School'] = exemplar_electricity_usage_in_units
       @bucketed_data['gas']['Exemplar School'] = exemplar_gas_usage_in_units * 0.9
+    end
+  end
+
+  private def scale_x_data(bucketed_data)
+    # exclude y2_axis values e.g. temperature, degree days
+    x_data_keys = bucketed_data.select { |series_name, data| !SeriesNames::Y2SERIESYMBOLTONAMEMAP.values.include?(series_name) }
+    scale_factor = YAxisScaling.new.scaling_factor(@chart_configuration[:yaxis_scaling], @meter_collection)
+    info = "Scaling the following series #{x_data_keys} by a factor of #{scale_factor} for y axis scaling #{@chart_configuration[:yaxis_scaling]}"
+    puts info
+    log.info info
+    x_data_keys.each do |data_series_name|
+      bucketed_data[data_series_name].each_with_index do |value, index|
+        bucketed_data[data_series_name][index] = value * scale_factor
+      end
     end
   end
 

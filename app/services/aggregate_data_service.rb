@@ -35,6 +35,7 @@ class AggregateDataService
     create_solar_pv_sub_meters if @meter_collection.solar_pv_panels?
     # defer this to as late as possible
     calculate_amr_data_carbon_emissions
+    calculate_energy_cost
   end
 
   private
@@ -50,6 +51,21 @@ class AggregateDataService
       end
     }
     logger.info "Calculated carbon emissions in #{bm.round(2)} seconds"
+  end
+
+  def calculate_energy_cost
+    bm = Benchmark.realtime {
+      @meter_collection.all_electricity_meters.each do |electricity_meter|
+        electricity_meter.set_economic_amr_tariff(@meter_collection.default_energy_purchaser)
+        electricity_meter.set_accounting_amr_tariff(@meter_collection.default_energy_purchaser)
+      end
+      @meter_collection.all_heat_meters.each do |gas_meter|
+        gas_meter.set_economic_amr_tariff(@meter_collection.default_energy_purchaser)
+        gas_meter.set_accounting_amr_tariff(@meter_collection.default_energy_purchaser)
+      end
+    }
+    logger.info "Calculated energy costs in #{bm.round(3)} seconds"
+    puts "Calculated energy costs in #{bm.round(3)} seconds"
   end
 
   def validate_meter_list(list_of_meters)

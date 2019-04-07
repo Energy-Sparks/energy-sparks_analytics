@@ -13,7 +13,7 @@ end
 
 profile = false
 
-if true
+if false
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
     new_data:      '../TestResults/Charts/New/'
@@ -25,13 +25,11 @@ end
 
 reports = ReportConfigSupport.new
 
-# reports.load_school('Coit Primary School', true)
+RubyProf.start if profile
+
+reports.load_school('King Edward VII Upper School', true)
 # reports.load_school('Paulton Junior School', true)
-<<<<<<< HEAD
-reports.load_school('St Marks Secondary', true)
-=======
-# reports.load_school('Hunters Bar School', true)
->>>>>>> e3e5c7fe149c520d8526f8d50522651197447d8c
+# reports.load_school('St Marks Secondary', true)
 
 # testing examples
 #
@@ -41,7 +39,7 @@ reports.load_school('St Marks Secondary', true)
 #   reports.do_chart_list('Boiler Control', [:hotwater, :frost_2, :optimum_start])
 #
 
-RubyProf.start if profile
+
 
 # reports.do_chart_list('Boiler Control', [:gas_heating_season_intraday, :gas_heating_season_intraday_£])
 
@@ -50,7 +48,9 @@ RubyProf.start if profile
 # reports.do_chart_list('kW scaling', [:intraday_line_school_last7days])
 # reports.do_all_schools(true)
 # reports.do_all_schools(true)
-reports.do_one_page(:carbon_emissions)
+# reports.do_one_page(:cost)
+
+reports.do_all_standard_pages_for_school
 
 if profile
   prof_result = RubyProf.stop

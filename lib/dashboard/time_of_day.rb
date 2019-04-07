@@ -14,10 +14,10 @@ class TimeOfDay
   end
 
   def to_s
-    if day == 1
-      self.strftime('%H:%M')
-    elsif day == 2 && hour == 0
-      self.strftime('24:%M')
+    if @relative_time.day == 1
+      @relative_time.strftime('%H:%M')
+    elsif @relative_time.day == 2 && @relative_time.hour == 0
+      @relative_time.strftime('24:%M')
     else
       '??:??'
     end

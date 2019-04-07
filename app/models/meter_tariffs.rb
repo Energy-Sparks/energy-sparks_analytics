@@ -2,510 +2,129 @@ require_relative '../../lib/dashboard/time_of_year.rb'
 require_relative '../../lib/dashboard/time_of_day.rb'
 require 'awesome_print'
 require 'date'
-# tariff information on a per school basis, part of meter attributes infrastructure
-# but held in a seperate file and class for clarity
-#
+# economic and accounting tariff configuration and setup
+# designed to be called and precalculated at the end of the
+# aggregation service process
+# economic tariffs: are used for estimating the economic benefit of
+#                   an energy efficiency investment decision or
+#                   more simplistically for education purposes
+#                   as there are no standing charges and the values
+#                   are typically round figures e.g. 12p/kWh and 3p/kWh
+#                   the economic tariff do however rely on the 'accounting
+#                   tariffs' to determine whether the electricity is on a
+#                   differential (economy 7) tariff
+# accounting tariffs: what the school should be paying in their bills
+#                   includes the standing and other charges
+#                   and can vary over time with new energy contracts
+# potentially should be Singleton class?
 class MeterTariffs
   extend Logging
 
-  @@cached_meter_tariff = Hash.new { |hash, key| hash[key] = {} } # [mprn/mpan][economic|accounting tariff ] = tariff object
+  def self.economic_tariff_x48(date, mpan_mprn, fuel_type, kwh_halfhour_x48)
+    tariff_config = economic_tariff_config(mpan_mprn, date, fuel_type)
 
-  def self.price_tariff(meter_collection, meter, tariff_type)
-    # have we already created a tariff object for this tariff?
-    cached_tariff = @@cached_meter_tariff.dig(meter.mpan_or_mprn, tariff_type)
-    return cached_tariff unless cached_tariff.nil?
+    daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48)
 
-    tariff = create_tariff(meter_collection, meter.mpan_or_mprn, tariff_type)
-    @@cached_meter_tariff[meter.mpan_or_mprn][tariff_type] = tariff
+    [daytime_cost_x48, nighttime_cost_x48, {}] # {} = the standing charges for consistancy with the accounting tariff interface
   end
 
-  def self.create_tariff(meter_collection, mpan_or_mprn, tariff_type)
-    specific_tariff = METER_TARIFFS.dig(meter.mpan_or_mprn, tariff_type)
-    return tariff_factory(specific_tariff) unless specific_tariff.nil?
+  def self.accounting_tariff_x48(date, mpan_mprn, fuel_type, kwh_halfhour_x48, default_energy_purchaser)
+    tariff_config = tariff_for_date(METER_TARIFFS, mpan_mprn, date)
 
-    # if its an economic tariff check whether accounting tariff suggests it should be
+    tariff_config = default_area_tariff_for_date(default_energy_purchaser, fuel_type, date) if tariff_config.nil?
 
-    area = meter_collection.area_name
-    specific_tariff = METER_TARIFFS.dig(meter.mpan_or_mprn, tariff_type)
-    return specific_tariff unless specific_tariff.nil?
+    daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48)
 
+    standing_charge = standing_charges(date, tariff_config, kwh_halfhour_x48.sum)
+
+    [daytime_cost_x48, nighttime_cost_x48, standing_charge]
   end
 
-  def self.accounting_tariff?(mpan_or_mprn)
-    !METER_TARIFFS.dig(meter.mpan_or_mprn, :accounting_tariffs).nil?
+  private_class_method def self.day_night_costs_x48(tariff_config, kwh_halfhour_x48)
+    daytime_cost_x48 = nil
+    nighttime_cost_x48 = nil
+
+    if differential_tariff?(tariff_config)
+      daytime_cost_x48, nighttime_cost_x48 = differential_tariff_cost(tariff_config, kwh_halfhour_x48)
+    else
+      daytime_cost_x48 = AMRData.fast_multiply_x48_x_scalar(kwh_halfhour_x48, tariff_config[:rates][:rate][:rate])
+    end
+    [daytime_cost_x48, nighttime_cost_x48]
   end
 
-  GROUP_TARIFFS = {
-    'All' => {
-      economic_tariffs: {
-        electricity:  {
-          flat_rate_£_per_kwh: 0.12,
-          rate_type: :flat
-        },
-        electricity_differential: {
-          name: 'Differential economic tariff (e.g. economy 7)',
-          rate_type: :differential,
-          differential_rate_£_per_kwh: {
-            TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08,
-            TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.13
-          }
-        },
-        gas: {
-          flat_rate_£_per_kwh: 0.03,
-          rate_type: :flat
-        }
-      }
-    },
-    'Bath' => {
-      electricity: {
-        accounting_tariffs: {
-          Date.new(2009,1,1)..Date.new(2020,3,1) => {
-            name: 'B&NES day-night electricity tariff',
-            rate_type: :differential,
-            standing_charge_£_per_quarter:		38.35,
-            renewable_energy_obligation_fit_£_per_kwh: 0.00565,
-            differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08736, TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12805}
-          }
-        }
-      },
-      gas: {
-      }
-    },
-    'Sheffield' => {
-      electricity: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - default - shouldnt really exist as all deals seem bespoke',
-          rate_type: :flat,
-          standing_charge_£_per_day:		6.00,
-          capacity_charge_£_per_month:		0.0,
-          flat_rate_£_per_kwh:  0.12
-        }
-      },
-      gas: {
-      }
-    }
-  }.freeze
-  private_constant :GROUP_TARIFFS
+  private_class_method def self.standing_charges(date, tariff_config, days_kwh)
+    standing_charge = {}
+    tariff_config[:rates].each do |standing_charge_type, rate|
+      next if [:rate, :daytime_rate, :nighttime_rate].include?(standing_charge_type)
+      standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh)
+    end
+    standing_charge
+  end
 
-  # meter specific tariffs, where tariff is unique to the meter
-  # typically 'accounting tariffs', and perhaps ultimately
-  # solar tariffs where there is a bespoke FIT rate?
-  METER_TARIFFS = {
+  private_class_method def self.daily_rate(date, per, rate, days_kwh)
+    case per
+    when :day
+      rate
+    when :month
+      rate / DateTimeHelper.days_in_month(date)
+    when :quarter
+      rate / DateTimeHelper.days_in_quarter(date)
+    when :kwh # treat these as day only rates for the moment TODO(PH, 8Apr2019), should perhaps be intraday?
+      rate * days_kwh
+    else
+      raise EnergySparksUnexpectedSchoolDataConfiguration.new("Unexpected unit rate type for tariff #{per}")
+    end
+  end
 
-    # =========Bankwood Primary School========
-    2333110019718 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - flat rate',
-          rate_type: :flat,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          flat_rate_£_per_kwh:  0.1191,
-        }
-      }
-    },
-  
-  # =========Coit Primary School========
-    2332951462710 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - flat rate',
-          rate_type: :flat,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          flat_rate_£_per_kwh:  0.1191,
-        }
-      }
-    },
-  
-  	2332951460713 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08975,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12696}
-        }
-      }
-    },
-  
-  # =========Ecclesfield Primary School========
-    2332531911711 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08975,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12696}
-        }
-      }
-    },
-  
-  # =========Mundella Primary School========
-    2333202372710 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - flat rate',
-          rate_type: :flat,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          flat_rate_£_per_kwh:  0.1191,
-        }
-      }
-    },
-  
-  	2380001727391 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08975,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12696}
-        }
-      }
-    },
-  
-  
-  # =========Walkley School Tennyson School========
-    2330621110711 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - flat rate',
-          rate_type: :flat,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          flat_rate_£_per_kwh:  0.1191,
-        }
-      }
-    },
-  
-  	2330605147010 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08975,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12696}
-        }
-      }
-    },
-  
-  # =========Woodthorpe Primary School========
-    2380000477230 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		4.064,
-          capacity_charge_£_per_month:		0.38,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08826,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.11684}
-        }
-      }
-    },
-  
-  # =========Wybourn Primary School========
-    2331301835711 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		4.064,
-          capacity_charge_£_per_month:		0.38,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08826,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.11897}
-        }
-      }
-    },
-  
-  
-  # =========Whiteways Primary========
-    2334501345714 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - flat rate',
-          rate_type: :flat,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          flat_rate_£_per_kwh:  0.1191,
-        }
-      }
-    },
-  
-  # =========Ecclesall Primary (Previously named 'Infants')========
-    2331031705716 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08975,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12696}
-        }
-      }
-    },
-  
-  # =========Hunters Bar Infants and Juniors========
-    2336531952014 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08975,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12696}
-        }
-      }
-    },
-  
-  
-  
-  
-  # =========Watercliffe Meadow Community Primary School========
-    2380001112280 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		4.064,
-          capacity_charge_£_per_month:		0.38,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08824,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.11763}
-        }
-      }
-    },
-  
-  # =========Athelstan Primary School========
-    2335212561712 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - flat rate',
-          rate_type: :flat,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          flat_rate_£_per_kwh:  0.1191,
-        }
-      }
-    },
-  
-  # =========Ballifield Primary School========
-    2335250725714 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08975,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12696}
-        }
-      }
-    },
-  
-  # =========Lydgate Junior school========
-    2330741676714 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		6.161,
-          capacity_charge_£_per_month:		0.0,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08975,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.12696}
-        }
-      }
-    },
-  
-  # =========Arbourthorne Community Primary========
-    2380000442901 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		4.064,
-          capacity_charge_£_per_month:		0.38,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08826,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.1201}
-        }
-      }
-    },
-  
-  # =========King Edwards Upper========
-    2380001640466 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - differential rate',
-          rate_type: :differential,
-          standing_charge_£_per_day:		4.064,
-          capacity_charge_£_per_month:		0.38,
-          differential_rate_£_per_kwh: { TimeOfDay.new(0,0)..TimeOfDay.new(6,30) => 0.08823,TimeOfDay.new(7,0)..TimeOfDay.new(24,0) => 0.11634}
-        }
-      }
-    },
-  
-  	2330400572210 =>  {
-      accounting_tariffs: {
-        Date.new(2017,1,1)..Date.new(2020,3,1) => {
-          name: 'Npower YPO 5 year electricity plan - flat rate',
-          rate_type: :flat,
-          standing_charge_£_per_day:		6.076,
-          capacity_charge_£_per_month:		0.0,
-          flat_rate_£_per_kwh:  0.1246,
-        }
-      }
-    },
-  
-  
-  # =========Ecclesall Primary (Previously named 'Infants')========
-	2155853706 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		4.24,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
+  # multiply the 'economy 7' tariffs for the relevant time of day by the kwh values
+  private_class_method def self.differential_tariff_cost(tariff_config, kwh_halfhour_x48)
+    daytime_costs = weighted_costs(tariff_config, kwh_halfhour_x48, :daytime_rate)
+    nighttime_costs = weighted_costs(tariff_config, kwh_halfhour_x48, :nighttime_rate)
+    # AMRData.fast_add_x48_x_x48(daytime_costs, nighttime_costs)
+    [daytime_costs, nighttime_costs]
+  end
 
-# =========Hunters Bar Infants and Juniors========
-	6511808 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		2.19,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
+  private_class_method def self.weighted_costs(tariff_config, kwh_halfhour_x48, rate_type)
+    daytime_time_weights = DateTimeHelper.weighted_x48_vector_single_range(
+      tariff_config[:rates][rate_type][:time_period],
+      tariff_config[:rates][rate_type][:rate]
+    )
+    AMRData.fast_multiply_x48_x_x48(daytime_time_weights, kwh_halfhour_x48)
+  end
 
-	6511101 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		4.76,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
+  private_class_method def self.tariff_for_date(date, tariff_config)
+    tariff_config.select { |date_range, _tariff| date_range == date }
+    return tariff_config.values[0] if tariff_config.length == 1
+    raise EnergySparksNotEnoughDataException.new("No tariff information available for date #{date}")
+    raise EnergySparksNotEnoughDataException.new("To many tariffs (#{tariff_config.length}) for date #{date}")
+  end
 
-	6512204 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		1.25,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
+  private_class_method def self.economic_tariff_config(mpan_mprn, date, fuel_type)
+    tariff_type = fuel_type
+    # use accounting tariff's to determine whether meter has a differential tariff
+    tariff_type = :electricity_differential if tariff_type == :electricity && differential_meter?(mpan_mprn, date)
+    tariff_for_date(ECONOMIC_TARIFFS, tariff_type, date)
+  end
 
-	9334657704 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		1.26,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
+  private_class_method def self.default_area_tariff_for_date(area_name, fuel_type, date)
+    raise EnergySparksNotEnoughDataException.new("Missing default area meter tariff data for #{area_name} #{fuel_type}") if DEFAULT_ACCOUNTING_TARIFFS.dig(area_name, fuel_type).nil?
+    DEFAULT_ACCOUNTING_TARIFFS[area_name][fuel_type]
+  end
 
-# =========Watercliffe Meadow Community Primary School========
-	9209120604 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		3.75,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
+  private_class_method def self.tariff_for_date(tariff_group, identifier, date)
+    return nil unless tariff_group.key?(identifier)
+    tariff = tariff_group[identifier].select { |date_range, _tariff| date >= date_range.first && date <= date_range.last }
+    return nil if tariff.empty?
+    raise EnergySparksUnexpectedSchoolDataConfiguration.new("Only expecting one tariff for date #{date}, got #{tariff.length}") if tariff.length > 1
+    tariff.values[0]
+  end
 
-# =========Athelstan Primary School========
-	2148244308 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		7.4,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
+  private_class_method def self.differential_meter?(mpan_mprn, date)
+    tariff_config = tariff_for_date(METER_TARIFFS, mpan_mprn, date)
+    tariff_config.nil? ? false : differential_tariff?(tariff_config)
+  end
 
-# =========Ballifield Primary School========
-	6508101 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		7.15,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
-
-# =========Lydgate Junior school========
-	6396610 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		5.3,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
-
-# =========Arbourthorne Community Primary========
-	9124298109 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		10.63,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
-
-# =========King Edwards Upper========
-	6516504 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		0.86,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
-
-	6517203 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		16.77,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
-
-	9306413207 =>  {
-		accounting_tariffs: {
-			Date.new(2017,1,1)..Date.new(2020,3,1) => {
-				name:  'Corona Sheffield YPO 5 year gas plan',
-				rate_type: :flat,
-				standing_charge_£_per_day:		1.56,
-				flat_rate_£_per_kwh:  0.020422
-			}
-		}
-	},
-
-  }.freeze
-  private_constant :METER_TARIFFS
-
+  private_class_method def self.differential_tariff?(tariff_config)
+    tariff_config[:rates].key?(:nighttime_rate)
+  end
 end

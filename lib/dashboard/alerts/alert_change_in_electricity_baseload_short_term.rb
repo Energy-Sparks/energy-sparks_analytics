@@ -39,11 +39,11 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
       units:  {kwh: :electricity}
     },
     last_week_change_in_baseload_kwh: {
-      description: 'change in baseload last week (kwh)',
+      description: 'change in baseload between last week and average of last year (kwh)',
       units:  {kwh: :electricity}
     },
     next_year_change_in_baseload_kwh: {
-      description: 'predicted change in baseload over next year (kwh)',
+      description: 'predicted impact of change in baseload over next year (kwh)',
       units:  {kwh: :electricity}
     },
     last_year_baseload_£: {

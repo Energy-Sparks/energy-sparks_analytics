@@ -40,7 +40,7 @@ class SolarPVPanels
     end
 
     def kwp(date)
-      capacity = @config_by_date_range.select{ |dates, _config| dates === date }.map { |_date_range, panel_set| panel_set[:kwp] }
+      capacity = @config_by_date_range.select{ |dates, _config| date >= dates.first && date <= dates.last }.map { |_date_range, panel_set| panel_set[:kwp] }
       capacity.empty? ? nil : capacity.sum # explicilty signal abscence of panels on date with nil
     end
 

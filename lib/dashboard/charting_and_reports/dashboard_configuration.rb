@@ -241,7 +241,24 @@ class DashboardConfiguration
                                   gas_longterm_trend_carbon
                                   last_2_weeks_carbon_emissions
                                 ],
-                              }
+                              },
+        cost:   {
+                                name: 'Cost',
+                                charts: %i[
+                                  electricity_cost_comparison_last_2_years
+                                  electricity_cost_comparison_last_2_years_accounting
+                                  electricity_cost_comparison_last_2_years_accounting_breakdown
+                                  electricity_cost_1_year_accounting_breakdown
+                                  electricity_cost_comparison_1_year_accounting_breakdown_by_week
+                                  gas_cost_comparison_1_year_accounting_breakdown_by_week
+                                  gas_cost_comparison_1_year_economic_breakdown_by_week
+                                  electricity_2_week_accounting_breakdown
+                                  electricity_1_year_intraday_accounting_breakdown
+                                  electricity_1_year_intraday_kwh_breakdown
+                                  gas_1_year_intraday_accounting_breakdown
+                                  gas_1_year_intraday_kwh_breakdown
+                                ],
+                              },                     
 }.freeze
 
 =begin

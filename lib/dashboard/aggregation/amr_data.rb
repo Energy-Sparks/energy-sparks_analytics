@@ -2,47 +2,25 @@ require_relative '../half_hourly_data'
 require_relative '../half_hourly_loader'
 
 class AMRData < HalfHourlyData
-  attr_reader :economic_tariff, :grid_carbon, :carbon_emissions
+  attr_reader :economic_tariff, :accounting_tariff, :grid_carbon, :carbon_emissions
 
   def initialize(type)
     super(type)
     @lock_updates = false
   end
 
-  def set_economic_tariff(economic_tariff)
-    @economic_tariff = economic_tariff
+  def set_economic_tariff(meter_id, fuel_type, default_energy_purchaser)
+    @economic_tariff = EconomicCosts.new(meter_id, self, fuel_type, default_energy_purchaser)
+  end
+
+  def set_accounting_tariff(meter_id, fuel_type, default_energy_purchaser)
+    @accounting_tariff = AccountingCosts.new(meter_id, self, fuel_type, default_energy_purchaser)
   end
 
   def set_carbon_emissions(meter_id_for_debug, flat_rate, grid_carbon)
     @grid_carbon = grid_carbon # needed for updates
     @carbon_emissions = CarbonEmissions.new(meter_id_for_debug, self, flat_rate, grid_carbon)
     @lock_updates = true
-  end
-
-  class CarbonEmissions < HalfHourlyData
-    attr_reader :flat_type, :flat_rate, :meter_id
-    def initialize(meter_id_for_debug, amr_data, flat_rate, grid_carbon_schedule)
-      super(:amr_data_carbon_emissions)
-      @meter_id = meter_id_for_debug
-      calculate_carbon_emissions(amr_data, flat_rate, grid_carbon_schedule)
-    end
-
-    # either flat_rate or grid_carbon is set, the other to nil
-    private def calculate_carbon_emissions(amr_data, flat_rate, grid_carbon)
-      (amr_data.start_date..amr_data.end_date).each do |date|
-        emissions = nil
-        if flat_rate.nil?
-          emissions = AMRData.fast_multiply_x48_x_x48(amr_data.days_kwh_x48(date, :kwh), grid_carbon.one_days_data_x48(date))
-        else
-          emissions = AMRData.fast_multiply_x48_x_scalar(amr_data.days_kwh_x48(date, :kwh), flat_rate)
-        end
-        add(date, emissions)
-      end
-      total_emissions = total_in_period(start_date, end_date) / 1_000.0
-      rate_type = flat_rate.nil? ? 'grid schedule' : 'flat rate'
-      info = "Created carbon emissions for meter #{meter_id}, #{self.length} days from #{start_date} to #{end_date}, #{total_emissions.round(0)} tonnes CO2 emissions, using #{rate_type}"
-      logger.info info
-    end
   end
 
   def add(date, one_days_data)
@@ -69,10 +47,8 @@ class AMRData < HalfHourlyData
   def days_kwh_x48(date, type = :kwh)
     kwhs = self[date].kwh_data_x48
     return kwhs if type == :kwh
-    if type == :economic_cost
-      rates = @economic_tariff.tariff_day_x48(date)
-      return fast_multiply_x48_x_x48(kwhs, rates)
-    end
+    return @economic_tariff.days_cost_data_x48(date) if type == :£ || type == :economic_cost
+    return @accounting_tariff.days_cost_data_x48(date) if type == :accounting_cost
     return @carbon_emissions.one_days_data_x48(date) if type == :co2
   end
 
@@ -98,7 +74,8 @@ class AMRData < HalfHourlyData
 
   def kwh(date, halfhour_index, type = :kwh)
     return self[date].kwh_halfhour(halfhour_index) if type == :kwh
-    return self[date].kwh_halfhour(halfhour_index) * @economic_tariff.tariff_time(date, halfhour_index) if type == :economic_cost
+    return @economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£ || type == :economic_cost
+    return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cost
     return @carbon_emissions.one_days_data_x48(date)[halfhour_index] if type == :co2
   end
 
@@ -112,7 +89,8 @@ class AMRData < HalfHourlyData
 
   def one_day_kwh(date, type = :kwh)
     return self[date].one_day_kwh  if type == :kwh
-    return self[date].one_day_kwh * @economic_tariff.tariff_day(date) if type == :economic_cost
+    return @economic_tariff.one_day_total_cost(date) if type == :£ || type == :economic_cost
+    return @accounting_tariff.one_day_total_cost(date) if type == :accounting_cost
     return @carbon_emissions.one_day_total(date) if type == :co2
   end
 

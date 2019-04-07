@@ -161,3 +161,27 @@ bm = Benchmark.measure {
   end
 }
 puts "array scale map array #{bm.to_s}"
+
+
+def simple_args(a,b)
+  a * b
+end
+
+def keyword_args(a:, b:)
+  a * b
+end
+
+bm = Benchmark.measure {
+  loops.times do |i|
+    c = simple_args(6.0,5.4)
+  end
+}
+puts "simple args #{bm.to_s}"
+
+bm = Benchmark.measure {
+  loops.times do |i|
+    c = keyword_args(b: 6.0, a: 5.4)
+  end
+}
+puts "keyword args #{bm.to_s}"
+

@@ -16,6 +16,19 @@ module DateTimeHelper
     end
   end
 
+  def self.days_in_month(date)
+    Date.new(date.year, date.month, -1).day
+  end
+
+  def self.days_in_quarter(date)
+    days = 0
+    quarter = ((date.month - 1) / 3).to_i
+    [1..3, 4..6, 7..9, 10..12][quarter].each do |month|
+      days += days_in_month(Date.new(date.year, month, 1))
+    end
+    days
+  end
+
   def self.datetime(date, halfhour_index)
     hour = (halfhour_index / 2).round
     minute = halfhour_index % 2 == 1 ? 30 : 0
@@ -40,5 +53,39 @@ module DateTimeHelper
     date = Date.new(time.year, time.month, time.day)
     index = time.hour * 2 + (time.min % 30)
     [date, index]
+  end
+
+  # takes an array of time of day ranges and returns a weighted vector for
+  # the standard 0..47 halfhourly buckets
+  # e.g. 00:15..01:45 would return [0.5, 1.0, 1.0, 0.5, 0.0......0.0]
+  def self.weighted_x48_vector_multiple_ranges(time_of_day_ranges, weight = 1.0)
+    result = nil
+    time_of_day_ranges.each do |time_of_day_range|
+      weighted_x48 = weighted_x48_vector_single_range(time_of_day_range, weight)
+      result = result.nil? ? weighted_x48 : AMRData.fast_add_x48_x_x48(weighted_x48, result)
+    end
+    result
+  end
+
+  # return a vector for a single time range (as per weighted_x48_vector_multiple_ranges)
+  # performance could be improved, currently takes 0.000007 seconds or 150,000 per second or 15ms for an average meter
+  def self.weighted_x48_vector_single_range(time_of_day_range, weight = 1.0)
+    start_time = time_of_day_range.first
+    end_time = time_of_day_range.last
+    start_halfhour_index, start_excess_minutes_percent = start_time.to_halfhour_index_with_fraction
+    end_halfhour_index, end_excess_minutes_percent = end_time.to_halfhour_index_with_fraction
+    result = []
+    (0..47).each do |halfhour_index|
+      value = 0.0
+      if  halfhour_index == start_halfhour_index
+        value =  start_excess_minutes_percent > 0.0 ? start_excess_minutes_percent : 1.0
+      elsif halfhour_index > start_halfhour_index && halfhour_index < end_halfhour_index
+        value = 1.0
+      elsif halfhour_index == end_halfhour_index
+        value = end_excess_minutes_percent > 0.0 ? end_excess_minutes_percent : 0.0
+      end
+      result.push(value * weight)
+    end
+    result
   end
 end

@@ -57,7 +57,7 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
     {
       'ISOMERSE15' => 0.5
     },
-    temperature_csv_file_name: 'Bath temperaturedata.csv',
+    temperature_csv_file_name: 'old Bath temperaturedata.csv',
     solar_csv_file_name: 'Bath solardata.csv',
     csv_format: :landscape
   },
@@ -87,7 +87,7 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
       'ISOUTHYO31' => 0.33,
       'ISHEFFIE56' => 0.33
     },
-    temperature_csv_file_name: 'Sheffield temperaturedata.csv',
+    temperature_csv_file_name: 'old Sheffield temperaturedata.csv',
     solar_csv_file_name: 'Sheffield solardata.csv',
     csv_format: :landscape
   },
@@ -118,7 +118,7 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
       'IKILMERS2' => 0.5,
       'IUPTONNO2' => 0.5
     },
-    temperature_csv_file_name: 'Frome temperaturedata.csv',
+    temperature_csv_file_name: 'old Frome temperaturedata.csv',
     solar_csv_file_name: 'Frome solardata.csv',
     csv_format: :landscape
   },
@@ -156,7 +156,7 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
       'IGREATER93' => 0.25,
       'ISOMERSE15' => 0.25    # Bath station to help with history
     },
-    temperature_csv_file_name: 'Bristol temperaturedata.csv',
+    temperature_csv_file_name: 'old Bristol temperaturedata.csv',
     solar_csv_file_name: 'Bristol solardata.csv',
     csv_format: :landscape
   }

@@ -9,6 +9,7 @@ class FormatEnergyUnit
     m2:                 'm2',
     pupils:             'pupils',
     £:                  '£',
+    accounting_cost:    '£',
     days:               'days',
     library_books:      'library books',
     km:                 'km',

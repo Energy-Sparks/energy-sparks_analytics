@@ -155,7 +155,8 @@ class DashboardChartAdviceBase
           SimulatorMiscOtherAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     else
       res  = DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
-      res2 = DashboardEnergyAdvice.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res2.nil?
+      res = DashboardEnergyAdvice.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
+      res
     end
   end
 
