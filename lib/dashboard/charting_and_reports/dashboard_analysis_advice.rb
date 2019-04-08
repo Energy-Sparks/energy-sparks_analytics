@@ -363,7 +363,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   def generate_advice
     logger.info @school.name
-    
+
     electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
     gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
     gas_only = electric_usage.nil?
