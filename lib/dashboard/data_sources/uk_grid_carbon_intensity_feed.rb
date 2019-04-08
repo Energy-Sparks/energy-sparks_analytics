@@ -44,7 +44,12 @@ class UKGridCarbonIntensityFeed
     readings.each do |reading|
       datetime = DateTime.parse(reading['from'])
       carbon = reading['intensity']['actual']
-      carbon = carbon / 1000.0 unless carbon.nil? # 1000.0  = convert from g/kWh to kg/kWh
+      if carbon.nil? # TODO(PH,8Apr2019) - consider making even more fault tolerant by interpolating, upstream the feed substitutes parameterised data if this fails
+        carbon = reading['intensity']['forecast']
+        logger.warn "nil carbon intensity reading for #{datetime} using forecast #{carbon} instead" if !carbon.nil?
+        logger.error "No carbon intensity data for #{datetime} - will use parameterised data upstream" if carbon.nil?
+      end
+      carbon /=  1000.0 unless carbon.nil? # 1000.0  = convert from g/kWh to kg/kWh
       data[datetime] = carbon
     end
     data

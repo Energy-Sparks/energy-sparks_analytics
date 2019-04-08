@@ -10,16 +10,30 @@ class AMRData < HalfHourlyData
   end
 
   def set_economic_tariff(meter_id, fuel_type, default_energy_purchaser)
-    @economic_tariff = EconomicCosts.new(meter_id, self, fuel_type, default_energy_purchaser)
+    @economic_tariff = EconomicCosts.create_costs(meter_id, self, fuel_type, default_energy_purchaser)
   end
 
   def set_accounting_tariff(meter_id, fuel_type, default_energy_purchaser)
-    @accounting_tariff = AccountingCosts.new(meter_id, self, fuel_type, default_energy_purchaser)
+    @accounting_tariff = AccountingCosts.create_costs(meter_id, self, fuel_type, default_energy_purchaser)
   end
 
+  def set_economic_tariff_schedule(tariff)
+    @economic_tariff = tariff
+  end
+
+  def set_accounting_tariff_schedule(tariff)
+    @accounting_tariff = tariff
+  end
+
+  # only accessed for combined meters, where calculation is the summation of 'sub' meters
+  def set_carbon_schedule(co2)
+    @carbon_emissions = co2
+  end
+
+  # access point for single meters, not combined meters
   def set_carbon_emissions(meter_id_for_debug, flat_rate, grid_carbon)
     @grid_carbon = grid_carbon # needed for updates
-    @carbon_emissions = CarbonEmissions.new(meter_id_for_debug, self, flat_rate, grid_carbon)
+    @carbon_emissions = CarbonEmissions.create_carbon_emissions(meter_id_for_debug, self, flat_rate, grid_carbon)
     @lock_updates = true
   end
 
@@ -61,6 +75,14 @@ class AMRData < HalfHourlyData
   def self.fast_add_x48_x_x48(a, b)
     c = Array.new(48, 0.0)
     (0..47).each { |x| c[x] = a[x] + b[x] }
+    c
+  end
+
+  def self.fast_add_multiple_x48_x_x48(list)
+    c = Array.new(48, 0.0)
+    list.each do |data_x48|
+      c = fast_add_x48_x_x48(c, data_x48)
+    end
     c
   end
 
@@ -112,7 +134,7 @@ class AMRData < HalfHourlyData
   end
 
   def kwh_date_range(date1, date2, type = :kwh)
-    return one_day_kwh(date1) if date1 == date2
+    return one_day_kwh(date1, type) if date1 == date2
     total_kwh = 0.0
     (date1..date2).each do |date|
       total_kwh += one_day_kwh(date, type)

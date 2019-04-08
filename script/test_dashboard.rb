@@ -1,5 +1,6 @@
 # test report manager
 require 'ruby-prof'
+require 'benchmark/memory'
 require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
@@ -13,10 +14,11 @@ end
 
 profile = false
 
-if false
+if true
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
-    new_data:      '../TestResults/Charts/New/'
+    new_data:      '../TestResults/Charts/New/',
+    skip_advice:   true
   }
 end
 
@@ -30,6 +32,13 @@ RubyProf.start if profile
 reports.load_school('King Edward VII Upper School', true)
 # reports.load_school('Paulton Junior School', true)
 # reports.load_school('St Marks Secondary', true)
+=begin
+Benchmark.memory do |x|
+  x.report("load school")  { reports.load_school('St Marks Secondary', true) }
+end
+=end
+
+# reports.load_school('Paulton Junior School', true)
 
 # testing examples
 #
@@ -39,8 +48,6 @@ reports.load_school('King Edward VII Upper School', true)
 #   reports.do_chart_list('Boiler Control', [:hotwater, :frost_2, :optimum_start])
 #
 
-
-
 # reports.do_chart_list('Boiler Control', [:gas_heating_season_intraday, :gas_heating_season_intraday_£])
 
 # @@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to £' if defined?(@@energysparksanalyticsautotest)
@@ -49,8 +56,18 @@ reports.load_school('King Edward VII Upper School', true)
 # reports.do_all_schools(true)
 # reports.do_all_schools(true)
 # reports.do_one_page(:cost)
+reports.do_all_schools(true)
+# reports.do_all_standard_pages_for_school({yaxis_units: :£})
+# reports.do_one_page(:carbon_emissions)
+# reports.do_one_page(:cost)
+# reports.do_all_schools(true)
 
-reports.do_all_standard_pages_for_school
+# @@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to £' if defined?(@@energysparksanalyticsautotest)
+# reports.do_all_standard_pages_for_school({yaxis_units: :co2})
+# reports.do_all_standard_pages_for_school
+# reports.do_chart_list('pound scaling', [:test_last_2_weeks_gas, :last_2_weeks_gas])
+
+# reports.do_all_standard_pages_for_school
 
 if profile
   prof_result = RubyProf.stop

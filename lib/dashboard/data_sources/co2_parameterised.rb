@@ -31,7 +31,7 @@ class CO2Parameterised
     start_date = HARDCODEDMAINSGRIDINTENSITY.keys[0].first
     end_date = HARDCODEDMAINSGRIDINTENSITY.keys[HARDCODEDMAINSGRIDINTENSITY.length - 1].last
     (start_date..end_date).each do |date|
-      if feed.day_readings.key?(date)
+      if feed.day_readings.key?(date) && !(feed.day_readings[date].count{ |co2_hh| co2_hh.nil?  } >= 1)
         grid_carbon.add(date, feed.day_readings[date])
       else
         carbon_intensity_kg_per_kwh = carbon_intensity_date_kg_per_kwh(date)

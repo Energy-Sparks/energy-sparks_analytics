@@ -246,8 +246,16 @@ class ReportConfigSupport
     unless diff # HashDiff is horribly slow, so only run if necessary
       puts "+" * 120
       puts "Chart #{chart_name} differs"
-      h_diff = HashDiff.diff(old_data, new_data, use_lcs: false) # use_lcs is O(N) otherwise and takes hours!!!!!
-      ap(h_diff)
+      h_diff = HashDiff.diff(old_data, new_data, use_lcs: false, :numeric_tolerance => 0.01) # use_lcs is O(N) otherwise and takes hours!!!!!
+      if @@energysparksanalyticsautotest[:skip_advice] && h_diff.to_s.include?('html')
+        puts 'Advice differs'
+      else
+        if h_diff.to_s.length > 50
+          puts "Lots of differences #{h_diff.to_s.length} length"
+        else
+          ap(h_diff)
+        end
+      end
       @differing_results.push(sprintf('%30.30s %20.20s %s', @school_name, chart_name, h_diff))
       puts "+" * 120
     end

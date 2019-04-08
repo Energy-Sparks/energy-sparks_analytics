@@ -256,6 +256,7 @@ class DashboardConfiguration
                                   electricity_1_year_intraday_accounting_breakdown
                                   electricity_1_year_intraday_kwh_breakdown
                                   gas_1_year_intraday_accounting_breakdown
+                                  gas_1_year_intraday_economic_breakdown
                                   gas_1_year_intraday_kwh_breakdown
                                 ],
                               },                     

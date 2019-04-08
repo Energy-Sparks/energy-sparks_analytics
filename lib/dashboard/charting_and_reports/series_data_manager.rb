@@ -348,7 +348,7 @@ class SeriesDataManager
     meter.amr_data.days_kwh_x48(date, data_type)
   end
 
-  def amr_data_one_day(meter, date, data_type = :kwh)
+  def amr_data_one_day(meter, date, data_type = :kwh) 
     meter.amr_data.one_day_kwh(date, data_type)
   end
 
@@ -356,8 +356,21 @@ class SeriesDataManager
     heating_model.predicted_kwh(date, @meter_collection.temperatures.average_temperature(date))
   end
 
+  private def scaling_factor_for_model_derived_gas_data(data_type)
+    case data_type
+    when :£, :economic_cost;      BenchmarkMetrics::GAS_PRICE         
+    when :accounting_cost;        BenchmarkMetrics::GAS_PRICE # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
+    when :co2;                    EnergyEquivalences::UK_GAS_CO2_KG_KWH
+    else;                         1.0 end
+  end
+
   def amr_data_date_range(meter, start_date, end_date, data_type)
-    meter.amr_data.kwh_date_range(start_date, end_date, data_type)
+    if @adjust_by_temperature && meter.fuel_type == :gas
+      scale = scaling_factor_for_model_derived_gas_data(data_type)
+      scale * heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value, 0.0)
+    else
+      meter.amr_data.kwh_date_range(start_date, end_date, data_type)
+    end
   end
 
   def daily_high_thermal_mass_heating_model
@@ -479,25 +492,14 @@ private
   # for speed aggregate single day breakdown using ranges
   # does fractional calculation if open/close time not on 30 minute boundary (TODO (PH, 6Feb2019) currently untested)
   def intraday_breakdown(meter, date, data_type)
-    if @open_halfhour_index.nil?
-      @open_halfhour_index, @open_excess_minutes_percent = @meter_collection.open_time.to_halfhour_index_with_fraction
-      @close_halfhour_index, @close_excess_minutes_percent = @meter_collection.close_time.to_halfhour_index_with_fraction
+    if @cached_weighted_open_x48.nil?
+      open_time = @meter_collection.open_time..@meter_collection.close_time
+      @cached_weighted_open_x48 = DateTimeHelper.weighted_x48_vector_multiple_ranges([open_time])
     end
     one_day_readings = amr_data_one_day_readings(meter, date, data_type)
-    close_kwh = one_day_readings[0...@open_halfhour_index].inject(:+)
-    close_kwh += one_day_readings[@open_halfhour_index] * @open_excess_minutes_percent if @open_excess_minutes_percent > 0
-    if @close_excess_minutes_percent == 0
-      close_kwh += one_day_readings[@close_halfhour_index...48].inject(:+)
-    else
-      close_kwh += one_day_readings[@close_halfhour_index] * (1.0 - @close_excess_minutes_percent)
-      close_kwh += one_day_readings[(@close_halfhour_index + 1)...48].inject(:+)
-    end
-
-    # PH 6Feb2019: - rounding is probably not necessary, put in to improve backtesting comparison
-    # of this new function, as order of addition created differences in floating point rounding
-    # at the 10 sf level. could be removed if required
-    close_kwh = close_kwh.round(3)
-    open_kwh = (amr_data_one_day(meter, date) - close_kwh).round(3)
+    open_kwh_x48 = AMRData.fast_multiply_x48_x_x48(one_day_readings, @cached_weighted_open_x48)
+    open_kwh =  open_kwh_x48.sum
+    close_kwh = amr_data_one_day(meter, date, data_type) - open_kwh
     [open_kwh, close_kwh]
   end
 
@@ -529,17 +531,19 @@ private
   end
 
   def cusum(meter, date1, date2)
+    scale = scaling_factor_for_model_derived_gas_data(kwh_cost_or_co2)
     model_kwh = heating_model.predicted_kwh_daterange(date1, date2, @meter_collection.temperatures)
     actual_kwh = amr_data_date_range(meter, date1, date2, :kwh)
-    model_kwh - actual_kwh
+    (model_kwh - actual_kwh) * scale
   end
 
   def hotwater_breakdown(date1, date2)
     breakdown = {}
+    scale = scaling_factor_for_model_derived_gas_data(kwh_cost_or_co2)
     hotwater_model = calculate_hotwater_model
     useful_kwh, wasted_kwh = hotwater_model.kwh_daterange(date1, date2)
-    breakdown[SeriesNames::USEFULHOTWATERUSAGE] = useful_kwh
-    breakdown[SeriesNames::WASTEDHOTWATERUSAGE] = wasted_kwh
+    breakdown[SeriesNames::USEFULHOTWATERUSAGE] = useful_kwh * scale
+    breakdown[SeriesNames::WASTEDHOTWATERUSAGE] = wasted_kwh * scale
     breakdown
   end
 
@@ -551,10 +555,10 @@ private
     breakdown
   end
 
-  def submeter_breakdown(meter, date1, date2, type)
+  def submeter_breakdown(meter, date1, date2)
     breakdown = {}
     meter.sub_meters.each do |submeter|
-      breakdown[submeter.name] = amr_data_date_range(submeter, date1, date2, type)
+      breakdown[submeter.name] = amr_data_date_range(submeter, date1, date2, kwh_cost_or_co2)
     end
     breakdown
   end

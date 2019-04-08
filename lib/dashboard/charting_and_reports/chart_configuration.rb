@@ -530,6 +530,12 @@ class ChartManager
       inherits_from:    :electricity_1_year_intraday_accounting_breakdown,
       meter_definition: :allheat
     },
+    gas_1_year_intraday_economic_breakdown: {
+      name:             'Gas costs for last year by time of day (economic costs)',
+      series_breakdown: :none,
+      inherits_from:    :gas_1_year_intraday_accounting_breakdown,
+      yaxis_units:      :£
+    },
     gas_1_year_intraday_kwh_breakdown: {
       name:             'Gas kWh usage intraday for last year for comparison with accounting version above',
       inherits_from:    :gas_1_year_intraday_accounting_breakdown,

@@ -546,8 +546,8 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
     percent_value = out_of_hours / (in_hours + out_of_hours)
     percent_str = percent(percent_value)
-    saving_percent = percent_value - 0.25
-    saving = (in_hours + out_of_hours) * @exemplar_percentage
+    saving_percent = percent_value - @exemplar_percentage
+    saving = (in_hours + out_of_hours) * saving_percent
     saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
     saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
 
@@ -560,7 +560,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
           <%= percent(percent_value) %> of your <%= @fuel_type_str %> usage is out of hours:
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
-          <% if percent_value > EXEMPLAR_PERCENT %>
+          <% if percent_value > @exemplar_percentage %>
             The best schools only consume <%= percent(@exemplar_percentage) %> out of hours.
             Reducing your school's out of hours usage to <%= percent(@exemplar_percentage) %>
             would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.

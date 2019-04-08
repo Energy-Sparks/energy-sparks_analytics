@@ -58,5 +58,6 @@ puts  "electrical simulation"
 list_of_schools = reports.schools.keys
 
 list_of_schools.each do |school_name|
+  next if ['Selwood Academy'].include?(school_name)
   test_one_school(school_name, reports)
 end

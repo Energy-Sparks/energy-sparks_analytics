@@ -25,8 +25,7 @@ module Dashboard
       @meter_type = type # think Energy Sparks variable naming is a minomer (PH,31May2018)
       check_fuel_type(fuel_type)
       @fuel_type = type
-      @id = identifier
-      @mpan_mprn = identifier.to_i
+      set_mpan_mprn_id(identifier)
       @name = name
       @floor_area = floor_area
       @number_of_pupils = number_of_pupils
@@ -42,15 +41,19 @@ module Dashboard
 
     def amr_data=(amr_data)
       @amr_data = amr_data
-      set_economic_amr_tariff
     end
 
-    def set_economic_amr_tariff(default_energy_purchaser)
-      @amr_data.set_economic_tariff(mpan_mprn, @fuel_type, default_energy_purchaser)
+    def set_mpan_mprn_id(identifier)
+      @id = identifier
+      @mpan_mprn = identifier.to_i
     end
 
-    def set_accounting_amr_tariff(default_energy_purchaser)
-      @amr_data.set_accounting_tariff(mpan_mprn, @fuel_type, default_energy_purchaser)
+    def set_economic_amr_tariff(default_energy_purchaser, fuel)
+      @amr_data.set_economic_tariff(mpan_mprn, fuel, default_energy_purchaser)
+    end
+
+    def set_accounting_amr_tariff(default_energy_purchaser, fuel)
+      @amr_data.set_accounting_tariff(mpan_mprn, fuel, default_energy_purchaser)
     end
 
     # set this here rather than lazy loading in AMRdata instance, so first access isn't slow
@@ -144,11 +147,27 @@ module Dashboard
 
     def self.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type)
       if fuel_type == :electricity || fuel_type == :aggregated_electricity
-        (90000000000000 + urn.to_i).to_s
+        90000000000000 + urn.to_i
       elsif fuel_type == :gas || fuel_type == :aggregated_heat
-        (80000000000000 + urn.to_i).to_s
+        80000000000000 + urn.to_i
       else
         throw EnergySparksUnexpectedStateException.new('Unexpected fuel_type')
+      end
+    end
+
+    def self.synthetic_mpan_mprn(mpan_mprn, type)
+      mpan_mprn = mpan_mprn.to_i
+      case type
+      when :storage_heater_only
+        70000000000000 + mpan_mprn
+      when :electricity_minus_storage_heater
+        75000000000000 + mpan_mprn
+      when :electricity_plus_solar_pv
+        60000000000000 + mpan_mprn
+      when :solar_pv_only
+        65000000000000 + mpan_mprn
+      else
+        throw EnergySparksUnexpectedStateException.new("Unexpected type #{type} for modified mpan/mprn")
       end
     end
   end

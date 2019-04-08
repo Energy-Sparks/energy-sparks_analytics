@@ -1,8 +1,8 @@
 # configuration information for meter tariff class
 class MeterTariffs
   SHEFFIELDYPOCONTRACTDATES_2015_2020 = Date.new(2015, 1, 1)..Date.new(2020, 3, 1)
-  BATHCONTRACTDATES_2015_2020 = Date.new(2017, 1, 1)..Date.new(2020, 3, 1)
-  FROMECONTRACTDATES_2015_2020 = Date.new(2017, 1, 1)..Date.new(2020, 3, 1)
+  BATHCONTRACTDATES_2008_2020 = Date.new(2008, 1, 1)..Date.new(2020, 3, 1)
+  FROMECONTRACTDATES_2015_2020 = Date.new(2015, 1, 1)..Date.new(2020, 3, 1)
   SOMERSETCONTRACTDATES_2015_2020 = Date.new(2017, 1, 1)..Date.new(2020, 3, 1)
   FOREVERCONTRACTDATES = Date.new(2000, 1, 1)..Date.new(2050, 1, 1)
   ECONOMY7_NIGHT_TIME_PERIOD = TimeOfDay.new(0, 0)..TimeOfDay.new(6, 30)
@@ -73,7 +73,7 @@ class MeterTariffs
       FOREVERCONTRACTDATES => {
         name: 'Economic gas tariff',
         rates: {
-          rate:   { per: :kwh,     rate: 0.03 }
+          rate:   { per: :kwh, rate: 0.03 }
         }
       }
     }
@@ -83,7 +83,7 @@ class MeterTariffs
   DEFAULT_ACCOUNTING_TARIFFS = {
     'Bath' => {
       electricity: {
-        BATHCONTRACTDATES_2015_2020 => {
+        BATHCONTRACTDATES_2008_2020 => {
           name: 'B&NES standard electricity tariff',
           rates: {
             standing_charge:              { per: :quarter, rate: 38.35   },
@@ -93,7 +93,7 @@ class MeterTariffs
         }
       },
       electricity_differential: {
-        BATHCONTRACTDATES_2015_2020 => {
+        BATHCONTRACTDATES_2008_2020 => {
           name: 'B&NES day-night electricity tariff',
           rates: {
             standing_charge:              { per: :quarter, rate: 38.35   },
@@ -104,7 +104,7 @@ class MeterTariffs
         }
       },
       gas: {
-        BATHCONTRACTDATES_2015_2020 => {
+        BATHCONTRACTDATES_2008_2020 => {
           name: 'B&NES gas tariff',
           rates: {
             standing_charge:              { per: :day,     rate: 4.00  },
@@ -116,7 +116,7 @@ class MeterTariffs
 
     'Sheffield' => {
       electricity: {
-        SHEFFIELDYPOCONTRACTDATES_2015_2020 => {
+        FOREVERCONTRACTDATES => {
           name: 'Sheffield standard electricity tariff',
           rates: {
             standing_charge:              { per: :quarter, rate: 38.35   },
@@ -126,7 +126,7 @@ class MeterTariffs
         }
       },
       electricity_differential: {
-        SHEFFIELDYPOCONTRACTDATES_2015_2020 => {
+        FOREVERCONTRACTDATES => {
           name: 'Sheffield day-night electricity tariff',
           rates: {
             standing_charge:              { per: :quarter, rate: 38.35   },
@@ -137,11 +137,11 @@ class MeterTariffs
         }
       },
       gas: {
-        SHEFFIELDYPOCONTRACTDATES_2015_2020 => {
+        FOREVERCONTRACTDATES => {
           name: 'Sheffield gas tariff',
           rates: {
             standing_charge:              { per: :day,     rate: 4.00  },
-            rate:                         { per: :kwh,     rate: 0.015 }
+            rate:                         { per: :kwh,     rate: 0.025 }
           }
         }
       }

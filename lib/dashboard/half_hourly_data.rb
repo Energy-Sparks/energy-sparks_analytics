@@ -61,7 +61,7 @@ class HalfHourlyData < Hash
   def key?(date)
     # think better to avoid direct access to underlying Hash, to allow for future design changes
     # raise EnergySparksDeprecatedException.new('key?(date) deprecated for HalfHourlyData use date_missing?(date) instead')
-    logger.warn "HalfHourlyData.key?() called on #{class_name} for date #{date}, is being deprecated in favour of date_missing?/date_exists?"
+    logger.warn "HalfHourlyData.key?() called on #{self.class.name} for date #{date}, is being deprecated in favour of date_missing?/date_exists?"
     parent_key?(date)
   end
 

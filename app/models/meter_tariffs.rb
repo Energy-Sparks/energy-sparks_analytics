@@ -33,6 +33,8 @@ class MeterTariffs
 
     tariff_config = default_area_tariff_for_date(default_energy_purchaser, fuel_type, date) if tariff_config.nil?
 
+    tariff_config = default_accounting_tariff_in_event_of_no_others(date, fuel_type) if tariff_config.nil?
+
     daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48)
 
     standing_charge = standing_charges(date, tariff_config, kwh_halfhour_x48.sum)
@@ -69,7 +71,7 @@ class MeterTariffs
       rate / DateTimeHelper.days_in_month(date)
     when :quarter
       rate / DateTimeHelper.days_in_quarter(date)
-    when :kwh # treat these as day only rates for the moment TODO(PH, 8Apr2019), should perhaps be intraday?
+    when :kwh # treat these as day only rates for the moment TODO(PH, 8Apr2019), should be intraday
       rate * days_kwh
     else
       raise EnergySparksUnexpectedSchoolDataConfiguration.new("Unexpected unit rate type for tariff #{per}")
@@ -92,12 +94,14 @@ class MeterTariffs
     AMRData.fast_multiply_x48_x_x48(daytime_time_weights, kwh_halfhour_x48)
   end
 
+=begin
   private_class_method def self.tariff_for_date(date, tariff_config)
     tariff_config.select { |date_range, _tariff| date_range == date }
     return tariff_config.values[0] if tariff_config.length == 1
     raise EnergySparksNotEnoughDataException.new("No tariff information available for date #{date}")
     raise EnergySparksNotEnoughDataException.new("To many tariffs (#{tariff_config.length}) for date #{date}")
   end
+=end
 
   private_class_method def self.economic_tariff_config(mpan_mprn, date, fuel_type)
     tariff_type = fuel_type
@@ -108,7 +112,12 @@ class MeterTariffs
 
   private_class_method def self.default_area_tariff_for_date(area_name, fuel_type, date)
     raise EnergySparksNotEnoughDataException.new("Missing default area meter tariff data for #{area_name} #{fuel_type}") if DEFAULT_ACCOUNTING_TARIFFS.dig(area_name, fuel_type).nil?
-    DEFAULT_ACCOUNTING_TARIFFS[area_name][fuel_type]
+    tariff_for_date(DEFAULT_ACCOUNTING_TARIFFS[area_name], fuel_type, date)
+  end
+
+  private_class_method def self.default_accounting_tariff_in_event_of_no_others(date, fuel_type)
+    Logging.logger.error "Error: unable to get accounting tariff for date #{date} and fuel #{fuel_type}"
+    tariff_for_date(ECONOMIC_TARIFFS[area_name], fuel_type, date)
   end
 
   private_class_method def self.tariff_for_date(tariff_group, identifier, date)

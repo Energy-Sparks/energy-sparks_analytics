@@ -775,7 +775,8 @@ class Aggregator
   end
 
   def add_to_bucket(bucketed_data, bucketed_data_count, series_name, x_index, value)
-    logger.debug "Unknown series name #{series_name} not in #{bucketed_data.keys}" if !bucketed_data.key?(series_name)
+    logger.warn "Unknown series name #{series_name} not in #{bucketed_data.keys}" if !bucketed_data.key?(series_name)
+    logger.warn "nil value for #{series_name}" if value.nil?
     bucketed_data[series_name][x_index] += value
     bucketed_data_count[series_name][x_index] += 1 # required to calculate kW
   end
@@ -848,6 +849,7 @@ class Aggregator
     end
   end
 
+  # performs scaling to 200, 1000 pupils or primary/secondary default sized floor areas
   private def scale_x_data(bucketed_data)
     # exclude y2_axis values e.g. temperature, degree days
     x_data_keys = bucketed_data.select { |series_name, data| !SeriesNames::Y2SERIESYMBOLTONAMEMAP.values.include?(series_name) }
@@ -863,11 +865,8 @@ class Aggregator
   end
 
   def scale_benchmarks(benchmark_usage_kwh, fuel_type)
-    puts "before: #{benchmark_usage_kwh} #{fuel_type}"
     y_scaling = YAxisScaling.new
-    val = y_scaling.scale_from_kwh(benchmark_usage_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], fuel_type, @meter_collection)
-    puts "after: #{val}"
-    val
+    y_scaling.scale_from_kwh(benchmark_usage_kwh, @chart_config[:yaxis_units], @chart_config[:yaxis_scaling], fuel_type, @meter_collection)
   end
 
   def exemplar_electricity_usage_in_units

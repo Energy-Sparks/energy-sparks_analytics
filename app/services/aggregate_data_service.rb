@@ -1,5 +1,6 @@
 # This should take a meter collection and populate
 # it with aggregated & validated data
+
 class AggregateDataService
   include Logging
 
@@ -29,44 +30,16 @@ class AggregateDataService
   end
 
   def aggregate_heat_and_electricity_meters
-    aggregate_heat_meters
-    aggregate_electricity_meters
-    disaggregate_storage_heaters if @meter_collection.storage_heaters?
-    create_solar_pv_sub_meters if @meter_collection.solar_pv_panels?
-    # defer this to as late as possible
-    calculate_amr_data_carbon_emissions
-    calculate_energy_cost
+    bm = Benchmark.realtime {
+      aggregate_heat_meters
+      aggregate_electricity_meters
+      disaggregate_storage_heaters if @meter_collection.storage_heaters?
+      create_solar_pv_sub_meters if @meter_collection.solar_pv_panels?
+    }
+    logger.info "Calculated meter aggregation in #{bm.round(2)} seconds"
   end
 
   private
-
-  def calculate_amr_data_carbon_emissions
-    bm = Benchmark.realtime {
-      @meter_collection.all_electricity_meters.each do |electricity_meter|
-        electricity_meter.amr_data.set_carbon_emissions(electricity_meter.id, nil, @meter_collection.grid_carbon_intensity)
-      end
-      @meter_collection.all_heat_meters.each do |gas_meter|
-        # doesn't work for storage heater or solar PV meters, yet TODO(PH, 24Mar2019)
-        gas_meter.amr_data.set_carbon_emissions(gas_meter.id, EnergyEquivalences::UK_GAS_CO2_KG_KWH, nil)
-      end
-    }
-    logger.info "Calculated carbon emissions in #{bm.round(2)} seconds"
-  end
-
-  def calculate_energy_cost
-    bm = Benchmark.realtime {
-      @meter_collection.all_electricity_meters.each do |electricity_meter|
-        electricity_meter.set_economic_amr_tariff(@meter_collection.default_energy_purchaser)
-        electricity_meter.set_accounting_amr_tariff(@meter_collection.default_energy_purchaser)
-      end
-      @meter_collection.all_heat_meters.each do |gas_meter|
-        gas_meter.set_economic_amr_tariff(@meter_collection.default_energy_purchaser)
-        gas_meter.set_accounting_amr_tariff(@meter_collection.default_energy_purchaser)
-      end
-    }
-    logger.info "Calculated energy costs in #{bm.round(3)} seconds"
-    puts "Calculated energy costs in #{bm.round(3)} seconds"
-  end
 
   def validate_meter_list(list_of_meters)
     logger.info "Validating #{list_of_meters.length} meters"
@@ -98,17 +71,39 @@ class AggregateDataService
       electricity_meter.sub_meters.push(original_electricity_meter_copy)
 
       electricity_meter.amr_data = electric_only_amr
+      calculate_meter_carbon_emissions_and_costs(electricity_meter, :electricity)
 
       storage_heater_meter = create_modified_meter_copy(
         electricity_meter,
         storage_heater_amr,
         :storage_heater,
-        "#{electricity_meter.id} storage heater only",
+        electricity_meter.id,
         "#{electricity_meter.name} storage heater only"
       )
+      puts "ggggg #{electricity_meter.id}"
+      calculate_meter_carbon_emissions_and_costs(storage_heater_meter, :electricity)
+
+      # set the synthetic meter identifier once the tariffs have been assigned above using the real meter identifier
+      electricity_meter.set_mpan_mprn_id(Dashboard::Meter.synthetic_mpan_mprn(electricity_meter.id, :electricity_minus_storage_heater))
+      storage_heater_meter.set_mpan_mprn_id(Dashboard::Meter.synthetic_mpan_mprn(electricity_meter.id, :storage_heater_only))
+
+      proportion_out_accounting_standing_charges(storage_heater_meter, electricity_meter)
+
       electricity_meter.sub_meters.push(storage_heater_meter)
       @meter_collection.storage_heater_meter = storage_heater_meter
     end
+  end
+
+  # if an electricity meter is split up into a storage and non-storage version
+  # we need to artificially split up the standing charges
+  # in any account scenario these probably need re-aggregating for any bill
+  # reconciliation if kept seperate for these purposes
+  private def proportion_out_accounting_standing_charges(meter1, meter2)
+    total_kwh_meter1 = meter1.amr_data.accounting_tariff.total_costs
+    total_kwh_meter2 = meter2.amr_data.accounting_tariff.total_costs
+    percent_meter1 = total_kwh_meter1 / (total_kwh_meter1 + total_kwh_meter2)
+    meter1.amr_data.accounting_tariff.scale_standing_charges(percent_meter1)
+    meter2.amr_data.accounting_tariff.scale_standing_charges(1.0 - percent_meter1)
   end
 
   # creates artificial PV meters, if solar pv present by scaling
@@ -134,6 +129,7 @@ class AggregateDataService
         electricity_meter.id.to_i + 10000000, # TODO(PH,21Mar2019) - need proper synthetic id
         'Electricity consumed from solar PV panels'
       )
+      logger.info "Created meter onsite consumed electricity pv data from #{solar_amr.start_date} to #{solar_amr.end_date} #{solar_amr.total.round(0)}kWh"
 
       electricity_meter.sub_meters.push(solar_pv_meter)
 
@@ -147,6 +143,8 @@ class AggregateDataService
         'Electricity consumed from mains'
       )
 
+      logger.info "Making original mains consumption meter a submeter from #{electricity_meter.amr_data.start_date} to #{electricity_meter.amr_data.end_date} #{electricity_meter.amr_data.total.round(0)}kWh"
+
       electricity_meter.sub_meters.push(original_electric_meter)
 
       # replace the AMR data of the top level meter with the
@@ -157,9 +155,21 @@ class AggregateDataService
         :electricity
         )
 
+      # currently the updated meter inherits the carbon emissions and costs of the original
+      # which implies the solar pv is zero carbon and zero cost
+      # a full accounting treatment will need to deal with FITs and exports..... TODO(PH, 7Apr2019)
+
+      logger.info "Assigning solar + mains amr to main meter from #{electric_plus_pv_amr_data.start_date} to #{electric_plus_pv_amr_data.end_date} #{electric_plus_pv_amr_data.total.round(0)}kWh"
+
+
       electricity_meter.amr_data = electric_plus_pv_amr_data
       electricity_meter.id = "#{electricity_meter.id} plus pv"
       electricity_meter.name = "#{electricity_meter.name} plus pv"
+
+      calculate_meter_carbon_emissions_and_costs(original_electric_meter, :electricity)
+      calculate_meter_carbon_emissions_and_costs(electricity_meter, :electricity)
+      calculate_meter_carbon_emissions_and_costs(solar_pv_meter, :electricity)
+
       @meter_collection.solar_pv_meter = solar_pv_meter
     end
   end
@@ -180,10 +190,12 @@ class AggregateDataService
   end
 
   def aggregate_heat_meters
+    calculate_meters_carbon_emissions_and_costs(@heat_meters, :gas)
     @meter_collection.aggregated_heat_meters = aggregate_main_meters(@meter_collection.aggregated_heat_meters, @heat_meters, :gas)
   end
 
   def aggregate_electricity_meters
+    calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
   end
 
@@ -244,6 +256,30 @@ class AggregateDataService
     combined_meter
   end
 
+  private def calculate_carbon_emissions_for_meter(meter, fuel_type)
+    if fuel_type == :electricity
+      meter.amr_data.set_carbon_emissions(meter.id, nil, @meter_collection.grid_carbon_intensity)
+    else
+      meter.amr_data.set_carbon_emissions(meter.id, EnergyEquivalences::UK_GAS_CO2_KG_KWH, nil)
+    end
+  end
+
+  private def calculate_costs_for_meter(meter, fuel_type)
+    meter.set_economic_amr_tariff(@meter_collection.default_energy_purchaser, fuel_type)
+    meter.set_accounting_amr_tariff(@meter_collection.default_energy_purchaser, fuel_type)
+  end
+
+  private def calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
+    calculate_carbon_emissions_for_meter(meter, fuel_type)
+    calculate_costs_for_meter(meter, fuel_type)
+  end
+
+  private def calculate_meters_carbon_emissions_and_costs(meters, fuel_type)
+    meters.each do |meter|
+      calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
+    end
+  end
+
   def aggregate_meters(combined_meter, list_of_meters, type)
     return nil if list_of_meters.nil? || list_of_meters.empty?
     if list_of_meters.length == 1
@@ -277,9 +313,26 @@ class AggregateDataService
       combined_meter.amr_data = combined_amr_data
     end
 
+    set_aggregate_carbon_emissions_and_costs_for_combined_meter(combined_meter, list_of_meters)
+
     logger.info "Creating combined meter data #{combined_amr_data.start_date} to #{combined_amr_data.end_date}"
     logger.info "with floor area #{combined_floor_area} and #{combined_pupils} pupils"
     combined_meter
+  end
+
+  private def set_aggregate_carbon_emissions_and_costs_for_combined_meter(combined_meter, list_of_meters)
+    mpan_mprn = combined_meter.mpan_mprn
+    start_date = combined_meter.amr_data.start_date # use combined meter start and end dates to conform with (deprecated) meter aggregation rules
+    end_date = combined_meter.amr_data.end_date
+
+    co2 = CarbonEmissions.combine_carbon_emissions_from_multiple_meters(mpan_mprn, list_of_meters, start_date, end_date)
+    combined_meter.amr_data.set_carbon_schedule(co2)
+
+    economic_costs = EconomicCosts.combine_economic_costs_from_multiple_meters(mpan_mprn, list_of_meters, start_date, end_date)
+    combined_meter.amr_data.set_economic_tariff_schedule(economic_costs)
+
+    accounting_costs = AccountingCosts.combine_accounting_costs_from_multiple_meters(mpan_mprn, list_of_meters, start_date, end_date)
+    combined_meter.amr_data.set_accounting_tariff_schedule(accounting_costs)
   end
 
   def log_meter_dates(list_of_meters)
