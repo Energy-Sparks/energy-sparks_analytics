@@ -110,14 +110,21 @@ class MeterTariffs
     tariff_for_date(ECONOMIC_TARIFFS, tariff_type, date)
   end
 
+  # short term adjustment for difference in area names between analystics and front end TODO(All, 9Apr2019) resolve long term
+  private_class_method def self.translate_area_names_from_front_end(area_name)
+    # rather not use include? as i may clash with other Bath school groups on different tariffs?
+    area_name == 'Bath & North East Somerset' ? 'Bath' : area_name
+  end
+
   private_class_method def self.default_area_tariff_for_date(area_name, fuel_type, date)
+    area_name = translate_area_names_from_front_end(area_name)
     raise EnergySparksNotEnoughDataException.new("Missing default area meter tariff data for #{area_name} #{fuel_type}") if DEFAULT_ACCOUNTING_TARIFFS.dig(area_name, fuel_type).nil?
     tariff_for_date(DEFAULT_ACCOUNTING_TARIFFS[area_name], fuel_type, date)
   end
 
   private_class_method def self.default_accounting_tariff_in_event_of_no_others(date, fuel_type)
     Logging.logger.error "Error: unable to get accounting tariff for date #{date} and fuel #{fuel_type}"
-    tariff_for_date(ECONOMIC_TARIFFS[area_name], fuel_type, date)
+    tariff_for_date(ECONOMIC_TARIFFS, fuel_type, date)
   end
 
   private_class_method def self.tariff_for_date(tariff_group, identifier, date)
