@@ -118,12 +118,38 @@ class AlertAnalysisBase
     template_data.each do |type, data| # front end want ranges as seperate high/low symbol-value pairs
       if [:£_range, :years_range].include?(lookup[type][:units])
         new_type = lookup[type][:units] == :£_range ? :£ : :years
-        puts type
         new_data[self.class.convert_range_symbol_to_high(type)] = FormatUnit.format(new_type, raw_data[type].first, :text, true)
         new_data[self.class.convert_range_symbol_to_low(type)]  = FormatUnit.format(new_type, raw_data[type].last,  :text, true)
       end
     end
     new_data
+  end
+
+  def raw_variables_for_saving
+    raw = {}
+    unformatted_template_variables.each do |type, data|
+      raw[type] = data
+      if data.is_a?(Range)
+        raw[self.class.convert_range_symbol_to_low(type)] = data.first
+        raw[self.class.convert_range_symbol_to_high(type)] = data.last
+      elsif data.is_a?(Array)
+        raw.merge!(flatten_table_for_saving(data))
+        raw.delete(type)
+      end
+    end
+    raw.transform_keys{ |k| self.class.name + ':' + k.to_s }
+  end
+
+  private def flatten_table_for_saving(table)
+    data = {}
+    header = table[0]
+    (1...table.length).each do |row_index|
+      (1...table[row_index].length).each do |column_index|
+        key = self.class.name + ':' + table[row_index][0] + ':' + header[column_index]
+        data[key] = table[row_index][column_index]
+      end
+    end
+    data
   end
 
   def front_end_template_charts
@@ -202,6 +228,10 @@ class AlertAnalysisBase
     school_name: {
       description: 'Name of school',
       units: String
+    },
+    urn: {
+      desciption: 'School URN',
+      units:  Integer
     },
     one_year_saving_£: {
       description: 'Estimated one year saving range',
@@ -406,6 +436,10 @@ class AlertAnalysisBase
     else
       throw EnergySparksBadDataException.new('Unable to find school name for alerts')
     end
+  end
+
+  def urn
+    @school.urn
   end
 
   def school_type

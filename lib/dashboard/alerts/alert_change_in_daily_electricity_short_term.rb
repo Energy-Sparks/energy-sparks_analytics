@@ -53,7 +53,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
       units: :date
     },
     week_on_week_electricity_daily_electricity_comparison_chart: {
-      description: 'Week on week daily electricity comparison chart bcolumnar chart',
+      description: 'Week on week daily electricity comparison chart column chart',
       units: :chart
     },
     last_5_weeks_intraday_school_day_chart: {

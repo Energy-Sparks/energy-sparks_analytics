@@ -3,6 +3,7 @@ require 'require_all'
 require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
+require 'hashdiff'
 
 module Logging
   @logger = Logger.new('log/test-alerts ' + Time.now.strftime('%H %M') + '.log')
@@ -14,6 +15,8 @@ def banner(title= '')
   len_after = 80 - title.length - len_before
   '=' * len_before + title + '=' * len_after
 end
+
+
 
 school_name = 'Freshford Primary School'
 # school_name = 'St Michaels Junior Church School'
@@ -30,8 +33,16 @@ reports = ReportConfigSupport.new
 
 failed_alerts = []
 
+history = AlertHistoryDatabase.new
+previous_results = history.load
+puts 'Loaded data'
+ap(previous_results)
+
+calculated_results = {}
+
 school_names.sort.each do |school_name|
   next if ['Ecclesall Primary School', 'Selwood Academy'].include?(school_name)
+  next unless ['Whiteways Primary'].include?(school_name)
   puts banner
   puts banner
   puts banner(school_name)
@@ -40,7 +51,11 @@ school_names.sort.each do |school_name|
 
   school = reports.load_school(school_name, true)
 
+  calculated_results[school.urn] = {}
+
   asof_date = Date.new(2019, 2, 15)
+
+  calculated_results[school.urn][asof_date] = {}
 
   alerts_classes = AlertAnalysisBase.all_available_alerts
 
@@ -67,6 +82,13 @@ school_names.sort.each do |school_name|
 
         alert.analyse(asof_date, true)
 
+        raw_data = alert.raw_variables_for_saving
+
+        calculated_results[school.urn][asof_date].merge!(raw_data)
+
+        ap(raw_data)
+
+=begin
         puts ">>>>All template variables:"
         ap(alert_class.front_end_template_variables)
         puts ">>>>front end text results:"
@@ -75,6 +97,7 @@ school_names.sort.each do |school_name|
         ap(alert.front_end_template_charts)
         puts ">>>>front end table results:"
         ap(alert.front_end_template_tables)
+=end
 =begin
         puts ">>>>All template variables:"
         ap(alert_class.front_end_template_variables)
@@ -119,6 +142,13 @@ school_names.sort.each do |school_name|
   }
   (school_calculation_time[school_name] ||= []).push(bm1)
 end
+
+ap(calculated_results)
+
+history.save(calculated_results)
+
+h_diff = HashDiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
+puts h_diff
 
 alert_calculation_time.each do |type, data|
   puts sprintf('%-35.35s %.6f', type, data.sum/data.length)
