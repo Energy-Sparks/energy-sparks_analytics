@@ -46,7 +46,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     },
     one_year_saving_versus_benchmark_£: {
       description: 'Annual difference in electricity consumption versus benchmark/average school - £ (use adjective for sign)',
-      units:  {kwh: :electricity}
+      units:  {£: :electricity}
     },
     one_year_saving_versus_benchmark_adjective: {
       description: 'Adjective: higher or lower: electricity consumption versus benchmark/average school',
@@ -67,7 +67,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     },
     one_year_saving_versus_exemplar_£: {
       description: 'Annual difference in electricity consumption versus exemplar school - £ (use adjective for sign)',
-      units:  {kwh: :electricity}
+      units:  {£: :electricity}
     },
     one_year_saving_versus_exemplar_adjective: {
       description: 'Adjective: higher or lower: electricity consumption versus exemplar school',
