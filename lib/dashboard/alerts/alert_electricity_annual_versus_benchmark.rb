@@ -2,11 +2,117 @@
 require_relative 'alert_analysis_base.rb'
 
 class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
+  attr_reader :last_year_kwh, :last_year_£
+
+  attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
+  attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
+  attr_reader :one_year_saving_versus_benchmark_adjective
+
+  attr_reader :one_year_exemplar_by_pupil_kwh, :one_year_exemplar_by_pupil_£
+  attr_reader :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_£
+  attr_reader :one_year_saving_versus_exemplar_adjective
+
+  attr_reader :one_year_saving_£
+
   def initialize(school)
     super(school, :annualelectricitybenchmark)
   end
 
+  def self.template_variables
+    specific = {'Annual electricity usage versus benchmark' => TEMPLATE_VARIABLES}
+    specific.merge(self.superclass.template_variables)
+  end
+  TEMPLATE_VARIABLES = {
+    last_year_kwh: {
+      description: 'Last years electricity consumption - kwh',
+      units:  {kwh: :electricity}
+    },
+    last_year_£: {
+      description: 'Last years electricity consumption - £ including differential tariff',
+      units:  {£: :electricity}
+    },
+
+    one_year_benchmark_by_pupil_kwh: {
+      description: 'Last years electricity consumption for benchmark/average school, normalised by pupil numbers - kwh',
+      units:  {kwh: :electricity}
+    },
+    one_year_benchmark_by_pupil_£: {
+      description: 'Last years electricity consumption for benchmark/average school, normalised by pupil numbers - £',
+      units:  {£: :electricity}
+    },
+    one_year_saving_versus_benchmark_kwh: {
+      description: 'Annual difference in electricity consumption versus benchmark/average school - kwh (use adjective for sign)',
+      units:  {kwh: :electricity}
+    },
+    one_year_saving_versus_benchmark_£: {
+      description: 'Annual difference in electricity consumption versus benchmark/average school - £ (use adjective for sign)',
+      units:  {kwh: :electricity}
+    },
+    one_year_saving_versus_benchmark_adjective: {
+      description: 'Adjective: higher or lower: electricity consumption versus benchmark/average school',
+      units:  String
+    },
+
+    one_year_exemplar_by_pupil_kwh: {
+      description: 'Last years electricity consumption for exemplar school, normalised by pupil numbers - kwh',
+      units:  {kwh: :electricity}
+    },
+    one_year_exemplar_by_pupil_£: {
+      description: 'Last years electricity consumption for exemplar school, normalised by pupil numbers - £',
+      units:  {£: :electricity}
+    },
+    one_year_saving_versus_exemplar_kwh: {
+      description: 'Annual difference in electricity consumption versus exemplar school - kwh (use adjective for sign)',
+      units:  {kwh: :electricity}
+    },
+    one_year_saving_versus_exemplar_£: {
+      description: 'Annual difference in electricity consumption versus exemplar school - £ (use adjective for sign)',
+      units:  {kwh: :electricity}
+    },
+    one_year_saving_versus_exemplar_adjective: {
+      description: 'Adjective: higher or lower: electricity consumption versus exemplar school',
+      units:  String
+    }
+
+  }
+
+  private def calculate(asof_date)
+    @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
+    @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
+
+    @one_year_benchmark_by_pupil_kwh   = BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @school.number_of_pupils
+    @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+
+    @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_by_pupil_kwh
+    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'
+    @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh.magnitude
+    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£.magnitude
+
+    @one_year_exemplar_by_pupil_kwh   = BenchmarkMetrics::EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * @school.number_of_pupils
+    @one_year_exemplar_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+
+    @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_by_pupil_kwh
+    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? 'higher' : 'lower'
+    @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh.magnitude
+    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£.magnitude
+
+    @one_year_saving_£ = Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£)
+
+    # rating: benchmark value = 4.0, exemplar = 10.0
+    percent_from_benchmark_to_exemplar = (@last_year_kwh - @one_year_benchmark_by_pupil_kwh) / (@one_year_exemplar_by_pupil_kwh - @one_year_benchmark_by_pupil_kwh)
+    uncapped_rating = percent_from_benchmark_to_exemplar * (10.0 - 4.0) + 4.0
+    @rating = [[uncapped_rating, 10.0].min, 0.0].max.round(2)
+
+    @status = @rating < 6.0 ? :bad : :good
+
+    @term = :longterm
+    @bookmark_url = add_book_mark_to_base_url('AnnualElectricity')
+  end
+
   def analyse_private(asof_date)
+    calculate(asof_date)
     annual_kwh = kwh(asof_date - 365, asof_date)
     annual_kwh_per_pupil_benchmark = BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @school.number_of_pupils
     annual_kwh_per_floor_area_benchmark = BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_M2 * @school.floor_area
@@ -44,8 +150,8 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     text
   end
 
-  def kwh(date1, date2)
+  def kwh(date1, date2, data_type = :kwh)
     amr_data = @school.aggregated_electricity_meters.amr_data
-    amr_data.kwh_date_range(date1, date2)
+    amr_data.kwh_date_range(date1, date2, data_type)
   end
 end
