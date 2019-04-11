@@ -141,7 +141,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     @analysis_report.add_book_mark_to_base_url('ElectricityChange')
 
     if last_weeks_consumption > week_befores_consumption * MAXDAILYCHANGE
-      last_weeks_baseload = average_baseload(asof_date - 7, asof_date)
+      last_weeks_baseload = average_baseload_kw(asof_date - 7, asof_date)
       @analysis_report.summary = 'Your daily electricity consumption has increased'
       text = sprintf('Your electricity consumption has increased from %.0f kWh ', week_befores_consumption)
       text += sprintf('last week (5 school days following %s) ', beginning_of_last_week.to_formatted_s(:long_ordinal))

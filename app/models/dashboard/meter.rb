@@ -52,6 +52,14 @@ module Dashboard
       @amr_data.set_economic_tariff(mpan_mprn, fuel, default_energy_purchaser)
     end
 
+    def economic_tariff
+      @amr_data.economic_tariff
+    end
+
+    def accounting_tariff
+      @amr_data.accounting_tariff
+    end
+
     def set_accounting_amr_tariff(default_energy_purchaser, fuel)
       @amr_data.set_accounting_tariff(mpan_mprn, fuel, default_energy_purchaser)
     end

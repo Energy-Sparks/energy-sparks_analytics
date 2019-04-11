@@ -56,6 +56,10 @@ class CostsBase < HalfHourlyData
       calculate_day_bill_components(daytime_cost_x48, nighttime_cost_x48, standing_charges)
     end
 
+    def differential_tariff?
+      !@nighttime_cost_x48.nil?
+    end
+
     # used for storage heater disaggregation
     def scale_standing_charges(percent)
       @standing_charges = @standing_charges.transform_values { |value| value * percent }
@@ -83,6 +87,10 @@ class CostsBase < HalfHourlyData
 
   def one_day_total_cost(date)
     self[date].one_day_total_cost
+  end
+
+  def differential_tariff?(date)
+    self[date].differential_tariff?
   end
 
   def days_cost_data_x48(date)

@@ -7,6 +7,10 @@ class MeterTariffs
   FOREVERCONTRACTDATES = Date.new(2000, 1, 1)..Date.new(2050, 1, 1)
   ECONOMY7_NIGHT_TIME_PERIOD = TimeOfDay.new(0, 0)..TimeOfDay.new(6, 30)
   ECONOMY7_DAY_TIME_PERIOD = TimeOfDay.new(6, 30)..TimeOfDay.new(24, 0)
+  DEFAULT_NIGHTTIME_RATE_FOR_DIFFERENTIAL_TARIFF = 0.08
+  DEFAULT_DAYTIME_RATE_FOR_DIFFERENTIAL_TARIFF = 0.13
+  DEFAULT_ELECTRICITY_ECONOMIC_TARIFF = 0.12
+  BLENDED_DIFFERNTIAL_RATE_APPROX = (13 * DEFAULT_NIGHTTIME_RATE_FOR_DIFFERENTIAL_TARIFF + (48 - 13) * DEFAULT_DAYTIME_RATE_FOR_DIFFERENTIAL_TARIFF)/ 48.0
 
   BILL_COMPONENTS = {
     rate: {
@@ -56,7 +60,7 @@ class MeterTariffs
       FOREVERCONTRACTDATES => {
         name: 'Economic standard electricity tariff',
         rates: {
-          rate:  { per: :kwh,     rate: 0.12 }
+          rate:  { per: :kwh,     rate: DEFAULT_ELECTRICITY_ECONOMIC_TARIFF }
         }
       }
     },
@@ -64,8 +68,8 @@ class MeterTariffs
       FOREVERCONTRACTDATES => {
         name: 'Economic day-night electricity tariff',
         rates: {
-          daytime_rate:    { per: :kwh,     rate: 0.13, time_period: ECONOMY7_DAY_TIME_PERIOD },
-          nighttime_rate:  { per: :kwh,     rate: 0.08, time_period: ECONOMY7_NIGHT_TIME_PERIOD }
+          daytime_rate:    { per: :kwh,     rate: DEFAULT_DAYTIME_RATE_FOR_DIFFERENTIAL_TARIFF, time_period: ECONOMY7_DAY_TIME_PERIOD },
+          nighttime_rate:  { per: :kwh,     rate: DEFAULT_NIGHTTIME_RATE_FOR_DIFFERENTIAL_TARIFF, time_period: ECONOMY7_NIGHT_TIME_PERIOD }
         }
       }
     },

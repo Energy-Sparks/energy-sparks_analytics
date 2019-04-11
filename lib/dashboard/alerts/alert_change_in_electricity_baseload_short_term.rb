@@ -90,7 +90,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
   end
 
   def calculate(asof_date)
-    @average_baseload_last_year_kw, _days_sample = baseload(asof_date)
+    @average_baseload_last_year_kw, _days_sample = annual_average_baseload_kw(asof_date)
     @kw_value_at_10_percent_saving = @average_baseload_last_year_kw * 0.9
     @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date)
     @change_in_baseload_kw = @average_baseload_last_week_kw - @average_baseload_last_year_kw
@@ -164,7 +164,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
 
   def analyse_private(asof_date)
     calculate(asof_date)
-    @average_baseload_last_year_kw, days_sample = baseload(asof_date)
+    @average_baseload_last_year_kw, days_sample = annual_average_baseload_kw(asof_date)
     @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date)
 
     @analysis_report.term = :shortterm

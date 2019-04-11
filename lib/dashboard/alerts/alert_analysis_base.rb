@@ -133,6 +133,7 @@ class AlertAnalysisBase
         raw[self.class.convert_range_symbol_to_low(type)] = data.first
         raw[self.class.convert_range_symbol_to_high(type)] = data.last
       elsif data.is_a?(Array)
+        puts "gggg #{type}"
         raw.merge!(flatten_table_for_saving(data))
         raw.delete(type)
       end

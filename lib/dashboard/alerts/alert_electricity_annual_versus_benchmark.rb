@@ -25,6 +25,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     specific = {'Annual electricity usage versus benchmark' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)
   end
+  
   TEMPLATE_VARIABLES = {
     last_year_kwh: {
       description: 'Last years electricity consumption - kwh',

@@ -37,6 +37,11 @@ module BenchmarkMetrics
     end
   end
 
+  def self.exemplar_baseload_for_pupils(pupils, school_type)
+    # arbitrarily 60% for the moment TODO(PH, 11Apr2019)
+    0.6 * recommended_baseload_for_pupils(pupils, school_type)
+  end
+
   def self.typical_servers_for_pupils(school_type, pupils)
     school_type = school_type.to_sym if school_type.instance_of? String
     servers = 1
