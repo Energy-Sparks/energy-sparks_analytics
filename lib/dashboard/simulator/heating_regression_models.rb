@@ -552,6 +552,54 @@ module AnalyseHeatingAndHotWater
       results
     end
 
+    # uses a crude optimum start model to work out the benefit of starting the boiler at a good time
+    # in the morning depending on the outside temperature
+    # the result is really an 'up to figure' as doesn't take into account thermal mass,
+    # which will have to wait for the building simulation model
+    # and doesn't include pre-midnight startup costs TODO(PH, 12Apr19)
+    def one_year_saving_from_better_boiler_start_time(asof_date)
+      start_date = [@heat_meter.amr_data.start_date, asof_date - 365].max
+      total_saving = 0.0
+      (start_date..asof_date).each do |date|
+        _actual_on_time, _start_time, _temperature, kwh_saving = heating_on_time_assessment(date)
+        total_saving += kwh_saving.nil? ? 0.0 : kwh_saving
+      end
+      # not particularly effective if data shortage doesn't cover the heating season!
+      normalisation_factor_for_less_than_one_years_data = 365 / (asof_date - start_date)
+      total_saving *= normalisation_factor_for_less_than_one_years_data
+      [total_saving, total_saving / @heat_meter.amr_data.kwh_date_range(start_date, asof_date, :kwh)]
+    end
+
+    def heating_on_time_assessment(date)
+      temperature = temperatures.average_temperature_in_time_range(date, 0, 10).round(1) # between midnight and 5:00am
+      return [nil, nil, temperature, nil] if !heating_on?(date)
+
+      baseload_kw = @heat_meter.amr_data.statistical_baseload_kw(date)
+      peakload_kw = @heat_meter.amr_data.statistical_peak_kw(date)
+      half_load_kw = baseload_kw + ((peakload_kw - baseload_kw) * 0.5)
+      days_data = @heat_meter.amr_data.days_kwh_x48(date)
+      heating_on_halfhour_index = days_data.index{ |kwh| (kwh * 2.0) > half_load_kw }
+      return [nil, nil, temperature, nil] if heating_on_halfhour_index.nil?
+
+      actual_on_time = heating_on_halfhour_index.nil? ? nil : TimeOfDay.time_of_day_from_halfhour_index(heating_on_halfhour_index)
+      recommended_start_time, recommended_start_time_halfhour_index = recommended_optimum_start_time(nil, temperature)
+      started_too_early = heating_on_halfhour_index < recommended_start_time_halfhour_index
+      kwh_saving = started_too_early ? days_data[heating_on_halfhour_index..recommended_start_time_halfhour_index].sum : 0.0
+
+      [actual_on_time, recommended_start_time, temperature, kwh_saving]
+    end
+
+    private def recommended_optimum_start_time(_date, temperature)
+      optimum_start_regression = { # [temperature] => hours past midnight
+        3.9 => 0.0,   # in weather below 4C (frost) turn heating on early
+        4.0 => 3.5,   # in weather at or below 0.0C turning heating on a 3:30am
+        10.0 => 6.5   # in weather at 10.0C turn heating on at 6:30am
+      }
+      interpolation = Interpolate::Points.new(optimum_start_regression)
+      start_time = interpolation.at(temperature)
+      [TimeOfDay.time_of_day_from_halfhour_index(start_time * 2.0), (start_time * 2).to_i]
+    end
+
     def model_configuration_pairs_format
       pairs = {}
       model_configuration.each do |name, value|

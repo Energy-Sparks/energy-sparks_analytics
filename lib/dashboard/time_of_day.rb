@@ -13,6 +13,10 @@ class TimeOfDay
     @relative_time = Time.new(1970, 1, 1, hour, minutes, 0)
   end
 
+  def self.time_of_day_from_halfhour_index(hh)
+    TimeOfDay.new((hh / 2).to_i, 30 * (hh % 2))
+  end
+
   def to_s
     if @relative_time.day == 1
       @relative_time.strftime('%H:%M')

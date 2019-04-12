@@ -42,7 +42,7 @@ class FormatEnergyUnit
     return value.to_s if convert_missing_types_to_strings && !UNIT_DESCRIPTION_TEXT.key?(unit)
 
     check_units(UNIT_DESCRIPTION_TEXT, unit)
-    if value.nil?
+    if value.nil? && unit != :temperature
       UNIT_DESCRIPTION_TEXT[unit]
     elsif unit == :£
       format_pounds(value, medium)
@@ -50,6 +50,8 @@ class FormatEnergyUnit
       format_pounds(value, medium) + '/kWh'
     elsif unit == :£_range
       format_pound_range(value, medium)
+    elsif unit == :temperature
+      "#{scale_num(value)}C"
     elsif unit == :years_range
       format_years_range(value)
     elsif unit == :percent

@@ -557,6 +557,10 @@ class ChartManager
       inherits_from: :gas_heating_season_intraday,
       yaxis_units: :£
     },
+    alert_gas_heating_season_intraday: {
+      inherits_from: :gas_heating_season_intraday,
+      yaxis_units: :£
+    },
     gas_intraday_schoolday_last_year: { # used by heating regression fitter
       name:             'Intra-school day gas consumption profile',
       inherits_from:    :gas_heating_season_intraday,
@@ -1306,6 +1310,9 @@ class ChartManager
       inherits_from:    :intraday_line_school_last7days,
       name:             'Intraday (last 7 days) gas',
       meter_definition: :allheat
+    },
+    alert_last_7_days_intraday_gas_heating_on_too_early: {
+      inherits_from:    :last_7_days_intraday_gas
     },
 =begin
     last_2_weeks_gas_comparison_datetime: {

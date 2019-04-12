@@ -26,6 +26,10 @@ class Temperatures < HalfHourlyData
     average_in_date_range(start_date, end_date)
   end
 
+  def average_temperature_in_time_range(date, start_halfhour_index, end_halfhour_index)
+    one_days_data_x48(date)[start_halfhour_index..end_halfhour_index].sum / (end_halfhour_index - start_halfhour_index + 1)
+  end
+
   def temperature_range(start_date, end_date)
     return @cached_min_max[start_date..end_date] if @cached_min_max.key?(start_date..end_date)
     min_temp = 100.0

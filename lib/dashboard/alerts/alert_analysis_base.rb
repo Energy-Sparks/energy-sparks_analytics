@@ -133,7 +133,6 @@ class AlertAnalysisBase
         raw[self.class.convert_range_symbol_to_low(type)] = data.first
         raw[self.class.convert_range_symbol_to_high(type)] = data.last
       elsif data.is_a?(Array)
-        puts "gggg #{type}"
         raw.merge!(flatten_table_for_saving(data))
         raw.delete(type)
       end
@@ -146,8 +145,9 @@ class AlertAnalysisBase
     header = table[0]
     (1...table.length).each do |row_index|
       (1...table[row_index].length).each do |column_index|
-        key = self.class.name + ':' + table[row_index][0] + ':' + header[column_index]
-        data[key] = table[row_index][column_index]
+        key = self.class.name + ':' + table[row_index][0].to_s + ':' + header[column_index]
+        value = table[row_index][column_index]
+        data[key] = value.is_a?(TimeOfDay) ? value.to_s : value
       end
     end
     data

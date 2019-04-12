@@ -47,8 +47,8 @@ class CO2Parameterised
   # pre 2019 intraday data will need to wait for a batch job
   def self.download_this_years_data_from_internet
     feed = UKGridCarbonIntensityFeed.new
-    start_date = Date.new(2019, 1, 1)
-  end_date = Date.today - 1
+    start_date = Date.new(2019, 4, 1)
+    end_date = Date.today - 1
     feed.download(start_date, end_date)
     feed
   end

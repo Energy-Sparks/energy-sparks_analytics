@@ -145,12 +145,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
   end
 
   def analyse_private(asof_date)
-    begin
     calculate(asof_date)
-    rescue StandardError => e
-      puts e.to_s
-      puts e.backtrace
-    end
     annual_kwh = kwh(asof_date - 365, asof_date)
     annual_kwh_per_pupil_area_benchmark = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_PUPIL * pupils
     annual_kwh_per_floor_area_benchmark = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area

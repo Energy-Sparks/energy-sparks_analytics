@@ -2,7 +2,7 @@
 require_relative 'alert_analysis_base.rb'
 
 class AlertImpendingHoliday < AlertAnalysisBase
-  WEEKDAYS_HOLIDAY_LOOKAHEAD_PERIOD = 2
+  WEEKDAYS_HOLIDAY_LOOKAHEAD_PERIOD = 5
 
   def initialize(school)
     super(school, :impendingholiday)
