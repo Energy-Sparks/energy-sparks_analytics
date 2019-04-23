@@ -391,6 +391,10 @@ class SeriesDataManager
     else;                  :kwh end
   end
 
+  def trendline_scale
+    scaling_factor_for_model_derived_gas_data(kwh_cost_or_co2)
+  end
+
 private
 
   def create_fuel_breakdown

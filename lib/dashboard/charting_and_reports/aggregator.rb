@@ -466,10 +466,14 @@ class Aggregator
       @x_axis.each_with_index do |date, index|
         model_type = @series_manager.model_type?(date)
         if model_type == model_type_for_trendline
-          bucketed_data[trendline_name_with_parameters][index] = @series_manager.predicted_amr_data_one_day(date)
+          bucketed_data[trendline_name_with_parameters][index] = @series_manager.predicted_amr_data_one_day(date) * trendline_scale
         end
       end
     end
+  end
+
+  def trendline_scale
+    @series_manager.trendline_scale
   end
 
   # find 2 extreme points for each model, add interpolated regression points
@@ -481,8 +485,8 @@ class Aggregator
       min, max = model_temperatures_and_index.minmax_by { |temp, _index, _date| temp }
       trendline = add_regression_parameters_to_trendline_symbol(SeriesDataManager.trendline_for_series_name(model_type), model_type)
       bucketed_data[trendline] = Array.new(@x_axis.length, Float::NAN)
-      bucketed_data[trendline][min[1]] = @series_manager.predicted_amr_data_one_day(min[2])
-      bucketed_data[trendline][max[1]] = @series_manager.predicted_amr_data_one_day(max[2])
+      bucketed_data[trendline][min[1]] = @series_manager.predicted_amr_data_one_day(min[2]) * trendline_scale
+      bucketed_data[trendline][max[1]] = @series_manager.predicted_amr_data_one_day(max[2]) * trendline_scale
     end
   end
 
