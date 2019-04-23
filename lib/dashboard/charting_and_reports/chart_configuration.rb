@@ -482,17 +482,6 @@ class ChartManager
       model:            :simple_regression_temperature
     },
     thermostatic: {
-=begin
-      name:             'Thermostatic (Heating Season, School Day)',
-      chart1_type:      :scatter,
-      meter_definition: :allheat,
-      timescale:        :year,
-      filter:            { daytype: :occupied, heating: true },
-      series_breakdown: %i[heating heatingmodeltrendlines degreedays],
-      x_axis:           :day,
-      yaxis_units:      :kwh,
-      yaxis_scaling:    :none
-=end
       inherits_from:    :thermostatic_regression_simple_school_day,
       name:             'Thermostatic (Temperature v. Daily Consumption - current year)',
     },

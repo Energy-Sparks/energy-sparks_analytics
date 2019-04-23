@@ -370,6 +370,19 @@ class SeriesDataManager
     @heating_model
   end
 
+  def kwh_cost_or_co2
+# puts "kwh co2 cost type: #{@chart_configuration[:yaxis_units]}"
+    case @chart_configuration[:yaxis_units]
+    when :£;               :economic_cost
+    when :accounting_cost; :accounting_cost
+    when :co2;             :co2
+    else;                  :kwh end
+  end
+
+  def trendline_scale
+    scaling_factor_for_model_derived_gas_data(kwh_cost_or_co2)
+  end
+
 private
 
   def create_fuel_breakdown
