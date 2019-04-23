@@ -14,7 +14,7 @@ end
 
 profile = false
 
-if true
+if false
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
     new_data:      '../TestResults/Charts/New/',
@@ -29,9 +29,11 @@ reports = ReportConfigSupport.new
 
 RubyProf.start if profile
 
-reports.load_school('King Edward VII Upper School', true)
+# reports.load_school('King Edward VII Upper School', true)
 # reports.load_school('Paulton Junior School', true)
 # reports.load_school('St Marks Secondary', true)
+# reports.load_school('Whiteways Primary', true)
+reports.load_school('Trinity First School', true)
 =begin
 Benchmark.memory do |x|
   x.report("load school")  { reports.load_school('St Marks Secondary', true) }
@@ -56,7 +58,7 @@ end
 # reports.do_all_schools(true)
 # reports.do_all_schools(true)
 # reports.do_one_page(:cost)
-reports.do_all_schools(true)
+# reports.do_all_schools(true)
 # reports.do_all_standard_pages_for_school({yaxis_units: :£})
 # reports.do_one_page(:carbon_emissions)
 # reports.do_one_page(:cost)
@@ -67,7 +69,8 @@ reports.do_all_schools(true)
 # reports.do_all_standard_pages_for_school
 # reports.do_chart_list('pound scaling', [:test_last_2_weeks_gas, :last_2_weeks_gas])
 
-# reports.do_all_standard_pages_for_school
+# reports.do_all_schools(true)
+reports.do_chart_list('baseload advice', [:baseload])
 
 if profile
   prof_result = RubyProf.stop

@@ -2,6 +2,7 @@
 require_relative 'alert_analysis_base.rb'
 
 class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
+  PERCENT_TOO_HIGH_MARGIN = 1.10
   attr_reader :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area # historic attributes, remove post template variables but check doesn't break advice TODO(PH, 11Apr2019)
 
   attr_reader :average_baseload_last_year_kw, :average_baseload_last_year_£, :average_baseload_last_year_kwh
@@ -191,7 +192,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @analysis_report.term = :longterm
     @analysis_report.add_book_mark_to_base_url('ElectricityBaseload')
 
-    if @avg_baseload > @benchmark_per_pupil || @avg_baseload > @benchmark_per_floor_area
+    if @avg_baseload > (@benchmark_per_pupil * PERCENT_TOO_HIGH_MARGIN) || @avg_baseload > (@benchmark_per_floor_area * PERCENT_TOO_HIGH_MARGIN)
       @analysis_report.summary = 'Your electricity baseload is too high'
       text = commentary(@avg_baseload, 'too high', @benchmark_per_pupil, @benchmark_per_floor_area)
       if days_sample < 3 * 30

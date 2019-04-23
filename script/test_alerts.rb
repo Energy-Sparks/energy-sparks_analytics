@@ -34,10 +34,11 @@ reports = ReportConfigSupport.new
 failed_alerts = []
 
 history = AlertHistoryDatabase.new
+=begin
 previous_results = history.load
 puts 'Loaded data'
 ap(previous_results)
-
+=end
 calculated_results = {}
 
 school_names.sort.each do |school_name|
@@ -62,14 +63,17 @@ school_names.sort.each do |school_name|
   bm1 = Benchmark.realtime {
     alerts_classes.each do |alert_class|
       next if ![
-
+        AlertHeatingComingOnTooEarly
+        
+=begin
         AlertChangeInDailyElectricityShortTerm,
         AlertChangeInDailyGasShortTerm,
         AlertChangeInElectricityBaseloadShortTerm,
         AlertHotWaterInsulationAdvice,
         AlertOutOfHoursElectricityUsage,
         AlertOutOfHoursGasUsage,
-=begin
+        AlertElectricityAnnualVersusBenchmark,
+        AlertGasAnnualVersusBenchmark,
         AlertWeekendGasConsumptionShortTerm
 =end
       ].include?(alert_class)
@@ -87,6 +91,8 @@ school_names.sort.each do |school_name|
         calculated_results[school.urn][asof_date].merge!(raw_data)
 
         ap(raw_data)
+
+        ap(alert.html_template_variables)
 
 =begin
         puts ">>>>All template variables:"
@@ -106,14 +112,16 @@ school_names.sort.each do |school_name|
         ap(alert.raw_template_variables)
         puts ">>>>html results:"
         ap(alert.html_template_variables)
-
+=end
+        puts ">>>>All template variables:"
+        ap(alert_class.front_end_template_variables)
         puts ">>>>front end text results:"
         ap(alert.front_end_template_data)
         puts ">>>>front end chart results:"
         ap(alert.front_end_template_charts)
         puts ">>>>front end table results:"
         ap(alert.front_end_template_tables)
-
+=begin
         puts ">>>>text results:"
         ap(alert.text_template_variables)
         puts "html summary"
@@ -143,12 +151,14 @@ school_names.sort.each do |school_name|
   (school_calculation_time[school_name] ||= []).push(bm1)
 end
 
-ap(calculated_results)
+# ap(calculated_results)
 
+=begin
 history.save(calculated_results)
 
 h_diff = HashDiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
 puts h_diff
+=end
 
 alert_calculation_time.each do |type, data|
   puts sprintf('%-35.35s %.6f', type, data.sum/data.length)
