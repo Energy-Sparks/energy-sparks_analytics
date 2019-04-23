@@ -1,4 +1,3 @@
-
 require 'erb'
 
 # extension of DashboardEnergyAdvice for heating regression model fitting
@@ -82,6 +81,8 @@ class DashboardEnergyAdvice
       meter_definition = @chart_definition[:meter_definition]
       if meter_definition == :allheat
         @heat_meter = @school.aggregated_heat_meters
+      elsif meter_definition == :storage_heater_meter
+        @heat_meter = @school.storage_heater_meter
       elsif meter_definition == :allelectricity
         raise EnergySparksUnexpectedStateException.new('Not expecting aggregate electricity meter for model fitting dashboard advice')
       else

@@ -25,7 +25,9 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
       saving_kwh = @heating_model.kwh_saving_for_1_C_thermostat_reduction(start_date, asof_date)
       saving_£ = saving_kwh * ConvertKwh.scale_unit_from_kwh(:£, :gas)
 
-      @analysis_report.summary = 'Advice on internal temperatures'
+      summary_text = 'Did you know you could save ' + FormatEnergyUnit.format(:£, saving_£) +
+                      ' if you reduced the temperature in the school by 1C?'
+      @analysis_report.summary = summary_text
       text =  'Did you know you could save '
       text += FormatEnergyUnit.format(:£, saving_£)
       text += '(' + FormatEnergyUnit.format(:kwh, saving_kwh) + ') '

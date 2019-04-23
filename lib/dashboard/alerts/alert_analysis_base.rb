@@ -13,53 +13,228 @@
 
 class AlertAnalysisBase
   include Logging
+
+  ALERT_HELP_URL = 'https://blog.energysparks.uk/alerts'.freeze
+
   attr_reader :analysis_report
+  attr_reader :status, :rating, :term, :default_summary, :default_content, :bookmark_url
+  attr_reader :analysis_date, :max_asofdate
 
   def initialize(school, report_type)
     @school = school
+    @report_type = report_type
     @analysis_report = AlertReport.new(report_type)
   end
 
   def analyse(asof_date, use_max_meter_date_if_less_than_asof_date = false)
     begin
-      @analysis_report.max_asofdate = maximum_alert_date
+      @max_asofdate = maximum_alert_date
+      @analysis_report.max_asofdate = @max_asofdate
       if valid_alert?
         date = use_max_meter_date_if_less_than_asof_date ? [maximum_alert_date, asof_date].min : asof_date
-        analyse_private(date)
+
+        if @analysis_date.nil? || @analysis_date != date # only call once per date
+          @analysis_date = date
+          analyse_private(@analysis_date)
+          @analysis_report = backwards_compatible_analysis_report if @analysis_report.nil?
+        end
       else
         invalid_alert_report # gas alert for electric only school or electic alert for gas only school
       end
     rescue StandardError => e
-      text = "Unexpected Internal Error: please report to hello@energysparks.uk\n"
-      text += e.message
-      text += e.backtrace.join("\n")
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.add_detail(description1)
-      @analysis_report.status = :failed
+      erroneous_report(e)
     end
   end
 
-  def invalid_alert_report
-    text =  'The alert is not valid for this school'
-    text += 'The alert is not valid probably because the alert is specific for a fuel type (gas/electricity) '
-    text += 'for which smart meter data is not available'
-    description1 = AlertDescriptionDetail.new(:text, text)
-    @analysis_report.add_detail(description1)
-    @analysis_report.status = :failed
+  def raw_template_variables
+    unformatted_template_variables
   end
 
-  def add_report(report)
-    raise EnergySparksUnexpectedStateException.new('add_report now deprecated from AlertAnalysisBase')
+  def html_template_variables
+    formatted_template_variables(:html)
   end
+
+  def text_template_variables
+    formatted_template_variables(:text)
+  end
+
+  def self.front_end_template_variables
+    front_end_template = {}
+    self.template_variables.each do |group_name, variable_group|
+      map_types = {
+        Float     => :float,
+        Date      => :date,
+        String    => :string,
+        Integer   => :integer,
+        Symbol    => :symbol
+      }
+      front_end_template[group_name] = {}
+      variable_group.each do |type, data|
+        next if [:chart, :table, TrueClass].include?(data[:units])
+        unless data[:units].is_a?(Symbol) || data[:units].is_a?(Hash)
+          if map_types.key?(data[:units])
+            data[:units] = map_types[data[:units]]
+          else
+            raise EnergySparksUnexpectedStateException.new("Missing maps for #{data[:units]} #{data}")
+          end
+        end
+        if [:£_range, :years_range].include?(data[:units]) # convert range values into low and high versions
+          front_end_template[group_name].merge!(front_end_high_low_range_values(convert_range_symbol_to_high(type), data, 'high'))
+          front_end_template[group_name].merge!(front_end_high_low_range_values(convert_range_symbol_to_low(type),  data, 'low'))
+        end
+        front_end_template[group_name][type] = data
+      end
+    end
+    front_end_template
+  end
+
+  # the front end needs the range type values split into high and low versions
+  def self.front_end_high_low_range_values(high_low_type, data, high_low_description_suffix)
+    {
+      high_low_type => {
+        description: data[:description] + ' ' + high_low_description_suffix,
+        units: data[:units] == :£_range ? :£ : :years
+      }
+    }
+  end
+
+  def self.convert_range_symbol_to_high(type)
+    (type.to_s + '_high').to_sym
+  end
+
+  def self.convert_range_symbol_to_low(type)
+    (type.to_s + '_low').to_sym
+  end
+
+  def front_end_template_data
+    lookup = flatten_template_variables
+    raw_data = raw_template_variables
+    list = text_template_variables.reject { |type, _value| [:chart, :table, TrueClass].include?(lookup[type][:units]) }
+    list.merge(convert_range_template_data_to_high_low(list, lookup, raw_data))
+  end
+
+  private def convert_range_template_data_to_high_low(template_data, lookup, raw_data)
+    new_data = {}
+    template_data.each do |type, data| # front end want ranges as seperate high/low symbol-value pairs
+      if [:£_range, :years_range].include?(lookup[type][:units])
+        new_type = lookup[type][:units] == :£_range ? :£ : :years
+        new_data[self.class.convert_range_symbol_to_high(type)] = FormatUnit.format(new_type, raw_data[type].first, :text, true)
+        new_data[self.class.convert_range_symbol_to_low(type)]  = FormatUnit.format(new_type, raw_data[type].last,  :text, true)
+      end
+    end
+    new_data
+  end
+
+  def front_end_template_charts
+    lookup = flatten_template_variables
+    text_template_variables.select { |type, value| lookup[type][:units] == :chart }
+  end
+
+  def front_end_template_tables
+    lookup = flatten_template_variables
+    text_template_variables.select { |type, value| lookup[type][:units] == :table }
+  end
+
+
+  # inherited, so derived class has hash of 'name' => variables
+  def self.template_variables
+    { 'Common' => TEMPLATE_VARIABLES }
+  end
+
+  def relevance
+    :relevant
+  end
+
+  def summary_wording(format = :html)
+    return nil if default_summary.nil? # remove once all new style alerts implemeted TODO(PH,13Mar2019)
+    summary = AlertTemplateBinding.new(default_summary, formatted_template_variables(format), format)
+    summary.bind
+  end
+
+  def content_wording(format = :html)
+    return nil if default_content.nil? # remove once all new style alerts implemeted TODO(PH,13Mar2019)
+    content = AlertTemplateBinding.new(default_content, formatted_template_variables(format), format)
+    content.bind
+  end
+
+  TEMPLATE_VARIABLES = {
+    relevance: {
+      desciption: 'Relevance of a alert to a school at this point in time',
+      units:  :relevance
+    },
+    analysis_date: {
+      desciption: 'Latest date on which the alert data is based',
+      units:  Date
+    },
+    status: {
+      desciption: 'Status: good, bad, failed',
+      units:  Symbol
+    },
+    rating: {
+      desciption: 'Rating out of 10',
+      units:  Float
+    },
+    term: {
+      desciption: 'long term or short term',
+      units:  Symbol
+    },
+    bookmark_url: {
+      desciption: 'Link to help URL',
+      units:  String
+    },
+    max_asofdate: {
+      description: 'The latest date on which an alert can be run given the available data',
+      units:  :date
+    },
+    pupils: {
+      description: 'Number of pupils for relevant part of school on this date',
+      units:  Integer
+    },
+    floor_area: {
+      description: 'Floor area of relevant part of school',
+      units:  :m2
+    },
+    school_type: {
+      description: 'Primary or Secondary',
+      units:  :school_type
+    },
+    school_name: {
+      description: 'Name of school',
+      units: String
+    },
+    one_year_saving_£: {
+      description: 'Estimated one year saving range',
+      units: :£_range
+    },
+    ten_year_saving_£: {
+      description: 'Estimated ten year saving range - typical capital investment horizon',
+      units: :£_range
+    },
+    payback_years: {
+      description: 'Payback in years',
+      units: :years_range
+    },
+    capital_cost: {
+      description: 'Capital cost',
+      units: :£_range
+    }
+  }.freeze
 
   def maximum_alert_date
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class ' + name)
   end
 
-  def self.valid_alerts(school, asof_date)
-    valid_alerts = all_available_alerts(school)
+  def valid_alert?
+    (!@school.aggregated_heat_meters.nil? && needs_gas_data?) ||
+      (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?)
+  end
 
-    valid_alerts.each do |alert|
+  # test method - runs all alaerts for school, prints results
+  def self.run_valid_alerts(school, asof_date)
+    valid_alerts = all_available_alerts
+
+    valid_alerts.each do |alert_class|
+      alert = alert_class.new(school)
       alert.analyse(asof_date)
       results = alert.analysis_report
       puts '=' * 80
@@ -67,15 +242,139 @@ class AlertAnalysisBase
     end
   end
 
-  def self.analyse_all(school, asof_date)
-    valid_alerts = all_available_alerts(school)
-
-    valid_alerts.each do |alert|
-      alert.analyse(asof_date)
-      results = alert.analysis_report
-      puts "\n" * 3
-      puts results
+  def self.print_all_formatted_template_variable_values
+    puts 'Available variables and values:'
+    self.template_variables.each do |group_name, variable_group|
+      puts "  #{group_name}"
+      variable_group.each do |type, data|
+        # next if data[:units] == :table
+        value = send(type)
+        formatted_value = FormatUnit.format(data[:units], value, :html, true)
+        puts sprintf('    %-40.40s %-20.20s', type, formatted_value) + ' ' + data.to_s
+      end
     end
+  end
+
+  private
+
+  def formatted_template_variables(format = :html)
+    variable_list(true, format)
+  end
+
+  def unformatted_template_variables
+    variable_list(false)
+  end
+
+  protected def calculate_rating_from_range(good_value, bad_value, actual_value)
+    [10.0 * [(bad_value / good_value) - (actual_value / good_value), 0.0].max, 10.0].min.round(1)
+  end
+
+  protected def flatten_template_variables
+    list = {}
+    self.class.template_variables.each do |_group_name, variable_group|
+      variable_group.each do |type, data|
+        list[type] = data
+      end
+    end
+    list
+  end
+
+  def variable_data_types
+    list = {}
+    flatten_template_variables.each do |type, data|
+      list[type] = data[:units]
+    end
+    list
+  end
+
+  private def variable_list(formatted, format = :text)
+    list = {}
+    flatten_template_variables.each do |type, data|
+      if [TrueClass, FalseClass].include?(data[:units])
+        list[type] = send(type) # don' reformat flags so can be bound in if tests
+      elsif data[:units] == :table
+        list[type] = format_table(type, data, formatted, format)
+      else
+        list[type] = formatted ? FormatUnit.format(data[:units], send(type), format, true) : send(type)
+      end
+    end
+    list
+  end
+
+  # convert a table either into an html table, or a '|' bar seperated text table; can't use commas as contined in 1,234 numbers
+  private def format_table(type, data_description, formatted, format)
+    header, formatted_data = format_table_data(type, data_description, formatted, format)
+    table_formatter = AlertRenderTable.new(header, formatted_data)
+    table_formatter.render(format)
+  end
+
+  # convert the cells within a table into formatted html or text
+  private def format_table_data(type, data_description, formatted, format)
+    formatted_table = []
+    table_data = send(type)
+    column_formats = data_description[:column_types]
+    table_data.each do |row_data|
+      formatted_row = []
+      row_data.each_with_index do |val, index|
+        formatted_val = formatted ? FormatUnit.format(column_formats[index], val, format, true, true) : val
+        formatted_row.push(formatted_val)
+      end
+      formatted_table.push(formatted_row)
+    end
+    [data_description[:header], formatted_table]
+  end
+
+  # takes the new alert infrastructure data and recreated
+  # the old alert data for backwards compatibility
+  public def backwards_compatible_analysis_report
+    analysis_report = AlertReport.new(@report_type)
+
+    analysis_report.status        = status
+    analysis_report.rating        = rating
+    analysis_report.term          = term
+    analysis_report.help_url      = bookmark_url
+    analysis_report.max_asofdate  = max_asofdate
+
+    analysis_report.summary       = summary_wording(:text)
+
+    description = AlertDescriptionDetail.new(:text, content_wording(:text))
+    analysis_report.add_detail(description)
+
+    unless @chart_results.nil?
+      description2 = AlertDescriptionDetail.new(:chart, @chart_results)
+      analysis_report.add_detail(description2)
+    end
+
+    unless @table_results.nil?
+      html_table = formatted_template_variables(:html)[@table_results]
+      description3 = AlertDescriptionDetail.new(:html, html_table)
+      analysis_report.add_detail(description3)
+    end
+
+    analysis_report
+  end
+
+  protected
+
+  def add_book_mark_to_base_url(bookmark)
+    @help_url = ALERT_HELP_URL + '#' + bookmark
+  end
+
+  def one_year_saving_£
+    nil
+  end
+
+  def ten_year_saving_£
+    one_year_saving_£.nil? ? nil : Range.new(one_year_saving_£.first * 10.0, one_year_saving_£.last * 10.0)
+  end
+
+  def payback_years
+    return 0..0 if one_year_saving_£.nil? || capital_cost.nil? || capital_cost = 0.0..0.0
+    Range.new(capital_cost.first / one_year_saving_£.last, capital_cost.last / one_year_saving_£.first)
+  end
+
+  def capital_cost
+    0.0..0.0
   end
 
   def pupils
@@ -98,9 +397,17 @@ class AlertAnalysisBase
     end
   end
 
-  def school_type
-    @school.school_type
+  def school_name
+    if @school.respond_to?(:name) && !@school.name.nil?
+      @school.name
+    elsif @school.respond_to?(:name) && !@school.school.name.nil?
+      @school.school.name
+    else
+      throw EnergySparksBadDataException.new('Unable to find school name for alerts')
+    end
+  end
 
+  def school_type
     if @school.respond_to?(:school_type) && !@school.school_type.nil?
       @school.school_type.instance_of?(String) ? @school.school_type.to_sym : @school.school_type
     elsif @school.respond_to?(:school) && !@school.school.school_type.nil?
@@ -123,13 +430,6 @@ class AlertAnalysisBase
     list_of_school_days.sort
   end
 
-  def valid_alert?
-    (!@school.aggregated_heat_meters.nil? && needs_gas_data?) ||
-      (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?)
-  end
-
-  protected
-
   def needs_gas_data?
     true
   end
@@ -140,30 +440,50 @@ class AlertAnalysisBase
 
   private
 
+  def erroneous_report(e)
+    @analysis_report = AlertReport.new(@report_type) if @analysis_report.nil?
+    text = "Unexpected Internal Error: please report to hello@energysparks.uk\n"
+    text += e.message
+    text += e.backtrace.join("\n")
+    description1 = AlertDescriptionDetail.new(:text, text)
+    @analysis_report.add_detail(description1)
+    @analysis_report.status = :failed
+  end
+
+  def invalid_alert_report
+    @analysis_report = AlertReport.new(@report_type) if @analysis_report.nil?
+    text =  'The alert is not valid for this school'
+    text += 'The alert is not valid probably because the alert is specific for a fuel type (gas/electricity) '
+    text += 'for which smart meter data is not available'
+    description1 = AlertDescriptionDetail.new(:text, text)
+    @analysis_report.add_detail(description1)
+    @analysis_report.status = :failed
+  end
+
   def analyse_private(asof_date)
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class')
   end
 
-  def self.all_available_alerts(school)
-    alerts = [
-      AlertElectricityBaseloadVersusBenchmark.new(school),
-      AlertChangeInElectricityBaseloadShortTerm.new(school),
-      AlertChangeInDailyElectricityShortTerm.new(school),
-      AlertOutOfHoursElectricityUsage.new(school),
-      AlertElectricityAnnualVersusBenchmark.new(school),
-      AlertGasAnnualVersusBenchmark.new(school),
-      AlertOutOfHoursGasUsage.new(school),
-      AlertChangeInDailyGasShortTerm.new(school),
-      AlertWeekendGasConsumptionShortTerm.new(school),
-      AlertImpendingHoliday.new(school),
-      AlertHeatingOnOff.new(school),
-      AlertHotWaterEfficiency.new(school),
-      AlertHeatingComingOnTooEarly.new(school),
-      AlertThermostaticControl.new(school),
-      AlertHeatingSensitivityAdvice.new(school),
-      AlertHeatingOnSchoolDays.new(school),
-      AlertHeatingOnNonSchoolDays.new(school),
-      AlertHotWaterInsulationAdvice.new(school)
+  def self.all_available_alerts
+    [
+      AlertElectricityBaseloadVersusBenchmark,
+      AlertChangeInElectricityBaseloadShortTerm,
+      AlertChangeInDailyElectricityShortTerm,
+      AlertOutOfHoursElectricityUsage,
+      AlertElectricityAnnualVersusBenchmark,
+      AlertGasAnnualVersusBenchmark,
+      AlertOutOfHoursGasUsage,
+      AlertChangeInDailyGasShortTerm,
+      AlertWeekendGasConsumptionShortTerm,
+      AlertImpendingHoliday,
+      AlertHeatingOnOff,
+      AlertHotWaterEfficiency,
+      AlertHeatingComingOnTooEarly,
+      AlertThermostaticControl,
+      AlertHeatingSensitivityAdvice,
+      AlertHeatingOnSchoolDays,
+      AlertHeatingOnNonSchoolDays,
+      AlertHotWaterInsulationAdvice
     ]
   end
 end

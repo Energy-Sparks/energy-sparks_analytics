@@ -54,6 +54,9 @@ class SeriesNames
   IRRADIANCE      = 'Solar Irradiance'.freeze
   GRIDCARBON      = 'Grid Carbon Intensity'.freeze
 
+  STORAGEHEATERS  = 'storage heaters'
+  SOLARPV         = 'solar pv (consumed onsite)'      
+
   PREDICTEDHEAT   = 'Predicted Heat'.freeze
   CUSUM           = 'CUSUM'.freeze
   BASELOAD        = 'BASELOAD'.freeze
@@ -176,7 +179,8 @@ class SeriesDataManager
 
   def degreeday_base_temperature
     begin
-      heating_model.average_base_temperature
+      base = heating_model.average_base_temperature
+      [[base, 10.0].min, 30.0].max # temporarily limit range of base temperature TODO(PH,20Mar2019) fix
     rescue StandardError => _e
       # TODO(PH, 7Mar2019) - this is a little dangerous as it might give a false
       # impression of the base temperature, the problem lies in the simulator
@@ -351,7 +355,7 @@ class SeriesDataManager
 
   def amr_data_date_range(meter, start_date, end_date)
     if @adjust_by_temperature && meter.fuel_type == :gas
-      heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value)
+      heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value, 0.0)
     else
       meter.amr_data.kwh_date_range(start_date, end_date)
     end
@@ -368,24 +372,21 @@ class SeriesDataManager
 
 private
 
-def create_fuel_breakdown
-=begin
-    # commented out 4Mar2019 after aggregate version of fuels starting accreting into buckets
-    buckets = []
-    buckets.push('electricity')
-    buckets.push('gas')
-    @meters.each do |meter|
-      if !meter.nil? && ['aggregated_electricity', 'aggregated_heat', 'electricity', 'gas'].include?(meter.fuel_type.to_s)
-        buckets.push(meter.fuel_type.to_s)
-      end
-    end
-=end
+  def create_fuel_breakdown
     buckets = ['electricity', 'gas']
+    buckets.push(SeriesNames::STORAGEHEATERS) if @meter_collection.storage_heaters?
+    buckets.push(SeriesNames::SOLARPV) if @meter_collection.solar_pv_panels?
+    buckets
   end
 
   def scaling_factor(_value, fuel_type)
     y_scaling = YAxisScaling.new # perhaps shouldn't be class, maybe just a method?
     y_scaling.scale_from_kwh(1.0, @chart_configuration[:yaxis_units], @chart_configuration[:yaxis_scaling], fuel_type, @meter_collection)
+  end
+
+  # single lookup for aggregator for performance
+  public def aggregator_scaling_factor
+    scaling_factor(nil, select_one_meter.fuel_type)
   end
 
   # combinatorially combine 2 arrays of series names
@@ -417,6 +418,7 @@ def create_fuel_breakdown
     # model calculated using the latest year's regression data,deliberately ignores chart request
     last_year = SchoolDatePeriod.year_to_date(:year_to_date, 'validate amr', @last_meter_date, @first_meter_date)
     meter = select_one_meter([:gas, :storage_heater])
+    logger.info "Calculating heating model for #{meter.id} - SeriesDataManager::calculate_model_by_type"
     meter.heating_model(last_year, model_type)
   end
 
@@ -496,7 +498,6 @@ def create_fuel_breakdown
     # at the 10 sf level. could be removed if required
     close_kwh = close_kwh.round(3)
     open_kwh = (amr_data_one_day(meter, date) - close_kwh).round(3)
-
     [open_kwh * factor, close_kwh * factor]
   end
 
@@ -606,16 +607,18 @@ def create_fuel_breakdown
   end
 
   def fuel_breakdown(date_range, electricity_meter, gas_meter)
+    has_storage_heaters = @meter_collection.storage_heaters?
+    has_solar_pv_panels = @meter_collection.solar_pv_panels?
     electric_factor = scaling_factor(1.0, :electricity) # lookup once for performance
+    storage_factor = electric_factor * 8.0 / 12.5
     gas_factor = scaling_factor(1.0, :gas) # lookup once for performance
-    # solar_pv_factor = scaling_factor(1.0, :solar_pv)
-    # storage_heater_factor = scaling_factor(1.0, :storage_heater)
     fuel_data = {
       'electricity' => 0.0,
       'gas' => 0.0
-      # 'solar pv' => 0.0,
-      # 'storage heaters' => 0.0
     }
+    fuel_data[SeriesNames::STORAGEHEATERS] = 0.0 if has_storage_heaters
+    fuel_data[SeriesNames::SOLARPV] = 0.0 if has_solar_pv_panels
+
     (date_range[0]..date_range[1]).each do |date|
       begin
         if gas_meter.nil?
@@ -628,8 +631,8 @@ def create_fuel_breakdown
         else
           fuel_data['electricity'] += amr_data_one_day(electricity_meter, date) * electric_factor
         end
-        # fuel_data['solar pv'] += amr_data_one_day(solar_pv_meter, date) * solar_pv_factor
-        # fuel_data['storage heaters'] += amr_data_one_day(storage_meter, date) * storage_heater_factor
+        fuel_data[SeriesNames::STORAGEHEATERS] += @meter_collection.storage_heater_meter.amr_data.one_day_kwh(date) * storage_factor if has_storage_heaters
+        fuel_data[SeriesNames::SOLARPV] += -1.0 * @meter_collection.solar_pv_meter.amr_data.one_day_kwh(date) * electric_factor if has_solar_pv_panels
       rescue Exception => e
         logger.error "Missing or nil data on #{date}"
         logger.error e
@@ -640,6 +643,7 @@ def create_fuel_breakdown
 
   def fuel_breakdown_halfhour(date, halfhour_index)
     electric_factor = scaling_factor(1.0, :electricity)
+    storage_factor = electric_factor * 8.0 / 12.5
     electricity_meter = @meters[0]
     electric_val = electricity_meter.nil? ? 0.0 : (amr_data_by_half_hour(electricity_meter, date, halfhour_index) * electric_factor)
 
@@ -652,16 +656,19 @@ def create_fuel_breakdown
       'gas' => gas_val
     }
 
+    fuel_data[SeriesNames::STORAGEHEATERS] = @meter_collection.storage_heater_meter.amr_data.kwh(date, halfhour_index) * electric_factor if @meter_collection.storage_heaters?
+    fuel_data[SeriesNames::SOLARPV] += -1.0 * @meter_collection.solar_pv_meter.amr_data.kwh(date, halfhour_index) * storage_factor if @meter_collection.solar_pv_panels?
     fuel_data
   end
 
-  def heating_breakdown(date_range, _electricity_meter, heat_meter)
-    factor = scaling_factor(1.0, heat_meter.fuel_type) # lookup once for performance
+  def heating_breakdown(date_range, electricity_meter, heat_meter)
+    meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
+    factor = scaling_factor(1.0, meter.fuel_type) # lookup once for performance
     heating_data = { SeriesNames::HEATINGDAY => 0.0, SeriesNames::NONHEATINGDAY => 0.0 }
     (date_range[0]..date_range[1]).each do |date|
       begin
         type = heating_model.heating_on?(date) ? SeriesNames::HEATINGDAY : SeriesNames::NONHEATINGDAY
-        heating_data[type] += amr_data_one_day(heat_meter, date) * factor
+        heating_data[type] += amr_data_one_day(meter, date) * factor
       rescue StandardError => e
         logger.error e
         logger.error "Warning: unable to calculate heating breakdown on #{date}"
@@ -671,8 +678,10 @@ def create_fuel_breakdown
   end
 
   # this breakdown uses NaN to indicate missing data, so Excel doesn't plot it
-  def heating_model_breakdown(date_range, _electricity_meter, heat_meter)
-    factor = scaling_factor(1.0, heat_meter.fuel_type) # lookup once for performance
+  def heating_model_breakdown(date_range, electricity_meter, heat_meter)
+    # puts "non heat meter #{electricity_meter} #{electricity_meter.storage_heater?}"
+    meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
+    factor = scaling_factor(1.0, meter.fuel_type) # lookup once for performance
     breakdown = {}
     regression_regimes = heating_model_types
     regression_regimes.each do |regime|
@@ -683,9 +692,9 @@ def create_fuel_breakdown
       begin
         type = heating_model.model_type?(date)
         if breakdown[type].nil? || breakdown[type].nan?
-          breakdown[type] = amr_data_one_day(heat_meter, date) * factor
+          breakdown[type] = amr_data_one_day(meter, date) * factor
         else
-          breakdown[type] += amr_data_one_day(heat_meter, date) * factor
+          breakdown[type] += amr_data_one_day(meter, date) * factor
         end
       rescue StandardError => e
         logger.error e
@@ -981,6 +990,10 @@ def create_fuel_breakdown
         @meters = [@meter_collection.aggregated_electricity_meters, nil]
       when :electricity_simulator
         @meters = [@meter_collection.electricity_simulation_meter, nil]
+      when :storage_heater_meter
+        @meters = [@meter_collection.storage_heater_meter, nil]
+      when :solar_pv_meter
+        @meters = [@meter_collection.solar_pv_meter, nil]
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
       # specified meter - typically by mpan or mprn

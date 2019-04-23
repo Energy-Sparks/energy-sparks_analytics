@@ -14,24 +14,11 @@ end
 profile = false
 
 reports = ReportConfigSupport.new
-
-# reports.load_school('Coit Primary School', true)
-# reports.load_school('Paulton Junior School', true)
-# reports.load_school('Hunters Bar School', true)
-
-# testing examples
-#
-#   reports.do_all_schools(true)
-#   reports.do_all_standard_pages_for_school
-#   reports.do_one_page(:main_dashboard_electric_and_gas)
-#   reports.do_chart_list('Boiler Control', [:hotwater, :frost_2, :optimum_start])
-#
+reports.load_school('Paulton Junior School', true)
 
 RubyProf.start if profile
 
-# reports.do_chart_list('Boiler Control', [:gas_heating_season_intraday, :gas_heating_season_intraday_£])
-
-reports.do_all_schools(true)
+reports.do_all_standard_pages_for_school
 
 if profile
   prof_result = RubyProf.stop

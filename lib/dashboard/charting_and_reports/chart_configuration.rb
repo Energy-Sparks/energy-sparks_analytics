@@ -72,6 +72,9 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    alert_daytype_breakdown_gas: {
+      inherits_from: :daytype_breakdown_gas
+    },
     daytype_breakdown_electricity: {
       name:             'Breakdown by type of day/time: Electricity',
       chart1_type:      :pie,
@@ -81,6 +84,9 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       timescale:        :year
+    },
+    alert_daytype_breakdown_electricity: {
+      inherits_from: :daytype_breakdown_electricity
     },
     group_by_week_electricity: {
       name:             'By Week: Electricity',
@@ -92,6 +98,60 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       timescale:        :year
+    },
+    storage_heater_group_by_week: {
+      name:               'Storage heater by week of the year',
+      inherits_from:      :group_by_week_electricity,
+      meter_definition:   :storage_heater_meter,
+      y2_axis:            :degreedays
+    },
+    storage_heater_by_day_of_week: {
+      name:               'Storage heater by day of the week (year to date)',
+      inherits_from:      :gas_by_day_of_week,
+      meter_definition:   :storage_heater_meter
+    },
+    storage_heater_group_by_week_long_term: {
+      name:               'Storage heater by day of the week (all years)',
+      inherits_from:      :storage_heater_group_by_week,
+      timescale:          nil
+    },
+    storage_heater_thermostatic: {
+      name:               'Storage heater thermostatic control by day of the week (year to date)',
+      inherits_from:      :thermostatic,
+      meter_definition:   :storage_heater_meter
+    },
+    storage_heater_intraday_current_year: {
+      name:               'Storage heater intraday profile (kwh) for year to date',
+      inherits_from:      :gas_heating_season_intraday,
+      meter_definition:   :storage_heater_meter
+    },
+    storage_heater_intraday_current_year_kw: {
+      name:               'Storage heater intraday profile (kw) for year to date',
+      chart1_type:        :line,
+      inherits_from:      :storage_heater_intraday_current_year,
+      yaxis_units:        :kw
+    },
+    intraday_line_school_last7days_storage_heaters:  {
+      inherits_from:    :intraday_line_school_last7days,
+      name:             'Intraday (last 7 days) storage heaters',
+      meter_definition: :storage_heater_meter
+    },
+    heating_on_off_by_week_storage_heater: {
+      inherits_from:    :heating_on_off_by_week,
+      name:             'Heating on/off periods',
+      meter_definition: :storage_heater_meter
+    },
+    solar_pv_group_by_week: {
+      name:               'Solar PV by week of the year',
+      inherits_from:      :storage_heater_group_by_week,
+      y2_axis:            :irradiance,
+      meter_definition:   :solar_pv_meter
+    },
+    solar_pv_group_by_week_by_submeter: {
+      name:               'Solar PV by week of the year',
+      inherits_from:      :solar_pv_group_by_week,
+      meter_definition: :allelectricity,
+      series_breakdown:   :submeter
     },
     group_by_week_electricity_test_range: {
       inherits_from:    :group_by_week_electricity,
@@ -372,6 +432,10 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
+    gas_heating_season_intraday_£: { # temporary chart 18Mar19 to bug fix non £ scaling intradat kWh charts
+      inherits_from: :gas_heating_season_intraday,
+      yaxis_units: :£
+    },
     gas_intraday_schoolday_last_year: { # used by heating regression fitter
       name:             'Intra-school day gas consumption profile',
       inherits_from:    :gas_heating_season_intraday,
@@ -405,8 +469,6 @@ class ChartManager
       meter_definition: :allheat,
       timescale:        :year,
       series_breakdown: %i[model_type temperature],
-      # model:            :simple_regression_temperature,
-      # trendlines:       true,
       x_axis:           :day,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
@@ -651,6 +713,9 @@ class ChartManager
       x_axis:           :day,
       yaxis_units:      :kw,
       yaxis_scaling:    :none
+    },
+    alert_1_year_baseload: {
+      inherits_from:    :baseload_lastyear,
     },
     intraday_line_school_days:  {
       name:             'Intraday (school days) - comparison of last 2 years',
@@ -1052,6 +1117,7 @@ class ChartManager
       name:             'Comparison of last 2 weeks gas consumption',
       chart1_type:      :column,
       series_breakdown: :none,
+      x_axis_reformat:  { date: '%A' },
       timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }],
       x_axis:           :day,
       meter_definition: :allheat,
@@ -1062,12 +1128,14 @@ class ChartManager
     last_2_weeks_gas: {
       name:             'Last 2 weeks gas consumption (with temperature)',
       timescale:        { week: -1..0 },
+      x_axis_reformat:  nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
     last_2_weeks_gas_degreedays: {
       name:             'Last 2 weeks gas consumption (with degree days)',
       y2_axis:          :degreedays,
       timescale:        { week: -1..0 },
+      x_axis_reformat:  nil,
       inherits_from:    :last_2_weeks_gas
     },
     last_2_weeks_gas_comparison_temperature_compensated: {
@@ -1079,16 +1147,30 @@ class ChartManager
     teachers_landing_page_gas: {
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
+    alert_last_2_weeks_gas_comparison_temperature_compensated: {
+      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
+    },
     teachers_landing_page_electricity: {
       name:             'Comparison of last 2 weeks electricity consumption',
       meter_definition: :allelectricity,
       inherits_from:    :teachers_landing_page_gas
+    },
+    alert_week_on_week_electricity_daily_electricity_comparison_chart: {
+      # used by short term change alert
+      inherits_from:    :teachers_landing_page_electricity
+    },
+    alert_intraday_line_school_days_last5weeks: {
+      inherits_from:    :intraday_line_school_days_last5weeks
+    },
+    alert_intraday_line_school_last7days: {
+      inherits_from:    :intraday_line_school_days_last5weeks
     },
     last_4_weeks_gas_temperature_compensated: {
       name:             'Last 4 weeks gas consumption - adjusted for outside temperature',
       adjust_by_temperature:  10.0,
       timescale:        [{ day: -27...0 }],
       y2_axis:          nil,
+      x_axis_reformat:  nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
     last_7_days_intraday_gas:  {

@@ -10,7 +10,13 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     super(school, :weekendgasconsumption)
   end
 
+  private def calculate(asof_date)
+    super(asof_date)
+    # other calculations
+  end
+
   def analyse_private(asof_date)
+    calculate(asof_date)
     weekend_dates = previous_weekend_dates(asof_date)
     weekend_kwh = kwh_usage_outside_frost_period(weekend_dates, FROST_PROTECTION_TEMPERATURE)
     weekend_cost = BenchmarkMetrics::GAS_PRICE * weekend_kwh

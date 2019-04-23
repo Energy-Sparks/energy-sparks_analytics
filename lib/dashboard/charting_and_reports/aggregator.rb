@@ -9,7 +9,7 @@ class Aggregator
   include Logging
 
   attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis
-  attr_reader :x_axis_bucket_date_ranges, :data_labels
+  attr_reader :x_axis_bucket_date_ranges, :data_labels, :x_axis_label
 
   def initialize(meter_collection, chart_config, show_reconciliation_values)
     @show_reconciliation_values = show_reconciliation_values
@@ -71,6 +71,8 @@ class Aggregator
 
     reorganise_buckets if @chart_config[:chart1_type] == :scatter
 
+    add_x_axis_label if @chart_config[:chart1_type] == :scatter
+
     # deprecated 28Feb2019
     # remove_zero_data if @chart_config[:chart1_type] == :scatter
 
@@ -79,6 +81,8 @@ class Aggregator
     reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order) && @chart_config[:series_name_order] == :reverse
 
     reverse_x_axis if @chart_config.key?(:reverse_xaxis) && @chart_config[:reverse_xaxis] == true
+
+    reformat_x_axis if @chart_config.key?(:x_axis_reformat) && !@chart_config[:x_axis_reformat].nil?
 
     aggregate_by_series
 
@@ -295,9 +299,9 @@ class Aggregator
         new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data[new_series_name] = x_data
       end
-      bucketed_data_count.each do |series_name, x_data|
+      bucketed_data_count.each do |series_name, count_data|
         new_series_name = series_name.to_s + time_description + school_name
-        @bucketed_data_count[new_series_name] = x_data
+        @bucketed_data_count[new_series_name] = count_data
       end
     end
     [@bucketed_data, @bucketed_data_count]
@@ -343,6 +347,15 @@ class Aggregator
       @y2_axis.each_key do |series_name|
         @y2_axis[series_name] = @y2_axis[series_name].reverse
       end
+    end
+  end
+
+  def reformat_x_axis
+    format = @chart_config[:x_axis_reformat]
+    if format.is_a?(Hash) && format.key?(:date)
+      @x_axis.map! { |date| date.strftime(format[:date]) }
+    else
+      raise EnergySparksBadChartSpecification.new("Unexpected x axis reformat chart configuration #{format}")
     end
   end
 
@@ -541,7 +554,8 @@ class Aggregator
   end
 
   def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
-    if bucketed_data.length == 1 && bucketed_data.keys[0] = SeriesNames::NONE
+    # Change Line Below 22Mar2019
+    if bucketed_data.length == 1 && bucketed_data.keys[0] == SeriesNames::NONE
       aggregate_by_halfhour_simple_fast(start_date, end_date, bucketed_data, bucketed_data_count)
     else
       (start_date..end_date).each do |date|
@@ -558,16 +572,18 @@ class Aggregator
   end
 
   def aggregate_by_halfhour_simple_fast(start_date, end_date, bucketed_data, bucketed_data_count)
-    count = 0
     total = Array.new(48, 0)
+    count = 0
     (start_date..end_date).each do |date|
       next unless match_filter_by_day(date)
       data = @series_manager.get_one_days_data_x48(date)
       total = [total, data].transpose.map{|a| a.sum}
       count += 1
     end
-    bucketed_data[SeriesNames::NONE] = total
-    bucketed_data_count[SeriesNames::NONE]= Array.new(48, count)
+    # Change Line Below 22Mar2019 - change
+    scaling_factor = @chart_config[:yaxis_units] == :kw ? 1.0 : @series_manager.aggregator_scaling_factor
+    bucketed_data[SeriesNames::NONE] = scaling_factor == 1.0 ? total : total.map { |hh_kwh| hh_kwh * scaling_factor }
+    bucketed_data_count[SeriesNames::NONE] = Array.new(48, count)
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
@@ -596,6 +612,11 @@ class Aggregator
 
     # insert dates back in as 'silent' y2_axis
     @data_labels = x_axis
+  end
+
+  # called only for scatter charts
+  def add_x_axis_label
+    @x_axis_label = @bucketed_data.key?(SeriesNames::DEGREEDAYS) ? SeriesNames::DEGREEDAYS : SeriesNames::TEMPERATURE
   end
 
   # remove zero data - issue with filtered scatter charts, and the difficulty or representing nan (NaN) in Excel charts
@@ -775,28 +796,39 @@ class Aggregator
           end
           # rubocop:enable Style/ConditionalAssignment
         else
-          hours = days * 24
-          @bucketed_data[series_name][index] /= hours
+          @bucketed_data[series_name][index] /= @bucketed_data_count[series_name][index]
         end
       end
     end
   end
 
   def inject_benchmarks
-    logger.info 'Injecting national, regional and exemplar bencmark data'
-    if (@bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)) ||
-       (@bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array))
+    logger.info "Injecting national, regional and exemplar bencmark data: for #{@bucketed_data.keys}"
+    has_gas = @bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array)
+    has_storage_heater = @bucketed_data.key?(SeriesNames::STORAGEHEATERS)
+    has_solar_pv = @bucketed_data.key?(SeriesNames::SOLARPV)
+    has_electricity = @bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)
+
+    if has_gas || has_electricity
+      electricity_data = has_electricity ? @bucketed_data['electricity'].sum > 0.0 : false
+      gas_only = has_gas && !has_electricity # for gas only schools don;t display electric benchmark, but not vice versa (electric heated schools)
       @x_axis.push('National Average')
-      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
+      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(benchmark_gas_usage_in_units)
+      @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
+      @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
 
       @x_axis.push('Regional Average')
-      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units)
+      @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(benchmark_gas_usage_in_units * 0.9)
+      @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
+      @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
 
       @x_axis.push('Exemplar School')
-      @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units)
+      @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units) if electricity_data
       @bucketed_data['gas'].push(exemplar_gas_usage_in_units * 0.9)
+      @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
+      @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
     else
       @x_axis.push('National Average')
       @bucketed_data['electricity']['National Average'] = benchmark_electricity_usage_in_units

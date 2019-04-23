@@ -154,7 +154,8 @@ class DashboardChartAdviceBase
           :intraday_line_school_days_6months_simulator_submeters
           SimulatorMiscOtherAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     else
-      DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
+      res  = DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
+      res2 = DashboardEnergyAdvice.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res2.nil?
     end
   end
 
@@ -298,9 +299,14 @@ class HeatingAnalysisBase < DashboardChartAdviceBase
 
   attr_reader :heating_model
 
-  def initialize(school, chart_definition, chart_data, chart_symbol)
+  def initialize(school, chart_definition, chart_data, chart_symbol, meter_type = :aggregated_heat)
     super(school, chart_definition, chart_data, chart_symbol)
+    @meter_type = meter_type
     @heating_model = calculate_model
+  end
+
+  def heat_meter
+    @meter_type == :aggregated_heat ? @school.aggregated_heat_meters : (@school.storage_heater_meter.nil? ? nil : @school.storage_heater_meter)
   end
 
   def a
@@ -333,16 +339,16 @@ class HeatingAnalysisBase < DashboardChartAdviceBase
   end
 
   def last_meter_date
-    @school.aggregated_heat_meters.amr_data.end_date
+    heat_meter.amr_data.end_date
   end
 
   def one_year_before_last_meter_date
-    start_date = [last_meter_date - 364, @school.aggregated_heat_meters.amr_data.end_date].min
+    start_date = [last_meter_date - 364, heat_meter.amr_data.end_date].min
   end
 
   def calculate_model
     period = SchoolDatePeriod.new(:analysis, 'Current Year', one_year_before_last_meter_date, last_meter_date)
-    @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, period)
+    heat_meter.model_cache.create_and_fit_model(:best, period)
   end
 end
 
@@ -356,12 +362,14 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   def generate_advice
     logger.info @school.name
+
     electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
     gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
+    gas_only = electric_usage.nil?
 
     address = @school.postcode.nil? ? @school.address : @school.postcode
 
-    electric_comparison_regional = comparison('electricity', :electricity, index_of_data("Regional Average"))
+    electric_comparison_regional = comparison('electricity', :electricity, index_of_data("Regional Average")) unless gas_only
     gas_comparison_regional = comparison('gas', :gas, index_of_data("Regional Average"))
 
     header_template = %{
@@ -376,10 +384,15 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         and a floor area of <%= @school.floor_area %>m<sup>2</sup>.
       </p>
       <p>
-        Your school spent <%= electric_usage %> on electricity
-        and <%= gas_usage %> on gas last year.
-        The electricity usage <%= electric_comparison_regional %>.
-        The gas usage <%= gas_comparison_regional %>:
+        <% if gas_only %>
+          Your school spent <%= gas_usage %> on gas last year.
+          The gas usage <%= gas_comparison_regional %>:
+        <% else %>
+          Your school spent <%= electric_usage %> on electricity
+          and <%= gas_usage %> on gas last year.
+          The electricity usage <%= electric_comparison_regional %>.
+          The gas usage <%= gas_comparison_regional %>:
+        <% end %>
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -417,14 +430,16 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
       <% end %>
       </p>
       <p>
-        <% if percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
+        <% if gas_only && percent_gas_of_regional_average < 0.7 %>
+          Well done you gas usage is very low and you should be congratulated for being an energy efficient school.
+        <% elsif percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
           Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
         <% else %>
-        Whether you have old or new school buildings, good energy management and best
-        practice in operation can save significant amounts of energy. With good management
-        an old building can use significantly less energy than a poorly managed new building.
-        Improving controls, upgrading to more efficient lighting and other measures are
-        applicable to all school buildings.
+          Whether you have old or new school buildings, good energy management and best
+          practice in operation can save significant amounts of energy. With good management
+          an old building can use significantly less energy than a poorly managed new building.
+          Improving controls, upgrading to more efficient lighting and other measures are
+          applicable to all school buildings.
         <% end %>
       </p>
     }.gsub(/^  /, '')
@@ -488,6 +503,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def get_energy_usage(type_str, type_sym, index)
+    return nil unless @chart_data[:x_data].key?(type_str) && @chart_data[:x_data][type_str].sum > 0.0
     pounds = @chart_data[:x_data][type_str][index]
     pounds_to_pounds_and_kwh(pounds, type_sym)
   end
@@ -518,11 +534,11 @@ end
 class FuelDaytypeAdvice < DashboardChartAdviceBase
   attr_reader :fuel_type, :fuel_type_str
   BENCHMARK_PERCENT = 0.5
-  EXEMPLAR_PERCENT = 0.25
-  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type)
+  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type, exemplar_percentage)
     super(school, chart_definition, chart_data, chart_symbol)
     @fuel_type = fuel_type
     @fuel_type_str = @fuel_type.to_s
+    @exemplar_percentage = exemplar_percentage
   end
 
   def generate_advice
@@ -530,7 +546,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     percent_value = out_of_hours / (in_hours + out_of_hours)
     percent_str = percent(percent_value)
     saving_percent = percent_value - 0.25
-    saving = (in_hours + out_of_hours) * saving_percent
+    saving = (in_hours + out_of_hours) * @exemplar_percentage
     saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
     saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
 
@@ -543,9 +559,9 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
           <%= percent(percent_value) %> of your <%= @fuel_type_str %> usage is out of hours:
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
-          <% if percent_value > EXEMPLAR_PERCENT %>
-            The best schools only consume <%= percent(EXEMPLAR_PERCENT) %> out of hours.
-            Reducing your school's out of hours usage to <%= percent(EXEMPLAR_PERCENT) %>
+          <% if percent_value > @exemplar_percentage %>
+            The best schools only consume <%= percent(@exemplar_percentage) %> out of hours.
+            Reducing your school's out of hours usage to <%= percent(@exemplar_percentage) %>
             would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
             <%# increase loop size to test %>
             <% 1.times do |_i| %>
@@ -605,13 +621,13 @@ end
 #==============================================================================
 class ElectricityDaytypeAdvice < FuelDaytypeAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol, :electricity)
+    super(school, chart_definition, chart_data, chart_symbol, :electricity, 0.35)
   end
 end
 #==============================================================================
 class GasDaytypeAdvice < FuelDaytypeAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol, :gas)
+    super(school, chart_definition, chart_data, chart_symbol, :gas, 0.3)
   end
 end
 
@@ -780,8 +796,8 @@ end
 class ThermostaticAdvice < HeatingAnalysisBase
   include Logging
 
-  def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol)
+  def initialize(school, chart_definition, chart_data, chart_symbol, meter_type = :aggregated_heat)
+    super(school, chart_definition, chart_data, chart_symbol, meter_type)
   end
 
   def generate_advice
@@ -843,11 +859,9 @@ class ThermostaticAdvice < HeatingAnalysisBase
             The outside temperature at which the two trendlines cross is generally a good indication
             of the schools 'balance point temperature', this is the outside temperature where there are enough
             internal gains to offset heating losses i.e. below this temperature the heating should be
-            turned on to maintain the internal temperature. A value below 18C is generally good. a value
-            above this might indicate either the school is very poorly insulated, or more likely the
-            internal temperature settings may be too high, for a school, you might expect the internal
-            temperature to be about 5C higher than the balance point temperature. General recommedations
-            for internal classroom temperatures are about 19C.
+            turned on to maintain the internal temperature.
+            A value below 18C is generally good. A value above this might indicate either the school
+            is very poorly insulated, or more likely the internal temperature settings may be too high.
           </p>
 
       <% if @add_extra_markup %>
@@ -891,6 +905,11 @@ class ThermostaticAdvice < HeatingAnalysisBase
           <%= a.round(0) %> + <%= b.round(1) %> * 4.0  = <%= predicted_kwh(4.0).round(0) %> kWh. See if you can read these values
           off the trend line of the graph above (degree days on the x axis and the answer -
           the predicted daily gas consumption on the y-axis).
+        </p>
+        <p>
+            The values for the trend line and the text above will vary slightly as the model used in the text
+            is more complicated than the one used by the chart, and if expressed in the chart would make it
+            more difficult to read.
         </p>
     }.gsub(/^  /, '')
 
@@ -2726,7 +2745,7 @@ class Last7DaysIntradayGas < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
         <p>
-          By clicking the legend at the bottom of the screen, you can turn the lines
+          By clicking the legend at the bottom of the chart, you can turn the lines
           on the chart on and off for individual days &hyphen; making it easier to understand
           what is going on at the school.
         </p>

@@ -19,14 +19,14 @@ class ReportConfigSupport
       'Castle Primary School'             => :electric_and_gas,
       'Freshford C of E Primary'          => :electric_and_gas,
       'Marksbury C of E Primary School'   => :electric_only,
-      'Paulton Junior School'             => :electric_and_gas,
+      'Paulton Junior School'             => :electric_and_gas_and_solar_pv,
       'Pensford Primary'                  => :electric_only,
       'Roundhill School'                  => :electric_and_gas,
       'Saltford C of E Primary School'    => :electric_and_gas,
       'St Marks Secondary'                => :electric_and_gas,
       'St Johns Primary'                  => :electric_and_gas,
       'St Saviours Junior'                => :electric_and_gas,
-      'Stanton Drew Primary School'       => :electric_only,
+      'Stanton Drew Primary School'       => :electric_and_storage_heaters,
       'St Martins Garden Primary School'  => :electric_and_gas,
       'St Michaels Junior Church School'  => :electric_and_gas,
       'Twerton Infant School'             => :electric_and_gas,
@@ -170,7 +170,7 @@ class ReportConfigSupport
   def save_excel_and_html
     write_excel
     write_html
-    @worksheet_charts = {}
+    # @worksheet_charts = {}
   end
 
   def do_one_page(page_config_name, reset_worksheets = true, chart_override = nil, name_override = nil)
