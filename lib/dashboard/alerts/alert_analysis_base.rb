@@ -153,16 +153,34 @@ class AlertAnalysisBase
     data
   end
 
-  def front_end_template_charts
-    lookup = flatten_template_variables
-    text_template_variables.select { |type, value| lookup[type][:units] == :chart }
+  public_class_method def self.front_end_template_charts
+    self.template_variable_by_type(:chart)
   end
 
-  def front_end_template_tables
-    lookup = flatten_template_variables
-    text_template_variables.select { |type, value| lookup[type][:units] == :table }
+  public_class_method def self.front_end_template_tables
+    self.template_variable_by_type(:table)
   end
 
+  def self.template_variable_by_type(var_type)
+    charts = {}
+    template_variables.each do |_group_name, variable_group|
+      charts.merge!(variable_group.select { |_type, value| value[:units] == var_type })
+    end
+    charts
+  end
+
+  def front_end_template_chart_data
+    front_end_template_chart_data_by_type(:chart)
+  end
+
+  def front_end_template_table_data
+    front_end_template_chart_data_by_type(:table)
+  end
+
+  private def front_end_template_chart_data_by_type(var_type)
+    lookup = flatten_template_variables
+    text_template_variables.select { |type, _value| lookup[type][:units] == var_type }
+  end
 
   # inherited, so derived class has hash of 'name' => variables
   def self.template_variables

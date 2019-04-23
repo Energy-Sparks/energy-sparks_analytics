@@ -94,6 +94,15 @@ school_names.sort.each do |school_name|
 
         ap(alert.html_template_variables)
 
+        puts ">>>>front end chart results:"
+        ap(alert_class.front_end_template_charts)
+        puts ">>>>front end table results:"
+        ap(alert_class.front_end_template_tables)
+        puts ">>>>chart data"
+        ap(alert.front_end_template_chart_data)
+        puts ">>>>table data"
+        ap(alert.front_end_template_table_data)
+
 =begin
         puts ">>>>All template variables:"
         ap(alert_class.front_end_template_variables)
@@ -118,9 +127,9 @@ school_names.sort.each do |school_name|
         puts ">>>>front end text results:"
         ap(alert.front_end_template_data)
         puts ">>>>front end chart results:"
-        ap(alert.front_end_template_charts)
+        ap(alert_class.front_end_template_charts)
         puts ">>>>front end table results:"
-        ap(alert.front_end_template_tables)
+        ap(alert_class.front_end_template_tables)
 =begin
         puts ">>>>text results:"
         ap(alert.text_template_variables)
