@@ -204,7 +204,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     comparison_commentary = sprintf('This week your gas consumption was %.0f kWh/£%.0f (predicted %.0f kWh) ', actual_kwh_this_week, this_week_cost, predicted_kwh_this_week)
     comparison_commentary += sprintf('compared with %.0f kWh/£%.0f (predicted %.0f kWh) last week.', actual_kwh_last_week, last_week_cost, predicted_kwh_last_week)
 
-    if difference_in_actual_versus_predicted_change_percent > MAX_CHANGE_IN_PERCENT
+    if predicted_percent_increase_in_usage > MAX_CHANGE_IN_PERCENT
       @analysis_report.summary = 'Your weekly gas consumption has increased more than expected'
       text = comparison_commentary
       cost = BenchmarkMetrics::GAS_PRICE * (actual_changein_kwh - predicted_changein_kwh)
