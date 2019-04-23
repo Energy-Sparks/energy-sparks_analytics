@@ -38,6 +38,10 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     }
   }.freeze
 
+  def timescale
+    'last year'
+  end
+
   def self.template_variables
     specific = {'Poorly Insulated Hot Water' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

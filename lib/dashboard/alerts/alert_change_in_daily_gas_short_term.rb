@@ -99,6 +99,10 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     :alert_last_2_weeks_gas_comparison_temperature_compensated
   end
 
+  def timescale
+    'week (school days only)'
+  end
+
   def self.template_variables
     specific = {'Change In Gas Short Term' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

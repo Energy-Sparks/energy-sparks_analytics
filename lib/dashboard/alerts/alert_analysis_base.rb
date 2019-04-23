@@ -267,11 +267,19 @@ class AlertAnalysisBase
     capital_cost: {
       description: 'Capital cost',
       units: :£_range
+    },
+    timescale: {
+      description: 'Timescale of analysis e.g. week, month, year',
+      units: String
     }
   }.freeze
 
   def maximum_alert_date
-    raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class ' + name)
+    raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class ' + self.class.name)
+  end
+
+  def timescale
+    raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for timeescale template variable ' + self.class.name)
   end
 
   def valid_alert?

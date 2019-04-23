@@ -78,6 +78,10 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     :alert_intraday_line_school_last7days
   end
 
+  def timescale
+    'week (school days only)'
+  end
+
   private def calculate(asof_date)
     # super(asof_date)
     days_in_week = 5

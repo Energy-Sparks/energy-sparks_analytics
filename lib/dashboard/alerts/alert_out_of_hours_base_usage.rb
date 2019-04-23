@@ -99,6 +99,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     }
   end
 
+  def timescale
+    'last year'
+  end
+
   def calculate(_asof_date)
     daytype_breakdown = extract_kwh_from_chart_data(out_of_hours_energy_consumption)
     @holidays_kwh         = daytype_breakdown['Holiday']

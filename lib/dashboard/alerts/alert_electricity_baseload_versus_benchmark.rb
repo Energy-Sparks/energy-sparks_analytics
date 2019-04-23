@@ -131,6 +131,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     :alert_1_year_baseload
   end
 
+  def timescale
+    'last year'
+  end
+
   private def calculate(asof_date)
     @average_baseload_last_year_kw, _days_sample = annual_average_baseload_kw(asof_date)
     @average_baseload_last_year_£ = annual_average_baseload_£(asof_date)

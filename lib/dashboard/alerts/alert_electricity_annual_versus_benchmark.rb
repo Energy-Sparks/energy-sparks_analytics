@@ -96,6 +96,10 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     }
   }
 
+  def timescale
+    'last year'
+  end
+
   private def calculate(asof_date)
     @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)

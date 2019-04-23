@@ -84,6 +84,10 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
     :alert_1_year_baseload
   end
 
+  def timescale
+    'last week compared with average over last year'
+  end
+
   def self.template_variables
     specific = {'Change In Baseload Short Term' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

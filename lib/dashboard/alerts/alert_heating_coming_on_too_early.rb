@@ -50,6 +50,10 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
     }
   }.freeze
 
+  def timescale
+    '7 days'
+  end
+
   def last_7_days_gas_chart
     :alert_last_7_days_intraday_gas_heating_on_too_early
   end
