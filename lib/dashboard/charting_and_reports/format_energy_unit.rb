@@ -82,7 +82,7 @@ class FormatEnergyUnit
 
   def self.format_pounds(value, medium)
     if value.magnitude >= 1.0
-      type_format(:£, medium) + scale_num(value)
+      type_format(:£, medium) + scale_num(value, true)
     else
       scale_num(value * 100.0) + 'p'
     end
@@ -118,7 +118,7 @@ class FormatEnergyUnit
     end
   end
 
-  def self.scale_num(number)
+  def self.scale_num(number, in_pounds = false)
     if number.nil?
       '' # specific case where no value specified
     elsif number.magnitude == 0.0
@@ -128,7 +128,11 @@ class FormatEnergyUnit
     elsif number.magnitude < 0
       sprintf '%.3f', number
     elsif number.magnitude < 50
-      sprintf '%.1f', number
+      if in_pounds
+        sprintf '%.2f', number
+      else
+        sprintf '%.1f', number
+      end
     elsif number.magnitude < 1000
       sprintf '%.0f', number
     else
