@@ -220,10 +220,9 @@ protected
     '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + kwh_text + 'kWh)'
   end
 
-  def kwh_to_pounds_and_kwh(kwh, fuel_type_sym)
-    pounds = YAxisScaling.convert(@chart_definition[:yaxis_units], :£, fuel_type_sym, kwh, false)
-    logger.debug pounds.inspect
-    logger.debug kwh.inspect
+  def kwh_to_pounds_and_kwh(kwh, fuel_type_sym, data_units = @chart_definition[:yaxis_units])
+    pounds = YAxisScaling.convert(data_units, :£, fuel_type_sym, kwh, false)
+    # logger.info "kwh_to_pounds_and_kwh:  kwh = #{kwh} £ = #{pounds}"
     '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + FormatEnergyUnit.scale_num(kwh) + 'kWh)'
   end
 
@@ -1685,7 +1684,7 @@ class HotWaterAdvice < DashboardChartAdviceBase
         <li>An average weekend day consumption of <%= FormatEnergyUnit.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
         <li>An average holiday day consumption of <%= FormatEnergyUnit.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
         <li>Likely overall efficiency: <%= percent(efficiency) %></li>
-        <li>Estimate of annual cost for hot water heating: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas) %>
+        <li>Estimate of annual cost for hot water heating: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas, :kwh) %>
         <li>Benchmark annual usage for school of same size <%= FormatEnergyUnit.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
         <li>If the school matched the annual benchmark consumption it would save the equivalent energy needed to heat  <%= baths_savings %> baths
         of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
