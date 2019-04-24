@@ -22,6 +22,8 @@ module Logging
   end
 end
 
+# WOOF WOOF
+
 # Ultimately based on AR models
 require_rel '../app/**/*.rb'
 
