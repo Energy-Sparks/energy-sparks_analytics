@@ -24,6 +24,8 @@ end
 
 # WOOF WOOF
 
+# EMOW
+
 # Ultimately based on AR models
 require_rel '../app/**/*.rb'
 
