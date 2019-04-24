@@ -12,7 +12,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
   attr_reader :actual_kwh_this_week, :actual_kwh_last_week, :actual_changein_kwh, :actual_percent_increase_in_usage
   attr_reader :this_week_cost, :last_week_cost, :difference_in_actual_versus_predicted_change_percent
   attr_reader :predicted_this_week_cost, :predicted_last_week_cost, :predicted_change_in_cost
-  attr_reader :signifcant_increase_in_gas_consumption
+  attr_reader :signficant_increase_in_gas_consumption
   attr_reader :beginning_of_week, :beginning_of_last_week
   attr_reader :one_year_saving_£
 
@@ -77,7 +77,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
       description: 'percentage difference between actual and predicted changes between this week and last week',
       units:  :percent
     },
-    signifcant_increase_in_gas_consumption: {
+    signficant_increase_in_gas_consumption: {
       description: 'significant change in gas consumption between last 2 weeks (rating > 3, temperature adjusted)',
       units:  TrueClass
     },
@@ -134,11 +134,11 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     saving_£ = heating_weeks * (@predicted_this_week_cost - @predicted_last_week_cost)
     @one_year_saving_£ = Range.new(saving_£, saving_£)
 
-    @rating = [10.0 - 10.0 * [@predicted_percent_increase_in_usage / 0.3, 0.0].max, 10.0].min.round(1)
+    @rating = calculate_rating_from_range(0.2, -0.2, -1 * @difference_in_actual_versus_predicted_change_percent)
 
-    @signifcant_increase_in_gas_consumption = @rating < 7.0
+    @significant_increase_in_gas_consumption = @rating < 7.0
 
-    @status = @signifcant_increase_in_gas_consumption ? :bad : :good
+    @status = @signficant_increase_in_gas_consumption ? :bad : :good
 
     @term = :shortterm
     @bookmark_url = add_book_mark_to_base_url('GasChange')
@@ -146,7 +146,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
 
   def default_content
     %{
-      <% if signifcant_increase_in_gas_consumption %>
+      <% if signficant_increase_in_gas_consumption %>
         <p>
           Your gas consumption on school days has increased from
           <%= predicted_last_week_cost %> (<%= predicted_kwh_last_week %>) last week (week starting <%= beginning_of_last_week %>) to
@@ -166,7 +166,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
 
   def default_summary
     %{
-      <% if signifcant_increase_in_gas_consumption %>
+      <% if signficant_increase_in_gas_consumption %>
         Your daily gas consumption has increased.
       <% else %>
         Your daily gas consumption is good
@@ -204,7 +204,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     comparison_commentary = sprintf('This week your gas consumption was %.0f kWh/£%.0f (predicted %.0f kWh) ', actual_kwh_this_week, this_week_cost, predicted_kwh_this_week)
     comparison_commentary += sprintf('compared with %.0f kWh/£%.0f (predicted %.0f kWh) last week.', actual_kwh_last_week, last_week_cost, predicted_kwh_last_week)
 
-    if predicted_percent_increase_in_usage > MAX_CHANGE_IN_PERCENT
+    if difference_in_actual_versus_predicted_change_percent > MAX_CHANGE_IN_PERCENT
       @analysis_report.summary = 'Your weekly gas consumption has increased more than expected'
       text = comparison_commentary
       cost = BenchmarkMetrics::GAS_PRICE * (actual_changein_kwh - predicted_changein_kwh)

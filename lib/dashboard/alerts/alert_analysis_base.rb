@@ -266,7 +266,7 @@ class AlertAnalysisBase
   end
 
   protected def calculate_rating_from_range(good_value, bad_value, actual_value)
-    [10.0 * [(bad_value / good_value) - (actual_value / good_value), 0.0].max, 10.0].min.round(1)
+    [10.0 * [(actual_value - bad_value) / (good_value - bad_value), 0.0].max, 10.0].min.round(1)
   end
 
   protected def flatten_template_variables
