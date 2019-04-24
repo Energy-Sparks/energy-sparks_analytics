@@ -22,7 +22,7 @@ class DarkSkyWeatherInterface
     results
   end
 
-  def historic_weather(latitude, longitude, start_date, end_date)
+  def historic_temperatures(latitude, longitude, start_date, end_date)
     distance_to_weather_station, historic_weather_data = download_historic_weather(latitude, longitude, start_date, end_date + 1)
     historic_weather_data, bad_data = document_missing_and_remove_nil_readings(historic_weather_data, start_date, end_date + 1)
     interpolated_historic_weather_data = interpolate_missing_data(historic_weather_data, start_date, end_date)
@@ -35,7 +35,7 @@ class DarkSkyWeatherInterface
   private def download_historic_weather(latitude, longitude, start_date, end_date)
     distance_to_weather_station = nil
     historic_weather_data = {}
-    (start_date..(end_date + 1)).each do |date|
+    (start_date..end_date).each do |date|
       data = download_one_days_historic_weather(latitude, longitude, date)
       distance_to_weather_station = data[:distance_to_nearest_station_km]
       historic_weather_data.merge!(data.select{ |time_key, _temperature| !%i[distance_to_nearest_station_km].include?(time_key) })

@@ -17,9 +17,21 @@ class AlertHeatingOnOff < AlertGasModelBase
     @forecast_data = nil
   end
 
-  def forecast
-    return @forecast_data unless @forecast_data.nil?
+  def timescale
+    'next 2 weeks'
+  end
 
+  private def dark_sky_forecast
+    throw EnergySparksUnexpectedSchoolDataConfiguration.new('Unexpected null area name for school') if @school.area_name.nil?
+
+    latitude, longitude = AreaNameGeoLocations.latitude_longitude_from_area_name(@school.area_name)
+
+    throw EnergySparksUnexpectedSchoolDataConfiguration.new('Cant find latitude for school, not setup?') if latitude.nil?
+
+    DarkSkyWeatherInterface.new.weather_forecast(latitude, longitude)
+  end
+
+  private def met_office_forecast
     area_name = @school.area_name
 
 =begin
@@ -30,7 +42,15 @@ class AlertHeatingOnOff < AlertGasModelBase
       @forecast_data = MetOfficeDatapointWeatherForecast.new(area_name)
     end
 =end
-    @forecast_data = MetOfficeDatapointWeatherForecast.new(area_name)
+    MetOfficeDatapointWeatherForecast.new(area_name)
+  end
+
+  private def forecast
+    @forecast_data = met_office_forecast
+    ap(@forecast)
+    @forecast_data = dark_sky_forecast if @forecast_data.nil?
+
+    @forecast_data
   end
 
   def analyse_private(asof_date)

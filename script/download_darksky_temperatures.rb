@@ -68,7 +68,7 @@ locations.each do |city, config|
   if start_date > end_date
     puts 'csv file already up to date'
   else
-    distance_to_weather_station, temperature_data, percent_bad, bad_data = darksky.historic_weather(config[:latitude], config[:longitude], start_date, end_date)
+    distance_to_weather_station, temperature_data, percent_bad, bad_data = darksky.historic_temperatures(config[:latitude], config[:longitude], start_date, end_date)
     write_csv(csv_filename, temperature_data, !new_file)
     puts "Saving dates from #{start_date} to #{end_date} to csv file"
     puts "Distance of weather station to location #{distance_to_weather_station}"
