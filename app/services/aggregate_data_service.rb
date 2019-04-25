@@ -31,12 +31,15 @@ class AggregateDataService
 
   def aggregate_heat_and_electricity_meters
     bm = Benchmark.realtime {
+      @@dontcachecalculatedco2costdata = true
       aggregate_heat_meters
       aggregate_electricity_meters
       disaggregate_storage_heaters if @meter_collection.storage_heaters?
       create_solar_pv_sub_meters if @meter_collection.solar_pv_panels?
+      @@dontcachecalculatedco2costdata = false
     }
-    logger.info "Calculated meter aggregation in #{bm.round(2)} seconds"
+    logger.info "Calculated meter aggregation in #{bm.round(3)} seconds"
+    puts "Calculated meter aggregation in #{bm.round(3)} seconds"
   end
 
   private
@@ -211,15 +214,10 @@ class AggregateDataService
     mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
     combined_amr_data = AMRData.new(type)
     (min_date..max_date).each do |date|
-      combined_data = Array.new(48, 0.0)
-      meters.each do |meter|
-        (0..47).each do |half_hour_index|
-          if meter.amr_data.date_exists?(date)
-            combined_data[half_hour_index] += meter.amr_data.kwh(date, half_hour_index)
-          end
-        end
-      end
-      days_data = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, combined_data)
+      valid_meters_for_date = meters.select { |meter| meter.amr_data.date_exists?(date) }
+      amr_data_for_date_x48_valid_meters = valid_meters_for_date.map { |meter| meter.amr_data.days_kwh_x48(date) }
+      combined_amr_data_x48 = AMRData.fast_add_multiple_x48_x_x48(amr_data_for_date_x48_valid_meters)
+      days_data = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, combined_amr_data_x48)
       combined_amr_data.add(date, days_data)
     end
     combined_amr_data

@@ -1,16 +1,25 @@
+require_relative './cost_carbon_base'
 # holds and calculates a schedule of carbon emissions - matches amd_data so [date] = [48x carbon emissions]
 
-class CarbonEmissions < HalfHourlyData
-  attr_reader :flat_type, :flat_rate, :meter_id
-  def initialize(meter_id_for_debug)
-    super(:amr_data_carbon_emissions)
+class CarbonEmissions < CostCarbonCalculatedCachedBase
+  attr_reader :grid_carbon_schedule, :flat_rate, :meter_id, :amr_data
+  def initialize(meter_id_for_debug, parameterised = false, flat_rate = nil, grid_carbon_schedule = nil, amr_data = nil)
+    super(:amr_data_carbon_emissions, parameterised)
     @meter_id = meter_id_for_debug
+    @flat_rate = flat_rate
+    @grid_carbon_schedule = grid_carbon_schedule
+    @amr_data = amr_data
   end
 
-  def self.create_carbon_emissions(meter_id_for_debug, amr_data, flat_rate, grid_carbon_schedule)
-    carbon_emissions = CarbonEmissions.new(meter_id_for_debug)
-    carbon_emissions.calculate_carbon_emissions(amr_data, flat_rate, grid_carbon_schedule)
-    carbon_emissions
+  def self.create_carbon_emissions(meter_id_for_debug, amr_data, flat_rate, grid_carbon_schedule, parameterised = false)
+    if parameterised
+      carbon_emissions = CarbonEmissions.new(meter_id_for_debug, true, flat_rate, grid_carbon_schedule, amr_data)
+      carbon_emissions
+    else
+      carbon_emissions = CarbonEmissions.new(meter_id_for_debug)
+      carbon_emissions.calculate_carbon_emissions(amr_data, flat_rate, grid_carbon_schedule)
+      carbon_emissions
+    end
   end
 
   # has to be done using data not from parameterised calculation

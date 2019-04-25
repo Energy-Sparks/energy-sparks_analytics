@@ -243,6 +243,7 @@ class ReportConfigSupport
 
   def compare_charts(chart_name, old_data, new_data)
     diff = old_data == new_data
+    puts "Chart result comparison"
     unless diff # HashDiff is horribly slow, so only run if necessary
       puts "+" * 120
       puts "Chart #{chart_name} differs"
@@ -250,7 +251,7 @@ class ReportConfigSupport
       if @@energysparksanalyticsautotest[:skip_advice] && h_diff.to_s.include?('html')
         puts 'Advice differs'
       else
-        if h_diff.to_s.length > 50
+        if h_diff.to_s.length > 2000
           puts "Lots of differences #{h_diff.to_s.length} length"
         else
           ap(h_diff)
