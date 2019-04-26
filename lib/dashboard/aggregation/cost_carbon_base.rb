@@ -7,7 +7,7 @@ class CostCarbonCalculatedCachedBase < HalfHourlyData
   end
 
   def one_days_data_x48(date)
-    if @@dontcachecalculatedco2costdata && parameterised
+    if true && parameterised
       if is_a?(CarbonEmissions)
         return calculate_emissions_for_date(date, amr_data.days_kwh_x48(date), flat_rate, grid_carbon_schedule)
       else
