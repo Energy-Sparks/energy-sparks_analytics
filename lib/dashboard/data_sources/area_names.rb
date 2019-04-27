@@ -36,6 +36,10 @@ class AreaNames
     AREA_NAMES[key][:met_office_forecast_id]
   end
 
+  def self.latitude_longitude(key)
+    [AREA_NAMES[key][:latitude] , AREA_NAMES[key][:longitude]]
+  end
+
   private
 
   AREA_NAMES = { # mapping from areas to csv data files for analytics non-db code
@@ -46,7 +50,9 @@ class AreaNames
       solar_pv_filename:          'pv data Bath.csv',
       holiday_calendar:           'Bath holidays.csv',
       yahoo_weather_forecast_id:  'bath, uk',
-      met_office_forecast_id:     310026
+      met_office_forecast_id:     310026,
+      latitude:                   51.39,
+      longitude:                  -2.37
     },
     frome: {
       name:                       'Frome',
@@ -55,7 +61,10 @@ class AreaNames
       solar_pv_filename:          'pv data Frome.csv',
       holiday_calendar:           'Holidays.csv',
       yahoo_weather_forecast_id:  'frome, uk', # untested 16Jan2019 post withdrawal of free API
-      met_office_forecast_id:     351523
+      met_office_forecast_id:     351523,
+      latitude:                   51.2308,
+      longitude:                  -2.3201
+
     },
     bristol: {
       name:                       'Bristol',
@@ -64,7 +73,9 @@ class AreaNames
       solar_pv_filename:          'pv data Bristol.csv',
       holiday_calendar:           'Holidays.csv',
       yahoo_weather_forecast_id:  'bristol, uk', # untested 16Jan2019 post withdrawal of free API
-      met_office_forecast_id:     310004
+      met_office_forecast_id:     310004,
+      latitude:                   51.4545,
+      longitude:                  -2.5879
     },
     sheffield: {
       name:                       'Sheffield',
@@ -73,7 +84,9 @@ class AreaNames
       solar_pv_filename:          'pv data Sheffield.csv',
       holiday_calendar:           'Sheffield holidays.csv',
       yahoo_weather_forecast_id:  'sheffield, uk', # untested 16Jan2019 post withdrawal of free API
-      met_office_forecast_id:     353467
+      met_office_forecast_id:     353467,
+      latitude:                   53.3811,
+      longitude:                  -1.4701
     }
   }.freeze
 end

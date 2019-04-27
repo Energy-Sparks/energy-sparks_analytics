@@ -27,6 +27,7 @@ class FormatEnergyUnit
     £_range:            '£',
     £_per_kwh:          '£/kWh',
     date:               '',
+    datetime:           '',
     teaching_assistant: 'teaching assistant (hours)'
   }.freeze
 
@@ -58,6 +59,8 @@ class FormatEnergyUnit
       "#{scale_num(value * 100.0)}#{type_format(unit, medium)}"
     elsif unit == :date
       value.strftime('%A %e %b %Y')
+    elsif unit == :datetime
+      value.strftime('%A %e %b %Y %H:%M')
     else
       "#{scale_num(value)}" + (in_table ? '' : " #{type_format(unit, medium)}")
     end

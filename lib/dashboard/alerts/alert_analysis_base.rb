@@ -42,6 +42,9 @@ class AlertAnalysisBase
         invalid_alert_report # gas alert for electric only school or electic alert for gas only school
       end
     rescue StandardError => e
+      puts e.to_s
+      puts e.message
+      puts e.backtrace
       erroneous_report(e)
     end
   end
@@ -64,6 +67,7 @@ class AlertAnalysisBase
       map_types = {
         Float     => :float,
         Date      => :date,
+        Time      => :datetime,
         String    => :string,
         Integer   => :integer,
         Symbol    => :symbol
@@ -479,11 +483,27 @@ class AlertAnalysisBase
     end
   end
 
+  protected def holiday?(date)
+    @school.holidays.holiday?(date)
+  end
+
+  protected def weekend?(date)
+    date.saturday? || date.sunday?
+  end
+
+  protected def occupied?(date)
+    !(weekend?(date) || holiday?(date))
+  end
+
+  protected def occupancy_description(date)
+    holiday?(date) ? 'holiday' : weekend?(date) ? 'weekend' : 'school day'
+  end
+
   # returns a list of the last n 'school_days' before and including the asof_date
   def last_n_school_days(asof_date, school_days)
     list_of_school_days = []
     while school_days > 0
-      unless @school.holidays.holiday?(asof_date) || asof_date.saturday? || asof_date.sunday?
+      if occupied?(asof_date)
         list_of_school_days.push(asof_date)
         school_days -= 1
       end

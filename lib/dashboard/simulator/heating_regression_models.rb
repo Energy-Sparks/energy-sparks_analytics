@@ -961,6 +961,16 @@ module AnalyseHeatingAndHotWater
       end
     end
 
+    # used by heating on/off alert when its using a forecast, so it doesn't know whether the heating is on or not
+    def predicted_kwh_future_date(date, temperature)
+      model = @models[heating_model_for_future_date(date)]
+      model.predicted_kwh_temperature(temperature)
+    end
+
+    private def heating_model_for_future_date(date)
+      holiday?(date) ? HEATINGHOLIDAYMODEL : weekend?(date) ? HEATINGWEEKENDMODEL : HEATINGOCCUPIEDMODEL
+    end
+
     def predicted_kwh_daterange(start_date, end_date, temperatures)
       total_kwh = 0.0
       (start_date..end_date).each do |date|
@@ -994,6 +1004,10 @@ module AnalyseHeatingAndHotWater
       'Thermally massive'
     end
 
+    private def heating_model_for_future_date(date)
+      holiday?(date) ? HEATINGHOLIDAYMODEL : weekend?(date) ? HEATINGWEEKENDMODEL : school_day_model(date)
+    end
+
     def all_heating_model_types # derived as constants not inherited
       ALLMODELTYPES
     end
@@ -1011,12 +1025,12 @@ module AnalyseHeatingAndHotWater
 
     # mathetically not meaningful
     def average_heating_school_day_a
-      SCHOOLDAYHEATINGMODELTYPES.map { |doy| @models[doy].a }.inject(:+) / SCHOOLDAYHEATINGMODELTYPES.length
+      SCHOOLDAYHEATINGMODELTYPES.map { |dow| @models[dow].a }.inject(:+) / SCHOOLDAYHEATINGMODELTYPES.length
     end
 
     # mathetically not meaningful
     def average_heating_school_day_b
-      SCHOOLDAYHEATINGMODELTYPES.map { |doy| @models[doy].b }.inject(:+) / SCHOOLDAYHEATINGMODELTYPES.length
+      SCHOOLDAYHEATINGMODELTYPES.map { |dow| @models[dow].b }.inject(:+) / SCHOOLDAYHEATINGMODELTYPES.length
     end
 
     # mathematically not meaningful

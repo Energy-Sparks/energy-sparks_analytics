@@ -6,12 +6,7 @@ class AlertGasModelBase < AlertGasOnlyBase
   MAX_CHANGE_IN_PERCENT = 0.15
 
   attr_reader :enough_data
-  attr_reader :school_days_heating, :school_days_heating_adjective
-  attr_reader :school_days_heating_rating_out_of_10, :average_school_heating_days
-  attr_reader :non_school_days_heating, :non_school_days_heating_adjective
-  attr_reader :non_school_days_heating_rating_out_of_10, :average_non_school_day_heating_days
-  attr_reader :r2, :r2_rating_adjective, :r2_rating_out_of_10, :average_schools_r2
-  attr_reader :base_temperature
+  attr_reader :r2_rating_out_of_10
 
   attr_reader :heating_model
 
@@ -115,15 +110,15 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   def a
-    @a ||= heating_model.average_heating_school_day_a
+    @a ||= @heating_model.average_heating_school_day_a
   end
 
   def b
-    @b ||= heating_model.average_heating_school_day_b
+    @b ||= @heating_model.average_heating_school_day_b
   end
 
   def school_days_heating
-    @school_days_heating ||= heating_model.number_of_heating_school_days
+    @school_days_heating ||= @heating_model.number_of_heating_school_days
   end
 
   def school_days_heating_adjective
@@ -139,12 +134,12 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   def heating_day_breakdown_current_year(asof_date)
-    @breakdown = heating_model.heating_day_breakdown(asof_date_minus_one_year(asof_date), asof_date) if @breakdown.nil?
+    @breakdown = @heating_model.heating_day_breakdown(asof_date_minus_one_year(asof_date), asof_date) if @breakdown.nil?
     @breakdown
   end
 
   def non_school_days_heating
-    @non_school_days_heating ||= heating_model.number_of_non_school_heating_days
+    @non_school_days_heating ||= @heating_model.number_of_non_school_heating_days
   end
 
   def non_school_days_heating_adjective
@@ -154,13 +149,13 @@ class AlertGasModelBase < AlertGasOnlyBase
   def non_school_days_heating_rating_out_of_10
     AnalyseHeatingAndHotWater::HeatingModel.non_school_day_heating_rating_out_of_10(non_school_days_heating)
   end
-  
+
   def average_non_school_day_heating_days
     AnalyseHeatingAndHotWater::HeatingModel.average_non_school_day_heating_days
   end
 
   def r2
-    @r2 ||= heating_model.average_heating_school_day_r2
+    @r2 ||= @heating_model.average_heating_school_day_r2
   end
 
   def r2_rating_adjective
@@ -171,17 +166,8 @@ class AlertGasModelBase < AlertGasOnlyBase
     AnalyseHeatingAndHotWater::HeatingModel.average_schools_r2
   end
 
-  def school_days_heating
-    @school_days_heating ||= heating_model.number_of_heating_school_days
-  end
-
   def base_temperature
-    @base_temperature ||= heating_model.average_base_temperature
-  end
-
-  protected def calculate_model(asof_date)
-    puts 'Warning calculate_model deprecated'
-    calculate(asof_date)
+    @base_temperature ||= @heating_model.average_base_temperature
   end
 
   protected def model_start_date(asof_date)
@@ -197,7 +183,7 @@ class AlertGasModelBase < AlertGasOnlyBase
     @enough_data = months >= 11
   end
 
-  protected def calculate(asof_date)
+  protected def calculate_model(asof_date)
     @heating_model = @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, one_year_period(asof_date))
     calculate_enough_data(model_start_date(asof_date), asof_date)
   end
