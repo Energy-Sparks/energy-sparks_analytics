@@ -967,6 +967,10 @@ module AnalyseHeatingAndHotWater
       model.predicted_kwh_temperature(temperature)
     end
 
+    def average_heating_b_kwh_per_1_C_per_day
+      @models[HEATINGOCCUPIEDMODEL].b
+    end
+
     # used by heating on/off alert when its using a forecast, so it doesn't know whether the heating is on or not
     def predicted_non_heating_kwh_future_date(date, temperature)
       model = @models[non_heating_model_for_future_date(date)]
@@ -1016,6 +1020,14 @@ module AnalyseHeatingAndHotWater
 
     private def heating_model_for_future_date(date)
       holiday?(date) ? HEATINGHOLIDAYMODEL : weekend?(date) ? HEATINGWEEKENDMODEL : school_day_model(date)
+    end
+
+    def average_heating_b_kwh_per_1_C_per_day
+      b_total = 0.0
+      SCHOOLDAYHEATINGMODELTYPES.each do |model_type|
+        b_total += @models[model_type].b
+      end
+      b_total / SCHOOLDAYHEATINGMODELTYPES.length
     end
 
     def all_heating_model_types # derived as constants not inherited

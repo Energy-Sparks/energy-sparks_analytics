@@ -4,6 +4,7 @@ require_relative 'alert_gas_model_base.rb'
 class AlertHeatingSensitivityAdvice < AlertGasModelBase
   attr_reader :annual_saving_1_C_change_kwh, :annual_saving_1_C_change_£, :annual_saving_1_C_change_percent
   attr_reader :one_year_saving_£
+  attr_reader :fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day
 
   def initialize(school)
     super(school, :heatingsensitivity)
@@ -31,6 +32,10 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
       description: 'Predicted annual reduction in heating consumption if thermostat turned down 1C (% of annual gas consumption)',
       units:  :percent
     },
+    fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day: {
+      description: 'Measure of combined fabric and boiler efficiency (kWh/1C dT/1000m2/day)',
+      units:  :kwh
+    }
   }
 
   private def calculate(asof_date)
@@ -42,6 +47,8 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     @annual_saving_1_C_change_kwh *= (365 / (asof_date - start_date)) # scale to 1 year
     @annual_saving_1_C_change_£ = @annual_saving_1_C_change_kwh * BenchmarkMetrics::GAS_PRICE
     @one_year_saving_£ = Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£)
+    @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = heating_model.average_heating_b_kwh_per_1_C_per_day
+    @rating = 5.0
   end
 
   def analyse_private(asof_date)
