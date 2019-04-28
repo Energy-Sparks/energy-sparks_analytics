@@ -37,7 +37,7 @@ class AlertHeatingOnOff < AlertGasModelBase
       description: 'Next N days weather forecast (N = ~7 for dark sky, N = ~5 for Met Office)',
       units: :table,
       header: ['Date', 'Average overnight temperature', 'Average day time temperature', 'Cloud', 
-               'Occupancy', 'Heating Recommendation', 'Potential Saving(-Cost) (kWh)', 'Potential Saving(-Cost) (£)'],
+               'Type of day', 'Heating recommendation', 'Potential Saving(-cost) (kWh)', 'Potential saving(-cost) (£)'],
       column_types: [Date, :temperature, :temperature, String, String, String, { kwh: :gas }, :£]
     },
     next_weeks_predicted_consumption_kwh: {

@@ -323,8 +323,8 @@ class SeriesDataManager
       when :meter;            breakdown = breakdown_to_meter_level(d1, d2)
       when :accounting_cost;  breakdown = breakdown_to_bill_components_date_range(d1, d2)
 
-      when :hotwater; breakdown.merge!(hotwater_breakdown(d1, d2))
-      when :submeter; breakdown.merge!(submeter_breakdown(meter, d1, d2))
+      when :hotwater;       breakdown.merge!(hotwater_breakdown(d1, d2))
+      when :submeter;       breakdown.merge!(submeter_breakdown(meter, d1, d2))
 
       when :none;           breakdown[SeriesNames::NONE] = amr_data_date_range(meter, d1, d2, kwh_cost_or_co2)
       when :baseload;       breakdown[SeriesNames::BASELOAD] = meter.amr_data.baseload_kwh_date_range(d1, d2)

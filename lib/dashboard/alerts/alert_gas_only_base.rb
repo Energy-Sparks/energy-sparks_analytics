@@ -50,6 +50,20 @@ class AlertGasOnlyBase < AlertAnalysisBase
     kwhs
   end
 
+  def pipework_insulation_cost
+    meters_pipework = floor_area / 5.0
+    Range.new(meters_pipework * 5, meters_pipework * 15) # TODO(PH,11Mar2019) - find real figure to replace these?
+  end
+
+  def electric_point_of_use_hotwater_costs
+    number_of_toilets = (pupils / 30.0)
+    Range.new(number_of_toilets * 300.0, number_of_toilets * 600.0)
+  end
+  
+  protected def aggregate_meter
+    @school.aggregated_heat_meters
+  end
+
   def non_heating_only
     @school.aggregated_heat_meters.non_heating_only?
   end

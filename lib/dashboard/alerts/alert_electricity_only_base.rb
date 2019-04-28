@@ -6,18 +6,18 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
   end
 
   def maximum_alert_date
-    @school.aggregated_electricity_meters.amr_data.end_date
+    aggregate_meter.amr_data.end_date
   end
 
   protected
 
   def average_baseload(date1, date2)
-    amr_data = @school.aggregated_electricity_meters.amr_data
+    amr_data = aggregate_meter.amr_data
     amr_data.average_baseload_kw_date_range(date1, date2)
   end
 
   def annual_average_baseload_kw(asof_date)
-    start_date = [asof_date - 365, @school.aggregated_electricity_meters.amr_data.start_date].max
+    start_date = [asof_date - 365, aggregate_meter.amr_data.start_date].max
     avg_baseload = average_baseload(start_date, asof_date)
     [avg_baseload, asof_date - start_date]
   end
@@ -30,6 +30,10 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
   def annual_average_baseload_£(asof_date)
     kwh = annual_average_baseload_kwh(asof_date)
     kwh * blended_electricity_£_per_kwh(asof_date)
+  end
+
+  protected def aggregate_meter
+    @school.aggregated_electricity_meters
   end
 
   def blended_electricity_£_per_kwh(asof_date)

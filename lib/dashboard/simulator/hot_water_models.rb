@@ -11,6 +11,8 @@ module AnalyseHeatingAndHotWater
     HWTEMPERATURE = 35 # C
     BATHLITRES = 60
     SEASONALBOILEREFFICIENCY = 0.65
+    # https://cms.esi.info/Media/documents/Stieb_SNU_ML.pdf
+    STANDING_LOSS_FROM_ELECTRIC_WATER_HEATER_KWH_PER_DAY = 0.25
     attr_reader :buckets, :analysis_period, :efficiency, :analysis_period_start_date
     attr_reader :analysis_period_end_date, :annual_hotwater_kwh_estimate
     attr_reader :avg_school_day_gas_consumption, :avg_holiday_day_gas_consumption, :avg_weekend_day_gas_consumption
@@ -42,6 +44,13 @@ module AnalyseHeatingAndHotWater
 
     def self.benchmark_one_day_pupil_kwh
       HEATCAPACITYWATER * PUPILUSAGELITRES * (HWTEMPERATURE - 10) * 1_000.0 / 3_600_000.0
+    end
+
+    def self.annual_point_of_use_electricity_meter_kwh(pupils)
+      number_heaters = (pupils / 30.0).ceil
+      standing_loss = number_heaters * STANDING_LOSS_FROM_ELECTRIC_WATER_HEATER_KWH_PER_DAY * 365
+      hot_water_usage = benchmark_annual_pupil_kwh * pupils
+      [hot_water_usage, standing_loss, hot_water_usage + standing_loss]
     end
 
     def self.litres_of_hotwater(kwh)

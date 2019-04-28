@@ -1225,6 +1225,10 @@ class ChartManager
       meter_definition: :allheat,
       yaxis_units:      :kwh
     },
+    hotwater_alert: {
+      inherits_from:    :hotwater,
+      yaxis_units:      :£
+    },
     irradiance_test:  {
       name:             'Solar Irradiance Y2 axis check',
       inherits_from:    :optimum_start,
@@ -1267,6 +1271,7 @@ class ChartManager
       inherits_from:    :last_2_weeks_gas_comparison
     },
     teachers_landing_page_gas: {
+      yaxis_units:      :£,
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
     alert_last_2_weeks_gas_comparison_temperature_compensated: {

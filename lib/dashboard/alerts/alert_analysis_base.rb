@@ -431,7 +431,7 @@ class AlertAnalysisBase
   end
 
   def payback_years
-    return 0..0 if one_year_saving_£.nil? || capital_cost.nil? || capital_cost = 0.0..0.0
+    return 0..0 if one_year_saving_£.nil? || capital_cost.nil? || capital_cost == 0.0..0.0
     Range.new(capital_cost.first / one_year_saving_£.last, capital_cost.last / one_year_saving_£.first)
   end
 
@@ -520,9 +520,25 @@ class AlertAnalysisBase
     true
   end
 
+  protected def meter_date_up_to_one_year_before(meter, asof_date)
+    [asof_date - 365, meter.amr_data.start_date].max
+  end
+
   protected def kwh(date1, date2, data_type = :kwh)
-    amr_data = @school.aggregated_heat_meters.amr_data
-    amr_data.kwh_date_range(date1, date2, data_type)
+    aggregate_meter.amr_data.kwh_date_range(date1, date2, data_type)
+  end
+
+  protected def meter_date_one_year_before(asof_date)
+    meter_date_up_to_one_year_before(aggregate_meter, asof_date)
+  end
+
+  protected def annual_kwh(asof_date)
+    start_date = meter_date_one_year_before(asof_date)
+    kwh(start_date, asof_date) * scale_up_to_one_year(asof_date)
+  end
+
+  protected def scale_up_to_one_year(asof_date)
+    365.0 / (asof_date - meter_date_one_year_before(asof_date))
   end
 
   private

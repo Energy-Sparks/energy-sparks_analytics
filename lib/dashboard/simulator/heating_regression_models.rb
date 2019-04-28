@@ -366,34 +366,67 @@ module AnalyseHeatingAndHotWater
     end
 
     def hot_water_poor_insulation_cost_kwh(start_date, end_date, max_non_hotwater_criteria = 50.0)
+      calculation = hot_water_analysis(start_date, end_date, max_non_hotwater_criteria)
+      [calculation[:annual_sensitivity_to_insulation_kwh], calculation[:percent_base_hot_water_usage]]
+    end
+
+    private def hotwater_in_period?(model_type, max_non_hotwater_criteria)
+      return false unless @models.key?(model_type)
+      crude_hw_estimate_kwh_per_day = @models[model_type].predicted_kwh_temperature(20.0)
+      crude_hw_estimate_kwh_per_day > max_non_hotwater_criteria
+    end
+
+    def hot_water_analysis(start_date, end_date, max_non_hotwater_criteria = 50.0)
       return [0.0, 0.0] if @meter.heating_only? || !@models.key?(:summer_occupied_all_days)
 
       temperature_sensitivity_kwh_per_c = -1.0 * @models[:summer_occupied_all_days].b
       base_hotwater_usage_at_20c = @models[:summer_occupied_all_days].predicted_kwh_temperature(20.0)
+      holiday_hotwater_usage_at_20c = @models[:holiday_hotwater_only].predicted_kwh_temperature(20.0)
 
       holiday_hotwater = hotwater_in_period?(:holiday_hotwater_only, max_non_hotwater_criteria)
       weekend_hotwater = hotwater_in_period?(:weekend_hotwater_only, max_non_hotwater_criteria)
 
-      total_kwh = 0.0
+      temperature_sensitivity_kwh = 0.0
       base_hot_water_usage = 0.0
+      total_heating_on_kwh = 0.0
+      total_heating_off_kwh = 0.0
+      hot_water_kwh_in_heating_period = 0.0
+
       (start_date..end_date).each do |date|
         if (weekend?(date) && weekend_hotwater) ||
            (holiday?(date) && holiday_hotwater) ||
            occupied?(date)
-           avg_temp = temperatures.average_temperature(date)
-           total_kwh += temperature_sensitivity_kwh_per_c * [20.0 - avg_temp, 0.0].max
-           base_hot_water_usage += base_hotwater_usage_at_20c 
+
+          avg_temp = temperatures.average_temperature(date)
+          temperature_sensitivity_kwh += temperature_sensitivity_kwh_per_c * [20.0 - avg_temp, 0.0].max
+          base_hot_water_usage += base_hotwater_usage_at_20c
+          
+          unless boiler_off?(date)
+            if heating_on?(date)
+              total_heating_on_kwh += @amr_data.one_day_kwh(date)
+              hot_water_kwh_in_heating_period += base_hotwater_usage_at_20c
+            else
+              total_heating_off_kwh += @amr_data.one_day_kwh(date)
+            end
+          end
         end
       end
-      sensivitity_kwh = [total_kwh, 0.0].max
-      percent = sensivitity_kwh / (sensivitity_kwh + base_hot_water_usage)
-      [sensivitity_kwh, percent]
-    end
+      sensivitity_kwh = [temperature_sensitivity_kwh, 0.0].max
+      percent_base_hot_water_usage = sensivitity_kwh / (sensivitity_kwh + base_hot_water_usage)
+      hot_water_kwh = total_heating_off_kwh + hot_water_kwh_in_heating_period
+      heating_kwh = total_heating_on_kwh - hot_water_kwh_in_heating_period
+      hot_water_efficiency = (base_hotwater_usage_at_20c - holiday_hotwater_usage_at_20c) / base_hotwater_usage_at_20c
+      hot_water_efficiency *= HotwaterModel::SEASONALBOILEREFFICIENCY
 
-    def hotwater_in_period?(model_type, max_non_hotwater_criteria)
-      return false unless @models.key?(model_type)
-      crude_hw_estimate_kwh_per_day = @models[model_type].predicted_kwh_temperature(20.0)
-      crude_hw_estimate_kwh_per_day > max_non_hotwater_criteria
+      {
+        annual_sensitivity_to_insulation_kwh: sensivitity_kwh,
+        percent_base_hot_water_usage:         percent_base_hot_water_usage,
+        annual_heating_kwh:                   heating_kwh,
+        annual_hotwater_kwh:                  hot_water_kwh,
+        daily_hotwater_usage_kwh:             base_hotwater_usage_at_20c,
+        daily_holiday_hotwater_usage_kwh:     holiday_hotwater_usage_at_20c,
+        hot_water_efficiency:                 hot_water_efficiency
+      }
     end
 
     def heating_category(date, doy_recommended_heating_start_date, doy_recommended_heating_doy_end_date)
