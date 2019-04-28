@@ -962,13 +962,23 @@ module AnalyseHeatingAndHotWater
     end
 
     # used by heating on/off alert when its using a forecast, so it doesn't know whether the heating is on or not
-    def predicted_kwh_future_date(date, temperature)
+    def predicted_heating_kwh_future_date(date, temperature)
       model = @models[heating_model_for_future_date(date)]
+      model.predicted_kwh_temperature(temperature)
+    end
+
+    # used by heating on/off alert when its using a forecast, so it doesn't know whether the heating is on or not
+    def predicted_non_heating_kwh_future_date(date, temperature)
+      model = @models[non_heating_model_for_future_date(date)]
       model.predicted_kwh_temperature(temperature)
     end
 
     private def heating_model_for_future_date(date)
       holiday?(date) ? HEATINGHOLIDAYMODEL : weekend?(date) ? HEATINGWEEKENDMODEL : HEATINGOCCUPIEDMODEL
+    end
+
+    private def non_heating_model_for_future_date(date)
+      holiday?(date) ? :holiday_hotwater_only : weekend?(date) ? :weekend_hotwater_only : :summer_occupied_all_days
     end
 
     def predicted_kwh_daterange(start_date, end_date, temperatures)

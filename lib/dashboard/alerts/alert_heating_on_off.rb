@@ -200,9 +200,9 @@ class AlertHeatingOnOff < AlertGasModelBase
 
     summary_forecast.each do |date, days_forecast|
       recommendation, reduction = heating_recommendation(date, days_forecast)
-      predicted_kwh = [heating_model.predicted_kwh_future_date(date, days_forecast[:average_temperature]), 0.0].max
+      predicted_kwh, saving_kwh = predicted_saving_kwh(date, days_forecast[:average_temperature], reduction)
       next_weeks_predicted_consumption_kwh += predicted_kwh
-      saving_kwh = predicted_kwh * reduction * heat_on_off_weight
+      saving_kwh *= heat_on_off_weight
       saving_£ = saving_kwh * BenchmarkMetrics::GAS_PRICE
       potential_saving_next_week_kwh += saving_kwh
 
@@ -220,6 +220,13 @@ class AlertHeatingOnOff < AlertGasModelBase
       )
     end
     [table, potential_saving_next_week_kwh, next_weeks_predicted_consumption_kwh]
+  end
+
+  private def predicted_saving_kwh(date, temperature, reduction)
+    heating_and_non_heating_kwh = [heating_model.predicted_heating_kwh_future_date(date, temperature), 0.0].max
+    non_heating_kwh = [heating_model.predicted_non_heating_kwh_future_date(date, temperature), 0.0].max
+    heating_kwh = [heating_and_non_heating_kwh - non_heating_kwh, 0.0].max
+    [heating_and_non_heating_kwh, reduction * heating_kwh]
   end
 
   # https://www.weather.gov/media/pah/ServiceGuide/A-forecast.pdf
