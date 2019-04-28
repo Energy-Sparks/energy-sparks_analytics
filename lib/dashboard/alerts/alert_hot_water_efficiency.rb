@@ -22,7 +22,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   end
 
   def timescale
-    'next week'
+    'year'
   end
 
   def self.template_variables
