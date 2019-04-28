@@ -520,6 +520,11 @@ class AlertAnalysisBase
     true
   end
 
+  protected def kwh(date1, date2, data_type = :kwh)
+    amr_data = @school.aggregated_heat_meters.amr_data
+    amr_data.kwh_date_range(date1, date2, data_type)
+  end
+
   private
 
   def erroneous_report(e)

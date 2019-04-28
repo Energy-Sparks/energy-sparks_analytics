@@ -187,9 +187,4 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     text += sprintf('and %.0f kWh/£%.0f (floor area based) ', floor_area_benchmark, benchmark_m2_cost)
     text
   end
-
-  def kwh(date1, date2, data_type = :kwh)
-    amr_data = @school.aggregated_heat_meters.amr_data
-    amr_data.kwh_date_range(date1, date2, data_type)
-  end
 end
