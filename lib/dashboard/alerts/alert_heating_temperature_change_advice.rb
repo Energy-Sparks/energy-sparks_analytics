@@ -47,7 +47,7 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     @annual_saving_1_C_change_kwh *= (365 / (asof_date - start_date)) # scale to 1 year
     @annual_saving_1_C_change_£ = @annual_saving_1_C_change_kwh * BenchmarkMetrics::GAS_PRICE
     @one_year_saving_£ = Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£)
-    @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = heating_model.average_heating_b_kwh_per_1_C_per_day
+    @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = 1000.0 * heating_model.average_heating_b_kwh_per_1_C_per_day / floor_area
     @rating = 5.0
   end
 
