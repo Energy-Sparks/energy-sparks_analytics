@@ -43,15 +43,11 @@ class AlertHeatingOnOff < AlertGasModelBase
   end
 
   private def calculate(asof_date)
-    puts "got here"
-    forecast = dark_sky_forecast
-    ap(forecast)
-    exit
   end
 
   def analyse_private(asof_date)
     calculate_model(asof_date)
-    calculate(asof_date)
+    # calculate(asof_date)
     heating_on = @heating_model.heating_on?(asof_date) # potential timing problem if AMR data not up to date
 
     @analysis_report = AlertReport.new(:turnheatingonoff)
