@@ -27,7 +27,8 @@ class CarbonEmissions < CostCarbonCalculatedCachedBase
     Logging.logger.info "Combining carbon emissions from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
     combined_carbon_emissions = CarbonEmissions.new(combined_meter_id)
     (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
+      # list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
+      list_of_meters_on_date = list_of_meters.select { |meter| meter.amr_data.date_exists?(date) }
       list_of_days_carbon_emissions = list_of_meters_on_date.map { |meter| meter.amr_data.carbon_emissions.one_days_data_x48(date) }
       combined_days_carbon_emissions_x48 = AMRData.fast_add_multiple_x48_x_x48(list_of_days_carbon_emissions)
       combined_carbon_emissions.add(date, combined_days_carbon_emissions_x48)

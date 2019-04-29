@@ -12,7 +12,7 @@ module Logging
   logger.level = :debug
 end
 
-@@parameterised = false
+@@parameterised = true
 @@dontcachecalculatedco2costdata = true
 
 profile = false
@@ -41,14 +41,14 @@ RubyProf.start if profile
 
 if false
   Benchmark.memory do |x|
-    x.report("load school")  { reports.load_school('Whiteways Primary', true) }
+    x.report("load school")  { reports.load_school('Roundhill School', true) }
   end
 end
 
 puts "Loading school"
 bm = Benchmark.realtime {
   # reports.load_school('Whiteways Primary', true)
-  reports.load_school('Whiteways Primary', true)
+  reports.load_school('Castle Primary School', true)
 }
 puts "Load time: #{bm.round(3)} seconds"
 

@@ -43,6 +43,9 @@ class AlertHeatingOnOff < AlertGasModelBase
   end
 
   private def calculate(asof_date)
+    # puts "got here"
+    # forecast = dark_sky_forecast
+    #  ap(forecast)
   end
 
   def analyse_private(asof_date)
