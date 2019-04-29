@@ -61,6 +61,14 @@ class AlertAnalysisBase
     formatted_template_variables(:text)
   end
 
+  def self.flatten_front_end_template_variables
+    variables = {}
+    self.template_variables.each do |group_name, variable_group|
+      variables.merge!(variable_group)
+    end
+    variables
+  end
+
   def self.front_end_template_variables
     front_end_template = {}
     self.template_variables.each do |group_name, variable_group|

@@ -1,14 +1,81 @@
 #======================== Holiday Alert =======================================
 require_relative 'alert_analysis_base.rb'
+require_relative 'alert_out_of_hours_electricity_usage.rb'
 
-class AlertImpendingHoliday < AlertAnalysisBase
+class AlertImpendingHoliday < AlertGasOnlyBase
   WEEKDAYS_HOLIDAY_LOOKAHEAD_PERIOD = 5
+
+  attr_reader :saving_kwh
 
   def initialize(school)
     super(school, :impendingholiday)
   end
 
+  def self.template_variables
+    specific = {'Impending holiday' => TEMPLATE_VARIABLES}
+    specific.merge!({"Impending Holiday (additonal)" => third_party_alert_variables})
+    puts "zog"
+    ap(specific)
+    specific.merge!(self.superclass.template_variables)
+    specific
+  end
+
+  def timescale
+    'week'
+  end
+
+  TEMPLATE_VARIABLES = {
+    saving_kwh: {
+      description: 'Upcoming holiday',
+      units:  {kwh: :gas}
+    },
+  }
+
+  ALERT_INHERITANCE = { # name_var_name: { class, old_name }
+    electricity_schoolday_open_kwh: { class_type: AlertOutOfHoursElectricityUsage, variable_name: :schoolday_open_kwh }
+  }
+
+  def self.third_party_alert_variables
+    vars = {}
+    ALERT_INHERITANCE.each do |new_variable_name, third_party_alert_variable|
+      third_party_alert = third_party_alert_variable[:class_type]
+      variable_definition = third_party_alert.flatten_front_end_template_variables[third_party_alert_variable[:variable_name]]
+      puts "assigning #{new_variable_name} to #{variable_definition} from #{third_party_alert_variable[:variable_name]}"
+      vars[new_variable_name] = variable_definition
+    end
+    puts "new vars"
+    ap(vars)
+    vars
+  end
+
+  private def assign_third_party_alert_variables(third_party_alert)
+    ALERT_INHERITANCE.each do |new_variable_name, third_party_alert_variable|
+      self.class.send(:attr_reader, new_variable_name)
+      instance_variable_set('@' + new_variable_name.to_s, third_party_alert.send(third_party_alert_variable[:variable_name]))
+    end
+  end
+
+  private def calculate(asof_date)
+    # annual gas holiday kWh, £: above frost protection, versus benchmark, versus % of annual usage, turning heating off, turning hot water off
+    # annual electricity kWh: above baseload, versus benchmark, versus % of annual usage
+    # previous year's holiday of same type; excess cost
+    # tips:
+    # - freezer consolidation, off
+    # - reduce baseload
+
+    electric_out_of_hours = AlertOutOfHoursElectricityUsage.new(@school)
+    electric_out_of_hours.calculate(nil)
+    assign_third_party_alert_variables(electric_out_of_hours)
+
+    puts "rtrt #{electricity_schoolday_open_kwh}"
+
+    @saving_kwh = electricity_schoolday_open_kwh
+    puts "And here #{saving_kwh}"
+    @rating = 5.0
+  end
+
   def analyse_private(asof_date)
+    calculate(asof_date)
     @analysis_report.add_book_mark_to_base_url('UpcomingHoliday')
     @analysis_report.term = :shortterm
 
