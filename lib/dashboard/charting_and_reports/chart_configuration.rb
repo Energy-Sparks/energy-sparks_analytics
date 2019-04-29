@@ -43,7 +43,6 @@ class ChartManager
       yaxis_units:      :co2,
       yaxis_scaling:    :none
     },
-    
     benchmark_electric:  {
       name:             'Benchmark Comparison (Annual Electricity Consumption)',
       chart1_type:      :bar,
@@ -111,6 +110,10 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    daytype_breakdown_combined_fuels: {
+      inherits_from:    :daytype_breakdown_gas,
+      series_breakdown: %i[model_type temperature],
+    },
     alert_daytype_breakdown_gas: {
       inherits_from: :daytype_breakdown_gas
     },
@@ -137,6 +140,10 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       timescale:        :year
+    },
+    alert_group_by_week_electricity: {
+      inherits_from:    :group_by_week_electricity,
+      yaxis_units:      :£,
     },
     storage_heater_group_by_week: {
       name:               'Storage heater by week of the year',
@@ -315,6 +322,10 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :degreedays,
       timescale:        :year
+    },
+    alert_group_by_week_gas: {
+      inherits_from:    :group_by_week_gas,
+      yaxis_units:      :£
     },
     group_by_week_carbon: {
       name:             'Carbon emissions from gas heating, hot water and kitchen usage over the last year',
@@ -1271,6 +1282,7 @@ class ChartManager
       inherits_from:    :last_2_weeks_gas_comparison
     },
     teachers_landing_page_gas: {
+      timescale:        { week: -1..0 }, 
       yaxis_units:      :£,
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
