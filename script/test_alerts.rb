@@ -16,7 +16,7 @@ def banner(title= '')
   '=' * len_before + title + '=' * len_after
 end
 
-
+@@parameterised = true
 
 school_name = 'Freshford Primary School'
 # school_name = 'St Michaels Junior Church School'
