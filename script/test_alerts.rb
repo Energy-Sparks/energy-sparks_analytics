@@ -42,8 +42,8 @@ def print_all_results(alert_class, alert)
 end
 
 @method_calls = [
+  { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
   { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
-  { on_class: false,  method: :front_end_template_table_data, name: 'Front end table data', args: nil, use_puts: false },
   { on_class: false,  method: :backwards_compatible_analysis_report, name: 'Backwards compatible alert report', args: nil, use_puts: true },
   { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
   { on_class: false,  method: :text_template_variables, name: 'text data', args: nil, use_puts: false },
@@ -69,7 +69,7 @@ end
 ]
 
 alerts_to_test = [
-  AlertHeatingOnOff
+  AlertImpendingHoliday
 =begin
   AlertChangeInDailyElectricityShortTerm,
   AlertHeatingComingOnTooEarly,
@@ -82,6 +82,9 @@ alerts_to_test = [
   AlertElectricityAnnualVersusBenchmark,
   AlertGasAnnualVersusBenchmark,
   AlertElectricityBaseloadVersusBenchmark
+  AlertHeatingOnOff
+  AlertHeatingSensitivityAdvice
+  AlertHotWaterEfficiency
   # AlertWeekendGasConsumptionShortTerm
 =end
 ]

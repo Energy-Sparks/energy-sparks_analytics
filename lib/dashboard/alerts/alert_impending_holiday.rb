@@ -14,8 +14,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   def self.template_variables
     specific = {'Impending holiday' => TEMPLATE_VARIABLES}
     specific.merge!({"Impending Holiday (additonal)" => third_party_alert_variables})
-    puts "zog"
-    ap(specific)
     specific.merge!(self.superclass.template_variables)
     specific
   end
@@ -43,8 +41,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       puts "assigning #{new_variable_name} to #{variable_definition} from #{third_party_alert_variable[:variable_name]}"
       vars[new_variable_name] = variable_definition
     end
-    puts "new vars"
-    ap(vars)
     vars
   end
 
@@ -67,10 +63,8 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     electric_out_of_hours.calculate(nil)
     assign_third_party_alert_variables(electric_out_of_hours)
 
-    puts "rtrt #{electricity_schoolday_open_kwh}"
-
     @saving_kwh = electricity_schoolday_open_kwh
-    puts "And here #{saving_kwh}"
+
     @rating = 5.0
   end
 
