@@ -33,7 +33,7 @@ RubyProf.start if profile
 # reports.load_school('Paulton Junior School', true)
 # reports.load_school('St Marks Secondary', true)
 # reports.load_school('Whiteways Primary', true)
-reports.load_school('Trinity First School', true)
+reports.load_school('Roundhill School', true)
 =begin
 Benchmark.memory do |x|
   x.report("load school")  { reports.load_school('St Marks Secondary', true) }
@@ -70,7 +70,7 @@ end
 # reports.do_chart_list('pound scaling', [:test_last_2_weeks_gas, :last_2_weeks_gas])
 
 # reports.do_all_schools(true)
-reports.do_chart_list('baseload advice', [:baseload])
+reports.do_chart_list('baseload advice', [:benchmark])
 
 if profile
   prof_result = RubyProf.stop
