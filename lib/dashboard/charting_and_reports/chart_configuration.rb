@@ -1282,7 +1282,7 @@ class ChartManager
       inherits_from:    :last_2_weeks_gas_comparison
     },
     teachers_landing_page_gas: {
-      timescale:        { week: -1..0 }, 
+      timescale:        { week: -1..0 }, # moved to weeks
       yaxis_units:      :£,
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
