@@ -21,9 +21,17 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
     :alert_daytype_breakdown_electricity
   end
 
+  def group_by_week_day_type_chart
+    :alert_group_by_week_electricity
+  end
+
   TEMPLATE_VARIABLES = {
     breakdown_chart: {
       description: 'Pie chart showing out of hour electricity consumption breakdown (school day, school day outside hours, weekends, holidays), also used for table generation',
+      units:  :chart
+    },
+    group_by_week_day_type_chart: {
+      description: 'Weekly chart showing out of hour electricity consumption breakdown (school day, school day outside hours, weekends, holidays), for last year',
       units:  :chart
     }
   }

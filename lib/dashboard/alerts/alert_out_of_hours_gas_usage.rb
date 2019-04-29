@@ -21,9 +21,17 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
     :alert_daytype_breakdown_gas
   end
 
+  def group_by_week_day_type_chart
+    :alert_group_by_week_gas
+  end
+
   TEMPLATE_VARIABLES = {
     breakdown_chart: {
       description: 'Pie chart showing out of hour gas consumption breakdown (school day, school day outside hours, weekends, holidays), also used for table generation',
+      units:  :chart
+    },
+    group_by_week_day_type_chart: {
+      description: 'Weekly chart showing out of hour electricity consumption breakdown (school day, school day outside hours, weekends, holidays), for last year',
       units:  :chart
     }
   }
@@ -31,7 +39,7 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
   def self.template_variables
     specific = {
       'Gas specific out of hours consumption' => TEMPLATE_VARIABLES,
-      'Out of hours energy consumption' => superclass.static_template_variables(:electricity)
+      'Out of hours energy consumption' => superclass.static_template_variables(:gas)
     }
     specific.merge(superclass.template_variables)
   end

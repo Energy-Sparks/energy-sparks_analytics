@@ -15,7 +15,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£
   attr_reader :daytype_breakdown_table
   attr_reader :percent_improvement_to_exemplar, :potential_saving_kwh, :potential_saving_£
-  attr_reader :one_year_saving_£
+  attr_reader :one_year_saving_£, :total_annual_£
 
   def initialize(school, fuel, benchmark_out_of_hours_percent,
                  fuel_cost, alert_type, bookmark, meter_definition,
@@ -46,6 +46,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       fuel_cost: {
         description: 'Fuel cost p/kWh',
         units:  :£_per_kwh
+      },
+      total_annual_£: {
+        description: 'Annual total fuel cost (£)',
+        units: :£
       },
 
       schoolday_open_kwh:   { description: 'Annual school day open kwh usage',   units: fuel_kwh },
@@ -124,6 +128,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @weekends_£         = @weekends_kwh         * @fuel_cost
     @schoolday_open_£   = @schoolday_open_kwh   * @fuel_cost
     @schoolday_closed_£ = @schoolday_closed_kwh * @fuel_cost
+    @total_annual_£     = @holidays_£ + @weekends_£ + @schoolday_open_£ + @schoolday_closed_£
 
     @daytype_breakdown_table = [
       ['Holiday',            @holidays_kwh,         @holidays_percent,          @holidays_£],
