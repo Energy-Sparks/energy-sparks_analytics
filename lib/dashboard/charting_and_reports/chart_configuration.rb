@@ -110,9 +110,10 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
-    daytype_breakdown_combined_fuels: {
+    daytype_breakdown_combined_fuels: { # double breakdown doesn't work TODO(PH, 29Apr2019)
       inherits_from:    :daytype_breakdown_gas,
-      series_breakdown: %i[model_type temperature]
+      meter_definition: :all,
+      series_breakdown: %i[daytype fuel]
     },
     alert_daytype_breakdown_gas: {
       inherits_from: :daytype_breakdown_gas

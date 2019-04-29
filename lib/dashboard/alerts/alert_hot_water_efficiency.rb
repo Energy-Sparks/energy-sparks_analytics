@@ -127,7 +127,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       @average_summer_school_day_kwh = @hot_water_model.avg_school_day_gas_consumption
       @average_summer_holiday_kwh = @hot_water_model.avg_holiday_day_gas_consumption
       @average_summer_weekend_day_kwh = @hot_water_model.avg_weekend_day_gas_consumption
-      kwh_annual = annual_kwh(asof_date)
+      kwh_annual = annual_kwh(@school.aggregated_heat_meters, asof_date)
       @hot_water_summer_methdology_percent_of_annual_gas = @hot_water_annual_summer_unoccupied_methdology_kwh / kwh_annual
       @annual_benchmark_hot_water_kwh, @point_of_use_annual_standing_loss_kwh, @point_of_use_annual_total_kwh = AnalyseHeatingAndHotWater::HotwaterModel.annual_point_of_use_electricity_meter_kwh(pupils)
       @hot_water_annual_summer_unoccupied_methdology_£ = @hot_water_annual_summer_unoccupied_methdology_kwh * BenchmarkMetrics::GAS_PRICE
@@ -149,8 +149,9 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   end
 
   private def heating_model_analysis(asof_date)
-    heating_model_hot_water = @heating_model.hot_water_analysis(meter_date_one_year_before(asof_date), asof_date)
-    scale = scale_up_to_one_year(asof_date)
+    meter_date_1_year_before = meter_date_one_year_before(@school.aggregated_heat_meters, asof_date)
+    heating_model_hot_water = @heating_model.hot_water_analysis(meter_date_1_year_before, asof_date)
+    scale = scale_up_to_one_year(@school.aggregated_heat_meters, asof_date)
  
     @heat_model_annual_heating_kwh                = heating_model_hot_water[:annual_heating_kwh] * scale
     @heat_model_annual_hotwater_kwh               = heating_model_hot_water[:annual_hotwater_kwh] * scale

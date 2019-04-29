@@ -78,6 +78,30 @@ class Holidays
     SchoolDatePeriod.find_period_for_date(date, @holidays)
   end
 
+  def find_next_holiday(date, max_days_search = 100)
+    (0..max_days_search).each do |days|
+      period = SchoolDatePeriod.find_period_for_date(date + days, @holidays)
+      return period unless period.nil?
+    end
+    nil
+  end
+
+  def same_holiday_previous_year(this_years_holiday_period, max_days_search = 365 + 100)
+    this_years_holiday_mid_date = this_years_holiday_period.start_date + (this_years_holiday_period.days / 2).floor
+    this_years_holiday_type = type(this_years_holiday_mid_date) 
+    # start 200 days back, the only real concern is to mis Easter which moves by up to ~40 days
+    (200..max_days_search).each do |num_days_offset_backwards|
+      date = this_years_holiday_period.start_date - num_days_offset_backwards
+      last_years_holiday_period = find_holiday(date)
+      unless last_years_holiday_period.nil?
+        last_years_holiday_mid_date = last_years_holiday_period.start_date + (last_years_holiday_period.days / 2).floor
+        last_years_holiday_type = type(last_years_holiday_mid_date)
+        return last_years_holiday_period if this_years_holiday_type == last_years_holiday_type
+      end
+    end
+    nil
+  end
+
   def find_summer_holiday_before(date)
     @holidays.reverse.each do |hol|
       # identify summer holiday by length, then month (England e.g. Mon 9 Jul 2018 - Wed 4 Sep 2018  Scotland e.g. Mon 1 Jul 2019 - 13 Aug 2019

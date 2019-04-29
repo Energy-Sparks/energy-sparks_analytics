@@ -532,21 +532,26 @@ class AlertAnalysisBase
     [asof_date - 365, meter.amr_data.start_date].max
   end
 
+  private def kwh_date_range(meter, start_date, end_date, data_type = :kwh)
+    return nil if meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date
+    meter.amr_data.kwh_date_range(start_date, end_date, data_type)
+  end
+
   protected def kwh(date1, date2, data_type = :kwh)
     aggregate_meter.amr_data.kwh_date_range(date1, date2, data_type)
   end
 
-  protected def meter_date_one_year_before(asof_date)
-    meter_date_up_to_one_year_before(aggregate_meter, asof_date)
+  protected def meter_date_one_year_before(meter, asof_date)
+    meter_date_up_to_one_year_before(meter, asof_date)
   end
 
-  protected def annual_kwh(asof_date)
-    start_date = meter_date_one_year_before(asof_date)
-    kwh(start_date, asof_date) * scale_up_to_one_year(asof_date)
+  protected def annual_kwh(meter, asof_date)
+    start_date = meter_date_one_year_before(meter, asof_date)
+    kwh(start_date, asof_date) * scale_up_to_one_year(meter, asof_date)
   end
 
-  protected def scale_up_to_one_year(asof_date)
-    365.0 / (asof_date - meter_date_one_year_before(asof_date))
+  protected def scale_up_to_one_year(meter, asof_date)
+    365.0 / (asof_date - meter_date_one_year_before(meter, asof_date))
   end
 
   private

@@ -70,7 +70,7 @@ end
 # reports.do_chart_list('pound scaling', [:test_last_2_weeks_gas, :last_2_weeks_gas])
 
 # reports.do_all_schools(true)
-reports.do_chart_list('baseload advice', [:benchmark])
+reports.do_chart_list('baseload advice', [:daytype_breakdown_combined_fuels])
 
 if profile
   prof_result = RubyProf.stop
