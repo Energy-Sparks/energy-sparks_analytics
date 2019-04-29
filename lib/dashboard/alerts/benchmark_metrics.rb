@@ -25,7 +25,7 @@ module BenchmarkMetrics
       else
         2.5 * (pupils / 300)
       end
-    when :secondary
+    when :secondary, :middle
       if pupils < 400
         10
       else
@@ -55,7 +55,7 @@ module BenchmarkMetrics
       else
         servers = 3 + (pupils / 300).floor
       end
-    when :secondary
+    when :secondary, :middle
       power = 1000.0
       if pupils < 400
         servers = 4
@@ -82,7 +82,7 @@ module BenchmarkMetrics
       else
         2.5 * (floor_area / 1600)
       end
-    when :secondary
+    when :secondary, :middle
       if floor_area < 1000
         10
       else
