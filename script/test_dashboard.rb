@@ -12,6 +12,9 @@ module Logging
   logger.level = :debug
 end
 
+@@parameterised = true
+@@dontcachecalculatedco2costdata = true
+
 profile = false
 
 if false
@@ -33,12 +36,23 @@ RubyProf.start if profile
 # reports.load_school('Paulton Junior School', true)
 # reports.load_school('St Marks Secondary', true)
 # reports.load_school('Whiteways Primary', true)
-reports.load_school('Freshford C of E Primary', true)
-=begin
-Benchmark.memory do |x|
-  x.report("load school")  { reports.load_school('St Marks Secondary', true) }
+# reports.load_school('Trinity First School', true)
+# 'Wybourn Primary School'
+
+if false
+  Benchmark.memory do |x|
+    x.report("load school")  { reports.load_school('Roundhill School', true) }
+  end
 end
-=end
+
+puts "Loading school"
+bm = Benchmark.realtime {
+  # reports.load_school('Whiteways Primary', true)
+  reports.load_school('Castle Primary School', true)
+}
+puts "Load time: #{bm.round(3)} seconds"
+
+
 
 # reports.load_school('Paulton Junior School', true)
 
@@ -70,7 +84,10 @@ end
 # reports.do_chart_list('pound scaling', [:test_last_2_weeks_gas, :last_2_weeks_gas])
 
 # reports.do_all_schools(true)
-reports.do_one_page(:cost)
+# reports.do_chart_list('hot water advice', [:hotwater])
+
+@@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to co2' if defined?(@@energysparksanalyticsautotest)
+reports.do_all_standard_pages_for_school({yaxis_units: :co2})
 
 if profile
   prof_result = RubyProf.stop

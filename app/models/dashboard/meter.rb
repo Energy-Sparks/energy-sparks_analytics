@@ -48,6 +48,12 @@ module Dashboard
       @mpan_mprn = identifier.to_i
     end
 
+    #
+    #
+    #
+    # Move down to amr_data PH 1May2019
+    #
+    #
     def set_economic_amr_tariff(default_energy_purchaser, fuel)
       @amr_data.set_economic_tariff(mpan_mprn, fuel, default_energy_purchaser)
     end
@@ -60,6 +66,12 @@ module Dashboard
       @amr_data.accounting_tariff
     end
 
+    #
+    #
+    #
+    # Move down to amr_data PH 1May2019
+    #
+    #
     def set_accounting_amr_tariff(default_energy_purchaser, fuel)
       @amr_data.set_accounting_tariff(mpan_mprn, fuel, default_energy_purchaser)
     end

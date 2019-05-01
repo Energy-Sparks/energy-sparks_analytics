@@ -2,7 +2,7 @@ require_relative '../half_hourly_data'
 require_relative '../half_hourly_loader'
 
 class AMRData < HalfHourlyData
-  attr_reader :economic_tariff, :accounting_tariff, :grid_carbon, :carbon_emissions
+  attr_reader :economic_tariff, :accounting_tariff, :carbon_emissions
 
   def initialize(type)
     super(type)
@@ -10,11 +10,11 @@ class AMRData < HalfHourlyData
   end
 
   def set_economic_tariff(meter_id, fuel_type, default_energy_purchaser)
-    @economic_tariff = EconomicCosts.create_costs(meter_id, self, fuel_type, default_energy_purchaser)
+    @economic_tariff = EconomicCosts.create_costs(meter_id, self, fuel_type, default_energy_purchaser, true)
   end
 
   def set_accounting_tariff(meter_id, fuel_type, default_energy_purchaser)
-    @accounting_tariff = AccountingCosts.create_costs(meter_id, self, fuel_type, default_energy_purchaser)
+    @accounting_tariff = AccountingCosts.create_costs(meter_id, self, fuel_type, default_energy_purchaser, true)
   end
 
   def set_economic_tariff_schedule(tariff)
@@ -32,8 +32,7 @@ class AMRData < HalfHourlyData
 
   # access point for single meters, not combined meters
   def set_carbon_emissions(meter_id_for_debug, flat_rate, grid_carbon)
-    @grid_carbon = grid_carbon # needed for updates
-    @carbon_emissions = CarbonEmissions.create_carbon_emissions(meter_id_for_debug, self, flat_rate, grid_carbon)
+    @carbon_emissions = CarbonEmissions.create_carbon_emissions(meter_id_for_debug, self, flat_rate, grid_carbon, true)
     @lock_updates = true
   end
 
@@ -98,7 +97,7 @@ class AMRData < HalfHourlyData
     return self[date].kwh_halfhour(halfhour_index) if type == :kwh
     return @economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£ || type == :economic_cost
     return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cost
-    return @carbon_emissions.one_days_data_x48(date)[halfhour_index] if type == :co2
+    return @carbon_emissions.co2_data_halfhour(date, halfhour_index) if type == :co2
   end
 
   def set_kwh(date, halfhour_index, kwh)
@@ -119,7 +118,7 @@ class AMRData < HalfHourlyData
   def clone_one_days_data(date)
     self[date].deep_dup
   end
-  
+
    # called from inherited half_hourly)data.one_day_total(date), shouldn't use generally
   def one_day_total(date, type = :kwh)
     one_day_kwh(date, type)
@@ -292,7 +291,7 @@ class AMRData < HalfHourlyData
       end
     end
   end
-  
+
     # take one set (dd_data) of half hourly data from self
   # - avoiding performance hit of taking a copy
   # caller expected to ensure start and end dates reasonable
@@ -312,7 +311,7 @@ class AMRData < HalfHourlyData
   end
 
   private
- 
+
   # go through amr_data creating 'histogram' of type of amr_data by type (original data v. substituted)
   # returns {type} = [list of dates of that type]
   def bad_data_count
