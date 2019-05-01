@@ -47,8 +47,8 @@ end
 
 puts "Loading school"
 bm = Benchmark.realtime {
-  # reports.load_school('Whiteways Primary', true)
-  reports.load_school('Castle Primary School', true)
+  reports.load_school('Whiteways Primary', true)
+  # reports.load_school('Castle Primary School', true)
 }
 puts "Load time: #{bm.round(3)} seconds"
 
@@ -87,7 +87,9 @@ puts "Load time: #{bm.round(3)} seconds"
 # reports.do_chart_list('hot water advice', [:hotwater])
 
 @@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to co2' if defined?(@@energysparksanalyticsautotest)
-reports.do_all_standard_pages_for_school({yaxis_units: :co2})
+# reports.do_all_standard_pages_for_school({yaxis_units: :co2})
+
+reports.do_chart_list('Teachers workweek', [:teachers_landing_page_gas, :teachers_landing_page_electricity])
 
 if profile
   prof_result = RubyProf.stop
