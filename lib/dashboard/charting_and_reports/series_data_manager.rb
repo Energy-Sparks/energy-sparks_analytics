@@ -751,6 +751,8 @@ private
       when :week
         period = SchoolDatePeriod.new(:week, 'current week', @last_meter_date - 6, @last_meter_date)
         @periods = [period]
+      when :workweek
+        @periods = [workweek_period(@last_meter_date)]
       when :day
         period = SchoolDatePeriod.new(:day, 'latest day', @last_meter_date, @last_meter_date)
         @periods = [period]
@@ -820,6 +822,12 @@ private
           @periods = [period]
         else
           raise EnergySparksBadChartSpecification.new('Expecting integer for :schoolweek timescale configuration')
+        end
+      when :workweek
+        if hash_value.is_a?(Integer)
+          @periods = [workweek_period(@last_meter_date + hash_value * 7)]
+        else
+          raise EnergySparksBadChartSpecification.new('Expecting integer for :workweek timescale configuration')
         end
       when :daterange # used in chart drilldown
         if hash_value.is_a?(Array) && hash_value.length == 2
@@ -928,6 +936,12 @@ private
     else
       @periods = [SchoolDatePeriod.new(:chartperiod, 'One Period for Chart', @first_meter_date, @last_meter_date)]
     end
+  end
+
+  # workweek = Sunday to Saturday: roll back to previous Saturday for end date
+  private def workweek_period(end_date)
+    saturday = end_date - ((end_date.wday - 6) % 7)
+    SchoolDatePeriod.new(:chartperiod, 'Work week', saturday - 6, saturday)
   end
 
   def calculate_first_chart_date
