@@ -22,6 +22,7 @@ class FormatEnergyUnit
     smartphone:         'smartphone charges',
     tree:               'trees',
     percent:            '%',
+    r2:                 '',
     temperature:        'C',
     years_range:        'years',
     £_range:            '£',
@@ -51,6 +52,8 @@ class FormatEnergyUnit
       format_days(value)
     elsif unit == :£_per_kwh
       format_pounds(value, medium) + '/kWh'
+    elsif unit == :r2
+      sprintf('%.2f', value)
     elsif unit == :£_range
       format_pound_range(value, medium)
     elsif unit == :temperature

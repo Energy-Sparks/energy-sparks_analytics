@@ -6,7 +6,6 @@ class AlertGasModelBase < AlertGasOnlyBase
   MAX_CHANGE_IN_PERCENT = 0.15
 
   attr_reader :enough_data
-  attr_reader :r2_rating_out_of_10
 
   attr_reader :heating_model
 
@@ -45,26 +44,6 @@ class AlertGasModelBase < AlertGasOnlyBase
     b: {
       description: 'Average heating model regression parameter b',
       units: :kwh_per_day_per_c
-    },
-    r2: {
-      description: 'Average heating model regression parameter thermostatic control r2',
-      units: Float
-    },
-    average_schools_r2: {
-      description: 'Average heating r2 of all schools',
-      units: Float
-    },
-    r2_rating_adjective: {
-      description: 'Average heating model regression parameter thermostatic control r2 adjective',
-      units: String
-    },
-    r2_rating_out_of_10: {
-      description: 'Average heating model regression parameter thermostatic control r2 rating out of 10',
-      units: Float
-    },
-    base_temperature: {
-      description: 'Average base temperature for heating model',
-      units: :temperature
     },
     school_days_heating: {
       description: 'Number of school days of heating in the last year',
@@ -147,22 +126,6 @@ class AlertGasModelBase < AlertGasOnlyBase
 
   def average_non_school_day_heating_days
     AnalyseHeatingAndHotWater::HeatingModel.average_non_school_day_heating_days
-  end
-
-  def r2
-    @r2 ||= @heating_model.average_heating_school_day_r2
-  end
-
-  def r2_rating_adjective
-    AnalyseHeatingAndHotWater::HeatingModel.r2_rating_adjective(r2)
-  end
-
-  def average_schools_r2
-    AnalyseHeatingAndHotWater::HeatingModel.average_schools_r2
-  end
-
-  def base_temperature
-    @base_temperature ||= @heating_model.average_base_temperature
   end
 
   protected def model_start_date(asof_date)
