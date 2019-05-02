@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '2.5.3'
 
 gem 'require_all'
-gem 'activesupport', '6.0.0.beta3'
+gem 'activesupport', '6.0.0.rc1'
 
 # Previous releases of statsample overrode the definition of Array#sum with dodgy results
 # Master currently has a fix...
@@ -18,6 +18,7 @@ gem 'ruby-sun-times'
 gem 'soda-ruby', require: 'soda'
 gem 'structured_warnings'
 gem 'chroma'
+gem 'spreadsheet'
 
 # Useful for debugging
 gem 'pry-byebug'
