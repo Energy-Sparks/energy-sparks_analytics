@@ -46,7 +46,7 @@ class OneDayAMRReading
       one_days_reading.type,
       one_days_reading.substitute_date,
       DateTime.now,
-      fast_multiply_x48_x_scalar(one_days_reading, scale_factor)
+      AMRData.fast_multiply_x48_x_scalar(one_days_reading.kwh_data_x48, scale_factor)
     )
     scaled
   end

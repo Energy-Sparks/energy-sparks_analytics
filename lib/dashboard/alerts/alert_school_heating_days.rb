@@ -2,7 +2,7 @@
 require_relative 'alert_gas_model_base.rb'
 
 # alerts for leaving the heating on for too long over winter
-class AlertHeatingOnSchoolDays < AlertGasModelBase
+class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
   def initialize(school)
     super(school, :heating_on_days)
   end

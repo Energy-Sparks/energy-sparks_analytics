@@ -103,7 +103,7 @@ class AverageSchoolAggregator < VirtualSchool
     end
 
     (average_amr_data.start_date..average_amr_data.end_date).each do |date|
-      one_days_data =OneDayAMRReading.scale(average_amr_data[date], 1.0 / amr_data_count[date])
+      one_days_data = OneDayAMRReading.scale(average_amr_data[date], 1.0 / amr_data_count[date])
       one_days_data.set_meter_id(average_school_meter.mpan_mprn.to_s)
       average_amr_data.add(date, one_days_data)
     end

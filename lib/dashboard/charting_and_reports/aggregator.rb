@@ -856,12 +856,11 @@ class Aggregator
   # performs scaling to 200, 1000 pupils or primary/secondary default sized floor areas
   private def scale_x_data(bucketed_data)
     # exclude y2_axis values e.g. temperature, degree days
-    x_data_keys = bucketed_data.select { |series_name, data| !SeriesNames::Y2SERIESYMBOLTONAMEMAP.values.include?(series_name) }
-    scale_factor = YAxisScaling.new.scaling_factor(@chart_configuration[:yaxis_scaling], @meter_collection)
-    info = "Scaling the following series #{x_data_keys} by a factor of #{scale_factor} for y axis scaling #{@chart_configuration[:yaxis_scaling]}"
-    puts info
-    log.info info
-    x_data_keys.each do |data_series_name|
+    x_data_keys = bucketed_data.select { |series_name, _data| !SeriesNames::Y2SERIESYMBOLTONAMEMAP.values.include?(series_name) }
+    scale_factor = YAxisScaling.new.scaling_factor(@chart_config[:yaxis_scaling], @meter_collection)
+    info = "Scaling the following series #{x_data_keys} by a factor of #{scale_factor} for y axis scaling #{@chart_config[:yaxis_scaling]}"
+    logger.info info
+    x_data_keys.each_key do |data_series_name|
       bucketed_data[data_series_name].each_with_index do |value, index|
         bucketed_data[data_series_name][index] = value * scale_factor
       end

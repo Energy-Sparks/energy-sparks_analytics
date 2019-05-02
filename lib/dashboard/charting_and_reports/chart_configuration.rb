@@ -233,7 +233,7 @@ class ChartManager
         { urn: 109089 },  # Paulton Junior
         { urn: 109328 },  # St Marks
         { urn: 109005 },  # St Johns
-        { urn: 109081 }   # Castle
+ #       { urn: 109081 }   # Castle
       ]
     },
     group_by_week_electricity_school_comparison_with_average: {

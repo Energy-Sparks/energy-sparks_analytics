@@ -133,11 +133,6 @@ class AlertGasModelBase < AlertGasOnlyBase
     AnalyseHeatingAndHotWater::HeatingModel.average_school_heating_days
   end
 
-  def heating_day_breakdown_current_year(asof_date)
-    @breakdown = @heating_model.heating_day_breakdown(asof_date_minus_one_year(asof_date), asof_date) if @breakdown.nil?
-    @breakdown
-  end
-
   def non_school_days_heating
     @non_school_days_heating ||= @heating_model.number_of_non_school_heating_days
   end

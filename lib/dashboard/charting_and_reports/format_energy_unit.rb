@@ -47,6 +47,8 @@ class FormatEnergyUnit
       UNIT_DESCRIPTION_TEXT[unit]
     elsif unit == :£
       format_pounds(value, medium)
+    elsif unit == :days
+      format_days(value)
     elsif unit == :£_per_kwh
       format_pounds(value, medium) + '/kWh'
     elsif unit == :£_range
@@ -101,6 +103,10 @@ class FormatEnergyUnit
     else
       sprintf('%.1f', years) + 'year' + singular_plural(years)
     end
+  end
+
+  private_class_method def self.format_days(days)
+    sprintf('%d', days.to_i) + 'day' + singular_plural(days)
   end
 
   def self.singular_plural(value)
