@@ -106,7 +106,7 @@ class FormatEnergyUnit
   end
 
   private_class_method def self.format_days(days)
-    sprintf('%d', days.to_i) + 'day' + singular_plural(days)
+    sprintf('%d', days.to_i) + ' day' + singular_plural(days)
   end
 
   def self.singular_plural(value)

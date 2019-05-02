@@ -50,6 +50,10 @@ class AlertGasOnlyBase < AlertAnalysisBase
     kwhs
   end
 
+  protected def gas_cost(kwh)
+    kwh * BenchmarkMetrics::GAS_PRICE
+  end
+
   def pipework_insulation_cost
     meters_pipework = floor_area / 5.0
     Range.new(meters_pipework * 5, meters_pipework * 15) # TODO(PH,11Mar2019) - find real figure to replace these?
