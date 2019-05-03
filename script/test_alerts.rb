@@ -69,7 +69,7 @@ end
 ]
 
 alerts_to_test = [
-  AlertImpendingHoliday
+  AlertWeekendGasConsumptionShortTerm
 =begin
   AlertChangeInDailyElectricityShortTerm,
   AlertHeatingComingOnTooEarly,
@@ -85,7 +85,11 @@ alerts_to_test = [
   AlertHeatingOnOff
   AlertHeatingSensitivityAdvice
   AlertHotWaterEfficiency
-  # AlertWeekendGasConsumptionShortTerm
+  AlertImpendingHoliday
+  AlertHeatingOnNonSchoolDays
+  AlertWeekendGasConsumptionShortTerm
+  AlertHeatingOnSchoolDays
+  AlertThermostaticControl
 =end
 ]
 

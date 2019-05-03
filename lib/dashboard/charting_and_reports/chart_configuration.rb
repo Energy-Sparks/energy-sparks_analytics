@@ -1263,6 +1263,27 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :temperature
     },
+    alert_weekend_last_week_gas_datetime_kwh: {
+      name:             'Last weeks half hourly gas consumption (kWh)',
+      series_breakdown: :none,
+      chart1_type:      :line,
+      timescale:        :week,
+      x_axis:           :datetime,
+      meter_definition: :allheat,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    alert_weekend_last_week_gas_datetime_kw: {
+      inherits_from:    :alert_weekend_last_week_gas_datetime_kwh,
+      name:             'Last weeks half hourly gas consumption (kW)',
+      yaxis_units:      :kw
+    },
+    alert_weekend_last_week_gas_datetime_£: {
+      inherits_from:    :alert_weekend_last_week_gas_datetime_kwh,
+      name:             'Last weeks half hourly gas consumption (£/half hour)',
+      yaxis_units:      :£
+    },
     last_2_weeks_gas: {
       name:             'Last 2 weeks gas consumption (with temperature)',
       timescale:        { week: -1..0 },
