@@ -20,6 +20,7 @@ class EnergyEquivalences
 
   UK_ELECTRIC_GRID_CO2_KG_KWH = 0.280
   UK_ELECTRIC_GRID_£_KWH = BenchmarkMetrics::ELECTRICITY_PRICE
+  UK_DOMESTIC_ELECTRICITY_£_KWH = 0.15
 
   UK_GAS_CO2_KG_KWH = 0.210
   UK_GAS_£_KWH = BenchmarkMetrics::GAS_PRICE
@@ -55,6 +56,12 @@ class EnergyEquivalences
         "(In reality if you include the costs of maintenance, servicing, depreciation "\
         "it can cost about £0.30/km to travel by car). "
 
+  BEV_KWH_PER_KM = 64.0 / (239.0 * 1.6) # Hyundia Kona Electric goes 260 miles on
+  BEV_CO2_PER_KM = BEV_KWH_PER_KM * UK_ELECTRIC_GRID_CO2_KG_KWH
+  BEV_£_PER_KM = BEV_KWH_PER_KM * UK_DOMESTIC_ELECTRICITY_£_KWH
+  BEV_EFFICIENCY_DESCRIPTION = "An electric car uses #{X.format(:kwh, BEV_KWH_PER_KM)} of electricity to travel 1 km. "
+  BEV_CO2_DESCRIPTION = "An electric car emits #{X.format(:co2, BEV_CO2_PER_KM)} of electricity to travel 1 km (emissons from the National Grid). "
+
   SHOWER_TEMPERATURE_RAISE = 25.0
   SHOWER_LITRES = 50.0
   SHOWER_KWH_GROSS = (SHOWER_LITRES * SHOWER_TEMPERATURE_RAISE * WATER_ENERGY_LITRE_PER_K_J / J_TO_KWH).round(3)
@@ -72,7 +79,6 @@ class EnergyEquivalences
         "= #{X.format(:kwh, SHOWER_KWH_NET)} of gas is required. ".freeze
 
   UK_DOMESTIC_GAS_£_KWH = 0.05
-  UK_DOMESTIC_ELECTRICITY_£_KWH = 0.15
   HOMES_ELECTRICITY_KWH_YEAR = 2_600
   HOMES_GAS_KWH_YEAR = 14_000
   HOMES_KWH_YEAR = HOMES_ELECTRICITY_KWH_YEAR + HOMES_GAS_KWH_YEAR
@@ -95,6 +101,11 @@ class EnergyEquivalences
   SMARTPHONE_CHARGE_£ = SMARTPHONE_CHARGE_kWH * UK_ELECTRIC_GRID_£_KWH
   SMARTPHONE_CHARGE_CO2_KG = SMARTPHONE_CHARGE_kWH * UK_ELECTRIC_GRID_CO2_KG_KWH
 
+  ONE_HOUR = 1.0
+  TV_POWER_KW = 0.04 # also kWh/hour
+  TV_HOUR_£ = TV_POWER_KW * ONE_HOUR * UK_ELECTRIC_GRID_£_KWH
+  TV_HOUR_CO2_KG = TV_POWER_KW * ONE_HOUR * UK_ELECTRIC_GRID_CO2_KG_KWH
+
   TREE_LIFE_YEARS = 40
   TREE_CO2_KG_YEAR = 22
   TREE_CO2_KG = TREE_LIFE_YEARS * TREE_CO2_KG_YEAR # https://www.quora.com/How-many-trees-do-I-need-to-plant-to-offset-the-carbon-dioxide-released-in-a-flight
@@ -102,6 +113,23 @@ class EnergyEquivalences
   LIBRARY_BOOK_£ = 5
 
   TEACHING_ASSISTANT_£_HOUR = 8.33
+
+  CARNIVORE_DINNER_£ = 2.5
+  CARNIVORE_DINNER_CO2_KG = 4.0
+  VEGETARIAN_DINNER_£ = 1.5
+  VEGETARIAN_DINNER_CO2_KG = 2.0
+
+  ONSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT = 0.27
+  ONSHORE_WIND_TURBINE_CAPACITY_KW = 500
+  ONSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR = ONSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT * ONSHORE_WIND_TURBINE_CAPACITY_KW * ONE_HOUR
+
+  OFFSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT = 0.38
+  OFFSHORE_WIND_TURBINE_CAPACITY_KW = 3000
+  OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR = OFFSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT * OFFSHORE_WIND_TURBINE_CAPACITY_KW * ONE_HOUR
+
+  SOLAR_PANEL_KWP = 300.0
+  SOLAR_PANEL_YIELD_PER_KWH_PER_KWP_PER_YEAR = 0.83
+  SOLAR_PANEL_KWH_PER_YEAR = SOLAR_PANEL_KWP * SOLAR_PANEL_YIELD_PER_KWH_PER_KWP_PER_YEAR
 
   ENERGY_EQUIVALENCES = {
     electricity: {
@@ -153,6 +181,23 @@ class EnergyEquivalences
         £:  {
           rate:         ICE_£_KM,
           description:  ICE_DESCRIPTION_TO_£
+        }
+      }
+    },
+    bev_car: {
+      description: 'driving a battery electric car %s',
+      conversions: {
+        kwh:  {
+          rate:         BEV_KWH_PER_KM,
+          description:  BEV_EFFICIENCY_DESCRIPTION
+        },
+        co2:  {
+          rate:         BEV_CO2_PER_KM,
+          description:  BEV_CO2_DESCRIPTION
+        },
+        £:  {
+          rate:         BEV_£_PER_KM,
+          description:  BEV_EFFICIENCY_DESCRIPTION
         }
       }
     },
@@ -250,6 +295,27 @@ class EnergyEquivalences
         }
       }
     },
+    tv: {
+      description: '%s',
+      conversions: {
+        kwh:  {
+          rate:         TV_POWER_KW,
+          description:  "TVs use about #{X.format(:kwh, TV_POWER_KW)} of electricity every hour. "
+        },
+        co2:  {
+          rate:         TV_HOUR_CO2_KG,
+          description:  "TVs use about #{X.format(:kwh, TV_POWER_KW)} of electricity every hour. "\
+                        "Generating 1 kWh of electricity produces #{X.format(:co2, UK_ELECTRIC_GRID_£_KWH)}. "\
+                        "Therefore using a TV for 1 hour produces #{X.format(:co2, TV_HOUR_CO2_KG)}. "
+        },
+        £:  {
+          rate:         TV_HOUR_£,
+          description:  "TVs use about #{X.format(:kwh, TV_POWER_KW)} of electricity every hour. "\
+                        "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)}. "\
+                        "Therefore using a TV for 1 hour costs #{X.format(:£, TV_HOUR_£)}. "
+        }
+      }
+    },
     tree: {
       description: 'planting a %s (40 year life)',
       conversions: {
@@ -276,6 +342,63 @@ class EnergyEquivalences
         £:  {
           rate:         TEACHING_ASSISTANT_£_HOUR,
           description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour."
+        }
+      }
+    },
+    carnivore_dinner: {
+      description: '%s',
+      conversions: {
+        co2:  {
+          rate:         CARNIVORE_DINNER_CO2_KG,
+          description:  "#{X.format(:co2, CARNIVORE_DINNER_CO2_KG)} of CO2 is emitted producing one dinner containing meat."
+        },
+        £:  {
+          rate:         CARNIVORE_DINNER_£,
+          description:  "One dinner containing meat costs #{X.format(:£, CARNIVORE_DINNER_CO2_KG)}."
+        }
+      }
+    },
+    vegetarian_dinner: {
+      description: '%s',
+      conversions: {
+        co2:  {
+          rate:         VEGETARIAN_DINNER_CO2_KG,
+          description:  "#{X.format(:co2, CARNIVORE_DINNER_CO2_KG)} of CO2 is emitted producing one vegetarian dinner."
+        },
+        £:  {
+          rate:         VEGETARIAN_DINNER_£,
+          description:  "One vegetarian dinner costs #{X.format(:£, VEGETARIAN_DINNER_£)}."
+        }
+      }
+    },
+    onshore_wind_turbine_hours: {
+      description: '%s',
+      conversions: {
+        kwh:  {
+          rate:         ONSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR,
+          description:  "An average onshore wind turbine has a maximum capacity of #{X.format(:kw, ONSHORE_WIND_TURBINE_CAPACITY_KW)}. "\
+                        "On average (wind varies) it is windy enough to use #{X.format(:percent, ONSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT)} of that capacity. "\
+                        "Therefore an average onshore wind turbine generates about #{X.format(:kwh, ONSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR)} per hour."
+        }
+      }
+    },
+    offshore_wind_turbine_hours: {
+      description: '%s',
+      conversions: {
+        kwh:  {
+          rate:         OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR,
+          description:  "An average onshore wind turbine has a maximum capacity of #{X.format(:kw, OFFSHORE_WIND_TURBINE_CAPACITY_KW)}. "\
+                        "On average (wind varies) it is windy enough to use #{X.format(:percent, OFFSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT)} of that capacity. "\
+                        "Therefore an average onshore wind turbine generates about #{X.format(:kwh, OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR)} per hour."
+        }
+      }
+    },
+    solar_panels_in_a_year: {
+      description: '%s',
+      conversions: {
+        kwh:  {
+          rate:         SOLAR_PANEL_KWH_PER_YEAR,
+          description:  "An average solar panel produces #{X.format(:kwh, SOLAR_PANEL_KWH_PER_YEAR)} per year. "
         }
       }
     },

@@ -19,6 +19,8 @@ class FormatEnergyUnit
     home:               'homes',
     kettle:             'kettles',
     ice_car:            'km',
+    bev_car:            'km',
+    tv:                 'hours of TV',
     smartphone:         'smartphone charges',
     tree:               'trees',
     percent:            '%',
@@ -29,7 +31,12 @@ class FormatEnergyUnit
     £_per_kwh:          '£/kWh',
     date:               '',
     datetime:           '',
-    teaching_assistant: 'teaching assistant (hours)'
+    teaching_assistant: 'teaching assistant (hours)',
+    carnivore_dinner:   'dinners',
+    vegetarian_dinner:  'dinners',
+    onshore_wind_turbine_hours:  'onshore wind turbine hours',
+    offshore_wind_turbine_hours: 'offshore wind turbine hours',
+    solar_panels_in_a_year: 'solar panels in a year'
   }.freeze
 
   UNIT_DESCRIPTION_HTML = {
@@ -134,11 +141,13 @@ class FormatEnergyUnit
     if number.nil?
       '' # specific case where no value specified
     elsif number.magnitude == 0.0
-      '0.0'  
-    elsif number.magnitude < 0.01
+      '0.0'
+    elsif number.magnitude < 0.001
       sprintf '%.6f', number
-    elsif number.magnitude < 0
+    elsif number.magnitude < 0.1
       sprintf '%.3f', number
+    elsif number.magnitude < 1.0
+      sprintf '%.2f', number
     elsif number.magnitude < 50
       if in_pounds
         sprintf '%.2f', number

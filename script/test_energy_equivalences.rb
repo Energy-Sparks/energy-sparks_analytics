@@ -28,7 +28,20 @@ equivalences = {
   'Electricity £ to kettles via £' => [1000.0, :£, :electricity, :kettle, :kettle, :£],
   'Electricity kWh to charge smartphones' => [1000.0, :kwh, :electricity, :smartphone, :smartphone, :kwh],
   'Electricity kWh to trees' => [10_000.0, :kwh, :electricity, :tree, :tree, :co2],
-  'Electricity kWh to teaching assistant (hours)' => [10_000.0, :kwh, :electricity, :teaching_assistant, :teaching_assistant, :£]
+  'Electricity kWh to teaching assistant (hours)' => [10_000.0, :kwh, :electricity, :teaching_assistant, :teaching_assistant, :£],
+  'Electricity kWh to TV hours - via £' => [10_000.0, :kwh, :electricity, :tv, :tv, :£],
+  'Electricity kWh to TV hours - via co2' => [10_000.0, :kwh, :electricity, :tv, :tv, :co2],
+  'Electricity kWh to TV hours - via kwh' => [10_000.0, :kwh, :electricity, :tv, :tv, :kwh],
+  'Electricity kWh to electric car via £' => [1000.0, :kwh, :electricity, :km, :bev_car, :£],
+  'Electricity kWh to electric car via CO2' => [1000.0, :kwh, :electricity, :km, :bev_car, :co2],
+  'Electricity kWh to electric car via kWh' => [1000.0, :kwh, :electricity, :km, :bev_car, :kwh],
+  'Electricity kWh to dinner with meat via £' => [1000.0, :kwh, :electricity, :carnivore_dinner, :carnivore_dinner, :£],
+  'Electricity kWh to dinner with meat via CO2' => [1000.0, :kwh, :electricity, :carnivore_dinner, :carnivore_dinner, :co2],
+  'Electricity kWh to vegetarian dinner via £' => [1000.0, :kwh, :electricity, :vegetarian_dinner, :vegetarian_dinner, :£],
+  'Electricity kWh to vegetarian dinner via CO2' => [1000.0, :kwh, :electricity, :vegetarian_dinner, :vegetarian_dinner, :co2],
+  'Electricity kWh to onshore wind turbine hours via kwh' => [100000.0, :kwh, :electricity, :onshore_wind_turbine_hours, :onshore_wind_turbine_hours, :kwh],
+  'Electricity kWh to offshore wind turbine hours via kwh' => [100000.0, :kwh, :electricity, :offshore_wind_turbine_hours, :offshore_wind_turbine_hours, :kwh],
+  'Electricity kWh to solar panels in a year via kwh' => [100000.0, :kwh, :electricity, :solar_panels_in_a_year, :solar_panels_in_a_year, :kwh]
 }
 
 puts
