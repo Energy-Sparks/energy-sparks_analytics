@@ -12,21 +12,15 @@ module Logging
   logger.level = :debug
 end
 
-@@parameterised = true
-@@dontcachecalculatedco2costdata = true
-
 profile = false
 
-if false
+if true
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
     new_data:      '../TestResults/Charts/New/',
-    skip_advice:   true
+    skip_advice:   false
   }
 end
-
-# CO2Parameterised.create_uk_grid_carbon_intensity_from_parameterised_data
-# ScheduleDataManager.uk_grid_carbon_intensity
 
 reports = ReportConfigSupport.new
 
@@ -39,22 +33,22 @@ RubyProf.start if profile
 # reports.load_school('Trinity First School', true)
 # 'Wybourn Primary School'
 
+school_name = 'Whiteways Primary'
+# school_name = 'St Marks Secondary'
+# school_name = 'Stanton Drew Primary School'
+
 if false
   Benchmark.memory do |x|
-    x.report("load school")  { reports.load_school('Roundhill School', true) }
+    x.report("load school")  { reports.load_school(school_name, true) }
   end
 end
 
 puts "Loading school"
 bm = Benchmark.realtime {
-  reports.load_school('Whiteways Primary', true)
+  reports.load_school(school_name, true)
   # reports.load_school('Castle Primary School', true)
 }
 puts "Load time: #{bm.round(3)} seconds"
-
-
-
-# reports.load_school('Paulton Junior School', true)
 
 # testing examples
 #
@@ -62,34 +56,16 @@ puts "Load time: #{bm.round(3)} seconds"
 #   reports.do_all_standard_pages_for_school
 #   reports.do_one_page(:main_dashboard_electric_and_gas)
 #   reports.do_chart_list('Boiler Control', [:hotwater, :frost_2, :optimum_start])
-#
 
-# reports.do_chart_list('Boiler Control', [:gas_heating_season_intraday, :gas_heating_season_intraday_£])
-
-# @@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to £' if defined?(@@energysparksanalyticsautotest)
-# reports.do_all_standard_pages_for_school({yaxis_units: :£})
-# reports.do_chart_list('kW scaling', [:intraday_line_school_last7days])
-# reports.do_all_schools(true)
-# reports.do_all_schools(true)
-# reports.do_one_page(:cost)
-# reports.do_all_schools(true)
-# reports.do_all_standard_pages_for_school({yaxis_units: :£})
-# reports.do_one_page(:carbon_emissions)
-# reports.do_one_page(:cost)
-# reports.do_all_schools(true)
-
-# @@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to £' if defined?(@@energysparksanalyticsautotest)
-# reports.do_all_standard_pages_for_school({yaxis_units: :co2})
 # reports.do_all_standard_pages_for_school
-# reports.do_chart_list('pound scaling', [:test_last_2_weeks_gas, :last_2_weeks_gas])
-
-# reports.do_all_schools(true)
-# reports.do_chart_list('hot water advice', [:hotwater])
 
 @@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to co2' if defined?(@@energysparksanalyticsautotest)
-# reports.do_all_standard_pages_for_school({yaxis_units: :co2})
+reports.do_all_standard_pages_for_school({yaxis_units: :co2})
 
-reports.do_chart_list('Teachers workweek', [:teachers_landing_page_gas, :teachers_landing_page_electricity])
+# reports.do_one_page(:cost)
+# reports..do_all_schools(true)
+
+# reports.do_all_standard_pages_for_school
 
 if profile
   prof_result = RubyProf.stop

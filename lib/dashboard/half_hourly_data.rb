@@ -104,7 +104,7 @@ class HalfHourlyData < Hash
         logger.debug "Error: missing data for #{self.class.name} on date #{date} returning zero"
         return 0.0
       end
-      total = self[date].inject(:+)
+      total = self[date].sum # inject(:+)
       @cache_days_totals[date] = total
       return total
     end

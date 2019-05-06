@@ -1,27 +1,29 @@
 require_relative '../half_hourly_data'
 require_relative '../half_hourly_loader'
-require_relative './cost_carbon_base'
 
 # maintain costs information in parallel to AMRData
 # set of data per day: 48 x half hour costs, plus standing charges
 # 2 derived classes for: economic costs, accounting costs
 # economic costs are simpler, just a rate (or 2 if differential) - good for forecasting, education
 # accounting costs, contain lots of standing charges
-class CostsBase < CostCarbonCalculatedCachedBase
+class CostsBase < HalfHourlyData
   attr_reader :meter_id, :fuel_type, :amr_data, :fuel_type, :default_energy_purchaser
-  def initialize(meter_id, parameterised, amr_data = nil, fuel_type = nil, default_energy_purchaser = nil)
-    super(:amr_data_accounting_tariff, parameterised)
+  attr_accessor :post_aggregation_state
+  def initialize(meter_id, amr_data = nil, fuel_type = nil, default_energy_purchaser = nil)
+    super(:amr_data_accounting_tariff)
     @amr_data = amr_data
     @fuel_type = fuel_type
-    @default_energy_purchaser = default_energy_purchaser
+    @default_energy_purchaser = default_energy_purchaser # typically the area name for LAs
     @meter_id = meter_id
     @bill_component_types_internal = Hash.new(nil) # only interested in (quick access) to keys, so maintain as hash rather than array
+    @post_aggregation_state = false
   end
 
   def bill_component_types
     @bill_component_types_internal.keys
   end
 
+  # combine OneDaysCostData[] into single aggregate OneDaysCostData
   private_class_method def self.combined_day_costs(costs)
     day_time_costs = costs.map { |cost| cost.daytime_cost_x48 }.compact
     combined_day_costs_x48 = day_time_costs.empty? ? nil : AMRData.fast_add_multiple_x48_x_x48(day_time_costs)
@@ -178,31 +180,61 @@ class CostsBase < CostCarbonCalculatedCachedBase
   end
 
   protected def costs(_date, _meter_id, _fuel_type, _days_kwh_x48)
-    raise EnergySparksAbstractBaseClass.new("Unexpected call to abstract base class for CostsBase")
+    raise EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class for CostsBase: costs')
   end
 end
 
 class EconomicCosts < CostsBase
   protected def costs(date, meter_id, fuel_type, days_kwh_x48, _default_energy_purchaser)
+    fuel_type = :electricity if fuel_type == :aggregated_electricity # TODO(PH, 6Apr2019) remove after analytics school loading metadata code changes
     MeterTariffs.economic_tariff_x48(date, meter_id, fuel_type, days_kwh_x48)
   end
 
-  # has to be done using data not from parameterised calculation
   def self.combine_economic_costs_from_multiple_meters(combined_meter_id, list_of_meters, combined_start_date, combined_end_date)
     Logging.logger.info "Combining economic costs from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
-    combined_economic_costs = EconomicCosts.new(combined_meter_id, false)
+
+    combined_economic_costs = EconomicCostsPreAggregated.new(combined_meter_id)
+
     (combined_start_date..combined_end_date).each do |date|
       list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
       list_of_days_economic_costs = list_of_meters_on_date.map { |meter| meter.amr_data.economic_tariff.one_days_data_x48(date) }
-      # ap(list_of_days_economic_costs.map { |cost| cost.bill_components }.flatten.uniq.join(';') )
       combined_economic_costs.add(date, combined_day_costs(list_of_days_economic_costs))
     end
+
     Logging.logger.info "Created combined meter economic #{combined_economic_costs.costs_summary}"
     combined_economic_costs
   end
 
-  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser, parameterised = false)
-    costs = EconomicCosts.new(meter_id, parameterised, amr_data, fuel_type, default_energy_purchaser)
+end
+
+# parameterised representation of economic costs until after agggregation to reduce memory footprint
+class EconomicCostsParameterised < EconomicCosts
+
+  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
+    EconomicCostsParameterised.new(meter_id, amr_data, fuel_type, default_energy_purchaser)
+  end
+
+  # returns a x48 array of half hourly costs
+  def one_days_cost_data(date)
+    return calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser)) if date_missing?(date)
+    self[date]
+  end
+
+  def one_day_total_cost(date)
+    @cache_days_totals[date] = one_days_cost_data(date).one_day_total_cost unless @cache_days_totals.key?(date)
+    @cache_days_totals[date]
+  end
+end
+
+class EconomicCostsPreAggregated < EconomicCosts
+  def one_day_total_cost(date)
+    @cache_days_totals[date] = one_days_cost_data(date).one_day_total_cost unless @cache_days_totals.key?(date)
+    @cache_days_totals[date]
+  end
+
+  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
+    costs = EconomicCostsPreAggregated.new(meter_id, amr_data, fuel_type, default_energy_purchaser)
     costs.calculate_tariff(amr_data, fuel_type, default_energy_purchaser) unless parameterised
     costs
   end
@@ -213,22 +245,73 @@ class AccountingCosts < CostsBase
     MeterTariffs.accounting_tariff_x48(date, meter_id, fuel_type, days_kwh_x48, default_energy_purchaser)
   end
 
-  # has to be done using data not from parameterised calculation
+  # similar to Economic version, but too many differences to easily refactor to inherited version for the moment
   def self.combine_accounting_costs_from_multiple_meters(combined_meter_id, list_of_meters, combined_start_date, combined_end_date)
     Logging.logger.info "Combining accounting costs from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
-    combined_accounting_costs = AccountingCosts.new(combined_meter_id, false)
+
+    combined_accounting_costs = AccountingCostsPreAggregated.new(combined_meter_id)
+
     (combined_start_date..combined_end_date).each do |date|
       list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
-      list_of_days_accounting_costs = list_of_meters_on_date.map { |meter| meter.amr_data.accounting_tariff.one_days_data_x48(date) }
+      list_of_days_accounting_costs = list_of_meters_on_date.map { |meter| meter.amr_data.accounting_tariff.one_days_cost_data(date) }
       combined_accounting_costs.add(date, combined_day_costs(list_of_days_accounting_costs))
     end
+
     Logging.logger.info "Created combined meter accounting #{combined_accounting_costs.costs_summary}"
     combined_accounting_costs
   end
 
-  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser, parameterised = false)
-    costs = AccountingCosts.new(meter_id, parameterised, amr_data, fuel_type, default_energy_purchaser)
-    costs.calculate_tariff(amr_data, fuel_type, default_energy_purchaser) unless parameterised
+  # returns a x48 array of half hourly costs
+  def one_days_cost_data(date)
+    return calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser)) if date_missing?(date)
+    self[date]
+  end
+
+  def one_day_total_cost(date)
+    @cache_days_totals[date] = one_days_cost_data(date).one_day_total_cost unless @cache_days_totals.key?(date)
+    @cache_days_totals[date]
+  end
+end
+
+class AccountingCostsParameterised < AccountingCosts
+  # returns a x48 array of half hourly costs, only caches post aggregation, and front end cache
+  def one_days_cost_data(date) 
+    return calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser)) if date_missing?(date)
+    self[date]
+  end
+
+  # in the case of parameterised accounting costs, the underlying costs types are not known
+  # until post aggregation, on the first request for chart bucket names which is before
+  # data requests get made which build up the component list, so manually instantiate the list
+  # on the fly; quicker alternative would be to search through the static tariff data through time (meter_tariffs)
+  def bill_component_types
+    create_all_bill_components(amr_data.start_date, amr_data.end_date) if post_aggregation_state && @bill_component_types_internal.empty?
+    @bill_component_types_internal.keys
+  end
+
+  # also instantiates all accounting data in pre aggregated form
+  private def create_all_bill_components(start_date, end_date)
+    (start_date..end_date).each do |date|
+      one_day_total_cost(date)
+    end
+  end
+
+  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
+    AccountingCostsParameterised.new(meter_id, amr_data, fuel_type, default_energy_purchaser)
+  end
+end
+
+class AccountingCostsPreAggregated < AccountingCosts
+  # always precalculated so don't calculate on the fly
+  def one_days_cost_data(date)
+    self[date]
+  end
+
+  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
+    costs = AccountingCostsPreAggregated.new(meter_id, amr_data, fuel_type, default_energy_purchaser)
+    costs.calculate_tariff(amr_data, fuel_type, default_energy_purchaser)
     costs
   end
 end

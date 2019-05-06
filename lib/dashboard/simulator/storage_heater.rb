@@ -91,7 +91,7 @@ class StorageHeater
     end
 
     def in_operation?(date)
-      !@config_by_date_range.select{ |dates| dates === date }.empty?
+      !@config_by_date_range.select { |dates| date >= dates.first && date <= dates.last }.empty?
     end
 
     def storage_heater_start_time_hh(date)

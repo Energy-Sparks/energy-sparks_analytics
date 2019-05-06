@@ -6,9 +6,6 @@ require './script/report_config_support.rb'
 require 'hashdiff'
 
 
-@@parameterised = false
-@@dontcachecalculatedco2costdata = true
-
 module Logging
   @logger = Logger.new('log/test-alerts ' + Time.now.strftime('%H %M') + '.log')
   logger.level = :debug

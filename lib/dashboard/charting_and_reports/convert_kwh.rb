@@ -22,7 +22,7 @@ class ConvertKwh
         raise "Error: CO2: unknown fuel type #{fuel_type}" unless fuel_type.nil?
         raise 'Error: CO2: nil fuel type'
       end
-    when :£
+    when :£, :accounting_cost # these costs, typically called from dashboard_advice should be moved into the proper differential tariff supporting infrastructure
       case fuel_type
       when :electricity, :storage_heater, :aggregated_electricity
         unit_scale = BenchmarkMetrics::ELECTRICITY_PRICE # 12p/kWh long term average

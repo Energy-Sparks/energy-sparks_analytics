@@ -48,46 +48,9 @@ module Dashboard
       @mpan_mprn = identifier.to_i
     end
 
-    #
-    #
-    #
-    # Move down to amr_data PH 1May2019
-    #
-    #
-    def set_economic_amr_tariff(default_energy_purchaser, fuel)
-      @amr_data.set_economic_tariff(mpan_mprn, fuel, default_energy_purchaser)
-    end
-
-    def economic_tariff
-      @amr_data.economic_tariff
-    end
-
-    def accounting_tariff
-      @amr_data.accounting_tariff
-    end
-
-    #
-    #
-    #
-    # Move down to amr_data PH 1May2019
-    #
-    #
-    def set_accounting_amr_tariff(default_energy_purchaser, fuel)
-      @amr_data.set_accounting_tariff(mpan_mprn, fuel, default_energy_purchaser)
-    end
-
-    # set this here rather than lazy loading in AMRdata instance, so first access isn't slow
-    def set_amr_data_carbon_intensity_deprecated
-      @amr_data.set_carbon_emissions(@meter_collection.grid_carbon_intensity)
-    end
-
     private def process_meter_attributes
-      if @meter_attributes.key?(:storage_heaters)
-        @storage_heater_setup = StorageHeater.new(attributes(:storage_heaters))
-      end
-      if @meter_attributes.key?(:solar_pv)
-        @solar_pv_setup = SolarPVPanels.new(attributes(:solar_pv))
-      end
+      @storage_heater_setup = StorageHeater.new(attributes(:storage_heaters)) if @meter_attributes.key?(:storage_heaters)
+      @solar_pv_setup = SolarPVPanels.new(attributes(:solar_pv)) if @meter_attributes.key?(:solar_pv)
     end
 
     private def check_fuel_type(fuel_type)

@@ -21,6 +21,8 @@ class MeterTariffs
   extend Logging
 
   def self.economic_tariff_x48(date, mpan_mprn, fuel_type, kwh_halfhour_x48)
+    # TODO(PH, 5May19) - analystics meta data load means strange fuel types are filtering through, remove on reorg of meta data loader
+    fuel_type = :electricity if fuel_type == :aggregated_electricity
     tariff_config = economic_tariff_config(mpan_mprn, date, fuel_type)
 
     daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48)
@@ -92,6 +94,30 @@ class MeterTariffs
       tariff_config[:rates][rate_type][:rate]
     )
     AMRData.fast_multiply_x48_x_x48(daytime_time_weights, kwh_halfhour_x48)
+  end
+
+  # to support an optmisation in the aggregation service for combined meters
+  # avoid the need to non-parameterised aggregate economic costs data if there are
+  # no differential tariffs in the given date range for any of its underlying meters
+  # the aggregattion service interates through the component meters to check 'if any' are differential
+  # calling this for each component meter, not the combined meter
+  def self.differential_tariff_in_date_range?(mpan_mprn, start_date, end_date)
+    return false unless METER_TARIFFS.key?(mpan_mprn) # we have no information for this meter, so assume non differential
+    aggregate_meter_date_range = Range.new(start_date, end_date)
+    METER_TARIFFS[mpan_mprn].each do |tariff_date_range, tariff_config|
+      in_range = date_ranges_overlap(tariff_date_range, aggregate_meter_date_range)
+      return true if differential_tariff?(tariff_config) && in_range
+    end
+    false
+  end
+
+  # test explicitly rather than ruby .overlap? function as it has potential
+  # to slowly iterate through each range rather than testing boundary conditions
+  private_class_method def self.date_ranges_overlap(date_range_1, date_range_2)
+    # think clearer on 3 lines:
+    return false if date_range_1.last  < date_range_2.first # range 1 occurs before range 2
+    return false if date_range_1.first > date_range_2.last  # range 1 occurs after  range 2
+    return true                                              # otherwise there must be an overlap
   end
 
 =begin

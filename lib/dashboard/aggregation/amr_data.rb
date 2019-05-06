@@ -6,15 +6,22 @@ class AMRData < HalfHourlyData
 
   def initialize(type)
     super(type)
-    @lock_updates = false
+  end
+
+  def set_post_aggregation_state
+    @carbon_emissions.post_aggregation_state = true if @carbon_emissions.is_a?(CarbonEmissionsParameterised)
+    @economic_tariff.post_aggregation_state = true if @economic_tariff.is_a?(EconomicCostsParameterised)
+    @accounting_tariff.post_aggregation_state = true if @accounting_tariff.is_a?(AccountingCostsParameterised)
   end
 
   def set_economic_tariff(meter_id, fuel_type, default_energy_purchaser)
-    @economic_tariff = EconomicCosts.create_costs(meter_id, self, fuel_type, default_energy_purchaser, true)
+    logger.info "Creating an economic costs in amr_meter #{meter_id} #{fuel_type} #{default_energy_purchaser}"
+    @economic_tariff = EconomicCostsParameterised.create_costs(meter_id, self, fuel_type, default_energy_purchaser)
   end
 
   def set_accounting_tariff(meter_id, fuel_type, default_energy_purchaser)
-    @accounting_tariff = AccountingCosts.create_costs(meter_id, self, fuel_type, default_energy_purchaser, true)
+    logger.info "Creating an accounting costs in amr_meter #{meter_id} #{fuel_type}  #{default_energy_purchaser}"
+    @accounting_tariff = AccountingCostsParameterised.create_costs(meter_id, self, fuel_type, default_energy_purchaser)
   end
 
   def set_economic_tariff_schedule(tariff)
@@ -32,12 +39,10 @@ class AMRData < HalfHourlyData
 
   # access point for single meters, not combined meters
   def set_carbon_emissions(meter_id_for_debug, flat_rate, grid_carbon)
-    @carbon_emissions = CarbonEmissions.create_carbon_emissions(meter_id_for_debug, self, flat_rate, grid_carbon, true)
-    @lock_updates = true
+    @carbon_emissions = CarbonEmissionsParameterised.create_carbon_emissions(meter_id_for_debug, self, flat_rate, grid_carbon)
   end
 
   def add(date, one_days_data)
-    throw EnergySparksUnexpectedStateException.new('Updates locked - no updates allowed') if @lock_updates
     throw EnergySparksUnexpectedStateException.new('AMR Data must not be nil') if one_days_data.nil?
     throw EnergySparksUnexpectedStateException.new("AMR Data now held as OneDayAMRReading not #{one_days_data.class.name}") unless one_days_data.is_a?(OneDayAMRReading)
     throw EnergySparksUnexpectedStateException.new("AMR Data date mismatch not #{date} v. #{one_days_data.date}") if date != one_days_data.date

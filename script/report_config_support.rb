@@ -48,7 +48,7 @@ class ReportConfigSupport
       'Shortbrook School'                 => :electric_and_gas,
       'Valley Park School'                => :electric_only,
       'Watercliffe Meadow Primary'        => :electric_and_gas,
-      'Walkley Tennyson School'           => :gas_only,
+#     'Walkley Tennyson School'           => :gas_only,
       'Whiteways Primary'                 => :electric_and_gas,
       'Woodthorpe Primary School'         => :electric_and_gas,
       'Wybourn Primary School'            => :electric_only,
@@ -58,7 +58,7 @@ class ReportConfigSupport
       'Frome College'                     => :electric_only,
       'Hayesdown First School'            => :electric_only,
       'Oakfield School'                   => :electric_and_gas,
-      'Selwood Academy'                   => :electric_and_gas,
+#      'Selwood Academy'                   => :electric_and_gas,
       'St Johns First School'             => :electric_and_gas,
       'St Louis First School'             => :electric_and_gas,
       'Trinity First School'              => :electric_and_gas,
@@ -247,7 +247,7 @@ class ReportConfigSupport
     unless diff # HashDiff is horribly slow, so only run if necessary
       puts "+" * 120
       puts "Chart #{chart_name} differs"
-      h_diff = HashDiff.diff(old_data, new_data, use_lcs: false, :numeric_tolerance => 0.01) # use_lcs is O(N) otherwise and takes hours!!!!!
+      h_diff = HashDiff.diff(old_data, new_data, use_lcs: false, :numeric_tolerance => 0.000001) # use_lcs is O(N) otherwise and takes hours!!!!!
       if @@energysparksanalyticsautotest[:skip_advice] && h_diff.to_s.include?('html')
         puts 'Advice differs'
       else
