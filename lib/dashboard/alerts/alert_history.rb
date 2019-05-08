@@ -42,11 +42,13 @@ class AlertHistoryDatabase
 
   def load_yaml
     yaml_filename = filename('.yaml')
+    puts "Loading #{yaml_filename}"
     return nil unless File.file?(yaml_filename)
     YAML::load_file(yaml_filename)
   end
 
   def save_yaml(data)
+    puts "Saving #{filename('.yaml')}"
     File.open(filename('.yaml'), 'w') { |f| f.write(YAML.dump(data)) }
   end
 

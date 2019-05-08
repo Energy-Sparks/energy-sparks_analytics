@@ -109,7 +109,7 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
   end
 
   private def calculate(asof_date)
-    super(asof_date)
+    calculate_model(asof_date)
     calculate_annual_hotwater_poor_insulation_heatloss_estimate(asof_date) if @annual_hotwater_poor_insulation_heatloss_estimate_kwh.nil?
     @rating = ((1.0 - annual_hotwater_poor_insulation_heatloss_estimate_percent) * 10.0).round(0)
     @status = !enough_data ? :fail : (rating > 3.0 ? :good : :bad)

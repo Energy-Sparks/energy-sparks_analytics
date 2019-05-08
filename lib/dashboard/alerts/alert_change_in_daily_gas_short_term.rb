@@ -109,7 +109,6 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
   end
 
   def calculate(asof_date)
-    super(asof_date)
     days_in_week = 5
 
     this_weeks_school_days = last_n_school_days(asof_date, days_in_week)
@@ -180,6 +179,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
 
   def analyse_private(asof_date)
     calculate_model(asof_date)
+    calculate(asof_date)
 
     this_weeks_school_days = last_n_school_days(asof_date, 5)
     last_weeks_school_days = last_n_school_days(this_weeks_school_days[0] - 1, 5)

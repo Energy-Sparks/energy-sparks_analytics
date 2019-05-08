@@ -147,12 +147,28 @@ class AlertHeatingOnOff < AlertGasModelBase
     end
   end
 
+  # reduces potentiall bill caused by making more than 1000 calls per day, a bit hacky
+  private def cached_dark_sky_for_testing
+    unless defined?(@@dark_sky_cache)
+      filename = File.join('./TestResults/Alerts/dark_sky_forecast_cache.yaml')
+      if File.exist?(filename)
+        @@dark_sky_cache, @@cached_forecast_date_time = YAML::load_file(filename)
+      else
+        @@dark_sky_cache = dark_sky_forecast unless defined?(@@dark_sky_cache)
+        @@cached_forecast_date_time = @forecast_date_time
+        File.open(filename, 'w') { |f| f.write(YAML.dump([@@dark_sky_cache, @@cached_forecast_date_time])) }
+      end
+    end
+    @forecast_date_time = @@cached_forecast_date_time
+    @@dark_sky_cache
+  end
+
   private def calculate(asof_date)
     @weather_forecast_table = []
-    forecast = dark_sky_forecast
+    forecast = AlertAnalysisBase.test_mode ? cached_dark_sky_for_testing : dark_sky_forecast
     summary_forecast = convert_forecast_to_average_overnight_daytime_temperatures_cloud_cover(forecast)
 
-    heating_on, @last_5_school_days_consumption_kwh  = heating_on_generally(asof_date, 5)
+    heating_on, @last_5_school_days_consumption_kwh = heating_on_generally(asof_date, 5)
 
     @heating_on_off_description = heating_on ? 'on' : 'off'
     @latest_meter_data_date = last_meter_data_date

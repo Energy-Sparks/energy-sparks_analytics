@@ -114,15 +114,15 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   end
 
   private def calculate(asof_date)
+    calculate_model(asof_date) # so gas_model_only base varaiables are expressed even if no hot water
     if heating_only
       @relevance = :never_relevant
       @rating = nil
     else
       @relevance = :relevant
-      calculate_model(asof_date)
       calculate_hot_water_model(asof_date)
 
-      @hot_water_efficiency_summer_unoccupied_methdology_percent = @hot_water_model.overall_efficiency
+      @hot_water_efficiency_summer_unoccupied_methdology_percent = [@hot_water_model.overall_efficiency, 0.0].max
       @hot_water_annual_summer_unoccupied_methdology_kwh = @hot_water_model.annual_hotwater_kwh_estimate
       @average_summer_school_day_kwh = @hot_water_model.avg_school_day_gas_consumption
       @average_summer_holiday_kwh = @hot_water_model.avg_holiday_day_gas_consumption
@@ -153,22 +153,34 @@ class AlertHotWaterEfficiency < AlertGasModelBase
     heating_model_hot_water = @heating_model.hot_water_analysis(meter_date_1_year_before, asof_date)
     scale = scale_up_to_one_year(@school.aggregated_heat_meters, asof_date)
  
-    @heat_model_annual_heating_kwh                = heating_model_hot_water[:annual_heating_kwh] * scale
-    @heat_model_annual_hotwater_kwh               = heating_model_hot_water[:annual_hotwater_kwh] * scale
-    @heat_model_daily_hotwater_usage_kwh          = heating_model_hot_water[:daily_hotwater_usage_kwh]
-    @heat_model_daily_holiday_hotwater_usage_kwh  = heating_model_hot_water[:daily_holiday_hotwater_usage_kwh]
-    @heat_model_hot_water_efficiency              = heating_model_hot_water[:hot_water_efficiency]
+    unless heating_model_hot_water.nil?
+      @heat_model_annual_heating_kwh                = heating_model_hot_water[:annual_heating_kwh] * scale
+      @heat_model_annual_hotwater_kwh               = heating_model_hot_water[:annual_hotwater_kwh] * scale
+      @heat_model_daily_hotwater_usage_kwh          = heating_model_hot_water[:daily_hotwater_usage_kwh]
+      @heat_model_daily_holiday_hotwater_usage_kwh  = heating_model_hot_water[:daily_holiday_hotwater_usage_kwh]
+      @heat_model_hot_water_efficiency              = heating_model_hot_water[:hot_water_efficiency]
+    else # school should really have :heating_only meter attribute set to flag no hot water
+      @heat_model_annual_heating_kwh                = 0.0
+      @heat_model_annual_hotwater_kwh               = 0.0
+      @heat_model_daily_hotwater_usage_kwh          = 0.0
+      @heat_model_daily_holiday_hotwater_usage_kwh  = 0.0
+      @heat_model_hot_water_efficiency              = 0.0
+    end
   end
 
   def analyse_private(asof_date)
     calculate(asof_date)
 
-    efficiency = @hot_water_model.overall_efficiency
-
     @analysis_report.add_book_mark_to_base_url('HotWaterEfficiency')
     @analysis_report.term = :longterm
 
-    if efficiency < MIN_EFFICIENCY
+    efficiency = @hot_water_model.nil? ? 0.0 : @hot_water_model.overall_efficiency
+    if @hot_water_model.nil?
+      @analysis_report.summary = 'The school doesnt appear to have hot water heated by gas'
+      text = 'Your hot water system appears to be only used for heating '
+      @analysis_report.rating = 10.0
+      @analysis_report.status = :good
+    elsif efficiency < MIN_EFFICIENCY
       @analysis_report.summary = 'Inefficient hot water system'
       text = 'Your hot water system appears to be only '
       text += sprintf('%.0f percent efficient.', efficiency * 100.0)

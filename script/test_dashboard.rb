@@ -33,9 +33,10 @@ RubyProf.start if profile
 # reports.load_school('Trinity First School', true)
 # 'Wybourn Primary School'
 
-school_name = 'Whiteways Primary'
+# school_name = 'Whiteways Primary'
 # school_name = 'St Marks Secondary'
 # school_name = 'Stanton Drew Primary School'
+school_name = 'Christchurch First School'
 
 if false
   Benchmark.memory do |x|
@@ -59,13 +60,15 @@ puts "Load time: #{bm.round(3)} seconds"
 
 # reports.do_all_standard_pages_for_school
 
-@@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to co2' if defined?(@@energysparksanalyticsautotest)
-reports.do_all_standard_pages_for_school({yaxis_units: :co2})
-
+# @@energysparksanalyticsautotest[:name_extension] = 'y_axis_scale to £' if defined?(@@energysparksanalyticsautotest)
+# reports.do_all_standard_pages_for_school({yaxis_units: :£})
+# reports.do_one_page(:carbon_emissions)
 # reports.do_one_page(:cost)
 # reports..do_all_schools(true)
 
-# reports.do_all_standard_pages_for_school
+reports.do_all_schools(true)
+# reports.do_one_page(:solar_pv)
+
 
 if profile
   prof_result = RubyProf.stop

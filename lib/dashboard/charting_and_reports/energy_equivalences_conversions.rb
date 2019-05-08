@@ -354,7 +354,7 @@ class EnergyEquivalences
         },
         £:  {
           rate:         CARNIVORE_DINNER_£,
-          description:  "One dinner containing meat costs #{X.format(:£, CARNIVORE_DINNER_CO2_KG)}."
+          description:  "One dinner containing meat costs #{X.format(:£, CARNIVORE_DINNER_£)}."
         }
       }
     },
@@ -363,7 +363,7 @@ class EnergyEquivalences
       conversions: {
         co2:  {
           rate:         VEGETARIAN_DINNER_CO2_KG,
-          description:  "#{X.format(:co2, CARNIVORE_DINNER_CO2_KG)} of CO2 is emitted producing one vegetarian dinner."
+          description:  "#{X.format(:co2, VEGETARIAN_DINNER_CO2_KG)} of CO2 is emitted producing one vegetarian dinner."
         },
         £:  {
           rate:         VEGETARIAN_DINNER_£,

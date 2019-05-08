@@ -75,7 +75,8 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
     statistics = AnalyseHeatingAndHotWater::HeatingModel # alias long name
     @breakdown = heating_day_breakdown_current_year(asof_date)
 
-    days = heating_model.number_of_non_school_heating_days
+    meter_date_1_year_before = meter_date_one_year_before(@school.aggregated_heat_meters, asof_date)
+    days = heating_model.number_of_non_school_heating_days_method_b(meter_date_1_year_before, asof_date)
     @number_of_non_heating_days_last_year = days
 
     @average_number_of_non_heating_days_last_year = statistics.average_non_school_day_heating_days

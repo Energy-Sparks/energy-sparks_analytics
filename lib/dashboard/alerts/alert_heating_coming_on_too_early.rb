@@ -63,8 +63,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   end
 
   def calculate(asof_date)
-    super(asof_date) # heating model call
-
+    calculate_model(asof_date) # heating model call
     @heating_on_times_table, rating_7_day = heating_on_time_assessment(asof_date)
 
     @one_year_optimum_start_saving_kwh, @percent_of_annual_gas = heating_model.one_year_saving_from_better_boiler_start_time(asof_date)
@@ -97,8 +96,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   end
 
   def analyse_private(asof_date)
-    calculate_model(asof_date)
-
+    calculate(asof_date)
     heating_on = @heating_model.heating_on?(asof_date) # potential timing problem if AMR data not up to date
 
     @analysis_report.add_book_mark_to_base_url('HeatingComingOnTooEarly')

@@ -142,7 +142,20 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   protected def calculate_model(asof_date)
-    @heating_model = @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, one_year_period(asof_date))
+    @heating_model = model_cache(@school.urn, asof_date)
     calculate_enough_data(model_start_date(asof_date), asof_date)
+  end
+
+  # during analytics testing store model results to save recalculating for different alerts at same school
+  private def model_cache(urn, asof_date)
+    return call_model(asof_date) unless AlertAnalysisBase.test_mode
+    @@model_cache_results = {} unless defined?(@@model_cache_results)
+    composite_key = urn.to_s + ':' + asof_date.to_s
+    return @@model_cache_results[composite_key] if @@model_cache_results.key?(composite_key)
+    @@model_cache_results[composite_key] = call_model(asof_date) 
+  end
+
+  private def call_model(asof_date)
+    @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, one_year_period(asof_date)) 
   end
 end

@@ -55,6 +55,9 @@ class MeterAttributes
         readings_end_date: Date.new(2017, 9, 30)
       ]
     },
+    8891205403 => {
+      function: [ :heating_only ]
+    },
     # ==============================Castle Primary=============================
     2200015105145 => {
       aggregation:  [

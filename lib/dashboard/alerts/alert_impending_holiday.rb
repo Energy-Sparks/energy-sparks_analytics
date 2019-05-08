@@ -184,7 +184,13 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       consumption_in_holiday_period(gas?, @school.aggregated_heat_meters, start_date, end_date)
     @last_year_holiday_electricity_kwh, @last_year_holiday_electricity_£ =
       consumption_in_holiday_period(electricity?, @school.aggregated_electricity_meters, start_date, end_date)
-    @last_year_holiday_energy_costs_£ = @last_year_holiday_gas_£ + @last_year_holiday_electricity_£
+
+    @last_year_holiday_energy_costs_£ = nil_to_zero(@last_year_holiday_gas_£) + nil_to_zero(@last_year_holiday_electricity_£)
+  end
+
+  # written for Bishop Sutton where the electricity data is 2 years out of date
+  private def nil_to_zero(value)
+    value.nil? ? 0.0 : value
   end
 
   private def consumption_in_holiday_period(set, meter, start_date, end_date)
@@ -219,7 +225,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     @potential_saving_£ = (electricity? ? electricity_potential_saving_£ : 0.0) + (gas? ? gas_potential_saving_£ : 0.0)
     @holidays_percent = @holidays_£ / @total_annual_£
 
-    aggregate_electricity_and_gas_day_type_breakdown_tables(electricity_daytype_breakdown_table, gas_daytype_breakdown_table)
     merge_day_type_breakdown_tables(electricity_daytype_breakdown_table, gas_daytype_breakdown_table)
   end
 

@@ -151,25 +151,24 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
   def analyse_private(asof_date)
     calculate(asof_date)
     annual_kwh = kwh(asof_date - 365, asof_date)
-    annual_kwh_per_pupil_area_benchmark = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_PUPIL * pupils
+    annual_kwh_per_pupil_benchmark = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_PUPIL * pupils
     annual_kwh_per_floor_area_benchmark = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area
 
     @analysis_report.term = :longterm
     @analysis_report.add_book_mark_to_base_url('AnnualGasBenchmark')
 
-    if annual_kwh > annual_kwh_per_floor_area_benchmark ||
-        annual_kwh > annual_kwh_per_pupil_benchmark
+    if annual_kwh > [annual_kwh_per_floor_area_benchmark, annual_kwh_per_pupil_benchmark].max
       @analysis_report.summary = 'Your annual gas consumption is high compared with the average school'
       text = commentary(annual_kwh, 'too high', annual_kwh_per_floor_area_benchmark, annual_kwh_per_floor_area_benchmark)
       description1 = AlertDescriptionDetail.new(:text, text)
 
-      per_pupil_ratio = annual_kwh / annual_kwh_per_pupil_area_benchmark
+      per_pupil_ratio = annual_kwh / annual_kwh_per_pupil_benchmark
       per_floor_area_ratio = annual_kwh / annual_kwh_per_floor_area_benchmark
       @analysis_report.rating = AlertReport::MAX_RATING * (per_floor_area_ratio > per_pupil_ratio ? (1.0 / per_pupil_ratio) : (1.0 / per_floor_area_ratio))
       @analysis_report.status = :poor
     else
       @analysis_report.summary = 'Your gas consumption is good'
-      text = commentary(annual_kwh, 'good', annual_kwh_per_pupil_area_benchmark, annual_kwh_per_floor_area_benchmark)
+      text = commentary(annual_kwh, 'good', annual_kwh_per_pupil_benchmark, annual_kwh_per_floor_area_benchmark)
       description1 = AlertDescriptionDetail.new(:text, text)
       @analysis_report.rating = 10.0
       @analysis_report.status = :good

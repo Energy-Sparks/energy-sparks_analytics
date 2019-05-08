@@ -188,17 +188,18 @@ class ReportConfigSupport
     do_one_page_internal(worksheet_tab_name, page_config[:charts], chart_override)
   end
 
-  def do_chart_list(page_name, list_of_charts)
-    @worksheet_charts = {}
+  def do_chart_list(page_name, list_of_charts, empty_existing_chart_list = true)
+    @worksheet_charts = {} if empty_existing_chart_list
     do_one_page_internal(page_name, list_of_charts)
   end
 
-  def write_excel
-    excel = ExcelCharts.new(File.join(File.dirname(__FILE__), '../Results/') + @excel_name + '- charts test.xlsx')
+  def write_excel(filename = File.join(File.dirname(__FILE__), '../Results/') + @excel_name + '- charts test.xlsx')
+    excel = ExcelCharts.new(filename)
     @worksheet_charts.each do |worksheet_name, charts|
       excel.add_charts(worksheet_name, charts)
     end
     excel.close
+    @worksheet_charts = {}
   end
 
   def write_html

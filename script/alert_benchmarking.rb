@@ -5,6 +5,7 @@ require_rel '../test_support'
 require './script/report_config_support.rb'
 require 'hashdiff'
 
+ENV['ENERGYSPARKSTESTMODE'] = 'ON'
 
 module Logging
   @logger = Logger.new('log/test-alerts ' + Time.now.strftime('%H %M') + '.log')
@@ -65,31 +66,30 @@ end
 =end
 ]
 
-alerts_to_test = [
-  AlertHeatingOnNonSchoolDays,
-  AlertChangeInDailyElectricityShortTerm,
-  AlertHeatingComingOnTooEarly,
-  AlertChangeInDailyElectricityShortTerm,
-  AlertChangeInDailyGasShortTerm,
-  AlertChangeInElectricityBaseloadShortTerm,
-  AlertHotWaterInsulationAdvice,
-  AlertOutOfHoursElectricityUsage,
-  AlertOutOfHoursGasUsage,
-  AlertElectricityAnnualVersusBenchmark,
-  AlertGasAnnualVersusBenchmark,
-  AlertElectricityBaseloadVersusBenchmark,
-  AlertHeatingOnOff,
-  AlertHeatingSensitivityAdvice,
-  AlertHotWaterEfficiency,
-  AlertImpendingHoliday,
-  AlertHeatingOnNonSchoolDays,
-  AlertWeekendGasConsumptionShortTerm,
-  AlertHeatingOnSchoolDays,
-  AlertThermostaticControl
-]
+alerts_to_test = { # classname => excel worksheet tab
+  AlertWeekendGasConsumptionShortTerm         => 'WeekendGas',
+  AlertChangeInDailyElectricityShortTerm      => 'ChangeInElectric',
+  AlertHeatingComingOnTooEarly                => 'HeatingTooEarly',
+  AlertChangeInDailyElectricityShortTerm      => 'LastWeekElectric',
+  AlertChangeInDailyGasShortTerm              => 'LastWeekGas',
+  AlertChangeInElectricityBaseloadShortTerm   => 'BaseloadChange',
+  AlertHotWaterInsulationAdvice               => 'HWInsulation',
+  AlertOutOfHoursElectricityUsage             => 'OutHoursElectric',
+  AlertOutOfHoursGasUsage                     => 'OutHoursGas',
+  AlertElectricityAnnualVersusBenchmark       => 'ElectricVBenchmark',
+  AlertGasAnnualVersusBenchmark               => 'GasVBenchmark',
+  AlertElectricityBaseloadVersusBenchmark     => 'BaseloadBenchmark',
+  AlertHeatingOnOff                           => 'HeatingOnOff',
+  AlertHeatingSensitivityAdvice               => 'HeatSenseAdvice',
+  AlertHotWaterEfficiency                     => 'HWEfficiency',
+  AlertImpendingHoliday                       => 'ImpendingHoliday',
+  AlertHeatingOnNonSchoolDays                 => 'NonHeatingDays',
+  AlertHeatingOnSchoolDays                    => 'HeatingDays',
+  AlertThermostaticControl                    => 'Thermostatic'
+}
 
-excluded_schools = ['Ecclesall Primary School', 'Selwood Academy', 'Walkley Tennyson School']
-included_schools = ['Bishop Sutton Primary School']
+excluded_schools = ['Ecclesall Primary School', 'Selwood Academy', 'Athelstan Primary School', 'Walkley Tennyson School']
+included_schools = nil # ['Whiteways Primary']
 
 asof_date = Date.new(2019, 2, 15)
 
@@ -101,13 +101,15 @@ school_calculation_time = {}
 reports = ReportConfigSupport.new
 
 failed_alerts = []
+ 
+generate_charts = false
+excel_charts = ReportConfigSupport.new if generate_charts
 
 history = AlertHistoryDatabase.new
-=begin
 previous_results = history.load
 puts 'Loaded data'
-ap(previous_results)
-=end
+# ap(previous_results)
+
 calculated_results = {}
 
 school_names.sort.each do |school_name|
@@ -118,6 +120,8 @@ school_names.sort.each do |school_name|
 
   school = reports.load_school(school_name, true)
 
+  excel_charts.setup_school(school, school_name)  if generate_charts
+
   calculated_results[school.urn] = {}
   calculated_results[school.urn][asof_date] = {}
 
@@ -125,7 +129,7 @@ school_names.sort.each do |school_name|
 
   bm1 = Benchmark.realtime {
     alerts_classes.each do |alert_class|
-      next if !alerts_to_test.include?(alert_class)
+      # next if !alerts_to_test.include?(alert_class)
 
       alert = alert_class.new(school)
       next unless alert.valid_alert?
@@ -138,7 +142,7 @@ school_names.sort.each do |school_name|
 
         calculated_results[school.urn][asof_date].merge!(raw_data)
 
-        print_all_results(alert_class, alert)
+        # print_all_results(alert_class, alert)
 
         results = alert.analysis_report
         if results.status == :failed
@@ -146,28 +150,42 @@ school_names.sort.each do |school_name|
         end
       }
       (alert_calculation_time[alert.class.name] ||= []).push(bm2)
+
+      if generate_charts
+        excel_tab_name = alerts_to_test[alert_class]
+        charts = alert.front_end_template_chart_data.values.map(&:to_sym)
+        puts "Saving charts to #{excel_tab_name}: #{charts.join(';')}"
+        excel_charts.do_chart_list(excel_tab_name, charts, false) unless charts.empty?
+      end
     end
-    }
-    (school_calculation_time[school_name] ||= []).push(bm1)
+  }
+
+  (school_calculation_time[school_name] ||= []).push(bm1)
+  if generate_charts
+    excel_filename = File.join(File.dirname(__FILE__), '../TestResults/Alerts/Charts/') + school.name + ' alert charts ' + asof_date.strftime('%d%b%Y') + '.xlsx'
+    puts "Writing to #{excel_filename}"
+    excel_charts.write_excel(excel_filename)
+  end
 end
 
 # ap(calculated_results)
 
-=begin
 history.save(calculated_results)
 
+print_banner "Differences:"
 h_diff = HashDiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
 puts h_diff
-=end
 
+print_banner "Calc times:"
 alert_calculation_time.each do |type, data|
-  puts sprintf('%-35.35s %.6f', type, data.sum/data.length)
+  puts sprintf('%-35.35s %.6f', type, data.sum / data.length)
 end
 
 school_calculation_time.each do |type, data|
   puts sprintf('%-35.35s %.6f', type, data.sum)
 end
 
+print_banner "Failed alerts:"
 failed_alerts.each do |fail|
     puts fail
 end

@@ -102,7 +102,7 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     @one_year_saving_reduced_days_to_average_£ = gas_cost(@one_year_saving_reduced_days_to_average_kwh)
     @one_year_saving_reduced_days_to_exemplar_£ = gas_cost(@one_year_saving_reduced_days_to_exemplar_kwh)
 
-    @one_year_saving_£ = Range.new(@one_year_saving_reduced_days_to_average_£ , @one_year_saving_reduced_days_to_exemplar_£)
+    @one_year_saving_£ = Range.new(@one_year_saving_reduced_days_to_average_£, @one_year_saving_reduced_days_to_exemplar_£)
 
     @rating = statistics.school_day_heating_rating_out_of_10(days)
 

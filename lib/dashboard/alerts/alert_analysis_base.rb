@@ -49,6 +49,10 @@ class AlertAnalysisBase
     end
   end
 
+  def self.test_mode
+    !ENV['ENERGYSPARKSTESTMODE'].nil? && ENV['ENERGYSPARKSTESTMODE'] == 'ON'
+  end
+
   def raw_template_variables
     unformatted_template_variables
   end
@@ -63,7 +67,7 @@ class AlertAnalysisBase
 
   def self.flatten_front_end_template_variables
     variables = {}
-    self.template_variables.each do |group_name, variable_group|
+    self.template_variables.each do |_group_name, variable_group|
       variables.merge!(variable_group)
     end
     variables
@@ -182,7 +186,8 @@ class AlertAnalysisBase
   end
 
   def front_end_template_chart_data
-    front_end_template_chart_data_by_type(:chart)
+    charts = front_end_template_chart_data_by_type(:chart)
+    charts.reject { |_name, definition| definition.empty? }
   end
 
   def front_end_template_table_data
@@ -374,6 +379,7 @@ class AlertAnalysisBase
   # convert a table either into an html table, or a '|' bar seperated text table; can't use commas as contined in 1,234 numbers
   private def format_table(type, data_description, formatted, format)
     header, formatted_data = format_table_data(type, data_description, formatted, format)
+    return nil if formatted_data.nil?
     table_formatter = AlertRenderTable.new(header, formatted_data)
     table_formatter.render(format)
   end
@@ -382,6 +388,7 @@ class AlertAnalysisBase
   private def format_table_data(type, data_description, formatted, format)
     formatted_table = []
     table_data = send(type)
+    return [data_description[:header], nil] if table_data.nil?
     column_formats = data_description[:column_types]
     table_data.each do |row_data|
       formatted_row = []
@@ -439,7 +446,7 @@ class AlertAnalysisBase
   end
 
   def payback_years
-    return 0..0 if one_year_saving_£.nil? || capital_cost.nil? || capital_cost == 0.0..0.0
+    return (0.0..0.0) if one_year_saving_£.nil? || capital_cost.nil? || capital_cost == (0.0..0.0) || one_year_saving_£.last == 0.0 || one_year_saving_£.first == 0.0
     Range.new(capital_cost.first / one_year_saving_£.last, capital_cost.last / one_year_saving_£.first)
   end
 
@@ -582,24 +589,24 @@ class AlertAnalysisBase
 
   def self.all_available_alerts
     [
-      AlertElectricityBaseloadVersusBenchmark,
-      AlertChangeInElectricityBaseloadShortTerm,
       AlertChangeInDailyElectricityShortTerm,
-      AlertOutOfHoursElectricityUsage,
-      AlertElectricityAnnualVersusBenchmark,
-      AlertGasAnnualVersusBenchmark,
-      AlertOutOfHoursGasUsage,
       AlertChangeInDailyGasShortTerm,
-      AlertWeekendGasConsumptionShortTerm,
-      AlertImpendingHoliday,
-      AlertHeatingOnOff,
-      AlertHotWaterEfficiency,
+      AlertChangeInElectricityBaseloadShortTerm,
+      AlertElectricityAnnualVersusBenchmark,
+      AlertElectricityBaseloadVersusBenchmark,
+      AlertGasAnnualVersusBenchmark,
       AlertHeatingComingOnTooEarly,
-      AlertThermostaticControl,
+      AlertHeatingOnOff,
       AlertHeatingSensitivityAdvice,
-      AlertHeatingOnSchoolDays,
+      AlertHotWaterEfficiency,
+      AlertImpendingHoliday,
       AlertHeatingOnNonSchoolDays,
-      AlertHotWaterInsulationAdvice
+      AlertOutOfHoursElectricityUsage,
+      AlertOutOfHoursGasUsage,
+      AlertHotWaterInsulationAdvice,
+      AlertHeatingOnSchoolDays,
+      AlertThermostaticControl,
+      AlertWeekendGasConsumptionShortTerm
     ]
   end
 end

@@ -115,7 +115,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
 
     @one_year_saving_£ = Range.new(@next_year_change_in_baseload_£, @next_year_change_in_baseload_£)
 
-    @rating = [10.0 - 10.0 * [@predicted_percent_increase_in_usage / 0.3, 0.0].max, 10.0].min.round(1)
+    @rating = calculate_rating_from_range(-0.05, 0.15, @predicted_percent_increase_in_usage)
 
     @significant_increase_in_baseload = @rating < 7.0
 

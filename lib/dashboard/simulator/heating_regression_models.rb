@@ -367,7 +367,7 @@ module AnalyseHeatingAndHotWater
 
     def hot_water_poor_insulation_cost_kwh(start_date, end_date, max_non_hotwater_criteria = 50.0)
       calculation = hot_water_analysis(start_date, end_date, max_non_hotwater_criteria)
-      [calculation[:annual_sensitivity_to_insulation_kwh], calculation[:percent_base_hot_water_usage]]
+      calculation.nil? ? [0.0, 0.0] : [calculation[:annual_sensitivity_to_insulation_kwh], calculation[:percent_base_hot_water_usage]]
     end
 
     private def hotwater_in_period?(model_type, max_non_hotwater_criteria)
@@ -377,7 +377,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def hot_water_analysis(start_date, end_date, max_non_hotwater_criteria = 50.0)
-      return [0.0, 0.0] if @meter.heating_only? || !@models.key?(:summer_occupied_all_days)
+      return nil if @meter.heating_only? || !@models.key?(:summer_occupied_all_days) || !@models.key?(:holiday_hotwater_only)
 
       temperature_sensitivity_kwh_per_c = -1.0 * @models[:summer_occupied_all_days].b
       base_hotwater_usage_at_20c = @models[:summer_occupied_all_days].predicted_kwh_temperature(20.0)
@@ -793,6 +793,21 @@ module AnalyseHeatingAndHotWater
       weekend_days + holidays
     end
 
+    def number_of_non_school_heating_days_method_b(start_date, end_date, gas_meter_noise_kwh_day = 25.0)
+      count = 0
+      (start_date..end_date).each do |date|
+        unless occupied?(date)
+          count += 1 if @amr_data.one_day_kwh(date) > (@max_summer_hotwater_kwh + gas_meter_noise_kwh_day)
+        end
+      end
+      count
+    end
+
+    def number_of_heating_days_method_b(start_date, end_date)
+      number_of_heating_school_days + number_of_non_school_heating_days_method_b(start_date, end_date)
+    end
+
+    
     def number_of_heating_days
       number_of_heating_school_days + number_of_non_school_heating_days
     end
@@ -997,6 +1012,7 @@ module AnalyseHeatingAndHotWater
     # used by heating on/off alert when its using a forecast, so it doesn't know whether the heating is on or not
     def predicted_heating_kwh_future_date(date, temperature)
       model = @models[heating_model_for_future_date(date)]
+      return 0.0 if model.nil? # generally assume this when for example heating completely off at weekends or holidays
       model.predicted_kwh_temperature(temperature)
     end
 
@@ -1007,6 +1023,7 @@ module AnalyseHeatingAndHotWater
     # used by heating on/off alert when its using a forecast, so it doesn't know whether the heating is on or not
     def predicted_non_heating_kwh_future_date(date, temperature)
       model = @models[non_heating_model_for_future_date(date)]
+      return 0.0 if model.nil? # generally assume this when for example hot water completely off at weekends or holidays
       model.predicted_kwh_temperature(temperature)
     end
 

@@ -87,6 +87,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     days_in_week = 5
 
     @beginning_of_week, @last_weeks_consumption_kwh = schoolday_energy_usage_over_period(asof_date, days_in_week)
+    # -1 moves the the date to the previous N school day period
     @beginning_of_last_week, @week_befores_consumption_kwh = schoolday_energy_usage_over_period(@beginning_of_week - 1, days_in_week)
 
     @last_weeks_consumption_£ = @last_weeks_consumption_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
@@ -99,7 +100,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     saving_£ = 195.0 * (@last_weeks_consumption_£ - @week_befores_consumption_£) / days_in_week
     @one_year_saving_£ = Range.new(saving_£, saving_£)
 
-    @rating = [10.0 - 10.0 * [@percent_change_in_consumption / 0.3, 0.0].max, 10.0].min.round(1)
+    @rating = calculate_rating_from_range(-0.05, 0.15, @percent_change_in_consumption)
     @status = @signifcant_increase_in_electricity_consumption ? :bad : :good
     @term = :shortterm
     @bookmark_url = add_book_mark_to_base_url('ElectricityChange')
@@ -139,18 +140,18 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     calculate(asof_date)
     days_in_week = 5
     beginning_of_week, last_weeks_consumption = schoolday_energy_usage_over_period(asof_date, days_in_week)
-    beginning_of_last_week, week_befores_consumption = schoolday_energy_usage_over_period(beginning_of_week - 1, days_in_week)
+    beginning_of_last_week, week_befores_consumption = schoolday_energy_usage_over_period(beginning_of_week - 7, days_in_week)
 
     @analysis_report.term = :shortterm
     @analysis_report.add_book_mark_to_base_url('ElectricityChange')
 
     if last_weeks_consumption > week_befores_consumption * MAXDAILYCHANGE
-      last_weeks_baseload = average_baseload_kw(asof_date - 7, asof_date)
+      last_weeks_baseload = average_baseload(asof_date - 7, asof_date)
       @analysis_report.summary = 'Your daily electricity consumption has increased'
       text = sprintf('Your electricity consumption has increased from %.0f kWh ', week_befores_consumption)
-      text += sprintf('last week (5 school days following %s) ', beginning_of_last_week.to_formatted_s(:long_ordinal))
+      text += sprintf('last week (5 school days following %s) ', beginning_of_last_week.strftime('%d %m'))
       text += sprintf('to %.0f kWh ', last_weeks_consumption)
-      text += sprintf('this week (5 school days following %s) ', beginning_of_week.to_formatted_s(:long_ordinal))
+      text += sprintf('this week (5 school days following %s) ', beginning_of_week.strftime('%d %m'))
       text += sprintf('over the last year to %.1f last week. ', last_weeks_baseload)
       cost = BenchmarkMetrics::ELECTRICITY_PRICE * 195.0 * (last_weeks_consumption - week_befores_consumption) / days_in_week
       text += sprintf('If this continues it will costs you an additional £%.0f over the next year.', cost)
