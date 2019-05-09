@@ -25,6 +25,7 @@ gem 'hashdiff'
 
 # For profiling code
 gem 'ruby-prof'
+gem "benchmark-memory"
 
 # For tests
 gem 'rspec', '~> 3.8.0'

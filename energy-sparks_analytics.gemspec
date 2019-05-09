@@ -36,6 +36,7 @@ Gem::Specification.new do |s|
 
   # For profiling code
   s.add_dependency 'ruby-prof', '~> 0.17.0'
+  s.add_dependency 'benchmark-memory', '~> 0.1.2'
 
   # Useful for debugging
   s.add_dependency 'pry-byebug', '~> 3.6.0'
