@@ -64,7 +64,20 @@ class AreaNames
       met_office_forecast_id:     351523,
       latitude:                   51.2308,
       longitude:                  -2.3201
-
+    },
+    # Front end has a school area of Somerset, but we need to come up with a plan
+    # where the front end can simply pass lat/long and any other bits required, like met office
+    # forecast id through - maybe added to Dashboard::School
+    somerset: {
+      name:                       'Somerset',
+      temperature_filename:       'Frome temperaturedata.csv',
+      solar_ir_filename:          'Frome solardata.csv',
+      solar_pv_filename:          'pv data Frome.csv',
+      holiday_calendar:           'Holidays.csv',
+      yahoo_weather_forecast_id:  'frome, uk', # untested 16Jan2019 post withdrawal of free API
+      met_office_forecast_id:     351523,
+      latitude:                   51.2308,
+      longitude:                  -2.3201
     },
     bristol: {
       name:                       'Bristol',

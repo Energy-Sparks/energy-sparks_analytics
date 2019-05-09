@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '2.5.1'
 
 gem 'require_all'
-gem 'activesupport'
+gem 'activesupport', '~> 6.0.0.rc1'
 
 # Previous releases of statsample overrode the definition of Array#sum with dodgy results
 # Master currently has a fix...
@@ -25,6 +25,7 @@ gem 'hashdiff'
 
 # For profiling code
 gem 'ruby-prof'
+gem "benchmark-memory"
 
 # For tests
-gem 'rspec'
+gem 'rspec', '~> 3.8.0'
