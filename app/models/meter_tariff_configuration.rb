@@ -10,6 +10,7 @@ class MeterTariffs
   DEFAULT_NIGHTTIME_RATE_FOR_DIFFERENTIAL_TARIFF = 0.08
   DEFAULT_DAYTIME_RATE_FOR_DIFFERENTIAL_TARIFF = 0.13
   DEFAULT_ELECTRICITY_ECONOMIC_TARIFF = 0.12
+  DEFAULT_SOLAR_PV_TARIFF = 0.12
   BLENDED_DIFFERNTIAL_RATE_APPROX = (13 * DEFAULT_NIGHTTIME_RATE_FOR_DIFFERENTIAL_TARIFF + (48 - 13) * DEFAULT_DAYTIME_RATE_FOR_DIFFERENTIAL_TARIFF)/ 48.0
 
   BILL_COMPONENTS = {
@@ -78,6 +79,14 @@ class MeterTariffs
         name: 'Economic gas tariff',
         rates: {
           rate:   { per: :kwh, rate: 0.03 }
+        }
+      }
+    },
+    solar_pv: {
+      FOREVERCONTRACTDATES => {
+        name: 'Solar PV Default Tariff',
+        rates: {
+          rate:  { per: :kwh,     rate: DEFAULT_SOLAR_PV_TARIFF }
         }
       }
     }
@@ -182,7 +191,7 @@ class MeterTariffs
           }
         }
       }
-    },
+    }
   }.freeze
   private_constant :DEFAULT_ACCOUNTING_TARIFFS
 
