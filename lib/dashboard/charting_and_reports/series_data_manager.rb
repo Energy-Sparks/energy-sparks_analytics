@@ -761,6 +761,8 @@ private
       when :year
         periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
         @periods = [periods[0]]
+      when :month
+        @periods = [month_offset_period(@last_meter_date, 0)]
       when :week
         period = SchoolDatePeriod.new(:week, 'current week', @last_meter_date - 6, @last_meter_date)
         @periods = [period]
@@ -800,6 +802,12 @@ private
           @periods = [SchoolDatePeriod.merge_two_periods(periods[hash_value.last.magnitude], periods[hash_value.first.magnitude])]
         else
           raise "Expecting an integer or date as an parameter for a year specification got a #{hash_value.class.name}"
+        end
+      when :month
+        if hash_value.is_a?(Integer)
+          @periods = [month_offset_period(@last_meter_date, hash_value)]
+        else
+          raise 'Expecting an integer for a month specification'
         end
       when :week
         if hash_value.is_a?(Integer) # hash_value weeks back from latest week
@@ -955,6 +963,14 @@ private
   private def workweek_period(end_date)
     saturday = end_date - ((end_date.wday - 6) % 7)
     SchoolDatePeriod.new(:chartperiod, 'Work week', saturday - 6, saturday)
+  end
+
+  def month_offset_period(date, offset)
+    offset_month = date.prev_month(-offset)
+    first_day_of_month = Date.new(offset_month.year, offset_month.month, 1)
+    last_day_of_month = Date.new(offset_month.year, offset_month.month + 1, 1) - 1
+    last_day_of_month = date if offset == 0 # partial month
+    SchoolDatePeriod.new(:chartperiod, 'month', first_day_of_month, last_day_of_month)
   end
 
   def calculate_first_chart_date

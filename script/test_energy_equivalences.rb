@@ -9,6 +9,42 @@ module Logging
   logger.level = :debug
 end
 
+school_name = 'Whiteways Primary'
+meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
+
+conversion = EnergyConversions.new(meter_collection)
+
+[:electricity, :gas].each do |fuel_type|
+  [{week: 0}, {day: 0}, {month: 0}, {year: 0}].each do |period|
+    [:kwh, :co2, :£].each do |convert_to|
+      type_choices = conversion.conversion_choices(convert_to)
+      type_choices.each do |type|
+        next if [:electricity, :gas].include?(type)
+        value, kwh, factor = conversion.convert(type, convert_to, period, fuel_type)
+        formatted_kwh = FormatEnergyUnit.format(:kwh, kwh)
+        formatted_value = FormatEnergyUnit.format(type, value)
+        puts "Your school consumed #{formatted_kwh} of #{fuel_type} for period #{period} this is equivalent  #{type}: #{formatted_value} (via #{convert_to})"
+      end
+    end
+  end
+end
+exit
+
+scalar_data = ScalarkWhCO2CostValues.new(meter_collection)
+bm = Benchmark.realtime {
+  puts scalar_data.aggregate_value({week: 0}, :electricity, :kwh)
+}
+puts "kwh 1 year takes #{bm.round(5)} seconds"
+bm = Benchmark.realtime {
+  puts scalar_data.aggregate_value({week: 0}, :electricity, :co2)
+}
+puts "co2 1 year takes #{bm.round(5)} seconds"
+bm = Benchmark.realtime {
+  puts scalar_data.aggregate_value({week: 0}, :electricity, :£)
+}
+puts "pounds 1 year takes #{bm.round(5)} seconds"
+exit
+
 equivalences = {
   'Electricity kWh to petrol car via £' => [1000.0, :kwh, :electricity, :km, :ice_car, :£],
   'Electricity kWh to petrol car via CO2' => [1000.0, :kwh, :electricity, :km, :ice_car, :co2],

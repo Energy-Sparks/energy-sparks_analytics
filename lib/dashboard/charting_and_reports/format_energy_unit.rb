@@ -32,6 +32,8 @@ class FormatEnergyUnit
     £_per_kwh:          '£/kWh',
     date:               '',
     datetime:           '',
+    gas:                'gas',
+    electricity:        'electricity',
     teaching_assistant: 'teaching assistant (hours)',
     carnivore_dinner:   'dinners',
     vegetarian_dinner:  'dinners',
