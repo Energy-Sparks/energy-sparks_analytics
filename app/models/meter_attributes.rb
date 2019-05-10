@@ -56,7 +56,11 @@ class MeterAttributes
       ]
     },
     8891205403 => {
-      function: [ :heating_only ]
+      function: [ :heating_only ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     50,
+        reason: 'Automated process set too high at about 140'
+      }
     },
     # ==============================Castle Primary=============================
     2200015105145 => {
