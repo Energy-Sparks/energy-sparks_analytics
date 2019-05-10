@@ -370,7 +370,11 @@ class AlertAnalysisBase
       elsif data[:units] == :table
         list[type] = format_table(type, data, formatted, format)
       else
-        list[type] = formatted ? FormatUnit.format(data[:units], send(type), format, true) : send(type)
+        if respond_to? type
+          list[type] = formatted ? FormatUnit.format(data[:units], send(type), format, true) : send(type)
+        else
+          logger.info "Warning: alert doesnt implement #{type}"
+        end
       end
     end
     list
@@ -387,6 +391,7 @@ class AlertAnalysisBase
   # convert the cells within a table into formatted html or text
   private def format_table_data(type, data_description, formatted, format)
     formatted_table = []
+    return [nil, nil] unless respond_to? type
     table_data = send(type)
     return [data_description[:header], nil] if table_data.nil?
     column_formats = data_description[:column_types]
