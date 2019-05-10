@@ -26,7 +26,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   end
 
   def timescale
-    "#{@holiday_length_weeks} week" + (@holiday_length_weeks > 1 ? 's' : '')
+    @holiday.nil? ? 'Unknown' : ("#{@holiday_length_weeks} week" + (@holiday_length_weeks > 1 ? 's' : ''))
   end
 
   TEMPLATE_VARIABLES = {
@@ -174,7 +174,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     last_year_holiday = same_holiday_previous_year(@holiday_period)
     set_last_year_holiday_consumption_variables(last_year_holiday.start_date, last_year_holiday.end_date)
 
-    @saving_kwh = electricity_holidays_kwh
+    @saving_kwh = 0.0
 
     @rating = 5.0
   end
@@ -225,7 +225,10 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     @potential_saving_£ = (electricity? ? electricity_potential_saving_£ : 0.0) + (gas? ? gas_potential_saving_£ : 0.0)
     @holidays_percent = @holidays_£ / @total_annual_£
 
-    merge_day_type_breakdown_tables(electricity_daytype_breakdown_table, gas_daytype_breakdown_table)
+    electric_table  = respond_to?(:electricity_daytype_breakdown_table) ? electricity_daytype_breakdown_table : nil
+    gas_table       = respond_to?(:gas_daytype_breakdown_table) ? gas_daytype_breakdown_table : nil
+
+    merge_day_type_breakdown_tables(electric_table, gas_table)
   end
 
   private def merge_day_type_breakdown_tables(electric_table, gas_table)
