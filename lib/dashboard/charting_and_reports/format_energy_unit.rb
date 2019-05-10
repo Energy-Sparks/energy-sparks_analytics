@@ -1,3 +1,4 @@
+require 'bigdecimal'
 
 class FormatEnergyUnit
   UNIT_DESCRIPTION_TEXT = {
@@ -45,45 +46,44 @@ class FormatEnergyUnit
     percent:        '&percnt;'
   }.freeze
 
-  def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false)
+  def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
-    return "#{scale_num(value)}" if unit == Float
+    return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
     return value.to_s if convert_missing_types_to_strings && !UNIT_DESCRIPTION_TEXT.key?(unit)
-
     check_units(UNIT_DESCRIPTION_TEXT, unit)
     if value.nil? && unit != :temperature
       UNIT_DESCRIPTION_TEXT[unit]
     elsif unit == :£
-      format_pounds(value, medium)
+      format_pounds(value, medium, user_numeric_comprehension_level)
     elsif unit == :days
       format_days(value)
     elsif unit == :£_per_kwh
-      format_pounds(value, medium) + '/kWh'
+      format_pounds(value, medium, user_numeric_comprehension_level) + '/kWh'
     elsif unit == :r2
       sprintf('%.2f', value)
     elsif unit == :£_range
-      format_pound_range(value, medium)
+      format_pound_range(value, medium, user_numeric_comprehension_level)
     elsif unit == :temperature
       "#{scale_num(value)}C"
     elsif unit == :years_range
       format_years_range(value)
     elsif unit == :percent
-      "#{scale_num(value * 100.0)}#{type_format(unit, medium)}"
+      "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
     elsif unit == :date
       value.strftime('%A %e %b %Y')
     elsif unit == :datetime
       value.strftime('%A %e %b %Y %H:%M')
     else
-      "#{scale_num(value)}" + (in_table ? '' : " #{type_format(unit, medium)}")
+      "#{scale_num(value, false, user_numeric_comprehension_level)}" + (in_table ? '' : " #{type_format(unit, medium)}")
     end
   end
 
-  def self.format_pound_range(range, medium)
+  def self.format_pound_range(range, medium, user_numeric_comprehension_level)
     if ((range.last - range.first) / range.last).magnitude < 0.05 ||
       (range.first.magnitude < 0.005 && range.last.magnitude < 0.005)
-      format_pounds(range.first, medium)
+      format_pounds(range.first, medium, user_numeric_comprehension_level)
     else
-      format_pounds(range.first, medium) + ' to ' + format_pounds(range.last, medium)
+      format_pounds(range.first, medium, user_numeric_comprehension_level) + ' to ' + format_pounds(range.last, medium, user_numeric_comprehension_level)
     end
   end
 
@@ -95,11 +95,11 @@ class FormatEnergyUnit
     end
   end
 
-  def self.format_pounds(value, medium)
+  def self.format_pounds(value, medium, user_numeric_comprehension_level)
     if value.magnitude >= 1.0
-      type_format(:£, medium) + scale_num(value, true)
+      type_format(:£, medium) + scale_num(value, true, user_numeric_comprehension_level)
     else
-      scale_num(value * 100.0) + 'p'
+      scale_num(value * 100.0, true, user_numeric_comprehension_level) + 'p'
     end
   end
 
@@ -137,30 +137,39 @@ class FormatEnergyUnit
     end
   end
 
-  def self.scale_num(number, in_pounds = false)
-    if number.nil?
-      '' # specific case where no value specified
-    elsif number.magnitude == 0.0
-      '0.0'
-    elsif number.magnitude < 0.001
-      sprintf '%.6f', number
-    elsif number.magnitude < 0.1
-      sprintf '%.3f', number
-    elsif number.magnitude < 1.0
-      sprintf '%.2f', number
-    elsif number.magnitude < 50
-      if in_pounds
-        sprintf '%.2f', number
-      else
-        sprintf '%.1f', number
-      end
-    elsif number.magnitude < 1000
-      sprintf '%.0f', number
+  def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)
+    number = significant_figures(value, user_numeric_comprehension_level(user_numeric_comprehension_level))
+    return 0.to_s if number.zero?
+    before_decimal_point = number.to_s.gsub(/^(.*)\..*$/, '\1')
+    after_decimal_point = number.to_s.gsub(/.*(\..*)/, '\1').gsub(/^.*\.0$/, '')
+    if in_pounds && !after_decimal_point.empty? && after_decimal_point.length < 3
+      # add zero pence onto e.g. £23.1 so it becomes £23.10
+      after_decimal_point += '0'
+    elsif number.magnitude >= 1000
+      return number.round(0).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse + after_decimal_point
+    end
+    before_decimal_point + after_decimal_point
+  end
+
+  private_class_method def self.user_numeric_comprehension_level(user_type)
+    case user_type
+    when :ks2
+      2
+    when :accountant, :energy_expert
+      10
     else
-      number.round(0).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
+      raise EnergySparksUnexpectedStateException.new('Unexpected nil user_type for user_numeric_comprehension_level') if user_type.nil?
+      raise EnergySparksUnexpectedStateException.new("Unexpected nil user_type #{user_type}for user_numeric_comprehension_level") if user_type.nil?
     end
   end
+
+  def self.significant_figures(value, significant_figures)
+    return 0 if value.nil? || value.zero?
+    BigDecimal.new(value,significant_figures).to_f # value.round(-(Math.log10(value).ceil - significant_figures))
+  end
 end
+
+
 
 # eventually migrate from FormatEnergyUnit to more generic FormatUnit
 class FormatUnit < FormatEnergyUnit
