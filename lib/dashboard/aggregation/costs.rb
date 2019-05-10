@@ -197,7 +197,7 @@ class EconomicCosts < CostsBase
 
     (combined_start_date..combined_end_date).each do |date|
       list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
-      list_of_days_economic_costs = list_of_meters_on_date.map { |meter| meter.amr_data.economic_tariff.one_days_data_x48(date) }
+      list_of_days_economic_costs = list_of_meters_on_date.map { |meter| meter.amr_data.economic_tariff.one_days_cost_data(date) }
       combined_economic_costs.add(date, combined_day_costs(list_of_days_economic_costs))
     end
 
@@ -231,6 +231,10 @@ class EconomicCostsPreAggregated < EconomicCosts
   def one_day_total_cost(date)
     @cache_days_totals[date] = one_days_cost_data(date).one_day_total_cost unless @cache_days_totals.key?(date)
     @cache_days_totals[date]
+  end
+
+  def one_days_cost_data(date)
+    self[date]
   end
 
   def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
