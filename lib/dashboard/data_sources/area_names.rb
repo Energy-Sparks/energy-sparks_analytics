@@ -40,8 +40,6 @@ class AreaNames
     [AREA_NAMES[key][:latitude] , AREA_NAMES[key][:longitude]]
   end
 
-  private
-
   AREA_NAMES = { # mapping from areas to csv data files for analytics non-db code
     bath: {
       name:                       'Bath',
@@ -51,8 +49,8 @@ class AreaNames
       holiday_calendar:           'Bath holidays.csv',
       yahoo_weather_forecast_id:  'bath, uk',
       met_office_forecast_id:     310026,
-      latitude:                   51.39,
-      longitude:                  -2.37
+      latitude:                   51.3751,
+      longitude:                  -2.36172
     },
     frome: {
       name:                       'Frome',
