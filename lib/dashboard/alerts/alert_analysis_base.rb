@@ -299,6 +299,12 @@ class AlertAnalysisBase
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for timeescale template variable ' + self.class.name)
   end
 
+  # returns :more_than_enough, :not_enough, :enough_but_results_questionable
+  # depending on whether there is enough data to provide the alert
+  def enough_data
+    raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for enough_data template variable ' + self.class.name)
+  end
+
   def valid_alert?
     (!@school.aggregated_heat_meters.nil? && needs_gas_data?) ||
       (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?)

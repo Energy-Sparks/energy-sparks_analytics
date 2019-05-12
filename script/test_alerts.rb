@@ -39,12 +39,12 @@ def print_all_results(alert_class, alert)
 end
 
 @method_calls = [
-  { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
-  { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
-  { on_class: false,  method: :backwards_compatible_analysis_report, name: 'Backwards compatible alert report', args: nil, use_puts: true },
-  { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
-  { on_class: false,  method: :text_template_variables, name: 'text data', args: nil, use_puts: false },
-  { on_class: false,  method: :html_template_variables, name: 'Template variables', args: nil, use_puts: false },
+ # { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
+ # { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
+ # { on_class: false,  method: :backwards_compatible_analysis_report, name: 'Backwards compatible alert report', args: nil, use_puts: true },
+ # { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
+   { on_class: false,  method: :text_template_variables, name: 'text data', args: nil, use_puts: false },
+#  { on_class: false,  method: :html_template_variables, name: 'Template variables', args: nil, use_puts: false },
 
 =begin
   { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
@@ -89,7 +89,7 @@ alerts_to_test = [
 ]
 
 excluded_schools = ['Ecclesall Primary School', 'Selwood Academy', 'Walkley Tennyson School']
-included_schools = ['Bishop Sutton Primary School']
+included_schools = ['Christchurch First School']
 
 asof_date = Date.new(2019, 2, 15)
 
@@ -112,7 +112,7 @@ calculated_results = {}
 
 school_names.sort.each do |school_name|
   next if excluded_schools.include?(school_name)
-  # next unless !included_schools.nil? && included_schools.include?(school_name)
+  next unless !included_schools.nil? && included_schools.include?(school_name)
 
   print_banner(school_name, 2)
 
@@ -144,6 +144,7 @@ school_names.sort.each do |school_name|
         if results.status == :failed
           failed_alerts.push(sprintf('%-32.32s: %s', school_name, alert.class.name))
         end
+        puts results
       }
       (alert_calculation_time[alert.class.name] ||= []).push(bm2)
     end
@@ -168,6 +169,7 @@ school_calculation_time.each do |type, data|
   puts sprintf('%-35.35s %.6f', type, data.sum)
 end
 
+puts "Failed alerts:"
 failed_alerts.each do |fail|
-    puts fail
+  puts fail
 end

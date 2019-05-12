@@ -164,7 +164,13 @@ class MeterAttributes
       ],
       heating_model: {
         max_summer_daily_heating_kwh:     150,
-        reason: 'Automated process set too high at about 400'
+        reason: 'Automated process set too high at about 400',
+        fitting: {
+          fit_model_start_date:           Date.new(2017, 2, 1),
+          fit_model_end_date:             Date.new(2017, 8, 31),
+          expiry_date_of_override:        Date.new(2019, 5, 1),
+          use_dates_for_model_validation:  false # use above dates for validation?
+        }
       }
     },
     2200011955152 => {

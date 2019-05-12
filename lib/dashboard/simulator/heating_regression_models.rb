@@ -28,11 +28,28 @@ module AnalyseHeatingAndHotWater
       @meter.meter_collection.temperatures
     end
 
+    private def override_model_start_end_dates?(allow_more_than_1_year, period)
+      return false if @model_overrides.fitting.nil?
+      return false if period.end_date >= @model_overrides.fitting[:expiry_date_of_override]
+      return false if allow_more_than_1_year && !@model_overrides.fitting[:use_dates_for_model_validation]
+      true
+    end
+
     def create_and_fit_model(model_type, period, allow_more_than_1_year = false)
       logger.info "create_and_fit_model start"
       unless @processed_model_overrides # deferred until meter available
         @model_overrides = HeatingModelOverrides.new(@meter)
         @processed_model_overrides = true
+      end
+
+      if override_model_start_end_dates?(allow_more_than_1_year, period)
+        period = SchoolDatePeriod.new(
+          :overridden_model_start_end_dates,
+          'Overridden Model Start - End Dates',
+          @model_overrides.fitting[:fit_model_start_date],
+          @model_overrides.fitting[:fit_model_end_date]
+        )
+        logger.info "Meter attributes have overridden model start and end dates #{period.start_date} #{period.end_date}"
       end
 
       return @models[model_type] if @models.key?(model_type)
@@ -65,7 +82,7 @@ module AnalyseHeatingAndHotWater
 
     class HeatingModelOverrides
       attr_reader :override_best_model_type
-      attr_reader :override_regression_model, :reason, :function
+      attr_reader :override_regression_model, :reason, :function, :fitting
 
       def initialize(meter)
         @meter = meter
@@ -75,11 +92,13 @@ module AnalyseHeatingAndHotWater
           @override_best_model_type = overrides.fetch(:override_best_model_type, nil)
           @override_regression_model = overrides.fetch(:override_model, nil)
           @reason = overrides.fetch(:reason, nil)
+          @fitting = overrides.fetch(:fitting, nil)
         else
           @max_summer_hotwater_kwh = nil
           @override_best_model_type = nil
           @override_regression_model = nil
           @reason = nil
+          @fitting = nil
         end
         @function = meter.attributes(:function)
       end
@@ -110,6 +129,8 @@ module AnalyseHeatingAndHotWater
       if !@model_overrides.override_regression_model.nil?
         override_model
       else
+        return simple_model if simple_model.enough_samples_for_good_fit && !thermal_mass_model.enough_samples_for_good_fit
+
         thermal_mass_model.standard_deviation_percent < simple_model.standard_deviation_percent ? thermal_mass_model : simple_model
       end
     end
@@ -562,6 +583,15 @@ module AnalyseHeatingAndHotWater
       @models[type]
     end
 
+    def winter_heating_samples
+      model(:heating_occupied_all_days).samples
+    end
+
+    # 60 value needs further reasarch across multiple schools
+    def enough_samples_for_good_fit
+      winter_heating_samples > 35
+    end
+
     # returns a hash to value, or hash of information relating to the model
     # for debugging or presentation
     def model_configuration
@@ -654,11 +684,17 @@ module AnalyseHeatingAndHotWater
       [pairs.keys, pairs.values]
     end
 
-    def calculate_regression_model(period, allow_more_than_1_year)
+    private def check_model_fitting_start_end_dates(period, allow_more_than_1_year)
+      return unless @model_overrides.fitting.nil?
       days = period.end_date - period.start_date + 1
       if !allow_more_than_1_year && (days > 365 || days < 362)
+        logger.info "Error: regression model fitting should only be over a year, got #{days}"
         raise EnergySparksUnexpectedStateException.new("Error: regression model fitting should only be over a year, got #{days}")
       end
+    end
+
+    def calculate_regression_model(period, allow_more_than_1_year)
+      check_model_fitting_start_end_dates(period, allow_more_than_1_year)
 
       bm = Benchmark.realtime {
         @max_summer_hotwater_kwh = calculate_max_summer_hotwater_kitchen_kwh(period)
@@ -1080,6 +1116,15 @@ module AnalyseHeatingAndHotWater
       b_total / SCHOOLDAYHEATINGMODELTYPES.length
     end
 
+    def winter_heating_samples
+      SCHOOLDAYHEATINGMODELTYPES.map { |model_type| model(model_type).samples }.sum
+    end
+
+    # 60 value needs further reasarch across multiple schools
+    def enough_samples_for_good_fit
+      winter_heating_samples > 60
+    end
+
     def all_heating_model_types # derived as constants not inherited
       ALLMODELTYPES
     end
@@ -1144,6 +1189,10 @@ module AnalyseHeatingAndHotWater
 
     def name
       'Overridden'
+    end
+
+    def enough_samples_for_good_fit
+      true
     end
 
     # just assign sample data, don't calculate model as manually set

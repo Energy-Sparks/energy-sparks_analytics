@@ -156,6 +156,7 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   private def call_model(asof_date)
+    # enough_samples_for_good_fit - 
     @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, one_year_period(asof_date)) 
   end
 end

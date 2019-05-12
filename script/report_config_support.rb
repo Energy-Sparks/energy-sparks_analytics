@@ -48,7 +48,7 @@ class ReportConfigSupport
       'Shortbrook School'                 => :electric_and_gas,
       'Valley Park School'                => :electric_only,
       'Watercliffe Meadow Primary'        => :electric_and_gas,
-#     'Walkley Tennyson School'           => :gas_only,
+      'Walkley Tennyson School'           => :electric_and_gas,
       'Whiteways Primary'                 => :electric_and_gas,
       'Woodthorpe Primary School'         => :electric_and_gas,
       'Wybourn Primary School'            => :electric_only,
@@ -194,6 +194,8 @@ class ReportConfigSupport
   end
 
   def write_excel(filename = File.join(File.dirname(__FILE__), '../Results/') + @excel_name + '- charts test.xlsx')
+    @html_chart_list = @worksheet_charts
+    @worksheet_charts
     excel = ExcelCharts.new(filename)
     @worksheet_charts.each do |worksheet_name, charts|
       excel.add_charts(worksheet_name, charts)
@@ -204,13 +206,14 @@ class ReportConfigSupport
 
   def write_html
     html_file = HtmlFileWriter.new(@school_name)
-    @worksheet_charts.each do |worksheet_name, charts|
+    @html_chart_list.each do |worksheet_name, charts|
       html_file.write_header(worksheet_name)
       charts.each do |chart|
         html_file.write_header_footer(chart[:config_name], chart[:advice_header], chart[:advice_footer])
       end
     end
     html_file.close
+    @html_chart_list = {}
   end
 
   def do_one_page_internal(page_name, list_of_charts, chart_override = nil)
