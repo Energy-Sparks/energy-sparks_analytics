@@ -40,10 +40,11 @@ end
 
 @method_calls = [
  # { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
- # { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
+ { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
+ { on_class: false,  method: :front_end_template_data, name: 'front end text data', args: nil, use_puts: false },
  # { on_class: false,  method: :backwards_compatible_analysis_report, name: 'Backwards compatible alert report', args: nil, use_puts: true },
  # { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
-   { on_class: false,  method: :text_template_variables, name: 'text data', args: nil, use_puts: false },
+# { on_class: false,  method: :text_template_variables, name: 'text data', args: nil, use_puts: false },
 #  { on_class: false,  method: :html_template_variables, name: 'Template variables', args: nil, use_puts: false },
 
 =begin
@@ -67,7 +68,6 @@ end
 
 alerts_to_test = [
   AlertHeatingOnNonSchoolDays,
-  AlertChangeInDailyElectricityShortTerm,
   AlertHeatingComingOnTooEarly,
   AlertChangeInDailyElectricityShortTerm,
   AlertChangeInDailyGasShortTerm,
@@ -89,9 +89,9 @@ alerts_to_test = [
 ]
 
 excluded_schools = ['Ecclesall Primary School', 'Selwood Academy', 'Walkley Tennyson School']
-included_schools = ['Christchurch First School']
+included_schools = ['Bishop Sutton Primary School']
 
-asof_date = Date.new(2019, 2, 15)
+asof_date = Date.new(2019, 4, 30)
 
 school_names = AnalysticsSchoolAndMeterMetaData.new.meter_collections.keys
 
@@ -103,16 +103,20 @@ reports = ReportConfigSupport.new
 failed_alerts = []
 
 history = AlertHistoryDatabase.new
-=begin
 previous_results = history.load
 puts 'Loaded data'
-ap(previous_results)
-=end
+
+# ap(previous_results)
+
+irrelevant_alerts = []
+
+school_alert_count = Hash.new(0.0)
+
 calculated_results = {}
 
 school_names.sort.each do |school_name|
   next if excluded_schools.include?(school_name)
-  next unless !included_schools.nil? && included_schools.include?(school_name)
+  # next unless !included_schools.nil? && included_schools.include?(school_name)
 
   print_banner(school_name, 2)
 
@@ -129,12 +133,20 @@ school_names.sort.each do |school_name|
 
       alert = alert_class.new(school)
       next unless alert.valid_alert?
+
+      if alert.relevance == :never_relevant
+        irrelevant_alerts.push("#{school_name}: #{alert.class.name}")
+        next
+      end
       print_banner(alert.class.name,1)
 
       bm2 = Benchmark.realtime {
         alert.analyse(asof_date, true)
 
         raw_data = alert.raw_variables_for_saving
+
+        puts "Has enough data: #{alert.enough_data}"
+        puts "Relevant: #{alert.relevance}"
 
         calculated_results[school.urn][asof_date].merge!(raw_data)
 
@@ -144,6 +156,7 @@ school_names.sort.each do |school_name|
         if results.status == :failed
           failed_alerts.push(sprintf('%-32.32s: %s', school_name, alert.class.name))
         end
+        school_alert_count[school_name] += 1
         puts results
       }
       (alert_calculation_time[alert.class.name] ||= []).push(bm2)
@@ -156,10 +169,9 @@ end
 
 =begin
 history.save(calculated_results)
-
-h_diff = HashDiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
-puts h_diff
 =end
+# h_diff = HashDiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
+# puts h_diff
 
 alert_calculation_time.each do |type, data|
   puts sprintf('%-35.35s %.6f', type, data.sum/data.length)
@@ -172,4 +184,14 @@ end
 puts "Failed alerts:"
 failed_alerts.each do |fail|
   puts fail
+end
+
+puts 'Irrelvent alerts'
+irrelevant_alerts.each do |not_relevant|
+  puts not_relevant
+end
+
+puts 'School alert count'
+school_alert_count.each do |school_name, count|
+  puts sprintf('%-25.25s %2d', school_name, count)
 end

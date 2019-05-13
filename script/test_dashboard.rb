@@ -14,7 +14,8 @@ end
 
 profile = false
 
-if true
+if false
+  
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
     new_data:      '../TestResults/Charts/New/',
@@ -34,9 +35,9 @@ RubyProf.start if profile
 # 'Wybourn Primary School'
 
 # school_name = 'Whiteways Primary'
-# school_name = 'St Marks Secondary'
+school_name = 'Paulton Junior School'
 # school_name = 'Stanton Drew Primary School'
-school_name = 'Christchurch First School'
+# school_name = 'Walkley Tennyson School'
 
 if false
   Benchmark.memory do |x|
@@ -66,9 +67,17 @@ puts "Load time: #{bm.round(3)} seconds"
 # reports.do_one_page(:cost)
 # reports..do_all_schools(true)
 
-reports.do_all_schools(true)
+# reports.do_all_schools(true)
 # reports.do_one_page(:solar_pv)
+# reports.do_chart_list('Paulton', [:benchmark])
+# reports.do_all_standard_pages_for_school
+# reports.do_all_standard_pages_for_school
+# reports.do_all_schools(true)
+# reports.save_excel_and_html
 
+# reports.do_one_page(:carbon_emissions)
+# reports.do_all_standard_pages_for_school
+reports.do_all_schools(true)
 
 if profile
   prof_result = RubyProf.stop
@@ -76,6 +85,6 @@ if profile
   printer.print(File.open('log\code-profile - test_dashboard' + Date.today.to_s + '.html','w')) # 'code-profile.html')
 end
 
-reports.save_excel_and_html
+# reports.save_excel_and_html
 
 reports.report_benchmarks

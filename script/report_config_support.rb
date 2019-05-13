@@ -16,55 +16,42 @@ class ReportConfigSupport
 
     @schools = {
     # Bath
-      'Bishop Sutton Primary School'      => :electric_and_gas,
-      'Castle Primary School'             => :electric_and_gas,
-      'Freshford C of E Primary'          => :electric_and_gas,
-      'Marksbury C of E Primary School'   => :electric_only,
-      'Paulton Junior School'             => :electric_and_gas_and_solar_pv,
-      'Pensford Primary'                  => :electric_only,
-      'Roundhill School'                  => :electric_and_gas,
-      'Saltford C of E Primary School'    => :electric_and_gas,
-      'St Marks Secondary'                => :electric_and_gas,
-      'St Johns Primary'                  => :electric_and_gas,
-      'St Saviours Junior'                => :electric_and_gas,
-      'Stanton Drew Primary School'       => :electric_and_storage_heaters,
-      'St Martins Garden Primary School'  => :electric_and_gas,
-      'St Michaels Junior Church School'  => :electric_and_gas,
-      'Twerton Infant School'             => :electric_and_gas,
-      'Westfield Primary'                 => :electric_and_gas,
+      'Bishop Sutton Primary School'            => :electric_and_gas,
+      'Castle Primary School'                   => :electric_and_gas,
+      'Freshford C of E Primary'                => :electric_and_gas,
+      'Marksbury C of E Primary School'         => :electric_only,
+      'Paulton Junior School'                   => :electric_and_gas_and_solar_pv,
+      'Pensford Primary'                        => :electric_only,
+      'Roundhill School'                        => :electric_and_gas,
+      'Saltford C of E Primary School'          => :electric_and_gas,
+      'St Johns Primary'                        => :electric_and_gas,
+      'St Marks Secondary'                      => :electric_and_gas,
+      'St Martins Garden Primary School'        => :electric_and_gas,
+      'St Michaels Junior Church School'        => :electric_and_gas,
+      'St Saviours Junior'                      => :electric_and_gas,
+      'Stanton Drew Primary School'             => :electric_and_storage_heaters,
+      'Twerton Infant School'                   => :electric_and_gas,
+      'Westfield Primary'                       => :electric_and_gas,
     # Sheffield
-      'Athelstan Primary School'          => :electric_and_gas,
-      'Bankwood Primary School'           => :electric_and_gas,
-      'Ballifield Community Primary School' => :electric_and_gas,
-      'Coit Primary School'               => :gas_only,
- #     'Ecclesall Primary School'          => :electric_and_gas,
-      'Ecclesfield Primary School'        => :electric_and_gas,
-      'Hunters Bar School'                => :electric_and_gas,
-      'King Edward VII Upper School'      => :electric_and_gas,
-      'Lowfields Primary School'          => :electric_only,
-      'Meersbrook Primary School'         => :electric_and_gas,
-      'Mundella Primary School'           => :electric_and_gas,
-      'Phillimore School'                 => :electric_and_gas,
-      'Shortbrook School'                 => :electric_and_gas,
-      'Valley Park School'                => :electric_only,
-      'Watercliffe Meadow Primary'        => :electric_and_gas,
-      'Walkley Tennyson School'           => :electric_and_gas,
-      'Whiteways Primary'                 => :electric_and_gas,
-      'Woodthorpe Primary School'         => :electric_and_gas,
-      'Wybourn Primary School'            => :electric_only,
+      'Athelstan Primary School'                => :electric_and_gas,
+      'Ballifield Community Primary School'     => :electric_and_gas,
+      'Bankwood Primary School'                 => :electric_and_gas,
+      'Coit Primary School'                     => :gas_only,
+      'Ecclesall Primary School'                => :electric_and_gas,
+      'Ecclesfield Primary School'              => :electric_and_gas,
+      'King Edward VII Upper School'            => :electric_and_gas,
+      'Walkley Tennyson School'                 => :electric_and_gas,
+      'Watercliffe Meadow Primary'              => :electric_and_gas,
+      'Whiteways Primary'                       => :electric_and_gas,
+      'Woodthorpe Primary School'               => :electric_and_gas,
+      'Wybourn Primary School'                  => :electric_only,
     # Frome
-      'Christchurch First School'         => :gas_only,
-      'Critchill School'                  => :electric_and_gas,
-      'Frome College'                     => :electric_only,
-      'Hayesdown First School'            => :electric_only,
-      'Oakfield School'                   => :electric_and_gas,
-#      'Selwood Academy'                   => :electric_and_gas,
-      'St Johns First School'             => :electric_and_gas,
-      'St Louis First School'             => :electric_and_gas,
-      'Trinity First School'              => :electric_and_gas,
-      'Vallis First School'               => :electric_and_gas,
-    # Average and Exemplar
-      'Average School'                    => :electric_and_gas,
+      'Christchurch First School'               => :gas_only,
+      'Critchill School'                        => :electric_and_gas,
+      'Frome College'                           => :electric_only,
+      'Hugh Sexey'                              => :electric_only,
+      'St Louis First School'                   => :electric_and_gas,
+      'Trinity First School'                    => :electric_and_gas,
     }
     @benchmarks = []
 
@@ -160,8 +147,6 @@ class ReportConfigSupport
     report_config = @schools[@school_name]
 
     if report_config != meter_collection_config
-      puts "|" * 100
-      puts "\n" * 10
       puts "Mismatch in report config #{report_config} versus #{meter_collection_config}"
     end
     report_config = meter_collection_config if report_config.nil?

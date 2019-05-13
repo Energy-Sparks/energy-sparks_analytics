@@ -17,7 +17,7 @@ module Logging
   @logger.level = Logger::DEBUG
 end
 
-@school_data_sources = {
+@school_data_sources_deprecated = {
   'Bishop Sutton Primary School'      => :bathhacked,
   'Castle Primary School'             => :bathcsv,
   'Freshford C of E Primary'          => :bathhacked,
@@ -36,7 +36,6 @@ end
   'Bankwood Primary School'           => :sheffieldcsv,
   'Ecclesall Primary School'          => :sheffieldcsv,
   'Ecclesfield Primary School'        => :sheffieldcsv,
-  'Hunters Bar School'                => :sheffieldcsv,
   'Lowfields Primary School'          => :sheffieldcsv,
   'Meersbrook Primary School'         => :sheffieldcsv,
   'Mundella Primary School'           => :sheffieldcsv,
@@ -58,6 +57,44 @@ end
   'Trinity First School'              => :fromecsv,
   'Vallis First School'               => :fromecsv
 }
+
+@school_data_sources = {
+  'Bishop Sutton Primary School'        => :downloadfromfrontend,
+  'Castle Primary School'               => :downloadfromfrontend,
+  'Freshford C of E Primary'            => :downloadfromfrontend,
+  'Marksbury C of E Primary School'     => :downloadfromfrontend,
+  'Paulton Junior School'               => :downloadfromfrontend,
+  'Pensford Primary'                    => :downloadfromfrontend,
+  'Roundhill School'                    => :downloadfromfrontend,
+  'Saltford C of E Primary School'      => :downloadfromfrontend,
+  'St Marks Secondary'                  => :downloadfromfrontend,
+  'St Johns Primary'                    => :downloadfromfrontend,
+  'St Saviours Junior'                  => :downloadfromfrontend,
+  'Stanton Drew Primary School'         => :downloadfromfrontend,
+  'St Michaels Junior Church School'    => :downloadfromfrontend,
+  'Twerton Infant School'               => :downloadfromfrontend,
+  'Westfield Primary'                   => :downloadfromfrontend,
+  'Bankwood Primary School'             => :downloadfromfrontend,
+  'Ecclesall Primary School'            => :downloadfromfrontend,
+  'Ecclesfield Primary School'          => :downloadfromfrontend,
+  'Walkley Tennyson School'             => :downloadfromfrontend,
+  'Whiteways Primary'                   => :downloadfromfrontend,
+  'Woodthorpe Primary School'           => :downloadfromfrontend,
+  'Wybourn Primary School'              => :downloadfromfrontend,
+  'Christchurch First School'           => :downloadfromfrontend,
+  'Frome College'                       => :downloadfromfrontend,
+  'Critchill School'                    => :downloadfromfrontend,
+  'St Louis First School'               => :downloadfromfrontend,
+  'Trinity First School'                => :downloadfromfrontend,
+  'Coit Primary School'                 => :downloadfromfrontend,
+  'Ballifield Community Primary School' => :downloadfromfrontend,
+  'King Edward VII Upper School'        => :downloadfromfrontend,
+  'St Martins Garden Primary School'    => :downloadfromfrontend,
+  'Athelstan Primary School'            => :downloadfromfrontend,
+  'Watercliffe Meadow Primary'          => :downloadfromfrontend,
+  'Hugh Sexey'                          => :downloadfromfrontend
+}
+
 
 def parse_command_line
   extend Logging
@@ -157,7 +194,7 @@ def process_selected_schools
     downloader = MeterReadingsDownloadBase::meter_reading_factory(@school_data_sources[school_name], meter_collection)
     downloader.load_meter_readings
 
-    AggregateDataService.new(meter_collection).validate_and_aggregate_meter_data
+    # AggregateDataService.new(meter_collection).validate_and_aggregate_meter_data
 
     save_to_local_analytics_marshal_and_yml_files(meter_collection) if @save
 

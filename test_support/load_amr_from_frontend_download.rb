@@ -23,7 +23,7 @@ class LoadSchoolFromFrontEndDownload < MeterReadingsDownloadCSVBase
   private
 
   def load_meter_amr_data(meter)
-    filename = move_file_to__school_subdirectory(meter.mpan_mprn)
+    filename = move_file_to_school_subdirectory(meter.mpan_mprn)
     logger.info "Loading meter readings from #{filename}"
     puts filename.split('/').last
 
@@ -41,7 +41,7 @@ class LoadSchoolFromFrontEndDownload < MeterReadingsDownloadCSVBase
   # its easiest to manually export all the meter reading files to a single directory
   # but then better when running this program to move the processed files to a school
   # specific subdirectory
-  def move_file_to__school_subdirectory(mpan_or_mprn)
+  def move_file_to_school_subdirectory(mpan_or_mprn)
     school_directory = directory + '/' + @meter_collection.name
     if !File.directory?(school_directory)
       Dir.mkdir(school_directory)

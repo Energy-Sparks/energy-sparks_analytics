@@ -34,8 +34,8 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
     name: 'Bath',
     latitude: 51.39,
     longitude: -2.37,
-    start_date:  Date.new(2018, 9, 26), # may be better in controlling program
-    end_date: Date.new(2018, 10, 21), # ditto, inclusive
+    start_date:  Date.new(2019, 4, 7), # may be better in controlling program
+    end_date: Date.new(2019, 5, 12), # ditto, inclusive
     method:    :weighted_average,
     max_minutes_between_samples: 120, # ignore data where samples from station are too far apart
     max_temperature: 38.0,
@@ -65,8 +65,8 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
     name: 'Sheffield',
     latitude: 53.3811,
     longitude: -1.4701,
-    start_date:  Date.new(2013, 1, 1), # may be better in controlling program
-    end_date: Date.new(2018, 9, 25), # ditto, inclusive
+    start_date:  Date.new(2019, 4, 7), # may be better in controlling program
+    end_date: Date.new(2019, 5, 12), # ditto, inclusive
     method:    :weighted_average,
     max_minutes_between_samples: 120, # ignore data where samples from station are too far apart
     max_temperature: 38.0,
@@ -95,8 +95,8 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
     name: 'Frome',
     latitude: 51.2308,
     longitude: -2.3201,
-    start_date:  Date.new(2013, 8, 12), # may be better in controlling program
-    end_date: Date.new(2018, 9, 26), # ditto, inclusive
+    start_date:  Date.new(2019, 4, 7), # may be better in controlling program
+    end_date: Date.new(2019, 5, 12), # ditto, inclusive
     method:    :weighted_average,
     max_minutes_between_samples: 120, # ignore data where samples from station are too far apart
     max_temperature: 38.0,
@@ -126,8 +126,8 @@ INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData')
     name: 'Bristol',
     latitude: 51.4545,
     longitude: -2.5879,
-    start_date:  Date.new(2010, 1, 1), # may be better in controlling program
-    end_date: Date.new(2018, 9, 26), # ditto, inclusive
+    start_date:  Date.new(2019, 4, 7), # may be better in controlling program
+    end_date: Date.new(2019, 5, 12), # ditto, inclusive
     method:    :weighted_average,
     max_minutes_between_samples: 120, # ignore data where samples from station are too far apart
     max_temperature: 38.0,

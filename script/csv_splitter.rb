@@ -55,7 +55,7 @@ class CSVSplitter
   end
 
   def new_filename(key)
-    @destination_directory + '\electricity amr data for ' + key + '.csv'
+    @destination_directory + '\meter-amr-readings-' + key + '.csv'
   end
 
   def data_statistics
@@ -65,10 +65,10 @@ class CSVSplitter
   end
 end
 
-destination_directory = 'F:\OneDrive\Documents\Transition Bath\Schools Energy Competition\Ruby\Examples\Aggregator Application\energy-sparks_analytics\MeterReadings\Sheffield'
-source_file = destination_directory + '\Energy Sparks 3.csv'
+destination_directory = 'G:\\RemoteCloneRepo\\energy-sparks_analytics\\MeterReadings\\Front End CSV Downloads\\'
+source_file = destination_directory + 'all-amr-readings.csv'
 
-splitter = CSVSplitter.new(source_file, destination_directory,'siteRef', ',')
+splitter = CSVSplitter.new(source_file, destination_directory,'Mpan Mprn', ',')
 
 splitter.split
 
