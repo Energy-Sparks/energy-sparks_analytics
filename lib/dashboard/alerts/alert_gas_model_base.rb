@@ -136,14 +136,13 @@ class AlertGasModelBase < AlertGasOnlyBase
     SchoolDatePeriod.new(:alert, 'Current Year', model_start_date(asof_date), asof_date)
   end
 
-  protected def calculate_enough_data(start_date, asof_date)
-    months = ((asof_date - start_date) / 30.0).floor
-    @enough_data = months >= 11
+  protected def enough_data_for_model_fit
+    @heating_model = calculate_model(asof_date) if @heating_model.nil?
+    @heating_model.enough_samples_for_good_fit
   end
 
   protected def calculate_model(asof_date)
     @heating_model = model_cache(@school.urn, asof_date)
-    calculate_enough_data(model_start_date(asof_date), asof_date)
   end
 
   # during analytics testing store model results to save recalculating for different alerts at same school
@@ -156,7 +155,6 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   private def call_model(asof_date)
-    # enough_samples_for_good_fit - 
     @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, one_year_period(asof_date)) 
   end
 end

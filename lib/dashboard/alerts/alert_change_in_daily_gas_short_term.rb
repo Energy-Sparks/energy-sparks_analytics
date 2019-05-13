@@ -103,6 +103,10 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     'week (school days only)'
   end
 
+  def enough_data
+    days_amr_data > 3 * 7 && enough_data_for_model_fit ? :enough : :not_enough
+  end
+
   def self.template_variables
     specific = {'Change In Gas Short Term' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

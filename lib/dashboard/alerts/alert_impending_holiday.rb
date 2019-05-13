@@ -16,6 +16,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
 
   def initialize(school)
     super(school, :impendingholiday)
+    @relevance = :relevant
   end
 
   def self.template_variables
@@ -27,6 +28,10 @@ class AlertImpendingHoliday < AlertGasOnlyBase
 
   def timescale
     @holiday.nil? ? 'Unknown' : ("#{@holiday_length_weeks} week" + (@holiday_length_weeks > 1 ? 's' : ''))
+  end
+
+  def enough_data
+    days_amr_data >= 364 ? :enough : (days_amr_data >= 3 ? :minimum_might_not_be_accurate : :not_enough)
   end
 
   TEMPLATE_VARIABLES = {
@@ -172,20 +177,28 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     @holiday_period = holiday_information[:period]
     set_holiday_variables(holiday_information)
     last_year_holiday = same_holiday_previous_year(@holiday_period)
-    set_last_year_holiday_consumption_variables(last_year_holiday.start_date, last_year_holiday.end_date)
+    set_last_year_holiday_consumption_variables(last_year_holiday.start_date, last_year_holiday.end_date, last_year_holiday.nil?)
 
     @saving_kwh = 0.0
 
     @rating = 5.0
   end
 
-  private def set_last_year_holiday_consumption_variables(start_date, end_date)
-    @last_year_holiday_gas_kwh, @last_year_holiday_gas_£ =
-      consumption_in_holiday_period(gas?, @school.aggregated_heat_meters, start_date, end_date)
-    @last_year_holiday_electricity_kwh, @last_year_holiday_electricity_£ =
-      consumption_in_holiday_period(electricity?, @school.aggregated_electricity_meters, start_date, end_date)
+  private def set_last_year_holiday_consumption_variables(start_date, end_date, no_data)
+    if no_data
+      @last_year_holiday_gas_kwh = 0.0
+      @last_year_holiday_gas_£ = 0.0
+      @last_year_holiday_electricity_kwh = 0.0
+      @last_year_holiday_electricity_£ = 0.0
+      @last_year_holiday_energy_costs_£ = 0.0
+    else
+      @last_year_holiday_gas_kwh, @last_year_holiday_gas_£ =
+        consumption_in_holiday_period(gas?, @school.aggregated_heat_meters, start_date, end_date)
+      @last_year_holiday_electricity_kwh, @last_year_holiday_electricity_£ =
+        consumption_in_holiday_period(electricity?, @school.aggregated_electricity_meters, start_date, end_date)
 
-    @last_year_holiday_energy_costs_£ = nil_to_zero(@last_year_holiday_gas_£) + nil_to_zero(@last_year_holiday_electricity_£)
+      @last_year_holiday_energy_costs_£ = nil_to_zero(@last_year_holiday_gas_£) + nil_to_zero(@last_year_holiday_electricity_£)
+    end
   end
 
   # written for Bishop Sutton where the electricity data is 2 years out of date
@@ -200,8 +213,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       kwh_date_range(meter, start_date, end_date, :economic_cost)
     ]
   end
-
-
 
   private def set_holiday_variables(holiday_information)
     @holiday_short_name       = holiday_information[:short_name]
@@ -238,6 +249,19 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       strip_kwh_from_table(electric_table)
     else
       strip_kwh_from_table(gas_table)
+    end
+  end
+
+  public def days_amr_data
+    if electricity? && !gas?
+      @school.aggregated_electricity_meters.amr_data.end_date - @school.aggregated_electricity_meters.amr_data.start_date + 1
+    elsif !electricity? && gas?
+      @school.aggregated_heat_meters.amr_data.end_date - @school.aggregated_heat_meters.amr_data.start_date + 1
+    else
+      [
+        @school.aggregated_electricity_meters.amr_data.end_date - @school.aggregated_electricity_meters.amr_data.start_date + 1,
+        @school.aggregated_heat_meters.amr_data.end_date - @school.aggregated_heat_meters.amr_data.start_date + 1
+      ].min
     end
   end
 

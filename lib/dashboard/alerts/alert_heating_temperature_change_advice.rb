@@ -19,6 +19,10 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     'year'
   end
 
+  def enough_data
+    enough_data_for_model_fit ? :enough : :not_enough
+  end
+
   TEMPLATE_VARIABLES = {
     annual_saving_1_C_change_kwh: {
       description: 'Predicted annual reduction in heating consumption if thermostat turned down 1C (kWh)',

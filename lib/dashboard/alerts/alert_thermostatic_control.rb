@@ -14,6 +14,10 @@ class AlertThermostaticControl < AlertGasModelBase
     '1 year'
   end
 
+  def enough_data
+    enough_data_for_model_fit ? :enough : :not_enough
+  end
+  
   def self.template_variables
     specific = {'Thermostatic Control' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

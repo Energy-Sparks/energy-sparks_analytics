@@ -84,6 +84,10 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
     :alert_1_year_baseload
   end
 
+  def enough_data
+    days_amr_data > 6 * 7 ? :enough : (days_amr_data > 3 * 7 ? :minimum_might_not_be_accurate : :not_enough)
+  end
+
   def timescale
     'last week compared with average over last year'
   end

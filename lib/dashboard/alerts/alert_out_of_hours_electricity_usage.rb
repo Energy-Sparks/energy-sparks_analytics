@@ -9,8 +9,12 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
           0.35, 0.65)
   end
 
+  protected def aggregate_meter
+    @school.aggregated_electricity_meters
+  end
+
   def maximum_alert_date
-    @school.aggregated_electricity_meters.amr_data.end_date
+    aggregate_meter.amr_data.end_date
   end
 
   def needs_gas_data?

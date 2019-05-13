@@ -82,6 +82,10 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     'week (school days only)'
   end
 
+  def enough_data
+    days_amr_data > 3 * 7 ? :enough : :not_enough
+  end
+
   private def calculate(asof_date)
     # super(asof_date)
     days_in_week = 5

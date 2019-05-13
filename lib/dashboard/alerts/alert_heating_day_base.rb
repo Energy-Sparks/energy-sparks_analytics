@@ -6,6 +6,10 @@ class AlertHeatingDaysBase < AlertGasModelBase
     @breakdown
   end
 
+  def enough_data
+    days_amr_data >= 364 ? :enough : :not_enough
+  end
+
   protected def calculate_heating_off_statistics(asof_date, frost_protection_temperature = FROST_PROTECTION_TEMPERATURE)
     kwh_needed_for_frost_protection = 0.0
     kwh_consumed = 0.0

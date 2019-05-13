@@ -17,6 +17,10 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     'last weekend'
   end
 
+  def enough_data
+    days_amr_data >= 7 ? :enough : :not_enough
+  end
+
   def self.template_variables
     specific = {'Weekend gas consumption' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

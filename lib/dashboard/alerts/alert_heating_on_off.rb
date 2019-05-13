@@ -348,10 +348,6 @@ class AlertHeatingOnOff < AlertGasModelBase
     @analysis_report.add_detail(description1)
   end
 
-  def relevance
-    heating_only ? :never_relevant : :relevant
-  end
-  
   def dates_and_temperatures_display
     display = ''
     forecast_limit_days = FORECAST_DAYS_LOOKAHEAD

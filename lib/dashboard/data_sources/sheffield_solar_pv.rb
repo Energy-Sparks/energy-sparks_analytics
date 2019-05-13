@@ -263,8 +263,8 @@ end
 # Sheffield Historic Solar PV Download - v2 API - valid from May 2019
 class SheffieldSolarPVV2 < SheffieldSolarPVBase
   def initialize
-    @v2_historic_interface_url_base = ENV['ENERGYSPARKSSHEFFIELDPVV2HISTORICURL']
-    @v2_geographic_area_url         = ENV['ENERGYSPARKSSHEFFIELDPVV2AREAURL']
+    @v2_historic_interface_url_base = 'https://api0.solar.sheffield.ac.uk/pvlive/v2/gsp/' # ENV['ENERGYSPARKSSHEFFIELDPVV2HISTORICURL']
+    @v2_geographic_area_url         = 'https://api0.solar.sheffield.ac.uk/pvlive/v2/gsp_list' # ENV['ENERGYSPARKSSHEFFIELDPVV2AREAURL']
     @yield_diff_criteria = 0.001
   end
 

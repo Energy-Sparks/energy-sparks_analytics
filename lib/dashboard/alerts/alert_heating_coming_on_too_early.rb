@@ -54,6 +54,10 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
     '7 days'
   end
 
+  def enough_data
+    days_amr_data >= 7 && enough_data_for_model_fit ? :enough : :not_enough
+  end
+
   def last_7_days_gas_chart
     :alert_last_7_days_intraday_gas_heating_on_too_early
   end

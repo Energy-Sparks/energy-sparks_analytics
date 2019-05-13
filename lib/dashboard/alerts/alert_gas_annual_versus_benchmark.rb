@@ -108,6 +108,10 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     'last year'
   end
 
+  def enough_data
+    days_amr_data >= 364 ? :enough : :not_enough
+  end
+
   private def calculate(asof_date)
     @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)

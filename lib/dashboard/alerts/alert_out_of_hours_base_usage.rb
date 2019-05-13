@@ -107,6 +107,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     'last year'
   end
 
+  def enough_data
+    days_amr_data >= 364 ? :enough : :not_enough
+  end
+
   def calculate(_asof_date)
     daytype_breakdown = extract_kwh_from_chart_data(out_of_hours_energy_consumption)
     @holidays_kwh         = daytype_breakdown['Holiday']

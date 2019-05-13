@@ -18,11 +18,18 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   attr_reader :heat_model_hot_water_efficiency
 
   def initialize(school)
-    super(school, :hotwaterefficiency)
+    super(school, :hotwaterefficiency) 
+    @relevance = :never_relevant if @relevance != :never_relevant && heating_only # set before calculation
   end
 
   def timescale
     'year'
+  end
+
+  def enough_data
+    hw_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@school)
+    summer_holidays = hw_model.find_period_before_and_during_summer_holidays(@school.holidays, aggregate_meter.amr_data)
+    summer_holidays.nil? ? :not_enough : :enough 
   end
 
   def self.template_variables
@@ -115,7 +122,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
 
   private def calculate(asof_date)
     calculate_model(asof_date) # so gas_model_only base varaiables are expressed even if no hot water
-    if heating_only
+    if @relevance != :never_relevant && heating_only
       @relevance = :never_relevant
       @rating = nil
     else

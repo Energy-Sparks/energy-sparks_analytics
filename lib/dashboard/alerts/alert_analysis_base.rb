@@ -23,7 +23,12 @@ class AlertAnalysisBase
   def initialize(school, report_type)
     @school = school
     @report_type = report_type
+    @relevance = aggregate_meter.nil? ? :never_relevant : :relevant
     @analysis_report = AlertReport.new(report_type)
+  end
+
+  def relevance
+    @relevance
   end
 
   def analyse(asof_date, use_max_meter_date_if_less_than_asof_date = false)
@@ -204,10 +209,6 @@ class AlertAnalysisBase
     { 'Common' => TEMPLATE_VARIABLES }
   end
 
-  def relevance
-    :relevant
-  end
-
   def summary_wording(format = :html)
     return nil if default_summary.nil? # remove once all new style alerts implemeted TODO(PH,13Mar2019)
     summary = AlertTemplateBinding.new(default_summary, formatted_template_variables(format), format)
@@ -299,13 +300,18 @@ class AlertAnalysisBase
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for timeescale template variable ' + self.class.name)
   end
 
-  # returns :more_than_enough, :not_enough, :enough_but_results_questionable
+  # returns :enough, :not_enough, :minimum_might_not_be_accurate
   # depending on whether there is enough data to provide the alert
   def enough_data
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for enough_data template variable ' + self.class.name)
   end
 
+  def days_amr_data
+    aggregate_meter.amr_data.end_date - aggregate_meter.amr_data.start_date + 1
+  end
+
   def valid_alert?
+    return false if @relevance == :never_relevant
     (!@school.aggregated_heat_meters.nil? && needs_gas_data?) ||
       (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?)
   end

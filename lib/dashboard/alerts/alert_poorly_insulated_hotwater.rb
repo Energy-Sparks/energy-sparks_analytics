@@ -9,6 +9,7 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
 
   def initialize(school)
     super(school, :hotwaterinsulation)
+    @relevance = :never_relevant if @relevance != :never_relevant && heating_only # set before calculation
   end
 
   TEMPLATE_VARIABLES = {
@@ -40,6 +41,10 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
 
   def timescale
     'last year'
+  end
+
+  def enough_data
+    enough_data_for_model_fit ? :enough : :not_enough
   end
 
   def self.template_variables

@@ -129,6 +129,8 @@ module AnalyseHeatingAndHotWater
 
       last_summer_hol = holidays.find_summer_holiday_before(running_date)
 
+      return nil if last_summer_hol.nil?
+
       [SchoolDatePeriod.new(:date_range, 'Summer Hot Water', last_summer_hol.start_date - 21, last_summer_hol.start_date + 21), last_summer_hol.start_date]
     end
   end

@@ -135,6 +135,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     'last year'
   end
 
+  def enough_data
+    days_amr_data >= 364 ? :enough : (days_amr_data >= 180 ? :minimum_might_not_be_accurate : :not_enough)
+  end
+
   private def calculate(asof_date)
     @average_baseload_last_year_kw, _days_sample = annual_average_baseload_kw(asof_date)
     @average_baseload_last_year_£ = annual_average_baseload_£(asof_date)
