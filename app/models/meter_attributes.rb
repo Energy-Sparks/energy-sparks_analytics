@@ -50,11 +50,13 @@ class MeterAttributes
       ],
       function: [ :heating_only ]
     },
+=begin
     2200012833358 => {
       meter_corrections: [
         readings_end_date: Date.new(2017, 9, 30)
       ]
     },
+=end
     8891205403 => {
       function: [ :heating_only ],
       heating_model: {
