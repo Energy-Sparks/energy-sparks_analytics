@@ -57,6 +57,7 @@ class MeterAttributes
       ]
     },
 =end
+
     8891205403 => {
       function: [ :heating_only ],
       heating_model: {
