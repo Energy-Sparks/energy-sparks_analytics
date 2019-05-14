@@ -14,6 +14,17 @@ meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, 
 
 conversion = EnergyConversions.new(meter_collection)
 
+ap(conversion.equivalences_available_to_front_end)
+
+results = conversion.front_end_convert(:ice_car_kwh_km, {month: 0}, :electricity)
+ap(results)
+
+results = conversion.front_end_convert(:ice_car_co2_km, {year: 0}, :electricity)
+ap(results)
+
+
+exit
+
 [:electricity, :gas].each do |fuel_type|
   [{week: 0}, {day: 0}, {month: 0}, {year: 0}].each do |period|
     [:kwh, :co2, :£].each do |convert_to|
