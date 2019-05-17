@@ -24,7 +24,7 @@ class MeterCollection
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter
 
-  def initialize(school)
+  def initialize(school, schedule_data_manager)
     @name = school.name
     @address = school.address
     @postcode = school.postcode
@@ -41,22 +41,16 @@ class MeterCollection
     @default_energy_purchaser = @area_name # use the area name for the moment
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
+    @schedule_data_manager = schedule_data_manager
 
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
 
-    if Object.const_defined?('ScheduleDataManager')
-      logger.info 'Running standalone, not in Rails environment'
-
-      # Normally these would come from the school, hard coded at the mo
-      @holiday_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
-      @temperature_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
-      @solar_irradiance_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
-      @solar_pv_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
-    else
-      logger.info 'Running in Rails environment'
-      throw ArgumentException if school.meters.empty?
-    end
+    # Normally these would come from the school, hard coded at the mo
+    @holiday_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
+    @temperature_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
+    @solar_irradiance_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
+    @solar_pv_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
   end
 
   def matches_identifier?(identifier, identifier_type)
@@ -191,22 +185,22 @@ class MeterCollection
 
   # held at building level as a school building e.g. a community swimming pool may have a different holiday schedule
   def holidays
-    ScheduleDataManager.holidays(@holiday_schedule_name)
+    @schedule_data_manager.holidays(@holiday_schedule_name)
   end
 
   def temperatures
-    ScheduleDataManager.temperatures(@temperature_schedule_name)
+    @schedule_data_manager.temperatures(@temperature_schedule_name)
   end
 
   def solar_irradiation
-    ScheduleDataManager.solar_irradiation(@solar_irradiance_schedule_name)
+    @schedule_data_manager.solar_irradiation(@solar_irradiance_schedule_name)
   end
 
   def solar_pv
-    ScheduleDataManager.solar_pv(@solar_pv_schedule_name)
+    @schedule_data_manager.solar_pv(@solar_pv_schedule_name)
   end
 
   def grid_carbon_intensity
-    ScheduleDataManager.uk_grid_carbon_intensity
+    @schedule_data_manager.uk_grid_carbon_intensity
   end
 end
