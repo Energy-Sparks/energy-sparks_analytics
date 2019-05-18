@@ -23,8 +23,8 @@ class ChartManagerTimescaleManipulation
     when :contract; ChartManagerTimescaleManipulationContract.new(:contract, original_chart_config, school)
     when :compare;  ChartManagerTimescaleManipulationContract.new(:compare, original_chart_config, school)
     else
-      throw EnergySparksUnexpectedStateException.new('Unexpected nil chart adjustment timescale shift') if type.nil?
-      throw EnergySparksUnexpectedStateException.new("Unexpected chart adjustment timescale shift #{type}")
+      raise EnergySparksUnexpectedStateException.new('Unexpected nil chart adjustment timescale shift') if type.nil?
+      raise EnergySparksUnexpectedStateException.new("Unexpected chart adjustment timescale shift #{type}")
     end
   end
 
@@ -49,7 +49,7 @@ class ChartManagerTimescaleManipulation
   protected
 
   def manipulate_timescale(timescale, factor, available_periods)
-    throw EnergySparksAbstractBaseClass.new('attempt to call abstract base class for time manipulation')
+    raise EnergySparksAbstractBaseClass.new('attempt to call abstract base class for time manipulation')
   end
 
   def timescale_adjust(timescales, factor, available_periods)
@@ -69,7 +69,7 @@ class ChartManagerTimescaleManipulation
       logger.info "METER range = #{chart_config[:min_combined_school_date]} to #{chart_config[:max_combined_school_date]}"
       [chart_config[:min_combined_school_date], chart_config[:max_combined_school_date]]
     else
-      throw EnergySparksUnexpectedStateException.new('Unable to determine chart date range')
+      raise EnergySparksUnexpectedStateException.new('Unable to determine chart date range')
     end
   end
 
@@ -81,7 +81,7 @@ class ChartManagerTimescaleManipulation
     elsif timescale.is_a?(Array)
       timescales = timescale
     else
-      throw EnergySparksUnexpectedStateException.new("Unsupported timescale #{timescale} for chart manipulation")
+      raise EnergySparksUnexpectedStateException.new("Unsupported timescale #{timescale} for chart manipulation")
     end
     timescales
   end
@@ -100,14 +100,14 @@ class ChartManagerTimescaleManipulation
       key, _value = timescale[0].first
       key
     else
-      throw EnergySparksUnexpectedStateException.new("Unsupported timescale type for chart timescale manipulation #{timescale}")
+      raise EnergySparksUnexpectedStateException.new("Unsupported timescale type for chart timescale manipulation #{timescale}")
     end
   end
 
   def calculate_new_period_number(period_number, factor, available_periods)
     new_period_number = period_number + factor
     if new_period_number > 0 || new_period_number < (-1 * (available_periods - 1))
-      throw EnergySparksUnexpectedStateException.new("Timescale charge request out of range #{new_period_number} versus #{available_periods} limit")
+      raise EnergySparksUnexpectedStateException.new("Timescale charge request out of range #{new_period_number} versus #{available_periods} limit")
     end
     new_period_number
   end
@@ -128,7 +128,7 @@ class ChartManagerTimescaleManipulationMove < ChartManagerTimescaleManipulation
       new_end_period_number = calculate_new_period_number(period_number.max, factor, available_periods)
       { period_type => Range.new(new_start_period_number, new_end_period_number) }
     else
-      throw EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
+      raise EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
     end
   end
 end
@@ -155,7 +155,7 @@ class ChartManagerTimescaleManipulationExtend < ChartManagerTimescaleManipulatio
       end
       {period_type => new_range}
     else
-      throw EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
+      raise EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
     end
   end
 end
@@ -168,7 +168,7 @@ class ChartManagerTimescaleManipulationContract < ChartManagerTimescaleManipulat
   def manipulate_timescale(timescale, factor, available_periods)
     period_type, period_number = timescale.first
     if period_number.is_a?(Integer)
-      # do nothing as can't contract single time range, should potentially throw error
+      # do nothing as can't contract single time range, should potentially raise error
       {period_type => period_number}
     elsif period_number.is_a?(Range)
       new_range = nil
@@ -189,7 +189,7 @@ class ChartManagerTimescaleManipulationContract < ChartManagerTimescaleManipulat
         {period_type => new_range}
       end
     else
-      throw EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
+      raise EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
     end
   end
 end
@@ -223,7 +223,7 @@ class ChartManagerTimescaleManipulationCompare < ChartManagerTimescaleManipulati
       new_range = Range.new(new_start_period_number, new_end_period_number)
       {period_type => new_range}
     else
-      throw EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
+      raise EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
     end
   end
 end

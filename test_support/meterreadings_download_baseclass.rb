@@ -13,11 +13,11 @@ class MeterReadingsDownloadBase
   end
 
   def load_meter_readings
-    throw EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class (load_meter_readings)')
+    raise EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class (load_meter_readings)')
   end
 
   def save_meter_readings
-    throw EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class (save_meter_readings)')
+    raise EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class (save_meter_readings)')
   end
 
   def self.meter_reading_factory(download_type, meter_collection)
@@ -36,8 +36,8 @@ class MeterReadingsDownloadBase
     when :downloadfromfrontend 
       LoadSchoolFromFrontEndDownload.new(meter_collection)
     else
-      throw EnergySparksUnexpectedStateException.new('Unknown download type') if download_type.nil?
-      throw EnergySparksUnexpectedStateException.new("Unknown download type #{download_type}") if !download_type.nil?
+      raise EnergySparksUnexpectedStateException.new('Unknown download type') if download_type.nil?
+      raise EnergySparksUnexpectedStateException.new("Unknown download type #{download_type}") if !download_type.nil?
     end
   end
 

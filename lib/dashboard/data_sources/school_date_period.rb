@@ -30,7 +30,7 @@ class SchoolDatePeriod
     elsif period_2.start_date >= period_1.start_date && period_2.end_date >= period_1.end_date
       SchoolDatePeriod.new(period_2.type, period_2.title + 'merged', period_1.start_date, period_2.end_date)
     else
-      throw EnergySparksUnexpectedStateException.new('Expected School Period merge request for overlapping date ranges')
+      raise EnergySparksUnexpectedStateException.new('Expected School Period merge request for overlapping date ranges')
     end
   end
 

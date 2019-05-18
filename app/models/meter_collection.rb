@@ -68,8 +68,8 @@ class MeterCollection
     when :postcode
       identifier == postcode
     else
-      throw EnergySparksUnexpectedStateException.new("Unexpected nil school identifier_type") if identifier_type.nil?
-      throw EnergySparksUnexpectedStateException.new("Unknown or implement school identifier lookup #{identifier_type}")
+      raise EnergySparksUnexpectedStateException.new("Unexpected nil school identifier_type") if identifier_type.nil?
+      raise EnergySparksUnexpectedStateException.new("Unknown or implement school identifier lookup #{identifier_type}")
     end
   end
 
@@ -133,6 +133,14 @@ class MeterCollection
 
   def gas_only?
     all_meters.select { |meter| meter.electricity_meter? }.empty?
+  end
+
+  def electricity?
+    !aggregated_electricity_meters.nil?
+  end
+
+  def gas?
+    !aggregated_heat_meters.nil?
   end
 
   def storage_heaters?

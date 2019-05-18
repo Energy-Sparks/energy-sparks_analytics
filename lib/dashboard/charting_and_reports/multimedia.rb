@@ -12,8 +12,8 @@ class MultiMediaDetail
   attr_accessor :content
 
   def initialize(type, content)
-    throw EnergySparksUnexpectedStateException("Unexpected nil media type") if type.nil?
-    throw EnergySparksUnexpectedStateException.new("Unexpected media type #{type}") unless [:text, :html, :chart].include?(type)
+    raise EnergySparksUnexpectedStateException("Unexpected nil media type") if type.nil?
+    raise EnergySparksUnexpectedStateException.new("Unexpected media type #{type}") unless [:text, :html, :chart].include?(type)
     @type = type
     @content = content
   end

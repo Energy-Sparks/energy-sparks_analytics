@@ -25,6 +25,9 @@ end
 class EnergySparksMissingPeriodForSpecifiedPeriodChart < StandardError
 end
 
+class EnergySparksNoMeterDataAvailableForFuelType < StandardError
+end
+
 class EnergySparksBadChartSpecification < StandardError
 end
 

@@ -178,7 +178,7 @@ class LoadSchoolFromSheffieldCSV < MeterReadingsDownloadCSVBase
   end
 
   def filename
-    throw EnergySparksUnexpectedStateException.new('No single file name for loading Sheffield Schools')
+    raise EnergySparksUnexpectedStateException.new('No single file name for loading Sheffield Schools')
   end
 
   def subdirectory

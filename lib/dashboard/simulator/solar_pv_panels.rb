@@ -50,7 +50,7 @@ class SolarPVPanels
     end
 
     private def parse_meter_attributes_configuration(meter_attributes_config)
-      puts "solar pv config #{meter_attributes_config}"
+  
       if meter_attributes_config.is_a?(Array)
         meter_attributes_config.each do |period_config|
           @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(period_config))

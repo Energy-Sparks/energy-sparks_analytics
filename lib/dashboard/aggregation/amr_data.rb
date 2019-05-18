@@ -43,9 +43,9 @@ class AMRData < HalfHourlyData
   end
 
   def add(date, one_days_data)
-    throw EnergySparksUnexpectedStateException.new('AMR Data must not be nil') if one_days_data.nil?
-    throw EnergySparksUnexpectedStateException.new("AMR Data now held as OneDayAMRReading not #{one_days_data.class.name}") unless one_days_data.is_a?(OneDayAMRReading)
-    throw EnergySparksUnexpectedStateException.new("AMR Data date mismatch not #{date} v. #{one_days_data.date}") if date != one_days_data.date
+    raise EnergySparksUnexpectedStateException.new('AMR Data must not be nil') if one_days_data.nil?
+    raise EnergySparksUnexpectedStateException.new("AMR Data now held as OneDayAMRReading not #{one_days_data.class.name}") unless one_days_data.is_a?(OneDayAMRReading)
+    raise EnergySparksUnexpectedStateException.new("AMR Data date mismatch not #{date} v. #{one_days_data.date}") if date != one_days_data.date
     set_min_max_date(date)
 
     self[date] = one_days_data
@@ -59,7 +59,7 @@ class AMRData < HalfHourlyData
   end
 
   def data(date, halfhour_index)
-    throw EnergySparksUnexpectedStateException.new('Deprecated call to amr_data.data()')
+    raise EnergySparksUnexpectedStateException.new('Deprecated call to amr_data.data()')
   end
 
   def days_kwh_x48(date, type = :kwh)

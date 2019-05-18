@@ -89,6 +89,14 @@ class MeterTariffs
           rate:  { per: :kwh,     rate: DEFAULT_SOLAR_PV_TARIFF }
         }
       }
+    },
+    storage_heater: {
+      FOREVERCONTRACTDATES => {
+        name: 'Economic standard electricity tariff',
+        rates: {
+          rate:  { per: :kwh,     rate: DEFAULT_ELECTRICITY_ECONOMIC_TARIFF }
+        }
+      }
     }
   }.freeze
   private_constant :ECONOMIC_TARIFFS

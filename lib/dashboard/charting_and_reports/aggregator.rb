@@ -84,8 +84,6 @@ class Aggregator
 
     reformat_x_axis if @chart_config.key?(:x_axis_reformat) && !@chart_config[:x_axis_reformat].nil?
 
-    
-
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
@@ -133,7 +131,7 @@ class Aggregator
       when 3
         grouped_bucketed_data[sub_keys[0]][sub_keys[1]][sub_keys[2]] = data
       else
-        throw EnergySparksBadChartSpecification.new("Bad grouping specification too much grouping depth #{sub_keys.length}")
+        raise EnergySparksBadChartSpecification.new("Bad grouping specification too much grouping depth #{sub_keys.length}")
       end
     end
     logger.info  "Reorganised bucketed data: #{grouped_bucketed_data.inspect}"
@@ -189,20 +187,29 @@ class Aggregator
 
   def run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by = nil)
     saved_meter_collection = @meter_collection
+    error_messages = []
     aggregations = []
     # iterate through the time periods aggregating
     schools.each do |school|
       @meter_collection = school
       periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-        aggregation = run_one_aggregation(@chart_config, period)
-        aggregations.push(
-          {
-            school:       school,
-            period:       period,
-            aggregation:  aggregation
-          }
-        ) unless aggregation.nil?
+        begin
+          aggregation = run_one_aggregation(@chart_config, period)
+          aggregations.push(
+            {
+              school:       school,
+              period:       period,
+              aggregation:  aggregation
+            }
+          )
+        rescue EnergySparksNotEnoughDataException, EnergySparksMissingPeriodForSpecifiedPeriodChart => e
+          error_messages.push(e.message)
+        end
       end
+    end
+
+    if (schools.length * periods.length) == error_messages.length
+      raise EnergySparksNotEnoughDataException.new('All requested chart aggregations failed :' + error_messages.join(' + '))
     end
 
     aggregations = sort_aggregations(aggregations, sort_by) unless sort_by.nil?
@@ -225,7 +232,7 @@ class Aggregator
         elsif sort_by[0].key?(:time)
           period_compare(x, y, sort_by[0][:period])
         else
-          throw EnergySparksBadChartSpecification.new("Bad sort specification #{sort_by}")
+          raise EnergySparksBadChartSpecification.new("Bad sort specification #{sort_by}")
         end
       else
         if sort_by[0].key?(:school)
@@ -241,7 +248,7 @@ class Aggregator
             period_compare(x, y, sort_by[0][:period])
           end
         else
-          throw EnergySparksBadChartSpecification.new("Bad sort specification 2 #{sort_by}")
+          raise EnergySparksBadChartSpecification.new("Bad sort specification 2 #{sort_by}")
         end
       end
     }
@@ -259,37 +266,9 @@ class Aggregator
   end
 
   def run_one_aggregation(chart_config, period)
-    aggregation = nil
     chartconfig_copy = chart_config.clone
     chartconfig_copy[:timescale] = period
-    begin
-      aggregation = aggregate_period(chartconfig_copy)
-    rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-      logger.warn e
-      logger.warn 'Warning: chart specification calls for more fixed date periods than available in AMR data(1)'
-    rescue StandardError => e
-      logger.error e
-    end
-    aggregation
-  end
-
-  def aggregate_multiple_charts_deprecated(periods)
-    bucketed_period_data = []
-
-    # iterate through the time periods aggregating
-    periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-      chartconfig_copy = @chart_config.clone
-      chartconfig_copy[:timescale] = period
-      begin
-        bucketed_period_data.push(aggregate_period(chartconfig_copy))
-      rescue EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-        logger.warn e
-        logger.warn 'Warning: chart specification calls for more fixed date periods than available in AMR data(2)'
-      rescue StandardError => e
-        logger.error e
-      end
-    end
-    bucketed_period_data
+    aggregate_period(chartconfig_copy)
   end
 
   def merge_multiple_charts(bucketed_period_data, schools)

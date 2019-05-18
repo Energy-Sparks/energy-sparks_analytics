@@ -93,7 +93,7 @@ class AlertHeatingOnOff < AlertGasModelBase
   private def dark_sky_forecast
     latitude, longitude = AreaNames.latitude_longitude(AreaNames.key_from_name(@school.area_name))
 
-    throw EnergySparksUnexpectedSchoolDataConfiguration.new('Cant find latitude for school, not setup?') if latitude.nil?
+    raise EnergySparksUnexpectedSchoolDataConfiguration.new('Cant find latitude for school, not setup?') if latitude.nil?
 
     weather = DarkSkyWeatherInterface.new.weather_forecast(latitude, longitude)
     @forecast_date_time = weather[:current][:time]

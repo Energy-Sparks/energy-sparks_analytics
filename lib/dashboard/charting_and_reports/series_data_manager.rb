@@ -81,8 +81,8 @@ class SeriesNames
       Y2SERIESYMBOLTONAMEMAP[axis_sym]
     else
       if throw_exception
-        throw EnergySparksBadChartSpecification.new('nil y2 axis specification') if axis_sym.nil?
-        throw EnergySparksBadChartSpecification.new("unknown y2 axis specification #{axis_sym}")
+        raise EnergySparksBadChartSpecification.new('nil y2 axis specification') if axis_sym.nil?
+        raise EnergySparksBadChartSpecification.new("unknown y2 axis specification #{axis_sym}")
       else
         nil
       end
@@ -149,7 +149,7 @@ class SeriesDataManager
           buckets.push(SeriesNames::Y2SERIESYMBOLTONAMEMAP[breakdown])
         else
           # TODO(PH,6Feb2019) - y2 sometimes comes through as nil - not clear why this is happening upstream
-          throw EnergySparksBadChartSpecification.new("Unknown series_definition #{breakdown}") unless breakdown.nil?
+          raise EnergySparksBadChartSpecification.new("Unknown series_definition #{breakdown}") unless breakdown.nil?
         end
       end
     end
@@ -201,19 +201,7 @@ class SeriesDataManager
   end
 
   def get_data(time_period)
-    begin
-      get_data_private(time_period)
-    rescue StandardError => ee
-      _timetype, dates, _halfhour_index = time_period
-      if !dates.is_a?(Array) || dates[0].nil? || dates[1].nil?
-        logger.error "Error: getting data for time period #{time_period}"
-      else
-        start_date_str = dates[0].strftime('%d %m %Y')
-        end_date_str = dates[1].strftime('%d %m %Y')
-        logger.error "Error: getting data for time period #{start_date_str} to #{end_date_str}"
-      end
-      logger.info ee
-    end
+    get_data_private(time_period)
   end
 
   def submeter_names
@@ -264,15 +252,28 @@ class SeriesDataManager
     breakdown = {}
     case timetype
     when :halfhour, :datetime
+      check_requested_meter_date(meter, dates, dates)
       breakdown = getdata_by_halfhour(meter, dates, halfhour_index)
     when :daterange
+      check_requested_meter_date(meter, dates[0], dates[1])
       breakdown = getdata_by_daterange(meter, dates[0], dates[1])
     end
     breakdown
   end
 
+  private def check_requested_meter_date(meter, start_date, end_date)
+    if start_date < meter.amr_data.start_date || end_date > meter.amr_data.end_date
+      requested_dates = start_date == end_date ? "requested data for #{start_date}" : "requested data from #{start_date} to #{end_date}"
+      meter_dates = "meter from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}: "
+      puts "bog off 11 " + "Not enough data for chart aggregation: " + meter_dates + requested_dates
+      raise EnergySparksNotEnoughDataException.new("Not enough data for chart aggregation: " + meter_dates + requested_dates)
+    end
+  end
+
   def get_one_days_data_x48(date, type = :kwh)
-    amr_data_one_day_readings(select_one_meter, date, type)
+    meter = select_one_meter
+    check_requested_meter_date(meter, date, date) # non optimal request
+    amr_data_one_day_readings(meter, date, type)
   end
 
   # implemented for aggregator post aggregaton trend line calculation
@@ -956,6 +957,10 @@ private
       @periods = [period]
     else
       @periods = [SchoolDatePeriod.new(:chartperiod, 'One Period for Chart', @first_meter_date, @last_meter_date)]
+    end
+    if @periods.nil? || @periods.empty? || @periods[0].nil?
+      timescale_config = @chart_configuration.key?(:timescale) 
+      raise EnergySparksNotEnoughDataException.new("Not enough meter data (nil periods) for chart timescale config #{timescale_config}")
     end
   end
 

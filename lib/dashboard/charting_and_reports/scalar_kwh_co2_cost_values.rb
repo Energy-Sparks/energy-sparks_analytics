@@ -9,7 +9,12 @@ class ScalarkWhCO2CostValues
     @meter_collection = meter_collection
   end
 
+  def front_end_aggregate_value(time_scale, fuel_type, data_type = :kwh)
+    aggregate_value(time_scale, fuel_type, data_type)
+  end
+
   def aggregate_value(time_scale, fuel_type, data_type = :kwh)
+    check_data_available_for_fuel_type(fuel_type)
     aggregation_configuration(time_scale, fuel_type, data_type)
   end
 
@@ -24,7 +29,7 @@ class ScalarkWhCO2CostValues
       timescale:        time_scale,
 
       chart1_type:      :column,
-      chart1_subtype:   :stacked,
+      chart1_subtype:   :stacked
     }
  
     aggregator = Aggregator.new(@meter_collection, config, false)
@@ -32,6 +37,23 @@ class ScalarkWhCO2CostValues
     aggregator.aggregate
 
     aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
+  end
+
+  private def check_data_available_for_fuel_type(fuel_type)
+    case fuel_type
+    when :gas
+      raise EnergySparksNoMeterDataAvailableForFuelType.new('No gas meter data available') unless @meter_collection.gas?
+    when :electricity
+      raise EnergySparksNoMeterDataAvailableForFuelType.new('No electricity meter data available') unless @meter_collection.electricity?
+    when :storage_heaters
+      raise EnergySparksNoMeterDataAvailableForFuelType.new('No storage heater meter data available') unless @meter_collection.storage_heaters?
+    when solar_pv
+      raise EnergySparksNoMeterDataAvailableForFuelType.new('No solar pv meter data available') unless @meter_collection.solar_pv_panels?
+      :solar_pv_meter
+    else
+      raise EnergySparksBadChartSpecification.new('Unexpected nil fuel type for scalar energy calculation') if fuel_type.nil?
+      raise EnergySparksBadChartSpecification.new("Unexpected fuel type #{fuel_type} for scalar energy calculation") 
+    end
   end
 
   private def meter_type_from_fuel_type(fuel_type)

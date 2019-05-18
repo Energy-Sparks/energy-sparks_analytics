@@ -565,7 +565,7 @@ class ValidateAMRData
     when :weekday
       return 'S'
     else
-      throw EnergySparksUnexpectedStateException.new('Unexpected day type')
+      raise EnergySparksUnexpectedStateException.new('Unexpected day type')
     end
   end
 

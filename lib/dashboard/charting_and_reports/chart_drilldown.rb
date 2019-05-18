@@ -54,7 +54,7 @@ class ChartManager
   def drilldown_daterange(chart_config, x_axis_range)
     new_x_axis = x_axis_drilldown(chart_config[:x_axis])
     if new_x_axis.nil?
-      throw EnergySparksBadChartSpecification.new("Illegal drilldown requested for #{chart_config[:name]}  call drilldown_available first")
+      raise EnergySparksBadChartSpecification.new("Illegal drilldown requested for #{chart_config[:name]}  call drilldown_available first")
     end
 
     date_range_config = {
@@ -78,7 +78,7 @@ class ChartManager
     when :datetime, :dayofweek, :intraday, :nodatebuckets
       nil
     else
-      throw EnergySparksBadChartSpecification.new("Unhandled x_axis drilldown config #{existing_x_axis_config}")
+      raise EnergySparksBadChartSpecification.new("Unhandled x_axis drilldown config #{existing_x_axis_config}")
     end
   end
 end

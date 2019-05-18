@@ -174,7 +174,7 @@ class Holidays
       _sunday, _saturday, week_count = holidays.nth_school_week(end_date, -1000, 3, start_date)
       1000 - week_count
     else
-      throw EnergySparksUnexpectedStateException.new("Unsupported period type #{period_type} for periods_in_date_range request")
+      raise EnergySparksUnexpectedStateException.new("Unsupported period type #{period_type} for periods_in_date_range request")
     end
   end
 

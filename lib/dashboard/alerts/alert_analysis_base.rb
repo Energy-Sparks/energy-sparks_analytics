@@ -477,7 +477,7 @@ class AlertAnalysisBase
     elsif @school.respond_to?(:school) && !@school.school.number_of_pupils > 0
       @school.school.number_of_pupils
     else
-      throw EnergySparksBadDataException.new('Unable to find number of pupils for alerts')
+      raise EnergySparksBadDataException.new('Unable to find number of pupils for alerts')
     end
   end
 
@@ -487,7 +487,7 @@ class AlertAnalysisBase
     elsif @school.respond_to?(:school) && !@school.school.floor_area.nil? && @school.school.floor_area > 0.0
       @school.school.floor_area
     else
-      throw EnergySparksBadDataException.new('Unable to find number of floor_area for alerts')
+      raise EnergySparksBadDataException.new('Unable to find number of floor_area for alerts')
     end
   end
 
@@ -497,7 +497,7 @@ class AlertAnalysisBase
     elsif @school.respond_to?(:name) && !@school.school.name.nil?
       @school.school.name
     else
-      throw EnergySparksBadDataException.new('Unable to find school name for alerts')
+      raise EnergySparksBadDataException.new('Unable to find school name for alerts')
     end
   end
 
@@ -511,7 +511,7 @@ class AlertAnalysisBase
     elsif @school.respond_to?(:school) && !@school.school.school_type.nil?
       @school.school.school_type.instance_of?(String) ? @school.school.school_type.to_sym : @school.school.school_type
     else
-      throw EnergySparksBadDataException.new("Unable to find number of school_type for alerts #{@school.school_type} #{@school.school.school_type}")
+      raise EnergySparksBadDataException.new("Unable to find number of school_type for alerts #{@school.school_type} #{@school.school.school_type}")
     end
   end
 

@@ -9,19 +9,62 @@ module Logging
   logger.level = :debug
 end
 
+=begin
+schools = ReportConfigSupport.new.schools
+
+schools.each do |school_name, fuel_type|
+  next if fuel_type == :gas_only
+
+  meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
+
+  conversion = EnergyConversions.new(meter_collection)
+
+  results = conversion.front_end_convert(:ice_car_kwh_km, {year: 0}, :electricity)
+
+  puts '=' * 80
+  puts school_name
+  puts '=' * 80
+  ap(results)
+end
+=end
+
 school_name = 'Whiteways Primary'
+
 meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
 
 conversion = EnergyConversions.new(meter_collection)
+
+list_of_conversions = conversion.front_end_conversion_list
+
+list_of_conversions.each do |conversion_key, conversion_configuration|
+  results = conversion.front_end_convert(conversion_key, {month: -2}, :electricity)
+  puts '=' * 80
+  puts conversion_key
+  ap(conversion_configuration)
+  ap(results)
+end
+
+
+exit
 
 ap(conversion.equivalences_available_to_front_end)
 
 results = conversion.front_end_convert(:ice_car_kwh_km, {month: 0}, :electricity)
 ap(results)
 
+results = conversion.front_end_convert_2(:ice_car_kwh_km, {month: 0}, :electricity)
+ap(results)
+
 results = conversion.front_end_convert(:ice_car_co2_km, {year: 0}, :electricity)
 ap(results)
 
+list_of_conversions = conversion.front_end_conversion_list
+list_of_conversions.each do |conversion_key, conversion_configuration|
+  results = conversion.front_end_convert(conversion_key, {year: 0}, :electricity)
+  ap(results)
+end
+
+ap(x)
 
 exit
 

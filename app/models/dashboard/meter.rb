@@ -54,7 +54,7 @@ module Dashboard
     end
 
     private def check_fuel_type(fuel_type)
-      throw EnergySparksUnexpectedStateException.new("Unexpected fuel type #{fuel_type}") if [:electricity, :gas].include?(fuel_type)
+      raise EnergySparksUnexpectedStateException.new("Unexpected fuel type #{fuel_type}") if [:electricity, :gas].include?(fuel_type)
     end
 
     def to_s
@@ -138,7 +138,7 @@ module Dashboard
       elsif fuel_type == :gas || fuel_type == :aggregated_heat
         80000000000000 + urn.to_i
       else
-        throw EnergySparksUnexpectedStateException.new('Unexpected fuel_type')
+        raise EnergySparksUnexpectedStateException.new('Unexpected fuel_type')
       end
     end
 
@@ -154,7 +154,7 @@ module Dashboard
       when :solar_pv_only
         65000000000000 + mpan_mprn
       else
-        throw EnergySparksUnexpectedStateException.new("Unexpected type #{type} for modified mpan/mprn")
+        raise EnergySparksUnexpectedStateException.new("Unexpected type #{type} for modified mpan/mprn")
       end
     end
   end

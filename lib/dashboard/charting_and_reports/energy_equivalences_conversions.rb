@@ -81,9 +81,13 @@ class EnergyEquivalences
   UK_DOMESTIC_GAS_£_KWH = 0.05
   HOMES_ELECTRICITY_KWH_YEAR = 2_600
   HOMES_GAS_KWH_YEAR = 14_000
+  HOMES_ELECTRICITY_CO2_YEAR = HOMES_ELECTRICITY_KWH_YEAR * UK_ELECTRIC_GRID_CO2_KG_KWH
+  HOMES_GAS_CO2_YEAR = HOMES_GAS_KWH_YEAR * UK_GAS_CO2_KG_KWH
   HOMES_KWH_YEAR = HOMES_ELECTRICITY_KWH_YEAR + HOMES_GAS_KWH_YEAR
-  HOMES_CO2_YEAR = HOMES_ELECTRICITY_KWH_YEAR * UK_ELECTRIC_GRID_CO2_KG_KWH + HOMES_GAS_KWH_YEAR * UK_GAS_CO2_KG_KWH
-  HOMES_£_YEAR = HOMES_ELECTRICITY_KWH_YEAR * UK_DOMESTIC_ELECTRICITY_£_KWH + HOMES_GAS_KWH_YEAR * UK_DOMESTIC_GAS_£_KWH
+  HOMES_CO2_YEAR = HOMES_ELECTRICITY_CO2_YEAR + HOMES_GAS_CO2_YEAR
+  HOMES_ELECTRICITY_£_YEAR = HOMES_ELECTRICITY_KWH_YEAR * UK_DOMESTIC_ELECTRICITY_£_KWH
+  HOMES_GAS_£_YEAR = HOMES_GAS_KWH_YEAR * UK_DOMESTIC_GAS_£_KWH
+  HOMES_£_YEAR = HOMES_ELECTRICITY_£_YEAR + HOMES_GAS_£_YEAR
 
   KETTLE_LITRE_BY_85C_KWH = (85.0 * WATER_ENERGY_KWH_LITRE_PER_K).round(3)
   KETTLE_LITRES = 1.5
@@ -171,54 +175,76 @@ class EnergyEquivalences
       description: 'driving a petrol car %s',
       conversions: {
         kwh:  {
-          rate:         ICE_KWH_KM,
-          description:  ICE_DESCRIPTION_TO_KWH
+          rate:                   ICE_KWH_KM,
+          description:            ICE_DESCRIPTION_TO_KWH,
+          front_end_description:  'Distance (km) travelled by a petrol car (conversion using kwh)',
+          calculation_variables:  {
+            ice_kwh_per_km:        { value: ICE_KWH_KM,           units: :kwh_per_km,   description: 'kwh required to travel for 1km'}
+          }
         },
         co2:  {
           rate:         ICE_CO2_KM,
-          description:  ICE_DESCRIPTION_CO2_KG
+          description:  ICE_DESCRIPTION_CO2_KG,
+          front_end_description:  'Distance (km) travelled by a petrol car (conversion using co2)',
+          calculation_variables:  {
+            ice_co2_per_km:        { value: ICE_CO2_KM,           units: :co2_kg_per_km,description: 'kg co2 per 1km'}
+          }
         },
         £:  {
           rate:         ICE_£_KM,
-          description:  ICE_DESCRIPTION_TO_£
+          description:  ICE_DESCRIPTION_TO_£,
+          front_end_description:  'Distance (km) travelled by a petrol car (conversion using £)',
+          calculation_variables:  {
+            ice_£_per_km:          { value: ICE_£_KM,             units: :£_per_km,     description: 'cost £ for 1km'}
+          }
         }
-      }
+      },
+      convert_to:       :km
     },
     bev_car: {
       description: 'driving a battery electric car %s',
       conversions: {
         kwh:  {
           rate:         BEV_KWH_PER_KM,
-          description:  BEV_EFFICIENCY_DESCRIPTION
+          description:  BEV_EFFICIENCY_DESCRIPTION,
+          front_end_description:  'Distance (km) travelled by a battery electric car (conversion using kwh)',
+          calculation_variables:         {
+            ice_litres_per_100_km: { value: ICE_LITRES_PER_100KM, units: :l_per_100_km, description: 'litres petrol for 100km (~40mpg)'},
+          }
         },
         co2:  {
           rate:         BEV_CO2_PER_KM,
-          description:  BEV_CO2_DESCRIPTION
+          description:  BEV_CO2_DESCRIPTION,
+          front_end_description:  'Distance (km) travelled by a battery electric car (conversion using co2)'
         },
         £:  {
           rate:         BEV_£_PER_KM,
-          description:  BEV_EFFICIENCY_DESCRIPTION
+          description:  BEV_EFFICIENCY_DESCRIPTION,
+          front_end_description:  'Distance (km) travelled by a battery electric car (conversion using £)'
         }
-      }
+      },
+      convert_to:       :km
     },
     home: {
       description: 'the annual energy consumption of %s',
       conversions: {
         kwh:  {
           rate:         HOMES_KWH_YEAR,
-          description:  "A average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity "\
+          description:  "An average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity "\
                         "and #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas per year, "\
-                        "so a total of #{X.format(:kwh, HOMES_KWH_YEAR)}. "
+                        "so a total of #{X.format(:kwh, HOMES_KWH_YEAR)}. ",
+          front_end_description:  'The consumption of N average homes (conversion via kWh)'
         },
         co2:  {
           rate:         HOMES_CO2_YEAR,
-          description:  "A average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity "\
+          description:  "An average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity "\
                         "and #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas per year. "\
                         "The carbon intensity of 1 kWh of electricity = #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)}/kWh and "\
                         "gas #{X.format(:co2, UK_GAS_CO2_KG_KWH)}/kWh. "\
                         "Therefore 1 home emits #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} &times; #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)} + "\
                         "#{X.format(:kwh, HOMES_GAS_KWH_YEAR)} &times; #{X.format(:co2, UK_GAS_CO2_KG_KWH)} = "\
-                        "#{X.format(:co2, HOMES_CO2_YEAR)} per year. "
+                        "#{X.format(:co2, HOMES_CO2_YEAR)} per year. ",
+          front_end_description:  'The consumption of N average homes (conversion via co2)'
         },
         £:  {
           rate:         HOMES_£_YEAR,
@@ -228,148 +254,242 @@ class EnergyEquivalences
                         "gas #{X.format(:£, UK_DOMESTIC_GAS_£_KWH)}/kWh. "\
                         "Therefore 1 home costs #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} &times; #{X.format(:£, UK_DOMESTIC_ELECTRICITY_£_KWH)} + "\
                         "#{X.format(:kwh, HOMES_GAS_KWH_YEAR)} &times; #{X.format(:£, UK_DOMESTIC_GAS_£_KWH)} = "\
-                        "#{X.format(:£, HOMES_£_YEAR)} in energy per year. "
+                        "#{X.format(:£, HOMES_£_YEAR)} in energy per year. ",
+          front_end_description:  'The consumption of N average homes (conversion via £)'
         }
-      }
+      },
+      convert_to:             :home,
+      equivalence_timescale:  :year,
+      timescale_units:        :home
+    },
+    homes_electricity: {
+      description: 'the annual electricity consumption of %s',
+      conversions: {
+        kwh:  {
+          rate:         HOMES_ELECTRICITY_KWH_YEAR,
+          description:  "A average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity ",
+          front_end_description:  'The consumption of N average homes electricity (conversion via kWh)'
+        },
+        co2:  {
+          rate:         HOMES_ELECTRICITY_CO2_YEAR,
+          description:  "A average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity. "\
+                        "The carbon intensity of 1 kWh of electricity = #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)}/kWh. "\
+                        "Therefore 1 home emits #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} &times; #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)} = "\
+                        "#{X.format(:co2, HOMES_ELECTRICITY_CO2_YEAR)} per year. ",
+          front_end_description:  'The consumption of N average homes electricity (conversion via co2)'
+        },
+        £:  {
+          rate:         HOMES_ELECTRICITY_£_YEAR,
+          description:  "An average uk home uses #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} of electricity. "\
+                        "For homes the cost of 1 kWh of electricity = #{X.format(:£, UK_DOMESTIC_ELECTRICITY_£_KWH)}/kWh. "\
+                        "Therefore 1 home costs #{X.format(:kwh, HOMES_ELECTRICITY_KWH_YEAR)} &times; #{X.format(:£, UK_DOMESTIC_ELECTRICITY_£_KWH)} = "\
+                        "#{X.format(:£, HOMES_ELECTRICITY_£_YEAR)} in electricity per year. ",
+          front_end_description:  'The consumption of N average homes electricity (conversion via £)'
+        }
+      },
+      convert_to:             :home,
+      equivalence_timescale:  :year,
+      timescale_units:        :home
+    },
+    homes_gas: {
+      description: 'the annual gas consumption of %s',
+      conversions: {
+        kwh:  {
+          rate:         HOMES_GAS_KWH_YEAR,
+          description:  "A average uk home uses #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas ",
+          front_end_description:  'The consumption of N average homes gas (conversion via kWh)'
+        },
+        co2:  {
+          rate:         HOMES_GAS_CO2_YEAR,
+          description:  "A average uk home uses #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas. "\
+                        "The carbon intensity of 1 kWh of gas = #{X.format(:co2, UK_GAS_CO2_KG_KWH)}/kWh. "\
+                        "Therefore 1 home emits #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} &times; #{X.format(:co2, UK_GAS_CO2_KG_KWH)} = "\
+                        "#{X.format(:co2, HOMES_GAS_CO2_YEAR)} per year. ",
+          front_end_description:  'The consumption of N average homes gas (conversion via co2)'
+        },
+        £:  {
+          rate:         HOMES_GAS_£_YEAR,
+          description:  "An average uk home uses #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} of gas. "\
+                        "For homes the cost of 1 kWh of gas = #{X.format(:£, UK_DOMESTIC_GAS_£_KWH)}/kWh. "\
+                        "Therefore 1 home costs #{X.format(:kwh, HOMES_GAS_KWH_YEAR)} &times; #{X.format(:£, UK_DOMESTIC_GAS_£_KWH)} = "\
+                        "#{X.format(:£, HOMES_GAS_£_YEAR)} in gas per year. ",
+          front_end_description:  'The consumption of N average homes gas (conversion via £)'
+        }
+      },
+      convert_to:             :home,
+      equivalence_timescale:  :year,
+      timescale_units:        :home
     },
     shower: {
       description: 'taking %s',
       conversions: {
         kwh:  {
-          rate:         SHOWER_KWH_NET,
-          description:  SHOWER_DESCRIPTION_TO_KWH
+          rate:                   SHOWER_KWH_NET,
+          description:            SHOWER_DESCRIPTION_TO_KWH,
+          front_end_description:  'Number of showers (conversion via kWh)'
         },
         co2:  {
-          rate:         SHOWER_CO2_KG,
-          description:  SHOWER_DESCRIPTION_TO_KWH +
-                        "Burning 1 kwh of gas (normal source of heat for showers) emits #{X.format(:kg, UK_GAS_CO2_KG_KWH)} CO2. "\
-                        "Therefore 1 shower uses #{X.format(:kg, SHOWER_CO2_KG)} CO2. "
+          rate:                   SHOWER_CO2_KG,
+          description:            SHOWER_DESCRIPTION_TO_KWH +
+                                  "Burning 1 kwh of gas (normal source of heat for showers) emits #{X.format(:kg, UK_GAS_CO2_KG_KWH)} CO2. "\
+                                  "Therefore 1 shower uses #{X.format(:kg, SHOWER_CO2_KG)} CO2. ",
+          front_end_description:  'Number of showers (conversion via co2)'
         },
         £:  {
           rate:         SHOWER_£,
           description:  SHOWER_DESCRIPTION_TO_KWH +
                         "1 kwh of gas costs #{X.format(:£, UK_GAS_£_KWH)}. "\
-                        "Therefore 1 shower costs #{X.format(:kwh, SHOWER_KWH_NET)} &times; #{X.format(:£, UK_GAS_£_KWH)} = #{X.format(:£, SHOWER_£)} of gas. "
+                        "Therefore 1 shower costs #{X.format(:kwh, SHOWER_KWH_NET)} &times; #{X.format(:£, UK_GAS_£_KWH)} = #{X.format(:£, SHOWER_£)} of gas. ",
+          front_end_description:  'Number of showers (conversion via £)'
         }
-      }
+      },
+      convert_to:       :shower
     },
     kettle: {
       description: 'heating %s of water',
       conversions: {
         kwh:  {
           rate:         KETTLE_KWH,
-          description:  ONE_KETTLE_DESCRIPTION_TO_KWH
+          description:  ONE_KETTLE_DESCRIPTION_TO_KWH,
+          front_end_description:  'Number of kettles boiled (conversion via kWh)'
         },
         co2:  {
           rate:         KETTLE_CO2_KG,
           description:  ONE_KETTLE_DESCRIPTION_TO_KWH +
                         "And, heating 1 kettle emits #{X.format(:kwh, KETTLE_KWH)} &times; #{X.format(:co2, UK_ELECTRIC_GRID_CO2_KG_KWH)}"\
-                        " = #{X.format(:co2, KETTLE_CO2_KG)}. "
+                        " = #{X.format(:co2, KETTLE_CO2_KG)}. ",
+          front_end_description:  'Number of kettles boiled (conversion via co2)'
         },
         £:  {
           rate:         KETTLE_£,
           description:  ONE_KETTLE_DESCRIPTION_TO_KWH +
                         "Thus it costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)} &times; #{X.format(:kwh, KETTLE_KWH)} = "\
-                        "#{X.format(:£, KETTLE_£)} to boil a kettle. "
+                        "#{X.format(:£, KETTLE_£)} to boil a kettle. ",
+          front_end_description:  'Number of kettles boiled (conversion via £)'
         }
-      }
+      },
+      convert_to:       :kettle
     },
     smartphone: {
       description: '%s',
       conversions: {
         kwh:  {
-          rate:         SMARTPHONE_CHARGE_kWH,
-          description:  "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. "
+          rate:                   SMARTPHONE_CHARGE_kWH,
+          description:            "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. ",
+          front_end_description:  'Number of charges of a smartphone (conversion via kWh)'
         },
         co2:  {
-          rate:         SMARTPHONE_CHARGE_CO2_KG,
-          description:  "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. "\
-                        "Generating 1 kWh of electricity produces #{X.format(:co2, UK_ELECTRIC_GRID_£_KWH)}. "\
-                        "Therefore charging one smartphone produces #{X.format(:co2, SMARTPHONE_CHARGE_CO2_KG)}. "
+          rate:                   SMARTPHONE_CHARGE_CO2_KG,
+          description:            "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. "\
+                                  "Generating 1 kWh of electricity produces #{X.format(:co2, UK_ELECTRIC_GRID_£_KWH)}. "\
+                                  "Therefore charging one smartphone produces #{X.format(:co2, SMARTPHONE_CHARGE_CO2_KG)}. ",
+          front_end_description:  'Number of charges of a smartphone (conversion via co2)'
         },
         £:  {
-          rate:         SMARTPHONE_CHARGE_£,
-          description:  "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. "\
-                        "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)}. "\
-                        "Therefore charging one smartphone costs #{X.format(:£, SMARTPHONE_CHARGE_£)}. "
+          rate:                   SMARTPHONE_CHARGE_£,
+          description:            "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. "\
+                                  "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)}. "\
+                                  "Therefore charging one smartphone costs #{X.format(:£, SMARTPHONE_CHARGE_£)}. ",
+          front_end_description:  'Number of charges of a smartphone (conversion via co2)'
         }
-      }
+      },
+      convert_to:       :smartphone
     },
     tv: {
       description: '%s',
       conversions: {
         kwh:  {
-          rate:         TV_POWER_KW,
-          description:  "TVs use about #{X.format(:kwh, TV_POWER_KW)} of electricity every hour. "
+          rate:                   TV_POWER_KW,
+          description:            "TVs use about #{X.format(:kwh, TV_POWER_KW)} of electricity every hour. ",
+          front_end_description:  'Number of hours of TV usage (converted via kWh)'
         },
         co2:  {
-          rate:         TV_HOUR_CO2_KG,
-          description:  "TVs use about #{X.format(:kwh, TV_POWER_KW)} of electricity every hour. "\
-                        "Generating 1 kWh of electricity produces #{X.format(:co2, UK_ELECTRIC_GRID_£_KWH)}. "\
-                        "Therefore using a TV for 1 hour produces #{X.format(:co2, TV_HOUR_CO2_KG)}. "
+          rate:                   TV_HOUR_CO2_KG,
+          description:            "TVs use about #{X.format(:kwh, TV_POWER_KW)} of electricity every hour. "\
+                                  "Generating 1 kWh of electricity produces #{X.format(:co2, UK_ELECTRIC_GRID_£_KWH)}. "\
+                                  "Therefore using a TV for 1 hour produces #{X.format(:co2, TV_HOUR_CO2_KG)}. ",
+          front_end_description:  'Number of hours of TV usage (converted via co2)'
         },
         £:  {
           rate:         TV_HOUR_£,
           description:  "TVs use about #{X.format(:kwh, TV_POWER_KW)} of electricity every hour. "\
                         "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)}. "\
-                        "Therefore using a TV for 1 hour costs #{X.format(:£, TV_HOUR_£)}. "
+                        "Therefore using a TV for 1 hour costs #{X.format(:£, TV_HOUR_£)}. ",
+          front_end_description:  'Number of hours of TV usage (converted via £)'
         }
-      }
+      },
+      convert_to:             :hour,
+      equivalence_timescale:  :hour,
+      timescale_units:        :tv
     },
     tree: {
       description: 'planting a %s (40 year life)',
       conversions: {
         co2:  {
-          rate:         TREE_CO2_KG,
-          description:  "An average tree absorbs #{X.format(:co2, TREE_CO2_KG_YEAR)} per year. "\
-                        "And if the tree lives to #{TREE_LIFE_YEARS} years it will absorb "\
-                        "#{X.format(:co2, TREE_CO2_KG)}. "
+          rate:                   TREE_CO2_KG,
+          description:            "An average tree absorbs #{X.format(:co2, TREE_CO2_KG_YEAR)} per year. "\
+                                  "And if the tree lives to #{TREE_LIFE_YEARS} years it will absorb "\
+                                  "#{X.format(:co2, TREE_CO2_KG)}. ",
+          front_end_description:  'Number of trees (40 year life, CO2 conversion)'
         }
-      }
+      },
+      convert_to:       :tree
     },
     library_books: {
       description: 'the cost of %s',
       conversions: {
         £:  {
-          rate:         LIBRARY_BOOK_£,
-          description:  "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}."
+          rate:                   LIBRARY_BOOK_£,
+          description:            "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}.",
+          front_end_description:  'Number of library books (£5)'
         }
-      }
+      },
+      convert_to:       :library_books
     },
     teaching_assistant: {
       description: '%s',
       conversions: {
         £:  {
           rate:         TEACHING_ASSISTANT_£_HOUR,
-          description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour."
+          description:  "A school teaching assistant is paid on average #{X.format(:£, TEACHING_ASSISTANT_£_HOUR)} per hour.",
+          front_end_description:  'Number of teaching assistant hours (£8.33/hour)'
         }
-      }
+      },
+      convert_to:             :teaching_assistant_hours,
+      equivalence_timescale:  :working_hours,
+      timescale_units:        :teaching_assistant
     },
     carnivore_dinner: {
       description: '%s',
       conversions: {
         co2:  {
-          rate:         CARNIVORE_DINNER_CO2_KG,
-          description:  "#{X.format(:co2, CARNIVORE_DINNER_CO2_KG)} of CO2 is emitted producing one dinner containing meat."
+          rate:                   CARNIVORE_DINNER_CO2_KG,
+          description:            "#{X.format(:co2, CARNIVORE_DINNER_CO2_KG)} of CO2 is emitted producing one dinner containing meat.",
+          front_end_description:  'Number of meals containing meat (conversion via co2, 4kg/meal)'
         },
         £:  {
-          rate:         CARNIVORE_DINNER_£,
-          description:  "One dinner containing meat costs #{X.format(:£, CARNIVORE_DINNER_£)}."
+          rate:                   CARNIVORE_DINNER_£,
+          description:            "One dinner containing meat costs #{X.format(:£, CARNIVORE_DINNER_£)}.",
+          front_end_description:  'Number of meals containing meat (conversion via £, £2.50/meal)'
         }
-      }
+      },
+      convert_to:       :carnivore_dinner
     },
     vegetarian_dinner: {
       description: '%s',
       conversions: {
         co2:  {
-          rate:         VEGETARIAN_DINNER_CO2_KG,
-          description:  "#{X.format(:co2, VEGETARIAN_DINNER_CO2_KG)} of CO2 is emitted producing one vegetarian dinner."
+          rate:                     VEGETARIAN_DINNER_CO2_KG,
+          description:              "#{X.format(:co2, VEGETARIAN_DINNER_CO2_KG)} of CO2 is emitted producing one vegetarian dinner.",
+          front_end_description:    'Number of vegetarian meals (conversion via co2, 2kg/meal)'
         },
         £:  {
-          rate:         VEGETARIAN_DINNER_£,
-          description:  "One vegetarian dinner costs #{X.format(:£, VEGETARIAN_DINNER_£)}."
+          rate:                     VEGETARIAN_DINNER_£,
+          description:              "One vegetarian dinner costs #{X.format(:£, VEGETARIAN_DINNER_£)}.",
+          front_end_description:    'Number of vegetarian meals (conversion via £, £1.50/meal)'
         }
-      }
+      },
+      convert_to:       :vegetarian_dinner
     },
     onshore_wind_turbine_hours: {
       description: '%s',
@@ -378,9 +498,13 @@ class EnergyEquivalences
           rate:         ONSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR,
           description:  "An average onshore wind turbine has a maximum capacity of #{X.format(:kw, ONSHORE_WIND_TURBINE_CAPACITY_KW)}. "\
                         "On average (wind varies) it is windy enough to use #{X.format(:percent, ONSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT)} of that capacity. "\
-                        "Therefore an average onshore wind turbine generates about #{X.format(:kwh, ONSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR)} per hour."
+                        "Therefore an average onshore wind turbine generates about #{X.format(:kwh, ONSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR)} per hour.",
+          front_end_description:    'Number of onshore wind turbine hours (converted using kWh)'
         }
-      }
+      },
+      convert_to:       :onshore_wind_turbine_hours,
+      equivalence_timescale:  :hour,
+      timescale_units:        :onshore_wind_turbines
     },
     offshore_wind_turbine_hours: {
       description: '%s',
@@ -389,18 +513,26 @@ class EnergyEquivalences
           rate:         OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR,
           description:  "An average onshore wind turbine has a maximum capacity of #{X.format(:kw, OFFSHORE_WIND_TURBINE_CAPACITY_KW)}. "\
                         "On average (wind varies) it is windy enough to use #{X.format(:percent, OFFSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT)} of that capacity. "\
-                        "Therefore an average onshore wind turbine generates about #{X.format(:kwh, OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR)} per hour."
+                        "Therefore an average onshore wind turbine generates about #{X.format(:kwh, OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR)} per hour.",
+          front_end_description:    'Number of offshore wind turbine hours (converted using kWh)'
         }
-      }
+      },
+      convert_to:       :offshore_wind_turbine_hours,
+      equivalence_timescale:  :hour,
+      timescale_units:        :offshore_wind_turbines
     },
     solar_panels_in_a_year: {
       description: '%s',
       conversions: {
         kwh:  {
           rate:         SOLAR_PANEL_KWH_PER_YEAR,
-          description:  "An average solar panel produces #{X.format(:kwh, SOLAR_PANEL_KWH_PER_YEAR)} per year. "
+          description:  "An average solar panel produces #{X.format(:kwh, SOLAR_PANEL_KWH_PER_YEAR)} per year. ",
+          front_end_description:    'Number of solar panels in a year (converted using kWh)'
         }
-      }
+      },
+      convert_to:             :solar_panels_in_a_year,
+      equivalence_timescale:  :year,
+      timescale_units:        :solar_panels
     },
   }.freeze
 end

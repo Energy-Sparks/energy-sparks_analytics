@@ -14,7 +14,7 @@ end
 
 profile = false
 
-if false
+if true
   
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
@@ -35,7 +35,7 @@ RubyProf.start if profile
 # 'Wybourn Primary School'
 
 # school_name = 'Whiteways Primary'
-school_name = 'Bishop Sutton Primary School'
+school_name = 'Stanton Drew Primary School'
 # school_name = 'Stanton Drew Primary School'
 # school_name = 'Walkley Tennyson School'
 
@@ -76,8 +76,8 @@ puts "Load time: #{bm.round(3)} seconds"
 # reports.save_excel_and_html
 
 # reports.do_one_page(:carbon_emissions)
-reports.do_all_standard_pages_for_school
-# reports.do_all_schools(true)
+# reports.do_all_standard_pages_for_school
+reports.do_all_schools(true)
 
 if profile
   prof_result = RubyProf.stop
