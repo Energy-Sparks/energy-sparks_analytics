@@ -51,8 +51,8 @@ class ScalarkWhCO2CostValues
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No solar pv meter data available') unless @meter_collection.solar_pv_panels?
       :solar_pv_meter
     else
-      raise EnergySparksBadChartSpecification.new('Unexpected nil fuel type for scalar energy calculation') if fuel_type.nil?
-      raise EnergySparksBadChartSpecification.new("Unexpected fuel type #{fuel_type} for scalar energy calculation") 
+      raise EnergySparksNoMeterDataAvailableForFuelType.new('Unexpected nil fuel type for scalar energy calculation') if fuel_type.nil?
+      raise EnergySparksNoMeterDataAvailableForFuelType.new("Unexpected fuel type #{fuel_type} for scalar energy calculation") 
     end
   end
 

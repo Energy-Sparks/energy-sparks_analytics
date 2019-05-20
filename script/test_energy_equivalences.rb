@@ -34,7 +34,7 @@ meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, 
 
 conversion = EnergyConversions.new(meter_collection)
 
-list_of_conversions = conversion.front_end_conversion_list
+list_of_conversions = EnergyConversions.front_end_conversion_list
 
 list_of_conversions.each do |conversion_key, conversion_configuration|
   results = conversion.front_end_convert(conversion_key, {month: -2}, :electricity)

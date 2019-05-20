@@ -3,11 +3,11 @@
 class EnergyConversions
   def initialize(meter_collection)
     @meter_collection = meter_collection
-    @conversion_list = generate_conversion_list
+    @conversion_list = EnergyConversions.generate_conversion_list
   end
 
-  def front_end_conversion_list
-    @conversion_list
+  def self.front_end_conversion_list
+    EnergyConversions.generate_conversion_list
   end
 
   def front_end_convert(convert_to, time_period, meter_type)
@@ -88,12 +88,12 @@ class EnergyConversions
   end
 
   # returns for example :ice_car_co2_km
-  private def key_for_equivalence_conversion(type, via, convert_to)
+  private_class_method def self.key_for_equivalence_conversion(type, via, convert_to)
     "#{type}_#{via}_#{convert_to}".to_sym
   end
 
   # converts energy_equivalence_conversions ENERGY_EQUIVALENCES to form flattened choice of conversions for the from end
-  private def generate_conversion_list
+  def self.generate_conversion_list
     conversions = {}
     EnergyEquivalences::ENERGY_EQUIVALENCES.each do |conversion_key, conversion_data|
       next unless conversion_data.key?(:convert_to)
@@ -106,7 +106,7 @@ class EnergyConversions
     conversions
   end
 
-  private def create_description(conversion_key, conversion_data, via, via_data)
+  private_class_method def self.create_description(conversion_key, conversion_data, via, via_data)
     description = {
       description:  via_data[:front_end_description],
       via:          via,
@@ -119,7 +119,7 @@ class EnergyConversions
     description
   end
 
-  private def merge_in_additional_information(conversions, from_hash, from_key)
+  private_class_method def self.merge_in_additional_information(conversions, from_hash, from_key)
     conversions.merge!(from_key => from_hash[from_key]) if from_hash.key?(from_key)
   end
 end
