@@ -23,6 +23,26 @@ class EnergyConversions
     results
   end
 
+  def front_end_kwh_value(time_period, fuel_type)
+    front_end_kwh_£_or_co2_value(time_period, fuel_type, :kwh)
+  end
+
+  def front_end_£_value(time_period, fuel_type)
+    front_end_kwh_£_or_co2_value(time_period, fuel_type, :£)
+  end
+
+  def front_end_co2_value(time_period, fuel_type)
+    front_end_kwh_£_or_co2_value(time_period, fuel_type, :co2)
+  end
+
+  def front_end_kwh_£_or_co2_value(time_period, fuel_type, type)
+    value = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, fuel_type, type)
+    {
+      value:            value,
+      formatted_value:  FormatEnergyUnit.format(type, value)
+    }
+  end
+
   def convert(convert_to, kwh_co2_or_£, time_period, meter_type, units_of_equivalance = nil)
     kwh = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, :kwh)
     value = kwh_co2_or_£ == :kwh ? kwh : ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, kwh_co2_or_£)
