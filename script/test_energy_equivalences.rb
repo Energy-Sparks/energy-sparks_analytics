@@ -36,11 +36,6 @@ conversion = EnergyConversions.new(meter_collection)
 
 list_of_conversions = EnergyConversions.front_end_conversion_list
 
-puts "Single kwh value: #{conversion.front_end_kwh_value({month: -2}, :electricity)}"
-puts "Single £ value: #{conversion.front_end_£_value({month: -2}, :electricity)}"
-puts "Single co2 value: #{conversion.front_end_co2_value({month: -2}, :electricity)}"
-exit
-
 list_of_conversions.each do |conversion_key, conversion_configuration|
   results = conversion.front_end_convert(conversion_key, {month: -2}, :electricity)
   puts '=' * 80

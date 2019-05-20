@@ -9,10 +9,6 @@ class ScalarkWhCO2CostValues
     @meter_collection = meter_collection
   end
 
-  def front_end_aggregate_value(time_scale, fuel_type, data_type = :kwh)
-    aggregate_value(time_scale, fuel_type, data_type)
-  end
-
   def aggregate_value(time_scale, fuel_type, data_type = :kwh)
     check_data_available_for_fuel_type(fuel_type)
     aggregation_configuration(time_scale, fuel_type, data_type)

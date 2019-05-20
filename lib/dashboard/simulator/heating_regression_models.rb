@@ -843,7 +843,6 @@ module AnalyseHeatingAndHotWater
       number_of_heating_school_days + number_of_non_school_heating_days_method_b(start_date, end_date)
     end
 
-    
     def number_of_heating_days
       number_of_heating_school_days + number_of_non_school_heating_days
     end

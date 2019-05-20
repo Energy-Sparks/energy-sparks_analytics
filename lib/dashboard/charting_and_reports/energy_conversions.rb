@@ -3,11 +3,12 @@
 class EnergyConversions
   def initialize(meter_collection)
     @meter_collection = meter_collection
-    @conversion_list = EnergyConversions.generate_conversion_list
+    @conversion_list = EnergyConversions.front_end_conversion_list
   end
 
   def self.front_end_conversion_list
-    EnergyConversions.generate_conversion_list
+    conversion_choices = EnergyConversions.generate_conversion_list
+    conversion_choices.merge(self.additional_frontend_only_variable_descriptions)
   end
 
   def front_end_convert(convert_to, time_period, meter_type)
@@ -23,31 +24,14 @@ class EnergyConversions
     results
   end
 
-  def front_end_kwh_value(time_period, fuel_type)
-    front_end_kwh_£_or_co2_value(time_period, fuel_type, :kwh)
-  end
-
-  def front_end_£_value(time_period, fuel_type)
-    front_end_kwh_£_or_co2_value(time_period, fuel_type, :£)
-  end
-
-  def front_end_co2_value(time_period, fuel_type)
-    front_end_kwh_£_or_co2_value(time_period, fuel_type, :co2)
-  end
-
-  def front_end_kwh_£_or_co2_value(time_period, fuel_type, type)
-    value = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, fuel_type, type)
-    {
-      value:            value,
-      formatted_value:  FormatEnergyUnit.format(type, value)
-    }
-  end
-
   def convert(convert_to, kwh_co2_or_£, time_period, meter_type, units_of_equivalance = nil)
+    basic_unit = [:kwh, :co2, :£].include?(convert_to)
+    raise EnergySparksUnexpectedStateException.new('Expecting 2nd parameter to be same as first for kwh, co2 or £') if basic_unit && convert_to != kwh_co2_or_£
+    conversion = basic_unit ? 1.0 : EnergyEquivalences::ENERGY_EQUIVALENCES[convert_to][:conversions][kwh_co2_or_£][:rate]
     kwh = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, :kwh)
     value = kwh_co2_or_£ == :kwh ? kwh : ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, kwh_co2_or_£)
-    conversion = EnergyEquivalences::ENERGY_EQUIVALENCES[convert_to][:conversions][kwh_co2_or_£][:rate]
     equivalence = value / conversion
+
     {
       equivalence:                equivalence,
       formatted_equivalence:      FormatEnergyUnit.format(units_of_equivalance, equivalence),
@@ -137,6 +121,30 @@ class EnergyConversions
     merge_in_additional_information(description, conversion_data, :equivalence_timescale)
     merge_in_additional_information(description, conversion_data, :timescale_units)
     description
+  end
+
+  # should be private, but had to make public because Ruby doesn't handle this well
+  def self.additional_frontend_only_variable_descriptions
+    {
+      kwh: {
+        description:    'meter data in kWh',
+        via:            :kwh,
+        converted_to:   :kwh,
+        primary_key:    :kwh
+      },
+      co2: {
+        description:    'meter data in co2',
+        via:            :co2,
+        converted_to:   :co2,
+        primary_key:    :co2
+      },
+      £: {
+        description:    'meter data in £',
+        via:            :£,
+        converted_to:   :£,
+        primary_key:    :£
+      }
+    }
   end
 
   private_class_method def self.merge_in_additional_information(conversions, from_hash, from_key)
