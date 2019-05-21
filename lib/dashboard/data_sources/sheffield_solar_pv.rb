@@ -369,6 +369,7 @@ class SheffieldSolarPVV2 < SheffieldSolarPVBase
       time = DateTime.parse(halfhour_data[meta_data_dictionary.index('datetime_gmt')])
       generation = halfhour_data[meta_data_dictionary.index('generation_mw')]
       capacity = halfhour_data[meta_data_dictionary.index('installedcapacity_mwp')]
+      next if generation.nil? || capacity.nil?
       yield_pv = generation / capacity
       all_pv_yield[time] = yield_pv
     end

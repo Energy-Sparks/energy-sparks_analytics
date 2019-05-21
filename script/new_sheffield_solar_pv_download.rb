@@ -92,6 +92,29 @@ def update_solar_pv_csv_file(filename, name, latitude, longitude, datum_for_feed
   report_bad_data(missing_date_times, whole_day_substitutes)
 end
 
+=begin
+latitude = 51.60728
+longitude = -2.00116
+
+pv_interface = SheffieldSolarPVV2.new
+
+nearest = pv_interface.find_nearest_areas(latitude, longitude)
+
+puts '5 nearest solar pv areas'
+ap(nearest)
+
+start_date = Date.new(2014, 1, 1)
+end_date = Date.new(2019, 5, 18)
+
+solar_pv_data, missing_date_times, whole_day_substitutes = pv_interface.historic_solar_pv_data(nearest.first[:gsp_id], latitude, longitude, start_date, end_date)
+
+puts 'Missing dates'
+ap(missing_date_times)
+puts 'whole days'
+ap(whole_day_substitutes)
+exit
+=end
+
 # =================== MAIN ============================
 datum_for_feed = Date.new(2014, 1, 1)
 end_date = Date.today - 1
