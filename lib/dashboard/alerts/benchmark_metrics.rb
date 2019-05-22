@@ -14,8 +14,34 @@ module BenchmarkMetrics
   EXEMPLAR_GAS_USAGE_PER_M2 = 80.0
   EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175
 
+  def self.benchmark_annual_electricity_usage_kwh(school_type, pupils = 1)
+    school_type = school_type.to_sym if school_type.instance_of? String
+    check_school_type(school_type, 'benchmark electricity usage per pupil')
+
+    case school_type
+    when :primary, :infant, :junior, :special, :middle
+      300.0 * pupils
+    when :secondary
+      400.0 * pupils
+    end
+  end
+
+  def self.exemplar_annual_electricity_usage_kwh(school_type, pupils = 1)
+    school_type = school_type.to_sym if school_type.instance_of? String
+    check_school_type(school_type, 'benchmark electricity usage per pupil')
+
+    case school_type
+    when :primary, :infant, :junior, :special, :middle
+      200.0 * pupils
+    when :secondary
+      300.0 * pupils
+    end
+  end
+
   def self.recommended_baseload_for_pupils(pupils, school_type)
     school_type = school_type.to_sym if school_type.instance_of? String
+    check_school_type(school_type)
+
     case school_type
     when :primary, :infant, :junior, :special
       if pupils < 150
@@ -31,9 +57,13 @@ module BenchmarkMetrics
       else
         10 + 10 * (pupils - 400) / 400
       end
-    else
-      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in benchmark baseload request") if !school_type.nil?
-      raise EnergySparksUnexpectedStateException.new('Nil type of school in benchmark baseload request') if school_type.nil?
+    end
+  end
+
+  private_class_method def self.check_school_type(school_type, type = 'baseload benckmark')
+    raise EnergySparksUnexpectedStateException.new("Nil type of school in #{type} request") if school_type.nil?
+    if !%i[primary infant junior special middle secondary].include?(school_type)
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in #{type} request")
     end
   end
 

@@ -67,6 +67,8 @@ end
 ]
 
 alerts_to_test = [
+  AlertElectricityAnnualVersusBenchmark
+=begin
   AlertHeatingOnNonSchoolDays,
   AlertHeatingComingOnTooEarly,
   AlertChangeInDailyElectricityShortTerm,
@@ -86,10 +88,11 @@ alerts_to_test = [
   AlertWeekendGasConsumptionShortTerm,
   AlertHeatingOnSchoolDays,
   AlertThermostaticControl
+=end
 ]
 
 excluded_schools = ['Ecclesall Primary School', 'Selwood Academy', 'Walkley Tennyson School']
-included_schools = ['Bishop Sutton Primary School']
+included_schools = ['St Marks Secondary']
 
 asof_date = Date.new(2019, 4, 30)
 
