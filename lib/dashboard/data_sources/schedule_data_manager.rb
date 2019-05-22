@@ -59,10 +59,10 @@ class ScheduleDataManager
     check_area_name(area_name)
     unless @@solar_irradiance_data.key?(area_name) # lazy load data if not already loaded
       area = AreaNames.key_from_name(area_name)
-      filename = self.full_filepath(AreaNames.solar_irradiance_filename(area))
-      solar_data = SolarIrradiance.new('solar irradiance')
-      SolarIrradianceLoader.new(filename, solar_data)
-      puts "Loaded #{solar_data.length} days of solar irradiance data"
+      filename = self.full_filepath(AreaNames.solar_pv_filename(area))
+      solar_data = SolarIrradianceFromPV.new('solar irradiance from pv')
+      SolarPVLoader.new(filename, solar_data)
+      puts "Loaded #{solar_data.length} days of solar irradiance data from #{filename}"
       @@solar_irradiance_data[area_name] = solar_data
     end
     @@solar_irradiance_data[area_name]
@@ -75,7 +75,7 @@ class ScheduleDataManager
       filename = self.full_filepath(AreaNames.solar_pv_filename(area))
       solar_data = SolarPV.new('solar pv')
       SolarPVLoader.new(filename, solar_data)
-      puts "Loaded #{solar_data.length} days of solar pv data"
+      puts "Loaded #{solar_data.length} days of solar pv data from #{filename}"
       @@solar_pv_data[area_name] = solar_data
     end
     @@solar_pv_data[area_name]

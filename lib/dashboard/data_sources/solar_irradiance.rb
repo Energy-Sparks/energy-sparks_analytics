@@ -4,7 +4,7 @@ class SolarIrradiance < HalfHourlyData
   end
 
   def solar_irradiance(date, half_hour_index)
-    data(date, half_hour_index)
+    data(date, half_hour_index) * scaling_factor(date)
   end
 
   def average_days_irradiance_above_threshold(date, threshold)
@@ -30,7 +30,11 @@ class SolarIrradiance < HalfHourlyData
   end
 
   def irradiance(date, half_hour_index)
-    data(date, half_hour_index)
+    data(date, half_hour_index) * scaling_factor(date)
+  end
+
+  protected def scaling_factor(date)
+    1.0
   end
 end
 
