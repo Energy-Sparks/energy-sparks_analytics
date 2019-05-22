@@ -69,7 +69,7 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
   end
 
   def relevance
-    heating_only ? :never_relevant : :relevant
+    (aggregate_meter.nil? || heating_only) ? :never_relevant : :relevant
   end
 
   private def calculate_annual_hotwater_poor_insulation_heatloss_estimate(asof_date)
