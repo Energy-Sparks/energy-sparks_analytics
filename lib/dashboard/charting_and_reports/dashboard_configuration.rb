@@ -232,13 +232,13 @@ class DashboardConfiguration
                                 name: 'Carbon Emissions',
                                 charts: %i[
                                   benchmark_co2
-                                  group_by_week_carbon
                                   electricity_longterm_trend_kwh_with_carbon
                                   electricity_longterm_trend_carbon
-                                  electricity_intraday_line_school_last7days_co2_commentary
-                                  electricity_intraday_line_school_last7days_carbon
+                                  electricity_co2_last_year_weekly_with_co2_intensity
+                                  electricity_co2_last_7_days_with_co2_intensity
+                                  electricity_kwh_last_7_days_with_co2_intensity
                                   gas_longterm_trend_kwh_with_carbon
-                                  gas_longterm_trend_carbon
+                                  group_by_week_carbon
                                   last_2_weeks_carbon_emissions
                                 ],
                               },

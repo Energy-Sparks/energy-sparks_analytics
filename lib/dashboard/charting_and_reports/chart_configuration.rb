@@ -142,9 +142,27 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    electricity_co2_last_year_weekly_with_co2_intensity: {
+      name:             'Last years electricity carbon emissions',
+      inherits_from:    :group_by_week_electricity,
+      # series_breakdown: :none,
+      yaxis_units:      :co2,
+      y2_axis:          :gridcarbon
+    },
+    electricity_co2_last_7_days_with_co2_intensity: {
+      name:             'Your schools carbon emissions from electricity consumption over the last 7 days',
+      inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
+      x_axis:           :datetime,
+      timescale:        :week
+    },
+    electricity_kwh_last_7_days_with_co2_intensity: {
+      name:             'Your schools electricity consumption (kWh) over the last 7 days',
+      inherits_from:    :electricity_co2_last_7_days_with_co2_intensity,
+      yaxis_units:      :kwh
+    },
     alert_group_by_week_electricity: {
       inherits_from:    :group_by_week_electricity,
-      yaxis_units:      :£,
+      yaxis_units:      :£
     },
     storage_heater_group_by_week: {
       name:               'Storage heater by week of the year',
@@ -332,7 +350,8 @@ class ChartManager
       name:             'Carbon emissions from gas heating, hot water and kitchen usage over the last year',
       inherits_from:    :group_by_week_gas,
       series_breakdown: :none,
-      yaxis_units:      :co2
+      yaxis_units:      :co2,
+      y2_axis:          :gascarbon
     },
     group_by_week_gas_unlimited: {
       name:             'By Week: Gas (multi-year)',
@@ -939,6 +958,7 @@ class ChartManager
       y2_axis:          :degreedays,
       timescale:        :year
     },
+
     group_by_week_electricity_simulator_appliance: {
       name:             'By Week: Electricity Simulator',
       chart1_type:      :column,
