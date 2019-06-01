@@ -272,55 +272,6 @@ class DashboardEnergyAdvice
         The table below shows where the UK National Electricity Grid has been
         sourcing its electricity from in the last 5 minutes:
       </p>
-      <table border="1" cellspacing="0" cellpadding="0">
-        <tbody>
-          <tr>
-            <td width="120" valign="top">
-              <p>
-                Solar
-              </p>
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-          </tr>
-          <tr>
-            <td width="120" valign="top">
-              <p>
-                Wind
-              </p>
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-          </tr>
-          <tr>
-            <td width="120" valign="top">
-              <p>
-                Nuclear
-              </p>
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-            <td width="120" valign="top">
-            </td>
-          </tr>
-        </tbody>
-      </table>
       ).freeze
 
       SCHOOL_CARBON_EMISSIONS_OVER_LAST_FEW_YEARS_4 = %q(
@@ -365,12 +316,197 @@ class DashboardEnergyAdvice
         </p>
       ).freeze
 
+      LIVE_UK_ELECTRICITY_GRID_SOURCES_TABLE_EXPLANATION = %q(
+        <p>
+          The first column of the table shows the percent of electricity being
+          generated for that source.
+        </p>
+        <p>
+          The second column is the amount of carbon emitted from generating 1 kWh of
+          electricity from that source. Some of the renewable and 'low carbon'
+          sources like solar, wind. Hydro and nuclear still have a small carbon
+          intensity because of the energy used in their manufacture e.g. wind
+          turbines are made of steel, which takes energy to manufacture.
+        </p>
+        <p>
+          The third column is the carbon contribution from each source in kg CO2 per
+          kWh of electricity produced. And, the final column is the percentage of the
+          total carbon from each source.
+        </p>
+        <p>
+          The net carbon intensity of the National Electricity Grid is currently XXX.
+          This is calculated by adding up all the carbon contributions in the 'Carbon
+          Contribution' column in the table above.
+        </p>
+        <p>
+          The 'biomass' source comes from burning waste wood. 'Imports' are from
+          electricity we get from other countries like Ireland, France, Netherlands
+          and Norway through electricity cables running under the sea (we exchange
+          electricity with them to balance up supply and demand).
+        </p>
+        <p>
+          <strong>Question</strong>
+          : Which of the sources are emitting the most carbon? Why do you think this
+          is?
+        </p>
+        <p>
+          <strong>Question</strong>
+          : On average over the last year the net carbon intensity of the National
+          Electricity Grid was 0.24 kg CO2/kWh - how does this compare with the
+          current value (see the paragraph above)? Generally, you would expect it to
+          be below the figure on a sunny or windy day, but above on dull or calm
+          days?
+        </p>
+      ).freeze
+
+      COMPARISON_WITH_2018_ELECTRICITY_MIX = %q(
+        <p>
+          In 2018 the percentages of electricity generated from each source were:
+        </p>
+        <table border="1" cellspacing="0" cellpadding="0">
+          <tbody>
+            <tr>
+              <td width="301" valign="top">
+                <p>
+                  Gas
+                </p>
+              </td>
+              <td width="301" valign="top">
+                <p>
+                  39%
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td width="301" valign="top">
+                <p>
+                  Nuclear
+                </p>
+              </td>
+              <td width="301" valign="top">
+                <p>
+                  19%
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td width="301" valign="top">
+                <p>
+                  Wind
+                </p>
+              </td>
+              <td width="301" valign="top">
+                <p>
+                  17%
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td width="301" valign="top">
+                <p>
+                  Biomass
+                </p>
+              </td>
+              <td width="301" valign="top">
+                <p>
+                  11%
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td width="301" valign="top">
+                <p>
+                  Solar
+                </p>
+              </td>
+              <td width="301" valign="top">
+                <p>
+                  4%
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td width="301" valign="top">
+                <p>
+                  Coal
+                </p>
+              </td>
+              <td width="301" valign="top">
+                <p>
+                  4%
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td width="301" valign="top">
+                <p>
+                  Hydro
+                </p>
+              </td>
+              <td width="301" valign="top">
+                <p>
+                  2%
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          <strong>Question</strong>
+          : How does that compare with the first table which contains todays
+          electricity sources? Why do you think they differ?
+        </p>
+      ).freeze
+
+    private def current_carbon_intensity_html_table
+      grid_info = UKGridInformation.new
+      raw_data = grid_info.current_generation_mix
+
+      sorted_data = raw_data.sort_by {|_fuel_source, data|  -data[:percent] }
+
+      formatted_data = []
+      sorted_data.each do |fuel_source, data|
+        formatted_data.push(
+          [
+            fuel_source,
+            FormatEnergyUnit.format(:percent, data[:percent], :html),
+            FormatEnergyUnit.format(:kg_co2_per_kwh, data[:intensity], :html, false, true),
+            FormatEnergyUnit.format(:kg_co2_per_kwh, data[:carbon_contribution], :html, false, true),
+            FormatEnergyUnit.format(:percent, data[:carbon_percent], :html),
+          ]
+        )
+      end
+
+      header = ['Source', 'Percent of Energy', 'Carbon Intensity (kg CO2/kWh)', 'Carbon Contribution (kg CO2/kWh)', 'Percentage of Carbon']
+
+      table = html_table(header, formatted_data)
+
+      [table, grid_info.net_intensity]
+    end
+
+    private def net_carbon_intensity_question(net_intensity)
+      %q(
+        <p>
+          The net carbon intensity of the National Electricity Grid is currently
+          <%= FormatEnergyUnit.format(:kg_co2_per_kwh, net_intensity, :html)  %>.
+          This is calculated by adding up all the carbon contributions in the
+          right hand column of the table above.
+        </p>
+      )
+    end
+
     def generate_valid_advice
+      current_carbon_intensity_table, net_intensity = current_carbon_intensity_html_table
+
       header_template = concatenate_advice_with_body_start_end(
         [
           INTRO_TO_SCHOOL_CO2_1,
           INTRO_TO_SCHOOL_CO2_GAS_AND_ELECTRICITY_2,
           CARBON_EMISSION_FACTORS_3,
+          current_carbon_intensity_table,
+          net_carbon_intensity_question(net_intensity),
+          LIVE_UK_ELECTRICITY_GRID_SOURCES_TABLE_EXPLANATION,
+          COMPARISON_WITH_2018_ELECTRICITY_MIX,
           SCHOOL_CARBON_EMISSIONS_OVER_LAST_FEW_YEARS_4
         ]
       )
@@ -784,6 +920,7 @@ class DashboardEnergyAdvice
     ).freeze
 
     def generate_valid_advice
+
       header_template = concatenate_advice_with_body_start_end(
         [
           OVERALL_CO2_EMISSIONS_1,
