@@ -14,7 +14,23 @@ class ScalarkWhCO2CostValues
     aggregation_configuration(time_scale, fuel_type, data_type)
   end
 
+  def day_type_breakdown(time_scale, fuel_type, data_type = :kwh, format_data = false, percent = false)
+    aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, {series_breakdown: :daytype})
+    data = aggregator.bucketed_data
+    data.transform_values! { |v| v[0] }
+    total = data.values.sum if percent
+    data.transform_values! { |v| v / total } if percent
+    format_unit_type = percent ? :percent : data_type
+    data.transform_values! { |v| FormatEnergyUnit.format(format_unit_type, v) } if format_data
+    data
+  end
+
   private def aggregation_configuration(time_scale, fuel_type, data_type)
+    aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type)
+    aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
+  end
+
+  private def generic_aggregation_calculation(time_scale, fuel_type, data_type, override = nil)
     config = {
       name:             'Scalar aggregation request',
       meter_definition: meter_type_from_fuel_type(fuel_type),
@@ -27,12 +43,14 @@ class ScalarkWhCO2CostValues
       chart1_type:      :column,
       chart1_subtype:   :stacked
     }
- 
+
+    config.merge!(override) unless override.nil?
+
     aggregator = Aggregator.new(@meter_collection, config, false)
 
     aggregator.aggregate
 
-    aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
+    aggregator
   end
 
   private def check_data_available_for_fuel_type(fuel_type)

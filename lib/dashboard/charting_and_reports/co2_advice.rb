@@ -234,7 +234,8 @@ class DashboardEnergyAdvice
       </p>
       <p>
         For gas the emissions are always the same; for every kWh of gas which is
-      burnt in the school boilers 210g of CO<sub>2</sub> is emitted. CO	<sub>2</sub> is emitted as a result of burning gas (CH<sub>4</sub>) with
+        burnt in the school boilers 210g of CO<sub>2</sub> is emitted. CO	<sub>2</sub>
+        is emitted as a result of burning gas (CH<sub>4</sub>) with
         oxygen (O<sub>2</sub>), to produce carbon dioxide (CO<sub>2</sub>) and
         water (H<sub>2</sub>0) (the chemical reaction is as follows CH<sub>4</sub>
         + 4O<sub>2</sub> = CO<sub>2</sub> + 2H<sub>2</sub>O).
@@ -334,7 +335,8 @@ class DashboardEnergyAdvice
           total carbon from each source.
         </p>
         <p>
-          The net carbon intensity of the National Electricity Grid is currently XXX.
+          The net carbon intensity of the National Electricity Grid is currently
+          <%= FormatEnergyUnit.format(:kg_co2_per_kwh, current_grid_carbon_intensity, :html) %>.
           This is calculated by adding up all the carbon contributions in the 'Carbon
           Contribution' column in the table above.
         </p>
@@ -457,6 +459,10 @@ class DashboardEnergyAdvice
           electricity sources? Why do you think they differ?
         </p>
       ).freeze
+
+    private def current_grid_carbon_intensity
+      UKGridInformation.new.net_intensity
+    end
 
     private def current_carbon_intensity_html_table
       grid_info = UKGridInformation.new
@@ -773,71 +779,165 @@ class DashboardEnergyAdvice
         overview of your school's total carbon emissions and perhaps where there
         may be opportunities to reduce your emissions.
       </p>
-    ).freeze
-
-    OVERALL_CO2_EMISSIONS_2 = %q(
-      <h2>
-        Question 1: Does your school emit more carbon for transport, or through gas
-        and electricity, or from food consumed onsite?
-      </h2>
       <p>
-        The charts above on this webpage documents the carbon emissions from your
-        school's electricity and gas consumption, but is this more or less than
-        emissions from other sources like transport to and from your school, and
-        from food eaten onsite?
-      </p>
-    ).freeze
-
-    OVERALL_CO2_EMISSIONS_3 = %q(
-      <h2>
-        Calculation for example school
-      </h2>
-      <p>
-        A calculation for an example school with 500 pupils might be as follows:
+        For most schools about 30% of carbon emissions come from gas and
+        electricity consumption, 30% from food and 30% from transport.
       </p>
       <p>
-        <strong>Gas and electricity:</strong>
-        the daily carbon emissions are 500kg of carbon per school day (read from an
-        Energy Sparks graph,) see the graph for your school below.
-      </p>
-      <p>
-        The chart below shows the carbon emissions on a daily basis of your school.
-      </p>
-      <p>
-        <strong>Transport</strong>
-        : the pupils at the example school counted 100 cars in the car park for
-        school staff and reckoned that about 200 pupils were driven to school. Each
-        of the school staff drove 20km there and back to school every day, and
-        pupils were driven 6 km on average there and back. We also know that an
-        average car emits 0.2kg of carbon for every km it is driven. So everyday
-        staff drive 100 x 20km (2,000km), and pupils are driven 200 x 6km
-        (1,200km), so 3,200 km in total. As a result, transport for the school will
-        emit 3,200 * 0.2 = 640kg of carbon.
-      </p>
-      <p>
-        <strong>Food</strong>
-        : The process of producing (growing vegetable, meat) for an average meal
-        results in the emissions of about 2kg of carbon per person per meal. If
-        there are 500 pupils and 100 staff in the school that is 600 meals eaten at
-        lunchtime, so, 2kg x 600 = 1200kg of emissions from food.
-      </p>
-      <p>
-        So, in summary for this example school every day the carbon emissions are:
+        To calculate your school's total carbon emissions, you will need to do some
+        research:
       </p>
       <ul>
         <li>
-          500kg from gas and electricity (21%)
+          <strong>Transport</strong>
+          : You will need to find out how staff and pupils get to school, either
+          my doing a survey, or by asking school management if a survey has been
+          done in the past
         </li>
         <li>
-          640kg from transport (27%)
+          <strong>Food</strong>
+          : You will need to count how many meals are eaten at school each day
+          (normally one of each pupil and staff member), and how many of these
+          are meat based, and how many vegetarians?
         </li>
         <li>
-          1200kg from food (51%)
+          <strong>Gas and electricity</strong>
+          : You just need to find the information on Energy Sparks
         </li>
       </ul>
       <p>
-        So, 2340kg in total, with food consumed (at lunchtime) being the largest
-        contributor.
+        Once you have gathered the information you will then need to enter the data
+        into this spreadsheet:
+      </p>
+    ).freeze
+
+    OVERALL_CO2_EMISSIONS_2 = %q(
+      <p>
+        It might be best if you download a copy of the spreadsheet (button bottom
+        right), so you can save the information for future use. You need to fill in
+        the information in the cells coloured orange which have been prepopulated
+        for an example school with 400 pupils.
+      </p>
+      <p>
+        The next section tells you how to gather the data required for each of the
+        types of carbon emissions (gas, electricity, transport, food).
+      </p>
+    ).freeze
+
+    OVERALL_CO2_EMISSIONS_TRANSPORT_3 = %q(
+      <h3>
+        1. Transport
+      </h3>
+      <p>
+        To calculate the 'transport' carbon emissions of a school you need to find
+        out how people, both staff and pupils travel to school, and how far they
+        travel. For this you might need to do a survey, or school management might
+        already know if a 'Transport Survey' has already been carried out at a
+        school.
+      </p>
+      <p>
+        You need to determine how everyone gets to school. The most important
+        information to find is how many people travel to school by car and how far
+        they travel, as car generally generate the most carbon emissions,
+        accounting for more than 90% of transport carbon emissions at most schools.
+      </p>
+      <p>
+        You need to find the following information for the spreadsheet (Transport
+        Tab):
+      </p>
+      <p>
+        <img src="https://lhjawq.sn.files.1drv.com/y4m4xygPzQJ7Qaa2kBkzr9pFBPk0liVNrxne0pLmHDWh1BB2AsBQqViHRLNq_g4D6DJE1sPd8baRNkU6QtwNF3EzLGmZ-8MsceWWQ-kMwCmQJ-bRRrizK-3kdFrZaDRrEEDldeDmW6iXLQSND8b7MA4ZcfXbNTdFHEPrVlGhnGAHce8l9Gy6yAcQGqFOIjJGu32Q4EiDSWJzStc9OatPNjYXg?width=539&height=539&cropmode=none" width="539" height="539" />
+      </p>
+      <p>
+        The easiest way is to survey the staff, create a form containing 3 columns,
+        the first with the name of the staff member, and the how they get to work,
+        and the third with the average distance they travel, and then ask them to
+        provide you will the information e.g.
+      </p>
+      <table border="1" cellspacing="0" cellpadding="0">
+        <tbody>
+          <tr>
+            <td width="200" valign="top">
+              <p>
+                Staff member
+              </p>
+            </td>
+            <td width="200" valign="top">
+              <p>
+                Transport Mode
+              </p>
+            </td>
+            <td width="200" valign="top">
+              <p>
+                Average daily return distance
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td width="200" valign="top">
+              <p>
+                Mrs Smith
+              </p>
+            </td>
+            <td width="200" valign="top">
+              <p>
+                Petrol car
+              </p>
+            </td>
+            <td width="200" valign="top">
+              <p>
+                12
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td width="200" valign="top">
+              <p>
+                Mr Jones
+              </p>
+            </td>
+            <td width="200" valign="top">
+              <p>
+                Bus
+              </p>
+            </td>
+            <td width="200" valign="top">
+              <p>
+                6
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td width="200" valign="top">
+              <p>
+                Ms Khan
+              </p>
+            </td>
+            <td width="200" valign="top">
+              <p>
+                Petrol Car
+              </p>
+            </td>
+            <td width="200" valign="top">
+              <p>
+                10
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        You then need to calculate the number of staff travelling my each mode and
+        the average distance for each Transport Mode - you might need to get a
+        member of staff to help you with this. For the example above, you would
+        need to enter under Staff - Petrol car: 2 staff (number) and an average
+        distance of 11 miles (average of 10 and 12 miles), and under Staff - Bus: 1
+        staff member and an average of 6 miles.
+      </p>
+      <p>
+        To survey the figures for pupils you might need to survey pupils as they
+        arrive at school but asking them to fill in a form for you, or you could
+        print out and send a survey home.
       </p>
     ).freeze
 
@@ -852,90 +952,243 @@ class DashboardEnergyAdvice
       </p>
     ).freeze
 
-    OVERALL_CO2_EMISSIONS_5 = %q(
-        <p>
-        And, then estimate how many kilometres of car journeys are taken too and
-        from the school each day (buses emit 0.6kg/km per carry many more people
-        than cars). And, then work out how many meals are consumed each day at your
-        school, and repeat the calculation for your school in the same way as the
-        calculation above.
+    OVERALL_CO2_EMISSIONS_FOOD_4 = %q(
+      <h3>
+        2. Food
+      </h3>
+      <p>
+        Food is much easier to calculate. You just need to find out how many people
+        eat meat-based meals at school each day and how many are vegetarian and
+        enter them into the spreadsheet. Most people at the school will eat lunch
+        every day, some will be supplied by the school kitchen (you could ask the
+        kitchen staff how many meat based and vegetarian meals they serve each
+        day), and also packed lunches.
       </p>
       <p>
-        For your school which of the following emit the most carbon?
+        Once you have gathered this information you simply enter the 2 numbers into
+        the 'Food' tab of the spreadsheet.
+      </p>
+    ).freeze
+
+    OVERALL_CO2_EMISSIONS_ENERGY_5 = %q(
+      <h2>
+        3. Electricity and gas
+      </h2>
+      <p>
+        Energy Sparks can calculate this for you automatically if there is at least
+        a year of electricity and gas meter readings.
+      </p>
+      <p>
+        Energy Sparks has calculated the following values for your school:
+      </p>
+      <p>
+        &#183; Electricity: <%= FormatEnergyUnit.format(:co2, annual_electricity_co2) %> /year
+      </p>
+      <p>
+        &#183; Gas: <%= FormatEnergyUnit.format(:co2, annual_gas_co2) %> /year
+      </p>
+      <p>
+        You just need to enter these values in the 'Electric+Gas' tab in the
+        spreadsheet.
+      </p>
+    ).freeze
+
+    OVERALL_CO2_EMISSIONS_TOTAL_6 = %q(
+      <h3>
+        Totals
+      </h3>
+      <p>
+          Once you have entered the information on the 3 tabs you can look at the
+          result on the &#8216;Totals&#8217; tab. The pie chart should show about 30%
+          of carbon emissions at your school coming from each of transport, food and
+          energy (electricity and gas).
+      </p>
+    ).freeze
+
+    OVERALL_CO2_EMISSIONS_QUESTIONS_7 = %q(
+      <h2>
+        Question: Can you devise a strategy for your school to reduce its emissions
+        to help combat climate change?
+      </h2>
+      <p>
+        Once you have completed this, perhaps you could consider how you might help
+        the school reduce its carbon emissions and reduce the impact of global
+        warming?
+      </p>
+      <p>
+        Suggestions include:
+      </p>
+      <p>
+        1. <strong>Transport</strong>:
+      </p>
+      <p>
+        &#183; Getting more people to walk, cycle and take the bus to school and
+        fewer driving (which also causes air pollution which is bad for your
+        health)
+      </p>
+      <p>
+        &#183; Car sharing: sharing a car reduces per person carbon emissions
       </p>
       <ul>
         <li>
-          Gas and electricity
-        </li>
-        <li>
-          Transport
-        </li>
-        <li>
-          Food
+          Switching from petrol to electric cars
         </li>
       </ul>
-    ).freeze
-
-    OVERALL_CO2_EMISSIONS_Q2 = %q(
-      <h1>
-        Question 2: How can your school reduce its carbon emissions and meet the
-        UK's future zero carbon emissions commitment?
-      </h1>
       <p>
-        The UK is committed to reducing its carbon emissions to zero by 2050, to
-        try to avoid the worst impacts on the planet of climate change. To do this
-        it needs the emissions from buildings (gas and electricity) to be zero by
-        2035, so only 15 years' time (buildings need to go to zero emissions
-        earlier, as reducing emissions from planes for example is more difficult
-        and will be addressed after 2035).
+        2. <strong>Food</strong>:
       </p>
       <p>
-        To reduce your school's carbon emissions to zero in 15 years, would mean
-        reducing the school's emissions by about 7% every year (7% x 15 years is
-        about 100%).
+        &#183; We all have to eat, but perhaps we could eat more vegetarian food,
+        which has about 60% of the carbon emissions of a meat-based meal
       </p>
       <p>
-        Can you consider the following questions?
+        3. <strong>Energy</strong>:
       </p>
       <p>
-        &#183; Looking at the charts above is your school on-track to reduce its
-        carbon emissions by 7% every year?
+        &#183; Reducing your school's energy consumption is the simplest solution,
+        by using Energy Sparks to determine the best way of saving energy; the
+        easiest way is to make sure heating and hot water are not left on over
+        weekends, and holidays, to turn appliances and lighting off, and to make
+        sure the school purchase the most efficient equipment when replacing
+        appliances. Specific suggestions include:
       </p>
       <p>
-        &#183; The carbon intensity of the UK electricity grid is unlikely to
-        continue reducing as fast as it has done recently once it gets to about
-        0.1km/kWh in 2025, so emissions from gas will then have to be made - how do
-        you think your school gas reduce its carbon emissions from using gas?
+          <ul>
+            <%= energy_reduction_suggestions %>
+          </ul>
       </p>
       <p>
-        &#183; Can you think of ways the school could reduce its emissions from
-        transport and food?
+        Put together a strategy for each of these, and re-enter the new numbers
+        into the spreadsheet and see how much if the school follows your strategy
+        how much carbon you will save?
+      </p>
+      <p>
+        To stop catastrophic global warming the UK has committed to reduce its
+        carbon emissions to zero by 2050, which is about 4% per year. Can you come
+        up with a plan for your school for the next 5 years which would reduce its
+        carbon emissions by 20% (5 years times 4%)?
       </p>
     ).freeze
 
-    OVERALL_CO2_EMISSIONS_Q3 = %q(
-      <h1>
-        Question 3: Supply and demand; electricity grid carbon emissions
-      </h1>
-    ).freeze
+    EMBEDDED_EXCEL_CARBON_CALCULATOR = %q(
+      <iframe width="700" height="450" frameborder="0" scrolling="no" src="https://onedrive.live.com/embed?resid=D22255E34EA12530%21278999&authkey=%21AA4vdwZUz8mhacQ&em=2&wdAllowInteractivity=False&AllowTyping=True&ActiveCell='Totals'!A1&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True"></iframe>
+      )
+
+    private def annual_electricity_co2
+      @annual_electricity_co2 ||= ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, :electricity, :co2)
+    end
+
+    private def annual_electricity_kwh
+      @annual_electricity_kwh ||= ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, :electricity, :kwh)
+    end
+
+    private def annual_gas_co2
+      @annual_gas_co2 ||= ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, :gas, :co2)
+    end
+
+    private def last_year_carbon_intensity_kg_per_kwh
+      @last_year_carbon_intensity ||= annual_electricity_co2 / annual_electricity_kwh
+    end
+
+    private def energy_reduction_suggestions
+      [
+        gas_reduction_suggestions,
+        electricity_reduction_suggestions
+      ].flatten.compact.join(' ')
+    end
+
+    private def gas_reduction_suggestions
+      [
+        gas_reduction_from_turning_off_out_of_hours,
+        turn_thermostat_down
+      ].compact
+    end
+
+    private def gas_reduction_from_turning_off_out_of_hours
+      suggestion = ''
+      co2 = ScalarkWhCO2CostValues.new(@school).day_type_breakdown({year: 0}, :gas, :co2, false, false)
+      percent = ScalarkWhCO2CostValues.new(@school).day_type_breakdown({year: 0}, :gas, :co2, false, true)
+      if percent['School Day Open'] < 0.75
+        non_school_hours_percent = 1.0 - percent['School Day Open']
+        co2_saving = co2.map { |daytype, value| ['Holiday', 'Weekend', 'School Day Closed'].include?(daytype) ? value : 0.0 }
+        suggestion += '<li> You could reduce the schools gas CO2 emissions by ' +
+                      FormatEnergyUnit.format(:percent, non_school_hours_percent, :html) +
+                      ' by turning your heating and hot water off out of school hours, ' +
+                      ' during weekends and holidays, saving ' +
+                      FormatEnergyUnit.format(:co2, co2_saving.sum, :html) +
+                      ' per year. </li>'
+      end
+      suggestion
+    end
+
+    private def turn_thermostat_down
+      aggregate_gas_amr = @school.aggregated_heat_meters.amr_data
+      last_year = SchoolDatePeriod.year_to_date(:year_to_date, 'validate amr', aggregate_gas_amr.end_date, aggregate_gas_amr.start_date)
+      model = @school.aggregated_heat_meters.heating_model(last_year)
+      saving_kwh = model.kwh_saving_for_1_C_thermostat_reduction(last_year.start_date, last_year.end_date)
+      saving_co2_per_1c = saving_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+      saving_percent_per_1c = saving_co2_per_1c / annual_gas_co2
+      '<li> For every 1C you turn the thermostat down by you would save ' +
+      FormatEnergyUnit.format(:co2, saving_co2_per_1c, :html) +
+      ' or ' +
+      FormatEnergyUnit.format(:percent, saving_percent_per_1c, :html) +
+      ' of your gas CO2 emissions</li>'
+    end
+
+    private def reducing_baseload_by_10_percent
+      aggregate_electric_amr = @school.aggregated_electricity_meters.amr_data
+      start_date = [aggregate_electric_amr.start_date, aggregate_electric_amr.end_date - 365].max
+      average_baseload_kw = aggregate_electric_amr.average_baseload_kw_date_range(start_date, aggregate_electric_amr.end_date)
+      annual_10_percent_baseload_kwh = average_baseload_kw * 365 * 24 * 0.1
+      percent_of_annual_kwh_10_percent_baseload_reduction = annual_10_percent_baseload_kwh / annual_electricity_kwh
+      annual_co2_reduction_from_10_percent_baseload_reduction = annual_electricity_co2 * percent_of_annual_kwh_10_percent_baseload_reduction
+
+      '<li> Every 10 &percnt; reduction in electricity baseload would save ' +
+      FormatEnergyUnit.format(:co2, annual_co2_reduction_from_10_percent_baseload_reduction, :html) +
+      ' or ' +
+      FormatEnergyUnit.format(:percent, percent_of_annual_kwh_10_percent_baseload_reduction, :html) +
+      ' of your annual electricity CO2 emissions </li>'
+    end
+
+    private def solar_panel_co2_reduction_per_10_panels(panels = 10)
+      panel_kwp = 0.3
+      panel_yield_kwh_per_kwp = 900
+      annual_panel_kwh = panel_kwp * panel_yield_kwh_per_kwp
+      panel_annual_co2_saving = annual_panel_kwh * last_year_carbon_intensity_kg_per_kwh
+      annual_co2_saving_10_panels = panels * panel_annual_co2_saving
+      annual_kwh_saving = panels * annual_panel_kwh / annual_electricity_kwh
+
+      '<li>For every ' + panels.to_s + ' solar PV panels you install you could save ' +
+      FormatEnergyUnit.format(:co2, annual_co2_saving_10_panels, :html) +
+      ' or ' +
+      FormatEnergyUnit.format(:percent, annual_kwh_saving, :html) +
+      ' of your annual electricity CO2 emissions</li>'
+    end
+
+    private def electricity_reduction_suggestions
+      [
+        reducing_baseload_by_10_percent,
+        solar_panel_co2_reduction_per_10_panels
+      ].compact
+    end
 
     def generate_valid_advice
-
       header_template = concatenate_advice_with_body_start_end(
         [
           OVERALL_CO2_EMISSIONS_1,
+          EMBEDDED_EXCEL_CARBON_CALCULATOR,
           OVERALL_CO2_EMISSIONS_2,
-          OVERALL_CO2_EMISSIONS_3,
-          OVERALL_CO2_EMISSIONS_4
+          OVERALL_CO2_EMISSIONS_TRANSPORT_3,
+          OVERALL_CO2_EMISSIONS_FOOD_4,
+          OVERALL_CO2_EMISSIONS_ENERGY_5,
+          OVERALL_CO2_EMISSIONS_TOTAL_6
         ]
       )
       @header_advice = generate_html(header_template, binding)
 
       footer_template = concatenate_advice_with_body_start_end(
         [
-          OVERALL_CO2_EMISSIONS_5,
-          OVERALL_CO2_EMISSIONS_Q2,
-          OVERALL_CO2_EMISSIONS_Q3
+          OVERALL_CO2_EMISSIONS_QUESTIONS_7
         ]
       )
       @footer_advice = generate_html(footer_template, binding)

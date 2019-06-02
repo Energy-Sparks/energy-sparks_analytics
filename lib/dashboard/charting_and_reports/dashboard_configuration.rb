@@ -259,26 +259,9 @@ class DashboardConfiguration
                                   gas_1_year_intraday_economic_breakdown
                                   gas_1_year_intraday_kwh_breakdown
                                 ],
-                              },                     
+                              },
 }.freeze
 
-=begin
-                                  thermostatic_regression_simple
-                                  thermostatic_regression_thermal_mass
-                                  thermostatic_regression_best
-                                  thermostatic_none
-                                  thermostatic_winter_occupied
-                                  thermostatic_winter_weekend
-                                  thermostatic_winter_holiday
-                                  thermostatic_summer_occupied
-                                  thermostatic_summer_weekend
-                                  thermostatic_summer_holiday
-                                  
-                                  thermostatic_model_by_week
-                                  heating_on_off_by_week
-                                  group_by_week_gas
-                                  cusum_weekly
-=end
   DASHBOARD_FUEL_TYPES = { # 2 main dashboards: 1 for electric only schools, one for electric and gas schools
     electric_only:
                         %i[
@@ -297,6 +280,7 @@ class DashboardConfiguration
                             electricity_detail
                             gas_detail
                             boiler_control
+                            carbon_emissions
                         ],
     electric_and_storage_heaters:
                         %i[
