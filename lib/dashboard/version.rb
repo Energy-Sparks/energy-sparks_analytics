@@ -1,3 +1,3 @@
 module Dashboard
-  VERSION = "0.45.1-fixes-electric-only-hot-water-insulation-bug".freeze
+  VERSION = "0.46.0-co-2-tab".freeze
 end
