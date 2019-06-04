@@ -118,10 +118,13 @@ class EnergyEquivalences
 
   TEACHING_ASSISTANT_£_HOUR = 8.33
 
+  # https://www.fcrn.org.uk/research-library/quantifying-carbon-footprint-catering-service-public-schools => 1.7kg meat, 1.3kg veggie in Italy
+  # https://www.fcrn.org.uk/research-library/contribution-healthy-and-unhealthy-primary-school-meals-greenhouse-gas-emissions => 0.7kg
+  # https://www.sciencedirect.com/science/article/pii/S1876610217328126 1.02kg/0.5kg
   CARNIVORE_DINNER_£ = 2.5
-  CARNIVORE_DINNER_CO2_KG = 4.0
+  CARNIVORE_DINNER_CO2_KG = 1.0
   VEGETARIAN_DINNER_£ = 1.5
-  VEGETARIAN_DINNER_CO2_KG = 2.0
+  VEGETARIAN_DINNER_CO2_KG = 0.5
 
   ONSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT = 0.27
   ONSHORE_WIND_TURBINE_CAPACITY_KW = 500

@@ -88,7 +88,7 @@ alerts_to_test = { # classname => excel worksheet tab
   AlertThermostaticControl                    => 'Thermostatic'
 }
 
-excluded_schools = ['Ecclesall Primary School', 'Selwood Academy', 'Athelstan Primary School', 'Walkley Tennyson School']
+excluded_schools = [] # ['Ecclesall Primary School', 'Selwood Academy', 'Athelstan Primary School', 'Walkley Tennyson School']
 included_schools = nil # ['Whiteways Primary']
 
 asof_date = Date.new(2019, 2, 15)

@@ -67,8 +67,7 @@ end
 ]
 
 alerts_to_test = [
-  AlertElectricityAnnualVersusBenchmark
-=begin
+
   AlertHeatingOnNonSchoolDays,
   AlertHeatingComingOnTooEarly,
   AlertChangeInDailyElectricityShortTerm,
@@ -88,11 +87,10 @@ alerts_to_test = [
   AlertWeekendGasConsumptionShortTerm,
   AlertHeatingOnSchoolDays,
   AlertThermostaticControl
-=end
 ]
 
 excluded_schools = ['Ecclesall Primary School', 'Selwood Academy', 'Walkley Tennyson School']
-included_schools = ['St Marks Secondary']
+included_schools = ['Frome College']
 
 asof_date = Date.new(2019, 4, 30)
 
@@ -112,6 +110,7 @@ puts 'Loaded data'
 # ap(previous_results)
 
 irrelevant_alerts = []
+invalid_alerts = []
 
 school_alert_count = Hash.new(0.0)
 
@@ -119,7 +118,7 @@ calculated_results = {}
 
 school_names.sort.each do |school_name|
   next if excluded_schools.include?(school_name)
-  # next unless !included_schools.nil? && included_schools.include?(school_name)
+  next unless !included_schools.nil? && included_schools.include?(school_name)
 
   print_banner(school_name, 2)
 
@@ -135,13 +134,20 @@ school_names.sort.each do |school_name|
       next if !alerts_to_test.include?(alert_class)
 
       alert = alert_class.new(school)
-      next unless alert.valid_alert?
+
+      puts "Valid #{alert.valid_alert?}"
+      puts "Relevant #{alert.relevance}"
+
+      unless alert.valid_alert?
+        invalid_alerts.push("#{school_name}: #{alert.class.name}")
+        next
+      end
 
       if alert.relevance == :never_relevant
         irrelevant_alerts.push("#{school_name}: #{alert.class.name}")
         next
       end
-      print_banner(alert.class.name,1)
+      print_banner(alert.class.name, 1)
 
       bm2 = Benchmark.realtime {
         alert.analyse(asof_date, true)
@@ -192,6 +198,11 @@ end
 puts 'Irrelvent alerts'
 irrelevant_alerts.each do |not_relevant|
   puts not_relevant
+end
+
+puts 'Invalid alerts'
+invalid_alerts.each do |invalid|
+  puts invalid
 end
 
 puts 'School alert count'

@@ -33,6 +33,7 @@ class FormatEnergyUnit
     years_range:                  'years',
     £_range:                      '£',
     £_per_kwh:                    '£/kWh',
+    kg_co2_per_kwh:               'kg CO2/kWh',
     date:                         '',
     datetime:                     '',
     gas:                          'gas',

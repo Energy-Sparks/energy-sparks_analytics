@@ -19,7 +19,7 @@ end
 reports = ReportConfigSupport.new
 
 def test_one_school(school_name, reports)
-  # return if school_name != 'Coit Primary School'
+  return if school_name != 'Roundhill School'
   puts '=' * 120
   puts "Running electricity simulator for #{school_name}"
   puts
