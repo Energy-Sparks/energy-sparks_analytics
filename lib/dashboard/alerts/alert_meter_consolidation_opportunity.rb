@@ -53,6 +53,14 @@ class AlertMeterConsolidationOpportunityBase < AlertAnalysisBase
     @one_year_saving_£
   end
 
+  def ten_year_saving_£
+    super
+  end
+
+  def payback_years
+    super
+  end
+
   def cost_of_consolidating_1_meter_£
     COST_OF_1_METER_CONSOLIDATION_£
   end
