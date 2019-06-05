@@ -5,7 +5,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   FROST_PROTECTION_TEMPERATURE = 4
   MAX_HALFHOURS_HEATING_ON = 10
 
-  attr_reader :last_year_kwh, :last_year_£, :one_year_saving_£
+  attr_reader :last_year_kwh, :last_year_£
   attr_reader :heating_on_times_table
 
   attr_reader :one_year_saving_£, :capital_cost

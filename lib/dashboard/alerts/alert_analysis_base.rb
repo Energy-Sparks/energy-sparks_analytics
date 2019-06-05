@@ -623,7 +623,9 @@ class AlertAnalysisBase
       AlertHotWaterInsulationAdvice,
       AlertHeatingOnSchoolDays,
       AlertThermostaticControl,
-      AlertWeekendGasConsumptionShortTerm
+      AlertWeekendGasConsumptionShortTerm,
+      AlertElectricityMeterConsolidationOpportunity,
+      AlertGasMeterConsolidationOpportunity
     ]
   end
 end
