@@ -67,7 +67,8 @@ end
 ]
 
 alerts_to_test = [
-
+  AlertMeterASCLimit
+=begin
   AlertHeatingOnNonSchoolDays,
   AlertHeatingComingOnTooEarly,
   AlertChangeInDailyElectricityShortTerm,
@@ -86,11 +87,14 @@ alerts_to_test = [
   AlertHeatingOnNonSchoolDays,
   AlertWeekendGasConsumptionShortTerm,
   AlertHeatingOnSchoolDays,
-  AlertThermostaticControl
+  AlertThermostaticControl,
+  AlertGasMeterConsolidationOpportunity,
+  AlertElectricityMeterConsolidationOpportunity
+=end
 ]
 
-excluded_schools = ['Ecclesall Primary School', 'Selwood Academy', 'Walkley Tennyson School']
-included_schools = ['Frome College']
+excluded_schools = ['Ecclesall Primary School']
+included_schools = ['King Edward VII Upper School']
 
 asof_date = Date.new(2019, 4, 30)
 

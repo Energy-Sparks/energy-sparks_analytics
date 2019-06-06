@@ -61,6 +61,7 @@ class SeriesNames
   PREDICTEDHEAT   = 'Predicted Heat'.freeze
   CUSUM           = 'CUSUM'.freeze
   BASELOAD        = 'BASELOAD'.freeze
+  PEAK_KW         = 'Peak (kW)'.freeze
 
   USEFULHOTWATERUSAGE = 'Hot Water Usage'.freeze
   WASTEDHOTWATERUSAGE = 'Wasted Hot Water Usage'.freeze
@@ -143,6 +144,7 @@ class SeriesDataManager
       when :none;                   buckets.push(SeriesNames::NONE)
       when :cusum;                  buckets.push(SeriesNames::CUSUM)
       when :baseload;               buckets.push(SeriesNames::BASELOAD)
+      when :peak_kw;                buckets.push(SeriesNames::PEAK_KW)
       when :predictedheat;          buckets.push(SeriesNames::PREDICTEDHEAT)
       else
         if SeriesNames::Y2SERIESYMBOLTONAMEMAP.key?(breakdown)
@@ -329,6 +331,7 @@ class SeriesDataManager
 
       when :none;           breakdown[SeriesNames::NONE] = amr_data_date_range(meter, d1, d2, kwh_cost_or_co2)
       when :baseload;       breakdown[SeriesNames::BASELOAD] = meter.amr_data.baseload_kwh_date_range(d1, d2)
+      when :peak_kw;        breakdown[SeriesNames::PEAK_KW] = meter.amr_data.peak_kw_kwh_date_range(d1, d2)
       when :cusum;          breakdown[SeriesNames::CUSUM] = cusum(meter, d1, d2)
       when :degreedays;     breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2)
       when :temperature;    breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(d1, d2)

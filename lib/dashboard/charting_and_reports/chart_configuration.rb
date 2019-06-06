@@ -859,6 +859,11 @@ class ChartManager
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
+    peak_kw: {
+      inherits_from:    :baseload,
+      name:             'Peak daily power consumption (kW)',
+      series_breakdown: :peak_kw
+    },
     alert_1_year_baseload: {
       inherits_from:    :baseload_lastyear,
     },

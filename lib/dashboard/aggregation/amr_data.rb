@@ -231,6 +231,36 @@ class AMRData < HalfHourlyData
     average_kwh * 2.0 # convert to kW
   end
 
+  def peak_kw_kwh_date_range(date1, date2)
+    total = 0.0
+    (date1..date2).each do |date|
+      total += peak_kw(date)
+    end
+    total
+  end
+
+  def peak_kw(date)
+    days_kwh_x48(date).sort.last * 2.0 # 2.0 = half hour kWh to kW
+  end
+
+  def peak_kw_date_range_with_dates(date1 = start_date, date2 = end_date, top_n = 1)
+    peaks_by_day = peak_kws_date_range(date1, date2)
+    reverse_sorted_peaks = peaks_by_day.sort_by {|_date, kw| -kw}
+    if top_n.nil?
+      return reverse_sorted_peaks
+    else
+      return Hash[reverse_sorted_peaks[0...top_n]]
+    end
+  end
+
+  def peak_kws_date_range(date1 = start_date, date2 = end_date)
+    daily_peaks = {}
+    (date1..date2).each do |date|
+      daily_peaks[date] = peak_kw(date)
+    end
+    daily_peaks
+  end
+
   def average_baseload_kw_date_range(date1, date2)
     baseload_kwh_date_range(date1, date2) / (date2 - date1 + 1)
   end

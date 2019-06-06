@@ -625,7 +625,8 @@ class AlertAnalysisBase
       AlertThermostaticControl,
       AlertWeekendGasConsumptionShortTerm,
       AlertElectricityMeterConsolidationOpportunity,
-      AlertGasMeterConsolidationOpportunity
+      AlertGasMeterConsolidationOpportunity,
+      AlertMeterASCLimit
     ]
   end
 end

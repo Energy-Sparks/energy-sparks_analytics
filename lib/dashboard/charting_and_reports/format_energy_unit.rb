@@ -31,6 +31,7 @@ class FormatEnergyUnit
     r2:                           '',
     temperature:                  'C',
     years_range:                  'years',
+    years:                        'years',
     £_range:                      '£',
     £_per_kwh:                    '£/kWh',
     kg_co2_per_kwh:               'kg CO2/kWh',
@@ -77,6 +78,9 @@ class FormatEnergyUnit
       "#{scale_num(value)}C"
     elsif unit == :years_range
       format_years_range(value)
+    elsif unit == :years
+      puts "Got here"
+      format_time(value)
     elsif unit == :percent
       "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
     elsif unit == :date
@@ -121,7 +125,7 @@ class FormatEnergyUnit
       months = (years / 12.0).round(0)
       months.to_s + ' month' + singular_plural(months)
     else
-      sprintf('%.1f', years) + 'year' + singular_plural(years)
+      sprintf('%.1f ', years) + 'year' + singular_plural(years)
     end
   end
 

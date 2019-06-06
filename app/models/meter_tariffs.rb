@@ -30,6 +30,10 @@ class MeterTariffs
     [daytime_cost_x48, nighttime_cost_x48, {}] # {} = the standing charges for consistancy with the accounting tariff interface
   end
 
+  def self.accounting_tariff_for_date(date, mpan_mprn)
+    tariff_for_date(METER_TARIFFS, mpan_mprn, date)
+  end
+
   def self.accounting_tariff_x48(date, mpan_mprn, fuel_type, kwh_halfhour_x48, default_energy_purchaser)
     tariff_config = tariff_for_date(METER_TARIFFS, mpan_mprn, date)
 

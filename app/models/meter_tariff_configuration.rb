@@ -427,7 +427,8 @@ class MeterTariffs
           standing_charge:  { per: :day, rate: 4.064 },
           daytime_rate:     { per: :kwh, rate: 0.11634 , time_period: ECONOMY7_DAY_TIME_PERIOD },
           nighttime_rate:  { per: :kwh, rate: 0.08823, time_period: ECONOMY7_NIGHT_TIME_PERIOD },
-        }
+        },
+        asc_limit_kw:  400.0
       }
     },
   
