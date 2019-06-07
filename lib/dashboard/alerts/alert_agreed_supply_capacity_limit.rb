@@ -182,7 +182,7 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
             <p>
               However, often this is set far above the schools needs, so you are paying for the
               additional capacity for no reason. An example might be that your school has an ASC
-              of 400 KWA, but your peak demand is only 100 KVA. Which means you are paying for an
+              of 400 KVA, but your peak demand is only 100 KVA. Which means you are paying for an
               additional 300 KVA on capacity you are unlikely to need, which might cost you
               £3,000 per year. Getting this limit reduced which is simply a matter of asking your
               energy company to reduce the limit (they may ask you to contact their DNO
@@ -193,7 +193,7 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
               readings and finds the largest reading in kW and compares it with your ASC limit KVA allowing 10%
               margin. Unfortunately Energy Sparks doesnt have access to your peak KVA value but it should be
               within 1% of the kW figure it calculates; you can ask your electricity supplier to provide
-              you with your historic monthly peak KWA values just to check Energy Sparks is accurate before
+              you with your historic monthly peak KVA values just to check Energy Sparks is accurate before
               making a decision. DNO's normally advice setting the ASC limit to 10% above your maximum peak KVA.
             <p>
             <p>

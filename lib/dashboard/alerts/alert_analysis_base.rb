@@ -626,7 +626,8 @@ class AlertAnalysisBase
       AlertWeekendGasConsumptionShortTerm,
       AlertElectricityMeterConsolidationOpportunity,
       AlertGasMeterConsolidationOpportunity,
-      AlertMeterASCLimit
+      AlertMeterASCLimit,
+      AlertDifferentialTariffOpportunity
     ]
   end
 end
