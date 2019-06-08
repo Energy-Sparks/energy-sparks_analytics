@@ -28,43 +28,43 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
 
   TEMPLATE_VARIABLES = {
     number_of_heating_days_last_year: {
-      description: 'Number of days in the last year when the school was not open but the heating was left on',
+      description: 'Number of days school days plus non school days when the heating was on',
       units:  :days
     },
     average_number_of_heating_days_last_year: {
-      description: 'Average number of days in the last year when 30 schools in Energy Spark were not open but the heating was left on',
+      description: 'Average number of days in the last year when 30 schools in Energy Sparks left their heating on',
       units:  :days
     },
     exemplar_number_of_heating_days_last_year: {
-      description: 'The number of days an exemplar school leaves their heating on when the school is unoccupied',
+      description: 'The number of days an exemplar school leaves their heating on',
       units:  :days
     },
     heating_day_adjective: {
-      description: 'Adjective describing the schools non heating day usage relative to other schools (e.g. average - 9 different adjectives)',
+      description: 'Adjective describing the schools heating day usage relative to other schools (e.g. average - 9 different adjectives)',
       units:  String
     },
     one_year_saving_reduced_days_to_average_kwh: {
-      description: 'Saving through matching average schools heating days (turning off earlier and on later in year) kWh',
+      description: 'Saving through matching average schools heating days (turning off earlier and on later in year, not on holidays, weekends) kWh',
       units:  { kwh: :gas }
     },
     one_year_saving_reduced_days_to_exemplar_kwh: {
-      description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year) kWh',
+      description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year, not on holidays, weekends) kWh',
       units:  { kwh: :gas }
     },
     one_year_saving_reduced_days_to_average_£: {
-      description: 'Saving through matching average schools heating days (turning off earlier and on later in year) £',
+      description: 'Saving through matching average schools heating days (turning off earlier and on later in year, not on holidays, weekends) £',
       units:  :£
     },
     one_year_saving_reduced_days_to_exemplar_£: {
-      description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year) £',
+      description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year, not on holidays, weekends) £',
       units:  :£
     },
     one_year_saving_reduced_days_to_average_percent: {
-      description: 'Saving through matching average schools heating days (turning off earlier and on later in year) percent of annual consumption',
+      description: 'Saving through matching average schools heating days (turning off earlier and on later in year, not on holidays, weekends) percent of annual consumption',
       units:  :percent
     },
     one_year_saving_reduced_days_to_exemplar_percent: {
-      description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year) percent of annual consumption',
+      description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year, , not on holidays, weekends) percent of annual consumption',
       units:  :percent
     },
     total_heating_day_kwh: {
