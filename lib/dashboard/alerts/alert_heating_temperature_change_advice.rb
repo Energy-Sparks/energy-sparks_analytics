@@ -2,6 +2,7 @@
 require_relative 'alert_gas_model_base.rb'
 
 class AlertHeatingSensitivityAdvice < AlertGasModelBase
+  MIN_REPORTED_SENSITIVITY_£ = 50.0
   attr_reader :annual_saving_1_C_change_kwh, :annual_saving_1_C_change_£, :annual_saving_1_C_change_percent
   attr_reader :one_year_saving_£
   attr_reader :fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day
@@ -52,7 +53,7 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     @annual_saving_1_C_change_£ = @annual_saving_1_C_change_kwh * BenchmarkMetrics::GAS_PRICE
     @one_year_saving_£ = Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£)
     @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = 1000.0 * heating_model.average_heating_b_kwh_per_1_C_per_day / floor_area
-    @rating = 5.0
+    @rating = @annual_saving_1_C_change_£ > MIN_REPORTED_SENSITIVITY_£ ? 5.0 : 10.0
   end
 
   def analyse_private(asof_date)
