@@ -23,8 +23,6 @@ class DashboardEnergyAdvice
       CO2GasCO2EmissionsLongTermTrends.new(school, chart_definition, chart_data, chart_symbol)
     when :group_by_week_carbon
       CO2GasCO2EmissionsLastYear.new(school, chart_definition, chart_data, chart_symbol)
-    when :last_2_weeks_carbon_emissions
-      CO2OverallEmissionQuestions.new(school, chart_definition, chart_data, chart_symbol)
     else
       nil
     end
@@ -66,47 +64,6 @@ class DashboardEnergyAdvice
 
     def advice_valid?
       true
-    end
-
-    def model_standard_devation_table_html
-      header = ['Model', 'Standard Deviation kWh', 'Standard Deviation (%)', 'Average R2', 'Average base temperature', 'Calculation time(ms)']
-      rows = []
-      rows.push(formatted_model_deviation_information(simple_model))
-      rows.push(formatted_model_deviation_information(thermally_massive_model))
-      rows.push(formatted_model_deviation_information(best_model)) if overridden_model?
-      html_table(header, rows)
-    end
-
-    def formatted_model_deviation_information(model)
-      [
-        model.name,
-        FormatEnergyUnit.format(:kwh, model.standard_deviation),
-        (model.standard_deviation_percent * 100.0).round(1).to_s + '%',
-        model.average_heating_school_day_r2.round(2),
-        model.average_base_temperature.round(1).to_s + 'C',
-        (model.model_calculation_time * 1000.0).to_i
-      ]
-    end
-
-    def regression_parameters_html_table(model)
-      sorted_models = best_model.sorted_model_keys(model.models)
-
-      header = ['Name', 'A kWh/day', 'B kWh/day/C', 'R2', 'Base Temperature(C)','Samples', 'Example prediction kWh/day']
-      rows = []
-      sorted_models.each do |name, results|
-        rows.push(
-          [
-            name,
-            round_nan(results.a, 0),
-            round_nan(results.b, 0),
-            round_nan(results.r2, 2),
-            round_nan(results.base_temperature, 1),
-            results.samples,
-            example_predicted_kwh(model, name, results)
-          ]
-        )
-      end
-      html_table(header, rows)
     end
 
     # copied from heating_regression_model_fitter.rb TODO(PH,17Feb2019) - merge
@@ -151,14 +108,12 @@ class DashboardEnergyAdvice
     include Logging
 
     INTRO_TO_SCHOOL_CO2_1 = %q(
-      <h1>
-        School Carbon Emissions from Electricity and Gas Usage
-      </h1>
       <p>
         Man-made carbon dioxide (CO<sub>2</sub>) emissions and other greenhouse
         gasses (e.g. methane CH<sub>4</sub>) are the primary cause of climate
         change. The emission of greenhouse gases into the atmosphere is causing the
-      earth to warm up and increasing the frequency of extreme weather events. CO	<sub>2</sub> levels in the atmosphere have
+        earth to warm up and increasing the frequency of extreme weather events.
+        CO	<sub>2</sub> levels in the atmosphere have
         <a
           href="https://climate.nasa.gov/climate_resources/24/graphic-the-relentless-rise-of-carbon-dioxide/"
           target="_blank"
@@ -173,25 +128,28 @@ class DashboardEnergyAdvice
       <ul>
         <li>
           <strong>Transport</strong>
-          : The carbon emissions of transport used to get to the school (cars and
-          buses use fossil fuels and emit carbon dioxide and other pollutants
-          from their exhausts)
+          : Most cars and buses used by pupils and staff to get to school use
+          fossil fuels (petrol and diesel) and emit carbon dioxide and other
+          pollutants from their exhausts
         </li>
         <li>
           <strong>Food</strong>
-          : Food eaten at lunchtime, particularly from meat (cows emit a lot of
-          CO<sub>2</sub> and methane as a result of eating grass, a vegetarian
-          diet has half the carbon emissions of meat based diet)
+          : The production and transport of food eaten at lunchtime generates
+          greenhouse gas emissions. A diet high in meat can generate a lot of
+          greenhouse gases, as cows emit a lot of CO<sub>2</sub> and methane
+          as a result of eating grass.
+          A vegetarian diet has half the carbon emissions of meat-based diet.
         </li>
         <li>
           <strong>Electricity</strong>
-          : From electricity used to power computers, lights and other appliances
-          at the school
+          : The electricity used to power computers, lights and other appliances
+          at the school is often generated in power stations
+          which burn gas and coal (fossil fuels)
         </li>
         <li>
           <strong>Gas</strong>
-          : From gas used to heat the school in the winter, for hot water and in
-          school kitchens
+          : The gas used to heat the school in the winter, to heat hot water and
+          in cookers in the school kitchens, creates CO2 when it is burnt
         </li>
       </ul>
     ).freeze
@@ -206,15 +164,7 @@ class DashboardEnergyAdvice
         school's electricity and gas consumption.
       </p>
       <p>
-        The charts and analysis in Energy Sparks comes from your school's gas and
-        electricity meters. Energy Sparks receives readings of how much energy the
-        school has consumption from the school's smart meters which record energy
-        consumption in kWh every half hour.
-      </p>
-      <p>
-        Using this data Energy Sparks can accurately calculate the emissions from
-        consumption of electricity and gas at your school by converting the energy
-        used in kWh to CO<sub>2</sub> using 'carbon emission factors'.
+        Energy Sparks converts the energy used in kWh to CO<sub>2</sub> using 'carbon emission factors'.
       </p>
     ).freeze
 
@@ -223,7 +173,7 @@ class DashboardEnergyAdvice
         Carbon Emission Factors
       </h2>
       <p>
-        The calculate the school's carbon emissions from the consumption of gas and
+        To calculate the school's carbon emissions from the consumption of gas and
         electricity we need to know how much carbon dioxide (CO<sub>2</sub>) is
         produced for every kWh of gas and electricity used by the school, these
         values are called 'emission factors', and they are different for gas and
@@ -237,7 +187,7 @@ class DashboardEnergyAdvice
         burnt in the school boilers 210g of CO<sub>2</sub> is emitted. CO	<sub>2</sub>
         is emitted as a result of burning gas (CH<sub>4</sub>) with
         oxygen (O<sub>2</sub>), to produce carbon dioxide (CO<sub>2</sub>) and
-        water (H<sub>2</sub>0) (the chemical reaction is as follows CH<sub>4</sub>
+        water (H<sub>2</sub>0) (CH<sub>4</sub>
         + 4O<sub>2</sub> = CO<sub>2</sub> + 2H<sub>2</sub>O).
       </p>
       <p>
@@ -251,23 +201,25 @@ class DashboardEnergyAdvice
         Electricity is more complicated as it varies continuously depending on what
         power sources are being used to supply the National Electricity Grid, these
         include power stations which burn coal and gas which have high emissions,
-        and nuclear power stations, solar photovoltaic panels and wind turbines
+        and nuclear power stations, solar photovoltaic (PV) panels and wind turbines
         which emit almost zero carbon when producing electricity. On a windy and
         sunny day when a larger proportion of the UK's electricity supply is from
-        solar photovoltaic panels and wind turbines electricity emissions can be
-        quite low at perhaps 100g of CO<sub>2</sub> per kWh of electricity, but on
+        solar PV panels and wind turbines electricity emissions can be
+        quite low at about 100g of CO<sub>2</sub> per kWh of electricity on
         calm, cloudy days when most of the electricity is coming from gas and coal
         power stations as much as 400g of CO<sub>2</sub> is emitted for every 1 kWh
-      of electricity production.	<a href="https://carbonintensity.org.uk/">This link</a> shows a graph of
-        the electricity grid's carbon emissions today and has a brief video
+        of electricity production.
+        <a href="https://carbonintensity.org.uk/" target="_blank">This link</a> shows
+        a graph of the electricity grid's carbon emissions today and has a brief video
         explaining the variability.
       </p>
       <p>
         The amount of carbon dioxide emitted by the UK National Electricity Grid
-        has significantly declined over the last few year's as large number of
-        solar photovoltaic panels (solar PV) have been installed and many offshore
+        has significantly decreased over the last few year's as large number of
+        solar PV panels and many offshore
         wind turbines have been installed replacing coal power stations which have
-      been closed. Average annual emissions factors have declined from 500g CO	<sub>2</sub> per kWh in 2012 to about 230g per kWh in 2019.
+        been closed. Average annual emissions factors have decreased from 500g
+        CO	<sub>2</sub> per kWh in 2012 to about 230g per kWh in 2019.
       </p>
       <p>
         The table below shows where the UK National Electricity Grid has been
@@ -277,18 +229,18 @@ class DashboardEnergyAdvice
 
       SCHOOL_CARBON_EMISSIONS_OVER_LAST_FEW_YEARS_4 = %q(
         <h1>
-          Your School's Carbon Emissions over last few years
+          Your School's Carbon Emissions over the last few years
         </h1>
         <p>
           This chart shows your school's carbon emissions over the last few years.
-          Generally, for most schools, unless they have managed to reduce gas
-          consumption you would expect carbon emissions from gas to have remained
-          relatively constant. However, for electricity, as a result of the national
-          electricity grid's decarbonisation, replacing coal power stations with wind
-          turbines, even without energy efficiency measures at school you would
-          expect to see a decline in emissions. This chart shows your schools annual
-          carbon emissions versus an average and an exemplar school of the same size
-          (floor area, number of pupils):
+          Unless your school has managed to reduce its gas consumption you would
+          expect carbon emissions from gas to have remained relatively constant.
+          However, for electricity, as a result of the national electricity grid's
+          decarbonisation, you would expect to see a decline in emissions.
+          This has happened even without energy efficiency measures at school
+          and is due to coal power stations being replaced with wind turbines.
+          This chart shows your schools annual carbon emissions compared to an
+          average and an exemplar school of the same size: 
         </p>
       ).freeze
 
@@ -309,42 +261,39 @@ class DashboardEnergyAdvice
           : Does your school emit more CO<sub>2</sub> from the consumption of
           electricity or gas?
         </p>
-        <p>
-          For some schools we don't have enough historic meter readings to show many
-          year's history of your carbon emissions, if this is the case you might want
-          to pick another local similar school with more data on Energy Sparks to
-          look at general longer-term trends in schools' carbon emissions?
-        </p>
       ).freeze
 
       LIVE_UK_ELECTRICITY_GRID_SOURCES_TABLE_EXPLANATION = %q(
         <p>
-          The first column of the table shows the percent of electricity being
-          generated for that source.
+          The first column of the table shows how much of the
+          UK's electricity is being generated from that source.
         </p>
         <p>
           The second column is the amount of carbon emitted from generating 1 kWh of
           electricity from that source. Some of the renewable and 'low carbon'
-          sources like solar, wind. Hydro and nuclear still have a small carbon
+          sources like solar, wind, hydro and nuclear still have a small carbon
           intensity because of the energy used in their manufacture e.g. wind
           turbines are made of steel, which takes energy to manufacture.
         </p>
         <p>
-          The third column is the carbon contribution from each source in kg CO2 per
-          kWh of electricity produced. And, the final column is the percentage of the
-          total carbon from each source.
+          The third column is the carbon contribution to the total cabron intensity
+          from each source in kg CO2 per
+          kWh of electricity produced.
         </p>
         <p>
-          The net carbon intensity of the National Electricity Grid is currently
+          And, the final column is the UK's percentage of the
+          total carbon emissions from each source.
+        </p>
+        <p>
+          The carbon intensity of the National Electricity Grid is currently
           <%= FormatEnergyUnit.format(:kg_co2_per_kwh, current_grid_carbon_intensity, :html) %>.
           This is calculated by adding up all the carbon contributions in the 'Carbon
-          Contribution' column in the table above.
+          Contribution' columns in the table above.
         </p>
         <p>
           The 'biomass' source comes from burning waste wood. 'Imports' are from
           electricity we get from other countries like Ireland, France, Netherlands
-          and Norway through electricity cables running under the sea (we exchange
-          electricity with them to balance up supply and demand).
+          and Norway through electricity cables running under the sea.
         </p>
         <p>
           <strong>Question</strong>
@@ -365,94 +314,9 @@ class DashboardEnergyAdvice
         <p>
           In 2018 the percentages of electricity generated from each source were:
         </p>
-        <table border="1" cellspacing="0" cellpadding="0">
-          <tbody>
-            <tr>
-              <td width="301" valign="top">
-                <p>
-                  Gas
-                </p>
-              </td>
-              <td width="301" valign="top">
-                <p>
-                  39%
-                </p>
-              </td>
-            </tr>
-            <tr>
-              <td width="301" valign="top">
-                <p>
-                  Nuclear
-                </p>
-              </td>
-              <td width="301" valign="top">
-                <p>
-                  19%
-                </p>
-              </td>
-            </tr>
-            <tr>
-              <td width="301" valign="top">
-                <p>
-                  Wind
-                </p>
-              </td>
-              <td width="301" valign="top">
-                <p>
-                  17%
-                </p>
-              </td>
-            </tr>
-            <tr>
-              <td width="301" valign="top">
-                <p>
-                  Biomass
-                </p>
-              </td>
-              <td width="301" valign="top">
-                <p>
-                  11%
-                </p>
-              </td>
-            </tr>
-            <tr>
-              <td width="301" valign="top">
-                <p>
-                  Solar
-                </p>
-              </td>
-              <td width="301" valign="top">
-                <p>
-                  4%
-                </p>
-              </td>
-            </tr>
-            <tr>
-              <td width="301" valign="top">
-                <p>
-                  Coal
-                </p>
-              </td>
-              <td width="301" valign="top">
-                <p>
-                  4%
-                </p>
-              </td>
-            </tr>
-            <tr>
-              <td width="301" valign="top">
-                <p>
-                  Hydro
-                </p>
-              </td>
-              <td width="301" valign="top">
-                <p>
-                  2%
-                </p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <p>
+          <%= grid_carbon_intensity_2018_html_table %>
+        </p>
         <p>
           <strong>Question</strong>
           : How does that compare with the first table which contains todays
@@ -460,15 +324,24 @@ class DashboardEnergyAdvice
         </p>
       ).freeze
 
-    private def current_grid_carbon_intensity
-      UKGridInformation.new.net_intensity
+    private def uk_grid_sources
+      @uk_grid_sources ||= UKElecticityGridMix.new
     end
 
-    private def current_carbon_intensity_html_table
-      grid_info = UKGridInformation.new
-      raw_data = grid_info.current_generation_mix
+    private def grid_carbon_intensity_2018_html_table
+      convert_grid_intensity_to_html_table(uk_grid_sources.carbon_intensity_table_2018)
+    end
 
-      sorted_data = raw_data.sort_by {|_fuel_source, data|  -data[:percent] }
+    private def grid_carbon_intensity_live_html_table
+      convert_grid_intensity_to_html_table(uk_grid_sources.carbon_intensity_table_live)
+    end
+
+    private def current_grid_carbon_intensity
+      uk_grid_sources.net_carbon_intensity_live
+    end
+
+    private def convert_grid_intensity_to_html_table(grid_intensity)
+      sorted_data = grid_intensity.sort_by {|_fuel_source, data|  -data[:percent] }
 
       formatted_data = []
       sorted_data.each do |fuel_source, data|
@@ -478,39 +351,24 @@ class DashboardEnergyAdvice
             FormatEnergyUnit.format(:percent, data[:percent], :html),
             FormatEnergyUnit.format(:kg_co2_per_kwh, data[:intensity], :html, false, true),
             FormatEnergyUnit.format(:kg_co2_per_kwh, data[:carbon_contribution], :html, false, true),
-            FormatEnergyUnit.format(:percent, data[:carbon_percent], :html),
+            FormatEnergyUnit.format(:percent, data[:carbon_percent], :html)
           ]
         )
       end
 
       header = ['Source', 'Percent of Energy', 'Carbon Intensity (kg CO2/kWh)', 'Carbon Contribution (kg CO2/kWh)', 'Percentage of Carbon']
 
-      table = html_table(header, formatted_data)
-
-      [table, grid_info.net_intensity]
-    end
-
-    private def net_carbon_intensity_question(net_intensity)
-      %q(
-        <p>
-          The net carbon intensity of the National Electricity Grid is currently
-          <%= FormatEnergyUnit.format(:kg_co2_per_kwh, net_intensity, :html)  %>.
-          This is calculated by adding up all the carbon contributions in the
-          right hand column of the table above.
-        </p>
-      )
+      html_table(header, formatted_data)
     end
 
     def generate_valid_advice
-      current_carbon_intensity_table, net_intensity = current_carbon_intensity_html_table
 
       header_template = concatenate_advice_with_body_start_end(
         [
           INTRO_TO_SCHOOL_CO2_1,
           INTRO_TO_SCHOOL_CO2_GAS_AND_ELECTRICITY_2,
           CARBON_EMISSION_FACTORS_3,
-          current_carbon_intensity_table,
-          net_carbon_intensity_question(net_intensity),
+          grid_carbon_intensity_live_html_table,
           LIVE_UK_ELECTRICITY_GRID_SOURCES_TABLE_EXPLANATION,
           COMPARISON_WITH_2018_ELECTRICITY_MIX,
           SCHOOL_CARBON_EMISSIONS_OVER_LAST_FEW_YEARS_4
@@ -533,7 +391,7 @@ class DashboardEnergyAdvice
       </h2>
       <p>
         This chart shows your school's electricity consumption in kWh over the last
-        few years, with the average UK grid carbon intensity on the second Y2 axis:
+        few years, with the average UK grid carbon intensity on the second y axis:
       </p>
     ).freeze
 
@@ -548,8 +406,8 @@ class DashboardEnergyAdvice
   class CO2ElectricityCO2LongTerm < CO2AdviceBase
     LAST_FEW_YEARS_CO2_1 = %q(
       <p>
-        This second chart shows your school's carbon emissions from electricity,
-        for most schools this will have reduced, mainly as a result of the
+        This second chart shows your school's carbon emissions from electricity.
+        For most schools this will have reduced, mainly as a result of the
         decarbonisation of the National Electricity Grid rather than from reduced
         electricity consumption:
       </p>
@@ -575,13 +433,9 @@ class DashboardEnergyAdvice
 
   class CO2ElectricityCO2LastYear < CO2AdviceBase
     LAST_YEAR_CO2_1 = %q(
-      <h2>
-        The carbon emissions of your school and the National Electricity Grid over
-        the last year
-      </h2>
       <p>
         The chart below shows the carbon emissions from electricity consumption of
-        your school over the last year (bar chart), generally emissions are higher
+        your school over the last year. Generally emissions are higher
         during the winter as more electricity is used for lighting and sometimes
         for heating:
       </p>
@@ -619,9 +473,6 @@ class DashboardEnergyAdvice
 
   class CO2ElectricityCO2LastWeek < CO2AdviceBase
     LAST_WEEK_CO2_1 = %q(
-      <h2>
-        Variation in carbon emissions of your school over the last week
-      </h2>
       <p>
         The graph below shows the carbon emissions (bar charts. Left hand axis)
         from your school as a result of electricity consumption over the last week,
@@ -680,9 +531,6 @@ class DashboardEnergyAdvice
 
   class CO2GasCO2EmissionsLongTermTrends < CO2AdviceBase
     GAS_LONG_TERM_CO2_1 = %q(
-      <h2>
-        Your School's Gas Carbon Emissions over the last few years
-      </h2>
       <p>
         Gas is consumed by schools to provide heating in the winter, and for
         heating hot water, and kitchen usage all year round.
@@ -723,27 +571,19 @@ class DashboardEnergyAdvice
 
   class CO2GasCO2EmissionsLastYear < CO2AdviceBase
     GAS_LAST_YEAR_CO2_1 = %q(
-      <h2>
-        Gas CO<sub>2</sub> emissions over the last year
-      </h2>
       <p>
-        Because most gas in schools is consumed for heating, CO<sub>2</sub>
+        As most gas in schools is consumed for heating, CO<sub>2</sub>
         emissions from the consumption of gas in school is greater during the
         winter than the summer.
-      </p>
-      <p>
-        This chart shows more detailed information, you should be able to see
-        because more heating is required in the winter when it is cold then because
-        more gas is being consumed (kWh) carbon dioxide emissions are higher:
       </p>
     ).freeze
 
     GAS_LAST_YEAR_CO2_QUESTIONS_2 = %q(
       <p>
         <strong>Question</strong>
-        : because gas is a fossil fuel and the 'carbon factor' or emissions from
+        : As gas is a fossil fuel and the 'carbon factor' or emissions from
         burning 1 kWh of gas can't be reduced, how can the school reduce its gas
-        emissions? What opportunities are there for reduction?
+        emissions?
       </p>
       <p>
         <strong>Answer</strong>
@@ -755,26 +595,11 @@ class DashboardEnergyAdvice
         but this can be expensive to install.
       </p>
     ).freeze
-
-    def generate_valid_advice
-      header_template = concatenate_advice_with_body_start_end(GAS_LAST_YEAR_CO2_1)
-      @header_advice = generate_html(header_template, binding)
-
-      footer_template = concatenate_advice_with_body_start_end(GAS_LAST_YEAR_CO2_QUESTIONS_2)
-      @footer_advice = generate_html(footer_template, binding)
-    end
-  end
-  
-  class CO2OverallEmissionQuestions < CO2AdviceBase
     OVERALL_CO2_EMISSIONS_1 = %q(
-      <h1>
-        Calculating your school's total carbon emissions, including transport and
-        food
-      </h1>
       <p>
-        As per the introduction to this web page, electricity and gas are not the
+        Electricity and gas are not the
         only carbon emissions from a school; transport and consumption of food also
-        contribute. The remainder of the webpage should help you calculate the
+        contribute. This should help you calculate the
         additional greenhouse gas emissions from transport and food to get an
         overview of your school's total carbon emissions and perhaps where there
         may be opportunities to reduce your emissions.
@@ -815,7 +640,7 @@ class DashboardEnergyAdvice
       <p>
         It might be best if you download a copy of the spreadsheet (button bottom
         right), so you can save the information for future use. You need to fill in
-        the information in the cells coloured orange which have been prepopulated
+        the information in the cells coloured orange which have been pre-populated
         for an example school with 400 pupils.
       </p>
       <p>
@@ -838,7 +663,7 @@ class DashboardEnergyAdvice
       <p>
         You need to determine how everyone gets to school. The most important
         information to find is how many people travel to school by car and how far
-        they travel, as car generally generate the most carbon emissions,
+        they travel, as cars generally generate the most carbon emissions,
         accounting for more than 90% of transport carbon emissions at most schools.
       </p>
       <p>
@@ -854,25 +679,16 @@ class DashboardEnergyAdvice
         and the third with the average distance they travel, and then ask them to
         provide you will the information e.g.
       </p>
-      <table border="1" cellspacing="0" cellpadding="0">
+
+      <table class="table table-striped table-sm">
+      <thead>
+      <tr class="thead-dark">
+          <th scope="col"> Staff member </th>
+          <th scope="col"> Transport Mode </th>
+          <th scope="col"> Average daily return distance </th>
+      </tr>
+    </thead>
         <tbody>
-          <tr>
-            <td width="200" valign="top">
-              <p>
-                Staff member
-              </p>
-            </td>
-            <td width="200" valign="top">
-              <p>
-                Transport Mode
-              </p>
-            </td>
-            <td width="200" valign="top">
-              <p>
-                Average daily return distance
-              </p>
-            </td>
-          </tr>
           <tr>
             <td width="200" valign="top">
               <p>
@@ -927,7 +743,7 @@ class DashboardEnergyAdvice
         </tbody>
       </table>
       <p>
-        You then need to calculate the number of staff travelling my each mode and
+        You then need to calculate the number of staff travelling by each mode and
         the average distance for each Transport Mode - you might need to get a
         member of staff to help you with this. For the example above, you would
         need to enter under Staff - Petrol car: 2 staff (number) and an average
@@ -1007,11 +823,11 @@ class DashboardEnergyAdvice
 
     OVERALL_CO2_EMISSIONS_QUESTIONS_7 = %q(
       <h2>
-        Question: Can you devise a strategy for your school to reduce its emissions
-        to help combat climate change?
+        Devising a strategy for reducing your school's carbon emissions
       </h2>
       <p>
-        Once you have completed this, perhaps you could consider how you might help
+        After calculating your school's current carbon emissions,
+        perhaps you could consider how you might help
         the school reduce its carbon emissions and reduce the impact of global
         warming?
       </p>
@@ -1031,7 +847,8 @@ class DashboardEnergyAdvice
       </p>
       <ul>
         <li>
-          Switching from petrol to electric cars
+          Switching from petrol to electric cars (you could try
+            <a href="https://energysparks.uk/activity_types/75" target="_blank">this activity</a>)
         </li>
       </ul>
       <p>
@@ -1045,12 +862,13 @@ class DashboardEnergyAdvice
         3. <strong>Energy</strong>:
       </p>
       <p>
-        &#183; Reducing your school's energy consumption is the simplest solution,
-        by using Energy Sparks to determine the best way of saving energy; the
-        easiest way is to make sure heating and hot water are not left on over
+        &#183; Reducing your school's energy consumption is the simplest solution.
+        Use Energy Sparks to determine the best way of saving energy; the
+        easiest ways are to make sure heating and hot water are not left on over
         weekends, and holidays, to turn appliances and lighting off, and to make
-        sure the school purchase the most efficient equipment when replacing
-        appliances. Specific suggestions include:
+        sure the school purchases the most efficient equipment when replacing
+        appliances. Specific suggestions, using information which Energy Sparks
+        has calculated for your school include:
       </p>
       <p>
           <ul>
@@ -1058,20 +876,19 @@ class DashboardEnergyAdvice
           </ul>
       </p>
       <p>
-        Put together a strategy for each of these, and re-enter the new numbers
-        into the spreadsheet and see how much if the school follows your strategy
-        how much carbon you will save?
+        Put together a plan to achieve each of these. Re-enter the new numbers
+        into the spreadsheet and see how much carbon the school will save?
       </p>
       <p>
         To stop catastrophic global warming the UK has committed to reduce its
         carbon emissions to zero by 2050, which is about 4% per year. Can you come
         up with a plan for your school for the next 5 years which would reduce its
-        carbon emissions by 20% (5 years times 4%)?
+        carbon emissions by 20%?
       </p>
     ).freeze
 
     EMBEDDED_EXCEL_CARBON_CALCULATOR = %q(
-      <iframe width="700" height="450" frameborder="0" scrolling="no" src="https://onedrive.live.com/embed?resid=D22255E34EA12530%21278999&authkey=%21AA4vdwZUz8mhacQ&em=2&wdAllowInteractivity=False&AllowTyping=True&ActiveCell='Totals'!A1&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True"></iframe>
+      <iframe width="800" height="450" frameborder="0" scrolling="no" src="https://onedrive.live.com/embed?resid=D22255E34EA12530%21278999&authkey=%21AA4vdwZUz8mhacQ&em=2&wdAllowInteractivity=False&AllowTyping=True&ActiveCell='Totals'!A1&wdHideGridlines=True&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True"></iframe>
       )
 
     private def annual_electricity_co2
@@ -1173,34 +990,23 @@ class DashboardEnergyAdvice
     end
 
     def generate_valid_advice
-      header_template = concatenate_advice_with_body_start_end(
+      header_template = concatenate_advice_with_body_start_end(GAS_LAST_YEAR_CO2_1)
+      @header_advice = generate_html(header_template, binding)
+
+      footer_template = concatenate_advice_with_body_start_end(
         [
+          GAS_LAST_YEAR_CO2_QUESTIONS_2,
           OVERALL_CO2_EMISSIONS_1,
           EMBEDDED_EXCEL_CARBON_CALCULATOR,
           OVERALL_CO2_EMISSIONS_2,
           OVERALL_CO2_EMISSIONS_TRANSPORT_3,
           OVERALL_CO2_EMISSIONS_FOOD_4,
           OVERALL_CO2_EMISSIONS_ENERGY_5,
-          OVERALL_CO2_EMISSIONS_TOTAL_6
-        ]
-      )
-      @header_advice = generate_html(header_template, binding)
-
-      footer_template = concatenate_advice_with_body_start_end(
-        [
+          OVERALL_CO2_EMISSIONS_TOTAL_6,
           OVERALL_CO2_EMISSIONS_QUESTIONS_7
         ]
       )
       @footer_advice = generate_html(footer_template, binding)
-    end
-  end
-
-  class CO2AdviceTemplateDoNothing < DashboardChartAdviceBase
-    include Logging
-
-    def generate_valid_advice
-      @header_advice = nil_advice
-      @footer_advice = nil_advice
     end
   end
 end

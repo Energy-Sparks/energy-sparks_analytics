@@ -29,7 +29,7 @@ class ChartManager
     },
     benchmark_co2: {
       inherits_from:    :benchmark,
-      name:             'Your schools carbon emissions from electricity and gas over last few years',
+      name:             'School Carbon Emissions from Electricity and Gas Usage',
       yaxis_units:      :co2
     },
     last_2_weeks_carbon_emissions: {
@@ -68,6 +68,7 @@ class ChartManager
       reverse_xaxis:    true
     },
     gas_longterm_trend_kwh_with_carbon: {
+      name:             'Your School Gas Carbon Emissions over the last few years',
       inherits_from:    :gas_longterm_trend,
       series_breakdown: :none,
       y2_axis:          :gascarbon
@@ -90,11 +91,13 @@ class ChartManager
       reverse_xaxis:    true
     },
     electricity_longterm_trend_kwh_with_carbon: {
+      name:             'Your schools carbon emissions over the last few years',
       inherits_from:    :electricity_longterm_trend,
       series_breakdown: :none,
       y2_axis:          :gridcarbon
     },
     electricity_longterm_trend_carbon: {
+      name:             '', # 2 of 2 charts in same section of presentation, no header wanted
       inherits_from:    :electricity_longterm_trend,
       series_breakdown: :none,
       yaxis_units:      :co2,
@@ -143,20 +146,19 @@ class ChartManager
       timescale:        :year
     },
     electricity_co2_last_year_weekly_with_co2_intensity: {
-      name:             'Last years electricity carbon emissions',
+      name:             'The carbon emissions of your school and the carbon intensity of the National Electricity Grid over the last year',
       inherits_from:    :group_by_week_electricity,
-      # series_breakdown: :none,
       yaxis_units:      :co2,
       y2_axis:          :gridcarbon
     },
     electricity_co2_last_7_days_with_co2_intensity: {
-      name:             'Your schools carbon emissions from electricity consumption over the last 7 days',
+      name:             'Variation in the electricity carbon emissions of your school over the last week',
       inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
       x_axis:           :datetime,
       timescale:        :week
     },
     electricity_kwh_last_7_days_with_co2_intensity: {
-      name:             'Your schools electricity consumption (kWh) over the last 7 days',
+      name:             '', # chart 2 of 2 in a section of the carbon emissions tab, dont want header
       inherits_from:    :electricity_co2_last_7_days_with_co2_intensity,
       yaxis_units:      :kwh
     },
@@ -347,7 +349,7 @@ class ChartManager
       yaxis_units:      :£
     },
     group_by_week_carbon: {
-      name:             'Carbon emissions from gas heating, hot water and kitchen usage over the last year',
+      name:             'Calculating your schools total carbon emissions, including transport and food',
       inherits_from:    :group_by_week_gas,
       series_breakdown: :none,
       yaxis_units:      :co2,

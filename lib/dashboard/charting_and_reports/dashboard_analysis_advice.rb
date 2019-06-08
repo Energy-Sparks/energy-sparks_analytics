@@ -157,6 +157,7 @@ class DashboardChartAdviceBase
       res = DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
       res = DashboardEnergyAdvice.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
       res = DashboardEnergyAdvice.co2_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
+      res = DashboardEnergyAdvice.financial_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
       res
     end
   end

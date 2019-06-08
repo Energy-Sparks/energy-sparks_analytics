@@ -239,7 +239,6 @@ class DashboardConfiguration
                                   electricity_kwh_last_7_days_with_co2_intensity
                                   gas_longterm_trend_kwh_with_carbon
                                   group_by_week_carbon
-                                  last_2_weeks_carbon_emissions
                                 ],
                               },
         cost:   {
