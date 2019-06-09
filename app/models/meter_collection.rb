@@ -22,7 +22,9 @@ class MeterCollection
   attr_reader :school, :name, :address, :postcode, :urn, :area_name, :model_cache, :default_energy_purchaser
 
   # These are things which will be populated
-  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters, :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter
+  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters,
+                :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter,
+                :schedule_data_manager
 
   def initialize(school, schedule_data_manager)
     @name = school.name
@@ -46,6 +48,10 @@ class MeterCollection
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
 
+    configure_schedule_names
+  end
+
+  def configure_schedule_names
     # Normally these would come from the school, hard coded at the mo
     @holiday_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
     @temperature_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
