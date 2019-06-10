@@ -12,7 +12,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :total_annual_kwh, :out_of_hours_kwh
   attr_reader :holidays_percent, :weekends_percent, :schoolday_open_percent, :schoolday_closed_percent
   attr_reader :percent_out_of_hours
-  attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£
+  attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£, :out_of_hours_£
   attr_reader :daytype_breakdown_table
   attr_reader :percent_improvement_to_exemplar, :potential_saving_kwh, :potential_saving_£
   attr_reader :one_year_saving_£, :total_annual_£
@@ -69,6 +69,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       schoolday_closed_£:       { description: 'Annual school day closed cost usage', units: :£ },
       holidays_£:               { description: 'Annual holiday cost usage',           units: :£ },
       weekends_£:               { description: 'Annual weekend cost usage',           units: :£ },
+      out_of_hours_£:           { description: 'Annual £ out of hours usage',         units: :£ },
 
       good_out_of_hours_use_percent: {
         description: 'Good/Exemplar out of hours use percent (suggested benchmark comparison)',
@@ -132,6 +133,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @weekends_£         = @weekends_kwh         * @fuel_cost
     @schoolday_open_£   = @schoolday_open_kwh   * @fuel_cost
     @schoolday_closed_£ = @schoolday_closed_kwh * @fuel_cost
+    @out_of_hours_£     = @schoolday_closed_£ + @weekends_£ + @holidays_£
     @total_annual_£     = @holidays_£ + @weekends_£ + @schoolday_open_£ + @schoolday_closed_£
 
     @daytype_breakdown_table = [
