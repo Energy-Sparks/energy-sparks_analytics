@@ -580,7 +580,7 @@ class ChartManager
       chart1_type:      :column,
       meter_definition: :allheat,
       timescale:        :year,
-      filter:            { daytype: :occupied, heating: true },
+      filter:           { daytype: :occupied, heating: true },
       series_breakdown: :none,
       x_axis:           :intraday,
       yaxis_units:      :kwh,
@@ -740,6 +740,15 @@ class ChartManager
       timescale:        :year,
       model:            :best,
       series_breakdown: :heating
+    },
+    heating_on_off_by_week_heating_school_days_and_holidays_only: {
+      inherits_from:    :heating_on_off_by_week,
+      filter:            { heating: true }
+    },
+    heating_on_off_by_week_heating_school_non_school_days_only: {
+      inherits_from:    :heating_on_off_by_week_heating_school_days_and_holidays_only,
+      filter:            { daytype: :unoccupied, heating: true },
+      y2_axis:          :none
     },
     thermostatic_model_categories_pie_chart: {
       name:             'Categorised consumption by model',

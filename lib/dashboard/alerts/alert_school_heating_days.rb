@@ -78,7 +78,7 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
   }
 
   def heating_on_off_chart
-    :heating_on_off_by_week
+    :heating_on_off_by_week_heating_school_days_and_holidays_only
   end
 
   private def calculate(asof_date)

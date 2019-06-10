@@ -534,6 +534,8 @@ class Aggregator
     case filter
     when :occupied
       !(DateTimeHelper.weekend?(date) || holidays.holiday?(date))
+    when :unoccupied
+      DateTimeHelper.weekend?(date) || holidays.holiday?(date)
     when :holidays
       holidays.holiday?(date)
     when :weekends
