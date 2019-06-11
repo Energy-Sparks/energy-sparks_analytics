@@ -26,7 +26,9 @@ class VirtualSchool
 
     school = Dashboard::School.new(name, na, floor_area, number_of_pupils, :primary, area_name, urn, na)
 
-    meter_collection = MeterCollection.new(school)
+    # Second parameter is for something which complies with the schedule data manager
+    # for holidays etc
+    meter_collection = MeterCollection.new(school, nil)
 
     meter_collection.add_electricity_meter(
       create_empty_meter(meter_collection, name + ' Electricity', :electricity)

@@ -89,7 +89,7 @@ class AnalysticsSchoolAndMeterMetaData
 
   def create_meter_collection(school_name, school_metadata, meter_metadata)
     school = create_school(school_name)
-    meter_collection = MeterCollection.new(school)
+    meter_collection = MeterCollection.new(school, ScheduleDataManager)
 
     gas_meters = create_meters(meter_collection, school_metadata[:meters], :gas)
     gas_meters.each do |gas_meter|
