@@ -34,8 +34,10 @@ class EnergyConversions
 
     {
       equivalence:                equivalence,
-      formatted_equivalence:      FormatEnergyUnit.format(units_of_equivalance, equivalence),
+      formatted_equivalence:      format_equivalance_for_front_end(units_of_equivalance, equivalence),
+      old_formatted_equivalence:  FormatEnergyUnit.format(units_of_equivalance, equivalence),
       units_of_equivalance:       units_of_equivalance,
+      show_equivalence:           show_equivalence(units_of_equivalance, equivalence),
       kwh:                        kwh,
       formatted_kwh:              FormatEnergyUnit.format(:kwh, kwh),
       value_in_via_units:         value, # in kWh, CO2 or £
@@ -59,6 +61,27 @@ class EnergyConversions
       equivalence_scaled_to_time_period:    scaled_equivalence,
       formatted_equivalence_to_time_period: formatted_equivalence
     }
+  end
+
+  private def show_equivalence(units_of_equivalance, equivalence)
+    equivalence >= 1.0
+  end
+
+  # temporary/short term adjustment to meet front end requirements
+  private def format_equivalance_for_front_end(units_of_equivalance, equivalence)
+    if [
+      :kwh,
+      :kg,
+      :£
+    ].include?(units_of_equivalance)
+      return FormatEnergyUnit.format(units_of_equivalance, equivalence)
+    elsif units_of_equivalance == :co2
+      return FormatEnergyUnit.format(:kg, equivalence)
+    elsif %i[teaching_assistant_hours onshore_wind_turbine_hours offshore_wind_turbine_hours hour].include?(units_of_equivalance)
+      return FormatEnergyUnit.format(:years, equivalence / 24.0 / 365.0)
+    else
+      return FormatEnergyUnit.format(Float, equivalence)
+    end
   end
 
   # scale conversion to time period of equivelance
