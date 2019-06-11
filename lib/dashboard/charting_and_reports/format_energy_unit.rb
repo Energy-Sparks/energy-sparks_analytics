@@ -118,9 +118,21 @@ class FormatEnergyUnit
   end
 
   def self.format_time(years)
-    if years < (1.0 / 12.0)
-      days = (years / 365.0).round(0)
-      days.to_s + ' day' + singular_plural(days)
+    if years < (1.0 / 365.0) && years > 0.0 # less than a day
+      minutes = 24 * 60 * 365.0 * years
+      if minutes < 90
+        minutes.round(0).to_s + ' minute' + singular_plural(minutes)
+      else
+        (minutes / 60.0).round(0).to_s + ' hours'
+      end
+    elsif years < (3.0 / 12.0) # less than 3 months
+      days = (years * 365.0).round(0)
+      puts "ddddddd #{days}"
+      if days <= 14
+        days.to_s + ' day' + singular_plural(days)
+      else
+        (days / 7.0).round(0).to_s + ' weeks'
+      end
     elsif years < 1.0
       months = (years / 12.0).round(0)
       months.to_s + ' month' + singular_plural(months)
