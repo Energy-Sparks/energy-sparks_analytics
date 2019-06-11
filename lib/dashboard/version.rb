@@ -1,3 +1,3 @@
 module Dashboard
-  VERSION = "0.46.0-co-2-tab".freeze
+  VERSION = "0.47.0-co2-updates-alert-updates".freeze
 end
