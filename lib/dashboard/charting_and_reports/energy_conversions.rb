@@ -33,18 +33,18 @@ class EnergyConversions
     equivalence = value / conversion
 
     {
-      equivalence:                equivalence,
-      formatted_equivalence:      format_equivalance_for_front_end(units_of_equivalance, equivalence),
-      old_formatted_equivalence:  FormatEnergyUnit.format(units_of_equivalance, equivalence),
-      units_of_equivalance:       units_of_equivalance,
-      show_equivalence:           show_equivalence(units_of_equivalance, equivalence),
-      kwh:                        kwh,
-      formatted_kwh:              FormatEnergyUnit.format(:kwh, kwh),
-      value_in_via_units:         value, # in kWh, CO2 or £
-      formatted_via_units_value:  FormatEnergyUnit.format(kwh_co2_or_£, value),
-      conversion:                 conversion,
-      conversion_factor:          value / kwh,
-      via:                        kwh_co2_or_£
+      equivalence:                  equivalence,
+      formatted_equivalence:        format_equivalance_for_front_end(units_of_equivalance, equivalence),
+      old_formatted_equivalence:    FormatEnergyUnit.format(units_of_equivalance, equivalence),
+      units_of_equivalance:         units_of_equivalance,
+      show_equivalence:             show_equivalence(units_of_equivalance, equivalence),
+      kwh:                          kwh,
+      formatted_kwh:                FormatEnergyUnit.format(:kwh, kwh),
+      value_in_via_units:           value, # in kWh, CO2 or £
+      formatted_via_units_value:    FormatEnergyUnit.format(kwh_co2_or_£, value),
+      conversion:                   conversion,
+      conversion_factor:            value / kwh,
+      via:                          kwh_co2_or_£
     }
   end
 
@@ -56,10 +56,12 @@ class EnergyConversions
   private def scaled_results(conversion, time_period, unscaled_results)
     scale = scale_conversion_period(time_period, conversion[:equivalence_timescale])
     scaled_equivalence = unscaled_results[:equivalence] * scale 
-    formatted_equivalence = FormatEnergyUnit.format(conversion[:timescale_units], scaled_equivalence)
+    old_formatted_equivalence = FormatEnergyUnit.format(conversion[:timescale_units], scaled_equivalence)
+    formatted_equivalence = format_equivalance_for_front_end(conversion[:timescale_units], scaled_equivalence)
     {
-      equivalence_scaled_to_time_period:    scaled_equivalence,
-      formatted_equivalence_to_time_period: formatted_equivalence
+      equivalence_scaled_to_time_period:        scaled_equivalence,
+      old_formatted_equivalence_to_time_period: old_formatted_equivalence,
+      formatted_equivalence_to_time_period:     formatted_equivalence
     }
   end
 
@@ -69,15 +71,9 @@ class EnergyConversions
 
   # temporary/short term adjustment to meet front end requirements
   private def format_equivalance_for_front_end(units_of_equivalance, equivalence)
-    if [
-      :kwh,
-      :kg,
-      :£
-    ].include?(units_of_equivalance)
-      return FormatEnergyUnit.format(units_of_equivalance, equivalence)
-    elsif units_of_equivalance == :co2
-      return FormatEnergyUnit.format(:kg, equivalence)
-    elsif %i[teaching_assistant_hours onshore_wind_turbine_hours offshore_wind_turbine_hours hour].include?(units_of_equivalance)
+    return FormatEnergyUnit.format(units_of_equivalance, equivalence) if %i[kwh kg £].include?(units_of_equivalance)
+    return FormatEnergyUnit.format(:kg, equivalence) if units_of_equivalance == :co2
+    if %i[teaching_assistant_hours onshore_wind_turbine_hours offshore_wind_turbine_hours hour].include?(units_of_equivalance)
       return FormatEnergyUnit.format(:years, equivalence / 24.0 / 365.0)
     else
       return FormatEnergyUnit.format(Float, equivalence)
