@@ -5,6 +5,7 @@ class MeterTariffs
   FROMECONTRACTDATES_2015_2020 = Date.new(2015, 1, 1)..Date.new(2020, 3, 1)
   SOMERSETCONTRACTDATES_2015_2020 = Date.new(2017, 1, 1)..Date.new(2020, 3, 1)
   FOREVERCONTRACTDATES = Date.new(2000, 1, 1)..Date.new(2050, 1, 1)
+  # TODO(PH, 12Jun2019) update times to regional times : https://greennetworkenergy.co.uk/help-centre/meters-and-meter-reading/economy-7/
   ECONOMY7_NIGHT_TIME_PERIOD = TimeOfDay.new(0, 0)..TimeOfDay.new(6, 30)
   ECONOMY7_DAY_TIME_PERIOD = TimeOfDay.new(6, 30)..TimeOfDay.new(24, 0)
   DEFAULT_NIGHTTIME_RATE_FOR_DIFFERENTIAL_TARIFF = 0.08

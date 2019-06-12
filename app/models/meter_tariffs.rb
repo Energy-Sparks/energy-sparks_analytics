@@ -143,7 +143,16 @@ class MeterTariffs
   # short term adjustment for difference in area names between analystics and front end TODO(All, 9Apr2019) resolve long term
   private_class_method def self.translate_area_names_from_front_end(area_name)
     # rather not use include? as i may clash with other Bath school groups on different tariffs?
-    area_name == 'Bath & North East Somerset' ? 'Bath' : area_name
+    case area_name
+    when 'Bath & North East Somerset'
+      'Bath'
+    when 'Somerset'
+      'Frome'
+    when 'Abingdon'
+      'Oxfordshire'
+    else
+      area_name
+    end
   end
 
   private_class_method def self.default_area_tariff_for_date(area_name, fuel_type, date)
