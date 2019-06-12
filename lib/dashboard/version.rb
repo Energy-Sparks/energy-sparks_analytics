@@ -1,3 +1,3 @@
 module Dashboard
-  VERSION = "0.46.0-co-2-tab".freeze
+  VERSION = "0.48.0-co2-schedule-data-manager-changes-alerts-equivalences".freeze
 end
