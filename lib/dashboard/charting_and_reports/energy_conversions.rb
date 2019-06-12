@@ -73,7 +73,7 @@ class EnergyConversions
   private def format_equivalance_for_front_end(units_of_equivalance, equivalence)
     return FormatEnergyUnit.format(units_of_equivalance, equivalence) if %i[kwh kg £ km].include?(units_of_equivalance)
     return FormatEnergyUnit.format(:kg, equivalence) if units_of_equivalance == :co2
-    if %i[teaching_assistant_hours onshore_wind_turbine_hours offshore_wind_turbine_hours hour].include?(units_of_equivalance)
+    if %i[onshore_wind_turbine_hours offshore_wind_turbine_hours hour].include?(units_of_equivalance)
       return FormatEnergyUnit.format(:years, equivalence / 24.0 / 365.0)
     else
       return FormatEnergyUnit.format(Float, equivalence)
