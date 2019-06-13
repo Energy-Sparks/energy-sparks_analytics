@@ -9,6 +9,11 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
 
   def initialize(school)
     super(school, :asclimit)
+    # should really use asof date but not available in constructor
+    if @relevance == :relevant
+      opportunities = all_agreed_supply_capacities_with_peak_kw(Date.today)
+      @relevance = opportunities.empty? ? :never_relevant : :relevant
+    end
   end
 
   def self.template_variables
@@ -74,18 +79,15 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
 
   private def calculate(asof_date)
     opportunities = all_agreed_supply_capacities_with_peak_kw(asof_date)
-    @text_explaining_asc_meters_below_limit = text_for_all_meters(opportunities)
-    @asc_limit_kw = aggregate_asc_limit_kw(opportunities)
-    @maximum_kw_meter_period_kw = aggregate_peak_kw(opportunities)
-    annual_saving_£ = aggregate_annual_saving_£(opportunities)
-    @one_year_saving_£ = Range.new(annual_saving_£, annual_saving_£)
-    @rating = calculate_rating_from_range(400.0, 3000.0, annual_saving_£)
-  end
-
-  private def find_peak_kw
-    live_meters.each do |electric_meter|
-      peaks = electric_meter.amr_data.peak_kw_date_range_with_dates
-      puts peaks
+    unless opportunities.empty?
+      @text_explaining_asc_meters_below_limit = text_for_all_meters(opportunities)
+      @asc_limit_kw = aggregate_asc_limit_kw(opportunities)
+      @maximum_kw_meter_period_kw = aggregate_peak_kw(opportunities)
+      annual_saving_£ = aggregate_annual_saving_£(opportunities)
+      @one_year_saving_£ = Range.new(annual_saving_£, annual_saving_£)
+      @rating = calculate_rating_from_range(400.0, 3000.0, annual_saving_£)
+    else
+      @rating = 10.0
     end
   end
 
@@ -100,7 +102,7 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
 
   private def agreed_supply_capacity(meter, date)
     asc = MeterTariffs.accounting_tariff_for_date(date, meter.mpan_mprn)
-    asc[:asc_limit_kw]
+    asc.nil? ? nil : asc[:asc_limit_kw]
   end
 
   private def text_for_all_meters(opportunity_list)
