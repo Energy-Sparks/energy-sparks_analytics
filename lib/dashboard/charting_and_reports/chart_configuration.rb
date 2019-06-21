@@ -371,7 +371,7 @@ class ChartManager
       name:             'By Week: Gas (Meter Breakdown)',
       inherits_from:    :group_by_week_gas_unlimited,
       series_breakdown: :meter
-      # filter:            { meter: [ 'Electrical Heating' ] } 
+      # filter:            { meter: [ 'Electrical Heating' ] }
     },
     group_by_year_gas_unlimited_meter_breakdown_heating_model_fitter: {
       name:             'Gas meter breakdown by year',
@@ -748,7 +748,7 @@ class ChartManager
     heating_on_off_by_week_heating_school_non_school_days_only: {
       inherits_from:    :heating_on_off_by_week_heating_school_days_and_holidays_only,
       filter:            { daytype: :unoccupied, heating: true },
-      y2_axis:          :none
+      y2_axis:          nil
     },
     thermostatic_model_categories_pie_chart: {
       name:             'Categorised consumption by model',

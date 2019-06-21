@@ -56,7 +56,7 @@ class SeriesNames
   GASCARBON       = 'Carbon Intensity of Gas (kg/kWh)'.freeze
 
   STORAGEHEATERS  = 'storage heaters'
-  SOLARPV         = 'solar pv (consumed onsite)'      
+  SOLARPV         = 'solar pv (consumed onsite)'
 
   PREDICTEDHEAT   = 'Predicted Heat'.freeze
   CUSUM           = 'CUSUM'.freeze
@@ -304,7 +304,7 @@ class SeriesDataManager
 
     @y2_axis_list.each do |breakdown_type|
       case breakdown_type
-      when :degreedays;   breakdown[SeriesNames::DEGREEDAYS]  = @meter_collection.temperatures.degree_hour(date, halfhour_index, degreeday_base_temperature)
+      when :degreedays;   breakdown[SeriesNames::DEGREEDAYS]  = @meter_collection.temperatures.degree_hour(date, halfhour_index, 20.0)
       when :temperature;  breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.temperature(date, halfhour_index)
       when :irradiance;   breakdown[SeriesNames::IRRADIANCE]  = @meter_collection.solar_irradiation.solar_irradiance(date, halfhour_index)
       when :gridcarbon;   breakdown[SeriesNames::GRIDCARBON]  = @meter_collection.grid_carbon_intensity.grid_carbon_intensity(date, halfhour_index)
@@ -333,7 +333,7 @@ class SeriesDataManager
       when :baseload;       breakdown[SeriesNames::BASELOAD] = meter.amr_data.baseload_kwh_date_range(d1, d2)
       when :peak_kw;        breakdown[SeriesNames::PEAK_KW] = meter.amr_data.peak_kw_kwh_date_range(d1, d2)
       when :cusum;          breakdown[SeriesNames::CUSUM] = cusum(meter, d1, d2)
-      when :degreedays;     breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2)
+      when :degreedays;     breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(20.0, d1, d2)
       when :temperature;    breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(d1, d2)
       when :irradiance;     breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.average_in_date_range(d1, d2)
       when :gridcarbon;     breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.average_in_date_range(d1, d2)
@@ -352,7 +352,7 @@ class SeriesDataManager
     meter.amr_data.days_kwh_x48(date, data_type)
   end
 
-  def amr_data_one_day(meter, date, data_type = :kwh) 
+  def amr_data_one_day(meter, date, data_type = :kwh)
     meter.amr_data.one_day_kwh(date, data_type)
   end
 
@@ -362,7 +362,7 @@ class SeriesDataManager
 
   private def scaling_factor_for_model_derived_gas_data(data_type)
     case data_type
-    when :£, :economic_cost;      BenchmarkMetrics::GAS_PRICE         
+    when :£, :economic_cost;      BenchmarkMetrics::GAS_PRICE
     when :accounting_cost;        BenchmarkMetrics::GAS_PRICE # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
     when :co2;                    EnergyEquivalences::UK_GAS_CO2_KG_KWH
     else;                         1.0 end
@@ -962,7 +962,7 @@ private
       @periods = [SchoolDatePeriod.new(:chartperiod, 'One Period for Chart', @first_meter_date, @last_meter_date)]
     end
     if @periods.nil? || @periods.empty? || @periods[0].nil?
-      timescale_config = @chart_configuration.key?(:timescale) 
+      timescale_config = @chart_configuration.key?(:timescale)
       raise EnergySparksNotEnoughDataException.new("Not enough meter data (nil periods) for chart timescale config #{timescale_config}")
     end
   end
