@@ -193,6 +193,18 @@ class Aggregator
     schools.each do |school|
       @meter_collection = school
       periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
+
+      aggregation = run_one_aggregation(@chart_config, period)
+      aggregations.push(
+        {
+          school:       school,
+          period:       period,
+          aggregation:  aggregation
+        }
+      )
+
+=begin
+# temporarily commented out, now allows any one failure in a chart with multiple lines to fail PH 4Jul2019
         begin
           aggregation = run_one_aggregation(@chart_config, period)
           aggregations.push(
@@ -205,6 +217,7 @@ class Aggregator
         rescue EnergySparksNotEnoughDataException, EnergySparksMissingPeriodForSpecifiedPeriodChart => e
           error_messages.push(e.message)
         end
+=end
       end
     end
 

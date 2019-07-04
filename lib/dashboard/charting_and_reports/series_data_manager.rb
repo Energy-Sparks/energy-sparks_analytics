@@ -181,8 +181,11 @@ class SeriesDataManager
 
   def degreeday_base_temperature
     begin
+      return 15.5 # tempeorary fix for unstable models PH 4Jul2019
       base = heating_model.average_base_temperature
-      [[base, 10.0].min, 30.0].max # temporarily limit range of base temperature TODO(PH,20Mar2019) fix
+      return 30.0 if base > 30.0
+      return 10.0 if base < 10.0
+      return base
     rescue StandardError => _e
       # TODO(PH, 7Mar2019) - this is a little dangerous as it might give a false
       # impression of the base temperature, the problem lies in the simulator

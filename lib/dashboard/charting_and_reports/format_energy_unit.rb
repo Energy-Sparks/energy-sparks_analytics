@@ -191,7 +191,7 @@ class FormatEnergyUnit
 
   def self.significant_figures(value, significant_figures)
     return 0 if value.nil? || value.zero?
-    BigDecimal.new(value, significant_figures).to_f # value.round(-(Math.log10(value).ceil - significant_figures))
+    BigDecimal(value, significant_figures).to_f # value.round(-(Math.log10(value).ceil - significant_figures))
   end
 end
 
