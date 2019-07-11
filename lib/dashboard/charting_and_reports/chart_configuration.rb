@@ -1345,6 +1345,11 @@ class ChartManager
       yaxis_units:      :£,
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
+    teachers_landing_page_gas_simple: {
+      yaxis_units:      :£,
+      y2_axis:          nil,
+      inherits_from:    :last_2_weeks_gas_comparison,
+    },
     alert_last_2_weeks_gas_comparison_temperature_compensated: {
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
