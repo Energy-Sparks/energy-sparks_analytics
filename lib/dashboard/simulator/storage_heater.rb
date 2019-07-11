@@ -40,9 +40,17 @@ class StorageHeater
   end
 
   private def storage_heater_on?(amr_data, date, halfhour_index, baseload_kwh)
-    halfhour_index >= @storage_heater_config.storage_heater_start_time_hh(date) &&
-    halfhour_index <= @storage_heater_config.storage_heater_end_time_hh(date) &&
-    amr_data.kwh(date, halfhour_index) > baseload_kwh * 1.5
+    if @storage_heater_config.storage_heater_end_time_hh(date) > @storage_heater_config.storage_heater_start_time_hh(date)
+      # when storage heater starts and ends in the same day
+      halfhour_index >= @storage_heater_config.storage_heater_start_time_hh(date) &&
+      halfhour_index <= @storage_heater_config.storage_heater_end_time_hh(date) &&
+      amr_data.kwh(date, halfhour_index) > baseload_kwh * 1.5
+    else
+      # when storage heater starts before midnight
+      ( halfhour_index >= @storage_heater_config.storage_heater_start_time_hh(date) ||
+        halfhour_index <= @storage_heater_config.storage_heater_end_time_hh(date) ) &&
+        amr_data.kwh(date, halfhour_index) > baseload_kwh * 1.5
+    end
   end
 
   BASELOAD_FACTOR = 1.5
@@ -95,11 +103,16 @@ class StorageHeater
     end
 
     def storage_heater_start_time_hh(date)
-      0 # TODO PH 20Mar2019 - put in config or config default times
+      config_for_date(date)[:charge_start_time].to_halfhour_index_with_fraction[0]
     end
 
     def storage_heater_end_time_hh(date)
-      15 # TODO PH 20Mar2019 - put in config or config default times
+      config_for_date(date)[:charge_end_time].to_halfhour_index_with_fraction[0]
+    end
+
+    private def config_for_date(date)
+      @config_by_date_range.select { |date_range, config| date >= date_range.first && date <= date_range.last }
+      @config_by_date_range.empty? ? nil : @config_by_date_range.values[0]
     end
 
     private def parse_meter_attributes_configuration(meter_attributes_config)

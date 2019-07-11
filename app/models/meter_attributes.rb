@@ -134,9 +134,22 @@ class MeterAttributes
       meter_corrections: [
         {
           readings_start_date: Date.new(2011, 10, 20),
-          reason: 'For some reason all data was set as an attibute to zero historically, changed 3Mar2019 PH'
+          reason: 'For some reason all data was set as an attribute to zero historically, changed 3Mar2019 PH'
         }
-      ]
+      ],
+      storage_heaters: [  # an array so you can change the config for different time periods
+        {
+          start_date:         Date.new(2011, 10, 20),
+          end_date:           Date.new(2025, 1, 1),
+          power_kw:           22.0,
+          charge_start_time:  TimeOfDay.new(22, 30),
+          charge_end_time:    TimeOfDay.new(6, 30)
+        }
+      ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     20,
+        reason: 'Storage heater model assumptions on summer usage, wrong probably because of partial turn off'
+      }
     },
     # ==============================Mundella Primary School=============================
     9091095306 => {
@@ -407,19 +420,19 @@ class MeterAttributes
         },
       ],
       heating_model: {
-        max_summer_daily_heating_kwh:     25,
+        max_summer_daily_heating_kwh:     15,
         reason: 'Staton Drew has strange bifurcation, suggesting half the storage heaters are switched off much earlier in the year'
       },
       tariff: {
         type:             :economy_7 # this isn't really the case for Stanton Drew as runs off flat tariff but it will do for testing
       },
       storage_heaters: [  # an array so you can change the config for different time periods
-        {                 # the contents of the hash are all optional, so can set the config to storage_heaters: nil for simplicity
-          start_date:         Date.new(2010, 1, 1),   # not strictly necessary, included for testing purposes, if missing assumes 'forever'
-          end_date:           Date.new(2025, 1, 1),   # not strictly necessary, included for testing purposes, if missing assumes 'forever'
+        {
+          start_date:         Date.new(2010, 1, 1),
+          end_date:           Date.new(2025, 1, 1),
           power_kw:           22.0,                   # not strictly necessary, included for testing purposes
-          charge_start_time:  TimeOfDay.new(0, 30),   # optional
-          charge_end_time:    TimeOfDay.new(6, 30),   # optional
+          charge_start_time:  TimeOfDay.new(0, 30),
+          charge_end_time:    TimeOfDay.new(7, 00), 
           days_of_week:       ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Saturday'] # suspect this isn't required/not supported
         }
       ]
