@@ -216,8 +216,8 @@ class DashboardConfiguration
                                     storage_heater_intraday_current_year
                                     storage_heater_intraday_current_year_kw
                                     intraday_line_school_last7days_storage_heaters
-                                    storage_heater_thermostatic
                                     heating_on_off_by_week_storage_heater
+                                    storage_heater_thermostatic
                                   ],
                               },
         solar_pv:             {

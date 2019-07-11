@@ -167,28 +167,28 @@ class ChartManager
       yaxis_units:      :£
     },
     storage_heater_group_by_week: {
-      name:               'Storage heater by week of the year',
+      name:               'Information on your school’s storage heater electricity consumption',
       inherits_from:      :group_by_week_electricity,
       meter_definition:   :storage_heater_meter,
       y2_axis:            :degreedays
     },
     storage_heater_by_day_of_week: {
-      name:               'Storage heater by day of the week (year to date)',
+      name:               'Storage heater usage by day of the week',
       inherits_from:      :gas_by_day_of_week,
       meter_definition:   :storage_heater_meter
     },
     storage_heater_group_by_week_long_term: {
-      name:               'Storage heater by day of the week (all years)',
+      name:               'Storage heater electricity consumption over a longer time period',
       inherits_from:      :storage_heater_group_by_week,
       timescale:          nil
     },
     storage_heater_thermostatic: {
-      name:               'Storage heater thermostatic control by day of the week (year to date)',
+      name:               'Thermostatic control',
       inherits_from:      :thermostatic,
       meter_definition:   :storage_heater_meter
     },
     storage_heater_intraday_current_year: {
-      name:               'Storage heater intraday profile (kwh) for year to date',
+      name:               'Storage heater power consumption',
       inherits_from:      :gas_heating_season_intraday,
       meter_definition:   :storage_heater_meter
     },
@@ -200,12 +200,12 @@ class ChartManager
     },
     intraday_line_school_last7days_storage_heaters:  {
       inherits_from:    :intraday_line_school_last7days,
-      name:             'Intraday (last 7 days) storage heaters',
+      name:             'Last 7 days storage heater power consumption',
       meter_definition: :storage_heater_meter
     },
     heating_on_off_by_week_storage_heater: {
       inherits_from:    :heating_on_off_by_week,
-      name:             'Heating on/off periods',
+      name:             'How many days the heating is left on during the year',
       meter_definition: :storage_heater_meter
     },
     solar_pv_group_by_week: {
@@ -1348,7 +1348,7 @@ class ChartManager
     teachers_landing_page_gas_simple: {
       yaxis_units:      :£,
       y2_axis:          nil,
-      inherits_from:    :last_2_weeks_gas_comparison,
+      inherits_from:    :last_2_weeks_gas_comparison
     },
     alert_last_2_weeks_gas_comparison_temperature_compensated: {
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated

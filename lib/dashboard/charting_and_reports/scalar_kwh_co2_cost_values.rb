@@ -16,6 +16,10 @@ class ScalarkWhCO2CostValues
 
   def day_type_breakdown(time_scale, fuel_type, data_type = :kwh, format_data = false, percent = false)
     aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, {series_breakdown: :daytype})
+    extract_data_from_chart_calculation_result(aggregator, percent, data_type, format_data)
+  end
+
+  private def extract_data_from_chart_calculation_result(aggregator, percent, data_type, format_data)
     data = aggregator.bucketed_data
     data.transform_values! { |v| v[0] }
     total = data.values.sum if percent
