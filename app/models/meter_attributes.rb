@@ -117,6 +117,20 @@ class MeterAttributes
         :deprecated_include_but_ignore_start_date
       ]
     },
+    # ==============================Hugh Sexey=============================
+    2200013680374 => {
+      solar_pv: [  # and array to cope with multiple installations at different times at the same school e.g. Newbridge
+        {
+          start_date:         Date.new(2018, 11, 15),
+          # end_date:          Date.new(2025, 1, 7),
+          kwp:                30.0,
+          orientation:        0,
+          tilt:               30,
+          shading:            0,
+          fit_£_per_kwh:      0.05
+        }
+      ]
+    },
     # ==============================King Edward VI =============================
     6517203  => {
       meter_corrections: [
@@ -421,7 +435,7 @@ class MeterAttributes
       ],
       heating_model: {
         max_summer_daily_heating_kwh:     15,
-        reason: 'Staton Drew has strange bifurcation, suggesting half the storage heaters are switched off much earlier in the year'
+        reason: 'Stanton Drew has strange bifurcation, suggesting half the storage heaters are switched off much earlier in the year'
       },
       tariff: {
         type:             :economy_7 # this isn't really the case for Stanton Drew as runs off flat tariff but it will do for testing

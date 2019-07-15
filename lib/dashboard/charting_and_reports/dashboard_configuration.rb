@@ -295,5 +295,11 @@ class DashboardConfiguration
                             boiler_control
                             solar_pv
                         ],
+    electric_and_solar_pv:
+                        %i[
+                            main_dashboard_electric_and_gas
+                            electricity_detail
+                            solar_pv
+                        ],
   }.freeze
 end
