@@ -297,7 +297,7 @@ class DashboardConfiguration
                         ],
     electric_and_solar_pv:
                         %i[
-                            main_dashboard_electric_and_gas
+                            main_dashboard_electric
                             electricity_detail
                             solar_pv
                         ],
