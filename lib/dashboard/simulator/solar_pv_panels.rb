@@ -99,7 +99,7 @@ class SolarPVPanels
   # and the mains consumption is zero or near zero, i.e. mains consumption is zero
   # but there isn't enough predicted pv to result in an export
   private def normalise_pv(exported_pv_kwh_x48, pv_consumed_onsite_kwh_x48)
-    positive_export_kwh = exported_pv_kwh_x48.sum { |kwh| kwh > 0.0 ? kwh : 0.0 }
+    positive_export_kwh = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? kwh : 0.0 }.sum
     negative_only_exported_kwh_x48 = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? 0.0 : kwh }
     scale_factor = 1.0 + (positive_export_kwh / pv_consumed_onsite_kwh_x48.sum)
     scaled_onsite_kwh_x48 = pv_consumed_onsite_kwh_x48.map { |kwh| kwh * scale_factor }
