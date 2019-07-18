@@ -28,7 +28,7 @@ schools.each do |school_name, fuel_type|
 end
 =end
 
-school_name = 'Whiteways Primary'
+school_name = 'Paulton Junior School'
 
 meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
 
