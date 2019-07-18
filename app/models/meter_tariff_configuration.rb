@@ -329,6 +329,8 @@ class MeterTariffs
         name: 'Npower YPO 5 year electricity plan - flat rate',
         rates: {
           standing_charge:  { per: :day, rate: 6.161 },
+          # TODO(PH, 13Jun019) - REO added for Sprint 3 purposes only, remove afterwards
+          renewable_energy_obligation:  { per: :kwh,     rate: 0.00565 },
           rate:  { per: :kwh, rate: 0.1191 }
         }
       }

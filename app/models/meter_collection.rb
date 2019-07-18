@@ -117,7 +117,11 @@ class MeterCollection
     elsif heat_report
       :gas_only
     elsif electric_report
-      :electric_only
+      if solar_pv_panels?
+        :electric_and_solar_pv
+      else
+        :electric_only
+      end
     else
       nil
     end

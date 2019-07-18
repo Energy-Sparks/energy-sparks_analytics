@@ -220,6 +220,19 @@ class ChartManager
       meter_definition: :allelectricity,
       series_breakdown:   :submeter
     },
+    solar_pv_group_by_month: {
+      name:               'Analysis of your school’s solar PV panels',
+      inherits_from:      :solar_pv_group_by_week_by_submeter,
+      x_axis:             :month
+    },
+    solar_pv_last_7_days_by_submeter: {
+      name:               'The last 7 days of your school’s electricity consumption',
+      inherits_from:      :solar_pv_group_by_week,
+      timescale:          [{ day: -6...0 }],
+      x_axis:             :datetime,
+      meter_definition:   :allelectricity,
+      series_breakdown:   :submeter
+    },
     group_by_week_electricity_test_range: {
       inherits_from:    :group_by_week_electricity,
       name:             'By Day: Electricity Range Test',

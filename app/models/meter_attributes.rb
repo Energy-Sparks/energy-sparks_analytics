@@ -121,7 +121,7 @@ class MeterAttributes
     2200013680374 => {
       solar_pv: [  # and array to cope with multiple installations at different times at the same school e.g. Newbridge
         {
-          start_date:         Date.new(2018, 11, 15),
+          start_date:         Date.new(2018, 11, 7),
           # end_date:          Date.new(2025, 1, 7),
           kwp:                30.0,
           orientation:        0,

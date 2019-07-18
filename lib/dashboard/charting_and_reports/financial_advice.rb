@@ -67,41 +67,6 @@ class DashboardEnergyAdvice
       true
     end
 
-    # copied from heating_regression_model_fitter.rb TODO(PH,17Feb2019) - merge
-    def html_table(header, rows, totals_row = false)
-      template = %{
-        <p>
-          <table class="table table-striped table-sm">
-            <thead>
-              <tr class="thead-dark">
-                <% header.each do |header_titles| %>
-                  <th scope="col"> <%= header_titles.to_s %> </th>
-                <% end %>
-              </tr>
-            </thead>
-            <tbody>
-              <% rows.each do |row| %>
-                <tr>
-                  <% row.each do |val| %>
-                    <td> <%= val %> </td>
-                  <% end %>
-                </tr>
-              <% end %>
-            </tbody>
-            <% if totals_row %>
-              <tr class="table-success">
-              <% totals_row.each do |total| %>
-                <th scope="col"> <%= total.to_s %> </th>
-              <% end %>
-              </tr>
-            <% end %>
-          </table>
-        </p>
-      }.gsub(/^  /, '')
-  
-      generate_html(template, binding)
-    end
-
     def concatenate_advice_with_body_start_end(advice_list)
       advice_list = [ advice_list ] unless advice_list.is_a?(Array)
       template =  %q{ <%= @body_start %> } +
@@ -265,6 +230,7 @@ class DashboardEnergyAdvice
 
     # "standing_charge:Sun14May17-Sat12May18" becomes [:standing_charge, start_date, end_date]
     private def decode_month_chart_type_key(composite_key)
+      return [composite_key, nil, nil] unless composite_key.include?(':')
       rate_type_key, date_range = composite_key.split(':')
       date1, date2 = date_range.split('-')
       [rate_type_key.to_sym, Date.parse(date1), Date.parse(date2)]

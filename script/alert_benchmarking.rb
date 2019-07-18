@@ -91,7 +91,7 @@ alerts_to_test = { # classname => excel worksheet tab
 excluded_schools = [] # ['Ecclesall Primary School', 'Selwood Academy', 'Athelstan Primary School', 'Walkley Tennyson School']
 included_schools = nil # ['Whiteways Primary']
 
-asof_date = Date.new(2019, 2, 15)
+asof_date = Date.new(2019, 6, 30)
 
 school_names = AnalysticsSchoolAndMeterMetaData.new.meter_collections.keys
 
@@ -173,7 +173,7 @@ end
 history.save(calculated_results)
 
 print_banner "Differences:"
-h_diff = Hashdiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
+h_diff = HashDiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
 puts h_diff
 
 print_banner "Calc times:"

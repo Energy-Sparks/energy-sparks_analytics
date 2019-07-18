@@ -128,7 +128,7 @@ class AggregateDataService
 
       logger.info 'Creating an artificial solar pv meter and associated amr data'
 
-      solar_amr = electricity_meter.solar_pv_setup.create_solar_pv_amr_data(
+      disaggregated_data = electricity_meter.solar_pv_setup.create_solar_pv_data(
         electricity_meter.amr_data,
         @meter_collection,
         electricity_meter.mpan_mprn
@@ -136,14 +136,25 @@ class AggregateDataService
 
       solar_pv_meter = create_modified_meter_copy(
         electricity_meter,
-        solar_amr,
+        disaggregated_data[:solar_consumed_onsite],
         :solar_pv,
-        electricity_meter.id.to_i + 10000000, # TODO(PH,21Mar2019) - need proper synthetic id
-        'Electricity consumed from solar PV panels'
+        Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, :solar_pv),
+        SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
       )
-      logger.info "Created meter onsite consumed electricity pv data from #{solar_amr.start_date} to #{solar_amr.end_date} #{solar_amr.total.round(0)}kWh"
+      logger.info "Created meter onsite consumed electricity pv data from #{disaggregated_data[:solar_consumed_onsite].start_date} to #{disaggregated_data[:solar_consumed_onsite].end_date} #{disaggregated_data[:solar_consumed_onsite].total.round(0)}kWh"
 
       electricity_meter.sub_meters.push(solar_pv_meter)
+
+      exported_pv = create_modified_meter_copy(
+        electricity_meter,
+        disaggregated_data[:exported],
+        :solar_pv,
+        Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, :exported_solar_pv),
+        SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME
+      )
+      logger.info "Created meter onsite consumed electricity pv data from #{disaggregated_data[:exported].start_date} to #{disaggregated_data[:exported].end_date} #{disaggregated_data[:exported].total.round(0)}kWh"
+
+      electricity_meter.sub_meters.push(exported_pv)
 
       # make the original top level meter a sub meter of itself
 
@@ -152,7 +163,7 @@ class AggregateDataService
         electricity_meter.amr_data,
         :electricity,
         electricity_meter.id,
-        'Electricity consumed from mains'
+        SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
       )
 
       logger.info "Making original mains consumption meter a submeter from #{electricity_meter.amr_data.start_date} to #{electricity_meter.amr_data.end_date} #{electricity_meter.amr_data.total.round(0)}kWh"
@@ -173,9 +184,9 @@ class AggregateDataService
 
       logger.info "Assigning solar + mains amr to main meter from #{electric_plus_pv_amr_data.start_date} to #{electric_plus_pv_amr_data.end_date} #{electric_plus_pv_amr_data.total.round(0)}kWh"
 
-      electricity_meter.amr_data = electric_plus_pv_amr_data
-      electricity_meter.id = "#{electricity_meter.id} plus pv"
-      electricity_meter.name = "#{electricity_meter.name} plus pv"
+      electricity_meter.amr_data = disaggregated_data[:electricity_consumed_onsite]
+      electricity_meter.id = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+      electricity_meter.name = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
 
       calculate_meter_carbon_emissions_and_costs(original_electric_meter, :electricity)
       calculate_meter_carbon_emissions_and_costs(electricity_meter, :electricity)

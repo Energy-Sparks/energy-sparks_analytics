@@ -223,9 +223,8 @@ class DashboardConfiguration
         solar_pv:             {
                                 name: 'Solar PV',
                                 charts: %i[
-                                  solar_pv_group_by_week
-                                  group_by_week_electricity
-                                  solar_pv_group_by_week_by_submeter
+                                  solar_pv_group_by_month
+                                  solar_pv_last_7_days_by_submeter
                                 ],
                               },
         carbon_emissions:   {

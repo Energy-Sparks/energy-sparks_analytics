@@ -132,11 +132,15 @@ module Dashboard
       meter_no.present? ? meter_no : meter_type.to_s
     end
 
-    def self.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type)
+    def self.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type, group_number = 0)
       if fuel_type == :electricity || fuel_type == :aggregated_electricity
         90000000000000 + urn.to_i
       elsif fuel_type == :gas || fuel_type == :aggregated_heat
         80000000000000 + urn.to_i
+      elsif fuel_type == :solar_pv
+        70000000000000 + urn.to_i + 1000000000000 * group_number
+      elsif fuel_type == :exported_solar_pv
+        60000000000000 + urn.to_i + 1000000000000 * group_number
       else
         raise EnergySparksUnexpectedStateException.new('Unexpected fuel_type')
       end

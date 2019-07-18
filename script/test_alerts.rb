@@ -39,7 +39,7 @@ def print_all_results(alert_class, alert)
 end
 
 @method_calls = [
- # { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
+ { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
  { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
  { on_class: false,  method: :front_end_template_data, name: 'front end text data', args: nil, use_puts: false },
  # { on_class: false,  method: :backwards_compatible_analysis_report, name: 'Backwards compatible alert report', args: nil, use_puts: true },
@@ -89,12 +89,14 @@ alerts_to_test = [
   AlertHeatingOnSchoolDays,
   AlertThermostaticControl,
   AlertGasMeterConsolidationOpportunity,
-  AlertElectricityMeterConsolidationOpportunity
+  AlertElectricityMeterConsolidationOpportunity,
+  AlertMeterASCLimit,
+  AlertDifferentialTariffOpportunity
 =end
 ]
 
 excluded_schools = ['Ecclesall Primary School']
-included_schools = ['King Edward VII Upper School']
+included_schools = ['Athelstan Primary School']
 
 asof_date = Date.new(2019, 4, 30)
 

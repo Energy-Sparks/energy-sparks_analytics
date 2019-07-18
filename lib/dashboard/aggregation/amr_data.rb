@@ -70,20 +70,24 @@ class AMRData < HalfHourlyData
     return @carbon_emissions.one_days_data_x48(date) if type == :co2
   end
 
+  def self.one_day_zero_kwh_x48
+    Array.new(48, 0.0)
+  end
+
   def self.fast_multiply_x48_x_x48(a, b)
-    c = Array.new(48, 0.0)
+    c = one_day_zero_kwh_x48
     (0..47).each { |x| c[x] = a[x] * b[x] }
     c
   end
 
   def self.fast_add_x48_x_x48(a, b)
-    c = Array.new(48, 0.0)
+    c = one_day_zero_kwh_x48
     (0..47).each { |x| c[x] = a[x] + b[x] }
     c
   end
 
   def self.fast_add_multiple_x48_x_x48(list)
-    c = Array.new(48, 0.0)
+    c = one_day_zero_kwh_x48
     list.each do |data_x48|
       c = fast_add_x48_x_x48(c, data_x48)
     end
@@ -276,7 +280,7 @@ class AMRData < HalfHourlyData
   def self.create_empty_dataset(type, start_date, end_date)
     data = AMRData.new(type)
     (start_date..end_date).each do |date|
-      data.add(date, OneDayAMRReading.new('Unknown', date, 'ORIG', nil, DateTime.now, Array.new(48, 0.0)))
+      data.add(date, OneDayAMRReading.new('Unknown', date, 'ORIG', nil, DateTime.now, one_day_zero_kwh_x48))
     end
     data
   end

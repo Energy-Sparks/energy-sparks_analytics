@@ -33,7 +33,10 @@ class OneDayAMRReading
     'AGGR'  => { name: 'Aggregate meter data',                              description: 'Internally aggregated from more than one meter'},
     'STOR'  => { name: 'Extracted storage heater data (good)',              description: 'Synthetic storage heater data extracted from main meter'},
     'STEX'  => { name: 'Remaining data post storage heater extraction-good',description: 'Synthetic remaining data after storage heater data extracted from main meter'},
-    'SOLR'  => { name: 'Synthetic solar PV (good)',                         description: 'Synthetic solar pv data'},
+    'SOLR'  => { name: 'Synthetic solar PV output (good)',                  description: 'Synthetic solar pv output'},
+    'SOLO'  => { name: 'Synthetic solar PV consumed Onsite (good)',         description: 'Synthetic solar pv consumed onsite'},
+    'SOLE'  => { name: 'Synthetic solar PV exported (good)',                description: 'Synthetic solar pv exported'},
+    'SOLX'  => { name: 'Synthetic onsite solar + mains consumption (good)', description: 'Synthetic sum of solar pv consumed onsite and mains consumption'},
   }.freeze
   # rubocop:disable Metrics/LineLength
 end

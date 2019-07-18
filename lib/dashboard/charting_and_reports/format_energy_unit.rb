@@ -181,6 +181,8 @@ class FormatEnergyUnit
     case user_type
     when :ks2
       2
+    when :approx_accountant
+      5
     when :accountant, :energy_expert
       10
     else
