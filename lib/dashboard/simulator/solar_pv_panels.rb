@@ -28,6 +28,10 @@ class SolarPVPanels
     solar_pv_consumed_onsite_amr = AMRData.new(:electricity)
     electricity_consumed_onsite_amr = AMRData.new(:electricity)
 
+    logger.info 'create_solar_pv_data:'
+    logger.info "Meter date range #{electricity_amr.start_date} to #{electricity_amr.end_date}"
+    logger.info "PV date range #{meter_collection.solar_pv.start_date} to #{meter_collection.solar_pv.end_date}"
+
     (electricity_amr.start_date..electricity_amr.end_date).each do |date|
       capacity = degraded_kwp(date)
       pv_yield_x48 = meter_collection.solar_pv[date]
@@ -42,6 +46,11 @@ class SolarPVPanels
       end
 
       electricity_consumed_onsite_x48 = AMRData.one_day_zero_kwh_x48
+      if date == Date.new(2014, 1, 1)
+        puts "Solar PV 1st Jan 2014 issue"
+        ap pv_consumed_onsite_kwh_x48
+      end
+
       (0..47).each do |halfhour_index|
         electricity_consumed_onsite_x48[halfhour_index] = electricity_amr.kwh(date, halfhour_index) + pv_consumed_onsite_kwh_x48[halfhour_index]
       end
@@ -95,11 +104,11 @@ class SolarPVPanels
   end
 
   # to avoid persistent bias in output rescale pv_consumed_onsite_kwh_x48 if
-  # the baseload minus the predicted pv output is doesn't result in an export
+  # the baseload minus the predicted pv output doesn't result in an export
   # and the mains consumption is zero or near zero, i.e. mains consumption is zero
   # but there isn't enough predicted pv to result in an export
   private def normalise_pv(exported_pv_kwh_x48, pv_consumed_onsite_kwh_x48)
-    positive_export_kwh = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? kwh : 0.0 }.sum
+    positive_export_kwh = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? kwh : 0.0 }.sum # map then sum to avoid StatSample sum bug
     negative_only_exported_kwh_x48 = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? 0.0 : kwh }
     scale_factor = 1.0 + (positive_export_kwh / pv_consumed_onsite_kwh_x48.sum)
     scaled_onsite_kwh_x48 = pv_consumed_onsite_kwh_x48.map { |kwh| kwh * scale_factor }
@@ -112,7 +121,7 @@ class SolarPVPanels
 
   private def yesterday_baseload_kw(date, electricity_amr)
     yesterday_date = date == electricity_amr.start_date ? electricity_amr.start_date : (date - 1)
-    yesterday_baseload_kw = electricity_amr.overnight_baseload_kw(yesterday_date)
+    electricity_amr.overnight_baseload_kw(yesterday_date)
   end
 
   def create_solar_pv_amr_data_deprecated(electricity_amr, meter_collection, mpan_solar_pv)

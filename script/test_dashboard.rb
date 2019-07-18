@@ -14,7 +14,7 @@ end
 
 profile = false
 
-if true
+if false
   
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
@@ -74,7 +74,7 @@ puts "Load time: #{bm.round(3)} seconds"
 # reports.do_all_schools(true)
 # reports.do_one_page(:solar_pv)
 # reports.do_chart_list('Paulton', [:benchmark])
-# reports.do_all_standard_pages_for_school
+reports.do_all_standard_pages_for_school
 # reports.do_all_schools(true)
 # reports.save_excel_and_html
 # reports.do_all_schools(true)
@@ -82,7 +82,7 @@ puts "Load time: #{bm.round(3)} seconds"
 # reports.do_one_page(:cost)
 # reports.do_chart_list('Peak', [:peak_kw])
 # reports.do_chart_list('Paulton',  [:teachers_landing_page_gas_simple])
-reports.do_all_standard_pages_for_school
+# reports.do_all_standard_pages_for_school
 
 if profile
   prof_result = RubyProf.stop
