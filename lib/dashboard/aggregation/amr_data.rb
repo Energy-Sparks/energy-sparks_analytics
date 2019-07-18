@@ -179,7 +179,7 @@ class AMRData < HalfHourlyData
   end
 
   def overnight_baseload_kw(date)
-    raise EnergySparksNotEnoughDataException.new("Missing electric data (2) for #{date}") if !self.key?(date)
+    raise EnergySparksNotEnoughDataException.new("Missing electric data (2) for #{date}") if date_missing?(date)
     baseload_kw_between_half_hour_indices(date, 41, 47)
   end
 
