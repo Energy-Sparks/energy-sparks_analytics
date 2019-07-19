@@ -56,7 +56,7 @@ class EnergyEquivalences
 
   def self.equivalence_description(from_value, from_unit, from_type_description, to_value, to_unit, to_type_description)
     equivalence = # commented out following CT request 27Mar2019; description(from_value, from_unit, from_type_description) +
-                  'This is equivalent to ' +
+                  'This saving is equivalent to ' +
                   description(to_value, to_unit, to_type_description)
   end
 
