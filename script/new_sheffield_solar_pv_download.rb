@@ -65,6 +65,18 @@ def old_pv_feed
   # ap(pv_data_date_to_x48)
 end
 
+def download_data(latitude, longitude, start_date, end_date)
+  pv_interface = SheffieldSolarPVV2.new
+
+  nearest = pv_interface.find_nearest_areas(latitude, longitude)
+
+  solar_pv_data, missing_date_times, whole_day_substitutes = pv_interface.historic_solar_pv_data(nearest.first[:gsp_id], latitude, longitude, start_date, end_date)
+
+  report_bad_data(missing_date_times, whole_day_substitutes)
+
+  ap solar_pv_data
+end
+
 def update_solar_pv_csv_file(filename, name, latitude, longitude, datum_for_feed, end_date)
   puts '=' * 80
   puts "Updating solar pv for #{name}"
@@ -118,6 +130,19 @@ exit
 # =================== MAIN ============================
 datum_for_feed = Date.new(2014, 1, 1)
 end_date = Date.today - 1
+
+=begin
+AreaNames::AREA_NAMES.each do |area, location_data|
+
+  puts "Doing #{area}"
+
+  download_data(location_data[:latitude], location_data[:longitude], Date.new(2016, 11, 24), Date.new(2016, 11, 27))
+
+  exit
+
+end
+
+=end
 
 AreaNames::AREA_NAMES.each do |_area, location_data|
   update_solar_pv_csv_file(
