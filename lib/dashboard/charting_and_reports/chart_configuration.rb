@@ -1,3 +1,4 @@
+require_relative './series_data_manager.rb'
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
@@ -749,11 +750,44 @@ class ChartManager
       y2_axis:          :degreedays
     },
     heating_on_off_by_week: {
-      name:             'Heating season analysis',
-      inherits_from:    :thermostatic_model_by_week,
-      timescale:        :year,
-      model:            :best,
-      series_breakdown: :heating
+      name:                     'Heating season analysis',
+      inherits_from:            :thermostatic_model_by_week,
+      timescale:                :year,
+      model:                    :best,
+      series_breakdown:         :heating
+    },
+    heating_on_off_by_week_with_breakdown_all: {
+      inherits_from:            :heating_on_off_by_week,
+      series_breakdown:         :heating_daytype,
+      add_day_count_to_legend:  true
+    },
+    heating_on_by_week_with_breakdown: {
+      inherits_from:            :heating_on_off_by_week_with_breakdown_all,
+      filter:                   { 
+                                  heating_daytype: [
+                                    SeriesNames::SCHOOLDAYHEATING,
+                                    SeriesNames::HOLIDAYHEATING,
+                                    SeriesNames::WEEKENDHEATING
+                                  ]
+                                }
+    },
+    heating_on_by_week_with_breakdown_school_day_only: {
+      inherits_from:  :heating_on_off_by_week_with_breakdown_all,
+      filter: { 
+                heating_daytype: [
+                  SeriesNames::SCHOOLDAYHEATING
+                ]
+              }
+    },
+    hot_water_kitchen_on_off_by_week_with_breakdown: {
+      inherits_from:  :heating_on_off_by_week_with_breakdown_all,
+      filter: { 
+                heating_daytype: [
+                  SeriesNames::SCHOOLDAYHOTWATER,
+                  SeriesNames::WEEKENDHOTWATER,
+                  SeriesNames::HOLIDAYHOTWATER
+                ]
+              }
     },
     heating_on_off_by_week_heating_school_days_and_holidays_only: {
       inherits_from:    :heating_on_off_by_week,

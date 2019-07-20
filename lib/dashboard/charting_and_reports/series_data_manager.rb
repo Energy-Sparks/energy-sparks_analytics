@@ -39,6 +39,15 @@ class SeriesNames
   NONHEATINGDAY   = 'Non Heating Day'.freeze
   HEATINGSERIESNAMES = [HEATINGDAY.freeze, NONHEATINGDAY.freeze].freeze
 
+  SCHOOLDAYHEATING  = 'Heating On School Days'.freeze
+  HOLIDAYHEATING    = 'Heating On Holidays'.freeze
+  WEEKENDHEATING    = 'Heating On Weekends'.freeze
+  SCHOOLDAYHOTWATER = 'Hot water/kitchen only On School Days'.freeze
+  HOLIDAYHOTWATER   = 'Hot water/kitchen only On Holidays'.freeze
+  WEEKENDHOTWATER   = 'Hot water/kitchen only On Weekends'.freeze
+  BOILEROFF         = 'Boiler Off'.freeze
+  HEATINGDAYTYPESERIESNAMES = [SCHOOLDAYHEATING, HOLIDAYHEATING, WEEKENDHEATING, SCHOOLDAYHOTWATER, HOLIDAYHOTWATER, WEEKENDHOTWATER, BOILEROFF].freeze
+
   HEATINGDAYMODEL      = 'Heating Day Model'.freeze
   NONHEATINGDAYMODEL   = 'Non Heating Day Model'.freeze
   HEATINGMODELSERIESNAMES = [HEATINGDAYMODEL.freeze, NONHEATINGDAYMODEL.freeze].freeze
@@ -131,6 +140,7 @@ class SeriesDataManager
     [@breakdown_list + @y2_axis_list].flatten.each do |breakdown|
       case breakdown
       when :heating;                buckets = combinatorially_combine(buckets, SeriesNames::HEATINGSERIESNAMES)
+      when :heating_daytype;        buckets = combinatorially_combine(buckets, SeriesNames::HEATINGDAYTYPESERIESNAMES)
       when :daytype;                buckets = combinatorially_combine(buckets, SeriesNames::DAYTYPESERIESNAMES)
       when :meter;                  buckets = combinatorially_combine(buckets, meter_names)
 
@@ -270,7 +280,7 @@ class SeriesDataManager
     if start_date < meter.amr_data.start_date || end_date > meter.amr_data.end_date
       requested_dates = start_date == end_date ? "requested data for #{start_date}" : "requested data from #{start_date} to #{end_date}"
       meter_dates = "meter from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}: "
-      puts "bog off 11 " + "Not enough data for chart aggregation: " + meter_dates + requested_dates
+      puts "problem 11 " + "Not enough data for chart aggregation: " + meter_dates + requested_dates
       raise EnergySparksNotEnoughDataException.new("Not enough data for chart aggregation: " + meter_dates + requested_dates)
     end
   end
@@ -325,6 +335,7 @@ class SeriesDataManager
       when :daytype;          breakdown = daytype_breakdown([d1, d2], meter)
       when :fuel;             breakdown = fuel_breakdown([d1, d2], @meters[0], @meters[1])
       when :heating;          breakdown = heating_breakdown([d1, d2], @meters[0], @meters[1])
+      when :heating_daytype;  breakdown = heating_daytype_breakdown([d1, d2], @meters[0], @meters[1])
       when :model_type;       breakdown = heating_model_breakdown([d1, d2], @meters[0], @meters[1])
       when :meter;            breakdown = breakdown_to_meter_level(d1, d2)
       when :accounting_cost;  breakdown = breakdown_to_bill_components_date_range(d1, d2)
@@ -697,6 +708,43 @@ private
       end
     end
     heating_data
+  end
+
+  def heating_daytype_breakdown(date_range, electricity_meter, heat_meter)
+    meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
+    heating_data = SeriesNames::HEATINGDAYTYPESERIESNAMES.map { |heating_daytype| [heating_daytype, 0.0] }.to_h
+    (date_range[0]..date_range[1]).each do |date|
+      begin
+        type = convert_model_name_to_heating_daytype(date)
+        one_day_value = amr_data_one_day(meter, date, kwh_cost_or_co2)
+        # this is a fudge, to avoid restructuring of aggregation/series data manager interface
+        # based back to allow count to work for adding 'XXX days' to legend
+        # the modelling of 'BOILEROFF' allows days with small kWh, assuming its meter noise
+        one_day_value = Float::MIN if one_day_value == 0.0 && type == SeriesNames::BOILEROFF
+        heating_data[type] += one_day_value
+      rescue StandardError => e
+        logger.error e
+        logger.error "Warning: unable to calculate heating breakdown on #{date}"
+      end
+    end
+    heating_data
+  end
+
+  public def convert_model_name_to_heating_daytype(date)
+    # use daytype logic here, rather than switching on model types
+    # which have also had daytype logic applied to them
+    # small risk of inconsistancy, but reduces dependancy between
+    # this code and the regression models
+    return SeriesNames::BOILEROFF if heating_model.boiler_off?(date)
+
+    heating_on = heating_model.heating_on?(date)
+    if @meter_collection.holidays.holiday?(date)
+      heating_on ? SeriesNames::HOLIDAYHEATING : SeriesNames::HOLIDAYHOTWATER
+    elsif DateTimeHelper.weekend?(date)
+      heating_on ? SeriesNames::WEEKENDHEATING : SeriesNames::WEEKENDHOTWATER
+    else
+      heating_on ? SeriesNames::SCHOOLDAYHEATING : SeriesNames::SCHOOLDAYHOTWATER
+    end
   end
 
   # this breakdown uses NaN to indicate missing data, so Excel doesn't plot it

@@ -67,7 +67,7 @@ end
 ]
 
 alerts_to_test = [
-  AlertMeterASCLimit
+  AlertHeatingOnSchoolDays
 =begin
   AlertHeatingOnNonSchoolDays,
   AlertHeatingComingOnTooEarly,
@@ -96,9 +96,9 @@ alerts_to_test = [
 ]
 
 excluded_schools = ['Ecclesall Primary School']
-included_schools = ['Athelstan Primary School']
+included_schools = ['Brunswick']
 
-asof_date = Date.new(2019, 4, 30)
+asof_date = Date.new(2019, 7, 3)
 
 school_names = AnalysticsSchoolAndMeterMetaData.new.meter_collections.keys
 

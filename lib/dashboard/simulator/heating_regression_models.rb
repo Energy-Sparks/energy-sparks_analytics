@@ -452,10 +452,10 @@ module AnalyseHeatingAndHotWater
 
     def heating_category(date, doy_recommended_heating_start_date, doy_recommended_heating_doy_end_date)
       if heating_on?(date)
-        if weekend?(date)
-          :weekend_heating_on
-        elsif holiday?(date)
+        if holiday?(date)
           :holiday_heating_on
+        elsif weekend?(date)
+          :weekend_heating_on
         else
           recommended = within_recommended_heating_period(date, doy_recommended_heating_start_date, doy_recommended_heating_doy_end_date)
           recommended ? :schoolday_heating_on_recommended : :schoolday_heating_on_not_recommended
@@ -765,10 +765,10 @@ module AnalyseHeatingAndHotWater
     private def choose_by_day_type(date, occupied, weekend, holiday)
       if occupied?(date)
         occupied.is_a?(Symbol) ? occupied : occupied.call(date) # defer func eval until know its occupied
-      elsif weekend?(date)
-        weekend
       elsif holiday?(date)
         holiday
+      elsif weekend?(date)
+        weekend
       else
         raise EnergySparksUnexpectedStateException.new("Unexpected uncatagorised date #{date}")
       end
@@ -910,7 +910,7 @@ module AnalyseHeatingAndHotWater
         error = x1.empty? ? 'Warning: zero vector' : 'Warning: vector of length 1'
         return RegressionModelTemperature.new(model_name, error, 0.0, 0.0, 0.0, 0, nil, nil)
       end
-      
+
       x = Daru::Vector.new(x1)
       y = Daru::Vector.new(y1)
       sr = Statsample::Regression.simple(x, y)
@@ -1161,7 +1161,7 @@ module AnalyseHeatingAndHotWater
     def valid_heating_models
       SCHOOLDAYHEATINGMODELTYPES.select { |doy| !@models[doy].nil? }
     end
-    
+
     def number_of_heating_school_days
       SCHOOLDAYHEATINGMODELTYPES.map { |doy| @models[doy].samples }.inject(:+)
     end

@@ -258,7 +258,7 @@ class DashboardEnergyAdvice
           <p>
             5. The answer to this quesiton will depend on whether your school owns the panels
             (the value of your feed-in-tariff), or the cost of solar electricity
-            charged by the thrid party.
+            charged by the third party.
         </p>
         <%= @body_end %>
       }.gsub(/^  /, '')

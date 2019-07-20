@@ -84,6 +84,8 @@ class Aggregator
 
     reformat_x_axis if @chart_config.key?(:x_axis_reformat) && !@chart_config[:x_axis_reformat].nil?
 
+    mark_up_legend_with_day_count if add_daycount_to_legend?
+
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
@@ -375,6 +377,15 @@ class Aggregator
     periods
   end
 
+  def mark_up_legend_with_day_count
+    @bucketed_data.keys.each do |series_name|
+      days = @bucketed_data_count[series_name].sum
+      new_series_name = series_name + " (#{days} days)"
+      @bucketed_data[new_series_name] = @bucketed_data.delete(series_name)
+      @bucketed_data_count[new_series_name] = @bucketed_data_count.delete(series_name)
+    end
+  end
+
   def aggregate_period(chart_config)
     @series_manager = SeriesDataManager.new(@meter_collection, chart_config)
     @series_names = @series_manager.series_bucket_names
@@ -488,12 +499,24 @@ class Aggregator
     (trendline_symbol.to_s + parameters).to_sym
   end
 
+  def add_daycount_to_legend?
+    @chart_config.key?(:add_day_count_to_legend) && @chart_config[:add_day_count_to_legend]
+  end
+
+  private def daytype_filter?
+    has_filter?(:daytype) || has_filter?(:heating_daytype)
+  end
+
+  private def has_filter?(type)
+    chart_has_filter && @chart_config[:filter].key?(:type) && !@chart_config[:filter][type].nil?
+  end
+
   # aggregate by whole date range, the 'series_manager' deals with any spliting within a day
   # e.g. 'school day in hours' v. 'school day out of hours'
   # returns a hash of this breakdown to the kWh values
   def aggregate_by_day(bucketed_data, bucketed_data_count)
     count = 0
-    if chart_has_filter && @chart_config[:filter].key?(:daytype)
+    if add_daycount_to_legend? || daytype_filter?
       # this is slower, as it needs to loop through a day at a time
       # TODO(PH,17Jun2018) push down and optimise in series_data_manager
       @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
@@ -663,7 +686,6 @@ class Aggregator
         keep_key_list += @bucketed_data.keys # TODO(PH,2Jul2018) may not be generic enough?
       end
     end
-    keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, @chart_config[:filter][:meter]) if @chart_config[:filter].key?(:meter)
     if @chart_config.key?(:filter) && @chart_config[:filter].key?(:heating)
       filter = @chart_config[:filter][:heating] ? [SeriesNames::HEATINGDAY, SeriesNames::HEATINGDAYMODEL] : [SeriesNames::NONHEATINGDAY, SeriesNames::NONHEATINGDAYMODEL]
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filter)
@@ -675,14 +697,13 @@ class Aggregator
       trendline_filters_with_parameters = pattern_match_two_symbol_lists(trendline_filters, @bucketed_data.keys)
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, model_filter + trendline_filters_with_parameters)
     end
-    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:fuel)
-      filtered_fuel = @chart_config[:filter][:fuel]
-      keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, [filtered_fuel])
+    %i[fuel daytype heating_daytype meter].each do |filter_type|
+      if @chart_config.key?(:filter) && @chart_config[:filter].key?(filter_type)
+        filtered_data = [@chart_config[:filter][filter_type]].flatten
+        keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filtered_data)
+      end
     end
-    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:daytype)
-      filtered_daytype = @chart_config[:filter][:daytype]
-      keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, [filtered_daytype])
-    end
+
     keep_key_list += pattern_match_y2_axis_names
 
     remove_list = []
@@ -776,7 +797,12 @@ class Aggregator
     logger.warn "Unknown series name #{series_name} not in #{bucketed_data.keys}" if !bucketed_data.key?(series_name)
     logger.warn "nil value for #{series_name}" if value.nil?
     bucketed_data[series_name][x_index] += value
-    bucketed_data_count[series_name][x_index] += 1 # required to calculate kW
+
+    count = 1
+    if add_daycount_to_legend?
+      count = value != 0.0 ? 1 : 0
+    end
+    bucketed_data_count[series_name][x_index] += count # required to calculate kW
   end
 
   # kw to kwh scaling is slightly painful as you need to know how many buckets

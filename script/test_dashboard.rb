@@ -14,7 +14,7 @@ end
 
 profile = false
 
-if false
+if true
   
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
@@ -34,13 +34,15 @@ RubyProf.start if profile
 # reports.load_school('Trinity First School', true)
 # 'Wybourn Primary School'
 
-# school_name = 'Whiteways Primary'
+school_name = 'Whiteways Primary'
 # school_name = 'St Martins Garden Primary School'
 # school_name = 'Hugh Sexey'
-school_name = 'Paulton Junior School'
-# school_name = 'Whiteways Primary'
-# school_name = 'St Marks Secondary'
+# school_name = 'Paulton Junior School'
+school_name = 'Whiteways Primary'
+#  = 'St Marks Secondary'
 # school_name = 'Trinity First School'
+school_name = 'Brunswick'
+# school_name = 'Bishop Sutton Primary School'
 # school_name = 'Marksbury C of E Primary School'
 
 if false
@@ -73,8 +75,8 @@ puts "Load time: #{bm.round(3)} seconds"
 
 # reports.do_all_schools(true)
 # reports.do_one_page(:solar_pv)
-# reports.do_chart_list('Paulton', [:benchmark])
-reports.do_all_standard_pages_for_school
+reports.do_chart_list('HeatingTest', [:heating_on_off_by_week, :heating_on_off_by_week_with_breakdown_all, :heating_on_by_week_with_breakdown, :heating_on_by_week_with_breakdown_school_day_only, :hot_water_kitchen_on_off_by_week_with_breakdown])
+# reports.do_all_standard_pages_for_school
 # reports.do_all_schools(true)
 # reports.save_excel_and_html
 # reports.do_all_schools(true)
@@ -90,6 +92,6 @@ if profile
   printer.print(File.open('log\code-profile - test_dashboard' + Date.today.to_s + '.html','w')) # 'code-profile.html')
 end
 
-# reports.save_excel_and_html
+reports.save_excel_and_html
 
 # reports.report_benchmarks
