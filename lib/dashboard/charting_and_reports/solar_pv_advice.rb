@@ -196,7 +196,7 @@ class DashboardEnergyAdvice
               <li>
                 In general, the school will save from the free electricity it is
                 consuming from the panels, about <%= annual_solar_pv_consumed_onsite_£_html %>
-                (&#163;<%= BenchmarkMetrics::ELECTRICITY_PRICE %>/kWh *
+                (&#163;<%= BenchmarkMetrics::ELECTRICITY_PRICE %>/kWh x
                   <%= annual_solar_pv_consumed_onsite_kwh_html %>)
               </li>
               <li>
@@ -206,7 +206,7 @@ class DashboardEnergyAdvice
               <li>
                 It will also gain from the 'feed-in-tariff', a government subsidy, the
                 amount of the feed in tariff will depend on when the panels were installed
-                and is typically in the range 5p/kWh to 40 p/kWh * the total 'Photovoltaic
+                and is typically in the range 5p/kWh to 40 p/kWh x the total 'Photovoltaic
                 production' of <%= annual_solar_pv_kwh_html %>, each year
               </li>
             </ul>
