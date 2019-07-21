@@ -79,7 +79,6 @@ class FormatEnergyUnit
     elsif unit == :years_range
       format_years_range(value)
     elsif unit == :years
-      puts "Got here"
       format_time(value)
     elsif unit == :percent
       "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
@@ -127,18 +126,26 @@ class FormatEnergyUnit
       end
     elsif years < (3.0 / 12.0) # less than 3 months
       days = (years * 365.0).round(0)
-      puts "ddddddd #{days}"
       if days <= 14
         days.to_s + ' day' + singular_plural(days)
       else
         (days / 7.0).round(0).to_s + ' weeks'
       end
-    elsif years < 1.0
-      months = (years / 12.0).round(0)
+    elsif years <= 1.51
+      months = months_from_years(years)
       months.to_s + ' month' + singular_plural(months)
+    elsif years < 5.0
+      y = years.floor
+      years_str = sprintf('%.0f ', y) + 'year' + singular_plural(y)
+      months = months_from_years(years - y)
+      years_str + ' ' + months.to_s + ' month' + singular_plural(months)
     else
-      sprintf('%.1f ', years) + 'year' + singular_plural(years)
+      sprintf('%.0f ', years) + 'year' + singular_plural(years)
     end
+  end
+
+  def self.months_from_years(years)
+    (years * 12.0).round(0)
   end
 
   private_class_method def self.format_days(days)
