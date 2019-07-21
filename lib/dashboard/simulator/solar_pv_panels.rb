@@ -46,10 +46,6 @@ class SolarPVPanels
       end
 
       electricity_consumed_onsite_x48 = AMRData.one_day_zero_kwh_x48
-      if date == Date.new(2014, 1, 1)
-        puts "Solar PV 1st Jan 2014 issue"
-        ap pv_consumed_onsite_kwh_x48
-      end
 
       (0..47).each do |halfhour_index|
         electricity_consumed_onsite_x48[halfhour_index] = electricity_amr.kwh(date, halfhour_index) + pv_consumed_onsite_kwh_x48[halfhour_index]

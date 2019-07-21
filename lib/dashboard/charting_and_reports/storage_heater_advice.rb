@@ -113,7 +113,8 @@ class DashboardEnergyAdvice
           </blockquote>
 
           <p>
-            <strong>Answer</strong>
+            <strong>Answer:</strong>
+            There is a potential saving of
             <%= annual_usage('Holiday', :kwh) %> or <%= annual_usage('Holiday', :£) %> per year
              if you turn your storage heaters off during holidays.
             and 

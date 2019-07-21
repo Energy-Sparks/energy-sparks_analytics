@@ -256,7 +256,7 @@ class DashboardEnergyAdvice
             building is in use.
           </p>
           <p>
-            5. The answer to this quesiton will depend on whether your school owns the panels
+            5. The answer to this question will depend on whether your school owns the panels
             (the value of your feed-in-tariff), or the cost of solar electricity
             charged by the third party.
         </p>
