@@ -86,6 +86,8 @@ class Aggregator
 
     mark_up_legend_with_day_count if add_daycount_to_legend?
 
+    humanize_legend if humanize_legend?
+
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
@@ -386,6 +388,15 @@ class Aggregator
     end
   end
 
+  def humanize_legend
+    @bucketed_data.keys.each do |series_name|
+      new_series_name = series_name.to_s.humanize
+      puts "old name #{series_name} new name #{new_series_name}"
+      @bucketed_data[new_series_name] = @bucketed_data.delete(series_name)
+      @bucketed_data_count[new_series_name] = @bucketed_data_count.delete(series_name)
+    end
+  end
+
   def aggregate_period(chart_config)
     @series_manager = SeriesDataManager.new(@meter_collection, chart_config)
     @series_names = @series_manager.series_bucket_names
@@ -501,6 +512,10 @@ class Aggregator
 
   def add_daycount_to_legend?
     @chart_config.key?(:add_day_count_to_legend) && @chart_config[:add_day_count_to_legend]
+  end
+
+  def humanize_legend?
+    @chart_config.key?(:humanize_legend) && @chart_config[:humanize_legend] && Object.const_defined?('Rails')
   end
 
   private def daytype_filter?

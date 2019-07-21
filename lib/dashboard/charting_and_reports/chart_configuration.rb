@@ -186,7 +186,13 @@ class ChartManager
     storage_heater_thermostatic: {
       name:               'Thermostatic control',
       inherits_from:      :thermostatic,
-      meter_definition:   :storage_heater_meter
+      humanize_legend:    true,
+      meter_definition:   :storage_heater_meter,
+=begin
+      trendlines:       [
+        'heating occupied all days'
+      ]
+=end
     },
     storage_heater_intraday_current_year: {
       name:               'Storage heater power consumption',
