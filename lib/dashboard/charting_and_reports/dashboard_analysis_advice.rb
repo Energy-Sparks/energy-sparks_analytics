@@ -545,8 +545,8 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   def comparison(type_str, type_sym, with)
     usage_from_chart_£ = @chart_data[:x_data][type_str][index_of_most_recent_date]
     benchmark_from_chart = @chart_data[:x_data][type_str][with]
-    formatted_usage_£ = FormatEnergyUnit.format(:£, usage_from_chart_£)
-    benchmark_usage_£ = FormatEnergyUnit.format(:£, benchmark_from_chart)
+    formatted_usage_£ = FormatEnergyUnit.format(:£, usage_from_chart_£, :html)
+    benchmark_usage_£ = FormatEnergyUnit.format(:£, benchmark_from_chart, :html)
 
     if formatted_usage_£ == benchmark_usage_£ # values same in formatted space
       'is similar to regional schools which spent ' + benchmark_usage_£

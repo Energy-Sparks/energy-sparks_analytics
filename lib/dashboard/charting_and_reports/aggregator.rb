@@ -67,7 +67,7 @@ class Aggregator
 
     remove_filtered_series if chart_has_filter && @chart_config[:series_breakdown] != :none
 
-    create_y2_axis_data if @chart_config.key?(:y2_axis) && !@chart_config[:y2_axis].nil?
+    create_y2_axis_data if y2_axis?
 
     reorganise_buckets if @chart_config[:chart1_type] == :scatter
 
@@ -95,6 +95,10 @@ class Aggregator
     swap_NaN_for_nil if true || Object.const_defined?('Rails')
   end
 
+  def y2_axis?
+    @chart_config.key?(:y2_axis) && !@chart_config[:y2_axis].nil? && @chart_config[:y2_axis] != :none
+  end
+  
   private
 
   def chart_has_filter
