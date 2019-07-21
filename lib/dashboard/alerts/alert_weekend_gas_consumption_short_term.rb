@@ -3,7 +3,7 @@
 require_relative 'alert_gas_model_base.rb'
 
 class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
-  MAX_COST = 2.5 # £2.5 limit
+  MAX_COST = 5.0 # £5 limit
   FROST_PROTECTION_TEMPERATURE = 4
 
   attr_reader :last_week_end_kwh, :last_weekend_cost_£
@@ -76,7 +76,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     @last_year_weekend_gas_kwh = weekend_gas_consumption_last_year(asof_date)
     @last_year_weekend_gas_£ = gas_cost(@last_year_weekend_gas_kwh)
 
-    @rating = @last_week_end_kwh < MAX_COST ? 10.0 : 2.0
+    @rating = @last_weekend_cost_£ < MAX_COST ? 10.0 : 2.0
 
     @status = @rating < 5.0 ? :bad : :good
 
