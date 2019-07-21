@@ -406,6 +406,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
     electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
     gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
+    storage_heater_usage = get_energy_usage('storage heaters', :electricity, index_of_most_recent_date)
     gas_only = electric_usage.nil?
 
     address = @school.postcode.nil? ? @school.address : @school.postcode
@@ -425,9 +426,15 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         and a floor area of <%= @school.floor_area %>m<sup>2</sup>.
       </p>
       <p>
-        <% if gas_only %>
+        <% if @school.gas_only? %>
           Your school spent <%= gas_usage %> on gas last year.
           The gas usage <%= gas_comparison_regional %>:
+        <% elsif @school.electricity? && !@school.gas? && !@school.storage_heaters? %>
+            Your school spent <%= electric_usage %> on electricity last year.
+            The electricity usage <%= electric_comparison_regional %>:
+        <% elsif @school.electricity? && @school.storage_heaters? %>
+          Your school spent <%= storage_heater_usage %> on storage heating last year,
+          plus <%= electric_usage %> for the remaining electrical appliances (lighting. ICT etc.):
         <% else %>
           Your school spent <%= electric_usage %> on electricity
           and <%= gas_usage %> on gas last year.
@@ -591,12 +598,14 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
     saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
 
+    excluding_storage_heaters = (@school.storage_heaters? && fuel_type_str == 'electricity') ? '(exluding storage heaters)' : ''
+
     table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
 
     header_template = %{
       <%= @body_start %>
         <p>
-          This chart shows when you have used <%= @fuel_type_str %> over the past year.
+          This chart shows when you have used <%= @fuel_type_str %> <%= excluding_storage_heaters %> over the past year.
           <%= percent(percent_value) %> of your <%= @fuel_type_str %> usage is out of hours:
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
