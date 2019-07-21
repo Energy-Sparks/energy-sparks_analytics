@@ -408,11 +408,12 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
     storage_heater_usage = get_energy_usage('storage heaters', :electricity, index_of_most_recent_date)
     gas_only = electric_usage.nil?
+    electric_only = gas_usage.nil?
 
     address = @school.postcode.nil? ? @school.address : @school.postcode
 
     electric_comparison_regional = comparison('electricity', :electricity, index_of_data("Regional Average")) unless gas_only
-    gas_comparison_regional = comparison('gas', :gas, index_of_data("Regional Average"))
+    gas_comparison_regional = comparison('gas', :gas, index_of_data("Regional Average")) unless electric_only
 
     header_template = %{
       <%= @body_start %>
@@ -542,11 +543,17 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def comparison(type_str, type_sym, with)
-    spent = get_energy_usage(type_str, type_sym, with)
-    if @chart_data[:x_data][type_str][index_of_most_recent_date] > @chart_data[:x_data][type_str][with]
-      'is more than similar regional schools which spent ' + spent
+    usage_from_chart_£ = @chart_data[:x_data][type_str][index_of_most_recent_date]
+    benchmark_from_chart = @chart_data[:x_data][type_str][with]
+    formatted_usage_£ = FormatEnergyUnit.format(:£, usage_from_chart_£)
+    benchmark_usage_£ = FormatEnergyUnit.format(:£, benchmark_from_chart)
+
+    if formatted_usage_£ == benchmark_usage_£ # values same in formatted space
+      'is similar to regional schools which spent ' + benchmark_usage_£
+    elsif usage_from_chart_£ > benchmark_from_chart
+      'is more than similar regional schools which spent ' + benchmark_usage_£
     else
-      'is less than similar regional schools which spent ' + spent
+      'is less than similar regional schools which spent ' + benchmark_usage_£
     end
   end
 
