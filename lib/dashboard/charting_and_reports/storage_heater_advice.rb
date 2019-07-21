@@ -293,7 +293,9 @@ class DashboardEnergyAdvice
           <p>
             This chart plots the outside temperature (x axis) versus the storage heater
             electricity consumption for all the days of the last year when the storage
-            heaters were turned on.
+            heaters were turned on. The trendline shows the ideal electricity consumption
+            if the thermostatic control is working perfectly i.e. all the points sit on
+            a straight line.
           </p>
         <%= @body_end %>
       }.gsub(/^  /, '')
