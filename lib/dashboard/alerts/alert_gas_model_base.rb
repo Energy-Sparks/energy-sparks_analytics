@@ -127,8 +127,10 @@ class AlertGasModelBase < AlertGasOnlyBase
   end
 
   protected def enough_data_for_model_fit
-    @heating_model = calculate_model(asof_date) if @heating_model.nil?
+    @heating_model = calculate_model(@asof_date) if @heating_model.nil?
     @heating_model.enough_samples_for_good_fit
+  rescue EnergySparksNotEnoughDataException, NoMethodError => e
+    false
   end
 
   protected def calculate_model(asof_date)

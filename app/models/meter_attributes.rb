@@ -106,6 +106,11 @@ class MeterAttributes
         reason: 'Automated process set too high at about 1000'
       }
     },
+    # ==============================Freshford=============================
+    67095200  => { # gas kitchen
+      function: [ :kitchen_only ],
+      reason: 'Freshford no longer has gas heating - PH 1 Aug 2019'
+    },
     # ==============================Frome College============================
     2000027481429 => {
       meter_corrections: [ :correct_zero_partial_data ]

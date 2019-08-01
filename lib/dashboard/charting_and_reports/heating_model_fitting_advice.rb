@@ -731,6 +731,9 @@ class DashboardEnergyAdvice
     include Logging
 
     def generate_valid_advice
+      min_simple_model_samples = AnalyseHeatingAndHotWater::MINIMUM_SAMPLES_FOR_SIMPLE_MODEL_TO_RUN_WELL
+      min_massive_model_samples =  AnalyseHeatingAndHotWater::MINIMUM_SAMPLES_FOR_THERMALLY_MASSIVE_MODEL_TO_RUN_WELL
+
       header_template1 = %{
         <%= @body_start %>
           <h2>
@@ -764,6 +767,14 @@ class DashboardEnergyAdvice
               deviation percent), this model will be used by Energy Sparks going forward
               (today), unless in future new data suggests the other model is a better
               fit.
+            </p>
+            <p>
+              <strong>Caveat:</strong> Both models are subject to a minimum number of samples which are
+              required for model stability. These are currently <%= min_simple_model_samples %> winter school day
+              heating samples for the simple model, and <%= min_massive_model_samples %> for the thermally
+              massive model (aggregate of Monday through Friday). These limits are also used for the availability
+              of chart and alert data, where as a minimum the <%= min_simple_model_samples %> days required by
+              the simple model will be required before certain model dependent functionality  will work.
             </p>
             <p>
                 The CUSUM chart below represents the difference between the gas consumption

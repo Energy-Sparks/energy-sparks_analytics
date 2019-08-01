@@ -4,7 +4,9 @@
 #   winter - equivalent to - heating
 #
 module AnalyseHeatingAndHotWater
-
+  # both these constants are 'publicly' documented on the model fitting advice web pages
+  MINIMUM_SAMPLES_FOR_SIMPLE_MODEL_TO_RUN_WELL = 35
+  MINIMUM_SAMPLES_FOR_THERMALLY_MASSIVE_MODEL_TO_RUN_WELL = 60
   # caches the definitions and resultant calculations for a number of models
   # associated with a meter
   class ModelCache
@@ -602,9 +604,13 @@ module AnalyseHeatingAndHotWater
       model(:heating_occupied_all_days).samples
     end
 
-    # 60 value needs further reasarch across multiple schools
+    def minimum_samples_for_model_to_run_well
+      MINIMUM_SAMPLES_FOR_SIMPLE_MODEL_TO_RUN_WELL
+    end
+
+    # 35/60 value needs further research across multiple schools
     def enough_samples_for_good_fit
-      winter_heating_samples > 35
+      winter_heating_samples > minimum_samples_for_model_to_run_well
     end
 
     # returns a hash to value, or hash of information relating to the model
@@ -1142,9 +1148,9 @@ module AnalyseHeatingAndHotWater
       end
     end
 
-    # 60 value needs further reasarch across multiple schools
-    def enough_samples_for_good_fit
-      winter_heating_samples > 60
+    # 60 value needs further research across multiple schools
+    def minimum_samples_for_model_to_run_well
+      MINIMUM_SAMPLES_FOR_THERMALLY_MASSIVE_MODEL_TO_RUN_WELL
     end
 
     def all_heating_model_types # derived as constants not inherited

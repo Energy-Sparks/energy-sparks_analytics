@@ -147,7 +147,7 @@ class AlertHeatingOnOff < AlertGasModelBase
     end
   end
 
-  # reduces potentiall bill caused by making more than 1000 calls per day, a bit hacky
+  # reduces potential bill caused by making more than 1000 calls per day, a bit hacky
   private def cached_dark_sky_for_testing
     unless defined?(@@dark_sky_cache)
       filename = File.join('./TestResults/Alerts/dark_sky_forecast_cache.yaml')
@@ -161,6 +161,10 @@ class AlertHeatingOnOff < AlertGasModelBase
     end
     @forecast_date_time = @@cached_forecast_date_time
     @@dark_sky_cache
+  end
+
+  def enough_data
+    (days_amr_data > 360 && enough_data_for_model_fit) ? :enough : :not_enough
   end
 
   private def calculate(asof_date)

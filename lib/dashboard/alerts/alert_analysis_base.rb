@@ -18,7 +18,7 @@ class AlertAnalysisBase
 
   attr_reader :analysis_report
   attr_reader :status, :rating, :term, :default_summary, :default_content, :bookmark_url
-  attr_reader :analysis_date, :max_asofdate
+  attr_reader :analysis_date, :max_asofdate, :calculation_worked
 
   def initialize(school, report_type)
     @school = school
@@ -26,6 +26,7 @@ class AlertAnalysisBase
     @relevance = aggregate_meter.nil? ? :never_relevant : :relevant
     @analysis_report = AlertReport.new(report_type)
     @not_enough_data_exception = false
+    @calculation_worked = true
   end
 
   def relevance
@@ -53,6 +54,7 @@ class AlertAnalysisBase
       logger.warn e.backtrace
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue StandardError => e
+      @calculation_worked = false
       puts 
       puts e.to_s
       puts e.message
@@ -328,6 +330,11 @@ class AlertAnalysisBase
       (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?)
   end
 
+  def make_available_to_users?
+    puts "#{relevance} #{enough_data} #{calculation_worked}"
+    relevance == :relevant && enough_data == :enough && calculation_worked
+  end
+
   # test method - runs all alaerts for school, prints results
   def self.run_valid_alerts(school, asof_date)
     valid_alerts = all_available_alerts
@@ -389,20 +396,24 @@ class AlertAnalysisBase
   private def variable_list(formatted, format = :text)
     list = {}
     flatten_template_variables.each do |type, data|
-      if [TrueClass, FalseClass].include?(data[:units])
-        list[type] = send(type) # don' reformat flags so can be bound in if tests
-      elsif data[:units] == :table
-        list[type] = format_table(type, data, formatted, format)
-      else
-        if respond_to?(type, true)
-          if formatted && send(type).nil?
-            list[type] = ''
-          else
-            list[type] = formatted ? FormatUnit.format(data[:units], send(type), format, true) : send(type)
-          end
+      begin
+        if [TrueClass, FalseClass].include?(data[:units])
+          list[type] = send(type) # don't reformat flags so can be bound in if tests
+        elsif data[:units] == :table
+          list[type] = format_table(type, data, formatted, format)
         else
-          logger.info "Warning: alert doesnt implement #{type}"
+          if respond_to?(type, true)
+            if formatted && send(type).nil?
+              list[type] = ''
+            else
+              list[type] = formatted ? FormatUnit.format(data[:units], send(type), format, true) : send(type)
+            end
+          else
+            logger.info "Warning: alert doesnt implement #{type}"
+          end
         end
+      rescue StandardError => e
+        list[type] = e.message
       end
     end
     list
