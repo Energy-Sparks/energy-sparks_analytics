@@ -24,6 +24,7 @@ class FormatEnergyUnit
     ice_car:                      'km',
     bev_car:                      'km',
     tv:                           'tvs',
+    computer_console:             'computer consoles',
     hour:                         'hours',
     smartphone:                   'smartphone charges',
     tree:                         'trees',

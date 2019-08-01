@@ -110,6 +110,10 @@ class EnergyEquivalences
   TV_HOUR_£ = TV_POWER_KW * ONE_HOUR * UK_ELECTRIC_GRID_£_KWH
   TV_HOUR_CO2_KG = TV_POWER_KW * ONE_HOUR * UK_ELECTRIC_GRID_CO2_KG_KWH
 
+  COMPUTER_CONSOLE_POWER_KW = 0.2 # also kWh/hour
+  COMPUTER_CONSOLE_HOUR_£ = COMPUTER_CONSOLE_POWER_KW * ONE_HOUR * UK_ELECTRIC_GRID_£_KWH
+  COMPUTER_CONSOLE_HOUR_CO2_KG = COMPUTER_CONSOLE_POWER_KW * ONE_HOUR * UK_ELECTRIC_GRID_CO2_KG_KWH
+
   TREE_LIFE_YEARS = 40
   TREE_CO2_KG_YEAR = 22
   TREE_CO2_KG = TREE_LIFE_YEARS * TREE_CO2_KG_YEAR # https://www.quora.com/How-many-trees-do-I-need-to-plant-to-offset-the-carbon-dioxide-released-in-a-flight
@@ -424,6 +428,33 @@ class EnergyEquivalences
       convert_to:             :hour,
       equivalence_timescale:  :hour,
       timescale_units:        :tv
+    },
+    computer_console: {
+      description: '%s',
+      conversions: {
+        kwh:  {
+          rate:                   COMPUTER_CONSOLE_POWER_KW,
+          description:            "Computer consoles use about #{X.format(:kwh, COMPUTER_CONSOLE_POWER_KW)} of electricity every hour. ",
+          front_end_description:  'Number of hours of computer console usage (converted via kWh)'
+        },
+        co2:  {
+          rate:                   COMPUTER_CONSOLE_HOUR_CO2_KG,
+          description:            "Computer consoles use about #{X.format(:kwh, COMPUTER_CONSOLE_POWER_KW)} of electricity every hour. "\
+                                  "Generating 1 kWh of electricity produces #{X.format(:co2, UK_ELECTRIC_GRID_£_KWH)}. "\
+                                  "Therefore using a computer console  for 1 hour produces #{X.format(:co2, COMPUTER_CONSOLE_HOUR_CO2_KG)}. ",
+          front_end_description:  'Number of hours of computer console  usage (converted via co2)'
+        },
+        £:  {
+          rate:         COMPUTER_CONSOLE_HOUR_£,
+          description:  "Computer consoles use about #{X.format(:kwh, COMPUTER_CONSOLE_POWER_KW)} of electricity every hour. "\
+                        "Generating 1 kWh of electricity costs #{X.format(:£, UK_ELECTRIC_GRID_£_KWH)}. "\
+                        "Therefore using a computer console for 1 hour costs #{X.format(:£, COMPUTER_CONSOLE_HOUR_£)}. ",
+          front_end_description:  'Number of hours of computer console  usage (converted via £)'
+        }
+      },
+      convert_to:             :hour,
+      equivalence_timescale:  :hour,
+      timescale_units:        :computer_console
     },
     tree: {
       description: 'planting a %s (40 year life)',
