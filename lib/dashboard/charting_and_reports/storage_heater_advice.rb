@@ -31,7 +31,7 @@ class DashboardEnergyAdvice
     protected def annual_usage(day_type_type = 'Weekend', units = :kwh)
       data = ScalarkWhCO2CostValues.new(@school)
       usage_kwh = data.day_type_breakdown({year: 0}, :storage_heaters, units, units)[day_type_type]
-      usage_kwh
+      usage_kwh.gsub(/£/, '&pound;')
     end
   end
 
@@ -91,7 +91,7 @@ class DashboardEnergyAdvice
             colder the outside temperature.
           </p>
           <p>
-            <strong>Question</strong>
+            <strong>Question 1</strong>
             : Does your school consume more electricity for storage heating in the
             winter than the summer? How well does the electricity consumption (bar
             chart) follow the 'Degree Day' line? (If control of the storage heaters is
@@ -99,7 +99,7 @@ class DashboardEnergyAdvice
           </p>
           <blockquote class="bg-gray primary">
             <p>
-              <strong>Question</strong>
+              <strong>Question 2</strong>
               : The chart also highlights usage at weekends and holidays. Did your school
               leave the storage heaters on over the holidays? Sometimes it might be
               necessary to leave them on to avoid frost damage to cold water pipework,
@@ -113,13 +113,17 @@ class DashboardEnergyAdvice
           </blockquote>
 
           <p>
-            <strong>Answer:</strong>
-            There is a potential saving of
-            <%= annual_usage('Holiday', :kwh) %> or <%= annual_usage('Holiday', :£) %> per year
-             if you turn your storage heaters off during holidays.
-            and 
-            <%= annual_usage('Weekend', :kwh) %> or <%= annual_usage('Weekend', :£) %> per year
-            at weekends (term time)
+            <strong>Answer to question 2:</strong>
+            Your school used
+            <%= annual_usage('Holiday', :kwh) %> or <%= annual_usage('Holiday', :£) %> during holidays
+            last year.
+            <%= annual_usage('Weekend', :kwh) %> or <%= annual_usage('Weekend', :£) %>
+            at weekends (term time) last year. Turning the storage heaters off during holidays
+            and weekends is a quick way to save money. To do this automatically at weekends
+              you might need to install a 7-day timer. For holidays, you can get Energy Sparks
+              to send you or whoever is responsible a reminder just before a holiday - using its alerts system.
+              If you don't know how to do this send us
+              <a href="mailto:hello@energysparks.uk?subject=Help with setting up an alert to remind us to turn our storage heaters off&">an email</a>.
           </p>
         <%= @body_end %>
       }.gsub(/^  /, '')

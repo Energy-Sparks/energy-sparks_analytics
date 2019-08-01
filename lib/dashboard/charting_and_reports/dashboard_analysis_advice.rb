@@ -491,6 +491,14 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           applicable to all school buildings.
         <% end %>
       </p>
+      <% if @school.storage_heaters? %>
+        <p>
+          Energy Sparks has taken the meter readings from your electricity meter and split it into two:
+          electricity used by your storage heaters and the remainder. This allows you to better understand
+          how much electricity is used for heating via storage heaters which vary significantly with outside
+          temperatures and the remainder (all other appliances including lighting and ICT) which is less seasonal.
+        </p>
+      <% end %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
@@ -638,6 +646,11 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
       <p>
       <%= table_info %>
       </p>
+      <% if @school.storage_heaters? %>
+        <p>
+          The remaining charts on this page analyse just your non-storage heater electricity consumption.
+        </p>
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
