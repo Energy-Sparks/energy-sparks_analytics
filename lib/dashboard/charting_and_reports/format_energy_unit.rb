@@ -75,7 +75,7 @@ class FormatEnergyUnit
     elsif unit == :£_range
       format_pound_range(value, medium, user_numeric_comprehension_level)
     elsif unit == :temperature
-      "#{scale_num(value)}C"
+      "#{value.round(1)}C"
     elsif unit == :years_range
       format_years_range(value)
     elsif unit == :years

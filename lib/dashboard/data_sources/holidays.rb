@@ -1,10 +1,43 @@
-require_relative '../data_sources/school_date_period' # PH(03Jul2018) - James this probably needs fixing, there is a ruby loading order issue
+require_relative '../data_sources/school_date_period'
+
+# single holiday period
+class Holiday < SchoolDatePeriod
+  attr_accessor :type           # :easter, :xmas, autumn_halfterm etc.
+  attr_accessor :academic_year  # e.g. 2018..2019
+  def initialize(type, name, start_date, end_date, academic_year)
+    start_date = roll_start_date_back_to_sunday(start_date)
+    end_date = roll_end_date_forward_to_saturday(end_date)
+    super(:holiday, name, start_date, end_date)
+    @type = type
+    @academic_year = academic_year
+    raise EnergySparksNoMeterDataAvailableForFuelType.new('Start date after end date') if start_date > end_date
+  end
+
+  private def roll_start_date_back_to_sunday(start_date)
+    return start_date - 1 if start_date.monday?
+    start_date
+  end
+
+  private def roll_end_date_forward_to_saturday(end_date)
+    return end_date + 1 if end_date.friday?
+    end_date
+  end
+
+  def middle_date
+    start_date + ((end_date - start_date) / 2).to_i
+  end
+
+  def to_s
+    super + ' ' + type.to_s + ' ' + academic_year.first.to_s + '/' + academic_year.last.to_s
+  end
+end
+
 # holds holiday data as an array of hashes - one hash for each holiday period
 class HolidayData < Array
   include Logging
 
-  def add(title, start_date, end_date)
-    self.push(SchoolDatePeriod.new(:holiday, title, start_date, end_date))
+  def add(name, start_date, end_date)
+    self.push(Holiday.new(nil, name, start_date, end_date, nil))
   end
 end
 
@@ -38,7 +71,44 @@ class Holidays
 
   def initialize(holiday_data)
     @holidays = holiday_data
+    set_holiday_types_and_academic_years
     @cached_holiday_lookup = {} # for speed,
+  end
+
+  # once all the data is loaded, set type enumerations e.g. :easter
+  # and academic year e.g. 2018..2019 against each holiday
+  private def set_holiday_types_and_academic_years
+    set_holiday_types
+    set_academic_years
+    check_consistency
+  end
+
+  private def set_holiday_types
+    @holidays.each do |holiday|
+      holiday.type = type(holiday.middle_date)
+    end
+  end
+
+  private def set_academic_years
+    @holidays.each do |holiday|
+      if holiday.middle_date.month > 8
+        holiday.academic_year = holiday.middle_date.year..(holiday.middle_date.year + 1)
+      else
+        holiday.academic_year = (holiday.middle_date.year - 1)..holiday.middle_date.year
+      end
+    end
+  end
+
+  private def check_consistency
+    logger.info 'Checking for consistency of recently loaded holiday data'
+    types_grouped_by_academic_year = Hash.new([])
+    @holidays.each do |holiday|
+      next unless types_grouped_by_academic_year.key?(holiday.academic_year)
+      unless types_grouped_by_academic_year[holiday.academic_year].find { |hol| hol.type == holiday.type }.nil?
+        logger.error "2 holidays of same time #{holiday.type} in same academic year #{holiday.academic_year.first}/#{holiday.academic_year.first}"
+      end
+    end
+    logger.info 'Holiday check complete'
   end
 
   def holiday?(date)
@@ -79,8 +149,22 @@ class Holidays
   end
 
   def find_next_holiday(date, max_days_search = 100)
+    find_holiday_with_offset(date, max_days_search, 1)
+  end
+
+  def find_previous_or_current_holiday(date, max_days_search = 100)
+    find_holiday_with_offset(date, max_days_search, -1)
+  end
+
+  def find_previous_holiday_to_current(current_holiday, number_holidays_before = 1)
+    current_holiday_index = SchoolDatePeriod.find_period_index_for_date(current_holiday.middle_date, @holidays)
+    new_index = current_holiday_index - number_holidays_before
+    new_index >= 0 ? @holidays[new_index] : nil
+  end
+
+  private def find_holiday_with_offset(date, max_days_search = 100, direction = 1)
     (0..max_days_search).each do |days|
-      period = SchoolDatePeriod.find_period_for_date(date + days, @holidays)
+      period = SchoolDatePeriod.find_period_for_date(date + direction * days, @holidays)
       return period unless period.nil?
     end
     nil
@@ -98,6 +182,34 @@ class Holidays
         last_years_holiday_type = type(last_years_holiday_mid_date)
         return last_years_holiday_period if this_years_holiday_type == last_years_holiday_type
       end
+    end
+    nil
+  end
+
+  # finds nth holiday before or after date, including/excluding current holiday if date within a holiday
+  # Test Code:
+  # [-100, -2, -1, 0, 1, 2, 50].each do |nth_holiday_number|
+  #  [true, false].each do |include_holiday_if_in_date|
+  #     [Date.new(2019,6,25), Date.new(2019,8,15), Date.new(1999,1,1), Date.new(2030,1,1)].each do |date|
+  #       hol = @school.holidays.find_nth_holiday(date, nth_holiday_number, include_holiday_if_in_date)
+  #       puts "#{date} #{nth_holiday_number} #{include_holiday_if_in_date}: #{hol}"
+  #    end
+  #   end
+  # end
+  #
+  def find_nth_holiday(date, nth_holiday_number, include_holiday_if_in_date = false)
+    nearest_holiday_index = find_nearest_holiday_index(@holidays, date, include_holiday_if_in_date)
+    return nil if nearest_holiday_index.nil?
+    holiday_index = nearest_holiday_index + nth_holiday_number
+    return nil if holiday_index < 0 || holiday_index >= @holidays.length
+    @holidays[holiday_index]
+  end
+
+  private def find_nearest_holiday_index(holidays, date, include_holiday_if_in_date = false)
+    holidays.each_with_index do |holiday, index|
+      return index if include_holiday_if_in_date && date.between?(holiday.start_date, holiday.end_date)
+      return index - 1 if date.between?(holiday.start_date, holiday.end_date)
+      return index if index < holidays.length - 1 && date > holiday.end_date && date < holidays[index + 1].start_date
     end
     nil
   end
@@ -336,8 +448,14 @@ class Holidays
       else
         :summer_half_term
       end
-    when 7, 8, 9
+    when 7, 8
       :summer
+    when 9
+      if date.day < 15 # Scotland has a one off holiday later in September
+        :summer
+      else
+        nil
+      end
     when 10, 11
       :autumn_half_term
     else

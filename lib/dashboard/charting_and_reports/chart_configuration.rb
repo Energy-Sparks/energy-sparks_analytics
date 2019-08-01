@@ -368,6 +368,22 @@ class ChartManager
       inherits_from:    :group_by_week_gas,
       yaxis_units:      :£
     },
+    alert_group_by_week_electricity_14_months: {
+      inherits_from:    :alert_group_by_week_electricity,
+      timescale:        { month: -13..0 } # 14 months so can see previous year's holiday (max requirement - 1 year + 6 weeks summer holiday
+    },
+    alert_group_by_week_gas_14_months: {
+      inherits_from:    :alert_group_by_week_gas,
+      timescale:        { month: -13..0 } # 14 months so can see previous year's holiday (max requirement - 1 year + 6 weeks summer holiday
+    },
+    alert_group_by_week_electricity_4_months: {
+      inherits_from:    :alert_group_by_week_electricity,
+      timescale:        { month: -3..0 } # previous holiday alert, 4 months is minium required to cover, Whitsun (x 1 wk), term (x6), sum hol (x6), term (x3)
+    },
+    alert_group_by_week_gas_4_months: {
+      inherits_from:    :alert_group_by_week_gas,
+      timescale:        { month: -3..0 } # 14 months so can see previous year's holiday (max requirement - 1 year + 6 weeks summer holiday
+    },
     group_by_week_carbon: {
       name:             'Calculating your schools total carbon emissions, including transport and food',
       inherits_from:    :group_by_week_gas,
@@ -601,7 +617,7 @@ class ChartManager
       chart1_type:      :column,
       meter_definition: :allheat,
       timescale:        :year,
-      filter:           { daytype: :occupied, heating: true },
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ], heating: true },
       series_breakdown: :none,
       x_axis:           :intraday,
       yaxis_units:      :kwh,
@@ -619,7 +635,7 @@ class ChartManager
       name:             'Intra-school day gas consumption profile',
       inherits_from:    :gas_heating_season_intraday,
       series_breakdown: :none,
-      filter:           { daytype: :occupied }
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] }
     },
     meter_breakdown_pie_1_year: { # used by heating regression fitter
       name:             'Breakdown by meter (this year): Gas',
@@ -801,7 +817,7 @@ class ChartManager
     },
     heating_on_off_by_week_heating_school_non_school_days_only: {
       inherits_from:    :heating_on_off_by_week_heating_school_days_and_holidays_only,
-      filter:            { daytype: :unoccupied, heating: true },
+      filter:           { daytype: [ SeriesNames::HOLIDAY, SeriesNames::WEEKEND ], heating: true },
       y2_axis:          nil
     },
     thermostatic_model_categories_pie_chart: {
@@ -824,59 +840,12 @@ class ChartManager
       y2_axis:          nil,
       x_axis:           :nodatebuckets
     },
-=begin
-    thermostatic_regression_simple: {
-      name:             'Thermostatic (Winter - School Day) - simple model',
-      inherits_from:    :thermostatic_regression,
-      model:            :simple_regression_temperature
-    },
-    thermostatic_regression_thermal_mass: {
-      name:             'Thermostatic (Winter - School Day) - thermal mass model',
-      inherits_from:    :thermostatic_regression,
-      model:            :thermal_mass_regression_temperature
-    },
-    thermostatic_regression_best: {
-      name:             'Thermostatic (Winter - School Day) - best model',
-      inherits_from:    :thermostatic_regression,
-      model:            :best
-    },
-    thermostatic_winter_occupied: {
-      name:             'Thermostatic (Winter - School Day)',
-      inherits_from:    :thermostatic_regression,
-      filter:           { model_type: %i[heating_occupied_all_days heating_occupied_monday heating_occupied_tuesday heating_occupied_wednesday heating_occupied_thursday heating_occupied_friday] }
-    },
-    thermostatic_winter_weekend: {
-      name:             'Thermostatic (Winter Weekend)',
-      inherits_from:    :thermostatic_regression,
-      filter:           { model_type: :weekend_heating }
-    },
-    thermostatic_summer_occupied: {
-      name:             'Thermostatic (Summer - School Days)',
-      inherits_from:    :thermostatic_regression,
-      filter:           { model_type: :summer_occupied_all_days }
-    },
-    thermostatic_summer_weekend: {
-      name:             'Thermostatic (Summer Weekend)',
-      inherits_from:    :thermostatic_regression,
-      filter:           { model_type: :weekend_hotwater_only }
-    },
-    thermostatic_summer_holiday: {
-      name:             'Thermostatic (Summer Holiday)',
-      inherits_from:    :thermostatic_regression,
-      filter:           { model_type: :holiday_hotwater_only }
-    },
-    thermostatic_none: {
-      name:             'Thermostatic (Not heating or hot water)',
-      inherits_from:    :thermostatic_regression,
-      filter:           { model_type: :none }
-    },
-=end
     thermostatic_non_heating: {
       name:             'Thermostatic (Non Heating Season, School Day)',
       chart1_type:      :scatter,
       meter_definition: :allheat,
       timescale:        :year,
-      filter:            { daytype: :occupied, heating: false },
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ], heating: false },
       series_breakdown: %i[heating heatingmodeltrendlines degreedays],
       x_axis:           :day,
       yaxis_units:      :kwh,
@@ -939,7 +908,7 @@ class ChartManager
       timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:            { daytype: :occupied },
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -950,7 +919,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }, { schoolweek: -2 }, { schoolweek: -3 }, { schoolweek: -4 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:            { daytype: :occupied },
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -961,7 +930,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -20 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:            { daytype: :occupied },
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -972,7 +941,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -20 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:            { daytype: :occupied },
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1001,7 +970,7 @@ class ChartManager
       timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           { daytype: :holidays },
+      filter:           { daytype: [ SeriesNames::HOLIDAY] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1012,7 +981,7 @@ class ChartManager
       timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           { daytype: :weekends },
+      filter:           { daytype: [ SeriesNames::WEEKEND] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1215,7 +1184,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -20 }],
       x_axis:           :intraday,
       meter_definition: :electricity_simulator,
-      filter:            { daytype: :occupied },
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1226,7 +1195,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -20 }],
       x_axis:           :intraday,
       meter_definition: :electricity_simulator,
-      filter:            { daytype: :occupied },
+      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1245,7 +1214,7 @@ class ChartManager
       name:             'Frost Protection Example Sunday 2',
       chart1_type:      :column,
       series_breakdown: :none,
-      timescale:        [{ frostday_3: -1 }], # skip -1 for moment, as 12-2-2017 has no gas data at most schools TODO(PH,27Jun2017) - fix gas data algorithm
+      timescale:        [{ frostday_3: -1 }],
       x_axis:           :datetime,
       meter_definition: :allheat,
       yaxis_units:      :kw,
@@ -1353,6 +1322,18 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :temperature
     },
+    last_2_school_weeks_electricity_comparison_alert: {
+      name:             'Comparison of last 2 school weeks electricity consumption',
+      inherits_from:    :last_2_weeks_gas_comparison,
+      meter_definition: :allelectricity,
+      y2_axis:          :none
+    },
+    recent_holiday_electricity_comparison_alert: {
+      name:             'Comparison of electricity consumption for recent holidays',
+      inherits_from:    :group_by_week_electricity,
+      filter:           { daytype: [ SeriesNames::HOLIDAY ] },
+      timescale:        { week: -10..0 }
+    },
     alert_weekend_last_week_gas_datetime_kwh: {
       name:             'Last weeks half hourly gas consumption (kWh)',
       series_breakdown: :none,
@@ -1392,6 +1373,23 @@ class ChartManager
       adjust_by_temperature:  10.0,
       y2_axis:          nil,
       inherits_from:    :last_2_weeks_gas_comparison
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted: {
+      name:             'Comparison of last 2 weeks gas consumption - unadjusted alert calculation',
+      y2_axis:          nil,
+      inherits_from:    :last_2_weeks_gas_comparison
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted: {
+      name:                   'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
+      adjust_by_temperature:  { schoolweek: 0 },
+      #asof_date:              Date.new(2019, 3, 7), # gets overridden by alert
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
+    },
+    schoolweek_alert_2_previous_holiday_comparison_adjusted: {
+      name:                           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
+      adjust_by_average_temperature:  { holiday: 0 },
+      #asof_date:                     Date.new(2019, 3, 7), # gets overridden by alert
+      inherits_from:                  :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
     },
     teachers_landing_page_gas: {
       timescale:        [{ workweek: 0 }, { workweek: -1 }],
@@ -1437,52 +1435,6 @@ class ChartManager
     alert_last_7_days_intraday_gas_heating_on_too_early: {
       inherits_from:    :last_7_days_intraday_gas
     },
-=begin
-    last_2_weeks_gas_comparison_datetime: {
-      name:             'Last 2 weeks gas consumption week',
-      x_axis:           :datetime,
-      chart1_type:      :line,
-      inherits_from:    :last_2_weeks_gas_comparison
-    },
-    last_2_weeks_gas_datetime: {
-      name:             'Last 2 weeks gas consumption week',
-      x_axis:           :datetime,
-      chart1_type:      :line,
-      inherits_from:    :last_2_weeks_gas
-    },
-    last_2_weeks_gas_temperature_compensated: {
-      name:             'Last 2 weeks gas consumption - adjusted for outside temperature',
-      timescale:        { week: -1..0 },
-      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
-    },
-    last_8_weeks_gas_comparison: {
-      name:             'Comparison of 2 months gas consumption',
-      x_axis:           :day,
-      timescale:        [{ week: -4..0 }, { week: -9..-5 }],
-      inherits_from:    :last_2_weeks_gas_comparison
-    },
-    last_8_weeks_gas_comparison_temperature_compensated: {
-      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
-      timescale:        [{ week: -4..0 }, { week: -9..-5 }],
-      x_axis:           :day,
-      y2_axis:          nil,
-      inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
-    },
-    last_8_weeks_gas_comparison_temperature_compensated_line: {
-      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
-      chart1_type:      :line,
-      inherits_from:    :last_8_weeks_gas_comparison_temperature_compensated
-    },
-    last_28_days_gas_comparison_temperature_compensated_line: {
-      name:             'Comparison of last 2 months gas consumption - adjusted for outside temperature',
-      timescale:        [{ day: -27...0 }, { day: -55..-28 }],
-      inherits_from:    :last_8_weeks_gas_comparison_temperature_compensated
-    },
-    last_28_days_gas_comparison_temperature_compensated_column: {
-      chart1_type:      :line,
-      inherits_from:    :last_28_days_gas_comparison_temperature_compensated_line
-    },
-=end
     #==============================================================
     sprint2_last_2_weeks_electricity_by_datetime: {
       name:             'Compare last 2 weeks by time of day - line chart (Electricity)',

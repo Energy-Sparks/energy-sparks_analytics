@@ -25,6 +25,7 @@ class AlertAnalysisBase
     @report_type = report_type
     @relevance = aggregate_meter.nil? ? :never_relevant : :relevant
     @analysis_report = AlertReport.new(report_type)
+    @not_enough_data_exception = false
   end
 
   def relevance
@@ -33,6 +34,7 @@ class AlertAnalysisBase
 
   def analyse(asof_date, use_max_meter_date_if_less_than_asof_date = false)
     begin
+      @asof_date = asof_date
       @max_asofdate = maximum_alert_date
       @analysis_report.max_asofdate = @max_asofdate
       if valid_alert?
@@ -46,7 +48,12 @@ class AlertAnalysisBase
       else
         invalid_alert_report # gas alert for electric only school or electic alert for gas only school
       end
+    rescue EnergySparksNotEnoughDataException => e
+      logger.warn e.message
+      logger.warn e.backtrace
+      @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue StandardError => e
+      puts 
       puts e.to_s
       puts e.message
       puts e.backtrace
@@ -139,8 +146,13 @@ class AlertAnalysisBase
     template_data.each do |type, data| # front end want ranges as seperate high/low symbol-value pairs
       if [:£_range, :years_range].include?(lookup[type][:units])
         new_type = lookup[type][:units] == :£_range ? :£ : :years
-        new_data[self.class.convert_range_symbol_to_high(type)] = FormatUnit.format(new_type, raw_data[type].first, :text, true)
-        new_data[self.class.convert_range_symbol_to_low(type)]  = FormatUnit.format(new_type, raw_data[type].last,  :text, true)
+        if raw_data[type].nil?
+          new_data[self.class.convert_range_symbol_to_high(type)] = nil
+          new_data[self.class.convert_range_symbol_to_low(type)]  = nil
+        else
+          new_data[self.class.convert_range_symbol_to_high(type)] = FormatUnit.format(new_type, raw_data[type].first, :text, true)
+          new_data[self.class.convert_range_symbol_to_low(type)]  = FormatUnit.format(new_type, raw_data[type].last,  :text, true)
+        end
       end
     end
     new_data
@@ -382,8 +394,12 @@ class AlertAnalysisBase
       elsif data[:units] == :table
         list[type] = format_table(type, data, formatted, format)
       else
-        if respond_to? type
-          list[type] = formatted ? FormatUnit.format(data[:units], send(type), format, true) : send(type)
+        if respond_to?(type, true)
+          if formatted && send(type).nil?
+            list[type] = ''
+          else
+            list[type] = formatted ? FormatUnit.format(data[:units], send(type), format, true) : send(type)
+          end
         else
           logger.info "Warning: alert doesnt implement #{type}"
         end
@@ -556,9 +572,14 @@ class AlertAnalysisBase
     [asof_date - 365, meter.amr_data.start_date].max
   end
 
-  private def kwh_date_range(meter, start_date, end_date, data_type = :kwh)
+  protected def kwh_date_range(meter, start_date, end_date, data_type = :kwh)
     return nil if meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date
     meter.amr_data.kwh_date_range(start_date, end_date, data_type)
+  end
+
+  protected def kwhs_date_range(meter, start_date, end_date, data_type = :kwh)
+    return nil if meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date
+    (start_date..end_date).to_a.map { |date| meter.amr_data.one_day_kwh(date, data_type) }
   end
 
   protected def kwh(date1, date2, data_type = :kwh)
@@ -627,7 +648,13 @@ class AlertAnalysisBase
       AlertElectricityMeterConsolidationOpportunity,
       AlertGasMeterConsolidationOpportunity,
       AlertMeterASCLimit,
-      AlertDifferentialTariffOpportunity
+      AlertDifferentialTariffOpportunity,
+      AlertSchoolWeekComparisonElectricity,
+      AlertPreviousHolidayComparisonElectricity,
+      AlertPreviousYearHolidayComparisonElectricity,
+      AlertSchoolWeekComparisonGas,
+      AlertPreviousHolidayComparisonGas,
+      AlertPreviousYearHolidayComparisonGas
     ]
   end
 end

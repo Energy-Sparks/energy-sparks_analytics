@@ -1,8 +1,10 @@
 #================= Base Class for Gas Alerts including model usage=============
 require_relative 'alert_gas_only_base.rb'
+require_relative 'alert_model_cache_mixin.rb'
 
 class AlertGasModelBase < AlertGasOnlyBase
   include Logging
+  include AlertModelCacheMixin
   MAX_CHANGE_IN_PERCENT = 0.15
 
   attr_reader :enough_data
@@ -84,10 +86,6 @@ class AlertGasModelBase < AlertGasOnlyBase
     amr_data.one_day_kwh(date)
   end
 
-  protected def asof_date_minus_one_year(date)
-    date - 364
-  end
-
   def a
     @a ||= @heating_model.average_heating_school_day_a
   end
@@ -128,14 +126,6 @@ class AlertGasModelBase < AlertGasOnlyBase
     AnalyseHeatingAndHotWater::HeatingModel.average_non_school_day_heating_days
   end
 
-  protected def model_start_date(asof_date)
-    asof_date_minus_one_year(asof_date)
-  end
-
-  protected def one_year_period(asof_date)
-    SchoolDatePeriod.new(:alert, 'Current Year', model_start_date(asof_date), asof_date)
-  end
-
   protected def enough_data_for_model_fit
     @heating_model = calculate_model(asof_date) if @heating_model.nil?
     @heating_model.enough_samples_for_good_fit
@@ -143,18 +133,5 @@ class AlertGasModelBase < AlertGasOnlyBase
 
   protected def calculate_model(asof_date)
     @heating_model = model_cache(@school.urn, asof_date)
-  end
-
-  # during analytics testing store model results to save recalculating for different alerts at same school
-  private def model_cache(urn, asof_date)
-    return call_model(asof_date) unless AlertAnalysisBase.test_mode
-    @@model_cache_results = {} unless defined?(@@model_cache_results)
-    composite_key = urn.to_s + ':' + asof_date.to_s
-    return @@model_cache_results[composite_key] if @@model_cache_results.key?(composite_key)
-    @@model_cache_results[composite_key] = call_model(asof_date) 
-  end
-
-  private def call_model(asof_date)
-    @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, one_year_period(asof_date)) 
   end
 end

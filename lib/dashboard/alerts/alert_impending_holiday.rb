@@ -334,7 +334,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
 
   private def upcoming_holiday_information(asof_date)
     holiday_period = @school.holidays.find_next_holiday(asof_date)
-    length_days = (holiday_period.days + 1).to_i
+    length_days = holiday_period.days
     weekdays = week_days(holiday_period.start_date, holiday_period.end_date)
     mid_date = holiday_period.start_date + (length_days / 2).floor
     {

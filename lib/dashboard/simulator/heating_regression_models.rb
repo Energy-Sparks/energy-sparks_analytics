@@ -56,9 +56,11 @@ module AnalyseHeatingAndHotWater
 
       case model_type
       when :simple_regression_temperature
+        enough_amr_data?
         @models[model_type] = HeatingModelTemperatureSpace.new(@meter, @model_overrides)
         @models[model_type].calculate_regression_model(period, allow_more_than_1_year)
       when :thermal_mass_regression_temperature
+        enough_amr_data?
         @models[model_type] = HeatingModelTemperatureSpaceThermalMass.new(@meter, @model_overrides)
         @models[model_type].calculate_regression_model(period, allow_more_than_1_year)
       when :override_model
@@ -78,6 +80,12 @@ module AnalyseHeatingAndHotWater
       end
       logger.info "create_and_fit_model end"
       @models[model_type]
+    end
+
+    private def enough_amr_data?
+      if @meter.amr_data.days < 30
+        raise EnergySparksNotEnoughDataException, "Not enough amr data for model to provide good regression fit #{@meter.amr_data.days} days"
+      end
     end
 
     class HeatingModelOverrides
@@ -131,6 +139,9 @@ module AnalyseHeatingAndHotWater
       else
         return simple_model if simple_model.enough_samples_for_good_fit && !thermal_mass_model.enough_samples_for_good_fit
 
+        if !simple_model.enough_samples_for_good_fit
+          raise EnergySparksNotEnoughDataException, "Not enough samples for model to provide good regression fit simple: #{simple_model.winter_heating_samples} massive: #{thermal_mass_model.winter_heating_samples}"
+        end
         thermal_mass_model.standard_deviation_percent < simple_model.standard_deviation_percent ? thermal_mass_model : simple_model
       end
     end
@@ -169,6 +180,10 @@ module AnalyseHeatingAndHotWater
 
       def predicted_kwh_temperature(temperature)
         @a + @b * (@base_temperature.nil? ? temperature : [temperature, @base_temperature].min)
+      end
+
+      def valid?
+        !@a.nil? && !@b.nil? && !@samples.nil?
       end
 
       def samples
@@ -694,7 +709,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def calculate_regression_model(period, allow_more_than_1_year)
-      check_model_fitting_start_end_dates(period, allow_more_than_1_year)
+      # check_model_fitting_start_end_dates(period, allow_more_than_1_year)
 
       bm = Benchmark.realtime {
         @max_summer_hotwater_kwh = calculate_max_summer_hotwater_kitchen_kwh(period)
@@ -1039,6 +1054,9 @@ module AnalyseHeatingAndHotWater
       if model.nil?
         logger.warn "Unable to predict kwh as no model #{model_type?(date)} for #{date} using zero, only #{@models.keys} available"
         0.0
+      elsif !model.valid?
+        logger.warn "Unable to predict kwh as model not valid for #{date} using zero"
+        0.0
       else
         model.predicted_kwh_temperature(temperature)
       end
@@ -1116,7 +1134,12 @@ module AnalyseHeatingAndHotWater
     end
 
     def winter_heating_samples
-      SCHOOLDAYHEATINGMODELTYPES.map { |model_type| model(model_type).samples }.sum
+      if SCHOOLDAYHEATINGMODELTYPES.any? { |model_type| model(model_type).nil? || !model(model_type).valid? }
+        logger.warn 'Not all winter heating models are valid, returning 0.0'
+        0.0
+      else
+        SCHOOLDAYHEATINGMODELTYPES.map { |model_type| model(model_type).samples }.sum
+      end
     end
 
     # 60 value needs further reasarch across multiple schools

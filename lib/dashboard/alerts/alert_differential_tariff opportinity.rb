@@ -75,7 +75,6 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
 
     saving_info_by_meter, @total_potential_savings_£, @total_potential_savings_percent = analyse_all_meters(asof_date)
     table = switching_advice_table_analytics_only(saving_info_by_meter)
-    puts table
 
     @differential_tariff_opportunity_table, _total_saving = calculate_differential_tariff_opportunity_table(saving_info_by_meter)
 

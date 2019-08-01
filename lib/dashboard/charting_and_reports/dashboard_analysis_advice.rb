@@ -605,7 +605,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
     saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
 
-    excluding_storage_heaters = (@school.storage_heaters? && fuel_type_str == 'electricity') ? '(exluding storage heaters)' : ''
+    excluding_storage_heaters = (@school.storage_heaters? && fuel_type_str == 'electricity') ? '(excluding storage heaters)' : ''
 
     table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
 

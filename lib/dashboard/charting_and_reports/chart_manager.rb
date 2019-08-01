@@ -56,9 +56,9 @@ class ChartManager
   end
 
   # Used by ES Web application
-  def run_standard_chart(chart_param, override_config = nil)
+  def run_standard_chart(chart_param, override_config = nil, reraise_exception = false)
     chart_config = get_chart_config(chart_param, override_config)
-    chart_definition = run_chart(chart_config, chart_param, false, override_config)
+    chart_definition = run_chart(chart_config, chart_param, false, override_config, reraise_exception)
     chart_definition
   end
 
@@ -70,7 +70,7 @@ class ChartManager
   end
 
   # Used by ES Web application
-  def run_chart(chart_config, chart_param, resolve_inheritance = true, override_config = nil)
+  def run_chart(chart_config, chart_param, resolve_inheritance = true, override_config = nil, reraise_exception = false)
     logger.info '>' * 120
     logger.info chart_config[:name]
     logger.info '>' * 120
@@ -99,9 +99,15 @@ class ChartManager
         nil
       end
     rescue StandardError => e
-      puts "Unable to create chart", e
-      puts e.backtrace
-      nil
+      puts "Unable to create chart"
+      logger.warn "Unable to create chart"
+      if reraise_exception
+        raise
+      else
+        puts e.message
+        puts e.backtrace
+        nil
+      end
     end
   end
 

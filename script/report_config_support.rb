@@ -179,9 +179,9 @@ class ReportConfigSupport
     do_one_page_internal(worksheet_tab_name, page_config[:charts], chart_override)
   end
 
-  def do_chart_list(page_name, list_of_charts, empty_existing_chart_list = true)
+  def do_chart_list(page_name, list_of_charts, empty_existing_chart_list = true, chart_override = nil)
     @worksheet_charts = {} if empty_existing_chart_list
-    do_one_page_internal(page_name, list_of_charts)
+    do_one_page_internal(page_name, list_of_charts, chart_override)
   end
 
   def write_excel(filename = File.join(File.dirname(__FILE__), '../Results/') + @excel_name + '- charts test.xlsx')

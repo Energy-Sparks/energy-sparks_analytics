@@ -28,6 +28,9 @@ end
 class EnergySparksNoMeterDataAvailableForFuelType < StandardError
 end
 
+class EnergySparksBadHolidayDataException < StandardError
+end
+
 class EnergySparksBadChartSpecification < StandardError
 end
 

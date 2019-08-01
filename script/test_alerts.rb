@@ -39,8 +39,8 @@ def print_all_results(alert_class, alert)
 end
 
 @method_calls = [
- { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
- { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
+ # { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
+ # { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false }
  { on_class: false,  method: :front_end_template_data, name: 'front end text data', args: nil, use_puts: false },
  # { on_class: false,  method: :backwards_compatible_analysis_report, name: 'Backwards compatible alert report', args: nil, use_puts: true },
  # { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
@@ -67,7 +67,6 @@ end
 ]
 
 alerts_to_test = [
-  AlertHeatingOnSchoolDays
 =begin
   AlertHeatingOnNonSchoolDays,
   AlertHeatingComingOnTooEarly,
@@ -91,14 +90,24 @@ alerts_to_test = [
   AlertGasMeterConsolidationOpportunity,
   AlertElectricityMeterConsolidationOpportunity,
   AlertMeterASCLimit,
-  AlertDifferentialTariffOpportunity
+  AlertDifferentialTariffOpportunity,
 =end
+  AlertSchoolWeekComparisonElectricity,
+  AlertPreviousHolidayComparisonElectricity,
+  AlertPreviousYearHolidayComparisonElectricity,
+  AlertSchoolWeekComparisonGas,
+  AlertPreviousHolidayComparisonGas,
+  AlertPreviousYearHolidayComparisonGas
 ]
 
 excluded_schools = ['Ecclesall Primary School']
-included_schools = ['Brunswick']
+included_schools = ['Whiteways Primary']
 
-asof_date = Date.new(2019, 7, 3)
+# school week, previous holiday, last year holiday comparison
+# Whiteways: 4 Oct 2015: start of electricity, 6 Apr 2014 start of gas
+# Date.new(2015, 10, 6): all gas, but only school week relevant, no electricity
+# Date.new(2014, 7, 5): all gas, but only school week relevant, no electricity
+asof_date = Date.new(2019, 4, 20)
 
 school_names = AnalysticsSchoolAndMeterMetaData.new.meter_collections.keys
 
@@ -156,6 +165,7 @@ school_names.sort.each do |school_name|
       print_banner(alert.class.name, 1)
 
       bm2 = Benchmark.realtime {
+
         alert.analyse(asof_date, true)
 
         raw_data = alert.raw_variables_for_saving
@@ -176,8 +186,8 @@ school_names.sort.each do |school_name|
       }
       (alert_calculation_time[alert.class.name] ||= []).push(bm2)
     end
-    }
-    (school_calculation_time[school_name] ||= []).push(bm1)
+  }
+  (school_calculation_time[school_name] ||= []).push(bm1)
 end
 
 # ap(calculated_results)

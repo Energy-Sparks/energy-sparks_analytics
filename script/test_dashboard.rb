@@ -38,12 +38,16 @@ school_name = 'Whiteways Primary'
 # school_name = 'St Martins Garden Primary School'
 # school_name = 'Hugh Sexey'
 # school_name = 'Paulton Junior School'
-school_name = 'Whiteways Primary'
-#  = 'St Marks Secondary'
+# school_name = 'Whiteways Primary'
+# school_name = 'St Marks Secondary'
 # school_name = 'Trinity First School'
-school_name = 'Brunswick'
+# school_name = 'Brunswick'
 # school_name = 'Bishop Sutton Primary School'
 # school_name = 'Marksbury C of E Primary School'
+# school_name = 'Stanton Drew Primary School'
+# school_name = 'Woodthorpe Primary School'
+# school_name = 'St Thomas of Canterbury'
+# school_name = 'Freshford C of E Primary'
 
 if false
   Benchmark.memory do |x|
@@ -75,7 +79,7 @@ puts "Load time: #{bm.round(3)} seconds"
 
 # reports.do_all_schools(true)
 # reports.do_one_page(:solar_pv)
-reports.do_chart_list('HeatingTest', [:heating_on_off_by_week, :heating_on_off_by_week_with_breakdown_all, :heating_on_by_week_with_breakdown, :heating_on_by_week_with_breakdown_school_day_only, :hot_water_kitchen_on_off_by_week_with_breakdown])
+# reports.do_chart_list('HeatingTest', [:heating_on_off_by_week, :heating_on_off_by_week_with_breakdown_all, :heating_on_by_week_with_breakdown, :heating_on_by_week_with_breakdown_school_day_only, :hot_water_kitchen_on_off_by_week_with_breakdown])
 # reports.do_all_standard_pages_for_school
 # reports.do_all_schools(true)
 # reports.save_excel_and_html
@@ -83,8 +87,21 @@ reports.do_chart_list('HeatingTest', [:heating_on_off_by_week, :heating_on_off_b
 # reports.do_all_schools(true)
 # reports.do_one_page(:cost)
 # reports.do_chart_list('Peak', [:peak_kw])
-# reports.do_chart_list('Paulton',  [:teachers_landing_page_gas_simple])
+
+reports.do_chart_list('Paulton',  [
+                                    :last_2_school_weeks_electricity_comparison_alert,
+                                    :schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted,
+                                    :alert_group_by_week_electricity_14_months,
+                                    :alert_group_by_week_gas_14_months,
+                                    :alert_group_by_week_electricity_4_months,
+                                    :alert_group_by_week_gas_4_months
+                                ],
+                              true, { asof_date: Date.new(2019, 4, 20)})
+
 # reports.do_all_standard_pages_for_school
+
+
+
 
 if profile
   prof_result = RubyProf.stop

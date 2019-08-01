@@ -111,19 +111,63 @@ class SeriesDataManager
     @meter_collection = meter_collection
     @meter_definition = chart_configuration[:meter_definition]
     @breakdown_list = convert_variable_to_array(chart_configuration[:series_breakdown])
-    @y2_axis_list = convert_variable_to_array(chart_configuration[:y2_axis])
+    @y2_axis_list = process_y_axis_config(chart_configuration[:y2_axis])
     @data_types = convert_variable_to_array(chart_configuration[:data_types])
     @heating_model = nil
     @high_thermal_mass_heating_model = nil
     @hotwater_model = nil
     @periods = nil
     @chart_configuration = chart_configuration
-    # set true/false for performance
-    @adjust_by_temperature = @chart_configuration.key?(:adjust_by_temperature)
-    @adjust_by_temperature_value = @chart_configuration[:adjust_by_temperature] if @adjust_by_temperature
     @model_type = chart_configuration.key?(:model) ? chart_configuration[:model] : :best
     configure_manager
+    process_temperature_adjustment_config
     logger.info "Series Name Manager: Chart Creation for #{meter_collection}"
+  end
+
+  private def process_y_axis_config(y2_axis_config)
+    return [] if y2_axis_config.nil? || y2_axis_config == :none
+    convert_variable_to_array(y2_axis_config)
+  end
+
+  private def process_temperature_adjustment_config
+    if @chart_configuration.key?(:adjust_by_temperature)
+      @adjust_by_temperature = true
+      if @chart_configuration[:adjust_by_temperature].is_a?(Float)
+        @adjust_by_temperature_value = @chart_configuration[:adjust_by_temperature]
+      elsif @chart_configuration[:adjust_by_temperature].is_a?(Hash)
+        @adjust_by_temperature_value = @chart_configuration[:temperature_adjustment_map]
+      else
+        raise EnergySparksBadChartSpecification, 'Unexpected temperature adjustment type'
+      end
+    end
+    if @chart_configuration.key?(:adjust_by_average_temperature)
+      if @chart_configuration[:adjust_by_average_temperature].is_a?(Hash)
+        temperatures = adjusted_temperature_values_for_period(@chart_configuration[:adjust_by_average_temperature])
+        @adjust_by_average_temperature = temperatures.sum / temperatures.length
+        @adjust_by_temperature = true
+      else
+        raise EnergySparksBadChartSpecification, 'Unexpected average temperature adjustment type'
+      end
+    end
+  end
+
+  private def adjusted_temperature_values_for_period(period_config)
+    period_calc = PeriodsBase.period_factory({timescale: period_config}, @meter_collection, @first_meter_date, @last_meter_date)
+    period = period_calc.periods[0]
+    start_date, end_date = truncate_averaging_range(period)
+    (start_date..end_date).to_a.map { |date| @meter_collection.temperatures.average_temperature(date) }
+  end
+
+  # allows some fault tolerance in holiday alerts, can be triggered part way through
+  # holiday, only need one day of data for averaging temperature to be calculated
+  private def truncate_averaging_range(period)
+    start_date = [@first_meter_date, period.start_date].max
+    end_date   = [@last_meter_date, period.end_date].min
+    if end_date - start_date < 0
+      dates = "meter #{@first_meter_date} to #{@last_meter_date} and period #{period.start_date} to #{period.end_date}"
+      raise EnergySparksNotEnoughDataException, "No overlap for average temperature between #{dates}"
+    end
+    [start_date, end_date]
   end
 
   def convert_variable_to_array(value)
@@ -231,12 +275,12 @@ class SeriesDataManager
   def meter_names
     names = []
     if !@meters[0].nil? # indication of solar pv meters only
-      names += meter_names_from_list(@meter_collection.electricity_meters)
-      names += meter_names_from_list(@meter_collection.solar_pv_meters)
+      names += @meter_collection.electricity_meters.map(&:display_name)
+      names += @meter_collection.solar_pv_meters.map(&:display_name)
     end
     if !@meters[1].nil? # indication of heat meters only
-      names += meter_names_from_list(@meter_collection.heat_meters)
-      names += meter_names_from_list(@meter_collection.storage_heater_meters)
+      names += @meter_collection.heat_meters.map(&:display_name)
+      names += @meter_collection.storage_heater_meters.map(&:display_name)
     end
     names
   end
@@ -250,15 +294,6 @@ class SeriesDataManager
       end
     end
     names
-  end
-
-  # TODO(PH,16Sep2018) - this function is called repetatively - list should be cached
-  def meter_names_from_list(list_of_meters)
-    list = []
-    list_of_meters.each do |meter|
-      list.push(meter.display_name)
-    end
-    list
   end
 
   def get_data_private(time_period)
@@ -376,7 +411,7 @@ class SeriesDataManager
 
   private def scaling_factor_for_model_derived_gas_data(data_type)
     case data_type
-    when :£, :economic_cost;      BenchmarkMetrics::GAS_PRICE         
+    when :£, :economic_cost;      BenchmarkMetrics::GAS_PRICE
     when :accounting_cost;        BenchmarkMetrics::GAS_PRICE # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
     when :co2;                    EnergyEquivalences::UK_GAS_CO2_KG_KWH
     else;                         1.0 end
@@ -385,7 +420,21 @@ class SeriesDataManager
   def amr_data_date_range(meter, start_date, end_date, data_type)
     if @adjust_by_temperature && meter.fuel_type == :gas
       scale = scaling_factor_for_model_derived_gas_data(data_type)
-      scale * heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value, 0.0)
+      if @adjust_by_temperature_value.is_a?(Float)
+        scale * heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value, 0.0)
+      elsif !@adjust_by_average_temperature.nil?
+        scale * heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_average_temperature, 0.0)
+      elsif @adjust_by_temperature_value.is_a?(Hash)
+        # see aggregator.temperature_compensation_temperature_map comments for more detailed explanation
+        # but adjusts gas data to corresponding temperatures of first series
+        total_adjusted_kwh = 0.0
+        (start_date..end_date).each do |date|
+          total_adjusted_kwh += heating_model.temperature_compensated_one_day_gas_kwh(date, @adjust_by_temperature_value[date])
+        end
+        [scale * total_adjusted_kwh, 0.0].max
+      else
+        raise EnergySparksUnexpectedStateException, "Expecting Float or Hash for @adjust_by_temperature_value when @adjust_by_temperature true: #{@adjust_by_temperature_value}"
+      end
     else
       meter.amr_data.kwh_date_range(start_date, end_date, data_type)
     end
@@ -401,7 +450,6 @@ class SeriesDataManager
   end
 
   def kwh_cost_or_co2
-# puts "kwh co2 cost type: #{@chart_configuration[:yaxis_units]}"
     case @chart_configuration[:yaxis_units]
     when :£;               :economic_cost
     when :accounting_cost; :accounting_cost
@@ -797,239 +845,9 @@ private
     calculate_last_chart_date
   end
 
-  # the timescale parameter comes from the 'chart_configuration' and helps define the
-  # arrangement or grouping of dates along the x-axis
-  # the parameter is heavingly overloaded, it can deal with a variety of values:
-  # :academic_year
-  # :year             - implies the current year to date i.e. using the lastest data
-  # :week
-  # and then these parameters are then overloaded as either hashes or arrays, for example
-  # {:week => Date.new(2018, 6, 1)}              # calculate a chart for a week ending 1Jun2018
-  # [{:week => 0}, {:week => -1}, {:week => -2}] # compare the last 3 weeks data
-
   def calculate_periods
-    if @chart_configuration.key?(:timescale) && @chart_configuration[:timescale].is_a?(Symbol)
-      case @chart_configuration[:timescale]
-      when :academicyear
-        periods = @meter_collection.holidays.academic_years(@first_meter_date, @last_meter_date)
-        @periods = [periods[0]]
-      when :year
-        periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
-        @periods = [periods[0]]
-      when :month
-        @periods = [month_offset_period(@last_meter_date, 0)]
-      when :week
-        period = SchoolDatePeriod.new(:week, 'current week', @last_meter_date - 6, @last_meter_date)
-        @periods = [period]
-      when :workweek
-        @periods = [workweek_period(@last_meter_date)]
-      when :day
-        period = SchoolDatePeriod.new(:day, 'latest day', @last_meter_date, @last_meter_date)
-        @periods = [period]
-      else
-        raise "Unsupported time period for charting #{@chart_configuration[:timescale]}"
-      end
-    elsif @chart_configuration.key?(:timescale) && @chart_configuration[:timescale].is_a?(Hash)
-      hash_key, hash_value = @chart_configuration[:timescale].first
-      case hash_key
-      when :academicyear
-        periods = @meter_collection.holidays.academic_years(@first_meter_date, @last_meter_date)
-        if hash_value.is_a?(Integer)
-          raise 'Error: expecting zero of negative number for academic year specification' if hash_value > 0
-          raise EnergySparksMissingPeriodForSpecifiedPeriodChart.new("Error: data not available for #{hash_value}th academic year") if hash_value.magnitude > periods.length - 1
-          @periods = [periods[hash_value.magnitude]]
-        else
-          raise "Expecting an integer as an parameter for an academic year specification got a #{hash_value.class.name}"
-        end
-      when :year
-        if hash_value.is_a?(Integer)
-          raise 'Error: expecting zero or negative number for year specification' if hash_value > 0
-          periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
-          raise EnergySparksMissingPeriodForSpecifiedPeriodChart.new("Error: data not available for #{hash_value}th year") if hash_value.magnitude > periods.length - 1
-          @periods = [periods[hash_value.magnitude]]
-        elsif hash_value.is_a?(Date)
-          end_date = hash_value > @last_meter_date ? @last_meter_date : hash_value
-          @periods = @meter_collection.holidays.years_to_date(@first_meter_date, end_date, false)
-        elsif hash_value.is_a?(Range)
-          raise 'Error: expecting zero or negative number for year specification' if hash_value.last > 0
-          periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
-          raise EnergySparksMissingPeriodForSpecifiedPeriodChart.new("Error: data not available for #{hash_value.first}th year") if hash_value.first.magnitude > periods.length - 1
-          @periods = [SchoolDatePeriod.merge_two_periods(periods[hash_value.last.magnitude], periods[hash_value.first.magnitude])]
-        else
-          raise "Expecting an integer or date as an parameter for a year specification got a #{hash_value.class.name}"
-        end
-      when :month
-        if hash_value.is_a?(Integer)
-          @periods = [month_offset_period(@last_meter_date, hash_value)]
-        else
-          raise 'Expecting an integer for a month specification'
-        end
-      when :week
-        if hash_value.is_a?(Integer) # hash_value weeks back from latest week
-          raise 'Error: expecting zero of negative number for week specification' if hash_value > 0
-          end_date = @last_meter_date - 7 * hash_value.magnitude
-          start_date = end_date - 6
-          if start_date < @first_meter_date
-            raise "Error: date request for week of data out of range start date #{start_date} before first meter data #{@first_meter_date}"
-          else
-            period = SchoolDatePeriod.new(:week, 'current week', start_date, end_date)
-          end
-        elsif hash_value.is_a?(Date) # assume in this case the specified date is the first day of the week
-          end_date = hash_value + 6 > @last_meter_date ? @last_meter_date : hash_value + 6
-          start_date = end_date - 6
-          period = SchoolDatePeriod.new(:week, 'current week', start_date, end_date)
-        elsif hash_value.is_a?(Range)
-          raise 'Error: expecting zero or negative number for week specification' if hash_value.last > 0
-          end_date = @last_meter_date - 7 * hash_value.last.magnitude
-          start_date = @last_meter_date - 7 * hash_value.first.magnitude - 6
-          if start_date < @first_meter_date
-            raise "Error: date request for week of data out of range start date #{start_date} before first meter data #{@first_meter_date}"
-          else
-            period = SchoolDatePeriod.new(:week, 'range of weeks', start_date, end_date)
-          end
-        else
-          raise "Expecting an integer or date as an parameter for a week specification got a #{hash_value.class.name}"
-        end
-        @periods = [period]
-      when :schoolweek
-        if hash_value.is_a?(Integer)
-          sunday, saturday, _week_count = @meter_collection.holidays.nth_school_week(@last_meter_date, hash_value)
-          period = SchoolDatePeriod.new(:schoolweek, 'current week', sunday, saturday)
-          @periods = [period]
-        else
-          raise EnergySparksBadChartSpecification.new('Expecting integer for :schoolweek timescale configuration')
-        end
-      when :workweek
-        if hash_value.is_a?(Integer)
-          @periods = [workweek_period(@last_meter_date + hash_value * 7)]
-        else
-          raise EnergySparksBadChartSpecification.new('Expecting integer for :workweek timescale configuration')
-        end
-      when :daterange # used in chart drilldown
-        if hash_value.is_a?(Array) && hash_value.length == 2
-          period = SchoolDatePeriod.new(:daterange, 'date range', hash_value[0], hash_value[1])
-          @periods = [period]
-        else
-          raise EnergySparksBadChartSpecification.new('Expecting array of 2 dates for :daterange :timescale chart definition')
-        end
-      when :day
-        if hash_value.is_a?(Integer) # hash_value weeks back from latest week
-          raise 'Error: expecting zero or negative number for day specification' if hash_value > 0
-          start_date = @last_meter_date - hash_value.magnitude
-          end_date = start_date
-          if start_date < @first_meter_date
-            raise "Error: date request for day of data out of range start date #{start_date} before first meter data #{@first_meter_date}"
-          else
-            period = SchoolDatePeriod.new(:day, 'one day', start_date, end_date)
-          end
-        elsif hash_value.is_a?(Date) # assume in this case the specified date is the first day of the week
-          start_date = hash_value
-          end_date = start_date
-          period = SchoolDatePeriod.new(:day, 'one day', start_date, end_date)
-        elsif hash_value.is_a?(Range)
-          raise 'Error: expecting zero or negative number for day specification' if hash_value.last > 0
-          end_date = @last_meter_date - 1 * hash_value.last.magnitude
-          start_date = @last_meter_date - 1 * hash_value.first.magnitude
-          if start_date < @first_meter_date
-            raise "Error: date request for day of data out of range start date #{start_date} before first meter data #{@first_meter_date}"
-          else
-            period = SchoolDatePeriod.new(:day, 'range of days', start_date, end_date)
-          end
-        else
-          raise "Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}"
-        end
-        @periods = [period]
-      when :frostday, :frostday_3
-        if hash_value.is_a?(Integer) # hash_value weeks back from latest week
-          raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for frostday specification') if hash_value > 0
-          days = @meter_collection.temperatures.frost_days(@first_meter_date, @last_meter_date, 0, @meter_collection.holidays)
-          index = hash_value.magnitude
-          if index > days.length - 1
-            raise EnergySparksBadChartSpecification.new("Not enough frost days #{days.length} for chart specification index #{index}")
-          elsif hash_key == :frostday
-            period = SchoolDatePeriod.new(:day, 'frost day', days[index], days[index])
-          else hash_key == :frostday_3
-            start_date = days[index] <= @first_meter_date ? days[index] :  days[index] - 1
-            end_date = days[index] >= @last_meter_date ? days[index] :  days[index] + 1
-            period = SchoolDatePeriod.new(:day, 'frost day, before and after', start_date, end_date)
-          end
-        else
-          raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
-        end
-        @periods = [period]
-      when :diurnal
-        if hash_value.is_a?(Integer) # hash_value weeks back from latest week
-          raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for dirunal range specification') if hash_value > 0
-          days = @meter_collection.temperatures.largest_diurnal_ranges(@first_meter_date, @last_meter_date, true, false, @meter_collection.holidays, false)
-          index = hash_value.magnitude
-          if index > days.length - 1
-            raise EnergySparksBadChartSpecification.new("Not enough diurnal range days #{days.length} for chart specification index #{index}")
-          else
-            period = SchoolDatePeriod.new(:day, 'diurnal day', days[index], days[index])
-          end
-        else
-          raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
-        end
-        @periods = [period]
-      when :optimum_start # hardcoded fudge for the moment
-        if hash_value.is_a?(Integer) # hash_value weeks back from latest week
-          raise EnergySparksBadChartSpecification.new('Error: expecting zero or negative number for optimum start range specification') if hash_value > 0
-          index = hash_value.magnitude
-          day1 = Date.new(2018, 3, 6)
-          day2 = Date.new(2018, 3, 16)
-          if @first_meter_date <= day1  && @last_meter_date >= day2
-            if index == 0
-              @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day1, day1)]
-            elsif index == 1
-              @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day2, day2)]
-            end
-          else
-            day1 = Date.new(2017, 3, 6)
-            day2 = Date.new(2017, 3, 16)
-            if @first_meter_date <= day1  && @last_meter_date >= day2
-              if index == 0
-                @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day1, day1)]
-              elsif index == 1
-                @periods = [SchoolDatePeriod.new(:day, 'optimum start day', day2, day2)]
-              end
-            end
-          end
-        else
-          raise EnergySparksBadChartSpecification.new("Expecting an integer or date as an parameter for a day specification got a #{hash_value.class.name}")
-        end
-
-      else
-        raise "Unsupported time period for charting #{@chart_configuration[:timescale]}"
-      end
-    elsif @chart_configuration[:x_axis] == :year
-      @periods = @meter_collection.holidays.years_to_date(@first_meter_date, @last_meter_date, false)
-    elsif @chart_configuration[:x_axis] == :academicyear
-      @periods = @meter_collection.holidays.academic_years(@first_meter_date, @last_meter_date)
-    elsif @chart_configuration[:series_breakdown] == :hotwater
-      hotwater_model = calculate_hotwater_model
-      period = SchoolDatePeriod.new(nil, 'summer hot water', hotwater_model.analysis_period_start_date, hotwater_model.analysis_period_end_date)
-      @periods = [period]
-    else
-      @periods = [SchoolDatePeriod.new(:chartperiod, 'One Period for Chart', @first_meter_date, @last_meter_date)]
-    end
-    if @periods.nil? || @periods.empty? || @periods[0].nil?
-      timescale_config = @chart_configuration.key?(:timescale) 
-      raise EnergySparksNotEnoughDataException.new("Not enough meter data (nil periods) for chart timescale config #{timescale_config}")
-    end
-  end
-
-  # workweek = Sunday to Saturday: roll back to previous Saturday for end date
-  private def workweek_period(end_date)
-    saturday = end_date - ((end_date.wday - 6) % 7)
-    SchoolDatePeriod.new(:chartperiod, 'Work week', saturday - 6, saturday)
-  end
-
-  def month_offset_period(date, offset)
-    offset_month = date.prev_month(-offset)
-    first_day_of_month = Date.new(offset_month.year, offset_month.month, 1)
-    last_day_of_month = Date.new(offset_month.year, offset_month.month + 1, 1) - 1
-    last_day_of_month = date if offset == 0 # partial month
-    SchoolDatePeriod.new(:chartperiod, 'month', first_day_of_month, last_day_of_month)
+    period_calc = PeriodsBase.period_factory(@chart_configuration, @meter_collection, @first_meter_date, @last_meter_date)
+    @periods = period_calc.periods
   end
 
   def calculate_first_chart_date
@@ -1073,6 +891,7 @@ private
       meter_date = @meter_collection.temperatures.end_date # this may not be strict enough?
     end
     meter_date = @chart_configuration[:max_combined_school_date] if @chart_configuration.key?(:max_combined_school_date)
+    meter_date = @chart_configuration[:asof_date] if @chart_configuration.key?(:asof_date)
     meter_date
   end
 

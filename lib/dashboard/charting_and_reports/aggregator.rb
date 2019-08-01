@@ -65,7 +65,7 @@ class Aggregator
 
     inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
 
-    remove_filtered_series if chart_has_filter && @chart_config[:series_breakdown] != :none
+    remove_filtered_series if chart_has_filter? && @chart_config[:series_breakdown] != :none
 
     create_y2_axis_data if y2_axis?
 
@@ -96,13 +96,13 @@ class Aggregator
   end
 
   def y2_axis?
-    @chart_config.key?(:y2_axis) && !@chart_config[:y2_axis].nil? && @chart_config[:y2_axis] != :none
+    !config_none_or_nil?(:y2_axis, @chart_config)
   end
   
   private
 
-  def chart_has_filter
-    @chart_config.key?(:filter) && !@chart_config[:filter].nil?
+  def chart_has_filter?
+    !config_none_or_nil?(:filter, @chart_config)
   end
 
   #=================regrouping of chart data ======================================
@@ -193,39 +193,58 @@ class Aggregator
     logger.info '-' * 120
   end
 
+  # for a chart_config e.g. :  {[ timescale: [ { schoolweek: 0 } , { schoolweek: -1 }, adjust_by_temperature:{ schoolweek: 0 } }
+  # copy the correpsonding temperatures from the :adjust_by_temperature onto all the corresponding :timescale periods
+  # into a [date] => temperature hash
+  # this allows in this example, for examples for all mondays to be compensated to the temperature of {schoolweek: 0}
+  private def temperature_compensation_temperature_map(school, chart_config_original)
+    chart_config = chart_config_original.clone
+    raise EnergySparksBadChartSpecification, 'Expected chart config timescale for array temperature compensation' unless chart_config.key?(:timescale) && chart_config[:timescale].is_a?(Array)
+    date_to_temperature_map = {}
+    periods = chart_config[:timescale]
+    periods.each do |period|
+      chart_config[:timescale] = date_to_temperature_map.empty? ? chart_config[:adjust_by_temperature] : period
+      series_manager = SeriesDataManager.new(school, chart_config)
+      if date_to_temperature_map.empty?
+        series_manager.periods[0].dates.each do |date|
+          date_to_temperature_map[date] = school.temperatures.average_temperature(date)
+        end
+      else
+        subsequent_period_dates = series_manager.periods[0].dates
+        subsequent_period_dates.each_with_index do |date, index|
+          date_to_temperature_map[date] = date_to_temperature_map.values[index]
+        end
+      end
+    end
+    date_to_temperature_map
+  end
+
+  private def temperature_adjustment_map(school)
+    if @chart_config.key?(:adjust_by_temperature) && @chart_config[:adjust_by_temperature].is_a?(Hash) && !@chart_config.key?(:temperature_adjustment_map)
+      @chart_config[:temperature_adjustment_map] = temperature_compensation_temperature_map(school, @chart_config)
+    end
+  end
+
   def run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by = nil)
     saved_meter_collection = @meter_collection
     error_messages = []
     aggregations = []
+
     # iterate through the time periods aggregating
     schools.each do |school|
       @meter_collection = school
+
+      # do it here so it maps to the 1st school
+      temperature_adjustment_map(school)
+
       periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-
-      aggregation = run_one_aggregation(@chart_config, period)
-      aggregations.push(
-        {
-          school:       school,
-          period:       period,
-          aggregation:  aggregation
-        }
-      )
-
-=begin
-# temporarily commented out, now allows any one failure in a chart with multiple lines to fail PH 4Jul2019
-        begin
-          aggregation = run_one_aggregation(@chart_config, period)
-          aggregations.push(
-            {
-              school:       school,
-              period:       period,
-              aggregation:  aggregation
-            }
-          )
-        rescue EnergySparksNotEnoughDataException, EnergySparksMissingPeriodForSpecifiedPeriodChart => e
-          error_messages.push(e.message)
-        end
-=end
+        aggregations.push(
+          {
+            school:       school,
+            period:       period,
+            aggregation:  run_one_aggregation(@chart_config, period)
+          }
+        )
       end
     end
 
@@ -235,7 +254,7 @@ class Aggregator
 
     aggregations = sort_aggregations(aggregations, sort_by) unless sort_by.nil?
 
-    bucketed_period_data = aggregations.map{ |aggregation_description| aggregation_description[:aggregation] }
+    bucketed_period_data = aggregations.map { |aggregation_description| aggregation_description[:aggregation] }
 
     @meter_collection = saved_meter_collection
 
@@ -395,7 +414,6 @@ class Aggregator
   def humanize_legend
     @bucketed_data.keys.each do |series_name|
       new_series_name = series_name.to_s.humanize
-      puts "old name #{series_name} new name #{new_series_name}"
       @bucketed_data[new_series_name] = @bucketed_data.delete(series_name)
       @bucketed_data_count[new_series_name] = @bucketed_data_count.delete(series_name)
     end
@@ -451,7 +469,7 @@ class Aggregator
 
   def post_process_aggregation(chart_config, bucketed_data, bucketed_data_count)
     create_trend_lines(chart_config, bucketed_data, bucketed_data_count) if @series_manager.trendlines?
-    scale_x_data(bucketed_data) if @chart_config.key?(:yaxis_scaling) && !@chart_config[:yaxis_scaling].nil? && @chart_config[:yaxis_scaling] != :none
+    scale_x_data(bucketed_data) unless config_none_or_nil?(:yaxis_scaling)
   end
 
   # - process trendlines post aggregation as potentially faster, if line
@@ -527,7 +545,11 @@ class Aggregator
   end
 
   private def has_filter?(type)
-    chart_has_filter && @chart_config[:filter].key?(:type) && !@chart_config[:filter][type].nil?
+    chart_has_filter? && @chart_config[:filter].key?(:type) && !@chart_config[:filter][type].nil?
+  end
+
+  private def config_none_or_nil?(config_key, chart_config = @chart_config)
+    !chart_config.key?(config_key) || chart_config[config_key].nil? || chart_config[config_key] == :none
   end
 
   # aggregate by whole date range, the 'series_manager' deals with any spliting within a day
@@ -563,8 +585,7 @@ class Aggregator
   end
 
   def match_filter_by_day(date)
-    return true unless chart_has_filter
-    match_daytype = true
+    return true unless chart_has_filter?
     match_daytype = match_occupied_type_filter_by_day(date) if @chart_config[:filter].key?(:daytype)
     match_heating = true
     match_heating = match_filter_by_heatingdayday(date) if @chart_config[:filter].key?(:heating)
@@ -586,19 +607,21 @@ class Aggregator
   def match_occupied_type_filter_by_day(date)
     filter = @chart_config[:filter][:daytype]
     holidays = @meter_collection.holidays
-    case filter
-    when :occupied
-      !(DateTimeHelper.weekend?(date) || holidays.holiday?(date))
-    when :unoccupied
-      DateTimeHelper.weekend?(date) || holidays.holiday?(date)
-    when :holidays
-      holidays.holiday?(date)
-    when :weekends
-      DateTimeHelper.weekend?(date)
-    else
-      true
+    match = false
+    [filter].flatten.each do |one_filter|
+      case one_filter
+      when SeriesNames::HOLIDAY
+        match ||= true if holidays.holiday?(date)
+      when SeriesNames::WEEKEND
+        match ||= true if DateTimeHelper.weekend?(date) && !holidays.holiday?(date)
+      when SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYOPEN
+        match ||= true if !(DateTimeHelper.weekend?(date) || holidays.holiday?(date))
+      end
     end
+    match
   end
+
+  private
 
   def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
     # Change Line Below 22Mar2019
@@ -691,7 +714,7 @@ class Aggregator
   # pattern matches on series_names, removing any from list which don't match
   def remove_filtered_series
     keep_key_list = []
-    if !chart_has_filter
+    if !chart_has_filter?
       logger.info 'No filters set'
       return
     end
@@ -705,11 +728,11 @@ class Aggregator
         keep_key_list += @bucketed_data.keys # TODO(PH,2Jul2018) may not be generic enough?
       end
     end
-    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:heating)
+    if @chart_config[:filter].key?(:heating)
       filter = @chart_config[:filter][:heating] ? [SeriesNames::HEATINGDAY, SeriesNames::HEATINGDAYMODEL] : [SeriesNames::NONHEATINGDAY, SeriesNames::NONHEATINGDAYMODEL]
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filter)
     end
-    if @chart_config.key?(:filter) && @chart_config[:filter].key?(:model_type)
+    if @chart_config[:filter].key?(:model_type)
       # for model filters, copy in any trendlines for those models to avoid filtering 
       model_filter = [@chart_config[:filter][:model_type]].flatten(1)
       trendline_filters = model_filter.map { |model_name| SeriesDataManager.trendline_for_series_name(model_name) }
@@ -717,7 +740,7 @@ class Aggregator
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, model_filter + trendline_filters_with_parameters)
     end
     %i[fuel daytype heating_daytype meter].each do |filter_type|
-      if @chart_config.key?(:filter) && @chart_config[:filter].key?(filter_type)
+      if @chart_config[:filter].key?(filter_type)
         filtered_data = [@chart_config[:filter][filter_type]].flatten
         keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filtered_data)
       end

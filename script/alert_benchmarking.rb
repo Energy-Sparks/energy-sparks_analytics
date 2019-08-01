@@ -85,7 +85,13 @@ alerts_to_test = { # classname => excel worksheet tab
   AlertImpendingHoliday                       => 'ImpendingHoliday',
   AlertHeatingOnNonSchoolDays                 => 'NonHeatingDays',
   AlertHeatingOnSchoolDays                    => 'HeatingDays',
-  AlertThermostaticControl                    => 'Thermostatic'
+  AlertThermostaticControl                    => 'Thermostatic',
+  AlertSchoolWeekComparisonElectricity        => 'SchWeekElectric',
+  AlertPreviousHolidayComparisonElectricity   => 'PrevHolElectric',
+  AlertPreviousYearHolidayComparisonElectricity  => 'PrevYearHolElectric',
+  AlertSchoolWeekComparisonGas                => 'SchWeekGas',
+  AlertPreviousHolidayComparisonGas           => 'PrevHolGas',
+  AlertPreviousYearHolidayComparisonGas       => 'PrevYearHolGas'
 }
 
 excluded_schools = [] # ['Ecclesall Primary School', 'Selwood Academy', 'Athelstan Primary School', 'Walkley Tennyson School']

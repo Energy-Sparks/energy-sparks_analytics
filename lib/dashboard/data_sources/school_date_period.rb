@@ -15,13 +15,21 @@ class SchoolDatePeriod
   end
 
   def days
-    @end_date - @start_date
+    (@end_date - @start_date + 1).to_i
   end
 
   def self.year_to_date(type, title, end_date, limit_start_date = nil)
     # use 364 = 52 weeks rather than 365, as works better with weekly aggregation etc.
     start_date = limit_start_date.nil? ? end_date - 364 : [end_date - 364, limit_start_date].max
     SchoolDatePeriod.new(type, title, start_date, end_date)
+  end
+
+  def dates
+    (start_date..end_date).to_a
+  end
+
+  def self.matching_dates_in_period_to_day_of_week_list(period, list_of_days_of_week)
+    (period.start_date..period.end_date).to_a.select { |date| list_of_days_of_week.include?(date.wday) }
   end
 
   def self.merge_two_periods(period_1, period_2)
