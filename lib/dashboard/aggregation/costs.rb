@@ -153,9 +153,9 @@ class CostsBase < HalfHourlyData
     total_standing_charges_between_dates(start_date, end_date)
   end
 
-  private def total_standing_charges_between_dates(date1, date2)
+  public def total_standing_charges_between_dates(date1, date2)
     total = 0.0
-    (start_date..end_date).each do |date|
+    (date1..date2).each do |date|
       total += one_days_cost_data(date).total_standing_charge
     end
     total

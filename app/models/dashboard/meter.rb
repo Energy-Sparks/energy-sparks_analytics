@@ -132,6 +132,10 @@ module Dashboard
       meter_no.present? ? meter_no : meter_type.to_s
     end
 
+    def synthetic_mpan_mprn?
+      mpan_mprn > 60000000000000 
+    end
+
     def self.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type, group_number = 0)
       if fuel_type == :electricity || fuel_type == :aggregated_electricity
         90000000000000 + urn.to_i

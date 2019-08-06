@@ -38,7 +38,9 @@ school_name = 'Whiteways Primary'
 # school_name = 'St Martins Garden Primary School'
 # school_name = 'Hugh Sexey'
 # school_name = 'Paulton Junior School'
-# school_name = 'Whiteways Primary'
+school_name = 'Whiteways Primary'
+school_name = 'Roundhill School'
+school_name = 'Abbey Lane'
 # school_name = 'St Marks Secondary'
 # school_name = 'Trinity First School'
 # school_name = 'Brunswick'
@@ -87,7 +89,7 @@ puts "Load time: #{bm.round(3)} seconds"
 # reports.do_all_schools(true)
 # reports.do_one_page(:cost)
 # reports.do_chart_list('Peak', [:peak_kw])
-
+=begin
 reports.do_chart_list('Paulton',  [
                                     :last_2_school_weeks_electricity_comparison_alert,
                                     :schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted,
@@ -97,10 +99,9 @@ reports.do_chart_list('Paulton',  [
                                     :alert_group_by_week_gas_4_months
                                 ],
                               true, { asof_date: Date.new(2019, 4, 20)})
+=end
 
-# reports.do_all_standard_pages_for_school
-
-
+reports.do_all_standard_pages_for_school
 
 
 if profile
@@ -109,6 +110,6 @@ if profile
   printer.print(File.open('log\code-profile - test_dashboard' + Date.today.to_s + '.html','w')) # 'code-profile.html')
 end
 
-reports.save_excel_and_html
+# reports.save_excel_and_html
 
 # reports.report_benchmarks

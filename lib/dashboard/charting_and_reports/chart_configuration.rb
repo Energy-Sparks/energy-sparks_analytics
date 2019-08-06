@@ -535,25 +535,66 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
+    # 8 finance tab charts
+    electricity_by_month_year_0_1_finance_advice: {
+      name:             'Energy Costs',
+      inherits_from:    :electricity_by_month_year_0_1
+    },
+    electricity_cost_comparison_last_2_years_accounting: {
+      name:             '',
+      inherits_from:    :electricity_cost_comparison_last_2_years,
+      yaxis_units:      :accounting_cost
+    },
+    electricity_cost_1_year_accounting_breakdown: {
+      name:             '',
+      inherits_from:    :electricity_cost_comparison_last_2_years_accounting_breakdown,
+      chart1_subtype:   :stacked,
+      timescale:        :year
+    },
+    accounting_cost_daytype_breakdown_electricity: {
+      name:             '',
+      yaxis_units:      :accounting_cost,
+      inherits_from:    :daytype_breakdown_electricity
+    },
+    gas_by_month_year_0_1_finance_advice: {
+      name:             'Gas Costs',
+      inherits_from:    :gas_by_month_year_0_1
+    },
+    gas_cost_comparison_last_2_years_accounting: {
+      name:             '',
+      inherits_from:    :electricity_cost_comparison_last_2_years,
+      meter_definition: :allheat
+    },
+    gas_cost_1_year_accounting_breakdown: {
+      name:             '',
+      inherits_from:    :electricity_cost_1_year_accounting_breakdown,
+      meter_definition: :allheat
+    },
+    accounting_cost_daytype_breakdown_gas: {
+      name:             '',
+      yaxis_units:      :accounting_cost,
+      inherits_from: :daytype_breakdown_gas
+    },
+
+    gas_by_month_year_0_1:  {
+      inherits_from:    :electricity_by_month_year_0_1,
+      name:             'Gas Use By Month (last 2 years)',
+      meter_definition: :allheat
+    },
     electricity_cost_comparison_last_2_years: {
       chart1_type:      :column,
       inherits_from:    :electricity_by_month_year_0_1,
       yaxis_units:      :£
     },
-    electricity_cost_comparison_last_2_years_accounting: {
-      inherits_from:    :electricity_cost_comparison_last_2_years,
-      yaxis_units:      :accounting_cost
-    },
     electricity_cost_comparison_last_2_years_accounting_breakdown: {
-      name:             'Electricity accounting cost by month for the last year',
+      name:             'Energy Costs', # title for 1st heading of introductory text for web page
       inherits_from:    :electricity_cost_comparison_last_2_years_accounting,
       series_breakdown: :accounting_cost
     },
-    electricity_cost_1_year_accounting_breakdown: {
-      name:             'Electricity accounting cost breakdown by month for the last year (stacked)',
+    gas_cost_comparison_last_2_years_accounting_breakdown: {
+      name:             'Gas accounting cost by month for the last year',
       inherits_from:    :electricity_cost_comparison_last_2_years_accounting_breakdown,
-      chart1_subtype:   :stacked,
-      timescale:        :year
+      meter_definition: :allheat
     },
     electricity_cost_comparison_1_year_accounting_breakdown_by_week: {
       name:             'Electricity accounting cost breakdown by week for the last year',

@@ -67,7 +67,6 @@ end
 ]
 
 alerts_to_test = [
-=begin
   AlertHeatingOnNonSchoolDays,
   AlertHeatingComingOnTooEarly,
   AlertChangeInDailyElectricityShortTerm,
@@ -91,7 +90,6 @@ alerts_to_test = [
   AlertElectricityMeterConsolidationOpportunity,
   AlertMeterASCLimit,
   AlertDifferentialTariffOpportunity,
-=end
   AlertSchoolWeekComparisonElectricity,
   AlertPreviousHolidayComparisonElectricity,
   AlertPreviousYearHolidayComparisonElectricity,
@@ -117,6 +115,7 @@ school_calculation_time = {}
 reports = ReportConfigSupport.new
 
 failed_alerts = []
+not_available_to_users = []
 
 history = AlertHistoryDatabase.new
 previous_results = history.load
@@ -181,6 +180,9 @@ school_names.sort.each do |school_name|
         if results.status == :failed
           failed_alerts.push(sprintf('%-32.32s: %s', school_name, alert.class.name))
         end
+        if !alert.make_available_to_users?
+          not_available_to_users.push(sprintf('%-32.32s: %s', school_name, alert.class.name))
+        end
         school_alert_count[school_name] += 1
         puts results
       }
@@ -207,8 +209,13 @@ school_calculation_time.each do |type, data|
 end
 
 puts "Failed alerts:"
-failed_alerts.each do |fail|
-  puts fail
+failed_alerts.each do |failure|
+  puts failure
+end
+
+puts "Not available to user:"
+not_available_to_users.each do |not_available|
+  puts not_available
 end
 
 puts 'Irrelvent alerts'

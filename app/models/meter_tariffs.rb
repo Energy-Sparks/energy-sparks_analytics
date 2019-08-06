@@ -48,6 +48,12 @@ class MeterTariffs
     [daytime_cost_x48, nighttime_cost_x48, standing_charge]
   end
 
+  def self.default_area_tariff_for_date(area_name, fuel_type, date)
+    area_name = translate_area_names_from_front_end(area_name)
+    raise EnergySparksNotEnoughDataException.new("Missing default area meter tariff data for #{area_name} #{fuel_type}") if DEFAULT_ACCOUNTING_TARIFFS.dig(area_name, fuel_type).nil?
+    tariff_for_date(DEFAULT_ACCOUNTING_TARIFFS[area_name], fuel_type, date)
+  end
+  
   private_class_method def self.day_night_costs_x48(tariff_config, kwh_halfhour_x48)
     daytime_cost_x48 = nil
     nighttime_cost_x48 = nil
@@ -153,12 +159,6 @@ class MeterTariffs
     else
       area_name
     end
-  end
-
-  private_class_method def self.default_area_tariff_for_date(area_name, fuel_type, date)
-    area_name = translate_area_names_from_front_end(area_name)
-    raise EnergySparksNotEnoughDataException.new("Missing default area meter tariff data for #{area_name} #{fuel_type}") if DEFAULT_ACCOUNTING_TARIFFS.dig(area_name, fuel_type).nil?
-    tariff_for_date(DEFAULT_ACCOUNTING_TARIFFS[area_name], fuel_type, date)
   end
 
   private_class_method def self.default_accounting_tariff_in_event_of_no_others(date, fuel_type)

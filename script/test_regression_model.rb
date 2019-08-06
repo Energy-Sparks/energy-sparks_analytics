@@ -29,7 +29,7 @@ end
 csv_results = []
 
 list_of_schools.reverse.each do |school_name|
-  next if school_name != 'Paulton Junior School'
+  next if school_name != 'Whiteways Primary'
 
   # next if ['Saltford C of E Primary School', 'Hunters Bar School', 'Roundhill School'].include?(school_name)
   # next if !['St Saviours Junior'].include?(school_name)

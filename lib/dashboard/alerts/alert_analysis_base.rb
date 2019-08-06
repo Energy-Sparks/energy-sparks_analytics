@@ -331,7 +331,6 @@ class AlertAnalysisBase
   end
 
   def make_available_to_users?
-    puts "#{relevance} #{enough_data} #{calculation_worked}"
     relevance == :relevant && enough_data == :enough && calculation_worked
   end
 

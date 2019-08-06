@@ -109,6 +109,11 @@ class MeterCollection
     meter_list.uniq{ |meter| meter.mpan_mprn } # for single meter schools aggregate and meter can be one and the same
   end
 
+  # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
+  def real_meters
+    all_meters.select { |meter| !meter.synthetic_mpan_mprn? }
+  end
+
   def report_group
     heat_report = !all_heat_meters.nil?
     electric_report = !all_electricity_meters.nil?

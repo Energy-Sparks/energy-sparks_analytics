@@ -172,10 +172,11 @@ class FormatEnergyUnit
   end
 
   def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)
-    number = significant_figures(value, user_numeric_comprehension_level(user_numeric_comprehension_level))
+    number = significant_figures_user_type(value, user_numeric_comprehension_level)
     return 0.to_s if number.zero?
     before_decimal_point = number.to_s.gsub(/^(.*)\..*$/, '\1')
-    after_decimal_point = number.to_s.gsub(/.*(\..*)/, '\1').gsub(/^.*\.0$/, '')
+    # for some reason a number without dp e.g. 15042 when mathed with gsub(/.*(\..*)/, '\1') returns 15042 and not null as it should match ./?
+    after_decimal_point = number.to_s.include?('.') ? number.to_s.gsub(/.*(\..*)/, '\1').gsub(/^.*\.0$/, '') : ''
     if in_pounds && !after_decimal_point.empty? && after_decimal_point.length < 3
       # add zero pence onto e.g. £23.1 so it becomes £23.10
       after_decimal_point += '0'
@@ -197,6 +198,12 @@ class FormatEnergyUnit
       raise EnergySparksUnexpectedStateException.new('Unexpected nil user_type for user_numeric_comprehension_level') if user_type.nil?
       raise EnergySparksUnexpectedStateException.new("Unexpected nil user_type #{user_type}for user_numeric_comprehension_level") if user_type.nil?
     end
+  end
+
+  def self.significant_figures_user_type(value, user_numeric_comprehension_level)
+    return value.round(0) if user_numeric_comprehension_level == :no_decimals
+    return value.round(2) if user_numeric_comprehension_level == :to_pence
+    significant_figures(value, user_numeric_comprehension_level(user_numeric_comprehension_level))
   end
 
   def self.significant_figures(value, significant_figures)

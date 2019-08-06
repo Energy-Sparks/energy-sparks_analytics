@@ -241,22 +241,46 @@ class DashboardConfiguration
                                 ],
                               },
         cost:   {
-                                name: 'Cost',
+                                name: 'Costs',
                                 charts: %i[
-                                  electricity_cost_comparison_last_2_years
+                                  electricity_by_month_year_0_1_finance_advice
                                   electricity_cost_comparison_last_2_years_accounting
-                                  electricity_cost_comparison_last_2_years_accounting_breakdown
                                   electricity_cost_1_year_accounting_breakdown
-                                  electricity_cost_comparison_1_year_accounting_breakdown_by_week
-                                  gas_cost_comparison_1_year_accounting_breakdown_by_week
-                                  gas_cost_comparison_1_year_economic_breakdown_by_week
-                                  electricity_2_week_accounting_breakdown
-                                  electricity_1_year_intraday_accounting_breakdown
-                                  electricity_1_year_intraday_kwh_breakdown
-                                  gas_1_year_intraday_accounting_breakdown
-                                  gas_1_year_intraday_economic_breakdown
-                                  gas_1_year_intraday_kwh_breakdown
+                                  accounting_cost_daytype_breakdown_electricity
+
+                                  gas_by_month_year_0_1_finance_advice
+                                  gas_cost_comparison_last_2_years_accounting
+                                  gas_cost_1_year_accounting_breakdown
+                                  accounting_cost_daytype_breakdown_gas
                                 ],
+                              },
+        cost_electricity_only:   {
+                                name: 'Costs',
+                                charts: %i[
+                                  electricity_by_month_year_0_1_finance_advice
+                                  electricity_cost_comparison_last_2_years_accounting
+                                  electricity_cost_1_year_accounting_breakdown
+                                  accounting_cost_daytype_breakdown_electricity
+                                ],
+                              },
+        cost_unused: {
+                              name: 'Cost - additional',
+                              charts: %i[
+                                electricity_cost_comparison_last_2_years
+                                electricity_cost_comparison_last_2_years_accounting_breakdown
+                                gas_1_year_intraday_accounting_breakdown
+                                electricity_cost_comparison_1_year_accounting_breakdown_by_week
+                                gas_cost_comparison_1_year_accounting_breakdown_by_week
+                                gas_cost_comparison_1_year_economic_breakdown_by_week
+                                electricity_2_week_accounting_breakdown
+                                electricity_1_year_intraday_accounting_breakdown
+                                electricity_1_year_intraday_kwh_breakdown
+                                gas_1_year_intraday_accounting_breakdown
+                                gas_1_year_intraday_economic_breakdown
+                                gas_1_year_intraday_kwh_breakdown
+                                electricity_cost_comparison_last_2_years
+                                electricity_cost_comparison_last_2_years_accounting_breakdown
+                              ],
                               },
 }.freeze
 
@@ -265,6 +289,7 @@ class DashboardConfiguration
                         %i[
                             main_dashboard_electric
                             electricity_detail
+                            cost_electricity_only
                         ],
     gas_only:
                         %i[
@@ -279,6 +304,7 @@ class DashboardConfiguration
                             gas_detail
                             boiler_control
                             carbon_emissions
+                            cost
                         ],
     electric_and_storage_heaters:
                         %i[
