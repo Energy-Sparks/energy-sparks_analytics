@@ -40,6 +40,9 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :current_holiday_temperatures, :current_holiday_average_temperature
   attr_reader :previous_holiday_temperatures, :previous_holiday_average_temperature
   attr_reader :current_period_kwhs, :previous_period_kwhs_unadjusted, :previous_period_average_kwh_unadjusted
+  attr_reader :current_period_weekly_kwh, :current_period_weekly_£, :previous_period_weekly_kwh, :previous_period_weekly_£
+  attr_reader :change_in_weekly_kwh, :change_in_weekly_£
+  attr_reader :change_in_weekly_percent
 
   def self.dynamic_template_variables(fuel_type)
     {
@@ -73,6 +76,14 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       previous_period_average_kwh_unadjusted: { description: 'Previous period average unadjusted kwh',  units:  { kwh: fuel_type } },
       current_period_kwhs:                    { description: 'Current period kwh values', units:  String  },
       previous_period_kwhs_unadjusted:        { description: 'Previous period kwh values', units:  String  },
+
+      current_period_weekly_kwh:  { description: 'Current period normalised average weekly kwh',   units:  { kwh: fuel_type } },
+      current_period_weekly_£:    { description: 'Current period normalised average weekly £',     units:  :£  },
+      previous_period_weekly_kwh: { description: 'Previous period normalised average weekly kwh',  units:  { kwh: fuel_type } },
+      previous_period_weekly_£:   { description: 'Previous period normalised average weekly £',    units:  :£  },
+      change_in_weekly_kwh:       { description: 'Change in normalised average weekly kwh',        units:  { kwh: fuel_type } },
+      change_in_weekly_£:         { description: 'Change in normalised average weekly £',          units:  :£  },
+      change_in_weekly_percent:   { description: 'Difference in weekly % between last 2 periods',  units:  :percent  },
 
       comparison_chart: { description: 'Relevant comparison chart', units: :chart }
     }
@@ -125,16 +136,24 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @name_of_previous_period      = previous_period_name(previous_period)
     @previous_period_average_kwh  = @previous_period_kwh / @days_in_previous_period
 
-    current_period = @current_period_start_date..@current_period_end_date
-    @current_holiday_temperatures,  @current_holiday_average_temperature = weeks_temperatures(current_period)
+    current_period_range = @current_period_start_date..@current_period_end_date
+    @current_holiday_temperatures,  @current_holiday_average_temperature = weeks_temperatures(current_period_range)
 
-    previous_period = @previous_period_start_date..@previous_period_end_date
-    @previous_holiday_temperatures, @previous_holiday_average_temperature = weeks_temperatures(previous_period)
+    previous_period_range = @previous_period_start_date..@previous_period_end_date
+    @previous_holiday_temperatures, @previous_holiday_average_temperature = weeks_temperatures(previous_period_range)
 
-    @current_period_kwhs, _avg = formatted_kwh_period_unadjusted(current_period)
-    @previous_period_kwhs_unadjusted,  @previous_period_average_kwh_unadjusted = formatted_kwh_period_unadjusted(previous_period)
+    @current_period_kwhs, _avg = formatted_kwh_period_unadjusted(previous_period_range)
+    @previous_period_kwhs_unadjusted,  @previous_period_average_kwh_unadjusted = formatted_kwh_period_unadjusted(previous_period_range)
 
-    @rating = calculate_rating(@difference_percent, @difference_£, fuel_type)
+    @current_period_weekly_kwh  = normalised_average_weekly_kwh(current_period,   :kwh)
+    @current_period_weekly_£    = normalised_average_weekly_kwh(current_period,   :£)
+    @previous_period_weekly_kwh = normalised_average_weekly_kwh(previous_period,  :kwh)
+    @previous_period_weekly_£   = normalised_average_weekly_kwh(previous_period,  :£)
+    @change_in_weekly_kwh       = @current_period_weekly_kwh - @previous_period_weekly_kwh
+    @change_in_weekly_£         = @current_period_weekly_£ - @previous_period_weekly_£
+    @change_in_weekly_percent   = @change_in_weekly_kwh / @previous_period_weekly_kwh
+
+    @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
 
     @bookmark_url = add_book_mark_to_base_url(url_bookmark)
     @term = :shortterm
@@ -195,9 +214,15 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     current_weekend_dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(current_period, [0, 6])
 
     previous_average_weekdays = average_period_value(previous_period, (1..5).to_a, data_type)
-    previous_average_weekends = average_period_value(previous_period, [0,6], data_type)
+    previous_average_weekends = average_period_value(previous_period, [0, 6], data_type)
 
     current_weekday_dates.length * previous_average_weekdays + current_weekend_dates.length * previous_average_weekends
+  end
+
+  private def normalised_average_weekly_kwh(period, data_type)
+    weekday_average = average_period_value(period, (1..5).to_a, data_type)
+    weekend_average = average_period_value(period, [0, 6], data_type)
+    5.0 * weekday_average + 2.0 * weekend_average
   end
 
   private def average_period_value(period, days_of_week, data_type)
