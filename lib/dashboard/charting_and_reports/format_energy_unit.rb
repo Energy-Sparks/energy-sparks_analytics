@@ -188,6 +188,7 @@ class FormatEnergyUnit
 
   private_class_method def self.user_numeric_comprehension_level(user_type)
     case user_type
+      # :no_decimals and :to_pence are also valid, but dealt with outwith the significant figures handling
     when :ks2
       2
     when :approx_accountant

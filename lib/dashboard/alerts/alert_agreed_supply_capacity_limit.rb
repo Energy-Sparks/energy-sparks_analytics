@@ -52,6 +52,10 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
     }
   }
 
+  protected def format(unit, value, format, in_table, level)
+    FormatUnit.format(unit, value, format, true, in_table, unit == :£ ? :no_decimals : level)
+  end
+
   def peak_kw_chart
     :peak_kw
   end

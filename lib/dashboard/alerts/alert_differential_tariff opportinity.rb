@@ -18,6 +18,10 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
     specific.merge(self.superclass.template_variables)
   end
 
+  protected def format(unit, value, format, in_table, level)
+    FormatUnit.format(unit, value, format, true, in_table, unit == :£ ? :no_decimals : level)
+  end
+
   def timescale
     'year'
   end

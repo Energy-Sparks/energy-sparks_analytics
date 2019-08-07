@@ -152,8 +152,8 @@ class AlertAnalysisBase
           new_data[self.class.convert_range_symbol_to_high(type)] = nil
           new_data[self.class.convert_range_symbol_to_low(type)]  = nil
         else
-          new_data[self.class.convert_range_symbol_to_high(type)] = FormatUnit.format(new_type, raw_data[type].first, :text, true)
-          new_data[self.class.convert_range_symbol_to_low(type)]  = FormatUnit.format(new_type, raw_data[type].last,  :text, true)
+          new_data[self.class.convert_range_symbol_to_high(type)] = format(new_type, raw_data[type].first, :text, false, user_numeric_comprehension_level)
+          new_data[self.class.convert_range_symbol_to_low(type)]  = format(new_type, raw_data[type].last,  :text, false, user_numeric_comprehension_level)
         end
       end
     end
@@ -354,7 +354,7 @@ class AlertAnalysisBase
       variable_group.each do |type, data|
         # next if data[:units] == :table
         value = send(type)
-        formatted_value = FormatUnit.format(data[:units], value, :html, true)
+        formatted_value = format(data[:units], value, :html, false, user_numeric_comprehension_level)
         puts sprintf('    %-40.40s %-20.20s', type, formatted_value) + ' ' + data.to_s
       end
     end
@@ -405,7 +405,7 @@ class AlertAnalysisBase
             if formatted && send(type).nil?
               list[type] = ''
             else
-              list[type] = formatted ? FormatUnit.format(data[:units], send(type), format, true) : send(type)
+              list[type] = formatted ? format(data[:units], send(type), format, false, user_numeric_comprehension_level) : send(type)
             end
           else
             logger.info "Warning: alert doesnt implement #{type}"
@@ -426,6 +426,14 @@ class AlertAnalysisBase
     table_formatter.render(format)
   end
 
+  protected def user_numeric_comprehension_level
+    :ks2
+  end
+
+  protected def format(unit, value, format, in_table, level)
+    FormatUnit.format(unit, value, format, true, in_table, level)
+  end
+
   # convert the cells within a table into formatted html or text
   private def format_table_data(type, data_description, formatted, format)
     formatted_table = []
@@ -436,7 +444,7 @@ class AlertAnalysisBase
     table_data.each do |row_data|
       formatted_row = []
       row_data.each_with_index do |val, index|
-        formatted_val = formatted ? FormatUnit.format(column_formats[index], val, format, true, true) : val
+        formatted_val = formatted ? format(column_formats[index], val, format, true, user_numeric_comprehension_level) : val
         formatted_row.push(formatted_val)
       end
       formatted_table.push(formatted_row)

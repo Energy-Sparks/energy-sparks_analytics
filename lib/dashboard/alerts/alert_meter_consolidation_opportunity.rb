@@ -69,6 +69,10 @@ class AlertMeterConsolidationOpportunityBase < AlertAnalysisBase
     live_meters.length
   end
 
+  protected def format(unit, value, format, in_table, level)
+    FormatUnit.format(unit, value, format, true, in_table, unit == :£ ? :no_decimals : level)
+  end
+
   protected def live_meters
     max_combined_date = aggregate_meter.amr_data.end_date
     meters.select { |meter| meter.amr_data.end_date >= max_combined_date }
