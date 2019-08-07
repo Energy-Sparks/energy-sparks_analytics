@@ -49,15 +49,15 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
       current_period_kwh:        { description: 'Current period kwh',                 units:  { kwh: fuel_type } },
       current_period_£:          { description: 'Current period £',                   units:  :£  },
-      current_period_start_date: { description: 'Current period start date',          units:  Date  },
-      current_period_end_date:   { description: 'Current period end date',            units:  Date  },
+      current_period_start_date: { description: 'Current period start date',          units:  :date  },
+      current_period_end_date:   { description: 'Current period end date',            units:  :date  },
       days_in_current_period:    { description: 'No. of days in current period',      units: Integer },
       name_of_current_period:    { description: 'name of current period e.g. Easter', units: String },
 
       previous_period_kwh:        { description: 'Previous period kwh',             units:  { kwh: fuel_type } },
       previous_period_£:          { description: 'Previous period £',               units:  :£  },
-      previous_period_start_date: { description: 'Previous period start date',      units:  Date  },
-      previous_period_end_date:   { description: 'Previous period end date',        units:  Date  },
+      previous_period_start_date: { description: 'Previous period start date',      units:  :date  },
+      previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
       name_of_previous_period:    { description: 'name of pervious period',         units: String },
 
