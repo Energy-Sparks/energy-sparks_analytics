@@ -22,7 +22,7 @@ end
 
 def write_csv(filename, data, append)
   mode = append ? "Appending" : "Writing"
-  puts "#{mode} csv file #{filename}: #{data.length} items from #{data.keys.first} to #{data.keys.last}"
+  logger.info "    #{mode} csv file #{filename}: #{data.length} items from #{data.keys.first} to #{data.keys.last}"
   File.open(filename, append ? 'a' : 'w') do |file|
     data.each do |date, one_days_values|
       dts = date.strftime('%Y-%m-%d')

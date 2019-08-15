@@ -89,7 +89,7 @@ class LocalAnalyticsMeterReadingDB < MeterReadingsDownloadBase
       meter_id = meter_reading.meter_id
       id_count[meter_id] = 0 unless id_count.key?(meter_id)
       id_count[meter_id] += 1
-      meter = @meter_collection.meter?(meter_id)
+      meter = @meter_collection.meter?(meter_id, true)
       if meter.nil?
         logger.error "Meter #{meter_id} not found (1)"
       else

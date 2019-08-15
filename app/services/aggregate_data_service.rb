@@ -34,7 +34,8 @@ class AggregateDataService
       aggregate_heat_meters
       aggregate_electricity_meters
       disaggregate_storage_heaters if @meter_collection.storage_heaters?
-      create_solar_pv_sub_meters if @meter_collection.solar_pv_panels?
+      create_solar_pv_sub_meters if @meter_collection.sheffield_simulated_solar_pv_panels?
+      create_solar_pv_sub_meters_using_meter_data if @meter_collection.low_carbon_solar_pv_panels?
       set_post_aggregation_state_on_all_meters
     }
     calc_text = "Calculated meter aggregation in #{bm.round(3)} seconds"
@@ -124,7 +125,7 @@ class AggregateDataService
   # rather than a consumer
   private def create_solar_pv_sub_meters
     @electricity_meters.each do |electricity_meter|
-      next if electricity_meter.solar_pv_setup.nil?
+      next unless electricity_meter.sheffield_simulated_solar_pv_panels?
 
       logger.info 'Creating an artificial solar pv meter and associated amr data'
 
@@ -172,17 +173,16 @@ class AggregateDataService
 
       # replace the AMR data of the top level meter with the
       # combined original mains consumption data plus the solar pv data
-
+=begin
+      # deprecated 15Aug2019
       electric_plus_pv_amr_data = aggregate_amr_data(
         [electricity_meter, solar_pv_meter],
         :electricity
         )
-
+=end
       # currently the updated meter inherits the carbon emissions and costs of the original
       # which implies the solar pv is zero carbon and zero cost
       # a full accounting treatment will need to deal with FITs and exports..... TODO(PH, 7Apr2019)
-
-      logger.info "Assigning solar + mains amr to main meter from #{electric_plus_pv_amr_data.start_date} to #{electric_plus_pv_amr_data.end_date} #{electric_plus_pv_amr_data.total.round(0)}kWh"
 
       electricity_meter.amr_data = disaggregated_data[:electricity_consumed_onsite]
       electricity_meter.id = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
@@ -194,6 +194,108 @@ class AggregateDataService
 
       @meter_collection.solar_pv_meter = solar_pv_meter
     end
+  end
+
+  # Low Carbon Hub based solar PV aggregation
+  #
+  # similar to Sheffield PV based create_solar_pv_sub_meters() function
+  # except the data comes in a more precalculated form, so its more a 
+  # matter of moving meters around, plus some imple maths
+  #
+  # Low carbon hub provides 4 sets of meter readings: 'solar PV production', 'exported electricity', 'mains consumption', 'solar pv concumed onsite'
+  #
+  # 1. Energy Sparks currently needs an aggregate meter containing all school consumption from whereever its sourced
+  #    which in this case is 'mains consumption' + 'solar PV production' - 'exported electricity'
+  # 2. Solar PV consumed onsite = 'solar PV production' - 'exported electricity'
+  # 3. Exported PV = 'exported electricity'
+  #
+  # the data should arrive in the aggregate meter service as a single electricity meter, with 2 sub meters
+  # prior to this the single electricity meter will have been promoted to be the aggregate electricity meter as well
+  private def create_solar_pv_sub_meters_using_meter_data
+    check_solar_pv__meter_configuration
+
+    meters = find_solar_pv_meters
+    mains_meter   = meters[:electricity]
+    solar_meter   = meters[:solar_pv]
+    export_meter  = meters[:exported_solar_pv]
+
+    # this is required for charting and p&l
+    export_meter.name = SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME
+
+    # move solar pv meter data from sub meter to top level
+    # TODO(PH, 15Aug2019) - review what prices should used for this
+    #                     - Low Cabon Hub schools probably don't benefit from this
+    calculate_meter_carbon_emissions_and_costs(solar_meter, :solar_pv)
+    @meter_collection.solar_pv_meter = solar_meter
+    mains_meter.sub_meters.delete_if { |sub_meter| sub_meter.fuel_type == :solar_pv }
+
+    # make the original meter a sub meter of the combined electricity meter
+
+    original_electric_meter = create_modified_meter_copy(
+      mains_meter,
+      mains_meter.amr_data,
+      :electricity,
+      mains_meter.id,
+      SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
+    )
+    mains_meter.sub_meters.push(original_electric_meter)
+    logger.info "Making original mains consumption meter a submeter from #{mains_meter.amr_data.start_date} to #{mains_meter.amr_data.end_date} #{mains_meter.amr_data.total.round(0)}kWh"
+
+    # calculated onsite consumed electricity = solar pv production - export
+
+    onsite_consumpton_amr_data = aggregate_amr_data(
+      [solar_meter, export_meter],
+      :electricity
+      )
+
+    solar_pv_consumed_onsite_meter = create_modified_meter_copy(
+      mains_meter,
+      onsite_consumpton_amr_data,
+      :solar_pv,
+      Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, :solar_pv),
+      SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+    )
+    mains_meter.sub_meters.push(solar_pv_consumed_onsite_meter)
+
+    # calculate a new aggregate meter which is the 'mains consumpion' + 'solar pv production' - 'exported'
+    # export kwh values already -tve
+    electric_plus_pv_minus_export = aggregate_amr_data(
+      [mains_meter, solar_meter, export_meter],
+      :electricity
+      )
+
+    mains_meter.amr_data = electric_plus_pv_minus_export
+    mains_meter.name = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+    calculate_meter_carbon_emissions_and_costs(mains_meter, :electricity)
+
+    puts "Totals: pv #{solar_meter.amr_data.total} exp #{export_meter.amr_data.total} mains #{mains_meter.amr_data.total} pvons #{solar_pv_consumed_onsite_meter.amr_data.total}"
+    puts @meter_collection.aggregated_electricity_meters.amr_data.total
+  end
+
+  # defensive programming to ensure correct data arrives from front end, and analytics
+  private def check_solar_pv__meter_configuration
+    raise EnergySparksUnexpectedStateException.new, 'Expecting an aggregate electricity meter for solar pv meter aggregation' if @meter_collection.aggregated_electricity_meters.nil?
+    raise EnergySparksUnexpectedStateException.new, 'Only 1 electricity meter currently supported for solar pv meter aggregation' if @meter_collection.electricity_meters.length != 1
+    raise EnergySparksUnexpectedStateException.new, '2 electricity sub meters required for solar pv meter aggregation' if @meter_collection.electricity_meters[0].sub_meters.length != 2
+    meters = find_solar_pv_meters
+    raise EnergySparksUnexpectedStateException.new, 'Missing solar pv sub meter from aggregation' if meters[:solar_pv].nil?
+    raise EnergySparksUnexpectedStateException.new, 'Missing export sub meter from aggregation' if meters[:exported_solar_pv].nil?
+    raise EnergySparksUnexpectedStateException.new, 'Missing solar pv amr data from aggregation' if meters[:solar_pv].amr_data.length == 0
+    raise EnergySparksUnexpectedStateException.new, 'Missing export amr data from aggregation' if meters[:exported_solar_pv].amr_data.length == 0
+  end
+
+  private def find_solar_pv_meters
+    mains_consumption_meter = @meter_collection.electricity_meters[0]
+    {
+      electricity:        mains_consumption_meter,
+      solar_pv:           mains_consumption_meter.sub_meters.find { |meter| meter.fuel_type == :solar_pv },
+      exported_solar_pv:  mains_consumption_meter.sub_meters.find { |meter| meter.fuel_type == :exported_solar_pv }
+    }
+  end
+
+  private def lookup_synthetic_meter(type)
+    meter_id = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type)
+    @meter_collection.meter?(meter_id, true)
   end
 
   private def create_modified_meter_copy(meter, amr_data, type, identifier, name)
@@ -229,7 +331,6 @@ class AggregateDataService
     min_date, max_date = combined_amr_data_date_range(meters)
     logger.info "Aggregating data between #{min_date} #{max_date}"
 
-    mpan_mprn = 'NEEDSFIXING'
     mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
     combined_amr_data = AMRData.new(type)
     (min_date..max_date).each do |date|
@@ -269,7 +370,7 @@ class AggregateDataService
   def aggregate_main_meters(combined_meter, list_of_meters, type)
     logger.info "Aggregating #{list_of_meters.length} meters"
     combined_meter = aggregate_meters(combined_meter, list_of_meters, type)
-    combine_sub_meters(combined_meter, list_of_meters)
+    # combine_sub_meters_deprecated(combined_meter, list_of_meters) # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
     combined_meter
   end
 
@@ -399,11 +500,11 @@ class AggregateDataService
     sub_meter_types
   end
 
-  def combine_sub_meters(parent_meter, list_of_meters)
+  def combine_sub_meters_deprecated(parent_meter, list_of_meters)
     sub_meter_types = group_sub_meters_by_fuel_type(list_of_meters)
 
     sub_meter_types.each do |fuel_type, sub_meters|
-      combined_meter = aggregate_meters(sub_meters, fuel_type)
+      combined_meter = aggregate_meters(parent_meter, sub_meters, fuel_type)
       parent_meter.sub_meters.push(combined_meter)
     end
   end

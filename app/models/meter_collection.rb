@@ -77,17 +77,37 @@ class MeterCollection
     'Meter Collection:' + name + ':' + all_meters.join(';')
   end
 
-  def meter?(identifier)
+  def meter?(identifier, search_sub_meters = false)
     identifier = identifier.to_s # ids coulld be integer or string
     return @meter_identifier_lookup[identifier] if @meter_identifier_lookup.key?(identifier)
 
-    all_meters.each do |meter|
-      if meter.id.to_s == identifier
-        @meter_identifier_lookup[identifier] = meter
-        return meter
+    meter = search_meter_list_for_identifier(all_meters, identifier)
+    unless meter.nil?
+      @meter_identifier_lookup[identifier] = meter
+      return meter
+    end
+
+    if search_sub_meters
+      all_meters.each do |meter|
+        sub_meter = search_meter_list_for_identifier(meter.sub_meters, identifier)
+        unless sub_meter.nil?
+          @meter_identifier_lookup[identifier] = sub_meter
+          return sub_meter
+        end
       end
     end
+
     @meter_identifier_lookup[identifier] = nil
+    nil
+  end
+
+  private def search_meter_list_for_identifier(meter_list, identifier)
+    return nil if identifier.nil?
+    meter_list.each do |meter|
+      return nil if meter.id.nil?
+      return meter if meter.id.to_s == identifier.to_s
+    end
+    nil
   end
 
   def all_meters
@@ -115,20 +135,20 @@ class MeterCollection
   end
 
   def report_group
-    heat_report = !all_heat_meters.nil?
-    electric_report = !all_electricity_meters.nil?
-    if heat_report && electric_report
-      :electric_and_gas
-    elsif heat_report
-      :gas_only
-    elsif electric_report
+    if !aggregated_heat_meters.nil?
+      if !aggregated_electricity_meters.nil?
+        solar_pv_panels? ? :electric_and_gas_and_solar_pv : :electric_and_gas
+      else
+        :gas_only
+      end
+    else 
       if solar_pv_panels?
         :electric_and_solar_pv
+      elsif storage_heaters?
+        :electric_and_storage_heaters
       else
         :electric_only
       end
-    else
-      nil
     end
   end
 
@@ -138,6 +158,10 @@ class MeterCollection
 
   def all_electricity_meters
     all_meters.select { |meter| meter.electricity_meter? }
+  end
+
+  def all_real_meters
+    [all_heat_meters, all_electricity_meters].flatten
   end
 
   def gas_only?
@@ -157,7 +181,15 @@ class MeterCollection
   end
 
   def solar_pv_panels?
-    @has_solar_pv_panels ||= all_meters.any?{ |meter| meter.solar_pv_panels? }
+    sheffield_simulated_solar_pv_panels? || low_carbon_solar_pv_panels?
+  end
+
+  def sheffield_simulated_solar_pv_panels?
+    @has_sheffield_simulated_solar_pv_panels ||= all_meters.any?{ |meter| meter.sheffield_simulated_solar_pv_panels? }
+  end
+
+  def low_carbon_solar_pv_panels?
+    @has_low_carbon_hub_solar_pv_panels ||= all_meters.any?{ |meter| meter.low_carbon_hub_solar_pv_panels? }
   end
 
   def school_type

@@ -1024,32 +1024,7 @@ class CusumAdvice < DashboardChartAdviceBase
 
     @header_advice = generate_html(header_template, binding)
 
-    alert = AlertThermostaticControl.new(@school)
-    alert.analyse(@school.aggregated_heat_meters.amr_data.end_date)
-    alert_description = alert.analysis_report
-    a = alert.a.round(0)
-    b = alert.b.round(0) * 1.0
-
     footer_template = %{
-      <% if @add_extra_markup %>
-        <html>
-      <% end %>
-<% if false %>
-
-        <p>
-          Each point is calculated by subtracting the school's actual
-          gas consumption from the value calculated from the trend
-          line in the thermostatic scatter plot above. i.e.
-        </p>
-        <blockquote>cusum_value = actual_gas_consumption - predicted_gas_consumption</blockquote>
-
-        <p>which for this school is</p>
-
-        <blockquote>cusum_value = actual_gas_consumption - <%= a %> + <%= b %> * degree_days</blockquote>
-<% end %>
-      <% if @add_extra_markup %>
-        </html>
-      <% end %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)

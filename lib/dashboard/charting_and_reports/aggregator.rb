@@ -463,7 +463,7 @@ class Aggregator
   def swap_NaN_for_nil
     return if @bucketed_data.nil?
     @bucketed_data.each do |series_name, result_data|
-      @bucketed_data[series_name] = result_data.map { |x| x.nan? ? nil : x } unless result_data.is_a?(Symbol)
+      @bucketed_data[series_name] = result_data.map { |x| x.is_a?(Integer) ? x.to_f : (x.nan? ? nil : x) } unless result_data.is_a?(Symbol)
     end
   end
 
@@ -806,7 +806,7 @@ class Aggregator
       @series_sums = {}
       @total_of_unit = 0.0
       @bucketed_data.each do |series_name, data|
-        @series_sums[series_name] = data.map { |x| x.nil? || x.nan? ? 0.0 : x }.sum unless data.is_a?(Symbol)
+        @series_sums[series_name] = data.map { |x| (x.nil? || x.is_a?(Integer) || x.nan?) ? 0.0 : x }.sum unless data.is_a?(Symbol)
       end
       @total_of_unit = @series_sums.values.sum
     end
@@ -874,7 +874,7 @@ class Aggregator
   end
 
   def inject_benchmarks
-    logger.info "Injecting national, regional and exemplar bencmark data: for #{@bucketed_data.keys}"
+    logger.info "Injecting national, regional and exemplar benchmark data: for #{@bucketed_data.keys}"
     has_gas = @bucketed_data.key?('gas') && @bucketed_data['gas'].is_a?(Array)
     has_storage_heater = @bucketed_data.key?(SeriesNames::STORAGEHEATERS)
     has_solar_pv = @bucketed_data.key?(SeriesNames::SOLARPV)

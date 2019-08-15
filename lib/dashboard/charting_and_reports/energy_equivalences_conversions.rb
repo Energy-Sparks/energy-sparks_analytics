@@ -545,9 +545,9 @@ class EnergyEquivalences
       conversions: {
         kwh:  {
           rate:         OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR,
-          description:  "An average onshore wind turbine has a maximum capacity of #{X.format(:kw, OFFSHORE_WIND_TURBINE_CAPACITY_KW)}. "\
+          description:  "An average offshore wind turbine has a maximum capacity of #{X.format(:kw, OFFSHORE_WIND_TURBINE_CAPACITY_KW)}. "\
                         "On average (wind varies) it is windy enough to use #{X.format(:percent, OFFSHORE_WIND_TURBINE_LOAD_FACTOR_PERCENT)} of that capacity. "\
-                        "Therefore an average onshore wind turbine generates about #{X.format(:kwh, OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR)} per hour.",
+                        "Therefore an average offshore wind turbine generates about #{X.format(:kwh, OFFSHORE_WIND_TURBINE_AVERAGE_KW_PER_HOUR)} per hour.",
           front_end_description:    'Number of offshore wind turbine hours (converted using kWh)'
         }
       },

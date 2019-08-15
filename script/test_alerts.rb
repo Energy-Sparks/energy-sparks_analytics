@@ -67,6 +67,10 @@ end
 ]
 
 alerts_to_test = [
+  AlertElectricityMeterConsolidationOpportunity,
+  AlertMeterASCLimit,
+  AlertDifferentialTariffOpportunity,
+=begin
   AlertHeatingOnNonSchoolDays,
   AlertHeatingComingOnTooEarly,
   AlertChangeInDailyElectricityShortTerm,
@@ -96,10 +100,11 @@ alerts_to_test = [
   AlertSchoolWeekComparisonGas,
   AlertPreviousHolidayComparisonGas,
   AlertPreviousYearHolidayComparisonGas
+=end
 ]
 
 excluded_schools = ['Ecclesall Primary School']
-included_schools = ['Whiteways Primary']
+included_schools = ['King Edward VII Upper School']
 
 # school week, previous holiday, last year holiday comparison
 # Whiteways: 4 Oct 2015: start of electricity, 6 Apr 2014 start of gas

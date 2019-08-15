@@ -136,6 +136,28 @@ class MeterAttributes
         }
       ]
     },
+    # ==============================Long Furlong=============================
+    # meter data comes from Low Carbon Hub RBee interface, which includes accurate
+    # solar PV, these attributes are largely to notify the aggregation service
+    # to handle the solar PV data manipution differently from the default
+    # base on the Sheffield Solar PV feed
+    70000000123085 => {
+      solar_pv: [  # and array to cope with multiple installations at different times at the same school e.g. Newbridge
+        {
+          start_date:         Date.new(2016, 11, 1),
+          kwp:                30.0,
+          orientation:        230,
+          tilt:               30,
+          shading:            0
+        }
+      ],
+      low_carbon_hub_meter_id: 216057958
+    },
+    # assign the low_carbon_hub_meter_id to all 3 synthetic meters
+    # for the moment, until the aggregation service's handling
+    # of this information is rationalised
+    60000000123085 => { low_carbon_hub_meter_id: 216057958 },
+    90000000123085 => { low_carbon_hub_meter_id: 216057958 },
     # ==============================King Edward VI =============================
     6517203  => {
       meter_corrections: [

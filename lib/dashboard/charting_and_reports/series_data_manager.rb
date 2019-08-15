@@ -851,6 +851,8 @@ private
   end
 
   def calculate_first_chart_date
+    nil_period_count = periods.count(&:nil?)
+    raise EnergySparksNotEnoughDataException, "Not enough data for chart (nil period x#{nil_period_count})" if nil_period_count > 0 || periods.length == 0
     @first_chart_date = periods.last.start_date # years in reverse chronological order
   end
 

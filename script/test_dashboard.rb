@@ -6,15 +6,39 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
+puts
+
+RunTests.new.run
+
+exit
+=begin
+meta_data = AnalysticsSchoolAndMeterMetaData.new
+
+meter_collection = meta_data.school('Whiteways Primary')
+
+meter_readings = LoadSchoolFromRawFrontEndDownload.new(meter_collection)
+meter_readings.load_meter_readings
+
+agg_service = AggregateDataService.new(meter_collection)
+agg_service.validate_meter_data
+
+puts "$" * 200
+puts agg_service.validate_meter_data
+
+local_db = LocalAnalyticsMeterReadingDB.new(meter_collection)
+local_db.save_meter_readings
+exit
+=end
 module Logging
   @logger = Logger.new('log/test-dashboard ' + Time.now.strftime('%H %M') + '.log')
   # @logger = Logger.new(STDOUT)
   logger.level = :debug
 end
 
+
 profile = false
 
-if true
+if false
   
   @@energysparksanalyticsautotest = {
     original_data: '../TestResults/Charts/Base/',
@@ -34,13 +58,11 @@ RubyProf.start if profile
 # reports.load_school('Trinity First School', true)
 # 'Wybourn Primary School'
 
-school_name = 'Whiteways Primary'
 # school_name = 'St Martins Garden Primary School'
 # school_name = 'Hugh Sexey'
 # school_name = 'Paulton Junior School'
 school_name = 'Whiteways Primary'
-school_name = 'Roundhill School'
-school_name = 'Abbey Lane'
+
 # school_name = 'St Marks Secondary'
 # school_name = 'Trinity First School'
 # school_name = 'Brunswick'
@@ -102,7 +124,6 @@ reports.do_chart_list('Paulton',  [
 =end
 
 reports.do_all_standard_pages_for_school
-
 
 if profile
   prof_result = RubyProf.stop

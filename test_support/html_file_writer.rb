@@ -12,15 +12,10 @@ class HtmlFileWriter
   end
 
   def write_header_footer(chart_name, header, footer)
-    unless chart_name.nil?
-      @file.write("<html><h1>#{chart_name}</h1></html>")
-    end
-    unless header.nil?
-      @file.write(header)
-    end
-    unless footer.nil?
-      @file.write(footer)
-    end
+    @file.write("<html><h1>#{chart_name}</h1></html>") unless chart_name.nil?
+    @file.write(header) unless header.nil?
+    @file.write("<html><h2>Chart #{chart_name} inserted here</h2></html>")
+    @file.write(footer) unless footer.nil?
   end
 
   def write(html)

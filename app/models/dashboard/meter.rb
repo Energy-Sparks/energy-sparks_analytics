@@ -51,6 +51,7 @@ module Dashboard
     private def process_meter_attributes
       @storage_heater_setup = StorageHeater.new(attributes(:storage_heaters)) if @meter_attributes.key?(:storage_heaters)
       @solar_pv_setup = SolarPVPanels.new(attributes(:solar_pv)) if @meter_attributes.key?(:solar_pv)
+      @low_carbon_hub_solar_pv = true if @meter_attributes.key?(:low_carbon_hub_meter_id)
     end
 
     private def check_fuel_type(fuel_type)
@@ -74,7 +75,15 @@ module Dashboard
     end
 
     def solar_pv_panels?
+      low_carbon_solar_pv_panels? || sheffield_simulated_solar_pv_panels?
+    end
+
+    def sheffield_simulated_solar_pv_panels?
       !@solar_pv_setup.nil?
+    end
+
+    def low_carbon_hub_solar_pv_panels?
+      !@low_carbon_hub_solar_pv.nil?
     end
 
     def non_heating_only?
@@ -146,7 +155,7 @@ module Dashboard
       elsif fuel_type == :exported_solar_pv
         60000000000000 + urn.to_i + 1000000000000 * group_number
       else
-        raise EnergySparksUnexpectedStateException.new('Unexpected fuel_type')
+        raise EnergySparksUnexpectedStateException.new, "Unexpected fuel_type #{fuel_type}"
       end
     end
 
@@ -157,10 +166,6 @@ module Dashboard
         70000000000000 + mpan_mprn
       when :electricity_minus_storage_heater
         75000000000000 + mpan_mprn
-      when :electricity_plus_solar_pv
-        60000000000000 + mpan_mprn
-      when :solar_pv_only
-        65000000000000 + mpan_mprn
       else
         raise EnergySparksUnexpectedStateException.new("Unexpected type #{type} for modified mpan/mprn")
       end

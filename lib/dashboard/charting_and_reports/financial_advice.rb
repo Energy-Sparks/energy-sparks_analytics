@@ -104,7 +104,7 @@ class DashboardEnergyAdvice
     private def run_chart(fuel_type = :electricity, meter = nil)
       chart_config = chart_definition(fuel_type, meter)
       chart_manager = ChartManager.new(@school)
-      @chart_data = chart_manager.run_chart(chart_config, :financial_advice_manual_config)
+      @chart_data = chart_manager.run_chart(chart_config, :financial_advice_manual_config, true, nil, true)
     end
 
     private def meter_definition(fuel_type, meter)

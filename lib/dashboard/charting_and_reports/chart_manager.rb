@@ -10,21 +10,21 @@ class ChartManager
     @show_reconciliation_values = show_reconciliation_values
   end
 
-  def run_chart_group(chart_param, override_config = nil)
+  def run_chart_group(chart_param, override_config = nil, reraise_exception = false)
     if chart_param.is_a?(Symbol)
-      run_standard_chart(chart_param, override_config)
+      run_standard_chart(chart_param, override_config, reraise_exception)
     elsif chart_param.is_a?(Hash)
-      run_composite_chart(chart_param, override_config = nil)
+      run_composite_chart(chart_param, override_config, reraise_exception)
     end
   end
 
-  def run_composite_chart(chart_group, override_config = nil)
+  def run_composite_chart(chart_group, override_config = nil, reraise_exception = false)
     puts "Running composite chart group #{chart_group[:name]}"
     chart_group_result = {}
     chart_group_result[:config] = chart_group
     chart_group_result[:charts] = []
     chart_group[:chart_group][:charts].each do |chart_param|
-      chart = run_standard_chart(chart_param, override_config = nil)
+      chart = run_standard_chart(chart_param, override_config, reraise_exception)
       ap(chart, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
       chart_group_result[:charts].push(chart)
     end
@@ -84,12 +84,17 @@ class ChartManager
     ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
     begin
-      aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)
+      aggregator = nil
+      calculation_time = nil
 
-      aggregator.aggregate
+      calculation_time = Benchmark.realtime {
+        aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)
+
+        aggregator.aggregate
+      }
 
       if aggregator.valid
-        graph_data = configure_graph(aggregator, chart_config, chart_param)
+        graph_data = configure_graph(aggregator, chart_config, chart_param, calculation_time)
 
         ap(graph_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
         logger.info '<' * 120
@@ -99,7 +104,6 @@ class ChartManager
         nil
       end
     rescue StandardError => e
-      puts "Unable to create chart"
       logger.warn "Unable to create chart"
       if reraise_exception
         raise
@@ -111,7 +115,7 @@ class ChartManager
     end
   end
 
-  def configure_graph(aggregator, chart_config, chart_param)
+  def configure_graph(aggregator, chart_config, chart_param, calculation_time)
     graph_definition = {}
 
     graph_definition[:title]          = chart_config[:name] + ' ' + aggregator.title_summary
@@ -132,6 +136,7 @@ class ChartManager
     end
 
     graph_definition[:configuration] = chart_config
+    graph_definition[:name] = chart_param
 
     advice = DashboardChartAdviceBase.advice_factory(chart_param, @school, chart_config, graph_definition, chart_param)
 
@@ -141,6 +146,7 @@ class ChartManager
       graph_definition[:advice_footer] = advice.footer_advice
     end
     # ap(graph_definition, limit: 20)
+    graph_definition[:calculation_time] = calculation_time
     graph_definition
   end
 end

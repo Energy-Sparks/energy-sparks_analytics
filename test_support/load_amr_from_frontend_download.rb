@@ -25,7 +25,6 @@ class LoadSchoolFromFrontEndDownload < MeterReadingsDownloadCSVBase
   def load_meter_amr_data(meter)
     filename = move_file_to_school_subdirectory(meter.mpan_mprn)
     logger.info "Loading meter readings from #{filename}"
-    puts filename.split('/').last
 
     @file = File.open(filename)
 

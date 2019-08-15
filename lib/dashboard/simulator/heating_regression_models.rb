@@ -5,6 +5,7 @@
 #
 module AnalyseHeatingAndHotWater
   # both these constants are 'publicly' documented on the model fitting advice web pages
+  MINIMUM_NON_HEATING_MODEL_SAMPLES = 15
   MINIMUM_SAMPLES_FOR_SIMPLE_MODEL_TO_RUN_WELL = 35
   MINIMUM_SAMPLES_FOR_THERMALLY_MASSIVE_MODEL_TO_RUN_WELL = 60
   # caches the definitions and resultant calculations for a number of models
@@ -604,13 +605,21 @@ module AnalyseHeatingAndHotWater
       model(:heating_occupied_all_days).samples
     end
 
+    def summer_occupied_day_samples
+      model(:summer_occupied_all_days).samples
+    end
+
     def minimum_samples_for_model_to_run_well
       MINIMUM_SAMPLES_FOR_SIMPLE_MODEL_TO_RUN_WELL
     end
 
     # 35/60 value needs further research across multiple schools
     def enough_samples_for_good_fit
-      winter_heating_samples > minimum_samples_for_model_to_run_well
+      if no_heating?
+        summer_occupied_day_samples > MINIMUM_NON_HEATING_MODEL_SAMPLES
+      else
+        winter_heating_samples > minimum_samples_for_model_to_run_well
+      end
     end
 
     # returns a hash to value, or hash of information relating to the model
@@ -781,6 +790,10 @@ module AnalyseHeatingAndHotWater
       else 
         heating_on?(date) ? winter_model(date) : summer_model(date)
       end
+    end
+
+    private def no_heating?
+      @meter.kitchen_only? || @meter.hot_water_only?
     end
 
     private def choose_by_day_type(date, occupied, weekend, holiday)

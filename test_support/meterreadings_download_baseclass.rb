@@ -21,7 +21,7 @@ class MeterReadingsDownloadBase
   end
 
   def self.meter_reading_factory(download_type, meter_collection)
-    puts "Creating a meter reading download of type #{download_type}" # not sure how to access logger?
+    Logging.logger.info "Creating a meter reading download of type #{download_type}" # not sure how to access logger?
     case download_type
     when :bathcsv
       LoadSchoolFromBathSplitCSVFile.new(meter_collection)
