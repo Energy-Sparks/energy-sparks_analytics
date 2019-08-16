@@ -119,7 +119,7 @@ excel_charts = ReportConfigSupport.new if generate_charts
 
 history = AlertHistoryDatabase.new
 previous_results = history.load
-puts 'Loaded data'
+
 # ap(previous_results)
 
 calculated_results = {}

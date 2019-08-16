@@ -13,6 +13,7 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
 
   def initialize(school)
     super(school, :heating_on_days)
+    @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 
   def timescale

@@ -32,8 +32,6 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
   def calculate(asof_date)
     super(asof_date)
 
-    puts 'Got here philip'
-
     date_format = '%e %B'
     @current_period_start_short_date    = format_date(current_period_start_date)
     @current_period_end_short_date      = format_date(current_period_end_date)

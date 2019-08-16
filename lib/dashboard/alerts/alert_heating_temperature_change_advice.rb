@@ -9,6 +9,7 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
 
   def initialize(school)
     super(school, :heatingsensitivity)
+    @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 
   def self.template_variables

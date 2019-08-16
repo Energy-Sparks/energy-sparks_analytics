@@ -8,9 +8,11 @@ class RunTests
 
   DEFAULT_TEST_SCRIPT = {
     logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+=begin
     dark_sky_temperatures:    nil,
     grid_carbon_intensity:    nil,
     sheffield_solar_pv:       nil,
+=end
     schools:                  ['.*'],
     source:                   :analytics_db,
     logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
@@ -26,10 +28,24 @@ class RunTests
                                 }
                               },
     alerts:                   {
-                                  alerts:   [ AlertHotWaterEfficiency ],
+                                  alerts:   nil, # [ AlertHotWaterEfficiency ],
                                   control:  {
-                                              outputs:    [ :front_end_template_variables ],
-                                              asof_date:  Date.new(2019, 6, 30)
+                                              # print_alert_banner: true,
+                                              # alerts_history: true,
+                                              print_school_name_banner: true,
+                                              # outputs:           [ :front_end_template_variables ],
+                                              save_and_compare:  {
+                                                                    summary:      true,
+                                                                    h_diff:     { use_lcs: false, :numeric_tolerance => 0.000001 },
+                                                                    data: %i[
+                                                                      front_end_template_variables
+                                                                      raw_variables_for_saving
+                                                                      front_end_template_data
+                                                                      front_end_template_chart_data
+                                                                      front_end_template_table_data
+                                                                    ]
+                                                                  },
+                                              asof_date:          Date.new(2019, 6, 30)
                                             } 
                               }
   }.freeze
@@ -49,7 +65,7 @@ class RunTests
       when :dark_sky_temperatures
         update_dark_sky_temperatures
       when :grid_carbon_intensity
-        update_grid_carbon_intersity
+        update_grid_carbon_intensity
       when :sheffield_solar_pv
         update_sheffield_solar_pv
       when :schools
@@ -60,7 +76,7 @@ class RunTests
         $logger_format = 2
         run_reports(configuration[:charts], configuration[:control])
       when :alerts
-        # run_alerts(configuration[:alerts], configuration[:control])
+        run_alerts(configuration[:alerts], configuration[:control])
       else
         configure_log_file(configuration) if component.to_s.include?('logger')
       end
@@ -81,7 +97,7 @@ class RunTests
     DownloadDarkSkyTemperatures.new.download
   end
 
-  def update_grid_carbon_intersity
+  def update_grid_carbon_intensity
     DownloadUKGridCarbonIntensity.new.download
   end
 
@@ -120,7 +136,6 @@ class RunTests
     logger.info 'RUNNING ALERTS'
     failed_alerts = []
     @school_list.each do |school_name|
-      puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
       school = load_school(school_name)

@@ -38,6 +38,14 @@ module AnalyseHeatingAndHotWater
       true
     end
 
+    # called from alerts, to avoid picking up precached
+    # model from charting which a different asof_date
+    # should onlt be required in analystics when
+    # testing charting and alerts at the same time
+    def clear_model_cache
+      @models = {}
+    end
+
     def create_and_fit_model(model_type, period, allow_more_than_1_year = false)
       logger.info "create_and_fit_model start"
       unless @processed_model_overrides # deferred until meter available

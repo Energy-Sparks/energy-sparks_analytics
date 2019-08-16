@@ -113,6 +113,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
   end
 
   private def calculate(asof_date)
+    raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
     @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
 

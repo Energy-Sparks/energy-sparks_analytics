@@ -8,6 +8,7 @@ class AlertThermostaticControl < AlertGasModelBase
 
   def initialize(school)
     super(school, :thermostaticcontrol)
+    @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 
   def timescale

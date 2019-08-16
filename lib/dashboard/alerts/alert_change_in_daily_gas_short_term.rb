@@ -18,6 +18,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
 
   def initialize(school)
     super(school, :changeingasconsumption)
+    @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 
   TEMPLATE_VARIABLES = {
@@ -139,7 +140,11 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
 
     heating_weeks = @heating_model.number_of_heating_days / days_in_week
     saving_£ = heating_weeks * (@predicted_this_week_cost - @predicted_last_week_cost)
+    saving_£ = 0.0 if saving_£.nan?
     @one_year_saving_£ = Range.new(saving_£, saving_£)
+
+    # PH, 16Aug2019 - as this alert is being deprecated, make more fault tolerant: St Louis school only
+    @difference_in_actual_versus_predicted_change_percent = 0.0 if @difference_in_actual_versus_predicted_change_percent.nan?
 
     @rating = calculate_rating_from_range(0.2, -0.2, -1 * @difference_in_actual_versus_predicted_change_percent)
 

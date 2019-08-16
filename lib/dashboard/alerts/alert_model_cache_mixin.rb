@@ -26,6 +26,7 @@ module AlertModelCacheMixin
   end
 
   private def call_model(asof_date)
+    @school.aggregated_heat_meters.model_cache.clear_model_cache
     @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, one_year_period(asof_date)) 
   end
 end

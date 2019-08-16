@@ -39,6 +39,10 @@ class HalfHourlyData < Hash
     avg
   end
 
+  def days_valid_data
+    end_date - start_date + 1
+  end
+
   def average_in_date_range(start_date, end_date)
     if start_date < self.start_date || end_date > self.end_date
       return nil # NAN blows up write_xlsx

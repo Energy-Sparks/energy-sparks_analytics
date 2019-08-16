@@ -94,12 +94,88 @@ class RunAlerts
     end
   end
 
+  def save_yaml_file(filename, data)
+    # puts "Saving data to #{full_filename(filename)}"
+    File.open(full_filename(filename, false), 'w') { |f| f.write(YAML.dump(data)) }
+  end
+
+  def load_yaml_file(filename)
+    full_name = full_filename(filename, true)
+    return nil unless File.exist?(full_name)
+    YAML.load_file(full_name)
+  end
+
+  def full_filename(filename, base)
+    if base
+      File.join(File.dirname(__FILE__), '../TestResults/Alerts/Base/') + filename
+    else
+      File.join(File.dirname(__FILE__), '../TestResults/Alerts/New/') + filename
+    end
+  end
+
+  def yaml_filename(alert_type, output_type, asof_date)
+    "#{@school.name} #{asof_date.strftime('%Y%m%d')} #{alert_type} #{output_type}.yml" 
+  end
+
+  def save_and_compare(alert_class, alert, control, asof_date)
+    control[:save_and_compare][:data].each do |result_type|
+      result = RESULT_CALCULATION_METHOD_CALLS[result_type]
+      filename = yaml_filename(alert_class, result[:method], asof_date)
+      obj = result[:on_class] ? alert_class : alert
+      data = result[:args].nil? ? obj.public_send(result[:method]) : obj.public_send(result[:method], result[:args])
+      save_yaml_file(filename, data)
+      data = remove_volatile_data(data, alert_class, result_type)
+      previous_data = load_yaml_file(filename)
+      previous_data = remove_volatile_data(previous_data, alert_class, result_type)
+      differs = data != previous_data
+      puts "differs: #{filename}" if !control[:save_and_compare][:summary].nil? && differs
+      if differs && !control[:save_and_compare][:h_diff].nil?
+        h_diff = HashDiff.diff(previous_data, data, control[:save_and_compare][:h_diff]) do |_path, obj1, obj2|
+          obj1.is_a?(Float) && obj2.is_a?(Float) && obj1.nan? && obj2.nan? ? true : nil # make NaN == NaN, produces a [] result
+        end
+        ap h_diff
+      end
+    end
+  end
+
+  def remove_volatile_data(data, alert_type, result_type)
+    if alert_type == AlertHeatingOnOff # .is_? doesn't seem to work
+      if result_type == :raw_variables_for_saving || result_type == :front_end_template_data
+        [ 'Average overnight temperature', 'Average day time temperature', 'Cloud',
+          'Potential Saving(-cost)', 'Potential saving(-cost)', 'forecast_date_time',
+          'potential_saving_next_week_', 'next_weeks_predicted_consumption_',
+          'percent_saving_next_week'
+        ].each do |match|
+          data.delete_if { |key, _value| key.to_s.include?(match) }
+        end
+      elsif result_type == :front_end_template_data
+        data.delete_if { |key, _value| key.to_s == :forecast_date_time }
+      elsif result_type == :front_end_template_table_data
+        data.delete_if { |key, _value| key.to_s.include?('weather_forecast_table') }
+      end
+    end
+    data
+  end
+
+  def run_charts(alert)
+    return if alert.front_end_template_chart_data.empty? 
+    control = {
+      charts: [ adhoc_worksheet: { name: 'Test', charts: [ alert.front_end_template_chart_data ] } ],
+      control: {
+        report_failed_charts:   :summary,
+        compare_results:        [ :summary, :report_differing_charts, :report_differences ] 
+      }
+    }
+    charts = RunCharts.new(@school)
+    charts.run(chart_list, control)
+  end
+
   def run_alerts(alerts, control)
-
-    ap control
-    ap alerts
-
     asof_date = control[:asof_date]
+
+    alerts = ALERT_TO_EXCELTAB_MAP.keys if alerts.nil?
+
+    print_banner(@school.name, 0) unless control[:print_school_name_banner].nil?
 
     # reports = ReportConfigSupport.new
 
@@ -108,9 +184,11 @@ class RunAlerts
     generate_charts = false
     # excel_charts = ReportConfigSupport.new if generate_charts
 
-    history = AlertHistoryDatabase.new
-    previous_results = history.load
-    puts 'Loaded data'
+    unless control[:alerts_history].nil?
+      history = AlertHistoryDatabase.new
+      previous_results = history.load
+    end
+
     # ap(previous_results)
 
     calculated_results = {}
@@ -124,20 +202,22 @@ class RunAlerts
 
         alert = alert_class.new(school)
         next unless alert.valid_alert?
-        print_banner(alert.class.name,1)
+        print_banner(alert.class.name, 1) unless control[:print_alert_banner].nil?
 
         bm2 = Benchmark.realtime {
           alert.analyse(asof_date, true)
-
+          next unless alert.make_available_to_users?
           raw_data = alert.raw_variables_for_saving
 
           calculated_results[asof_date].merge!(raw_data)
 
-          # print_all_results(alert_class, alert)
+          print_all_results(alert_class, alert, control) if control.key?(:outputs)
+
+          save_and_compare(alert_class, alert, control, asof_date) if control.key?(:save_and_compare)
 
           results = alert.analysis_report
           if results.status == :failed
-            failed_alerts.push(sprintf('%-32.32s: %s', school_name, alert.class.name))
+            failed_alerts.push(sprintf('%-32.32s: %s', @school.name, alert.class.name))
           end
         }
         (@alert_calculation_time[alert.class.name] ||= []).push(bm2)

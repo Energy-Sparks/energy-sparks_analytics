@@ -30,6 +30,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @meter_definition = meter_definition
     @chart_results = nil
     @table_results = nil
+    @relevance = :never_relevant if @relevance != :never_relevant && aggregate_meter.amr_data.days_valid_data > 364
   end
 
   def self.static_template_variables(fuel)
@@ -113,6 +114,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   end
 
   def calculate(_asof_date)
+    raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
     daytype_breakdown = extract_kwh_from_chart_data(out_of_hours_energy_consumption)
     @holidays_kwh         = daytype_breakdown['Holiday']
     @weekends_kwh         = daytype_breakdown['Weekend']
@@ -252,7 +254,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
   def out_of_hours_energy_consumption
     chart = ChartManager.new(@school)
-    chart.run_standard_chart(breakdown_chart)
+    chart.run_standard_chart(breakdown_chart, nil, true)
   end
 
   def generate_html(template, binding)
