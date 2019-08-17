@@ -3,8 +3,6 @@ require_relative 'alert_analysis_base.rb'
 
 class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
   PERCENT_TOO_HIGH_MARGIN = 1.10
-  attr_reader :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area # historic attributes, remove post template variables but check doesn't break advice TODO(PH, 11Apr2019)
-
   attr_reader :average_baseload_last_year_kw, :average_baseload_last_year_£, :average_baseload_last_year_kwh
 
   attr_reader :benchmark_per_pupil_kw, :exemplar_per_pupil_kw
@@ -189,44 +187,5 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url('ElectricityBaseload')
   end
-
-  def analyse_private(asof_date)
-    calculate(asof_date)
-    @avg_baseload, days_sample = annual_average_baseload_kw(asof_date)
-
-    @benchmark_per_pupil = BenchmarkMetrics.recommended_baseload_for_pupils(pupils, school_type)
-    @benchmark_per_floor_area = BenchmarkMetrics.recommended_baseload_for_floor_area(floor_area, school_type)
-
-    @analysis_report.term = :longterm
-    @analysis_report.add_book_mark_to_base_url('ElectricityBaseload')
-
-    if @avg_baseload > (@benchmark_per_pupil * PERCENT_TOO_HIGH_MARGIN) || @avg_baseload > (@benchmark_per_floor_area * PERCENT_TOO_HIGH_MARGIN)
-      @analysis_report.summary = 'Your electricity baseload is too high'
-      text = commentary(@avg_baseload, 'too high', @benchmark_per_pupil, @benchmark_per_floor_area)
-      if days_sample < 3 * 30
-        text += '(we have less that 3 months of data from which to calculate your baseload)'
-      end
-      description1 = AlertDescriptionDetail.new(:text, text)
-
-      per_pupil_ratio = @avg_baseload / @benchmark_per_pupil
-      per_floor_area_ratio = @avg_baseload / @benchmark_per_floor_area
-      @analysis_report.rating = AlertReport::MAX_RATING * (per_pupil_ratio > per_floor_area_ratio ? (1.0 / per_pupil_ratio) : (1.0 / per_floor_area_ratio))
-      @analysis_report.status = :poor
-    else
-      @analysis_report.summary = 'Your electricity baseload is good'
-      text = commentary(@avg_baseload, 'good', @benchmark_per_pupil, @benchmark_per_floor_area)
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-
-    end
-    @analysis_report.add_detail(description1)
-  end
-
-  def commentary(baseload, comparative_text, pupil_benchmark, floor_area_benchmark)
-    text = sprintf('Your baseload over the last year of %.1f kW is %s, ', baseload, comparative_text)
-    text += sprintf('compared with average usage at other schools of %.1f kW (pupil based) ', pupil_benchmark)
-    text += sprintf('and %.1f kW (for a similar floor area).', floor_area_benchmark)
-    text
-  end
+  alias_method :analyse_private, :calculate
 end
