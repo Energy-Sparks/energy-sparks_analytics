@@ -215,10 +215,7 @@ class RunAlerts
 
           save_and_compare(alert_class, alert, control, asof_date) if control.key?(:save_and_compare)
 
-          results = alert.analysis_report
-          if results.status == :failed
-            failed_alerts.push(sprintf('%-32.32s: %s', @school.name, alert.class.name))
-          end
+          failed_alerts.push(sprintf('%-32.32s: %s', @school.name, alert.class.name)) unless alert.calculation_worked
         }
         (@alert_calculation_time[alert.class.name] ||= []).push(bm2)
 

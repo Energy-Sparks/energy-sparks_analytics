@@ -16,7 +16,6 @@ class AlertAnalysisBase
 
   ALERT_HELP_URL = 'https://blog.energysparks.uk/alerts'.freeze
 
-  attr_reader :analysis_report
   attr_reader :status, :rating, :term, :default_summary, :default_content, :bookmark_url
   attr_reader :analysis_date, :max_asofdate, :calculation_worked
 
@@ -24,7 +23,6 @@ class AlertAnalysisBase
     @school = school
     @report_type = report_type
     @relevance = aggregate_meter.nil? ? :never_relevant : :relevant
-    @analysis_report = AlertReport.new(report_type)
     @not_enough_data_exception = false
     @calculation_worked = true
   end
@@ -37,17 +35,13 @@ class AlertAnalysisBase
     begin
       @asof_date = asof_date
       @max_asofdate = maximum_alert_date
-      @analysis_report.max_asofdate = @max_asofdate
       if valid_alert?
         date = use_max_meter_date_if_less_than_asof_date ? [maximum_alert_date, asof_date].min : asof_date
 
         if @analysis_date.nil? || @analysis_date != date # only call once per date
           @analysis_date = date
-          analyse_private(@analysis_date)
-          @analysis_report = backwards_compatible_analysis_report if @analysis_report.nil?
+          calculate(@analysis_date)
         end
-      else
-        invalid_alert_report # gas alert for electric only school or electic alert for gas only school
       end
     rescue EnergySparksNotEnoughDataException => e
       logger.warn e.message
@@ -59,7 +53,6 @@ class AlertAnalysisBase
       puts e.to_s
       puts e.message
       puts e.backtrace
-      erroneous_report(e)
     end
   end
 
@@ -334,19 +327,6 @@ class AlertAnalysisBase
     relevance == :relevant && enough_data == :enough && calculation_worked
   end
 
-  # test method - runs all alaerts for school, prints results
-  def self.run_valid_alerts(school, asof_date)
-    valid_alerts = all_available_alerts
-
-    valid_alerts.each do |alert_class|
-      alert = alert_class.new(school)
-      alert.analyse(asof_date)
-      results = alert.analysis_report
-      puts '=' * 80
-      puts results
-    end
-  end
-
   def self.print_all_formatted_template_variable_values
     puts 'Available variables and values:'
     self.template_variables.each do |group_name, variable_group|
@@ -450,36 +430,6 @@ class AlertAnalysisBase
       formatted_table.push(formatted_row)
     end
     [data_description[:header], formatted_table]
-  end
-
-  # takes the new alert infrastructure data and recreated
-  # the old alert data for backwards compatibility
-  public def backwards_compatible_analysis_report
-    analysis_report = AlertReport.new(@report_type)
-
-    analysis_report.status        = status
-    analysis_report.rating        = rating
-    analysis_report.term          = term
-    analysis_report.help_url      = bookmark_url
-    analysis_report.max_asofdate  = max_asofdate
-
-    analysis_report.summary       = summary_wording(:text)
-
-    description = AlertDescriptionDetail.new(:text, content_wording(:text))
-    analysis_report.add_detail(description)
-
-    unless @chart_results.nil?
-      description2 = AlertDescriptionDetail.new(:chart, @chart_results)
-      analysis_report.add_detail(description2)
-    end
-
-    unless @table_results.nil?
-      html_table = formatted_template_variables(:html)[@table_results]
-      description3 = AlertDescriptionDetail.new(:html, html_table)
-      analysis_report.add_detail(description3)
-    end
-
-    analysis_report
   end
 
   protected
@@ -619,28 +569,8 @@ class AlertAnalysisBase
 
   private
 
-  def erroneous_report(e)
-    @analysis_report = AlertReport.new(@report_type) if @analysis_report.nil?
-    text = "Unexpected Internal Error: please report to hello@energysparks.uk\n"
-    text += e.message
-    text += e.backtrace.join("\n")
-    description1 = AlertDescriptionDetail.new(:text, text)
-    @analysis_report.add_detail(description1)
-    @analysis_report.status = :failed
-  end
-
-  def invalid_alert_report
-    @analysis_report = AlertReport.new(@report_type) if @analysis_report.nil?
-    text =  'The alert is not valid for this school'
-    text += 'The alert is not valid probably because the alert is specific for a fuel type (gas/electricity) '
-    text += 'for which smart meter data is not available'
-    description1 = AlertDescriptionDetail.new(:text, text)
-    @analysis_report.add_detail(description1)
-    @analysis_report.status = :failed
-  end
-
-  def analyse_private(asof_date)
-    raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class')
+  def calculate(asof_date)
+    raise EnergySparksAbstractBaseClass, 'Error: incorrect attempt to use abstract base class'
   end
 
   def self.all_available_alerts
