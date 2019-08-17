@@ -183,6 +183,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
 
     @rating = 5.0
   end
+  alias_method :analyse_private, :calculate
 
   private def set_last_year_holiday_consumption_variables(start_date, end_date, no_data)
     if no_data
@@ -295,29 +296,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     table.each do |row|
       @daytype_breakdown_table.push([row[0], row[2], row[3]])
     end
-  end
-
-  def analyse_private(asof_date)
-    calculate(asof_date)
-    @analysis_report.add_book_mark_to_base_url('UpcomingHoliday')
-    @analysis_report.term = :shortterm
-
-    if !@school.holidays.holiday?(asof_date) && upcoming_holiday?(asof_date, WEEKDAYS_HOLIDAY_LOOKAHEAD_PERIOD)
-      @analysis_report.summary = 'There is an upcoming holiday - please turn heating, hot water and appliances off'
-      text = 'There is a holiday coming up '
-      text += 'please ensure all unnecessary appliances are switched off, '
-      text += 'including heating and hot water (but remember to flush when turned back on)'
-      @analysis_report.rating = 2.0
-      @analysis_report.status = :poor
-    else
-      @analysis_report.summary = 'There is no upcoming holiday, no action needs to be taken'
-      text = ''
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    end
-
-    description1 = AlertDescriptionDetail.new(:text, text)
-    @analysis_report.add_detail(description1)
   end
 
   def upcoming_holiday?(asof_date, num_days)
