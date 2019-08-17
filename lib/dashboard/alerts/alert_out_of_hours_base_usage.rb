@@ -163,67 +163,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url(@bookmark)
   end
-
-  def default_content
-    %{
-      <p>
-        <% if significant_out_of_hours_use %>
-          <%= out_of_hours_percent %> of your <%= fuel_description %> is used out of hours
-          which is high compared with exemplar schools, which use <%= good_out_of_hours_use_percent %>
-          out of hours.
-        <% else %>
-          Your out of hours <%= fuel_description %> consumption is good at <%= out_of_hours_percent %>.
-        <% end %>
-      </end>
-    }.gsub(/^  /, '')
-  end
-
-  def default_summary
-    %{
-      <p>
-        <% if significant_out_of_hours_use %>
-          You have a high percentage of your  <%= fuel_description %> usage outside school hours
-        <% else %>
-          Your out of hours <%= fuel_description %> consumption is good
-        <% end %>
-      </p>
-    }.gsub(/^  /, '')
-  end
-
-  def analyse_private(_asof_date)
-    calculate(_asof_date)
-    breakdown = out_of_hours_energy_consumption
-
-    kwh_in_hours, kwh_out_of_hours = in_out_of_hours_consumption(breakdown)
-    percent = kwh_out_of_hours / (kwh_in_hours + kwh_out_of_hours)
-
-    @analysis_report.term = :longterm
-    @analysis_report.add_book_mark_to_base_url(@bookmark)
-
-    if significant_out_of_hours_use
-      @analysis_report.summary = 'You have a high percentage of your ' + @fuel + ' usage outside school hours'
-      text = sprintf('%.0f percent of your ' + @fuel, 100.0 * percent)
-      text += ' is used out of hours which is high compared with exemplar schools '
-      text += sprintf('which use only %.0f percent out of hours.', 100.0 * @good_out_of_hours_use_percent)
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.add_detail(description1)
-      description2 = AlertDescriptionDetail.new(:chart, breakdown)
-      @analysis_report.add_detail(description2)
-      table_data = convert_breakdown_to_html_compliant_array(breakdown)
-
-      description3 = AlertDescriptionDetail.new(:html, html_table_from_data(table_data))
-      @analysis_report.add_detail(description3)
-      @analysis_report.rating = 2.0
-      @analysis_report.status = :poor
-    else
-      @analysis_report.summary = 'Your out of hours ' + @fuel + ' consumption is good'
-      text = sprintf('Your out of hours ' + @fuel + ' consumption is good at %.0f percent', 100.0 * percent)
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.add_detail(description1)
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    end
-  end
+  alias_method :analyse_private, :calculate
 
   def convert_breakdown_to_html_compliant_array(breakdown)
     html_table = []
