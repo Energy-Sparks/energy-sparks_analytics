@@ -30,7 +30,7 @@ class RunTests
                               },
 =end   
                               alerts:                   {
-                                  alerts:   [ AlertImpendingHoliday ],
+                                  alerts:   [ AlertGasMeterConsolidationOpportunity ],
                                   control:  {
                                               # print_alert_banner: true,
                                               # alerts_history: true,
