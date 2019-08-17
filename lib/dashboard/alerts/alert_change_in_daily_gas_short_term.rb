@@ -114,10 +114,14 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
   end
 
   def calculate(asof_date)
+    calculate_model(asof_date)
     days_in_week = 5
 
     this_weeks_school_days = last_n_school_days(asof_date, days_in_week)
     last_weeks_school_days = last_n_school_days(this_weeks_school_days[0] - 1, days_in_week)
+
+    @beginning_of_week = this_weeks_school_days[0]
+    @beginning_of_last_week = last_weeks_school_days[0]
 
     @predicted_kwh_this_week = @heating_model.predicted_kwh_list_of_dates(this_weeks_school_days, @school.temperatures)
     @predicted_kwh_last_week = @heating_model.predicted_kwh_list_of_dates(last_weeks_school_days, @school.temperatures)
@@ -155,84 +159,5 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     @term = :shortterm
     @bookmark_url = add_book_mark_to_base_url('GasChange')
   end
-
-  def default_content
-    %{
-      <% if signficant_increase_in_gas_consumption %>
-        <p>
-          Your gas consumption on school days has increased from
-          <%= predicted_last_week_cost %> (<%= predicted_kwh_last_week %>) last week (week starting <%= beginning_of_last_week %>) to
-          <%= predicted_this_week_cost %> (<%= predicted_kwh_this_week %>) this week (week starting <%= beginning_of_week %>).
-          If this continues it will cost you an additional <%= one_year_saving_£ %> over the next year.
-        </p>
-      <% else %>
-        <p>
-          Your gas consumption on school days last week was
-          <%= predicted_last_week_cost %> (<%= predicted_kwh_last_week %>) - (week starting <%= beginning_of_last_week %>).
-          Your gas consumption on school days this week is
-          <%= predicted_this_week_cost %> (<%= predicted_kwh_this_week %>) - (week starting <%= beginning_of_week %>).
-        </p>
-      <% end %>
-    }.gsub(/^  /, '')
-  end
-
-  def default_summary
-    %{
-      <% if signficant_increase_in_gas_consumption %>
-        Your daily gas consumption has increased.
-      <% else %>
-        Your daily gas consumption is good
-      <% end %>
-    }.gsub(/^  /, '')
-  end
-
-  def analyse_private(asof_date)
-    calculate_model(asof_date)
-    calculate(asof_date)
-
-    this_weeks_school_days = last_n_school_days(asof_date, 5)
-    last_weeks_school_days = last_n_school_days(this_weeks_school_days[0] - 1, 5)
-
-    @beginning_of_week = this_weeks_school_days[0]
-    @beginning_of_last_week = last_weeks_school_days[0]
-
-    predicted_kwh_this_week = @heating_model.predicted_kwh_list_of_dates(this_weeks_school_days, @school.temperatures)
-    predicted_kwh_last_week = @heating_model.predicted_kwh_list_of_dates(last_weeks_school_days, @school.temperatures)
-    predicted_changein_kwh = predicted_kwh_this_week - predicted_kwh_last_week
-    predicted_percent_increase_in_usage = predicted_changein_kwh / predicted_kwh_last_week
-
-    actual_kwh_this_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(this_weeks_school_days)
-    actual_kwh_last_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(last_weeks_school_days)
-    actual_changein_kwh = actual_kwh_this_week - actual_kwh_last_week
-    actual_percent_increase_in_usage = actual_changein_kwh / actual_kwh_last_week
-
-    this_week_cost = BenchmarkMetrics::GAS_PRICE * actual_kwh_this_week
-    last_week_cost = BenchmarkMetrics::GAS_PRICE * actual_kwh_last_week
-
-    difference_in_actual_versus_predicted_change_percent = actual_percent_increase_in_usage - predicted_percent_increase_in_usage
-
-    @analysis_report.term = :shortterm
-    @analysis_report.add_book_mark_to_base_url('GasChange')
-
-    comparison_commentary = sprintf('This week your gas consumption was %.0f kWh/£%.0f (predicted %.0f kWh) ', actual_kwh_this_week, this_week_cost, predicted_kwh_this_week)
-    comparison_commentary += sprintf('compared with %.0f kWh/£%.0f (predicted %.0f kWh) last week.', actual_kwh_last_week, last_week_cost, predicted_kwh_last_week)
-
-    if difference_in_actual_versus_predicted_change_percent > MAX_CHANGE_IN_PERCENT
-      @analysis_report.summary = 'Your weekly gas consumption has increased more than expected'
-      text = comparison_commentary
-      cost = BenchmarkMetrics::GAS_PRICE * (actual_changein_kwh - predicted_changein_kwh)
-      text += sprintf('This has cost the school about £%.0f', cost)
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.rating = 2.0
-      @analysis_report.status = :poor
-    else
-      @analysis_report.summary = 'Your weekly gas consumption is good'
-      text = comparison_commentary
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    end
-
-    @analysis_report.add_detail(description1)
-  end
+  alias_method :analyse_private, :calculate
 end
