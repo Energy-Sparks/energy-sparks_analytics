@@ -45,6 +45,7 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
   }
 
   private def calculate(asof_date)
+    calculate_model(asof_date)
     start_date = [asof_date - 365, @school.aggregated_heat_meters.amr_data.start_date].max
     @months = ((asof_date - start_date) / 30.0).floor
     @annual_saving_1_C_change_kwh = @heating_model.kwh_saving_for_1_C_thermostat_reduction(start_date, asof_date)
@@ -56,30 +57,5 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = 1000.0 * heating_model.average_heating_b_kwh_per_1_C_per_day / floor_area
     @rating = @annual_saving_1_C_change_£ > MIN_REPORTED_SENSITIVITY_£ ? 5.0 : 10.0
   end
-
-  def analyse_private(asof_date)
-    calculate_model(asof_date)
-    calculate(asof_date)
-
-    # @analysis_report.add_book_mark_to_base_url('ThermostaticControl')
-    @analysis_report.term = :longterm
-
-    if @months < 12
-      @analysis_report.summary = 'Not enough (<1 year) historic gas data to provide advice on heating temperatures'
-      @analysis_report.status = :fail
-      @analysis_report.rating = 10.0
-    else
-      summary_text = 'Did you know you could save ' + FormatEnergyUnit.format(:£, @annual_saving_1_C_change_£) +
-                      ' if you reduced the temperature in the school by 1C?'
-      @analysis_report.summary = summary_text
-      text =  'Did you know you could save '
-      text += FormatEnergyUnit.format(:£, @annual_saving_1_C_change_£)
-      text += '(' + FormatEnergyUnit.format(:kwh, @annual_saving_1_C_change_kwh) + ') '
-      text += 'if you reduced the temperature in the school by 1C'
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.add_detail(description1)
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    end
-  end
+  alias_method :analyse_private, :calculate
 end
