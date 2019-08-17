@@ -70,6 +70,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   end
 
   private def calculate(asof_date)
+    calculate_model(asof_date)
     @weekend_dates = previous_weekend_dates(asof_date)
     @last_week_end_kwh = kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE)
     @last_weekend_cost_£ = gas_cost(@last_week_end_kwh)
@@ -83,31 +84,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url('WeekendGas')
   end
-
-  def analyse_private(asof_date)
-    calculate_model(asof_date)
-    calculate(asof_date)
-
-    usage_text = sprintf('%.0f kWh/£%.0f', @last_week_end_kwh, @last_weekend_cost_£)
-
-    @analysis_report.term = :shortterm
-    @analysis_report.add_book_mark_to_base_url('WeekendGas')
-
-    if @last_week_end_kwh > MAX_COST
-      @analysis_report.summary = 'Your weekend gas consumption was more than expected'
-      text = 'Your weekend gas consumption was more than expected at ' + usage_text
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.rating = 2.0
-      @analysis_report.status = :poor
-    else
-      @analysis_report.summary = 'Your weekend gas consumption was good'
-      text = 'Your weekend gas consumption was ' + usage_text
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    end
-    @analysis_report.add_detail(description1)
-  end
+  alias_method :analyse_private, :calculate
 
   private def previous_weekend_dates(asof_date)
     weekend_dates = []
