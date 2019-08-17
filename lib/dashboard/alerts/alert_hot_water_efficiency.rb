@@ -154,6 +154,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       @bookmark_url = add_book_mark_to_base_url('HotWaterEfficiency')
     end
   end
+  alias_method :analyse_private, :calculate
 
   private def heating_model_analysis(asof_date)
     meter_date_1_year_before = meter_date_one_year_before(@school.aggregated_heat_meters, asof_date)
@@ -173,36 +174,6 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       @heat_model_daily_holiday_hotwater_usage_kwh  = 0.0
       @heat_model_hot_water_efficiency              = 0.0
     end
-  end
-
-  def analyse_private(asof_date)
-    calculate(asof_date)
-
-    @analysis_report.add_book_mark_to_base_url('HotWaterEfficiency')
-    @analysis_report.term = :longterm
-
-    efficiency = @hot_water_model.nil? ? 0.0 : @hot_water_model.overall_efficiency
-    if @hot_water_model.nil?
-      @analysis_report.summary = 'The school doesnt appear to have hot water heated by gas'
-      text = 'Your hot water system appears to be only used for heating '
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    elsif efficiency < MIN_EFFICIENCY
-      @analysis_report.summary = 'Inefficient hot water system'
-      text = 'Your hot water system appears to be only '
-      text += sprintf('%.0f percent efficient.', efficiency * 100.0)
-      @analysis_report.rating = 10.0 * (efficiency / 0.85)
-      @analysis_report.status = :poor
-    else
-      @analysis_report.summary = 'Your hot water system is efficient'
-      text = 'Your hot water system appears is '
-      text += sprintf('%.0f percent efficient, which is very good.', efficiency * 100.0)
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    end
-
-    description1 = AlertDescriptionDetail.new(:text, text)
-    @analysis_report.add_detail(description1)
   end
 
   def calculate_hot_water_model(_as_of_date)
