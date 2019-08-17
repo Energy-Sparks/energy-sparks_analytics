@@ -168,6 +168,7 @@ class AlertHeatingOnOff < AlertGasModelBase
   end
 
   private def calculate(asof_date)
+    calculate_model(asof_date)
     @weather_forecast_table = []
     forecast = AlertAnalysisBase.test_mode ? cached_dark_sky_for_testing : dark_sky_forecast
     summary_forecast = convert_forecast_to_average_overnight_daytime_temperatures_cloud_cover(forecast)
@@ -201,6 +202,7 @@ class AlertHeatingOnOff < AlertGasModelBase
 
     @term = :shortterm
   end
+  alias_method :analyse_private, :calculate
 
   # TODO(PH, 27Apr2019) - doesn't take into account alerts running during the holidays
   private def heating_on_generally(asof_date, last_n_school_days_count)
@@ -319,37 +321,6 @@ class AlertHeatingOnOff < AlertGasModelBase
       1.0 => 0.0    # 0C adjustment at full cloud cover
     }
     Interpolate::Points.new(cloud_cover_adjustment).at(cloud_cover)
-  end
-
-  def analyse_private(asof_date)
-    calculate_model(asof_date)
-    calculate(asof_date)
-
-    heating_on = @heating_model.heating_on?(asof_date) # potential timing problem if AMR data not up to date
-
-    @analysis_report = AlertReport.new(:turnheatingonoff)
-    @analysis_report.add_book_mark_to_base_url('TurnHeatingOnOff')
-    @analysis_report.term = :shortterm
-
-    if heating_on && average_temperature_in_period > AVERAGE_TEMPERATURE_LIMIT
-      @analysis_report.summary = 'The average temperature over the next few days is high enough to consider switching the heating off'
-      text = 'The following temperatures are forecast: ' + dates_and_temperatures_display
-      @analysis_report.rating = 5.0
-      @analysis_report.status = :poor
-    elsif !heating_on && average_temperature_in_period < AVERAGE_TEMPERATURE_LIMIT
-      @analysis_report.summary = 'The average temperature over the next few days is low enough to consider switching the heating on'
-      text = 'The following temperatures are forecast: ' + dates_and_temperatures_display
-      @analysis_report.rating = 5.0
-      @analysis_report.status = :poor
-    else
-      @analysis_report.summary = 'No change is necessary to the heating system'
-      text = ''
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    end
-
-    description1 = AlertDescriptionDetail.new(:text, text)
-    @analysis_report.add_detail(description1)
   end
 
   def dates_and_temperatures_display
