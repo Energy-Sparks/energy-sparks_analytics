@@ -109,73 +109,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     @term = :shortterm
     @bookmark_url = add_book_mark_to_base_url('ElectricityChange')
   end
-
-  def default_content
-    %{
-      <% if signifcant_increase_in_electricity_consumption %>
-        <p>
-          Your electricity consumption on school days has increased from
-          <%= week_befores_consumption_£ %> (<%= week_befores_consumption_kwh %>) last week (week starting <%= beginning_of_last_week %>) to
-          <%= last_weeks_consumption_£ %> (<%= last_weeks_consumption_kwh %>) this week (week starting <%= beginning_of_week %>).
-          If this continues it will cost you an additional <%= one_year_saving_£ %> over the next year.
-        </p>
-      <% else %>
-        <p>
-          Your electricity consumption on school days last week was
-          <%= week_befores_consumption_£ %> (<%= week_befores_consumption_kwh %>) - (week starting <%= beginning_of_last_week %>).
-          Your electricity consumption on school days this week is
-          <%= last_weeks_consumption_£ %> (<%= last_weeks_consumption_kwh %>) - (week starting <%= beginning_of_week %>).
-        </p>
-      <% end %>
-    }.gsub(/^  /, '')
-  end
-
-  def default_summary
-    %{
-      <% if signifcant_increase_in_electricity_consumption %>
-        Your daily electricity consumption has increased.
-      <% else %>
-        Your daily electricity consumption is good
-      <% end %>
-    }.gsub(/^  /, '')
-  end
-
-  def analyse_private(asof_date)
-    calculate(asof_date)
-    days_in_week = 5
-    beginning_of_week, last_weeks_consumption = schoolday_energy_usage_over_period(asof_date, days_in_week)
-    beginning_of_last_week, week_befores_consumption = schoolday_energy_usage_over_period(beginning_of_week - 7, days_in_week)
-
-    @analysis_report.term = :shortterm
-    @analysis_report.add_book_mark_to_base_url('ElectricityChange')
-
-    if last_weeks_consumption > week_befores_consumption * MAXDAILYCHANGE
-      last_weeks_baseload = average_baseload(asof_date - 7, asof_date)
-      @analysis_report.summary = 'Your daily electricity consumption has increased'
-      text = sprintf('Your electricity consumption has increased from %.0f kWh ', week_befores_consumption)
-      text += sprintf('last week (5 school days following %s) ', beginning_of_last_week.strftime('%d %m'))
-      text += sprintf('to %.0f kWh ', last_weeks_consumption)
-      text += sprintf('this week (5 school days following %s) ', beginning_of_week.strftime('%d %m'))
-      text += sprintf('over the last year to %.1f last week. ', last_weeks_baseload)
-      cost = BenchmarkMetrics::ELECTRICITY_PRICE * 195.0 * (last_weeks_consumption - week_befores_consumption) / days_in_week
-      text += sprintf('If this continues it will costs you an additional £%.0f over the next year.', cost)
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.rating = 2.0
-      @analysis_report.status = :poor
-    else
-      @analysis_report.summary = 'Your daily electricity consumption is good'
-      text = sprintf('Your weekly school day electricity consumption was %.0f kWh (£%.0f) this week ',
-                     last_weeks_consumption,
-                     last_weeks_consumption * BenchmarkMetrics::ELECTRICITY_PRICE)
-      text += sprintf('compared with %.0f kWh (£%.0f) last week.',
-                      week_befores_consumption,
-                      week_befores_consumption * BenchmarkMetrics::ELECTRICITY_PRICE)
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.rating = 10.0
-      @analysis_report.status = :good
-    end
-    @analysis_report.add_detail(description1)
-  end
+  alias_method :analyse_private, :calculate
 
   private def schoolday_energy_usage_over_period(asof_date, school_days)
     list_of_school_days = last_n_school_days(asof_date, school_days)
