@@ -112,6 +112,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
     end
     total_saving_per_meter_£ = 0.0 if total_saving_per_meter_£ < 10.0 # loose floating point noise
     percent = non_differential_cost_£_per_year == 0.0 ? 0.0 : total_saving_per_meter_£ / total_meters_consumption_for_meters_where_savings_possible_£
+    percent = 0.0 if percent.nan?
     [meter_costs, total_saving_per_meter_£, percent]
   end
 

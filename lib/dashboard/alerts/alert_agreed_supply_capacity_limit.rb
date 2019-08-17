@@ -94,6 +94,7 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
       @rating = 10.0
     end
   end
+  alias_method :analyse_private, :calculate
 
   private def potential_annual_saving_£(peak_kw, asc_limit_kw)
     peak_plus_margin_kw = peak_kw * (1.0 + ASC_MARGIN_PERCENT)
@@ -162,70 +163,5 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
 
   private def aggregate_annual_saving_£(meters_with_limits_and_peak_values)
     meters_with_limits_and_peak_values.values.map { |info| info[:annual_saving_£] }.sum
-  end
-
-  def analyse_private(asof_date)
-    calculate(asof_date)
-
-    # temporary dummy text to maintain backwards compatibility
-    @analysis_report.term = :longterm
-    @analysis_report.summary, text =
-      if @rating < 10
-        [
-          %q( There might be an opportunity to save costs by reducing your Agreed Supply Capacity (ASC) limit ),
-          %q( 
-            <p>
-              <%= text_explaining_asc_meters_below_limit %>
-
-            </p>
-            <p>
-              Larger schools often have an Agreed Supply Capacity (ASC) limit, which is an extra charge
-              added to your electricity by the Nation Grid, paid through your electricity bill.
-              This is an agreed maximum peak power consumption for the school (KVA), and you pay the
-              charge to cover the National Grids investment in their distribution network which
-              ensures when you need the power they have enough capacity to deliver it.
-            </p>
-            <p>
-              However, often this is set far above the schools needs, so you are paying for the
-              additional capacity for no reason. An example might be that your school has an ASC
-              of 400 KVA, but your peak demand is only 100 KVA. Which means you are paying for an
-              additional 300 KVA on capacity you are unlikely to need, which might cost you
-              £3,000 per year. Getting this limit reduced which is simply a matter of asking your
-              energy company to reduce the limit (they may ask you to contact their DNO
-              (Distributed Network Operator)), might over 10 years save £30,000 for 20 minutes work.
-            </p>
-            <p>
-              To work out your peak used Energy Sparks searches through all yuor schools half hourly meter
-              readings and finds the largest reading in kW and compares it with your ASC limit KVA allowing 10%
-              margin. Unfortunately Energy Sparks doesnt have access to your peak KVA value but it should be
-              within 1% of the kW figure it calculates; you can ask your electricity supplier to provide
-              you with your historic monthly peak KVA values just to check Energy Sparks is accurate before
-              making a decision. DNO's normally advice setting the ASC limit to 10% above your maximum peak KVA.
-            <p>
-            <p>
-              If you are planning on signifcantly expanding the school in the near future and you expect
-              your peak electricity consumption to increase, consider whether a. to reduce the limit
-              or b. to reduce it less than the 10% suggestion b. if you get the limit wrong, you will be
-              penalised, the charges will be about 3 times your updated ASC charges for every month
-              you breach the limit. For all of the above your electricity supplier or DNO should be
-              able to provide you with good advice on what to do. You might also expect your peak
-              electricity consumption to decline over time as you install more energy efficient equipment
-              e.g. computers and LED lighting.
-            </p>
-
-
-            ).gsub(/^  /, '')
-          ]
-      else
-        [
-          %q( There are no opportunities for ASC limit saving. ),
-          ''
-        ]
-      end
-
-    description1 = AlertDescriptionDetail.new(:text, ERB.new(text).result(binding))
-    @analysis_report.add_detail(description1)
-    @analysis_report.rating = 10.0
-    @analysis_report.status = :good
   end
 end

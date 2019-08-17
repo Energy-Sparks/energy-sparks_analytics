@@ -16,6 +16,7 @@ class RunTests
     schools:                  ['.*'],
     source:                   :analytics_db,
     logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
+=begin
     reports:                  {
                                 charts: [
                                   :dashboard,
@@ -27,8 +28,9 @@ class RunTests
                                   compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
                                 }
                               },
-    alerts:                   {
-                                  alerts:   nil, # [ AlertHotWaterEfficiency ],
+=end   
+                              alerts:                   {
+                                  alerts:   [ AlertMeterASCLimit ],
                                   control:  {
                                               # print_alert_banner: true,
                                               # alerts_history: true,

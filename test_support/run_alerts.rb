@@ -26,18 +26,15 @@ class RunAlerts
     AlertHeatingOnNonSchoolDays                   => 'NonHeatingDays',
     AlertHeatingOnSchoolDays                      => 'HeatingDays',
     AlertThermostaticControl                      => 'Thermostatic',
+    AlertElectricityMeterConsolidationOpportunity => 'MeterConsolid',
+    AlertMeterASCLimit                            => 'ASCLimit',
+    AlertDifferentialTariffOpportunity            => 'DiffTariffOpp',
     AlertSchoolWeekComparisonElectricity          => 'SchWeekElectric',
     AlertPreviousHolidayComparisonElectricity     => 'PrevHolElectric',
     AlertPreviousYearHolidayComparisonElectricity => 'PrevYearHolElectric',
     AlertSchoolWeekComparisonGas                  => 'SchWeekGas',
     AlertPreviousHolidayComparisonGas             => 'PrevHolGas',
     AlertPreviousYearHolidayComparisonGas         => 'PrevYearHolGas',
-    AlertSchoolWeekComparisonElectricity          => 'SchWeekCompoElectric',
-    AlertPreviousHolidayComparisonElectricity     => 'PrevHolCompoElectric',
-    AlertPreviousYearHolidayComparisonElectricity => 'PrevYrHolCompoElectric',
-    AlertSchoolWeekComparisonGas                  => 'SchWeekCompoGas',
-    AlertPreviousHolidayComparisonGas             => 'PrevHolCompoGas',
-    AlertPreviousYearHolidayComparisonGas         => 'PrevYrHolCompoGas'
   }.freeze
 
   RESULT_CALCULATION_METHOD_CALLS = {
@@ -144,12 +141,14 @@ class RunAlerts
         [ 'Average overnight temperature', 'Average day time temperature', 'Cloud',
           'Potential Saving(-cost)', 'Potential saving(-cost)', 'forecast_date_time',
           'potential_saving_next_week_', 'next_weeks_predicted_consumption_',
-          'percent_saving_next_week'
+          'percent_saving_next_week', 'Heating recommendation', 'Type of day',
+          'days_between_forecast_and_last_meter_date'
         ].each do |match|
           data.delete_if { |key, _value| key.to_s.include?(match) }
         end
       elsif result_type == :front_end_template_data
         data.delete_if { |key, _value| key.to_s == :forecast_date_time }
+        data.delete_if { |key, _value| key.to_s == :days_between_forecast_and_last_meter_date }
       elsif result_type == :front_end_template_table_data
         data.delete_if { |key, _value| key.to_s.include?('weather_forecast_table') }
       end
