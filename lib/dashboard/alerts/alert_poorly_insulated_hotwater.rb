@@ -81,38 +81,6 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     @annual_hotwater_poor_insulation_heatloss_estimate_percent = savings_percent
   end
 
-  def default_content
-    %{
-      <% if !enough_data %>
-        <p>
-          There is less than 1 years data - so Energy Sparks is unable to perform this calculation.
-        <p>
-      <% else %>
-        <p>
-          Energy Sparks has analysed the sensitivity of your hot water consumption to outside
-          temperatures and estimates <%= annual_hotwater_poor_insulation_heatloss_estimate_£ %>
-          (<%= annual_hotwater_poor_insulation_heatloss_estimate_kwh %>)
-          each year is lost in your hot water system as temperatures get colder
-          likely because of poor insulation.
-          This is about <%= annual_hotwater_poor_insulation_heatloss_estimate_percent %>
-          of your annual hot water consumption.
-        </p>
-      <% end %>
-    }.gsub(/^  /, '')
-  end
-
-  def default_summary
-    %{
-      <p>
-        <% if !enough_data %>
-          There is less than 1 years data - so Energy Sparks is unable to perform this calculation.
-        <% else %>
-          Advice the on the insulation of your hot water system
-        <% end %>
-      </p>
-    }.gsub(/^  /, '')
-  end
-
   private def calculate(asof_date)
     calculate_model(asof_date)
     calculate_annual_hotwater_poor_insulation_heatloss_estimate(asof_date) if @annual_hotwater_poor_insulation_heatloss_estimate_kwh.nil?
@@ -121,28 +89,5 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     @term = :longterm
     @bookmark_url = nil
   end
-
-  def analyse_private(asof_date)
-    calculate(asof_date)
-
-    @analysis_report.term = term
-    @analysis_report.status = status
-    @analysis_report.rating = rating
-
-    if !enough_data
-      @analysis_report.summary = 'Not enough (<1 year) historic gas data to provide advice on hot water insulation losses'
-    else
-      @analysis_report.summary = 'Advice the insulation of your hot water system'
-      text =  'Energy Sparks has analysed the sensitivity of your hot water consumption to outside '
-      text += 'temperatures and estimates '
-      text += FormatEnergyUnit.format(:£, @annual_hotwater_poor_insulation_heatloss_estimate_£)
-      text += '(' + FormatEnergyUnit.format(:kwh, @annual_hotwater_poor_insulation_heatloss_estimate_kwh) + ') '
-      text += 'each year is lost in your hot water system as temperatures get colder '
-      text += ' likely because of poor insulation. '
-      text += sprintf('This is about %.0f percent of your annual hot water consumption.', @annual_hotwater_poor_insulation_heatloss_estimate_percent * 100.0)
-      description1 = AlertDescriptionDetail.new(:text, text)
-      @analysis_report.add_detail(description1)
-      # @analysis_report = nil
-    end
-  end
+  alias_method :analyse_private, :calculate
 end

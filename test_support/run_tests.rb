@@ -30,7 +30,7 @@ class RunTests
                               },
 =end   
                               alerts:                   {
-                                  alerts:   [ AlertOutOfHoursGasUsage ],
+                                  alerts:   [ AlertHotWaterInsulationAdvice ],
                                   control:  {
                                               # print_alert_banner: true,
                                               # alerts_history: true,
