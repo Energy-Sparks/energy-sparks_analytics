@@ -85,6 +85,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
     @one_year_saving_£ = Range.new(@total_potential_savings_£, @total_potential_savings_£)
     @rating = calculate_rating_from_range(100.0, 1000.0, @total_potential_savings_£)
   end
+  alias_method :analyse_private, :calculate
 
   private def analyse_all_meters(asof_date)
     meter_costs = {}
@@ -190,54 +191,5 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
     scale_factor = scale_up_to_one_year(meter, asof_date) # scale up to a year if < 1 year data
 
     [total_differential_tariff_cost * scale_factor, total_daytime_cost * scale_factor]
-  end
-
-  def analyse_private(asof_date)
-    calculate(asof_date)
-
-    # temporary dummy text to maintain backwards compatibility
-    @analysis_report.term = :longterm
-    @analysis_report.summary, text =
-      if @rating < 10
-        [
-          %q( There might be an opportunity to save costs by switching between a non-differential and differential (economy 7) tariff ),
-          %q( 
-            <p>
-              Differential or economy 7 tariffs, charge less for electricity between midnight and 6:30am (8p/kWh),
-              and slightly more for the rest of the day (13p/kWh), compared with normal tariffs which charge
-              the same rate all day (12p/kWh). If you have a relatively high overnight usage, for example if
-              you have storage heaters a differential tariff might reduce your electricity costs.
-            </p>
-            <p>
-              Energy Sparks looks at your daytime and nightime usage and works out using approximate
-              tariffs (13p/12p/8p) whether it might be beneficial for your school to switch to a differential
-              tariff, or from a non-differential tariff, and
-              presents these calculations for each of your electricity meters below.
-            </p>
-            <p>
-              If Energy Sparks recommends that it might be beneficial to switch between differential tariff
-              types you should get in contact with your supplier and ask for them to accurately estimate
-              the cost benefits of switching. Given you have a smart or advanced meter providing half hourly
-              meter readings, you shouldn't need a new meter.
-            </p>
-            <p>
-              In total Energy Sparks estimates you could save <%= FormatEnergyUnit.format(:£, total_potential_savings_£) %>
-              or <%= FormatEnergyUnit.format(:percent, total_potential_savings_percent) %> of your annual electricity bill
-              by switching the meter(s) below. However, this doesnt include any additional standing charge you might have
-              to pay, which you will need to ask your supplier about.
-            </p>
-            ).gsub(/^  /, '')
-          ]
-      else
-        [
-          %q( There are probably no opportunities for switching tariffs. ),
-          ''
-        ]
-      end
-
-    description1 = AlertDescriptionDetail.new(:text, ERB.new(text).result(binding))
-    @analysis_report.add_detail(description1)
-    @analysis_report.rating = 10.0
-    @analysis_report.status = :good
   end
 end
