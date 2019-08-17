@@ -30,7 +30,7 @@ class RunTests
                               },
 =end   
                               alerts:                   {
-                                  alerts:   [ AlertElectricityBaseloadVersusBenchmark ],
+                                  alerts:   [ AlertGasAnnualVersusBenchmark ],
                                   control:  {
                                               # print_alert_banner: true,
                                               # alerts_history: true,
