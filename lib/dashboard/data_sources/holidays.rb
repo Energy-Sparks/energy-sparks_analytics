@@ -36,8 +36,8 @@ end
 class HolidayData < Array
   include Logging
 
-  def add(name, start_date, end_date)
-    self.push(Holiday.new(nil, name, start_date, end_date, nil))
+  def add(holiday)
+    self.push(holiday)
   end
 end
 
@@ -57,7 +57,7 @@ class HolidayLoader
       title = reading[0]
       start_date = Date.parse reading[1]
       end_date = Date.parse reading[2]
-      holidays.add(title, start_date, end_date)
+      holidays.add(Holiday.new(:school_holiday, title, start_date, end_date, nil))
       count += 1
     end
     logger.debug "Read #{count} rows"
@@ -72,6 +72,7 @@ class Holidays
   def initialize(holiday_data)
     @holidays = holiday_data
     set_holiday_types_and_academic_years
+    remove_non_holidays
     @cached_holiday_lookup = {} # for speed,
   end
 
@@ -81,6 +82,10 @@ class Holidays
     set_holiday_types
     set_academic_years
     check_consistency
+  end
+
+  private def remove_non_holidays
+    @holidays.reject! { |holiday| %i[bank_holiday inset_day_in_school inset_day_out_of_school].include?(holiday.type) } # not :school_holiday
   end
 
   private def set_holiday_types
