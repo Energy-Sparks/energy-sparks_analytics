@@ -281,7 +281,7 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
     return period if period.start_date >= aggregate_meter.amr_data.start_date && period.end_date <= aggregate_meter.amr_data.end_date
     start_date = [period.start_date, aggregate_meter.amr_data.start_date].max
     end_date = [period.end_date, aggregate_meter.amr_data.end_date].min
-    SchoolDatePeriod.new(period.type, period.title + ' truncated to available meter data', start_date, end_date) if end_date >= start_date
+    SchoolDatePeriod.new(period.type, "#{period.title} truncated to available meter data", start_date, end_date) if end_date >= start_date
     nil
   end
 
