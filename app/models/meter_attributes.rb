@@ -275,6 +275,7 @@ class MeterAttributes
       }
     },
     50974602 => {
+      function: [ :kitchen_only ],
       meter_corrections: [
         {
           rescale_amr_data: {
