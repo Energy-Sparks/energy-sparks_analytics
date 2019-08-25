@@ -64,6 +64,10 @@ class ChartManager
     }
   end
 
+  def drilldown_available?(chart_config_original)
+    drilldown_available(chart_config_original)
+  end
+
   def drilldown_available(chart_config_original)
     chart_config = resolve_chart_inheritance(chart_config_original)
     !x_axis_drilldown(chart_config[:x_axis]).nil?

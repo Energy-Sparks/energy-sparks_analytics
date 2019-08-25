@@ -140,7 +140,7 @@ class ChartManagerTimescaleManipulation
     timescales
   end
 
-  private def timescale_description
+  public def timescale_description
     time_scale_types = {
       year:           'year',
       academicyear:   'academic year',
@@ -163,6 +163,8 @@ class ChartManagerTimescaleManipulation
     timescale = timescales[0]
     if time_scale_types.key?(timescale)
       time_scale_types[timescale]
+    elsif timescale.is_a?(Hash) && !timescale.empty? && time_scale_types.key?(timescale.keys[0])
+      time_scale_types[timescale.keys[0]]
     else
       'period'
     end
@@ -250,9 +252,9 @@ class ChartManagerTimescaleManipulationMove < ChartManagerTimescaleManipulation
       new_period_number = calculate_new_period_number(period_number, factor, available_periods)
       { period_type => new_period_number }
     elsif period_number.is_a?(Range)
-      new_start_period_number = calculate_new_period_number(period_number.min, factor, available_periods)
-      new_end_period_number = calculate_new_period_number(period_number.max, factor, available_periods)
-      { period_type => Range.new(new_start_period_number, new_end_period_number) }
+      new_start_period_number = calculate_new_period_number(period_number.first, factor, available_periods)
+      new_end_period_number = calculate_new_period_number(period_number.last, factor, available_periods)
+      { period_type => Range.new(new_start_period_number, new_end_period_number, period_number.exclude_end?) }
     else
       raise EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")
     end
@@ -282,11 +284,11 @@ class ChartManagerTimescaleManipulationExtend < ChartManagerTimescaleManipulatio
     elsif period_number.is_a?(Range)
       new_range = nil
       if factor > 0
-        new_end_period_number = calculate_new_period_number(period_number.max, factor, available_periods)
-        new_range = Range.new(period_number.min, new_end_period_number)
+        new_end_period_number = calculate_new_period_number(period_number.last, factor, available_periods)
+        new_range = Range.new(period_number.first, new_end_period_number, period_number.exclude_end?)
       else
-        new_start_period_number = calculate_new_period_number(period_number.min, factor, available_periods)
-        new_range = Range.new(new_start_period_number, period_number.max)
+        new_start_period_number = calculate_new_period_number(period_number.first, factor, available_periods)
+        new_range = Range.new(new_start_period_number, period_number.last, period_number.exclude_end?)
       end
       {period_type => new_range}
     else
@@ -319,11 +321,11 @@ class ChartManagerTimescaleManipulationContract < ChartManagerTimescaleManipulat
     elsif period_number.is_a?(Range)
       new_range = nil
       if factor > 0
-        new_end_period_number = calculate_new_period_number(period_number.max, -1 * factor, available_periods)
-        new_range = Range.new(period_number.min, new_end_period_number)
+        new_end_period_number = calculate_new_period_number(period_number.last, -1 * factor, available_periods)
+        new_range = Range.new(period_number.first, new_end_period_number, period_number.exclude_end?)
       else
-        new_start_period_number = calculate_new_period_number(period_number.min, -1 * factor, available_periods)
-        new_range = Range.new(new_start_period_number, period_number.max)
+        new_start_period_number = calculate_new_period_number(period_number.first, -1 * factor, available_periods)
+        new_range = Range.new(new_start_period_number, period_number.last, period_number.exclude_end?)
       end
       if new_range.first == new_range.last
         if new_range.first == 0
@@ -377,9 +379,9 @@ class ChartManagerTimescaleManipulationCompare < ChartManagerTimescaleManipulati
       new_period_number = calculate_new_period_number(period_number, factor, available_periods)
       {period_type => new_period_number}
     elsif period_number.is_a?(Range)
-      new_start_period_number = calculate_new_period_number(period_number.min, period_number.size * factor, available_periods)
-      new_end_period_number = calculate_new_period_number(period_number.max, period_number.size * factor, available_periods)
-      new_range = Range.new(new_start_period_number, new_end_period_number)
+      new_start_period_number = calculate_new_period_number(period_number.first, period_number.size * factor, available_periods)
+      new_end_period_number = calculate_new_period_number(period_number.last, period_number.size * factor, available_periods)
+      new_range = Range.new(new_start_period_number, new_end_period_number, period_number.exclude_end?)
       {period_type => new_range}
     else
       raise EnergySparksUnexpectedStateException.new("Unsupported period number #{period_number} type")

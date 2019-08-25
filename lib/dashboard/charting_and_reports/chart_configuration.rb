@@ -240,6 +240,11 @@ class ChartManager
       meter_definition:   :allelectricity,
       series_breakdown:   :submeter
     },
+    solar_pv_last_7_days_timescale_test: {
+      inherits_from:    :solar_pv_last_7_days_by_submeter,
+      series_breakdown: :none,
+      chart1_type:      :line
+    },
     group_by_week_electricity_test_range: {
       inherits_from:    :group_by_week_electricity,
       name:             'By Day: Electricity Range Test',

@@ -18,6 +18,7 @@ class RunTests
     schools:                  ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
     source:                   :analytics_db,
     logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
+    drilldown: true,
     no_reports:                  {
                                 charts: [
                                   :dashboard,
@@ -30,7 +31,7 @@ class RunTests
                                 }
                               }, 
 
-    alerts:                   {
+    no_alerts:                   {
                                   alerts:   nil, # [ AlertOutOfHoursElectricityUsage ],
                                   control:  {
                                               # print_alert_banner: true,
@@ -83,6 +84,10 @@ class RunTests
         run_reports(configuration[:charts], configuration[:control])
       when :alerts
         run_alerts(configuration[:alerts], configuration[:control])
+      when :drilldown
+        run_drilldown
+      when :timescales
+        run_timescales
       else
         configure_log_file(configuration) if component.to_s.include?('logger')
       end
@@ -135,6 +140,52 @@ class RunTests
       failed_charts += charts.failed_charts
     end
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
+  end
+
+  def run_drilldown
+    @school_list.each do |school_name|
+      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- drilldown.xlsx'
+      school = load_school(school_name)
+      chart_manager = ChartManager.new(school)
+      chart_name = :group_by_week_electricity
+      chart_config = chart_manager.get_chart_config(chart_name)
+      next unless chart_manager.drilldown_available?(chart_config)
+      result = chart_manager.run_chart(chart_config, chart_name)
+      fourth_column_in_chart = result[:x_axis_ranges][3]
+      new_chart_name, new_chart_config = chart_manager.drilldown(chart_name, chart_config, nil, fourth_column_in_chart)
+      new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
+      excel = ExcelCharts.new(excel_filename)
+      excel.add_charts('Test', [result, new_chart_results])
+      excel.close
+    end
+  end
+
+  def run_timescales
+    @school_list.each do |school_name|
+      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- timescale shift.xlsx'
+      school = load_school(school_name)
+      chart_manager = ChartManager.new(school)
+      chart_name = :solar_pv_last_7_days_timescale_test
+      chart_config = chart_manager.get_chart_config(chart_name)
+      result = chart_manager.run_chart(chart_config, chart_name)
+
+      chart_list = [result]
+
+      %i[move extend contract compare].each do |operation_type|
+        manipulator = ChartManagerTimescaleManipulation.factory(operation_type, chart_config, school)
+        next unless manipulator.chart_suitable_for_timescale_manipulation?
+        puts "Display button: #{operation_type} forward 1 #{manipulator.timescale_description}" if manipulator.can_go_forward_in_time_one_period?
+        puts "Display button: #{operation_type} back 1 #{manipulator.timescale_description}"    if manipulator.can_go_back_in_time_one_period?
+        next unless manipulator.enough_data?(-1) # shouldn't be necessary if conform to above button display
+        new_chart_config = manipulator.adjust_timescale(-1) # go back one period
+        new_chart_results = chart_manager.run_chart(new_chart_config, chart_name)
+        chart_list.push(new_chart_results)
+      end
+
+      excel = ExcelCharts.new(excel_filename)
+      excel.add_charts('Test', chart_list)
+      excel.close
+    end
   end
 
   def run_alerts(alert_list, control)
