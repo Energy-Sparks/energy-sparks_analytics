@@ -108,8 +108,12 @@ chart_list_for_page.each do |dashboard_chart_name|
   reports.worksheet_charts[worksheet_name] = chart_results
 end
 
-reports.worksheet_charts.each_key do |name|
+reports.worksheet_charts.each do |name, charts|
   puts "Workheet>>>> name #{name}"
+  if charts.any?(&:nil?)
+    puts "Got #{charts.count(&:nil?)} nil charts out of #{charts.length}"
+    reports.worksheet_charts[name] = charts.compact
+  end
 end
 
 reports.save_excel_and_html

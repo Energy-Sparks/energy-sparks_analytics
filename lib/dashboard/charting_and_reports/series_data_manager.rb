@@ -327,7 +327,7 @@ class SeriesDataManager
   end
 
   # implemented for aggregator post aggregaton trend line calculation
-  # perhaps shou;d be better integrated into SeriesDataManager getter methods?
+  # perhaps should be better integrated into SeriesDataManager getter methods?
   def model_type?(date)
     heating_model.model_type?(date)
   end
@@ -343,9 +343,9 @@ class SeriesDataManager
       case breakdown_type
       when :submeter;         breakdown.merge!(submeter_datetime_breakdown(meter, date, halfhour_index))
       when :meter;            breakdown.merge!(breakdown_to_meter_level(date, date, halfhour_index))
-      when :fuel;             breakdown.merge!(fuel_breakdown_halfhour(date, halfhour_index))
+      when :fuel;             breakdown.merge!(fuel_breakdown_halfhour(date, halfhour_index, @meters[0], @meters[1]))
       when :daytype;          breakdown.merge!(daytype_breakdown_halfhour(date, halfhour_index, meter))
-      when :accounting_cost;  breakdown.merge!(breakdown_to_bill_components_halfhour(date, halfhour_index, meter))
+      when :accounting_cost;  breakdown.merge!(breakdown_to_bill_components_halfhour(date, halfhour_index, meter))     
       else;                   breakdown[SeriesNames::NONE] = amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2)
       end
     end
@@ -729,7 +729,7 @@ private
     fuel_data
   end
 
-  def fuel_breakdown_halfhour(date, halfhour_index)
+  def fuel_breakdown_halfhour(date, halfhour_index, electricity_meter, gas_meter)
     electric_val = electricity_meter.nil? ? 0.0 : amr_data_by_half_hour(electricity_meter, date, halfhour_index, kwh_cost_or_co2)
     gas_val = gas_meter.nil? ? 0.0 : amr_data_by_half_hour(gas_meter, date, halfhour_index, kwh_cost_or_co2)
 

@@ -8,7 +8,6 @@ require 'hashdiff'
 class RunAlerts
   ALERT_TO_EXCELTAB_MAP = { # classname => excel worksheet tab name
     AlertWeekendGasConsumptionShortTerm           => 'WeekendGas',
-    AlertChangeInDailyElectricityShortTerm        => 'ChangeInElectric',
     AlertHeatingComingOnTooEarly                  => 'HeatingTooEarly',
     AlertChangeInDailyElectricityShortTerm        => 'LastWeekElectric',
     AlertChangeInDailyGasShortTerm                => 'LastWeekGas',
@@ -36,6 +35,7 @@ class RunAlerts
     AlertSchoolWeekComparisonGas                  => 'SchWeekGas',
     AlertPreviousHolidayComparisonGas             => 'PrevHolGas',
     AlertPreviousYearHolidayComparisonGas         => 'PrevYearHolGas',
+    AlertAdditionalPrioritisationData             => 'PrioritisationData'
   }.freeze
 
   RESULT_CALCULATION_METHOD_CALLS = {
@@ -60,8 +60,19 @@ class RunAlerts
 
   def initialize(school)
     @school = school
-    @alert_calculation_time = {}
+    @@alert_calculation_time ||= Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
+    @@alert_prioritises ||= Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
     @school_calculation_time = 0.0
+  end
+
+  def self.convert_asof_dates(date_spec)
+    if date_spec.is_a?(Date)
+      [date_spec]
+    elsif date_spec.is_a?(Range)
+      date_spec.to_a
+    elsif date_spec.is_a?(Array)
+      date_spec
+    end
   end
 
   def print_method(obj, method, name, arg = nil, use_puts = false)
@@ -136,7 +147,52 @@ class RunAlerts
     end
   end
 
+  def save_priority_variables(alert_class, alert, _control, asof_date)
+    priorities = alert_class.priority_template_variables
+    unless priorities.empty?
+      priorities.each do |method, definition|
+        next unless alert.respond_to?(method)
+        alert_code = AlertAnalysisBase.alert_short_code(alert_class)
+        field = definition[:priority_code]
+        @@alert_prioritises[@school.name][asof_date.strftime('%Y-%m-%d')][alert_class.to_s][method] = alert.public_send(method)
+        data = [
+          @school.name,
+          AlertAnalysisBase.alert_short_code(alert_class),
+          asof_date.strftime('%Y-%m-%d'),
+          definition[:priority_code],
+          alert.public_send(method)
+        ].join(',')
+      end
+    end
+  end
+
+  def self.save_priority_data(control)
+    if !control.nil? && !@@alert_prioritises.empty?
+      # get unique list of alert classes and their data, for header
+      unique_class_data_map =  @@alert_prioritises.map { |_school_names, dates| dates.map { |date, info| info.map { |class_name, method| [class_name, method.keys] } } }.flatten(2).uniq.to_h
+      data_fields = unique_class_data_map.map { |alert_class, fields| fields.map { |field| alert_class + ':' + field.to_s } }.flatten
+
+      puts "Saving results to #{control[:filename]}"
+      File.open(control[:filename], 'w') do |f|
+        f.puts ['school name', 'date', data_fields].flatten.join(',')
+        @@alert_prioritises.each do |school_name, dates|
+          dates.each do |date, alert_types|
+            data = Array.new(data_fields.length)
+            alert_types.each do |alert_class, fields|
+              fields.each do |field, value|
+                key = alert_class + ':' + field.to_s
+                data[data_fields.index(key)] = value # populate potentially sparse data
+              end
+            end
+            f.puts [school_name, date, data].flatten.join(',')
+          end
+        end
+      end
+    end
+  end
+
   def remove_volatile_data(data, alert_type, result_type)
+    return data if data.nil?
     if alert_type == AlertHeatingOnOff # .is_? doesn't seem to work
       if result_type == :raw_variables_for_saving || result_type == :front_end_template_data
         [ 'Average overnight temperature', 'Average day time temperature', 'Cloud',
@@ -170,14 +226,11 @@ class RunAlerts
     charts.run(chart_list, control)
   end
 
-  def run_alerts(alerts, control)
-    asof_date = control[:asof_date]
-
+  def run_alerts(alerts, control, asof_date)
     alerts = ALERT_TO_EXCELTAB_MAP.keys if alerts.nil?
 
     print_banner(@school.name, 0) unless control[:print_school_name_banner].nil?
-
-    # reports = ReportConfigSupport.new
+    print_banner("asof date: #{asof_date.strftime('%a %d-%m-%Y')}", 0)
 
     failed_alerts = []
  
@@ -201,23 +254,33 @@ class RunAlerts
       alerts.each do |alert_class|
 
         alert = alert_class.new(school)
+
+        unless alert.valid_alert?
+          puts "#{alert_class}: Invalid alert before analysis"
+          next
+        end
+
         next unless alert.valid_alert?
         print_banner(alert.class.name, 1) unless control[:print_alert_banner].nil?
-
         bm2 = Benchmark.realtime {
           alert.analyse(asof_date, true)
-          next unless alert.make_available_to_users?
+          unless alert.make_available_to_users?
+            puts "#{alert_class}: Not make_available_to_users after analysis"
+            next
+          end
           raw_data = alert.raw_variables_for_saving
 
           calculated_results[asof_date].merge!(raw_data)
 
           print_all_results(alert_class, alert, control) if control.key?(:outputs)
 
+          save_priority_variables(alert_class, alert, control, asof_date) if control.key?(:save_priority_variables)
+
           save_and_compare(alert_class, alert, control, asof_date) if control.key?(:save_and_compare)
 
           failed_alerts.push(sprintf('%-32.32s: %s', @school.name, alert.class.name)) unless alert.calculation_worked
         }
-        (@alert_calculation_time[alert.class.name] ||= []).push(bm2)
+        @@alert_calculation_time[@school.name][asof_date][alert.class.name] = bm2
 
         if false && generate_charts
           excel_tab_name = alerts_to_test[alert_class]
@@ -231,6 +294,71 @@ class RunAlerts
       excel_filename = File.join(File.dirname(__FILE__), '../TestResults/Alerts/Charts/') + school.name + ' alert charts ' + asof_date.strftime('%d%b%Y') + '.xlsx'
       puts "Writing to #{excel_filename}"
       excel_charts.write_excel(excel_filename)
+    end
+  end
+
+  def self.print_calculation_time(benchmark_information)
+    benchmark_information.each do |information_required|
+      case information_required
+      when :school
+        print_school_calculation_time
+      when :alert
+        print_alert_calculation_time
+      when :detail
+        print_detailed_calculation_time
+      else
+        raise StandardError, "Unknown benchmark print type #{information_required}"
+      end
+    end
+  end
+
+  def self.print_detailed_calculation_time
+    @@alert_calculation_time.each do |school_name, dates|
+      puts school_name
+      dates.each do |date, alert_types|
+        puts "    #{date.strftime('%a %d-%m-%Y')}"
+        alert_types.each do |alert_type, time|
+          puts sprintf("        %-45.45s %1.3f", alert_type.to_s, time)
+        end
+      end
+    end
+  end
+
+  def self.average_school_calculation_time(aggregate_by_school = true)
+    school_calc_times = Hash.new { |hash, key| hash[key] = Hash.new([]) }
+    @@alert_calculation_time.each do |school_name, dates|
+      dates.each do |date, alert_types|
+        alert_types.each do |alert_type, time|
+          if aggregate_by_school
+            hash_to_hash_to_array_push(school_calc_times, school_name, date, time)
+          else
+            hash_to_hash_to_array_push(school_calc_times, alert_type, date, time)
+          end
+        end
+      end
+    end
+    school_calc_time_per_date = Hash.new { |hash, key| hash[key] = Hash.new([]) }
+    school_calc_times.each do |type, dates|
+      dates.each do |date, alert_calc_times|
+        school_calc_time_per_date[type][date] = alert_calc_times.sum
+      end
+    end
+    school_calc_time_per_date.map { |type, dates| [type, dates.values.sum / dates.values.length] }.to_h
+  end
+
+  def self.hash_to_hash_to_array_push(hash, k1, k2, v)
+    (hash[k1].key?(k2) ? hash[k1][k2] : (hash[k1][k2] = []) ).push(v)
+  end
+
+  def self.print_school_calculation_time
+    average_school_calculation_time.each do |school_name, average|
+      puts sprintf('%-25.25s %1.3f', school_name, average)
+    end
+  end
+
+  def self.print_alert_calculation_time
+    average_school_calculation_time(false).each do |school_name, average|
+      puts sprintf('%-25.25s %1.3f', school_name, average)
     end
   end
 

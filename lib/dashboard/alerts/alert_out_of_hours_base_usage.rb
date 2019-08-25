@@ -15,7 +15,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£, :out_of_hours_£
   attr_reader :daytype_breakdown_table
   attr_reader :percent_improvement_to_exemplar, :potential_saving_kwh, :potential_saving_£
-  attr_reader :one_year_saving_£, :total_annual_£
+  attr_reader :total_annual_£
 
   def initialize(school, fuel, benchmark_out_of_hours_percent,
                  fuel_cost, alert_type, bookmark, meter_definition,
@@ -30,7 +30,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @meter_definition = meter_definition
     @chart_results = nil
     @table_results = nil
-    @relevance = :never_relevant if @relevance != :never_relevant && aggregate_meter.amr_data.days_valid_data > 364
+    @relevance = :never_relevant if @relevance != :never_relevant && aggregate_meter.amr_data.days_valid_data < 364
   end
 
   def self.static_template_variables(fuel)
@@ -152,7 +152,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @potential_saving_kwh = @total_annual_kwh * @percent_improvement_to_exemplar
     @potential_saving_£ = @potential_saving_kwh * @fuel_cost
 
-    @one_year_saving_£ = Range.new(@potential_saving_£, @potential_saving_£)
+    set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil)
 
     @rating = calculate_rating_from_range(good_out_of_hours_use_percent, bad_out_of_hours_use_percent, out_of_hours_percent)
 

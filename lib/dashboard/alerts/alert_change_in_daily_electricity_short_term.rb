@@ -8,7 +8,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
   attr_reader :last_weeks_consumption_£, :week_befores_consumption_£
   attr_reader :signifcant_increase_in_electricity_consumption
   attr_reader :beginning_of_week, :beginning_of_last_week
-  attr_reader :one_year_saving_£, :percent_change_in_consumption
+  attr_reader :percent_change_in_consumption
 
   def initialize(school)
     super(school, :changeinelectricityconsumption)
@@ -102,7 +102,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     @percent_change_in_consumption = ((@last_weeks_consumption_kwh - @week_befores_consumption_kwh) / @week_befores_consumption_kwh)
 
     saving_£ = 195.0 * (@last_weeks_consumption_£ - @week_befores_consumption_£) / days_in_week
-    @one_year_saving_£ = Range.new(saving_£, saving_£)
+    set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil)
 
     @rating = calculate_rating_from_range(-0.05, 0.15, @percent_change_in_consumption)
     @status = @signifcant_increase_in_electricity_consumption ? :bad : :good

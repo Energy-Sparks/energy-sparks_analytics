@@ -15,8 +15,6 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :one_year_electricity_per_pupil_kwh, :one_year_electricity_per_pupil_£
   attr_reader :one_year_electricity_per_floor_area_kwh, :one_year_electricity_per_floor_area_£
 
-  attr_reader :one_year_saving_£
-
   def initialize(school)
     super(school, :annualelectricitybenchmark)
   end
@@ -132,7 +130,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @one_year_electricity_per_floor_area_kwh  = @last_year_kwh / floor_area
     @one_year_electricity_per_floor_area_£    = @last_year_£ / floor_area
 
-    @one_year_saving_£ = Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£)
+    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), capital_cost)
 
     # rating: benchmark value = 4.0, exemplar = 10.0
     percent_from_benchmark_to_exemplar = (@last_year_kwh - @one_year_benchmark_by_pupil_kwh) / (@one_year_exemplar_by_pupil_kwh - @one_year_benchmark_by_pupil_kwh)

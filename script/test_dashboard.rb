@@ -8,7 +8,26 @@ require './script/report_config_support.rb'
 
 puts
 
-RunTests.new.run
+script = {
+  logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+  # ruby_profiler:            true,
+  schools:                  ['.*'], # ['Round.*'],
+  source:                   :analytics_db,
+  logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
+  reports:                  {
+                              charts: [
+                                :dashboard
+                                # adhoc_worksheet: { name: 'Test', charts: %i[last_2_weeks_gas last_2_weeks_gas_degreedays] }
+                              ],
+                              control: {
+                                display_average_calculation_rate: true,
+                                report_failed_charts:   :summary, # :detailed
+                                compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
+                              }
+                            }, 
+}
+
+RunTests.new(script).run
 
 exit
 =begin

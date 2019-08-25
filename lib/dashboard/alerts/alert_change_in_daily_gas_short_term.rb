@@ -14,7 +14,6 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
   attr_reader :predicted_this_week_cost, :predicted_last_week_cost, :predicted_change_in_cost
   attr_reader :signficant_increase_in_gas_consumption
   attr_reader :beginning_of_week, :beginning_of_last_week
-  attr_reader :one_year_saving_£
 
   def initialize(school)
     super(school, :changeingasconsumption)
@@ -145,7 +144,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     heating_weeks = @heating_model.number_of_heating_days / days_in_week
     saving_£ = heating_weeks * (@predicted_this_week_cost - @predicted_last_week_cost)
     saving_£ = 0.0 if saving_£.nan?
-    @one_year_saving_£ = Range.new(saving_£, saving_£)
+    set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil)
 
     # PH, 16Aug2019 - as this alert is being deprecated, make more fault tolerant: St Louis school only
     @difference_in_actual_versus_predicted_change_percent = 0.0 if @difference_in_actual_versus_predicted_change_percent.nan?

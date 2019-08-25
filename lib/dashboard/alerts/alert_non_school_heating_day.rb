@@ -91,7 +91,7 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
     @unoccupied_above_frost_£ = @one_year_saving_kwh * BenchmarkMetrics::GAS_PRICE
     @total_on_unoccupied_days_£ = @total_kwh_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE
 
-    @one_year_saving_£ = Range.new(@unoccupied_above_frost_£ , @unoccupied_above_frost_£ )
+    set_savings_capital_costs_payback(Range.new(@unoccupied_above_frost_£ , @unoccupied_above_frost_£), nil)
 
     @rating = statistics.non_school_day_heating_rating_out_of_10(days)
 

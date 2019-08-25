@@ -48,14 +48,6 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
     },
   }
 
-  def one_year_saving_£
-    @one_year_saving_£
-  end
-
-  def ten_year_saving_£
-    super
-  end
-
   protected def live_meters
     return @live_meters unless @live_meters.nil?
     max_combined_date = aggregate_meter.amr_data.end_date
@@ -82,7 +74,8 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
 
     @differential_tariff_opportunity_table, _total_saving = calculate_differential_tariff_opportunity_table(saving_info_by_meter)
 
-    @one_year_saving_£ = Range.new(@total_potential_savings_£, @total_potential_savings_£)
+    set_savings_capital_costs_payback(Range.new(@total_potential_savings_£, @total_potential_savings_£), nil)
+
     @rating = calculate_rating_from_range(100.0, 1000.0, @total_potential_savings_£)
   end
   alias_method :analyse_private, :calculate

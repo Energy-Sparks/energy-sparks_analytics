@@ -56,11 +56,6 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     :thermostatic
   end
 
-  def one_year_saving_£
-    x = @annual_hotwater_poor_insulation_heatloss_estimate_£
-    Range.new(x * 0.7, x * 1.3)
-  end
-
   def capital_cost
     Range.new(
       [pipework_insulation_cost.first, electric_point_of_use_hotwater_costs.first].min,
@@ -79,6 +74,9 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     @annual_hotwater_poor_insulation_heatloss_estimate_£ = savings_kwh * ConvertKwh.scale_unit_from_kwh(:£, :gas)
     @annual_hotwater_poor_insulation_heatloss_estimate_kwh = savings_kwh
     @annual_hotwater_poor_insulation_heatloss_estimate_percent = savings_percent
+
+    one_year_saving_£ = Range.new(@annual_hotwater_poor_insulation_heatloss_estimate_£ * 0.7, @annual_hotwater_poor_insulation_heatloss_estimate_£ * 1.3)
+    set_savings_capital_costs_payback(one_year_saving_£, nil)
   end
 
   private def calculate(asof_date)

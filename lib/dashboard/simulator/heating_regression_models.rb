@@ -47,7 +47,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def create_and_fit_model(model_type, period, allow_more_than_1_year = false)
-      logger.info "create_and_fit_model start"
+      logger.info "create_and_fit_model start #{model_type} #{period.start_date} to #{period.end_date}"
       unless @processed_model_overrides # deferred until meter available
         @model_overrides = HeatingModelOverrides.new(@meter)
         @processed_model_overrides = true
@@ -151,7 +151,7 @@ module AnalyseHeatingAndHotWater
         return simple_model if simple_model.enough_samples_for_good_fit && !thermal_mass_model.enough_samples_for_good_fit
 
         if !simple_model.enough_samples_for_good_fit
-          raise EnergySparksNotEnoughDataException, "Not enough samples for model to provide good regression fit simple: #{simple_model.winter_heating_samples} massive: #{thermal_mass_model.winter_heating_samples}"
+          raise EnergySparksNotEnoughDataException, "Not enough samples for model to provide good regression fit simple: #{simple_model.winter_heating_samples} massive: #{thermal_mass_model.winter_heating_samples} mpan or mprn #{@meter.mpan_mprn}"
         end
         thermal_mass_model.standard_deviation_percent < simple_model.standard_deviation_percent ? thermal_mass_model : simple_model
       end

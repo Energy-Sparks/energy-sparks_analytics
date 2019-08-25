@@ -5,10 +5,12 @@ class SchoolDatePeriod
   def initialize(type, title, start_date, end_date)
     @type = type
     @title = title
-    @start_date = start_date
-    @end_date = end_date
+    @start_date = check_is_date(start_date, 'start date')
+    @end_date = check_is_date(end_date, 'end date')
     @calendar_event_type_id = @calendar_event_type_id
   end
+
+
 
   def to_s
     "" << @title << ' (' << start_date.strftime("%a %d %b %Y") << ' to ' << end_date.strftime("%a %d %b %Y") << ')'
@@ -94,5 +96,11 @@ class SchoolDatePeriod
 
   def to_a
     [type, title, start_date, end_date]
+  end
+
+  private def check_is_date(date, name)
+    raise EnergySparksUnexpectedStateException, "Unexpected nil #{name}" if date.nil?
+    raise EnergySparksUnexpectedStateException, "Unexpected #{name} of type #{date.class.name} expecting a Date" unless date.is_a?(Date)
+    date
   end
 end

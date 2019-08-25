@@ -82,7 +82,6 @@ class ChartManager
     chart_config.merge!(override_config) unless override_config.nil?
 
     ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-
     begin
       aggregator = nil
       calculation_time = nil

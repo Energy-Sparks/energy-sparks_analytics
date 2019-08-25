@@ -42,7 +42,10 @@ class RunCharts
   end
 
   def log_results
-    puts sprintf('Completed %2d charts for %-25.25s %d failed in %.3fs', number_of_charts, @school.name, @failed_charts.length, total_chart_calculation_time)
+    failed = @failed_charts.nil? ? -1 : @failed_charts.length
+    charts = number_of_charts.nil? ? 0 : number_of_charts
+    calc_time = total_chart_calculation_time.nil? ? 0.0 : total_chart_calculation_time
+    puts sprintf('Completed %2d charts for %-25.25s %d failed in %.3fs', charts, @school.name, failed, calc_time)
   end
 
   def number_of_charts
@@ -124,6 +127,7 @@ class RunCharts
 
   def average_calculation_time
     all_times = @worksheets.values.map { |charts| charts.map { |chart| chart[:calculation_time] } }.flatten
+    return Float::NAN if all_times.empty?
     all_times.sum / all_times.length
   end
 

@@ -1,5 +1,6 @@
 require_relative './logger_control.rb'
 require_relative './test_directory_configuration.rb'
+require 'ruby-prof'
 $logger_format = 1
 
 class RunTests
@@ -8,16 +9,16 @@ class RunTests
 
   DEFAULT_TEST_SCRIPT = {
     logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+    # ruby_profiler:            true,
 =begin
     dark_sky_temperatures:    nil,
     grid_carbon_intensity:    nil,
     sheffield_solar_pv:       nil,
 =end
-    schools:                  ['.*'],
+    schools:                  ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
     source:                   :analytics_db,
     logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
-=begin
-    reports:                  {
+    no_reports:                  {
                                 charts: [
                                   :dashboard,
                                   # adhoc_worksheet: { name: 'Test', charts: [:gas_latest_years, :gas_by_day_of_week] }
@@ -27,16 +28,16 @@ class RunTests
                                   report_failed_charts:   :summary,
                                   compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
                                 }
-                              },
-=end   
-                              alerts:                   {
-                                  alerts:   [ AlertWeekendGasConsumptionShortTerm ],
+                              }, 
+
+    alerts:                   {
+                                  alerts:   nil, # [ AlertOutOfHoursElectricityUsage ],
                                   control:  {
                                               # print_alert_banner: true,
                                               # alerts_history: true,
                                               print_school_name_banner: true,
-                                              # outputs:           [ :front_end_template_variables ],
-                                              save_and_compare:  {
+                                              outputs:           %i[], # front_end_template_variables front_end_template_data raw_variables_for_saving],
+                                              not_save_and_compare:  {
                                                                     summary:      true,
                                                                     h_diff:     { use_lcs: false, :numeric_tolerance => 0.000001 },
                                                                     data: %i[
@@ -47,7 +48,10 @@ class RunTests
                                                                       front_end_template_table_data
                                                                     ]
                                                                   },
-                                              asof_date:          Date.new(2019, 6, 30)
+
+                                              save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
+                                              benchmark:          %i[school alert ], # detail],
+                                              asof_date:          (Date.new(2018,6,14)..Date.new(2019,6,14)).each_slice(7).map(&:first)
                                             } 
                               }
   }.freeze
@@ -137,15 +141,36 @@ class RunTests
     logger.info '=' * 120
     logger.info 'RUNNING ALERTS'
     failed_alerts = []
+    ENV['ENERGYSPARKSTESTMODE'] = 'ON'
+    dates = RunAlerts.convert_asof_dates(control[:asof_date])
+
     @school_list.each do |school_name|
       @current_school_name = school_name
-      reevaluate_log_filename
-      school = load_school(school_name)
-      alerts = RunAlerts.new(school)
-      alerts.run_alerts(alert_list, control)
+      dates.each do |asof_date|
+        reevaluate_log_filename
+        school = load_school(school_name)
+        start_profiler
+        alerts = RunAlerts.new(school)
+        alerts.run_alerts(alert_list, control, asof_date)
+        stop_profiler
+      end
       # failed_alerts += alerts.failed_charts
     end
-    # RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
+    RunAlerts.print_calculation_time(control[:benchmark])
+    RunAlerts.save_priority_data(control[:save_priority_variables])
+    RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
+  end
+
+  private def start_profiler
+    RubyProf.start if @test_script.key?(:ruby_profiler)
+  end
+
+  private def stop_profiler
+    if @test_script.key?(:ruby_profiler)
+      prof_result = RubyProf.stop
+      printer = RubyProf::GraphHtmlPrinter.new(prof_result)
+      printer.print(File.open('log\code-profile - alerts' + Date.today.to_s + '.html','w'))
+    end
   end
 
   def configure_log_file(configuration)

@@ -11,7 +11,6 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
   attr_reader :one_year_saving_reduced_days_to_exemplar_kwh
   attr_reader :one_year_saving_reduced_days_to_average_£, :one_year_saving_reduced_days_to_exemplar_£
   attr_reader :one_year_saving_reduced_days_to_average_percent, :one_year_saving_reduced_days_to_exemplar_percent
-  attr_reader :one_year_saving_£
 
   def initialize(school)
     super(school, :heating_on_days)
@@ -104,7 +103,8 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     @one_year_saving_reduced_days_to_average_£ = gas_cost(@one_year_saving_reduced_days_to_average_kwh)
     @one_year_saving_reduced_days_to_exemplar_£ = gas_cost(@one_year_saving_reduced_days_to_exemplar_kwh)
 
-    @one_year_saving_£ = Range.new(@one_year_saving_reduced_days_to_average_£, @one_year_saving_reduced_days_to_exemplar_£)
+    one_year_saving_£ = Range.new(@one_year_saving_reduced_days_to_average_£, @one_year_saving_reduced_days_to_exemplar_£)
+    set_savings_capital_costs_payback(one_year_saving_£, nil)
 
     @rating = statistics.school_day_heating_rating_out_of_10(days)
 

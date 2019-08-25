@@ -477,27 +477,28 @@ class Aggregator
   # - only works for model_type breakdowns for the moment. and only for 'daily' bucketing
   # - ignore bucketed data count as probably doesn;t apply to scatter plots with trendlines for the moment
   def create_trend_lines(chart_config, bucketed_data, _bucketed_data_count)
+    regression_parameters = calculate_regression_parameters_outside_model(bucketed_data)
     if Object.const_defined?('Rails')
-      add_trendlines_for_rails_all_points(bucketed_data)
+      add_trendlines_for_rails_all_points(bucketed_data, regression_parameters)
     elsif false && Object.const_defined?('Rails')
-      add_trendlines_for_rails_2_points(bucketed_data)
+      add_trendlines_for_rails_2_points(bucketed_data, regression_parameters)
     else
-      analystics_excel_trendlines(bucketed_data)
+      analystics_excel_trendlines(bucketed_data, regression_parameters)
     end 
   end
 
-  def analystics_excel_trendlines(bucketed_data)
+  def analystics_excel_trendlines(bucketed_data, regression_parameters)
     @series_manager.trendlines.each do |trendline_series_name|
       model_type_for_trendline = SeriesDataManager.series_name_for_trendline(trendline_series_name)
-      trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline)
+      trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline, regression_parameters)
       bucketed_data[trendline_name_with_parameters] = model_type_for_trendline # set model symbol
     end
   end
 
-  def add_trendlines_for_rails_all_points(bucketed_data)
+  def add_trendlines_for_rails_all_points(bucketed_data, regression_parameters)
     @series_manager.trendlines.each do |trendline_series_name|
       model_type_for_trendline = SeriesDataManager.series_name_for_trendline(trendline_series_name)
-      trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline)
+      trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline, regression_parameters)
       bucketed_data[trendline_name_with_parameters] = Array.new(@x_axis.length, Float::NAN)
       @x_axis.each_with_index do |date, index|
         model_type = @series_manager.model_type?(date)
@@ -513,23 +514,60 @@ class Aggregator
   end
 
   # find 2 extreme points for each model, add interpolated regression points
-  def add_trendlines_for_rails_2_points(bucketed_data)
+  def add_trendlines_for_rails_2_points(bucketed_data, regression_parameters)
     series_model_types = bucketed_data.keys & @series_manager.heating_model_types
     temperatures = bucketed_data['Temperature'] # problematic assumption?
     series_model_types.each do |model_type|
       model_temperatures_and_index = bucketed_data[model_type].each_with_index.map { | kwh, index| kwh.nan? ? nil : [temperatures[index], index, @x_axis[index]] }.compact
       min, max = model_temperatures_and_index.minmax_by { |temp, _index, _date| temp }
-      trendline = add_regression_parameters_to_trendline_symbol(SeriesDataManager.trendline_for_series_name(model_type), model_type)
+      trendline = add_regression_parameters_to_trendline_symbol(SeriesDataManager.trendline_for_series_name(model_type), model_type. regression_parameters)
       bucketed_data[trendline] = Array.new(@x_axis.length, Float::NAN)
       bucketed_data[trendline][min[1]] = @series_manager.predicted_amr_data_one_day(min[2]) * trendline_scale
       bucketed_data[trendline][max[1]] = @series_manager.predicted_amr_data_one_day(max[2]) * trendline_scale
     end
   end
 
-  def add_regression_parameters_to_trendline_symbol(trendline_symbol, model_type)
-    model = @series_manager.model(model_type)
-    parameters = model.nil? ? ' =no model' : sprintf(' =%.0f + %.1fT r2 = %.2f x %d', model.a, model.b, model.r2, model.samples)
-    (trendline_symbol.to_s + parameters).to_sym
+  def add_regression_parameters_to_trendline_symbol(trendline_symbol, model_type, regression_parameters)
+    if false # deprecated, left in for comparison purposes TODO(PH, 25Jul2019) remove was satisifed with result
+      model = @series_manager.model(model_type)
+      parameters = model.nil? ? ' =no model' : sprintf(' =%.0f + %.1fT r2 = %.2f x %d', model.a, model.b, model.r2, model.samples)
+      (trendline_symbol.to_s + parameters).to_sym
+    else
+      reg = regression_parameters[model_type]
+      parameters = reg.nil? ? ' =no model' : sprintf(' =%.0f + %.1fT r2 = %.2f x %d', reg[:a], reg[:b], reg[:r2], reg[:n])
+      (trendline_symbol.to_s + parameters).to_sym
+    end
+  end
+
+  private def calculate_regression_parameters_outside_model(bucketed_data)
+    regression_parameters = {}
+    temperatures = bucketed_data[SeriesNames::TEMPERATURE]
+    model_names = bucketed_data.select { |bucket_name, _data| bucket_name != SeriesNames::TEMPERATURE }
+    model_names.each_key do |model_name|
+      x_data, y_data = compact_to_non_nan_data(temperatures, bucketed_data[model_name])
+      regression_parameters[model_name]  = calculate_regression_parameters(x_data, y_data)
+    end
+    regression_parameters
+  end
+
+  private def compact_to_non_nan_data(temperatures, kwhs)
+    x_data = []
+    y_data = []
+    (0...temperatures.length).each do |i|
+      unless kwhs[i].nan?
+        x_data.push(temperatures[i])
+        y_data.push(kwhs[i])
+      end
+    end
+    [x_data, y_data]
+  end
+
+  private def calculate_regression_parameters(x_data, y_data)
+    return nil if x_data.empty? || y_data.empty? # defensive: logically only 1 of these really necessary
+    x = Daru::Vector.new(x_data)
+    y = Daru::Vector.new(y_data)
+    sr = Statsample::Regression.simple(x, y)
+    { a: sr.a, b: sr.b, r2: sr.r2, n: x_data.length }
   end
 
   def add_daycount_to_legend?
@@ -920,8 +958,6 @@ class Aggregator
     # exclude y2_axis values e.g. temperature, degree days
     x_data_keys = bucketed_data.select { |series_name, _data| !SeriesNames::Y2SERIESYMBOLTONAMEMAP.values.include?(series_name) }
     scale_factor = YAxisScaling.new.scaling_factor(@chart_config[:yaxis_scaling], @meter_collection)
-    info = "Scaling the following series #{x_data_keys} by a factor of #{scale_factor} for y axis scaling #{@chart_config[:yaxis_scaling]}"
-    logger.info info
     x_data_keys.each_key do |data_series_name|
       bucketed_data[data_series_name].each_with_index do |value, index|
         bucketed_data[data_series_name][index] = value * scale_factor

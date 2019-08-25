@@ -1153,7 +1153,6 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
   def generate_advice
     alert = AlertElectricityBaseloadVersusBenchmark.new(@school)
     alert.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
-    alert_description = alert.analysis_report
     # :avg_baseload, :benchmark_per_pupil, :benchmark_per_floor_area
     header_template = %{
       <%= @body_start %>
@@ -1173,9 +1172,9 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
+      <p><%= alert.dashboard_summary %> </p>
+      <p><%= alert.dashboard_detail %> </p>
       <p>
-        <%= alert_description.summary %>.
-        <%= alert_description.detail[0].content %>
         Reducing a school's baseload is often the fastest way of reducing a school's energy costs
         and reducing its carbon footprint. For each 1kW reduction in baseload, the school will save
         £1,050 per year, and reduce its carbon footprint by 2,400 kg.

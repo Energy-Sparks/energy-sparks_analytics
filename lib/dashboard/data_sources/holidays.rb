@@ -210,6 +210,14 @@ class Holidays
     @holidays[holiday_index]
   end
 
+  def number_holidays_between_dates(start_date, end_date, include_holiday_if_in_date = false)
+    end_date_holiday_index = find_nearest_holiday_index(@holidays, end_date, include_holiday_if_in_date)
+    raise EnergySparksNotEnoughDataException, "Not enough holiday data for meter end date #{end_date}" if end_date_holiday_index.nil?
+    start_date_holiday_index = find_nearest_holiday_index(@holidays, end_date, false)
+    raise EnergySparksNotEnoughDataException, "Not enough holiday data for meter start date #{start_date}" if start_date_holiday_index.nil?
+    end_date_holiday_index - start_date_holiday_index # could possibly be +1????
+  end
+
   private def find_nearest_holiday_index(holidays, date, include_holiday_if_in_date = false)
     holidays.each_with_index do |holiday, index|
       return index if include_holiday_if_in_date && date.between?(holiday.start_date, holiday.end_date)
@@ -273,26 +281,6 @@ class Holidays
       raise EnergySparksUnexpectedStateException.new('Gone too many times around loop looking for school weeks, not sure why error has occurred') if limit <= 0
     end
     [saturday - 6, saturday, week_count]
-  end
-
-  # doesn't really fit here, but for the moment can't think of a better place
-  # mix of class and instance 'holiday' access isn't ideal
-  def self.periods_in_date_range(start_date, end_date, period_type, holidays)
-    case period_type
-    when :year
-      ((end_date - start_date + 1) / 365.0).floor
-    when :academicyear
-      academic_years(start_date, end_date).length
-    when :week
-      ((end_date - start_date + 1) / 7.0).floor
-    when :day, :datetime
-      end_date - start_date + 1
-    when :school_week
-      _sunday, _saturday, week_count = holidays.nth_school_week(end_date, -1000, 3, start_date)
-      1000 - week_count
-    else
-      raise EnergySparksUnexpectedStateException.new("Unsupported period type #{period_type} for periods_in_date_range request")
-    end
   end
 
   # was originally included in ActiveSupport code base, may be lost in rails integration

@@ -98,7 +98,7 @@ class PeriodsBase
       elsif hash_value.is_a?(Range)
         [calculate_period_from_range(hash_value)]
       else
-        raise EnergySparksBadChartSpecification, "Unexpected chart timescale value #{@timescale.class.name}"
+        raise EnergySparksBadChartSpecification, "Unexpected chart timescale value #{@timescale.class.name} hash value #{hash_value}"
       end
     else
       raise EnergySparksBadChartSpecification, "Unexpected chart timescale type #{@timescale.class.name}"
@@ -110,9 +110,16 @@ class PeriodsBase
   end
 
   protected def calculate_period_from_range(range)
-    first_period  = calculate_period_from_offset(range.first)
-    last_period   = calculate_period_from_offset(range.last)
-    new_school_period(first_period.start_date, last_period.end_date, ' range')
+    if range.first.is_a?(Integer) && range.last.is_a?(Integer)
+      first_period  = calculate_period_from_offset(range.first)
+      last_period   = calculate_period_from_offset(range.last)
+      new_school_period(first_period.start_date, last_period.end_date, ' range')
+    elsif range.first.is_a?(Date) && range.last.is_a?(Date)
+      new_school_period(range.first, range.last, ' range')
+    else
+      raise EnergySparksUnexpectedStateException, 'Expected range, got nil' if range.nil?
+      raise EnergySparksUnexpectedStateException, "Expected range of type Date or Integer, got #{range.first.class.name}"
+    end
   end
 end
 
@@ -222,15 +229,15 @@ class DiurnalPeriods < FrostDayPeriods
 end
 
 class OptimumStartPeriods < FrostDayPeriods
+  BEST_OPTIMUM_START_DAYS = [ # TODO(PH,26Jul2019) - automate calculation of these days, used in chart timescale manipulation as well
+    Date.new(2018, 3, 6),
+    Date.new(2018, 3, 16),
+    Date.new(2017, 3, 6),
+    Date.new(2017, 3, 16)
+  ].freeze
   protected def name; 'optimum start' end
   protected def list_of_days
-    best_optimum_start_days = [ # TODO(PH,26Jul2019) - automate calculation of these days
-      Date.new(2018, 3, 6),
-      Date.new(2018, 3, 16),
-      Date.new(2017, 3, 6),
-      Date.new(2017, 3, 16)
-    ]
-    best_optimum_start_days.select { |day| day >= @first_meter_date && day <= @last_meter_date }
+    BEST_OPTIMUM_START_DAYS.select { |day| day >= @first_meter_date && day <= @last_meter_date }
   end
 end
 

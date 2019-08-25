@@ -8,7 +8,6 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   attr_reader :last_year_kwh, :last_year_£
   attr_reader :heating_on_times_table
 
-  attr_reader :one_year_saving_£, :capital_cost
   attr_reader :one_year_optimum_start_saving_kwh, :one_year_optimum_start_saving_£
   attr_reader :percent_of_annual_gas
   
@@ -73,8 +72,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
     @one_year_optimum_start_saving_kwh, @percent_of_annual_gas = heating_model.one_year_saving_from_better_boiler_start_time(asof_date)
     @one_year_optimum_start_saving_£ = @one_year_optimum_start_saving_kwh * BenchmarkMetrics::GAS_PRICE
  
-    @one_year_saving_£ = Range.new(0.0, @one_year_optimum_start_saving_£)
-    @capital_cost = Range.new(0.0, 700.0)
+    set_savings_capital_costs_payback(Range.new(0.0, @one_year_optimum_start_saving_£), Range.new(0.0, 700.0))
 
     @rating = [[10 - (rating_7_day + 5), 10].min, 0.0].max
 

@@ -49,18 +49,6 @@ class AlertMeterConsolidationOpportunityBase < AlertAnalysisBase
     }
   }
 
-  def one_year_saving_£
-    @one_year_saving_£
-  end
-
-  def ten_year_saving_£
-    super
-  end
-
-  def payback_years
-    super
-  end
-
   def cost_of_consolidating_1_meter_£
     COST_OF_1_METER_CONSOLIDATION_£
   end
@@ -98,8 +86,9 @@ class AlertMeterConsolidationOpportunityBase < AlertAnalysisBase
     sorted_standing_charges = daily_standing_charges_for_live_meters.values.sort
     low_annual_saving = sorted_standing_charges.first * 365.0
     high_annual_saving = @annual_total_standing_charge - (sorted_standing_charges.first * 365.0)
-    @one_year_saving_£ = Range.new(low_annual_saving, high_annual_saving)
-    @capital_cost = Range.new(COST_OF_1_METER_CONSOLIDATION_£, COST_OF_1_METER_CONSOLIDATION_£ * (sorted_standing_charges.length - 1))
+    one_year_saving_£ = Range.new(low_annual_saving, high_annual_saving)
+    capital_cost = Range.new(COST_OF_1_METER_CONSOLIDATION_£, COST_OF_1_METER_CONSOLIDATION_£ * (sorted_standing_charges.length - 1))
+    set_savings_capital_costs_payback(one_year_saving_£, capital_cost)
     @rating = number_of_live_meters <= 1 ? 10.0 : 0.0
   end
   alias_method :analyse_private, :calculate

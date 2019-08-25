@@ -60,14 +60,6 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
     :peak_kw
   end
 
-  def one_year_saving_£
-    @one_year_saving_£
-  end
-
-  def ten_year_saving_£
-    super
-  end
-
   def cost_of_consolidating_1_meter_£
     COST_OF_1_METER_CONSOLIDATION_£
   end
@@ -88,7 +80,7 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
       @asc_limit_kw = aggregate_asc_limit_kw(opportunities)
       @maximum_kw_meter_period_kw = aggregate_peak_kw(opportunities)
       annual_saving_£ = aggregate_annual_saving_£(opportunities)
-      @one_year_saving_£ = Range.new(annual_saving_£, annual_saving_£)
+      set_savings_capital_costs_payback(Range.new(annual_saving_£, annual_saving_£), nil)
       @rating = calculate_rating_from_range(400.0, 3000.0, annual_saving_£)
     else
       @rating = 10.0

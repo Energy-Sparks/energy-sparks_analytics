@@ -19,12 +19,18 @@ class AlertAnalysisBase
   attr_reader :status, :rating, :term, :default_summary, :default_content, :bookmark_url
   attr_reader :analysis_date, :max_asofdate, :calculation_worked
 
+  
+  attr_reader :capital_cost, :one_year_saving_£, :ten_year_saving_£, :payback_years
+  attr_reader :average_capital_cost, :average_one_year_saving_£, :average_payback_years
+
   def initialize(school, report_type)
     @school = school
     @report_type = report_type
     @relevance = aggregate_meter.nil? ? :never_relevant : :relevant
     @not_enough_data_exception = false
     @calculation_worked = true
+    @capital_cost = 0.0..0.0
+    clear_model_cache
   end
 
   def relevance
@@ -78,6 +84,10 @@ class AlertAnalysisBase
       variables.merge!(variable_group)
     end
     variables
+  end
+
+  def self.priority_template_variables
+    flatten_front_end_template_variables.select { |_name_sym, data| data.key?(:priority_code) }
   end
 
   def self.front_end_template_variables
@@ -243,7 +253,8 @@ class AlertAnalysisBase
     },
     rating: {
       desciption: 'Rating out of 10',
-      units:  Float
+      units:  Float,
+      priority_code:  'RATE'
     },
     term: {
       desciption: 'long term or short term',
@@ -281,6 +292,11 @@ class AlertAnalysisBase
       description: 'Estimated one year saving range',
       units: :£_range
     },
+    average_one_year_saving_£: {
+      description: 'Estimated one year saving range',
+      units: :£,
+      priority_code:  '1YRS'
+    },
     ten_year_saving_£: {
       description: 'Estimated ten year saving range - typical capital investment horizon',
       units: :£_range
@@ -289,9 +305,19 @@ class AlertAnalysisBase
       description: 'Payback in years',
       units: :years_range
     },
+    average_payback_years: {
+      description: 'Average payback in years',
+      units: :years,
+      priority_code:  'PAYB'
+    },
     capital_cost: {
       description: 'Capital cost',
-      units: :£_range
+      units: :£_range,
+    },
+    average_capital_cost: {
+      description: 'Average Capital cost',
+      units: :£,
+      priority_code:  'CAPC'
     },
     timescale: {
       description: 'Timescale of analysis e.g. week, month, year',
@@ -324,7 +350,9 @@ class AlertAnalysisBase
   end
 
   def make_available_to_users?
-    relevance == :relevant && enough_data == :enough && calculation_worked
+    result = relevance == :relevant && enough_data == :enough && calculation_worked
+    logger.info "Alert #{self.class.name} not being made available to users: reason: #{relevance} #{enough_data} #{calculation_worked}" if !result
+    result
   end
 
   def self.print_all_formatted_template_variable_values
@@ -438,21 +466,22 @@ class AlertAnalysisBase
     @help_url = ALERT_HELP_URL + '#' + bookmark
   end
 
-  def one_year_saving_£
-    nil
+  def calculate_payback_years_deprecated
+    return (0.0..0.0) if one_year_saving_£.nil? || capital_cost.nil? || capital_cost == (0.0..0.0)
+    min_saving = one_year_saving_£.last.nil? ? 0.0 : capital_cost.first / one_year_saving_£.last
+    max_saving = one_year_saving_£.first.nil? ?  0.0 : capital_cost.last / one_year_saving_£.first
+    Range.new(min_saving, max_saving)
   end
 
-  def ten_year_saving_£
-    one_year_saving_£.nil? ? nil : Range.new(one_year_saving_£.first * 10.0, one_year_saving_£.last * 10.0)
-  end
+  def set_savings_capital_costs_payback(one_year_saving_£, capital_cost)
+    @capital_cost = capital_cost
+    @average_capital_cost = capital_cost.nil? ? 0.0 : ((capital_cost.first + capital_cost.last)/ 2.0)
 
-  def payback_years
-    return (0.0..0.0) if one_year_saving_£.nil? || capital_cost.nil? || capital_cost == (0.0..0.0) || one_year_saving_£.last == 0.0 || one_year_saving_£.first == 0.0
-    Range.new(capital_cost.first / one_year_saving_£.last, capital_cost.last / one_year_saving_£.first)
-  end
+    @one_year_saving_£ = one_year_saving_£
+    @ten_year_saving_£ = one_year_saving_£.nil? ? 0.0 : Range.new(one_year_saving_£.first * 10.0, one_year_saving_£.last * 10.0)
+    @average_one_year_saving_£ = one_year_saving_£.nil? ? 0.0 : ((one_year_saving_£.first + one_year_saving_£.last)/ 2.0)
 
-  def capital_cost
-    0.0..0.0
+    @average_payback_years = (@one_year_saving_£.nil? || @one_year_saving_£ == 0.0 || @average_capital_cost.nil?) ? 0.0 : @average_capital_cost / @average_one_year_saving_£
   end
 
   def pupils
@@ -573,6 +602,26 @@ class AlertAnalysisBase
     raise EnergySparksAbstractBaseClass, 'Error: incorrect attempt to use abstract base class'
   end
 
+  # the model cache cached at the aggregate meter and therefore the school level
+  # if in the analystics enronment we are running slightly different (asof_date v. chart_date)
+  # then clear the cache, however, then does further caching if in 'test' mode
+  private def clear_model_cache
+    @school.aggregated_heat_meters.model_cache.clear_model_cache unless @school.aggregated_heat_meters.nil?
+  end
+
+  public
+
+  # slightly iffy way of creating short codes for alert class names
+  def self.alert_short_code(alert_class)
+    alert_class.to_s.split(//).select { |char| ('A'..'Z').include?(char) }[1..8].join
+  end
+
+  def self.short_code_alert(short_code)
+    matching_alerts = all_available_alerts.select { |available_alert| alert_short_code(available_alert) == short_code }
+    raise EnergySparksUnexpectedStateException, "Only expected one matching short code for #{short_code}, got #{matching_alerts.length}" if matching_alerts.length != 1
+    matching_alerts.first
+  end
+
   def self.all_available_alerts
     [
       AlertChangeInDailyElectricityShortTerm,
@@ -602,7 +651,8 @@ class AlertAnalysisBase
       AlertPreviousYearHolidayComparisonElectricity,
       AlertSchoolWeekComparisonGas,
       AlertPreviousHolidayComparisonGas,
-      AlertPreviousYearHolidayComparisonGas
+      AlertPreviousYearHolidayComparisonGas,
+      AlertAdditionalPrioritisationData
     ]
   end
 end

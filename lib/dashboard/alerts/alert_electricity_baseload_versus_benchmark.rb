@@ -15,8 +15,6 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_£
   attr_reader :one_year_saving_versus_exemplar_adjective
 
-  attr_reader :one_year_saving_£
-
   attr_reader :one_year_baseload_per_pupil_kw, :one_year_baseload_per_pupil_kwh, :one_year_baseload_per_pupil_£
   attr_reader :one_year_baseload_per_floor_area_kw, :one_year_baseload_per_floor_area_kwh, :one_year_baseload_per_floor_area_£
 
@@ -175,7 +173,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @one_year_baseload_per_floor_area_kwh  = @average_baseload_last_year_kwh / floor_area
     @one_year_baseload_per_floor_area_£    = @average_baseload_last_year_£ / floor_area
 
-    @one_year_saving_£ = Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£)
+    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil)
 
     # rating: benchmark value = 4.0, exemplar = 10.0
     percent_from_benchmark_to_exemplar = (@average_baseload_last_year_kwh - @one_year_benchmark_by_pupil_kwh) / (@one_year_exemplar_by_pupil_kwh - @one_year_benchmark_by_pupil_kwh)
@@ -188,4 +186,20 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @bookmark_url = add_book_mark_to_base_url('ElectricityBaseload')
   end
   alias_method :analyse_private, :calculate
+
+  private def dashboard_adjective
+    @average_baseload_last_year_kw > @benchmark_per_pupil_kw * 1.05 ? 'too high' : 'good'
+  end
+
+  def dashboard_summary
+    'Your electricity baseload is ' + dashboard_adjective
+  end
+
+  def dashboard_detail
+    text = %{
+      Your baseload over the last year of <%= FormatEnergyUnit.format(:kw, @average_baseload_last_year_kw) %> is <%= dashboard_adjective %>
+      compared with average usage at other schools of <%= FormatEnergyUnit.format(:kw, @benchmark_per_pupil_kw) %> (pupil based).
+    }
+    ERB.new(text).result(binding)
+  end
 end

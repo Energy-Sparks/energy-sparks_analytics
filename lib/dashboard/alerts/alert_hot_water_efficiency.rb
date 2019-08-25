@@ -11,7 +11,6 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   attr_reader :annual_benchmark_hot_water_kwh, :point_of_use_annual_standing_loss_kwh
   attr_reader :point_of_use_annual_total_£, :point_of_use_annual_total_kwh
   attr_reader :saving_replacing_gas_hot_water_with_electric_point_of_use_£
-  attr_reader :one_year_saving_£, :capital_cost
   attr_reader :efficiency_relative_to_theoretical_demand_percent
   attr_reader :heat_model_annual_heating_kwh, :heat_model_annual_hotwater_kwh
   attr_reader :heat_model_daily_hotwater_usage_kwh, :heat_model_daily_holiday_hotwater_usage_kwh
@@ -143,8 +142,8 @@ class AlertHotWaterEfficiency < AlertGasModelBase
 
       heating_model_analysis(asof_date)
 
-      @one_year_saving_£ = Range.new(@saving_replacing_gas_hot_water_with_electric_point_of_use_£, @saving_replacing_gas_hot_water_with_electric_point_of_use_£)
-      @capital_cost = electric_point_of_use_hotwater_costs
+      one_year_saving_£ = Range.new(@saving_replacing_gas_hot_water_with_electric_point_of_use_£, @saving_replacing_gas_hot_water_with_electric_point_of_use_£)
+      set_savings_capital_costs_payback(one_year_saving_£, electric_point_of_use_hotwater_costs)
 
       @efficiency_relative_to_theoretical_demand_percent = @annual_benchmark_hot_water_kwh / @hot_water_annual_summer_unoccupied_methdology_kwh
 

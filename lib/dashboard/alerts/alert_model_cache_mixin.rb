@@ -5,7 +5,7 @@ module AlertModelCacheMixin
     @@model_cache_results = {} unless defined?(@@model_cache_results)
     composite_key = urn.to_s + ':' + asof_date.to_s
     return @@model_cache_results[composite_key] if @@model_cache_results.key?(composite_key)
-    @@model_cache_results[composite_key] = call_model(asof_date) 
+    @@model_cache_results[composite_key] = call_model(asof_date)
   end
 
   protected def asof_date_minus_one_year(date)
@@ -26,7 +26,6 @@ module AlertModelCacheMixin
   end
 
   private def call_model(asof_date)
-    @school.aggregated_heat_meters.model_cache.clear_model_cache
     @school.aggregated_heat_meters.model_cache.create_and_fit_model(:best, one_year_period(asof_date)) 
   end
 end

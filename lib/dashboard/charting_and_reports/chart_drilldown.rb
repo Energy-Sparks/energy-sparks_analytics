@@ -9,6 +9,7 @@ class ChartManager
     if chart_config[:series_breakdown] == :baseload || 
        chart_config[:series_breakdown] == :cusum ||
        chart_config[:series_breakdown] == :hotwater ||
+       chart_config[:series_breakdown] == :heating ||
        chart_config[:chart1_type]      == :scatter
        # these special case may need reviewing if we decide to aggregate
        # these types of graphs by anything other than days
@@ -58,12 +59,13 @@ class ChartManager
     end
 
     date_range_config = {
-      timescale: { daterange: [x_axis_range[0], x_axis_range[1]]},
+      timescale: { daterange: x_axis_range[0]..x_axis_range[1] },
       x_axis: new_x_axis
     }
   end
 
-  def drilldown_available(chart_config)
+  def drilldown_available(chart_config_original)
+    chart_config = resolve_chart_inheritance(chart_config_original)
     !x_axis_drilldown(chart_config[:x_axis]).nil?
   end
 

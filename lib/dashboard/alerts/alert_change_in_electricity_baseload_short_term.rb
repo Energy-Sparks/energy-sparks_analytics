@@ -9,7 +9,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
   attr_reader :last_year_baseload_kwh, :last_week_baseload_kwh
   attr_reader :last_week_change_in_baseload_kwh, :next_year_change_in_baseload_kwh
   attr_reader :last_year_baseload_£, :last_week_baseload_£, :next_year_change_in_baseload_£
-  attr_reader :one_year_saving_£, :saving_in_annual_costs_through_10_percent_baseload_reduction
+  attr_reader :saving_in_annual_costs_through_10_percent_baseload_reduction
   attr_reader :predicted_percent_increase_in_usage, :significant_increase_in_baseload
   attr_reader :one_year_baseload_chart
 
@@ -117,7 +117,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
     @next_year_change_in_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @next_year_change_in_baseload_kwh
     @saving_in_annual_costs_through_10_percent_baseload_reduction = @last_year_baseload_£ * 0.1
 
-    @one_year_saving_£ = Range.new(@next_year_change_in_baseload_£, @next_year_change_in_baseload_£)
+    set_savings_capital_costs_payback(Range.new(@next_year_change_in_baseload_£, @next_year_change_in_baseload_£), nil)
 
     @rating = calculate_rating_from_range(-0.05, 0.15, @predicted_percent_increase_in_usage)
 
