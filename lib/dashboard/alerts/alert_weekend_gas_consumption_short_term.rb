@@ -10,6 +10,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   attr_reader :last_year_weekend_gas_kwh, :last_year_weekend_gas_£
   attr_reader :average_weekend_gas_kwh, :average_weekend_gas_£
   attr_reader :percent_increase_on_average_weekend, :projected_percent_of_annual
+  attr_reader :last_5_weeks_average_weekend_kwh, :last_5_weeks_average_weekend_£, :percent_increase_on_last_5_weekends
 
   def initialize(school)
     super(school, :weekendgasconsumption)
@@ -61,6 +62,18 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       description: 'Last weekends (projected i.e. x 52) consumption as a percent of total annual gas consumption',
       units: :percent
     },
+    last_5_weeks_average_weekend_£: {
+      description: 'Average weekend gas consumption last 5 weeks kWh',
+      units: { kwh: :gas }
+    },
+    last_5_weeks_average_weekend_£: {
+      description: 'Average weekend gas consumption last 5 weeks £',
+      units: :£
+    },
+    percent_increase_on_last_5_weekends: {
+      description: 'Increase in last weekends gas consumption as a percentage of the last 5 weeks',
+      units: :percent
+    },
     last_7_day_intraday_kwh_chart: {
       description: 'last 7 days gas consumption chart (intraday) - suggest zoom to user, kWh per half hour',
       units: :chart
@@ -101,14 +114,20 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     @percent_increase_on_average_weekend = @average_weekend_gas_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @average_weekend_gas_kwh) / @average_weekend_gas_kwh
     @projected_percent_of_annual = @last_week_end_kwh * 52.0 / annual_kwh(aggregate_meter, asof_date)
 
-    increase_rating  = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_average_weekend)
+    @last_5_weeks_average_weekend_kwh = average_last_n_weekends_kwh(@weekend_dates, 5)
+    @last_5_weeks_average_weekend_£ = @last_5_weeks_average_weekend_kwh * BenchmarkMetrics::GAS_PRICE
+    @percent_increase_on_last_5_weekends = @last_5_weeks_average_weekend_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @last_5_weeks_average_weekend_kwh) / @last_5_weeks_average_weekend_kwh
+
+    increase_rating_on_year  = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_average_weekend)
+    increase_rating_on_last_5_weeks  = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_last_5_weekends)
     of_annual_rating = calculate_rating_from_range(0.02, 0.12, @projected_percent_of_annual)
-    combined_rating = increase_rating * of_annual_rating / 10.0
+    combined_rating = increase_rating_on_year * of_annual_rating * increase_rating_on_last_5_weeks / 100.0
 
     set_savings_capital_costs_payback(52.0 * (@last_weekend_cost_£ - @average_weekend_gas_£), 0.0)
 
     @rating = @last_weekend_cost_£ < MAX_COST ? 10.0 : combined_rating
 
+    puts "increase in 5 weeks #{(@percent_increase_on_last_5_weekends * 100.0).round(1)}"
     puts "increase on annual #{(@percent_increase_on_average_weekend * 100.0).round(1)} projected percent of annual #{(@projected_percent_of_annual * 100.0).round(1)} rating #{@rating.round(2)} cost #{@average_one_year_saving_£.round(0)}"
 
     @status = @rating < 5.0 ? :bad : :good
@@ -125,6 +144,21 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       asof_date -= 1
     end
     weekend_dates.sort
+  end
+
+  private def average_last_n_weekends_kwh(this_weekend_dates, n = 5)
+    dates = prior_weekend_dates(this_weekend_dates, n)
+    kwh = kwh_usage_outside_frost_period(dates, FROST_PROTECTION_TEMPERATURE)
+    kwh / n
+  end
+
+  private def prior_weekend_dates(this_weekend_dates, n)
+    dates = []
+    (1..n).each do |offset|
+      dates.push(this_weekend_dates[0] - offset * 7)
+      dates.push(this_weekend_dates[1] - offset * 7)
+    end
+    dates
   end
 
   private def weekend_gas_consumption_last_year(asof_date)

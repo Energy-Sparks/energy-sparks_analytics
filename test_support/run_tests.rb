@@ -31,7 +31,7 @@ class RunTests
                                 }
                               }, 
 
-    no_alerts:                   {
+    alerts:                   {
                                   alerts:   nil, # [ AlertOutOfHoursElectricityUsage ],
                                   control:  {
                                               # print_alert_banner: true,
