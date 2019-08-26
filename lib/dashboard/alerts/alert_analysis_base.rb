@@ -474,12 +474,14 @@ class AlertAnalysisBase
   end
 
   def set_savings_capital_costs_payback(one_year_saving_£, capital_cost)
+    one_year_saving_£ = Range.new(one_year_saving_£, one_year_saving_£) if one_year_saving_£.is_a?(Float)
+    capital_cost = Range.new(capital_cost, capital_cost) if capital_cost.is_a?(Float)
     @capital_cost = capital_cost
     @average_capital_cost = capital_cost.nil? ? 0.0 : ((capital_cost.first + capital_cost.last)/ 2.0)
 
     @one_year_saving_£ = one_year_saving_£
     @ten_year_saving_£ = one_year_saving_£.nil? ? 0.0 : Range.new(one_year_saving_£.first * 10.0, one_year_saving_£.last * 10.0)
-    @average_one_year_saving_£ = one_year_saving_£.nil? ? 0.0 : ((one_year_saving_£.first + one_year_saving_£.last)/ 2.0)
+    @average_one_year_saving_£ = one_year_saving_£.nil? ? 0.0 : ((one_year_saving_£.first + one_year_saving_£.last) / 2.0)
 
     @average_payback_years = (@one_year_saving_£.nil? || @one_year_saving_£ == 0.0 || @average_capital_cost.nil?) ? 0.0 : @average_capital_cost / @average_one_year_saving_£
   end

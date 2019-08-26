@@ -9,9 +9,9 @@ class ScalarkWhCO2CostValues
     @meter_collection = meter_collection
   end
 
-  def aggregate_value(time_scale, fuel_type, data_type = :kwh)
+  def aggregate_value(time_scale, fuel_type, data_type = :kwh, override = nil)
     check_data_available_for_fuel_type(fuel_type)
-    aggregation_configuration(time_scale, fuel_type, data_type)
+    aggregation_configuration(time_scale, fuel_type, data_type, override)
   end
 
   def day_type_breakdown(time_scale, fuel_type, data_type = :kwh, format_data = false, percent = false)
@@ -29,8 +29,8 @@ class ScalarkWhCO2CostValues
     data
   end
 
-  private def aggregation_configuration(time_scale, fuel_type, data_type)
-    aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type)
+  private def aggregation_configuration(time_scale, fuel_type, data_type, override = nil)
+    aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, override)
     aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
   end
 
