@@ -62,7 +62,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       description: 'Last weekends (projected i.e. x 52) consumption as a percent of total annual gas consumption',
       units: :percent
     },
-    last_5_weeks_average_weekend_£: {
+    last_5_weeks_average_weekend_kwh: {
       description: 'Average weekend gas consumption last 5 weeks kWh',
       units: { kwh: :gas }
     },
@@ -126,9 +126,6 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     set_savings_capital_costs_payback(52.0 * (@last_weekend_cost_£ - @average_weekend_gas_£), 0.0)
 
     @rating = @last_weekend_cost_£ < MAX_COST ? 10.0 : combined_rating
-
-    puts "increase in 5 weeks #{(@percent_increase_on_last_5_weekends * 100.0).round(1)}"
-    puts "increase on annual #{(@percent_increase_on_average_weekend * 100.0).round(1)} projected percent of annual #{(@projected_percent_of_annual * 100.0).round(1)} rating #{@rating.round(2)} cost #{@average_one_year_saving_£.round(0)}"
 
     @status = @rating < 5.0 ? :bad : :good
 
