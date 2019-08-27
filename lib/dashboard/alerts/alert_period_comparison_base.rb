@@ -153,6 +153,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @change_in_weekly_£         = @current_period_weekly_£ - @previous_period_weekly_£
     @change_in_weekly_percent   = @change_in_weekly_kwh / @previous_period_weekly_kwh
 
+    set_savings_capital_costs_payback(@difference_£, 0.0)
+
     @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
 
     @bookmark_url = add_book_mark_to_base_url(url_bookmark)
@@ -283,6 +285,24 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
     end_date = [period.end_date, aggregate_meter.amr_data.end_date].min
     SchoolDatePeriod.new(period.type, "#{period.title} truncated to available meter data", start_date, end_date) if end_date >= start_date
     nil
+  end
+
+  # relevant if asof date immediately at end of period or up to
+  # 3 weeks after
+  private def calculate_time_of_day_relevance(asof_date)
+    current_period, _previous_period = last_two_periods(asof_date)
+    return 0.0 if current_period.nil?
+    # relevant during period, subject to 'enough_data'
+    return 10.0 if enough_days_in_period(current_period, asof_date)
+    days_from_end_of_period_to_asof_date = asof_date - current_period.end_date
+    return 0.0 if days_from_end_of_period_to_asof_date > DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD
+    percent_into_post_holiday_period = (days_from_end_of_period_to_asof_date - DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD) / DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD
+    weight =  percent_into_post_holiday_period * 2.5
+    10.0 - weight # scale down relevance of holiday comparison from 10.0 to 7.5 over relevance period (e.g. 3 weeks)
+  end
+
+  def time_of_year_relevance
+    calculate_time_of_day_relevance(@asof_date)
   end
 
   protected def current_period_name(current_period); period_name(current_period) end

@@ -9,6 +9,10 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
     aggregate_meter.amr_data.end_date
   end
 
+  def time_of_year_relevance
+    set_time_of_year_relevance(5.0)
+  end
+
   protected
 
   def average_baseload(date1, date2)

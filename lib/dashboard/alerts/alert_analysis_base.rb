@@ -19,9 +19,10 @@ class AlertAnalysisBase
   attr_reader :status, :rating, :term, :default_summary, :default_content, :bookmark_url
   attr_reader :analysis_date, :max_asofdate, :calculation_worked
 
-  
   attr_reader :capital_cost, :one_year_saving_£, :ten_year_saving_£, :payback_years
   attr_reader :average_capital_cost, :average_one_year_saving_£, :average_payback_years
+
+  attr_reader :time_of_year_relevance
 
   def initialize(school, report_type)
     @school = school
@@ -322,6 +323,11 @@ class AlertAnalysisBase
     timescale: {
       description: 'Timescale of analysis e.g. week, month, year',
       units: String
+    },
+    time_of_year_relevance: {
+      description: 'Rating: 10 = relevant to time of year, 0 = irrelevant, 5 = average/normal',
+      units: Float,
+      priority_code:  'TYRL'
     }
   }.freeze
 
@@ -331,6 +337,16 @@ class AlertAnalysisBase
 
   def timescale
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for timeescale template variable ' + self.class.name)
+  end
+
+  protected def set_time_of_year_relevance(weight)
+    @time_of_year_relevance = weight
+  end
+
+  def time_of_year_relevance
+    set_time_of_year_relevance(5.0)
+    # TODO(PH, 26Aug2019) - remove return in favour of raise once all derived classes defined
+    # raise EnergySparksAbstractBaseClass, "Error: incorrect attempt to use abstract base class for time_of_year_relevance template variable #{self.class.name}"
   end
 
   # returns :enough, :not_enough, :minimum_might_not_be_accurate

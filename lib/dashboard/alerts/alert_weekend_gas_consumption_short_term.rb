@@ -118,8 +118,8 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     @last_5_weeks_average_weekend_£ = @last_5_weeks_average_weekend_kwh * BenchmarkMetrics::GAS_PRICE
     @percent_increase_on_last_5_weekends = @last_5_weeks_average_weekend_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @last_5_weeks_average_weekend_kwh) / @last_5_weeks_average_weekend_kwh
 
-    increase_rating_on_year  = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_average_weekend)
-    increase_rating_on_last_5_weeks  = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_last_5_weekends)
+    increase_rating_on_year = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_average_weekend)
+    increase_rating_on_last_5_weeks = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_last_5_weekends)
     of_annual_rating = calculate_rating_from_range(0.02, 0.12, @projected_percent_of_annual)
     combined_rating = increase_rating_on_year * of_annual_rating * increase_rating_on_last_5_weeks / 100.0
 

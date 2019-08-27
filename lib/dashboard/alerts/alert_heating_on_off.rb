@@ -167,8 +167,30 @@ class AlertHeatingOnOff < AlertGasModelBase
     (days_amr_data > 360 && enough_data_for_model_fit) ? :enough : :not_enough
   end
 
+  # overlap of this function with rating!
+  def time_of_year_relevance
+    # TODO(PH, 26Aug2019) - convert the rest of this class to this infrastructure which mixes and matches forecast and historic data
+    recent_temperatures = AverageHistoricOrForecastTemperatures.new(@school)
+    forecast_average_temperature = recent_temperatures.calculate_average_temperature_for_week_following(@asof_date - 7)
+
+    if heating_on_in_last_n_days(@asof_date, true) > 0 && forecast_average_temperature > 10.0
+      rating = calculate_rating_from_range(10.0, 15.0, forecast_average_temperature)
+      set_time_of_year_relevance(10.0 - (rating / 2.0)) # scale from 15+C(10.0 rating) to 10.0C(5.0 rating)
+    elsif heating_on_in_last_n_days(@asof_date, true) == 0 && forecast_average_temperature < 12.5
+      rating = calculate_rating_from_range(12.5, 7.5, forecast_average_temperature)
+      set_time_of_year_relevance(10.0 - (rating / 2.0)) # scale from 12.5+C(5.0 rating) to 7.5C(10.0 rating)
+    else
+      set_time_of_year_relevance(2.5)
+    end
+  end
+
+  private def heating_on_in_last_n_days(asof_date, on, n = 7)
+    (0...n).count { |days_ago| @heating_model.heating_on?(asof_date - days_ago) == on }
+  end
+
   private def calculate(asof_date)
     calculate_model(asof_date)
+
     @weather_forecast_table = []
     forecast = AlertAnalysisBase.test_mode ? cached_dark_sky_for_testing : dark_sky_forecast
     summary_forecast = convert_forecast_to_average_overnight_daytime_temperatures_cloud_cover(forecast)
@@ -186,6 +208,8 @@ class AlertHeatingOnOff < AlertGasModelBase
     @percent_saving_next_week = @next_weeks_predicted_consumption_kwh == 0.0 ? 0.0 : (@potential_saving_next_week_kwh / @next_weeks_predicted_consumption_kwh)
 
     @days_between_forecast_and_last_meter_date = calculate_days_between_forecast_and_last_meter_date
+
+    set_savings_capital_costs_payback(4 * @potential_saving_next_week_£, 0.0) # arbitrarily set 4 weeks of savings
 
     if @days_between_forecast_and_last_meter_date > 10
       @rating = 0 # special case, data out of date/stale

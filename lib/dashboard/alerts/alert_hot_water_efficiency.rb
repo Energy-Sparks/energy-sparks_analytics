@@ -119,6 +119,11 @@ class AlertHotWaterEfficiency < AlertGasModelBase
     :hotwater_alert
   end
 
+  # higher rating in summer when user has time to think about hot water versus heating
+  def time_of_year_relevance
+    set_time_of_year_relevance(@heating_on.nil? ? 5.0 : (@heating_on ? 5.0 : 7.5))
+  end
+
   private def calculate(asof_date)
     calculate_model(asof_date) # so gas_model_only base varaiables are expressed even if no hot water
     if @relevance != :never_relevant && heating_only
@@ -138,10 +143,9 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       @annual_benchmark_hot_water_kwh, @point_of_use_annual_standing_loss_kwh, @point_of_use_annual_total_kwh = AnalyseHeatingAndHotWater::HotwaterModel.annual_point_of_use_electricity_meter_kwh(pupils)
       @hot_water_annual_summer_unoccupied_methdology_£ = @hot_water_annual_summer_unoccupied_methdology_kwh * BenchmarkMetrics::GAS_PRICE
       @point_of_use_annual_total_£ = @point_of_use_annual_total_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
-      @saving_replacing_gas_hot_water_with_electric_point_of_use_£ = [@hot_water_annual_summer_unoccupied_methdology_£ - @point_of_use_annual_total_£, 0.0].max
+      @saving_replacing_gas_hot_water_with_electric_point_of_use_£ = @hot_water_annual_summer_unoccupied_methdology_£ - @point_of_use_annual_total_£
 
       heating_model_analysis(asof_date)
-
       one_year_saving_£ = Range.new(@saving_replacing_gas_hot_water_with_electric_point_of_use_£, @saving_replacing_gas_hot_water_with_electric_point_of_use_£)
       set_savings_capital_costs_payback(one_year_saving_£, electric_point_of_use_hotwater_costs)
 

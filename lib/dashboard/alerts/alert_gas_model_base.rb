@@ -133,7 +133,13 @@ class AlertGasModelBase < AlertGasOnlyBase
     false
   end
 
+  def time_of_year_relevance
+    set_time_of_year_relevance(@heating_on.nil? ? 5.0 : (@heating_on ? 7.5 : 2.5))
+  end
+
   protected def calculate_model(asof_date)
     @heating_model = model_cache(@school.urn, asof_date)
+    @heating_on = @heating_model.heating_on?(asof_date)
+    @heating_model
   end
 end

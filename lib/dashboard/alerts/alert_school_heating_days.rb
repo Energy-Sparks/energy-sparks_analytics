@@ -77,6 +77,11 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     },
   }
 
+  def time_of_year_relevance
+    toy_rating = [10, 11, 4, 5, 6].include?(@asof_date.month) ? 7.5 : 2.5
+    set_time_of_year_relevance(toy_rating)
+  end
+
   def heating_on_off_chart
     :heating_on_by_week_with_breakdown
   end

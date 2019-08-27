@@ -1,3 +1,5 @@
+# not a real 'user' alert, but something which provides basic data to support the
+# prioritisation of other alerts
 class AlertAdditionalPrioritisationData < AlertGasModelBase
   attr_reader :heating_on, :days_to_next_holiday, :days_from_last_holiday
   attr_reader :average_temperature_last_week, :average_forecast_temperature_next_week

@@ -169,7 +169,7 @@ class RunAlerts
   def self.save_priority_data(control)
     if !control.nil? && !@@alert_prioritises.empty?
       # get unique list of alert classes and their data, for header
-      unique_class_data_map =  @@alert_prioritises.map { |_school_names, dates| dates.map { |date, info| info.map { |class_name, method| [class_name, method.keys] } } }.flatten(2).uniq.to_h
+      unique_class_data_map = @@alert_prioritises.map { |_school_names, dates| dates.map { |date, info| info.map { |class_name, method| [class_name, method.keys] } } }.flatten(2).uniq.to_h
       data_fields = unique_class_data_map.map { |alert_class, fields| fields.map { |field| alert_class + ':' + field.to_s } }.flatten
 
       puts "Saving results to #{control[:filename]}"

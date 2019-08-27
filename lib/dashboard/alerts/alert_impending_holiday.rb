@@ -122,6 +122,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     electricity_daytype_breakdown_table:  { class_type: AlertOutOfHoursElectricityUsage, variable_name: :daytype_breakdown_table },
     electricity_breakdown_chart:          { class_type: AlertOutOfHoursElectricityUsage, variable_name: :breakdown_chart },
     electricity_weekly_chart:             { class_type: AlertOutOfHoursElectricityUsage, variable_name: :group_by_week_day_type_chart },
+    electricity_rating:                   { class_type: AlertOutOfHoursElectricityUsage, variable_name: :rating },
 
     gas_holidays_kwh:             { class_type: AlertOutOfHoursGasUsage, variable_name: :holidays_kwh },
     gas_total_annual_kwh:         { class_type: AlertOutOfHoursGasUsage, variable_name: :total_annual_kwh },
@@ -132,7 +133,8 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     gas_potential_saving_£:       { class_type: AlertOutOfHoursGasUsage, variable_name: :potential_saving_£ },
     gas_daytype_breakdown_table:  { class_type: AlertOutOfHoursGasUsage, variable_name: :daytype_breakdown_table },
     gas_breakdown_chart:          { class_type: AlertOutOfHoursGasUsage, variable_name: :breakdown_chart },
-    gas_weekly_chart:             { class_type: AlertOutOfHoursGasUsage, variable_name: :group_by_week_day_type_chart }
+    gas_weekly_chart:             { class_type: AlertOutOfHoursGasUsage, variable_name: :group_by_week_day_type_chart },
+    gas_rating:                   { class_type: AlertOutOfHoursGasUsage, variable_name: :rating }
   }.freeze
 
   def self.third_party_alert_variable_definitions
@@ -178,12 +180,21 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     set_holiday_variables(holiday_information)
     last_year_holiday = same_holiday_previous_year(@holiday_period)
     set_last_year_holiday_consumption_variables(last_year_holiday.start_date, last_year_holiday.end_date, last_year_holiday.nil?)
+    potential_saving = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
+    set_savings_capital_costs_payback(potential_saving, 0.0)
 
-    @saving_kwh = 0.0
+    @saving_kwh = potential_saving
 
-    @rating = 5.0
+    @rating = (@gas_rating + @electricity_rating) / 2.0
   end
   alias_method :analyse_private, :calculate
+
+  def time_of_year_relevance
+    days_to_holiday = upcoming_holiday_information(@asof_date)[:start_date] - @asof_date
+    len = upcoming_holiday_information(@asof_date)[:length_days]
+    # only rate on the 21 days leading up to a holiday
+    set_time_of_year_relevance(days_to_holiday > 21.0 && len > 3 ? 0.0 : (10.0 - (days_to_holiday / 21.0) * 2.5))
+  end
 
   private def set_last_year_holiday_consumption_variables(start_date, end_date, no_data)
     if no_data

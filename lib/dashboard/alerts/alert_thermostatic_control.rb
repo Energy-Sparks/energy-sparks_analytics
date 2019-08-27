@@ -4,7 +4,7 @@ require_relative 'alert_gas_model_base.rb'
 class AlertThermostaticControl < AlertGasModelBase
   MIN_R2 = 0.8
 
-  attr_reader :r2_rating_out_of_10
+  attr_reader :r2_rating_out_of_10, :potential_saving_kwh
 
   def initialize(school)
     super(school, :thermostaticcontrol)
@@ -48,6 +48,10 @@ class AlertThermostaticControl < AlertGasModelBase
     thermostatic_chart: {
       description: 'Simplified version of relevant thermostatic chart',
       units: :chart
+    },
+    potential_saving_kwh: {
+      description: 'Potential savings kWh through perfect themostatic control',
+      units: { kwh: :gas}
     }
   }.freeze
 
@@ -78,6 +82,11 @@ class AlertThermostaticControl < AlertGasModelBase
   private def calculate(asof_date)
     calculate_model(asof_date)
 
+    @potential_saving_kwh = calculate_annual_heating_deviance_from_model_kwh(asof_date)
+    potential_saving_£ = calculate_annual_heating_deviance_from_model_kwh(asof_date) * BenchmarkMetrics::GAS_PRICE
+
+    set_savings_capital_costs_payback(potential_saving_£, 1000.0) # suggested £1,000 cost
+
     @rating = r2_rating_out_of_10
 
     @status = @rating < 5.0 ? :bad : :good
@@ -86,4 +95,21 @@ class AlertThermostaticControl < AlertGasModelBase
     @bookmark_url = add_book_mark_to_base_url('ThermostaticControl')
   end
   alias_method :analyse_private, :calculate
+
+  # crudely assess the potential saving as the difference between actual and predicted
+  # multiplied by the difference in the r2 to perfect 1.0, for the moment (PH, 27Aug2019)
+  private def calculate_annual_heating_deviance_from_model_kwh(asof_date)
+    potential_saving_kwh = 0.0
+    start_date = meter_date_up_to_one_year_before(aggregate_meter, asof_date)
+    (start_date..asof_date).each do |date|
+      if @heating_model.heating_on?(date)
+        avg_temperature = @school.temperatures.average_temperature(date)
+        predicted_kwh = [@heating_model.predicted_kwh(date, avg_temperature), 0.0].max # not -tve - fudge e.g. Whiteways holiday heating model producing spurious output
+        actual_kwh = kwh(date, date)
+        loss_versus_predicted_kwh = actual_kwh - predicted_kwh
+        potential_saving_kwh += loss_versus_predicted_kwh.magnitude # use absolute value for want of any other basis for the moment (PH, 27Aug2019)
+      end
+    end
+    potential_saving_kwh * (1.0 - r2)
+  end
 end

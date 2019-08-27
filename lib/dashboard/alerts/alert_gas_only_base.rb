@@ -41,6 +41,10 @@ class AlertGasOnlyBase < AlertAnalysisBase
     @school.aggregated_heat_meters.amr_data.end_date
   end
 
+  def time_of_year_relevance
+    set_time_of_year_relevance(5.0)
+  end
+
   def last_n_school_days_kwh(asof_date, school_days)
     kwhs = []
     days = last_n_school_days(asof_date, school_days)
