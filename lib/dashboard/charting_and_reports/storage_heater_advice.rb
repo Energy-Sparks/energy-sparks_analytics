@@ -183,7 +183,7 @@ class DashboardEnergyAdvice
             : At many schools the storage heaters are left on at weekends because the
             timer doesn't understand days of the week (24 hour timer)? Are storage
             heaters left on at your school during the weekend? Installing a '7-day'
-            timer which might cost the school &#163;300 could save your school
+            timer which might cost the school &#163;400 could save your school
             <%= annual_usage %> or <%= annual_usage('Weekend', :£) %> per year. Contact Energy Sparks
             <a href="mailto:hello@energysparks.uk?subject=Help with changing storage heater timers&">hello@energysparks.uk</a>
             for advice on changing timers if you
