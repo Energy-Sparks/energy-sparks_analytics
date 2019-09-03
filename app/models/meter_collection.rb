@@ -73,6 +73,19 @@ class MeterCollection
     end
   end
 
+  def aggregate_meter(fuel_type)
+    case fuel_type
+    when :electricity
+      aggregated_electricity_meters
+    when :gas
+      aggregated_heat_meters
+    when :storage_heater, :storage_heaters
+      storage_heater_meter
+    when :solar_pv
+      solar_pv_meter
+    end
+  end
+
   def to_s
     'Meter Collection:' + name + ':' + all_meters.join(';')
   end

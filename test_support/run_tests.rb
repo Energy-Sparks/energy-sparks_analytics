@@ -88,6 +88,10 @@ class RunTests
         run_drilldown
       when :timescales
         run_timescales
+      when :timescale_and_drilldown
+        run_timescales_drilldown
+      when :kpi_analysis
+        run_kpi_calculations(configuration)
       else
         configure_log_file(configuration) if component.to_s.include?('logger')
       end
@@ -171,8 +175,10 @@ class RunTests
 
       chart_list = [result]
 
+      new_chart_config = chart_config
+
       %i[move extend contract compare].each do |operation_type|
-        manipulator = ChartManagerTimescaleManipulation.factory(operation_type, chart_config, school)
+        manipulator = ChartManagerTimescaleManipulation.factory(operation_type, new_chart_config, school)
         next unless manipulator.chart_suitable_for_timescale_manipulation?
         puts "Display button: #{operation_type} forward 1 #{manipulator.timescale_description}" if manipulator.can_go_forward_in_time_one_period?
         puts "Display button: #{operation_type} back 1 #{manipulator.timescale_description}"    if manipulator.can_go_back_in_time_one_period?
@@ -185,6 +191,61 @@ class RunTests
       excel = ExcelCharts.new(excel_filename)
       excel.add_charts('Test', chart_list)
       excel.close
+    end
+  end
+
+  def run_timescales_drilldown
+    @school_list.each do |school_name|
+      chart_list = []
+      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- drilldown and timeshift.xlsx'
+      school = load_school(school_name)
+
+      puts 'Calculating standard chart'
+
+      chart_manager = ChartManager.new(school)
+      chart_name = :group_by_week_electricity
+      chart_config = chart_manager.get_chart_config(chart_name)
+      result = chart_manager.run_chart(chart_config, chart_name)
+      chart_list.push(result)
+
+      puts 'drilling down onto first column of chart => week chart by day'
+
+      [0, 7].each do |drilldown_chart_column_number|
+        column_in_chart = result[:x_axis_ranges][drilldown_chart_column_number]
+        new_chart_name, new_chart_config = chart_manager.drilldown(chart_name, chart_config, nil, column_in_chart)
+        new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
+        chart_list.push(new_chart_results)
+
+        %i[move extend contract compare].each do |operation_type|
+          puts "#{operation_type} chart 1 week"
+
+          manipulator = ChartManagerTimescaleManipulation.factory(operation_type, new_chart_config, school)
+          next unless manipulator.chart_suitable_for_timescale_manipulation?
+          puts "Display button: #{operation_type} forward 1 #{manipulator.timescale_description}" if manipulator.can_go_forward_in_time_one_period?
+          puts "Display button: #{operation_type} back 1 #{manipulator.timescale_description}"    if manipulator.can_go_back_in_time_one_period?
+          next unless manipulator.enough_data?(1) # shouldn't be necessary if conform to above button display
+          new_chart_config = manipulator.adjust_timescale(1) # go forward one period
+          new_new_chart_results = chart_manager.run_chart(new_chart_config, chart_name)
+          chart_list.push(new_new_chart_results)
+        end
+      end
+
+      puts 'saving result to Excel'
+
+      excel = ExcelCharts.new(excel_filename)
+      excel.add_charts('Test', chart_list)
+      excel.close
+    end
+  end
+
+  def run_kpi_calculations(config)
+    calculation_results = Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
+    @school_list.sort.each do |school_name|
+      school = load_school(school_name)
+      calculation = KPICalculation.new(school)
+      calculation.run_kpi_calculations
+      calculation_results = calculation_results.deep_merge(calculation.calculation_results)
+      KPICalculation.save_kpi_calculation_to_csv(config, calculation_results)
     end
   end
 

@@ -144,7 +144,7 @@ class ChartManagerTimescaleManipulation
       year:           'year',
       academicyear:   'academic year',
       month:          'month',
-      holiday:        'holiday',         
+      holiday:        'holiday',
       includeholiday: 'holiday',
       week:           'week',
       workweek:       'week',

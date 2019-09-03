@@ -161,7 +161,7 @@ class ExcelCharts
     charts.each do |chart|
       add_chart(worksheet, chart, data_col_offset, chart_row_offset)
       data_col_offset += 40
-      chart_row_offset += 20
+      chart_row_offset += 22
     end
   end
 

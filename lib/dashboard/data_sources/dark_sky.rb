@@ -32,6 +32,45 @@ class DarkSkyWeatherInterface
     [distance_to_weather_station, temperature_data, percent_bad, bad_data]
   end
 
+  # when setting up new schools it is often useful to find the location
+  # of the weather station for that latitide and longitude
+  # do this my moving slightly, then triangulating the position
+  # however there is a risk with this technique as the result could be
+  # ambigious e.g. the lat, long is equidistant between 2 weather stations
+  # hence returns 4 results for the reader to interpret
+  # this can't be resolve because darksky only provide a rounded distance
+  # - it turns out that the weather station is probably not relevant as the
+  # - temperature data is further interpolated by DarkSky to the requested
+  # - latitude, longitude rather than the 'nearest weather station'
+  def find_nearest_weather_station(date, latitude, longitude)
+    dist = distance_to_station(date, latitude, longitude)
+    return [latitude, longitude] if dist < 1.0
+
+    move_km = 0.25
+    one_degree_longitude_km = Math.cos(latitude * Math::PI / 180.0) * 111.0
+
+    dist_N = distance_to_station(date, latitude + (move_km / 111.0), longitude)
+    dist_E = distance_to_station(date, latitude, longitude + (move_km / one_degree_longitude_km))
+    dist_S = distance_to_station(date, latitude - (move_km / 111.0), longitude)
+    dist_W = distance_to_station(date, latitude, longitude - (move_km / one_degree_longitude_km))
+
+    distances = []
+
+    [[dist_N, dist_E], [dist_S, dist_E], [dist_N, dist_W], [dist_S, dist_W]].each_with_index do |dist_NEWS, index|
+      dist_NS, dist_EW = dist_NEWS
+      radians = Math.atan((dist - dist_NS) / (dist - dist_EW))
+      radians *= -1 if [1, 2].include?(index)
+      puts "#{dist} #{dist_NS} #{dist_EW} #{radians * 180 / Math::PI}"
+      distances.push([latitude + (dist * Math.sin(radians) / 111.0), longitude + (dist * Math.cos(radians) / one_degree_longitude_km)])
+    end
+    distances
+  end
+
+  private def distance_to_station(date, latitude, longitude)
+    distance, _temps, _p_bad, _bad = download_historic_weather(latitude, longitude, date - 1, date)
+    distance
+  end
+
   private def download_historic_weather(latitude, longitude, start_date, end_date)
     distance_to_weather_station = nil
     historic_weather_data = {}

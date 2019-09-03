@@ -134,6 +134,10 @@ class Temperatures < HalfHourlyData
     end
   end
 
+  def degree_days_in_date_range(start_date, end_date, base_temp = 15.5)
+    (start_date..end_date).to_a.map { |date| degree_days(date, base_temp) }.sum
+  end
+
   def modified_degree_days(date, base_temp)
     frost_degree_hours = 0.0
     (0..47).each do |i|

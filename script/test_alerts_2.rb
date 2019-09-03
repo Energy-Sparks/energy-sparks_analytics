@@ -5,11 +5,11 @@ require_rel '../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['.*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['Wood.*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   source:                   :analytics_db,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
-    alerts:   nil, #  [ AlertThermostaticControl ],
+    alerts:   nil, # [ AlertElectricityPeakKWVersusBenchmark ],
     control:  {
                 # print_alert_banner: true,
                 # alerts_history: true,
@@ -17,7 +17,7 @@ script = {
                 no_outputs:           %i[raw_variables_for_saving], # front_end_template_variables front_end_template_data raw_variables_for_saving],
                 save_and_compare:  {
                                       summary:      true,
-                                      # h_diff:     { use_lcs: false, :numeric_tolerance => 0.000001 },
+                                      h_diff:     { use_lcs: false, :numeric_tolerance => 0.000001 },
                                       data: %i[
                                         front_end_template_variables
                                         raw_variables_for_saving

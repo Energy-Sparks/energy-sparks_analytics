@@ -35,7 +35,8 @@ class RunAlerts
     AlertSchoolWeekComparisonGas                  => 'SchWeekGas',
     AlertPreviousHolidayComparisonGas             => 'PrevHolGas',
     AlertPreviousYearHolidayComparisonGas         => 'PrevYearHolGas',
-    AlertAdditionalPrioritisationData             => 'PrioritisationData'
+    AlertAdditionalPrioritisationData             => 'PrioritisationData',
+    AlertElectricityPeakKWVersusBenchmark         => 'PeakELectricKW'
   }.freeze
 
   RESULT_CALCULATION_METHOD_CALLS = {

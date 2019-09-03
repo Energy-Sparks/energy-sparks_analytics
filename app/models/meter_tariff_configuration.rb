@@ -1,9 +1,10 @@
 # configuration information for meter tariff class
 class MeterTariffs
   SHEFFIELDYPOCONTRACTDATES_2015_2020 = Date.new(2015, 1, 1)..Date.new(2020, 3, 1)
-  BATHCONTRACTDATES_2008_2020 = Date.new(2008, 1, 1)..Date.new(2020, 3, 1)
-  FROMECONTRACTDATES_2015_2020 = Date.new(2015, 1, 1)..Date.new(2020, 3, 1)
-  SOMERSETCONTRACTDATES_2015_2020 = Date.new(2017, 1, 1)..Date.new(2020, 3, 1)
+  BATHCONTRACTDATES_2008_2020 = Date.new(2008, 1, 1)..Date.new(2022, 3, 1)
+  FROMECONTRACTDATES_2015_2020 = Date.new(2015, 1, 1)..Date.new(2022, 3, 1)
+  HIGHLANDSCONTRACTDATES_2015_2020 = Date.new(2015, 1, 1)..Date.new(2022, 3, 1)
+  SOMERSETCONTRACTDATES_2015_2020 = Date.new(2017, 1, 1)..Date.new(2022, 3, 1)
   FOREVERCONTRACTDATES = Date.new(2000, 1, 1)..Date.new(2050, 1, 1)
   # TODO(PH, 12Jun2019) update times to regional times : https://greennetworkenergy.co.uk/help-centre/meters-and-meter-reading/economy-7/
   ECONOMY7_NIGHT_TIME_PERIOD = TimeOfDay.new(0, 0)..TimeOfDay.new(6, 30)
@@ -194,6 +195,38 @@ class MeterTariffs
       gas: {
         FROMECONTRACTDATES_2015_2020 => {
           name: 'Somerset gas tariff',
+          rates: {
+            standing_charge:              { per: :day,     rate: 4.00  },
+            rate:                         { per: :kwh,     rate: 0.015 }
+          }
+        }
+      }
+    },
+    'Highlands' => {
+      electricity: {
+        FOREVERCONTRACTDATES => {
+          name: 'Highland standard electricity tariff',
+          rates: {
+            standing_charge:              { per: :quarter, rate: 38.35   },
+            renewable_energy_obligation:  { per: :kwh,     rate: 0.00565 },
+            rate:                         { per: :kwh,     rate: 0.115 }
+          }
+        }
+      },
+      electricity_differential: {
+        FOREVERCONTRACTDATES => {
+          name: 'Highland day-night electricity tariff',
+          rates: {
+            standing_charge:              { per: :quarter, rate: 38.35   },
+            renewable_energy_obligation:  { per: :kwh,     rate: 0.00565 },
+            daytime_rate:                 { per: :kwh,     rate: 0.12805, time_period: ECONOMY7_DAY_TIME_PERIOD },
+            nighttime_rate:               { per: :kwh,     rate: 0.08736, time_period: ECONOMY7_NIGHT_TIME_PERIOD }
+          }
+        }
+      },
+      gas: {
+        FOREVERCONTRACTDATES => {
+          name: 'Highland gas tariff',
           rates: {
             standing_charge:              { per: :day,     rate: 4.00  },
             rate:                         { per: :kwh,     rate: 0.015 }

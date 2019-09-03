@@ -6,7 +6,7 @@ class ChartManager
   def drilldown(old_chart_name, chart_config_original, series_name, x_axis_range)
     chart_config = resolve_chart_inheritance(chart_config_original)
 
-    if chart_config[:series_breakdown] == :baseload || 
+    if chart_config[:series_breakdown] == :baseload ||
        chart_config[:series_breakdown] == :cusum ||
        chart_config[:series_breakdown] == :hotwater ||
        chart_config[:series_breakdown] == :heating ||
@@ -77,7 +77,7 @@ class ChartManager
     case existing_x_axis_config
     when :year, :academicyear
       :week
-    when :month, :week
+    when :month, :week, :schoolweek, :workweek, :hotwater, :daterange
       :day
     when :day
       :datetime

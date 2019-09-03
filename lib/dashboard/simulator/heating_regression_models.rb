@@ -820,7 +820,7 @@ module AnalyseHeatingAndHotWater
       choose_by_day_type(date, method(:school_day_model), HEATINGWEEKENDMODEL, HEATINGHOLIDAYMODEL)
     end
 
-    private def summer_model(date)
+    public def summer_model(date)
       choose_by_day_type(date, :summer_occupied_all_days, :weekend_hotwater_only, :holiday_hotwater_only)
     end
 

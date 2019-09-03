@@ -670,7 +670,8 @@ class AlertAnalysisBase
       AlertSchoolWeekComparisonGas,
       AlertPreviousHolidayComparisonGas,
       AlertPreviousYearHolidayComparisonGas,
-      AlertAdditionalPrioritisationData
+      AlertAdditionalPrioritisationData,
+      AlertElectricityPeakKWVersusBenchmark
     ]
   end
 end

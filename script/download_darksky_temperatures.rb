@@ -44,13 +44,27 @@ def start_end_dates(csv_filename)
   [start_date, end_date, new_file]
 end
 
+def find_nearest_weather_station_location(locations, date)
+  darksky = DarkSkyWeatherInterface.new
+
+  locations.each do |location, config|
+    lat_long_x4 = darksky.find_nearest_weather_station(date, config[:latitude], config[:longitude])
+    puts "#{location}: #{lat_long_x4}"
+    _dist, temperature_data_location, _percent_bad, _bad_data = darksky.historic_temperatures(config[:latitude], config[:longitude], date, date)
+    _dist, station_temperatures, _percent_bad, _bad_data = darksky.historic_temperatures(lat_long_x4[0][0], lat_long_x4[0][1], date, date)
+    puts temperature_data_location.values[0].join(';')
+    puts station_temperatures.values[0].join(';')
+  end
+end
+
 locations = {
-  'Bath'      => { latitude: 51.39,   longitude: -2.37,   csv_filename: 'Bath temperaturedata.csv' },
-  'Sheffield' => { latitude: 53.3811, longitude: -1.4701, csv_filename: 'Sheffield temperaturedata.csv' },
-  'Frome'     => { latitude: 51.2308, longitude: -2.3201, csv_filename: 'Frome temperaturedata.csv'},
+  'Bath'          => { latitude: 51.39,   longitude: -2.37,   csv_filename: 'Bath temperaturedata.csv' },
+  'Sheffield'     => { latitude: 53.3811, longitude: -1.4701, csv_filename: 'Sheffield temperaturedata.csv' },
+  'Frome'         => { latitude: 51.2308, longitude: -2.3201, csv_filename: 'Frome temperaturedata.csv'},
+  'Highlands (Inverness)'  => { latitude: 57.565289, longitude: -4.4325656, csv_filename: 'Frome temperaturedata.csv'},
 }
 
-darksky = DarkSkyWeatherInterface.new
+# find_nearest_weather_station_location(locations, Date.new(2019, 8, 20))
 
 puts
 puts 'DARK SKY TEMPERATURE DOWNLOAD'

@@ -98,6 +98,17 @@ class AreaNames
       met_office_forecast_id:     353467,
       latitude:                   53.3811,
       longitude:                  -1.4701
+    },
+    highlands: {
+      name:                       'Highlands (Inverness)',
+      temperature_filename:       'Highlands temperaturedata.csv',
+      solar_ir_filename:          'Highlands solardata.csv',
+      solar_pv_filename:          'pv data Highlands.csv',
+      holiday_calendar:           'Highlands holidays.csv',
+      yahoo_weather_forecast_id:  'inverness, uk', # untested 16Jan2019 post withdrawal of free API
+      met_office_forecast_id:     0,
+      latitude:                   57.565289,
+      longitude:                  -4.4325656
     }
   }.freeze
 end
