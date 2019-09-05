@@ -185,7 +185,7 @@ end
 history.save(calculated_results)
 
 print_banner "Differences:"
-h_diff = HashDiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
+h_diff = Hashdiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
 puts h_diff
 
 print_banner "Calc times:"

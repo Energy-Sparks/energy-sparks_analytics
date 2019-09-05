@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'soda-ruby', '~> 0.2.25'
   s.add_dependency 'structured_warnings', '~> 0.3.0'
   s.add_dependency 'chroma', '~> 0.2.0'
-  s.add_dependency 'hashdiff', '~> 0.4.0'
+  s.add_dependency 'hashdiff', '~> 1.0.0'
 
   # For profiling code
   s.add_dependency 'ruby-prof', '~> 0.17.0'

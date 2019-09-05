@@ -21,7 +21,7 @@ gem 'chroma'
 
 # Useful for debugging
 gem 'pry-byebug'
-gem 'hashdiff'
+gem 'hashdiff', '~> 1.0.0'
 
 # For profiling code
 gem 'ruby-prof'

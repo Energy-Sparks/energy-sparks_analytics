@@ -45,7 +45,7 @@ GEM
     extendmatrix (0.4)
     ffi (1.9.25)
     ffi (1.9.25-x64-mingw32)
-    hashdiff (0.3.7)
+    hashdiff (1.0.0)
     hashie (3.5.7)
     html-table (1.5.1)
       strongtyping
@@ -163,7 +163,7 @@ DEPENDENCIES
   activesupport (~> 6.0.0.rc1)
   benchmark-memory
   chroma
-  hashdiff
+  hashdiff (~> 1.0.0)
   html-table
   interpolate
   mechanize
