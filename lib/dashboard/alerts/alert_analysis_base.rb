@@ -147,6 +147,11 @@ class AlertAnalysisBase
     list.merge(convert_range_template_data_to_high_low(list, lookup, raw_data))
   end
 
+  def priority_template_data
+    lookup = flatten_template_variables
+    raw_template_variables.select { |type, _value| lookup[type].key?(:priority_code) }
+  end
+
   private def convert_range_template_data_to_high_low(template_data, lookup, raw_data)
     new_data = {}
     template_data.each do |type, data| # front end want ranges as seperate high/low symbol-value pairs
