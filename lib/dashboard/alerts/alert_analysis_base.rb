@@ -145,7 +145,7 @@ class AlertAnalysisBase
     raw_data = raw_template_variables
     list = text_template_variables.reject { |type, _value| [:chart, :table, TrueClass].include?(lookup[type][:units]) }
     list.merge(convert_range_template_data_to_high_low(list, lookup, raw_data))
-  end
+  end 
 
   def priority_template_data
     lookup = flatten_template_variables
