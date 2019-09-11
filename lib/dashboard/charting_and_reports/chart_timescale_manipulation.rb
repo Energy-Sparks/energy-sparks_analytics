@@ -271,7 +271,7 @@ class ChartManagerTimescaleManipulation
   end
 
   def days_in_date_range(daterange)
-    daterange.last - daterange.first + daterange.exclude_end? ? 0 : 1
+    daterange.last - daterange.first + (daterange.exclude_end? ? 0 : 1)
   end
 end
 
