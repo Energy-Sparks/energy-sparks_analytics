@@ -138,7 +138,7 @@ class AlertAnalysisBase
 
   def self.convert_range_symbol_to_low(type)
     (type.to_s + '_low').to_sym
-  end
+  end 
 
   def front_end_template_data
     lookup = flatten_template_variables
