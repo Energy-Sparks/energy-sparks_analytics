@@ -244,7 +244,7 @@ class ChartManagerTimescaleManipulation
 
   def calculate_new_date_range(existing_timescale_daterange, start_factor, end_factor, override_days_factor = nil)
     days_in_range = override_days_factor.nil? ? days_in_date_range(existing_timescale_daterange) : override_days_factor
-    # need to provide chart config for original period range, so when you extend
+    # need to provide chart config for original period range, so when you extend.
     # from a 1 to a 2 and then a 3 week chart, you can go back to a 2 week chart following a contraction request
     @cadence_days = days_in_range.to_i unless @original_chart_config.key?(:cadence_days)
     start_date = existing_timescale_daterange.first + days_in_range * start_factor
@@ -271,7 +271,7 @@ class ChartManagerTimescaleManipulation
   end
 
   def days_in_date_range(daterange)
-    daterange.last - daterange.first + daterange.exclude_end? ? 0 : 1
+    daterange.last - daterange.first + (daterange.exclude_end? ? 0 : 1)
   end
 end
 
