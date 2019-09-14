@@ -45,3 +45,4 @@ documents/*
 TestResults/*
 BenchmarkLog/*
 Charts/*
+Alerts/*
