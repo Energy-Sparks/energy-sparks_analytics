@@ -44,7 +44,17 @@ class ChartManager
 
     ap(chart_config, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
+    reformat_dates(chart_config)
+
     [new_chart_name, chart_config]
+  end
+
+  private def reformat_dates(chart_config)
+    if !chart_config[:x_axis].nil? && !%i[datetime dayofweek intraday nodatebuckets datetime].include?(chart_config[:x_axis])
+      chart_config[:x_axis_reformat] = { date: '%d %b %Y' }
+    elsif chart_config.key?(:x_axis_reformat)
+      chart_config.delete(:x_axis_reformat)
+    end
   end
 
   def parent_chart_timescale_description(chart_config)
