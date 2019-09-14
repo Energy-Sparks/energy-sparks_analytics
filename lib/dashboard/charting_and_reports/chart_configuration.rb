@@ -1532,6 +1532,89 @@ class ChartManager
       series_breakdown: :daytype,
       yaxis_units:      :£,
       yaxis_scaling:    :none
+    },
+    james_almond_chart_timeshifting_bug: {
+      :name=>"By Week: Electricity drilldown",
+      :chart1_type=>:column,
+      :chart1_subtype=>:stacked,
+      :meter_definition=>:allelectricity,
+      :x_axis=>:day,
+      :series_breakdown=>:daytype,
+      :yaxis_units=>:£,
+      :yaxis_scaling=>:none,
+      :timescale=>{ :daterange=>Date.new(2018,6,12)..Date.new(2018,6,18) }
+    },
+    calendar_picker_gas_week_chart: {
+      name:             'Calendar picker gas week chart',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      series_breakdown: :daytype,
+      timescale:        { daterange: Date.new(2018,6,12)..Date.new(2018,6,18) },
+      x_axis:           :day,
+      x_axis_reformat:  { date: '%a %d %b %Y' },
+      meter_definition: :allheat,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none
+    },
+    calendar_picker_electricity_week_chart: {
+      name:             'Calendar picker electricity week chart',
+      meter_definition: :allelectricity,
+      inherits_from:    :calendar_picker_gas_week_chart
+    },
+    calendar_picker_storage_heaters_week_chart: {
+      name:             'Calendar picker storage heaters week chart',
+      meter_definition: :storage_heater_meter,
+      inherits_from:    :calendar_picker_gas_week_chart
+    },
+    calendar_picker_gas_day_chart: {
+      name:             'Calendar picker gas day chart',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      timescale:        { daterange: Date.new(2018,6,12)..Date.new(2018,6,12) },
+      x_axis:           :intraday,
+      meter_definition: :allheat,
+      yaxis_units:      :kw,
+      yaxis_scaling:    :none
+    },
+    calendar_picker_electricity_day_chart: {
+      name:             'Calendar picker electricity day chart',
+      meter_definition: :allelectricity,
+      inherits_from:    :calendar_picker_gas_day_chart
+    },
+    calendar_picker_storage_heater_day_chart: {
+      name:             'Calendar picker storage heater day chart',
+      meter_definition: :storage_heater_meter,
+      inherits_from:    :calendar_picker_gas_day_chart
+    },
+    calendar_picker_electricity_week_example_comparison_chart: {
+      name:             'Calendar picker electricity example week comparison chart',
+      timescale:        [
+                          { daterange: Date.new(2018,6,12)..Date.new(2018,6,18) },
+                          { daterange: Date.new(2018,6,19)..Date.new(2018,6,26) },
+                        ],
+      inherits_from:    :calendar_picker_electricity_week_chart
+    },
+    calendar_picker_electricity_day_example_comparison_chart: {
+      name:             'Calendar picker electricity example day comparison chart',
+      timescale:        [
+                          { daterange: Date.new(2018,6,12)..Date.new(2018,6,12) },
+                          { daterange: Date.new(2018,6,13)..Date.new(2018,6,13) },
+                        ],
+      inherits_from:    :calendar_picker_electricity_day_chart
+    },
+    calendar_picker_electricity_day_example_meter_breakdown_chart: {
+      name:             'Calendar picker electricity example meter breakdown chart',
+      series_breakdown: :meter,
+      inherits_from:    :calendar_picker_electricity_week_chart
+    },
+    calendar_picker_electricity_day_example_meter_breakdown_comparison_chart: {
+      name:             'Calendar picker electricity example meter breakdown chart',
+      series_breakdown: :meter,
+      timescale:        [
+        { daterange: Date.new(2018,6,12)..Date.new(2018,6,18) },
+        { daterange: Date.new(2018,6,19)..Date.new(2018,6,26) },
+      ],
+      inherits_from:    :calendar_picker_electricity_week_chart
     }
   }.freeze
 end
