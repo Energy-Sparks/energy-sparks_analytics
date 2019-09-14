@@ -108,9 +108,7 @@ class ChartManagerTimescaleManipulation
     new_timescales
   end
 
-  private
-
-  def determine_chart_range(chart_config)
+  private def determine_chart_range(chart_config)
     aggregator = Aggregator.new(@school, chart_config, false)
     chart_config, _schools = aggregator.initialise_schools_date_range # get min and max combined meter ranges
     if chart_config.key?(:min_combined_school_date) || chart_config.key?(:max_combined_school_date)
@@ -139,33 +137,62 @@ class ChartManagerTimescaleManipulation
     timescales
   end
 
+  TIME_SCALE_TYPES = { 
+    year:           'year',
+    academicyear:   'academic year',
+    month:          'month',
+    holiday:        'holiday',
+    includeholiday: 'holiday',
+    week:           'week',
+    workweek:       'week',
+    schoolweek:     'school week',
+    day:            'day',
+    frostday:       'frosty day',
+    frostday_3:     'frosty day',
+    diurnal:        'day with large diurnal range',
+    optimum_start:  'optimum start example day',
+    daterange:      'date range',
+    hotwater:       'summer period with hot water usage',
+    none:           ''
+  }.freeze
+
+  def self.timescale_name(timescale_symbol) # also used by drilldown
+    TIME_SCALE_TYPES.key?(timescale_symbol) ? TIME_SCALE_TYPES[timescale_symbol] : TIME_SCALE_TYPES[:none] 
+  end
+
   public def timescale_description
-    time_scale_types = {
-      year:           'year',
-      academicyear:   'academic year',
-      month:          'month',
-      holiday:        'holiday',
-      includeholiday: 'holiday',
-      week:           'week',
-      workweek:       'week',
-      schoolweek:     'school week',
-      day:            'day',
-      frostday:       'frosty day',
-      frostday_3:     'frosty day',
-      diurnal:        'day with large diurnal range',
-      optimum_start:  'optimum start example day',
-      daterange:      'date range',
-      hotwater:       'summer period with hot water usage',
-      none:           ''
-    }
     timescales = convert_timescale_to_array_internal(@original_chart_config[:timescale])
     timescale = timescales[0]
-    if time_scale_types.key?(timescale)
-      time_scale_types[timescale]
-    elsif timescale.is_a?(Hash) && !timescale.empty? && time_scale_types.key?(timescale.keys[0])
-      time_scale_types[timescale.keys[0]]
+    if timescale.is_a?(Hash) && !timescale.empty? && timescale.keys[0] == :daterange
+      impute_description_from_date_range(timescale.values[0])
+    elsif TIME_SCALE_TYPES.key?(timescale)
+      self.class.timescale_name(timescale)
+    elsif timescale.is_a?(Hash) && !timescale.empty? && TIME_SCALE_TYPES.key?(timescale.keys[0])
+      self.class.timescale_name(timescale.keys[0])
     else
       'period'
+    end
+  end
+
+  private
+
+  private def impute_description_from_date_range(date_range)
+    days = days_in_date_range(date_range)
+    case days
+    when 1
+      self.class.timescale_name(:day)
+    when 7
+      self.class.timescale_name(:week)
+    when 28..31
+      self.class.timescale_name(:month)
+    when 350..380
+      self.class.timescale_name(:year)
+    else
+      if days % 7 == 0
+        "#{days / 7} weeks" # ends up with duplicate number e.g. 'Move forward 1 2 weeks' TODO(PH, 13Sep2019) fix further up hierarchy
+      else
+        self.class.timescale_name(:daterange)
+      end
     end
   end
 
@@ -271,7 +298,7 @@ class ChartManagerTimescaleManipulation
   end
 
   def days_in_date_range(daterange)
-    daterange.last - daterange.first + (daterange.exclude_end? ? 0 : 1)
+    (daterange.last - daterange.first + (daterange.exclude_end? ? 0 : 1)).to_i
   end
 end
 

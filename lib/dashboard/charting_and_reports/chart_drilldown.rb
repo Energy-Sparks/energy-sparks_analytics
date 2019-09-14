@@ -6,6 +6,8 @@ class ChartManager
   def drilldown(old_chart_name, chart_config_original, series_name, x_axis_range)
     chart_config = resolve_chart_inheritance(chart_config_original)
 
+    chart_config[:parent_chart_xaxis_config] = chart_config[:x_axis] # save for front end 'up/back' button text
+
     if chart_config[:series_breakdown] == :baseload ||
        chart_config[:series_breakdown] == :cusum ||
        chart_config[:series_breakdown] == :hotwater ||
@@ -40,10 +42,14 @@ class ChartManager
 
     chart_config[:name] += (series_name.nil? && x_axis_range.nil?) ? ' no drilldown' : ' drilldown'
 
-    puts "Final drilldown chart config: #{chart_config}"
     ap(chart_config, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
     [new_chart_name, chart_config]
+  end
+
+  def parent_chart_timescale_description(chart_config)
+    return nil if !chart_config.key?(:parent_chart_xaxis_config) || chart_config[:parent_chart_xaxis_config].nil?
+    ChartManagerTimescaleManipulation.timescale_name(chart_config[:parent_chart_xaxis_config])
   end
 
   def drilldown_series_name(chart_config, series_name)
