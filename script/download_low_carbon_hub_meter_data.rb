@@ -92,11 +92,22 @@ class DownloadLowCarbonHubMeterReadings
   end
 end
 
+def print_all_available_meter_data
+  rbee = RbeeSolarPV.new
+  list = rbee.available_meter_ids
+  list.each do |meter_id|
+    puts '=' * 80
+    ap rbee.full_installation_information(meter_id)
+  end
+end
+
 request = {
   name:     'Long Furlong',
   meter_id: 216057958,
   urn:      123085
 }
+
+# print_all_available_meter_data
 
 low_carbon = DownloadLowCarbonHubMeterReadings.new(request[:name], request[:meter_id], request[:urn])
 start_date = low_carbon.calculate_start_date
