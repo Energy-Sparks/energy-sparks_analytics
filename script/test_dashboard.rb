@@ -15,13 +15,14 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  schools:                  ['.*'],
+  schools:                  ['St Marks.*'],
   source:                   :analytics_db,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                :dashboard
+                                pupils_dashboard: :pupil_analysis_page
 =begin
+                                :dashboard
                                 adhoc_worksheet: { name: 'Test', charts: %i[
                                   calendar_picker_gas_week_chart
                                   calendar_picker_electricity_week_chart
@@ -37,7 +38,7 @@ script = {
                               control: {
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
-                                dont_compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
+                                compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
                               }
                             }, 
 }

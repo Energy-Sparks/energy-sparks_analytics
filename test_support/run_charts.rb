@@ -61,6 +61,8 @@ class RunCharts
       run_dashboard
     elsif config_component.is_a?(Hash) && config_component.keys[0] == :adhoc_worksheet
       run_single_dashboard_page(config_component.values[0])
+    elsif config_component.is_a?(Hash) && config_component.keys[0] == :pupils_dashboard
+      run_recursive_dashboard_page(config_component.values[0])
     end
   end
 
@@ -72,6 +74,35 @@ class RunCharts
 
     report_groups.each do |page_name|
       run_single_dashboard_page(DashboardConfiguration::DASHBOARD_PAGE_GROUPS[page_name])
+    end
+  end
+
+  def run_recursive_dashboard_page(parent_page_config)
+    puts 'run_recursive_dashboard_page'
+    pages = []
+    config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[parent_page_config]
+    flatten_recursive_page_hierarchy(config, pages)
+    pages.each do |page|
+      page.each do |page_name, charts|
+        charts.each do |chart_name|
+         run_chart(page_name, chart_name)
+        end
+      end
+    end
+  end
+
+  def flatten_recursive_page_hierarchy(parent_page,  pages, name = '')
+    if parent_page.is_a?(Hash)
+      if parent_page.key?(:sub_pages)
+        parent_page[:sub_pages].each do |sub_page|
+          new_name = name + sub_page[:name] if sub_page.is_a?(Hash) && sub_page.key?(:name)
+          flatten_recursive_page_hierarchy(sub_page,  pages, new_name)
+        end
+      else
+        pages.push({ name => parent_page[:charts] })
+      end
+    else
+      puts 'Error in recursive dashboard definition'
     end
   end
 
