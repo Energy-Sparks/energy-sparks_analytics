@@ -214,6 +214,7 @@ class DashboardConfiguration
                               },
         heating_model_fitting: {
                                 name: 'Heating Model Fitting',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   group_by_week_gas_model_fitting_one_year
                                   group_by_week_gas_model_fitting_unlimited
@@ -251,6 +252,7 @@ class DashboardConfiguration
                               },
         solar_pv:             {
                                 name: 'Solar PV',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   solar_pv_group_by_month
                                   solar_pv_last_7_days_by_submeter
@@ -258,6 +260,7 @@ class DashboardConfiguration
                               },
         carbon_emissions:   {
                                 name: 'Carbon Emissions',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   benchmark_co2
                                   electricity_longterm_trend_kwh_with_carbon
@@ -271,6 +274,7 @@ class DashboardConfiguration
                               },
         cost:   {
                                 name: 'Costs',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   electricity_by_month_year_0_1_finance_advice
                                   electricity_cost_comparison_last_2_years_accounting
@@ -285,6 +289,7 @@ class DashboardConfiguration
                               },
         cost_electricity_only:   {
                                 name: 'Costs',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   electricity_by_month_year_0_1_finance_advice
                                   electricity_cost_comparison_last_2_years_accounting
