@@ -8,11 +8,14 @@ class DownloadDarkSkyTemperatures
   include Logging
   INPUT_DATA_DIR = File.join(File.dirname(__FILE__), '../InputData').freeze
 
+=begin
   LOCATIONS = {
-    'Bath'      => { latitude: 51.39,   longitude: -2.37,   csv_filename: 'Bath temperaturedata.csv' },
-    'Sheffield' => { latitude: 53.3811, longitude: -1.4701, csv_filename: 'Sheffield temperaturedata.csv' },
-    'Frome'     => { latitude: 51.2308, longitude: -2.3201, csv_filename: 'Frome temperaturedata.csv'},
+    'Bath'      => { latitude: 51.39,   longitude: -2.37,         csv_filename: 'Bath temperaturedata.csv' },
+    'Sheffield' => { latitude: 53.3811, longitude: -1.4701,       csv_filename: 'Sheffield temperaturedata.csv' },
+    'Frome'     => { latitude: 51.2308, longitude: -2.3201,       csv_filename: 'Frome temperaturedata.csv'},
+    'Highlands' => { latitude: 57.565289, longitude: -4.4325656,  csv_filename: 'Highlands temperaturedata.csv'},
   }.freeze
+=end
 
   def csv_last_reading(filename)
     last_date = nil
@@ -40,7 +43,7 @@ class DownloadDarkSkyTemperatures
     end_date = Date.today - 1
     last_reading_date = csv_last_reading(csv_filename)
     if last_reading_date.nil?
-      start_date = end_date - 365
+      start_date = Date.new(2016,12,31)
     else
       new_file = false
       start_date = last_reading_date + 1
@@ -54,9 +57,9 @@ class DownloadDarkSkyTemperatures
     logger.info '=' * 120
     logger.info 'DARK SKY TEMPERATURE DOWNLOAD'
 
-    LOCATIONS.each do |city, config|
+    AreaNames::AREA_NAMES.each do |city, config|
       logger.info "#{city}:"
-      csv_filename = "#{INPUT_DATA_DIR}/" + config[:csv_filename]
+      csv_filename = "#{INPUT_DATA_DIR}/" + config[:temperature_filename]
       start_date, end_date, new_file = start_end_dates(csv_filename)
 
       if start_date > end_date

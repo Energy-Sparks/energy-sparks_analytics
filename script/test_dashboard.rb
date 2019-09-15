@@ -10,19 +10,34 @@ puts
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+  # logger1:                  { name: STDOUT, format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['.*'], # ['Round.*'],
+  # dark_sky_temperatures:    nil,
+  # grid_carbon_intensity:    nil,
+  # sheffield_solar_pv:       nil,
+  schools:                  ['.*'],
   source:                   :analytics_db,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
                                 :dashboard
-                                # adhoc_worksheet: { name: 'Test', charts: %i[last_2_weeks_gas last_2_weeks_gas_degreedays] }
+=begin
+                                adhoc_worksheet: { name: 'Test', charts: %i[
+                                  calendar_picker_gas_week_chart
+                                  calendar_picker_electricity_week_chart
+                                  calendar_picker_gas_day_chart
+                                  calendar_picker_electricity_day_chart
+                                  calendar_picker_electricity_week_example_comparison_chart
+                                  calendar_picker_electricity_day_example_comparison_chart
+                                  calendar_picker_electricity_day_example_meter_breakdown_chart
+                                  calendar_picker_electricity_day_example_meter_breakdown_comparison_chart
+                                  ] }
+=end
                               ],
                               control: {
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
-                                compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
+                                dont_compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
                               }
                             }, 
 }

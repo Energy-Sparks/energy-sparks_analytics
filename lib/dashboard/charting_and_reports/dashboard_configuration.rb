@@ -52,6 +52,35 @@ class DashboardConfiguration
                                   last_7_days_intraday_gas
                                 ]
                               },
+    pupil_analysis_page_electicity_kwh: {
+      charts: %i[
+        # for gas no degree days
+        group_by_week_electricity
+      ]
+    },
+    pupil_analysis_page_electicity_£: {
+      charts: %i[ group_by_week_electricity ]
+    },
+    pupil_analysis_page_electicity_CO2: {
+      charts: %i[ group_by_week_electricity ]
+    },
+    pupil_analysis_page_electicity_pie_chart: {
+      charts: %i[ daytype_breakdown_electricity ]
+       # in £
+    },
+    pupil_analysis_page_electicity_bar_chart: {
+      charts: %i[
+        benchmark
+        group_by_week_electricity # in £
+        electricity_longterm_trend # in £
+      ]
+    },
+    pupil_analysis_page_electricity_line_chart: {
+      charts: %i[
+        baseload_lastyear # not electricity
+        intraday_line_school_last7days # and gas
+      ]
+    },
     main_dashboard_electric_and_gas: {
                                 name:   'Overview',
                                 charts: %i[

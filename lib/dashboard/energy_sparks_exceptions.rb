@@ -7,6 +7,9 @@ end
 class EnergySparksUnexpectedStateException < StandardError
 end
 
+class EnergySparksUnsupportedFunctionalityException < StandardError
+end
+
 class EnergySparksNotEnoughDataException < StandardError
 end
 

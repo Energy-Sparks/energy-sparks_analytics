@@ -65,7 +65,7 @@ class CSVSplitter
   end
 end
 
-destination_directory = 'G:\\RemoteCloneRepo\\energy-sparks_analytics\\MeterReadings\\Front End CSV Downloads\\'
+destination_directory = 'C:\\Users\\phili\\OneDrive\\ESDev\\energy-sparks_analytics\\MeterReadings\\Front End CSV Downloads\\'
 source_file = destination_directory + 'all-amr-readings.csv'
 
 splitter = CSVSplitter.new(source_file, destination_directory,'Mpan Mprn', ',')

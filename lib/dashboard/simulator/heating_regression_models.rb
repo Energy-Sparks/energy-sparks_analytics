@@ -60,7 +60,6 @@ module AnalyseHeatingAndHotWater
           @model_overrides.fitting[:fit_model_start_date],
           @model_overrides.fitting[:fit_model_end_date]
         )
-        logger.info "Meter attributes have overridden model start and end dates #{period.start_date} #{period.end_date}"
       end
 
       return @models[model_type] if @models.key?(model_type)

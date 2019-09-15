@@ -99,7 +99,13 @@ end
   'St Martins Garden Primary School'    => :downloadfromfrontend,
   'Athelstan Primary School'            => :downloadfromfrontend,
   'Watercliffe Meadow Primary'          => :downloadfromfrontend,
-  'Hugh Sexey'                          => :downloadfromfrontend
+  'Hugh Sexey'                          => :downloadfromfrontend,
+  'Aviemore'                            => :downloadfromfrontend,
+  'Ben Wyvis'                           => :downloadfromfrontend,
+  'Miller'                              => :downloadfromfrontend,
+  'Pennyland'                           => :downloadfromfrontend,
+  'Strathpeffer'                        => :downloadfromfrontend,
+  'Tomnacross'                          => :downloadfromfrontend
 }
 
 
