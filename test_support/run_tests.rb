@@ -169,7 +169,7 @@ class RunTests
       excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- timescale shift.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
-      chart_name = :solar_pv_last_7_days_timescale_test
+      chart_name = :james_almond_chart_timeshifting_bug # :solar_pv_last_7_days_timescale_test
       chart_config = chart_manager.get_chart_config(chart_name)
       result = chart_manager.run_chart(chart_config, chart_name)
 
@@ -206,15 +206,22 @@ class RunTests
       chart_name = :group_by_week_electricity
       chart_config = chart_manager.get_chart_config(chart_name)
       result = chart_manager.run_chart(chart_config, chart_name)
+
       chart_list.push(result)
 
       puts 'drilling down onto first column of chart => week chart by day'
 
-      [0, 7].each do |drilldown_chart_column_number|
+      [0, 6].each do |drilldown_chart_column_number|
         column_in_chart = result[:x_axis_ranges][drilldown_chart_column_number]
         new_chart_name, new_chart_config = chart_manager.drilldown(chart_name, chart_config, nil, column_in_chart)
+        puts "Chart parent times description: #{chart_manager.parent_chart_timescale_description(new_chart_config)}"
         new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
         chart_list.push(new_chart_results)
+
+        # one off test to drill down to datetime to check temporary datetime axis reformat TODO(PH, 14Sep2019) remove
+        new_chart_name_2, new_chart_config_2 = chart_manager.drilldown(new_chart_name, new_chart_config, nil, column_in_chart)
+        new_chart_results_2 = chart_manager.run_chart(new_chart_config_2, new_chart_name_2)
+        chart_list.push(new_chart_results_2)
 
         %i[move extend contract compare].each do |operation_type|
           puts "#{operation_type} chart 1 week"

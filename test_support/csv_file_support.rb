@@ -14,7 +14,7 @@ class TestCSVFileSupport
 
   def backup
     logger.info "copying from #{full_filename} to #{@backup_filename}"
-    FileUtils.cp(full_filename, @backup_filename)
+    FileUtils.cp(full_filename, @backup_filename) if exists?
   end
 
   def last_reading_date

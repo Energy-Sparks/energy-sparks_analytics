@@ -52,6 +52,82 @@ class DashboardConfiguration
                                   last_7_days_intraday_gas
                                 ]
                               },
+    pupil_analysis_page: {
+      name:   'Pupil Analysis',
+      sub_pages:  [
+        {                    
+          name:     'Electricity',
+          sub_pages:  [
+            { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_electricity_kwh] },
+            { name: 'Cost',   charts: %i[pupil_dashboard_group_by_week_electricity_£] },
+            { name: 'CO2',    charts: %i[pupil_dashboard_group_by_week_electricity_co2] },
+            { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_electricity] },
+            { 
+              name: 'Bar',
+              sub_pages: [
+                { name: 'Bench',   charts: %i[pupil_dashboard_electricity_benchmark] },
+                { name: 'Week',    charts: %i[pupil_dashboard_group_by_week_electricity_£] },
+                { name: 'Year',    charts: %i[pupil_dashboard_electricity_longterm_trend_£] }
+              ]
+            },
+            {
+              name: 'Line',  
+              sub_pages: [
+                { name: 'Base',   charts: %i[pupil_dashboard_baseload_lastyear] },
+                { name: '7days',  charts: %i[pupil_dashboard_intraday_line_electricity_last7days] }
+              ]
+            }
+          ],
+        },                   
+        {                    
+          name:     'Gas',
+          sub_pages:  [
+            { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_gas_kwh] },
+            { name: 'Cost',   charts: %i[pupil_dashboard_group_by_week_gas_£] },
+            { name: 'CO2',    charts: %i[pupil_dashboard_group_by_week_gas_co2] },
+            { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_gas] },
+            { 
+              name: 'Bar',
+              sub_pages: [
+                { name: 'Bench',   charts: %i[pupil_dashboard_gas_benchmark] },
+                { name: 'Week',    charts: %i[pupil_dashboard_group_by_week_gas_£] },
+                { name: 'Year',    charts: %i[pupil_dashboard_gas_longterm_trend_£] }
+              ]
+            },
+            { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_gas_last7days] },
+          ],
+        },
+      ],
+    },
+    pupil_analysis_page_electicity_kwh: {
+      charts: %i[
+        # for gas no degree days
+        group_by_week_electricity
+      ]
+    },
+    pupil_analysis_page_electicity_£: {
+      charts: %i[ group_by_week_electricity ]
+    },
+    pupil_analysis_page_electicity_CO2: {
+      charts: %i[ group_by_week_electricity ]
+    },
+    pupil_analysis_page_electicity_pie_chart: {
+      charts: %i[ daytype_breakdown_electricity ]
+       # in £
+    },
+    pupil_analysis_page_electicity_bar_chart: {
+      charts: %i[
+        benchmark
+        group_by_week_electricity # in £
+        electricity_longterm_trend # in £
+      ]
+    },
+    pupil_analysis_page_electricity_line_chart: {
+      charts: %i[
+        baseload_lastyear # not electricity
+        intraday_line_school_last7days # and gas
+      ]
+    },
     main_dashboard_electric_and_gas: {
                                 name:   'Overview',
                                 charts: %i[
@@ -185,6 +261,7 @@ class DashboardConfiguration
                               },
         heating_model_fitting: {
                                 name: 'Heating Model Fitting',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   group_by_week_gas_model_fitting_one_year
                                   group_by_week_gas_model_fitting_unlimited
@@ -222,6 +299,7 @@ class DashboardConfiguration
                               },
         solar_pv:             {
                                 name: 'Solar PV',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   solar_pv_group_by_month
                                   solar_pv_last_7_days_by_submeter
@@ -229,6 +307,7 @@ class DashboardConfiguration
                               },
         carbon_emissions:   {
                                 name: 'Carbon Emissions',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   benchmark_co2
                                   electricity_longterm_trend_kwh_with_carbon
@@ -242,6 +321,7 @@ class DashboardConfiguration
                               },
         cost:   {
                                 name: 'Costs',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   electricity_by_month_year_0_1_finance_advice
                                   electricity_cost_comparison_last_2_years_accounting
@@ -256,6 +336,7 @@ class DashboardConfiguration
                               },
         cost_electricity_only:   {
                                 name: 'Costs',
+                                change_measurement_units:   false,
                                 charts: %i[
                                   electricity_by_month_year_0_1_finance_advice
                                   electricity_cost_comparison_last_2_years_accounting

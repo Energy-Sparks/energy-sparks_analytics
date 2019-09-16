@@ -43,3 +43,6 @@ OldInputData/*
 OldMeterReadings/*
 documents/*
 TestResults/*
+BenchmarkLog/*
+Charts/*
+Alerts/*

@@ -33,10 +33,14 @@ module Dashboard
       @meter_correction_rules = []
       @sub_meters = []
       @external_meter_id = external_meter_id
-      @meter_attributes = meter_attributes
-      process_meter_attributes
+      set_meter_attributes(meter_attributes)
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
+    end
+
+    def set_meter_attributes(meter_attributes)
+      @meter_attributes = meter_attributes
+      process_meter_attributes
     end
 
     def amr_data=(amr_data)
@@ -71,7 +75,7 @@ module Dashboard
     end
 
     def storage_heater?
-      !@storage_heater_setup.nil?
+      !@storage_heater_setup.nil? || @fuel_type == :storage_heater # TODO(PH, 14Sep2019) remove @sstorage_heater_setup test?
     end
 
     def solar_pv_panels?
@@ -145,11 +149,18 @@ module Dashboard
       mpan_mprn > 60000000000000 
     end
 
+    def aggregate_meter?
+      # TODO(PH, 14Sep2019) - Make 90000000000000 etc. masks constants
+      90000000000000 & mpan_mprn > 0 || 80000000000000 & mpan_mprn > 0
+    end
+
     def self.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type, group_number = 0)
       if fuel_type == :electricity || fuel_type == :aggregated_electricity
         90000000000000 + urn.to_i
       elsif fuel_type == :gas || fuel_type == :aggregated_heat
         80000000000000 + urn.to_i
+      elsif fuel_type == :storage_heater # suspect as same number as solar_pv; TODO(PH, 14Sep2019)
+        70000000000000 + urn.to_i
       elsif fuel_type == :solar_pv
         70000000000000 + urn.to_i + 1000000000000 * group_number
       elsif fuel_type == :exported_solar_pv

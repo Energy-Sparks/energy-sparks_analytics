@@ -192,6 +192,35 @@ class MeterAttributes
         reason: 'Storage heater model assumptions on summer usage, wrong probably because of partial turn off'
       }
     },
+    # ==============================Miller Academy==================================
+    1712485592509 => {
+      storage_heaters: [
+        {
+          start_date:         Date.new(2010, 1, 1),
+          end_date:           Date.new(2025, 1, 1),
+          power_kw:           144.0,
+          charge_start_time:  TimeOfDay.new(22, 00),
+          charge_end_time:    TimeOfDay.new(7, 00)
+        }
+      ],
+    },
+    1712485591505 => {
+      storage_heaters: [
+        {
+          start_date:         Date.new(2010, 1, 1),
+          end_date:           Date.new(2025, 1, 1),
+          power_kw:           34.0,
+          charge_start_time:  TimeOfDay.new(22, 00),
+          charge_end_time:    TimeOfDay.new(7, 00)
+        }
+      ],
+    },
+    160000005101328 => { # aggregate storage heater i.e. 1600..... + urn
+      heating_model: {
+        max_summer_daily_heating_kwh:     160,
+        reason: 'Aggregate Storage heater: model assumptions wrong as heating on all year'
+      }
+    },
     # ==============================Mundella Primary School=============================
     9091095306 => {
       meter_corrections: [
@@ -242,6 +271,26 @@ class MeterAttributes
           fit_£_per_kwh:      0.30
         }
       ]
+    },
+    
+    # ==============================Pennyland==================================
+    1732522812008 => {
+      storage_heaters: [
+        {
+          start_date:         Date.new(2010, 1, 1),
+          end_date:           Date.new(2025, 1, 1),
+          power_kw:           70.0,
+          charge_start_time:  TimeOfDay.new(00, 00),
+          charge_end_time:    TimeOfDay.new(24, 00),
+          reason:             'Set to 24 hours as think might be only SH consumption, waiting confirmation from CT 15Sep2019'
+        }
+      ],
+    },
+    160000005101026 => { # aggregate storage heater i.e. 1600..... + urn
+      heating_model: {
+        max_summer_daily_heating_kwh:     40,
+        reason: 'Aggregate Storage heater: model assumptions ~160 wrong as heating on all year'
+      }
     },
     # ==============================Roundhill==================================
     75665806 => {
@@ -478,6 +527,38 @@ class MeterAttributes
           days_of_week:       ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Saturday'] # suspect this isn't required/not supported
         }
       ]
+    },
+    # ==============================Strathpeffer==================================
+    1700050961855 => {
+      storage_heaters: [
+        {
+          start_date:         Date.new(2010, 1, 1),
+          end_date:           Date.new(2025, 1, 1),
+          power_kw:           70.0,
+          charge_start_time:  TimeOfDay.new(00, 30),
+          charge_end_time:    TimeOfDay.new(06, 00),
+        }
+      ],
+      no_heating_model: {
+        max_summer_daily_heating_kwh:     40,
+        reason: 'Needs setting once enough winter data is available for school'
+      }
+    },
+    # ==============================Tomnacross==================================
+    1710162390501 => {
+      storage_heaters: [
+        {
+          start_date:         Date.new(2010, 1, 1),
+          end_date:           Date.new(2025, 1, 1),
+          power_kw:           40.0,
+          charge_start_time:  TimeOfDay.new(23, 30),
+          charge_end_time:    TimeOfDay.new(05, 30),
+        }
+      ],
+      heating_model: {
+        max_summer_daily_heating_kwh:     20,
+        reason: 'Aggregate Storage heater: model assumptions ~80 wrong as heating on all year'
+      }
     },
     # ==============================Trinity============================
     2000025766288 => {
