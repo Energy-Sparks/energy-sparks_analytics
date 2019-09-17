@@ -1641,8 +1641,9 @@ class ChartManager
       yaxis_units:      :£   
     },
     pupil_dashboard_daytype_breakdown_electricity: {
-      name:             'Electricity costs broken down by school day (open and closed), weekends and holidays (£)',
-      inherits_from:     :daytype_breakdown_electricity
+      name:             'Electricity costs broken down by school day (open and closed), weekends and holidays',
+      inherits_from:     :daytype_breakdown_electricity,
+      yaxis_units:      :£
     },
     pupil_dashboard_baseload_lastyear: {
       name:             'Electricity baseload: power consumption when school unoccupied (kW)',
@@ -1673,7 +1674,7 @@ class ChartManager
       meter_definition:   :allheat
     },
     pupil_dashboard_daytype_breakdown_gas: {
-      name:              'Gas costs broken down by school day (open and closed), weekends and holidays (£)',
+      name:              'Gas costs broken down by school day (open and closed), weekends and holidays',
       inherits_from:     :pupil_dashboard_daytype_breakdown_electricity,
       meter_definition:  :allheat
     },
