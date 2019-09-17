@@ -1617,7 +1617,8 @@ class ChartManager
       inherits_from:    :calendar_picker_electricity_week_chart
     },
     pupil_dashboard_group_by_week_electricity_kwh: {
-      name:             'Last years electricity consumption: grouped by week (in kWh)',
+      name:             'Your school\'s electricity use over a year (in kWh). Each bar shows a week\'s use',
+      drilldown_name:   ['Electricity use in your chosen week (in kWh)', 'Electricity use in your chosen day (in kWh)'],
       inherits_from:    :group_by_week_electricity
     },
     pupil_dashboard_group_by_week_electricity_£: {
