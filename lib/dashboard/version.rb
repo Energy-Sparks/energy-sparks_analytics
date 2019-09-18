@@ -1,7 +1,3 @@
 module Dashboard
-<<<<<<< HEAD
-  VERSION = "0.50.10"
-=======
-  VERSION = "0.50.11"
->>>>>>> master
+  VERSION = "0.50.12"
 end
