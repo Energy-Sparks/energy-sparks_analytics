@@ -1617,7 +1617,8 @@ class ChartManager
       inherits_from:    :calendar_picker_electricity_week_chart
     },
     pupil_dashboard_group_by_week_electricity_kwh: {
-      name:             'Last years electricity consumption: grouped by week (in kWh)',
+      name:             'Your school\'s electricity use over a year (in kWh). Each bar shows a week\'s use',
+      drilldown_name:   ['Electricity use in your chosen week (in kWh)', 'Electricity use in your chosen day (in kWh)'],
       inherits_from:    :group_by_week_electricity
     },
     pupil_dashboard_group_by_week_electricity_£: {
@@ -1641,8 +1642,9 @@ class ChartManager
       yaxis_units:      :£   
     },
     pupil_dashboard_daytype_breakdown_electricity: {
-      name:             'Electricity costs broken down by school day (open and closed), weekends and holidays (£)',
-      inherits_from:     :daytype_breakdown_electricity
+      name:             'Electricity costs broken down by school day (open and closed), weekends and holidays',
+      inherits_from:     :daytype_breakdown_electricity,
+      yaxis_units:      :£
     },
     pupil_dashboard_baseload_lastyear: {
       name:             'Electricity baseload: power consumption when school unoccupied (kW)',
@@ -1673,7 +1675,7 @@ class ChartManager
       meter_definition:   :allheat
     },
     pupil_dashboard_daytype_breakdown_gas: {
-      name:              'Gas costs broken down by school day (open and closed), weekends and holidays (£)',
+      name:              'Gas costs broken down by school day (open and closed), weekends and holidays',
       inherits_from:     :pupil_dashboard_daytype_breakdown_electricity,
       meter_definition:  :allheat
     },

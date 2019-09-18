@@ -40,13 +40,26 @@ class ChartManager
 
     new_chart_name = (old_chart_name.to_s + '_drilldown').to_sym
 
-    chart_config[:name] += (series_name.nil? && x_axis_range.nil?) ? ' no drilldown' : ' drilldown'
+    chart_config[:name] = drilldown_title(chart_config, series_name, x_axis_range)
 
     ap(chart_config, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
     reformat_dates(chart_config)
 
     [new_chart_name, chart_config]
+  end
+
+  private def drilldown_title(chart_config, series_name, x_axis_range)
+    if chart_config.key?(:drilldown_name)
+      index = chart_config[:drilldown_name].index(chart_config[:name])
+      if !index.nil? && index < chart_config[:drilldown_name].length - 1
+        chart_config[:drilldown_name][index + 1] 
+      else
+        chart_config[:drilldown_name][0]
+      end
+    else
+      chart_config[:name] + ((series_name.nil? && x_axis_range.nil?) ? ' no drilldown' : ' drilldown')
+    end
   end
 
   private def reformat_dates(chart_config)
