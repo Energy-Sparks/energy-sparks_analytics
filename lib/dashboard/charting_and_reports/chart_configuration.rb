@@ -1618,74 +1618,78 @@ class ChartManager
     },
     pupil_dashboard_group_by_week_electricity_kwh: {
       name:             'Your school\'s electricity use over a year (in kWh). Each bar shows a week\'s use',
-      drilldown_name:   ['Electricity use in your chosen week (in kWh)', 'Electricity use in your chosen day (in kWh)'],
+      drilldown_name:   ['Electricity use in your chosen week (in kWh)', 'Electricity use on your chosen day (in kWh)'],
       inherits_from:    :group_by_week_electricity
     },
     pupil_dashboard_group_by_week_electricity_£: {
-      name:             'Last years electricity costs: grouped by week (in £)',
+      name:             'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
+      drilldown_name:   ['Electricity costs in your chosen week (in £)', 'Electricity costs on your chosen day (in £)'],
       inherits_from:    :pupil_dashboard_group_by_week_electricity_kwh,
       yaxis_units:      :£
     },
     pupil_dashboard_group_by_week_electricity_co2: {
-      name:             'Last years electricity carbon emissions: grouped by week (in kg CO2)',
+      name:             'Your school\'s carbon emissions from electricity use over a year (in kg CO2). Each bar shows a week\'s emissions.',
+      drilldown_name:   ['Electricity carbon emissions in your chosen week (in kg CO2)', 'Electricity carbon emissions on your chosen day (in kg CO2)'],
       inherits_from:  :pupil_dashboard_group_by_week_electricity_kwh,
       yaxis_units:      :co2
     },
     pupil_dashboard_electricity_benchmark: {
-      name:             'Comparison of schools electricity consumption with other schools (£)',
+      name:               'How my school\'s spend on electricity compares with other schools (£)',
       inherits_from:      :benchmark,
       meter_definition:   :allelectricity
     },
     pupil_dashboard_electricity_longterm_trend_£: {
-      name:             'Last few years electricity costs (£)',
+      name:             'Your school\'s long term electricity costs (£). Each bar shows a year\'s costs.',
       inherits_from:     :electricity_longterm_trend,
       yaxis_units:      :£   
     },
     pupil_dashboard_daytype_breakdown_electricity: {
-      name:             'Electricity costs broken down by school day (open and closed), weekends and holidays',
+      name:             'When your school used electricity over the past year. School day closed is the electricity used in the evenings and early mornings during term time.',
       inherits_from:     :daytype_breakdown_electricity,
       yaxis_units:      :£
     },
     pupil_dashboard_baseload_lastyear: {
-      name:             'Electricity baseload: power consumption when school unoccupied (kW)',
+      name:             'Your school\'s electricity baseload. This is power used when the school is empty (kW)',
       inherits_from:     :baseload_lastyear
     },
     pupil_dashboard_intraday_line_electricity_last7days: {
-      name:             'Electricity power consumption most recent 7 days (kW)',
+      name:             'Your school\'s electricity use over 7 days (kW)',
       inherits_from:     :intraday_line_school_last7days
     },
     pupil_dashboard_group_by_week_gas_kwh: {
-      name:             'Last years gas consumption (heating, hot water & kitchen): grouped by week (in kWh)',
+      name:             'Your school\'s gas use over a year (in kWh). Each bar shows a week\'s use.',
+      drilldown_name:   ['Gas use in your chosen week (in kWh)', 'Gas use on your chosen day (in kWh)'],
       inherits_from:    :pupil_dashboard_group_by_week_electricity_kwh,
       meter_definition: :allheat
     },
     pupil_dashboard_group_by_week_gas_£: {
-      name:             'Last years gas costs (heating, hot water & kitchen): grouped by week (£)',
+      name:             'Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs.',
       inherits_from:    :pupil_dashboard_group_by_week_gas_kwh,
       yaxis_units:      :£
     },
     pupil_dashboard_group_by_week_gas_co2: {
-      name:             'Last years gas carbon emissions (heating, hot water & kitchen): grouped by week (in kg CO2)',
+      name:             'Your school\'s carbon emissions from gas use over a year (in kg CO2). Each bar shows a week\'s emissions.',
+      drilldown_name:   ['Gas carbon emissions in your chosen week (in kg CO2)', 'Gas carbon emissions on your chosen day (in kg CO2)'],
       inherits_from:  :pupil_dashboard_group_by_week_gas_kwh,
       yaxis_units:      :co2
     },
     pupil_dashboard_gas_benchmark: {
-      name:             'Comparison of schools gas consumption with other schools (£)',
+      name:             'How my school\'s spend on gas compares with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
       meter_definition:   :allheat
     },
     pupil_dashboard_daytype_breakdown_gas: {
-      name:              'Gas costs broken down by school day (open and closed), weekends and holidays',
+      name:              'When your school used gas over the past year. School day closed is the gas used in the evenings and early mornings during term time.',
       inherits_from:     :pupil_dashboard_daytype_breakdown_electricity,
       meter_definition:  :allheat
     },
     pupil_dashboard_gas_longterm_trend_£: {
-      name:             'Last few years gas costs (£)',
+      name:             'Your school\'s long term gas costs (£). Each bar shows a year\'s costs.',
       inherits_from:     :pupil_dashboard_electricity_longterm_trend_£,
       meter_definition:  :allheat
     },
     pupil_dashboard_intraday_line_gas_last7days: {
-      name:             'Gas power consumption most recent 7 days (kW)',
+      name:             'Your school\'s gas use over 7 days (kW)',
       inherits_from:     :pupil_dashboard_intraday_line_electricity_last7days,
       meter_definition:  :allheat
     },

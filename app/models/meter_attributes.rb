@@ -571,6 +571,15 @@ class MeterAttributes
         reason: 'Automated process set too high at about 350'
       }
     },
+    2200012581120 => {
+      meter_corrections: [
+        no_heating_in_summer_set_missing_to_zero: {
+          start_toy: TimeOfYear.new(4, 1),
+          end_toy:   TimeOfYear.new(9, 30),
+          reason:    'appears to be a storage heater meter'
+        }
+      ]
+    },
     # ==============================Whiteways========================
     2163409301 => {
       heating_model: {
