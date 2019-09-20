@@ -73,7 +73,7 @@ class ChartManager
     return nil if !chart_config.key?(:parent_chart_xaxis_config) # || chart_config[:parent_chart_xaxis_config].nil?
     # unlimited i.e. long term charts have no timescale, so set to :years
     timescale = chart_config[:parent_chart_xaxis_config].nil? ? :years : chart_config[:parent_chart_xaxis_config]
-    ChartManagerTimescaleManipulation.interpret_timescale_description(timescale)
+    ChartTimeScaleDescriptions.interpret_timescale_description(timescale)
   end
 
   def drilldown_series_name(chart_config, series_name)

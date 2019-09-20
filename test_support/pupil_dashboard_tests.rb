@@ -47,7 +47,16 @@ class PupilDashboardTests < RunCharts
   private def title_addendum(chart_config)
     up_timescale = "[Parent timescale #{@chart_manager.parent_chart_timescale_description(chart_config)}]"
     drilldown = @chart_manager.drilldown_available?(chart_config) ? '[drilldown available]' : '[drilldown unavailable]'
-    drilldown + up_timescale
+    move = move_forward_back_one_time_unit_availability_description(chart_config)
+    drilldown + up_timescale + move
+  end
+
+  private def move_forward_back_one_time_unit_availability_description(chart_config)
+    move = ChartManagerTimescaleManipulationMove.factory(:move, chart_config, @school)
+    return "[move not available]" unless move.chart_suitable_for_timescale_manipulation?
+    forward = move.can_go_forward_in_time_one_period? ? 'available' : 'unavailable'
+    back = move.can_go_back_in_time_one_period? ? 'available' : 'unavailable'
+    "[move forward: #{forward}, move back: #{back}]"
   end
 
   private def drilldown(chart_result, page_name, chart_name, chart_config)

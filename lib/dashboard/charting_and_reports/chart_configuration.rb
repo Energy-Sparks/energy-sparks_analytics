@@ -1650,6 +1650,7 @@ class ChartManager
     },
     pupil_dashboard_daytype_breakdown_electricity: {
       name:             'When your school used electricity over the past year. School day closed is the electricity used in the evenings and early mornings during term time.',
+      timescale:        :year,
       inherits_from:     :daytype_breakdown_electricity,
       yaxis_units:      :£
     },
