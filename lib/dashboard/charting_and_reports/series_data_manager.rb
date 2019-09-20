@@ -900,7 +900,7 @@ private
       logger.info "Reducing meter range because temperature axis with less data on chart #{meter_date} versus #{@meter_collection.temperatures.end_date}"
       meter_date = @meter_collection.temperatures.end_date # this may not be strict enough?
     end
-    if y2_axis_uses_solar_irradiance? && @meter_collection.temperatures.end_date < meter_date
+    if y2_axis_uses_solar_irradiance? && @meter_collection.solar_irradiation.end_date < meter_date
       logger.info "Reducing meter range because irradiance axis with less data on chart #{meter_date} versus #{@meter_collection.solar_irradiation.end_date}"
       meter_date = @meter_collection.solar_irradiation.end_date # this may not be strict enough?
     end
