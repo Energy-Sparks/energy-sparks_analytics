@@ -71,6 +71,24 @@ class ChartManagerTimescaleManipulation
     "#{direction_description} #{shift_amount.magnitude} #{timescale_description}#{singular_plural}"
   end
 
+  def convert_timescale_to_array(chart_config)
+    self.class.convert_timescale_to_array_internal(chart_config[:timescale])
+  end
+
+  def self.convert_timescale_to_array_internal(timescale)
+    timescales = []
+    if timescale.is_a?(Symbol)
+      timescales = [ {timescale => 0}]
+    elsif timescale.is_a?(Hash)
+      timescales = [ timescale ]
+    elsif timescale.is_a?(Array)
+      timescales = timescale
+    else
+      raise EnergySparksUnexpectedStateException, "Unsupported timescale #{timescale} for chart manipulation"
+    end
+    timescales
+  end
+
   protected
 
   def adjust_timescale_private(factor)
@@ -119,26 +137,9 @@ class ChartManagerTimescaleManipulation
     end
   end
 
-  def convert_timescale_to_array(chart_config)
-    convert_timescale_to_array_internal(chart_config[:timescale])
-  end
-
-  protected def convert_timescale_to_array_internal(timescale)
-    timescales = []
-    if timescale.is_a?(Symbol)
-      timescales = [ {timescale => 0}]
-    elsif timescale.is_a?(Hash)
-      timescales = [ timescale ]
-    elsif timescale.is_a?(Array)
-      timescales = timescale
-    else
-      raise EnergySparksUnexpectedStateException, "Unsupported timescale #{timescale} for chart manipulation"
-    end
-    timescales
-  end
-
   TIME_SCALE_TYPES = { 
     year:           'year',
+    years:          'long term',
     academicyear:   'academic year',
     month:          'month',
     holiday:        'holiday',
@@ -161,40 +162,46 @@ class ChartManagerTimescaleManipulation
   end
 
   public def timescale_description
-    timescales = convert_timescale_to_array_internal(@original_chart_config[:timescale])
+    self.class.interpret_timescale_description(@original_chart_config[:timescale])
+  end
+
+  def self.interpret_timescale_description(timescale)
+    timescales = convert_timescale_to_array_internal(timescale)
     timescale = timescales[0]
     if timescale.is_a?(Hash) && !timescale.empty? && timescale.keys[0] == :daterange
       impute_description_from_date_range(timescale.values[0])
     elsif TIME_SCALE_TYPES.key?(timescale)
-      self.class.timescale_name(timescale)
+      timescale_name(timescale)
     elsif timescale.is_a?(Hash) && !timescale.empty? && TIME_SCALE_TYPES.key?(timescale.keys[0])
-      self.class.timescale_name(timescale.keys[0])
+      timescale_name(timescale.keys[0])
     else
       'period'
     end
   end
 
-  private
-
-  private def impute_description_from_date_range(date_range)
+  def self.impute_description_from_date_range(date_range)
     days = days_in_date_range(date_range)
     case days
     when 1
-      self.class.timescale_name(:day)
+      timescale_name(:day)
     when 7
-      self.class.timescale_name(:week)
+      timescale_name(:week)
     when 28..31
-      self.class.timescale_name(:month)
+      timescale_name(:month)
     when 350..380
-      self.class.timescale_name(:year)
+      timescale_name(:year)
     else
-      if days % 7 == 0
+      if days > 380
+        timescale_name(:years)
+      elsif days % 7 == 0
         "#{days / 7} weeks" # ends up with duplicate number e.g. 'Move forward 1 2 weeks' TODO(PH, 13Sep2019) fix further up hierarchy
       else
-        self.class.timescale_name(:daterange)
+        timescale_name(:daterange)
       end
     end
   end
+
+  private
 
   def available_periods(chart_config_original = @original_chart_config)
     available_periods_by_type(chart_config_original)
@@ -270,7 +277,7 @@ class ChartManagerTimescaleManipulation
   end
 
   def calculate_new_date_range(existing_timescale_daterange, start_factor, end_factor, override_days_factor = nil)
-    days_in_range = override_days_factor.nil? ? days_in_date_range(existing_timescale_daterange) : override_days_factor
+    days_in_range = override_days_factor.nil? ? self.class.days_in_date_range(existing_timescale_daterange) : override_days_factor
     # need to provide chart config for original period range, so when you extend.
     # from a 1 to a 2 and then a 3 week chart, you can go back to a 2 week chart following a contraction request
     @cadence_days = days_in_range.to_i unless @original_chart_config.key?(:cadence_days)
@@ -297,7 +304,7 @@ class ChartManagerTimescaleManipulation
     end
   end
 
-  def days_in_date_range(daterange)
+  def self.days_in_date_range(daterange)
     (daterange.last - daterange.first + (daterange.exclude_end? ? 0 : 1)).to_i
   end
 end
@@ -343,7 +350,7 @@ class ChartManagerTimescaleManipulationExtend < ChartManagerTimescaleManipulatio
       new_range = factor > 0 ? Range.new(period_number, new_period_number) : Range.new(new_period_number, period_number)
       {period_type => new_range}
     elsif period_number.is_a?(Range)
-      override_days_factor = date_range?(period_number) ? days_in_date_range(period_number) : nil
+      override_days_factor = date_range?(period_number) ? self.class.days_in_date_range(period_number) : nil
       calculate_new_range(period_type, period_number, factor > 0 ? 0 : factor, factor < 0 ? 0 : factor, override_days_factor)
     else
       raise EnergySparksUnexpectedStateException, "Unsupported period number #{period_number} type"
@@ -372,7 +379,7 @@ class ChartManagerTimescaleManipulationContract < ChartManagerTimescaleManipulat
   end
 
   private def not_enough_periods(range)
-    date_range?(range) && @original_chart_config.key?(:cadence_days) && days_in_date_range(range) == @original_chart_config[:cadence_days]
+    date_range?(range) && @original_chart_config.key?(:cadence_days) && self.class.days_in_date_range(range) == @original_chart_config[:cadence_days]
   end
 end
 
