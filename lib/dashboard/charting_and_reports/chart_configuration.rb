@@ -1640,6 +1640,11 @@ class ChartManager
     },
     pupil_dashboard_electricity_longterm_trend_£: {
       name:             'Your school\'s long term electricity costs (£). Each bar shows a year\'s costs.',
+      drilldown_name:   [
+        'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
+        'Electricity costs in your chosen week (in £)',
+        'Electricity costs on your chosen day (in £)'
+      ],
       inherits_from:     :electricity_longterm_trend,
       yaxis_units:      :£   
     },
@@ -1685,6 +1690,11 @@ class ChartManager
     },
     pupil_dashboard_gas_longterm_trend_£: {
       name:             'Your school\'s long term gas costs (£). Each bar shows a year\'s costs.',
+      drilldown_name:   [
+        'Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs.',
+        'Gas costs in your chosen week (in £)',
+        'Gas costs on your chosen day (in £)'
+      ],
       inherits_from:     :pupil_dashboard_electricity_longterm_trend_£,
       meter_definition:  :allheat
     },
