@@ -134,6 +134,10 @@ class Temperatures < HalfHourlyData
     end
   end
 
+  def degree_days_this_year
+    @this_year_degree_days ||= degree_days_in_date_range(end_date - 364, end_date, 15.5)
+  end
+
   def degree_days_in_date_range(start_date, end_date, base_temp = 15.5)
     (start_date..end_date).to_a.map { |date| degree_days(date, base_temp) }.sum
   end
