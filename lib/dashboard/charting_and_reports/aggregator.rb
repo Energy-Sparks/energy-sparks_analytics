@@ -923,13 +923,13 @@ class Aggregator
       gas_only = has_gas && !has_electricity # for gas only schools don;t display electric benchmark, but not vice versa (electric heated schools)
       @x_axis.push('National Average')
       @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
-      @bucketed_data['gas'].push(benchmark_gas_usage_in_units)
+      @bucketed_data['gas'].push(national_benchmark_gas_usage_in_units)
       @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
       @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
 
       @x_axis.push('Regional Average')
       @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
-      @bucketed_data['gas'].push(benchmark_gas_usage_in_units * 0.9)
+      @bucketed_data['gas'].push(regional_benchmark_gas_usage_in_units)
       @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
       @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
 
@@ -941,11 +941,11 @@ class Aggregator
     else
       @x_axis.push('National Average')
       @bucketed_data['electricity']['National Average'] = benchmark_electricity_usage_in_units
-      @bucketed_data['gas']['National Average'] = benchmark_gas_usage_in_units
+      @bucketed_data['gas']['National Average'] = national_benchmark_gas_usage_in_units
 
       @x_axis.push('Regional Average')
       @bucketed_data['electricity']['Regional Average'] = benchmark_electricity_usage_in_units
-      @bucketed_data['gas']['Regional Average'] = benchmark_gas_usage_in_units * 0.9
+      @bucketed_data['gas']['Regional Average'] = regional_benchmark_gas_usage_in_units
 
       @x_axis.push('Exemplar School')
       @bucketed_data['electricity']['Exemplar School'] = exemplar_electricity_usage_in_units
@@ -974,17 +974,30 @@ class Aggregator
     scale_benchmarks(BenchmarkMetrics::EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils, :electricity)
   end
 
+  ARTIFICIAL_GAS_REDUCTION_INCENTIVE = 0.9
+
   def exemplar_gas_usage_in_units
-    scale_benchmarks(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * @meter_collection.floor_area, :gas)
+    regional_degree_days = @meter_collection.temperatures.degree_days_this_year
+    dd_adjustment = regional_degree_days / 2000.0
+    scale_benchmarks(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * @meter_collection.floor_area, :gas) * dd_adjustment * ARTIFICIAL_GAS_REDUCTION_INCENTIVE
   end
 
   def benchmark_electricity_usage_in_units
     scale_benchmarks(BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils, :electricity)
   end
 
-  def benchmark_gas_usage_in_units
-    scale_benchmarks(BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * @meter_collection.floor_area, :gas)
+  def national_benchmark_gas_usage_in_units
+    regional_degree_days = @meter_collection.temperatures.degree_days_this_year
+    dd_adjustment = regional_degree_days / 2000.0
+    scale_benchmarks(BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * @meter_collection.floor_area, :gas) * dd_adjustment * ARTIFICIAL_GAS_REDUCTION_INCENTIVE
   end
+
+  def regional_benchmark_gas_usage_in_units
+    regional_degree_days = @meter_collection.temperatures.degree_days_this_year
+    dd_adjustment = regional_degree_days / 2000.0
+    national_benchmark_gas_usage_in_units * dd_adjustment * ARTIFICIAL_GAS_REDUCTION_INCENTIVE
+  end
+  
 
   def create_empty_bucket_series
     logger.debug "Creating empty data buckets #{@series_names} x #{@x_axis.length}"

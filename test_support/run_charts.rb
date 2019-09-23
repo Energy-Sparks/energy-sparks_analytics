@@ -7,9 +7,13 @@ class RunCharts
   def initialize(school)
     @school = school
     @worksheets = Hash.new { |worksheet_name, charts| worksheet_name[charts] = [] }
-    @excel_filename = File.join(File.dirname(__FILE__), '../Results/') + @school.name + '- charts test.xlsx'
+    @excel_filename = File.join(File.dirname(__FILE__), '../Results/') + @school.name + excel_variation + '.xlsx'
     @runtime = Time.now.strftime('%d/%m/%Y %H:%M:%S')
     @failed_charts = []
+  end
+
+  private def excel_variation
+    '- charts test'
   end
 
   def run(charts, control)
@@ -85,7 +89,7 @@ class RunCharts
     pages.each do |page|
       page.each do |page_name, charts|
         charts.each do |chart_name|
-         run_chart(page_name, chart_name)
+          run_chart(page_name, chart_name)
         end
       end
     end
@@ -117,11 +121,11 @@ class RunCharts
   def run_chart(page_name, chart_name)
     logger.info "            #{chart_name}"
     chart_manager = ChartManager.new(@school)
+    chart_results = nil
     begin
       chart_results = chart_manager.run_chart_group(chart_name, nil, true) # chart_override)
       if chart_results.nil?
         @failed_charts.push( { school_name: @school.name, chart_name: chart_name, message: 'Unknown', backtrace: nil } )
-        nil
       else
         chart_results = [chart_results] unless chart_results.is_a?(Array)
         @worksheets[page_name] += chart_results.flatten # could be a composite chart
@@ -130,6 +134,7 @@ class RunCharts
       @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
       nil
     end
+    chart_results
   end
 
   def save_to_excel

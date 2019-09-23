@@ -90,6 +90,8 @@ class RunTests
         run_timescales
       when :timescale_and_drilldown
         run_timescales_drilldown
+      when :pupil_dashboard
+        run_pupil_dashboard(configuration[:control])
       when :kpi_analysis
         run_kpi_calculations(configuration)
       else
@@ -194,6 +196,14 @@ class RunTests
     end
   end
 
+  def run_pupil_dashboard(control)
+    @school_list.each do |school_name|
+      school = load_school(school_name)
+      test = PupilDashboardTests.new(school)
+      test.run_tests(control)
+    end
+  end
+
   def run_timescales_drilldown
     @school_list.each do |school_name|
       chart_list = []
@@ -203,37 +213,54 @@ class RunTests
       puts 'Calculating standard chart'
 
       chart_manager = ChartManager.new(school)
-      chart_name = :group_by_week_electricity
+      chart_name = :pupil_dashboard_group_by_week_electricity_kwh
       chart_config = chart_manager.get_chart_config(chart_name)
       result = chart_manager.run_chart(chart_config, chart_name)
+      puts "Year: group by week chart:"
+      ap chart_config
+      puts "Chart parent time description (nil?): #{chart_manager.parent_chart_timescale_description(chart_config)}"
 
       chart_list.push(result)
 
       puts 'drilling down onto first column of chart => week chart by day'
 
-      [0, 6].each do |drilldown_chart_column_number|
+      [0, 2].each do |drilldown_chart_column_number|
         column_in_chart = result[:x_axis_ranges][drilldown_chart_column_number]
         new_chart_name, new_chart_config = chart_manager.drilldown(chart_name, chart_config, nil, column_in_chart)
-        puts "Chart parent times description: #{chart_manager.parent_chart_timescale_description(new_chart_config)}"
+        puts 'Week chart: 7 x days'
+        ap new_chart_config
+        puts "Chart parent time description(year?): #{chart_manager.parent_chart_timescale_description(new_chart_config)}"
+        new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
+        chart_list.push(new_chart_results)
+
+        puts 'Day chart: half hours'
+        column_in_chart = result[:x_axis_ranges][drilldown_chart_column_number]
+        new_chart_name, new_chart_config = chart_manager.drilldown(new_chart_name, new_chart_config, nil, column_in_chart)
+        ap new_chart_config
+        puts "Chart parent time description(week?): #{chart_manager.parent_chart_timescale_description(new_chart_config)}"
+exit
         new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
         chart_list.push(new_chart_results)
 
         # one off test to drill down to datetime to check temporary datetime axis reformat TODO(PH, 14Sep2019) remove
+        column_in_chart = new_chart_results[:x_axis_ranges][drilldown_chart_column_number]
         new_chart_name_2, new_chart_config_2 = chart_manager.drilldown(new_chart_name, new_chart_config, nil, column_in_chart)
         new_chart_results_2 = chart_manager.run_chart(new_chart_config_2, new_chart_name_2)
         chart_list.push(new_chart_results_2)
 
-        %i[move extend contract compare].each do |operation_type|
-          puts "#{operation_type} chart 1 week"
+        if false
+          %i[move extend contract compare].each do |operation_type|
+            puts "#{operation_type} chart 1 week"
 
-          manipulator = ChartManagerTimescaleManipulation.factory(operation_type, new_chart_config, school)
-          next unless manipulator.chart_suitable_for_timescale_manipulation?
-          puts "Display button: #{operation_type} forward 1 #{manipulator.timescale_description}" if manipulator.can_go_forward_in_time_one_period?
-          puts "Display button: #{operation_type} back 1 #{manipulator.timescale_description}"    if manipulator.can_go_back_in_time_one_period?
-          next unless manipulator.enough_data?(1) # shouldn't be necessary if conform to above button display
-          new_chart_config = manipulator.adjust_timescale(1) # go forward one period
-          new_new_chart_results = chart_manager.run_chart(new_chart_config, chart_name)
-          chart_list.push(new_new_chart_results)
+            manipulator = ChartManagerTimescaleManipulation.factory(operation_type, new_chart_config, school)
+            next unless manipulator.chart_suitable_for_timescale_manipulation?
+            puts "Display button: #{operation_type} forward 1 #{manipulator.timescale_description}" if manipulator.can_go_forward_in_time_one_period?
+            puts "Display button: #{operation_type} back 1 #{manipulator.timescale_description}"    if manipulator.can_go_back_in_time_one_period?
+            next unless manipulator.enough_data?(1) # shouldn't be necessary if conform to above button display
+            new_chart_config = manipulator.adjust_timescale(1) # go forward one period
+            new_new_chart_results = chart_manager.run_chart(new_chart_config, chart_name)
+            chart_list.push(new_new_chart_results)
+          end
         end
       end
 
@@ -243,6 +270,19 @@ class RunTests
       excel.add_charts('Test', chart_list)
       excel.close
     end
+  end
+
+  private def chart_drilldown(chart_manager:, chart_name:, chart_config:, previous_chart_results:, chart_results:, drilldown_chart_column_number: 0)
+    column_in_chart = previous_chart_results[:x_axis_ranges][chart_results.last]
+    new_chart_name, new_chart_config = chart_manager.drilldown(chart_name, chart_config, nil, column_in_chart)
+    puts "Chart parent time description(year?): #{chart_manager.parent_chart_timescale_description(new_chart_config)}"
+    new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
+    {
+      chart_results:            new_chart_results,
+      chart_name:               new_chart_name,
+      parent_time_description:  chart_manager.parent_chart_timescale_description(new_chart_config)
+  }
+    chart_results.push(new_chart_results)
   end
 
   def run_kpi_calculations(config)

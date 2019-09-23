@@ -154,8 +154,9 @@ class MeterTariffs
       'Bath'
     when 'Somerset'
       'Frome'
-    when 'Abingdon'
-      'Oxfordshire'
+    when 'Abingdon', 'Oxfordshire'
+      'Bath'
+      # 'Oxfordshire'
     else
       area_name
     end

@@ -6,7 +6,7 @@ class ChartManager
   def drilldown(old_chart_name, chart_config_original, series_name, x_axis_range)
     chart_config = resolve_chart_inheritance(chart_config_original)
 
-    chart_config[:parent_chart_xaxis_config] = chart_config[:x_axis] # save for front end 'up/back' button text
+    chart_config[:parent_chart_xaxis_config] = chart_config[:timescale] # save for front end 'up/back' button text
 
     if chart_config[:series_breakdown] == :baseload ||
        chart_config[:series_breakdown] == :cusum ||
@@ -20,7 +20,6 @@ class ChartManager
        chart_config[:chart1_type] = :column
        chart_config[:series_breakdown] = :none
     else
-      puts "Starting drilldown chart config:"
       ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
       chart_config.delete(:inject)
@@ -58,7 +57,7 @@ class ChartManager
         chart_config[:drilldown_name][0]
       end
     else
-      chart_config[:name] + ((series_name.nil? && x_axis_range.nil?) ? ' no drilldown' : ' drilldown')
+      chart_config[:name] # + ((series_name.nil? && x_axis_range.nil?) ? ' no drilldown' : ' drilldown')
     end
   end
 
@@ -71,8 +70,10 @@ class ChartManager
   end
 
   def parent_chart_timescale_description(chart_config)
-    return nil if !chart_config.key?(:parent_chart_xaxis_config) || chart_config[:parent_chart_xaxis_config].nil?
-    ChartManagerTimescaleManipulation.timescale_name(chart_config[:parent_chart_xaxis_config])
+    return nil if !chart_config.key?(:parent_chart_xaxis_config) # || chart_config[:parent_chart_xaxis_config].nil?
+    # unlimited i.e. long term charts have no timescale, so set to :years
+    timescale = chart_config[:parent_chart_xaxis_config].nil? ? :years : chart_config[:parent_chart_xaxis_config]
+    ChartTimeScaleDescriptions.interpret_timescale_description(timescale)
   end
 
   def drilldown_series_name(chart_config, series_name)
@@ -99,7 +100,7 @@ class ChartManager
 
   def drilldown_available(chart_config_original)
     chart_config = resolve_chart_inheritance(chart_config_original)
-    !x_axis_drilldown(chart_config[:x_axis]).nil?
+    !x_axis_drilldown(chart_config[:x_axis]).nil? && chart_config_original[:series_breakdown] != :fuel
   end
 
   def x_axis_drilldown(existing_x_axis_config)
