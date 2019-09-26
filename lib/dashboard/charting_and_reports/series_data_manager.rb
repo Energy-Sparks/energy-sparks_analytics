@@ -104,6 +104,7 @@ end
 
 class SeriesDataManager
   include Logging
+  REMOVE_SOLAR_PV_FROM_FUEL_BREAKDOWN_CHARTS = true # TODO(PH, 26Sep2019) - remove if result satisfactory
 
   attr_reader :first_meter_date, :last_meter_date, :first_chart_date, :last_chart_date, :periods, :adjust_by_temperature
 
@@ -466,7 +467,7 @@ private
   def create_fuel_breakdown
     buckets = ['electricity', 'gas']
     buckets.push(SeriesNames::STORAGEHEATERS) if @meter_collection.storage_heaters?
-    buckets.push(SeriesNames::SOLARPV) if @meter_collection.solar_pv_panels?
+    buckets.push(SeriesNames::SOLARPV) if @meter_collection.solar_pv_panels? && !REMOVE_SOLAR_PV_FROM_FUEL_BREAKDOWN_CHARTS
     buckets
   end
 
@@ -705,7 +706,7 @@ private
       'gas' => 0.0
     }
     fuel_data[SeriesNames::STORAGEHEATERS] = 0.0 if has_storage_heaters
-    fuel_data[SeriesNames::SOLARPV] = 0.0 if has_solar_pv_panels
+    fuel_data[SeriesNames::SOLARPV] = 0.0 if has_solar_pv_panels && !REMOVE_SOLAR_PV_FROM_FUEL_BREAKDOWN_CHARTS
 
     (date_range[0]..date_range[1]).each do |date|
       begin
@@ -720,7 +721,7 @@ private
           fuel_data['electricity'] += amr_data_one_day(electricity_meter, date, kwh_cost_or_co2)
         end
         fuel_data[SeriesNames::STORAGEHEATERS] += @meter_collection.storage_heater_meter.amr_data.one_day_kwh(date, kwh_cost_or_co2) if has_storage_heaters
-        fuel_data[SeriesNames::SOLARPV] += -1.0 * @meter_collection.solar_pv_meter.amr_data.one_day_kwh(date, kwh_cost_or_co2) if has_solar_pv_panels
+        fuel_data[SeriesNames::SOLARPV] += -1.0 * @meter_collection.solar_pv_meter.amr_data.one_day_kwh(date, kwh_cost_or_co2) if has_solar_pv_panels && !REMOVE_SOLAR_PV_FROM_FUEL_BREAKDOWN_CHARTS
       rescue Exception => e
         logger.error "Missing or nil data on #{date}"
         logger.error e
@@ -739,7 +740,7 @@ private
     }
 
     fuel_data[SeriesNames::STORAGEHEATERS] = @meter_collection.storage_heater_meter.amr_data.kwh(date, halfhour_index, kwh_cost_or_co2) if @meter_collection.storage_heaters?
-    fuel_data[SeriesNames::SOLARPV] += -1.0 * @meter_collection.solar_pv_meter.amr_data.kwh(date, halfhour_index, kwh_cost_or_co2) if @meter_collection.solar_pv_panels?
+    fuel_data[SeriesNames::SOLARPV] += -1.0 * @meter_collection.solar_pv_meter.amr_data.kwh(date, halfhour_index, kwh_cost_or_co2) if @meter_collection.solar_pv_panels? && !REMOVE_SOLAR_PV_FROM_FUEL_BREAKDOWN_CHARTS
     fuel_data
   end
 
