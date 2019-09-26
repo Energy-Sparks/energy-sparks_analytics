@@ -21,6 +21,7 @@ class AlertAnalysisBase
 
   attr_reader :capital_cost, :one_year_saving_£, :ten_year_saving_£, :payback_years
   attr_reader :average_capital_cost, :average_one_year_saving_£, :average_payback_years
+  attr_reader :average_ten_year_saving_£
 
   attr_reader :time_of_year_relevance
 
@@ -303,6 +304,11 @@ class AlertAnalysisBase
       units: :£,
       priority_code:  '1YRS'
     },
+    average_ten_year_saving_£: {
+      description: 'Estimated ten year saving range',
+      units: :£,
+      priority_code:  '10YR'
+    },
     ten_year_saving_£: {
       description: 'Estimated ten year saving range - typical capital investment horizon',
       units: :£_range
@@ -503,6 +509,7 @@ class AlertAnalysisBase
     @one_year_saving_£ = one_year_saving_£
     @ten_year_saving_£ = one_year_saving_£.nil? ? 0.0 : Range.new(one_year_saving_£.first * 10.0, one_year_saving_£.last * 10.0)
     @average_one_year_saving_£ = one_year_saving_£.nil? ? 0.0 : ((one_year_saving_£.first + one_year_saving_£.last) / 2.0)
+    @average_ten_year_saving_£ = @average_one_year_saving_£ * 10.0
 
     @average_payback_years = (@one_year_saving_£.nil? || @one_year_saving_£ == 0.0 || @average_capital_cost.nil?) ? 0.0 : @average_capital_cost / @average_one_year_saving_£
   end
