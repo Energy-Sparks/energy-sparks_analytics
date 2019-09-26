@@ -8,6 +8,8 @@ class ChartManager
 
     chart_config[:parent_chart_xaxis_config] = chart_config[:timescale] # save for front end 'up/back' button text
 
+    chart_config.delete(:reverse_xaxis) # benchmark charts reverse the x-axis order, long-term charts then inherit this behaviour, negate on drilldown
+
     if chart_config[:series_breakdown] == :baseload ||
        chart_config[:series_breakdown] == :cusum ||
        chart_config[:series_breakdown] == :hotwater ||
