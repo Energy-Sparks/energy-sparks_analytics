@@ -1670,6 +1670,7 @@ class ChartManager
     },
     pupil_dashboard_group_by_week_gas_£: {
       name:             'Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs.',
+      drilldown_name:   ['Gas costs in your chosen week (in £)', 'Gas costs on your chosen day (in £)'],
       inherits_from:    :pupil_dashboard_group_by_week_gas_kwh,
       yaxis_units:      :£
     },
