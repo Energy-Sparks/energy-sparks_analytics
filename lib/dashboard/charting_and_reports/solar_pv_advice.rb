@@ -8,6 +8,8 @@ class DashboardEnergyAdvice
     case chart_type
     when :solar_pv_group_by_month
       SolarPVVersusIrradianceLastYearAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :solar_pv_group_by_month_dashboard_overview
+      SolarPVVersusIrradianceLastYearOverviewAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :solar_pv_last_7_days_by_submeter
       SolarPVLast7Days.new(school, chart_definition, chart_data, chart_symbol)
     else
@@ -71,11 +73,16 @@ class DashboardEnergyAdvice
         [ 'Total consumption', annual_electricity_including_onsite_solar_pv_consumption_kwh_html ]
       ]
     end
+
+    def formatted_summary_table_html
+      data, total = summary_pv_table_data_html
+      html_table(false, data, total)
+    end
   end 
 
   class SolarPVVersusIrradianceLastYearAdvice < SolarPVAdviceBase
 
-    private def format_row(row)
+    protected def format_row(row)
       [
         row[:name],
         FormatEnergyUnit.format(:kwh,       row[:kwh],  :html, false, true, :approx_accountant),
@@ -85,7 +92,13 @@ class DashboardEnergyAdvice
     end
 
     def generate_advice
-      header_template = %{
+      @header_advice = generate_html(header_template, binding)
+
+      @footer_advice = generate_html(footer_template, binding)
+    end
+
+    private def header_template
+      %{
         <%= @body_start %>
           <p>
             Your school has solar photovoltaic (PV) panels which produce electricity
@@ -112,10 +125,10 @@ class DashboardEnergyAdvice
           </p>
         <%= @body_end %>
       }.gsub(/^  /, '')
+    end
 
-      @header_advice = generate_html(header_template, binding)
-
-      footer_template = %{
+    private def footer_template
+      %{
         <%= @body_start %>
           <p>
             The line on the chart represents the 'average solar irradiance' - which is
@@ -136,17 +149,27 @@ class DashboardEnergyAdvice
           </p>
         <%= @body_end %>
       }.gsub(/^  /, '')
-  
-      @footer_advice = generate_html(footer_template, binding)
     end
   end
 
-  class SolarPVLast7Days < SolarPVAdviceBase
-
-    def formatted_summary_table_html
-      data, total = summary_pv_table_data_html
-      html_table(false, data, total)
+  class SolarPVVersusIrradianceLastYearOverviewAdvice < SolarPVVersusIrradianceLastYearAdvice
+    private def footer_template
+      %{
+        <%= @body_start %>
+          <p>
+            The table below provides information on your electricity consumption and
+            electricity from your school panels over the last year:
+          </p>
+          <p>
+            <%= formatted_summary_table_html %>
+          </p>
+        <%= @body_end %>
+      }.gsub(/^  /, '')
     end
+
+  end
+
+  class SolarPVLast7Days < SolarPVAdviceBase
 
     def generate_advice
       header_template = %{

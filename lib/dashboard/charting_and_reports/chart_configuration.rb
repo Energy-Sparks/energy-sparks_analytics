@@ -232,6 +232,10 @@ class ChartManager
       inherits_from:      :solar_pv_group_by_week_by_submeter,
       x_axis:             :month
     },
+    solar_pv_group_by_month_dashboard_overview: {
+      inherits_from:      :solar_pv_group_by_month,
+      reason:             'simplified text used for overview page, requires different chart name'
+    },
     solar_pv_last_7_days_by_submeter: {
       name:               'The last 7 days of your school’s electricity consumption',
       inherits_from:      :solar_pv_group_by_week,
@@ -1670,6 +1674,7 @@ class ChartManager
     },
     pupil_dashboard_group_by_week_gas_£: {
       name:             'Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs.',
+      drilldown_name:   ['Gas costs in your chosen week (in £)', 'Gas costs on your chosen day (in £)'],
       inherits_from:    :pupil_dashboard_group_by_week_gas_kwh,
       yaxis_units:      :£
     },

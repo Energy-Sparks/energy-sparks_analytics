@@ -8,6 +8,15 @@ class DashboardConfiguration
                                   group_by_week_electricity
                                 ]
                               },
+    main_dashboard_electric_solar:  {
+                                name:   'Overview',
+                                charts: %i[
+                                  benchmark
+                                  daytype_breakdown_electricity
+                                  group_by_week_electricity
+                                  solar_pv_group_by_month_dashboard_overview
+                                ]
+                              },
     # Benchmark currently not working for Gas only
     main_dashboard_gas:  {
                                 name:   'Main Dashboard',
@@ -136,6 +145,17 @@ class DashboardConfiguration
                                   daytype_breakdown_gas
                                   group_by_week_electricity
                                   group_by_week_gas
+                                ]
+                              },
+    main_dashboard_electric_and_gas_and_solar: {
+                                name:   'Overview',
+                                charts: %i[
+                                  benchmark
+                                  daytype_breakdown_electricity
+                                  daytype_breakdown_gas
+                                  group_by_week_electricity
+                                  group_by_week_gas
+                                  solar_pv_group_by_month_dashboard_overview
                                 ]
                               },
     boiler_control:           {
@@ -395,7 +415,7 @@ class DashboardConfiguration
                         ],
     electric_and_gas_and_solar_pv:
                         %i[
-                            main_dashboard_electric_and_gas
+                            main_dashboard_electric_and_gas_and_solar
                             electricity_detail
                             gas_detail
                             boiler_control
@@ -403,7 +423,7 @@ class DashboardConfiguration
                         ],
     electric_and_solar_pv:
                         %i[
-                            main_dashboard_electric
+                            main_dashboard_electric_solar
                             electricity_detail
                             solar_pv
                         ],

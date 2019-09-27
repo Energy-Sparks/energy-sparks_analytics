@@ -192,7 +192,7 @@ class FormatEnergyUnit
     when :ks2
       2
     when :approx_accountant
-      5
+      4
     when :accountant, :energy_expert
       10
     else
