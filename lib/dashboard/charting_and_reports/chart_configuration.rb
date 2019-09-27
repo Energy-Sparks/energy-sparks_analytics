@@ -232,6 +232,10 @@ class ChartManager
       inherits_from:      :solar_pv_group_by_week_by_submeter,
       x_axis:             :month
     },
+    solar_pv_group_by_month_dashboard_overview: {
+      inherits_from:      :solar_pv_group_by_month,
+      reason:             'simplified text used for overview page, requires different chart name'
+    },
     solar_pv_last_7_days_by_submeter: {
       name:               'The last 7 days of your school’s electricity consumption',
       inherits_from:      :solar_pv_group_by_week,
