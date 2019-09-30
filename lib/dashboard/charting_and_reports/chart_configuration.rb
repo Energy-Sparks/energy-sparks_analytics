@@ -33,6 +33,15 @@ class ChartManager
       name:             'School Carbon Emissions from Electricity and Gas Usage',
       yaxis_units:      :co2
     },
+    benchmark_kwh: {
+      inherits_from:    :benchmark,
+      yaxis_units:      :kwh
+    },
+    benchmark_kwh_electric_only: {
+      inherits_from:    :benchmark,
+      filter:           { fuel: [ 'electricity' ] },
+      yaxis_units:      :kwh
+    },
     last_2_weeks_carbon_emissions: {
       name:             'Last 2 weeks carbon emissions at your school from electricity and gas',
       chart1_type:      :column,

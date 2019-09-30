@@ -56,6 +56,8 @@ class DashboardChartAdviceBase
     case chart_type
     when :benchmark
       BenchmarkComparisonAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :benchmark_kwh, :benchmark_kwh_electric_only
+      BenchmarkComparisonAdviceSolarSchools.new(school, chart_definition, chart_data, chart_symbol)
     when :thermostatic
       ThermostaticAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :cusum
@@ -401,19 +403,41 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     super(school, chart_definition, chart_data, chart_symbol)
   end
 
+  protected def electric_usage
+    get_energy_usage('electricity', :electricity, index_of_most_recent_date)
+  end
+
+  protected def gas_usage
+    get_energy_usage('gas', :gas, index_of_most_recent_date)
+  end
+
+  protected def storage_heater_usage
+    get_energy_usage('storage heaters', :electricity, index_of_most_recent_date)
+  end
+
+  protected def electric_comparison_regional(gas_only)
+    gas_only ? '' : comparison('electricity', :electricity, index_of_data("Regional Average"))
+  end
+
+  protected def gas_comparison_regional(electric_only)
+    electric_only ? '' : comparison('gas', :gas, index_of_data("Regional Average"))
+  end
+
+  protected def usage_adjective
+    'spent'
+  end
+
+  protected def usage_preposition
+    'on'
+  end
+
   def generate_advice
     logger.info @school.name
 
-    electric_usage = get_energy_usage('electricity', :electricity, index_of_most_recent_date)
-    gas_usage = get_energy_usage('gas', :gas, index_of_most_recent_date)
-    storage_heater_usage = get_energy_usage('storage heaters', :electricity, index_of_most_recent_date)
     gas_only = electric_usage.nil?
     electric_only = gas_usage.nil?
 
     address = @school.postcode.nil? ? @school.address : @school.postcode
-
-    electric_comparison_regional = comparison('electricity', :electricity, index_of_data("Regional Average")) unless gas_only
-    gas_comparison_regional = comparison('gas', :gas, index_of_data("Regional Average")) unless electric_only
 
     header_template = %{
       <%= @body_start %>
@@ -428,19 +452,19 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
       </p>
       <p>
         <% if @school.gas_only? %>
-          Your school spent <%= gas_usage %> on gas last year.
-          The gas usage <%= gas_comparison_regional %>:
+          Your school <%= usage_adjective %> <%= gas_usage %> <%= usage_preposition %> gas last year.
+          The gas usage <%= gas_comparison_regional(electric_only) %>:
         <% elsif @school.electricity? && !@school.gas? && !@school.storage_heaters? %>
-            Your school spent <%= electric_usage %> on electricity last year.
-            The electricity usage <%= electric_comparison_regional %>:
+            Your school <%= usage_adjective %> <%= electric_usage %> on electricity last year.
+            The electricity usage <%= electric_comparison_regional(gas_only) %>:
         <% elsif @school.electricity? && @school.storage_heaters? %>
-          Your school spent <%= storage_heater_usage %> on storage heating last year,
+          Your school <%= usage_adjective %> <%= storage_heater_usage %> <%= usage_preposition %> storage heating last year,
           plus <%= electric_usage %> for the remaining electrical appliances (lighting. ICT etc.):
         <% else %>
-          Your school spent <%= electric_usage %> on electricity
-          and <%= gas_usage %> on gas last year.
-          The electricity usage <%= electric_comparison_regional %>.
-          The gas usage <%= gas_comparison_regional %>:
+          Your school <%= usage_adjective %> <%= electric_usage %> <%= usage_preposition %> electricity
+          and <%= gas_usage %> <%= usage_preposition %> gas last year.
+          The electricity usage <%= electric_comparison_regional(gas_only) %>.
+          The gas usage <%= gas_comparison_regional(electric_only) %>:
         <% end %>
       </p>
       <%= @body_end %>
@@ -509,7 +533,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def actual_gas_usage
-    @chart_data[:x_data]['gas'][index_of_most_recent_date]
+    @chart_data[:x_data].key?('gas') ? @chart_data[:x_data]['gas'][index_of_most_recent_date] : 0.0
   end
 
   def average_regional_electricity_usage
@@ -517,7 +541,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def average_regional_gas_usage
-    @chart_data[:x_data]['gas'][index_of_data("Regional Average")]
+    @chart_data[:x_data].key?('gas') ? @chart_data[:x_data]['gas'][index_of_data("Regional Average")] : 0.0
   end
 
   def exemplar_electricity_usage
@@ -525,7 +549,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def exemplar_gas_usage
-    @chart_data[:x_data]['gas'][index_of_data("Exemplar School")]
+    @chart_data[:x_data].key?('gas') ? @chart_data[:x_data]['gas'][index_of_data("Exemplar School")] : 0.0
   end
 
   def percent_gas_of_regional_average
@@ -593,6 +617,54 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 end
 
+#==============================================================================
+class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
+  protected def usage_adjective
+    'consumed'
+  end
+
+  protected def usage_preposition
+    'of'
+  end
+
+  # this is a bit of a bodge, for solar schools we just want to talk about kWh
+  # and the spend information requires detailed tariff data
+  # the charts are also in kWh and not pounds so override parent's £ conversion
+  def pounds_to_pounds_and_kwh(kwh, _fuel_type_sym)
+    kwh_text = FormatEnergyUnit.scale_num(kwh)
+    kwh_text + 'kWh'
+  end
+
+  # as above just do in kWh
+  def pound_gas_saving_versus_exemplar
+    pounds = actual_gas_usage - exemplar_gas_usage
+    kwh = pounds_to_kwh(pounds, :gas)
+    FormatEnergyUnit.scale_num(kwh) + 'kWh'
+  end
+
+  # as above just do in kWh
+  def pound_electricity_saving_versus_exemplar
+    pounds = actual_electricity_usage - exemplar_electricity_usage
+    kwh = pounds_to_kwh(pounds, :electricity)
+    FormatEnergyUnit.scale_num(kwh) + 'kWh'
+  end
+
+  def comparison(type_str, type_sym, with)
+    usage_from_chart_kwh = @chart_data[:x_data][type_str][index_of_most_recent_date]
+    benchmark_from_chart = @chart_data[:x_data][type_str][with]
+    formatted_usage_kwh = FormatEnergyUnit.format(:kwh, usage_from_chart_kwh, :html)
+    benchmark_usage_kwh = FormatEnergyUnit.format(:kwh, benchmark_from_chart, :html)
+
+    if formatted_usage_kwh == benchmark_usage_kwh # values same in formatted space
+      'is similar to regional schools which spent ' + benchmark_usage_kwh
+    elsif usage_from_chart_kwh > benchmark_from_chart
+      'is more than similar regional schools which consumed ' + benchmark_usage_kwh
+    else
+      'is less than similar regional schools which consumed ' + benchmark_usage_kwh
+    end
+  end
+
+end
 #==============================================================================
 class FuelDaytypeAdvice < DashboardChartAdviceBase
   attr_reader :fuel_type, :fuel_type_str

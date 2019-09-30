@@ -11,7 +11,7 @@ class DashboardConfiguration
     main_dashboard_electric_solar:  {
                                 name:   'Overview',
                                 charts: %i[
-                                  benchmark
+                                  benchmark_kwh_electric_only
                                   daytype_breakdown_electricity
                                   group_by_week_electricity
                                   solar_pv_group_by_month_dashboard_overview
@@ -150,7 +150,7 @@ class DashboardConfiguration
     main_dashboard_electric_and_gas_and_solar: {
                                 name:   'Overview',
                                 charts: %i[
-                                  benchmark
+                                  benchmark_kwh
                                   daytype_breakdown_electricity
                                   daytype_breakdown_gas
                                   group_by_week_electricity

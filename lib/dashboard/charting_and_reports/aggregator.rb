@@ -917,25 +917,26 @@ class Aggregator
     has_storage_heater = @bucketed_data.key?(SeriesNames::STORAGEHEATERS)
     has_solar_pv = @bucketed_data.key?(SeriesNames::SOLARPV)
     has_electricity = @bucketed_data.key?('electricity') && @bucketed_data['electricity'].is_a?(Array)
+    compare_gas = has_gas || has_storage_heater
 
     if has_gas || has_electricity
       electricity_data = has_electricity ? @bucketed_data['electricity'].sum > 0.0 : false
-      gas_only = has_gas && !has_electricity # for gas only schools don;t display electric benchmark, but not vice versa (electric heated schools)
+      gas_only = has_gas && !has_electricity # for gas only schools don't display electric benchmark, but not vice versa (electric heated schools)
       @x_axis.push('National Average')
       @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
-      @bucketed_data['gas'].push(national_benchmark_gas_usage_in_units)
+      @bucketed_data['gas'].push(national_benchmark_gas_usage_in_units) if compare_gas
       @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
       @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
 
       @x_axis.push('Regional Average')
       @bucketed_data['electricity'].push(benchmark_electricity_usage_in_units) if electricity_data
-      @bucketed_data['gas'].push(regional_benchmark_gas_usage_in_units)
+      @bucketed_data['gas'].push(regional_benchmark_gas_usage_in_units)  if compare_gas
       @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
       @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
 
       @x_axis.push('Exemplar School')
       @bucketed_data['electricity'].push(exemplar_electricity_usage_in_units) if electricity_data
-      @bucketed_data['gas'].push(exemplar_gas_usage_in_units * 0.9)
+      @bucketed_data['gas'].push(exemplar_gas_usage_in_units * 0.9)  if compare_gas
       @bucketed_data[SeriesNames::STORAGEHEATERS].push(0.0) if has_storage_heater
       @bucketed_data[SeriesNames::SOLARPV].push(0.0) if has_solar_pv
     else
