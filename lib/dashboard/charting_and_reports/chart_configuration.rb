@@ -1502,69 +1502,6 @@ class ChartManager
     alert_last_7_days_intraday_gas_heating_on_too_early: {
       inherits_from:    :last_7_days_intraday_gas
     },
-    #==============================================================
-    sprint2_last_2_weeks_electricity_by_datetime: {
-      name:             'Compare last 2 weeks by time of day - line chart (Electricity)',
-      chart1_type:      :line,
-      series_breakdown: :none,
-      timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }],
-      x_axis:           :datetime,
-      meter_definition: :allelectricity,
-      yaxis_units:      :£,
-      yaxis_scaling:    :none
-    },
-    sprint2_last_2_weeks_electricity_by_datetime_column: {
-      name:             'Compare last 2 weeks by time of day - line chart (Electricity)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
-      chart1_type:      :column
-    },
-    sprint2_last_2_weeks_electricity_by_day_line: {
-      name:             'Compare last 2 weeks by day - line chart (Electricity)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
-      x_axis:           :day
-    },
-    sprint2_last_2_weeks_electricity_by_day_column: {
-      name:             'Compare last 2 weeks by day - column chart (Electricity)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
-      chart1_type:      :column
-    },
-    sprint2_last_2_weeks_gas_by_datetime: {
-      name:             'Compare last 2 weeks by time of day - line chart (Gas)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
-      meter_definition: :allheat
-    },
-    sprint2_last_2_weeks_gas_by_datetime_column: {
-      name:             'Compare last 2 weeks by time of day - line chart (Gas)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime_column,
-      meter_definition: :allheat
-    },
-    sprint2_last_2_weeks_gas_by_day_line: {
-      name:             'Compare last 2 weeks by day - line chart (Gas)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
-      meter_definition: :allheat
-    },
-    sprint2_gas_comparison:  {
-      name:             'Comparison of out of hour',
-      chart1_type:      :bar,
-      chart1_subtype:   :stacked,
-      meter_definition: :all,
-      timescale:        :year,
-      x_axis:           :year,
-      series_breakdown: :daytype,
-      yaxis_units:      :£,
-      yaxis_scaling:    :none
-    },
-    james_almond_chart_timeshifting_bug: {
-      :name=>"By Week: Electricity drilldown",
-      :chart1_type=>:column,
-      :chart1_subtype=>:stacked,
-      :meter_definition=>:allelectricity,
-      :x_axis=>:day,
-      :series_breakdown=>:daytype,
-      :yaxis_units=>:£,
-      :yaxis_scaling=>:none,
-      :timescale=>{ :daterange=>Date.new(2018,6,12)..Date.new(2018,6,18) }
-    },
     calendar_picker_gas_week_chart: {
       name:             'Calendar picker gas week chart',
       chart1_type:      :column,
