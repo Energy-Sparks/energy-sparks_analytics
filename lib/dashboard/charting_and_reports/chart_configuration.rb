@@ -1460,6 +1460,14 @@ class ChartManager
       y2_axis:          nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
+    teachers_landing_page_storage_heaters: {
+      inherits_from:    :teachers_landing_page_gas,
+      meter_definition: :storage_heater_meter
+    },
+    teachers_landing_page_storage_heaters_simple: {
+      inherits_from:    :teachers_landing_page_gas_simple,
+      meter_definition: :storage_heater_meter
+    },
     alert_last_2_weeks_gas_comparison_temperature_compensated: {
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
