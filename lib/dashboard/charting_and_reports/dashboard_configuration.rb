@@ -87,7 +87,7 @@ class DashboardConfiguration
               ]
             }
           ],
-        },                   
+        },                 
         {                    
           name:     'Gas',
           sub_pages:  [
@@ -106,36 +106,25 @@ class DashboardConfiguration
             { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_gas_last7days] },
           ],
         },
+        {                    
+          name:     'Storage Heaters',
+          sub_pages:  [
+            { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_storage_heaters_kwh] },
+            { name: 'Cost',   charts: %i[pupil_dashboard_group_by_week_storage_heaters_£] },
+            { name: 'CO2',    charts: %i[pupil_dashboard_group_by_week_storage_heaters_co2] },
+            { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_storage_heaters] },
+            { 
+              name: 'Bar',
+              sub_pages: [
+                { name: 'Bench',   charts: %i[pupil_dashboard_storage_heaters_benchmark] },
+                { name: 'Week',    charts: %i[pupil_dashboard_group_by_week_storage_heaters_£] },
+                { name: 'Year',    charts: %i[pupil_dashboard_storage_heaters_longterm_trend_£] }
+              ]
+            },
+            { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_storage_heaters_last7days] },
+          ],
+        },
       ],
-    },
-    pupil_analysis_page_electicity_kwh: {
-      charts: %i[
-        # for gas no degree days
-        group_by_week_electricity
-      ]
-    },
-    pupil_analysis_page_electicity_£: {
-      charts: %i[ group_by_week_electricity ]
-    },
-    pupil_analysis_page_electicity_CO2: {
-      charts: %i[ group_by_week_electricity ]
-    },
-    pupil_analysis_page_electicity_pie_chart: {
-      charts: %i[ daytype_breakdown_electricity ]
-       # in £
-    },
-    pupil_analysis_page_electicity_bar_chart: {
-      charts: %i[
-        benchmark
-        group_by_week_electricity # in £
-        electricity_longterm_trend # in £
-      ]
-    },
-    pupil_analysis_page_electricity_line_chart: {
-      charts: %i[
-        baseload_lastyear # not electricity
-        intraday_line_school_last7days # and gas
-      ]
     },
     main_dashboard_electric_and_gas: {
                                 name:   'Overview',

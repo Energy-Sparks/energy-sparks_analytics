@@ -483,11 +483,11 @@ class Aggregator
     elsif false && Object.const_defined?('Rails')
       add_trendlines_for_rails_2_points(bucketed_data, regression_parameters)
     else
-      analystics_excel_trendlines(bucketed_data, regression_parameters)
+      analytics_excel_trendlines(bucketed_data, regression_parameters)
     end 
   end
 
-  def analystics_excel_trendlines(bucketed_data, regression_parameters)
+  def analytics_excel_trendlines(bucketed_data, regression_parameters)
     @series_manager.trendlines.each do |trendline_series_name|
       model_type_for_trendline = SeriesDataManager.series_name_for_trendline(trendline_series_name)
       trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline, regression_parameters)
@@ -528,7 +528,7 @@ class Aggregator
   end
 
   def add_regression_parameters_to_trendline_symbol(trendline_symbol, model_type, regression_parameters)
-    if false # deprecated, left in for comparison purposes TODO(PH, 25Jul2019) remove was satisifed with result
+    if false # deprecated, left in for comparison purposes TODO(PH, 25Jul2019) remove once satisifed with result
       model = @series_manager.model(model_type)
       parameters = model.nil? ? ' =no model' : sprintf(' =%.0f + %.1fT r2 = %.2f x %d', model.a, model.b, model.r2, model.samples)
       (trendline_symbol.to_s + parameters).to_sym
