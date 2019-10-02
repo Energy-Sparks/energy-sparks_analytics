@@ -77,6 +77,7 @@ class PupilDashboardTests < RunCharts
     if parent_page.is_a?(Hash)
       if parent_page.key?(:sub_pages)
         parent_page[:sub_pages].each do |sub_page|
+          next unless fuel_type_available(name)
           new_name = name + sub_page[:name] if sub_page.is_a?(Hash) && sub_page.key?(:name)
           flatten_recursive_page_hierarchy(sub_page,  pages, new_name)
         end
@@ -85,6 +86,19 @@ class PupilDashboardTests < RunCharts
       end
     else
       puts 'Error in recursive dashboard definition'
+    end
+  end
+
+  private def fuel_type_available(name)
+    case name
+    when 'Electricity'
+      @school.electricity?
+    when 'Gas'
+      @school.gas?
+    when 'Storage Heaters'
+      @school.storage_heaters?
+    else
+      true
     end
   end
 end

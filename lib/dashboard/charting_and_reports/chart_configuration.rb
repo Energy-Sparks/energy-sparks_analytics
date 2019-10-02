@@ -1460,6 +1460,14 @@ class ChartManager
       y2_axis:          nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
+    teachers_landing_page_storage_heaters: {
+      inherits_from:    :teachers_landing_page_gas,
+      meter_definition: :storage_heater_meter
+    },
+    teachers_landing_page_storage_heaters_simple: {
+      inherits_from:    :teachers_landing_page_gas_simple,
+      meter_definition: :storage_heater_meter
+    },
     alert_last_2_weeks_gas_comparison_temperature_compensated: {
       inherits_from:    :last_2_weeks_gas_comparison_temperature_compensated
     },
@@ -1493,69 +1501,6 @@ class ChartManager
     },
     alert_last_7_days_intraday_gas_heating_on_too_early: {
       inherits_from:    :last_7_days_intraday_gas
-    },
-    #==============================================================
-    sprint2_last_2_weeks_electricity_by_datetime: {
-      name:             'Compare last 2 weeks by time of day - line chart (Electricity)',
-      chart1_type:      :line,
-      series_breakdown: :none,
-      timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }],
-      x_axis:           :datetime,
-      meter_definition: :allelectricity,
-      yaxis_units:      :£,
-      yaxis_scaling:    :none
-    },
-    sprint2_last_2_weeks_electricity_by_datetime_column: {
-      name:             'Compare last 2 weeks by time of day - line chart (Electricity)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
-      chart1_type:      :column
-    },
-    sprint2_last_2_weeks_electricity_by_day_line: {
-      name:             'Compare last 2 weeks by day - line chart (Electricity)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
-      x_axis:           :day
-    },
-    sprint2_last_2_weeks_electricity_by_day_column: {
-      name:             'Compare last 2 weeks by day - column chart (Electricity)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
-      chart1_type:      :column
-    },
-    sprint2_last_2_weeks_gas_by_datetime: {
-      name:             'Compare last 2 weeks by time of day - line chart (Gas)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime,
-      meter_definition: :allheat
-    },
-    sprint2_last_2_weeks_gas_by_datetime_column: {
-      name:             'Compare last 2 weeks by time of day - line chart (Gas)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_datetime_column,
-      meter_definition: :allheat
-    },
-    sprint2_last_2_weeks_gas_by_day_line: {
-      name:             'Compare last 2 weeks by day - line chart (Gas)',
-      inherits_from:    :sprint2_last_2_weeks_electricity_by_day_line,
-      meter_definition: :allheat
-    },
-    sprint2_gas_comparison:  {
-      name:             'Comparison of out of hour',
-      chart1_type:      :bar,
-      chart1_subtype:   :stacked,
-      meter_definition: :all,
-      timescale:        :year,
-      x_axis:           :year,
-      series_breakdown: :daytype,
-      yaxis_units:      :£,
-      yaxis_scaling:    :none
-    },
-    james_almond_chart_timeshifting_bug: {
-      :name=>"By Week: Electricity drilldown",
-      :chart1_type=>:column,
-      :chart1_subtype=>:stacked,
-      :meter_definition=>:allelectricity,
-      :x_axis=>:day,
-      :series_breakdown=>:daytype,
-      :yaxis_units=>:£,
-      :yaxis_scaling=>:none,
-      :timescale=>{ :daterange=>Date.new(2018,6,12)..Date.new(2018,6,18) }
     },
     calendar_picker_gas_week_chart: {
       name:             'Calendar picker gas week chart',
@@ -1629,6 +1574,7 @@ class ChartManager
       ],
       inherits_from:    :calendar_picker_electricity_week_chart
     },
+    #======================================PUPIL DASHBOARD - ELECTRICITY=============================================
     pupil_dashboard_group_by_week_electricity_kwh: {
       name:             'Your school\'s electricity use over a year (in kWh). Each bar shows a week\'s use',
       drilldown_name:   ['Electricity use in your chosen week (in kWh)', 'Electricity use on your chosen day (in kWh)'],
@@ -1675,6 +1621,7 @@ class ChartManager
       name:             'Your school\'s electricity use over 7 days (kW)',
       inherits_from:     :intraday_line_school_last7days
     },
+    #======================================PUPIL DASHBOARD - GAS=============================================
     pupil_dashboard_group_by_week_gas_kwh: {
       name:             'Your school\'s gas use over a year (in kWh). Each bar shows a week\'s use.',
       drilldown_name:   ['Gas use in your chosen week (in kWh)', 'Gas use on your chosen day (in kWh)'],
@@ -1717,6 +1664,50 @@ class ChartManager
       name:             'Your school\'s gas use over 7 days (kW)',
       inherits_from:     :pupil_dashboard_intraday_line_electricity_last7days,
       meter_definition:  :allheat
+    },
+    #======================================PUPIL DASHBOARD - STORAGE HEATERS========================================
+    pupil_dashboard_group_by_week_storage_heaters_kwh: {
+      name:             'Your school\'s storage heater use over a year (in kWh). Each bar shows a week\'s use.',
+      drilldown_name:   ['Storage heater use in your chosen week (in kWh)', 'Storage heater use on your chosen day (in kWh)'],
+      inherits_from:    :pupil_dashboard_group_by_week_electricity_kwh,
+      meter_definition: :storage_heater_meter
+    },
+    pupil_dashboard_group_by_week_storage_heaters_£: {
+      name:             'Your school\'s storage heater costs over a year (in £). Each bar shows a week\'s costs.',
+      drilldown_name:   ['Storage heater costs in your chosen week (in £)', 'Storage heater costs on your chosen day (in £)'],
+      inherits_from:    :pupil_dashboard_group_by_week_storage_heaters_kwh,
+      yaxis_units:      :£
+    },
+    pupil_dashboard_group_by_week_storage_heaters_co2: {
+      name:             'Your school\'s carbon emissions from storage heater use over a year (in kg CO2). Each bar shows a week\'s emissions.',
+      drilldown_name:   ['Storage heater carbon emissions in your chosen week (in kg CO2)', 'Storage heater carbon emissions on your chosen day (in kg CO2)'],
+      inherits_from:    :pupil_dashboard_group_by_week_storage_heaters_kwh,
+      yaxis_units:      :co2
+    },
+    pupil_dashboard_storage_heaters_benchmark: {
+      name:             'How my school\'s spend on storage heaters compares with other schools (£)',
+      inherits_from:      :pupil_dashboard_electricity_benchmark,
+      meter_definition:   :storage_heater_meter
+    },
+    pupil_dashboard_daytype_breakdown_storage_heaters: {
+      name:              'When your school used storage heaters over the past year. School day closed is the storage heaters used in the evenings and early mornings during term time.',
+      inherits_from:     :pupil_dashboard_daytype_breakdown_electricity,
+      meter_definition:  :storage_heater_meter
+    },
+    pupil_dashboard_storage_heaters_longterm_trend_£: {
+      name:             'Your school\'s long term storage heaters costs (£). Each bar shows a year\'s costs.',
+      drilldown_name:   [
+        'Your school\'s storage heaters costs over a year (in £). Each bar shows a week\'s costs.',
+        'Storage heater costs in your chosen week (in £)',
+        'Storage heater costs on your chosen day (in £)'
+      ],
+      inherits_from:     :pupil_dashboard_electricity_longterm_trend_£,
+      meter_definition:  :storage_heater_meter
+    },
+    pupil_dashboard_intraday_line_storage_heaters_last7days: {
+      name:             'Your school\'s storage heaters use over 7 days (kW)',
+      inherits_from:     :pupil_dashboard_intraday_line_electricity_last7days,
+      meter_definition:  :storage_heater_meter
     },
   }.freeze
 end

@@ -15,12 +15,12 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  schools:                  ['.*'],
+  schools:                  ['Stant.*'],
   source:                   :analytics_db,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                :dashboard,
+                                adhoc_worksheet: { name: 'Test', charts: %i[teachers_landing_page_storage_heaters teachers_landing_page_storage_heaters_simple] }
                                 # pupils_dashboard: :pupil_analysis_page
 =begin
                                 :dashboard
