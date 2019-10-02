@@ -448,7 +448,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
       <p>
         <%= @school.name %> is a <%= @school.school_type %> school near <%= address %>
         with <%= @school.number_of_pupils %> pupils
-        and a floor area of <%= @school.floor_area %>m<sup>2</sup>.
+        and a floor area of <%= @school.floor_area.round(0) %>m<sup>2</sup>.
       </p>
       <p>
         <% if @school.gas_only? %>
