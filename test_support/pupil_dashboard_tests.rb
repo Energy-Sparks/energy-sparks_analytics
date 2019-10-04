@@ -92,11 +92,13 @@ class PupilDashboardTests < RunCharts
   private def fuel_type_available(name)
     case name
     when 'Electricity'
-      @school.electricity?
+      @school.electricity? && !@school.solar_pv_panels?
     when 'Gas'
       @school.gas?
     when 'Storage Heaters'
       @school.storage_heaters?
+    when 'Electricity+Solar PV'
+      @school.electricity? && @school.solar_pv_panels?
     else
       true
     end
