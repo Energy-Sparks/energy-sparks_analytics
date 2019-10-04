@@ -103,7 +103,7 @@ class DashboardConfiguration
                 { name: 'Year',    charts: %i[pupil_dashboard_gas_longterm_trend_£] }
               ]
             },
-            { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_gas_last7days] },
+            { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_gas_last7days] }
           ],
         },
         {                    

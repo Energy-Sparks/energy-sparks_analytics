@@ -10,11 +10,15 @@ class ChartManager
 
     chart_config.delete(:reverse_xaxis) # benchmark charts reverse the x-axis order, long-term charts then inherit this behaviour, negate on drilldown
 
-    if chart_config[:series_breakdown] == :baseload ||
-       chart_config[:series_breakdown] == :cusum ||
-       chart_config[:series_breakdown] == :hotwater ||
-       chart_config[:series_breakdown] == :heating ||
-       chart_config[:chart1_type]      == :scatter
+    if chart_config[:chart1_type] == :scatter
+      chart_config[:chart1_type] = :column
+      chart_config[:series_breakdown] = :none
+      chart_config.delete(:filter)
+      chart_config.delete(:trendlines)
+    end
+
+    if %i[baseload cusum hotwater heating].include?(chart_config[:series_breakdown])
+       
        # these special case may need reviewing if we decide to aggregate
        # these types of graphs by anything other than days
        # therefore create a single date datetime drilldown
