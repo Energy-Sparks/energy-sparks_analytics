@@ -80,7 +80,7 @@ class AlertThermostaticControl < AlertGasModelBase
   end
 
   def time_of_year_relevance
-    set_time_of_year_relevance(@heating_on.nil? ? 5.0 : (@heating_on ? 7.5 : 1.0))
+    set_time_of_year_relevance(@heating_on.nil? ? 5.0 : (@heating_on ? 7.5 : 0.0))
   end
 
   private def calculate(asof_date)
