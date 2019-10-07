@@ -24,14 +24,24 @@ class MeterCollection
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters,
                 :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter,
-                :schedule_data_manager
+                :holidays,
+                :temperatures,
+                :solar_irradiation,
+                :solar_pv,
+                :grid_carbon_intensity
 
-  def initialize(school, schedule_data_manager)
+  def initialize(school, holidays:, temperatures:, solar_irradiation:, solar_pv:, grid_carbon_intensity:)
     @name = school.name
     @address = school.address
     @postcode = school.postcode
     @floor_area = school.floor_area
     @number_of_pupils = school.number_of_pupils
+    @holidays = holidays
+    @temperatures = temperatures
+    @solar_irradiation = solar_irradiation
+    @solar_pv = solar_pv
+    @grid_carbon_intensity = grid_carbon_intensity
+
     @heat_meters = []
     @electricity_meters = []
     @solar_pv_meters = []
@@ -43,20 +53,9 @@ class MeterCollection
     @default_energy_purchaser = @area_name # use the area name for the moment
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
-    @schedule_data_manager = schedule_data_manager
 
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
-
-    configure_schedule_names
-  end
-
-  def configure_schedule_names
-    # Normally these would come from the school, hard coded at the mo
-    @holiday_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
-    @temperature_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
-    @solar_irradiance_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
-    @solar_pv_schedule_name = school.area_name.nil? ? @schedule_data_manager::BATH_AREA_NAME : school.area_name
   end
 
   def matches_identifier?(identifier, identifier_type)
@@ -154,7 +153,7 @@ class MeterCollection
       else
         :gas_only
       end
-    else 
+    else
       if solar_pv_panels?
         :electric_and_solar_pv
       elsif storage_heaters?
@@ -241,26 +240,5 @@ class MeterCollection
   # It replaces school_day_in_hours(time_of_day)
   def is_school_usually_open?(_date, time_of_day)
     time_of_day >= @cached_open_time && time_of_day < @cached_close_time
-  end
-
-  # held at building level as a school building e.g. a community swimming pool may have a different holiday schedule
-  def holidays
-    @schedule_data_manager.holidays(@holiday_schedule_name)
-  end
-
-  def temperatures
-    @schedule_data_manager.temperatures(@temperature_schedule_name)
-  end
-
-  def solar_irradiation
-    @schedule_data_manager.solar_irradiation(@solar_irradiance_schedule_name)
-  end
-
-  def solar_pv
-    @schedule_data_manager.solar_pv(@solar_pv_schedule_name)
-  end
-
-  def grid_carbon_intensity
-    @schedule_data_manager.uk_grid_carbon_intensity
   end
 end
