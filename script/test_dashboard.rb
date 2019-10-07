@@ -15,12 +15,13 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  schools:                  ['Stant.*'],
+  schools:                  ['.*'],
   source:                   :analytics_db,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                adhoc_worksheet: { name: 'Test', charts: %i[teachers_landing_page_storage_heaters teachers_landing_page_storage_heaters_simple] }
+                                :dashboard
+                                # adhoc_worksheet: { name: 'Test', charts: %i[teachers_landing_page_storage_heaters teachers_landing_page_storage_heaters_simple] }
                                 # pupils_dashboard: :pupil_analysis_page
 =begin
                                 :dashboard
@@ -39,7 +40,7 @@ script = {
                               control: {
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
-                                compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
+                                # compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
                               }
                             }, 
 }
