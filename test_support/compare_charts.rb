@@ -66,7 +66,7 @@ class CompareChartResults
     else
       @differing_results[chart_name] = true # set for summary purposes
       if !control_contains?(:quick_comparison) # HashDiff is horribly slow, so only run if necessary
-        h_diff = HashDiff.diff(old_data, new_data, use_lcs: false, :numeric_tolerance => 0.000001) # use_lcs is O(N) otherwise and takes hours!!!!!
+        h_diff = Hashdiff.diff(old_data, new_data, use_lcs: false, :numeric_tolerance => 0.000001) # use_lcs is O(N) otherwise and takes hours!!!!!
         @differing_results[chart_name] = h_diff
         puts h_diff
       end

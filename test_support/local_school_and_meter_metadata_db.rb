@@ -128,7 +128,21 @@ class AnalysticsSchoolAndMeterMetaData
 
   def create_meter_collection(school_name, school_metadata, meter_metadata)
     school = create_school(school_name)
-    meter_collection = MeterCollection.new(school, ScheduleDataManager)
+
+    # This was previously in meter collection
+    holiday_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
+    temperature_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
+    solar_irradiance_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
+    solar_pv_schedule_name = school.area_name.nil? ? ScheduleDataManager::BATH_AREA_NAME : school.area_name
+
+    # Now we pass in the data independently
+    meter_collection = MeterCollection.new(school,
+      temperatures: ScheduleDataManager.temperatures(temperature_schedule_name)
+      solar_pv: ScheduleDataManager.solar_pv(solar_pv_schedule_name)
+      solar_irradiation: ScheduleDataManager.solar_irradiation(solar_irradiance_schedule_name)
+      uk_grid_carbon_intensity: ScheduleDataManager.uk_grid_carbon_intensity
+      holidays: ScheduleDataManager.holidays(holiday_schedule_name)
+    )
 
     gas_meters = create_meters(meter_collection, school_metadata[:meters], :gas)
     gas_meters.each do |gas_meter|

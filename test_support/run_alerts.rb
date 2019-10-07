@@ -140,7 +140,7 @@ class RunAlerts
       differs = data != previous_data
       puts "differs: #{filename}" if !control[:save_and_compare][:summary].nil? && differs
       if differs && !control[:save_and_compare][:h_diff].nil?
-        h_diff = HashDiff.diff(previous_data, data, control[:save_and_compare][:h_diff]) do |_path, obj1, obj2|
+        h_diff = Hashdiff.diff(previous_data, data, control[:save_and_compare][:h_diff]) do |_path, obj1, obj2|
           obj1.is_a?(Float) && obj2.is_a?(Float) && obj1.nan? && obj2.nan? ? true : nil # make NaN == NaN, produces a [] result
         end
         ap h_diff
@@ -369,7 +369,7 @@ class RunAlerts
     history.save(calculated_results)
 
     print_banner "Differences:"
-    h_diff = HashDiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
+    h_diff = Hashdiff.diff(previous_results, calculated_results, use_lcs: false, :numeric_tolerance => 0.01)
     puts h_diff
 
     print_banner "Calc times:"
