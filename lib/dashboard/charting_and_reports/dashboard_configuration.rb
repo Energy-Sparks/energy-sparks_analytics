@@ -103,7 +103,7 @@ class DashboardConfiguration
                 { name: 'Year',    charts: %i[pupil_dashboard_gas_longterm_trend_£] }
               ]
             },
-            { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_gas_last7days] },
+            { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_gas_last7days] }
           ],
         },
         {                    
@@ -124,6 +124,29 @@ class DashboardConfiguration
             { name: 'Line',  charts: %i[pupil_dashboard_intraday_line_storage_heaters_last7days] },
           ],
         },
+        {                    
+          name:     'Electricity+Solar PV',
+          sub_pages:  [
+            { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_electricity_kwh] },
+            { name: 'Solar',  charts: %i[pupil_dashboard_solar_pv_monthly] },
+            { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_electricity] },
+            { 
+              name: 'Bar',
+              sub_pages: [
+                { name: 'Bench',   charts: %i[pupil_dashboard_solar_pv_benchmark] },
+                { name: 'Week',    charts: %i[pupil_dashboard_group_by_week_electricity_£] },
+                { name: 'Year',    charts: %i[pupil_dashboard_electricity_longterm_trend_£] }
+              ]
+            },
+            {
+              name: 'Line',  
+              sub_pages: [
+                { name: 'Base',   charts: %i[pupil_dashboard_baseload_lastyear] },
+                { name: '7days',  charts: %i[pupil_dashboard_intraday_line_electricity_last7days] }
+              ]
+            }
+          ],
+        } 
       ],
     },
     main_dashboard_electric_and_gas: {

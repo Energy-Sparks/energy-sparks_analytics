@@ -1709,5 +1709,18 @@ class ChartManager
       inherits_from:     :pupil_dashboard_intraday_line_electricity_last7days,
       meter_definition:  :storage_heater_meter
     },
+    #======================================PUPIL DASHBOARD - SOLAR PV========================================
+    pupil_dashboard_solar_pv_benchmark: {
+      name:               'How my school\'s spend on electricity compares with other schools (kWh)',
+      inherits_from:      :pupil_dashboard_electricity_benchmark
+    },
+    pupil_dashboard_solar_pv_monthly: {
+      name:               'How my school\'s solar PV panels reduce my school\'s mains electricity consumption (kWh)',
+      drilldown_name:   [
+        'Impact of Solar PV in your chosen week (in kWh)',
+        'Impact of Solar PV costs on your chosen day (in kWh)'
+      ],
+      inherits_from:      :solar_pv_group_by_month_dashboard_overview
+    },
   }.freeze
 end

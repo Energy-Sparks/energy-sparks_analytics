@@ -79,6 +79,10 @@ class AlertThermostaticControl < AlertGasModelBase
     @base_temperature ||= @heating_model.average_base_temperature
   end
 
+  def time_of_year_relevance
+    set_time_of_year_relevance(@heating_on.nil? ? 5.0 : (@heating_on ? 7.5 : 0.0))
+  end
+
   private def calculate(asof_date)
     calculate_model(asof_date)
 
