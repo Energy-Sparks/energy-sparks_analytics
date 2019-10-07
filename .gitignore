@@ -46,3 +46,4 @@ TestResults/*
 BenchmarkLog/*
 Charts/*
 Alerts/*
+AggregatedMeterCollections/*

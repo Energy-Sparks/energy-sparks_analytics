@@ -10,6 +10,8 @@ class SchoolFactory
 
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
   def load_or_use_cached_meter_collection(identifier_type, identifier, source)
+    return load_aggregated_meter_collection if source == :aggregated_meter_collection
+    puts "Got here: #{source}"
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
@@ -24,6 +26,43 @@ class SchoolFactory
   end
 
   private
+
+  private def load_aggregated_meter_collection
+    filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-trinity-c-of-e-first-school.yaml'
+    return load_marshal_copy(marshal_filename(filename)) if File.exist?(marshal_filename(filename))
+
+    school = nil
+
+    
+
+    bm = Benchmark.realtime {
+      school = YAML.load_file(filename)
+    }
+    puts "Loaded #{filename} in #{bm.round(3)} seconds"
+
+    bm = Benchmark.realtime {
+      save_marshal_copy(filename, school)
+    }
+    puts "saved marshal version in #{bm.round(5)}"
+    school
+  end
+
+  private def marshal_filename(filename)
+    Pathname(filename).sub_ext('.marshal')
+  end
+
+  private def save_marshal_copy(filename, school)
+    File.open(marshal_filename(filename), 'wb') { |f| f.write(Marshal.dump(school)) }
+  end
+
+  private def load_marshal_copy(marshal_filename)
+    school = nil
+    bm = Benchmark.realtime {
+      school = Marshal.load(File.open(marshal_filename))
+    }
+    puts"loaded marshal version in #{bm.round(5)}"
+    school
+  end
 
   def find_cached_school(urn, source)
     @school_cache.dig(urn, source)
