@@ -40,7 +40,7 @@ script = {
                               control: {
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
-                                # compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
+                                compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
                               }
                             }, 
 }

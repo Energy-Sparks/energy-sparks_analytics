@@ -137,10 +137,10 @@ class AnalysticsSchoolAndMeterMetaData
 
     # Now we pass in the data independently
     meter_collection = MeterCollection.new(school,
-      temperatures: ScheduleDataManager.temperatures(temperature_schedule_name)
-      solar_pv: ScheduleDataManager.solar_pv(solar_pv_schedule_name)
-      solar_irradiation: ScheduleDataManager.solar_irradiation(solar_irradiance_schedule_name)
-      uk_grid_carbon_intensity: ScheduleDataManager.uk_grid_carbon_intensity
+      temperatures: ScheduleDataManager.temperatures(temperature_schedule_name),
+      solar_pv: ScheduleDataManager.solar_pv(solar_pv_schedule_name),
+      solar_irradiation: ScheduleDataManager.solar_irradiation(solar_irradiance_schedule_name),
+      grid_carbon_intensity: ScheduleDataManager.uk_grid_carbon_intensity,
       holidays: ScheduleDataManager.holidays(holiday_schedule_name)
     )
 
