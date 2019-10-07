@@ -20,9 +20,9 @@ script = {
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
-                                #  calendar_picker_electricity_day_example_comparison_chart] }
-                                :dashboard
+                                adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
+                                  calendar_picker_electricity_day_example_comparison_chart] }
+                                # :dashboard
                                 # adhoc_worksheet: { name: 'Test', charts: %i[teachers_landing_page_storage_heaters teachers_landing_page_storage_heaters_simple] }
                                 # pupils_dashboard: :pupil_analysis_page
 =begin

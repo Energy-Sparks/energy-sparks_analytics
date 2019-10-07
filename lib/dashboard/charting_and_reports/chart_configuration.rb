@@ -1552,6 +1552,7 @@ class ChartManager
                         ],
       chart1_subtype:   nil,
       series_breakdown: :none,
+      x_axis_reformat:  { date: '%A' },
       inherits_from:    :calendar_picker_electricity_week_chart
     },
     calendar_picker_electricity_day_example_comparison_chart: {
