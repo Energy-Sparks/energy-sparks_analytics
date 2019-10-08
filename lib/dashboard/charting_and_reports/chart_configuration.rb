@@ -1623,6 +1623,7 @@ class ChartManager
     pupil_dashboard_baseload_lastyear: {
       name:             'Your school\'s electricity baseload. This is power used when the school is empty (kW)',
       inherits_from:     :baseload_lastyear,
+      drilldown_name:   ['Electricity power consumption on your chosen day (in kW)'],
       minimum_days_data_override: 21
     },
     pupil_dashboard_intraday_line_electricity_last7days: {
