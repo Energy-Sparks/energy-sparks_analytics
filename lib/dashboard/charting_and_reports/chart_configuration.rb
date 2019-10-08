@@ -1583,7 +1583,8 @@ class ChartManager
     pupil_dashboard_group_by_week_electricity_kwh: {
       name:             'Your school\'s electricity use over a year (in kWh). Each bar shows a week\'s use',
       drilldown_name:   ['Electricity use in your chosen week (in kWh)', 'Electricity use on your chosen day (in kWh)'],
-      inherits_from:    :group_by_week_electricity
+      inherits_from:    :group_by_week_electricity,
+      minimum_days_data_override: 21
     },
     pupil_dashboard_group_by_week_electricity_£: {
       name:             'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
@@ -1616,11 +1617,13 @@ class ChartManager
       name:             'When your school used electricity over the past year. School day closed is the electricity used in the evenings and early mornings during term time.',
       timescale:        :year,
       inherits_from:     :daytype_breakdown_electricity,
-      yaxis_units:      :£
+      yaxis_units:      :£,
+      minimum_days_data_override: 180
     },
     pupil_dashboard_baseload_lastyear: {
       name:             'Your school\'s electricity baseload. This is power used when the school is empty (kW)',
-      inherits_from:     :baseload_lastyear
+      inherits_from:     :baseload_lastyear,
+      minimum_days_data_override: 21
     },
     pupil_dashboard_intraday_line_electricity_last7days: {
       name:             'Your school\'s electricity use over 7 days (kW)',

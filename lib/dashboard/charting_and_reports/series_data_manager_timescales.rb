@@ -11,6 +11,7 @@
 class PeriodsBase
   def initialize(chart_config, meter_collection, first_meter_date, last_meter_date, type)
     @timescale = chart_config[:timescale]
+    @minimum_days_data_override = chart_config[:minimum_days_data_override]
     @meter_collection = meter_collection
     @first_meter_date = first_meter_date
     @last_meter_date = last_meter_date
@@ -83,6 +84,20 @@ class PeriodsBase
     raise EnergySparksBadChartSpecification, "Error: expecting zero or negative number for #{self.class.name} specification" if offset > 0
   end
 
+  protected def enough_data_for_override
+    return false if @minimum_days_data_override.nil?
+    (@last_meter_date - @first_meter_date + 1) >= @minimum_days_data_override
+  end
+
+  protected def check_or_create_minimum_period(periods)
+    return periods unless periods.empty?
+    if enough_data_for_override
+      [SchoolDatePeriod.new(:less_data_than_ideal, 'limited data chart', @first_meter_date, @last_meter_date)]
+    else
+      periods
+    end
+  end
+
   private def calculate_periods
     if @timescale.nil? # @timescale.is_a?(Symbol) # e.g. x_axis: :year
       period_list # required for backward compatibility with aggregator, no timescale set, so assume full range
@@ -125,7 +140,7 @@ end
 
 class YearPeriods < PeriodsBase
   protected def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
-    @meter_collection.holidays.years_to_date(first_meter_date, last_meter_date, false)
+    check_or_create_minimum_period(@meter_collection.holidays.years_to_date(first_meter_date, last_meter_date, false))
   end
 
   def calculate_period_from_offset(offset)
