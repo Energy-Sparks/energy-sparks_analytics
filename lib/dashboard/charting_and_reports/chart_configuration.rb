@@ -121,7 +121,8 @@ class ChartManager
       series_breakdown: :daytype,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      timescale:        :year
+      timescale:        :year,
+      subtitle:         :daterange
     },
     daytype_breakdown_combined_fuels: { # double breakdown doesn't work TODO(PH, 29Apr2019)
       inherits_from:    :daytype_breakdown_gas,
@@ -139,7 +140,8 @@ class ChartManager
       series_breakdown: :daytype,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      timescale:        :year
+      timescale:        :year,
+      subtitle:         :daterange
     },
     alert_daytype_breakdown_electricity: {
       inherits_from: :daytype_breakdown_electricity
@@ -887,7 +889,8 @@ class ChartManager
       chart1_subtype:   nil,
       y2_chart_type:    nil,
       y2_axis:          nil,
-      x_axis:           :nodatebuckets
+      x_axis:           :nodatebuckets,
+      subtitle:         :daterange
     },
     heating_on_off_pie_chart: {
       name:             'Heating versus non-heating day gas consumption',
@@ -897,7 +900,8 @@ class ChartManager
       chart1_subtype:   nil,
       y2_chart_type:    nil,
       y2_axis:          nil,
-      x_axis:           :nodatebuckets
+      x_axis:           :nodatebuckets,
+      subtitle:         :daterange
     },
     thermostatic_non_heating: {
       name:             'Thermostatic (Non Heating Season, School Day)',

@@ -128,6 +128,7 @@ class ChartManager
     graph_definition[:y_axis_label]   = chart_config[:y_axis_label]
     graph_definition[:config_name]    = chart_param
     graph_definition[:data_labels]    = aggregator.data_labels unless aggregator.data_labels.nil?
+    graph_definition[:subtitle]       = aggregator.subtitle unless aggregator.subtitle.nil?
 
     if aggregator.y2_axis?
       graph_definition[:y2_chart_type] = :line

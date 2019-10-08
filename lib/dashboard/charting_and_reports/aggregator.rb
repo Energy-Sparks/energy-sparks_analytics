@@ -95,6 +95,15 @@ class Aggregator
     swap_NaN_for_nil if true || Object.const_defined?('Rails')
   end
 
+  def subtitle
+    return nil unless @chart_config.key?(:subtitle)
+    if @chart_config[:subtitle] == :daterange && !@xbucketor.data_start_date.nil? && !@xbucketor.data_end_date.nil?
+      @xbucketor.data_start_date.strftime('%e %b %Y') + ' to ' + @xbucketor.data_end_date.strftime('%e %b %Y')
+    else
+      return 'Internal error expected subtitle request'
+    end
+  end
+
   def y2_axis?
     !config_none_or_nil?(:y2_axis, @chart_config)
   end
