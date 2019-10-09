@@ -1569,6 +1569,16 @@ class ChartManager
       series_breakdown: :none,
       inherits_from:    :calendar_picker_electricity_day_chart
     },
+    calendar_picker_gas_week_example_comparison_chart: {
+      name:             'Calendar picker gas example week comparison chart',
+      inherits_from:    :calendar_picker_electricity_week_example_comparison_chart,
+      meter_definition: :allheat
+    },
+    calendar_picker_gas_day_example_comparison_chart: {
+      name:             'Calendar picker gas example day comparison chart',
+      inherits_from:    :calendar_picker_electricity_day_example_comparison_chart,
+      meter_definition: :allheat
+    },
     calendar_picker_electricity_day_example_meter_breakdown_chart: {
       name:             'Calendar picker electricity example meter breakdown chart',
       series_breakdown: :meter,
