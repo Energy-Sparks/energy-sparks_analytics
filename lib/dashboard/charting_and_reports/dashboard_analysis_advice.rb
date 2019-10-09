@@ -173,6 +173,9 @@ protected
 
 # copied from heating_regression_model_fitter.rb TODO(PH,17Feb2019) - merge
 def html_table(header, rows, totals_row = false)
+  HtmlTableFormatting.new(header, rows, totals_row).html
+=begin
+  # TODO(PH, 9Oct2019) remove
   template = %{
     <p>
       <table class="table table-striped table-sm">
@@ -206,21 +209,22 @@ def html_table(header, rows, totals_row = false)
   }.gsub(/^  /, '')
 
   generate_html(template, binding)
+=end
 end
 
 
-  def generate_html(template, binding)
-    begin
-      rhtml = ERB.new(template)
-      rhtml.result(binding)
-      # rhtml.gsub('£', '&pound;')
-    rescue StandardError => e
-      logger.error "Error generating html for #{self.class.name}"
-      logger.error e.message
-      logger.error e.backtrace
-      '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
-    end
+def generate_html(template, binding)
+  begin
+    rhtml = ERB.new(template)
+    rhtml.result(binding)
+    # rhtml.gsub('£', '&pound;')
+  rescue StandardError => e
+    logger.error "Error generating html for #{self.class.name}"
+    logger.error e.message
+    logger.error e.backtrace
+    '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
   end
+end
 
   def nil_advice
     footer_template = %{
@@ -1737,6 +1741,8 @@ class HotWaterAdvice < DashboardChartAdviceBase
       return
     end
 
+
+
     avg_school_day_gas_consumption = hotwater_model.avg_school_day_gas_consumption
     avg_holiday_day_gas_consumption = hotwater_model.avg_holiday_day_gas_consumption
     avg_weekend_day_gas_consumption = hotwater_model.avg_weekend_day_gas_consumption
@@ -1749,6 +1755,20 @@ class HotWaterAdvice < DashboardChartAdviceBase
     baths_per_pupil = (baths_savings / @school.number_of_pupils).round(0)
 
     efficiency = hotwater_model.overall_efficiency
+
+    hw_alert = AlertHotWaterEfficiency.new(@school)
+    if hw_alert.valid_alert?
+       hw_alert.analyse(@school.aggregated_heat_meters.amr_data.end_date, true)
+       eff = hw_alert.hot_water_efficiency_summer_unoccupied_methdology_percent
+       puts "Got here: alert says #{eff} compared with #{efficiency}"
+    end
+
+    hw_analysis = AnalyseHeatingAndHotWater::HotWaterInvestmentAnalysis.new(@school)
+    investment_data = hw_analysis.analyse_annual
+    ap investment_data
+
+    table = HotWaterTableFormatting.new(investment_data)
+    html_investment_table = table.full_analysis_table(:html)
 
     header_template = %{
       <%= @body_start %>
@@ -1805,6 +1825,11 @@ class HotWaterAdvice < DashboardChartAdviceBase
         <li>If the school matched the annual benchmark consumption it would save the equivalent energy needed to heat  <%= baths_savings %> baths
         of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
       </ul>
+      <p>To improve the efficiency of your hot water system,
+          you have two potential choices, to improve the timing control of your hot water system,
+          or to replace your gas based hot water system with point of use electric heaters:
+      <p> <%= html_investment_table %> </p>
+      <p>Further background information on making this choice is available here.</p>
       <p>
         The Energy Sparks analysis above is based on looking at data patterns and should be seen as a reasonable
         estimate for the efficiency of your hot water system.

@@ -14,6 +14,7 @@ module BenchmarkMetrics
   EXEMPLAR_GAS_USAGE_PER_M2 = 80.0
   EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175
   BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2 = 0.015
+  LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH = 0.15
 
   def self.benchmark_annual_electricity_usage_kwh(school_type, pupils = 1)
     school_type = school_type.to_sym if school_type.instance_of? String

@@ -100,7 +100,7 @@ class Aggregator
     if @chart_config[:subtitle] == :daterange && !@xbucketor.data_start_date.nil? && !@xbucketor.data_end_date.nil?
       @xbucketor.data_start_date.strftime('%e %b %Y') + ' to ' + @xbucketor.data_end_date.strftime('%e %b %Y')
     else
-      return 'Internal error expected subtitle request'
+      'Internal error: expected subtitle request'
     end
   end
 

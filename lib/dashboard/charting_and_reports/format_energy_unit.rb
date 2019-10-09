@@ -33,6 +33,7 @@ class FormatEnergyUnit
     temperature:                  'C',
     years_range:                  'years',
     years:                        'years',
+    years_decimal:                'years',
     £_range:                      '£',
     £_per_kwh:                    '£/kWh',
     kg_co2_per_kwh:               'kg CO2/kWh',

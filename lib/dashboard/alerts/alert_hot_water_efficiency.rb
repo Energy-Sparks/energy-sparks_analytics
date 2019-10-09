@@ -140,7 +140,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       @average_summer_weekend_day_kwh = @hot_water_model.avg_weekend_day_gas_consumption
       kwh_annual = annual_kwh(@school.aggregated_heat_meters, asof_date)
       @hot_water_summer_methdology_percent_of_annual_gas = @hot_water_annual_summer_unoccupied_methdology_kwh / kwh_annual
-      @annual_benchmark_hot_water_kwh, @point_of_use_annual_standing_loss_kwh, @point_of_use_annual_total_kwh = AnalyseHeatingAndHotWater::HotwaterModel.annual_point_of_use_electricity_meter_kwh(pupils)
+      @annual_benchmark_hot_water_kwh, @point_of_use_annual_standing_loss_kwh, @point_of_use_annual_total_kwh = AnalyseHeatingAndHotWater::HotWaterInvestmentAnalysis.annual_point_of_use_electricity_meter_kwh(pupils)
       @hot_water_annual_summer_unoccupied_methdology_£ = @hot_water_annual_summer_unoccupied_methdology_kwh * BenchmarkMetrics::GAS_PRICE
       @point_of_use_annual_total_£ = @point_of_use_annual_total_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
       @saving_replacing_gas_hot_water_with_electric_point_of_use_£ = @hot_water_annual_summer_unoccupied_methdology_£ - @point_of_use_annual_total_£

@@ -17,6 +17,12 @@ class TimeOfDay
     TimeOfDay.new((hh / 2).to_i, 30 * (hh % 2))
   end
 
+  def self.add_hours_and_minutes(time_of_day, add_hours, add_minutes = 0.0)
+    t = time_of_day.relative_time
+    t += add_hours * 60 * 60 + add_minutes * 60
+    TimeOfDay.new(t.hour, t.min)
+  end
+
   def to_s
     if @relative_time.day == 1
       @relative_time.strftime('%H:%M')
