@@ -1551,12 +1551,13 @@ class ChartManager
     calendar_picker_electricity_week_example_comparison_chart: {
       name:             'Calendar picker electricity example week comparison chart',
       timescale:        [
-                          { daterange: Date.new(2018,6,12)..Date.new(2018,6,18) },
-                          { daterange: Date.new(2018,6,19)..Date.new(2018,6,25) },
+                          { daterange: Date.new(2019,9,1)..Date.new(2019,9,7)  },
+                          { daterange: Date.new(2019,9,8)..Date.new(2019,9,14) },
                         ],
       chart1_subtype:   nil,
       series_breakdown: :none,
       x_axis_reformat:  { date: '%A' },
+      calendar_picker_allow_up_to_1_week_past_last_meter_date: true,
       inherits_from:    :calendar_picker_electricity_week_chart
     },
     calendar_picker_electricity_day_example_comparison_chart: {

@@ -22,7 +22,11 @@ script = {
   reports:                  {
                               charts: [
                                 # adhoc_worksheet: { name: 'Test', charts: %i[hotwater]}
-                                adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_gas_week_example_comparison_chart calendar_picker_gas_day_example_comparison_chart]}
+                                adhoc_worksheet: { name: 'Test', charts: %i[
+                                  group_by_week_electricity
+                                  calendar_picker_electricity_week_example_comparison_chart
+                                  calendar_picker_gas_week_example_comparison_chart
+                                  calendar_picker_gas_day_example_comparison_chart]}
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }
                                 # :dashboard

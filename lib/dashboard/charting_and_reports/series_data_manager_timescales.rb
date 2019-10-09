@@ -11,6 +11,7 @@
 class PeriodsBase
   def initialize(chart_config, meter_collection, first_meter_date, last_meter_date, type)
     @timescale = chart_config[:timescale]
+    @override_meter_end_date = chart_config.key?(:calendar_picker_allow_up_to_1_week_past_last_meter_date)
     @minimum_days_data_override = chart_config[:minimum_days_data_override]
     @meter_collection = meter_collection
     @first_meter_date = first_meter_date
@@ -72,7 +73,16 @@ class PeriodsBase
 
   protected def check_out_of_range(date)
     raise EnergySparksNotEnoughDataException, "Error: date request for data out of range start date #{date} before first meter data #{@first_meter_date}" if date < @first_meter_date
-    raise EnergySparksNotEnoughDataException, "Error: date request for data out of range end date #{date} before last meter data #{@last_meter_date}" if date > @last_meter_date
+    raise EnergySparksNotEnoughDataException, "Error: date request for data out of range end date #{date} before last meter data #{@last_meter_date}" if past_end_date(date)
+  end
+
+  protected def past_end_date(date)
+    last_meter_date = @override_meter_end_date ? roll_date_to_next_saturday(@last_meter_date) : @last_meter_date
+    date > last_meter_date
+  end
+
+  private def roll_date_to_next_saturday(date)
+    date + (6 - date.wday)
   end
 
   protected def check_period_in_range(period)

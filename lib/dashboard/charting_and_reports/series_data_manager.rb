@@ -125,6 +125,10 @@ class SeriesDataManager
     logger.info "Series Name Manager: Chart Creation for #{meter_collection}"
   end
 
+  private def override_meter_end_date?
+    @chart_configuration.key?(:calendar_picker_allow_up_to_1_week_past_last_meter_date)
+  end
+
   private def process_y_axis_config(y2_axis_config)
     return [] if y2_axis_config.nil? || y2_axis_config == :none
     convert_variable_to_array(y2_axis_config)
@@ -306,7 +310,7 @@ class SeriesDataManager
       check_requested_meter_date(meter, dates, dates)
       breakdown = getdata_by_halfhour(meter, dates, halfhour_index)
     when :daterange
-      check_requested_meter_date(meter, dates[0], dates[1])
+      check_requested_meter_date(meter, dates[0], dates[1]) unless override_meter_end_date?
       breakdown = getdata_by_daterange(meter, dates[0], dates[1])
     end
     breakdown
@@ -316,7 +320,6 @@ class SeriesDataManager
     if start_date < meter.amr_data.start_date || end_date > meter.amr_data.end_date
       requested_dates = start_date == end_date ? "requested data for #{start_date}" : "requested data from #{start_date} to #{end_date}"
       meter_dates = "meter from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}: "
-      puts "problem 11 " + "Not enough data for chart aggregation: " + meter_dates + requested_dates
       raise EnergySparksNotEnoughDataException.new("Not enough data for chart aggregation: " + meter_dates + requested_dates)
     end
   end
@@ -436,6 +439,12 @@ class SeriesDataManager
       else
         raise EnergySparksUnexpectedStateException, "Expecting Float or Hash for @adjust_by_temperature_value when @adjust_by_temperature true: #{@adjust_by_temperature_value}"
       end
+    elsif override_meter_end_date?
+      total = 0.0
+      (start_date..end_date).each do |date|
+        total += date > meter.amr_data.end_date ? 0.0 : meter.amr_data.one_day_kwh(date, data_type)
+      end
+      total
     else
       meter.amr_data.kwh_date_range(start_date, end_date, data_type)
     end
