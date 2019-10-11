@@ -1742,7 +1742,7 @@ class ChartManager
       name:               'How my school\'s solar PV panels reduce my school\'s mains electricity consumption (kWh)',
       drilldown_name:   [
         'Impact of Solar PV in your chosen week (in kWh)',
-        'Impact of Solar PV costs on your chosen day (in kWh)'
+        'Impact of Solar PV on your chosen day (in kWh)'
       ],
       inherits_from:      :solar_pv_group_by_month_dashboard_overview
     },
