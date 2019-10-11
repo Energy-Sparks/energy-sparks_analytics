@@ -1,6 +1,7 @@
 class SolarIrradiance < HalfHourlyData
   def initialize(type)
     super(type)
+    @cache_daylight_irradiance = {}
   end
 
   def solar_irradiance(date, half_hour_index)
@@ -29,8 +30,25 @@ class SolarIrradiance < HalfHourlyData
     total / (halfhour_index2 - halfhour_index1 + 1)
   end
 
+  def average_daytime_irradiance_in_date_range(date1, date2)
+    total = 0.0 # do calc as scalar rather than array for performance
+    count = 1
+    (date1..date2).each do |date|
+      total += average_irradiance_during_daylight(date)
+      count += 1
+    end
+    total / count
+  end
+
+  def average_irradiance_during_daylight(date)
+    return @cache_daylight_irradiance[date] if @cache_daylight_irradiance.key?(date)
+    daylight_readings = one_days_data_x48(date).select { |irradiance| irradiance > 0.0 }
+    avg = daylight_readings.empty? ? 0.0 : (daylight_readings.sum / daylight_readings.length)
+    @cache_daylight_irradiance[date] = avg * scaling_factor(date)
+  end
+
   def irradiance(date, half_hour_index)
-    data(date, half_hour_index) * scaling_factor(date)
+    solar_irradiance(date, half_hour_index)
   end
 
   protected def scaling_factor(date)
