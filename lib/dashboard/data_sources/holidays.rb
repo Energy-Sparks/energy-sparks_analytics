@@ -71,9 +71,15 @@ class Holidays
 
   def initialize(holiday_data)
     @holidays = holiday_data
-    set_holiday_types_and_academic_years
     remove_non_holidays
+    set_holiday_types_and_academic_years
     @cached_holiday_lookup = {} # for speed,
+  end
+
+  def print
+    @holidays.each do |holiday|
+      puts holiday
+    end
   end
 
   # once all the data is loaded, set type enumerations e.g. :easter
