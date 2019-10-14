@@ -76,7 +76,7 @@ class DashboardEnergyAdvice
 
     def formatted_summary_table_html
       data, total = summary_pv_table_data_html
-      html_table(false, data, total)
+      html_table(nil, data, total)
     end
   end 
 

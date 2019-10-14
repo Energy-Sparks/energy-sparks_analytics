@@ -1,4 +1,5 @@
 class HtmlTableFormatting
+  include Logging
   def initialize(header, rows, total_row = nil)
     @header = header
     @rows = rows
