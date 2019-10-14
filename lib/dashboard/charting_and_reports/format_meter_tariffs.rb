@@ -67,7 +67,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
       )
     end
     header = ['Tariff type', 'Rate']
-    table = html_table(header, rates, false)
+    table = html_table(header, rates)
     [tariff[:name], table, real_tariff]
   end
 

@@ -4,9 +4,11 @@ module AnalyseHeatingAndHotWater
     STANDING_LOSS_FROM_ELECTRIC_WATER_HEATER_KWH_PER_DAY = 0.35
     CAPITAL_COST_POU_ELECTRIC_HEATER = 200.0
     INSTALL_COST_POU_ELECTRIC_HEATER = 200.0
+    attr_reader :hotwater_model
     def initialize(school)
       @school = school
-      @hot_water_model = HotwaterModel.new(@school)
+      @hotwater_model = HotwaterModel.new(@school)
+      @theoretical_hw_kwh, _standing_loss_kwh, _total_kwh = self.class.annual_point_of_use_electricity_meter_kwh(@school.number_of_pupils)
     end
 
     def analyse_annual
@@ -18,10 +20,15 @@ module AnalyseHeatingAndHotWater
       }
     end
 
+    private def calculate_gas_efficiency(annual, current, gas_better_control)
+      annual[:existing_gas][:efficiency] = @theoretical_hw_kwh / current[:annual_kwh]
+      annual[:gas_better_control][:efficiency] = @theoretical_hw_kwh / gas_better_control[:annual_kwh]
+    end
+
     private def calculate_saving(base_line, proposal)
-      saving_kwh, saving_kwh_percent  = saving_and_percent(base_line[:kwh], proposal[:kwh])
-      saving_£, saving_£_percent      = saving_and_percent(base_line[:£],   proposal[:£])
-      saving_co2, saving_co2_percent  = saving_and_percent(base_line[:co2], proposal[:co2])
+      saving_kwh, saving_kwh_percent  = saving_and_percent(base_line[:annual_kwh], proposal[:annual_kwh])
+      saving_£, saving_£_percent      = saving_and_percent(base_line[:annual_£],   proposal[:annual_£])
+      saving_co2, saving_co2_percent  = saving_and_percent(base_line[:annual_co2], proposal[:annual_co2])
       payback_years = proposal[:capex] == 0.0 ? 0.0 : (proposal[:capex] / saving_£)
       {
         saving_kwh:         saving_kwh,
@@ -39,33 +46,40 @@ module AnalyseHeatingAndHotWater
       [saving, saving / baseline]
     end
 
+    private def efficiency(kwh)
+      @theoretical_hw_kwh / kwh
+    end
+
     private def existing_gas_estimates
-      total_kwh = @hot_water_model.annual_hotwater_kwh_estimate
+      total_kwh = @hotwater_model.annual_hotwater_kwh_estimate
       {
-        kwh:    total_kwh,
-        £:      total_kwh * BenchmarkMetrics::GAS_PRICE,
-        co2:    total_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH,
-        capex:  0.0
+        annual_kwh:   total_kwh,
+        annual_£:     total_kwh * BenchmarkMetrics::GAS_PRICE,
+        annual_co2:   total_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH,
+        capex:        0.0,
+        efficiency:   efficiency(total_kwh)
       }
     end
 
     private def gas_better_control
-      total_kwh = @hot_water_model.annual_hotwater_kwh_estimate_better_control
+      total_kwh = @hotwater_model.annual_hotwater_kwh_estimate_better_control
       {
-        kwh:    total_kwh,
-        £:      total_kwh * BenchmarkMetrics::GAS_PRICE,
-        co2:    total_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH,
-        capex:  0.0
+        annual_kwh:    total_kwh,
+        annual_£:      total_kwh * BenchmarkMetrics::GAS_PRICE,
+        annual_co2:    total_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH,
+        capex:         0.0,
+        efficiency:    efficiency(total_kwh)
       }
     end
 
     private def point_of_use_hotwater_economics
-      _hw_kwh, _standing_loss_kwh, total_kwh = self.class.annual_point_of_use_electricity_meter_kwh(@school.number_of_pupils)
+      @theoretical_hw_kwh, standing_loss_kwh, total_kwh = self.class.annual_point_of_use_electricity_meter_kwh(@school.number_of_pupils)
       {
-        kwh:    total_kwh,
-        £:      total_kwh * BenchmarkMetrics::ELECTRICITY_PRICE,
-        co2:    total_kwh * BenchmarkMetrics::LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH,
-        capex:  point_of_use_electric_heaters_capex
+        annual_kwh:   total_kwh,
+        annual_£:     total_kwh * BenchmarkMetrics::ELECTRICITY_PRICE,
+        annual_co2:   total_kwh * BenchmarkMetrics::LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH,
+        capex:        point_of_use_electric_heaters_capex,
+        efficiency:   efficiency(total_kwh)
       }
     end
 

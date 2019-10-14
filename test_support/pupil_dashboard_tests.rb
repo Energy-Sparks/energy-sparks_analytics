@@ -22,22 +22,27 @@ class PupilDashboardTests < RunCharts
     pages.each do |page|
       page.each do |page_name, charts|
         charts.each do |chart_name|
-          chart_config = @chart_manager.get_chart_config(chart_name)
-          chart_results = @chart_manager.run_chart(chart_config, chart_name)
-          chart_results[:title] += title_addendum(chart_config)
-          @worksheets[page_name].push(chart_results)
-          depth = 0
-          loop do
-            chart_name, chart_config, chart_results = drilldown(chart_results, page_name, chart_name, chart_config)
-            puts "#{page_name} #{chart_name}"
-            break if chart_name.nil?
-            depth += 1
-            if depth > 4
-              puts "===" * 50
-              break
-            end
+          chart_results = nil
+          begin
+            chart_config = @chart_manager.get_chart_config(chart_name)
+            chart_results = @chart_manager.run_chart(chart_config, chart_name)
             chart_results[:title] += title_addendum(chart_config)
             @worksheets[page_name].push(chart_results)
+            depth = 0
+            loop do
+              chart_name, chart_config, chart_results = drilldown(chart_results, page_name, chart_name, chart_config)
+              puts "#{page_name} #{chart_name}"
+              break if chart_name.nil?
+              depth += 1
+              if depth > 4
+                puts "===" * 50
+                break
+              end
+              chart_results[:title] += title_addendum(chart_config)
+              @worksheets[page_name].push(chart_results)
+            end
+          rescue StandardError => e
+            puts "Chart #{chart_name} failed: #{e.message}"
           end
         end
       end

@@ -109,8 +109,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     @relevance = time_relevance(asof_date) # during and up to 3 weeks after current period
 
-    raise EnergySparksNotEnoughDataException, "Not enough data in current period"  unless enough_days_data_for_period(current_period,  asof_date)
-    raise EnergySparksNotEnoughDataException, "Not enough data in previous period" unless enough_days_data_for_period(previous_period, asof_date)
+    raise EnergySparksNotEnoughDataException, "Not enough data in current period: #{period_debug(current_period,  asof_date)}"  unless enough_days_data_for_period(current_period,  asof_date)
+    raise EnergySparksNotEnoughDataException, "Not enough data in previous period: #{period_debug(previous_period,  asof_date)}" unless enough_days_data_for_period(previous_period, asof_date)
 
     current_period_data = meter_values_period(current_period)
     previous_period_data = normalised_period_data(current_period, previous_period)
@@ -161,6 +161,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @term = :shortterm
   end
   alias_method :analyse_private, :calculate
+
+  private def period_debug(current_period,  asof_date)
+    "#{current_period} asof #{asof_date}"
+  end
 
   protected def calculate_rating(percentage_difference, financial_difference_£, fuel_type)
     return 10.0 if financial_difference_£.between?(-MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£, MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£)

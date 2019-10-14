@@ -57,7 +57,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
         if electric_meter.storage_heater?
           @live_meters += electric_meter.sub_meters.select { |meter| meter.amr_data.end_date >= max_combined_date && meter.fuel_type == :electricity }
         elsif electric_meter.amr_data.end_date >= max_combined_date
-          @live_meters += electric_meter
+          @live_meters.push(electric_meter)
         end
       end
     else

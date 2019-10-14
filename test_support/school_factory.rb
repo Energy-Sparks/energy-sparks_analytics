@@ -27,8 +27,16 @@ class SchoolFactory
 
   private
 
+  private def aggregate_meter_collection_filename(school_part)
+    'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-'+ school_part + '.yaml'
+  end
+
   private def load_aggregated_meter_collection
     filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-trinity-c-of-e-first-school.yaml'
+    filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-farr-primary-school.yaml'
+    filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-king-edward-vii-upper-school.yaml'
+    filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-whiteways-primary-school.yaml'
+    filename = aggregate_meter_collection_filename('whiteways-primary-school')
     return load_marshal_copy(marshal_filename(filename)) if File.exist?(marshal_filename(filename))
 
     school = nil

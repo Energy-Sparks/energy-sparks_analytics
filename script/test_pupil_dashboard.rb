@@ -7,6 +7,7 @@ script = {
   # ruby_profiler:            true,
   schools:                  ['White.*','Paulto.*', 'Stanton.*'], # ['Round.*'],
   source:                   :analytics_db,
+  # source:                   :aggregated_meter_collection,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   pupil_dashboard:          {
                               control: {

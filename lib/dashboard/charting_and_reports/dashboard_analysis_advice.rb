@@ -172,7 +172,7 @@ class DashboardChartAdviceBase
 protected
 
 # copied from heating_regression_model_fitter.rb TODO(PH,17Feb2019) - merge
-def html_table(header, rows, totals_row = false)
+def html_table(header, rows, totals_row = nil)
   HtmlTableFormatting.new(header, rows, totals_row).html
 =begin
   # TODO(PH, 9Oct2019) remove
@@ -1741,65 +1741,18 @@ class HotWaterAdvice < DashboardChartAdviceBase
       return
     end
 
-
-
-    avg_school_day_gas_consumption = hotwater_model.avg_school_day_gas_consumption
-    avg_holiday_day_gas_consumption = hotwater_model.avg_holiday_day_gas_consumption
-    avg_weekend_day_gas_consumption = hotwater_model.avg_weekend_day_gas_consumption
-    annual_hotwater_kwh_estimate = hotwater_model.annual_hotwater_kwh_estimate
-    benchmark_hotwater_kwh = AnalyseHeatingAndHotWater::HotwaterModel.benchmark_annual_pupil_kwh * @school.number_of_pupils
-    annual_benchmark_saving = (annual_hotwater_kwh_estimate - benchmark_hotwater_kwh)
-    _litres_savings = AnalyseHeatingAndHotWater::HotwaterModel.litres_of_hotwater(annual_benchmark_saving)
-    baths_savings = AnalyseHeatingAndHotWater::HotwaterModel.baths_of_hotwater(annual_benchmark_saving)
-    baths_savings = (baths_savings / 100.0).round(0) * 100.0
-    baths_per_pupil = (baths_savings / @school.number_of_pupils).round(0)
-
-    efficiency = hotwater_model.overall_efficiency
-
-    hw_alert = AlertHotWaterEfficiency.new(@school)
-    if hw_alert.valid_alert?
-       hw_alert.analyse(@school.aggregated_heat_meters.amr_data.end_date, true)
-       eff = hw_alert.hot_water_efficiency_summer_unoccupied_methdology_percent
-       puts "Got here: alert says #{eff} compared with #{efficiency}"
-    end
-
-    hw_analysis = AnalyseHeatingAndHotWater::HotWaterInvestmentAnalysis.new(@school)
-    investment_data = hw_analysis.analyse_annual
-    ap investment_data
-
-    table = HotWaterTableFormatting.new(investment_data)
-    html_investment_table = table.full_analysis_table(:html)
+    advice = HotWaterInvestmentAnalysisText.new(@school)
 
     header_template = %{
       <%= @body_start %>
-      <% if @chart_type == :hotwater %>
-        <p>
-        Hot water is schools is generally provided by a central gas boiler which then circulates
-        the hot water around the school, or by more local electrically powered immersion
-        or point of use heaters.
-        </p>
-        <p>
-        This section of the dashboard attempts to help analysis gas based hot water heating
-        where a gas boiler, generally in the boiler room circulates hot water around the
-        school. These systems are often quite inefficient, because they circulate hot water
-        permanently in a loop around the school so hot water is immediately available
-        when someone turns on a tap rather than having to wait for the hot water to come
-        all the way from the boiler room. The circulatory pipework used to do this is often
-        poorly insulated, and loses heat. Often these types of systems are only 20% efficient
-        compared with direct point of use water heaters which are often over 90% efficient.
-        </p>
-        <p>
-        The graph below attempts to analyse your school's hot water system by looking
-        at the heating over the course of the summer, just before and during the start
-        of the summer holidays. If the hot water has been accidentally left on during the summer
-        holidays, it is possible to see how efficient the hot water system is by
-        comparing the difference in consumption between occupied and unoccupied days.
-        </p>
-        <p>
-        The Energy Sparks analysis tries to automate this comparison, but sometimes doesn't get
-        this right, as its much easier for a human to do this by looking at the graph.
-          </p>
-      <% end %>
+        <% if @chart_type == :hotwater %>
+          <%= advice.introductory_hot_water_text_1 %>
+          <%= advice.introductory_hot_water_text_2_with_efficiency_estimate %>
+          <%= advice.introductory_hot_water_text_3_circulatory_inefficiency %>
+          <%= advice.introductory_hot_water_text_4_analysis_intro %>
+          <%= advice.estimate_of_boiler_efficiency_header %>
+          <%= advice.estimate_of_boiler_efficiency_text_1_chart_explanation %> 
+        <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1807,45 +1760,25 @@ class HotWaterAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-      <% if @chart_type == :hotwater %>
-      <p>
-        Look at the graph, has the hot water been left on either during the summer holidays
-        or at the weekend?
-      </p>
-      <p>
-        The Energy Sparks automated analysis suggests the following:
-      </p>
-      <ul>
-        <li>An average school day consumption of <%= FormatEnergyUnit.scale_num(avg_school_day_gas_consumption) %> kWh</li>
-        <li>An average weekend day consumption of <%= FormatEnergyUnit.scale_num(avg_weekend_day_gas_consumption) %> kWh</li>
-        <li>An average holiday day consumption of <%= FormatEnergyUnit.scale_num(avg_holiday_day_gas_consumption) %> kWh</li>
-        <li>Likely overall efficiency: <%= percent(efficiency) %></li>
-        <li>Estimate of annual cost for hot water heating: <%= kwh_to_pounds_and_kwh(annual_hotwater_kwh_estimate, :gas, :kwh) %>
-        <li>Benchmark annual usage for school of same size <%= FormatEnergyUnit.scale_num(benchmark_hotwater_kwh) %> kWh (assumes 5 litres of hot water per pupil per day)</li>
-        <li>If the school matched the annual benchmark consumption it would save the equivalent energy needed to heat  <%= baths_savings %> baths
-        of hot water every year, or <%= baths_per_pupil %> per pupil!</li>
-      </ul>
-      <p>To improve the efficiency of your hot water system,
-          you have two potential choices, to improve the timing control of your hot water system,
-          or to replace your gas based hot water system with point of use electric heaters:
-      <p> <%= html_investment_table %> </p>
-      <p>Further background information on making this choice is available here.</p>
-      <p>
-        The Energy Sparks analysis above is based on looking at data patterns and should be seen as a reasonable
-        estimate for the efficiency of your hot water system.
-      </p>
-      <% end %>
+        <% if @chart_type == :hotwater %>
+          <%= advice.estimate_of_boiler_efficiency_text_2_summary_table_info %>
+          <%= advice.daytype_breakdown_table(:html) %>
+          <%= advice.estimate_heat_required_text_header %>
+          <%= advice.estimate_heat_required_text_1_calculation %>
+          <%= advice.estimate_heat_required_text_2_comparison %>
+          <%= advice.investment_choice_header %>
+          <%= advice.investment_choice_text_1_2_choices %>
+          <%= advice.investment_choice_text_2_table_intro %>
+          <%= advice.investment_table(:html) %>
+          <%= advice.investment_choice_text_3_accuracy_caveat %>
+          <%= advice.investment_choice_text_4_improved_boiler_control_benefit %>
+          <%= advice.investment_choice_text_5_point_of_use_electric_benefit %>
+          <%= advice.investment_choice_text_5_further_guidance %>
+        <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
-  end
-
-  def hotwater_model
-    if @hotwater_model.nil?
-      @hotwater_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@school)
-    end
-    @hotwater_model
   end
 
   def no_hotwater_advice

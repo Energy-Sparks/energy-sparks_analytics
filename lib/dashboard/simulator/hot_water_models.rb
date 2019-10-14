@@ -8,7 +8,8 @@ module AnalyseHeatingAndHotWater
 
     HEATCAPACITYWATER = 4.2 # J/g/K
     PUPILUSAGELITRES = 5
-    HWTEMPERATURE = 35 # C
+    HWTEMPERATURE = 35.0 # C
+    COLDWATERTEMPERATURE = 10.0
     BATHLITRES = 60
     SEASONALBOILEREFFICIENCY = 0.65
     # https://cms.esi.info/Media/documents/Stieb_SNU_ML.pdf
@@ -47,7 +48,15 @@ module AnalyseHeatingAndHotWater
     end
 
     def self.benchmark_one_day_pupil_kwh
-      HEATCAPACITYWATER * PUPILUSAGELITRES * (HWTEMPERATURE - 10) * 1_000.0 / 3_600_000.0
+      HEATCAPACITYWATER * PUPILUSAGELITRES * (HWTEMPERATURE - COLDWATERTEMPERATURE) * 1_000.0 / 3_600_000.0
+    end
+
+    def self.annual_school_hot_water_litres(pupils)
+      PUPILUSAGELITRES * 39 * 5 * pupils
+    end
+
+    def self.heat_capacity_water_kwh(litres, hot_water_temperature = HWTEMPERATURE, cold_water_temperature = COLDWATERTEMPERATURE)
+      HEATCAPACITYWATER * litres * (hot_water_temperature - cold_water_temperature) * 1_000.0 / 3_600_000.0
     end
 
     def self.litres_of_hotwater(kwh)
@@ -117,6 +126,49 @@ module AnalyseHeatingAndHotWater
       @annual_hotwater_kwh_estimate_better_control = annual_schoolday_open_kwh
     end
 
+    public def daytype_breakdown_statistics
+      results = Hash.new{ |h,k| h[k] = Hash.new(&h.default_proc) }
+
+      results[:daily][:kwh]  = daily_kwh_averages
+      results[:daily][:£]    = costs(results[:daily][:kwh])
+
+      results[:annual][:kwh] = annual_kwh_daytype_breakdown(results[:daily][:kwh])
+      results[:annual][:£]   = costs(results[:annual][:kwh])
+
+      results
+    end
+
+    # PH 12Oct2019: perhaps don't want costs in model?
+    private def costs(kwhs, energy_tariff_per_kwh = BenchmarkMetrics::GAS_PRICE)
+      kwhs.transform_values{ |kwh| kwh.nil? ? nil : kwh * energy_tariff_per_kwh }
+    end
+
+    private def daily_kwh_averages
+      {
+        schoolday_open:   avg_school_day_open_kwh,
+        schoolday_closed: avg_school_day_closed_kwh,
+        holiday:          avg_holiday_day_gas_consumption,
+        weekend:          avg_weekend_day_gas_consumption,
+        total:            nil
+      }
+    end
+
+    private def annual_kwh_daytype_breakdown(daily_kwhs = daily_kwh_averages)
+      weeks_holiday = 13
+      school_weeks  = 52 - weeks_holiday
+
+      annual_kwh = {
+        schoolday_open:   daily_kwhs[:schoolday_open]   * school_weeks  * 5,
+        schoolday_closed: daily_kwhs[:schoolday_closed] * school_weeks  * 5,
+        holiday:          daily_kwhs[:holiday]          * weeks_holiday * 7,
+        weekend:          daily_kwhs[:weekend]          * school_weeks  * 2,
+      }
+
+      annual_kwh[:total] = annual_kwh.values.sum
+
+      annual_kwh
+    end
+
     private def average_kwhs(arr)
       return 0.0 if arr.empty?
       arr.sum / arr.length
@@ -151,7 +203,7 @@ module AnalyseHeatingAndHotWater
 
     # the analysis relies on having hot water running exclusively before and during the holidays
     # this analysis won't work if these basic conditions aren't met
-    private def find_period_before_and_during_summer_holidays(holidays, amr_data)
+    def find_period_before_and_during_summer_holidays(holidays, amr_data)
       running_date = amr_data.end_date
 
       last_summer_hol = holidays.find_summer_holiday_before(running_date)

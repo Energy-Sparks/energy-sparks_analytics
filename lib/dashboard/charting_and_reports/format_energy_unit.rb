@@ -112,7 +112,8 @@ class FormatEnergyUnit
 
   def self.format_pounds(value, medium, user_numeric_comprehension_level)
     if value.magnitude >= 1.0
-      type_format(:£, medium) + scale_num(value, true, user_numeric_comprehension_level)
+      # £-40.00 => -£40.00
+      (value < 0.0 ? '-' : '') + type_format(:£, medium) + scale_num(value.magnitude, true, user_numeric_comprehension_level)
     else
       scale_num(value * 100.0, true, user_numeric_comprehension_level) + 'p'
     end
