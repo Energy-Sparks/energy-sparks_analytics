@@ -60,6 +60,7 @@ class FormatEnergyUnit
   }.freeze
 
   def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
+    return '' if value.nil? && in_table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
     return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
     return value.to_s if convert_missing_types_to_strings && !UNIT_DESCRIPTION_TEXT.key?(unit)

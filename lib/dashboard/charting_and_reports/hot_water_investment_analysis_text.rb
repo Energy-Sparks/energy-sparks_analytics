@@ -13,9 +13,17 @@ class HotWaterInvestmentAnalysisText
   end
 
   def self.alert_table_template_variables
-    investment_vars = HotWaterInvestmentTableFormatting.template_variables
-    day_type_vars   = HotWaterDayTypeTableFormatting.template_variables
+    investment_vars = investment_table_template_variables
+    day_type_vars   = daytype_table_template_variables
     day_type_vars.merge(investment_vars)
+  end
+
+  def self.investment_table_template_variables
+    HotWaterInvestmentTableFormatting.template_variables
+  end
+
+  def self.daytype_table_template_variables
+    HotWaterDayTypeTableFormatting.template_variables
   end
 
   def daytype_breakdown_table(medium)
@@ -30,8 +38,8 @@ class HotWaterInvestmentAnalysisText
   end
 
   private def alert_investment_table_data
-    table = HotWaterInvestmentTableFormatting.new(@investment_analysis)
-    extract_alert_table_data(HotWaterDayTypeTableFormatting.template_variables, table)
+    table = HotWaterInvestmentTableFormatting.new(@investment_data)
+    extract_alert_table_data(HotWaterInvestmentTableFormatting.template_variables, table)
   end
 
   private def alert_daytype_table_data

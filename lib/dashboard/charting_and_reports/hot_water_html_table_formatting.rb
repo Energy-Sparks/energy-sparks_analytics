@@ -1,6 +1,6 @@
 class HotWaterFormattingBase
   private def format(unit, value, medium, comprehension = :ks2)
-    return '' if value.nil?
+    return nil if value.nil?
     medium.nil? ? value : FormatEnergyUnit.format(unit, value, medium, false, true, comprehension)
   end
 
@@ -51,8 +51,7 @@ class HotWaterDayTypeTableFormatting < HotWaterFormattingBase
   end
 
   def find_data_in_table(key, composite_key)
-    value = @daytime_breakdown[key[1]][key[2]][key[0]]
-    puts "#{composite_key}: #{value}"
+    @daytime_breakdown[key[1]][key[2]][key[0]]
   end
 
   def self.template_variables
@@ -111,18 +110,20 @@ class HotWaterInvestmentTableFormatting < HotWaterFormattingBase
       end
     end
 
-    # null results
+    # remove null results
     %i[
-      existing_gas_saving_£ existing_gas_saving_£_percent existing_gas_saving_co2
-      existing_gas_saving_co2_percent existing_gas_payback_years
+      existing_gas_saving_£
+      existing_gas_saving_£_percent
+      existing_gas_saving_co2
+      existing_gas_saving_co2_percent
+      existing_gas_payback_years
     ].each { |key| variables.delete(key) }
 
     variables
   end
 
   def find_data_in_table(key, composite_key)
-    value = @hotwater_data[key[0]][key[1]]
-    puts "#{composite_key}: #{value}"
+    @hotwater_data[key[0]][key[1]]
   end
 
   def full_analysis_table(medium = :text)

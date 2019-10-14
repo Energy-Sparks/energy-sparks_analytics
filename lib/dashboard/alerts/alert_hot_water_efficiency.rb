@@ -2,19 +2,7 @@
 require_relative 'alert_gas_model_base.rb'
 
 class AlertHotWaterEfficiency < AlertGasModelBase
-  MIN_EFFICIENCY = 0.7
-
-  attr_reader :hot_water_efficiency_summer_unoccupied_methdology_percent
-  attr_reader :hot_water_annual_summer_unoccupied_methdology_kwh, :hot_water_annual_summer_unoccupied_methdology_£
-  attr_reader :average_summer_school_day_kwh, :average_summer_holiday_kwh, :average_summer_weekend_day_kwh
-  attr_reader :hot_water_summer_methdology_percent_of_annual_gas
-  attr_reader :annual_benchmark_hot_water_kwh, :point_of_use_annual_standing_loss_kwh
-  attr_reader :point_of_use_annual_total_£, :point_of_use_annual_total_kwh
-  attr_reader :saving_replacing_gas_hot_water_with_electric_point_of_use_£
-  attr_reader :efficiency_relative_to_theoretical_demand_percent
-  attr_reader :heat_model_annual_heating_kwh, :heat_model_annual_hotwater_kwh
-  attr_reader :heat_model_daily_hotwater_usage_kwh, :heat_model_daily_holiday_hotwater_usage_kwh
-  attr_reader :heat_model_hot_water_efficiency
+  attr_reader :investment_choices_table, :daytype_breakdown_table
 
   def initialize(school)
     super(school, :hotwaterefficiency) 
@@ -32,87 +20,35 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   end
 
   def self.template_variables
-    specific = {'Hot water efficiency' => TEMPLATE_VARIABLES}
-    specific.merge(self.superclass.template_variables)
+    vars = {'Hot water efficiency' => TEMPLATE_VARIABLES}
+    vars.merge!({'Investment table variables' => HotWaterInvestmentAnalysisText.investment_table_template_variables})
+    vars.merge!({'Day type breakdown table variables' => HotWaterInvestmentAnalysisText.daytype_table_template_variables})
+    vars.merge(self.superclass.template_variables)
   end
 
   TEMPLATE_VARIABLES = {
-    hot_water_efficiency_summer_unoccupied_methdology_percent: {
-      description: 'Efficiency of hot water system (summer unoccupied methodology)',
-      units:  :percent
-    },
-    efficiency_relative_to_theoretical_demand_percent: {
-      description: 'Efficiency of hot water system (relative to 5l/pupil/day 38C demand)',
-      units:  :percent
-    },
-    hot_water_summer_methdology_percent_of_annual_gas: {
-      description: 'Gas consumption for hot water (&kitchen) as a percent off annual gas consumption',
-      units:  :percent
-    },
-    hot_water_annual_summer_unoccupied_methdology_kwh: {
-      description: 'Estimate of annual hot water(& kitchen) consumption (kWh, summer unoccupied methodology)',
-      units:  {kwh: :gas}
-    },
-    hot_water_annual_summer_unoccupied_methdology_£: {
-      description: 'Estimate of annual hot water(& kitchen) consumption (£, summer unoccupied methodology)',
-      units:  :£
-    },
-    average_summer_school_day_kwh: {
-      description: 'Average summer school day kWh',
-      units:  {kwh: :gas}
-    },
-    average_summer_holiday_kwh: {
-      description: 'Average summer holiday day kWh',
-      units:  {kwh: :gas}
-    },
-    average_summer_weekend_day_kwh: {
-      description: 'Average summer weekend day kWh',
-      units:  {kwh: :gas}
-    },
     summer_hot_water_efficiency_chart: {
       description: 'Chart of summer gas consumption before and during summer holidays',
       units: :chart
     },
-    annual_benchmark_hot_water_kwh: {
-      description: 'Annual benchmark hot water usage (kWh, based on 5 litres/pupil/school day at 38C)',
-      units:  {kwh: :electricity}
+    investment_choices_table: {
+      description: 'Current v. Improved Control v. Point of Use Electric cost-benefit table',
+      units: :table,
+      header: ['Choice', 'Annual kWh', 'Annual Cost £', 'Annual CO2/kg',
+               'Efficiency', 'Saving £', 'Saving £ percent', 'Saving CO2', 
+               'Saving CO2 percent', 'Capital Cost', 'Payback (years)'],
+      column_types: [String, {kwh: :gas}, :£, :co2,
+                      :percent, :£, :percent, :co2,
+                      :percent, :£, :years],
+      data_column_justification: %i[left right right right right right right right right right right]
     },
-    point_of_use_annual_standing_loss_kwh: {
-      description: 'Potential standing losses from point of use electricity hot water (kWh, 30 pupils per appliance, assumed left on all year, no timers)',
-      units:  {kwh: :electricity}
+    daytype_breakdown_table: {
+      description: 'School day open v. School day closed v Holidays v Weekends kWh/£ usage',
+      units: :table,
+      header: ['', 'Average daily kWh', 'Average daily £', 'Annual kWh', 'Annual £'],
+      column_types: [String, {kwh: :gas}, :£, {kwh: :gas}, :£],
+      data_column_justification: %i[left right right right right]
     },
-    point_of_use_annual_total_kwh: {
-      description: 'Annual electricity requirements for point of use electricity hot water throughout school (kWh)',
-      units:  {kwh: :electricity}
-    },
-    point_of_use_annual_total_£: {
-      description: 'Annual electricity requirements for point of use electricity hot water throughout school (£)',
-      units:  :£
-    },
-    saving_replacing_gas_hot_water_with_electric_point_of_use_£: {
-      description: 'Potential savings moving from gas boiler hot water to electric point of use (£)',
-      units:  :£
-    },
-    heat_model_annual_heating_kwh: {
-      description: 'Annual heating gas consumption (kWh, heat model)',
-      units:  {kwh: :gas}
-    },
-    heat_model_annual_hotwater_kwh: {
-      description: 'Annual hot water gas consumption estimate (kWh, heat model)',
-      units:  {kwh: :gas}
-    },
-    heat_model_daily_hotwater_usage_kwh: {
-      description: 'Daily school day hot water gas consumption estimate (kWh, heat model)',
-      units:  {kwh: :gas}
-    },
-    heat_model_daily_holiday_hotwater_usage_kwh: {
-      description: 'Daily holiday day hot water gas consumption estimate (kWh, heat model)',
-      units:  {kwh: :gas}
-    },
-    heat_model_hot_water_efficiency: {
-      description: 'Heating model hot water efficiency estimate',
-      units:  :percent
-    }
   }
 
   def summer_hot_water_efficiency_chart
@@ -130,28 +66,21 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       @relevance = :never_relevant
       @rating = nil
     else
+      investment = HotWaterInvestmentAnalysisText.new(@school)
+      set_tabular_data_as_dynamically_created_attributes(investment.alert_table_data)
+      header, rows, totals = investment.investment_table(nil)
+      @investment_choices_table = rows
+
+      header, rows, totals = investment.daytype_breakdown_table(nil)
+      @daytype_breakdown_table = rows
+
       @relevance = :relevant
-      calculate_hot_water_model(asof_date)
 
-      @hot_water_efficiency_summer_unoccupied_methdology_percent = [@hot_water_model.overall_efficiency, 0.0].max
-      @hot_water_annual_summer_unoccupied_methdology_kwh = @hot_water_model.annual_hotwater_kwh_estimate
-      @average_summer_school_day_kwh = @hot_water_model.avg_school_day_gas_consumption
-      @average_summer_holiday_kwh = @hot_water_model.avg_holiday_day_gas_consumption
-      @average_summer_weekend_day_kwh = @hot_water_model.avg_weekend_day_gas_consumption
-      kwh_annual = annual_kwh(@school.aggregated_heat_meters, asof_date)
-      @hot_water_summer_methdology_percent_of_annual_gas = @hot_water_annual_summer_unoccupied_methdology_kwh / kwh_annual
-      @annual_benchmark_hot_water_kwh, @point_of_use_annual_standing_loss_kwh, @point_of_use_annual_total_kwh = AnalyseHeatingAndHotWater::HotWaterInvestmentAnalysis.annual_point_of_use_electricity_meter_kwh(pupils)
-      @hot_water_annual_summer_unoccupied_methdology_£ = @hot_water_annual_summer_unoccupied_methdology_kwh * BenchmarkMetrics::GAS_PRICE
-      @point_of_use_annual_total_£ = @point_of_use_annual_total_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
-      @saving_replacing_gas_hot_water_with_electric_point_of_use_£ = @hot_water_annual_summer_unoccupied_methdology_£ - @point_of_use_annual_total_£
-
-      heating_model_analysis(asof_date)
-      one_year_saving_£ = Range.new(@saving_replacing_gas_hot_water_with_electric_point_of_use_£, @saving_replacing_gas_hot_water_with_electric_point_of_use_£)
+      one_year_saving_£ = one_year_saving_calculation
+      capital_costs_£ = @existing_gas_capex..@point_of_use_electric_capex
       set_savings_capital_costs_payback(one_year_saving_£, electric_point_of_use_hotwater_costs)
 
-      @efficiency_relative_to_theoretical_demand_percent = @annual_benchmark_hot_water_kwh / @hot_water_annual_summer_unoccupied_methdology_kwh
-
-      @rating = calculate_rating_from_range(0.6, 0.0, @hot_water_efficiency_summer_unoccupied_methdology_percent)
+      @rating = calculate_rating_from_range(0.6, 0.05, @existing_gas_efficiency)
 
       @term = :shortterm
       @bookmark_url = add_book_mark_to_base_url('HotWaterEfficiency')
@@ -159,27 +88,19 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   end
   alias_method :analyse_private, :calculate
 
-  private def heating_model_analysis(asof_date)
-    meter_date_1_year_before = meter_date_one_year_before(@school.aggregated_heat_meters, asof_date)
-    heating_model_hot_water = @heating_model.hot_water_analysis(meter_date_1_year_before, asof_date)
-    scale = scale_up_to_one_year(@school.aggregated_heat_meters, asof_date)
- 
-    unless heating_model_hot_water.nil?
-      @heat_model_annual_heating_kwh                = heating_model_hot_water[:annual_heating_kwh] * scale
-      @heat_model_annual_hotwater_kwh               = heating_model_hot_water[:annual_hotwater_kwh] * scale
-      @heat_model_daily_hotwater_usage_kwh          = heating_model_hot_water[:daily_hotwater_usage_kwh]
-      @heat_model_daily_holiday_hotwater_usage_kwh  = heating_model_hot_water[:daily_holiday_hotwater_usage_kwh]
-      @heat_model_hot_water_efficiency              = heating_model_hot_water[:hot_water_efficiency]
-    else # school should really have :heating_only meter attribute set to flag no hot water
-      @heat_model_annual_heating_kwh                = 0.0
-      @heat_model_annual_hotwater_kwh               = 0.0
-      @heat_model_daily_hotwater_usage_kwh          = 0.0
-      @heat_model_daily_holiday_hotwater_usage_kwh  = 0.0
-      @heat_model_hot_water_efficiency              = 0.0
+  private def one_year_saving_calculation
+    savings = [@gas_better_control_saving_£, @point_of_use_electric_saving_£].sort
+    savings[0]..savings[1]
+  end
+
+  private def set_tabular_data_as_dynamically_created_attributes(data)
+    data.each do |key, value|
+      create_and_set_attr_reader(key, value)
     end
   end
 
-  def calculate_hot_water_model(_as_of_date)
-    @hot_water_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@school)
+  private def create_and_set_attr_reader(key, value)
+    self.class.send(:attr_reader, key)
+    instance_variable_set("@#{key}", value)
   end
 end
