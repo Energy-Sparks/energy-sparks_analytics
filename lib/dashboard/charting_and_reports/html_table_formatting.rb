@@ -30,8 +30,8 @@ class HtmlTableFormatting
           </tbody>
           <% unless @total_row.nil? %>
             <tr class="table-success">
-            <% @total_row.each do |total| %>
-              <th scope="col"> <%= total.to_s %> </th>
+            <% @total_row.each_with_index do |total, column_number| %>
+              <%= column_th(column_number, right_justified_columns) %> <%= total.to_s %> </th>
             <% end %>
             </tr>
           <% end %>
@@ -46,12 +46,20 @@ class HtmlTableFormatting
     td_for_right_justified_column(is_right_justified_column(column, right_justified_columns))
   end
 
+  private def column_th(column, right_justified_columns)
+    th_for_right_justified_column(is_right_justified_column(column, right_justified_columns))
+  end
+
   private def is_right_justified_column(column, right_justified_columns)
     right_justified_columns.any? { |col_group| col_group === column }
   end
 
   private def td_for_right_justified_column(right_justified)
     right_justified ? '<td class="text-right">' : '<td>'
+  end
+
+  private def th_for_right_justified_column(right_justified)
+    right_justified ? '<th scope="col" class="text-right">' : '<th>'
   end
 
   private def generate_html(template, binding)
