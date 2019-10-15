@@ -632,7 +632,8 @@ class Aggregator
   end
 
   def match_filter_by_day(date)
-    return true unless chart_has_filter?
+    # heating_daytype filter gets filtered out post aggregation, reduced performance but simpler
+    return true unless chart_has_filter? && !@chart_config[:filter].key?(:heating_daytype)
     match_daytype = match_occupied_type_filter_by_day(date) if @chart_config[:filter].key?(:daytype)
     match_heating = true
     match_heating = match_filter_by_heatingdayday(date) if @chart_config[:filter].key?(:heating)
