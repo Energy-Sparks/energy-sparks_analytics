@@ -64,15 +64,15 @@ class HotWaterInvestmentAnalysisText
   end
 
   def current_system_annual_consumption_kwh
-    @investment_data[:existing_gas][:kwh]
+    @investment_data[:existing_gas][:annual_kwh]
   end
 
   def current_system_annual_consumption_kwh_html
-    FormatEnergyUnit.format(:£, current_system_annual_consumption_kwh, :html)
+    FormatEnergyUnit.format(:kwh, current_system_annual_consumption_kwh, :html)
   end
 
   def current_system_annual_cost_£
-    @investment_data[:existing_gas][:£]
+    @investment_data[:existing_gas][:annual_£]
   end
 
   def current_system_annual_cost_£_html
@@ -303,10 +303,12 @@ class HotWaterInvestmentAnalysisText
         about <%= better_boiler_control_£_saving_html %> year and reduce your carbon
         emissions by <%= better_boiler_control_co2_saving_kg_html %>
         (<%= better_boiler_control_co2_saving_percent_html %>).
-        <%= link('http://www.bbc.co.uk/', 'This case study') %> outlines how this was
-        achieved at a school in Sheffield using information from Energy Sparks.
       </p>
     }.gsub(/^  /, '')
+=begin
+    <%= link('http://www.bbc.co.uk/', 'This case study') %> outlines how this was
+    achieved at a school in Sheffield using information from Energy Sparks.
+=end
     generate_html(template, binding)
   end
 

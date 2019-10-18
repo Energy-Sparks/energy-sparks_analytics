@@ -1773,11 +1773,10 @@ class HotWaterAdvice < DashboardChartAdviceBase
           <%= advice.investment_choice_text_3_accuracy_caveat %>
           <%= advice.investment_choice_text_4_improved_boiler_control_benefit %>
           <%= advice.investment_choice_text_5_point_of_use_electric_benefit %>
-          <%= advice.investment_choice_text_5_further_guidance %>
         <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
-
+    # <%= advice.investment_choice_text_5_further_guidance %>
     @footer_advice = generate_html(footer_template, binding)
   end
 

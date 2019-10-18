@@ -3,6 +3,7 @@ require_relative 'alert_gas_model_base.rb'
 
 class AlertHotWaterEfficiency < AlertGasModelBase
   attr_reader :investment_choices_table, :daytype_breakdown_table
+  attr_reader :theoretical_annual_hot_water_requirement_litres, :theoretical_annual_hot_water_requirement_kwh
 
   def initialize(school)
     super(school, :hotwaterefficiency) 
@@ -49,6 +50,14 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       column_types: [String, {kwh: :gas}, :£, {kwh: :gas}, :£],
       data_column_justification: %i[left right right right right]
     },
+    theoretical_annual_hot_water_requirement_litres: {
+      description: 'Estimate of schools annual hot water requirement in litres',
+      units: :litre
+    },
+    theoretical_annual_hot_water_requirement_kwh: {
+      description: 'Estimate of schools annual hot water requirement in kwh if 100% efficient',
+      units: { kwh: :gas }
+    }
   }
 
   def summer_hot_water_efficiency_chart
@@ -73,6 +82,9 @@ class AlertHotWaterEfficiency < AlertGasModelBase
 
       header, rows, totals = investment.daytype_breakdown_table(nil)
       @daytype_breakdown_table = rows
+
+      @theoretical_annual_hot_water_requirement_litres = investment.annual_litres
+      @theoretical_annual_hot_water_requirement_kwh = investment.annual_kwh
 
       @relevance = :relevant
 
