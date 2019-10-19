@@ -37,6 +37,7 @@ class SchoolFactory
     filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-king-edward-vii-upper-school.yaml'
     filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-whiteways-primary-school.yaml'
     filename = aggregate_meter_collection_filename('whiteways-primary-school')
+    filename = aggregate_meter_collection_filename('trinity-c-of-e-first-school')
     return load_marshal_copy(marshal_filename(filename)) if File.exist?(marshal_filename(filename))
 
     school = nil
@@ -68,7 +69,8 @@ class SchoolFactory
     bm = Benchmark.realtime {
       school = Marshal.load(File.open(marshal_filename))
     }
-    puts"loaded marshal version in #{bm.round(5)}"
+    puts"loaded marshal version in #{bm.round(5)}: #{marshal_filename}"
+    puts "Got here 7: #{school.aggregated_heat_meters.amr_data.end_date}"
     school
   end
 

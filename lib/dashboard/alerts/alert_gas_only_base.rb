@@ -1,8 +1,8 @@
 require_relative 'alert_analysis_base.rb'
 
 class AlertGasOnlyBase < AlertAnalysisBase
-  def initialize(school, report_type)
-    super(school, report_type)
+  def initialize(school, _report_type)
+    super(school, _report_type)
   end
 
   def maximum_alert_date

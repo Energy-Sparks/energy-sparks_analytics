@@ -1,0 +1,2 @@
+class AdviceGasOutHours < AdviceBase
+end

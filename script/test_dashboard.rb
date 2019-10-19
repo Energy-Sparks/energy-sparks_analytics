@@ -13,7 +13,7 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  schools:                  ['Hugh.*'],
+  schools:                  ['.*'],
   source:                   :analytics_db, # :aggregated_meter_collection
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
@@ -21,7 +21,7 @@ script = {
                               charts: [
                                 # adhoc_worksheet: { name: 'Test', charts: %i[electricity_by_month_year_0_1_finance_advice]},
                                 :dashboard,
-                                not_adhoc_worksheet: { name: 'Test', charts: %i[hotwater]},
+                                # adhoc_worksheet: { name: 'Test', charts: %i[group_by_week_gas]},
                                 no_adhoc_worksheet: { name: 'Test', charts: %i[
                                   group_by_week_electricity
                                   calendar_picker_electricity_week_example_comparison_chart
@@ -36,7 +36,7 @@ script = {
                               control: {
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
-                                no_compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
+                                compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
                               }
                             }, 
 }

@@ -11,8 +11,8 @@ class AlertGasModelBase < AlertGasOnlyBase
 
   attr_reader :heating_model
 
-  def initialize(school, report_type)
-    super(school, report_type)
+  def initialize(school, _report_type)
+    super(school, _report_type)
     @heating_model = nil
     @breakdown = nil
   end

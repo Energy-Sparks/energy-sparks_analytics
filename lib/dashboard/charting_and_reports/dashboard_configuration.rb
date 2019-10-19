@@ -149,6 +149,150 @@ class DashboardConfiguration
         } 
       ],
     },
+#========================================================================================
+    adult_analysis_page: {
+      name:   'Adult Analysis',
+         
+      sub_pages:  [
+        {       
+          name:     'How you school\'s energy consumption compares with other schools',
+          charts: %i[benchmark],
+          rating: 'average of benchmark electricity and gas benchmark use'
+        },
+        {
+          name:     'Detailed analysis of your school\'s electricity consumption',
+          sub_pages:  [
+            { 
+              name:   'Your electricity use out of school hours',
+              charts: %i[
+                daytype_breakdown_electricity
+                baseload
+                electricity_by_day_of_week
+              ],
+              rating: 'electricity alert benchmark rating'
+            },
+            { 
+              name:   'How your electricity use varies over time',
+              charts: %i[
+                group_by_week_electricity
+                electricity_longterm_trend
+                group_by_week_electricity_unlimited
+                electricity_by_month_year_0_1
+              ],
+              rating: 'new electricity trend benchmark rating'
+            },
+            { 
+              name:   'Recent changes in your electricity use',
+              charts: %i[
+                intraday_line_school_last7days
+                baseload_lastyear
+              ],
+              rating: 'short term measure of change in electricity - derived from school week alert'
+            },
+            { 
+              name:   'How your electricity usages has varies across the day',
+              charts: %i[
+                intraday_line_school_days
+                intraday_line_holidays
+                intraday_line_weekends
+                intraday_line_school_days_last5weeks
+                intraday_line_school_days_6months
+                intraday_line_school_last7days
+                baseload_lastyear
+              ],
+              rating: 'mix of peak and baseload benchmarks'
+            },
+          ], 
+        },                  
+        {   
+          name:     'Detailed analysis of your school\'s gas consumption',
+          sub_pages:  [
+            { 
+              name:   'Your gas use out of school hours',
+              charts: %i[
+                daytype_breakdown_gas
+                gas_by_day_of_week
+              ],
+              rating: 'gas alert benchmark rating, perhaps with some recent weekend alert loading'
+            },
+            { 
+              name:   'How your gas use varies over time',
+              charts: %i[
+                group_by_week_gas
+                gas_longterm_trend
+                group_by_week_gas_unlimited
+                gas_by_month_year_0_1_but_doesnt_currently_exist
+              ],
+              rating: 'new gas trend benchmark rating'
+            },
+            { 
+              name:   'Recent changes in your gas use',
+              charts: %i[
+                last_7_days_intraday_gas
+                last_2_weeks_gas
+                last_2_weeks_gas_degreedays
+                last_2_weeks_gas_comparison_temperature_compensated
+                last_4_weeks_gas_temperature_compensated
+              ],
+              rating: 'short term measure of change in gas - derived from school week alert'
+            },
+            { 
+              name:   'How your gas usages has varies across the day',
+              charts: %i[
+                gas_heating_season_intraday
+                last_7_days_intraday_gas
+              ],
+              rating: 'mix of peak and baseload benchmarks'
+            },
+            {
+              name: 'Advanced Boiler Control',
+              sub_pages: [
+                {
+                  name: 'Intraday timing: is the boiler starting too early in the morning',
+                  charts: %i[
+                    gas_heating_season_intraday
+                    optimum_start
+                  ],
+                  rating: 'Mix of out of hours usage assessment and shorter term optimum start analysis'
+                },
+                {
+                  name: 'Hot water management',
+                  charts: %i[hotwater],
+                  rating: 'new analysis - check not no usage in v. cold weather & not too much'
+                },
+                {
+                  name: 'Seasonal and holiday control',
+                  charts: %i[
+                    heating_on_off_by_week
+                    group_by_week_gas
+                    daytype_breakdown_gas
+                  ],
+                  rating: 'new analysis - check not no usage in v. cold weather & not too much'
+                },
+                {
+                  name: 'Thermostatic control',
+                  charts: %i[
+                    thermostatic
+                    thermostatic_control_large_diurnal_range_1
+                    thermostatic_control_large_diurnal_range_2
+                    thermostatic_control_large_diurnal_range_3
+                    thermostatic_control_medium_diurnal_range
+                    cusum
+                  ],
+                  rating: 'based on R2 rating'
+                },
+                {
+                  name: 'Frost protection',
+                  charts: %i[frost_1 frost_2 frost_3], # reduced to 1 chart with time shifting
+                  rating: 'new analysis - check not no usage in v. cold weather & not too much'
+                },
+              ]
+            }
+          ],  
+        },   
+      ],
+    },
+#======================================================================================================
     main_dashboard_electric_and_gas: {
                                 name:   'Overview',
                                 charts: %i[
