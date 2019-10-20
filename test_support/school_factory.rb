@@ -11,7 +11,6 @@ class SchoolFactory
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
   def load_or_use_cached_meter_collection(identifier_type, identifier, source)
     return load_aggregated_meter_collection if source == :aggregated_meter_collection
-    puts "Got here: #{source}"
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
@@ -70,7 +69,6 @@ class SchoolFactory
       school = Marshal.load(File.open(marshal_filename))
     }
     puts"loaded marshal version in #{bm.round(5)}: #{marshal_filename}"
-    puts "Got here 7: #{school.aggregated_heat_meters.amr_data.end_date}"
     school
   end
 

@@ -131,9 +131,9 @@ class RunCharts
         @worksheets[page_name] += chart_results.flatten # could be a composite chart
       end
     rescue => e
-puts 'Got here'
-puts e.message
-puts e.backtrace
+      puts 'Got here: '
+      puts e.message
+      puts e.backtrace
       @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
       nil
     end

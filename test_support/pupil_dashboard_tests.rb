@@ -7,7 +7,7 @@ class PupilDashboardTests < RunCharts
   end
 
   def run_tests(control)
-    run_recursive_dashboard_page(:pupil_analysis_page)
+    run_recursive_dashboard_page(control[:root])
     save_to_excel
     write_html
     # CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
@@ -15,36 +15,57 @@ class PupilDashboardTests < RunCharts
   end
 
   private def run_recursive_dashboard_page(parent_page_config)
-    puts 'run_recursive_dashboard_page'
     pages = []
     config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[parent_page_config]
     flatten_recursive_page_hierarchy(config, pages)
     pages.each do |page|
-      page.each do |page_name, charts|
-        charts.each do |chart_name|
-          chart_results = nil
-          begin
-            chart_config = @chart_manager.get_chart_config(chart_name)
-            chart_results = @chart_manager.run_chart(chart_config, chart_name)
+      if page.key?(:class)
+        run_all_charts_for_new_style_page(page[:class])
+      else
+        page.each do |page_name, charts| # needles iteration around single entry hash
+          run_all_charts_on_one_page(charts, config, page_name)
+        end
+      end
+    end
+  end
+
+  private def run_all_charts_for_new_style_page(advice_class)
+    puts "Running new style charts: #{advice_class}"
+    puts "Available variables: #{advice_class.template_variables}"
+    advice = advice_class.new(@school)
+    advice.calculate
+    new_content_type = advice.content
+    chart_content = new_content_type.select { |content| content[:type] == :chart }
+    charts = chart_content.map { |content| content[:content] }
+    worksheet_name = advice_class.config[:excel_worksheet_name]
+    @worksheets[worksheet_name] = charts
+  end
+
+  private def run_all_charts_on_one_page(charts, config, page_name)
+    charts.each do |chart_name|
+      chart_results = nil
+      begin
+        chart_config = @chart_manager.get_chart_config(chart_name)
+        chart_results = @chart_manager.run_chart(chart_config, chart_name)
+        chart_results[:title] += title_addendum(chart_config)
+        @worksheets[page_name].push(chart_results)
+        depth = 0
+        if config.key?(:chart_manipulation) # TODO(PH, 20Oct2019) doesn't read config to direct drilldown v. time shifting
+          loop do
+            chart_name, chart_config, chart_results = drilldown(chart_results, page_name, chart_name, chart_config)
+            puts "#{page_name} #{chart_name}"
+            break if chart_name.nil?
+            depth += 1
+            if depth > 4
+              puts "===" * 50
+              break
+            end
             chart_results[:title] += title_addendum(chart_config)
             @worksheets[page_name].push(chart_results)
-            depth = 0
-            loop do
-              chart_name, chart_config, chart_results = drilldown(chart_results, page_name, chart_name, chart_config)
-              puts "#{page_name} #{chart_name}"
-              break if chart_name.nil?
-              depth += 1
-              if depth > 4
-                puts "===" * 50
-                break
-              end
-              chart_results[:title] += title_addendum(chart_config)
-              @worksheets[page_name].push(chart_results)
-            end
-          rescue StandardError => e
-            puts "Chart #{chart_name} failed: #{e.message}"
           end
         end
+      rescue StandardError => e
+        puts "Chart #{chart_name} failed: #{e.message}"
       end
     end
   end
@@ -83,11 +104,19 @@ class PupilDashboardTests < RunCharts
       if parent_page.key?(:sub_pages)
         parent_page[:sub_pages].each do |sub_page|
           next unless fuel_type_available(name)
-          new_name = name + sub_page[:name] if sub_page.is_a?(Hash) && sub_page.key?(:name)
+          if sub_page.key?(:excel_worksheet_name)
+            new_name = sub_page[:excel_worksheet_name]
+          else
+            new_name = name + sub_page[:name] if sub_page.is_a?(Hash) && sub_page.key?(:name)
+          end
           flatten_recursive_page_hierarchy(sub_page,  pages, new_name)
         end
       else
-        pages.push({ name => parent_page[:charts] })
+        if parent_page.key?(:class)
+          pages.push({ name => parent_page[:charts], class: parent_page[:class]})
+        else
+          pages.push({ name => parent_page[:charts] })
+        end
       end
     else
       puts 'Error in recursive dashboard definition'

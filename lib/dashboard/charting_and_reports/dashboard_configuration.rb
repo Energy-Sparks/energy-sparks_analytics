@@ -156,6 +156,7 @@ class DashboardConfiguration
       sub_pages:  [
         {       
           name:     'How you school\'s energy consumption compares with other schools',
+          excel_worksheet_name:   'Benchmark',
           charts: %i[benchmark],
           rating: 'average of benchmark electricity and gas benchmark use'
         },
@@ -164,6 +165,7 @@ class DashboardConfiguration
           sub_pages:  [
             { 
               name:   'Your electricity use out of school hours',
+              excel_worksheet_name:   'ElectricOutOfHours',
               charts: %i[
                 daytype_breakdown_electricity
                 baseload
@@ -173,6 +175,7 @@ class DashboardConfiguration
             },
             { 
               name:   'How your electricity use varies over time',
+              excel_worksheet_name:   'ElectricOverTime',
               charts: %i[
                 group_by_week_electricity
                 electricity_longterm_trend
@@ -183,6 +186,7 @@ class DashboardConfiguration
             },
             { 
               name:   'Recent changes in your electricity use',
+              excel_worksheet_name:   'ElectricRecent',
               charts: %i[
                 intraday_line_school_last7days
                 baseload_lastyear
@@ -191,6 +195,7 @@ class DashboardConfiguration
             },
             { 
               name:   'How your electricity usages has varies across the day',
+              excel_worksheet_name:   'ElectricIntraday',
               charts: %i[
                 intraday_line_school_days
                 intraday_line_holidays
@@ -208,25 +213,35 @@ class DashboardConfiguration
           name:     'Detailed analysis of your school\'s gas consumption',
           sub_pages:  [
             { 
-              name:   'Your gas use out of school hours',
+              name:                   'Your gas use out of school hours',
+              class:                  AdviceGasOutHours,
+              excel_worksheet_name:   'GasOutOfHours',
               charts: %i[
                 daytype_breakdown_gas
                 gas_by_day_of_week
               ],
+              promoted_variables: {
+                AlertOutOfHoursGasUsage => {
+                  rating:         :rating,
+                  out_of_hours_£: :out_of_hours_£
+                }
+              },
               rating: 'gas alert benchmark rating, perhaps with some recent weekend alert loading'
             },
             { 
               name:   'How your gas use varies over time',
+              excel_worksheet_name:   'GasOverTime',
               charts: %i[
                 group_by_week_gas
                 gas_longterm_trend
                 group_by_week_gas_unlimited
-                gas_by_month_year_0_1_but_doesnt_currently_exist
+                gas_by_month_year_0_1
               ],
               rating: 'new gas trend benchmark rating'
             },
             { 
               name:   'Recent changes in your gas use',
+              excel_worksheet_name:   'GasRecent',
               charts: %i[
                 last_7_days_intraday_gas
                 last_2_weeks_gas
@@ -238,6 +253,7 @@ class DashboardConfiguration
             },
             { 
               name:   'How your gas usages has varies across the day',
+              excel_worksheet_name:   'GasIntraday',
               charts: %i[
                 gas_heating_season_intraday
                 last_7_days_intraday_gas
@@ -249,6 +265,7 @@ class DashboardConfiguration
               sub_pages: [
                 {
                   name: 'Intraday timing: is the boiler starting too early in the morning',
+                  excel_worksheet_name:   'BoilerIntraday',
                   charts: %i[
                     gas_heating_season_intraday
                     optimum_start
@@ -257,11 +274,13 @@ class DashboardConfiguration
                 },
                 {
                   name: 'Hot water management',
+                  excel_worksheet_name:   'BoilerHotWater',
                   charts: %i[hotwater],
                   rating: 'new analysis - check not no usage in v. cold weather & not too much'
                 },
                 {
                   name: 'Seasonal and holiday control',
+                  excel_worksheet_name:   'BoilerSeasonal',
                   charts: %i[
                     heating_on_off_by_week
                     group_by_week_gas
@@ -271,6 +290,7 @@ class DashboardConfiguration
                 },
                 {
                   name: 'Thermostatic control',
+                  excel_worksheet_name:   'BoilerThermostatic',
                   charts: %i[
                     thermostatic
                     thermostatic_control_large_diurnal_range_1
@@ -283,6 +303,7 @@ class DashboardConfiguration
                 },
                 {
                   name: 'Frost protection',
+                  excel_worksheet_name:   'BoilerFrost',
                   charts: %i[frost_1 frost_2 frost_3], # reduced to 1 chart with time shifting
                   rating: 'new analysis - check not no usage in v. cold weather & not too much'
                 },

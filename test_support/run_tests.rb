@@ -197,12 +197,18 @@ class RunTests
   end
 
   def run_pupil_dashboard(control)
+    run_dashboard(control)
+  end
+
+  private def run_dashboard(control)
     @school_list.each do |school_name|
       school = load_school(school_name)
       test = PupilDashboardTests.new(school)
       test.run_tests(control)
     end
   end
+
+  
 
   def run_timescales_drilldown
     @school_list.each do |school_name|
