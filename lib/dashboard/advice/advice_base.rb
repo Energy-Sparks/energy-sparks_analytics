@@ -1,5 +1,21 @@
 require_rel '../charting_and_reports/content_base.rb'
 class AdviceBase < ContentBase
+  def initialize(school)
+    super(school)
+  end
+
+  def enough_data
+    true
+  end
+
+  def valid_alert?
+    true
+  end
+
+  def analyse(asof_date)
+    @asof_date = asof_date
+    calculate
+  end
 
   def calculate
     @rating = nil
@@ -22,9 +38,16 @@ class AdviceBase < ContentBase
 
   def content
     charts_and_html = []
+
+    charts_and_html.push( { type: :analytics_html, content: '<br>' } )
+    charts_and_html.push( { type: :analytics_html, content: "<h2>#{self.class.config[:name]}</h2>" } )
+    charts_and_html.push( { type: :analytics_html, content: template_data_html } )
+
     charts.each do |chart|
       begin
+        charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
         charts_and_html.push( { type: :html,  content: chart[:advice_header] } ) if chart.key?(:advice_header)
+        charts_and_html.push( { type: :chart_name, content: chart[:config_name] } )
         charts_and_html.push( { type: :chart, content: chart } )
         charts_and_html.push( { type: :html,  content: chart[:advice_footer] } ) if chart.key?(:advice_footer)
       rescue StandardError => e
@@ -35,8 +58,24 @@ class AdviceBase < ContentBase
     charts_and_html
   end
 
+  def analytics_split_charts_and_html(content_data)
+    html_bits = content_data.select { |h| %i[html analytics_html].include?(h[:type]) }
+    html = html_bits.map { |v| v[:content] }
+    charts_bits = content_data.select { |h| h[:type] == :chart }
+    charts = charts_bits.map { |v| v[:content] }
+    [html, charts]
+  end
+
   def self.config
-    @@config ||= find_config_recursive(config_base, self)
+    definition
+  end
+
+  def self.excel_worksheet_name
+    definition[:excel_worksheet_name]
+  end
+
+  private_class_method def self.definition
+    DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.select { |_key, defn| defn[:content_class] == self }.values[0]
   end
 
   def self.template_variables
@@ -45,7 +84,7 @@ class AdviceBase < ContentBase
 
   def self.promote_variables
     template_variables = {}
-    config[:promoted_variables].each do |alert_class, variables|
+    self.config[:promoted_variables].each do |alert_class, variables|
       variables.each do |to, from|
         template_variables[to] = find_alert_variable_definition(alert_class.template_variables, from)
       end
@@ -65,19 +104,6 @@ class AdviceBase < ContentBase
     DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:adult_analysis_page]
   end
 
-  def self.find_config_recursive(parent_page, search_class)
-    if parent_page.is_a?(Hash)
-      if parent_page.key?(:sub_pages)
-        parent_page[:sub_pages].each do |sub_page|
-          config = find_config_recursive(sub_page,  search_class)
-          return config if config.is_a?(Hash)
-        end
-      else
-        return parent_page if parent_page.key?(:class) && parent_page[:class] == search_class
-      end
-    end
-  end
-
   def promote_data
     ap self.class.config
     self.class.config[:promoted_variables].each do |alert_class, variables|
@@ -90,7 +116,12 @@ class AdviceBase < ContentBase
   end
 
   def alert_asof_date
-    aggregate_meter.amr_data.end_date
+    @asof_date ||= aggregate_meter.amr_data.end_date
+  end
+
+  def template_data_html
+    rows = html_template_variables.to_a
+    HtmlTableFormatting.new(['Variable','Value'], rows).html
   end
 
   private def create_and_set_attr_reader(key, value)

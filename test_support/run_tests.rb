@@ -92,6 +92,8 @@ class RunTests
         run_timescales_drilldown
       when :pupil_dashboard
         run_pupil_dashboard(configuration[:control])
+      when :adult_dashboard
+        run_adult_dashboard(configuration[:control])
       when :kpi_analysis
         run_kpi_calculations(configuration)
       else
@@ -193,6 +195,14 @@ class RunTests
       excel = ExcelCharts.new(excel_filename)
       excel.add_charts('Test', chart_list)
       excel.close
+    end
+  end
+
+  def run_adult_dashboard(control)
+    @school_list.each do |school_name|
+      school = load_school(school_name)
+      test = RunAdultDashboard.new(school)
+      test.run_flat_dashboard(control)
     end
   end
 

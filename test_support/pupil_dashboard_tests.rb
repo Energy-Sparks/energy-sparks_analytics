@@ -119,7 +119,8 @@ class PupilDashboardTests < RunCharts
         end
       end
     else
-      puts 'Error in recursive dashboard definition'
+      puts Thread.current.backtrace
+      puts 'Error in recursive dashboard definition 2'
     end
   end
 

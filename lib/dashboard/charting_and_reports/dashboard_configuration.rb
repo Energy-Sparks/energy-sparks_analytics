@@ -150,6 +150,7 @@ class DashboardConfiguration
       ],
     },
 #========================================================================================
+=begin
     adult_analysis_page: {
       name:   'Adult Analysis',
          
@@ -313,6 +314,7 @@ class DashboardConfiguration
         },   
       ],
     },
+=end
 #======================================================================================================
     main_dashboard_electric_and_gas: {
                                 name:   'Overview',

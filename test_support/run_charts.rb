@@ -61,12 +61,15 @@ class RunCharts
   end
 
   def run_config_component(config_component)
+  puts "GOT HERE " * 20
     if config_component.is_a?(Symbol) && config_component == :dashboard
       run_dashboard
     elsif config_component.is_a?(Hash) && config_component.keys[0] == :adhoc_worksheet
       run_single_dashboard_page(config_component.values[0])
     elsif config_component.is_a?(Hash) && config_component.keys[0] == :pupils_dashboard
       run_recursive_dashboard_page(config_component.values[0])
+    elsif config_component.is_a?(Hash) && config_component.keys[0] == :adults_dashboard
+      run_flat_dashboard
     end
   end
 
@@ -106,7 +109,7 @@ class RunCharts
         pages.push({ name => parent_page[:charts] })
       end
     else
-      puts 'Error in recursive dashboard definition'
+      puts 'Error in recursive dashboard definition 1'
     end
   end
 
