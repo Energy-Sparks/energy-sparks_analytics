@@ -2,10 +2,16 @@ class AdviceGasBase < AdviceBase
   protected def aggregate_meter
     @school.aggregated_heat_meters
   end
+  def relevance
+    @school.aggregated_heat_meters.nil? ? :never_relevant : :relevant
+  end
 end
 class AdviceElectricityBase < AdviceBase
   protected def aggregate_meter
     @school.aggregated_electricity_meters
+  end
+  def relevance
+    @school.aggregated_electricity_meters.nil? ? :never_relevant : :relevant
   end
 end
 class AdviceGasOutHours < AdviceGasBase;    end
@@ -31,8 +37,23 @@ class AdviceGasBoilerThermostatic < AdviceGasBase; end
 class AdviceGasBoilerFrost < AdviceGasBase; end
 class AdviceGasHotWater < AdviceGasBase; end
 
-class AdviceStorageHeaters < AdviceElectricityBase; end
-class AdviceSolarPV < AdviceElectricityBase; end
+class AdviceStorageHeaters < AdviceElectricityBase
+  def relevance
+    @school.storage_heaters? ? :relevant : :never_relevant
+  end
+end
+
+class AdviceSolarPV < AdviceElectricityBase
+  def relevance
+    @school.solar_pv_panels? ? :relevant : :never_relevant
+  end
+end
+
+class AdviceCarbon < AdviceElectricityBase
+  def relevance
+    @school.gas? && @school.electricity?
+  end
+end
 
 class AdviceCarbon < AdviceElectricityBase; end
 class AdviceEnergyTariffs < AdviceElectricityBase; end

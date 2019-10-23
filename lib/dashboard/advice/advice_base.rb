@@ -26,6 +26,10 @@ class AdviceBase < ContentBase
     @rating
   end
 
+  def relevance
+    :relevant
+  end
+
   def chart_names
     # config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:adult_analysis_page][:sub_pages][2][:sub_pages][0]
     self.class.config[:charts]

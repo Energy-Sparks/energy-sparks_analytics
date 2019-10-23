@@ -37,6 +37,7 @@ puts "Got here: #{report_group}"
     puts "Items of front end content: #{advice.front_end_content.length}"
     puts "Rating: #{advice.rating}"
     puts "Title: #{advice.content[0]}"
+    puts "Relevance: #{advice.relevance}"
 
     puts advice.rating if advice.respond_to?(:rating)
     ap advice.front_end_template_data
