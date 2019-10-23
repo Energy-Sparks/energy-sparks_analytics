@@ -5,7 +5,7 @@ class AdviceBase < ContentBase
   end
 
   def enough_data
-    :enough_data
+    :enough
   end
 
   def valid_alert?
@@ -22,6 +22,10 @@ class AdviceBase < ContentBase
     promote_data if self.class.config.key?(:promoted_variables)
   end
 
+  def rating
+    @rating
+  end
+
   def chart_names
     # config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:adult_analysis_page][:sub_pages][2][:sub_pages][0]
     self.class.config[:charts]
@@ -36,11 +40,17 @@ class AdviceBase < ContentBase
     chart_results
   end
 
+  def front_end_content
+    content.select { |segment| %i[html chart_name title].include?(segment[:type]) }
+  end
+
   def content
     charts_and_html = []
 
+    charts_and_html.push( { type: :title, content: self.class.config[:name] } )
     charts_and_html.push( { type: :analytics_html, content: '<br>' } )
     charts_and_html.push( { type: :analytics_html, content: "<h2>#{self.class.config[:name]}</h2>" } )
+    charts_and_html.push( { type: :analytics_html, content: "<h3>Rating: #{rating}</h3>" } )
     charts_and_html.push( { type: :analytics_html, content: template_data_html } )
 
     charts.each do |chart|

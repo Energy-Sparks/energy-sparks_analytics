@@ -34,6 +34,10 @@ puts "Got here: #{report_group}"
 
     advice.calculate
 
+    puts "Items of front end content: #{advice.front_end_content.length}"
+    puts "Rating: #{advice.rating}"
+    puts "Title: #{advice.content[0]}"
+
     puts advice.rating if advice.respond_to?(:rating)
     ap advice.front_end_template_data
 
