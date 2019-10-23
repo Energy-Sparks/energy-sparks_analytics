@@ -5,7 +5,7 @@ class AdviceBase < ContentBase
   end
 
   def enough_data
-    true
+    :enough_data
   end
 
   def valid_alert?
