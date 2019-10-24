@@ -25,11 +25,19 @@ class AdviceElectricityAnnual < AdviceElectricityBase; end
 class AdviceElectricityOutHours < AdviceElectricityBase; end
 class AdviceElectricityLongTerm < AdviceElectricityBase; end
 class AdviceElectricityRecent < AdviceElectricityBase; end
-class AdviceElectricityIntraday < AdviceElectricityBase; end
+class AdviceElectricityIntraday < AdviceElectricityBase
+  def rating
+    5.0
+  end
+end
 
 class AdviceGasLongTerm < AdviceGasBase; end
 class AdviceGasRecent < AdviceGasBase; end
-class AdviceGasIntraday < AdviceGasBase; end
+class AdviceGasIntraday < AdviceGasBase
+  def rating
+    5.0
+  end
+end
 
 class AdviceGasBoilerMorningStart < AdviceGasBase; end
 class AdviceGasBoilerSeasonalControl < AdviceGasBase; end
