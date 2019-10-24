@@ -18,7 +18,7 @@ module Benchmarking
       name:     'Annual gas usage per pupil (temperature adjusted)',
       columns:  [
         # may support select statement like this going forward:
-        #     select anng_kwh * 100.0 as 'School name' type :kwh,
+        #     select anng_kwh * 100.0 as 'Annual kWh' type :kwh,
         #            aapd_name as 'School name'
         # for now define columns as hash
         {   data: 'aapd_name',                                 name: 'School name', units: String },

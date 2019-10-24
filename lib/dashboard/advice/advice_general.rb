@@ -34,7 +34,11 @@ class AdviceGasIntraday < AdviceGasBase; end
 class AdviceGasBoilerMorningStart < AdviceGasBase; end
 class AdviceGasBoilerSeasonalControl < AdviceGasBase; end
 class AdviceGasBoilerThermostatic < AdviceGasBase; end
-class AdviceGasBoilerFrost < AdviceGasBase; end
+class AdviceGasBoilerFrost < AdviceGasBase
+  def rating
+    5.0
+  end
+end
 class AdviceGasHotWater < AdviceGasBase; end
 
 class AdviceStorageHeaters < AdviceElectricityBase
