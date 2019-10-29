@@ -60,17 +60,17 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       total_annual_kwh:     { description: 'Annual kwh usage',                   units: fuel_kwh },
       out_of_hours_kwh:     { description: 'Annual kwh out of hours usage',      units: fuel_kwh },
 
-      schoolday_open_percent:   { description: 'Annual school day open percent usage',    units: :percent },
-      schoolday_closed_percent: { description: 'Annual school day closed percent usage',  units: :percent },
-      holidays_percent:         { description: 'Annual holiday percent usage',            units: :percent },
-      weekends_percent:         { description: 'Annual weekend percent usage',            units: :percent },
+      schoolday_open_percent:   { description: 'Annual school day open percent usage',    units: :percent, benchmark_code: 'sdop' },
+      schoolday_closed_percent: { description: 'Annual school day closed percent usage',  units: :percent, benchmark_code: 'sdcp' },
+      holidays_percent:         { description: 'Annual holiday percent usage',            units: :percent, benchmark_code: 'holp' },
+      weekends_percent:         { description: 'Annual weekend percent usage',            units: :percent, benchmark_code: 'wkep' },
       out_of_hours_percent:     { description: 'Percent of kwh usage out of school hours',units: :percent},
 
       schoolday_open_£:         { description: 'Annual school day open cost usage',   units: :£ },
       schoolday_closed_£:       { description: 'Annual school day closed cost usage', units: :£ },
       holidays_£:               { description: 'Annual holiday cost usage',           units: :£ },
       weekends_£:               { description: 'Annual weekend cost usage',           units: :£ },
-      out_of_hours_£:           { description: 'Annual £ out of hours usage',         units: :£ },
+      out_of_hours_£:           { description: 'Annual £ out of hours usage',         units: :£, benchmark_code: 'aoo£' },
 
       good_out_of_hours_use_percent: {
         description: 'Good/Exemplar out of hours use percent (suggested benchmark comparison)',
@@ -94,7 +94,8 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       },
       potential_saving_£: {
         description: 'annual £ reduction if move to examplar out of hours usage',
-        units: :£
+        units: :£,
+        benchmark_code: 'esv£'
       },
       daytype_breakdown_table: {
         description: 'Table broken down by school day in/out hours, weekends, holidays - kWh, percent, £ (annual)',

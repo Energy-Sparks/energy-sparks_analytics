@@ -96,6 +96,8 @@ class RunTests
         run_adult_dashboard(configuration[:control])
       when :kpi_analysis
         run_kpi_calculations(configuration)
+      when :run_benchmark_charts_and_tables
+        run_benchmark_charts_and_tables(configuration, @test_script[:schools])
       else
         configure_log_file(configuration) if component.to_s.include?('logger')
       end
@@ -310,6 +312,11 @@ exit
       calculation_results = calculation_results.deep_merge(calculation.calculation_results)
       KPICalculation.save_kpi_calculation_to_csv(config, calculation_results)
     end
+  end
+
+  def run_benchmark_charts_and_tables(control, schools)
+    benchmark = RunBenchmarks.new(control, schools)
+    benchmark.run
   end
 
   def run_alerts(alert_list, control)

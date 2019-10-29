@@ -4,7 +4,6 @@ class RunAdultDashboard < RunCharts
     @all_html = ''
     report_groups = @school.adult_report_groups
     report_groups.each do |report_group|
-puts "Got here: #{report_group}"
       DashboardConfiguration::ADULT_DASHBOARD_GROUPS[report_group].each do |page|
         if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)
           definition = DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS[page]

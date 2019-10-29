@@ -61,7 +61,6 @@ class RunCharts
   end
 
   def run_config_component(config_component)
-  puts "GOT HERE " * 20
     if config_component.is_a?(Symbol) && config_component == :dashboard
       run_dashboard
     elsif config_component.is_a?(Hash) && config_component.keys[0] == :adhoc_worksheet
@@ -134,7 +133,6 @@ class RunCharts
         @worksheets[page_name] += chart_results.flatten # could be a composite chart
       end
     rescue => e
-      puts 'Got here: '
       puts e.message
       puts e.backtrace
       @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )

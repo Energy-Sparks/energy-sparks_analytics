@@ -1,6 +1,7 @@
 class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :average_school_day_last_year_kw, :average_school_day_last_year_kw_per_pupil
   attr_reader :average_school_day_last_year_kw_per_floor_area, :exemplar_kw
+  attr_reader :one_year_saving_versus_exemplar_£, :one_year_saving_versus_exemplar_kwh
 
   def initialize(school)
     super(school, :peakelectricbenchmark)
@@ -14,19 +15,23 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
   TEMPLATE_VARIABLES = {
     average_school_day_last_year_kw: {
       description: 'Average peak kW last year',
-      units:  { kw: :electricity}
+      units:  { kw: :electricity},
+      benchmark_code: 'kwsc'
     },
     average_school_day_last_year_kw_per_pupil: {
       description: 'Average peak kW last year per pupil',
-      units:  { kw: :electricity}
+      units:  { kw: :electricity},
+      benchmark_code: 'kwpp'
     },
     average_school_day_last_year_kw_per_floor_area: {
       description: 'Average peak kWh last year per floor area',
-      units:  { kw: :electricity}
+      units:  { kw: :electricity},
+      benchmark_code: 'kwfa'
     },
     exemplar_kw: {
       description: 'Exemplar peak KW for school of same floor area',
-      units:  { kw: :electricity}
+      units:  { kw: :electricity},
+      benchmark_code: 'kwex'
     },
     one_year_saving_versus_exemplar_kwh: {
       description: 'One year savings kWh versus exemplar for school of same floor area',
@@ -34,7 +39,8 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
     },
     one_year_saving_versus_exemplar_£: {
       description: 'One year savings £ versus exemplar for school of same floor area',
-      units:  :£
+      units:  :£,
+      benchmark_code: 'tex£'
     },
     electricity_intraday_comparison_chart_6_months_apart: {
       description: 'Compares intraday usage 6 months apart',

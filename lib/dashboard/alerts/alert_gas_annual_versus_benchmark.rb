@@ -39,9 +39,9 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     },
     last_year_£: {
       description: 'Last years gas consumption - £ including differential tariff',
-      units:  {£: :gas}
+      units:  {£: :gas},
+      benchmark_code: '£lyr'
     },
-
     one_year_benchmark_floor_area_kwh: {
       description: 'Last years gas consumption for benchmark/average school, normalised by floor area - kwh',
       units:  {kwh: :gas}
@@ -69,7 +69,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     },
     one_year_exemplar_floor_area_£: {
       description: 'Last years gas consumption for exemplar school, normalised by floor area - £',
-      units:  {£: :gas}
+      units:  {£: :gas},
+      benchmark_code: '£exa'
     },
     one_year_saving_versus_exemplar_kwh: {
       description: 'Annual difference in gas consumption versus exemplar school - kwh (use adjective for sign)',
@@ -98,7 +99,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     },
     one_year_gas_per_floor_area_£: {
       description: 'Per floor area annual gas usage - £ - required for PH analysis, not alerts',
-      units:  {£: :gas}
+      units:  {£: :gas},
+      benchmark_code: 'pfla'
     }
   }
 

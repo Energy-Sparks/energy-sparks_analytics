@@ -312,14 +312,14 @@ module AnalyseHeatingAndHotWater
     # based on analysis of 31 schools from 16Feb2019
     def self.school_heating_days_statistics
       { # days range => stats, rating
-        0...70    => { percent: 0.10,   rating: 'perfect',              rating_value: 10 },
-        70...80   => { percent: 0.20,   rating: 'excellent',            rating_value: 10 },
-        80...90   => { percent: 0.07,   rating: 'good',                 rating_value: 9 },
-        90...100  => { percent: 0.23,   rating: 'better than average',  rating_value: 7 },
-        100...110 => { percent: 0.23,   rating: 'about average',        rating_value: 4 },
-        110...120 => { percent: 0.10,   rating: 'worse than average',   rating_value: 3 },
-        120...130 => { percent: 0.0,    rating: 'poor',                 rating_value: 2 },
-        130..365  => { percent: 0.10,   rating: 'very poor',            rating_value: 0 },
+        0...90    => { percent: 0.10,   rating: 'perfect',              rating_value: 10 },
+        90...100  => { percent: 0.20,   rating: 'excellent',            rating_value: 10 },
+        100...110 => { percent: 0.07,   rating: 'good',                 rating_value: 9 },
+        110...120 => { percent: 0.23,   rating: 'better than average',  rating_value: 7 },
+        120...130 => { percent: 0.23,   rating: 'about average',        rating_value: 4 },
+        130...140 => { percent: 0.10,   rating: 'worse than average',   rating_value: 3 },
+        140...150 => { percent: 0.0,    rating: 'poor',                 rating_value: 2 },
+        150..365  => { percent: 0.10,   rating: 'very poor',            rating_value: 0 },
       }
     end
 
@@ -337,7 +337,7 @@ module AnalyseHeatingAndHotWater
 
     # based on analysis of 31 schools from 16Feb2019
     def self.average_school_heating_days
-      104
+      115
     end
 
     # based on analysis of 31 schools from 16Feb2019

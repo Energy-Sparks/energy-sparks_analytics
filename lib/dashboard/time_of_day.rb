@@ -17,6 +17,12 @@ class TimeOfDay
     TimeOfDay.new((hh / 2).to_i, 30 * (hh % 2))
   end
 
+  def self.average_time_of_day(time_of_days)
+    times = time_of_days.map(&:relative_time)
+    t = Time.at(times.map(&:to_i).reduce(:+) / times.size)
+    TimeOfDay.new(t.hour, t.min)
+  end
+
   def self.add_hours_and_minutes(time_of_day, add_hours, add_minutes = 0.0)
     t = time_of_day.relative_time
     t += add_hours * 60 * 60 + add_minutes * 60
@@ -46,6 +52,10 @@ class TimeOfDay
     else
       [@hour * 2, @minutes / 30.0]
     end
+  end
+
+  def hours_fraction
+    hour + (minutes / 60.0)
   end
 
   def strftime(options)

@@ -48,13 +48,15 @@ class AlertAnalysisBase < ContentBase
     rescue EnergySparksNotEnoughDataException => e
       logger.warn e.message
       logger.warn e.backtrace
+      puts "Got here: #{e.message}"
+      puts "Got here: #{e.backtrace}"
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue StandardError => e
       @calculation_worked = false
-      puts 
-      puts e.to_s
-      puts e.message
-      puts e.backtrace
+      logger.warn e.message
+      puts "Got here: #{e.message}"
+      puts "Got here: #{e.backtrace}"
+      logger.warn e.backtrace
     end
   end
 
@@ -136,7 +138,8 @@ class AlertAnalysisBase < ContentBase
     average_one_year_saving_£: {
       description: 'Estimated one year saving range',
       units: :£,
-      priority_code:  '1YRS'
+      priority_code:  '1YRS',
+      # benchmark_code: '1yrsav_£'
     },
     average_ten_year_saving_£: {
       description: 'Estimated ten year saving range',
@@ -370,38 +373,46 @@ class AlertAnalysisBase < ContentBase
     matching_alerts.first
   end
 
+  def self.all_alerts
+    {
+      AlertChangeInDailyElectricityShortTerm        => 'elst',
+      AlertChangeInDailyGasShortTerm                => 'gsst',
+      AlertChangeInElectricityBaseloadShortTerm     => 'elbc',
+      AlertElectricityAnnualVersusBenchmark         => 'elba',
+      AlertElectricityBaseloadVersusBenchmark       => 'elbb',
+      AlertGasAnnualVersusBenchmark                 => 'gsba',
+      AlertHeatingComingOnTooEarly                  => 'hthe',
+      AlertHeatingOnOff                             => 'htoo',
+      AlertHeatingSensitivityAdvice                 => 'htsa',
+      AlertHotWaterEfficiency                       => 'hotw',
+      AlertImpendingHoliday                         => 'ihol',
+      AlertHeatingOnNonSchoolDays                   => 'htns',
+      AlertOutOfHoursElectricityUsage               => 'eloo',
+      AlertOutOfHoursGasUsage                       => 'gsoo',
+      AlertHotWaterInsulationAdvice                 => 'hwia',
+      AlertHeatingOnSchoolDays                      => 'htsd',
+      AlertThermostaticControl                      => 'httc',
+      AlertWeekendGasConsumptionShortTerm           => 'gswe',
+      AlertElectricityMeterConsolidationOpportunity => 'emtc',
+      AlertGasMeterConsolidationOpportunity         => 'gmtc',
+      AlertMeterASCLimit                            => 'masc',
+      AlertDifferentialTariffOpportunity            => 'mtar',
+      AlertSchoolWeekComparisonElectricity          => 'eswc',
+      AlertPreviousHolidayComparisonElectricity     => 'ephc',
+      AlertPreviousYearHolidayComparisonElectricity => 'epyc',
+      AlertSchoolWeekComparisonGas                  => 'gswc',
+      AlertPreviousHolidayComparisonGas             => 'gphc',
+      AlertPreviousYearHolidayComparisonGas         => 'gpyc',
+      AlertAdditionalPrioritisationData             => 'addp',
+      AlertElectricityPeakKWVersusBenchmark         => 'epkb'
+    }
+  end
+
+  def self.short_code
+    all_alerts[self]
+  end
+
   def self.all_available_alerts
-    [
-      AlertChangeInDailyElectricityShortTerm,
-      AlertChangeInDailyGasShortTerm,
-      AlertChangeInElectricityBaseloadShortTerm,
-      AlertElectricityAnnualVersusBenchmark,
-      AlertElectricityBaseloadVersusBenchmark,
-      AlertGasAnnualVersusBenchmark,
-      AlertHeatingComingOnTooEarly,
-      AlertHeatingOnOff,
-      AlertHeatingSensitivityAdvice,
-      AlertHotWaterEfficiency,
-      AlertImpendingHoliday,
-      AlertHeatingOnNonSchoolDays,
-      AlertOutOfHoursElectricityUsage,
-      AlertOutOfHoursGasUsage,
-      AlertHotWaterInsulationAdvice,
-      AlertHeatingOnSchoolDays,
-      AlertThermostaticControl,
-      AlertWeekendGasConsumptionShortTerm,
-      AlertElectricityMeterConsolidationOpportunity,
-      AlertGasMeterConsolidationOpportunity,
-      AlertMeterASCLimit,
-      AlertDifferentialTariffOpportunity,
-      AlertSchoolWeekComparisonElectricity,
-      AlertPreviousHolidayComparisonElectricity,
-      AlertPreviousYearHolidayComparisonElectricity,
-      AlertSchoolWeekComparisonGas,
-      AlertPreviousHolidayComparisonGas,
-      AlertPreviousYearHolidayComparisonGas,
-      AlertAdditionalPrioritisationData,
-      AlertElectricityPeakKWVersusBenchmark
-    ]
+    all_alerts.keys
   end
 end

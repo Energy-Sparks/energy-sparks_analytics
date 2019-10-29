@@ -30,11 +30,13 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
   TEMPLATE_VARIABLES = {
     average_baseload_last_year_kw: {
       description: 'Average baseload last year kW',
-      units:  { kw: :electricity}
+      units:  { kw: :electricity},
+      benchmark_code: 'lykw'
     },
     average_baseload_last_year_£: {
       description: 'Average baseload last year - value in £s (so kW * 24.0 * 365 * 12p or blended rate for differential tariff)',
-      units:  :£
+      units:  :£,
+      benchmark_code: 'lygb'
     },
     average_baseload_last_year_kwh: {
       description: 'Average baseload last year - value in £s (so kW * 24.0 * 365)',
@@ -93,7 +95,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
 
     one_year_baseload_per_pupil_kw: {
       description: 'kW baseload for school per pupil - for energy expert use',
-      units:  { kw: :electricity}
+      units:  { kw: :electricity},
+      benchmark_code: 'blpp'
     },
     one_year_baseload_per_pupil_kwh: {
       description: 'kwh baseload for school per pupil - for energy expert use',

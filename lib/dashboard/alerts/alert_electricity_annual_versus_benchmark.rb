@@ -27,13 +27,14 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   TEMPLATE_VARIABLES = {
     last_year_kwh: {
       description: 'Last years electricity consumption - kwh',
-      units:  {kwh: :electricity}
+      units:  {kwh: :electricity},
+      benchmark_code: 'klyr'
     },
     last_year_£: {
       description: 'Last years electricity consumption - £ including differential tariff',
-      units:  {£: :electricity}
+      units:  {£: :electricity},
+      benchmark_code: '£lyr'
     },
-
     one_year_benchmark_by_pupil_kwh: {
       description: 'Last years electricity consumption for benchmark/average school, normalised by pupil numbers - kwh',
       units:  {kwh: :electricity}
@@ -54,7 +55,6 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       description: 'Adjective: higher or lower: electricity consumption versus benchmark/average school',
       units:  String
     },
-
     one_year_exemplar_by_pupil_kwh: {
       description: 'Last years electricity consumption for exemplar school, normalised by pupil numbers - kwh',
       units:  {kwh: :electricity}
@@ -69,20 +69,21 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     },
     one_year_saving_versus_exemplar_£: {
       description: 'Annual difference in electricity consumption versus exemplar school - £ (use adjective for sign)',
-      units:  {£: :electricity}
+      units:  {£: :electricity},
+      benchmark_code: '£esav'
     },
     one_year_saving_versus_exemplar_adjective: {
       description: 'Adjective: higher or lower: electricity consumption versus exemplar school',
       units:  String
     },
-
     one_year_electricity_per_pupil_kwh: {
       description: 'Per pupil annual electricity usage - kwh - required for PH analysis, not alerts',
       units:  {kwh: :electricity}
     },
     one_year_electricity_per_pupil_£: {
       description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts',
-      units:  {£: :electricity}
+      units:  {£: :electricity},
+      benchmark_code: '£pup'
     },
     one_year_electricity_per_floor_area_kwh: {
       description: 'Per floor area annual electricity usage - kwh - required for PH analysis, not alerts',

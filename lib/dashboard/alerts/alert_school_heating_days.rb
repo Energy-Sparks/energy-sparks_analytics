@@ -29,7 +29,8 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
   TEMPLATE_VARIABLES = {
     number_of_heating_days_last_year: {
       description: 'Number of days school days plus non school days when the heating was on',
-      units:  :days
+      units:  :days,
+      benchmark_code: 'hdyr'
     },
     average_number_of_heating_days_last_year: {
       description: 'Average number of days in the last year when 30 schools in Energy Sparks left their heating on',
@@ -53,11 +54,13 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     },
     one_year_saving_reduced_days_to_average_£: {
       description: 'Saving through matching average schools heating days (turning off earlier and on later in year, not on holidays, weekends) £',
-      units:  :£
+      units:  :£,
+      benchmark_code: 'svav'
     },
     one_year_saving_reduced_days_to_exemplar_£: {
       description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year, not on holidays, weekends) £',
-      units:  :£
+      units:  :£,
+      benchmark_code: 'svex'
     },
     one_year_saving_reduced_days_to_average_percent: {
       description: 'Saving through matching average schools heating days (turning off earlier and on later in year, not on holidays, weekends) percent of annual consumption',
@@ -65,7 +68,8 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     },
     one_year_saving_reduced_days_to_exemplar_percent: {
       description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year, , not on holidays, weekends) percent of annual consumption',
-      units:  :percent
+      units:  :percent,
+      benchmark_code: 'svep'
     },
     total_heating_day_kwh: {
       description: 'Total heating day kWh',
@@ -91,7 +95,7 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     statistics = AnalyseHeatingAndHotWater::HeatingModel # alias long name
     @breakdown = heating_day_breakdown_current_year(asof_date)
 
-    @exemplar_number_of_heating_days_last_year = 75 # TODO(PH, 2May2019) - need to work out how to calculate this from benchmarking
+    @exemplar_number_of_heating_days_last_year = 90
 
     days = school_days_heating
     @number_of_heating_days_last_year = days

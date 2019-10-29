@@ -31,7 +31,8 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     },
     annual_saving_1_C_change_£: {
       description: 'Predicted annual reduction in heating consumption if thermostat turned down 1C (£)',
-      units:  :£
+      units:  :£,
+      benchmark_code: 'td1c'
     },
     annual_saving_1_C_change_percent: {
       description: 'Predicted annual reduction in heating consumption if thermostat turned down 1C (% of annual gas consumption)',

@@ -34,6 +34,10 @@ class ContentBase
     flatten_front_end_template_variables.select { |_name_sym, data| data.key?(:priority_code) }
   end
 
+  def self.benchmark_template_variables
+    flatten_front_end_template_variables.select { |_name_sym, data| data.key?(:benchmark_code) }
+  end
+
   def self.front_end_template_variables
     front_end_template = {}
     self.template_variables.each do |group_name, variable_group|
@@ -93,6 +97,11 @@ class ContentBase
   def priority_template_data
     lookup = flatten_template_variables
     raw_template_variables.select { |type, _value| lookup[type].key?(:priority_code) }
+  end
+
+  def benchmark_template_data
+    lookup = flatten_template_variables
+    raw_template_variables.select { |type, _value| lookup[type].key?(:benchmark_code) }
   end
 
   private def convert_range_template_data_to_high_low(template_data, lookup, raw_data)

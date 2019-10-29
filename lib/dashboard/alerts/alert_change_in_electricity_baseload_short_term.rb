@@ -20,15 +20,18 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
   TEMPLATE_VARIABLES = {
     average_baseload_last_year_kw: {
       description: 'average baseload over last year',
-      units:  :kw
+      units:  :kw,
+      benchmark_code: 'blly'
     },
     average_baseload_last_week_kw: {
       description: 'average baseload over last week',
-      units:  :kw
+      units:  :kw,
+      benchmark_code: 'bllw'
     },
     change_in_baseload_kw: {
       description: 'change in baseload last week compared with the average over the last year',
-      units:  :kw
+      units:  :kw,
+      benchmark_code: 'blch'
     },
     last_year_baseload_kwh: {
       description: 'baseload last year (kwh)',
@@ -60,7 +63,8 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
     },
     predicted_percent_increase_in_usage: {
       description: 'percentage increase in baseload',
-      units:  :percent
+      units:  :percent,
+      benchmark_code: 'bspc'
     },
     significant_increase_in_baseload: {
       description: 'significant increase in baseload flag',

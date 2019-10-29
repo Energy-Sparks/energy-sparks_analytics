@@ -243,6 +243,8 @@ class RunAlerts
       previous_results = history.load
     end
 
+    benchmark = BenchmarkDatabase.new(control[:benchmark_alert][:filename]) if control.key?(:benchmark_alert)
+
     # ap(previous_results)
 
     calculated_results = {}
@@ -269,7 +271,16 @@ class RunAlerts
             puts "#{alert_class}: Not make_available_to_users after analysis"
             next
           end
-          raw_data = alert.raw_variables_for_saving
+          raw_data = alert.raw_variables_for_saving          
+          if control.key?(:benchmark_alert)
+            new_data = alert.benchmark_template_data
+            alert_short_code = alert_class.short_code
+            new_data.each do |key, value|
+              variable_short_code = alert_class.benchmark_template_variables[key][:benchmark_code]
+              benchmark.add_value(asof_date, @school.urn, alert_short_code, variable_short_code, value)
+            end
+            # benchmark.database.deep_merge!(new_data) unless new_data.nil?
+          end
 
           calculated_results[asof_date].merge!(raw_data)
 
@@ -291,6 +302,9 @@ class RunAlerts
         end
       end
     }
+
+    benchmark.save_database if control.key?(:benchmark_alert)
+
     if false && generate_charts
       excel_filename = File.join(File.dirname(__FILE__), '../TestResults/Alerts/Charts/') + school.name + ' alert charts ' + asof_date.strftime('%d%b%Y') + '.xlsx'
       puts "Writing to #{excel_filename}"

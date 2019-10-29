@@ -469,8 +469,8 @@ class MeterAttributes
     # ==============================St Martins========================
     80000000143108 => {
       heating_model: {
-        max_summer_daily_heating_kwh:     650,
-        reason: 'Automated process set too high at about 1400'
+        max_summer_daily_heating_kwh:     1400,
+        reason: 'R2 control very unstable; 2nd attempt set to 1400; PH 29Oct2019'
       }
     },
     # ==============================Saltford========================

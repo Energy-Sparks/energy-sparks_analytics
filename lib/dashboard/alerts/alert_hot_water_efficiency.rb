@@ -4,6 +4,8 @@ require_relative 'alert_gas_model_base.rb'
 class AlertHotWaterEfficiency < AlertGasModelBase
   attr_reader :investment_choices_table, :daytype_breakdown_table
   attr_reader :theoretical_annual_hot_water_requirement_litres, :theoretical_annual_hot_water_requirement_kwh
+  attr_reader :avg_gas_per_pupil_£, :benchmark_existing_gas_efficiency
+  attr_reader :benchmark_gas_better_control_saving_£, :benchmark_point_of_use_electric_saving_£
 
   def initialize(school)
     super(school, :hotwaterefficiency) 
@@ -57,6 +59,26 @@ class AlertHotWaterEfficiency < AlertGasModelBase
     theoretical_annual_hot_water_requirement_kwh: {
       description: 'Estimate of schools annual hot water requirement in kwh if 100% efficient',
       units: { kwh: :gas }
+    },
+    avg_gas_per_pupil_£: {
+      description: 'Annual cost of hot water per pupil (gas)',
+      units:          :£,
+      benchmark_code: 'ppyr'
+    },
+    benchmark_existing_gas_efficiency: {
+      description: 'Efficiency of existing gas system (percent): for benchmark reporting only',
+      units:          :percent,
+      benchmark_code: 'eff'
+    },
+    benchmark_gas_better_control_saving_£: {
+      description: 'Saving moving improving gas control: for benchmark reporting only',
+      units:          :£,
+      benchmark_code: 'gsav'
+    },
+    benchmark_point_of_use_electric_saving_£: {
+      description: 'Saving through moving to POU electric: for benchmark reporting only',
+      units:          :£,
+      benchmark_code: 'esav'
     }
   }
 
@@ -85,6 +107,11 @@ class AlertHotWaterEfficiency < AlertGasModelBase
 
       @theoretical_annual_hot_water_requirement_litres = investment.annual_litres
       @theoretical_annual_hot_water_requirement_kwh = investment.annual_kwh
+
+      @avg_gas_per_pupil_£ = @existing_gas_annual_£ / @school.number_of_pupils
+      @benchmark_existing_gas_efficiency = @existing_gas_efficiency
+      @benchmark_gas_better_control_saving_£ = @gas_better_control_saving_£
+      @benchmark_point_of_use_electric_saving_£ = @point_of_use_electric_saving_£
 
       @relevance = :relevant
 

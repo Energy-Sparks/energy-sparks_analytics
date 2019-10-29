@@ -27,6 +27,7 @@ class FormatEnergyUnit
     computer_console:             'computer consoles',
     hour:                         'hours',
     smartphone:                   'smartphone charges',
+    meters:                       'meters',
     tree:                         'trees',
     percent:                      '%',
     r2:                           '',
@@ -39,6 +40,7 @@ class FormatEnergyUnit
     kg_co2_per_kwh:               'kg CO2/kWh',
     date:                         '',
     datetime:                     '',
+    timeofday:                    '',
     gas:                          'gas',
     electricity:                  'electricity',
     teaching_assistant:           'teaching assistants',
@@ -89,6 +91,8 @@ class FormatEnergyUnit
       value.strftime('%A %e %b %Y')
     elsif unit == :datetime
       value.strftime('%A %e %b %Y %H:%M')
+    elsif unit == :timeofday
+      value.to_s
     else
       "#{scale_num(value, false, user_numeric_comprehension_level)}" + (in_table ? '' : " #{type_format(unit, medium)}")
     end

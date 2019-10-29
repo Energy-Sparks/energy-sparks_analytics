@@ -33,7 +33,8 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
   TEMPLATE_VARIABLES = {
     total_potential_savings_£: {
       description: 'Total percentage savings if meter tariffs changes as per recommendations (£)',
-      units:  :£
+      units:  :£,
+      benchmark_code: 'sav£'
     },
     total_potential_savings_percent: {
       description: 'Total percentage savings if meter tariffs changes as per recommendations (% of total consumption of those meters)',

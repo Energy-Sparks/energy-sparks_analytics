@@ -47,8 +47,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   def self.dynamic_template_variables(fuel_type)
     {
       difference_kwh:     { description: 'Difference in kwh between last 2 periods', units:  { kwh: fuel_type } },
-      difference_£:       { description: 'Difference in £ between last 2 periods',   units:  :£  },
-      difference_percent: { description: 'Difference in % between last 2 periods',   units:  :percent  },
+      difference_£:       { description: 'Difference in £ between last 2 periods',   units:  :£, benchmark_code: 'dif£'},
+      difference_percent: { description: 'Difference in % between last 2 periods',   units:  :percent, benchmark_code: 'difp'  },
 
       current_period_kwh:        { description: 'Current period kwh',                 units:  { kwh: fuel_type } },
       current_period_£:          { description: 'Current period £',                   units:  :£  },

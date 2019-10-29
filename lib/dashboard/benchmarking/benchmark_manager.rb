@@ -1,141 +1,154 @@
-require 'date'
+
 module Benchmarking
-  EXAMPLE_DATA = [
-    # data estimate: 250 schools * 40 alerts * 6 fields * 365 * 2 years = 43 million or 80K/day
-    #       date             schoolId  alert   variable  value
-    [ Date.new(2019, 10, 10), 123456, 'aapd', 'flra',   1000.4 ], # floor 
-    [ Date.new(2019, 10, 10), 123456, 'aapd', 'pupn',   250 ],    # pupil numbers
-    [ Date.new(2019, 10, 10), 123456, 'aapd', 'name',   'Whiteways Primary' ], # school
-    [ Date.new(2019, 10, 10), 123456, 'aapd', 'dedd',   2300 ],       # degree days
-    [ Date.new(2019, 10, 10), 123456, 'aapd', 'urnn',   123456 ],      # urn
-    [ Date.new(2019, 10, 10), 123456, 'aapd', 'arnm',   'Sheffield' ], # area
-    [ Date.new(2019, 10, 10), 123456, 'anng', 'kwh ',   10000 ], # Annual gas kwh
-    [ Date.new(2019, 10, 10), 123456, 'anng', 'gbp ',   1500 ],  # Annual gas £
-  ]
-
-  CHART_TABLE_CONFIG = {
-    annual_gas_per_floor_area_chart: {
-      name:     'Annual gas usage per pupil (temperature adjusted)',
-      columns:  [
-        # may support select statement like this going forward:
-        #     select anng_kwh * 100.0 as 'Annual kWh' type :kwh,
-        #            aapd_name as 'School name'
-        # for now define columns as hash
-        {   data: 'aapd_name',                                 name: 'School name', units: String },
-        {   data: 'anng_kwh * 2000.0 / aapd_dedd / aapd_flra', name: 'Annual kWh/floor area (temp compensated)', units: :kwh },
-      ],
-      sort_by:  [1], # column 1 i.e. Annual kWh
-      type: %i[chart table]
-    }
-  }
-
-  # converts row database as in EXAMPLE_DATA into instance variables
-  # one per row, to allow for subsequent formulaic binding/eval
-  class DatabaseAsVariables
-    def initialize(database)
-      database.each do |row|
-        promote_row_as_variable(row)
-      end
-    end
-
-    def calculate(formula)
-      eval(formula)
-    end
-
-    private
-
-    def promote_row_as_variable(row)
-      key = convert_row_key_to_variable_name(row)
-      create_and_set_attr_reader(key, row[4])
-    end
-
-    def convert_row_key_to_variable_name(row)
-      # "#{row[2]}_#{row[3]}_#{row[0].strftime('%Y%m%d')}".gsub(' ', '')
-      "#{row[2]}_#{row[3]}".gsub(' ', '')
-    end
-
-    private def create_and_set_attr_reader(key, value)
-      self.class.send(:attr_reader, key)
-      instance_variable_set("@#{key}", value)
-    end
-  end
-
   class BenchmarkManager
-    def initialize(benchmark_database = EXAMPLE_DATA)
+    class DatabaseRow < OpenStruct; end
+
+    def initialize(benchmark_database)
       @benchmark_database = benchmark_database
     end
 
     def self.report_dates(today, report = :annual_gas_per_floor_area_chart)
-      [today, today - 30, today - 364] # only today would be needed for the example
+      [today] # only today would be needed for the example
     end
 
-    def run_benchmark_chart(today, report = :annual_gas_per_floor_area_chart, school_ids = [123456])
+    def run_benchmark_chart(today, report, school_ids = [123456])
+      config = self.class.chart_table_config(report)
+      table = run_benchmark_table(today, report, school_ids, true)
+      create_chart(config, table)
+    end
+
+    def run_benchmark_table(today, report, school_ids, chart_columns_only = false)
       results = []
-      selected_schools = select_schools(@benchmark_database, school_ids)
-      selected_dates = select_dates(selected_schools, [today])
-      
-      school_ids = all_school_ids(selected_dates) if school_ids.nil?
+      config = self.class.chart_table_config(report)
+      school_ids = all_school_ids([today]) if school_ids.nil?
+      last_year = today-364
+
       school_ids.each do |school_id|
-        school_database = select_schools(selected_dates, [school_id])
-        school_class_database = DatabaseAsVariables.new(school_database)
-        row = calculate_row(school_database, school_class_database, CHART_TABLE_CONFIG[report], today)
-        results.push(row) unless row.nil?
+        school_data = @benchmark_database.fetch(today){{}}.fetch(school_id)
+        school_data_last_year = @benchmark_database.fetch(last_year){{}}.fetch(school_id)
+        school_data.merge!(dated_attributes('_last_year', school_data_last_year))
+        next unless school_data && school_data_last_year
+        row  = DatabaseRow.new(school_data)
+        calculated_row = calculate_row(row, config, chart_columns_only, school_id)
+        results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
+
+      sort_table!(results, config) if config.key?(:sort_by)
+
       results
     end
 
     private
 
-    def calculate_row(school_database, school_class_database, report, date)
-      row = []
-      report[:columns].each do |column_specification|
-        value = evaluate_value(school_class_database, date, column_specification)
-        row.push(value)
+    def sort_table!(results, config)
+      results.sort! do |row1, row2|
+        sort_level = 0 # multi-column sort
+        compare = nil
+        loop do
+          sort_col = config[:sort_by][sort_level]
+          sort_col_type = config[:columns][sort_col][:units]
+          compare = sort_compare(row1, row2, sort_col, sort_col_type)
+          sort_level += 1
+          break if sort_level >= config[:sort_by].length || compare != 0
+        end 
+        compare
       end
-      row
+      results
     end
 
-    def evaluate_value(school_class_database, date, column_specification)
-      school_class_database.calculate(column_specification[:data])
+    def sort_compare(row1, row2, sort_col, sort_col_type)
+      if sort_col_type == :timeofday
+        time_of_day_compare(row1[sort_col], row2[sort_col])
+      elsif sort_col_type == String
+        row1[sort_col] <=> row2[sort_col]
+      else
+        row1[sort_col].to_f <=> row2[sort_col].to_f
+      end
     end
 
-    def select_schools(benchmark_database, school_ids)
-      select_column(benchmark_database, 1, school_ids)
+    # avoid doing in TimeOfDay class as reduces performance of default
+    def time_of_day_compare(tod1, tod2)
+      if [tod1, tod2].count(&:nil?) == 1
+        tod1.nil? ? 1 : -1
+      else
+        tod1 <=> tod2
+      end
     end
 
-    def select_dates(benchmark_database, dates)
-      select_column(benchmark_database, 0, dates)
+    def row_has_useful_data(calculated_row, config, chart_columns_only)
+      min_non_nulls = if chart_columns_only && config.key?(:number_non_null_columns_for_filtering_charts)
+                        config[:number_non_null_columns_for_filtering_charts]
+                      elsif !chart_columns_only && config.key?(:number_non_null_columns_for_filtering_tables)
+                        config[:number_non_null_columns_for_filtering_tables]
+                      else
+                        1
+                      end
+      !calculated_row.nil? && calculated_row.compact.length > min_non_nulls
     end
 
-    def all_school_ids(benchmark_database)
-      benchmark_database.map { |row| row[1] }.uniq
+    def create_chart(config, table)
+      # need to extract 1st 2 'chart columns' from table data
+      chart_columns_definitions = config[:columns].select {|column_definition| self.class.chart_column?(column_definition)}
+      chart_column_numbers = config[:columns].each_with_index.map {|column_definition, index| self.class.chart_column?(column_definition) ? index : nil}
+      chart_column_numbers.compact!
+
+      data = table.map{ |row| row[chart_column_numbers[1]] }
+      data.map!{|val| val.nil? ? nil : val * 100.0 } if chart_columns_definitions[1][:units] == :percent
+      graph_definition = {}
+      graph_definition[:title]          = config[:name]
+      graph_definition[:x_axis]         = table.map{ |row| row[chart_column_numbers[0]] }
+      graph_definition[:x_axis_ranges]  = nil
+      graph_definition[:x_data]         = create_chart_data(config, table, chart_column_numbers, chart_columns_definitions)
+      graph_definition[:chart1_type]    = :bar
+      graph_definition[:chart1_subtype] = :stacked
+      graph_definition[:y_axis_label]   = 'GBP'
+      graph_definition[:config_name]    = 'Not set for benchmark charts'
+      graph_definition
     end
 
-    def select_column(database, column_number, where)
-      return database if where.nil?
-      database.select{ |row| where.include?(row[column_number]) }
+    def create_chart_data(config, table, chart_column_numbers, chart_columns_definitions)
+      chart_data = {}
+      chart_column_numbers.each_with_index do |chart_column_number, index|
+        data = table.map{ |row| row[chart_column_number] }
+        series_name = chart_columns_definitions[index][:name]
+        chart_data[series_name] = data
+      end
+      chart_data
+    end
+
+    def dated_attributes(suffix, school_data)
+      school_data.transform_keys { |key| key.to_s + suffix }
+    end
+
+    def calculate_row(row, report, chart_columns_only, school_id_debug)
+      report[:columns].map do |column_specification|
+        next if chart_columns_only && !self.class.chart_column?(column_specification)
+        calculate_value(row, column_specification, school_id_debug)
+      end
+    end
+
+    def calculate_value(row, column_specification, school_id_debug)
+      begin
+        case column_specification[:data]
+        when String then row.send(column_specification[:data])
+        when Proc then row.instance_exec(&column_specification[:data]) # this calls the configs lambda as if it was inside the class of the database row, given the lambda access to all the row's variables
+        else nil
+        end
+      rescue StandardError => e
+        puts "#{e.message}: school id #{school_id_debug}"
+        return nil
+      end
+    end
+
+    def all_school_ids(selected_dates)
+      list_of_school_ids = {}
+      selected_dates.each do |date|
+        school_ids = @benchmark_database[date].keys
+        school_ids.each do |school_id|
+          list_of_school_ids[school_id] = true
+        end
+      end
+      list_of_school_ids.keys
     end
   end
-
-  today = Date.new(2019, 10, 10)
-  report = :annual_gas_per_floor_area_chart
-
-  # ask benchmark manager which dates it needs data for, for this report
-  # typically will be just 'today', but might be 'today - 364' if comparing
-  # with previous year
-
-  dates_required = BenchmarkManager.report_dates(today, report)
-
-  # front end or analytics goes off and gets precalculated alert
-  # data for all schools for given dates
-  puts "Downloading data for #{dates_required}"
-  data = EXAMPLE_DATA
-
-  benchmark = BenchmarkManager.new(data)
-
-  school_ids = nil # nil for all or an array of schools e.g. all Sheffield schools selected by user
-
-  puts 'Results:'
-  table = benchmark.run_benchmark_chart(today, :annual_gas_per_floor_area_chart, school_ids)
-  puts table.inspect
 end

@@ -104,10 +104,16 @@ class ExcelCharts
     column_number_to_name_map = {}
 
     data.each do |column_name, column_data|
+      column_name = clean_text(column_name)
       unless column_data.is_a?(Symbol)
         worksheet.write(0, column_number, column_name)
         column_number_to_name_map[column_number] = column_name
-        worksheet.write_col(1, column_number, column_data)
+        if !column_data.empty? && column_data[0].is_a?(TimeOfDay)
+          time_data = column_data.map(&:hours_fraction)
+          worksheet.write_col(1, column_number, time_data)
+        else
+          worksheet.write_col(1, column_number, column_data)
+        end
         max_data_rows = column_data.length
         column_number += 1
       end
