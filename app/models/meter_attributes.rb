@@ -246,6 +246,14 @@ class MeterAttributes
         },
         {
           readings_start_date: Date.new(2014, 9, 30)
+        },
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 31Oct2019'
+          }
         }
       ],
       heating_model: {
@@ -259,6 +267,7 @@ class MeterAttributes
         }
       }
     },
+
     2200011955152 => {
       solar_pv: [  # and array to cope with multiple installations at different times at the same school e.g. Newbridge
         {
@@ -357,9 +366,32 @@ class MeterAttributes
         reason: 'Auto fitter high at 1400 PH(4Mar2019)'
       }
     },
+    # ==============================St Michaels===============================
+    87681203 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 31Oct2019'
+          }
+        }
+      ]
+    },
     # ==============================St Johns===============================
     9206222810 => {
-      meter_corrections: [ { readings_start_date: Date.new(2017, 2, 21) } ],
+      meter_corrections: [
+        { readings_start_date: Date.new(2017, 2, 21) },
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 31Oct2019'
+          }
+        }
+      ],
       heating_model: {
         max_summer_daily_heating_kwh:     250,
         reason: 'Automated process set too high at about 450'
@@ -422,6 +454,19 @@ class MeterAttributes
         max_summer_daily_heating_kwh:     850,
         reason: 'Automated process set too high at about 1500'
       }
+    },
+    # ==============================St Michaels===============================
+    51068306 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 31Oct2019'
+          }
+        }
+      ]
     },
     # ==============================St Saviours Juniors========================
     4234023603 => { # current gas meter
