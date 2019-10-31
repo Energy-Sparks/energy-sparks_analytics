@@ -227,7 +227,7 @@ class ValidateAMRData
     logger.info "Rescaling data between #{start_date} and #{end_date} by #{scale}"
     start_date = @amr_data.start_date if @amr_data.start_date > start_date # case where another correction has changed data prior to confiured correction
     (start_date..end_date).each do |date|
-      if @amr_data.date_exists?(date)
+      if @amr_data.date_exists?(date) && @amr_data.substitution_type(date) != 'S31M'
         new_data_x48 = []
         (0..47).each do |halfhour_index|
           new_data_x48.push(@amr_data.kwh(date, halfhour_index) * scale)

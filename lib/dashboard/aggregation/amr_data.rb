@@ -70,6 +70,10 @@ class AMRData < HalfHourlyData
     return @carbon_emissions.one_days_data_x48(date) if type == :co2
   end
 
+  def substitution_type(date)
+    self[date].type
+  end
+
   def self.one_day_zero_kwh_x48
     Array.new(48, 0.0)
   end
