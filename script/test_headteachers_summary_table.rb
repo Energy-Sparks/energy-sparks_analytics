@@ -18,9 +18,7 @@ school_names.each do |school_name|
 
   meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
 
-  tbl = HeadTeachersSchoolSummaryTable.new(meter_collection)
-
-  puts tbl.html
+  puts HeadTeachersSchoolSummaryTable.new(meter_collection).html
 end
 
 

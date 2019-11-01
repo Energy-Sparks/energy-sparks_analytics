@@ -24,7 +24,7 @@ class HeadTeachersSchoolSummaryTable
   end
 
   def data_by_fuel_type
-    @school.fuel_types(true).map do |fuel_type|
+    @school.fuel_types(false).map do |fuel_type|
       values_for_fuel_type(fuel_type)
     end
   end
