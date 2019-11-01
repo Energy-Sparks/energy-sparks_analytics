@@ -3,6 +3,7 @@ require 'bigdecimal'
 class FormatEnergyUnit
   UNIT_DESCRIPTION_TEXT = {
     kwh:                          'kWh',
+    kwp:                          'kWp',
     kw:                           'kW',
     kwh_per_day:                  'kWh/day',
     kwh_per_day_per_c:            'kWh/day/C',
@@ -15,8 +16,10 @@ class FormatEnergyUnit
     library_books:                'library books',
     km:                           'km',
     litre:                        'litres',
+    fuel_type:                    '',
     kg:                           'kg',
     shower:                       'showers',
+    panels:                       'solar PV panels',
     home:                         'homes',
     homes_gas:                    'homes (gas usage)',
     homes_electricity:            'homes (electricity usage)',
@@ -91,7 +94,7 @@ class FormatEnergyUnit
       value.strftime('%A %e %b %Y')
     elsif unit == :datetime
       value.strftime('%A %e %b %Y %H:%M')
-    elsif unit == :timeofday
+    elsif unit == :timeofday || unit == :fuel_type
       value.to_s
     else
       "#{scale_num(value, false, user_numeric_comprehension_level)}" + (in_table ? '' : " #{type_format(unit, medium)}")

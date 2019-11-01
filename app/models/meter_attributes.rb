@@ -366,7 +366,7 @@ class MeterAttributes
         reason: 'Auto fitter high at 1400 PH(4Mar2019)'
       }
     },
-    # ==============================St Michaels===============================
+    # ==============================St Andrews===============================
     87681203 => {
       meter_corrections: [
         {

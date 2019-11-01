@@ -219,6 +219,14 @@ class MeterCollection
     sheffield_simulated_solar_pv_panels? || low_carbon_solar_pv_panels?
   end
 
+  def fuel_types(exclude_storage_heaters = true)
+    types = []
+    types.push(:electricity)      if electricity?
+    types.push(:gas)              if gas?
+    types.push(:storage_heaters)  if storage_heaters? && !exclude_storage_heaters
+    types
+  end
+
   def sheffield_simulated_solar_pv_panels?
     @has_sheffield_simulated_solar_pv_panels ||= all_meters.any?{ |meter| meter.sheffield_simulated_solar_pv_panels? }
   end

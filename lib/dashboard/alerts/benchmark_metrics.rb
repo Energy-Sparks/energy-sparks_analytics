@@ -7,6 +7,7 @@ module BenchmarkMetrics
   OIL_PRICE = 0.05
   PERCENT_ELECTRICITY_OUT_OF_HOURS_BENCHMARK = 0.3
   PERCENT_GAS_OUT_OF_HOURS_BENCHMARK = 0.3
+  PERCENT_STORAGE_HEATER_OUT_OF_HOURS_BENCHMARK = 0.2
   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL = 50_000.0 / 200.0
   BENCHMARK_ELECTRICITY_USAGE_PER_M2 = 50_000.0 / 1_200.0
   BENCHMARK_GAS_USAGE_PER_PUPIL = 115_000.0 / 200.0
@@ -28,13 +29,31 @@ module BenchmarkMetrics
     end
   end
 
+  def self.exemplar_£(school, fuel_type)
+    case fuel_type
+    when :electricity, :storage_heater, :storage_heaters
+      examplar_kwh(school, fuel_type) * BenchmarkMetrics::ELECTRICITY_PRICE
+    when :gas
+      examplar_kwh(school, fuel_type) * BenchmarkMetrics::GAS_PRICE
+    end
+  end
+
+  def self.examplar_kwh(school, fuel_type)
+    case fuel_type
+    when :electricity, :storage_heater, :storage_heaters
+      BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school.school_type, school.number_of_pupils)
+    when :gas
+      BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * school.floor_area
+    end
+  end
+
   def self.exemplar_annual_electricity_usage_kwh(school_type, pupils = 1)
     school_type = school_type.to_sym if school_type.instance_of? String
     check_school_type(school_type, 'benchmark electricity usage per pupil')
 
     case school_type
     when :primary, :infant, :junior, :special, :middle
-      200.0 * pupils
+      EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
     when :secondary
       300.0 * pupils
     end

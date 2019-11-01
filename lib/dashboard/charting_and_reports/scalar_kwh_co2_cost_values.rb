@@ -65,7 +65,7 @@ class ScalarkWhCO2CostValues
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No electricity meter data available') unless @meter_collection.electricity?
     when :storage_heaters
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No storage heater meter data available') unless @meter_collection.storage_heaters?
-    when solar_pv
+    when :solar_pv
       raise EnergySparksNoMeterDataAvailableForFuelType.new('No solar pv meter data available') unless @meter_collection.solar_pv_panels?
       :solar_pv_meter
     else
