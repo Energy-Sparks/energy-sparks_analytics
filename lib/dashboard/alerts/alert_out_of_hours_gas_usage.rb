@@ -3,10 +3,13 @@ require_relative 'alert_out_of_hours_base_usage.rb'
 
 class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
   attr_reader :daytype_breakdown_table
-  def initialize(school)
-    super(school, 'gas', BenchmarkMetrics::PERCENT_GAS_OUT_OF_HOURS_BENCHMARK,
-          BenchmarkMetrics::GAS_PRICE, :gasoutofhours, 'GasOutOfHours', :allheat,
-          0.3, 0.7)
+  def initialize(school, fuel = 'gas', oo_percent = BenchmarkMetrics::PERCENT_GAS_OUT_OF_HOURS_BENCHMARK,
+          fuel_price = BenchmarkMetrics::GAS_PRICE, type = :gasoutofhours,
+          bookmark = 'GasOutOfHours', meter_defn_not_used = :allheat,
+          good_out_of_hours_use_percent = 0.3, bad_out_of_hours_use_percent = 0.7)
+    super(school, fuel, oo_percent,
+          fuel_price, type, bookmark, meter_defn_not_used,
+          good_out_of_hours_use_percent, bad_out_of_hours_use_percent)
   end
 
   protected def aggregate_meter

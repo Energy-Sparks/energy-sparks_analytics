@@ -108,8 +108,8 @@ class ExcelCharts
       unless column_data.is_a?(Symbol)
         worksheet.write(0, column_number, column_name)
         column_number_to_name_map[column_number] = column_name
-        if !column_data.empty? && column_data[0].is_a?(TimeOfDay)
-          time_data = column_data.map(&:hours_fraction)
+        if !column_data.empty? && column_data.any?{ |val| val.is_a?(TimeOfDay) }
+          time_data = column_data.map { |val| val.nil? ? nil : val.is_a?(TimeOfDay) ? val.hours_fraction : val }
           worksheet.write_col(1, column_number, time_data)
         else
           worksheet.write_col(1, column_number, column_data)
@@ -180,7 +180,13 @@ class ExcelCharts
   # the write_xlsx gem seems to produce corrupt Excel
   # if text contains a £ symbol
   def clean_text(text)
-    text.tr('£', '$')
+    if text.is_a?(String)
+      text.tr('£', '$')
+    elsif text.is_a?(Symbol)
+      text.to_s.tr('£', '$').to_sym
+    else
+      text
+    end
   end
 
   def add_chart(worksheet, graph_definition, data_col_offset, chart_row_offset)

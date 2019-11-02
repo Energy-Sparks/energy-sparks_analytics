@@ -12,8 +12,8 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
   attr_reader :one_year_saving_reduced_days_to_average_£, :one_year_saving_reduced_days_to_exemplar_£
   attr_reader :one_year_saving_reduced_days_to_average_percent, :one_year_saving_reduced_days_to_exemplar_percent
 
-  def initialize(school)
-    super(school, :heating_on_days)
+  def initialize(school, type = :heating_on_days)
+    super(school, type)
     @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 

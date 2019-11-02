@@ -6,7 +6,7 @@ class AlertGasOnlyBase < AlertAnalysisBase
   end
 
   def maximum_alert_date
-    @school.aggregated_heat_meters.amr_data.end_date
+    aggregate_meter.amr_data.end_date
   end
 
   def needs_electricity_data?
@@ -38,7 +38,7 @@ class AlertGasOnlyBase < AlertAnalysisBase
   }.freeze
 
   def last_meter_data_date
-    @school.aggregated_heat_meters.amr_data.end_date
+    aggregate_meter.amr_data.end_date
   end
 
   def time_of_year_relevance
@@ -49,7 +49,7 @@ class AlertGasOnlyBase < AlertAnalysisBase
     kwhs = []
     days = last_n_school_days(asof_date, school_days)
     days.each do |date|
-      kwhs.push(@school.aggregated_heat_meters.amr_data.one_day_kwh(date))
+      kwhs.push(aggregate_meter.amr_data.one_day_kwh(date))
     end
     kwhs
   end
@@ -72,19 +72,23 @@ class AlertGasOnlyBase < AlertAnalysisBase
     @school.aggregated_heat_meters
   end
 
+  def fuel_price
+    BenchmarkMetrics::GAS_PRICE
+  end
+
   def non_heating_only
-    @school.aggregated_heat_meters.non_heating_only?
+    aggregate_meter.non_heating_only?
   end
 
   def kitchen_only
-    @school.aggregated_heat_meters.kitchen_only?
+    aggregate_meter.kitchen_only?
   end
 
   def hot_water_only
-    @school.aggregated_heat_meters.hot_water_only?
+    aggregate_meter.hot_water_only?
   end
 
   def heating_only
-    @school.aggregated_heat_meters.heating_only?
+    aggregate_meter.heating_only?
   end
 end

@@ -143,7 +143,7 @@ class ReconcileMeters
   end
 end
 
-@source_csv_filename = './MeterReadings/Front End CSV Downloads/all-amr-readings.csv'
+@source_csv_filename = './MeterReadings/Front End CSV Downloads/all-amr-validated-readings.csv'
 @destination_directory = './MeterReadings/Front End CSV Downloads/'
 @save = false
 @run_report = false

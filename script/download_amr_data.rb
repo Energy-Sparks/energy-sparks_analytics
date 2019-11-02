@@ -105,7 +105,15 @@ end
   'Miller'                              => :downloadfromfrontend,
   'Pennyland'                           => :downloadfromfrontend,
   'Strathpeffer'                        => :downloadfromfrontend,
-  'Tomnacross'                          => :downloadfromfrontend
+  'Tomnacross'                          => :downloadfromfrontend,
+  'Caldecott'                           => :downloadfromfrontend,
+  'St Benedicts'                        => :downloadfromfrontend,
+  'St Stephens'                         => :downloadfromfrontend,
+  'Tain Royal Academy'                  => :downloadfromfrontend,
+  'Farr Primary'                        => :downloadfromfrontend,
+  'Inverness High School'               => :downloadfromfrontend,
+  'Grantown Grammar'                    => :downloadfromfrontend,
+  'West Witney'                         => :downloadfromfrontend
 }
 
 
@@ -205,7 +213,13 @@ def process_selected_schools
     puts "Downloading #{school_name}"
 
     downloader = MeterReadingsDownloadBase::meter_reading_factory(@school_data_sources[school_name], meter_collection)
-    downloader.load_meter_readings
+    begin
+      downloader.load_meter_readings
+    rescue StandardError => e
+      puts "Failed to download data for #{school_name}"
+      puts e.message
+      puts e.backtrace
+    end
 
     # AggregateDataService.new(meter_collection).validate_and_aggregate_meter_data
 

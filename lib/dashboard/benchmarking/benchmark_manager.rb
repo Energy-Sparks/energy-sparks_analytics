@@ -11,17 +11,18 @@ module Benchmarking
       [today] # only today would be needed for the example
     end
 
-    def run_benchmark_chart(today, report, school_ids = [123456])
+    def run_benchmark_chart(today, report, school_ids, chart_columns_only = false, filter = nil)
       config = self.class.chart_table_config(report)
-      table = run_benchmark_table(today, report, school_ids, true)
-      create_chart(config, table)
+      table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter)
+      create_chart(report, config, table)
     end
 
-    def run_benchmark_table(today, report, school_ids, chart_columns_only = false)
+    # filter e.g. for area: ->{ addp_area.include?('Highlands') }
+    def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw)
       results = []
       config = self.class.chart_table_config(report)
       school_ids = all_school_ids([today]) if school_ids.nil?
-      last_year = today-364
+      last_year = today - 364
 
       school_ids.each do |school_id|
         school_data = @benchmark_database.fetch(today){{}}.fetch(school_id)
@@ -29,13 +30,14 @@ module Benchmarking
         school_data.merge!(dated_attributes('_last_year', school_data_last_year))
         next unless school_data && school_data_last_year
         row  = DatabaseRow.new(school_data)
+        next unless filter_row(row, filter)
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
       sort_table!(results, config) if config.key?(:sort_by)
 
-      results
+      format_table(config, results, medium)
     end
 
     private
@@ -66,6 +68,29 @@ module Benchmarking
       end
     end
 
+    def format_table(table_definition, rows, medium)
+      header = table_definition[:columns].map{ |column_definition| column_definition[:name] }
+      case medium
+      when :raw
+        [header] + rows
+      when :text
+        formatted_rows = format_rows(rows, table_definition[:columns], medium)
+        {header: header, rows: formatted_rows}
+      when :html
+        formatted_rows = format_rows(rows, table_definition[:columns], medium)
+        HtmlTableFormatting.new(header, formatted_rows).html
+      end
+    end
+
+    def format_rows(rows, column_definitions, medium)
+      column_units = column_definitions.map{ |column_definition| column_definition[:units] }
+      formatted_rows = rows.map do |row|
+        row.each_with_index.map do |value, index|
+          column_units[index] == String ? value : FormatEnergyUnit.format(column_units[index], value, medium, false, true, :ks2)
+        end
+      end
+    end
+
     # avoid doing in TimeOfDay class as reduces performance of default
     def time_of_day_compare(tod1, tod2)
       if [tod1, tod2].count(&:nil?) == 1
@@ -78,15 +103,13 @@ module Benchmarking
     def row_has_useful_data(calculated_row, config, chart_columns_only)
       min_non_nulls = if chart_columns_only && config.key?(:number_non_null_columns_for_filtering_charts)
                         config[:number_non_null_columns_for_filtering_charts]
-                      elsif !chart_columns_only && config.key?(:number_non_null_columns_for_filtering_tables)
-                        config[:number_non_null_columns_for_filtering_tables]
                       else
-                        1
+                        1 + (self.class.y2_axis_column?(config) ? 1 : 0)
                       end
       !calculated_row.nil? && calculated_row.compact.length > min_non_nulls
     end
 
-    def create_chart(config, table)
+    def create_chart(chart_name, config, table, include_y2 = false)
       # need to extract 1st 2 'chart columns' from table data
       chart_columns_definitions = config[:columns].select {|column_definition| self.class.chart_column?(column_definition)}
       chart_column_numbers = config[:columns].each_with_index.map {|column_definition, index| self.class.chart_column?(column_definition) ? index : nil}
@@ -96,28 +119,60 @@ module Benchmarking
       data.map!{|val| val.nil? ? nil : val * 100.0 } if chart_columns_definitions[1][:units] == :percent
       graph_definition = {}
       graph_definition[:title]          = config[:name]
-      graph_definition[:x_axis]         = table.map{ |row| row[chart_column_numbers[0]] }
+      graph_definition[:x_axis]         = remove_first_column(table.map{ |row| row[chart_column_numbers[0]] })
       graph_definition[:x_axis_ranges]  = nil
       graph_definition[:x_data]         = create_chart_data(config, table, chart_column_numbers, chart_columns_definitions)
       graph_definition[:chart1_type]    = :bar
       graph_definition[:chart1_subtype] = :stacked
       graph_definition[:y_axis_label]   = 'GBP'
-      graph_definition[:config_name]    = 'Not set for benchmark charts'
+      graph_definition[:config_name]    = chart_name.to_s
+
+      y2_data = create_y2_data(config, table, chart_column_numbers, chart_columns_definitions)
+
+      unless y2_data.empty? || !include_y2
+        graph_definition[:y2_data] = y2_data
+        graph_definition[:y2_chart_type] = :line
+      end
+
       graph_definition
     end
 
+    def remove_first_column(row)
+      row[1..100]
+    end
+
     def create_chart_data(config, table, chart_column_numbers, chart_columns_definitions)
+      data, _y2_data = select_chart_data(config, table, chart_column_numbers, chart_columns_definitions, :y1)
+      data
+    end
+
+    def create_y2_data(config, table, chart_column_numbers, chart_columns_definitions)
+      _data, y2_data = select_chart_data(config, table, chart_column_numbers, chart_columns_definitions, :y2)
+      y2_data
+    end
+
+    def select_chart_data(config, table, chart_column_numbers, chart_columns_definitions, axis)
       chart_data = {}
+      y2_data = {}
       chart_column_numbers.each_with_index do |chart_column_number, index|
-        data = table.map{ |row| row[chart_column_number] }
+        data = remove_first_column(table.map{ |row| row[chart_column_number] })
         series_name = chart_columns_definitions[index][:name]
-        chart_data[series_name] = data
+        if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
+          chart_data[series_name] = data
+        elsif axis == :y2 && self.class.y2_axis_column?(chart_columns_definitions[index])
+          y2_data[series_name] = data
+        end
       end
-      chart_data
+      [chart_data, y2_data]
     end
 
     def dated_attributes(suffix, school_data)
       school_data.transform_keys { |key| key.to_s + suffix }
+    end
+
+    def filter_row(row, filter)
+      return true if filter.nil?
+      row.instance_exec(&filter)
     end
 
     def calculate_row(row, report, chart_columns_only, school_id_debug)

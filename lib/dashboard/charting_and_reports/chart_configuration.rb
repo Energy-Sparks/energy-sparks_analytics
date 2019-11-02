@@ -132,6 +132,11 @@ class ChartManager
     alert_daytype_breakdown_gas: {
       inherits_from: :daytype_breakdown_gas
     },
+    alert_daytype_breakdown_storage_heater: {
+      inherits_from:      :alert_daytype_breakdown_gas,
+      name:               'Breakdown by type of day/time: Storage Heaters',
+      meter_definition:   :storage_heater_meter
+    },
     daytype_breakdown_electricity: {
       name:             'Breakdown by type of day/time: Electricity',
       chart1_type:      :pie,
@@ -387,6 +392,11 @@ class ChartManager
     alert_group_by_week_gas: {
       inherits_from:    :group_by_week_gas,
       yaxis_units:      :£
+    },
+    alert_group_by_week_storage_heaters: {
+      inherits_from:      :alert_group_by_week_gas,
+      name:               'By Week: Storage Heaters',
+      meter_definition:   :storage_heater_meter
     },
     alert_group_by_week_electricity_14_months: {
       inherits_from:    :alert_group_by_week_electricity,
@@ -853,6 +863,10 @@ class ChartManager
                                     SeriesNames::WEEKENDHEATING
                                   ]
                                 }
+    },
+    heating_on_by_week_with_breakdown_storage_heaters: {
+      inherits_from:            :heating_on_by_week_with_breakdown,
+      meter_definition: :storage_heater_meter
     },
     heating_on_by_week_with_breakdown_school_day_only: {
       inherits_from:  :heating_on_off_by_week_with_breakdown_all,

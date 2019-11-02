@@ -6,8 +6,8 @@ class AlertThermostaticControl < AlertGasModelBase
 
   attr_reader :r2_rating_out_of_10, :potential_saving_kwh, :potential_saving_£
 
-  def initialize(school)
-    super(school, :thermostaticcontrol)
+  def initialize(school, type = :thermostaticcontrol)
+    super(school, type)
     @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 

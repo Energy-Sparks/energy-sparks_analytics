@@ -82,7 +82,7 @@ class AlertGasModelBase < AlertGasOnlyBase
   }.freeze
 
   protected def days_energy_consumption(date)
-    amr_data = @school.aggregated_heat_meters.amr_data
+    amr_data = aggregate_meter.amr_data
     amr_data.one_day_kwh(date)
   end
 

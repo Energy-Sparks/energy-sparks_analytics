@@ -109,6 +109,17 @@ class AreaNames
       met_office_forecast_id:     0,
       latitude:                   57.565289,
       longitude:                  -4.4325656
+    },
+    oxford: {
+      name:                       'Oxford',
+      temperature_filename:       'Oxford temperaturedata.csv',
+      solar_ir_filename:          'Oxford solardata.csv',
+      solar_pv_filename:          'pv data Oxford.csv',
+      holiday_calendar:           'Oxford holidays.csv',
+      yahoo_weather_forecast_id:  'oxford, uk', # untested 20Oct2019 post withdrawal of free API
+      met_office_forecast_id:     0,
+      latitude:                   51.7520,
+      longitude:                  -1.2577
     }
   }.freeze
 end

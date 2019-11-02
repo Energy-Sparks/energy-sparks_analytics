@@ -60,6 +60,10 @@ class AlertAnalysisBase < ContentBase
     end
   end
 
+  def benchmark_dates(asof_date)
+    [asof_date, asof_date - 364]
+  end
+
   def self.test_mode
     !ENV['ENERGYSPARKSTESTMODE'].nil? && ENV['ENERGYSPARKSTESTMODE'] == 'ON'
   end
@@ -97,7 +101,8 @@ class AlertAnalysisBase < ContentBase
     rating: {
       desciption: 'Rating out of 10',
       units:  Float,
-      priority_code:  'RATE'
+      priority_code:  'RATE',
+      benchmark_code: 'ratg'
     },
     term: {
       desciption: 'long term or short term',
@@ -396,7 +401,7 @@ class AlertAnalysisBase < ContentBase
       AlertElectricityMeterConsolidationOpportunity => 'emtc',
       AlertGasMeterConsolidationOpportunity         => 'gmtc',
       AlertMeterASCLimit                            => 'masc',
-      AlertDifferentialTariffOpportunity            => 'mtar',
+      AlertDifferentialTariffOpportunity            => 'dtaf',
       AlertSchoolWeekComparisonElectricity          => 'eswc',
       AlertPreviousHolidayComparisonElectricity     => 'ephc',
       AlertPreviousYearHolidayComparisonElectricity => 'epyc',
@@ -404,7 +409,12 @@ class AlertAnalysisBase < ContentBase
       AlertPreviousHolidayComparisonGas             => 'gphc',
       AlertPreviousYearHolidayComparisonGas         => 'gpyc',
       AlertAdditionalPrioritisationData             => 'addp',
-      AlertElectricityPeakKWVersusBenchmark         => 'epkb'
+      AlertElectricityPeakKWVersusBenchmark         => 'epkb',
+      AlertStorageHeaterAnnualVersusBenchmark       => 'shan',
+      AlertStorageHeaterThermostatic                => 'shtc',
+      AlertStorageHeaterOutOfHours                  => 'shoo',
+      AlertHeatingOnSchoolDaysStorageHeaters        => 'shhd',
+      AlertSolarPVBenefitEstimator                  => 'sole'
     }
   end
 

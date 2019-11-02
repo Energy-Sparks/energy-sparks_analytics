@@ -66,7 +66,7 @@ class CSVSplitter
 end
 
 destination_directory = 'C:\\Users\\phili\\OneDrive\\ESDev\\energy-sparks_analytics\\MeterReadings\\Front End CSV Downloads\\'
-source_file = destination_directory + 'all-amr-readings.csv'
+source_file = destination_directory + 'all-amr-validated-readings.csv'
 
 splitter = CSVSplitter.new(source_file, destination_directory,'Mpan Mprn', ',')
 

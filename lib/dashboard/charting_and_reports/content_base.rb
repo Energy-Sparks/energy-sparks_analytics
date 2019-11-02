@@ -192,7 +192,8 @@ class ContentBase
   def valid_content?
     return false if @relevance == :never_relevant
     (!@school.aggregated_heat_meters.nil? && needs_gas_data?) ||
-      (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?)
+      (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?) ||
+      (!@school.storage_heater_meter.nil? && needs_storage_heater_data?)
   end
 
   def make_available_to_users?
@@ -305,5 +306,9 @@ class ContentBase
 
   def needs_electricity_data?
     true
+  end
+
+  def needs_storage_heater_data?
+    false
   end
 end

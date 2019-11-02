@@ -22,8 +22,8 @@ class AlertHeatingOnOff < AlertGasModelBase
   attr_reader :latest_meter_data_date, :forecast_date_time
   attr_reader :days_between_forecast_and_last_meter_date
 
-  def initialize(school)
-    super(school, :turnheatingonoff)
+  def initialize(school, type = :turnheatingonoff)
+    super(school, type)
     @forecast_data = nil
   end
 

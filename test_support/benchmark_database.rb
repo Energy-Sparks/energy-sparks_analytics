@@ -9,7 +9,11 @@ class BenchmarkDatabase
   def initialize(filename)
     @db_filename = filename
     @database = {}
-    load_database
+    load_database_private
+  end
+
+  def load_database(_dates)
+    @database
   end
 
   def add_value(date, urn, alert_short_code, value_short_code, value)
@@ -46,7 +50,7 @@ class BenchmarkDatabase
     end
   end
 
-  private def load_database
+  private def load_database_private
     writer = FileWriter.new(@db_filename)
     data = writer.load
     @database.deep_merge!(data) unless data.nil?

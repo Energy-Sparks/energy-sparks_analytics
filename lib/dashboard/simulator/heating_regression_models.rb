@@ -189,7 +189,8 @@ module AnalyseHeatingAndHotWater
       end
 
       def predicted_kwh_temperature(temperature)
-        @a + @b * (@base_temperature.nil? ? temperature : [temperature, @base_temperature].min)
+        base_temp_problem = @base_temperature.nil? || @base_temperature.nan?
+        @a + @b * (base_temp_problem ? temperature : [temperature, @base_temperature].min)
       end
 
       def valid?

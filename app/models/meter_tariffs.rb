@@ -154,7 +154,7 @@ class MeterTariffs
       'Bath'
     when 'Somerset'
       'Frome'
-    when 'Abingdon', 'Oxfordshire'
+    when 'Abingdon', 'Oxfordshire', 'Oxford'
       'Bath'
       # 'Oxfordshire'
     else
