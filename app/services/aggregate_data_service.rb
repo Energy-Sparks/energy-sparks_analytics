@@ -31,6 +31,7 @@ class AggregateDataService
 
   def aggregate_heat_and_electricity_meters
     bm = Benchmark.realtime {
+      set_long_gap_boundary_on_all_meters
       aggregate_heat_meters
       aggregate_electricity_meters
       disaggregate_storage_heaters if @meter_collection.storage_heaters?
@@ -44,6 +45,12 @@ class AggregateDataService
   end
 
   private
+
+  private def set_long_gap_boundary_on_all_meters
+    @meter_collection.all_meters.each do |meter|
+      meter.amr_data.set_long_gap_boundary
+    end
+  end
 
   # allows parameterised carbon/cost objects to cache data post
   # aggregation, reducing memory footprint in front end cache prior to this
