@@ -518,6 +518,31 @@ class MeterAttributes
         reason: 'R2 control very unstable; 2nd attempt set to 1400; PH 29Oct2019'
       }
     },
+    # ==============================St Stephens===============================
+    13918504 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 4Nov2019'
+          }
+        }
+      ]
+    },
+    13918605 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 4Nov2019'
+          }
+        }
+      ]
+    },
     # ==============================Saltford========================
     47939506 => {
       heating_model: {

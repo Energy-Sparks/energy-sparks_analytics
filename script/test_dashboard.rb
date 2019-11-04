@@ -19,7 +19,7 @@ script = {
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                # adhoc_worksheet: { name: 'Test', charts: %i[electricity_by_month_year_0_1_finance_advice]},
+                                # adhoc_worksheet: { name: 'Test', charts: %i[heating_on_by_week_with_breakdown_storage_heaters]},
                                 :dashboard,
                                 # adhoc_worksheet: { name: 'Test', charts: %i[group_by_week_gas]},
                                 no_adhoc_worksheet: { name: 'Test', charts: %i[
