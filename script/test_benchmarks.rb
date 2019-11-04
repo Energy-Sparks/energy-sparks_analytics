@@ -5,7 +5,7 @@ require_rel '../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/benchmark db %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['.*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['White.*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   source:                   :analytics_db, # :aggregated_meter_collection, 
   logger2:                  { name: "./log/benchmark %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   
@@ -17,7 +17,7 @@ script = {
     # run_charts_and_tables: Date.new(2019,10,16),
     run_content:    {
       asof_date:      Date.new(2019,10,16),
-      filter:         ->{ addp_area.include?('Sheffield') },
+      filter:         ->{ addp_area.include?('Sheffield') || addp_area.include?('Highland') },
     }
   }
 }

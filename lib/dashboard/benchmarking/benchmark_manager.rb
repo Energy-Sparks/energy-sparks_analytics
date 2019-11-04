@@ -1,7 +1,28 @@
 
 module Benchmarking
   class BenchmarkManager
-    class DatabaseRow < OpenStruct; end
+    class DatabaseRow < OpenStruct
+      def zero(value)
+        value.nil? ? 0.0 : value
+      end
+
+      def percent_change(base, new_val, to_nil_if_sum_zero = false)
+        return 0.0 if sum_data(base) == 0.0
+        change = (sum_data(new_val) - sum_data(base)) / sum_data(base)
+        (to_nil_if_sum_zero && change == 0.0) ? nil : change
+      end
+
+      def or_nil(arr)
+        arr.compact.empty? ? nil : arr.compact[0]
+      end
+
+      def sum_data(data, to_nil_if_sum_zero = false)
+        data = [data] unless data.is_a?(Array)
+        data.map! { |value| zero(value) } # create array 1st to avoid statsample map/sum bug
+        val = data.sum 
+        (to_nil_if_sum_zero && val == 0.0) ? nil : val
+      end
+    end
 
     def initialize(benchmark_database)
       @benchmark_database = benchmark_database

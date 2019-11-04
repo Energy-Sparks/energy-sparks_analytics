@@ -110,13 +110,14 @@ module Benchmarking
         type: %i[chart table]
       },
       annual_gas_costs_per_floor_area: {
-        name:     'Annual gas use per floor area (temperature compensated)',
+        name:     'Annual heating cost per floor area (temperature compensated)',
         columns:  [
           { data: 'addp_name',      name: 'School name',    units: String, chart_data: true },
-          { data: ->{ gsba_pfla  * 2000.0 / addp_ddays },   name: 'Annual gas GBP/pupil (temp compensated)', units: :£, chart_data: true },
-          { data: ->{ gsba_£lyr },  name: 'Annual gas GBP', units: :£},
-          { data: ->{ gsba_pfla - (gsba_£exa * addp_ddays / 2000.0) }, name: 'Saving if matched exemplar school', units: :£ },
-          { data: ->{ gsba_ratg },  name: 'rating', units: Float, y2_axis: true }
+          { data: ->{ sum_data([gsba_pfla, shan_pfla], true)  * 2000.0 / addp_ddays },   name: 'Annual gas/storage heater GBP/pupil (temp compensated)', units: :£, chart_data: true },
+          { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost GBP', units: :£},
+          { data: ->{ sum_data([gsba_pfla, shan_pfla], true) - 
+                        (sum_data([gsba_£exa, shan_£exa], true) * addp_ddays / 2000.0) }, name: 'Saving if matched exemplar school', units: :£ },
+          { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -125,7 +126,7 @@ module Benchmarking
         name:     'Change in annual gas consumption',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-          { data: ->{ (gsba_£lyr - gsba_£lyr_last_year) / gsba_£lyr_last_year},  name: 'Change in annual electricity usage', units: :percent, chart_data: true },
+          { data: ->{ percent_change([gsba_£lyr_last_year, shan_£lyr_last_year], [gsba_£lyr, shan_£lyr], true) },  name: 'Change in annual gas/storage heater usage', units: :percent, chart_data: true },
           { data: ->{ gsba_£lyr },  name: 'Annual gas GBP (this year)', units: :£},
           { data: ->{ gsba_£lyr_last_year },  name: 'Annual gas GBP (last year)', units: :£}
         ],
@@ -143,6 +144,21 @@ module Benchmarking
           { data: ->{ gsoo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ gsoo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ gsoo_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by:  [1],
+        type: %i[chart table]
+      },
+      annual_storage_heater_out_of_hours_use: {
+        name:     'Storage heater out of hours use',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true },
+          { data: ->{ shoo_sdop },  name: 'School day open',              units: :percent, chart_data: true },
+          { data: ->{ shoo_sdcp },  name: 'School day closed',            units: :percent, chart_data: true },
+          { data: ->{ shoo_holp },  name: 'Holidays',                     units: :percent, chart_data: true },
+          { data: ->{ shoo_wkep },  name: 'Weekends',                     units: :percent, chart_data: true },
+          { data: ->{ shoo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
+          { data: ->{ shoo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
+          { data: ->{ shoo_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -187,8 +203,8 @@ module Benchmarking
         name:     'Quality of thermostatic control (R2 close to 1.0 is good)',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
-          { data: ->{ httc_r2 },    name: 'Thermostatic R2', units: Float,  chart_data: true },
-          { data: ->{ httc_sav£ },  name: 'Saving through improved thermostatic control', units: :£ },
+          { data: ->{ or_nil([httc_r2, shtc_r2]) },    name: 'Thermostatic R2', units: Float,  chart_data: true },
+          { data: ->{ sum_data([httc_sav£, shtc_sav£], true) },  name: 'Saving through improved thermostatic control', units: :£ },
           { data: ->{ httc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by: [1],
