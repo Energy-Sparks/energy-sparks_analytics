@@ -57,9 +57,18 @@ class MeterAttributes
       ]
     },
 =end
-
     8891205403 => {
       function: [ :heating_only ],
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 5Nov2019'
+          }
+        }
+      ],
       heating_model: {
         max_summer_daily_heating_kwh:     50,
         reason: 'Automated process set too high at about 140'
@@ -647,6 +656,19 @@ class MeterAttributes
           start_toy: TimeOfYear.new(4, 1),
           end_toy:   TimeOfYear.new(9, 30),
           reason:    'appears to be a storage heater meter'
+        }
+      ]
+    },
+    # ==============================Westfield========================
+    51015307 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 5Nov2019'
+          }
         }
       ]
     },
