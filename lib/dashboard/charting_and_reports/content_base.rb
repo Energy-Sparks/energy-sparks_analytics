@@ -1,4 +1,5 @@
 class ContentBase
+  include Logging
   def initialize(school)
     @school = school
     @relevance = check_relevance

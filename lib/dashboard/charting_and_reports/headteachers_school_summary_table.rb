@@ -1,18 +1,15 @@
-class HeadTeachersSchoolSummaryTable
+class HeadTeachersSchoolSummaryTable < ContentBase
   attr_reader :scalar
+  attr_reader :summary_table
+  attr_reader :calculation_worked
 
   def initialize(school)
-    @school = school
+    super(school)
     @scalar = ScalarkWhCO2CostValues.new(@school)
+    @rating = nil
   end
 
-  def html
-    HtmlTableFormatting.new(header_html, format_rows(data_by_fuel_type)).html
-  end
-
-  private
-
-  def header_html
+  def self.header_html
     [
       '',
       'Annual Use (kWh)',
@@ -23,16 +20,61 @@ class HeadTeachersSchoolSummaryTable
     ] 
   end
 
+  def self.header_text
+    text_header = header_html.map { |col_header| col_header.gsub('&pound;', '£') }
+    text_header.map { |col_header| col_header.gsub('&percnt;', '%') }
+  end
+
+  def self.template_variables
+    { 'Head teacher\'s energy summary' => TEMPLATE_VARIABLES}
+  end
+  
+  TEMPLATE_VARIABLES = {
+    summary_table: {
+      description: 'Summary of annual per fuel consumption, annual change, 4 week change, saving to exemplar',
+      units:          :table,
+      header:         header_text,
+      column_types:   %i[fuel_type kwh £ percent percent £] # needs to be kept in sync with instance table
+    }
+  }
+
+  def analyse(_asof_date)
+    calculate
+  end
+
+  def check_relevance
+    true
+  end
+
+  def enough_data
+    :enough
+  end
+
+  def relevance
+    :relevant
+  end
+
+  def html
+    HtmlTableFormatting.new(self.class.header_html, format_rows(data_by_fuel_type)).html
+  end
+
+  private
+
+  def calculate
+    @summary_table = format_rows(data_by_fuel_type, :raw)
+    @calculation_worked = true
+  end
+
   def data_by_fuel_type
     @school.fuel_types(false).map do |fuel_type|
       values_for_fuel_type(fuel_type)
     end
   end
 
-  def format_rows(rows)
+  def format_rows(rows, medium = :html)
     rows.map do |row|
       row.map do |_field_name, field|
-        FormatEnergyUnit.format(field[:units], field[:data], :html, false, true) rescue 'error'
+        FormatEnergyUnit.format(field[:units], field[:data], medium, false, true) rescue 'error'
       end
     end
   end

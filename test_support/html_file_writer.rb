@@ -1,9 +1,12 @@
 # writes html advice snippets included in the output
 # of chart_manager to a file for testing purposes
 class HtmlFileWriter
-  def initialize(school_name)
+  FRONTEND_CSS = '<link rel="stylesheet" media="screen" href="https://fonts.googleapis.com/css?family=Open+Sans|Quicksand:300,500,700&amp;display=swap" />
+  <link rel="stylesheet" media="all" href="https://cdn.energysparks.uk/static-assets/application-f2535905cd7274d6e4ffd9b4614323b1e11bbe6445bca5828b642a18516b9160.css" />'
+  def initialize(school_name, frontend_css = true)
     filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + ' - advice.html'
     @file = File.new(filename, 'w')
+    @file.write(FRONTEND_CSS) if frontend_css
     @file.write("<html><h1>#{school_name}</h1></html>")
   end
 
