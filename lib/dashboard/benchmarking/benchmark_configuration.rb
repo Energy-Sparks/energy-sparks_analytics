@@ -31,7 +31,71 @@ module Benchmarking
       all_pages.transform_values{ |config| config[:name] }
     end
 
+    # complex sort, so schools with missing meters, compare
+    # their fuel type only and not on a total basis
+    def self.sort_energy_costs(row1, row2)
+      # row = [name, electric, gas, storage heaters, etc.....]
+      row1a = [row1[1], [row1[2], row1[3]].compact.sum] # combined gas and storage heaters
+      row2a = [row2[1], [row2[2], row2[3]].compact.sum]
+      return  0 if row1a.compact.empty? && row2a.compact.empty?
+      return +1 if row2a.compact.empty?
+      return -1 if row1a.compact.empty?
+      if row1a.compact.length == row2a.compact.length
+        row1a.compact.sum <=> row2a.compact.sum
+      elsif row1a[0].nil? || row2a[0].nil? # compare [nil, val] with [val1, val2] => val <=> val2
+        row1a[1] <=> row2a[1]
+      else                # compare [val, nil] with [val1, val2] => val <=> val1
+        row1a[0] <=> row2a[0]
+      end
+    end
+
     CHART_TABLE_CONFIG = {
+      annual_energy_costs_per_pupil: {
+        name:     'Annual energy use per pupil',
+        columns:  [
+          { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
+          { data: ->{ elba_£pup },          name: 'Annual electricity GBP/pupil', units: :£, chart_data: true },
+          { data: ->{ zero(gsba_£pup) * zero(gsba_ddaj) },  name: 'Annual gas GBP/pupil', units: :£, chart_data: true },
+          { data: ->{ zero(shan_£pup) * zero(shan_ddaj) },  name: 'Annual storage heater GBP/pupil', units: :£, chart_data: true },
+          { data: ->{ enba_£pup },  name: 'Annual energy GBP', units: :£},
+          { data: ->{ enba_ratg },  name: 'rating', units: Float, y2_axis: true },
+        ],
+        sort_by:  method(:sort_energy_costs),
+        type: %i[chart table]
+      },
+      annual_energy_costs: {
+        name:     'Annual energy costs',
+        columns:  [
+          { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
+          { data: ->{ enba_£lyr },          name: 'Annual Energy Costs', units: :£, chart_data: true },
+          { data: ->{ enba_co2y },          name: 'Annual Energy CO2', units: :co2 },
+          { data: ->{ enba_klyr },          name: 'Annual Energy kWh', units: :kwh },
+          { data: ->{ addp_pupn },          name: 'Pupils', units: :pupils },
+          { data: ->{ addp_flra },          name: 'Flooer area', units: :m2 },
+        ],
+        sort_by:  [1],
+        type: %i[chart table]
+      },
+      annual_energy_costs_per_pupil_2: {
+        name:     'Annual energy use per pupil 2',
+        columns:  [
+          { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
+          { data: ->{ enba_£pup },  name: 'Annual energy GBP', units: :£, chart_data: true }
+        ],
+        sort_by:  [1],
+        type: %i[chart table]
+      },
+      annual_energy_costs_per_floor_area: {
+        name:     'Annual energy use per floor area',
+        columns:  [
+          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
+          { data: ->{ enba_£fla },  name: 'Annual energy GBP/floor area', units: :£, chart_data: true },
+          { data: ->{ enba_£lyr },  name: 'Annual energy GBP', units: :£},
+          { data: ->{ enba_ratg },  name: 'rating', units: Float, y2_axis: true },
+        ],
+        sort_by:  [1],
+        type: %i[chart table]
+      },
       annual_electricity_costs_per_pupil: {
         benchmark_class:  BenchmarkContentElectricityPerPupil,
         name:     'Annual electricity use per pupil (excluding storage heaters)',
@@ -113,10 +177,10 @@ module Benchmarking
         name:     'Annual heating cost per floor area (temperature compensated)',
         columns:  [
           { data: 'addp_name',      name: 'School name',    units: String, chart_data: true },
-          { data: ->{ sum_data([gsba_pfla, shan_pfla], true)  * 2000.0 / addp_ddays },   name: 'Annual gas/storage heater GBP/pupil (temp compensated)', units: :£, chart_data: true },
+          { data: ->{ sum_data([gsba_pfla, shan_pfla], true)  * BenchmarkMetrics::ANNUAL_AVERAGE_DEGREE_DAYS/ addp_ddays },   name: 'Annual gas/storage heater GBP/pupil (temp compensated)', units: :£, chart_data: true },
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost GBP', units: :£},
           { data: ->{ sum_data([gsba_pfla, shan_pfla], true) - 
-                        (sum_data([gsba_£exa, shan_£exa], true) * addp_ddays / 2000.0) }, name: 'Saving if matched exemplar school', units: :£ },
+                        (sum_data([gsba_£exa, shan_£exa], true) * addp_ddays / BenchmarkMetrics::ANNUAL_AVERAGE_DEGREE_DAYS) }, name: 'Saving if matched exemplar school', units: :£ },
           { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
@@ -188,7 +252,7 @@ module Benchmarking
         name:     'Number of days heating was on last year',
         columns:  [
           { data: 'addp_name',                   name: 'School name',           units: String, chart_data: true },
-          { data: ->{ addp_area.split(' ')[0] }, name: 'Area',                  units: String },
+          { data: ->{ area },       name: 'Area',                  units: String },
           { data: ->{ htsd_hdyr },  name: 'No. days heating on last year', units: :days, chart_data: true },
           { data: ->{ htsd_svav },  name: 'Saving through reducing season to average', units: :£ },
           { data: ->{ htsd_svex },  name: 'Saving through reducing season to exemplar', units: :£ },

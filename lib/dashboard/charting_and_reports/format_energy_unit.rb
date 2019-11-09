@@ -8,6 +8,7 @@ class FormatEnergyUnit
     kwh_per_day:                  'kWh/day',
     kwh_per_day_per_c:            'kWh/day/C',
     co2:                          'kg CO2',
+    co2t:                         'tonnes CO2',
     m2:                           'm2',
     pupils:                       'pupils',
     £:                            '£',

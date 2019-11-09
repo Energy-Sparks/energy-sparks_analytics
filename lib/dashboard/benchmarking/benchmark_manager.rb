@@ -19,8 +19,16 @@ module Benchmarking
       def sum_data(data, to_nil_if_sum_zero = false)
         data = [data] unless data.is_a?(Array)
         data.map! { |value| zero(value) } # create array 1st to avoid statsample map/sum bug
-        val = data.sum 
+        val = data.sum
         (to_nil_if_sum_zero && val == 0.0) ? nil : val
+      end
+
+      def area
+        addp_area.nil? ? '?' : addp_area.split(' ')[0]
+      end
+
+      def school_name
+        addp_name
       end
     end
 
@@ -64,6 +72,14 @@ module Benchmarking
     private
 
     def sort_table!(results, config)
+      if config[:sort_by].is_a?(Array)
+        sort_table_by_column!(results, config)
+      elsif config[:sort_by].is_a?(Method)
+        results.sort! { |a, b| config[:sort_by].call(a, b) }
+      end
+    end
+
+    def sort_table_by_column!(results, config)
       results.sort! do |row1, row2|
         sort_level = 0 # multi-column sort
         compare = nil
@@ -211,9 +227,15 @@ module Benchmarking
         else nil
         end
       rescue StandardError => e
-        puts "#{e.message}: school id #{school_id_debug}"
+        name = row.instance_exec(& ->{ school_name })
+        puts format_rescue_message(e, school_id_debug, column_specification, name)
         return nil
       end
+    end
+
+    def format_rescue_message(e, school_id_debug, column_specification, name)
+      line_number = column_specification.to_s.split(':')[4][0..3]
+      "#{e.message}: school id #{school_id_debug} line #{line_number} #{name[0..10]}"
     end
 
     def all_school_ids(selected_dates)

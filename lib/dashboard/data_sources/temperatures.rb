@@ -126,16 +126,13 @@ class Temperatures < HalfHourlyData
   def degree_days(date, base_temp)
     # return modified_degree_days(date, base_temp)
     avg_temperature = average_temperature(date)
-
-    if avg_temperature <= base_temp
-      return base_temp - avg_temperature
-    else
-      return 0.0
-    end
+    avg_temperature <= base_temp ? (base_temp - avg_temperature) : 0.0
   end
 
-  def degree_days_this_year
-    @this_year_degree_days ||= degree_days_in_date_range(end_date - 364, end_date, 15.5)
+  def degree_days_this_year(asof_date = nil)
+    asof_date = end_date if asof_date.nil?
+    # computationally intensive so cache result
+    (@years_degree_days ||= {})[asof_date] ||= degree_days_in_date_range(asof_date - 364, asof_date, 15.5)
   end
 
   def degree_days_in_date_range(start_date, end_date, base_temp = 15.5)

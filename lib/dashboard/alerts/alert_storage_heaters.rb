@@ -7,6 +7,10 @@ class AlertStorageHeaterAnnualVersusBenchmark < AlertGasAnnualVersusBenchmark
     super(school, :storage_heater_annual_benchmark)
     @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
   end
+
+  private def dd_adj(asof_date)
+    BenchmarkMetrics.normalise_degree_days(@school.temperatures, @school.holidays, :electricity, asof_date)
+  end
 end
 
 class AlertStorageHeaterThermostatic < AlertThermostaticControl

@@ -185,7 +185,9 @@ class AlertImpendingHoliday < AlertGasOnlyBase
 
     @saving_kwh = potential_saving
 
-    @rating = (@gas_rating + @electricity_rating) / 2.0
+    rating_list = [@gas_rating, @electricity_rating].compact
+
+    @rating = rating_list.empty? ? -1 : (rating_list.sum / rating_list.length)
   end
   alias_method :analyse_private, :calculate
 

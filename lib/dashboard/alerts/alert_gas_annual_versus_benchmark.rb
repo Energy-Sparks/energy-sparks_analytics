@@ -7,10 +7,11 @@
 #======================== Gas Annual kWh Versus Benchmark =====================
 # currently not derived from a common base class with electricity as we may need
 # to tmperature adjust in future
+# storage heaters derived from this class, most of code shared - beware
 require_relative 'alert_gas_only_base.rb'
 
 class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
-  attr_reader :last_year_kwh, :last_year_£
+  attr_reader :last_year_kwh, :last_year_£, :last_year_co2
 
   attr_reader :one_year_benchmark_floor_area_kwh, :one_year_benchmark_floor_area_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
@@ -22,6 +23,11 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
 
   attr_reader :one_year_gas_per_pupil_kwh, :one_year_gas_per_pupil_£
   attr_reader :one_year_gas_per_floor_area_kwh, :one_year_gas_per_floor_area_£
+
+  attr_reader :degree_day_adjustment
+
+  attr_reader :one_year_gas_per_pupil_normalised_kwh, :one_year_gas_per_pupil_normalised_£
+  attr_reader :one_year_gas_per_floor_area_normalised_kwh, :one_year_gas_per_floor_area_normalised_£
 
   def initialize(school, type = :annualgasbenchmark)
     super(school, type)
@@ -42,6 +48,11 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
         description: 'Last years gas consumption - £ including differential tariff',
         units:  {£: :gas},
         benchmark_code: '£lyr'
+      },
+      last_year_co2: {
+        description: 'Last years gas CO2 kg',
+        units:  :co2,
+        benchmark_code: 'co2y'
       },
       one_year_benchmark_floor_area_kwh: {
         description: 'Last years gas consumption for benchmark/average school, normalised by floor area - kwh',
@@ -92,7 +103,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
       },
       one_year_gas_per_pupil_£: {
         description: 'Per pupil annual gas usage - £ - required for PH analysis, not alerts',
-        units:  {£: :gas}
+        units:  {£: :gas},
+        benchmark_code: '£pup'
       },
       one_year_gas_per_floor_area_kwh: {
         description: 'Per floor area annual gas usage - kwh - required for PH analysis, not alerts',
@@ -102,7 +114,32 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
         description: 'Per floor area annual gas usage - £ - required for PH analysis, not alerts',
         units:  {£: :gas},
         benchmark_code: 'pfla'
-      }
+      },
+      degree_day_adjustment: {
+        description: 'Regional degree day adjustment; 60% of adjustment for Gas (not 100% heating consumption), 100% of Storage Heaters',
+        units: Float,
+        benchmark_code: 'ddaj'
+      },
+      one_year_gas_per_pupil_normalised_kwh: {
+        description: 'Per pupil annual gas usage - kwh - temperature normalised (internal use only)',
+        units:  {kwh: :gas},
+        benchmark_code: 'nkpp'
+      },
+      one_year_gas_per_pupil_normalised_£: {
+        description: 'Per pupil annual gas usage - £ - temperature normalised (internal use only)',
+        units:  {£: :gas},
+        benchmark_code: 'n£pp'
+      },
+      one_year_gas_per_floor_area_normalised_kwh: {
+        description: 'Per floor area annual gas usage - kwh - temperature normalised (internal use only)',
+        units:  {kwh: :gas},
+        benchmark_code: 'nkm2'
+      },
+      one_year_gas_per_floor_area_normalised_£: {
+        description: 'Per floor area annual gas usage - £ - temperature normalised (internal use only)',
+        units:  {£: :gas},
+        benchmark_code: 'n£m2'
+      },
     }
   end
 
@@ -116,10 +153,13 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
 
   private def calculate(asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
+    @degree_day_adjustment = dd_adj(asof_date)
+
     @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
+    @last_year_co2 = kwh(asof_date - 365, asof_date, :co2)
 
-    @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area
+    @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area / @degree_day_adjustment
     @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * fuel_price
 
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_floor_area_kwh
@@ -128,7 +168,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh.magnitude
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£.magnitude
 
-    @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area
+    @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area / @degree_day_adjustment
     @one_year_exemplar_floor_area_£     = @one_year_exemplar_floor_area_kwh * fuel_price
 
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_floor_area_kwh
@@ -141,6 +181,11 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_gas_per_pupil_£         = @last_year_£ / pupils
     @one_year_gas_per_floor_area_kwh  = @last_year_kwh / floor_area
     @one_year_gas_per_floor_area_£    = @last_year_£ / floor_area
+
+    @one_year_gas_per_pupil_normalised_kwh        = @one_year_gas_per_pupil_kwh * @degree_day_adjustment
+    @one_year_gas_per_pupil_normalised_£          = @one_year_gas_per_pupil_£ * @degree_day_adjustment
+    @one_year_gas_per_floor_area_normalised_kwh   = @one_year_gas_per_floor_area_kwh * @degree_day_adjustment
+    @one_year_gas_per_floor_area_normalised_£     = @one_year_gas_per_floor_area_£ * @degree_day_adjustment
 
     set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil)
 
@@ -155,4 +200,9 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @bookmark_url = add_book_mark_to_base_url('AnnualGas')
   end
   alias_method :analyse_private, :calculate
+
+  private def dd_adj(asof_date)
+    # overriden to full rather than 60% adjustment for storage heaters
+    BenchmarkMetrics.normalise_degree_days(@school.temperatures, @school.holidays, :gas, asof_date)
+  end
 end

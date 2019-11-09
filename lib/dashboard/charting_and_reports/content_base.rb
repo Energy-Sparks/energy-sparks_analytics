@@ -1,13 +1,22 @@
 class ContentBase
   def initialize(school)
     @school = school
-    @relevance = aggregate_meter.nil? ? :never_relevant : :relevant
+    @relevance = check_relevance
     @not_enough_data_exception = false
     @calculation_worked = true
   end
 
   def relevance
     @relevance
+  end
+
+  def no_single_aggregate_meter
+    false
+  end
+
+  def check_relevance
+    return :relevant if no_single_aggregate_meter
+    aggregate_meter.nil? ? :never_relevant : :relevant
   end
 
   def raw_template_variables
@@ -99,10 +108,21 @@ class ContentBase
     raw_template_variables.select { |type, _value| lookup[type].key?(:priority_code) }
   end
 
-  def benchmark_template_data
+  def benchmark_template_data_deprecated
     lookup = flatten_template_variables
     raw_template_variables.select { |type, _value| lookup[type].key?(:benchmark_code) }
   end
+
+  def benchmark_template_data
+    lookup = flatten_template_variables
+    benchmark_vars = raw_template_variables.select { |type, _value| lookup[type].key?(:benchmark_code) }
+
+    benchmark_vars.map do |key, value|
+      variable_short_code = self.class.benchmark_template_variables[key][:benchmark_code]
+      ["#{self.class.short_code}_#{variable_short_code}".to_sym, value]
+    end.to_h
+  end
+
 
   private def convert_range_template_data_to_high_low(template_data, lookup, raw_data)
     new_data = {}
@@ -194,12 +214,6 @@ class ContentBase
     (!@school.aggregated_heat_meters.nil? && needs_gas_data?) ||
       (!@school.aggregated_electricity_meters.nil? && needs_electricity_data?) ||
       (!@school.storage_heater_meter.nil? && needs_storage_heater_data?)
-  end
-
-  def make_available_to_users?
-    result = relevance == :relevant && enough_data == :enough && calculation_worked
-    logger.info "Alert #{self.class.name} not being made available to users: reason: #{relevance} #{enough_data} #{calculation_worked}" if !result
-    result
   end
 
   def make_available_to_users?

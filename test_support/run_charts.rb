@@ -132,6 +132,9 @@ class RunCharts
         chart_results = [chart_results] unless chart_results.is_a?(Array)
         @worksheets[page_name] += chart_results.flatten # could be a composite chart
       end
+    rescue EnergySparksNotEnoughDataException => e
+      puts 'Chart failed: not enough data'
+      @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
     rescue => e
       puts e.message
       puts e.backtrace

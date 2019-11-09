@@ -215,6 +215,14 @@ class MeterCollection
     @has_storage_heaters ||= all_meters.any?{ |meter| meter.storage_heater? }
   end
 
+  def all_aggregate_meters
+    [
+      electricity? ? aggregated_electricity_meters : nil,
+      gas? ? aggregated_heat_meters : nil,
+      storage_heaters? ? storage_heater_meter : nil
+    ].compact
+  end
+
   def solar_pv_panels?
     sheffield_simulated_solar_pv_panels? || low_carbon_solar_pv_panels?
   end

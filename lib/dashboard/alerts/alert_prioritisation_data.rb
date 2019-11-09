@@ -150,7 +150,7 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     @annual_gas_£             = annual_kwh(@school.aggregated_heat_meters,        :gas,             asof_date, :£)
     @annual_storage_heater_£  = annual_kwh(@school.storage_heater_meter,          :storage_heaters, asof_date, :£)
     
-    @degree_days_15_5C_domestic = @school.temperatures.degree_days_this_year
+    @degree_days_15_5C_domestic = @school.temperatures.degree_days_this_year(asof_date)
 
     @school_area = @school.area_name
   end

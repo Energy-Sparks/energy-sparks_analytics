@@ -201,10 +201,8 @@ class RunBenchmarks
 
   def save_benchmark_template_data(alert_class, alert, benchmark_date, school)
     new_data = alert.benchmark_template_data
-    alert_short_code = alert_class.short_code
     new_data.each do |key, value|
-      variable_short_code = alert_class.benchmark_template_variables[key][:benchmark_code]
-      @database.add_value(benchmark_date, school.urn, alert_short_code, variable_short_code, value)
+      @database.add_value(benchmark_date, school.urn, key, value)
     end
   end
 end

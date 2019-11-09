@@ -46,10 +46,10 @@ class AlertAnalysisBase < ContentBase
         end
       end
     rescue EnergySparksNotEnoughDataException => e
-      logger.warn e.message
-      logger.warn e.backtrace
+      logger.debug e.message
+      logger.debug e.backtrace
       puts "Got here: #{e.message}"
-      puts "Got here: #{e.backtrace}"
+      # puts "Got here: #{e.backtrace}"
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue StandardError => e
       @calculation_worked = false
@@ -383,6 +383,7 @@ class AlertAnalysisBase < ContentBase
       AlertChangeInDailyElectricityShortTerm        => 'elst',
       AlertChangeInDailyGasShortTerm                => 'gsst',
       AlertChangeInElectricityBaseloadShortTerm     => 'elbc',
+      AlertEnergyAnnualVersusBenchmark              => 'enba',
       AlertElectricityAnnualVersusBenchmark         => 'elba',
       AlertElectricityBaseloadVersusBenchmark       => 'elbb',
       AlertGasAnnualVersusBenchmark                 => 'gsba',

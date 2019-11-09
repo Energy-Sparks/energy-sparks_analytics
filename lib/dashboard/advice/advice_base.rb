@@ -22,6 +22,13 @@ class AdviceBase < ContentBase
     promote_data if self.class.config.key?(:promoted_variables)
   end
 
+  # override alerts base class, ignore calculation_worked
+  def make_available_to_users?
+    result = relevance == :relevant && enough_data == :enough
+    logger.info "Alert #{self.class.name} not being made available to users: reason: #{relevance} #{enough_data}" if !result
+    result
+  end
+
   def rating
     @rating
   end

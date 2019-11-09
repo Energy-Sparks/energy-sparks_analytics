@@ -16,14 +16,11 @@ class BenchmarkDatabase
     @database
   end
 
-  def add_value(date, urn, alert_short_code, value_short_code, value)
-    var_key = alert_short_code + '_' + value_short_code
-
+  def add_value(date, urn, var_key, value)
     begin
       add_create(date, urn, var_key, value)
     rescue StandardError => e
       puts e.message
-      puts "Got here 2 #{date} #{urn} #{alert_short_code} #{value_short_code} #{value}"
     end
   end
 

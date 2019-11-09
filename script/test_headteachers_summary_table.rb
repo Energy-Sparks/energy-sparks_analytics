@@ -11,7 +11,7 @@ end
 
 school_names = AnalysticsSchoolAndMeterMetaData.new.match_school_names('.*')
 
-puts "Got here: #{school_names.length}"
+puts "Number of schools: #{school_names.length}"
 
 school_names.each do |school_name|
   puts "<h2>#{school_name}</h2>"

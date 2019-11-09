@@ -2,7 +2,7 @@
 require_relative 'alert_analysis_base.rb'
 
 class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
-  attr_reader :last_year_kwh, :last_year_£
+  attr_reader :last_year_kwh, :last_year_£, :last_year_co2
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
@@ -34,6 +34,11 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       description: 'Last years electricity consumption - £ including differential tariff',
       units:  {£: :electricity},
       benchmark_code: '£lyr'
+    },
+    last_year_co2: {
+      description: 'Last years electricity CO2 kg',
+      units:  :co2,
+      benchmark_code: 'co2y'
     },
     one_year_benchmark_by_pupil_kwh: {
       description: 'Last years electricity consumption for benchmark/average school, normalised by pupil numbers - kwh',
@@ -107,6 +112,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
     @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
+    @last_year_co2 = kwh(asof_date - 365, asof_date, :co2)
 
     @one_year_benchmark_by_pupil_kwh   = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pupils)
     @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
