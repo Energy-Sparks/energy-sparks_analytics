@@ -57,6 +57,21 @@ class HeadTeachersSchoolSummaryTable < ContentBase
   def html
     HtmlTableFormatting.new(self.class.header_html, format_rows(data_by_fuel_type)).html
   end
+  
+  def values_for_fuel_type(fuel_type)
+    last_4_week_comparison  = compare_two_periods(fuel_type, { schoolweek: -3..0 }, { schoolweek: -7..-4 })
+    last_2_years_comparison = compare_two_periods(fuel_type, { year: 0 }, { year: -1 })
+    difference = difference_to_exemplar_£(last_2_years_comparison[:current_£], fuel_type)
+
+    {
+      fuel_type:          { data: fuel_type.to_s.humanize.capitalize,       units: :fuel_type },
+      this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: :kwh },
+      this_year_£:        { data: last_2_years_comparison[:current_£],      units: :£ },
+      change_years:       { data: last_2_years_comparison[:percent_change], units: :percent },
+      change_4_weeks:     { data: last_4_week_comparison[:percent_change],  units: :percent },
+      examplar_benefit:   { data: difference,                               units: :£ }
+    }
+  end
 
   private
 
@@ -79,20 +94,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     end
   end
 
-  def values_for_fuel_type(fuel_type)
-    last_4_week_comparison  = compare_two_periods(fuel_type, { schoolweek: -3..0 }, { schoolweek: -7..-4 })
-    last_2_years_comparison = compare_two_periods(fuel_type, { year: 0 }, { year: -1 })
-    difference = difference_to_exemplar_£(last_2_years_comparison[:current_£], fuel_type)
 
-    {
-      fuel_type:          { data: fuel_type.to_s.humanize.capitalize,       units: :fuel_type },
-      this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: :kwh },
-      this_year_£:        { data: last_2_years_comparison[:current_£],      units: :£ },
-      change_years:       { data: last_2_years_comparison[:percent_change], units: :percent },
-      change_4_weeks:     { data: last_4_week_comparison[:percent_change],  units: :percent },
-      examplar_benefit:   { data: difference,                               units: :£ }
-    }
-  end
 
   def difference_to_exemplar_£(actual_£, fuel_type)
     return nil if actual_£.nil?

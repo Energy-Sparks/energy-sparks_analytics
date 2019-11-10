@@ -106,15 +106,17 @@ class DashboardConfiguration
       content_class:           AdviceElectricityLongTerm,
       excel_worksheet_name:   'ElectricLongTerm',
       charts: %i[
-        group_by_week_electricity
         electricity_longterm_trend
+        group_by_week_electricity
         group_by_week_electricity_unlimited
         electricity_by_month_year_0_1
       ],
       promoted_variables: {
-        AlertElectricityAnnualVersusBenchmark => { # need new electricity trend alert!
-          rating:         :rating,
-          last_year_£:    :last_year_£
+        AlertElectricityLongTermTrend => {
+          rating:           :rating,
+          year_change_£:    :year_change_£,
+          prefix:           :prefix,
+          summary:          :summary
         }
       },
     },
@@ -197,15 +199,17 @@ class DashboardConfiguration
       content_class:           AdviceGasLongTerm,
       excel_worksheet_name:   'GasLongTerm',
       charts: %i[
-        group_by_week_gas
         gas_longterm_trend
+        group_by_week_gas
         group_by_week_gas_unlimited
         gas_by_month_year_0_1
       ],
       promoted_variables: {
-        AlertGasAnnualVersusBenchmark => { # need new gas trend alert!
-          rating:         :rating,
-          last_year_£:    :last_year_£
+        AlertGasLongTermTrend => {
+          rating:           :rating,
+          year_change_£:    :year_change_£,
+          prefix:           :prefix,
+          summary:          :summary
         }
       },
     },

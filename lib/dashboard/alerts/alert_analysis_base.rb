@@ -415,7 +415,10 @@ class AlertAnalysisBase < ContentBase
       AlertStorageHeaterThermostatic                => 'shtc',
       AlertStorageHeaterOutOfHours                  => 'shoo',
       AlertHeatingOnSchoolDaysStorageHeaters        => 'shhd',
-      AlertSolarPVBenefitEstimator                  => 'sole'
+      AlertSolarPVBenefitEstimator                  => 'sole',
+      AlertElectricityLongTermTrend                 => 'ellt',
+      AlertGasLongTermTrend                         => 'gslt',
+      AlertStorageHeatersLongTermTrend              => 'shlt'
     }
   end
 

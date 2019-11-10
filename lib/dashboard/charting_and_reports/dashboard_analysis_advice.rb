@@ -62,6 +62,10 @@ class DashboardChartAdviceBase
       ThermostaticAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :cusum
       CusumAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :electricity_longterm_trend
+      ElectricityLongTermTrend.new(school, chart_definition, chart_data, chart_symbol)
+    when :gas_longterm_trend
+      GasLongTermTrend.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_electricity
       ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_gas
@@ -807,7 +811,65 @@ class GasDaytypeAdvice < FuelDaytypeAdvice
     super(school, chart_definition, chart_data, chart_symbol, :gas, 0.3)
   end
 end
+#==============================================================================
+class GasLongTermTrend < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
 
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          This chart shows your gas usage over the last few years, and how it has changed.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+        <p>
+          Reducing gas consumption can be achieved by turning your school's thermostat down,
+          and by reducing out of hours usage.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class ElectricityLongTermTrend < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          This chart shows your electricity usage over the last few years, and how it has changed.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
+        <p>
+          Unless the school has had additional buildings added, if you are managing your electricity
+          consumption well this should show a downward trend; more modern ICT equipment,
+          LED lighting and behavioural change all contribute to reducing electricity usage.
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
 #==============================================================================
 class WeeklyLongTermAdvice < DashboardChartAdviceBase
   def initialize(school, chart_definition, chart_data, chart_symbol)
@@ -887,6 +949,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
+        <h2>How your <%= @fuel_type_str %> varies throughout the year</h2>
         <p>
           The graph below shows how your <%= @fuel_type_str %> consumption varies throughout the year.
           Each bar represents a whole week and the split between holiday, weekend and school day open and closed consumption for that week.

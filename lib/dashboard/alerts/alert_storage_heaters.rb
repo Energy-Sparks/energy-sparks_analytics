@@ -55,3 +55,23 @@ class AlertHeatingOnSchoolDaysStorageHeaters < AlertHeatingOnSchoolDays
   end
 end
 
+class AlertStorageHeatersLongTermTrend < AlertLongTermTrend
+  def initialize(school)
+    super(school, :storage_heater_heating_days)
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+  end
+
+  def self.template_variables
+    specific = { 'Storage heaters long term trend' => long_term_variables('storage heater')}
+    specific.merge(self.superclass.template_variables)
+  end
+
+  def fuel_type
+    :storage_heaters
+  end
+
+  protected def aggregate_meter
+    @school.storage_heater_meter
+  end
+end
+
