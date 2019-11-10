@@ -292,15 +292,14 @@ class DashboardConfiguration
       excel_worksheet_name:   'GasThermostatic',
       charts: %i[
         thermostatic
-        thermostatic_control_large_diurnal_range_1
-        thermostatic_control_large_diurnal_range_2
-        thermostatic_control_large_diurnal_range_3
-        thermostatic_control_medium_diurnal_range
+        thermostatic_control_large_diurnal_range
         cusum
       ],
       promoted_variables: {
-        AlertHeatingSensitivityAdvice => {
+        AlertThermostaticControl => {
           rating:         :rating,
+        },
+        AlertHeatingSensitivityAdvice => {
           annual_saving_1_C_change_£: :annual_saving_1_C_change_£
         }
       },

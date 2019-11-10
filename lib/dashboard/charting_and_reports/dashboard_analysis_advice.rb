@@ -108,7 +108,7 @@ class DashboardChartAdviceBase
       Last7DaysIntradayGas.new(school, chart_definition, chart_data, chart_symbol)
     when :frost, :frost_1,  :frost_2,  :frost_3
       HeatingFrostAdviceAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
-    when :thermostatic_control_large_diurnal_range_1,  :thermostatic_control_large_diurnal_range_2,  :thermostatic_control_large_diurnal_range_3
+    when :thermostatic_control_large_diurnal_range, :thermostatic_control_large_diurnal_range_1,  :thermostatic_control_large_diurnal_range_2,  :thermostatic_control_large_diurnal_range_3
       HeatingThermostaticDiurnalRangeAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     when :optimum_start
       HeatingOptimumStartAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
@@ -1750,7 +1750,7 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      <% if @chart_type == :thermostatic_control_large_diurnal_range_1 %>
+      <% if @chart_type == :thermostatic_control_large_diurnal_range  || @chart_type == :thermostatic_control_large_diurnal_range_1%>
         <p>
         Sometimes the 'thermostatic' scatter plot on the graph can be misleading, and
         thermostatic control is either better or worse than the R<sup>2</sup> suggests.
@@ -1780,14 +1780,19 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-      <% if @chart_type == :thermostatic_control_large_diurnal_range_1 %>
+      <% if @chart_type == :thermostatic_control_large_diurnal_range || @chart_type == :thermostatic_control_large_diurnal_range_1 %>
       <p>
         We can't automate this analysis, so you will need to look at the chart for you and
         decide: as the outside temperature rises (dark blue line), does the school's gas consumption
         drop signifcantly?
       </p>
       <% end %>
-      <% if @chart_type == :thermostatic_control_large_diurnal_range_3 %>
+      <% if @chart_type == :thermostatic_control_large_diurnal_range %>
+        <p>
+          You can use the buttons at the top of the chart to pick other days with large diurnal ranges.
+        </p>
+      <% end %>
+      <% if @chart_type == :thermostatic_control_large_diurnal_range || @chart_type == :thermostatic_control_large_diurnal_range_3 %>
         <p>
         Do any of these charts indicate there is poor thermostatic control? You would see this
         if the gas consumption varied little during the day?
