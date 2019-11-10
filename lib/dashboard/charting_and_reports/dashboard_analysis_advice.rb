@@ -54,7 +54,7 @@ class DashboardChartAdviceBase
 
   def self.advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
     case chart_type
-    when :benchmark
+    when :benchmark, :benchmark_electric_only_£, :benchmark_gas_only_£, :benchmark_storage_heater_only_£
       BenchmarkComparisonAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :benchmark_kwh, :benchmark_kwh_electric_only
       BenchmarkComparisonAdviceSolarSchools.new(school, chart_definition, chart_data, chart_symbol)
@@ -415,16 +415,27 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     get_energy_usage('gas', :gas, index_of_most_recent_date)
   end
 
+  protected def gas?;             !gas_usage.nil?             end
+  protected def electricity?;     !electric_usage.nil?        end
+  protected def storage_heaters?; !storage_heater_usage.nil?  end
+
   protected def storage_heater_usage
     get_energy_usage('storage heaters', :electricity, index_of_most_recent_date)
   end
 
-  protected def electric_comparison_regional(gas_only)
-    gas_only ? '' : comparison('electricity', :electricity, index_of_data("Regional Average"))
+  protected def electric_comparison_regional
+    compare = comparison('electricity', index_of_data('Regional Average'))
+    generate_html(%{ The electricity usage <%= compare %>: }.gsub(/^  /, ''), binding)
   end
 
-  protected def gas_comparison_regional(electric_only)
-    electric_only ? '' : comparison('gas', :gas, index_of_data("Regional Average"))
+  protected def gas_comparison_regional
+    compare = comparison('gas', index_of_data('Regional Average'))
+    generate_html(%{ The gas usage <%= compare %>: }.gsub(/^  /, ''), binding)
+  end
+
+  protected def storage_heater_comparison_regional
+    compare = comparison('storage heaters', index_of_data('Regional Average'))
+    generate_html(%{ The storage heater usage <%= compare %>: }.gsub(/^  /, ''), binding)
   end
 
   protected def usage_adjective
@@ -438,10 +449,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   def generate_advice
     logger.info @school.name
 
-    gas_only = electric_usage.nil?
-    electric_only = gas_usage.nil?
-
-    address = @school.postcode.nil? ? @school.address : @school.postcode
+    address = [@school.address, @school.postcode].uniq.compact.join(' ')
 
     header_template = %{
       <%= @body_start %>
@@ -455,20 +463,25 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         and a floor area of <%= @school.floor_area.round(0) %>m<sup>2</sup>.
       </p>
       <p>
-        <% if @school.gas_only? %>
-          Your school <%= usage_adjective %> <%= gas_usage %> <%= usage_preposition %> gas last year.
-          The gas usage <%= gas_comparison_regional(electric_only) %>:
-        <% elsif @school.electricity? && !@school.gas? && !@school.storage_heaters? %>
-            Your school <%= usage_adjective %> <%= electric_usage %> on electricity last year.
-            The electricity usage <%= electric_comparison_regional(gas_only) %>:
-        <% elsif @school.electricity? && @school.storage_heaters? %>
-          Your school <%= usage_adjective %> <%= storage_heater_usage %> <%= usage_preposition %> storage heating last year,
-          plus <%= electric_usage %> for the remaining electrical appliances (lighting. ICT etc.):
+        <% if actual_gas_usage > 0 && actual_electricity_usage <= 0 %>
+          <%= energy_usage_intro('gas', gas_usage) %>
+          <%= gas_comparison_regional %>
+        <% elsif actual_electricity_usage > 0 && actual_gas_usage <= 0 && actual_storage_heater_usage <= 0 %>
+          <%= energy_usage_intro('electricity', electric_usage) %>
+          <%= electric_comparison_regional %>
+        <% elsif actual_electricity_usage > 0 && actual_storage_heater_usage > 0 %>
+          <%= energy_usage_intro('storage heating', storage_heater_usage, ',') %>
+          plus <%= electric_usage %> for the remaining electrical appliances (lighting. ICT etc.).
+          <%= electric_comparison_regional %>
+          <%= storage_heater_comparison_regional %>
+        <% elsif actual_storage_heater_usage > 0 %>
+          <%= energy_usage_intro('storage heating', storage_heater_usage, ',') %>
+          <%= storage_heater_comparison_regional %>
         <% else %>
           Your school <%= usage_adjective %> <%= electric_usage %> <%= usage_preposition %> electricity
           and <%= gas_usage %> <%= usage_preposition %> gas last year.
-          The electricity usage <%= electric_comparison_regional(gas_only) %>.
-          The gas usage <%= gas_comparison_regional(electric_only) %>:
+          <%= electric_comparison_regional %>
+          <%= gas_comparison_regional %>
         <% end %>
       </p>
       <%= @body_end %>
@@ -506,20 +519,22 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <% end %>
       <% end %>
       </p>
-      <p>
-        <% if gas_only && percent_gas_of_regional_average < 0.7 %>
-          Well done you gas usage is very low and you should be congratulated for being an energy efficient school.
-        <% elsif percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
-          Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
-        <% else %>
-          Whether you have old or new school buildings, good energy management and best
-          practice in operation can save significant amounts of energy. With good management
-          an old building can use significantly less energy than a poorly managed new building.
-          Improving controls, upgrading to more efficient lighting and other measures are
-          applicable to all school buildings.
-        <% end %>
-      </p>
-      <% if @school.storage_heaters? %>
+      <% if actual_gas_usage > 0 %>
+        <p>
+          <% if percent_gas_of_regional_average < 0.7 %>
+            Well done you gas usage is very low and you should be congratulated for being an energy efficient school.
+          <% elsif percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
+            Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
+          <% else %>
+            Whether you have old or new school buildings, good energy management and best
+            practice in operation can save significant amounts of energy. With good management
+            an old building can use significantly less energy than a poorly managed new building.
+            Improving controls, upgrading to more efficient lighting and other measures are
+            applicable to all school buildings.
+          <% end %>
+        </p>
+      <% end %>
+      <% if actual_storage_heater_usage > 0 %>
         <p>
           Energy Sparks has taken the meter readings from your electricity meter and split it into two:
           electricity used by your storage heaters and the remainder. This allows you to better understand
@@ -532,28 +547,44 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     @footer_advice = generate_html(footer_template, binding)
   end
 
+  def energy_usage_intro(fuel, usage, sentence_end = '.')
+    text = %{
+      Your school <%= usage_adjective %> <%= usage %> <%= usage_preposition %> <%= fuel %> last year<%= sentence_end %>
+    }
+    generate_html(text.gsub(/^  /, ''), binding)
+  end
+
   def actual_electricity_usage
-    @chart_data[:x_data]['electricity'][index_of_most_recent_date]
+    actual_fuel_usage('electricity', index_of_most_recent_date)
   end
 
   def actual_gas_usage
-    @chart_data[:x_data].key?('gas') ? @chart_data[:x_data]['gas'][index_of_most_recent_date] : 0.0
+    actual_fuel_usage('gas', index_of_most_recent_date)
+  end
+
+  def actual_storage_heater_usage
+    actual_fuel_usage('storage heaters', index_of_most_recent_date)
+  end
+
+  def actual_fuel_usage(fuel, index)
+    return 0.0 unless @chart_data[:x_data].key?(fuel)
+    @chart_data[:x_data][fuel][index]
   end
 
   def average_regional_electricity_usage
-    @chart_data[:x_data]['electricity'][index_of_data("Regional Average")]
+    actual_fuel_usage('electricity', index_of_data('Regional Average'))
   end
 
   def average_regional_gas_usage
-    @chart_data[:x_data].key?('gas') ? @chart_data[:x_data]['gas'][index_of_data("Regional Average")] : 0.0
+    actual_fuel_usage('gas', index_of_data('Regional Average'))
   end
 
   def exemplar_electricity_usage
-    @chart_data[:x_data]['electricity'][index_of_data("Exemplar School")]
+    actual_fuel_usage('electricity', index_of_data('Exemplar School'))
   end
 
   def exemplar_gas_usage
-    @chart_data[:x_data].key?('gas') ? @chart_data[:x_data]['gas'][index_of_data("Exemplar School")] : 0.0
+    actual_fuel_usage('gas', index_of_data('Exemplar School'))
   end
 
   def percent_gas_of_regional_average
@@ -578,7 +609,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     pounds_to_kwh(actual_electricity_usage - exemplar_electricity_usage, :electricity)
   end
 
-  def comparison(type_str, type_sym, with)
+  def comparison(type_str, with)
     usage_from_chart_£ = @chart_data[:x_data][type_str][index_of_most_recent_date]
     benchmark_from_chart = @chart_data[:x_data][type_str][with]
     formatted_usage_£ = FormatEnergyUnit.format(:£, usage_from_chart_£, :html)
@@ -786,7 +817,7 @@ class WeeklyLongTermAdvice < DashboardChartAdviceBase
     header_template = %{
       <%= @body_start %>
         <p>
-        This graph shows he same information as the graph above but over a longer period of time.
+        This graph shows the same information as the graph above but over a longer period of time.
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')

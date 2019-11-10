@@ -48,14 +48,14 @@ class AlertAnalysisBase < ContentBase
     rescue EnergySparksNotEnoughDataException => e
       logger.debug e.message
       logger.debug e.backtrace
-      puts "Got here: #{e.message}"
+      puts "Got here 1: #{e.message}"
       # puts "Got here: #{e.backtrace}"
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue StandardError => e
       @calculation_worked = false
       logger.warn e.message
-      puts "Got here: #{e.message}"
-      puts "Got here: #{e.backtrace}"
+      puts "Got here 2: #{e.message}"
+      puts "Got here 2: ", e.backtrace.join("\n")
       logger.warn e.backtrace
     end
   end

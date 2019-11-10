@@ -58,18 +58,18 @@ class AdviceBase < ContentBase
   def content
     charts_and_html = []
 
+    charts_and_html.push( { type: :analytics_html, content: '<hr>' } )
     charts_and_html.push( { type: :title, content: self.class.config[:name] } )
-    charts_and_html.push( { type: :analytics_html, content: '<br>' } )
     charts_and_html.push( { type: :analytics_html, content: "<h2>#{self.class.config[:name]}</h2>" } )
     charts_and_html.push( { type: :analytics_html, content: "<h3>Rating: #{rating}</h3>" } )
     charts_and_html.push( { type: :analytics_html, content: template_data_html } )
 
     charts.each do |chart|
       begin
-        charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
         charts_and_html.push( { type: :html,  content: chart[:advice_header] } ) if chart.key?(:advice_header)
         charts_and_html.push( { type: :chart_name, content: chart[:config_name] } )
         charts_and_html.push( { type: :chart, content: chart } )
+        charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
         charts_and_html.push( { type: :html,  content: chart[:advice_footer] } ) if chart.key?(:advice_footer)
       rescue StandardError => e
         puts e.message

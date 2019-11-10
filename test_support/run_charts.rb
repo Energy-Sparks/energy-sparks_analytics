@@ -137,7 +137,7 @@ class RunCharts
       @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
     rescue => e
       puts e.message
-      puts e.backtrace
+      puts e.backtrace.join("\n")
       @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
       nil
     end

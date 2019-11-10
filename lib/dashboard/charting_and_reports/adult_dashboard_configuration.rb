@@ -44,11 +44,24 @@ class DashboardConfiguration
       excel_worksheet_name:   'Benchmark',
       charts:                 %i[benchmark],
       promoted_variables: {
+        AlertEnergyAnnualVersusBenchmark => {
+          rating:                               :rating,
+          last_year_£:                          :last_year_£,
+          last_year_kwh:                        :last_year_kwh,
+          last_year_co2:                        :last_year_co2,
+          # difference_from_average:              :percent_difference_from_average_per_pupil,
+          # percent_difference_adjective:         :percent_difference_adjective,
+          # simple_percent_difference_adjective:  :simple_percent_difference_adjective,
+          # summary:                              :summary
+        },
         AlertGasAnnualVersusBenchmark         => { gas_rating: :rating, gas_last_year_£: :last_year_£ },
         AlertElectricityAnnualVersusBenchmark => { 
           electric_rating: :rating,
-          rating: :rating, # TODO(PH, 21Oct2019) need to combine gas and electric
           electric_last_year_£: :last_year_£
+        },
+        AlertStorageHeaterAnnualVersusBenchmark => { 
+          storage_heater_rating: :rating,
+          storage_heater_last_year_£: :last_year_£
         }
       }
     },
@@ -57,6 +70,7 @@ class DashboardConfiguration
       content_class:          AdviceElectricityAnnual,
       excel_worksheet_name:   'ElectricityAnnual',
       charts: %i[
+        benchmark_electric_only_£
         group_by_week_electricity
         electricity_longterm_trend
         group_by_week_electricity_unlimited
@@ -141,6 +155,7 @@ class DashboardConfiguration
       content_class:          AdviceGasAnnual,
       excel_worksheet_name:   'GasAnnual',
       charts: %i[
+        benchmark_gas_only_£
         group_by_week_gas
         gas_longterm_trend
         group_by_week_gas_unlimited
@@ -292,6 +307,7 @@ class DashboardConfiguration
       content_class:           AdviceStorageHeaters,
       excel_worksheet_name:   'StorageHeaters',
       charts: %i[
+        benchmark_storage_heater_only_£
         storage_heater_group_by_week
         storage_heater_group_by_week_long_term
         storage_heater_by_day_of_week

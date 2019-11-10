@@ -117,7 +117,7 @@ class ChartManager
   def configure_graph(aggregator, chart_config, chart_param, calculation_time)
     graph_definition = {}
 
-    graph_definition[:title]          = chart_config[:name] + ' ' + aggregator.title_summary
+    graph_definition[:title]          = chart_config[:name] # + ' ' + aggregator.title_summary
 
     graph_definition[:x_axis]         = aggregator.x_axis
     graph_definition[:x_axis_ranges]  = aggregator.x_axis_bucket_date_ranges

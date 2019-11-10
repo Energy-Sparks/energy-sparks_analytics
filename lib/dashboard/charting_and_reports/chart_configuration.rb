@@ -42,6 +42,21 @@ class ChartManager
       filter:           { fuel: [ 'electricity' ] },
       yaxis_units:      :kwh
     },
+    benchmark_electric_only_£: {
+      inherits_from:    :benchmark,
+      filter:           { fuel: [ 'electricity' ] },
+      yaxis_units:      :£
+    },
+    benchmark_gas_only_£: {
+      inherits_from:    :benchmark,
+      filter:           { fuel: [ 'gas' ] },
+      yaxis_units:      :£
+    },
+    benchmark_storage_heater_only_£: {
+      inherits_from:    :benchmark,
+      filter:           { fuel: [ 'storage heaters' ] },
+      yaxis_units:      :£
+    },
     last_2_weeks_carbon_emissions: {
       name:             'Last 2 weeks carbon emissions at your school from electricity and gas',
       chart1_type:      :column,

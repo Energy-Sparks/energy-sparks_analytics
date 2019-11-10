@@ -124,6 +124,9 @@ class ContentBase
     end.to_h
   end
 
+  private def percent_change(old_value, new_value)
+    old_value.nil? ? nil : ((new_value - old_value) / old_value)
+  end
 
   private def convert_range_template_data_to_high_low(template_data, lookup, raw_data)
     new_data = {}

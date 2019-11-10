@@ -53,7 +53,7 @@ class RunAdultDashboard < RunCharts
 
   def write_html
     html_file = HtmlFileWriter.new(@school.name + '- adult dashboard')
-    html_file.write_header_footer('Unknown', @all_html, nil)
+    html_file.write_header_footer('', @all_html, nil)
     html_file.close
   end
 end

@@ -3,6 +3,8 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   attr_reader :last_year_kwh, :last_year_£, :last_year_co2, :last_year_co2_tonnes
   attr_reader :one_year_energy_per_pupil_kwh, :one_year_energy_per_pupil_£, :one_year_energy_per_pupil_co2
   attr_reader :one_year_energy_per_floor_area_kwh, :one_year_energy_per_floor_area_£, :one_year_energy_per_floor_area_co2
+  attr_reader :percent_difference_from_average_per_pupil, :percent_difference_adjective
+  attr_reader :simple_percent_difference_adjective, :summary
 
   def initialize(school)
     super(school, :annualenergybenchmark)
@@ -80,6 +82,23 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       description: 'Per floor area annual energy usage - co2',
       units:  :co2,
       benchmark_code: 'cfla'
+    },
+    percent_difference_from_average_per_pupil: {
+      description: 'Percent difference from average',
+      units:  :relative_percent,
+      benchmark_code: 'pp%d'
+    },
+    percent_difference_adjective: {
+      description: 'Adjective relative to average: above, signifantly above, about',
+      units: String
+    },
+    simple_percent_difference_adjective:  {
+      description: 'Adjective relative to average: above, about, below',
+      units: String
+    },
+    summary: {
+      description: 'Description: £spend, adj relative to average',
+      units: String
     }
   }
 
@@ -109,7 +128,13 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     @per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school)
     @per_pupil_energy_exemplar_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school)
 
-   
+    @percent_difference_from_average_per_pupil = percent_change(@per_pupil_energy_benchmark_£, @one_year_energy_per_pupil_£)
+
+    @percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
+    @simple_percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)
+
+    @summary  = summary_text
+
     if valid_alerts.length == 1
       @rating = valid_alerts[0].rating
     else
@@ -135,6 +160,11 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   end
   alias_method :analyse_private, :calculate
 
+  private def summary_text
+    FormatEnergyUnit.format(:£, @last_year_£, :text) + 'pa, ' + 
+    FormatEnergyUnit.format(:percent, @percent_difference_from_average_per_pupil, :text) + ' ' +
+    @simple_percent_difference_adjective + ' average'
+  end
   
   private def calculate_alert(alert_class, asof_date)
     alert = alert_class.new(@school)

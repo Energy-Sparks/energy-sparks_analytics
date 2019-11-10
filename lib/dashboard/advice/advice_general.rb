@@ -21,7 +21,6 @@ class AdviceBenchmark   < AdviceBase
     @school.aggregated_electricity_meters # TODO(PH, 21Oct2019) - needs to check gas asof as well
   end
 end
-class AdviceElectricityAnnual < AdviceElectricityBase; end
 class AdviceElectricityOutHours < AdviceElectricityBase; end
 class AdviceElectricityLongTerm < AdviceElectricityBase; end
 class AdviceElectricityRecent < AdviceElectricityBase; end

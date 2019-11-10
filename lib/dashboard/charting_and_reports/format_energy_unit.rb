@@ -34,6 +34,7 @@ class FormatEnergyUnit
     meters:                       'meters',
     tree:                         'trees',
     percent:                      '%',
+    relative_percent:             '%',
     r2:                           '',
     temperature:                  'C',
     years_range:                  'years',
@@ -92,6 +93,10 @@ class FormatEnergyUnit
       format_time(value)
     elsif unit == :percent
       "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
+    elsif unit == :relative_percent
+      formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
+      formatted_val = '+' + formatted_val if value > 0.0
+      formatted_val
     elsif unit == :date
       value.strftime('%A %e %b %Y')
     elsif unit == :datetime
