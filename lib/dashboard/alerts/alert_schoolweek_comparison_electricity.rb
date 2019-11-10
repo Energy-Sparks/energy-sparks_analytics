@@ -25,6 +25,10 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
 
   def fuel_type; :electricity end
 
+  private def period_type
+    'school week'
+  end
+
   def comparison_chart
     :last_2_school_weeks_electricity_comparison_alert
   end

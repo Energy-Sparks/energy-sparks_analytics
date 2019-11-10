@@ -66,6 +66,8 @@ class DashboardChartAdviceBase
       ElectricityLongTermTrend.new(school, chart_definition, chart_data, chart_symbol)
     when :gas_longterm_trend
       GasLongTermTrend.new(school, chart_definition, chart_data, chart_symbol)
+    when :teachers_landing_page_electricity
+      ElectricityShortTermTrend.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_electricity
       ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_gas
@@ -752,7 +754,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
       <p>
-        This the breakdown for the most recent year:
+        This is the breakdown for the most recent year:
       </p>
       <p>
       <%= table_info %>
@@ -865,6 +867,31 @@ class ElectricityLongTermTrend < DashboardChartAdviceBase
           consumption well this should show a downward trend; more modern ICT equipment,
           LED lighting and behavioural change all contribute to reducing electricity usage.
         </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @footer_advice = generate_html(footer_template, binding)
+  end
+end
+#==============================================================================
+class ElectricityShortTermTrend < DashboardChartAdviceBase
+  def initialize(school, chart_definition, chart_data, chart_symbol)
+    super(school, chart_definition, chart_data, chart_symbol)
+  end
+
+  def generate_advice
+    header_template = %{
+      <%= @body_start %>
+        <p>
+          This chart compares your electricity usage over the last 2 weeks:
+        </p>
+      <%= @body_end %>
+    }.gsub(/^  /, '')
+
+    @header_advice = generate_html(header_template, binding)
+
+    footer_template = %{
+      <%= @body_start %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1588,6 +1615,9 @@ class ElectricityShortTermIntradayAdvice < DashboardChartAdviceBase
       </p>
       <% when :intraday_line_school_last7days %>
       <% end %>
+      <p>
+        You can click on the legend to add or remove lines from the graph to make it clearer.
+      </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -2840,7 +2870,8 @@ class Last2WeeksDailyGasComparisonTemperatureCompensatedAdvice < DashboardChartA
     header_template = %{
       <%= @body_start %>
         <p>
-          This chart automatically adjusts the school’s gas consumption for outside temperature,
+          This chart shows you how much your school&apos;s gas consumption has changed
+          in the last two weeks. It adjusts the gas consumption for outside temperature,
           removing the effect of changes in outside temperature. This should make it easier to
           see the impact of changes you might be making in boiler control:
         </p>
@@ -2851,15 +2882,6 @@ class Last2WeeksDailyGasComparisonTemperatureCompensatedAdvice < DashboardChartA
 
     footer_template = %{
       <%= @body_start %>
-        <p>
-          The quality of the adjustment for outside temperatures may not be perfect as it
-          is dependent on the quality of the school&apos;s thermostatic control (see the thermostatic
-          chart on the Advanced Boiler Control page for an explanation). But, it should give you
-          a much better idea if you are making progress with reducing gas consumption, and the
-          long&hyphen;term impact of any changes you might have made? For example, a reduction on the
-          chart from one week to the next of 10&percnt; might indicate a long&hyphen;term annual reduction of
-          10% in your heating costs.
-        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 

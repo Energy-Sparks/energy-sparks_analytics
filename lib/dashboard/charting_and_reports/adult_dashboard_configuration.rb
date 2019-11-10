@@ -115,8 +115,8 @@ class DashboardConfiguration
         AlertElectricityLongTermTrend => {
           rating:           :rating,
           year_change_£:    :year_change_£,
-          prefix_1:           :prefix_1,
-          prefix_2:           :prefix_2,
+          prefix_1:         :prefix_1,
+          prefix_2:         :prefix_2,
           summary:          :summary
         }
       },
@@ -126,13 +126,19 @@ class DashboardConfiguration
       content_class:           AdviceElectricityRecent,
       excel_worksheet_name:   'ElectricRecent',
       charts: %i[
+        teachers_landing_page_electricity
         intraday_line_school_last7days
         baseload_lastyear
       ],
       promoted_variables: {
         AlertSchoolWeekComparisonElectricity => {
-          rating:         :rating,
-          difference_kwh: :difference_kwh
+          rating:             :rating,
+          difference_kwh:     :difference_kwh,
+          difference_£:       :difference_£,
+          difference_percent: :difference_percent,
+          prefix_1:           :prefix_1,
+          prefix_2:           :prefix_2,
+          summary:            :summary
         }
       },
     },
@@ -209,8 +215,8 @@ class DashboardConfiguration
         AlertGasLongTermTrend => {
           rating:           :rating,
           year_change_£:    :year_change_£,
-          prefix_1:           :prefix_1,
-          prefix_2:           :prefix_2,
+          prefix_1:         :prefix_1,
+          prefix_2:         :prefix_2,
           summary:          :summary
         }
       },
@@ -220,17 +226,21 @@ class DashboardConfiguration
       content_class:           AdviceGasRecent,
       excel_worksheet_name:   'GasRecent',
       charts: %i[
-        intraday_line_school_days
+        last_2_weeks_gas_comparison_temperature_compensated
         last_7_days_intraday_gas
         last_2_weeks_gas
         last_2_weeks_gas_degreedays
-        last_2_weeks_gas_comparison_temperature_compensated
         last_4_weeks_gas_temperature_compensated
       ],
       promoted_variables: {
         AlertSchoolWeekComparisonGas => {
-          rating:         :rating,
-          difference_kwh: :difference_kwh
+          rating:             :rating,
+          difference_kwh:     :difference_kwh,
+          difference_£:       :difference_£,
+          difference_percent: :difference_percent,
+          prefix_1:           :prefix_1,
+          prefix_2:           :prefix_2,
+          summary:            :summary
         }
       },
     },
@@ -299,7 +309,7 @@ class DashboardConfiguration
       name:                   'Frost',
       content_class:           AdviceGasBoilerFrost,
       excel_worksheet_name:   'Frost',
-      charts: %i[frost_1 frost_2 frost_3],
+      charts: %i[frost_1],
       promoted_variables: {
       },
     },

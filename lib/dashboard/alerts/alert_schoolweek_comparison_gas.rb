@@ -45,6 +45,10 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
 
   def fuel_type; :gas end
 
+  private def period_type
+    'school week'
+  end
+
   def comparison_chart
     TEMPERATURE_ADJUSTED_CHART
   end

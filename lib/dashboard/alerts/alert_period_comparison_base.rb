@@ -43,6 +43,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :current_period_weekly_kwh, :current_period_weekly_£, :previous_period_weekly_kwh, :previous_period_weekly_£
   attr_reader :change_in_weekly_kwh, :change_in_weekly_£
   attr_reader :change_in_weekly_percent
+  attr_reader :summary, :prefix_1, :prefix_2
 
   def self.dynamic_template_variables(fuel_type)
     {
@@ -85,7 +86,11 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       change_in_weekly_£:         { description: 'Change in normalised average weekly £',          units:  :£  },
       change_in_weekly_percent:   { description: 'Difference in weekly % between last 2 periods',  units:  :percent  },
 
-      comparison_chart: { description: 'Relevant comparison chart', units: :chart }
+      comparison_chart: { description: 'Relevant comparison chart', units: :chart },
+
+      summary: { description: 'Change in £spend, relative to previous period', units: String },
+      prefix_1: { description: 'Change: up or down', units: String },
+      prefix_2: { description: 'Change: increase or reduction', units: String }
     }
   end
 
@@ -153,6 +158,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @change_in_weekly_£         = @current_period_weekly_£ - @previous_period_weekly_£
     @change_in_weekly_percent   = @change_in_weekly_kwh / @previous_period_weekly_kwh
 
+    @prefix_1 = @difference_percent > 0 ? 'up' : 'down'
+    @prefix_2 = @difference_percent > 0 ? 'increase' : 'reduction'
+    @summary  = summary_text
+
     set_savings_capital_costs_payback(@difference_£, 0.0)
 
     @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
@@ -164,6 +173,16 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   private def period_debug(current_period,  asof_date)
     "#{current_period} asof #{asof_date}"
+  end
+
+  private def period_type
+    'period'
+  end
+
+  private def summary_text
+    FormatEnergyUnit.format(:£, @difference_£, :text) + 'pa ' +
+    @prefix_2 + ' since last ' + period_type + ', ' +
+    FormatEnergyUnit.format(:relative_percent, @difference_percent, :text)
   end
 
   protected def calculate_rating(percentage_difference, financial_difference_£, fuel_type)
@@ -283,6 +302,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 end
 
 class AlertHolidayComparisonBase < AlertPeriodComparisonBase
+  private def period_type
+    'holiday'
+  end
+
   protected def truncate_period_to_available_meter_data(period)
     return period if period.start_date >= aggregate_meter.amr_data.start_date && period.end_date <= aggregate_meter.amr_data.end_date
     start_date = [period.start_date, aggregate_meter.amr_data.start_date].max
