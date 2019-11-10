@@ -1,6 +1,7 @@
 class DashboardConfiguration
   ADULT_DASHBOARD_GROUPS = {
     benchmark:      %i[benchmark],
+    benchmark_kwh_electric_only: %i[benchmark_kwh_electric_only],
     electric_group: %i[
       electric_annual
       electric_out_of_hours
@@ -27,15 +28,19 @@ class DashboardConfiguration
     storage_heater_group: %i[
       storage_heater
     ],
+=begin
     solar_pv_group: %i[
       solar_pv
     ],
+=end
     carbon_group: %i[
       carbon
     ],
+=begin
     energy_tariffs_group: %i[
       energy_tariffs
     ],
+=end
   }.freeze
 
   ADULT_DASHBOARD_GROUP_CONFIGURATIONS = {
