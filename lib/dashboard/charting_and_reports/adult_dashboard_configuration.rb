@@ -309,7 +309,7 @@ class DashboardConfiguration
       name:                   'Frost',
       content_class:           AdviceGasBoilerFrost,
       excel_worksheet_name:   'Frost',
-      charts: %i[frost_1],
+      charts: %i[frost],
       promoted_variables: {
       },
     },

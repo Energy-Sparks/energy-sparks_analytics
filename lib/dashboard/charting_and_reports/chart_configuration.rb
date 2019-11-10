@@ -1291,8 +1291,8 @@ class ChartManager
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
-    frost_1:  {
-      name:             'Frost Protection Example Sunday 1',
+    frost:  {
+      name:             'Frost Protection: cold weekend',
       chart1_type:      :column,
       series_breakdown: :none,
       timescale:        [{ frostday_3: 0 }], # 1 day either side of frosty day i.e. 3 days
@@ -1302,27 +1302,20 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :temperature
     },
+    frost_1:  {
+      name:             'Frost Protection Example Sunday 1',
+      inherits_from:    :frost,
+      timescale:        [{ frostday_3: 0 }], # 1 day either side of frosty day i.e. 3 days
+    },
     frost_2:  {
       name:             'Frost Protection Example Sunday 2',
-      chart1_type:      :column,
-      series_breakdown: :none,
-      timescale:        [{ frostday_3: -1 }],
-      x_axis:           :datetime,
-      meter_definition: :allheat,
-      yaxis_units:      :kw,
-      yaxis_scaling:    :none,
-      y2_axis:          :temperature
+      inherits_from:    :frost,
+      timescale:        [{ frostday_3: -1 }], # 1 day either side of frosty day i.e. 3 days
     },
     frost_3:  {
       name:             'Frost Protection Example Sunday 3',
-      chart1_type:      :column,
-      series_breakdown: :none,
-      timescale:        [{ frostday_3: -2 }],
-      x_axis:           :datetime,
-      meter_definition: :allheat,
-      yaxis_units:      :kw,
-      yaxis_scaling:    :none,
-      y2_axis:          :temperature
+      inherits_from:    :frost,
+      timescale:        [{ frostday_3: -2 }], # 1 day either side of frosty day i.e. 3 days
     },
     thermostatic_control_large_diurnal_range_1:  {
       name:             'Thermostatic Control Large Diurnal Range Assessment 1',

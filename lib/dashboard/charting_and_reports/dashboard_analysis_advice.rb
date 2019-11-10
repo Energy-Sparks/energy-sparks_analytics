@@ -106,7 +106,7 @@ class DashboardChartAdviceBase
       Last4WeeksDailyGasComparisonTemperatureCompensatedAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :last_7_days_intraday_gas
       Last7DaysIntradayGas.new(school, chart_definition, chart_data, chart_symbol)
-    when :frost_1,  :frost_2,  :frost_3
+    when :frost, :frost_1,  :frost_2,  :frost_3
       HeatingFrostAdviceAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     when :thermostatic_control_large_diurnal_range_1,  :thermostatic_control_large_diurnal_range_2,  :thermostatic_control_large_diurnal_range_3
       HeatingThermostaticDiurnalRangeAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
@@ -1636,7 +1636,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-      <% if @chart_type == :frost_1 %>
+      <% if @chart_type == :frost || @chart_type == :frost_1 %>
         <p>
         'Frost Protection' is a feature built into most school boiler controllers
         which turns the heating on when it is cold outside in order to prevent
@@ -1664,6 +1664,8 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         for these schools to leave their heating on during winter holidays, which is signifcantly more expensive
         than if frost protection is allowed to provide the protection automatically.
         </p>
+      <% end %>
+      <% if @chart_type == :frost_1 %>
         <p>
         The 3 graphs below which are for the coldest weekends of recent years, attempt to demonstrate whether
         </p>
@@ -1672,6 +1674,16 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         <li>whether it is configured correctly and running efficiently</li>
         </ol>
       <% end %>
+      <% if @chart_type == :frost %>
+      <p>
+        The graph below which is for the coldest weekend of recent years, attempts to demonstrate whether
+        </p>
+        <ol type="a">
+        <li>Frost protection is configured for your school and</li>
+        <li>whether it is configured correctly and running efficiently</li>
+        </ol>
+        <p>You can check another frosty f=weekend by clicking the move forward/back frosty day buttons</p>
+      <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -1679,7 +1691,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-      <% if @chart_type == :frost_1 %>
+      <% if @chart_type == :frost || @chart_type == :frost_1 %>
       <p>
         The graph shows both the gas consumption (blue bars), and the outside temperature
         (dark blue line) on a cold weekend (Saturday through to Monday).
@@ -1701,7 +1713,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
       graphs for your school below?
       </p>
       <% end %>
-      <% if @chart_type == :frost_3 %>
+      <% if @chart_type == :frost || @chart_type == :frost_3 %>
         <p>
         The graphs can be difficult to interpret sometimes, so if you are uncertain about what
         you are seeing please <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a>
