@@ -1,13 +1,13 @@
 class Adjective
   ADJECTIVES = {
     relative_to_1: {
-      -Float::INFINITY..-0.3  => 'signifcantly below',
+      -Float::INFINITY..-0.3  => 'significantly below',
       -0.3..-0.1              => 'below',
       -0.1..-0.05             => 'just below',
       -0.05..0.05             => 'about',
       0.05..0.1               => 'just above',
       0.1..0.2                => 'above',
-      0.2..Float::INFINITY    => 'significantly'
+      0.2..Float::INFINITY    => 'significantly above'
     },
     simple_relative_to_1: {
       -Float::INFINITY..-0.05  => 'below',

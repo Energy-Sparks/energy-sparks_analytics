@@ -29,6 +29,10 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
   attr_reader :one_year_gas_per_pupil_normalised_kwh, :one_year_gas_per_pupil_normalised_£
   attr_reader :one_year_gas_per_floor_area_normalised_kwh, :one_year_gas_per_floor_area_normalised_£
 
+  attr_reader :per_floor_area_gas_benchmark_£
+  attr_reader :percent_difference_from_average_per_floor_area, :percent_difference_adjective
+  attr_reader :simple_percent_difference_adjective, :summary
+
   def initialize(school, type = :annualgasbenchmark)
     super(school, type)
   end
@@ -140,6 +144,27 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
         units:  {£: :gas},
         benchmark_code: 'n£m2'
       },
+      per_floor_area_gas_benchmark_£: {
+        description: 'Per floor area annual gas usage - £',
+        units:  {£: :gas}
+      },
+      percent_difference_from_average_per_floor_area: {
+        description: 'Percent difference from average',
+        units:  :relative_percent,
+        benchmark_code: 'pp%d'
+      },
+      percent_difference_adjective: {
+        description: 'Adjective relative to average: above, signifantly above, about',
+        units: String
+      },
+      simple_percent_difference_adjective:  {
+        description: 'Adjective relative to average: above, about, below',
+        units: String
+      },
+      summary: {
+        description: 'Description: £spend, adj relative to average',
+        units: String
+      }
     }
   end
 
@@ -187,6 +212,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_gas_per_floor_area_normalised_kwh   = @one_year_gas_per_floor_area_kwh * @degree_day_adjustment
     @one_year_gas_per_floor_area_normalised_£     = @one_year_gas_per_floor_area_£ * @degree_day_adjustment
 
+    @per_floor_area_gas_£ = @last_year_£ / @school.floor_area
+    @per_floor_area_gas_benchmark_£ = @one_year_benchmark_floor_area_£ / @school.floor_area
+    @percent_difference_from_average_per_floor_area = percent_change(@per_floor_area_gas_benchmark_£, one_year_gas_per_floor_area_£)
+    @percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_floor_area, :relative_to_1)
+    @simple_percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_floor_area, :simple_relative_to_1)
+
+    @summary = summary_text
+
     set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil)
 
     # rating: benchmark value = 4.0, exemplar = 10.0
@@ -200,6 +233,12 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @bookmark_url = add_book_mark_to_base_url('AnnualGas')
   end
   alias_method :analyse_private, :calculate
+
+  def summary_text
+    FormatEnergyUnit.format(:£, @last_year_£, :text) + 'pa, ' +
+    FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_floor_area, :text) + ' ' +
+    @simple_percent_difference_adjective + ' average'
+  end
 
   private def dd_adj(asof_date)
     # overriden to full rather than 60% adjustment for storage heaters

@@ -15,6 +15,10 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :one_year_electricity_per_pupil_kwh, :one_year_electricity_per_pupil_£
   attr_reader :one_year_electricity_per_floor_area_kwh, :one_year_electricity_per_floor_area_£
 
+  attr_reader :per_pupil_electricity_benchmark_£
+  attr_reader :percent_difference_from_average_per_pupil, :percent_difference_adjective
+  attr_reader :simple_percent_difference_adjective, :summary
+
   def initialize(school)
     super(school, :annualelectricitybenchmark)
   end
@@ -97,6 +101,27 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     one_year_electricity_per_floor_area_£: {
       description: 'Per floor area annual electricity usage - £ - required for PH analysis, not alerts',
       units:  {£: :electricity}
+    },
+    per_pupil_electricity_benchmark_£: {
+      description: 'Per pupil annual electricity usage - £',
+      units:  {£: :electricity}
+    },
+    percent_difference_from_average_per_pupil: {
+      description: 'Percent difference from average',
+      units:  :relative_percent,
+      benchmark_code: 'pp%d'
+    },
+    percent_difference_adjective: {
+      description: 'Adjective relative to average: above, signifantly above, about',
+      units: String
+    },
+    simple_percent_difference_adjective:  {
+      description: 'Adjective relative to average: above, about, below',
+      units: String
+    },
+    summary: {
+      description: 'Description: £spend, adj relative to average',
+      units: String
     }
   }
 
@@ -139,6 +164,14 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
     set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), capital_cost)
 
+    @per_pupil_electricity_£ = @last_year_£ / @school.number_of_pupils
+    @per_pupil_electricity_benchmark_£ = @one_year_benchmark_by_pupil_£ / @school.number_of_pupils
+    @percent_difference_from_average_per_pupil = percent_change(@per_pupil_electricity_benchmark_£, one_year_electricity_per_pupil_£)
+    @percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
+    @simple_percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)
+
+    @summary = summary_text
+
     # rating: benchmark value = 4.0, exemplar = 10.0
     percent_from_benchmark_to_exemplar = (@last_year_kwh - @one_year_benchmark_by_pupil_kwh) / (@one_year_exemplar_by_pupil_kwh - @one_year_benchmark_by_pupil_kwh)
     uncapped_rating = percent_from_benchmark_to_exemplar * (10.0 - 4.0) + 4.0
@@ -150,6 +183,12 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @bookmark_url = add_book_mark_to_base_url('AnnualElectricity')
   end
   alias_method :analyse_private, :calculate
+
+  def summary_text
+    FormatEnergyUnit.format(:£, @last_year_£, :text) + 'pa, ' +
+    FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_pupil, :text) + ' ' +
+    @simple_percent_difference_adjective + ' average'
+  end
 
   def kwh(date1, date2, data_type = :kwh)
     amr_data = @school.aggregated_electricity_meters.amr_data

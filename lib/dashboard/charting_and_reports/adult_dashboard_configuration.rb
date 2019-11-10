@@ -78,8 +78,12 @@ class DashboardConfiguration
       ],
       promoted_variables: {
         AlertElectricityAnnualVersusBenchmark => { # need new electricity trend alert!
-          rating:         :rating,
-          last_year_£:    :last_year_£
+          rating:                               :rating,
+          last_year_£:                          :last_year_£,
+          percent_difference:                   :percent_difference_from_average_per_pupil,
+          percent_difference_adjective:         :percent_difference_adjective,
+          simple_percent_difference_adjective:  :simple_percent_difference_adjective,
+          summary:                              :summary
         }
       },
     },
@@ -163,8 +167,12 @@ class DashboardConfiguration
       ],
       promoted_variables: {
         AlertGasAnnualVersusBenchmark => { # need new gas trend alert!
-          rating:         :rating,
-          last_year_£:    :last_year_£
+          rating:                               :rating,
+          last_year_£:                          :last_year_£,
+          percent_difference:                   :percent_difference_from_average_per_floor_area,
+          percent_difference_adjective:         :percent_difference_adjective,
+          simple_percent_difference_adjective:  :simple_percent_difference_adjective,
+          summary:                              :summary
         }
       },
     },

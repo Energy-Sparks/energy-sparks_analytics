@@ -97,7 +97,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       units: String
     },
     summary: {
-      description: 'Description: £spend, adj relative to average',
+      description: 'Description: £spend/yr',
       units: String
     }
   }
@@ -161,9 +161,10 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   alias_method :analyse_private, :calculate
 
   private def summary_text
-    FormatEnergyUnit.format(:£, @last_year_£, :text) + 'pa, ' + 
-    FormatEnergyUnit.format(:percent, @percent_difference_from_average_per_pupil, :text) + ' ' +
-    @simple_percent_difference_adjective + ' average'
+    FormatEnergyUnit.format(:£, @last_year_£, :text) + 'pa'
+    # , ' + 
+    # FormatEnergyUnit.format(:percent, @percent_difference_from_average_per_pupil, :text) + ' ' +
+    # @simple_percent_difference_adjective + ' average'
   end
   
   private def calculate_alert(alert_class, asof_date)
