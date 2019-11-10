@@ -832,7 +832,8 @@ class GasLongTermTrend < DashboardChartAdviceBase
       <%= @body_start %>
         <p>
           Reducing gas consumption can be achieved by turning your school's thermostat down,
-          and by reducing out of hours usage.
+          reducing out of hours usage, insulating your buildings or installing a new more efficient
+          gas boiler.
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')

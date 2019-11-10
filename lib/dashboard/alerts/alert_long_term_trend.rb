@@ -1,6 +1,6 @@
 class AlertLongTermTrend < AlertAnalysisBase
   attr_reader :this_year_£, :last_year_£, :year_change_£
-  attr_reader :percent_change_£, :summary, :prefix
+  attr_reader :percent_change_£, :summary, :prefix_1, :prefix_2
 
   def initialize(school)
     super(school, :electricitylongtermtrend)
@@ -33,8 +33,12 @@ class AlertLongTermTrend < AlertAnalysisBase
         description: 'Change in £spend, relative to previous year',
         units: String
       },
-      prefix: {
+      prefix_1: {
         description: 'Change: up or down',
+        units: String
+      },
+      prefix_2: {
+        description: 'Change: increase or reduction',
         units: String
       }
     }
@@ -50,7 +54,8 @@ class AlertLongTermTrend < AlertAnalysisBase
     @last_year_£        = scalar.aggregate_value({ year: -1 }, fuel_type, :£)
     @year_change_£      = @this_year_£ - @last_year_£
     @percent_change_£   = @year_change_£ / @last_year_£
-    @prefix = @year_change_£ > 0 ? 'up' : 'down'
+    @prefix_1 = @year_change_£ > 0 ? 'up' : 'down'
+    @prefix_2 = @year_change_£ > 0 ? 'increase' : 'reduction'
     @summary            = summary_text
 
     @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_£)
@@ -60,8 +65,8 @@ class AlertLongTermTrend < AlertAnalysisBase
   alias_method :analyse_private, :calculate
 
   def summary_text
-    @prefix + ' ' +
-    FormatEnergyUnit.format(:£, @year_change_£, :text) + 'pa since last year, ' +
+    FormatEnergyUnit.format(:£, @year_change_£, :text) + 'pa ' +
+    @prefix_2 + ' since last year, ' +
     FormatEnergyUnit.format(:relative_percent, @percent_change_£, :text)
   end
 end

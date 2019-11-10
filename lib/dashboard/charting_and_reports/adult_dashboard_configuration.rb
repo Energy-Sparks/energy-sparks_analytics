@@ -115,7 +115,8 @@ class DashboardConfiguration
         AlertElectricityLongTermTrend => {
           rating:           :rating,
           year_change_£:    :year_change_£,
-          prefix:           :prefix,
+          prefix_1:           :prefix_1,
+          prefix_2:           :prefix_2,
           summary:          :summary
         }
       },
@@ -208,7 +209,8 @@ class DashboardConfiguration
         AlertGasLongTermTrend => {
           rating:           :rating,
           year_change_£:    :year_change_£,
-          prefix:           :prefix,
+          prefix_1:           :prefix_1,
+          prefix_2:           :prefix_2,
           summary:          :summary
         }
       },
