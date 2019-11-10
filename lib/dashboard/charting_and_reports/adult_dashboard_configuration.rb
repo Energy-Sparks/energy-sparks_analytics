@@ -7,6 +7,7 @@ class DashboardConfiguration
       electric_long_term_progress
       electric_recent_progress
       electric_intraday
+      solar_pv_group
     ],
     gas_group: %i[
       gas_annual
@@ -276,8 +277,6 @@ class DashboardConfiguration
       excel_worksheet_name:   'GasSeasonalControl',
       charts: %i[
         heating_on_off_by_week
-        group_by_week_gas
-        daytype_breakdown_gas
       ],
       promoted_variables: {
         AlertHeatingOnSchoolDays => {
@@ -347,7 +346,7 @@ class DashboardConfiguration
     solar_pv_group: {
       name:                   'Solar PV',
       content_class:           AdviceSolarPV,
-      excel_worksheet_name:   'StorageHeaters',
+      excel_worksheet_name:   'SolarPVS',
       charts: %i[
         solar_pv_group_by_month
         solar_pv_last_7_days_by_submeter

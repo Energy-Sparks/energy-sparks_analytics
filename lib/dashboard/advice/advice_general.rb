@@ -57,16 +57,6 @@ class AdviceStorageHeaters < AdviceElectricityBase
   end
 end
 
-class AdviceSolarPV < AdviceElectricityBase
-  def relevance
-    @school.solar_pv_panels? ? :relevant : :never_relevant
-  end
-
-  def rating
-    5.0
-  end
-end
-
 class AdviceCarbon < AdviceElectricityBase
   def relevance
     @school.gas? && @school.electricity? ? :relevant : :never_relevant

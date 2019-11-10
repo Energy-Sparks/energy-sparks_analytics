@@ -155,7 +155,7 @@ class MeterCollection
     report_groups.push(:hotwater_group)               unless heating_only?
     report_groups.push(:boiler_control_group)         unless non_heating_only?
     report_groups.push(:storage_heater_group)         if storage_heaters?
-    report_groups.push(:solar_pv_group)               if solar_pv_panels?
+    # now part of electricity report_groups.push(:solar_pv_group)               if solar_pv_panels?
     report_groups.push(:carbon_group)                 if electricity? && gas?
     report_groups.push(:energy_tariffs_group)         if false
     report_groups
