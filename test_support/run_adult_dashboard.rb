@@ -24,22 +24,11 @@ class RunAdultDashboard < RunCharts
   private def run_one_page(page, definition, control)
     puts "Running page #{page} has class #{definition.key?(:content_class)}"
 
-    puts definition
-
-    ap definition[:content_class].front_end_template_variables # front end variables
+    # ap definition[:content_class].front_end_template_variables # front end variables
 
     advice = definition[:content_class].new(@school)
-    puts "Strange: #{advice.class.name}"
 
     advice.calculate
-
-    puts "Items of front end content: #{advice.front_end_content.length}"
-    puts "Rating: #{advice.rating}"
-    puts "Title: #{advice.content[0]}"
-    puts "Relevance: #{advice.relevance}"
-
-    puts advice.rating if advice.respond_to?(:rating)
-    ap advice.front_end_template_data
 
     content = advice.content
 

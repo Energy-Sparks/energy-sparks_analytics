@@ -15,7 +15,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£, :out_of_hours_£
   attr_reader :daytype_breakdown_table
   attr_reader :percent_improvement_to_exemplar, :potential_saving_kwh, :potential_saving_£
-  attr_reader :total_annual_£
+  attr_reader :total_annual_£, :summary
 
   def initialize(school, fuel, benchmark_out_of_hours_percent,
                  fuel_cost, alert_type, bookmark, meter_definition,
@@ -97,6 +97,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
         units: :£,
         benchmark_code: 'esv£'
       },
+      summary: {
+        description: 'Description: £spend/yr, percent out of hours',
+        units: String
+      },
       daytype_breakdown_table: {
         description: 'Table broken down by school day in/out hours, weekends, holidays - kWh, percent, £ (annual)',
         units: :table,
@@ -155,6 +159,8 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
     set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil)
 
+    @summary = summary_text
+
     @rating = calculate_rating_from_range(good_out_of_hours_use_percent, bad_out_of_hours_use_percent, out_of_hours_percent)
 
     @significant_out_of_hours_use = @rating < 7.0
@@ -165,6 +171,11 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @bookmark_url = add_book_mark_to_base_url(@bookmark)
   end
   alias_method :analyse_private, :calculate
+
+  def summary_text
+    FormatEnergyUnit.format(:£, @out_of_hours_£, :text) + 'pa (' +
+    FormatEnergyUnit.format(:percent, @out_of_hours_percent, :text) + ' of annual cost) '
+  end
 
   def convert_breakdown_to_html_compliant_array(breakdown)
     html_table = []

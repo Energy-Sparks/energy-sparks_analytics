@@ -49,10 +49,7 @@ class DashboardConfiguration
           last_year_£:                          :last_year_£,
           last_year_kwh:                        :last_year_kwh,
           last_year_co2:                        :last_year_co2,
-          # difference_from_average:              :percent_difference_from_average_per_pupil,
-          # percent_difference_adjective:         :percent_difference_adjective,
-          # simple_percent_difference_adjective:  :simple_percent_difference_adjective,
-          # summary:                              :summary
+          summary:                              :summary
         },
         AlertGasAnnualVersusBenchmark         => { gas_rating: :rating, gas_last_year_£: :last_year_£ },
         AlertElectricityAnnualVersusBenchmark => { 
@@ -97,8 +94,10 @@ class DashboardConfiguration
       ],
       promoted_variables: {
         AlertOutOfHoursElectricityUsage => {
-          rating:         :rating,
-          out_of_hours_£: :out_of_hours_£
+          rating:                 :rating,
+          out_of_hours_£:         :out_of_hours_£,
+          out_of_hours_percent:   :out_of_hours_percent,
+          summary:                :summary
         }
       },
     },
@@ -186,8 +185,10 @@ class DashboardConfiguration
       ],
       promoted_variables: {
         AlertOutOfHoursGasUsage => {
-          rating:         :rating,
-          out_of_hours_£: :out_of_hours_£
+          rating:                 :rating,
+          out_of_hours_£:         :out_of_hours_£,
+          out_of_hours_percent:   :out_of_hours_percent,
+          summary:                :summary
         }
       },
     },

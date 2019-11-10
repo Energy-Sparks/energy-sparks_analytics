@@ -54,8 +54,8 @@ class AlertAnalysisBase < ContentBase
     rescue StandardError => e
       @calculation_worked = false
       logger.warn e.message
-      puts "Got here 2: #{e.message}"
-      puts "Got here 2: ", e.backtrace.join("\n")
+      puts "Analysis base: #{e.message}"
+      puts "Analysis base: ", e.backtrace.join("\n")
       logger.warn e.backtrace
     end
   end

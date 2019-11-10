@@ -299,7 +299,6 @@ end
             <th scope="col" class="text-center">kWh &#47; year </th>
             <th scope="col" class="text-center">&pound; &#47;year </th>
             <th scope="col" class="text-center">CO2 kg &#47;year </th>
-            <th scope="col" class="text-center">Library Books &#47;year </th>
             <th scope="col" class="text-center">Percent </th>
           </tr>
         </thead>
@@ -316,7 +315,6 @@ end
                 <td class="text-right"><%= YAxisScaling.convert(units, :£, fuel_type, val) %></td>
               <% end %>
               <td class="text-right"><%= YAxisScaling.convert(units, :co2, fuel_type, val) %></td>
-              <td class="text-right"><%= YAxisScaling.convert(units, :library_books, fuel_type, val) %></td>
               <td class="text-right"><%= percent(pct) %></td>
             </tr>
           <% end %>
@@ -327,7 +325,6 @@ end
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :kwh, fuel_type, total) %></b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :£, fuel_type, total) %></b></td>
               <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :co2, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :library_books, fuel_type, total) %></b></td>
               <td></td>
             </tr>
           <% end %>
@@ -751,6 +748,9 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
       <p>
+        This the breakdown for the most recent year:
+      </p>
+      <p>
       <%= table_info %>
       </p>
       <% if @school.storage_heaters? %>
@@ -1157,6 +1157,7 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
       <% if @add_extra_markup %>
         <body>
       <% end %>
+        <h2> Your <%= @fuel_type_str %> usage by day of the week </h2>
         <p>
           The graph below shows your <%= @fuel_type_str %> use broken down by
           day of the week over the last year:

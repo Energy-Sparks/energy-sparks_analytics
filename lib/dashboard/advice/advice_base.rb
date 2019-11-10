@@ -126,7 +126,6 @@ class AdviceBase < ContentBase
   end
 
   def promote_data
-    ap self.class.config
     self.class.config[:promoted_variables].each do |alert_class, variables|
       alert = alert_class.new(@school)
       alert.analyse(alert_asof_date, true)
