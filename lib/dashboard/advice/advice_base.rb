@@ -62,6 +62,8 @@ class AdviceBase < ContentBase
     charts_and_html.push( { type: :title, content: self.class.config[:name] } )
     charts_and_html.push( { type: :analytics_html, content: "<h2>#{self.class.config[:name]}</h2>" } )
     charts_and_html.push( { type: :analytics_html, content: "<h3>Rating: #{rating}</h3>" } )
+    charts_and_html.push( { type: :analytics_html, content: "<h3>Valid: #{valid_alert?}</h3>" } )
+    charts_and_html.push( { type: :analytics_html, content: "<h3>Make available to users: #{make_available_to_users?}</h3>" } )
     charts_and_html.push( { type: :analytics_html, content: template_data_html } )
 
     charts.each do |chart|

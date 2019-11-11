@@ -1682,7 +1682,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         <li>Frost protection is configured for your school and</li>
         <li>whether it is configured correctly and running efficiently</li>
         </ol>
-        <p>You can check another frosty f=weekend by clicking the move forward/back frosty day buttons</p>
+        <p>You can check another frosty weekend by clicking the move forward/back frosty day buttons</p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')

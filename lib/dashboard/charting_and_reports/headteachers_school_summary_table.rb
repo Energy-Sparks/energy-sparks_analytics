@@ -102,8 +102,6 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     end
   end
 
-
-
   def difference_to_exemplar_£(actual_£, fuel_type)
     return nil if actual_£.nil?
     examplar = BenchmarkMetrics.exemplar_£(@school, fuel_type)

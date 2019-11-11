@@ -201,8 +201,10 @@ class RunTests
   end
 
   def run_adult_dashboard(control)
-    @school_list.each do |school_name|
+    @school_list.sort.each do |school_name|
       school = load_school(school_name)
+      puts "=" * 100
+      puts "Running for #{school_name}"
       test = RunAdultDashboard.new(school)
       test.run_flat_dashboard(control)
     end

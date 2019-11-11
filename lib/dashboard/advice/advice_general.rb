@@ -23,7 +23,6 @@ class AdviceBenchmark   < AdviceBase
 end
 class AdviceElectricityOutHours < AdviceElectricityBase; end
 class AdviceElectricityLongTerm < AdviceElectricityBase; end
-class AdviceElectricityRecent < AdviceElectricityBase; end
 class AdviceElectricityIntraday < AdviceElectricityBase
   def rating
     5.0
@@ -31,7 +30,6 @@ class AdviceElectricityIntraday < AdviceElectricityBase
 end
 
 class AdviceGasLongTerm < AdviceGasBase; end
-class AdviceGasRecent < AdviceGasBase; end
 class AdviceGasIntraday < AdviceGasBase
   def rating
     5.0

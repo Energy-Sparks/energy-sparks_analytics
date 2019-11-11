@@ -136,6 +136,7 @@ class DashboardConfiguration
         intraday_line_school_last7days
         baseload_lastyear
       ],
+=begin
       promoted_variables: {
         AlertSchoolWeekComparisonElectricity => {
           rating:             :rating,
@@ -147,6 +148,7 @@ class DashboardConfiguration
           summary:            :summary
         }
       },
+=end
     },
     electric_intraday: {
       name:                   'Electricity: intraday',
@@ -238,6 +240,7 @@ class DashboardConfiguration
         last_2_weeks_gas_degreedays
         last_4_weeks_gas_temperature_compensated
       ],
+=begin
       promoted_variables: {
         AlertSchoolWeekComparisonGas => {
           rating:             :rating,
@@ -249,6 +252,7 @@ class DashboardConfiguration
           summary:            :summary
         }
       },
+=end
     },
     gas_intraday: {
       name:                   'Gas: intraday',

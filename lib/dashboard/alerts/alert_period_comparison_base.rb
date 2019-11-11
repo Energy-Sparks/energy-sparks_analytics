@@ -180,7 +180,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   end
 
   private def summary_text
-    FormatEnergyUnit.format(:£, @difference_£, :text) + 'pa ' +
+    FormatEnergyUnit.format(:£, @difference_£, :text) + ' ' +
     @prefix_2 + ' since last ' + period_type + ', ' +
     FormatEnergyUnit.format(:relative_percent, @difference_percent, :text)
   end
