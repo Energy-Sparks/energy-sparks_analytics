@@ -574,7 +574,8 @@ private
   def intraday_breakdown(meter, date, data_type)
     if @cached_weighted_open_x48.nil?
       # fudge: override start time if storage heater: TODO(PH, 30Oct2019) move to specialised Meter class
-      start_time = meter.meter_type == :storage_heater ? TimeOfDay.new(0, 0) : @meter_collection.open_time
+      # start_time = meter.meter_type == :storage_heater ? TimeOfDay.new(0, 0) : @meter_collection.open_time
+      start_time = @meter_collection.open_time
       open_time = start_time..@meter_collection.close_time
       @cached_weighted_open_x48 = DateTimeHelper.weighted_x48_vector_multiple_ranges([open_time])
     end
