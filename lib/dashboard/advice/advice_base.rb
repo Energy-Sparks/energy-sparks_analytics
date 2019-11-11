@@ -55,16 +55,22 @@ class AdviceBase < ContentBase
     content.select { |segment| %i[html chart_name title].include?(segment[:type]) }
   end
 
+  def debug_content
+    [
+      { type: :analytics_html, content: "<h2>#{self.class.config[:name]}</h2>" },
+      { type: :analytics_html, content: "<h3>Rating: #{rating}</h3>" },
+      { type: :analytics_html, content: "<h3>Valid: #{valid_alert?}</h3>" },
+      { type: :analytics_html, content: "<h3>Make available to users: #{make_available_to_users?}</h3>" },
+      { type: :analytics_html, content: template_data_html }
+    ]
+  end
+
   def content
     charts_and_html = []
 
     charts_and_html.push( { type: :analytics_html, content: '<hr>' } )
     charts_and_html.push( { type: :title, content: self.class.config[:name] } )
-    charts_and_html.push( { type: :analytics_html, content: "<h2>#{self.class.config[:name]}</h2>" } )
-    charts_and_html.push( { type: :analytics_html, content: "<h3>Rating: #{rating}</h3>" } )
-    charts_and_html.push( { type: :analytics_html, content: "<h3>Valid: #{valid_alert?}</h3>" } )
-    charts_and_html.push( { type: :analytics_html, content: "<h3>Make available to users: #{make_available_to_users?}</h3>" } )
-    charts_and_html.push( { type: :analytics_html, content: template_data_html } )
+    charts_and_html += debug_content
 
     charts.each do |chart|
       begin

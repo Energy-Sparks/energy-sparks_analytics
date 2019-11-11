@@ -66,7 +66,7 @@ class DashboardChartAdviceBase
       ElectricityLongTermTrend.new(school, chart_definition, chart_data, chart_symbol)
     when :gas_longterm_trend
       GasLongTermTrend.new(school, chart_definition, chart_data, chart_symbol)
-    when :teachers_landing_page_electricity
+    when :adult_dashboard_drilldown_last_2_weeks_electricity_comparison
       ElectricityShortTermTrend.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_electricity
       ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)

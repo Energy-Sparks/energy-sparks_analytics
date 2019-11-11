@@ -132,7 +132,7 @@ class DashboardConfiguration
       content_class:           AdviceElectricityRecent,
       excel_worksheet_name:   'ElectricRecent',
       charts: %i[
-        teachers_landing_page_electricity
+        adult_dashboard_drilldown_last_2_weeks_electricity_comparison
         intraday_line_school_last7days
         baseload_lastyear
       ],
@@ -359,9 +359,7 @@ class DashboardConfiguration
       charts: %i[
         solar_pv_group_by_month
         solar_pv_last_7_days_by_submeter
-      ],
-      promoted_variables: {
-      },
+      ]
     },
     carbon: {
       name:                   'Carbon',

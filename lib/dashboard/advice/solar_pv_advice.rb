@@ -1,6 +1,6 @@
 class AdviceSolarPV < AdviceElectricityBase
+  attr_reader :summary
   def relevance
-    puts "QQQQQQ" * 1000
     @school.aggregated_electricity_meters.nil? ? :never_relevant : :relevant
   end
 
@@ -12,14 +12,23 @@ class AdviceSolarPV < AdviceElectricityBase
     @pv_benefit_alert ||= AlertSolarPVBenefitEstimator.new(@school)
   end
 
+  def self.template_variables
+    { 'Summary' => { summary: { description: 'benefit of existing or potential pv summary', units: String } } }
+  end
+
   def content
     @school.solar_pv_panels? ? super : solar_pv_benefit_content
+  end
+
+  def summary
+    @school.solar_pv_panels? ? summarise_existing_panels_benefit : summarise_potential_benefits
   end
 
   def solar_pv_benefit_content
     pv_benefit_estimator.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
     charts_and_html = []
     charts_and_html.push( { type: :html, content: '<h2>Benefits of installing solar PV</h2>' } )
+    charts_and_html += debug_content
     charts_and_html.push( { type: :html, content: introduction } )
     charts_and_html.push( { type: :html, content: table_intro } )
     charts_and_html.push( { type: :html, content: pv_benefit_estimator.solar_pv_scenario_table_html } )
@@ -28,11 +37,28 @@ class AdviceSolarPV < AdviceElectricityBase
     charts_and_html
   end
 
+  def summarise_existing_panels_benefit
+    saving = FormatEnergyUnit.format(:percent, calculate_existing_pv_panel_benefit, :text)
+    "Reduced your mains electricity consumption by #{saving} last year"
+  end
+
+  def summarise_potential_benefits
+    # not ideal, fishing out a numbered column from a table
+    min_saving = FormatEnergyUnit.format(:percent, pv_benefit_estimator.solar_pv_scenario_table.first[6], :text)
+    max_saving = FormatEnergyUnit.format(:percent, pv_benefit_estimator.solar_pv_scenario_table.last[6],  :text)
+    "Installing solar pv would reduce your electricity consumption between #{min_saving} and #{max_saving}"
+  end
+
   def rating
     5.0
   end
 
   private
+
+  def calculate_existing_pv_panel_benefit
+    solar_pv_profit_loss = SolarPVProfitLoss.new(@school)
+    solar_pv_profit_loss.annual_saving_from_solar_pv_percent
+  end
 
   def introduction
     %{

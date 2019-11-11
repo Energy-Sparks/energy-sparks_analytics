@@ -1489,6 +1489,11 @@ class ChartManager
       meter_definition: :allelectricity,
       inherits_from:    :teachers_landing_page_gas
     },
+    adult_dashboard_drilldown_last_2_weeks_electricity_comparison: {
+      name:             'Comparison of last 2 school weeks electricity consumption',
+      inherits_from:    :teachers_landing_page_electricity,
+      timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }],
+    },
     alert_week_on_week_electricity_daily_electricity_comparison_chart: {
       # used by short term change alert
       inherits_from:    :teachers_landing_page_electricity
