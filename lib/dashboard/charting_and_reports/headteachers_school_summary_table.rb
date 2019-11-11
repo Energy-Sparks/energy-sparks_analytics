@@ -13,6 +13,10 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     true
   end
 
+  def rating
+    5.0
+  end
+
   def self.header_html
     [
       '',
