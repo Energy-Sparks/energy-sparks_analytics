@@ -9,6 +9,10 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     @rating = nil
   end
 
+  def valid_alert?
+    true
+  end
+
   def self.header_html
     [
       '',
