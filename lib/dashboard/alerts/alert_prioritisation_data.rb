@@ -53,7 +53,7 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
       benchmark_code: 'area'
     },
     urn: {
-      desciption: 'School URN',
+      description: 'School URN',
       units:  Integer,
       benchmark_code: 'urn'
     },

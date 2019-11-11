@@ -13,15 +13,15 @@ class AdviceRecentChangeBase < AdviceElectricityBase
 
   TEMPLATE_VARIABLES = {
     rating: {
-      desciption: 'Rating out of 10',
+      description: 'Rating out of 10',
       units:  Float
     },
     percentage_change: {
-      desciption: 'percent change between last 4 weeks and previous 4 weeks',
+      description: 'percent change between last 4 weeks and previous 4 weeks',
       units:  :relative_perent
     },
     difference_per_week_£: {
-      desciption: 'change in average weekly usage between last 4 weeks and previous 4 weeks',
+      description: 'change in average weekly usage between last 4 weeks and previous 4 weeks',
       units:  :£
     },
     prefix_1: {

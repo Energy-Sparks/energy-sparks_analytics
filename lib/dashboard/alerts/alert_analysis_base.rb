@@ -87,29 +87,29 @@ class AlertAnalysisBase < ContentBase
 
   TEMPLATE_VARIABLES = {
     relevance: {
-      desciption: 'Relevance of a alert to a school at this point in time',
+      description: 'Relevance of a alert to a school at this point in time',
       units:  :relevance
     },
     analysis_date: {
-      desciption: 'Latest date on which the alert data is based',
+      description: 'Latest date on which the alert data is based',
       units:  Date
     },
     status: {
-      desciption: 'Status: good, bad, failed',
+      description: 'Status: good, bad, failed',
       units:  Symbol
     },
     rating: {
-      desciption: 'Rating out of 10',
+      description: 'Rating out of 10',
       units:  Float,
       priority_code:  'RATE',
       benchmark_code: 'ratg'
     },
     term: {
-      desciption: 'long term or short term',
+      description: 'long term or short term',
       units:  Symbol
     },
     bookmark_url: {
-      desciption: 'Link to help URL',
+      description: 'Link to help URL',
       units:  String
     },
     max_asofdate: {
@@ -133,7 +133,7 @@ class AlertAnalysisBase < ContentBase
       units: String
     },
     urn: {
-      desciption: 'School URN',
+      description: 'School URN',
       units:  Integer
     },
     one_year_saving_£: {
