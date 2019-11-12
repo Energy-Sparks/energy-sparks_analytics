@@ -203,7 +203,7 @@ class Aggregator
   end
 
   # for a chart_config e.g. :  {[ timescale: [ { schoolweek: 0 } , { schoolweek: -1 }, adjust_by_temperature:{ schoolweek: 0 } }
-  # copy the correpsonding temperatures from the :adjust_by_temperature onto all the corresponding :timescale periods
+  # copy the corresponding temperatures from the :adjust_by_temperature onto all the corresponding :timescale periods
   # into a [date] => temperature hash
   # this allows in this example, for examples for all mondays to be compensated to the temperature of {schoolweek: 0}
   private def temperature_compensation_temperature_map(school, chart_config_original)

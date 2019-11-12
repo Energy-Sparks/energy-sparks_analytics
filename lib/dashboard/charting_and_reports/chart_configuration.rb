@@ -225,6 +225,53 @@ class ChartManager
       ]
 =end
     },
+    activities_school_day_electricity_cost: {
+      name:               'School day electricity cost',
+      timescale:          [{ schoolday: 0 }],
+      x_axis:             :datetime,
+      meter_definition:   :allelectricity,
+      yaxis_units:        :£,
+      series_breakdown:   :daytype,
+      chart1_type:        :column,
+      chart1_subtype:     :stacked,
+    },
+    activities_school_day_gas_cost: {
+      inherits_from:      :activities_school_day_electricity_cost,
+      name:               'School day gas cost',
+      meter_definition:   :allheat
+    },
+    activities_weekend_day_electricity_cost: {
+      inherits_from:      :activities_school_day_electricity_cost,
+      timescale:          [{ weekendday: 0 }],
+      name:               'Weekend day electricity cost',
+    },
+    activities_weekend_day_gas_cost: {
+      inherits_from:      :activities_weekend_day_electricity_cost,
+      name:               'Weekend day gas cost',
+      meter_definition:   :allheat
+    },
+    activities_14_days_daytype_electricity_cost: {
+      inherits_from:      :activities_school_day_electricity_cost,
+      timescale:          [{ day: -13..0 }],
+      x_axis:             :day,
+      x_axis_reformat:    { date: '%a %d %b %Y' },
+      name:               'Last 14 days electricity costs',
+    },
+    activities_14_days_daytype_gas_cost: {
+      inherits_from:      :activities_2_weeks_daytype_electricity_cost,
+      name:               'Last 14 days gas costs',
+      meter_definition:   :allheat
+    },
+    activities_2_weeks_daytype_electricity_cost: {
+      inherits_from:      :activities_14_days_daytype_electricity_cost,
+      timescale:          [{ workweek: -1..0 }],
+      name:               'Last 2 weeks electricity costs',
+    },
+    activities_2_weeks_daytype_gas_cost: {
+      inherits_from:      :activities_2_weeks_daytype_electricity_cost,
+      name:               'Last 2 weeks gas costs',
+      meter_definition:   :allheat
+    },
     storage_heater_intraday_current_year: {
       name:               'Storage heater power consumption',
       inherits_from:      :gas_heating_season_intraday,

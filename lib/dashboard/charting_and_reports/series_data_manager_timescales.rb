@@ -38,6 +38,8 @@ class PeriodsBase
       workweek:       WorkWeekPeriods,
       schoolweek:     SchoolWeekPeriods,
       day:            DayPeriods,
+      schoolday:      SchoolDayPeriods,
+      weekendday:     WeekendDayPeriods,
       frostday:       FrostDayPeriods,
       frostday_3:     FrostDay3Periods,
       diurnal:        DiurnalPeriods,
@@ -226,6 +228,32 @@ class DayPeriods < WeekPeriods
     end_date = final_meter_date - offset.magnitude
     start_date = end_date
     new_school_period(start_date, end_date)
+  end
+end
+
+class SchoolDayPeriods < DayPeriods
+  protected def calculate_period_from_offset(offset)
+    check_offset(offset)
+    schoolday_count = 0
+    @last_meter_date.downto(@first_meter_date) do |date|
+      if @meter_collection.holidays.occupied?(date) 
+        return new_school_period(date, date) if schoolday_count == offset
+        schoolday_count -= 1
+      end
+    end
+  end
+end
+
+class WeekendDayPeriods < DayPeriods
+  protected def calculate_period_from_offset(offset)
+    check_offset(offset)
+    weekendday_count = 0
+    @last_meter_date.downto(@first_meter_date) do |date|
+      if @meter_collection.holidays.weekend?(date) 
+        return new_school_period(date, date) if weekendday_count == offset
+        weekendday_count -= 1
+      end
+    end
   end
 end
 

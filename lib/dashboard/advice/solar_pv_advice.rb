@@ -68,7 +68,7 @@ class AdviceSolarPV < AdviceElectricityBase
         your school&apos;s electricity consumption through energy efficiency rather than an alternative.
         Economically, following the removal of subsidies from solar panels it might take
         between 10 and 15 years to payback the capital costs of installing solar panels, but
-        PTAs will often be prepared to raise some of the capital costs making it more economi for schools.
+        PTAs will often be prepared to raise some of the capital costs making it more economic for schools.
       <p>
     }
   end
@@ -77,7 +77,7 @@ class AdviceSolarPV < AdviceElectricityBase
     %{
       <p>
         The table below provides estimates of the potential benefits and costs of
-        installing different quanitities of solar pv panels at your school:
+        installing different quantities of solar pv panels at your school:
       <p>
     }
   end
@@ -88,10 +88,10 @@ class AdviceSolarPV < AdviceElectricityBase
         The table contains a range of capacities, calculated using half hourly electricity
         meter data from your school and real solar pv data for your locality for the last year
         to produce a reasonable estimate of the potential for solar pv to reduce your
-        main consumption. Energy Sparks has also estimated that installing
-        <%= FormatEnergyUnit.format(:kwp, pv_benefit_estimator.optimum_kwp, :html) %> you get the
-        best payback, however, normally it the payback is relatively insensitive to
-        the installed solar pv capacity.
+        main consumption. Energy Sparks has estimated that installing
+        <%= FormatEnergyUnit.format(:kwp, pv_benefit_estimator.optimum_kwp, :html) %> provides the
+        best payback. However, installing slightly more or less than the best payback
+        makes little difference to the economics.
       <p>
     }
     ERB.new(text).result(binding)
@@ -117,7 +117,7 @@ class AdviceSolarPV < AdviceElectricityBase
         <li>
           The estimates assume your have roof space and that is it roughly
           south facing - as this is optimal for schools whose peak demand is
-          during the middle of the day when south facing panels produce most electricity.
+          during the middle of the day when south facing panels produce the most electricity.
         </li>
         <li>
           The benefits of your solar pv will be reduced if you make your school more energy efficient.
