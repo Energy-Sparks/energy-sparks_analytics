@@ -24,7 +24,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
       'Annual Cost (&pound;)',
       '&percnt; change from previous year',
       '&percnt; change in last 4 weeks',
-      'Energy saving if you matched the most efficient_schools (&pound;)'
+      'Energy saving if you matched the most efficient schools (&pound;)'
     ] 
   end
 
