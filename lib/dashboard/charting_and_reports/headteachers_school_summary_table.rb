@@ -42,7 +42,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
       description: 'Summary of annual per fuel consumption, annual change, 4 week change, saving to exemplar',
       units:          :table,
       header:         header_text,
-      column_types:   %i[fuel_type kwh £ percent percent £] # needs to be kept in sync with instance table
+      column_types:   %i[fuel_type kwh £ relative_percent relative_percent £] # needs to be kept in sync with instance table
     }
   }
 
