@@ -14,6 +14,11 @@ class ScalarkWhCO2CostValues
     aggregation_configuration(time_scale, fuel_type, data_type, override)
   end
 
+  def aggregate_value_with_dates(time_scale, fuel_type, data_type = :kwh, override = nil)
+    check_data_available_for_fuel_type(fuel_type)
+    aggregation_configuration(time_scale, fuel_type, data_type, override, true)
+  end
+
   def day_type_breakdown(time_scale, fuel_type, data_type = :kwh, format_data = false, percent = false)
     aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, {series_breakdown: :daytype})
     extract_data_from_chart_calculation_result(aggregator, percent, data_type, format_data)
@@ -29,9 +34,11 @@ class ScalarkWhCO2CostValues
     data
   end
 
-  private def aggregation_configuration(time_scale, fuel_type, data_type, override = nil)
-    aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, override)
-    aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
+  private def aggregation_configuration(time_scale, fuel_type, data_type, override = nil, with_dates = false)
+    aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, override)   
+    dates = aggregator.x_axis_bucket_date_ranges if with_dates
+    value = aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
+    with_dates ? [value, dates[0][0], dates[0][1]] : value
   end
 
   private def generic_aggregation_calculation(time_scale, fuel_type, data_type, override = nil)

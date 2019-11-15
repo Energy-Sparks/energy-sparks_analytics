@@ -28,7 +28,7 @@ class EnergyConversions
     basic_unit = [:kwh, :co2, :£].include?(convert_to)
     raise EnergySparksUnexpectedStateException.new('Expecting 2nd parameter to be same as first for kwh, co2 or £') if basic_unit && convert_to != kwh_co2_or_£
     conversion = basic_unit ? 1.0 : EnergyEquivalences::ENERGY_EQUIVALENCES[convert_to][:conversions][kwh_co2_or_£][:rate]
-    kwh = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, :kwh)
+    kwh, date1, date2 = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value_with_dates(time_period, meter_type, :kwh)
     value = kwh_co2_or_£ == :kwh ? kwh : ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, kwh_co2_or_£)
     equivalence = value / conversion
 
@@ -44,7 +44,9 @@ class EnergyConversions
       formatted_via_units_value:    FormatEnergyUnit.format(kwh_co2_or_£, value),
       conversion:                   conversion,
       conversion_factor:            value / kwh,
-      via:                          kwh_co2_or_£
+      via:                          kwh_co2_or_£,
+      from_date:                    date1,
+      to_date:                      date2
     }
   end
 

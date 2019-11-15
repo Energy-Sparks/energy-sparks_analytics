@@ -75,8 +75,8 @@ class HeadTeachersSchoolSummaryTable < ContentBase
       fuel_type:          { data: fuel_type.to_s.humanize.capitalize,       units: :fuel_type },
       this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: :kwh },
       this_year_£:        { data: last_2_years_comparison[:current_£],      units: :£ },
-      change_years:       { data: last_2_years_comparison[:percent_change], units: :percent },
-      change_4_weeks:     { data: last_4_week_comparison[:percent_change],  units: :percent },
+      change_years:       { data: last_2_years_comparison[:percent_change], units: :relative_percent },
+      change_4_weeks:     { data: last_4_week_comparison[:percent_change],  units: :relative_percent },
       examplar_benefit:   { data: difference,                               units: :£ }
     }
   end
