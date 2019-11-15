@@ -56,7 +56,7 @@ class AdviceRecentChangeBase < AdviceElectricityBase
   end
 
   def summary_text
-    FormatEnergyUnit.format(:£, @difference_per_week_£, :text) +
+    FormatEnergyUnit.format(:£, @difference_per_week_£, :text) + ' ' +
     @prefix_2 + ' in weekly consumption since 4 weeks ago, ' +
     '(' + FormatEnergyUnit.format(:relative_percent, @percentage_change, :text) + ')'
   end
