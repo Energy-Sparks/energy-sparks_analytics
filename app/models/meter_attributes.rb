@@ -118,7 +118,16 @@ class MeterAttributes
     # ==============================Freshford=============================
     67095200  => { # gas kitchen
       function: [ :kitchen_only ],
-      reason: 'Freshford no longer has gas heating - PH 1 Aug 2019'
+      reason: 'Freshford no longer has gas heating - PH 1 Aug 2019',
+      meter_corrections: [
+        {
+          set_missing_data_to_zero: {
+            start_date: Date.new(2019, 2, 18),
+            end_date:   Date.new(2019, 2, 22),
+            reason:     'switched from gas to electric heating, validaiton was substituting holiday from previous gassy year: PH 16Nov2019'
+          }
+        }
+      ]
     },
     # ==============================Frome College============================
     2000027481429 => {
