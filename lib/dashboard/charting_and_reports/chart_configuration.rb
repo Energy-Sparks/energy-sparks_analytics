@@ -199,14 +199,16 @@ class ChartManager
       yaxis_units:      :£
     },
     storage_heater_group_by_week: {
-      name:               'Information on your school’s storage heater electricity consumption',
-      inherits_from:      :group_by_week_electricity,
-      meter_definition:   :storage_heater_meter,
-      y2_axis:            :degreedays
+      name:                 'Information on your school’s storage heater electricity consumption',
+      inherits_from:        :group_by_week_electricity,
+      meter_definition:     :storage_heater_meter,
+      replace_series_label: [['School Day Closed', 'Storage heater charge (school day)']],
+      y2_axis:              :degreedays
     },
     storage_heater_by_day_of_week: {
       name:               'Storage heater usage by day of the week',
       inherits_from:      :gas_by_day_of_week,
+      replace_series_label: [['School Day Closed', 'Storage heater charge (school day)']],
       meter_definition:   :storage_heater_meter
     },
     storage_heater_group_by_week_long_term: {

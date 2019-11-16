@@ -88,6 +88,8 @@ class Aggregator
 
     humanize_legend if humanize_legend?
 
+    relabel_legend if relabel_legend?
+
     aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
@@ -428,6 +430,16 @@ class Aggregator
     end
   end
 
+  def relabel_legend
+    @chart_config[:replace_series_label].each do |substitute_pair|
+      @bucketed_data.keys.each do |series_name|
+        new_series_name = series_name.gsub(substitute_pair[0], substitute_pair[1])
+        @bucketed_data[new_series_name] = @bucketed_data.delete(series_name)
+        @bucketed_data_count[new_series_name] = @bucketed_data_count.delete(series_name)
+      end
+    end
+  end
+
   def aggregate_period(chart_config)
     @series_manager = SeriesDataManager.new(@meter_collection, chart_config)
     @series_names = @series_manager.series_bucket_names
@@ -581,6 +593,10 @@ class Aggregator
 
   def add_daycount_to_legend?
     @chart_config.key?(:add_day_count_to_legend) && @chart_config[:add_day_count_to_legend]
+  end
+
+  def relabel_legend?
+    @chart_config.key?(:replace_series_label) && @chart_config[:replace_series_label]
   end
 
   def humanize_legend?
