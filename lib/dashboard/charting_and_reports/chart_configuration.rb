@@ -227,6 +227,17 @@ class ChartManager
       ]
 =end
     },
+    adhoc_test_chart: {
+      name:               'Adhoc chart test',
+      timescale:          [{ day: 0 }],
+      x_axis:             :datetime,
+      meter_definition:   :allheat,
+      yaxis_units:        :kwh,
+      series_breakdown:   :daytype,
+      chart1_type:        :column,
+      chart1_subtype:     :stacked,
+      asof_date:          Date.new(2019, 2, 18)
+    },
     activities_school_day_electricity_cost: {
       name:               'School day electricity cost',
       timescale:          [{ schoolday: 0 }],

@@ -1142,6 +1142,9 @@ class ThermostaticAdvice < HeatingAnalysisBase
 
     url = 'http://blog.minitab.com/blog/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit'.freeze
     footer_template = %{
+      <% if @school.non_heating_only? %>
+        <p>Our records suggest your school doesn&apos;t use gas for heating, so the above chart and advice is for information only.</p>
+      <% else %>
         <p>
           One measure of how well the thermostatic control at the school is working is
           the mathematical value R<sup>2</sup>
@@ -1179,6 +1182,7 @@ class ThermostaticAdvice < HeatingAnalysisBase
             is more complicated than the one used by the chart, and if expressed in the chart would make it
             more difficult to read.
         </p>
+      <%end %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
