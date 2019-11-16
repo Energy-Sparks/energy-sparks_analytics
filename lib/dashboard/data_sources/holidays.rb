@@ -315,7 +315,7 @@ class Holidays
       return acy_years if previous_summer_hol.end_date < start_date
 
       year_name = previous_summer_hol.end_date.year.to_s + '/' + last_summer_hol.start_date.year.to_s
-      AcademicYear.new(previous_summer_hol.end_date + 1, last_summer_hol.end_date)
+      AcademicYear.new(previous_summer_hol.end_date + 1, last_summer_hol.end_date, self)
       acy_years.push(AcademicYear.new(previous_summer_hol.end_date + 1, last_summer_hol.end_date, @holidays))
 
       last_summer_hol = previous_summer_hol
@@ -354,11 +354,12 @@ class Holidays
   class AcademicYear < SchoolDatePeriod
     include Logging
 
-    attr_reader :holidays_in_year
+    # attr_reader :holidays_in_year
     def initialize(start_date, end_date, full_holiday_schedule)
       year_name = start_date.year.to_s + '/' + end_date.year.to_s
       super(:academic_year, year_name, start_date, end_date)
-      @holidays_in_year = find_holidays_in_year(full_holiday_schedule)
+      # commented out 16Nov2019 by PH to get equivalences working
+      # @holidays_in_year = find_holidays_in_year(full_holiday_schedule)
     end
 
     def find_holidays_in_year(full_holiday_schedule)
