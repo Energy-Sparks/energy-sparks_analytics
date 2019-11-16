@@ -71,7 +71,7 @@ class ChartManager
     if !chart_config[:x_axis].nil? && !%i[day datetime dayofweek intraday nodatebuckets datetime].include?(chart_config[:x_axis])
       chart_config[:x_axis_reformat] = { date: '%d %b %Y' }
     elsif !chart_config[:x_axis].nil? && %i[day].include?(chart_config[:x_axis])
-      chart_config[:x_axis_reformat] = { date: '%a %d %b %Y' }
+      chart_config[:x_axis_reformat] = { date: '%A %d %b %Y' }
     elsif chart_config.key?(:x_axis_reformat)
       chart_config.delete(:x_axis_reformat)
     end
