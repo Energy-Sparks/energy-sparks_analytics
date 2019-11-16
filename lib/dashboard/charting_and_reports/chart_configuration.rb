@@ -1029,7 +1029,7 @@ class ChartManager
       chart1_type:      :line,
       series_breakdown: :baseload,
       meter_definition: :allelectricity,
-      timescale:        :year,
+      timescale:        :up_to_a_year,
       x_axis:           :day,
       yaxis_units:      :kw,
       yaxis_scaling:    :none

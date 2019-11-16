@@ -30,6 +30,7 @@ class PeriodsBase
   def self.period_factory(chart_config, meter_collection, first_meter_date, last_meter_date)
     classes = {
       year:           YearPeriods,
+      up_to_a_year:   UpToAYearPeriods,
       academicyear:   AcademicYearsPeriod,
       month:          MonthPeriods,
       holiday:        HolidayPeriods,          # offset count starts with previous holiday
@@ -163,6 +164,16 @@ class YearPeriods < PeriodsBase
     @meter_collection.holidays.years_to_date(@first_meter_date, date, false)
   end
 end
+
+# e.g. baseload chart, still display if under a years data
+class UpToAYearPeriods < YearPeriods
+  protected def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
+    periods = check_or_create_minimum_period(@meter_collection.holidays.years_to_date(first_meter_date, last_meter_date, false))
+    periods = [new_school_period(@first_meter_date, last_meter_date, 'short year')] if periods.empty?
+    periods
+  end
+end
+
 
 class AcademicYearsPeriod < YearPeriods
   def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
