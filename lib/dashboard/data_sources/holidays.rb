@@ -353,13 +353,11 @@ class Holidays
 
   class AcademicYear < SchoolDatePeriod
     include Logging
-
-    # attr_reader :holidays_in_year
+    attr_reader :holidays_in_year
     def initialize(start_date, end_date, full_holiday_schedule)
       year_name = start_date.year.to_s + '/' + end_date.year.to_s
       super(:academic_year, year_name, start_date, end_date)
-      # commented out 16Nov2019 by PH to get equivalences working
-      # @holidays_in_year = find_holidays_in_year(full_holiday_schedule)
+      @holidays_in_year = find_holidays_in_year(full_holiday_schedule)
     end
 
     def find_holidays_in_year(full_holiday_schedule)

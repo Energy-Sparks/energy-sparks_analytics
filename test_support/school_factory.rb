@@ -11,6 +11,8 @@ class SchoolFactory
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
   def load_or_use_cached_meter_collection(identifier_type, identifier, source)
     return load_aggregated_meter_collection if source == :aggregated_meter_collection
+    return load_validated_meter_collection  if source == :load_validated_meter_collection
+    return load_unvalidated_meter_collection  if source == :load_unvalidated_meter_collection
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
@@ -26,41 +28,59 @@ class SchoolFactory
 
   private
 
-  private def aggregate_meter_collection_filename(school_part)
-    'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-'+ school_part + '.yaml'
+  private def load_aggregated_meter_collection
+    school_filename = [
+      'whiteways-primary-school',
+      'trinity-c-of-e-first-school'
+    ][0]
+
+    load_meter_collections(school_filename, 'aggregated-meter-collection-')
   end
 
-  private def load_aggregated_meter_collection
-    filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-trinity-c-of-e-first-school.yaml'
-    filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-farr-primary-school.yaml'
-    filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-king-edward-vii-upper-school.yaml'
-    filename = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\aggregated-meter-collection-whiteways-primary-school.yaml'
-    filename = aggregate_meter_collection_filename('whiteways-primary-school')
-    filename = aggregate_meter_collection_filename('trinity-c-of-e-first-school')
-    return load_marshal_copy(marshal_filename(filename)) if File.exist?(marshal_filename(filename))
+  def load_validated_meter_collection
+    school_filename = 'st-marks-c-of-e-school'
+    validated_meter_collection = load_meter_collections(school_filename, 'validated-meter-collection-')
+    AggregateDataService.new(validated_meter_collection).aggregate_heat_and_electricity_meters
+    validated_meter_collection
+  end
 
+  def load_unvalidated_meter_collection
+    school_filename = 'st-marks-c-of-e-school'
+    unvalidated_meter_collection = load_meter_collections(school_filename, 'unvalidated-meter-collection-')
+    AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
+    unvalidated_meter_collection
+  end
+
+  # validate_and_aggregate_meter_data
+
+  def load_meter_collections(school_filename, file_type)
     school = nil
+    yaml_filename = meter_collection_filename(school_filename, file_type, '.yaml')
+    marshal_filename = meter_collection_filename(school_filename, file_type, '.marshal')
 
-    
-
-    bm = Benchmark.realtime {
-      school = YAML.load_file(filename)
-    }
-    puts "Loaded #{filename} in #{bm.round(3)} seconds"
-
-    bm = Benchmark.realtime {
-      save_marshal_copy(filename, school)
-    }
-    puts "saved marshal version in #{bm.round(5)}"
+    validated_meter_collection = if File.exist?(marshal_filename)
+      bm = Benchmark.realtime {
+        school = load_marshal_copy(marshal_filename)
+      }
+      puts "Loaded #{marshal_filename} in #{bm.round(3)} seconds"
+    else
+      bm = Benchmark.realtime {
+        school = YAML.load_file(yaml_filename)
+      }
+      puts "Loaded #{yaml_filename} in #{bm.round(3)} seconds"
+      save_marshal_copy(marshal_filename, school)
+    end
     school
   end
 
-  private def marshal_filename(filename)
-    Pathname(filename).sub_ext('.marshal')
+  private def meter_collection_filename(school_filename, file_type, extension)
+    'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\\' +
+     file_type + school_filename + extension
   end
 
   private def save_marshal_copy(filename, school)
-    File.open(marshal_filename(filename), 'wb') { |f| f.write(Marshal.dump(school)) }
+    File.open(filename, 'wb') { |f| f.write(Marshal.dump(school)) }
+    school
   end
 
   private def load_marshal_copy(marshal_filename)
@@ -68,7 +88,7 @@ class SchoolFactory
     bm = Benchmark.realtime {
       school = Marshal.load(File.open(marshal_filename))
     }
-    puts"loaded marshal version in #{bm.round(5)}: #{marshal_filename}"
+    puts "loaded marshal version in #{bm.round(5)}: #{marshal_filename}"
     school
   end
 
