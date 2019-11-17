@@ -10,28 +10,16 @@ script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # logger1:                  { name: STDOUT, format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  dark_sky_temperatures:    nil,
-  grid_carbon_intensity:    nil,
-  sheffield_solar_pv:       nil,
-  schools:                  ['Trinit.*'],
-  source:                   :load_unvalidated_meter_collection, # :analytics_db, # :aggregated_meter_collection
+  # dark_sky_temperatures:    nil,
+  # grid_carbon_intensity:    nil,
+  # sheffield_solar_pv:       nil,
+  schools:                  ['.*'],
+  source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                # adhoc_worksheet: { name: 'Test', charts: %i[heating_on_by_week_with_breakdown_storage_heaters]},
                                 :dashboard,
-                                no_adhoc_worksheet: { name: 'Test', charts: %i[alert_1_year_baseload]},
-                                no_adhoc_worksheet: { name: 'Test', charts: %i[
-                                  activities_school_day_electricity_cost
-                                  activities_school_day_gas_cost
-                                  activities_weekend_day_electricity_cost
-                                  activities_weekend_day_gas_cost
-                                  activities_2_weeks_daytype_electricity_cost
-                                  activities_2_weeks_daytype_gas_cost
-                                  activities_14_days_daytype_electricity_cost
-                                  activities_14_days_daytype_gas_cost
-                                  ]},
                                 no_adhoc_worksheet: { name: 'Test', charts: %i[
                                   group_by_week_electricity
                                   calendar_picker_electricity_week_example_comparison_chart

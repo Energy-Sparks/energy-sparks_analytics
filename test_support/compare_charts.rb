@@ -9,9 +9,14 @@ class CompareChartResults
   end
 
   def compare_results(all_charts)
+    chart_list = all_charts.map { |chart| [chart[:name], chart] }.to_h
+    compare_chart_list(chart_list)
+  end
+
+  def compare_chart_list(chart_list)
     return if control.nil?
-    all_charts.each do |chart|
-      save_and_compare_chart_data(chart[:name], chart)
+    chart_list.each do |name, content|
+      save_and_compare_chart_data(name, content)
     end
     puts "Comparison: #{@identical_result_count} matching charts, advice; #{@differing_results.length} differ #{@missing.length} missing" if control_contains?(:summary)
   end

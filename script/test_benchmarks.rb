@@ -13,11 +13,11 @@ script = {
     filename:       './TestResults/benchmark database',
     # calculate_and_save_variables: true,
     asof_date:      Date.new(2019, 10, 16),
-    filter:         ->{ addp_area.include?('Sheffield') },
+    # filter:         ->{ addp_area.include?('Sheffield') },
     # run_charts_and_tables: Date.new(2019,10,16),
     run_content:    {
       asof_date:      Date.new(2019,10,16),
-      filter:         ->{ addp_area.include?('Sheffield') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
+      # filter:         ->{ addp_area.include?('Sheffield') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
     }
   }
 }

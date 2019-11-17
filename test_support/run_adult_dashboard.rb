@@ -32,12 +32,23 @@ class RunAdultDashboard < RunCharts
 
     content = advice.content
 
+    save_content_as_yaml(content)
+
     html, charts = advice.analytics_split_charts_and_html(content)
 
     worksheet_name = definition[:content_class].excel_worksheet_name
 
     @worksheets[worksheet_name] = charts
     @all_html += html.join(' ')
+  end
+
+  private def save_content_as_yaml(content)
+    filename_base = "adult dashboard content #{@school.name} "
+    content.each_with_index do |content_component, n|
+      file_name_detail = "#{n} #{content_component[:type]}"
+      full_filename = filename_base + file_name_detail + '.yaml'
+      puts full_filename
+    end
   end
 
   def write_html

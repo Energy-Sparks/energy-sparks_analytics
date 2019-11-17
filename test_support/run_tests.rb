@@ -258,17 +258,10 @@ class RunTests
         new_chart_name, new_chart_config = chart_manager.drilldown(new_chart_name, new_chart_config, nil, column_in_chart)
         ap new_chart_config
         puts "Chart parent time description(week?): #{chart_manager.parent_chart_timescale_description(new_chart_config)}"
-exit
         new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
         chart_list.push(new_chart_results)
 
-        # one off test to drill down to datetime to check temporary datetime axis reformat TODO(PH, 14Sep2019) remove
-        column_in_chart = new_chart_results[:x_axis_ranges][drilldown_chart_column_number]
-        new_chart_name_2, new_chart_config_2 = chart_manager.drilldown(new_chart_name, new_chart_config, nil, column_in_chart)
-        new_chart_results_2 = chart_manager.run_chart(new_chart_config_2, new_chart_name_2)
-        chart_list.push(new_chart_results_2)
-
-        if false
+        if true
           %i[move extend contract compare].each do |operation_type|
             puts "#{operation_type} chart 1 week"
 
