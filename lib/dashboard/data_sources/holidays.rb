@@ -5,8 +5,8 @@ class Holiday < SchoolDatePeriod
   attr_accessor :type           # :easter, :xmas, autumn_halfterm etc.
   attr_accessor :academic_year  # e.g. 2018..2019
   def initialize(type, name, start_date, end_date, academic_year)
-    start_date = roll_start_date_back_to_sunday(start_date)
-    end_date = roll_end_date_forward_to_saturday(end_date)
+    start_date = roll_start_date_back_to_sunday(start_date) unless type == :inset_day_in_school
+    end_date = roll_end_date_forward_to_saturday(end_date)  unless type == :inset_day_in_school
     super(:holiday, name, start_date, end_date)
     @type = type
     @academic_year = academic_year
@@ -54,10 +54,12 @@ class HolidayLoader
     datareadings = Roo::CSV.new(csv_file)
     count = 0
     datareadings.each do |reading|
-      title = reading[0]
-      start_date = Date.parse reading[1]
-      end_date = Date.parse reading[2]
-      holidays.add(Holiday.new(:school_holiday, title, start_date, end_date, nil))
+      holiday_type = reading[0].to_sym
+      raise EnergySparksBadHolidayDataException, "Unknown holiday type #{holiday_type}" if !%i[bank_holiday inset_day_in_school inset_day_out_of_school school_holiday].include?(holiday_type)
+      title = reading[1]
+      start_date = Date.parse reading[2]
+      end_date = Date.parse reading[3]
+      holidays.add(Holiday.new(holiday_type, title, start_date, end_date, nil))
       count += 1
     end
     logger.debug "Read #{count} rows"
@@ -70,8 +72,8 @@ class Holidays
   include Logging
 
   def initialize(holiday_data)
-    @holidays = holiday_data
-    remove_non_holidays
+    set_holidays_by_type(holiday_data)
+    # remove_non_holidays
     set_holiday_types_and_academic_years
     @cached_holiday_lookup = {} # for speed,
   end
@@ -92,6 +94,21 @@ class Holidays
 
   private def remove_non_holidays
     @holidays.reject! { |holiday| %i[bank_holiday inset_day_in_school inset_day_out_of_school].include?(holiday.type) } # not :school_holiday
+  end
+
+  private def set_holidays_by_type(holidays)
+    @holidays            = filter_and_sort_holidays(holidays, %i[school_holiday])
+    @additional_holidays = filter_and_sort_holidays(holidays, %i[bank_holiday inset_day_out_of_school])
+    @school_days         = filter_and_sort_holidays(holidays, %i[inset_day_in_school] )
+  end
+
+  private def sort_holidays(holidays)
+    holidays.sort_by(&:start_date)
+  end
+
+  private def filter_and_sort_holidays(holidays, types)
+    filtered_holidays = holidays.select{ |holiday| types.include?(holiday.type) }
+    sort_holidays(filtered_holidays)
   end
 
   private def set_holiday_types
@@ -137,12 +154,25 @@ class Holidays
   # returns a holiday period corresponding to a date, nil if not a date
   def holiday(date)
     # check cache, as lookup currently loops through list of holidays
-    # speeds up this function for 48x365 loopup report by 0.5s (0.6s to 0.1s)
+    # speeds up this function for 48x365 lookup report by 0.5s (0.6s to 0.1s)
     if @cached_holiday_lookup.key?(date)
       return @cached_holiday_lookup[date]
     end
-    @cached_holiday_lookup[date] = find_holiday(date)
+    @cached_holiday_lookup[date] = is_holiday(date)
     @cached_holiday_lookup[date]
+  end
+
+  def is_holiday(date)
+    return nil unless find_holiday(date, @school_days).nil? # inset day out of school not a holiday
+    
+    school_holiday      = find_holiday(date, @holidays)
+    return school_holiday       unless school_holiday.nil?
+
+    public_or_inset_day = find_holiday(date, @additional_holidays)
+    return public_or_inset_day  unless public_or_inset_day.nil?
+
+    # TODO(PH, 17Nov2019) check for weekend gap between 2 holidays here - complex & difficult, but not critical
+    nil # no holiday
   end
 
   def is_weekend(date)
@@ -155,8 +185,8 @@ class Holidays
   end
 
   # returns a hash defining a holiday :title => title, :start_date => start_date, :end_date => end_date} or nil
-  def find_holiday(date)
-    SchoolDatePeriod.find_period_for_date(date, @holidays)
+  def find_holiday(date, holiday_schedule = @holidays)
+    SchoolDatePeriod.find_period_for_date(date, holiday_schedule)
   end
 
   def find_next_holiday(date, max_days_search = 100)
