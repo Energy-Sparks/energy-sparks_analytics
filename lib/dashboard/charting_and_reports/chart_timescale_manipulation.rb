@@ -79,6 +79,7 @@ class ChartManagerTimescaleManipulation
 
   def adjust_timescale_private(factor)
     new_config = @original_chart_config.deep_dup
+    factor *= factor_multiplier(new_config)
     logger.info "Old timescales #{new_config[:timescale]}"
 
     available_periods = available_periods(new_config)
@@ -147,6 +148,12 @@ class ChartManagerTimescaleManipulation
     available_periods_by_type(chart_config_original)
   end
 
+  private def factor_multiplier(chart_config_original)
+    type, _value = timescale_type(chart_config_original)
+    # optimum start chart grouped in 5 heating workdays, jump to next set of 5 days
+    type == :optimum_start ? 5 : 1
+  end
+
   private def available_periods_by_type(chart_config_original)
     start_date, end_date = determine_chart_range(chart_config_original)
     timescale_type, value = timescale_type(chart_config_original)
@@ -176,7 +183,7 @@ class ChartManagerTimescaleManipulation
     when :diurnal
       @school.temperatures.largest_diurnal_ranges(start_date, end_date, true, false, @school.holidays, false).length
     when :optimum_start
-      OptimumStartPeriods::BEST_OPTIMUM_START_DAYS.length
+      optimum_start_periods.length
     when :daterange
       days_in_range = value.last - value.first + 1
       ((end_date - start_date + 1) / days_in_range).floor
@@ -187,6 +194,10 @@ class ChartManagerTimescaleManipulation
     else
       raise EnergySparksUnexpectedStateException, "Unsupported period type #{timescale_type} for periods_in_date_range request"
     end
+  end
+
+  private def optimum_start_periods
+    @optimum_start_days ||= OptimumStartDates.new(@school).list_of_dates
   end
 
   def timescale_type(chart_config_original)

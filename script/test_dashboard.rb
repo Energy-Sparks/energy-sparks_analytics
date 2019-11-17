@@ -13,18 +13,15 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  schools:                  ['.*'],
+  schools:                  ['Trinit.*'],
   source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                :dashboard,
-                                no_adhoc_worksheet: { name: 'Test', charts: %i[
-                                  group_by_week_electricity
-                                  calendar_picker_electricity_week_example_comparison_chart
-                                  calendar_picker_gas_week_example_comparison_chart
-                                  calendar_picker_gas_day_example_comparison_chart]}
+                                # :dashboard,
+                                adhoc_worksheet: { name: 'Test', charts: %i[
+                                  optimum_start]}
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }
                                 # :dashboard

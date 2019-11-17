@@ -175,7 +175,7 @@ class RunTests
       excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- timescale shift.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
-      chart_name = :james_almond_chart_timeshifting_bug # :solar_pv_last_7_days_timescale_test
+      chart_name = :activities_14_days_daytype_electricity_cost 
       chart_config = chart_manager.get_chart_config(chart_name)
       result = chart_manager.run_chart(chart_config, chart_name)
 
@@ -193,7 +193,7 @@ class RunTests
         new_chart_results = chart_manager.run_chart(new_chart_config, chart_name)
         chart_list.push(new_chart_results)
       end
-
+      
       excel = ExcelCharts.new(excel_filename)
       excel.add_charts('Test', chart_list)
       excel.close
