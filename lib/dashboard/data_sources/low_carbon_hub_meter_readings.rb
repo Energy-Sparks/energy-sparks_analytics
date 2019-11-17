@@ -62,7 +62,6 @@ class LowCarbonHubMeterReadings
         meter_readings[date] = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, Array.new(48, 0.0))
         message = "Warning: missing meter readings for #{mpan_mprn} on #{date}"
         logger.warn message
-        puts message
       end
     end
     meter_readings

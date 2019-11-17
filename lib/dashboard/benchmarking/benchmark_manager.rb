@@ -1,6 +1,7 @@
 
 module Benchmarking
   class BenchmarkManager
+    include Logging
     class DatabaseRow < OpenStruct
       def zero(value)
         value.nil? ? 0.0 : value
@@ -228,7 +229,7 @@ module Benchmarking
         end
       rescue StandardError => e
         name = row.instance_exec(& ->{ school_name })
-        puts format_rescue_message(e, school_id_debug, column_specification, name)
+        logger.info format_rescue_message(e, school_id_debug, column_specification, name)
         return nil
       end
     end

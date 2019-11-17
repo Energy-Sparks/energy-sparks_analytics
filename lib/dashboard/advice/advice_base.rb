@@ -1,5 +1,6 @@
 require_rel '../charting_and_reports/content_base.rb'
 class AdviceBase < ContentBase
+  include Logging
   def initialize(school)
     super(school)
   end
@@ -80,8 +81,8 @@ class AdviceBase < ContentBase
         charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
         charts_and_html.push( { type: :html,  content: chart[:advice_footer] } ) if chart.key?(:advice_footer)
       rescue StandardError => e
-        puts e.message
-        puts e.backtrace
+        logger.info e.message
+        logger.info e.backtrace
       end
     end
     charts_and_html

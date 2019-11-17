@@ -997,9 +997,9 @@ module AnalyseHeatingAndHotWater
     # this heuristic method is employed to consolidate the heating_on_periods
     def consolidate_heating_periods(heating_on_periods)
       df = '%a %d-%b-%Y'
-      puts "Original heating periods #{@heat_meter.mpan_mprn}"
+      logger.info "Original heating periods #{@heat_meter.mpan_mprn}"
       heating_on_periods.each do |heating_period|
-        puts "#{heating_period.start_date.strftime(df)} #{heating_period.start_date.strftime(df)}"
+        logger.info "#{heating_period.start_date.strftime(df)} #{heating_period.start_date.strftime(df)}"
       end
     end
 

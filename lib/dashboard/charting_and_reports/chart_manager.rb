@@ -19,7 +19,7 @@ class ChartManager
   end
 
   def run_composite_chart(chart_group, override_config = nil, reraise_exception = false)
-    puts "Running composite chart group #{chart_group[:name]}"
+    logger.info "Running composite chart group #{chart_group[:name]}"
     chart_group_result = {}
     chart_group_result[:config] = chart_group
     chart_group_result[:charts] = []
@@ -107,8 +107,8 @@ class ChartManager
       if reraise_exception
         raise
       else
-        puts e.message
-        puts e.backtrace
+        logger.info e.message
+        logger.info e.backtrace
         nil
       end
     end

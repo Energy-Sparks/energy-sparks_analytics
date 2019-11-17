@@ -128,8 +128,6 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     begin
       calculate_private(asof_date)
     rescue StandardError => e
-      puts "Prioritisation error: #{e.message}"
-      puts e.backtrace
       logger.info e.message
       0.0
     end
@@ -162,7 +160,6 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     begin
       ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, fuel_type, data_type, chart_end_date)
     rescue StandardError => e
-      puts e.message
       logger.info e.message
       0.0
     end
