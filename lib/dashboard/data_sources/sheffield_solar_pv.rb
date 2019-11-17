@@ -57,7 +57,7 @@ class SheffieldSolarPVBase
   def distance_to_climate_zone_km(latitude, longitude, proxy)
     proxy_latitude = proxy[:latitude]
     proxy_longitude = proxy[:longitude]
-    distance_km = 111*((latitude-proxy_latitude)**2+(longitude-proxy_longitude)**2)**0.5
+    LatitudeLongitude.distance(latitude, longitude, proxy_latitude, proxy_longitude)
   end
   
   # for a single 'Sheffield region' download half hourly PV data (output, capacity)
@@ -98,7 +98,7 @@ class SheffieldSolarPVBase
     @area_proxies.each do |proxy|
       proxy_latitude = proxy[:latitude]
       proxy_longitude = proxy[:longitude]
-      distance_km = 111*((latitude-proxy_latitude)**2+(longitude-proxy_longitude)**2)**0.5
+      distance_km = LatitudeLongitude.distance(latitude, longitude, proxy_latitude, proxy_longitude)
       logger.info "id #{proxy[:id]} #{proxy[:name]} #{distance_km}"
       region_id = proxy[:id]
       name = proxy[:name]
@@ -445,7 +445,7 @@ class SheffieldSolarPVV2 < SheffieldSolarPVBase
   end
 
   private def distance_km(latitude, longitude, gsp_latitude, gsp_longitude)
-    111.0 * ((latitude - gsp_latitude)**2 + (longitude - gsp_longitude)**2)**0.5
+    LatitudeLongitude.distance(latitude, longitude, gsp_latitude, gsp_longitude)
   end
 
   private def direction(latitude, longitude, gsp_latitude, gsp_longitude)
