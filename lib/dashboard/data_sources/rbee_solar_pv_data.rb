@@ -177,7 +177,7 @@ class RbeeSolarPV
   # and the numbers are relatively constant, this is 'ok'
   private def adjust_to_bst(datetime)
     begin
-      @schools_timezone.local_to_utc(datetime)
+      @schools_timezone.utc_to_local(datetime)
     rescue TZInfo::AmbiguousTime, TZInfo::PeriodNotFound => _e
       datetime
     end

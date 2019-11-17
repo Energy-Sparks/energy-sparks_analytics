@@ -335,6 +335,30 @@ class ChartManager
       meter_definition:   :allelectricity,
       series_breakdown:   :submeter
     },
+    # TODO(PH, 17Nov2019) - remove post December 2019
+    solar_pv_gmt_bst_test_1: {
+      inherits_from:      :solar_pv_last_7_days_by_submeter,
+      asof_date:          Date.new(2019, 3, 1)
+    },
+    solar_pv_gmt_bst_test_2: {
+      inherits_from:      :solar_pv_last_7_days_by_submeter,
+      asof_date:          Date.new(2019, 10, 1)
+    },
+    solar_pv_gmt_bst_test_3: {
+      inherits_from:      :solar_pv_last_7_days_by_submeter,
+      asof_date:          Date.new(2019, 3, 1)
+    },
+    solar_pv_gmt_bst_test_4: {
+      inherits_from:      :solar_pv_last_7_days_by_submeter,
+      timescale:          :day,
+      asof_date:          Date.new(2019, 10, 5)
+    },
+    solar_pv_gmt_bst_test_5: {
+      inherits_from:      :solar_pv_last_7_days_by_submeter,
+      timescale:          :day,
+      asof_date:          Date.new(2019, 3, 1)
+    },
+
     solar_pv_last_7_days_timescale_test: {
       inherits_from:    :solar_pv_last_7_days_by_submeter,
       series_breakdown: :none,

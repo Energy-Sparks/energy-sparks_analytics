@@ -7,6 +7,7 @@ require 'net/http'
 require 'json'
 require 'date'
 require 'sun_times'
+require 'tzinfo'
 
 class SheffieldSolarPVBase
   include Logging
@@ -41,6 +42,7 @@ class SheffieldSolarPVV2 < SheffieldSolarPVBase
     @v2_historic_interface_url_base = 'https://api0.solar.sheffield.ac.uk/pvlive/v2/gsp/' # ENV['ENERGYSPARKSSHEFFIELDPVV2HISTORICURL']
     @v2_geographic_area_url         = 'https://api0.solar.sheffield.ac.uk/pvlive/v2/gsp_list' # ENV['ENERGYSPARKSSHEFFIELDPVV2AREAURL']
     @yield_diff_criteria = 0.001
+    @schools_timezone = TZInfo::Timezone.get('Europe/London')
   end
 
   # should run minimum to 10 days, to create overlap for interpolation (missing days data only slightly fault tolerant)
@@ -110,6 +112,8 @@ class SheffieldSolarPVV2 < SheffieldSolarPVBase
 
     whole_day_substitutes = substitute_missing_days(too_little_data_on_day, date_to_halfhour_yields_x48, start_date, end_date)
 
+    date_to_halfhour_yields_x48 = date_to_halfhour_yields_x48.sort.to_h
+
     [date_to_halfhour_yields_x48, missing_date_times, whole_day_substitutes]
   end
 
@@ -136,7 +140,7 @@ class SheffieldSolarPVV2 < SheffieldSolarPVBase
 
   private def zero_out_noise(datetime_to_yield_hash, latitude, longitude)
     datetime_to_yield_hash.each do |datetime, yield_pv|
-      datetime_to_yield_hash[datetime] = 0.0 unless daytime?(datetime, latitude, longitude, 0.5)
+      datetime_to_yield_hash[datetime] = 0.0 unless daytime?(datetime, latitude, longitude, -0.5)
       datetime_to_yield_hash[datetime] = 0.0 if yield_pv < @yield_diff_criteria
     end
     datetime_to_yield_hash
@@ -145,7 +149,9 @@ class SheffieldSolarPVV2 < SheffieldSolarPVBase
   private def convert_raw_data(pv_data, meta_data_dictionary)
     all_pv_yield = {}
     pv_data.each do |halfhour_data|
-      time = DateTime.parse(halfhour_data[meta_data_dictionary.index('datetime_gmt')])
+      dts = halfhour_data[meta_data_dictionary.index('datetime_gmt')]
+      gmt_time = DateTime.parse(dts)
+      time = adjust_to_bst(gmt_time)
       generation = halfhour_data[meta_data_dictionary.index('generation_mw')]
       capacity = halfhour_data[meta_data_dictionary.index('installedcapacity_mwp')]
       next if generation.nil? || capacity.nil?
@@ -153,6 +159,19 @@ class SheffieldSolarPVV2 < SheffieldSolarPVBase
       all_pv_yield[time] = yield_pv
     end
     all_pv_yield
+  end
+
+  # silently deal with the case of the Autumn time zone change where the local time
+  # around midnight exists twice - in this case just use the UTC time;
+  # the same issue occurs in Spring where an hour of local time doesn't exist
+  # in both cases given it is dark it doesn't matter
+  # and the numbers are relatively constant, this is 'ok'
+  private def adjust_to_bst(datetime)
+    begin
+      @schools_timezone.utc_to_local(datetime)
+    rescue TZInfo::AmbiguousTime, TZInfo::PeriodNotFound => _e
+      datetime
+    end
   end
 
   private def download_historic_data(gsp_id, start_date, end_date)
