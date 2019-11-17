@@ -7,6 +7,7 @@ class Holiday < SchoolDatePeriod
   def initialize(type, name, start_date, end_date, academic_year)
     start_date = roll_start_date_back_to_sunday(start_date) unless type == :inset_day_in_school
     end_date = roll_end_date_forward_to_saturday(end_date)  unless type == :inset_day_in_school
+    name = Holidays.holiday_name(middle_date(start_date, end_date)) if name.nil? || name == 'No title'
     super(:holiday, name, start_date, end_date)
     @type = type
     @academic_year = academic_year
@@ -23,7 +24,7 @@ class Holiday < SchoolDatePeriod
     end_date
   end
 
-  def middle_date
+  def middle_date(start_date = @start_date, end_date = @end_date)
     start_date + ((end_date - start_date) / 2).to_i
   end
 
@@ -462,7 +463,7 @@ class Holidays
   # returns which holiday this is, not self as may eventually
   # have to reference its own holiday schedule
   # would be best if list were an enumeration, but these aren't supported outside rails
-  def type(date)
+  def self.holiday_type(date)
     case date.month
     when 1, 12
       :xmas
@@ -489,5 +490,33 @@ class Holidays
     else
       nil
     end
+  end
+
+  def self.new_year_year(date)
+    year = date.year
+    if date.mon == 12
+      year.to_s + '/' + (year + 1).to_s
+    else
+      (year - 1).to_s + '/' + year.to_s
+    end
+  end
+
+  def self.holiday_name(date)
+    type = holiday_type(date)
+    year = type == :xmas ? new_year_year(date) : date.year.to_s
+    type.to_s.humanize + ' ' + year
+  end
+
+  def new_year_year(date)
+    year = date.year
+    if date.mon == 12
+      year.to_s + '/' + (year + 1).to_s
+    else
+      (year - 1).to_s + '/' + year.to_s
+    end
+  end
+
+  def type(date)
+    self.class.holiday_type(date)
   end
 end
