@@ -9,7 +9,7 @@ class AdviceSolarPV < AdviceElectricityBase
   end
 
   def pv_benefit_estimator
-    @pv_benefit_alert ||= AlertSolarPVBenefitEstimator.new(@school)
+    @pv_benefit_alert ||= calculate_benefit
   end
 
   def self.template_variables
@@ -21,11 +21,10 @@ class AdviceSolarPV < AdviceElectricityBase
   end
 
   def summary
-    @school.solar_pv_panels? ? summarise_existing_panels_benefit : summarise_potential_benefits
+    @summary = @school.solar_pv_panels? ? summarise_existing_panels_benefit : summarise_potential_benefits
   end
 
   def solar_pv_benefit_content
-    pv_benefit_estimator.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
     charts_and_html = []
     charts_and_html.push( { type: :html, content: '<h2>Benefits of installing solar PV</h2>' } )
     charts_and_html += debug_content
@@ -54,6 +53,12 @@ class AdviceSolarPV < AdviceElectricityBase
   end
 
   private
+
+  def calculate_benefit
+    calced_benefit = AlertSolarPVBenefitEstimator.new(@school)
+    calced_benefit.analyse(@school.aggregated_electricity_meters.amr_data.end_date)
+    calced_benefit
+  end
 
   def calculate_existing_pv_panel_benefit
     solar_pv_profit_loss = SolarPVProfitLoss.new(@school)
