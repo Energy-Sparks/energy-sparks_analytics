@@ -265,7 +265,9 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     # using analysis of ebay offerings (x20)
     # pending feedback to request (28Oct2019) for feedback on
     # real prices from BWCE and FreCo
-    kwp == 0.0 ? 0.0 : (850.0 + 1200.0 * kwp)
+    # old value: kwp == 0.0 ? 0.0 : (850.0 + 1200.0 * kwp)
+    # PH 18Nov2019: reduced cost of larger installations following advice from PC/BWCE
+    kwp == 0.0 ? 0.0 : (-0.8947 * kwp**2 + 793.86 * kwp + 1600)
   end
 
   def attributes(asof_date, kwp)
