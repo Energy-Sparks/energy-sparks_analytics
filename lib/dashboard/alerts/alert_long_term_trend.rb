@@ -2,13 +2,17 @@ class AlertLongTermTrend < AlertAnalysisBase
   attr_reader :this_year_£, :last_year_£, :year_change_£
   attr_reader :percent_change_£, :summary, :prefix_1, :prefix_2
 
-  def initialize(school)
-    super(school, :electricitylongtermtrend)
+  def initialize(school, type = :electricitylongtermtrend)
+    super(school, type)
     @relevance == :relevant
   end
 
   def enough_data
     aggregate_meter.amr_data.days_valid_data > 2 * 365 ? :enough : :not_enough # 365 not 364 to be safe
+  end
+
+  def timescale
+    'last 2 years'
   end
 
   def self.long_term_variables(fuel_type)
