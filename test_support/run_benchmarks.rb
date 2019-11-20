@@ -60,7 +60,7 @@ class RunBenchmarks
       composite_tables  += page_table_composites
     end
 
-    puts composite_tables
+    ap composite_tables
     save_html(html)
     save_charts_to_excel(charts.compact)
   end
