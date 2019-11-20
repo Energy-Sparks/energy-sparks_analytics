@@ -9,13 +9,13 @@ script = {
   source:                   :analytics_db, # :aggregated_meter_collection, 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
-    alerts:    nil, # [ AlertSolarPVBenefitEstimator ], # nil, 
+    alerts:   [ AlertImpendingHoliday ], # nil, 
     control:  {
                 # print_alert_banner: true,
                 # alerts_history: true,
                 print_school_name_banner: true,
                 # raw_variables_for_saving
-                # outputs:           %i[front_end_template_variables front_end_template_data], # front_end_template_tables front_end_template_table_data], # front_end_template_variables front_end_template_data raw_variables_for_saving],
+                no_outputs:           %i[front_end_template_variables front_end_template_data front_end_template_tables front_end_template_table_data], # front_end_template_variables front_end_template_data raw_variables_for_saving],
                 save_and_compare:  {
                                       summary:      true,
                                       h_diff:     { use_lcs: false, :numeric_tolerance => 0.000001 },
