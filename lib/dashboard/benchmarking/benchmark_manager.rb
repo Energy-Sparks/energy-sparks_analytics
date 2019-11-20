@@ -124,7 +124,18 @@ module Benchmarking
       column_units = column_definitions.map{ |column_definition| column_definition[:units] }
       formatted_rows = rows.map do |row|
         row.each_with_index.map do |value, index|
-          column_units[index] == String ? value : format_cell(column_units[index], value, medium)
+          if column_units[index] == String
+            if medium == :text_and_raw
+              {
+                formatted: value,
+                raw: value
+              }
+            else
+              value
+            end
+          else
+            format_cell(column_units[index], value, medium)
+          end
         end
       end
     end
