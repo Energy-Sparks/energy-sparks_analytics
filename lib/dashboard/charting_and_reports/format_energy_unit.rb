@@ -67,6 +67,17 @@ class FormatEnergyUnit
   }.freeze
 
   def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
+    if unit.is_a?(Hash) && unit.key?(:substitute_nil)
+      if value.nil?
+        return unit[:substitute_nil]
+      else
+        unit = unit[:units]
+      end
+    end
+    format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
+  end
+  
+  def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
     return value if medium == :raw
     return '' if value.nil? && in_table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes

@@ -36,13 +36,22 @@ class HeadTeachersSchoolSummaryTable < ContentBase
   def self.template_variables
     { 'Head teacher\'s energy summary' => TEMPLATE_VARIABLES}
   end
+
+  COLUMN_TYPES = [
+    :fuel_type,
+    { units: :kwh, substitute_nil: 'Not enough data'},
+    :£,
+    :relative_percent,
+    :relative_percent,
+    :£
+  ] # needs to be kept in sync with instance table
   
   TEMPLATE_VARIABLES = {
     summary_table: {
       description: 'Summary of annual per fuel consumption, annual change, 4 week change, saving to exemplar',
       units:          :table,
       header:         header_text,
-      column_types:   %i[fuel_type kwh £ relative_percent relative_percent £] # needs to be kept in sync with instance table
+      column_types:   COLUMN_TYPES 
     }
   }
 
@@ -73,7 +82,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
 
     {
       fuel_type:          { data: fuel_type.to_s.humanize.capitalize,       units: :fuel_type },
-      this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: :kwh },
+      this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: { units: :kwh, substitute_nil: 'Not enough data'} },
       this_year_£:        { data: last_2_years_comparison[:current_£],      units: :£ },
       change_years:       { data: last_2_years_comparison[:percent_change], units: :relative_percent },
       change_4_weeks:     { data: last_4_week_comparison[:percent_change],  units: :relative_percent },
