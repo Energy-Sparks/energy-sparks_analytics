@@ -79,7 +79,7 @@ class FormatEnergyUnit
   
   def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
     return value if medium == :raw
-    return '' if value.nil? && in_table
+    return '' if value.nil? #  && in_table - PH 20Nov2019 experimental change to tidying blank cells on heads summary table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
     return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
     return value.to_s if convert_missing_types_to_strings && !UNIT_DESCRIPTION_TEXT.key?(unit)
