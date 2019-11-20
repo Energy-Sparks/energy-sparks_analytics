@@ -45,7 +45,7 @@ class AdviceSolarPV < AdviceElectricityBase
     # not ideal, fishing out a numbered column from a table
     min_saving = FormatEnergyUnit.format(:percent, pv_benefit_estimator.solar_pv_scenario_table.first[6], :text)
     max_saving = FormatEnergyUnit.format(:percent, pv_benefit_estimator.solar_pv_scenario_table.last[6],  :text)
-    "Installing solar pv would reduce your electricity consumption between #{min_saving} and #{max_saving}"
+    "Installing solar pv would save up to #{max_saving} of your electricity consumption "
   end
 
   def rating
