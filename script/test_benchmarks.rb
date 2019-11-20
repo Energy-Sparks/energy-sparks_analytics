@@ -11,7 +11,7 @@ script = {
   
   run_benchmark_charts_and_tables: {
     filename:       './TestResults/benchmark database',
-    # calculate_and_save_variables: true,
+    calculate_and_save_variables: true,
     asof_date:      Date.new(2019, 10, 16),
     # filter:         ->{ addp_area.include?('Sheffield') },
     # run_charts_and_tables: Date.new(2019,10,16),
