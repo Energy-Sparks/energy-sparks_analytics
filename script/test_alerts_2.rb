@@ -9,7 +9,7 @@ script = {
   source:                   :analytics_db, # :aggregated_meter_collection, 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
-    alerts:   [ AlertImpendingHoliday ], # nil, 
+    alerts:   [ AlertSchoolWeekComparisonElectricity ], # nil, 
     control:  {
                 # print_alert_banner: true,
                 # alerts_history: true,
