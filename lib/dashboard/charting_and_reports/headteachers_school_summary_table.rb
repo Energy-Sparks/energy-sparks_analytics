@@ -20,11 +20,11 @@ class HeadTeachersSchoolSummaryTable < ContentBase
   def self.header_html
     [
       '',
-      'Annual Use (kWh)',
-      'Annual Cost (&pound;)',
-      '&percnt; change from previous year',
-      '&percnt; change in last 4 weeks',
-      'Energy saving if you matched the most efficient schools (&pound;)'
+      'Annual Use',
+      'Annual Cost',
+      'Change from last year',
+      'Change in last 4 weeks',
+      'Potential savings'
     ] 
   end
 
@@ -106,7 +106,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
   def format_rows(rows, medium = :html)
     rows.map do |row|
       row.map do |_field_name, field|
-        FormatEnergyUnit.format(field[:units], field[:data], medium, false, true) rescue 'error'
+        FormatEnergyUnit.format(field[:units], field[:data], medium, false, false) rescue 'error'
       end
     end
   end
