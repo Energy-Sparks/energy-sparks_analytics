@@ -35,6 +35,7 @@ class RunBenchmarks
     html = FRONTEND_CSS
     charts = []
     tables = []
+    composite_tables = []
 
     puts "Running content config #{config}"
     content_manager = Benchmarking::BenchmarkContentManager.new(config[:asof_date])
@@ -49,15 +50,17 @@ class RunBenchmarks
 
       content = content_manager.content(db, page_name, filter: config[:filter])
 
-      page_html, page_charts, page_tables = process_content(content)
+      page_html, page_charts, page_tables, page_table_composites = process_content(content)
 
       # print_content(page_html, page_charts, page_tables)
 
-      html    += page_html
-      charts  += page_charts
-      tables  += page_tables
+      html              += page_html
+      charts            += page_charts
+      tables            += page_tables
+      composite_tables  += page_table_composites
     end
 
+    puts composite_tables
     save_html(html)
     save_charts_to_excel(charts.compact)
   end
@@ -83,6 +86,7 @@ class RunBenchmarks
     html = '<br>'
     charts = []
     tables = []
+    tables_composite = []
 
     content.each do |content_item|
       case content_item[:type]
@@ -94,9 +98,11 @@ class RunBenchmarks
         charts.push(content_item[:content])
       when :table_text
         tables.push(content_item[:content])
+      when :table_composite
+        tables_composite.push(content_item[:content])
       end
     end
-    [html, charts, tables]
+    [html, charts, tables, tables_composite]
   end
 
   def run_charts_and_tables(asof_date)

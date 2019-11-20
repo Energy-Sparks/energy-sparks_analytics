@@ -111,7 +111,7 @@ module Benchmarking
       case medium
       when :raw
         [header] + rows
-      when :text
+      when :text, :text_and_raw
         formatted_rows = format_rows(rows, table_definition[:columns], medium)
         {header: header, rows: formatted_rows}
       when :html
@@ -124,8 +124,19 @@ module Benchmarking
       column_units = column_definitions.map{ |column_definition| column_definition[:units] }
       formatted_rows = rows.map do |row|
         row.each_with_index.map do |value, index|
-          column_units[index] == String ? value : FormatEnergyUnit.format(column_units[index], value, medium, false, true, :ks2)
+          column_units[index] == String ? value : format_cell(column_units[index], value, medium)
         end
+      end
+    end
+    
+    def format_cell(units, value, medium)
+      if medium == :text_and_raw
+        {
+          formatted: format_cell(units, value, :text),
+          raw: value
+        }
+      else
+        FormatEnergyUnit.format(units, value, medium, false, true, :ks2)
       end
     end
 

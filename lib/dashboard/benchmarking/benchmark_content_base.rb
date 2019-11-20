@@ -16,6 +16,7 @@ module Benchmarking
       chart       = run_chart(school_ids, filter)         if charts?
       table_html  = run_table(school_ids, filter, :html)  if tables?
       table_text  = run_table(school_ids, filter, :text)  if tables?
+      composite   = run_table(school_ids, filter, :text_and_raw) if tables?
 
       charts = charts? ? [
         { type: :html,                  content: "<h3>Chart Introduction</h3>" },
@@ -28,6 +29,7 @@ module Benchmarking
         { type: :html,                  content: "<h3>Table Introduction</h3>"},
         { type: :table_html,            content: table_html },
         { type: :table_text,            content: table_text },
+        { type: :table_composite,       content: composite },
         { type: :html,                  content: "<h3>Table Interpretation</h3>" }
       ] : nil
 
