@@ -35,6 +35,20 @@ class MeterAttributes
         reason: 'Automated process set too high at about 1500'
       }
     },
+    # ==============================Ballifield=============================
+    2335250725714 => {
+      solar_pv: [ 
+        {
+          start_date:         Date.new(2015, 10, 4),
+          kwp:                12.0,
+          orientation:        0,
+          tilt:               30,
+          shading:            0,
+          fit_£_per_kwh:      0.05,
+          reason:             '56 panels, unknown capacity on satellite, installed 2012, but set to 2015 as 1st meter date'
+        }
+      ]
+    },
     # ==============================Bishop Sutton==============================
     2200012833349 => {
       aggregation:  [
@@ -50,13 +64,20 @@ class MeterAttributes
       ],
       function: [ :heating_only ]
     },
-=begin
     2200012833358 => {
-      meter_corrections: [
-        readings_end_date: Date.new(2017, 9, 30)
+      solar_pv: [  
+        {
+          start_date:         Date.new(2016, 4, 14),
+          # end_date:          Date.new(2030, 1, 1),
+          kwp:                4.0,
+          orientation:        0,
+          tilt:               0,
+          shading:            0,
+          fit_£_per_kwh:      0.30,
+          reason:             '16 panels appear on satellite - appear to be flat on roof? '
+        }
       ]
     },
-=end
     8891205403 => {
       function: [ :heating_only ],
       meter_corrections: [
@@ -73,6 +94,20 @@ class MeterAttributes
         max_summer_daily_heating_kwh:     50,
         reason: 'Automated process set too high at about 140'
       }
+    },
+    # ==============================Caldecott =============================
+    2000053945332  => {
+      solar_pv: [  
+        {
+          start_date:         Date.new(2018, 1, 10),
+          kwp:                4.0,
+          orientation:        0,
+          tilt:               0,
+          shading:            0,
+          fit_£_per_kwh:      0.30,
+          reason:             '46 panels on roof should be ~10kWp, but consumption suggests 3kWp '
+        }
+      ]
     },
     # ==============================Castle Primary=============================
     2200015105145 => {
@@ -535,6 +570,20 @@ class MeterAttributes
         max_summer_daily_heating_kwh:     1400,
         reason: 'R2 control very unstable; 2nd attempt set to 1400; PH 29Oct2019'
       }
+    },
+    2200030028094 => { 
+      solar_pv: [  
+        {
+          start_date:         Date.new(2012, 1, 15),
+          # end_date:          Date.new(2030, 1, 1),
+          kwp:                10.0,
+          orientation:        0,
+          tilt:               30,
+          shading:            0,
+          fit_£_per_kwh:      0.30,
+          reason:             '10 kWp confirmed BWCE solar PV'
+        }
+      ]
     },
     # ==============================St Stephens===============================
     13918504 => {
