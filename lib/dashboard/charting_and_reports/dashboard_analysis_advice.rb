@@ -687,7 +687,7 @@ class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
     FormatEnergyUnit.scale_num(kwh) + 'kWh'
   end
 
-  def comparison(type_str, type_sym, with)
+  def comparison(type_str, with)
     usage_from_chart_kwh = @chart_data[:x_data][type_str][index_of_most_recent_date]
     benchmark_from_chart = @chart_data[:x_data][type_str][with]
     formatted_usage_kwh = FormatEnergyUnit.format(:kwh, usage_from_chart_kwh, :html)

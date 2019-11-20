@@ -7,6 +7,12 @@ class SolarPVPanels
   SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME = 'Exported solar electricity (not consumed onsite)'.freeze
   ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME = 'Electricity consumed from mains'.freeze
 
+  SUBMETER_TYPES = [
+    ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
+    SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
+    SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+  ]
+
   def initialize(meter_attributes_config)
     @solar_pv_panel_config = SolarPVPanelConfiguration.new(meter_attributes_config)
   end
@@ -84,7 +90,6 @@ class SolarPVPanels
     baseload_kw = yesterday_baseload_kw(date, electricity_amr)
     unoccupied = unoccupied?(meter_collection, date)
     exported_pv_kwh_x48 = AMRData.one_day_zero_kwh_x48
-
     pv_yield_x48.each_with_index do |yield_kwh_per_kwp, halfhour_index|
       metered_electricity_consumption_kwh = electricity_amr.kwh(date, halfhour_index)
       solar_pv_panel_output_kwh_x48[halfhour_index] = yield_kwh_per_kwp * capacity / 2.0
@@ -106,7 +111,8 @@ class SolarPVPanels
   private def normalise_pv(exported_pv_kwh_x48, pv_consumed_onsite_kwh_x48)
     positive_export_kwh = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? kwh : 0.0 }.sum # map then sum to avoid StatSample sum bug
     negative_only_exported_kwh_x48 = exported_pv_kwh_x48.map { |kwh| kwh > 0.0 ? 0.0 : kwh }
-    scale_factor = 1.0 + (positive_export_kwh / pv_consumed_onsite_kwh_x48.sum)
+    days_pv_consumed_onsite_kwh = pv_consumed_onsite_kwh_x48.sum
+    scale_factor = days_pv_consumed_onsite_kwh == 0 ? 1.0 : 1.0 + (positive_export_kwh / days_pv_consumed_onsite_kwh)
     scaled_onsite_kwh_x48 = pv_consumed_onsite_kwh_x48.map { |kwh| kwh * scale_factor }
     [negative_only_exported_kwh_x48, scaled_onsite_kwh_x48]
   end

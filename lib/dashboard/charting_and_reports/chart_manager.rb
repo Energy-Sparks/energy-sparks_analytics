@@ -100,6 +100,7 @@ class ChartManager
 
         graph_data
       else
+        puts "kkkkkkkkkkk"
         nil
       end
     rescue StandardError => e

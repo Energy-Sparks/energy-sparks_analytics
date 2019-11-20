@@ -256,7 +256,14 @@ class AccountingCosts < CostsBase
     combined_accounting_costs = AccountingCostsPreAggregated.new(combined_meter_id)
 
     (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
+      list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }.compact
+      missing_accounting_costs = list_of_meters_on_date.select { |meter| meter.amr_data.accounting_tariff.nil? }
+      if missing_accounting_costs.length > 0
+        missing_accounting_costs.each do |meter|
+          puts "Missing accounting costs for #{meter.mpan_mprn} on #{date}"
+        end
+      end
+      next if missing_accounting_costs.length > 0 
       list_of_days_accounting_costs = list_of_meters_on_date.map { |meter| meter.amr_data.accounting_tariff.one_days_cost_data(date) }
       combined_accounting_costs.add(date, combined_day_costs(list_of_days_accounting_costs))
     end

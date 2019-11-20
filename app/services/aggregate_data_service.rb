@@ -33,10 +33,11 @@ class AggregateDataService
     bm = Benchmark.realtime {
       set_long_gap_boundary_on_all_meters
       aggregate_heat_meters
+      create_solar_pv_sub_meters if @meter_collection.sheffield_simulated_solar_pv_panels?
       aggregate_electricity_meters
       disaggregate_storage_heaters if @meter_collection.storage_heaters?
-      create_solar_pv_sub_meters if @meter_collection.sheffield_simulated_solar_pv_panels?
       create_solar_pv_sub_meters_using_meter_data if @meter_collection.low_carbon_solar_pv_panels?
+      combine_solar_pv_submeters_into_aggregate if aggregate_solar_pv_sub_meters?
       set_post_aggregation_state_on_all_meters
     }
     calc_text = "Calculated meter aggregation in #{bm.round(3)} seconds"
@@ -205,6 +206,7 @@ class AggregateDataService
   # the PV installation; note the kWh is negative as its a producer
   # rather than a consumer
   private def create_solar_pv_sub_meters
+    logger.info 'Creating solar PV data from Sheffield PV feed'
     @electricity_meters.each do |electricity_meter|
       next unless electricity_meter.sheffield_simulated_solar_pv_panels?
 
@@ -223,8 +225,8 @@ class AggregateDataService
         Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, :solar_pv),
         SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
       )
-      logger.info "Created meter onsite consumed electricity pv data from #{disaggregated_data[:solar_consumed_onsite].start_date} to #{disaggregated_data[:solar_consumed_onsite].end_date} #{disaggregated_data[:solar_consumed_onsite].total.round(0)}kWh"
-
+      logger.warn "Created meter onsite consumed electricity pv data from #{disaggregated_data[:solar_consumed_onsite].start_date} to #{disaggregated_data[:solar_consumed_onsite].end_date} #{disaggregated_data[:solar_consumed_onsite].total.round(0)}kWh"
+      
       electricity_meter.sub_meters.push(solar_pv_meter)
 
       exported_pv = create_modified_meter_copy(
@@ -272,6 +274,7 @@ class AggregateDataService
       calculate_meter_carbon_emissions_and_costs(original_electric_meter, :electricity)
       calculate_meter_carbon_emissions_and_costs(electricity_meter, :electricity)
       calculate_meter_carbon_emissions_and_costs(solar_pv_meter, :electricity)
+      calculate_meter_carbon_emissions_and_costs(exported_pv, :exported_solar_pv)
 
       @meter_collection.solar_pv_meter = solar_pv_meter
     end
@@ -350,7 +353,6 @@ class AggregateDataService
     calculate_meter_carbon_emissions_and_costs(mains_meter, :electricity)
 
     puts "Totals: pv #{solar_meter.amr_data.total} exp #{export_meter.amr_data.total} mains #{mains_meter.amr_data.total} pvons #{solar_pv_consumed_onsite_meter.amr_data.total}"
-    puts @meter_collection.aggregated_electricity_meters.amr_data.total
   end
 
   # defensive programming to ensure correct data arrives from front end, and analytics
@@ -453,6 +455,30 @@ class AggregateDataService
     combined_meter = aggregate_meters(combined_meter, list_of_meters, type)
     # combine_sub_meters_deprecated(combined_meter, list_of_meters) # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
     combined_meter
+  end
+
+  def aggregate_solar_pv_sub_meters?
+    @meter_collection.solar_pv_panels? && @meter_collection.electricity_meters.length > 1
+  end
+
+  def combine_solar_pv_submeters_into_aggregate
+    aggregate_meter = @meter_collection.aggregated_electricity_meters
+    SolarPVPanels::SUBMETER_TYPES.each do |solar_sub_meter_type|
+      meters_to_aggregate = @meter_collection.electricity_meters.map do |electric_meter|
+        electric_meter.sub_meters.find{ |sub_meter| sub_meter.name == solar_sub_meter_type }
+      end.compact
+      next if meters_to_aggregate.empty? # defensive
+      if meters_to_aggregate.length == 1
+        aggregate_meter.sub_meters.push(meters_to_aggregate[0])
+      else
+        aggregated_sub_meter = aggregate_meters(nil, meters_to_aggregate, :electricity)
+        aggregated_sub_meter.name = solar_sub_meter_type
+        aggregate_meter.sub_meters.push(aggregated_sub_meter)
+        # assign too many times
+        aggregate_meter.id   = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+        aggregate_meter.name = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+      end
+    end
   end
 
   private def calculate_carbon_emissions_for_meter(meter, fuel_type)
