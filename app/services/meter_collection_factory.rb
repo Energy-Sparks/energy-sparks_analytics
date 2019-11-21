@@ -1,5 +1,9 @@
 class MeterCollectionFactory
 
+  def self.build(data)
+    new(**data[:schedule_data]).build(**data.slice(:school_data, :amr_data, :meter_attributes))
+  end
+
   def initialize(temperatures:, solar_pv:, solar_irradiation:, grid_carbon_intensity:, holidays:)
     @temperatures = temperatures
     @solar_pv = solar_pv
@@ -8,7 +12,18 @@ class MeterCollectionFactory
     @holidays = holidays
   end
 
-  def build(school:, meter_data: {electricity_meters: [], heat_meters: []}, meter_attributes: {})
+  def build(school_data:, amr_data: {electricity_meters: [], heat_meters: []}, meter_attributes: {})
+
+    school = Dashboard::School.new(
+      school_data[:name],
+      school_data[:address],
+      school_data[:floor_area],
+      school_data[:number_of_pupils],
+      school_data[:school_type],
+      school_data[:area_name],
+      school_data[:urn],
+      school_data[:postcode]
+    )
 
     meter_collection = MeterCollection.new(school,
                                            temperatures: @temperatures,
@@ -18,7 +33,7 @@ class MeterCollectionFactory
                                            holidays: @holidays
                                           )
 
-    add_meters_and_amr_data(meter_collection, meter_data, meter_attributes)
+    add_meters_and_amr_data(meter_collection, amr_data, meter_attributes)
 
     meter_collection
   end
@@ -51,7 +66,7 @@ class MeterCollectionFactory
     attributes = meter_attributes.fetch(meter_data[:identifier]){ {} }
     amr_data = AMRData.new(meter_data[:type])
     meter_data[:readings].each do |reading|
-      amr_data.add(reading[:reading_date], OneDayAMRReading.new(reading[:meter_id], reading[:reading_date], reading[:type], reading[:substitute_date], reading[:upload_datetime], reading[:kwh_data_x48]))
+      amr_data.add(reading[:reading_date], OneDayAMRReading.new(meter_data[:external_meter_id], reading[:reading_date], reading[:type], reading[:substitute_date], reading[:upload_datetime], reading[:kwh_data_x48]))
     end
     Dashboard::Meter.new(
       meter_collection:   meter_collection,
