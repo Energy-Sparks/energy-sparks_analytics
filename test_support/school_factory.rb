@@ -39,14 +39,16 @@ class SchoolFactory
 
   def load_validated_meter_collection
     school_filename = 'st-marks-c-of-e-school'
-    validated_meter_collection = load_meter_collections(school_filename, 'validated-meter-collection-')
+    validated_meter_data = load_meter_collections(school_filename, 'validated-data-')
+    validated_meter_collection = MeterCollectionFactory.build(validated_meter_data)
     AggregateDataService.new(validated_meter_collection).aggregate_heat_and_electricity_meters
     validated_meter_collection
   end
 
   def load_unvalidated_meter_collection
     school_filename = 'freshford-church-school'
-    unvalidated_meter_collection = load_meter_collections(school_filename, 'unvalidated-meter-collection-')
+    unvalidated_meter_data = load_meter_collections(school_filename, 'unvalidated-data-')
+    unvalidated_meter_collection = MeterCollectionFactory.build(unvalidated_meter_data)
     AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
     unvalidated_meter_collection
   end
