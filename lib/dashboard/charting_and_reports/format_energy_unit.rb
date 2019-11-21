@@ -68,7 +68,7 @@ class FormatEnergyUnit
 
   def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
     if unit.is_a?(Hash) && unit.key?(:substitute_nil)
-      if value.nil?
+      if value.nil? || value == unit[:substitute_nil]
         return unit[:substitute_nil]
       else
         unit = unit[:units]

@@ -16,7 +16,7 @@ puts "Number of schools: #{school_names.length}"
 html = ''
 
 school_names.each do |school_name|
-  # next unless school_name == 'Mundella'
+  # next unless school_name == 'Farr Primary'
   html += "<h2>#{school_name}</h2>"
   puts "==============================Doing #{school_name} ================================"
 
