@@ -168,9 +168,6 @@ class AggregateDataService
       :storage_heater_aggreated
     )
 
-    # not ideal but aggregate storage heater meter is virtual and created here so needs to acquire attributes
-    aggregate_storage_heater_meter.set_meter_attributes(@meter_collection.modifiers(:aggregate_store_heater))
-
     calculate_meter_carbon_emissions_and_costs(aggregate_storage_heater_meter, :electricity)
 
     @meter_collection.storage_heater_meter = aggregate_storage_heater_meter
