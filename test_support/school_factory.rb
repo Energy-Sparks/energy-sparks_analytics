@@ -9,10 +9,10 @@ class SchoolFactory
   end
 
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
-  def load_or_use_cached_meter_collection(identifier_type, identifier, source)
-    return load_aggregated_meter_collection if source == :aggregated_meter_collection
-    return load_validated_meter_collection  if source == :load_validated_meter_collection
-    return load_unvalidated_meter_collection  if source == :load_unvalidated_meter_collection
+  def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {})
+    return load_aggregated_meter_collection if source == :aggregated_meter_collection # no overrides as this is the final object that we use, including meter attributes
+    return load_validated_meter_collection(meter_attributes_overrides: meter_attributes_overrides)  if source == :load_validated_meter_collection
+    return load_unvalidated_meter_collection (meter_attributes_overrides: meter_attributes_overrides) if source == :load_unvalidated_meter_collection
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
@@ -37,18 +37,18 @@ class SchoolFactory
     load_meter_collections(school_filename, 'aggregated-meter-collection-')
   end
 
-  def load_validated_meter_collection
+  def load_validated_meter_collection(meter_attributes_overrides: {})
     school_filename = 'st-marks-c-of-e-school'
     validated_meter_data = load_meter_collections(school_filename, 'validated-data-')
-    validated_meter_collection = MeterCollectionFactory.build(validated_meter_data)
+    validated_meter_collection = build_meter_collection(validated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
     AggregateDataService.new(validated_meter_collection).aggregate_heat_and_electricity_meters
     validated_meter_collection
   end
 
-  def load_unvalidated_meter_collection
+  def load_unvalidated_meter_collection(meter_attributes_overrides: {})
     school_filename = 'freshford-church-school'
     unvalidated_meter_data = load_meter_collections(school_filename, 'unvalidated-data-')
-    unvalidated_meter_collection = MeterCollectionFactory.build(unvalidated_meter_data)
+    unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
     AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
     unvalidated_meter_collection
   end
@@ -94,6 +94,21 @@ class SchoolFactory
     school
   end
 
+  private def build_meter_collection(data, meter_attributes_overrides: {})
+    meter_attributes = data[:meter_attributes]
+    MeterCollectionFactory.new(
+      temperatures: data[:schedule_data][:temperatures],
+      solar_pv: data[:schedule_data][:solar_pv],
+      solar_irradiation: data[:schedule_data][:solar_irradiation],
+      grid_carbon_intensity: data[:schedule_data][:grid_carbon_intensity],
+      holidays: data[:schedule_data][:holidays]
+    ).build(
+      school_data: data[:school_data],
+      amr_data: data[:amr_data],
+      meter_attributes: meter_attributes.merge(meter_attributes_overrides)
+    )
+  end
+
   def find_cached_school(urn, source)
     @school_cache.dig(urn, source)
   end
@@ -108,4 +123,5 @@ class SchoolFactory
     loader.load_meter_readings
     school_copy
   end
+
 end
