@@ -129,7 +129,7 @@ class AggregateDataService
       storage_heater_amr,
       :storage_heater,
       electricity_meter.id,
-      "#{electricity_meter.name} storage heater only"
+      "#{electricity_meter.name} storage heater only",
       :storage_heater_disaggreated_storage_heater
     )
 
