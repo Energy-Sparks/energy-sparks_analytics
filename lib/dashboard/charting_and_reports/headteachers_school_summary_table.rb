@@ -20,7 +20,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
   def self.header_html
     [
       '',
-      'Annual Use',
+      'Annual Use (kWh)',
       'Annual Cost',
       'Change from last year',
       'Change in last 4 weeks',
@@ -37,9 +37,11 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     { 'Head teacher\'s energy summary' => TEMPLATE_VARIABLES}
   end
 
+  KWH_NOT_ENOUGH_IN_COL_FORMAT = { units: :kwh, substitute_nil: 'Not enough data' }
+
   COLUMN_TYPES = [
     :fuel_type,
-    { units: :kwh, substitute_nil: 'Not enough data'},
+    KWH_NOT_ENOUGH_IN_COL_FORMAT,
     :£,
     :relative_percent,
     :relative_percent,
@@ -82,7 +84,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
 
     {
       fuel_type:          { data: fuel_type.to_s.humanize.capitalize,       units: :fuel_type },
-      this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: { units: :kwh, substitute_nil: 'Not enough data'} },
+      this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: KWH_NOT_ENOUGH_IN_COL_FORMAT },
       this_year_£:        { data: last_2_years_comparison[:current_£],      units: :£ },
       change_years:       { data: last_2_years_comparison[:percent_change], units: :relative_percent },
       change_4_weeks:     { data: last_4_week_comparison[:percent_change],  units: :relative_percent },
