@@ -12,7 +12,7 @@ class SchoolFactory
   def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {})
     return load_aggregated_meter_collection if source == :aggregated_meter_collection # no overrides as this is the final object that we use, including meter attributes
     return load_validated_meter_collection(meter_attributes_overrides: meter_attributes_overrides)  if source == :load_validated_meter_collection
-    return load_unvalidated_meter_collection (meter_attributes_overrides: meter_attributes_overrides) if source == :load_unvalidated_meter_collection
+    return load_unvalidated_meter_collection(meter_attributes_overrides: meter_attributes_overrides) if source == :load_unvalidated_meter_collection
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
