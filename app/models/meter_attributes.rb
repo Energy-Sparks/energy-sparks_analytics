@@ -161,6 +161,14 @@ class MeterAttributes
             end_date:   Date.new(2019, 2, 22),
             reason:     'switched from gas to electric heating, validaiton was substituting holiday from previous gassy year: PH 16Nov2019'
           }
+        },
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 22Nov2019'
+          }
         }
       ]
     },
