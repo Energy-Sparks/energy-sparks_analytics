@@ -414,7 +414,8 @@ class AlertAnalysisBase < ContentBase
       AlertSolarPVBenefitEstimator                  => 'sole',
       AlertElectricityLongTermTrend                 => 'ellt',
       AlertGasLongTermTrend                         => 'gslt',
-      AlertStorageHeatersLongTermTrend              => 'shlt'
+      AlertStorageHeatersLongTermTrend              => 'shlt',
+      AlertOptimumStartAnalysis                     => 'opts'
     }
   end
 
