@@ -8,7 +8,6 @@ class RunBenchmarks
   attr_reader :control
   def initialize(control, schools)
     @control = control
-    ap control
     puts "School list: #{schools}"
     @school_list = AnalysticsSchoolAndMeterMetaData.new.match_school_names(schools)
     @database = BenchmarkDatabase.new(control[:filename])
@@ -60,7 +59,6 @@ class RunBenchmarks
       composite_tables  += page_table_composites
     end
 
-    ap composite_tables
     save_html(html)
     save_charts_to_excel(charts.compact)
   end

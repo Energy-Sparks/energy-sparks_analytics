@@ -13,7 +13,7 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  schools:                  ['.*'],
+  schools:                  ['White.*'],
   source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },

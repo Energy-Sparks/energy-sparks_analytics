@@ -415,7 +415,8 @@ class AlertAnalysisBase < ContentBase
       AlertElectricityLongTermTrend                 => 'ellt',
       AlertGasLongTermTrend                         => 'gslt',
       AlertStorageHeatersLongTermTrend              => 'shlt',
-      AlertOptimumStartAnalysis                     => 'opts'
+      AlertOptimumStartAnalysis                     => 'opts',
+      AlertSummerHolidayRefridgerationAnalysis      => 'shol'
     }
   end
 

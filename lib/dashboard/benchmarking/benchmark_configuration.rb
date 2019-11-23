@@ -71,7 +71,7 @@ module Benchmarking
           { data: ->{ enba_co2y },          name: 'Annual Energy CO2', units: :co2 },
           { data: ->{ enba_klyr },          name: 'Annual Energy kWh', units: :kwh },
           { data: ->{ addp_pupn },          name: 'Pupils', units: :pupils },
-          { data: ->{ addp_flra },          name: 'Flooer area', units: :m2 },
+          { data: ->{ addp_flra },          name: 'Floor area', units: :m2 },
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -406,6 +406,21 @@ module Benchmarking
           { data: ->{ opts_rmss },  name: 'Regression model optimum start sensitivity to outside temperature',  units: :optimum_start_sensitivity },
           { data: ->{ opts_rmr2 },  name: 'Regression model optimum start r2',  units: :r2 },
           { data: ->{ hthe_htst },  name: 'Average heating start time last week', units: :timeofday},
+        ],
+        sort_by: [1],
+        type: %i[table]
+      },
+      summer_holiday_electricity_analysis: {
+        name:     'Experimental analysis of reductions in baseload over summer holidays',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',      units: String },
+          { data: ->{ shol_ann£ },  name: 'Annualised £ value of summer holiday reduction',    units: :£, chart_data: true },
+          { data: ->{ shol_hol£ },  name: 'Saving during summer holiday from baseload reduction',  units: :£ },
+          { data: ->{ shol_kwrd },  name: 'Reduction in baseload over summer holidays', units: :kw },
+          { data: ->{ shol_rrat },  name: 'Size of reduction rating',  units: Float },
+          { data: ->{ shol_trat },  name: 'Rating based on number of recent years with reduction',  units: Float },
+          { data: ->{ shol_ratg },  name: 'Overall rating',  units: Float },
+
         ],
         sort_by: [1],
         type: %i[table]

@@ -102,8 +102,11 @@ class SchoolFactory
 
   def load_meter_readings(school, source)
     school_copy = school.deep_dup
-    loader = MeterReadingsDownloadBase.meter_reading_factory(source, school_copy)
-    loader.load_meter_readings
+    bm = Benchmark.realtime {
+      loader = MeterReadingsDownloadBase.meter_reading_factory(source, school_copy)
+      loader.load_meter_readings
+    }
+    puts "loaded marshal meter readings in #{bm.round(5)}"
     school_copy
   end
 end

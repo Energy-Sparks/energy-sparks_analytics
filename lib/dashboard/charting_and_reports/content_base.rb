@@ -124,6 +124,19 @@ class ContentBase
     end.to_h
   end
 
+  protected def format_array_of_hashes_into_table(rows, keys, units, medium)
+    rows.map do |row|
+      keys.each_with_index.map do |key, column_number|
+        format_for_table(row[key], units[column_number], medium)
+      end
+    end
+  end
+
+  private def format_for_table(value, unit, medium)
+    return value if medium == :raw || unit == String
+    FormatEnergyUnit.format(unit, value, medium, false, true) 
+  end
+
   private def percent_change(old_value, new_value)
     old_value.nil? ? nil : ((new_value - old_value) / old_value)
   end
