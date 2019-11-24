@@ -9,7 +9,7 @@ module Benchmarking
     end
 
     def front_end_content(school_ids: nil, filter: nil)
-      content(school_ids, filter).select{ |content_config| %i[html chart_name, table].include?(content_config[:type]) }
+      content(school_ids, filter).select{ |content_config| %i[html chart_name chart table title].include?(content_config[:type]) }
     end
 
     def content(school_ids: nil, filter: nil)
@@ -42,6 +42,7 @@ module Benchmarking
       [
         { type: :analytics_html,        content: '<br>' },
         { type: :html,                  content: "<h1>#{chart_table_config[:name]}</h1>" },
+        { type: :title,                 content: chart_table_config[:name]},
         { type: :html,                  content: introduction_text },
       ]
     end

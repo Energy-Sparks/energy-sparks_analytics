@@ -61,7 +61,9 @@ module Benchmarking
           { data: ->{ enba_ratg },  name: 'rating', units: Float, y2_axis: true },
         ],
         sort_by:  method(:sort_energy_costs),
-        type: %i[chart table]
+        type: %i[chart table],
+        drilldown:  { adult_dashboard: :benchmark, content: AdviceBenchmark }
+
       },
       annual_energy_costs: {
         name:     'Annual energy costs',
@@ -124,10 +126,10 @@ module Benchmarking
         name:     'Electricity out of hours use',
         columns:  [
           { data: 'addp_name',      name: 'School name',                  units: String, chart_data: true   },
-          { data: ->{ eloo_sdop },  name: 'School day open',              units: :percent, chart_data: true },
-          { data: ->{ eloo_sdcp },  name: 'School day closed',            units: :percent, chart_data: true },
-          { data: ->{ eloo_holp },  name: 'Holidays',                     units: :percent, chart_data: true },
-          { data: ->{ eloo_wkep },  name: 'Weekends',                     units: :percent, chart_data: true },
+          { data: ->{ eloo_sdop },  name: 'School Day Open',              units: :percent, chart_data: true },
+          { data: ->{ eloo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
+          { data: ->{ eloo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
+          { data: ->{ eloo_wkep },  name: 'Weekend',                      units: :percent, chart_data: true },
           { data: ->{ eloo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ eloo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ eloo_ratg },  name: 'rating',                       units: Float, y2_axis: true }
@@ -201,10 +203,10 @@ module Benchmarking
         name:     'Gas out of hours use',
         columns:  [
           { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true },
-          { data: ->{ gsoo_sdop },  name: 'School day open',              units: :percent, chart_data: true },
-          { data: ->{ gsoo_sdcp },  name: 'School day closed',            units: :percent, chart_data: true },
-          { data: ->{ gsoo_holp },  name: 'Holidays',                     units: :percent, chart_data: true },
-          { data: ->{ gsoo_wkep },  name: 'Weekends',                     units: :percent, chart_data: true },
+          { data: ->{ gsoo_sdop },  name: 'School Day Open',              units: :percent, chart_data: true },
+          { data: ->{ gsoo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
+          { data: ->{ gsoo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
+          { data: ->{ gsoo_wkep },  name: 'Weekend',                      units: :percent, chart_data: true },
           { data: ->{ gsoo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ gsoo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ gsoo_ratg },  name: 'rating', units: Float, y2_axis: true }
@@ -216,10 +218,10 @@ module Benchmarking
         name:     'Storage heater out of hours use',
         columns:  [
           { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true },
-          { data: ->{ shoo_sdop },  name: 'School day open',              units: :percent, chart_data: true },
-          { data: ->{ shoo_sdcp },  name: 'School day closed',            units: :percent, chart_data: true },
-          { data: ->{ shoo_holp },  name: 'Holidays',                     units: :percent, chart_data: true },
-          { data: ->{ shoo_wkep },  name: 'Weekends',                     units: :percent, chart_data: true },
+          { data: ->{ shoo_sdop },  name: 'School Day Open',              units: :percent, chart_data: true },
+          { data: ->{ shoo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
+          { data: ->{ shoo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
+          { data: ->{ shoo_wkep },  name: 'Weekend',                      units: :percent, chart_data: true },
           { data: ->{ shoo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ shoo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ shoo_ratg },  name: 'rating', units: Float, y2_axis: true }
