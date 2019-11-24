@@ -3,7 +3,7 @@ require_relative 'alert_gas_model_base.rb'
 
 class AlertOptimumStartAnalysis < AlertGasModelBase
   attr_reader :regression_start_time, :optimum_start_sensitivity, :regression_r2
-  attr_reader :average_start_time, :start_time_standard_devation
+  attr_reader :average_start_time, :start_time_standard_devation, :average_start_time_hh_mm
   
   def initialize(school)
     super(school, :optimumstartanalysis)
@@ -35,6 +35,11 @@ class AlertOptimumStartAnalysis < AlertGasModelBase
       units:          :morning_start_time,
       benchmark_code: 'avgt'
     },
+    average_start_time_hh_mm: {
+      description:     'Average start time in morning',
+      units:          :timeofday,
+      benchmark_code: 'avhm'
+    },
     start_time_standard_devation: {
       description:      'Standard deviation (hours) of start time in last year',
       units:            :opt_start_standard_deviation,
@@ -59,6 +64,7 @@ class AlertOptimumStartAnalysis < AlertGasModelBase
     @optimum_start_sensitivity    = results[:optimum_start_sensitivity]
     @regression_r2                = results[:regression_r2]
     @average_start_time           = results[:average_start_time]
+    @average_start_time_hh_mm     = TimeOfDay.from_hour_fraction(@average_start_time)
     @start_time_standard_devation = results[:start_time_standard_devation]
 
     @rating = calculate_rating_from_range(6.0, 3.0, results[:average_start_time])

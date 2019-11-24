@@ -33,6 +33,8 @@ module Benchmarking
       end
     end
 
+    attr_reader :benchmark_database
+
     def initialize(benchmark_database)
       @benchmark_database = benchmark_database
     end

@@ -91,7 +91,7 @@ class RunBenchmarks
       when :analytics_html, :html, :table_html
         html += content_item[:content]
       when :chart_name
-        html += "<h2>Chart: #{content_item[:content]} inserted here"
+        html += "<h2>Chart: #{content_item[:content]} inserted here</h2>"
       when :chart
         charts.push(content_item[:content])
       when :table_text

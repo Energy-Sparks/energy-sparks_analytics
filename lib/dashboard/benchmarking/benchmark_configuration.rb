@@ -1,4 +1,5 @@
 require_relative './benchmark_content_base.rb'
+require_relative './benchmark_content_general.rb'
 module Benchmarking
   class BenchmarkManager
 
@@ -26,9 +27,14 @@ module Benchmarking
       column_definition.key?(key) && column_definition[key]
     end
 
-    def self.available_pages
+    def self.available_pages(filter_out = nil)
       all_pages = CHART_TABLE_CONFIG.clone
+      all_pages = all_pages.select{ |name, config| !filter_out?(config, filter_out.keys[0], filter_out.values[0]) } unless filter_out.nil?
       all_pages.transform_values{ |config| config[:name] }
+    end
+
+    def self.filter_out?(config, key, value)
+      config.key?(key) && config[key] == value
     end
 
     # complex sort, so schools with missing meters, compare
@@ -230,14 +236,33 @@ module Benchmarking
         type: %i[chart table]
       },
       heating_coming_on_too_early: {
+        benchmark_class:  BenchmarkHeatingComingOnTooEarly,
         name:     'Heating start time (potentially coming on too early in morning)',
         columns:  [
           { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true },
           { data: ->{ hthe_htst },  name: 'Average heating start time (last week)', units: :timeofday, chart_data: true },
+          { data: ->{ opts_avhm },  name: 'Average heating start time last year',   units: :timeofday },
           { data: ->{ hthe_oss£ },  name: 'Annual saving if improve to exemplar',units: :£ },
           { data: ->{ hthe_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
+        type: %i[chart table]
+      },
+      optimum_start_analysis: {
+        benchmark_class:  BenchmarkOptimumStartAnalysis,
+        filter_out:     :dont_make_available_directly,
+        name:     'Optimum start analysis',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',      units: String, chart_data: true },
+          { data: ->{ opts_avhm },  name: 'Average heating start time last year',    units: :timeofday, chart_data: true },
+          { data: ->{ opts_sdst },  name: 'Standard deviation of start time - hours, last year',  units: :opt_start_standard_deviation },
+          { data: ->{ opts_ratg },  name: 'Optimum start rating', units: Float },
+          { data: ->{ opts_rmst },  name: 'Regression model optimum start time',  units: :morning_start_time },
+          { data: ->{ opts_rmss },  name: 'Regression model optimum start sensitivity to outside temperature',  units: :optimum_start_sensitivity },
+          { data: ->{ opts_rmr2 },  name: 'Regression model optimum start r2',  units: :r2 },
+          { data: ->{ hthe_htst },  name: 'Average heating start time last week', units: :timeofday},
+        ],
+        sort_by: [1],
         type: %i[chart table]
       },
       thermostat_sensitivity: {
@@ -393,21 +418,6 @@ module Benchmarking
           { data: ->{ sole_opvk },  name: 'kWp',    units: :kwp},
           { data: ->{ sole_opvy },  name: 'payback (years)',  units: :years },
           { data: ->{ sole_opvp },  name: 'Percent reduction in mains consumption', units: :percent }
-        ],
-        sort_by: [1],
-        type: %i[table]
-      },
-      optimum_start_analysis: {
-        name:     'Experimental analysis of whether optimum start working',
-        columns:  [
-          { data: 'addp_name',      name: 'School name',      units: String },
-          { data: ->{ opts_avgt },  name: 'Average heating start time last year',    units: :morning_start_time, chart_data: true },
-          { data: ->{ opts_sdst },  name: 'Standard deviation of start time - hours, last year',  units: :opt_start_standard_deviation },
-          { data: ->{ opts_ratg },  name: 'Optimum start rating', units: Float },
-          { data: ->{ opts_rmst },  name: 'Regression model optimum start time',  units: :morning_start_time },
-          { data: ->{ opts_rmss },  name: 'Regression model optimum start sensitivity to outside temperature',  units: :optimum_start_sensitivity },
-          { data: ->{ opts_rmr2 },  name: 'Regression model optimum start r2',  units: :r2 },
-          { data: ->{ hthe_htst },  name: 'Average heating start time last week', units: :timeofday},
         ],
         sort_by: [1],
         type: %i[table]

@@ -7,7 +7,7 @@ module Benchmarking
 
     def available_pages(school_ids: nil, filter: nil)
       # TODO(PH, 1Nov2019) filter list where not relevant e.g. gas only content for Highland Schools
-      BenchmarkManager.available_pages
+      BenchmarkManager.available_pages({filter_out: :dont_make_available_directly})
     end
 
     def benchmark_dates(_page_name)
