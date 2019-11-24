@@ -57,19 +57,23 @@ module Benchmarking
 
     CHART_TABLE_CONFIG = {
       annual_energy_costs_per_pupil: {
+        benchmark_class:  BenchmarkContentEnergyPerPupil,
         name:     'Annual energy use per pupil',
         columns:  [
           { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
           { data: ->{ elba_£pup },          name: 'Annual electricity GBP/pupil', units: :£, chart_data: true },
-          { data: ->{ zero(gsba_£pup) * zero(gsba_ddaj) },  name: 'Annual gas GBP/pupil', units: :£, chart_data: true },
-          { data: ->{ zero(shan_£pup) * zero(shan_ddaj) },  name: 'Annual storage heater GBP/pupil', units: :£, chart_data: true },
-          { data: ->{ enba_£pup },  name: 'Annual energy GBP', units: :£},
-          { data: ->{ enba_ratg },  name: 'rating', units: Float, y2_axis: true },
+          { data: ->{ gsba_£pup },          name: 'Annual gas GBP/pupil', units: :£, chart_data: true },
+          { data: ->{ shan_£pup },          name: 'Annual storage heater GBP/pupil', units: :£, chart_data: true },
+          { data: ->{ enba_£pup },          name: 'Annual energy GBP', units: :£},
+          { data: ->{ sum_data([elba_£pup, gsba_n£pp, shan_n£pp]) }, name: 'Annual energy GBP/pupil (temperature compensated)', units: :£},
+          { data: ->{ sum_data([elba_kpup, gsba_kpup, shan_kpup]) }, name: 'Annual energy kWh/pupil', units: :kwh},
+          { data: ->{ sum_data([elba_cpup, gsba_cpup, shan_cpup]) }, name: 'Annual energy kgCO2/pupil', units: :kwh},
+          { data: ->{ addp_stpn },          name: 'Type',   units: String },
+          { data: ->{ enba_ratg },          name: 'rating', units: Float, y2_axis: true },
         ],
         sort_by:  method(:sort_energy_costs),
         type: %i[chart table],
         drilldown:  { adult_dashboard: :benchmark, content: AdviceBenchmark }
-
       },
       annual_energy_costs: {
         name:     'Annual energy costs',

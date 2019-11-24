@@ -23,6 +23,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
 
   attr_reader :one_year_gas_per_pupil_kwh, :one_year_gas_per_pupil_£
   attr_reader :one_year_gas_per_floor_area_kwh, :one_year_gas_per_floor_area_£
+  attr_reader :one_year_gas_per_pupil_co2, :one_year_gas_per_floor_area_co2
 
   attr_reader :degree_day_adjustment
 
@@ -103,12 +104,23 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
 
       one_year_gas_per_pupil_kwh: {
         description: 'Per pupil annual gas usage - kwh - required for PH analysis, not alerts',
-        units:  {kwh: :gas}
+        units:  {kwh: :gas},
+        benchmark_code: 'kpup'
       },
       one_year_gas_per_pupil_£: {
         description: 'Per pupil annual gas usage - £ - required for PH analysis, not alerts',
         units:  {£: :gas},
         benchmark_code: '£pup'
+      },
+      one_year_gas_per_pupil_co2: {
+        description: 'Per pupil annual gas usage - co2 - required for PH analysis, not alerts',
+        units:  :co2,
+        benchmark_code: 'cpup'
+      },
+      one_year_gas_per_floor_area_co2: {
+        description: 'Per floor area annual gas usage - co2 - required for PH analysis, not alerts',
+        units:  :co2,
+        benchmark_code: 'cfla'
       },
       one_year_gas_per_floor_area_kwh: {
         description: 'Per floor area annual gas usage - kwh - required for PH analysis, not alerts',
@@ -206,6 +218,9 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_gas_per_pupil_£         = @last_year_£ / pupils
     @one_year_gas_per_floor_area_kwh  = @last_year_kwh / floor_area
     @one_year_gas_per_floor_area_£    = @last_year_£ / floor_area
+
+    @one_year_gas_per_pupil_co2       = @last_year_co2  / pupils
+    @one_year_gas_per_floor_area_co2  = @last_year_co2  / floor_area
 
     @one_year_gas_per_pupil_normalised_kwh        = @one_year_gas_per_pupil_kwh * @degree_day_adjustment
     @one_year_gas_per_pupil_normalised_£          = @one_year_gas_per_pupil_£ * @degree_day_adjustment

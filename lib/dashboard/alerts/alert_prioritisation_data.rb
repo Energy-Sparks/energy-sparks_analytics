@@ -7,7 +7,7 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
   attr_reader :annual_electricity_kwh, :annual_gas_kwh, :annual_storage_heater_kwh
   attr_reader :annual_electricity_£, :annual_gas_£, :annual_storage_heater_£
   attr_reader :degree_days_15_5C_domestic
-  attr_reader :school_area
+  attr_reader :school_area, :school_type_name
 
   def initialize(school)
     super(school, :prioritisationdata)
@@ -41,6 +41,11 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
       description: 'Primary or Secondary',
       units:  :school_type,
       benchmark_code: 'sctp'
+    },
+    school_type_name: {
+      description: 'Primary or Secondary',
+      units:  String,
+      benchmark_code: 'stpn'
     },
     school_name: {
       description: 'Name of school',
@@ -148,6 +153,8 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     @annual_gas_£             = annual_kwh(@school.aggregated_heat_meters,        :gas,             asof_date, :£)
     @annual_storage_heater_£  = annual_kwh(@school.storage_heater_meter,          :storage_heaters, asof_date, :£)
     
+    @school_type_name = @school.school_type.to_s.humanize
+
     @degree_days_15_5C_domestic = @school.temperatures.degree_days_this_year(asof_date)
 
     @school_area = @school.area_name

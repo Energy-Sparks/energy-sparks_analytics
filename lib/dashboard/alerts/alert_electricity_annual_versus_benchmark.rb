@@ -12,7 +12,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_£
   attr_reader :one_year_saving_versus_exemplar_adjective
 
-  attr_reader :one_year_electricity_per_pupil_kwh, :one_year_electricity_per_pupil_£
+  attr_reader :one_year_electricity_per_pupil_kwh, :one_year_electricity_per_pupil_£, :one_year_electricity_per_pupil_co2
   attr_reader :one_year_electricity_per_floor_area_kwh, :one_year_electricity_per_floor_area_£
 
   attr_reader :per_pupil_electricity_benchmark_£
@@ -87,12 +87,18 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     },
     one_year_electricity_per_pupil_kwh: {
       description: 'Per pupil annual electricity usage - kwh - required for PH analysis, not alerts',
-      units:  {kwh: :electricity}
+      units:  {kwh: :electricity},
+      benchmark_code: 'kpup'
     },
     one_year_electricity_per_pupil_£: {
       description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts',
       units:  {£: :electricity},
       benchmark_code: '£pup'
+    },
+    one_year_electricity_per_pupil_co2: {
+      description: 'Per pupil annual electricity usage - co2 - required for PH analysis, not alerts',
+      units:  :co2,
+      benchmark_code: 'cpup'
     },
     one_year_electricity_per_floor_area_kwh: {
       description: 'Per floor area annual electricity usage - kwh - required for PH analysis, not alerts',
@@ -159,6 +165,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
     @one_year_electricity_per_pupil_kwh       = @last_year_kwh / pupils
     @one_year_electricity_per_pupil_£         = @last_year_£ / pupils
+    @one_year_electricity_per_pupil_co2       = @last_year_co2 / pupils
     @one_year_electricity_per_floor_area_kwh  = @last_year_kwh / floor_area
     @one_year_electricity_per_floor_area_£    = @last_year_£ / floor_area
 

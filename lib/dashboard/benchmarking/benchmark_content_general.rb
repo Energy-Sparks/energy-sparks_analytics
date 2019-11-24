@@ -1,5 +1,27 @@
 require_relative './benchmark_no_text_mixin.rb'
 module Benchmarking
+  class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This benchmark compares the energy consumed per pupil each year,
+          expressed in pounds.
+        </p>
+      )
+    end
+    private def table_introduction_text
+      %q(
+        <p>
+          The table provides the information in more detail.
+          Energy Sparks doesn&apos;t have a full set of meter data
+          for some schools, for example rural schools with biomass or oil boilers,
+          so this comparison might not be relevant for all schools.
+        </p>
+      )
+    end
+  end
+
   class BenchmarkContentElectricityPerPupil < BenchmarkContentBase
     private def introduction_text
       %q(
