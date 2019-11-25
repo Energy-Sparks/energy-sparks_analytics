@@ -115,6 +115,15 @@ class AdviceSolarPV < AdviceElectricityBase
           already offering to pay you for any exported electricity.
         </li>
         <li>
+          The calculations are based on a current electricity price of 12p/kWh,
+          if mains electricity prices reduce there will be a lower economic benefit and
+          longer payback to the installation.
+        </li>
+        <li>
+          If the school becomes more efficient at using electricity and reduces its electricity
+          consumption the benefit will also reduce.
+        </li>
+        <li>
           The capital costs in the table above are estimates based on
           current market rates; an installation cost at your
           school might be a little different.
