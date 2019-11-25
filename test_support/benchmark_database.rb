@@ -4,6 +4,7 @@
 #
 
 class BenchmarkDatabase
+  include Logging
   attr_reader :db_filename, :database
 
   def initialize(filename)
@@ -35,6 +36,7 @@ class BenchmarkDatabase
       puts 'Unable to save: database empty'
     else
       # data_without_default_proc = remove_proc_from_hash(data.deep_dup)
+      logger.info "Saving data to database file #{@db_filename}"
       writer = FileWriter.new(@db_filename)
       writer.save(data)
     end
@@ -48,6 +50,7 @@ class BenchmarkDatabase
   end
 
   private def load_database_private
+    logger.info "Loading data from database file #{@db_filename}"
     writer = FileWriter.new(@db_filename)
     data = writer.load
     @database.deep_merge!(data) unless data.nil?

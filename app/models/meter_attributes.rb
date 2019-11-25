@@ -334,11 +334,12 @@ class MeterAttributes
         {
           start_date:         Date.new(2014, 1, 1),
           # end_date:          Date.new(2025, 1, 1),
-          kwp:                6.0, # appears to have 22 panels on bing satellite - for 2016 extension
+          kwp:                6.0, # 
           orientation:        0,
           tilt:               30,
           shading:            0,
-          fit_£_per_kwh:      0.30
+          fit_£_per_kwh:      0.30,
+          reason:    'appears to have 22 panels on bing satellite - for 2016 extension' 
         }
       ]
     },

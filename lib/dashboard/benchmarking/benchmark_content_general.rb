@@ -1,5 +1,25 @@
 require_relative './benchmark_no_text_mixin.rb'
 module Benchmarking
+  CAVEAT_TEXT = {
+    es_doesnt_have_all_meter_data: %q(
+      <p>
+        The table provides the information in more detail.
+        Energy Sparks doesn&apos;t have a full set of meter data
+        for some schools, for example rural schools with biomass or oil boilers,
+        so this comparison might not be relevant for all schools.
+      </p>
+    ),
+    es_data_not_in_sync: %q(
+      <p>
+        The gas, electricity and storage heater costs are all using the latest
+        data. The total might not be the sum of these 3 in the circumstance
+        where one of the meter's data is out of date, and the total covers the
+        most recent year where data is available to us on all the underlying
+        meters.
+      </p>
+    )
+  }
+  #=======================================================================================
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -11,17 +31,27 @@ module Benchmarking
       )
     end
     private def table_introduction_text
+      CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentTotalAnnualEnergy < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
       %q(
         <p>
-          The table provides the information in more detail.
-          Energy Sparks doesn&apos;t have a full set of meter data
-          for some schools, for example rural schools with biomass or oil boilers,
-          so this comparison might not be relevant for all schools.
+          This benchmark shows how much each school is spending on energy each year.
         </p>
       )
     end
+    private def table_introduction_text
+      CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
+    end
+    protected def table_interpretation_text
+      CAVEAT_TEXT[:es_data_not_in_sync]
+    end
   end
-
+  #=======================================================================================
   class BenchmarkContentElectricityPerPupil < BenchmarkContentBase
     private def introduction_text
       %q(
@@ -109,6 +139,7 @@ module Benchmarking
     end
   end
 
+  #=======================================================================================
   class BenchmarkOptimumStartAnalysis  < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 

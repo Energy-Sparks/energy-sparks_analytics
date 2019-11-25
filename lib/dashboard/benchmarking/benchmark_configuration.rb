@@ -64,7 +64,7 @@ module Benchmarking
           { data: ->{ elba_£pup },          name: 'Annual electricity GBP/pupil', units: :£, chart_data: true },
           { data: ->{ gsba_£pup },          name: 'Annual gas GBP/pupil', units: :£, chart_data: true },
           { data: ->{ shan_£pup },          name: 'Annual storage heater GBP/pupil', units: :£, chart_data: true },
-          { data: ->{ enba_£pup },          name: 'Annual energy GBP', units: :£},
+          { data: ->{ enba_£pup },          name: 'Annual energy GBP/pupil', units: :£},
           { data: ->{ sum_data([elba_£pup, gsba_n£pp, shan_n£pp]) }, name: 'Annual energy GBP/pupil (temperature compensated)', units: :£},
           { data: ->{ sum_data([elba_kpup, gsba_kpup, shan_kpup]) }, name: 'Annual energy kWh/pupil', units: :kwh},
           { data: ->{ sum_data([elba_cpup, gsba_cpup, shan_cpup]) }, name: 'Annual energy kgCO2/pupil', units: :kwh},
@@ -76,16 +76,22 @@ module Benchmarking
         drilldown:  { adult_dashboard: :benchmark, content: AdviceBenchmark }
       },
       annual_energy_costs: {
+        benchmark_class:  BenchmarkContentTotalAnnualEnergy,
         name:     'Annual energy costs',
         columns:  [
           { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
-          { data: ->{ enba_£lyr },          name: 'Annual Energy Costs', units: :£, chart_data: true },
-          { data: ->{ enba_co2y },          name: 'Annual Energy CO2', units: :co2 },
+          { data: ->{ elba_£lyr },          name: 'Annual Electricity GBP', units: :£, chart_data: true },
+          { data: ->{ gsba_£lyr },          name: 'Annual Gas GBP', units: :£, chart_data: true },
+          { data: ->{ shan_£lyr },          name: 'Annual Storage Heater GBP', units: :£, chart_data: true },
+          { data: ->{ enba_£lyr },          name: 'Total Energy Costs GBP', units: :£},
+          { data: ->{ enba_£pup },          name: 'Annual energy GBP/pupil', units: :£},
+          { data: ->{ enba_co2t },          name: 'Annual Energy CO2(tonnes)', units: :co2 },
           { data: ->{ enba_klyr },          name: 'Annual Energy kWh', units: :kwh },
+          { data: ->{ addp_stpn },          name: 'Type',   units: String  },
           { data: ->{ addp_pupn },          name: 'Pupils', units: :pupils },
           { data: ->{ addp_flra },          name: 'Floor area', units: :m2 },
         ],
-        sort_by:  [1],
+        sort_by:  [4],
         type: %i[chart table]
       },
       annual_energy_costs_per_pupil_2: {

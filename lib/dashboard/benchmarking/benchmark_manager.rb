@@ -149,7 +149,7 @@ module Benchmarking
           raw: value
         }
       else
-        FormatEnergyUnit.format(units, value, medium, false, true, :ks2)
+        FormatEnergyUnit.format(units, value, medium, false, true, :benchmark)
       end
     end
 
@@ -287,6 +287,8 @@ module Benchmarking
     def all_school_ids(selected_dates)
       list_of_school_ids = {}
       selected_dates.each do |date|
+        # puts "Got here: #{@benchmark_database.class.name}"
+        # ap @benchmark_database
         school_ids = @benchmark_database[date].keys
         school_ids.each do |school_id|
           list_of_school_ids[school_id] = true

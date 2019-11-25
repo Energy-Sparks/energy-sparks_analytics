@@ -51,7 +51,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     last_year_co2_tonnes: {
       description: 'Last years energy CO2 tonnes',
       units:  :co2t,
-      benchmark_code: 'co2y'
+      benchmark_code: 'co2t'
     },
     one_year_energy_per_pupil_kwh: {
       description: 'Per pupil annual energy usage - kwh',

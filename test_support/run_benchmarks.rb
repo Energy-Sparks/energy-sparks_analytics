@@ -10,6 +10,7 @@ class RunBenchmarks
     @control = control
     puts "School list: #{schools}"
     @school_list = AnalysticsSchoolAndMeterMetaData.new.match_school_names(schools)
+    transform_front_end_yaml_file(control[:transform_frontend_yaml]) if control.key?(:transform_frontend_yaml)
     @database = BenchmarkDatabase.new(control[:filename])
   end
 
@@ -20,6 +21,19 @@ class RunBenchmarks
   end
 
   private
+
+  # front end uses strings for keys, analytics symbols
+  def transform_front_end_yaml_file(filenames)
+    front_end_filename = filenames[:from_filename]
+    analytics_filename = filenames[:to_filename] + '.yaml'
+    front_end = YAML.load_file(front_end_filename + '.yaml')
+    front_end.each do |date, schools|
+      schools.each do |school_id, variables|
+        schools[school_id] = variables.transform_keys { |key| key.to_sym }
+      end
+    end
+    File.open(analytics_filename, 'w') { |f| f.write(YAML.dump(front_end)) }
+  end
 
   def run_alerts_to_update_database
     @school_list.sort.each do |school_name|
