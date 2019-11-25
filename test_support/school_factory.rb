@@ -19,7 +19,8 @@ class SchoolFactory
     else
       meter_collection = find_cached_school(school.urn, source)
       if meter_collection.nil?
-        meter_collection = load_meter_readings(school, source)
+        meter_attributes = @schools_meta_data.meter_attributes(identifier, identifier_type)
+        meter_collection = load_meter_readings(school, source, meter_attributes)
         add_meter_collection_to_cache(school, source, meter_collection)
       end
       meter_collection
@@ -117,9 +118,9 @@ class SchoolFactory
     (@school_cache[school.urn] ||= {})[source] = meter_collection
   end
 
-  def load_meter_readings(school, source)
+  def load_meter_readings(school, source, meter_attributes)
     school_copy = school.deep_dup
-    loader = MeterReadingsDownloadBase.meter_reading_factory(source, school_copy)
+    loader = MeterReadingsDownloadBase.meter_reading_factory(source, school_copy, meter_attributes)
     loader.load_meter_readings
     school_copy
   end

@@ -21,7 +21,7 @@ class MeterAttributes
           meter_corrections_array << weekend_correction
         end
       else
-        meter_corrections_array = [weekend_correction]
+        attributes[:meter_corrections] = [weekend_correction]
       end
     end
     attributes

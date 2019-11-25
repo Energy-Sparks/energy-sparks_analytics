@@ -1,7 +1,7 @@
 class MeterCollectionFactory
 
   def self.build(data)
-    new(**data[:schedule_data]).build(**data.slice(:school_data, :amr_data, :meter_attributes))
+    new(**data[:schedule_data]).build(**data.slice(:school_data, :amr_data, :pseudo_meter_attributes))
   end
 
   def initialize(temperatures:, solar_pv:, solar_irradiation:, grid_carbon_intensity:, holidays:)
@@ -12,7 +12,7 @@ class MeterCollectionFactory
     @holidays = holidays
   end
 
-  def build(school_data:, amr_data: {electricity_meters: [], heat_meters: []}, modifiers: {})
+  def build(school_data:, amr_data: {electricity_meters: [], heat_meters: []}, pseudo_meter_attributes: {})
 
     school = Dashboard::School.new(
       school_data[:name],
@@ -31,7 +31,7 @@ class MeterCollectionFactory
                                            solar_irradiation: @solar_irradiation,
                                            grid_carbon_intensity: @uk_grid_carbon_intensity,
                                            holidays: @holidays,
-                                           modifiers: modifiers
+                                           pseudo_meter_attributes: pseudo_meter_attributes
                                           )
 
     add_meters_and_amr_data(meter_collection, amr_data)
@@ -75,7 +75,7 @@ class MeterCollectionFactory
       identifier:         meter_data[:identifier],
       name:               meter_data[:name],
       external_meter_id:  meter_data[:external_meter_id],
-      meter_attributes:   meter_data[:modifiers]
+      meter_attributes:   meter_data[:attributes]
     )
   end
 

@@ -384,7 +384,7 @@ class AggregateDataService
     @meter_collection.meter?(meter_id, true)
   end
 
-  private def create_modified_meter_copy(meter, amr_data, type, identifier, name, modifier_name)
+  private def create_modified_meter_copy(meter, amr_data, type, identifier, name, pseudo_meter_name)
     Dashboard::Meter.new(
       meter_collection: meter_collection,
       amr_data: amr_data,
@@ -395,7 +395,7 @@ class AggregateDataService
       number_of_pupils: meter.number_of_pupils,
       solar_pv_installation: meter.solar_pv_setup,
       storage_heater_config: meter.storage_heater_setup,
-      meter_attributes: meter.meter_attributes.merge(@meter_collection.modifiers(modifier_name))
+      meter_attributes: meter.meter_attributes.merge(@meter_collection.pseudo_meter_attributes(pseudo_meter_name))
     )
   end
 
@@ -511,7 +511,7 @@ class AggregateDataService
         name: combined_name,
         floor_area: combined_floor_area,
         number_of_pupils: combined_pupils,
-        meter_attributes: @meter_collection.modifiers(:"aggregated_#{fuel_type}")
+        meter_attributes: @meter_collection.pseudo_meter_attributes(:"aggregated_#{fuel_type}")
       )
     else
       logger.info "Combined meter #{combined_meter.mpan_mprn} already created"
