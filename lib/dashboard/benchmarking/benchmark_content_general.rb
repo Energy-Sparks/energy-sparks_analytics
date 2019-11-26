@@ -159,6 +159,30 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+    #=======================================================================================
+    class BenchmarkContentChangeInBaseloadSinceLastYear < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+      private def introduction_text
+        text = %q(
+          <p>
+            This benchmark compares a school&apos;s current baseload (electricity
+            consumed when the school is closed) with that of the average
+            of last year. Schools should be aiming to reduce baseload over time
+            and not increase it as equipment and lighting has become significantly
+            more efficient over the last few years. Any increase should be tracked
+            down as soon as it is discovered. Energy Sparks can be configured
+            to send you an alert via an email or a text message if it detects
+            this has happened.
+          </p>
+          <p>
+            A 1 kW increase in baseload is equivalent to an annual increase in
+            electricity costs of £1,100.
+          </p>
+          <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+        )
+        ERB.new(text).result(binding)
+      end
+    end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase

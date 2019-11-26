@@ -148,6 +148,7 @@ module Benchmarking
         type: %i[chart table]
       },
       recent_change_in_baseload: {
+        benchmark_class: BenchmarkContentChangeInBaseloadSinceLastYear,
         name:     'Last week\'s baseload versus average of last year (% difference)',
         columns:  [
           { data: 'addp_name', name: 'School name', units: String, chart_data: true },
