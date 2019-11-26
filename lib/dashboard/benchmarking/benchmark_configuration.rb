@@ -296,10 +296,10 @@ module Benchmarking
         type: %i[chart table]
       },
       length_of_school_day_heating_season: {
+        benchmark_class:  BenchmarkContentLengthOfHeatingSeason,
         name:     'Number of days heating was on last year',
         columns:  [
           { data: 'addp_name',                   name: 'School name',           units: String, chart_data: true },
-          { data: ->{ area },       name: 'Area',                  units: String },
           { data: ->{ htsd_hdyr },  name: 'No. days heating on last year', units: :days, chart_data: true },
           { data: ->{ htsd_svav },  name: 'Saving through reducing season to average', units: :£ },
           { data: ->{ htsd_svex },  name: 'Saving through reducing season to exemplar', units: :£ },
@@ -307,7 +307,7 @@ module Benchmarking
           { data: ->{ htsd_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         number_non_null_columns_for_filtering_tables: 3,
-        sort_by: [1, 2],
+        sort_by: [1],
         type: %i[chart table]
       },
       thermostatic_control: {

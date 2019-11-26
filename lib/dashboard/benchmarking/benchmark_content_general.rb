@@ -404,6 +404,29 @@ module Benchmarking
       )
     end
   end
+  #=======================================================================================  
+  class BenchmarkContentLengthOfHeatingSeason < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          Schools often forget to turn their heating off in warm weather,
+          about 10% of schools leave their heating on all summer.
+        </p>
+        <p>
+          The chart and table below shows how many days the heating was
+          left on in the last year and the potential benefit of switching
+          the heating off in warmer weather. Schools should target reducing
+          the length of the heating season to below 90 days.
+        </p>
+        <p>
+          Energy Sparks can be configured
+          to send you an alert via an email or a text message to you if the
+          forecast for the coming week suggests you should turn off your heating.
+        </p>
+      )
+    end
+  end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
