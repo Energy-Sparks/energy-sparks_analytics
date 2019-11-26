@@ -341,7 +341,7 @@ module Benchmarking
   class BenchmarkContentGasOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
+      %q(
         <p>
           Most schools are unoccupied for about 85% of the year;
           between 5:00pm and 7:30am on school days, at weekends
@@ -360,10 +360,37 @@ module Benchmarking
           the boilers frost proection functions have been configured correctly
           to come on only when necessary.
         </p>
+        <p>
+          You can get Energy Sparks to send you a reminder (an &apos;alert&apos;) just before holidays
+          to turn your heating off.
+        </p>
       )
-      ERB.new(text).result(binding)
     end
+  end
+  #=======================================================================================  
+  class BenchmarkContentStorageHeaterOutOfHoursUsage < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          Storage heaters consume electricity and store heat overnight when
+          electricity is cheaper (assuming the school is on an &apos;teconomy 7&apos;t
+          type differential tariff) and releases the heat during the day.
+        </p>
+        <p>
+          Ensuring heating is turned off over the weekend (installing a 7 day
+          timer can provide very short paybacks - 16 weeks in this
+          <a href="https://cdn-test.energysparks.uk/static-assets/Energy_Sparks_Case_Study_3_-_Stanton_Drew_Storage_Heaters-f124cfe069b2746ab175f139c09eee70fcb558d5604be86811c70fedd67a7a6d.pdf" target ="_blank">case study</a>).
+          Turning off the heaters or turning then down as low as possible to avoid frost damage
+          can save during holidays; setting a school policy for this
+        </p>
+        <p>
+          You can get Energy Sparks to send you a reminder (an &apos;alert&apos;) just before holidays
+          to turn your heating off.
+        </p>
+      )
     end
+  end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase

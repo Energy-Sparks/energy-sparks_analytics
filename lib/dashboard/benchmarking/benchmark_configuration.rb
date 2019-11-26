@@ -240,15 +240,15 @@ module Benchmarking
         type: %i[chart table]
       },
       annual_storage_heater_out_of_hours_use: {
+        benchmark_class: BenchmarkContentStorageHeaterOutOfHoursUsage,
         name:     'Storage heater out of hours use',
         columns:  [
           { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true },
           { data: ->{ shoo_sdop },  name: 'School Day Open',              units: :percent, chart_data: true },
-          { data: ->{ shoo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
+          { data: ->{ shoo_sdcp },  name: 'Overnight charging',           units: :percent, chart_data: true },
           { data: ->{ shoo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
           { data: ->{ shoo_wkep },  name: 'Weekend',                      units: :percent, chart_data: true },
-          { data: ->{ shoo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
-          { data: ->{ shoo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
+          { data: ->{ sum_data([shoo_ahl£, shoo_awk£], true)  },  name: 'Annual weekend and holiday costs', units: :£ },
           { data: ->{ shoo_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],

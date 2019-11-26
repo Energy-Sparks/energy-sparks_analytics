@@ -68,8 +68,8 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
       schoolday_open_£:         { description: 'Annual school day open cost usage',   units: :£ },
       schoolday_closed_£:       { description: 'Annual school day closed cost usage', units: :£ },
-      holidays_£:               { description: 'Annual holiday cost usage',           units: :£ },
-      weekends_£:               { description: 'Annual weekend cost usage',           units: :£ },
+      holidays_£:               { description: 'Annual holiday cost usage',           units: :£, benchmark_code: 'ahl£' },
+      weekends_£:               { description: 'Annual weekend cost usage',           units: :£, benchmark_code: 'awk£' },
       out_of_hours_£:           { description: 'Annual £ out of hours usage',         units: :£, benchmark_code: 'aoo£' },
 
       good_out_of_hours_use_percent: {
