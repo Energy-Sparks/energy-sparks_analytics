@@ -187,7 +187,31 @@ module Benchmarking
           { data: ->{ shol_rrat },  name: 'Size of reduction rating',  units: Float },
           { data: ->{ shol_trat },  name: 'Rating based on number of recent years with reduction',  units: Float },
           { data: ->{ shol_ratg },  name: 'Overall rating',  units: Float },
-
+        ],
+        sort_by: [1],
+        type: %i[table]
+      },
+      electricity_peak_kw_per_pupil: {
+        benchmark_class: BenchmarkContentPeakElectricityPerFloorArea,
+        name:     'Peak school day electricity comparison kW/floor area',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',      units: String, chart_data: true },
+          { data: ->{ epkb_kwfa * 1000.0 },  name: 'w/floor area',    units: :w, chart_data: true },
+          { data: ->{ epkb_kwsc },  name: 'average peak kw',  units: :kw },
+          { data: ->{ epkb_kwex },  name: 'exemplar peak kw', units: :kw },
+          { data: ->{ epkb_tex£ },  name: 'saving if match exemplar (£)', units: :£ },
+          { data: ->{ epkb_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
+      solar_pv_benefit_estimate: {
+        name:     'Benefit of estimated optimum size solar PV installation',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',      units: String },
+          { data: ->{ sole_opvk },  name: 'kWp',    units: :kwp},
+          { data: ->{ sole_opvy },  name: 'payback (years)',  units: :years },
+          { data: ->{ sole_opvp },  name: 'Percent reduction in mains consumption', units: :percent }
         ],
         sort_by: [1],
         type: %i[table]
@@ -407,6 +431,7 @@ module Benchmarking
         type: %i[table chart]
       },
       change_in_gas_consumption_recent_school_weeks: {
+        benchmark_class: BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek,
         name:     'Change in gas consumption since last school week',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
@@ -418,6 +443,7 @@ module Benchmarking
         type: %i[table chart]
       },
       change_in_gas_holiday_consumption_previous_holiday: {
+        benchmark_class: BenchmarkContentChangeInGasBetweenLast2Holidays,
         name:     'Change in gas consumption between the 2 most recent holidays',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
@@ -429,6 +455,7 @@ module Benchmarking
         type: %i[table chart]
       },
       change_in_gas_holiday_consumption_previous_years_holiday: {
+        benchmark_class: BenchmarkContentChangeInGasBetween2HolidaysYearApart,
         name:     'Change in gas consumption between this holiday and the same the previous year',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
@@ -439,30 +466,6 @@ module Benchmarking
         sort_by: [1],
         type: %i[table chart]
       },
-      electricity_peak_kw_per_pupil: {
-        name:     'Peak school day electricity comparison kW/floor area',
-        columns:  [
-          { data: 'addp_name',      name: 'School name',      units: String, chart_data: true },
-          { data: ->{ epkb_kwfa },  name: 'kW/floor area',    units: :kw, chart_data: true },
-          { data: ->{ epkb_kwsc },  name: 'average peak kw',  units: :kw },
-          { data: ->{ epkb_kwex },  name: 'exemplar peak kw', units: :kw },
-          { data: ->{ epkb_tex£ },  name: 'saving if match exemplar (£)', units: :£ },
-          { data: ->{ epkb_ratg },  name: 'rating', units: Float, y2_axis: true }
-        ],
-        sort_by: [1],
-        type: %i[table chart]
-      },
-      solar_pv_benefit_estimate: {
-        name:     'Benefit of estimated optimum size solar PV installation',
-        columns:  [
-          { data: 'addp_name',      name: 'School name',      units: String },
-          { data: ->{ sole_opvk },  name: 'kWp',    units: :kwp},
-          { data: ->{ sole_opvy },  name: 'payback (years)',  units: :years },
-          { data: ->{ sole_opvp },  name: 'Percent reduction in mains consumption', units: :percent }
-        ],
-        sort_by: [1],
-        type: %i[table]
-      }
     }.freeze
 =begin
 

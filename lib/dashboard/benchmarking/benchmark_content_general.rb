@@ -252,6 +252,33 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+  #=======================================================================================  
+  class BenchmarkContentPeakElectricityPerFloorArea < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This comparison shows the peak daily school power consumption per floor area.
+          High values compared with other schools migth suggest inefficient lighting,
+          appliances or kitchen equipment. The peaks generally occur during the middle
+          of the day. Energy Sparks allows you to drill down to individual school day usage
+          to better understand the intraday characterestics of a schools electricity
+          consumption.
+        </p>
+        <p>
+          If a school&apos;s electricity consumption is high compared with
+          other schools is probably warrants further investigation. There might be
+          simple low cost remedies like turning lighting off when it is bright outside,
+          or better management of appliances in a school&apos;s kitchen. Other measures
+          like installing LED lighting might require investment.
+        </p>
+        <p>
+          LED lighting for example can consume as little as 4W/m2, whereas older
+          less efficient lighting can consume up to 12W/m2.
+        </p>
+      )
+    end
+  end
   #=======================================================================================
   class BenchmarkContentSummerHolidayBaseloadAnalysis < BenchmarkContentBase
     include BenchmarkingNoTextMixin
@@ -726,7 +753,7 @@ module Benchmarking
           This comparison simply shows the change in electricity consumption since the
           last school week. You should expect a slight but not significant
           increase in electricity consumption going into the winter with
-          inreased lighting usage.
+          increased lighting usage and a subsequent reducton in the spring.
         </p>
       )
     end
@@ -753,6 +780,53 @@ module Benchmarking
           my switching appliances off and genenerally reducing baseload. An increase
           from year to year suggests a school is not managing to reduce consumption,
           which would help mitigate some of the impacts of climate change.
+        </p>
+      )
+    end
+  end
+  #=======================================================================================  
+  class BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This comparison simply shows the change in gas consumption since the
+          last school week. You might expect an
+          increase in gas consumption going into the winter with
+          heating usage and a subsequent reducton in the spring.
+        </p>
+      )
+    end
+  end
+  #=======================================================================================  
+  class BenchmarkContentChangeInGasBetweenLast2Holidays < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This comparison shows the change in consumption between the 2 most recent holidays.
+          This can be affected by whether the heating was turned on one one of the holidays.
+          Generally schools don&apos;t need heating during holidays, or at least not
+          to heat the whole school! You can setup an Energy Sparks &apos;alert&apos; to
+          send you an email or text message just before a holiday to remind you to
+          turn heating or hot water off.
+        </p>
+      )
+    end
+  end
+  #=======================================================================================  
+  class BenchmarkContentChangeInGasBetween2HolidaysYearApart < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This comparison shows the change in consumption the most recent holiday, and
+          the same holiday a year ago. Schools should be looking to reduce holiday usage
+          my switching heating and hot water off over holidays when it is often unnecessary.
+          A signifcant  increase from year to year suggests a school is not managing to reduce consumption,
+          which would help mitigate some of the impacts of climate change. You can setup an Energy Sparks &apos;alert&apos; to
+          send you an email or text message just before a holiday to remind you to
+          turn heating or hot water off.
         </p>
       )
     end
