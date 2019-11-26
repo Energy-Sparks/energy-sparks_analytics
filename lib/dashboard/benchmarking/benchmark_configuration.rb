@@ -312,7 +312,7 @@ module Benchmarking
       },
       thermostatic_control: {
         benchmark_class:  BenchmarkContentThermostaticControl,
-        name:     'Quality of thermostatic control (R2 close to 1.0 is good)',
+        name:     'Quality of thermostatic control',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ or_nil([httc_r2, shtc_r2]) },    name: 'Thermostatic R2', units: Float,  chart_data: true },
@@ -323,6 +323,7 @@ module Benchmarking
         type: %i[chart table]
       },
       hot_water_efficiency: {
+        benchmark_class:  BenchmarkContentHotWaterEfficiency,
         name:     'Hot Water Efficiency',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
