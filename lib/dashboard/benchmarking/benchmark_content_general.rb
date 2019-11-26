@@ -208,6 +208,17 @@ module Benchmarking
       )
       ERB.new(text).result(binding)
     end
+    protected def table_introduction_text
+      %q( 
+        <p>
+          The annualised saving in the table below gives a good indication if
+          it is worthwhile investigating further. Large domestic A++ rated fridges
+          and freezers typically use £40 of electricity per year each - how does
+          this compare with the annualised reduction in the first numeric (2nd column)
+          below?
+        </p>
+       )
+    end
   end
   #=======================================================================================
   class BenchmarkContentBaseloadPerPupil < BenchmarkContentBase
@@ -236,6 +247,43 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+    #=======================================================================================
+    class BenchmarkContentSummerHolidayBaseloadAnalysis < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+      private def introduction_text
+        text = %q(
+          <p>
+            This analysis attempts to analyse whether a school school&apos;s
+            has reduced during the summer holidays by comparing overnight
+            consumption before, during and after school holidays.
+          </p>
+          <p>
+            It then reports potential reduction it has spotted. Its a useful way
+            determining how efficient appliances which have been switched off are.
+            The school will need to know whether appliances have been turned off
+            in order for you to understand what contributed to the reduction and
+            therefore what their electricity consumption is.
+          </p>
+          <p>
+            The most common reduction is due to some or all of kitchen fridges and
+            freezers being turned off over the summer.
+            Our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a>
+            on this demonstrates that it is possible to get a short return on investment
+            replacing old inefficient refridgeration with more efficient modern equipment.
+          </p>
+          <p>
+            However, the analysis can sometimes get confused if the school&apos;s out of hours
+            consumption is unstable. To further investigate the issue for a given school
+            its worth drilling down to see more detailed baseload information on that school, and
+            then perhaps install appliance monitors to establish accurately how inefficient
+            equipment is before making a purchasing decision. Domestic rather than commercial
+            refridgeration generally offers much better value and efficiency.
+          </p>
+          <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+        )
+        ERB.new(text).result(binding)
+      end
+    end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
