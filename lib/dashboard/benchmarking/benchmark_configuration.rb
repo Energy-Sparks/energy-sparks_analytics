@@ -108,7 +108,7 @@ module Benchmarking
       },
       annual_electricity_costs_per_pupil: {
         benchmark_class:  BenchmarkContentElectricityPerPupil,
-        name:     'Annual electricity use per pupil (excluding storage heaters)',
+        name:     'Annual electricity use per pupil',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
           { data: ->{ elba_£pup },  name: 'Annual electricity GBP/pupil', units: :£, chart_data: true },
@@ -120,6 +120,7 @@ module Benchmarking
         type: %i[chart table]
       },
       change_in_annual_electricity_consumption: {
+        benchmark_class:  BenchmarkContentChangeInAnnualElectricityConsumption,
         name:     'Change in annual electricity consumption (excluding storage heaters)',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },

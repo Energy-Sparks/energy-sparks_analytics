@@ -6,7 +6,9 @@ module Benchmarking
         The table provides the information in more detail.
         Energy Sparks doesn&apos;t have a full set of meter data
         for some schools, for example rural schools with biomass or oil boilers,
-        so this comparison might not be relevant for all schools.
+        so this comparison might not be relevant for all schools. The comparison
+        excludes the benefit of any solar PV which might be installed - so looks
+        at energy consumption.
       </p>
     ),
     es_data_not_in_sync: %q(
@@ -78,11 +80,53 @@ module Benchmarking
         <p>
           A realistic target for the primary school to use less than
           &pound;20 per pupil per year, for middle schools &pound;30
-          and for secondaries &pound;40. 
+          and for secondaries &pound;40. There really shouln't be a
+          signifcant difference between schools as all schools
+          need to use roughly the same amount of ICT equipment,
+          lighting and refridgeration per pupil. The biggest reductions
+          can often be acheived by focussing on &apos;baseload&apos;
+          ensuring equipment is turned off out of hours, and that the
+          equipment which is left on is as efficient as possible.
+        </p>
+        <p>
+          The data excludes storage heaters which are reported elsewhere
+          under the &apos;sheating&apos;s benchmarks.
         </p>
       )
     end
   end
+    #=======================================================================================
+    class BenchmarkContentChangeInAnnualElectricityConsumption < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+      private def introduction_text
+        %q(
+          <p>
+            This benchmark shows the change in electricity consumption between
+            this year and last year, excluding solar PV.
+          </p>
+          <p>
+            Schools should be aiming to reduce their electricity consumption by
+            about 5% per year because most equipment used by schools is getting
+            more efficient, for example a desktop computer might use 150W, a laptop
+            20W and a tablet 2W. Switching from using desktops to tablets reduces
+            their electricity consumption by a factor of 75. LED lighting can be
+            2 to 3 times for efficient than older florescent lighting.
+          </p>
+          <p>
+            To make a signifcant contribution ot mitigating climate
+            change schools should really be aiming to reduce their electricity
+            consumption by 10% year on year - something which is easily achievable
+            through a mixture of behavioural change and tactical investment in
+            more efficient equipment.
+          </p>
+          <p>
+            An increase in electricuity consumption, unless there has been a signficant
+            increase in pupil numbers is inexcusable if a school is planning on contributing
+            to reducing global carbon emissions.
+          </p>
+        )
+      end
+    end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
