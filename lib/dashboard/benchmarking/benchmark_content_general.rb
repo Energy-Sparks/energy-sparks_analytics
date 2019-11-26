@@ -280,6 +280,24 @@ module Benchmarking
       )
     end
   end
+    #=======================================================================================  
+    class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+      private def introduction_text
+        %q(
+          <p>
+            The comparison below shows the benefit of installing solar PV panels
+            at schools which don't already have solar PV panels. This analysis
+            is based on using the last year&apos;s electricity consumption at
+            each school over the last year and combining it with local half hourly
+            meter readings to work out the benefit of installing solar panels.
+            Further detail is provided if you drilldown to a school&apos;s individual
+            analysis - where a range of different scenarios of different numbers
+            of panels is presented.
+          </p>
+        )
+      end
+    end
   #=======================================================================================
   class BenchmarkContentSummerHolidayBaseloadAnalysis < BenchmarkContentBase
     include BenchmarkingNoTextMixin

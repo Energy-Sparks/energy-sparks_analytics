@@ -206,6 +206,7 @@ module Benchmarking
         type: %i[table chart]
       },
       solar_pv_benefit_estimate: {
+        benchmark_class: BenchmarkContentSolarPVBenefit,
         name:     'Benefit of estimated optimum size solar PV installation',
         columns:  [
           { data: 'addp_name',      name: 'School name',      units: String },
