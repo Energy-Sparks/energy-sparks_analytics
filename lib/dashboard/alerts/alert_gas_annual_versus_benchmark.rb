@@ -47,7 +47,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     {
       last_year_kwh: {
         description: "Last years gas consumption - kwh",
-        units:  {kwh: :gas}
+        units:  {kwh: :gas},
+        benchmark_code: 'klyr'
       },
       last_year_£: {
         description: 'Last years gas consumption - £ including differential tariff',
@@ -95,7 +96,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
       },
       one_year_saving_versus_exemplar_£: {
         description: 'Annual difference in gas consumption versus exemplar school - £ (use adjective for sign)',
-        units:  {£: :gas}
+        units:  {£: :gas},
+        benchmark_code: 's£ex'
       },
       one_year_saving_versus_exemplar_adjective: {
         description: 'Adjective: higher or lower: gas consumption versus exemplar school',
@@ -202,8 +204,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_floor_area_kwh
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * fuel_price
     @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'
-    @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh.magnitude
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£.magnitude
+    @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh
+    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£
 
     @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area / @degree_day_adjustment
     @one_year_exemplar_floor_area_£     = @one_year_exemplar_floor_area_kwh * fuel_price
@@ -211,8 +213,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_floor_area_kwh
     @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * fuel_price
     @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? 'higher' : 'lower'
-    @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh.magnitude
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£.magnitude
+    @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh
+    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£
 
     @one_year_gas_per_pupil_kwh       = @last_year_kwh / pupils
     @one_year_gas_per_pupil_£         = @last_year_£ / pupils

@@ -192,39 +192,33 @@ module Benchmarking
         sort_by: [1],
         type: %i[table]
       },
-      hot_water_efficiency: {
-        name:     'Hot Water Efficiency',
-        columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-          { data: ->{ hotw_ppyr },  name: 'Cost per pupil', units: :£, chart_data: true},
-          { data: ->{ hotw_eff  },  name: 'Efficiency of system', units: :percent},
-          { data: ->{ hotw_gsav },  name: 'Saving improving timing', units: :£},
-          { data: ->{ hotw_esav },  name: 'Saving with POU electric hot water', units: :£},
-          { data: ->{ hotw_ratg },  name: 'rating', units: Float, y2_axis: true }
-        ],
-        sort_by:  [1],
-        type: %i[chart table]
-      },
-      annual_gas_costs_per_floor_area: {
-        name:     'Annual heating cost per floor area (temperature compensated)',
+      annual_heating_costs_per_floor_area: {
+        benchmark_class:  BenchmarkContentHeatingPerFloorArea,
+        name:     'Annual heating cost per floor area',
         columns:  [
           { data: 'addp_name',      name: 'School name',    units: String, chart_data: true },
-          { data: ->{ sum_data([gsba_pfla, shan_pfla], true)  * BenchmarkMetrics::ANNUAL_AVERAGE_DEGREE_DAYS/ addp_ddays },   name: 'Annual gas/storage heater GBP/pupil (temp compensated)', units: :£, chart_data: true },
+          { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: 'Annual gas/storage heater GBP/pupil (temp compensated)', units: :£, chart_data: true },
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost GBP', units: :£},
-          { data: ->{ sum_data([gsba_pfla, shan_pfla], true) - 
-                        (sum_data([gsba_£exa, shan_£exa], true) * addp_ddays / BenchmarkMetrics::ANNUAL_AVERAGE_DEGREE_DAYS) }, name: 'Saving if matched exemplar school', units: :£ },
+          { data: ->{ sum_data([gsba_s£ex, shan_s£ex], true) },  name: 'Saving if matched exemplar school', units: :£ },
+          { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost GBP', units: :£},
+          { data: ->{ sum_data([gsba_klyr, shan_klyr], true) },  name: 'Annual consumption kWh', units: :kwh},
+          { data: ->{ sum_data([gsba_co2y, shan_co2y], true) / 1000.0 },  name: 'Annual carbon emissions (tonnes CO2)', units: :co2},
           { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
         type: %i[chart table]
       },
-      change_in_annual_gas_consumption: {
-        name:     'Change in annual gas consumption',
+      change_in_annual_heating_consumption: {
+        benchmark_class:  BenchmarkContentChangeInAnnualHeatingConsumption,
+        name:     'Change in annual heating consumption',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
           { data: ->{ percent_change([gsba_£lyr_last_year, shan_£lyr_last_year], [gsba_£lyr, shan_£lyr], true) },  name: 'Change in annual gas/storage heater usage', units: :percent, chart_data: true },
-          { data: ->{ gsba_£lyr },  name: 'Annual gas GBP (this year)', units: :£},
-          { data: ->{ gsba_£lyr_last_year },  name: 'Annual gas GBP (last year)', units: :£}
+          { data: ->{ gsba_£lyr },  name: 'Annual gas costs GBP (this year)', units: :£},
+          { data: ->{ gsba_£lyr_last_year },  name: 'Annual gas costs GBP (last year)', units: :£},
+          { data: ->{ shan_£lyr },  name: 'Annual storage heater costs GBP (this year)', units: :£},
+          { data: ->{ shan_£lyr_last_year },  name: 'Annual gas costs GBP (last year)', units: :£},
+          { data: ->{ sum_data([gsba_£lyr, shan_£lyr]) - sum_data([gsba_£lyr_last_year, shan_£lyr_last_year]) },  name: 'Change in heating costs between last 2 years', units: :£}
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
         type: %i[chart table]
@@ -323,6 +317,19 @@ module Benchmarking
           { data: ->{ httc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by: [1],
+        type: %i[chart table]
+      },
+      hot_water_efficiency: {
+        name:     'Hot Water Efficiency',
+        columns:  [
+          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
+          { data: ->{ hotw_ppyr },  name: 'Cost per pupil', units: :£, chart_data: true},
+          { data: ->{ hotw_eff  },  name: 'Efficiency of system', units: :percent},
+          { data: ->{ hotw_gsav },  name: 'Saving improving timing', units: :£},
+          { data: ->{ hotw_esav },  name: 'Saving with POU electric hot water', units: :£},
+          { data: ->{ hotw_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by:  [1],
         type: %i[chart table]
       },
       electricity_meter_consolidation_opportunities: {

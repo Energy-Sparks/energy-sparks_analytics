@@ -59,6 +59,11 @@ module Benchmarking
             replaced can provide a very short payback on investment (see 
             our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a> on this).
           </li>
+          <li>
+            Hot water heaters and boilers left on outside school hours - installing a timer or getting
+            the caretaker to switch these off when closing the school at night or on a Friday can
+            make a big difference
+          </li>
         </ul>
       <p>
     )
@@ -247,43 +252,91 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-    #=======================================================================================
-    class BenchmarkContentSummerHolidayBaseloadAnalysis < BenchmarkContentBase
-      include BenchmarkingNoTextMixin
-      private def introduction_text
-        text = %q(
-          <p>
-            This analysis attempts to analyse whether a school school&apos;s
-            has reduced during the summer holidays by comparing overnight
-            consumption before, during and after school holidays.
-          </p>
-          <p>
-            It then reports potential reduction it has spotted. Its a useful way
-            determining how efficient appliances which have been switched off are.
-            The school will need to know whether appliances have been turned off
-            in order for you to understand what contributed to the reduction and
-            therefore what their electricity consumption is.
-          </p>
-          <p>
-            The most common reduction is due to some or all of kitchen fridges and
-            freezers being turned off over the summer.
-            Our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a>
-            on this demonstrates that it is possible to get a short return on investment
-            replacing old inefficient refridgeration with more efficient modern equipment.
-          </p>
-          <p>
-            However, the analysis can sometimes get confused if the school&apos;s out of hours
-            consumption is unstable. To further investigate the issue for a given school
-            its worth drilling down to see more detailed baseload information on that school, and
-            then perhaps install appliance monitors to establish accurately how inefficient
-            equipment is before making a purchasing decision. Domestic rather than commercial
-            refridgeration generally offers much better value and efficiency.
-          </p>
-          <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-        )
-        ERB.new(text).result(binding)
-      end
+  #=======================================================================================
+  class BenchmarkContentSummerHolidayBaseloadAnalysis < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          This analysis attempts to analyse whether a school school&apos;s
+          has reduced during the summer holidays by comparing overnight
+          consumption before, during and after school holidays.
+        </p>
+        <p>
+          It then reports potential reduction it has spotted. Its a useful way
+          determining how efficient appliances which have been switched off are.
+          The school will need to know whether appliances have been turned off
+          in order for you to understand what contributed to the reduction and
+          therefore what their electricity consumption is.
+        </p>
+        <p>
+          The most common reduction is due to some or all of kitchen fridges and
+          freezers being turned off over the summer.
+          Our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a>
+          on this demonstrates that it is possible to get a short return on investment
+          replacing old inefficient refridgeration with more efficient modern equipment.
+        </p>
+        <p>
+          However, the analysis can sometimes get confused if the school&apos;s out of hours
+          consumption is unstable. To further investigate the issue for a given school
+          its worth drilling down to see more detailed baseload information on that school, and
+          then perhaps install appliance monitors to establish accurately how inefficient
+          equipment is before making a purchasing decision. Domestic rather than commercial
+          refridgeration generally offers much better value and efficiency.
+        </p>
+        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
     end
+  end
+  #=======================================================================================
+  class BenchmarkContentHeatingPerFloorArea < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This benchmark compares the gas and storage heater costs
+          per floor area (m2) each year, expressed in pounds.
+        </p>
+        <p>
+          The benchmark is adjusted for regional temperatures over the
+          last year, so that for example
+          schools in Scotland are compared on the same terms as schools in the
+          warmer south west of England.
+        </p>
+        <p>
+          More modern schools should have lower consumption, however, a well managed
+          Victorian School who turns its heating off during holidays and weekends
+          often has lower heating and hot water consumption than a more modern school.
+        </p>
+      )
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentChangeInAnnualHeatingConsumption < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This benchmark shows the change the gas and storage heater costs
+          from last year to this year.
+        </p>
+        <p>
+          Schools should aim to reduce their heating and hot water costs
+          each year through better control of boilers and storage radiators;
+          making sure they are switched off when unoccupied. Better management
+          can typically reduce these costs by between 15% and 50%, at little
+          or no cost to a school. Even something as simple as turning the thermostat
+          down 1C can lead to a significant reduction in costs.
+        </p>
+        <p>
+          Upgrading boilers, switching from gas based circulatory hot water systems
+          to point of use electric hot water, and installing boiler optimum start control
+          and weather compensation which require investment will reduce costs further.
+        </p>
+      )
+    end
+  end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
