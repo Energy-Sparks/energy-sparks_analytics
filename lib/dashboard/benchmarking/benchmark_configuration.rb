@@ -337,6 +337,7 @@ module Benchmarking
         type: %i[chart table]
       },
       electricity_meter_consolidation_opportunities: {
+        benchmark_class:  BenchmarkContentElectricityMeterConsolidation,
         name:     'Opportunities for electricity meter consolidation',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },

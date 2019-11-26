@@ -638,5 +638,37 @@ module Benchmarking
       )
     end
   end
+
+  #=======================================================================================  
+  class BenchmarkContentElectricityMeterConsolidation < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          Electricity meters can have quite high standing charges, between &pound;500
+          and &pound;5,000 per year. If a school has a number of electricity meters
+          it might be worth consolidating them i.e. getting your local electricity
+          network provider or energy company to reduce the number of meters in a
+          school to reduce annual standing order costs, this consolidation
+          often costs about &pound;1,000.
+        </p>
+        <p>
+          You need to consider how far apart the meters are, if for example they
+          are in the same room or cupboard the change could cost you very little.
+          The choice can also be determined by whether you have storage heaters,
+          historically it would have been cheaper to have them on a seperate meter,
+          but with the advent of smart and advanced meters 10 years ago this is
+          less necessary as your energy supplier can read you meters half hourly
+          and can charge the appropriate lower cost for your overnight usage.
+        </p>
+        <p>
+          This is a simple low cost change a school can make, the chart and table below
+          attempts to estimated this cost based on some indicative standing charges
+          for your area; you will need to look at your bills to get a more accurate
+          estimate.
+        </p>
+      )
+    end
+  end
 end
 
