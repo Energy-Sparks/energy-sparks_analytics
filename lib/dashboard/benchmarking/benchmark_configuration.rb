@@ -372,6 +372,7 @@ module Benchmarking
         type: %i[table chart]
       },
       change_in_electricity_consumption_recent_school_weeks: {
+        benchmark_class:  BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek,
         name:     'Change in electricity consumption since last school week',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
@@ -382,6 +383,7 @@ module Benchmarking
         type: %i[table chart]
       },
       change_in_electricity_holiday_consumption_previous_holiday: {
+        benchmark_class: BenchmarkContentChangeInElectricityBetweenLast2Holidays,
         name:     'Change in electricity consumption between the 2 most recent holidays',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
@@ -393,7 +395,8 @@ module Benchmarking
         type: %i[table chart]
       },
       change_in_electricity_holiday_consumption_previous_years_holiday: {
-        name:     'Change in electricity consumption between this holiday and the same the previous year',
+        benchmark_class: BenchmarkContentChangeInElectricityBetween2HolidaysYearApart,
+        name:     'Change in electricity consumption between this holiday and the same holiday the previous year',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ epyc_difp },  name: 'Change %', units: :percent, chart_data: true },

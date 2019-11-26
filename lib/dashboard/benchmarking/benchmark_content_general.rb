@@ -717,5 +717,45 @@ module Benchmarking
       )
     end
   end
+  #=======================================================================================  
+  class BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This comparison simply shows the change in electricity consumption since the
+          last school week. You should expect a slight but not significant
+          increase in electricity consumption going into the winter with
+          inreased lighting usage.
+        </p>
+      )
+    end
+  end
+  #=======================================================================================  
+  class BenchmarkContentChangeInElectricityBetweenLast2Holidays < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This comparison shows the change in consumption between the 2 most recent holidays.
+        </p>
+      )
+    end
+  end
+  #=======================================================================================  
+  class BenchmarkContentChangeInElectricityBetween2HolidaysYearApart < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This comparison shows the change in consumption the most recent holiday, and
+          the same holiday a year ago. Schools should be looking to reduce holiday usage
+          my switching appliances off and genenerally reducing baseload. An increase
+          from year to year suggests a school is not managing to reduce consumption,
+          which would help mitigate some of the impacts of climate change.
+        </p>
+      )
+    end
+  end
 end
 
