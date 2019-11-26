@@ -311,6 +311,7 @@ module Benchmarking
         type: %i[chart table]
       },
       thermostatic_control: {
+        benchmark_class:  BenchmarkContentThermostaticControl,
         name:     'Quality of thermostatic control (R2 close to 1.0 is good)',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },

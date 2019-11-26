@@ -427,6 +427,50 @@ module Benchmarking
       )
     end
   end
+  #=======================================================================================  
+  class BenchmarkContentThermostaticControl < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          Energy Sparks calculates how good a school&apos;s thermostatic control
+          is by calculating a measure called &apos;R2&apos;. The heating consumption
+          of a school should be proportional to the outside temperature, the colder
+          it is the more energy is required to keep the school warm. The &apos;R2&apos;
+          is a measure of how well correlated this heating consumption is with outside
+          temperature - the closer to 1.0 the better the control. Any value above 0.8
+          is good. If a school has a value below 0.5 its suggests the thermostatic control
+          is very poor and there is a limited relationship between the temperature and
+          the heating used to keep the school warm.
+        </p>
+        <p>
+          There can be many reasons for this control being poor:
+          <ul>
+            <li>
+              A poorly sited thermostat, for example in a corridor or a hall
+            </li>
+            <li>
+              Poor radiator control, the thermostatic valves (TRVs) on each radiator
+              aren&apos;t appropriately set, perhaps set too high, and rather than
+              turning then down, occupents of classrooms open windows rather
+              than turning the TRVs down
+            </li>
+          </ul>
+        </p>
+        <p>
+          Poor thermostat control can make a school and unfortable place to
+          inhabit and also expensive to run. It also means a school will see
+          less benefit in installing insulation if the heating consumption
+          has little relationship to outside temperature and therefore
+          heat loss.
+        </p>
+        <p>
+          If a school&apos;s thermostatic control is poor and want to improve it,
+          please contact Energy Sparks and we would be happy to provide further advice.
+        </p>
+      )
+    end
+  end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
