@@ -391,6 +391,19 @@ module Benchmarking
       )
     end
   end
+  #=======================================================================================  
+  class BenchmarkContentThermostaticSensitivity < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This chart and table indicate the benefit at each school
+          of reducing the thermostats temperature setting per 1C
+          of reduction.
+        </p>
+      )
+    end
+  end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase

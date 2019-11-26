@@ -285,6 +285,7 @@ module Benchmarking
         type: %i[chart table]
       },
       thermostat_sensitivity: {
+        benchmark_class:  BenchmarkContentThermostaticSensitivity,
         name:     'Annual saving through 1C reduction in thermostat temperature',
         columns:  [
           { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true },
