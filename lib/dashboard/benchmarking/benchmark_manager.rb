@@ -209,7 +209,7 @@ module Benchmarking
     end
 
     def y_axis_label_name(unit)
-      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£',
+      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W',
                      percent: 'percent', timeofday: 'Time of day',
                      days: 'days' }
       return unit_names[unit] if unit_names.key?(unit)

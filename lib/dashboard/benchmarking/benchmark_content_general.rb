@@ -35,6 +35,32 @@ module Benchmarking
         This breakdown excludes electricity consumed by storage heaters and
         solar PV.
       </p>
+    ),
+    es_sources_of_baseload_electricity_consumption: %q(
+      <p>
+        Consumers of out of hours electricity include
+        <ul>
+          <li>
+            Equipment left on rather than being turned off, including
+            photocopiers and ICT equipment
+          </li>
+          <li>
+            ICT servers - can be inefficient, newer ones can often payback their
+            capital costs in electricity savings within a few years, see our
+            <a href="https://blog.energysparks.uk/wp-content/uploads/2019/11/Energy-Sparks-Case-Study-4-Trinity-School-ICT-Servers.pdf" target ="_blank">case study</a>
+            on this.
+          </li>
+          <li>
+            Security lighting - this can be reduced by using PIR movement detectors
+            - often better for security and by moving to more efficient LED lighting
+          </li>
+          <li>
+            Fridges and freezers, particularly inefficient commercial kitchen appliances, which if
+            replaced can provide a very short payback on investment (see 
+            our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a> on this).
+          </li>
+        </ul>
+      <p>
     )
   }
   #=======================================================================================
@@ -159,30 +185,57 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-    #=======================================================================================
-    class BenchmarkContentChangeInBaseloadSinceLastYear < BenchmarkContentBase
-      include BenchmarkingNoTextMixin
-      private def introduction_text
-        text = %q(
-          <p>
-            This benchmark compares a school&apos;s current baseload (electricity
-            consumed when the school is closed) with that of the average
-            of last year. Schools should be aiming to reduce baseload over time
-            and not increase it as equipment and lighting has become significantly
-            more efficient over the last few years. Any increase should be tracked
-            down as soon as it is discovered. Energy Sparks can be configured
-            to send you an alert via an email or a text message if it detects
-            this has happened.
-          </p>
-          <p>
-            A 1 kW increase in baseload is equivalent to an annual increase in
-            electricity costs of £1,100.
-          </p>
-          <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-        )
-        ERB.new(text).result(binding)
-      end
+  #=======================================================================================
+  class BenchmarkContentChangeInBaseloadSinceLastYear < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          This benchmark compares a school&apos;s current baseload (electricity
+          consumed when the school is closed) with that of the average
+          of last year. Schools should be aiming to reduce baseload over time
+          and not increase it as equipment and lighting has become significantly
+          more efficient over the last few years. Any increase should be tracked
+          down as soon as it is discovered. Energy Sparks can be configured
+          to send you an alert via an email or a text message if it detects
+          this has happened.
+        </p>
+        <p>
+          A 1 kW increase in baseload is equivalent to an annual increase in
+          electricity costs of &pound;1,100.
+        </p>
+        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
     end
+  end
+  #=======================================================================================
+  class BenchmarkContentBaseloadPerPupil < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          A school&apos;s baseload is the power it consumes out of hours when
+          the school is unoccupied.
+        </p>
+        <p>
+          This is one of the most useful benchmarks for understanding
+          a school&apos;s electricity use, as half of most schools&apos;
+          is consumed out of hours, reducing the baseload will have a big
+          impact on electricity consumption.
+        </p>
+        <p>
+          There is generally no excuse for a school trying to reduce their
+          electricity baseload per pupil to that of the best schools. All
+          schools perform roughly the same function so should be able to achieve
+          similar electricity consumption particularly out of hours.
+        </p>
+        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
+        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase

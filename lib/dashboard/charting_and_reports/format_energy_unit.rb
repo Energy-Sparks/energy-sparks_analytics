@@ -5,6 +5,7 @@ class FormatEnergyUnit
     kwh:                          'kWh',
     kwp:                          'kWp',
     kw:                           'kW',
+    w:                            'W',
     kwh_per_day:                  'kWh/day',
     kwh_per_day_per_c:            'kWh/day/C',
     co2:                          'kg CO2',

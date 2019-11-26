@@ -162,16 +162,32 @@ module Benchmarking
         type: %i[chart table]
       },
       baseload_per_pupil: {
+        benchmark_class: BenchmarkContentBaseloadPerPupil,
         name:     'Baseload per pupil',
         columns:  [
           { data: 'addp_name', name: 'School name', units: String, chart_data: true },
-          { data: ->{ elbb_blpp }, name: 'Baseload per pupil (kW)', units: :kw, chart_data: true},
+          { data: ->{ elbb_blpp * 1000.0 }, name: 'Baseload per pupil (W)', units: :w, chart_data: true},
           { data: ->{ elbb_lygb }, name: 'Annual cost of baseload', units: :£},
-          { data: ->{ elbb_lykw }, name: 'Average baseload kW', units: :kw},
+          { data: ->{ elbb_lykw }, name: 'Average baseload kW', units: :w},
           { data: ->{ elbb_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
         type: %i[chart table]
+      },
+      summer_holiday_electricity_analysis: {
+        name:     'Experimental analysis of reductions in baseload over summer holidays',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',      units: String },
+          { data: ->{ shol_ann£ },  name: 'Annualised £ value of summer holiday reduction',    units: :£, chart_data: true },
+          { data: ->{ shol_hol£ },  name: 'Saving during summer holiday from baseload reduction',  units: :£ },
+          { data: ->{ shol_kwrd },  name: 'Reduction in baseload over summer holidays', units: :kw },
+          { data: ->{ shol_rrat },  name: 'Size of reduction rating',  units: Float },
+          { data: ->{ shol_trat },  name: 'Rating based on number of recent years with reduction',  units: Float },
+          { data: ->{ shol_ratg },  name: 'Overall rating',  units: Float },
+
+        ],
+        sort_by: [1],
+        type: %i[table]
       },
       hot_water_efficiency: {
         name:     'Hot Water Efficiency',
