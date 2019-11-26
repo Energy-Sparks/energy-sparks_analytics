@@ -669,7 +669,7 @@ module Benchmarking
       )
     end
   end
-    #=======================================================================================  
+  #=======================================================================================  
   class BenchmarkContentGasMeterConsolidation < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -681,6 +681,38 @@ module Benchmarking
           network provider or energy company to reduce the number of meters in a
           school to reduce annual standing order costs, this consolidation
           often costs about &pound;1,000 but can provide guaranteed annual savings.
+        </p>
+      )
+    end
+  end
+  #=======================================================================================  
+  class BenchmarkContentDifferentialTariffOpportunity < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          Electricity is generally charged at a flat rate, for example 12p/kWh
+          whatever the time of day. Your energy company&apos;s costs however
+          vary significantly depending on supply and demand at different times
+          of day, from perhaps 4p/kWh overnight to 25p/kWh at peak times.
+          Electricity companies generally offer differential tariff&apos;s
+          (economy 7) which have lower overnight costs (typically 8p/kWh) and
+          slightly higher daytime costs (13p/kWh) to users who have high overnight
+          consumption to share the benefit of cheaper overnight wholesale costs.
+        </p>
+        <p>
+          Typically this should benefit schools with storage heaters, however
+          many schools with storage heaters are on a single flat tariff and fail
+          to gain from lower overnight prices.
+        </p>
+        <p>
+          The charts and table below estimates the potential benefit of switching
+          to or from a differential tariff. However, unless you have told Energy Sparks
+          we might not know if you are already on such a tariff, but if the table
+          suggests it is worth switching to a differential tariff, you should at
+          least consider contacting you energy supplier to ask what the benefit
+          is, which they should be able to provide very accurately using your smart
+          meter data which provides half hourly historic readings.
         </p>
       )
     end

@@ -361,7 +361,8 @@ module Benchmarking
         type: %i[table chart]
       },
       differential_tariff_opportunity: {
-        name:     'Benefit of moving to or away from differential tariff',
+        benchmark_class:  BenchmarkContentDifferentialTariffOpportunity,
+        name:     'Benefit of moving to or away from a differential tariff',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ dtaf_sav£ },  name: 'Potential annual saving £', units: :£,  chart_data: true },
