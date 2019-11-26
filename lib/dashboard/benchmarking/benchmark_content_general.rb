@@ -29,6 +29,12 @@ module Benchmarking
           on a per pupil basis is probably more appropriate than on a per
           floor area basis.
       </p>
+    ),
+    es_exclude_storage_heaters_and_solar_pv: %q(
+      <p>
+        This breakdown excludes electricity consumed by storage heaters and
+        solar PV.
+      </p>
     )
   }
   #=======================================================================================
@@ -95,38 +101,64 @@ module Benchmarking
       )
     end
   end
-    #=======================================================================================
-    class BenchmarkContentChangeInAnnualElectricityConsumption < BenchmarkContentBase
-      include BenchmarkingNoTextMixin
-      private def introduction_text
-        %q(
-          <p>
-            This benchmark shows the change in electricity consumption between
-            this year and last year, excluding solar PV.
-          </p>
-          <p>
-            Schools should be aiming to reduce their electricity consumption by
-            about 5% per year because most equipment used by schools is getting
-            more efficient, for example a desktop computer might use 150W, a laptop
-            20W and a tablet 2W. Switching from using desktops to tablets reduces
-            their electricity consumption by a factor of 75. LED lighting can be
-            2 to 3 times for efficient than older florescent lighting.
-          </p>
-          <p>
-            To make a signifcant contribution ot mitigating climate
-            change schools should really be aiming to reduce their electricity
-            consumption by 10% year on year - something which is easily achievable
-            through a mixture of behavioural change and tactical investment in
-            more efficient equipment.
-          </p>
-          <p>
-            An increase in electricuity consumption, unless there has been a signficant
-            increase in pupil numbers is inexcusable if a school is planning on contributing
-            to reducing global carbon emissions.
-          </p>
-        )
-      end
+  #=======================================================================================
+  class BenchmarkContentChangeInAnnualElectricityConsumption < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This benchmark shows the change in electricity consumption between
+          this year and last year, excluding solar PV and storahe heaters.
+        </p>
+        <p>
+          Schools should be aiming to reduce their electricity consumption by
+          about 5% per year because most equipment used by schools is getting
+          more efficient, for example a desktop computer might use 150W, a laptop
+          20W and a tablet 2W. Switching from using desktops to tablets reduces
+          their electricity consumption by a factor of 75. LED lighting can be
+          2 to 3 times for efficient than older florescent lighting.
+        </p>
+        <p>
+          To make a signifcant contribution ot mitigating climate
+          change schools should really be aiming to reduce their electricity
+          consumption by 10% year on year - something which is easily achievable
+          through a mixture of behavioural change and tactical investment in
+          more efficient equipment.
+        </p>
+        <p>
+          An increase in electricuity consumption, unless there has been a signficant
+          increase in pupil numbers is inexcusable if a school is planning on contributing
+          to reducing global carbon emissions.
+        </p>
+      )
     end
+  end
+  #=======================================================================================
+  class BenchmarkContentElectricityOutOfHoursUsage < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          Most schools are unoccupied for about 85% of the year;
+          between 5:00pm and 7:30am on school days, at weekends
+          and during holidays. Focussing on reducing out of hours
+          usage; turning appliances off, installing efficient
+          appliances often provides schools with a cost efficient
+          way of reducing their overall consumption.
+        </p>
+        <p>
+          Schools should aim to reduce their out of hours usage
+          below 25% of annual consumption. In comparing schools
+          it might be helpful for you to look at the 2 additional
+          benchmarks on baseload (out of hours power consumption)
+          that we provide as it might elicit more information
+          on a school&apos;s out of hours consumption.
+        </p>
+        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
   #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase

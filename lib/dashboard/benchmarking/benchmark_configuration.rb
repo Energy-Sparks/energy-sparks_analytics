@@ -121,7 +121,7 @@ module Benchmarking
       },
       change_in_annual_electricity_consumption: {
         benchmark_class:  BenchmarkContentChangeInAnnualElectricityConsumption,
-        name:     'Change in annual electricity consumption (excluding storage heaters)',
+        name:     'Change in annual electricity consumption',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
           { data: ->{ (elba_£lyr - elba_£lyr_last_year) / elba_£lyr_last_year},  name: 'Change in annual electricity usage', units: :percent, chart_data: true },
@@ -132,6 +132,7 @@ module Benchmarking
         type: %i[chart table]
       },
       annual_electricity_out_of_hours_use: {
+        benchmark_class: BenchmarkContentElectricityOutOfHoursUsage,
         name:     'Electricity out of hours use',
         columns:  [
           { data: 'addp_name',      name: 'School name',                  units: String, chart_data: true   },
