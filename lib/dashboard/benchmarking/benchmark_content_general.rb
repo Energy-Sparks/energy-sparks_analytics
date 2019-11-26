@@ -252,6 +252,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+  
   #=======================================================================================  
   class BenchmarkContentPeakElectricityPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin
