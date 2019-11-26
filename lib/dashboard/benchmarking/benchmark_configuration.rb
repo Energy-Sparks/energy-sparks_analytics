@@ -94,21 +94,13 @@ module Benchmarking
         sort_by:  [4],
         type: %i[chart table]
       },
-      annual_energy_costs_per_pupil_2: {
-        name:     'Annual energy use per pupil 2',
-        columns:  [
-          { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
-          { data: ->{ enba_£pup },  name: 'Annual energy GBP', units: :£, chart_data: true }
-        ],
-        sort_by:  [1],
-        type: %i[chart table]
-      },
       annual_energy_costs_per_floor_area: {
+        benchmark_class:  BenchmarkContentEnergyPerPupil,
         name:     'Annual energy use per floor area',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
           { data: ->{ enba_£fla },  name: 'Annual energy GBP/floor area', units: :£, chart_data: true },
-          { data: ->{ enba_£lyr },  name: 'Annual energy GBP', units: :£},
+          { data: ->{ enba_£lyr },  name: 'Annual energy cost GBP', units: :£},
           { data: ->{ enba_ratg },  name: 'rating', units: Float, y2_axis: true },
         ],
         sort_by:  [1],

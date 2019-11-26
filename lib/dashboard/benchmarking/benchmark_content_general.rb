@@ -17,18 +17,33 @@ module Benchmarking
         most recent year where data is available to us on all the underlying
         meters.
       </p>
+    ),
+    es_per_pupil_v_per_floor_area: %q(
+      <p>
+          Generally per pupil benchmarks are appropriate for electricity
+          (should be proportional to the appliances e.g. ICT in use),
+          but per floor area benchmarks are more appropriate for gas (size of
+          building which needs heating). FOr overall energy use comparison
+          on a per pupil basis is probably more appropriate than on a per
+          floor area basis.
+      </p>
     )
   }
   #=======================================================================================
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
+      text = %q(
         <p>
           This benchmark compares the energy consumed per pupil each year,
           expressed in pounds.
         </p>
+        <p>
+          This benchmark is best used for economic comparisons. 
+          <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
+        </p>
       )
+      ERB.new(text).result(binding)
     end
     private def table_introduction_text
       CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
@@ -53,6 +68,7 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkContentElectricityPerPupil < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
     private def introduction_text
       %q(
         <p>
@@ -67,7 +83,7 @@ module Benchmarking
       )
     end
   end
-
+  #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
     include BenchmarkingNoTextMixin
@@ -139,6 +155,20 @@ module Benchmarking
     end
   end
 
+  #=======================================================================================
+  class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = %q(
+        <p>
+            This comparison benchmark is an alternative to a per pupil energy
+            benchmark. <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
   #=======================================================================================
   class BenchmarkOptimumStartAnalysis  < BenchmarkContentBase
     include BenchmarkingNoTextMixin
