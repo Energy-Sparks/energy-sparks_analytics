@@ -638,7 +638,6 @@ module Benchmarking
       )
     end
   end
-
   #=======================================================================================  
   class BenchmarkContentElectricityMeterConsolidation < BenchmarkContentBase
     include BenchmarkingNoTextMixin
@@ -666,6 +665,22 @@ module Benchmarking
           attempts to estimated this cost based on some indicative standing charges
           for your area; you will need to look at your bills to get a more accurate
           estimate.
+        </p>
+      )
+    end
+  end
+    #=======================================================================================  
+  class BenchmarkContentGasMeterConsolidation < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          Gas meters can have quite high standing charges, between &pound;500
+          and &pound;5,000 per year. If a school has a number of gas meters
+          it might be worth consolidating them i.e. getting your local gas
+          network provider or energy company to reduce the number of meters in a
+          school to reduce annual standing order costs, this consolidation
+          often costs about &pound;1,000 but can provide guaranteed annual savings.
         </p>
       )
     end

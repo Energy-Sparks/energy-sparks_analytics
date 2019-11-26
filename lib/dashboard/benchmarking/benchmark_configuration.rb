@@ -349,6 +349,7 @@ module Benchmarking
         type: %i[table chart]
       },
       gas_meter_consolidation_opportunities: {
+        benchmark_class:  BenchmarkContentGasMeterConsolidation,
         name:     'Opportunities for gas meter consolidation',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
