@@ -224,7 +224,8 @@ module Benchmarking
         type: %i[chart table]
       },
       annual_gas_out_of_hours_use: {
-        name:     'Gas out of hours use',
+        benchmark_class: BenchmarkContentGasOutOfHoursUsage,
+        name:     'Gas: out of hours use',
         columns:  [
           { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true },
           { data: ->{ gsoo_sdop },  name: 'School Day Open',              units: :percent, chart_data: true },

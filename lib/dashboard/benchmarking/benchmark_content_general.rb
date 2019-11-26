@@ -338,6 +338,33 @@ module Benchmarking
     end
   end
   #=======================================================================================
+  class BenchmarkContentGasOutOfHoursUsage < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          Most schools are unoccupied for about 85% of the year;
+          between 5:00pm and 7:30am on school days, at weekends
+          and during holidays. Focussing on reducing out of hours
+          usage; turning heating and hot water systems off out of hours
+          provides schools with a cost efficient
+          way of reducing their overall consumption.
+        </p>
+        <p>
+          Schools should aim to reduce their out of hours usage
+          below 35% of annual consumption. Writing of policy about
+          weekend and holiday use, and ensuring the boiler doesn&apos;t
+          start too early in the morning should allow most school's
+          to meet this target with no captial investment costs. It shouldn&apos;t
+          be necessary to leave heating on during winter holidays and weekends if
+          the boilers frost proection functions have been configured correctly
+          to come on only when necessary.
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+    end
+  #=======================================================================================
   # 2 sets of charts, tables on one page
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
     include BenchmarkingNoTextMixin
