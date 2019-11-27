@@ -8,26 +8,27 @@ module Benchmarking
         for some schools, for example rural schools with biomass or oil boilers,
         so this comparison might not be relevant for all schools. The comparison
         excludes the benefit of any solar PV which might be installed - so looks
-        at energy consumption.
+        at energy consumption only.
       </p>
     ),
     es_data_not_in_sync: %q(
       <p>
         The gas, electricity and storage heater costs are all using the latest
         data. The total might not be the sum of these 3 in the circumstance
-        where one of the meter's data is out of date, and the total covers the
-        most recent year where data is available to us on all the underlying
-        meters.
+        where one of the meter's data is out of date, and the total then covers the
+        most recent year where all data is available to us on all the underlying
+        meters, and hence will cover the period of the most out of date of the
+        underlying meters.
       </p>
     ),
     es_per_pupil_v_per_floor_area: %q(
       <p>
-          Generally per pupil benchmarks are appropriate for electricity
+          Generally, per pupil benchmarks are appropriate for electricity
           (should be proportional to the appliances e.g. ICT in use),
           but per floor area benchmarks are more appropriate for gas (size of
-          building which needs heating). FOr overall energy use comparison
+          building which needs heating). Overall, <u>energy</u> use comparison
           on a per pupil basis is probably more appropriate than on a per
-          floor area basis.
+          floor area basis, but this analysis can be useful in some circumstances.
       </p>
     ),
     es_exclude_storage_heaters_and_solar_pv: %q(
@@ -48,7 +49,7 @@ module Benchmarking
             ICT servers - can be inefficient, newer ones can often payback their
             capital costs in electricity savings within a few years, see our
             <a href="https://blog.energysparks.uk/wp-content/uploads/2019/11/Energy-Sparks-Case-Study-4-Trinity-School-ICT-Servers.pdf" target ="_blank">case study</a>
-            on this.
+            on this
           </li>
           <li>
             Security lighting - this can be reduced by using PIR movement detectors
@@ -115,19 +116,25 @@ module Benchmarking
           expressed in pounds.
         </p>
         <p>
-          A realistic target for the primary school to use less than
+          A realistic target for primary schools is to use less than
           &pound;20 per pupil per year, for middle schools &pound;30
-          and for secondaries &pound;40. There really shouln't be a
-          signifcant difference between schools as all schools
+          and for secondaries &pound;40. There  shouldn't be a
+          significant difference between schools as all schools
           need to use roughly the same amount of ICT equipment,
-          lighting and refridgeration per pupil. The biggest reductions
-          can often be acheived by focussing on &apos;baseload&apos;
+          lighting and refrigeration per pupil. Exceptions might
+          be schools with swimming pools or sports flood lighting
+          which can significantly increase demand.
+        </p>
+        <p>
+          To meet these targets the biggest reductions
+          can often be achieved by focussing on &apos;baseload&apos;
           ensuring equipment is turned off out of hours, and that the
-          equipment which is left on is as efficient as possible.
+          equipment which is left on is as efficient as possible. Energy Sparks
+          has separate comparisons and analysis for baseload.
         </p>
         <p>
           The data excludes storage heaters which are reported elsewhere
-          under the &apos;sheating&apos;s benchmarks.
+          under the &apos;heating&apos; benchmarks.
         </p>
       )
     end
@@ -139,7 +146,7 @@ module Benchmarking
       %q(
         <p>
           This benchmark shows the change in electricity consumption between
-          this year and last year, excluding solar PV and storahe heaters.
+          this year and last year, excluding solar PV and storage heaters.
         </p>
         <p>
           Schools should be aiming to reduce their electricity consumption by
@@ -150,14 +157,15 @@ module Benchmarking
           2 to 3 times for efficient than older florescent lighting.
         </p>
         <p>
-          To make a signifcant contribution ot mitigating climate
+          To make a significant contribution to mitigating climate
           change schools should really be aiming to reduce their electricity
-          consumption by 10% year on year - something which is easily achievable
+          consumption by 10% year on year to meet the UK&apos;s climate change obligations
+          - something which is easily achievable
           through a mixture of behavioural change and tactical investment in
           more efficient equipment.
         </p>
         <p>
-          An increase in electricuity consumption, unless there has been a signficant
+          An increase in electricity consumption, unless there has been a significant
           increase in pupil numbers is inexcusable if a school is planning on contributing
           to reducing global carbon emissions.
         </p>
@@ -174,12 +182,12 @@ module Benchmarking
           between 5:00pm and 7:30am on school days, at weekends
           and during holidays. Focussing on reducing out of hours
           usage; turning appliances off, installing efficient
-          appliances often provides schools with a cost efficient
+          appliances often provides schools with a cost-efficient
           way of reducing their overall consumption.
         </p>
         <p>
           Schools should aim to reduce their out of hours usage
-          below 25% of annual consumption. In comparing schools
+          below 25% of annual consumption. In comparing schools,
           it might be helpful for you to look at the 2 additional
           benchmarks on baseload (out of hours power consumption)
           that we provide as it might elicit more information
@@ -198,7 +206,7 @@ module Benchmarking
         <p>
           This benchmark compares a school&apos;s current baseload (electricity
           consumed when the school is closed) with that of the average
-          of last year. Schools should be aiming to reduce baseload over time
+          of the last year. Schools should be aiming to reduce baseload over time
           and not increase it as equipment and lighting has become significantly
           more efficient over the last few years. Any increase should be tracked
           down as soon as it is discovered. Energy Sparks can be configured
@@ -206,8 +214,122 @@ module Benchmarking
           this has happened.
         </p>
         <p>
-          A 1 kW increase in baseload is equivalent to an annual increase in
-          electricity costs of &pound;1,100.
+          A 1 kW increase in baseload is equivalent to an increase in
+          annual electricity costs of &pound;1,100.
+        </p>
+        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentBaseloadPerPupil < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          A school&apos;s baseload is the power it consumes out of hours when
+          the school is unoccupied.
+        </p>
+        <p>
+          This is one of the most useful benchmarks for understanding
+          a school&apos;s electricity use, as half of most schools&apos;
+          is consumed out of hours, reducing the baseload will have a big
+          impact on overall electricity consumption.
+        </p>
+        <p>
+          There is generally no excuse for a school not trying to reduce their
+          electricity baseload per pupil to that of the best schools. All
+          schools perform roughly the same function so should be able to achieve
+          similar electricity consumption particularly out of hours and meet
+          the energy efficiency standards of schools which meet best practice.
+        </p>
+        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
+        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+  
+  #=======================================================================================  
+  class BenchmarkContentPeakElectricityPerFloorArea < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      %q(
+        <p>
+          This comparison shows the peak daily school power consumption per floor area.
+          High values compared with other schools might suggest inefficient lighting,
+          appliances or kitchen equipment. The peaks generally occur during the middle
+          of the day. Energy Sparks allows you to drill down to individual school day usage
+          to better understand the intraday characteristics of a school&apos;s electricity
+          consumption.
+        </p>
+        <p>
+          If a school&apos;s electricity consumption is high compared with
+          other schools is probably warrants further investigation. There might be
+          simple low-cost remedies like turning lighting off when it is bright outside,
+          or better management of appliances in a school&apos;s kitchen. Other measures
+          like installing LED lighting might require investment.
+        </p>
+        <p>
+          LED lighting for example can consume as little as 4W/m<sup>2</sup>, whereas older
+          less efficient lighting can consume up to 12W/m<sup>2</sup>.
+        </p>
+      )
+    end
+  end
+    #=======================================================================================  
+    class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+      private def introduction_text
+        %q(
+          <p>
+            The comparison below shows the benefit of installing solar PV panels
+            at schools which don't already have solar PV panels. This analysis
+            is based on using half hourly electricity consumption at
+            each school over the last year and combining it with local half hourly
+            solar pv data to work out the benefit of installing solar panels.
+            Further detail is provided if you drilldown to a school&apos;s individual
+            analysis - where a range of different scenarios of different numbers
+            of panels is presented.
+          </p>
+        )
+      end
+    end
+  #=======================================================================================
+  class BenchmarkContentSummerHolidayBaseloadAnalysis < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          This analysis attempts to analyse whether a school
+          has reduced its electricity consumption during the
+          summer holidays by comparing overnight
+          consumption before, during and after school holidays.
+        </p>
+        <p>
+          It then reports a potential reduction it has spotted. It&apos;s a useful way
+          determining how efficient appliances which have been switched off are.
+          The school will need to know which appliances have been turned off
+          in order for you to understand what contributed to the reduction.
+        </p>
+        <p>
+          The most common reduction is due to some or all of kitchen fridges and
+          freezers being turned off over the summer.
+          Our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a>
+          on this demonstrates that it is possible to get a short return on investment
+          replacing old inefficient refrigeration with more efficient modern equipment.
+          It is also good practice to empty and turn off refrigeration over the summer holidays
+          - Energy Sparks can be configured to send an &apos;alert&apos; via email or text
+          just before holidays to remind schools to do this.
+        </p>
+        <p>
+          However, the analysis can sometimes get confused if the school&apos;s out of hours
+          consumption is unstable. To further investigate the issue for a given school
+          its worth drilling down to see more detailed baseload information on that school, and
+          then perhaps install appliance monitors to establish accurately how inefficient
+          equipment is, before making a purchasing decision. Domestic rather than commercial
+          refrigeration generally offers much better value and efficiency.
         </p>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
       )
@@ -226,123 +348,13 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentBaseloadPerPupil < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      text = %q(
-        <p>
-          A school&apos;s baseload is the power it consumes out of hours when
-          the school is unoccupied.
-        </p>
-        <p>
-          This is one of the most useful benchmarks for understanding
-          a school&apos;s electricity use, as half of most schools&apos;
-          is consumed out of hours, reducing the baseload will have a big
-          impact on electricity consumption.
-        </p>
-        <p>
-          There is generally no excuse for a school trying to reduce their
-          electricity baseload per pupil to that of the best schools. All
-          schools perform roughly the same function so should be able to achieve
-          similar electricity consumption particularly out of hours.
-        </p>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
-      ERB.new(text).result(binding)
-    end
-  end
-  
-  #=======================================================================================  
-  class BenchmarkContentPeakElectricityPerFloorArea < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      %q(
-        <p>
-          This comparison shows the peak daily school power consumption per floor area.
-          High values compared with other schools migth suggest inefficient lighting,
-          appliances or kitchen equipment. The peaks generally occur during the middle
-          of the day. Energy Sparks allows you to drill down to individual school day usage
-          to better understand the intraday characterestics of a schools electricity
-          consumption.
-        </p>
-        <p>
-          If a school&apos;s electricity consumption is high compared with
-          other schools is probably warrants further investigation. There might be
-          simple low cost remedies like turning lighting off when it is bright outside,
-          or better management of appliances in a school&apos;s kitchen. Other measures
-          like installing LED lighting might require investment.
-        </p>
-        <p>
-          LED lighting for example can consume as little as 4W/m2, whereas older
-          less efficient lighting can consume up to 12W/m2.
-        </p>
-      )
-    end
-  end
-    #=======================================================================================  
-    class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
-      include BenchmarkingNoTextMixin
-      private def introduction_text
-        %q(
-          <p>
-            The comparison below shows the benefit of installing solar PV panels
-            at schools which don't already have solar PV panels. This analysis
-            is based on using the last year&apos;s electricity consumption at
-            each school over the last year and combining it with local half hourly
-            meter readings to work out the benefit of installing solar panels.
-            Further detail is provided if you drilldown to a school&apos;s individual
-            analysis - where a range of different scenarios of different numbers
-            of panels is presented.
-          </p>
-        )
-      end
-    end
-  #=======================================================================================
-  class BenchmarkContentSummerHolidayBaseloadAnalysis < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      text = %q(
-        <p>
-          This analysis attempts to analyse whether a school school&apos;s
-          has reduced during the summer holidays by comparing overnight
-          consumption before, during and after school holidays.
-        </p>
-        <p>
-          It then reports potential reduction it has spotted. Its a useful way
-          determining how efficient appliances which have been switched off are.
-          The school will need to know whether appliances have been turned off
-          in order for you to understand what contributed to the reduction and
-          therefore what their electricity consumption is.
-        </p>
-        <p>
-          The most common reduction is due to some or all of kitchen fridges and
-          freezers being turned off over the summer.
-          Our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a>
-          on this demonstrates that it is possible to get a short return on investment
-          replacing old inefficient refridgeration with more efficient modern equipment.
-        </p>
-        <p>
-          However, the analysis can sometimes get confused if the school&apos;s out of hours
-          consumption is unstable. To further investigate the issue for a given school
-          its worth drilling down to see more detailed baseload information on that school, and
-          then perhaps install appliance monitors to establish accurately how inefficient
-          equipment is before making a purchasing decision. Domestic rather than commercial
-          refridgeration generally offers much better value and efficiency.
-        </p>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
-      ERB.new(text).result(binding)
-    end
-  end
-  #=======================================================================================
   class BenchmarkContentHeatingPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       %q(
         <p>
           This benchmark compares the gas and storage heater costs
-          per floor area (m2) each year, expressed in pounds.
+          per floor area (m<sup>2</sup>) each year, expressed in pounds.
         </p>
         <p>
           The benchmark is adjusted for regional temperatures over the
@@ -351,9 +363,9 @@ module Benchmarking
           warmer south west of England.
         </p>
         <p>
-          More modern schools should have lower consumption, however, a well managed
-          Victorian School who turns its heating off during holidays and weekends
-          often has lower heating and hot water consumption than a more modern school.
+          More modern schools should have lower consumption, however, a well-managed
+          Victorian school which turns its heating off during holidays and weekends
+          often has lower heating and hot water consumption than more modern schools.
         </p>
       )
     end
@@ -393,7 +405,7 @@ module Benchmarking
           between 5:00pm and 7:30am on school days, at weekends
           and during holidays. Focussing on reducing out of hours
           usage; turning heating and hot water systems off out of hours
-          provides schools with a cost efficient
+          provides schools with a cost-efficient
           way of reducing their overall consumption.
         </p>
         <p>
@@ -401,9 +413,9 @@ module Benchmarking
           below 35% of annual consumption. Writing of policy about
           weekend and holiday use, and ensuring the boiler doesn&apos;t
           start too early in the morning should allow most school's
-          to meet this target with no captial investment costs. It shouldn&apos;t
+          to meet this target with no capital investment costs. It shouldn&apos;t
           be necessary to leave heating on during winter holidays and weekends if
-          the boilers frost proection functions have been configured correctly
+          the boilers frost protection functions have been configured correctly
           to come on only when necessary.
         </p>
         <p>
@@ -420,15 +432,17 @@ module Benchmarking
       %q(
         <p>
           Storage heaters consume electricity and store heat overnight when
-          electricity is cheaper (assuming the school is on an &apos;teconomy 7&apos;t
+          electricity is cheaper (assuming the school is on an &apos;economy 7&apos;
           type differential tariff) and releases the heat during the day.
         </p>
         <p>
           Ensuring heating is turned off over the weekend (installing a 7 day
           timer can provide very short paybacks - 16 weeks in this
           <a href="https://cdn-test.energysparks.uk/static-assets/Energy_Sparks_Case_Study_3_-_Stanton_Drew_Storage_Heaters-f124cfe069b2746ab175f139c09eee70fcb558d5604be86811c70fedd67a7a6d.pdf" target ="_blank">case study</a>).
-          Turning off the heaters or turning then down as low as possible to avoid frost damage
-          can save during holidays; setting a school policy for this
+          Turning off the heaters or turning them down as low as possible to avoid frost damage
+          can save during holidays; setting a school policy for this. Energy Sparks
+          can provide accurate estimates of the benefits of installing 7-day timers, or
+          switching off during holidays if you drilldown to an individual school&apos;s analysis pages.
         </p>
         <p>
           You can get Energy Sparks to send you a reminder (an &apos;alert&apos;) just before holidays
@@ -460,14 +474,14 @@ module Benchmarking
           about 10% of schools leave their heating on all summer.
         </p>
         <p>
-          The chart and table below shows how many days the heating was
+          The chart and table below show how many days the heating was
           left on in the last year and the potential benefit of switching
           the heating off in warmer weather. Schools should target reducing
           the length of the heating season to below 90 days.
         </p>
         <p>
           Energy Sparks can be configured
-          to send you an alert via an email or a text message to you if the
+          to send you an alert via an email or a text message to you if the weather
           forecast for the coming week suggests you should turn off your heating.
         </p>
       )
@@ -481,11 +495,11 @@ module Benchmarking
         <p>
           Energy Sparks calculates how good a school&apos;s thermostatic control
           is by calculating a measure called &apos;R2&apos;. The heating consumption
-          of a school should be proportional to the outside temperature, the colder
+          of a school should be linearly proportional to the outside temperature, the colder
           it is the more energy is required to keep the school warm. The &apos;R2&apos;
           is a measure of how well correlated this heating consumption is with outside
           temperature - the closer to 1.0 the better the control. Any value above 0.8
-          is good. If a school has a value below 0.5 its suggests the thermostatic control
+          is good. If a school has a value below 0.5 it suggests the thermostatic control
           is very poor and there is a limited relationship between the temperature and
           the heating used to keep the school warm.
         </p>
@@ -498,14 +512,14 @@ module Benchmarking
             <li>
               Poor radiator control, the thermostatic valves (TRVs) on each radiator
               aren&apos;t appropriately set, perhaps set too high, and rather than
-              turning then down, occupents of classrooms open windows rather
-              than turning the TRVs down
+              turning them down, occupants of classrooms open windows to reduce
+              overheating
             </li>
           </ul>
         </p>
         <p>
-          Poor thermostat control can make a school and unfortable place to
-          inhabit and also expensive to run. It also means a school will see
+          Poor thermostat control can make a school and uncomfortable place to
+          inhabit and expensive to run. It also means a school will see
           less benefit in installing insulation if the heating consumption
           has little relationship to outside temperature and therefore
           heat loss.
@@ -542,12 +556,15 @@ module Benchmarking
           all the way from the boiler room. The circulatory pipework used to do this
           is often poorly insulated and loses heat. Often these types of systems are
           only 15% efficient compared with direct point of use water heaters which
-          are often over 90% efficient. Replacing the pipework insulation is generally
+          can be over 90% efficient. Replacing the pipework insulation is generally
           not a cost-efficient investment.
         </p>
-
         <p>
-          This charts and table below analyses the efficiency of
+          Drilling down to an individual school's hot water analysis provides
+          more detailed information on how a school can reduce its hot water costs.
+        </p>
+        <p>
+          The charts and table below analyse the efficiency of
           schools&apos; hot water systems and the potential savings from either improving
           the timing control of existing hot water systems or replacing it
           completely with point of use electric hot water systems.
@@ -566,11 +583,11 @@ module Benchmarking
           on average in the last week.
         </p>
         <p>
-          Generally if the weather last week was mild then your might
+          Generally, if the weather last week was mild then you might
           expect the heating to be coming on at about 6:30am. In colder
           weather depending on the fabric (insulation, thermal mass) of
           the school you might expect the heating to start earlier at
-          perhaps 3:00am. If its coming on earlier the school&apos;s boiler
+          perhaps 3:00am. If it&apos;s coming on earlier the school&apos;s boiler
           control probably warrants further investigation.
         </p>
         <p>
@@ -579,26 +596,28 @@ module Benchmarking
             <li>
               Monitoring temperature in the school in the early morning - typically
               available via the school&apos;s BMS or boiler controller, or via temperature
-              logger (typically &pound;20)
+              logger (&pound;20 - or you can borrow one from Energy Sparks)
             </li>
             <li>
-              Has the school&apos;s thermostat been correctly located, if in a hall then
+              Has the school&apos;s thermostat been correctly located,
+              if in a cold poorly insulated hall then
               classrooms might be up to temperature many hours before the hall, so perhaps
-              the thermostat could be relocated or the hall&apos;s thermostat&apos;s settings
+              the thermostat could be relocated, or the hall&apos;s thermostat&apos;s settings
               could be lowered (16C or less)?
             </li>
             <li>
               Otherwise consider whether the radiator output is high enough to get the
-              school up to temperature quickly? Fan convector radiators should take less
-              than an hour to get a room up to temperature even in cold weather. Is the flow
+              school up to temperature quickly? Fan convector radiators should take under
+              30 minutes to get a room up to temperature even in cold weather, undersized
+              traditional radiators can take hours. Is the flow
               temperature high enough, does the pipework allow adequate distribution of heat,
               do the radiators have adequate output, have their TRVs been set too low for
               the main boiler thermostat?
             </li>
             <li>
                 If the boiler&apos;s starting time has been set because school users have
-                complained its too cold in the morning, consider experimenting
-                with the start time. We generally recommened starting the boiler
+                complained it&apos;s too cold in the morning, consider experimenting
+                with the start time. We generally recommend starting the boiler
                 2 hours early on a Monday, to give the school more time to heat up
                 from the weekend, this may mitigate most of the complaints?
             </li>
@@ -628,13 +647,14 @@ module Benchmarking
   end
 
   #=======================================================================================
-  class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
+  class BenchmarkContentEnergyPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 
     private def introduction_text
       text = %q(
         <p>
-            This comparison benchmark is an alternative to a per pupil energy
+            This comparison benchmark is an alternative to the more commonly used
+            per pupil energy comparison
             benchmark. <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
         </p>
       )
@@ -659,8 +679,8 @@ module Benchmarking
       %q( 
         <p>
           The &apos;standard deviation&apos; column shows over how many hours
-          the starting time has varaied over the last year. If this is more than
-          an hour or os, it might indicate the optimum start control is working,
+          the starting time has varied over the last year. If this is more than
+          an hour or so, it might indicate the optimum start control is working,
           or it could be that someone has made lots of adjustments to the boiler
           start time during the year.
         </p>
@@ -676,7 +696,7 @@ module Benchmarking
     protected def caveat_text
       %q(
         <p>
-          However these calculations are experimental and might not provide
+          However, these calculations are experimental and might not provide
           good indicators of how well the optimum start is working for all schools.
           Drilling down to look at the data for an individual school should provide
           a better indication.
@@ -691,7 +711,7 @@ module Benchmarking
       %q(
         <p>
           Electricity meters can have quite high standing charges, between &pound;500
-          and &pound;5,000 per year. If a school has a number of electricity meters
+          and &pound;5,000 per year. If a school has several electricity meters
           it might be worth consolidating them i.e. getting your local electricity
           network provider or energy company to reduce the number of meters in a
           school to reduce annual standing order costs, this consolidation
@@ -701,14 +721,14 @@ module Benchmarking
           You need to consider how far apart the meters are, if for example they
           are in the same room or cupboard the change could cost you very little.
           The choice can also be determined by whether you have storage heaters,
-          historically it would have been cheaper to have them on a seperate meter,
+          historically it would have been cheaper to have them on a separate meter,
           but with the advent of smart and advanced meters 10 years ago this is
           less necessary as your energy supplier can read you meters half hourly
           and can charge the appropriate lower cost for your overnight usage.
         </p>
         <p>
           This is a simple low cost change a school can make, the chart and table below
-          attempts to estimated this cost based on some indicative standing charges
+          attempt to estimate this cost based on some indicative standing charges
           for your area; you will need to look at your bills to get a more accurate
           estimate.
         </p>
@@ -747,18 +767,18 @@ module Benchmarking
           consumption to share the benefit of cheaper overnight wholesale costs.
         </p>
         <p>
-          Typically this should benefit schools with storage heaters, however
+          Typically, this should benefit schools with storage heaters, however
           many schools with storage heaters are on a single flat tariff and fail
           to gain from lower overnight prices.
         </p>
         <p>
-          The charts and table below estimates the potential benefit of switching
+          The chart and table below estimate the potential benefit of switching
           to or from a differential tariff. However, unless you have told Energy Sparks
           we might not know if you are already on such a tariff, but if the table
           suggests it is worth switching to a differential tariff, you should at
           least consider contacting you energy supplier to ask what the benefit
           is, which they should be able to provide very accurately using your smart
-          meter data which provides half hourly historic readings.
+          meter data which provides them with half hourly historic readings.
         </p>
       )
     end
@@ -772,7 +792,7 @@ module Benchmarking
           This comparison simply shows the change in electricity consumption since the
           last school week. You should expect a slight but not significant
           increase in electricity consumption going into the winter with
-          increased lighting usage and a subsequent reducton in the spring.
+          increased lighting usage and a subsequent reduction in the spring.
         </p>
       )
     end
@@ -796,7 +816,7 @@ module Benchmarking
         <p>
           This comparison shows the change in consumption the most recent holiday, and
           the same holiday a year ago. Schools should be looking to reduce holiday usage
-          my switching appliances off and genenerally reducing baseload. An increase
+          by switching appliances off and generally reducing baseload. An increase
           from year to year suggests a school is not managing to reduce consumption,
           which would help mitigate some of the impacts of climate change.
         </p>
@@ -811,8 +831,8 @@ module Benchmarking
         <p>
           This comparison simply shows the change in gas consumption since the
           last school week. You might expect an
-          increase in gas consumption going into the winter with
-          heating usage and a subsequent reducton in the spring.
+          increase in gas consumption going into the winter as it gets
+          colder and a subsequent reduction in the spring.
         </p>
       )
     end
@@ -824,10 +844,16 @@ module Benchmarking
       %q(
         <p>
           This comparison shows the change in consumption between the 2 most recent holidays.
-          This can be affected by whether the heating was turned on one one of the holidays.
-          Generally schools don&apos;t need heating during holidays, or at least not
-          to heat the whole school! You can setup an Energy Sparks &apos;alert&apos; to
-          send you an email or text message just before a holiday to remind you to
+          This can be affected by whether the heating was turned on one of the holidays,
+          and not on the other.
+          Generally, schools don&apos;t need heating during holidays, or at least not
+          to heat the whole school if minimally occupied! Using an electric fan heater
+          is always more cost effective for a few individuals in the school during holidays
+          than heating the whole school.
+        </p>
+        <p>
+          You can setup an Energy Sparks
+          &apos;alert&apos; to send you an email or text message just before a holiday to remind you to
           turn heating or hot water off.
         </p>
       )
@@ -841,8 +867,8 @@ module Benchmarking
         <p>
           This comparison shows the change in consumption the most recent holiday, and
           the same holiday a year ago. Schools should be looking to reduce holiday usage
-          my switching heating and hot water off over holidays when it is often unnecessary.
-          A signifcant  increase from year to year suggests a school is not managing to reduce consumption,
+          by switching heating and hot water off over holidays when it is often unnecessary.
+          A significant  increase from year to year suggests a school is not managing to reduce consumption,
           which would help mitigate some of the impacts of climate change. You can setup an Energy Sparks &apos;alert&apos; to
           send you an email or text message just before a holiday to remind you to
           turn heating or hot water off.
@@ -851,4 +877,3 @@ module Benchmarking
     end
   end
 end
-

@@ -95,7 +95,7 @@ module Benchmarking
         type: %i[chart table]
       },
       annual_energy_costs_per_floor_area: {
-        benchmark_class:  BenchmarkContentEnergyPerPupil,
+        benchmark_class:  BenchmarkContentEnergyPerFloorArea,
         name:     'Annual energy use per floor area',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
@@ -210,7 +210,7 @@ module Benchmarking
         name:     'Benefit of estimated optimum size solar PV installation',
         columns:  [
           { data: 'addp_name',      name: 'School name',      units: String },
-          { data: ->{ sole_opvk },  name: 'kWp',    units: :kwp},
+          { data: ->{ sole_opvk },  name: 'Size: kWp',    units: :kwp},
           { data: ->{ sole_opvy },  name: 'payback (years)',  units: :years },
           { data: ->{ sole_opvp },  name: 'Percent reduction in mains consumption', units: :percent }
         ],
