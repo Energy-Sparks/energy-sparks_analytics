@@ -4,6 +4,10 @@ class MeterCollectionFactory
     new(**data[:schedule_data]).build(**data.slice(:school_data, :amr_data, :pseudo_meter_attributes))
   end
 
+  def self.build_with_meter_data(data)
+    new(**data[:schedule_data]).build_with_meter_data(**data.slice(:school_data, :meter_data, :pseudo_meter_attributes))
+  end
+
   def initialize(temperatures:, solar_pv:, solar_irradiation:, grid_carbon_intensity:, holidays:)
     @temperatures = temperatures
     @solar_pv = solar_pv
@@ -13,7 +17,18 @@ class MeterCollectionFactory
   end
 
   def build(school_data:, amr_data: {electricity_meters: [], heat_meters: []}, pseudo_meter_attributes: {})
+    meter_collection = build_initial_meter_collection(school_data, pseudo_meter_attributes)
+    add_meters_and_amr_data(meter_collection, amr_data)
+    meter_collection
+  end
 
+  def build_with_meter_data(school_data:, meter_data:, pseudo_meter_attributes: {})
+    meter_collection = build_initial_meter_collection(school_data, pseudo_meter_attributes)
+    meter_collection.meter_data = meter_data
+    meter_collection
+  end
+
+  def build_initial_meter_collection(school_data, pseudo_meter_attributes)
     school = Dashboard::School.new(
       school_data[:name],
       school_data[:address],
@@ -25,18 +40,14 @@ class MeterCollectionFactory
       school_data[:postcode]
     )
 
-    meter_collection = MeterCollection.new(school,
-                                           temperatures: @temperatures,
-                                           solar_pv: @solar_pv,
-                                           solar_irradiation: @solar_irradiation,
-                                           grid_carbon_intensity: @uk_grid_carbon_intensity,
-                                           holidays: @holidays,
-                                           pseudo_meter_attributes: pseudo_meter_attributes
-                                          )
-
-    add_meters_and_amr_data(meter_collection, amr_data)
-
-    meter_collection
+    MeterCollection.new(school,
+                       temperatures: @temperatures,
+                       solar_pv: @solar_pv,
+                       solar_irradiation: @solar_irradiation,
+                       grid_carbon_intensity: @grid_carbon_intensity,
+                       holidays: @holidays,
+                       pseudo_meter_attributes: pseudo_meter_attributes
+                      )
   end
 
   private
@@ -78,5 +89,4 @@ class MeterCollectionFactory
       meter_attributes:   meter_data[:attributes]
     )
   end
-
 end

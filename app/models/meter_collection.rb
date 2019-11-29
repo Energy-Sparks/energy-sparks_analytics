@@ -10,55 +10,53 @@
 #           used out of core school hours
 #           - also holds modelling data
 
+require 'active_support/core_ext/module/delegation'
+
 class MeterCollection
   include Logging
 
-  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters
+  delegate :number_of_pupils, :address, :name, :postcode, :floor_area, :area_name, :urn, to: :school
 
-  # From school/building
-  attr_reader :floor_area, :number_of_pupils
+  delegate :all_meters, :real_meters, :all_heat_meters, :all_heat_meters, :all_real_meters, :gas_only?, :report_group, to: :meter_data
+  delegate :non_heating_only?, :heating_only?, to: :meter_data
+  delegate :sheffield_simulated_solar_pv_panels?, :low_carbon_solar_pv_panels?, :electricity?, :gas?, :storage_heaters?, :all_aggregate_meters?, :solar_pv_panels?, to: :meter_data
+  delegate :aggregated_heat_meters, :aggregated_electricity_meters, :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter, to: :meter_data
+  delegate :aggregated_heat_meters=, :aggregated_electricity_meters=, :electricity_simulation_meter=, :storage_heater_meter=, :solar_pv_meter=, to: :meter_data
+  delegate :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters, :all_aggregate_meters, to: :meter_data
 
-  # Currently, but not always
-  attr_reader :school, :name, :address, :postcode, :urn, :area_name, :model_cache, :default_energy_purchaser
+  attr_reader :school, :model_cache, :default_energy_purchaser
+  attr_reader :pseudo_meter_attributes
 
   # These are things which will be populated
-  attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters,
-                :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter,
-                :holidays,
-                :temperatures,
-                :solar_irradiation,
-                :solar_pv,
-                :grid_carbon_intensity
+  attr_accessor :holidays, :temperatures, :solar_irradiation, :solar_pv, :grid_carbon_intensity, :meter_data
 
   def initialize(school, holidays:, temperatures:, solar_irradiation:, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
-    @name = school.name
-    @address = school.address
-    @postcode = school.postcode
-    @floor_area = school.floor_area
-    @number_of_pupils = school.number_of_pupils
     @holidays = holidays
     @temperatures = temperatures
     @solar_irradiation = solar_irradiation
     @solar_pv = solar_pv
     @grid_carbon_intensity = grid_carbon_intensity
 
-    @heat_meters = []
-    @electricity_meters = []
-    @solar_pv_meters = []
-    @storage_heater_meters = []
     @school = school
     @urn = school.urn
-    @meter_identifier_lookup = {} # [mpan or mprn] => meter
-    @area_name = school.area_name
-    @default_energy_purchaser = @area_name # use the area name for the moment
-    @aggregated_heat_meters = nil
-    @aggregated_electricity_meters = nil
-    @pseudo_meter_attributes = {}
+    @default_energy_purchaser = area_name # use the area name for the moment
+    @pseudo_meter_attributes = pseudo_meter_attributes
+
+    @meter_data = Dashboard::MeterData.new(pseudo_meter_attributes: @pseudo_meter_attributes)
 
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
   end
 
+  def to_s
+    'Meter Collection:' + name + ':' + all_meters.join(';')
+  end
+
+  def school_type
+    @school.nil? ? nil : @school.school_type
+  end
+
+  # This method only used when loading school and meta data
   def matches_identifier?(identifier, identifier_type)
     case identifier_type
     when :name
@@ -73,80 +71,19 @@ class MeterCollection
     end
   end
 
-  def aggregate_meter(fuel_type)
-    case fuel_type
-    when :electricity
-      aggregated_electricity_meters
-    when :gas
-      aggregated_heat_meters
-    when :storage_heater, :storage_heaters
-      storage_heater_meter
-    when :solar_pv
-      solar_pv_meter
-    end
+  def open_time
+    @cached_open_time
   end
 
-  def to_s
-    'Meter Collection:' + name + ':' + all_meters.join(';')
+  def close_time
+    @cached_close_time
   end
 
-  def meter?(identifier, search_sub_meters = false)
-    identifier = identifier.to_s # ids coulld be integer or string
-    return @meter_identifier_lookup[identifier] if @meter_identifier_lookup.key?(identifier)
-
-    meter = search_meter_list_for_identifier(all_meters, identifier)
-    unless meter.nil?
-      @meter_identifier_lookup[identifier] = meter
-      return meter
-    end
-
-    if search_sub_meters
-      all_meters.each do |meter|
-        sub_meter = search_meter_list_for_identifier(meter.sub_meters, identifier)
-        unless sub_meter.nil?
-          @meter_identifier_lookup[identifier] = sub_meter
-          return sub_meter
-        end
-      end
-    end
-
-    @meter_identifier_lookup[identifier] = nil
-    nil
+  def is_school_usually_open?(_date, time_of_day)
+    time_of_day >= @cached_open_time && time_of_day < @cached_close_time
   end
 
-  private def search_meter_list_for_identifier(meter_list, identifier)
-    return nil if identifier.nil?
-    meter_list.each do |meter|
-      return nil if meter.id.nil?
-      return meter if meter.id.to_s == identifier.to_s
-    end
-    nil
-  end
-
-  def all_meters
-    meter_groups = [
-      @heat_meters,
-      @electricity_meters,
-      @solar_pv_meters,
-      @storage_heater_meters,
-      @aggregated_heat_meters,
-      @aggregated_electricity_meters
-    ]
-
-    meter_list = []
-    meter_groups.each do |meter_group|
-      unless meter_group.nil?
-        meter_list += meter_group.is_a?(Dashboard::Meter) ? [meter_group] : meter_group
-      end
-    end
-    meter_list.uniq{ |meter| meter.mpan_mprn } # for single meter schools aggregate and meter can be one and the same
-  end
-
-  # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
-  def real_meters
-    all_meters.select { |meter| !meter.synthetic_mpan_mprn? }
-  end
-
+  # This method is only used in test scripts
   def adult_report_groups
     report_groups = []
     report_groups.push(:benchmark)                    if electricity? && !solar_pv_panels?
@@ -162,127 +99,36 @@ class MeterCollection
     report_groups
   end
 
-  def report_group
-    if !aggregated_heat_meters.nil?
-      if !aggregated_electricity_meters.nil?
-        solar_pv_panels? ? :electric_and_gas_and_solar_pv : :electric_and_gas
-      else
-        :gas_only
-      end
-    else
-      if solar_pv_panels?
-        :electric_and_solar_pv
-      elsif storage_heaters?
-        :electric_and_storage_heaters
-      else
-        :electric_only
-      end
-    end
-  end
-
-  def all_heat_meters
-    all_meters.select { |meter| meter.heat_meter? }
-  end
-
-  def all_electricity_meters
-    all_meters.select { |meter| meter.electricity_meter? }
-  end
-
-  def all_real_meters
-    [all_heat_meters, all_electricity_meters].flatten
-  end
-
-  def gas_only?
-    all_meters.select { |meter| meter.electricity_meter? }.empty?
-  end
-
-  def non_heating_only?
-    all_heat_meters.all? { |meter| meter.non_heating_only? }
-  end
-
-  def heating_only?
-    all_heat_meters.all? { |meter| meter.heating_only? }
-  end
-
-  def electricity?
-    !aggregated_electricity_meters.nil?
-  end
-
-  def gas?
-    !aggregated_heat_meters.nil?
-  end
-
-  def storage_heaters?
-    @has_storage_heaters ||= all_meters.any?{ |meter| meter.storage_heater? }
-  end
-
-  def all_aggregate_meters
-    [
-      electricity? ? aggregated_electricity_meters : nil,
-      gas? ? aggregated_heat_meters : nil,
-      storage_heaters? ? storage_heater_meter : nil
-    ].compact
-  end
-
-  def solar_pv_panels?
-    sheffield_simulated_solar_pv_panels? || low_carbon_solar_pv_panels?
+  # Delegate all these to meter data manually as they have parameters
+  def meter?(identifier, search_sub_meters = false)
+    @meter_data.meter?(identifier, search_sub_meters)
   end
 
   def fuel_types(exclude_storage_heaters = true)
-    types = []
-    types.push(:electricity)      if electricity?
-    types.push(:gas)              if gas?
-    types.push(:storage_heaters)  if storage_heaters? && !exclude_storage_heaters
-    types
+    @meter_data.fuel_types(exclude_storage_heaters)
   end
 
-  def sheffield_simulated_solar_pv_panels?
-    @has_sheffield_simulated_solar_pv_panels ||= all_meters.any?{ |meter| meter.sheffield_simulated_solar_pv_panels? }
-  end
-
-  def low_carbon_solar_pv_panels?
-    @has_low_carbon_hub_solar_pv_panels ||= all_meters.any?{ |meter| meter.low_carbon_hub_solar_pv_panels? }
-  end
-
-  def school_type
-    @school.nil? ? nil : @school.school_type
+  def aggregate_meter(fuel_type)
+    @meter_data.aggregate_meter(fuel_type)
   end
 
   def add_heat_meter(meter)
-    @heat_meters.push(meter)
-    @meter_identifier_lookup[meter.id] = meter
+    @meter_data.add_heat_meter(meter)
   end
 
   def add_electricity_meter(meter)
-    @electricity_meters.push(meter)
-    @meter_identifier_lookup[meter.id] = meter
+    @meter_data.add_electricity_meter(meter)
   end
 
   def add_aggregate_heat_meter(meter)
-    @aggregated_heat_meters = meter
-    @meter_identifier_lookup[meter.id] = meter
+    @meter_data.add_aggregate_heat_meter(meter)
   end
 
   def add_aggregate_electricity_meter(meter)
-    @aggregated_electricity_meters = meter
-    @meter_identifier_lookup[meter.id] = meter
-  end
-
-  def open_time
-    @cached_open_time
-  end
-
-  def close_time
-    @cached_close_time
+    @meter_data.add_aggregate_electricity_meter(meter)
   end
 
   def pseudo_meter_attributes(type)
-    @pseudo_meter_attributes.fetch(type){ {} }
-  end
-
-  # This is overridden in the energysparks code at the moment, to use the actual open/close times
-  # It replaces school_day_in_hours(time_of_day)
-  def is_school_usually_open?(_date, time_of_day)
-    time_of_day >= @cached_open_time && time_of_day < @cached_close_time
+    @meter_data.pseudo_meter_attributes(type)
   end
 end

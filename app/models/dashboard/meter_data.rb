@@ -1,0 +1,204 @@
+module Dashboard
+  class MeterData
+    include Logging
+
+    attr_accessor :heat_meters,
+                  :electricity_meters,
+                  :solar_pv_meters,
+                  :storage_heater_meters
+
+    # Populated post aggregation
+    attr_accessor :aggregated_heat_meters,
+                  :aggregated_electricity_meters,
+                  :electricity_simulation_meter,
+                  :storage_heater_meter,
+                  :solar_pv_meter
+
+    def initialize(pseudo_meter_attributes: {})
+      @heat_meters = []
+      @electricity_meters = []
+      @solar_pv_meters = []
+      @storage_heater_meters = []
+      @meter_identifier_lookup = {} # [mpan or mprn] => meter
+      @aggregated_heat_meters = nil
+      @aggregated_electricity_meters = nil
+      @pseudo_meter_attributes = pseudo_meter_attributes
+    end
+
+    def aggregate_meter(fuel_type)
+      case fuel_type
+      when :electricity
+        aggregated_electricity_meters
+      when :gas
+        aggregated_heat_meters
+      when :storage_heater, :storage_heaters
+        storage_heater_meter
+      when :solar_pv
+        solar_pv_meter
+      end
+    end
+
+    def meter?(identifier, search_sub_meters = false)
+      identifier = identifier.to_s # ids coulld be integer or string
+      return @meter_identifier_lookup[identifier] if @meter_identifier_lookup.key?(identifier)
+
+      meter = search_meter_list_for_identifier(all_meters, identifier)
+      unless meter.nil?
+        @meter_identifier_lookup[identifier] = meter
+        return meter
+      end
+
+      if search_sub_meters
+        all_meters.each do |meter|
+          sub_meter = search_meter_list_for_identifier(meter.sub_meters, identifier)
+          unless sub_meter.nil?
+            @meter_identifier_lookup[identifier] = sub_meter
+            return sub_meter
+          end
+        end
+      end
+
+      @meter_identifier_lookup[identifier] = nil
+      nil
+    end
+
+    private def search_meter_list_for_identifier(meter_list, identifier)
+      return nil if identifier.nil?
+      meter_list.each do |meter|
+        return nil if meter.id.nil?
+        return meter if meter.id.to_s == identifier.to_s
+      end
+      nil
+    end
+
+    def all_meters
+      meter_groups = [
+        @heat_meters,
+        @electricity_meters,
+        @solar_pv_meters,
+        @storage_heater_meters,
+        @aggregated_heat_meters,
+        @aggregated_electricity_meters
+      ]
+
+      meter_list = []
+      meter_groups.each do |meter_group|
+        unless meter_group.nil?
+          meter_list += meter_group.is_a?(Dashboard::Meter) ? [meter_group] : meter_group
+        end
+      end
+      meter_list.uniq{ |meter| meter.mpan_mprn } # for single meter schools aggregate and meter can be one and the same
+    end
+
+    # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
+    def real_meters
+      all_meters.select { |meter| !meter.synthetic_mpan_mprn? }
+    end
+
+    def all_heat_meters
+      all_meters.select { |meter| meter.heat_meter? }
+    end
+
+    def all_electricity_meters
+      all_meters.select { |meter| meter.electricity_meter? }
+    end
+
+    def all_real_meters
+      [all_heat_meters, all_electricity_meters].flatten
+    end
+
+    def gas_only?
+      all_meters.select { |meter| meter.electricity_meter? }.empty?
+    end
+
+    def non_heating_only?
+      all_heat_meters.all? { |meter| meter.non_heating_only? }
+    end
+
+    def heating_only?
+      all_heat_meters.all? { |meter| meter.heating_only? }
+    end
+
+    def electricity?
+      !aggregated_electricity_meters.nil?
+    end
+
+    def gas?
+      !aggregated_heat_meters.nil?
+    end
+
+    def storage_heaters?
+      @has_storage_heaters ||= all_meters.any?{ |meter| meter.storage_heater? }
+    end
+
+    def all_aggregate_meters
+      [
+        electricity? ? aggregated_electricity_meters : nil,
+        gas? ? aggregated_heat_meters : nil,
+        storage_heaters? ? storage_heater_meter : nil
+      ].compact
+    end
+
+    def solar_pv_panels?
+      sheffield_simulated_solar_pv_panels? || low_carbon_solar_pv_panels?
+    end
+
+    def fuel_types(exclude_storage_heaters = true)
+      types = []
+      types.push(:electricity)      if electricity?
+      types.push(:gas)              if gas?
+      types.push(:storage_heaters)  if storage_heaters? && !exclude_storage_heaters
+      types
+    end
+
+    def sheffield_simulated_solar_pv_panels?
+      @has_sheffield_simulated_solar_pv_panels ||= all_meters.any?{ |meter| meter.sheffield_simulated_solar_pv_panels? }
+    end
+
+    def low_carbon_solar_pv_panels?
+      @has_low_carbon_hub_solar_pv_panels ||= all_meters.any?{ |meter| meter.low_carbon_hub_solar_pv_panels? }
+    end
+
+    def add_heat_meter(meter)
+      @heat_meters.push(meter)
+      @meter_identifier_lookup[meter.id] = meter
+    end
+
+    def add_electricity_meter(meter)
+      @electricity_meters.push(meter)
+      @meter_identifier_lookup[meter.id] = meter
+    end
+
+    def add_aggregate_heat_meter(meter)
+      @aggregated_heat_meters = meter
+      @meter_identifier_lookup[meter.id] = meter
+    end
+
+    def add_aggregate_electricity_meter(meter)
+      @aggregated_electricity_meters = meter
+      @meter_identifier_lookup[meter.id] = meter
+    end
+
+    def pseudo_meter_attributes(type)
+      @pseudo_meter_attributes.fetch(type){ {} }
+    end
+
+    def report_group
+      if !@aggregated_heat_meters.nil?
+        if !@aggregated_electricity_meters.nil?
+          solar_pv_panels? ? :electric_and_gas_and_solar_pv : :electric_and_gas
+        else
+          :gas_only
+        end
+      else
+        if solar_pv_panels?
+          :electric_and_solar_pv
+        elsif storage_heaters?
+          :electric_and_storage_heaters
+        else
+          :electric_only
+        end
+      end
+    end
+  end
+end
