@@ -112,7 +112,9 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     configure_models(asof_date)
     current_period, previous_period = last_two_periods(asof_date)
 
-    @relevance = time_relevance(asof_date) # during and up to 3 weeks after current period
+    # commented out 1Dec2019, in favour of alert prioritisation control
+    # @relevance = time_relevance(asof_date) # during and up to 3 weeks after current period
+    @relevance = :relevant
 
     raise EnergySparksNotEnoughDataException, "Not enough data in current period: #{period_debug(current_period,  asof_date)}"  unless enough_days_data_for_period(current_period,  asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data in previous period: #{period_debug(previous_period,  asof_date)}" unless enough_days_data_for_period(previous_period, asof_date)
