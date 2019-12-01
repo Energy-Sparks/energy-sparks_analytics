@@ -52,6 +52,7 @@ class RunBenchmarks
 
     puts "Running content config #{config}"
     content_manager = Benchmarking::BenchmarkContentManager.new(config[:asof_date])
+    ap content_manager.structured_pages
     content_list = content_manager.available_pages(filter: config[:filter])
 
     content_list.each do |page_name, description|
@@ -119,6 +120,8 @@ class RunBenchmarks
 
   def run_charts_and_tables(asof_date)
     benchmarks = Benchmarking::BenchmarkManager.new(@database.database)
+
+    ap benchmarks.structured_pages
 
     charts = []
     html = FRONTEND_CSS

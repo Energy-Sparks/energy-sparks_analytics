@@ -27,6 +27,15 @@ module Benchmarking
       column_definition.key?(key) && column_definition[key]
     end
 
+    def self.structured_pages(_user_type_hash, filter_out = nil)
+      CHART_TABLE_GROUPING.map do |group|
+        {
+          name:  group[:name],
+          benchmarks: group[:benchmarks].map{ |key| [key, CHART_TABLE_CONFIG[key][:name]] }.to_h
+        }
+      end
+    end
+
     def self.available_pages(filter_out = nil)
       all_pages = CHART_TABLE_CONFIG.clone
       all_pages = all_pages.select{ |name, config| !filter_out?(config, filter_out.keys[0], filter_out.values[0]) } unless filter_out.nil?
@@ -54,6 +63,59 @@ module Benchmarking
         row1a[0] <=> row2a[0]
       end
     end
+
+    CHART_TABLE_GROUPING = [
+      {
+        name:       'Energy Cost Benchmarks',
+        benchmarks: %i[
+          annual_energy_costs_per_pupil
+          annual_energy_costs
+          annual_energy_costs_per_floor_area
+        ]
+      },
+      {
+        name:       'Electricity Benchmarks',
+        benchmarks: %i[
+          annual_electricity_costs_per_pupil
+          change_in_annual_electricity_consumption
+          annual_electricity_out_of_hours_use
+          recent_change_in_baseload
+          baseload_per_pupil
+          summer_holiday_electricity_analysis
+          electricity_peak_kw_per_pupil
+          solar_pv_benefit_estimate
+          change_in_electricity_consumption_recent_school_weeks
+          change_in_electricity_holiday_consumption_previous_holiday
+          change_in_electricity_holiday_consumption_previous_years_holiday
+        ]
+      },
+      {
+        name:       'Gas and Storage Heater Benchmarks',
+        benchmarks: %i[
+          annual_heating_costs_per_floor_area
+          change_in_annual_heating_consumption
+          annual_gas_out_of_hours_use
+          annual_storage_heater_out_of_hours_use
+          heating_coming_on_too_early
+          optimum_start_analysis
+          thermostat_sensitivity
+          length_of_school_day_heating_season
+          thermostatic_control
+          hot_water_efficiency
+          change_in_gas_consumption_recent_school_weeks
+          change_in_gas_holiday_consumption_previous_holiday
+          change_in_gas_holiday_consumption_previous_years_holiday
+        ]
+      },
+      {
+        name:       'Metering Potential Cost Savings',
+        benchmarks: %i[
+          electricity_meter_consolidation_opportunities
+          gas_meter_consolidation_opportunities
+          differential_tariff_opportunity
+        ]
+      }
+    ]
 
     CHART_TABLE_CONFIG = {
       annual_energy_costs_per_pupil: {
