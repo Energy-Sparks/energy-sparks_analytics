@@ -13,6 +13,7 @@ class FormatEnergyUnit
     m2:                           'm2',
     pupils:                       'pupils',
     £:                            '£',
+    £_0dp:                        '£',
     accounting_cost:              '£',
     days:                         'days',
     library_books:                'library books',
@@ -35,7 +36,9 @@ class FormatEnergyUnit
     meters:                       'meters',
     tree:                         'trees',
     percent:                      '%',
+    percent_0dp:                  '%',
     relative_percent:             '%',
+    relative_percent_0dp:         '%',
     r2:                           '',
     opt_start_standard_deviation: 'standard deviation (hours)',
     morning_start_time:           'time of day',
@@ -90,8 +93,8 @@ class FormatEnergyUnit
     check_units(UNIT_DESCRIPTION_TEXT, unit)
     if value.nil? && unit != :temperature
       UNIT_DESCRIPTION_TEXT[unit]
-    elsif unit == :£
-      format_pounds(value, medium, user_numeric_comprehension_level)
+    elsif unit == :£ || unit == :£_0dp
+      format_pounds(value, medium, user_numeric_comprehension_level, unit == :£_0dp)
     elsif unit == :days
       format_days(value)
     elsif unit == :£_per_kwh
@@ -106,9 +109,15 @@ class FormatEnergyUnit
       format_years_range(value)
     elsif unit == :years
       format_time(value)
-    elsif unit == :percent
+    elsif %i[percent percent_0dp relative_percent relative_percent_0dp].include?(unit)
+      format_percent(value, unit, user_numeric_comprehension_level, medium)
+    elsif unit == :percent_0dp
       "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
     elsif unit == :relative_percent
+      formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
+      formatted_val = '+' + formatted_val if value > 0.0
+      formatted_val
+    elsif unit == :relative_percent_0dp
       formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
       formatted_val = '+' + formatted_val if value > 0.0
       formatted_val
@@ -121,6 +130,13 @@ class FormatEnergyUnit
     else
       "#{scale_num(value, false, user_numeric_comprehension_level)}" + (in_table ? '' : " #{type_format(unit, medium)}")
     end
+  end
+
+  def self.format_percent(value, unit, user_numeric_comprehension_level, medium)
+    user_numeric_comprehension_level = :no_decimals if %i[percent_0dp relative_percent_0dp].include?(unit)
+    formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
+    formatted_val = '+' + formatted_val if %i[relative_percent relative_percent_0dp].include?(unit) && value > 0.0
+    formatted_val
   end
 
   def self.format_pound_range(range, medium, user_numeric_comprehension_level)
@@ -140,7 +156,8 @@ class FormatEnergyUnit
     end
   end
 
-  def self.format_pounds(value, medium, user_numeric_comprehension_level)
+  def self.format_pounds(value, medium, user_numeric_comprehension_level, no_dp = false)
+    user_numeric_comprehension_level = :no_decimals if no_dp
     if value.magnitude >= 1.0
       # £-40.00 => -£40.00
       (value < 0.0 ? '-' : '') + type_format(:£, medium) + scale_num(value.magnitude, true, user_numeric_comprehension_level)

@@ -61,11 +61,11 @@ module Benchmarking
         name:     'Annual energy use per pupil',
         columns:  [
           { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
-          { data: ->{ elba_£pup },          name: 'Annual electricity GBP/pupil', units: :£, chart_data: true },
-          { data: ->{ gsba_£pup },          name: 'Annual gas GBP/pupil', units: :£, chart_data: true },
-          { data: ->{ shan_£pup },          name: 'Annual storage heater GBP/pupil', units: :£, chart_data: true },
-          { data: ->{ enba_£pup },          name: 'Annual energy GBP/pupil', units: :£},
-          { data: ->{ sum_data([elba_£pup, gsba_n£pp, shan_n£pp]) }, name: 'Annual energy GBP/pupil (temperature compensated)', units: :£},
+          { data: ->{ elba_£pup },          name: 'Annual electricity £/pupil', units: :£, chart_data: true },
+          { data: ->{ gsba_£pup },          name: 'Annual gas £/pupil', units: :£, chart_data: true },
+          { data: ->{ shan_£pup },          name: 'Annual storage heater £/pupil', units: :£, chart_data: true },
+          { data: ->{ enba_£pup },          name: 'Annual energy £/pupil', units: :£},
+          { data: ->{ sum_data([elba_£pup, gsba_n£pp, shan_n£pp]) }, name: 'Annual energy £/pupil (temperature compensated)', units: :£},
           { data: ->{ sum_data([elba_kpup, gsba_kpup, shan_kpup]) }, name: 'Annual energy kWh/pupil', units: :kwh},
           { data: ->{ sum_data([elba_cpup, gsba_cpup, shan_cpup]) }, name: 'Annual energy kgCO2/pupil', units: :kwh},
           { data: ->{ addp_stpn },          name: 'Type',   units: String },
@@ -80,11 +80,11 @@ module Benchmarking
         name:     'Annual energy costs',
         columns:  [
           { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
-          { data: ->{ elba_£lyr },          name: 'Annual Electricity GBP', units: :£, chart_data: true },
-          { data: ->{ gsba_£lyr },          name: 'Annual Gas GBP', units: :£, chart_data: true },
-          { data: ->{ shan_£lyr },          name: 'Annual Storage Heater GBP', units: :£, chart_data: true },
-          { data: ->{ enba_£lyr },          name: 'Total Energy Costs GBP', units: :£},
-          { data: ->{ enba_£pup },          name: 'Annual energy GBP/pupil', units: :£},
+          { data: ->{ elba_£lyr },          name: 'Annual Electricity £', units: :£, chart_data: true },
+          { data: ->{ gsba_£lyr },          name: 'Annual Gas £', units: :£, chart_data: true },
+          { data: ->{ shan_£lyr },          name: 'Annual Storage Heater £', units: :£, chart_data: true },
+          { data: ->{ enba_£lyr },          name: 'Total Energy Costs £', units: :£},
+          { data: ->{ enba_£pup },          name: 'Annual energy £/pupil', units: :£},
           { data: ->{ enba_co2t },          name: 'Annual Energy CO2(tonnes)', units: :co2 },
           { data: ->{ enba_klyr },          name: 'Annual Energy kWh', units: :kwh },
           { data: ->{ addp_stpn },          name: 'Type',   units: String  },
@@ -99,8 +99,8 @@ module Benchmarking
         name:     'Annual energy use per floor area',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-          { data: ->{ enba_£fla },  name: 'Annual energy GBP/floor area', units: :£, chart_data: true },
-          { data: ->{ enba_£lyr },  name: 'Annual energy cost GBP', units: :£},
+          { data: ->{ enba_£fla },  name: 'Annual energy £/floor area', units: :£, chart_data: true },
+          { data: ->{ enba_£lyr },  name: 'Annual energy cost £', units: :£},
           { data: ->{ enba_ratg },  name: 'rating', units: Float, y2_axis: true },
         ],
         sort_by:  [1],
@@ -111,8 +111,8 @@ module Benchmarking
         name:     'Annual electricity use per pupil',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-          { data: ->{ elba_£pup },  name: 'Annual electricity GBP/pupil', units: :£, chart_data: true },
-          { data: ->{ elba_£lyr },  name: 'Annual electricity GBP', units: :£},
+          { data: ->{ elba_£pup },  name: 'Annual electricity £/pupil', units: :£_0dp, chart_data: true },
+          { data: ->{ elba_£lyr },  name: 'Annual electricity £', units: :£},
           { data: ->{ elba_£esav }, name: 'Saving if matched exemplar school', units: :£ },
           { data: ->{ elba_ratg },  name: 'rating', units: Float, y2_axis: true },
         ],
@@ -124,9 +124,9 @@ module Benchmarking
         name:     'Change in annual electricity consumption',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-          { data: ->{ (elba_£lyr - elba_£lyr_last_year) / elba_£lyr_last_year},  name: 'Change in annual electricity usage', units: :percent, chart_data: true },
-          { data: ->{ elba_£lyr },  name: 'Annual electricity GBP (this year)', units: :£},
-          { data: ->{ elba_£lyr_last_year },  name: 'Annual electricity GBP (last year)', units: :£}
+          { data: ->{ (elba_£lyr - elba_£lyr_last_year) / elba_£lyr_last_year},  name: 'Change in annual electricity usage', units: :percent_0dp, chart_data: true },
+          { data: ->{ elba_£lyr },  name: 'Annual electricity £ (this year)', units: :£},
+          { data: ->{ elba_£lyr_last_year },  name: 'Annual electricity £ (last year)', units: :£}
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
         type: %i[chart table]
@@ -222,10 +222,10 @@ module Benchmarking
         name:     'Annual heating cost per floor area',
         columns:  [
           { data: 'addp_name',      name: 'School name',    units: String, chart_data: true },
-          { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: 'Annual gas/storage heater GBP/pupil (temp compensated)', units: :£, chart_data: true },
-          { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost GBP', units: :£},
+          { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: 'Annual gas/storage heater £/pupil (temp compensated)', units: :£, chart_data: true },
+          { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost £', units: :£},
           { data: ->{ sum_data([gsba_s£ex, shan_s£ex], true) },  name: 'Saving if matched exemplar school', units: :£ },
-          { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost GBP', units: :£},
+          { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost £', units: :£},
           { data: ->{ sum_data([gsba_klyr, shan_klyr], true) },  name: 'Annual consumption kWh', units: :kwh},
           { data: ->{ sum_data([gsba_co2y, shan_co2y], true) / 1000.0 },  name: 'Annual carbon emissions (tonnes CO2)', units: :co2},
           { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: 'rating', units: Float, y2_axis: true }
@@ -239,10 +239,10 @@ module Benchmarking
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
           { data: ->{ percent_change([gsba_£lyr_last_year, shan_£lyr_last_year], [gsba_£lyr, shan_£lyr], true) },  name: 'Change in annual gas/storage heater usage', units: :percent, chart_data: true },
-          { data: ->{ gsba_£lyr },  name: 'Annual gas costs GBP (this year)', units: :£},
-          { data: ->{ gsba_£lyr_last_year },  name: 'Annual gas costs GBP (last year)', units: :£},
-          { data: ->{ shan_£lyr },  name: 'Annual storage heater costs GBP (this year)', units: :£},
-          { data: ->{ shan_£lyr_last_year },  name: 'Annual gas costs GBP (last year)', units: :£},
+          { data: ->{ gsba_£lyr },  name: 'Annual gas costs £ (this year)', units: :£},
+          { data: ->{ gsba_£lyr_last_year },  name: 'Annual gas costs £ (last year)', units: :£},
+          { data: ->{ shan_£lyr },  name: 'Annual storage heater costs £ (this year)', units: :£},
+          { data: ->{ shan_£lyr_last_year },  name: 'Annual gas costs £ (last year)', units: :£},
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr]) - sum_data([gsba_£lyr_last_year, shan_£lyr_last_year]) },  name: 'Change in heating costs between last 2 years', units: :£}
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
@@ -370,7 +370,8 @@ module Benchmarking
           { data: ->{ emtc_mets },  name: 'Number of electricity meters', units: :meters },
           { data: ->{ emtc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
-        sort_by: [1],
+        sort_by:  [1],
+        # sort_by: [{ reverse: 1}],
         type: %i[table chart]
       },
       gas_meter_consolidation_opportunities: {
@@ -382,7 +383,8 @@ module Benchmarking
           { data: ->{ gmtc_mets },  name: 'Number of gas meters', units: :meters },
           { data: ->{ gmtc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
-        sort_by: [1],
+        sort_by:  [1],
+        # sort_by: [{ reverse: 1}],
         type: %i[table chart]
       },
       differential_tariff_opportunity: {
@@ -393,7 +395,8 @@ module Benchmarking
           { data: ->{ dtaf_sav£ },  name: 'Potential annual saving £', units: :£,  chart_data: true },
           { data: ->{ dtaf_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
-        sort_by: [1],
+        sort_by:  [1],
+        # sort_by: [{ reverse: 1}],
         type: %i[table chart]
       },
       change_in_electricity_consumption_recent_school_weeks: {

@@ -87,9 +87,15 @@ module Benchmarking
         sort_level = 0 # multi-column sort
         compare = nil
         loop do
+          reverse_it = false
           sort_col = config[:sort_by][sort_level]
+          if sort_col.is_a?(Hash)
+            reverse_it = true
+            sort_col = sort_col.values[0]
+          end
           sort_col_type = config[:columns][sort_col][:units]
           compare = sort_compare(row1, row2, sort_col, sort_col_type)
+          compare *= -1 unless reverse_it
           sort_level += 1
           break if sort_level >= config[:sort_by].length || compare != 0
         end 

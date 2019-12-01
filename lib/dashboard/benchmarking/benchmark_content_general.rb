@@ -75,8 +75,7 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <p>
-          This benchmark compares the energy consumed per pupil each year,
-          expressed in pounds.
+          This benchmark compares the energy consumed per pupil each year in &pound;.
         </p>
         <p>
           This benchmark is best used for economic comparisons. 
@@ -113,7 +112,7 @@ module Benchmarking
       %q(
         <p>
           This benchmark compares the electricity consumed per pupil each year,
-          expressed in pounds.
+          in &pound;.
         </p>
         <p>
           A realistic target for primary schools is to use less than
@@ -234,7 +233,7 @@ module Benchmarking
         <p>
           This is one of the most useful benchmarks for understanding
           a school&apos;s electricity use, as half of most schools&apos;
-          is consumed out of hours, reducing the baseload will have a big
+          electricity is consumed out of hours, reducing the baseload will have a big
           impact on overall electricity consumption.
         </p>
         <p>
@@ -354,7 +353,7 @@ module Benchmarking
       %q(
         <p>
           This benchmark compares the gas and storage heater costs
-          per floor area (m<sup>2</sup>) each year, expressed in pounds.
+          per floor area (m<sup>2</sup>) each year, in &pound;.
         </p>
         <p>
           The benchmark is adjusted for regional temperatures over the
