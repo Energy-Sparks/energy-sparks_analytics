@@ -152,10 +152,10 @@ module Benchmarking
         name:     'Last week\'s baseload versus average of last year (% difference)',
         columns:  [
           { data: 'addp_name', name: 'School name', units: String, chart_data: true },
-          { data: ->{ elbc_bspc }, name: 'Change in baseload last week v. year percent', units: :percent, chart_data: true},
-          { data: ->{ elbc_blly }, name: 'Average baseload last year kW', units: :kw},
-          { data: ->{ elbc_bllw }, name: 'Average baseload last week kW', units: :kw},
-          { data: ->{ elbc_blch }, name: 'Change in baseload last week v. year kW', units: :kw},
+          { data: ->{ elbc_bspc }, name: 'Change in baseload last week v. year (%)', units: :percent, chart_data: true},
+          { data: ->{ elbc_blly }, name: 'Average baseload last year (kW)', units: :kw},
+          { data: ->{ elbc_bllw }, name: 'Average baseload last week (kW)', units: :kw},
+          { data: ->{ elbc_blch }, name: 'Change in baseload last week v. year (kW)', units: :kw},
           { data: ->{ elbc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
@@ -212,7 +212,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name',      units: String },
           { data: ->{ sole_opvk },  name: 'Size: kWp',    units: :kwp},
           { data: ->{ sole_opvy },  name: 'payback (years)',  units: :years },
-          { data: ->{ sole_opvp },  name: 'Percent reduction in mains consumption', units: :percent }
+          { data: ->{ sole_opvp },  name: 'Reduction in mains consumption (%)', units: :percent }
         ],
         sort_by: [1],
         type: %i[table]
@@ -222,7 +222,7 @@ module Benchmarking
         name:     'Annual heating cost per floor area',
         columns:  [
           { data: 'addp_name',      name: 'School name',    units: String, chart_data: true },
-          { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: 'Annual gas/storage heater £/pupil (temp compensated)', units: :£, chart_data: true },
+          { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: 'Annual gas/storage heater £/floor area (temp compensated)', units: :£, chart_data: true },
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost £', units: :£},
           { data: ->{ sum_data([gsba_s£ex, shan_s£ex], true) },  name: 'Saving if matched exemplar school', units: :£ },
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost £', units: :£},
