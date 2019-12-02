@@ -53,7 +53,7 @@ class MeterCollection
     @default_energy_purchaser = @area_name # use the area name for the moment
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
-    @pseudo_meter_attributes = {}
+    @pseudo_meter_attributes = pseudo_meter_attributes
 
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
