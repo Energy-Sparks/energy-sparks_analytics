@@ -29,7 +29,7 @@ class MeterCollectionFactory
                                            temperatures: @temperatures,
                                            solar_pv: @solar_pv,
                                            solar_irradiation: @solar_irradiation,
-                                           grid_carbon_intensity: @uk_grid_carbon_intensity,
+                                           grid_carbon_intensity: @grid_carbon_intensity,
                                            holidays: @holidays,
                                            pseudo_meter_attributes: pseudo_meter_attributes
                                           )
