@@ -33,7 +33,10 @@ class YAxisScaling
       per_200_pupils:   'per 200 pupil (average size primary school)',
       per_1000_pupils:  'per 1000 pupil (average size secondary school)'
     }
-    formatted_value = FormatEnergyUnit.format(unit, value)
+    # dummy insert of 10 and its subsequent removal is a fudge to
+    # offset formatting change in FormatEnergyUnit which removes the
+    # unit e.g. £ if the value is nil PH 20Nov2019
+    formatted_value = FormatEnergyUnit.format(unit, 10).gsub('10','').strip
     unless scaling_factor_type.nil? || scaling_factor_type == :none
       formatted_value += '/' + factor_type_description[scaling_factor_type]
     end

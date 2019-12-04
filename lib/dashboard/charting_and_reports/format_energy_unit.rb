@@ -5,6 +5,7 @@ class FormatEnergyUnit
     kwh:                          'kWh',
     kwp:                          'kWp',
     kw:                           'kW',
+    w:                            'W',
     kwh_per_day:                  'kWh/day',
     kwh_per_day_per_c:            'kWh/day/C',
     co2:                          'kg CO2',
@@ -12,6 +13,7 @@ class FormatEnergyUnit
     m2:                           'm2',
     pupils:                       'pupils',
     £:                            '£',
+    £_0dp:                        '£',
     accounting_cost:              '£',
     days:                         'days',
     library_books:                'library books',
@@ -34,8 +36,13 @@ class FormatEnergyUnit
     meters:                       'meters',
     tree:                         'trees',
     percent:                      '%',
+    percent_0dp:                  '%',
     relative_percent:             '%',
+    relative_percent_0dp:         '%',
     r2:                           '',
+    opt_start_standard_deviation: 'standard deviation (hours)',
+    morning_start_time:           'time of day',
+    optimum_start_sensitivity:    'hours/C',
     temperature:                  'C',
     years_range:                  'years',
     years:                        'years',
@@ -67,16 +74,27 @@ class FormatEnergyUnit
   }.freeze
 
   def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
+    if unit.is_a?(Hash) && unit.key?(:substitute_nil)
+      if value.nil? || value == unit[:substitute_nil]
+        return unit[:substitute_nil]
+      else
+        unit = unit[:units]
+      end
+    end
+    format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
+  end
+  
+  def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
     return value if medium == :raw
-    return '' if value.nil? && in_table
+    return '' if value.nil? #  && in_table - PH 20Nov2019 experimental change to tidying blank cells on heads summary table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
     return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
     return value.to_s if convert_missing_types_to_strings && !UNIT_DESCRIPTION_TEXT.key?(unit)
     check_units(UNIT_DESCRIPTION_TEXT, unit)
     if value.nil? && unit != :temperature
       UNIT_DESCRIPTION_TEXT[unit]
-    elsif unit == :£
-      format_pounds(value, medium, user_numeric_comprehension_level)
+    elsif unit == :£ || unit == :£_0dp
+      format_pounds(value, medium, user_numeric_comprehension_level, unit == :£_0dp)
     elsif unit == :days
       format_days(value)
     elsif unit == :£_per_kwh
@@ -91,9 +109,15 @@ class FormatEnergyUnit
       format_years_range(value)
     elsif unit == :years
       format_time(value)
-    elsif unit == :percent
+    elsif %i[percent percent_0dp relative_percent relative_percent_0dp].include?(unit)
+      format_percent(value, unit, user_numeric_comprehension_level, medium)
+    elsif unit == :percent_0dp
       "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
     elsif unit == :relative_percent
+      formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
+      formatted_val = '+' + formatted_val if value > 0.0
+      formatted_val
+    elsif unit == :relative_percent_0dp
       formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
       formatted_val = '+' + formatted_val if value > 0.0
       formatted_val
@@ -106,6 +130,13 @@ class FormatEnergyUnit
     else
       "#{scale_num(value, false, user_numeric_comprehension_level)}" + (in_table ? '' : " #{type_format(unit, medium)}")
     end
+  end
+
+  def self.format_percent(value, unit, user_numeric_comprehension_level, medium)
+    user_numeric_comprehension_level = :no_decimals if %i[percent_0dp relative_percent_0dp].include?(unit)
+    formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
+    formatted_val = '+' + formatted_val if %i[relative_percent relative_percent_0dp].include?(unit) && value > 0.0
+    formatted_val
   end
 
   def self.format_pound_range(range, medium, user_numeric_comprehension_level)
@@ -125,7 +156,8 @@ class FormatEnergyUnit
     end
   end
 
-  def self.format_pounds(value, medium, user_numeric_comprehension_level)
+  def self.format_pounds(value, medium, user_numeric_comprehension_level, no_dp = false)
+    user_numeric_comprehension_level = :no_decimals if no_dp
     if value.magnitude >= 1.0
       # £-40.00 => -£40.00
       (value < 0.0 ? '-' : '') + type_format(:£, medium) + scale_num(value.magnitude, true, user_numeric_comprehension_level)
@@ -208,6 +240,8 @@ class FormatEnergyUnit
       # :no_decimals and :to_pence are also valid, but dealt with outwith the significant figures handling
     when :ks2
       2
+    when :benchmark
+      3
     when :approx_accountant
       4
     when :accountant, :energy_expert

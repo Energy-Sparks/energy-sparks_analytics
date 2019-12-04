@@ -46,22 +46,29 @@ class AlertAnalysisBase < ContentBase
         end
       end
     rescue EnergySparksNotEnoughDataException => e
-      logger.debug e.message
-      logger.debug e.backtrace
+      log_stack_trace(e)
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue StandardError => e
+      log_stack_trace(e)
       @calculation_worked = false
-      logger.warn e.message
-      logger.warn e.backtrace
     end
-  end
-
-  def benchmark_dates(asof_date)
-    [asof_date, asof_date - 364]
   end
 
   def self.test_mode
     !ENV['ENERGYSPARKSTESTMODE'].nil? && ENV['ENERGYSPARKSTESTMODE'] == 'ON'
+  end
+
+  def log_stack_trace(e)
+    if self.class.test_mode
+      puts e.message
+      puts e.backtrace
+    end
+    logger.warn e.message
+    logger.warn e.backtrace
+  end
+
+  def benchmark_dates(asof_date)
+    [asof_date, asof_date - 364]
   end
 
   # inherited, so derived class has hash of 'name' => variables
@@ -414,7 +421,9 @@ class AlertAnalysisBase < ContentBase
       AlertSolarPVBenefitEstimator                  => 'sole',
       AlertElectricityLongTermTrend                 => 'ellt',
       AlertGasLongTermTrend                         => 'gslt',
-      AlertStorageHeatersLongTermTrend              => 'shlt'
+      AlertStorageHeatersLongTermTrend              => 'shlt',
+      AlertOptimumStartAnalysis                     => 'opts',
+      AlertSummerHolidayRefridgerationAnalysis      => 'shol'
     }
   end
 

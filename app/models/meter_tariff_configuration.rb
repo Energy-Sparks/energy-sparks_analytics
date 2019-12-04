@@ -13,6 +13,7 @@ class MeterTariffs
   DEFAULT_DAYTIME_RATE_FOR_DIFFERENTIAL_TARIFF = 0.13
   DEFAULT_ELECTRICITY_ECONOMIC_TARIFF = 0.12
   DEFAULT_SOLAR_PV_TARIFF = 0.12
+  DEFAULT_SOLAR_PV_EXPORT_TARIFF = 0.05
   BLENDED_DIFFERNTIAL_RATE_APPROX = (13 * DEFAULT_NIGHTTIME_RATE_FOR_DIFFERENTIAL_TARIFF + (48 - 13) * DEFAULT_DAYTIME_RATE_FOR_DIFFERENTIAL_TARIFF)/ 48.0
 
   BILL_COMPONENTS = {
@@ -92,6 +93,14 @@ class MeterTariffs
         }
       }
     },
+    exported_solar_pv: {
+      FOREVERCONTRACTDATES => {
+        name: 'Exported Solar PV Default Tariff',
+        rates: {
+          rate:  { per: :kwh,     rate: DEFAULT_SOLAR_PV_EXPORT_TARIFF }
+        }
+      }
+    },
     storage_heater: {
       FOREVERCONTRACTDATES => {
         name: 'Economic standard electricity tariff',
@@ -132,6 +141,15 @@ class MeterTariffs
           rates: {
             standing_charge:              { per: :day,     rate: 4.00  },
             rate:                         { per: :kwh,     rate: 0.015 }
+          }
+        }
+      },
+      solar_pv: {
+        FOREVERCONTRACTDATES => {
+          name: 'example pv export tariff',
+          rates: {
+            standing_charge:              { per: :day,     rate: 0.0 },
+            rate:                         { per: :kwh,     rate: 0.12 }
           }
         }
       }

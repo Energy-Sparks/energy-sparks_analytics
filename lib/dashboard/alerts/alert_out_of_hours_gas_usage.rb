@@ -38,7 +38,7 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
       units:  :chart
     },
     group_by_week_day_type_chart: {
-      description: 'Weekly chart showing out of hour electricity consumption breakdown (school day, school day outside hours, weekends, holidays), for last year',
+      description: 'Weekly chart showing out of hour gas consumption breakdown (school day, school day outside hours, weekends, holidays), for last year',
       units:  :chart
     }
   }

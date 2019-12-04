@@ -13,15 +13,15 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  schools:                  ['Trinit.*'],
+  schools:                  ['.*'],
   source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                # :dashboard,
-                                adhoc_worksheet: { name: 'Test', charts: %i[
-                                  optimum_start]}
+                                :dashboard,
+                                no_adhoc_worksheet: { name: 'Test', charts: %i[
+                                  solar_pv_group_by_month]}
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }
                                 # :dashboard
@@ -30,8 +30,14 @@ script = {
                               ],
                               control: {
                                 display_average_calculation_rate: true,
-                                report_failed_charts:   :summary, # :detailed
-                                compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
+                                report_failed_charts:   :summary, 
+                                # :detailed
+                                compare_results:        [ 
+                                  :summary, 
+                                  :quick_comparison,
+                                #  :report_differing_charts, 
+                                # :report_differences
+                              ] # :quick_comparison,
                               }
                             }, 
 }

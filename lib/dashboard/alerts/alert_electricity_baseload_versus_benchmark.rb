@@ -74,11 +74,11 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
 
     one_year_exemplar_by_pupil_kwh: {
       description: 'Exemplar annual baseload kWh for a school of this number of pupils and type (secondaries have higher baseloads)',
-      units:  { kwh: :electricity}
+      units:  { kwh: :electricity},
     },
     one_year_exemplar_by_pupil_£: {
       description: 'Exemplar annual baseload cost £ for a school of this number of pupils and type (secondaries have higher baseloads)',
-      units:  :£
+      units:  :£,
     },
     one_year_saving_versus_exemplar_kwh: {
       description: 'Potential annual kWh saving if school matched exemplar - absolute value, so needs to be used in conjuction with adjective',
@@ -86,7 +86,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     },
     one_year_saving_versus_exemplar_£: {
       description: 'Potential annual £ saving if school matched exemplar - absolute value, so needs to be used in conjuction with adjective',
-      units:  :£
+      units:  :£,
+      benchmark_code: 'svex'
     },
     one_year_saving_versus_exemplar_adjective: {
       description: 'Adjective associated with whether saving is higher of lower than exemplar (higher or lower)',
@@ -154,8 +155,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_benchmark_kwh = @average_baseload_last_year_kwh - @one_year_benchmark_by_pupil_kwh
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * electricity_tariff
     @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'
-    @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh.magnitude
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£.magnitude
+    @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh
+    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£
 
     @exemplar_per_pupil_kw = BenchmarkMetrics.exemplar_baseload_for_pupils(pupils, school_type)
 
@@ -165,8 +166,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_exemplar_kwh = @average_baseload_last_year_kwh - @one_year_exemplar_by_pupil_kwh
     @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * electricity_tariff
     @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? 'higher' : 'lower'
-    @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh.magnitude
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£.magnitude
+    @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh
+    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£
 
     @one_year_baseload_per_pupil_kw        = @average_baseload_last_year_kw / pupils
     @one_year_baseload_per_pupil_kwh       = @average_baseload_last_year_kwh / pupils

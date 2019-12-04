@@ -21,7 +21,7 @@ class MeterAttributes
     key :no_heating_in_summer_set_missing_to_zero
     aggregate_over :meter_corrections
     description 'Meter correction > No heating in summer set missing to zero'
-    
+
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_toy: MeterAttributeTypes::TimeOfYear.define(required: true),

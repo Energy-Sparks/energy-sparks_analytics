@@ -142,10 +142,23 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     ALERT_INHERITANCE.each do |new_variable_name, third_party_alert_variable|
       third_party_alert = third_party_alert_variable[:class_type]
       variable_definition = third_party_alert.flatten_front_end_template_variables[third_party_alert_variable[:variable_name]]
-      vars[new_variable_name] = variable_definition
+      vars[new_variable_name] = add_fuel_type_to_table(variable_definition, new_variable_name)
     end
     vars
   end
+
+  private_class_method def self.add_fuel_type_to_table(variable_definition, new_variable_name)
+    return variable_definition unless new_variable_name.to_s.include?('daytype_breakdown_table')
+    return merge_into_description(variable_definition, 'gas') if new_variable_name.to_s.include?('gas')
+    return merge_into_description(variable_definition, 'electricity') if new_variable_name.to_s.include?('electricity')
+    variable_definition
+  end
+
+  private_class_method def self.merge_into_description(definition, fuel_type)
+    definition[:description] = definition[:description] + ' (' + fuel_type + ')'
+    definition
+  end
+
 
   private def assign_third_party_alert_variables(class_type, third_party_alert)
     ALERT_INHERITANCE.each do |new_variable_name, third_party_alert_variable|

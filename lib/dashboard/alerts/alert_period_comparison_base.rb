@@ -112,7 +112,9 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     configure_models(asof_date)
     current_period, previous_period = last_two_periods(asof_date)
 
-    @relevance = time_relevance(asof_date) # during and up to 3 weeks after current period
+    # commented out 1Dec2019, in favour of alert prioritisation control
+    # @relevance = time_relevance(asof_date) # during and up to 3 weeks after current period
+    @relevance = enough_periods_data(asof_date) ? :relevant : :not_relevant
 
     raise EnergySparksNotEnoughDataException, "Not enough data in current period: #{period_debug(current_period,  asof_date)}"  unless enough_days_data_for_period(current_period,  asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data in previous period: #{period_debug(previous_period,  asof_date)}" unless enough_days_data_for_period(previous_period, asof_date)
@@ -186,7 +188,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   end
 
   protected def calculate_rating(percentage_difference, financial_difference_£, fuel_type)
-    return 10.0 if financial_difference_£.between?(-MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£, MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£)
+    # PH removed £10 limit 20Nov2019 at CT request
+    # return 10.0 if financial_difference_£.between?(-MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£, MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£)
     ten_rating_range_percent = fuel_type == :electricity ? 0.10 : 0.15 # more latitude for gas
     calculate_rating_from_range(-ten_rating_range_percent, ten_rating_range_percent, percentage_difference)
   end
@@ -265,6 +268,11 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     return :relevant if enough_days_in_period(current_period, asof_date)
     days_from_end_of_period_to_asof_date = asof_date - current_period.end_date
     return days_from_end_of_period_to_asof_date.between?(0, DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD) ? :relevant : :not_relevant
+  end
+
+  private def enough_periods_data(asof_date)
+    current_period, previous_period = last_two_periods(asof_date)
+    !current_period.nil? && !previous_period.nil? 
   end
 
   private def enough_days_in_period(period, asof_date)

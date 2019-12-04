@@ -45,7 +45,7 @@ class AdviceSolarPV < AdviceElectricityBase
     # not ideal, fishing out a numbered column from a table
     min_saving = FormatEnergyUnit.format(:percent, pv_benefit_estimator.solar_pv_scenario_table.first[6], :text)
     max_saving = FormatEnergyUnit.format(:percent, pv_benefit_estimator.solar_pv_scenario_table.last[6],  :text)
-    "Installing solar pv would reduce your electricity consumption between #{min_saving} and #{max_saving}"
+    "Installing solar pv would save up to #{max_saving} of your electricity consumption "
   end
 
   def rating
@@ -113,6 +113,15 @@ class AdviceSolarPV < AdviceElectricityBase
           government have proposed a Smart Export Guarantee (SEG) scheme, but
           it is not in place yet (as of Nov 2019) but some suppliers are
           already offering to pay you for any exported electricity.
+        </li>
+        <li>
+          The calculations are based on a current electricity price of 12p/kWh,
+          if mains electricity prices reduce there will be a lower economic benefit and
+          longer payback to the installation.
+        </li>
+        <li>
+          If the school becomes more efficient at using electricity and reduces its electricity
+          consumption the benefit will also reduce.
         </li>
         <li>
           The capital costs in the table above are estimates based on

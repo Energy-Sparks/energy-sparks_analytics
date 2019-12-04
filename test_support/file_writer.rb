@@ -43,10 +43,10 @@ class FileWriter
     data
   end
 
-  def load_yaml_file(filename = marshal_filename)
+  def load_yaml_file(filename = yaml_filename)
     data = nil
     bm = Benchmark.realtime {
-      puts "Loading #{filename}"
+      puts "Loading YAML file #{filename}"
       return nil unless File.file?(filename)
       data = YAML::load_file(filename)
     }

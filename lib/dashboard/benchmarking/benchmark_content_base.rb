@@ -9,29 +9,31 @@ module Benchmarking
     end
 
     def front_end_content(school_ids: nil, filter: nil)
-      content(school_ids, filter).select{ |content_config| %i[html chart_name, table].include?(content_config[:type]) }
+      content(school_ids, filter).select{ |content_config| %i[html chart_name chart table title].include?(content_config[:type]) }
     end
 
     def content(school_ids: nil, filter: nil)
       chart       = run_chart(school_ids, filter)         if charts?
       table_html  = run_table(school_ids, filter, :html)  if tables?
       table_text  = run_table(school_ids, filter, :text)  if tables?
+      composite   = run_table(school_ids, filter, :text_and_raw) if tables?
 
       charts = charts? ? [
-        { type: :html,                  content: "<h3>Chart Introduction</h3>" },
+        { type: :html,                  content: chart_introduction_text },
         { type: :chart_name,            content: chart_name },
         { type: :chart,                 content: chart },
-        { type: :html,                  content: "<h3>Chart Interpretation</h3>" }
+        { type: :html,                  content: chart_interpretation_text }
       ] : nil
 
       tables = tables? ? [
-        { type: :html,                  content: "<h3>Table Introduction</h3>"},
+        { type: :html,                  content: table_introduction_text},
         { type: :table_html,            content: table_html },
         { type: :table_text,            content: table_text },
-        { type: :html,                  content: "<h3>Table Interpretation</h3>" }
+        { type: :table_composite,       content: composite },
+        { type: :html,                  content: table_interpretation_text }
       ] : nil
 
-      caveats = [{ type: :html,         content: "<h3>Caveat</h3>"}]
+      caveats = [{ type: :html,         content: caveat_text}]
 
       [preamble_content, charts, tables, caveats].compact.flatten
     end
@@ -39,13 +41,43 @@ module Benchmarking
     protected def preamble_content
       [
         { type: :analytics_html,        content: '<br>' },
-        { type: :html,                  content: "<h1>#{chart_table_config[:name]}</h1>" },
+        { type: :html,                  content: content_title },
+        { type: :title,                 content: chart_table_config[:name]},
         { type: :html,                  content: introduction_text },
       ]
     end
 
+    protected def content_title
+      text = %( <h1><%= chart_table_config[:name] %></h1> )
+      ERB.new(text).result(binding)
+    end
+
     protected def introduction_text
       %q( <h3>Introduction here</h3> )
+    end
+
+    protected def introduction_text
+      %q( <h3>Introduction here</h3> )
+    end
+
+    protected def chart_introduction_text
+      %q( <h3>Chart Introduction</h3> )
+    end
+
+    protected def chart_interpretation_text
+      %q( <h3>Chart interpretation</h3> )
+    end
+
+    protected def table_introduction_text
+      %q( <h3>Table Introduction</h3> )
+    end
+
+    protected def table_interpretation_text
+      %q( <h3>Table interpretation</h3> )
+    end
+
+    protected def caveat_text
+      %q( <h3>Caveat</h3> )
     end
 
     def charts?
@@ -66,22 +98,6 @@ module Benchmarking
   
     def run_table(school_ids, filter, medium)
       benchmark_manager.run_benchmark_table(asof_date, page_name, school_ids, nil, filter, medium)
-    end
-  end
-
-  class BenchmarkContentElectricityPerPupil < BenchmarkContentBase
-    private def introduction_text
-      %q(
-        <p>
-          This benchmark compares the electricity consumed per pupil each year,
-          expressed in pounds.
-        </p>
-        <p>
-          A realistic target for the primary school to use less than
-          &pound;20 per pupil per year, for middle schools &pound;30
-          and for secondaries &pound;40. 
-        </p>
-      )
     end
   end
 end

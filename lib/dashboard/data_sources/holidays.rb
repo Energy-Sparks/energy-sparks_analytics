@@ -71,6 +71,7 @@ end
 # contains holidays, plus functionality for determining whether a date is a holiday
 class Holidays
   include Logging
+  attr_reader :holidays
 
   def initialize(holiday_data)
     set_holidays_by_type(holiday_data)
@@ -386,9 +387,12 @@ class Holidays
     include Logging
     attr_reader :holidays_in_year
     def initialize(start_date, end_date, full_holiday_schedule)
+      # this is called from meter validation and equivalences with slightly different
+      # structures TODO(PH,24Nov2019) normalise upstream so switch not required
+      schedule = full_holiday_schedule.is_a?(Array) ? full_holiday_schedule : full_holiday_schedule.holidays
       year_name = start_date.year.to_s + '/' + end_date.year.to_s
       super(:academic_year, year_name, start_date, end_date)
-      @holidays_in_year = find_holidays_in_year(full_holiday_schedule)
+      @holidays_in_year = find_holidays_in_year(schedule)
     end
 
     def find_holidays_in_year(full_holiday_schedule)

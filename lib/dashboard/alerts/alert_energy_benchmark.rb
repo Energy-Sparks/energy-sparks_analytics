@@ -51,7 +51,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     last_year_co2_tonnes: {
       description: 'Last years energy CO2 tonnes',
       units:  :co2t,
-      benchmark_code: 'co2y'
+      benchmark_code: 'co2t'
     },
     one_year_energy_per_pupil_kwh: {
       description: 'Per pupil annual energy usage - kwh',
@@ -141,22 +141,6 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       # exemplar = 10.0, 20% worse than average = 0.0
       @rating = calculate_rating_from_range(@per_pupil_energy_exemplar_£, @per_pupil_energy_benchmark_£ * 1.2, @one_year_energy_per_pupil_£)
     end
-
-=begin
-    scenarios, optimum_kwp = calculate_range_of_scenarios(asof_date)
-
-    @solar_pv_scenario_table  = format_scenarios_into_table(scenarios, :raw)
-    html_table_data           = format_scenarios_into_table(scenarios, :html)
-
-    @solar_pv_scenario_table_html = HtmlTableFormatting.new(self.class.scenario_table_text, html_table_data).html
-
-    optimum_scenario = find_optimum_kwp(scenarios, round_optimum_kwp(optimum_kwp))
-    promote_optimum_variables(optimum_scenario)
-
-    one_year_saving  = optimum_scenario[:total_annual_saving_£]
-    savings_range = Range.new(one_year_saving, one_year_saving)
-    set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£])
-=end
   end
   alias_method :analyse_private, :calculate
 

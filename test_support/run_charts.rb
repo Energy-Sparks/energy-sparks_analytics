@@ -30,9 +30,8 @@ class RunCharts
   end
 
   def self.report_failed_charts(failed_charts, detail)
-    puts 'Failed Charts:'
     failed_charts.each do |failed_chart|
-      short_backtrace = failed_chart[:backtrace][0].split('/').last
+      short_backtrace = failed_chart.key?(:backtrace) && !failed_chart[:backtrace].nil? ? failed_chart[:backtrace][0].split('/').last : 'no backtrace'
       puts sprintf('%-15.15s %-25.25s %-35.35s %-80.80s %-20.20s', 
         failed_chart[:school_name], failed_chart[:chart_name], failed_chart[:message], short_backtrace, failed_chart[:type])
       puts failed_chart[:backtrace] if detail == :detailed
@@ -127,6 +126,7 @@ class RunCharts
     begin
       chart_results = chart_manager.run_chart_group(chart_name, nil, true) # chart_override)
       if chart_results.nil?
+        puts "Nil chart result for #{chart_name}"
         @failed_charts.push( { school_name: @school.name, chart_name: chart_name, message: 'Unknown', backtrace: nil } )
       else
         chart_results = [chart_results] unless chart_results.is_a?(Array)

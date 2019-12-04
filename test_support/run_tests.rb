@@ -140,7 +140,7 @@ class RunTests
     logger.info '=' * 120
     logger.info 'RUNNING REPORTS'
     failed_charts = []
-    @school_list.each do |school_name|
+    @school_list.sort.each do |school_name|
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename

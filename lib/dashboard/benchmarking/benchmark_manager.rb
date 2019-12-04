@@ -33,6 +33,8 @@ module Benchmarking
       end
     end
 
+    attr_reader :benchmark_database
+
     def initialize(benchmark_database)
       @benchmark_database = benchmark_database
     end
@@ -85,9 +87,15 @@ module Benchmarking
         sort_level = 0 # multi-column sort
         compare = nil
         loop do
+          reverse_it = false
           sort_col = config[:sort_by][sort_level]
+          if sort_col.is_a?(Hash)
+            reverse_it = true
+            sort_col = sort_col.values[0]
+          end
           sort_col_type = config[:columns][sort_col][:units]
           compare = sort_compare(row1, row2, sort_col, sort_col_type)
+          compare *= -1 unless reverse_it
           sort_level += 1
           break if sort_level >= config[:sort_by].length || compare != 0
         end 
@@ -111,7 +119,7 @@ module Benchmarking
       case medium
       when :raw
         [header] + rows
-      when :text
+      when :text, :text_and_raw
         formatted_rows = format_rows(rows, table_definition[:columns], medium)
         {header: header, rows: formatted_rows}
       when :html
@@ -124,8 +132,30 @@ module Benchmarking
       column_units = column_definitions.map{ |column_definition| column_definition[:units] }
       formatted_rows = rows.map do |row|
         row.each_with_index.map do |value, index|
-          column_units[index] == String ? value : FormatEnergyUnit.format(column_units[index], value, medium, false, true, :ks2)
+          if column_units[index] == String
+            if medium == :text_and_raw
+              {
+                formatted: value,
+                raw: value
+              }
+            else
+              value
+            end
+          else
+            format_cell(column_units[index], value, medium)
+          end
         end
+      end
+    end
+    
+    def format_cell(units, value, medium)
+      if medium == :text_and_raw
+        {
+          formatted: format_cell(units, value, :text),
+          raw: value
+        }
+      else
+        FormatEnergyUnit.format(units, value, medium, false, true, :benchmark)
       end
     end
 
@@ -162,7 +192,7 @@ module Benchmarking
       graph_definition[:x_data]         = create_chart_data(config, table, chart_column_numbers, chart_columns_definitions)
       graph_definition[:chart1_type]    = :bar
       graph_definition[:chart1_subtype] = :stacked
-      graph_definition[:y_axis_label]   = 'GBP'
+      graph_definition[:y_axis_label]   = y_axis_label(chart_columns_definitions)
       graph_definition[:config_name]    = chart_name.to_s
 
       y2_data = create_y2_data(config, table, chart_column_numbers, chart_columns_definitions)
@@ -175,7 +205,27 @@ module Benchmarking
       graph_definition
     end
 
+    def y_axis_type(chart_columns_definitions)
+      first_chart_data_column = chart_columns_definitions[1] # [0] = school name
+      first_chart_data_column[:units]
+    end
+
+    def y_axis_label(chart_columns_definitions)
+      y_axis_label_name(y_axis_type(chart_columns_definitions))
+    end
+
+    def y_axis_label_name(unit)
+      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W',
+                     percent: 'percent', timeofday: 'Time of day',
+                     days: 'days' }
+      return unit_names[unit] if unit_names.key?(unit)
+      logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
+      puts "Unexpected untranslated unit type for benchmark chart #{unit}"
+      unit.to_s.humanize
+    end
+
     def remove_first_column(row)
+      # return the data, the 1st entry is the column heading/series/label
       row[1..100]
     end
 
@@ -193,6 +243,7 @@ module Benchmarking
       chart_data = {}
       y2_data = {}
       chart_column_numbers.each_with_index do |chart_column_number, index|
+        next if index == 0 # skip entry as its the school name
         data = remove_first_column(table.map{ |row| row[chart_column_number] })
         series_name = chart_columns_definitions[index][:name]
         if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
@@ -242,6 +293,8 @@ module Benchmarking
     def all_school_ids(selected_dates)
       list_of_school_ids = {}
       selected_dates.each do |date|
+        # puts "Got here: #{@benchmark_database.class.name}"
+        # ap @benchmark_database
         school_ids = @benchmark_database[date].keys
         school_ids.each do |school_id|
           list_of_school_ids[school_id] = true

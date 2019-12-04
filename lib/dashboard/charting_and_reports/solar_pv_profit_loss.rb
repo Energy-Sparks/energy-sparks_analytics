@@ -46,7 +46,7 @@ class SolarPVProfitLoss
   end
 
   private def value_from_profit_loss_tables(row_type, data_type)
-    data = profit_loss_multiple_years.values[0][:data].detect { |row| row[:name] == row_type }
+    data = profit_loss_multiple_years.values[0][:data].detect { |row| row[:name].include?(row_type) }
     data[data_type]
   end
 

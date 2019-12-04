@@ -690,6 +690,38 @@ module AnalyseHeatingAndHotWater
       [actual_on_time, recommended_start_time, temperature, kwh_saving]
     end
 
+    def optimum_start_analysis(start_date = [@amr_data.start_date, @amr_data.end_date - 364].max, end_date = @amr_data.end_date)
+      start_time_temperature_pairs = optimum_start_times_temperatures(start_date, end_date)
+      # print_optimum_start_times_temperatures(start_time_temperature_pairs)
+      calculate_optimum_start_regression(start_time_temperature_pairs)
+    end
+
+    def calculate_optimum_start_regression(time_temp_pairs)
+      start_times = time_temp_pairs.map(&:first)
+      x = Daru::Vector.new(start_times)
+      y = Daru::Vector.new(time_temp_pairs.map(&:last))
+      sr = Statsample::Regression.simple(x, y)
+      {
+        regression_start_time:        sr.a,
+        optimum_start_sensitivity:    sr.b,
+        regression_r2:                sr.r2,
+        average_start_time:           start_times.sum / start_times.length,
+        start_time_standard_devation: EnergySparks::Maths.standard_deviation(start_times)
+      }
+    end
+
+    def print_optimum_start_times_temperatures(data)
+      data.each do |time_temp_pair|
+        puts "#{time_temp_pair[0].round(2)} #{time_temp_pair[1].round(2)}"
+      end
+    end
+    def optimum_start_times_temperatures(start_date, end_date)
+      start_times = (start_date..end_date).map do |date|
+        on_time, _recommend_time, temperature, _kwh_saving = heating_on_time_assessment(date)
+        on_time.nil? ? nil : [on_time.hours_fraction, temperature]
+      end.compact
+    end
+
     private def recommended_optimum_start_time(_date, temperature)
       optimum_start_regression = { # [temperature] => hours past midnight
         3.9 => 0.0,   # in weather below 4C (frost) turn heating on early

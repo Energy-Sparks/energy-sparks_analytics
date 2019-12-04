@@ -191,7 +191,7 @@ class HotWaterInvestmentAnalysisText
       <p>
         This section of the dashboard analyses the efficiency of your
         school&apos;s hot water usage and the potential savings from either improving
-        the timing control of your existing hot water system of replacing it
+        the timing control of your existing hot water system or replacing it
         completely with point of use electric hot water systems.
       </p>
     }.gsub(/^  /, '')

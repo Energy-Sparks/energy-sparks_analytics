@@ -8,9 +8,9 @@ class RunBenchmarks
   attr_reader :control
   def initialize(control, schools)
     @control = control
-    ap control
     puts "School list: #{schools}"
     @school_list = AnalysticsSchoolAndMeterMetaData.new.match_school_names(schools)
+    transform_front_end_yaml_file(control[:transform_frontend_yaml]) if control.key?(:transform_frontend_yaml)
     @database = BenchmarkDatabase.new(control[:filename])
   end
 
@@ -21,6 +21,19 @@ class RunBenchmarks
   end
 
   private
+
+  # front end uses strings for keys, analytics symbols
+  def transform_front_end_yaml_file(filenames)
+    front_end_filename = filenames[:from_filename]
+    analytics_filename = filenames[:to_filename] + '.yaml'
+    front_end = YAML.load_file(front_end_filename + '.yaml')
+    front_end.each do |date, schools|
+      schools.each do |school_id, variables|
+        schools[school_id] = variables.transform_keys { |key| key.to_sym }
+      end
+    end
+    File.open(analytics_filename, 'w') { |f| f.write(YAML.dump(front_end)) }
+  end
 
   def run_alerts_to_update_database
     @school_list.sort.each do |school_name|
@@ -35,9 +48,11 @@ class RunBenchmarks
     html = FRONTEND_CSS
     charts = []
     tables = []
+    composite_tables = []
 
     puts "Running content config #{config}"
     content_manager = Benchmarking::BenchmarkContentManager.new(config[:asof_date])
+    ap content_manager.structured_pages
     content_list = content_manager.available_pages(filter: config[:filter])
 
     content_list.each do |page_name, description|
@@ -49,13 +64,14 @@ class RunBenchmarks
 
       content = content_manager.content(db, page_name, filter: config[:filter])
 
-      page_html, page_charts, page_tables = process_content(content)
+      page_html, page_charts, page_tables, page_table_composites = process_content(content)
 
       # print_content(page_html, page_charts, page_tables)
 
-      html    += page_html
-      charts  += page_charts
-      tables  += page_tables
+      html              += page_html
+      charts            += page_charts
+      tables            += page_tables
+      composite_tables  += page_table_composites
     end
 
     save_html(html)
@@ -83,24 +99,29 @@ class RunBenchmarks
     html = '<br>'
     charts = []
     tables = []
+    tables_composite = []
 
     content.each do |content_item|
       case content_item[:type]
       when :analytics_html, :html, :table_html
         html += content_item[:content]
       when :chart_name
-        html += "<h2>Chart: #{content_item[:content]} inserted here"
+        html += "<h2>Chart: #{content_item[:content]} inserted here</h2>"
       when :chart
         charts.push(content_item[:content])
       when :table_text
         tables.push(content_item[:content])
+      when :table_composite
+        tables_composite.push(content_item[:content])
       end
     end
-    [html, charts, tables]
+    [html, charts, tables, tables_composite]
   end
 
   def run_charts_and_tables(asof_date)
     benchmarks = Benchmarking::BenchmarkManager.new(@database.database)
+
+    ap benchmarks.structured_pages
 
     charts = []
     html = FRONTEND_CSS

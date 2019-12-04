@@ -47,7 +47,7 @@ class SchoolFactory
   end
 
   def load_unvalidated_meter_collection(meter_attributes_overrides: {})
-    school_filename = 'freshford-church-school'
+    school_filename = 'st-marks-c-of-e-school'
     unvalidated_meter_data = load_meter_collections(school_filename, 'unvalidated-data-')
     unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
     AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
@@ -120,8 +120,16 @@ class SchoolFactory
 
   def load_meter_readings(school, source, meter_attributes)
     school_copy = school.deep_dup
+<<<<<<< HEAD
     loader = MeterReadingsDownloadBase.meter_reading_factory(source, school_copy, meter_attributes)
     loader.load_meter_readings
+=======
+    bm = Benchmark.realtime {
+      loader = MeterReadingsDownloadBase.meter_reading_factory(source, school_copy)
+      loader.load_meter_readings
+    }
+    puts "loaded marshal meter readings in #{bm.round(5)}"
+>>>>>>> origin/master
     school_copy
   end
 
