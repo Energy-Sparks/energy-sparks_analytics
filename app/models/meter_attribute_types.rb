@@ -7,8 +7,19 @@ module MeterAttributeTypes
 
   class InvalidAttributeValue < StandardError; end
 
+  PSEUDO_METER_TYPES = [
+    :aggregated_electricity,
+    :aggregated_gas,
+    :solar_pv_consumed_sub_meter,
+    :solar_pv_exported_sub_meter,
+    :solar_pv_original_sub_meter,
+    :storage_heater_aggreated,
+    :storage_heater_disaggreated_electricity,
+    :storage_heater_disaggreated_storage_heater,
+  ].freeze
+
   class AttributeBase
-    class_attribute :attribute_key, :attribute_aggregation, :attribute_name, :attribute_structure, :attribute_id, :attribute_description
+    class_attribute :attribute_key, :attribute_aggregation, :attribute_name, :attribute_structure, :attribute_id, :attribute_description, :attribute_meter_types, :attribute_pseudo_meter_types
 
     def self.id(value)
       self.attribute_id = value
@@ -36,6 +47,18 @@ module MeterAttributeTypes
 
     def self.parse(input)
       new(attribute_structure.parse(input))
+    end
+
+    def self.applicable_meter_types
+      applicable_attribute_meter_types + applicable_attribute_pseudo_meter_types
+    end
+
+    def self.applicable_attribute_meter_types
+      attribute_meter_types || [:gas, :electricity, :solar_pv, :exported_solar_pv]
+    end
+
+    def self.applicable_attribute_pseudo_meter_types
+      attribute_pseudo_meter_types || PSEUDO_METER_TYPES
     end
 
     def initialize(value)

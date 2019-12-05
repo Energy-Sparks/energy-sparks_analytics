@@ -1,3 +1,3 @@
 module Dashboard
-  VERSION = "0.54.7-meter-attributes-b"
+  VERSION = "0.54.7-meter-attributes-c"
 end
