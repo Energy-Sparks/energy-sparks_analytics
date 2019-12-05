@@ -8,7 +8,7 @@ module MeterAttributeTypes
   class InvalidAttributeValue < StandardError; end
 
   class AttributeBase
-    class_attribute :attribute_key, :attribute_aggregation, :attribute_description, :attribute_structure, :attribute_id
+    class_attribute :attribute_key, :attribute_aggregation, :attribute_name, :attribute_structure, :attribute_id, :attribute_description
 
     def self.id(value)
       self.attribute_id = value
@@ -24,6 +24,10 @@ module MeterAttributeTypes
 
     def self.description(description)
       self.attribute_description = description
+    end
+
+    def self.name(name)
+      self.attribute_name = name
     end
 
     def self.structure(structure)
@@ -57,6 +61,10 @@ module MeterAttributeTypes
 
     def required?
       @configuration[:required] == true
+    end
+
+    def hint
+      @configuration[:hint]
     end
 
     def parse(input)

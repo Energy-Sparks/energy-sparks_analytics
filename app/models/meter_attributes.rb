@@ -6,11 +6,14 @@ class MeterAttributes
     id :meter_corrections_auto_insert_missing_readings
     key :auto_insert_missing_readings
     aggregate_over :meter_corrections
-    description 'Meter correction > Auto insert missing readings'
+
+    name 'Meter correction > Auto insert missing readings'
+    description 'A meter correction that uses past data to fill in readings that are missing. Useful for schools with flaky meters.'
+
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        type: MeterAttributeTypes::Symbol.define(allowed_values: [:weekends])
+        type: MeterAttributeTypes::Symbol.define(allowed_values: [:weekends], required: true)
       }
     )
   end
@@ -20,7 +23,7 @@ class MeterAttributes
     id :meter_corrections_no_heating_in_summer_set_missing_to_zero
     key :no_heating_in_summer_set_missing_to_zero
     aggregate_over :meter_corrections
-    description 'Meter correction > No heating in summer set missing to zero'
+    name 'Meter correction > No heating in summer set missing to zero'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -34,7 +37,7 @@ class MeterAttributes
     id :meter_corrections_rescale_amr_data
     key :rescale_amr_data
     aggregate_over :meter_corrections
-    description 'Meter correction > Rescale AMR data'
+    name 'Meter correction > Rescale AMR data'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date: MeterAttributeTypes::Date.define(required: true),
@@ -48,7 +51,7 @@ class MeterAttributes
     id :meter_corrections_set_missing_data_to_zero
     key :set_missing_data_to_zero
     aggregate_over :meter_corrections
-    description 'Meter correction > Set missing data to zero'
+    name 'Meter correction > Set missing data to zero'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date: MeterAttributeTypes::Date.define(required: true),
@@ -61,7 +64,7 @@ class MeterAttributes
     id :meter_corrections_set_bad_data_to_zero
     key :set_bad_data_to_zero
     aggregate_over :meter_corrections
-    description 'Meter correction > Set bad data to zero'
+    name 'Meter correction > Set bad data to zero'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date: MeterAttributeTypes::Date.define(required: true),
@@ -74,14 +77,14 @@ class MeterAttributes
     id :meter_corrections_readings_start_date
     key :readings_start_date
     aggregate_over :meter_corrections
-    description 'Meter correction > ReadingsStartDate'
+    name 'Meter correction > ReadingsStartDate'
     structure MeterAttributeTypes::Date.define(required: true)
   end
 
   class MeterCorrectionSwitch < MeterAttributeTypes::AttributeBase
     id :meter_corrections_switch
     aggregate_over :meter_corrections
-    description 'Meter correction > Switch'
+    name 'Meter correction > Switch'
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:set_all_missing_to_zero, :correct_zero_partial_data])
   end
 
@@ -90,7 +93,7 @@ class MeterAttributes
 
     id :heating_model
     key :heating_model
-    description 'Heating model'
+    name 'Heating model'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -112,7 +115,7 @@ class MeterAttributes
 
     id :aggregation_switch
     aggregate_over :aggregation
-    description 'Aggregation > Switch'
+    name 'Aggregation > Switch'
 
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:ignore_start_date, :deprecated_include_but_ignore_start_date, :deprecated_include_but_ignore_end_date])
   end
@@ -121,7 +124,7 @@ class MeterAttributes
 
     id :function_switch
     aggregate_over :function
-    description 'Function > Switch'
+    name 'Function > Switch'
 
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:heating_only, :kitchen_only, :hotwater_only])
   end
@@ -130,7 +133,7 @@ class MeterAttributes
 
     id :tariff
     key :tariff
-    description 'Tariff'
+    name 'Tariff'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
@@ -143,14 +146,14 @@ class MeterAttributes
 
     id :solar_pv
     key :solar_pv
-    description 'Solar PV'
+    name 'Solar PV'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date:         MeterAttributeTypes::Date.define,
         end_date:           MeterAttributeTypes::Date.define,
         kwp:                MeterAttributeTypes::Float.define,
-        orientation:        MeterAttributeTypes::Integer.define,
+        orientation:        MeterAttributeTypes::Integer.define(hint: 'in degrees'),
         tilt:               MeterAttributeTypes::Integer.define,
         shading:            MeterAttributeTypes::Integer.define,
         fit_£_per_kwh:      MeterAttributeTypes::Float.define
@@ -162,7 +165,7 @@ class MeterAttributes
 
     id :low_carbon_hub_meter_id
     key :low_carbon_hub_meter_id
-    description 'Low carbon hub meter ID'
+    name 'Low carbon hub meter ID'
 
     structure MeterAttributeTypes::Integer.define(required: true, min: 0)
 
@@ -171,7 +174,7 @@ class MeterAttributes
   class StorageHeaters < MeterAttributeTypes::AttributeBase
     id :storage_heaters
     key :storage_heaters
-    description 'Storage heaters'
+    name 'Storage heaters'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
