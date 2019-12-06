@@ -145,7 +145,7 @@ class MeterAttributes
   class SolarPV < MeterAttributeTypes::AttributeBase
 
     id :solar_pv
-    key :solar_pv
+    aggregate_over :solar_pv
     name 'Solar PV'
 
     structure MeterAttributeTypes::Hash.define(
@@ -173,7 +173,7 @@ class MeterAttributes
 
   class StorageHeaters < MeterAttributeTypes::AttributeBase
     id :storage_heaters
-    key :storage_heaters
+    aggregate_over :storage_heaters
     name 'Storage heaters'
 
     structure MeterAttributeTypes::Hash.define(
