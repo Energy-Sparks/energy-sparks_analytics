@@ -69,6 +69,7 @@ class AnalysticsSchoolAndMeterMetaData
   end
 
   def yaml_meter_attributes_database
+    puts "Loading meter attibutes from #{meter_attributes_filename}"
     @meter_attributes ||= YAML::load_file(meter_attributes_filename)
   end
 
@@ -288,6 +289,12 @@ class AnalysticsSchoolAndMeterMetaData
   def create_empty_meter(meter_collection, name, identifier, fuel_type, floor_area, pupils, meter_no, all_attributes)
 
     logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
+
+    # front end maintains strict integer rule for mpan/mprn
+    # analytics more ambiguous string or integer
+    # need integer for attribute lookup
+    identifier = identifier.to_i if identifier.is_a?(String) && identifier.match(/^\d+$/)
+
     meter_attributes = all_attributes.fetch(identifier){ {} }
 
     meter = Dashboard::Meter.new(
