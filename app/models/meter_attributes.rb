@@ -77,7 +77,15 @@ class MeterAttributes
     id :meter_corrections_readings_start_date
     key :readings_start_date
     aggregate_over :meter_corrections
-    name 'Meter correction > ReadingsStartDate'
+    name 'Meter correction > Readings start date'
+    structure MeterAttributeTypes::Date.define(required: true)
+  end
+
+  class ReadingsEndDate < MeterAttributeTypes::AttributeBase
+    id :meter_corrections_readings_end_date
+    key :readings_end_date
+    aggregate_over :meter_corrections
+    name 'Meter correction > Readings end date'
     structure MeterAttributeTypes::Date.define(required: true)
   end
 
