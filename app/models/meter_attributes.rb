@@ -363,6 +363,20 @@ class MeterAttributes
         reason: 'Aggregate Storage heater: model assumptions ~160 wrong as heating on all year'
       }
     },
+    # ==============================Ralph Allen=============================
+    2200030352583 => {
+      solar_pv: [  
+        {
+          start_date:         Date.new(2012, 1, 1),
+          # end_date:          Date.new(2025, 1, 7),
+          kwp:                45.0,
+          orientation:        0,
+          tilt:               30,
+          shading:            0,
+          fit_£_per_kwh:      0.05
+        }
+      ]
+    },
     # ==============================Roundhill==================================
     75665806 => {
       meter_corrections: [
