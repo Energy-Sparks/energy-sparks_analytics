@@ -377,6 +377,18 @@ class MeterAttributes
         }
       ]
     },
+    9313345903 => {
+      meter_corrections: [
+        {
+          rescale_amr_data: {
+            start_date: Date.new(2019, 4, 7),
+            end_date:   Date.new(2020, 4, 7),
+            scale:      11.1,
+            reason:     'fix BNES gas feed sending m3 gas and not kWh: PH 31Oct2019'
+          }
+        }
+      ]
+    },
     # ==============================Roundhill==================================
     75665806 => {
       meter_corrections: [
