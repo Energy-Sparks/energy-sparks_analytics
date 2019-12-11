@@ -77,7 +77,15 @@ class MeterAttributes
     id :meter_corrections_readings_start_date
     key :readings_start_date
     aggregate_over :meter_corrections
-    name 'Meter correction > ReadingsStartDate'
+    name 'Meter correction > Readings start date'
+    structure MeterAttributeTypes::Date.define(required: true)
+  end
+
+  class ReadingsEndDate < MeterAttributeTypes::AttributeBase
+    id :meter_corrections_readings_end_date
+    key :readings_end_date
+    aggregate_over :meter_corrections
+    name 'Meter correction > Readings end date'
     structure MeterAttributeTypes::Date.define(required: true)
   end
 
@@ -145,7 +153,7 @@ class MeterAttributes
   class SolarPV < MeterAttributeTypes::AttributeBase
 
     id :solar_pv
-    key :solar_pv
+    aggregate_over :solar_pv
     name 'Solar PV'
 
     structure MeterAttributeTypes::Hash.define(
@@ -173,7 +181,7 @@ class MeterAttributes
 
   class StorageHeaters < MeterAttributeTypes::AttributeBase
     id :storage_heaters
-    key :storage_heaters
+    aggregate_over :storage_heaters
     name 'Storage heaters'
 
     structure MeterAttributeTypes::Hash.define(
