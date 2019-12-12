@@ -13,9 +13,9 @@ module MeterAttributeTypes
     :solar_pv_consumed_sub_meter,
     :solar_pv_exported_sub_meter,
     :solar_pv_original_sub_meter,
-    :storage_heater_aggreated,
-    :storage_heater_disaggreated_electricity,
-    :storage_heater_disaggreated_storage_heater,
+    :storage_heater_aggregated,
+    :storage_heater_disaggregated_electricity,
+    :storage_heater_disaggregated_storage_heater,
   ].freeze
 
   class AttributeBase

@@ -118,7 +118,7 @@ class AggregateDataService
       :electricity,
       electricity_meter.id,
       electricity_meter.name,
-      :storage_heater_disaggreated_electricity
+      :storage_heater_disaggregated_electricity
     )
     electricity_meter.sub_meters.push(original_electricity_meter_copy)
 
@@ -131,7 +131,7 @@ class AggregateDataService
       :storage_heater,
       electricity_meter.id,
       "#{electricity_meter.name} storage heater only",
-      :storage_heater_disaggreated_storage_heater
+      :storage_heater_disaggregated_storage_heater
     )
 
     calculate_meter_carbon_emissions_and_costs(storage_heater_meter, :electricity)
@@ -166,7 +166,7 @@ class AggregateDataService
       :storage_heater,
       aggregate_storage_heater_mpan,
       "#{meter_collection.aggregated_electricity_meters.name} storage heater only",
-      :storage_heater_aggreated
+      :storage_heater_aggregated
     )
 
     calculate_meter_carbon_emissions_and_costs(aggregate_storage_heater_meter, :electricity)
