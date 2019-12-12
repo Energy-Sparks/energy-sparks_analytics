@@ -6,8 +6,8 @@ require 'fileutils'
 class LoadSchoolFromFrontEndDownload < MeterReadingsDownloadCSVBase
   include Logging
 
-  def initialize(meter_collection)
-    super(meter_collection)
+  def initialize(meter_collection, meter_attributes)
+    super(meter_collection, meter_attributes)
     @delimiter = ','
   end
 

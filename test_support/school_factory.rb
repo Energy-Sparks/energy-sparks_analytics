@@ -9,17 +9,18 @@ class SchoolFactory
   end
 
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
-  def load_or_use_cached_meter_collection(identifier_type, identifier, source)
-    return load_aggregated_meter_collection if source == :aggregated_meter_collection
-    return load_validated_meter_collection  if source == :load_validated_meter_collection
-    return load_unvalidated_meter_collection  if source == :load_unvalidated_meter_collection
+  def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {})
+    return load_aggregated_meter_collection if source == :aggregated_meter_collection # no overrides as this is the final object that we use, including meter attributes
+    return load_validated_meter_collection(meter_attributes_overrides: meter_attributes_overrides)  if source == :load_validated_meter_collection
+    return load_unvalidated_meter_collection(meter_attributes_overrides: meter_attributes_overrides) if source == :load_unvalidated_meter_collection
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
     else
       meter_collection = find_cached_school(school.urn, source)
       if meter_collection.nil?
-        meter_collection = load_meter_readings(school, source)
+        meter_attributes = @schools_meta_data.meter_attributes(identifier, identifier_type)
+        meter_collection = load_meter_readings(school, source, meter_attributes)
         add_meter_collection_to_cache(school, source, meter_collection)
       end
       meter_collection
@@ -37,17 +38,18 @@ class SchoolFactory
     load_meter_collections(school_filename, 'aggregated-meter-collection-')
   end
 
-  def load_validated_meter_collection
+  def load_validated_meter_collection(meter_attributes_overrides: {})
     school_filename = 'st-marks-c-of-e-school'
-    validated_meter_collection = load_meter_collections(school_filename, 'validated-meter-collection-')
+    validated_meter_data = load_meter_collections(school_filename, 'validated-data-')
+    validated_meter_collection = build_meter_collection(validated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
     AggregateDataService.new(validated_meter_collection).aggregate_heat_and_electricity_meters
     validated_meter_collection
   end
 
-  def load_unvalidated_meter_collection
-    school_filename = 'freshford-church-school'
+  def load_unvalidated_meter_collection(meter_attributes_overrides: {})
     school_filename = 'st-marks-c-of-e-school'
-    unvalidated_meter_collection = load_meter_collections(school_filename, 'unvalidated-meter-collection-')
+    unvalidated_meter_data = load_meter_collections(school_filename, 'unvalidated-data-')
+    unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
     AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
     unvalidated_meter_collection
   end
@@ -93,6 +95,21 @@ class SchoolFactory
     school
   end
 
+  private def build_meter_collection(data, meter_attributes_overrides: {})
+    meter_attributes = data[:meter_attributes]
+    MeterCollectionFactory.new(
+      temperatures: data[:schedule_data][:temperatures],
+      solar_pv: data[:schedule_data][:solar_pv],
+      solar_irradiation: data[:schedule_data][:solar_irradiation],
+      grid_carbon_intensity: data[:schedule_data][:grid_carbon_intensity],
+      holidays: data[:schedule_data][:holidays]
+    ).build(
+      school_data: data[:school_data],
+      amr_data: data[:amr_data],
+      meter_attributes: meter_attributes.merge(meter_attributes_overrides)
+    )
+  end
+
   def find_cached_school(urn, source)
     @school_cache.dig(urn, source)
   end
@@ -101,13 +118,14 @@ class SchoolFactory
     (@school_cache[school.urn] ||= {})[source] = meter_collection
   end
 
-  def load_meter_readings(school, source)
+  def load_meter_readings(school, source, meter_attributes)
     school_copy = school.deep_dup
     bm = Benchmark.realtime {
-      loader = MeterReadingsDownloadBase.meter_reading_factory(source, school_copy)
+      loader = MeterReadingsDownloadBase.meter_reading_factory(source, school_copy, meter_attributes)
       loader.load_meter_readings
     }
     puts "loaded marshal meter readings in #{bm.round(5)}"
     school_copy
   end
+
 end

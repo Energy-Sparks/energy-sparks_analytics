@@ -4,8 +4,8 @@ require_relative '../app/models/meter_collection'
 class LoadSchoolFromBathSplitCSVFile < MeterReadingsDownloadCSVBase
   include Logging
 
-  def initialize(meter_collection)
-    super(meter_collection)
+  def initialize(meter_collection, meter_attributes)
+    super(meter_collection, meter_attributes)
     @delimiter = ','
   end
 

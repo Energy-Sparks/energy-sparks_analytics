@@ -209,10 +209,11 @@ def process_selected_schools
     # meter_collection = download_school(school_name)
 
     meter_collection = @school_metadata.school(school_name)
+    meter_attributes = @school_metadata.meter_attributes(school_name)
 
     puts "Downloading #{school_name}"
 
-    downloader = MeterReadingsDownloadBase::meter_reading_factory(@school_data_sources[school_name], meter_collection)
+    downloader = MeterReadingsDownloadBase::meter_reading_factory(@school_data_sources[school_name], meter_collection, meter_attributes)
     begin
       downloader.load_meter_readings
     rescue StandardError => e

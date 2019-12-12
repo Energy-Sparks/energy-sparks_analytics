@@ -6,8 +6,9 @@ require_relative './meterreadings_download_baseclass.rb'
 class MeterReadingsDownloadCSVBase < MeterReadingsDownloadBase
   include Logging
 
-  def initialize(meter_collection)
+  def initialize(meter_collection, meter_attributes)
     super(meter_collection)
+    @meter_attributes = meter_attributes
   end
 
   protected
@@ -58,7 +59,7 @@ class MeterReadingsDownloadCSVBase < MeterReadingsDownloadBase
   def create_empty_meter(identifier, fuel_type, name)
     identifier_type = fuel_type == :electricity ? :mpan : :mprn
     logger.debug "Creating Meter with no AMR data #{identifier} #{fuel_type} #{name}"
-    meter_attributes = MeterAttributes.for(identifier, @meter_collection.area_name, fuel_type)
+    meter_attributes = @meter_attributes.fetch(identifier){ {} }
 
     meter = Dashboard::Meter.new(
       meter_collection: meter_collection,
