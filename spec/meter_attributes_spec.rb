@@ -265,15 +265,13 @@ describe MeterAttributes do
       })
       expect(attribute.to_analytics).to eq(
         {
-          solar_pv: {
-            start_date:         Date.new(2017, 1, 1),
-            end_date:           Date.new(2017, 2, 2),
-            kwp:                30.0,
-            orientation:        1,
-            tilt:               180,
-            shading:            30,
-            fit_£_per_kwh:      20.0
-          }
+          start_date:         Date.new(2017, 1, 1),
+          end_date:           Date.new(2017, 2, 2),
+          kwp:                30.0,
+          orientation:        1,
+          tilt:               180,
+          shading:            30,
+          fit_£_per_kwh:      20.0
         }
       )
     end
@@ -299,13 +297,11 @@ describe MeterAttributes do
       })
       expect(attribute.to_analytics).to eq(
         {
-          storage_heaters: {
-            start_date: Date.new(2017, 1, 1),
-            end_date:   Date.new(2017, 2, 2),
-            power_kw:   30.0,
-            charge_start_time: TimeOfDay.new(23,12),
-            charge_end_time: TimeOfDay.new(23,15)
-          }
+          start_date: Date.new(2017, 1, 1),
+          end_date:   Date.new(2017, 2, 2),
+          power_kw:   30.0,
+          charge_start_time: TimeOfDay.new(23,12),
+          charge_end_time: TimeOfDay.new(23,15)
         }
       )
     end
