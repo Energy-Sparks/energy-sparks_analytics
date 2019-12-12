@@ -30,7 +30,7 @@ class MeterCollection
                 :solar_pv,
                 :grid_carbon_intensity
 
-  def initialize(school, holidays:, temperatures:, solar_irradiation:, solar_pv:, grid_carbon_intensity:)
+  def initialize(school, holidays:, temperatures:, solar_irradiation:, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
     @name = school.name
     @address = school.address
     @postcode = school.postcode
@@ -53,6 +53,7 @@ class MeterCollection
     @default_energy_purchaser = @area_name # use the area name for the moment
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
+    @pseudo_meter_attributes = pseudo_meter_attributes
 
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
@@ -273,6 +274,10 @@ class MeterCollection
 
   def close_time
     @cached_close_time
+  end
+
+  def pseudo_meter_attributes(type)
+    @pseudo_meter_attributes.fetch(type){ {} }
   end
 
   # This is overridden in the energysparks code at the moment, to use the actual open/close times

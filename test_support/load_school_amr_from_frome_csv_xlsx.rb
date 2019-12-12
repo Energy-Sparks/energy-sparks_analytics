@@ -46,8 +46,8 @@ class LoadSchoolFromFromeFiles < MeterReadingsDownloadCSVBase
     }
 
   }
-  def initialize(meter_collection)
-    super(meter_collection)
+  def initialize(meter_collection, meter_attributes)
+    super(meter_collection, meter_attributes)
     @meter_collection = meter_collection
     @delimiter = ','
   end

@@ -244,8 +244,9 @@ def save_schools(school_map, school_metadata)
     logger.info "Saving #{school_name} , #{meters}"
     logger.info "\n" * 3
     meter_collection = school_metadata.school(school_name)
+    meter_attributes = school_metadata.meter_attributes(school_name)
 
-    load_meter_readings(meter_collection)
+    load_meter_readings(meter_collection, meter_attributes)
 
     save_to_local_analytics_marshal_and_yml_files(meter_collection) if @save
 
@@ -257,8 +258,8 @@ def save_schools(school_map, school_metadata)
   reports.report_failed_charts
 end
 
-def load_meter_readings(meter_collection, validate = true, aggregate = true)
-  downloader = MeterReadingsDownloadBase::meter_reading_factory(:downloadfromfrontend, meter_collection)
+def load_meter_readings(meter_collection, meter_attributes, validate = true, aggregate = true)
+  downloader = MeterReadingsDownloadBase::meter_reading_factory(:downloadfromfrontend, meter_collection, meter_attributes)
   downloader.load_meter_readings
 
   meter_collection.all_meters.each do |meter|

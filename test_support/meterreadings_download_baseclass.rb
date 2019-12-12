@@ -20,21 +20,21 @@ class MeterReadingsDownloadBase
     raise EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class (save_meter_readings)')
   end
 
-  def self.meter_reading_factory(download_type, meter_collection)
+  def self.meter_reading_factory(download_type, meter_collection, meter_attributes)
     Logging.logger.info "Creating a meter reading download of type #{download_type}" # not sure how to access logger?
     case download_type
     when :bathcsv
-      LoadSchoolFromBathSplitCSVFile.new(meter_collection)
+      LoadSchoolFromBathSplitCSVFile.new(meter_collection, meter_attributes)
     when :bathhacked
-      BathHackedSocrataDownload.new(meter_collection)
+      BathHackedSocrataDownload.new(meter_collection, meter_attributes)
     when :fromecsv
-      LoadSchoolFromFromeFiles.new(meter_collection)
+      LoadSchoolFromFromeFiles.new(meter_collection, meter_attributes)
     when :analytics_db
       LocalAnalyticsMeterReadingDB.new(meter_collection)
     when :sheffieldcsv
-      LoadSchoolFromSheffieldCSV.new(meter_collection)
+      LoadSchoolFromSheffieldCSV.new(meter_collection, meter_attributes)
     when :downloadfromfrontend 
-      LoadSchoolFromFrontEndDownload.new(meter_collection)
+      LoadSchoolFromFrontEndDownload.new(meter_collection, meter_attributes)
     else
       raise EnergySparksUnexpectedStateException.new('Unknown download type') if download_type.nil?
       raise EnergySparksUnexpectedStateException.new("Unknown download type #{download_type}") if !download_type.nil?
