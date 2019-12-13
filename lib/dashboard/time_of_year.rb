@@ -31,6 +31,10 @@ class TimeOfYear
     @relative_time.strftime('%d %b')
   end
 
+  def inspect
+    to_s
+  end
+
   def <=>(other)
     other.class == self.class && [month, day] <=> [other.month, other.day]
   end

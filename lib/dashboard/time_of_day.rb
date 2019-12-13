@@ -43,6 +43,10 @@ class TimeOfDay
     end
   end
 
+  def inspect
+    to_s
+  end
+
   # returns the halfhour index in which the time of day starts,
   # plus the proportion of the way through the half hour bucket the time is
   # code obscificated for performancce
