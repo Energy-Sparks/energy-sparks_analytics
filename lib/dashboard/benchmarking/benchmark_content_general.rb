@@ -468,6 +468,12 @@ module Benchmarking
           of reducing the thermostats temperature setting per 1C
           of reduction.
         </p>
+        <p>
+          Occasionally this will result in a negative value, which is indicative
+          or very poor thermostatic control where the internal mathematics cannot
+          make sense of the relationship between the school&apos;s gas consumption and
+          outside temperature.
+        </p>
       )
     end
   end
