@@ -230,6 +230,7 @@ class FormatEnergyUnit
       # add zero pence onto e.g. £23.1 so it becomes £23.10
       after_decimal_point += '0'
     elsif number.magnitude >= 1000
+      return 'Infinity' unless number.infinite?.nil?
       return number.round(0).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse + after_decimal_point
     end
     before_decimal_point + after_decimal_point
