@@ -240,7 +240,7 @@ module Benchmarking
       },
       summer_holiday_electricity_analysis: {
         benchmark_class: BenchmarkContentSummerHolidayBaseloadAnalysis,
-        name:     'Experimental analysis of reductions in baseload over summer holidays',
+        name:     'Reduction in baseload in the summer holidays',
         columns:  [
           { data: 'addp_name',      name: 'School name',      units: String },
           { data: ->{ shol_ann£ },  name: 'Annualised £ value of summer holiday reduction',    units: :£, chart_data: true },

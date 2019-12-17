@@ -177,6 +177,12 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <p>
+          This chart shows the breakdown of when schools are using electricity
+          - school day open: when the school is open to pupils and staff,
+          school day closed: when the school is closed to pupils and staff overnight,
+          weekends and evenings.
+        </p>
+        <p>
           Most schools are unoccupied for about 85% of the year;
           between 5:00pm and 7:30am on school days, at weekends
           and during holidays. Focussing on reducing out of hours
@@ -189,7 +195,7 @@ module Benchmarking
           below 25% of annual consumption. In comparing schools,
           it might be helpful for you to look at the 2 additional
           benchmarks on baseload (out of hours power consumption)
-          that we provide as it might elicit more information
+          that we provide as it might give you more information
           on a school&apos;s out of hours consumption.
         </p>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
@@ -237,11 +243,10 @@ module Benchmarking
           impact on overall electricity consumption.
         </p>
         <p>
-          There is generally no excuse for a school not trying to reduce their
-          electricity baseload per pupil to that of the best schools. All
-          schools perform roughly the same function so should be able to achieve
-          similar electricity consumption particularly out of hours and meet
-          the energy efficiency standards of schools which meet best practice.
+          All schools should aim to reduce their electricity baseload per pupil
+          to that of the best schools. Schools perform roughly the same function
+          so should be able to achieve similar electricity consumption
+          particularly out of hours.
         </p>
         <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
@@ -303,12 +308,11 @@ module Benchmarking
         <p>
           This analysis attempts to analyse whether a school
           has reduced its electricity consumption during the
-          summer holidays by comparing overnight
-          consumption before, during and after school holidays.
+          summer holidays.
         </p>
         <p>
-          It then reports a potential reduction it has spotted. It&apos;s a useful way
-          determining how efficient appliances which have been switched off are.
+          IIt&apos;s a useful way of
+          determining the efficiency appliances which have been switched off.
           The school will need to know which appliances have been turned off
           in order for you to understand what contributed to the reduction.
         </p>
@@ -323,25 +327,22 @@ module Benchmarking
           just before holidays to remind schools to do this.
         </p>
         <p>
-          However, the analysis can sometimes get confused if the school&apos;s out of hours
-          consumption is unstable. To further investigate the issue for a given school
-          its worth drilling down to see more detailed baseload information on that school, and
-          then perhaps install appliance monitors to establish accurately how inefficient
-          equipment is, before making a purchasing decision. Domestic rather than commercial
-          refrigeration generally offers much better value and efficiency.
+          To further investigate the issue it is worth installing appliance monitors
+          to establish accurately how inefficient equipment is, before making a purchasing decision.
+          Domestic rather than commercial refrigeration generally offers much better value
+          and efficiency.
         </p>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
       )
       ERB.new(text).result(binding)
     end
     protected def table_introduction_text
       %q( 
         <p>
-          The annualised saving in the table below gives a good indication if
-          it is worthwhile investigating further. Large domestic A++ rated fridges
-          and freezers typically use £40 of electricity per year each - how does
-          this compare with the annualised reduction in the first numeric (2nd column)
-          below?
+          Large domestic A++ rated fridges
+          and freezers typically use £40 of electricity per year each.
+        </p>
+        <p>
+          This breakdown excludes electricity consumed by storage heaters and solar PV.
         </p>
        )
     end
@@ -375,7 +376,7 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          This benchmark shows the change the gas and storage heater costs
+          This benchmark shows the change in the gas and storage heater costs
           from last year to this year.
         </p>
         <p>
@@ -400,6 +401,12 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
+          This chart shows the breakdown of when schools are using gas
+          - school day open: when the school is open to pupils and staff,
+          school day closed: when the school is closed to pupils and
+          staff overnight, weekends and evenings. 
+        </p>
+        <p>
           Most schools are unoccupied for about 85% of the year;
           between 5:00pm and 7:30am on school days, at weekends
           and during holidays. Focussing on reducing out of hours
@@ -409,7 +416,7 @@ module Benchmarking
         </p>
         <p>
           Schools should aim to reduce their out of hours usage
-          below 35% of annual consumption. Writing of policy about
+          below 35% of annual consumption. Implementing a policy to reduce
           weekend and holiday use, and ensuring the boiler doesn&apos;t
           start too early in the morning should allow most school's
           to meet this target with no capital investment costs. It shouldn&apos;t
@@ -435,11 +442,12 @@ module Benchmarking
           type differential tariff) and releases the heat during the day.
         </p>
         <p>
-          Ensuring heating is turned off over the weekend (installing a 7 day
+          Ensuring heating is turned off over the weekend by installing a 7 day
           timer can provide very short paybacks - 16 weeks in this
-          <a href="https://cdn-test.energysparks.uk/static-assets/Energy_Sparks_Case_Study_3_-_Stanton_Drew_Storage_Heaters-f124cfe069b2746ab175f139c09eee70fcb558d5604be86811c70fedd67a7a6d.pdf" target ="_blank">case study</a>).
+          <a href="https://cdn-test.energysparks.uk/static-assets/Energy_Sparks_Case_Study_3_-_Stanton_Drew_Storage_Heaters-f124cfe069b2746ab175f139c09eee70fcb558d5604be86811c70fedd67a7a6d.pdf" target ="_blank">case study</a>.
           Turning off the heaters or turning them down as low as possible to avoid frost damage
-          can save during holidays; setting a school policy for this. Energy Sparks
+          can save during holidays.
+          We recommend you set a school policy for this. Energy Sparks
           can provide accurate estimates of the benefits of installing 7-day timers, or
           switching off during holidays if you drilldown to an individual school&apos;s analysis pages.
         </p>
@@ -479,9 +487,9 @@ module Benchmarking
           the length of the heating season to below 90 days.
         </p>
         <p>
-          Energy Sparks can be configured
-          to send you an alert via an email or a text message to you if the weather
-          forecast for the coming week suggests you should turn off your heating.
+          You can set up Energy Sparks email or text alerts which will notify
+          you if the weather forecast for the coming week suggests you should
+          turn off your heating.
         </p>
       )
     end
@@ -512,7 +520,7 @@ module Benchmarking
               Poor radiator control, the thermostatic valves (TRVs) on each radiator
               aren&apos;t appropriately set, perhaps set too high, and rather than
               turning them down, occupants of classrooms open windows to reduce
-              overheating
+              overheating.
             </li>
           </ul>
         </p>
@@ -727,7 +735,7 @@ module Benchmarking
         </p>
         <p>
           This is a simple low cost change a school can make, the chart and table below
-          attempt to estimate this cost based on some indicative standing charges
+          attempt to estimate the potential saving based on some indicative standing charges
           for your area; you will need to look at your bills to get a more accurate
           estimate.
         </p>
@@ -772,12 +780,7 @@ module Benchmarking
         </p>
         <p>
           The chart and table below estimate the potential benefit of switching
-          to or from a differential tariff. However, unless you have told Energy Sparks
-          we might not know if you are already on such a tariff, but if the table
-          suggests it is worth switching to a differential tariff, you should at
-          least consider contacting you energy supplier to ask what the benefit
-          is, which they should be able to provide very accurately using your smart
-          meter data which provides them with half hourly historic readings.
+          to or from a differential tariff.
         </p>
       )
     end

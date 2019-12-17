@@ -41,7 +41,7 @@ module Benchmarking
     protected def preamble_content
       [
         { type: :analytics_html,        content: '<br>' },
-        { type: :html,                  content: content_title },
+        # { type: :html,                  content: content_title },
         { type: :title,                 content: chart_table_config[:name]},
         { type: :html,                  content: introduction_text },
       ]

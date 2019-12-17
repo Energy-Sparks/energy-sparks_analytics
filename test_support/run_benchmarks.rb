@@ -105,6 +105,8 @@ class RunBenchmarks
       case content_item[:type]
       when :analytics_html, :html, :table_html
         html += content_item[:content]
+      when :title
+        html += "<h2>#{content_item[:content]}</h2>"
       when :chart_name
         html += "<h2>Chart: #{content_item[:content]} inserted here</h2>"
       when :chart
