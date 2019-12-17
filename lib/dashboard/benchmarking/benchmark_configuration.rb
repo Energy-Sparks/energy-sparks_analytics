@@ -304,7 +304,7 @@ module Benchmarking
           { data: ->{ gsba_£lyr },  name: 'Annual gas costs £ (this year)', units: :£},
           { data: ->{ gsba_£lyr_last_year },  name: 'Annual gas costs £ (last year)', units: :£},
           { data: ->{ shan_£lyr },  name: 'Annual storage heater costs £ (this year)', units: :£},
-          { data: ->{ shan_£lyr_last_year },  name: 'Annual gas costs £ (last year)', units: :£},
+          { data: ->{ shan_£lyr_last_year },  name: 'Annual storage heater costs £ (last year)', units: :£},
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr]) - sum_data([gsba_£lyr_last_year, shan_£lyr_last_year]) },  name: 'Change in heating costs between last 2 years', units: :£}
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
