@@ -43,14 +43,14 @@ module Benchmarking
       [today] # only today would be needed for the example
     end
 
-    def run_benchmark_chart(today, report, school_ids, chart_columns_only = false, filter = nil)
+    def run_benchmark_chart(today, report, school_ids, chart_columns_only = false, filter = nil, user_type = nil)
       config = self.class.chart_table_config(report)
-      table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter)
+      table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter, user_type)
       create_chart(report, config, table)
     end
 
     # filter e.g. for area: ->{ addp_area.include?('Highlands') }
-    def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw)
+    def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       results = []
       config = self.class.chart_table_config(report)
       school_ids = all_school_ids([today]) if school_ids.nil?
@@ -63,7 +63,7 @@ module Benchmarking
         next unless school_data && school_data_last_year
         row  = DatabaseRow.new(school_data)
         next unless filter_row(row, filter)
-        calculated_row = calculate_row(row, config, chart_columns_only, school_id)
+        calculated_row = calculate_row(row, config, chart_columns_only, school_id, user_type)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
@@ -264,11 +264,24 @@ module Benchmarking
       row.instance_exec(&filter)
     end
 
-    def calculate_row(row, report, chart_columns_only, school_id_debug)
+    def calculate_row(row, report, chart_columns_only, school_id_debug, user_type)
       report[:columns].map do |column_specification|
         next if chart_columns_only && !self.class.chart_column?(column_specification)
+        next if rating_column?(column_specification) && !system_admin_type?(user_type)
         calculate_value(row, column_specification, school_id_debug)
       end
+    end
+
+    def rating_column?(column_specification)
+      column_specification[:name] == 'rating'
+    end
+
+    def system_admin_type?(user_type)
+      return false if user_type.nil?
+      return false unless user_type.is_a?(Hash)
+      return true if user_type.key?(:user_role)  && user_type[:user_role] == :admin
+      return true if user_type.key?(:staff_role) && user_type[:staff_role] == :admin
+      false
     end
 
     def calculate_value(row, column_specification, school_id_debug)

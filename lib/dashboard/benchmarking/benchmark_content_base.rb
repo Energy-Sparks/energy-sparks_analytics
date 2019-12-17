@@ -12,10 +12,10 @@ module Benchmarking
       content(school_ids, filter).select{ |content_config| %i[html chart_name chart table title].include?(content_config[:type]) }
     end
 
-    def content(school_ids: nil, filter: nil)
+    def content(school_ids: nil, filter: nil, user_type: nil)
       chart       = run_chart(school_ids, filter)         if charts?
       table_html  = run_table(school_ids, filter, :html)  if tables?
-      table_text  = run_table(school_ids, filter, :text)  if tables?
+      table_text  = run_table(school_ids, filter, :text, user_type)  if tables?
       composite   = run_table(school_ids, filter, :text_and_raw) if tables?
 
       charts = charts? ? [
@@ -96,8 +96,8 @@ module Benchmarking
       benchmark_manager.run_benchmark_chart(asof_date, page_name, school_ids, nil, filter)
     end
   
-    def run_table(school_ids, filter, medium)
-      benchmark_manager.run_benchmark_table(asof_date, page_name, school_ids, nil, filter, medium)
+    def run_table(school_ids, filter, medium, user_type = nil)
+      benchmark_manager.run_benchmark_table(asof_date, page_name, school_ids, nil, filter, medium, user_type)
     end
   end
 end

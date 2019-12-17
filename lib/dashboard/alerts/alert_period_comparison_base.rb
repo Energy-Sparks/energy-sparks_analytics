@@ -56,7 +56,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       current_period_start_date: { description: 'Current period start date',          units:  :date  },
       current_period_end_date:   { description: 'Current period end date',            units:  :date  },
       days_in_current_period:    { description: 'No. of days in current period',      units: Integer },
-      name_of_current_period:    { description: 'name of current period e.g. Easter', units: String },
+      name_of_current_period:    { description: 'name of current period e.g. Easter', units: String, benchmark_code: 'cper' },
 
       previous_period_kwh:        { description: 'Previous period kwh',             units:  { kwh: fuel_type } },
       previous_period_£:          { description: 'Previous period £',               units:  :£  },

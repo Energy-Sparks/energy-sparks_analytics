@@ -130,7 +130,7 @@ class RunBenchmarks
 
     Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG.each do |chart_table_name, definition|
       if definition[:type].include?(:table)
-        table = benchmarks.run_benchmark_table(asof_date, chart_table_name, nil, nil, control[:filter]) 
+        table = benchmarks.run_benchmark_table(asof_date, chart_table_name, nil, nil, control[:filter], nil) 
         html += "<h2>#{definition[:name]}</h2>"
         html += html_table(definition, table)
       end

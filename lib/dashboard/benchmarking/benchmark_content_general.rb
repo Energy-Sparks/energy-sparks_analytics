@@ -644,7 +644,7 @@ module Benchmarking
       )
     end
 
-    def content(school_ids: nil, filter: nil)
+    def content(school_ids: nil, filter: nil, user_type: nil)
       content1 = super(school_ids: school_ids, filter: filter)
       content2 = optimum_start_content(school_ids: school_ids, filter: filter)
       content1 + content2

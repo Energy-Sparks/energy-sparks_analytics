@@ -478,6 +478,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ ephc_difp },  name: 'Change %', units: :percent, chart_data: true },
           { data: ->{ ephc_dif£ },  name: 'Change £', units: :£ },
+          { data: ->{ ephc_cper },  name: 'Current holiday', units: String },
           { data: ->{ ephc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by: [1],
@@ -490,6 +491,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ epyc_difp },  name: 'Change %', units: :percent, chart_data: true },
           { data: ->{ epyc_dif£ },  name: 'Change £', units: :£ },
+          { data: ->{ epyc_cper },  name: 'Current holiday', units: String },
           { data: ->{ epyc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by: [1],
@@ -514,6 +516,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ gphc_difp },  name: 'Change %', units: :percent, chart_data: true },
           { data: ->{ gphc_dif£ },  name: 'Change £', units: :£ },
+          { data: ->{ gphc_cper },  name: 'Current holiday', units: String },
           { data: ->{ gphc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by: [1],
@@ -526,6 +529,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ gpyc_difp },  name: 'Change %', units: :percent, chart_data: true },
           { data: ->{ gpyc_dif£ },  name: 'Change £', units: :£ },
+          { data: ->{ gpyc_cper },  name: 'Current holiday', units: String },
           { data: ->{ gpyc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by: [1],
