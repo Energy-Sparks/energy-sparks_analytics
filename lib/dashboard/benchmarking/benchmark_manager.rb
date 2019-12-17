@@ -183,8 +183,6 @@ module Benchmarking
       chart_column_numbers = config[:columns].each_with_index.map {|column_definition, index| self.class.chart_column?(column_definition) ? index : nil}
       chart_column_numbers.compact!
 
-      data = table.map{ |row| row[chart_column_numbers[1]] }
-      data.map!{|val| val.nil? ? nil : val * 100.0 } if chart_columns_definitions[1][:units] == :percent
       graph_definition = {}
       graph_definition[:title]          = config[:name]
       graph_definition[:x_axis]         = remove_first_column(table.map{ |row| row[chart_column_numbers[0]] })
@@ -248,6 +246,8 @@ module Benchmarking
         series_name = chart_columns_definitions[index][:name]
         if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
           chart_data[series_name] = data
+          percent_type = %i[percent relative_percent].include?(chart_columns_definitions[1][:units])
+          chart_data[series_name].map! { |val| val * 100.0 } if percent_type
         elsif axis == :y2 && self.class.y2_axis_column?(chart_columns_definitions[index])
           y2_data[series_name] = data
         end
