@@ -284,10 +284,9 @@ module Benchmarking
         name:     'Annual heating cost per floor area',
         columns:  [
           { data: 'addp_name',      name: 'School name',    units: String, chart_data: true },
-          { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: 'Annual gas/storage heater £/floor area (temp compensated)', units: :£, chart_data: true },
+          { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: 'Annual heating costs per floor area', units: :£, chart_data: true },
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost £', units: :£},
           { data: ->{ sum_data([gsba_s£ex, shan_s£ex], true) },  name: 'Saving if matched exemplar school', units: :£ },
-          { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost £', units: :£},
           { data: ->{ sum_data([gsba_klyr, shan_klyr], true) },  name: 'Annual consumption kWh', units: :kwh},
           { data: ->{ sum_data([gsba_co2y, shan_co2y], true) / 1000.0 },  name: 'Annual carbon emissions (tonnes CO2)', units: :co2},
           { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: 'rating', units: Float, y2_axis: true }
