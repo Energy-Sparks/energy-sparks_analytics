@@ -531,7 +531,7 @@ module Benchmarking
           </ul>
         </p>
         <p>
-          Poor thermostat control can make a school and uncomfortable place to
+          Poor thermostat control can make a school an uncomfortable place to
           inhabit and expensive to run. It also means a school will see
           less benefit in installing insulation if the heating consumption
           has little relationship to outside temperature and therefore
