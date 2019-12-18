@@ -130,30 +130,45 @@ module Benchmarking
 
     def format_rows(rows, column_definitions, medium)
       column_units = column_definitions.map{ |column_definition| column_definition[:units] }
+      column_sense = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
+      
       formatted_rows = rows.map do |row|
         row.each_with_index.map do |value, index|
+          sense = sense_column(column_sense[index])
           if column_units[index] == String
-            if medium == :text_and_raw
-              {
-                formatted: value,
-                raw: value
-              }
-            else
-              value
-            end
+            format_cell_string(value, medium, sense)
           else
-            format_cell(column_units[index], value, medium)
+            format_cell(column_units[index], value, medium, sense)
           end
         end
       end
     end
-    
-    def format_cell(units, value, medium)
+
+    def sense_column(sense)
+      sense.nil? ? nil : { sense: sense }
+    end
+
+    def format_cell_string(value, medium, sense)
       if medium == :text_and_raw
-        {
-          formatted: format_cell(units, value, :text),
+        data = {
+          formatted: value,
+          raw: value,
+        }
+        data.merge!(sense) unless sense.nil?
+        data
+      else
+        value
+      end
+    end
+    
+    def format_cell(units, value, medium, sense)
+      if medium == :text_and_raw
+        data = {
+          formatted: format_cell(units, value, :text, nil),
           raw: value
         }
+        data.merge!(sense) unless sense.nil?
+        data
       else
         FormatEnergyUnit.format(units, value, medium, false, true, :benchmark)
       end

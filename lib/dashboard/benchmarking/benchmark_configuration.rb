@@ -299,7 +299,7 @@ module Benchmarking
         name:     'Change in annual heating consumption',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-          { data: ->{ percent_change([gsba_£lyr_last_year, shan_£lyr_last_year], [gsba_£lyr, shan_£lyr], true) },  name: 'Change in annual gas/storage heater usage', units: :relative_percent_0dp, chart_data: true },
+          { data: ->{ percent_change([gsba_£lyr_last_year, shan_£lyr_last_year], [gsba_£lyr, shan_£lyr], true) },  name: 'Change in annual gas/storage heater usage', units: :relative_percent_0dp, sense: :positive_is_bad, chart_data: true },
           { data: ->{ gsba_£lyr },  name: 'Annual gas costs £ (this year)', units: :£},
           { data: ->{ gsba_£lyr_last_year },  name: 'Annual gas costs £ (last year)', units: :£},
           { data: ->{ shan_£lyr },  name: 'Annual storage heater costs £ (this year)', units: :£},
