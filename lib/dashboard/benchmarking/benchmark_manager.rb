@@ -213,8 +213,10 @@ module Benchmarking
     end
 
     def y_axis_label_name(unit)
-      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W',
-                     percent: 'percent', timeofday: 'Time of day',
+      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W', £_0dp: '£',
+                     timeofday: 'Time of day',
+                     percent: 'percent', percent_0dp: 'percent',
+                     relative_percent: 'percent', relative_percent_0dp: 'percent',
                      days: 'days' }
       return unit_names[unit] if unit_names.key?(unit)
       logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
@@ -246,8 +248,8 @@ module Benchmarking
         series_name = chart_columns_definitions[index][:name]
         if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
           chart_data[series_name] = data
-          percent_type = %i[percent relative_percent].include?(chart_columns_definitions[1][:units])
-          chart_data[series_name].map! { |val| val * 100.0 } if percent_type
+          percent_type = %i[percent relative_percent percent_0dp relative_percent_0dp].include?(chart_columns_definitions[1][:units])
+          chart_data[series_name].map! { |val| val.nil? ? nil : val * 100.0 } if percent_type
         elsif axis == :y2 && self.class.y2_axis_column?(chart_columns_definitions[index])
           y2_data[series_name] = data
         end
