@@ -219,7 +219,7 @@ module Benchmarking
       return unit_names[unit] if unit_names.key?(unit)
       logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
       puts "Unexpected untranslated unit type for benchmark chart #{unit}"
-      unit.to_s.humanize
+      unit.to_s.humanize.gsub(' 0dp', '')
     end
 
     def remove_first_column(row)

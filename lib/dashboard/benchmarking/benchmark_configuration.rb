@@ -465,7 +465,7 @@ module Benchmarking
         name:     'Change in electricity consumption since last school week',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
-          { data: ->{ eswc_difp },  name: 'Change %', units: :percent, chart_data: true },
+          { data: ->{ eswc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ eswc_dif£ },  name: 'Change £', units: :£ },
         ],
         sort_by: [1],
@@ -476,7 +476,7 @@ module Benchmarking
         name:     'Change in electricity consumption between the 2 most recent holidays',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
-          { data: ->{ ephc_difp },  name: 'Change %', units: :percent, chart_data: true },
+          { data: ->{ ephc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ ephc_dif£ },  name: 'Change £', units: :£ },
           { data: ->{ ephc_cper },  name: 'Most recent holiday', units: String },
           { data: ->{ ephc_pper },  name: 'Previous holiday', units: String },
@@ -490,7 +490,7 @@ module Benchmarking
         name:     'Change in electricity consumption between this holiday and the same holiday the previous year',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
-          { data: ->{ epyc_difp },  name: 'Change %', units: :percent, chart_data: true },
+          { data: ->{ epyc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ epyc_dif£ },  name: 'Change £', units: :£ },
           { data: ->{ epyc_cper },  name: 'Most recent holiday', units: String },
           { data: ->{ epyc_pper },  name: 'Previous holiday', units: String },
@@ -504,7 +504,7 @@ module Benchmarking
         name:     'Change in gas consumption since last school week',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
-          { data: ->{ gswc_difp },  name: 'Change %', units: :percent, chart_data: true },
+          { data: ->{ gswc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ gswc_dif£ },  name: 'Change £', units: :£ },
           { data: ->{ gswc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
@@ -516,7 +516,7 @@ module Benchmarking
         name:     'Change in gas consumption between the 2 most recent holidays',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
-          { data: ->{ gphc_difp },  name: 'Change %', units: :percent, chart_data: true },
+          { data: ->{ gphc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ gphc_dif£ },  name: 'Change £', units: :£ },
           { data: ->{ gphc_cper },  name: 'Most recent holiday', units: String },
           { data: ->{ gphc_pper },  name: 'Previous holiday', units: String },
@@ -530,7 +530,7 @@ module Benchmarking
         name:     'Change in gas consumption between this holiday and the same the previous year',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
-          { data: ->{ gpyc_difp },  name: 'Change %', units: :percent, chart_data: true },
+          { data: ->{ gpyc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ gpyc_dif£ },  name: 'Change £', units: :£ },
           { data: ->{ gpyc_cper },  name: 'Most recent holiday', units: String },
           { data: ->{ gpyc_pper },  name: 'Previous holiday', units: String },
