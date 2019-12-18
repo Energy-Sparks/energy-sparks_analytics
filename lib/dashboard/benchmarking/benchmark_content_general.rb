@@ -37,6 +37,11 @@ module Benchmarking
         solar PV.
       </p>
     ),
+    comparison_with_previous_period_infinite: %q(
+      <p>
+        An infinite value indicates the consumption in the first period was zero.
+      </p>
+    ),
     es_sources_of_baseload_electricity_consumption: %q(
       <p>
         Consumers of out of hours electricity include
@@ -795,32 +800,36 @@ module Benchmarking
   class BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
+      text = %q(
         <p>
           This comparison simply shows the change in electricity consumption since the
           last school week. You should expect a slight but not significant
           increase in electricity consumption going into the winter with
           increased lighting usage and a subsequent reduction in the spring.
         </p>
+        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================  
   class BenchmarkContentChangeInElectricityBetweenLast2Holidays < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
+      text = %q(
         <p>
           This comparison shows the change in consumption between the 2 most recent holidays.
         </p>
+        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================  
   class BenchmarkContentChangeInElectricityBetween2HolidaysYearApart < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
+      text = %q(
         <p>
           This comparison shows the change in consumption the most recent holiday, and
           the same holiday a year ago. Schools should be looking to reduce holiday usage
@@ -828,28 +837,32 @@ module Benchmarking
           from year to year suggests a school is not managing to reduce consumption,
           which would help mitigate some of the impacts of climate change.
         </p>
+        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================  
   class BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
+      text = %q(
         <p>
           This comparison simply shows the change in gas consumption since the
           last school week. You might expect an
           increase in gas consumption going into the winter as it gets
           colder and a subsequent reduction in the spring.
         </p>
+        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================  
   class BenchmarkContentChangeInGasBetweenLast2Holidays < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
+      text = %q(
         <p>
           This comparison shows the change in consumption between the 2 most recent holidays.
           This can be affected by whether the heating was turned on one of the holidays,
@@ -864,14 +877,16 @@ module Benchmarking
           &apos;alert&apos; to send you an email or text message just before a holiday to remind you to
           turn heating or hot water off.
         </p>
+        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================  
   class BenchmarkContentChangeInGasBetween2HolidaysYearApart < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
+      text = %q(
         <p>
           This comparison shows the change in consumption the most recent holiday, and
           the same holiday a year ago. Schools should be looking to reduce holiday usage
@@ -881,7 +896,9 @@ module Benchmarking
           send you an email or text message just before a holiday to remind you to
           turn heating or hot water off.
         </p>
+        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
+      ERB.new(text).result(binding)
     end
   end
 end
