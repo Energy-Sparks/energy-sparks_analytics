@@ -7,14 +7,13 @@ require_relative '../half_hourly_loader'
 # economic costs are simpler, just a rate (or 2 if differential) - good for forecasting, education
 # accounting costs, contain lots of standing charges
 class CostsBase < HalfHourlyData
-  attr_reader :meter_id, :fuel_type, :amr_data, :fuel_type, :default_energy_purchaser
+  attr_reader :meter, :fuel_type, :amr_data, :fuel_type
   attr_accessor :post_aggregation_state
-  def initialize(meter_id, amr_data = nil, fuel_type = nil, default_energy_purchaser = nil)
+  def initialize(meter)
     super(:amr_data_accounting_tariff)
-    @amr_data = amr_data
-    @fuel_type = fuel_type
-    @default_energy_purchaser = default_energy_purchaser # typically the area name for LAs
-    @meter_id = meter_id
+    @meter = meter
+    @amr_data = meter.amr_data
+    @fuel_type = meter.fuel_type
     @bill_component_types_internal = Hash.new(nil) # only interested in (quick access) to keys, so maintain as hash rather than array
     @post_aggregation_state = false
   end
@@ -119,30 +118,30 @@ class CostsBase < HalfHourlyData
     results
   end
 
-  public def calculate_tariff(amr_data, fuel_type, default_energy_purchaser)
+  public def calculate_tariff(meter)
     (amr_data.start_date..amr_data.end_date).each do |date|
-      one_day_cost = calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser)
+      one_day_cost = calculate_tariff_for_date(date, meter)
       add(date, one_day_cost)
     end
     logger.info "Created #{costs_summary}"
   end
 
-  public def calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser)
+  public def calculate_tariff_for_date(date, meter)
     kwh_x48 = nil
-    if amr_data.date_missing?(date) # TODO(PH, 7Apr2019) - bad Castle data for 2009, work out why validation not cleaning up
+    if meter.amr_data.date_missing?(date) # TODO(PH, 7Apr2019) - bad Castle data for 2009, work out why validation not cleaning up
       logger.warn "Warning: missing amr data for #{date} using zero"
       kwh_x48 = Array.new(48, 0.0)
     else
-      kwh_x48 = amr_data.days_kwh_x48(date, :kwh)
+      kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
     end
-    daytime_cost_x48, nighttime_cost_x48, standing_charges = costs(date, meter_id, fuel_type, kwh_x48, default_energy_purchaser)
+    daytime_cost_x48, nighttime_cost_x48, standing_charges = costs(date, meter, kwh_x48)
     one_day_cost = OneDaysCostData.new(daytime_cost_x48, nighttime_cost_x48, standing_charges)
     one_day_cost
   end
 
   public def costs_summary
     type_info = "with the following bill components: #{bill_component_types}"
-    "costs for meter #{meter_id}, #{self.length} days from #{start_date} to #{end_date}, £#{total_costs.round(0)} of which standing charges £#{total_standing_charges.round(0)}, #{type_info}"
+    "costs for meter #{meter.mpan_mprn}, #{self.length} days from #{start_date} to #{end_date}, £#{total_costs.round(0)} of which standing charges £#{total_standing_charges.round(0)}, #{type_info}"
   end
 
   public def total_costs
@@ -179,21 +178,20 @@ class CostsBase < HalfHourlyData
     total
   end
 
-  protected def costs(_date, _meter_id, _fuel_type, _days_kwh_x48)
+  protected def costs(_date, _meter, _days_kwh_x48)
     raise EnergySparksAbstractBaseClass.new('Unexpected call to abstract base class for CostsBase: costs')
   end
 end
 
 class EconomicCosts < CostsBase
-  protected def costs(date, meter_id, fuel_type, days_kwh_x48, _default_energy_purchaser)
-    fuel_type = :electricity if fuel_type == :aggregated_electricity # TODO(PH, 6Apr2019) remove after analytics school loading metadata code changes
-    MeterTariffs.economic_tariff_x48(date, meter_id, fuel_type, days_kwh_x48)
+  protected def costs(date, meter, days_kwh_x48)
+    MeterTariffs.economic_tariff_x48(date, meter, days_kwh_x48)
   end
 
-  def self.combine_economic_costs_from_multiple_meters(combined_meter_id, list_of_meters, combined_start_date, combined_end_date)
+  def self.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
     Logging.logger.info "Combining economic costs from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
 
-    combined_economic_costs = EconomicCostsPreAggregated.new(combined_meter_id)
+    combined_economic_costs = EconomicCostsPreAggregated.new(combined_meter)
 
     (combined_start_date..combined_end_date).each do |date|
       list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
@@ -210,14 +208,14 @@ end
 # parameterised representation of economic costs until after agggregation to reduce memory footprint
 class EconomicCostsParameterised < EconomicCosts
 
-  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
-    EconomicCostsParameterised.new(meter_id, amr_data, fuel_type, default_energy_purchaser)
+  def self.create_costs(meter)
+    EconomicCostsParameterised.new(meter)
   end
 
   # returns a x48 array of half hourly costs
   def one_days_cost_data(date)
-    return calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser)) if date_missing?(date)
+    return calculate_tariff_for_date(date, meter) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
     self[date]
   end
 
@@ -237,23 +235,23 @@ class EconomicCostsPreAggregated < EconomicCosts
     self[date]
   end
 
-  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
-    costs = EconomicCostsPreAggregated.new(meter_id, amr_data, fuel_type, default_energy_purchaser)
-    costs.calculate_tariff(amr_data, fuel_type, default_energy_purchaser) unless parameterised
+  def self.create_costs(meter)
+    costs = EconomicCostsPreAggregated.new(meter)
+    costs.calculate_tariff unless parameterised
     costs
   end
 end
 
 class AccountingCosts < CostsBase
-  protected def costs(date, meter_id, fuel_type, days_kwh_x48, default_energy_purchaser)
-    MeterTariffs.accounting_tariff_x48(date, meter_id, fuel_type, days_kwh_x48, default_energy_purchaser)
+  protected def costs(date, meter, days_kwh_x48)
+    MeterTariffs.accounting_tariff_x48(date, meter, days_kwh_x48)
   end
 
   # similar to Economic version, but too many differences to easily refactor to inherited version for the moment
-  def self.combine_accounting_costs_from_multiple_meters(combined_meter_id, list_of_meters, combined_start_date, combined_end_date)
+  def self.combine_accounting_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
     Logging.logger.info "Combining accounting costs from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
 
-    combined_accounting_costs = AccountingCostsPreAggregated.new(combined_meter_id)
+    combined_accounting_costs = AccountingCostsPreAggregated.new(combined_meter)
 
     (combined_start_date..combined_end_date).each do |date|
       list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }.compact
@@ -274,8 +272,8 @@ class AccountingCosts < CostsBase
 
   # returns a x48 array of half hourly costs
   def one_days_cost_data(date)
-    return calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser)) if date_missing?(date)
+    return calculate_tariff_for_date(date, meter) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
     self[date]
   end
 
@@ -288,8 +286,8 @@ end
 class AccountingCostsParameterised < AccountingCosts
   # returns a x48 array of half hourly costs, only caches post aggregation, and front end cache
   def one_days_cost_data(date) 
-    return calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, amr_data, fuel_type, default_energy_purchaser)) if date_missing?(date)
+    return calculate_tariff_for_date(date, meter) unless post_aggregation_state
+    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
     self[date]
   end
 
@@ -309,8 +307,8 @@ class AccountingCostsParameterised < AccountingCosts
     end
   end
 
-  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
-    AccountingCostsParameterised.new(meter_id, amr_data, fuel_type, default_energy_purchaser)
+  def self.create_costs(meter)
+    AccountingCostsParameterised.new(meter)
   end
 end
 
@@ -320,8 +318,8 @@ class AccountingCostsPreAggregated < AccountingCosts
     self[date]
   end
 
-  def self.create_costs(meter_id, amr_data, fuel_type, default_energy_purchaser)
-    costs = AccountingCostsPreAggregated.new(meter_id, amr_data, fuel_type, default_energy_purchaser)
+  def self.create_costs(meter)
+    costs = AccountingCostsPreAggregated.new(meter)
     costs.calculate_tariff(amr_data, fuel_type, default_energy_purchaser)
     costs
   end

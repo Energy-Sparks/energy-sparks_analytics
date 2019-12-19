@@ -241,7 +241,7 @@ class MeterAttributes
 
   class AccountingTariff < MeterAttributeTypes::AttributeBase
     id :accounting_tariff
-    aggregate_over :accounting_tariff
+    aggregate_over :accounting_tariffs
     name 'Accounting tariff'
 
     structure MeterAttributeTypes::Hash.define(
@@ -272,15 +272,14 @@ class MeterAttributes
               }
             )
           }
-        )
-
+        ),
       }
     )
   end
 
   class AccountingTariffDifferential < MeterAttributeTypes::AttributeBase
     id :accounting_tariff_differential
-    aggregate_over :accounting_tariff
+    aggregate_over :accounting_tariffs
     name 'Accounting tariff (differential)'
 
     structure MeterAttributeTypes::Hash.define(
@@ -323,7 +322,8 @@ class MeterAttributes
               }
             )
           }
-        )
+        ),
+        asc_limit_kw: MeterAttributeTypes::Float.define
 
       }
     )

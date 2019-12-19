@@ -74,9 +74,9 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   # returns true if have real accounting tariff, or false if only general tariff for area
   private def find_tariff(meter)
     date = Date.today
-    tariff = MeterTariffs.accounting_tariff_for_date(date, meter.mpan_mprn)
+    tariff = MeterTariffs.accounting_tariff_for_date(date, meter)
     return [true, tariff] unless tariff.nil?
-    tariff = MeterTariffs.default_area_tariff_for_date(@school.area_name, meter.fuel_type, date)
+    tariff = default_accounting_tariff_in_event_of_no_others(date, meter)
     [false, tariff]
   end
 end

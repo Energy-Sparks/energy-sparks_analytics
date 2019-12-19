@@ -20,45 +20,42 @@ require 'date'
 class MeterTariffs
   extend Logging
 
-  def self.economic_tariff_x48(date, mpan_mprn, fuel_type, kwh_halfhour_x48)
-    # TODO(PH, 5May19) - analystics meta data load means strange fuel types are filtering through, remove on reorg of meta data loader
-    fuel_type = :electricity if fuel_type == :aggregated_electricity
-    tariff_config = economic_tariff_config(mpan_mprn, date, fuel_type)
+  def self.economic_tariff_x48(date, meter, kwh_halfhour_x48)
+    tariff_config = meter.attributes(:economic_tariff)
 
-    daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48)
+    daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48, differential_meter?(date, meter))
 
     [daytime_cost_x48, nighttime_cost_x48, {}] # {} = the standing charges for consistancy with the accounting tariff interface
   end
 
-  def self.accounting_tariff_for_date(date, mpan_mprn)
-    tariff_for_date(METER_TARIFFS, mpan_mprn, date)
+  # accounting tariffs come in least to most specific order
+  # we want the most specific matching one first
+  def self.accounting_tariff_for_date(date, meter)
+    tariffs = meter.attributes(:accounting_tariffs) || []
+    matching_date  = tariffs.select { |tariff| date >= tariff[:start_date] && date <= tariff[:end_date] }
+    matching_date.last
   end
 
-  def self.accounting_tariff_x48(date, mpan_mprn, fuel_type, kwh_halfhour_x48, default_energy_purchaser)
-    tariff_config = tariff_for_date(METER_TARIFFS, mpan_mprn, date)
+  def self.accounting_tariff_x48(date, meter, kwh_halfhour_x48)
+    #byebug if meter.mpan_mprn.to_s == '4234023603'
+    tariff_config = accounting_tariff_for_date(date, meter)
 
-    tariff_config = default_area_tariff_for_date(default_energy_purchaser, fuel_type, date) if tariff_config.nil?
+    tariff_config = default_accounting_tariff_in_event_of_no_others(date, meter) if tariff_config.nil?
 
-    tariff_config = default_accounting_tariff_in_event_of_no_others(date, fuel_type) if tariff_config.nil?
+    raise EnergySparksNotEnoughDataException.new("Missing tariff data for #{meter.mpan_mprn} on #{date}") if tariff_config.nil?
 
-    daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48)
+    daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48, differential_tariff?(tariff_config))
 
     standing_charge = standing_charges(date, tariff_config, kwh_halfhour_x48.sum)
 
     [daytime_cost_x48, nighttime_cost_x48, standing_charge]
   end
 
-  def self.default_area_tariff_for_date(area_name, fuel_type, date)
-    area_name = translate_area_names_from_front_end(area_name)
-    raise EnergySparksNotEnoughDataException.new("Missing default area meter tariff data for #{area_name} #{fuel_type}") if DEFAULT_ACCOUNTING_TARIFFS.dig(area_name, fuel_type).nil?
-    tariff_for_date(DEFAULT_ACCOUNTING_TARIFFS[area_name], fuel_type, date)
-  end
-  
-  private_class_method def self.day_night_costs_x48(tariff_config, kwh_halfhour_x48)
+  private_class_method def self.day_night_costs_x48(tariff_config, kwh_halfhour_x48, differential)
     daytime_cost_x48 = nil
     nighttime_cost_x48 = nil
 
-    if differential_tariff?(tariff_config)
+    if differential
       daytime_cost_x48, nighttime_cost_x48 = differential_tariff_cost(tariff_config, kwh_halfhour_x48)
     else
       daytime_cost_x48 = AMRData.fast_multiply_x48_x_scalar(kwh_halfhour_x48, tariff_config[:rates][:rate][:rate])
@@ -100,7 +97,7 @@ class MeterTariffs
 
   private_class_method def self.weighted_costs(tariff_config, kwh_halfhour_x48, rate_type)
     daytime_time_weights = DateTimeHelper.weighted_x48_vector_single_range(
-      tariff_config[:rates][rate_type][:time_period],
+      tariff_config[:rates][rate_type][:from]..tariff_config[:rates][rate_type][:to],
       tariff_config[:rates][rate_type][:rate]
     )
     AMRData.fast_multiply_x48_x_x48(daytime_time_weights, kwh_halfhour_x48)
@@ -111,72 +108,34 @@ class MeterTariffs
   # no differential tariffs in the given date range for any of its underlying meters
   # the aggregattion service interates through the component meters to check 'if any' are differential
   # calling this for each component meter, not the combined meter
-  def self.differential_tariff_in_date_range?(mpan_mprn, start_date, end_date)
-    return false unless METER_TARIFFS.key?(mpan_mprn) # we have no information for this meter, so assume non differential
-    aggregate_meter_date_range = Range.new(start_date, end_date)
-    METER_TARIFFS[mpan_mprn].each do |tariff_date_range, tariff_config|
-      in_range = date_ranges_overlap(tariff_date_range, aggregate_meter_date_range)
-      return true if differential_tariff?(tariff_config) && in_range
+  def self.differential_tariff_in_date_range?(meter, start_date, end_date)
+    tariffs = meter.attributes(:accounting_tariffs) || []
+    return false if tariffs.empty? # we have no information for this meter, so assume non differential
+    tariffs.each do |tariff_config|
+      in_range = date_ranges_overlap(tariff_config[:start_date], tariff_config[:end_date], start_date, end_date)
+      return true if in_range && differential_tariff?(tariff_config)
     end
     false
   end
 
+
   # test explicitly rather than ruby .overlap? function as it has potential
   # to slowly iterate through each range rather than testing boundary conditions
-  private_class_method def self.date_ranges_overlap(date_range_1, date_range_2)
+  private_class_method def self.date_ranges_overlap(date_range_1_start, date_range_1_end, date_range_2_start, date_range_2_end)
     # think clearer on 3 lines:
-    return false if date_range_1.last  < date_range_2.first # range 1 occurs before range 2
-    return false if date_range_1.first > date_range_2.last  # range 1 occurs after  range 2
+    return false if date_range_1_end < date_range_2_start # range 1 occurs before range 2
+    return false if date_range_1_start > date_range_2_end  # range 1 occurs after  range 2
     return true                                              # otherwise there must be an overlap
   end
 
-=begin
-  private_class_method def self.tariff_for_date(date, tariff_config)
-    tariff_config.select { |date_range, _tariff| date_range == date }
-    return tariff_config.values[0] if tariff_config.length == 1
-    raise EnergySparksNotEnoughDataException.new("No tariff information available for date #{date}")
-    raise EnergySparksNotEnoughDataException.new("To many tariffs (#{tariff_config.length}) for date #{date}")
-  end
-=end
-
-  private_class_method def self.economic_tariff_config(mpan_mprn, date, fuel_type)
-    tariff_type = fuel_type
-    # use accounting tariff's to determine whether meter has a differential tariff
-    tariff_type = :electricity_differential if tariff_type == :electricity && differential_meter?(mpan_mprn, date)
-    tariff_for_date(ECONOMIC_TARIFFS, tariff_type, date)
+  private_class_method def self.default_accounting_tariff_in_event_of_no_others(date, meter)
+    Logging.logger.error "Error: unable to get accounting tariff for date #{date} and fuel #{meter.fuel_type}"
+    meter.attributes(:economic_tariff)
   end
 
-  # short term adjustment for difference in area names between analystics and front end TODO(All, 9Apr2019) resolve long term
-  private_class_method def self.translate_area_names_from_front_end(area_name)
-    # rather not use include? as i may clash with other Bath school groups on different tariffs?
-    case area_name
-    when 'Bath & North East Somerset'
-      'Bath'
-    when 'Somerset'
-      'Frome'
-    when 'Abingdon', 'Oxfordshire', 'Oxford'
-      'Bath'
-      # 'Oxfordshire'
-    else
-      area_name
-    end
-  end
 
-  private_class_method def self.default_accounting_tariff_in_event_of_no_others(date, fuel_type)
-    Logging.logger.error "Error: unable to get accounting tariff for date #{date} and fuel #{fuel_type}"
-    tariff_for_date(ECONOMIC_TARIFFS, fuel_type, date)
-  end
-
-  private_class_method def self.tariff_for_date(tariff_group, identifier, date)
-    return nil unless tariff_group.key?(identifier)
-    tariff = tariff_group[identifier].select { |date_range, _tariff| date >= date_range.first && date <= date_range.last }
-    return nil if tariff.empty?
-    raise EnergySparksUnexpectedSchoolDataConfiguration.new("Only expecting one tariff for date #{date}, got #{tariff.length}") if tariff.length > 1
-    tariff.values[0]
-  end
-
-  private_class_method def self.differential_meter?(mpan_mprn, date)
-    tariff_config = tariff_for_date(METER_TARIFFS, mpan_mprn, date)
+  private_class_method def self.differential_meter?(date, meter)
+    tariff_config = accounting_tariff_for_date(date, meter)
     tariff_config.nil? ? false : differential_tariff?(tariff_config)
   end
 

@@ -332,7 +332,7 @@ class DashboardEnergyAdvice
 
     private def missing_accounting_tariffs_meters
       meters = @school.real_meters
-      meters.select { |meter| MeterTariffs.accounting_tariff_for_date(meter.amr_data.end_date, meter.mpan_mprn).nil? }
+      meters.select { |meter| MeterTariffs.accounting_tariff_for_date(meter.amr_data.end_date, meter).nil? }
     end
 
     private def missing_accounting_tariff_meter_mpan_mprn_text

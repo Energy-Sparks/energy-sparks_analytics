@@ -14,14 +14,14 @@ class AMRData < HalfHourlyData
     @accounting_tariff.post_aggregation_state = true if @accounting_tariff.is_a?(AccountingCostsParameterised)
   end
 
-  def set_economic_tariff(meter_id, fuel_type, default_energy_purchaser)
-    logger.info "Creating an economic costs in amr_meter #{meter_id} #{fuel_type} #{default_energy_purchaser}"
-    @economic_tariff = EconomicCostsParameterised.create_costs(meter_id, self, fuel_type, default_energy_purchaser)
+  def set_economic_tariff(meter)
+    logger.info "Creating an economic costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
+    @economic_tariff = EconomicCostsParameterised.create_costs(meter)
   end
 
-  def set_accounting_tariff(meter_id, fuel_type, default_energy_purchaser)
-    logger.info "Creating an accounting costs in amr_meter #{meter_id} #{fuel_type}  #{default_energy_purchaser}"
-    @accounting_tariff = AccountingCostsParameterised.create_costs(meter_id, self, fuel_type, default_energy_purchaser)
+  def set_accounting_tariff(meter)
+    logger.info "Creating an accounting costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
+    @accounting_tariff = AccountingCostsParameterised.create_costs(meter)
   end
 
   def set_economic_tariff_schedule(tariff)
