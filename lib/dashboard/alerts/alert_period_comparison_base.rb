@@ -56,14 +56,14 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       current_period_start_date: { description: 'Current period start date',          units:  :date  },
       current_period_end_date:   { description: 'Current period end date',            units:  :date  },
       days_in_current_period:    { description: 'No. of days in current period',      units: Integer },
-      name_of_current_period:    { description: 'name of current period e.g. Easter', units: String },
+      name_of_current_period:    { description: 'name of current period e.g. Easter', units: String, benchmark_code: 'cper' },
 
       previous_period_kwh:        { description: 'Previous period kwh',             units:  { kwh: fuel_type } },
       previous_period_£:          { description: 'Previous period £',               units:  :£  },
       previous_period_start_date: { description: 'Previous period start date',      units:  :date  },
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
-      name_of_previous_period:    { description: 'name of pervious period',         units: String },
+      name_of_previous_period:    { description: 'name of pervious period',         units: String, benchmark_code: 'pper' },
 
       current_period_average_kwh:  { description: 'Current period average daily kwh', units:  { kwh: fuel_type } },
       previous_period_average_kwh: { description: 'Previous period average daily',    units:  { kwh: fuel_type } },
@@ -125,6 +125,9 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     @difference_kwh     = current_period_data[:kwh] - previous_period_data[:kwh]
     @difference_£       = current_period_data[:£]   - previous_period_data[:£]
+    # put in a large percent if the usage was zero during the last period
+    # fixes St Louis autumn 2019 half term verus zero summer holiday -inf in benchmarking (PH, 17Dec2019)
+    # @difference_percent = previous_period_data[:kwh] == 0.0 ? 1000.0 : (difference_kwh  / previous_period_data[:kwh])
     @difference_percent = difference_kwh  / previous_period_data[:kwh]
 
     @current_period_kwh         = current_period_data[:kwh]

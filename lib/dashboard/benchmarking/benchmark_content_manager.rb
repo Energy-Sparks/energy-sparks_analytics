@@ -31,7 +31,7 @@ module Benchmarking
 
     def content(benchmark_database, page_name, school_ids: nil, filter: nil, user_type: nil)
       content = content_handler(benchmark_database, page_name)
-      content.content(school_ids: school_ids, filter: filter)
+      content.content(school_ids: school_ids, filter: filter, user_type: user_type)
     end
 
     private

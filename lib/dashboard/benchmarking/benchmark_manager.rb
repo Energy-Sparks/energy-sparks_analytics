@@ -43,14 +43,14 @@ module Benchmarking
       [today] # only today would be needed for the example
     end
 
-    def run_benchmark_chart(today, report, school_ids, chart_columns_only = false, filter = nil)
+    def run_benchmark_chart(today, report, school_ids, chart_columns_only = false, filter = nil, user_type = nil)
       config = self.class.chart_table_config(report)
-      table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter)
+      table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter, user_type)
       create_chart(report, config, table)
     end
 
     # filter e.g. for area: ->{ addp_area.include?('Highlands') }
-    def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw)
+    def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       results = []
       config = self.class.chart_table_config(report)
       school_ids = all_school_ids([today]) if school_ids.nil?
@@ -63,7 +63,7 @@ module Benchmarking
         next unless school_data && school_data_last_year
         row  = DatabaseRow.new(school_data)
         next unless filter_row(row, filter)
-        calculated_row = calculate_row(row, config, chart_columns_only, school_id)
+        calculated_row = calculate_row(row, config, chart_columns_only, school_id, user_type)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
@@ -130,30 +130,45 @@ module Benchmarking
 
     def format_rows(rows, column_definitions, medium)
       column_units = column_definitions.map{ |column_definition| column_definition[:units] }
+      column_sense = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
+      
       formatted_rows = rows.map do |row|
         row.each_with_index.map do |value, index|
+          sense = sense_column(column_sense[index])
           if column_units[index] == String
-            if medium == :text_and_raw
-              {
-                formatted: value,
-                raw: value
-              }
-            else
-              value
-            end
+            format_cell_string(value, medium, sense)
           else
-            format_cell(column_units[index], value, medium)
+            format_cell(column_units[index], value, medium, sense)
           end
         end
       end
     end
-    
-    def format_cell(units, value, medium)
+
+    def sense_column(sense)
+      sense.nil? ? nil : { sense: sense }
+    end
+
+    def format_cell_string(value, medium, sense)
       if medium == :text_and_raw
-        {
-          formatted: format_cell(units, value, :text),
+        data = {
+          formatted: value,
+          raw: value,
+        }
+        data.merge!(sense) unless sense.nil?
+        data
+      else
+        value
+      end
+    end
+    
+    def format_cell(units, value, medium, sense)
+      if medium == :text_and_raw
+        data = {
+          formatted: format_cell(units, value, :text, nil),
           raw: value
         }
+        data.merge!(sense) unless sense.nil?
+        data
       else
         FormatEnergyUnit.format(units, value, medium, false, true, :benchmark)
       end
@@ -183,8 +198,6 @@ module Benchmarking
       chart_column_numbers = config[:columns].each_with_index.map {|column_definition, index| self.class.chart_column?(column_definition) ? index : nil}
       chart_column_numbers.compact!
 
-      data = table.map{ |row| row[chart_column_numbers[1]] }
-      data.map!{|val| val.nil? ? nil : val * 100.0 } if chart_columns_definitions[1][:units] == :percent
       graph_definition = {}
       graph_definition[:title]          = config[:name]
       graph_definition[:x_axis]         = remove_first_column(table.map{ |row| row[chart_column_numbers[0]] })
@@ -215,13 +228,15 @@ module Benchmarking
     end
 
     def y_axis_label_name(unit)
-      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W',
-                     percent: 'percent', timeofday: 'Time of day',
+      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W', £_0dp: '£',
+                     timeofday: 'Time of day',
+                     percent: 'percent', percent_0dp: 'percent',
+                     relative_percent: 'percent', relative_percent_0dp: 'percent',
                      days: 'days' }
       return unit_names[unit] if unit_names.key?(unit)
       logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
       puts "Unexpected untranslated unit type for benchmark chart #{unit}"
-      unit.to_s.humanize
+      unit.to_s.humanize.gsub(' 0dp', '')
     end
 
     def remove_first_column(row)
@@ -248,6 +263,8 @@ module Benchmarking
         series_name = chart_columns_definitions[index][:name]
         if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
           chart_data[series_name] = data
+          percent_type = %i[percent relative_percent percent_0dp relative_percent_0dp].include?(chart_columns_definitions[1][:units])
+          chart_data[series_name].map! { |val| val.nil? ? nil : val * 100.0 } if percent_type
         elsif axis == :y2 && self.class.y2_axis_column?(chart_columns_definitions[index])
           y2_data[series_name] = data
         end
@@ -264,11 +281,24 @@ module Benchmarking
       row.instance_exec(&filter)
     end
 
-    def calculate_row(row, report, chart_columns_only, school_id_debug)
+    def calculate_row(row, report, chart_columns_only, school_id_debug, user_type)
       report[:columns].map do |column_specification|
         next if chart_columns_only && !self.class.chart_column?(column_specification)
+        next if rating_column?(column_specification) && !system_admin_type?(user_type)
         calculate_value(row, column_specification, school_id_debug)
       end
+    end
+
+    def rating_column?(column_specification)
+      column_specification[:name] == 'rating'
+    end
+
+    def system_admin_type?(user_type)
+      return false if user_type.nil?
+      return false unless user_type.is_a?(Hash)
+      return true if user_type.key?(:user_role)  && user_type[:user_role] == :admin
+      return true if user_type.key?(:staff_role) && user_type[:staff_role] == :admin
+      false
     end
 
     def calculate_value(row, column_specification, school_id_debug)
