@@ -247,7 +247,7 @@ class SchoolDayPeriods < DayPeriods
     check_offset(offset)
     schoolday_count = 0
     @last_meter_date.downto(@first_meter_date) do |date|
-      if @meter_collection.holidays.occupied?(date) 
+      if @meter_collection.holidays.occupied?(date)
         return new_school_period(date, date) if schoolday_count == offset
         schoolday_count -= 1
       end
@@ -260,7 +260,7 @@ class WeekendDayPeriods < DayPeriods
     check_offset(offset)
     weekendday_count = 0
     @last_meter_date.downto(@first_meter_date) do |date|
-      if @meter_collection.holidays.weekend?(date) 
+      if @meter_collection.holidays.weekend?(date)
         return new_school_period(date, date) if weekendday_count == offset
         weekendday_count -= 1
       end
@@ -308,7 +308,7 @@ class OptimumStartPeriods < FrostDayPeriods
   end
 
   # returns weeks as list of 5 dates at a time
-  
+
 end
 
 class MonthPeriods < NumericPeriods
@@ -316,7 +316,7 @@ class MonthPeriods < NumericPeriods
     check_offset(offset)
     offset_month = @last_meter_date.prev_month(-offset)
     first_day_of_month = Date.new(offset_month.year, offset_month.month, 1)
-    last_day_of_month = Date.new(offset_month.year, offset_month.month + 1, 1) - 1
+    last_day_of_month = Date.new(offset_month.year, (offset_month.month % 12) + 1, 1) - 1
     last_day_of_month = @last_meter_date if offset == 0 && last_day_of_month > @last_meter_date # partial month
     new_school_period(first_day_of_month, last_day_of_month)
   end
