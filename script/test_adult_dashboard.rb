@@ -15,7 +15,9 @@ script = {
                                 chart_manipulation: %i[drilldown timeshift],
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
-                                compare_results: [ 
+                                compare_results: [
+                                  { comparison_directory: '../TestResults/AdultDashboard/Base' },
+                                  { output_directory:     '../TestResults/AdultDashboard/New' },
                                   :summary, 
                                   :report_differing_charts,
                                   :report_differences 
