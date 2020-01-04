@@ -39,16 +39,16 @@ class CompareContentResults
   private def save_new_content(page, content)
     split_content = split_content(content)
     split_content.each do |key, contents|
-      filename = File.join(output_directory, "#{school_or_type} #{page} #{key}.yaml")
+      filename = File.join(output_directory, "#{school_or_type} #{page} #{key}.yaml".strip)
       save_yaml_file(filename, contents)
     end
   end
 
   private def load_comparison_content(page)
-    filenames = Dir.glob("#{school_or_type} #{page} *.yaml", base: comparison_directory)
+    filenames = Dir.glob("#{school_or_type} #{page} *.yaml".strip, base: comparison_directory)
     content = Array.new(filenames.length)
     filenames.each do |filename|
-      index_string, key = filename.gsub("#{school_or_type} #{page} ",'').gsub('.yaml', '').split(' ')
+      index_string, key = filename.gsub("#{school_or_type} #{page} ".strip,'').gsub('.yaml', '').split(' ')
       full_filename = File.join(comparison_directory, filename)
       content[index_string.to_i] = { type: key.to_sym, content: load_yaml_file(full_filename) }
     end
