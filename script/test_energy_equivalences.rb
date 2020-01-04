@@ -9,6 +9,32 @@ module Logging
   logger.level = :debug
 end
 
+script = {
+  logger1:                  { name: TestDirectoryConfiguration::LOG + "/equivalences %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+  schools:                  ['.*'], # ['Round.*'],
+  source:                   :analytics_db,
+  logger2:                  { name: "./log/equivalences %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
+  equivalences:          {
+                              control: {
+                                periods: [
+                                  {academicyear: 0},
+                                  {workweek: 0},
+                                  {schoolweek: 0},
+                                  {schoolweek: -1},
+                                  {month: 0},
+                                  {month: -1}
+                                ],
+                                compare_results: [
+                                  { comparison_directory: '../TestResults/Equivalences/Base' },
+                                  { output_directory:     '../TestResults/Equivalences/New' },
+                                ]
+                              }
+                            }
+}
+
+RunTests.new(script).run
+exit
+
 =begin
 schools = ReportConfigSupport.new.schools
 

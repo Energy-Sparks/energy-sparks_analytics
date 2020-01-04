@@ -17,10 +17,6 @@ class RunAdultDashboard < RunCharts
     write_html
   end
 
-  private def comparison_directory(latest = true)
-    File.join(File.dirname(__FILE__), '../TestResults/AdultDashboard', latest ? 'New' : 'Base')
-  end
-
   private def excel_variation
     '- adult dashboard'
   end
@@ -36,7 +32,6 @@ class RunAdultDashboard < RunCharts
 
     content = advice.content
 
-    # save_content_as_yaml(page, content)
     comparison = CompareContentResults.new(control, @school.name)
     comparison.save_and_compare_content(page, content)
 
@@ -46,20 +41,6 @@ class RunAdultDashboard < RunCharts
 
     @worksheets[worksheet_name] = charts
     @all_html += html.join(' ')
-  end
-
-  private def save_content_as_yaml(page, content)
-    filename_base = File.join(comparison_directory, "#{@school.name} #{page} ")
-    content.each_with_index do |content_component, n|
-      file_name_detail = "#{n} #{content_component[:type]}"
-      full_filename = filename_base + file_name_detail + '.yaml'
-      puts full_filename
-      save_yaml_file(full_filename, content_component[:content])
-    end
-  end
-
-  def save_yaml_file(yaml_filename, data)
-    File.open(yaml_filename, 'w') { |f| f.write(YAML.dump(data)) }
   end
 
   def write_html
