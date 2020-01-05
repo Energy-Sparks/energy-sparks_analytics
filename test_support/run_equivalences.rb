@@ -6,13 +6,16 @@ class RunEquivalences < RunCharts
     conversion = EnergyConversions.new(@school)
     list_of_conversions = EnergyConversions.front_end_conversion_list
     fuel_types.each do |fuel_type|
+      equivalences = {}
       periods.each do |period|
-        name = equivalence_description(fuel_type, period)
-        puts "Doing: #{name}"
-        equivalence = calculate_equivalence(conversion, list_of_conversions.keys[0], period, fuel_type)
-        comparison = CompareContentResults.new(control, @school.name)
-        comparison.save_and_compare_content(name, [{ type: :eq, content: equivalence }])
+        list_of_conversions.each_key do |equivalence_type|
+          name = equivalence_description(fuel_type, period, equivalence_type)
+          equivalence = calculate_equivalence(conversion, equivalence_type, period, fuel_type)
+          equivalences[name.to_sym] = equivalence
+        end
       end
+      comparison = CompareContentResults.new(control, @school.name)
+      comparison.save_and_compare_content(fuel_type.to_s, [{ type: :eq, content: equivalences }])
     end
   end
 
@@ -28,7 +31,7 @@ class RunEquivalences < RunCharts
     equivalence
   end
 
-  def equivalence_description(fuel_type, period)
-    "#{fuel_type} #{period.keys[0]} #{period.values[0]}"
+  def equivalence_description(fuel_type, period, equivalence_type)
+    "#{fuel_type}_#{period.keys[0]}_#{period.values[0]}_#{equivalence_type}"
   end
 end
