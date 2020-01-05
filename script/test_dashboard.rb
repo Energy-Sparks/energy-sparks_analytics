@@ -21,7 +21,7 @@ script = {
                               charts: [
                                 :dashboard,
                                 no_adhoc_worksheet: { name: 'Test', charts: %i[
-                                  solar_pv_group_by_month]}
+                                  daytype_breakdown_electricity]}
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }
                                 # :dashboard

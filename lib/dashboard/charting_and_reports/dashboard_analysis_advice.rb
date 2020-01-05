@@ -714,6 +714,37 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     @exemplar_percentage = exemplar_percentage
   end
 
+  def daytype_breakdown_table
+    hash_table = raw_daytype_breakdown_table_hash
+    raw_table = transform_hash_to_table(hash_table)
+    header = ['Time Of Day', 'kWh / year', '&pound; /year',  'CO2 kg /year', 'Percent']
+    units = [String, :kwh, :£, :co2, :percent]
+    use_table_formats = [true, true, true, true, false]
+    html_tbl = HtmlTableFormatting.new(header, raw_table[0..3], raw_table[4], units, use_table_formats)
+    html_tbl.html
+  end
+
+  def raw_daytype_breakdown_table_hash
+    scalar_values = ScalarkWhCO2CostValues.new(@school)
+    raw_table = {}
+    [[:kwh, false, :kwh], [:£, false, :£], [:co2, false, :co2], [:kwh, true, :percent]].each do |unit, percent, output_unit|
+      raw_table[output_unit] =  scalar_values.day_type_breakdown({year: 0}, @fuel_type, unit, false, percent)
+      raw_table[output_unit]['Total'] =  raw_table[output_unit].values.sum
+    end
+    raw_table
+  end
+
+  def transform_hash_to_table(hash_table)
+    table = Array.new(5){Array.new(5)}
+    %i[kwh £ co2 percent].each_with_index do |unit, col_index|
+      ['Holiday', 'Weekend', 'School Day Open', 'School Day Closed', 'Total'].each_with_index do |row_name, row_index|
+        table[row_index][0] = row_name
+        table[row_index][col_index+1] = hash_table[unit][row_name]
+      end
+    end
+    table
+  end
+
   def generate_advice
     in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
     percent_value = out_of_hours / (in_hours + out_of_hours)
@@ -757,7 +788,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
         This is the breakdown for the most recent year:
       </p>
       <p>
-      <%= table_info %>
+        <%= daytype_breakdown_table %>
       </p>
       <% if @school.storage_heaters? %>
         <p>

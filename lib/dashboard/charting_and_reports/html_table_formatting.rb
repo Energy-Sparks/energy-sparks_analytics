@@ -1,9 +1,11 @@
 class HtmlTableFormatting
   include Logging
-  def initialize(header, rows, total_row = nil)
+  def initialize(header, rows, total_row = nil, row_units = nil, use_table_formats = nil)
     @header = header
     @rows = rows
     @total_row = total_row
+    @row_units = row_units
+    @use_table_formats = use_table_formats
   end
 
   def html(right_justified_columns: [1..1000])
@@ -23,7 +25,7 @@ class HtmlTableFormatting
             <% @rows.each do |row| %>
               <tr>
                 <% row.each_with_index do |val, column_number| %>
-                  <%= column_td(column_number, right_justified_columns) %><%= val %> </td>
+                  <%= column_td(column_number, right_justified_columns) %><%= format_value(val, column_number) %> </td>
                 <% end %>
               </tr>
             <% end %>
@@ -31,7 +33,7 @@ class HtmlTableFormatting
           <% unless @total_row.nil? %>
             <tr class="table-success">
             <% @total_row.each_with_index do |total, column_number| %>
-              <%= column_th(column_number, right_justified_columns) %> <%= total.to_s %> </th>
+              <%= column_th(column_number, right_justified_columns) %> <%= format_value(total, column_number) %> </th>
             <% end %>
             </tr>
           <% end %>
@@ -40,6 +42,11 @@ class HtmlTableFormatting
     }.gsub(/^  /, '')
 
     generate_html(template, binding)
+  end
+
+  private def format_value(val, column_number)
+    table_format = @use_table_formats.nil? ? true : @use_table_formats[column_number]
+    @row_units.nil? ? val : FormatEnergyUnit.format(@row_units[column_number], val, :html, true, table_format)
   end
 
   private def column_td(column, right_justified_columns)
