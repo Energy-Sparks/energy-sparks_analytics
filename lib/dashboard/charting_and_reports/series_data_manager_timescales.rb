@@ -293,18 +293,10 @@ class DiurnalPeriods < FrostDayPeriods
 end
 
 class OptimumStartPeriods < FrostDayPeriods
-  BEST_OPTIMUM_START_DAYS = [ # TODO(PH,26Jul2019) - automate calculation of these days, used in chart timescale manipulation as well
-    Date.new(2018, 3, 6),
-    Date.new(2018, 3, 16),
-    Date.new(2017, 3, 6),
-    Date.new(2017, 3, 16),
-    Date.new(2017, 3, 16)
-  ].freeze
   protected def name; 'optimum start' end
   protected def list_of_days
+    raise EnergySparksChartNotRelevantForSchoolException, 'optimum start chart not relevant for school where gas not used for heating' if @meter_collection.non_heating_only?
     @optimum_start_days ||= OptimumStartDates.new(@meter_collection).list_of_dates
-    # ap @optimum_start_days
-    # BEST_OPTIMUM_START_DAYS.select { |day| day >= @first_meter_date && day <= @last_meter_date }
   end
 
   # returns weeks as list of 5 dates at a time

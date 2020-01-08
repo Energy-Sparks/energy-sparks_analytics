@@ -86,7 +86,8 @@ class CompareContentResults
     new_component        = strip_content_of_volatile_data(new_component_orig)
     if comparison_component != new_component
       puts 'Differs:'
-      puts comparison_component
+      h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
+      puts h_diff
       puts 'Versus:'
       puts new_component
     end

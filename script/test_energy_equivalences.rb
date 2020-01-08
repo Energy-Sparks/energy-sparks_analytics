@@ -18,11 +18,14 @@ script = {
                               control: {
                                 periods: [
                                   {academicyear: 0},
+                                  {academicyear: -1},
+                                  {year: 0},
                                   {workweek: 0},
+                                  {week: 0},
                                   {schoolweek: 0},
                                   {schoolweek: -1},
                                   {month: 0},
-                                  {month: -1}
+                                  {month: -1}                    
                                 ],
                                 compare_results: [
                                   { comparison_directory: '../TestResults/Equivalences/Base' },
