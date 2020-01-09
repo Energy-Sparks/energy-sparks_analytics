@@ -75,8 +75,6 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   private def find_tariff(meter)
     date = Date.today
     tariff = MeterTariffs.accounting_tariff_for_date(date, meter)
-    return [!tariff[:default], tariff] unless tariff.nil?
-    tariff = default_accounting_tariff_in_event_of_no_others(date, meter)
-    [false, tariff]
+    [!tariff[:default], tariff]
   end
 end
