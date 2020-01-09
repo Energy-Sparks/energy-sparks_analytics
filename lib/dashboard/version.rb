@@ -1,3 +1,3 @@
 module Dashboard
-  VERSION = "0.55.5-tariff-refactor-c-patch-for-eqiuvalence-date-bug"
+  VERSION = "0.55.5-tariff-refactor-d-patch-for-eqiuvalence-date-bug"
 end
