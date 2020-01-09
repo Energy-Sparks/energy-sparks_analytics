@@ -195,6 +195,142 @@ class MeterAttributes
     )
   end
 
+  class EconomicTariff < MeterAttributeTypes::AttributeBase
+    id :economic_tariff
+    key :economic_tariff
+
+    name 'Economic tariff'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        name:       MeterAttributeTypes::String.define,
+        rates:      MeterAttributeTypes::Hash.define(
+          required: true,
+          structure: {
+            rate: MeterAttributeTypes::Hash.define(
+              required: true,
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
+                rate: MeterAttributeTypes::Float.define(required: true)
+              }
+            ),
+            daytime_rate: MeterAttributeTypes::Hash.define(
+              required: false,
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+                rate: MeterAttributeTypes::Float.define,
+                from: MeterAttributeTypes::TimeOfDay.define,
+                to:   MeterAttributeTypes::TimeOfDay.define
+              }
+            ),
+            nighttime_rate: MeterAttributeTypes::Hash.define(
+              required: false,
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+                rate: MeterAttributeTypes::Float.define,
+                from: MeterAttributeTypes::TimeOfDay.define,
+                to:   MeterAttributeTypes::TimeOfDay.define
+              }
+            )
+          }
+        )
+
+      }
+    )
+  end
+
+  class AccountingTariff < MeterAttributeTypes::AttributeBase
+    id :accounting_tariff
+    aggregate_over :accounting_tariffs
+    name 'Accounting tariff'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define,
+        end_date:   MeterAttributeTypes::Date.define,
+        name:       MeterAttributeTypes::String.define,
+        default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
+        rates:      MeterAttributeTypes::Hash.define(
+          required: true,
+          structure: {
+            standing_charge: MeterAttributeTypes::Hash.define(
+              required: true,
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:quarter, :day]),
+                rate: MeterAttributeTypes::Float.define(required: true)
+              }
+            ),
+            renewable_energy_obligation: MeterAttributeTypes::Hash.define(
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+                rate: MeterAttributeTypes::Float.define
+              }
+            ),
+            rate: MeterAttributeTypes::Hash.define(
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+                rate: MeterAttributeTypes::Float.define
+              }
+            )
+          }
+        ),
+      }
+    )
+  end
+
+  class AccountingTariffDifferential < MeterAttributeTypes::AttributeBase
+    id :accounting_tariff_differential
+    aggregate_over :accounting_tariffs
+    name 'Accounting tariff (differential)'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define,
+        end_date:   MeterAttributeTypes::Date.define,
+        name:       MeterAttributeTypes::String.define,
+        default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
+        rates:      MeterAttributeTypes::Hash.define(
+          required: true,
+          structure: {
+            standing_charge: MeterAttributeTypes::Hash.define(
+              required: true,
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:quarter, :day]),
+                rate: MeterAttributeTypes::Float.define(required: true)
+              }
+            ),
+            renewable_energy_obligation: MeterAttributeTypes::Hash.define(
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:quarter, :day]),
+                rate: MeterAttributeTypes::Float.define
+              }
+            ),
+            daytime_rate: MeterAttributeTypes::Hash.define(
+              required: true,
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
+                rate: MeterAttributeTypes::Float.define(required: true),
+                from: MeterAttributeTypes::TimeOfDay.define(required: true),
+                to:   MeterAttributeTypes::TimeOfDay.define(required: true),
+              }
+            ),
+            nighttime_rate: MeterAttributeTypes::Hash.define(
+              required: true,
+              structure: {
+                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
+                rate: MeterAttributeTypes::Float.define(required: true),
+                from: MeterAttributeTypes::TimeOfDay.define(required: true),
+                to:   MeterAttributeTypes::TimeOfDay.define(required: true),
+              }
+            )
+          }
+        ),
+        asc_limit_kw: MeterAttributeTypes::Float.define
+
+      }
+    )
+  end
+
   def self.all
     constants.inject({}) do |collection, constant_name|
       constant = const_get(constant_name)
