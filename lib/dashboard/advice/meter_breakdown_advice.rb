@@ -30,6 +30,7 @@ class AdviceMeterBreakdownBase < AdviceBase
     charts_and_html.push( { type: :chart, content: breakdown_chart } )
     charts_and_html.push( { type: :html,  content: table_timescale_html } )
     charts_and_html.push( { type: :html,  content: table_breakdown_html } )
+    charts_and_html.push( { type: :html,  content: table_comments } )
     charts_and_html
   end
 
@@ -42,7 +43,7 @@ class AdviceMeterBreakdownBase < AdviceBase
   def introduction
     text = %{
       <p>
-        Your school has multiple <%= aggregate_meter.fuel_type.to_s %> underlying meters
+        Your school has multiple <%= aggregate_meter.fuel_type.to_s %> underlying meters.
       <p>
     }
     ERB.new(text).result(binding)
@@ -81,5 +82,16 @@ class AdviceMeterBreakdownBase < AdviceBase
     row_units = [String, :kwh, :percent]
     html_table = HtmlTableFormatting.new(header, rows, total_row, row_units)
     '<p> ' + html_table.html + ' </p>'
+  end
+
+  def table_comments
+    text = %{
+      <p>
+        Having multiple meters can help you understand your energy use better,
+        however, there is a signifcant standing charge for each meter of more than 
+        &pound; 1,000 per year, so there is potential for saving by consolidating meters.
+      <p>
+    }
+    ERB.new(text).result(binding)
   end
 end
