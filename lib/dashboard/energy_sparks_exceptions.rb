@@ -39,3 +39,6 @@ end
 
 class EnergySparksMeterSpecification < StandardError
 end
+
+class EnergySparksChartNotRelevantForSchoolException < StandardError
+end

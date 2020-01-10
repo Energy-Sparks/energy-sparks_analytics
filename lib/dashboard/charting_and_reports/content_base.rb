@@ -40,6 +40,14 @@ class ContentBase
     variables
   end
 
+  def self.system_admin_type?(user_type)
+    return false if user_type.nil?
+    return false unless user_type.is_a?(Hash)
+    return true if user_type.key?(:user_role)  && user_type[:user_role] == :admin
+    return true if user_type.key?(:staff_role) && user_type[:staff_role] == :admin
+    false
+  end
+
   def self.priority_template_variables
     flatten_front_end_template_variables.select { |_name_sym, data| data.key?(:priority_code) }
   end

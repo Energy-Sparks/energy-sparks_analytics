@@ -494,16 +494,15 @@ class AggregateDataService
     end
   end
 
-  private def calculate_costs_for_meter(meter, fuel_type)
+  private def calculate_costs_for_meter(meter)
     logger.info "Creating economic & accounting costs for #{meter.mpan_mprn} fuel #{meter.fuel_type} from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}"
- 
-    meter.amr_data.set_economic_tariff(meter.mpan_mprn, meter.fuel_type, @meter_collection.default_energy_purchaser)
-    meter.amr_data.set_accounting_tariff(meter.mpan_mprn, meter.fuel_type, @meter_collection.default_energy_purchaser)
+    meter.amr_data.set_economic_tariff(meter)
+    meter.amr_data.set_accounting_tariff(meter)
   end
 
   private def calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
     calculate_carbon_emissions_for_meter(meter, fuel_type)
-    calculate_costs_for_meter(meter, fuel_type)
+    calculate_costs_for_meter(meter)
   end
 
   private def calculate_meters_carbon_emissions_and_costs(meters, fuel_type)
@@ -560,7 +559,7 @@ class AggregateDataService
   private def any_component_meter_differential?(list_of_meters, fuel_type, combined_meter_start_date, combined_meter_end_date)
     return false if fuel_type == :gas
     list_of_meters.each do |meter|
-      return true if MeterTariffs.differential_tariff_in_date_range?(meter.mpan_mprn, combined_meter_start_date, combined_meter_end_date)
+      return true if MeterTariffs.differential_tariff_in_date_range?(meter, combined_meter_start_date, combined_meter_end_date)
     end
     false
   end
@@ -574,7 +573,7 @@ class AggregateDataService
 
     set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differential_meter)
 
-    accounting_costs = AccountingCosts.combine_accounting_costs_from_multiple_meters(mpan_mprn, list_of_meters, start_date, end_date)
+    accounting_costs = AccountingCosts.combine_accounting_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
     combined_meter.amr_data.set_accounting_tariff_schedule(accounting_costs)
   end
 
@@ -582,10 +581,10 @@ class AggregateDataService
     mpan_mprn = combined_meter.mpan_mprn
     if has_differential_meter # so need pre aggregated economic costs as kwh to £ no longer additive
       logger.info 'Creating a multiple economic costs for differential tariff meter'
-      economic_costs = EconomicCosts.combine_economic_costs_from_multiple_meters(mpan_mprn, list_of_meters, start_date, end_date)
+      economic_costs = EconomicCosts.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
     else
       logger.info 'Creating a parameterised economic cost meter'
-      economic_costs = EconomicCostsParameterised.new(mpan_mprn, combined_meter.amr_data, combined_meter.fuel_type, @meter_collection.default_energy_purchaser)
+      economic_costs = EconomicCostsParameterised.new(combined_meter)
     end
     combined_meter.amr_data.set_economic_tariff_schedule(economic_costs)
   end

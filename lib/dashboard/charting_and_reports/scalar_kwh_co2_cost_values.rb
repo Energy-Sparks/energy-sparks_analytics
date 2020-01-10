@@ -19,6 +19,12 @@ class ScalarkWhCO2CostValues
     aggregation_configuration(time_scale, fuel_type, data_type, override, true)
   end
 
+  def uk_electricity_grid_carbon_intensity_for_period_kg_per_kwh(time_scale)
+    kwh = aggregation_configuration(time_scale, :electricity, :kwh)
+    co2 = aggregation_configuration(time_scale, :electricity, :co2)
+    co2 / kwh
+  end
+
   def day_type_breakdown(time_scale, fuel_type, data_type = :kwh, format_data = false, percent = false)
     aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, {series_breakdown: :daytype})
     extract_data_from_chart_calculation_result(aggregator, percent, data_type, format_data)

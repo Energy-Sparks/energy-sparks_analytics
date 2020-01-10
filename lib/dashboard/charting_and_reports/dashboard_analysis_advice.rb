@@ -253,9 +253,9 @@ end
     "<p>#{equivalence_text} <button class=\"btn btn-secondary\" data-toggle=\"popover\" data-container=\"body\" data-placement=\"top\" data-title=\"How we calculate this\" data-content=\"#{calculation_text}\"> See how we calculate this</button></p>"
   end
 
-  def random_equivalence_text(kwh, fuel_type)
-    equiv_type, conversion_type = EnergyEquivalences.random_equivalence_type_and_via_type
-    _val, equivalence, calc, in_text, out_text = EnergyEquivalences.convert(kwh, :kwh, fuel_type, equiv_type, equiv_type, conversion_type)
+  def random_equivalence_text(kwh, fuel_type, uk_grid_carbon_intensity = EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH)
+    equiv_type, conversion_type = EnergyEquivalences.random_equivalence_type_and_via_type(uk_grid_carbon_intensity)
+    _val, equivalence, calc, in_text, out_text = EnergyEquivalences.convert(kwh, :kwh, fuel_type, equiv_type, equiv_type, conversion_type, EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH)
     equivalence_tool_tip_html(equivalence, in_text + out_text + calc)
   end
 
@@ -714,7 +714,13 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     @exemplar_percentage = exemplar_percentage
   end
 
+  def random_out_of_hours_equivalence
+    equivalence = EnergyConversionsOutOfHours.random_out_of_hours_to_exemplar_percent_improvement(@school, @fuel_type, @exemplar_percentage)
+    ['This saving is equivalent to ' + equivalence[:adult_dashboard_wording], equivalence[:calculation_description ]]
+  end
+
   def generate_advice
+    equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence
     in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
     percent_value = out_of_hours / (in_hours + out_of_hours)
     percent_str = percent(percent_value)
@@ -725,7 +731,11 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
 
     excluding_storage_heaters = (@school.storage_heaters? && fuel_type_str == 'electricity') ? '(excluding storage heaters)' : ''
 
-    table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
+    # table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
+
+    daytype_breakdown_table = DayTypeBreakDownTable.new(@school, @fuel_type)
+    daytype_breakdown_table_html = daytype_breakdown_table.html
+    grid_intensity = daytype_breakdown_table.uk_electricity_grid_carbon_intensity_kg_per_kwh
 
     header_template = %{
       <%= @body_start %>
@@ -740,7 +750,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
             would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
             <%# increase loop size to test %>
             <% 1.times do |_i| %>
-              <%= random_equivalence_text(saving_kwh, @fuel_type) %>
+              <%= equivalence_tool_tip_html(equivalence_saving_description, equivalence_calculation_description) %>
             <% end %>
           <% else %>
             which is very good, and is one of the best schools.
@@ -757,7 +767,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
         This is the breakdown for the most recent year:
       </p>
       <p>
-      <%= table_info %>
+        <%= daytype_breakdown_table_html %>
       </p>
       <% if @school.storage_heaters? %>
         <p>

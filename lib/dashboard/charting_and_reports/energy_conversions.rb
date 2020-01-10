@@ -13,6 +13,7 @@ class EnergyConversions
 
   def front_end_convert(convert_to, time_period, meter_type)
     conversion = @conversion_list[convert_to]
+
     via_unit      = conversion[:via]
     key           = conversion[:primary_key]
     converted_to  = conversion[:converted_to]
@@ -25,16 +26,20 @@ class EnergyConversions
   end
 
   def convert(convert_to, kwh_co2_or_£, time_period, meter_type, units_of_equivalance = nil)
+    grid_intensity = grid_intensity(time_period, meter_type)
     basic_unit = [:kwh, :co2, :£].include?(convert_to)
     raise EnergySparksUnexpectedStateException.new('Expecting 2nd parameter to be same as first for kwh, co2 or £') if basic_unit && convert_to != kwh_co2_or_£
-    conversion = basic_unit ? 1.0 : EnergyEquivalences::ENERGY_EQUIVALENCES[convert_to][:conversions][kwh_co2_or_£][:rate]
-    kwh, date1, date2 = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value_with_dates(time_period, meter_type, :kwh)
-    value = kwh_co2_or_£ == :kwh ? kwh : ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, kwh_co2_or_£)
+    configuration = basic_unit ? nil : EnergyEquivalences.equivalence_conversion_configuration(convert_to, kwh_co2_or_£, grid_intensity)
+    conversion = basic_unit ? 1.0 : configuration[:rate]
+    kwh, date1, date2 = scalar_value(time_period, meter_type, :kwh, true)
+    value = kwh_co2_or_£ == :kwh ? kwh : scalar_value(time_period, meter_type, kwh_co2_or_£, false)
+    calc = basic_unit ? 'no conversion' : calculation_description(kwh, meter_type, convert_to, kwh_co2_or_£, grid_intensity)
     equivalence = value / conversion
+    formatted_equivalence = format_equivalance_for_front_end(units_of_equivalance, equivalence) 
 
     {
       equivalence:                  equivalence,
-      formatted_equivalence:        format_equivalance_for_front_end(units_of_equivalance, equivalence),
+      formatted_equivalence:        formatted_equivalence,
       old_formatted_equivalence:    FormatEnergyUnit.format(units_of_equivalance, equivalence),
       units_of_equivalance:         units_of_equivalance,
       show_equivalence:             show_equivalence(units_of_equivalance, equivalence),
@@ -43,16 +48,42 @@ class EnergyConversions
       value_in_via_units:           value, # in kWh, CO2 or £
       formatted_via_units_value:    FormatEnergyUnit.format(kwh_co2_or_£, value),
       conversion:                   conversion,
-      conversion_factor:            value / kwh,
+      conversion_factor:            kwh == 0.0 ? nil : (value / kwh),
       via:                          kwh_co2_or_£,
       from_date:                    date1,
-      to_date:                      date2
+      to_date:                      date2,
+      calculation_description:      calc,
+      adult_dashboard_wording:      adult_dashboard_description(configuration, kwh_co2_or_£, formatted_equivalence)
     }
   end
 
+  private def grid_intensity(time_scale, meter_type)
+    if %i[electricity storage_heaters].include?(meter_type)
+      ScalarkWhCO2CostValues.new(@meter_collection).uk_electricity_grid_carbon_intensity_for_period_kg_per_kwh(time_scale)
+    else
+      EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH # default for cashing purposes if not electricity
+    end
+  end
+
+  private def adult_dashboard_description(configuration, kwh_co2_or_£, formatted_equivalence)
+    !configuration.nil? && configuration.key?(:adult_dashboard_wording) ? sprintf(configuration[:adult_dashboard_wording], formatted_equivalence) : 'No adult dashboard wording'
+  end
+
+  private def calculation_description(kwh, fuel_type, equiv_type, kwh_co2_or_£, grid_intensity)
+    _val, _equ, calc, in_text, out_text = EnergyEquivalences.convert(kwh, :kwh, fuel_type, equiv_type, equiv_type, kwh_co2_or_£, grid_intensity)
+    in_text + out_text + calc
+  end
+
+  protected def scalar_value(time_period, meter_type, kwh_co2_or_£, with_dates)
+    if with_dates
+      ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value_with_dates(time_period, meter_type, kwh_co2_or_£)
+    else
+      ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value(time_period, meter_type, kwh_co2_or_£)
+    end
+  end
+
   def conversion_choices(kwh_co2_or_£)
-    choices = EnergyEquivalences::ENERGY_EQUIVALENCES.select { |_equivalence, conversions| conversions[:conversions].key?(kwh_co2_or_£) }
-    choices.keys
+    EnergyEquivalences.equivalence_choice_by_via_type(kwh_co2_or_£)
   end
 
   private def scaled_results(conversion, time_period, unscaled_results)
@@ -118,9 +149,10 @@ class EnergyConversions
   end
 
   # converts energy_equivalence_conversions ENERGY_EQUIVALENCES to form flattened choice of conversions for the from end
-  def self.generate_conversion_list
+  def self.generate_conversion_list(grid_intensity = EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH)
     conversions = {}
-    EnergyEquivalences::ENERGY_EQUIVALENCES.each do |conversion_key, conversion_data|
+    EnergyEquivalences.equivalence_types.each do |conversion_key|
+      conversion_data = EnergyEquivalences.equivalence_configuration(conversion_key, grid_intensity)
       next unless conversion_data.key?(:convert_to)
       conversion_data[:conversions].each do |via, via_data|
         next unless via_data.key?(:front_end_description)
@@ -133,10 +165,11 @@ class EnergyConversions
 
   private_class_method def self.create_description(conversion_key, conversion_data, via, via_data)
     description = {
-      description:  via_data[:front_end_description],
-      via:          via,
-      converted_to: conversion_data[:convert_to],
-      primary_key:  conversion_key
+      description:              via_data[:front_end_description],
+      adult_dashboard_wording:  via_data[:adult_dashboard_wording],
+      via:                      via,
+      converted_to:             conversion_data[:convert_to],
+      primary_key:              conversion_key
     }
     merge_in_additional_information(description, via_data, :calculation_variables)
     merge_in_additional_information(description, conversion_data, :equivalence_timescale)
@@ -170,5 +203,39 @@ class EnergyConversions
 
   private_class_method def self.merge_in_additional_information(conversions, from_hash, from_key)
     conversions.merge!(from_key => from_hash[from_key]) if from_hash.key?(from_key)
+  end
+end
+
+class EnergyConversionsOutOfHours < EnergyConversions
+  def self.random_out_of_hours_to_exemplar_percent_improvement(school, fuel_type, exemplar_percent)
+    equivalence = EnergyConversionsOutOfHours.new(school)
+    equivalences = generate_conversion_list
+    random_index = Random.rand(generate_conversion_list.length)
+    equivalence.front_end_convert(EnergyConversionsOutOfHours.generate_conversion_list.keys[random_index], { year: 0}, fuel_type, exemplar_percent)
+  end
+
+  def front_end_convert(convert_to, time_period, meter_type, exemplar_percent)
+    @exemplar_percent = exemplar_percent
+    results = super(convert_to, time_period, meter_type)
+    conversion = @conversion_list[convert_to]
+    kwh_co2_or_£ = conversion[:via]
+    _examplar_saving, percent_saving_to_exemplar = saving_to_examplar(time_period, meter_type, kwh_co2_or_£, exemplar_percent)
+    results[:examplar_percent_saving] = percent_saving_to_exemplar
+    results
+  end
+
+  protected def scalar_value(time_period, meter_type, kwh_co2_or_£, _with_dates)
+    examplar_saving, _percent_saving_to_exemplar = saving_to_examplar(time_period, meter_type, kwh_co2_or_£, @exemplar_percent)
+    examplar_saving
+  end
+
+  private def saving_to_examplar(time_period, meter_type, kwh_co2_or_£, exemplar_percent)
+    daytype_breakdown = ScalarkWhCO2CostValues.new(@meter_collection).day_type_breakdown(time_period, meter_type, kwh_co2_or_£)
+    out_of_hours_value = daytype_breakdown.select{ |daytype, value| daytype != 'School Day Open' }.values.sum
+    total_value = daytype_breakdown.values.sum
+    percent_out_of_hours = out_of_hours_value / total_value
+    percent_saving_to_exemplar = percent_out_of_hours - exemplar_percent
+    examplar_saving = total_value * percent_saving_to_exemplar
+    [examplar_saving, percent_saving_to_exemplar]
   end
 end

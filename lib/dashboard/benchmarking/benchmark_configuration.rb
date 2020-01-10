@@ -97,7 +97,6 @@ module Benchmarking
           annual_gas_out_of_hours_use
           annual_storage_heater_out_of_hours_use
           heating_coming_on_too_early
-          optimum_start_analysis
           thermostat_sensitivity
           length_of_school_day_heating_season
           thermostatic_control

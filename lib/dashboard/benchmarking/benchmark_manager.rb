@@ -3,7 +3,7 @@ module Benchmarking
   class BenchmarkManager
     include Logging
     class DatabaseRow < OpenStruct
-      def zero(value)
+      def zero(value)BenchmarkManager
         value.nil? ? 0.0 : value
       end
 
@@ -52,7 +52,8 @@ module Benchmarking
     # filter e.g. for area: ->{ addp_area.include?('Highlands') }
     def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       results = []
-      config = self.class.chart_table_config(report)
+      full_config = self.class.chart_table_config(report)
+      config = hide_columns(full_config, user_type)
       school_ids = all_school_ids([today]) if school_ids.nil?
       last_year = today - 364
 
@@ -63,7 +64,7 @@ module Benchmarking
         next unless school_data && school_data_last_year
         row  = DatabaseRow.new(school_data)
         next unless filter_row(row, filter)
-        calculated_row = calculate_row(row, config, chart_columns_only, school_id, user_type)
+        calculated_row = calculate_row(row, config, chart_columns_only, school_id)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
@@ -73,6 +74,14 @@ module Benchmarking
     end
 
     private
+    
+    def hide_columns(config, user_type)
+      new_config = config.clone
+      new_config[:columns].delete_if do |column|
+        rating_column?(column) && !ContentBase.system_admin_type?(user_type)
+      end
+      new_config
+    end
 
     def sort_table!(results, config)
       if config[:sort_by].is_a?(Array)
@@ -296,14 +305,6 @@ module Benchmarking
 
     def rating_column?(column_specification)
       column_specification[:name] == 'rating'
-    end
-
-    def system_admin_type?(user_type)
-      return false if user_type.nil?
-      return false unless user_type.is_a?(Hash)
-      return true if user_type.key?(:user_role)  && user_type[:user_role] == :admin
-      return true if user_type.key?(:staff_role) && user_type[:staff_role] == :admin
-      false
     end
 
     def calculate_value(row, column_specification, school_id_debug)

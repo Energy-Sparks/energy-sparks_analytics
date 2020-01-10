@@ -75,11 +75,11 @@ class AdviceBase < ContentBase
 
     charts.each do |chart|
       begin
-        charts_and_html.push( { type: :html,  content: chart[:advice_header] } ) if chart.key?(:advice_header)
+        charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_header]) } ) if chart.key?(:advice_header)
         charts_and_html.push( { type: :chart_name, content: chart[:config_name] } )
         charts_and_html.push( { type: :chart, content: chart } )
         charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
-        charts_and_html.push( { type: :html,  content: chart[:advice_footer] } ) if chart.key?(:advice_footer)
+        charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_footer]) } ) if chart.key?(:advice_footer)
       rescue StandardError => e
         logger.info e.message
         logger.info e.backtrace
@@ -129,6 +129,10 @@ class AdviceBase < ContentBase
   end
 
   private
+  
+  def clean_html(html)
+    html.gsub(/[ \t\f\v]{2,}/, ' ').gsub(/^ $/, '').gsub(/\n+|\r+/, "\n").squeeze("\n").strip
+  end
 
   def self.config_base
     DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:adult_analysis_page]

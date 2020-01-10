@@ -98,7 +98,7 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
   end
 
   private def agreed_supply_capacity(meter, date)
-    asc = MeterTariffs.accounting_tariff_for_date(date, meter.mpan_mprn)
+    asc = MeterTariffs.accounting_tariff_for_date(date, meter)
     asc.nil? ? nil : asc[:asc_limit_kw]
   end
 

@@ -55,7 +55,7 @@ class FormatEnergyUnit
     timeofday:                    '',
     gas:                          'gas',
     electricity:                  'electricity',
-    teaching_assistant:           'teaching assistants',
+    teaching_assistant:           'teaching assistant',
     teaching_assistant_hours:     'teaching assistant (hours)',
     carnivore_dinner:             'dinners',
     vegetarian_dinner:            'dinners',

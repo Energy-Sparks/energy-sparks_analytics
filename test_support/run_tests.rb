@@ -94,6 +94,8 @@ class RunTests
         run_pupil_dashboard(configuration[:control])
       when :adult_dashboard
         run_adult_dashboard(configuration[:control])
+      when :equivalences
+        run_equivalences(configuration[:control])
       when :kpi_analysis
         run_kpi_calculations(configuration)
       when :run_benchmark_charts_and_tables
@@ -207,6 +209,16 @@ class RunTests
       puts "Running for #{school_name}"
       test = RunAdultDashboard.new(school)
       test.run_flat_dashboard(control)
+    end
+  end
+
+  def run_equivalences(control)
+    @school_list.sort.each do |school_name|
+      school = load_school(school_name)
+      puts "=" * 100
+      puts "Running for #{school_name}"
+      test = RunEquivalences.new(school)
+      test.run_equivalences(control)
     end
   end
 

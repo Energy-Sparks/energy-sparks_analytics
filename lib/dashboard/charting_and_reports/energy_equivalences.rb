@@ -28,22 +28,22 @@
 #         different sized cars, airplanes, rail
 #
 class EnergyEquivalences
-  attr_reader :kwh, :fuel_type
-  def initialize(value, units, fuel_type)
+  attr_reader :kwh_deprecated, :fuel_type_deprecated
+  def initialize_deprecated(value, units, fuel_type, grid_intensity)
     @fuel_type = fuel_type
-    @kwh = EnergyEquivalences.conversion_ratio(value, units, fuel_type, :kwh, fuel_type, units)
+    @kwh = EnergyEquivalences.conversion_ratio(value, units, fuel_type, :kwh, fuel_type, units, grid_intensity)
   end
 
-  def self.conversion_ratio(value, from_unit, from_type, to_unit, to_type, via_unit)
-    ratio, _from_desc, _to_desc = convert(value, from_unit, from_type, to_unit, to_type, via_unit)
+  def self.conversion_ratio_deprecated(value, from_unit, from_type, to_unit, to_type, via_unit, grid_intensity)
+    ratio, _from_desc, _to_desc = convert(value, from_unit, from_type, to_unit, to_type, via_unit, grid_intensity)
     ratio
   end
 
-  def self.convert(value, from_unit, from_type, to_unit, to_type, via_unit)
+  def self.convert(value, from_unit, from_type, to_unit, to_type, via_unit, grid_intensity)
     # ap( ENERGY_EQUIVALENCES2)
     check_got_co2_kwh_or_£(via_unit)
-    from_unit_conversion, from_conversion_description, from_type_description = equivalence_conversion_rate_and_decription(from_type, via_unit)
-    to_unit_conversion, to_conversion_description, to_type_description = equivalence_conversion_rate_and_decription(to_type, via_unit)
+    from_unit_conversion, from_conversion_description, from_type_description = equivalence_conversion_rate_and_description(from_type, via_unit, grid_intensity)
+    to_unit_conversion, to_conversion_description, to_type_description = equivalence_conversion_rate_and_description(to_type, via_unit, grid_intensity)
 
     equivalent = value * from_unit_conversion / to_unit_conversion
 
@@ -72,24 +72,16 @@ class EnergyEquivalences
     description % FormatEnergyUnit.format(unit, value)
   end
 
-  def self.random_equivalence_type_and_via_type
-    if defined?(@@energysparksanalyticsautotest) # don't want random numbers for testing
-      non_gas_electric_equivalences = ENERGY_EQUIVALENCES.reject {|k, _v| [:electricity, :gas].include? k }
-      random_type = non_gas_electric_equivalences.keys[0]
-      equivalence = ENERGY_EQUIVALENCES[random_type]
-      random_via_type = equivalence[:conversions].keys[1]
-      [random_type, random_via_type]
-    else
-      non_gas_electric_equivalences = ENERGY_EQUIVALENCES.reject {|k, _v| [:electricity, :gas].include? k }
-      random_type = non_gas_electric_equivalences.keys[rand(non_gas_electric_equivalences.length)]
-      equivalence = ENERGY_EQUIVALENCES[random_type]
-      random_via_type = equivalence[:conversions].keys[rand(equivalence[:conversions].length)]
-      [random_type, random_via_type]
-    end
+  def self.random_equivalence_type_and_via_type(grid_intensity)
+    random_type = equivalence_types(false)[rand(equivalence_types(false).length)]
+    equivalence = equivalence_configuration(random_type, grid_intensity)
+    random_via_type = equivalence[:conversions].keys[rand(equivalence[:conversions].length)]
+    [random_type, random_via_type]
   end
 
-  def self.equivalence_conversion_rate_and_decription(type, via_unit)
-    type_data = ENERGY_EQUIVALENCES[type]
+  def self.equivalence_conversion_rate_and_description(type, via_unit, grid_intensity)
+    type = :electricity if type == :storage_heaters
+    type_data = equivalence_configuration(type, grid_intensity)
     type_description = type_data[:description]
     rate = type_data[:conversions][via_unit][:rate]
     description = type_data[:conversions][via_unit][:description]

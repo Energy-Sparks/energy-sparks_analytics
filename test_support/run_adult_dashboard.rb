@@ -32,7 +32,8 @@ class RunAdultDashboard < RunCharts
 
     content = advice.content
 
-    save_content_as_yaml(content)
+    comparison = CompareContentResults.new(control, @school.name)
+    comparison.save_and_compare_content(page, content)
 
     html, charts = advice.analytics_split_charts_and_html(content)
 
@@ -40,15 +41,6 @@ class RunAdultDashboard < RunCharts
 
     @worksheets[worksheet_name] = charts
     @all_html += html.join(' ')
-  end
-
-  private def save_content_as_yaml(content)
-    filename_base = "adult dashboard content #{@school.name} "
-    content.each_with_index do |content_component, n|
-      file_name_detail = "#{n} #{content_component[:type]}"
-      full_filename = filename_base + file_name_detail + '.yaml'
-      puts full_filename
-    end
   end
 
   def write_html

@@ -107,6 +107,13 @@ module MeterAttributeTypes
 
   end
 
+  class String < AttributeType
+    self.type = :string
+    def _parse(value)
+      value.to_s
+    end
+  end
+
   class Number < AttributeType
     def min
       @configuration[:min]

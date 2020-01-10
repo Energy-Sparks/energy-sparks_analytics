@@ -1,3 +1,3 @@
 module Dashboard
-  VERSION = "0.55.4"
+  VERSION = "0.60.0"
 end

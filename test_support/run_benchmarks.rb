@@ -64,6 +64,9 @@ class RunBenchmarks
 
       content = content_manager.content(db, page_name, filter: config[:filter])
 
+      comparison = CompareContentResults.new(control, '')
+      comparison.save_and_compare_content(page_name, content)
+
       page_html, page_charts, page_tables, page_table_composites = process_content(content)
 
       # print_content(page_html, page_charts, page_tables)
