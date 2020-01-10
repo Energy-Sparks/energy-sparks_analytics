@@ -9,12 +9,14 @@ class DashboardConfiguration
       electric_recent_progress
       electric_intraday
       solar_pv_group
+      underlying_electricity_meters_breakdown
     ],
     gas_group: %i[
       gas_annual
       gas_out_of_hours
       gas_long_term_progress
       gas_recent_progress
+      underlying_gas_meters_breakdown
     ],
     boiler_control_group: %i[
       boiler_control_morning_start_time
@@ -28,19 +30,9 @@ class DashboardConfiguration
     storage_heater_group: %i[
       storage_heater
     ],
-=begin
-    solar_pv_group: %i[
-      solar_pv
-    ],
-=end
     carbon_group: %i[
       carbon
     ],
-=begin
-    energy_tariffs_group: %i[
-      energy_tariffs
-    ],
-=end
   }.freeze
 
   ADULT_DASHBOARD_GROUP_CONFIGURATIONS = {
@@ -360,6 +352,18 @@ class DashboardConfiguration
         solar_pv_group_by_month
         solar_pv_last_7_days_by_submeter
       ]
+    },
+    underlying_electricity_meters_breakdown: {
+      name:                   'Electricity Meter Breakdown',
+      content_class:           AdviceElectricityMeterBreakdownBase,
+      excel_worksheet_name:   'ElectricBDown',
+      charts: %i[ group_by_week_electricity_meter_breakdown_one_year ]
+    },
+    underlying_gas_meters_breakdown: {
+      name:                   'Gas Meter Breakdown',
+      content_class:           AdviceGasMeterBreakdownBase,
+      excel_worksheet_name:   'GasBDown',
+      charts: %i[ group_by_week_gas_meter_breakdown_one_year ]
     },
     carbon: {
       name:                   'Carbon',

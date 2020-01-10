@@ -1,3 +1,4 @@
+require_relative './meter_breakdown_advice.rb'
 class AdviceGasBase < AdviceBase
   protected def aggregate_meter
     @school.aggregated_heat_meters
@@ -13,6 +14,14 @@ class AdviceElectricityBase < AdviceBase
   def relevance
     @school.aggregated_electricity_meters.nil? ? :never_relevant : :relevant
   end
+end
+class AdviceElectricityMeterBreakdownBase < AdviceMeterBreakdownBase
+  protected def aggregate_meter; @school.aggregated_electricity_meters end
+  protected def underlying_meters; @school.electricity_meters end
+end
+class AdviceGasMeterBreakdownBase < AdviceMeterBreakdownBase
+  protected def aggregate_meter; @school.aggregated_heat_meters end
+  protected def underlying_meters; @school.heat_meters end
 end
 class AdviceGasOutHours < AdviceGasBase;    end
 class AdviceGasAnnual   < AdviceGasBase;    end

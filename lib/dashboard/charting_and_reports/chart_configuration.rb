@@ -470,11 +470,15 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
-    group_by_week_electricity_unlimited_meter_filter_debug: {
+    group_by_week_electricity_meter_breakdown: {
       name:             'By Week: Electricity (Meter Breakdown)',
       meter_definition: :allelectricity,
-      inherits_from:    :group_by_week_gas_unlimited_meter_filter_debug,
+      inherits_from:    :group_by_week_gas_meter_breakdown,
       series_breakdown: :meter
+    },
+    group_by_week_electricity_meter_breakdown_one_year: {
+      inherits_from:    :group_by_week_electricity_meter_breakdown,
+      timescale:        :up_to_a_year
     },
     group_by_week_gas: {
       name:             'By Week: Gas',
@@ -532,11 +536,14 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :degreedays
     },
-    group_by_week_gas_unlimited_meter_filter_debug: {
+    group_by_week_gas_meter_breakdown: {
       name:             'By Week: Gas (Meter Breakdown)',
       inherits_from:    :group_by_week_gas_unlimited,
       series_breakdown: :meter
-      # filter:            { meter: [ 'Electrical Heating' ] } 
+    },
+    group_by_week_gas_meter_breakdown_one_year: {
+      inherits_from:    :group_by_week_gas_meter_breakdown,
+      timescale:        :up_to_a_year
     },
     group_by_year_gas_unlimited_meter_breakdown_heating_model_fitter: {
       name:             'Gas meter breakdown by year',

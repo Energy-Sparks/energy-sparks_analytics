@@ -205,11 +205,18 @@ class RunAlerts
           data.delete_if { |key, _value| key.to_s.include?(match) }
         end
       elsif result_type == :front_end_template_data
-        data.delete_if { |key, _value| key.to_s == :forecast_date_time }
+        daalert_typeta.delete_if { |key, _value| key.to_s == :forecast_date_time }
         data.delete_if { |key, _value| key.to_s == :days_between_forecast_and_last_meter_date }
       elsif result_type == :front_end_template_table_data
         data.delete_if { |key, _value| key.to_s.include?('weather_forecast_table') }
       end
+    elsif alert_type == AlertGasMeterConsolidationOpportunity ||
+          alert_type == AlertElectricityMeterConsolidationOpportunity ||
+          alert_type == AlertDifferentialTariffOpportunity ||
+          alert_type == AlertMeterASCLimit
+      data.delete(:max_asofdate)
+      raw_variables_for_saving_key = alert_type.to_s + ':' + 'max_asofdate'
+      data.delete(raw_variables_for_saving_key)
     end
     data
   end

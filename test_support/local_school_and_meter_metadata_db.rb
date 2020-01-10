@@ -66,6 +66,8 @@ class AnalysticsSchoolAndMeterMetaData
 
   def yaml_school_database
     @schools_metadata ||= YAML::load_file(school_metadata_filename)
+    @schools_metadata.delete_if { |name, config| config.key?(:deprecated) }
+    @schools_metadata
   end
 
   def yaml_meter_attributes_database
