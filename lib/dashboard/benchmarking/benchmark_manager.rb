@@ -3,7 +3,7 @@ module Benchmarking
   class BenchmarkManager
     include Logging
     class DatabaseRow < OpenStruct
-      def zero(value)BenchmarkManager
+      def zero(value)
         value.nil? ? 0.0 : value
       end
 
@@ -74,7 +74,7 @@ module Benchmarking
     end
 
     private
-    
+
     def hide_columns(config, user_type)
       new_config = config.clone
       new_config[:columns].delete_if do |column|
@@ -107,7 +107,7 @@ module Benchmarking
           compare *= -1 unless reverse_it
           sort_level += 1
           break if sort_level >= config[:sort_by].length || compare != 0
-        end 
+        end
         compare
       end
       results
@@ -140,7 +140,7 @@ module Benchmarking
     def format_rows(rows, column_definitions, medium)
       column_units = column_definitions.map{ |column_definition| column_definition[:units] }
       column_sense = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
-      
+
       formatted_rows = rows.map do |row|
         row.each_with_index.map do |value, index|
           sense = sense_column(column_sense[index])
@@ -169,7 +169,7 @@ module Benchmarking
         value
       end
     end
-    
+
     def format_cell(units, value, medium, sense)
       if medium == :text_and_raw
         data = {
