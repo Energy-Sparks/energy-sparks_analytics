@@ -69,7 +69,7 @@ module Benchmarking
 
       sort_table!(results, config) if config.key?(:sort_by)
 
-      format_table(config, results, medium)
+      format_table(config, results, medium, user_type)
     end
 
     private
@@ -98,7 +98,7 @@ module Benchmarking
           compare *= -1 unless reverse_it
           sort_level += 1
           break if sort_level >= config[:sort_by].length || compare != 0
-        end 
+        end
         compare
       end
       results
@@ -114,8 +114,10 @@ module Benchmarking
       end
     end
 
-    def format_table(table_definition, rows, medium)
+    def format_table(table_definition, rows, medium, user_type)
       header = table_definition[:columns].map{ |column_definition| column_definition[:name] }
+      header.delete('rating') unless system_admin_type?(user_type)
+
       case medium
       when :raw
         [header] + rows
@@ -131,7 +133,7 @@ module Benchmarking
     def format_rows(rows, column_definitions, medium)
       column_units = column_definitions.map{ |column_definition| column_definition[:units] }
       column_sense = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
-      
+
       formatted_rows = rows.map do |row|
         row.each_with_index.map do |value, index|
           sense = sense_column(column_sense[index])
@@ -160,7 +162,7 @@ module Benchmarking
         value
       end
     end
-    
+
     def format_cell(units, value, medium, sense)
       if medium == :text_and_raw
         data = {
@@ -282,11 +284,14 @@ module Benchmarking
     end
 
     def calculate_row(row, report, chart_columns_only, school_id_debug, user_type)
-      report[:columns].map do |column_specification|
+      columns = report[:columns].clone
+      columns.delete_if { |column| column[:name] == 'rating' && !system_admin_type?(user_type) }
+
+      columns.map do |column_specification|
         next if chart_columns_only && !self.class.chart_column?(column_specification)
-        next if rating_column?(column_specification) && !system_admin_type?(user_type)
         calculate_value(row, column_specification, school_id_debug)
       end
+
     end
 
     def rating_column?(column_specification)
