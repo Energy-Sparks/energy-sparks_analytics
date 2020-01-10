@@ -435,7 +435,7 @@ class EnergyEquivalences
             rate:                   SMARTPHONE_CHARGE_kWH,
             description:            "It takes #{X.format(:kwh, SMARTPHONE_CHARGE_kWH)} to charge a smartphone. ",
             front_end_description:  'Number of charges of a smartphone (conversion via kWh)',
-            adult_dashboard_wording:  'the energy needed charge %s smartphones'
+            adult_dashboard_wording:  'the energy needed to charge %s smartphones'
           },
           co2:  {
             rate:                   smart_phone_charge_co2_kg,
