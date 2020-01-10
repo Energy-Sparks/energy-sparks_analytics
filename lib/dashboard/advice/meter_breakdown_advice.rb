@@ -30,7 +30,6 @@ class AdviceMeterBreakdownBase < AdviceBase
     charts_and_html.push( { type: :chart, content: breakdown_chart } )
     charts_and_html.push( { type: :html,  content: table_timescale_html } )
     charts_and_html.push( { type: :html,  content: table_breakdown_html } )
-    charts_and_html.push( { type: :html,  content: table_explanation } )
     charts_and_html
   end
 
@@ -82,11 +81,5 @@ class AdviceMeterBreakdownBase < AdviceBase
     row_units = [String, :kwh, :percent]
     html_table = HtmlTableFormatting.new(header, rows, total_row, row_units)
     '<p> ' + html_table.html + ' </p>'
-  end
-
-  def table_explanation
-    %{
-      <p>Comments</p>
-    }
   end
 end
