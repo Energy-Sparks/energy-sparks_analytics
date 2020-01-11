@@ -6,6 +6,12 @@ class AdviceGasBase < AdviceBase
   def relevance
     @school.aggregated_heat_meters.nil? ? :never_relevant : :relevant
   end
+  def non_heating_only?
+    aggregate_meter.non_heating_only?
+  end
+  def heating_only?
+    aggregate_meter.heating_only?
+  end
 end
 class AdviceElectricityBase < AdviceBase
   protected def aggregate_meter
@@ -45,15 +51,34 @@ class AdviceGasIntraday < AdviceGasBase
   end
 end
 
-class AdviceGasBoilerMorningStart < AdviceGasBase; end
-class AdviceGasBoilerSeasonalControl < AdviceGasBase; end
-class AdviceGasBoilerThermostatic < AdviceGasBase; end
+class AdviceGasBoilerMorningStart < AdviceGasBase
+  def relevance
+    super &&  !non_heating_only? ? :relevant : :never_relevant
+  end
+end
+class AdviceGasBoilerSeasonalControl < AdviceGasBase
+  def relevance
+    super &&  !non_heating_only? ? :relevant : :never_relevant
+  end
+end
+class AdviceGasBoilerThermostatic < AdviceGasBase
+  def relevance
+    super &&  !non_heating_only? ? :relevant : :never_relevant
+  end
+end
 class AdviceGasBoilerFrost < AdviceGasBase
   def rating
     5.0
   end
+  def relevance
+    super &&  !non_heating_only? ? :relevant : :never_relevant
+  end
 end
-class AdviceGasHotWater < AdviceGasBase; end
+class AdviceGasHotWater < AdviceGasBase
+  def relevance
+    super &&  !heating_only? ? :relevant : :never_relevant
+  end
+end
 
 class AdviceStorageHeaters < AdviceElectricityBase
   def relevance

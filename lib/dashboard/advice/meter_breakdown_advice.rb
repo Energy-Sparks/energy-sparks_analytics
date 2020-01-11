@@ -10,7 +10,7 @@ class AdviceMeterBreakdownBase < AdviceBase
   end
 
   def self.template_variables
-    { 'Summary' => { summary: { description: 'benefit of existing or potential pv summary', units: String } } }
+    { 'Summary' => { summary: { description: 'Breakdown of meter data', units: String } } }
   end
 
   def summary
