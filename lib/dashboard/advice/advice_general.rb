@@ -29,8 +29,6 @@ class AdviceGasMeterBreakdownBase < AdviceMeterBreakdownBase
   protected def aggregate_meter; @school.aggregated_heat_meters end
   protected def underlying_meters; @school.heat_meters end
 end
-class AdviceElectricityCosts < AdviceElectricityBase; end
-class AdviceGasCosts < AdviceGasBase; end
 class AdviceGasOutHours < AdviceGasBase;    end
 class AdviceGasAnnual   < AdviceGasBase;    end
 class AdviceBenchmark   < AdviceBase

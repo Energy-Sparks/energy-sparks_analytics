@@ -36,6 +36,31 @@ class MeterTariffs
     matching_date.last
   end
 
+  # stats for rating adult dashboard costs pages, by availability of accounting tariff data
+  def self.accounting_tariff_availability_statistics(start_date, end_date, meters)
+    missing_meter_stats = Hash.new{ |hash, key| hash[key] = { days_tariffs: 0, days_data: 0 } }
+    meters.each do |meter|
+      # some meters may not extent over period of aggregate if deprecated
+      start_date = meter.amr_data.start_date if start_date < meter.amr_data.start_date
+      end_date   = meter.amr_data.end_date   if end_date < meter.amr_data.end_date
+      (start_date..end_date).each do |date|
+        tariff = accounting_tariff_for_date(date, meter)
+        missing_meter_stats[meter.mpan_mprn][:days_data] += 1
+        missing_meter_stats[meter.mpan_mprn][:days_tariffs] += 1 unless tariff.nil? || tariff[:default]
+      end
+    end
+    missing_meter_stats
+  end
+
+  def self.accounting_tariff_availability_coverage(start_date, end_date, meters)
+    stats = accounting_tariff_availability_statistics(start_date, end_date, meters)
+    # can't use sum directly because of Ruby lib statssample sum issue
+    days_data = stats.values.map{ |meter_stats| meter_stats[:days_data] }
+    days_tariffs = stats.values.map{ |meter_stats| meter_stats[:days_tariffs] }
+    (days_tariffs.sum / days_data.sum).to_f
+  end
+
+
   def self.accounting_tariff_x48(date, meter, kwh_halfhour_x48)
     #byebug if meter.mpan_mprn.to_s == '4234023603'
     tariff_config = accounting_tariff_for_date(date, meter)

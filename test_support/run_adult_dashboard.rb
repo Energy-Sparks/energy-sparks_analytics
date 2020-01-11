@@ -23,12 +23,19 @@ class RunAdultDashboard < RunCharts
 
   private def run_one_page(page, definition, control)
     puts "Running page #{page} has class #{definition.key?(:content_class)}"
+    logger.info "Running page #{page} has class #{definition.key?(:content_class)}"
 
     # ap definition[:content_class].front_end_template_variables # front end variables
 
     advice = definition[:content_class].new(@school)
 
+    puts "Page failed, as advice not valid #{page}" unless advice.valid_alert?
+    return unless advice.valid_alert?
+
     advice.calculate
+
+    puts "Page failed, as advice not available to users #{page}" unless advice.make_available_to_users?
+    return unless advice.make_available_to_users?
 
     content = advice.content
 

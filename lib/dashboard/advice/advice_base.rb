@@ -81,6 +81,7 @@ class AdviceBase < ContentBase
         charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
         charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_footer]) } ) if chart.key?(:advice_footer)
       rescue StandardError => e
+        logger.info self.class.name
         logger.info e.message
         logger.info e.backtrace
       end
@@ -166,6 +167,7 @@ class AdviceBase < ContentBase
   def promote_data
     self.class.config[:promoted_variables].each do |alert_class, variables|
       alert = alert_class.new(@school)
+      next unless alert.valid_alert?
       alert.analyse(alert_asof_date, true)
       variables.each do |to, from|
         create_and_set_attr_reader(to, alert.send(from))

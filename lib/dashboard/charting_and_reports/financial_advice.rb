@@ -81,6 +81,144 @@ class DashboardEnergyAdvice
                   
       template.gsub(/^  /, '')
     end
+
+    def meter_tariff_completeness_advice(aggregate_meter, meters)
+      end_date = aggregate_meter.amr_data.end_date
+      ideal_start_date = end_date - 2 * 365
+      start_date = [ideal_start_date, aggregate_meter.amr_data.start_date].max
+      percent_coverage = MeterTariffs.accounting_tariff_availability_coverage(start_date, end_date, meters)
+      percent_coverage_html = FormatEnergyUnit.format(:£, percent_coverage, :html)
+      if percent_coverage >= 0.99
+        %q(
+          We have complete meter tariff information for your school
+          so this information should be reasonably accurate. However,
+          first time you use this page you should cross reference
+          the information provided with your bills and let us know
+          if there are descrepancies?
+        )
+      elsif percent_coverage <= 0.01
+        %q(
+          We have no up to date tariff information for your school,
+          so this page is only an estimate based on default information
+          and you should assume is not accurate.
+        )
+      else
+        text = %(
+          We have  <%= percent_coverage_html %> of the tariff information we need for your school,
+          so this page is only an estimate based on default information
+          and you should assume is not accurate.
+        )
+        generate_html(text, binding)
+      end
+    end
+
+    INTRO_TO_SCHOOL_FINANCES_1 = %q(
+      <p>
+        Energy Sparks calculates electricity and gas costs using 2 different
+        methods:
+      </p>
+      <p>
+        1. <strong>Economic Costs</strong>:
+      </p>
+        <ul>
+          <li>
+            this assumes a simple cost model, with electricity costing 12p/kWh
+            and gas 3p/kWh
+          </li>
+          <li>
+            generally, this method is used when information is presented to
+            pupils because it is easy to understand, and allows them to do simple maths
+            converting between kWh and &#163;
+          </li>
+          <li>
+            we also use it for economic forecasting, when doing cost benefit
+            analysis for suggested improvements to your energy management, as it better
+            represents future energy prices/tariffs than your current potentially
+            volatile tariffs as these can change from year to year
+          </li>
+        </ul>
+      <p>
+        2. <strong>Accounting Costs</strong>:
+      </p>
+          <ul>
+            <li>
+              These represent your real energy costs and represent all the
+              different types of standing charges applied to your account
+            </li>
+            <li>
+              To do this we need to know what these tariffs are, sometimes these
+              can be provided by all schools by a local authority, and sometimes you will
+              need to provide us the information is not available from the Local
+              Authority. MAT or Energy Supplier
+            </li>
+            <li>
+              We can use this more accurate tariff information to provide more
+              detailed advice on potential cost savings through tariff changes or meter
+              consolidation
+            </li>
+          </ul>
+      <p>
+        The remainder of this web page represents your 'Accounting Costs', the
+        information is kept up to date on a daily basis from Energy Spark's smart
+        meter feeds for your school.
+      </p>
+    ).freeze
+
+    INSTRUCTIONS_IF_ACCOUNTING_TARIFF_INFORMATION_MISSING = %q(
+      <p>
+        Unfortunately, we don't have detailed meter information for these meters
+        <%= missing_accounting_tariff_meter_mpan_mprn_text %>
+        so we are using defaults for your area. Could you
+        <a href="mailto:hello@energysparks.uk?subject=Meter tariff information for <%= @school.name %>">contact us</a>
+        and let us know your current tariffs and we can set them up so the
+        information on this page is accurate? This will also allow us to analyse
+        your tariff to see if there are opportunities for cost reduction.
+      </p>
+    ).freeze
+
+    def meter_intro(aggregate_meter, meters)
+      info = meter_tariff_completeness_advice(aggregate_meter, meters)
+      text = %(
+        <hr>
+        <h2>Accounting tariff Information for your school</h2>
+        <p> <%= info %></p>
+      )
+      generate_html(text, binding)
+    end
+
+    INTRODUCTION_TO_2_YEAR_ELECTRICITY_COMPARISON_CHART = %q(
+      <br>
+      <h2>
+          Summary of your annual costs
+      </h2>
+      <h3>
+          Electricity
+      </h3>
+      <p>
+          The chart below shows a comparison of your total electricity usage over the
+          last 2 years (across all electricity meters) in kWh:
+      </p>
+    ).freeze
+
+    private def missing_accounting_tariffs_meters
+      meters = @school.real_meters
+      meters.select do |meter|
+        tariff = MeterTariffs.accounting_tariff_for_date(meter.amr_data.end_date, meter)
+        tariff.nil? || tariff[:default]
+      end
+    end
+
+    private def missing_accounting_tariff_meter_mpan_mprn_text
+      meters = missing_accounting_tariffs_meters
+      return nil if meters.empty?
+      list_of_meter_texts = meters.map { |meter| "#{meter.fuel_type}: #{meter.mpan_mprn}" }
+      list_of_meter_texts.join(', ')
+    end
+
+    private def missing_accounting_tariff_text
+      return '' if missing_accounting_tariffs_meters.empty?
+      INSTRUCTIONS_IF_ACCOUNTING_TARIFF_INFORMATION_MISSING
+    end
   end
 
   class ConvertTwoYearAccountingChartDataToTable
@@ -246,119 +384,15 @@ class DashboardEnergyAdvice
   class FinancialAdviceIntroduction < FinancialAdviceBase
     include Logging
 
-    INTRO_TO_SCHOOL_FINANCES_1 = %q(
-      <p>
-        Energy Sparks calculates electricity and gas costs using 2 different
-        methods:
-      </p>
-      <p>
-        1. <strong>Economic Costs</strong>:
-      </p>
-        <ul>
-          <li>
-            this assumes a simple cost model, with electricity costing 12p/kWh
-            and gas 3p/kWh
-          </li>
-          <li>
-            generally, this method is used when information is presented to
-            pupils because it is easy to understand, and allows them to do simple maths
-            converting between kWh and &#163;
-          </li>
-          <li>
-            we also use it for economic forecasting, when doing cost benefit
-            analysis for suggested improvements to your energy management, as it better
-            represents future energy prices/tariffs than your current potentially
-            volatile tariffs as these can change from year to year
-          </li>
-        </ul>
-      <p>
-        2. <strong>Accounting Costs</strong>:
-      </p>
-          <ul>
-            <li>
-              These represent your real energy costs and represent all the
-              different types of standing charges applied to your account
-            </li>
-            <li>
-              To do this we need to know what these tariffs are, sometimes these
-              can be provided by all schools by a local authority, and sometimes you will
-              need to provide us the information is not available from the Local
-              Authority. MAT or Energy Supplier
-            </li>
-            <li>
-              We can use this more accurate tariff information to provide more
-              detailed advice on potential cost savings through tariff changes or meter
-              consolidation
-            </li>
-          </ul>
-      <p>
-        The remainder of this web page represents your 'Accounting Costs', the
-        information is kept up to date on a daily basis from Energy Spark's smart
-        meter feeds for your school.
-      </p>
-    ).freeze
-
-    INSTRUCTIONS_IF_ACCOUNTING_TARIFF_INFORMATION_MISSING = %q(
-      <p>
-        Unfortunately, we don't have detailed meter information for these meters
-        <%= missing_accounting_tariff_meter_mpan_mprn_text %>
-        so we are using defaults for your area. Could you
-        <a href="mailto:hello@energysparks.uk?subject=Meter tariff information for <%= @school.name %>">contact us</a>
-        and let us know your current tariffs and we can set them up so the
-        information on this page is accurate? This will also allow us to analyse
-        your tariff to see if there are opportunities for cost reduction.
-      </p>
-    ).freeze
-
-    METER_INTRO = %q(
-      <hr>
-      <h2>Accounting tariff Information for your school</h2>
-      <p>We have the following tariff information for meters at your school:</p>
-    ).freeze
-
-    INTRODUCTION_TO_2_YEAR_ELECTRICITY_COMPARISON_CHART = %q(
-      <br>
-      <h2>
-          Summary of your annual costs
-      </h2>
-      <h3>
-          Electricity
-      </h3>
-      <p>
-          The chart below shows a comparison of your total electricity usage over the
-          last 2 years (across all electricity meters) in kWh:
-      </p>
-    ).freeze
-
-    private def missing_accounting_tariffs_meters
-      meters = @school.real_meters
-      meters.select do |meter|
-        tariff = MeterTariffs.accounting_tariff_for_date(meter.amr_data.end_date, meter)
-        tariff.nil? || tariff[:default]
-      end
-    end
-
-    private def missing_accounting_tariff_meter_mpan_mprn_text
-      meters = missing_accounting_tariffs_meters
-      return nil if meters.empty?
-      list_of_meter_texts = meters.map { |meter| "#{meter.fuel_type}: #{meter.mpan_mprn}" }
-      list_of_meter_texts.join(', ')
-    end
-
-    private def missing_accounting_tariff_text
-      return '' if missing_accounting_tariffs_meters.empty?
-      INSTRUCTIONS_IF_ACCOUNTING_TARIFF_INFORMATION_MISSING
-    end
-
     def generate_valid_advice
 
-      gas_and_electricity_meter_tariff_tables = FormatMeterTariffs.new(@school).tariff_tables_html
+      electricity_meter_tariff_tables = FormatMeterTariffs.new(@school).tariff_tables_html(@school.electricity_meters)
 
       header_template = concatenate_advice_with_body_start_end(
         [
           INTRO_TO_SCHOOL_FINANCES_1,
-          METER_INTRO,
-          gas_and_electricity_meter_tariff_tables,
+          meter_intro(@school.aggregated_electricity_meters, @school.electricity_meters),
+          electricity_meter_tariff_tables,
           missing_accounting_tariff_text,
           INTRODUCTION_TO_2_YEAR_ELECTRICITY_COMPARISON_CHART
         ]
@@ -396,13 +430,26 @@ class DashboardEnergyAdvice
   end
 
   class FinancialAdviceGasCostsIntroduction < FinancialAdviceBase
+
+    INTRODUCTION_TO_2_YEAR_GAS_COMPARISON_CHART = %q(
+      <p>
+        The chart below shows a comparison of your total
+        gas usage over the last 2 years (across all gas meters):
+      </p>
+    ).freeze
+
     def generate_valid_advice
-      header_template = %q(
-        <p>
-          The chart below shows a comparison of your total
-          gas usage over the last 2 years (across all gas meters):
-        </p>
-      ).freeze
+      gas_meter_tariff_tables = FormatMeterTariffs.new(@school).tariff_tables_html(@school.heat_meters)
+
+      header_template = concatenate_advice_with_body_start_end(
+        [
+          INTRO_TO_SCHOOL_FINANCES_1,
+          meter_intro(@school.aggregated_heat_meters, @school.heat_meters),
+          gas_meter_tariff_tables,
+          missing_accounting_tariff_text,
+          INTRODUCTION_TO_2_YEAR_GAS_COMPARISON_CHART
+        ]
+      )
 
       @header_advice = generate_html(header_template, binding)
 

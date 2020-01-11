@@ -7,9 +7,9 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     super(school, nil, nil, nil) # inherit from DashboardChartAdviceBase to get html_table functionality
   end
 
-  def tariff_tables_html
+  def tariff_tables_html(meter_list = nil)
     tables = ''
-    all_meters = [@school.electricity_meters, @school.heat_meters].flatten
+    all_meters = meter_list.nil? ? [@school.electricity_meters, @school.heat_meters].flatten : meter_list
     all_meters.each do |meter|
       tariff_name, table_data, real_tariff = single_tariff_table_html(meter)
       table = %{
