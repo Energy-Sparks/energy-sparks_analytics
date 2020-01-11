@@ -18,6 +18,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :one_year_baseload_per_pupil_kw, :one_year_baseload_per_pupil_kwh, :one_year_baseload_per_pupil_£
   attr_reader :one_year_baseload_per_floor_area_kw, :one_year_baseload_per_floor_area_kwh, :one_year_baseload_per_floor_area_£
 
+  attr_reader :summary
+
   def initialize(school)
     super(school, :baseloadbenchmark)
   end
@@ -124,6 +126,11 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     one_year_baseload_chart: {
       description: 'chart of last years baseload',
       units: :chart
+    },
+
+    summary: {
+      description: 'Description: annual benefit of moving to exemplar £',
+      units: String
     }
   }.freeze
 
@@ -177,6 +184,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @one_year_baseload_per_floor_area_kwh  = @average_baseload_last_year_kwh / floor_area
     @one_year_baseload_per_floor_area_£    = @average_baseload_last_year_£ / floor_area
 
+    @summary = summary_text
+
     set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil)
 
     # rating: benchmark value = 4.0, exemplar = 10.0
@@ -190,6 +199,15 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @bookmark_url = add_book_mark_to_base_url('ElectricityBaseload')
   end
   alias_method :analyse_private, :calculate
+
+  def summary_text
+    if @one_year_saving_versus_exemplar_£ > 0
+      'Reducing your baseload is high, reducing it could save ' +
+      FormatEnergyUnit.format(:£, @one_year_saving_versus_exemplar_£, :text) + 'pa'
+    else
+      'You are doing well - you are an examplar school'
+    end
+  end
 
   private def dashboard_adjective
     @average_baseload_last_year_kw > @benchmark_per_pupil_kw * 1.05 ? 'too high' : 'good'

@@ -61,12 +61,11 @@ class AdviceMeterBreakdownBase < AdviceBase
   end
 
   def table_timescale_html
-    time_scale = (Date.parse(breakdown_chart[:x_axis].last) - Date.parse(breakdown_chart[:x_axis].first) + 1)/365
-    period = FormatEnergyUnit.format(:years, time_scale, :html)
+    timescale = self.class.chart_timescale_and_dates(breakdown_chart)
     text = %{
       <p>
-        This table covers the most recent <%= period %>
-        from <%= breakdown_chart[:x_axis].first %> to <%= breakdown_chart[:x_axis].last %>:
+        This table covers the most recent <%= timescale[:timescale_description] %>
+        from <%= timescale[:start_date] %> to <%= timescale[:end_date] %>:
       </p>
     }
     ERB.new(text).result(binding)

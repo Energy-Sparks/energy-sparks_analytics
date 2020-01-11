@@ -5,6 +5,7 @@ class DashboardConfiguration
     electric_group: %i[
       electric_annual
       electric_out_of_hours
+      baseload
       electric_long_term_progress
       electric_recent_progress
       electric_intraday
@@ -96,6 +97,26 @@ class DashboardConfiguration
           out_of_hours_£:         :out_of_hours_£,
           out_of_hours_percent:   :out_of_hours_percent,
           summary:                :summary
+        }
+      },
+    },
+    baseload: {   
+      name:                   'Your electricity baseload',
+      content_class:           AdviceBaseload,
+      excel_worksheet_name:   'Baseload',
+      charts: %i[
+        baseload_lastyear
+        baseload
+      ],
+      promoted_variables: {
+        AlertElectricityBaseloadVersusBenchmark => {
+          rating:                             :rating,
+          one_year_saving_versus_exemplar_£:  :one_year_saving_versus_exemplar_£,
+          one_year_saving_versus_benchmark_£: :one_year_saving_versus_benchmark_£,
+          average_baseload_last_year_kw:      :average_baseload_last_year_kw,
+          exemplar_per_pupil_kw:              :exemplar_per_pupil_kw,
+          benchmark_per_pupil_kw:             :benchmark_per_pupil_kw,
+          summary:                            :summary
         }
       },
     },

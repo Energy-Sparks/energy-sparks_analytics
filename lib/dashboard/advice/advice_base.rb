@@ -138,6 +138,31 @@ class AdviceBase < ContentBase
     DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:adult_analysis_page]
   end
 
+  def self.parse_date(date)
+    date.is_a?(String) ? Date.parse(date) : date
+  end
+
+  def self.chart_timescale_and_dates(chart_results)
+    start_date      = parse_date(chart_results[:x_axis].first)
+    end_date        = parse_date(chart_results[:x_axis].last)
+    time_scale_days = end_date - start_date + 1
+    {
+      timescale_days:         time_scale_days,
+      timescale_years:        time_scale_days / 365.0,
+      timescale_description:  FormatEnergyUnit.format(:years, time_scale_days / 365.0, :html),
+      start_date:             chart_results[:x_axis].first,
+      end_date:               chart_results[:x_axis].last
+    }
+  end
+
+  def format_£(value)
+    FormatEnergyUnit.format(:£, value, :html)
+  end
+
+  def format_kw(value)
+    FormatEnergyUnit.format(:kw, value, :html)
+  end
+
   def promote_data
     self.class.config[:promoted_variables].each do |alert_class, variables|
       alert = alert_class.new(@school)
