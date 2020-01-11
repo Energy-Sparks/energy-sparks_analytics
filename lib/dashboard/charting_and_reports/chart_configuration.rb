@@ -636,7 +636,8 @@ class ChartManager
       timescale:        :year,
       meter_definition: :allheat,
       yaxis_units:      :kwh,
-      yaxis_scaling:    :none
+      yaxis_scaling:    :none,
+      subtitle:         :daterange
     },
     electricity_by_day_of_week:  {
       name:             'Electricity Use By Day of the Week (this year)',
@@ -647,7 +648,8 @@ class ChartManager
       timescale:        :year,
       meter_definition: :allelectricity,
       yaxis_units:      :kwh,
-      yaxis_scaling:    :none
+      yaxis_scaling:    :none,
+      subtitle:         :daterange
     },
     electricity_by_month_acyear_0_1:  {
       name:             'Electricity Use By Month (previous 2 academic years)',
@@ -856,6 +858,7 @@ class ChartManager
     thermostatic: {
       inherits_from:    :thermostatic_regression_simple_school_day,
       name:             'Thermostatic (Temperature v. Daily Consumption - current year)',
+      subtitle:         :daterange
     },
     thermostatic_regression_simple_all: {
       name:             'Thermostatic (All Categories) - simple model',
@@ -1046,16 +1049,8 @@ class ChartManager
       yaxis_scaling:    :none
     },
     cusum: {
-      inherits_from:    :cusum_weekly
-=begin
-      name:             'CUSUM',
-      chart1_type:      :column,
-      meter_definition: :allheat,
-      series_breakdown: :cusum,
-      x_axis:           :day,
-      yaxis_units:      :kwh,
-      yaxis_scaling:    :none
-=end
+      inherits_from:    :cusum_weekly,
+      subtitle:         :daterange
     },
     baseload: {
       name:             'Baseload kW',
