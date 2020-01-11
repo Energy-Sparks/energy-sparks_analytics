@@ -299,7 +299,7 @@ class AggregateDataService
   # the data should arrive in the aggregate meter service as a single electricity meter, with 2 sub meters
   # prior to this the single electricity meter will have been promoted to be the aggregate electricity meter as well
   private def create_solar_pv_sub_meters_using_meter_data
-    check_solar_pv__meter_configuration
+    check_solar_pv_meter_configuration
 
     meters = find_solar_pv_meters
     mains_meter   = meters[:electricity]
@@ -361,7 +361,7 @@ class AggregateDataService
   end
 
   # defensive programming to ensure correct data arrives from front end, and analytics
-  private def check_solar_pv__meter_configuration
+  private def check_solar_pv_meter_configuration
     raise EnergySparksUnexpectedStateException.new, 'Expecting an aggregate electricity meter for solar pv meter aggregation' if @meter_collection.aggregated_electricity_meters.nil?
     raise EnergySparksUnexpectedStateException.new, 'Only 1 electricity meter currently supported for solar pv meter aggregation' if @meter_collection.electricity_meters.length != 1
     raise EnergySparksUnexpectedStateException.new, '2 electricity sub meters required for solar pv meter aggregation' if @meter_collection.electricity_meters[0].sub_meters.length != 2

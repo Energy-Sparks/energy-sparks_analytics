@@ -228,11 +228,36 @@ class DashboardEnergyAdvice
 
     def formatted_table(fuel_type)
       two_year_p_and_l(fuel_type)
+      if less_than_one_year_data?
+        one_year_reduced_data_table
+      else
+        two_year_data_comparison_table
+      end
+    end
+
+    def two_year_data_comparison_table
       header, monthly_p_and_l_table, totals, £_columns = decode_monthly_data
       £_formatted_monthly_p_and_l_rows = format_month_rows(monthly_p_and_l_table, £_columns)
       £_formatted_totals = format_month_row(totals, £_columns)
       £_formatted_totals[0] = 'Total'
       [header, £_formatted_monthly_p_and_l_rows, £_formatted_totals]
+    end
+
+    def one_year_reduced_data_table
+      header = ['Month', @chart_data[:x_data].keys.map(&:humanize), 'Total'].flatten
+      rows = @chart_data[:x_axis].map.with_index do |month, index|
+        component_data = @chart_data[:x_data].values.map { |value| value[index] }
+        [
+          month,
+          component_data.map { |value| format_£(value) },
+          format_£(component_data.sum)
+        ].flatten
+      end
+      [header, rows, nil]
+    end
+
+    def less_than_one_year_data?
+      !@chart_data[:x_data].keys.any? { |key| key.include?(':') }
     end
 
     def two_year_p_and_l(fuel_type = :electricity, meter = nil)
@@ -269,7 +294,8 @@ class DashboardEnergyAdvice
         meter_definition: meter_definition(fuel_type, meter),
         yaxis_scaling:    :none,
         yaxis_label:      :£,
-        timescale:        [{ year: 0 }, { year: -1 }],
+        timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+        ignore_single_series_failure: true,
         yaxis_units:      :accounting_cost
       }
     end
@@ -308,7 +334,7 @@ class DashboardEnergyAdvice
       totals = columns_to_total.map { |total| total ? 0.0 : '' }
       month_rows.each do |month_row|
         columns_to_total.each_with_index do |total, index|
-          totals[index] += month_row[index] if total
+          totals[index] += month_row[index] if total && !month_row[index].nil?
         end
       end
       totals
@@ -321,9 +347,17 @@ class DashboardEnergyAdvice
     private def format_month_row(month_row, columns_to_convert_to_£)
       formatted_row = Array.new(columns_to_convert_to_£.length, '')
       columns_to_convert_to_£.each_with_index do |in_£s, index|
-        formatted_row[index] += in_£s ? FormatEnergyUnit.format(:£, month_row[index], :html, false, false, :no_decimals) : month_row[index]
+        if in_£s
+          formatted_row[index] += format_£(month_row[index])
+        else
+          formatted_row[index] = month_row[index]
+        end
       end
       formatted_row
+    end
+
+    def format_£(value)
+      FormatEnergyUnit.format(:£, value, :html, false, false, :no_decimals)
     end
 
     private def rate(rate_type, month_index, year_index)
@@ -334,6 +368,7 @@ class DashboardEnergyAdvice
     private def key_for_rate_year(rate_type, year_index)
       @chart_data[:x_data].keys.each do |composite_key|
         loop_rate_type, start_date, end_date = decode_month_chart_type_key(composite_key)
+        next if start_date.nil? || end_date.nil?
         dehumanized_rate_type = rate_type.downcase.squish.gsub(/\s/, '_').to_sym # not ideal
         return composite_key if year_key(start_date, end_date) == unique_years[year_index] && loop_rate_type == dehumanized_rate_type
       end
@@ -344,6 +379,7 @@ class DashboardEnergyAdvice
       totals = Array.new(13, 0.0)
       @chart_data[:x_data].each_with_index do |(composite_key, months_x13), month_index|
         rate_type, start_date, end_date = decode_month_chart_type_key(composite_key)
+        next if start_date.nil? || end_date.nil?
         if year_key(start_date, end_date) == unique_years[year_index]
           totals = [totals, months_x13].transpose.map {|x| x.reduce(:+)}
         end
@@ -499,8 +535,14 @@ class DashboardEnergyAdvice
     end
 
     protected def change_in_usage_description(fuel_type)
-      current_year = annual_values(fuel_type, 0)
-      previous_year = annual_values(fuel_type, -1)
+      current_year = nil
+      previous_year = nil
+      begin
+        current_year = annual_values(fuel_type, 0)
+        previous_year = annual_values(fuel_type, -1)
+      rescue EnergySparksNotEnoughDataException => _e
+        return ''
+      end
       annual_increase_kwh = current_year[:kwh] - previous_year[:kwh]
       annual_increase_£ = current_year[:£] - previous_year[:£]
 
@@ -575,9 +617,10 @@ class DashboardEnergyAdvice
     end
 
     def generate_valid_advice
+      timescale = { up_to_a_year: 0 }
       # SeriesNames [HOLIDAY.freeze, WEEKEND.freeze, SCHOOLDAYOPEN.freeze, SCHOOLDAYCLOSED.freeze].freeze
-      total_cost_£ = ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, fuel_type, :accounting_cost)
-      day_type_percent = ScalarkWhCO2CostValues.new(@school).day_type_breakdown({year: 0}, fuel_type, :kwh, false, true)
+      total_cost_£ = ScalarkWhCO2CostValues.new(@school).aggregate_value(timescale, fuel_type, :accounting_cost)
+      day_type_percent = ScalarkWhCO2CostValues.new(@school).day_type_breakdown(timescale, fuel_type, :kwh, false, true)
 
       out_of_hours_percent = 1.0 - day_type_percent[SeriesNames::SCHOOLDAYOPEN]
       formatted_out_of_hours_percent = FormatEnergyUnit.format(:percent, out_of_hours_percent, :html)

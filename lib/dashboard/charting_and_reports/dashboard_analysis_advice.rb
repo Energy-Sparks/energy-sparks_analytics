@@ -228,6 +228,8 @@ def generate_html(template, binding)
     logger.error "Error generating html for #{self.class.name}"
     logger.error e.message
     logger.error e.backtrace
+puts e.message
+puts e.backtrace
     '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
   end
 end

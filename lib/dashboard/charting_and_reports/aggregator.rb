@@ -188,7 +188,6 @@ class Aggregator
     logger.info "Determining maximum chart range for #{schools.length} schools:"
     min_date = nil
     max_date = nil
-
     schools.each do |school|
       series_manager = SeriesDataManager.new(school, chart_config)
       logger.info "    #{school.name} from #{series_manager.first_meter_date} to  #{series_manager.last_meter_date}"
@@ -249,13 +248,17 @@ class Aggregator
       temperature_adjustment_map(school)
 
       periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-        aggregations.push(
-          {
-            school:       school,
-            period:       period,
-            aggregation:  run_one_aggregation(@chart_config, period)
-          }
-        )
+        begin
+          aggregations.push(
+            {
+              school:       school,
+              period:       period,
+              aggregation:  run_one_aggregation(@chart_config, period)
+            }
+          )
+        rescue EnergySparksNotEnoughDataException => e_
+          raise unless ignore_single_series_failure?
+        end
       end
     end
 
@@ -270,6 +273,10 @@ class Aggregator
     @meter_collection = saved_meter_collection
 
     bucketed_period_data
+  end
+
+  def ignore_single_series_failure?
+    @chart_config.key?(:ignore_single_series_failure) && @chart_config[:ignore_single_series_failure]
   end
 
   # sorting config example:      sort_by:          [ { school: :desc }, { time: :asc } ]

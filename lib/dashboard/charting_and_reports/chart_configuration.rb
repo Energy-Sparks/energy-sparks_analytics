@@ -676,31 +676,41 @@ class ChartManager
     # 8 finance tab charts
     electricity_by_month_year_0_1_finance_advice: {
       name:             'Energy Costs',
+      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      ignore_single_series_failure: true,
       inherits_from:    :electricity_by_month_year_0_1
     },
     electricity_cost_comparison_last_2_years_accounting: {
       name:             '',
       inherits_from:    :electricity_cost_comparison_last_2_years,
+      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      ignore_single_series_failure: true,
       yaxis_units:      :accounting_cost
     },
     electricity_cost_1_year_accounting_breakdown: {
       name:             '',
       inherits_from:    :electricity_cost_comparison_last_2_years_accounting_breakdown,
+      timescale:        [{ up_to_a_year: 0 }],
+      ignore_single_series_failure: true,
       chart1_subtype:   :stacked,
-      timescale:        :year
     },
     accounting_cost_daytype_breakdown_electricity: {
       name:             '',
       yaxis_units:      :accounting_cost,
+      timescale:        :up_to_a_year,
       inherits_from:    :daytype_breakdown_electricity
     },
     gas_by_month_year_0_1_finance_advice: {
       name:             'Gas Costs',
+      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      ignore_single_series_failure: true,
       inherits_from:    :gas_by_month_year_0_1
     },
     gas_cost_comparison_last_2_years_accounting: {
       name:             '',
       inherits_from:    :electricity_cost_comparison_last_2_years,
+      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      ignore_single_series_failure: true,
       meter_definition: :allheat
     },
     gas_cost_1_year_accounting_breakdown: {
@@ -711,6 +721,7 @@ class ChartManager
     accounting_cost_daytype_breakdown_gas: {
       name:             '',
       yaxis_units:      :accounting_cost,
+      timescale:        :up_to_a_year,
       inherits_from: :daytype_breakdown_gas
     },
 
