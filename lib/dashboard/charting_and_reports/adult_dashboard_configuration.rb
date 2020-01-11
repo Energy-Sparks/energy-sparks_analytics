@@ -11,6 +11,7 @@ class DashboardConfiguration
       electric_intraday
       solar_pv_group
       underlying_electricity_meters_breakdown
+      electricity_profit_loss
     ],
     gas_group: %i[
       gas_annual
@@ -18,6 +19,7 @@ class DashboardConfiguration
       gas_long_term_progress
       gas_recent_progress
       underlying_gas_meters_breakdown
+      gas_profit_loss
     ],
     boiler_control_group: %i[
       boiler_control_morning_start_time
@@ -183,6 +185,19 @@ class DashboardConfiguration
         }
       },
     },
+    electricity_profit_loss: {   
+      name:                   'Electicity Costs',
+      content_class:           AdviceElectricityCosts,
+      excel_worksheet_name:   'ElectCosts',
+      charts: %i[
+        electricity_by_month_year_0_1_finance_advice
+        electricity_cost_comparison_last_2_years_accounting
+        electricity_cost_1_year_accounting_breakdown
+        accounting_cost_daytype_breakdown_electricity
+      ],
+      promoted_variables: {
+      }
+    },
     gas_annual: {   
       name:                   'Overview of annual gas consumption',
       content_class:          AdviceGasAnnual,
@@ -277,6 +292,19 @@ class DashboardConfiguration
       ],
       promoted_variables: {
       },
+    },
+    gas_profit_loss: {   
+      name:                   'Gas Costs',
+      content_class:           AdviceGasCosts,
+      excel_worksheet_name:   'GasCosts',
+      charts: %i[
+        gas_by_month_year_0_1_finance_advice
+        gas_cost_comparison_last_2_years_accounting
+        gas_cost_1_year_accounting_breakdown
+        accounting_cost_daytype_breakdown_gas
+      ],
+      promoted_variables: {
+      }
     },
     boiler_control_morning_start_time: {
       name:                   'Morning start time',
