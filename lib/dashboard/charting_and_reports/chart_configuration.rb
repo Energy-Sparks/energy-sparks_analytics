@@ -724,6 +724,23 @@ class ChartManager
       timescale:        :up_to_a_year,
       inherits_from: :daytype_breakdown_gas
     },
+    # TODO(PH 12Jan2020) remove once SH/PV accounting testing complete:
+    acc1: {
+      meter_definition: :allelectricity_unmodified,
+      inherits_from: :electricity_by_month_year_0_1_finance_advice
+    },
+    acc2: {
+      meter_definition: :allelectricity_unmodified,
+      inherits_from: :electricity_cost_comparison_last_2_years_accounting
+    },
+    acc3: {
+      meter_definition: :allelectricity_unmodified,
+      inherits_from: :electricity_cost_1_year_accounting_breakdown
+    },
+    acc4: {
+      meter_definition: :allelectricity_unmodified,
+      inherits_from: :accounting_cost_daytype_breakdown_electricity
+    },
 
     gas_by_month_year_0_1:  {
       inherits_from:    :electricity_by_month_year_0_1,

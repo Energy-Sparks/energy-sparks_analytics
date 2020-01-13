@@ -7,13 +7,13 @@ class DashboardEnergyAdvice
 
   def self.financial_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
     case chart_type
-    when :electricity_by_month_year_0_1_finance_advice
+    when :electricity_by_month_year_0_1_finance_advice, :acc1
       FinancialAdviceIntroduction.new(school, chart_definition, chart_data, chart_symbol)
-    when :electricity_cost_comparison_last_2_years_accounting
+    when :electricity_cost_comparison_last_2_years_accounting, :acc2
       FinancialAdvice2YearCostComparisonText.new(school, chart_definition, chart_data, chart_symbol)
-    when :electricity_cost_1_year_accounting_breakdown
+    when :electricity_cost_1_year_accounting_breakdown, :acc3
       FinancialAdviceElectricity2YearComparison.new(school, chart_definition, chart_data, chart_symbol)
-    when :accounting_cost_daytype_breakdown_electricity
+    when :accounting_cost_daytype_breakdown_electricity, :acc4
       FinancialAdviceEasySavingsElectricity.new(school, chart_definition, chart_data, chart_symbol)
     when :gas_by_month_year_0_1_finance_advice
       FinancialAdviceGasCostsIntroduction.new(school, chart_definition, chart_data, chart_symbol)
@@ -276,7 +276,7 @@ class DashboardEnergyAdvice
       elsif !meter.nil?
         return meter.id
       elsif fuel_type == :electricity
-        return :allelectricity
+        return :allelectricity_unmodified
       elsif fuel_type == :gas
         return :allheat
       else
@@ -323,7 +323,7 @@ class DashboardEnergyAdvice
         variance = this_year_totals[month_index] - last_year_totals[month_index]
         month_rows[month_index][header.index('Variance versus 17/18')] = variance
         rate_types_for_header.each do |rate_type|
-          month_rows[month_index][header.index(rate_type)] = rate(rate_type, month_index, 0)
+          month_rows[month_index][header.index(rate_type)] = rate(rate_type, month_index, 1)
         end
       end
       totals = totals_from_table(month_rows, £_columns)
@@ -396,6 +396,10 @@ class DashboardEnergyAdvice
     end
 
     private def unique_years
+      @unique_years ||= calculate_unique_years
+    end
+
+    private def calculate_unique_years
       year_list = []
       @chart_data[:x_data].keys.each do |composite_key|
         _rate_type, start_date, end_date = decode_month_chart_type_key(composite_key)
@@ -524,13 +528,14 @@ class DashboardEnergyAdvice
     end
 
     protected def annual_values(fuel_type, year_number)
+      fuel_type = :allelectricity_unmodified if fuel_type == :electricity
       year_kwh = ScalarkWhCO2CostValues.new(@school).aggregate_value({year: year_number}, fuel_type, :kwh)
       year_£ = ScalarkWhCO2CostValues.new(@school).aggregate_value({year: year_number}, fuel_type, :accounting_cost)
       {
         kwh:     year_kwh,
         £:       year_£,
         formatted_kwh:   FormatEnergyUnit.format(:kwh, year_kwh, :html, false, false, :no_decimals),
-        formatted_£:   FormatEnergyUnit.format(:£, year_£, :html, false, false, :no_decimals),
+        formatted_£:     FormatEnergyUnit.format(:£,   year_£,   :html, false, false, :no_decimals),
       }
     end
 
@@ -613,7 +618,8 @@ class DashboardEnergyAdvice
     end
 
     private def total_standing_charges
-      meters.map { |meter| annual_standing_charge_for_meter_£(meter) }.sum
+      standing_charges = meters.map { |meter| annual_standing_charge_for_meter_£(meter) }.sum
+      standing_charges.nil? ? 0.0 : standing_charges # TODO(PH, 13Jan2020) - Low Carbon Hub schools have no real meters so produce nil
     end
 
     def generate_valid_advice
@@ -621,13 +627,12 @@ class DashboardEnergyAdvice
       # SeriesNames [HOLIDAY.freeze, WEEKEND.freeze, SCHOOLDAYOPEN.freeze, SCHOOLDAYCLOSED.freeze].freeze
       total_cost_£ = ScalarkWhCO2CostValues.new(@school).aggregate_value(timescale, fuel_type, :accounting_cost)
       day_type_percent = ScalarkWhCO2CostValues.new(@school).day_type_breakdown(timescale, fuel_type, :kwh, false, true)
-
       out_of_hours_percent = 1.0 - day_type_percent[SeriesNames::SCHOOLDAYOPEN]
       formatted_out_of_hours_percent = FormatEnergyUnit.format(:percent, out_of_hours_percent, :html)
-
       variable_costs_£ = total_cost_£ - total_standing_charges
       saving_to_exemplar_percent = out_of_hours_percent - exemplar_out_of_hours_percent
       saving_£ = variable_costs_£ * saving_to_exemplar_percent
+
       formatted_saving_£ = FormatEnergyUnit.format(:£, saving_£.magnitude, :html)
       formatted_exemplar_out_of_hours_percent = FormatEnergyUnit.format(:percent, exemplar_out_of_hours_percent.magnitude, :html)
       formatted_average_out_of_hours_percent = FormatEnergyUnit.format(:percent, average_out_of_hours_percent.magnitude, :html)

@@ -3,8 +3,8 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 
 class RunBenchmarks
-  FRONTEND_CSS = '<link rel="stylesheet" media="screen" href="https://fonts.googleapis.com/css?family=Open+Sans|Quicksand:300,500,700&amp;display=swap" />
-  <link rel="stylesheet" media="all" href="https://cdn.energysparks.uk/static-assets/application-f2535905cd7274d6e4ffd9b4614323b1e11bbe6445bca5828b642a18516b9160.css" />'
+  FRONTEND_CSS = '<link rel="stylesheet" media="all" href="C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\InputData\application-1.css" />
+  <link rel="stylesheet" media="screen" href="\Users\phili\OneDrive\ESDev\energy-sparks_analytics\InputData\application-2.css" />'
   attr_reader :control
   def initialize(control, schools)
     @control = control

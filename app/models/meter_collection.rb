@@ -23,6 +23,7 @@ class MeterCollection
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters,
+                :unaltered_aggregated_electricity_meters,
                 :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter,
                 :holidays,
                 :temperatures,
@@ -123,15 +124,16 @@ class MeterCollection
     nil
   end
 
-  def all_meters
+  def all_meters(ensure_unique = true)
     meter_groups = [
       @heat_meters,
       @electricity_meters,
       @solar_pv_meters,
       @storage_heater_meters,
       @aggregated_heat_meters,
-      @aggregated_electricity_meters
-    ]
+      @aggregated_electricity_meters,
+      @unaltered_aggregated_electricity_meters
+    ].compact
 
     meter_list = []
     meter_groups.each do |meter_group|
@@ -139,7 +141,8 @@ class MeterCollection
         meter_list += meter_group.is_a?(Dashboard::Meter) ? [meter_group] : meter_group
       end
     end
-    meter_list.uniq{ |meter| meter.mpan_mprn } # for single meter schools aggregate and meter can be one and the same
+    meter_list.uniq{ |meter| meter.mpan_mprn } if ensure_unique# for single meter schools aggregate and meter can be one and the same
+    meter_list
   end
 
   # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
@@ -228,6 +231,10 @@ class MeterCollection
     sheffield_simulated_solar_pv_panels? || low_carbon_solar_pv_panels?
   end
 
+  def solar_pv_and_or_storage_heaters?
+    storage_heaters? || solar_pv_panels?
+  end
+
   def fuel_types(exclude_storage_heaters = true)
     types = []
     types.push(:electricity)      if electricity?
@@ -278,6 +285,10 @@ class MeterCollection
 
   def pseudo_meter_attributes(type)
     @pseudo_meter_attributes.fetch(type){ {} }
+  end
+
+  def meter_attribute_types
+    @pseudo_meter_attributes.keys
   end
 
   # This is overridden in the energysparks code at the moment, to use the actual open/close times

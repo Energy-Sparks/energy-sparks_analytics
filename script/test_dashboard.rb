@@ -13,18 +13,18 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  schools:                  ['Penny.*'],
+  schools:                  ['.*'],
   source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                # :dashboard,
-                                adhoc_worksheet: { name: 'Test', charts: %i[
-                                  electricity_by_month_year_0_1_finance_advice
-                                  electricity_cost_comparison_last_2_years_accounting
-                                  electricity_cost_1_year_accounting_breakdown
-                                  accounting_cost_daytype_breakdown_electricity
+                                :dashboard,
+                                no_adhoc_worksheet: { name: 'Test', charts: %i[
+                                  acc1
+                                  acc2
+                                  acc3
+                                  acc4
                                   ]},
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }

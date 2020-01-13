@@ -74,22 +74,24 @@ class CompareContentResults
   def compare_content(comparison_content, new_content)
     if comparison_content.length == new_content.length
       comparison_content.each_with_index do |comparison_component, index|
-        compare_content_component(comparison_component, new_content[index])
+        compare_content_component(comparison_component, new_content[index], index)
       end
     else
       puts "Number of content components differ: #{comparison_content.length} versus #{new_content.length}"
     end
   end
 
-  def compare_content_component(comparison_component_orig, new_component_orig)
+  def compare_content_component(comparison_component_orig, new_component_orig, index)
     comparison_component = strip_content_of_volatile_data(comparison_component_orig)
     new_component        = strip_content_of_volatile_data(new_component_orig)
     if comparison_component != new_component
-      puts 'Differs:'
-      h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
-      puts h_diff
-      puts 'Versus:'
-      puts new_component
+      puts "Differs: #{index}"
+      if @control .include?(:report_differences)
+        h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
+        puts h_diff
+        puts 'Versus:'
+        puts new_component
+      end
     end
   end
 

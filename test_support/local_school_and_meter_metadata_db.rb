@@ -71,7 +71,7 @@ class AnalysticsSchoolAndMeterMetaData
   end
 
   def yaml_meter_attributes_database
-    puts "Loading meter attibutes from #{meter_attributes_filename}"
+    puts "Loading meter attibutes from #{meter_attributes_filename}" if @meter_attributes.nil?
     @meter_attributes ||= YAML::load_file(meter_attributes_filename)
   end
 

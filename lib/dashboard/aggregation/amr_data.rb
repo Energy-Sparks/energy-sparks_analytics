@@ -8,6 +8,14 @@ class AMRData < HalfHourlyData
     super(type)
   end
 
+  def self.copy_amr_data(original_amr_data)
+    new_amr_data = AMRData.new(original_amr_data.type)
+    (original_amr_data.start_date..original_amr_data.end_date).each do |date|
+      new_amr_data.add(date, original_amr_data.clone_one_days_data(date))
+    end
+    new_amr_data
+  end
+
   def set_post_aggregation_state
     @carbon_emissions.post_aggregation_state = true if @carbon_emissions.is_a?(CarbonEmissionsParameterised)
     @economic_tariff.post_aggregation_state = true if @economic_tariff.is_a?(EconomicCostsParameterised)

@@ -33,6 +33,7 @@ class AggregateDataService
     bm = Benchmark.realtime {
       set_long_gap_boundary_on_all_meters
       aggregate_heat_meters
+      create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
       create_solar_pv_sub_meters if @meter_collection.sheffield_simulated_solar_pv_panels?
       aggregate_electricity_meters
       disaggregate_storage_heaters if @meter_collection.storage_heaters?
@@ -259,13 +260,6 @@ class AggregateDataService
 
       # replace the AMR data of the top level meter with the
       # combined original mains consumption data plus the solar pv data
-=begin
-      # deprecated 15Aug2019
-      electric_plus_pv_amr_data = aggregate_amr_data(
-        [electricity_meter, solar_pv_meter],
-        :electricity
-        )
-=end
       # currently the updated meter inherits the carbon emissions and costs of the original
       # which implies the solar pv is zero carbon and zero cost
       # a full accounting treatment will need to deal with FITs and exports..... TODO(PH, 7Apr2019)
@@ -324,9 +318,10 @@ class AggregateDataService
       :electricity,
       mains_meter.id,
       SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-      :solar_pv_original_sub_meter
+      :solar_pv_original_sub_meter,
     )
     mains_meter.sub_meters.push(original_electric_meter)
+    assign_unaltered_low_carbon_hub_mains_consumption_meter(original_electric_meter)
     logger.info "Making original mains consumption meter a submeter from #{mains_meter.amr_data.start_date} to #{mains_meter.amr_data.end_date} #{mains_meter.amr_data.total.round(0)}kWh"
 
     # calculated onsite consumed electricity = solar pv production - export
@@ -358,6 +353,12 @@ class AggregateDataService
     calculate_meter_carbon_emissions_and_costs(mains_meter, :electricity)
 
     puts "Totals: pv #{solar_meter.amr_data.total} exp #{export_meter.amr_data.total} mains #{mains_meter.amr_data.total} pvons #{solar_pv_consumed_onsite_meter.amr_data.total}"
+  end
+
+  def assign_unaltered_low_carbon_hub_mains_consumption_meter(meter)
+    calculate_meter_carbon_emissions_and_costs(meter, :electricity)
+    meter.amr_data.set_post_aggregation_state
+    assign_unaltered_electricity_meter(meter)
   end
 
   # defensive programming to ensure correct data arrives from front end, and analytics
@@ -409,6 +410,23 @@ class AggregateDataService
   def aggregate_electricity_meters
     calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
+    assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)
+  end
+
+  # pv and storage heater meters alter the meter data, but for
+  # P&L purposes we need an unaltered copy of the original meter
+  def create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
+    if @meter_collection.sheffield_simulated_solar_pv_panels? ||
+       @meter_collection.storage_heaters?
+       # but not low carbon hub meters, as split already taken place
+      calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
+      unaltered_aggregate_meter = aggregate_main_meters(nil, @electricity_meters, :electricity, true)
+      assign_unaltered_electricity_meter(unaltered_aggregate_meter)
+    end
+  end
+
+  def assign_unaltered_electricity_meter(meter)
+    @meter_collection.unaltered_aggregated_electricity_meters ||= meter
   end
 
   private def aggregate_amr_data(meters, type)
@@ -455,9 +473,9 @@ class AggregateDataService
     [name, id, floor_area, pupils]
   end
 
-  def aggregate_main_meters(combined_meter, list_of_meters, type)
+  def aggregate_main_meters(combined_meter, list_of_meters, type, copy_amr_data = false)
     logger.info "Aggregating #{list_of_meters.length} meters"
-    combined_meter = aggregate_meters(combined_meter, list_of_meters, type)
+    combined_meter = aggregate_meters(combined_meter, list_of_meters, type, copy_amr_data)
     # combine_sub_meters_deprecated(combined_meter, list_of_meters) # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
     combined_meter
   end
@@ -511,10 +529,35 @@ class AggregateDataService
     end
   end
 
-  private def aggregate_meters(combined_meter, list_of_meters, fuel_type)
+  # copy meter and amr data - for pv, storage heater meters about to be disaggregated
+  private def copy_meter_and_amr_data(meter)
+    logger.info "Creating cloned copy of meter #{meter.mpan_mprn}"
+    new_meter = nil
+    bm = Benchmark.realtime {
+      new_meter = Dashboard::Meter.new(
+        meter_collection: @meter_collection,
+        amr_data:         AMRData.copy_amr_data(meter.amr_data),
+        type:             meter.fuel_type,
+        identifier:       meter.mpan_mprn,
+        name:             meter.name,
+        floor_area:       meter.floor_area,
+        number_of_pupils: meter.number_of_pupils,
+        meter_attributes: meter.meter_attributes
+      )
+      calculate_meter_carbon_emissions_and_costs(new_meter, :electricity)
+      new_meter.amr_data.set_post_aggregation_state
+    }
+    calc_text = "Copied meter and amr data in #{bm.round(3)} seconds"
+    logger.info calc_text
+    puts calc_text
+    new_meter
+  end
+
+  private def aggregate_meters(combined_meter, list_of_meters, fuel_type, copy_amr_data = false)
     return nil if list_of_meters.nil? || list_of_meters.empty?
     if list_of_meters.length == 1
       meter = list_of_meters.first
+      meter = copy_meter_and_amr_data(meter) if copy_amr_data
       logger.info "Single meter of type #{fuel_type} - using as combined meter from #{meter.amr_data.start_date} to #{meter.amr_data.end_date} rather than creating new one"
       return meter
     end

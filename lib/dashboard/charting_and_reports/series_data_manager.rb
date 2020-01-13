@@ -936,6 +936,8 @@ private
       when :allelectricity
         # aggregate all electricity meters
         @meters = [@meter_collection.aggregated_electricity_meters, nil]
+      when :allelectricity_unmodified
+        @meters = [@meter_collection.unaltered_aggregated_electricity_meters, nil]
       when :electricity_simulator
         @meters = [@meter_collection.electricity_simulation_meter, nil]
       when :storage_heater_meter

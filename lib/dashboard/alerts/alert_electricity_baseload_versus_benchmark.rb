@@ -202,7 +202,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
 
   def summary_text
     if @one_year_saving_versus_exemplar_£ > 0
-      'Reducing your baseload is high, reducing it could save ' +
+      'Your baseload is high, reducing it could save ' +
       FormatEnergyUnit.format(:£, @one_year_saving_versus_exemplar_£, :text) + 'pa'
     else
       'You are doing well - you are an examplar school'
