@@ -48,6 +48,10 @@ class ContentBase
     false
   end
 
+  def self.public_user_type?(user_type)
+    user_type.nil? || (user_type.key?(:user_role) && user_type[:user_role] == :guest)
+  end
+
   def self.priority_template_variables
     flatten_front_end_template_variables.select { |_name_sym, data| data.key?(:priority_code) }
   end

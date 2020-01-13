@@ -2,8 +2,8 @@ class AdviceRecentChangeBase < AdviceElectricityBase
   attr_reader :rating, :percentage_change, :difference_per_week_£
   attr_reader :prefix_1, :prefix_2, :summary
 
-  def initialize(school, fuel_type)
-    super(school)
+  def initialize(school, fuel_type, user = nil)
+    super(school, user)
     @fuel_type = fuel_type
   end
 
@@ -63,13 +63,13 @@ class AdviceRecentChangeBase < AdviceElectricityBase
 end
 
 class AdviceElectricityRecent < AdviceRecentChangeBase
-  def initialize(school)
-    super(school, :electricity)
+  def initialize(school, user = nil)
+    super(school, :electricity, user)
   end
 end
 
 class AdviceGasRecent < AdviceRecentChangeBase
-  def initialize(school)
-    super(school, :gas)
+  def initialize(school, user = nil)
+    super(school, :gas, user)
   end
 end

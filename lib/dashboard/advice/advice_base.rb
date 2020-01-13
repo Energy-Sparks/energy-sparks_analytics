@@ -1,8 +1,9 @@
 require_rel '../charting_and_reports/content_base.rb'
 class AdviceBase < ContentBase
   include Logging
-  def initialize(school)
+  def initialize(school, user_type = nil)
     super(school)
+    @user_type = user_type
   end
 
   def enough_data
