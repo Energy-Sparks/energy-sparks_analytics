@@ -72,6 +72,10 @@ class AdviceBase < ContentBase
 
     charts_and_html.push( { type: :analytics_html, content: '<hr>' } )
     charts_and_html.push( { type: :title, content: self.class.config[:name] } )
+    enhanced_title = enhanced_title(self.class.config[:name])
+    charts_and_html.push( { type: :enhanced_title, content: enhanced_title})
+    charts_and_html.push( { type: :analytics_html, content: format_enhanced_title_for_analytics(enhanced_title)})
+    
     charts_and_html += debug_content
 
     charts.each do |chart|
@@ -87,6 +91,7 @@ class AdviceBase < ContentBase
         logger.info e.backtrace
       end
     end
+    charts_and_html = promote_analytics_html_to_frontend(charts_and_html) if ContentBase.system_admin_type?(@user_type)
     charts_and_html
   end
 
@@ -131,6 +136,24 @@ class AdviceBase < ContentBase
   end
 
   private
+
+  private def enhanced_title(title)
+    {
+      title:    title,
+      rating:   @rating,
+      summary:  @summary
+    }
+  end
+
+  private def format_enhanced_title_for_analytics(enhanced_title)
+    text = %(
+      <p>
+        <h3>Summary rating information (provided by analytics)</h3>
+        <%= HtmlTableFormatting.new(['Variable', 'Value'], enhanced_title.to_a).html.gsub('£', '&pound;') %>
+      <p>
+    )
+    ERB.new(text).result(binding)
+  end
   
   def clean_html(html)
     html.gsub(/[ \t\f\v]{2,}/, ' ').gsub(/^ $/, '').gsub(/\n+|\r+/, "\n").squeeze("\n").strip
@@ -156,6 +179,13 @@ class AdviceBase < ContentBase
       end_date:               chart_results[:x_axis].last
     }
   end
+
+  def promote_analytics_html_to_frontend(charts_and_html)
+    charts_and_html.map do |sub_content|
+      sub_content[:type] = :html if sub_content[:type] == :analytics_html
+      sub_content
+    end
+   end
 
   def format_£(value)
     FormatEnergyUnit.format(:£, value, :html)
