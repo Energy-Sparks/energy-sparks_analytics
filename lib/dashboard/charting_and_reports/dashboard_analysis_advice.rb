@@ -80,9 +80,9 @@ class DashboardChartAdviceBase
       WeeklyLongTermAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :group_by_week_gas
       GasWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :electricity_by_day_of_week
+    when :electricity_by_day_of_week, :electricity_by_day_of_week_tolerant
       ElectricityDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :gas_by_day_of_week
+    when :gas_by_day_of_week, :gas_by_day_of_week_tolerant
       GasDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :baseload, :baseload_lastyear
       ElectricityBaseloadAdvice.new(school, chart_definition, chart_data, chart_symbol)
@@ -1260,6 +1260,11 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
     @fuel_type_str = @fuel_type.to_s
   end
 
+  def chart_period
+    chart_interpretation = ChartInterpretation.new(@chart_data)
+    FormatEnergyUnit.format(:years, chart_interpretation.days / 365.0, :html)
+  end
+
   def generate_advice
     header_template = %{
       <%= @body_start %>
@@ -1269,7 +1274,7 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
         <h2> Your <%= @fuel_type_str %> usage by day of the week </h2>
         <p>
           The graph below shows your <%= @fuel_type_str %> use broken down by
-          day of the week over the last year:
+          day of the week over the last <%= chart_period %>:
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')

@@ -211,6 +211,10 @@ class ChartManager
       replace_series_label: [['School Day Closed', 'Storage heater charge (school day)']],
       meter_definition:   :storage_heater_meter
     },
+    storage_heater_by_day_of_week_tolerant:  {
+      inherits_from:    :storage_heater_by_day_of_week,
+      timescale:        :up_to_a_year,
+    },
     storage_heater_group_by_week_long_term: {
       name:               'Storage heater electricity consumption over a longer time period',
       inherits_from:      :storage_heater_group_by_week,
@@ -628,7 +632,7 @@ class ChartManager
       yaxis_scaling:    :none
     },
     gas_by_day_of_week:  {
-      name:             'Gas Use By Day of the Week (this year)',
+      name:             'Gas Use By Day of the Week',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       series_breakdown: :daytype,
@@ -639,8 +643,12 @@ class ChartManager
       yaxis_scaling:    :none,
       subtitle:         :daterange
     },
+    gas_by_day_of_week_tolerant:  {
+      inherits_from:    :gas_by_day_of_week,
+      timescale:        :up_to_a_year,
+    },
     electricity_by_day_of_week:  {
-      name:             'Electricity Use By Day of the Week (this year)',
+      name:             'Electricity Use By Day of the Week',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       series_breakdown: :daytype,
@@ -650,6 +658,10 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
       subtitle:         :daterange
+    },
+    electricity_by_day_of_week_tolerant:  {
+      inherits_from:    :electricity_by_day_of_week,
+      timescale:        :up_to_a_year,
     },
     electricity_by_month_acyear_0_1:  {
       name:             'Electricity Use By Month (previous 2 academic years)',

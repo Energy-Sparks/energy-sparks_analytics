@@ -92,7 +92,7 @@ class DashboardConfiguration
       excel_worksheet_name:   'ElectricOutOfHours',
       charts: %i[
         daytype_breakdown_electricity
-        electricity_by_day_of_week
+        electricity_by_day_of_week_tolerant
       ],
       promoted_variables: {
         AlertOutOfHoursElectricityUsage => {
@@ -230,7 +230,7 @@ class DashboardConfiguration
       excel_worksheet_name:   'GasOutOfHours',
       charts: %i[
         daytype_breakdown_gas
-        gas_by_day_of_week
+        gas_by_day_of_week_tolerant
       ],
       promoted_variables: {
         AlertOutOfHoursGasUsage => {
@@ -388,7 +388,7 @@ class DashboardConfiguration
         benchmark_storage_heater_only_£
         storage_heater_group_by_week
         storage_heater_group_by_week_long_term
-        storage_heater_by_day_of_week
+        storage_heater_by_day_of_week_tolerant
         storage_heater_intraday_current_year
         storage_heater_intraday_current_year_kw
         intraday_line_school_last7days_storage_heaters

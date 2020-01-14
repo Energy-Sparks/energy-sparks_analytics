@@ -10,7 +10,7 @@ class DashboardEnergyAdvice
       StorageHeaterGroupByWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :storage_heater_group_by_week_long_term
       StorageHeaterWeeklyLongTermAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :storage_heater_by_day_of_week
+    when :storage_heater_by_day_of_week, :storage_heater_by_day_of_week_tolerant
       StorageHeaterDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :storage_heater_intraday_current_year
       StorageHeaterHeatingIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol)

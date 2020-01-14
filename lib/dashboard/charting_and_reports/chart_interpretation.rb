@@ -16,7 +16,7 @@ class ChartInterpretation
   end
 
   def end_date
-    charts_completed == 1 ? @chart_data[:x_axis_ranges].first[1] : date_ranges_from_series_names.last[1]
+    charts_completed == 1 ? @chart_data[:x_axis_ranges].last[1] : date_ranges_from_series_names.last[1]
   end
 
   def days
