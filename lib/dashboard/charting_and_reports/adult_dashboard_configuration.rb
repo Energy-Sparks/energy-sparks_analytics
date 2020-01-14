@@ -170,7 +170,7 @@ class DashboardConfiguration
       content_class:           AdviceElectricityIntraday,
       excel_worksheet_name:   'ElectricIntraday',
       charts: %i[
-        intraday_line_school_days
+        intraday_line_school_days_reduced_data
         intraday_line_holidays
         intraday_line_weekends
         intraday_line_school_days_last5weeks
@@ -178,6 +178,7 @@ class DashboardConfiguration
         intraday_line_school_last7days
         baseload_lastyear
       ],
+      skip_chart_and_advice_if_fails: %i[intraday_line_school_days_6months],
       promoted_variables: {
         AlertElectricityPeakKWVersusBenchmark => {
           rating:         :rating,

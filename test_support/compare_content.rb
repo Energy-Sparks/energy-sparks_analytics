@@ -9,9 +9,9 @@ class CompareContentResults
   end
 
   def save_and_compare_content(page, content)
-    save_new_content(page, content)
     comparison_content = load_comparison_content(page)
-    compare_content(comparison_content, content)
+    differences = compare_content(comparison_content, content)
+    save_new_content(page, differences)
   end
 
   def compare_chart_list(chart_list)
@@ -72,13 +72,16 @@ class CompareContentResults
   end
 
   def compare_content(comparison_content, new_content)
+    differences = []
     if comparison_content.length == new_content.length
       comparison_content.each_with_index do |comparison_component, index|
-        compare_content_component(comparison_component, new_content[index], index)
+        differences.push(compare_content_component(comparison_component, new_content[index], index))
       end
     else
+      differences = new_content
       puts "Number of content components differ: #{comparison_content.length} versus #{new_content.length}"
     end
+    differences.compact
   end
 
   def compare_content_component(comparison_component_orig, new_component_orig, index)
@@ -92,7 +95,9 @@ class CompareContentResults
         puts 'Versus:'
         puts new_component
       end
+      return new_component_orig
     end
+    nil
   end
 
   def save_and_compare_chart_data(chart_name, charts)

@@ -88,7 +88,7 @@ class DashboardChartAdviceBase
       ElectricityBaseloadAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :electricity_by_month_year_0_1
       ElectricityMonthOnMonth2yearAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :intraday_line_school_days
+    when :intraday_line_school_days, :intraday_line_school_days_reduced_data
       ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :school_days)
     when :intraday_line_holidays
       ElectricityLongTermIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol, :holidays)
@@ -1426,16 +1426,38 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
     end
   end
 
+  def chart_interpretation
+    @chart_interpretation ||= ChartInterpretation.new(@chart_data)
+  end
+
+  def two_full_years_of_data?
+    chart_interpretation.days >= 364 * 2
+  end
+
+  def text_for_period_of_data
+    days = chart_interpretation.days
+    text = if days >= 364 * 2
+      %( This graph compares the average electricity consumption
+      at the school during the last 2 years <%= @period %>. )
+    elsif days.between?(364 + 1, 364 * 2) && chart_interpretation.charts_completed >= 2
+      %( This graph compares the average electricity consumption
+      at the school during the last <%= FormatEnergyUnit.format(:years, days / 365, :html) %>  <%= @period %>. )
+    else
+      %( This graph shows the average electricity consumption
+      at the school over the last <%= FormatEnergyUnit.format(:years, days / 365, :html) %>  <%= @period %>. )
+    end
+    ERB.new(text).result(binding)
+  end
+
   def generate_advice
     header_template = %{
       <%= @body_start %>
       <p>
-      This graph compares the average electricity consumption
-      at the school during the last 2 years <%= @period %>.
-      <% if type == :school_days %>
-      It shows the peak electricity usage at the school (normally during
-        the middle of the day) and the overnight electricity consumption.
-      <% end %>
+        <%= text_for_period_of_data %>
+        <% if type == :school_days %>
+        It shows the peak electricity usage at the school (normally during
+          the middle of the day) and the overnight electricity consumption.
+        <% end %>
       </p>
       <%= @body_end %>
     }.gsub(/^  /, '')

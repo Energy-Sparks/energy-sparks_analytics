@@ -4,6 +4,7 @@ class AdviceBase < ContentBase
   def initialize(school, user_type = nil)
     super(school)
     @user_type = user_type
+    @failed_charts = []
   end
 
   def enough_data
@@ -19,6 +20,10 @@ class AdviceBase < ContentBase
     calculate
   end
 
+  def failed_charts
+    @failed_charts
+  end
+
   def calculate
     @rating = nil
     promote_data if self.class.config.key?(:promoted_variables)
@@ -26,9 +31,20 @@ class AdviceBase < ContentBase
 
   # override alerts base class, ignore calculation_worked
   def make_available_to_users?
-    result = relevance == :relevant && enough_data == :enough
-    logger.info "Alert #{self.class.name} not being made available to users: reason: #{relevance} #{enough_data}" if !result
-    result
+    make_available = relevance == :relevant && enough_data == :enough && failed_charts_required.empty?
+    unless make_available
+      message = "Alert #{self.class.name} not being made available to users: reason: #{relevance} #{enough_data} failed charts #{@failed_charts.length}"
+      logger.info message
+    end
+    make_available
+  end
+
+  def failed_charts_required
+    @failed_charts.select{ |failed_chart| !charts_that_are_allowed_to_fail.include?(failed_chart[:chart_name])}
+  end
+
+  def charts_that_are_allowed_to_fail
+    self.class.config.fetch(:skip_chart_and_advice_if_fails, [])
   end
 
   def rating
@@ -40,15 +56,14 @@ class AdviceBase < ContentBase
   end
 
   def chart_names
-    # config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:adult_analysis_page][:sub_pages][2][:sub_pages][0]
     self.class.config[:charts]
   end
 
   def charts
     chart_results = []
-    chart_manager = ChartManager.new(@school)
+
     chart_names.each do |chart_name|
-      chart_results.push(chart_manager.run_standard_chart(chart_name))
+      chart_results.push(run_chart(chart_name))
     end
     chart_results
   end
@@ -137,7 +152,7 @@ class AdviceBase < ContentBase
 
   private
 
-  private def enhanced_title(title)
+  def enhanced_title(title)
     {
       title:    title,
       rating:   @rating,
@@ -145,7 +160,7 @@ class AdviceBase < ContentBase
     }
   end
 
-  private def format_enhanced_title_for_analytics(enhanced_title)
+  def format_enhanced_title_for_analytics(enhanced_title)
     text = %(
       <p>
         <h3>Summary rating information (provided by analytics)</h3>
@@ -178,6 +193,21 @@ class AdviceBase < ContentBase
       start_date:             chart_results[:x_axis].first,
       end_date:               chart_results[:x_axis].last
     }
+  end
+
+  def run_chart(chart_name)
+    begin
+      chart_manager = ChartManager.new(@school)
+      chart = chart_manager.run_standard_chart(chart_name, nil, true)
+      @failed_charts.push( { school_name: @school.name, chart_name: chart_name, message: 'Unknown', backtrace: nil } ) if chart.nil?
+      chart
+    rescue EnergySparksNotEnoughDataException => e
+      @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
+      nil
+    rescue => e
+      @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
+      nil
+    end
   end
 
   def promote_analytics_html_to_frontend(charts_and_html)

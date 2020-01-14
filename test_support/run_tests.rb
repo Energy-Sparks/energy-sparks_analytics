@@ -203,13 +203,16 @@ class RunTests
   end
 
   def run_adult_dashboard(control)
+    failed_charts = []
     @school_list.sort.each do |school_name|
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
       test = RunAdultDashboard.new(school)
       test.run_flat_dashboard(control)
+      failed_charts += test.failed_charts
     end
+    RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 
   def run_equivalences(control)

@@ -1169,27 +1169,20 @@ class ChartManager
       yaxis_units:      :co2,
       y2_axis:          :gridcarbon
     },
+    intraday_line_school_days_reduced_data: {
+      inherits_from:    :intraday_line_school_days,
+      timescale:        [{ up_to_a_year: 0 }, { up_to_a_year: -1 }],
+      ignore_single_series_failure: true
+    },
     intraday_line_holidays:  {
+      inherits_from:    :intraday_line_school_days_reduced_data,
       name:             'Intraday (holidays)',
-      chart1_type:      :line,
-      series_breakdown: :none,
-      timescale:        [{ year: 0 }, { year: -1 }],
-      x_axis:           :intraday,
-      meter_definition: :allelectricity,
-      filter:           { daytype: [ SeriesNames::HOLIDAY] },
-      yaxis_units:      :kw,
-      yaxis_scaling:    :none
+      filter:           { daytype: [ SeriesNames::HOLIDAY] }
     },
     intraday_line_weekends:  {
+      inherits_from:    :intraday_line_school_days_reduced_data,
       name:             'Intraday (weekends)',
-      chart1_type:      :line,
-      series_breakdown: :none,
-      timescale:        [{ year: 0 }, { year: -1 }],
-      x_axis:           :intraday,
-      meter_definition: :allelectricity,
       filter:           { daytype: [ SeriesNames::WEEKEND] },
-      yaxis_units:      :kw,
-      yaxis_scaling:    :none
     },
     group_by_week_electricity_dd: {
       name:             'By Week: Electricity',
