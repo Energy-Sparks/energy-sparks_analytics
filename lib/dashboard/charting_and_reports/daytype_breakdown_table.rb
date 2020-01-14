@@ -22,7 +22,11 @@ class DayTypeBreakDownTable
   def daytype_breakdown_table
     hash_table = raw_daytype_breakdown_table_hash
     raw_table = transform_hash_to_table(hash_table)
-    header = ['Time Of Day', 'kWh / year', '&pound; /year',  'CO2 kg /year', 'Percent']
+    header = if @time_period == :up_to_a_year
+      ['Time Of Day', 'kWh / year', '&pound; /year',  'CO2 kg /year', 'Percent']
+    else
+      ['Time Of Day', 'kWh', '&pound;',  'CO2 kg', 'Percent']
+    end
     units = [String, :kwh, :£, :co2, :percent]
     use_table_formats = [true, true, true, true, false]
     html_tbl = HtmlTableFormatting.new(header, raw_table[0..3], raw_table[4], units, use_table_formats)
@@ -33,7 +37,7 @@ class DayTypeBreakDownTable
     scalar_values = ScalarkWhCO2CostValues.new(@school)
     raw_table = {}
     [[:kwh, false, :kwh], [:£, false, :£], [:co2, false, :co2], [:kwh, true, :percent]].each do |unit, percent, output_unit|
-      raw_table[output_unit] =  scalar_values.day_type_breakdown({year: 0}, @fuel_type, unit, false, percent)
+      raw_table[output_unit] =  scalar_values.day_type_breakdown(@time_period, @fuel_type, unit, false, percent)
       raw_table[output_unit]['Total'] =  raw_table[output_unit].values.sum
     end
     raw_table

@@ -139,6 +139,10 @@ class ChartManager
       timescale:        :year,
       subtitle:         :daterange
     },
+    daytype_breakdown_gas_tolerant: {
+      inherits_from:    :daytype_breakdown_gas,
+      timescale:        :up_to_a_year
+    },
     daytype_breakdown_combined_fuels: { # double breakdown doesn't work TODO(PH, 29Apr2019)
       inherits_from:    :daytype_breakdown_gas,
       meter_definition: :all,
@@ -162,6 +166,10 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year,
       subtitle:         :daterange
+    },
+    daytype_breakdown_electricity_tolerant: {
+      inherits_from:    :daytype_breakdown_electricity,
+      timescale:        :up_to_a_year
     },
     alert_daytype_breakdown_electricity: {
       inherits_from: :daytype_breakdown_electricity
@@ -213,7 +221,7 @@ class ChartManager
     },
     storage_heater_by_day_of_week_tolerant:  {
       inherits_from:    :storage_heater_by_day_of_week,
-      timescale:        :up_to_a_year,
+      timescale:        :up_to_a_year
     },
     storage_heater_group_by_week_long_term: {
       name:               'Storage heater electricity consumption over a longer time period',

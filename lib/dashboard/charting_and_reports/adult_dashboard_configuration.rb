@@ -91,7 +91,7 @@ class DashboardConfiguration
       content_class:           AdviceElectricityOutHours,
       excel_worksheet_name:   'ElectricOutOfHours',
       charts: %i[
-        daytype_breakdown_electricity
+        daytype_breakdown_electricity_tolerant
         electricity_by_day_of_week_tolerant
       ],
       promoted_variables: {
@@ -229,7 +229,7 @@ class DashboardConfiguration
       content_class:           AdviceGasOutHours,
       excel_worksheet_name:   'GasOutOfHours',
       charts: %i[
-        daytype_breakdown_gas
+        daytype_breakdown_gas_tolerant
         gas_by_day_of_week_tolerant
       ],
       promoted_variables: {

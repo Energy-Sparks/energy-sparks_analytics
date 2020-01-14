@@ -68,9 +68,9 @@ class DashboardChartAdviceBase
       GasLongTermTrend.new(school, chart_definition, chart_data, chart_symbol)
     when :adult_dashboard_drilldown_last_2_weeks_electricity_comparison
       ElectricityShortTermTrend.new(school, chart_definition, chart_data, chart_symbol)
-    when :daytype_breakdown_electricity
+    when :daytype_breakdown_electricity, :daytype_breakdown_electricity_tolerant
       ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :daytype_breakdown_gas
+    when :daytype_breakdown_gas, :daytype_breakdown_gas_tolerant
       GasDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :gas_heating_season_intraday
       GasHeatingIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol)
@@ -721,13 +721,22 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     ['This saving is equivalent to ' + equivalence[:adult_dashboard_wording], equivalence[:calculation_description ]]
   end
 
+  def chart_period
+    FormatEnergyUnit.format(:years, days  / 365.0, :html)
+  end
+
+  def days
+    chart_interpretation = ChartInterpretation.new(@chart_data)
+    chart_interpretation.days
+  end
+
   def generate_advice
-    equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence
+    equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence if days > 364
     in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
     percent_value = out_of_hours / (in_hours + out_of_hours)
     percent_str = percent(percent_value)
     saving_percent = percent_value - @exemplar_percentage
-    saving = (in_hours + out_of_hours) * saving_percent
+    saving = (in_hours + out_of_hours) * saving_percent * 365.0 / days
     saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
     saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
 
@@ -735,14 +744,14 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
 
     # table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
 
-    daytype_breakdown_table = DayTypeBreakDownTable.new(@school, @fuel_type)
+    daytype_breakdown_table = DayTypeBreakDownTable.new(@school, @fuel_type, :up_to_a_year)
     daytype_breakdown_table_html = daytype_breakdown_table.html
     grid_intensity = daytype_breakdown_table.uk_electricity_grid_carbon_intensity_kg_per_kwh
 
     header_template = %{
       <%= @body_start %>
         <p>
-          This chart shows when you have used <%= @fuel_type_str %> <%= excluding_storage_heaters %> over the past year.
+          This chart shows when you have used <%= @fuel_type_str %> <%= excluding_storage_heaters %> over the past <%= chart_period %>.
           <%= percent(percent_value) %> of your <%= @fuel_type_str %> usage is out of hours:
           which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
           of <%= percent(BENCHMARK_PERCENT) %>.
@@ -751,11 +760,16 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
             Reducing your school's out of hours usage to <%= percent(@exemplar_percentage) %>
             would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
             <%# increase loop size to test %>
-            <% 1.times do |_i| %>
+            <% if days > 364 %>
               <%= equivalence_tool_tip_html(equivalence_saving_description, equivalence_calculation_description) %>
             <% end %>
           <% else %>
             which is very good, and is one of the best schools.
+          <% end %>
+          <% if days < 360 %>
+            However, until we have a complete year&apos;s worth of data for you
+            this advice may not be accurate - as the analysis is scaled to a year
+            from the limited data available.
           <% end %>
         </p>
       <%= @body_end %>
@@ -766,7 +780,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
       <p>
-        This is the breakdown for the most recent year:
+        This is the breakdown for the most recent <%= chart_period %>:
       </p>
       <p>
         <%= daytype_breakdown_table_html %>
