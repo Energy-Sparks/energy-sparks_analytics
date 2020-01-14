@@ -47,6 +47,10 @@ class AdviceBase < ContentBase
     self.class.config.fetch(:skip_chart_and_advice_if_fails, [])
   end
 
+  def tolerate_chart_failure(chart_name)
+    charts_that_are_allowed_to_fail.include?(chart_name)
+  end
+
   def rating
     @rating
   end
@@ -202,7 +206,7 @@ class AdviceBase < ContentBase
       @failed_charts.push( { school_name: @school.name, chart_name: chart_name, message: 'Unknown', backtrace: nil } ) if chart.nil?
       chart
     rescue EnergySparksNotEnoughDataException => e
-      @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
+      @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name, tolerate_failure: tolerate_chart_failure(chart_name) } )
       nil
     rescue => e
       @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )

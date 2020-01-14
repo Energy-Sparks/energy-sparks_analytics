@@ -32,13 +32,19 @@ class RunCharts
   def self.report_failed_charts(failed_charts, detail)
     failed_charts.each do |failed_chart|
       short_backtrace = failed_chart.key?(:backtrace) && !failed_chart[:backtrace].nil? ? failed_chart[:backtrace][0].split('/').last : 'no backtrace'
-      puts sprintf('%-15.15s %-35.35s %-35.35s %-80.80s %-20.20s', 
-        failed_chart[:school_name], failed_chart[:chart_name], failed_chart[:message], short_backtrace, failed_chart[:type])
+      tolerate_failure = failed_chart.fetch(:tolerate_failure, false) ? 'ok   ' : 'notok'
+      puts sprintf('%-15.15s %s %-35.35s %-35.35s %-80.80s %-20.20s', 
+        failed_chart[:school_name], tolerate_failure, failed_chart[:chart_name], failed_chart[:message], short_backtrace,
+        shorten_type(failed_chart[:type]))
       puts failed_chart[:backtrace] if detail == :detailed
     end
   end
 
   private
+
+  private_class_method def self.shorten_type(type)
+    type.gsub('EnergySparks', 'ES').gsub('Exception', 'EX')
+  end
 
   def report_calculation_time(control)
     puts "Average calculation rate #{average_calculation_rate.round(1)} charts per second" if control.key?(:display_average_calculation_rate)

@@ -39,7 +39,7 @@ class RunAdultDashboard < RunCharts
 
     content = advice.content
         
-    @failed_charts.concat(advice.failed_charts_required) unless advice.failed_charts_required.empty?
+    @failed_charts.concat(advice.failed_charts) unless advice.failed_charts.empty?
 
     puts "Page failed 2, as advice not available to users #{page}" unless advice.make_available_to_users?
 

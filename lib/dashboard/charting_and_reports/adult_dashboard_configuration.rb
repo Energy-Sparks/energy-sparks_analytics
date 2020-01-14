@@ -74,6 +74,7 @@ class DashboardConfiguration
         group_by_week_electricity_unlimited
         electricity_by_month_year_0_1
       ],
+      skip_chart_and_advice_if_fails: %i[electricity_by_month_year_0_1],
       promoted_variables: {
         AlertElectricityAnnualVersusBenchmark => { # need new electricity trend alert!
           rating:                               :rating,
@@ -132,6 +133,7 @@ class DashboardConfiguration
         group_by_week_electricity_unlimited
         electricity_by_month_year_0_1
       ],
+      skip_chart_and_advice_if_fails: %i[electricity_by_month_year_0_1],
       promoted_variables: {
         AlertElectricityLongTermTrend => {
           rating:           :rating,
@@ -210,6 +212,7 @@ class DashboardConfiguration
         group_by_week_gas_unlimited
         gas_by_month_year_0_1
       ],
+      skip_chart_and_advice_if_fails: %i[gas_by_month_year_0_1],
       promoted_variables: {
         AlertGasAnnualVersusBenchmark => { # need new gas trend alert!
           rating:                               :rating,
@@ -248,6 +251,7 @@ class DashboardConfiguration
         group_by_week_gas_unlimited
         gas_by_month_year_0_1
       ],
+      skip_chart_and_advice_if_fails: %i[gas_by_month_year_0_1],
       promoted_variables: {
         AlertGasLongTermTrend => {
           rating:           :rating,
