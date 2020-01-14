@@ -23,7 +23,6 @@ class DayTypeBreakDownTable
     hash_table = raw_daytype_breakdown_table_hash
     raw_table = transform_hash_to_table(hash_table)
     header = if @time_period == :up_to_a_year
-      puts 'Got here: short header'
       ['Time Of Day', 'kWh', '&pound;',  'CO2 kg', 'Percent']
     else
       ['Time Of Day', 'kWh / year', '&pound; /year',  'CO2 kg /year', 'Percent']
