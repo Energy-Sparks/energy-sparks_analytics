@@ -129,17 +129,21 @@ class AdviceCarbon < AdviceBase
         charts_and_html.push( { type: component[:type], content: component[:content] } )
       end
       @content_data.each do |content|
-        advice_class = content[:advice_class].new(@school, nil, nil, nil)
-        charts_and_html.push(
-          case content[:type]
-          when :text
-            { type: :html,  content: advice_class.erb_bind(content[:data]) }
-          when :function
-            { type: :html,  content: advice_class.send(content[:data]) }
-          when :chart
-            { type: :chart, content: run_chart(content[:data]) }
-          end
-        )
+        begin
+          advice_class = content[:advice_class].new(@school, nil, nil, nil)
+          charts_and_html.push(
+            case content[:type]
+            when :text
+              { type: :html,  content: advice_class.erb_bind(content[:data]) }
+            when :function
+              { type: :html,  content: advice_class.send(content[:data]) }
+            when :chart
+              { type: :chart, content: run_chart(content[:data]) }
+            end
+          )
+        rescue EnergySparksNotEnoughDataException => e
+          { type: :chart, html: 'Unfortunately we don\'t have enough meter data to provide this information.' }
+        end
       end
       charts_and_html
     end
