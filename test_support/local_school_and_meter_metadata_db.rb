@@ -161,13 +161,10 @@ class AnalysticsSchoolAndMeterMetaData
     meter_collection = MeterCollection.new(school,
       temperatures: ScheduleDataManager.temperatures(temperature_schedule_name),
       solar_pv: ScheduleDataManager.solar_pv(solar_pv_schedule_name),
-      # solar_irradiation: ScheduleDataManager.solar_irradiation(solar_irradiance_schedule_name),
       grid_carbon_intensity: ScheduleDataManager.uk_grid_carbon_intensity,
       holidays: ScheduleDataManager.holidays(holiday_schedule_name),
       pseudo_meter_attributes: meter_attributes[:pseudo_meter_attributes]
     )
-
-    puts "Got here: #{meter_collection.solar_irradiation.nil?} - need to set to nil for testing, forever"
 
     gas_meters = create_meters(meter_collection, school_metadata[:meters], :gas, meter_attributes[:meter_attributes])
     gas_meters.each do |gas_meter|

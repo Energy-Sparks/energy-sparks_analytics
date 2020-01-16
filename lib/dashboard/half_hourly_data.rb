@@ -14,7 +14,6 @@ class HalfHourlyData < Hash
     @validated = false
     @type = type
     @cache_days_totals = {} # speed optimisation cache[date] = total of 48x 1/2hour data
-    @cache_averages = {} # speed optimisation
   end
 
   def add(date, half_hourly_data_x48)
@@ -25,7 +24,6 @@ class HalfHourlyData < Hash
     data_count = validate_data(half_hourly_data_x48)
 
     @cache_days_totals.delete(date)
-    @cache_averages.delete(date)
 
     if data_count != 48
       logger.debug "Missing data: #{date}: only #{data_count} of 48"
@@ -39,10 +37,7 @@ class HalfHourlyData < Hash
   end
 
   def average(date)
-    return @cache_averages[date] if @cache_averages.key?(date)
-    avg = self[date].inject{ |sum, el| sum + el }.to_f / self[date].size
-    @cache_averages[date] = avg
-    avg
+    one_day_total(date) / 48.0
   end
 
   def days_valid_data

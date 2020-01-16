@@ -39,8 +39,6 @@ class MeterCollection
     @number_of_pupils = school.number_of_pupils
     @holidays = holidays
     @temperatures = temperatures
-    puts "Got here: setting #{solar_irradiation.nil?}"
-    solar_irradiation = nil
     @solar_pv = solar_pv
     @solar_irradiation = solar_irradiation.nil? ? SolarIrradianceFromPV.new('solar irradiance from pv', solar_pv_data: solar_pv) : solar_irradiation
     
