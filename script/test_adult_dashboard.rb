@@ -18,8 +18,8 @@ script = {
                                 user:          { user_role: :admin }, # guest
                                 no_pages: %i[carbon],
                                 compare_results: [
-                                  { comparison_directory: '../TestResults/AdultDashboard/Base' },
-                                  { output_directory:     '../TestResults/AdultDashboard/New' },
+                                  { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
+                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Test' },
                                   :summary, 
                                   # :report_differing_charts,
                                   # :report_differences 

@@ -32,6 +32,12 @@ class HalfHourlyData < Hash
     end
   end
 
+  def create_from_halfhourly_data(data)
+    data.each do |date, half_hourly_data_x48|
+      add(date, half_hourly_data_x48)
+    end
+  end
+
   def average(date)
     return @cache_averages[date] if @cache_averages.key?(date)
     avg = self[date].inject{ |sum, el| sum + el }.to_f / self[date].size

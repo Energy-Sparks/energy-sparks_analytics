@@ -1,7 +1,8 @@
 class SolarIrradiance < HalfHourlyData
-  def initialize(type)
+  def initialize(type, solar_pv_data: nil)
     super(type)
     @cache_daylight_irradiance = {}
+    create_from_halfhourly_data(solar_pv_data) unless solar_pv_data.nil?
   end
 
   def solar_irradiance(date, half_hour_index)

@@ -16,7 +16,11 @@ class SolarIrradianceFromPV < SolarIrradiance
      700,  # Nov
      585   # Dec
   ].freeze
- 
+
+  def initialize(type, solar_pv_data: nil)
+    super(type, solar_pv_data: solar_pv_data)
+  end
+
   protected def scaling_factor(date)
     scale_pv_to_irradiance_by_month(date)
   end

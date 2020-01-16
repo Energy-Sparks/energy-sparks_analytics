@@ -4,7 +4,7 @@ class MeterCollectionFactory
     new(**data[:schedule_data]).build(**data.slice(:school_data, :amr_data, :pseudo_meter_attributes))
   end
 
-  def initialize(temperatures:, solar_pv:, solar_irradiation:, grid_carbon_intensity:, holidays:)
+  def initialize(temperatures:, solar_pv:, solar_irradiation: nil, grid_carbon_intensity:, holidays:)
     @temperatures = temperatures
     @solar_pv = solar_pv
     @solar_irradiation = solar_irradiation

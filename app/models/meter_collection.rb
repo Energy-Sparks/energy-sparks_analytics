@@ -31,7 +31,7 @@ class MeterCollection
                 :solar_pv,
                 :grid_carbon_intensity
 
-  def initialize(school, holidays:, temperatures:, solar_irradiation:, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
+  def initialize(school, holidays:, temperatures:, solar_irradiation: nil, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
     @name = school.name
     @address = school.address
     @postcode = school.postcode
@@ -39,8 +39,11 @@ class MeterCollection
     @number_of_pupils = school.number_of_pupils
     @holidays = holidays
     @temperatures = temperatures
-    @solar_irradiation = solar_irradiation
+    puts "Got here: setting #{solar_irradiation.nil?}"
+    solar_irradiation = nil
     @solar_pv = solar_pv
+    @solar_irradiation = solar_irradiation.nil? ? SolarIrradianceFromPV.new('solar irradiance from pv', solar_pv_data: solar_pv) : solar_irradiation
+    
     @grid_carbon_intensity = grid_carbon_intensity
 
     @heat_meters = []
