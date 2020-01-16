@@ -59,7 +59,7 @@ class AdviceCarbon < AdviceBase
 
   def enough_data
     # TODO(PH, 16Jan2020) - temp comment out
-    max_period_days > 364 ? :enough :not_enough
+    max_period_days > 364 ? :enough : :not_enough
   end
 
   private
