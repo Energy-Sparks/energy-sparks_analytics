@@ -434,7 +434,10 @@ class DashboardConfiguration
         group_by_week_carbon
       ],
       promoted_variables: {
-      },
+        AlertEnergyAnnualVersusBenchmark => {
+          rating: :rating,
+        } 
+      }
     },
     energy_tariffs: {
       name:                   'Energy Tariffs',
@@ -448,7 +451,7 @@ class DashboardConfiguration
           rating:         :rating,
           total_potential_savings_£: :total_potential_savings_£
         }
-      },
+      }
     },
   }.freeze
 end

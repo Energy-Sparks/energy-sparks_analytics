@@ -900,11 +900,11 @@ class DashboardEnergyAdvice
       )
 
     private def annual_electricity_co2
-      @annual_electricity_co2 ||= ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, :electricity, :co2)
+      @annual_electricity_co2 ||= ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, :allelectricity_unmodified, :co2)
     end
 
     private def annual_electricity_kwh
-      @annual_electricity_kwh ||= ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, :electricity, :kwh)
+      @annual_electricity_kwh ||= ScalarkWhCO2CostValues.new(@school).aggregate_value({year: 0}, :allelectricity_unmodified, :kwh)
     end
 
     private def annual_gas_co2

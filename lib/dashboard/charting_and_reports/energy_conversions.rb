@@ -70,6 +70,7 @@ class EnergyConversions
   end
 
   private def calculation_description(kwh, fuel_type, equiv_type, kwh_co2_or_£, grid_intensity)
+    fuel_type = :electricity if fuel_type == :allelectricity_unmodified
     _val, _equ, calc, in_text, out_text = EnergyEquivalences.convert(kwh, :kwh, fuel_type, equiv_type, equiv_type, kwh_co2_or_£, grid_intensity)
     in_text + out_text + calc
   end

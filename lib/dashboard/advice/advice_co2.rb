@@ -32,6 +32,7 @@ class AdviceCarbon < AdviceBase
   end
 
   def structured_content
+puts "Got here #{summary}"
     content_information = []
     component_pages.each do |component_page_class|
       component_page = component_page_class.new(@school)
@@ -49,7 +50,67 @@ class AdviceCarbon < AdviceBase
     structured_content.map { |component| component[:content] }.flatten
   end
 
+  def summary
+    @summary ||= summary_text
+  end
+
+  def alert_asof_date
+    [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.map { |meter| meter.amr_data.end_date }.min
+  end
+
   private
+
+  def min_data
+    [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.map { |meter| meter.amr_data.start_date }.max
+  end
+
+  def max_period_days
+    alert_asof_date - min_data + 1
+  end
+
+  def timescale
+    return { year: 0 } if max_period_days >= 364
+    months = (max_period_days / 12.0).to_i
+    return { month: 0..months } if months > 0
+    return { day: 0..max_period_days }
+  end
+
+  def timescale_description
+    FormatEnergyUnit.format(:years, [max_period_days / 365.0, 1.0].min, :html)
+  end
+
+  def summary_text
+    "Your school emitted #{total_co2_html} over the last #{timescale_description}, equivalent to planting #{trees_description}"
+  end
+
+  def total_co2
+    annual_electricity_co2 + annual_gas_co2
+  end
+
+  def total_co2_html
+    FormatEnergyUnit.format(:co2, total_co2, :html)
+  end
+
+  def trees_electricity
+    @school.electricity? ? EnergyConversions.new(@school).front_end_convert(:tree_co2_tree, timescale, :allelectricity_unmodified)[:equivalence] : 0.0
+  end
+
+  def trees_gas
+    @school.gas? ? EnergyConversions.new(@school).front_end_convert(:tree_co2_tree, timescale, :gas)[:equivalence] : 0.0
+  end
+
+  def trees_description
+    trees = (trees_electricity + trees_gas).round(0).to_i
+    "#{trees} trees"
+  end
+
+  def annual_electricity_co2
+    @annual_electricity_co2 ||= @school.electricity? ? ScalarkWhCO2CostValues.new(@school).aggregate_value(timescale, :allelectricity_unmodified, :co2) : 0.0
+  end
+
+  def annual_gas_co2
+    @annual_gas_co2 ||= @school.gas? ? ScalarkWhCO2CostValues.new(@school).aggregate_value(timescale, :gas, :co2) : 0.0
+  end
 
   class CO2AdviceComponentBase < AdviceBase
     include MeterlessMixin

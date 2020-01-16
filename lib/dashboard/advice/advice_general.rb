@@ -32,8 +32,11 @@ end
 class AdviceGasOutHours < AdviceGasBase;    end
 class AdviceGasAnnual   < AdviceGasBase;    end
 class AdviceBenchmark   < AdviceBase
-  protected def aggregate_meter
-    @school.aggregated_electricity_meters # TODO(PH, 21Oct2019) - needs to check gas asof as well
+  def alert_asof_date
+    [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.map { |meter| meter.amr_data.end_date }.min
+  end
+  protected def XXaggregate_meter
+    @school.electricity? ? @school.aggregated_electricity_meters : @school.aggregated_heat_meters
   end
 end
 class AdviceElectricityOutHours < AdviceElectricityBase; end
