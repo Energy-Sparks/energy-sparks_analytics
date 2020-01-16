@@ -35,8 +35,8 @@ class AdviceBenchmark   < AdviceBase
   def alert_asof_date
     [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.map { |meter| meter.amr_data.end_date }.min
   end
-  protected def XXaggregate_meter
-    @school.electricity? ? @school.aggregated_electricity_meters : @school.aggregated_heat_meters
+  protected def aggregate_meter
+    [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.first
   end
 end
 class AdviceElectricityOutHours < AdviceElectricityBase; end

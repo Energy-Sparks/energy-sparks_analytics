@@ -49,7 +49,7 @@ class AdviceBase < ContentBase
   end
 
   def charts_that_are_allowed_to_fail
-    self.class.config.fetch(:skip_chart_and_advice_if_fails, [])
+    self.class.config.nil? ? [] : self.class.config.fetch(:skip_chart_and_advice_if_fails, [])
   end
 
   def tolerate_chart_failure(chart_name)

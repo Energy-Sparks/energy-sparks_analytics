@@ -32,7 +32,6 @@ class AdviceCarbon < AdviceBase
   end
 
   def structured_content
-puts "Got here #{summary}"
     content_information = []
     component_pages.each do |component_page_class|
       component_page = component_page_class.new(@school)
@@ -58,6 +57,11 @@ puts "Got here #{summary}"
     [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.map { |meter| meter.amr_data.end_date }.min
   end
 
+  def enough_data
+    # TODO(PH, 16Jan2020) - temp comment out
+    max_period_days > 364 ? :enough :not_enough
+  end
+
   private
 
   def min_data
@@ -65,14 +69,11 @@ puts "Got here #{summary}"
   end
 
   def max_period_days
-    alert_asof_date - min_data + 1
+    (alert_asof_date - min_data + 1).to_i
   end
 
   def timescale
-    return { year: 0 } if max_period_days >= 364
-    months = (max_period_days / 12.0).to_i
-    return { month: 0..months } if months > 0
-    return { day: 0..max_period_days }
+    { up_to_a_year: 0 }
   end
 
   def timescale_description
