@@ -89,13 +89,4 @@ class AdviceStorageHeaters < AdviceElectricityBase
   end
 end
 
-class AdviceCarbon < AdviceElectricityBase
-  def relevance
-    @school.gas? && @school.electricity? ? :relevant : :never_relevant
-  end
-
-  def rating
-    5.0
-  end
-end
 class AdviceEnergyTariffs < AdviceElectricityBase; end

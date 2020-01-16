@@ -82,7 +82,7 @@ module BenchmarkMetrics
     check_school_type(school_type, 'benchmark electricity usage per pupil')
 
     case school_type
-    when :primary, :infant, :junior, :special, :middle
+    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
       300.0 * pupils
     when :secondary
       400.0 * pupils
@@ -112,7 +112,7 @@ module BenchmarkMetrics
     check_school_type(school_type, 'benchmark electricity usage per pupil')
 
     case school_type
-    when :primary, :infant, :junior, :special, :middle
+    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
       EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
     when :secondary
       300.0 * pupils
@@ -132,7 +132,7 @@ module BenchmarkMetrics
       else
         2.5 * (pupils / 300)
       end
-    when :secondary, :middle
+    when :secondary, :middle, :mixed_primary_and_secondary
       if pupils < 400
         10
       else
@@ -166,7 +166,7 @@ module BenchmarkMetrics
       else
         servers = 3 + (pupils / 300).floor
       end
-    when :secondary, :middle
+    when :secondary, :middle, :mixed_primary_and_secondary
       power = 1000.0
       if pupils < 400
         servers = 4
@@ -193,7 +193,7 @@ module BenchmarkMetrics
       else
         2.5 * (floor_area / 1600)
       end
-    when :secondary, :middle
+    when :secondary, :middle, :mixed_primary_and_secondary
       if floor_area < 1000
         10
       else

@@ -1,6 +1,7 @@
 require_rel '../charting_and_reports/content_base.rb'
 class AdviceBase < ContentBase
   include Logging
+  attr_reader :summary
   def initialize(school, user_type = nil)
     super(school)
     @user_type = user_type
@@ -13,6 +14,10 @@ class AdviceBase < ContentBase
 
   def valid_alert?
     true
+  end
+
+  def has_structured_content?
+    false
   end
 
   def analyse(asof_date)

@@ -2,19 +2,23 @@ class RunAdultDashboard < RunCharts
 
   def run_flat_dashboard(control)
     @all_html = ''
-    report_groups = @school.adult_report_groups
-    report_groups.each do |report_group|
-      DashboardConfiguration::ADULT_DASHBOARD_GROUPS[report_group].each do |page|
-        if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)
-          definition = DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS[page]
-          run_one_page(page, definition, control)
-        else
-          puts "Not running page #{page}"
-        end
+    pages = control.fetch(:pages, page_list)
+    pages.each do |page|
+      if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)
+        definition = DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS[page]
+        run_one_page(page, definition, control)
+      else
+        puts "Not running page #{page}"
       end
     end
     save_to_excel
     write_html
+  end
+
+  private def page_list
+    @school.adult_report_groups.map do |report_group|
+      DashboardConfiguration::ADULT_DASHBOARD_GROUPS[report_group]
+    end.flatten
   end
 
   private def excel_variation

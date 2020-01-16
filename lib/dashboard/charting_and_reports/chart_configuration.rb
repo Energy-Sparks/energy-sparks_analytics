@@ -116,10 +116,14 @@ class ChartManager
       reverse_xaxis:    true
     },
     electricity_longterm_trend_kwh_with_carbon: {
-      name:             'Your schools carbon emissions over the last few years',
+      name:             'Your schools electricity consumption over the last few years',
       inherits_from:    :electricity_longterm_trend,
       series_breakdown: :none,
       y2_axis:          :gridcarbon
+    },
+    electricity_longterm_trend_kwh_with_carbon_unmodified: {
+      inherits_from:    :electricity_longterm_trend_kwh_with_carbon,
+      meter_definition: :allelectricity_unmodified
     },
     electricity_longterm_trend_carbon: {
       name:             '', # 2 of 2 charts in same section of presentation, no header wanted
@@ -127,6 +131,10 @@ class ChartManager
       series_breakdown: :none,
       yaxis_units:      :co2,
       y2_axis:          :gridcarbon
+    },
+    electricity_longterm_trend_carbon_unmodified: {
+      inherits_from:    :electricity_longterm_trend_carbon,
+      meter_definition: :allelectricity_unmodified
     },
     daytype_breakdown_gas: {
       name:             'Breakdown by type of day/time: Gas',
@@ -191,16 +199,28 @@ class ChartManager
       yaxis_units:      :co2,
       y2_axis:          :gridcarbon
     },
+    electricity_co2_last_year_weekly_with_co2_intensity_unmodified: {
+      inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
+      meter_definition: :allelectricity_unmodified
+    },
     electricity_co2_last_7_days_with_co2_intensity: {
       name:             'Variation in the electricity carbon emissions of your school over the last week',
       inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
       x_axis:           :datetime,
       timescale:        :week
     },
+    electricity_co2_last_7_days_with_co2_intensity_unmodified: {
+      inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
+      meter_definition: :allelectricity_unmodified
+    },
     electricity_kwh_last_7_days_with_co2_intensity: {
       name:             '', # chart 2 of 2 in a section of the carbon emissions tab, dont want header
       inherits_from:    :electricity_co2_last_7_days_with_co2_intensity,
       yaxis_units:      :kwh
+    },
+    electricity_kwh_last_7_days_with_co2_intensity_unmodified: {
+      inherits_from:    :electricity_kwh_last_7_days_with_co2_intensity,
+      meter_definition: :allelectricity_unmodified
     },
     alert_group_by_week_electricity: {
       inherits_from:    :group_by_week_electricity,

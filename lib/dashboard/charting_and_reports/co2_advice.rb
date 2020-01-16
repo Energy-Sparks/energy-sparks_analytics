@@ -29,8 +29,8 @@ class DashboardEnergyAdvice
   end
 
   class CO2AdviceBase < DashboardChartAdviceBase
-    def initialize(chart_type, school, chart_definition, chart_data, advice_function = :co2)
-      super(chart_type, school, chart_definition, chart_data)
+    def initialize(school, chart_definition, chart_data, chart_symbol, advice_function = :co2)
+      super(school, chart_definition, chart_data, chart_symbol)
       @advice_function = advice_function
     end
 
@@ -50,6 +50,10 @@ class DashboardEnergyAdvice
 
         @footer_advice = nil_advice
       end
+    end
+  
+    def erb_bind(text)
+      ERB.new(text).result(binding)
     end
 
     protected
@@ -332,7 +336,7 @@ class DashboardEnergyAdvice
       convert_grid_intensity_to_html_table(uk_grid_sources.carbon_intensity_table_2018)
     end
 
-    private def grid_carbon_intensity_live_html_table
+    public def grid_carbon_intensity_live_html_table
       convert_grid_intensity_to_html_table(uk_grid_sources.carbon_intensity_table_live)
     end
 
@@ -797,12 +801,16 @@ class DashboardEnergyAdvice
       <p>
         Energy Sparks has calculated the following values for your school:
       </p>
-      <p>
-        &#183; Electricity: <%= FormatEnergyUnit.format(:co2, annual_electricity_co2) %> /year
-      </p>
-      <p>
-        &#183; Gas: <%= FormatEnergyUnit.format(:co2, annual_gas_co2) %> /year
-      </p>
+      <% if @school.electricity? %>
+        <p>
+          &#183; Electricity: <%= FormatEnergyUnit.format(:co2, annual_electricity_co2) %> /year
+        </p>
+      <% end %>
+      <% if @school.gas? %>
+        <p>
+          &#183; Gas: <%= FormatEnergyUnit.format(:co2, annual_gas_co2) %> /year
+        </p>
+      <% end %>
       <p>
         You just need to enter these values in the 'Electric+Gas' tab in the
         spreadsheet.
@@ -922,6 +930,7 @@ class DashboardEnergyAdvice
     end
 
     private def gas_reduction_from_turning_off_out_of_hours
+      return '' if !@school.gas?
       suggestion = ''
       co2 = ScalarkWhCO2CostValues.new(@school).day_type_breakdown({year: 0}, :gas, :co2, false, false)
       percent = ScalarkWhCO2CostValues.new(@school).day_type_breakdown({year: 0}, :gas, :co2, false, true)
@@ -939,6 +948,7 @@ class DashboardEnergyAdvice
     end
 
     private def turn_thermostat_down
+      return '' if !@school.gas?
       aggregate_gas_amr = @school.aggregated_heat_meters.amr_data
       last_year = SchoolDatePeriod.year_to_date(:year_to_date, 'validate amr', aggregate_gas_amr.end_date, aggregate_gas_amr.start_date)
       model = @school.aggregated_heat_meters.heating_model(last_year)
@@ -953,7 +963,8 @@ class DashboardEnergyAdvice
     end
 
     private def reducing_baseload_by_10_percent
-      aggregate_electric_amr = @school.aggregated_electricity_meters.amr_data
+      return '' if !@school.electricity?
+      aggregate_electric_amr = @school.unaltered_aggregated_electricity_meters.amr_data
       start_date = [aggregate_electric_amr.start_date, aggregate_electric_amr.end_date - 365].max
       average_baseload_kw = aggregate_electric_amr.average_baseload_kw_date_range(start_date, aggregate_electric_amr.end_date)
       annual_10_percent_baseload_kwh = average_baseload_kw * 365 * 24 * 0.1
@@ -968,6 +979,7 @@ class DashboardEnergyAdvice
     end
 
     private def solar_panel_co2_reduction_per_10_panels(panels = 10)
+      return '' if !@school.electricity?
       panel_kwp = 0.3
       panel_yield_kwh_per_kwp = 900
       annual_panel_kwh = panel_kwp * panel_yield_kwh_per_kwp
