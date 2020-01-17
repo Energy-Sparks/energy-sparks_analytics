@@ -262,25 +262,31 @@ class MeterAttributes
       ),
       agreed_capacity: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       ),
       settlement_agency_fee: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       ),
       reactive_power_charge: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       ),
       half_hourly_data_charge: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      other: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       )
