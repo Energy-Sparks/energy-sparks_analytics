@@ -25,11 +25,11 @@ class CompareContentResults
   private
 
   def comparison_directory
-    File.join(File.dirname(__FILE__), control_hash_value(:comparison_directory))
+    File.join(control_hash_value(:comparison_directory))
   end
 
   def output_directory
-    File.join(File.dirname(__FILE__), control_hash_value(:output_directory))
+    File.join(control_hash_value(:output_directory))
   end
 
   def control_hash_value(type)

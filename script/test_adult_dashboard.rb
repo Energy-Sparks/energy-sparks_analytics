@@ -19,7 +19,7 @@ script = {
                                 no_pages: %i[carbon],
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
-                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Test' },
+                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },
                                   :summary, 
                                   # :report_differing_charts,
                                   # :report_differences 
