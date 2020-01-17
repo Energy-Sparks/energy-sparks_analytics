@@ -239,6 +239,61 @@ class MeterAttributes
     )
   end
 
+  def self.default_tariff_rates
+    {
+      standing_charge: MeterAttributeTypes::Hash.define(
+        required: true,
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define(required: true)
+        }
+      ),
+      climate_change_levy: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      renewable_energy_obligation: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      agreed_capacity: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      settlement_agency_fee: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      reactive_power_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      half_hourly_data_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      other: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      )
+    }
+  end
+
+
   class AccountingTariff < MeterAttributeTypes::AttributeBase
     id :accounting_tariff
     aggregate_over :accounting_tariffs
@@ -253,26 +308,14 @@ class MeterAttributes
         rates:      MeterAttributeTypes::Hash.define(
           required: true,
           structure: {
-            standing_charge: MeterAttributeTypes::Hash.define(
+            rate: MeterAttributeTypes::Hash.define(
               required: true,
               structure: {
-                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:quarter, :day]),
+                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
                 rate: MeterAttributeTypes::Float.define(required: true)
               }
-            ),
-            renewable_energy_obligation: MeterAttributeTypes::Hash.define(
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
-                rate: MeterAttributeTypes::Float.define
-              }
-            ),
-            rate: MeterAttributeTypes::Hash.define(
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
-                rate: MeterAttributeTypes::Float.define
-              }
             )
-          }
+          }.merge(MeterAttributes.default_tariff_rates)
         ),
       }
     )
@@ -292,19 +335,6 @@ class MeterAttributes
         rates:      MeterAttributeTypes::Hash.define(
           required: true,
           structure: {
-            standing_charge: MeterAttributeTypes::Hash.define(
-              required: true,
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:quarter, :day]),
-                rate: MeterAttributeTypes::Float.define(required: true)
-              }
-            ),
-            renewable_energy_obligation: MeterAttributeTypes::Hash.define(
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:quarter, :day]),
-                rate: MeterAttributeTypes::Float.define
-              }
-            ),
             daytime_rate: MeterAttributeTypes::Hash.define(
               required: true,
               structure: {
@@ -323,10 +353,9 @@ class MeterAttributes
                 to:   MeterAttributeTypes::TimeOfDay.define(required: true),
               }
             )
-          }
+          }.merge(MeterAttributes.default_tariff_rates)
         ),
         asc_limit_kw: MeterAttributeTypes::Float.define
-
       }
     )
   end
@@ -338,6 +367,5 @@ class MeterAttributes
       collection
     end
   end
-
 
 end

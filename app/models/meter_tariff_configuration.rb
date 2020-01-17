@@ -56,6 +56,10 @@ class MeterTariffs
     half_hourly_data_charge: {
       summary:      'Half Hourly Metering Charge',
       description:  'Charge for half hourly metering service'
+    },
+    other: {
+      summary:      'Charge of type not in default list',
+      description:  'Miscellaneous not in default list'
     }
   }.freeze
 
