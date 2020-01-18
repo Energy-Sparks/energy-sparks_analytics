@@ -46,7 +46,7 @@ module Benchmarking
     def run_benchmark_chart(today, report, school_ids, chart_columns_only = false, filter = nil, user_type = nil)
       config = self.class.chart_table_config(report)
       table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter, user_type)
-      create_chart(report, config, table)
+      create_chart(report, config, table, true)
     end
 
     # filter e.g. for area: ->{ addp_area.include?('Highlands') }
