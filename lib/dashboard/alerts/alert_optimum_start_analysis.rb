@@ -7,6 +7,7 @@ class AlertOptimumStartAnalysis < AlertGasModelBase
   
   def initialize(school)
     super(school, :optimumstartanalysis)
+    @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 
   def self.template_variables
