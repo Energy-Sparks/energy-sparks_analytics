@@ -30,8 +30,8 @@ script = {
       filter:         nil, # ->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
     },
     compare_results: [
-      { comparison_directory: '../TestResults/Benchmark/Base' },
-      { output_directory:     '../TestResults/Benchmark/New' }
+      { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Benchmark\Base\\' },
+      { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Benchmark\New\\' }
     ]
   }
 }

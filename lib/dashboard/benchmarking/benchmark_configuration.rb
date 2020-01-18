@@ -134,7 +134,7 @@ module Benchmarking
         ],
         sort_by:  method(:sort_energy_costs),
         type: %i[chart table],
-        drilldown:  { adult_dashboard: :benchmark, content: AdviceBenchmark }
+        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark }
       },
       annual_energy_costs: {
         benchmark_class:  BenchmarkContentTotalAnnualEnergy,
@@ -537,6 +537,17 @@ module Benchmarking
         ],
         sort_by: [1],
         type: %i[table chart]
+      },
+      school_information: {
+        benchmark_class:  nil,
+        filter_out:     :dont_make_available_directly,
+        name:     'School information - used for drilldown, not directly presented to user',
+        columns:  [
+          { data: 'addp_name',     name: 'School name', units: String, chart_data: false },
+          { data: 'addp_urn',      name: 'URN',         units: Integer, chart_data: false },
+        ],
+        sort_by: [1],
+        type: %i[table]
       },
     }.freeze
 =begin

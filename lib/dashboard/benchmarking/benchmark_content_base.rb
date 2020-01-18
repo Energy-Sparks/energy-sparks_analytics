@@ -35,7 +35,7 @@ module Benchmarking
 
       caveats = [{ type: :html,         content: caveat_text}]
 
-      [preamble_content, charts, tables, caveats].compact.flatten
+      [preamble_content, charts, tables, caveats, drilldown(school_ids, user_type)].compact.flatten
     end
 
     protected def preamble_content
@@ -45,6 +45,23 @@ module Benchmarking
         { type: :title,                 content: chart_table_config[:name]},
         { type: :html,                  content: introduction_text },
       ]
+    end
+
+    private def drilldown(school_ids, user_type)
+      drilldown_info = benchmark_manager.drilldown_class(@page_name)
+      return nil if drilldown_info.nil?
+      {
+        type:     :drilldown,
+        content:  {
+                    drilldown:  drilldown_info,
+                    school_map: school_map(school_ids, user_type)
+                  }
+      }
+    end
+
+    private def school_map(school_ids, user_type)
+      schools = benchmark_manager.run_benchmark_table(asof_date, :school_information, school_ids, false, nil, :raw, user_type)
+      schools.map { |school_data| {name: school_data[0], urn: school_data[1]} }
     end
 
     protected def content_title

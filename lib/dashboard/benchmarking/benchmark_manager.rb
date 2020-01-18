@@ -73,6 +73,10 @@ module Benchmarking
       format_table(config, results, medium)
     end
 
+    def drilldown_class(report)
+      self.class.chart_table_config(report).fetch(:drilldown, nil)
+    end
+
     private
 
     def hide_columns(config, user_type)
