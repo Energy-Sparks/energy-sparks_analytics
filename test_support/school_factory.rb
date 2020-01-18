@@ -3,6 +3,7 @@ require_relative 'load_amr_from_bath_hacked'
 # School Factory: deals with getting school, meter data from different sources:
 #                 caches data so only loads once
 class SchoolFactory
+  METER_COLLECTION_DIRECTORY = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\\'
   def initialize
     @school_cache = {}  # [urn][source] = meter_collection
     @schools_meta_data = AnalysticsSchoolAndMeterMetaData.new
@@ -10,9 +11,9 @@ class SchoolFactory
 
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
   def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {})
-    return load_aggregated_meter_collection if source == :aggregated_meter_collection # no overrides as this is the final object that we use, including meter attributes
-    return load_validated_meter_collection(meter_attributes_overrides: meter_attributes_overrides)  if source == :load_validated_meter_collection
-    return load_unvalidated_meter_collection(meter_attributes_overrides: meter_attributes_overrides) if source == :load_unvalidated_meter_collection
+    return load_aggregated_meter_collection(identifier) if source == :aggregated_meter_collection # no overrides as this is the final object that we use, including meter attributes
+    return load_validated_meter_collection(meter_attributes_overrides: meter_attributes_overrides)  if source == :validated_meter_collection
+    return load_unvalidated_meter_collection(meter_attributes_overrides: meter_attributes_overrides) if source == :unvalidated_meter_collection
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
@@ -29,11 +30,13 @@ class SchoolFactory
 
   private
 
-  private def load_aggregated_meter_collection
-    school_filename = [
+  private def load_aggregated_meter_collection(school_filename)
+    old_school_filename = [
       'whiteways-primary-school',
-      'trinity-c-of-e-first-school'
-    ][0]
+      'trinity-c-of-e-first-school',
+      'christ-church-c-of-e-first-school',
+      'bishop-sutton-primary-school'
+    ][3]
 
     load_meter_collections(school_filename, 'aggregated-meter-collection-')
   end
@@ -77,8 +80,8 @@ class SchoolFactory
   end
 
   private def meter_collection_filename(school_filename, file_type, extension)
-    'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\\' +
-     file_type + school_filename + extension
+    METER_COLLECTION_DIRECTORY +
+    file_type + school_filename + extension
   end
 
   private def save_marshal_copy(filename, school)

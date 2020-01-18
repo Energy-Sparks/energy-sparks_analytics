@@ -945,36 +945,40 @@ class Aggregator
   end
 
   def inject_benchmarks
+
+    # reverse X axis on benchamrks only following PM/CT request 18Jan2020
+    reverse_x_axis
+
     logger.info "Injecting national, regional and exemplar benchmark data: for #{@bucketed_data.keys}"
 
-    @x_axis.push('National Average')
-    @x_axis.push('Regional Average')
     @x_axis.push('Exemplar School')
+    @x_axis.push('Regional Average')
+    @x_axis.push('National Average')
 
     if benchmark_required?('electricity')
       set_benchmark_buckets(
         @bucketed_data['electricity'],
-        benchmark_electricity_usage_in_units,
+        exemplar_electricity_usage_in_units,
         benchmark_electricity_usage_in_units, # there is no difference between national and regional for electricity'
-        exemplar_electricity_usage_in_units
+        benchmark_electricity_usage_in_units
       )
     end
 
     if benchmark_required?('gas')
       set_benchmark_buckets(
         @bucketed_data['gas'],
-        national_benchmark_gas_usage_in_units,
+        regional_exemplar_gas_usage_in_units,
         regional_benchmark_gas_usage_in_units,
-        regional_exemplar_gas_usage_in_units
+        national_benchmark_gas_usage_in_units
       )
     end
 
     if benchmark_required?(SeriesNames::STORAGEHEATERS)
       set_benchmark_buckets(
         @bucketed_data[SeriesNames::STORAGEHEATERS],
-        national_benchmark_storage_heater_usage_in_units,
+        regional_exemplar_storage_heater_usage_in_units,
         regional_benchmark_storage_heater_usage_in_units,
-        regional_exemplar_storage_heater_usage_in_units
+        national_benchmark_storage_heater_usage_in_units
       )
     end
 
@@ -987,10 +991,10 @@ class Aggregator
     @bucketed_data.key?(fuel_type) && @bucketed_data[fuel_type].is_a?(Array) && @bucketed_data[fuel_type].sum > 0.0
   end
 
-  def set_benchmark_buckets(bucket, national, regional, exemplar)
-    bucket.push(national)
-    bucket.push(regional)
+  def set_benchmark_buckets(bucket, exemplar, regional, national)
     bucket.push(exemplar)
+    bucket.push(regional)
+    bucket.push(national)
   end
 
   # performs scaling to 200, 1000 pupils or primary/secondary default sized floor areas

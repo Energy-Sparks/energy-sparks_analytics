@@ -76,7 +76,7 @@ class RunTests
       when :sheffield_solar_pv
         update_sheffield_solar_pv
       when :schools
-        determine_schools(configuration)
+        @school_name_pattern_match = configuration
       when :source
         @meter_readings_source = configuration
       when :reports
@@ -128,12 +128,6 @@ class RunTests
     DownloadSheffieldSolarPVData.new.download
   end
 
-  def determine_schools(config)
-    logger.info '=' * 120
-    @school_list = AnalysticsSchoolAndMeterMetaData.new.match_school_names(config)
-    logger.info "Schools: #{@school_list}"
-  end
-
   def banner(title)
     '=' * 60 + title.ljust(60, '=')
   end
@@ -142,7 +136,7 @@ class RunTests
     logger.info '=' * 120
     logger.info 'RUNNING REPORTS'
     failed_charts = []
-    @school_list.sort.each do |school_name|
+    schools_list.sort.each do |school_name|
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
@@ -155,7 +149,7 @@ class RunTests
   end
 
   def run_drilldown
-    @school_list.each do |school_name|
+    schools_list.each do |school_name|
       excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- drilldown.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
@@ -173,7 +167,7 @@ class RunTests
   end
 
   def run_timescales
-    @school_list.each do |school_name|
+    schools_list.each do |school_name|
       excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- timescale shift.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
@@ -204,7 +198,7 @@ class RunTests
 
   def run_adult_dashboard(control)
     failed_charts = []
-    @school_list.sort.each do |school_name|
+    schools_list.sort.each do |school_name|
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
@@ -216,7 +210,8 @@ class RunTests
   end
 
   def run_equivalences(control)
-    @school_list.sort.each do |school_name|
+    puts "Got here #{schools_list.join('; ')}"
+    schools_list.sort.each do |school_name|
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
@@ -230,17 +225,15 @@ class RunTests
   end
 
   private def run_dashboard(control)
-    @school_list.each do |school_name|
+    schools_list.each do |school_name|
       school = load_school(school_name)
       test = PupilDashboardTests.new(school)
       test.run_tests(control)
     end
   end
 
-  
-
   def run_timescales_drilldown
-    @school_list.each do |school_name|
+    schools_list.each do |school_name|
       chart_list = []
       excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- drilldown and timeshift.xlsx'
       school = load_school(school_name)
@@ -315,7 +308,7 @@ class RunTests
 
   def run_kpi_calculations(config)
     calculation_results = Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
-    @school_list.sort.each do |school_name|
+    schools_list.sort.each do |school_name|
       school = load_school(school_name)
       calculation = KPICalculation.new(school)
       calculation.run_kpi_calculations
@@ -336,7 +329,7 @@ class RunTests
     ENV['ENERGYSPARKSTESTMODE'] = 'ON'
     dates = RunAlerts.convert_asof_dates(control[:asof_date])
 
-    @school_list.each do |school_name|
+    schools_list.each do |school_name|
       @current_school_name = school_name
       dates.each do |asof_date|
         reevaluate_log_filename
@@ -373,5 +366,28 @@ class RunTests
   def reevaluate_log_filename
     filename = @log_filename.is_a?(IO) ? @log_filename : (@log_filename % { school_name: @current_school_name, time: Time.now.strftime('%d %b %H %M') })
     @@es_logger_file.file = filename
+  end
+
+  def schools_list
+    list = case @meter_readings_source
+    when :analytics_db
+      AnalysticsSchoolAndMeterMetaData.new.match_school_names(@school_name_pattern_match)
+    when :aggregated_meter_collection
+      matching_yaml_files_in_directory('aggregated-meter-collection-', @school_name_pattern_match)
+    when :validated_meter_collection
+      matching_yaml_files_in_directory('validated-data-', @school_name_pattern_match)
+    when :unvalidated_meter_collection
+      matching_yaml_files_in_directory('unvalidated-data-', @school_name_pattern_match)
+    end
+    puts "Running tests for #{list.join('; ')}"
+    list
+  end
+
+  def matching_yaml_files_in_directory(file_type, school_pattern_matches)
+    filenames = school_pattern_matches.map do |school_pattern_match|
+      match = file_type + school_pattern_match + '.yaml'
+      Dir[match, base: SchoolFactory::METER_COLLECTION_DIRECTORY]
+    end.flatten.uniq
+    filenames.map { |filename| filename.gsub(file_type,'').gsub('.yaml','') }
   end
 end

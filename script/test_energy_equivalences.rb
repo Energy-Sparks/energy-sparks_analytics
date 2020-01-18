@@ -11,8 +11,8 @@ end
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/equivalences %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  schools:                  ['.*'], # ['Round.*'],
-  source:                   :analytics_db,
+  schools:                  ['bathampton*'], # ['Round.*'],
+  source:                   :aggregated_meter_collection,
   logger2:                  { name: "./log/equivalences %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   equivalences:          {
                               control: {
@@ -28,8 +28,8 @@ script = {
                                   {month: -1}                    
                                 ],
                                 compare_results: [
-                                  { comparison_directory: '../TestResults/Equivalences/Base' },
-                                  { output_directory:     '../TestResults/Equivalences/New' },
+                                  { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Equivalences\Base\\' },
+                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Equivalences\New\\' }
                                 ]
                               }
                             }
