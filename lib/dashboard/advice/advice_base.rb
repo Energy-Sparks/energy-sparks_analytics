@@ -2,9 +2,9 @@ require_rel '../charting_and_reports/content_base.rb'
 class AdviceBase < ContentBase
   include Logging
   attr_reader :summary
-  def initialize(school, user_type = nil)
+  def initialize(school)
     super(school)
-    @user_type = user_type
+    # @user_type = user_type
     @failed_charts = []
   end
 
@@ -115,7 +115,7 @@ class AdviceBase < ContentBase
         logger.info e.backtrace
       end
     end
-    charts_and_html = promote_analytics_html_to_frontend(charts_and_html) if ContentBase.system_admin_type?(@user_type)
+    # charts_and_html = promote_analytics_html_to_frontend(charts_and_html) if ContentBase.system_admin_type?(@user_type)
     charts_and_html
   end
 
