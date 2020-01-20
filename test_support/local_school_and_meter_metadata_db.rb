@@ -41,6 +41,15 @@ class AnalysticsSchoolAndMeterMetaData
     matches.flatten.uniq
   end
 
+  def mpan_mprn_school_name_map
+    @mpan_mprn_map ||= yaml_school_database.map do |school_name, school_data|
+      school_data[:meters].map do |meter|
+        [meter.fetch(:mpan, meter[:mprn]).to_i, school_name]
+      end
+    end.flatten(1).to_h
+    @mpan_mprn_map
+  end
+
   private
 
   def find_school(identifier, identifier_type)

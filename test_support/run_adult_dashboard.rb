@@ -31,7 +31,7 @@ class RunAdultDashboard < RunCharts
 
     # ap definition[:content_class].front_end_template_variables # front end variables
 
-    advice = definition[:content_class].new(@school, control[:user])
+    advice = definition[:content_class].new(@school) # , control[:user])
 
     puts "Page failed, as advice not valid #{page}" unless advice.valid_alert?
     return unless advice.valid_alert?
