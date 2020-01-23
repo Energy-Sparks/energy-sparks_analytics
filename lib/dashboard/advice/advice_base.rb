@@ -16,10 +16,6 @@ class AdviceBase < ContentBase
     true
   end
 
-  def has_structured_content?
-    false
-  end
-
   def analyse(asof_date)
     @asof_date = asof_date
     calculate
@@ -78,7 +74,7 @@ class AdviceBase < ContentBase
   end
 
   def front_end_content
-    content.select { |segment| %i[html chart_name title].include?(segment[:type]) }
+    content.select { |segment| %i[html chart_name enhanced_title].include?(segment[:type]) }
   end
 
   def debug_content
@@ -99,7 +95,7 @@ class AdviceBase < ContentBase
     enhanced_title = enhanced_title(self.class.config[:name])
     charts_and_html.push( { type: :enhanced_title, content: enhanced_title})
     charts_and_html.push( { type: :analytics_html, content: format_enhanced_title_for_analytics(enhanced_title)})
-    
+
     charts_and_html += debug_content
 
     charts.each do |chart|
@@ -178,7 +174,7 @@ class AdviceBase < ContentBase
     )
     ERB.new(text).result(binding)
   end
-  
+
   def clean_html(html)
     html.gsub(/[ \t\f\v]{2,}/, ' ').gsub(/^ $/, '').gsub(/\n+|\r+/, "\n").squeeze("\n").strip
   end

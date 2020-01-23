@@ -15,6 +15,14 @@ class ContentBase
     false
   end
 
+  def has_structured_content?
+    false
+  end
+
+  def structured_content
+    []
+  end
+
   def check_relevance
     return :relevant if no_single_aggregate_meter
     aggregate_meter.nil? ? :never_relevant : :relevant
@@ -107,7 +115,7 @@ class ContentBase
 
   def self.convert_range_symbol_to_low(type)
     (type.to_s + '_low').to_sym
-  end 
+  end
 
   def front_end_template_data
     lookup = flatten_template_variables
@@ -146,7 +154,7 @@ class ContentBase
 
   private def format_for_table(value, unit, medium)
     return value if medium == :raw || unit == String
-    FormatEnergyUnit.format(unit, value, medium, false, true) 
+    FormatEnergyUnit.format(unit, value, medium, false, true)
   end
 
   private def percent_change(old_value, new_value)
@@ -260,7 +268,7 @@ class ContentBase
   def unformatted_template_variables
     variable_list(false)
   end
-  
+
   protected def calculate_rating_from_range(good_value, bad_value, actual_value)
     [10.0 * [(actual_value - bad_value) / (good_value - bad_value), 0.0].max, 10.0].min.round(1)
   end
