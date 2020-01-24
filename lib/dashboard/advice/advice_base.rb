@@ -16,10 +16,6 @@ class AdviceBase < ContentBase
     true
   end
 
-  def has_structured_content?
-    false
-  end
-
   def analyse(asof_date)
     @asof_date = asof_date
     calculate
