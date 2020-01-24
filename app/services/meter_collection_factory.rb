@@ -66,7 +66,7 @@ class MeterCollectionFactory
   def build_meter(meter_collection, meter_data)
     amr_data = AMRData.new(meter_data[:type])
     meter_data[:readings].each do |reading|
-      amr_data.add(reading[:reading_date], OneDayAMRReading.new(meter_data[:external_meter_id], reading[:reading_date], reading[:type], reading[:substitute_date], reading[:upload_datetime], reading[:kwh_data_x48]))
+      amr_data.add(reading[:reading_date], OneDayAMRReading.new(meter_data[:identifier], reading[:reading_date], reading[:type], reading[:substitute_date], reading[:upload_datetime], reading[:kwh_data_x48]))
     end
     Dashboard::Meter.new(
       meter_collection:   meter_collection,

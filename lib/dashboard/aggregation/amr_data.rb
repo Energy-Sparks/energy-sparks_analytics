@@ -321,7 +321,7 @@ class AMRData < HalfHourlyData
   def summarise_bad_data
     date, one_days_data = self.first
     logger.info '=' * 80
-    logger.info "Bad data for meter #{one_days_data.mpan_mprn}"
+    logger.info "Bad data for meter #{one_days_data.meter_id}"
     logger.info "Valid data between #{start_date} and #{end_date}"
     key, _value = self.first
     if key < start_date
