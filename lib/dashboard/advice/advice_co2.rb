@@ -138,14 +138,18 @@ class AdviceCarbon < AdviceBase
             when :function
               { type: :html,  content: advice_class.send(content[:data]) }
             when :chart
-              { type: :chart, content: run_chart(content[:data]) }
+              chart = run_chart(content[:data])
+              [
+                { type: :chart,       content: chart },
+                { type: :chart_name,  content: chart[:config_name] }
+              ]
             end
           )
         rescue EnergySparksNotEnoughDataException => e
           { type: :chart, html: 'Unfortunately we don\'t have enough meter data to provide this information.' }
         end
       end
-      charts_and_html
+      charts_and_html.flatten
     end
   end
 
