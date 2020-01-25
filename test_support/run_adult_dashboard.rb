@@ -41,6 +41,14 @@ class RunAdultDashboard < RunCharts
     puts "Page failed 1, as advice not available to users #{page}" unless advice.make_available_to_users?
     # return unless advice.make_available_to_users?
 
+    if advice.has_structured_content?
+      puts "Advice has structured content"
+      
+      advice.structured_content.each do |component_advice|
+        puts component_advice[:title]
+        puts component_advice[:content].map { |component| component[:type] }.join('; ')
+      end
+    end
     content = advice.content
         
     @failed_charts.concat(advice.failed_charts) unless advice.failed_charts.empty?

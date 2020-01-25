@@ -667,12 +667,11 @@ class MeterAttributes
         max_summer_daily_heating_kwh:     100,
         reason:                           'heating only since 2018, cant set as not so in past: PH 4Mar2019'
       },
-=begin
+
       # example of tested manual model override, for which support required
       # when atributes are absorbed into front end
       heating_model: {
         max_summer_daily_heating_kwh:     400,
-        # override_best_model_type:         :simple_regression_temperature,
         override_model: {
           type:   :simple_regression_temperature,
           regression_models: {
@@ -687,7 +686,7 @@ class MeterAttributes
         },
         reason: 'Saltford has strange gas consumption data, this is a test'
       },
-=end
+
       # function: [:heating_only] - although its currently heating only (2018-19) it wasn't in the past
     },
     # ==============================Stanton Drew========================
