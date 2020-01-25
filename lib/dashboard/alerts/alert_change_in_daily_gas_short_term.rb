@@ -20,6 +20,10 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+
   TEMPLATE_VARIABLES = {
     predicted_kwh_this_week: {
       description: 'kwh usage this week adjusted for temperature (school days only)',

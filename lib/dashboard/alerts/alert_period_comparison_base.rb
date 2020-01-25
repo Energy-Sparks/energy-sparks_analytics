@@ -104,7 +104,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def timescale; 'Error- should be overridden' end
 
-  def relevance; @relevance end # overridden in calculate
+  # overridden in calculate
+  def relevance
+    meter_readings_up_to_date_enough? ? :not_relevant : @relevance
+  end
 
   def maximum_alert_date; aggregate_meter.amr_data.end_date end
 
@@ -114,7 +117,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     # commented out 1Dec2019, in favour of alert prioritisation control
     # @relevance = time_relevance(asof_date) # during and up to 3 weeks after current period
-    @relevance = enough_periods_data(asof_date) ? :relevant : :not_relevant
+    @relevance = (enough_periods_data(asof_date) ? :relevant : :not_relevant) if relevance == :relevant
 
     raise EnergySparksNotEnoughDataException, "Not enough data in current period: #{period_debug(current_period,  asof_date)}"  unless enough_days_data_for_period(current_period,  asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data in previous period: #{period_debug(previous_period,  asof_date)}" unless enough_days_data_for_period(previous_period, asof_date)

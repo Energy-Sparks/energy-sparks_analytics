@@ -550,21 +550,5 @@ module Benchmarking
         type: %i[table]
       },
     }.freeze
-=begin
-
-      AlertSchoolWeekComparisonElectricity          => 'eswc',
-      AlertPreviousHolidayComparisonElectricity     => 'ephc',
-      AlertPreviousYearHolidayComparisonElectricity => 'epyc',
-      AlertSchoolWeekComparisonGas                  => 'gswc',
-      AlertPreviousHolidayComparisonGas             => 'gphc',
-      AlertPreviousYearHolidayComparisonGas         => 'gpyc',
-
-      AlertElectricityPeakKWVersusBenchmark         => 'epkb'
-
-      AlertHeatingOnOff                             => 'htoo',
-      AlertWeekendGasConsumptionShortTerm           => 'gswe',
-      AlertMeterASCLimit                            => 'masc',
-      AlertAdditionalPrioritisationData             => 'addp',
-=end
   end
 end

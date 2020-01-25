@@ -14,6 +14,10 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     super(school, :changeinelectricityconsumption)
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+
   def self.template_variables
     specific = {'Change in electricity short term' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

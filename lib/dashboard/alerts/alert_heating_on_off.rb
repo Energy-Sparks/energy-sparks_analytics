@@ -27,6 +27,10 @@ class AlertHeatingOnOff < AlertGasModelBase
     @forecast_data = nil
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+
   def self.template_variables
     specific = {'Heating on/off recommendations' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

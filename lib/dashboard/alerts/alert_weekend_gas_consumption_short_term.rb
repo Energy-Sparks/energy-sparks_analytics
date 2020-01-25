@@ -16,6 +16,10 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     super(school, :weekendgasconsumption)
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+  
   def timescale
     'last weekend'
   end

@@ -25,6 +25,10 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
 
   def fuel_type; :electricity end
 
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+  
   private def period_type
     'school week'
   end

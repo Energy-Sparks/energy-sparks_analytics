@@ -5,6 +5,7 @@ class ContentBase
     @relevance = check_relevance
     @not_enough_data_exception = false
     @calculation_worked = true
+    @today = Date.today
   end
 
   def relevance
@@ -21,6 +22,19 @@ class ContentBase
 
   def structured_content
     []
+  end
+
+  def meter_readings_up_to_date_enough?
+    max_days_out_of_date_while_still_relevant.nil? ? true : (days_between_today_and_last_meter_date < max_days_out_of_date_while_still_relevant)
+  end
+
+  protected def max_days_out_of_date_while_still_relevant
+    nil
+  end
+
+  protected def days_between_today_and_last_meter_date
+    return 0 if check_relevance == :never_relevant
+    (@today - aggregate_meter.amr_data.end_date).to_i
   end
 
   def check_relevance

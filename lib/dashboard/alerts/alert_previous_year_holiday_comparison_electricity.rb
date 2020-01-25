@@ -10,6 +10,10 @@ class AlertPreviousYearHolidayComparisonElectricity < AlertHolidayComparisonBase
     :alert_group_by_week_electricity_14_months
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    60
+  end
+  
   def fuel_type; :electricity end
 
   def self.template_variables

@@ -5,7 +5,7 @@ require_rel '../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  no_schools:                  ['bathampton*'], # ['Round.*'],
+  no_schools:                  ['abbey*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   schools:                  ['.*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   source:                   :analytics_db, # :aggregated_meter_collection, 
@@ -33,7 +33,8 @@ script = {
                 no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
                 no_benchmark:          %i[school alert ], # detail],
                 # asof_date:          (Date.new(2018,6,14)..Date.new(2019,6,14)).each_slice(7).map(&:first),
-                asof_date:      Date.new(2019,10,16)
+               asof_date:      Date.new(2019,10,16)
+               # asof_date:      Date.new(2020,1,7)
               } 
   }
 }

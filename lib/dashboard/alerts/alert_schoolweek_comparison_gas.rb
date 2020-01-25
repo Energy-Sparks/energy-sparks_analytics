@@ -26,6 +26,10 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
     specific.merge(superclass.template_variables)
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+
   def self.schoolweek_adjusted_gas_variables
     {
       current_week_kwhs:              { description: 'List of current school week kWh values', units:  String },

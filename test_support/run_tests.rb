@@ -210,7 +210,6 @@ class RunTests
   end
 
   def run_equivalences(control)
-    puts "Got here #{schools_list.join('; ')}"
     schools_list.sort.each do |school_name|
       school = load_school(school_name)
       puts "=" * 100

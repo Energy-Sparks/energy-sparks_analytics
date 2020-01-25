@@ -17,6 +17,10 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
     super(school, :baseloadchangeshortterm)
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+
   TEMPLATE_VARIABLES = {
     average_baseload_last_year_kw: {
       description: 'average baseload over last year',

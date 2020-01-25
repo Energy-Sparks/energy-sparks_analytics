@@ -11,6 +11,7 @@ class AlertMeterConsolidationOpportunityBase < AlertAnalysisBase
   def initialize(school, fuel_type)
     super(school, :meter_consolidation)
     @fuel_type = fuel_type
+    @relevance = meters.length > 1 ? :relevant : :never_relevant
   end
 
   def self.template_variables
@@ -87,7 +88,6 @@ class AlertMeterConsolidationOpportunityBase < AlertAnalysisBase
   end
 
   private def calculate(asof_date)
-    @number_of_meters = 1
     @annual_total_standing_charge = daily_standing_charges_for_live_meters.values.sum * 365.0
     sorted_standing_charges = daily_standing_charges_for_live_meters.values.sort
     low_annual_saving = sorted_standing_charges.first * 365.0
