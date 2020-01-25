@@ -5,7 +5,7 @@ require 'json'
 require 'date'
 require 'logger'
 
-class UKElecticityGridMix
+class UKElectricityGridMix
   include Logging
 
   GRIDCARBONINTENSITYFACTORSKGPERKWH = {

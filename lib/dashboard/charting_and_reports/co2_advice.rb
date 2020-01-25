@@ -329,7 +329,7 @@ class DashboardEnergyAdvice
       ).freeze
 
     private def uk_grid_sources
-      @uk_grid_sources ||= UKElecticityGridMix.new
+      @uk_grid_sources ||= UKElectricityGridMix.new
     end
 
     private def grid_carbon_intensity_2018_html_table

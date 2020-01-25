@@ -189,7 +189,7 @@ class DashboardConfiguration
       },
     },
     electricity_profit_loss: {   
-      name:                   'Electicity Costs',
+      name:                   'Electricity Costs',
       content_class:           AdviceElectricityCosts,
       excel_worksheet_name:   'ElectCosts',
       charts: %i[
