@@ -13,27 +13,34 @@ module Benchmarking
     end
 
     def content(school_ids: nil, filter: nil, user_type: nil)
+      charts = nil
+      tables = nil
+      caveats = nil
       chart       = run_chart(school_ids, filter, user_type)                if charts?
       table_html  = run_table(school_ids, filter, :html, user_type)         if tables?
       table_text  = run_table(school_ids, filter, :text, user_type)         if tables?
       composite   = run_table(school_ids, filter, :text_and_raw, user_type) if tables?
 
-      charts = charts? ? [
-        { type: :html,                  content: chart_introduction_text },
-        { type: :chart_name,            content: chart_name },
-        { type: :chart,                 content: chart },
-        { type: :html,                  content: chart_interpretation_text }
-      ] : nil
+      if (tables? || charts?) && table_text[:rows].empty?
+        tables = { type: :html, content: '<h3>There are no schools to report using this filter for this benchmark</h3>' }
+      else
+        charts = [
+          { type: :html,                  content: chart_introduction_text },
+          { type: :chart_name,            content: chart_name },
+          { type: :chart,                 content: chart },
+          { type: :html,                  content: chart_interpretation_text }
+        ] if charts?
 
-      tables = tables? ? [
-        { type: :html,                  content: table_introduction_text},
-        { type: :table_html,            content: table_html },
-        { type: :table_text,            content: table_text },
-        { type: :table_composite,       content: composite },
-        { type: :html,                  content: table_interpretation_text }
-      ] : nil
+        tables = [
+          { type: :html,                  content: table_introduction_text},
+          { type: :table_html,            content: table_html },
+          { type: :table_text,            content: table_text },
+          { type: :table_composite,       content: composite },
+          { type: :html,                  content: table_interpretation_text }
+        ] if tables?
 
-      caveats = [{ type: :html,         content: caveat_text}]
+        caveats = [{ type: :html,         content: caveat_text}]
+      end 
 
       [preamble_content, charts, tables, caveats, drilldown(school_ids, user_type)].compact.flatten
     end

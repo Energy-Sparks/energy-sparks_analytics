@@ -26,8 +26,8 @@ script = {
     run_content:    {
       asof_date:      Date.new(2019,10,16),
       # asof_date:      Date.new(2019,11,25),
-      no_user:          { user_role: :admin }, 
-      filter:         nil, # ->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
+      user:          { user_role: :admin }, 
+      filter:        ->{ addp_area.include?('Frome') } , # nil, # ->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
     },
     compare_results: [
       { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Benchmark\Base\\' },
