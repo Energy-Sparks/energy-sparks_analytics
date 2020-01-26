@@ -43,6 +43,7 @@ class RunAdultDashboard < RunCharts
 
     if advice.has_structured_content?
       puts "Advice has structured content"
+      puts "Has #{advice.structured_content.length} components and is called #{advice.class.name}"
       
       advice.structured_content.each do |component_advice|
         puts component_advice[:title]

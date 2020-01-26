@@ -11,14 +11,14 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     tables = ''
     all_meters = meter_list.nil? ? [@school.electricity_meters, @school.heat_meters].flatten : meter_list
     all_meters.each do |meter|
+      name = meter.name.nil? || meter.name.strip.empty? ?  '' : "(#{meter.name})"
       tariff_name, table_data, real_tariff = single_tariff_table_html(meter)
       table = %{
         <h3>
           <%= meter.fuel_type.to_s.capitalize %>
           meter
           <%= meter_identifier_type(meter.fuel_type) %>
-          <%= meter.mpan_mprn %>
-          ( <%= meter.name %> ) :
+          <%= meter.mpan_mprn %> <%= name %>:
         </h3>
         <p>
           <%= tariff_name %>

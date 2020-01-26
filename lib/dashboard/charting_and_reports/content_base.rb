@@ -21,6 +21,7 @@ class ContentBase
   end
 
   def structured_content
+    puts "GOT HERERERERERERERRRRERERER"
     []
   end
 
@@ -80,6 +81,10 @@ class ContentBase
 
   def self.benchmark_template_variables
     flatten_front_end_template_variables.select { |_name_sym, data| data.key?(:benchmark_code) }
+  end
+
+  def email_us_html(subject, text = 'contact us')
+    '<a href="mailto:hello@energysparks.uk?subject=' + subject + '">' + text + '</a>'
   end
 
   def self.front_end_template_variables

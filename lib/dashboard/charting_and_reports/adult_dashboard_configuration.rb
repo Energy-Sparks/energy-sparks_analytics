@@ -192,14 +192,8 @@ class DashboardConfiguration
       name:                   'Electricity Costs',
       content_class:           AdviceElectricityCosts,
       excel_worksheet_name:   'ElectCosts',
-      charts: %i[
-        electricity_by_month_year_0_1_finance_advice
-        electricity_cost_comparison_last_2_years_accounting
-        electricity_cost_1_year_accounting_breakdown
-        accounting_cost_daytype_breakdown_electricity
-      ],
-      promoted_variables: {
-      }
+      charts: %i[],
+      promoted_variables: {}
     },
     gas_annual: {   
       name:                   'Overview of annual gas consumption',

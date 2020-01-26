@@ -16,7 +16,7 @@ class HtmlTableFormatting
             <thead>
               <tr class="thead-dark">
                 <% @header.each do |header_titles| %>
-                  <th scope="col"> <%= header_titles.to_s %> </th>
+                  <th scope="col" class="text-center"> <%= header_titles.to_s %> </th>
                 <% end %>
               </tr>
             </thead>

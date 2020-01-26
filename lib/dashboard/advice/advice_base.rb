@@ -130,6 +130,10 @@ class AdviceBase < ContentBase
   def self.excel_worksheet_name
     definition[:excel_worksheet_name]
   end
+ 
+  def erb_bind(text)
+    ERB.new(text).result(binding)
+  end
 
   private_class_method def self.definition
     DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.select { |_key, defn| defn[:content_class] == self }.values[0]

@@ -50,6 +50,10 @@ class DashboardEnergyAdvice
       end
     end
 
+    def erb_bind(text)
+      ERB.new(text).result(binding)
+    end
+    
     protected
 
     def adjective(percent_increase)
@@ -157,11 +161,6 @@ class DashboardEnergyAdvice
               consolidation
             </li>
           </ul>
-      <p>
-        The remainder of this web page represents your 'Accounting Costs', the
-        information is kept up to date on a daily basis from Energy Spark's smart
-        meter feeds for your school.
-      </p>
     ).freeze
 
     INSTRUCTIONS_IF_ACCOUNTING_TARIFF_INFORMATION_MISSING = %q(
@@ -454,9 +453,8 @@ class DashboardEnergyAdvice
     def generate_valid_advice
       header_template = %q(
         <p>
-          This is the same chart but presented in cost terms using the tariff information
-          we have for you. The tariff may have changed over the course of the 2 years
-          and hence some of your savings or gains may have come from tariff changes.
+          This first chart compares your monthly consumption
+          over the last 2 years.
         </p>
       ).freeze
 
@@ -513,12 +511,9 @@ class DashboardEnergyAdvice
 
     TWO_YEAR_COMPARISON_CHART_BROKEN_DOWN_TO_STANDING_CHARGE_CHART_INFO = %q(
       <p>
-        You can use the chart to quickly assess changes in electricity costs.
+        You can use the chart to quickly assess changes in <%= fuel_type %> costs.
       <p>
       <%= change_in_usage_description(fuel_type) %>
-      <p>
-          These are broken down as follows by charge type:
-      </p>
     ).freeze
 
     private def aggregate_meter_p_and_l_table
@@ -573,7 +568,6 @@ class DashboardEnergyAdvice
 
     def generate_valid_advice
       @header_advice = generate_html(TWO_YEAR_COMPARISON_CHART_BROKEN_DOWN_TO_STANDING_CHARGE_CHART_INFO, binding)
-
       footer_template = %q(
         <p>
         This is the same information in tabular form:
