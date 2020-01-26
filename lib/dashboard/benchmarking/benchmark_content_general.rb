@@ -760,6 +760,15 @@ module Benchmarking
         </p>
       )
     end
+
+    def table_introduction_text
+      %q(
+        <p>
+          Opportunities to save money through consolidation will only
+          exist if a school has multiple electricity meters.
+        </p>
+      )
+    end
   end
   #=======================================================================================  
   class BenchmarkContentGasMeterConsolidation < BenchmarkContentBase
@@ -773,6 +782,15 @@ module Benchmarking
           network provider or energy company to reduce the number of meters in a
           school to reduce annual standing order costs, this consolidation
           often costs about &pound;1,000 but can provide guaranteed annual savings.
+        </p>
+      )
+    end
+
+    def table_introduction_text
+      %q(
+        <p>
+          Opportunities to save money through consolidation will only
+          exist if a school has multiple gas meters.
         </p>
       )
     end
