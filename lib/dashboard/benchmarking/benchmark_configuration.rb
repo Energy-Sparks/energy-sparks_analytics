@@ -27,11 +27,16 @@ module Benchmarking
       column_definition.key?(key) && column_definition[key]
     end
 
-    def self.structured_pages(_user_type_hash, filter_out = nil)
+    def self.structured_pages(user_type_hash, filter_out = nil)
       CHART_TABLE_GROUPING.map do |group|
+        visible_benchmarks = if ContentBase.system_admin_type?(user_type_hash)
+          group[:benchmarks]
+        else
+          group[:benchmarks].select { |key| !CHART_TABLE_CONFIG[key].fetch(:systems_admin_only, false) }
+        end
         {
           name:  group[:name],
-          benchmarks: group[:benchmarks].map{ |key| [key, CHART_TABLE_CONFIG[key][:name]] }.to_h
+          benchmarks: visible_benchmarks.map{ |key| [key, CHART_TABLE_CONFIG[key][:name]] }.to_h
         }
       end
     end
@@ -248,6 +253,7 @@ module Benchmarking
           { data: ->{ shol_trat },  name: 'Rating based on number of recent years with reduction',  units: Float },
           { data: ->{ shol_ratg },  name: 'Overall rating',  units: Float },
         ],
+        systems_admin_only: true,
         sort_by: [1],
         type: %i[table]
       },

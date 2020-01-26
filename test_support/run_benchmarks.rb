@@ -52,7 +52,7 @@ class RunBenchmarks
 
     puts "Running content config #{config}"
     content_manager = Benchmarking::BenchmarkContentManager.new(config[:asof_date])
-    ap content_manager.structured_pages
+    ap content_manager.structured_pages(user_type: config[:user])
     content_list = content_manager.available_pages(filter: config[:filter])
 
     content_list.each do |page_name, description|
