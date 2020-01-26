@@ -640,12 +640,20 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def index_of_most_recent_date
-    converted_to_date_or_nil = []
-    @chart_data[:x_axis].each do |series_name|
-      converted_to_date_or_nil.push(parse_axis_date(series_name))
+    dr = date_range
+    last_date = dr.compact.sort { |a, b| a.first <=> b.first }.last
+    dr.find_index(last_date)
+  end
+
+  def date_range
+    @chart_data[:x_axis].map do |bar_name|
+      if ['Exemplar School', 'Regional Average', 'National Average'].include?(bar_name)
+        nil
+      else
+        date1, date2 = bar_name.split(' to ')
+        Date.parse(date1)..Date.parse(date2)
+      end
     end
-    sorted_list = converted_to_date_or_nil.sort { |a,b| a && b ? b <=> a : b ? 1 : -1 } # newest date 1st, nils at end
-    converted_to_date_or_nil.find_index(sorted_list[0])
   end
 
   def parse_axis_date(series_name)
