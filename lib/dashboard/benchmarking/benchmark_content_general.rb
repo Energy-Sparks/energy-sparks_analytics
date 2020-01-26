@@ -374,6 +374,14 @@ module Benchmarking
         </p>
       )
     end
+    protected def table_introduction_text
+      %q( 
+        <p>
+          Schools with negative 'Saving if matched exemplar school' have
+          heating consumption below that of the best schools, which is good.
+        </p>
+       )
+    end
   end
   #=======================================================================================
   class BenchmarkContentChangeInAnnualHeatingConsumption < BenchmarkContentBase
