@@ -159,10 +159,6 @@ class DashboardEnergyAdvice
     ).freeze
 
     INTRO_TO_SCHOOL_CO2_GAS_AND_ELECTRICITY_2 = %q(
-      <h2>
-        Energy Sparks analysis of your school's greenhouse gas emissions from gas
-        and electricity consumption
-      </h2>
       <p>
         Energy Sparks can be used to analyse the carbon dioxide emissions from your
         school's electricity and gas consumption.
