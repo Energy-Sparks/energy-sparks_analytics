@@ -985,9 +985,6 @@ class Aggregator
     if benchmark_required?(SeriesNames::SOLARPV)
       set_benchmark_buckets(@bucketed_data[SeriesNames::STORAGEHEATERS], 0.0, 0.0, 0.0)
     end
-
-    puts "Injecting national, regional and exemplar benchmark data: for #{@bucketed_data.keys}"
-    puts @x_axis
   end
 
   def benchmark_required?(fuel_type)
