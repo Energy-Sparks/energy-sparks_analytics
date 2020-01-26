@@ -230,8 +230,7 @@ module Benchmarking
           { data: ->{ elbb_blpp * 1000.0 }, name: 'Baseload per pupil (W)', units: :w, chart_data: true},
           { data: ->{ elbb_lygb },  name: 'Annual cost of baseload', units: :£},
           { data: ->{ elbb_lykw },  name: 'Average baseload kW', units: :w},
-          { data: ->{ elbb_svex },  name: 'Saving if moved to exemplar', units: :£},
-          { data: ->{ elbb_lygb },  name: 'Annual cost of baseload', units: :£},
+          { data: ->{ [0.0, elbb_svex].max },  name: 'Saving if moved to exemplar', units: :£},
           { data: ->{ elbb_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
