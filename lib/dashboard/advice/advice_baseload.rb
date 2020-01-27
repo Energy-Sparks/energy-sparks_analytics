@@ -29,6 +29,7 @@ class AdviceBaseload < AdviceElectricityBase
     charts_and_html.push( { type: :html,  content: explanation_of_baseload } )
     charts_and_html.push( { type: :html,  content: benefit_of_moving_to_exemplar_baseload } )
     charts_and_html.push( { type: :chart, content: baseload_one_year_chart } )
+    charts_and_html.push( { type: :chart_name, content: baseload_one_year_chart[:config_name] } )
     charts_and_html.push( { type: :html,  content: chart_seasonal_trend_comment } ) if max_baseload_period_years > 0.75
     charts_and_html.push( { type: :html,  content: chart_drilldown_explanation } )
 
@@ -36,6 +37,7 @@ class AdviceBaseload < AdviceElectricityBase
       charts_and_html.push( { type: :html,  content: '<h2>Electricity Baseload - Longer Term</h2>' } )
       charts_and_html.push( { type: :html,  content: longterm_chart_intro } )
       charts_and_html.push( { type: :chart, content: baseload_longterm_chart } )
+      charts_and_html.push( { type: :chart_name, content: baseload_longterm_chart[:config_name] } )
       charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
     end
     charts_and_html
