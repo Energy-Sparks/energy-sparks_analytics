@@ -3,6 +3,11 @@ module Benchmarking
   class BenchmarkManager
     include Logging
     class DatabaseRow < OpenStruct
+      attr_reader :school_id
+      def initialize(school_id, school_data)
+        super(school_data)
+        @school_id = school_id
+      end
       def zero(value)
         value.nil? ? 0.0 : value
       end
@@ -45,12 +50,28 @@ module Benchmarking
 
     def run_benchmark_chart(today, report, school_ids, chart_columns_only = false, filter = nil, user_type = nil)
       config = self.class.chart_table_config(report)
-      table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter, user_type)
+      table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter, :raw, user_type)
       create_chart(report, config, table, true)
     end
 
     # filter e.g. for area: ->{ addp_area.include?('Highlands') }
     def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
+      @school_name_urn_map = school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
+      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, user_type)
+    end
+
+    def drilldown_class(report)
+      self.class.chart_table_config(report).fetch(:drilldown, nil)
+    end
+
+    private
+
+    def benchmark_has_drilldown?(report)
+      config = self.class.chart_table_config(report)
+      config[:columns].any?{ |column_definition| column_definition.key?(:content_class) }
+    end
+
+    def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       results = []
       full_config = self.class.chart_table_config(report)
       config = hide_columns(full_config, user_type)
@@ -62,7 +83,7 @@ module Benchmarking
         school_data_last_year = @benchmark_database.fetch(last_year){{}}.fetch(school_id)
         school_data.merge!(dated_attributes('_last_year', school_data_last_year))
         next unless school_data && school_data_last_year
-        row  = DatabaseRow.new(school_data)
+        row  = DatabaseRow.new(school_id, school_data)
         next unless filter_row(row, filter)
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
@@ -73,11 +94,15 @@ module Benchmarking
       format_table(config, results, medium)
     end
 
-    def drilldown_class(report)
-      self.class.chart_table_config(report).fetch(:drilldown, nil)
+    def school_map(asof_date, school_ids, user_type)
+      schools = run_benchmark_table_private(asof_date, :school_information, school_ids, false, nil, :raw, user_type)
+      schools.map do |school_data|
+        [
+          school_data[2], 
+          { name: school_data[0], urn: school_data[1]}
+        ]
+      end.to_h
     end
-
-    private
 
     def hide_columns(config, user_type)
       new_config = config.clone
@@ -91,7 +116,7 @@ module Benchmarking
       if config[:sort_by].is_a?(Array)
         sort_table_by_column!(results, config)
       elsif config[:sort_by].is_a?(Method)
-        results.sort! { |a, b| config[:sort_by].call(a, b) }
+        results.sort! { |a, b| config[:sort_by].call(a[:data], b[:data]) }
       end
     end
 
@@ -119,37 +144,41 @@ module Benchmarking
 
     def sort_compare(row1, row2, sort_col, sort_col_type)
       if sort_col_type == :timeofday
-        time_of_day_compare(row1[sort_col], row2[sort_col])
+        time_of_day_compare(row1[:data][sort_col], row2[:data][sort_col])
       elsif sort_col_type == String
-        row1[sort_col] <=> row2[sort_col]
+        row1[:data][sort_col] <=> row2[:data][sort_col]
       else
-        row1[sort_col].to_f <=> row2[sort_col].to_f
+        row1[:data][sort_col].to_f <=> row2[:data][sort_col].to_f
       end
     end
 
     def format_table(table_definition, rows, medium)
       header = table_definition[:columns].map{ |column_definition| column_definition[:name] }
+      raw_rows = rows.map{ |d| d[:data] }
+      school_ids = rows.map{ |d| d[:school_id] }
       case medium
       when :raw
-        [header] + rows
+        [header] + raw_rows
       when :text, :text_and_raw
-        formatted_rows = format_rows(rows, table_definition[:columns], medium)
+        formatted_rows = format_rows(raw_rows, table_definition[:columns], medium, school_ids)
         {header: header, rows: formatted_rows}
       when :html
-        formatted_rows = format_rows(rows, table_definition[:columns], medium)
+        formatted_rows = format_rows(raw_rows, table_definition[:columns], medium, school_ids)
         HtmlTableFormatting.new(header, formatted_rows).html
       end
     end
 
-    def format_rows(rows, column_definitions, medium)
-      column_units = column_definitions.map{ |column_definition| column_definition[:units] }
-      column_sense = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
+    def format_rows(rows, column_definitions, medium, school_ids)
+      column_units    = column_definitions.map{ |column_definition| column_definition[:units] }
+      column_sense    = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
+      content_classes = column_definitions.map{ |column_definition| column_definition.dig(:content_class) }
 
       formatted_rows = rows.map do |row|
         row.each_with_index.map do |value, index|
           sense = sense_column(column_sense[index])
+          drilldown = content_classes[index]
           if column_units[index] == String
-            format_cell_string(value, medium, sense)
+            format_cell_string(value, medium, sense, drilldown, school_ids[index])
           else
             format_cell(column_units[index], value, medium, sense)
           end
@@ -161,17 +190,29 @@ module Benchmarking
       sense.nil? ? nil : { sense: sense }
     end
 
-    def format_cell_string(value, medium, sense)
+    def format_cell_string(value, medium, sense, drilldown, school_id)
       if medium == :text_and_raw
         data = {
           formatted: value,
           raw: value,
         }
         data.merge!(sense) unless sense.nil?
+        unless school_id.nil? || drilldown.nil?
+          data[:urn] = @school_name_urn_map[school_id][:urn]
+          data[:drilldown_content_class] = drilldown
+        end
         data
       else
         value
       end
+    end
+
+    def content_class_urn_info(school_name, content_class)
+      {
+        school_name:    school_name,
+        urn:            @school_name_urn_map[school_name],
+        content_class:  content_class   
+      }
     end
 
     def format_cell(units, value, medium, sense)
@@ -202,7 +243,7 @@ module Benchmarking
                       else
                         1 + (self.class.y2_axis_column?(config) ? 1 : 0)
                       end
-      !calculated_row.nil? && calculated_row.compact.length > min_non_nulls
+      !calculated_row.nil? && !calculated_row[:data].nil? && calculated_row[:data].compact.length > min_non_nulls
     end
 
     def create_chart(chart_name, config, table, include_y2 = false)
@@ -294,11 +335,12 @@ module Benchmarking
       row.instance_exec(&filter)
     end
 
-    def calculate_row(row, report, chart_columns_only, school_id_debug)
-      report[:columns].map do |column_specification|
+    def calculate_row(row, report, chart_columns_only, school_id)
+      row_data = report[:columns].map do |column_specification|
         next if chart_columns_only && !self.class.chart_column?(column_specification)
-        calculate_value(row, column_specification, school_id_debug)
+        calculate_value(row, column_specification, school_id)
       end
+      { data: row_data, school_id: school_id }
     end
 
     def rating_column?(column_specification)
@@ -327,8 +369,6 @@ module Benchmarking
     def all_school_ids(selected_dates)
       list_of_school_ids = {}
       selected_dates.each do |date|
-        # puts "Got here: #{@benchmark_database.class.name}"
-        # ap @benchmark_database
         school_ids = @benchmark_database[date].keys
         school_ids.each do |school_id|
           list_of_school_ids[school_id] = true

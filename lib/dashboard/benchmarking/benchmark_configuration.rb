@@ -126,7 +126,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentEnergyPerPupil,
         name:     'Annual energy use per pupil',
         columns:  [
-          { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
+          { data: 'addp_name',              name: 'School name', units: String, chart_data: true, content_class: AdviceBenchmark },
           { data: ->{ elba_£pup },          name: 'Annual electricity £/pupil', units: :£, chart_data: true },
           { data: ->{ gsba_£pup },          name: 'Annual gas £/pupil', units: :£, chart_data: true },
           { data: ->{ shan_£pup },          name: 'Annual storage heater £/pupil', units: :£, chart_data: true },
@@ -548,8 +548,12 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:     'School information - used for drilldown, not directly presented to user',
         columns:  [
-          { data: 'addp_name',     name: 'School name', units: String, chart_data: false },
+          # the ordered and index of these 3 columns is important as hardcoded
+          # indexes are used else where in the code [0] etc. to map between id and urn
+          # def school_map()
+          { data: 'addp_name',     name: 'School name', units: String,  chart_data: false },
           { data: 'addp_urn',      name: 'URN',         units: Integer, chart_data: false },
+          { data: ->{ school_id }, name: 'school id',   units: Integer, chart_data: false  }
         ],
         sort_by: [1],
         type: %i[table]
