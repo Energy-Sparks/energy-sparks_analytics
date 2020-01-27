@@ -25,12 +25,13 @@ class AdviceMeterBreakdownBase < AdviceBase
     charts_and_html = []
     charts_and_html.push( { type: :html, content: '<h2>Breakdown of underlying meters</h2>' } )
     charts_and_html += debug_content
-    charts_and_html.push( { type: :html,  content: introduction } )
-    charts_and_html.push( { type: :html,  content: chart_intro } )
-    charts_and_html.push( { type: :chart, content: breakdown_chart } )
-    charts_and_html.push( { type: :html,  content: table_timescale_html } )
-    charts_and_html.push( { type: :html,  content: table_breakdown_html } )
-    charts_and_html.push( { type: :html,  content: table_comments } )
+    charts_and_html.push( { type: :html,       content: introduction } )
+    charts_and_html.push( { type: :html,       content: chart_intro } )
+    charts_and_html.push( { type: :chart,      content: breakdown_chart } )
+    charts_and_html.push( { type: :chart_name, content: breakdown_chart[:config_name] } )
+    charts_and_html.push( { type: :html,       content: table_timescale_html } )
+    charts_and_html.push( { type: :html,       content: table_breakdown_html } )
+    charts_and_html.push( { type: :html,       content: table_comments } )
     charts_and_html
   end
 
