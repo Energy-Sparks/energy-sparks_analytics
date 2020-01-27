@@ -20,6 +20,10 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
     specific.merge(self.superclass.template_variables)
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+
   TEMPLATE_VARIABLES = {
     heating_on_times_table: {
       description: 'Last 7 days, heating on times and recommended heating start times with optimal start control and frost protection',

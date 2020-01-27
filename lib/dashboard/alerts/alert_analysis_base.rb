@@ -206,10 +206,8 @@ class AlertAnalysisBase < ContentBase
   end
 
   def valid_alert?
-    valid_content?
+    valid_content? && meter_readings_up_to_date_enough?
   end
-
-
 
   def self.print_all_formatted_template_variable_values
     puts 'Available variables and values:'

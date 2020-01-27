@@ -21,7 +21,6 @@ class ContentBase
   end
 
   def structured_content
-    puts "GOT HERERERERERERERRRRERERER"
     []
   end
 
