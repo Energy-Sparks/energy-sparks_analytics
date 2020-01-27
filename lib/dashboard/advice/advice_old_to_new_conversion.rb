@@ -106,7 +106,7 @@ class AdviceOldToNewConversion < AdviceBase
               info.push({ type: :html,          content: chart[:advice_header]  }) if content[:type] == :chart_and_text && components[0]
               info.push({ type: :chart,         content: chart                  }) if components[1]
               info.push({ type: :chart_name,    content: chart[:config_name]    }) if components[1]
-              info.push({ type: :analytics_html,content: "<p><b>Chart inserted here: #{chart[:config_name]}</b></p>"}) if components[1]
+#              info.push({ type: :analytics_html,content: "<p><b>Chart inserted here: #{chart[:config_name]}</b></p>"}) if components[1]
               info.push({ type: :html,          content: chart[:advice_footer]  }) if content[:type] == :chart_and_text && components[2]
               info
             end
