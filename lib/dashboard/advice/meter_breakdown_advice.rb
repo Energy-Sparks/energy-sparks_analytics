@@ -14,7 +14,11 @@ class AdviceMeterBreakdownBase < AdviceBase
   end
 
   def summary
-    nil
+    @summary ||= summary_text
+  end
+
+  def summary_text
+    'A breakdown to individual meters'
   end
 
   def breakdown_chart
