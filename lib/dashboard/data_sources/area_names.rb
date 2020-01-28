@@ -120,6 +120,17 @@ class AreaNames
       met_office_forecast_id:     0,
       latitude:                   51.7520,
       longitude:                  -1.2577
+    },
+    london: {
+      name:                       'London',
+      temperature_filename:       'London temperaturedata.csv',
+      solar_ir_filename:          'London solardata.csv',
+      solar_pv_filename:          'pv data London.csv',
+      holiday_calendar:           'Oxford holidays.csv',
+      yahoo_weather_forecast_id:  'london, uk', # untested 20Oct2019 post withdrawal of free API
+      met_office_forecast_id:     0,
+      latitude:                   51.50642,
+      longitude:                  -0.12721
     }
   }.freeze
 end

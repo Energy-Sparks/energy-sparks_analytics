@@ -23,7 +23,13 @@ class AnalysticsSchoolAndMeterMetaData
   end
 
   def meter_attributes(identifier, identifier_type = :name)
-    urn = school(identifier, identifier_type).school.urn
+    school = school(identifier, identifier_type)
+    if school.nil?
+      puts "Unable to find school for #{identifier} #{identifier_type}"
+      puts Thread.current.backtrace
+      return nil
+    end
+    urn = school.school.urn
     yaml_meter_attributes_database.fetch(urn){ {} }.fetch(:meter_attributes) { {} }
   end
 
@@ -75,6 +81,12 @@ class AnalysticsSchoolAndMeterMetaData
 
   def yaml_school_database
     @schools_metadata ||= YAML::load_file(school_metadata_filename)
+=begin
+    @schools_metadata.keys.each do |school_name|
+      name = school_name.gsub("'", %q(\\\'))
+      puts "\'#{name}\' => :downloadfromfrontend,"
+    end
+=end
     @schools_metadata.delete_if { |name, config| config.key?(:deprecated) }
     @schools_metadata
   end

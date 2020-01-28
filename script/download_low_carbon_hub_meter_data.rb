@@ -101,10 +101,15 @@ def print_all_available_meter_data
   end
 end
 
-request = {
+old_request = {
   name:     'Long Furlong',
   meter_id: 216057958,
   urn:      123085
+}
+request = {
+  name:     'Windmill Primary School',
+  meter_id: 216057754,
+  urn:      9312527
 }
 
 # print_all_available_meter_data

@@ -21,6 +21,10 @@ class MeterReadingsDownloadBase
   end
 
   def self.meter_reading_factory(download_type, meter_collection, meter_attributes)
+    if meter_collection.nil?
+      puts "Missing meter collection"
+      return
+    end
     Logging.logger.info "Creating a meter reading download of type #{download_type}" # not sure how to access logger?
     case download_type
     when :bathcsv

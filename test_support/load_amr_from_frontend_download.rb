@@ -70,7 +70,7 @@ class LoadSchoolFromFrontEndDownload < MeterReadingsDownloadCSVBase
     sub_date = sub_date_str.length > 4 ? Date.parse(sub_date_str) : nil
     halfhour_kwh_x48 = line[column_index(@column_names, '00:30')..column_index(@column_names, '00:00')].map(&:to_f)
     calced_day_kwh = halfhour_kwh_x48.inject(:+)
-    log.info "Date #{date} sum of half hour readings #{calced_day_kwh} != provided total #{one_day_total_kwh}" if calced_day_kwh != one_day_total_kwh
+    logger.info "Date #{date} sum of half hour readings #{calced_day_kwh} != provided total #{one_day_total_kwh}" if calced_day_kwh != one_day_total_kwh
     one_days_data = OneDayAMRReading.new(meter.mpan_mprn, date, bad_data_status, sub_date, DateTime.now, halfhour_kwh_x48)
     meter.amr_data.add(date, one_days_data)
   end
