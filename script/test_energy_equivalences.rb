@@ -11,8 +11,8 @@ end
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/equivalences %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  schools:                  ['bathampton*'], # ['Round.*'],
-  source:                   :aggregated_meter_collection,
+  schools:                  ['.*'], # ['Round.*'],
+  source:                   :analytics_db,
   logger2:                  { name: "./log/equivalences %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   equivalences:          {
                               control: {

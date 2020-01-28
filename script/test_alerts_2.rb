@@ -7,7 +7,7 @@ script = {
   # ruby_profiler:            true,
   no_schools:                  ['round*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
-  schools:                  ['Round.*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['.*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   source:                   :analytics_db, # :aggregated_meter_collection, 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
@@ -18,7 +18,7 @@ script = {
                 print_school_name_banner: true,
                 # raw_variables_for_saving
                 no_outputs:           %i[front_end_template_variables front_end_template_data front_end_template_tables front_end_template_table_data], # front_end_template_variables front_end_template_data raw_variables_for_saving],
-                no_save_and_compare:  {
+                save_and_compare:  {
                                       summary:      true,
                                       h_diff:     { use_lcs: false, :numeric_tolerance => 0.000001 },
                                       data: %i[

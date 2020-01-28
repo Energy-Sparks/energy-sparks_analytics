@@ -18,13 +18,13 @@ script = {
     },
     # filename:       './TestResults/benchmark_results_data analytics',
 
-    # calculate_and_save_variables: true,
-    asof_date:      Date.new(2019, 10, 16),
+    calculate_and_save_variables: true,
+    asof_date:      Date.new(2020, 1, 20),
     # asof_date:      Date.new(2019,11,25),
     # filter:         ->{ addp_area.include?('Sheffield') },
     # run_charts_and_tables: Date.new(2019,10,16),
     run_content:    {
-      asof_date:      Date.new(2019,10,16),
+      asof_date:      Date.new(2020,1,20),
       # asof_date:      Date.new(2019,11,25),
       user:          { user_role: :admin }, 
       filter:        nil, # ->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
