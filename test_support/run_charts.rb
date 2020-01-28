@@ -125,12 +125,12 @@ class RunCharts
     end
   end
 
-  def run_chart(page_name, chart_name)
+  def run_chart(page_name, chart_name, override = nil)
     logger.info "            #{chart_name}"
     chart_manager = ChartManager.new(@school)
     chart_results = nil
     begin
-      chart_results = chart_manager.run_chart_group(chart_name, nil, true) # chart_override)
+      chart_results = chart_manager.run_chart_group(chart_name, override, true) # chart_override)
       if chart_results.nil?
         puts "Nil chart result for #{chart_name}"
         @failed_charts.push( { school_name: @school.name, chart_name: chart_name, message: 'Unknown', backtrace: nil } )
@@ -188,8 +188,8 @@ class RunCharts
     @worksheets.values.flatten
   end
 
-  def write_html
-    html_file = HtmlFileWriter.new(@school.name)
+  def write_html(filename_suffix = '')
+    html_file = HtmlFileWriter.new(@school.name + filename_suffix)
     @worksheets.each do |worksheet_name, charts|
       html_file.write_header(worksheet_name)
       charts.compact.each do |chart|

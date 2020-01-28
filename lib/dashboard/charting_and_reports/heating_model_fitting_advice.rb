@@ -282,10 +282,13 @@ class DashboardEnergyAdvice
     include Logging
 
     def generate_valid_advice
+
+      meter = @school.meter?(@chart_definition[:meter_definition], true)
+      name = meter.nil? || meter.name.empty? ? '' : "(#{meter.name})"
       header_template = %{
       <%= @body_start %>
         <h1>Heating Regression Model Fitting</h1>
-        <h2>Summary</h2>
+        <h2>Summary: <%= @chart_definition[:meter_definition] %> <%= name %></h2>
         <p>
           In summary:
         </p>

@@ -100,6 +100,8 @@ class RunTests
         run_equivalences(configuration[:control])
       when :kpi_analysis
         run_kpi_calculations(configuration)
+      when :model_fitting
+        run_model_fitting(configuration[:control])
       when :run_benchmark_charts_and_tables
         run_benchmark_charts_and_tables(configuration, @test_script[:schools])
       else
@@ -321,6 +323,21 @@ class RunTests
   def run_benchmark_charts_and_tables(control, schools)
     benchmark = RunBenchmarks.new(control, schools)
     benchmark.run
+  end
+
+  def run_model_fitting(control)
+    logger.info '=' * 120
+    logger.info 'RUNNING MODEL FITTING'
+    failed_charts = []
+    schools_list.sort.each do |school_name|
+      puts banner(school_name)
+      @current_school_name = school_name
+      reevaluate_log_filename
+      school = load_school(school_name)
+      charts = RunModelFitting.new(school)
+      charts.run(control)
+      failed_charts += charts.failed_charts
+    end
   end
 
   def run_alerts(alert_list, control)
