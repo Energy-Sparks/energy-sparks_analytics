@@ -120,7 +120,7 @@ class AdviceCarbon < AdviceStructuredOldToNewConversion
         { type: :text,  advice_class: KwhLastWeek, data: KwhLastWeek::LAST_WEEK_KWH_QUESTIONS_5 },
 
         { type: :text,  advice_class: CO2LastWeek, data: CO2LastWeek::LAST_WEEK_CO2_1 },
-        { type: :chart, advice_class: CO2LastWeek, data: :electricity_kwh_last_7_days_with_co2_intensity_unmodified },
+        { type: :chart, advice_class: CO2LastWeek, data: :electricity_co2_last_7_days_with_co2_intensity_unmodified },
         { type: :text,  advice_class: CO2LastWeek, data: CO2LastWeek::LAST_WEEK_CO2_QUESTIONS_2 },
       ]
     end

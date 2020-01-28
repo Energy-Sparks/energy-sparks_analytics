@@ -211,7 +211,9 @@ class ChartManager
     },
     electricity_co2_last_7_days_with_co2_intensity_unmodified: {
       inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
-      meter_definition: :allelectricity_unmodified
+      meter_definition: :allelectricity_unmodified,
+      x_axis:           :datetime,
+      timescale:        :week
     },
     electricity_kwh_last_7_days_with_co2_intensity: {
       name:             '', # chart 2 of 2 in a section of the carbon emissions tab, dont want header

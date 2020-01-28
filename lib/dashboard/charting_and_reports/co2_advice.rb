@@ -502,6 +502,8 @@ class DashboardEnergyAdvice
 
   class CO2ElectricitykWhLastWeek < CO2AdviceBase
     LAST_WEEK_KWH_4 = %q(
+      <hr>
+      <h2>Variation in your school's electricity carbon emissions during the last week</h2>
       <p>
         <strong>Question</strong>
         : How has the carbon intensity of the National Electricity Grid impacted
