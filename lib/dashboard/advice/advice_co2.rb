@@ -171,9 +171,9 @@ class AdviceCarbon < AdviceStructuredOldToNewConversion
   class CO2Plan < CO2AdviceComponentBase
     include MeterlessMixin
     class CO2Overall < DashboardEnergyAdvice::CO2GasCO2EmissionsLastYear; end
-    @summary = 'Creating a plan to reduce your school\'s carbon emissions'
     def initialize(school)
       super(school)
+      @summary = 'Creating a plan to reduce your school\'s carbon emissions'
       @content_data = [
         { type: :text, advice_class: CO2Overall, data: CO2Overall::OVERALL_CO2_EMISSIONS_QUESTIONS_7 }
       ]
