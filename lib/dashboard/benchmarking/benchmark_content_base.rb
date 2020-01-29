@@ -16,6 +16,7 @@ module Benchmarking
       charts = nil
       tables = nil
       caveats = nil
+
       chart       = run_chart(school_ids, filter, user_type)                if charts?
       table_html  = run_table(school_ids, filter, :html, user_type)         if tables?
       table_text  = run_table(school_ids, filter, :text, user_type)         if tables?
@@ -29,7 +30,7 @@ module Benchmarking
           { type: :chart_name,            content: chart_name },
           { type: :chart,                 content: chart },
           { type: :html,                  content: chart_interpretation_text }
-        ] if charts?
+        ] if charts? && !chart_empty?(chart)
 
         tables = [
           { type: :html,                  content: table_introduction_text},
@@ -122,6 +123,10 @@ module Benchmarking
 
     def run_table(school_ids, filter, medium, user_type = nil)
       benchmark_manager.run_benchmark_table(asof_date, page_name, school_ids, nil, filter, medium, user_type)
+    end
+
+    def chart_empty?(chart_results)
+      chart_results.nil? || !chart_results[:x_data].values.any?{ |data| !data.all?(&:nil?) }
     end
   end
 end
