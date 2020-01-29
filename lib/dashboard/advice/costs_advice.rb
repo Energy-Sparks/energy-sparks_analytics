@@ -25,8 +25,9 @@ end
 class CostsIntroductionAdvice < CostAdviceBase
   def initialize(school)
     super(school)
+    @summary = "Your School\'s #{fuel_type.to_s.capitalize} Costs" 
     @content_data = [
-      { type: :text, advice_class: advice_class, data: "<h2>Your School\'s #{fuel_type.to_s.capitalize} Costs</h2>" },
+      { type: :text, advice_class: advice_class, data: "<h2>#{@summary}</h2>"},
       { type: :text, advice_class: advice_class, data: availability_of_meter_tariffs_text },
       { type: :text, advice_class: advice_class, data: "<p><b>Comparison of last 2 years #{fuel_type.to_s.capitalize} costs</b></p>" },
       { type: :chart_and_text, data: chart_2_year_comparison },
