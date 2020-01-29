@@ -51,6 +51,7 @@ class RunAdultDashboard < RunCharts
       end
     end
     content = advice.content(user_type: control[:user])
+    fe_content = advice.front_end_content(user_type: control[:user])
         
     @failed_charts.concat(advice.failed_charts) unless advice.failed_charts.empty?
 

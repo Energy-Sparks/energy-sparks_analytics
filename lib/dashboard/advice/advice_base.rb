@@ -73,8 +73,8 @@ class AdviceBase < ContentBase
     chart_results
   end
 
-  def front_end_content
-    content.select { |segment| %i[html chart_name enhanced_title].include?(segment[:type]) }
+  def front_end_content(user_type: nil)
+    content(user_type: user_type).select { |segment| %i[html chart_name enhanced_title].include?(segment[:type]) }
   end
 
   def debug_content

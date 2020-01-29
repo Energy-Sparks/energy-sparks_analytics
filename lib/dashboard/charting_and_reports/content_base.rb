@@ -20,7 +20,7 @@ class ContentBase
     false
   end
 
-  def structured_content
+  def structured_content(user_type: nil)
     []
   end
 
