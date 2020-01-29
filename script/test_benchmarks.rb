@@ -26,7 +26,7 @@ script = {
     run_content:    {
       asof_date:      Date.new(2020,1,20),
       # asof_date:      Date.new(2019,11,25),
-      user:          { user_role: :admin }, 
+      user:          { user_role: :admin }, # { user_role: :analytics, staff_role: nil }, # { user_role: :admin }, 
       filter:        ->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
     },
     compare_results: [

@@ -107,7 +107,7 @@ module Benchmarking
     def hide_columns(config, user_type)
       new_config = config.clone
       new_config[:columns].delete_if do |column|
-        rating_column?(column) && !ContentBase.system_admin_type?(user_type)
+        rating_column?(column) && !ContentBase.analytics_user?(user_type)
       end
       new_config
     end

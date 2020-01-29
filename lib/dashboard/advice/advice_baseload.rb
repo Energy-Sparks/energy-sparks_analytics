@@ -21,7 +21,7 @@ class AdviceBaseload < AdviceElectricityBase
     baseload_longterm_chart_timescales[:timescale_years]
   end
 
-  def content
+  def content(user_type: nil)
     charts_and_html = []
     charts_and_html.push( { type: :html, content: '<h2>Electricity Baseload</h2>' } )
     charts_and_html += debug_content

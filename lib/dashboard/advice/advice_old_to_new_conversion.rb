@@ -37,7 +37,7 @@ class AdviceStructuredOldToNewConversion < AdviceBase
     content_information
   end
 
-  def content
+  def content(user_type: nil)
     structured_content.map { |component| component[:content] }.flatten
   end
 
@@ -87,7 +87,7 @@ class AdviceOldToNewConversion < AdviceBase
     old_advice_class.new(@school, nil, nil, nil)
   end
 
-  def content
+  def content(user_type: nil)
     charts_and_html = []
     @content_list.each do |component|
       charts_and_html.push( { type: component[:type], content: component[:content] } )

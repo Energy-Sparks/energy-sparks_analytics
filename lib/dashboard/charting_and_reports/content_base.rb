@@ -70,6 +70,11 @@ class ContentBase
     false
   end
 
+  # JJ spec: { user_role: :analytics, staff_role: nil }
+  def self.analytics_user?(user_type)
+    !user_type.nil? && user_type.key?(:user_role) && user_type[:user_role] == :analytics
+  end
+
   def self.public_user_type?(user_type)
     user_type.nil? || (user_type.key?(:user_role) && user_type[:user_role] == :guest)
   end

@@ -87,7 +87,7 @@ class AdviceBase < ContentBase
     ]
   end
 
-  def content
+  def content(user_type: nil)
     charts_and_html = []
 
     charts_and_html.push( { type: :analytics_html, content: '<hr>' } )
@@ -111,7 +111,12 @@ class AdviceBase < ContentBase
         logger.info e.backtrace
       end
     end
-    # charts_and_html = promote_analytics_html_to_frontend(charts_and_html) if ContentBase.system_admin_type?(@user_type)
+
+    if ContentBase.analytics_user?(user_type)
+      charts_and_html = promote_analytics_html_to_frontend(charts_and_html) if ContentBase.analytics_user?(user_type)
+    else
+      charts_and_html.delete_if{ |content_component| %i[analytics_html].include?(content_component[:type]) }
+    end
     charts_and_html
   end
 

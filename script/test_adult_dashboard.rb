@@ -5,7 +5,7 @@ require_rel '../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['Marksbu.*'], # ['Trinity.*','Farr.*', 'King Ed.*', 'Round.*'],
+  schools:                  ['.*'], # ['Trinity.*','Farr.*', 'King Ed.*', 'Round.*'],
   source:                   :analytics_db,
   # source:                   :aggregated_meter_collection,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
@@ -15,7 +15,7 @@ script = {
                                 chart_manipulation: %i[drilldown timeshift],
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
-                                user:          { user_role: :admin }, # guest
+                                user:          nil, # { user_role: :analytics, staff_role: nil }, # { user_role: :admin }, # guest
                                 no_pages: %i[electricity_profit_loss gas_profit_loss],
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },

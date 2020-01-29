@@ -16,7 +16,7 @@ class AdviceSolarPV < AdviceElectricityBase
     { 'Summary' => { summary: { description: 'benefit of existing or potential pv summary', units: String } } }
   end
 
-  def content
+  def content(user_type: nil)
     @school.solar_pv_panels? ? super : solar_pv_benefit_content
   end
 

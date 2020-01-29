@@ -29,10 +29,10 @@ module Benchmarking
 
     def self.structured_pages(user_type_hash, filter_out = nil)
       CHART_TABLE_GROUPING.map do |group|
-        visible_benchmarks = if ContentBase.system_admin_type?(user_type_hash)
+        visible_benchmarks = if ContentBase.analytics_user?(user_type_hash)
           group[:benchmarks]
         else
-          group[:benchmarks].select { |key| !CHART_TABLE_CONFIG[key].fetch(:systems_admin_only, false) }
+          group[:benchmarks].select { |key| !CHART_TABLE_CONFIG[key].fetch(:analytics_user_type, false) }
         end
         {
           name:  group[:name],
@@ -253,7 +253,7 @@ module Benchmarking
           { data: ->{ shol_trat },  name: 'Rating based on number of recent years with reduction',  units: Float },
           { data: ->{ shol_ratg },  name: 'Overall rating',  units: Float },
         ],
-        systems_admin_only: true,
+        analytics_user_type: true,
         sort_by: [1],
         type: %i[table]
       },

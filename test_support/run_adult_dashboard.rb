@@ -31,7 +31,7 @@ class RunAdultDashboard < RunCharts
 
     # ap definition[:content_class].front_end_template_variables # front end variables
 
-    advice = definition[:content_class].new(@school) # , control[:user])
+    advice = definition[:content_class].new(@school) # , )
 
     puts "Page failed, as advice not valid #{page}" unless advice.valid_alert?
     return unless advice.valid_alert?
@@ -50,7 +50,7 @@ class RunAdultDashboard < RunCharts
         puts component_advice[:content].map { |component| component[:type] }.join('; ')
       end
     end
-    content = advice.content
+    content = advice.content(user_type: control[:user])
         
     @failed_charts.concat(advice.failed_charts) unless advice.failed_charts.empty?
 
