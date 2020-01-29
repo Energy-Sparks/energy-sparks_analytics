@@ -4,7 +4,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   attr_reader :one_year_energy_per_pupil_kwh, :one_year_energy_per_pupil_£, :one_year_energy_per_pupil_co2
   attr_reader :one_year_energy_per_floor_area_kwh, :one_year_energy_per_floor_area_£, :one_year_energy_per_floor_area_co2
   attr_reader :percent_difference_from_average_per_pupil, :percent_difference_adjective
-  attr_reader :simple_percent_difference_adjective, :summary
+  attr_reader :simple_percent_difference_adjective, :summary, :trees_co2
 
   def initialize(school)
     super(school, :annualenergybenchmark)
@@ -99,8 +99,29 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     summary: {
       description: 'Description: £spend/yr',
       units: String
-    }
+    },
+    trees_co2: {
+      description: 'Numner of trees (40 years) equivalence of CO2',
+      units:  :tree
+    },
   }
+
+  def trees_electricity
+    @school.electricity? ? EnergyConversions.new(@school).front_end_convert(:tree_co2_tree, timescale, :allelectricity_unmodified)[:equivalence] : 0.0
+  end
+
+  def trees_gas
+    @school.gas? ? EnergyConversions.new(@school).front_end_convert(:tree_co2_tree, timescale, :gas)[:equivalence] : 0.0
+  end
+
+  def trees
+    trees_electricity + trees_gas
+  end
+
+  def trees_description
+    trees_numbers = trees.round(0).to_i
+    "#{trees_numbers} trees"
+  end
 
   def calculate(asof_date)
     electricity_benchmark_alert     = calculate_alert(AlertElectricityAnnualVersusBenchmark, asof_date)
@@ -132,6 +153,8 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
 
     @percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
     @simple_percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)
+
+    @trees_co2 = trees
 
     @summary  = summary_text
 

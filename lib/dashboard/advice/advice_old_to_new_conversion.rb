@@ -14,6 +14,11 @@ class AdviceStructuredOldToNewConversion < AdviceBase
   include MeterlessMixin
   attr_reader :summary
 
+  def initialize(school)
+    super(school)
+    promote_data if self.class.config.key?(:promoted_variables)
+  end
+
   def has_structured_content?
     true
   end

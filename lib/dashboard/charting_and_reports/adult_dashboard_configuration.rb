@@ -429,8 +429,13 @@ class DashboardConfiguration
       ],
       promoted_variables: {
         AlertEnergyAnnualVersusBenchmark => {
-          rating: :rating,
-        } 
+          rating:                               :rating,
+          last_year_£:                          :last_year_£,
+          last_year_kwh:                        :last_year_kwh,
+          last_year_co2:                        :last_year_co2,
+          trees_co2:                            :trees_co2,
+          summary:                              :summary
+        },
       }
     },
     energy_tariffs: {
