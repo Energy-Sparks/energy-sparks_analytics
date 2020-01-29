@@ -362,7 +362,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:     'Optimum start analysis',
         columns:  [
-          { data: 'addp_name',      name: 'School name',      units: String, chart_data: true, content_class: AdviceGasBoilerMorningStart },
+          { data: 'addp_name',      name: 'School name',      units: String, chart_data: true },
           { data: ->{ opts_avhm },  name: 'Average heating start time last year',    units: :timeofday, chart_data: true },
           { data: ->{ opts_sdst },  name: 'Standard deviation of start time - hours, last year',  units: :opt_start_standard_deviation },
           { data: ->{ opts_ratg },  name: 'Optimum start rating', units: Float },
