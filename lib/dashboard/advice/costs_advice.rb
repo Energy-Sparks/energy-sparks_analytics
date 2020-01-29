@@ -17,6 +17,8 @@ class CostAdviceBase < AdviceOldToNewConversion
     end
   end
 
+  
+
   def erb_bind(text)
     ERB.new(text).result(binding)
   end
@@ -96,6 +98,9 @@ class MeterTariffInfo < CostAdviceBase
       { type: :text, advice_class: self.class, data: tariff_table },
     ]
   end
+  def rating
+    @rating ||= 100.0 * MeterTariffs.accounting_tariff_availability_coverage(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, underlying_meters)
+  end
 end
 
 class ElectricityTariffs < MeterTariffInfo
@@ -109,7 +114,9 @@ class AdviceFuelTypeBase < AdviceStructuredOldToNewConversion
     @summary = fuel_type.to_s.capitalize + ' Costs'
   end
   def relevance
-    aggregate_meter.nil? ? :never_relevant : :relevant
+    return :never_relevant if aggregate_meter.nil?
+    tariffs = MeterTariffs.accounting_tariffs_available_for_period?(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, underlying_meters)
+    tariffs ? :relevant : :never_relevant
   end
   def advice_class; self.class end
   def has_structured_content?; true end
@@ -136,9 +143,7 @@ class AdviceElectricityCosts < AdviceFuelTypeBase
     @school.aggregated_electricity_meters
   end
 
-  def rating
-    @rating ||= 100.0 * MeterTariffs.accounting_tariff_availability_coverage(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, @school.electricity_meters)
-  end
+  def underlying_meters; @school.electricity_meters end
 end
 
 class GasTariffs < MeterTariffInfo
@@ -167,7 +172,5 @@ class AdviceGasCosts < AdviceFuelTypeBase
     @school.aggregated_heat_meters
   end
 
-  def rating
-    @rating ||= 100.0 * MeterTariffs.accounting_tariff_availability_coverage(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, @school.heat_meters)
-  end
+  def underlying_meters; @school.heat_meters end
 end

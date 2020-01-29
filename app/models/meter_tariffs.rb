@@ -52,6 +52,18 @@ class MeterTariffs
     missing_meter_stats
   end
 
+  def self.accounting_tariffs_available_for_period?(start_date, end_date, meters)
+    meters.each do |meter|
+      # some meters may not extent over period of aggregate if deprecated
+      start_date = meter.amr_data.start_date if start_date < meter.amr_data.start_date
+      end_date   = meter.amr_data.end_date   if end_date < meter.amr_data.end_date
+      (start_date..end_date).each do |date|
+        return false if accounting_tariff_for_date(date, meter).nil?
+      end
+    end
+    true
+  end
+
   def self.accounting_tariff_availability_coverage(start_date, end_date, meters)
     stats = accounting_tariff_availability_statistics(start_date, end_date, meters)
     # can't use sum directly because of Ruby lib statssample sum issue
