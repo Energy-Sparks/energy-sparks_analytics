@@ -172,13 +172,12 @@ module Benchmarking
       column_units    = column_definitions.map{ |column_definition| column_definition[:units] }
       column_sense    = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
       content_classes = column_definitions.map{ |column_definition| column_definition.dig(:content_class) }
-
-      formatted_rows = rows.map do |row|
+      formatted_rows = rows.each_with_index.map do |row, row_number|
         row.each_with_index.map do |value, index|
           sense = sense_column(column_sense[index])
           drilldown = content_classes[index]
           if column_units[index] == String
-            format_cell_string(value, medium, sense, drilldown, school_ids[index])
+            format_cell_string(value, medium, sense, drilldown, school_ids[row_number])
           else
             format_cell(column_units[index], value, medium, sense)
           end
