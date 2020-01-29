@@ -40,7 +40,7 @@ class AdviceBaseload < AdviceElectricityBase
       charts_and_html.push( { type: :chart_name, content: baseload_longterm_chart[:config_name] } )
       charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
     end
-    charts_and_html
+    remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
   private

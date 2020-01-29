@@ -111,7 +111,10 @@ class AdviceBase < ContentBase
         logger.info e.backtrace
       end
     end
+    remove_diagnostics_from_html(charts_and_html, user_type)
+  end
 
+  protected def remove_diagnostics_from_html(charts_and_html, user_type)
     if ContentBase.analytics_user?(user_type)
       charts_and_html = promote_analytics_html_to_frontend(charts_and_html) if ContentBase.analytics_user?(user_type)
     else

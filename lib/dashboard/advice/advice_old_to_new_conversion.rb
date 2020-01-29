@@ -38,7 +38,8 @@ class AdviceStructuredOldToNewConversion < AdviceBase
   end
 
   def content(user_type: nil)
-    structured_content.map { |component| component[:content] }.flatten
+    content_info = structured_content.map { |component| component[:content] }.flatten
+    remove_diagnostics_from_html(content_info, user_type)
   end
 
   def summary
@@ -121,6 +122,6 @@ class AdviceOldToNewConversion < AdviceBase
         { type: :chart, html: 'Unfortunately we don\'t have enough meter data to provide this information.' }
       end
     end
-    charts_and_html.compact.flatten
+    remove_diagnostics_from_html(charts_and_html.compact.flatten, user_type)
   end
 end

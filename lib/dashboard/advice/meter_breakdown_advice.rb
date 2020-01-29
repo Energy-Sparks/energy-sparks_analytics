@@ -36,7 +36,7 @@ class AdviceMeterBreakdownBase < AdviceBase
     charts_and_html.push( { type: :html,       content: table_timescale_html } )
     charts_and_html.push( { type: :html,       content: table_breakdown_html } )
     charts_and_html.push( { type: :html,       content: table_comments } )
-    charts_and_html
+    remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
   def rating

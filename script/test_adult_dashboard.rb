@@ -15,7 +15,7 @@ script = {
                                 chart_manipulation: %i[drilldown timeshift],
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
-                                user:          nil, # { user_role: :analytics, staff_role: nil }, # { user_role: :admin }, # guest
+                                user:          { user_role: :analytics, staff_role: nil }, # nil, # , # { user_role: :admin }, # guest
                                 no_pages: %i[electricity_profit_loss gas_profit_loss],
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
