@@ -106,7 +106,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   # overridden in calculate
   def relevance
-    meter_readings_up_to_date_enough? ? :not_relevant : @relevance
+    !meter_readings_up_to_date_enough? ? :not_relevant : @relevance
   end
 
   def maximum_alert_date; aggregate_meter.amr_data.end_date end
