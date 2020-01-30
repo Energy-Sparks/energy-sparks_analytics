@@ -92,7 +92,7 @@ class AdviceMeterBreakdownBase < AdviceBase
     text = %{
       <p>
         Having multiple meters can help you understand your energy use better,
-        however, there is a signifcant standing charge for each meter of more than 
+        however, there is a significant standing charge for each meter of more than 
         &pound; 1,000 per year, so there is potential for saving by consolidating meters.
       <p>
     }

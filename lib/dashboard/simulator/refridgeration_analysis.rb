@@ -20,7 +20,7 @@ class RefridgerationAnalysis
       weekend_baseload_kw:    weekend_average_baseload_kw,
       holiday_baseload_kw:    holiday_average_baseload_kw,
       change_in_baseload_kw:  change_kw,
-      signifcant_change:      change_kw < drop_criteria ? 'Signifcant reduction' : 'No signifcant reduction',
+      signifcant_change:      change_kw < drop_criteria ? 'Signifcant reduction' : 'No significant reduction',
       annualised_saving_£:    annualised_£,
       holiday_saving_£:       holiday_£,
       holiday_name:           period.title

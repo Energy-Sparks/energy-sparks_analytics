@@ -81,8 +81,8 @@ class HeatingRegressionModelFitter
     html paragraph('First we analyse whether there is a gradual reduction in consumption by day of the week:')
     chart_results = run_standard_chart_with_for_one_meter(:gas_by_day_of_week, meter, @meter_collection.heat_meters.length)
     chart chart_results
-    doy_text = 'If there is a signifcant reduction between days we assume the meter monitors a heating system '\
-              'in a building with signifcant thermal mass and reasonable admittance, where you would expect a '\
+    doy_text = 'If there is a significant reduction between days we assume the meter monitors a heating system '\
+              'in a building with significant thermal mass and reasonable admittance, where you would expect a '\
               'gradual reduction in gas consumption as the building warms up during the week, following '\
               'weekends when the building shouldnt be heated.'
     html paragraph(doy_text)

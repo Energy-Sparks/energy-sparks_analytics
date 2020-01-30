@@ -1728,7 +1728,7 @@ class HeatingFrostAdviceAdvice < DashboardChartAdviceBase
         Although 'frost protection' uses energy and therefore it costs money to run, it is cheaper than
         the damage which might be caused from burst pipes. Some schools don't have frost protection
         configured for their boilers, and although this saves money for most of the year, it is common
-        for these schools to leave their heating on during winter holidays, which is signifcantly more expensive
+        for these schools to leave their heating on during winter holidays, which is significantly more expensive
         than if frost protection is allowed to provide the protection automatically.
         </p>
       <% end %>
@@ -1825,7 +1825,7 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
         <p>
         An alternative way of looking at the thermostatic control is to look at whether
         a school's gas consumption changes on a day when the outside temperature changes
-        signifcantly. It is common, particularly in Spring for outside temperatures to increase by
+        significantly. It is common, particularly in Spring for outside temperatures to increase by
         more than 10C during the day (called a large diurnal temperature range, typically caused
         by a cold ground temperatures after the winter reducing overnight temperatures,
         and warm Spring sunshine during the day).
