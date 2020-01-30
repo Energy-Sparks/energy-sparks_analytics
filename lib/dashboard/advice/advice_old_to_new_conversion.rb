@@ -23,7 +23,7 @@ class AdviceStructuredOldToNewConversion < AdviceBase
     true
   end
 
-  def structured_content
+  def structured_content(user_type: nil)
     content_information = []
     component_pages.each do |component_page_class|
       component_page = component_page_class.new(@school)
