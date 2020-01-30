@@ -247,7 +247,7 @@ class HotWaterInvestmentAnalysisText
   def estimate_heat_required_text_2_comparison
     template = %{
       <p>
-        This calculation of <%= formatted_annual_kwh %> for a 100&percnt;
+        This calculation of <%= formatted_annual_kwh %> for a 100&percnt; efficient
         system compares with Energy Sparks&apos; estimate of
         <%= current_system_annual_consumption_kwh_html %> for your current system.
       </p>
