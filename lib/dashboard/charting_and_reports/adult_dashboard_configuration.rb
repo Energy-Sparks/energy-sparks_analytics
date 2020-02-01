@@ -47,6 +47,7 @@ class DashboardConfiguration
       promoted_variables: {
         AlertEnergyAnnualVersusBenchmark => {
           rating:                               :rating,
+          enough_data:                          :enough_data,
           last_year_£:                          :last_year_£,
           last_year_kwh:                        :last_year_kwh,
           last_year_co2:                        :last_year_co2,
