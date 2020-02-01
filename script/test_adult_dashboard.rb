@@ -16,7 +16,7 @@ script = {
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
                                 user:          { user_role: :analytics, staff_role: nil }, # nil, # , # { user_role: :admin }, # guest
-                                pages: %i[electricity_profit_loss gas_profit_loss],
+                                no_pages: %i[electricity_profit_loss gas_profit_loss],
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
                                   { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },

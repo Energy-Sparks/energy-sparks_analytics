@@ -739,7 +739,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
-    equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence if days > 364
+    equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence if days > 360
     in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
     percent_value = out_of_hours / (in_hours + out_of_hours)
     percent_str = percent(percent_value)
@@ -768,13 +768,13 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
             Reducing your school's out of hours usage to <%= percent(@exemplar_percentage) %>
             would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
             <%# increase loop size to test %>
-            <% if days > 364 %>
+            <% if days > 360 %>
               <%= equivalence_tool_tip_html(equivalence_saving_description, equivalence_calculation_description) %>
             <% end %>
           <% else %>
             which is very good, and is one of the best schools.
           <% end %>
-          <% if days < 360 %>
+          <% if days <= 360 %>
             However, until we have a complete year&apos;s worth of data for you
             this advice may not be accurate - as the analysis is scaled to a year
             from the limited data available.
