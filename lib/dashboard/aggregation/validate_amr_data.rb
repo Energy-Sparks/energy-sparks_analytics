@@ -123,6 +123,13 @@ class ValidateAMRData
         rule[:no_heating_in_summer_set_missing_to_zero][:start_toy],
         rule[:no_heating_in_summer_set_missing_to_zero][:end_toy],
       )
+    elsif rule.key?(:override_bad_readings)
+      fill_in_missing_data(
+        rule[:override_bad_readings][:start_date],
+        rule[:override_bad_readings][:end_date],
+        'X',
+        true
+      )
     end
   end
 
@@ -175,7 +182,7 @@ class ValidateAMRData
 
   def substitute_partial_missing_data_with_whole_day(missing_dates)
     missing_dates.each do |date|
-      date, updated_one_day_reading = substitute_missing_electricity_data(date)
+      date, updated_one_day_reading = substitute_missing_electricity_data(date, 'S')
       updated_one_day_reading.set_type('CMP2')
       @amr_data.add(date, updated_one_day_reading.deep_dup)
     end
@@ -417,14 +424,14 @@ class ValidateAMRData
     end
   end
 
-  def fill_in_missing_data
+  def fill_in_missing_data(sd = @amr_data.start_date, ed = @amr_data.end_date, sub_type_code = 'S', override = false)
     missing_days = {}
-    (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if @amr_data.date_missing?(date)
+    (sd..ed).each do |date|
+      if @amr_data.date_missing?(date) || override
         if @meter.meter_type == :electricity
-          missing_days[date] = substitute_missing_electricity_data(date)
+          missing_days[date] = substitute_missing_electricity_data(date, sub_type_code)
         elsif @meter.meter_type == :gas
-          missing_days[date] = substitute_missing_gas_data(date)
+          missing_days[date] = substitute_missing_gas_data(date, sub_type_code)
         end
       end
     end
@@ -439,7 +446,7 @@ class ValidateAMRData
   end
 
   # iterate out from missing data date, looking for a similar day without missing data
-  def substitute_missing_electricity_data(date)
+  def substitute_missing_electricity_data(date, sub_type_code)
     missing_daytype = daytype(date)
     (1..@max_search_range_for_corrected_data).each do |days_offset|
       # look for similar day after the missing date
@@ -447,14 +454,14 @@ class ValidateAMRData
       if day_after <= @amr_data.end_date &&
           @amr_data.date_exists?(day_after) &&
           daytype(day_after) == missing_daytype
-        return [date, create_substituted_electricity_data(date, day_after)]
+        return [date, create_substituted_electricity_data(date, day_after, sub_type_code)]
       end
       # look for similar day before the missing date
       day_before = date - days_offset
       if day_before >= @amr_data.start_date &&
          @amr_data.date_exists?(day_before) &&
          daytype(day_before) == missing_daytype
-        return [date, create_substituted_electricity_data(date, day_before)]
+        return [date, create_substituted_electricity_data(date, day_before, sub_type_code)]
       end
     end
     [date, nil]
@@ -462,7 +469,7 @@ class ValidateAMRData
 
   # iterate put from missing data, looking for a similar day without missing data
   # then adjust for temperature
-  def substitute_missing_gas_data(date)
+  def substitute_missing_gas_data(date, sub_type_code)
     create_heating_model if @heating_model.nil?
     heating_on = @heating_model.heat_on_missing_data?(date)
     missing_daytype = daytype(date)
@@ -477,7 +484,7 @@ class ValidateAMRData
         if heating_on == @heating_model.heat_on_missing_data?(day_after) &&
             within_temperature_range?(avg_temperature, temperature_after) &&
             daytype(day_after) == missing_daytype
-          return [date, create_substituted_gas_data(date, day_after)]
+          return [date, create_substituted_gas_data(date, day_after, sub_type_code)]
         end
       end
       # look for similar day before the missing date
@@ -488,23 +495,23 @@ class ValidateAMRData
           heating_on == @heating_model.heat_on_missing_data?(day_before) &&
           within_temperature_range?(avg_temperature, temperature_before) &&
           daytype(day_before) == missing_daytype
-        return [date, create_substituted_gas_data(date, day_before)]
+        return [date, create_substituted_gas_data(date, day_before, sub_type_code)]
       end
     end
     logger.debug "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype} heating? #{heating_on}"
     [date, nil]
   end
 
-  def create_substituted_gas_data(date, adjusted_date)
+  def create_substituted_gas_data(date, adjusted_date, sub_type_code)
     amr_day_type = day_type_to_amr_type_letter(daytype(date))
-    sub_type = 'GS' + amr_day_type + '1'
+    sub_type = 'G' + sub_type_code + amr_day_type + '1'
     adjusted_data = adjusted_substitute_heating_kwh(date, adjusted_date)
     OneDayAMRReading.new(meter_id, date, sub_type, adjusted_date, DateTime.now, adjusted_data)
   end
 
-  def create_substituted_electricity_data(date, adjusted_date)
+  def create_substituted_electricity_data(date, adjusted_date, sub_type_code)
     amr_day_type = day_type_to_amr_type_letter(daytype(date))
-    sub_type = 'ES' + amr_day_type + '1'
+    sub_type = 'E'  + sub_type_code + amr_day_type + '1'
     substitute_data = @amr_data.days_kwh_x48(adjusted_date).deep_dup
     OneDayAMRReading.new(meter_id, date, sub_type, adjusted_date, DateTime.now, substitute_data)
   end
