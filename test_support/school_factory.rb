@@ -11,9 +11,17 @@ class SchoolFactory
 
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
   def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {})
-    return load_aggregated_meter_collection(identifier) if source == :aggregated_meter_collection # no overrides as this is the final object that we use, including meter attributes
-    return load_validated_meter_collection(meter_attributes_overrides: meter_attributes_overrides)  if source == :validated_meter_collection
-    return load_unvalidated_meter_collection(meter_attributes_overrides: meter_attributes_overrides) if source == :unvalidated_meter_collection
+    meter_collection = case source
+    when :aggregated_meter_collection
+      load_aggregated_meter_collection(identifier)
+    when :validated_meter_collection
+      load_validated_meter_collection(meter_attributes_overrides: meter_attributes_overrides)
+    when :unvalidated_meter_collection
+      load_unvalidated_meter_collection(identifier, meter_attributes_overrides: meter_attributes_overrides)
+    when :unvalidated_meter_data
+      load_unvalidated_meter_data(identifier, meter_attributes_overrides: meter_attributes_overrides)
+    end
+    return meter_collection unless meter_collection.nil?
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
@@ -31,13 +39,6 @@ class SchoolFactory
   private
 
   private def load_aggregated_meter_collection(school_filename)
-    old_school_filename = [
-      'whiteways-primary-school',
-      'trinity-c-of-e-first-school',
-      'christ-church-c-of-e-first-school',
-      'bishop-sutton-primary-school'
-    ][3]
-
     load_meter_collections(school_filename, 'aggregated-meter-collection-')
   end
 
@@ -49,12 +50,20 @@ class SchoolFactory
     validated_meter_collection
   end
 
-  def load_unvalidated_meter_collection(meter_attributes_overrides: {})
-    school_filename = 'st-marks-c-of-e-school'
-    unvalidated_meter_data = load_meter_collections(school_filename, 'unvalidated-data-')
-    unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
-    AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
-    unvalidated_meter_collection
+  def load_unvalidated_meter_data_collection(school_filename, filename_stub, meter_attributes_overrides: {})
+      unvalidated_meter_data = load_meter_collections(school_filename, filename_stub)
+      ap meter_attributes_overrides
+      unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
+      AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
+      unvalidated_meter_collection
+  end
+
+  def load_unvalidated_meter_collection(school_filename, meter_attributes_overrides: {})
+    load_unvalidated_meter_data_collection(school_filename, 'unvalidated-meter-collection-', meter_attributes_overrides: {})
+  end
+
+  def load_unvalidated_meter_data(school_filename, meter_attributes_overrides: {})
+    load_unvalidated_meter_data_collection(school_filename, 'unvalidated-data-', meter_attributes_overrides: {})
   end
 
   # validate_and_aggregate_meter_data
@@ -99,7 +108,9 @@ class SchoolFactory
   end
 
   private def build_meter_collection(data, meter_attributes_overrides: {})
-    meter_attributes = data[:meter_attributes]
+  puts "Got here #{data.keys.join(';')}"
+    puts "Warning: loading meter attributes from :pseudo_meter_attributes rather than :meter_attributes"
+    meter_attributes = data[:pseudo_meter_attributes]
     MeterCollectionFactory.new(
       temperatures: data[:schedule_data][:temperatures],
       solar_pv: data[:schedule_data][:solar_pv],
@@ -109,7 +120,7 @@ class SchoolFactory
     ).build(
       school_data: data[:school_data],
       amr_data: data[:amr_data],
-      meter_attributes: meter_attributes.merge(meter_attributes_overrides)
+      pseudo_meter_attributes: meter_attributes.merge(meter_attributes_overrides)
     )
   end
 

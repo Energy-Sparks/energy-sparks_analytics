@@ -945,6 +945,8 @@ module AnalyseHeatingAndHotWater
     def calculate_max_summer_hotwater_kitchen_kwh(period)
       if !@model_overrides.override_max_summer_hotwater_kwh.nil?
         @model_overrides.override_max_summer_hotwater_kwh
+      elsif @meter.heating_only?
+        0.0
       else
         name = :summer_occupied_all_days
         calc = regression_filtered(name, name.to_s, true, period, [6, 7, 8], [1, 2, 3, 4, 5])

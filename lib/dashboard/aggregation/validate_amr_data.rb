@@ -533,6 +533,14 @@ class ValidateAMRData
       logger.debug "Warning: negative predicated data for missing day #{missing_day} from #{substitute_day} setting to zero"
       prediction_ratio = 0.0
     end
+
+    if kwh_prediction_for_substitute_day == 0.0
+      logger.warn "Warning: zero predicted kwh for substitute day #{substitute_day} setting prediction_ratio to 0.0 for #{missing_day}"
+      prediction_ratio = 1.0
+    end
+
+    prediction_ratio = 1.0 if kwh_prediction_for_substitute_day == 0.0 && kwh_prediction_for_missing_day == 0.0
+
     substitute_data = Array.new(48, 0.0)
     (0..47).each do |halfhour_index|
       substitute_data[halfhour_index] = @amr_data.kwh(substitute_day, halfhour_index) * prediction_ratio

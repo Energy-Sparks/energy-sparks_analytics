@@ -16,8 +16,9 @@ script = {
   no_schools:                  ['hhhhhhhhh*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
-  schools:                  ['.*'],
-  source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
+  schools:                  ['st-phili*'],
+  no_source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
+  source: :unvalidated_meter_data,
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {

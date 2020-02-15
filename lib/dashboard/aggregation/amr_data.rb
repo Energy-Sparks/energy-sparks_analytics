@@ -82,6 +82,14 @@ class AMRData < HalfHourlyData
     self[date].type
   end
 
+  def substitution_date(date)
+    self[date].substitute_date
+  end
+
+  def meter_id(date)
+   self[date].meter_id
+  end
+
   def self.one_day_zero_kwh_x48
     Array.new(48, 0.0)
   end
@@ -341,6 +349,17 @@ class AMRData < HalfHourlyData
         cpdp.log
       end
     end
+    bad_dates = dates_with_non_finite_values
+    logger.info "bad non finite data on these dates: #{bad_dates.join(';')}" unless bad_dates.empty?
+  end
+
+  def dates_with_non_finite_values(sd = start_date, ed = end_date)
+    list = []
+    (sd..ed).each do |date|
+      next if date_missing?(date)
+      list.push(date) if days_kwh_x48(date).any?{ |kwh| kwh.nil? || !kwh.finite? }
+    end
+    list
   end
 
     # take one set (dd_data) of half hourly data from self
