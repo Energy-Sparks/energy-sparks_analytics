@@ -60,6 +60,32 @@ class MeterAttributes
     )
   end
 
+  class OverrideBadReadings < MeterAttributeTypes::AttributeBase
+    id :meter_corrections_override_bad_readings
+    key :override_bad_readings
+    aggregate_over :meter_corrections
+    name 'Meter correction > Substitute bad readings'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define(required: true),
+        end_date:   MeterAttributeTypes::Date.define(required: true)
+      }
+    )
+  end
+
+  class ExtendMeterReadingsForSubstitution < MeterAttributeTypes::AttributeBase
+    id :meter_corrections_extend_meter_readings_for_substitution
+    key :extend_meter_readings_for_substitution
+    aggregate_over :meter_corrections
+    name 'Meter correction > Extend meter reading range for substitutions'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define(required: false),
+        end_date:   MeterAttributeTypes::Date.define(required: false)
+      }
+    )
+  end
+
   class SetBadDataToZero < MeterAttributeTypes::AttributeBase
     id :meter_corrections_set_bad_data_to_zero
     key :set_bad_data_to_zero

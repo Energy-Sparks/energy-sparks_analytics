@@ -130,7 +130,20 @@ class ValidateAMRData
         'X',
         true
       )
+    elsif rule.key?(:extend_meter_readings_for_substitution)
+      extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
+      extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
     end
+  end
+
+  def extend_start_date(date)
+    logger.info "Extending start date to #{date}"
+    @amr_data.set_start_date(date)
+  end
+
+  def extend_end_date(date)
+    logger.info "Extending end date to #{date}"
+    @amr_data.set_end_date(date)
   end
 
   def set_all_missing_data_to_zero_by_time_of_year(start_toy, end_toy, type)
@@ -183,8 +196,12 @@ class ValidateAMRData
   def substitute_partial_missing_data_with_whole_day(missing_dates)
     missing_dates.each do |date|
       date, updated_one_day_reading = substitute_missing_electricity_data(date, 'S')
-      updated_one_day_reading.set_type('CMP2')
-      @amr_data.add(date, updated_one_day_reading.deep_dup)
+      unless updated_one_day_reading.nil?
+        updated_one_day_reading.set_type('CMP2')
+        @amr_data.add(date, updated_one_day_reading.deep_dup)
+      else
+        logger.debug "Unable to override partial/missing data for #{@meter.mpan_mprn} on #{date}"
+      end
     end
   end
 

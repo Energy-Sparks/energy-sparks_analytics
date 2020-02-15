@@ -182,6 +182,24 @@ describe MeterAttributes do
     end
   end
 
+  describe MeterAttributes::OverrideBadReadings do
+    it 'accepts a hash of dates and keys it using the class defined key' do
+      attribute = MeterAttributes::OverrideBadReadings.parse({start_date: '13/1/2012', end_date: '12/1/2013'})
+      expect(attribute.to_analytics).to eq(
+        {override_bad_readings: {start_date: Date.new(2012, 1, 13), end_date: Date.new(2013, 1, 12)}}
+      )
+    end
+  end
+
+  describe MeterAttributes::ExtendMeterReadingsForSubstitution do
+    it 'accepts a hash of dates and keys it using the class defined key' do
+      attribute = MeterAttributes::ExtendMeterReadingsForSubstitution.parse({start_date: '13/1/2012', end_date: '12/1/2013'})
+      expect(attribute.to_analytics).to eq(
+        {extend_meter_readings_for_substitution: {start_date: Date.new(2012, 1, 13), end_date: Date.new(2013, 1, 12)}}
+      )
+    end
+  end
+
   describe MeterAttributes::ReadingsStartDate do
     it 'accepts a single date and keys it using the class defined key' do
       attribute = MeterAttributes::ReadingsStartDate.parse('13/1/2012')

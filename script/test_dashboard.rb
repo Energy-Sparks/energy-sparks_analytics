@@ -16,7 +16,7 @@ script = {
   no_schools:                  ['hhhhhhhhh*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
-  schools:                  ['st-phili*'],
+  schools:                  ['aviemore*'],
   no_source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
   source: :unvalidated_meter_data,
   # 

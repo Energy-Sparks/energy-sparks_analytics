@@ -133,6 +133,14 @@ class HalfHourlyData < Hash
     @max_date
   end
 
+  def set_start_date(date)
+    @min_date = date
+  end
+
+  def set_end_date(date)
+    @max_date = date
+  end
+
   def days
     end_date - start_date + 1
   end
