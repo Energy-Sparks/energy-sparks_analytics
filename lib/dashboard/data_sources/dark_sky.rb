@@ -8,9 +8,16 @@ require 'date'
 require 'awesome_print'
 
 class DarkSkyWeatherInterface
-  def initialize
+  DEFAULT_FIELDS =  {
+    temperature:  'temperature',
+    cloud_cover:  'cloudCover',
+    wind_speed:   'windSpeed'
+  }
+
+  def initialize(fields_wanted = nil)
     @forecast_api_key = ENV['ENERGYSPARKSDARKSKYFORECASTAPIKEY']
     @historic_api_key = ENV['ENERGYSPARKSDARKSKYHISTORICAPIKEY']
+    @fields_wanted = fields_wanted.nil? ? DEFAULT_FIELDS : fields_wanted
   end
 
   def weather_forecast(latitude, longitude)
@@ -30,6 +37,11 @@ class DarkSkyWeatherInterface
     temperature_data = convert_to_date_hash_to_x48_temperatures(interpolated_historic_weather_data, start_date, end_date)
     percent_bad = bad_data.empty? ? 0.0 : (bad_data.length / (24 * temperature_data.length))
     [distance_to_weather_station, temperature_data, percent_bad, bad_data]
+  end
+
+  def historic_weather_data(latitude, longitude, start_date, end_date)
+    distance_to_weather_station, historic_weather_data = download_historic_weather(latitude, longitude, start_date, end_date + 1)
+    historic_weather_data
   end
 
   # when setting up new schools it is often useful to find the location
@@ -201,17 +213,40 @@ class DarkSkyWeatherInterface
     }
   end
 
+  # Example historic hours_forecast fields:
+  # {
+  #                 "time" => 1580760000,
+  #              "summary" => "Mostly Cloudy",
+  #                 "icon" => "partly-cloudy-night",
+  #      "precipIntensity" => 0.0073,
+  #    "precipProbability" => 0.06,
+  #           "precipType" => "rain",
+  #          "temperature" => 5.86,
+  #  "apparentTemperature" => 2.11,
+  #             "dewPoint" => 1.72,
+  #             "humidity" => 0.75,
+  #             "pressure" => 1015.2,
+  #            "windSpeed" => 5.67,
+  #             "windGust" => 11.74,
+  #          "windBearing" => 281,
+  #           "cloudCover" => 0.72,
+  #              "uvIndex" => 0,
+  #           "visibility" => 16.093,
+  #                "ozone" => 373.3
+  # }
   private def hourly_data(data)
     forecast = {} # or historic data - same interface
     hourly_data = data['hourly']['data']
     hourly_data.each do |hours_forecast|
-      forecast[Time.at(hours_forecast['time'])] = {
-        temperature:  hours_forecast['temperature'],
-        cloud_cover:  hours_forecast['cloudCover'],
-        wind_speed:   hours_forecast['windSpeed']
-      }
+      forecast[Time.at(hours_forecast['time'])] = extract_fields(hours_forecast)
     end
     forecast
+  end
+
+  private def extract_fields(hours_data)
+    @fields_wanted.map do |key, darksky_fieldname|
+      hours_data.key?(darksky_fieldname) ? [key, hours_data[darksky_fieldname]] : nil
+    end.compact.to_h
   end
 
   private def fahrenheit_to_centigrade_conversion(fahrenheit)
