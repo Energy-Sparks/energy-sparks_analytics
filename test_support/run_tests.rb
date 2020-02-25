@@ -117,7 +117,17 @@ class RunTests
   end
 
   def load_school(school_name)
-    school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source)
+    school = nil
+    begin
+      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source)
+    rescue Exception => e
+      puts "=" * 100
+      puts "Load of school #{school_name} failed"
+      puts "=" * 100
+      puts e.message
+      puts e.backtrace
+    end
+    school
   end
 
   def update_dark_sky_temperatures
@@ -145,6 +155,7 @@ class RunTests
       @current_school_name = school_name
       reevaluate_log_filename
       school = load_school(school_name)
+      next if school.nil?
       charts = RunCharts.new(school)
       charts.run(chart_list, control)
       failed_charts += charts.failed_charts
