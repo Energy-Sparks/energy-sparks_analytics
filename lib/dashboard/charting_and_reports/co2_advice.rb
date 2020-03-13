@@ -205,7 +205,7 @@ class DashboardEnergyAdvice
         which emit almost zero carbon when producing electricity. On a windy and
         sunny day when a larger proportion of the UK's electricity supply is from
         solar PV panels and wind turbines electricity emissions can be
-        quite low at about 100g of CO<sub>2</sub> per kWh of electricity on
+        quite low at about 100g of CO<sub>2</sub> per kWh of electricity. On
         calm, cloudy days when most of the electricity is coming from gas and coal
         power stations as much as 400g of CO<sub>2</sub> is emitted for every 1 kWh
         of electricity production.
@@ -679,7 +679,7 @@ class DashboardEnergyAdvice
         The easiest way is to survey the staff, create a form containing 3 columns,
         the first with the name of the staff member, and the how they get to work,
         and the third with the average distance they travel, and then ask them to
-        provide you will the information e.g.
+        provide you with the information e.g.
       </p>
 
       <table class="table table-striped table-sm">
