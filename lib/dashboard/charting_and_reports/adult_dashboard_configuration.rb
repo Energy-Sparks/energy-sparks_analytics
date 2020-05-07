@@ -312,7 +312,7 @@ class DashboardConfiguration
       content_class:           AdviceGasBoilerMorningStart,
       excel_worksheet_name:   'GasStartTime',
       charts: %i[
-        gas_heating_season_intraday
+        gas_heating_season_intraday_up_to_1_year
         optimum_start
       ],
       promoted_variables: {
@@ -341,7 +341,7 @@ class DashboardConfiguration
       content_class:           AdviceGasBoilerThermostatic,
       excel_worksheet_name:   'GasThermostatic',
       charts: %i[
-        thermostatic
+        thermostatic_up_to_1_year
         thermostatic_control_large_diurnal_range
         cusum
       ],

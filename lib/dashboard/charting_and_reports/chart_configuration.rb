@@ -872,6 +872,10 @@ class ChartManager
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
+    gas_heating_season_intraday_up_to_1_year: {
+      inherits_from: :gas_heating_season_intraday,
+      timescale:        :up_to_a_year
+    },
     gas_heating_season_intraday_£: { # temporary chart 18Mar19 to bug fix non £ scaling intradat kWh charts
       inherits_from: :gas_heating_season_intraday,
       yaxis_units: :£
@@ -929,6 +933,11 @@ class ChartManager
       inherits_from:    :thermostatic_regression_simple_school_day,
       name:             'Thermostatic (Temperature v. Daily Consumption - current year)',
       subtitle:         :daterange
+    },
+    thermostatic_up_to_1_year: {
+      inherits_from:    :thermostatic,
+      name:             'Thermostatic (Temperature v. Daily Consumption)',
+      timescale:        :up_to_a_year
     },
     thermostatic_regression_simple_all: {
       name:             'Thermostatic (All Categories) - simple model',

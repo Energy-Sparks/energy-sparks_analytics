@@ -58,7 +58,7 @@ class DashboardChartAdviceBase
       BenchmarkComparisonAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :benchmark_kwh, :benchmark_kwh_electric_only
       BenchmarkComparisonAdviceSolarSchools.new(school, chart_definition, chart_data, chart_symbol)
-    when :thermostatic
+    when :thermostatic, :thermostatic_up_to_1_year
       ThermostaticAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :cusum
       CusumAdvice.new(school, chart_definition, chart_data, chart_symbol)
@@ -72,7 +72,7 @@ class DashboardChartAdviceBase
       ElectricityDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :daytype_breakdown_gas, :daytype_breakdown_gas_tolerant
       GasDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :gas_heating_season_intraday
+    when :gas_heating_season_intraday, :gas_heating_season_intraday_up_to_1_year
       GasHeatingIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :group_by_week_electricity
       ElectricityWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)

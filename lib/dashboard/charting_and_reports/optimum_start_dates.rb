@@ -49,10 +49,11 @@ class OptimumStartDates
 
   def calculate_heating_model
     end_date = @meter_collection.aggregated_heat_meters.amr_data.end_date
-    start_date = end_date - 364
-    raise EnergySparksNotEnoughDataException, 'Not enough data for optimum start analysis' if start_date < @meter_collection.aggregated_heat_meters.amr_data.start_date
+    start_date = [end_date - 364, @meter_collection.aggregated_heat_meters.amr_data.start_date].max
     period = new_school_period(start_date, end_date)
-    @meter_collection.aggregated_heat_meters.heating_model(period, :best)
+    model = @meter_collection.aggregated_heat_meters.heating_model(period, :best)
+    raise EnergySparksNotEnoughDataException, 'Not enough data for to calculate model for optimum start analysis' unless model.enough_samples_for_good_fit
+    model
   end
 
   def new_school_period(start_date, end_date, name_suffix = '')
