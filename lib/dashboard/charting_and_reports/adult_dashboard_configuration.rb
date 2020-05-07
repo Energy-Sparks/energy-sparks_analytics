@@ -226,6 +226,7 @@ class DashboardConfiguration
       charts: %i[
         daytype_breakdown_gas_tolerant
         gas_by_day_of_week_tolerant
+        gas_heating_season_intraday
       ],
       promoted_variables: {
         AlertOutOfHoursGasUsage => {
