@@ -249,6 +249,7 @@ class DashboardEnergyAdvice
       start_month_index = [monthly_accounts.values.length - 13, 0].max
       up_to_13_most_recent_months = monthly_accounts.values[start_month_index..monthly_accounts.values.length]
       components = up_to_13_most_recent_months.map{ |k,_v| k.keys }.flatten.uniq
+      components = reorder_columns(components)
       bill_components = components.select{ |type| !@non_rate_types.include?(type) } # inefficient
 
       header = ['Month', bill_components.map { |component| component.to_s.humanize }].flatten
@@ -257,11 +258,24 @@ class DashboardEnergyAdvice
       [header, rows, totals]
     end
 
+    private def reorder_columns(components)
+      if components.include?(:total) # put total in last column
+        components.delete(:total)
+        components.push(:total)
+      end
+      if components.include?(:rate) # put rate in the first column
+        components.delete(:rate)
+        components.insert(0, :rate)
+      end
+      components
+    end
+
     def data_rows(up_to_13_most_recent_months, bill_components)
       up_to_13_most_recent_months.map do |month|
         [
           month[:month],
-          month.select{ |type, value| !@non_rate_types.include?(type) }.values
+          bill_components.map { |col_name| month[col_name] }
+          # month.select{ |type, value| !@non_rate_types.include?(type) }.values
         ].flatten
       end
     end
@@ -635,6 +649,7 @@ class DashboardEnergyAdvice
 
       ma = MonthlyAccounting.new(@school, meter)
       ma.two_year_monthly_comparison_table_html
+      
 =begin
       accounting_cost_data = ConvertTwoYearAccountingChartDataToTable.new(@school)
       header, £_formatted_monthly_p_and_l_rows, £_formatted_totals = accounting_cost_data.formatted_table(fuel_type)
