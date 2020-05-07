@@ -108,7 +108,6 @@ class SchoolFactory
   end
 
   private def build_meter_collection(data, meter_attributes_overrides: {})
-  puts "Got here #{data.keys.join(';')}"
     puts "Warning: loading meter attributes from :pseudo_meter_attributes rather than :meter_attributes"
     meter_attributes = data[:pseudo_meter_attributes]
     MeterCollectionFactory.new(

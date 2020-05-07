@@ -398,23 +398,27 @@ class RunTests
   end
 
   def schools_list
-    list = case @meter_readings_source
+    RunTests.resolve_school_list(@meter_readings_source, @school_name_pattern_match)
+  end
+
+  def self.resolve_school_list(source, school_name_pattern_match)
+    list = case source
     when :analytics_db
-      AnalysticsSchoolAndMeterMetaData.new.match_school_names(@school_name_pattern_match)
+      AnalysticsSchoolAndMeterMetaData.new.match_school_names(school_name_pattern_match)
     when :aggregated_meter_collection
-      matching_yaml_files_in_directory('aggregated-meter-collection-', @school_name_pattern_match)
+      matching_yaml_files_in_directory('aggregated-meter-collection-', school_name_pattern_match)
     when :validated_meter_collection
-      matching_yaml_files_in_directory('validated-data-', @school_name_pattern_match)
+      matching_yaml_files_in_directory('validated-data-', school_name_pattern_match)
     when :unvalidated_meter_collection
-      matching_yaml_files_in_directory('unvalidated-meter-collection', @school_name_pattern_match)
+      matching_yaml_files_in_directory('unvalidated-meter-collection', school_name_pattern_match)
     when :unvalidated_meter_data
-      matching_yaml_files_in_directory('unvalidated-data-', @school_name_pattern_match)
+      matching_yaml_files_in_directory('unvalidated-data-', school_name_pattern_match)
     end
     puts "Running tests for #{list.join('; ')}"
     list
   end
 
-  def matching_yaml_files_in_directory(file_type, school_pattern_matches)
+  def self.matching_yaml_files_in_directory(file_type, school_pattern_matches)
     filenames = school_pattern_matches.map do |school_pattern_match|
       match = file_type + school_pattern_match + '.yaml'
       Dir[match, base: SchoolFactory::METER_COLLECTION_DIRECTORY]

@@ -946,7 +946,7 @@ class Aggregator
 
   def inject_benchmarks
 
-    # reverse X axis on benchamrks only following PM/CT request 18Jan2020
+    # reverse X axis on benchmarks only following PM/CT request 18Jan2020
     reverse_x_axis
 
     logger.info "Injecting national, regional and exemplar benchmark data: for #{@bucketed_data.keys}"
@@ -1018,20 +1018,22 @@ class Aggregator
   end
 
   def exemplar_electricity_usage_in_units
-    scale_benchmarks(BenchmarkMetrics::EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils, :electricity)
+    exemplar_annual_kwh = BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(@meter_collection.school_type, @meter_collection.number_of_pupils)
+    # slight issue here is that this chart is typically in £, and if the school
+    # has a differential tariff then the £ and kWh comparisons versus exemplar will be different
+    scale_benchmarks(exemplar_annual_kwh, :electricity)
   end
 
-  # set a target 10% better thn average for schools, otherwise half of schools
-  # who are above average might not see 'average' as an incentive
-  ARTIFICIAL_GAS_REDUCTION_INCENTIVE = 0.9
-
   def benchmark_electricity_usage_in_units
-    scale_benchmarks(BenchmarkMetrics::BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * @meter_collection.number_of_pupils, :electricity)
+    benchmark_annual_kwh = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(@meter_collection.school_type, @meter_collection.number_of_pupils)
+    # slight issue here is that this chart is typically in £, and if the school
+    # has a differential tariff then the £ and kWh comparisons versus benchmark will be different
+    scale_benchmarks(benchmark_annual_kwh, :electricity)
   end
 
   def benchmark_heating_usage(target_benchmark_per_m2, fuel_type, dd_ajust)
     dd_adjustment = dd_ajust ?  (1.0 / BenchmarkMetrics.normalise_degree_days(@meter_collection.temperatures, @meter_collection.holidays, fuel_type)) : 1.0
-    scale_benchmarks(target_benchmark_per_m2 * @meter_collection.floor_area, fuel_type) * dd_adjustment * ARTIFICIAL_GAS_REDUCTION_INCENTIVE
+    scale_benchmarks(target_benchmark_per_m2 * @meter_collection.floor_area, fuel_type) * dd_adjustment
   end
 
   def national_benchmark_gas_usage_in_units

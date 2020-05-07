@@ -46,4 +46,8 @@ TestResults/*
 BenchmarkLog/*
 Charts/*
 Alerts/*
+Rails/*
+Rails/webapp/*
+webapp/*
+webapp
 AggregatedMeterCollections/*

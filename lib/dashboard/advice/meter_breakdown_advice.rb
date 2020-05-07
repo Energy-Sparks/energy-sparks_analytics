@@ -80,7 +80,7 @@ class AdviceMeterBreakdownBase < AdviceBase
     kwh_per_meter = breakdown_chart[:x_data].map { |meter_name, kwhs| [meter_name, kwhs.sum] }.to_h
     total = kwh_per_meter.values.sum
     rows = kwh_per_meter.map { |meter_name, kwh| [meter_name, kwh, kwh / total ] }
-    rows.sort! { |a, b| a[2] <=> b[2] }
+    rows.sort! { |a, b| (a[2] + b[2]).nan? ? a[1] <=> b[1] : a[2] <=> b[2]}
     total_row = ['Total', total, 1.0]
     header = ['Meter Name', 'Kwh', 'Percent']
     row_units = [String, :kwh, :percent]

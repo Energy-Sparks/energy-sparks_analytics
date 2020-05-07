@@ -139,7 +139,6 @@ class RunBenchmarks
       end
 
       if definition[:type].include?(:chart)
-        puts "Got here 88 #{user_type}", "&" * 1000
         chart = benchmarks.run_benchmark_chart(asof_date, chart_table_name, nil, nil, control[:filter], control[:user])
         charts.push(chart)
       end

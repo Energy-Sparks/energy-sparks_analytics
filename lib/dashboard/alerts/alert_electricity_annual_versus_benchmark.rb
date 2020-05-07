@@ -147,7 +147,6 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
     @one_year_benchmark_by_pupil_kwh   = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pupils)
     @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
-
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_by_pupil_kwh
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
     @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'

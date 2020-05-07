@@ -9,7 +9,10 @@ module Logging
   logger.level = :debug
 end
 
-school_names = AnalysticsSchoolAndMeterMetaData.new.match_school_names('.*')
+school_name_pattern_match = ['king*']
+source_db = :aggregated_meter_collection # :analytics_db
+
+school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
 
 puts "Number of schools: #{school_names.length}"
 
@@ -20,7 +23,7 @@ school_names.each do |school_name|
   html += "<h2>#{school_name}</h2>"
   puts "==============================Doing #{school_name} ================================"
 
-  meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
+  meter_collection = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
 
   content = HeadTeachersSchoolSummaryTable.new(meter_collection)
   puts 'Invalid content' unless content.valid_content?

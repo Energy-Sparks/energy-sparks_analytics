@@ -9,9 +9,10 @@ module BenchmarkMetrics
   PERCENT_GAS_OUT_OF_HOURS_BENCHMARK = 0.3
   PERCENT_STORAGE_HEATER_OUT_OF_HOURS_BENCHMARK = 0.2
   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL = 50_000.0 / 200.0
+  RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE = 1.3 # secondary electricity usage typically 1.3 times higher due extra hours and server ICT
   BENCHMARK_ELECTRICITY_USAGE_PER_M2 = 50_000.0 / 1_200.0
-  BENCHMARK_GAS_USAGE_PER_PUPIL = 115_000.0 / 200.0
-  BENCHMARK_GAS_USAGE_PER_M2 = 115_000.0 / 1_200.0
+  BENCHMARK_GAS_USAGE_PER_PUPIL = 0.9 * 115_000.0 / 200.0 # 0.9 is artificial incentive for schools to do better
+  BENCHMARK_GAS_USAGE_PER_M2 = 0.9 * 115_000.0 / 1_200.0 # 0.9 is artificial incentive for schools to do better
   EXEMPLAR_GAS_USAGE_PER_M2 = 80.0
   EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175
   BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2 = 0.01
@@ -83,9 +84,9 @@ module BenchmarkMetrics
 
     case school_type
     when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
-      300.0 * pupils
+      BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * pupils
     when :secondary
-      400.0 * pupils
+      RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE * BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * pupils
     end
   end
 
@@ -115,7 +116,7 @@ module BenchmarkMetrics
     when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
       EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
     when :secondary
-      300.0 * pupils
+      RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE * EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
     end
   end
 
