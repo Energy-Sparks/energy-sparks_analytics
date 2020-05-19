@@ -981,16 +981,15 @@ class GasHeatingIntradayAdvice < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
         <p>
-        Its a useful graph for determining how well controlled the timing of the boiler is?
+        It&apos;s a useful graph for determining how well controlled the timing of the boiler is.
         A well timed boiler should only come on at about 6:00am in the morning
         to get the school up to temperature by 8:00am, and then turn off again about half
         and hour before the school closes.
         </p>
         <p>
-        Does you school's boiler control in the graph above do this?
-        Is the timing of the boiler 'well controlled'?
-        If it isn't you might need to speak to your building manager or caretaker and
-        ask why? There is lots of advice on our dashboard advice webpage about this.
+        Does your school&apos;s boiler in the graph above do this?
+        If it doesn't you might need to speak to your building manager
+        or caretaker and ask why? 
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
