@@ -3,59 +3,212 @@ require 'net/http'
 require 'json'
 require 'uri'
 require 'tzinfo'
+require 'awesome_print'
+require 'faraday'
+require 'faraday_middleware'
+require 'benchmark'
+# Test script to understand detailed workings of n3rgy JSON API
+# - shortcoming: doesn't propogate standing charges for each day, only adds in for 1st day of that charge (change)
+# - you need to set N3RGY_APP_KEY environment variable
 
-# working CURL:
-# curl --verbose --header "Authorization: 1a9ff6bf-3512-4739-ae96-d912cde23a6e" https://sandboxapi.data.n3rgy.com/1234567891034/electricity/consumption/1?start=201301021600&end=201301021830&granularity=halfhour
+class N3rgy
+  def initialize(app_key = ENV['N3RGY_APP_KEY'])
+    @app_key = app_key
+  end
 
-if false
-  puts "UK Carbon request===================================================="
-  url = 'https://api.carbonintensity.org.uk/generation'
-  response = Net::HTTP.get(URI(url))
-  data = JSON.parse(response)
-  puts data
+  def mpans
+    get_json_data['entries'].map(&:to_i)
+  end
+
+  def kwh_and_tariff_data_for_mpan(mpan)
+    puts '=' * 40 + mpan.to_s + '=' * 40
+    data = []
+    type =  get_json_data(mpan: mpan)
+    type['entries'].each do |fuel_type|
+      data_types =  get_json_data(mpan: mpan, fuel_type: fuel_type)['entries']
+      data_types.each do |data_type| # typically either 'consumption' i.e. kWh or 'tariff' i.e. £
+        phases = get_json_data(mpan: mpan, fuel_type: fuel_type, data_type: data_type)['entries']
+        puts "Phases: #{phases.join(',')}"
+        phases.each do |phase|
+          meter_data_type_range = meter_date_range(mpan, fuel_type, data_type, phase)
+          puts "Got data between #{meter_data_type_range.first} and #{meter_data_type_range.last} for #{mpan} #{fuel_type} #{data_type} #{phase}"
+          half_hourly_data(mpan, meter_data_type_range.first, meter_data_type_range.last, fuel_type, data_type, phase)
+        end
+      end
+    end
+    data
+  end
+
+  private
+
+  def half_hourly_data(mpan, start_date, end_date, fuel_type, data_type, phase = 1)
+    kwhs = {}
+    total_cost = 0.0
+    (start_date..end_date).each_slice(90) do |date_range_max_90days|
+      raw_data = get_json_data(mpan: mpan, fuel_type: fuel_type, data_type: data_type, phase: phase,
+                                start_date: date_range_max_90days.first, end_date: date_range_max_90days.last)
+
+      case data_type
+      when 'consumption'
+        kwhs.merge!(process_consumption_data(raw_data))
+      when 'tariff'
+        costs = process_cost_data(raw_data)
+        # TODO: should add in standard charge for each day of date range, not just once?
+        cost = costs[:standing_charges] + costs[:prices][:costs].values.map(&:sum).sum
+        total_cost += cost
+      else
+        raise StandardError, "Unknown data type #{data_type}"
+      end
+      puts raw_data['message'] if raw_data.key?('message')
+    end
+    puts "total kwhs #{kwhs.values.map(&:sum).sum} costs #{total_cost}"
+  end
+
+  def process_consumption_data(raw_data)
+    readings = Hash.new { |h, k| h[k] = Array.new(48, 0.0) } # [date] => [48x half hour kwh]
+    raw_data['values'].each do |reading|
+      date, half_hour_index = timestamp_to_date_and_half_hour_index(reading)
+      kwh = reading['value']
+      readings[date][half_hour_index] += kwh
+    end
+    puts "Processes #{readings.length} dates"
+    puts "sub total kwh = #{readings.values.map(&:sum).sum}"
+    readings
+  end
+
+  def timestamp_to_date_and_half_hour_index(reading)
+    dt = DateTime.parse(reading['timestamp'])
+    date = dt.to_date
+    half_hour_index = ((dt - date) * 48).to_i
+    [date, half_hour_index]
+  end
+
+  # there is no interface to provide the first and last meter readings
+  # this is probably because the first time the data is accessed it needs
+  # to make a GSM request of a remote meter, and until it makes this request it doesn't
+  # know the data range stored in the meter?
+  def meter_date_range(mpan, fuel_type, data_type, phase)
+    raw_data = get_json_data(mpan: mpan, fuel_type: fuel_type, data_type: data_type, phase: phase,
+                              start_date: Date.today, end_date: Date.today + 1)
+    start_date = Date.strptime(raw_data['availableCacheRange']['start'], '%Y%m%d') + 1
+    end_date = Date.strptime(raw_data['availableCacheRange']['end'], '%Y%m%d') - 1
+    start_date..end_date
+  end
+
+  def process_cost_data(raw_data)
+    costs = {}
+    raw_data.each_key do |key|
+      case key
+      when 'values'
+        costs = process_cost_values(raw_data['values'])
+      when 'resource', 'responseTimestamp', 'start', 'end', 'availableCacheRange'
+        # known returned data, currently ignored
+      else
+        raise StandardError, "Unknown cost attribute #{key}"
+      end
+    end
+
+    puts "keys = #{raw_data.keys}"
+    costs
+  end
+
+  def process_cost_values(cost_values_array)
+    standing_charges = 0.0
+    prices = {}
+    raise StandardError, "Error: more than one cost value set, unexpected, num =  #{cost_values_array.lengthy}" if cost_values_array.length > 1
+    cost_values_array[0].each do |key, cost_values|
+      case key
+      when 'standingCharges'
+        cost_values.each do |standing_charge|
+          standing_charges += standing_charge['value']
+          raise StandardError, "Unknown standard charge type in #{standing_charge.keys}" unless standing_charge.keys.all?{ |key| ['startDate', 'value'].include?(key) }
+          puts "Standing charges: #{standing_charges} - TODO: which probably needs to be applied daily until the next change in standing charge"
+        end
+      when 'prices'
+        puts "Got #{cost_values.length} prices"
+        prices = process_prices(cost_values)
+        puts "sub total £ = #{prices[:costs].values.map(&:sum).sum}"
+      else
+        raise StandardError, "Unknown cost type #{key}"
+      end
+    end
+    { prices: prices, standing_charges: standing_charges }
+  end
+
+  # it appears that there is either a single price for a half hour period
+  # or two - one above and one below a threshold (volume discount?)
+  def process_prices(price_values)
+    costs = Hash.new { |h, k| h[k] = Array.new(48, 0.0) } # [date] => [48x half hour costs]
+    thresholds = 0
+    unknowns = Hash.new(0)
+    price_values.each do |reading|
+      date, half_hour_index = timestamp_to_date_and_half_hour_index(reading)
+      
+      if reading.key?('value')
+        cost = reading['value']
+        costs[date][half_hour_index] += cost
+      end
+      if reading.key?('prices') && reading['prices'].is_a?(Array)
+        cost = reading['prices'].sum{ |threshold_price| threshold_price['value'] }
+        costs[date][half_hour_index] += cost
+      end
+      if reading.key?('thresholds')
+        thresholds  += 1
+      end
+      reading.each_key do |key|
+        if !['prices', 'value', 'thresholds', 'timestamp'].include?(key)
+          unknowns[key] += 1
+        end
+      end
+    end
+    { costs: costs, thresholds: thresholds, unknowns: unknowns }
+  end
+
+  def get_json_data(mpan: nil, fuel_type: nil, data_type: nil, phase: nil, start_date: nil, end_date: nil)
+    url = json_url(mpan, fuel_type, data_type, phase, start_date, end_date)
+    puts "JSON: #{url}"
+    connection = Faraday.new(url, headers: authorization)
+    response = connection.get
+    raw_data = JSON.parse(response.body)
+  end
+
+  def authorization
+    { 'Authorization' => @app_key }
+  end
+
+  def half_hourly_query(start_date, end_date)
+    '?start=' + url_date(start_date) + '&end=' + url_date(end_date, true) + '&granularity=halfhour'
+  end
+
+  def json_url(mpan, fuel_type, data_type, phase, start_date, end_date)
+    url = 'https://sandboxapi.data.n3rgy.com/'
+    url += mpan.to_s + '/' unless mpan.nil?
+    url += fuel_type + '/' unless fuel_type.nil?
+    url += data_type + '/' unless data_type.nil? 
+    url += phase.to_s unless phase.nil?
+    url += half_hourly_query(start_date, end_date) unless start_date.nil? || end_date.nil?
+    url
+  end
+
+  def url_date(date, end_date = false)
+    end_date ? date.strftime('%Y%m%d2359') : date.strftime('%Y%m%d0000')
+  end
 end
 
-if false
-  puts "Request without Authorisation=========================================="
-  url = 'https://sandboxapi.data.n3rgy.com/1234567891034/electricity/consumption/1?start=201301021600&end=201301021830&granularity=halfhour'
-  # https://stackoverflow.com/questions/33770326/ruby-http-sending-api-key-basic-auth
-  uri = URI(url)
-  puts "host: #{uri.host} #{uri.port} scheme #{uri.scheme} info #{uri.to_s}"
-  response = Net::HTTP.get(uri)
-  puts "get_print #{Net::HTTP.get_print(uri)}"
-  data = JSON.parse(response)
-  puts data
+mpans = N3rgy.new.mpans
+ap mpans
+mpans.each do |mpan|
+  data = N3rgy.new.kwh_and_tariff_data_for_mpan(mpan)
 end
-
-puts "Request with Authorisation 1 =========================================="
-url = 'https://sandboxapi.data.n3rgy.com/1234567891034/electricity/consumption/1?start=201301021600&end=201301021830&granularity=halfhour'
-uri = URI(url)
-http = Net::HTTP.new(uri.host, uri.port)
-http.set_debug_output($stdout)
-request = Net::HTTP::Get.new(uri.request_uri)
-request['Authorization'] = '1a9ff6bf-3512-4739-ae96-d912cde23a6e'
-x = http.request(request)
-x.each_header do |key, value|
-  p "#{key} => #{value}"
+exit
+data.each_with_index do |item, count|
+  puts '-' * 10 + count.to_s + '-' * 10
+  N3rgy.process_meter_readings(item)
 end
-
 exit
-puts "Got here: #{x.inspect}"
-puts JSON.parse(request)
-exit
-puts "Request with Authorisation 2 =========================================="
-http = Net::HTTP.new(uri)
-request = Net::HTTP::Get.new(uri)
-request['Authorization'] = '1a9ff6bf-3512-4739-ae96-d912cde23a6e'
-http.request(uri)
-exit
-http = Net::HTTP.new(uri)
-request = Net::HTTP::Get.new(uri.request_uri)
-# request['Authorization'] = '1a9ff6bf-3512-4739-ae96-d912cde23a6e'
-
-x = http.request(request)
-puts x.inspect
-exit
-data = JSON.parse(request)
-
-puts data
+data = []
+bm = Benchmark.realtime {
+  data =  N3rgy.new.half_hourly_data(1234567891034, Date.new(2012, 7, 7), Date.new(2014, 3, 1))
+}
+puts data.length
+puts bm.round(3)
