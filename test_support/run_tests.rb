@@ -104,6 +104,8 @@ class RunTests
         run_model_fitting(configuration[:control])
       when :run_benchmark_charts_and_tables
         run_benchmark_charts_and_tables(configuration, @test_script[:schools])
+      when :management_summary_table
+        run_management_summary_tables(configuration[:combined_html_output_file], configuration[:control])
       else
         configure_log_file(configuration) if component.to_s.include?('logger')
       end
@@ -222,6 +224,21 @@ class RunTests
       failed_charts += test.failed_charts
     end
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
+  end
+
+  def run_management_summary_tables(combined_html_output_file, control)
+    html = ""
+    schools_list.sort.each do |school_name|
+      school = load_school(school_name)
+      puts "=" * 30
+      puts "running for summary management table for #{school_name}"
+      test = RunManagementSummaryTable.new(school)
+      test.run_management_table(control)
+      html += "<h2>#{school.name}</h2>" + test.html
+    end
+    html_writer = HtmlFileWriter.new(control[:combined_html_output_file])
+    html_writer.write(html)
+    html_writer.close
   end
 
   def run_equivalences(control)

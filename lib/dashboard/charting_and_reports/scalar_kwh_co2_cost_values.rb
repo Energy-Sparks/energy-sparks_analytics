@@ -9,9 +9,9 @@ class ScalarkWhCO2CostValues
     @meter_collection = meter_collection
   end
 
-  def aggregate_value(time_scale, fuel_type, data_type = :kwh, override = nil)
+  def aggregate_value(time_scale, fuel_type, data_type = :kwh, override = nil, max_days_out_of_date = nil)
     check_data_available_for_fuel_type(fuel_type)
-    aggregation_configuration(time_scale, fuel_type, data_type, override)
+    aggregation_configuration(time_scale, fuel_type, data_type, override, false, max_days_out_of_date)
   end
 
   def aggregate_value_with_dates(time_scale, fuel_type, data_type = :kwh, override = nil)
@@ -40,11 +40,20 @@ class ScalarkWhCO2CostValues
     data
   end
 
-  private def aggregation_configuration(time_scale, fuel_type, data_type, override = nil, with_dates = false)
+  private def aggregation_configuration(time_scale, fuel_type, data_type, override = nil, with_dates = false, max_days_out_of_date = nil)
     aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, override)   
     dates = aggregator.x_axis_bucket_date_ranges if with_dates
+    check_dates(aggregator.last_meter_date, max_days_out_of_date)
     value = aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
     with_dates ? [value, dates[0][0], dates[0][1]] : value
+  end
+
+  private def check_dates(last_meter_date, max_days_out_of_date)
+    return if max_days_out_of_date.nil?
+    days_out_of_date = Date.today - max_days_out_of_date
+    if last_meter_date < days_out_of_date
+      raise EnergySparksMeterDataTooOutOfDate, "last reading #{last_meter_date} = #{days_out_of_date} days out of date"
+    end
   end
 
   private def generic_aggregation_calculation(time_scale, fuel_type, data_type, override = nil)

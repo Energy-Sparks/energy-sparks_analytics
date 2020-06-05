@@ -10,6 +10,7 @@ class Aggregator
 
   attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis
   attr_reader :x_axis_bucket_date_ranges, :data_labels, :x_axis_label
+  attr_reader :first_meter_date, :last_meter_date
 
   def initialize(meter_collection, chart_config, show_reconciliation_values)
     @show_reconciliation_values = show_reconciliation_values
@@ -197,6 +198,9 @@ class Aggregator
 
     chart_config[:min_combined_school_date] = min_date
     chart_config[:max_combined_school_date] = max_date
+
+    @first_meter_date = min_date
+    @last_meter_date = max_date
 
     description = schools.length > 1 ? 'Combined school charts' : 'School chart'
     logger.info description + " date range #{min_date} to #{max_date}"
