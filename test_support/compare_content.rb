@@ -89,7 +89,8 @@ class CompareContentResults
     new_component        = strip_content_of_volatile_data(new_component_orig)
     if comparison_component != new_component
       puts "Differs: #{index}"
-      if @control .include?(:report_differences)
+      ap @control
+      if @control[:compare_results].include?(:report_differences)
         h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
         puts h_diff
         puts 'Versus:'
@@ -132,7 +133,8 @@ class CompareContentResults
     [
       ['<p>This saving is equivalent', '</button></p>'],
       ['sourcing its electricity from in the last 5 minutes:', 'The first column'],
-      ['National Electricity Grid is currently', ' kg CO2/kWh.']
+      ['National Electricity Grid is currently', ' kg CO2/kWh.'],
+      ['<th scope="col"> Percentage of Carbon </th>', '<td> coal </td>'] # not ideal as doesn;t quite match end of table
     ].each do |start_match, end_match|
       html = strip_volatile_content(html, start_match, end_match)
     end

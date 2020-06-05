@@ -20,7 +20,8 @@ script = {
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
                                   { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },
-                                  :summary, 
+                                  :summary,
+                                  :report_differences
                                   # :report_differing_charts,
                                   # :report_differences 
                                 ] # :quick_comparison,
