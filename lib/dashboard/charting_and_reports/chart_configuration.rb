@@ -870,7 +870,8 @@ class ChartManager
       series_breakdown: :none,
       x_axis:           :intraday,
       yaxis_units:      :kwh,
-      yaxis_scaling:    :none
+      yaxis_scaling:    :none,
+      subtitle:         :daterange
     },
     gas_heating_season_intraday_up_to_1_year: {
       inherits_from: :gas_heating_season_intraday,
