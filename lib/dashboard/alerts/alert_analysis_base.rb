@@ -359,6 +359,16 @@ class AlertAnalysisBase < ContentBase
     raise EnergySparksAbstractBaseClass, 'Error: incorrect attempt to use abstract base class'
   end
 
+  def relative_change(difference, base)
+    if difference == 0.0 && base == 0.0
+      0.0
+    elsif base == 0.0
+      Float::INFINITY
+    else
+      difference / base
+    end
+  end
+
   # the model cache cached at the aggregate meter and therefore the school level
   # if in the analystics enronment we are running slightly different (asof_date v. chart_date)
   # then clear the cache, however, then does further caching if in 'test' mode

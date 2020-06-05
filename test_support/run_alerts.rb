@@ -266,7 +266,7 @@ class RunAlerts
         alert = alert_class.new(school)
 
         puts "METER DATA TOO OUT OF DATE: #{alert.class.name}" unless alert.meter_readings_up_to_date_enough?
-        puts "up to date: #{alert.class.name}" if alert.meter_readings_up_to_date_enough?
+        # puts "up to date: #{alert.class.name}" if alert.meter_readings_up_to_date_enough?
 
         unless alert.valid_alert?
           puts "#{alert_class}: Invalid alert before analysis"

@@ -610,7 +610,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def winter_heating_samples
-      model(:heating_occupied_all_days).samples
+      model(:heating_occupied_all_days).nil? ? 0 : model(:heating_occupied_all_days).samples
     end
 
     def summer_occupied_day_samples

@@ -17,9 +17,13 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   end
 
   def enough_data
-    hw_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@school)
-    summer_holidays = hw_model.find_period_before_and_during_summer_holidays(@school.holidays, aggregate_meter.amr_data)
-    summer_holidays.nil? ? :not_enough : :enough 
+    begin
+      hw_model = AnalyseHeatingAndHotWater::HotwaterModel.new(@school)
+      summer_holidays = hw_model.find_period_before_and_during_summer_holidays(@school.holidays, aggregate_meter.amr_data)
+      summer_holidays.nil? ? :not_enough : :enough
+    rescue EnergySparksNotEnoughDataException => _e
+      :not_enough
+    end
   end
 
   def self.template_variables

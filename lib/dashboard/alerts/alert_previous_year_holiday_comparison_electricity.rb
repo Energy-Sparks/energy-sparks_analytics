@@ -31,7 +31,7 @@ class AlertPreviousYearHolidayComparisonElectricity < AlertHolidayComparisonBase
 
   protected def last_two_periods(asof_date)
     date_with_margin_for_enough_data = asof_date - minimum_days_for_period
-    current_holiday = @school.holidays.find_previous_or_current_holiday(date_with_margin_for_enough_data)
+    current_holiday = @school.holidays.find_previous_or_current_holiday(date_with_margin_for_enough_data, 100, MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD)
     same_holiday_previous_year = @school.holidays.same_holiday_previous_year(current_holiday)
     current_holiday = truncate_period_to_available_meter_data(current_holiday)
     [current_holiday, same_holiday_previous_year]

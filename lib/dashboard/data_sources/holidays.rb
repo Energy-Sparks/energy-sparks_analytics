@@ -187,27 +187,36 @@ class Holidays
   end
 
   # returns a hash defining a holiday :title => title, :start_date => start_date, :end_date => end_date} or nil
-  def find_holiday(date, holiday_schedule = @holidays)
-    SchoolDatePeriod.find_period_for_date(date, holiday_schedule)
+  def find_holiday(date, holiday_schedule = @holidays, min_days_in_holiday = nil)
+    SchoolDatePeriod.find_period_for_date(date, holiday_schedule, min_days_in_holiday)
   end
 
-  def find_next_holiday(date, max_days_search = 100)
-    find_holiday_with_offset(date, max_days_search, 1)
+  def find_next_holiday(date, max_days_search = 100, min_days_in_holiday = nil)
+    find_holiday_with_offset(date, max_days_search, 1, min_days_in_holiday)
   end
 
-  def find_previous_or_current_holiday(date, max_days_search = 100)
-    find_holiday_with_offset(date, max_days_search, -1)
+  def find_previous_or_current_holiday(date, max_days_search = 100, min_days_in_holiday = nil)
+    find_holiday_with_offset(date, max_days_search, -1, min_days_in_holiday)
   end
 
-  def find_previous_holiday_to_current(current_holiday, number_holidays_before = 1)
-    current_holiday_index = SchoolDatePeriod.find_period_index_for_date(current_holiday.middle_date, @holidays)
-    new_index = current_holiday_index - number_holidays_before
-    new_index >= 0 ? @holidays[new_index] : nil
+  def find_previous_holiday_to_current(current_holiday, number_holidays_before = 1, min_days_in_holiday = nil)
+    raise EnergySparksUnexpectedStateException, "number holidays before = #{number_holidays_before} needs to be > 0" if number_holidays_before <= 0 
+  
+    holiday_index = SchoolDatePeriod.find_period_index_for_date(current_holiday.middle_date, @holidays)
+ 
+    while number_holidays_before > 0 && holiday_index > 0
+      if min_days_in_holiday.nil? || @holidays[holiday_index - 1].weekdays >= min_days_in_holiday
+        number_holidays_before -= 1
+      end
+      holiday_index -= 1
+    end
+
+    holiday_index < 0 || number_holidays_before > 0 ? nil : @holidays[holiday_index]
   end
 
-  private def find_holiday_with_offset(date, max_days_search = 100, direction = 1)
+  private def find_holiday_with_offset(date, max_days_search = 100, direction = 1, min_days_in_holiday = nil)
     (0..max_days_search).each do |days|
-      period = SchoolDatePeriod.find_period_for_date(date + direction * days, @holidays)
+      period = SchoolDatePeriod.find_period_for_date(date + direction * days, @holidays, min_days_in_holiday)
       return period unless period.nil?
     end
     nil

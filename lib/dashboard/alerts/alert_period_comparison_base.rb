@@ -29,7 +29,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   # for the purposes to a 'relevant' alert we need a minimum of 6 days
   # period data, this ensures at least 1 weekend day is present for
   # the averaging process
-  MINIMUM_DAYS_DATA_FOR_RELEVANT_PERIOD = 6
+  MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD = 4
   MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£ = 10.0
   attr_reader :difference_kwh, :difference_£, :difference_percent
   attr_reader :current_period_kwh, :current_period_£, :current_period_start_date, :current_period_end_date
@@ -164,14 +164,13 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @previous_period_weekly_£   = normalised_average_weekly_kwh(previous_period,  :£)
     @change_in_weekly_kwh       = @current_period_weekly_kwh - @previous_period_weekly_kwh
     @change_in_weekly_£         = @current_period_weekly_£ - @previous_period_weekly_£
-    @change_in_weekly_percent   = @change_in_weekly_kwh / @previous_period_weekly_kwh
+    @change_in_weekly_percent   = relative_change(@change_in_weekly_kwh, @previous_period_weekly_kwh)
 
-    @prefix_1 = @difference_percent > 0 ? 'up' : 'down'
-    @prefix_2 = @difference_percent > 0 ? 'increase' : 'reduction'
+    @prefix_1 = prefix(@difference_percent, 'up', 'the same', 'down')
+    @prefix_2 = prefix(@difference_percent, 'increase', 'unchanged', 'reduction')
     @summary  = summary_text
 
     set_savings_capital_costs_payback(@difference_£, 0.0)
-
     @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
 
     @bookmark_url = add_book_mark_to_base_url(url_bookmark)
@@ -180,11 +179,21 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   alias_method :analyse_private, :calculate
 
   private def period_debug(current_period,  asof_date)
-    "#{current_period} asof #{asof_date}"
+    "#{current_period.nil? ? 'no current period' : current_period}, asof #{asof_date}"
   end
 
   private def period_type
     'period'
+  end
+
+  private def prefix(change, up, same, down)
+    if change < 0.0
+      down
+    elsif change == 0.0
+      same
+    else
+      up
+    end
   end
 
   private def summary_text
@@ -295,16 +304,15 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     return false if period.nil?
     period_start = [aggregate_meter.amr_data.start_date,  period.start_date].max
     period_end   = [aggregate_meter.amr_data.end_date,    period.end_date, asof_date].min
-    days_in_period = period_end - period_start + 1
-    enough_days_data(days_in_period)
+    enough_days_data(SchoolDatePeriod.weekdays_inclusive(period_start, period_end))
   end
 
   private def enough_days_data(days)
-    days >= MINIMUM_DAYS_DATA_FOR_RELEVANT_PERIOD
+    days >= MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD
   end
 
   protected def minimum_days_for_period
-    MINIMUM_DAYS_DATA_FOR_RELEVANT_PERIOD
+    MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD
   end
 
   # returns [ formatted string of 7 temperatures, average for week]
@@ -324,7 +332,7 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
     return period if period.start_date >= aggregate_meter.amr_data.start_date && period.end_date <= aggregate_meter.amr_data.end_date
     start_date = [period.start_date, aggregate_meter.amr_data.start_date].max
     end_date = [period.end_date, aggregate_meter.amr_data.end_date].min
-    SchoolDatePeriod.new(period.type, "#{period.title} truncated to available meter data", start_date, end_date) if end_date >= start_date
+    return SchoolDatePeriod.new(period.type, "#{period.title} truncated to available meter data", start_date, end_date) if end_date >= start_date
     nil
   end
 

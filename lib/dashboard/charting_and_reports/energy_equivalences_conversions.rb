@@ -535,7 +535,7 @@ class EnergyEquivalences
         conversions: {
           £:  {
             rate:                   LIBRARY_BOOK_£,
-            description:            "A libary book costs about #{X.format(:£, LIBRARY_BOOK_£)}.",
+            description:            "A library book costs about #{X.format(:£, LIBRARY_BOOK_£)}.",
             front_end_description:  'Number of library books (£5)',
             adult_dashboard_wording:  'the cost of %s library books'
           }

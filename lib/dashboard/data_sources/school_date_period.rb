@@ -10,8 +10,6 @@ class SchoolDatePeriod
     @calendar_event_type_id = @calendar_event_type_id
   end
 
-
-
   def to_s
     "" << @title << ' (' << start_date.strftime("%a %d %b %Y") << ' to ' << end_date.strftime("%a %d %b %Y") << ')'
   end
@@ -30,6 +28,25 @@ class SchoolDatePeriod
     (start_date..end_date).to_a
   end
 
+  def self.number_of_weekdays(period)
+    weekdays_inclusive(period.start_date, period.end_date)
+  end
+
+  def self.weekdays_inclusive(start_date, end_date)
+    days = (end_date - start_date + 1).to_i
+    saturdays = ((days + start_date.wday) / 7).to_i
+    days - 2 * saturdays - (start_date.wday == 0 ? 1 : 0) + (end_date.wday == 6 ? 1 : 0)
+  end
+
+  # fast calculation - no looping
+  #   weekdays(Date.new(2020, 6,  1), Date.new(2020, 6, 1)) => 1 - Mon to Mon
+  #   weekdays(Date.new(2020, 5, 31), Date.new(2020, 6, 1)) => 1 - Sun to Mon
+  #   weekdays(Date.new(2020, 5, 31), Date.new(2020, 6, 6)) => 5 - Sun to Sat
+  #   weekdays(Date.new(2020, 5, 31), Date.new(2020, 6, 8)) => 6 - Sun to Mon
+  def weekdays
+    SchoolDatePeriod.number_of_weekdays(self)
+  end
+
   def self.matching_dates_in_period_to_day_of_week_list(period, list_of_days_of_week)
     (period.start_date..period.end_date).to_a.select { |date| list_of_days_of_week.include?(date.wday) }
   end
@@ -44,7 +61,8 @@ class SchoolDatePeriod
     end
   end
 
-  def self.find_period_for_date(date, periods)
+  def self.find_period_for_date(date, periods, min_period_length_days = nil)
+    periods = remove_short_holidays(periods, min_period_length_days) unless min_period_length_days.nil?
     period = nil
     if periods.length > 1 && periods[0].start_date < periods[1].start_date
       period = periods.bsearch {|p| date < p.start_date ? -1 : date > p.end_date ? 1 : 0 }
@@ -54,8 +72,15 @@ class SchoolDatePeriod
     period
   end
 
+  # e.g. 'May Day' might be defined in some circumstances
+  # as not being a real school holiday for analysis
+  def self.remove_short_holidays(periods, min_period_length_days)
+    periods.select{ |period| period.weekdays >= min_period_length_days }
+  end
 
-  def self.find_period_for_date_deprecated(date, periods)
+
+  def self.find_period_for_date_deprecated(date, periods, min_period_length_days = nil)
+    periods = remove_short_holidays(periods, min_period_length_days) unless min_period_length_days.nil?
     periods.each do |period|
       if date.nil? || period.nil? || period.start_date.nil? || period.end_date.nil?
         raise "Bad date" + date + period

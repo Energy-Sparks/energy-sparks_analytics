@@ -5,7 +5,7 @@ class ContentBase
     @relevance = check_relevance
     @not_enough_data_exception = false
     @calculation_worked = true
-    @today = Date.today
+    @today = ENV['ENERGYSPARKSTODAY'].nil? ? Date.today : Date.parse(ENV['ENERGYSPARKSTODAY'])
   end
 
   def relevance
