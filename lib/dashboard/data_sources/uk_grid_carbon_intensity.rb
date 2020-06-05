@@ -17,6 +17,11 @@ class GridCarbonIntensity < HalfHourlyData
     super(date, half_hour_index)
   end
 
+  def one_day_total(date)
+    add_parameterised_co2(date) if date_missing?(date)
+    super(date)
+  end
+
   # unlike other schedules maintain co2 as holey data, so start_date and end_date not valid
   def average_in_date_range(start_date, end_date)
     total = 0.0
