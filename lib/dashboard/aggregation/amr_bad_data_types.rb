@@ -45,6 +45,7 @@ class OneDayAMRReading
     'SOLO'  => { name: 'Synthetic solar PV consumed Onsite (good)',         description: 'Synthetic solar pv consumed onsite'},
     'SOLE'  => { name: 'Synthetic solar PV exported (good)',                description: 'Synthetic solar pv exported'},
     'SOLX'  => { name: 'Synthetic onsite solar + mains consumption (good)', description: 'Synthetic sum of solar pv consumed onsite and mains consumption'},
+    'HSIM'  => { name: 'Synthetic data used on heating/hw calcs',           description: 'Synthetic data used on heating/hw calcs'},
   }.freeze
   # rubocop:disable Metrics/LineLength
 end

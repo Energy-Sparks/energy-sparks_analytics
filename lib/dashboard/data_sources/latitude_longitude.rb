@@ -1,3 +1,4 @@
+require 'json'
 class LatitudeLongitude
   def self.distance(from_latitude, from_longitude, to_latitude, to_longitude)
     radius_earth_km = 6371.0
@@ -12,5 +13,19 @@ class LatitudeLongitude
   
   def self.degrees_to_radians(degrees)
     degrees * Math::PI / 180.0
+  end
+
+  def self.schools_latitude_longitude(school)
+    begin
+      url = 'http://api.postcodes.io/postcodes/' + school.postcode.gsub(' ', '%20')
+      response = Net::HTTP.get(URI(url))
+      data = JSON.parse(response)
+      {
+        latitude: data['result']['latitude'],
+        longitude: data['result']['longitude']
+      }
+    rescue Exception => _e # not sure what exceptions might be raised as part of code above?
+      raise EnergySparksUnableToDetermineLatitudeLongitudeFromPostCode, "Unable to determine lat/longitude for school #{school.name} and postcode #{school.postcode}"
+    end
   end
 end

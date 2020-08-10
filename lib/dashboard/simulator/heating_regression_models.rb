@@ -690,6 +690,14 @@ module AnalyseHeatingAndHotWater
       [actual_on_time, recommended_start_time, temperature, kwh_saving]
     end
 
+    # perhaps needs merging with def heating_on_time_assessment, but not in this test cycle TODO(PH, 25Jul2020)
+    def heating_on_date_time?(date, halfhour_index, criteria_percent_baseload_to_peak = 0.2)
+      baseload_kw = @heat_meter.amr_data.statistical_baseload_kw(date)
+      peakload_kw = @heat_meter.amr_data.statistical_peak_kw(date)
+      min_load_kw = baseload_kw + ((peakload_kw - baseload_kw) * criteria_percent_baseload_to_peak)
+      @heat_meter.amr_data.kw(date, halfhour_index) > min_load_kw
+    end
+
     def optimum_start_analysis(start_date = [@amr_data.start_date, @amr_data.end_date - 364].max, end_date = @amr_data.end_date)
       start_time_temperature_pairs = optimum_start_times_temperatures(start_date, end_date)
       # print_optimum_start_times_temperatures(start_time_temperature_pairs)
