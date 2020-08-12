@@ -37,7 +37,7 @@ class AggregateDataService
       create_solar_pv_sub_meters if @meter_collection.sheffield_simulated_solar_pv_panels?
       aggregate_electricity_meters
       disaggregate_storage_heaters if @meter_collection.storage_heaters?
-      create_solar_pv_sub_meters_using_meter_data if @meter_collection.low_carbon_solar_pv_panels?
+      create_solar_pv_sub_meters_using_meter_data if @meter_collection.low_carbon_hub_solar_pv_panels?
       combine_solar_pv_submeters_into_aggregate if aggregate_solar_pv_sub_meters?
       set_post_aggregation_state_on_all_meters
     }

@@ -79,7 +79,7 @@ module Dashboard
     end
 
     def solar_pv_panels?
-      low_carbon_solar_pv_panels? || sheffield_simulated_solar_pv_panels?
+      low_carbon_hub_solar_pv_panels? || sheffield_simulated_solar_pv_panels?
     end
 
     def sheffield_simulated_solar_pv_panels?
