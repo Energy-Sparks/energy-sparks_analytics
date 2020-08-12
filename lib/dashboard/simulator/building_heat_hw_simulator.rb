@@ -211,7 +211,7 @@ class BuildingHeatHWSimulator
   end
 
   def calc_occupied_controlled_air_permeability_m3_per_hr
-    recommend_ventilation_per_pupil = 5.0 # l/s
+    recommend_ventilation_per_pupil = 10.0 # l/s
     school.number_of_pupils * (recommend_ventilation_per_pupil / 1000) * 3600.0
   end
 
