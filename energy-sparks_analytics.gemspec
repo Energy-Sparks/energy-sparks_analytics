@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 2.5.0'
 
   s.add_dependency 'require_all', '~> 2.0.0'
-  s.add_dependency 'activesupport', '~> 6.0.0.rc1'
+  s.add_dependency 'activesupport', '~> 6.0.0'
   s.add_dependency 'statsample', '~> 2.1.0'
   s.add_dependency 'mechanize', '~> 2.7.6'
   s.add_dependency 'write_xlsx', '~> 0.85.5'
@@ -39,7 +39,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'benchmark-memory', '~> 0.1.2'
 
   # Useful for debugging
-  s.add_dependency 'pry-byebug', '~> 3.6.0'
+  s.add_dependency 'pry-byebug'
   # For testing
-  s.add_dependency 'rspec', '~> 3.8.0'
+  s.add_dependency 'rspec'
 end
