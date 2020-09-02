@@ -119,8 +119,8 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
       start_date, end_date = convert_x_axis_date_key_to_dates(date_range_key)
       weeks_data[start_date..end_date] = data
     end
-    # try to force chronological order, just in case chart result ordering ever changes
-    weeks_data.sort { |entry1, _entry2| entry1[0].first <=> entry1[1].first }.to_h
+    # force chronological order
+    weeks_data.sort_by { |date_range, kwh_values| date_range.first }.to_h
   end
 
   private def convert_x_axis_date_key_to_dates(key)
