@@ -15,14 +15,14 @@ class MeterCollectionFactory
   def build(school_data:, amr_data: {electricity_meters: [], heat_meters: []}, pseudo_meter_attributes: {})
 
     school = Dashboard::School.new(
-      school_data[:name],
-      school_data[:address],
-      school_data[:floor_area],
-      school_data[:number_of_pupils],
-      school_data[:school_type],
-      school_data[:area_name],
-      school_data[:urn],
-      school_data[:postcode]
+      name: school_data[:name],
+      address: school_data[:address],
+      floor_area: school_data[:floor_area],
+      number_of_pupils: school_data[:number_of_pupils],
+      school_type: school_data[:school_type],
+      area_name: school_data[:area_name],
+      urn: school_data[:urn],
+      postcode: school_data[:postcode]
     )
 
     meter_collection = MeterCollection.new(school,

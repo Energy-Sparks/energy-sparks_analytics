@@ -24,7 +24,16 @@ class VirtualSchool
 
     na = 'Not Applicable'
 
-    school = Dashboard::School.new(name, na, floor_area, number_of_pupils, :primary, area_name, urn, na)
+    school = Dashboard::School.new(
+      name: name,
+      address: na,
+      floor_area: floor_area,
+      number_of_pupils: number_of_pupils,
+      school_type: :primary,
+      area_name: area_name,
+      urn: urn,
+      postcode: na
+    )
 
     # Second parameter is for something which complies with the schedule data manager
     # for holidays etc

@@ -279,14 +279,14 @@ class AnalysticsSchoolAndMeterMetaData
     logger.debug "Creating School: #{school_name} #{school_metadata[:postcode]}"
 
     school = Dashboard::School.new(
-      school_name,
-      school_metadata[:postcode],
-      school_metadata[:floor_area],
-      school_metadata[:pupils],
-      school_metadata[:school_type],
-      school_metadata[:area],
-      school_metadata[:urn],
-      school_metadata[:postcode]
+      name: school_name,
+      address: school_metadata[:postcode],
+      floor_area: school_metadata[:floor_area],
+      number_of_pupils: school_metadata[:pupils],
+      school_type: school_metadata[:school_type],
+      area_name: school_metadata[:area],
+      urn: school_metadata[:urn],
+      postcode: school_metadata[:postcode]
     )
 
     school
