@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.summary     = "Energy sparks - analytics"
   s.homepage    = "https://github.com/BathHacked/energy_sparks"
   s.description = "Energy sparks - analytics - for charting"
-  s.authors     = ['Philip Haile', 'James Jefferies']
+  s.authors     = ['Philip Haile']
   # s.files         = `git ls-files`.split("\n")
   # s.test_files    = `git ls-files -- rspec/*`.split("\n")
   s.require_paths = ["lib"]
