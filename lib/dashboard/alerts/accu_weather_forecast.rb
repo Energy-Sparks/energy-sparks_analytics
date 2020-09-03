@@ -1,7 +1,7 @@
 require 'net/http'
 require 'json'
 require 'date'
-require 'awesome_print'
+require 'amazing_print'
 
 # 5 day forecast appears to be free, longer forecast appear to be on a different tier
 class AccuWeatherForecast

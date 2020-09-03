@@ -1,4 +1,4 @@
-require 'awesome_print'
+require 'amazing_print'
 require 'digest'
 require 'net/http'
 require 'json'

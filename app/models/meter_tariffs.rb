@@ -1,6 +1,6 @@
 require_relative '../../lib/dashboard/time_of_year.rb'
 require_relative '../../lib/dashboard/time_of_day.rb'
-require 'awesome_print'
+require 'amazing_print'
 require 'date'
 # economic and accounting tariff configuration and setup
 # designed to be called and precalculated at the end of the
