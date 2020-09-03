@@ -31,7 +31,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   # the averaging process
   MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD = 4
   MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£ = 10.0
-  attr_reader :difference_kwh, :difference_£, :difference_percent
+  attr_reader :difference_kwh, :difference_£, :difference_percent, :abs_difference_percent
   attr_reader :current_period_kwh, :current_period_£, :current_period_start_date, :current_period_end_date
   attr_reader :previous_period_kwh, :previous_period_£, :previous_period_start_date, :previous_period_end_date
   attr_reader :days_in_current_period, :days_in_previous_period
@@ -50,6 +50,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       difference_kwh:     { description: 'Difference in kwh between last 2 periods', units:  { kwh: fuel_type } },
       difference_£:       { description: 'Difference in £ between last 2 periods',   units:  :£, benchmark_code: 'dif£'},
       difference_percent: { description: 'Difference in % between last 2 periods',   units:  :percent, benchmark_code: 'difp'  },
+      abs_difference_percent: { description: 'Difference in % between last 2 periods - absolute, positive number only',   units:  :percent },
 
       current_period_kwh:        { description: 'Current period kwh',                 units:  { kwh: fuel_type } },
       current_period_£:          { description: 'Current period £',                   units:  :£  },
@@ -132,6 +133,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     # fixes St Louis autumn 2019 half term verus zero summer holiday -inf in benchmarking (PH, 17Dec2019)
     # @difference_percent = previous_period_data[:kwh] == 0.0 ? 1000.0 : (difference_kwh  / previous_period_data[:kwh])
     @difference_percent = difference_kwh  / previous_period_data[:kwh]
+    @abs_difference_percent = @difference_percent.magnitude
 
     @current_period_kwh         = current_period_data[:kwh]
     @current_period_£           = current_period_data[:£]
