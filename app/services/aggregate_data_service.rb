@@ -12,7 +12,6 @@ class AggregateDataService
     @electricity_meters = @meter_collection.electricity_meters
   end
 
-  # This is called by the EnergySparks codebase
   def validate_and_aggregate_meter_data
     logger.info 'Validating and Aggregating Meters'
     validate_meter_data
@@ -29,7 +28,9 @@ class AggregateDataService
     validate_meter_list(@electricity_meters)
   end
 
+  # This is called by the EnergySparks codebase
   def aggregate_heat_and_electricity_meters
+    logger.info 'Aggregate Meters'
     bm = Benchmark.realtime {
       set_long_gap_boundary_on_all_meters
       aggregate_heat_meters
@@ -144,7 +145,7 @@ class AggregateDataService
     proportion_out_accounting_standing_charges(storage_heater_meter, electricity_meter)
 
     electricity_meter.sub_meters.push(storage_heater_meter)
-    
+
     {
       electricity_minus_storage_heater_meter: electricity_meter,
       storage_heater_meter: storage_heater_meter
@@ -160,7 +161,7 @@ class AggregateDataService
       )
 
     aggregate_storage_heater_mpan = Dashboard::Meter.synthetic_mpan_mprn(meter_collection.aggregated_electricity_meters.id, :storage_heater_only)
-  
+
     aggregate_storage_heater_meter = create_modified_meter_copy(
       meter_collection.aggregated_electricity_meters, # pass in floor area, pupil numbers
       aggregate_storage_heater_amr_data,
@@ -186,7 +187,7 @@ class AggregateDataService
       :electricity
     )
     @meter_collection.aggregated_electricity_meters.amr_data = disaggregated_electricity_amr_data
-    
+
     calculate_meter_carbon_emissions_and_costs(@meter_collection.aggregated_electricity_meters, :electricity)
   end
 
@@ -228,7 +229,7 @@ class AggregateDataService
         :solar_pv_consumed_sub_meter
       )
       logger.warn "Created meter onsite consumed electricity pv data from #{disaggregated_data[:solar_consumed_onsite].start_date} to #{disaggregated_data[:solar_consumed_onsite].end_date} #{disaggregated_data[:solar_consumed_onsite].total.round(0)}kWh"
-      
+
       electricity_meter.sub_meters.push(solar_pv_meter)
 
       exported_pv = create_modified_meter_copy(
@@ -280,7 +281,7 @@ class AggregateDataService
   # Low Carbon Hub based solar PV aggregation
   #
   # similar to Sheffield PV based create_solar_pv_sub_meters() function
-  # except the data comes in a more precalculated form, so its more a 
+  # except the data comes in a more precalculated form, so its more a
   # matter of moving meters around, plus some imple maths
   #
   # Low carbon hub provides 4 sets of meter readings: 'solar PV production', 'exported electricity', 'mains consumption', 'solar pv concumed onsite'

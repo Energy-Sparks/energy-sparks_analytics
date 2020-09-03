@@ -8,7 +8,9 @@ require_relative '../../../lib/dashboard.rb'
 module Dashboard
   class School
 
-    attr_reader :name, :address, :floor_area, :number_of_pupils, :school_type, :area_name, :postcode
+    # Activation date is when the school was activated by an administrator in the Energy Sparks front end - it is a date
+    # Created at is when the school was created during the onboarding process - it is a timestamp
+    attr_reader :name, :address, :floor_area, :number_of_pupils, :school_type, :area_name, :postcode, :activation_date, :created_at
     attr_accessor :urn
 
     def initialize(
@@ -19,7 +21,9 @@ module Dashboard
       school_type: nil,
       area_name: 'Bath',
       urn: nil,
-      postcode: nil
+      postcode: nil,
+      activation_date: nil,
+      created_at: nil
     )
       @school_type = school_type
       @name = name
@@ -30,6 +34,12 @@ module Dashboard
       @area_name = area_name
       @urn = urn
       @postcode = postcode
+      @activation_date = activation_date
+      @created_at = created_at
+    end
+
+    def to_s
+      "#{name} - #{urn} - #{school_type} - #{area_name} - Activated: #{activation_date} - Created: #{created_at}"
     end
   end
 end

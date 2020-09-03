@@ -22,7 +22,9 @@ class MeterCollectionFactory
       school_type: school_data[:school_type],
       area_name: school_data[:area_name],
       urn: school_data[:urn],
-      postcode: school_data[:postcode]
+      postcode: school_data[:postcode],
+      activation_date: school_data[:activation_date],
+      created_at: school_data[:created_at]
     )
 
     meter_collection = MeterCollection.new(school,
@@ -35,7 +37,6 @@ class MeterCollectionFactory
                                           )
 
     add_meters_and_amr_data(meter_collection, amr_data)
-
     meter_collection
   end
 
