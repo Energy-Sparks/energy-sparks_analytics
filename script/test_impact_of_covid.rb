@@ -11,6 +11,7 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 require 'ruby-prof'
+require 'csv'
 
 class COVIDMeterAnalysis
   START_OF_LOCKDOWN = Date.new(2020, 3, 23)
@@ -28,6 +29,10 @@ class COVIDMeterAnalysis
     return 'Starts after Mar 2019' if @meter.amr_data.start_date > Date.new(2019, 3, 30)
     return 'Stops before May 2020' if @meter.amr_data.end_date   < Date.new(2020, 5, 20)
     nil
+  end
+
+  def meter_ranges
+    [@school.name, fuel_type, @meter.amr_data.start_date, @meter.amr_data.end_date]
   end
 
   def fuel_type; 'error' end
@@ -148,6 +153,10 @@ class COVIDHeatMeterAnalysis < COVIDMeterAnalysis
   def fuel_type; 'gas' end
 end
 
+class COVIDStorageHeaterMeterAnalysis < COVIDMeterAnalysis
+  def fuel_type; 'storage heater' end
+end
+
 def save_to_excel(data, dates)
   data = data.compact
   filename = 'Results\covid analysis.xlsx'
@@ -185,37 +194,70 @@ school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match
 
 results = []
 
-individual_meters = false
+meter_ranges = true
 
-school_names.each do |school_name|
-  puts "==============================Doing #{school_name} ================================"
+if meter_ranges
 
-  school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
-
-  if individual_meters
-    school.electricity_meters.each do |electricity_meter|
-      analyser = COVIDElectricityMeterAnalysis.new(school, electricity_meter)
-      results.push(analyser.process)
-    end
-
-    school.heat_meters.each do |heat_meter|
-      analyser = COVIDHeatMeterAnalysis.new(school, heat_meter)
-      results.push(analyser.process)
-    end
-  else
+  meter_ranges = []
+  school_names.each do |school_name|
+    school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
+    puts "==============================Doing #{school_name} ================================"
     unless school.aggregated_electricity_meters.nil?
       analyser = COVIDElectricityMeterAnalysis.new(school, school.aggregated_electricity_meters)
-      results.push(analyser.process)
+      meter_ranges.push(analyser.meter_ranges)
     end
 
     unless school.aggregated_heat_meters.nil?
       analyser = COVIDHeatMeterAnalysis.new(school, school.aggregated_heat_meters)
-      results.push(analyser.process)
+      meter_ranges.push(analyser.meter_ranges)
+    end
+
+    unless school.storage_heater_meter.nil?
+      analyser = COVIDStorageHeaterMeterAnalysis.new(school, school.storage_heater_meter)
+      meter_ranges.push(analyser.meter_ranges)
     end
   end
 
+  filename = 'Results\covid meter dates.csv'
+
+  CSV.open(filename, "w") do |csv|
+    meter_ranges.each do |school_meter_range|
+      csv << school_meter_range
+    end
+  end
+else
+
+  individual_meters = false
+
+  school_names.each do |school_name|
+    puts "==============================Doing #{school_name} ================================"
+
+    school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
+
+    if individual_meters
+      school.electricity_meters.each do |electricity_meter|
+        analyser = COVIDElectricityMeterAnalysis.new(school, electricity_meter)
+        results.push(analyser.process)
+      end
+
+      school.heat_meters.each do |heat_meter|
+        analyser = COVIDHeatMeterAnalysis.new(school, heat_meter)
+        results.push(analyser.process)
+      end
+    else
+      unless school.aggregated_electricity_meters.nil?
+        analyser = COVIDElectricityMeterAnalysis.new(school, school.aggregated_electricity_meters)
+        results.push(analyser.process)
+      end
+
+      unless school.aggregated_heat_meters.nil?
+        analyser = COVIDHeatMeterAnalysis.new(school, school.aggregated_heat_meters)
+        results.push(analyser.process)
+      end
+    end
+
+  end
+
+  save_to_excel(results, COVIDMeterAnalysis::WEEKS.map{ |week| week.first })
 end
-
-save_to_excel(results, COVIDMeterAnalysis::WEEKS.map{ |week| week.first })
-
 
