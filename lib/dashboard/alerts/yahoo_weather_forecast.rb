@@ -3,7 +3,7 @@
 require 'net/http'
 require 'json'
 require 'date'
-require 'awesome_print'
+require 'amazing_print'
 
 class YahooWeatherForecast
   include Logging

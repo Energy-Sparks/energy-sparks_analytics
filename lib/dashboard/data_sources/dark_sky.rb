@@ -5,7 +5,7 @@
 require 'net/http'
 require 'json'
 require 'date'
-require 'awesome_print'
+require 'amazing_print'
 
 class DarkSkyWeatherInterface
   DEFAULT_FIELDS =  {

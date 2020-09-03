@@ -34,7 +34,7 @@ require 'logger'
 require 'net/http'
 require 'json'
 require 'date'
-require 'awesome_print'
+require 'amazing_print'
 
 require 'interpolate'
 require 'benchmark'
