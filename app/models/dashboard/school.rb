@@ -3,19 +3,28 @@
 #           - TODO(PH,JJ,3Jun18) - at some point decide whether
 #           - this is the correct model
 #
-# JJ - this will ultimately just be an ActiveModel/ActiveRecord School
 require_relative '../../../lib/dashboard.rb'
 
 module Dashboard
   class School
-    # Energy Sparks existing activerecord fields:
-    attr_reader :name, :address, :floor_area, :number_of_pupils
-    attr_reader :calendar_id, :competition_role, :created_at, :electricity_dataset, :enrolled
-    attr_reader :gas_dataset, :id, :level, :sash_id, :postcode, :school_type, :slug, :update_at
-    attr_reader :website, :area_name
+
+    # Activation date is when the school was activated by an administrator in the Energy Sparks front end - it is a date
+    # Created at is when the school was created during the onboarding process - it is a timestamp
+    attr_reader :name, :address, :floor_area, :number_of_pupils, :school_type, :area_name, :postcode, :activation_date, :created_at
     attr_accessor :urn
 
-    def initialize(name, address = nil, floor_area = nil, number_of_pupils = nil, school_type = nil, area_name = 'Bath', urn = nil, postcode = nil)
+    def initialize(
+      name:,
+      address: nil,
+      floor_area: nil,
+      number_of_pupils: nil,
+      school_type: nil,
+      area_name: 'Bath',
+      urn: nil,
+      postcode: nil,
+      activation_date: nil,
+      created_at: nil
+    )
       @school_type = school_type
       @name = name
       @address = address
@@ -25,6 +34,12 @@ module Dashboard
       @area_name = area_name
       @urn = urn
       @postcode = postcode
+      @activation_date = activation_date
+      @created_at = created_at
+    end
+
+    def to_s
+      "#{name} - #{urn} - #{school_type} - #{area_name} - Activated: #{activation_date} - Created: #{created_at}"
     end
   end
 end

@@ -1,7 +1,7 @@
 require 'net/http'
 require 'json'
 require 'date'
-require 'awesome_print'
+require 'amazing_print'
 # required Energy Sparks API key needs setting in ENERGYSPARKSMETOFFICEDATAPOINTAPIKEY environment variable
 # choice of sites: http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/xml/sitelist?key=
 # 5 day x 3 hour forecast: http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/xml/3840?res=3hourly&key=

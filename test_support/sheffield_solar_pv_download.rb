@@ -50,7 +50,7 @@ class DownloadSheffieldSolarPVData
     nearest = pv_interface.find_nearest_areas(latitude, longitude)
 
     logger.info '    5 nearest solar pv areas'
-    logger.info nearest.awesome_inspect(:indent => 8)
+    logger.ap   nearest, indent: 8
 
     solar_pv_data, missing_date_times, whole_day_substitutes = pv_interface.historic_solar_pv_data(nearest.first[:gsp_id], latitude, longitude, start_date, end_date)
 

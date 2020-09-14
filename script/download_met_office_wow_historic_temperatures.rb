@@ -3,7 +3,7 @@ require 'json'
 require 'date'
 require 'time'
 require 'yaml'
-require 'awesome_print'
+require 'amazing_print'
 
 # experimental interface to Met Office Wow historic temperature database
 # caches raw data to .\InputData\CachedWOWData to save 10 queries per week starter api limit
