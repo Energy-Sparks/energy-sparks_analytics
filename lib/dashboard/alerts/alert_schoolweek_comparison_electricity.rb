@@ -40,7 +40,6 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
   def calculate(asof_date)
     super(asof_date)
 
-    date_format = '%e %B'
     @current_period_start_short_date    = format_date(current_period_start_date)
     @current_period_end_short_date      = format_date(current_period_end_date)
     @previous_period_start_short_date   = format_date(previous_period_start_date)
@@ -85,5 +84,9 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
   private def school_week(asof_date, offset)
     sunday, saturday, _week_count = @school.holidays.nth_school_week(asof_date, offset)
     SchoolDatePeriod.new(:alert, "School Week offset #{offset}", sunday, saturday)
+  end
+
+  private def fuel_time_of_year_priority(asof_date, current_period)
+    5.0
   end
 end

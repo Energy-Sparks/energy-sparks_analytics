@@ -7,12 +7,17 @@ script = {
   # ruby_profiler:            true,
   no_schools:                  ['*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
-  schools:                  ['*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   no_source:                   :analytics_db, # :aggregated_meter_collection, 
   source:                   :aggregated_meter_collection,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
-    alerts:    nil, # [ AlertSummerHolidayRefridgerationAnalysis ],
+    alerts:   nil,
+    no_alerts: [ AlertSchoolWeekComparisonElectricity, AlertSchoolWeekComparisonGas ],
+    no_alerts:   [ AlertSchoolWeekComparisonElectricity, AlertPreviousHolidayComparisonElectricity,
+    AlertPreviousYearHolidayComparisonElectricity, AlertSchoolWeekComparisonGas,
+    AlertPreviousHolidayComparisonGas, AlertPreviousYearHolidayComparisonGas],
+    # nil [ AlertSummerHolidayRefridgerationAnalysis ],
     control:  {
                 # print_alert_banner: true,
                 # alerts_history: true,
@@ -28,14 +33,15 @@ script = {
                                         front_end_template_data
                                         front_end_template_chart_data
                                         front_end_template_table_data
-                                      ]
+                                      ],
+                                      comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Alerts\Base',
+                                      output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Alerts\New',
                                     },
 
                 no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
                 no_benchmark:          %i[school alert ], # detail],
                 # asof_date:          (Date.new(2018,6,14)..Date.new(2019,6,14)).each_slice(7).map(&:first),
-               # asof_date:      Date.new(2019,10,16)
-               asof_date:      Date.new(2020,6,1)
+               asof_date:      Date.new(2020,9,14)
               } 
   }
 }

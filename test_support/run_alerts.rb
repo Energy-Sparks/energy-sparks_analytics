@@ -57,7 +57,7 @@ class RunAlerts
     summary_content_text:           { on_class: false,  method: :content_wording, name: 'text content', args: :html, use_puts: true },
   }.freeze
 
-  attr_reader :school
+  attr_reader :school, :comparison_directory, :output_directory
 
   def initialize(school)
     @school = school
@@ -117,9 +117,9 @@ class RunAlerts
 
   def full_filename(filename, base)
     if base
-      File.join(File.dirname(__FILE__), '../TestResults/Alerts/Base/') + filename
+      @comparison_directory + '\\' + filename
     else
-      File.join(File.dirname(__FILE__), '../TestResults/Alerts/New/') + filename
+      @output_directory + '\\' + filename
     end
   end
 
@@ -236,6 +236,8 @@ class RunAlerts
 
   def run_alerts(alerts, control, asof_date)
     alerts = ALERT_TO_EXCELTAB_MAP.keys if alerts.nil?
+    @comparison_directory = control.dig(:save_and_compare, :comparison_directory)
+    @output_directory     = control.dig(:save_and_compare, :output_directory)
 
     print_banner(@school.name, 0) unless control[:print_school_name_banner].nil?
     print_banner("asof date: #{asof_date.strftime('%a %d-%m-%Y')}", 0)

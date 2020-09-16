@@ -99,6 +99,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     raise EnergySparksAbstractBaseClass, "Error: comparison_chart method not implemented for #{self.class.name}"
   end
 
+  public def time_of_year_relevance
+    @time_of_year_relevance ||= calculate_time_of_year_relevance(@asof_date)
+  end
+
   def aggregate_meter
     fuel_type == :electricity ? @school.aggregated_electricity_meters : @school.aggregated_heat_meters
   end
@@ -276,9 +280,24 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     values.sum / values.length
   end
 
+  protected def calculate_time_of_year_relevance(asof_date)
+    current_period, previous_period = last_two_periods(asof_date)
+    # lower relevance just after a holiday, only prioritise when 2 whole weeks of
+    # data post holiday, use 9 days as criteria to allow for non-whole weeks post holiday
+    # further modified by fuel type in derived classes so gas higher priority in winter
+    # and electricity in summer (CT request 15 Sep 2020)
+    days_between_school_weeks = current_period.end_date - previous_period.end_date
+    school_weeks_split_either_side_of_holiday = days_between_school_weeks > 9
+    meter_data_days_out_of_date = asof_date - current_period.end_date
+    meter_data_out_of_date = meter_data_days_out_of_date > 10 # agreed with CT 16Sep2020
+    fuel_priority = fuel_time_of_year_priority(asof_date, current_period)
+    time_relevance = (meter_data_out_of_date || school_weeks_split_either_side_of_holiday) ? 1.0 : fuel_priority
+    time_relevance
+  end
+
   # relevant if asof date immediately at end of period or up to
   # 3 weeks after
-  private def time_relevance(asof_date)
+  private def time_relevance_deprecated(asof_date)
     current_period, _previous_period = last_two_periods(asof_date)
     return :not_relevant if current_period.nil?
     # relevant during period, subject to 'enough_data'
@@ -340,7 +359,7 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
 
   # relevant if asof date immediately at end of period or up to
   # 3 weeks after
-  private def calculate_time_of_day_relevance(asof_date)
+  private def calculate_time_of_year_relevance(asof_date)
     current_period, _previous_period = last_two_periods(asof_date)
     return 0.0 if current_period.nil?
     # relevant during period, subject to 'enough_data'
@@ -350,10 +369,6 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
     percent_into_post_holiday_period = (days_from_end_of_period_to_asof_date - DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD) / DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD
     weight =  percent_into_post_holiday_period * 2.5
     10.0 - weight # scale down relevance of holiday comparison from 10.0 to 7.5 over relevance period (e.g. 3 weeks)
-  end
-
-  def time_of_year_relevance
-    calculate_time_of_day_relevance(@asof_date)
   end
 
   protected def current_period_name(current_period); period_name(current_period) end

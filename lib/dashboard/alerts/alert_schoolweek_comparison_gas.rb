@@ -1,4 +1,5 @@
 require_relative './alert_period_comparison_base.rb'
+require_relative './alert_model_cache_mixin.rb'
 # Compares the last two SCHOOL weeks - i.e. when this school is occupied, i.e. skips holidays
 # Unlike the other week/short term comparison alerts, it works completly off chart data
 # and doesn't do the amr aggregation locally
@@ -9,6 +10,7 @@ require_relative './alert_period_comparison_base.rb'
 # previous Monday's data would be increased as determined by the model's temperature adjustment
 #
 class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
+  include AlertModelCacheMixin
   TEMPERATURE_ADJUSTED_CHART = :schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted
   # include AlertPeriodComparisonTemperatureAdjustmentMixin
   attr_reader :current_week_kwhs, :previous_week_kwhs_unadjusted, :previous_week_kwhs_adjusted
@@ -125,5 +127,17 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
 
   private def convert_x_axis_date_key_to_dates(key)
     key.match(/Energy[:](.*)[-](.*)/).captures.map { |date_str| Date.parse(date_str) }
+  end
+
+  private def fuel_time_of_year_priority(asof_date, current_period)
+    heating_on_in_period(asof_date, current_period) ? 7.5 : 2.5
+  end
+
+  private def heating_on_in_period(asof_date, period)
+    @heating_model ||= model_cache(@school.urn, asof_date)
+    school_days = (period.start_date..period.end_date).to_a.select{ |date| date.wday.between?(1,5) }
+    heating_on_days = school_days.count{ |school_day| @heating_model.heating_on?(school_day) }
+    heating_on_most_days = heating_on_days > (school_days.length / 2.0)
+    heating_on_most_days
   end
 end
