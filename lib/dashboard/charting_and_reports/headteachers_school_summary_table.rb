@@ -25,10 +25,11 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     [
       '',
       'Annual Use (kWh)',
+      'Annual CO2 (kg)',
       'Annual Cost',
       'Change from last year',
       'Change in last 4 weeks',
-      'Potential savings'
+      'Potential savings',
     ] 
   end
 
@@ -46,6 +47,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
   COLUMN_TYPES = [
     :fuel_type,
     KWH_NOT_ENOUGH_IN_COL_FORMAT,
+    :co2,
     :£,
     :relative_percent, # or text saying 'No recent data'
     :relative_percent, # or text saying 'No recent data'
@@ -89,6 +91,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     {
       fuel_type:          { data: fuel_type.to_s.humanize.capitalize,       units: :fuel_type },
       this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: KWH_NOT_ENOUGH_IN_COL_FORMAT },
+      this_year_co2:      { data: last_2_years_comparison[:current_co2],    units: :co2 },
       this_year_£:        { data: last_2_years_comparison[:current_£],      units: :£ },
       change_years:       { data: last_2_years_comparison[:percent_change], units: :relative_percent },
       change_4_weeks:     { data: last_4_week_comparison[:percent_change],  units: :relative_percent },
@@ -136,13 +139,16 @@ class HeadTeachersSchoolSummaryTable < ContentBase
 
   def compare_two_periods(fuel_type, period1, period2, max_days_out_of_date)
     current_period_kwh  = checked_get_aggregate(period1, fuel_type, :kwh)
+    current_period_co2  = checked_get_aggregate(period1, fuel_type, :co2)
+    current_period_co2  = electricity_co2_with_solar_offset if @school.solar_pv_panels? && fuel_type == :electricity
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
     percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : (current_period - previous_period)/previous_period 
     
     { 
-      current_kwh:    current_period_kwh, 
+      current_kwh:    current_period_kwh,
+      current_co2:    current_period_co2,
       current_£:      current_period, 
       previous_£:     previous_period, 
       percent_change: out_of_date ? NO_RECENT_DATA_MESSAGE : percent_change,
@@ -155,6 +161,13 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     rescue EnergySparksNotEnoughDataException => _e
       nil
     end
+  end
+
+  # just take the mains consumpton which was previously saved and stored as a sub meter
+  def electricity_co2_with_solar_offset
+    mains_consumption_meter = @school.aggregated_electricity_meters.sub_meters.find{ |meter| meter.name == SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME }
+    co2_ex_solar = ScalarkWhCO2CostValues.new(@school).aggregate_value_with_dates({ year: 0}, :electricity, :co2)
+    mains_consumption_meter.amr_data.kwh_date_range(co2_ex_solar[1], co2_ex_solar[2], :co2)
   end
 
   def comparison_out_of_date(period1, fuel_type, max_days_out_of_date)

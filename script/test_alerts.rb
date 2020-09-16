@@ -5,7 +5,7 @@ require_rel '../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  no_schools:                  ['*'], # ['Round.*'],
+  no_schools:                  ['Trin.*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   schools:                  ['*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   no_source:                   :analytics_db, # :aggregated_meter_collection, 
