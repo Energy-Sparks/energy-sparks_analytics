@@ -163,11 +163,12 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     end
   end
 
-  # just take the mains consumpton which was previously saved and stored as a sub meter
   def electricity_co2_with_solar_offset
-    mains_consumption_meter = @school.aggregated_electricity_meters.sub_meters.find{ |meter| meter.name == SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME }
-    co2_ex_solar = ScalarkWhCO2CostValues.new(@school).aggregate_value_with_dates({ year: 0}, :electricity, :co2)
-    mains_consumption_meter.amr_data.kwh_date_range(co2_ex_solar[1], co2_ex_solar[2], :co2)
+    scalar = ScalarkWhCO2CostValues.new(@school)
+    consumption   = scalar.aggregate_value({ year: 0}, :electricity, :co2)
+    pv_production = scalar.aggregate_value({ year: 0}, :solar_pv,    :co2)
+    net_co2 = consumption - pv_production
+    net_co2
   end
 
   def comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
