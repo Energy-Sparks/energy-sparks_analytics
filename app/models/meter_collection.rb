@@ -229,7 +229,7 @@ class MeterCollection
   end
 
   def solar_pv_panels?
-    sheffield_simulated_solar_pv_panels? || low_carbon_hub_solar_pv_panels?
+    sheffield_simulated_solar_pv_panels? || low_carbon_hub_solar_pv_panels? || solar_for_schools_solar_pv_panels?
   end
 
   def solar_pv_and_or_storage_heaters?
@@ -250,6 +250,10 @@ class MeterCollection
 
   def low_carbon_hub_solar_pv_panels?
     @has_low_carbon_hub_solar_pv_panels ||= all_meters.any?{ |meter| meter.low_carbon_hub_solar_pv_panels? }
+  end
+
+  def solar_for_schools_solar_pv_panels?
+    @has_solar_for_schools_solar_pv_panels ||= all_meters.any?{ |meter| meter.solar_for_schools_solar_pv_panels? }
   end
 
   def school_type

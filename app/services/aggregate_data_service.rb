@@ -38,7 +38,7 @@ class AggregateDataService
       create_solar_pv_sub_meters if @meter_collection.sheffield_simulated_solar_pv_panels?
       aggregate_electricity_meters
       disaggregate_storage_heaters if @meter_collection.storage_heaters?
-      create_solar_pv_sub_meters_using_meter_data if @meter_collection.low_carbon_hub_solar_pv_panels?
+      create_solar_pv_sub_meters_using_meter_data if @meter_collection.low_carbon_hub_solar_pv_panels? || @meter_collection.solar_for_schools_solar_pv_panels?
       combine_solar_pv_submeters_into_aggregate if aggregate_solar_pv_sub_meters?
       set_post_aggregation_state_on_all_meters
     }
@@ -306,7 +306,7 @@ class AggregateDataService
 
     # move solar pv meter data from sub meter to top level
     # TODO(PH, 15Aug2019) - review what prices should used for this
-    #                     - Low Cabon Hub schools probably don't benefit from this
+    #                     - Low Carbon Hub schools probably don't benefit from this
     calculate_meter_carbon_emissions_and_costs(solar_meter, :solar_pv)
     @meter_collection.solar_pv_meter = solar_meter
     mains_meter.sub_meters.delete_if { |sub_meter| sub_meter.fuel_type == :solar_pv }
