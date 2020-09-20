@@ -54,8 +54,8 @@ class AlertLongTermTrend < AlertAnalysisBase
 
   private def calculate(asof_date)
     scalar = ScalarkWhCO2CostValues.new(@school)
-    @this_year_£        = scalar.aggregate_value({ year: 0 },  fuel_type, :£)
-    @last_year_£        = scalar.aggregate_value({ year: -1 }, fuel_type, :£)
+    @this_year_£        = scalar.aggregate_value({ year:  0 }, fuel_type, :£, { asof_date: asof_date})
+    @last_year_£        = scalar.aggregate_value({ year: -1 }, fuel_type, :£, { asof_date: asof_date})
     @year_change_£      = @this_year_£ - @last_year_£
     @percent_change_£   = @year_change_£ / @last_year_£
     @prefix_1 = @year_change_£ > 0 ? 'up' : 'down'

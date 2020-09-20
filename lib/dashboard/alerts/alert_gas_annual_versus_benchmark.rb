@@ -187,7 +187,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
   end
 
   def enough_data
-    days_amr_data >= 364 ? :enough : :not_enough
+    days_amr_data_with_asof_date(@asof_date) >= 364 ? :enough : :not_enough
   end
 
   private def calculate(asof_date)

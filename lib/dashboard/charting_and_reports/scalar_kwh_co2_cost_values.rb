@@ -106,7 +106,7 @@ class ScalarkWhCO2CostValues
       :allelectricity_unmodified
     when :storage_heaters
       :storage_heater_meter
-    when solar_pv
+    when :solar_pv
       :solar_pv_meter
     else
       raise EnergySparksBadChartSpecification.new('Unexpected nil fuel type for scalar energy calculation') if fuel_type.nil?

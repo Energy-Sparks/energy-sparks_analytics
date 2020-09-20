@@ -135,6 +135,14 @@ class AlertAnalysisBase < ContentBase
       description: 'Name of school',
       units: String
     },
+    school_activation_date: {
+      description: 'Date school activated on Energy Sparks',
+      units: Date
+    },
+    school_creation_date: {
+      description: 'Date school created on Energy Sparks',
+      units: Date
+    },
     urn: {
       description: 'School URN',
       units:  Integer
@@ -281,6 +289,14 @@ class AlertAnalysisBase < ContentBase
 
   def urn
     @school.urn
+  end
+
+  def activation_date
+    @school.activation_date
+  end
+
+  def creation_date
+    @school.creation_date
   end
 
   def school_type

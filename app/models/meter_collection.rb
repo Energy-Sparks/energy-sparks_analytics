@@ -256,6 +256,26 @@ class MeterCollection
     @school.nil? ? nil : @school.school_type
   end
 
+  def activation_date
+    return nil if @school.nil?
+    return nil if @school.activation_date.nil?
+    # the time is passed in as an active_support Time and not a ruby Time
+    # from the front end, so can't be used directly, the utc field needs to be accessed
+    # instead
+    t = @school.activation_date.utc
+    Date.new(t.year, t.month, t.day)
+  end
+
+  def creation_date
+    return nil if @school.nil?
+    return nil if @school.created_at.nil?
+    # the time is passed in as an active_support Time and not a ruby Time
+    # from the front end, so can't be used directly, the utc field needs to be accessed
+    # instead
+    t = @school.created_at.utc
+    Date.new(t.year, t.month, t.day)
+  end
+
   def add_heat_meter(meter)
     @heat_meters.push(meter)
     @meter_identifier_lookup[meter.id] = meter

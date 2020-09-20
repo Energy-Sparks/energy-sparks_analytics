@@ -6,8 +6,8 @@ ENV['ENERGYSPARKSTESTMODE'] = 'ON'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/benchmark db %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['.*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
-  source:                   :analytics_db, # :aggregated_meter_collection, 
+  schools:                  ['*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  source:                   :aggregated_meter_collection, # :aggregated_meter_collection, 
   logger2:                  { name: "./log/benchmark %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   
   run_benchmark_charts_and_tables: {
@@ -19,15 +19,15 @@ script = {
     # filename:       './TestResults/benchmark_results_data analytics',
 
     no_calculate_and_save_variables: true,
-    asof_date:      Date.new(2020, 1, 20),
+    asof_date:      Date.new(2020, 9, 14),
     # asof_date:      Date.new(2019,11,25),
     # filter:         ->{ addp_area.include?('Sheffield') },
     # run_charts_and_tables: Date.new(2019,10,16),
     run_content:    {
-      asof_date:      Date.new(2020,1,20),
+      asof_date:      Date.new(2020,9,14),
       # asof_date:      Date.new(2019,11,25),
       user:          { user_role: :admin }, # { user_role: :analytics, staff_role: nil }, # { user_role: :admin }, 
-      filter:        ->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
+      filter:        nil, #->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
     },
     compare_results: [
       { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Benchmark\Base\\' },

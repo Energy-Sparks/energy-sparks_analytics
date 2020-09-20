@@ -6,12 +6,13 @@ class RunBenchmarks
   FRONTEND_CSS = '<link rel="stylesheet" media="all" href="C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\InputData\application-1.css" />
   <link rel="stylesheet" media="screen" href="\Users\phili\OneDrive\ESDev\energy-sparks_analytics\InputData\application-2.css" />'
   attr_reader :control
-  def initialize(control, schools)
+  def initialize(control, schools, source)
     @control = control
-    puts "School list: #{schools}"
-    @school_list = AnalysticsSchoolAndMeterMetaData.new.match_school_names(schools)
+    @source = source
+    @school_pattern_match = schools
     transform_front_end_yaml_file(control[:transform_frontend_yaml]) if control.key?(:transform_frontend_yaml)
     @database = BenchmarkDatabase.new(control[:filename])
+    @source_of_school_data = control[:source]
   end
 
   def run
@@ -36,8 +37,9 @@ class RunBenchmarks
   end
 
   def run_alerts_to_update_database
-    @school_list.sort.each do |school_name|
-      school = load_school(school_name)
+    school_list = RunTests.resolve_school_list(@source, @school_pattern_match)
+    school_list.sort.each do |school_name|
+      school = load_school(school_name, @source)
       calculate_alerts(school, control[:asof_date])
     end
 
@@ -50,7 +52,6 @@ class RunBenchmarks
     tables = []
     composite_tables = []
 
-    puts "Running content config #{config}"
     content_manager = Benchmarking::BenchmarkContentManager.new(config[:asof_date])
     ap content_manager.structured_pages(user_type: config[:user])
     content_list = content_manager.available_pages(filter: config[:filter])
@@ -198,8 +199,22 @@ class RunBenchmarks
     end
   end
 
-  def load_school(school_name)
+  def load_school_deprecated(school_name)
     school_factory.load_or_use_cached_meter_collection(:name, school_name, :analytics_db)
+  end
+
+  def load_school(school_name, source)
+    school = nil
+    begin
+      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, source)
+    rescue Exception => e
+      puts "=" * 100
+      puts "Load of school #{school_name} failed"
+      puts "=" * 100
+      puts e.message
+      puts e.backtrace
+    end
+    school
   end
 
   def school_factory

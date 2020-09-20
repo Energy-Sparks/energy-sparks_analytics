@@ -266,7 +266,12 @@ class ContentBase
   end
 
   def days_amr_data
-    aggregate_meter.amr_data.end_date - aggregate_meter.amr_data.start_date + 1
+    days_amr_data_with_asof_date
+  end
+
+  def days_amr_data_with_asof_date(asof_date = nil)
+    end_date = asof_date.nil? ? aggregate_meter.amr_data.end_date : [aggregate_meter.amr_data.end_date, asof_date].min
+    end_date - aggregate_meter.amr_data.start_date + 1
   end
 
   def valid_content?

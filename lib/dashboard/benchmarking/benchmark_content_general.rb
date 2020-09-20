@@ -688,6 +688,79 @@ module Benchmarking
     end
   end
   #=======================================================================================
+  class BenchmarkContentChangeInEnergyUseSinceJoined < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = %q(
+        <p>
+          This benchmark compares the change in annual energy use since the school
+          joined Energy Sparks.
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+  #=======================================================================================
+  # this benachmark generates 2 charts and 1 table
+  class BenchmarkContentChangeInCO2SinceLastYear < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = %q(
+        <p>
+          This benchmark compares the change in annual CO2 emissions between the last two years.
+          All CO2 is expressed in kg (kilograms).
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      content1 = super(school_ids: school_ids, filter: filter)
+      content2 = full_co2_breakdown(school_ids: school_ids, filter: filter)
+      content1 + content2
+    end
+
+    private
+    
+    def full_co2_breakdown(school_ids:, filter:)
+      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
+      db = @benchmark_manager.benchmark_database
+      content_manager.content(db, :change_in_co2_emissions_since_last_year_full_table, filter: filter)
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentChangeInCO2SinceLastYearFullData  < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      %q(
+        <p>
+          This chart provides a breakdown on this CO2 emissions.
+        </p>
+      )
+    end
+
+    protected def table_introduction_text
+      %q( 
+        <p>
+          The solar PV CO2 columns in the table below are emissions the school saves from consuming
+          electricity produced by its solar panels, and the benefit to the national
+          grid from exporting surplus electricity. Its negative because it reduces
+          the school&apos;s overall carbon emissions. The solar CO2 is calculated as the
+          output of the panels times the carbon intensity of the national grid at the time of
+          the output (half hour periods). So for example a reduction in CO2 offset of the panels from one year
+          to the next doesn necessarily imply a loss of performance of the panels but
+          potentially a decarbionisation of the grid. As the grid decarbonises solar PV will
+          gradually have a lower impact on reducing a school&apos;s carbon emissions, but conversely
+          the school&apos;s carbon emissions from consuming from the grid will be lower.
+
+        </p>
+      )
+    end
+  end
+  #=======================================================================================
   class BenchmarkOptimumStartAnalysis  < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 
