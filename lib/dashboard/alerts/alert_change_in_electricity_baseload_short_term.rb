@@ -12,6 +12,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
   attr_reader :saving_in_annual_costs_through_10_percent_baseload_reduction
   attr_reader :predicted_percent_increase_in_usage, :significant_increase_in_baseload
   attr_reader :one_year_baseload_chart
+  attr_reader :predicted_percent_increase_in_usage_absolute, :next_year_change_in_baseload_absolute_£
 
   def initialize(school)
     super(school, :baseloadchangeshortterm)
@@ -65,10 +66,18 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
       description: 'projected addition cost of change in baseload next year',
       units:  :£
     },
+    next_year_change_in_baseload_absolute_£: {
+      description: 'projected addition cost of change in baseload next year - in absolute terms i.e. always positive',
+      units:  :£
+    },
     predicted_percent_increase_in_usage: {
       description: 'percentage increase in baseload',
       units:  :percent,
       benchmark_code: 'bspc'
+    },
+    predicted_percent_increase_in_usage_absolute: {
+      description: 'percentage increase in baseload = always positive',
+      units:  :percent,
     },
     significant_increase_in_baseload: {
       description: 'significant increase in baseload flag',
@@ -111,6 +120,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
     @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date)
     @change_in_baseload_kw = @average_baseload_last_week_kw - @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage = (@average_baseload_last_week_kw - @average_baseload_last_year_kw) / @average_baseload_last_year_kw
+    @predicted_percent_increase_in_usage_absolute = @predicted_percent_increase_in_usage.magnitude
 
     hours_in_year = 365.0 * 24.0
     hours_in_week =   7.0 * 24.0
@@ -123,6 +133,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
     @last_year_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @last_year_baseload_kwh
     @last_week_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @last_week_baseload_kwh
     @next_year_change_in_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @next_year_change_in_baseload_kwh
+    @next_year_change_in_baseload_absolute_£ = @next_year_change_in_baseload_£.magnitude
     @saving_in_annual_costs_through_10_percent_baseload_reduction = @last_year_baseload_£ * 0.1
 
     set_savings_capital_costs_payback(Range.new(@next_year_change_in_baseload_£, @next_year_change_in_baseload_£), nil)
