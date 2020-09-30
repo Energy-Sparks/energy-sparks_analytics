@@ -70,6 +70,11 @@ class AMRData < HalfHourlyData
     raise EnergySparksUnexpectedStateException.new('Deprecated call to amr_data.data()')
   end
 
+  # called from base class histogram function
+  def one_days_data_x48(date)
+    days_kwh_x48(date)
+  end
+
   def days_kwh_x48(date, type = :kwh)
     kwhs = self[date].kwh_data_x48
     return kwhs if type == :kwh
@@ -120,6 +125,12 @@ class AMRData < HalfHourlyData
 
   def set_days_kwh_x48(date, days_kwh_data_x48)
     self[date].set_days_kwh_x48(days_kwh_data_x48)
+  end
+
+  def scale_kwh(scale_factor, date1: start_date, date2: end_date)
+    (date1..date2).each do |date|
+      add(date, OneDayAMRReading.scale(self[date], scale_factor)) if date_exists?(date)
+    end
   end
 
   def kwh(date, halfhour_index, type = :kwh)

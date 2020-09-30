@@ -304,6 +304,11 @@ class AggregateDataService
     # this is required for charting and p&l
     export_meter.name = SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME
 
+    # invert export data so negative to match internal convention if for example
+    # supplied as positive numbers from Solar for Schools
+
+    export_meter.amr_data =invert_export_amr_data_if_positive(export_meter.amr_data)
+
     # move solar pv meter data from sub meter to top level
     # TODO(PH, 15Aug2019) - review what prices should used for this
     #                     - Low Carbon Hub schools probably don't benefit from this
@@ -372,6 +377,16 @@ class AggregateDataService
     raise EnergySparksUnexpectedStateException.new, 'Missing export sub meter from aggregation' if meters[:exported_solar_pv].nil?
     raise EnergySparksUnexpectedStateException.new, 'Missing solar pv amr data from aggregation' if meters[:solar_pv].amr_data.length == 0
     raise EnergySparksUnexpectedStateException.new, 'Missing export amr data from aggregation' if meters[:exported_solar_pv].amr_data.length == 0
+  end
+
+  private def invert_export_amr_data_if_positive(amr_data)
+    # using 0.10000000001 as LCC seems to have lots of 0.1 values?????
+    histo = amr_data.histogram_half_hours_data([-0.10000000001,+0.10000000001])
+    negative = histo[0] > (histo[2] * 10) # 90%
+    message = negative ? "is negative therefore leaving unchanged" : "is positive therefore inverting to conform to internal convention"
+    logger.info "Export amr pv data #{message}"
+    amr_data.scale_kwh(-1) unless negative
+    amr_data
   end
 
   private def find_solar_pv_meters
