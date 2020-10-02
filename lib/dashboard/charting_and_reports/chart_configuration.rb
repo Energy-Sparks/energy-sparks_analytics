@@ -352,6 +352,17 @@ class ChartManager
       meter_definition: :allelectricity,
       series_breakdown:   :submeter
     },
+    pupil_dashboard_solar_pv_one_week_by_day: {
+      name:               'Solar PV for last week',
+      inherits_from:      :solar_pv_group_by_week_by_submeter,
+      x_axis:           :day,
+      timescale:        {workweek: 0}
+    },
+    pupil_dashboard_solar_pv_one_week_by_day_previous_week: {
+      name:               'Solar PV for previous week',
+      inherits_from:      :pupil_dashboard_solar_pv_one_week_by_day,
+      timescale:        {workweek: -1}
+    },
     solar_pv_group_by_month: {
       name:               'Analysis of your school’s solar PV panels',
       inherits_from:      :solar_pv_group_by_week_by_submeter,

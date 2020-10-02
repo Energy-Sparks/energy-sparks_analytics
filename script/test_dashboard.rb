@@ -16,19 +16,18 @@ script = {
   no_schools:                  ['hhhhhhhhh*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
-  schools:                  ['*'],
+  schools:                  ['*long*'],
   no_source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
   source: :aggregated_meter_collection,
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
-                                :dashboard,
-                                no_adhoc_worksheet: { name: 'Test', charts: %i[
-                                  acc1
-                                  acc2
-                                  acc3
-                                  acc4
+                                # :dashboard,
+                                adhoc_worksheet: { name: 'Test', charts: %i[
+                                  solar_pv_group_by_week
+                                  pupil_dashboard_solar_pv_one_week_by_day
+                                  pupil_dashboard_solar_pv_one_week_by_day_previous_week
                                   ]},
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }
