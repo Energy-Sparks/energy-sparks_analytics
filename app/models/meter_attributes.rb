@@ -47,6 +47,19 @@ class MeterAttributes
     )
   end
 
+  class PartialMeterFloorAreaPupilNumberOverride < MeterAttributeTypes::AttributeBase
+    id :meter_corrections_rescale_amr_data
+    key :rescale_amr_data
+    aggregate_over :meter_corrections
+    name 'Override percent of floor area or pupil numbers covered by meter'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        percent_floor_area:      MeterAttributeTypes::Float.define(required: true),
+        percent_pupil_numbers:   MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
+
   class SetMissingDataToZero < MeterAttributeTypes::AttributeBase
     id :meter_corrections_set_missing_data_to_zero
     key :set_missing_data_to_zero
