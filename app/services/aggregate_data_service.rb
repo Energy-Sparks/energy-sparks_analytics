@@ -35,6 +35,7 @@ class AggregateDataService
       set_long_gap_boundary_on_all_meters
       aggregate_heat_meters
       create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
+      reorganise_solar_for_schools_meters if  @meter_collection.solar_for_schools_solar_pv_panels?
       create_solar_pv_sub_meters if @meter_collection.sheffield_simulated_solar_pv_panels?
       aggregate_electricity_meters
       disaggregate_storage_heaters if @meter_collection.storage_heaters?
@@ -398,6 +399,18 @@ class AggregateDataService
     }
   end
 
+  private def reorganise_solar_for_schools_meters
+    logger.info 'Reorganising Solar for Schools meters to look like Low Carbon Hub'
+    puts 'Reorganising Solar for Schools meters to look like Low Carbon Hub'
+    pv_meter     = @meter_collection.electricity_meters.find{ |meter| meter.fuel_type == :solar_pv }
+    export_meter = @meter_collection.electricity_meters.find{ |meter| meter.fuel_type == :exported_solar_pv }
+    mains_meter  = @meter_collection.electricity_meters.find{ |meter| meter.fuel_type == :electricity }
+    @meter_collection.electricity_meters.delete(pv_meter)
+    @meter_collection.electricity_meters.delete(export_meter)
+    mains_meter.sub_meters.push(pv_meter)
+    mains_meter.sub_meters.push(export_meter)
+  end
+
   private def lookup_synthetic_meter(type)
     meter_id = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type)
     @meter_collection.meter?(meter_id, true)
@@ -424,7 +437,6 @@ class AggregateDataService
   end
 
   def aggregate_electricity_meters
-    calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
     assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)
   end

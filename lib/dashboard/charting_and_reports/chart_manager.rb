@@ -44,7 +44,7 @@ class ChartManager
   end
 
   # recursively inherit previous chart definitions config
-  private def resolve_chart_inheritance(chart_config_original)
+  def resolve_chart_inheritance(chart_config_original)
     chart_config = chart_config_original.dup
     while chart_config.key?(:inherits_from)
       base_chart_config_param = chart_config[:inherits_from]

@@ -15,7 +15,7 @@ class SchoolFactory
     when :aggregated_meter_collection
       load_aggregated_meter_collection(identifier)
     when :validated_meter_collection
-      load_validated_meter_collection(meter_attributes_overrides: meter_attributes_overrides)
+      load_validated_meter_collection(identifier, meter_attributes_overrides: meter_attributes_overrides)
     when :unvalidated_meter_collection
       load_unvalidated_meter_collection(identifier, meter_attributes_overrides: meter_attributes_overrides)
     when :unvalidated_meter_data
@@ -42,8 +42,7 @@ class SchoolFactory
     load_meter_collections(school_filename, 'aggregated-meter-collection-')
   end
 
-  def load_validated_meter_collection(meter_attributes_overrides: {})
-    school_filename = 'st-marks-c-of-e-school'
+  def load_validated_meter_collection(school_filename, meter_attributes_overrides: {})
     validated_meter_data = load_meter_collections(school_filename, 'validated-data-')
     validated_meter_collection = build_meter_collection(validated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
     AggregateDataService.new(validated_meter_collection).aggregate_heat_and_electricity_meters

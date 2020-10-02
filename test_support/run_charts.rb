@@ -43,6 +43,7 @@ class RunCharts
   private
 
   private_class_method def self.shorten_type(type)
+    return type if type == "" || type.nil?
     type.gsub('EnergySparks', 'ES').gsub('Exception', 'EX')
   end
 
