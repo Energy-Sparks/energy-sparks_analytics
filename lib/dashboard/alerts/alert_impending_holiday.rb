@@ -206,9 +206,16 @@ class AlertImpendingHoliday < AlertGasOnlyBase
 
   def time_of_year_relevance
     days_to_holiday = upcoming_holiday_information(@asof_date)[:start_date] - @asof_date
-    len = upcoming_holiday_information(@asof_date)[:length_days]
-    # only rate on the 21 days leading up to a holiday
-    set_time_of_year_relevance(days_to_holiday > 21.0 && len > 3 ? 0.0 : (10.0 - (days_to_holiday / 21.0) * 2.5))
+    length_of_holiday = upcoming_holiday_information(@asof_date)[:length_days]
+    # give longer notice for longer holidays
+    priority =  if length_of_holiday < 4 || days_to_holiday > 14 # holiday too short or more than 14 days to holiday
+                  0.0
+                elsif length_of_holiday < 12 && days_to_holiday > 7 # one week holiday so only give one weeks notice
+                  0.0
+                else
+                  10.0    # 1 week holiday give 1 week notice, else if longer holiday give 2 weeks
+                end
+    set_time_of_year_relevance(priority)
   end
 
   private def set_last_year_holiday_consumption_variables(start_date, end_date, no_data)
