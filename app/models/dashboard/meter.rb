@@ -87,6 +87,10 @@ module Dashboard
       !@solar_pv_setup.nil?
     end
 
+    def real_solar_pv_metering_x3?
+      low_carbon_hub_solar_pv_panels? || solar_for_schools_solar_pv_panels?
+    end
+
     def low_carbon_hub_solar_pv_panels?
       !@low_carbon_hub_solar_pv.nil?
     end
