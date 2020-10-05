@@ -144,7 +144,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
-    percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : (current_period - previous_period)/previous_period 
+    percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : current_period == previous_period ? 0.0 : (current_period - previous_period)/previous_period 
     
     { 
       current_kwh:    current_period_kwh,
