@@ -16,11 +16,7 @@ script = {
   no_schools:                  ['hhhhhhhhh*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
-<<<<<<< HEAD
-  schools:                  ['*long*'],
-=======
   schools:                  ['King*'],
->>>>>>> solar-for-schools-short-term-fix
   no_source:                   :analytics_db, # :aggregated_meter_collection :load_unvalidated_meter_collection, 
   source: :unvalidated_meter_data,
   # 
