@@ -56,6 +56,7 @@ module Dashboard
       @storage_heater_setup = StorageHeater.new(attributes(:storage_heaters)) if @meter_attributes.key?(:storage_heaters)
       @solar_pv_setup = SolarPVPanels.new(attributes(:solar_pv)) if @meter_attributes.key?(:solar_pv)
       @low_carbon_hub_solar_pv = true if @meter_attributes.key?(:low_carbon_hub_meter_id)
+      @solar_for_schools_solar_pv = true if @meter_attributes.key?(:solar_for_schools_meter_id)
     end
 
     private def check_fuel_type(fuel_type)
@@ -79,15 +80,23 @@ module Dashboard
     end
 
     def solar_pv_panels?
-      low_carbon_hub_solar_pv_panels? || sheffield_simulated_solar_pv_panels?
+      low_carbon_hub_solar_pv_panels? || sheffield_simulated_solar_pv_panels? || solar_for_schools_solar_pv_panels?
     end
 
     def sheffield_simulated_solar_pv_panels?
       !@solar_pv_setup.nil?
     end
 
+    def real_solar_pv_metering_x3?
+      low_carbon_hub_solar_pv_panels? || solar_for_schools_solar_pv_panels?
+    end
+
     def low_carbon_hub_solar_pv_panels?
       !@low_carbon_hub_solar_pv.nil?
+    end
+
+    def solar_for_schools_solar_pv_panels?
+      !@solar_for_schools_solar_pv.nil?
     end
 
     def non_heating_only?

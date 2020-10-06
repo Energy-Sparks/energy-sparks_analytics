@@ -218,6 +218,16 @@ class MeterAttributes
 
   end
 
+  class SolarForSchools < MeterAttributeTypes::AttributeBase
+
+    id :solar_for_schools_meter_id
+    key :solar_for_schools_meter_id
+    name 'Solar for schools meter ID'
+
+    structure MeterAttributeTypes::Integer.define(required: true, min: 0)
+
+  end
+
   class StorageHeaters < MeterAttributeTypes::AttributeBase
     id :storage_heaters
     aggregate_over :storage_heaters

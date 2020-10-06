@@ -5,14 +5,14 @@ require_rel '../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['*'], # ['.*','Farr.*', 'King Ed.*', 'Round.*'],
+  schools:                  ['*ingfish*'], # ['.*','Farr.*', 'King Ed.*', 'Round.*'],
   no_source:                 :analytics_db,
-  source:                   :aggregated_meter_collection,
+  source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
                               control: {
                                 root:    :adult_analysis_page, # :pupil_analysis_page,
-                                chart_manipulation: %i[drilldown timeshift],
+                                no_chart_manipulation: %i[drilldown timeshift],
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, # :detailed
                                 user:          { user_role: :analytics, staff_role: nil }, # nil, # , # { user_role: :admin }, # guest

@@ -40,6 +40,22 @@ class HalfHourlyData < Hash
     one_day_total(date) / 48.0
   end
 
+  # returns an array, 1 greater in length than 'sorted_buckets', 
+  def histogram_half_hours_data(sorted_buckets, date1: start_date, date2: end_date)
+    results = Array.new(sorted_buckets.length + 1, 0)
+    (date1..date2).each do |date|
+      one_days_data_x48(date).each do |d|
+        i = sorted_buckets.bsearch_index{ |h| h >= d } || sorted_buckets.length
+        results[i] += 1
+      end
+    end
+    results
+  end
+
+  def raw_data(date, halfhour_index)
+    data(date, halfhour_index)
+  end
+
   def days_valid_data
     end_date - start_date + 1
   end

@@ -304,6 +304,15 @@ describe MeterAttributes do
     end
   end
 
+  describe MeterAttributes::SolarForSchools do
+    it 'accepts a string or symbol and keys it using the class defined key' do
+      attribute = MeterAttributes::SolarForSchools.parse('2345')
+      expect(attribute.to_analytics).to eq(
+        {solar_for_schools_meter_id: 2345}
+      )
+    end
+  end
+
   describe MeterAttributes::StorageHeaters do
     it 'accepts a hash and parses the values and keys it using the class definition' do
       attribute = MeterAttributes::StorageHeaters.parse({
