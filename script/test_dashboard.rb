@@ -25,13 +25,9 @@ script = {
                               charts: [
                                 # :dashboard,
                                 adhoc_worksheet: { name: 'Test', charts: %i[
-<<<<<<< HEAD
                                   solar_pv_group_by_week
                                   pupil_dashboard_solar_pv_one_week_by_day
                                   pupil_dashboard_solar_pv_one_week_by_day_previous_week
-=======
-                                  solar_pv_group_by_week_by_submeter
->>>>>>> solar-for-schools-short-term-fix
                                   ]},
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }

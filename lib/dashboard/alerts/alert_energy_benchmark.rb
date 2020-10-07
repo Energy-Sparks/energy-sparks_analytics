@@ -236,6 +236,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   private def calculate_alert(alert_class, asof_date)
     alert = alert_class.new(@school)
     return nil unless alert.valid_alert?
+    # analyse call will sometimes log a stack trace, but not raise - just set flags, so ignore stack trace
     alert.analyse(asof_date)
     return nil unless alert.make_available_to_users?
     alert
@@ -244,27 +245,28 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   # one off special, probably not for reuse elsewhere in the code
   private def calculate_change_since_activation_date(asof_date, data_type = :kwh)
     dates = comparison_dates(asof_date)
+
     return nil if dates.nil?
 
     results = @school.all_aggregate_meters.map{ |meter| [meter.meter_type, calculate_use(dates, meter, data_type)] }.to_h
 
     aggregate = {
       # map then sum to avoid statsample bug
-      first_year: results.values.map{ |data| data[:first_year] }.sum,
+      year_before_activation: results.values.map{ |data| data[:year_before_activation] }.sum,
       last_year:  results.values.map{ |data| data[:last_year]  }.sum,
     }
-    aggregate[:change] = (aggregate[:last_year] - aggregate[:first_year])/aggregate[:first_year]
+    aggregate[:change] = (aggregate[:last_year] - aggregate[:year_before_activation])/aggregate[:year_before_activation]
     results[:aggregate] = aggregate
     results
   end
 
   private def calculate_use(dates, meter, data_type)
-    first_year = meter.amr_data.kwh_date_range(dates[:first_year].first, dates[:first_year].last, data_type)
-    last_year  = meter.amr_data.kwh_date_range(dates[:last_year ].first, dates[:last_year ].last, data_type)
+    year_before_activation = meter.amr_data.kwh_date_range(dates[:year_before_activation].first, dates[:year_before_activation].last, data_type)
+    last_year              = meter.amr_data.kwh_date_range(dates[:last_year ].first, dates[:last_year ].last, data_type)
     {
-      first_year: first_year,
+      year_before_activation: year_before_activation,
       last_year:  last_year,
-      change:     (last_year - first_year)/first_year # allow infinity
+      change:     (last_year - year_before_activation)/year_before_activation # allow infinity
     }
   end
 
@@ -272,16 +274,19 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     first_combined_meter_date = @school.all_aggregate_meters.map { |meter| meter.amr_data.start_date }.max
     last_combined_meter_date  = @school.all_aggregate_meters.map { |meter| meter.amr_data.end_date }.min
 
-    max_asofdate = [asof_date, last_combined_meter_date].min
     activated = activation_date.nil? ? creation_date : activation_date
-    first_comparison_date = [activated, first_combined_meter_date].max
+    year_before_join_date = activated - 364
+    # need one year of data before activation/join date
+    return nil if year_before_join_date < first_combined_meter_date
 
-    comparison_possible = (max_asofdate - first_comparison_date) > 365 * 2
-    return nil unless comparison_possible
+    max_asofdate = [asof_date, last_combined_meter_date].min
+    start_of_current_year = max_asofdate - 364
+    # need a year since activation
+    return nil if start_of_current_year <= activated
 
     {
-      first_year: first_comparison_date..(first_comparison_date + 364),
-      last_year:  (max_asofdate - 364)..max_asofdate
+      year_before_activation: year_before_join_date..activated,
+      last_year:              start_of_current_year..max_asofdate
     }
   end
 
