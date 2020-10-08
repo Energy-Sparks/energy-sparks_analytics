@@ -49,7 +49,7 @@ class MeterAttributes
 
   class PartialMeterFloorAreaPupilNumberOverride < MeterAttributeTypes::AttributeBase
     id :meter_corrections_rescale_amr_data
-    key :rescale_amr_data
+    key :partial_floor_area_pupil_numbers
     aggregate_over :meter_corrections
     name 'Override percent of floor area or pupil numbers covered by meter'
     structure MeterAttributeTypes::Hash.define(
