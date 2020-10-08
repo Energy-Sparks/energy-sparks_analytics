@@ -129,8 +129,12 @@ class DashboardConfiguration
           sub_pages:  [
             { name: 'kWh',    charts: %i[pupil_dashboard_group_by_week_electricity_kwh] },
             { name: 'Solar',  charts: %i[pupil_dashboard_solar_pv_monthly] },
+            { name: 'SolarComparison',  charts: %i[
+                                                  pupil_dashboard_solar_pv_one_week_by_day
+                                                  pupil_dashboard_solar_pv_one_week_by_day_previous_week
+                                                ] },
             { name: 'Pie',    charts: %i[pupil_dashboard_daytype_breakdown_electricity] },
-            { 
+            {
               name: 'Bar',
               sub_pages: [
                 { name: 'Bench',   charts: %i[pupil_dashboard_solar_pv_benchmark] },
