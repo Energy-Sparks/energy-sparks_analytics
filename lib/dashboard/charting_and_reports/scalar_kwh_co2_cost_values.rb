@@ -108,6 +108,7 @@ class ScalarkWhCO2CostValues
   # deals with case school week range covers a holiday, so just the school weeks are calculated
   # not the span of weeks including the holiday
   private def non_contiguous_timescale_breakdown(timescale)
+    return [timescale] unless timescale.is_a?(Hash)
     if timescale.key?(:schoolweek) && timescale[:schoolweek].is_a?(Range)
       timescale[:schoolweek].map{ |swn| {schoolweek: swn} }
     else
