@@ -652,12 +652,12 @@ private
       breakdown[meter_name] = 0.0
     end
     unless @meters[0].nil? # indication of electricity only
-      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.electricity_meters, start_date, end_date, halfhour_index))
-      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.solar_pv_meters, start_date, end_date, halfhour_index))
+      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.aggregated_electricity_meters, @meter_collection.electricity_meters, start_date, end_date, halfhour_index))
+      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.solar_pv_meter, @meter_collection.solar_pv_meters, start_date, end_date, halfhour_index))
     end
     unless @meters[1].nil? # indication of heat meters only
-      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.heat_meters, start_date, end_date, halfhour_index))
-      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.storage_heater_meters, start_date, end_date, halfhour_index))
+      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.aggregated_heat_meters, @meter_collection.heat_meters, start_date, end_date, halfhour_index))
+      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.storage_heater_meter, @meter_collection.storage_heater_meters, start_date, end_date, halfhour_index))
     end
     breakdown
   end
@@ -676,17 +676,19 @@ private
     bill_components
   end
 
-  def breakdown_one_meter_type(list_of_meters, start_date, end_date, halfhour_index = nil)
+  def breakdown_one_meter_type(aggregate_meter, list_of_meters, start_date, end_date, halfhour_index = nil)
     breakdown = {}
     unless list_of_meters.nil?
       list_of_meters.each do |meter|
         begin
           if halfhour_index.nil?
-            breakdown[meter.display_name] = amr_data_date_range(meter, start_date, end_date, kwh_cost_or_co2)
+            start_date, end_date, ok = truncate_date_range_to_aggregate(aggregate_meter, start_date, end_date)
+            breakdown[meter.display_name] = ok ? amr_data_date_range(meter, start_date, end_date, kwh_cost_or_co2) : 0.0
           else
             breakdown[meter.display_name] = 0.0
             (start_date..end_date).each do |date|
-              breakdown[meter.display_name] = amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2)
+              ok = within_aggregate_date_range?(aggregate_meter, date)
+              breakdown[meter.display_name] = set_zero(amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2), !ok)
             end
           end
         rescue Exception => e
@@ -696,6 +698,21 @@ private
       end
     end
     breakdown
+  end
+
+  def set_zero(value, set_zero)
+    set_zero ? 0.0 : value
+  end
+
+  def within_aggregate_date_range?(aggregate_meter, date)
+    return true if aggregate_meter.nil?
+    date.between?(aggregate_meter.amr_date.start_date, aggregate_meter.amr_date.end_date)
+  end
+
+  def truncate_date_range_to_aggregate(aggregate_meter, start_date, end_date)
+    start_date = [start_date, aggregate_meter.amr_data.start_date].max
+    end_date   = [end_date,   aggregate_meter.amr_data.end_date  ].min
+    [start_date, end_date, start_date <= end_date]
   end
 
   def merge_breakdown(breakdown1, breakdown2)
