@@ -28,7 +28,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
       'Annual CO2 (kg)',
       'Annual Cost',
       'Change from last year',
-      'Change in last 4 weeks',
+      'Change in last 4 school weeks',
       'Potential savings',
     ] 
   end
