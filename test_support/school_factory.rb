@@ -109,6 +109,8 @@ class SchoolFactory
   private def build_meter_collection(data, meter_attributes_overrides: {})
     puts "Warning: loading meter attributes from :pseudo_meter_attributes rather than :meter_attributes"
     meter_attributes = data[:pseudo_meter_attributes]
+puts "Got here"
+ap meter_attributes
     MeterCollectionFactory.new(
       temperatures: data[:schedule_data][:temperatures],
       solar_pv: data[:schedule_data][:solar_pv],

@@ -9,6 +9,38 @@ class ScalarkWhCO2CostValues
     @meter_collection = meter_collection
   end
 
+  def value(time_scale, fuel_type, data_type, sync_energy_data_time_scales = true)
+    case fuel_type
+    when :energy_ex_solar
+      aggregate_multiple_fuel_types(time_scale, @meter_collection.fuel_types, data_type, sync_energy_data_time_scales)
+    when :energy
+      fuel_types = @meter_collection.fuel_types + [:solar_pv] if @meter_collection.solar_pv_panels?
+      aggregate_multiple_fuel_types(time_scale, fuel_types, data_type, sync_energy_data_time_scales)
+    else
+      aggregate_value(time_scale, fuel_type, data_type)
+    end
+  end
+
+  private def aggregate_multiple_fuel_types(time_scale, fuel_types, data_type, sync_energy_data_time_scales = true)
+    asof_date = sync_energy_data_time_scales ? { asof_date: @meter_collection.last_combined_meter_date } : nil
+    total = fuel_types.map do |fuel_type|
+      aggregate_but_nan_if_not_enough_data(time_scale, fuel_type, data_type, asof_date)
+    end.sum # map then sum to avoid statsample .sum bug
+    nan_to_nil(total)
+  end
+
+  private def aggregate_but_nan_if_not_enough_data(time_scale, fuel_type, data_type, override = nil)
+    begin
+      aggregate_value(time_scale, fuel_type, data_type, override)
+    rescue EnergySparksNotEnoughDataException => _e
+      Float::NAN
+    end
+  end
+
+  private def nan_to_nil(val)
+    val.nan? ? nil : val
+  end
+
   def aggregate_value(time_scale, fuel_type, data_type = :kwh, override = nil, max_days_out_of_date = nil)
     check_data_available_for_fuel_type(fuel_type)
     aggregation_configuration(time_scale, fuel_type, data_type, override, false, max_days_out_of_date)
@@ -40,12 +72,28 @@ class ScalarkWhCO2CostValues
     data
   end
 
-  private def aggregation_configuration(time_scale, fuel_type, data_type, override = nil, with_dates = false, max_days_out_of_date = nil)
-    aggregator = generic_aggregation_calculation(time_scale, fuel_type, data_type, override)   
-    dates = aggregator.x_axis_bucket_date_ranges if with_dates
+  private def aggregation_configuration(timescales, fuel_type, data_type, override = nil, with_dates = false, max_days_out_of_date = nil)
+    # puts "Got here #{timescales} #{data_type} #{fuel_type}"
+    results = non_contiguous_timescale_breakdown(timescales).map do |timescale|
+      aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
+    end
+    # ap results
+    # map then sum to avoid statsample bug
+    value      = results.map{ |result| result[:value]       }.sum
+    start_date = results.map{ |result| result[:start_date]  }.min
+    end_date   = results.map{ |result| result[:end_date]    }.max
+    # z = [value, start_date, end_date]
+    # puts "Got here 22 #{z}"
+
+    with_dates ? [value, start_date, end_date] : value
+  end
+
+  private def aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
+    aggregator = generic_aggregation_calculation(timescale, fuel_type, data_type, override)   
+    dates = aggregator.x_axis_bucket_date_ranges
     check_dates(aggregator.last_meter_date, max_days_out_of_date)
     value = aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
-    with_dates ? [value, dates[0][0], dates[0][1]] : value
+    { value: value, start_date: dates[0][0], end_date: dates[0][1] }
   end
 
   private def check_dates(last_meter_date, max_days_out_of_date)
@@ -53,6 +101,17 @@ class ScalarkWhCO2CostValues
     days_out_of_date = Date.today - max_days_out_of_date
     if last_meter_date < days_out_of_date
       raise EnergySparksMeterDataTooOutOfDate, "last reading #{last_meter_date} = #{days_out_of_date} days out of date"
+    end
+  end
+
+  # convert { schoolweek: -1..0 } into [ { schoolweek: 0 }, { schoolweek: -1 } ] or [ timescale ]
+  # deals with case school week range covers a holiday, so just the school weeks are calculated
+  # not the span of weeks including the holiday
+  private def non_contiguous_timescale_breakdown(timescale)
+    if timescale.key?(:schoolweek) && timescale[:schoolweek].is_a?(Range)
+      timescale[:schoolweek].map{ |swn| {schoolweek: swn} }
+    else
+      [timescale]
     end
   end
 

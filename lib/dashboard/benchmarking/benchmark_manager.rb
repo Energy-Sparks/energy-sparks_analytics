@@ -22,6 +22,12 @@ module Benchmarking
         arr.compact.empty? ? nil : arr.compact[0]
       end
 
+      # helper function for config lamda, only sums
+      # where corresponding components are non nil
+      def paired_sum(data1, data2)
+        data1.zip(data2).sum{ |pair| pair.any?{ |el| el.nil?} ? 0.0 : pair.sum }
+      end
+
       def sum_data(data, to_nil_if_sum_zero = false)
         data = [data] unless data.is_a?(Array)
         data.map! { |value| zero(value) } # create array 1st to avoid statsample map/sum bug
@@ -79,10 +85,11 @@ module Benchmarking
       last_year = today - 364
 
       school_ids.each do |school_id|
-        school_data = @benchmark_database.fetch(today){{}}.fetch(school_id)
-        school_data_last_year = @benchmark_database.fetch(last_year){{}}.fetch(school_id)
-        school_data.merge!(dated_attributes('_last_year', school_data_last_year))
-        next unless school_data && school_data_last_year
+        school_data = @benchmark_database.fetch(today, {}).fetch(school_id)
+        # @benchmark_database.@benchmark_database.fetch(last_year){{}}.fetch(school_id)
+        school_data_last_year = @benchmark_database.dig(last_year, school_id)
+        school_data.merge!(dated_attributes('_last_year', school_data_last_year)) unless school_data_last_year.nil?
+        next unless school_data # && school_data_last_year
         row  = DatabaseRow.new(school_id, school_data)
         next unless filter_row(row, filter)
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)

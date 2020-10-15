@@ -6,7 +6,7 @@ ENV['ENERGYSPARKSTESTMODE'] = 'ON'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/benchmark db %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['*ohn*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   source:                   :aggregated_meter_collection, # :aggregated_meter_collection, 
   logger2:                  { name: "./log/benchmark %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   

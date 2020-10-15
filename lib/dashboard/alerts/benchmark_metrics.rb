@@ -42,6 +42,20 @@ module BenchmarkMetrics
     ((percent - 1.0) * scale) + 1.0
   end
 
+  def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date = nil)
+    total = 0.0
+    if school.electricity?
+      total += benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
+    elsif school.gas? || school.storage_heaters?
+      total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date)
+    end
+    total
+  end
+
+  def self.benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
+    benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school) * ELECTRICITY_PRICE
+  end
+
   # scale benchmark to schools's temperature zone; so result if higher for
   # Scotland and lower for SW UK
   # also scales years, so all years normalised to same temperature
@@ -66,17 +80,6 @@ module BenchmarkMetrics
       exemplar_annual_electricity_usage_kwh(school.school_type)
     end
   end
-
-  def self.benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
-    benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school) * ELECTRICITY_PRICE
-  end
-
-  def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school)
-    benchmark_electricity_usage_£_per_pupil(benchmark_type, school) +
-    benchmark_heating_usage_£_per_pupil(benchmark_type, school)
-  end
-
-
 
   def self.benchmark_annual_electricity_usage_kwh(school_type, pupils = 1)
     school_type = school_type.to_sym if school_type.instance_of? String

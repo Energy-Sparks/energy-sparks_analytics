@@ -68,7 +68,7 @@ class AlertAnalysisBase < ContentBase
   end
 
   def benchmark_dates(asof_date)
-    [asof_date, asof_date - 364]
+    [asof_date]
   end
 
   # inherited, so derived class has hash of 'name' => variables

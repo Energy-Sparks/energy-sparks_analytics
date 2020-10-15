@@ -88,6 +88,14 @@ class MeterCollection
     end
   end
 
+  def first_combined_meter_date
+    all_aggregate_meters.map{ |meter| meter.amr_data.start_date }.max
+  end
+
+  def last_combined_meter_date
+    all_aggregate_meters.map{ |meter| meter.amr_data.end_date }.min
+  end
+
   def to_s
     'Meter Collection:' + name + ':' + all_meters.join(';')
   end
@@ -236,11 +244,12 @@ class MeterCollection
     storage_heaters? || solar_pv_panels?
   end
 
-  def fuel_types(exclude_storage_heaters = true)
+  def fuel_types(exclude_storage_heaters = true, exclude_solar_pv = true)
     types = []
     types.push(:electricity)      if electricity?
     types.push(:gas)              if gas?
     types.push(:storage_heaters)  if storage_heaters? && !exclude_storage_heaters
+    types.push(:solar_pv)         if solar_pv_panels? && !exclude_solar_pv
     types
   end
 
@@ -262,6 +271,10 @@ class MeterCollection
 
   def school_type
     @school.nil? ? nil : @school.school_type
+  end
+
+  def energysparks_start_date
+    activation_date.nil? ? creation_date : activation_date
   end
 
   def activation_date

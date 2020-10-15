@@ -42,12 +42,18 @@ class RunAdultDashboard < RunCharts
     # return unless advice.make_available_to_users?
 
     if advice.has_structured_content?
-      puts "Advice has structured content"
-      puts "Has #{advice.structured_content.length} components and is called #{advice.class.name}"
-      
-      advice.structured_content.each do |component_advice|
-        puts component_advice[:title]
-        puts component_advice[:content].map { |component| component[:type] }.join('; ')
+      begin
+        puts "Advice has structured content"
+        puts "Has #{advice.structured_content.length} components and is called #{advice.class.name}"
+        
+        advice.structured_content.each do |component_advice|
+          puts component_advice[:title]
+          puts component_advice[:content].map { |component| component[:type] }.join('; ')
+        end
+      rescue NoMethodError => e
+        puts e
+        puts "To DO Remove this code after fixing issue when have more time PH 15Oct2020"
+        return
       end
     end
     content = advice.content(user_type: control[:user])

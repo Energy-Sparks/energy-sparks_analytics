@@ -391,6 +391,40 @@ class Holidays
     yrs_to_date
   end
 
+  # differs from 'year_to_date' as datum (0) if first whole year before activation
+  # date hence return a hash, rather than an array, as offset is 2 directional
+  def activation_years(activation_date, start_date, end_date, move_to_saturday_boundary)
+    yrs_to_date = {}
+
+    last_date_of_period = end_date
+    
+    last_date_of_period = nearest_previous_saturday(last_date_of_period) if move_to_saturday_boundary
+    
+    # go backwards
+    offset = 0
+    while activation_date - 365 * offset > start_date
+      year_description = "#{offset.magnitude} years before activation date year"
+      start_of_year = activation_date - 365 * (offset + 1)
+      end_of_year   = start_of_year + 364
+      year = SchoolDatePeriod.new(:activationyear, year_description, start_of_year, end_of_year)
+      yrs_to_date[-offset] = year
+      offset += 1
+    end
+
+    # go forwards
+    offset = 0
+    while activation_date + 365 * offset < end_date
+      year_description = "#{offset} years after activation date year"
+      start_of_year = activation_date + 365 * (offset - 1)
+      end_of_year   = start_of_year + 364
+      year = SchoolDatePeriod.new(:activationyear, year_description, start_of_year, end_of_year)
+      yrs_to_date[offset] = year
+      offset += 1
+    end
+
+    yrs_to_date
+  end
+
 
   class AcademicYear < SchoolDatePeriod
     include Logging
