@@ -737,7 +737,15 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          This chart provides a breakdown on this CO2 emissions.
+          This chart provides a breakdown of the change in CO2 emissions
+          between electricity, gas and solar PV, and allows you to see which
+          has increased and decreased.
+        </p>
+        <p>
+          Generally an increase in solar PV production between last year and the year
+          before, would lead to a reduction in CO2 emissions in the chart below,
+          as the more electricity is produced by a school&apos;s less CO2 a school
+          emits overall.
         </p>
       )
     end
@@ -746,16 +754,15 @@ module Benchmarking
       %q( 
         <p>
           The solar PV CO2 columns in the table below are emissions the school saves from consuming
-          electricity produced by its solar panels, and the benefit to the national
-          grid from exporting surplus electricity. Its negative because it reduces
-          the school&apos;s overall carbon emissions. The solar CO2 is calculated as the
-          output of the panels times the carbon intensity of the national grid at the time of
-          the output (half hour periods). So for example a reduction in CO2 offset of the panels from one year
-          to the next doesn necessarily imply a loss of performance of the panels but
-          potentially a decarbionisation of the grid. As the grid decarbonises solar PV will
-          gradually have a lower impact on reducing a school&apos;s carbon emissions, but conversely
-          the school&apos;s carbon emissions from consuming from the grid will be lower.
-
+          electricity produced by its solar panels, and the benefit to the national grid from exporting
+          surplus electricity. It&apos;s negative because it reduces the school&apos;s overall carbon emissions.
+          The solar CO2 is calculated as the output of the panels times the carbon intensity of the
+          national grid at the time of the output (half hour periods). So for example a reduction
+          in CO2 offset by the school&apos;s panels from one year to the next doesn&apos;t necessarily
+          imply a loss of performance of the panels but potentially a decarbonisation of the grid.
+          As the grid decarbonises solar PV will gradually have a lower impact on reducing a
+          school&apos;s carbon emissions, but conversely the school&apos;s carbon emissions
+          from grid consumption will be lower.
         </p>
       )
     end

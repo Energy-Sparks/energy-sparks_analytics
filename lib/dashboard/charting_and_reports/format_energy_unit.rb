@@ -85,7 +85,7 @@ class FormatEnergyUnit
   end
   
   def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
-    return value if medium == :raw
+    return value if medium == :raw || no_recent_or_not_enough_data?(value)
     return '' if value.nil? #  && in_table - PH 20Nov2019 experimental change to tidying blank cells on heads summary table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
     return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
@@ -251,6 +251,13 @@ class FormatEnergyUnit
       raise EnergySparksUnexpectedStateException.new('Unexpected nil user_type for user_numeric_comprehension_level') if user_type.nil?
       raise EnergySparksUnexpectedStateException.new("Unexpected nil user_type #{user_type}for user_numeric_comprehension_level") if user_type.nil?
     end
+  end
+
+  def self.no_recent_or_not_enough_data?(value)
+    [
+      HeadTeachersSchoolSummaryTable::NO_RECENT_DATA_MESSAGE, 
+      HeadTeachersSchoolSummaryTable::NOT_ENOUGH_DATA_MESSAGE
+    ].include?(value)
   end
 
   def self.significant_figures_user_type(value, user_numeric_comprehension_level)

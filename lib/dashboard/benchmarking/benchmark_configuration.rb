@@ -184,10 +184,10 @@ module Benchmarking
         name:     'Change in energy use since the school joined Energy Sparks',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-          { data: ->{ enba_csjp },  name: 'Change in annual energy use since joined Energy Sparks', units: :relative_percent_0dp, chart_data: true, content_class: AdviceBenchmark },
-          { data: ->{ enba_esjp },  name: 'Change in annual electricity use since joined Energy Sparks', units: :relative_percent_0dp },
-          { data: ->{ enba_gsjp },  name: 'Change in annual gas use since joined Energy Sparks', units: :relative_percent_0dp },
-          { data: ->{ enba_ssjp },  name: 'Change in annual storage heater use since joined Energy Sparks', units: :relative_percent_0dp }
+          { data: ->{ enba_kxap },  name: 'Change in annual energy use since joined Energy Sparks', units: :relative_percent_0dp, chart_data: true, content_class: AdviceBenchmark },
+          { data: ->{ enba_keap },  name: 'Change in annual electricity use since joined Energy Sparks', units: :relative_percent_0dp },
+          { data: ->{ enba_kgap },  name: 'Change in annual gas use since joined Energy Sparks', units: :relative_percent_0dp },
+          { data: ->{ enba_khap },  name: 'Change in annual storage heater use since joined Energy Sparks', units: :relative_percent_0dp }
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -196,10 +196,10 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInCO2SinceLastYear,
         name:     'Change in annual CO2 emissions since last year',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-          { data: ->{ enba_co2y_last_year },                                     name: 'CO2 (previous year)', units: :co2 },
-          { data: ->{ enba_co2y },                                               name: 'CO2 (last year)', units: :co2 },
-          { data: ->{ (enba_co2y - enba_co2y_last_year) / enba_co2y_last_year},  name: 'Change in annual energy CO2', units: :relative_percent_0dp, chart_data: true }
+          { data: 'addp_name',      name: 'School name',          units: String, chart_data: true },
+          { data: ->{ enba_cxn },   name: 'CO2 (previous year)',  units: :co2 },
+          { data: ->{ enba_cx0 },   name: 'CO2 (last year)',      units: :co2 },
+          { data: ->{ enba_cxnp},   name: 'Change in annual CO2', units: :relative_percent_0dp, chart_data: true }
         ],
         sort_by:  [3],
         type: %i[chart table]
@@ -209,27 +209,27 @@ module Benchmarking
       change_in_co2_emissions_since_last_year_full_table: {
         benchmark_class:  BenchmarkContentChangeInCO2SinceLastYearFullData,
         filter_out:       :dont_make_available_directly,
-        name:     'Change in annual CO2 emissions since last year',
+        name:     'Breakdown of CO2 emissions change since last year',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
 
-          { data: ->{ enba_co2e_last_year },                                     name: 'Electricity CO2 (previous year)', units: :co2 },
-          { data: ->{ enba_co2e },                                               name: 'Electricity CO2 (last year)', units: :co2 },
-          { data: ->{ (enba_co2e - enba_co2e_last_year) / enba_co2e_last_year},  name: 'Change in annual electricity CO2 (excluding solar)', units: :relative_percent_0dp, chart_data: true },
+          { data: ->{ enba_cen }, name: 'Electricity CO2 (previous year)',                    units: :co2 },
+          { data: ->{ enba_ce0 }, name: 'Electricity CO2 (last year)',                        units: :co2 },
+          { data: ->{ enba_cenp}, name: 'Change in annual electricity CO2 (excluding solar)', units: :relative_percent_0dp, chart_data: true },
           
-          { data: ->{ enba_co2g_last_year },                                     name: 'Gas CO2 (previous year)', units: :co2 },
-          { data: ->{ enba_co2g },                                               name: 'Gas CO2 (last year)', units: :co2 },
-          { data: ->{ (enba_co2g - enba_co2g_last_year) / enba_co2g_last_year},  name: 'Change in annual gas CO2', units: :relative_percent_0dp, chart_data: true },
+          { data: ->{ enba_cgn },  name: 'Gas CO2 (previous year)',   units: :co2 },
+          { data: ->{ enba_cg0 },  name: 'Gas CO2 (last year)',       units: :co2 },
+          { data: ->{ enba_cgnp},  name: 'Change in annual gas CO2',  units: :relative_percent_0dp, chart_data: true },
           
-          { data: ->{ enba_co2h_last_year },                                     name: 'Storage Heater CO2 (previous year)', units: :co2 },
-          { data: ->{ enba_co2h },                                               name: 'Storage Heater CO2 (last year)', units: :co2 },
-          { data: ->{ (enba_co2h - enba_co2h_last_year) / enba_co2h_last_year},  name: 'Change in annual storage heater CO2', units: :relative_percent_0dp, chart_data: true },
+          { data: ->{ enba_chn },  name: 'Storage Heater CO2 (previous year)',  units: :co2 },
+          { data: ->{ enba_ch0 },  name: 'Storage Heater CO2 (last year)',      units: :co2 },
+          { data: ->{ enba_chnp},  name: 'Change in annual storage heater CO2', units: :relative_percent_0dp, chart_data: true },
 
-          { data: ->{ enba_co2s_last_year },                                     name: 'Solar PV CO2 (previous year)', units: :co2 },
-          { data: ->{ enba_co2s },                                               name: 'Solar PV CO2 (last year)', units: :co2 },
-          { data: ->{ (enba_co2s - enba_co2s_last_year) / enba_co2s_last_year},  name: 'Change in annual solar PV CO2', units: :relative_percent_0dp, chart_data: true },
+          { data: ->{ enba_csn },  name: 'Solar PV CO2 (previous year)',  units: :co2 },
+          { data: ->{ enba_cs0 },  name: 'Solar PV CO2 (last year)',      units: :co2 },
+          { data: ->{ enba_csnp},  name: 'Change in annual solar PV CO2', units: :relative_percent_0dp, chart_data: true },
           
-          { data: ->{ (enba_co2y - enba_co2y_last_year) / enba_co2y_last_year},  name: 'Overall change', units: :relative_percent_0dp, y2_axis: true },
+          { data: ->{ enba_cxnp},  name: 'Overall change', units: :relative_percent_0dp, y2_axis: true },
         ],
         sort_by:  [13],
         type: %i[chart table]

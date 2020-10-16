@@ -32,6 +32,7 @@ class PeriodsBase
       year:           YearPeriods,
       up_to_a_year:   UpToAYearPeriods,
       academicyear:   AcademicYearsPeriod,
+      activationyear: ActivationYearPeriods,
       month:          MonthPeriods,
       holiday:        HolidayPeriods,          # offset count starts with previous holiday
       includeholiday: InclusiveHolidayPeriods, # offset count starts with current holiday if in one
@@ -57,6 +58,14 @@ class PeriodsBase
     else
       raise EnergySparksBadChartSpecification, "Unexpected chart timescale type #{@timescale.class.name}"
     end
+  end
+
+  # given a timescale e.g. {year: -4} return its start and end dates
+  def self.period_dates(timescale, meter_collection, first_meter_date, last_meter_date)
+    period_calc = PeriodsBase.period_factory({timescale: timescale}, meter_collection, first_meter_date, last_meter_date)
+    period = period_calc.periods[0]
+    # puts "Got here #{timescale} #{period_calc.periods}"
+    period_calc.periods.compact.empty? ? nil : [period.start_date, period.end_date]
   end
 
   private def type_name; @type.to_s.humanize end
@@ -174,10 +183,28 @@ class UpToAYearPeriods < YearPeriods
   end
 end
 
-
 class AcademicYearsPeriod < YearPeriods
   def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
     @meter_collection.holidays.academic_years(first_meter_date, last_meter_date)
+  end
+end
+
+class ActivationYearPeriods < YearPeriods
+  def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
+    # n.b. this is a hash rather than an array, as offset 0 is in the middle of the periods
+    @activation_year_list ||= @meter_collection.holidays.activation_years(@meter_collection.energysparks_start_date, first_meter_date, last_meter_date, false)
+  end
+
+  def calculate_period_from_offset(offset)
+    period_list[offset]
+  end
+
+  protected def calculate_period_from_date(_date)
+    raise EnergySparksUnsupportedFunctionalityException, 'not implemented for activation years yet'
+  end
+
+  protected def check_offset(offset)
+    # override test for 0 or -tve offset only as activation years can be positive
   end
 end
 
