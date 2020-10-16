@@ -151,7 +151,7 @@ module Dashboard
     end
 
     def display_meter_number
-      meter_no.present? ? meter_no : meter_type.to_s
+      meter_no.present? ? meter_no : mpan_mprn.to_s
     end
 
     def synthetic_mpan_mprn?
