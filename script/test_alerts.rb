@@ -13,7 +13,7 @@ script = {
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
     alerts:   nil,
-    alerts: [ AlertEnergyAnnualVersusBenchmark ],
+    # alerts: [ AlertEnergyAnnualVersusBenchmark ],
     no_alerts:   [ AlertSchoolWeekComparisonElectricity, AlertPreviousHolidayComparisonElectricity,
     AlertPreviousYearHolidayComparisonElectricity, AlertSchoolWeekComparisonGas,
     AlertPreviousHolidayComparisonGas, AlertPreviousYearHolidayComparisonGas],

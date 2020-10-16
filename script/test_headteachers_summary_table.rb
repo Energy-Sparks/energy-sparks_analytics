@@ -6,7 +6,7 @@ require './script/report_config_support.rb'
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  schools:                  ['*'],
+  schools:                  ['durh*'],
   source:                   :aggregated_meter_collection,
   logger2:                  { name: "./log/management summary %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   management_summary_table:          {
