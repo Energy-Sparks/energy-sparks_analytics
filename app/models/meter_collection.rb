@@ -124,6 +124,18 @@ class MeterCollection
     nil
   end
 
+  def latitude
+    @latitude ||= latitude_longitude[:latitude]
+  end
+
+  def longitude
+    @longitude ||= latitude_longitude[:longitude]
+  end
+
+  private def latitude_longitude
+    @latitude_longitude ||= LatitudeLongitude.schools_latitude_longitude(self)
+  end
+
   private def search_meter_list_for_identifier(meter_list, identifier)
     return nil if identifier.nil?
     meter_list.each do |meter|

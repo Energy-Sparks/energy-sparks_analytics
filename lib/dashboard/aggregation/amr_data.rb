@@ -95,6 +95,10 @@ class AMRData < HalfHourlyData
    self[date].meter_id
   end
 
+  def days_amr_data(date)
+    self[date]
+  end
+
   def self.one_day_zero_kwh_x48
     Array.new(48, 0.0)
   end
@@ -138,6 +142,10 @@ class AMRData < HalfHourlyData
     return @economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£ || type == :economic_cost
     return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cost
     return @carbon_emissions.co2_data_halfhour(date, halfhour_index) if type == :co2
+  end
+
+  def kw(date, halfhour_index)
+    kwh(date, halfhour_index) * 2.0
   end
 
   def set_kwh(date, halfhour_index, kwh)

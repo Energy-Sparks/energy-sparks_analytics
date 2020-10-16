@@ -10,7 +10,7 @@ class TimeOfDay
     end
     @hour = hour
     @minutes = minutes
-    @relative_time = Time.new(1970, 1, 1, hour, minutes, 0)
+    @relative_time = DateTime.new(1970, 1, 1, hour, minutes, 0)
   end
 
   def self.time_of_day_from_halfhour_index(hh)

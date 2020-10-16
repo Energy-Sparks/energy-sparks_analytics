@@ -22,6 +22,9 @@ end
 class EnergySparksDeprecatedException < StandardError
 end
 
+class EnergySparksUnableToDetermineLatitudeLongitudeFromPostCode < StandardError
+end
+
 class EnergySparksBadAMRDataTypeException < StandardError
 end
 

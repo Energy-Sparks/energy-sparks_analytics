@@ -41,12 +41,18 @@ class BuildingHeatHWSimulator
   end
 
   def occupied_date_time?(date, day_index)
-    # Note - is_school_usually_open? is currently defined at meter collection level
-    occupied?(date) && school.is_school_usually_open?(date, time_of_day(day_index))
+    occupied_by_time?(date, day_index)
   end
 
   def occupied?(date)
-    !weekend?(date) && !holiday?(date)
+    return false if weekend?(date)
+    !holiday?(date)
+  end
+
+  def occupied_by_time?(date, day_index)
+    @occupied_time_cache ||= {} # this 2 level caching doesn't improve performance much
+    @occupied_time_cache[date] ||= {}
+    @occupied_time_cache[date][day_index] ||= occupied?(date) && school.is_school_usually_open?(date, time_of_day(day_index))
   end
 
   def weekend?(date)
@@ -67,6 +73,11 @@ class BuildingHeatHWSimulator
   end
 
   def time_of_day(day_index)
+    @time_of_day_index_cache ||= Array.new(48 * simulation_frequency, nil)
+    @time_of_day_index_cache[day_index] ||= calc_time_of_day(day_index)
+  end
+
+  def calc_time_of_day(day_index)
     hour, minute = index_to_hour_minute(day_index)
     TimeOfDay.new(hour, minute)
   end
@@ -82,7 +93,23 @@ class BuildingHeatHWSimulator
     (simulation_index/simulation_frequency).floor.to_i
   end
 
-  def electrical_gain_kw(date, day_index)
+  def electrical_gain_kw(date, simulation_index)
+    half_hour_index = simulation_index_to_halfhour_index(simulation_index)
+    school.aggregated_electricity_meters.amr_data.kw(date, half_hour_index)
+  end
+
+  def actual_heating_kw(date, simulation_index)
+    half_hour_index = simulation_index_to_halfhour_index(simulation_index)
+    school.aggregated_heat_meters.amr_data.kw(date, half_hour_index) * 0.8
+  end
+
+  def solar_gain_kw(date, simulation_index)
+    half_hour_index = simulation_index_to_halfhour_index(simulation_index)
+    # 20% of solar gain - because of inclinatuon/aspect, / 1000 to convert to kw = 0.0002 - not written out for speed
+    school.solar_irradiation.solar_irradiance(date, half_hour_index) * window_area * 0.0002
+  end
+
+  def electrical_gain_kw_deprecated(date, day_index)
     occupied_date_time?(date, day_index) ? occupied_electrical_gain_kw : unoccupied_electrical_gain_kw
   end
 
@@ -103,7 +130,7 @@ class BuildingHeatHWSimulator
   end
 
   def pupil_gain_occupied_kw
-    (60.0 / 1000.0) * school.number_of_pupils
+    @pupil_gain_occupied_kw ||= (60.0 / 1000.0) * school.number_of_pupils
   end
 
   def gross_wall_area
@@ -130,7 +157,7 @@ class BuildingHeatHWSimulator
     3.0
   end
 
-  def fabric_loss_kw_per_k
+  def calc_fabric_loss_kw_per_k
     u_value_wall = 1.5
     u_value_window = 2.7
     u_value_ceiling = 0.5
@@ -143,6 +170,10 @@ class BuildingHeatHWSimulator
     fabric_loss_w_per_k += u_value_floor * school.floor_area
 
     fabric_loss_w_per_k /1000.0
+  end
+
+  def fabric_loss_kw_per_k
+    @fabric_loss_kw_per_k ||= calc_fabric_loss_kw_per_k
   end
 
   # per m3
@@ -172,21 +203,33 @@ class BuildingHeatHWSimulator
   end
 
   def controlled_air_permeability_m3_per_hr(date, day_index)
-    if date.nil? || occupied_date_time?(date, day_index)
-      recommend_ventilation_per_pupil = 5.0 # l/s
-      school.number_of_pupils * (recommend_ventilation_per_pupil / 1000) * 3600.0
-    else
-      0.0
-    end
+    date.nil? || occupied_date_time?(date, day_index) ? occupied_controlled_air_permeability_m3_per_hr : 0.0
+  end
+
+  def occupied_controlled_air_permeability_m3_per_hr
+    @occupied_controlled_air_permeability_m3_per_hr ||= calc_occupied_controlled_air_permeability_m3_per_hr
+  end
+
+  def calc_occupied_controlled_air_permeability_m3_per_hr
+    recommend_ventilation_per_pupil = 10.0 # l/s
+    school.number_of_pupils * (recommend_ventilation_per_pupil / 1000) * 3600.0
   end
 
   def uncontrolled_air_permeability_m3_per_hr(_date, _day_index)
+    @uncontrolled_air_permeability_m3_per_hr ||= calc_uncontrolled_air_permeability_m3_per_hr
+  end
+
+  def calc_uncontrolled_air_permeability_m3_per_hr
     air_permeability_at_50_pa = 6.5 # ACH
     shelterfactor = 0.07
     air_permeability_at_50_pa * shelterfactor * volume
   end
 
   def thermal_mass_building_kwh_per_k
+    @thermal_mass_building_kwh_per_k ||= calc_thermal_mass_building_kwh_per_k
+  end
+
+  def calc_thermal_mass_building_kwh_per_k
     # http://www.greenspec.co.uk/building-design/thermal-mass/
     useful_thickness = 0.1
     volume = total_internal_external_wall_area * useful_thickness
@@ -222,9 +265,12 @@ class BuildingHeatHWSimulator
   end
 
   def admittance_kw(delta_t)
-    ad = total_internal_external_wall_area * construction_heat_admittance_kw_per_m2_per_k(:dense_masonary_cavity_wet_plaster)
-    ad += school.floor_area * construction_heat_admittance_kw_per_m2_per_k(:dense_masonary_cavity_wet_plaster) * 0.5
-    ad * delta_t
+    admittance_kw_per_K * delta_t
+  end
+
+  def admittance_kw_per_K
+    @admittance_kw_per_K ||= heat_capacity_air_internal_external_wall_area * construction_heat_admittance_kw_per_m2_per_k(:dense_masonary_cavity_wet_plaster) +
+                              school.floor_area * construction_heat_admittance_kw_per_m2_per_k(:dense_masonary_cavity_wet_plaster) * 0.5
   end
 
   def boiler_power_kw
