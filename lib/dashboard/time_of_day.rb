@@ -10,7 +10,9 @@ class TimeOfDay
     end
     @hour = hour
     @minutes = minutes
-    @relative_time = DateTime.new(1970, 1, 1, hour, minutes, 0)
+    # PH 24Oct2020: make .minutes '.to_i' after
+    # hour = 5 minutes = 57.000000000000014 => "invalid fraction"
+    @relative_time = DateTime.new(1970, 1, 1, hour, minutes.to_i, 0)
   end
 
   def self.time_of_day_from_halfhour_index(hh)
