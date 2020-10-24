@@ -47,19 +47,6 @@ class MeterAttributes
     )
   end
 
-  class PartialMeterFloorAreaPupilNumberOverride < MeterAttributeTypes::AttributeBase
-    id :meter_corrections_rescale_amr_data
-    key :partial_floor_area_pupil_numbers
-    aggregate_over :meter_corrections
-    name 'Override percent of floor area or pupil numbers covered by meter'
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        percent_floor_area:      MeterAttributeTypes::Float.define(required: true),
-        percent_pupil_numbers:   MeterAttributeTypes::Float.define(required: true)
-      }
-    )
-  end
-
   class SetMissingDataToZero < MeterAttributeTypes::AttributeBase
     id :meter_corrections_set_missing_data_to_zero
     key :set_missing_data_to_zero
@@ -134,7 +121,33 @@ class MeterAttributes
     name 'Meter correction > Switch'
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:set_all_missing_to_zero, :correct_zero_partial_data])
   end
+  class PartialMeterFloorAreaPupilNumberOverride < MeterAttributeTypes::AttributeBase
+    id :partial_meter_coverage
+    key :partial_meter_coverage
+    aggregate_over :meter_corrections
+    name 'Override percent of floor area or pupil numbers covered by meter'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        percent_floor_area:      MeterAttributeTypes::Float.define(required: true),
+        percent_pupil_numbers:   MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
 
+  class PartialMeterFloorAreaPupilNumberDateRangeOverride < MeterAttributeTypes::AttributeBase
+    id :partial_meter_coverage_date_range
+    key :partial_meter_coverage_date_range
+    aggregate_over :meter_corrections
+    name 'Override percent of floor area or pupil numbers covered by meter - with date ranges'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define(required: true),
+        end_date:   MeterAttributeTypes::Date.define(required: true),
+        percent_floor_area:      MeterAttributeTypes::Float.define(required: true),
+        percent_pupil_numbers:   MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
 
   class HeatingModel < MeterAttributeTypes::AttributeBase
 
