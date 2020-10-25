@@ -192,6 +192,36 @@ module Benchmarking
         sort_by:  [1],
         type: %i[chart table]
       },
+      # second chart and table on page defined by change_in_energy_use_since_joined_energy_sparks above
+      # not displayed on its own as a separate comparison
+      change_in_energy_use_since_joined_energy_sparks_full_data: {
+        benchmark_class:  BenchmarkContentChangeInEnergyUseSinceJoinedFullData,
+        filter_out:       :dont_make_available_directly,
+        name:     'breakdown in the change in energy use since the school joined Energy Sparks',
+        columns:  [
+          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
+
+          { data: ->{ enba_kea }, name: 'Electricity consumption kWh (year before joined Energy Sparks)', units: :kwh },
+          { data: ->{ enba_ke0 }, name: 'Electricity consumption kWh (last year)',                        units: :kwh },
+          { data: ->{ enba_keap}, name: 'Change in electricity consumption (excluding solar)',            units: :relative_percent_0dp, chart_data: true },
+          
+          { data: ->{ enba_kga }, name: 'Gas consumption kWh (year before joined)',               units: :kwh },
+          { data: ->{ enba_kg0 }, name: 'Gas consumption kWh (last year)',                        units: :kwh },
+          { data: ->{ enba_kgap}, name: 'Change in gas consumption',                              units: :relative_percent_0dp, chart_data: true },
+
+          { data: ->{ enba_kha }, name: 'Storage heater consumption kWh (year before joined)', units: :kwh },
+          { data: ->{ enba_kh0 }, name: 'Storage heater consumption kWh (last year)',          units: :kwh },
+          { data: ->{ enba_khap}, name: 'Change in storage heater consumption',                units: :relative_percent_0dp, chart_data: true },
+          
+          { data: ->{ enba_ksa }, name: 'Solar PV production kWh (year before joined)', units: :kwh },
+          { data: ->{ enba_ks0 }, name: 'Solar PV production kWh (last year)',          units: :kwh },
+          { data: ->{ enba_ksap}, name: 'Change in solar PV production',                units: :relative_percent_0dp, chart_data: true },
+          
+          { data: ->{ enba_kxap },  name: 'Change in annual energy use since joined Energy Sparks', units: :relative_percent_0dp, y2_axis: true }
+        ],
+        sort_by:  [13],
+        type: %i[chart table]
+      },
       change_in_co2_emissions_since_last_year: {
         benchmark_class:  BenchmarkContentChangeInCO2SinceLastYear,
         name:     'Change in annual CO2 emissions since last year',

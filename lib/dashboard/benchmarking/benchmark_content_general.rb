@@ -700,6 +700,44 @@ module Benchmarking
       )
       ERB.new(text).result(binding)
     end
+    protected def chart_interpretation_text
+      text = %q(
+        <p>
+          Not all schools will be representated in this data, as we need 1 year&apos;s
+          worth of data before the school joined Energy Sparks and at least 1 year
+          after to do the comparison.
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      content1 = super(school_ids: school_ids, filter: filter)
+      content2 = full_energy_change_breakdown(school_ids: school_ids, filter: filter)
+      content1 + content2
+    end
+
+    private
+    
+    def full_energy_change_breakdown(school_ids:, filter:)
+      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
+      db = @benchmark_manager.benchmark_database
+      content_manager.content(db, :change_in_energy_use_since_joined_energy_sparks_full_data, filter: filter)
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentChangeInEnergyUseSinceJoinedFullData < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = %q(
+        <p>
+          This table provides a more detailed breakdown of the data provided in the chart
+          and table above.
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
   end
   #=======================================================================================
   # this benachmark generates 2 charts and 1 table
