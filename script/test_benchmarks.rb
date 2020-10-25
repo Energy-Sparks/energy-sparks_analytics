@@ -18,7 +18,7 @@ script = {
     },
     # filename:       './TestResults/benchmark_results_data analytics',
 
-    calculate_and_save_variables: true,
+    calculate_and_save_variables: false,
     asof_date:      Date.new(2020, 10, 6),
     # asof_date:      Date.new(2019,11,25),
     # filter:         ->{ addp_area.include?('Sheffield') },
@@ -30,6 +30,7 @@ script = {
       filter:        nil, #->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
     },
     compare_results: [
+      :report_differences,
       { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Benchmark\Base\\' },
       { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Benchmark\New\\' }
     ]

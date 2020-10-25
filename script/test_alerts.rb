@@ -5,15 +5,15 @@ require_rel '../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  no_schools:                  ['*'], # ['Round.*'],
+  no_schools:                  ['*ound*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
-  schools:                  ['Balli*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['st-richard*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   no_source:                   :analytics_db, # :aggregated_meter_collection, 
   source:                   :aggregated_meter_collection,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
     alerts:   nil,
-    # alerts: [ AlertEnergyAnnualVersusBenchmark ],
+    alerts: [ AlertHeatingComingOnTooEarly ],
     no_alerts:   [ AlertSchoolWeekComparisonElectricity, AlertPreviousHolidayComparisonElectricity,
     AlertPreviousYearHolidayComparisonElectricity, AlertSchoolWeekComparisonGas,
     AlertPreviousHolidayComparisonGas, AlertPreviousYearHolidayComparisonGas],

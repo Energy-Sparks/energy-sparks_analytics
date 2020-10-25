@@ -16,16 +16,16 @@ script = {
   no_schools:                  ['hhhhhhhhh*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
-  schools:                  ['plumpton*'],
+  schools:                  ['little*'],
   no_source:                   :analytics_db, # : analytics_db :aggregated_meter_collection :unvalidated_meter_data :load_unvalidated_meter_collection, 
-  source:                   :unvalidated_meter_data,
+  source:                   :aggregated_meter_collection,
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
                                 # :dashboard,
                                 adhoc_worksheet: { name: 'Test', charts: %i[
-                                  storage_heater_thermostatic
+                                  schoolweek_alert_2_previous_holiday_comparison_adjusted
                                   ]},
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }
