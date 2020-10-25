@@ -87,18 +87,44 @@ class CompareContentResults
   def compare_content_component(comparison_component_orig, new_component_orig, index)
     comparison_component = strip_content_of_volatile_data(comparison_component_orig)
     new_component        = strip_content_of_volatile_data(new_component_orig)
+
     if comparison_component != new_component
-      puts "Differs: #{index}"
-      ap @control
-      if @control[:compare_results].include?(:report_differences)
-        h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
-        puts h_diff
-        puts 'Versus:'
-        puts new_component
+      remove_content_classes(comparison_component)
+      remove_content_classes(new_component)
+      if comparison_component != new_component
+        puts "Differs: #{index}"
+        if @control[:compare_results].include?(:report_differences)
+          h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
+          puts h_diff
+          puts 'Versus:'
+          puts new_component
+        end
+        return new_component_orig
       end
-      return new_component_orig
     end
     nil
+  end
+
+  def remove_content_classes(data)
+    remove_drilldown_content_classes(data)
+    remove_content_class(data)
+  end
+
+  # the benchmark tables contain object references, which include
+  # the dynamic addreess of the object, so are not comparable
+  # e.g. :drilldown_content_class=>#<Class:0x000000000527cef0>
+  def remove_drilldown_content_classes(data)
+    return if !data.is_a?(Hash) || !data.key?(:type) || data[:type] != :table_composite
+    data[:content][:rows].each do |row|
+      row.each do |column|
+        column.delete(:drilldown_content_class)
+      end
+    end
+  end
+
+  def remove_content_class(data)
+    return if !data.is_a?(Hash) || !data.key?(:type) || data[:type] != :drilldown
+    data[:content][:drilldown].delete(:content_class) unless data.dig(:content, :drilldown, :content_class).nil?
   end
 
   def save_and_compare_chart_data(chart_name, charts)
