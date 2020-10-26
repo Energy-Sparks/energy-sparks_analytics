@@ -28,13 +28,27 @@ class CompareChartResults
       puts 'Unable to save and compare composite chart'
       return
     end
-    save_chart(TestDirectoryConfiguration::CHARTCOMPARISONNEW, chart_name, charts)
-    previous_chart = load_chart(TestDirectoryConfiguration::CHARTCOMPARISONBASE, chart_name)
+    save_chart(output_directory, chart_name, charts)
+    previous_chart = load_chart(comparison_directory, chart_name)
     if previous_chart.nil?
       @missing.push(chart_name)
       return
     end
     compare_charts(chart_name, previous_chart, charts)
+  end
+
+  def comparison_directory
+    config_directory(:comparison_directory) || TestDirectoryConfiguration::CHARTCOMPARISONBASE
+  end
+
+  def output_directory
+    config_directory(:output_directory) || TestDirectoryConfiguration::CHARTCOMPARISONNEW
+  end
+
+  def config_directory(type)
+    return nil if control.nil?
+    return nil if control.detect{ |a| a.is_a?(Hash) && a.key?(type) }.nil?
+    control.detect{ |a| a.is_a?(Hash) && a.key?(type) }.values[0]
   end
 
   def strip_chart_of_volatile_data(chart)
@@ -101,7 +115,14 @@ class CompareChartResults
     h.nil? ? {} : h
   end
 
-  def yml_filepath(path, chart_name)
+  def yml_filepath(full_path, chart_name)
+    Dir.mkdir(full_path) unless File.exist?(full_path)
+    extension = control_contains?(:name_extension) ? ('- ' + hash_controls[:name_extension].to_s) : ''
+    yaml_filename = full_path + '\\' + @school_name + '-' + chart_name.to_s + extension + '.yaml'
+    yaml_filename.length > 259 ? shorten_filename(yaml_filename) : yaml_filename
+  end
+
+  def yml_filepath_deprecated(path, chart_name)
     full_path ||= File.join(File.dirname(__FILE__), path)
     Dir.mkdir(full_path) unless File.exist?(full_path)
     extension = control_contains?(:name_extension) ? ('- ' + hash_controls[:name_extension].to_s) : ''

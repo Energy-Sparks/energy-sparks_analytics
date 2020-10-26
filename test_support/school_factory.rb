@@ -72,17 +72,17 @@ class SchoolFactory
     yaml_filename = meter_collection_filename(school_filename, file_type, '.yaml')
     marshal_filename = meter_collection_filename(school_filename, file_type, '.marshal')
 
-    validated_meter_collection = if File.exist?(marshal_filename)
-      bm = Benchmark.realtime {
-        school = load_marshal_copy(marshal_filename)
-      }
-      puts "Loaded #{marshal_filename} in #{bm.round(3)} seconds"
-    else
+    if !File.exist?(marshal_filename) || File.mtime(yaml_filename) > File.mtime(marshal_filename)
       bm = Benchmark.realtime {
         school = YAML.load_file(yaml_filename)
       }
       puts "Loaded #{yaml_filename} in #{bm.round(3)} seconds"
       save_marshal_copy(marshal_filename, school)
+    else
+      bm = Benchmark.realtime {
+        school = load_marshal_copy(marshal_filename)
+      }
+      puts "Loaded #{marshal_filename} in #{bm.round(3)} seconds"
     end
     school
   end

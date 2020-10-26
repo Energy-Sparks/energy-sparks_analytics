@@ -21,6 +21,10 @@ class SolarPVPanels
     @solar_pv_panel_config.degraded_kwp(date)
   end
 
+  def estimated_days_pv_kwh_x48(date, sheffield_solar_pv_data)
+    AMRData.fast_multiply_x48_x_scalar(sheffield_solar_pv_data[date], degraded_kwp(date) / 2.0)
+  end
+
   # takes original electricity mains consumption meter data, and creates
   # 1. solar pv output
   # 2. exported solar pv (based on excess over baseload; weekends and holidays only, initially)

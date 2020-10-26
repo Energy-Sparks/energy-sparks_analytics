@@ -99,6 +99,20 @@ class MeterAttributes
     )
   end
 
+  class OverrideWithSyntheticSheffieldPVData < MeterAttributeTypes::AttributeBase
+    id :meter_corrections_use_sheffield_pv_data
+    key :set_to_sheffield_pv_data
+    aggregate_over :meter_corrections
+    name 'Meter correction > Override solar pv production data with Sheffield University data'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date:         MeterAttributeTypes::Date.define(required: true),
+        end_date:           MeterAttributeTypes::Date.define(required: true),
+      }
+    )
+  end
+
   class ReadingsStartDate < MeterAttributeTypes::AttributeBase
     id :meter_corrections_readings_start_date
     key :readings_start_date
@@ -121,6 +135,7 @@ class MeterAttributes
     name 'Meter correction > Switch'
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:set_all_missing_to_zero, :correct_zero_partial_data])
   end
+
   class PartialMeterFloorAreaPupilNumberOverride < MeterAttributeTypes::AttributeBase
     id :partial_meter_coverage
     key :partial_meter_coverage

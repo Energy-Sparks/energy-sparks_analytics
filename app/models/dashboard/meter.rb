@@ -129,6 +129,10 @@ module Dashboard
       school || @meter_collection
     end
 
+    def solar_pv
+      meter_collection.solar_pv
+    end
+
     def heat_meter?
       [:gas, :storage_heater, :aggregated_heat].include?(fuel_type)
     end
