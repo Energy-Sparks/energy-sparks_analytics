@@ -1,4 +1,4 @@
-require_relative '../app/services/aggregate_data_service'
+require_relative '../app/services/aggregation_service.rb'
 require_relative '../app/models/meter_collection'
 # Base class for downloading/storing meter readings from various external sources
 class MeterReadingsDownloadBase

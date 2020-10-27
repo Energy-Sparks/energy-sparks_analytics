@@ -919,13 +919,7 @@ private
   end
 
   def calculate_last_meter_date
-    meter_date = Date.new(2040, 1, 1)
-    unless @meters[0].nil?
-      meter_date = @meters[0].amr_data.end_date
-    end
-    if !@meters[1].nil? && @meters[1].amr_data.end_date < meter_date
-      meter_date = @meters[1].amr_data.end_date
-    end
+    meter_date = [Date.new(2040, 1, 1), @meters.compact.map { |meter| meter.amr_data.end_date }].flatten.min
     if y2_axis_uses_temperatures && @meter_collection.temperatures.end_date < meter_date
       logger.info "Reducing meter range because temperature axis with less data on chart #{meter_date} versus #{@meter_collection.temperatures.end_date}"
       meter_date = @meter_collection.temperatures.end_date # this may not be strict enough?

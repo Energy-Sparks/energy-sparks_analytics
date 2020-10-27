@@ -1,4 +1,4 @@
-require_relative '../app/services/aggregate_data_service'
+require_relative '../app/services/aggregation_service.rb'
 require_relative '../app/models/meter_collection'
 # creates meter_collection from csv file for Bath school
 class LoadSchoolFromBathSplitCSVFile < MeterReadingsDownloadCSVBase

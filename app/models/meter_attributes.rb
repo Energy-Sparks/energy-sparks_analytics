@@ -236,6 +236,33 @@ class MeterAttributes
     )
   end
 
+  class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
+
+    id    :solar_pv_mpan_meter_mapping
+    key   :solar_pv_mpan_meter_mapping
+    name  'Solar PV MPAN Meter mapping'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        export_mpan:        MeterAttributeTypes::String.define,
+        production_mpan:    MeterAttributeTypes::String.define,
+      }
+    )
+  end
+
+  class SolarPVExternalMeterIdentifier < MeterAttributeTypes::AttributeBase
+    id    :solar_pv_external_identifier
+    key   :solar_pv_external_identifier
+    name  'Solar PV External Identifier (type e.g. low_carbon_hub, id e.g. 123456)'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        identifier_type:  MeterAttributeTypes::String.define(required: true),
+        identifier:       MeterAttributeTypes::String.define(required: true),
+      }
+    )
+  end
+
   class LowCarbonHub < MeterAttributeTypes::AttributeBase
 
     id :low_carbon_hub_meter_id

@@ -1,5 +1,5 @@
 require 'yaml'
-require_relative '../app/services/aggregate_data_service'
+require_relative '../app/services/aggregation_service.rb'
 require_relative '../app/models/meter_collection'
 # Loads meta data defining schools and a list of meters (no readings)
 # from local yml file for test support

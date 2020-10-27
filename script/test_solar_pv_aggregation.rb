@@ -9,13 +9,30 @@ require './script/report_config_support.rb'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/pv %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['long*'],
+  schools:                  [
+                              'long*',
+                              'bishop-sutton*',
+                              'paulton*',
+                              'ralph*',
+                              'st-martin-s-garden*',
+                              'all-saints*',
+                              'little-horstead*',
+                              'robsack*',
+                              'milton-of-leys*',
+                              'caldecott*',
+                              'windmill*',
+                              'ballifield*',
+                              'hugh-sexey*',
+                              'portsmouth-high*'
+                            ],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
                                 adhoc_worksheet: { name: 'Test', charts: %i[
-                                  schoolweek_alert_2_previous_holiday_comparison_adjusted
+                                  solar_pv_group_by_month
+                                  solar_pv_last_7_days_by_submeter
+                                  group_by_week_electricity
                                   ]},
                               ],
                               control: {

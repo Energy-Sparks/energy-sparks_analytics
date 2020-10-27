@@ -1,6 +1,6 @@
 require 'yaml'
 require 'benchmark'
-require_relative '../app/services/aggregate_data_service'
+require_relative '../app/services/aggregation_service.rb'
 require_relative '../app/models/meter_collection'
 # Local meter readings database load and save = one yml or marshal file per school
 # - this stores meter readings - an array of OneDayAMRReading's in local yml/marshal files
