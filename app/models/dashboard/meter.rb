@@ -5,9 +5,9 @@ module Dashboard
 
     # Extra fields - potentially a concern or mix-in
     attr_reader :fuel_type, :meter_collection, :meter_attributes
-    attr_reader :solar_pv_setup, :storage_heater_setup, :sub_meters
+    attr_reader :storage_heater_setup, :sub_meters
     attr_reader :meter_correction_rules, :model_cache
-    attr_accessor :amr_data,  :floor_area, :number_of_pupils
+    attr_accessor :amr_data,  :floor_area, :number_of_pupils, :solar_pv_setup
 
     # Energy Sparks activerecord fields:
     attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
@@ -84,7 +84,7 @@ module Dashboard
     end
 
     def sheffield_simulated_solar_pv_panels?
-      !@solar_pv_setup.nil?
+      !@solar_pv_setup.nil? && @solar_pv_setup.instance_of?(SolarPVPanels)
     end
 
     def real_solar_pv_metering_x3?

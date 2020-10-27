@@ -33,14 +33,11 @@ class AggregateDataService
     logger.info 'Aggregate Meters'
     bm = Benchmark.realtime {
       set_long_gap_boundary_on_all_meters
+
       aggregate_heat_meters
-      create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
-      reorganise_solar_pv_sub_meters if  @meter_collection.real_solar_pv_metering_x3?
-      create_solar_pv_sub_meters if @meter_collection.sheffield_simulated_solar_pv_panels?
-      aggregate_electricity_meters
-      disaggregate_storage_heaters if @meter_collection.storage_heaters?
-      create_solar_pv_sub_meters_using_meter_data if @meter_collection.real_solar_pv_metering_x3?
-      combine_solar_pv_submeters_into_aggregate if aggregate_solar_pv_sub_meters?
+
+      process_electricity_meters
+
       set_post_aggregation_state_on_all_meters
     }
     calc_text = "Calculated meter aggregation in #{bm.round(3)} seconds"
@@ -49,6 +46,18 @@ class AggregateDataService
   end
 
   private
+
+  private def process_electricity_meters
+    create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
+
+    process_solar_pv_electricity_meters if @meter_collection.solar_pv_panels?
+
+    aggregate_electricity_meters
+
+    disaggregate_storage_heaters if @meter_collection.storage_heaters?
+    
+    combine_solar_pv_submeters_into_aggregate if more_than_one_solar_pv_sub_meter?
+  end
 
   private def set_long_gap_boundary_on_all_meters
     @meter_collection.all_meters.each do |meter|
@@ -122,9 +131,7 @@ class AggregateDataService
   # pv and storage heater meters alter the meter data, but for
   # P&L purposes we need an unaltered copy of the original meter
   def create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
-    if @meter_collection.sheffield_simulated_solar_pv_panels? ||
-       @meter_collection.storage_heaters?
-       # but not low carbon hub meters, as split already taken place
+    if @meter_collection.solar_pv_panels? || @meter_collection.storage_heaters?
       calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
       unaltered_aggregate_meter = aggregate_main_meters(nil, @electricity_meters, :electricity, true)
       assign_unaltered_electricity_meter(unaltered_aggregate_meter)

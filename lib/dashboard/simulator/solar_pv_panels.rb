@@ -6,6 +6,7 @@ class SolarPVPanels
   SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME = 'Electricity consumed from solar pv'.freeze
   SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME = 'Exported solar electricity (not consumed onsite)'.freeze
   ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME = 'Electricity consumed from mains'.freeze
+  SOLAR_PV_PRODUCTION_METER_NAME = 'Solar PV Production'
 
   SUBMETER_TYPES = [
     ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
@@ -43,16 +44,15 @@ class SolarPVPanels
     logger.info "PV date range #{meter_collection.solar_pv.start_date} to #{meter_collection.solar_pv.end_date}"
 
     (electricity_amr.start_date..electricity_amr.end_date).each do |date|
-      capacity = degraded_kwp(date)
-      pv_yield_x48 = meter_collection.solar_pv[date]
+      pv_output_x48 = solar_pv_output_kwh_x48(date, meter_collection)
 
       pv_consumed_onsite_kwh_x48 = AMRData.one_day_zero_kwh_x48
       solar_pv_panel_output_kwh_x48 = AMRData.one_day_zero_kwh_x48
       exported_pv_kwh_x48 = AMRData.one_day_zero_kwh_x48
 
-      if !capacity.nil? && !pv_yield_x48.nil?
+      if !pv_output_x48.nil?
         exported_pv_kwh_x48, pv_consumed_onsite_kwh_x48, solar_pv_panel_output_kwh_x48 =
-          days_exported_and_onsite_consumed_pv(meter_collection, date, capacity, electricity_amr, pv_yield_x48, pv_consumed_onsite_kwh_x48, solar_pv_panel_output_kwh_x48)
+          days_exported_and_onsite_consumed_pv(meter_collection, date, electricity_amr, pv_output_x48, pv_consumed_onsite_kwh_x48, solar_pv_panel_output_kwh_x48)
       end
 
       electricity_consumed_onsite_x48 = AMRData.one_day_zero_kwh_x48
@@ -77,6 +77,31 @@ class SolarPVPanels
     }
   end
 
+  def create_solar_pv_production_amr_from_sheffield_university(electricity_amr, meter_collection, mpan_solar_pv)
+    solar_pv_output_amr = AMRData.new(:solar_pv)
+    start_date  = [electricity_amr.start_date, meter_collection.solar_pv.start_date].max
+    end_date    = [electricity_amr.end_date,   meter_collection.solar_pv.end_date].min
+
+    (start_date..end_date).each do |date|
+      pv_output_x48 = solar_pv_output_kwh_x48(date, meter_collection)
+      solar_pv_output_amr.add(date, one_day_reading(mpan_solar_pv, date, 'SOLR', pv_output_x48))
+    end
+
+    logger.info "create synthetic solar pv production data between #{start_date} and #{end_date} total = #{solar_pv_output_amr.total.round(0)} kwh"
+
+    solar_pv_output_amr
+  end
+
+  private def solar_pv_output_kwh_x48(date, meter_collection)
+    capacity = degraded_kwp(date)
+    return AMRData.one_day_zero_kwh_x48 if capacity.nil?
+
+    pv_yield_x48 = meter_collection.solar_pv[date]
+    return AMRData.one_day_zero_kwh_x48 if pv_yield_x48.nil?
+
+    AMRData.fast_multiply_x48_x_scalar(pv_yield_x48, capacity / 2.0)
+  end
+
   private def log_disaggregation_results(electricity_amr, electricity_consumed_onsite_amr, solar_pv_consumed_onsite_amr, exported_solar_pv_amr, solar_pv_output_amr)
     logger.info "Disaggregated electricity meter with #{electricity_amr.total.round(0)} kWh data"
     logger.info 'Created:'
@@ -90,13 +115,13 @@ class SolarPVPanels
     OneDayAMRReading.new(mpan, date, type, nil, DateTime.now, data_x48)
   end
 
-  private def days_exported_and_onsite_consumed_pv(meter_collection, date, capacity, electricity_amr, pv_yield_x48, pv_consumed_onsite_kwh_x48, solar_pv_panel_output_kwh_x48)
+  private def days_exported_and_onsite_consumed_pv(meter_collection, date, electricity_amr, pv_output_x48, pv_consumed_onsite_kwh_x48, solar_pv_panel_output_kwh_x48)
     baseload_kw = yesterday_baseload_kw(date, electricity_amr)
     unoccupied = unoccupied?(meter_collection, date)
     exported_pv_kwh_x48 = AMRData.one_day_zero_kwh_x48
-    pv_yield_x48.each_with_index do |yield_kwh_per_kwp, halfhour_index|
+    pv_output_x48.each_with_index do |kwh, halfhour_index|
       metered_electricity_consumption_kwh = electricity_amr.kwh(date, halfhour_index)
-      solar_pv_panel_output_kwh_x48[halfhour_index] = yield_kwh_per_kwp * capacity / 2.0
+      solar_pv_panel_output_kwh_x48[halfhour_index] = kwh
       if unoccupied && metered_electricity_consumption_kwh <= 0.0 # 0.5 kWh nominal noise
         pv_consumed_onsite_kwh_x48[halfhour_index] = baseload_kw / 2.0
         exported_pv_kwh_x48[halfhour_index] = -1.0 * (solar_pv_panel_output_kwh_x48[halfhour_index] - pv_consumed_onsite_kwh_x48[halfhour_index])
@@ -322,5 +347,16 @@ class SolarPVPanelsNewBenefit < SolarPVPanels
       exported:               exported_solar_pv_total,
       solar_pv_output:        solar_pv_output_total
     }
+  end
+end
+
+class SolarPVPanelsWithProductionMeter < SolarPVPanels
+  def initialize(meter_attributes_config, production_meter)
+    super(meter_attributes_config)
+    @production_meter = production_meter
+  end
+
+  private def solar_pv_output_kwh_x48(date, meter_collection)
+    @production_meter.amr_data.days_kwh_x48(date)
   end
 end
