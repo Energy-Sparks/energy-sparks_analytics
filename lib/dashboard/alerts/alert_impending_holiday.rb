@@ -69,11 +69,11 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     },
     holiday_start_date: {
       description: 'Holiday start date',
-      units:  Date
+      units:  :date
     },
     holiday_end_date: {
       description: 'Holiday end date',
-      units:  Date
+      units:  :date
     },
     holiday_start_date_doy: {
       description: 'Holiday first day - name e.g. Saturday',

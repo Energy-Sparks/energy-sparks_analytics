@@ -78,7 +78,7 @@ class AlertHeatingOnOff < AlertGasModelBase
     },
     latest_meter_data_date: {
       description: 'whether the heating is on or off needs caveating with gas between forecast date and last meter date',
-      units:  Date
+      units:  :date
     },
     forecast_date_time: {
       description: 'date time when we picked up the weather forecast from dark sky',
