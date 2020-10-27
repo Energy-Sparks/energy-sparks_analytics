@@ -44,8 +44,8 @@ class AdviceRecentChangeBase < AdviceElectricityBase
       @last_4_school_weeks_£_per_week = scalar.aggregate_value({schoolweek: -3..0},  @fuel_type, :£) / 4.0
       @previous_4_school_weeks_£_per_week = scalar.aggregate_value({schoolweek: -7..-4}, @fuel_type, :£) / 4.0
       @difference_per_week_£ = @last_4_school_weeks_£_per_week - @previous_4_school_weeks_£_per_week
-      percent_change(@previous_4_school_weeks_£_per_week, @last_4_school_weeks_£_per_week)
       @percentage_change = percent_change(@previous_4_school_weeks_£_per_week, @last_4_school_weeks_£_per_week)
+      raise EnergySparksNotEnoughDataException.new("Could not calculate percentage change for #{@school.name}") if @percentage_change.nil?
       @rating = calculate_rating_from_range(-0.1, 0.1, @percentage_change)
       @prefix_1 = @difference_per_week_£ > 0 ? 'up' : 'down'
       @prefix_2 = @difference_per_week_£ > 0 ? 'increase' : 'reduction'
