@@ -80,7 +80,10 @@ module Dashboard
     end
 
     def solar_pv_panels?
-      low_carbon_hub_solar_pv_panels? || sheffield_simulated_solar_pv_panels? || solar_for_schools_solar_pv_panels?
+      low_carbon_hub_solar_pv_panels? ||
+      sheffield_simulated_solar_pv_panels? ||
+      solar_for_schools_solar_pv_panels? ||
+      solar_pv_sub_meters_to_be_aggregated > 0
     end
 
     def sheffield_simulated_solar_pv_panels?

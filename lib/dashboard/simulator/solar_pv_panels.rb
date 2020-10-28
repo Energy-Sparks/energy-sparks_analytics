@@ -238,7 +238,7 @@ class SolarPVPanels
     end
 
     private def parse_meter_attributes_configuration(meter_attributes_config)
-  
+      raise EnergySparksMeterSpecification, ':solar_pv: attribute not setup' if meter_attributes_config.nil?
       if meter_attributes_config.is_a?(Array)
         meter_attributes_config.each do |period_config|
           @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(period_config))
@@ -246,7 +246,10 @@ class SolarPVPanels
       elsif meter_attributes_config.is_a?(Hash)
         @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(meter_attributes_config))
       else
-        raise EnergySparksMeterSpecification.new('Unexpected meter attributes for solar pv, expecting array of hashes or 1 hash')
+      puts "Got here"
+        ap meter_attributes_config
+        puts "and got here"
+        raise EnergySparksMeterSpecification, 'Unexpected meter attributes for solar pv, expecting array of hashes or 1 hash'
       end
     end
 
@@ -275,7 +278,6 @@ class SolarPVPanelsNewBenefit < SolarPVPanels
 
   def create_solar_pv_data(electricity_amr, meter_collection, start_date, end_date, kwp)
     logger.info 'Simulating half hourly benefit of new solar pv panels'
-
     solar_pv_output_amr             = AMRData.create_empty_dataset(:solar_pv,  start_date, end_date)
     exported_solar_pv_amr           = AMRData.create_empty_dataset(:export,    start_date, end_date)
     solar_pv_consumed_onsite_amr    = AMRData.create_empty_dataset(:pv_onsite, start_date, end_date)
