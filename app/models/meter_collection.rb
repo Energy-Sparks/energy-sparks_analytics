@@ -266,19 +266,23 @@ class MeterCollection
   end
 
   def sheffield_simulated_solar_pv_panels?
-    @has_sheffield_simulated_solar_pv_panels ||= all_meters.any?{ |meter| meter.sheffield_simulated_solar_pv_panels? }
+    @sheffield_simulated_solar_pv_panels ||= all_meters.any?{ |meter| meter.sheffield_simulated_solar_pv_panels? }
   end
 
   def real_solar_pv_metering_x3?
-    @has_real_solar_pv_metering_x3 ||= all_meters.any?{ |meter| meter.real_solar_pv_metering_x3? }
+    @real_solar_pv_metering_x3 ||= all_meters.any?{ |meter| meter.real_solar_pv_metering_x3? }
+  end
+ 
+  def solar_pv_sub_meters_to_be_aggregated
+    @solar_pv_sub_meters_to_be_aggregated ||= all_meters.count{ |meter| meter.solar_pv_sub_meters_to_be_aggregated }
   end
 
   def low_carbon_hub_solar_pv_panels?
-    @has_low_carbon_hub_solar_pv_panels ||= all_meters.any?{ |meter| meter.low_carbon_hub_solar_pv_panels? }
+    @low_carbon_hub_solar_pv_panels ||= all_meters.any?{ |meter| meter.low_carbon_hub_solar_pv_panels? }
   end
 
   def solar_for_schools_solar_pv_panels?
-    @has_solar_for_schools_solar_pv_panels ||= all_meters.any?{ |meter| meter.solar_for_schools_solar_pv_panels? }
+    @solar_for_schools_solar_pv_panels ||= all_meters.any?{ |meter| meter.solar_for_schools_solar_pv_panels? }
   end
 
   def school_type

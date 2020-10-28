@@ -91,6 +91,13 @@ module Dashboard
       low_carbon_hub_solar_pv_panels? || solar_for_schools_solar_pv_panels?
     end
 
+    # num of incoming meters, the aggregation process then implies
+    # extra meters - so this method is only valid prior to aggregation
+    def solar_pv_sub_meters_to_be_aggregated
+      return 0 if attributes(:solar_pv_mpan_meter_mapping).nil?
+      attributes(:solar_pv_mpan_meter_mapping).length
+    end
+
     def low_carbon_hub_solar_pv_panels?
       !@low_carbon_hub_solar_pv.nil?
     end

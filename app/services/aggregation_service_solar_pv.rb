@@ -5,7 +5,7 @@ class AggregateDataService
   private
 
   def process_solar_pv_electricity_meters
-    reorganise_solar_pv_sub_meters if @meter_collection.real_solar_pv_metering_x3?
+    reorganise_solar_pv_sub_meters if @meter_collection.real_solar_pv_metering_x3? || @meter_collection.solar_pv_sub_meters_to_be_aggregated > 0
     @electricity_meters.each do |electricity_meter|
       if production_no_export_meter?(electricity_meter)
         # convoluted: reorganise_solar_pv_sub_meters sets up subclassed SolarPVPanels
@@ -16,7 +16,7 @@ class AggregateDataService
       elsif production_no_export_meter?(electricity_meter)
         create_synthetic_production_submeter(electricity_meter)
         create_solar_pv_sub_meters_using_meter_data(electricity_meter)
-      elsif electricity_meter.real_solar_pv_metering_x3?
+      elsif electricity_meter.real_solar_pv_metering_x3? || electricity_meter.solar_pv_sub_meters_to_be_aggregated == 2
         create_solar_pv_sub_meters_using_meter_data(electricity_meter)
       end
     end
@@ -108,13 +108,13 @@ class AggregateDataService
     electricity_meter.sub_meters.push(solar_pv_meter)
   end
 
-  # Low Carbon Hub based solar PV aggregation
-  #
+  # Meter aggregation where we have multiple meters metering the solar PV
+  # 
   # similar to Sheffield PV based create_solar_pv_sub_meters() function
   # except the data comes in a more precalculated form, so its more a
-  # matter of moving meters around, plus some imple maths
+  # matter of moving meters around, plus some simple maths
   #
-  # Low carbon hub provides 4 sets of meter readings: 'solar PV production', 'exported electricity', 'mains consumption', 'solar pv concumed onsite'
+  # Up to 4 sets of meter readings are used: 'solar PV production', 'exported electricity', 'mains consumption', 'solar pv concumed onsite'
   #
   # 1. Energy Sparks currently needs an aggregate meter containing all school consumption from whereever its sourced
   #    which in this case is 'mains consumption' + 'solar PV production' - 'exported electricity'
@@ -242,8 +242,8 @@ class AggregateDataService
     logger.info 'Reorganising solar PV meters imported as main meters into submeters of the relevent mains import meter'
     solar_pv_meters_with_mpan_remapping_attributes.each do |mains_meter, maps|
       maps.each do |_type, mpan|
-        meter = @meter_collection.electricity_meters.find{ |meter| meter.mpan_mprn == mpan }
-        @meter_collection.electricity_meters.delete_if{ |meter| meter.mpan_mprn == mpan }
+        meter = @meter_collection.electricity_meters.find{ |meter1| meter1.mpan_mprn == mpan }
+        @meter_collection.electricity_meters.delete_if{ |meter1| meter1.mpan_mprn == mpan }
         pv_panel_setup(mains_meter, meter) if meter.fuel_type == :solar_pv
         mains_meter.sub_meters.push(meter)
       end
