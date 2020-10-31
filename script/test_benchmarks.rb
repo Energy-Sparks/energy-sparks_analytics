@@ -18,7 +18,7 @@ script = {
     },
     # filename:       './TestResults/benchmark_results_data analytics',
 
-    calculate_and_save_variables: false,
+    calculate_and_save_variables: true,
     asof_date:      Date.new(2020, 10, 6),
     # asof_date:      Date.new(2019,11,25),
     # filter:         ->{ addp_area.include?('Sheffield') },

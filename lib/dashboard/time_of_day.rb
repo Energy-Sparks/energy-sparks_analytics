@@ -15,6 +15,10 @@ class TimeOfDay
     @relative_time = DateTime.new(1970, 1, 1, hour, minutes.to_i, 0)
   end
 
+  def to_time
+    @relative_time.to_time
+  end
+
   def self.time_of_day_from_halfhour_index(hh)
     TimeOfDay.new((hh / 2).to_i, 30 * (hh % 2))
   end
@@ -23,8 +27,14 @@ class TimeOfDay
     TimeOfDay.new(hours_fraction.to_i, 60 * (hours_fraction - hours_fraction.to_i))
   end
 
+  def self.time_of_day_since_midnight(minutes_since_midnight)
+    hours = (minutes_since_midnight / 60).to_i
+    minutes = (minutes_since_midnight - hours * 60).to_i
+    TimeOfDay.new(hours, minutes)
+  end
+
   def self.average_time_of_day(time_of_days)
-    times = time_of_days.map(&:relative_time)
+    times = time_of_days.map(&:to_time)
     t = Time.at(times.map(&:to_i).reduce(:+) / times.size)
     TimeOfDay.new(t.hour, t.min)
   end
