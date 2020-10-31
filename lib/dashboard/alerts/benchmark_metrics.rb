@@ -93,21 +93,21 @@ module BenchmarkMetrics
     end
   end
 
-  def self.exemplar_£(school, fuel_type)
+  def self.exemplar_£(school, fuel_type, start_date, end_date)
     case fuel_type
     when :electricity, :storage_heater, :storage_heaters
-      examplar_kwh(school, fuel_type) * BenchmarkMetrics::ELECTRICITY_PRICE
+      exemplar_kwh(school, fuel_type, start_date, end_date) * BenchmarkMetrics::ELECTRICITY_PRICE
     when :gas
-      examplar_kwh(school, fuel_type) * BenchmarkMetrics::GAS_PRICE
+      exemplar_kwh(school, fuel_type, start_date, end_date) * BenchmarkMetrics::GAS_PRICE
     end
   end
 
-  def self.examplar_kwh(school, fuel_type)
+  def self.exemplar_kwh(school, fuel_type, start_date, end_date)
     case fuel_type
     when :electricity, :storage_heater, :storage_heaters
-      BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school.school_type, school.number_of_pupils)
+      BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school.school_type, school.number_of_pupils(start_date, end_date))
     when :gas
-      BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * school.floor_area
+      BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * school.floor_area(start_date, end_date)
     end
   end
 

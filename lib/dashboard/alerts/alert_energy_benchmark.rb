@@ -1,3 +1,4 @@
+require_relative 'alert_floor_area_pupils_mixin.rb'
 # to reduce class clutter
 # TODO(PH 10Oct2020) needs further work as @attributes doesn't work as mixin only if as a class
 module TemplateVarPromotionMixIn
@@ -46,6 +47,7 @@ end
 class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   include Logging
   include TemplateVarPromotionMixIn
+  include AlertFloorAreaMixin
 
   attr_reader :last_year_kwh, :last_year_£, :last_year_co2, :last_year_co2_tonnes
   attr_reader :one_year_energy_per_pupil_kwh, :one_year_energy_per_pupil_£, :one_year_energy_per_pupil_co2
@@ -210,14 +212,14 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   
     assign_legacy_variables
 
-    @one_year_energy_per_pupil_kwh      = @current_year_energy_kwh / @school.number_of_pupils
-    @one_year_energy_per_floor_area_kwh = @current_year_energy_kwh / @school.floor_area
+    @one_year_energy_per_pupil_kwh      = @current_year_energy_kwh / pupils(asof_date - 365, asof_date)
+    @one_year_energy_per_floor_area_kwh = @current_year_energy_kwh / floor_area(asof_date - 365, asof_date)
 
-    @one_year_energy_per_pupil_£        = @current_year_energy_£ / @school.number_of_pupils
-    @one_year_energy_per_floor_area_£   = @current_year_energy_£ / @school.floor_area
+    @one_year_energy_per_pupil_£        = @current_year_energy_£ / pupils(asof_date - 365, asof_date)
+    @one_year_energy_per_floor_area_£   = @current_year_energy_£ / floor_area(asof_date - 365, asof_date)
 
-    @one_year_energy_per_pupil_co2      = @current_year_energy_co2 / @school.number_of_pupils
-    @one_year_energy_per_floor_area_co2 = @current_year_energy_co2 / @school.floor_area
+    @one_year_energy_per_pupil_co2      = @current_year_energy_co2 / pupils(asof_date - 365, asof_date)
+    @one_year_energy_per_floor_area_co2 = @current_year_energy_co2 / floor_area(asof_date - 365, asof_date)
 
     @per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school)
     @per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school)

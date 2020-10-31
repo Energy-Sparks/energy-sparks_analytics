@@ -88,6 +88,19 @@ class MeterCollection
     end
   end
 
+  # attr_reader/@floor_area is set by the front end
+  # if there are relevant pseudo meter attributes
+  # override it with a calculated value
+  def floor_area(start_date = nil, end_date = nil)
+    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(self, @floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
+    @calculated_floor_area_pupil_numbers.floor_area
+  end
+
+  def number_of_pupils(start_date = nil, end_date = nil)
+    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(self, @floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
+    @calculated_floor_area_pupil_numbers.number_of_pupils
+  end
+
   def first_combined_meter_date
     all_aggregate_meters.map{ |meter| meter.amr_data.start_date }.max
   end

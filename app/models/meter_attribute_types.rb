@@ -16,6 +16,7 @@ module MeterAttributeTypes
     :storage_heater_aggregated,
     :storage_heater_disaggregated_electricity,
     :storage_heater_disaggregated_storage_heater,
+    :school_level_data,
   ].freeze
 
   class AttributeBase

@@ -143,8 +143,24 @@ class MeterAttributes
     name 'Override percent of floor area or pupil numbers covered by meter'
     structure MeterAttributeTypes::Hash.define(
       structure: {
+        start_date: MeterAttributeTypes::Date.define,
+        end_date:   MeterAttributeTypes::Date.define,
         percent_floor_area:      MeterAttributeTypes::Float.define(required: true),
         percent_pupil_numbers:   MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
+
+  class FloorAreaPupilNumbersChangeOverTimeOverride < MeterAttributeTypes::AttributeBase
+    id :floor_area_pupil_numbers
+    aggregate_over :floor_area_pupil_numbers
+    name 'Changing floor area and pupil numbers over time'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date:       MeterAttributeTypes::Date.define,
+        end_date:         MeterAttributeTypes::Date.define,
+        floor_area:       MeterAttributeTypes::Float.define(required: true),
+        number_of_pupils: MeterAttributeTypes::Float.define(required: true)
       }
     )
   end
