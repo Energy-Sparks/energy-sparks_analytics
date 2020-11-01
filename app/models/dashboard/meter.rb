@@ -7,6 +7,7 @@ module Dashboard
     attr_reader :fuel_type, :meter_collection, :meter_attributes
     attr_reader :storage_heater_setup, :sub_meters
     attr_reader :meter_correction_rules, :model_cache
+    attr_reader :partial_meter_coverage
     attr_accessor :amr_data,  :floor_area, :number_of_pupils, :solar_pv_setup
 
     # Energy Sparks activerecord fields:
@@ -52,11 +53,42 @@ module Dashboard
       @mpan_mprn = identifier.to_i
     end
 
+    def partial_floor_area(start_date = nil, end_date = nil)
+      PartialMeterCoverage.total_partial_floor_area(@partial_meter_coverage, start_date, end_date)
+    end
+
+    def partial_number_of_pupils(start_date = nil, end_date = nil)
+      PartialMeterCoverage.total_partial_number_of_pupils(@partial_meter_coverage, start_date, end_date)
+    end
+
+    def meter_floor_area(school, start_date = nil, end_date = nil)
+      fa = school.floor_area(start_date, end_date) * partial_floor_area(start_date, end_date)
+      fa.round(0)
+    end
+
+    def meter_number_of_pupils(school, start_date = nil, end_date = nil)
+      p = school.number_of_pupils(start_date, end_date) * partial_number_of_pupils(start_date, end_date)
+      p.to_i
+    end
+
+    # aggregate @partial_meter_coverage meter attribute component is an array
+    # of its component meters' partial_meter_coverages, or just the component
+    # if only one meter of that fuel type - in which case the meter is copied
+    # and not aggregated - so it shouldn't get here!
+    def add_aggregate_partial_meter_coverage_component(partial_meter_coverage_components)
+      if partial_meter_coverage_components.empty?
+        @partial_meter_coverage = nil
+      else
+        @partial_meter_coverage = partial_meter_coverage_components
+      end
+    end
+
     private def process_meter_attributes
       @storage_heater_setup = StorageHeater.new(attributes(:storage_heaters)) if @meter_attributes.key?(:storage_heaters)
       @solar_pv_setup = SolarPVPanels.new(attributes(:solar_pv)) if @meter_attributes.key?(:solar_pv)
       @low_carbon_hub_solar_pv = true if @meter_attributes.key?(:low_carbon_hub_meter_id)
       @solar_for_schools_solar_pv = true if @meter_attributes.key?(:solar_for_schools_meter_id)
+      @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
     end
 
     private def check_fuel_type(fuel_type)

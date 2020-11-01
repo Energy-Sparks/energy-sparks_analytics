@@ -7,9 +7,9 @@ script = {
   # ruby_profiler:            true,
   no_schools:                  ['*ound*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
-  schools:                  ['pault*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['penny*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   no_source:                   :analytics_db, # :aggregated_meter_collection, 
-  source:                   :aggregated_meter_collection,
+  source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
     alerts:   nil,

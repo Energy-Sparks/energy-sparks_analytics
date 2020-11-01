@@ -56,7 +56,6 @@ class MeterCollection
     @aggregated_heat_meters = nil
     @aggregated_electricity_meters = nil
     @pseudo_meter_attributes = pseudo_meter_attributes
-
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
   end
@@ -92,13 +91,17 @@ class MeterCollection
   # if there are relevant pseudo meter attributes
   # override it with a calculated value
   def floor_area(start_date = nil, end_date = nil)
-    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(self, @floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
-    @calculated_floor_area_pupil_numbers.floor_area
+    calculate_floor_area_number_of_pupils
+    @calculated_floor_area_pupil_numbers.floor_area(start_date, end_date)
   end
 
   def number_of_pupils(start_date = nil, end_date = nil)
-    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(self, @floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
-    @calculated_floor_area_pupil_numbers.number_of_pupils
+    calculate_floor_area_number_of_pupils
+    @calculated_floor_area_pupil_numbers.number_of_pupils(start_date, end_date)
+  end
+
+  def calculate_floor_area_number_of_pupils
+    @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(@floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
   end
 
   def first_combined_meter_date
