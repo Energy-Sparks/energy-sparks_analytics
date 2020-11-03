@@ -95,7 +95,7 @@ class AlertAnalysisBase < ContentBase
     },
     analysis_date: {
       description: 'Latest date on which the alert data is based',
-      units:  Date
+      units:  :date
     },
     status: {
       description: 'Status: good, bad, failed',
