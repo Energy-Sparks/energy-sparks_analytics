@@ -47,7 +47,6 @@ end
 class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   include Logging
   include TemplateVarPromotionMixIn
-  include AlertFloorAreaMixin
 
   attr_reader :last_year_kwh, :last_year_£, :last_year_co2, :last_year_co2_tonnes
   attr_reader :one_year_energy_per_pupil_kwh, :one_year_energy_per_pupil_£, :one_year_energy_per_pupil_co2
@@ -212,14 +211,14 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   
     assign_legacy_variables
 
-    @one_year_energy_per_pupil_kwh      = @current_year_energy_kwh / pupils(asof_date - 365, asof_date)
-    @one_year_energy_per_floor_area_kwh = @current_year_energy_kwh / floor_area(asof_date - 365, asof_date)
+    @one_year_energy_per_pupil_kwh      = change_in_energy.calculate_normalised_energy({year: 0}, :kwh, :number_of_pupils)
+    @one_year_energy_per_floor_area_kwh = change_in_energy.calculate_normalised_energy({year: 0}, :kwh, :floor_area)
 
-    @one_year_energy_per_pupil_£        = @current_year_energy_£ / pupils(asof_date - 365, asof_date)
-    @one_year_energy_per_floor_area_£   = @current_year_energy_£ / floor_area(asof_date - 365, asof_date)
+    @one_year_energy_per_pupil_£        = change_in_energy.calculate_normalised_energy({year: 0}, :£,   :number_of_pupils)
+    @one_year_energy_per_floor_area_£   = change_in_energy.calculate_normalised_energy({year: 0}, :£,   :floor_area)
 
-    @one_year_energy_per_pupil_co2      = @current_year_energy_co2 / pupils(asof_date - 365, asof_date)
-    @one_year_energy_per_floor_area_co2 = @current_year_energy_co2 / floor_area(asof_date - 365, asof_date)
+    @one_year_energy_per_pupil_co2      = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :number_of_pupils)
+    @one_year_energy_per_floor_area_co2 = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :floor_area)
 
     @per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school)
     @per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school)
@@ -238,6 +237,28 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   alias_method :analyse_private, :calculate
 
   private
+
+  private def log_missing_variable(type)
+    # do nothing, overriding base class, as this alert
+    # produces different variables depending on the fuel
+    # types available, so for most schools storage heater
+    # and solar PV variables will be missing
+    # as the variables are defined on the class and not the instance
+    # there is no easy way around this issue
+    # TODO(PH, 2Nov2020) - is there a better way of dealing with this?
+    @missing_variables ||= []
+    @missing_variables.push(type)
+  end
+
+  private def missing_variable_summary
+    missing_solar_pv        = @missing_variables.count{ |var| var.to_s.include?('solar') }
+    missing_storage_heaters = @missing_variables.count{ |var| var.to_s.include?('storage') }
+    the_rest = @missing_variables.select{ |var| !var.to_s.include?('solar') && !var.to_s.include?('storage') }
+    logger.info "Comment: alert doesnt implement #{missing_solar_pv} solar variables and #{missing_storage_heaters} storage heater variables"
+    the_rest.each do |var|
+      logger.info "Warning: alert doesnt implement #{var}"
+    end
+  end
 
   def assign_legacy_variables
     # backwards compatibility TODO(PH, 10Oct2020) - remove and change references in calling code
@@ -287,7 +308,33 @@ class ChangeInEnergyUse < AlertAnalysisBase
     results
   end
 
+  # optimisation, calculate normalised energy from already calculated
+  # constituent fuel types, has to be normalised first for each fuel
+  # type as the (partial) floor_area s and number_of_pupil s might
+  # differ for each fuel type in the case of partial metering
+  def calculate_normalised_energy(period, datatype, normalisation)
+    @school.fuel_types(false, false).map do |fuel_type, _fuel_code|
+      next if ChangeInEnergyUseSymbols.exclude_solar_costs?(datatype, fuel_type)
+      symbol = ChangeInEnergyUseSymbols.symbol(nil, period, fuel_type, datatype)
+      res = calculate_variable(symbol, period, fuel_type, datatype)
+      norm_key = normalisation_key(normalisation)
+      res[norm_key]
+    end.sum
+  end
+
   private
+
+  def normalisation_key(normalisation)
+    if normalisation == :floor_area
+      :value_per_floor_area
+    elsif normalisation == :number_of_pupils
+      :value_per_pupil
+    elsif normalisation.nil?
+      raise EnergySparksUnexpectedStateException, 'nil normalisation symbol'
+    else
+      raise EnergySparksUnexpectedStateException, "Unexpected normalisation symbol #{normalisation}"
+    end
+  end
 
   # calculates and sets instance variables/attributes for energy use between
   # 2 periods
@@ -298,10 +345,10 @@ class ChangeInEnergyUse < AlertAnalysisBase
     sym_v0 = ChangeInEnergyUseSymbols.symbol(variable_stub, previous_period, fuel_type, datatype)
     v0 = calculate_variable(sym_v0, previous_period, fuel_type, datatype)
 
-    p = percent_change(v0, v1)
+    p = percent_change(v0[:value], v1[:value])
     sym_p = ChangeInEnergyUseSymbols.symbol(variable_stub, previous_period, fuel_type, datatype, :relative_percent)
 
-    v1, v0, p = label_missing_data(v1, v0, p, fuel_type, available_data)
+    v1, v0, p = label_missing_data(v1[:value], v0[:value], p, fuel_type, available_data)
 
     [
       {
@@ -368,7 +415,7 @@ class ChangeInEnergyUse < AlertAnalysisBase
   def scalar(timescale, fuel_type, datatype)
     scale = ScalarkWhCO2CostValues.new(@school)
     begin
-      scale.aggregate_value(timescale, fuel_type, datatype)
+      scale.scalar(timescale, fuel_type, datatype)
     rescue EnergySparksNotEnoughDataException => _e
       nil
     end

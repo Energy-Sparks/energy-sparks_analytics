@@ -277,6 +277,14 @@ class AlertAnalysisBase < ContentBase
     end
   end
 
+  def school_activation_date
+    @school.activation_date
+  end
+
+  def school_creation_date
+    @school.creation_date
+  end
+
   def school_name
     if @school.respond_to?(:name) && !@school.name.nil?
       @school.name

@@ -337,14 +337,24 @@ class ContentBase
               list[type] = formatted ? format(data[:units], send(type), format, false, user_numeric_comprehension_level) : send(type)
             end
           else
-            logger.info "Warning: alert doesnt implement #{type}"
+            log_missing_variable(type)
           end
         end
       rescue StandardError => e
         list[type] = e.message
       end
     end
+    missing_variable_summary
     list
+  end
+
+  private def log_missing_variable(type)
+    logger.info "Warning: alert doesnt implement #{type}"
+  end
+
+  private def missing_variable_summary
+    # do nothing as already logged above
+    # but overridden for energy alert benchmark
   end
 
   # convert a table either into an html table, or a '|' bar seperated text table; can't use commas as contined in 1,234 numbers
