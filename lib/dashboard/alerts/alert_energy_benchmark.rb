@@ -94,7 +94,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       description: 'Last years energy consumption - kwh',
       units:  {kwh: :electricity},
       benchmark_code: 'klyr',
-      calc: ->{ scalar({ year: 0}, :energy_ex_solar, :kwh) }
+      # calc: ->{ scalar({ year: 0}, :energy_ex_solar, :kwh) }
     },
     last_year_£: {
       description: 'Last years energy consumption - £ including differential tariff',
