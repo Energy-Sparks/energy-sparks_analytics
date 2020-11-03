@@ -251,6 +251,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   end
 
   private def missing_variable_summary
+    return if @missing_variables.nil?
     missing_solar_pv        = @missing_variables.count{ |var| var.to_s.include?('solar') }
     missing_storage_heaters = @missing_variables.count{ |var| var.to_s.include?('storage') }
     the_rest = @missing_variables.select{ |var| !var.to_s.include?('solar') && !var.to_s.include?('storage') }
@@ -319,7 +320,7 @@ class ChangeInEnergyUse < AlertAnalysisBase
       res = calculate_variable(symbol, period, fuel_type, datatype)
       norm_key = normalisation_key(normalisation)
       res[norm_key]
-    end.sum
+    end.compact.sum
   end
 
   private
@@ -345,10 +346,10 @@ class ChangeInEnergyUse < AlertAnalysisBase
     sym_v0 = ChangeInEnergyUseSymbols.symbol(variable_stub, previous_period, fuel_type, datatype)
     v0 = calculate_variable(sym_v0, previous_period, fuel_type, datatype)
 
-    p = percent_change(v0[:value], v1[:value])
+    p = percent_change(to_nil_value(v0), to_nil_value(v1))
     sym_p = ChangeInEnergyUseSymbols.symbol(variable_stub, previous_period, fuel_type, datatype, :relative_percent)
 
-    v1, v0, p = label_missing_data(v1[:value], v0[:value], p, fuel_type, available_data)
+    v1, v0, p = label_missing_data(to_nil_value(v1), to_nil_value(v0), p, fuel_type, available_data)
 
     [
       {
@@ -362,6 +363,10 @@ class ChangeInEnergyUse < AlertAnalysisBase
         fuel_type:  fuel_type
       }
     ]
+  end
+
+  def to_nil_value(result)
+    result.nil? ? nil : result[:value]
   end
 
   def calculate_variable(symbol, period, fuel_type, datatype)
