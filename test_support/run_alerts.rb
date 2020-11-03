@@ -36,9 +36,32 @@ class RunAlerts
     AlertPreviousHolidayComparisonGas             => 'PrevHolGas',
     AlertPreviousYearHolidayComparisonGas         => 'PrevYearHolGas',
     AlertAdditionalPrioritisationData             => 'PrioritisationData',
-    AlertElectricityPeakKWVersusBenchmark         => 'PeakELectricKW'
+    AlertElectricityPeakKWVersusBenchmark         => 'PeakElectricKW',
+    AlertElectricityLongTermTrend                 => 'ElectLongTerm',
+    AlertEnergyAnnualVersusBenchmark              => 'AnnualEnergy',
+    AlertGasLongTermTrend                         => 'GasLongTerm',
+    AlertHeatingOnSchoolDaysStorageHeaters        => 'StorageHSchoolDay',
+    AlertOptimumStartAnalysis                     =>'OptStart',
+    AlertSolarPVBenefitEstimator                  =>'PVBenefit',
+    AlertStorageHeaterAnnualVersusBenchmark       =>'StorageHAnnual',
+    AlertStorageHeaterOutOfHours                  =>'StorageHOutOfHours',
+    AlertStorageHeatersLongTermTrend              =>'StorageHLongTerm',
+    AlertStorageHeaterThermostatic                =>'StorageHThermo',
+    AlertSummerHolidayRefridgerationAnalysis      =>'Fridge'
   }.freeze
 
+=begin
+    AlertEnergyAnnualVersusBenchmark              => 'AnnualEnergy',
+
+    AlertHeatingOnSchoolDaysStorageHeaters        => 'StorageHSchoolDay',
+    
+    AlertSolarPVBenefitEstimator                  => 'PVBenefit',
+    AlertStorageHeaterAnnualVersusBenchmark       => 'StorageHAnnual',
+    AlertStorageHeaterOutOfHours                  => 'StorageHOutOfHours',
+    AlertStorageHeatersLongTermTrend              => 'StorageHLongTerm',
+    AlertStorageHeaterThermostatic                => 'StorageHThermo',
+    AlertSummerHolidayRefridgerationAnalysis      => 'Fridge'
+=end
   RESULT_CALCULATION_METHOD_CALLS = {
     front_end_template_variables:   { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },
     raw_variables_for_saving:       { on_class: false,  method: :raw_variables_for_saving, name: 'Raw data', args: nil, use_puts: false },
@@ -111,6 +134,7 @@ class RunAlerts
 
   def load_yaml_file(filename)
     full_name = full_filename(filename, true)
+    puts "Got here: loading #{full_name}"
     return nil unless File.exist?(full_name)
     YAML.load_file(full_name)
   end
@@ -235,7 +259,12 @@ class RunAlerts
   end
 
   def run_alerts(alerts, control, asof_date)
-    alerts = ALERT_TO_EXCELTAB_MAP.keys if alerts.nil?
+    if alerts.nil?
+      alerts = ALERT_TO_EXCELTAB_MAP.keys.sort
+      if AlertAnalysisBase.all_available_alerts.length != alerts.length
+        puts "Error: test list of alerts different from alert analysis base"
+      end
+    end
     @comparison_directory = control.dig(:save_and_compare, :comparison_directory)
     @output_directory     = control.dig(:save_and_compare, :output_directory)
 
