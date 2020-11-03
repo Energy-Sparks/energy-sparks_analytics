@@ -111,6 +111,7 @@ class RunAlerts
 
   def load_yaml_file(filename)
     full_name = full_filename(filename, true)
+    puts "Got here: loading #{full_name}"
     return nil unless File.exist?(full_name)
     YAML.load_file(full_name)
   end
