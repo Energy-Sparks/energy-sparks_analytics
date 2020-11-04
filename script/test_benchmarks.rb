@@ -6,8 +6,8 @@ ENV['ENERGYSPARKSTESTMODE'] = 'ON'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/benchmark db %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['*'], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
-  source:                   :aggregated_meter_collection, # :aggregated_meter_collection, 
+  schools:                  ['*'],
+  source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/benchmark %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   
   run_benchmark_charts_and_tables: {
@@ -18,7 +18,7 @@ script = {
     },
     # filename:       './TestResults/benchmark_results_data analytics',
 
-    calculate_and_save_variables: false,
+    calculate_and_save_variables: true,
     asof_date:      Date.new(2020, 10, 6),
     # asof_date:      Date.new(2019,11,25),
     # filter:         ->{ addp_area.include?('Sheffield') },
