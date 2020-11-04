@@ -315,7 +315,7 @@ class MeterCollection
     # the time is passed in as an active_support Time and not a ruby Time
     # from the front end, so can't be used directly, the utc field needs to be accessed
     # instead
-    t = @school.activation_date.utc
+    t = @school.activation_date.respond_to?(:utc) ? @school.activation_date.utc : @school.activation_date
     Date.new(t.year, t.month, t.day)
   end
 
@@ -325,7 +325,7 @@ class MeterCollection
     # the time is passed in as an active_support Time and not a ruby Time
     # from the front end, so can't be used directly, the utc field needs to be accessed
     # instead
-    t = @school.created_at.utc
+    t = @school.created_at.respond_to?(:utc) ? @school.created_at.utc : @school.created_at
     Date.new(t.year, t.month, t.day)
   end
 

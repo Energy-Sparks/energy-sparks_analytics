@@ -246,9 +246,6 @@ class SolarPVPanels
       elsif meter_attributes_config.is_a?(Hash)
         @config_by_date_range.merge!(parse_meter_attributes_configuration_for_period(meter_attributes_config))
       else
-      puts "Got here"
-        ap meter_attributes_config
-        puts "and got here"
         raise EnergySparksMeterSpecification, 'Unexpected meter attributes for solar pv, expecting array of hashes or 1 hash'
       end
     end

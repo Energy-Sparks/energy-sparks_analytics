@@ -42,11 +42,11 @@ module BenchmarkMetrics
     ((percent - 1.0) * scale) + 1.0
   end
 
-  def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date = nil)
+  def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date = nil, list_of_fuels)
     total = 0.0
-    if school.electricity?
+    if list_of_fuels.include?(:electricity)
       total += benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
-    elsif school.gas? || school.storage_heaters?
+    elsif list_of_fuels.include?(:gas) || list_of_fuels.include?(:storage_heater) || list_of_fuels.include?(:storage_heaters)
       total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date)
     end
     total
@@ -105,9 +105,11 @@ module BenchmarkMetrics
   def self.exemplar_kwh(school, fuel_type, start_date, end_date)
     case fuel_type
     when :electricity, :storage_heater, :storage_heaters
-      BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school.school_type, school.aggregated_electricity_meters.meter_number_of_pupils(start_date, end_date))
+      number_of_pupils = school.aggregated_electricity_meters.meter_number_of_pupils(school, start_date, end_date)
+      BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school.school_type, number_of_pupils)
     when :gas
-      BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * school.aggregated_heat_meters.meter_floor_area(start_date, end_date)
+      floor_area = school.aggregated_heat_meters.meter_floor_area(school, start_date, end_date)
+      BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area
     end
   end
 

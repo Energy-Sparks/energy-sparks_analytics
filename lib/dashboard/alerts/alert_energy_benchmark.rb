@@ -57,6 +57,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   attr_reader :change_in_gas_use_since_joined_percent, :change_in_storage_heater_use_since_joined_percent
   attr_reader :last_year_electricity_co2, :last_year_gas_co2
   attr_reader :last_year_storage_heater_co2, :last_year_solar_pv_co2
+  attr_reader :recent_fuel_types_for_debug
 
   def initialize(school)
     super(school, :annualenergybenchmark)
@@ -183,6 +184,10 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       description: 'Number of trees (40 years) equivalence of CO2',
       units:  :tree
     },
+    recent_fuel_types_for_debug: {
+      description: 'Debugging information - list of up to date fuel types',
+      units:  String
+    },
   }
 
   def trees_electricity
@@ -211,6 +216,11 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   
     assign_legacy_variables
 
+    available_recent_fuel_types = fuel_types_with_up_to_date_data_in_last_year(asof_date)
+    logger.info "Benchmarking versus these recent fuel_types: #{available_recent_fuel_types.join(',')}"
+    raise EnergySparksNotEnoughDataException, 'Zero up to dat meter data (by fuel type)' if available_recent_fuel_types.empty?
+    @recent_fuel_types_for_debug = available_recent_fuel_types.join(',')
+
     @one_year_energy_per_pupil_kwh      = change_in_energy.calculate_normalised_energy({year: 0}, :kwh, :number_of_pupils)
     @one_year_energy_per_floor_area_kwh = change_in_energy.calculate_normalised_energy({year: 0}, :kwh, :floor_area)
 
@@ -220,10 +230,10 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     @one_year_energy_per_pupil_co2      = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :number_of_pupils)
     @one_year_energy_per_floor_area_co2 = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :floor_area)
 
-    @per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school)
-    @per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school)
+    per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school, available_recent_fuel_types)
+    per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school, available_recent_fuel_types)
 
-    @percent_difference_from_average_per_pupil = percent_change(@per_pupil_energy_benchmark_£, @one_year_energy_per_pupil_£)
+    @percent_difference_from_average_per_pupil = percent_change(per_pupil_energy_benchmark_£, @one_year_energy_per_pupil_£)
 
     @percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
     @simple_percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)
@@ -232,7 +242,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
 
     @summary  = summary_text
 
-    @rating = calculate_rating_from_range(@per_pupil_energy_exemplar_£, @per_pupil_energy_benchmark_£ * 1.2, @one_year_energy_per_pupil_£)
+    @rating = calculate_rating_from_range(per_pupil_energy_exemplar_£, per_pupil_energy_benchmark_£ * 1.2, @one_year_energy_per_pupil_£)
   end
   alias_method :analyse_private, :calculate
 
@@ -277,6 +287,12 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   def summary_text
     FormatEnergyUnit.format(:£, @last_year_£, :text) + 'pa'
   end
+
+  def fuel_types_with_up_to_date_data_in_last_year(asof_date)
+    chg = ChangeInEnergyUse.new(@school, asof_date)
+    available_data = chg.data_available({year: 0}, {year: 0}, true)
+    available_data[:aggregate]
+  end
 end
 
 class ChangeInEnergyUse < AlertAnalysisBase
@@ -313,17 +329,19 @@ class ChangeInEnergyUse < AlertAnalysisBase
   # constituent fuel types, has to be normalised first for each fuel
   # type as the (partial) floor_area s and number_of_pupil s might
   # differ for each fuel type in the case of partial metering
+  # - deprecated as doesn't sync data correctly
   def calculate_normalised_energy(period, datatype, normalisation)
     @school.fuel_types(false, false).map do |fuel_type, _fuel_code|
       next if ChangeInEnergyUseSymbols.exclude_solar_costs?(datatype, fuel_type)
+      available_data = data_available(period, period, true)
+      next unless available_data[:aggregate].include?(fuel_type)
       symbol = ChangeInEnergyUseSymbols.symbol(nil, period, fuel_type, datatype)
-      res = calculate_variable(symbol, period, fuel_type, datatype)
+      res = precalculated_value(symbol)
+      # puts "Got here: AAAA #{symbol} = #{res} #{available_data}"
       norm_key = normalisation_key(normalisation)
       res[norm_key]
     end.compact.sum
   end
-
-  private
 
   def normalisation_key(normalisation)
     if normalisation == :floor_area
@@ -374,6 +392,10 @@ class ChangeInEnergyUse < AlertAnalysisBase
     @cached_calculations[symbol] ||= scalar(period, fuel_type, datatype)
   end
 
+  def precalculated_value(symbol)
+    @cached_calculations[symbol]
+  end
+
   def label_missing_data(cp, pp, percent, fuel_type, available_data)
     if available_data[:not_recent].include?(fuel_type)
       # represent current period as previous period, current period as 'no recent data'
@@ -407,8 +429,8 @@ class ChangeInEnergyUse < AlertAnalysisBase
     fuel_data.map{ |fuel| fuels_to_aggregate.include?(fuel[:fuel_type]) ? fuel[period_type] : 0.0 }.sum
   end
 
-  def data_available(period2, period1)
-    fuels_to_aggregate = FuelTypesToAggregate.new(@school, @asof_date, period2, period1)
+  def data_available(period2, period1, allow_overlapping_periods = false)
+    fuels_to_aggregate = FuelTypesToAggregate.new(@school, @asof_date, period2, period1, allow_overlapping_periods)
     fuels_to_aggregate.calculate
     fuels_to_aggregate.data
   end
@@ -436,11 +458,12 @@ class ChangeInEnergyUse < AlertAnalysisBase
     attr_reader :fuels_for_non_aggregation_because_of_no_recent_data
     attr_reader :fuels_for_non_aggregation_because_of_not_enough_data
 
-    def initialize(school, asof_date, first_period, last_period)
+    def initialize(school, asof_date, first_period, last_period, allow_overlapping_periods = false)
       @school = school
       @asof_date = asof_date
       @first_period = first_period
       @last_period = last_period
+      @allow_overlapping_periods = allow_overlapping_periods
       @fuels_for_aggregation = []
       @fuels_for_non_aggregation_because_of_no_recent_data = []
       @fuels_for_non_aggregation_because_of_not_enough_data = []
@@ -505,7 +528,11 @@ class ChangeInEnergyUse < AlertAnalysisBase
       amr_data = @school.aggregate_meter(fuel_type).amr_data
       p1 = period_dates(@first_period, amr_data)
       p2 = period_dates(@last_period,  amr_data)
-      !p1.nil? && !p2.nil? && p2[0] > p1[1]
+      if @allow_overlapping_periods
+        !p1.nil? && !p2.nil?
+      else
+        !p1.nil? && !p2.nil? && p2[0] > p1[1]
+      end
     end
   
     def period_dates(timescale, amr_data)

@@ -134,7 +134,6 @@ class RunAlerts
 
   def load_yaml_file(filename)
     full_name = full_filename(filename, true)
-    puts "Got here: loading #{full_name}"
     return nil unless File.exist?(full_name)
     YAML.load_file(full_name)
   end
@@ -260,7 +259,7 @@ class RunAlerts
 
   def run_alerts(alerts, control, asof_date)
     if alerts.nil?
-      alerts = ALERT_TO_EXCELTAB_MAP.keys.sort
+      alerts = ALERT_TO_EXCELTAB_MAP.keys.sort_by(&:to_s)
       if AlertAnalysisBase.all_available_alerts.length != alerts.length
         puts "Error: test list of alerts different from alert analysis base"
       end

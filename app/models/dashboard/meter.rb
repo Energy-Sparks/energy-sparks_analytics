@@ -61,13 +61,13 @@ module Dashboard
       PartialMeterCoverage.total_partial_number_of_pupils(@partial_meter_coverage, start_date, end_date)
     end
 
-    def meter_floor_area(school, start_date = nil, end_date = nil)
-      fa = school.floor_area(start_date, end_date) * partial_floor_area(start_date, end_date)
+    def meter_floor_area(local_school, start_date = nil, end_date = nil)
+      fa = local_school.floor_area(start_date, end_date) * partial_floor_area(start_date, end_date)
       fa.round(0)
     end
 
-    def meter_number_of_pupils(school, start_date = nil, end_date = nil)
-      p = school.number_of_pupils(start_date, end_date) * partial_number_of_pupils(start_date, end_date)
+    def meter_number_of_pupils(local_school, start_date = nil, end_date = nil)
+      p = local_school.number_of_pupils(start_date, end_date) * partial_number_of_pupils(start_date, end_date)
       p.to_i
     end
 
