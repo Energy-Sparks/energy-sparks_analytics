@@ -64,7 +64,6 @@ class PeriodsBase
   def self.period_dates(timescale, meter_collection, first_meter_date, last_meter_date)
     period_calc = PeriodsBase.period_factory({timescale: timescale}, meter_collection, first_meter_date, last_meter_date)
     period = period_calc.periods[0]
-    # puts "Got here #{timescale} #{period_calc.periods}"
     period_calc.periods.compact.empty? ? nil : [period.start_date, period.end_date]
   end
 

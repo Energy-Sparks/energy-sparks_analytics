@@ -337,7 +337,6 @@ class ChangeInEnergyUse < AlertAnalysisBase
       next unless available_data[:aggregate].include?(fuel_type)
       symbol = ChangeInEnergyUseSymbols.symbol(nil, period, fuel_type, datatype)
       res = precalculated_value(symbol)
-      # puts "Got here: AAAA #{symbol} = #{res} #{available_data}"
       norm_key = normalisation_key(normalisation)
       res[norm_key]
     end.compact.sum
@@ -415,16 +414,39 @@ class ChangeInEnergyUse < AlertAnalysisBase
     sym_v0 = ChangeInEnergyUseSymbols.symbol(variable_stub, previous_period, :energy, datatype)
     sym_p  = ChangeInEnergyUseSymbols.symbol(variable_stub, previous_period, :energy, datatype, :relative_percent)
 
-    s1 = aggregate_fuel(fuel_data, fuels_to_aggregate, :current)
-    s0 = aggregate_fuel(fuel_data, fuels_to_aggregate, :previous)
+    aggregated_fuels = aggregate_fuel_type(fuel_data)
+    
+    # will pick up case where can calculate a year's data for each period
+    # but periods overlap so percentatge comparison invalid
+    calculated_fuel_types = fuel_data.map{ |data| data[:fuel_type] }
+    both_periods_valid_data = fuels_to_aggregate.sort == calculated_fuel_types.sort
+
     {
-      sym_v1  => s1,
-      sym_v0  => s0,
-      sym_p   => percent_change(s0, s1)
+      sym_v1  => aggregated_fuels[:current],
+      sym_v0  => aggregated_fuels[:previous],
+      sym_p   => both_periods_valid_data ? percent_change(aggregated_fuels[:previous], aggregated_fuels[:current]) : nil
     }
   end
 
-  def aggregate_fuel(fuel_data, fuels_to_aggregate, period_type)
+  # only want to aggregate data where there is a full set of expected
+  # fuel types during the period
+  # TODO(PH, 4Nov2020) consider whether this is valid if a school is transitioning
+  #                    off 1 fuel type onto another e.g. gas to electric heating?
+  def aggregate_fuel_type(fuel_data)
+    full_set_current_data  = fuel_data.all?{ |data_for_fuel_type| !data_for_fuel_type[:current].nil?  }
+    full_set_previous_data = fuel_data.all?{ |data_for_fuel_type| !data_for_fuel_type[:previous].nil? }
+    {
+      current:   full_set_current_data  ? sum_period_data(fuel_data, :current)  : nil,
+      previous:  full_set_previous_data ? sum_period_data(fuel_data, :previous) : nil,
+    }
+  end
+
+  def sum_period_data(fuel_data, period_type)
+    # map then sum to avoid statsample bug
+    fuel_data.map{ |data_for_fuel_type| data_for_fuel_type[period_type] }.sum
+  end
+
+  def aggregate_fuel_deprecated(fuel_data, fuels_to_aggregate, period_type)
     # map then sum to avoid statsample bug
     fuel_data.map{ |fuel| fuels_to_aggregate.include?(fuel[:fuel_type]) ? fuel[period_type] : 0.0 }.sum
   end
@@ -467,7 +489,7 @@ class ChangeInEnergyUse < AlertAnalysisBase
       @fuels_for_aggregation = []
       @fuels_for_non_aggregation_because_of_no_recent_data = []
       @fuels_for_non_aggregation_because_of_not_enough_data = []
-      @basic_fuel_types = @school.fuel_types # only electric gas, ignore storage and solar
+      @basic_fuel_types = @school.fuel_types # only electric gas, ignore storage and solar as added later as they follow rules for underlying electricity meter
     end
 
     def calculate
@@ -551,7 +573,7 @@ class ChangeInEnergyUse < AlertAnalysisBase
     end
 
     def include_with_electric_if_on_list(list, fuel_type)
-      fuel_types = @school.fuel_types(true, true)
+      fuel_types = @school.fuel_types(false, false)
       if fuel_types.include?(fuel_type)
         if list.include?(:electricity)
           list.push(fuel_type)

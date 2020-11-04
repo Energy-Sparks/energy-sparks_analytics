@@ -92,7 +92,6 @@ class ScalarkWhCO2CostValues
   end
 
   private def aggregation_configuration(timescales, fuel_type, data_type, override = nil, with_dates = false, max_days_out_of_date = nil)
-    # puts "Got here #{timescales} #{data_type} #{fuel_type}"
     results = non_contiguous_timescale_breakdown(timescales).map do |timescale|
       aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
     end
@@ -101,8 +100,6 @@ class ScalarkWhCO2CostValues
     value      = results.map{ |result| result[:value]       }.sum
     start_date = results.map{ |result| result[:start_date]  }.min
     end_date   = results.map{ |result| result[:end_date]    }.max
-    # z = [value, start_date, end_date]
-    # puts "Got here 22 #{z}"
 
     with_dates ? [value, start_date, end_date] : value
   end
