@@ -21,6 +21,25 @@ class ScalarkWhCO2CostValues
     end
   end
 
+  def scalar(time_scale, fuel_type, data_type)
+    (value, start_date, end_date) = aggregate_value_with_dates(time_scale, fuel_type, data_type)
+    meter = @meter_collection.aggregate_meter(fuel_type)
+    floor_area       = meter.meter_floor_area(      @meter_collection, start_date, end_date)
+    number_of_pupils = meter.meter_number_of_pupils(@meter_collection, start_date, end_date)
+    {
+      value:                value,
+      start_date:           start_date,
+      end_date:             end_date,
+      floor_area:           floor_area,
+      number_of_pupils:     number_of_pupils,
+      value_per_floor_area: value / floor_area,
+      value_per_pupil:      value / number_of_pupils,
+      time_scale:           time_scale,
+      fuel_type:            fuel_type,
+      datatype:             data_type
+    }
+  end
+
   private def aggregate_multiple_fuel_types(time_scale, fuel_types, data_type, sync_energy_data_time_scales = true)
     asof_date = sync_energy_data_time_scales ? { asof_date: @meter_collection.last_combined_meter_date } : nil
     total = fuel_types.map do |fuel_type|
@@ -73,7 +92,6 @@ class ScalarkWhCO2CostValues
   end
 
   private def aggregation_configuration(timescales, fuel_type, data_type, override = nil, with_dates = false, max_days_out_of_date = nil)
-    # puts "Got here #{timescales} #{data_type} #{fuel_type}"
     results = non_contiguous_timescale_breakdown(timescales).map do |timescale|
       aggregate_one_timescale(timescale, fuel_type, data_type, override, max_days_out_of_date)
     end
@@ -82,8 +100,6 @@ class ScalarkWhCO2CostValues
     value      = results.map{ |result| result[:value]       }.sum
     start_date = results.map{ |result| result[:start_date]  }.min
     end_date   = results.map{ |result| result[:end_date]    }.max
-    # z = [value, start_date, end_date]
-    # puts "Got here 22 #{z}"
 
     with_dates ? [value, start_date, end_date] : value
   end

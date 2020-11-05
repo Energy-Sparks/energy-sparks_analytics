@@ -1,7 +1,9 @@
 #======================== Electricity Baseload Analysis Versus Benchmark =====
 require_relative 'alert_analysis_base.rb'
+require_relative 'alert_floor_area_pupils_mixin.rb'
 
 class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
+  include AlertFloorAreaMixin
   PERCENT_TOO_HIGH_MARGIN = 1.10
   attr_reader :average_baseload_last_year_kw, :average_baseload_last_year_£, :average_baseload_last_year_kwh
 
@@ -153,7 +155,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
 
     electricity_tariff = blended_electricity_£_per_kwh(asof_date)
 
-    @benchmark_per_pupil_kw = BenchmarkMetrics.recommended_baseload_for_pupils(pupils, school_type)
+    @benchmark_per_pupil_kw = BenchmarkMetrics.recommended_baseload_for_pupils(pupils(asof_date - 365, asof_date), school_type)
     hours_in_year = 24.0 * 365.0
 
     @one_year_benchmark_by_pupil_kwh   = @benchmark_per_pupil_kw * hours_in_year
@@ -165,7 +167,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£
 
-    @exemplar_per_pupil_kw = BenchmarkMetrics.exemplar_baseload_for_pupils(pupils, school_type)
+    @exemplar_per_pupil_kw = BenchmarkMetrics.exemplar_baseload_for_pupils(pupils(asof_date - 365, asof_date), school_type)
 
     @one_year_exemplar_by_pupil_kwh   = @exemplar_per_pupil_kw * hours_in_year
     @one_year_exemplar_by_pupil_£     = @one_year_exemplar_by_pupil_kwh * electricity_tariff
@@ -176,13 +178,13 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh
     @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£
 
-    @one_year_baseload_per_pupil_kw        = @average_baseload_last_year_kw / pupils
-    @one_year_baseload_per_pupil_kwh       = @average_baseload_last_year_kwh / pupils
-    @one_year_baseload_per_pupil_£         = @average_baseload_last_year_£ / pupils
+    @one_year_baseload_per_pupil_kw        = @average_baseload_last_year_kw / pupils(asof_date - 365, asof_date)
+    @one_year_baseload_per_pupil_kwh       = @average_baseload_last_year_kwh / pupils(asof_date - 365, asof_date)
+    @one_year_baseload_per_pupil_£         = @average_baseload_last_year_£ / pupils(asof_date - 365, asof_date)
 
-    @one_year_baseload_per_floor_area_kw   = @average_baseload_last_year_kw / floor_area
-    @one_year_baseload_per_floor_area_kwh  = @average_baseload_last_year_kwh / floor_area
-    @one_year_baseload_per_floor_area_£    = @average_baseload_last_year_£ / floor_area
+    @one_year_baseload_per_floor_area_kw   = @average_baseload_last_year_kw / floor_area(asof_date - 365, asof_date)
+    @one_year_baseload_per_floor_area_kwh  = @average_baseload_last_year_kwh / floor_area(asof_date - 365, asof_date)
+    @one_year_baseload_per_floor_area_£    = @average_baseload_last_year_£ / floor_area(asof_date - 365, asof_date)
 
     @summary = summary_text
 

@@ -271,6 +271,8 @@ class AggregateDataService
         number_of_pupils: combined_pupils,
         meter_attributes: @meter_collection.pseudo_meter_attributes(:"aggregated_#{fuel_type}")
       )
+
+      combined_meter.add_aggregate_partial_meter_coverage_component(list_of_meters.map{ |m| m.partial_meter_coverage})
     else
       logger.info "Combined meter #{combined_meter.mpan_mprn} already created"
       combined_meter.floor_area = combined_floor_area if combined_meter.floor_area.nil? || combined_meter.floor_area == 0

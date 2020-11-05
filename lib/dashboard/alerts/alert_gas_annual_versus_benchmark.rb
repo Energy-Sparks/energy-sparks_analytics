@@ -9,8 +9,10 @@
 # to tmperature adjust in future
 # storage heaters derived from this class, most of code shared - beware
 require_relative 'alert_gas_only_base.rb'
+require_relative 'alert_floor_area_pupils_mixin.rb'
 
 class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
+  include AlertFloorAreaMixin
   attr_reader :last_year_kwh, :last_year_£, :last_year_co2
 
   attr_reader :one_year_benchmark_floor_area_kwh, :one_year_benchmark_floor_area_£
@@ -202,7 +204,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
     @last_year_co2 = kwh(asof_date - 365, asof_date, :co2)
 
-    @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area / @degree_day_adjustment
+    @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
     @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * BenchmarkMetrics::GAS_PRICE
 
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_floor_area_kwh
@@ -211,7 +213,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£
 
-    @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area / @degree_day_adjustment
+    @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
     @one_year_exemplar_floor_area_£     = @one_year_exemplar_floor_area_kwh * BenchmarkMetrics::GAS_PRICE
 
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_floor_area_kwh
@@ -220,21 +222,21 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh
     @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£
 
-    @one_year_gas_per_pupil_kwh       = @last_year_kwh / pupils
-    @one_year_gas_per_pupil_£         = @last_year_£ / pupils
-    @one_year_gas_per_floor_area_kwh  = @last_year_kwh / floor_area
-    @one_year_gas_per_floor_area_£    = @last_year_£ / floor_area
+    @one_year_gas_per_pupil_kwh       = @last_year_kwh / pupils(asof_date - 365, asof_date)
+    @one_year_gas_per_pupil_£         = @last_year_£ / pupils(asof_date - 365, asof_date)
+    @one_year_gas_per_floor_area_kwh  = @last_year_kwh / floor_area(asof_date - 365, asof_date)
+    @one_year_gas_per_floor_area_£    = @last_year_£ / floor_area(asof_date - 365, asof_date)
 
-    @one_year_gas_per_pupil_co2       = @last_year_co2  / pupils
-    @one_year_gas_per_floor_area_co2  = @last_year_co2  / floor_area
+    @one_year_gas_per_pupil_co2       = @last_year_co2  / pupils(asof_date - 365, asof_date)
+    @one_year_gas_per_floor_area_co2  = @last_year_co2  / floor_area(asof_date - 365, asof_date)
 
     @one_year_gas_per_pupil_normalised_kwh        = @one_year_gas_per_pupil_kwh * @degree_day_adjustment
     @one_year_gas_per_pupil_normalised_£          = @one_year_gas_per_pupil_£ * @degree_day_adjustment
     @one_year_gas_per_floor_area_normalised_kwh   = @one_year_gas_per_floor_area_kwh * @degree_day_adjustment
     @one_year_gas_per_floor_area_normalised_£     = @one_year_gas_per_floor_area_£ * @degree_day_adjustment
 
-    @per_floor_area_gas_£ = @last_year_£ / @school.floor_area
-    @per_floor_area_gas_benchmark_£ = @one_year_benchmark_floor_area_£ / @school.floor_area
+    @per_floor_area_gas_£ = @last_year_£ / floor_area(asof_date - 365, asof_date)
+    @per_floor_area_gas_benchmark_£ = @one_year_benchmark_floor_area_£ / floor_area(asof_date - 365, asof_date)
     @percent_difference_from_average_per_floor_area = percent_change(@per_floor_area_gas_benchmark_£, one_year_gas_per_floor_area_£)
     @percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_floor_area, :relative_to_1)
     @simple_percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_floor_area, :simple_relative_to_1)

@@ -1,7 +1,9 @@
 #======================== Heating Sensitivity Advice ==============
 require_relative 'alert_gas_model_base.rb'
+require_relative 'alert_floor_area_pupils_mixin.rb'
 
 class AlertHeatingSensitivityAdvice < AlertGasModelBase
+  include AlertFloorAreaMixin
   MIN_REPORTED_SENSITIVITY_£ = 50.0
   attr_reader :annual_saving_1_C_change_kwh, :annual_saving_1_C_change_£, :annual_saving_1_C_change_percent
   attr_reader :fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day
@@ -55,7 +57,7 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     @annual_saving_1_C_change_£ = @annual_saving_1_C_change_kwh * BenchmarkMetrics::GAS_PRICE
     set_savings_capital_costs_payback(Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£), nil)
 
-    @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = 1000.0 * heating_model.average_heating_b_kwh_per_1_C_per_day / floor_area
+    @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = 1000.0 * heating_model.average_heating_b_kwh_per_1_C_per_day / floor_area(asof_date - 365, asof_date)
     @rating = @annual_saving_1_C_change_£ > MIN_REPORTED_SENSITIVITY_£ ? 5.0 : 10.0
   end
   alias_method :analyse_private, :calculate

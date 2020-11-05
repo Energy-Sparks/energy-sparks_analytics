@@ -1,7 +1,9 @@
 #======================== Electricity Annual kWh Versus Benchmark =============
 require_relative 'alert_analysis_base.rb'
+require_relative 'alert_floor_area_pupils_mixin.rb'
 
 class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
+  include AlertFloorAreaMixin
   attr_reader :last_year_kwh, :last_year_£, :last_year_co2
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
@@ -149,7 +151,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
     @last_year_co2 = kwh(asof_date - 365, asof_date, :co2)
 
-    @one_year_benchmark_by_pupil_kwh   = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pupils)
+    @one_year_benchmark_by_pupil_kwh   = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pupils(asof_date - 365, asof_date))
     @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_by_pupil_kwh
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
@@ -157,7 +159,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh.magnitude
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£.magnitude
 
-    @one_year_exemplar_by_pupil_kwh   = BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school_type, pupils)
+    @one_year_exemplar_by_pupil_kwh   = BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school_type, pupils(asof_date - 365, asof_date))
     @one_year_exemplar_by_pupil_£     = @one_year_exemplar_by_pupil_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
 
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_by_pupil_kwh
@@ -166,16 +168,16 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh.magnitude
     @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£.magnitude
 
-    @one_year_electricity_per_pupil_kwh       = @last_year_kwh / pupils
-    @one_year_electricity_per_pupil_£         = @last_year_£ / pupils
-    @one_year_electricity_per_pupil_co2       = @last_year_co2 / pupils
-    @one_year_electricity_per_floor_area_kwh  = @last_year_kwh / floor_area
-    @one_year_electricity_per_floor_area_£    = @last_year_£ / floor_area
+    @one_year_electricity_per_pupil_kwh       = @last_year_kwh / pupils(asof_date - 365, asof_date)
+    @one_year_electricity_per_pupil_£         = @last_year_£ / pupils(asof_date - 365, asof_date)
+    @one_year_electricity_per_pupil_co2       = @last_year_co2 / pupils(asof_date - 365, asof_date)
+    @one_year_electricity_per_floor_area_kwh  = @last_year_kwh / floor_area(asof_date - 365, asof_date)
+    @one_year_electricity_per_floor_area_£    = @last_year_£ / floor_area(asof_date - 365, asof_date)
 
     set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), capital_cost)
 
-    @per_pupil_electricity_£ = @last_year_£ / @school.number_of_pupils
-    @per_pupil_electricity_benchmark_£ = @one_year_benchmark_by_pupil_£ / @school.number_of_pupils
+    @per_pupil_electricity_£ = @last_year_£ / pupils(asof_date - 365, asof_date)
+    @per_pupil_electricity_benchmark_£ = @one_year_benchmark_by_pupil_£ / pupils(asof_date - 365, asof_date)
     @percent_difference_from_average_per_pupil = percent_change(@per_pupil_electricity_benchmark_£, one_year_electricity_per_pupil_£)
     @percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
     @simple_percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)

@@ -29,7 +29,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
       description: 'Last 7 days, heating on times and recommended heating start times with optimal start control and frost protection',
       units: :table,
       header: ['Date', 'Heating on time', 'Recommended on time', 'Overnight temperature', 'Timing', 'Potential Saving (kWh)', 'Potential Saving (£)'],
-      column_types: [Date, TimeOfDay, TimeOfDay, :temperature, String, { kwh: :gas }, :£]
+      column_types: [:date, TimeOfDay, TimeOfDay, :temperature, String, { kwh: :gas }, :£]
     },
     one_year_optimum_start_saving_kwh: {
       description: 'Estimates (up to saving) of benefit of starting boiler later in morning using a crude optimum start and frost model - kWh',
