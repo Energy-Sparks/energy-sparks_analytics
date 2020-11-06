@@ -16,16 +16,17 @@ script = {
   no_schools:                  ['hhhhhhhhh*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
-  schools:                  ['little*'],
+  schools:                  ['all-saints-st*'],
   no_source:                   :analytics_db, # : analytics_db :aggregated_meter_collection :unvalidated_meter_data :load_unvalidated_meter_collection, 
-  source:                   :aggregated_meter_collection,
+  source:                   :unvalidated_meter_data, #  :aggregated_meter_collection,
   # 
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   reports:                  {
                               charts: [
                                 # :dashboard,
                                 adhoc_worksheet: { name: 'Test', charts: %i[
-                                  schoolweek_alert_2_previous_holiday_comparison_adjusted
+                                  solar_pv_group_by_month
+                                  solar_pv_last_7_days_by_submeter
                                   ]},
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart
                                 #   calendar_picker_electricity_day_example_comparison_chart] }
@@ -40,6 +41,8 @@ script = {
                                 compare_results:        [ 
                                   :summary, 
                                   :quick_comparison,
+                                  { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Charts\Base' },
+                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Charts\New' },
                                 #  :report_differing_charts, 
                                 # :report_differences
                               ] # :quick_comparison,

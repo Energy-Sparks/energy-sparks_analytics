@@ -3,6 +3,14 @@ class HeadTeachersSchoolSummaryTable < ContentBase
   MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON = 3 * 30
   NO_RECENT_DATA_MESSAGE = 'no recent data'
   NOT_ENOUGH_DATA_MESSAGE = 'not enough data'
+  INCREASED_MESSAGE = 'increased'
+  DECREASED_MESSAGE = 'decreased'
+  NON_NUMERIC_DATA = [
+    NO_RECENT_DATA_MESSAGE,
+    NOT_ENOUGH_DATA_MESSAGE,
+    INCREASED_MESSAGE,
+    DECREASED_MESSAGE
+  ]
   attr_reader :scalar
   attr_reader :summary_table
   attr_reader :calculation_worked
@@ -113,15 +121,15 @@ class HeadTeachersSchoolSummaryTable < ContentBase
   end
 
   protected def format(unit, value, format, in_table, level)
-    return value if [NO_RECENT_DATA_MESSAGE, NOT_ENOUGH_DATA_MESSAGE].include?(value)  # bypass front end auto cell table formatting
+    return value if NON_NUMERIC_DATA.include?(value)  # bypass front end auto cell table formatting
     FormatUnit.format(unit, value, format, true, in_table, level)
   end
 
   def format_rows(rows, medium = :html)
     rows.map do |row|
       row.map do |_field_name, field|
-        if !field[:data].nil? && field[:data] == NO_RECENT_DATA_MESSAGE
-          NO_RECENT_DATA_MESSAGE
+        if !field[:data].nil? && (field[:data] == NO_RECENT_DATA_MESSAGE || field[:data] == INCREASED_MESSAGE || field[:data] == DECREASED_MESSAGE)
+          field[:data]
         elsif field[:data].nil?
           NOT_ENOUGH_DATA_MESSAGE
         else
@@ -144,7 +152,7 @@ class HeadTeachersSchoolSummaryTable < ContentBase
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
-    percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : current_period == previous_period ? 0.0 : (current_period - previous_period)/previous_period 
+    percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : percent_change_with_zero(current_period, previous_period) 
     
     { 
       current_kwh:    current_period_kwh,
@@ -153,6 +161,18 @@ class HeadTeachersSchoolSummaryTable < ContentBase
       previous_£:     previous_period, 
       percent_change: out_of_date ? NO_RECENT_DATA_MESSAGE : percent_change,
      }
+  end
+
+  def percent_change_with_zero(current_period, previous_period)
+    if current_period == previous_period
+      0.0
+    elsif previous_period == 0.0
+      INCREASED_MESSAGE
+    elsif current_period == 0.0
+      DECREASED_MESSAGE
+    else
+      (current_period - previous_period)/previous_period
+    end
   end
 
   def checked_get_aggregate(period, fuel_type, data_type, max_days_out_of_date = nil)
