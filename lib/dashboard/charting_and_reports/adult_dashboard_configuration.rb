@@ -40,7 +40,7 @@ class DashboardConfiguration
 
   ADULT_DASHBOARD_GROUP_CONFIGURATIONS = {
     benchmark: { 
-      name:                   'How you school\'s energy consumption compares with other schools',
+      name:                   'How your school\'s energy consumption compares with other schools',
       content_class:          AdviceBenchmark,
       excel_worksheet_name:   'Benchmark',
       charts:                 %i[benchmark],

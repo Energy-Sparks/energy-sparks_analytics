@@ -856,7 +856,7 @@ class GasLongTermTrend < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-        <h2>How you gas usage has changed over the last few years</h2>
+        <h2>How your gas usage has changed over the last few years</h2>
         <p>
           This chart shows your gas usage over the last few years, and how it has changed.
         </p>
@@ -887,7 +887,7 @@ class ElectricityLongTermTrend < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
-        <h2>How you electricity usage has changed over the last few years</h2>
+        <h2>How your electricity usage has changed over the last few years</h2>
         <p>
           This chart shows your electricity usage over the last few years, and how it has changed.
         </p>
