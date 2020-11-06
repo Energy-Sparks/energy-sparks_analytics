@@ -62,7 +62,7 @@ class AggregateDataService
       storage_heater_amr,
       :storage_heater,
       electricity_meter.id,
-      "#{electricity_meter.name} storage heater only",
+      meter_name(electricity_meter.name),
       :storage_heater_disaggregated_storage_heater
     )
 
@@ -82,6 +82,15 @@ class AggregateDataService
     }
   end
 
+  private def meter_name(stub)
+    if stub == SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+      # tidy up meter name so not too long, ignore solar pv wording
+      'storage heater charging'
+    else
+      "#{stub} storage heater charging" 
+    end
+  end
+
   private def calculate_aggregate_storage_heater_meter(disaggregated_meter_list)
     storage_meters_list = disaggregated_meter_list.map { |h| h[:storage_heater_meter] }
 
@@ -97,7 +106,7 @@ class AggregateDataService
       aggregate_storage_heater_amr_data,
       :storage_heater,
       aggregate_storage_heater_mpan,
-      "#{meter_collection.aggregated_electricity_meters.name} storage heater only",
+      meter_name(meter_collection.aggregated_electricity_meters.name),
       :storage_heater_aggregated
     )
 

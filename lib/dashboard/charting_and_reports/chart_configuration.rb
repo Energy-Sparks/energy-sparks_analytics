@@ -1,4 +1,5 @@
 require_relative './series_data_manager.rb'
+require_relative '../simulator/solar_pv_panels.rb'
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
@@ -366,6 +367,13 @@ class ChartManager
     solar_pv_group_by_month: {
       name:               'Analysis of your school’s solar PV panels',
       inherits_from:      :solar_pv_group_by_week_by_submeter,
+      filter:                   { 
+        submeter: [
+          SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
+          SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
+          SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+        ]
+      },
       x_axis:             :month
     },
     solar_pv_group_by_month_dashboard_overview: {
@@ -378,41 +386,14 @@ class ChartManager
       timescale:          [{ day: -6...0 }],
       x_axis:             :datetime,
       meter_definition:   :allelectricity,
-      series_breakdown:   :submeter
-    },
-    # TODO(PH, 17Nov2019) - remove post December 2019
-    solar_pv_gmt_bst_test_1: {
-      inherits_from:      :solar_pv_last_7_days_by_submeter,
-      asof_date:          Date.new(2019, 3, 1)
-    },
-    solar_pv_gmt_bst_test_2: {
-      inherits_from:      :solar_pv_last_7_days_by_submeter,
-      asof_date:          Date.new(2019, 10, 1)
-    },
-    solar_pv_gmt_bst_test_3: {
-      inherits_from:      :solar_pv_last_7_days_by_submeter,
-      asof_date:          Date.new(2019, 3, 1)
-    },
-    solar_pv_gmt_bst_test_4: {
-      inherits_from:      :solar_pv_last_7_days_by_submeter,
-      timescale:          :day,
-      asof_date:          Date.new(2019, 10, 5)
-    },
-    solar_pv_gmt_bst_test_5: {
-      inherits_from:      :solar_pv_last_7_days_by_submeter,
-      timescale:          :day,
-      asof_date:          Date.new(2019, 3, 1)
-    },
-
-    solar_pv_last_7_days_timescale_test: {
-      inherits_from:    :solar_pv_last_7_days_by_submeter,
-      series_breakdown: :none,
-      chart1_type:      :line
-    },
-    group_by_week_electricity_test_range: {
-      inherits_from:    :group_by_week_electricity,
-      name:             'By Day: Electricity Range Test',
-      timescale:        {year: -3..-1}
+      series_breakdown:   :submeter,
+      filter:                   { 
+        submeter: [
+          SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
+          SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
+          SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
+        ]
+      },
     },
     electricity_by_day:  {
       inherits_from:    :group_by_week_electricity,
