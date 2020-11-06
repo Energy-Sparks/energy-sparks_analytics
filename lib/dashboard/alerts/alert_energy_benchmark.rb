@@ -277,7 +277,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     @last_year_£                  = @current_year_energy_£
     @last_year_solar_pv_co2       = @current_year_solar_pv_co2
     @last_year_co2                = @current_year_energy_co2 
-    @last_year_co2_tonnes         = @current_year_energy_co2 / 1000.0
+    @last_year_co2_tonnes         = @current_year_energy_co2.nil? ? nil : @current_year_energy_co2 / 1000.0
 
     @last_year_electricity_co2    = @current_year_electricity_co2
     @last_year_gas_co2            = @current_year_gas_co2
