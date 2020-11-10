@@ -242,8 +242,8 @@ class AggregateDataService
     logger.info 'Reorganising solar PV meters imported as main meters into submeters of the relevent mains import meter'
     solar_pv_meters_with_mpan_remapping_attributes.each do |mains_meter, maps|
       maps.each do |_type, mpan|
-        meter = @meter_collection.electricity_meters.find{ |meter1| meter1.mpan_mprn == mpan }
-        @meter_collection.electricity_meters.delete_if{ |meter1| meter1.mpan_mprn == mpan }
+        meter = @meter_collection.electricity_meters.find{ |meter1| meter1.mpan_mprn.to_s == mpan }
+        @meter_collection.electricity_meters.delete_if{ |meter1| meter1.mpan_mprn.to_s == mpan }
         pv_panel_setup(mains_meter, meter) if meter.fuel_type == :solar_pv
         mains_meter.sub_meters.push(meter)
       end
