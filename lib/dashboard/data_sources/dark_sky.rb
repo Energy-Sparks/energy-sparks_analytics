@@ -86,7 +86,7 @@ class DarkSkyWeatherInterface
   private def download_historic_weather(latitude, longitude, start_date, end_date)
     distance_to_weather_station = nil
     historic_weather_data = {}
-    (start_date..end_date).each do |date|
+    (start_date..end_date).reverse_each do |date|
       data = download_one_days_historic_weather(latitude, longitude, date)
       distance_to_weather_station = data[:distance_to_nearest_station_km]
       historic_weather_data.merge!(data.select{ |time_key, _temperature| !%i[distance_to_nearest_station_km].include?(time_key) })
@@ -141,17 +141,18 @@ class DarkSkyWeatherInterface
       (0..23).each do |hour|
         [0, 30].each do |halfhour|
           t = Time.new(date.year, date.month, date.day, hour, halfhour, 0)
-          interpolated_historic_weather_data[t] = interpolator.at(t.to_i).round(2)
+          interpolated_historic_weather_data[t] = interpolator.at(t.to_i)
         end
       end
     end
-    interpolated_historic_weather_data
+    interpolated_historic_weather_data.transform_values{ |v| v.round(2) if v }
   end
 
   def check_for_jumps_in_data(interpolated_historic_weather_data)
     bad_data = []
     interpolated_historic_weather_data.each_with_index do |(time, _weather_data), index|
       next if index >= interpolated_historic_weather_data.values.length - 1 # skip very last iteration [index+ 1]
+      next if interpolated_historic_weather_data.values[index].nil? || interpolated_historic_weather_data.values[index + 1].nil?
       temp_change = (interpolated_historic_weather_data.values[index] - interpolated_historic_weather_data.values[index + 1]).magnitude
       if temp_change > 5.0
         bad_data.push("Large jump in temperature of #{temp_change} at #{time}")
@@ -236,9 +237,11 @@ class DarkSkyWeatherInterface
   # }
   private def hourly_data(data)
     forecast = {} # or historic data - same interface
-    hourly_data = data['hourly']['data']
-    hourly_data.each do |hours_forecast|
-      forecast[Time.at(hours_forecast['time'])] = extract_fields(hours_forecast)
+    if data['hourly']
+      hourly_data = data['hourly']['data']
+      hourly_data.each do |hours_forecast|
+        forecast[Time.at(hours_forecast['time'])] = extract_fields(hours_forecast)
+      end
     end
     forecast
   end
