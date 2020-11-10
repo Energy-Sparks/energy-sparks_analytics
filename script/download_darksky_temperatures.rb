@@ -64,31 +64,52 @@ locations = {
   'Highlands (Inverness)'  => { latitude: 57.565289, longitude: -4.4325656, csv_filename: 'Frome temperaturedata.csv'},
 }
 
+locations = {
+  'Pembrokeshire'          => { latitude: 51.808615,   longitude: -4.976258,   csv_filename: 'Bath temperaturedata.csv' },
+}
+
 # find_nearest_weather_station_location(locations, Date.new(2019, 8, 20))
 
-puts
-puts 'DARK SKY TEMPERATURE DOWNLOAD'
-puts 
-puts 'Appending data to existing csv files'
-puts
+download = false
 
-locations.each do |city, config|
+if download
   puts
-  puts "===============================#{city}======================================"
-  csv_filename = "#{INPUT_DATA_DIR}/" + config[:csv_filename]
-  start_date, end_date, new_file = start_end_dates(csv_filename)
-  puts "Downloading data for #{city} from #{start_date} to #{end_date} and adding to #{csv_filename}"
+  puts 'DARK SKY TEMPERATURE DOWNLOAD'
+  puts 
+  puts 'Appending data to existing csv files'
+  puts
 
-  if start_date > end_date
-    puts 'csv file already up to date'
-  else
-    distance_to_weather_station, temperature_data, percent_bad, bad_data = darksky.historic_temperatures(config[:latitude], config[:longitude], start_date, end_date)
-    write_csv(csv_filename, temperature_data, !new_file)
-    puts "Saving dates from #{start_date} to #{end_date} to csv file"
-    puts "Distance of weather station to location #{distance_to_weather_station}"
-    puts "Percentage bad data: #{(percent_bad * 100.0).round(2)}%"
-    bad_data.each do |problem|
-      puts "    Problem with: #{problem}"
+  locations.each do |city, config|
+    puts
+    puts "===============================#{city}======================================"
+    csv_filename = "#{INPUT_DATA_DIR}/" + config[:csv_filename]
+    start_date, end_date, new_file = start_end_dates(csv_filename)
+    puts "Downloading data for #{city} from #{start_date} to #{end_date} and adding to #{csv_filename}"
+
+    if start_date > end_date
+      puts 'csv file already up to date'
+    else
+      distance_to_weather_station, temperature_data, percent_bad, bad_data = darksky.historic_temperatures(config[:latitude], config[:longitude], start_date, end_date)
+      write_csv(csv_filename, temperature_data, !new_file)
+      puts "Saving dates from #{start_date} to #{end_date} to csv file"
+      puts "Distance of weather station to location #{distance_to_weather_station}"
+      puts "Percentage bad data: #{(percent_bad * 100.0).round(2)}%"
+      bad_data.each do |problem|
+        puts "    Problem with: #{problem}"
+      end
     end
+  end
+else
+  darksky = DarkSkyWeatherInterface.new
+  latitude = 51.808615
+  longitude = -4.976258,
+  locations.each do |city, config|
+    start_date = Date.new(2017,1,1)
+    end_date = start_date + 1000
+    distance_to_weather_station, temperature_data, percent_bad, bad_data = darksky.historic_temperatures(config[:latitude], config[:longitude], start_date, end_date)
+    ap distance_to_weather_station
+    # ap temperature_data
+    ap percent_bad
+    ap bad_data
   end
 end
