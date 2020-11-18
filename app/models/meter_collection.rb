@@ -87,6 +87,10 @@ class MeterCollection
     end
   end
 
+  def update_electricity_meters(electricity_meter_list)
+    @electricity_meters = electricity_meter_list
+  end
+
   # attr_reader/@floor_area is set by the front end
   # if there are relevant pseudo meter attributes
   # override it with a calculated value

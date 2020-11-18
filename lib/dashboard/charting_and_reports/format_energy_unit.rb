@@ -255,8 +255,8 @@ class FormatEnergyUnit
 
   def self.no_recent_or_not_enough_data?(value)
     [
-      HeadTeachersSchoolSummaryTable::NO_RECENT_DATA_MESSAGE, 
-      HeadTeachersSchoolSummaryTable::NOT_ENOUGH_DATA_MESSAGE
+      ManagementSummaryTable::NO_RECENT_DATA_MESSAGE, 
+      ManagementSummaryTable::NOT_ENOUGH_DATA_MESSAGE
     ].include?(value)
   end
 

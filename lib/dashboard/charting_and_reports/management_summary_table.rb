@@ -1,4 +1,4 @@
-class HeadTeachersSchoolSummaryTable < ContentBase
+class ManagementSummaryTable < ContentBase
   MAX_DAYS_OUT_OF_DATE_FOR_4_WEEK_COMPARISON = 2 * 7
   MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON = 3 * 30
   NO_RECENT_DATA_MESSAGE = 'no recent data'
@@ -199,4 +199,8 @@ class HeadTeachersSchoolSummaryTable < ContentBase
       true
     end
   end
+end
+
+# old name for backwards compatibility with front end
+class HeadTeachersSchoolSummaryTable < ManagementSummaryTable
 end

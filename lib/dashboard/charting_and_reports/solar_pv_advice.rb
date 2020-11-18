@@ -58,8 +58,8 @@ class DashboardEnergyAdvice
       FormatEnergyUnit.format(:kwh, solar_pv_profit_loss.annual_consumed_from_national_grid_kwh,  :html, false, false, :approx_accountant)
     end
 
-    def approx_annual_co2_saving_estimate_kg_html
-      FormatEnergyUnit.format(:co2, solar_pv_profit_loss.approx_annual_co2_saving_estimate_kg,  :html)
+    def annual_co2_saving_kg_html
+      FormatEnergyUnit.format(:co2, solar_pv_profit_loss.annual_co2_saving_kg,  :html)
     end
 
     def summary_pv_table_data_html
@@ -77,6 +77,22 @@ class DashboardEnergyAdvice
     def formatted_summary_table_html
       data, total = summary_pv_table_data_html
       html_table(nil, data, total)
+    end
+
+    protected def pv_util
+      @pv_util ||= SolarPVUtilities.new(@school)
+    end
+
+    protected def period_introduction
+      if pv_util.full_years_solar_installation?
+        'over the last year'
+      else
+        text = %{
+          since they were installed in
+          <%= pv_util.install_month_year_text %>
+        }.gsub(/^  /, '')
+        ERB.new(text).result(binding)
+      end
     end
   end 
 
@@ -97,6 +113,84 @@ class DashboardEnergyAdvice
       @footer_advice = generate_html(footer_template, binding)
     end
 
+    private def full_year_solar_pv_sheffield_estimates
+      text = %{
+        <p>
+        Energy Sparks estimates that your solar panels produce about
+          <%= annual_solar_pv_kwh_html %> of electricity each year,
+          <%= annual_solar_pv_consumed_onsite_kwh_html %> is consumed by the school,
+          reducing the schools electricity consumption from the National Electricity Grid by
+          <%= annual_saving_from_solar_pv_percent_html %>. In addition the school
+          exports about <%= annual_exported_solar_pv_kwh_html %>
+          when the solar panels produce more electricity than the school needs.
+        </p>
+      }.gsub(/^  /, '')
+      ERB.new(text).result(binding)
+    end
+
+    private def partial_year_solar_pv_sheffield_estimates
+      text = %{
+        <p>
+        Energy Sparks estimates that your solar panels produced about
+          <%= annual_solar_pv_kwh_html %> of electricity since they
+          were installed in <%= pv_util.install_month_year_text %>,
+          <%= annual_solar_pv_consumed_onsite_kwh_html %> was consumed by the school,
+          reducing the schools electricity consumption from the National Electricity Grid by
+          <%= annual_saving_from_solar_pv_percent_html %>. In addition the school
+          exported about <%= annual_exported_solar_pv_kwh_html %>
+          when the solar panels produce more electricity than the school needs.
+        </p>
+      }.gsub(/^  /, '')
+      ERB.new(text).result(binding)
+    end
+
+    private def full_year_solar_pv_metered
+      text = %{
+        <p>
+        Your solar panels produced
+          <%= annual_solar_pv_kwh_html %> of electricity last year,
+          <%= annual_solar_pv_consumed_onsite_kwh_html %> was consumed by the school,
+          reducing the schools electricity consumption from the National Electricity Grid by
+          <%= annual_saving_from_solar_pv_percent_html %>. In addition the school
+          exported about <%= annual_exported_solar_pv_kwh_html %>
+          when the solar panels produced more electricity than the school consumed.
+        </p>
+      }.gsub(/^  /, '')
+      ERB.new(text).result(binding)
+    end
+
+    private def partial_year_solar_pv_metered
+      text = %{
+        <p>
+        Your solar panels produced
+          <%= annual_solar_pv_kwh_html %> of electricity since they
+          were installed in <%= pv_util.install_month_year_text %>,
+          <%= annual_solar_pv_consumed_onsite_kwh_html %> was consumed by the school,
+          reducing the schools electricity consumption from the National Electricity Grid by
+          <%= annual_saving_from_solar_pv_percent_html %>. In addition the school
+          exported about <%= annual_exported_solar_pv_kwh_html %>
+          when the solar panels produced more electricity than the school consumed.
+        </p>
+      }.gsub(/^  /, '')
+      ERB.new(text).result(binding)
+    end
+
+    private def annual_solar_pv_commentary
+      if @school.sheffield_simulated_solar_pv_panels?
+        if pv_util.full_years_solar_installation?
+          full_year_solar_pv_sheffield_estimates
+        else
+          partial_year_solar_pv_sheffield_estimates
+        end
+      else
+        if pv_util.full_years_solar_installation?
+          full_year_solar_pv_metered
+        else
+          partial_year_solar_pv_metered
+        end
+      end
+    end
+
     private def header_template
       %{
         <%= @body_start %>
@@ -107,15 +201,7 @@ class DashboardEnergyAdvice
             emissions, as electricity produced from solar panels produces very little
             carbon. Solar panels also save your school money.
           </p>
-          <p>
-            Energy Sparks estimates that your solar panels produce about
-            <%= annual_solar_pv_kwh_html %> of electricity each year,
-            <%= annual_solar_pv_consumed_onsite_kwh_html %> is consumed by the school,
-            reducing the schools electricity consumption from the National Electricity Grid by
-            <%= annual_saving_from_solar_pv_percent_html %>. In addition the school
-            exports about <%= annual_exported_solar_pv_kwh_html %>
-            when the solar panels produce more electricity than the school needs.
-          </p>
+          <%= annual_solar_pv_commentary %>
           <p>
             The chart below shows your school&apos;s electricity consumption over the last
             year and, how much of this consumption is supplied by your solar PV panels
@@ -158,7 +244,7 @@ class DashboardEnergyAdvice
         <%= @body_start %>
           <p>
             The table below provides information on your electricity consumption and
-            electricity from your school panels over the last year:
+            electricity from your school panels <%= period_introduction %>:
           </p>
           <p>
             <%= formatted_summary_table_html %>
@@ -166,11 +252,9 @@ class DashboardEnergyAdvice
         <%= @body_end %>
       }.gsub(/^  /, '')
     end
-
   end
 
   class SolarPVLast7Days < SolarPVAdviceBase
-
     def generate_advice
       header_template = %{
         <%= @body_start %>
@@ -200,7 +284,7 @@ class DashboardEnergyAdvice
           </h2>
           <p>
             The table below provides information on your electricity consumption and
-            electricity from your school panels over the last year:
+            electricity from your school panels <%= period_introduction %>:
           </p>
           <p>
             <%= formatted_summary_table_html %>
@@ -248,7 +332,7 @@ class DashboardEnergyAdvice
           </ul>
           <p>
             In all cases the school's carbon emissions will be reduced by having solar
-            panels. For your school this is approximately <%= approx_annual_co2_saving_estimate_kg_html %>.
+            panels. For your school this is approximately <%= annual_co2_saving_kg_html %>.
           </p>
           <p>
             <strong>Question 5</strong>

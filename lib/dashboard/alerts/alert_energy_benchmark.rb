@@ -400,11 +400,11 @@ class ChangeInEnergyUse < AlertAnalysisBase
       # represent current period as previous period, current period as 'no recent data'
       pp = cp
       cp = nil
-      percent = HeadTeachersSchoolSummaryTable::NO_RECENT_DATA_MESSAGE
+      percent = ManagementSummaryTable::NO_RECENT_DATA_MESSAGE
     end
     if available_data[:not_enough].include?(fuel_type)
       # show both periods but label percent to indicate the problem (periods overlap)
-      percent = HeadTeachersSchoolSummaryTable::NOT_ENOUGH_DATA_MESSAGE
+      percent = ManagementSummaryTable::NOT_ENOUGH_DATA_MESSAGE
     end
     [cp, pp, percent]
   end
@@ -523,7 +523,7 @@ class ChangeInEnergyUse < AlertAnalysisBase
 
     def no_recent_data(fuel_type)
       meter = @school.aggregate_meter(fuel_type)
-      meter.amr_data.end_date < @asof_date - HeadTeachersSchoolSummaryTable::MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON
+      meter.amr_data.end_date < @asof_date - ManagementSummaryTable::MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON
     end
 
     def reject_fuel_type_with_no_recent_data(fuel_type)

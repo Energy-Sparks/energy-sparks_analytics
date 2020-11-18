@@ -166,7 +166,9 @@ class MeterTariffs
   end
 
   private_class_method def self.default_accounting_tariff_in_event_of_no_others(date, meter)
-    Logging.logger.error "Error: unable to get accounting tariff for date #{date} and fuel #{meter.fuel_type}"
+    unless %i[solar_pv exported_solar_pv].include?(meter.fuel_type)
+      Logging.logger.error "Error: unable to get accounting tariff for date #{date} and fuel #{meter.fuel_type}"
+    end
     meter.attributes(:economic_tariff)
   end
 

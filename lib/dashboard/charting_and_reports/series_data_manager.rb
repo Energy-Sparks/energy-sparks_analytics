@@ -271,7 +271,7 @@ class SeriesDataManager
   def submeter_names
     meter = select_one_meter
     submeter_names = []
-    meter.sub_meters.each do |submeter|
+    meter.sub_meters.values.each do |submeter|
       submeter_names.push(submeter.name)
     end
     submeter_names
@@ -632,7 +632,7 @@ private
 
   def submeter_datetime_breakdown(meter, date, halfhour_index)
     breakdown = {}
-    meter.sub_meters.each do |submeter|
+    meter.sub_meters.values.each do |submeter|
       breakdown[submeter.name] = amr_data_by_half_hour(submeter, date, halfhour_index, kwh_cost_or_co2)
     end
     breakdown
@@ -640,7 +640,7 @@ private
 
   def submeter_breakdown(meter, date1, date2)
     breakdown = {}
-    meter.sub_meters.each do |submeter|
+    meter.sub_meters.values.each do |submeter|
       breakdown[submeter.name] = amr_data_date_range(submeter, date1, date2, kwh_cost_or_co2)
     end
     breakdown

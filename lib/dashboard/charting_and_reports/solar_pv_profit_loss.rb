@@ -1,26 +1,32 @@
 class SolarPVProfitLoss
   DAYS_IN_YEAR = 365
   SOLAR_FIT = 0.12
-  attr_reader :profit_loss_multiple_years
 
   def initialize(meter_collection, mains_electricity_rate_£_per_kWh = 0.12, fit_£_per_kwh = 0.20, export_£_per_kwh = 0.05)
     @meter_collection = meter_collection
     @mains_electricity_rate_£_per_kWh = mains_electricity_rate_£_per_kWh
     @fit_£_per_kwh = fit_£_per_kwh
     @export_£_per_kwh = export_£_per_kwh
-    @profit_loss_multiple_years = calculate_profit_loss_multiple_years
   end
 
   def annual_electricity_including_onsite_solar_pv_consumption_kwh
-    value_from_profit_loss_tables(SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV, :kwh)
+    last_years_kwh(@meter_collection.aggregated_electricity_meters)[:kwh]
   end
 
   def annual_solar_pv_consumed_onsite_kwh
-    value_from_profit_loss_tables(SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME, :kwh)
+    last_years_kwh(sub_meter(:self_consume))[:kwh]
+  end
+
+  def period_available_description
+    last_years_kwh(sub_meter(:self_consume))[:period_description]
   end
 
   def annual_exported_solar_pv_kwh
-    value_from_profit_loss_tables(SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME, :kwh)
+    last_years_kwh(sub_meter(:export))[:kwh]
+  end
+
+  def sub_meter(meter_type)
+    @meter_collection.aggregated_electricity_meters.sub_meters[meter_type]
   end
 
   def annual_solar_pv_kwh
@@ -39,16 +45,53 @@ class SolarPVProfitLoss
     annual_electricity_including_onsite_solar_pv_consumption_kwh - annual_solar_pv_consumed_onsite_kwh
   end
 
-  def approx_annual_co2_saving_estimate_kg
-    annual_electricity_consumption_co2 = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value({year: 0}, :electricity, :co2)
-    solar_pv_to_consumption_ratio = annual_solar_pv_kwh / annual_electricity_including_onsite_solar_pv_consumption_kwh
-    solar_pv_to_consumption_ratio * annual_electricity_consumption_co2
+  def annual_co2_saving_kg
+    last_years_kwh(sub_meter(:generation))[:co2]
+  end
+
+  private
+
+  def sub_meter(meter_type)
+    @meter_collection.aggregated_electricity_meters.sub_meters[meter_type]
+  end
+
+  private def last_years_kwh(meter)
+    @last_years_kwh_cache ||= {}
+    @last_years_kwh_cache[meter.name] ||= calculate_years_kwh(meter)
+  end
+
+  private def calculate_years_kwh(meter)
+    end_date = meter.amr_data.end_date
+    start_date = [end_date - 365, meter.amr_data.start_date].max
+    kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh).magnitude
+    co2 = meter.amr_data.kwh_date_range(start_date, end_date, :co2).magnitude
+    days = end_date - start_date + 1
+    {
+      start_date:         start_date,
+      start_date:         end_date,
+      kwh:                kwh,
+      co2:                co2,
+      days:               days,
+      period_description: FormatEnergyUnit.format(:years, days / 365.0, :text)
+    }
+  end
+
+  private def period_description(days)
+    if days >= 364 - 15
+      'last year'
+    else
+    end
   end
 
   private def value_from_profit_loss_tables(row_type, data_type)
     data = profit_loss_multiple_years.values[0][:data].detect { |row| row[:name].include?(row_type) }
     data[data_type]
   end
+
+  private def profit_loss_multiple_years
+    @profit_loss_multiple_years ||= calculate_profit_loss_multiple_years
+  end
+
 
   private def calculate_profit_loss_multiple_years
     results_by_year = {}
@@ -70,15 +113,13 @@ class SolarPVProfitLoss
   private def annual_profit_loss(start_date, end_date)
     profit_loss = []
 
-    annual_electricity_consumption_kwh = ScalarkWhCO2CostValues.new(@meter_collection).aggregate_value({year: 0}, :electricity, :kwh)
-    ann_kwh = @meter_collection.aggregated_electricity_meters.amr_data.kwh_date_range(start_date, end_date, :kwh)
-
-    meters = [@meter_collection.aggregated_electricity_meters] + @meter_collection.aggregated_electricity_meters.sub_meters
+    meters = [@meter_collection.aggregated_electricity_meters] + @meter_collection.aggregated_electricity_meters.sub_meters.values
 
     total_pv_kwh = 0.0
 
     meters.each do |meter|
       next if meter.name == SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
+      next unless SolarPVPanels::SUBMETER_TYPES.include?(meter.name) # no storage heaters
       kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh).magnitude
       profit_loss.push(
         {

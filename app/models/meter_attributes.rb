@@ -267,14 +267,25 @@ class MeterAttributes
     )
   end
 
-  class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
+  class SolarPVOverrides < SolarPV
 
-    id    :solar_pv_mpan_meter_mapping
-    key   :solar_pv_mpan_meter_mapping
-    name  'Solar PV MPAN Meter mapping'
+    id :solar_pv_override
+    aggregate_over :solar_pv_override
+    name 'Override bad metered solar pv data'
+
+    # NB uses inherited attributes
+  end
+
+  class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
+  
+    id                  :solar_pv_mpan_meter_mapping
+    aggregate_over      :solar_pv_mpan_meter_mapping
+    name                'Solar PV MPAN Meter mapping'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
+        start_date:         MeterAttributeTypes::Date.define(required: true),
+        end_date:           MeterAttributeTypes::Date.define,
         export_mpan:        MeterAttributeTypes::String.define,
         production_mpan:    MeterAttributeTypes::String.define,
       }

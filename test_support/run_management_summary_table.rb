@@ -9,13 +9,13 @@ class RunManagementSummaryTable < RunCharts
   private
 
   def calculate
-    content = HeadTeachersSchoolSummaryTable.new(@school)
+    content = ManagementSummaryTable.new(@school)
     puts 'Invalid content' unless content.valid_content?
     content.analyse(nil)
     puts 'Content failed' unless content.make_available_to_users?
 
     {
-      front_end_template_tables:      HeadTeachersSchoolSummaryTable.front_end_template_tables,
+      front_end_template_tables:      ManagementSummaryTable.front_end_template_tables,
       front_end_template_table_data:  content.front_end_template_table_data,
       html:                           content.html
     }

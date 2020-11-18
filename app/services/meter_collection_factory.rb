@@ -56,6 +56,7 @@ class MeterCollectionFactory
     meter_collection
   end
 
+  # PH 17Nov2020 - probably deprecated with front end reorg of Low Carbon Hub Code
   def process_meters(meter_collection, meter_data)
     parent_meter = build_meter(meter_collection, meter_data)
     meter_data.fetch(:sub_meters){ [] }.each do |sub_meter_data|
