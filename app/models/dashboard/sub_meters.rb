@@ -13,7 +13,8 @@ module Dashboard
         storage_heaters
         generation
         self_consume
-        mains_plus_self_consume export
+        mains_plus_self_consume
+        export
       ]
     end
 
