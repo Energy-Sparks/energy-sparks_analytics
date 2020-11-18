@@ -121,12 +121,12 @@ class AggregateDataService
   end
 
   def aggregate_sub_meters_by_type(combined_meter, meters)
-    sub_meter_types = meters.map{ |m| m.sub_meters.keys }.uniq
+    sub_meter_types = meters.map{ |m| m.sub_meters.keys }.flatten.compact.uniq
 
     sub_meters_grouped_by_type = sub_meter_types.map do |sub_meter_type|
       [
         sub_meter_type,
-        meters.map{ |m| m.sub_meters[sub_meter_type] }
+        meters.map{ |m| m.sub_meters[sub_meter_type] }.compact
       ]
     end.to_h
 
@@ -164,7 +164,7 @@ class AggregateDataService
   def aggregate_electricity_meters
     calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
-    assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)
+    # assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)
   end
 
   # pv and storage heater meters alter the meter data, but for
@@ -173,11 +173,11 @@ class AggregateDataService
     if @meter_collection.solar_pv_panels? || @meter_collection.storage_heaters?
       calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
       unaltered_aggregate_meter = aggregate_main_meters(nil, @electricity_meters, :electricity, true)
-      assign_unaltered_electricity_meter(unaltered_aggregate_meter)
+      # assign_unaltered_electricity_meter(unaltered_aggregate_meter)
     end
   end
 
-  def assign_unaltered_electricity_meter(meter)
+  def assign_unaltered_electricity_meter_deprecated(meter)
     @meter_collection.unaltered_aggregated_electricity_meters ||= meter
   end
 

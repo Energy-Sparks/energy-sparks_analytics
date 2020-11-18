@@ -185,10 +185,9 @@ class ManagementSummaryTable < ContentBase
 
   def electricity_co2_with_solar_offset
     scalar = ScalarkWhCO2CostValues.new(@school)
-    consumption   = scalar.aggregate_value({ year: 0}, :electricity, :co2)
-    pv_production = scalar.aggregate_value({ year: 0}, :solar_pv,    :co2)
-    net_co2 = consumption - pv_production
-    net_co2
+    consumption   = checked_get_aggregate({ year: 0}, :electricity, :co2)
+    pv_production = checked_get_aggregate({ year: 0}, :solar_pv,    :co2)
+    net_co2 = consumption.nil? || pv_production.nil? ? nil : (consumption - pv_production)
   end
 
   def comparison_out_of_date(period1, fuel_type, max_days_out_of_date)

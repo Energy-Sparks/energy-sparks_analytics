@@ -193,6 +193,7 @@ class AggregateDataServiceSolar
     pv_meter_map.each do |meter_type, meter|
       next if meter.nil? || meter_type == :mains_consume
       mpan_mapping_start_date = earliest_mpan_mapping_attribute(pv_meter_map[:mains_consume], meter_type)
+puts "earliest date #{mpan_mapping_start_date}"
       mains_meter_start_date  = pv_meter_backfill_start_date(pv_meter_map[:mains_consume])
       start_date = [mpan_mapping_start_date, mains_meter_start_date].min
       backfill_meter_with_zeros(meter, start_date, mpan_mapping_start_date)
@@ -239,6 +240,8 @@ class AggregateDataServiceSolar
   # rather than a consumer
   def create_solar_pv_sub_meters_using_sheffield_pv_estimates(pv_map)
     log 'Creating solar PV data from Sheffield PV feed'
+
+    print_meter_map(pv_map)
 
     electricity_meter = pv_map[:mains_consume]
 
@@ -330,8 +333,20 @@ class AggregateDataServiceSolar
   # zero, or overridden by the synthetic Sheffield data if set
   def earliest_mpan_mapping_attribute(mains_meter, meter_type)
     mains_meter.attributes(:solar_pv_mpan_meter_mapping).map do |mpan_pv_map|
-      mpan_pv_map[meter_type_attribute_map(meter_type)].nil? ? nil : mpan_pv_map[:start_date]
+      mpan_pv_map[meter_type_attribute_map(meter_type)].nil? ? nil : meter_start_date(mpan_pv_map)
     end.compact.min
+  end
+
+  def meter_start_date(mpan_pv_map)
+    if mpan_pv_map[:start_date].nil?
+      # TODO(PH, 18Nov2020) - legacy, remove once now mandatory mapping :start_date set
+      mapped_meters = MPAN_KEY_MAPPINGS.values.compact.map do |type|
+        @electricity_meters.detect{ |m| m.mpan_mprn.to_s == mpan_pv_map[type] }
+      end.compact
+      mapped_meters.map{ |meter| meter.amr_data.start_date }.max
+    else
+      mpan_pv_map[:start_date]
+    end
   end
 
   # to save endless checking downstream in the analysis code
@@ -366,6 +381,7 @@ class AggregateDataServiceSolar
         pv_meter_map[attribute_map_meter_type(meter_type)] = meter
       end
     end
+    print_meter_map(pv_meter_map)
   end
 
   MPAN_KEY_MAPPINGS = {

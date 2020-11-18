@@ -13,7 +13,7 @@
 class MeterCollection
   include Logging
 
-  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters
+  attr_reader :heat_meters, :electricity_meters, :storage_heater_meters
 
   # From school/building
   attr_reader :floor_area, :number_of_pupils
@@ -23,8 +23,7 @@ class MeterCollection
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters,
-                :unaltered_aggregated_electricity_meters,
-                :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter,
+                :electricity_simulation_meter, :storage_heater_meter,
                 :holidays,
                 :temperatures,
                 :solar_irradiation,
@@ -46,7 +45,6 @@ class MeterCollection
 
     @heat_meters = []
     @electricity_meters = []
-    @solar_pv_meters = []
     @storage_heater_meters = []
     @school = school
     @urn = school.urn
@@ -89,6 +87,10 @@ class MeterCollection
 
   def update_electricity_meters(electricity_meter_list)
     @electricity_meters = electricity_meter_list
+  end
+
+  def aggregated_unaltered_electricity_meters
+    aggregated_electricity_meters.sub_meters.fetch(:mains_consume, @school.aggregated_electricity_meters)
   end
 
   # attr_reader/@floor_area is set by the front end
@@ -169,11 +171,9 @@ class MeterCollection
     meter_groups = [
       @heat_meters,
       @electricity_meters,
-      @solar_pv_meters,
       @storage_heater_meters,
       @aggregated_heat_meters,
-      @aggregated_electricity_meters,
-      @unaltered_aggregated_electricity_meters
+      @aggregated_electricity_meters
     ].compact
 
     meter_list = []

@@ -52,7 +52,7 @@ class AggregateDataService
       electricity_meter.name,
       :storage_heater_disaggregated_electricity
     )
-    electricity_meter.sub_meters.push(original_electricity_meter_copy)
+    electricity_meter.sub_meters[:mains_consume] = original_electricity_meter_copy
 
     electricity_meter.amr_data = electric_only_amr
     calculate_meter_carbon_emissions_and_costs(electricity_meter, :electricity)
@@ -74,7 +74,7 @@ class AggregateDataService
 
     proportion_out_accounting_standing_charges(storage_heater_meter, electricity_meter)
 
-    electricity_meter.sub_meters.push(storage_heater_meter)
+    electricity_meter.sub_meters[:storage_heaters] = storage_heater_meter
 
     {
       electricity_minus_storage_heater_meter: electricity_meter,

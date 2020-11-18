@@ -659,7 +659,7 @@ class DashboardEnergyAdvice
 
     private def meter
       if fuel_type == :electricity
-        return @school.unaltered_aggregated_electricity_meters
+        return @school.aggregated_unaltered_electricity_meters
       elsif fuel_type == :gas
         return @school.aggregated_heat_meters
       else
