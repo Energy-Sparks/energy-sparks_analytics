@@ -33,8 +33,10 @@ class AggregateDataServiceSolar
 
     clean_pv_meter_start_and_end_dates(pv_meter_map)
 
-    create_synthetic_solar_pv_generation_data_from_sheffield_university(pv_meter_map) if pv_meter_map[:generation].nil?
+    create_solar_pv_sub_meters_using_sheffield_pv_estimates(pv_meter_map) if pv_meter_map[:generation].nil?
     
+    print_meter_map(pv_meter_map)
+
     fill_in_missing_real_meter_data_with_data_from_sheffield_university(pv_meter_map)
     
     create_export_and_calculate_self_consumption_meters(pv_meter_map)
@@ -69,7 +71,7 @@ class AggregateDataServiceSolar
   def print_meter_map(pv_meter_map)
     log 'PV Meter map:'
     pv_meter_map.each do |meter_type, meter|
-      log "    #{meter_type} => #{meter.to_s} total #{meter.amr_data.total.round(0)}"
+      log "    #{meter_type} => #{meter.to_s} total #{meter.nil? ? nil : meter.amr_data.total.round(0)}"
     end
   end
 
@@ -91,7 +93,7 @@ class AggregateDataServiceSolar
   end
 
   def create_synthetic_solar_pv_generation_data_from_sheffield_university(pv_meter_map)
-    pv_meter_map[:generation] = create_synthetic_generation_meter(pv_meter_map[:mains_consume])
+    pv_meter_map[:generation] = create_synthetic_generation_submeter(pv_meter_map[:mains_consume])
   end
 
   def fill_in_missing_real_meter_data_with_data_from_sheffield_university(pv_meter_map)
@@ -217,6 +219,111 @@ class AggregateDataServiceSolar
     mains_electricity_meter.amr_data.start_date
   end
 
+  def create_synthetic_generation_submeter(electricity_meter)
+    mpan_solar_pv = Dashboard::Meter.synthetic_mpan_mprn(electricity_meter.mpan_mprn, :solar_pv)
+    pv_amr = electricity_meter.solar_pv_setup.create_solar_pv_production_amr_from_sheffield_university(electricity_meter.amr_data, @meter_collection, mpan_solar_pv)
+    solar_pv_meter = create_modified_meter_copy(
+      electricity_meter,
+      pv_amr,
+      :solar_pv,
+      mpan_solar_pv,
+      SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME,
+      :solar_pv_sub_meter
+    )
+    solar_pv_meter
+  end
+
+  # creates artificial PV meters, if solar pv present by scaling
+  # 1/2 hour yield data from Sheffield University by the kWp(s) of
+  # the PV installation; note the kWh is negative as its a producer
+  # rather than a consumer
+  def create_solar_pv_sub_meters_using_sheffield_pv_estimates(pv_map)
+    log 'Creating solar PV data from Sheffield PV feed'
+
+    electricity_meter = pv_map[:mains_consume]
+
+    log 'Creating an artificial solar pv meter and associated amr data'
+
+    disaggregated_data = electricity_meter.solar_pv_setup.create_solar_pv_data(
+      electricity_meter.amr_data,
+      @meter_collection,
+      electricity_meter.mpan_mprn
+    )
+
+    solar_pv_meter = create_modified_meter_copy(
+      electricity_meter,
+      disaggregated_data[:solar_consumed_onsite],
+      :solar_pv,
+      Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, :solar_pv),
+      SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME,
+      :solar_pv_consumed_sub_meter
+    )
+    logger.warn "Created meter onsite consumed electricity pv data from #{disaggregated_data[:solar_consumed_onsite].start_date} to #{disaggregated_data[:solar_consumed_onsite].end_date} #{disaggregated_data[:solar_consumed_onsite].total.round(0)}kWh"
+
+    pv_map[:self_consume] = solar_pv_meter
+
+    exported_pv = create_modified_meter_copy(
+      electricity_meter,
+      disaggregated_data[:exported],
+      :solar_pv,
+      Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, :exported_solar_pv),
+      SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
+      :solar_pv_exported_sub_meter
+    )
+    log "Created meter exported data from #{disaggregated_data[:exported].start_date} to #{disaggregated_data[:exported].end_date} #{disaggregated_data[:exported].total.round(0)}kWh"
+
+    pv_map[:export] = exported_pv
+
+    pv_generation_meter = create_modified_meter_copy(
+      electricity_meter,
+      disaggregated_data[:solar_pv_output],
+      :solar_pv,
+      Dashboard::Meter.synthetic_mpan_mprn(electricity_meter.mpan_mprn, :solar_pv),
+      SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME,
+      :solar_pv
+    )
+    log "Created meter generation data from #{disaggregated_data[:solar_pv_output].start_date} to #{disaggregated_data[:solar_pv_output].end_date} #{disaggregated_data[:solar_pv_output].total.round(0)}kWh"
+
+    pv_map[:generation] = pv_generation_meter
+
+    # make the original top level meter a sub meter of itself
+
+    original_electric_meter = create_modified_meter_copy(
+      electricity_meter,
+      electricity_meter.amr_data,
+      :electricity,
+      electricity_meter.id,
+      SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
+      :solar_pv_original_sub_meter
+    )
+
+    log "Making original mains consumption meter a submeter from #{electricity_meter.amr_data.start_date} to #{electricity_meter.amr_data.end_date} #{electricity_meter.amr_data.total.round(0)}kWh"
+
+    pv_map[:mains_consume] = original_electric_meter
+
+    # replace the AMR data of the top level meter with the
+    # combined original mains consumption data plus the solar pv data
+    # currently the updated meter inherits the carbon emissions and costs of the original
+    # which implies the solar pv is zero carbon and zero cost
+    # a full accounting treatment will need to deal with FITs and exports..... TODO(PH, 7Apr2019)
+
+    electricity_meter.amr_data = disaggregated_data[:electricity_consumed_onsite]
+    electricity_meter.id       = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+    electricity_meter.name     = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+
+    pv_map[:mains_plus_self_consume] = electricity_meter
+  end
+
+  def invert_export_amr_data_if_positive(amr_data)
+    # using 0.10000000001 as LCC seems to have lots of 0.1 values?????
+    histo = amr_data.histogram_half_hours_data([-0.10000000001,+0.10000000001])
+    negative = histo[0] > (histo[2] * 10) # 90%
+    message = negative ? "is negative therefore leaving unchanged" : "is positive therefore inverting to conform to internal convention"
+    logger.info "Export amr pv data #{message}"
+    amr_data.scale_kwh(-1) unless negative
+    amr_data
+  end
+
   # the mpan mapping is used to override the start date of the incoming data
   # if necessary e.g. in the circumstance where the metering was incorrect
   # during the installation phase, so anything before that is deemed to be
@@ -251,6 +358,7 @@ class AggregateDataServiceSolar
   # so they can eventual become sub meters of the electricity meter
   def map_real_meters(pv_meter_map)
     mappings = pv_meter_map[:mains_consume].attributes(:solar_pv_mpan_meter_mapping)
+    return if mappings.nil?
     mappings.each do |map|
       mpan_maps(map).each do |meter_type, mpan|
         meter = @meter_collection.electricity_meters.find{ |meter1| meter1.mpan_mprn.to_s == mpan }
@@ -275,7 +383,9 @@ class AggregateDataServiceSolar
   def meter_type_attribute_map(meter_type)
     MPAN_KEY_MAPPINGS.key(meter_type)
   end
+end
 
+class OldPVProcessingCodeDeprecated
   # ==========================================================================================
 
   def process_solar_pv_electricity_meters_deprecated
@@ -366,20 +476,6 @@ class AggregateDataServiceSolar
     calculate_meter_carbon_emissions_and_costs(exported_pv, :exported_solar_pv)
 
     @meter_collection.solar_pv_meter = solar_pv_meter
-  end
-
-  def create_synthetic_production_submeter(electricity_meter)
-    mpan_solar_pv = Dashboard::Meter.synthetic_mpan_mprn(electricity_meter.mpan_mprn, :solar_pv)
-    pv_amr = create_solar_pv_production_amr_from_sheffield_university(electricity_amr, @meter_collection, mpan_solar_pv)
-    solar_pv_meter = create_modified_meter_copy(
-      electricity_meter,
-      pv_amr,
-      :solar_pv,
-      mpan_solar_pv,
-      SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME,
-      :solar_pv_sub_meter
-    )
-    electricity_meter.sub_meters.push(solar_pv_meter)
   end
 
   # Meter aggregation where we have multiple meters metering the solar PV

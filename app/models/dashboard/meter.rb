@@ -232,6 +232,8 @@ module Dashboard
         70000000000000 + mpan_mprn
       when :electricity_minus_storage_heater
         75000000000000 + mpan_mprn
+      when :solar_pv
+        80000000000000 + mpan_mprn
       else
         raise EnergySparksUnexpectedStateException.new("Unexpected type #{type} for modified mpan/mprn")
       end
