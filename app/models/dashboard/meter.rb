@@ -32,7 +32,7 @@ module Dashboard
       @number_of_pupils = number_of_pupils
       @solar_pv_installation = solar_pv_installation
       @meter_correction_rules = []
-      @sub_meters = {}
+      @sub_meters = Dashboard::SubMeters.new
       @external_meter_id = external_meter_id
       set_meter_attributes(meter_attributes)
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
