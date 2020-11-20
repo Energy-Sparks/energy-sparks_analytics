@@ -90,7 +90,7 @@ class MeterCollection
   end
 
   def aggregated_unaltered_electricity_meters
-    aggregated_electricity_meters.sub_meters.fetch(:mains_consume, @school.aggregated_electricity_meters)
+    aggregated_electricity_meters.sub_meters.fetch(:mains_consume, aggregated_electricity_meters)
   end
 
   # attr_reader/@floor_area is set by the front end
