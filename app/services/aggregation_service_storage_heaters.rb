@@ -5,6 +5,7 @@ class AggregateDataService
   # if the electricity meter has a storage heater, split the meter
   # into 2 one with storage heater only kwh, the other with the remainder
   private def disaggregate_storage_heaters
+    logger.info '=' * 80
     disaggregated_meter_list, non_storage_heater_meters = split_normal_meters_and_storage_heater_meters
 
     if non_storage_heater_meters.length == 0 && disaggregated_meter_list.length == 1
@@ -21,6 +22,7 @@ class AggregateDataService
 
       calculate_aggregated_disaggregated_electricity_meter_for_storage_heater_school(disaggregated_meter_list, non_storage_heater_meters)
     end
+    logger.info '=' * 80
   end
 
   private def split_normal_meters_and_storage_heater_meters

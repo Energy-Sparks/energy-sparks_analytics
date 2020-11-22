@@ -8,7 +8,7 @@ module Dashboard
     attr_reader :storage_heater_setup, :sub_meters
     attr_reader :meter_correction_rules, :model_cache
     attr_reader :partial_meter_coverage
-    attr_accessor :amr_data,  :floor_area, :number_of_pupils, :solar_pv_setup
+    attr_accessor :amr_data,  :floor_area, :number_of_pupils, :solar_pv_setup, :solar_pv_overrides
 
     # Energy Sparks activerecord fields:
     attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
@@ -84,10 +84,10 @@ module Dashboard
     end
 
     private def process_meter_attributes
-      @storage_heater_setup = StorageHeater.new(attributes(:storage_heaters)) if @meter_attributes.key?(:storage_heaters)
-      @solar_pv_setup = SolarPVPanels.new(attributes(:solar_pv)) if @meter_attributes.key?(:solar_pv)
-      @low_carbon_hub_solar_pv = true if @meter_attributes.key?(:low_carbon_hub_meter_id)
-      @solar_for_schools_solar_pv = true if @meter_attributes.key?(:solar_for_schools_meter_id)
+      @storage_heater_setup     = StorageHeater.new(attributes(:storage_heaters)) if @meter_attributes.key?(:storage_heaters)
+      @solar_pv_setup           = SolarPVPanels.new(attributes(:solar_pv), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv)
+      @solar_pv_overrides       = SolarPVPanels.new(attributes(:solar_pv_override), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv_override)
+      @solar_pv_real_metering   = true if @meter_attributes.key?(:solar_pv_mpan_meter_mapping)
       @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
     end
 
@@ -112,9 +112,8 @@ module Dashboard
     end
 
     def solar_pv_panels?
-      low_carbon_hub_solar_pv_panels? ||
       sheffield_simulated_solar_pv_panels? ||
-      solar_for_schools_solar_pv_panels? ||
+      solar_pv_real_metering? ||
       solar_pv_sub_meters_to_be_aggregated > 0
     end
 
@@ -122,23 +121,15 @@ module Dashboard
       !@solar_pv_setup.nil? && @solar_pv_setup.instance_of?(SolarPVPanels)
     end
 
-    def real_solar_pv_metering_x3?
-      low_carbon_hub_solar_pv_panels? || solar_for_schools_solar_pv_panels?
+    def solar_pv_real_metering?
+      !@solar_pv_real_metering.nil?
     end
 
-    # num of incoming meters, the aggregation process then implies
+        # num of incoming meters, the aggregation process then implies
     # extra meters - so this method is only valid prior to aggregation
     def solar_pv_sub_meters_to_be_aggregated
       return 0 if attributes(:solar_pv_mpan_meter_mapping).nil?
       attributes(:solar_pv_mpan_meter_mapping).length
-    end
-
-    def low_carbon_hub_solar_pv_panels?
-      !@low_carbon_hub_solar_pv.nil?
-    end
-
-    def solar_for_schools_solar_pv_panels?
-      !@solar_for_schools_solar_pv.nil?
     end
 
     def non_heating_only?

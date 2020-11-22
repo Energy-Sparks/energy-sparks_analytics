@@ -68,7 +68,7 @@ class SolarPVProfitLoss
     days = end_date - start_date + 1
     {
       start_date:         start_date,
-      start_date:         end_date,
+      end_date:           end_date,
       kwh:                kwh,
       co2:                co2,
       days:               days,

@@ -56,7 +56,7 @@ class AggregateDataService
     aggregate_electricity_meters
 
     disaggregate_storage_heaters if @meter_collection.storage_heaters?
-    
+
     combine_solar_pv_submeters_into_aggregate if more_than_one_solar_pv_sub_meter?
   end
 
@@ -100,24 +100,6 @@ class AggregateDataService
   def combine_solar_pv_submeters_into_aggregate
     aggregate_meter = @meter_collection.aggregated_electricity_meters
     aggregate_sub_meters_by_type(aggregate_meter, @meter_collection.electricity_meters)
-=begin
-    SolarPVPanels::SUBMETER_TYPES.each do |solar_sub_meter_type|
-      meters_to_aggregate = @meter_collection.electricity_meters.map do |electric_meter|
-        electric_meter.sub_meters.find{ |sub_meter| sub_meter.name == solar_sub_meter_type }
-      end.compact
-      next if meters_to_aggregate.empty? # defensive
-      if meters_to_aggregate.length == 1
-        aggregate_meter.sub_meters.push(meters_to_aggregate[0])
-      else
-        aggregated_sub_meter = aggregate_meters(nil, meters_to_aggregate, :electricity)
-        aggregated_sub_meter.name = solar_sub_meter_type
-        aggregate_meter.sub_meters.push(aggregated_sub_meter)
-        # assign too many times
-        aggregate_meter.id   = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
-        aggregate_meter.name = SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
-      end
-    end
-=end
   end
 
   def aggregate_sub_meters_by_type(combined_meter, meters)

@@ -495,7 +495,12 @@ class Aggregator
   def swap_NaN_for_nil
     return if @bucketed_data.nil?
     @bucketed_data.each do |series_name, result_data|
-      @bucketed_data[series_name] = result_data.map { |x| x.is_a?(Integer) ? x.to_f : (x.nan? ? nil : x) } unless result_data.is_a?(Symbol)
+      unless result_data.is_a?(Symbol)
+        @bucketed_data[series_name] = result_data.map do |x|
+          x = x.to_f if is_a?(Integer)
+          x.finite? ? x : nil
+        end
+      end
     end
   end
 

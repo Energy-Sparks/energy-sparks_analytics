@@ -1,14 +1,14 @@
 class AlertLongTermTrend < AlertAnalysisBase
-  attr_reader :this_year_£, :last_year_£, :year_change_£
+  attr_reader :this_year_£, :last_year_£, :year_change_£, :relevance
   attr_reader :percent_change_£, :summary, :prefix_1, :prefix_2
 
   def initialize(school, type = :electricitylongtermtrend)
     super(school, type)
-    @relevance == :relevant
+    @relevance = aggregate_meter.nil? ? :never_relevant : :relevant
   end
 
   def enough_data
-    aggregate_meter.amr_data.days_valid_data > 2 * 365 ? :enough : :not_enough # 365 not 364 to be safe
+    days_amr_data_with_asof_date(@asof_date) > 2 * 365 ? :enough : :not_enough
   end
 
   def timescale
@@ -53,6 +53,7 @@ class AlertLongTermTrend < AlertAnalysisBase
   end
 
   private def calculate(asof_date)
+    raise EnergySparksNotEnoughDataException, "Not enough data: 2 years of data required, got #{days_amr_data} days" if enough_data == :not_enough
     scalar = ScalarkWhCO2CostValues.new(@school)
     @this_year_£        = scalar.aggregate_value({ year:  0 }, fuel_type, :£, { asof_date: asof_date})
     @last_year_£        = scalar.aggregate_value({ year: -1 }, fuel_type, :£, { asof_date: asof_date})

@@ -316,10 +316,10 @@ class AMRData < HalfHourlyData
     total
   end
 
-  def self.create_empty_dataset(type, start_date, end_date)
+  def self.create_empty_dataset(type, start_date, end_date, reading_type = 'ORIG')
     data = AMRData.new(type)
     (start_date..end_date).each do |date|
-      data.add(date, OneDayAMRReading.new('Unknown', date, 'ORIG', nil, DateTime.now, one_day_zero_kwh_x48))
+      data.add(date, OneDayAMRReading.new('Unknown', date, reading_type, nil, DateTime.now, one_day_zero_kwh_x48))
     end
     data
   end

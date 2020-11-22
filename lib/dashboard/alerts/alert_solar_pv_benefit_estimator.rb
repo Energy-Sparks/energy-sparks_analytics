@@ -209,7 +209,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
   def calculate_solar_pv_benefit(asof_date, kwp)
     start_date = asof_date - 365
 
-    pv_panels = SolarPVPanelsNewBenefit.new(attributes(asof_date, kwp))
+    pv_panels = SolarPVPanelsNewBenefit.new # (attributes(asof_date, kwp))
     kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregate_meter.amr_data, @school, start_date, asof_date, kwp)
 
     kwh = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date)

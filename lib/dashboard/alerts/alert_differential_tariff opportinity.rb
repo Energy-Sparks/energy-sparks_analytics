@@ -56,7 +56,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
       @live_meters = []
       @school.electricity_meters.each do |electric_meter|
         if electric_meter.storage_heater?
-          @live_meters += electric_meter.sub_meters.select { |meter| meter.amr_data.end_date >= max_combined_date && meter.fuel_type == :electricity }
+          @live_meters += electric_meter.sub_meters.values.select { |meter| meter.amr_data.end_date >= max_combined_date && meter.fuel_type == :electricity }
         elsif electric_meter.amr_data.end_date >= max_combined_date
           @live_meters.push(electric_meter)
         end

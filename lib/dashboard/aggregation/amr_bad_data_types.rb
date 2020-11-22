@@ -47,6 +47,7 @@ class OneDayAMRReading
     'SOLX'  => { name: 'Synthetic onsite solar + mains consumption (good)', description: 'Synthetic sum of solar pv consumed onsite and mains consumption'},
     'HSIM'  => { name: 'Synthetic data used on heating/hw calcs',           description: 'Synthetic data used on heating/hw calcs'},
     'SOLS'  => { name: 'Overridden PV data with data from Sheffield',       description: 'Overridden PV data with data from Sheffield'},
+    'SOL0'  => { name: 'Zero pv generation data prior/post to pv install',  description: 'Zero pv generation data prior/post to pv install'},
     'BKPV'  => { name: 'Backfilled PV data (aggregation service)',          description: 'Backfilled PV data (aggregation service)'},
   }.freeze
   # rubocop:disable Metrics/LineLength
