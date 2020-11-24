@@ -706,7 +706,7 @@ private
 
   def within_aggregate_date_range?(aggregate_meter, date)
     return true if aggregate_meter.nil?
-    date.between?(aggregate_meter.amr_date.start_date, aggregate_meter.amr_date.end_date)
+    date.between?(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date)
   end
 
   def truncate_date_range_to_aggregate(aggregate_meter, start_date, end_date)
