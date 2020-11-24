@@ -827,17 +827,19 @@ module AnalyseHeatingAndHotWater
     def model_type_slow_lookup?(date)
       model_type = @cached_model_type[date]
       return model_type unless model_type.nil?
-      if boiler_off?(date)
-        :none
-      elsif @meter.heating_only?
-        heating_on?(date) ? winter_model(date) : :none
-      elsif @meter.kitchen_only?
-        kitchen_model(date)
-      elsif @meter.hot_water_only?
-        summer_model(date)
-      else 
-        heating_on?(date) ? winter_model(date) : summer_model(date)
-      end
+      model_type = if boiler_off?(date)
+          :none
+        elsif @meter.heating_only?
+          heating_on?(date) ? winter_model(date) : :none
+        elsif @meter.kitchen_only?
+          kitchen_model(date)
+        elsif @meter.hot_water_only?
+          summer_model(date)
+        else 
+          heating_on?(date) ? winter_model(date) : summer_model(date)
+        end
+      logger.info "Missing model type for date #{date}" if model_type.nil?
+      model_type
     end
 
     private def no_heating?
@@ -1104,8 +1106,10 @@ module AnalyseHeatingAndHotWater
     end
 
     def temperature_compensated_one_day_gas_kwh(date, temperature)
-      model = @models[model_type?(date)]
+      model_type = model_type?(date)
+      model = @models[model_type]
       actual_kwh = @amr_data.one_day_kwh(date)
+      return actual_kwh if model_type == :none && model.nil?
       actual_temperature = temperatures.average_temperature(date)
       actual_kwh + model.b * (temperature - actual_temperature)
     end

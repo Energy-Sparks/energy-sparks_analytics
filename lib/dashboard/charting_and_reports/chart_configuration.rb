@@ -374,7 +374,8 @@ class ChartManager
           SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
         ]
       },
-      x_axis:             :month
+      x_axis:           :month,
+      timescale:        :up_to_a_year
     },
     solar_pv_group_by_month_dashboard_overview: {
       inherits_from:      :solar_pv_group_by_month,

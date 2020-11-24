@@ -122,7 +122,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     # commented out 1Dec2019, in favour of alert prioritisation control
     # @relevance = time_relevance(asof_date) # during and up to 3 weeks after current period
-    @relevance = (enough_periods_data(asof_date) ? :relevant : :not_relevant) if relevance == :relevant
+    @relevance = (enough_periods_data(asof_date) ? :relevant : :never_relevant) if relevance == :relevant
 
     raise EnergySparksNotEnoughDataException, "Not enough data in current period: #{period_debug(current_period,  asof_date)}"  unless enough_days_data_for_period(current_period,  asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data in previous period: #{period_debug(previous_period,  asof_date)}" unless enough_days_data_for_period(previous_period, asof_date)
@@ -251,7 +251,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   end
 
   private def formatted_kwh_period_unadjusted(period, data_type = :kwh)
-    values = kwhs_date_range(aggregate_meter, period.first, period.last, data_type)
+    min_days_data_if_meter_start_date_in_holiday = 4
+    values = kwhs_date_range(aggregate_meter, period.first, period.last, data_type, min_days_data_if_meter_start_date_in_holiday)
     formatted_values = values.map { |kwh| kwh.round(0) }.join(', ')
     [formatted_values, values.sum / values.length]
   end
@@ -277,7 +278,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   private def average_period_value(period, days_of_week, data_type)
     dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(period, days_of_week)
-    values = dates.map { |date| kwh_date_range(aggregate_meter, date, date, data_type) }
+    values = dates.map { |date| kwh_date_range(aggregate_meter, date, date, data_type) }.compact
     values.sum / values.length
   end
 
@@ -300,11 +301,11 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   # 3 weeks after
   private def time_relevance_deprecated(asof_date)
     current_period, _previous_period = last_two_periods(asof_date)
-    return :not_relevant if current_period.nil?
+    return :never_relevant if current_period.nil?
     # relevant during period, subject to 'enough_data'
     return :relevant if enough_days_in_period(current_period, asof_date)
     days_from_end_of_period_to_asof_date = asof_date - current_period.end_date
-    return days_from_end_of_period_to_asof_date.between?(0, DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD) ? :relevant : :not_relevant
+    return days_from_end_of_period_to_asof_date.between?(0, DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD) ? :relevant : :never_relevant
   end
 
   private def enough_periods_data(asof_date)

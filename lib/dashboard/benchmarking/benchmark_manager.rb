@@ -268,6 +268,13 @@ module Benchmarking
       graph_definition[:y_axis_label]   = y_axis_label(chart_columns_definitions)
       graph_definition[:config_name]    = chart_name.to_s
 
+      # clean up NaNs and Infinities so Excel doesn't blow up
+      graph_definition[:x_data].transform_values! do |array|
+        array.map! do |v|
+          v.is_a?(Float) && !v.finite? ? nil : v
+        end
+      end
+
       y2_data = create_y2_data(config, table, chart_column_numbers, chart_columns_definitions)
 
       unless y2_data.empty? || !include_y2

@@ -160,7 +160,8 @@ class CompareContentResults
       ['<p>This saving is equivalent', '</button></p>'],
       ['sourcing its electricity from in the last 5 minutes:', 'The first column'],
       ['National Electricity Grid is currently', ' kg CO2/kWh.'],
-      ['<th scope="col"> Percentage of Carbon </th>', '<td> coal </td>'] # not ideal as doesn;t quite match end of table
+      ['<th scope="col"> Percentage of Carbon </th>', '<td> coal </td>'], # not ideal as doesn't quite match end of table
+      ['<th scope="col"> Percent of Energy </th>', '</tbody>']
     ].each do |start_match, end_match|
       html = strip_volatile_content(html, start_match, end_match)
     end

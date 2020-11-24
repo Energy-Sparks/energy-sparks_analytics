@@ -3,6 +3,7 @@
 require 'benchmark/memory'
 class AggregateDataService
   include Logging
+  include AggregationMixin
 
   attr_reader :meter_collection
 
@@ -50,19 +51,33 @@ class AggregateDataService
   private def process_electricity_meters
     create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
 
-    process_solar_pv_electricity_meters if @meter_collection.solar_pv_panels?
+    process_solar_meters
 
     aggregate_electricity_meters
 
     disaggregate_storage_heaters if @meter_collection.storage_heaters?
-    
+
     combine_solar_pv_submeters_into_aggregate if more_than_one_solar_pv_sub_meter?
+  end
+
+  def process_solar_meters
+    if @meter_collection.solar_pv_panels?
+      aggregate_solar = AggregateDataServiceSolar.new(@meter_collection)
+      processed_meters = aggregate_solar.process_solar_pv_electricity_meters
+      # assign references to arrays, as can't be asigned within AggregateDataServiceSolar
+      @meter_collection.update_electricity_meters(processed_meters)
+      @electricity_meters = processed_meters
+    end
   end
 
   private def set_long_gap_boundary_on_all_meters
     @meter_collection.all_meters.each do |meter|
       meter.amr_data.set_long_gap_boundary
     end
+  end
+
+  def more_than_one_solar_pv_sub_meter?
+    @meter_collection.solar_pv_panels? && @meter_collection.electricity_meters.length > 1
   end
 
   # allows parameterised carbon/cost objects to cache data post
@@ -82,7 +97,28 @@ class AggregateDataService
     end
   end
 
-  
+  def combine_solar_pv_submeters_into_aggregate
+    aggregate_meter = @meter_collection.aggregated_electricity_meters
+    aggregate_sub_meters_by_type(aggregate_meter, @meter_collection.electricity_meters)
+  end
+
+  def aggregate_sub_meters_by_type(combined_meter, meters)
+    sub_meter_types = meters.map{ |m| m.sub_meters.keys }.flatten.compact.uniq
+
+    sub_meters_grouped_by_type = sub_meter_types.map do |sub_meter_type|
+      [
+        sub_meter_type,
+        meters.map{ |m| m.sub_meters[sub_meter_type] }.compact
+      ]
+    end.to_h
+
+    sub_meters_grouped_by_type.each do |sub_meter_type, sub_meters|
+      combined_sub_meter = aggregate_meters(nil, sub_meters, sub_meters[0].fuel_type)
+      combined_sub_meter.id   = sub_meters[0].id
+      combined_sub_meter.name = sub_meters[0].name
+      combined_meter.sub_meters[sub_meter_type] = combined_sub_meter
+    end
+  end
 
   # if an electricity meter is split up into a storage and non-storage version
   # we need to artificially split up the standing charges
@@ -102,21 +138,6 @@ class AggregateDataService
     @meter_collection.meter?(meter_id, true)
   end
 
-  private def create_modified_meter_copy(meter, amr_data, type, identifier, name, pseudo_meter_name)
-    Dashboard::Meter.new(
-      meter_collection: meter_collection,
-      amr_data: amr_data,
-      type: type,
-      identifier: identifier,
-      name: name,
-      floor_area: meter.floor_area,
-      number_of_pupils: meter.number_of_pupils,
-      solar_pv_installation: meter.solar_pv_setup,
-      storage_heater_config: meter.storage_heater_setup,
-      meter_attributes: meter.meter_attributes.merge(@meter_collection.pseudo_meter_attributes(pseudo_meter_name))
-    )
-  end
-
   def aggregate_heat_meters
     calculate_meters_carbon_emissions_and_costs(@heat_meters, :gas)
     @meter_collection.aggregated_heat_meters = aggregate_main_meters(@meter_collection.aggregated_heat_meters, @heat_meters, :gas)
@@ -125,7 +146,7 @@ class AggregateDataService
   def aggregate_electricity_meters
     calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
-    assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)
+    # assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)
   end
 
   # pv and storage heater meters alter the meter data, but for
@@ -134,32 +155,12 @@ class AggregateDataService
     if @meter_collection.solar_pv_panels? || @meter_collection.storage_heaters?
       calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
       unaltered_aggregate_meter = aggregate_main_meters(nil, @electricity_meters, :electricity, true)
-      assign_unaltered_electricity_meter(unaltered_aggregate_meter)
+      # assign_unaltered_electricity_meter(unaltered_aggregate_meter)
     end
   end
 
-  def assign_unaltered_electricity_meter(meter)
+  def assign_unaltered_electricity_meter_deprecated(meter)
     @meter_collection.unaltered_aggregated_electricity_meters ||= meter
-  end
-
-  private def aggregate_amr_data(meters, type)
-    if meters.length == 1
-      logger.info "Single meter, so aggregation is a reference to itself not an aggregate meter"
-      return meters.first.amr_data # optimisaton if only 1 meter, then its its own aggregate
-    end
-    min_date, max_date = combined_amr_data_date_range(meters)
-    logger.info "Aggregating data between #{min_date} #{max_date}"
-
-    mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
-    combined_amr_data = AMRData.new(type)
-    (min_date..max_date).each do |date|
-      valid_meters_for_date = meters.select { |meter| meter.amr_data.date_exists?(date) }
-      amr_data_for_date_x48_valid_meters = valid_meters_for_date.map { |meter| meter.amr_data.days_kwh_x48(date) }
-      combined_amr_data_x48 = AMRData.fast_add_multiple_x48_x_x48(amr_data_for_date_x48_valid_meters)
-      days_data = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, combined_amr_data_x48)
-      combined_amr_data.add(date, days_data)
-    end
-    combined_amr_data
   end
 
   private def combine_meter_meta_data(list_of_meters)
@@ -187,36 +188,10 @@ class AggregateDataService
   end
 
   def aggregate_main_meters(combined_meter, list_of_meters, type, copy_amr_data = false)
-    logger.info "Aggregating #{list_of_meters.length} meters"
+    logger.info "Aggregating #{list_of_meters.length} meters and #{list_of_meters.map{ |sm| sm.sub_meters.length}.sum} sub meters"
     combined_meter = aggregate_meters(combined_meter, list_of_meters, type, copy_amr_data)
     # combine_sub_meters_deprecated(combined_meter, list_of_meters) # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
     combined_meter
-  end
-
-
-  private def calculate_carbon_emissions_for_meter(meter, fuel_type)
-    if fuel_type == :electricity || fuel_type == :aggregated_electricity # TODO(PH, 6Apr19) remove : aggregated_electricity once analytics meter meta data loading changed
-      meter.amr_data.set_carbon_emissions(meter.id, nil, @meter_collection.grid_carbon_intensity)
-    else
-      meter.amr_data.set_carbon_emissions(meter.id, EnergyEquivalences::UK_GAS_CO2_KG_KWH, nil)
-    end
-  end
-
-  private def calculate_costs_for_meter(meter)
-    logger.info "Creating economic & accounting costs for #{meter.mpan_mprn} fuel #{meter.fuel_type} from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}"
-    meter.amr_data.set_economic_tariff(meter)
-    meter.amr_data.set_accounting_tariff(meter)
-  end
-
-  private def calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
-    calculate_carbon_emissions_for_meter(meter, fuel_type)
-    calculate_costs_for_meter(meter)
-  end
-
-  private def calculate_meters_carbon_emissions_and_costs(meters, fuel_type)
-    meters.each do |meter|
-      calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
-    end
   end
 
   # copy meter and amr data - for pv, storage heater meters about to be disaggregated
@@ -354,27 +329,5 @@ class AggregateDataService
       combined_meter = aggregate_meters(parent_meter, sub_meters, fuel_type)
       parent_meter.sub_meters.push(combined_meter)
     end
-  end
-
-  # for overlapping data i.e. date range where there is data for all meters
-  def combined_amr_data_date_range(meters)
-    start_dates = []
-    end_dates = []
-    meters.each do |meter|
-      aggregation_rules = meter.attributes(:aggregation)
-      if aggregation_rules.nil?
-        start_dates.push(meter.amr_data.start_date)
-      elsif !(aggregation_rules.include?(:ignore_start_date) ||
-              aggregation_rules.include?(:deprecated_include_but_ignore_start_date))
-        start_dates.push(meter.amr_data.start_date)
-      end
-      if aggregation_rules.nil?
-        end_dates.push(meter.amr_data.end_date)
-      elsif !(aggregation_rules.include?(:ignore_end_date) ||
-        aggregation_rules.include?(:deprecated_include_but_ignore_end_date))
-        end_dates.push(meter.amr_data.end_date)
-      end
-    end
-    [start_dates.sort.last, end_dates.sort.first]
   end
 end

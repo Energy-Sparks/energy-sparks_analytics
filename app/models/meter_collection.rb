@@ -13,7 +13,7 @@
 class MeterCollection
   include Logging
 
-  attr_reader :heat_meters, :electricity_meters, :solar_pv_meters, :storage_heater_meters
+  attr_reader :heat_meters, :electricity_meters, :storage_heater_meters
 
   # From school/building
   attr_reader :floor_area, :number_of_pupils
@@ -23,8 +23,7 @@ class MeterCollection
 
   # These are things which will be populated
   attr_accessor :aggregated_heat_meters, :aggregated_electricity_meters,
-                :unaltered_aggregated_electricity_meters,
-                :electricity_simulation_meter, :storage_heater_meter, :solar_pv_meter,
+                :electricity_simulation_meter, :storage_heater_meter,
                 :holidays,
                 :temperatures,
                 :solar_irradiation,
@@ -46,7 +45,6 @@ class MeterCollection
 
     @heat_meters = []
     @electricity_meters = []
-    @solar_pv_meters = []
     @storage_heater_meters = []
     @school = school
     @urn = school.urn
@@ -83,8 +81,16 @@ class MeterCollection
     when :storage_heater, :storage_heaters
       storage_heater_meter
     when :solar_pv
-      solar_pv_meter
+      aggregated_electricity_meters.sub_meters[:generation]
     end
+  end
+
+  def update_electricity_meters(electricity_meter_list)
+    @electricity_meters = electricity_meter_list
+  end
+
+  def aggregated_unaltered_electricity_meters
+    aggregated_electricity_meters.sub_meters.fetch(:mains_consume, aggregated_electricity_meters)
   end
 
   # attr_reader/@floor_area is set by the front end
@@ -165,11 +171,9 @@ class MeterCollection
     meter_groups = [
       @heat_meters,
       @electricity_meters,
-      @solar_pv_meters,
       @storage_heater_meters,
       @aggregated_heat_meters,
-      @aggregated_electricity_meters,
-      @unaltered_aggregated_electricity_meters
+      @aggregated_electricity_meters
     ].compact
 
     meter_list = []
@@ -256,20 +260,28 @@ class MeterCollection
     @has_storage_heaters ||= all_meters.any?{ |meter| meter.storage_heater? }
   end
 
+  def solar_pv_panels?
+    @solar_pv_panels ||= all_meters.any?{ |meter| meter.solar_pv_panels? }
+  end
+
+  def sheffield_simulated_solar_pv_panels?
+    @sheffield_simulated_solar_pv_panels ||= all_meters.any?{ |meter| meter.sheffield_simulated_solar_pv_panels? }
+  end
+
+  def solar_pv_real_metering?
+    @solar_pv_real_metering ||= all_meters.any?{ |meter| meter.solar_pv_real_metering? }
+  end
+
+  def solar_pv_and_or_storage_heaters?
+    storage_heaters? || solar_pv_panels?
+  end
+
   def all_aggregate_meters
     [
       electricity? ? aggregated_electricity_meters : nil,
       gas? ? aggregated_heat_meters : nil,
       storage_heaters? ? storage_heater_meter : nil
     ].compact
-  end
-
-  def solar_pv_panels?
-    @solar_pv_panels ||= all_meters.any?{ |meter| meter.solar_pv_panels? }
-  end
-
-  def solar_pv_and_or_storage_heaters?
-    storage_heaters? || solar_pv_panels?
   end
 
   def fuel_types(exclude_storage_heaters = true, exclude_solar_pv = true)
@@ -280,15 +292,9 @@ class MeterCollection
     types.push(:solar_pv)         if solar_pv_panels? && !exclude_solar_pv
     types
   end
-
-  def sheffield_simulated_solar_pv_panels?
-    @sheffield_simulated_solar_pv_panels ||= all_meters.any?{ |meter| meter.sheffield_simulated_solar_pv_panels? }
-  end
-
-  def real_solar_pv_metering_x3?
-    @real_solar_pv_metering_x3 ||= all_meters.any?{ |meter| meter.real_solar_pv_metering_x3? }
-  end
  
+=begin
+
   def solar_pv_sub_meters_to_be_aggregated
     @solar_pv_sub_meters_to_be_aggregated ||= all_meters.count{ |meter| meter.solar_pv_sub_meters_to_be_aggregated }
   end
@@ -300,6 +306,7 @@ class MeterCollection
   def solar_for_schools_solar_pv_panels?
     @solar_for_schools_solar_pv_panels ||= all_meters.any?{ |meter| meter.solar_for_schools_solar_pv_panels? }
   end
+=end
 
   def school_type
     @school.nil? ? nil : @school.school_type

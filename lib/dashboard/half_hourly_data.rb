@@ -30,6 +30,10 @@ class HalfHourlyData < Hash
     end
   end
 
+  def date_range
+    start_date..end_date
+  end
+
   def create_from_halfhourly_data(data)
     data.each do |date, half_hourly_data_x48|
       add(date, half_hourly_data_x48)

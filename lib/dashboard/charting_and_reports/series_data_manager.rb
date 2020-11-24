@@ -271,7 +271,7 @@ class SeriesDataManager
   def submeter_names
     meter = select_one_meter
     submeter_names = []
-    meter.sub_meters.each do |submeter|
+    meter.sub_meters.values.each do |submeter|
       submeter_names.push(submeter.name)
     end
     submeter_names
@@ -281,7 +281,7 @@ class SeriesDataManager
     names = []
     if !@meters[0].nil? # indication of solar pv meters only
       names += @meter_collection.electricity_meters.map(&:display_name)
-      names += @meter_collection.solar_pv_meters.map(&:display_name)
+      # names += @meter_collection.solar_pv_meters.map(&:display_name)
     end
     if !@meters[1].nil? # indication of heat meters only
       names += @meter_collection.heat_meters.map(&:display_name)
@@ -632,7 +632,7 @@ private
 
   def submeter_datetime_breakdown(meter, date, halfhour_index)
     breakdown = {}
-    meter.sub_meters.each do |submeter|
+    meter.sub_meters.values.each do |submeter|
       breakdown[submeter.name] = amr_data_by_half_hour(submeter, date, halfhour_index, kwh_cost_or_co2)
     end
     breakdown
@@ -640,7 +640,7 @@ private
 
   def submeter_breakdown(meter, date1, date2)
     breakdown = {}
-    meter.sub_meters.each do |submeter|
+    meter.sub_meters.values.each do |submeter|
       breakdown[submeter.name] = amr_data_date_range(submeter, date1, date2, kwh_cost_or_co2)
     end
     breakdown
@@ -653,7 +653,7 @@ private
     end
     unless @meters[0].nil? # indication of electricity only
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.aggregated_electricity_meters, @meter_collection.electricity_meters, start_date, end_date, halfhour_index))
-      breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.solar_pv_meter, @meter_collection.solar_pv_meters, start_date, end_date, halfhour_index))
+      # breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.aggregated_electricity_meters.sub_meters[:generation], @meter_collection.solar_pv_meters, start_date, end_date, halfhour_index))
     end
     unless @meters[1].nil? # indication of heat meters only
       breakdown = merge_breakdown(breakdown, breakdown_one_meter_type(@meter_collection.aggregated_heat_meters, @meter_collection.heat_meters, start_date, end_date, halfhour_index))
@@ -948,18 +948,26 @@ private
         # aggregate all electricity meters
         @meters = [@meter_collection.aggregated_electricity_meters, nil]
       when :allelectricity_unmodified
-        @meters = [@meter_collection.unaltered_aggregated_electricity_meters, nil]
+        @meters = [unmodified_aggregated_electricity_meter, nil]
       when :electricity_simulator
         @meters = [@meter_collection.electricity_simulation_meter, nil]
       when :storage_heater_meter
         @meters = [@meter_collection.storage_heater_meter, nil]
-      when :solar_pv_meter
-        @meters = [@meter_collection.solar_pv_meter, nil]
+      when :solar_pv_meter, :solar_pv
+        @meters = [@meter_collection.aggregated_electricity_meters.sub_meters[:generation], nil]
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
       # specified meter - typically by mpan or mprn
       meter = @meter_collection.meter?(@meter_definition)
       @meters = meter.heat_meter? ? [nil, meter] : [meter, nil]
+    end
+  end
+
+  def unmodified_aggregated_electricity_meter
+    if @meter_collection.aggregated_electricity_meters.sub_meters.key?(:mains_consume)
+      @meter_collection.aggregated_electricity_meters.sub_meters[:mains_consume]
+    else
+      @meter_collection.aggregated_electricity_meters
     end
   end
 end

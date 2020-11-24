@@ -99,20 +99,6 @@ class MeterAttributes
     )
   end
 
-  class OverrideWithSyntheticSheffieldPVData < MeterAttributeTypes::AttributeBase
-    id :meter_corrections_use_sheffield_pv_data
-    key :set_to_sheffield_pv_data
-    aggregate_over :meter_corrections
-    name 'Meter correction > Override solar pv production data with Sheffield University data'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        start_date:         MeterAttributeTypes::Date.define(required: true),
-        end_date:           MeterAttributeTypes::Date.define(required: true),
-      }
-    )
-  end
-
   class ReadingsStartDate < MeterAttributeTypes::AttributeBase
     id :meter_corrections_readings_start_date
     key :readings_start_date
@@ -176,6 +162,18 @@ class MeterAttributes
         end_date:         MeterAttributeTypes::Date.define,
         floor_area:       MeterAttributeTypes::Float.define(required: true),
         number_of_pupils: MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
+
+  class SchoolFabricDescription < MeterAttributeTypes::AttributeBase
+    id :school_fabric
+    aggregate_over :school_fabric
+    name 'Genric school fabric information for audit purposes'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        type:       MeterAttributeTypes::String.define(required: true),
+        description: MeterAttributeTypes::String.define(required: true)
       }
     )
   end
@@ -267,16 +265,42 @@ class MeterAttributes
     )
   end
 
-  class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
+  class SolarPVOverrides < SolarPV
 
-    id    :solar_pv_mpan_meter_mapping
-    key   :solar_pv_mpan_meter_mapping
-    name  'Solar PV MPAN Meter mapping'
+    id :solar_pv_override
+    aggregate_over :solar_pv_override
+    name 'Override bad metered solar pv data'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date:             MeterAttributeTypes::Date.define,
+        end_date:               MeterAttributeTypes::Date.define,
+        kwp:                    MeterAttributeTypes::Float.define,
+        orientation:            MeterAttributeTypes::Integer.define(hint: 'in degrees'),
+        tilt:                   MeterAttributeTypes::Integer.define,
+        shading:                MeterAttributeTypes::Integer.define,
+        fit_£_per_kwh:          MeterAttributeTypes::Float.define,
+        override_generation:    MeterAttributeTypes::Boolean.define(required: true),
+        override_export:        MeterAttributeTypes::Boolean.define(required: true),
+        override_self_consume:  MeterAttributeTypes::Boolean.define(required: true),
+      }
+    )
+
+    # NB uses inherited attributes
+  end
+
+  class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
+  
+    id                  :solar_pv_mpan_meter_mapping
+    aggregate_over      :solar_pv_mpan_meter_mapping
+    name                'Solar PV MPAN Meter mapping'
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
+        start_date:         MeterAttributeTypes::Date.define(required: true),
+        end_date:           MeterAttributeTypes::Date.define,
         export_mpan:        MeterAttributeTypes::String.define,
         production_mpan:    MeterAttributeTypes::String.define,
+        self_consume_mpan:  MeterAttributeTypes::String.define
       }
     )
   end
@@ -299,16 +323,6 @@ class MeterAttributes
     id :low_carbon_hub_meter_id
     key :low_carbon_hub_meter_id
     name 'Low carbon hub meter ID'
-
-    structure MeterAttributeTypes::Integer.define(required: true, min: 0)
-
-  end
-
-  class SolarForSchools < MeterAttributeTypes::AttributeBase
-
-    id :solar_for_schools_meter_id
-    key :solar_for_schools_meter_id
-    name 'Solar for schools meter ID'
 
     structure MeterAttributeTypes::Integer.define(required: true, min: 0)
 

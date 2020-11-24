@@ -61,10 +61,18 @@ class AlertAnalysisBase < ContentBase
   def log_stack_trace(e)
     if self.class.test_mode
       puts e.message
-      puts e.backtrace
+      puts e.backtrace unless exclude_backtrace?(e.message)
     end
     logger.warn e.message
     logger.warn e.backtrace
+  end
+
+  private def exclude_backtrace?(message)
+    [
+      'Not enough samples for model to provide good regression fit',
+      'Not enough data: 1 year of data required',
+      'Not enough data: 2 years of data required'
+    ].any?{ |exclude| message.include?(exclude) }
   end
 
   def benchmark_dates(asof_date)
@@ -355,9 +363,20 @@ class AlertAnalysisBase < ContentBase
     meter.amr_data.kwh_date_range(start_date, end_date, data_type)
   end
 
-  protected def kwhs_date_range(meter, start_date, end_date, data_type = :kwh)
-    return nil if meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date
-    (start_date..end_date).to_a.map { |date| meter.amr_data.one_day_kwh(date, data_type) }
+  protected def kwhs_date_range(meter, start_date, end_date, data_type = :kwh, min_days_data = nil)
+    if min_days_data.nil?
+      return nil if meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date
+      (start_date..end_date).to_a.map { |date| meter.amr_data.one_day_kwh(date, data_type) }
+    else
+      sd = [meter.amr_data.start_date, start_date].max
+      ed = [meter.amr_data.end_date  , end_date].min
+      days = ed - sd + 1
+      if (meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date) && days < min_days_data
+        nil
+      else
+        (sd..ed).to_a.map { |date| meter.amr_data.one_day_kwh(date, data_type) }
+      end
+    end
   end
 
   protected def kwh(date1, date2, data_type = :kwh)

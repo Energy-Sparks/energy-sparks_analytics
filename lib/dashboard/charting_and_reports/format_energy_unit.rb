@@ -221,6 +221,7 @@ class FormatEnergyUnit
   end
 
   def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)
+    return 'Infinity' unless value.infinite?.nil?
     number = significant_figures_user_type(value, user_numeric_comprehension_level)
     return 0.to_s if number.zero?
     before_decimal_point = number.to_s.gsub(/^(.*)\..*$/, '\1')
@@ -255,8 +256,8 @@ class FormatEnergyUnit
 
   def self.no_recent_or_not_enough_data?(value)
     [
-      HeadTeachersSchoolSummaryTable::NO_RECENT_DATA_MESSAGE, 
-      HeadTeachersSchoolSummaryTable::NOT_ENOUGH_DATA_MESSAGE
+      ManagementSummaryTable::NO_RECENT_DATA_MESSAGE, 
+      ManagementSummaryTable::NOT_ENOUGH_DATA_MESSAGE
     ].include?(value)
   end
 

@@ -962,7 +962,7 @@ class DashboardEnergyAdvice
 
     private def reducing_baseload_by_10_percent
       return '' if !@school.electricity?
-      aggregate_electric_amr = @school.unaltered_aggregated_electricity_meters.amr_data
+      aggregate_electric_amr = @school.aggregated_unaltered_electricity_meters.amr_data
       start_date = [aggregate_electric_amr.start_date, aggregate_electric_amr.end_date - 365].max
       average_baseload_kw = aggregate_electric_amr.average_baseload_kw_date_range(start_date, aggregate_electric_amr.end_date)
       annual_10_percent_baseload_kwh = average_baseload_kw * 365 * 24 * 0.1

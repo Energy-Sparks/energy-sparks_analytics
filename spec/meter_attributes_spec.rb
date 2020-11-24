@@ -295,20 +295,80 @@ describe MeterAttributes do
     end
   end
 
+  describe MeterAttributes::SolarPVOverrides do
+    it 'accepts a hash and parses the values and keys it using the class definition' do
+      attribute = MeterAttributes::SolarPVOverrides.parse({
+        start_date:         '1/1/2017',
+        end_date:           '2/2/2017',
+        kwp:                '30.0',
+        orientation:        '1',
+        tilt:               '180',
+        shading:            30,
+        fit_£_per_kwh:      '20.0',
+        override_generation:    'true',
+        override_export:        'true',
+        override_self_consume:  'true'
+      })
+      expect(attribute.to_analytics).to eq(
+        {
+          start_date:         Date.new(2017, 1, 1),
+          end_date:           Date.new(2017, 2, 2),
+          kwp:                30.0,
+          orientation:        1,
+          tilt:               180,
+          shading:            30,
+          fit_£_per_kwh:      20.0
+          override_generation:    true,
+          override_export:        true,
+          override_self_consume:  true
+        }
+      )
+    end
+  end
+
+  describe MeterAttributes::SolarPVMeterMapping do
+    it 'accepts a hash and parses the values and keys it using the class definition' do
+      attribute = MeterAttributes::SolarPV.SolarPVMeterMapping({
+        start_date:         '1/1/2017',
+        end_date:           '2/2/2017',
+        export_mpan:        '123456',
+        production_mpan:    '123457',
+        self_consume_mpan:  '123458'
+      })
+      expect(attribute.to_analytics).to eq(
+        {
+          start_date:         Date.new(2017, 1, 1),
+          end_date:           Date.new(2017, 2, 2),
+          export_mpan:        '123456',
+          production_mpan:    '123457',
+          self_consume_mpan:  '123458'
+        }
+      )
+    end
+  end
+
+  class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
+  
+    id                  :solar_pv_mpan_meter_mapping
+    aggregate_over      :solar_pv_mpan_meter_mapping
+    name                'Solar PV MPAN Meter mapping'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date:         MeterAttributeTypes::Date.define(required: true),
+        end_date:           MeterAttributeTypes::Date.define,
+        export_mpan:        MeterAttributeTypes::String.define,
+        production_mpan:    MeterAttributeTypes::String.define,
+        self_consume_mpan:  MeterAttributeTypes::String.define
+      }
+    )
+  end
+
   describe MeterAttributes::LowCarbonHub do
     it 'accepts a string or symbol and keys it using the class defined key' do
       attribute = MeterAttributes::LowCarbonHub.parse('2345')
       expect(attribute.to_analytics).to eq(
         {low_carbon_hub_meter_id: 2345}
-      )
-    end
-  end
-
-  describe MeterAttributes::SolarForSchools do
-    it 'accepts a string or symbol and keys it using the class defined key' do
-      attribute = MeterAttributes::SolarForSchools.parse('2345')
-      expect(attribute.to_analytics).to eq(
-        {solar_for_schools_meter_id: 2345}
       )
     end
   end
