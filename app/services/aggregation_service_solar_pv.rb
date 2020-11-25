@@ -296,7 +296,7 @@ class AggregateDataServiceSolar
   def meter_start_date(mpan_pv_map)
     if mpan_pv_map[:start_date].nil?
       # TODO(PH, 18Nov2020) - legacy, remove once now mandatory mapping :start_date set
-      mapped_meters = MPAN_KEY_MAPPINGS.values.compact.map do |type|
+      mapped_meters = PVMap::MPAN_KEY_MAPPINGS.values.compact.map do |type|
         @electricity_meters.detect{ |m| m.mpan_mprn.to_s == mpan_pv_map[type] }
       end.compact
       mapped_meters.map{ |meter| meter.amr_data.start_date }.max
