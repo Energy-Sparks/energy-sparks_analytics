@@ -178,7 +178,8 @@ class AggregateDataServiceSolar
     # self_consumption = solar pv production - export
     onsite_consumpton_amr_data = aggregate_amr_data(
       [pv_meter_map[:generation], pv_meter_map[:export]],
-      :electricity
+      :electricity,
+      true
       )
 
     make_all_amr_data_positive(onsite_consumpton_amr_data)
@@ -196,7 +197,8 @@ class AggregateDataServiceSolar
   def create_mains_plus_self_consume_meter(pv_meter_map)
     consumpton_amr_data = aggregate_amr_data(
       [pv_meter_map[:self_consume], pv_meter_map[:mains_consume]],
-      :electricity
+      :electricity,
+      true
       )
 
     pv_meter_map[:mains_plus_self_consume] = create_modified_meter_copy(

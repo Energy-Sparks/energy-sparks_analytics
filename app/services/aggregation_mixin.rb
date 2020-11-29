@@ -14,13 +14,13 @@ module AggregationMixin
     )
   end
 
-  private def aggregate_amr_data(meters, type)
+  private def aggregate_amr_data(meters, type, ignore_rules = false)
     if meters.length == 1
       logger.info "Single meter, so aggregation is a reference to itself not an aggregate meter"
       return meters.first.amr_data # optimisaton if only 1 meter, then its its own aggregate
     end
-    min_date, max_date = combined_amr_data_date_range(meters)
-    logger.info "Aggregating data between #{min_date} #{max_date}"
+    min_date, max_date = combined_amr_data_date_range(meters, ignore_rules)
+    logger.info "Aggregating data between #{min_date} and #{max_date}"
 
     mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
     combined_amr_data = AMRData.new(type)
@@ -35,7 +35,22 @@ module AggregationMixin
   end
 
   # for overlapping data i.e. date range where there is data for all meters
-  def combined_amr_data_date_range(meters)
+  def combined_amr_data_date_range(meters, ignore_rules)
+    if ignore_rules
+      combined_amr_data_date_range_no_rules(meters)
+    else
+      combined_amr_data_date_range_with_rules(meters)
+    end
+  end
+
+  def combined_amr_data_date_range_no_rules(meters)
+    [
+      meters.map{ |m| m.amr_data.start_date }.max,
+      meters.map{ |m| m.amr_data.end_date   }.min
+    ]
+  end
+
+  def combined_amr_data_date_range_with_rules(meters)
     start_dates = []
     end_dates = []
     meters.each do |meter|

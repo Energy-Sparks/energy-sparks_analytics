@@ -13,10 +13,10 @@ script = {
   # dark_sky_temperatures:    nil,
   # grid_carbon_intensity:    nil,
   # sheffield_solar_pv:       nil,
-  no_schools:                  ['hhhhhhhhh*'], # ['Round.*'],
+  no_schools:                  ['st-mart*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
-  schools:                  ['long*'],
+  schools:                  ['st-mart*'],
   no_source:                   :analytics_db, # : analytics_db :aggregated_meter_collection :unvalidated_meter_data :load_unvalidated_meter_collection, 
   source:                   :unvalidated_meter_data, #  :aggregated_meter_collection,
   # 
