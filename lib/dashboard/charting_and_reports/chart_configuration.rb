@@ -194,6 +194,10 @@ class ChartManager
       yaxis_scaling:    :none,
       timescale:        :year
     },
+    management_dashboard_group_by_week_electricity: {
+      inherits_from:    :group_by_week_electricity,
+      timescale:        :up_to_a_year
+    },
     electricity_co2_last_year_weekly_with_co2_intensity: {
       name:             'The carbon emissions of your school and the carbon intensity of the National Electricity Grid over the last year',
       inherits_from:    :group_by_week_electricity,
@@ -518,6 +522,10 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :degreedays,
       timescale:        :year
+    },
+    management_dashboard_group_by_week_gas: {
+      inherits_from:    :group_by_week_gas,
+      timescale:        :up_to_a_year
     },
     alert_group_by_week_gas: {
       inherits_from:    :group_by_week_gas,
