@@ -338,12 +338,43 @@ class AggregateDataServiceSolar
   def map_real_meters(pv_meter_map)
     mappings = pv_meter_map[:mains_consume].attributes(:solar_pv_mpan_meter_mapping)
     return if mappings.nil?
+    puts "Got here #{mappings}"
     mappings.each do |map|
       PVMap.mpan_maps(map).each do |meter_type, mpan|
         meter = @meter_collection.electricity_meters.find{ |meter1| meter1.mpan_mprn.to_s == mpan }
-        @meter_collection.electricity_meters.delete_if { |meter| meter.mpan_mprn.to_s == mpan.to_s }
+        @meter_collection.electricity_meters.delete_if { |m| m.mpan_mprn.to_s == mpan.to_s }
         pv_meter_map[PVMap.attribute_map_meter_type(meter_type)] = meter
+        truncate_meter_dates(meter, map)
       end
+    end
+  end
+
+  def truncate_meter_dates(meter, map)
+    truncate_start_date(meter, map[:start_date])
+    truncate_end_date(meter, map[:end_date])
+  end
+
+  def truncate_start_date(meter, start_date)
+    return if start_date.nil?
+    if start_date < meter.amr_data.start_date
+      log "Error: solar_pv_mpan_meter_mapping meter attribute start_date #{start_date} < meter start_date #{meter.amr_data.start_date}"
+    elsif start_date > meter.amr_data.end_date
+      log "Error: solar_pv_mpan_meter_mapping meter attribute start_date #{start_date} > meter end_date #{meter.amr_data.end_date}"
+    else
+      puts "Warning: overriding amr start date to #{start_date} for meter #{meter.mpan_mprn}"
+      meter.amr_data.set_start_date(start_date)
+    end
+  end
+
+  def truncate_end_date(meter, end_date)
+    return if end_date.nil?
+    if end_date > meter.amr_data.end_date
+      log "Error: solar_pv_mpan_meter_mapping meter attribute end_date #{end_date} > meter end_date #{meter.amr_data.end_date}"
+    elsif end_date < meter.amr_data.start_date
+      log "Error: solar_pv_mpan_meter_mapping meter attribute end_date #{end_date} < meter start_date #{meter.amr_data.start_date}"
+    else
+      log "Warning: overriding amr end date to #{end_date} for meter #{meter.mpan_mprn}"
+      meter.amr_data.set_end_date(end_date)
     end
   end
 end
