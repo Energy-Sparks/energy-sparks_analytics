@@ -406,7 +406,7 @@ class ValidateAMRData
 
   def in_meter_correction_period?(date)
     @meter.meter_correction_rules.each do |rule|
-      if rule.key?(:auto_insert_missing_readings) &&
+      if rule.is_a?(Hash) && rule.key?(:auto_insert_missing_readings) &&
          rule[:auto_insert_missing_readings][:type] == :date_range
         if date >= rule[:auto_insert_missing_readings][:start_date] &&
             date <= rule[:auto_insert_missing_readings][:end_date]
