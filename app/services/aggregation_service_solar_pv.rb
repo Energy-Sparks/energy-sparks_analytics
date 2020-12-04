@@ -74,6 +74,7 @@ class AggregateDataServiceSolar
         pv_meter_map = setup_meter_map(mains_electricity_meter)
         process_solar_pv_electricity_meter(pv_meter_map)
       else
+        reference_as_sub_meter_for_subsequent_aggregation(mains_electricity_meter)
         mains_electricity_meter
       end
     end
@@ -138,6 +139,11 @@ class AggregateDataServiceSolar
   def log(str)
     logger.info str
     # puts str # comment out for release to production
+  end
+
+  def reference_as_sub_meter_for_subsequent_aggregation(mains_electricity_meter)
+    log "Referencing mains consumption meter {mains_electricity_meter.mpan_mprn} without pv as sub meter for subsequent aggregation"
+    mains_electricity_meter.sub_meters[:mains_consume] = mains_electricity_meter
   end
 
   def clean_pv_meter_start_and_end_dates(pv_meter_map)
