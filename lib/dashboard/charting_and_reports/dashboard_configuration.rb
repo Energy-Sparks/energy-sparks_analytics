@@ -5,7 +5,7 @@ class DashboardConfiguration
                                 charts: %i[
                                   benchmark
                                   daytype_breakdown_electricity
-                                  group_by_week_electricity
+                                  management_dashboard_group_by_week_electricity
                                 ]
                               },
     main_dashboard_electric_solar:  {
@@ -13,7 +13,7 @@ class DashboardConfiguration
                                 charts: %i[
                                   benchmark_kwh_electric_only
                                   daytype_breakdown_electricity
-                                  group_by_week_electricity
+                                  management_dashboard_group_by_week_electricity
                                   solar_pv_group_by_month_dashboard_overview
                                 ]
                               },
@@ -23,14 +23,14 @@ class DashboardConfiguration
                                 charts: %i[
                                   benchmark
                                   daytype_breakdown_gas
-                                  group_by_week_gas
+                                  management_dashboard_group_by_week_gas
                                 ]
                               },
     electricity_detail:      {
                                 name:   'Electricity Detail',
                                 charts: %i[
                                   daytype_breakdown_electricity
-                                  group_by_week_electricity
+                                  management_dashboard_group_by_week_electricity
                                   group_by_week_electricity_unlimited
                                   electricity_longterm_trend
                                   electricity_by_day_of_week
@@ -49,7 +49,7 @@ class DashboardConfiguration
                                 name:   'Gas Detail',
                                 charts: %i[
                                   daytype_breakdown_gas
-                                  group_by_week_gas
+                                  management_dashboard_group_by_week_gas
                                   group_by_week_gas_unlimited
                                   gas_longterm_trend
                                   gas_by_day_of_week
@@ -156,8 +156,8 @@ class DashboardConfiguration
                                   benchmark
                                   daytype_breakdown_electricity
                                   daytype_breakdown_gas
-                                  group_by_week_electricity
-                                  group_by_week_gas
+                                  management_dashboard_group_by_week_electricity
+                                  management_dashboard_group_by_week_gas
                                 ]
                               },
     main_dashboard_electric_and_gas_and_solar: {
@@ -166,15 +166,15 @@ class DashboardConfiguration
                                   benchmark_kwh
                                   daytype_breakdown_electricity
                                   daytype_breakdown_gas
-                                  group_by_week_electricity
-                                  group_by_week_gas
+                                  management_dashboard_group_by_week_electricity
+                                  management_dashboard_group_by_week_gas
                                   solar_pv_group_by_month_dashboard_overview
                                 ]
                               },
     boiler_control:           {
                                 name: 'Advanced Boiler Control',
                                 charts: %i[
-                                  group_by_week_gas
+                                  management_dashboard_group_by_week_gas
                                   frost_1
                                   frost_2
                                   frost_3
@@ -320,7 +320,7 @@ class DashboardConfiguration
         storage_heaters:      {
                                   name: 'Storage Heaters',
                                   charts: %i[
-                                    storage_heater_group_by_week
+                                    management_dashboard_group_by_week_storage_heater
                                     storage_heater_group_by_week_long_term
                                     storage_heater_by_day_of_week
                                     storage_heater_intraday_current_year
@@ -334,7 +334,7 @@ class DashboardConfiguration
                                 name: 'Solar PV',
                                 change_measurement_units:   false,
                                 charts: %i[
-                                  solar_pv_group_by_month
+                                  management_dashboard_group_by_month_solar_pv
                                   solar_pv_last_7_days_by_submeter
                                 ],
                               },

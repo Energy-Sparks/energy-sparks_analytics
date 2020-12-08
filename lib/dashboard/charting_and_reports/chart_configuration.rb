@@ -240,6 +240,10 @@ class ChartManager
       replace_series_label: [['School Day Closed', 'Storage heater charge (school day)']],
       y2_axis:              :degreedays
     },
+    management_dashboard_group_by_week_storage_heater: {
+      inherits_from:        :storage_heater_group_by_week,
+      timescale:            :up_to_a_year
+    },
     storage_heater_by_day_of_week: {
       name:               'Storage heater usage by day of the week',
       inherits_from:      :gas_by_day_of_week,
@@ -384,6 +388,9 @@ class ChartManager
     solar_pv_group_by_month_dashboard_overview: {
       inherits_from:      :solar_pv_group_by_month,
       reason:             'simplified text used for overview page, requires different chart name'
+    },
+    management_dashboard_group_by_month_solar_pv: {
+      inherits_from:      :solar_pv_group_by_month
     },
     solar_pv_last_7_days_by_submeter: {
       name:               'The last 7 days of your school’s electricity consumption',
