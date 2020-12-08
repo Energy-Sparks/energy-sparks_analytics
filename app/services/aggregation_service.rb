@@ -49,7 +49,8 @@ class AggregateDataService
   private
 
   private def process_electricity_meters
-    create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
+    # PH: commented out 7Dec2020 as may not be necessary
+    # create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
 
     process_solar_meters
 
@@ -72,6 +73,7 @@ class AggregateDataService
 
   private def set_long_gap_boundary_on_all_meters
     @meter_collection.all_meters.each do |meter|
+      logger.info "Considering setting long gap boundaries on #{meter.mpan_mprn}?"
       meter.amr_data.set_long_gap_boundary
     end
   end
@@ -103,7 +105,9 @@ class AggregateDataService
   end
 
   def aggregate_sub_meters_by_type(combined_meter, meters)
+    logger.info "Aggregating sub meters for combined meter #{combined_meter.to_s} and main electricity meters #{meters.map{ |m| m.to_s}.join(' ')}"
     sub_meter_types = meters.map{ |m| m.sub_meters.keys }.flatten.compact.uniq
+    logger.info "Aggregating these types of sub meters: #{sub_meter_types}"
 
     sub_meters_grouped_by_type = sub_meter_types.map do |sub_meter_type|
       [
@@ -113,11 +117,17 @@ class AggregateDataService
     end.to_h
 
     sub_meters_grouped_by_type.each do |sub_meter_type, sub_meters|
+      logger.info '---------sub meter aggregation----------' * 2
+      logger.info "    Combining type #{sub_meter_type} for #{sub_meters.map{ |m| m.to_s}.join(' ')}"
+      AggregateDataServiceSolar.new(@meter_collection).backfill_meters_with_zeros(sub_meters, combined_meter.amr_data.start_date)
       combined_sub_meter = aggregate_meters(nil, sub_meters, sub_meters[0].fuel_type)
       combined_sub_meter.id   = sub_meters[0].id
       combined_sub_meter.name = sub_meters[0].name
       combined_meter.sub_meters[sub_meter_type] = combined_sub_meter
+      combined_sub_meter.name = SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME if sub_meter_type == :mains_consume
     end
+    logger.info "Completed sub meter aggregation for: #{combined_meter.to_s}"
+    combined_meter.sub_meters.each { |t, m| logger.info "   #{t}: #{m.to_s}" }
   end
 
   # if an electricity meter is split up into a storage and non-storage version

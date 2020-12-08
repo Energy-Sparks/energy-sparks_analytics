@@ -82,6 +82,12 @@ class AggregateDataServiceSolar
     processed_electricity_meters
   end
 
+  def backfill_meters_with_zeros(meters, mains_meter_start_date)
+    meters.each do |meter|
+      backfill_meter_with_zeros(meter, mains_meter_start_date, meter.amr_data.start_date)
+    end
+  end
+
   private
 
   def process_solar_pv_electricity_meter(pv_meter_map)
@@ -255,6 +261,7 @@ class AggregateDataServiceSolar
     mains_electricity_meter = pv_meter_map[:mains_consume]
     pv_meter_map.each do |meter_type, meter|
       next if meter.nil? || meter_type == :mains_consume
+      log "Mains meter start date #{mains_electricity_meter.amr_data.start_date} pv meter #{meter.mpan_mprn} #{meter.fuel_type} start date #{meter.amr_data.start_date}"
       raise EnergySparksUnexpectedStateException, "Meter should have been backfilled to #{mains_electricity_meter.amr_data.start_date} but set to #{meter.amr_data.start_date}" if mains_electricity_meter.amr_data.start_date > meter.amr_data.start_date
       if meter.amr_data.start_date < mains_electricity_meter.amr_data.start_date
         log "Truncating meter #{meter.mpan_mprn} to start date of electricity meter #{mains_electricity_meter.amr_data.start_date}"
