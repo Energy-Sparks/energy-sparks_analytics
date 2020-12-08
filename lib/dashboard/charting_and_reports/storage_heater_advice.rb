@@ -6,7 +6,7 @@ class DashboardEnergyAdvice
 
   def self.storage_heater_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
     case chart_type
-    when :storage_heater_group_by_week
+    when :storage_heater_group_by_week, :management_dashboard_group_by_week_storage_heater
       StorageHeaterGroupByWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :storage_heater_group_by_week_long_term
       StorageHeaterWeeklyLongTermAdvice.new(school, chart_definition, chart_data, chart_symbol)

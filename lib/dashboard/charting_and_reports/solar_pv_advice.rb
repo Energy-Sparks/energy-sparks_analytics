@@ -6,7 +6,7 @@ class DashboardEnergyAdvice
 
   def self.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
     case chart_type
-    when :solar_pv_group_by_month
+    when :solar_pv_group_by_month, :management_dashboard_group_by_month_solar_pv
       SolarPVVersusIrradianceLastYearAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :solar_pv_group_by_month_dashboard_overview
       SolarPVVersusIrradianceLastYearOverviewAdvice.new(school, chart_definition, chart_data, chart_symbol)

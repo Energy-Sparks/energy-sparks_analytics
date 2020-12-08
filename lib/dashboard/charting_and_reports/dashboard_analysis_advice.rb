@@ -74,11 +74,11 @@ class DashboardChartAdviceBase
       GasDaytypeAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :gas_heating_season_intraday, :gas_heating_season_intraday_up_to_1_year
       GasHeatingIntradayAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :group_by_week_electricity
+    when :group_by_week_electricity, :management_dashboard_group_by_week_electricity
       ElectricityWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :group_by_week_electricity_unlimited, :group_by_week_gas_unlimited
       WeeklyLongTermAdvice.new(school, chart_definition, chart_data, chart_symbol)
-    when :group_by_week_gas
+    when :group_by_week_gas, :management_dashboard_group_by_week_gas
       GasWeeklyAdvice.new(school, chart_definition, chart_data, chart_symbol)
     when :electricity_by_day_of_week, :electricity_by_day_of_week_tolerant
       ElectricityDayOfWeekAdvice.new(school, chart_definition, chart_data, chart_symbol)
