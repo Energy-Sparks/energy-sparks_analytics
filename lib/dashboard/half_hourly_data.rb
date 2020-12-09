@@ -154,23 +154,19 @@ class HalfHourlyData < Hash
   end
 
   def set_start_date(date)
+    logger.info "setting start date to #{date} truncating prior data"
     @min_date = date
+    self.delete_if{ |d, _value| d < date }
   end
 
   def set_end_date(date)
+    logger.info "setting end date to #{date} truncating post data"
     @max_date = date
+    self.delete_if{ |d, _value| d > date }
   end
 
   def days
     end_date - start_date + 1
-  end
-
-  def set_min_date(min_date)
-    @min_date = min_date
-  end
-
-  def set_max_date(max_date)
-    @max_date = max_date
   end
 
   def set_validated(valid)

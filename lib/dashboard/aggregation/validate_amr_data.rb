@@ -82,17 +82,17 @@ class ValidateAMRData
         rule[:rescale_amr_data][:scale]
       )
     elsif rule.key?(:readings_start_date)
-      logger.debug "Fixing start date to #{rule[:readings_start_date]}"
-      substitute_data = Array.new(48, 0.0)
       fix_start_date = rule[:readings_start_date]
-      @amr_data.add(fix_start_date, OneDayAMRReading.new(meter_id, fix_start_date, 'FIXS', nil, DateTime.now, substitute_data))
-      @amr_data.set_min_date(rule[:readings_start_date])
+      logger.debug "Fixing start date to #{fix_start_date}"
+      substitute_data_x48 = @amr_data.one_days_data_x48(fix_start_date)
+      @amr_data.add(fix_start_date, OneDayAMRReading.new(meter_id, fix_start_date, 'FIXS', nil, DateTime.now, substitute_data_x48))
+      @amr_data.set_start_date(fix_start_date)
     elsif rule.key?(:readings_end_date)
-      logger.debug "Fixing end date to #{rule[:readings_end_date]}"
-      substitute_data = Array.new(48, 0.0)
       fix_end_date = rule[:readings_end_date]
-      @amr_data.add(fix_end_date, OneDayAMRReading.new(meter_id, fix_end_date, 'FIXE', nil, DateTime.now, substitute_data))
-      @amr_data.set_max_date(rule[:readings_end_date])
+      logger.debug "Fixing end date to #{fix_end_date}"
+      substitute_data_x48 = @amr_data.one_days_data_x48(fix_end_date)
+      @amr_data.add(fix_end_date, OneDayAMRReading.new(meter_id, fix_end_date, 'FIXE', nil, DateTime.now, substitute_data_x48))
+      @amr_data.set_end_date(fix_end_date)
     elsif rule.key?(:set_bad_data_to_zero)
       zero_data_in_date_range(
         rule[:set_bad_data_to_zero][:start_date],
@@ -429,7 +429,7 @@ class ValidateAMRData
       end
       if gap_count > @max_days_missing_data && !in_meter_correction_period?(date)
         min_date = first_bad_date + 1
-        @amr_data.set_min_date(min_date)
+        @amr_data.set_start_date(min_date)
         msg =  'Ignoring all data before ' + min_date.strftime(FSTRDEF)
         msg += ' as gap of more than ' + @max_days_missing_data.to_s + ' days '
         msg += (@amr_data.keys.index(min_date) - 1).to_s + ' days of data ignored'

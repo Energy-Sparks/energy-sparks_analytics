@@ -337,11 +337,11 @@ class AMRData < HalfHourlyData
     end
     unless override_start_date.nil?
       logger.info "Overriding start_date of amr data from #{self.start_date} to #{override_start_date}"
-      set_min_date(override_start_date)
+      set_start_date(override_start_date)
     end
     unless override_end_date.nil?
       logger.info "Overriding end_date of amr data from #{self.end_date} to #{override_end_date}"
-      set_max_date(override_end_date) unless override_end_date.nil?
+      set_end_date(override_end_date) unless override_end_date.nil?
     end
   end
 

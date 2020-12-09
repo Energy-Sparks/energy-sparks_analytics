@@ -682,8 +682,8 @@ private
       list_of_meters.each do |meter|
         begin
           if halfhour_index.nil?
-            start_date, end_date, ok = truncate_date_range_to_aggregate(aggregate_meter, start_date, end_date)
-            breakdown[meter.display_name] = ok ? amr_data_date_range(meter, start_date, end_date, kwh_cost_or_co2) : 0.0
+            sd, ed, ok = truncate_date_range(aggregate_meter, meter, start_date, end_date)
+            breakdown[meter.display_name] = ok ? amr_data_date_range(meter, sd, ed, kwh_cost_or_co2) : 0.0
           else
             breakdown[meter.display_name] = 0.0
             (start_date..end_date).each do |date|
@@ -709,9 +709,9 @@ private
     date.between?(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date)
   end
 
-  def truncate_date_range_to_aggregate(aggregate_meter, start_date, end_date)
-    start_date = [start_date, aggregate_meter.amr_data.start_date].max
-    end_date   = [end_date,   aggregate_meter.amr_data.end_date  ].min
+  def truncate_date_range(aggregate_meter, meter, start_date, end_date)
+    start_date = [start_date, aggregate_meter.amr_data.start_date, meter.amr_data.start_date].max
+    end_date   = [end_date,   aggregate_meter.amr_data.end_date,   meter.amr_data.end_date  ].min
     [start_date, end_date, start_date <= end_date]
   end
 

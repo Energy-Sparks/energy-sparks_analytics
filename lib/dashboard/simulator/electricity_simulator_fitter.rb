@@ -8,7 +8,7 @@ class ElectricitySimulator
   def fit(appliance_definitions)
     @working_amr_data = Marshal.load(Marshal.dump(@existing_electricity_meter.amr_data))
     if @working_amr_data.start_date < @school.solar_pv.start_date
-      @working_amr_data.set_min_date(@school.solar_pv.start_date)
+      @working_amr_data.set_start_date(@school.solar_pv.start_date)
     end
 
     modified_config = appliance_definitions.clone
