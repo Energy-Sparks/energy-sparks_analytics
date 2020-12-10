@@ -84,7 +84,7 @@ class AggregateDataServiceSolar
 
   def backfill_meters_with_zeros(meters, mains_meter_start_date)
     meters.each do |meter|
-      backfill_meter_with_zeros(meter, mains_meter_start_date, meter.amr_data.start_date)
+      backfill_meter_with_zeros(meter, mains_meter_start_date, meter.amr_data.start_date - 1)
     end
   end
 
@@ -252,8 +252,7 @@ class AggregateDataServiceSolar
       next if meter.nil? || meter_type == :mains_consume
       mpan_mapping_start_date = earliest_mpan_mapping_attribute(pv_meter_map[:mains_consume], meter_type)
       mains_meter_start_date  = pv_meter_backfill_start_date(pv_meter_map[:mains_consume])
-      start_date = [mpan_mapping_start_date, mains_meter_start_date].min
-      backfill_meter_with_zeros(meter, start_date, mpan_mapping_start_date)
+      backfill_meter_with_zeros(meter, mains_meter_start_date, mpan_mapping_start_date - 1)
     end
   end
 
@@ -323,10 +322,21 @@ class AggregateDataServiceSolar
   # to save endless checking downstream in the analysis code
   # backfill pv meters which don't extend backwards as far as the
   # mains electricity meter with zeros
-  def backfill_meter_with_zeros(meter, mains_meter_start_date, mpan_mapping_start_date)
+  def backfill_meter_with_zeros_deprecated(meter, mains_meter_start_date, mpan_mapping_start_date)
     return if mains_meter_start_date >= meter.amr_data.start_date
     log "Backfilling pv meter #{meter.mpan_mprn} with zeros between #{mains_meter_start_date} and #{meter.amr_data.start_date}"
     (mains_meter_start_date..meter.amr_data.start_date).each do |date|
+      meter.amr_data.add(date, OneDayAMRReading.zero_reading(meter.id, date, 'BKPV'))
+    end
+  end
+
+    # to save endless checking downstream in the analysis code
+  # backfill pv meters which don't extend backwards as far as the
+  # mains electricity meter with zeros
+  def backfill_meter_with_zeros(meter, start_date, end_date)
+    return if start_date >= meter.amr_data.start_date
+    log "Backfilling pv meter #{meter.mpan_mprn} with zeros between #{start_date} and #{end_date}"
+    (start_date..end_date).each do |date|
       meter.amr_data.add(date, OneDayAMRReading.zero_reading(meter.id, date, 'BKPV'))
     end
   end
