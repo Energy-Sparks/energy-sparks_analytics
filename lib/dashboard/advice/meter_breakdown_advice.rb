@@ -6,7 +6,7 @@ class AdviceMeterBreakdownBase < AdviceBase
   end
 
   def relevance
-    aggregate_meter.nil? || underlying_meters.length <= 1  ? :never_relevant : :relevant
+    aggregate_meter.nil? || underlying_meters.length <= 1 || aggregate_meter.amr_data.days < 14 ? :never_relevant : :relevant
   end
 
   def self.template_variables
