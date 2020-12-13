@@ -17,6 +17,7 @@ script = {
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
   schools:                  ['st-mart*','paul*','long*','prend*','saund*','fresh*'],
+  schools:                  ['wimble*', 'fresh*', 'trini*'],
   no_source:                   :analytics_db, # : analytics_db :aggregated_meter_collection :unvalidated_meter_data :load_unvalidated_meter_collection, 
   source:                   :unvalidated_meter_data, #  :aggregated_meter_collection,
   # 
@@ -26,9 +27,12 @@ script = {
                                 # :dashboard,
                                 adhoc_worksheet: { name: 'Test', charts: %i[
                                     management_dashboard_group_by_week_electricity
-                                    solar_pv_group_by_month
-                                    solar_pv_last_7_days_by_submeter
                                   ]},
+
+                                  # management_dashboard_group_by_week_electricity
+                                  # solar_pv_group_by_month
+                                  # solar_pv_last_7_days_by_submeter
+                                  # group_by_week_electricity_meter_breakdown_one_year
 
                                   # solar_pv_last_7_days_by_submeter
                                 # adhoc_worksheet: { name: 'Test', charts: %i[calendar_picker_electricity_week_example_comparison_chart

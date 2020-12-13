@@ -33,8 +33,15 @@ class RunAdultDashboard < RunCharts
 
     advice = definition[:content_class].new(@school) # , )
 
-    puts "Page failed, as advice not valid #{page}" unless advice.valid_alert?
-    return unless advice.valid_alert?
+    unless advice.valid_alert?
+      puts "Page failed, as advice not valid #{page}" 
+      return
+    end
+
+    unless advice.relevance == :relevant
+      puts "Page failed, as advice not relevant #{page}" 
+      return
+    end
 
     advice.calculate
 
