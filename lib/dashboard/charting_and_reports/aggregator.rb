@@ -8,7 +8,7 @@
 class Aggregator
   include Logging
 
-  attr_reader :bucketed_data, :total_of_unit, :series_sums, :x_axis, :y2_axis
+  attr_reader :bucketed_data, :total_of_unit, :x_axis, :y2_axis
   attr_reader :x_axis_bucket_date_ranges, :data_labels, :x_axis_label
   attr_reader :first_meter_date, :last_meter_date
 
@@ -90,8 +90,6 @@ class Aggregator
     humanize_legend if humanize_legend?
 
     relabel_legend if relabel_legend?
-
-    aggregate_by_series
 
     @chart_config[:y_axis_label] = y_axis_label(nil)
 
@@ -876,21 +874,6 @@ class Aggregator
       matched += @bucketed_data.keys.select{ |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
     end
     matched
-  end
-
-  # once the aggregation process is complete, add up the aggregated data per series
-  # for additional series total information which can be added to the chart legend and title
-  def aggregate_by_series
-    if @bucketed_data.nil?
-      @total_of_unit = Float::NAN
-    else
-      @series_sums = {}
-      @total_of_unit = 0.0
-      @bucketed_data.each do |series_name, data|
-        @series_sums[series_name] = data.map { |x| (x.nil? || x.is_a?(Integer) || x.nan?) ? 0.0 : x }.sum unless data.is_a?(Symbol)
-      end
-      @total_of_unit = @series_sums.values.sum
-    end
   end
 
   def all_values_deprecated(obj)

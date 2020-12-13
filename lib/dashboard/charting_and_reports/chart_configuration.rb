@@ -1,4 +1,5 @@
 require_relative './series_data_manager.rb'
+require_relative './chart_dynamic_x_axis.rb'
 require_relative '../simulator/solar_pv_panels.rb'
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
@@ -196,6 +197,7 @@ class ChartManager
     },
     management_dashboard_group_by_week_electricity: {
       inherits_from:    :group_by_week_electricity,
+      x_axis:           ChartDynamicXAxis.standard_up_to_1_year_dynamic_x_axis,
       timescale:        :up_to_a_year
     },
     electricity_co2_last_year_weekly_with_co2_intensity: {

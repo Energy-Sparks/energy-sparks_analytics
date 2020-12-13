@@ -48,7 +48,7 @@ class ChartManager
     chart_config = chart_config_original.dup
     while chart_config.key?(:inherits_from)
       base_chart_config_param = chart_config[:inherits_from]
-      base_chart_config = STANDARD_CHART_CONFIGURATION[base_chart_config_param].dup
+      base_chart_config = standard_chart(base_chart_config_param).dup
       chart_config.delete(:inherits_from)
       chart_config = base_chart_config.merge(chart_config)
     end
@@ -64,7 +64,8 @@ class ChartManager
 
   # Used by ES Web application
   def get_chart_config(chart_param, override_config = nil)
-    resolved_chart = resolve_chart_inheritance(STANDARD_CHART_CONFIGURATION[chart_param])
+    resolved_chart = resolve_chart_inheritance(standard_chart(chart_param))
+    resolved_chart = resolve_x_axis_grouping(resolved_chart)
     resolved_chart.merge!(override_config) unless override_config.nil?
     resolved_chart
   end
@@ -76,6 +77,7 @@ class ChartManager
     logger.info '>' * 120
 
     chart_config = resolve_chart_inheritance(chart_config) if resolve_inheritance
+    chart_config = resolve_x_axis_grouping(chart_config)
 
     # overrides standard chart config, for example if you want to override
     # the default meter if providing charts at meter rather than aggregate level
@@ -148,5 +150,19 @@ class ChartManager
     # ap(graph_definition, limit: 20)
     graph_definition[:calculation_time] = calculation_time
     graph_definition
+  end
+
+  private
+
+  def standard_chart(chart_name)
+    STANDARD_CHART_CONFIGURATION[chart_name]
+  end
+
+  def resolve_x_axis_grouping(chart_config)
+    if ChartDynamicXAxis.is_dynamic?(chart_config)
+      ChartDynamicXAxis.new(@school, chart_config).redefined_chart_config
+    else
+      chart_config
+    end
   end
 end
