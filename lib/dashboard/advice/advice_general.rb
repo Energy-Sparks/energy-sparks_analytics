@@ -33,10 +33,17 @@ class AdviceGasOutHours < AdviceGasBase;    end
 class AdviceGasAnnual   < AdviceGasBase;    end
 class AdviceBenchmark   < AdviceBase
   def alert_asof_date
-    [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.map { |meter| meter.amr_data.end_date }.min
+    valid_meters.map { |meter| meter.amr_data.end_date }.min
   end
   protected def aggregate_meter
     [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.first
+  end
+  def valid_alert?
+    super && valid_meters.all?{ |m| m.amr_data.days > 364 }
+  end
+  private
+  def valid_meters
+    [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact
   end
 end
 class AdviceElectricityOutHours < AdviceElectricityBase; end
