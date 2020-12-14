@@ -8,7 +8,11 @@ class ChartDynamicXAxis
   end
 
   def self.standard_up_to_1_year_dynamic_x_axis
-    { 28..Float::INFINITY => :week, 4..27 => :day, 0..3 =>  :datetime}
+    { 28..Float::INFINITY => :week, 4..27 => :day, 0..3 => :datetime}
+  end
+
+  def self.standard_solar_up_to_1_year_dynamic_x_axis
+    { 56..Float::INFINITY => :month, 4..55 => :day, 0..3 => :datetime}
   end
 
   def self.is_dynamic?(chart_config)
@@ -24,17 +28,17 @@ class ChartDynamicXAxis
   private
 
   def x_axis_grouping
+    return :year if aggregate_meter.nil?
     days_data = aggregate_meter.amr_data.days
-    @chart_config[:x_axis].select{ |date_range, _v| date_range === days_data }.values[0]
+    @chart_config[:x_axis].select{ |date_range, _v| date_range.include?(days_data) }.values[0]
   end
 
   def aggregate_meter
     case @chart_config[:meter_definition]
-    when :all; 
-    when :allheat; @meter_collection.aggregated_heat_meters
-    when :allelectricity; @meter_collection.aggregated_electricity_meters
-    when :storage_heater_meter; @meter_collection.storage_heater_meter
-    when :solar_pv_meter, :solar_pv; @meter_collection.aggregated_electricity_meters.sub_meters[:generation]
+    when :allheat then @meter_collection.aggregated_heat_meters
+    when :allelectricity then @meter_collection.aggregated_electricity_meters
+    when :storage_heater_meter then @meter_collection.storage_heater_meter
+    when :solar_pv_meter, :solar_pv then @meter_collection.aggregated_electricity_meters.sub_meters[:generation]
     else
       raise EnergySparksUnsupportedFunctionalityException, "Dynamic x axis grouping not supported on #{@chart_config[:meter_definition]} meter_definition chart config"
     end

@@ -244,6 +244,7 @@ class ChartManager
     },
     management_dashboard_group_by_week_storage_heater: {
       inherits_from:        :storage_heater_group_by_week,
+      x_axis:               ChartDynamicXAxis.standard_up_to_1_year_dynamic_x_axis,
       timescale:            :up_to_a_year
     },
     storage_heater_by_day_of_week: {
@@ -392,7 +393,8 @@ class ChartManager
       reason:             'simplified text used for overview page, requires different chart name'
     },
     management_dashboard_group_by_month_solar_pv: {
-      inherits_from:      :solar_pv_group_by_month
+      inherits_from:      :solar_pv_group_by_month,
+      x_axis:           ChartDynamicXAxis.standard_solar_up_to_1_year_dynamic_x_axis,
     },
     solar_pv_last_7_days_by_submeter: {
       name:               'The last 7 days of your school’s electricity consumption',
@@ -534,6 +536,7 @@ class ChartManager
     },
     management_dashboard_group_by_week_gas: {
       inherits_from:    :group_by_week_gas,
+      x_axis:           ChartDynamicXAxis.standard_up_to_1_year_dynamic_x_axis,
       timescale:        :up_to_a_year
     },
     alert_group_by_week_gas: {

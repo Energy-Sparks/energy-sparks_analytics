@@ -17,7 +17,7 @@ script = {
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
   schools:                  ['st-mart*','paul*','long*','prend*','saund*','fresh*'],
-  schools:                  ['wimble*', 'fresh*', 'trini*'],
+  schools:                  ['wimble*', 'fresh*', 'trini*', 'st-mart*','paul*','long*','prend*','saund*','marks*','penny*'],
   no_source:                   :analytics_db, # : analytics_db :aggregated_meter_collection :unvalidated_meter_data :load_unvalidated_meter_collection, 
   source:                   :unvalidated_meter_data, #  :aggregated_meter_collection,
   # 
@@ -27,6 +27,9 @@ script = {
                                 # :dashboard,
                                 adhoc_worksheet: { name: 'Test', charts: %i[
                                     management_dashboard_group_by_week_electricity
+                                    management_dashboard_group_by_week_gas
+                                    management_dashboard_group_by_week_storage_heater
+                                    management_dashboard_group_by_month_solar_pv
                                   ]},
 
                                   # management_dashboard_group_by_week_electricity
