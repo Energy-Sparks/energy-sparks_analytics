@@ -7,6 +7,7 @@ require 'amazing_print'
 require 'faraday'
 require 'faraday_middleware'
 require 'benchmark'
+require 'csv'
 # Test script to understand detailed workings of n3rgy JSON API
 # - shortcoming: doesn't propogate standing charges for each day, only adds in for 1st day of that charge (change)
 # - you need to set N3RGY_APP_KEY environment variable
@@ -22,7 +23,7 @@ class N3rgy
 
   def kwh_and_tariff_data_for_mpan(mpan)
     puts '=' * 40 + mpan.to_s + '=' * 40
-    data = []
+    data = { kwh: {}, cost: 0.0 }
     type =  get_json_data(mpan: mpan)
     type['entries'].each do |fuel_type|
       data_types =  get_json_data(mpan: mpan, fuel_type: fuel_type)['entries']
@@ -32,7 +33,8 @@ class N3rgy
         phases.each do |phase|
           meter_data_type_range = meter_date_range(mpan, fuel_type, data_type, phase)
           puts "Got data between #{meter_data_type_range.first} and #{meter_data_type_range.last} for #{mpan} #{fuel_type} #{data_type} #{phase}"
-          half_hourly_data(mpan, meter_data_type_range.first, meter_data_type_range.last, fuel_type, data_type, phase)
+          d = half_hourly_data(mpan, meter_data_type_range.first, meter_data_type_range.last, fuel_type, data_type, phase)
+          data = deep_merge_data(data, d)
         end
       end
     end
@@ -40,6 +42,13 @@ class N3rgy
   end
 
   private
+
+  def deep_merge_data(base, additional)
+    {
+      kwh:  base[:kwh].merge(additional[:kwh]),
+      cost: base[:cost] + additional[:cost]
+    }
+  end
 
   def half_hourly_data(mpan, start_date, end_date, fuel_type, data_type, phase = 1)
     kwhs = {}
@@ -62,6 +71,10 @@ class N3rgy
       puts raw_data['message'] if raw_data.key?('message')
     end
     puts "total kwhs #{kwhs.values.map(&:sum).sum} costs #{total_cost}"
+    {
+      kwh:  kwhs,
+      cost: total_cost
+    }
   end
 
   def process_consumption_data(raw_data)
@@ -195,10 +208,22 @@ class N3rgy
   end
 end
 
+def save_readings_to_csv(mpan, readings)
+  filename = 'Results\N3rgy ' + mpan.to_s + '.csv'
+  puts "Saving readings to #{filename}"
+  CSV.open(filename, 'w') do |csv|
+    csv << ['date', 'days kWh', (0..47).map{ |hh| "#{(hh / 2).to_i}:#{(hh % 2) * 30}"}].flatten
+    readings.each do |date, kwh_x48|
+      csv << [date, kwh_x48.sum, kwh_x48].flatten
+    end
+  end
+end
+
 mpans = N3rgy.new.mpans
 ap mpans
 mpans.each do |mpan|
   data = N3rgy.new.kwh_and_tariff_data_for_mpan(mpan)
+  save_readings_to_csv(mpan, data[:kwh])
 end
 exit
 data.each_with_index do |item, count|

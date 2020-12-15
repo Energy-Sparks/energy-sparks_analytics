@@ -87,6 +87,7 @@ class HildebrandGlo
   # - TODO(PH, 25May2020) - needs refactor
   def find_valid_dates(meter_resource_id)
     max_year = Date.today.year
+    puts "Running binary search to find start and end dates of meter readings"
     years = (2010..max_year).to_a.map{ |year| Date.new(year, 1, 1)..Date.new(year, 12, 31) }
     months = {} # [month] = sum kwh
     years.each do |year_date_range|
@@ -103,6 +104,7 @@ class HildebrandGlo
       months_data = json(url, ENV['HILDEBRAND_USER_ID'])['data']
       days.merge!( months_data.map{ |days_data| [ hildebrand_time_parse(days_data[0]), days_data[1] ] }.to_h)
     end
+    puts "Completed binary search"
     days_with_good_data = days.select{ |_date, kwh| !kwh.nil? && kwh > 1.0 }
     {
       date_range: days_with_good_data.keys.first..days_with_good_data.keys.last,
@@ -181,7 +183,7 @@ C:/Ruby25-x64/lib/ruby/2.5.0/net/http.rb:939:in `rescue in block in connect': Fa
   end
 
   def json(url, user_id = nil)
-    # puts url
+    puts url
     uri = URI.parse(URI.escape(url))
     headers = {'Authorization' => 'Basic ' + ENV['HILDEBRAND_APP_KEY']}
     headers.merge!({'userId' => user_id}) unless user_id.nil?
