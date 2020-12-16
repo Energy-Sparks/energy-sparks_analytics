@@ -217,6 +217,13 @@ module Dashboard
       end
     end
 
+    def self.synthetic_aggregate_generation_meter(base_mpan)
+      mpan = base_mpan.to_i
+      prefix = (mpan / 10000000000000) * 10000000000000
+      new_mpan = 20000000000000 + (mpan - prefix)
+      new_mpan
+    end
+
     def self.synthetic_mpan_mprn(mpan_mprn, type)
       mpan_mprn = mpan_mprn.to_i
       case type

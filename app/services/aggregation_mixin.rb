@@ -23,8 +23,13 @@ module AggregationMixin
     logger.info "Aggregating data between #{min_date} and #{max_date}"
 
     mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
+    
+    combined_amr_data = aggregate_amr_data_between_dates(meters, type, min_date, max_date, mpan_mprn)
+  end
+
+  def aggregate_amr_data_between_dates(meters, type, start_date, end_date, mpan_mprn)
     combined_amr_data = AMRData.new(type)
-    (min_date..max_date).each do |date|
+    (start_date..end_date).each do |date|
       valid_meters_for_date = meters.select { |meter| meter.amr_data.date_exists?(date) }
       amr_data_for_date_x48_valid_meters = valid_meters_for_date.map { |meter| meter.amr_data.days_kwh_x48(date) }
       combined_amr_data_x48 = AMRData.fast_add_multiple_x48_x_x48(amr_data_for_date_x48_valid_meters)

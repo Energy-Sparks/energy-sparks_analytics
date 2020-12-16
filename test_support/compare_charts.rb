@@ -89,7 +89,7 @@ class CompareChartResults
         h_diff = Hashdiff.diff(old_data, new_data, use_lcs: false, :numeric_tolerance => 0.000001) # use_lcs is O(N) otherwise and takes hours!!!!!
         @differing_results[chart_name] = h_diff
         puts "Chart results for #{chart_name} differ"
-        puts h_diff if control_contains?(:quick_comparison)
+        puts h_diff if control_contains?(:report_differences)
       end
     end
   end

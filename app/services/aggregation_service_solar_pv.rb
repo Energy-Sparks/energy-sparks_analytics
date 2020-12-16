@@ -1,57 +1,3 @@
-# helper class for main solar aggregation service below
-# keeps track of the 5 meters being manipulated
-class PVMap  < Hash
-  MPAN_KEY_MAPPINGS = {
-    export_mpan:     :export,
-    production_mpan: :generation
-  }.freeze
-
-  EMPTY_MAP = {
-    export:                   nil,
-    generation:               nil,
-    self_consume:             nil,
-    mains_consume:            nil,
-    mains_plus_self_consume:  nil
-  }.freeze
-
-  def self.empty_meter_map
-    EMPTY_MAP
-  end
-
-  def self.instance
-    m = PVMap.new
-    m.merge!(EMPTY_MAP.clone)
-    m
-  end
-
-  def self.mpan_maps(mpan_map)
-    mpan_map.select {|k,_v| MPAN_KEY_MAPPINGS.keys.include?(k)}
-  end
-
-  def self.attribute_map_meter_type(mpan_meter_type)
-    MPAN_KEY_MAPPINGS[mpan_meter_type]
-  end
-
-  def self.meter_type_attribute_map(meter_type)
-    MPAN_KEY_MAPPINGS.key(meter_type)
-  end
-
-  def self.meter_type_to_name_map
-    {
-      export:                   SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-      generation:               SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME,
-      self_consume:             SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME,
-      mains_consume:            SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-      mains_plus_self_consume:  SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
-    }
-  end
-
-  def [](type)
-    raise EnergySparksUnexpectedStateException, "Unknown pv map type #{type}" unless PVMap::EMPTY_MAP.keys.include?(type)
-    super(type)
-  end
-end
-
 # solar pv methods associated with AggregateDataService (see aggregation_service.rb)
 class AggregateDataServiceSolar
   include Logging
@@ -94,6 +40,8 @@ class AggregateDataServiceSolar
     log "Aggregation service: processing mains meter #{pv_meter_map[:mains_consume].to_s} with solar pv"
     print_meter_map(pv_meter_map)
 
+    aggregate_multiple_generation_meters(pv_meter_map) if pv_meter_map.number_of_generation_meters > 1
+
     if pv_meter_map[:mains_consume].sheffield_simulated_solar_pv_panels?
       create_solar_pv_sub_meters_using_sheffield_pv_estimates(pv_meter_map) 
     else
@@ -106,12 +54,13 @@ class AggregateDataServiceSolar
 
     create_mains_plus_self_consume_meter(pv_meter_map)
 
-    raise EnergySparksUnexpectedStateException, 'Not all solar pv meters assigned' if pv_meter_map.values.any?(&:nil?)
+    raise EnergySparksUnexpectedStateException, 'Not all solar pv meters assigned' unless pv_meter_map.all_required_key_values_non_nil?
     
     assign_meter_names(pv_meter_map)
 
     calculate_carbon_emissions_and_costs(pv_meter_map)
 
+    normalise_date_ranges_of_sub_meters(pv_meter_map)
     mains_plus_self_consume_meter = assign_meters_and_sub_meters(pv_meter_map)
 
     consumption_meter = mains_plus_self_consume_meter
@@ -128,11 +77,23 @@ class AggregateDataServiceSolar
     end
   end
 
+  def not_a_meter?(meter)
+    meter.nil? || meter.is_a?(Array)
+  end
+
   def print_meter_map(pv_meter_map)
     log 'PV Meter map:'
     pv_meter_map.each do |meter_type, meter|
-      log "    #{meter_type} => #{meter.to_s} total #{meter.nil? ? nil : meter.amr_data.total.round(0)}"
+     if meter.is_a?(Array)
+        log "    #{meter_type} => #{meter.map{|m| format_meter(m)}.join('; ')}"
+      else
+        log "    #{meter_type} => #{format_meter(meter)}"
+      end
     end
+  end
+
+  def format_meter(meter)
+    meter.nil? ? 'nil' : "#{meter.to_s} #{meter.amr_data.total.round(0)} kWh"
   end
 
   def print_final_setup(meter)
@@ -144,7 +105,8 @@ class AggregateDataServiceSolar
 
   def log(str)
     logger.info str
-    # puts str # comment out for release to production
+    
+    # puts str # "Got here" # comment out for release to production
   end
 
   def reference_as_sub_meter_for_subsequent_aggregation(mains_electricity_meter)
@@ -223,9 +185,56 @@ class AggregateDataServiceSolar
     )
   end
 
+  def aggregate_multiple_generation_meters(pv_meter_map)
+    log 'Aggregating multiple solar pv generation meters'
+
+    generation_meters = pv_meter_map.select{ |type, meter| PVMap.generation_meters.include?(type) && !meter.nil? }.values
+
+    log "Aggregating these generation meters #{generation_meters.map(&:to_s).join(' + ')}"
+
+    mpan = Dashboard::Meter.synthetic_aggregate_generation_meter(pv_meter_map[:generation].mpan_mprn)
+
+    generation_amr_data = aggregate_amr_data_between_dates(
+      generation_meters,
+      :solar_pv,
+      generation_meters.map{ |m| m.amr_data.start_date }.min,
+      generation_meters.map{ |m| m.amr_data.end_date }.max,
+      mpan
+    )
+
+    generation_meter = create_modified_meter_copy(
+      pv_meter_map[:generation],
+      generation_amr_data,
+      :solar_pv,
+      mpan,
+      pv_meter_map[:generation].name,
+      {}
+    )
+
+    log "Created aggregate generation meter #{generation_meter} #{generation_meter.amr_data.total.round(0)}"
+
+    # hide constituent generation meters
+    pv_meter_map.set_nil_value(PVMap.generation_meters)
+    generation_mpans = generation_meters.map{ |m1| m1.mpan_mprn.to_s}
+    @meter_collection.electricity_meters.delete_if { |m| generation_mpans.include?(m.mpan_mprn.to_s) }
+    pv_meter_map[:generation] = generation_meter
+    pv_meter_map[:generation_meter_list] = generation_meters
+  end
+
   def calculate_carbon_emissions_and_costs(pv_meter_map)
     pv_meter_map.values.each do |meter|
-      calculate_meter_carbon_emissions_and_costs(meter, :electricity)
+      calculate_meter_carbon_emissions_and_costs(meter, :electricity) unless not_a_meter?(meter)
+    end
+  end
+
+  def normalise_date_ranges_of_sub_meters(pv_meter_map)
+    meters = %i[mains_consume self_consume export generation mains_plus_self_consume].map{ |meter_type| pv_meter_map[meter_type] }
+    start_date = meters.map{ |m| m.amr_data.start_date }.max
+    end_date   = meters.map{ |m| m.amr_data.end_date }.min
+    log "Reducing sub meter date ranges to between #{start_date} and #{end_date}"
+    meters.each do |meter|
+      meter.amr_data.set_start_date(start_date)
+      meter.amr_data.set_end_date(end_date)
     end
   end
 
@@ -238,7 +247,7 @@ class AggregateDataServiceSolar
 
   def assign_meter_names(pv_meter_map)
     pv_meter_map.each do |meter_type, meter|
-      meter.name = PVMap.meter_type_to_name_map[meter_type]
+      meter.name = PVMap.meter_type_to_name_map[meter_type] unless not_a_meter?(meter)
     end
   end
 
@@ -249,7 +258,7 @@ class AggregateDataServiceSolar
 
   def backfill_existing_meters_with_zeros(pv_meter_map)
     pv_meter_map.each do |meter_type, meter|
-      next if meter.nil? || meter_type == :mains_consume
+      next if not_a_meter?(meter) || meter_type == :mains_consume
       mpan_mapping_start_date = earliest_mpan_mapping_attribute(pv_meter_map[:mains_consume], meter_type)
       mains_meter_start_date  = pv_meter_backfill_start_date(pv_meter_map[:mains_consume])
       backfill_meter_with_zeros(meter, mains_meter_start_date, mpan_mapping_start_date - 1)
@@ -259,7 +268,7 @@ class AggregateDataServiceSolar
   def truncate_to_mains_meter_dates(pv_meter_map)
     mains_electricity_meter = pv_meter_map[:mains_consume]
     pv_meter_map.each do |meter_type, meter|
-      next if meter.nil? || meter_type == :mains_consume
+      next if not_a_meter?(meter) || meter_type == :mains_consume
       log "Mains meter start date #{mains_electricity_meter.amr_data.start_date} pv meter #{meter.mpan_mprn} #{meter.fuel_type} start date #{meter.amr_data.start_date}"
       raise EnergySparksUnexpectedStateException, "Meter should have been backfilled to #{mains_electricity_meter.amr_data.start_date} but set to #{meter.amr_data.start_date}" if mains_electricity_meter.amr_data.start_date > meter.amr_data.start_date
       if meter.amr_data.start_date < mains_electricity_meter.amr_data.start_date
