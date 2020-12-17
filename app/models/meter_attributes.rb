@@ -107,6 +107,20 @@ class MeterAttributes
     structure MeterAttributeTypes::Date.define(required: true)
   end
 
+  class OverrideWithSyntheticSheffieldPVData < MeterAttributeTypes::AttributeBase
+    id :meter_corrections_use_sheffield_pv_data
+    key :set_to_sheffield_pv_data
+    aggregate_over :meter_corrections
+    name 'Meter correction > Override solar pv production data with Sheffield University data'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date:         MeterAttributeTypes::Date.define(required: true),
+        end_date:           MeterAttributeTypes::Date.define(required: true),
+      }
+    )
+  end
+
   class ReadingsEndDate < MeterAttributeTypes::AttributeBase
     id :meter_corrections_readings_end_date
     key :readings_end_date
