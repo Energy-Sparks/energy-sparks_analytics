@@ -28,6 +28,14 @@ class SolarPVPanels
     create_self_consumption_data(pv_meter_map, meter_collection)
   end
 
+  def days_pv(date, mpan)
+    capacity = degraded_kwp(date)
+    pv_yield = @synthetic_sheffield_solar_pv_yields[date]
+    scaled_pv_kwh_x48 = AMRData.one_day_zero_kwh_x48
+    scaled_pv_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(pv_yield, capacity / 2.0) unless capacity.nil? || pv_yield.nil?
+    OneDayAMRReading.new(mpan, date, 'SOLR', nil, DateTime.now, scaled_pv_kwh_x48)
+  end
+
   private
 
   def create_generation_data(pv_meter_map, create_zero_if_no_config)
@@ -142,14 +150,6 @@ class SolarPVPanels
     end
 
     self_x48
-  end
-
-  def days_pv(date, mpan)
-    capacity = degraded_kwp(date)
-    pv_yield = @synthetic_sheffield_solar_pv_yields[date]
-    scaled_pv_kwh_x48 = AMRData.one_day_zero_kwh_x48
-    scaled_pv_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(pv_yield, capacity / 2.0) unless capacity.nil? || pv_yield.nil?
-    OneDayAMRReading.new(mpan, date, 'SOLR', nil, DateTime.now, scaled_pv_kwh_x48)
   end
 
   def create_generation_meter_from_map(pv_meter_map)

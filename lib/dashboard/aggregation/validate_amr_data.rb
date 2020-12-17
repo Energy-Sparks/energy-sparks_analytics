@@ -133,8 +133,8 @@ class ValidateAMRData
     elsif rule.key?(:extend_meter_readings_for_substitution)
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
-    elsif rule.key?(:meter_corrections_use_sheffield_pv_data)
-      config = rule[:meter_corrections_use_sheffield_pv_data]
+    elsif rule.key?(:meter_corrections_use_sheffield_pv_data) || rule.key?(:set_to_sheffield_pv_data)
+      config = rule[:meter_corrections_use_sheffield_pv_data] || rule[:set_to_sheffield_pv_data]
       override_with_sheffield_solar_pv_data(config[:start_date], config[:end_date])
     end
   end
@@ -409,18 +409,19 @@ class ValidateAMRData
 
   def override_with_sheffield_solar_pv_data(start_date, end_date)
     raise EnergySparksMeterSpecification, "Unable to correct pv data, wrong meter type #{@meter.meter_type}" if @meter.meter_type != :solar_pv
-    existing_kwh = @meter.amr_data.kwh_date_range(start_date, end_date)
+    sd = [start_date, @meter.amr_data.start_date].max
+    ed = [end_date,   @meter.amr_data.end_date  ].min
+    existing_kwh = sd <= ed ? @meter.amr_data.kwh_date_range(sd, ed) : 0.0
     logger.info "Correcting solar pv production data using Sheffield #{start_date} to #{end_date} current total kwh #{existing_kwh}"
-    pv = SolarPVPanels.new(@meter.attributes(:solar_pv))
+    pv = SolarPVPanels.new(@meter.attributes(:solar_pv), @meter.meter_collection.solar_pv)
     (start_date..end_date).each do |date|
-      pv_kwh_x48 = pv.estimated_days_pv_kwh_x48(start_date, @meter.solar_pv)
-      pv_days_readings = OneDayAMRReading.new(meter_id, date, 'SOLS', nil, DateTime.now, pv_kwh_x48)
+      pv_days_readings = pv.days_pv(date, @meter.solar_pv)
       @amr_data.add(date, pv_days_readings)
     end
     updated_kwh = @meter.amr_data.kwh_date_range(start_date, end_date)
     logger.info "Updated sheffield pv data kwh = #{updated_kwh}"
   end
-  
+
   def in_meter_correction_period?(date)
     @meter.meter_correction_rules.each do |rule|
       if rule.is_a?(Hash) && rule.key?(:auto_insert_missing_readings) &&
