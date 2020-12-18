@@ -149,6 +149,24 @@ class Holidays
     !weekend?(date) && !holiday?(date)
   end
 
+  def day_type_statistics(start_date, end_date)
+    stats = {
+      holiday:    0,
+      weekend:    0,
+      schoolday:  0
+    }
+    (start_date..end_date).each do |date|
+      if holiday?(date)
+        stats[:holiday] += 1
+      elsif weekend?(date)
+        stats[:weekend] += 1
+      else
+        stats[:schoolday] += 1
+      end
+    end
+    stats
+  end
+
   def last
     @holidays.last
   end

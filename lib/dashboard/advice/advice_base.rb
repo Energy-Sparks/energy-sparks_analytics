@@ -90,21 +90,13 @@ class AdviceBase < ContentBase
   def content(user_type: nil)
     charts_and_html = []
 
-    charts_and_html.push( { type: :analytics_html, content: '<hr>' } )
-    charts_and_html.push( { type: :title, content: self.class.config[:name] } )
-    enhanced_title = enhanced_title(self.class.config[:name])
-    charts_and_html.push( { type: :enhanced_title, content: enhanced_title})
-    charts_and_html.push( { type: :analytics_html, content: format_enhanced_title_for_analytics(enhanced_title)})
+    header_content(charts_and_html)
 
     charts_and_html += debug_content
 
     charts.each do |chart|
       begin
-        charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_header]) } ) if chart.key?(:advice_header)
-        charts_and_html.push( { type: :chart_name, content: chart[:config_name] } )
-        charts_and_html.push( { type: :chart, content: chart } )
-        charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
-        charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_footer]) } ) if chart.key?(:advice_footer)
+        chart_content(chart, charts_and_html)
       rescue StandardError => e
         logger.info self.class.name
         logger.info e.message
@@ -168,6 +160,22 @@ class AdviceBase < ContentBase
   end
 
   private
+
+  def header_content(charts_and_html)
+    charts_and_html.push( { type: :analytics_html, content: '<hr>' } )
+    charts_and_html.push( { type: :title, content: self.class.config[:name] } )
+    enhanced_title = enhanced_title(self.class.config[:name])
+    charts_and_html.push( { type: :enhanced_title, content: enhanced_title})
+    charts_and_html.push( { type: :analytics_html, content: format_enhanced_title_for_analytics(enhanced_title)})
+  end
+
+  def chart_content(chart, charts_and_html)
+    charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_header]) } ) if chart.key?(:advice_header)
+    charts_and_html.push( { type: :chart_name, content: chart[:config_name] } )
+    charts_and_html.push( { type: :chart, content: chart } )
+    charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
+    charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_footer]) } ) if chart.key?(:advice_footer)
+  end
 
   def enhanced_title(title)
     {

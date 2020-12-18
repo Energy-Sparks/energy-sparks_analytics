@@ -6,6 +6,7 @@ class AMRData < HalfHourlyData
 
   def initialize(type)
     super(type)
+    @total = {}
   end
 
   def self.copy_amr_data(original_amr_data)
@@ -58,6 +59,7 @@ class AMRData < HalfHourlyData
 
     self[date] = one_days_data
 
+    @total = {}
     @cache_days_totals.delete(date)
   end
 
@@ -173,6 +175,10 @@ class AMRData < HalfHourlyData
   end
 
   def total(type = :kwh)
+    @total[type] ||= calculate_total(type)
+  end
+
+  def calculate_total(type)
     t = 0.0
     (start_date..end_date).each do |date|
       t += one_day_kwh(date, type)
