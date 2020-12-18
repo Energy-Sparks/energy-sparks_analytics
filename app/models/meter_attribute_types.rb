@@ -115,11 +115,12 @@ module MeterAttributeTypes
     end
   end
 
-  class MPANString < AttributeType
+  # deprecated 18Dec2020 because of issues with its interaction with the front end editor
+  class MPANStringDeprecated < AttributeType
     self.type = :string
     def _parse(value)
       if value.count('0-9') != value.length
-        # temporary validation, may beed to be relaxed to include alphas in future
+        # temporary validation, may need to be relaxed to include alphas in future
         raise InvalidAttributeValue, 'Invalid MPAN: must be numeric'
       end
       value

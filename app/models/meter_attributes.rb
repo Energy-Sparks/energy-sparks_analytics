@@ -315,8 +315,8 @@ class MeterAttributes
         export_mpan:        MeterAttributeTypes::String.define,
         production_mpan:    MeterAttributeTypes::String.define,
         self_consume_mpan:  MeterAttributeTypes::String.define,
-        production_mpan2:   MeterAttributeTypes::MPANString.define(hint: 'for 2nd generation meter'),
-        production_mpan3:   MeterAttributeTypes::MPANString.define(hint: 'for 3rd generation meter')
+        production_mpan2:   MeterAttributeTypes::String.define(hint: 'for 2nd generation meter'),
+        production_mpan3:   MeterAttributeTypes::String.define(hint: 'for 3rd generation meter')
       }
     )
   end
