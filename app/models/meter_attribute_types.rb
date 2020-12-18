@@ -118,7 +118,7 @@ module MeterAttributeTypes
   class MPANString < AttributeType
     self.type = :string
     def _parse(value)
-      if value.count('0-9') != a.length
+      if value.count('0-9') != value.length
         # temporary validation, may beed to be relaxed to include alphas in future
         raise InvalidAttributeValue, 'Invalid MPAN: must be numeric'
       end
