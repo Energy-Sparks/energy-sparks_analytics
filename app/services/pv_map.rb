@@ -68,7 +68,7 @@ class PVMap  < RestrictedKeyHash
   end
 
   def number_of_generation_meters
-    self.count{ |k, _v| self.class.generation_meters.include?(k) }
+    self.count{ |k, v| self.class.generation_meters.include?(k) && !v.nil? }
   end
 
   def set_nil_value(list_of_keys)
