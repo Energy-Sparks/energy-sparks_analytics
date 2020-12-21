@@ -378,7 +378,10 @@ module Benchmarking
       %q( 
         <p>
           Schools with negative 'Saving if matched exemplar school' have
-          heating consumption below that of the best schools, which is good.
+          heating consumption below that of the best schools, which is good. For
+          schools with storage heaters, heating costs are calculated using 
+          electricity tariff prices (differential/economy-7 if schools is on such a tariff) versus
+          costs of exemplar schools using gas heating or an air source heat pump.
         </p>
        )
     end

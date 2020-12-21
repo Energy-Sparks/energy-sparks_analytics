@@ -208,19 +208,15 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * BenchmarkMetrics::GAS_PRICE
 
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_floor_area_kwh
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * BenchmarkMetrics::GAS_PRICE
+    @one_year_saving_versus_benchmark_£   = @last_year_£   - @one_year_benchmark_floor_area_£
     @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'
-    @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£
 
     @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
     @one_year_exemplar_floor_area_£     = @one_year_exemplar_floor_area_kwh * BenchmarkMetrics::GAS_PRICE
 
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_floor_area_kwh
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * BenchmarkMetrics::GAS_PRICE
+    @one_year_saving_versus_exemplar_£   = @last_year_£   - @one_year_exemplar_floor_area_£
     @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? 'higher' : 'lower'
-    @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£
 
     @one_year_gas_per_pupil_kwh       = @last_year_kwh / pupils(asof_date - 365, asof_date)
     @one_year_gas_per_pupil_£         = @last_year_£ / pupils(asof_date - 365, asof_date)
