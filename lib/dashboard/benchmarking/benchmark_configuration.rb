@@ -189,6 +189,7 @@ module Benchmarking
           { data: ->{ enba_kgap },  name: 'Change in annual gas use since joined Energy Sparks', units: :relative_percent_0dp },
           { data: ->{ enba_khap },  name: 'Change in annual storage heater use since joined Energy Sparks', units: :relative_percent_0dp }
         ],
+        treat_as_nil:   ['no recent data', 'not enough data'], # from ManagementSummaryTable:: not referenced because not on path
         sort_by:  [1],
         type: %i[chart table]
       },
@@ -403,6 +404,7 @@ module Benchmarking
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr]) - sum_data([gsba_£lyr_last_year, shan_£lyr_last_year]) },  name: 'Change in heating costs between last 2 years', units: :£}
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
+        treat_as_nil:   [0],
         type: %i[chart table]
       },
       annual_gas_out_of_hours_use: {

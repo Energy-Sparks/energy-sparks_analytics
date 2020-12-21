@@ -244,12 +244,16 @@ module Benchmarking
     end
 
     def row_has_useful_data(calculated_row, config, chart_columns_only)
-      min_non_nulls = if chart_columns_only && config.key?(:number_non_null_columns_for_filtering_charts)
-                        config[:number_non_null_columns_for_filtering_charts]
-                      else
-                        1 + (self.class.y2_axis_column?(config) ? 1 : 0)
-                      end
-      !calculated_row.nil? && !calculated_row[:data].nil? && calculated_row[:data].compact.length > min_non_nulls
+      min_non_nulls = 1 + (self.class.y2_axis_column?(config) ? 1 : 0)
+      !calculated_row.nil? && !calculated_row[:data].nil? && (items_useful_data(calculated_row, config) > min_non_nulls)
+    end
+
+    def items_useful_data(row, config)
+      row[:data].count{ |cell| !cell_nil?(cell, config) }
+    end
+
+    def cell_nil?(cell, config)
+      cell.nil? || (config.key?(:treat_as_nil) && config[:treat_as_nil].include?(cell))
     end
 
     def create_chart(chart_name, config, table, include_y2 = false)
