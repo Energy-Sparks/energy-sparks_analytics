@@ -368,6 +368,10 @@ module Benchmarking
           warmer south west of England.
         </p>
         <p>
+          For schools heated by gas, the cost includes gas used for hot water and
+          by the school kitchen.
+        </p>
+        <p>
           More modern schools should have lower consumption, however, a well-managed
           Victorian school which turns its heating off during holidays and weekends
           often has lower heating and hot water consumption than more modern schools.
@@ -785,8 +789,8 @@ module Benchmarking
         <p>
           Generally an increase in solar PV production between last year and the year
           before, would lead to a reduction in CO2 emissions in the chart below,
-          as the more electricity is produced by a school&apos;s less CO2 a school
-          emits overall.
+          as the more electricity is produced by a school&apos;s solar PV panels
+          the less CO2 a school emits overall.
         </p>
       )
     end
