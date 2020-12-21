@@ -211,7 +211,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   protected def calculate_rating(percentage_difference, financial_difference_£, fuel_type)
     # PH removed £10 limit 20Nov2019 at CT request
-    # return 10.0 if financial_difference_£.between?(-MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£, MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£)
+    # PH reinstated after CT request 21Dec2020
+    return 10.0 if financial_difference_£.between?(-MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£, MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£)
     ten_rating_range_percent = fuel_type == :electricity ? 0.10 : 0.15 # more latitude for gas
     calculate_rating_from_range(-ten_rating_range_percent, ten_rating_range_percent, percentage_difference)
   end
