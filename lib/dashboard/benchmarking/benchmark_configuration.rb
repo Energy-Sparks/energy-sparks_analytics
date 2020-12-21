@@ -144,6 +144,7 @@ module Benchmarking
           { data: ->{ addp_stpn },          name: 'Type',   units: String },
           { data: ->{ enba_ratg },          name: 'rating', units: Float, y2_axis: true },
         ],
+        where:   ->{ !enba_£pup.nil? },
         sort_by:  method(:sort_energy_costs),
         type: %i[chart table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark }

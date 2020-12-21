@@ -195,6 +195,10 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
   def benchmark_dates(asof_date)
     [asof_date, asof_date - 364]
   end
+
+  protected def max_days_out_of_date_while_still_relevant
+    ManagementSummaryTable::MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON
+  end
   
   private def calculate(asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough

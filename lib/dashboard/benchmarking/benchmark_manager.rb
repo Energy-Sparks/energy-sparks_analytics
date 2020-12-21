@@ -92,6 +92,7 @@ module Benchmarking
         next unless school_data # && school_data_last_year
         row  = DatabaseRow.new(school_id, school_data)
         next unless filter_row(row, filter)
+        next if config.key?(:where) && !filter_row(row, config[:where])
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
