@@ -518,6 +518,16 @@ class ChartManager
       inherits_from:    :group_by_week_gas_meter_breakdown,
       series_breakdown: :meter
     },
+    temp_test: {
+      inherits_from:    :group_by_week_electricity_meter_breakdown,
+      x_axis:           :day,
+      timescale:        :week
+    },
+    temp_test2: {
+      inherits_from:    :temp_test,
+      x_axis:           :datetime,
+      timescale:        :day
+    },
     group_by_week_electricity_meter_breakdown_one_year: {
       inherits_from:    :group_by_week_electricity_meter_breakdown,
       timescale:        :up_to_a_year
