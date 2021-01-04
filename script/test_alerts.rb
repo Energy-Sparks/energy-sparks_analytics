@@ -8,7 +8,7 @@ script = {
   no_schools:                  ['*ound*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   schools:                  ['st-richard*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
-  schools:                  ['trini*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   no_source:                :analytics_db, # :aggregated_meter_collection,
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
