@@ -89,7 +89,11 @@ class CalculateMonthlyTrackAndTraceData
   end
 
   def set_target
-    0.95
+    target_attributes.nil? ? 0.95 : target_attributes[0][:target]
+  end
+
+  def target_attributes
+    @school.aggregate_meter(@fuel_type).attributes(:targeting_and_tracking)
   end
 
   def cumulative(h)
