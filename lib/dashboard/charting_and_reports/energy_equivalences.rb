@@ -80,7 +80,7 @@ class EnergyEquivalences
   end
 
   def self.equivalence_conversion_rate_and_description(type, via_unit, grid_intensity)
-    type = :electricity if type == :storage_heaters
+    type = :electricity if type == :storage_heaters || type == :solar_pv
     type_data = equivalence_configuration(type, grid_intensity)
     type_description = type_data[:description]
     rate = type_data[:conversions][via_unit][:rate]
