@@ -20,6 +20,14 @@ module DateTimeHelper
     Date.new(date.year, date.month, -1).day
   end
 
+  def self.last_day_of_month(date)
+    if date.month == 12
+      Date.new(date.year + 1, 1, 1)  - 1
+    else
+      Date.new(date.year, date.month + 1, 1) - 1
+    end
+  end
+
   def self.days_in_quarter(date)
     days = 0
     quarter = ((date.month - 1) / 3).to_i

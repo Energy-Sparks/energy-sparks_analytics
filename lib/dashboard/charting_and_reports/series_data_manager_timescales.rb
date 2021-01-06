@@ -334,7 +334,7 @@ class MonthPeriods < NumericPeriods
     check_offset(offset)
     offset_month = @last_meter_date.prev_month(-offset)
     first_day_of_month = Date.new(offset_month.year, offset_month.month, 1)
-    last_day_of_month = Date.new(offset_month.year, (offset_month.month % 12) + 1, 1) - 1
+    last_day_of_month = DateTimeHelper.last_day_of_month(offset_month)
     last_day_of_month = @last_meter_date if offset == 0 && last_day_of_month > @last_meter_date # partial month
     new_school_period(first_day_of_month, last_day_of_month)
   end

@@ -161,6 +161,8 @@ class DashboardChartAdviceBase
     when  :intraday_line_school_days_6months_simulator,
           :intraday_line_school_days_6months_simulator_submeters
           SimulatorMiscOtherAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
+    when  :targeting_and_tracking_monthly_electricity
+          TargetingAndTrackingAdvice.new(school, chart_definition, chart_data, chart_symbol)
     else
       res = DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
       res = DashboardEnergyAdvice.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?

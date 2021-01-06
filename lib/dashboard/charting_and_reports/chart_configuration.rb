@@ -200,6 +200,12 @@ class ChartManager
       x_axis:           ChartDynamicXAxis.standard_up_to_1_year_dynamic_x_axis,
       timescale:        :up_to_a_year
     },
+    targeting_and_tracking_monthly_electricity: {
+      name:             'Ignore: required for the front end test framework to work',
+      x_axis:           :month,
+      timescale:        nil,
+      inherits_from:    :group_by_week_electricity
+    },
     electricity_co2_last_year_weekly_with_co2_intensity: {
       name:             'The carbon emissions of your school and the carbon intensity of the National Electricity Grid over the last year',
       inherits_from:    :group_by_week_electricity,

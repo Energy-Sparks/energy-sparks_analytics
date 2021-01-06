@@ -25,7 +25,7 @@ class HtmlTableFormatting
             <% @rows.each do |row| %>
               <tr>
                 <% row.each_with_index do |val, column_number| %>
-                  <%= column_td(column_number, right_justified_columns) %><%= format_value(val, column_number) %> </td>
+                  <%= cell_format(column_number, right_justified_columns, val) %>
                 <% end %>
               </tr>
             <% end %>
@@ -41,6 +41,13 @@ class HtmlTableFormatting
       </p>
     }.gsub(/^  /, '')
 
+    generate_html(template, binding)
+  end
+
+  def cell_format(column_number, right_justified_columns, val)
+    template = %{
+      <%= column_td(column_number, right_justified_columns) %><%= format_value(val, column_number) %> </td>
+    }.gsub(/^  /, '')
     generate_html(template, binding)
   end
 
@@ -79,5 +86,60 @@ class HtmlTableFormatting
       logger.error "Error generating html for #{self.class.name}"
       '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
     end
+  end
+end
+
+# this is a bit of a bodge for the moment to attempt to highlight cells in the front end
+# for the purposes of testing targetting and tracking - PH 6Jan2021
+class HtmlTableFormattingWithHighlightedCells < HtmlTableFormatting
+  def self.cell_highlight_style
+    %{
+      <style>
+        #energy_sparks_good_performance_cell
+        {
+          background-color: green; color:white; font-weight: bold; border-radius: 15px; border: 5px solid white
+        }
+        #energy_sparks_bad_performance_cell
+        {
+          background-color: red; color:white; font-weight: bold; border-radius: 15px; border: 5px solid white
+        }
+      </style>
+    }
+  end
+
+  private
+
+  def cell_format(column_number, right_justified_columns, val)
+    template = %{
+      <%= column_td(column_number, right_justified_columns, val) %><%= format_value(val, column_number) %> </td>
+    }.gsub(/^  /, '')
+    generate_html(template, binding)
+  end
+
+  def column_td(column, right_justified_columns, val)
+    td_for_right_justified_column(is_right_justified_column(column, right_justified_columns), val)
+  end
+
+  def td_for_right_justified_column(right_justified, val)
+    element = right_justified ? '<td class="text-right"' : '<td'
+    element + ' ' + id(val) + '>'
+  end
+
+  def id(val)
+    if cell_positive?(val)
+      %q{ id ="energy_sparks_bad_performance_cell"}
+    elsif cell_negative?(val)
+      %q{ id ="energy_sparks_good_performance_cell"}
+    else
+      %q{ }
+    end
+  end
+
+  def cell_positive?(val)
+    val.include?('+')
+  end
+
+  def cell_negative?(val)
+    val.include?('-')
   end
 end
