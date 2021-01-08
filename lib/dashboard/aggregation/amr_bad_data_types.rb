@@ -49,6 +49,7 @@ class OneDayAMRReading
     'SOLS'  => { name: 'Overridden PV data with data from Sheffield',       description: 'Overridden PV data with data from Sheffield'},
     'SOL0'  => { name: 'Zero pv generation data prior/post to pv install',  description: 'Zero pv generation data prior/post to pv install'},
     'BKPV'  => { name: 'Backfilled PV data (aggregation service)',          description: 'Backfilled PV data (aggregation service)'},
+    'TARG'  => { name: 'Synthetic target data',                             description: 'Synthetic target data'},
   }.freeze
   # rubocop:disable Metrics/LineLength
 end

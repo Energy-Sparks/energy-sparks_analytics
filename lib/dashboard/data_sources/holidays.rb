@@ -156,15 +156,19 @@ class Holidays
       schoolday:  0
     }
     (start_date..end_date).each do |date|
-      if holiday?(date)
-        stats[:holiday] += 1
-      elsif weekend?(date)
-        stats[:weekend] += 1
-      else
-        stats[:schoolday] += 1
-      end
+      stats[day_type(date)] += 1
     end
     stats
+  end
+
+  def day_type(date)
+    if holiday?(date)
+      :holiday
+    elsif weekend?(date)
+      :weekend
+    else
+      :schoolday
+    end
   end
 
   def last
