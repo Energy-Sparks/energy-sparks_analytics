@@ -152,6 +152,7 @@ class RunTests
     logger.info '=' * 120
     logger.info 'RUNNING REPORTS'
     failed_charts = []
+    start_profiler
     schools_list.sort.each do |school_name|
       puts banner(school_name)
       @current_school_name = school_name
@@ -162,6 +163,7 @@ class RunTests
       charts.run(chart_list, control)
       failed_charts += charts.failed_charts
     end
+    stop_profiler
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 

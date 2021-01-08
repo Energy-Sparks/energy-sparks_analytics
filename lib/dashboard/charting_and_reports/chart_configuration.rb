@@ -206,6 +206,34 @@ class ChartManager
       timescale:        nil,
       inherits_from:    :group_by_week_electricity
     },
+    targeting_and_tracking_monthly_electricity_experimental: {
+      name:             'Tracking experiment (daily line)',
+      chart1_type:      :line,
+      series_breakdown: :none,
+      x_axis:           :day,
+      target:           true,
+      inherits_from:    :targeting_and_tracking_monthly_electricity
+    },
+    targeting_and_tracking_monthly_electricity_experimental2: {
+      name:             'Tracking experiment 2 (datetime over a week)',
+      x_axis:           :datetime,
+      timescale:        :week,
+      inherits_from:    :targeting_and_tracking_monthly_electricity_experimental
+    },
+    targeting_and_tracking_monthly_electricity_experimental3: {
+      name:             'Tracking experiment 3 (datetime over a week - column)',
+      chart1_type:      :column,
+      chart1_subtype:   nil,
+      inherits_from:    :targeting_and_tracking_monthly_electricity_experimental2
+    },
+    targeting_and_tracking_monthly_electricity_experimental4: {
+      name:             'Tracking experiment 4 (day over a month - column)',
+      chart1_type:      :column,
+      chart1_subtype:   nil,
+      x_axis:           :day,
+      timescale:        :month,
+      inherits_from:    :targeting_and_tracking_monthly_electricity_experimental
+    },
     electricity_co2_last_year_weekly_with_co2_intensity: {
       name:             'The carbon emissions of your school and the carbon intensity of the National Electricity Grid over the last year',
       inherits_from:    :group_by_week_electricity,

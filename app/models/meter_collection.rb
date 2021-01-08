@@ -9,7 +9,6 @@
 #           schedule if a meter covers a community sports centre which is
 #           used out of core school hours
 #           - also holds modelling data
-
 class MeterCollection
   include Logging
 
@@ -366,6 +365,10 @@ class MeterCollection
 
   def pseudo_meter_attributes(type)
     @pseudo_meter_attributes.fetch(type){ {} }
+  end
+
+  def pseudo_meter_attributes_private
+    @pseudo_meter_attributes
   end
 
   def meter_attribute_types

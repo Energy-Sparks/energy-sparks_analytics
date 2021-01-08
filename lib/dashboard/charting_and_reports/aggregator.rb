@@ -38,9 +38,15 @@ class Aggregator
   def initialise_schools_date_range
     schools = @chart_config.key?(:schools) ? load_schools(@chart_config[:schools]) : [ @meter_collection ]
 
+    schools << TargetSchool.new(@meter_collection) if include_target?
+
     determine_multi_school_chart_date_range(schools, @chart_config)
 
     [@chart_config, schools]
+  end
+
+  def include_target?
+    @chart_config.key?(:target) && !@chart_config[:target].nil?
   end
 
   def aggregate
@@ -113,6 +119,10 @@ class Aggregator
 
   def chart_has_filter?
     !config_none_or_nil?(:filter, @chart_config)
+  end
+
+  def include_target?
+    @chart_config.key?(:target) && !@chart_config[:target].nil?
   end
 
   #=================regrouping of chart data ======================================

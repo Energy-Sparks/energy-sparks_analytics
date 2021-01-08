@@ -123,6 +123,19 @@ class SeriesDataManager
     configure_manager
     process_temperature_adjustment_config
     logger.info "Series Name Manager: Chart Creation for #{meter_collection}"
+
+    @@x ||= calc_target_school
+  end
+
+  private def calc_target_school
+    target_school = nil
+    puts "Got here - temporarily creating a target school"
+    bm = Benchmark.realtime {
+      target_school = TargetSchool.new(@meter_collection)
+    }
+    calc_text = "Calculated target school in #{bm.round(3)} seconds"
+    puts calc_text
+    target_school
   end
 
   private def override_meter_end_date?

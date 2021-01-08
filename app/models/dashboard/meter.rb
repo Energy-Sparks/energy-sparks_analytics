@@ -8,7 +8,7 @@ module Dashboard
     attr_reader :storage_heater_setup, :sub_meters
     attr_reader :meter_correction_rules, :model_cache
     attr_reader :partial_meter_coverage
-    attr_accessor :amr_data,  :floor_area, :number_of_pupils, :solar_pv_setup, :solar_pv_overrides
+    attr_accessor :amr_data, :floor_area, :number_of_pupils, :solar_pv_setup, :solar_pv_overrides
 
     # Energy Sparks activerecord fields:
     attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
@@ -69,6 +69,21 @@ module Dashboard
     def meter_number_of_pupils(local_school, start_date = nil, end_date = nil)
       p = local_school.number_of_pupils(start_date, end_date) * partial_number_of_pupils(start_date, end_date)
       p.to_i
+    end
+
+    def self.clone_meter_without_amr_data(meter_to_clone)
+      Dashboard::Meter.new(
+        meter_collection: meter_to_clone.meter_collection,
+        amr_data: nil,
+        type: meter_to_clone.meter_type,
+        name: meter_to_clone.name,
+        identifier: meter_to_clone.id,
+        floor_area: meter_to_clone.floor_area,
+        number_of_pupils: meter_to_clone.number_of_pupils,
+        solar_pv_installation: meter_to_clone.solar_pv_setup,
+        storage_heater_config: meter_to_clone.storage_heater_setup,
+        meter_attributes: meter_to_clone.meter_attributes
+      )
     end
 
     # aggregate @partial_meter_coverage meter attribute component is an array
