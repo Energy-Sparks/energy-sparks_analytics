@@ -215,13 +215,24 @@ class ChartManager
       chart1_type:      :line,
       series_breakdown: :none,
       x_axis:           :day,
-      target:           {calculation_type: :day},
+      target:           {calculation_type: :day, extend_chart_into_future: true},
       inherits_from:    :targeting_and_tracking_monthly_electricity
+    },
+    targeting_and_tracking_monthly_electricity_experimental_baseload: {
+      name:             'Tracking experiment (baseload kW)',
+      replace_series_label: [
+        ['BASELOAD:<school_name>: target', 'Baseload: target'],
+        ['BASELOAD:<school_name>', 'Baseload: actual']
+      ],
+      yaxis_units:      :kw,
+      series_breakdown: :baseload,
+      inherits_from:    :targeting_and_tracking_monthly_electricity_experimental
     },
     targeting_and_tracking_monthly_electricity_experimental2: {
       name:             'Tracking experiment 2 (datetime over a week)',
       x_axis:           :datetime,
       timescale:        :week,
+      target:           {calculation_type: :day},
       inherits_from:    :targeting_and_tracking_monthly_electricity_experimental
     },
     targeting_and_tracking_monthly_electricity_experimental3: {
