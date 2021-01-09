@@ -208,6 +208,10 @@ class ChartManager
     },
     targeting_and_tracking_monthly_electricity_experimental: {
       name:             'Tracking experiment (daily line)',
+      replace_series_label: [
+        ['Energy:<school_name>: target', 'Electricity: target'],
+        ['Energy:<school_name>', 'Electricity: actual']
+      ],
       chart1_type:      :line,
       series_breakdown: :none,
       x_axis:           :day,

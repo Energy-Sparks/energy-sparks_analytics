@@ -13,9 +13,9 @@ class TargetSchool < MeterCollection
             pseudo_meter_attributes: school.pseudo_meter_attributes_private)
     @original_school = school
     @aggregated_heat_meters         = school.aggregated_heat_meters
-    @aggregated_electricity_meters  = TargetMeter.new(school.aggregated_electricity_meters)
+    @aggregated_electricity_meters  = TargetMeterDailyDayType.new(school.aggregated_electricity_meters)
     @storage_heater_meter           = storage_heater_meter
-    @name += ' - target'
+    @name += ': target'
   end
 end
 
@@ -84,15 +84,13 @@ class TargetMeter < Dashboard::Meter
   private
 
   def create_target_amr_data(meter_to_clone)
-    targets = TargetAttributes.new(meter_to_clone)
-
-    start_date = targets.first_target_date
+    start_date = @target.first_target_date
     end_date   = meter_to_clone.amr_data.end_date + 363
 
     amr_data = AMRData.new(meter_to_clone.meter_type)
     (start_date..end_date).each do |date|
       # once a years worth of target data has been created then the target is compounded
-      # e.g. for a 95% targer, year 1 is 95%, year 2 95%^2 etc.
+      # e.g. for a 95% target, year 1 is 95%, year 2 95%^2 etc.
       clone_date = date - 364
       clone_amr_data = amr_data.date_exists?(clone_date) ? amr_data : meter_to_clone.amr_data
       clone_kwh_x48 = clone_amr_data.one_days_data_x48(clone_date)
@@ -101,6 +99,13 @@ class TargetMeter < Dashboard::Meter
     end
     amr_data
   end
+end
+
+# calculates average profiles per month from previous year
+# and then applies a scalar target reduction to them
+# takes about 24ms per 365 days to calculate
+class TargetMeterMonthlyDayType < TargetMeter
+  private
 
   def target_amr_data(clone_kwh_x48, date, clone_date, clone_amr_data)
     day_type = @meter_collection.holidays.day_type(date)
@@ -147,5 +152,45 @@ class TargetMeter < Dashboard::Meter
       total = AMRData.fast_add_multiple_x48_x_x48(kwhs_x48)
       AMRData.fast_multiply_x48_x_scalar(total, 1.0 / kwhs_x48.length)
     end
+  end
+end
+
+# calculates average profiles from nearby days from previous year
+# and then applies a scalar target reduction to them
+# takes about 45ms per 365 days to calculate
+# holiday averaging requirement less as don't want to have to go too far
+# to a matching holiday which is too far seasonally away from the one
+# we want to calculate an average profile for
+class TargetMeterDailyDayType < TargetMeter
+  NUM_SAME_DAYTYPE_REQUIRED = {
+    holiday:     4,
+    weekend:     6,
+    schoolday:  10
+  }
+  private
+
+  def target_amr_data(clone_kwh_x48, date, clone_date, clone_amr_data)
+    days_average_profile_x48 = average_profile_for_day_x48(clone_date, clone_amr_data)
+    target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(days_average_profile_x48, @target.target(date))
+    OneDayAMRReading.new(mpan_mprn, date, 'TARG', nil, DateTime.now, target_kwh_x48)
+  end
+
+  def scan_days_offset
+    # work outwards from target day with these offsets
+    # [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7, 8, -8, 9, -9, 10, -10......-100]
+    @scan_days ||= [0,(1..100).to_a.zip((-100..-1).to_a.reverse)].flatten
+  end
+
+  def average_profile_for_day_x48(date, amr_data)
+    day_type = @meter_collection.holidays.day_type(date)
+    profiles_to_average = []
+    scan_days_offset.each do |days_offset|
+      date_offset = date + days_offset
+      if amr_data.date_exists?(date_offset) && @meter_collection.holidays.day_type(date_offset) == day_type
+        profiles_to_average.push(amr_data.one_days_data_x48(date_offset))
+      end
+      break if profiles_to_average.length >= NUM_SAME_DAYTYPE_REQUIRED[day_type]
+    end
+    AMRData.fast_average_multiple_x48(profiles_to_average)
   end
 end

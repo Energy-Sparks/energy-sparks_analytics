@@ -125,6 +125,11 @@ class AMRData < HalfHourlyData
     c
   end
 
+  def self.fast_average_multiple_x48(kwhs_x48)
+    total = AMRData.fast_add_multiple_x48_x_x48(kwhs_x48)
+    AMRData.fast_multiply_x48_x_scalar(total, 1.0 / kwhs_x48.length)
+  end
+
   def self.fast_multiply_x48_x_scalar(a, scalar)
     a.map { |v| v * scalar }
   end
