@@ -6,14 +6,14 @@ require_relative 'virtual_school.rb'
 # with an attempt to correct for holidays, but set on a per month basis
 class TargetSchool < MeterCollection
   include Logging
-  def initialize(school)
+  def initialize(school, calculation_type)
     super(school.school, holidays: school.holidays, temperatures: school.temperatures,
             solar_irradiation: school.temperatures, solar_pv: school.solar_pv,
             grid_carbon_intensity: school.grid_carbon_intensity,
             pseudo_meter_attributes: school.pseudo_meter_attributes_private)
     @original_school = school
     @aggregated_heat_meters         = school.aggregated_heat_meters
-    @aggregated_electricity_meters  = TargetMeterDailyDayType.new(school.aggregated_electricity_meters)
+    @aggregated_electricity_meters  = TargetMeter.calculation_factory(calculation_type, school.aggregated_electricity_meters)
     @storage_heater_meter           = storage_heater_meter
     @name += ': target'
   end
@@ -79,6 +79,17 @@ class TargetMeter < Dashboard::Meter
     puts calc_text
     puts "Got here total = #{@amr_data.total} kwh"
     logger.info calc_text
+  end
+
+  def self.calculation_factory(type, meter_to_clone)
+    case type
+    when :month
+      TargetMeterMonthlyDayType.new(meter_to_clone)
+    when :day
+      TargetMeterDailyDayType.new(meter_to_clone)
+    else
+      raise EnergySparksUnexpectedStateException, "Unexpected target averaging type #{type}"
+    end
   end
 
   private
