@@ -215,7 +215,7 @@ class ChartManager
       chart1_type:      :line,
       series_breakdown: :none,
       x_axis:           :day,
-      target:           true,
+      target:           {calculation_type: :day},
       inherits_from:    :targeting_and_tracking_monthly_electricity
     },
     targeting_and_tracking_monthly_electricity_experimental2: {
