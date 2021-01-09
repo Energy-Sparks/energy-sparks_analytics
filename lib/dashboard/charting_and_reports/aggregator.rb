@@ -193,22 +193,17 @@ class Aggregator
   end
 
   def determine_multi_school_chart_date_range(schools, chart_config)
+    extend_to_future = include_target? && !@chart_config[:target][:extend_chart_into_future].nil?
+
     logger.info '-' * 120
     logger.info "Determining maximum chart range for #{schools.length} schools:"
-    min_date = nil
-    max_date = nil
-    schools.each do |school|
-      series_manager = SeriesDataManager.new(school, chart_config)
-      logger.info "    #{school.name} from #{series_manager.first_meter_date} to  #{series_manager.last_meter_date}"
-      min_date = series_manager.first_meter_date if min_date.nil? || series_manager.first_meter_date > min_date
-      max_date = series_manager.last_meter_date  if max_date.nil? || series_manager.last_meter_date  < max_date
-    end
+    
+    min_date = schools.map { |school| SeriesDataManager.new(school, chart_config).first_meter_date }.max
+    last_meter_dates = schools.map { |school| SeriesDataManager.new(school, chart_config).last_meter_date }
+    max_date = extend_to_future ? last_meter_dates.max : last_meter_dates.min
 
-    chart_config[:min_combined_school_date] = min_date
-    chart_config[:max_combined_school_date] = max_date
-
-    @first_meter_date = min_date
-    @last_meter_date = max_date
+    chart_config[:min_combined_school_date] = @first_meter_date = min_date
+    chart_config[:max_combined_school_date] = @last_meter_date  = max_date
 
     description = schools.length > 1 ? 'Combined school charts' : 'School chart'
     logger.info description + " date range #{min_date} to #{max_date}"
@@ -663,11 +658,13 @@ class Aggregator
       @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
         x_index = @xbucketor.index(date_range[0], nil)
         multi_day_breakdown = @series_manager.get_data([:daterange, date_range])
+        unless multi_day_breakdown.nil? # added to support future targeted data past end of real meter date
         multi_day_breakdown.each do |key, value|
           add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
           count += 1
         end
       end
+    end
     end
     logger.info "aggregate_by_day:  aggregated #{count} items"
   end

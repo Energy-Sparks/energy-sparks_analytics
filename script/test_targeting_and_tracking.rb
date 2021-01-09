@@ -21,6 +21,7 @@ script = {
                                   targeting_and_tracking_monthly_electricity_experimental2
                                   targeting_and_tracking_monthly_electricity_experimental3
                                   targeting_and_tracking_monthly_electricity_experimental4
+                                  targeting_and_tracking_monthly_electricity_experimental_baseload
                                   ]},
                               ],
                               control: {
