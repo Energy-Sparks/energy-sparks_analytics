@@ -45,10 +45,6 @@ class Aggregator
     [@chart_config, schools]
   end
 
-  def include_target?
-    @chart_config.key?(:target) && !@chart_config[:target].nil?
-  end
-
   def aggregate
     bucketed_period_data = nil
 
@@ -84,6 +80,8 @@ class Aggregator
     # remove_zero_data if @chart_config[:chart1_type] == :scatter
 
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
+
+    accumulate_data if cumulative?
 
     reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order) && @chart_config[:series_name_order] == :reverse
 
@@ -123,6 +121,10 @@ class Aggregator
 
   def include_target?
     @chart_config.key?(:target) && !@chart_config[:target].nil?
+  end
+
+  def cumulative?
+    @chart_config.key?(:cumulative) && @chart_config[:cumulative]
   end
 
   #=================regrouping of chart data ======================================
@@ -396,6 +398,15 @@ class Aggregator
     unless @y2_axis.nil?
       @y2_axis.each_key do |series_name|
         @y2_axis[series_name] = @y2_axis[series_name].reverse
+      end
+    end
+  end
+
+  def accumulate_data
+    @bucketed_data.keys.each do |series_name|
+      running_total = 0.0
+      @bucketed_data[series_name].map! do |val|
+        running_total += val
       end
     end
   end
