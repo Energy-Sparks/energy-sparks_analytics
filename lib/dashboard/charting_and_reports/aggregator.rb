@@ -81,6 +81,8 @@ class Aggregator
 
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
+    nullify_zero_data if nullify_zero_data?
+
     accumulate_data if cumulative?
 
     reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order) && @chart_config[:series_name_order] == :reverse
@@ -125,6 +127,10 @@ class Aggregator
 
   def cumulative?
     @chart_config.key?(:cumulative) && @chart_config[:cumulative]
+  end
+
+  def nullify_zero_data?
+    @chart_config.key?(:nullify_zero_data) && @chart_config[:nullify_zero_data]
   end
 
   #=================regrouping of chart data ======================================
@@ -402,13 +408,26 @@ class Aggregator
     end
   end
 
+  def nullify_zero_data
+    @bucketed_data.keys.each do |series_name|
+      @bucketed_data[series_name].map! do |val|
+        val == 0.0 ? nil : val
+      end
+    end
+  end
+
+
   def accumulate_data
+    puts "Got here before"
+    ap @bucketed_data
     @bucketed_data.keys.each do |series_name|
       running_total = 0.0
       @bucketed_data[series_name].map! do |val|
-        running_total += val
+        val.nil? ? nil : (running_total += val)
       end
     end
+    # puts "Got here after"
+    # ap @bucketed_data
   end
 
   def reformat_x_axis
@@ -513,7 +532,7 @@ class Aggregator
       unless result_data.is_a?(Symbol)
         @bucketed_data[series_name] = result_data.map do |x|
           x = x.to_f if is_a?(Integer)
-          x.finite? ? x : nil
+          (x.nil? || x.finite?) ? x : nil
         end
       end
     end
@@ -1080,7 +1099,6 @@ class Aggregator
     benchmark_heating_usage(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2, :storage_heaters, true)
   end
 
-  
   def create_empty_bucket_series
     logger.debug "Creating empty data buckets #{@series_names} x #{@x_axis.length}"
     bucketed_data = {}

@@ -212,11 +212,12 @@ class ChartManager
         ['Energy:<school_name>: target', 'Electricity: target'],
         ['Energy:<school_name>', 'Electricity: actual']
       ],
-      chart1_type:      :line,
-      series_breakdown: :none,
-      x_axis:           :day,
-      target:           {calculation_type: :day, extend_chart_into_future: true},
-      inherits_from:    :targeting_and_tracking_monthly_electricity
+      chart1_type:        :line,
+      series_breakdown:   :none,
+      x_axis:             :day,
+      nullify_zero_data:  true,
+      target:             {calculation_type: :day, extend_chart_into_future: true},
+      inherits_from:      :targeting_and_tracking_monthly_electricity
     },
     targeting_and_tracking_monthly_electricity_experimental0: {
       name:             'Tracking experiment (weekly line)',
