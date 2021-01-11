@@ -218,6 +218,17 @@ class ChartManager
       target:           {calculation_type: :day, extend_chart_into_future: true},
       inherits_from:    :targeting_and_tracking_monthly_electricity
     },
+    targeting_and_tracking_monthly_electricity_experimental0: {
+      name:             'Tracking experiment (weekly line)',
+      x_axis:           :week,
+      inherits_from:    :targeting_and_tracking_monthly_electricity_experimental
+    },
+    targeting_and_tracking_monthly_electricity_experimental1: {
+      name:             'Tracking experiment (cumulative weekly line)',
+      x_axis:           :week,
+      cumulative:       true,
+      inherits_from:    :targeting_and_tracking_monthly_electricity_experimental
+    },
     targeting_and_tracking_monthly_electricity_experimental_baseload: {
       name:             'Tracking experiment (baseload kW)',
       replace_series_label: [
