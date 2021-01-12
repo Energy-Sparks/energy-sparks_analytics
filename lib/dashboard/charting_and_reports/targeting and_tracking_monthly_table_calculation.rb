@@ -3,18 +3,17 @@
 class CalculateMonthlyTrackAndTraceData
   def initialize(school, fuel_type)
     @school = school
-    @scalar = ScalarkWhCO2CostValues.new(@school)
     @fuel_type = fuel_type
   end
 
   def raw_data
     @raw_data ||= calculate_raw_data
-  end
+  end 
 
   private
 
   def calculate_raw_data
-    basic_results  = basic_raw_data
+    basic_results = basic_raw_data
 
     target_results = target_data(basic_raw_data)
 
@@ -29,7 +28,6 @@ class CalculateMonthlyTrackAndTraceData
 
   def basic_raw_data
     previous_year, current_year = last_2_years(monthly_values)
-
     {
       previous_year_kwhs:                     values(previous_year),
       current_year_kwhs:                      values(current_year),
@@ -41,10 +39,26 @@ class CalculateMonthlyTrackAndTraceData
   end
 
   def target_data(basic_raw_data)
+    target_values = monthly_values(true)
+    this_years_monthly_targets_kwh_x12 = target_values.values.map{ |v| v.nil? ? nil : v[:value] }.last(12)
+    this_years_monthly_partial_targets_kwh_x12 = weight_partial_month_data(this_years_monthly_targets_kwh_x12, basic_raw_data[:partial_target_weights])
+
+    {
+      full_targets_kwh:    this_years_monthly_targets_kwh_x12,
+      partial_targets_kwh: this_years_monthly_partial_targets_kwh_x12
+    }
+  end
+
+  def target_data_deprecated(basic_raw_data)
+    # previous simplistic targetting calculation:
     {
       full_targets_kwh:    targets(basic_raw_data[:previous_year_kwhs], nil),
       partial_targets_kwh: targets(basic_raw_data[:previous_year_kwhs], basic_raw_data[:partial_target_weights]),
     }
+  end
+
+  def weight_partial_month_data(kwhs_x12, weights)
+    kwhs_x12.zip(weights).map { |a,b| a.nil? || b.nil? ? nil : a * b }
   end
 
   def cumulative_target_data(target_results)
@@ -61,17 +75,62 @@ class CalculateMonthlyTrackAndTraceData
     }
   end
 
+  def calculate_prototype_interprets_charts
+    extended             = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation)
+    extended_cumulative  = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_cumulative)
+    truncated            = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_unextended)
+    truncated_cumulative = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative)
+    ap extended
+  end
+
+  def chart_data(chart_name)
+    chart = calculate_chart(chart_name)
+    {
+      chart_name:       chart_name,
+      months_mmm_yyyyy: chart[:x_axis],
+      months_mmm:       chart[:x_axis].map { |name| name[0..2] },
+      actual_kwhs:      chart[:x_data]['actual'],
+      target_kwhs:      chart[:x_data]['target']
+    }
+  end
+
+  def calculate_chart(chart_name)
+    ChartManager.new(@school).run_standard_chart(chart_name)
+  end
+=begin
+  def combine_chart_data(extended_to_future, trunacted_recent, extended_cumulative, truncated_cumulative)
+    puts "Got here combine"
+    ap extended_to_future
+    ap trunacted_recent
+    (0..11).each do |month_index|
+      month_name = extended_to_future[:x_axis][month_index][0..2] # remove YYYY from default labelling
+      actual_kwh      = extended_to_future[:x_data]['actual'][month_index]
+      target_kwh_full = extended_to_future[:x_data]['target'][month_index]
+      percent = month_index == trunacted_recent.length - 1 ? 1.0 : percent_days_in_month(trunacted_recent, extended_to_future, month_index)
+      
+
+    end
+    extended_to_future[:x_axis].map.with_index do |x_axis_formatted_month_year, i|
+
+  end
+=end
+  def percent_days_in_month(trunacted_recent, extended_to_future, month_index)
+    month_dates_truncated = trunacted_recent[:x_axis_ranges][month_index]
+    month_dates_full = extended_to_future[:x_axis_ranges][month_index]
+    percent = (month_dates_truncated[1] - month_dates_truncated[0]) / (extended_to_future[1] - extended_to_future[0])
+  end
+
   def performance(kwhs, partial_target_kwh)
     kwhs.map.with_index do |_kwh, i|
       kwhs.nil? ? nil : ((kwhs[i] - partial_target_kwh[i]) / partial_target_kwh[i])
     end
   end
 
-  def monthly_values
+  def monthly_values(use_target = false)
     (-23..0).map do |month|
       [
         month,
-        checked_get_aggregate({month: month}, @fuel_type, :kwh)
+        checked_get_aggregate(use_target, {month: month}, @fuel_type, :kwh)
       ]
     end.to_h
   end
@@ -103,7 +162,7 @@ class CalculateMonthlyTrackAndTraceData
   def cumulative_raw(arr)
     running_total = 0.0
     arr.map do |v|
-      running_total += val(v)
+      running_total += v.nil? ? 0.0 : val(v)
     end
   end
 
@@ -173,9 +232,18 @@ class CalculateMonthlyTrackAndTraceData
     nil
   end
 
-  def checked_get_aggregate(period, fuel_type, data_type)
+  def target_school
+    @target_school ||= TargetSchool.new(@school, :day)
+  end
+
+  def scalar(use_target)
+    @scalar_cache ||= {}
+    @scalar_cache[use_target] ||= ScalarkWhCO2CostValues.new(use_target ? target_school : @school)
+  end
+
+  def checked_get_aggregate(use_target, period, fuel_type, data_type)
     begin
-      @scalar.scalar(period, fuel_type, data_type)
+      scalar(use_target).scalar(period, fuel_type, data_type)
     rescue EnergySparksNotEnoughDataException => _e
       nil
     end

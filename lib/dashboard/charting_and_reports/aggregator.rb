@@ -416,18 +416,13 @@ class Aggregator
     end
   end
 
-
   def accumulate_data
-    puts "Got here before"
-    ap @bucketed_data
     @bucketed_data.keys.each do |series_name|
       running_total = 0.0
       @bucketed_data[series_name].map! do |val|
         val.nil? ? nil : (running_total += val)
       end
     end
-    # puts "Got here after"
-    # ap @bucketed_data
   end
 
   def reformat_x_axis
