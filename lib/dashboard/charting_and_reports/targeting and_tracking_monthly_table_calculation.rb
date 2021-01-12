@@ -75,45 +75,6 @@ class CalculateMonthlyTrackAndTraceData
     }
   end
 
-  def calculate_prototype_interprets_charts
-    extended             = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation)
-    extended_cumulative  = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_cumulative)
-    truncated            = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_unextended)
-    truncated_cumulative = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative)
-    ap extended
-  end
-
-  def chart_data(chart_name)
-    chart = calculate_chart(chart_name)
-    {
-      chart_name:       chart_name,
-      months_mmm_yyyyy: chart[:x_axis],
-      months_mmm:       chart[:x_axis].map { |name| name[0..2] },
-      actual_kwhs:      chart[:x_data]['actual'],
-      target_kwhs:      chart[:x_data]['target']
-    }
-  end
-
-  def calculate_chart(chart_name)
-    ChartManager.new(@school).run_standard_chart(chart_name)
-  end
-=begin
-  def combine_chart_data(extended_to_future, trunacted_recent, extended_cumulative, truncated_cumulative)
-    puts "Got here combine"
-    ap extended_to_future
-    ap trunacted_recent
-    (0..11).each do |month_index|
-      month_name = extended_to_future[:x_axis][month_index][0..2] # remove YYYY from default labelling
-      actual_kwh      = extended_to_future[:x_data]['actual'][month_index]
-      target_kwh_full = extended_to_future[:x_data]['target'][month_index]
-      percent = month_index == trunacted_recent.length - 1 ? 1.0 : percent_days_in_month(trunacted_recent, extended_to_future, month_index)
-      
-
-    end
-    extended_to_future[:x_axis].map.with_index do |x_axis_formatted_month_year, i|
-
-  end
-=end
   def percent_days_in_month(trunacted_recent, extended_to_future, month_index)
     month_dates_truncated = trunacted_recent[:x_axis_ranges][month_index]
     month_dates_full = extended_to_future[:x_axis_ranges][month_index]
@@ -247,5 +208,29 @@ class CalculateMonthlyTrackAndTraceData
     rescue EnergySparksNotEnoughDataException => _e
       nil
     end
+  end
+
+  # the remainder of this class is currently unused PH 12Jan2021
+  def calculate_prototype_interprets_charts
+    extended             = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation)
+    extended_cumulative  = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_cumulative)
+    truncated            = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_unextended)
+    truncated_cumulative = chart_data(:targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative)
+    ap extended
+  end
+
+  def chart_data(chart_name)
+    chart = calculate_chart(chart_name)
+    {
+      chart_name:       chart_name,
+      months_mmm_yyyyy: chart[:x_axis],
+      months_mmm:       chart[:x_axis].map { |name| name[0..2] },
+      actual_kwhs:      chart[:x_data]['actual'],
+      target_kwhs:      chart[:x_data]['target']
+    }
+  end
+
+  def calculate_chart(chart_name)
+    ChartManager.new(@school).run_standard_chart(chart_name)
   end
 end
