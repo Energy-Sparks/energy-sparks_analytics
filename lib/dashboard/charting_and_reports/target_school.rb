@@ -70,7 +70,7 @@ class TargetMeter < Dashboard::Meter
       storage_heater_config: meter_to_clone.storage_heater_setup,
       meter_attributes: meter_to_clone.meter_attributes
     )
-    @original_meter  = meter_to_clone
+    @original_meter = meter_to_clone
     @target = TargetAttributes.new(meter_to_clone)
     bm = Benchmark.realtime {
       @amr_data = create_target_amr_data(meter_to_clone)

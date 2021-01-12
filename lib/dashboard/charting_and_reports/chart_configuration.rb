@@ -206,6 +206,34 @@ class ChartManager
       timescale:        nil,
       inherits_from:    :group_by_week_electricity
     },
+    targeting_and_tracking_monthly_electricity_internal_calculation: {
+      name:             'Used for internal tabular calculation - projected to end of target period',
+      replace_series_label: [
+        ['Energy:<school_name>: target', 'target'],
+        ['Energy:<school_name>', 'actual']
+      ],
+      chart1_type:        :line,
+      series_breakdown:   :none,
+      x_axis:             :month,
+      nullify_zero_data:  true,
+      target:             {calculation_type: :day, extend_chart_into_future: true},
+      inherits_from:      :targeting_and_tracking_monthly_electricity
+    },
+    targeting_and_tracking_monthly_electricity_internal_calculation_cumulative: {
+      name:          'Used for internal tabular calculation - projected to end of target period - cumulative',
+      cumulative:    true,
+      inherits_from: :targeting_and_tracking_monthly_electricity_internal_calculation
+    },
+    targeting_and_tracking_monthly_electricity_internal_calculation_unextended: {
+      name:          'Used for internal tabular calculation - to recent available data',
+      target:        {calculation_type: :day, extend_chart_into_future: nil},
+      inherits_from: :targeting_and_tracking_monthly_electricity_internal_calculation
+    },
+    targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative: {
+      name:          'Used for internal tabular calculation - to recent available data - cumulative',
+      cumulative:    true,
+      inherits_from: :targeting_and_tracking_monthly_electricity_internal_calculation_unextended
+    },
     targeting_and_tracking_monthly_electricity_experimental: {
       name:             'Tracking experiment (daily line)',
       replace_series_label: [
