@@ -26,7 +26,7 @@ class RunAdultDashboard < RunCharts
   end
 
   private def run_one_page(page, definition, control)
-    puts "Running page #{page} has class #{definition.key?(:content_class)}"
+    puts "Running page:   #{page}"
     logger.info "Running page #{page} has class #{definition.key?(:content_class)}"
 
     # ap definition[:content_class].front_end_template_variables # front end variables
@@ -34,28 +34,28 @@ class RunAdultDashboard < RunCharts
     advice = definition[:content_class].new(@school) # , )
 
     unless advice.valid_alert?
-      puts "Page failed, as advice not valid #{page}" 
+      puts "                Page failed, as advice not valid #{page}" 
       return
     end
 
     unless advice.relevance == :relevant
-      puts "Page failed, as advice not relevant #{page}" 
+      puts "                Page failed, as advice not relevant #{page}" 
       return
     end
 
     advice.calculate
 
-    puts "Page failed 1, as advice not available to users #{page}" unless advice.make_available_to_users?
+    puts "                Page failed 1, as advice not available to users #{page}" unless advice.make_available_to_users?
     # return unless advice.make_available_to_users?
 
     if advice.has_structured_content?
       begin
-        puts "Advice has structured content"
-        puts "Has #{advice.structured_content.length} components and is called #{advice.class.name}"
+        # puts "Advice has structured content"
+        # puts "Has #{advice.structured_content.length} components and is called #{advice.class.name}"
         
         advice.structured_content.each do |component_advice|
-          puts component_advice[:title]
-          puts component_advice[:content].map { |component| component[:type] }.join('; ')
+          # puts component_advice[:title]
+          # puts component_advice[:content].map { |component| component[:type] }.join('; ')
         end
       rescue NoMethodError => e
         puts e
@@ -68,7 +68,7 @@ class RunAdultDashboard < RunCharts
         
     @failed_charts.concat(advice.failed_charts) unless advice.failed_charts.empty?
 
-    puts "Page failed 2, as advice not available to users #{page}" unless advice.make_available_to_users?
+    puts "                Page failed 2, as advice not available to users #{page}" unless advice.make_available_to_users?
 
     comparison = CompareContentResults.new(control, @school.name)
     comparison.save_and_compare_content(page, content)
