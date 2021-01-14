@@ -11,9 +11,9 @@ class TargetSchool < MeterCollection
             grid_carbon_intensity: school.grid_carbon_intensity,
             pseudo_meter_attributes: school.pseudo_meter_attributes_private)
     @original_school = school
-    @aggregated_heat_meters         = school.aggregated_heat_meters
-    @aggregated_electricity_meters  = TargetMeter.calculation_factory(calculation_type, school.aggregated_electricity_meters)
-    @storage_heater_meter           = storage_heater_meter
+    @aggregated_heat_meters         = TargetMeter.calculation_factory(calculation_type, school.aggregated_heat_meters) unless school.aggregated_heat_meters.nil?
+    @aggregated_electricity_meters  = TargetMeter.calculation_factory(calculation_type, school.aggregated_electricity_meters) unless school.aggregated_electricity_meters.nil?
+    @storage_heater_meter           = TargetMeter.calculation_factory(calculation_type, school.storage_heater_meter) unless school.storage_heater_meter.nil?
     @name += ': target'
   end
 end
@@ -25,6 +25,10 @@ class TargetAttributes
     unless meter.attributes(:targeting_and_tracking).nil?
       @attributes = meter.attributes(:targeting_and_tracking).sort { |a,b| a[:start_date] <=> b[:start_date] } 
     end
+  end
+
+  def table
+    @attributes.map { |t| [t[:start_date], t[:target]] }
   end
 
   def target_date_ranges
@@ -56,6 +60,7 @@ end
 
 class TargetMeter < Dashboard::Meter
   include Logging
+  attr_reader :target
   def initialize(meter_to_clone)
     super(
       meter_collection: meter_to_clone.meter_collection,
@@ -73,6 +78,8 @@ class TargetMeter < Dashboard::Meter
     @target = TargetAttributes.new(meter_to_clone)
     bm = Benchmark.realtime {
       @amr_data = create_target_amr_data(meter_to_clone)
+      calculate_carbon_emissions_for_meter
+      calculate_costs_for_meter
     }
     calc_text = "Calculated target meter #{mpan_mprn} in #{bm.round(3)} seconds"
     puts calc_text
@@ -108,6 +115,21 @@ class TargetMeter < Dashboard::Meter
       amr_data.add(date, target_kwh_x48)
     end
     amr_data
+  end
+
+  # TODO(PH, 14Jan2021) ~ duplicate of code in aggregation mixin
+  def calculate_carbon_emissions_for_meter
+    if fuel_type == :electricity || fuel_type == :aggregated_electricity # TODO(PH, 6Apr19) remove : aggregated_electricity once analytics meter meta data loading changed
+      @amr_data.set_carbon_emissions(id, nil, @meter_collection.grid_carbon_intensity)
+    else
+      @amr_data.set_carbon_emissions(id, EnergyEquivalences::UK_GAS_CO2_KG_KWH, nil)
+    end
+  end
+
+  def calculate_costs_for_meter
+    logger.info "Creating economic & accounting costs for target #{mpan_mprn} fuel #{fuel_type} from #{amr_data.start_date} to #{amr_data.end_date}"
+    @amr_data.set_economic_tariff(self)
+    @amr_data.set_accounting_tariff(self)
   end
 end
 

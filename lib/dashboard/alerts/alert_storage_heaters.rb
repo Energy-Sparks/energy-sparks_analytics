@@ -1,5 +1,6 @@
 require_relative './alert_storage_heater_mixin.rb'
 require_relative './alert_thermostatic_control.rb'
+require_relative './alert_targets.rb'
 
 class AlertStorageHeaterAnnualVersusBenchmark < AlertGasAnnualVersusBenchmark
   include AlertGasToStorageHeaterSubstitutionMixIn
@@ -17,7 +18,7 @@ class AlertStorageHeaterThermostatic < AlertThermostaticControl
   include AlertGasToStorageHeaterSubstitutionMixIn
   def initialize(school)
     super(school, :storage_heater_thermostatic)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
   end
 
   def thermostatic_chart
@@ -75,3 +76,33 @@ class AlertStorageHeatersLongTermTrend < AlertLongTermTrend
   end
 end
 
+class AlertStorageHeaterTargetAnnual < AlertGasTargetAnnual
+  def self.template_variables
+    specific = { 'Storage heaters targetting and tracking' => long_term_variables('storage heaters')}
+    specific.merge(self.superclass.template_variables)
+  end
+
+  def fuel_type
+    :storage_heaters
+  end
+
+  def aggregate_meter
+    @school.storage_heater_meter
+  end
+
+  def aggregate_target_meter
+    @target_school.storage_heater_meter
+  end
+end
+
+class AlertStorageHeaterTarget4Week < AlertStorageHeaterTargetAnnual
+  def rating_target_percent
+    last_4_weeks_percent_of_target
+  end
+end
+
+class AlertStorageHeaterTarget1Week < AlertStorageHeaterTargetAnnual
+  def rating_target_percent
+    last_week_percent_of_target
+  end
+end

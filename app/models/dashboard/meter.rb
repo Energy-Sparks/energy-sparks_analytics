@@ -66,6 +66,15 @@ module Dashboard
       fa.round(0)
     end
 
+    def enough_amr_data_to_set_target?
+      academic_year = @meter_collection.holidays.calculate_academic_year_tolerant_of_missing_data(amr_data.end_date)
+      academic_year.start_date - 364 > amr_data.start_date
+    end
+
+    def target_set?
+      !attributes(:targeting_and_tracking).nil?
+    end
+
     def meter_number_of_pupils(local_school, start_date = nil, end_date = nil)
       p = local_school.number_of_pupils(start_date, end_date) * partial_number_of_pupils(start_date, end_date)
       p.to_i
