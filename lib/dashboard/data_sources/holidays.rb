@@ -366,6 +366,20 @@ class Holidays
     count
   end
 
+  def academic_year_tolerant_of_missing_data(date)
+    calculate_academic_year_tolerant_of_missing_data(date)
+  end
+
+  def calculate_academic_year_tolerant_of_missing_data(date)
+    year = academic_year(date)
+    if year.nil?
+      # data commonly not being set for next summer holiday, so make a guess!!!!!!!!!!!
+      previous_academic_year = academic_year(date - 364)
+      year = SchoolDatePeriod.new(:academic_year, 'Synthetic approx current academic year', previous_academic_year.end_date + 1, previous_academic_year.end_date + 365)
+    end
+    year
+  end
+
   # returns a list of academic years between 2 dates - iterates backwards from most recent end of summer holiday
   def academic_years(start_date, end_date)
     acy_years = []

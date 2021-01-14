@@ -242,7 +242,7 @@ class FormatEnergyUnit
       # :no_decimals and :to_pence are also valid, but dealt with outwith the significant figures handling
     when :ks2
       2
-    when :benchmark
+    when :benchmark, :target
       3
     when :approx_accountant
       4

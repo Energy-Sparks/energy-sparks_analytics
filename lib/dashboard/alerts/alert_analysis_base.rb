@@ -475,8 +475,12 @@ class AlertAnalysisBase < ContentBase
       AlertStorageHeatersLongTermTrend              => 'shlt',
       AlertOptimumStartAnalysis                     => 'opts',
       AlertSummerHolidayRefridgerationAnalysis      => 'shol',
-      AlertElectricityTarget                        => 'etrg',
-      AlertGasTarget                                => 'gtrg'
+      AlertElectricityTargetAnnual                  => 'etga',
+      AlertGasTargetAnnual                          => 'gtga',
+      AlertElectricityTarget4Week                   => 'etg4',
+      AlertGasTarget4Week                           => 'gtg4',
+      AlertElectricityTarget1Week                   => 'etg1',
+      AlertGasTarget1Week                           => 'gtg1'
     }
   end
 
