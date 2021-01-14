@@ -2,19 +2,35 @@ require 'require_all'
 # creates a 'target' school from an existing school
 # the initial implementation is the school with the
 # and data shifted 1 year and then scaled by the target factor
-# with an attempt to correct for holidays, but set on a per month basis
+# with an attempt to correct for holidays, but set on a per month basis or a nearby day basis
 class TargetSchool < MeterCollection
   include Logging
   def initialize(school, calculation_type)
-    super(school.school, holidays: school.holidays, temperatures: school.temperatures,
-            solar_irradiation: school.temperatures, solar_pv: school.solar_pv,
-            grid_carbon_intensity: school.grid_carbon_intensity,
-            pseudo_meter_attributes: school.pseudo_meter_attributes_private)
+    super(school.school,
+          holidays:                 school.holidays,
+          temperatures:             school.temperatures,
+          solar_irradiation:        school.solar_irradiation,
+          solar_pv:                 school.solar_pv,
+          grid_carbon_intensity:    school.grid_carbon_intensity,
+          pseudo_meter_attributes:  school.pseudo_meter_attributes_private)
+
     @original_school = school
-    @aggregated_heat_meters         = TargetMeter.calculation_factory(calculation_type, school.aggregated_heat_meters) unless school.aggregated_heat_meters.nil?
-    @aggregated_electricity_meters  = TargetMeter.calculation_factory(calculation_type, school.aggregated_electricity_meters) unless school.aggregated_electricity_meters.nil?
-    @storage_heater_meter           = TargetMeter.calculation_factory(calculation_type, school.storage_heater_meter) unless school.storage_heater_meter.nil?
+
+    @aggregated_heat_meters         = set_target(school.aggregated_heat_meters,         calculation_type)
+    @aggregated_electricity_meters  = set_target(school.aggregated_electricity_meters,  calculation_type)
+    @storage_heater_meter           = set_target(school.storage_heater_meter,           calculation_type)
+
     @name += ': target'
+  end
+
+  private
+
+  def set_target(meter, calculation_type)
+    set_target?(meter) ? TargetMeter.calculation_factory(calculation_type, meter) : nil
+  end
+
+  def set_target?(meter)
+    !meter.nil? && meter.target_set? && meter.enough_amr_data_to_set_target? 
   end
 end
 
@@ -22,8 +38,8 @@ class TargetAttributes
   attr_reader :attributes
   def initialize(meter)
     @attributes = nil
-    unless meter.attributes(:targeting_and_tracking).nil?
-      @attributes = meter.attributes(:targeting_and_tracking).sort { |a,b| a[:start_date] <=> b[:start_date] } 
+    if meter.target_set?
+      @attributes = meter.attributes(:targeting_and_tracking).sort { |a, b| a[:start_date] <=> b[:start_date] } 
     end
   end
 
@@ -110,14 +126,13 @@ class TargetMeter < Dashboard::Meter
       # e.g. for a 95% target, year 1 is 95%, year 2 95%^2 etc.
       clone_date = date - 364
       clone_amr_data = amr_data.date_exists?(clone_date) ? amr_data : meter_to_clone.amr_data
-      clone_kwh_x48 = clone_amr_data.one_days_data_x48(clone_date)
-      target_kwh_x48 = target_amr_data(clone_kwh_x48, date, clone_date, clone_amr_data)
+      target_kwh_x48 = target_amr_data(date, clone_date, clone_amr_data)
       amr_data.add(date, target_kwh_x48)
     end
     amr_data
   end
 
-  # TODO(PH, 14Jan2021) ~ duplicate of code in aggregation mixin
+  # TODO(PH, 14Jan2021) ~~~ duplicate of code in aggregation mixin
   def calculate_carbon_emissions_for_meter
     if fuel_type == :electricity || fuel_type == :aggregated_electricity # TODO(PH, 6Apr19) remove : aggregated_electricity once analytics meter meta data loading changed
       @amr_data.set_carbon_emissions(id, nil, @meter_collection.grid_carbon_intensity)
@@ -137,9 +152,10 @@ end
 # and then applies a scalar target reduction to them
 # takes about 24ms per 365 days to calculate
 class TargetMeterMonthlyDayType < TargetMeter
+  include Logging
   private
 
-  def target_amr_data(clone_kwh_x48, date, clone_date, clone_amr_data)
+  def target_amr_data(date, clone_date, clone_amr_data)
     day_type = @meter_collection.holidays.day_type(date)
     year_prior_average_profile_x48 = average_days_for_month_x48_xdaytype(clone_date, clone_amr_data)[day_type]
     target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(year_prior_average_profile_x48, @target.target(date))
@@ -172,7 +188,7 @@ class TargetMeterMonthlyDayType < TargetMeter
     x = average_kwh_x48(profiles)
     x.each do |type, x48|
       if x48.any?{ |z| z.nan? }
-        puts "Got here NaN #{first_of_month} #{type} TODO - change algorithm" 
+        logger.info "Got here NaN #{first_of_month} #{type} TODO(PH, 14Jan2021) - change algorithm" 
         x[type] = AMRData.one_day_zero_kwh_x48
       end
     end
@@ -199,9 +215,10 @@ class TargetMeterDailyDayType < TargetMeter
     weekend:     6,
     schoolday:  10
   }
+
   private
 
-  def target_amr_data(clone_kwh_x48, date, clone_date, clone_amr_data)
+  def target_amr_data(date, clone_date, clone_amr_data)
     days_average_profile_x48 = average_profile_for_day_x48(clone_date, clone_amr_data)
     target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(days_average_profile_x48, @target.target(date))
     OneDayAMRReading.new(mpan_mprn, date, 'TARG', nil, DateTime.now, target_kwh_x48)
@@ -210,7 +227,7 @@ class TargetMeterDailyDayType < TargetMeter
   def scan_days_offset
     # work outwards from target day with these offsets
     # [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7, 8, -8, 9, -9, 10, -10......-100]
-    @scan_days ||= [0,(1..100).to_a.zip((-100..-1).to_a.reverse)].flatten
+    @scan_days_offset ||= [0, (1..100).to_a.zip((-100..-1).to_a.reverse)].flatten
   end
 
   def average_profile_for_day_x48(date, amr_data)
