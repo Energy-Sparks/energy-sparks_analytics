@@ -16,10 +16,6 @@ class TargetingAndTrackingTable < ContentBase
     true
   end
 
-  def rating
-    5.0
-  end
-
   def self.template_variables
     { 'Targeting and tracking summary' => TEMPLATE_VARIABLES}
   end
@@ -89,6 +85,18 @@ class TargetingAndTrackingTable < ContentBase
     html_table_formatting(header, rows)
   end
 
+  def first_month_html
+    data[:previous_dates][0].first.strftime('%B')
+  end
+
+  def cumulative_target_percent
+    data[:cumulative_performance].last
+  end
+
+  def year_to_date_percent_absolute_html
+    format_cell(:relative_percent, cumulative_target_percent.magnitude) 
+  end
+
   private
 
   def select_rows(types)
@@ -126,10 +134,14 @@ class TargetingAndTrackingTable < ContentBase
   end
 
   def format_rows(years_values, datatype = :kwh)
-    years_values.map { |v| FormatEnergyUnit.format(datatype, v, :html, false, true) }
+    years_values.map { |v| format_cell(datatype, v) }
+  end
+
+  def format_cell(datatype, value)
+    FormatEnergyUnit.format(datatype, value, :html, false, true, :target) 
   end
 
   def html_table_formatting(header, rows)
-    HtmlTableFormattingWithHighlightedCells.new(header, rows).html
+    HtmlTableFormattingWithHighlightedCells.new(header, rows, nil, nil, nil, :target).html
   end
 end
