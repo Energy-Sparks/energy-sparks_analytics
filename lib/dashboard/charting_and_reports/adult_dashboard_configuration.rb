@@ -19,6 +19,7 @@ class DashboardConfiguration
       gas_out_of_hours
       gas_long_term_progress
       gas_recent_progress
+      gas_target
       underlying_gas_meters_breakdown
       gas_profit_loss
     ],
@@ -127,21 +128,23 @@ class DashboardConfiguration
     },
     electric_target: {   
       name:                   'Setting and tracking targets for your electricity',
-      content_class:           AdviceBaseload,
-      excel_worksheet_name:   'AdviceTargetsElectricity',
+      content_class:           AdviceTargetsElectricity,
+      excel_worksheet_name:   'AdviceTargetElectric',
       charts: %i[
-        baseload_lastyear
-        baseload
       ],
       promoted_variables: {
-        AlertElectricityBaseloadVersusBenchmark => {
-          rating:                             :rating,
-          one_year_saving_versus_exemplar_£:  :one_year_saving_versus_exemplar_£,
-          one_year_saving_versus_benchmark_£: :one_year_saving_versus_benchmark_£,
-          average_baseload_last_year_kw:      :average_baseload_last_year_kw,
-          exemplar_per_pupil_kw:              :exemplar_per_pupil_kw,
-          benchmark_per_pupil_kw:             :benchmark_per_pupil_kw,
-          summary:                            :summary
+        AlertElectricityTargetAnnual => {
+          rating:                                   :rating,
+          previous_year_kwh:                        :previous_year_kwh,
+          current_year_kwh:                         :current_year_kwh,
+          current_year_target_kwh:                  :current_year_target_kwh,
+          current_year_percent_of_target_absolute:  :current_year_percent_of_target_absolute,
+          current_year_percent_of_target_adjective: :current_year_percent_of_target_adjective,
+          current_year_percent_of_target:           :current_year_percent_of_target,
+          current_year_target_£_to_date:            :current_year_target_£_to_date,
+          current_year_£:                           :current_year_£,
+          current_year_target_kwh_to_date:          :current_year_target_kwh_to_date,
+          summary:                                  :summary
         }
       },
     },
@@ -303,6 +306,28 @@ class DashboardConfiguration
         }
       },
 =end
+    },
+    gas_target: {   
+      name:                   'Setting and tracking targets for your gas',
+      content_class:           AdviceTargetsGas,
+      excel_worksheet_name:   'AdviceTargetGas',
+      charts: %i[
+      ],
+      promoted_variables: {
+        AlertGasTargetAnnual => {
+          rating:                                   :rating,
+          previous_year_kwh:                        :previous_year_kwh,
+          current_year_kwh:                         :current_year_kwh,
+          current_year_target_kwh:                  :current_year_target_kwh,
+          current_year_percent_of_target_absolute:  :current_year_percent_of_target_absolute,
+          current_year_percent_of_target_adjective: :current_year_percent_of_target_adjective,
+          current_year_percent_of_target:           :current_year_percent_of_target,
+          current_year_target_£_to_date:            :current_year_target_£_to_date,
+          current_year_£:                           :current_year_£,
+          current_year_target_kwh_to_date:          :current_year_target_kwh_to_date,
+          summary:                                  :summary
+        }
+      },
     },
     gas_intraday: {
       name:                   'Gas: intraday',

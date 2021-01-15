@@ -18,7 +18,7 @@ class TargetingAndTrackingAdvice < DashboardChartAdviceBase
           of the academic year.
         </p>
         <p>
-          The data can either be presented on a monhtly iindividual basis or cumulatively.
+          The data can either be presented on a monhtly individual basis or cumulatively.
           Cumulatively is more correct in that it accounts for good and bad months overall
           and is more tolerant for example of changes to Easter dates and how many weekends
           there are in a month. It is ultimately the target you are trying to track and not

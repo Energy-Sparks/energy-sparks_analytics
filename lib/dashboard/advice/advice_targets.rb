@@ -6,144 +6,293 @@ class AdviceTargets < AdviceBase
     @fuel_type = fuel_type
   end
 
-  def baseload_one_year_chart
-    @bdown_1year_chart ||= charts[0]
+  def enough_data
+    aggregate_meter.enough_amr_data_to_set_target? ? :enough : :not_enough
   end
 
-  def baseload_one_year_chart_timescales
-    self.class.chart_timescale_and_dates(baseload_one_year_chart)
-  end
-
-  def baseload_longterm_chart
-    @bdown_longterm_chart ||= charts[1]
-  end
-
-  def baseload_longterm_chart_timescales
-    self.class.chart_timescale_and_dates(baseload_longterm_chart)
-  end
-
-  def max_baseload_period_years
-    baseload_longterm_chart_timescales[:timescale_years]
+  def relevance
+    (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
   end
 
   def content(user_type: nil)
     charts_and_html = []
-    charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.humanize}</h2>" } )
+    charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.to_s.humanize}</h2>" } )
     charts_and_html += debug_content
-    charts_and_html.push( { type: :html,  content: statement_of_baseload } )
-    charts_and_html.push( { type: :html,  content: explanation_of_baseload } )
-    charts_and_html.push( { type: :html,  content: benefit_of_moving_to_exemplar_baseload } )
-    charts_and_html.push( { type: :chart, content: baseload_one_year_chart } )
-    charts_and_html.push( { type: :chart_name, content: baseload_one_year_chart[:config_name] } )
-    charts_and_html.push( { type: :html,  content: chart_seasonal_trend_comment } ) if max_baseload_period_years > 0.75
-    charts_and_html.push( { type: :html,  content: chart_drilldown_explanation } )
-
-    if max_baseload_period_years > 1.1
-      charts_and_html.push( { type: :html,  content: '<h2>Electricity Baseload - Longer Term</h2>' } )
-      charts_and_html.push( { type: :html,  content: longterm_chart_intro } )
-      charts_and_html.push( { type: :chart, content: baseload_longterm_chart } )
-      charts_and_html.push( { type: :chart_name, content: baseload_longterm_chart[:config_name] } )
-      charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
-    end
+    charts_and_html.push( { type: :html,  content: brief_intro_to_targeting_and_tracking } )
+    charts_and_html.push( { type: :html,  content: current_targets } )
+    charts_and_html.push( { type: :html,  content: monthly_targeting_and_tracking_tables } )
+    charts_and_html.push( { type: :html,  content: weekly_chart_intro } )
+    create_chart(charts_and_html, monthly_chart)
+    charts_and_html.push( { type: :html,  content: weekly_chart_drilldown } )
+    charts_and_html.push( { type: :html,  content: culmulative_weekly_chart_intro } )
+    create_chart(charts_and_html, monthly_chart_cumulative)
+    charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
+    add_charts_for_testing(charts_and_html)
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
   private
 
-  def statement_of_baseload
-    text = %{
-      <p>
-        Your electricity baseload over the last
-        <%= baseload_one_year_chart_timescales[:timescale_description] %>
-        was <%= format_kw(average_baseload_last_year_kw) %>.
-        Other schools with a similar number of pupils have a baseload of <%= format_kw(benchmark_per_pupil_kw) %>.
-      <p>
-    }
-    ERB.new(text).result(binding)
+  def add_charts_for_testing(charts_and_html)
+    %i[
+      targeting_and_tracking_monthly_electricity
+      targeting_and_tracking_monthly_electricity_internal_calculation
+      targeting_and_tracking_monthly_electricity_internal_calculation_cumulative
+      targeting_and_tracking_monthly_electricity_internal_calculation_unextended
+      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative
+      targeting_and_tracking_monthly_electricity_base
+      targeting_and_tracking_weekly_electricity_1_year
+      alert_targeting_and_tracking_weekly_electricity_1_year
+      targeting_and_tracking_weekly_electricity_1_year_cumulative
+      targeting_and_tracking_monthly_electricity_experimental0
+      targeting_and_tracking_monthly_electricity_experimental1
+      targeting_and_tracking_monthly_electricity_experimental_baseload
+      targeting_and_tracking_monthly_electricity_experimental2
+      targeting_and_tracking_monthly_electricity_experimental3
+      targeting_and_tracking_monthly_electricity_experimental4
+    ].each do |chart_name|
+      create_chart(charts_and_html, chart_name)
+    end
   end
 
-  def explanation_of_baseload
-    %{
-      <p>
-        Electricity baseload is the electricity needed to provide power to appliances
-        that keep running at all times.
-        It can be measured by looking at your school&apos;s out of hours electricity consumption. 
-      <p>
-    }
+  def create_chart(charts_and_html, chart_name)
+    charts_and_html.push( { type: :chart, content: run_chart(chart_name) } )
+    charts_and_html.push( { type: :chart_name, content: chart_name } )
   end
 
-  def benefit_of_moving_to_exemplar_baseload
+  def current_targets
     text = %{
       <p>
-        <% if one_year_saving_versus_benchmark_£ > 0.0 %>
-          Reducing a school&apos;s baseload is often the fastest way of reducing a school&apos;s
-          energy costs and reducing its carbon footprint. If you matched the baseload
-          of other schools of the same size you would save
-          <%= format_£(one_year_saving_versus_benchmark_£) %> per year.
+        <% if single_target_set? %>
+          Your school has a single target of a
+          <%= FormatEnergyUnit.format(:percent, (1.0 - target_meter_attributes.target(last_meter_date)), :html) %>
+          reduction set starting from
+          <%= FormatEnergyUnit.format(:date, target_meter_attributes.first_target_date, :html) %>.
         <% else %>
-          Your school&apos;s baseload is low, which is good and as a result you are saving
-          <%= format_£(- 1.0 * one_year_saving_versus_benchmark_£) %> per year versus
-          the average of other schools of a similar size.
-        <% end %>
-
-        <% if one_year_saving_versus_benchmark_£ <= 0.0 && one_year_saving_versus_exemplar_£ > 0.0 %>
-          However, you could still improve by matching the baseload
-          of the best performing schools saving
-          <%= format_£(one_year_saving_versus_exemplar_£) %> per year.
-        <% elsif one_year_saving_versus_exemplar_£ > 0.0 %>
-          If you matched the baseload of the best performing schools you could save
-          <%= format_£(one_year_saving_versus_exemplar_£) %> per year.
+          Your school has the following targets set
+          <%= target_table_html %>
         <% end %>
       </p>
     }
     ERB.new(text).result(binding)
   end
 
-  def chart_seasonal_trend_comment
-    %{
-      <p>
-        Ideally the baseload should stay the same throughout the year and
-        not increase in winter (a heating problem) or the summer (air conditioning).
-      <p>
-    }
+  def target_meter_attributes
+    @target_meter_attributes ||= TargetAttributes.new(aggregate_meter)
   end
 
-  def chart_drilldown_explanation
-    %{
-      <p>
-        You can click on a day on the chart above and it will drilldown to
-        show you the usage on that day.
-      <p>
-    }
+  def single_target_set?
+    target_meter_attributes.table.length == 1
   end
 
-  def longterm_chart_intro
-    %{
-      <p>
-        This chart shows you the same chart as above but for all the meter
-        data we have available for you school - so you can see longer term
-        trends in your baseload.
-      <p>
-    }
+  def target_table_html
+    relative_percents = target_meter_attributes.table.map { |row| [row[0].strftime('%d-%b-%Y'), row[1] - 1.0] }
+    HtmlTableFormatting.new(['Start date','target'], relative_percents, nil, [String, :relative_percent]).html
   end
 
-  def longterm_chart_trend_should_be_downwards
-    %{
+  def monthly_tracking_table
+    @monthly_tracking_table ||= calculate_monthly_tracking_table
+  end
+
+  def calculate_monthly_tracking_table
+    tbl = TargetingAndTrackingTable.new(@school, @fuel_type)
+    tbl.analyse(nil)
+    tbl
+  end
+
+  def monthly_targeting_and_tracking_tables
+    text = %{
+      <%= HtmlTableFormattingWithHighlightedCells.cell_highlight_style %>
       <p>
-        You would expect baseload to reduce over
-        time as appliances and computers have become more power efficient
-        with lower standby power requirements.
-        If this is not the case then
-        you should look to identify the cause of the increase; you can
-        use appliance monitors to determine the standby power of individual
-        appliances - why not get the pupils to complete a survey?
+        This table shows you how the school has been doing on a monthly basis:
+      </p>
       <p>
+        <%=monthly_tracking_table.simple_target_table_html %>
+      </p>
+      <p>
+        This table shows you the same information but cumulatively:
+      </p>
+      <p>
+        <%=monthly_tracking_table.simple_culmulative_target_table_html %>
+      </p>
+      <% if monthly_tracking_table.cumulative_target_percent > 0.0 %>
+        <p>
+          Unfortunately you are currently running
+          <%= monthly_tracking_table.year_to_date_percent_absolute_html %> above target.
+        </p>
+      <% else %>
+        <p>
+          Congratulations, you are currently running
+          <%= monthly_tracking_table.year_to_date_percent_absolute_html %> below the target.
+        </p>
+      <% end  %>
+      <p>
+        So far you have spent
+          <%= format_cell(:£, current_year_£) %> (<%= format_cell(:kwh, current_year_kwh) %>)
+        versus your target of
+          <%= format_cell(:£, current_year_target_£_to_date) %> (<%= format_cell(:kwh, current_year_target_kwh_to_date) %>).
+      </p>
     }
+    ERB.new(text).result(binding)
+  end
+
+  def culmulative_weekly_chart_intro
+    text = %{
+      <p>
+        The chart below shows how you are progressing on a cumulative basis
+        versus the targets you have set:
+      </p>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def weekly_chart_intro
+    text = %{
+      <p>
+        The chart below shows how you are progressing on a weekly basis
+        versus the targets you have set:
+      </p>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def weekly_chart_drilldown
+    text = %{
+      <p>
+        If you want to see more detail you can drilldown by clicking on points
+        on the chart.
+      </p>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def format_cell(datatype, value)
+    FormatEnergyUnit.format(datatype, value, :html, false, false, :target) 
+  end
+
+  def fuel_type_html
+    @fuel_type.to_s.humanize
+  end
+
+  def last_meter_date
+    aggregate_meter.amr_data.end_date
+  end
+
+  def brief_intro_to_targeting_and_tracking
+    text = %{
+      <h2>Introduction to Targeting and Tracking</h2>
+      <p>
+        'Targeting and Tracking' on Energy Sparks lets you set separate targets for reducing
+        your electricity, gas or storage heater consumption over the next year. Energy Sparks
+        then lets you track how you are progressing versus these targets throughout the year.
+      </p>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def introduction_to_targeting_and_tracking
+    text = %{
+      <h2>Introduction to Targeting and Tracking</h2>
+      <p>
+        'Targeting and Tracking' on Energy Sparks lets you set separate targets for reducing
+        your electricity, gas or storage heater consumption over the next year.
+        You can do this by selecting the 'Edit targets' option on the 'Manage School'
+        menu above.
+      </p>
+      <p>
+        Targets are set as a percentage of last year's energy consumption. If for example
+        you set a target -5&percnt; reduction, and you consumed 100,000kWh of electricity
+        last year, then your target for this year would be 95,000kWh. Targets can be changed
+        at any time and can vary for different time periods. They apply continuously,
+        so if your target was -5&percnt; this year, and you achieved this goal, in the
+        case of the example 95,000kWh then if you left the target unchanged then next year's
+        target would be 90,250kWh.
+      </p>
+      <p>
+        If this is the first time you are setting a target and
+        it is already part way through the year, the target is tracked on a pro-rata basis
+        through the remainder of the year. So, setting a 5&percnt; target half way through
+        the academic year would imply approximately a 2.5&percnt; target for the year as a whole.
+      </p>
+      <p>
+        When setting a target review the some of the 'Energy saving opportunites' on the Management
+        dashboard and think how much you might be able to achieve by for example turning the heating
+        off in all holidays compared with the holidays you left it on last year? Don't try to be too
+        ambitious, achiveing a realistic 5% target this year is much better than failing to meet
+        a more ambitious target this year and getting disillusioned. Reducing your costs and carbon
+        emissions is a long term process and needs careful thought and planning. 
+      </p>
+      <p>
+        You can adjust the targets throughout the year and their adjustment works retrospectively.
+        However, we don't encourage you to do this if part way through the year you are failing
+        to meeting your original target; try to persist at meeting your target.
+      </p>
+      <p>
+        Energy Sparks compares your current consumption and targets versus an average consumption
+        from a similar time last year, matching up school days, weekends and holidays.
+      </p>
+      <p>
+        In addition to the tables and charts on this page which help you understand how you are doing
+        versus your targets, Energy Sparks will send weekly emails or text alerts to your school telling
+        you whether you are on track to meet the targets, for the year to date, over the last 4 weeks, and
+        for the most recent week.
+      </p>
+    }
+    ERB.new(text).result(binding)
   end
 end
 
 class AdviceTargetsElectricity < AdviceTargets
   def initialize(school)
     super(school, :electricity)
+  end
+  def relevance
+    @school.aggregated_electricity_meters.nil? ? :never_relevant : :relevant
+  end
+  protected def aggregate_meter
+    @school.aggregated_electricity_meters
+  end
+  def monthly_chart
+    :targeting_and_tracking_weekly_electricity_1_year
+  end
+  def monthly_chart_cumulative
+    :targeting_and_tracking_weekly_electricity_1_year_cumulative
+  end
+end
+
+class AdviceTargetsGas < AdviceTargets
+  def initialize(school)
+    super(school, :gas)
+  end
+  def relevance
+    @school.aggregated_heat_meters.nil? ? :never_relevant : :relevant
+  end
+  protected def aggregate_meter
+    @school.aggregated_heat_meters
+  end
+  def monthly_chart
+    :targeting_and_tracking_weekly_gas_1_year
+  end
+  def monthly_chart_cumulative
+    :targeting_and_tracking_weekly_gas_1_year_cumulative
+  end
+  def add_charts_for_testing(charts_and_html)
+    %i[
+      targeting_and_tracking_monthly_gas_column
+    ].each do |chart_name|
+      create_chart(charts_and_html, chart_name)
+    end
+  end
+end
+
+class AdviceTargetsStorageHeaters < AdviceTargets
+  def initialize(school)
+    super(school, :storage_heaters)
+  end
+  def relevance
+    @school.storage_heater_meter.nil? ? :never_relevant : :relevant
+  end
+  protected def aggregate_meter
+    @school.storage_heater_meter
   end
 end

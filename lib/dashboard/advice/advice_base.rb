@@ -190,7 +190,7 @@ class AdviceBase < ContentBase
       <p>
         <h3>Summary rating information (provided by analytics)</h3>
         <%= HtmlTableFormatting.new(['Variable', 'Value'], enhanced_title.to_a).html.gsub('£', '&pound;') %>
-      <p>
+      </p>
     )
     ERB.new(text).result(binding)
   end

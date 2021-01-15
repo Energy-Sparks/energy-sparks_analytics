@@ -234,7 +234,7 @@ class ChartManager
       cumulative:    true,
       inherits_from: :targeting_and_tracking_monthly_electricity_internal_calculation_unextended
     },
-    targeting_and_tracking_monthly_electricity: {
+    targeting_and_tracking_monthly_electricity_base: {
       name:             'Tracking experiment (daily line)',
       replace_series_label: [
         ['Energy:<school_name>: target', 'Electricity: target'],
@@ -250,7 +250,7 @@ class ChartManager
     targeting_and_tracking_weekly_electricity_1_year: {
       name:             'Weekly electricity targeting and tracking for this year',
       x_axis:           :week,
-      inherits_from:    :targeting_and_tracking_monthly_electricity
+      inherits_from:    :targeting_and_tracking_monthly_electricity_base
     },
     alert_targeting_and_tracking_weekly_electricity_1_year: {
       inherits_from:    :targeting_and_tracking_weekly_electricity_1_year
@@ -277,12 +277,14 @@ class ChartManager
         ['BASELOAD:<school_name>: target', 'Baseload: target'],
         ['BASELOAD:<school_name>', 'Baseload: actual']
       ],
+      chart1_type:       :line,
       yaxis_units:      :kw,
       series_breakdown: :baseload,
-      inherits_from:    :targeting_and_tracking_monthly_electricity
+      inherits_from:    :targeting_and_tracking_monthly_electricity_base
     },
     targeting_and_tracking_monthly_electricity_experimental2: {
       name:             'Tracking experiment 2 (datetime over a week)',
+      chart1_type:      :line,
       x_axis:           :datetime,
       timescale:        :week,
       target:           {calculation_type: :day},
@@ -292,6 +294,7 @@ class ChartManager
       name:             'Tracking experiment 3 (datetime over a week - column)',
       chart1_type:      :column,
       chart1_subtype:   nil,
+      series_breakdown: :none,
       inherits_from:    :targeting_and_tracking_monthly_electricity_experimental2
     },
     targeting_and_tracking_monthly_electricity_experimental4: {
@@ -301,6 +304,21 @@ class ChartManager
       x_axis:           :day,
       timescale:        :month,
       inherits_from:    :targeting_and_tracking_monthly_electricity
+    },
+    targeting_and_tracking_weekly_gas_1_year: {
+      name:             :targeting_and_tracking_monthly_gas.to_s,
+      meter_definition: :allheat,
+      inherits_from:    :targeting_and_tracking_weekly_electricity_1_year
+    },
+    targeting_and_tracking_weekly_gas_1_year_cumulative: {
+      name:             :targeting_and_tracking_weekly_gas_1_year_cumulative.to_s,
+      meter_definition: :allheat,
+      inherits_from:    :targeting_and_tracking_weekly_electricity_1_year_cumulative
+    },
+    targeting_and_tracking_monthly_gas_column: {
+      name:             :targeting_and_tracking_monthly_gas_column.to_s,
+      chart1_type:      :column,
+      inherits_from:    :targeting_and_tracking_weekly_gas_1_year
     },
     electricity_co2_last_year_weekly_with_co2_intensity: {
       name:             'The carbon emissions of your school and the carbon intensity of the National Electricity Grid over the last year',

@@ -1,11 +1,12 @@
 class HtmlTableFormatting
   include Logging
-  def initialize(header, rows, total_row = nil, row_units = nil, use_table_formats = nil)
+  def initialize(header, rows, total_row = nil, row_units = nil, use_table_formats = nil, precision = :ks2)
     @header = header
     @rows = rows
     @total_row = total_row
     @row_units = row_units
     @use_table_formats = use_table_formats
+    @precision = precision
   end
 
   def html(right_justified_columns: [1..1000])
@@ -53,7 +54,7 @@ class HtmlTableFormatting
 
   private def format_value(val, column_number)
     table_format = @use_table_formats.nil? ? true : @use_table_formats[column_number]
-    @row_units.nil? ? val : FormatEnergyUnit.format(@row_units[column_number], val, :html, true, table_format)
+    @row_units.nil? ? val : FormatEnergyUnit.format(@row_units[column_number], val, :html, true, table_format, @precision)
   end
 
   private def column_td(column, right_justified_columns)
