@@ -51,6 +51,22 @@ class TargetAttributes
     @target_date_ranges ||= convert_target_date_ranges
   end
 
+  def average_target(start_date, end_date)
+    weighted_values = target_date_ranges.map do |target_range, value|
+      [
+        overlap_days(start_date, end_date, target_range.first, target_range.last) * 1.0,
+        value
+      ]
+    end
+    sumproduct = weighted_values.map{ |(a,b)| a * b }.sum
+    sumproduct / weighted_values.transpose[0].sum
+  end
+
+  def overlap_days(sd1, ed1, sd2, ed2)
+    days = [ed1, ed2].min - [sd1, sd2].max
+    days >= 0 ? days : 0
+  end
+
   def target(date)
     # don't use date_range.include? or cover? as 500 times slower than:
     target_date_ranges.select{ |date_range, _target| date >= date_range.first && date <= date_range.last }.values[0]
@@ -67,7 +83,7 @@ class TargetAttributes
     h[Date.new(2000, 1, 1)..(attributes[0][:start_date] - 1)] = 1.0
     last_index = attributes.length - 1
     (0...last_index).each do |interim_index|
-      h[attributes[interim_index][:start_date]..Date.new(2050, 1, 1)] = attributes[interim_index][:target]
+      h[attributes[interim_index][:start_date]..attributes[interim_index+1][:start_date]] = attributes[interim_index][:target]
     end
     h[attributes[last_index][:start_date]..Date.new(2050, 1, 1)] = attributes[last_index][:target]
     h

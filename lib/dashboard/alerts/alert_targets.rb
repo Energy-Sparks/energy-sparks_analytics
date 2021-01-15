@@ -197,7 +197,10 @@ class AlertTargetBase < AlertAnalysisBase
         description: 'current relative target today e.g. 5% (= 95%)',
         units:  :percent
       },
-
+      average_target_to_date_percent: {
+        description: 'weighted average target to date',
+        units:  :percent
+      },
       target_table: {
         description: 'Table of targets (Date, Percent)',
         units: :table,
@@ -314,6 +317,10 @@ class AlertTargetBase < AlertAnalysisBase
 
   def current_target_relative_percent_reduction
     (1.0 - current_target_percent)
+  end
+
+  def average_target_to_date_percent
+    aggregate_target_meter.target.average_target(tracking_start_date, maximum_alert_date)
   end
 
   def aggregate_meter_end_date
