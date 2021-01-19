@@ -63,8 +63,7 @@ class TargetAttributes
   end
 
   def overlap_days(sd1, ed1, sd2, ed2)
-    days = [ed1, ed2].min - [sd1, sd2].max
-    days >= 0 ? days : 0
+    [[ed1, ed2].min - [sd1, sd2].max + 1, 0].max
   end
 
   def target(date)
