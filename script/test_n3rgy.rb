@@ -111,6 +111,7 @@ def download_all_permissioned_data(n3rgy)
   end
 end
 
+<<<<<<< HEAD
 logging = { puts: true, ap: { limit: 5 } }
 logging = nil
 
@@ -125,3 +126,39 @@ test_consent_process(n3rgy, 2234567891000)
 test_appendix_a_sandbox_mpxns_permissions(n3rgy)
 
 download_all_permissioned_data(n3rgy)
+=======
+mpans = N3rgy.new.mpans
+ap mpans
+mpans.each do |mpan|
+  data = N3rgy.new.kwh_and_tariff_data_for_mpan(mpan)
+  save_readings_to_csv(mpan, data[:kwh])
+end
+exit
+data.each_with_index do |item, count|
+  puts '-' * 10 + count.to_s + '-' * 10
+  N3rgy.process_meter_readings(item)
+end
+exit
+data = []
+bm = Benchmark.realtime {
+  data =  N3rgy.new.half_hourly_data(1234567891034, Date.new(2012, 7, 7), Date.new(2014, 3, 1))
+}
+puts data.length
+puts bm.round(3)
+
+
+#interface spec
+
+class N3rgyRawData
+  def initialize(app_key = ENV['N3RGY_APP_KEY']); end
+  def permissioned_mpans; end
+  def metadata(mpan); end # TBD, but probably a hash
+  def mpan_status; end # returns as enumeration e.g. permissioned, adopted, not available etc. TBD
+  def postcode; end # to be used as part of audit, permissioning process
+  def start_date; end
+  def end_date; end
+  def historic_meter_data(mpan, start_date, end_date); end # { channel?, kwhs: { date => [kwhx48]}, prices: { date => [£x48]} error_log => {} }
+  def standing_charges(mpan, start_date, end_date) # hash TBD
+  def permission_mpan(mpan, url_to_uploaded_utility_bill_scan) # this may be implemented outside this API
+end
+>>>>>>> da3f1c7... temp checkin of test scripts
