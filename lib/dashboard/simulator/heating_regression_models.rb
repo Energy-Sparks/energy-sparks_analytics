@@ -610,11 +610,15 @@ module AnalyseHeatingAndHotWater
     end
 
     def winter_heating_samples
-      model(:heating_occupied_all_days).nil? ? 0 : model(:heating_occupied_all_days).samples
+      samples(:heating_occupied_all_days)
     end
 
     def summer_occupied_day_samples
-      model(:summer_occupied_all_days).samples
+      samples(:summer_occupied_all_days)
+    end
+
+    def samples(model_type)
+      model(model_type).nil? ? 0 : model(model_type).samples
     end
 
     def minimum_samples_for_model_to_run_well
