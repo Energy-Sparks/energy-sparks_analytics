@@ -18,11 +18,17 @@ def download(latitude, longitude, start_date, end_date)
   met.historic_temperatures(latitude, longitude, start_date, end_date)
 end
 
+def nearest_weather_stations(latitude, longitude)
+  met = MeteoStat.new
+  met.nearest_weather_stations(latitude, longitude, 4, 100)
+end
+
 start_date = Date.new(2016, 1, 1)
 end_date   = Date.new(2020, 11, 10)
 
 AreaNames::AREA_NAMES.each do |area_name, config|
   puts "Doing #{area_name} #{config[:latitude]} #{config[:longitude]} #{config[:temperature_filename]}"
+  ap nearest_weather_stations(config[:latitude], config[:longitude])
   temperatures = download(
       config[:latitude],
       config[:longitude],

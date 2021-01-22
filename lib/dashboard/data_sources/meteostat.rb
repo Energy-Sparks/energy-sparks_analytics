@@ -36,6 +36,10 @@ class MeteoStat
     convert_to_datetime_to_x48(raw_data, start_date, end_date)
   end
 
+  def nearest_weather_stations(latitude, longitude, number_of_results = 8, within_radius_km = 100)
+    download_nearby_stations(latitude, longitude, number_of_results, within_radius_km)
+  end
+
   private
 
   def download(latitude, longitude, start_date, end_date, altitude)
@@ -84,11 +88,48 @@ class MeteoStat
   end
 
   def download_10_days_data(latitude, longitude, start_date, end_date, altitude)
+    url = historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
+    json_request(url)
+  end
+
+  def download_nearby_stations(latitude, longitude, number_of_results, within_radius_km)
+    json = download_nearby_stations_json_request(latitude, longitude, number_of_results, within_radius_km)
+  end
+
+  def download_nearby_stations_json_request(latitude, longitude, number_of_results, within_radius_km)
+    url = nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
+    station_list = json_request(url)['data']
+    station_list.map do |station_details|
+      raw_station_data = find_station(station_details['id'])
+      extract_station_data(raw_station_data['data'][0], station_details)
+    end
+  end
+
+  def extract_station_data(data, station_details)
+    {
+      name:       data['name']['en'],
+      latitude:   data['latitude'],
+      longitude:  data['longitude'],
+      elevation:  data['elevation'],
+      distance:   station_details['distance']
+    }
+  end
+
+  def find_station(identifier)
+    @cached_stations ||= {}
+    @cached_stations[identifier] ||= download_station(identifier)
+  end
+
+  def download_station(identifier)
+    url = find_station_url(identifier)
+    json_request(url)
+  end
+
+  def json_request(url)
     # there seem to be status 429 failures - if you make too
     # many requests in too short a time
     back_off_sleep_times = [0.1, 0.2, 0.5, 1.0, 5.0]
-    u = url(latitude, longitude, start_date, end_date, altitude)
-    connection = Faraday.new(u, headers: authorization)
+    connection = Faraday.new(url, headers: authorization)
     response = nil
     back_off_sleep_times.each do |time_seconds|
       response = connection.get
@@ -108,7 +149,7 @@ class MeteoStat
     date.strftime('%Y-%m-%d')
   end
 
-  def url(latitude, longitude, start_date, end_date, altitude)
+  def historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
     'https://api.meteostat.net/v2/point/hourly' +
     '?lat='     + latitude.to_s +
     '&lon='     + longitude.to_s +
@@ -116,6 +157,18 @@ class MeteoStat
     '&start='   + url_date(start_date) +
     '&end='     + url_date(end_date) +
     '&tz=Europe/London'
+  end
+
+  def nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
+    'https://api.meteostat.net/v2/stations/nearby' +
+    '?lat='     + latitude.to_s +
+    '&lon='     + longitude.to_s +
+    '&limit='   + number_of_results.to_i.to_s +
+    '&radius='  + within_radius_km.to_i.to_s
+  end
+
+  def find_station_url(identifier)
+    "https://api.meteostat.net/v2/stations/search?query=#{identifier}"
   end
 
   def parse_temperature_reading(reading)
