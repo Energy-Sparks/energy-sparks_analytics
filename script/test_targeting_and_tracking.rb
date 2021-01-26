@@ -9,7 +9,7 @@ require './script/report_config_support.rb'
 script = {
   
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/targetting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  schools:                  ['bathamp*'],
+  schools:                  ['bathamp*','trini*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/targetting %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,

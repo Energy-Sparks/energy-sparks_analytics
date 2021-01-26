@@ -71,7 +71,7 @@ class RunAdultDashboard < RunCharts
     puts "                Page failed 2, as advice not available to users #{page}" unless advice.make_available_to_users?
 
     comparison = CompareContentResults.new(control, @school.name)
-    comparison.save_and_compare_content(page, content)
+    comparison.save_and_compare_content(page, content, true)
 
     html, charts = advice.analytics_split_charts_and_html(content)
 
