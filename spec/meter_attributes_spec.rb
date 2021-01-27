@@ -328,7 +328,7 @@ describe MeterAttributes do
 
   describe MeterAttributes::SolarPVMeterMapping do
     it 'accepts a hash and parses the values and keys it using the class definition' do
-      attribute = MeterAttributes::SolarPV.SolarPVMeterMapping({
+      attribute = MeterAttributes::SolarPVMeterMapping.parse({
         start_date:         '1/1/2017',
         end_date:           '2/2/2017',
         export_mpan:        '123456',
