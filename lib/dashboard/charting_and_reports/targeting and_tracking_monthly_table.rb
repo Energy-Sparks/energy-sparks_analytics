@@ -30,9 +30,9 @@ class TargetingAndTrackingTable < ContentBase
   }
 
   ALL_TABLE_ROWS_CONFIG = {
-    previous_year_kwhs:                 { name: 'Previous year(kWh)',             datatype: :kwh },
+    # previous_year_kwhs:                 { name: 'Previous year(kWh)',             datatype: :kwh },
     current_year_kwhs:                  { name: 'Current year(kWh)',              datatype: :kwh },
-    full_cumulative_previous_year_kwhs: { name: 'Previous year: cumulative(kWh)', datatype: :kwh },
+    # full_cumulative_previous_year_kwhs: { name: 'Previous year: cumulative(kWh)', datatype: :kwh },
     full_cumulative_current_year_kwhs:  { name: 'Current year: cumulative(kWh)',  datatype: :kwh },
     full_targets_kwh:                   { name: 'Target(kWh): full',              datatype: :kwh },
     partial_targets_kwh:                { name: 'Target(kWh): partial',           datatype: :kwh },
@@ -86,11 +86,11 @@ class TargetingAndTrackingTable < ContentBase
   end
 
   def first_month_html
-    data[:previous_dates][0].first.strftime('%B')
+    data[:current_year_date_ranges][0].first.strftime('%B')
   end
 
   def cumulative_target_percent
-    data[:cumulative_performance].last
+    data[:cumulative_performance].compact.last
   end
 
   def year_to_date_percent_absolute_html
@@ -102,13 +102,14 @@ class TargetingAndTrackingTable < ContentBase
   def select_rows(types)
     types = ALL_TABLE_ROWS_CONFIG.keys if types.nil?
     types.map do |type|
+      puts type
       config = ALL_TABLE_ROWS_CONFIG[type]
       format_row(config[:name], data[type], config[:datatype])
     end
   end
 
   def header
-    ['Month', header_months(data[:previous_dates])].flatten
+    ['Month', header_months(data[:current_year_date_ranges])].flatten
   end
 
   def calculate
