@@ -19,6 +19,8 @@ gem 'ruby-sun-times'
 gem 'soda-ruby', require: 'soda'
 gem 'structured_warnings'
 gem 'chroma'
+gem 'faraday'
+gem 'faraday_middleware'
 
 # Useful for debugging
 gem 'pry-byebug'
