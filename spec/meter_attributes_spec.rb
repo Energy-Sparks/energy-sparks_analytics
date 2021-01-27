@@ -317,7 +317,7 @@ describe MeterAttributes do
           orientation:        1,
           tilt:               180,
           shading:            30,
-          fit_£_per_kwh:      20.0
+          fit_£_per_kwh:      20.0,
           override_generation:    true,
           override_export:        true,
           override_self_consume:  true
@@ -348,7 +348,7 @@ describe MeterAttributes do
   end
 
   class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
-  
+
     id                  :solar_pv_mpan_meter_mapping
     aggregate_over      :solar_pv_mpan_meter_mapping
     name                'Solar PV MPAN Meter mapping'
