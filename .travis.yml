@@ -10,7 +10,7 @@ addons:
     - google-chrome-stable
 sudo: required
 before_install:
-  - gem install bundler
+  - gem install bundler -v '2.1.4'
 before_script:
 - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
   > ./cc-test-reporter
