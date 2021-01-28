@@ -19,6 +19,8 @@ gem 'ruby-sun-times'
 gem 'soda-ruby', require: 'soda'
 gem 'structured_warnings'
 gem 'chroma'
+gem 'faraday'
+gem 'faraday_middleware'
 
 # Useful for debugging
 gem 'pry-byebug'
@@ -29,4 +31,7 @@ gem 'ruby-prof'
 gem "benchmark-memory"
 
 # For tests
-gem 'rspec', '~> 3.8.0'
+group :test do
+  gem 'rspec', '~> 3.8.0'
+  gem 'bundler-audit'
+end
