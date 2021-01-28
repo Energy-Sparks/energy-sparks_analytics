@@ -31,4 +31,7 @@ gem 'ruby-prof'
 gem "benchmark-memory"
 
 # For tests
-gem 'rspec', '~> 3.8.0'
+group :test do
+  gem 'rspec', '~> 3.8.0'
+  gem 'bundler-audit'
+end
