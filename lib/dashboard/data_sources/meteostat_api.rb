@@ -18,7 +18,8 @@ class MeteoStatApi
   private
 
   def historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
-    'https://api.meteostat.net/v2/point/hourly' +
+    base_url +
+      '/point/hourly' +
       '?lat='     + latitude.to_s +
       '&lon='     + longitude.to_s +
       '&alt='     + altitude.to_i.to_s +
@@ -28,7 +29,8 @@ class MeteoStatApi
   end
 
   def nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
-    'https://api.meteostat.net/v2/stations/nearby' +
+    base_url +
+      '/stations/nearby' +
       '?lat='     + latitude.to_s +
       '&lon='     + longitude.to_s +
       '&limit='   + number_of_results.to_i.to_s +
@@ -36,7 +38,9 @@ class MeteoStatApi
   end
 
   def find_station_url(identifier)
-    "https://api.meteostat.net/v2/stations/search?query=#{identifier}"
+    base_url +
+      '/stations/search' +
+      "?query=#{identifier}"
   end
 
   def url_date(date)
@@ -45,6 +49,10 @@ class MeteoStatApi
 
   def headers
     { 'x-api-key' => @api_key }
+  end
+
+  def base_url
+    'https://api.meteostat.net/v2'
   end
 
   def get(url)

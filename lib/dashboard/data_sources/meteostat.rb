@@ -92,10 +92,6 @@ class MeteoStat
   end
 
   def download_nearby_stations(latitude, longitude, number_of_results, within_radius_km)
-    json = download_nearby_stations_json_request(latitude, longitude, number_of_results, within_radius_km)
-  end
-
-  def download_nearby_stations_json_request(latitude, longitude, number_of_results, within_radius_km)
     station_list = meteostat_api.nearby_stations(latitude, longitude, number_of_results, within_radius_km)['data']
     station_list.map do |station_details|
       raw_station_data = find_station(station_details['id'])
