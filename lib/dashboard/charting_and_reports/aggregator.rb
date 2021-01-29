@@ -38,7 +38,7 @@ class Aggregator
   def initialise_schools_date_range
     schools = @chart_config.key?(:schools) ? load_schools(@chart_config[:schools]) : [ @meter_collection ]
 
-    schools << TargetSchool.new(@meter_collection, @chart_config[:target][:calculation_type]) if include_target?
+    schools << @meter_collection.target_school(@chart_config[:target][:calculation_type]) if include_target?
 
     determine_multi_school_chart_date_range(schools, @chart_config)
 

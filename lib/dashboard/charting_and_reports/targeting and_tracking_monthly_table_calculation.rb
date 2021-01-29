@@ -94,11 +94,7 @@ class CalculateMonthlyTrackAndTraceData
     end
   end
 
-  def target_school
-    @target_school ||= TargetSchool.new(@school, :day)
-  end
-
   def target_meter
-    target_school.aggregate_meter(@fuel_type)
+    @school.target_school.aggregate_meter(@fuel_type)
   end
 end

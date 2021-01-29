@@ -102,7 +102,6 @@ class TargetingAndTrackingTable < ContentBase
   def select_rows(types)
     types = ALL_TABLE_ROWS_CONFIG.keys if types.nil?
     types.map do |type|
-      puts type
       config = ALL_TABLE_ROWS_CONFIG[type]
       format_row(config[:name], data[type], config[:datatype])
     end

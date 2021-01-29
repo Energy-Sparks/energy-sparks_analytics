@@ -363,6 +363,11 @@ class MeterCollection
     @cached_close_time
   end
 
+  def target_school(type = :day)
+    @target_school ||= {}
+    @target_school[type] ||= TargetSchool.new(self, type)
+  end
+
   def pseudo_meter_attributes(type)
     @pseudo_meter_attributes.fetch(type){ {} }
   end
