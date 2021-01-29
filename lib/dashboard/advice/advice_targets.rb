@@ -33,28 +33,6 @@ class AdviceTargets < AdviceBase
 
   private
 
-  def add_charts_for_testing(charts_and_html)
-    %i[
-      targeting_and_tracking_monthly_electricity
-      targeting_and_tracking_monthly_electricity_internal_calculation
-      targeting_and_tracking_monthly_electricity_internal_calculation_cumulative
-      targeting_and_tracking_monthly_electricity_internal_calculation_unextended
-      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative
-      targeting_and_tracking_monthly_electricity_base
-      targeting_and_tracking_weekly_electricity_1_year
-      alert_targeting_and_tracking_weekly_electricity_1_year
-      targeting_and_tracking_weekly_electricity_1_year_cumulative
-      targeting_and_tracking_monthly_electricity_experimental0
-      targeting_and_tracking_monthly_electricity_experimental1
-      targeting_and_tracking_monthly_electricity_experimental_baseload
-      targeting_and_tracking_monthly_electricity_experimental2
-      targeting_and_tracking_monthly_electricity_experimental3
-      targeting_and_tracking_monthly_electricity_experimental4
-    ].each do |chart_name|
-      create_chart(charts_and_html, chart_name)
-    end
-  end
-
   def create_chart(charts_and_html, chart_name)
     charts_and_html.push( { type: :chart, content: run_chart(chart_name) } )
     charts_and_html.push( { type: :chart_name, content: chart_name } )
@@ -211,25 +189,25 @@ class AdviceTargets < AdviceBase
       <p>
         If this is the first time you are setting a target and
         it is already part way through the year, the target is tracked on a pro-rata basis
-        through the remainder of the year. So, setting a 5&percnt; target half way through
+        through the remainder of the year. So, setting a 5&percnt; target half-way through
         the academic year would imply approximately a 2.5&percnt; target for the year as a whole.
       </p>
       <p>
-        When setting a target review the some of the 'Energy saving opportunites' on the Management
+        When setting a target review the some of the 'Energy saving opportunities' on the Management
         dashboard and think how much you might be able to achieve by for example turning the heating
         off in all holidays compared with the holidays you left it on last year? Don't try to be too
-        ambitious, achiveing a realistic 5% target this year is much better than failing to meet
+        ambitious, achieving a realistic 5% target this year is much better than failing to meet
         a more ambitious target this year and getting disillusioned. Reducing your costs and carbon
-        emissions is a long term process and needs careful thought and planning. 
+        emissions is a long-term process and needs careful thought and planning. 
       </p>
       <p>
         You can adjust the targets throughout the year and their adjustment works retrospectively.
         However, we don't encourage you to do this if part way through the year you are failing
-        to meeting your original target; try to persist at meeting your target.
+        to meet your original target; try to persist at meeting your target.
       </p>
       <p>
         Energy Sparks compares your current consumption and targets versus an average consumption
-        from a similar time last year, matching up school days, weekends and holidays.
+        from a similar time last year, matching up school days, weekends, and holidays.
       </p>
       <p>
         In addition to the tables and charts on this page which help you understand how you are doing
@@ -253,10 +231,33 @@ class AdviceTargetsElectricity < AdviceTargets
     @school.aggregated_electricity_meters
   end
   def monthly_chart
-    :targeting_and_tracking_weekly_electricity_1_year
+    :targeting_and_tracking_weekly_electricity_1_year_line
   end
   def monthly_chart_cumulative
-    :targeting_and_tracking_weekly_electricity_1_year_cumulative
+    :targeting_and_tracking_weekly_electricity_1_year_cumulative_line
+  end
+  def add_charts_for_testing(charts_and_html)
+    %i[
+      targeting_and_tracking_weekly_electricity_1_year_column
+      targeting_and_tracking_weekly_electricity_1_year_column_unextended
+      targeting_and_tracking_monthly_electricity_internal_calculation
+      targeting_and_tracking_monthly_electricity_internal_calculation_cumulative
+      targeting_and_tracking_monthly_electricity_internal_calculation_unextended
+      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_column
+      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_day
+      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative
+      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative_day
+      targeting_and_tracking_monthly_electricity_base
+      targeting_and_tracking_weekly_electricity_1_year_line
+      alert_targeting_and_tracking_weekly_electricity_1_year
+      targeting_and_tracking_weekly_electricity_1_year_cumulative_line
+      targeting_and_tracking_monthly_electricity_experimental_baseload
+      targeting_and_tracking_monthly_electricity_experimental2
+      targeting_and_tracking_monthly_electricity_experimental3
+      targeting_and_tracking_monthly_electricity_experimental4
+    ].each do |chart_name|
+      create_chart(charts_and_html, chart_name)
+    end
   end
 end
 
@@ -271,10 +272,10 @@ class AdviceTargetsGas < AdviceTargets
     @school.aggregated_heat_meters
   end
   def monthly_chart
-    :targeting_and_tracking_weekly_gas_1_year
+    :targeting_and_tracking_weekly_gas_1_year_line
   end
   def monthly_chart_cumulative
-    :targeting_and_tracking_weekly_gas_1_year_cumulative
+    :targeting_and_tracking_weekly_electricity_1_year_cumulative_line
   end
   def add_charts_for_testing(charts_and_html)
     %i[
@@ -282,6 +283,8 @@ class AdviceTargetsGas < AdviceTargets
     ].each do |chart_name|
       create_chart(charts_and_html, chart_name)
     end
+  end
+  def add_charts_for_testing(charts_and_html)
   end
 end
 
@@ -294,5 +297,7 @@ class AdviceTargetsStorageHeaters < AdviceTargets
   end
   protected def aggregate_meter
     @school.storage_heater_meter
+  end
+  def add_charts_for_testing(charts_and_html)
   end
 end

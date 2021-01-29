@@ -3,7 +3,6 @@ class AlertTargetBase < AlertAnalysisBase
 
   def initialize(school, type = :electricitylongtermtrend)
     super(school, type)
-    @target_school = TargetSchool.new(school, :day)
     @relevance = relevance
   end
 
@@ -401,7 +400,7 @@ class AlertTargetBase < AlertAnalysisBase
 
   def total(use_target, start_date, end_date, datatype)
     begin
-      chosen_school = use_target ? @target_school : @school
+      chosen_school = use_target ? @school.target_school : @school
       end_date = [end_date, aggregate_meter_end_date].min
       chosen_school.aggregate_meter(fuel_type).amr_data.kwh_date_range(start_date, end_date, datatype)
     rescue EnergySparksNotEnoughDataException => _e
@@ -445,7 +444,7 @@ class AlertElectricityTargetAnnual < AlertTargetBase
   end
 
   def aggregate_target_meter
-    @target_school.aggregated_electricity_meters
+    @school.target_school.aggregated_electricity_meters
   end
 end
 
@@ -476,7 +475,7 @@ class AlertGasTargetAnnual < AlertTargetBase
   end
 
   def aggregate_target_meter
-    @target_school.aggregated_heat_meters
+    @school.target_school.aggregated_heat_meters
   end
 end
 

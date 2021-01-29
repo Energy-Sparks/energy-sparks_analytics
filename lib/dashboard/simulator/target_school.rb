@@ -113,8 +113,6 @@ class TargetMeter < Dashboard::Meter
       calculate_costs_for_meter
     }
     calc_text = "Calculated target meter #{mpan_mprn} in #{bm.round(3)} seconds"
-    puts calc_text
-    puts "Got here total = #{@amr_data.total} kwh"
     logger.info calc_text
   end
 

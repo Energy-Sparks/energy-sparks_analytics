@@ -33,7 +33,7 @@ class RunCharts
     failed_charts.each do |failed_chart|
       short_backtrace = failed_chart.key?(:backtrace) && !failed_chart[:backtrace].nil? ? failed_chart[:backtrace][0].split('/').last : 'no backtrace'
       tolerate_failure = failed_chart.fetch(:tolerate_failure, false) ? 'ok   ' : 'notok'
-      puts sprintf('%-15.15s %s %-35.35s %-35.35s %-80.80s %-20.20s', 
+      puts sprintf('%-15.15s %s %-85.85s %-35.35s %-80.80s %-20.20s', 
         failed_chart[:school_name], tolerate_failure, failed_chart[:chart_name], failed_chart[:message], short_backtrace,
         shorten_type(failed_chart[:type]))
       puts failed_chart[:backtrace] if detail == :detailed
