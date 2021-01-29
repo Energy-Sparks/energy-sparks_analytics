@@ -21,12 +21,13 @@ describe MeteoStat do
 
   let(:expected_nearest_weather_stations) do
     [
-      {:name=>"Nottingham Weather Centre", :latitude=>53, :longitude=>-1.25, :elevation=>117, :distance=>39.4},
+      {:name=>"Nottingham Weather Centre", :latitude=>53, :longitude=>-1.25, :elevation=>117, :distance=>0},
+      {:name=>"Newton / Saxondale", :latitude=>52.9667, :longitude=>-0.9833, :elevation=>55, :distance=>18.2},
     ]
   end
 
 
-  describe 'historic_temperatures' do
+    describe 'historic_temperatures' do
 
     let(:temperature_json)        { JSON.parse(File.read('spec/fixtures/meteostat/historic_temperatures.json')) }
 
@@ -61,15 +62,17 @@ describe MeteoStat do
   describe 'nearest_weather_stations' do
 
     let(:nearest_json)     { JSON.parse(File.read('spec/fixtures/meteostat/nearby_stations.json')) }
-    let(:find_json)        { JSON.parse(File.read('spec/fixtures/meteostat/find_station.json')) }
+    let(:find_1_json)        { JSON.parse(File.read('spec/fixtures/meteostat/find_station_1.json')) }
+    let(:find_2_json)        { JSON.parse(File.read('spec/fixtures/meteostat/find_station_2.json')) }
 
     before do
       expect_any_instance_of(MeteoStatApi).to receive(:nearby_stations).and_return(nearest_json)
-      expect_any_instance_of(MeteoStatApi).to receive(:find_station).and_return(find_json)
+      expect_any_instance_of(MeteoStatApi).to receive(:find_station).with('03354').and_return(find_1_json)
+      expect_any_instance_of(MeteoStatApi).to receive(:find_station).with('EGXN0').and_return(find_2_json)
     end
 
     it 'returns expected stations' do
-      expect(MeteoStat.new.nearest_weather_stations(latitude, longitude, 1)).to eq(expected_nearest_weather_stations)
+      expect(MeteoStat.new.nearest_weather_stations(latitude, longitude, 2)).to eq(expected_nearest_weather_stations)
     end
   end
 end
