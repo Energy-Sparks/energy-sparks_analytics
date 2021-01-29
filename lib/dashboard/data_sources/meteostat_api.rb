@@ -1,4 +1,21 @@
+# Interface to Meteostat weather data
+#
+# documentation: https://dev.meteostat.net/api/point/hourly.html
+#
+require 'json'
+require 'faraday'
+require 'faraday_middleware'
+require 'limiter'
+require 'retriable'
+
 class MeteoStatApi
+  extend Limiter::Mixin
+
+  limit_method :get, rate: 2, interval: 1
+
+  class RateLimitError < StandardError; end
+  class HttpError < StandardError; end
+
   def initialize(api_key)
     @api_key = api_key
   end
@@ -18,7 +35,7 @@ class MeteoStatApi
   private
 
   def historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
-    base_url +
+    # base_url +
       '/point/hourly' +
       '?lat='     + latitude.to_s +
       '&lon='     + longitude.to_s +
@@ -29,7 +46,7 @@ class MeteoStatApi
   end
 
   def nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
-    base_url +
+    # base_url +
       '/stations/nearby' +
       '?lat='     + latitude.to_s +
       '&lon='     + longitude.to_s +
@@ -38,7 +55,7 @@ class MeteoStatApi
   end
 
   def find_station_url(identifier)
-    base_url +
+    # base_url +
       '/stations/search' +
       "?query=#{identifier}"
   end
@@ -55,18 +72,23 @@ class MeteoStatApi
     'https://api.meteostat.net/v2'
   end
 
+  def get_client(url, headers)
+    Faraday.new(url, headers: headers)
+  end
+
   def get(url)
-    # there seem to be status 429 failures - if you make too
-    # many requests in too short a time
-    back_off_sleep_times = [0.1, 0.2, 0.5, 1.0, 5.0]
-    connection = Faraday.new(url, headers: headers)
-    response = nil
-    back_off_sleep_times.each do |time_seconds|
-      response = connection.get
-      break if response.status == 200
-      sleep time_seconds
+
+    client = get_client(base_url+url, headers)
+
+    # 3 retries with randomised intervals around 0.5, 0.75, 1.125
+    # https://github.com/kamui/retriable
+    response = Retriable.retriable do
+      ret = client.get
+      raise RateLimitError, "Rate limited" if ret.status == 429
+      ret
     end
-    raise StandardError, "Timed out after #{back_off_sleep_times.length} attempts" if response.status != 200
+
+    raise HttpError, "MeteoStatApi error" unless response.status == 200
     JSON.parse(response.body)
   end
 end

@@ -35,6 +35,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'hashdiff', '~> 1.0.0'
   s.add_dependency 'faraday', '~> 1.0.1'
   s.add_dependency 'faraday_middleware', '~> 1.0.0'
+  s.add_dependency 'ruby-limiter', '~> 1.1.0'
+  s.add_dependency 'retriable', '~> 3.1.2'
 
   # For profiling code
   s.add_dependency 'ruby-prof', '~> 0.17.0'

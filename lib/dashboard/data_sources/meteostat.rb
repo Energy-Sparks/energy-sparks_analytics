@@ -1,24 +1,17 @@
 # Interface to Meteostat weather data
 #
-# documentation: https://dev.meteostat.net/api/point/hourly.html
-#
 # - Daily limit of 2,000 queries per day, no paid option above that
 # - JSON limited to 10 days historic hourly data at a time
 # - so 20,000 days capacity per day => 60 location years
-# - status 429 errors - too frequent querying occur regularly on bulk
-# - downloads, interface below gradually throttles and retries if this happens
 # - suggest downloading 8 days of data when querying most recent data in front end
 # - the interface below interpolates for missing data and the half hour points
 # - interface requires an altitude, currently defaulted to 30m
 # - data seems to go back before 2008
 # - you will need to set environment variable: ENERGYSPARKSMETEOSTATAPIKEY
 require 'net/http'
-require 'json'
 require 'date'
 require 'time'
 require 'amazing_print'
-require 'faraday'
-require 'faraday_middleware'
 require 'interpolate'
 require 'tzinfo'
 

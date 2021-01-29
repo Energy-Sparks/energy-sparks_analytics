@@ -22,6 +22,10 @@ gem 'chroma'
 gem 'faraday'
 gem 'faraday_middleware'
 
+# limit rate that we call api methods
+gem 'ruby-limiter', '~> 1.1.0'
+gem 'retriable', '~> 3.1.2'
+
 # Useful for debugging
 gem 'pry-byebug'
 gem 'hashdiff', '~> 1.0.0'
