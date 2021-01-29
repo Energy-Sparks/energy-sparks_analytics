@@ -10,7 +10,7 @@ describe MeteoStatApi do
     let(:attempts) { 1 }
     let(:response) { double(status: 200, body: '{"a": "1"}') }
 
-    it 'retries 3 times then raises error' do
+    it 'tries once then returns parsed data' do
       expect(MeteoStatApi.new('123').find_station('xyz')).to eq({'a'=>'1'})
     end
   end
