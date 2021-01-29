@@ -88,8 +88,7 @@ class MeteoStat
   end
 
   def download_10_days_data(latitude, longitude, start_date, end_date, altitude)
-    url = historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
-    json_request(url)
+    meteostat_api.historic_temperatures(latitude, longitude, start_date, end_date, altitude)
   end
 
   def download_nearby_stations(latitude, longitude, number_of_results, within_radius_km)
@@ -97,8 +96,7 @@ class MeteoStat
   end
 
   def download_nearby_stations_json_request(latitude, longitude, number_of_results, within_radius_km)
-    url = nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
-    station_list = json_request(url)['data']
+    station_list = meteostat_api.nearby_stations(latitude, longitude, number_of_results, within_radius_km)['data']
     station_list.map do |station_details|
       raw_station_data = find_station(station_details['id'])
       extract_station_data(raw_station_data['data'][0], station_details)
@@ -121,42 +119,7 @@ class MeteoStat
   end
 
   def download_station(identifier)
-    url = find_station_url(identifier)
-    json_request(url)
-  end
-
-  def json_request(url)
-    MeteoStatApi.get(url, authorization)
-  end
-
-  def authorization
-    { 'x-api-key' => @api_key }
-  end
-
-  def url_date(date)
-    date.strftime('%Y-%m-%d')
-  end
-
-  def historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
-    'https://api.meteostat.net/v2/point/hourly' +
-    '?lat='     + latitude.to_s +
-    '&lon='     + longitude.to_s +
-    '&alt='     + altitude.to_i.to_s +
-    '&start='   + url_date(start_date) +
-    '&end='     + url_date(end_date) +
-    '&tz=Europe/London'
-  end
-
-  def nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
-    'https://api.meteostat.net/v2/stations/nearby' +
-    '?lat='     + latitude.to_s +
-    '&lon='     + longitude.to_s +
-    '&limit='   + number_of_results.to_i.to_s +
-    '&radius='  + within_radius_km.to_i.to_s
-  end
-
-  def find_station_url(identifier)
-    "https://api.meteostat.net/v2/stations/search?query=#{identifier}"
+    meteostat_api.find_station(identifier)
   end
 
   def parse_temperature_reading(reading)
@@ -164,5 +127,9 @@ class MeteoStat
       Time.parse(reading['time_local']),
       reading['temp'].to_f
     ]
+  end
+
+  def meteostat_api
+    @meteostat_api ||= MeteoStatApi.new(@api_key)
   end
 end
