@@ -6,7 +6,6 @@ require 'json'
 require 'faraday'
 require 'faraday_middleware'
 require 'limiter'
-require 'retriable'
 
 class MeteoStatApi
   extend Limiter::Mixin
@@ -69,23 +68,16 @@ class MeteoStatApi
     'https://api.meteostat.net/v2'
   end
 
-  def get_client(url, headers)
-    Faraday.new(url, headers: headers)
+  def client(url, headers)
+    # defaults to 2 retries
+    Faraday.new(url, headers: headers) do |f|
+      f.request :retry, { retry_statuses: [429] }
+    end
   end
 
   def get(url)
-
-    client = get_client(base_url+url, headers)
-
-    # 3 retries with randomised intervals around 0.5, 0.75, 1.125
-    # https://github.com/kamui/retriable
-    response = Retriable.retriable do
-      ret = client.get
-      raise RateLimitError, "Rate limited" if ret.status == 429
-      ret
-    end
-
-    raise HttpError, "MeteoStatApi error" unless response.status == 200
+    response = client(base_url + url, headers).get
+    raise HttpError, "status #{response.status}" unless response.status == 200
     JSON.parse(response.body)
   end
 end
