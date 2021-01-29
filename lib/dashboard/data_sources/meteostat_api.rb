@@ -35,29 +35,26 @@ class MeteoStatApi
   private
 
   def historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
-    # base_url +
-      '/point/hourly' +
-      '?lat='     + latitude.to_s +
-      '&lon='     + longitude.to_s +
-      '&alt='     + altitude.to_i.to_s +
-      '&start='   + url_date(start_date) +
-      '&end='     + url_date(end_date) +
-      '&tz=Europe/London'
+    '/point/hourly' +
+    '?lat='     + latitude.to_s +
+    '&lon='     + longitude.to_s +
+    '&alt='     + altitude.to_i.to_s +
+    '&start='   + url_date(start_date) +
+    '&end='     + url_date(end_date) +
+    '&tz=Europe/London'
   end
 
   def nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
-    # base_url +
-      '/stations/nearby' +
-      '?lat='     + latitude.to_s +
-      '&lon='     + longitude.to_s +
-      '&limit='   + number_of_results.to_i.to_s +
-      '&radius='  + within_radius_km.to_i.to_s
+    '/stations/nearby' +
+    '?lat='     + latitude.to_s +
+    '&lon='     + longitude.to_s +
+    '&limit='   + number_of_results.to_i.to_s +
+    '&radius='  + within_radius_km.to_i.to_s
   end
 
   def find_station_url(identifier)
-    # base_url +
-      '/stations/search' +
-      "?query=#{identifier}"
+    '/stations/search' +
+    "?query=#{identifier}"
   end
 
   def url_date(date)
