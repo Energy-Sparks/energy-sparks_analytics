@@ -50,9 +50,9 @@ describe MeteoStat do
       let(:start_date)  { Date.parse('20210101') }
       let(:end_date)    { Date.parse('20210128') }
 
-      it 'requests 10 days at a time' do
+      it 'requests 10 days at a time for 28 day span but shows 24 hours * 26 days missing' do
         data = MeteoStat.new.historic_temperatures(latitude, longitude, start_date, end_date)
-        expect(data[:missing].count).to eq(26*24)
+        expect(data[:missing].count).to eq(24*26)
       end
 
     end
