@@ -22,13 +22,6 @@ describe MeteoStat do
   let(:expected_nearest_weather_stations) do
     [
       {:name=>"Nottingham Weather Centre", :latitude=>53, :longitude=>-1.25, :elevation=>117, :distance=>39.4},
-      # {:name=>"Newton / Saxondale", :latitude=>52.9667, :longitude=>-0.9833, :elevation=>55, :distance=>51.5},
-      # {:name=>"Sturgate", :latitude=>53.3811, :longitude=>-0.6856, :elevation=>9, :distance=>51.9},
-      # {:name=>"Leeds Weather Centre", :latitude=>53.8, :longitude=>-1.55, :elevation=>47, :distance=>52.5},
-      # {:name=>"Manchester Airport", :latitude=>53.35, :longitude=>-2.2833, :elevation=>69, :distance=>54.6},
-      # {:name=>"East Midlands / Castle Donington", :latitude=>52.8333, :longitude=>-1.3333, :elevation=>94, :distance=>55.9},
-      # {:name=>"Church Fenton", :latitude=>53.8333, :longitude=>-1.2, :elevation=>9, :distance=>58.5},
-      # {:name=>"Scampton", :latitude=>53.3069, :longitude=>-0.5481, :elevation=>62, :distance=>60.8}
     ]
   end
 
@@ -38,11 +31,30 @@ describe MeteoStat do
     let(:temperature_json)        { JSON.parse(File.read('spec/fixtures/meteostat/historic_temperatures.json')) }
 
     before do
-      expect_any_instance_of(MeteoStatApi).to receive(:historic_temperatures).and_return(temperature_json)
+      expect_any_instance_of(MeteoStatApi).to receive(:historic_temperatures).exactly(api_call_count).times.and_return(temperature_json)
     end
 
-    it 'returns expected temperatures' do
-      expect(MeteoStat.new.historic_temperatures(latitude, longitude, start_date, end_date)).to eq(expected_historic_temperatures)
+    describe 'returns expected temperature data' do
+
+      let(:api_call_count) { 1 }
+
+      it 'returns expected temperatures' do
+        expect(MeteoStat.new.historic_temperatures(latitude, longitude, start_date, end_date)).to eq(expected_historic_temperatures)
+      end
+
+    end
+
+    describe 'for longer date ranges' do
+
+      let(:api_call_count) { 3 }
+      let(:start_date)  { Date.parse('20210101') }
+      let(:end_date)    { Date.parse('20210128') }
+
+      it 'requests 10 days at a time' do
+        data = MeteoStat.new.historic_temperatures(latitude, longitude, start_date, end_date)
+        expect(data[:missing].count).to eq(26*24)
+      end
+
     end
   end
 
