@@ -10,6 +10,8 @@ require 'limiter'
 class MeteoStatApi
   extend Limiter::Mixin
 
+  # limit rate of 'get' method calls to 2 per second
+  # https://github.com/Shopify/limiter
   limit_method :get, rate: 2, interval: 1
 
   class RateLimitError < StandardError; end
@@ -69,7 +71,8 @@ class MeteoStatApi
   end
 
   def client(url, headers)
-    # defaults to 2 retries
+    # retries 2 times, and honours the Retry-After time requested by server
+    # https://github.com/lostisland/faraday/blob/master/docs/middleware/request/retry.md
     Faraday.new(url, headers: headers) do |f|
       f.request :retry, { retry_statuses: [429] }
     end
