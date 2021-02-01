@@ -1,24 +1,17 @@
 # Interface to Meteostat weather data
 #
-# documentation: https://dev.meteostat.net/api/point/hourly.html
-#
 # - Daily limit of 2,000 queries per day, no paid option above that
 # - JSON limited to 10 days historic hourly data at a time
 # - so 20,000 days capacity per day => 60 location years
-# - status 429 errors - too frequent querying occur regularly on bulk
-# - downloads, interface below gradually throttles and retries if this happens
 # - suggest downloading 8 days of data when querying most recent data in front end
 # - the interface below interpolates for missing data and the half hour points
 # - interface requires an altitude, currently defaulted to 30m
 # - data seems to go back before 2008
 # - you will need to set environment variable: ENERGYSPARKSMETEOSTATAPIKEY
 require 'net/http'
-require 'json'
 require 'date'
 require 'time'
 require 'amazing_print'
-require 'faraday'
-require 'faraday_middleware'
 require 'interpolate'
 require 'tzinfo'
 
@@ -88,20 +81,18 @@ class MeteoStat
   end
 
   def download_10_days_data(latitude, longitude, start_date, end_date, altitude)
-    url = historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
-    json_request(url)
+    meteostat_api.historic_temperatures(latitude, longitude, start_date, end_date, altitude)
   end
 
   def download_nearby_stations(latitude, longitude, number_of_results, within_radius_km)
-    json = download_nearby_stations_json_request(latitude, longitude, number_of_results, within_radius_km)
-  end
-
-  def download_nearby_stations_json_request(latitude, longitude, number_of_results, within_radius_km)
-    url = nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
-    station_list = json_request(url)['data']
-    station_list.map do |station_details|
-      raw_station_data = find_station(station_details['id'])
-      extract_station_data(raw_station_data['data'][0], station_details)
+    stations = meteostat_api.nearby_stations(latitude, longitude, number_of_results, within_radius_km)
+    if stations['data']
+      stations['data'].map do |station_details|
+        raw_station_data = find_station(station_details['id'])
+        extract_station_data(raw_station_data['data'][0], station_details)
+      end
+    else
+      []
     end
   end
 
@@ -121,54 +112,7 @@ class MeteoStat
   end
 
   def download_station(identifier)
-    url = find_station_url(identifier)
-    json_request(url)
-  end
-
-  def json_request(url)
-    # there seem to be status 429 failures - if you make too
-    # many requests in too short a time
-    back_off_sleep_times = [0.1, 0.2, 0.5, 1.0, 5.0]
-    connection = Faraday.new(url, headers: authorization)
-    response = nil
-    back_off_sleep_times.each do |time_seconds|
-      response = connection.get
-      break if response.status == 200
-      sleep time_seconds
-    end
-    raise StandardError, "Timed out after #{back_off_sleep_times.length} attempts" if response.status != 200
-
-    JSON.parse(response.body)
-  end
-
-  def authorization
-    { 'x-api-key' => @api_key }
-  end
-
-  def url_date(date)
-    date.strftime('%Y-%m-%d')
-  end
-
-  def historic_temperatures_url(latitude, longitude, start_date, end_date, altitude)
-    'https://api.meteostat.net/v2/point/hourly' +
-    '?lat='     + latitude.to_s +
-    '&lon='     + longitude.to_s +
-    '&alt='     + altitude.to_i.to_s +
-    '&start='   + url_date(start_date) +
-    '&end='     + url_date(end_date) +
-    '&tz=Europe/London'
-  end
-
-  def nearby_stations_url(latitude, longitude, number_of_results, within_radius_km)
-    'https://api.meteostat.net/v2/stations/nearby' +
-    '?lat='     + latitude.to_s +
-    '&lon='     + longitude.to_s +
-    '&limit='   + number_of_results.to_i.to_s +
-    '&radius='  + within_radius_km.to_i.to_s
-  end
-
-  def find_station_url(identifier)
-    "https://api.meteostat.net/v2/stations/search?query=#{identifier}"
+    meteostat_api.find_station(identifier)
   end
 
   def parse_temperature_reading(reading)
@@ -176,5 +120,9 @@ class MeteoStat
       Time.parse(reading['time_local']),
       reading['temp'].to_f
     ]
+  end
+
+  def meteostat_api
+    @meteostat_api ||= MeteoStatApi.new(@api_key)
   end
 end
