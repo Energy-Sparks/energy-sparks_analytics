@@ -201,7 +201,7 @@ class Aggregator
   end
 
   def determine_multi_school_chart_date_range(schools, chart_config)
-    extend_to_future = include_target? && !@chart_config[:target][:extend_chart_into_future].nil?
+    extend_to_future = include_target? && !@chart_config[:target][:extend_chart_into_future].nil? && !@chart_config[:target][:extend_chart_into_future]
 
     logger.info '-' * 120
     logger.info "Determining maximum chart range for #{schools.length} schools:"

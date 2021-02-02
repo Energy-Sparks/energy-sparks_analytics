@@ -19,15 +19,27 @@ class AdviceTargets < AdviceBase
     charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.to_s.humanize}</h2>" } )
     charts_and_html += debug_content
     charts_and_html.push( { type: :html,  content: brief_intro_to_targeting_and_tracking } )
+    
     charts_and_html.push( { type: :html,  content: current_targets } )
     charts_and_html.push( { type: :html,  content: monthly_targeting_and_tracking_tables } )
+
     charts_and_html.push( { type: :html,  content: weekly_chart_intro } )
-    create_chart(charts_and_html, monthly_chart)
-    charts_and_html.push( { type: :html,  content: weekly_chart_drilldown } )
+    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_line)
+    charts_and_html.push( { type: :html,  content: weekly_chart_drilldown} )
+    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_column)
+
+    charts_and_html.push( { type: :html,  content: weekly_chart_intro_shorter_timescales } )
+    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_line)
+    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_column)
+
     charts_and_html.push( { type: :html,  content: culmulative_weekly_chart_intro } )
-    create_chart(charts_and_html, monthly_chart_cumulative)
+    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_cumulative_line)
+    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_cumulative_line)
+
     charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
+
     add_charts_for_testing(charts_and_html)
+
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
@@ -134,6 +146,16 @@ class AdviceTargets < AdviceBase
     ERB.new(text).result(binding)
   end
 
+  def weekly_chart_intro_shorter_timescales
+    text = %{
+      <p>
+        The chart below shows how you have progressed to date on a weekly basis
+        versus the targets you have set:
+      </p>
+    }
+    ERB.new(text).result(binding)
+  end
+
   def weekly_chart_drilldown
     text = %{
       <p>
@@ -158,11 +180,15 @@ class AdviceTargets < AdviceBase
 
   def brief_intro_to_targeting_and_tracking
     text = %{
-      <h2>Introduction to Targeting and Tracking</h2>
       <p>
         'Targeting and Tracking' on Energy Sparks lets you set separate targets for reducing
         your electricity, gas or storage heater consumption over the next year. Energy Sparks
         then lets you track how you are progressing versus these targets throughout the year.
+      </p>
+      <p>
+        Targets are set as a percentage of last year's energy consumption using the targetting setting
+        editor on the 'Manage School' menu above. So for example by setting a 95% target you would be
+        aiming to reduce your <%= @fuel_type.to_s %> consumption by 5% compared with last year.
       </p>
     }
     ERB.new(text).result(binding)
@@ -238,23 +264,6 @@ class AdviceTargetsElectricity < AdviceTargets
   end
   def add_charts_for_testing(charts_and_html)
     %i[
-      targeting_and_tracking_weekly_electricity_1_year_column
-      targeting_and_tracking_weekly_electricity_1_year_column_unextended
-      targeting_and_tracking_monthly_electricity_internal_calculation
-      targeting_and_tracking_monthly_electricity_internal_calculation_cumulative
-      targeting_and_tracking_monthly_electricity_internal_calculation_unextended
-      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_column
-      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_day
-      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative
-      targeting_and_tracking_monthly_electricity_internal_calculation_unextended_cumulative_day
-      targeting_and_tracking_monthly_electricity_base
-      targeting_and_tracking_weekly_electricity_1_year_line
-      alert_targeting_and_tracking_weekly_electricity_1_year
-      targeting_and_tracking_weekly_electricity_1_year_cumulative_line
-      targeting_and_tracking_monthly_electricity_experimental_baseload
-      targeting_and_tracking_monthly_electricity_experimental2
-      targeting_and_tracking_monthly_electricity_experimental3
-      targeting_and_tracking_monthly_electricity_experimental4
     ].each do |chart_name|
       create_chart(charts_and_html, chart_name)
     end
@@ -279,7 +288,6 @@ class AdviceTargetsGas < AdviceTargets
   end
   def add_charts_for_testing(charts_and_html)
     %i[
-      targeting_and_tracking_monthly_gas_column
     ].each do |chart_name|
       create_chart(charts_and_html, chart_name)
     end
