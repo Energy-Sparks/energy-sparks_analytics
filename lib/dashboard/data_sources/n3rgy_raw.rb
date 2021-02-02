@@ -32,7 +32,7 @@ module MeterReadingsFeeds
         req.headers['Authorization'] = @api_key
         req.body = config.to_json
       end
-      log(response)
+      log(response.inspect)
       response
     end
 
@@ -40,8 +40,10 @@ module MeterReadingsFeeds
     #     both the API manual and their github Python example...
     def withdraw_trusted_consent(mpxn)
       url = consent_base_url + 'consents/withdraw-consent?mpxn=' + mpxn.to_s
-      response = execute_json(url)
-      log(response)
+      response = Faraday.put(url) do |req|
+        req.headers['Authorization'] = @api_key
+      end
+      log(response.inspect)
       response
     end
 
@@ -141,7 +143,7 @@ module MeterReadingsFeeds
     def raw_meter_readings_kwh(mpxn, fuel_type, element, start_date, end_date)
       download_readings(mpxn, fuel_type, 'consumption', element, start_date, end_date)
     end
- 
+
     def raw_tariffs_£(mpxn, fuel_type, element, start_date, end_date)
       download_tariffs(mpxn, fuel_type, 'tariff', element, start_date, end_date)
     end
@@ -273,11 +275,11 @@ module MeterReadingsFeeds
       log(raw_data)
       raw_data
     end
-  
+
     def authorization
       { 'Authorization' => @api_key }
     end
-  
+
     def half_hourly_query(start_date, end_date)
       '?start=' + url_date(start_date) + '&end=' + url_date(end_date, true) + '&granularity=halfhour'
     end
@@ -289,17 +291,17 @@ module MeterReadingsFeeds
     def consent_base_url
       @production ? 'https://consent.data.n3rgy.com/' : 'https://consentsandbox.data.n3rgy.com/'
     end
-  
+
     def json_url(mpxn, fuel_type, data_type, element, start_date, end_date)
       url = base_url
       url += mpxn.to_s + '/' unless mpxn.nil?
       url += fuel_type + '/' unless fuel_type.nil?
-      url += data_type + '/' unless data_type.nil? 
+      url += data_type + '/' unless data_type.nil?
       url += element.to_s unless element.nil?
       url += half_hourly_query(start_date, end_date) unless start_date.nil? || end_date.nil?
       url
     end
-  
+
     def url_date(date, end_date = false)
       end_date ? date.strftime('%Y%m%d2359') : date.strftime('%Y%m%d0000')
     end

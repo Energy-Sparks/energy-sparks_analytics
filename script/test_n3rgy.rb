@@ -51,7 +51,7 @@ def process_one_mpxn(n3rgy, mpxn)
         puts "Start:      #{n3rgy.start_date(mpxn, fuel_type)}"
         puts "End:        #{n3rgy.end_date(mpxn, fuel_type)}"
         puts "Days:       #{data[:kwh][:readings].length}"
-        
+
         total_kwh = data[:kwh][:readings].values.map { |kwh_x48| kwh_x48.sum }.sum
         total_kwh ||= 0.0
         puts "Total kwh:  #{total_kwh.round(0)}"
@@ -111,18 +111,26 @@ def download_all_permissioned_data(n3rgy)
   end
 end
 
-logging = { puts: true, ap: { limit: 5 } }
-logging = nil
+# logging = { puts: true, ap: { limit: 5 } }
+logging = { puts: true, ap: { limit: false } }
+# logging = nil
 
 n3rgy = MeterReadingsFeeds::N3rgy.new(debugging: logging)
+
+# example_consent_file_link = 'https://energysparks.uk/meters/2234567891000'
+# n3rgy.grant_trusted_consent(2234567891000, example_consent_file_link)
+
 # process_one_mpxn(n3rgy, 2234567891000)
 
-puts "testing inventory process - only works in production environment?"
-n3rgy.inventory
+mpxn = 2234567891000
+fuel_type = :electricity
+start_date = Date.parse('01/01/2019')
+end_date = Date.parse('02/01/2019')
+readings = n3rgy.readings(mpxn, fuel_type, start_date, end_date)
 
-test_consent_process(n3rgy, 2234567891000)
+pp readings.inspect
 
-test_appendix_a_sandbox_mpxns_permissions(n3rgy)
+# process_one_mpxn(n3rgy, 2234567891000)
 
 download_all_permissioned_data(n3rgy)
 

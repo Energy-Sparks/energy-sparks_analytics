@@ -196,6 +196,9 @@ module MeterReadingsFeeds
 
     def processed_meter_readings_kwh(mpxn, fuel_type, element, start_date, end_date)
       raw_kwhs = raw.raw_meter_readings_kwh(mpxn, fuel_type, element, start_date, end_date)
+
+      puts raw_kwhs.to_json
+
       dt_to_kwh = raw.convert_readings_dt_to_kwh(raw_kwhs, mpxn, fuel_type, element, data_type(fuel_type))
       convert_dt_to_v_to_date_to_v_x48(start_date, end_date, dt_to_kwh)
     end
