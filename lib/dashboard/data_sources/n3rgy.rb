@@ -36,7 +36,7 @@ module MeterReadingsFeeds
   #                 readings: { date => kwhx48 }
   #                 missing_readings: [ DateTime ]
   #               },
-  #               cost: { 
+  #               cost: {
   #                 kwh_tariffs:  date => kwhx48,
   #                 standing_charges: { DateRange => £/day }
   #                 missing_readings: [ DateTime ]
@@ -109,6 +109,35 @@ module MeterReadingsFeeds
       raw.units(mpxn, fuel_type, el, data_type(fuel_type))
     end
 
+    ####################################################################
+
+    def readings(mpxn, fuel_type, start_date, end_date)
+      kwh = kwhs(mpxn, fuel_type, start_date, end_date)
+      { fuel_type =>
+        {
+          mpan_mprn:        mpxn,
+          readings:         convert_date_to_x48_to_one_day_readings(kwh[:readings], mpxn, start_date, end_date),
+          missing_readings: kwh[:missing_readings]
+        }
+      }
+    end
+
+    def convert_date_to_x48_to_one_day_readings(raw_meter_readings, mpan_mprn, start_date, end_date)
+      meter_readings = {}
+      (start_date..end_date).each do |date|
+        if raw_meter_readings.key?(date)
+          meter_readings[date] = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, raw_meter_readings[date])
+        else
+          meter_readings[date] = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, Array.new(48, 0.0))
+          message = "Warning: missing meter readings for #{mpan_mprn} on #{date}"
+          logger.warn message
+        end
+      end
+      meter_readings
+    end
+
+    ####################################################################
+
     def all_data(mpxn)
       data_by_fuel_type = {}
       fuel_types(mpxn).each do |fuel_type|
@@ -179,7 +208,7 @@ module MeterReadingsFeeds
       dt_to_£ = raw.convert_readings_dt_to_£(raw_£[:prices], mpxn, fuel_type)
 
       tariffs = convert_dt_to_v_to_date_to_v_x48(start_date, end_date, dt_to_£)
-      
+
       {
         kwh_tariffs:      tariffs[:readings],
         standing_charges: standing_charges,
