@@ -8,10 +8,10 @@ class CompareContentResults
     @missing = []
   end
 
-  def save_and_compare_content(page, content)
-    comparison_content = load_comparison_content(page)
+  def save_and_compare_content(page, content, merge_page = false)
+    comparison_content = load_comparison_content(page, merge_page)
     differences = compare_content(comparison_content, content)
-    save_new_content(page, differences)
+    save_new_content(page, differences, merge_page)
   end
 
   def compare_chart_list(chart_list)
@@ -36,22 +36,36 @@ class CompareContentResults
     @control[:compare_results].map{ |val| val.is_a?(Hash) ? val.dig(type) : nil }.compact[0]
   end
 
-  private def save_new_content(page, content)
-    split_content = split_content(content)
-    split_content.each do |key, contents|
-      filename = File.join(output_directory, "#{school_or_type} #{page} #{key}.yaml".strip)
-      save_yaml_file(filename, contents)
+  private def save_new_content(page, content, merge_page = false)
+    if merge_page
+      filename = File.join(output_directory, "#{school_or_type} #{page}.yaml".strip)
+      save_yaml_file(filename, content)
+    else
+      split_content = split_content(content) 
+      split_content.each do |key, contents|
+        filename = File.join(output_directory, "#{school_or_type} #{page} #{key}.yaml".strip)
+        save_yaml_file(filename, contents)
+      end
     end
   end
 
-  private def load_comparison_content(page)
-    filenames = Dir.glob("#{school_or_type} #{page} *.yaml".strip, base: comparison_directory)
-    content = Array.new(filenames.length)
-    filenames.each do |filename|
-      index_string, key = filename.gsub("#{school_or_type} #{page} ".strip,'').gsub('.yaml', '').split(' ')
-      full_filename = File.join(comparison_directory, filename)
-      content[index_string.to_i] = { type: key.to_sym, content: load_yaml_file(full_filename) }
-    end
+  private def load_comparison_content(page, merge_page)
+    content = []
+    if merge_page
+      filenames = Dir.glob("#{school_or_type} #{page}*.yaml".strip, base: comparison_directory)
+      raise EnergySparksUnexpectedStateException, "Only expecting 1 filename , got #{filenames.length}" if filenames.length > 1
+      return [] if filenames.length == 0
+      full_filename = File.join(comparison_directory, filenames[0])
+      content = load_yaml_file(full_filename)
+    else
+      filenames = Dir.glob("#{school_or_type} #{page} *.yaml".strip, base: comparison_directory)
+      content = Array.new(filenames.length)
+      filenames.each do |filename|
+        index_string, key = filename.gsub("#{school_or_type} #{page} ".strip,'').gsub('.yaml', '').split(' ')
+        full_filename = File.join(comparison_directory, filename)
+        content[index_string.to_i] = { type: key.to_sym, content: load_yaml_file(full_filename) }
+      end
+    end 
     content
   end
 
