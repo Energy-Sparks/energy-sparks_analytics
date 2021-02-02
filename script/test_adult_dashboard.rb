@@ -23,7 +23,7 @@ script = {
                                   :summary,
                                   :report_differences,
                                   #:report_differing_charts,
-                                  # :report_differences 
+                                  # :report_differences
                                 ] # :quick_comparison,
                               }
                             }

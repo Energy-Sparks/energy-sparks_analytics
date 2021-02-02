@@ -32,6 +32,7 @@ class AdviceTargets < AdviceBase
     create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_line)
     create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_column)
 
+
     charts_and_html.push( { type: :html,  content: culmulative_weekly_chart_intro } )
     create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_cumulative_line)
     create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_cumulative_line)
