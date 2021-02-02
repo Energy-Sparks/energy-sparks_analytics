@@ -1,12 +1,4 @@
-require 'date'
-require 'json'
-require 'faraday'
-require 'logger'
-require_relative '../../../../lib/dashboard/logging'
-require_relative '../../../../lib/dashboard/data_sources/n3rgy'
-require_relative '../../../../lib/dashboard/data_sources/n3rgy_raw'
-require_relative '../../../../lib/dashboard/aggregation/amr_bad_data_types'
-require_relative '../../../../lib/dashboard/aggregation/amr_one_days_data'
+require 'spec_helper'
 
 describe MeterReadingsFeeds::N3rgy do
 
