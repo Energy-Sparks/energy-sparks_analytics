@@ -91,11 +91,7 @@ class RunAdultDashboard < RunCharts
     advice.calculate
 
     puts "                Page failed 1, as advice not available to users #{page}" unless advice.make_available_to_users?
-<<<<<<< HEAD
-    # return unless advice.make_available_to_users?
-=======
     return unless advice.make_available_to_users?
->>>>>>> new-targeting-and-tracking-charts
 
     if advice.has_structured_content?
       begin
