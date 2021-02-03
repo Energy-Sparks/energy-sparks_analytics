@@ -216,15 +216,17 @@ class RunTests
   end
 
   def run_adult_dashboard(control)
+    differences = {}
     failed_charts = []
     schools_list.sort.each do |school_name|
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
       test = RunAdultDashboard.new(school)
-      test.run_flat_dashboard(control)
+      differences[school_name] = test.run_flat_dashboard(control)
       failed_charts += test.failed_charts
     end
+    RunAdultDashboard.summarise_differences(differences, control) if !control[:summarise_differences].nil? && control[:summarise_differences]
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 

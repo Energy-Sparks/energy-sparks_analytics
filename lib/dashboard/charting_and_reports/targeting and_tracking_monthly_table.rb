@@ -16,10 +16,6 @@ class TargetingAndTrackingTable < ContentBase
     true
   end
 
-  def rating
-    5.0
-  end
-
   def self.template_variables
     { 'Targeting and tracking summary' => TEMPLATE_VARIABLES}
   end
@@ -34,9 +30,9 @@ class TargetingAndTrackingTable < ContentBase
   }
 
   ALL_TABLE_ROWS_CONFIG = {
-    previous_year_kwhs:                 { name: 'Previous year(kWh)',             datatype: :kwh },
+    # previous_year_kwhs:                 { name: 'Previous year(kWh)',             datatype: :kwh },
     current_year_kwhs:                  { name: 'Current year(kWh)',              datatype: :kwh },
-    full_cumulative_previous_year_kwhs: { name: 'Previous year: cumulative(kWh)', datatype: :kwh },
+    # full_cumulative_previous_year_kwhs: { name: 'Previous year: cumulative(kWh)', datatype: :kwh },
     full_cumulative_current_year_kwhs:  { name: 'Current year: cumulative(kWh)',  datatype: :kwh },
     full_targets_kwh:                   { name: 'Target(kWh): full',              datatype: :kwh },
     partial_targets_kwh:                { name: 'Target(kWh): partial',           datatype: :kwh },
@@ -89,6 +85,18 @@ class TargetingAndTrackingTable < ContentBase
     html_table_formatting(header, rows)
   end
 
+  def first_month_html
+    data[:current_year_date_ranges][0].first.strftime('%B')
+  end
+
+  def cumulative_target_percent
+    data[:cumulative_performance].compact.last
+  end
+
+  def year_to_date_percent_absolute_html
+    format_cell(:relative_percent, cumulative_target_percent.magnitude) 
+  end
+
   private
 
   def select_rows(types)
@@ -100,7 +108,7 @@ class TargetingAndTrackingTable < ContentBase
   end
 
   def header
-    ['Month', header_months(data[:previous_dates])].flatten
+    ['Month', header_months(data[:current_year_date_ranges])].flatten
   end
 
   def calculate
@@ -126,10 +134,14 @@ class TargetingAndTrackingTable < ContentBase
   end
 
   def format_rows(years_values, datatype = :kwh)
-    years_values.map { |v| FormatEnergyUnit.format(datatype, v, :html, false, true) }
+    years_values.map { |v| format_cell(datatype, v) }
+  end
+
+  def format_cell(datatype, value)
+    FormatEnergyUnit.format(datatype, value, :html, false, true, :target) 
   end
 
   def html_table_formatting(header, rows)
-    HtmlTableFormattingWithHighlightedCells.new(header, rows).html
+    HtmlTableFormattingWithHighlightedCells.new(header, rows, nil, nil, nil, :target).html
   end
 end

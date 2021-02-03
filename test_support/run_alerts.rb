@@ -47,7 +47,13 @@ class RunAlerts
     AlertStorageHeaterOutOfHours                  =>'StorageHOutOfHours',
     AlertStorageHeatersLongTermTrend              =>'StorageHLongTerm',
     AlertStorageHeaterThermostatic                =>'StorageHThermo',
-    AlertSummerHolidayRefridgerationAnalysis      =>'Fridge'
+    AlertSummerHolidayRefridgerationAnalysis      =>'Fridge',
+    AlertElectricityTargetAnnual                  => 'ElectricTarget1yr',
+    AlertGasTargetAnnual                          => 'GasTarget1yr',
+    AlertElectricityTarget4Week                   => 'ElectricTarget4wk',
+    AlertGasTarget4Week                           => 'GasTarget4wk',
+    AlertElectricityTarget1Week                   => 'ElectricTarget1wk',
+    AlertGasTarget1Week                           => 'GasTarget1wk',
   }.freeze
 
 =begin

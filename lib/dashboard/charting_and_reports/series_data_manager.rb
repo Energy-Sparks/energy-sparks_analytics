@@ -301,6 +301,20 @@ class SeriesDataManager
     names
   end
 
+  def target_extend?
+    !@chart_configuration.dig(:target, :extend_chart_into_future).nil?
+  end
+
+  # truncate requested dates to non-target meter range or return nil
+  def target_extended_other_meter_end_date(meter, start_date, end_date)
+    end_date = [meter.amr_data.end_date, end_date].min
+    start_date > end_date ? [nil, nil] : [start_date, end_date]
+  end
+
+  def request_start_end_dates(meter, start_date, end_date)
+    target_extend? ? target_extended_other_meter_end_date(meter, start_date, end_date) : [start_date, end_date]
+  end
+
   def get_data_private(time_period)
     timetype, dates, halfhour_index = time_period
     meter = select_one_meter
@@ -310,8 +324,11 @@ class SeriesDataManager
       check_requested_meter_date(meter, dates, dates)
       breakdown = getdata_by_halfhour(meter, dates, halfhour_index)
     when :daterange
-      check_requested_meter_date(meter, dates[0], dates[1]) unless override_meter_end_date?
-      breakdown = getdata_by_daterange(meter, dates[0], dates[1])
+      start_date, end_date = request_start_end_dates(meter, dates[0], dates[1])
+      unless start_date.nil?
+        check_requested_meter_date(meter, start_date, end_date) unless override_meter_end_date?
+        breakdown = getdata_by_daterange(meter, start_date, end_date)
+      end
     end
     breakdown
   end

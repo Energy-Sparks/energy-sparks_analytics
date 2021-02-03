@@ -38,6 +38,8 @@ class Aggregator
   def initialise_schools_date_range
     schools = @chart_config.key?(:schools) ? load_schools(@chart_config[:schools]) : [ @meter_collection ]
 
+    schools << @meter_collection.target_school(@chart_config[:target][:calculation_type]) if include_target?
+
     determine_multi_school_chart_date_range(schools, @chart_config)
 
     [@chart_config, schools]
@@ -79,6 +81,10 @@ class Aggregator
 
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
+    nullify_zero_data if nullify_zero_data?
+
+    accumulate_data if cumulative?
+
     reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order) && @chart_config[:series_name_order] == :reverse
 
     reverse_x_axis if @chart_config.key?(:reverse_xaxis) && @chart_config[:reverse_xaxis] == true
@@ -113,6 +119,18 @@ class Aggregator
 
   def chart_has_filter?
     !config_none_or_nil?(:filter, @chart_config)
+  end
+
+  def include_target?
+    @chart_config.key?(:target) && !@chart_config[:target].nil?
+  end
+
+  def cumulative?
+    @chart_config.key?(:cumulative) && @chart_config[:cumulative]
+  end
+
+  def nullify_zero_data?
+    @chart_config.key?(:nullify_zero_data) && @chart_config[:nullify_zero_data]
   end
 
   #=================regrouping of chart data ======================================
@@ -183,22 +201,17 @@ class Aggregator
   end
 
   def determine_multi_school_chart_date_range(schools, chart_config)
+    extend_to_future = include_target? && !@chart_config[:target][:extend_chart_into_future].nil? && !@chart_config[:target][:extend_chart_into_future]
+
     logger.info '-' * 120
     logger.info "Determining maximum chart range for #{schools.length} schools:"
-    min_date = nil
-    max_date = nil
-    schools.each do |school|
-      series_manager = SeriesDataManager.new(school, chart_config)
-      logger.info "    #{school.name} from #{series_manager.first_meter_date} to  #{series_manager.last_meter_date}"
-      min_date = series_manager.first_meter_date if min_date.nil? || series_manager.first_meter_date > min_date
-      max_date = series_manager.last_meter_date  if max_date.nil? || series_manager.last_meter_date  < max_date
-    end
+    
+    min_date = schools.map { |school| SeriesDataManager.new(school, chart_config).first_meter_date }.max
+    last_meter_dates = schools.map { |school| SeriesDataManager.new(school, chart_config).last_meter_date }
+    max_date = extend_to_future ? last_meter_dates.max : last_meter_dates.min
 
-    chart_config[:min_combined_school_date] = min_date
-    chart_config[:max_combined_school_date] = max_date
-
-    @first_meter_date = min_date
-    @last_meter_date = max_date
+    chart_config[:min_combined_school_date] = @first_meter_date = min_date
+    chart_config[:max_combined_school_date] = @last_meter_date  = max_date
 
     description = schools.length > 1 ? 'Combined school charts' : 'School chart'
     logger.info description + " date range #{min_date} to #{max_date}"
@@ -395,6 +408,23 @@ class Aggregator
     end
   end
 
+  def nullify_zero_data
+    @bucketed_data.keys.each do |series_name|
+      @bucketed_data[series_name].map! do |val|
+        val == 0.0 ? nil : val
+      end
+    end
+  end
+
+  def accumulate_data
+    @bucketed_data.keys.each do |series_name|
+      running_total = 0.0
+      @bucketed_data[series_name].map! do |val|
+        val.nil? ? nil : (running_total += val)
+      end
+    end
+  end
+
   def reformat_x_axis
     format = @chart_config[:x_axis_reformat]
     if format.is_a?(Hash) && format.key?(:date)
@@ -442,6 +472,7 @@ class Aggregator
   def relabel_legend
     @chart_config[:replace_series_label].each do |substitute_pair|
       @bucketed_data.keys.each do |series_name|
+        substitute_pair[0] = substitute_pair[0].gsub('<school_name>', @meter_collection.name) if substitute_pair[0].include?('<school_name>')
         new_series_name = series_name.gsub(substitute_pair[0], substitute_pair[1])
         @bucketed_data[new_series_name] = @bucketed_data.delete(series_name)
         @bucketed_data_count[new_series_name] = @bucketed_data_count.delete(series_name)
@@ -496,7 +527,7 @@ class Aggregator
       unless result_data.is_a?(Symbol)
         @bucketed_data[series_name] = result_data.map do |x|
           x = x.to_f if is_a?(Integer)
-          x.finite? ? x : nil
+          (x.nil? || x.finite?) ? x : nil
         end
       end
     end
@@ -652,11 +683,13 @@ class Aggregator
       @xbucketor.x_axis_bucket_date_ranges.each do |date_range|
         x_index = @xbucketor.index(date_range[0], nil)
         multi_day_breakdown = @series_manager.get_data([:daterange, date_range])
+        unless multi_day_breakdown.nil? # added to support future targeted data past end of real meter date
         multi_day_breakdown.each do |key, value|
           add_to_bucket(bucketed_data, bucketed_data_count, key, x_index, value)
           count += 1
         end
       end
+    end
     end
     logger.info "aggregate_by_day:  aggregated #{count} items"
   end
@@ -1061,7 +1094,6 @@ class Aggregator
     benchmark_heating_usage(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2, :storage_heaters, true)
   end
 
-  
   def create_empty_bucket_series
     logger.debug "Creating empty data buckets #{@series_names} x #{@x_axis.length}"
     bucketed_data = {}

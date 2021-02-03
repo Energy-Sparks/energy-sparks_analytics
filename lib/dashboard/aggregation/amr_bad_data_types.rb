@@ -41,6 +41,8 @@ class OneDayAMRReading
     'AGGR'  => { name: 'Aggregate meter data',                              description: 'Internally aggregated from more than one meter'},
     'STOR'  => { name: 'Extracted storage heater data (good)',              description: 'Synthetic storage heater data extracted from main meter'},
     'STEX'  => { name: 'Remaining data post storage heater extraction-good',description: 'Synthetic remaining data after storage heater data extracted from main meter'},
+    'STRO'  => { name: 'Extracted storage heater data (substituted)',       description: 'Synthetic storage heater data extracted from main meter - original data substituted'},
+    'STXE'  => { name: 'Remaining data post storage heater extraction-subd',description: 'Synthetic remaining data after storage heater data extracted from main meter - original data substituted'},
     'SOLR'  => { name: 'Synthetic solar PV output (good)',                  description: 'Synthetic solar pv output'},
     'SOLO'  => { name: 'Synthetic solar PV consumed Onsite (good)',         description: 'Synthetic solar pv consumed onsite'},
     'SOLE'  => { name: 'Synthetic solar PV exported (good)',                description: 'Synthetic solar pv exported'},
@@ -49,6 +51,7 @@ class OneDayAMRReading
     'SOLS'  => { name: 'Overridden PV data with data from Sheffield',       description: 'Overridden PV data with data from Sheffield'},
     'SOL0'  => { name: 'Zero pv generation data prior/post to pv install',  description: 'Zero pv generation data prior/post to pv install'},
     'BKPV'  => { name: 'Backfilled PV data (aggregation service)',          description: 'Backfilled PV data (aggregation service)'},
+    'TARG'  => { name: 'Synthetic target data',                             description: 'Synthetic target data'},
   }.freeze
   # rubocop:disable Metrics/LineLength
 end

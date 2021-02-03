@@ -16,7 +16,7 @@ class AlertAnalysisBase < ContentBase
   include Logging
 
   ALERT_HELP_URL = 'https://blog.energysparks.uk/alerts'.freeze
-
+  
   attr_reader :status, :rating, :term, :default_summary, :default_content, :bookmark_url
   attr_reader :analysis_date, :max_asofdate, :calculation_worked
 
@@ -474,7 +474,13 @@ class AlertAnalysisBase < ContentBase
       AlertGasLongTermTrend                         => 'gslt',
       AlertStorageHeatersLongTermTrend              => 'shlt',
       AlertOptimumStartAnalysis                     => 'opts',
-      AlertSummerHolidayRefridgerationAnalysis      => 'shol'
+      AlertSummerHolidayRefridgerationAnalysis      => 'shol',
+      AlertElectricityTargetAnnual                  => 'etga',
+      AlertGasTargetAnnual                          => 'gtga',
+      AlertElectricityTarget4Week                   => 'etg4',
+      AlertGasTarget4Week                           => 'gtg4',
+      AlertElectricityTarget1Week                   => 'etg1',
+      AlertGasTarget1Week                           => 'gtg1'
     }
   end
 

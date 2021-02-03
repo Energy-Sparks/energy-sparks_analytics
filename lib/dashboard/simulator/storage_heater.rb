@@ -77,8 +77,10 @@ class StorageHeater
             electric_only_kwh[halfhour_index] = kwh
           end
         end
-        storage_heater_amr_data.add(  date, OneDayAMRReading.new(mpan_mprn_storage_heater, date, 'STOR', nil, DateTime.now, storage_heater_kwh))
-        electricity_only_amr_data.add(date, OneDayAMRReading.new(mpan_mprn_electric_only,  date, 'STEX', nil, DateTime.now, electric_only_kwh))
+        sh_type = amr_data.substitution_type(date) == 'ORIG' ? 'STOR' : 'STRO'
+        e_type = amr_data.substitution_type(date) == 'ORIG' ? 'STEX' : 'STXE'
+        storage_heater_amr_data.add(  date, OneDayAMRReading.new(mpan_mprn_storage_heater, date, sh_type, nil, DateTime.now, storage_heater_kwh))
+        electricity_only_amr_data.add(date, OneDayAMRReading.new(mpan_mprn_electric_only,  date, e_type, nil, DateTime.now, electric_only_kwh))
       else # non storage heater day, just copy days kwh data
         electricity_only_amr_data.add(date, amr_data.clone_one_days_data(date))
       end

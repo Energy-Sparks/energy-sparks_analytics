@@ -20,6 +20,10 @@ module DateTimeHelper
     Date.new(date.year, date.month, -1).day
   end
 
+  def self.first_day_of_month(date)
+    Date.new(date.year, date.month, 1)
+  end
+
   def self.last_day_of_month(date)
     if date.month == 12
       Date.new(date.year + 1, 1, 1)  - 1

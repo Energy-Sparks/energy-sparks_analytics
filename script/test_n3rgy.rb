@@ -125,3 +125,18 @@ test_consent_process(n3rgy, 2234567891000)
 test_appendix_a_sandbox_mpxns_permissions(n3rgy)
 
 download_all_permissioned_data(n3rgy)
+
+#interface spec
+
+class N3rgyRawData
+  def initialize(app_key = ENV['N3RGY_APP_KEY']); end
+  def permissioned_mpans; end
+  def metadata(mpan); end # TBD, but probably a hash
+  def mpan_status; end # returns as enumeration e.g. permissioned, adopted, not available etc. TBD
+  def postcode; end # to be used as part of audit, permissioning process
+  def start_date; end
+  def end_date; end
+  def historic_meter_data(mpan, start_date, end_date); end # { channel?, kwhs: { date => [kwhx48]}, prices: { date => [£x48]} error_log => {} }
+  def standing_charges(mpan, start_date, end_date) # hash TBD
+  def permission_mpan(mpan, url_to_uploaded_utility_bill_scan) # this may be implemented outside this API
+end
