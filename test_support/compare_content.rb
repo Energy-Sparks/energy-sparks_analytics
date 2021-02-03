@@ -11,7 +11,7 @@ class CompareContentResults
   def save_and_compare_content(page, content, merge_page = false)
     comparison_content = load_comparison_content(page, merge_page)
     differences = compare_content(comparison_content, content)
-    save_new_content(page, differences, merge_page)
+    save_new_content(page, content, merge_page)
     differences
   end
 
@@ -89,6 +89,7 @@ class CompareContentResults
   def compare_content(comparison_content, new_content)
     differences = []
     if comparison_content.length == new_content.length
+puts "Got here len = #{comparison_content.length}"
       comparison_content.each_with_index do |comparison_component, index|
         differences.push(compare_content_component(comparison_component, new_content[index], index))
       end
