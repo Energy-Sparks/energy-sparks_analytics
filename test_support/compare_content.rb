@@ -89,7 +89,6 @@ class CompareContentResults
   def compare_content(comparison_content, new_content)
     differences = []
     if comparison_content.length == new_content.length
-puts "Got here len = #{comparison_content.length}"
       comparison_content.each_with_index do |comparison_component, index|
         differences.push(compare_content_component(comparison_component, new_content[index], index))
       end

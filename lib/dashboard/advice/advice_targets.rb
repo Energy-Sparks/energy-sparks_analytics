@@ -11,9 +11,7 @@ class AdviceTargets < AdviceBase
   end
 
   def relevance
-    x = (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
-    puts "Got here #{x}"
-    x
+    (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
   end
 
   def content(user_type: nil)
