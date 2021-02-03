@@ -11,7 +11,9 @@ class AdviceTargets < AdviceBase
   end
 
   def relevance
-    (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
+    x = (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
+    puts "Got here #{x}"
+    x
   end
 
   def content(user_type: nil)
@@ -251,9 +253,6 @@ class AdviceTargetsElectricity < AdviceTargets
   def initialize(school)
     super(school, :electricity)
   end
-  def relevance
-    @school.aggregated_electricity_meters.nil? ? :never_relevant : :relevant
-  end
   protected def aggregate_meter
     @school.aggregated_electricity_meters
   end
@@ -274,9 +273,6 @@ end
 class AdviceTargetsGas < AdviceTargets
   def initialize(school)
     super(school, :gas)
-  end
-  def relevance
-    @school.aggregated_heat_meters.nil? ? :never_relevant : :relevant
   end
   protected def aggregate_meter
     @school.aggregated_heat_meters
@@ -300,9 +296,6 @@ end
 class AdviceTargetsStorageHeaters < AdviceTargets
   def initialize(school)
     super(school, :storage_heaters)
-  end
-  def relevance
-    @school.storage_heater_meter.nil? ? :never_relevant : :relevant
   end
   protected def aggregate_meter
     @school.storage_heater_meter

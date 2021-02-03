@@ -91,17 +91,29 @@ class UKElectricityGridMix
   end
 
   def download_percentage_electricity_by_source
+    data = nil
+    back_off_sleep_times = [0.1, 0.2, 0.3, 0.4]
     url = 'https://api.carbonintensity.org.uk/generation'
-    response = Net::HTTP.get(URI(url))
-    data = JSON.parse(response)
+
+    # PH 3Feb2021 - seems to very occasionally be returning a nil;
+    #             - not often enough to capture whether any server flags set
+    #             - and to find a better way of dealing with this?
+    #             - put response.tstaus logging in for now
+    back_off_sleep_times.each do |time_seconds|
+      response = Net::HTTP.get(URI(url))
+      data = JSON.parse(response)
+      break unless data.dig('data', 'generationmix').nil?
+      sleep time_seconds
+    end
+
     by_percent = []
-    data['data']['generationmix'].each do |energy_source|
-      by_percent.push(
+    unless data.dig('data', 'generationmix').nil?
+      by_percent = data['data']['generationmix'].map do |energy_source|
         [
           energy_source['fuel'],
           energy_source['perc'].to_f / 100.0
         ]
-      )
+      end
     end
     by_percent
   end

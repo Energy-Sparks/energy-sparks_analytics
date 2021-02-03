@@ -12,6 +12,7 @@ class CompareContentResults
     comparison_content = load_comparison_content(page, merge_page)
     differences = compare_content(comparison_content, content)
     save_new_content(page, differences, merge_page)
+    differences
   end
 
   def compare_chart_list(chart_list)

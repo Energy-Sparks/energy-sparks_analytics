@@ -2,19 +2,64 @@ class RunAdultDashboard < RunCharts
 
   def run_flat_dashboard(control)
     @all_html = ''
+    differing_pages = {}
     pages = control.fetch(:pages, page_list)
     pages.each do |page|
       if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)
         definition = DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS[page]
-        run_one_page(page, definition, control)
+        differences = run_one_page(page, definition, control)
+        differing_pages[page] = !differences.nil? && !differences.empty?
       else
         puts "Not running page #{page}"
       end
     end
     save_to_excel
     write_html
+    differing_pages
   end
 
+  def self.summarise_differences(differences, _control)
+    summarise_school_differences(differences)
+    summarise_page_differences(differences)
+  end
+
+  private
+
+  def self.summarise_school_differences(differences)
+    puts "================Differences By School===================="
+    differences.each do |school_name, page_differs|
+      diff_count = page_differs.values.count{ |v| v }
+      no_diff_count = page_differs.length - diff_count
+      puts sprintf('%-30.30s: %3d differ %3d same', school_name, diff_count, no_diff_count)
+    end
+  end
+
+  def self.summarise_page_differences(differences)
+    by_page_type = calculate_page_differences(differences)
+    print_page_differences(by_page_type)
+  end
+
+  def self.calculate_page_differences(differences)
+    by_page_type = {}
+    differences.each do |school_name, page_differs|
+      page_differs.each do |page_name, differs|
+        by_page_type[page_name] ||= {}
+
+        by_page_type[page_name][true]  ||= 0
+        by_page_type[page_name][false] ||= 0
+
+        by_page_type[page_name][differs] += 1
+      end
+    end
+    by_page_type
+  end
+
+  def self.print_page_differences(by_page_type)
+    puts "================Differences By Page Type================="
+    by_page_type.each do |page_name, stats|
+      puts sprintf('%-30.30s: %3d differ %3d same', page_name, by_page_type[page_name][true], by_page_type[page_name][false])
+    end
+  end
   private def page_list
     @school.adult_report_groups.map do |report_group|
       DashboardConfiguration::ADULT_DASHBOARD_GROUPS[report_group]
@@ -46,7 +91,7 @@ class RunAdultDashboard < RunCharts
     advice.calculate
 
     puts "                Page failed 1, as advice not available to users #{page}" unless advice.make_available_to_users?
-    # return unless advice.make_available_to_users?
+    return unless advice.make_available_to_users?
 
     if advice.has_structured_content?
       begin
@@ -71,7 +116,7 @@ class RunAdultDashboard < RunCharts
     puts "                Page failed 2, as advice not available to users #{page}" unless advice.make_available_to_users?
 
     comparison = CompareContentResults.new(control, @school.name)
-    comparison.save_and_compare_content(page, content, true)
+    differences = comparison.save_and_compare_content(page, content, true)
 
     html, charts = advice.analytics_split_charts_and_html(content)
 
@@ -79,6 +124,7 @@ class RunAdultDashboard < RunCharts
 
     @worksheets[worksheet_name] = charts
     @all_html += html.join(' ')
+    differences
   end
 
   def write_html

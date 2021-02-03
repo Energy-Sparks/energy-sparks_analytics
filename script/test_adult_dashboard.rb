@@ -6,7 +6,7 @@ script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
   schools:                  ['st-mart*','paul*','long*','prend*','saund*','fresh*','marks*'],
-  schools:                  ['trinit*'],
+  schools:                  ['*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
@@ -14,6 +14,7 @@ script = {
                                 root:    :adult_analysis_page, # :pupil_analysis_page,
                                 no_chart_manipulation: %i[drilldown timeshift],
                                 display_average_calculation_rate: true,
+                                summarise_differences: true,
                                 report_failed_charts:   :summary, # :detailed
                                 user:          { user_role: :analytics, staff_role: nil }, # nil, # , # { user_role: :admin }, # guest
                                 no_pages: %i[electricity_profit_loss gas_profit_loss],
@@ -23,7 +24,6 @@ script = {
                                   :summary,
                                   :report_differences,
                                   #:report_differing_charts,
-                                  # :report_differences
                                 ] # :quick_comparison,
                               }
                             }
