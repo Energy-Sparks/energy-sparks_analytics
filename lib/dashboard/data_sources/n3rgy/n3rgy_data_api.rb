@@ -30,6 +30,20 @@ module MeterReadingsFeeds
       get_data(url)
     end
 
+    def read_inventory(mpxn: )
+      url = @base_url + 'read-inventory'
+      body = { mpxns: [mpxn] }
+      response = Faraday.post(url) do |req|
+        req.headers['Authorization'] = @api_key
+        req.body = body.to_json
+      end
+      JSON.parse(response.body)
+    end
+
+    def fetch(url)
+      get_data(url)
+    end
+
     private
 
     def get_data(url)

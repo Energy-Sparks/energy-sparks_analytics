@@ -23,6 +23,13 @@ module MeterReadingsFeeds
       }
     end
 
+    def inventory(mpxn)
+      details = api.read_inventory(mpxn: mpxn)
+      # seems like requesting file too soon causes Access Denied response
+      sleep(0.5)
+      api.fetch(details['uri'])
+    end
+
     private
 
     def meter_readings_kwh(mpxn, fuel_type, start_date, end_date)
