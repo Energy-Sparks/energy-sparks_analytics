@@ -101,7 +101,6 @@ module MeterReadingsFeeds
     end
 
     def start_end_date_by_fuel(mpxn, fuel_type, element, data_type)
-      check_reading_types(mpxn, fuel_type)
       # PH: this API call gets previous days data as well; returns [] if meter not up to date
       response = get_json_data(mpxn: mpxn, fuel_type: fuel_type.to_s, data_type: data_type.to_s, element: element)
       start_date = roll_forward_start_date(response['availableCacheRange']['start'])
@@ -110,7 +109,6 @@ module MeterReadingsFeeds
     end
 
     def units(mpxn, fuel_type, element, data_type)
-      check_reading_types(mpxn, fuel_type)
       response = get_json_data(mpxn: mpxn, fuel_type: fuel_type.to_s, data_type: data_type.to_s, element: element)
       response['unit'].nil? ? nil : response['unit'].to_sym # example :m3 for gas
     end
@@ -252,13 +250,6 @@ module MeterReadingsFeeds
         standing_charges: standing_charges,
         prices:           prices
       }
-    end
-
-    def timestamp_to_date_and_half_hour_index(reading)
-      dt = DateTime.parse(reading['timestamp'])
-      date = dt.to_date
-      half_hour_index = ((dt - date) * 48).to_i
-      [date, half_hour_index]
     end
 
     def get_json_data(mpxn: nil, fuel_type: nil, data_type: nil, element: nil, start_date: nil, end_date: nil)

@@ -15,7 +15,6 @@ describe MeterReadingsFeeds::N3rgy do
     let(:expected_last_day_readings) { [0.426,0.405,0.479,0.463,0.528,0.517,0.589,0.554,0.599,0.595,0.648,0.574,0.674,0.633,0.713,0.585,0.562,0.481,0.516,0.459,0.473,0.399,0.459,0.462,0.496,0.51,0.478,0.369,0.482,0.433,0.416,0.403,0.451,0.406,0.386,0.417,0.4,0.377,0.532,0.637,0.688,0.736,0.643,0.621,0.642,0.791,1.331,0.512] }
 
     before do
-      expect_any_instance_of(MeterReadingsFeeds::N3rgyRaw).to receive(:check_reading_types).exactly(2).times.and_return(true)
       expect_any_instance_of(MeterReadingsFeeds::N3rgyRaw).to receive(:meter_elements).and_return([1])
       expect_any_instance_of(MeterReadingsFeeds::N3rgyRaw).to receive(:raw_meter_readings_kwh).and_return(raw_meter_readings_kwh)
     end

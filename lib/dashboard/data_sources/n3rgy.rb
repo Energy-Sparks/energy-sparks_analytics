@@ -94,13 +94,15 @@ module MeterReadingsFeeds
       !el.nil? && elements(mpxn, fuel_type).length == 1
     end
 
-    def start_date(mpxn, fuel_type)
+    def check_reading_types(mpxn, fuel_type)
       raw.check_reading_types(mpxn, fuel_type(fuel_type))
+    end
+
+    def start_date(mpxn, fuel_type)
       download_start_end_dates(mpxn, fuel_type)[:start_date]
     end
 
     def end_date(mpxn, fuel_type)
-      raw.check_reading_types(mpxn, fuel_type(fuel_type))
       download_start_end_dates(mpxn, fuel_type)[:end_date]
     end
 
@@ -158,13 +160,11 @@ module MeterReadingsFeeds
     end
 
     def kwhs(mpxn, fuel_type, start_date = start_date(mpxn, fuel_type), end_date = end_date(mpxn, fuel_type))
-      raw.check_reading_types(mpxn, fuel_type)
       el = element(mpxn, fuel_type)
       processed_meter_readings_kwh(mpxn, fuel_type, el, start_date, end_date)
     end
 
     def tariffs(mpxn, fuel_type, start_date = start_date(mpxn, fuel_type), end_date = end_date(mpxn, fuel_type))
-      raw.check_reading_types(mpxn, fuel_type)
       el = element(mpxn, fuel_type)
       processed_meter_readings_£(mpxn, fuel_type, el, start_date, end_date)
     end
