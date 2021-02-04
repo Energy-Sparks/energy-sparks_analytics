@@ -32,7 +32,7 @@ module MeterReadingsFeeds
         req.headers['Authorization'] = @api_key
         req.body = config.to_json
       end
-      log(response.inspect)
+      log(response)
       response
     end
 
@@ -40,10 +40,8 @@ module MeterReadingsFeeds
     #     both the API manual and their github Python example...
     def withdraw_trusted_consent(mpxn)
       url = consent_base_url + 'consents/withdraw-consent?mpxn=' + mpxn.to_s
-      response = Faraday.put(url) do |req|
-        req.headers['Authorization'] = @api_key
-      end
-      log(response.inspect)
+      response = execute_json(url)
+      log(response)
       response
     end
 
@@ -76,7 +74,7 @@ module MeterReadingsFeeds
     # https://github.com/n3rgy/data/blob/master/n3rgy-smartinventory.py
     # contains this:
     #   if apiSrv == "sandbox":
-	  #     print "Sandbox inventory queries are not supported\n"
+    #     print "Sandbox inventory queries are not supported\n"
     # get code 404: No property could be found with identifier 'read-inventory' in sandbox
     def inventory
       if @production
@@ -101,6 +99,7 @@ module MeterReadingsFeeds
     end
 
     def start_end_date_by_fuel(mpxn, fuel_type, element, data_type)
+      check_reading_types(mpxn, fuel_type)
       # PH: this API call gets previous days data as well; returns [] if meter not up to date
       response = get_json_data(mpxn: mpxn, fuel_type: fuel_type.to_s, data_type: data_type.to_s, element: element)
       start_date = roll_forward_start_date(response['availableCacheRange']['start'])
@@ -109,6 +108,7 @@ module MeterReadingsFeeds
     end
 
     def units(mpxn, fuel_type, element, data_type)
+      check_reading_types(mpxn, fuel_type)
       response = get_json_data(mpxn: mpxn, fuel_type: fuel_type.to_s, data_type: data_type.to_s, element: element)
       response['unit'].nil? ? nil : response['unit'].to_sym # example :m3 for gas
     end
@@ -229,7 +229,7 @@ module MeterReadingsFeeds
       readings = []
       (start_date..end_date).each_slice(90) do |date_range_max_90days|
         response = get_json_data(mpxn: mpxn, fuel_type: fuel_type.to_s, data_type: data_type, element: element,
-                                    start_date: date_range_max_90days.first, end_date: date_range_max_90days.last)
+                                 start_date: date_range_max_90days.first, end_date: date_range_max_90days.last)
         readings += response['values']
       end
       readings
@@ -240,7 +240,7 @@ module MeterReadingsFeeds
       prices = []
       (start_date..end_date).each_slice(90) do |date_range_max_90days|
         response = get_json_data(mpxn: mpxn, fuel_type: fuel_type.to_s, data_type: data_type, element: element,
-                                    start_date: date_range_max_90days.first, end_date: date_range_max_90days.last)
+                                 start_date: date_range_max_90days.first, end_date: date_range_max_90days.last)
         response['values'].each do |slice|
           standing_charges += slice['standingCharges']
           prices += slice['prices']
@@ -250,6 +250,13 @@ module MeterReadingsFeeds
         standing_charges: standing_charges,
         prices:           prices
       }
+    end
+
+    def timestamp_to_date_and_half_hour_index(reading)
+      dt = DateTime.parse(reading['timestamp'])
+      date = dt.to_date
+      half_hour_index = ((dt - date) * 48).to_i
+      [date, half_hour_index]
     end
 
     def get_json_data(mpxn: nil, fuel_type: nil, data_type: nil, element: nil, start_date: nil, end_date: nil)

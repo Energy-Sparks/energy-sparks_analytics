@@ -94,15 +94,13 @@ module MeterReadingsFeeds
       !el.nil? && elements(mpxn, fuel_type).length == 1
     end
 
-    def check_reading_types(mpxn, fuel_type)
-      raw.check_reading_types(mpxn, fuel_type(fuel_type))
-    end
-
     def start_date(mpxn, fuel_type)
+      raw.check_reading_types(mpxn, fuel_type(fuel_type))
       download_start_end_dates(mpxn, fuel_type)[:start_date]
     end
 
     def end_date(mpxn, fuel_type)
+      raw.check_reading_types(mpxn, fuel_type(fuel_type))
       download_start_end_dates(mpxn, fuel_type)[:end_date]
     end
 
@@ -110,35 +108,6 @@ module MeterReadingsFeeds
       el = element(mpxn, fuel_type)
       raw.units(mpxn, fuel_type, el, data_type(fuel_type))
     end
-
-    ####################################################################
-
-    def readings(mpxn, fuel_type, start_date, end_date)
-      kwh = kwhs(mpxn, fuel_type, start_date, end_date)
-      { fuel_type =>
-        {
-          mpan_mprn:        mpxn,
-          readings:         convert_date_to_x48_to_one_day_readings(kwh[:readings], mpxn, start_date, end_date),
-          missing_readings: kwh[:missing_readings]
-        }
-      }
-    end
-
-    def convert_date_to_x48_to_one_day_readings(raw_meter_readings, mpan_mprn, start_date, end_date)
-      meter_readings = {}
-      (start_date..end_date).each do |date|
-        if raw_meter_readings.key?(date)
-          meter_readings[date] = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, raw_meter_readings[date])
-        else
-          meter_readings[date] = OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, Array.new(48, 0.0))
-          message = "Warning: missing meter readings for #{mpan_mprn} on #{date}"
-          logger.warn message
-        end
-      end
-      meter_readings
-    end
-
-    ####################################################################
 
     def all_data(mpxn)
       data_by_fuel_type = {}
@@ -160,11 +129,13 @@ module MeterReadingsFeeds
     end
 
     def kwhs(mpxn, fuel_type, start_date = start_date(mpxn, fuel_type), end_date = end_date(mpxn, fuel_type))
+      raw.check_reading_types(mpxn, fuel_type)
       el = element(mpxn, fuel_type)
       processed_meter_readings_kwh(mpxn, fuel_type, el, start_date, end_date)
     end
 
     def tariffs(mpxn, fuel_type, start_date = start_date(mpxn, fuel_type), end_date = end_date(mpxn, fuel_type))
+      raw.check_reading_types(mpxn, fuel_type)
       el = element(mpxn, fuel_type)
       processed_meter_readings_£(mpxn, fuel_type, el, start_date, end_date)
     end
