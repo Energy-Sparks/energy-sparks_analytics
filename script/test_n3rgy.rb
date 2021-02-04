@@ -111,27 +111,22 @@ def download_all_permissioned_data(n3rgy)
   end
 end
 
-# logging = { puts: true, ap: { limit: 5 } }
-logging = { puts: true, ap: { limit: false } }
-# logging = nil
+logging = { puts: true, ap: { limit: 5 } }
+logging = nil
 
-# n3rgyConsent = MeterReadingsFeeds::N3rgyConsent.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_CONSENT_BASE_URL'], debugging: logging)
-#
-# example_consent_file_link = 'https://energysparks.uk/meters/2234567891000'
-# n3rgyConsent.grant_trusted_consent(2234567891000, example_consent_file_link)
-
-
-n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_BASE_URL'], debugging: logging)
-
-mpxn = 2234567891000
-fuel_type = :electricity
-start_date = Date.parse('01/01/2020')
-end_date = Date.parse('02/01/2020')
-readings = n3rgyData.readings(mpxn, fuel_type, start_date, end_date)
-
-pp readings.inspect
-
+n3rgy = MeterReadingsFeeds::N3rgy.new(debugging: logging)
 # process_one_mpxn(n3rgy, 2234567891000)
+
+puts "testing inventory process - only works in production environment?"
+n3rgy.inventory
+
+test_consent_process(n3rgy, 2234567891000)
+
+test_appendix_a_sandbox_mpxns_permissions(n3rgy)
+
+download_all_permissioned_data(n3rgy)
+
+#interface spec
 
 download_all_permissioned_data(n3rgy)
 
@@ -146,6 +141,6 @@ class N3rgyRawData
   def start_date; end
   def end_date; end
   def historic_meter_data(mpan, start_date, end_date); end # { channel?, kwhs: { date => [kwhx48]}, prices: { date => [£x48]} error_log => {} }
-  def standing_charges(mpan, start_date, end_date) # hash TBD
-  def permission_mpan(mpan, url_to_uploaded_utility_bill_scan) # this may be implemented outside this API
+  def standing_charges(mpan, start_date, end_date); end # hash TBD
+  def permission_mpan(mpan, url_to_uploaded_utility_bill_scan); end # this may be implemented outside this API
 end
