@@ -15,14 +15,22 @@ module MeterReadingsFeeds
     end
 
     def readings(mpxn, fuel_type, start_date, end_date)
-      kwhs = processed_meter_readings_kwh(mpxn, fuel_type, start_date, end_date)
+      meter_readings = meter_readings_kwh(mpxn, fuel_type, start_date, end_date)
       { fuel_type =>
           {
             mpan_mprn:        mpxn,
-            readings:         convert_date_to_x48_to_one_day_readings(kwhs[:readings], mpxn, start_date, end_date),
-            missing_readings: kwhs[:missing_readings]
+            readings:         convert_date_to_x48_to_one_day_readings(meter_readings[:readings], mpxn, start_date, end_date),
+            missing_readings: meter_readings[:missing_readings]
           }
       }
+    end
+
+    private
+
+    def meter_readings_kwh(mpxn, fuel_type, start_date, end_date)
+      data = consumption_data(mpxn, fuel_type, start_date, end_date)
+      dt_to_kwh = convert_readings_dt_to_kwh(data[:values], data[:units])
+      convert_dt_to_v_to_date_to_v_x48(start_date, end_date, dt_to_kwh)
     end
 
     def convert_date_to_x48_to_one_day_readings(raw_meter_readings, mpan_mprn, start_date, end_date)
@@ -39,13 +47,7 @@ module MeterReadingsFeeds
       meter_readings
     end
 
-    def processed_meter_readings_kwh(mpxn, fuel_type, start_date, end_date)
-      data = consumption_data(mpxn, fuel_type, start_date, end_date)
-      dt_to_kwh = convert_readings_dt_to_kwh(data[:values], data[:units])
-      convert_dt_to_v_to_date_to_v_x48(start_date, end_date, dt_to_kwh)
-    end
-
-    # returns hash with readings
+    # returns hash with consumption data
     # {
     #   values: [{value: 1.449, timestamp: "2019-01-01 00:00"}, ..],
     #   start_date: "201812242330",

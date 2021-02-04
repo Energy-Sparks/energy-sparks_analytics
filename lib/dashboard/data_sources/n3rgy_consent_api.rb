@@ -25,8 +25,6 @@ module MeterReadingsFeeds
       response
     end
 
-    # PH: this currently doesn't work, not sure why having read
-    #     both the API manual and their github Python example...
     def withdraw_trusted_consent(mpxn)
       url = base_url + 'consents/withdraw-consent?mpxn=' + mpxn.to_s
       response = Faraday.put(url) do |req|
