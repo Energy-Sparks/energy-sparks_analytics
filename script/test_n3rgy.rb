@@ -115,21 +115,18 @@ end
 logging = { puts: true, ap: { limit: false } }
 # logging = nil
 
-# n3rgy = MeterReadingsFeeds::N3rgy.new(debugging: logging)
-
+# n3rgyConsent = MeterReadingsFeeds::N3rgyConsent.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_CONSENT_BASE_URL'], debugging: logging)
+#
 # example_consent_file_link = 'https://energysparks.uk/meters/2234567891000'
-# n3rgy.grant_trusted_consent(2234567891000, example_consent_file_link)
+# n3rgyConsent.grant_trusted_consent(2234567891000, example_consent_file_link)
 
 
 n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_BASE_URL'], debugging: logging)
 
-# process_one_mpxn(n3rgy, 2234567891000)
-
-
 mpxn = 2234567891000
 fuel_type = :electricity
-start_date = Date.parse('01/01/2019')
-end_date = Date.parse('02/01/2019')
+start_date = Date.parse('01/01/2020')
+end_date = Date.parse('02/01/2020')
 readings = n3rgyData.readings(mpxn, fuel_type, start_date, end_date)
 
 pp readings.inspect

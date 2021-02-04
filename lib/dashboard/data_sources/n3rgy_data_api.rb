@@ -2,6 +2,7 @@ module MeterReadingsFeeds
   class N3rgyDataApi
     include Logging
 
+    DEFAULT_ELEMENT = 1
     DATA_TYPE_CONSUMPTION = 'consumption'
     DATA_TYPE_TARIFF = 'tariff'
     DATA_TYPE_PRODUCTION = 'production'
@@ -12,17 +13,19 @@ module MeterReadingsFeeds
       @debugging = debugging
     end
 
-    def get_consumption_data(mpxn: nil, fuel_type: nil, element: 1, start_date: nil, end_date: nil)
+    def get_consumption_data(mpxn: nil, fuel_type: nil, element: DEFAULT_ELEMENT, start_date: nil, end_date: nil)
       url = make_url(mpxn, fuel_type, DATA_TYPE_CONSUMPTION, element, start_date, end_date)
-      get_data(url)
+      data = get_data(url)
+      puts data
+      data
     end
 
-    def get_tariff_data(mpxn: nil, fuel_type: nil, element: 1, start_date: nil, end_date: nil)
+    def get_tariff_data(mpxn: nil, fuel_type: nil, element: DEFAULT_ELEMENT, start_date: nil, end_date: nil)
       url = make_url(mpxn, fuel_type, DATA_TYPE_TARIFF, element, start_date, end_date)
       get_data(url)
     end
 
-    def get_production_data(mpxn: nil, fuel_type: nil, element: 1, start_date: nil, end_date: nil)
+    def get_production_data(mpxn: nil, fuel_type: nil, element: DEFAULT_ELEMENT, start_date: nil, end_date: nil)
       url = make_url(mpxn, fuel_type, DATA_TYPE_PRODUCTION, element, start_date, end_date)
       get_data(url)
     end
@@ -39,12 +42,8 @@ module MeterReadingsFeeds
       { 'Authorization' => @api_key }
     end
 
-    def base_url
-      @base_url
-    end
-
     def make_url(mpxn, fuel_type, data_type, element, start_date, end_date)
-      url = base_url
+      url = @base_url
       url += mpxn.to_s + '/' unless mpxn.nil?
       url += fuel_type + '/' unless fuel_type.nil?
       url += data_type + '/' unless data_type.nil?

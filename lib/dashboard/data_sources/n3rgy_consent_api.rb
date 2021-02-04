@@ -37,5 +37,9 @@ module MeterReadingsFeeds
     def base_url
       @base_url
     end
+
+    def log(str)
+      puts str
+    end
   end
 end
