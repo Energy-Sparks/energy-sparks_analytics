@@ -11,21 +11,40 @@ describe MeterReadingsFeeds::N3rgyData do
     let(:start_date)    { Date.parse('20190101') }
     let(:end_date)      { Date.parse('20190102') }
 
-    describe 'for inventory' do
 
-      let(:status)             { 200 }
-      let(:inventory_url)      { 'https://read-inventory.data.n3rgy.com/files/3b80564b-fa21-451a-a8a1-2b4abb6bb8f6.json' }
-      let(:inventory_data)     { {"status" => status, "uuid" => "3b80564b-fa21-451a-a8a1-2b4abb6bb8f6", "uri" => inventory_url} }
-      let(:inventory_file)     { {"result"=>[{"mpxn"=>"1234567891234", "status"=>404, "message"=>"MPxN not found"}]} }
+    describe 'for tariffs' do
+
+      let(:expected_first_day_tariffs)  { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
+      let(:expected_last_day_tariffs)   { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
+      let(:expected_standing_charge)    { 0.19541 }
 
       before do
-        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:read_inventory).with(mpxn: mpxn).and_return(inventory_data)
-        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:fetch).with(inventory_url).and_return(inventory_file)
+        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_tariff_data).and_return(tariff_data)
       end
 
-      it 'returns inventory file contents' do
-        contents = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).inventory(mpxn)
-        expect(contents).to eq(inventory_file)
+      describe 'when data exists' do
+
+        let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data.json')) }
+
+        it 'returns tariffs' do
+          tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).tariffs(mpxn, fuel_type, start_date, end_date)
+          expect(tariffs.keys).to match_array([:kwh_tariffs, :standing_charges, :missing_readings])
+
+          expect(tariffs[:kwh_tariffs].count).to eq(2)
+          expect(tariffs[:kwh_tariffs].keys).to eq([start_date, end_date])
+          expect(tariffs[:kwh_tariffs][start_date]).to eq(expected_first_day_tariffs)
+          expect(tariffs[:kwh_tariffs][end_date]).to eq(expected_last_day_tariffs)
+
+          expect(tariffs[:standing_charges][start_date]).to eq(expected_standing_charge)
+          expect(tariffs[:missing_readings]).to eq([])
+        end
+
+        describe 'when adjusting for bad sandbox electricity standing charge units' do
+          it 'should convert standing charge from pence to pounds' do
+            tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url, bad_electricity_standing_charge_units: true).tariffs(mpxn, fuel_type, start_date, end_date)
+            expect(tariffs[:standing_charges][start_date]).to eq(100.0 * expected_standing_charge)
+          end
+        end
       end
     end
 
@@ -89,5 +108,24 @@ describe MeterReadingsFeeds::N3rgyData do
 
       end
     end
+
+    describe 'for inventory' do
+
+      let(:status)             { 200 }
+      let(:inventory_url)      { 'https://read-inventory.data.n3rgy.com/files/3b80564b-fa21-451a-a8a1-2b4abb6bb8f6.json' }
+      let(:inventory_data)     { {"status" => status, "uuid" => "3b80564b-fa21-451a-a8a1-2b4abb6bb8f6", "uri" => inventory_url} }
+      let(:inventory_file)     { {"result"=>[{"mpxn"=>"1234567891234", "status"=>404, "message"=>"MPxN not found"}]} }
+
+      before do
+        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:read_inventory).with(mpxn: mpxn).and_return(inventory_data)
+        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:fetch).with(inventory_url).and_return(inventory_file)
+      end
+
+      it 'returns inventory file contents' do
+        contents = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).inventory(mpxn)
+        expect(contents).to eq(inventory_file)
+      end
+    end
+
   end
 end

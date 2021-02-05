@@ -12,5 +12,8 @@ end_date = Date.parse('02/01/2020')
 # readings = n3rgyData.readings(mpxn, fuel_type, start_date, end_date)
 # pp readings.inspect
 
-resp = n3rgyData.inventory(mpxn)
-puts resp
+readings = n3rgyData.tariffs(mpxn, fuel_type, start_date, end_date)
+pp readings.inspect
+
+# resp = n3rgyData.inventory(mpxn)
+# puts resp

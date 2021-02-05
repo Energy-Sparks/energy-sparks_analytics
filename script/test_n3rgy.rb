@@ -117,14 +117,19 @@ logging = nil
 n3rgy = MeterReadingsFeeds::N3rgy.new(debugging: logging)
 # process_one_mpxn(n3rgy, 2234567891000)
 
-puts "testing inventory process - only works in production environment?"
-n3rgy.inventory
+# puts n3rgy.all_data(2234567891000)
+tariffs = n3rgy.tariffs(2234567891000, :electricity, Date.parse('20190101'), Date.parse('20190102'))
 
-test_consent_process(n3rgy, 2234567891000)
+puts tariffs[:standing_charges].inspect
 
-test_appendix_a_sandbox_mpxns_permissions(n3rgy)
+# puts "testing inventory process - only works in production environment?"
+# n3rgy.inventory
 
-download_all_permissioned_data(n3rgy)
+# test_consent_process(n3rgy, 2234567891000)
+#
+# test_appendix_a_sandbox_mpxns_permissions(n3rgy)
+#
+# download_all_permissioned_data(n3rgy)
 
 #interface spec
 
