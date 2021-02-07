@@ -14,7 +14,8 @@ module MeterReadingsFeeds
     end
 
     def readings(mpxn, fuel_type, start_date, end_date)
-      meter_readings = meter_readings_kwh(mpxn, fuel_type, start_date, end_date)
+      readings_by_date = consumption_data(mpxn, fuel_type, start_date, end_date)
+      meter_readings = convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date)
       { fuel_type =>
           {
             mpan_mprn:        mpxn,
@@ -25,11 +26,14 @@ module MeterReadingsFeeds
     end
 
     def tariffs(mpxn, fuel_type, start_date, end_date)
-      tariff_details = meter_tariffs(mpxn, fuel_type, start_date, end_date)
+      tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
+      charges_by_date = tariff_details[:standing_charges].to_h
+      prices_by_date = tariff_details[:prices].to_h
+      tariff_readings = convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
       {
-        kwh_tariffs:      tariff_details[:readings],
-        standing_charges: tariff_details[:standing_charges],
-        missing_readings: tariff_details[:missing_readings],
+        kwh_tariffs:      tariff_readings[:readings],
+        standing_charges: charges_by_date,
+        missing_readings: tariff_readings[:missing_readings],
       }
     end
 
@@ -41,49 +45,6 @@ module MeterReadingsFeeds
     end
 
     private
-
-    def meter_tariffs(mpxn, fuel_type, start_date, end_date)
-      raw_£ = tariff_data(mpxn, fuel_type, start_date, end_date)
-      dt_to_£ = format_tariffs(raw_£[:prices])
-      tariffs = convert_dt_to_v_to_date_to_v_x48(start_date, end_date, dt_to_£)
-      tariffs[:standing_charges] = format_standing_charges(raw_£[:standing_charges], fuel_type)
-      tariffs
-    end
-
-    def format_standing_charges(standing_charges_date_str, fuel_type)
-      standing_charges_date_str.map do |standing_charge|
-        [Date.parse(standing_charge['startDate']), convert_to_£(standing_charge['value'], fuel_type)]
-      end.to_h
-    end
-
-    def format_tariffs(raw_£)
-      raw_£.map do |tariff|
-        [DateTime.parse(tariff['timestamp']), convert_to_£(tariff_price(tariff))]
-      end.to_h
-    end
-
-    def tariff_price(tariff)
-      tariff['prices'] ? tariff['prices'][0]['value'] : tariff['value']
-    end
-
-    # quote from N3rgy support:
-    # "in sandbox environment, electricity tariffs have the standing charges in £/day and the TOU prices in pence/kWh. Gas tariffs are in pence/day and pence/kWh.
-    # However, in live environment, our system returns always pence/day and pence/kWh."
-    def convert_to_£(value, fuel_type = nil)
-      if (fuel_type == :electricity && @bad_electricity_standing_charge_units)
-        value
-      else
-        value / 100.0
-      end
-    end
-
-
-
-
-    def meter_readings_kwh(mpxn, fuel_type, start_date, end_date)
-      dt_to_kwh = consumption_data(mpxn, fuel_type, start_date, end_date)
-      convert_dt_to_v_to_date_to_v_x48(start_date, end_date, dt_to_kwh)
-    end
 
     def consumption_data(mpxn, fuel_type, start_date, end_date)
       readings = []
@@ -106,8 +67,8 @@ module MeterReadingsFeeds
                                        start_date: date_range_max_90days.first,
                                        end_date: date_range_max_90days.last)
         response['values'].each do |tariff|
-          standing_charges += tariff['standingCharges']
-          prices += tariff['prices']
+          standing_charges += unit_adjusted_standing_charges(tariff['standingCharges'], fuel_type)
+          prices += unit_adjusted_prices(tariff['prices'])
         end
       end
       {
@@ -116,9 +77,9 @@ module MeterReadingsFeeds
       }
     end
 
-    def unit_adjusted_readings(raw_kwhs, units)
+    def unit_adjusted_readings(raw_readings, units)
       adjust_kwh_units = unit_adjustment(units)
-      raw_kwhs.map do |reading|
+      raw_readings.map do |reading|
         [
           DateTime.parse(reading['timestamp']),
           reading['value'] * adjust_kwh_units
@@ -126,8 +87,41 @@ module MeterReadingsFeeds
       end
     end
 
+    def unit_adjusted_prices(raw_prices)
+      raw_prices.map do |price|
+        [
+          DateTime.parse(price['timestamp']),
+          convert_to_£(tariff_price(price))
+        ]
+      end
+    end
+
+    def unit_adjusted_standing_charges(raw_standing_charges, fuel_type)
+      raw_standing_charges.map do |standing_charge|
+        [
+          DateTime.parse(standing_charge['startDate']),
+          convert_to_£(standing_charge['value'], fuel_type)
+        ]
+      end
+    end
+
     def unit_adjustment(units)
       units == 'm3' ? KWH_PER_M3_GAS : 1.0
+    end
+
+    def tariff_price(tariff)
+      tariff['prices'] ? tariff['prices'][0]['value'] : tariff['value']
+    end
+
+    # quote from N3rgy support:
+    # "in sandbox environment, electricity tariffs have the standing charges in £/day and the TOU prices in pence/kWh. Gas tariffs are in pence/day and pence/kWh.
+    # However, in live environment, our system returns always pence/day and pence/kWh."
+    def convert_to_£(value, fuel_type = nil)
+      if (fuel_type == :electricity && @bad_electricity_standing_charge_units)
+        value
+      else
+        value / 100.0
+      end
     end
 
     def make_one_day_readings(meter_readings_by_date, mpan_mprn, start_date, end_date)
