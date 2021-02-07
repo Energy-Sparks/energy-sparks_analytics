@@ -11,6 +11,33 @@ describe MeterReadingsFeeds::N3rgyData do
     let(:start_date)    { Date.parse('20190101') }
     let(:end_date)      { Date.parse('20190102') }
 
+    describe 'status' do
+      before :each do
+        @api = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url)
+        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:status).and_return(status_response)
+      end
+
+      context 'when not in DCC' do
+        let(:status_response)    { {'errors' => [{'code' => 404}] } }
+        it 'returns not found' do
+          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:not_available)
+        end
+      end
+
+      context 'when in DCC but not consented' do
+        let(:status_response)    { {'errors' => [{'code' => 403}] } }
+        it 'returns not consented' do
+          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:available_not_consented)
+        end
+      end
+
+      context 'when in DCC and consented' do
+        let(:status_response)    { {} }
+        it 'returns ok' do
+          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:permissioned_and_data_available)
+        end
+      end
+    end
 
     describe 'for tariffs' do
 

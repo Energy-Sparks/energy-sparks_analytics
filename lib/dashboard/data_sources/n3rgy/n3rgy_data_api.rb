@@ -40,6 +40,11 @@ module MeterReadingsFeeds
       JSON.parse(response.body)
     end
 
+    def status(mpxn)
+      url = make_url(mpxn)
+      get_data(url)
+    end
+
     def fetch(url)
       get_data(url)
     end
@@ -56,7 +61,7 @@ module MeterReadingsFeeds
       { 'Authorization' => @api_key }
     end
 
-    def make_url(mpxn, fuel_type, data_type, element, start_date, end_date)
+    def make_url(mpxn, fuel_type = nil, data_type = nil, element = nil, start_date = nil, end_date = nil)
       url = @base_url
       url += mpxn.to_s + '/' unless mpxn.nil?
       url += fuel_type + '/' unless fuel_type.nil?

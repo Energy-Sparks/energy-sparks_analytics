@@ -44,6 +44,17 @@ module MeterReadingsFeeds
       api.fetch(details['uri'])
     end
 
+    def status(mpxn)
+      response = api.status(mpxn)
+      if response.key?('errors') && response['errors'][0]['code'] == 404
+        :not_available
+      elsif response.key?('errors') && response['errors'][0]['code'] == 403
+        :available_not_consented
+      else
+        :permissioned_and_data_available
+      end
+    end
+
     private
 
     def consumption_data(mpxn, fuel_type, start_date, end_date)
