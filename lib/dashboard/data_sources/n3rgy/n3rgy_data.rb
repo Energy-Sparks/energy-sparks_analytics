@@ -14,7 +14,11 @@ module MeterReadingsFeeds
     end
 
     def readings(mpxn, fuel_type, start_date, end_date)
-      readings_by_date = consumption_data(mpxn, fuel_type, start_date, end_date)
+      if fuel_type == :exported_solar_pv
+        readings_by_date = production_data(mpxn, fuel_type, start_date, end_date)
+      else
+        readings_by_date = consumption_data(mpxn, fuel_type, start_date, end_date)
+      end
       meter_readings = convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date)
       { fuel_type =>
           {
@@ -61,6 +65,18 @@ module MeterReadingsFeeds
       readings = []
       (start_date..end_date).each_slice(90) do |date_range_max_90days|
         response = api.get_consumption_data(mpxn: mpxn,
+                                            fuel_type: fuel_type.to_s,
+                                            start_date: date_range_max_90days.first,
+                                            end_date: date_range_max_90days.last)
+        readings += unit_adjusted_readings(response['values'], response['unit'])
+      end
+      readings.to_h
+    end
+
+    def production_data(mpxn, fuel_type, start_date, end_date)
+      readings = []
+      (start_date..end_date).each_slice(90) do |date_range_max_90days|
+        response = api.get_production_data(mpxn: mpxn,
                                             fuel_type: fuel_type.to_s,
                                             start_date: date_range_max_90days.first,
                                             end_date: date_range_max_90days.last)
