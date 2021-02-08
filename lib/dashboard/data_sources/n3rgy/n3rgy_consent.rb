@@ -10,10 +10,12 @@ module MeterReadingsFeeds
 
     def grant_trusted_consent(mpxn, file_link)
       api.grant_trusted_consent(mpxn, file_link)
+      true
     end
 
     def withdraw_trusted_consent(mpxn)
       api.withdraw_trusted_consent(mpxn)
+      true
     end
 
     def api
