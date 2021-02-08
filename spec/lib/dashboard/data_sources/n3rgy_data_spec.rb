@@ -20,21 +20,21 @@ describe MeterReadingsFeeds::N3rgyData do
       context 'when not in DCC' do
         let(:status_response)    { {'errors' => [{'code' => 404}] } }
         it 'returns not found' do
-          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:not_available)
+          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:unknown)
         end
       end
 
       context 'when in DCC but not consented' do
         let(:status_response)    { {'errors' => [{'code' => 403}] } }
         it 'returns not consented' do
-          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:available_not_consented)
+          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:consent_required)
         end
       end
 
       context 'when in DCC and consented' do
         let(:status_response)    { {} }
         it 'returns ok' do
-          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:permissioned_and_data_available)
+          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:available)
         end
       end
     end

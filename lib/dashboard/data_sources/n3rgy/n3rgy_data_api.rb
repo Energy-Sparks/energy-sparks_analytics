@@ -15,9 +15,7 @@ module MeterReadingsFeeds
 
     def get_consumption_data(mpxn: nil, fuel_type: nil, element: DEFAULT_ELEMENT, start_date: nil, end_date: nil)
       url = make_url(mpxn, fuel_type, DATA_TYPE_CONSUMPTION, element, start_date, end_date)
-      data = get_data(url)
-      puts data
-      data
+      get_data(url)
     end
 
     def get_tariff_data(mpxn: nil, fuel_type: nil, element: DEFAULT_ELEMENT, start_date: nil, end_date: nil)
@@ -67,16 +65,16 @@ module MeterReadingsFeeds
       url += fuel_type + '/' unless fuel_type.nil?
       url += data_type + '/' unless data_type.nil?
       url += element.to_s unless element.nil?
-      url += half_hourly_query(start_date, end_date) unless start_date.nil? || end_date.nil?
+      url += half_hourly_query(start_date, end_date + 1) unless start_date.nil? || end_date.nil?
       url
     end
 
     def half_hourly_query(start_date, end_date)
-      '?start=' + url_date(start_date) + '&end=' + url_date(end_date, true) + '&granularity=halfhour'
+      '?start=' + url_date(start_date) + '&end=' + url_date(end_date)
     end
 
-    def url_date(date, end_date = false)
-      end_date ? date.strftime('%Y%m%d2359') : date.strftime('%Y%m%d0000')
+    def url_date(date)
+      date.strftime('%Y%m%d')
     end
   end
 end

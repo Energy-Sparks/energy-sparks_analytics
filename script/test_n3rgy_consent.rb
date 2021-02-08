@@ -8,5 +8,5 @@ example_consent_reference = 'https://energysparks.uk/meters/2234567891000'
 response = n3rgyConsent.grant_trusted_consent(mpxn, example_consent_reference)
 puts response.inspect
 
-response = n3rgyConsent.withdraw_trusted_consent(mpxn)
-puts response.inspect
+# response = n3rgyConsent.withdraw_trusted_consent(mpxn)
+# puts response.inspect

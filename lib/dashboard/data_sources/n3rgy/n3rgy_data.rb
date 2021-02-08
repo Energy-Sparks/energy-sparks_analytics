@@ -23,7 +23,7 @@ module MeterReadingsFeeds
       { fuel_type =>
           {
             mpan_mprn:        mpxn,
-            readings:         make_one_day_readings(meter_readings[:readings], mpxn, start_date, end_date),
+            readings:         make_one_day_readings(meter_readings[:readings], mpxn),
             missing_readings: meter_readings[:missing_readings]
           }
       }
@@ -51,11 +51,11 @@ module MeterReadingsFeeds
     def status(mpxn)
       response = api.status(mpxn)
       if response.key?('errors') && response['errors'][0]['code'] == 404
-        :not_available
+        :unknown
       elsif response.key?('errors') && response['errors'][0]['code'] == 403
-        :available_not_consented
+        :consent_required
       else
-        :permissioned_and_data_available
+        :available
       end
     end
 
@@ -105,7 +105,7 @@ module MeterReadingsFeeds
     end
 
     def unit_adjusted_readings(raw_readings, units)
-      adjust_kwh_units = unit_adjustment(units)
+      adjust_kwh_units = to_kwh(units)
       raw_readings.map do |reading|
         [
           DateTime.parse(reading['timestamp']),
@@ -132,11 +132,12 @@ module MeterReadingsFeeds
       end
     end
 
-    def unit_adjustment(units)
+    def to_kwh(units)
       units == 'm3' ? KWH_PER_M3_GAS : 1.0
     end
 
     def tariff_price(tariff)
+      # may be multiple prices for peroid based on usage levels - ignore for the moment
       tariff['prices'] ? tariff['prices'][0]['value'] : tariff['value']
     end
 
@@ -151,7 +152,7 @@ module MeterReadingsFeeds
       end
     end
 
-    def make_one_day_readings(meter_readings_by_date, mpan_mprn, start_date, end_date)
+    def make_one_day_readings(meter_readings_by_date, mpan_mprn)
       meter_readings_by_date.map do |date, readings|
         [date, OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, readings)]
       end.to_h
