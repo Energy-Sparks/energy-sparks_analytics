@@ -8,8 +8,8 @@ module MeterReadingsFeeds
       @base_url = base_url
     end
 
-    def grant_trusted_consent(mpxn, file_link)
-      api.grant_trusted_consent(mpxn, file_link)
+    def grant_trusted_consent(mpxn, reference)
+      api.grant_trusted_consent(mpxn, reference)
       true
     end
 
