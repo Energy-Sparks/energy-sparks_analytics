@@ -2,27 +2,27 @@ module MeterReadingsFeeds
   class N3rgyConsentApi
     include Logging
 
-    def initialize(api_key, base_url, debugging)
+    class ConsentFailed < StandardError; end
+
+    def initialize(api_key, base_url)
       @api_key = api_key
       @base_url = base_url
-      @debugging = debugging
     end
 
-    def grant_trusted_consent(mpxn, file_link)
+    def grant_trusted_consent(mpxn, reference)
       url = base_url + 'consents/add-trusted-consent'
-      log("JSON: #{url}")
       config = {
         'mpxn'        => mpxn.to_s,
         'apiKey'      => @api_key,
-        'evidence'    => file_link,
+        'evidence'    => reference,
         'moveInDate'  => '2012-01-01'
       }
       response = Faraday.post(url) do |req|
         req.headers['Authorization'] = @api_key
         req.body = config.to_json
       end
-      log(response.inspect)
-      response
+      raise ConsentFailed, error_message(response) unless response.success?
+      JSON.parse(response.body)
     end
 
     def withdraw_trusted_consent(mpxn)
@@ -30,16 +30,20 @@ module MeterReadingsFeeds
       response = Faraday.put(url) do |req|
         req.headers['Authorization'] = @api_key
       end
-      log(response.inspect)
-      response
+      raise ConsentFailed.new(error_message(response)) unless response.success?
+      true
+    end
+
+    def error_message(response)
+      data = JSON.parse(response.body)
+      error = data['errors'][0]
+      "#{error['code']} : #{error['message']}"
+    rescue => e
+      e.message
     end
 
     def base_url
       @base_url
-    end
-
-    def log(str)
-      puts str
     end
   end
 end
