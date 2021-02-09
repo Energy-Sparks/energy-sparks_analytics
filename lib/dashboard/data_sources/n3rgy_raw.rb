@@ -241,11 +241,6 @@ module MeterReadingsFeeds
       (start_date..end_date).each_slice(90) do |date_range_max_90days|
         response = get_json_data(mpxn: mpxn, fuel_type: fuel_type.to_s, data_type: data_type, element: element,
                                  start_date: date_range_max_90days.first, end_date: date_range_max_90days.last)
-
-        puts "################"
-        puts response.to_json
-        puts "################"
-
         response['values'].each do |slice|
           standing_charges += slice['standingCharges']
           prices += slice['prices']
