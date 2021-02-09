@@ -12,7 +12,6 @@ module MeterReadingsFeeds
     DATA_TYPE_PRODUCTION = 'production'
 
     def initialize(api_key, base_url)
-      raise ApiFailure.new("Apikey and Base URL required for N3rgyDataApi") unless api_key.present? && base_url.present?
       @api_key = api_key
       @base_url = base_url
     end

@@ -2,6 +2,7 @@ module MeterReadingsFeeds
   class N3rgyData
     include Logging
 
+    class MissingConfig < StandardError; end
     class BadParameters < StandardError; end
 
     KWH_PER_M3_GAS = 11.1 # this depends on the calorifc value of the gas and so is an approximate average
@@ -9,6 +10,8 @@ module MeterReadingsFeeds
     # N3RGY_DATA_BASE_URL : 'https://api.data.n3rgy.com/' or 'https://sandboxapi.data.n3rgy.com/'
 
     def initialize(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_BASE_URL'], bad_electricity_standing_charge_units: ENV['N3RGY_BAD_UNITS'])
+      raise MissingConfig.new("Apikey must be set in N3RGY_API_KEY environment variable") unless api_key.present?
+      raise MissingConfig.new("Base URL must be set in N3RGY_DATA_BASE_URL environment variable") unless base_url.present?
       @api_key = api_key
       @base_url = base_url
       @bad_electricity_standing_charge_units = bad_electricity_standing_charge_units
