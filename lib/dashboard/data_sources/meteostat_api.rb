@@ -70,11 +70,21 @@ class MeteoStatApi
     'https://api.meteostat.net/v2'
   end
 
+  def retry_options
+    {
+      retry_statuses: [429],
+      max: 2,
+      interval: 0.5,
+      interval_randomness: 0.5,
+      backoff_factor: 2
+    }
+  end
+
   def client(url, headers)
     # retries 2 times, and honours the Retry-After time requested by server
     # https://github.com/lostisland/faraday/blob/master/docs/middleware/request/retry.md
     Faraday.new(url, headers: headers) do |f|
-      f.request :retry, { retry_statuses: [429] }
+      f.request :retry, retry_options
     end
   end
 
