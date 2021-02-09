@@ -2,7 +2,7 @@ module MeterReadingsFeeds
   class N3rgyDataApi
     include Logging
 
-    class N3rgyApiFailure < StandardError; end
+    class ApiFailure < StandardError; end
     class NotFound < StandardError; end
     class NotAllowed < StandardError; end
 
@@ -11,10 +11,10 @@ module MeterReadingsFeeds
     DATA_TYPE_TARIFF = 'tariff'
     DATA_TYPE_PRODUCTION = 'production'
 
-    def initialize(api_key, base_url, debugging)
+    def initialize(api_key, base_url)
+      raise ApiFailure.new("Apikey and Base URL required for N3rgyDataApi") unless api_key.present? && base_url.present?
       @api_key = api_key
       @base_url = base_url
-      @debugging = debugging
     end
 
     def get_consumption_data(mpxn: nil, fuel_type: nil, element: DEFAULT_ELEMENT, start_date: nil, end_date: nil)
@@ -58,7 +58,7 @@ module MeterReadingsFeeds
       response = connection.get
       raise NotFound if response.status == 404
       raise NotAllowed if response.status == 403
-      raise N3rgyApiFailure.new(error_message(response)) unless response.success?
+      raise ApiFailure.new(error_message(response)) unless response.success?
       JSON.parse(response.body)
     end
 
@@ -86,8 +86,12 @@ module MeterReadingsFeeds
 
     def error_message(response)
       data = JSON.parse(response.body)
-      error = data['errors'][0]
-      "#{error['code']} : #{error['message']}"
+      if data['errors']
+        error = data['errors'][0]
+        "#{error['code']} : #{error['message']}"
+      else
+        response.status
+      end
     rescue => e
       e.message
     end

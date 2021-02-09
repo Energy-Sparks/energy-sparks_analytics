@@ -8,10 +8,9 @@ module MeterReadingsFeeds
 
     # N3RGY_DATA_BASE_URL : 'https://api.data.n3rgy.com/' or 'https://sandboxapi.data.n3rgy.com/'
 
-    def initialize(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_BASE_URL'], debugging: nil, bad_electricity_standing_charge_units: ENV['N3RGY_BAD_UNITS'])
+    def initialize(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_BASE_URL'], bad_electricity_standing_charge_units: ENV['N3RGY_BAD_UNITS'])
       @api_key = api_key
       @base_url = base_url
-      @debugging = debugging
       @bad_electricity_standing_charge_units = bad_electricity_standing_charge_units
     end
 
@@ -161,7 +160,7 @@ module MeterReadingsFeeds
     end
 
     def api
-      @api ||= N3rgyDataApi.new(@api_key, @base_url, @debugging)
+      @api ||= N3rgyDataApi.new(@api_key, @base_url)
     end
   end
 end
