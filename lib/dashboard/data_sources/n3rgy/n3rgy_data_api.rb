@@ -2,6 +2,10 @@ module MeterReadingsFeeds
   class N3rgyDataApi
     include Logging
 
+    class N3rgyApiFailure < StandardError; end
+    class NotFound < StandardError; end
+    class NotAllowed < StandardError; end
+
     DEFAULT_ELEMENT = 1
     DATA_TYPE_CONSUMPTION = 'consumption'
     DATA_TYPE_TARIFF = 'tariff'
@@ -52,6 +56,9 @@ module MeterReadingsFeeds
     def get_data(url)
       connection = Faraday.new(url, headers: headers)
       response = connection.get
+      raise NotFound if response.status == 404
+      raise NotAllowed if response.status == 403
+      raise N3rgyApiFailure.new(error_message(response)) unless response.success?
       JSON.parse(response.body)
     end
 
@@ -76,5 +83,14 @@ module MeterReadingsFeeds
     def url_date(date)
       date.strftime('%Y%m%d')
     end
+
+    def error_message(response)
+      data = JSON.parse(response.body)
+      error = data['errors'][0]
+      "#{error['code']} : #{error['message']}"
+    rescue => e
+      e.message
+    end
+
   end
 end

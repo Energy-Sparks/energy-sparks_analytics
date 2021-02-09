@@ -49,14 +49,12 @@ module MeterReadingsFeeds
     end
 
     def status(mpxn)
-      response = api.status(mpxn)
-      if response.key?('errors') && response['errors'][0]['code'] == 404
-        :unknown
-      elsif response.key?('errors') && response['errors'][0]['code'] == 403
-        :consent_required
-      else
-        :available
-      end
+      api.status(mpxn)
+      :available
+    rescue MeterReadingsFeeds::N3rgyDataApi::NotFound
+      :unknown
+    rescue MeterReadingsFeeds::N3rgyDataApi::NotAllowed
+      :consent_required
     end
 
     private

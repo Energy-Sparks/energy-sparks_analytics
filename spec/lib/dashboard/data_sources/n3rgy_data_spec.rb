@@ -14,25 +14,31 @@ describe MeterReadingsFeeds::N3rgyData do
     describe 'status' do
       before :each do
         @api = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url)
-        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:status).and_return(status_response)
       end
 
       context 'when not in DCC' do
-        let(:status_response)    { {'errors' => [{'code' => 404}] } }
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:status).and_raise(MeterReadingsFeeds::N3rgyDataApi::NotFound)
+        end
         it 'returns not found' do
           expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:unknown)
         end
       end
 
       context 'when in DCC but not consented' do
-        let(:status_response)    { {'errors' => [{'code' => 403}] } }
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:status).and_raise(MeterReadingsFeeds::N3rgyDataApi::NotAllowed)
+        end
         it 'returns not consented' do
           expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:consent_required)
         end
       end
 
       context 'when in DCC and consented' do
-        let(:status_response)    { {} }
+        let(:response) { {"entries" => ["gas", "electricity"], "resource" => "/2234567891000/", "responseTimestamp" => "2021-02-08T19:50:35.929Z"} }
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:status).and_return(response)
+        end
         it 'returns ok' do
           expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:available)
         end
