@@ -21,7 +21,10 @@ class OptimiseMeterMaxSummerHotWaterKwh
   end
 
   def analyse
-    model = meter.heating_model(period, model_type = :best)
+    end_date = meter.amr_data.end_date
+    start_date = [end_date - 364, meter.amr_data.start_date].max
+    period = SchoolDatePeriod.new(:optimisation, 'optmisation', start_date, end_date)
+    model = meter.heating_model(period, :simple_regression_temperature)
   end
 end
 
@@ -43,7 +46,8 @@ school_names.each do |school_name|
 
   heat_meters.each do |heat_meter|
     analyser = OptimiseMeterMaxSummerHotWaterKwh.new(heat_meter)
-    key = sprintf '%-32.32s %14d', school.name.encode('utf-8'), heat_meter.mpan_mprn
+    analyser.analyse
+    key = '%-32.32s %14d' % [school.name.encode('utf-8'), heat_meter.mpan_mprn]
     results[key] = nil
   end
 end
