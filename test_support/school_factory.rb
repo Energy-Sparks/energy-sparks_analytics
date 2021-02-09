@@ -36,6 +36,20 @@ class SchoolFactory
     end
   end
 
+  def self.unique_short_school_names_for_excel_worksheet_tab_names(full_names)
+    uniq_short_names = {}
+    (6..20).each do |width|
+      short_names = full_names.map do |name|
+        key = sprintf('%*.*s', width, width, name.gsub(/\W/,''))
+        [name, key]
+      end.to_h
+      uniq_short_names.merge!(short_names.select{ |_fn, n| short_names.values.count(n) == 1 })
+      full_names = short_names.select{ |_fn, n| short_names.values.count(n) > 1 }.keys
+      break if full_names.length == 0
+    end
+    uniq_short_names
+  end
+
   private
 
   private def load_aggregated_meter_collection(school_filename)

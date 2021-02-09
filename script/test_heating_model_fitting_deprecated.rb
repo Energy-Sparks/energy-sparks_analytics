@@ -18,21 +18,18 @@ puts  "Heating Model Fitting"
 
 suppress_school_loading_output = true
 
-school_name = 'Whiteways Primary'
-# school_name = 'Castle Primary School'
+school_name_pattern_match = ['trini*']
+source_db = :unvalidated_meter_data
+
+list_of_schools = RunTests.resolve_school_list(source_db, school_name_pattern_match)
 
 reports = ReportConfigSupport.new
 
-list_of_schools = reports.schools.keys
-
 list_of_schools.each do |school_name|
-
-  school_name = 'St Marks Secondary'
- school_name = 'Whiteways Primary'
 
   puts "Processing #{school_name}"
 
-  school = reports.load_school(school_name, suppress_school_loading_output)
+  school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
 
   next if school.aggregated_heat_meters.nil?
 
