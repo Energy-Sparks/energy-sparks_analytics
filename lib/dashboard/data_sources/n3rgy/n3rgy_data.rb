@@ -19,7 +19,7 @@ module MeterReadingsFeeds
       else
         readings_by_date = consumption_data(mpxn, fuel_type, start_date, end_date)
       end
-      meter_readings = convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date)
+      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date, true)
       { fuel_type =>
           {
             mpan_mprn:        mpxn,
@@ -33,7 +33,7 @@ module MeterReadingsFeeds
       tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
       charges_by_date = tariff_details[:standing_charges].to_h
       prices_by_date = tariff_details[:prices].to_h
-      tariff_readings = convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
+      tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
       {
         kwh_tariffs:      tariff_readings[:readings],
         standing_charges: charges_by_date,
@@ -154,34 +154,6 @@ module MeterReadingsFeeds
       meter_readings_by_date.map do |date, readings|
         [date, OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, readings)]
       end.to_h
-    end
-
-    def convert_dt_to_v_to_date_to_v_x48(start_date, end_date, dt_to_kwh)
-      missing_readings = []
-      readings = Hash.new { |h, k| h[k] = Array.new(48, 0.0) }
-
-      # iterate through data at fixed time intervals
-      # so missing date times can be spotted
-      (start_date..end_date).each do |date|
-        (0..23).each do |hour|
-          [0, 30].each_with_index do |mins30, hh_index|
-            dt = datetime_to_30_minutes(date, hour, mins30)
-            if dt_to_kwh.key?(dt)
-              readings[date][hour * 2 + hh_index] = dt_to_kwh[dt]
-            else
-              missing_readings.push(dt)
-            end
-          end
-        end
-      end
-      {
-        readings:         readings,
-        missing_readings: missing_readings
-      }
-    end
-
-    def datetime_to_30_minutes(date, hour, mins)
-      DateTime.new(date.year, date.month, date.day, hour, mins, 0)
     end
 
     def api
