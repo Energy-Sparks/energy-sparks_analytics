@@ -2,6 +2,8 @@ module MeterReadingsFeeds
   class N3rgyData
     include Logging
 
+    class BadParameters < StandardError; end
+
     KWH_PER_M3_GAS = 11.1 # this depends on the calorifc value of the gas and so is an approximate average
 
     # N3RGY_DATA_BASE_URL : 'https://api.data.n3rgy.com/' or 'https://sandboxapi.data.n3rgy.com/'
@@ -14,6 +16,7 @@ module MeterReadingsFeeds
     end
 
     def readings(mpxn, fuel_type, start_date, end_date)
+      raise BadParameters.new("Please specify start and end date") if start_date.nil? || end_date.nil?
       if fuel_type == :exported_solar_pv
         readings_by_date = production_data(mpxn, fuel_type, start_date, end_date)
       else
@@ -30,6 +33,7 @@ module MeterReadingsFeeds
     end
 
     def tariffs(mpxn, fuel_type, start_date, end_date)
+      raise BadParameters.new("Please specify start and end date") if start_date.nil? || end_date.nil?
       tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
       charges_by_date = tariff_details[:standing_charges].to_h
       prices_by_date = tariff_details[:prices].to_h

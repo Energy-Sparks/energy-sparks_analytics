@@ -51,13 +51,21 @@ describe MeterReadingsFeeds::N3rgyData do
       let(:expected_last_day_tariffs)   { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
       let(:expected_standing_charge)    { 0.19541 }
 
-      before do
-        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_tariff_data).and_return(tariff_data)
+      describe 'when date not specified' do
+        it 'raises error' do
+          expect {
+            MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).tariffs(mpxn, fuel_type, start_date, nil)
+          }.to raise_error(MeterReadingsFeeds::N3rgyData::BadParameters)
+        end
       end
 
       describe 'when data exists' do
 
         let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data.json')) }
+
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_tariff_data).and_return(tariff_data)
+        end
 
         it 'returns tariffs' do
           tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).tariffs(mpxn, fuel_type, start_date, end_date)
@@ -86,11 +94,19 @@ describe MeterReadingsFeeds::N3rgyData do
       let(:expected_first_day_readings) { [0.671,1.212,1.208,0.972,0.445,0.43,0.35,0.388,0.366,0.449,0.374,0.381,0.412,0.464,0.38,0.317,0.313,0.488,0.529,1.96,0.839,0.554,1.062,1.635,0.734,0.561,0.518,0.407,0.362,0.291,0.28,0.349,0.32,0.415,0.355,0.318,0.321,0.347,0.409,0.406,0.354,0.362,0.311,0.439,0.439,0.38,0.39,0.426] }
       let(:expected_last_day_readings) { [0.405,0.479,0.463,0.528,0.517,0.589,0.554,0.599,0.595,0.648,0.574,0.674,0.633,0.713,0.585,0.562,0.481,0.516,0.459,0.473,0.399,0.459,0.462,0.496,0.51,0.478,0.369,0.482,0.433,0.416,0.403,0.451,0.406,0.386,0.417,0.4,0.377,0.532,0.637,0.688,0.736,0.643,0.621,0.642,0.791,1.331,0.512,0.674] }
 
-      before do
-        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_consumption_data).and_return(consumption_data)
+      describe 'when date not specified' do
+        it 'raises error' do
+          expect {
+            MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).readings(mpxn, fuel_type, start_date, nil)
+          }.to raise_error(MeterReadingsFeeds::N3rgyData::BadParameters)
+          end
       end
 
       describe 'when data exists' do
+
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_consumption_data).and_return(consumption_data)
+        end
 
         let(:consumption_data)      { JSON.parse(File.read('spec/fixtures/n3rgy/get_consumption_data.json')) }
 
@@ -129,6 +145,10 @@ describe MeterReadingsFeeds::N3rgyData do
               },
             "unit"=>"kWh"
           }
+        end
+
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_consumption_data).and_return(consumption_data)
         end
 
         it 'returns empty collection and 2 days * 48 half hours missing readings' do
