@@ -51,7 +51,7 @@ def process_one_mpxn(n3rgy, mpxn)
         puts "Start:      #{n3rgy.start_date(mpxn, fuel_type)}"
         puts "End:        #{n3rgy.end_date(mpxn, fuel_type)}"
         puts "Days:       #{data[:kwh][:readings].length}"
-        
+
         total_kwh = data[:kwh][:readings].values.map { |kwh_x48| kwh_x48.sum }.sum
         total_kwh ||= 0.0
         puts "Total kwh:  #{total_kwh.round(0)}"
@@ -117,12 +117,21 @@ logging = nil
 n3rgy = MeterReadingsFeeds::N3rgy.new(debugging: logging)
 # process_one_mpxn(n3rgy, 2234567891000)
 
-puts "testing inventory process - only works in production environment?"
-n3rgy.inventory
+# puts n3rgy.all_data(2234567891000)
+tariffs = n3rgy.tariffs(2234567891000, :electricity, Date.parse('20190101'), Date.parse('20190102'))
 
-test_consent_process(n3rgy, 2234567891000)
+puts tariffs[:standing_charges].inspect
 
-test_appendix_a_sandbox_mpxns_permissions(n3rgy)
+# puts "testing inventory process - only works in production environment?"
+# n3rgy.inventory
+
+# test_consent_process(n3rgy, 2234567891000)
+#
+# test_appendix_a_sandbox_mpxns_permissions(n3rgy)
+#
+# download_all_permissioned_data(n3rgy)
+
+#interface spec
 
 download_all_permissioned_data(n3rgy)
 
@@ -137,6 +146,6 @@ class N3rgyRawData
   def start_date; end
   def end_date; end
   def historic_meter_data(mpan, start_date, end_date); end # { channel?, kwhs: { date => [kwhx48]}, prices: { date => [£x48]} error_log => {} }
-  def standing_charges(mpan, start_date, end_date) # hash TBD
-  def permission_mpan(mpan, url_to_uploaded_utility_bill_scan) # this may be implemented outside this API
+  def standing_charges(mpan, start_date, end_date); end # hash TBD
+  def permission_mpan(mpan, url_to_uploaded_utility_bill_scan); end # this may be implemented outside this API
 end
