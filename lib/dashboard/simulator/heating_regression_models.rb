@@ -69,6 +69,10 @@ module AnalyseHeatingAndHotWater
         enough_amr_data?
         @models[model_type] = HeatingModelTemperatureSpace.new(@meter, @model_overrides)
         @models[model_type].calculate_regression_model(period, allow_more_than_1_year)
+      when :simple_regression_temperature_no_overrides
+        enough_amr_data?
+        @models[model_type] = HeatingModelTemperatureSpace.new(@meter, HeatingModelOverrides.no_overrides(@meter))
+        @models[model_type].calculate_regression_model(period, allow_more_than_1_year)
       when :thermal_mass_regression_temperature
         enough_amr_data?
         @models[model_type] = HeatingModelTemperatureSpaceThermalMass.new(@meter, @model_overrides)
@@ -102,23 +106,27 @@ module AnalyseHeatingAndHotWater
       attr_reader :override_best_model_type
       attr_reader :override_regression_model, :reason, :function, :fitting
 
-      def initialize(meter)
+      def initialize(meter, ignore_meter_attributes = false)
         @meter = meter
         overrides = meter.attributes(:heating_model)
-        unless overrides.nil?
-          @max_summer_hotwater_kwh = overrides.fetch(:max_summer_daily_heating_kwh, nil)
-          @override_best_model_type = overrides.fetch(:override_best_model_type, nil)
-          @override_regression_model = overrides.fetch(:override_model, nil)
-          @reason = overrides.fetch(:reason, nil)
-          @fitting = overrides.fetch(:fitting, nil)
-        else
+        if overrides.nil? || ignore_meter_attributes
           @max_summer_hotwater_kwh = nil
           @override_best_model_type = nil
           @override_regression_model = nil
           @reason = nil
           @fitting = nil
+        else 
+          @max_summer_hotwater_kwh = overrides.fetch(:max_summer_daily_heating_kwh, nil)
+          @override_best_model_type = overrides.fetch(:override_best_model_type, nil)
+          @override_regression_model = overrides.fetch(:override_model, nil)
+          @reason = overrides.fetch(:reason, nil)
+          @fitting = overrides.fetch(:fitting, nil)
         end
         @function = meter.attributes(:function)
+      end
+
+      def self.no_overrides(meter)
+        HeatingModelOverrides.new(meter, true)
       end
 
       def override_max_summer_hotwater_kwh
