@@ -136,7 +136,7 @@ class DashboardConfiguration
         AlertElectricityTargetAnnual => {
           rating:                                   :rating,
           relevance:                                :relevance,
-          enough_data:                              :enough_data,
+          # enough_data:                              :enough_data,
           previous_year_kwh:                        :previous_year_kwh,
           current_year_kwh:                         :current_year_kwh,
           current_year_target_kwh:                  :current_year_target_kwh,
