@@ -55,8 +55,8 @@ module MeterReadingsFeeds
     def get_data(url)
       connection = Faraday.new(url, headers: headers)
       response = connection.get
-      raise NotFound if response.status == 404
-      raise NotAllowed if response.status == 403
+      raise NotFound.new(error_message(response)) if response.status == 404
+      raise NotAllowed.new(error_message(response)) if response.status == 403
       raise ApiFailure.new(error_message(response)) unless response.success?
       JSON.parse(response.body)
     end
