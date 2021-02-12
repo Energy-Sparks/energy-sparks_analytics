@@ -588,7 +588,6 @@ module AnalyseHeatingAndHotWater
     ALLMODELTYPES = %i[heating_occupied_all_days weekend_heating holiday_heating
                       summer_occupied_all_days holiday_hotwater_only weekend_hotwater_only none].freeze
     attr_reader :standard_deviation, :standard_deviation_percent, :model_calculation_time
-    attr_reader :max_summer_hotwater_kwh
 
     def initialize(heat_meter, model_overrides)
       super(heat_meter, model_overrides)
@@ -790,7 +789,7 @@ module AnalyseHeatingAndHotWater
       # check_model_fitting_start_end_dates(period, allow_more_than_1_year)
 
       bm = Benchmark.realtime {
-        @hw_model = HeatingNonHeatingDisaggregationModelBase.model_factory(:fixed_single_value_temperature, @heat_meter, @model_overrides)
+        @hw_model = HeatingNonHeatingDisaggregationModelBase.model_factory(:temperature_sensitive_regression_model, @heat_meter, @model_overrides)
         @hw_model.calculate_max_summer_hotwater_kitchen_kwh(period)
         x_data, y_data = assign_models(period)
         calculate_regressions(x_data, y_data)
