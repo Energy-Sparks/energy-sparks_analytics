@@ -27,7 +27,7 @@ class OptimiseMeterMaxSummerHotWaterKwh
     model = meter.heating_model(period, :simple_regression_temperature_no_overrides)
 
     {
-      calculated_max_summer_hotwater_kwh: model.max_summer_hotwater_kwh,
+      calculated_max_summer_hotwater_kwh: model.average_max_non_heating_day_kwh,
       overridden_max_summer_hotwater_kwh: overridden_max_summer_hot_water_kwh
     }
   end
@@ -52,7 +52,7 @@ def save_results_to_csv(results)
   end
 end
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['a*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)

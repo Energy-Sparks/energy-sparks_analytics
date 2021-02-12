@@ -110,13 +110,13 @@ module AnalyseHeatingAndHotWater
         @meter = meter
         overrides = meter.attributes(:heating_model)
         if overrides.nil? || ignore_meter_attributes
-          @max_summer_hotwater_kwh = nil
+          @hw_model = nil
           @override_best_model_type = nil
           @override_regression_model = nil
           @reason = nil
           @fitting = nil
         else 
-          @max_summer_hotwater_kwh = overrides.fetch(:max_summer_daily_heating_kwh, nil)
+          @hw_model = HeatingNonHeatingFixedValueDisaggregationOverrideModel.new(overrides.fetch(:max_summer_daily_heating_kwh, nil))
           @override_best_model_type = overrides.fetch(:override_best_model_type, nil)
           @override_regression_model = overrides.fetch(:override_model, nil)
           @reason = overrides.fetch(:reason, nil)
@@ -130,8 +130,8 @@ module AnalyseHeatingAndHotWater
       end
 
       def override_max_summer_hotwater_kwh
-        if !@max_summer_hotwater_kwh.nil?
-          @max_summer_hotwater_kwh
+        if !@hw_model.nil?
+          @hw_model.average_max_non_heating_day_kwh
         elsif !@function.nil?
           if @meter.heating_only?
             # if max_summer_hotwater_kwh not specified by heating_only assume 0.0
@@ -594,7 +594,6 @@ module AnalyseHeatingAndHotWater
       super(heat_meter, model_overrides)
       @base_degreedays_temperature = 50.0
       @max_zero_daily_kwh = 20.0
-      @max_summer_hotwater_kwh = nil
       @heat_meter = heat_meter
       @heating_on_periods = nil
       @models = {}
@@ -603,6 +602,10 @@ module AnalyseHeatingAndHotWater
 
     def name
       'Simple'
+    end
+
+    def average_max_non_heating_day_kwh
+      @hw_model.average_max_non_heating_day_kwh
     end
 
     def all_heating_model_types
@@ -649,7 +652,7 @@ module AnalyseHeatingAndHotWater
         'School Name'                 =>    @heat_meter.meter_collection.name,
         'Floor Area'                  =>    [@heat_meter.meter_collection.floor_area, :float_0dp],
         'Pupils'                      =>    [@heat_meter.meter_collection.number_of_pupils, :integer],
-        'Max summer kWh'              =>    [@max_summer_hotwater_kwh, :kwh],
+        'Max summer kWh'              =>    [@hw_model.average_max_non_heating_day_kwh, :kwh],
         'Standard Deviation'          =>    [@standard_deviation, :kwh],
         'Standard Deviation Percent'  =>    [@standard_deviation_percent, :percent],
         'Balance Point Temperature'   =>    [average_base_temperature,  :temperature],
@@ -787,7 +790,8 @@ module AnalyseHeatingAndHotWater
       # check_model_fitting_start_end_dates(period, allow_more_than_1_year)
 
       bm = Benchmark.realtime {
-        @max_summer_hotwater_kwh = calculate_max_summer_hotwater_kitchen_kwh(period)
+        @hw_model = HeatingNonHeatingDisaggregationModelBase.model_factory(:fixed_single_value_temperature, @heat_meter, @model_overrides)
+        @hw_model.calculate_max_summer_hotwater_kitchen_kwh(period)
         x_data, y_data = assign_models(period)
         calculate_regressions(x_data, y_data)
         calculate_base_temperatures
@@ -929,7 +933,8 @@ module AnalyseHeatingAndHotWater
       count = 0
       (start_date..end_date).each do |date|
         unless occupied?(date)
-          count += 1 if @amr_data.one_day_kwh(date) > (@max_summer_hotwater_kwh + gas_meter_noise_kwh_day)
+          count += 1 if @amr_data.one_day_kwh(date) > (@hw_model.max_non_heating_day_kwh(date)
+ + gas_meter_noise_kwh_day)
         end
       end
       count
@@ -947,59 +952,20 @@ module AnalyseHeatingAndHotWater
       base_temperature = nil
       winter_model = @models[winter_model_parameter]
       summer_model = @models[:summer_occupied_all_days]
-      unless winter_model.nil?
-        unless summer_model.nil?
-          base_temperature = (winter_model.a - summer_model.a) / (summer_model.b - winter_model.b)
-        else
-          base_temperature = - winter_model.a / winter_model.b
-        end
+
+      if winter_model.nil?
+        return nil if summer_model.nil?
+        
+        base_temperature = - summer_model.a / summer_model.b
       else
-        unless summer_model.nil?
-          base_temperature = - summer_model.a / summer_model.b
+        if summer_model.nil?
+          base_temperature = - winter_model.a / winter_model.b
         else
-          nil
+          base_temperature = (winter_model.a - summer_model.a) / (summer_model.b - winter_model.b)
         end
       end
 
       base_temperature
-    end
-
-    def calculate_max_summer_hotwater_kitchen_kwh(period)
-      if !@model_overrides.override_max_summer_hotwater_kwh.nil?
-        @model_overrides.override_max_summer_hotwater_kwh
-      elsif @meter.heating_only?
-        0.0
-      else
-        name = :summer_occupied_all_days
-        calc = regression_filtered(name, name.to_s, true, period, [6, 7, 8], [1, 2, 3, 4, 5])
-        sd = calc.standard_deviation_from_model
-        # kwh at 20C + 2 standard deviations
-        calc.a + 20.0 * calc.b + 2 * sd
-      end
-    end
-
-    def regression_filtered(key, regression_model_name, occupied, period, list_of_months, days_of_week, min_kwh = 20.0, max_kwh = nil)
-      average_day_temperatures = []
-      days_kwh = []
-      missing_dates = []
-
-      (period.start_date..period.end_date).each do |date|
-        if days_of_week.include?(date.wday) && occupied?(date) == occupied
-          if @amr_data.date_exists?(date)
-            kwh_today = @amr_data.one_day_kwh(date)
-            if kwh_today > min_kwh && (max_kwh.nil? || kwh_today < max_kwh) # filter out small usage, assume close to zero
-              average_day_temperatures.push(temperatures.average_temperature(date))
-              days_kwh.push(kwh_today)
-            end
-          else
-            missing_dates.push(date.strftime('%a%d%b%Y'))
-          end
-        end
-      end
-
-      report_missing_amr_dates(missing_dates) unless missing_dates.empty?
-
-      regression(key, average_day_temperatures, days_kwh)
     end
 
     def regression(model_name, x1, y1)
@@ -1032,8 +998,13 @@ module AnalyseHeatingAndHotWater
       @amr_data.date_missing?(date) || @amr_data.one_day_kwh(date) < @max_zero_daily_kwh
     end
 
+    def boiler_on?(date)
+      !@amr_data.date_missing?(date) && @amr_data.one_day_kwh(date) >= @max_zero_daily_kwh
+    end
+
     def heating_on?(date)
-      @amr_data.date_exists?(date) && @amr_data.one_day_kwh(date) > @max_summer_hotwater_kwh
+      @amr_data.date_exists?(date) && @amr_data.one_day_kwh(date) > @hw_model.max_non_heating_day_kwh(date)
+
     end
 
     def heat_on_missing_data?(date)
@@ -1078,12 +1049,12 @@ module AnalyseHeatingAndHotWater
 
             kwh_today = @amr_data.one_day_kwh(date)
             temperature = temperatures.average_temperature(date)
-            if kwh_today > @max_summer_hotwater_kwh && !heating_on
-              # puts "heating on  transition #{date.strftime('%a %d-%b-%Y')} #{kwh_today.round(0)} v #{@max_summer_hotwater_kwh}"
+            if kwh_today > @hw_model.max_non_heating_day_kwh(date) && !heating_on
+              # puts "heating on  transition #{date.strftime('%a %d-%b-%Y')} #{kwh_today.round(0)} v #{@hw_model.max_non_heating_day_kwh(date)}"
               heating_on = true
               heating_start_date = date
-            elsif kwh_today <= @max_summer_hotwater_kwh && heating_on
-              # puts "heating off transition #{date.strftime('%a %d-%b-%Y')} #{kwh_today.round(0)} v #{@max_summer_hotwater_kwh}"
+            elsif kwh_today <= @hw_model.max_non_heating_day_kwh(date) && heating_on
+              # puts "heating off transition #{date.strftime('%a %d-%b-%Y')} #{kwh_today.round(0)} v #{@hw_model.max_non_heating_day_kwh(date)}"
               heating_on = false
               heating_period = SchoolDatePeriod.new(:heatingperiod, 'N/A', heating_start_date, previous_date)
               @heating_on_periods.push(heating_period)
@@ -1280,7 +1251,7 @@ module AnalyseHeatingAndHotWater
     def initialize(heat_meter, model_overrides)
       super(heat_meter, model_overrides)
 
-      @max_summer_hotwater_kwh = model_overrides.override_max_summer_hotwater_kwh
+      @hw_model = HeatingNonHeatingFixedValueDisaggregationOverrideModel.new(model_overrides.override_max_summer_hotwater_kwh)
       @reason = model_overrides.reason
       model_overrides.override_regression_model[:regression_models].each do |key, model|
         m = HeatingModel::RegressionModelTemperatureManuallyConfigured.new(
