@@ -179,8 +179,8 @@ module Dashboard
       !function.nil? && !(function_list & function).empty?
     end
 
-    def heating_model(period, model_type = :best)
-      @model_cache.create_and_fit_model(model_type, period)
+    def heating_model(period, model_type = :best, non_heating_model_type = nil)
+      @model_cache.create_and_fit_model(model_type, period, false, non_heating_model_type)
     end
 
     def meter_collection

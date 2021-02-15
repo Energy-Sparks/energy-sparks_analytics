@@ -281,8 +281,18 @@ class DashboardEnergyAdvice
   class ModelFittingIntroductionAndOneYearWeeklyGas < ModelFittingAdviceBase
     include Logging
 
-    def generate_valid_advice
+    # amazing print requires rails to do ap html
+    # formatting, so do manually
+    def attributes_html
+      text = %{
+        <pre>
+          <%= heat_meter.all_attributes.awesome_inspect %>
+        </pre>
+      }
+      ERB.new(text).result(binding)
+    end
 
+    def generate_valid_advice
       meter = @school.meter?(@chart_definition[:meter_definition], true)
       name = meter.nil? || meter.name.empty? ? '' : "(#{meter.name})"
       header_template = %{
@@ -321,7 +331,10 @@ class DashboardEnergyAdvice
           </p>
         <% else %>
           <p>
-            The meter has the following attributes configured for it: <%= ap heat_meter.all_attributes %>.
+            The meter has the following attributes configured for it:
+          </p>
+          <p>
+            <%= attributes_html %>
           </p>
         <% end %>
         <p>
@@ -456,9 +469,9 @@ class DashboardEnergyAdvice
         <%= @body_end %>
       }.gsub(/^  /, '')
 
-        @header_advice = generate_html(header_template, binding)
+      @header_advice = generate_html(header_template, binding)
 
-        footer_template = %{
+      footer_template = %{
           <%= @body_start %>
           <p>
             Generally the weekly gas consumption (bar chart) should follow the 'Degree

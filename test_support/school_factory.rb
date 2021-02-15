@@ -65,7 +65,7 @@ class SchoolFactory
 
   def load_unvalidated_meter_data_collection(school_filename, filename_stub, meter_attributes_overrides: {})
       unvalidated_meter_data = load_meter_collections(school_filename, filename_stub)
-      ap meter_attributes_overrides
+      # ap meter_attributes_overrides
       unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
       AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
       unvalidated_meter_collection

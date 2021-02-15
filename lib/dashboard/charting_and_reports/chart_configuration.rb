@@ -1145,6 +1145,11 @@ class ChartManager
       filter:           { model_type: %i[heating_occupied_all_days summer_occupied_all_days] },
       model:            :simple_regression_temperature
     },
+    thermostatic_regression_simple_school_day_non_heating_regression: {
+      name:               'Thermostatic (School Day) - simple model, non heating regression',
+      inherits_from:      :thermostatic_regression_simple_school_day,
+      non_heating_model:  :fixed_single_value_temperature
+    },
     thermostatic: {
       inherits_from:    :thermostatic_regression_simple_school_day,
       name:             'Thermostatic (Temperature v. Daily Consumption - current year)',
