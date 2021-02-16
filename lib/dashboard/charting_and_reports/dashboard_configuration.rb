@@ -319,6 +319,7 @@ class DashboardConfiguration
                                   thermostatic_model_categories_pie_chart
                                   heating_on_off_pie_chart
                                   thermostatic_regression_simple_school_day_non_heating_regression
+                                  thermostatic_regression_simple_school_day_non_heating_regression_covid_tolerant
                                 ],
                                },
         storage_heaters:      {

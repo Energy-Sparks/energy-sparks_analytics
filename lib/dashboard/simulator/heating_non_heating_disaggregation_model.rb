@@ -4,6 +4,7 @@ module AnalyseHeatingAndHotWater
   # particularly identifying heating versus non-heating days
   class HeatingNonHeatingDisaggregationModelBase < HeatingModelTemperatureSpace
     attr_reader :model_results
+    SUMMER_MONTHS = [6, 7, 8]
     def initialize(heat_meter, model_overrides)
       raise EnergySparksAbstractBaseClass, "Abstract base class for heating, non-heating model max disaggregator called"  if self.instance_of?(HeatingNonHeatingDisaggregationModelBase)
       super(heat_meter, model_overrides)
@@ -12,7 +13,8 @@ module AnalyseHeatingAndHotWater
     def self.models
       [
         HeatingNonHeatingFixedValueDisaggregationModel,
-        HeatingNonHeatingDisaggregationWithRegressionModel
+        HeatingNonHeatingDisaggregationWithRegressionModel,
+        HeatingNonHeatingDisaggregationWithRegressionCOVIDTolerantModel
       ]
     end
 
@@ -84,7 +86,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def calculate_max_hotwater_only_daily_kwh(period)
-      boiler_days, days, boiler_off_days = boiler_on_days(period, [6, 7, 8])
+      boiler_days, days, boiler_off_days = boiler_on_days(period, SUMMER_MONTHS)
 
       # if for more than half the days in the summer the boiler is off
       # assume heating only and set to threshold of gas kWh noise
@@ -145,6 +147,42 @@ module AnalyseHeatingAndHotWater
     end
     def t_description
       'T'
+    end
+  end
+
+  class HeatingNonHeatingDisaggregationWithRegressionCOVIDTolerantModel < HeatingNonHeatingDisaggregationWithRegressionModel
+    def self.type; :temperature_sensitive_regression_model_covid_tolerant end
+    private
+
+    def occupied_school_days(period, list_of_months)
+      school_days = super(period, list_of_months)
+      if meter_data_available_in_2019?(list_of_months) && all_in_covid_lock_down(school_days)
+        school_days = occupied_school_days_2019(list_of_months)
+      end
+      school_days
+    end
+
+    def all_in_covid_lock_down(days)
+      days.all? { |date| DateTimeHelper.covid_lockdown_date?(date) }
+    end
+
+    def meter_data_available_in_2019?(list_of_months)
+      @meter.amr_data.start_date <= first_day_of_months(list_of_months) &&
+      @meter.amr_data.end_date   >= last_day_of_months(list_of_months)
+    end
+
+    def occupied_school_days_2019(list_of_months)
+      (first_day_of_months(list_of_months)..last_day_of_months(list_of_months)).map do |date|
+        occupied?(date) && list_of_months.include?(date.month) ? date : nil
+      end.compact
+    end
+
+    def first_day_of_months(list_of_months)
+      Date.new(2019, list_of_months.min, 1)
+    end
+
+    def last_day_of_months(list_of_months)
+      DateTimeHelper.last_day_of_month(Date.new(2019, list_of_months.max, 1))
     end
   end
 end

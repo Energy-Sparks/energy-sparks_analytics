@@ -23,6 +23,7 @@ end
   # all saints & st richards - no charts?
   # aviemore  - no charts
   # athelstan - no charts
+  2148244308  => {  kwh: 800..850,   certainty: 0.9, comment: 'current model working very well' },
   # balliefield
   6508101  => {  kwh: 650..750,   certainty: 0.65, comment: 'current model wrong as bifurcation of summer data' },
   # bankwood
@@ -63,7 +64,7 @@ end
   8879383007      => {  kwh: 0..10,       certainty: 0.90, comment: 'heating only' },
   10328108        => {  kwh: 200..330,    certainty: 0.90, comment: 'model does a good job of separating, big gap' },
   80000000114310  => {  kwh: 400..500,    certainty: 0.90, comment: 'model assigns a few low heating dayas as non heating days' },
-  # durham st margerets
+  # durham st margarets
   12193907        => {  kwh: 0..0,         certainty: 0.90, comment: 'heating only' },
   12192602        => {  kwh: 80..100,     certainty: 0.80, comment: 'model does a good job of separating' },
   12192501        => {  kwh: 580..640,    certainty: 0.40, comment: 'models messes up completely, limited separation' },
@@ -288,12 +289,17 @@ end
 
 class OptimiseMeterMaxSummerHotWaterKwh
   attr_reader :meter
-  def initialize(meter)
+  def initialize(meter, manual_estimations)
     @meter = meter
+    @manual_estimations = manual_estimations
   end
 
   def self.heat_meters(school)
-    school.all_heat_meters.uniq
+    [
+      school.all_heat_meters,
+      school.storage_heater_meters,
+      school.storage_heater_meter
+    ].flatten.compact.uniq
   end
 
   def analyse
@@ -309,6 +315,7 @@ class OptimiseMeterMaxSummerHotWaterKwh
       results[model_type][:average_max_non_heating_day_kwh] = model.average_max_non_heating_day_kwh
     end
     results[:overridden_max_summer_hot_water_kwh] = overridden_max_summer_hot_water_kwh
+    results[:manual] = @manual_estimations[@meter.mpan_mprn] unless @manual_estimations[@meter.mpan_mprn].nil?
     results
   end
 
@@ -331,7 +338,6 @@ def all_model_keys(results)
       result.keys
     end
   end.flatten.uniq
-
 end
 
 def save_results_to_csv(results)
@@ -369,8 +375,7 @@ school_names.each do |school_name|
     heat_meters = OptimiseMeterMaxSummerHotWaterKwh.heat_meters(school)
 
     heat_meters.each do |heat_meter|
-      puts "Got herev #{heat_meter.mpan_mprn}"
-      analyser = OptimiseMeterMaxSummerHotWaterKwh.new(heat_meter)
+      analyser = OptimiseMeterMaxSummerHotWaterKwh.new(heat_meter, @manual_estimations)
       analysis = analyser.analyse
       results[school_name][heat_meter.mpan_mprn] = flatten_results(analysis)
     end

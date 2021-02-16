@@ -67,6 +67,10 @@ module DateTimeHelper
     [date, index]
   end
 
+  def self.covid_lockdown_date?(date)
+    date.between?(Date.new(2020, 3, 22), Date.new(2020, 9, 3))
+  end
+
   # takes an array of time of day ranges and returns a weighted vector for
   # the standard 0..47 halfhourly buckets
   # e.g. 00:15..01:45 would return [0.5, 1.0, 1.0, 0.5, 0.0......0.0]
