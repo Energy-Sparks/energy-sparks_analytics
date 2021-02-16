@@ -1150,6 +1150,11 @@ class ChartManager
       inherits_from:      :thermostatic_regression_simple_school_day,
       non_heating_model:  :fixed_single_value_temperature
     },
+    thermostatic_regression_simple_school_day_non_heating_regression_covid_tolerant: {
+      name:               'Thermostatic (School Day) - simple model, non heating regression, covid tolerant',
+      inherits_from:      :thermostatic_regression_simple_school_day,
+      non_heating_model:  :temperature_sensitive_regression_model_covid_tolerant
+    },
     thermostatic: {
       inherits_from:    :thermostatic_regression_simple_school_day,
       name:             'Thermostatic (Temperature v. Daily Consumption - current year)',
