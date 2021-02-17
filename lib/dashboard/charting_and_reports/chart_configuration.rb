@@ -1145,16 +1145,40 @@ class ChartManager
       filter:           { model_type: %i[heating_occupied_all_days summer_occupied_all_days] },
       model:            :simple_regression_temperature
     },
-    thermostatic_regression_simple_school_day_non_heating_regression: {
-      name:               'Thermostatic (School Day) - simple model, non heating regression',
+
+    thermostatic_regression_simple_school_day_non_heating_non_regression: {
+      name:               'Thermostatic (School Day) - heating - non-heating separation non regression',
       inherits_from:      :thermostatic_regression_simple_school_day,
       non_heating_model:  :fixed_single_value_temperature
     },
+    thermostatic_regression_simple_school_day_non_heating_regression: {
+      name:               'Thermostatic (School Day) - heating - non-heating separation regression',
+      inherits_from:      :thermostatic_regression_simple_school_day,
+      non_heating_model:  :temperature_sensitive_regression_model
+    },
     thermostatic_regression_simple_school_day_non_heating_regression_covid_tolerant: {
-      name:               'Thermostatic (School Day) - simple model, non heating regression, covid tolerant',
+      name:               'Thermostatic (School Day) - heating - non-heating separation regression, covid tolerant',
       inherits_from:      :thermostatic_regression_simple_school_day,
       non_heating_model:  :temperature_sensitive_regression_model_covid_tolerant
     },
+
+    seasonal_simple_school_day_non_heating_non_regression: {
+      name:               'Thermostatic (School Day) - heating - non-heating separation non regression',
+      inherits_from:      :heating_on_off_by_week,
+      non_heating_model:  :fixed_single_value_temperature
+    },
+    seasonal_simple_school_day_non_heating_regression: {
+      name:               'Thermostatic (School Day) - heating - non-heating separation regression',
+      inherits_from:      :heating_on_off_by_week,
+      non_heating_model:  :temperature_sensitive_regression_model
+    },
+    seasonal_simple_school_day_non_heating_regression_covid_tolerant: {
+      name:               'Thermostatic (School Day) - heating - non-heating separation regression, covid tolerant',
+      inherits_from:      :heating_on_off_by_week,
+      non_heating_model:  :temperature_sensitive_regression_model_covid_tolerant
+    },
+
+
     thermostatic: {
       inherits_from:    :thermostatic_regression_simple_school_day,
       name:             'Thermostatic (Temperature v. Daily Consumption - current year)',

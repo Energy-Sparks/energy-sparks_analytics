@@ -355,7 +355,7 @@ def save_results_to_csv(results)
   end
 end
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['trin*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)

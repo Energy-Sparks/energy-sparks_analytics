@@ -177,64 +177,37 @@ class DashboardChartAdviceBase
     raise EnergySparksUnexpectedStateException.new('Error: unexpected call to DashboardChartAdviceBase abstract base class')
   end
 
-protected
+  protected
 
-# copied from heating_regression_model_fitter.rb TODO(PH,17Feb2019) - merge
-def html_table(header, rows, totals_row = nil)
-  HtmlTableFormatting.new(header, rows, totals_row).html
-=begin
-  # TODO(PH, 9Oct2019) remove
-  template = %{
-    <p>
-      <table class="table table-striped table-sm">
-        <% if header %>
-          <thead>
-            <tr class="thead-dark">
-              <% header.each do |header_titles| %>
-                <th scope="col"> <%= header_titles.to_s %> </th>
-              <% end %>
-            </tr>
-          </thead>
-        <% end %>
-        <tbody>
-          <% rows.each do |row| %>
-            <tr>
-              <% row.each do |val| %>
-                <td> <%= val %> </td>
-              <% end %>
-            </tr>
-          <% end %>
-        </tbody>
-        <% if totals_row %>
-          <tr class="table-success">
-          <% totals_row.each do |total| %>
-            <th scope="col"> <%= total.to_s %> </th>
-          <% end %>
-          </tr>
-        <% end %>
-      </table>
-    </p>
-  }.gsub(/^  /, '')
-
-  generate_html(template, binding)
-=end
-end
-
-
-def generate_html(template, binding)
-  begin
-    rhtml = ERB.new(template)
-    rhtml.result(binding)
-    # rhtml.gsub('£', '&pound;')
-  rescue StandardError => e
-    logger.error "Error generating html for #{self.class.name}"
-    logger.error e.message
-    logger.error e.backtrace
-puts e.message
-puts e.backtrace
-    '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
+  # copied from heating_regression_model_fitter.rb TODO(PH,17Feb2019) - merge
+  def html_table(header, rows, totals_row = nil)
+    HtmlTableFormatting.new(header, rows, totals_row).html
   end
-end
+
+  def generate_html(template, binding)
+    begin
+      rhtml = ERB.new(template)
+      rhtml.result(binding)
+      # rhtml.gsub('£', '&pound;')
+    rescue StandardError => e
+      logger.error "Error generating html for #{self.class.name}"
+      logger.error e.message
+      logger.error e.backtrace
+      puts e.message
+      puts e.backtrace
+      '<div class="alert alert-danger" role="alert"><p>Error generating advice</p></div>'
+    end
+  end
+
+  def generate_html_from_array_adding_body_tags(html_components, binding)
+    template = [
+      '<%= @body_start %>',
+      html_components,
+      '<%= @body_end %>'
+    ].flatten.join(' ').gsub(/^  /, '')
+
+    generate_html(template, binding)
+  end
 
   def nil_advice
     footer_template = %{

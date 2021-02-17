@@ -13,6 +13,18 @@ class DashboardEnergyAdvice
       ModelFittingGasByDayOfWeek.new(school, chart_definition, chart_data, chart_symbol)
     when :gas_longterm_trend_model_fitting
       ModelFittingAnnualGasConsumptionTrends.new(school, chart_definition, chart_data, chart_symbol)
+    when :thermostatic_regression_simple_school_day_non_heating_regression_covid_tolerant
+      HeatingNonHeatingSeparationIntroAndCovidModel.new(school, chart_definition, chart_data, chart_symbol)
+    when :seasonal_simple_school_day_non_heating_regression_covid_tolerant
+      SeasonalHeatingNonHeatingSeparationCovidModel.new(school, chart_definition, chart_data, chart_symbol)
+    when :thermostatic_regression_simple_school_day_non_heating_regression
+      HeatingNonHeatingSeparationRegressionModel.new(school, chart_definition, chart_data, chart_symbol)
+    when :seasonal_simple_school_day_non_heating_regression
+      SeasonalHeatingNonHeatingSeparationRegressionModel.new(school, chart_definition, chart_data, chart_symbol)
+    when :thermostatic_regression_simple_school_day_non_heating_non_regression
+      HeatingNonHeatingSeparationNonRegressionModel.new(school, chart_definition, chart_data, chart_symbol)
+    when :seasonal_simple_school_day_non_heating_non_regression
+      SeasonalHeatingNonHeatingSeparationNonRegressionModel.new(school, chart_definition, chart_data, chart_symbol)
     when :thermostatic_regression_simple_school_day
       ModelFittingIntroductionAndCategorisation.new(school, chart_definition, chart_data, chart_symbol)
     when :thermostatic_regression_simple_all
@@ -281,23 +293,23 @@ class DashboardEnergyAdvice
   class ModelFittingIntroductionAndOneYearWeeklyGas < ModelFittingAdviceBase
     include Logging
 
+    def non_tariff_meter_attributes
+      heat_meter.all_attributes.select { |k, _v| !k.to_s.include?('tariff')}
+    end
+
     # amazing print requires rails to do ap html
     # formatting, so do manually
-    def attributes_html
+    def non_tariff_attributes_html
       text = %{
         <pre>
-          <%= heat_meter.all_attributes.awesome_inspect %>
+          <%= non_tariff_meter_attributes.awesome_inspect %>
         </pre>
       }
       ERB.new(text).result(binding)
     end
 
-    def generate_valid_advice
-      meter = @school.meter?(@chart_definition[:meter_definition], true)
-      name = meter.nil? || meter.name.empty? ? '' : "(#{meter.name})"
-      header_template = %{
-      <%= @body_start %>
-        <h1>Heating Regression Model Fitting</h1>
+    def school_summary_html
+      %{
         <h2>Summary: <%= @chart_definition[:meter_definition] %> <%= name %></h2>
         <p>
           In summary:
@@ -325,22 +337,27 @@ class DashboardEnergyAdvice
         <p>
             <strong>Meter Attributes</strong>
         </p>
-        <% if heat_meter.all_attributes.nil? %>
+        <% if non_tariff_meter_attributes.empty? %>
           <p>
             The meter has no 'attributes' set for this meter.
           </p>
         <% else %>
           <p>
-            The meter has the following attributes configured for it:
+            The meter has the following non-tariff attributes configured for it:
           </p>
           <p>
-            <%= attributes_html %>
+            <%= non_tariff_attributes_html %>
           </p>
         <% end %>
         <p>
           The remainder of this webpage explains the heating gas consumption
           modelling process, and present the calculation results.
         </p>
+      }
+    end
+
+    def modelling_background_html
+      %{
         <h3>Background</h3>
         <p>
             This is a statistical process which Energy Sparks uses to try to model the
@@ -360,28 +377,35 @@ class DashboardEnergyAdvice
         <p>
             The modelling is subsequently used for:
         </p>
-        <ul>
-          <li>
-              Adjusting/normalising gas consumption for outside temperature, so
-              comparisons can be made between differing days
-          </li>
-          <li>
-              Calculating missing data - the Smart Meter data fed to Energy Sparks
-              often has gaps, which we need to fill in, by finding days with similar
-              temperatures where the data isn't missing, and then using the model to
-              calculate the theoretical gas consumption for the missing day using that
-              day's temperature data
-          </li>
-          <li>
-              Estimating the potential reduced gas consumption from reducing the
-              school's internal temperature&#47;thermostat settings
-          </li>
-          <li>
-              Providing feedback via alerts on the quality of the thermostatic
-              control R2), number of days in the year the heating is on, significant
-              (temperature compensated) changes in gas consumption
-          </li>
-        </ul>
+        <p>
+          <ul>
+            <li>
+                Adjusting/normalising gas consumption for outside temperature, so
+                comparisons can be made between differing days
+            </li>
+            <li>
+                Calculating missing data - the Smart Meter data fed to Energy Sparks
+                often has gaps, which we need to fill in, by finding days with similar
+                temperatures where the data isn't missing, and then using the model to
+                calculate the theoretical gas consumption for the missing day using that
+                day's temperature data
+            </li>
+            <li>
+                Estimating the potential reduced gas consumption from reducing the
+                school's internal temperature&#47;thermostat settings
+            </li>
+            <li>
+                Providing feedback via alerts on the quality of the thermostatic
+                control R2), number of days in the year the heating is on, significant
+                (temperature compensated) changes in gas consumption
+            </li>
+          </ul>
+        </p>
+      }
+    end
+
+    def modelling_process_explanation_html
+      %{
         <h3>Process</h3>
         <p>
             The process involves:
@@ -446,6 +470,11 @@ class DashboardEnergyAdvice
             is going on with a school's gas consumption - typically if the school's
             consumption is dysfunctional.
         </p>
+      }
+    end
+
+    def regression_modelling_1_html
+      %{
         <h2>
             Regression Modelling
         </h2>
@@ -466,10 +495,21 @@ class DashboardEnergyAdvice
         <h3>
             Weekly gas consumption versus how cold it is over the last year
         </h3>
-        <%= @body_end %>
-      }.gsub(/^  /, '')
+      }
+    end
 
-      @header_advice = generate_html(header_template, binding)
+    def generate_valid_advice
+      meter = @school.meter?(@chart_definition[:meter_definition], true)
+      name = meter.nil? || meter.name.empty? ? '' : "(#{meter.name})"
+      html_components = [
+        '<h1>Heating Regression Model Fitting</h1>',
+         school_summary_html,
+         modelling_background_html,
+         modelling_process_explanation_html,
+         regression_modelling_1_html
+      ]
+
+      @header_advice = generate_html_from_array_adding_body_tags(html_components, binding)
 
       footer_template = %{
           <%= @body_start %>
@@ -583,6 +623,238 @@ class DashboardEnergyAdvice
         @header_advice = generate_html(header_template, binding)
 
         @footer_advice = nil_advice
+    end
+  end
+
+  class HeatingNonHeatingSeparationAdviceBase < ModelFittingAdviceBase
+    def model_type; nil end
+
+    def model
+      @model ||= @heat_meter.heating_model(period, :simple_regression_temperature_no_overrides, model_type)
+    end
+
+    def period
+      end_date = @heat_meter.amr_data.end_date
+      start_date = [end_date - 364, @heat_meter.amr_data.start_date].max
+      period = SchoolDatePeriod.new(:optimisation, 'optmisation', start_date, end_date)
+    end
+
+    def model_results_html
+      text = %{
+        <h3>Results of model calculations:</h3>
+        <pre>
+          <%= model.non_heating_model.model_results.awesome_inspect %>
+        </pre>
+      }
+      ERB.new(text).result(binding)
+    end
+  end
+
+  class HeatingNonHeatingSeparationIntroAndCovidModel < HeatingNonHeatingSeparationAdviceBase
+    def model_type; :temperature_sensitive_regression_model_covid_tolerant end
+
+    def separating_heating_and_non_heating_days_explanation_html
+      %{
+        <h2>
+          Separating heating and non-heating days
+        </h2>
+        <p>
+          The first stage of the modelling process is to try to separate heating
+          and non-heating days. This is because the regression modelling for
+          heating and non-heating days is quite different. This separation allows
+          different regresison models to be applied to the 2 modes of gas/storage
+          heater consumption.
+        </p>
+        <p>
+          The process is difficult to automate as the data is often messy, so
+          sometimes the automatically modelling needs to be manually overwritten
+          by a meter attribute. This often occurs where there is no clear distinction
+          between days when the heating is on and off:
+          <ul>
+            <li>
+                sometimes if the heating is left on all year it can be difficult to understand
+                what is going on at a school, and impossible to identiy whether the heating
+                has ever been turned off. This gets more difficult the further north you
+                go where you would expect longer heating seasons.
+            </li>
+            <li>
+                where a school has very good thermostatic control, or working daytime setback
+                (the boiler turns off when the outside temperature for example reaches 15C),
+                there is not an abrupt drop in energy consumption which is what the modelling
+                is looking for to determine what is a heating and what is a non-heating day
+            </li>
+            <li>
+                where a school has very poor thermostatic control, where there is limited relationship
+                between the outside temperature and daily heating energy consumption
+            </li>
+            <li>
+              where the building manager occasionally turns off the heating half way through the school
+              day in mild weather
+            </li>
+            <li>
+              where there has been a substantial change in heating or hot water control or a new boiler
+              half way through the most recent year - as happened ata number of schools between March 2020
+              and August 2020 due to COVID
+            </li>
+          </ul>
+        </p>
+        <p>
+        The process starts by sampling daily gas or storage heater consumption during the summer in June,
+        July and August. It assumes the heating is off during these months and then models this
+        daily consumption calculating the standard devation of this data, to imply a range of
+        daily consumption for daily heating days, and then assumes any consumption above this
+        range is a &quot;heating&quot; day.
+      }
+    end
+
+    def heating_non_heating_separation_subsequent_3_chart_introduction_html
+      %{
+        <p>
+            The next 3 pairs of 2 charts show 3 different models used for separating
+            heating and non heating data, in order of their effectiveness:
+            <ol>
+              <li>regression model ignoring COVID lockdown periods, using summer 2019 if available</li>
+              <li>regression model</li>
+              <li>a very simplistic model that assumes non-heating day consumption is not corrleated with outside temperature</li>
+            </ol>
+            Each pair of charts consists of a thermostatic scatter chart and a seasonal heating chart for each of the models.
+        </p>
+      }
+    end
+
+    def heating_non_heating_separation_covid_model_chart_introduction_html
+      %{
+        <h3>regression model ignoring COVID lockdown periods</h3>
+        <p>
+            This first chart uses a model which samples school day consumption
+            in June, July and August avoiding the COVID lockdown in 2020 if
+            data is available: 
+        </p>
+      }
+    end
+
+    def default_model_explanation_html
+      %{
+        <p>
+          This is the default model unless manually overwridden with meter attributes.
+        <p>
+        <p>
+          Look at the points on the scatter chart, has is correctly or reasonably
+          separated heating from non heating days? If not you will need to apply
+          meter attributes.
+        </p>
+      }
+    end
+
+    def generate_valid_advice
+      html_components = [
+         separating_heating_and_non_heating_days_explanation_html,
+         heating_non_heating_separation_subsequent_3_chart_introduction_html,
+         heating_non_heating_separation_covid_model_chart_introduction_html,
+         model_results_html
+      ]
+
+      @header_advice = generate_html_from_array_adding_body_tags(html_components, binding)
+
+      @footer_advice = generate_html(default_model_explanation_html, binding)
+    end
+  end
+
+  class SeasonalHeatingNonHeatingSeparationCovidModel < HeatingNonHeatingSeparationAdviceBase
+    def generate_valid_advice
+      @header_advice = nil_advice
+      @footer_advice = nil_advice
+    end
+  end
+
+  class HeatingNonHeatingSeparationRegressionModel < HeatingNonHeatingSeparationAdviceBase
+    def model_type; :temperature_sensitive_regression_model end
+    
+    def vanilla_regression_model_chart_explanation_html
+      %{
+        <p>
+          This chart uses the same model as that of the &apos;COVID model&apos; above
+          but does&apos;nt skip COVID lockdown periods. If there is not enough meter
+          reading history for the COVID model to go back a year then the 2 charts and
+          the model results will be identical.
+        </p>
+      }
+    end
+
+    def generate_valid_advice
+      html_components = [
+        vanilla_regression_model_chart_explanation_html,
+        model_results_html
+      ]
+
+      @header_advice = generate_html_from_array_adding_body_tags(html_components, binding)
+
+      @footer_advice = nil_advice
+    end
+  end
+
+  class SeasonalHeatingNonHeatingSeparationRegressionModel < HeatingNonHeatingSeparationAdviceBase
+    def generate_valid_advice
+      @header_advice = nil_advice
+      @footer_advice = nil_advice
+    end
+  end
+
+  class HeatingNonHeatingSeparationNonRegressionModel < HeatingNonHeatingSeparationAdviceBase
+    def model_type; :fixed_single_value_temperature end
+    def vanilla_regression_model_chart_explanation_html
+      %{
+        <p>
+          Unlike the previous 2 models assume the summer hot water has some correlation
+          with outside temperatures, this one does not. Sometimes it achieves better
+          separation than the other two models.
+        </p>
+      }
+    end
+
+    def generate_valid_advice
+      html_components = [
+        vanilla_regression_model_chart_explanation_html,
+        model_results_html
+      ]
+
+      @header_advice = generate_html_from_array_adding_body_tags(html_components, binding)
+
+      @footer_advice = nil_advice
+    end
+  end
+
+  class SeasonalHeatingNonHeatingSeparationNonRegressionModel < HeatingNonHeatingSeparationAdviceBase
+    def choosing_model_decision_html
+      %{
+        <p>
+          You need to review all 3 pairs of charts and work out which model is working best.
+          If the first model which takes COVID into account is working well then you don&apos;t
+          need to do anything.
+        </p>
+        <p>
+          If the model is not working well then you need to pick one of the other two models
+          and set a meter attribute. If none of the models is working then you will need
+          to set a manual override.
+        </p>
+        <p>
+          Additionally, sometimes an issue with a model can be fixed by setting a
+          meter &apos;function&apos; type attribute to tell the model that there is
+          either no heating on this meter, or it is heating only.
+        </p>
+        <p>
+          The choice of meter overrides are as follows:
+          <ul>
+            <li></li>
+          </ul>
+        </p>
+      }
+    end
+
+    def generate_valid_advice
+      html_components = [choosing_model_decision_html]
+      @header_advice = generate_html_from_array_adding_body_tags(html_components, binding)
+      @footer_advice = nil_advice
     end
   end
 
