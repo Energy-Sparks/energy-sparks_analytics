@@ -101,7 +101,8 @@ module AnalyseHeatingAndHotWater
         non_heat_n:   boiler_days.length,
         heat_n:       boiler_off_days.length,
         calculation:  "a #{calc.a.round(1)} + b #{calc.b.round(2)} * #{t_description} r2 #{calc.r2.round(2)} sd #{sd.round(2)} on: #{boiler_days.length} off: #{boiler_off_days.length}",
-        sd:           sd
+        sd:           sd,
+        model:        self.class.type
       }
       
       valid_results?(results) ? results : 0.0

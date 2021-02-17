@@ -10,6 +10,7 @@ class ValidateAMRData
   FSTRDEF = '%a %d %b %Y'.freeze # fixed format for reporting dates for error messages
   MAXGASAVGTEMPDIFF = 5 # max average temperature difference over which to adjust temperatures
   MAXSEARCHRANGEFORCORRECTEDDATA = 100
+  NO_MODEL = 0 # model calc failed
   attr_reader :data_problems, :meter_id
   def initialize(meter, max_days_missing_data, holidays, temperatures)
     @amr_data = meter.amr_data
@@ -504,15 +505,9 @@ class ValidateAMRData
     max_days = MAXSEARCHRANGEFORCORRECTEDDATA
     @alternating_search_days_offset ||= (1..max_days).to_a.zip((-max_days..-1).to_a.reverse).flatten
   end
-
-  def substitute_gas_with_limited_data(date, sub_type_code)
-    substitute_missing_data(date, sub_type_code, 'g')
-  end
-
+  
   def substitute_missing_gas_data(date, sub_type_code)
-    return substitute_gas_with_limited_data(date, sub_type_code) if @not_enough_data_for_model
-
-    heating_on = heating_model.heat_on_missing_data?(date)
+    heating_on = heating_model.heat_on_missing_data?(date) if heating_model != NO_MODEL
     missing_daytype = daytype(date)
     avg_temperature = average_temperature(date)
 
@@ -520,7 +515,11 @@ class ValidateAMRData
       substitute_date = date + days_offset
       if @amr_data.date_exists?(substitute_date)
         substitute_day_temperature = average_temperature(substitute_date)
-        if heating_on == heating_model.heat_on_missing_data?(substitute_date) &&
+        if heating_model == NO_MODEL
+          if @amr_data.date_exists?(substitute_date) && daytype(substitute_date) == missing_daytype
+           return [date, create_substituted_data(date, substitute_date, sub_type_code, 'g')]
+          end
+        elsif heating_on == heating_model.heat_on_missing_data?(substitute_date) &&
            within_temperature_range?(avg_temperature, substitute_day_temperature) &&
            daytype(substitute_date) == missing_daytype
           return [date, create_substituted_gas_data(date, substitute_date, sub_type_code)]
@@ -624,8 +623,11 @@ class ValidateAMRData
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(@meter)
       period_of_all_meter_readings = SchoolDatePeriod.new(:validation, 'Validation Period', @amr_data.start_date, @amr_data.end_date)
       @model_cache.create_and_fit_model(:best, period_of_all_meter_readings, true)
-    rescue EnergySparksNotEnoughDataException => _e
-      @not_enough_data_for_model = true
+    rescue EnergySparksNotEnoughDataException => e
+      logger.info "Unable to calculate model data for heat day substitution for #{@meter.mpan_mprn}"
+      logger.info e.message
+      logger.info 'using simplistic substitution without modelling'
+      NO_MODEL
     end
   end
 
