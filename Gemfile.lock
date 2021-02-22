@@ -46,6 +46,8 @@ GEM
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
     extendmatrix (0.4)
+    factory_bot (6.1.0)
+      activesupport (>= 5.0.0)
     faraday (1.3.0)
       faraday-net_http (~> 1.0)
       multipart-post (>= 1.2, < 3)
@@ -174,6 +176,7 @@ DEPENDENCIES
   benchmark-memory
   bundler-audit
   chroma
+  factory_bot
   faraday
   faraday_middleware
   hashdiff (~> 1.0.0)
