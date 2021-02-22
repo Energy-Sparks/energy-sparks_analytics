@@ -7,7 +7,7 @@ FactoryBot.define do
     initialize_with{ new(type) }
 
     after(:build) do |data|
-      data.add(Date.today, build(:one_data_amr_reading) )
+      data.add(Date.today, build(:one_day_amr_reading) )
     end
 
   end
