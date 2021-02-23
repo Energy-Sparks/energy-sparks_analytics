@@ -63,6 +63,10 @@ module MeterReadingsFeeds
       :consent_required
     end
 
+    def elements(mpxn, fuel_type, reading_type=MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
+      api.get_elements(mpxn: mpxn, fuel_type: fuel_type, reading_type: reading_type)
+    end
+
     private
 
     def consumption_data(mpxn, fuel_type, start_date, end_date)
