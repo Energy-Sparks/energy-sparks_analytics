@@ -1,0 +1,119 @@
+{
+  "result": [
+    {
+      "mpxn": "1100000000003",
+      "status": 200,
+      "devices": [
+        {
+          "deviceId": "01-0A-00-00-00-00-00-05",
+          "deviceType": "CHF",
+          "deviceStatus": "COMMISSIONED",
+          "deviceManufacturer": "0001",
+          "deviceModel": "B22B0002",
+          "smetsChtsVersion": "V2.0",
+          "deviceFirmwareVersion": "00010001",
+          "deviceFirmwareVersionStatus": "ACTIVE",
+          "cplStatus": "ACTIVE",
+          "dateCommissioned": "2019-10-09Z",
+          "uprn": "110000001",
+          "propertyFilter": {
+            "postCode": "A9A 9AA",
+            "addressIdentifier": "1, OAK ROAD, SOMEWHERE"
+          },
+          "cspRegion": "CENTRAL",
+          "deviceGbcsVersion": "1.1"
+        },
+        {
+          "deviceId": "01-0A-00-00-00-00-00-01",
+          "deviceType": "ESME",
+          "deviceStatus": "COMMISSIONED",
+          "deviceManufacturer": "0001",
+          "deviceModel": "B22B0002",
+          "smetsChtsVersion": "V2.0",
+          "deviceFirmwareVersion": "00010001",
+          "deviceFirmwareVersionStatus": "ACTIVE",
+          "cplStatus": "ACTIVE",
+          "dateCommissioned": "2019-10-09Z",
+          "importMpxn": "1100000000001",
+          "esmeVariant": "A",
+          "uprn": "110000001",
+          "propertyFilter": {
+            "postCode": "A9A 9AA",
+            "addressIdentifier": "1, OAK ROAD, SOMEWHERE"
+          },
+          "cspRegion": "CENTRAL",
+          "deviceGbcsVersion": "1.1"
+        },
+        {
+          "deviceId": "01-0A-00-00-00-00-00-02",
+          "deviceType": "ESME",
+          "deviceStatus": "COMMISSIONED",
+          "deviceManufacturer": "0001",
+          "deviceModel": "B22B0002",
+          "smetsChtsVersion": "V2.0",
+          "deviceFirmwareVersion": "00010001",
+          "deviceFirmwareVersionStatus": "ACTIVE",
+          "cplStatus": "ACTIVE",
+          "dateCommissioned": "2019-10-09Z",
+          "importMpxn": "1100000000002",
+          "exportMpan": "1100000000102",
+          "esmeVariant": "A",
+          "uprn": "110000001",
+          "propertyFilter": {
+            "postCode": "A9A 9AA",
+            "addressIdentifier": "1, OAK ROAD, SOMEWHERE"
+          },
+          "cspRegion": "CENTRAL",
+          "deviceGbcsVersion": "1.1"
+        },
+        {
+          "deviceId": "01-0A-00-00-00-00-00-04",
+          "deviceType": "GPF",
+          "deviceStatus": "COMMISSIONED",
+          "deviceManufacturer": "0001",
+          "deviceModel": "B22B0002",
+          "smetsChtsVersion": "V2.0",
+          "deviceFirmwareVersion": "00010001",
+          "deviceFirmwareVersionStatus": "ACTIVE",
+          "cplStatus": "ACTIVE",
+          "dateCommissioned": "2019-10-09Z",
+          "uprn": "110000001",
+          "propertyFilter": {
+            "postCode": "A9A 9AA",
+            "addressIdentifier": "1, OAK ROAD, SOMEWHERE"
+          },
+          "cspRegion": "CENTRAL",
+          "deviceGbcsVersion": "1.1"
+        },
+        {
+          "deviceId": "01-0A-00-00-00-00-00-03",
+          "deviceType": "GSME",
+          "deviceStatus": "COMMISSIONED",
+          "deviceManufacturer": "0001",
+          "deviceModel": "B22B0002",
+          "smetsChtsVersion": "V2.0",
+          "deviceFirmwareVersion": "00010001",
+          "deviceFirmwareVersionStatus": "ACTIVE",
+          "cplStatus": "ACTIVE",
+          "dateCommissioned": "2019-10-09Z",
+          "importMpxn": "1100000000003",
+          "uprn": "110000001",
+          "propertyFilter": {
+            "postCode": "A9A 9AA",
+            "addressIdentifier": "1, OAK ROAD, SOMEWHERE"
+          },
+          "cspRegion": "CENTRAL",
+          "deviceGbcsVersion": "1.1"
+        }
+      ],
+      "wanMatrix": {
+        "status": 200,
+        "cspRegion": "CENTRAL",
+        "coverageAvailability": "true",
+        "wanTechnology": "Cellular",
+        "connectivityLikelihood": "HIGH"
+      },
+      "lastUpdate": "2020-02-04T14:30:26.018Z"
+    }
+  ]
+}

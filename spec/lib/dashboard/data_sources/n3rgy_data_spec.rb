@@ -227,19 +227,44 @@ describe MeterReadingsFeeds::N3rgyData do
 
     describe 'for inventory' do
 
-      let(:status)             { 200 }
-      let(:inventory_url)      { 'https://read-inventory.data.n3rgy.com/files/3b80564b-fa21-451a-a8a1-2b4abb6bb8f6.json' }
-      let(:inventory_data)     { {"status" => status, "uuid" => "3b80564b-fa21-451a-a8a1-2b4abb6bb8f6", "uri" => inventory_url} }
-      let(:inventory_file)     { {"result"=>[{"mpxn"=>"1234567891234", "status"=>404, "message"=>"MPxN not found"}]} }
+      let(:status)                     { 200 }
+      let(:inventory_url)              { 'https://read-inventory.data.n3rgy.com/files/3b80564b-fa21-451a-a8a1-2b4abb6bb8f6.json' }
+      let(:inventory_data)             { {"status" => status, "uuid" => "3b80564b-fa21-451a-a8a1-2b4abb6bb8f6", "uri" => inventory_url} }
+      let(:inventory_file_no_data)     { {"result"=>[{"mpxn"=>"1234567891234", "status"=>404, "message"=>"MPxN not found"}]} }
+      let(:inventory_file_with_data)   { JSON.parse(File.read('spec/fixtures/n3rgy/get_inventory_file.json')) }
 
       before do
         expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:read_inventory).with(mpxn: mpxn).and_return(inventory_data)
-        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:fetch).with(inventory_url).and_return(inventory_file)
       end
 
-      it 'returns inventory file contents' do
-        contents = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).inventory(mpxn)
-        expect(contents).to eq(inventory_file)
+      describe 'when mpan not available' do
+
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:fetch).with(inventory_url, any_args).and_return(inventory_file_no_data)
+        end
+
+        let(:expected_details) { { addresses: [] } }
+
+        it 'returns inventory file contents' do
+          details = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).inventory(mpxn)
+          expect(details).to eq(expected_details)
+        end
+
+      end
+
+      describe 'when mpan is available' do
+
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:fetch).with(inventory_url, any_args).and_return(inventory_file_with_data)
+        end
+
+        let(:expected_details) { { addresses: [ {postcode: 'A9A 9AA', identifier: '1, OAK ROAD, SOMEWHERE'} ] } }
+
+        it 'returns inventory file contents' do
+          details = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).inventory(mpxn)
+          expect(details).to eq(expected_details)
+        end
+
       end
     end
 

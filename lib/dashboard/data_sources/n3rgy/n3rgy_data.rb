@@ -5,13 +5,14 @@ module MeterReadingsFeeds
     class MissingConfig < StandardError; end
     class BadParameters < StandardError; end
 
+    MAX_RETRIES = 2
+    RETRY_INTERVAL = 3
+
     KWH_PER_M3_GAS = 11.1 # this depends on the calorifc value of the gas and so is an approximate average
 
     # N3RGY_DATA_BASE_URL : 'https://api.data.n3rgy.com/' or 'https://sandboxapi.data.n3rgy.com/'
 
-    def initialize(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_BASE_URL'], bad_electricity_standing_charge_units: ENV['N3RGY_BAD_UNITS'])
-      raise MissingConfig.new("Apikey must be set in N3RGY_API_KEY environment variable") unless api_key.present?
-      raise MissingConfig.new("Base URL must be set in N3RGY_DATA_BASE_URL environment variable") unless base_url.present?
+    def initialize(api_key:, base_url:, bad_electricity_standing_charge_units: false)
       @api_key = api_key
       @base_url = base_url
       @bad_electricity_standing_charge_units = bad_electricity_standing_charge_units
@@ -48,10 +49,9 @@ module MeterReadingsFeeds
     end
 
     def inventory(mpxn)
-      details = api.read_inventory(mpxn: mpxn)
-      # seems like requesting file too soon causes Access Denied response
-      sleep(1.5)
-      api.fetch(details['uri'])
+      location = api.read_inventory(mpxn: mpxn)
+      details = api.fetch(location['uri'], RETRY_INTERVAL, MAX_RETRIES)
+      { addresses: get_addresses(details) }
     end
 
     def status(mpxn)
@@ -160,6 +160,16 @@ module MeterReadingsFeeds
       meter_readings_by_date.map do |date, readings|
         [date, OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, readings)]
       end.to_h
+    end
+
+    def get_addresses(details)
+      return [] unless details['result'] && details['result'][0]['status'] == 200
+      details['result'][0]['devices'].map do |device|
+        {
+          postcode: device['propertyFilter']['postCode'],
+          identifier: device['propertyFilter']['addressIdentifier']
+        }
+      end.uniq
     end
 
     def api

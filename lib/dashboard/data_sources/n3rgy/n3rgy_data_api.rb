@@ -46,13 +46,35 @@ module MeterReadingsFeeds
       get_data(url)
     end
 
-    def fetch(url)
-      get_data(url)
+    def fetch(url, retry_interval = 0, max_retries = 0)
+
+      retry_options = {}
+
+      # retry_options = {
+      #   retry_statuses: [429, 403, 404],
+      #   max: max_retries,
+      #   interval: retry_interval,
+      #   retry_block: -> (env, options, retries, exc) { puts "############# retry because #{env.status}" }
+      # }
+
+      # retry_options = {
+      #   retry_statuses: [429, 403, 404],
+      #   max: 2,
+      #   interval: 0.5,
+      #   interval_randomness: 0.5,
+      #   backoff_factor: 2
+      # }
+
+      sleep(retry_interval)
+      get_data(url, retry_options)
     end
 
     private
 
-    def get_data(url)
+    def get_data(url, retry_options = {})
+      connection = Faraday.new(url, headers: headers) do |f|
+        f.request :retry, retry_options unless retry_options.blank?
+      end
       connection = Faraday.new(url, headers: headers)
       response = connection.get
       raise NotFound.new(error_message(response)) if response.status == 404
