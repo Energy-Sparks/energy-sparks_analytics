@@ -225,6 +225,28 @@ describe MeterReadingsFeeds::N3rgyData do
       end
     end
 
+    describe 'elements' do
+      let(:response) {
+        {
+          "entries" => [
+            1,
+            2
+          ],
+          "resource" => "1234567891001/electricity/consumption",
+          "responseTimestamp"=>"2021-02-23T16:36:14.801Z"
+        }
+      }
+      before do
+        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_elements).with(mpxn: mpxn, fuel_type: :electricity, reading_type: "consumption").and_return(response)
+      end
+
+      it 'returns elements' do
+        contents = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).elements(mpxn, :electricity)
+        expect(contents).to eq([1,2])
+      end
+
+    end
+
     describe 'for inventory' do
 
       let(:status)             { 200 }

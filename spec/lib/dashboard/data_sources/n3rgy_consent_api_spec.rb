@@ -14,6 +14,7 @@ describe MeterReadingsFeeds::N3rgyConsentApi do
       let(:ref)     { 'some random guid' }
       let(:success) { {'status' => {'messages' => ['2234567891000 was submitted successfully.'], 'code' => '200'}} }
       let(:failure) { {'errors' => [{'code' => 404, 'message' => 'Unsuccessful trusted consent to property'}]} }
+      let(:auth_failure) { {'message' => "Unauthorized"} }
 
       before :each do
         expect(Faraday).to receive(:post).and_return(response)
@@ -31,7 +32,16 @@ describe MeterReadingsFeeds::N3rgyConsentApi do
         it 'raises error' do
           expect{
             @api.grant_trusted_consent(mpxn, ref)
-          }.to raise_error(MeterReadingsFeeds::N3rgyConsentApi::ConsentFailed)
+          }.to raise_error(MeterReadingsFeeds::N3rgyConsentApi::ConsentFailed, "Unsuccessful trusted consent to property")
+        end
+      end
+
+      context 'when authorization problem' do
+        let(:response) { double(success?: false , body: auth_failure.to_json) }
+        it 'raises error' do
+          expect{
+            @api.grant_trusted_consent(mpxn, ref)
+          }.to raise_error(MeterReadingsFeeds::N3rgyConsentApi::ConsentFailed, "Unauthorized")
         end
       end
     end
