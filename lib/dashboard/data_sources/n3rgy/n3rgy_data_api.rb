@@ -13,13 +13,9 @@ module MeterReadingsFeeds
     DATA_TYPE_PRODUCTION = 'production'
 
     def initialize(api_key, base_url, connection=nil)
-      #@api_key = api_key
-      #@base_url = base_url
-      @connection = if connection != nil
-        connection
-                else
-        Faraday.new(base_url, headers: { 'Authorization' => api_key })
-                end
+      @api_key = api_key
+      @base_url = base_url
+      @connection = connection
     end
 
     def get_consumption_data(mpxn: nil, fuel_type: nil, element: DEFAULT_ELEMENT, start_date: nil, end_date: nil)
@@ -45,7 +41,7 @@ module MeterReadingsFeeds
     def read_inventory(mpxn: )
       url = '/read-inventory'
       body = { mpxns: [mpxn] }
-      response = @connection.post(url) do |req|
+      response = connection.post(url) do |req|
         req.headers['Authorization'] = @api_key
         req.body = body.to_json
       end
@@ -63,8 +59,12 @@ module MeterReadingsFeeds
 
     private
 
+    def connection
+      @connection ||= Faraday.new(@base_url, headers: { 'Authorization' => @api_key })
+    end
+
     def get_data(url)
-      response = @connection.get(url)
+      response = connection.get(url)
       raise NotAuthorised.new(error_message(response)) if response.status == 401
       raise NotAllowed.new(error_message(response)) if response.status == 403
       raise NotFound.new(error_message(response)) if response.status == 404
