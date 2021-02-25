@@ -49,7 +49,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
         stubs.get("/123456789100/") do |env|
           [401, {}, response.to_json]
         end
-        expect{ api.status(mpxn) }.to raise_error(MeterReadingsFeeds::N3rgyDataApi::NotAuthorised)
+        expect{ api.status(mpxn) }.to raise_error(MeterReadingsFeeds::N3rgyDataApi::NotAuthorised, "Unauthorized")
         stubs.verify_stubbed_calls
       end
     end
@@ -58,7 +58,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
       let(:response) {
         {
           "errors":[
-            {"code":404,"message":"No property could be found with identifier \u0027123456789100\u0027"}
+            {"code":404,"message":"No property could be found with identifier '123456789100'"}
           ]
         }
       }
@@ -66,7 +66,7 @@ describe MeterReadingsFeeds::N3rgyDataApi do
         stubs.get("/123456789100/") do |env|
           [404, {}, response.to_json]
         end
-        expect{ api.status(mpxn) }.to raise_error(MeterReadingsFeeds::N3rgyDataApi::NotFound)
+        expect{ api.status(mpxn) }.to raise_error(MeterReadingsFeeds::N3rgyDataApi::NotFound, "No property could be found with identifier '123456789100'")
         stubs.verify_stubbed_calls
       end
     end

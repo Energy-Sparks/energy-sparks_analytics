@@ -94,11 +94,15 @@ module MeterReadingsFeeds
       data = JSON.parse(response.body)
       if data['errors']
         error = data['errors'][0]
-        "#{error['code']} : #{error['message']}"
+        error['message']
+      elsif data['message'] != nil
+        data['message']
       else
-        response.status
+        response.body
       end
     rescue => e
+      #problem parsing or traversing json, return original api error
+      response.body
       e.message
     end
 
