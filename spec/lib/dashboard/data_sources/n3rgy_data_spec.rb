@@ -240,9 +240,9 @@ describe MeterReadingsFeeds::N3rgyData do
         expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_elements).with(mpxn: mpxn, fuel_type: :electricity, reading_type: "consumption").and_return(response)
       end
 
-      it 'returns inventory file contents' do
+      it 'returns elements' do
         contents = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).elements(mpxn, :electricity)
-        expect(contents).to eq(response)
+        expect(contents).to eq([1,2])
       end
 
     end
