@@ -95,7 +95,7 @@ module MeterReadingsFeeds
       if data['errors']
         error = data['errors'][0]
         error['message']
-      elsif data['message'] != nil
+      elsif data['message']
         data['message']
       else
         response.body
