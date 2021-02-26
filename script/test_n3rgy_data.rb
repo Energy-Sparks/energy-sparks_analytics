@@ -1,12 +1,10 @@
 require_relative '../lib/dashboard.rb'
 
-
 # for live
 # n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_URL'])
 
 # for sandbox
 n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_SANDBOX_API_KEY'], base_url: ENV['N3RGY_SANDBOX_DATA_URL'], bad_electricity_standing_charge_units: true)
-
 
 # mpxn = 2234567891000
 # mpxn = 1234567891000

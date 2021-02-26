@@ -253,10 +253,12 @@ describe MeterReadingsFeeds::N3rgyData do
       let(:inventory_url)      { 'https://read-inventory.data.n3rgy.com/files/3b80564b-fa21-451a-a8a1-2b4abb6bb8f6.json' }
       let(:inventory_data)     { {"status" => status, "uuid" => "3b80564b-fa21-451a-a8a1-2b4abb6bb8f6", "uri" => inventory_url} }
       let(:inventory_file)     { {"result"=>[{"mpxn"=>"1234567891234", "status"=>404, "message"=>"MPxN not found"}]} }
+      let(:retry_interval)     { MeterReadingsFeeds::N3rgyData::RETRY_INTERVAL }
+      let(:max_retries)        { MeterReadingsFeeds::N3rgyData::MAX_RETRIES }
 
       before do
         expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:read_inventory).with(mpxn: mpxn).and_return(inventory_data)
-        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:fetch).with(inventory_url).and_return(inventory_file)
+        expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:fetch).with(inventory_url, retry_interval, max_retries).and_return(inventory_file)
       end
 
       it 'returns inventory file contents' do
