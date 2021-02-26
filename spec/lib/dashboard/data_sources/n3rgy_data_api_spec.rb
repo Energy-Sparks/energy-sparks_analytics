@@ -26,6 +26,38 @@ describe MeterReadingsFeeds::N3rgyDataApi do
     end
   end
 
+  context '#fetch' do
+    context 'with auth failure' do
+      let(:response) { {"message":"Unauthorized"} }
+      it 'raises error' do
+        stubs.get("some-inventory-file") do |env|
+          [401, {}, 'no way']
+        end
+        expect{ api.fetch('some-inventory-file') }.to raise_error(MeterReadingsFeeds::N3rgyDataApi::NotAuthorised, "no way")
+        stubs.verify_stubbed_calls
+      end
+    end
+
+    context 'with retry' do
+      it 'retries and then raises error' do
+        expect(api).to receive(:get_data).exactly(4).times.and_raise(MeterReadingsFeeds::N3rgyDataApi::NotAllowed.new('not ready'))
+        expect{ api.fetch('some-inventory-file', 0.1, 3) }.to raise_error(MeterReadingsFeeds::N3rgyDataApi::NotAllowed, "not ready")
+      end
+    end
+
+    context 'with data' do
+      let(:response) { {"result" => "your data"} }
+      it 'returns contents' do
+        stubs.get("some-inventory-file") do |env|
+          [200, {}, response.to_json]
+        end
+        contents = api.fetch('some-inventory-file', 0.1, 3)
+        expect(contents).to eq(response)
+        stubs.verify_stubbed_calls
+      end
+    end
+  end
+
   context '#status' do
     let(:response) {
       {
