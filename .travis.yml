@@ -12,5 +12,5 @@ sudo: required
 before_install:
   - gem install bundler -v '2.1.4'
 script:
-#- bundle exec bundle-audit check --update
+- bundle exec bundle-audit check --update
 - bundle exec rspec
