@@ -54,19 +54,14 @@ module MeterReadingsFeeds
     end
 
     def fetch(url, retry_interval = 0, max_retries = 0)
-      retries = 0
-      retrying = true
-      while retrying do
-        begin
-          sleep(retry_interval)
-          contents = get_data(url)
-          retrying = false
-        rescue NotAllowed => e
-          retries += 1
-          raise e if retries > max_retries
-        end
+      begin
+        retries ||= 0
+        sleep(retry_interval)
+        get_data(url)
+      rescue NotAllowed => e
+        retry if (retries += 1) <= max_retries
+        raise e
       end
-      contents
     end
 
     private
