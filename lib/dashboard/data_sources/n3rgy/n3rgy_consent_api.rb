@@ -45,6 +45,7 @@ module MeterReadingsFeeds
         response.body
       end
     rescue => e
+      #problem parsing or traversing json, return original api error
       response.body
     end
 
