@@ -11,6 +11,7 @@ FactoryBot.define do
       solar_pv_installation   { nil }
       storage_heater_config   { nil }
       external_meter_id       { nil }
+      dcc_meter               { false }
       meter_attributes        { {} }
     end
 
@@ -20,6 +21,7 @@ FactoryBot.define do
       solar_pv_installation: solar_pv_installation,
       storage_heater_config: storage_heater_config,
       external_meter_id: external_meter_id,
+      dcc_meter: dcc_meter,
       meter_attributes: meter_attributes) }
   end
 end
