@@ -94,8 +94,19 @@ class AggregateDataService
   private def validate_meter_list(list_of_meters)
     logger.info "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
-      validate_meter = ValidateAMRData.new(meter, 50, @meter_collection.holidays, @meter_collection.temperatures)
-      validate_meter.validate
+      begin
+        validate_meter = ValidateAMRData.new(meter, 50, @meter_collection.holidays, @meter_collection.temperatures)
+        validate_meter.validate
+      rescue => exception
+        add_rollbar_context_if_available(meter, exception)
+        raise
+      end
+    end
+  end
+
+  private def add_rollbar_context_if_available(meter, exception)
+    if exception.respond_to?(:rollbar_context)
+      exception.rollbar_context ||= { mpan_mprn: meter.id }
     end
   end
 
@@ -142,7 +153,7 @@ class AggregateDataService
     meter2.amr_data.accounting_tariff.scale_standing_charges(1.0 - percent_meter1)
   end
 
- 
+
   private def lookup_synthetic_meter(type)
     meter_id = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type)
     @meter_collection.meter?(meter_id, true)
