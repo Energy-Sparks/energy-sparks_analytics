@@ -36,7 +36,7 @@ module MeterReadingsFeeds
   #                 readings: { date => kwhx48 }
   #                 missing_readings: [ DateTime ]
   #               },
-  #               cost: { 
+  #               cost: {
   #                 kwh_tariffs:  date => kwhx48,
   #                 standing_charges: { DateRange => £/day }
   #                 missing_readings: [ DateTime ]
@@ -179,7 +179,7 @@ module MeterReadingsFeeds
       dt_to_£ = raw.convert_readings_dt_to_£(raw_£[:prices], mpxn, fuel_type)
 
       tariffs = convert_dt_to_v_to_date_to_v_x48(start_date, end_date, dt_to_£)
-      
+
       {
         kwh_tariffs:      tariffs[:readings],
         standing_charges: standing_charges,
