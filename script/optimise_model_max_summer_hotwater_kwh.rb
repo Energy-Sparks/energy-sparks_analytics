@@ -312,7 +312,7 @@ class OptimiseMeterMaxSummerHotWaterKwh
 
       model_results = model.non_heating_model.model_results
       results[model_type] = model_results.is_a?(Hash) ? model_results : { fixed: model_results}
-      results[model_type][:average_max_non_heating_day_kwh] = model.average_max_non_heating_day_kwh
+      results[model_type][:average_max_non_heating_day_kwh] = model.non_heating_model.average_max_non_heating_day_kwh
     end
     results[:overridden_max_summer_hot_water_kwh] = overridden_max_summer_hot_water_kwh
     results[:manual] = @manual_estimations[@meter.mpan_mprn] unless @manual_estimations[@meter.mpan_mprn].nil?
@@ -355,7 +355,7 @@ def save_results_to_csv(results)
   end
 end
 
-school_name_pattern_match = ['trin*']
+school_name_pattern_match = ['*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)

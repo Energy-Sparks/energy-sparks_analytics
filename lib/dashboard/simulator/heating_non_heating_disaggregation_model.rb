@@ -2,9 +2,18 @@ require_relative './heating_regression_models.rb'
 module AnalyseHeatingAndHotWater
   # regression models associated with hot water, and
   # particularly identifying heating versus non-heating days
+  # series of models where the default can be overridden by meter attributes
+  # if the automatically modelling gets the separation between heating
+  # and (summer) non-heating days doesn't work
+  # the models sample data in mid-summer and assume +/- a bit that
+  # mid summer data is representative of the heating being off
+  # sometimes it gets it wrong because the heating is left on all summer
+  # or for example the hot water system is inefficient and temperature
+  # sensitive because of a lack of insulation, and to some extent its
+  # inefficiency/heat loss becomes ambient heating even when not wanted in the summer!
   class HeatingNonHeatingDisaggregationModelBase < HeatingModelTemperatureSpace
+    include Logging
     attr_reader :model_results
-    SUMMER_MONTHS = [6, 7, 8]
     def initialize(heat_meter, model_overrides)
       raise EnergySparksAbstractBaseClass, "Abstract base class for heating, non-heating model max disaggregator called"  if self.instance_of?(HeatingNonHeatingDisaggregationModelBase)
       super(heat_meter, model_overrides)
@@ -12,76 +21,127 @@ module AnalyseHeatingAndHotWater
 
     def self.models
       [
-        HeatingNonHeatingFixedValueDisaggregationModel,
+        HeatingNonHeatingRegressionFixedTemperatureDisaggregationModel,
         HeatingNonHeatingDisaggregationWithRegressionModel,
-        HeatingNonHeatingDisaggregationWithRegressionCOVIDTolerantModel
+        HeatingNonHeatingDisaggregationWithRegressionCOVIDTolerantModel,
+        # plus HeatingNonHeatingFixedValueOverrideDisaggregationModel see method all_models below
       ]
     end
 
     def self.default_type
-      :temperature_sensitive_regression_model
+      :best
+    end
+
+    def self.best_non_override_model
+      :temperature_sensitive_regression_model_covid_tolerant
     end
 
     def self.model_types
       models.map(&:type)
     end
 
+    # either use a specific model, the 'best' model, or one defined by a meter attribute override
     def self.model_factory(type, heat_meter, model_overrides)
-      type = default_type if type.nil?
-      models.each do |model|
+      model = model_factory_private(type, heat_meter, model_overrides)
+      Logging.logger.info "Using #{model.class.type} for heating/non heating model separation for mprn #{heat_meter.mpan_mprn}"
+      model
+    end
+
+    private
+    
+    # technically the fixed override model is only a model if overidden
+    # its not one of the default models which can be choosen/tested
+    def self.all_models
+      [models, HeatingNonHeatingFixedValueOverrideDisaggregationModel].flatten
+    end
+
+    def self.model_factory_private(type, heat_meter, model_overrides)
+      type = override_or_best_model(type, heat_meter, model_overrides)
+
+      all_models.each do |model|
         return model.new(heat_meter, model_overrides) if model.type == type
       end
+
       raise EnergySparksUnexpectedStateException, "Unknown heat non-heat disaggregation model #{type}"
     end
-  end
 
-  class HeatingNonHeatingFixedValueDisaggregationOverrideModel < HeatingNonHeatingDisaggregationModelBase
-    attr_reader :max_non_heating_daily_kwh
-    def self.type; :overridden_fixed end
-    def initialize(max_non_heating_daily_kwh)
-      @max_non_heating_daily_kwh = max_non_heating_daily_kwh
+    def self.override_or_best_model(type, heat_meter, model_overrides)
+      if best_type(type)
+        type =  if fixed_override_model(heat_meter, model_overrides)
+                  :fixed_single_value_kwh_per_day_override
+                elsif model_overrides.heating_non_heating_day_separation_model_override
+                  model_overrides.heating_non_heating_day_separation_model_override.to_sym
+                else
+                  best_non_override_model
+                end
+      else
+        type
+      end
     end
-    def max_non_heating_day_kwh(_date); @max_non_heating_daily_kwh end
-    def average_max_non_heating_day_kwh; @max_non_heating_daily_kwh end
+
+    def self.fixed_override_model(heat_meter, model_overrides)
+      model_overrides.heating_non_heating_day_fixed_kwh_separation ||
+      heat_meter.heating_only? ||
+      heat_meter.non_heating_only?
+    end
+
+    def self.best_type(type)
+      type == :best || type.nil?
+    end
   end
 
-  class HeatingNonHeatingFixedValueDisaggregationModel < HeatingNonHeatingDisaggregationModelBase
-    def self.type; :fixed_single_value_temperature end
+  # fixed kWh/day override from meter attributes - either a value or 0.0/infinity if heating/non-heating only
+  class HeatingNonHeatingFixedValueOverrideDisaggregationModel < HeatingNonHeatingDisaggregationModelBase
+    def self.type; :fixed_single_value_kwh_per_day_override end
+    def initialize(heat_meter, model_overrides)
+      @fix_kwh_per_day = calculate_fixed_kwh_per_day(heat_meter, model_overrides)
+    end
 
-    def max_non_heating_day_kwh(date)
-      @max_non_heating_day_kwh.is_a?(Float) ? @max_non_heating_day_kwh : calculate_from_regression(date)
+    def calculate_max_summer_hotwater_kitchen_kwh(_period)
+      # do nothing
+    end
+
+    def max_non_heating_day_kwh(_date)
+      @fix_kwh_per_day
     end
 
     def average_max_non_heating_day_kwh
-      @max_non_heating_day_kwh.is_a?(Float) ? @max_non_heating_day_kwh : model_prediction(20.0)
+      @fix_kwh_per_day
+    end
+
+    private
+    
+    def calculate_fixed_kwh_per_day(heat_meter, model_overrides)
+      if model_overrides.heating_non_heating_day_fixed_kwh_separation
+        model_overrides.heating_non_heating_day_fixed_kwh_separation
+      elsif heat_meter.heating_only?
+        # heating_only assume 0.0
+        0.0
+      elsif heat_meter.non_heating_only?
+        123456789.0 # set really high number so all assumed as non heating use
+      end
+    end
+  end
+
+  # base regression model - not actually called, but derived models are
+  # samples summer months, assuming the heating is off and then calculates
+  # a regression with a standard deviation spread to seperate heating and non-heating days
+  class HeatingNonHeatingRegressionModelBase < HeatingNonHeatingDisaggregationModelBase
+    SUMMER_MONTHS = [6, 7, 8]
+    REPRESENTATIVE_SUMMER_TEMPERATURE = 20.0
+
+    def max_non_heating_day_kwh(date)
+      calculate_from_regression(date)
     end
 
     def calculate_max_summer_hotwater_kitchen_kwh(period)
-      @model_results ||= calculate_max_summer_hotwater_kitchen_kwh_private(period)
+      @model_results ||= calculate_max_hotwater_only_daily_kwh(period)
     end
 
     private
 
-    def calculate_max_summer_hotwater_kitchen_kwh_private(period)
-      @max_non_heating_day_kwh = if !@model_overrides.override_max_summer_hotwater_kwh.nil?
-        @model_overrides.override_max_summer_hotwater_kwh.to_f
-      elsif @meter.heating_only?
-        0.0
-      else
-        calculate_max_hotwater_only_daily_kwh(period)
-      end
-    end
-
-    def calculate_from_regression(_date)
-      model_prediction(fixed_temperature)
-    end
-
-    def fixed_temperature
-      20.0
-    end
-
     def model_prediction(avg_temperature)
-      calc = @max_non_heating_day_kwh
+      calc = @model_results
       calc[:a] + avg_temperature * calc[:b] + 2 * calc[:sd]
     end
 
@@ -90,7 +150,9 @@ module AnalyseHeatingAndHotWater
 
       # if for more than half the days in the summer the boiler is off
       # assume heating only and set to threshold of gas kWh noise
-      return @max_zero_daily_kwh if (1.0 * boiler_days.length / days.length) < 0.5
+      if (1.0 * boiler_days.length / days.length) < 0.5
+        return synthesize_heating_only_model_calculation(boiler_days, boiler_off_days)
+      end
 
       calc, sd = regress_boiler_on_days(boiler_days)
 
@@ -104,16 +166,44 @@ module AnalyseHeatingAndHotWater
         sd:           sd,
         model:        self.class.type
       }
-      
-      valid_results?(results) ? results : 0.0
+
+      if valid_results?(results)
+        results
+      else 
+        log_data(results, boiler_days, "NaN regression results from heat/non-heat separation")
+        logger.info 'This is really an error by provides synthetic model for fault tolerance'
+        synthesize_heating_only_model_calculation(boiler_days, boiler_off_days)
+      end
     end
 
     def valid_results?(results)
-      %i[a b r2 sd].all?{ |s| !results[s].nan? }
+      %i[a b r2 sd].all? { |s| !results[s].nan? }
     end
 
-    def t_description
-      "(T = #{fixed_temperature})"
+    def log_data(results, days, message)
+      kwhs      = days.map { |date| @amr_data.one_day_kwh(date) }.join(', ')
+      avg_temps = days.map { |date| temperatures.average_temperature(date) }.join(', ')
+      logger.info message
+      logger.info "kwh: #{kwhs}"
+      logger.info "temps: #{avg_temps}"
+
+      puts message
+      puts "kwh: #{kwhs}"
+      puts "temps: #{avg_temps}"
+    end
+
+    # no summer usage so synthesize a model
+    def synthesize_heating_only_model_calculation(boiler_days, boiler_off_days)
+      {
+        a:            @max_zero_daily_kwh,
+        b:            0.0,
+        r2:           1.0,
+        non_heat_n:   boiler_days.length,
+        heat_n:       boiler_off_days.length,
+        calculation:  "heating only: a #{@max_zero_daily_kwh.round(1)} on: #{boiler_days.length} off: #{boiler_off_days.length}",
+        sd:           0.0,
+        model:        self.class.type
+      }
     end
 
     def boiler_on_days(period, list_of_months)
@@ -137,22 +227,45 @@ module AnalyseHeatingAndHotWater
     end
   end
 
-  class HeatingNonHeatingDisaggregationWithRegressionModel < HeatingNonHeatingFixedValueDisaggregationModel
+  # regression model, but single separation kWh/day value read at fixed temperature
+  class HeatingNonHeatingRegressionFixedTemperatureDisaggregationModel < HeatingNonHeatingRegressionModelBase
+    AVERAGE_TEMPERATURE_FOR_REGRESSION = 18.0
+    def self.type; :fixed_single_value_temperature_sensitive_regression_model end
+
+    def average_max_non_heating_day_kwh
+      model_prediction(AVERAGE_TEMPERATURE_FOR_REGRESSION)
+    end
+
+    private
+
+    def t_description
+      "(T = #{REPRESENTATIVE_SUMMER_TEMPERATURE})"
+    end
+
+    def calculate_from_regression(_date)
+      model_prediction(REPRESENTATIVE_SUMMER_TEMPERATURE)
+    end
+  end
+  
+  # basic regression model
+  class HeatingNonHeatingDisaggregationWithRegressionModel < HeatingNonHeatingRegressionFixedTemperatureDisaggregationModel
     def self.type; :temperature_sensitive_regression_model end
+
     def calculate_from_regression(date)
       avg_temp = temperatures.average_temperature(date)
       [model_prediction(avg_temp), 0.0].max
     end
-    def average_max_non_heating_day_kwh
-      @max_non_heating_day_kwh.is_a?(Float) ? @max_non_heating_day_kwh : model_prediction(18.0)
-    end
+    
     def t_description
       'T'
     end
   end
 
+  # as per the basic regression model but gets its summer data from 2019
+  # to avoid 2020 COVID period when summer usage was 'strange' at some schools
   class HeatingNonHeatingDisaggregationWithRegressionCOVIDTolerantModel < HeatingNonHeatingDisaggregationWithRegressionModel
     def self.type; :temperature_sensitive_regression_model_covid_tolerant end
+
     private
 
     def occupied_school_days(period, list_of_months)

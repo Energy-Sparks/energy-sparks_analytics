@@ -1149,7 +1149,7 @@ class ChartManager
     thermostatic_regression_simple_school_day_non_heating_non_regression: {
       name:               'Thermostatic (School Day) - heating - non-heating separation non regression',
       inherits_from:      :thermostatic_regression_simple_school_day,
-      non_heating_model:  :fixed_single_value_temperature
+      non_heating_model:  :fixed_single_value_temperature_sensitive_regression_model
     },
     thermostatic_regression_simple_school_day_non_heating_regression: {
       name:               'Thermostatic (School Day) - heating - non-heating separation regression',
@@ -1165,7 +1165,7 @@ class ChartManager
     seasonal_simple_school_day_non_heating_non_regression: {
       name:               'Thermostatic (School Day) - heating - non-heating separation non regression',
       inherits_from:      :heating_on_off_by_week,
-      non_heating_model:  :fixed_single_value_temperature
+      non_heating_model:  :fixed_single_value_temperature_sensitive_regression_model
     },
     seasonal_simple_school_day_non_heating_regression: {
       name:               'Thermostatic (School Day) - heating - non-heating separation regression',

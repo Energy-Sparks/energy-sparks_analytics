@@ -302,7 +302,7 @@ class DashboardEnergyAdvice
     def non_tariff_attributes_html
       text = %{
         <pre>
-          <%= non_tariff_meter_attributes.awesome_inspect %>
+          <%= non_tariff_meter_attributes.pretty_inspect %>
         </pre>
       }
       ERB.new(text).result(binding)
@@ -801,7 +801,7 @@ class DashboardEnergyAdvice
   end
 
   class HeatingNonHeatingSeparationNonRegressionModel < HeatingNonHeatingSeparationAdviceBase
-    def model_type; :fixed_single_value_temperature end
+    def model_type; :fixed_single_value_temperature_sensitive_regression_model end
     def vanilla_regression_model_chart_explanation_html
       %{
         <p>

@@ -232,7 +232,7 @@ class MeterAttributes
   class HeatingNonHeatingDayFixedkWh < MeterAttributeTypes::AttributeBase
     id  :heating_non_heating_day_fixed_kwh_separation
     key :heating_non_heating_day_fixed_kwh_separation
-    name 'Heating/Non-Heating Separation Model Fixed Separation'
+    name 'Heating/Non-Heating Separation Model Fixed Separation in kWh'
     structure MeterAttributeTypes::Float.define(required: true, hint: 'kwh per day')
   end
 
@@ -240,7 +240,8 @@ class MeterAttributes
     id  :heating_non_heating_day_separation_model_override
     key :heating_non_heating_day_separation_model_override
     name 'Heating/Non-Heating Separation Model Override'
-    structure MeterAttributeTypes::String.define(required: true, hint: 'fixed_single_value_temperature or temperature_sensitive_regression_model')
+
+    structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:fixed_single_value_temperature_sensitive_regression_model, :temperature_sensitive_regression_model, :temperature_sensitive_regression_model_covid_tolerant])
   end
 
   class AggregationSwitch < MeterAttributeTypes::AttributeBase
