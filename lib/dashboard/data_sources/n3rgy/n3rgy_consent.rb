@@ -1,9 +1,7 @@
 module MeterReadingsFeeds
   class N3rgyConsent
 
-    # N3RGY_CONSENT_BASE_URL : 'https://consent.data.n3rgy.com/' or 'https://consentsandbox.data.n3rgy.com/'
-
-    def initialize(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_CONSENT_BASE_URL'])
+    def initialize(api_key:, base_url:)
       @api_key = api_key
       @base_url = base_url
     end
@@ -19,6 +17,8 @@ module MeterReadingsFeeds
     end
 
     def api
+      raise MissingConfig.new("Apikey must be set") unless @api_key.present?
+      raise MissingConfig.new("Base URL must be set") unless @base_url.present?
       @api ||= N3rgyConsentApi.new(@api_key, @base_url)
     end
   end

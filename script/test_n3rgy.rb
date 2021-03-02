@@ -111,14 +111,17 @@ def download_all_permissioned_data(n3rgy)
   end
 end
 
-logging = { puts: true, ap: { limit: 5 } }
 logging = nil
+logging = { puts: true, ap: { limit: 5 } }
 
-n3rgy = MeterReadingsFeeds::N3rgy.new(debugging: logging)
-# process_one_mpxn(n3rgy, 2234567891000)
+
+n3rgy = MeterReadingsFeeds::N3rgy.new(api_key: '6ceb77c7-4d16-4e4f-b582-4d29d8c32718', debugging: logging, production: true)
+process_one_mpxn(n3rgy, 2000006185057)
 
 # puts n3rgy.all_data(2234567891000)
-tariffs = n3rgy.tariffs(2234567891000, :electricity, Date.parse('20190101'), Date.parse('20190102'))
+tariffs = n3rgy.tariffs(2000006185057, :electricity, Date.parse('20190101'), Date.parse('20190102'))
+
+exit
 
 puts tariffs[:standing_charges].inspect
 
