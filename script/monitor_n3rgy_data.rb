@@ -2,7 +2,11 @@ require_relative '../lib/dashboard.rb'
 
 class DCCMeters
   def available_meters
-    @available_meters ||= {
+    @available_meters ||= meter_config.transform_keys { |mpxn| real_mpxn(mpxn) }
+  end
+
+  def meter_config
+    @meter_config ||= {
       1234567891000 => {},
       1234567891002 => {},
       1234567891004 => {},
@@ -25,9 +29,22 @@ class DCCMeters
       1234567891038 => {},
       2234567891000 => {},
       2234567891001 => {},
-      2000006185057 => { production: true},
-      2200015678553 => { production: true},
+      1 => { production: true}, # PH
+      2 => { production: true}, # DH
+      3 => { production: true}, # JH-E
+      4 => { production: true}, # KH-G
+      5 => { production: true}, #JB
     }
+  end
+
+  def real_mpxn(mpxn)
+    mpxn_map.key?(mpxn) ? mpxn_map[mpxn] : mpxn
+  end
+
+  def mpxn_map
+    # for priv*cy hold MPXN's in an environment variable
+    pairs = ENV['N3RGY_LIVE_MPXN'].split(',')
+    @mpxn_map ||= pairs.map { |pair| pair.split('=').map(&:to_i) }.to_h
   end
 
   def api_key(mpxn)
@@ -74,7 +91,8 @@ def analyse_readings(fuel_type, readings)
   "Readings: #{readings[fuel_type][:readings].length} Missing: #{readings[fuel_type][:missing_readings].length}"
 end
 
-mpxn = 2200015678553
+mpxn = DCCMeters.new.real_mpxn(5)
+puts mpxn
 
 api_key     = DCCMeters.new.api_key(mpxn)
 base_url    = DCCMeters.new.base_url(mpxn)
