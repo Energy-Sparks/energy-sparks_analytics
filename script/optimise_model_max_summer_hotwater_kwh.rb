@@ -355,23 +355,32 @@ def save_results_to_csv(results)
   end
 end
 
-school_name_pattern_match = ['*']
-source_db = :unvalidated_meter_data
+def test_script_config(school_name_pattern_match, source_db)
+  {
+    logger1:                  { name: TestDirectoryConfiguration::LOG + "/model fitting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+    schools:                  school_name_pattern_match,
+    source:                   source_db,
+    model_fitting:            {
+      control: {
+        display_average_calculation_rate: true,
+        report_failed_charts:   :summary, 
+        compare_results: [
+          :summary,
+          :quick_comparison,
+          { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Models\Base\\' },
+          { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Models\New\\' }
+        ]
+      }
+    }, 
+  }
+end
 
-school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
-
-results = {}
-full_school_names = []
-school = nil
-
-school_names.each do |school_name|
-  results[school_name] ||= {}
+def run_all_heat_non_heat_models_for_school(school_name, source_db, results, attributes)
   puts "==============================Doing #{school_name} ================================"
 
   begin
-    school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
+    school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db, meter_attributes_overrides: attributes)
 
-    full_school_names.push(school.name)
     heat_meters = OptimiseMeterMaxSummerHotWaterKwh.heat_meters(school)
 
     heat_meters.each do |heat_meter|
@@ -385,23 +394,25 @@ school_names.each do |school_name|
   end
 end
 
+def school_meter_attributes(school_name)
+  puts school_name
+  {}
+end
+
+school_name_pattern_match = ['abb*']
+source_db = :unvalidated_meter_data
+
+school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
+
+results = {}
+
+school_names.each do |school_name|
+  results[school_name] ||= {}
+  attributes = school_meter_attributes(school_name)
+  run_all_heat_non_heat_models_for_school(school_name, source_db, results, attributes)
+end
+
 save_results_to_csv(results)
 
-script = {
-  logger1:                  { name: TestDirectoryConfiguration::LOG + "/model fitting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  schools:                  school_name_pattern_match,
-  source:                   source_db,
-  model_fitting:            {
-    control: {
-      display_average_calculation_rate: true,
-      report_failed_charts:   :summary, 
-      compare_results: [
-        :summary,
-        :quick_comparison,
-        { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Models\Base\\' },
-        { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Models\New\\' }
-      ]
-    }
-  }, 
-}
+script = test_script_config(school_name_pattern_match, source_db)
 RunTests.new(script).run
