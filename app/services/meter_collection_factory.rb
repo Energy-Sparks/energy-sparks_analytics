@@ -77,6 +77,7 @@ class MeterCollectionFactory
       identifier:         meter_data[:identifier],
       name:               meter_data[:name],
       external_meter_id:  meter_data[:external_meter_id],
+      dcc_meter:          meter_data[:dcc_meter],
       meter_attributes:   meter_data[:attributes]
     )
   end

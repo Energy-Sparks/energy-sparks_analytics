@@ -11,7 +11,7 @@ module Dashboard
     attr_accessor :amr_data, :floor_area, :number_of_pupils, :solar_pv_setup, :solar_pv_overrides
 
     # Energy Sparks activerecord fields:
-    attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn
+    attr_reader :active, :created_at, :meter_no, :meter_type, :school, :updated_at, :mpan_mprn, :dcc_meter
     attr_accessor :id, :name, :external_meter_id
     # enum meter_type: [:electricity, :gas]
 
@@ -20,6 +20,7 @@ module Dashboard
                     solar_pv_installation: nil,
                     storage_heater_config: nil, # now redundant PH 20Mar2019
                     external_meter_id: nil,
+                    dcc_meter: false,
                     meter_attributes: {})
       @amr_data = amr_data
       @meter_collection = meter_collection
@@ -34,6 +35,7 @@ module Dashboard
       @meter_correction_rules = []
       @sub_meters = Dashboard::SubMeters.new
       @external_meter_id = external_meter_id
+      @dcc_meter = dcc_meter
       set_meter_attributes(meter_attributes)
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
@@ -217,7 +219,7 @@ module Dashboard
     end
 
     def synthetic_mpan_mprn?
-      mpan_mprn > 60000000000000 
+      mpan_mprn > 60000000000000
     end
 
     def aggregate_meter?

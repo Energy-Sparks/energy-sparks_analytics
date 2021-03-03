@@ -53,14 +53,25 @@ module MeterReadingsFeeds
       get_data(url)
     end
 
-    def fetch(url)
-      get_data(url)
+    def fetch(url, retry_interval = 0, max_retries = 0)
+      begin
+        retries ||= 0
+        sleep(retry_interval)
+        get_data(url)
+      rescue NotAllowed => e
+        retry if (retries += 1) <= max_retries
+        raise e
+      end
     end
 
     private
 
+    def headers
+      { 'Authorization' => @api_key }
+    end
+
     def connection
-      @connection ||= Faraday.new(@base_url, headers: { 'Authorization' => @api_key })
+      @connection ||= Faraday.new(@base_url, headers: headers)
     end
 
     def get_data(url)
@@ -103,7 +114,6 @@ module MeterReadingsFeeds
     rescue => e
       #problem parsing or traversing json, return original api error
       response.body
-      e.message
     end
 
   end
