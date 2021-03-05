@@ -1,4 +1,4 @@
-require_relative '../lib/dashboard.rb'
+require_relative '../../lib/dashboard.rb'
 
 # for live
 # n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_URL'])

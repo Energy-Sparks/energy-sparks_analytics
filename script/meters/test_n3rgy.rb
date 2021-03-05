@@ -1,154 +1,162 @@
-require 'benchmark'
-require 'csv'
 require 'require_all'
-require 'date'
-require_relative '../lib/dashboard.rb'
+require_relative '../../lib/dashboard.rb'
+require_rel '../../test_support'
 
-# Test script to understand detailed workings of n3rgy JSON API
-# - you need to set N3RGY_APP_KEY environment variable
+class DCCMeters
+  def self.available_meters
+    @@available_meters ||= meter_config.transform_keys { |mpxn| real_mpxn(mpxn) }
+  end
 
+  def self.meter_config
+    @@meter_config ||= {
+      1234567891000 => {},
+      1234567891002 => {},
+      1234567891004 => {},
+      1234567891006 => {},
+      1234567891008 => {},
+      1234567891010 => {},
+      1234567891012 => {},
+      1234567891014 => {},
+      1234567891016 => {},
+      1234567891018 => {},
+      1234567891020 => {},
+      1234567891022 => {},
+      1234567891024 => {},
+      1234567891026 => {},
+      1234567891028 => {},
+      1234567891030 => {},
+      1234567891032 => {},
+      1234567891034 => {},
+      1234567891036 => {},
+      1234567891038 => {},
+      2234567891000 => {},
+      2234567891001 => { fuel_type: :gas },
+      1 => { production: true }, # PH
+      2 => { production: true }, # DH
+      3 => { production: true }, # JH-E
+      4 => { production: true, fuel_type: :gas }, # KH-G
+      5 => { production: true }, #JB
+    }
+  end
 
-def save_readings_to_csv(mpxn, fuel_type, readings)
-  filename = 'Results\\' + "N3rgy #{mpxn.to_s} #{fuel_type}.csv"
-  puts "Saving readings to #{filename}"
-  CSV.open(filename, 'w') do |csv|
-    csv << ['date', 'days kWh', (0..47).map{ |hh| "#{(hh / 2).to_i}:#{(hh % 2) * 30}"}].flatten
-    readings.each do |date, kwh_x48|
-      csv << [date, kwh_x48.sum, kwh_x48].flatten
+  def self.meter(mpxn)
+    DCCMeter.new(mpxn, available_meters[mpxn])
+  end
+
+  private
+
+  def self.real_mpxn(mpxn)
+    mpxn_map.key?(mpxn) ? mpxn_map[mpxn] : mpxn
+  end
+
+  def self.mpxn_map
+    # for priv*cy hold MPXN's in an environment variable
+    pairs = ENV['N3RGY_LIVE_MPXN'].split(',')
+    @mpxn_map ||= pairs.map { |pair| pair.split('=').map(&:to_i) }.to_h
+  end
+
+  class DCCMeter
+    attr_reader :mpxn
+    def initialize(mpxn, config)
+      @mpxn = mpxn
+      @config = config
+    end
+
+    def api_key
+      production? ? ENV['N3RGY_API_KEY'] : ENV['N3RGY_SANDBOX_API_KEY']
+    end
+
+    def base_url
+      production? ? 'https://api.data.n3rgy.com/' : 'https://sandboxapi.data.n3rgy.com/'
+    end
+
+    def fuel_type
+      @config.fetch(:fuel_type, :electricity)
+    end
+
+    private
+
+    def production?
+      @config.fetch(:production, false)
     end
   end
 end
 
-def calculate_total_costs(data)
-  total_£ = total_standing_charges_£ = 0.0
-  data[:kwh][:readings].keys.each do |date|
-    (0..47).each do |hh_i|
-      total_£ += data[:kwh][:readings][date][hh_i] * data[:cost][:kwh_tariffs][date][hh_i]
-    end
-
-    sc = data[:cost][:standing_charges].select { |dr, _v| date >= dr.first && date <= dr.last }
-    total_standing_charges_£ += sc.values[0]
-  end
-  [total_£, total_standing_charges_£]
-end
-
-def process_one_mpxn(n3rgy, mpxn)
-  all_data = nil
-  puts ('=' * 40) +  mpxn.to_s + ('=' * 40)
-
-  bm = Benchmark.realtime {
-    puts "Status:  #{n3rgy.mpxn_status(mpxn)}"
-
-    all_data = n3rgy.all_data(mpxn)
-
-    all_data.each do |fuel_type, data|
-      puts "===============#{fuel_type}=================="
-      puts "Fuel        #{fuel_type}"
-      if data.nil?
-        puts "No data"
-      else
-        puts "Units:      #{n3rgy.units(mpxn, fuel_type)}"
-        puts "Start:      #{n3rgy.start_date(mpxn, fuel_type)}"
-        puts "End:        #{n3rgy.end_date(mpxn, fuel_type)}"
-        puts "Days:       #{data[:kwh][:readings].length}"
-
-        total_kwh = data[:kwh][:readings].values.map { |kwh_x48| kwh_x48.sum }.sum
-        total_kwh ||= 0.0
-        puts "Total kwh:  #{total_kwh.round(0)}"
-
-        total_£, total_standing_charges_£ = calculate_total_costs(data)
-        puts "£: kwh:     £#{total_£.round(0)}"
-        puts "£: sc:      £#{total_standing_charges_£.round(0)}"
-        puts "Missing:    #{data[:kwh][:missing_readings].length}"
-      end
-    end
+def log(in_str)
+  str = DateTime.now.strftime('%H:%M:%S: ') + in_str
+  puts str
+  open('./Results/n3rgy mpan log.text', 'a') { |f|
+    f.puts str
   }
-  puts "Time:       #{bm.round(1)}s"
-  all_data
 end
 
-def test_consent_process(n3rgy, mpxn)
-  puts ('=' * 30) + ' testing consents for ' +  mpxn.to_s + ('=' * 30)
-  example_consent_file_link = 'https://es-active-storage-production.s3.eu-west-2.amazonaws.com/1isvxhf6fk4ep7nqo7yi4v71umky?response-content-disposition=inline%3B%20filename%3D%22Energy%20Sparks%20Case%20Study%201%20-%20Freshford%20Freezer.pdf%22%3B%20filename%2A%3DUTF-8%27%27Energy%2520Sparks%2520Case%2520Study%25201%2520-%2520Freshford%2520Freezer.pdf&response-content-type=application%2Fpdf&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJ53OZKG2W5BDLHXA%2F20210123%2Feu-west-2%2Fs3%2Faws4_request&X-Amz-Date=20210123T182223Z&X-Amz-Expires=300&X-Amz-SignedHeaders=host&X-Amz-Signature=797b1523784280e5beb2e746f75be95a3c256c06e5e4111d3825a613a107e91a'
-
-  session_id = n3rgy.session_id(mpxn)
-  puts "Session id #{session_id}"
-  puts ('=' * 30) + ' grant trusted consent ' + ('=' * 30)
-  ap n3rgy.grant_trusted_consent(mpxn, example_consent_file_link)
-  puts ('=' * 30) + ' withdraw trusted consent ' + ('=' * 27)
-  ap n3rgy.withdraw_trusted_consent(mpxn)
-end
-
-def test_appendix_a_sandbox_mpxns_permissions(n3rgy)
-  puts ('=' * 30) +  ' testing sandbox mpxn statuses ' + ('=' * 03)
-  appendix_a_sandbox_mpxns = [
-    1234567891000, 1234567891002, 1234567891004, 1234567891006,
-    1234567891008, 1234567891010, 1234567891012, 1234567891014,
-    1234567891016, 1234567891018, 1234567891020, 1234567891022,
-    1234567891024, 1234567891026, 1234567891028, 1234567891030,
-    1234567891032, 1234567891034, 1234567891036, 1234567891038,
-    2234567891000,
-  ]
-
-  appendix_a_sandbox_mpxns.each do |mpxn|
-    puts "#{mpxn}: #{n3rgy.mpxn_status(mpxn)}"
+def save_csv(fuel_type, readings, mpxn)
+  CSV.open(filename(mpxn, ' data '), 'w') do |csv|
+    csv << ['date', 'days kWh', (0..47).map{ |hh| "#{(hh / 2).to_i}:#{(hh % 2) * 30}"}].flatten
+    readings[fuel_type][:readings].each do |date, one_days_readings|
+      csv << [date, one_days_readings.one_day_kwh, one_days_readings.kwh_data_x48].flatten
+    end
   end
-end
 
-def download_all_permissioned_data(n3rgy)
-  puts '=' * 90
-  puts ('=' * 30) +  ' downloading all data for permissoned mpxns ' + ('=' * 16)
-  puts '=' * 90
-
-  mpxns = n3rgy.mpxns
-  ap mpxns.sort
-
-  mpxns.sort.each do |mpxn|
-    data = process_one_mpxn(n3rgy, mpxn)
-    data.each do |fuel_type, data_per_fuel|
-      save_readings_to_csv(mpxn, fuel_type, data_per_fuel[:kwh][:readings])
+  CSV.open(filename(mpxn, ' missing data '), 'w') do |csv|
+    readings[fuel_type][:missing_readings].each do |dt|
+      csv << [ dt ]
     end
   end
 end
 
-logging = nil
-logging = { puts: true, ap: { limit: 5 } }
-
-
-n3rgy = MeterReadingsFeeds::N3rgy.new(api_key: '6ceb77c7-4d16-4e4f-b582-4d29d8c32718', debugging: logging, production: true)
-process_one_mpxn(n3rgy, 2000006185057)
-
-# puts n3rgy.all_data(2234567891000)
-tariffs = n3rgy.tariffs(2000006185057, :electricity, Date.parse('20190101'), Date.parse('20190102'))
-
-exit
-
-puts tariffs[:standing_charges].inspect
-
-# puts "testing inventory process - only works in production environment?"
-# n3rgy.inventory
-
-# test_consent_process(n3rgy, 2234567891000)
-#
-# test_appendix_a_sandbox_mpxns_permissions(n3rgy)
-#
-# download_all_permissioned_data(n3rgy)
-
-#interface spec
-
-download_all_permissioned_data(n3rgy)
-
-#interface spec
-
-class N3rgyRawData
-  def initialize(app_key = ENV['N3RGY_APP_KEY']); end
-  def permissioned_mpans; end
-  def metadata(mpan); end # TBD, but probably a hash
-  def mpan_status; end # returns as enumeration e.g. permissioned, adopted, not available etc. TBD
-  def postcode; end # to be used as part of audit, permissioning process
-  def start_date; end
-  def end_date; end
-  def historic_meter_data(mpan, start_date, end_date); end # { channel?, kwhs: { date => [kwhx48]}, prices: { date => [£x48]} error_log => {} }
-  def standing_charges(mpan, start_date, end_date); end # hash TBD
-  def permission_mpan(mpan, url_to_uploaded_utility_bill_scan); end # this may be implemented outside this API
+def filename(mpxn, type)
+  './Results/n3rgy' +  type + mpxn.to_s + ' ' + DateTime.now.strftime('%H %M %S') + '.csv'
 end
+
+def check_one_mpxn(mpxn)
+  meter = DCCMeters.meter(mpxn)
+
+  end_date    = Date.today
+  start_date  = end_date - 13 * (364 / 12)
+
+  n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
+
+  readings = n3rgy_data.readings(mpxn, meter.fuel_type, start_date, end_date)
+
+  log(sprintf('%-14.14s', mpxn) + analyse_readings(meter.fuel_type, readings))
+  save_csv(meter.fuel_type, readings, mpxn)
+end
+
+def monitor(mpxns)
+  sleep_times = [[10, 60], [60, 60], [600, 24 * 6]]
+
+  sleep_times.each do |(sleep_period, count)|
+    count.times do
+      mpxns.each do |mpxn|
+        check_one_mpxn(mpxn)
+      end
+      sleep sleep_period
+    end
+  end
+
+end
+
+def analyse_readings(fuel_type, readings)
+  "Readings: #{readings[fuel_type][:readings].length} Missing: #{readings[fuel_type][:missing_readings].length}"
+end
+
+def command_line_options
+  [
+    { arg: '-mpxn',     args: 1, var: :mpxns, parse: 'mpxn_split_list', help: 'comma separated list' },
+    { arg: '-data',     args: 0, var: :download_data },
+    { arg: '-monitor',  args: 0, var: :monitor },
+    { arg: '-available_meters',   args: 0, var: :available_meters }
+  ]
+end
+
+def mpxn_split_list(list)
+  list.split(',').map(&:to_i)
+end
+
+cmd = ParseCommandLine.new(command_line_options)
+cmd.parse
+
+ap DCCMeters.available_meters if cmd.available_meters
+
+monitor(cmd.mpxns) if cmd.monitor

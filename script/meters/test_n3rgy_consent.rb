@@ -1,4 +1,4 @@
-require_relative '../lib/dashboard.rb'
+require_relative '../../lib/dashboard.rb'
 
 # for live
 # n3rgyConsent = MeterReadingsFeeds::N3rgyConsent.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_CONSENT_URL'])
