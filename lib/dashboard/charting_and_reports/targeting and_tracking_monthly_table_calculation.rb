@@ -57,9 +57,7 @@ class CalculateMonthlyTrackAndTraceData
   end
 
   def academic_year_month_dates
-    current_year = @school.holidays.academic_year_tolerant_of_missing_data(@aggregate_meter.amr_data.end_date)
-
-    start_date = Date.new(current_year.start_date.year, current_year.start_date.month, 1)
+    start_date = target_meter.target_start_date(@aggregate_meter.amr_data.end_date)
 
     (0..11).map do |month_index|
       end_date = DateTimeHelper.last_day_of_month(start_date)

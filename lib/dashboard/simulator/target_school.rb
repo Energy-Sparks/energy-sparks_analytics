@@ -116,6 +116,13 @@ class TargetMeter < Dashboard::Meter
     logger.info calc_text
   end
 
+  def target_start_date(date)
+    academic_year = @meter_collection.holidays.calculate_academic_year_tolerant_of_missing_data(date)
+    start_of_academic_year = Date.new(academic_year.start_date.year, academic_year.start_date.month, 1)
+    target_start_date = target.first_target_date
+    [start_of_academic_year, target_start_date].max
+  end
+
   def self.calculation_factory(type, meter_to_clone)
     case type
     when :month

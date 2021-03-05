@@ -218,7 +218,7 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def tracking_start_date
-    @tracking_start_date ||= Date.new(academic_year.start_date.year, academic_year.start_date.month, 1)
+    @tracking_start_date ||= target_start_date
   end
 
   def tracking_end_date
@@ -396,6 +396,10 @@ class AlertTargetBase < AlertAnalysisBase
 
   def current_year_target_total_to_date(datatype)
     total(true, tracking_start_date, maximum_alert_date, datatype)
+  end
+
+  def target_start_date
+    @school.target_school.aggregate_meter(fuel_type).target_start_date(maximum_alert_date)
   end
 
   def total(use_target, start_date, end_date, datatype)

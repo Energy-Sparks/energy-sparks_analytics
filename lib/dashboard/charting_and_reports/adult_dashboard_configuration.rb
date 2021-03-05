@@ -129,7 +129,7 @@ class DashboardConfiguration
     electric_target: {   
       name:                   'Setting and tracking targets for your electricity',
       content_class:           AdviceTargetsElectricity,
-      excel_worksheet_name:   'AdviceTargetElectric',
+      excel_worksheet_name:   'TargetElectric',
       charts: %i[
       ],
       promoted_variables: {
@@ -312,7 +312,7 @@ class DashboardConfiguration
     gas_target: {   
       name:                   'Setting and tracking targets for your gas',
       content_class:           AdviceTargetsGas,
-      excel_worksheet_name:   'AdviceTargetGas',
+      excel_worksheet_name:   'TargetGas',
       charts: %i[
       ],
       promoted_variables: {
