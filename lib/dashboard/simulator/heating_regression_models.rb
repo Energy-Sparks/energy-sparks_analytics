@@ -641,6 +641,7 @@ module AnalyseHeatingAndHotWater
         'Floor Area'                  =>    [@heat_meter.meter_collection.floor_area, :float_0dp],
         'Pupils'                      =>    [@heat_meter.meter_collection.number_of_pupils, :integer],
         'Max summer kWh'              =>    [non_heating_model.average_max_non_heating_day_kwh, :kwh],
+        'Non heating model'           =>    [non_heating_model_type.to_s, :string],
         'Standard Deviation'          =>    [@standard_deviation, :kwh],
         'Standard Deviation Percent'  =>    [@standard_deviation_percent, :percent],
         'Balance Point Temperature'   =>    [average_base_temperature,  :temperature],
@@ -772,6 +773,10 @@ module AnalyseHeatingAndHotWater
         logger.info "Error: regression model fitting should only be over a year, got #{days}"
         raise EnergySparksUnexpectedStateException, "Error: regression model fitting should only be over a year, got #{days}"
       end
+    end
+
+    def non_heating_model_type_description
+      HeatingNonHeatingDisaggregationModelBase.model_type_description(:best, @heat_meter, @model_overrides)
     end
 
     def calculate_regression_model(period, allow_more_than_1_year, non_heating_model_type = nil)

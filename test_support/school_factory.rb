@@ -65,18 +65,17 @@ class SchoolFactory
 
   def load_unvalidated_meter_data_collection(school_filename, filename_stub, meter_attributes_overrides: {})
       unvalidated_meter_data = load_meter_collections(school_filename, filename_stub)
-      # ap meter_attributes_overrides
       unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
       AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
       unvalidated_meter_collection
   end
 
   def load_unvalidated_meter_collection(school_filename, meter_attributes_overrides: {})
-    load_unvalidated_meter_data_collection(school_filename, 'unvalidated-meter-collection-', meter_attributes_overrides: {})
+    load_unvalidated_meter_data_collection(school_filename, 'unvalidated-meter-collection-', meter_attributes_overrides: meter_attributes_overrides)
   end
 
   def load_unvalidated_meter_data(school_filename, meter_attributes_overrides: {})
-    load_unvalidated_meter_data_collection(school_filename, 'unvalidated-data-', meter_attributes_overrides: {})
+    load_unvalidated_meter_data_collection(school_filename, 'unvalidated-data-', meter_attributes_overrides: meter_attributes_overrides)
   end
 
   # validate_and_aggregate_meter_data
@@ -120,11 +119,19 @@ class SchoolFactory
     school
   end
 
+  private def split_pseudo_and_non_pseudo_override_attributes(meter_attributes_overrides)
+    pseudo_meter_attributes = meter_attributes_overrides.select { |k, _v| k.is_a?(Symbol) }
+    meter_attributes = meter_attributes_overrides.select { |k, _v| k.is_a?(Integer) }
+    [pseudo_meter_attributes, meter_attributes]
+  end
+
   private def build_meter_collection(data, meter_attributes_overrides: {}) 
     puts "Warning: loading meter attributes from :pseudo_meter_attributes rather than :meter_attributes"
+    pseudo_meter_overrides, meter_overrides = split_pseudo_and_non_pseudo_override_attributes(meter_attributes_overrides)
     meter_attributes = data[:pseudo_meter_attributes]
-    puts "Got here"
-    ap meter_attributes
+
+    add_meter_specific_attribute_overrides(data, meter_overrides)
+
     MeterCollectionFactory.new(
       temperatures: data[:schedule_data][:temperatures],
       solar_pv: data[:schedule_data][:solar_pv],
@@ -134,8 +141,24 @@ class SchoolFactory
     ).build(
       school_data: data[:school_data],
       amr_data: data[:amr_data],
-      pseudo_meter_attributes: meter_attributes.merge(meter_attributes_overrides)
+      pseudo_meter_attributes: meter_attributes.merge(pseudo_meter_overrides)
     )
+  end
+
+  # real meter attributes aren't easily accessible via MeterCollectionFactory.build
+  # so merge them into the data if the mpxn match
+  # - there is no checking to see whether the overridden mpxn for the school exists
+  # - so a large hash of ttributes for multiple schools/meters can be passed in if required
+  # - and then largely ignored for the school
+  private def add_meter_specific_attribute_overrides(data, meter_overrides)
+    data[:amr_data].each do |meters_type, meter_data|
+      meter_data.each.with_index do |one_meter, meter_index|
+        mpxn = one_meter[:identifier]
+        if meter_overrides.key?(mpxn)
+          data[:amr_data][meters_type][meter_index][:attributes].merge!(meter_overrides[mpxn])
+        end
+      end
+    end
   end
 
   def find_cached_school(urn, source)

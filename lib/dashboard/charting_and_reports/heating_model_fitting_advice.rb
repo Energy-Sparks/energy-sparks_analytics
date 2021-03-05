@@ -300,11 +300,20 @@ class DashboardEnergyAdvice
     # amazing print requires rails to do ap html
     # formatting, so do manually
     def non_tariff_attributes_html
-      text = %{
-        <pre>
-          <%= non_tariff_meter_attributes.pretty_inspect %>
-        </pre>
-      }
+      text = if Object.const_defined?('Rails')
+                %{
+                  <pre>
+                    <%= non_tariff_meter_attributes.awesome_inspect({ html: true }) %>
+                  </pre>
+                }
+              else
+                %{
+                  <pre>
+                    <%= non_tariff_meter_attributes.pretty_inspect %>
+                  </pre>
+                }
+              end
+
       ERB.new(text).result(binding)
     end
 
@@ -707,6 +716,25 @@ class DashboardEnergyAdvice
       }
     end
 
+    def type_of_heating_model_html
+      puts "Got here: chosen non heat model: #{model.non_heating_model_type_description}"
+      %{
+        <h2>Chosen Non Heating Separation Model Type</h2>
+        <blockquote>
+            The model currently chosen for this meter is the
+            <%= model.non_heating_model_type_description.to_s %> model.
+        </blockquote>
+        <p>
+          This model can be overridden if it isn&quot;t working using either
+          of the following meter attributes:
+          <ul>
+            <li>heating_non_heating_day_fixed_kwh_separation</li>
+            <li>heating_non_heating_day_separation_model_override</li>
+          </ul>
+        </p>
+      }
+    end
+
     def heating_non_heating_separation_subsequent_3_chart_introduction_html
       %{
         <p>
@@ -749,6 +777,7 @@ class DashboardEnergyAdvice
     def generate_valid_advice
       html_components = [
          separating_heating_and_non_heating_days_explanation_html,
+         type_of_heating_model_html,
          heating_non_heating_separation_subsequent_3_chart_introduction_html,
          heating_non_heating_separation_covid_model_chart_introduction_html,
          model_results_html

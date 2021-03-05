@@ -42,9 +42,38 @@ module AnalyseHeatingAndHotWater
 
     # either use a specific model, the 'best' model, or one defined by a meter attribute override
     def self.model_factory(type, heat_meter, model_overrides)
+      puts "Got here: kwh override: #{model_overrides.heating_non_heating_day_fixed_kwh_separation}" unless model_overrides.heating_non_heating_day_fixed_kwh_separation.nil?
+      if !model_overrides.heating_non_heating_day_separation_model_override.nil? && !%i[no_idea either].include?(model_overrides.heating_non_heating_day_separation_model_override)
+        puts "Got here: model override: #{model_overrides.heating_non_heating_day_separation_model_override} #{heat_meter.mpan_mprn}"
+      end
       model = model_factory_private(type, heat_meter, model_overrides)
       Logging.logger.info "Using #{model.class.type} for heating/non heating model separation for mprn #{heat_meter.mpan_mprn}"
       model
+    end
+
+    def self.override_or_best_model(type, heat_meter, model_overrides)
+      if best_type(type)
+        override_model = model_overrides.heating_non_heating_day_separation_model_override
+        override_model = override_model.nil? ? nil : override_model.to_sym # defensive paranoia
+        type =  if fixed_override_model(heat_meter, model_overrides)
+                  :fixed_single_value_kwh_per_day_override
+                elsif override_model && !%i[no_idea either].include?(override_model)
+                  override_model
+                else
+                  best_non_override_model
+                end
+      else
+        type
+      end
+    end
+
+    def self.model_type_description(type, heat_meter, model_overrides)
+      type = override_or_best_model(type, heat_meter, model_overrides)
+      if type == :fixed_single_value_kwh_per_day_override
+        type + " (at #{model_overrides.heating_non_heating_day_fixed_kwh_separation} kWh/day)"
+      else
+        type
+      end
     end
 
     private
@@ -65,20 +94,6 @@ module AnalyseHeatingAndHotWater
       raise EnergySparksUnexpectedStateException, "Unknown heat non-heat disaggregation model #{type}"
     end
 
-    def self.override_or_best_model(type, heat_meter, model_overrides)
-      if best_type(type)
-        type =  if fixed_override_model(heat_meter, model_overrides)
-                  :fixed_single_value_kwh_per_day_override
-                elsif model_overrides.heating_non_heating_day_separation_model_override
-                  model_overrides.heating_non_heating_day_separation_model_override.to_sym
-                else
-                  best_non_override_model
-                end
-      else
-        type
-      end
-    end
-
     def self.fixed_override_model(heat_meter, model_overrides)
       model_overrides.heating_non_heating_day_fixed_kwh_separation ||
       heat_meter.heating_only? ||
@@ -86,7 +101,9 @@ module AnalyseHeatingAndHotWater
     end
 
     def self.best_type(type)
-      type == :best || type.nil?
+      # see documentation, but no_idea = 'anyones guess whats best to do'
+      # either: either of Covid or non-COVID regression models - equlivalent to 'best'
+      type.nil? || %i[best no_idea either].include?(type)
     end
   end
 

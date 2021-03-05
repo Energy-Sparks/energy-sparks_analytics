@@ -355,11 +355,12 @@ def save_results_to_csv(results)
   end
 end
 
-def test_script_config(school_name_pattern_match, source_db)
+def test_script_config(school_name_pattern_match, source_db, attribute_overrides)
   {
     logger1:                  { name: TestDirectoryConfiguration::LOG + "/model fitting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-    schools:                  school_name_pattern_match,
-    source:                   source_db,
+    schools:                    school_name_pattern_match,
+    source:                     source_db,
+    meter_attribute_overrides:  attribute_overrides,
     model_fitting:            {
       control: {
         display_average_calculation_rate: true,
@@ -394,12 +395,131 @@ def run_all_heat_non_heat_models_for_school(school_name, source_db, results, att
   end
 end
 
-def school_meter_attributes(school_name)
-  puts school_name
-  {}
+def meter_attribute_overrides
+  @meter_attribute_overrides ||= {
+    6615809  => { heating_non_heating_day_fixed_kwh_separation: 235.0 }, # abbey lane
+    9330192104  => { heating_non_heating_day_fixed_kwh_separation: 125.0 }, # abbey lane
+    80000000106982  => { heating_non_heating_day_separation_model_override: :either }, # abbey lane
+    15718809   => { function_switch: :heating_only }, # All Saints
+    15719508  => { heating_non_heating_day_fixed_kwh_separation: 150.0 }, # All Saints
+    80000000114491  => { heating_non_heating_day_fixed_kwh_separation: 150.0 }, # All Saints
+    2148244308  => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # athelston
+    6326701     => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # bankwood
+    6508101     => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # balliefield
+    6504306     => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # brunswick
+    9088174803  => { heating_non_heating_day_separation_model_override: :either }, # caldicot
+    9102173605  => { heating_non_heating_day_separation_model_override: :no_idea }, # caldicot
+    80000000123087  => { heating_non_heating_day_separation_model_override: :no_idea }, # caldicot
+    13605606   => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # christ church
+    6460705    => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Coit
+    13610902   => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Critchill
+    78503110   => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Ditchling
+    10328108   => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Durham Sixth
+    8879383007 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Durham Sixth
+    10274100   => { heating_non_heating_day_separation_model_override: :either }, # Durham Sixth
+    80000000114310  => { heating_non_heating_day_fixed_kwh_separation: 500.0 }, # Durham Sixth
+    12192501   => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Durham St M
+    12192602   => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Durham St M
+    12193907   => { function_switch: :heating_only }, # Durham St 
+    80000000114230 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Durham St M
+    2155853706 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Eccleshall
+    6554602 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Ecclesfield
+    9109952508 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Golden Grove
+    10302505 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Green Lane
+    9216058504 => { function_switch: :kitchen_only }, # Green Lane
+    9216058605 => { function_switch: :heating_only }, # Green Lane
+    80000000114219 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Green Lane
+    8817452200 =>  { function_switch: :heating_only }, # Hunwick
+    61561206 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Kensington Prep
+    6517203 => { heating_non_heating_day_separation_model_override: :either }, # King Edward
+    9335373908 => { heating_non_heating_day_separation_model_override: :either }, # King James
+    10308203 => { function_switch: :heating_only }, # King James
+    10307706 => { heating_non_heating_day_separation_model_override: :no_idea }, # King James
+    10308607 => { function_switch: :heating_only }, # King James
+    80000000136770 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # King James
+    9306088907 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Lamphey
+    8913915100 => { function_switch: :heating_only }, # Little Horsted
+    74118502 => { heating_non_heating_day_separation_model_override: :either }, # Long Furlong
+    6538402 => { function_switch: :heating_only }, # Mossbrook
+    9091095306 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Mundella
+    6319210 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Mundella
+    6319300 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Mundella
+    80000000107006 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Mundella
+    13610307 => { function_switch: :heating_only }, # Oakfield
+    13610408 => { heating_non_heating_day_separation_model_override: :either }, # Oakfield
+    80000000136970 => { heating_non_heating_day_separation_model_override: :either }, # Oakfield
+    9088027004 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Pevensey
+    14601603 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Portsmouth
+    14601805 => { heating_non_heating_day_separation_model_override: :either }, # Portsmouth
+    68351006 => { function_switch: :heating_only }, # Portsmouth
+    9153680108 => { heating_non_heating_day_separation_model_override: :either }, # Portsmouth
+    80000000116581 => { heating_non_heating_day_separation_model_override: :either }, # Portsmouth
+    9178098904 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Prendaghast
+    9308062001 => { heating_non_heating_day_separation_model_override: :either }, # Prince Bishop
+    14349002 => { heating_non_heating_day_separation_model_override: :no_idea }, # Red Rose
+    9305046403 => { function_switch: :heating_only }, # Red Rose
+    80000000002125 => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # Red Rose
+    9158112702  => { heating_non_heating_day_fixed_kwh_separation: 400.0 }, # ribbon
+    75869205 => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # Ringmer
+    15224503 => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # Robsack
+    181109 => { heating_non_heating_day_separation_model_override: :no_idea }, # Royal High
+    180410 => { heating_non_heating_day_separation_model_override: :no_idea }, # Royal High
+    180803 => { function_switch: :heating_only }, # Royal High
+    181502 => { heating_non_heating_day_separation_model_override: :no_idea }, # Royal High
+    180006 => { heating_non_heating_day_fixed_kwh_separation: 100.0 }, # Royal High
+    180208 => { function_switch: :heating_only }, # Royal High
+    180702 => { function_switch: :heating_only }, # Royal High
+    181210 => { function_switch: :heating_only }, # Royal High
+    181401 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # Royal High
+    180601 => { heating_non_heating_day_separation_model_override: :no_idea }, # Royal High
+    80000000109348 => { heating_non_heating_day_fixed_kwh_separation: 2000.0 }, # Royal High
+    15234304 => { heating_non_heating_day_separation_model_override: :either }, # Sacred Heart
+    47939506 => { heating_non_heating_day_separation_model_override: :no_idea }, # Saltford
+    78575708 => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # Saundersfoot
+    8834264005 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # St Bedes
+    9090353207 => { heating_non_heating_day_separation_model_override: :either }, # St Bedes
+    80000008403344 => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # St Bedes
+    19161200 => { function_switch: :heating_only }, # St Louis
+    16747608 => { heating_non_heating_day_separation_model_override: :either }, # St Philips
+    16747810 => { heating_non_heating_day_separation_model_override: :either }, # St Philips
+    80000000143560 => { heating_non_heating_day_separation_model_override: :either }, # St Philips
+    82044001 => { function_switch: :heating_only }, # St Richards C
+    15496604 => { heating_non_heating_day_separation_model_override: :either }, # St Richards C
+    82043504 => { function_switch: :kitchen_only }, # St Richards C
+    8814676600 => { heating_non_heating_day_separation_model_override: :either }, # St Richards C
+    80000000114612 => { heating_non_heating_day_separation_model_override: :either }, # St Richards C
+    6354605 => { heating_non_heating_day_separation_model_override: :either }, # St Thomas of C
+    67285306 => { heating_non_heating_day_separation_model_override: :either }, # St Benedict
+    8908639402 => { heating_non_heating_day_fixed_kwh_separation: 200.0 }, # St Nicolas
+    11139604 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # St Micolas
+    76187307 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # St Micolas
+    8904906502 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model_covid_tolerant }, # St Micolas
+    80000000147894 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # St Micolas
+    8903472804 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # The Durham Federation, good example
+    8907148400 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # The Haven
+    8907137204 => { function_switch: :kitchen_only }, # The Haven
+    80000000002169 => { heating_non_heating_day_separation_model_override: :either }, # The Haven
+    11160707 => { function_switch: :heating_only }, # Toft Hill
+    10545307 => { heating_non_heating_day_separation_model_override: :either }, # Trinity
+    9337391909 => { heating_non_heating_day_fixed_kwh_separation: 500.0 }, # Walkley
+    6500803 => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # Walkley
+    80000000107094 => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # Walkley
+    9209120604 => { heating_non_heating_day_separation_model_override: :either }, # Watercliffe Meadow
+    2163409301 => { heating_non_heating_day_separation_model_override: :either }, # Whiteways
+    14494404 => { heating_non_heating_day_separation_model_override: :not_enough_data }, # Wimbledon
+    14493806 => { heating_non_heating_day_separation_model_override: :not_enough_data }, # Wimbledon
+    9377457904 => { heating_non_heating_day_separation_model_override: :not_enough_data }, # Wimbledon
+    620361806 => { heating_non_heating_day_separation_model_override: :not_enough_data }, # Wimbledon
+    80000000102692 => { heating_non_heating_day_separation_model_override: :not_enough_data }, # Wimbledon
+    1335642507 => { heating_non_heating_day_separation_model_override: :temperature_sensitive_regression_model }, # Wingate
+    9188991203 => { heating_non_heating_day_separation_model_override: :either }, # Wivelsfield
+    9120550903 =>  { heating_non_heating_day_fixed_kwh_separation: 350.0 }, # Woodthorpe
+    13947702 =>  { heating_non_heating_day_fixed_kwh_separation: 140.0 }, # Wooton St Peters
+    9297324003 => { heating_non_heating_day_separation_model_override: :fixed_single_value_temperature_sensitive_regression_model }, # Wybourne
+  }.select { |_k, v| !v.nil? }
 end
 
-school_name_pattern_match = ['abb*']
+school_name_pattern_match = ['*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
@@ -408,11 +528,10 @@ results = {}
 
 school_names.each do |school_name|
   results[school_name] ||= {}
-  attributes = school_meter_attributes(school_name)
-  run_all_heat_non_heat_models_for_school(school_name, source_db, results, attributes)
+  run_all_heat_non_heat_models_for_school(school_name, source_db, results, meter_attribute_overrides)
 end
 
 save_results_to_csv(results)
 
-script = test_script_config(school_name_pattern_match, source_db)
+script = test_script_config(school_name_pattern_match, source_db, meter_attribute_overrides)
 RunTests.new(script).run
