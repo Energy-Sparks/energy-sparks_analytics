@@ -115,7 +115,7 @@ logging = nil
 logging = { puts: true, ap: { limit: 5 } }
 
 
-n3rgy = MeterReadingsFeeds::N3rgy.new(api_key: '6ceb77c7-4d16-4e4f-b582-4d29d8c32718', debugging: logging, production: true)
+n3rgy = MeterReadingsFeeds::N3rgy.new(api_key: ENV['N3RGY_APP_KEY'], debugging: logging, production: true)
 process_one_mpxn(n3rgy, 2000006185057)
 
 # puts n3rgy.all_data(2234567891000)

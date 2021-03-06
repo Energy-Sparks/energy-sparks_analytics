@@ -38,6 +38,11 @@ module MeterReadingsFeeds
       get_data(url)
     end
 
+    def cache_data(mpxn: nil, fuel_type: nil, element: DEFAULT_ELEMENT, reading_type: DATA_TYPE_CONSUMPTION)
+      url = make_url(mpxn, fuel_type, reading_type, element)
+      get_data(url)
+    end
+
     def read_inventory(mpxn: )
       url = '/read-inventory'
       body = { mpxns: [mpxn] }
@@ -115,6 +120,5 @@ module MeterReadingsFeeds
       #problem parsing or traversing json, return original api error
       response.body
     end
-
   end
 end

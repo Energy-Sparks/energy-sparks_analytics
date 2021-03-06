@@ -7,6 +7,10 @@ class DCCMeters
     @@available_meters ||= meter_config.transform_keys { |mpxn| real_mpxn(mpxn) }
   end
 
+  def self.all_mpxns
+    available_meters.keys
+  end
+
   def self.meter_config
     @@meter_config ||= {
       1234567891000 => {},
@@ -109,7 +113,7 @@ def filename(mpxn, type)
   './Results/n3rgy' +  type + mpxn.to_s + ' ' + DateTime.now.strftime('%H %M %S') + '.csv'
 end
 
-def check_one_mpxn(mpxn)
+def check_one_mpxn(mpxn, cmd)
   meter = DCCMeters.meter(mpxn)
 
   end_date    = Date.today
@@ -123,13 +127,13 @@ def check_one_mpxn(mpxn)
   save_csv(meter.fuel_type, readings, mpxn)
 end
 
-def monitor(mpxns)
+def monitor(mpxns, cmd)
   sleep_times = [[10, 60], [60, 60], [600, 24 * 6]]
 
   sleep_times.each do |(sleep_period, count)|
     count.times do
       mpxns.each do |mpxn|
-        check_one_mpxn(mpxn)
+        check_one_mpxn(mpxn, cmd)
       end
       sleep sleep_period
     end
@@ -141,11 +145,28 @@ def analyse_readings(fuel_type, readings)
   "Readings: #{readings[fuel_type][:readings].length} Missing: #{readings[fuel_type][:missing_readings].length}"
 end
 
+# currently the new library doesn't work
+def grant_old_consent(mpxn)
+  logging = { puts: true, ap: { limit: 5 } }
+  example_consent_file_link = 'sandbox testing PH 6Mar2021'
+  n3rgy = MeterReadingsFeeds::N3rgy.new(api_key: ENV['N3RGY_SANDBOX_API_KEY'], debugging: logging, production: true)
+  n3rgy.grant_trusted_consent(mpxn, example_consent_file_link)
+end
+
+# parked here temporarily as doesn't work
+def grant_new_consent(mpxn)
+  n3rgy_consent = MeterReadingsFeeds::N3rgyConsent.new(api_key: meter.api_key, base_url: meter.base_url)
+  n3rgy_consent.grant_trusted_consent(mpxn, 'testing sandbox')
+end
+
 def command_line_options
   [
     { arg: '-mpxn',     args: 1, var: :mpxns, parse: 'mpxn_split_list', help: 'comma separated list' },
+    { arg: '-all',      args: 0, var: :all_meters },
     { arg: '-data',     args: 0, var: :download_data },
     { arg: '-monitor',  args: 0, var: :monitor },
+    { arg: '-consent',  args: 0, var: :consent },
+    { arg: '-dates',  args: 0,   var: :dates },
     { arg: '-available_meters',   args: 0, var: :available_meters }
   ]
 end
@@ -157,6 +178,22 @@ end
 cmd = ParseCommandLine.new(command_line_options)
 cmd.parse
 
+mpxns = cmd.all_meters ? DCCMeters.all_mpxns : cmd.mpxns
+mpxns.each do |mpxn|
+  meter = DCCMeters.meter(mpxn)
+  n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
+  if n3rgy_data.status(mpxn) == :consent_required && cmd.consent
+    grant_old_consent(mpxn)
+  end
+  if cmd.dates
+    start_date = n3rgy_data.cache_start_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
+    end_date   = n3rgy_data.cache_end_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
+    puts "#{mpxn} #{start_date} #{end_date}"
+  end
+end
+
+exit
+
 ap DCCMeters.available_meters if cmd.available_meters
 
-monitor(cmd.mpxns) if cmd.monitor
+monitor(cmd.mpxns, cmd) if cmd.monitor

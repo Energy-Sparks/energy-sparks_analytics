@@ -65,6 +65,16 @@ module MeterReadingsFeeds
       elements['entries']
     end
 
+    def cache_start_datetime(mpxn: nil, fuel_type: nil, element: MeterReadingsFeeds::N3rgyDataApi::DEFAULT_ELEMENT, reading_type: MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
+      start_date = cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type, type: 'start')
+      DateTime.strptime(start_date, '%Y%m%d%H%M')
+    end
+
+    def cache_end_datetime(mpxn: nil, fuel_type: nil, element: MeterReadingsFeeds::N3rgyDataApi::DEFAULT_ELEMENT, reading_type: MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
+      end_date = cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type, type: 'end')
+      DateTime.strptime(end_date, '%Y%m%d%H%M')
+    end
+
     private
 
     def consumption_data(mpxn, fuel_type, start_date, end_date)
@@ -156,6 +166,11 @@ module MeterReadingsFeeds
       else
         value / 100.0
       end
+    end
+
+    
+    def cache_data(mpxn:, fuel_type:, element:, reading_type:, type:)
+      api.cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type)['availableCacheRange'][type]
     end
 
     def make_one_day_readings(meter_readings_by_date, mpan_mprn)
