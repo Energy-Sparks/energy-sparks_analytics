@@ -150,11 +150,11 @@ def grant_old_consent(mpxn)
   logging = { puts: true, ap: { limit: 5 } }
   example_consent_file_link = 'sandbox testing PH 6Mar2021'
   n3rgy = MeterReadingsFeeds::N3rgy.new(api_key: ENV['N3RGY_SANDBOX_API_KEY'], debugging: logging, production: true)
-  n3rgy.grant_trusted_consent(mpxn, example_consent_file_link)
+  ap n3rgy.grant_trusted_consent(mpxn, example_consent_file_link)
 end
 
 # parked here temporarily as doesn't work
-def grant_new_consent(mpxn)
+def grant_new_consent(mpxn, meter)
   n3rgy_consent = MeterReadingsFeeds::N3rgyConsent.new(api_key: meter.api_key, base_url: meter.base_url)
   n3rgy_consent.grant_trusted_consent(mpxn, 'testing sandbox')
 end
@@ -183,7 +183,7 @@ mpxns.each do |mpxn|
   meter = DCCMeters.meter(mpxn)
   n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
   if n3rgy_data.status(mpxn) == :consent_required && cmd.consent
-    grant_old_consent(mpxn)
+    grant_new_consent(mpxn, meter)
   end
   if cmd.dates
     start_date = n3rgy_data.cache_start_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
