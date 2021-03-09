@@ -94,37 +94,62 @@ def log(in_str)
   }
 end
 
-def save_csv(fuel_type, readings, mpxn)
-  CSV.open(filename(mpxn, ' data '), 'w') do |csv|
-    csv << ['date', 'days kWh', (0..47).map{ |hh| "#{(hh / 2).to_i}:#{(hh % 2) * 30}"}].flatten
+def save_csv(fuel_type, readings, mpxn, dtt = nil)
+  CSV.open(filename(mpxn, 'meter_readings-', dtt), 'w') do |csv|
+    csv << ['date', 'days kWh', 'type', 'fuel_type', (0..47).map{ |hh| "#{(hh / 2).to_i}:#{(hh % 2) * 30}"}].flatten
     readings[fuel_type][:readings].each do |date, one_days_readings|
-      csv << [date, one_days_readings.one_day_kwh, one_days_readings.kwh_data_x48].flatten
+      csv << [date, one_days_readings.one_day_kwh, one_days_readings.type, fuel_type, one_days_readings.kwh_data_x48].flatten
     end
   end
 
-  CSV.open(filename(mpxn, ' missing data '), 'w') do |csv|
+  CSV.open(filename(mpxn, ' missing data ', dtt), 'w') do |csv|
     readings[fuel_type][:missing_readings].each do |dt|
       csv << [ dt ]
     end
   end
 end
 
-def filename(mpxn, type)
-  './Results/n3rgy' +  type + mpxn.to_s + ' ' + DateTime.now.strftime('%H %M %S') + '.csv'
+def filename(mpxn, type, dtt)
+  './Results/dcc-' +  type + mpxn.to_s + ' ' + '.csv'
 end
 
 def check_one_mpxn(mpxn, cmd)
-  meter = DCCMeters.meter(mpxn)
-
   end_date    = Date.today
   start_date  = end_date - 13 * (364 / 12)
+
+  download_meter_readings(mpxn, start_date, end_date, DateTime.now.strftime('%H %M %S'))
+end
+
+def download_meter_readings(mpxn, start_date, end_date, dtt = nil)
+  meter = DCCMeters.meter(mpxn)
 
   n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
 
   readings = n3rgy_data.readings(mpxn, meter.fuel_type, start_date, end_date)
 
   log(sprintf('%-14.14s', mpxn) + analyse_readings(meter.fuel_type, readings))
-  save_csv(meter.fuel_type, readings, mpxn)
+  save_csv(meter.fuel_type, readings, mpxn, dtt)
+end
+
+def export(mpxn)
+  download_meter_readings(mpxn, start_date(mpxn), end_date(mpxn))
+end
+
+def start_date(mpxn)
+  meter = DCCMeters.meter(mpxn)
+  n3rgy = n3rgy_data(mpxn)
+  n3rgy.cache_start_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
+end
+
+def end_date(mpxn)
+  meter = DCCMeters.meter(mpxn)
+  n3rgy = n3rgy_data(mpxn)
+  n3rgy.cache_end_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
+end
+
+def n3rgy_data(mpxn)
+  meter = DCCMeters.meter(mpxn)
+  MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
 end
 
 def monitor(mpxns, cmd)
@@ -138,7 +163,6 @@ def monitor(mpxns, cmd)
       sleep sleep_period
     end
   end
-
 end
 
 def analyse_readings(fuel_type, readings)
@@ -166,7 +190,8 @@ def command_line_options
     { arg: '-data',     args: 0, var: :download_data },
     { arg: '-monitor',  args: 0, var: :monitor },
     { arg: '-consent',  args: 0, var: :consent },
-    { arg: '-dates',  args: 0,   var: :dates },
+    { arg: '-dates',    args: 0, var: :dates },
+    { arg: '-export',   args: 0, var: :export },
     { arg: '-available_meters',   args: 0, var: :available_meters }
   ]
 end
@@ -180,15 +205,19 @@ cmd.parse
 
 mpxns = cmd.all_meters ? DCCMeters.all_mpxns : cmd.mpxns
 mpxns.each do |mpxn|
-  meter = DCCMeters.meter(mpxn)
-  n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
-  if n3rgy_data.status(mpxn) == :consent_required && cmd.consent
-    grant_new_consent(mpxn, meter)
-  end
-  if cmd.dates
-    start_date = n3rgy_data.cache_start_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
-    end_date   = n3rgy_data.cache_end_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
-    puts "#{mpxn} #{start_date} #{end_date}"
+  begin
+    meter = DCCMeters.meter(mpxn)
+    n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
+    if n3rgy_data.status(mpxn) == :consent_required && cmd.consent
+      grant_new_consent(mpxn, meter)
+    end
+
+    puts "#{mpxn} #{start_date(mpxn)} #{end_date(mpxn)}" if cmd.dates
+
+    export(mpxn) if cmd.export
+  rescue => e
+    puts e.message
+    puts e.backtrace
   end
 end
 

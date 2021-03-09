@@ -23,7 +23,7 @@ module MeterReadingsFeeds
       else
         readings_by_date = consumption_data(mpxn, fuel_type, start_date, end_date)
       end
-      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date, true)
+      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date, true, nil)
       { fuel_type =>
           {
             mpan_mprn:        mpxn,
@@ -175,7 +175,7 @@ module MeterReadingsFeeds
 
     def make_one_day_readings(meter_readings_by_date, mpan_mprn)
       meter_readings_by_date.map do |date, readings|
-        [date, OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, readings)]
+        [date.to_date, OneDayAMRReading.new(mpan_mprn, date.to_date, 'ORIG', nil, DateTime.now, readings, true)]
       end.to_h
     end
 
