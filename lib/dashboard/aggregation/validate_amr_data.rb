@@ -29,14 +29,16 @@ class ValidateAMRData
     @data_problems = {}
   end
 
-  def validate(analysis = false)
-puts "Got here"; analysis = true
+  def validate(debug_analysis = false)
+    # assess_null_dcc_data
     logger.debug "=" * 150
     logger.debug "Validating meter data of type #{@meter.meter_type} #{@meter.name} #{@meter.id}"
     logger.debug "Meter data from #{@meter.amr_data.start_date} to #{@meter.amr_data.end_date}"
-    puts "Before validation #{missing_data} missing items of data" if analysis
+    logger.debug "DCC Meter #{@meter.dcc_meter}"
+    puts "Before validation #{missing_data} missing items of data" if debug_analysis
     # ap(@meter, limit: 5, :color => {:float  => :red})
     process_meter_attributes
+    correct_dcc_meter if @meter.dcc_meter
     meter_corrections unless @meter.meter_correction_rules.nil?
     check_for_long_gaps_in_data
     # meter_corrections unless @meter.meter_correction_rules.nil?
@@ -44,7 +46,7 @@ puts "Got here"; analysis = true
     correct_holidays_with_adjacent_academic_years
     final_missing_data_set_to_small_negative
     @amr_data.summarise_bad_data
-    if analysis
+    if debug_analysis
       puts "After validation #{missing_data} missing items of data"
       ap missing_data_stats
     end
@@ -182,32 +184,58 @@ puts "Got here"; analysis = true
     end
   end
 
-  # the Frome/Somerset csv feed has a small amount of zero data in its electricity csv feeds
-  # sometimes its just a few points, sometimes its a whole day (with BST/GMT offset issues!)
-  def correct_zero_partial_data
-    # do this is a particular order to avoid substitiing partial data
-    # with partial data
-    max_missing_readings = 6
-
-    missing_dates = remove_readings_with_too_many_missing_partial_readings(max_missing_readings)
-
-    interpolate_partial_missing_data(max_missing_readings)
-
-    substitute_partial_missing_data_with_whole_day(missing_dates)
+  def correct_dcc_meter
+    remove_missing_start_end_dates_if_partial_nil
+    correct_zero_partial_data(missing_data_value: nil)
+    # leave the rest of the validation to fix whole missing days
   end
 
-  def interpolate_partial_missing_data(max_missing_readings)
+  def remove_missing_start_end_dates_if_partial_nil
+    if @amr_data.days_kwh_x48(@amr_data.start_date).any?(&:nil?)
+      logger.info "Removing DCC meter start date #{@amr_data.start_date} as only partial data start date"
+      @amr_data[@amr_data.start_date].set_type('PSTD')
+      @amr_data.set_start_date(@amr_data.start_date + 1)
+    end
+    if @amr_data.days_kwh_x48(@amr_data.end_date).any?(&:nil?)
+      logger.info "Removing DCC meter end date #{@amr_data.end_date} as only partial data end date"
+      @amr_data[@amr_data.end_date].set_type('PETD')
+      @amr_data.set_start_date(@amr_data.end_date - 1)
+    end
+  end
+
+  # the Frome/Somerset csv feed has a small amount of zero data in its electricity csv feeds
+  # sometimes its just a few points, sometimes its a whole day (with BST/GMT offset issues!)
+  def correct_zero_partial_data(max_missing_readings: 6, missing_data_value: 0.0)
+    # do this is a particular order to avoid substitiing partial data
+    # with partial data
+
+    missing_dates = remove_readings_with_too_many_missing_partial_readings(max_missing_readings, missing_data_value)
+
+    interpolate_partial_missing_data(max_missing_readings, missing_data_value)
+
+    substitute_partial_missing_data_with_whole_day(missing_dates) unless @meter.dcc_meter
+  end
+
+  def interpolate_partial_missing_data(max_missing_readings, missing_data_value)
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if @amr_data.date_exists?(date)
         days_kwh_x48 = @amr_data.days_kwh_x48(date)
-        num_zero_values = days_kwh_x48.count(0.0)
+        num_zero_values = days_kwh_x48.count(missing_data_value)
         if num_zero_values > 0 && num_zero_values <= max_missing_readings
-          days_kwh_x48 = interpolate_zero_readings(days_kwh_x48)
-          updated_data = OneDayAMRReading.new(meter_id, date, 'CMP1', nil, DateTime.now, days_kwh_x48)
+          days_kwh_x48 = interpolate_zero_readings(days_kwh_x48, missing_data_value: missing_data_value)
+          type = (@meter.dcc_meter ? 'DMP' : 'CMP') + num_zero_values.to_s
+          updated_data = OneDayAMRReading.new(meter_id, date, type, nil, DateTime.now, days_kwh_x48)
           @amr_data.add(date, updated_data)
         end
       end
     end
+  end
+
+  def assess_null_dcc_data
+    count = (@amr_data.start_date..@amr_data.end_date).sum do |date|
+      @amr_data.date_missing?(date) ? 48 : @amr_data.days_kwh_x48(date).count(&:nil?)
+    end
+    puts "Items of nil data #{count} for #{@meter.mpan_mprn}"
   end
 
   def missing_data_stats
@@ -226,7 +254,7 @@ puts "Got here"; analysis = true
     missing_dates.each do |date|
       date, updated_one_day_reading = substitute_missing_electricity_data(date, 'S')
       unless updated_one_day_reading.nil?
-        updated_one_day_reading.set_type('CMP2')
+        updated_one_day_reading.set_type('CMPH')
         @amr_data.add(date, updated_one_day_reading.deep_dup)
       else
         logger.debug "Unable to override partial/missing data for #{@meter.mpan_mprn} on #{date}"
@@ -234,10 +262,10 @@ puts "Got here"; analysis = true
     end
   end
 
-  def remove_readings_with_too_many_missing_partial_readings(max_missing_readings)
+  def remove_readings_with_too_many_missing_partial_readings(max_missing_readings, missing_data_value)
     missing_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
-      if @amr_data.date_exists?(date) && @amr_data.days_kwh_x48(date).count(0.0 ) > max_missing_readings
+      if @amr_data.date_exists?(date) && @amr_data.days_kwh_x48(date).count(missing_data_value) > max_missing_readings
         missing_dates.push(date)
       end
     end
@@ -247,17 +275,17 @@ puts "Got here"; analysis = true
     missing_dates
   end
 
-  def interpolate_zero_readings(days_kwh_x48)
+  def interpolate_zero_readings(days_kwh_x48, missing_data_value: 0.0)
     interpolation_data = {}
 
     days_kwh_x48.each_index do |halfhour_index|
-      interpolation_data[halfhour_index] = days_kwh_x48[halfhour_index] if days_kwh_x48[halfhour_index] != 0.0
+      interpolation_data[halfhour_index] = days_kwh_x48[halfhour_index] if days_kwh_x48[halfhour_index] != missing_data_value
     end
 
     interpolation = Interpolate::Points.new(interpolation_data)
 
     days_kwh_x48.each_index do |halfhour_index|
-      days_kwh_x48[halfhour_index] = interpolation.at(halfhour_index) if days_kwh_x48[halfhour_index] == 0.0
+      days_kwh_x48[halfhour_index] = interpolation.at(halfhour_index) if days_kwh_x48[halfhour_index] == missing_data_value
     end
 
     days_kwh_x48

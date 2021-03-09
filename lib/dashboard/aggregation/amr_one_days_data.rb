@@ -19,7 +19,7 @@ class OneDayAMRReading
     @kwh_data_x48 = kwh_data_x48
     valid = validate_data(nils_valid)
     if valid != 48
-      raise EnergySparksBadAMRDataTypeException, "Error: expecting all 48 half hour kWh values to be float or integer (#{valid})"
+      raise EnergySparksBadAMRDataTypeException, "Error: expecting all 48 half hour kWh values to be float or integer (or nil) (#{valid})"
     end
     @one_day_kwh = (nils_valid && kwh_data_x48.any?(&:nil?)) ? nil : kwh_data_x48.inject(:+)
   end
@@ -72,7 +72,7 @@ class OneDayAMRReading
   def check_type(type)
     if type.nil?
       raise EnergySparksBadAMRDataTypeException.new('Unexpected nil AMR bad data type')
-    elsif !AMR_TYPES.key?(type)
+    elsif !self.class.amr_types.key?(type)
       raise EnergySparksBadAMRDataTypeException.new("Unexpected AMR bad data type #{type}")
     end
   end

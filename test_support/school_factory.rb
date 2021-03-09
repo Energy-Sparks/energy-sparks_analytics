@@ -18,6 +18,8 @@ class SchoolFactory
       load_validated_meter_collection(identifier, meter_attributes_overrides: meter_attributes_overrides)
     when :unvalidated_meter_collection
       load_unvalidated_meter_collection(identifier, meter_attributes_overrides: meter_attributes_overrides)
+    when :dcc_n3rgy_override_with_files
+      load_unvalidated_meter_data_with_dcc_override(identifier, meter_attributes_overrides: meter_attributes_overrides)
     when :unvalidated_meter_data
       load_unvalidated_meter_data(identifier, meter_attributes_overrides: meter_attributes_overrides)
     end
@@ -65,7 +67,6 @@ class SchoolFactory
 
   def load_unvalidated_meter_data_collection(school_filename, filename_stub, meter_attributes_overrides: {})
       unvalidated_meter_data = load_meter_collections(school_filename, filename_stub)
-      ap meter_attributes_overrides
       unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
       AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
       unvalidated_meter_collection
@@ -79,7 +80,18 @@ class SchoolFactory
     load_unvalidated_meter_data_collection(school_filename, 'unvalidated-data-', meter_attributes_overrides: {})
   end
 
-  # validate_and_aggregate_meter_data
+  def load_unvalidated_meter_data_with_dcc_override(school_filename, meter_attributes_overrides: {})
+    unvalidated_meter_data = load_meter_collections(school_filename, 'unvalidated-data-')
+    unvalidated_meter_collection = build_meter_collection(unvalidated_meter_data, meter_attributes_overrides: meter_attributes_overrides)
+    N3rgyMeterDataOverride.new(unvalidated_meter_collection).override
+    begin
+      AggregateDataService.new(unvalidated_meter_collection).validate_and_aggregate_meter_data
+    rescue => e
+      puts e.message
+      puts e.backtrace
+    end
+    unvalidated_meter_collection
+  end
 
   def load_meter_collections(school_filename, file_type)
     school = nil
