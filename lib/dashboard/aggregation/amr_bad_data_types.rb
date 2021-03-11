@@ -11,6 +11,7 @@ class OneDayAMRReading
     'MHOL'  => { name: 'Missing Holiday',                                   description: 'Missing data replaced with zeros'},
     'MDTZ'  => { name: 'Missing data date range set to zero',               description: 'Missing data replaced with zeros'},
     'S31M'  => { name: 'Scaled Data: 100ft3 to m2',                         description: 'Data from original source in wrong units'},
+    
     'GSS1'  => { name: 'Missing gas - substituted school day',              description: 'Missing gas school day substituted with DD adjustment'},
     'GSW1'  => { name: 'Missing gas - substituted weekend',                 description: 'Missing gas weekend substituted with DD adjustment'},
     'GSh1'  => { name: 'Missing gas - substituted weekend/holiday',         description: 'Missing gas weekend substituted with DD adjustment'},
@@ -21,6 +22,19 @@ class OneDayAMRReading
     'GXH1'  => { name: 'Override gas - substituted holiday',                description: 'Override gas holiday substituted with DD adjustment'},
     'GSBH'  => { name: 'Missing gas - substituted holiday',                 description: 'Missing gas holiday substituted with DD adjustment'},
     'G0H1'  => { name: 'Missing gas - holiday set to zero',                 description: 'Missing gas holiday substituted 0.0'},
+
+    # these types occur where there isn't enough data for modelling, just substitute nearest day
+    'gSS1'  => { name: 'Missing gas - substituted school day (limited data)',       description: 'Missing gas school day substituted No DD adjustment'},
+    'gSW1'  => { name: 'Missing gas - substituted weekend (limited data)',          description: 'Missing gas weekend substituted No DD adjustment'},
+    'gSh1'  => { name: 'Missing gas - substituted weekend/holiday (limited data)',  description: 'Missing gas weekend substituted No DD adjustment'},
+    'gSH1'  => { name: 'Missing gas - substituted holiday (limited data)',          description: 'Missing gas holiday substituted No DD adjustment'},
+    'gXS1'  => { name: 'Override gas - substituted school day (limited data)',      description: 'Override gas school day substituted No DD adjustment'},
+    'gXW1'  => { name: 'Override gas - substituted weekend (limited data)',         description: 'Override gas weekend substituted No DD adjustment'},
+    'gXh1'  => { name: 'Override gas - substituted weekend/holiday (limited data)', description: 'Override gas weekend substituted No DD adjustment'},
+    'gXH1'  => { name: 'Override gas - substituted  (limited data)',                description: 'Override gas holiday substituted No DD adjustment'},
+    'gSBH'  => { name: 'Missing gas - substituted holiday (limited data)',          description: 'Missing gas holiday substituted No DD adjustment'},
+    'g0H1'  => { name: 'Missing gas - holiday set to zero (limited data)',          description: 'Missing gas holiday substituted 0.0'},
+    
     'E0H1'  => { name: 'Missing electricity - holiday set to zero',         description: 'Missing electricity holiday substituted 0.0'},
     'ESS1'  => { name: 'Missing electricity - substituted school day',      description: 'Missing electricity school day substituted'},
     'ESW1'  => { name: 'Missing electricity - substituted weekend',         description: 'Missing electricity weekend substituted'},
@@ -30,6 +44,7 @@ class OneDayAMRReading
     'EXW1'  => { name: 'Override electricity - substituted weekend',        description: 'Override electricity weekend substituted'},
     'EXh1'  => { name: 'Override electricity - substituted weekend/holiday',description: 'Override electricity weekend substituted'},
     'EXH1'  => { name: 'Override electricity - substituted holiday',        description: 'Override electricity holiday substituted'},
+ 
     'ESBH'  => { name: 'Missing electricity - substituted holiday',         description: 'Missing electricity holiday substituted'},
     'BGG1'  => { name: 'Gap too big - ignored all previous days',           description: 'Too big a gap (30 days) ignoring all days prior'},
     'BGG2'  => { name: 'Gap too big - ignored all previous days',           description: 'Too big a gap (50 days) ignoring all days prior'},

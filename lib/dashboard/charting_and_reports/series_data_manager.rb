@@ -467,10 +467,6 @@ class SeriesDataManager
     end
   end
 
-  def daily_high_thermal_mass_heating_model
-    @high_thermal_mass_heating_model = calculate_high_thermal_mass_model if @high_thermal_mass_heating_model.nil?
-  end
-
   def heating_model
     @heating_model = calculate_model if @heating_model.nil?
     @heating_model
@@ -515,19 +511,16 @@ private
   end
 
   def calculate_model
-    calculate_model_by_type(@model_type)
+    non_heating_model_type = @chart_configuration[:non_heating_model]
+    calculate_model_by_type(@model_type, non_heating_model_type)
   end
 
-  def calculate_high_thermal_mass_model
-    @high_thermal_mass_heating_model = calculate_model_by_type(:thermal_mass_regression_temperature)
-  end
-
-  def calculate_model_by_type(model_type)
+  def calculate_model_by_type(model_type, non_heating_model_type = nil)
     # model calculated using the latest year's regression data,deliberately ignores chart request
     last_year = SchoolDatePeriod.year_to_date(:year_to_date, 'validate amr', @last_meter_date, @first_meter_date)
     meter = select_one_meter([:gas, :storage_heater])
     logger.info "Calculating heating model for #{meter.id} - SeriesDataManager::calculate_model_by_type"
-    meter.heating_model(last_year, model_type)
+    meter.heating_model(last_year, model_type, non_heating_model_type)
   end
 
   def calculate_hotwater_model

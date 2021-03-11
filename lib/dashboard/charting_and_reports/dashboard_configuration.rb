@@ -303,6 +303,12 @@ class DashboardConfiguration
                                   group_by_week_gas_model_fitting_unlimited
                                   gas_by_day_of_week_model_fitting
                                   gas_longterm_trend_model_fitting
+                                  thermostatic_regression_simple_school_day_non_heating_regression_covid_tolerant
+                                  seasonal_simple_school_day_non_heating_regression_covid_tolerant
+                                  thermostatic_regression_simple_school_day_non_heating_regression
+                                  seasonal_simple_school_day_non_heating_regression
+                                  thermostatic_regression_simple_school_day_non_heating_non_regression
+                                  seasonal_simple_school_day_non_heating_non_regression
                                   thermostatic_regression_simple_school_day
                                   thermostatic_regression_simple_all
                                   thermostatic_regression_thermally_massive_school_day
