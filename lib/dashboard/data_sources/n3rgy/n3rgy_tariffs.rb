@@ -1,4 +1,7 @@
 class N3rgyTariffs
+  # can't use Date::Ininity as only comparable on rhs of comparison
+  # see this longstanding bug report: https://bugs.ruby-lang.org/issues/6753
+  INFINITE_DATE = Date.new(2050, 1, 1) 
   def initialize(tariff_data)
     @tariff_data = tariff_data
   end
@@ -7,10 +10,15 @@ class N3rgyTariffs
   # into meter attribute like descriptive tariffs
   # approx 16,000 to 2 compression
   def parameterise
+    return nil unless tariffs_available?
     {
       kwh_rates:        process_kwh_rates(       @tariff_data[:kwh_tariffs]),
       standing_charges: process_standing_charges(@tariff_data[:standing_charges])
     }
+  end
+
+  def tariffs_available?
+    !@tariff_data.nil? && !@tariff_data[:kwh_tariffs].empty? && !@tariff_data[:standing_charges].empty?
   end
 
   private
@@ -77,7 +85,7 @@ class N3rgyTariffs
       [group.first[0], group.first[1]]
     end.to_h
     end_dates = compressed_date_rates.keys[1..10000].map{ |d| d - 1}
-    end_dates.push(Date.new(2050,1,1))
+    end_dates.push(INFINITE_DATE)
     date_ranged_rates = compressed_date_rates.transform_keys.with_index do |date, index|
       date..end_dates[index]
     end

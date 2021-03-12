@@ -113,7 +113,10 @@ def tariffs(mpxn)
   meter = DCCMeters.meter(mpxn)
   tariff_data = load_yaml(meter.fuel_type, mpxn)
   td = N3rgyTariffs.new(tariff_data)
-  ap td.parameterise
+  parameterised_tariff = td.parameterise
+  ap parameterised_tariff
+  energy_sparks_tariffs = N3rgyToEnergySparksTariffs.new(parameterised_tariff)
+  ap energy_sparks_tariffs.convert
 end
 
 def load_yaml(fuel_type, mpxn, dtt = nil)
