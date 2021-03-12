@@ -109,8 +109,27 @@ def save_csv(fuel_type, readings, mpxn, dtt = nil)
   end
 end
 
-def filename(mpxn, type, dtt)
-  './Results/dcc-' +  type + mpxn.to_s + ' ' + '.csv'
+def tariffs(mpxn)
+  meter = DCCMeters.meter(mpxn)
+  tariff_data = load_yaml(meter.fuel_type, mpxn)
+  td = N3rgyTariffs.new(tariff_data)
+  ap td.parameterise
+end
+
+def load_yaml(fuel_type, mpxn, dtt = nil)
+  name = filename(mpxn, 'tariffs-', dtt, '.yaml')
+  return nil unless File.exist?(name)
+  puts "Loading file from #{name}"
+  YAML.load_file(name)
+end
+
+def save_yaml(fuel_type, tariff_data, mpxn, dtt = nil)
+  name = filename(mpxn, 'tariffs-', dtt, '.yaml')
+  File.open(name, 'w') { |f| f.write(YAML.dump(tariff_data)) }
+end
+
+def filename(mpxn, type, dtt, ext = '.csv')
+  './Results/dcc-' +  type + mpxn.to_s + ext
 end
 
 def check_one_mpxn(mpxn, cmd)
@@ -131,20 +150,33 @@ def download_meter_readings(mpxn, start_date, end_date, dtt = nil)
   save_csv(meter.fuel_type, readings, mpxn, dtt)
 end
 
+def download_tariffs(mpxn, start_date, end_date, dtt = nil)
+  meter = DCCMeters.meter(mpxn)
+
+  n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
+
+  tariffs = n3rgy_data.tariffs(mpxn, meter.fuel_type, start_date, end_date)
+
+  save_yaml(meter.fuel_type, tariffs, mpxn, dtt)
+end
+
 def export(mpxn)
   download_meter_readings(mpxn, start_date(mpxn), end_date(mpxn))
+  download_tariffs(mpxn, start_date(mpxn), end_date(mpxn))
 end
 
 def start_date(mpxn)
   meter = DCCMeters.meter(mpxn)
   n3rgy = n3rgy_data(mpxn)
-  n3rgy.cache_start_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
+  dt = n3rgy.cache_start_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
+  dt.to_date
 end
 
 def end_date(mpxn)
   meter = DCCMeters.meter(mpxn)
   n3rgy = n3rgy_data(mpxn)
-  n3rgy.cache_end_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
+  dt = n3rgy.cache_end_datetime(mpxn: mpxn, fuel_type: meter.fuel_type)
+  dt.to_date
 end
 
 def n3rgy_data(mpxn)
@@ -192,6 +224,7 @@ def command_line_options
     { arg: '-consent',  args: 0, var: :consent },
     { arg: '-dates',    args: 0, var: :dates },
     { arg: '-export',   args: 0, var: :export },
+    { arg: '-tariffs',  args: 0, var: :tariffs },
     { arg: '-available_meters',   args: 0, var: :available_meters }
   ]
 end
@@ -214,6 +247,7 @@ mpxns.each do |mpxn|
 
     puts "#{mpxn} #{start_date(mpxn)} #{end_date(mpxn)}" if cmd.dates
 
+    tariffs(mpxn) if cmd.tariffs
     export(mpxn) if cmd.export
   rescue => e
     puts e.message
