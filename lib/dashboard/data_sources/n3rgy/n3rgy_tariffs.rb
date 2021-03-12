@@ -117,7 +117,7 @@ class N3rgyTariffs
         same_rate_groups   = group_where_same_rates(date_ranges_to_rates)
         continguous_groups = split_group_where_not_7_days_apart(same_rate_groups)
         convert_to_tariff(continguous_groups, weekdays)
-      end
+      end.flatten
       log('Finals Resulting tariffs', tariffs)
       tariffs
     end

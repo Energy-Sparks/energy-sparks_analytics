@@ -1,12 +1,13 @@
 class N3rgyToEnergySparksTariffs
+  class UnexpectedNon24HourRangeForFlatRate < StandardError; end
+
   def initialize(n3rgy_parameterised_tariff)
     @n3rgy_parameterised_tariff = n3rgy_parameterised_tariff
   end
 
   def convert
     return nil if @n3rgy_parameterised_tariff.nil?
-    puts "Energy Sparks tariffs: In"
-    ap @n3rgy_parameterised_tariff
+
     {
       accounting_tariffs:  embed_standing_charges_in_rates
     }
@@ -26,20 +27,51 @@ class N3rgyToEnergySparksTariffs
 
   def merge_tariffs(standing_charge, kwh_date_range, kwh_rate)
     overlap_dates = intersect_overlapping_date_ranges(standing_charge.keys.first, kwh_date_range)
-    {
+    tariff = {
       start_date:       overlap_dates.first,
       end_date:         overlap_dates.last,
       name:             'Tariff from DCC SMETS2 meter',
-      rates:            kwh_rate,
       standing_charge:  standing_charge.values.first
     }
+    tariff.merge(convert_rates(kwh_rate))
   end
 
   def standing_charges_for_date_range(kwh_date_range)
     @n3rgy_parameterised_tariff[:standing_charges].map do |standing_charge_date_range, standing_charge|
       dri = intersect_dateranges(standing_charge_date_range, kwh_date_range)
-      dri.nil? ? nil : { dri => standing_charge }
+      dri.nil? ? nil : { dri => { per: :day, rate: standing_charge }}
     end.compact
+  end
+
+  def convert_rates(rates)
+    if rates.length == 1
+      raise UnexpectedNon24HourRangeForFlatRate, "time of day range  #{rates.keys.first} doesnt cover 24 hours" unless whole_24_hours?(rates.keys.first)
+      {
+        rate: {
+          per:    :kwh,
+          rate:   rates.values.first
+        },
+        type: :flat_rate
+      }
+    else
+
+      rates.map.with_index do |(time_of_day_range, rate), index|
+        [
+          "rate#{index}".to_sym,
+          {
+            from:   time_of_day_range.first,
+            to:     time_of_day_range.last,
+            per:    :kwh,
+            rate:   rate
+          }
+        ]
+      end.to_h.merge({ type: :differential })
+    end
+  end
+
+  def whole_24_hours?(time_of_day_range)
+    time_of_day_range.first == TimeOfDay.new( 0,  0) &&
+    time_of_day_range.last  == TimeOfDay.new(23, 30)
   end
 
   def intersect_dateranges(dr1, dr2)
