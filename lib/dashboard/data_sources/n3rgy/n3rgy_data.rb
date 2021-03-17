@@ -157,14 +157,40 @@ module MeterReadingsFeeds
     end
 
     def tariff_price(tariff)
-      # may be multiple prices for peroid based on usage levels - ignore for the moment
-      tariff['prices'] ? tariff['prices'][0]['value'] : tariff['value']
+      tariff['prices'] ? tiered_tariff(tariff) : tariff['value']
+    end
+
+    def tiered_tariff(tariff)
+      # index tiered tariff by index as there is nothing in the documentation
+      # to indicate that anything other than the 'index' defines the ordering and
+      # association of thresholds with prices, there is always 1 less threshold
+      # than value, the last price without a threshold goes to infinity
+      tariffs = tariff['prices'].map{ |price| [ price['index'], price['value'] ] }.to_h
+      thresholds = tariff['thresholds'].map{ |price| [ price['index'], price['value'] ] }.to_h
+      {
+        type:       :tiered,
+        tariffs:    tariffs,
+        thresholds: thresholds
+      }
     end
 
     # quote from N3rgy support:
     # "in sandbox environment, electricity tariffs have the standing charges in £/day and the TOU prices in pence/kWh. Gas tariffs are in pence/day and pence/kWh.
     # However, in live environment, our system returns always pence/day and pence/kWh."
     def convert_to_£(value, fuel_type = nil)
+      if value.is_a?(Hash)
+        convert_tiered_prices(value, fuel_type)
+      else
+        convert_one_value_to_£(value, fuel_type)
+      end
+    end
+
+    def convert_tiered_prices(values, fuel_type)
+      values[:tariffs].transform_values! { |value| convert_one_value_to_£(value, fuel_type) }
+      values
+    end
+
+    def convert_one_value_to_£(value, fuel_type)
       if (fuel_type == :electricity && @bad_electricity_standing_charge_units)
         value
       else
@@ -172,7 +198,6 @@ module MeterReadingsFeeds
       end
     end
 
-    
     def cache_data(mpxn:, fuel_type:, element:, reading_type:, type:)
       api.cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type)['availableCacheRange'][type]
     end

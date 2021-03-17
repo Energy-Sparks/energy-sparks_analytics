@@ -1,4 +1,6 @@
 class N3rgyTariffs
+  class UnexpectedState < StandardError; end
+  class UnexpectedRateType < StandardError; end
   # can't use Date::Ininity as only comparable on rhs of comparison
   # see this longstanding bug report: https://bugs.ruby-lang.org/issues/6753
   INFINITE_DATE = Date.new(2050, 1, 1) 
@@ -64,7 +66,26 @@ class N3rgyTariffs
       [group.first[0]..group.last[0], group.first[1]]
     end.to_h
     indexed_group_rates.transform_keys!   { |hh_i_range| hh_index_to_range(hh_i_range) }
-    indexed_group_rates.transform_values! { |rate| round_rate(rate) }
+    indexed_group_rates.transform_values! do |rate|
+      if rate.is_a?(Float)
+        round_rate(rate)
+      elsif rate.is_a?(Hash) && rate[:type] == :tiered
+        convert_tiered_tariff(rate)
+      else
+        raise UnexpectedRateType, rate.nil?  ? 'Unexpected Nil rate type' : "Unexpected type #{rate.class.name}"
+      end
+    end
+  end
+
+  def convert_tiered_tariff(tariff)
+    tariff[:tariffs].map do |index, rate|
+      start_threshold = index == 1 ? 0.0 : tariff[:thresholds][index - 1].to_f
+      end_threshold = tariff[:thresholds].key?(index) ? tariff[:thresholds][index].to_f : Float::INFINITY
+      [
+        start_threshold..end_threshold,
+        round_rate(rate)
+      ]
+    end.to_h
   end
 
   def round_rate(rate)
@@ -140,7 +161,7 @@ class N3rgyTariffs
           weekday_groups[weekdays].push({date_range => rates})
         else
           # probably should just push back onto the list
-          raise StandardError, 'unexpected problem'
+          raise UnexpectedState, 'unexpected problem'
         end
       end
       log('out', weekday_groups)

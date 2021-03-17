@@ -89,12 +89,12 @@ end
 def log(in_str)
   str = DateTime.now.strftime('%H:%M:%S: ') + in_str
   puts str
-  open('./Results/n3rgy mpan log.text', 'a') { |f|
+  open('./DCC/n3rgy mpan log.text', 'a') { |f|
     f.puts str
   }
 end
 
-def save_csv(fuel_type, readings, mpxn, dtt = nil)
+def save_csv(fuel_type, readings, mpxn, dtt = '')
   CSV.open(filename(mpxn, 'meter_readings-', dtt), 'w') do |csv|
     csv << ['date', 'days kWh', 'type', 'fuel_type', (0..47).map{ |hh| "#{(hh / 2).to_i}:#{(hh % 2) * 30}"}].flatten
     readings[fuel_type][:readings].each do |date, one_days_readings|
@@ -116,23 +116,24 @@ def tariffs(mpxn)
   parameterised_tariff = td.parameterise
   ap parameterised_tariff
   energy_sparks_tariffs = N3rgyToEnergySparksTariffs.new(parameterised_tariff)
-  ap energy_sparks_tariffs.convert
+  meter_attributes = energy_sparks_tariffs.convert
+  save_yaml(meter.fuel_type, meter_attributes, mpxn, 'meter-attributes-')
 end
 
-def load_yaml(fuel_type, mpxn, dtt = nil)
+def load_yaml(fuel_type, mpxn, dtt = '')
   name = filename(mpxn, 'tariffs-', dtt, '.yaml')
   return nil unless File.exist?(name)
   puts "Loading file from #{name}"
   YAML.load_file(name)
 end
 
-def save_yaml(fuel_type, tariff_data, mpxn, dtt = nil)
+def save_yaml(fuel_type, tariff_data, mpxn, dtt = '')
   name = filename(mpxn, 'tariffs-', dtt, '.yaml')
   File.open(name, 'w') { |f| f.write(YAML.dump(tariff_data)) }
 end
 
-def filename(mpxn, type, dtt, ext = '.csv')
-  './Results/dcc-' +  type + mpxn.to_s + ext
+def filename(mpxn, type, dtt = '', ext = '.csv')
+  './DCC/dcc-' + type + dtt + mpxn.to_s + ext
 end
 
 def check_one_mpxn(mpxn, cmd)
@@ -142,7 +143,7 @@ def check_one_mpxn(mpxn, cmd)
   download_meter_readings(mpxn, start_date, end_date, DateTime.now.strftime('%H %M %S'))
 end
 
-def download_meter_readings(mpxn, start_date, end_date, dtt = nil)
+def download_meter_readings(mpxn, start_date, end_date, dtt = '')
   meter = DCCMeters.meter(mpxn)
 
   n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
@@ -153,7 +154,7 @@ def download_meter_readings(mpxn, start_date, end_date, dtt = nil)
   save_csv(meter.fuel_type, readings, mpxn, dtt)
 end
 
-def download_tariffs(mpxn, start_date, end_date, dtt = nil)
+def download_tariffs(mpxn, start_date, end_date, dtt = '')
   meter = DCCMeters.meter(mpxn)
 
   n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)

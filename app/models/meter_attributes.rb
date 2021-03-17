@@ -538,6 +538,97 @@ class MeterAttributes
       }
     )
   end
+  
+  def self.default_flat_rate
+    MeterAttributeTypes::Hash.define(
+      required: false,
+      structure: {
+        per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
+        rate: MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
+
+  def self.default_rate
+    MeterAttributeTypes::Hash.define(
+      required: false,
+      structure: {
+        per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
+        rate: MeterAttributeTypes::Float.define(required: true),
+        from: MeterAttributeTypes::TimeOfDay.define(required: true),
+        to:   MeterAttributeTypes::TimeOfDay.define(required: true),
+      }
+    )
+  end
+
+  def self.default_tiered_rate_definition
+    MeterAttributeTypes::Hash.define(
+      required: false,
+      structure: {
+        low_threshold:  MeterAttributeTypes::Float.define(required: true),
+        high_threshold: MeterAttributeTypes::Float.define(required: true),
+        rate:           MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
+
+  def self.default_tiered_rate
+    MeterAttributeTypes::Hash.define(
+      required: false,
+      structure: {
+        per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
+        from: MeterAttributeTypes::TimeOfDay.define(required: true),
+        to:   MeterAttributeTypes::TimeOfDay.define(required: true),
+        tier0: default_tiered_rate_definition,
+        tier1: default_tiered_rate_definition,
+        tier2: default_tiered_rate_definition,
+        tier3: default_tiered_rate_definition
+      }
+    )
+  end
+
+  class AccountingGenericTariff < MeterAttributeTypes::AttributeBase
+    id :accounting_tariff_generic
+    aggregate_over :accounting_tariffs
+    name 'Accounting tariff (DCC)'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define,
+        end_date:   MeterAttributeTypes::Date.define,
+        name:       MeterAttributeTypes::String.define,
+        type:       MeterAttributeTypes::Symbol.define(required: true, allowed_values: %i[flat differential differential_tiered]),
+        sub_type:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:weekday_weekend]),
+        # default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
+        rates:      MeterAttributeTypes::Hash.define(
+          required: true,
+          structure: {
+            flat_rate:    MeterAttributes.default_flat_rate,
+
+            # enumerated hash keys as not sure front end can copy with an array?
+            rate0:        MeterAttributes.default_rate,
+            rate1:        MeterAttributes.default_rate,
+            rate2:        MeterAttributes.default_rate,
+            rate3:        MeterAttributes.default_rate,
+
+            # included for backwards compatibility - probably shouldn't be used?
+            # favour rate0..rate3 as above
+            daytime_rate:   MeterAttributes.default_rate,
+            nighttime_rate: MeterAttributes.default_rate,
+
+            tiered_rate0: MeterAttributes.default_tiered_rate,
+            tiered_rate1: MeterAttributes.default_tiered_rate,
+            tiered_rate2: MeterAttributes.default_tiered_rate,
+            tiered_rate3: MeterAttributes.default_tiered_rate,
+
+            weekdays:     MeterAttributeTypes::Boolean.define,
+            weekends:     MeterAttributeTypes::Boolean.define,
+          }.merge(MeterAttributes.default_tariff_rates)
+        ),
+        asc_limit_kw: MeterAttributeTypes::Float.define
+      }
+    )
+  end
 
   def self.all
     constants.inject({}) do |collection, constant_name|

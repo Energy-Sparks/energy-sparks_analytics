@@ -20,7 +20,7 @@ class N3rgyMeterDataOverride
   end
 
   def load_csv_file(mpxn)
-    filename = './Results/dcc-meter_readings-' + mpxn.to_s + ' ' + '.csv'
+    filename = './DCC/dcc-meter_readings-' + mpxn.to_s + ' ' + '.csv'
     if File.file?(filename)
       data = CSV.read(filename)
       puts "Got here #{data.length} rows"

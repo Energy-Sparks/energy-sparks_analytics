@@ -9,7 +9,7 @@ class N3rgyToEnergySparksTariffs
     return nil if @n3rgy_parameterised_tariff.nil?
 
     {
-      accounting_tariffs:  embed_standing_charges_in_rates
+      accounting_tariff_generic:  embed_standing_charges_in_rates
     }
   end
 
@@ -54,19 +54,40 @@ class N3rgyToEnergySparksTariffs
         type: :flat_rate
       }
     else
-
+      type = rates.values.any?{ |v| v.is_a?(Hash) } ? :differential_tiered : :differential
       rates.map.with_index do |(time_of_day_range, rate), index|
-        [
-          "rate#{index}".to_sym,
-          {
-            from:   time_of_day_range.first,
-            to:     time_of_day_range.last,
-            per:    :kwh,
-            rate:   rate
-          }
-        ]
-      end.to_h.merge({ type: :differential })
+        base = {
+          from:   time_of_day_range.first,
+          to:     time_of_day_range.last,
+          per:    :kwh,
+        }
+
+        if rate.is_a?(Float)
+          [
+            "rate#{index}".to_sym,
+            base.merge({ rate:   rate })
+          ]
+        else
+          [
+            "tiered_rate#{index}".to_sym,
+            base.merge(convert_tiered_rate(rate))
+          ]
+        end
+      end.to_h.merge({ type: type })
     end
+  end
+
+  def convert_tiered_rate(rates)
+    rates.map.with_index do |(threshold_range, rate), index|
+      [
+        "tier#{index}".to_sym,
+        {
+          low_threshold:  threshold_range.first,
+          high_threshold: threshold_range.last, # overlap with low of next tier, match to high of lower tier first
+          rate:           rate
+        }
+      ]
+    end.to_h
   end
 
   def whole_24_hours?(time_of_day_range)
