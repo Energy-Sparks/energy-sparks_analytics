@@ -66,7 +66,9 @@ class OneDayAMRReading
     'PSTD'  => { name: 'Partial data for end date - ignoring'},
     'PETD'  => { name: 'Partial data for end date - ignoring'},
   }.freeze
-  private_constant :AMR_TYPES
+
+  # allow access until front end changes made
+  # private_constant :AMR_TYPES
 
   # duplicate name to description: a bit of a fudge as the original design
   # was to make name a short description, but most end up being the same length
