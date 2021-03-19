@@ -9,7 +9,7 @@ class OneDayAMRReading
   attr_reader :meter_id, :date, :type, :substitute_date, :upload_datetime
   attr_reader :one_day_kwh, :kwh_data_x48
 
-  def initialize(meter_id, date, type, substitute_date, upload_datetime, kwh_data_x48, nils_valid = false)
+  def initialize(meter_id, date, type, substitute_date, upload_datetime, kwh_data_x48, nils_valid = true)
     check_type(type)
     @meter_id = meter_id.to_s
     @date = date
@@ -106,7 +106,7 @@ class OneDayAMRReading
   end
 
   def <=>(other)
-    other.class == self.class && 
+    other.class == self.class &&
     [meter_id, date, type, substitute_date] <=> [other.meter_id, other.date, other.type, other.substitute_date] &&
     one_day_kwh <=> other.one_day_kwh &&
     @kwh_data_x48 <=> other.kwh_data_x48
