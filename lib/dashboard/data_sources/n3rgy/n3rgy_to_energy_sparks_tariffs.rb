@@ -47,15 +47,17 @@ class N3rgyToEnergySparksTariffs
     if rates.length == 1
       raise UnexpectedNon24HourRangeForFlatRate, "time of day range  #{rates.keys.first} doesnt cover 24 hours" unless whole_24_hours?(rates.keys.first)
       {
-        rate: {
-          per:    :kwh,
-          rate:   rates.values.first
+        rates: {
+          flat_rate: {
+            per:    :kwh,
+            rate:   rates.values.first
+          }
         },
         type: :flat_rate
       }
     else
       type = rates.values.any?{ |v| v.is_a?(Hash) } ? :differential_tiered : :differential
-      rates.map.with_index do |(time_of_day_range, rate), index|
+      rates = rates.map.with_index do |(time_of_day_range, rate), index|
         base = {
           from:   time_of_day_range.first,
           to:     time_of_day_range.last,
@@ -73,7 +75,12 @@ class N3rgyToEnergySparksTariffs
             base.merge(convert_tiered_rate(rate))
           ]
         end
-      end.to_h.merge({ type: type })
+      end.to_h
+
+      {
+        rates: rates,
+        type:  type
+      }
     end
   end
 

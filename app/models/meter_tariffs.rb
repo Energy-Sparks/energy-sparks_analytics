@@ -31,9 +31,12 @@ class MeterTariffs
   # accounting tariffs come in least to most specific order
   # we want the most specific matching one first
   def self.accounting_tariff_for_date(date, meter)
-    tariffs = meter.attributes(:accounting_tariffs) || []
-    matching_date  = tariffs.select { |tariff| date >= tariff[:start_date] && date <= tariff[:end_date] }
-    matching_date.last
+    choose_an_accounting_tariff(date, meter)
+  end
+
+  private_class_method def self.choose_an_accounting_tariff(date, meter)
+    tariffs = [meter.attributes(:accounting_tariffs), meter.attributes(:accounting_tariff_generic)].compact.flatten
+    tariffs.select { |tariff| date >= tariff[:start_date] && date <= tariff[:end_date] }.last
   end
 
   # stats for rating adult dashboard costs pages, by availability of accounting tariff data
@@ -95,7 +98,8 @@ class MeterTariffs
     if differential
       daytime_cost_x48, nighttime_cost_x48 = differential_tariff_cost(tariff_config, kwh_halfhour_x48)
     else
-      daytime_cost_x48 = AMRData.fast_multiply_x48_x_scalar(kwh_halfhour_x48, tariff_config[:rates][:rate][:rate])
+      rate_key = flat_rate_key_name(tariff_config)
+      daytime_cost_x48 = AMRData.fast_multiply_x48_x_scalar(kwh_halfhour_x48, tariff_config[:rates][rate_key][:rate])
     end
     [daytime_cost_x48, nighttime_cost_x48]
   end
@@ -126,8 +130,9 @@ class MeterTariffs
 
   # multiply the 'economy 7' tariffs for the relevant time of day by the kwh values
   private_class_method def self.differential_tariff_cost(tariff_config, kwh_halfhour_x48)
-    daytime_costs = weighted_costs(tariff_config, kwh_halfhour_x48, :daytime_rate)
-    nighttime_costs = weighted_costs(tariff_config, kwh_halfhour_x48, :nighttime_rate)
+    daytime_rate_key, daytime_rate_key = differential_key_name(tariff_config)
+    daytime_costs   = weighted_costs(tariff_config, kwh_halfhour_x48, daytime_rate_key)
+    nighttime_costs = weighted_costs(tariff_config, kwh_halfhour_x48, daytime_rate_key)
     # AMRData.fast_add_x48_x_x48(daytime_costs, nighttime_costs)
     [daytime_costs, nighttime_costs]
   end
@@ -172,13 +177,32 @@ class MeterTariffs
     meter.attributes(:economic_tariff)
   end
 
-
   private_class_method def self.differential_meter?(date, meter)
     tariff_config = accounting_tariff_for_date(date, meter)
     tariff_config.nil? ? false : differential_tariff?(tariff_config)
   end
 
   private_class_method def self.differential_tariff?(tariff_config)
-    tariff_config[:rates].key?(:nighttime_rate)
+    tariff_config[:rates][:nighttime_rate] || generic_tariff?(tariff_config)
+  end
+
+  private_class_method def self.generic_tariff?(tariff_config)
+    tariff_config[:rates].keys.any?{ |type| type.to_s.match(/rate[0-9]/) }
+  end
+
+  private_class_method def self.flat_rate_key_name(tariff_config)
+    if tariff_config.dig(:rates, :rate, :rate)
+      :rate
+    elsif tariff_config.dig(:rates, :flat_rate, :rate)
+      :flat_rate
+    else
+      raise EnergySparksUnexpectedStateException, 'Flat rate not configured?'
+    end
+  end
+
+  private_class_method def self.differential_key_name(tariff_config)
+    daytime_rate_key = generic_tariff?(tariff_config) ? :rate1 : :daytime_rate
+    night_time_rate_key = generic_tariff?(tariff_config) ? :rate0 : :nighttime_rate
+    [daytime_rate_key, daytime_rate_key]
   end
 end

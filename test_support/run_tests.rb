@@ -1,6 +1,6 @@
 require_relative './logger_control.rb'
 require_relative './test_directory_configuration.rb'
-require 'ruby-prof'
+# require 'ruby-prof'
 $logger_format = 1
 
 class RunTests
@@ -79,6 +79,8 @@ class RunTests
         @school_name_pattern_match = configuration
       when :source
         @meter_readings_source = configuration
+      when :meter_attribute_overrides
+        @meter_attribute_overrides = meter_attribute_overrides
       when :reports
         $logger_format = 2
         run_reports(configuration[:charts], configuration[:control])
@@ -121,7 +123,8 @@ class RunTests
   def load_school(school_name)
     school = nil
     begin
-      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source)
+      attributes_override = @meter_attribute_overrides.nil? ? {} : @meter_attribute_overrides
+      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source, meter_attributes_overrides: attributes_override)
     rescue Exception => e
       puts "=" * 100
       puts "Load of school #{school_name} failed"

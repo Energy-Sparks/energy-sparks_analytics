@@ -100,5 +100,4 @@ module AggregationMixin
       calculate_meter_carbon_emissions_and_costs(meter, fuel_type)
     end
   end
-
 end

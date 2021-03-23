@@ -144,7 +144,7 @@ class SchoolFactory
     ).build(
       school_data: data[:school_data],
       amr_data: data[:amr_data],
-      pseudo_meter_attributes: meter_attributes.merge(meter_attributes_overrides)
+      meter_attributes_overrides: meter_attributes_overrides
     )
   end
 

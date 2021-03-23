@@ -41,6 +41,10 @@ module Dashboard
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
     end
 
+    def mpxn
+      mpan_mprn
+    end
+
     def set_meter_attributes(meter_attributes)
       @meter_attributes = meter_attributes
       process_meter_attributes

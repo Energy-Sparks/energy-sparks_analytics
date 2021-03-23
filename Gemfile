@@ -21,6 +21,7 @@ gem 'structured_warnings'
 gem 'chroma'
 gem 'faraday'
 gem 'faraday_middleware'
+gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
 
 # limit rate that we call api methods
 gem 'ruby-limiter', '~> 1.1.0'
@@ -36,6 +37,6 @@ gem "benchmark-memory"
 # For tests
 group :test do
   gem 'rspec', '~> 3.8.0'
-  gem 'bundler-audit'
+  # gem 'bundler-audit', platforms: [:x86_64-linux]
   gem 'factory_bot'
 end

@@ -12,7 +12,7 @@ class MeterCollectionFactory
     @holidays = holidays
   end
 
-  def build(school_data:, amr_data: {electricity_meters: [], heat_meters: []}, pseudo_meter_attributes: {})
+  def build(school_data:, amr_data: {electricity_meters: [], heat_meters: []}, pseudo_meter_attributes: {}, meter_attributes_overrides: {})
 
     school = Dashboard::School.new(
       name: school_data[:name],
@@ -36,36 +36,38 @@ class MeterCollectionFactory
                                            pseudo_meter_attributes: pseudo_meter_attributes
                                           )
 
-    add_meters_and_amr_data(meter_collection, amr_data)
+    add_meters_and_amr_data(meter_collection, amr_data, meter_attributes_overrides)
     meter_collection
   end
 
   private
 
-  def add_meters_and_amr_data(meter_collection, meter_data)
+  def add_meters_and_amr_data(meter_collection, meter_data, meter_attributes_overrides)
     meter_data[:heat_meters].map do |meter|
-      dashboard_meter = process_meters(meter_collection, meter)
+      dashboard_meter = process_meters(meter_collection, meter, meter_attributes_overrides)
       meter_collection.add_heat_meter(dashboard_meter)
     end
 
     meter_data[:electricity_meters].map do |meter|
-      dashboard_meter = process_meters(meter_collection, meter)
+      dashboard_meter = process_meters(meter_collection, meter, meter_attributes_overrides)
       meter_collection.add_electricity_meter(dashboard_meter)
     end
 
     meter_collection
   end
 
-  # PH 17Nov2020 - probably deprecated with front end reorg of Low Carbon Hub Code
-  def process_meters(meter_collection, meter_data)
-    parent_meter = build_meter(meter_collection, meter_data)
+  def process_meters(meter_collection, meter_data, meter_attributes_overrides)
+    parent_meter = build_meter(meter_collection, meter_data, meter_attributes_overrides)
     meter_data.fetch(:sub_meters){ [] }.each do |sub_meter_data|
       parent_meter.sub_meters.push build_meter(meter_collection, sub_meter_data)
     end
     parent_meter
   end
 
-  def build_meter(meter_collection, meter_data)
+  def build_meter(meter_collection, meter_data, meter_attributes_overrides)
+    mpxn = meter_data[:identifier]
+    attributes = meter_data[:attributes]
+    attributes.merge!(meter_attributes_overrides[mpxn]) if meter_attributes_overrides.key?(mpxn)
     amr_data = AMRData.new(meter_data[:type])
     meter_data[:readings].each do |reading|
       amr_data.add(reading[:reading_date], OneDayAMRReading.new(meter_data[:identifier], reading[:reading_date], reading[:type], reading[:substitute_date], reading[:upload_datetime], reading[:kwh_data_x48]))
@@ -74,11 +76,11 @@ class MeterCollectionFactory
       meter_collection:   meter_collection,
       amr_data:           amr_data,
       type:               meter_data[:type],
-      identifier:         meter_data[:identifier],
+      identifier:         mpxn,
       name:               meter_data[:name],
       external_meter_id:  meter_data[:external_meter_id],
       dcc_meter:          meter_data[:dcc_meter],
-      meter_attributes:   meter_data[:attributes]
+      meter_attributes:   attributes
     )
   end
 
