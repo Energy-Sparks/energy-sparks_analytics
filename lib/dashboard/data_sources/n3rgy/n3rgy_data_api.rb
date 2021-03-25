@@ -86,9 +86,6 @@ module MeterReadingsFeeds
 
     def get_data(url)
       response = connection.get(url)
-
-      puts response.inspect
-
       raise NotAuthorised.new(error_message(response)) if response.status == 401
       raise NotAllowed.new(error_message(response)) if response.status == 403
       raise NotFound.new(error_message(response)) if response.status == 404
