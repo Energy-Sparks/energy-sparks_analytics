@@ -58,6 +58,11 @@ module MeterReadingsFeeds
       get_data(url)
     end
 
+    def find(mpxn)
+      url = "/find-mpxn/#{mpxn}"
+      get_data(url)
+    end
+
     def fetch(url, retry_interval = 0, max_retries = 0)
       begin
         retries ||= 0
@@ -81,6 +86,9 @@ module MeterReadingsFeeds
 
     def get_data(url)
       response = connection.get(url)
+
+      puts response.inspect
+
       raise NotAuthorised.new(error_message(response)) if response.status == 401
       raise NotAllowed.new(error_message(response)) if response.status == 403
       raise NotFound.new(error_message(response)) if response.status == 404
