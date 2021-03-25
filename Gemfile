@@ -37,6 +37,6 @@ gem "benchmark-memory"
 # For tests
 group :test do
   gem 'rspec', '~> 3.8.0'
-  # gem 'bundler-audit', platforms: [:x86_64-linux]
+  # gem 'bundler-audit'
   gem 'factory_bot'
 end
