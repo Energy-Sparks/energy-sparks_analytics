@@ -11,17 +11,15 @@ describe MeterReadingsFeeds::N3rgyData do
     let(:start_date)    { Date.parse('20190101') }
     let(:end_date)      { Date.parse('20190102') }
 
-    describe 'status' do
-      before :each do
-        @api = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url)
-      end
+    let(:api) { MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url) }
 
+    describe 'status' do
       context 'when not in DCC' do
         before do
           expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:status).and_raise(MeterReadingsFeeds::N3rgyDataApi::NotFound)
         end
         it 'returns not found' do
-          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:unknown)
+          expect(api.status(mpxn)).to eq(:unknown)
         end
       end
 
@@ -30,7 +28,7 @@ describe MeterReadingsFeeds::N3rgyData do
           expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:status).and_raise(MeterReadingsFeeds::N3rgyDataApi::NotAllowed)
         end
         it 'returns not consented' do
-          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:consent_required)
+          expect(api.status(mpxn)).to eq(:consent_required)
         end
       end
 
@@ -40,7 +38,28 @@ describe MeterReadingsFeeds::N3rgyData do
           expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:status).and_return(response)
         end
         it 'returns ok' do
-          expect(MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).status(mpxn)).to eq(:available)
+          expect(api.status(mpxn)).to eq(:available)
+        end
+      end
+    end
+
+    describe 'find' do
+      context 'when not in DCC' do
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:find).and_raise(MeterReadingsFeeds::N3rgyDataApi::NotFound)
+        end
+        it 'returns false' do
+          expect(api.find(mpxn)).to be_falsey
+        end
+      end
+
+      context 'when in DCC' do
+        let(:response) { { "mpxn": "123456789100", "deviceType": "ESME" } }
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:find).and_return(response)
+        end
+        it 'returns true' do
+          expect(api.find(mpxn)).to be_truthy
         end
       end
     end
@@ -54,7 +73,7 @@ describe MeterReadingsFeeds::N3rgyData do
       describe 'when date not specified' do
         it 'raises error' do
           expect {
-            MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).tariffs(mpxn, fuel_type, start_date, nil)
+            api.tariffs(mpxn, fuel_type, start_date, nil)
           }.to raise_error(MeterReadingsFeeds::N3rgyData::BadParameters)
         end
       end
@@ -68,7 +87,7 @@ describe MeterReadingsFeeds::N3rgyData do
         end
 
         it 'returns tariffs' do
-          tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).tariffs(mpxn, fuel_type, start_date, end_date)
+          tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
           expect(tariffs.keys).to match_array([:kwh_tariffs, :standing_charges, :missing_readings])
 
           expect(tariffs[:kwh_tariffs].count).to eq(2)
@@ -97,7 +116,7 @@ describe MeterReadingsFeeds::N3rgyData do
       describe 'when date not specified' do
         it 'raises error' do
           expect {
-            MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).readings(mpxn, fuel_type, start_date, nil)
+            api.readings(mpxn, fuel_type, start_date, nil)
           }.to raise_error(MeterReadingsFeeds::N3rgyData::BadParameters)
           end
       end
@@ -111,7 +130,7 @@ describe MeterReadingsFeeds::N3rgyData do
         let(:consumption_data)      { JSON.parse(File.read('spec/fixtures/n3rgy/get_consumption_data.json')) }
 
         it 'returns readings' do
-          readings = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).readings(mpxn, fuel_type, start_date, end_date)
+          readings = api.readings(mpxn, fuel_type, start_date, end_date)
           expect(readings[fuel_type].keys).to match_array([:mpan_mprn, :readings, :missing_readings])
 
           expect(readings[fuel_type][:readings].count).to eq(2)
@@ -152,7 +171,7 @@ describe MeterReadingsFeeds::N3rgyData do
         end
 
         it 'returns empty collection and 2 days * 48 half hours missing readings' do
-          readings = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).readings(mpxn, fuel_type, start_date, end_date)
+          readings = api.readings(mpxn, fuel_type, start_date, end_date)
           expect(readings[fuel_type].keys).to match_array([:mpan_mprn, :readings, :missing_readings])
 
           expect(readings[fuel_type][:readings]).to eq({})
@@ -178,7 +197,7 @@ describe MeterReadingsFeeds::N3rgyData do
         let(:consumption_data)      { JSON.parse(File.read('spec/fixtures/n3rgy/get_consumption_data.json')) }
 
         it 'returns readings' do
-          readings = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).readings(mpxn, fuel_type, start_date, end_date)
+          readings = api.readings(mpxn, fuel_type, start_date, end_date)
           expect(readings[fuel_type].keys).to match_array([:mpan_mprn, :readings, :missing_readings])
 
           expect(readings[fuel_type][:readings].count).to eq(2)
@@ -215,7 +234,7 @@ describe MeterReadingsFeeds::N3rgyData do
         end
 
         it 'returns empty collection and 2 days * 48 half hours missing readings' do
-          readings = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).readings(mpxn, fuel_type, start_date, end_date)
+          readings = api.readings(mpxn, fuel_type, start_date, end_date)
           expect(readings[fuel_type].keys).to match_array([:mpan_mprn, :readings, :missing_readings])
 
           expect(readings[fuel_type][:readings]).to eq({})
@@ -241,7 +260,7 @@ describe MeterReadingsFeeds::N3rgyData do
       end
 
       it 'returns elements' do
-        contents = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).elements(mpxn, :electricity)
+        contents = api.elements(mpxn, :electricity)
         expect(contents).to eq([1,2])
       end
 
@@ -262,10 +281,9 @@ describe MeterReadingsFeeds::N3rgyData do
       end
 
       it 'returns inventory file contents' do
-        contents = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url).inventory(mpxn)
+        contents = api.inventory(mpxn)
         expect(contents).to eq(inventory_file)
       end
     end
-
   end
 end

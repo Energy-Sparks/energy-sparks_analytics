@@ -58,6 +58,11 @@ module MeterReadingsFeeds
       get_data(url)
     end
 
+    def find(mpxn)
+      url = "/find-mpxn/#{mpxn}"
+      get_data(url)
+    end
+
     def fetch(url, retry_interval = 0, max_retries = 0)
       begin
         retries ||= 0

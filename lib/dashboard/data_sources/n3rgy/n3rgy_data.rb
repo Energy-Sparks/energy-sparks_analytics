@@ -60,6 +60,13 @@ module MeterReadingsFeeds
       :consent_required
     end
 
+    def find(mpxn)
+      api.find(mpxn)
+      true
+    rescue MeterReadingsFeeds::N3rgyDataApi::NotFound
+      false
+    end
+
     def elements(mpxn, fuel_type, reading_type=MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
       elements = api.get_elements(mpxn: mpxn, fuel_type: fuel_type, reading_type: reading_type)
       elements['entries']
@@ -168,7 +175,7 @@ module MeterReadingsFeeds
       end
     end
 
-    
+
     def cache_data(mpxn:, fuel_type:, element:, reading_type:, type:)
       api.cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type)['availableCacheRange'][type]
     end
