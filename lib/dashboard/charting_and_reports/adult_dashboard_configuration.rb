@@ -49,7 +49,7 @@ class DashboardConfiguration
       promoted_variables: {
         AlertEnergyAnnualVersusBenchmark => {
           rating:                               :rating,
-          enough_data:                          :enough_data,
+          # enough_data:                          :enough_data,
           last_year_£:                          :last_year_£,
           last_year_kwh:                        :last_year_kwh,
           last_year_co2:                        :last_year_co2,
@@ -117,8 +117,8 @@ class DashboardConfiguration
       promoted_variables: {
         AlertElectricityBaseloadVersusBenchmark => {
           rating:                             :rating,
-          one_year_saving_versus_exemplar_£:  :one_year_saving_versus_exemplar_£,
-          one_year_saving_versus_benchmark_£: :one_year_saving_versus_benchmark_£,
+          one_year_saving_versus_exemplar_£_local:  :one_year_saving_versus_exemplar_£,
+          one_year_saving_versus_benchmark_£_local: :one_year_saving_versus_benchmark_£,
           average_baseload_last_year_kw:      :average_baseload_last_year_kw,
           exemplar_per_pupil_kw:              :exemplar_per_pupil_kw,
           benchmark_per_pupil_kw:             :benchmark_per_pupil_kw,
@@ -135,8 +135,9 @@ class DashboardConfiguration
       promoted_variables: {
         AlertElectricityTargetAnnual => {
           rating:                                   :rating,
-          relevance:                                :relevance,
+          # relevance:                                :relevance,
           # enough_data:                              :enough_data,
+          school_name:                              :school_name,
           previous_year_kwh:                        :previous_year_kwh,
           current_year_kwh:                         :current_year_kwh,
           current_year_target_kwh:                  :current_year_target_kwh,
