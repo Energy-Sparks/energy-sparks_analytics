@@ -22,7 +22,7 @@ class MeterTariffs
 
   def self.economic_tariff_x48(date, meter, kwh_halfhour_x48)
     tariff_config = meter.attributes(:economic_tariff)
-
+puts "Got here eco tariff for #{meter.mpan_mprn} is #{!tariff_config.nil?} #{date}"
     daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48, differential_meter?(date, meter))
 
     [daytime_cost_x48, nighttime_cost_x48, {}] # {} = the standing charges for consistancy with the accounting tariff interface
@@ -77,7 +77,6 @@ class MeterTariffs
 
 
   def self.accounting_tariff_x48(date, meter, kwh_halfhour_x48)
-    #byebug if meter.mpan_mprn.to_s == '4234023603'
     tariff_config = accounting_tariff_for_date(date, meter)
 
     tariff_config = default_accounting_tariff_in_event_of_no_others(date, meter) if tariff_config.nil?

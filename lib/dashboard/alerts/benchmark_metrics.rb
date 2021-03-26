@@ -149,7 +149,7 @@ module BenchmarkMetrics
 
   private_class_method def self.check_school_type(school_type, type = 'baseload benckmark')
     raise EnergySparksUnexpectedStateException.new("Nil type of school in #{type} request") if school_type.nil?
-    if !%i[primary infant junior special middle secondary].include?(school_type)
+    if !%i[primary infant junior special middle secondary mixed_primary_and_secondary].include?(school_type)
       raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in #{type} request")
     end
   end

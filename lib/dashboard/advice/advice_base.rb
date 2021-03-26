@@ -271,7 +271,29 @@ class AdviceBase < ContentBase
   end
 
   private def create_and_set_attr_reader(key, value)
+    status = variable_name_status(key)
+    case status
+    when :function
+      logger.info "promoted variable #{key} already set as function  for #{self.class.name} - overwriting"
+      create_var(key, value)
+    when :variable
+      logger.info "promoted variable #{key} already defined for #{self.class.name} - overwriting"
+      instance_variable_set("@#{key}", value)
+    else
+      create_var(key, value)
+    end
+  end
+
+  def create_var(key, value)
     self.class.send(:attr_reader, key)
     instance_variable_set("@#{key}", value)
+  end
+
+  def variable_name_status(key)
+    if respond_to?(key) && !instance_variable_defined?("@#{key.to_s}")
+      :function
+    else
+      instance_variable_defined?("@#{key.to_s}") ? :variable : nil
+    end
   end
 end

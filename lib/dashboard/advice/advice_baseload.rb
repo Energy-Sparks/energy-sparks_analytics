@@ -70,24 +70,24 @@ class AdviceBaseload < AdviceElectricityBase
   def benefit_of_moving_to_exemplar_baseload
     text = %{
       <p>
-        <% if one_year_saving_versus_benchmark_£ > 0.0 %>
+        <% if one_year_saving_versus_benchmark_£_local > 0.0 %>
           Reducing a school&apos;s baseload is often the fastest way of reducing a school&apos;s
           energy costs and reducing its carbon footprint. If you matched the baseload
           of other schools of the same size you would save
-          <%= format_£(one_year_saving_versus_benchmark_£) %> per year.
+          <%= format_£(one_year_saving_versus_benchmark_£_local) %> per year.
         <% else %>
           Your school&apos;s baseload is low, which is good and as a result you are saving
-          <%= format_£(- 1.0 * one_year_saving_versus_benchmark_£) %> per year versus
+          <%= format_£(- 1.0 * one_year_saving_versus_benchmark_£_local) %> per year versus
           the average of other schools of a similar size.
         <% end %>
 
-        <% if one_year_saving_versus_benchmark_£ <= 0.0 && one_year_saving_versus_exemplar_£ > 0.0 %>
+        <% if one_year_saving_versus_benchmark_£_local <= 0.0 && one_year_saving_versus_exemplar_£_local > 0.0 %>
           However, you could still improve by matching the baseload
           of the best performing schools saving
-          <%= format_£(one_year_saving_versus_exemplar_£) %> per year.
-        <% elsif one_year_saving_versus_exemplar_£ > 0.0 %>
+          <%= format_£(one_year_saving_versus_exemplar_£_local) %> per year.
+        <% elsif one_year_saving_versus_exemplar_£_local > 0.0 %>
           If you matched the baseload of the best performing schools you could save
-          <%= format_£(one_year_saving_versus_exemplar_£) %> per year.
+          <%= format_£(one_year_saving_versus_exemplar_£_local) %> per year.
         <% end %>
       </p>
     }
