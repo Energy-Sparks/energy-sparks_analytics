@@ -132,9 +132,16 @@ class SchoolFactory
     school
   end
 
+  private def split_pseudo_and_non_pseudo_override_attributes(meter_attributes_overrides)
+    pseudo_meter_attributes = meter_attributes_overrides.select { |k, _v| k.is_a?(Symbol) }
+    meter_attributes = meter_attributes_overrides.select { |k, _v| k.is_a?(Integer) }
+    [pseudo_meter_attributes, meter_attributes]
+  end
+
   private def build_meter_collection(data, meter_attributes_overrides: {})
-    puts "Warning: loading meter attributes from :pseudo_meter_attributes rather than :meter_attributes"
+    pseudo_meter_overrides, meter_overrides = split_pseudo_and_non_pseudo_override_attributes(meter_attributes_overrides)
     meter_attributes = data[:pseudo_meter_attributes]
+
     MeterCollectionFactory.new(
       temperatures: data[:schedule_data][:temperatures],
       solar_pv: data[:schedule_data][:solar_pv],
@@ -144,7 +151,8 @@ class SchoolFactory
     ).build(
       school_data: data[:school_data],
       amr_data: data[:amr_data],
-      meter_attributes_overrides: meter_attributes_overrides
+      meter_attributes_overrides: meter_attributes_overrides,
+      pseudo_meter_attributes: meter_attributes.merge(pseudo_meter_overrides)
     )
   end
 

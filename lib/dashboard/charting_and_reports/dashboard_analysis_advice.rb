@@ -621,8 +621,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     benchmark_from_chart = @chart_data[:x_data][type_str][with]
     formatted_usage_£ = FormatEnergyUnit.format(:£, usage_from_chart_£, :html)
     benchmark_usage_£ = FormatEnergyUnit.format(:£, benchmark_from_chart, :html)
-puts "Got here 1: #{usage_from_chart_£} 2: #{benchmark_from_chart}"
-ap @chart_data, { limit: 4}
+
     if formatted_usage_£ == benchmark_usage_£ # values same in formatted space
       'is similar to regional schools which spent ' + benchmark_usage_£
     elsif usage_from_chart_£ > benchmark_from_chart
