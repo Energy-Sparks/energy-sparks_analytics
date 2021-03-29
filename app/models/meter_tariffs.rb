@@ -27,6 +27,7 @@ puts "Got here eco tariff for #{meter.mpan_mprn} is #{!tariff_config.nil?} #{dat
 puts Thread.current.backtrace if meter.mpan_mprn == 80000000106982
 exit if meter.mpan_mprn == 80000000106982
 =end
+
     daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48, differential_meter?(date, meter))
 
     [daytime_cost_x48, nighttime_cost_x48, {}] # {} = the standing charges for consistancy with the accounting tariff interface
@@ -133,9 +134,9 @@ exit if meter.mpan_mprn == 80000000106982
 
   # multiply the 'economy 7' tariffs for the relevant time of day by the kwh values
   private_class_method def self.differential_tariff_cost(tariff_config, kwh_halfhour_x48)
-    daytime_rate_key, daytime_rate_key = differential_key_name(tariff_config)
+    daytime_rate_key, night_time_rate_key = differential_key_name(tariff_config)
     daytime_costs   = weighted_costs(tariff_config, kwh_halfhour_x48, daytime_rate_key)
-    nighttime_costs = weighted_costs(tariff_config, kwh_halfhour_x48, daytime_rate_key)
+    nighttime_costs = weighted_costs(tariff_config, kwh_halfhour_x48, night_time_rate_key)
     # AMRData.fast_add_x48_x_x48(daytime_costs, nighttime_costs)
     [daytime_costs, nighttime_costs]
   end
@@ -186,7 +187,7 @@ exit if meter.mpan_mprn == 80000000106982
   end
 
   private_class_method def self.differential_tariff?(tariff_config)
-    tariff_config[:rates][:nighttime_rate] || generic_tariff?(tariff_config)
+    tariff_config[:rates].key?(:nighttime_rate) || generic_tariff?(tariff_config)
   end
 
   private_class_method def self.generic_tariff?(tariff_config)
@@ -206,6 +207,6 @@ exit if meter.mpan_mprn == 80000000106982
   private_class_method def self.differential_key_name(tariff_config)
     daytime_rate_key = generic_tariff?(tariff_config) ? :rate1 : :daytime_rate
     night_time_rate_key = generic_tariff?(tariff_config) ? :rate0 : :nighttime_rate
-    [daytime_rate_key, daytime_rate_key]
+    [daytime_rate_key, night_time_rate_key]
   end
 end
