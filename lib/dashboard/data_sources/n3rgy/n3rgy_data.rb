@@ -69,9 +69,6 @@ module MeterReadingsFeeds
 
     def list
       resp = api.list
-
-      puts resp
-
       resp['entries']
     end
 
