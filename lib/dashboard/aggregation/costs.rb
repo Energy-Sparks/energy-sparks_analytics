@@ -285,7 +285,7 @@ end
 
 class AccountingCostsParameterised < AccountingCosts
   # returns a x48 array of half hourly costs, only caches post aggregation, and front end cache
-  def one_days_cost_data(date) 
+  def one_days_cost_data(date)
     return calculate_tariff_for_date(date, meter) unless post_aggregation_state
     add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
     self[date]

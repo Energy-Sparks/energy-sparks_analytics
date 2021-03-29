@@ -23,7 +23,7 @@ module MeterReadingsFeeds
       else
         readings_by_date = consumption_data(mpxn, fuel_type, start_date, end_date)
       end
-      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date, true)
+      meter_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, readings_by_date, true, nil)
       { fuel_type =>
           {
             mpan_mprn:        mpxn,
@@ -36,7 +36,7 @@ module MeterReadingsFeeds
     def tariffs(mpxn, fuel_type, start_date, end_date)
       raise BadParameters.new("Please specify start and end date") if start_date.nil? || end_date.nil?
       tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
-      charges_by_date = tariff_details[:standing_charges].to_h
+      charges_by_date = convert_datetime_key_to_date(tariff_details[:standing_charges].to_h)
       prices_by_date = tariff_details[:prices].to_h
       tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
       {
@@ -127,6 +127,10 @@ module MeterReadingsFeeds
       }
     end
 
+    def convert_datetime_key_to_date(h)
+      h.transform_keys(&:to_date)
+    end
+
     def unit_adjusted_readings(raw_readings, units)
       adjust_kwh_units = to_kwh(units)
       raw_readings.map do |reading|
@@ -160,14 +164,40 @@ module MeterReadingsFeeds
     end
 
     def tariff_price(tariff)
-      # may be multiple prices for peroid based on usage levels - ignore for the moment
-      tariff['prices'] ? tariff['prices'][0]['value'] : tariff['value']
+      tariff['prices'] ? tiered_tariff(tariff) : tariff['value']
+    end
+
+    def tiered_tariff(tariff)
+      # index tiered tariff by index as there is nothing in the documentation
+      # to indicate that anything other than the 'index' defines the ordering and
+      # association of thresholds with prices, there is always 1 less threshold
+      # than value, the last price without a threshold goes to infinity
+      tariffs = tariff['prices'].map{ |price| [ price['index'], price['value'] ] }.to_h
+      thresholds = tariff['thresholds'].map{ |price| [ price['index'], price['value'] ] }.to_h
+      {
+        type:       :tiered,
+        tariffs:    tariffs,
+        thresholds: thresholds
+      }
     end
 
     # quote from N3rgy support:
     # "in sandbox environment, electricity tariffs have the standing charges in £/day and the TOU prices in pence/kWh. Gas tariffs are in pence/day and pence/kWh.
     # However, in live environment, our system returns always pence/day and pence/kWh."
     def convert_to_£(value, fuel_type = nil)
+      if value.is_a?(Hash)
+        convert_tiered_prices(value, fuel_type)
+      else
+        convert_one_value_to_£(value, fuel_type)
+      end
+    end
+
+    def convert_tiered_prices(values, fuel_type)
+      values[:tariffs].transform_values! { |value| convert_one_value_to_£(value, fuel_type) }
+      values
+    end
+
+    def convert_one_value_to_£(value, fuel_type)
       if (fuel_type == :electricity && @bad_electricity_standing_charge_units)
         value
       else
@@ -175,14 +205,13 @@ module MeterReadingsFeeds
       end
     end
 
-
     def cache_data(mpxn:, fuel_type:, element:, reading_type:, type:)
       api.cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type)['availableCacheRange'][type]
     end
 
     def make_one_day_readings(meter_readings_by_date, mpan_mprn)
       meter_readings_by_date.map do |date, readings|
-        [date, OneDayAMRReading.new(mpan_mprn, date, 'ORIG', nil, DateTime.now, readings)]
+        [date.to_date, OneDayAMRReading.new(mpan_mprn, date.to_date, 'ORIG', nil, DateTime.now, readings, true)]
       end.to_h
     end
 

@@ -38,6 +38,7 @@ profiles
 
 InputData/*
 MeterReadings/*
+DCC/
 Results/*
 DCC/*
 OldInputData/*

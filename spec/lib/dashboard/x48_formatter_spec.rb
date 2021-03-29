@@ -26,7 +26,7 @@ describe X48Formatter do
     let(:dt_to_kwh) { { first_time_slot => 123.0, second_time_slot => 456.0, last_time_slot => 789.0 } }
 
     it 'starts at 0030, ends at 0000 next day' do
-      expected_x48 = Array.new(48, 0.0)
+      expected_x48 = Array.new(48, nil)
       expected_x48[0] = 123.0
       expected_x48[1] = 456.0
       expected_x48[47] = 789.0
@@ -47,7 +47,7 @@ describe X48Formatter do
     let(:dt_to_kwh) { { first_time_slot => 123.0, second_time_slot => 456.0, last_time_slot => 789.0 } }
 
     it 'starts at 0000, ends at 2330 same day' do
-      expected_x48 = Array.new(48, 0.0)
+      expected_x48 = Array.new(48, nil)
       expected_x48[0] = 123.0
       expected_x48[1] = 456.0
       expected_x48[47] = 789.0
