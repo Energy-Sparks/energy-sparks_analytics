@@ -258,4 +258,43 @@ describe MeterReadingsFeeds::N3rgyDataApi do
       stubs.verify_stubbed_calls
     end
   end
+
+  context 'find' do
+    let(:response) {
+      {
+        "mpxn": "123456789100",
+        "deviceType": "ESME"
+      }
+    }
+
+    it 'requests correct url' do
+      stubs.get("/find-mpxn/123456789100") do |env|
+        [200, {}, response.to_json]
+      end
+      data = api.find("123456789100")
+      expect(data["deviceType"]).to eql ('ESME')
+      stubs.verify_stubbed_calls
+    end
+
+    it 'raise Not Found if not found' do
+      stubs.get("/find-mpxn/123456789100") do |env|
+        [404, {}, 'not there']
+      end
+      expect{ api.find(123456789100) }.to raise_error(MeterReadingsFeeds::N3rgyDataApi::NotFound, "not there")
+      stubs.verify_stubbed_calls
+    end
+  end
+
+  context 'list' do
+    let(:response) { {"startAt"=>0, "maxResults"=>100, "total"=>3, "entries"=>["1234567891000", "1234567891002", "1234567891008"], "resource"=>"/", "responseTimestamp"=>"2021-03-29T15:48:37.637Z"} }
+
+    it 'requests correct url' do
+      stubs.get("/") do |env|
+        [200, {}, response.to_json]
+      end
+      data = api.list
+      expect(data["total"]).to eql (3)
+      stubs.verify_stubbed_calls
+    end
+  end
 end

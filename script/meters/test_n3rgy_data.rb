@@ -30,8 +30,11 @@ end_date = Date.parse('20210226')
 # status = n3rgyData.status(mpxn)
 # pp status.inspect
 
-response = n3rgyData.find(mpxn)
-pp response.inspect
-
+# response = n3rgyData.find(mpxn)
+# pp response.inspect
+#
 # resp = n3rgyData.inventory(mpxn)
 # puts resp
+
+resp = n3rgyData.list
+puts resp

@@ -67,6 +67,14 @@ module MeterReadingsFeeds
       false
     end
 
+    def list
+      resp = api.list
+
+      puts resp
+
+      resp['entries']
+    end
+
     def elements(mpxn, fuel_type, reading_type=MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
       elements = api.get_elements(mpxn: mpxn, fuel_type: fuel_type, reading_type: reading_type)
       elements['entries']
