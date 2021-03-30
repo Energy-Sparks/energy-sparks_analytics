@@ -30,15 +30,15 @@ class ValidateAMRData
   end
 
   def validate(debug_analysis = false)
-    # assess_null_dcc_data
     logger.debug "=" * 150
+    assess_null_data if debug_analysis
     logger.debug "Validating meter data of type #{@meter.meter_type} #{@meter.name} #{@meter.id}"
     logger.debug "Meter data from #{@meter.amr_data.start_date} to #{@meter.amr_data.end_date}"
     logger.debug "DCC Meter #{@meter.dcc_meter}"
     puts "Before validation #{missing_data} missing items of data" if debug_analysis
     # ap(@meter, limit: 5, :color => {:float  => :red})
     process_meter_attributes
-    correct_dcc_meter if @meter.dcc_meter
+    correct_nil_readings
     meter_corrections unless @meter.meter_correction_rules.nil?
     check_for_long_gaps_in_data
     # meter_corrections unless @meter.meter_correction_rules.nil?
@@ -49,6 +49,7 @@ class ValidateAMRData
     if debug_analysis
       puts "After validation #{missing_data} missing items of data"
       ap missing_data_stats
+      assess_null_data if debug_analysis
     end
     logger.debug "=" * 150
   end
@@ -184,7 +185,7 @@ class ValidateAMRData
     end
   end
 
-  def correct_dcc_meter
+  def correct_nil_readings
     remove_missing_start_end_dates_if_partial_nil
     correct_zero_partial_data(missing_data_value: nil)
     # leave the rest of the validation to fix whole missing days
@@ -192,12 +193,13 @@ class ValidateAMRData
 
   def remove_missing_start_end_dates_if_partial_nil
     if @amr_data.days_kwh_x48(@amr_data.start_date).any?(&:nil?)
-      logger.info "Removing DCC meter start date #{@amr_data.start_date} as only partial data start date"
+      logger.info "Moving meter start date #{@amr_data.start_date} 1 day forward as only partial data on start date"
       @amr_data[@amr_data.start_date].set_type('PSTD')
       @amr_data.set_start_date(@amr_data.start_date + 1)
     end
+
     if @amr_data.days_kwh_x48(@amr_data.end_date).any?(&:nil?)
-      logger.info "Removing DCC meter end date #{@amr_data.end_date} as only partial data end date"
+      logger.info "Moving meter end date #{@amr_data.end_date} one day back as only partial data on end date"
       @amr_data[@amr_data.end_date].set_type('PETD')
       @amr_data.set_start_date(@amr_data.end_date - 1)
     end
@@ -213,7 +215,7 @@ class ValidateAMRData
 
     interpolate_partial_missing_data(max_missing_readings, missing_data_value)
 
-    substitute_partial_missing_data_with_whole_day(missing_dates) unless @meter.dcc_meter
+    substitute_partial_missing_data_with_whole_day(missing_dates)
   end
 
   def interpolate_partial_missing_data(max_missing_readings, missing_data_value)
@@ -231,11 +233,11 @@ class ValidateAMRData
     end
   end
 
-  def assess_null_dcc_data
+  def assess_null_data
     count = (@amr_data.start_date..@amr_data.end_date).sum do |date|
       @amr_data.date_missing?(date) ? 48 : @amr_data.days_kwh_x48(date).count(&:nil?)
     end
-    puts "Items of nil data #{count} for #{@meter.mpan_mprn}"
+    puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Items of nil data #{count} for #{@meter.mpan_mprn}"
   end
 
   def missing_data_stats
