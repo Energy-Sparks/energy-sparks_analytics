@@ -61,7 +61,7 @@ class MeterTariffManager
   def accounting_tariff_£(date, kwh_x48)
     tariff = accounting_tariff_for_date(date)
 
-    raise MissingAccountingTariff, "Missing tariff data for #{meter.mpxn} on #{date}" if tariff.nil?
+    raise MissingAccountingTariff, "Missing tariff data for #{@meter.mpxn} on #{date}" if tariff.nil?
 
     costs_x48 = tariff.costs_x48_x2(date, kwh_x48)
 
