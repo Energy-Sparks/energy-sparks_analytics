@@ -290,7 +290,7 @@ class AggregateDataService
   private def any_component_meter_differential?(list_of_meters, fuel_type, combined_meter_start_date, combined_meter_end_date)
     return false if fuel_type == :gas
     list_of_meters.each do |meter|
-      return true if MeterTariffs.differential_tariff_in_date_range?(meter, combined_meter_start_date, combined_meter_end_date)
+      return true if meter.meter_tariffs.any_differential_tariff?(combined_meter_start_date, combined_meter_end_date)
     end
     false
   end

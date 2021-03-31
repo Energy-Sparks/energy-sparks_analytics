@@ -1,0 +1,83 @@
+class MeterTariff
+  attr_reader :tariff
+  def initialize(meter, tariff)
+    @meter  = meter
+    @tariff = tariff
+  end
+
+  def default?
+    @tariff[:default] == true
+  end
+
+  def in_date_range?(date)
+    date >= @tariff[:start_date] && date <= @tariff[:end_date]
+  end
+
+  def times(type)
+    @tariff[:rates][type][:from]..@tariff[:rates][type][:to]
+  end
+
+  def rate(type)
+    @tariff[:rates][type][:rate]
+  end
+
+  def weighted_cost(kwh_x48, type)
+    weights = DateTimeHelper.weighted_x48_vector_single_range(times(type), rate(type))
+    AMRData.fast_multiply_x48_x_x48(weights, kwh_x48)
+  end
+end
+
+class EconomicTariff < MeterTariff
+end
+
+class AccountingTariff < EconomicTariff
+  class UnexpectedRateType < StandardError; end
+  def differential?(_date)
+    tariff[:rates].key?(:nighttime_rate)
+  end
+
+  def costs_x48_x2(date, kwh_x48)
+    if differential?(date)
+      {
+        nighttime_rate:   weighted_cost(kwh_x48, :nighttime_rate),
+        daytime_rate:     weighted_cost(kwh_x48, :daytime_rate),
+        standing_charges: standing_charges(date, kwh_x48.sum)
+      }
+    else
+      {
+        nighttime_rate:   nil, # AMRData.one_day_zero_kwh_x48,
+        daytime_rate:     AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:rate][:rate]),
+        standing_charges: standing_charges(date, kwh_x48.sum)
+      }
+    end
+  end
+
+  def standing_charges(date, days_kwh)
+    standing_charge = {}
+    tariff[:rates].each do |standing_charge_type, rate|
+      next if [:rate, :daytime_rate, :nighttime_rate].include?(standing_charge_type)
+      standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh)
+    end
+    standing_charge
+  end
+
+  def daily_rate(date, per, rate, days_kwh)
+    case per
+    when :day
+      rate
+    when :month
+      rate / DateTimeHelper.days_in_month(date)
+    when :quarter
+      rate / DateTimeHelper.days_in_quarter(date)
+    when :kwh # treat these as day only rates for the moment TODO(PH, 8Apr2019), should be intraday
+      rate * days_kwh
+    else
+      raise UnexpectedRateType, "Unexpected unit rate type for tariff #{per}"
+    end
+=begin
+    private_class_method def self.generic_tariff?(tariff_config)
+      tariff_config[:rates].keys.any?{ |type| type.to_s.match(/rate[0-9]/) }
+    end
+=end
+  end
+end

@@ -202,7 +202,7 @@ class DashboardEnergyAdvice
     private def missing_accounting_tariffs_meters
       meters = @school.real_meters
       meters.select do |meter|
-        tariff = MeterTariffs.accounting_tariff_for_date(meter.amr_data.end_date, meter)
+        tariff = meter.meter_tariffs.accounting_tariff_for_date(meter.amr_data.end_date)&.tariff
         tariff.nil? || tariff[:default]
       end
     end
