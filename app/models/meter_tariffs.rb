@@ -21,16 +21,13 @@ class MeterTariffs
   extend Logging
 
   def self.economic_tariff_x48(date, meter, kwh_halfhour_x48)
-    tariff_config = meter.attributes(:economic_tariff)
-=begin
-puts "Got here eco tariff for #{meter.mpan_mprn} is #{!tariff_config.nil?} #{date}"
-puts Thread.current.backtrace if meter.mpan_mprn == 80000000106982
-exit if meter.mpan_mprn == 80000000106982
-=end
+    new_costs = meter.meter_tariffs.economic_cost(date, kwh_halfhour_x48)
 
-    daytime_cost_x48, nighttime_cost_x48 = day_night_costs_x48(tariff_config, kwh_halfhour_x48, differential_meter?(date, meter))
-
-    [daytime_cost_x48, nighttime_cost_x48, {}] # {} = the standing charges for consistancy with the accounting tariff interface
+    if new_costs.key?(:flat_rate)
+      [new_costs[:flat_rate], AMRData.one_day_zero_kwh_x48, {}]
+    else
+      [new_costs[:daytime_rate], new_costs[:nighttime_rate], {}]
+    end
   end
 
   # accounting tariffs come in least to most specific order
@@ -41,8 +38,22 @@ exit if meter.mpan_mprn == 80000000106982
 
   private_class_method def self.choose_an_accounting_tariff(date, meter)
     tariffs = [meter.attributes(:accounting_tariffs), meter.attributes(:accounting_tariff_generic)].compact.flatten
-    tariffs.select { |tariff| date >= tariff[:start_date] && date <= tariff[:end_date] }.last
+    tariffs = tariffs.select { |tariff| date >= tariff[:start_date] && date <= tariff[:end_date] }
+    non_default_tariffs = tariffs.select { |t| !default_tariff(t) }
+=begin
+    puts "All: Got here #{date} #{meter.mpxn}"
+    ap tariffs
+    puts "Non default: Got here"
+    ap non_default_tariffs
+=end
+    return non_default_tariffs[0] unless non_default_tariffs.empty?
+    tariffs.last
   end
+
+  private_class_method def self.default_tariff(tariff)
+    tariff[:default] == true
+  end
+
 
   # stats for rating adult dashboard costs pages, by availability of accounting tariff data
   def self.accounting_tariff_availability_statistics(start_date, end_date, meters)
