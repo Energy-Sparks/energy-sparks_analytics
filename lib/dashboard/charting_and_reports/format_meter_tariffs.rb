@@ -52,7 +52,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
 
   private def rate_type_description(rate_type)
     return MeterTariffs::BILL_COMPONENTS[rate_type][:summary] if MeterTariffs::BILL_COMPONENTS.key?(rate_type)
-    rate_type.humanize
+    rate_type.to_s.humanize
   end
 
   private def single_tariff_table_html(meter)
@@ -73,8 +73,11 @@ class FormatMeterTariffs < DashboardChartAdviceBase
 
   # returns true if have real accounting tariff, or false if only general tariff for area
   private def find_tariff(meter)
-    date = Date.today
+    date = meter.dcc_meter ? Date.new(2013,1,1) : Date.today
+    puts "Got here fixup for old dcc tariff data" if meter.dcc_meter
     tariff = meter.meter_tariffs.accounting_tariff_for_date(date)&.tariff
+puts "Got here #{date}"
+ap tariff
     [!tariff[:default], tariff]
   end
 end

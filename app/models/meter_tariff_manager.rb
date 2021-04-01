@@ -70,8 +70,8 @@ class MeterTariffManager
 
   def pre_process_tariff_attributes(meter)
     @economic_tariff = EconomicTariff.new(meter, meter.attributes(:economic_tariff))
-    @accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs))
-
+    @accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs)) || []
+    @accounting_tariffs += preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic)) || []
     puts "Got 1 eco tariff and #{@accounting_tariffs.nil? ? 0 : @accounting_tariffs.length} accounting tariffs"
   end
 
@@ -79,6 +79,13 @@ class MeterTariffManager
     return nil if accounting_tariffs.nil?
     accounting_tariffs.map do |accounting_tariff|
       AccountingTariff.new(meter, accounting_tariff)
+    end
+  end
+
+  def preprocess_generic_accounting_tariffs(meter, accounting_tariffs)
+    return nil if accounting_tariffs.nil?
+    accounting_tariffs.map do |accounting_tariff|
+      GenericAccountingTariff.new(meter, accounting_tariff)
     end
   end
 end

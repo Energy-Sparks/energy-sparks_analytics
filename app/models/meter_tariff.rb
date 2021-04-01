@@ -74,10 +74,27 @@ class AccountingTariff < EconomicTariff
     else
       raise UnexpectedRateType, "Unexpected unit rate type for tariff #{per}"
     end
-=begin
-    private_class_method def self.generic_tariff?(tariff_config)
-      tariff_config[:rates].keys.any?{ |type| type.to_s.match(/rate[0-9]/) }
+  end
+end
+
+class GenericAccountingTariff < AccountingTariff
+  def differential?(_date)
+    tariff[:rates].keys.any?{ |type| type.to_s.match(/rate[0-9]/) }
+  end
+
+  def costs_x48_x2(date, kwh_x48)
+    if differential?(date)
+      {
+        nighttime_rate:   weighted_cost(kwh_x48, :rate0),
+        daytime_rate:     weighted_cost(kwh_x48, :rate1),
+        standing_charges: standing_charges(date, kwh_x48.sum)
+      }
+    else
+      {
+        nighttime_rate:   nil, # AMRData.one_day_zero_kwh_x48,
+        daytime_rate:     AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate]),
+        standing_charges: standing_charges(date, kwh_x48.sum)
+      }
     end
-=end
   end
 end

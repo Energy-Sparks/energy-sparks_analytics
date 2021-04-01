@@ -2,9 +2,9 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
-def test_script_config(school_name_pattern_match, source_db, attribute_overrides)
+def test_script_config1(school_name_pattern_match, source_db, attribute_overrides)
   {
-    logger1:                  { name: TestDirectoryConfiguration::LOG + "/model fitting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+    logger1:                  { name: TestDirectoryConfiguration::LOG + "/dcc tariff %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
     schools:                    school_name_pattern_match,
     source:                     source_db,
     meter_attribute_overrides:  attribute_overrides,
@@ -22,6 +22,28 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
           { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Charts\New' },
           :report_differing_charts,
           :report_differences
+        ]
+      }
+    }
+  }
+end
+
+def test_script_config(school_name_pattern_match, source_db, attribute_overrides)
+  {
+    logger1:                  { name: TestDirectoryConfiguration::LOG + "/dcc tariff %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+    schools:                    school_name_pattern_match,
+    source:                     source_db,
+    meter_attribute_overrides:  attribute_overrides,
+    adult_dashboard:          {
+      control: {
+        root:    :adult_analysis_page,
+        report_failed_charts:   :summary,
+        pages: %i[electricity_profit_loss],
+        compare_results: [
+          { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
+          { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },
+          :summary,
+          :report_differences,
         ]
       }
     }
@@ -55,8 +77,6 @@ school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match
 school_names.each do |school_name|
   school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db, meter_attributes_overrides: meter_attribute_overrides)
 end
-
-exit
 
 script = test_script_config(school_name_pattern_match, source_db, meter_attribute_overrides)
 RunTests.new(script).run

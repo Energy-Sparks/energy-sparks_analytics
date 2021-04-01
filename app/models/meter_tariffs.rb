@@ -41,7 +41,7 @@ class MeterTariffs
       start_date = meter.amr_data.start_date if start_date < meter.amr_data.start_date
       end_date   = meter.amr_data.end_date   if end_date < meter.amr_data.end_date
       (start_date..end_date).each do |date|
-        return false if meter.meter_tariffs.accounting_tariff_for_date(date)&.tariff
+        return false if meter.meter_tariffs.accounting_tariff_for_date(date)&.tariff.nil?
       end
     end
     true

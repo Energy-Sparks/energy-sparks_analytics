@@ -104,6 +104,7 @@ class RunAdultDashboard < RunCharts
         end
       rescue NoMethodError => e
         puts e
+        puts e.backtrace
         puts "To DO Remove this code after fixing issue when have more time PH 15Oct2020"
         return
       end
