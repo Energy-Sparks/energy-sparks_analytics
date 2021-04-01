@@ -31,9 +31,8 @@ class N3rgyToEnergySparksTariffs
       start_date:       overlap_dates.first,
       end_date:         overlap_dates.last,
       name:             'Tariff from DCC SMETS2 meter',
-      standing_charge:  standing_charge.values.first
     }
-    tariff.merge(convert_rates(kwh_rate))
+    tariff.merge(convert_rates(kwh_rate, standing_charge.values.first))
   end
 
   def standing_charges_for_date_range(kwh_date_range)
@@ -43,7 +42,7 @@ class N3rgyToEnergySparksTariffs
     end.compact
   end
 
-  def convert_rates(rates)
+  def convert_rates(rates, standing_charge)
     if rates.length == 1
       raise UnexpectedNon24HourRangeForFlatRate, "time of day range  #{rates.keys.first} doesnt cover 24 hours" unless whole_24_hours?(rates.keys.first)
       {
@@ -51,7 +50,8 @@ class N3rgyToEnergySparksTariffs
           flat_rate: {
             per:    :kwh,
             rate:   rates.values.first
-          }
+          },
+          standing_charge: standing_charge
         },
         type: :flat_rate
       }
@@ -78,7 +78,7 @@ class N3rgyToEnergySparksTariffs
       end.to_h
 
       {
-        rates: rates,
+        rates: rates.merge({standing_charge: standing_charge}),
         type:  type
       }
     end

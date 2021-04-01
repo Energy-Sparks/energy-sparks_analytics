@@ -1,41 +1,82 @@
-require 'erb'
+
 require_relative 'dashboard_analysis_advice'
 
 # returns html representing tables of all meter tariffs for a school
 class FormatMeterTariffs < DashboardChartAdviceBase
+  class UnhandledTariffDescriptionError < StandardError; end
+  class UnhandledTypeTariffDescriptionError < StandardError; end
   def initialize(school)
     super(school, nil, nil, nil) # inherit from DashboardChartAdviceBase to get html_table functionality
   end
 
   def tariff_tables_html(meter_list = nil)
-    tables = ''
+    html = ''
     all_meters = meter_list.nil? ? [@school.electricity_meters, @school.heat_meters].flatten : meter_list
     all_meters.each do |meter|
-      name = meter.name.nil? || meter.name.strip.empty? ?  '' : "(#{meter.name})"
-      tariff_name, table_data, real_tariff = single_tariff_table_html(meter)
-      table = %{
-        <h3>
-          <%= meter.fuel_type.to_s.capitalize %>
-          meter
-          <%= meter_identifier_type(meter.fuel_type) %>
-          <%= meter.mpan_mprn %> <%= name %>:
-        </h3>
-        <p>
-          <%= tariff_name %>
-        </p>
-        <p>
-          <%= table_data %>
-        </p>
-      }
-
-      table += missing_tariff_information_text unless real_tariff
-
-      tables += generate_html(table, binding)
+      html += tariff_table_for_meter_html(meter)
     end
-    tables
+    html
   end
 
-  private def missing_tariff_information_text
+  def tariff_table_for_meter_html(meter)
+    html = ''
+    html += meter_description_html(meter)
+    meter.meter_tariffs.accounting_tariffs.each do |tariff|
+      html += tariff_description_html(tariff)
+    end
+    html
+  end
+
+  private
+
+  def meter_description_html(meter)
+    meter_description = %{
+      <h3>
+        <%= meter.fuel_type.to_s.capitalize %>
+        meter
+        <%= meter_identifier_type(meter.fuel_type) %>
+        <%= meter.mpan_mprn %> <%= meter_name(meter) %>:
+      </h3>
+    }
+
+    generate_html(meter_description, binding)
+  end
+
+  def tariff_description_html(tariff)
+    table_data = single_tariff_table_html(tariff)
+    tariff_description = %{
+      <p>
+        <%= tariff.tariff[:name] %>:
+        <%= tariff_dates_html(tariff) %>
+      </p>
+      <p>
+        <%= table_data %>
+      </p>
+    }
+
+    generate_html(tariff_description, binding)
+  end
+
+  def meter_name(meter)
+    meter.name.nil? || meter.name.strip.empty? ?  '' : "(#{meter.name})"
+  end
+
+  def tariff_dates_html(tariff)
+    start_date_text = tariff.tariff[:start_date].strftime('%d %b %Y')
+
+    end_date_text = if tariff.tariff[:end_date] == N3rgyTariffs::INFINITE_DATE
+                      'to date'
+                    else
+                      tariff.tariff[:end_date].strftime('%d %b %Y')
+                    end
+    
+    dates_text = %{
+      <%= start_date_text %> to <%= end_date_text %>
+    }
+    generate_html(dates_text, binding)
+  end
+
+  def missing_tariff_information_text
     %(
       <p>
         Unfortunately, we don't have detailed meter information for this meter, so we are using defaults
@@ -46,38 +87,45 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     )
   end
 
-  private def meter_identifier_type(fuel_type)
+  def meter_identifier_type(fuel_type)
     fuel_type == :electricity ? 'MPAN' : 'MPRN'
   end
 
-  private def rate_type_description(rate_type)
+  def rate_type_description(rate_type, costs)
     return MeterTariffs::BILL_COMPONENTS[rate_type][:summary] if MeterTariffs::BILL_COMPONENTS.key?(rate_type)
-    rate_type.to_s.humanize
+    rate_description(rate_type, costs)
   end
 
-  private def single_tariff_table_html(meter)
-    real_tariff, tariff = find_tariff(meter)
-    rates = []
-    tariff[:rates].each do |rate_type, costs|
-      rates.push(
-        [
-          rate_type_description(rate_type),
-          FormatEnergyUnit.format(:£, costs[:rate], :html, false, false, :accountant) + '/' + costs[:per].to_s
-        ]
-      )
+  def rate_description(rate_type, costs)
+    case rate_type.to_s
+    when 'flat_rate'
+      'Flat Rate'
+    when /rate[0-9]/
+      costs[:from].to_s + ' to ' + costs[:to].to_s
+    when 'daytime_rate', 'nighttime_rate'
+      rate_type.to_s.humanize + ' ' + costs[:from].to_s + ' to ' + costs[:to].to_s
+    else
+      raise UnhandledTypeTariffDescriptionError, "Unknown type #{rate_type}"
+    end
+  end
+
+  def single_tariff_table_html(tariff)
+    rates = tariff.tariff[:rates].map do |rate_type, costs|
+      [
+        rate_type_description(rate_type, costs),
+        FormatEnergyUnit.format(:£, costs[:rate], :html, false, false, :accountant) + '/' + costs[:per].to_s
+      ]
     end
     header = ['Tariff type', 'Rate']
-    table = html_table(header, rates)
-    [tariff[:name], table, real_tariff]
+    html_table(header, rates)
   end
 
-  # returns true if have real accounting tariff, or false if only general tariff for area
-  private def find_tariff(meter)
-    date = meter.dcc_meter ? Date.new(2013,1,1) : Date.today
-    puts "Got here fixup for old dcc tariff data" if meter.dcc_meter
-    tariff = meter.meter_tariffs.accounting_tariff_for_date(date)&.tariff
-puts "Got here #{date}"
-ap tariff
-    [!tariff[:default], tariff]
+  def tariff_description_html_no_2(tariff)
+    case tariff.class.name
+    when AccountingTariff
+    when GenericAccountingTariff
+    else
+      raise UnhandledTariffDescriptionError, "Unable to display tariff of type #{tariff.class.name}"
+    end
   end
 end

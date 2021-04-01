@@ -2,6 +2,7 @@
 # - which can be used for both differential and non-differential cost calculations
 # - to work out whether its differential or not the code below looks up the meters accounting tariff
 class MeterTariffManager
+  attr_reader :accounting_tariffs
   class MissingAccountingTariff < StandardError; end
   def initialize(meter)
     @meter = meter
