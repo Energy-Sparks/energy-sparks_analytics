@@ -40,8 +40,10 @@ class MeterCost
     chart_config[:meter_definition] =  @meter.mpxn
     name = "#{chart_name}_#{@meter.mpxn}".to_sym
     data = chart_manager.run_chart(chart_config, name)
-    { type: :chart, data: data }
-    { type: :chart_data, data: data }
+    [
+      { type: :chart, data: data },
+      { type: :chart_data, data: data }
+    ]
   end
 
   def cost_table
