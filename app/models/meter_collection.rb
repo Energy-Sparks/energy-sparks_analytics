@@ -187,7 +187,7 @@ class MeterCollection
 
   # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
   def real_meters
-    all_meters.select { |meter| !meter.synthetic_mpan_mprn? }
+    all_meters.select { |meter| !meter.synthetic_mpan_mprn? }.uniq{ |m| m.mpxn}
   end
 
   def adult_report_groups

@@ -112,8 +112,34 @@ class AdviceFuelTypeBase < AdviceStructuredOldToNewConversion
     tariffs = MeterTariffs.accounting_tariffs_available_for_period?(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, underlying_meters)
     tariffs ? :relevant : :never_relevant
   end
+  # overwrite structured content old to new converter
+  # so can do per meter analysis
+  def structured_content(user_type: nil)
+    content_information = []
+    component_pages.each do |component_page_class|
+      component_page = component_page_class.new(@school)
+      content_information.push(
+        {
+          title:    component_page.summary,
+          content:  component_page.content
+        }
+      ) if component_page.relevance == :relevant
+    end
+    content_information += meter_costs
+    content_information
+  end
   def advice_class; self.class end
   def has_structured_content?; true end
+
+  def meter_costs
+    real_meters.map do |meter|
+      MeterCost.new(@school,meter).content
+    end
+  end
+
+  def real_meters
+    @school.real_meters.select { |m| m.fuel_type == fuel_type }
+  end
 end
 
 class ElectricityCostsIntroductionAdvice < CostsIntroductionAdvice
