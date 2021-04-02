@@ -1,7 +1,3 @@
-require_relative './advice_general.rb'
-require_relative './advice_old_to_new_conversion.rb'
-require_relative '../charting_and_reports/financial_advice.rb'
-
 class CostAdviceBase < AdviceOldToNewConversion
   include MeterlessMixin
   def create_class(old_advice_class)
@@ -16,8 +12,6 @@ class CostAdviceBase < AdviceOldToNewConversion
       raise EnergySparksUnexpectedStateException, "Unexpected number of arguments #{args}"
     end
   end
-
-  
 
   def erb_bind(text)
     ERB.new(text).result(binding)

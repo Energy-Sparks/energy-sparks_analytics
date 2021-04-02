@@ -1,6 +1,3 @@
-require 'erb'
-require_relative 'dashboard_analysis_advice'
-
 # extension of DashboardEnergyAdvice CO2 Advice Tab
 # NB clean HTML from https://word2cleanhtml.com/cleanit
 class DashboardEnergyAdvice

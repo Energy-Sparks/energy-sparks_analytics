@@ -1,3 +1,6 @@
+require_rel './*.rb'
+require_rel './costs/*.rb'
+require_rel './../alerts/*.rb'
 class DashboardConfiguration
   ADULT_DASHBOARD_GROUPS = {
     benchmark:      %i[benchmark],

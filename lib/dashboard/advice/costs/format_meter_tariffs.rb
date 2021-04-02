@@ -1,6 +1,3 @@
-
-require_relative 'dashboard_analysis_advice'
-
 # returns html representing tables of all meter tariffs for a school
 class FormatMeterTariffs < DashboardChartAdviceBase
   class UnhandledTariffDescriptionError < StandardError; end
