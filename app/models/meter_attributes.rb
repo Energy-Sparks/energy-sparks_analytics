@@ -602,12 +602,8 @@ class MeterAttributes
     )
   end
 
-  class AccountingGenericTariff < MeterAttributeTypes::AttributeBase
-    id :accounting_tariff_generic
-    aggregate_over :accounting_tariffs
-    name 'Accounting tariff (DCC)'
-
-    structure MeterAttributeTypes::Hash.define(
+  def self.generic_accounting_tariff
+    MeterAttributeTypes::Hash.define(
       structure: {
         start_date: MeterAttributeTypes::Date.define,
         end_date:   MeterAttributeTypes::Date.define,
@@ -636,6 +632,10 @@ class MeterAttributes
             tiered_rate2: MeterAttributes.default_tiered_rate,
             tiered_rate3: MeterAttributes.default_tiered_rate,
 
+            duos_red:     MeterAttributeTypes::Float.define,
+            duos_amber:   MeterAttributeTypes::Float.define,
+            duos_green:   MeterAttributeTypes::Float.define,
+
             weekdays:     MeterAttributeTypes::Boolean.define,
             weekends:     MeterAttributeTypes::Boolean.define,
           }.merge(MeterAttributes.default_tariff_rates)
@@ -643,6 +643,30 @@ class MeterAttributes
         asc_limit_kw: MeterAttributeTypes::Float.define
       }
     )
+  end
+
+  class AccountingGenericTariff < MeterAttributeTypes::AttributeBase
+    id :accounting_tariff_generic
+    aggregate_over :accounting_tariffs
+    name 'Accounting tariff (generic + DCC)'
+
+    structure MeterAttributes.generic_accounting_tariff
+  end
+
+  class AccountingGenericTariffOverride < MeterAttributeTypes::AttributeBase
+    id :accounting_tariff_generic_override
+    aggregate_over :accounting_tariffs
+    name 'Accounting tariff override (generic + DCC)'
+
+    structure MeterAttributes.generic_accounting_tariff
+  end
+
+  class AccountingGenericTariffMerge < MeterAttributeTypes::AttributeBase
+    id :accounting_tariff_generic_merge
+    aggregate_over :accounting_tariffs
+    name 'Accounting tariff merge (generic + DCC)'
+
+    structure MeterAttributes.generic_accounting_tariff
   end
 
   def self.all
