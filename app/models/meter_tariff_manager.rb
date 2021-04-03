@@ -12,29 +12,30 @@ class MeterTariffManager
   def economic_cost(date, kwh_x48)
     if differential_tariff_on_date?(date)
       {
-        nighttime_rate: @economic_tariff.weighted_cost(kwh_x48, :nighttime_rate),
-        daytime_rate:   @economic_tariff.weighted_cost(kwh_x48, :daytime_rate)
+        rates_x48: {
+          nighttime_rate: @economic_tariff.weighted_cost(kwh_x48, :nighttime_rate),
+          daytime_rate:   @economic_tariff.weighted_cost(kwh_x48, :daytime_rate)
+        },
+        standing_charges: {},
+        differential: true
       }
     else
       {
-        flat_rate: AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(:rate))
+        rates_x48: {
+          flat_rate: AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(:rate))
+        },
+        standing_charges: {},
+        differential: false  
       }
     end
   end
 
   def economic_cost_backwards_compatible(date, kwh_x48)
-    costs = economic_cost(date, kwh_x48)
-    if costs.key?(:flat_rate)
-      [costs[:flat_rate], AMRData.one_day_zero_kwh_x48, {}]
-    else
-      [costs[:daytime_rate], costs[:nighttime_rate], {}]
-    end
+    economic_cost(date, kwh_x48)
   end
 
   def accounting_tariff_x48_backwards_compatible(date, kwh_x48)
-    costs = accounting_tariff_£(date, kwh_x48)
-
-    [costs[:daytime_rate], costs[:nighttime_rate], costs[:standing_charges]]
+    accounting_tariff_£(date, kwh_x48)
   end
 
   def any_differential_tariff?(start_date, end_date)
@@ -64,9 +65,7 @@ class MeterTariffManager
 
     raise MissingAccountingTariff, "Missing tariff data for #{@meter.mpxn} on #{date}" if tariff.nil?
 
-    costs_x48 = tariff.costs_x48_x2(date, kwh_x48)
-
-    costs_x48.merge({ standing_charges: tariff.standing_charges(date, kwh_x48.sum) })
+    tariff.costs(date, kwh_x48)
   end
 
   def pre_process_tariff_attributes(meter)

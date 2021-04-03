@@ -24,17 +24,23 @@ class CostsBase < HalfHourlyData
 
   # combine OneDaysCostData[] into single aggregate OneDaysCostData
   private_class_method def self.combined_day_costs(costs)
-    day_time_costs = costs.map { |cost| cost.daytime_cost_x48 }.compact
-    combined_day_costs_x48 = day_time_costs.empty? ? nil : AMRData.fast_add_multiple_x48_x_x48(day_time_costs)
-    nighttime_costs = costs.map { |cost| cost.nighttime_cost_x48 }.compact
-    combined_night_costs_x48 = nighttime_costs.empty? ? nil : AMRData.fast_add_multiple_x48_x_x48(nighttime_costs)
-    combined_standing_charges = Hash.new(0.0)
+    combined = {
+      rates_x48:        AMRData.fast_add_multiple_x48_x_x48(costs.map(&:costs_x48)),
+      standing_charges: combined_standing_charges(costs),
+      differential:     costs.any?{ |c| c.differential_tariff? }
+    }
+
+    OneDaysCostData.new(combined)
+  end
+
+  def combined_standing_charges(costs)
+    combined_standing_charges = {}
     costs.each do |cost|
       cost.standing_charges.each do |type, value|
         combined_standing_charges[type] += value
       end
     end
-    OneDaysCostData.new(combined_day_costs_x48, combined_night_costs_x48, combined_standing_charges)
+    combined_standing_charges
   end
 
   # used in obscure case where we have split storage heater meter up
@@ -47,22 +53,36 @@ class CostsBase < HalfHourlyData
   end
 
   class OneDaysCostData
-    attr_reader :costs_x48, :daytime_cost_x48, :nighttime_cost_x48
     attr_reader :standing_charges, :total_standing_charge, :one_day_total_cost
     attr_reader :bill_components, :bill_component_costs_per_day
 
-    def initialize(daytime_cost_x48, nighttime_cost_x48, standing_charges)
-      @daytime_cost_x48 = daytime_cost_x48
-      @nighttime_cost_x48 = nighttime_cost_x48
-      @costs_x48 = nighttime_cost_x48.nil? ? daytime_cost_x48 : AMRData.fast_add_x48_x_x48(daytime_cost_x48, nighttime_cost_x48)
-      @standing_charges = standing_charges
+    def initialize(costs)
+      @all_costs_x48 = costs[:rates_x48]
+      @standing_charges = costs[:standing_charges]
+      @differential =  costs[:differential] 
       @total_standing_charge = standing_charges.empty? ? 0.0 : standing_charges.values.sum
-      @one_day_total_cost = @costs_x48.sum + @total_standing_charge
-      calculate_day_bill_components(daytime_cost_x48, nighttime_cost_x48, standing_charges)
+      @one_day_total_cost = total_x48_costs + @total_standing_charge
+      calculate_day_bill_components
+    end
+
+    def costs_x48
+      @costs_x48 ||= AMRData.fast_add_multiple_x48_x_x48(@all_costs_x48.values)
+    end
+
+    def total_x48_costs
+      @total_x48_costs ||= costs_x48.sum
+    end
+
+    def cost_x48(type)
+      @all_costs_x48[type]
     end
 
     def differential_tariff?
-      !@nighttime_cost_x48.nil?
+      @differential
+    end
+
+    def rates_at_half_hour(halfhour_index)
+      @all_costs_x48.map { |type, £_x48| [type, £_x48[halfhour_index]] }.to_h
     end
 
     # used for storage heater disaggregation
@@ -73,14 +93,10 @@ class CostsBase < HalfHourlyData
       @bill_component_costs_per_day.merge!(@standing_charges)
     end
 
-    private def calculate_day_bill_components(daytime_cost_x48, nighttime_cost_x48, standing_charges)
-      @bill_component_costs_per_day = {}
-      if nighttime_cost_x48.nil?
-        @bill_component_costs_per_day[:rate] = daytime_cost_x48.sum
-      else
-        @bill_component_costs_per_day[:daytime_rate] = daytime_cost_x48.sum
-        @bill_component_costs_per_day[:nighttime_rate] = nighttime_cost_x48.sum
-      end
+    private
+    
+    def calculate_day_bill_components
+      @bill_component_costs_per_day = @all_costs_x48.transform_values{ |£_x48| £_x48.sum }
       @bill_component_costs_per_day.merge!(standing_charges)
       @bill_components = @bill_component_costs_per_day.keys
     end
@@ -107,15 +123,9 @@ class CostsBase < HalfHourlyData
   end
 
   def cost_data_halfhour_broken_down(date, halfhour_index)
-    results = {}
-    if one_days_cost_data(date).nighttime_cost_x48.nil?
-      results[:rate] = cost_data_halfhour(date, halfhour_index)
-    else
-      results[:daytime_rate] = one_days_cost_data(date).daytime_cost_x48[halfhour_index]
-      results[:nighttime_rate] = one_days_cost_data(date).nighttime_cost_x48[halfhour_index]
-    end
-    results.merge!(one_days_cost_data(date).standing_charges.transform_values{ |one_day_kwh| one_day_kwh / 48.0 })
-    results
+    cost_hh_£ = rates_at_half_hour(halfhour_index)
+    cost_hh_£.merge!(one_days_cost_data(date).standing_charges.transform_values{ |one_day_kwh| one_day_kwh / 48.0 })
+    cost_hh_£
   end
 
   public def calculate_tariff(meter)
@@ -127,15 +137,8 @@ class CostsBase < HalfHourlyData
   end
 
   public def calculate_tariff_for_date(date, meter)
-    kwh_x48 = nil
-    if meter.amr_data.date_missing?(date) # TODO(PH, 7Apr2019) - bad Castle data for 2009, work out why validation not cleaning up
-      logger.warn "Warning: missing amr data for #{date} using zero"
-      kwh_x48 = Array.new(48, 0.0)
-    else
-      kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
-    end
-    daytime_cost_x48, nighttime_cost_x48, standing_charges = costs(date, meter, kwh_x48)
-    one_day_cost = OneDaysCostData.new(daytime_cost_x48, nighttime_cost_x48, standing_charges)
+    kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
+    one_day_cost = OneDaysCostData.new(costs(date, meter, kwh_x48))
     one_day_cost
   end
 

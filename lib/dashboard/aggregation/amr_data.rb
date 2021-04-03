@@ -81,6 +81,7 @@ class AMRData < HalfHourlyData
     kwhs = self[date].kwh_data_x48
     return kwhs if type == :kwh
     return @economic_tariff.days_cost_data_x48(date) if type == :£ || type == :economic_cost
+    # Got here ardvark
     return @accounting_tariff.days_cost_data_x48(date) if type == :accounting_cost
     return @carbon_emissions.one_days_data_x48(date) if type == :co2
   end
@@ -118,6 +119,7 @@ class AMRData < HalfHourlyData
   end
 
   def self.fast_add_multiple_x48_x_x48(list)
+    return list.first if list.length == 1
     c = one_day_zero_kwh_x48
     list.each do |data_x48|
       c = fast_add_x48_x_x48(c, data_x48)
