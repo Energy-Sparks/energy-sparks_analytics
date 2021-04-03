@@ -42,6 +42,7 @@ class MeterCost
     data = chart_manager.run_chart(chart_config, name)
     [
       { type: :chart, data: data },
+      { type: :chart_config, data: chart_config },
       { type: :chart_data, data: data }
     ]
   end
