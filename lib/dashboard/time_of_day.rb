@@ -19,6 +19,10 @@ class TimeOfDay
     @relative_time.to_time
   end
 
+  def on_30_minute_interval?
+    [0, 30].include?(minutes)
+  end
+
   def self.time_of_day_from_halfhour_index(hh)
     TimeOfDay.new((hh / 2).to_i, 30 * (hh % 2))
   end
@@ -74,6 +78,10 @@ class TimeOfDay
     end
   end
 
+  def to_halfhour_index
+    to_halfhour_index_with_fraction[0]
+  end
+
   def hours_fraction
     hour + (minutes / 60.0)
   end
@@ -86,7 +94,24 @@ class TimeOfDay
     other.class == self.class && [hour, minutes] <=> [other.hour, other.minutes]
   end
 
+  def ==(other)
+    puts "Got here AA #{other.class.name} #{self.class.name}" if other.class != self.class
+    other.class == self.class && [hour, minutes] == [other.hour, other.minutes]
+  end
+
   def - (value)
     relative_time - value.relative_time
+  end
+end
+
+class TimeOfDay30mins < TimeOfDay
+  class TimeOfDayNotOn30MinuteInterval < StandardError; end
+  def initialize(hour, minutes)
+    raise TimeOfDayNotOn30MinuteBoundary, "Not on 30 minute interval #{minutes}" unless minutes = 0.0 || minutes = 30.0
+    super(hour, minutes)
+  end
+
+  def self.time_of_day_from_halfhour_index(hh)
+    TimeOfDay30mins.new((hh / 2).to_i, 30 * (hh % 2))
   end
 end

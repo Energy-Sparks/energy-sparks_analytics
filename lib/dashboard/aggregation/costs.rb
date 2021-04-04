@@ -188,7 +188,7 @@ end
 
 class EconomicCosts < CostsBase
   protected def costs(date, meter, days_kwh_x48)
-    meter.meter_tariffs.economic_cost_backwards_compatible(date, days_kwh_x48)
+    meter.meter_tariffs.economic_cost(date, days_kwh_x48)
   end
 
   def self.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
@@ -247,7 +247,7 @@ end
 
 class AccountingCosts < CostsBase
   protected def costs(date, meter, days_kwh_x48)
-    meter.meter_tariffs.accounting_tariff_x48_backwards_compatible(date, days_kwh_x48)
+    meter.meter_tariffs.accounting_cost(date, days_kwh_x48)
   end
 
   # similar to Economic version, but too many differences to easily refactor to inherited version for the moment

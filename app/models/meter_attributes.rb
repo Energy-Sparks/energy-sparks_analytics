@@ -433,6 +433,19 @@ class MeterAttributes
     )
   end
 
+  class EconomicTariffDifferentialType < MeterAttributeTypes::AttributeBase
+    id  :economic_tariff_differential_accounting_tariff
+    key :economic_tariff_differential_accounting_tariff
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date:      MeterAttributeTypes::Date.define(required: true),
+        end_date:        MeterAttributeTypes::Date.define,
+        differential:    MeterAttributeTypes::Boolean.define(required: true),
+      }
+    )
+  end
+
   def self.default_tariff_rates
     {
       standing_charge: MeterAttributeTypes::Hash.define(
@@ -570,8 +583,8 @@ class MeterAttributes
       structure: {
         per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
         rate: MeterAttributeTypes::Float.define(required: true),
-        from: MeterAttributeTypes::TimeOfDay.define(required: true),
-        to:   MeterAttributeTypes::TimeOfDay.define(required: true),
+        from: MeterAttributeTypes::TimeOfDay30mins.define(required: true),
+        to:   MeterAttributeTypes::TimeOfDay30mins.define(required: true),
       }
     )
   end
@@ -592,8 +605,8 @@ class MeterAttributes
       required: false,
       structure: {
         per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
-        from: MeterAttributeTypes::TimeOfDay.define(required: true),
-        to:   MeterAttributeTypes::TimeOfDay.define(required: true),
+        from: MeterAttributeTypes::TimeOfDay30mins.define(required: true),
+        to:   MeterAttributeTypes::TimeOfDay30mins.define(required: true),
         tier0: default_tiered_rate_definition,
         tier1: default_tiered_rate_definition,
         tier2: default_tiered_rate_definition,
@@ -607,6 +620,7 @@ class MeterAttributes
       structure: {
         start_date: MeterAttributeTypes::Date.define,
         end_date:   MeterAttributeTypes::Date.define,
+        source:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:dcc, :manually_entered]),
         name:       MeterAttributeTypes::String.define,
         type:       MeterAttributeTypes::Symbol.define(required: true, allowed_values: %i[flat differential differential_tiered]),
         sub_type:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:weekday_weekend]),

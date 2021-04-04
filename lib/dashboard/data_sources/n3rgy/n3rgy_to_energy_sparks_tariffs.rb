@@ -1,5 +1,6 @@
 class N3rgyToEnergySparksTariffs
   class UnexpectedNon24HourRangeForFlatRate < StandardError; end
+  class UnexpectedWeekdays < StandardError; end
 
   def initialize(n3rgy_parameterised_tariff)
     @n3rgy_parameterised_tariff = n3rgy_parameterised_tariff
@@ -8,9 +9,7 @@ class N3rgyToEnergySparksTariffs
   def convert
     return nil if @n3rgy_parameterised_tariff.nil?
 
-    {
-      accounting_tariff_generic:  embed_standing_charges_in_rates
-    }
+    { accounting_tariff_generic:  embed_standing_charges_in_rates }
   end
 
   private
@@ -19,9 +18,13 @@ class N3rgyToEnergySparksTariffs
   # Energy Sparks by default groups them, so the kw rates and standing
   # charges apply for the same date ranges
   def embed_standing_charges_in_rates
-    @n3rgy_parameterised_tariff[:kwh_rates].map do |kwh_date_range, kwh_rate|
-      standing_charges = standing_charges_for_date_range(kwh_date_range)
-      standing_charges.map { |sc| merge_tariffs(sc, kwh_date_range, kwh_rate) }
+    one_or_more = @n3rgy_parameterised_tariff[:kwh_rates] # weekday tariffs are arrays of rates
+    kwh_rates = one_or_more.is_a?(Hash) ? [one_or_more] : one_or_more
+    kwh_rates.map do |kwh_rate|
+      kwh_rate.map do |kwh_date_range, kwh_rate|
+        standing_charges = standing_charges_for_date_range(kwh_date_range)
+        standing_charges.map { |sc| merge_tariffs(sc, kwh_date_range, kwh_rate) }
+      end.flatten
     end.flatten
   end
 
@@ -57,30 +60,51 @@ class N3rgyToEnergySparksTariffs
       }
     else
       type = rates.values.any?{ |v| v.is_a?(Hash) } ? :differential_tiered : :differential
-      rates = rates.map.with_index do |(time_of_day_range, rate), index|
-        base = {
-          from:   time_of_day_range.first,
-          to:     time_of_day_range.last,
-          per:    :kwh,
-        }
+      converted_rates = rates.map.with_index do |(time_of_day_range, rate), index|
+        unless time_of_day_range.is_a?(Symbol) && time_of_day_range == :weekdays
+          base = {
+            from:   time_of_day_range.first,
+            to:     time_of_day_range.last,
+            per:    :kwh,
+          }
 
-        if rate.is_a?(Float)
-          [
-            "rate#{index}".to_sym,
-            base.merge({ rate:   rate })
-          ]
-        else
-          [
-            "tiered_rate#{index}".to_sym,
-            base.merge(convert_tiered_rate(rate))
-          ]
+          if rate.is_a?(Float)
+            [
+              "rate#{index}".to_sym,
+              base.merge({ rate:   rate })
+            ]
+          else
+            [
+              "tiered_rate#{index}".to_sym,
+              base.merge(convert_tiered_rate(rate))
+            ]
+          end
         end
-      end.to_h
+      end.compact.to_h
 
-      {
-        rates: rates.merge({standing_charge: standing_charge}),
-        type:  type
+      config = {
+        rates:  converted_rates.merge({standing_charge: standing_charge}),
+        type:   type,
+        source: :dcc
       }
+
+      set_weekdays(rates, config)
+
+      config
+    end
+  end
+
+  def set_weekdays(rates, config)
+    if rates.key?(:weekdays)
+      config[:sub_type] = :weekday_weekend
+
+      if !([1, 2, 3, 4, 5] & rates[:weekdays]).empty?
+        config[:weekday] = true
+      elsif !([0, 6] & rates[:weekdays]).empty?
+        config[:weekend] = true
+      else
+        raise UnexpectedWeekdays, "Unexepected weekdays #{rate}"
+      end
     end
   end
 
@@ -98,8 +122,8 @@ class N3rgyToEnergySparksTariffs
   end
 
   def whole_24_hours?(time_of_day_range)
-    time_of_day_range.first == TimeOfDay.new( 0,  0) &&
-    time_of_day_range.last  == TimeOfDay.new(23, 30)
+    time_of_day_range.first == TimeOfDay30mins.new( 0,  0) &&
+    time_of_day_range.last  == TimeOfDay30mins.new(23, 30)
   end
 
   def intersect_dateranges(dr1, dr2)
