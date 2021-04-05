@@ -166,6 +166,14 @@ module MeterAttributeTypes
     end
   end
 
+  class TimeOfDay30mins < AttributeType
+    self.type = :time_of_day
+    def _parse(input)
+      return nil if missing_value?(input[:hour]) || missing_value?(input[:minutes])
+      ::TimeOfDay30mins.new(input[:hour].to_i, input[:minutes].to_i)
+    end
+  end
+
   class Boolean < AttributeType
     self.type = :boolean
     def _parse(input)

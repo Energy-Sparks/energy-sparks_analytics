@@ -52,8 +52,8 @@ class N3rgyTariffs
 
   def self.compare_two_rates(rates1, rates2)
     # rates1 == rates2 object comparison doesn't work, think
-    # because the range comparison operator isn't working for TimeOfDay or Date
-    # it doesn't seem to call TimeOfDay.== or TimeOfDay.<=>
+    # because the range comparison operator isn't working for TimeOfDay30mins or Date
+    # it doesn't seem to call TimeOfDay30mins.== or TimeOfDay30mins.<=>
     # suspect must do an object address comparison instead?
     rates1.keys == rates2.keys && rates1.values == rates2.values
   end
@@ -93,8 +93,8 @@ class N3rgyTariffs
   end
 
   def hh_index_to_range(hh_i_range)
-    start_tod = TimeOfDay.time_of_day_from_halfhour_index(hh_i_range.first)
-    end_tod   = TimeOfDay.time_of_day_from_halfhour_index(hh_i_range.last)
+    start_tod = TimeOfDay30mins.time_of_day_from_halfhour_index(hh_i_range.first)
+    end_tod   = TimeOfDay30mins.time_of_day_from_halfhour_index(hh_i_range.last)
     start_tod..end_tod
   end
 

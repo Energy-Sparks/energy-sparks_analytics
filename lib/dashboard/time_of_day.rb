@@ -4,12 +4,19 @@ class TimeOfDay
 
   attr_reader :hour, :minutes, :relative_time
 
-  def initialize(hour, minutes)
-    if hour.nil? || minutes.nil? || hour < 0 || hour > 24 || minutes < 0 || minutes >= 60 || (hour == 24 && minutes != 0)
-      raise EnergySparksUnexpectedStateException.new("Unexpected time of day setting #{hour}:#{minutes}")
+  def initialize(hour, mins)
+    ruby_26_bug_initialize(hour, mins)
+  end
+
+  # on Ruby 2.6 Windows, the 2nd argument of super(,)
+  # in the derived TimeOfDay30mins constructor loses
+  # the value which always comes through as zero???
+  def ruby_26_bug_initialize(hour, mins)
+    if hour.nil? || mins.nil? || hour < 0 || hour > 24 || mins < 0 || mins >= 60 || (hour == 24 && mins != 0)
+      raise EnergySparksUnexpectedStateException.new("Unexpected time of day setting #{hour}:#{mins}")
     end
     @hour = hour
-    @minutes = minutes
+    @minutes = mins
     # PH 24Oct2020: make .minutes '.to_i' after
     # hour = 5 minutes = 57.000000000000014 => "invalid fraction"
     @relative_time = DateTime.new(1970, 1, 1, hour, minutes.to_i, 0)
@@ -17,6 +24,10 @@ class TimeOfDay
 
   def to_time
     @relative_time.to_time
+  end
+
+  def on_30_minute_interval?
+    [0, 30].include?(minutes)
   end
 
   def self.time_of_day_from_halfhour_index(hh)
@@ -74,6 +85,10 @@ class TimeOfDay
     end
   end
 
+  def to_halfhour_index
+    to_halfhour_index_with_fraction[0]
+  end
+
   def hours_fraction
     hour + (minutes / 60.0)
   end
@@ -86,7 +101,47 @@ class TimeOfDay
     other.class == self.class && [hour, minutes] <=> [other.hour, other.minutes]
   end
 
+  def ==(other)
+    puts "Got here AA #{other.class.name} #{self.class.name}" if other.class != self.class
+    other.class == self.class && [hour, minutes] == [other.hour, other.minutes]
+  end
+
   def - (value)
     relative_time - value.relative_time
   end
 end
+
+class TimeOfDay30mins < TimeOfDay
+  class TimeOfDayNotOn30MinuteInterval < StandardError; end
+  def initialize(hour, minutes)
+    ruby_26_bug_initialize(hour, minutes)
+  end
+
+  def self.time_of_day_from_halfhour_index(hh)
+    TimeOfDay30mins.new((hh / 2).to_i, (30 * (hh % 2)).to_i)
+  end
+end
+
+=begin
+# ruby_26_bug_initialize: this works but the above doesn't
+class A
+  def initialize(a,b)
+    puts "A #{a}, #{b}"
+  end
+  def self.set(a,b)
+    A.new(a,b)
+  end
+end
+
+class B < A
+  def initialize(a,b)
+    puts "B #{a}, #{b}"
+    super(a,b)
+  end
+  def self.set(a,b)
+    B.new(a,b)
+  end
+end
+
+B.set(1,40)
+=end
