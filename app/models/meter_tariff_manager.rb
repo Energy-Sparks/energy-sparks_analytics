@@ -149,7 +149,7 @@ class MeterTariffManager
     tariffs.combination(2) do |t1, t2|
       r = t1.tariff[:start_date]..t1.tariff[:end_date]
       if r.cover?(t2.tariff[:start_date]) || r.cover?(t2.tariff[:end_date])
-        raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs default = #{default}"
+        raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs default = #{default} #{@meter.mpxn}"
       end
     end
   end

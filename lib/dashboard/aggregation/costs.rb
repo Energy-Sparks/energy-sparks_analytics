@@ -23,9 +23,9 @@ class CostsBase < HalfHourlyData
   end
 
   # combine OneDaysCostData[] into single aggregate OneDaysCostData
-  private_class_method def self.combined_day_costs(costs)
+  def self.combined_day_costs(costs)
     combined = {
-      rates_x48:        AMRData.fast_add_multiple_x48_x_x48(costs.map(&:costs_x48)),
+      rates_x48:        merge_costs_x48(costs.map(&:all_costs_x48)),
       standing_charges: combined_standing_charges(costs),
       differential:     costs.any?{ |c| c.differential_tariff? }
     }
@@ -33,8 +33,21 @@ class CostsBase < HalfHourlyData
     OneDaysCostData.new(combined)
   end
 
-  def combined_standing_charges(costs)
-    combined_standing_charges = {}
+  # merge array of hashes of x48 costs
+  def self.merge_costs_x48(arr_of_type_to_costs_x48)
+    totals_x48_by_type = Hash.new{ |h, k| h[k] = [] }
+
+    arr_of_type_to_costs_x48.each do |type_to_costs_x48|
+      type_to_costs_x48.each do |type, c_x48|
+        totals_x48_by_type[type].push(c_x48)
+      end
+    end
+
+    totals_x48_by_type.transform_values{ |c_x48_array| AMRData.fast_add_multiple_x48_x_x48(c_x48_array) }
+  end
+
+  def self.combined_standing_charges(costs)
+    combined_standing_charges = Hash.new(0.0)
     costs.each do |cost|
       cost.standing_charges.each do |type, value|
         combined_standing_charges[type] += value
@@ -55,6 +68,7 @@ class CostsBase < HalfHourlyData
   class OneDaysCostData
     attr_reader :standing_charges, :total_standing_charge, :one_day_total_cost
     attr_reader :bill_components, :bill_component_costs_per_day
+    attr_reader :all_costs_x48
 
     def initialize(costs)
       @all_costs_x48 = costs[:rates_x48]
