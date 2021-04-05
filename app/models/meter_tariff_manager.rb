@@ -141,9 +141,6 @@ class MeterTariffManager
     check_overlapping_accounting_tariffs_default_type(@accounting_tariffs, false)
   end
 
-  def check_differential_tariffs_times(tariff)
-  end
-
   def check_overlapping_accounting_tariffs_default_type(tariff_type, default)
     tariffs = tariff_type.select { |t| t.default? == default }
     tariffs.combination(2) do |t1, t2|
