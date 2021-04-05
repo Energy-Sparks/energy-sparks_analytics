@@ -124,7 +124,7 @@ class AccountingTariff < EconomicTariff
   def check_time_ranges_on_30_minute_boundaries(time_ranges)
     time_of_days = [time_ranges.map(&:first), time_ranges.map(&:last)].flatten
     if time_of_days.any?{ |tod| !tod.on_30_minute_interval? }
-      raise TimeRangesNotOn30MinuteBoundary, 'Differential tariff time of day  rates not on 30 minute interval'
+      raise TimeRangesNotOn30MinuteBoundary, "Differential tariff time of day  rates not on 30 minute interval #{@meter.mpxn}"
     end
   end
 
