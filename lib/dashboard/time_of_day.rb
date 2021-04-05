@@ -4,12 +4,19 @@ class TimeOfDay
 
   attr_reader :hour, :minutes, :relative_time
 
-  def initialize(hour, minutes)
-    if hour.nil? || minutes.nil? || hour < 0 || hour > 24 || minutes < 0 || minutes >= 60 || (hour == 24 && minutes != 0)
-      raise EnergySparksUnexpectedStateException.new("Unexpected time of day setting #{hour}:#{minutes}")
+  def initialize(hour, mins)
+    ruby_26_bug_initialize(hour, mins)
+  end
+
+  # on Ruby 2.6 Windows, the 2nd argument of super(,)
+  # in the derived TimeOfDay30mins constructor loses
+  # the value which always comes through as zero???
+  def ruby_26_bug_initialize(hour, mins)
+    if hour.nil? || mins.nil? || hour < 0 || hour > 24 || mins < 0 || mins >= 60 || (hour == 24 && mins != 0)
+      raise EnergySparksUnexpectedStateException.new("Unexpected time of day setting #{hour}:#{mins}")
     end
     @hour = hour
-    @minutes = minutes
+    @minutes = mins
     # PH 24Oct2020: make .minutes '.to_i' after
     # hour = 5 minutes = 57.000000000000014 => "invalid fraction"
     @relative_time = DateTime.new(1970, 1, 1, hour, minutes.to_i, 0)
@@ -107,11 +114,34 @@ end
 class TimeOfDay30mins < TimeOfDay
   class TimeOfDayNotOn30MinuteInterval < StandardError; end
   def initialize(hour, minutes)
-    raise TimeOfDayNotOn30MinuteBoundary, "Not on 30 minute interval #{minutes}" unless minutes = 0.0 || minutes = 30.0
-    super(hour, minutes)
+    ruby_26_bug_initialize(hour, minutes)
   end
 
   def self.time_of_day_from_halfhour_index(hh)
-    TimeOfDay30mins.new((hh / 2).to_i, 30 * (hh % 2))
+    TimeOfDay30mins.new((hh / 2).to_i, (30 * (hh % 2)).to_i)
   end
 end
+
+=begin
+# ruby_26_bug_initialize: this works but the above doesn't
+class A
+  def initialize(a,b)
+    puts "A #{a}, #{b}"
+  end
+  def self.set(a,b)
+    A.new(a,b)
+  end
+end
+
+class B < A
+  def initialize(a,b)
+    puts "B #{a}, #{b}"
+    super(a,b)
+  end
+  def self.set(a,b)
+    B.new(a,b)
+  end
+end
+
+B.set(1,40)
+=end

@@ -12,6 +12,35 @@ class DCCMeters
   end
 
   def self.meter_config
+=begin
+  ======kwh readings=================
+    10:15:22: 1234567891000 Readings: 672 Missing: 122 2012-04-27 to 2014-02-27
+    10:15:33: 1234567891002 Readings: 671 Missing: 169 2012-04-27 to 2014-02-27
+    10:15:41: 1234567891004 Readings: 354 Missing: 73 2012-04-27 to 2013-04-15
+    10:15:49: 1234567891006 Readings: 514 Missing: 69 2012-04-27 to 2013-09-22
+    10:16:00: 1234567891008 Readings: 656 Missing: 167 2012-05-12 to 2014-02-27
+    10:16:11: 1234567891010 Readings: 653 Missing: 317 2012-05-12 to 2014-02-27
+    10:16:17: 1234567891012 Readings: 0 Missing: 31536  to
+    10:16:25: 1234567891014 Readings: 653 Missing: 220 2012-05-14 to 2014-02-27
+    10:16:30: 1234567891016 Readings: 0 Missing: 37920  to
+    10:16:38: 1234567891018 Readings: 0 Missing: 37920  to
+    10:16:46: 1234567891020 Readings: 0 Missing: 37920  to
+    10:16:55: 1234567891022 Readings: 0 Missing: 37920  to
+    10:17:06: 1234567891024 Readings: 494 Missing: 117 2012-10-22 to 2014-02-27
+    10:17:55: 1234567891026 Readings: 652 Missing: 122 2012-05-17 to 2014-02-27
+    10:18:46: 1234567891028 Readings: 652 Missing: 124 2012-05-17 to 2014-02-27
+    10:18:51: 1234567891030 Readings: 106 Missing: 72 2012-05-17 to 2012-08-30
+    10:19:49: 1234567891032 Readings: 789 Missing: 55 2012-01-01 to 2014-02-27
+    10:20:37: 1234567891034 Readings: 601 Missing: 122 2012-07-07 to 2014-02-27
+    10:21:18: 1234567891036 Readings: 520 Missing: 120 2012-09-26 to 2014-02-27
+    10:22:05: 1234567891038 Readings: 593 Missing: 212 2012-07-13 to 2014-02-27
+    Start date must not be before move in date: [2018-12-24T23:30].
+    Start date must not be before move in date: [2018-12-24T23:30].
+    10:22:21: 2000XXXXXX057 Readings: 437 Missing: 84 2020-01-25 to 2021-04-05
+    You do not have a registered consent to access property '2200013480585'
+    10:22:27: 5083XXXXXXXX6 Readings: 430 Missing: 73 2020-02-01 to 2021-04-05
+    10:22:29: 22000156XXXXX Readings: 41 Missing: 40 2021-02-24 to 2021-04-05
+=end
     @@meter_config ||= {
       1234567891000 => {},
       1234567891002 => {},
@@ -19,16 +48,16 @@ class DCCMeters
       1234567891006 => {},
       1234567891008 => {},
       1234567891010 => {},
-      1234567891012 => {},
+      1234567891012 => {}, # no kWh readings
       1234567891014 => {},
-      1234567891016 => {},
-      1234567891018 => {},
-      1234567891020 => {},
-      1234567891022 => {},
-      1234567891024 => {},
+      1234567891016 => {}, # no kWh readings, tiered
+      1234567891018 => {}, # no kWh readings, tiered
+      1234567891020 => {}, # no kWh readings, tiered
+      1234567891022 => {}, # no kWh readings, tiered
+      1234567891024 => {}, # starts Oct 2012
       1234567891026 => {},
       1234567891028 => {},
-      1234567891030 => {},
+      1234567891030 => {}, # only 3 months data
       1234567891032 => {},
       1234567891034 => {},
       1234567891036 => {},
@@ -37,7 +66,7 @@ class DCCMeters
       2234567891001 => { fuel_type: :gas },
       1 => { production: true }, # PH
       2 => { production: true }, # DH
-      3 => { production: true }, # JH-E
+#      3 => { production: true }, # JH-E - CT unconsented it
       4 => { production: true, fuel_type: :gas }, # KH-G
       5 => { production: true }, #JB
     }
@@ -72,6 +101,10 @@ class DCCMeters
 
     def base_url
       production? ? 'https://api.data.n3rgy.com/' : 'https://sandboxapi.data.n3rgy.com/'
+    end
+
+    def base_consent_url
+      production? ? 'https://consent.data.n3rgy.com/' : 'https://consentsandbox.data.n3rgy.com/'
     end
 
     def fuel_type
@@ -126,8 +159,9 @@ def load_yaml(fuel_type, mpxn, dtt = '')
   YAML.load_file(name)
 end
 
-def save_yaml(fuel_type, tariff_data, mpxn, dtt = '')
+def save_yaml(fuel_type, tariff_data, mpxn, dtt = '') 
   name = filename(mpxn, 'tariffs-', dtt, '.yaml')
+  puts "Saving file #{name}"
   File.open(name, 'w') { |f| f.write(YAML.dump(tariff_data)) }
 end
 
@@ -201,20 +235,23 @@ def monitor(mpxns, cmd)
 end
 
 def analyse_readings(fuel_type, readings)
-  "Readings: #{readings[fuel_type][:readings].length} Missing: #{readings[fuel_type][:missing_readings].length}"
+  start_date = readings[fuel_type][:readings].keys.min
+  end_date =  readings[fuel_type][:readings].keys.max
+  "Readings: #{readings[fuel_type][:readings].length} Missing: #{readings[fuel_type][:missing_readings].length} #{start_date} to #{end_date}"
 end
 
 # currently the new library doesn't work
 def grant_old_consent(mpxn)
   logging = { puts: true, ap: { limit: 5 } }
   example_consent_file_link = 'sandbox testing PH 6Mar2021'
+  puts "Using API key #{ENV['N3RGY_SANDBOX_API_KEY']}"
   n3rgy = MeterReadingsFeeds::N3rgy.new(api_key: ENV['N3RGY_SANDBOX_API_KEY'], debugging: logging, production: true)
   ap n3rgy.grant_trusted_consent(mpxn, example_consent_file_link)
 end
 
 # parked here temporarily as doesn't work
 def grant_new_consent(mpxn, meter)
-  n3rgy_consent = MeterReadingsFeeds::N3rgyConsent.new(api_key: meter.api_key, base_url: meter.base_url)
+  n3rgy_consent = MeterReadingsFeeds::N3rgyConsent.new(api_key: meter.api_key, base_url: meter.base_consent_url)
   n3rgy_consent.grant_trusted_consent(mpxn, 'testing sandbox')
 end
 
@@ -235,6 +272,8 @@ end
 def mpxn_split_list(list)
   list.split(',').map(&:to_i)
 end
+
+puts
 
 cmd = ParseCommandLine.new(command_line_options)
 cmd.parse

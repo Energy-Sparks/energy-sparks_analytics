@@ -500,7 +500,6 @@ class MeterAttributes
     }
   end
 
-
   class AccountingTariff < MeterAttributeTypes::AttributeBase
     id :accounting_tariff
     aggregate_over :accounting_tariffs
