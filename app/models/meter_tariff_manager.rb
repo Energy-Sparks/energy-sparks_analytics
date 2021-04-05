@@ -37,7 +37,7 @@ class MeterTariffManager
       }
     end
   end
-  
+
   def accounting_cost(date, kwh_x48)
     tariff = accounting_tariff_for_date(date)
 
