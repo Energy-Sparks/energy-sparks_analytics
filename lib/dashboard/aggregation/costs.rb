@@ -108,7 +108,7 @@ class CostsBase < HalfHourlyData
     end
 
     private
-    
+
     def calculate_day_bill_components
       @bill_component_costs_per_day = @all_costs_x48.transform_values{ |£_x48| £_x48.sum }
       @bill_component_costs_per_day.merge!(standing_charges)
