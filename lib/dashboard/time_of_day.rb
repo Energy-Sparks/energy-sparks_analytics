@@ -115,7 +115,7 @@ class TimeOfDay30mins < TimeOfDay
   class TimeOfDay24HourNotExpected < StandardError; end
   def initialize(hour, minutes)
     raise TimeOfDayNotOn30MinuteInterval, "Not on 30 minute boundary #{minutes}" unless minutes == 0 || minutes == 30
-    raise TimeOfDay24HourNotExpected, 'Unexepected: hour set to 24' if hour == 24
+    raise TimeOfDay24HourNotExpected, 'Unexpected: hour set to 24' if hour == 24
     ruby_26_bug_initialize(hour, minutes)
   end
 
