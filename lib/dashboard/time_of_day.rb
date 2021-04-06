@@ -102,7 +102,6 @@ class TimeOfDay
   end
 
   def ==(other)
-    puts "Got here AA #{other.class.name} #{self.class.name}" if other.class != self.class
     other.class == self.class && [hour, minutes] == [other.hour, other.minutes]
   end
 
@@ -113,7 +112,10 @@ end
 
 class TimeOfDay30mins < TimeOfDay
   class TimeOfDayNotOn30MinuteInterval < StandardError; end
+  class TimeOfDay24HourNotExpected < StandardError; end
   def initialize(hour, minutes)
+    raise TimeOfDayNotOn30MinuteInterval, "Not on 30 minute boundary #{minutes}" unless minutes == 0 || minutes == 30
+    raise TimeOfDay24HourNotExpected, 'Unexepected: hour set to 24' if hour == 24
     ruby_26_bug_initialize(hour, minutes)
   end
 

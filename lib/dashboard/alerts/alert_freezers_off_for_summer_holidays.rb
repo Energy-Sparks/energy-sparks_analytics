@@ -99,6 +99,7 @@ class AlertSummerHolidayRefridgerationAnalysis < AlertElectricityOnlyBase
   end
 
   def calculate(asof_date)
+    raise EnergySparksNotEnoughDataException, 'meter readings prior to last summer holiday required' if enough_data == :not_enough
     @summer_holiday_analysis_table = holiday_data_table
 
     ratings_based_on_last_n_years_data

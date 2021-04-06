@@ -77,7 +77,9 @@ class AlertMeterConsolidationOpportunityBase < AlertAnalysisBase
     max_combined_date = aggregate_meter.amr_data.end_date
     standing_charges = {}
     live_meters.each do |meter|
-      _day_cost_x48, _night_cost_x48, standing_charge = MeterTariffs.accounting_tariff_x48(max_combined_date, meter, Array.new(48, 0.0))
+      kwh_x48 = meter.amr_data.days_kwh_x48(max_combined_date)
+      standing_charge = meter.meter_tariffs.accounting_tariff_for_date(max_combined_date).costs(max_combined_date, kwh_x48)[:standing_charges]
+      # _day_cost_x48, _night_cost_x48, standing_charge = MeterTariffs.accounting_tariff_x48(max_combined_date, meter, Array.new(48, 0.0))
       standing_charges[meter.mpan_mprn] = standing_charge.values.sum
     end
     standing_charges

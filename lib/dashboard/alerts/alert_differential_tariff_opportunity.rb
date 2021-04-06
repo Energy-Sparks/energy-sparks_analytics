@@ -89,7 +89,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
 
     live_meters.each do |electric_meter|
       differential_cost_£_per_year, non_differential_cost_£_per_year = calculate_differential_and_non_differential_costs(electric_meter, asof_date)
-      on_differential_tariff = electric_meter.meter_tariffs.any_differential_tariff?(electric_meter, asof_date, asof_date - 1)
+      on_differential_tariff = electric_meter.meter_tariffs.any_differential_tariff?(asof_date, asof_date - 1)
       sign_of_saving = on_differential_tariff ? 1 : -1
       saving_£_per_year = sign_of_saving * (differential_cost_£_per_year - non_differential_cost_£_per_year)
       if saving_£_per_year > 0.0

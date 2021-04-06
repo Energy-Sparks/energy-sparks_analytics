@@ -66,7 +66,7 @@ class DCCMeters
       2234567891001 => { fuel_type: :gas },
       1 => { production: true }, # PH
       2 => { production: true }, # DH
-#      3 => { production: true }, # JH-E - CT unconsented it
+      3 => { production: true }, # JH-E
       4 => { production: true, fuel_type: :gas }, # KH-G
       5 => { production: true }, #JB
     }

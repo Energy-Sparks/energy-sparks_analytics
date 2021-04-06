@@ -81,7 +81,6 @@ class AMRData < HalfHourlyData
     kwhs = self[date].kwh_data_x48
     return kwhs if type == :kwh
     return @economic_tariff.days_cost_data_x48(date) if type == :£ || type == :economic_cost
-    # Got here ardvark
     return @accounting_tariff.days_cost_data_x48(date) if type == :accounting_cost
     return @carbon_emissions.one_days_data_x48(date) if type == :co2
   end
