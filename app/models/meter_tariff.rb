@@ -45,7 +45,6 @@ class AccountingTariff < EconomicTariff
   end
 
   def costs(date, kwh_x48)
-    differential = 
     if differential?(date)
       {
         rates_x48: {
