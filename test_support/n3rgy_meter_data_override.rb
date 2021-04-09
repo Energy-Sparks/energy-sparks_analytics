@@ -30,6 +30,9 @@ class N3rgyMeterDataOverride
   end
 
   def override_front_end_data(csv_mpxn, csv_on_days_data)
+    puts "Got here not overriding #{all_mpxns}"
+    return # skip for moment as raw kwh data should now be in YAML file
+
     all_mpxns.each do |front_end_mpxn|
       if front_end_mpxn == csv_mpxn
         amr_data = @school.meter?(csv_mpxn).amr_data

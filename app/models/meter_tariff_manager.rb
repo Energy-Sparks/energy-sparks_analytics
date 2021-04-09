@@ -1,3 +1,8 @@
+# MeterTariffManager: manages all the tariffs associated with a given meter
+#                     these tariffs are either generated from the DCC or manually edited by the user
+#                     the managers main job is to select the right type of tariff for a given date
+#                     there is potentially a complex hierarchy of these tariffs to select from
+#
 # Economic Tariffs: each meter has a system wide economic tariff
 # - which can be used for both differential and non-differential cost calculations
 # - to work out whether its differential or not the code below looks up the meters accounting tariff
@@ -8,10 +13,20 @@
 #                       - shouldn't be used to determine whether the economic tariff is differential or not
 # - override tariff     - highest precedence typically used to override bad data from dcc, only applies to generic
 # - merge tariff        - used to add tariff information e.g. DUOS rates not available on the DCC
+#
+# Summary: the manager selects the most relevant tariff for a given date
+#
 class MeterTariffManager
   attr_reader :accounting_tariffs
-  class MissingAccountingTariff < StandardError; end
-  class OverlappingAccountingTariffs < StandardError; end
+
+  class MissingAccountingTariff                                   < StandardError; end
+  class OverlappingAccountingTariffs                              < StandardError; end
+  class WeekdayTypeNotSetForWeekdayTariff                         < StandardError; end
+  class OverlappingAccountingTariffsForWeekdayTariff              < StandardError; end
+  class NotAllWeekdayWeekendTariffsOnDateAreWeekdayWeekendTariffs < StandardError; end
+  class TooManyWeekdayWeekendTariffsOnDate                        < StandardError; end
+  class MissingWeekdayWeekendTariffsOnDate                        < StandardError; end
+
   def initialize(meter)
     @meter = meter
     pre_process_tariff_attributes(meter)
@@ -33,7 +48,7 @@ class MeterTariffManager
           flat_rate: AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(:rate))
         },
         standing_charges: {},
-        differential: false  
+        differential: false
       }
     end
   end
@@ -48,6 +63,8 @@ class MeterTariffManager
 
   def any_differential_tariff?(start_date, end_date)
     # slow, TODO(PH, 30Mar2021) speed up by scanning tariff date ranges
+    # this is now more complex as there are now potentially multiple tariffs on
+    # a date with different rules
     (start_date..end_date).any? { |date| differential_tariff_on_date?(date) }
   end
 
@@ -62,10 +79,18 @@ class MeterTariffManager
   end
 
   def accounting_tariff_for_date(date)
+    @accounting_tariff_cache       ||= {}
+    @accounting_tariff_cache[date] ||= calculate_accounting_tariff_for_date(date)
+  end
+
+  private
+
+  def calculate_accounting_tariff_for_date(date)
     override = override_tariff(date)
     return override unless override.nil?
 
     return nil if @accounting_tariffs.nil?
+
     accounting_tariff = default_tariff(date, false) || default_tariff(date, true)
 
     merge = merge_tariff(date)
@@ -74,11 +99,16 @@ class MeterTariffManager
     accounting_tariff
   end
 
-  private
-
   def default_tariff(date, default)
     tariffs = select_default_tariffs(date, default)
-    tariffs.empty? ? nil : tariffs[0]
+
+    choosen_weekend_weekday_tariff = weekend_weekday_tariff(tariffs, date, default)
+
+    if choosen_weekend_weekday_tariff.nil?
+      tariffs.empty? ? nil : tariffs[0]
+    else
+      choosen_weekend_weekday_tariff
+    end
   end
 
   def select_default_tariffs(date, default)
@@ -98,7 +128,8 @@ class MeterTariffManager
 
   def differential_override(date)
     return nil if @differential_tariff_override.nil?
-    @differential_tariff_override.any?{ |dr, tf| date >= dr.first && date <= dr.last && tf }
+
+    @differential_tariff_override.any? { |dr, tf| date >= dr.first && date <= dr.last && tf }
   end
 
   def pre_process_tariff_attributes(meter)
@@ -113,6 +144,7 @@ class MeterTariffManager
 
   def process_economic_tariff_override(diffential_overrides)
     return nil if diffential_overrides.nil?
+
     diffential_overrides.map do |override|
       end_date = override[:end_date] || Date.new(2050, 1, 1)
       [
@@ -124,6 +156,7 @@ class MeterTariffManager
 
   def preprocess_accounting_tariffs(meter, accounting_tariffs)
     return nil if accounting_tariffs.nil?
+
     accounting_tariffs.map do |accounting_tariff|
       AccountingTariff.new(meter, accounting_tariff)
     end
@@ -131,6 +164,7 @@ class MeterTariffManager
 
   def preprocess_generic_accounting_tariffs(meter, accounting_tariffs)
     return nil if accounting_tariffs.nil?
+
     accounting_tariffs.map do |accounting_tariff|
       GenericAccountingTariff.new(meter, accounting_tariff)
     end
@@ -141,13 +175,68 @@ class MeterTariffManager
     check_overlapping_accounting_tariffs_default_type(@accounting_tariffs, false)
   end
 
-  def check_overlapping_accounting_tariffs_default_type(tariff_type, default)
+  def check_overlapping_accounting_tariffs_default_type(tariff_type, default) 
     tariffs = tariff_type.select { |t| t.default? == default }
+
     tariffs.combination(2) do |t1, t2|
       r = t1.tariff[:start_date]..t1.tariff[:end_date]
       if r.cover?(t2.tariff[:start_date]) || r.cover?(t2.tariff[:end_date])
-        raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs default = #{default} #{@meter.mpxn}"
+        if t1.tariff[:sub_type] != :weekday_weekend || t2.tariff[:sub_type] != :weekday_weekend
+          raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs default = #{default} #{@meter.mpxn}"
+        elsif weekday_type?(t1) == weekday_type?(t2)
+          raise OverlappingAccountingTariffsForWeekdayTariff, "Overlapping weekday accounting tariffs #{@meter.mpxn}"
+        end
       end
     end
+  end
+
+  def weekday_type?(tariff)
+    if tariff.tariff.key?(:weekday) && tariff.tariff[:weekday]
+      :weekday
+    elsif tariff.tariff.key?(:weekend) && tariff.tariff[:weekend]
+      :weekend
+    else
+      raise WeekdayTypeNotSetForWeekdayTariff, "Missing weekday type for tariff #{@meter.mpxn}"
+    end
+  end
+
+  # weekday/weekend tariffs are typically represented by 2 tariffs within a given supply contract
+  # i.e. have same or very similar start and end dates, but are differentiated by having
+  # [:weekday] or [:weekend] flags set, ultimately only 1 of the 2 tariffs is used depending on the date
+  # generally you would expect zero or 1 weekday/weekend tariff on a given date 
+  def weekend_weekday_tariff(tariffs, date, default)
+    return nil if default
+
+    weekday_tariffs = tariffs.select { |tariff| tariff.tariff.key?(:weekday) }
+    weekend_tariffs = tariffs.select { |tariff| tariff.tariff.key?(:weekend) }
+
+    return nil if weekday_tariffs.empty? && weekend_tariffs.empty?
+
+    check_weekday_weekend_tariffs(tariffs, weekday_tariffs, weekend_tariffs, date)
+
+    weekend?(date) ? weekend_tariffs[0] : weekend_tariffs[0]
+  end
+
+  # defensive programming on basis either user or dcc might setup tariffs incorrectly
+  def check_weekday_weekend_tariffs(tariffs, weekday_tariffs, weekend_tariffs, date)
+    if tariffs.length != weekday_tariffs.length + weekend_tariffs.length 
+      raise NotAllWeekdayWeekendTariffsOnDateAreWeekdayWeekendTariffs, "Not all tariffs on #{date} for mpxn #{@meter.mpxn} are  weekday weekend tariffs"
+    end
+
+    if weekday_tariffs.length > 1 || weekend_tariffs.length > 1
+      raise TooManyWeekdayWeekendTariffsOnDate, "Too many weekend/weekday tariffs on #{date} for mpxn #{@meter.mpxn}"
+    end
+
+    if weekend?(date)
+      if weekend_tariffs.empty? || weekend_tariffs[0].tariff[:weekend] != true
+        raise MissingWeekdayWeekendTariffsOnDate, "Missing or set false weekend tariff on #{date} for mpxn #{@meter.mpxn}"
+      end
+    elsif weekday_tariffs.empty? || weekday_tariffs[0].tariff[:weekday] != true
+      raise MissingWeekdayWeekendTariffsOnDate, "Missing weekday or set false tariff on #{date} for mpxn #{@meter.mpxn}" 
+    end
+  end
+
+  def weekend?(date)
+    date.saturday? || date.sunday?
   end
 end

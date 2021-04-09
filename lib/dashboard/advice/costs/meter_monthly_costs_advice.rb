@@ -37,14 +37,25 @@ class MeterMonthlyCostsAdvice
   end
 
   private def reorder_columns(components)
-    if components.include?(:total) # put total in last column
-      components.delete(:total)
-      components.push(:total)
+
+    # move to last 3 columns, in this order
+    %i[standing_charge variance_versus_last_year total].each do |column_type|
+      if components.include?(column_type)
+        components.delete(column_type)
+        components.push(column_type)
+      end
     end
+
     if components.include?(:rate) # put rate in the first column
       components.delete(:rate)
       components.insert(0, :rate)
     end
+    
+    if components.include?(:flat_rate) # put flat_rate in the first column
+      components.delete(:flat_rate)
+      components.insert(0, :flat_rate)
+    end
+
     components
   end
 
