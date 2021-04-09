@@ -125,7 +125,7 @@ class AdviceFuelTypeBase < AdviceStructuredOldToNewConversion
         }
       ) if component_page.relevance == :relevant
     end
-    content_information += meter_costs
+    content_information += meter_costs if has_dcc_meters?
     content_information
   end
   def advice_class; self.class end
@@ -139,6 +139,12 @@ class AdviceFuelTypeBase < AdviceStructuredOldToNewConversion
 
   def real_meters
     @school.real_meters.select { |m| m.fuel_type == fuel_type }
+  end
+
+  # TODO(PH, 9Apr2021) remove once testing complet on test
+  #                    restricts meter breakdown to dcc only schools
+  def has_dcc_meters?
+    real_meters.any? { |m| m.dcc_meter }
   end
 end
 

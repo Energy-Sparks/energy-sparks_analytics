@@ -56,7 +56,8 @@ class N3rgyToEnergySparksTariffs
           },
           standing_charge: standing_charge
         },
-        type: :flat_rate
+        type: :flat_rate,
+        source: :dcc
       }
     else
       type = rates.values.any?{ |v| v.is_a?(Hash) } ? :differential_tiered : :differential

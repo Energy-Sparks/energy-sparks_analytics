@@ -68,7 +68,7 @@ def meter_attribute_overrides
   @meter_attribute_overrides ||= load_all_accounting_tariffs
 end
 
-ap meter_attribute_overrides
+# ap meter_attribute_overrides
 
 school_name_pattern_match = ['n3rgy*']
 source_db = :dcc_n3rgy_override_with_files
