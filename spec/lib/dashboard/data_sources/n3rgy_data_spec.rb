@@ -66,10 +66,6 @@ describe MeterReadingsFeeds::N3rgyData do
 
     describe 'for tariffs' do
 
-      let(:expected_first_day_tariffs)  { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
-      let(:expected_last_day_tariffs)   { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
-      let(:expected_standing_charge)    { 0.19541 }
-
       describe 'when date not specified' do
         it 'raises error' do
           expect {
@@ -80,32 +76,76 @@ describe MeterReadingsFeeds::N3rgyData do
 
       describe 'when data exists' do
 
-        let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data.json')) }
-
         before do
           expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:get_tariff_data).and_return(tariff_data)
         end
 
-        it 'returns tariffs' do
-          tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
-          expect(tariffs.keys).to match_array([:kwh_tariffs, :standing_charges, :missing_readings])
+        describe 'for normal tariffs' do
 
-          expect(tariffs[:kwh_tariffs].count).to eq(2)
-          expect(tariffs[:kwh_tariffs].keys).to eq([start_date, end_date])
-          expect(tariffs[:kwh_tariffs][start_date]).to eq(expected_first_day_tariffs)
-          expect(tariffs[:kwh_tariffs][end_date]).to eq(expected_last_day_tariffs)
+          let(:expected_first_day_tariffs)  { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
+          let(:expected_last_day_tariffs)   { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
+          let(:expected_standing_charge)    { 0.19541 }
 
-          expect(tariffs[:standing_charges][start_date]).to eq(expected_standing_charge)
-          expect(tariffs[:missing_readings]).to eq([])
+          let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data.json')) }
+
+          it 'returns tariffs' do
+            tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
+            expect(tariffs.keys).to match_array([:kwh_tariffs, :standing_charges, :missing_readings])
+
+            expect(tariffs[:kwh_tariffs].count).to eq(2)
+            expect(tariffs[:kwh_tariffs].keys).to eq([start_date, end_date])
+            expect(tariffs[:kwh_tariffs][start_date]).to eq(expected_first_day_tariffs)
+            expect(tariffs[:kwh_tariffs][end_date]).to eq(expected_last_day_tariffs)
+
+            expect(tariffs[:standing_charges][start_date]).to eq(expected_standing_charge)
+            expect(tariffs[:missing_readings]).to eq([])
+          end
+
+          describe 'when adjusting for bad sandbox electricity standing charge units' do
+            it 'should convert standing charge from pence to pounds' do
+              tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url, bad_electricity_standing_charge_units: true).tariffs(mpxn, fuel_type, start_date, end_date)
+              expect(tariffs[:standing_charges][start_date]).to eq(100.0 * expected_standing_charge)
+            end
+            it 'should still convert prices from pence to pounds' do
+              tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url, bad_electricity_standing_charge_units: true).tariffs(mpxn, fuel_type, start_date, end_date)
+              expect(tariffs[:kwh_tariffs][start_date][0]).to eq(0.15992)
+            end
+          end
         end
 
-        describe 'when adjusting for bad sandbox electricity standing charge units' do
-          it 'should convert standing charge from pence to pounds' do
-            tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url, bad_electricity_standing_charge_units: true).tariffs(mpxn, fuel_type, start_date, end_date)
-            expect(tariffs[:standing_charges][start_date]).to eq(100.0 * expected_standing_charge)
+        describe 'for tiered tariffs' do
+
+          let(:expected_tiered_tariff)      { {:tariffs=>{1=>0.48527000000000003, 2=>0.16774}, :thresholds=>{1=>1000}, :type=>:tiered} }
+          let(:expected_first_day_tariffs)  { [expected_tiered_tariff, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
+          let(:expected_standing_charge)    { 0.19541 }
+
+          let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data_with_tiers.json')) }
+
+          it 'returns tariffs' do
+            tariffs = api.tariffs(mpxn, fuel_type, start_date, start_date)
+            expect(tariffs.keys).to match_array([:kwh_tariffs, :standing_charges, :missing_readings])
+
+            expect(tariffs[:kwh_tariffs].count).to eq(1)
+            expect(tariffs[:kwh_tariffs].keys).to eq([start_date])
+            expect(tariffs[:kwh_tariffs][start_date]).to eq(expected_first_day_tariffs)
+
+            expect(tariffs[:standing_charges][start_date]).to eq(expected_standing_charge)
+            expect(tariffs[:missing_readings]).to eq([])
+          end
+
+          describe 'when adjusting for bad sandbox electricity standing charge units' do
+            it 'should convert standing charge from pence to pounds' do
+              tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url, bad_electricity_standing_charge_units: true).tariffs(mpxn, fuel_type, start_date, end_date)
+              expect(tariffs[:standing_charges][start_date]).to eq(100.0 * expected_standing_charge)
+            end
+            it 'should still convert prices from pence to pounds' do
+              tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url, bad_electricity_standing_charge_units: true).tariffs(mpxn, fuel_type, start_date, end_date)
+              expect(tariffs[:kwh_tariffs][start_date][0][:tariffs][1]).to eq(0.48527000000000003)
+            end
           end
         end
       end
+
     end
 
     describe 'for consumption' do
