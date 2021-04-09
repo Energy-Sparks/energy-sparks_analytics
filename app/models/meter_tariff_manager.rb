@@ -142,10 +142,10 @@ class MeterTariffManager
     check_tariffs
   end
 
-  def process_economic_tariff_override(diffential_overrides)
-    return nil if diffential_overrides.nil?
+  def process_economic_tariff_override(differential_overrides)
+    return nil if differential_overrides.nil?
 
-    diffential_overrides.map do |override|
+    differential_overrides.map do |override|
       end_date = override[:end_date] || Date.new(2050, 1, 1)
       [
         override[:start_date]..end_date,
@@ -214,7 +214,7 @@ class MeterTariffManager
 
     check_weekday_weekend_tariffs(tariffs, weekday_tariffs, weekend_tariffs, date)
 
-    weekend?(date) ? weekend_tariffs[0] : weekend_tariffs[0]
+    weekend?(date) ? weekend_tariffs[0] : weekday_tariffs[0]
   end
 
   # defensive programming on basis either user or dcc might setup tariffs incorrectly
