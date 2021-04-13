@@ -150,9 +150,12 @@ class ValidateAMRData
     elsif rule.key?(:extend_meter_readings_for_substitution)
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
+=begin
+# deprecated PH 13Apr2021
     elsif rule.key?(:meter_corrections_use_sheffield_pv_data) || rule.key?(:set_to_sheffield_pv_data)
       config = rule[:meter_corrections_use_sheffield_pv_data] || rule[:set_to_sheffield_pv_data]
       override_with_sheffield_solar_pv_data(config[:start_date], config[:end_date])
+=end
     end
   end
 
