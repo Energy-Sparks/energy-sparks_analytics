@@ -107,6 +107,8 @@ class MeterAttributes
     structure MeterAttributeTypes::Date.define(required: true)
   end
 
+=begin
+# deprecated PH 13Apr2021
   class OverrideWithSyntheticSheffieldPVData < MeterAttributeTypes::AttributeBase
     id :meter_corrections_use_sheffield_pv_data
     key :set_to_sheffield_pv_data
@@ -120,6 +122,7 @@ class MeterAttributes
       }
     )
   end
+=end
 
   class ReadingsEndDate < MeterAttributeTypes::AttributeBase
     id :meter_corrections_readings_end_date
@@ -136,7 +139,7 @@ class MeterAttributes
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:set_all_missing_to_zero, :correct_zero_partial_data])
   end
 
-  class PartialMeterFloorAreaPupilNumbersolar_pvOverride < MeterAttributeTypes::AttributeBase
+  class PartialMeterFloorAreaPupilNumberOverride < MeterAttributeTypes::AttributeBase
     id :partial_meter_coverage
     key :partial_meter_coverage
     aggregate_over :partial_meter_coverage
@@ -336,6 +339,8 @@ class MeterAttributes
     )
   end
 
+=begin
+# deprecated PH 13Apr2021
   class SolarPVExternalMeterIdentifier < MeterAttributeTypes::AttributeBase
     id    :solar_pv_external_identifier
     key   :solar_pv_external_identifier
@@ -348,6 +353,7 @@ class MeterAttributes
       }
     )
   end
+=end
 
   class LowCarbonHub < MeterAttributeTypes::AttributeBase
 
