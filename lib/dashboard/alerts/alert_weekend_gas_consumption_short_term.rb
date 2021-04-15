@@ -104,6 +104,17 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     :alert_weekend_last_week_gas_datetime_£
   end
 
+  def material?
+    true
+  end
+
+  def materiality_percent;        percent_increase_on_average_weekend end
+  def materiality_£;              gas_cost(@increase_gas_weekend_kwh) end
+  def materiality_kwh;            @increase_gas_weekend_kwh end
+  def materiality_annual_percent; projected_percent_of_annual end
+  def materiality_annual_£;       52.0 * materiality_£ end
+  def materiality_annual_kwh;     52.0 * materiality_kwh end
+
   private def calculate(asof_date)
     calculate_model(asof_date)
     @weekend_dates = previous_weekend_dates(asof_date)
@@ -112,10 +123,11 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     @last_year_weekend_gas_kwh = weekend_gas_consumption_last_year(asof_date)
     @last_year_weekend_gas_£ = gas_cost(@last_year_weekend_gas_kwh)
 
-    @average_weekend_gas_kwh = @last_year_weekend_gas_kwh / 52
-    @average_weekend_gas_£   = @last_year_weekend_gas_£ / 52
+    @average_weekend_gas_kwh = @last_year_weekend_gas_kwh / 52.0
+    @average_weekend_gas_£   = @last_year_weekend_gas_£ / 52.0
+    @increase_gas_weekend_kwh = @last_week_end_kwh - @average_weekend_gas_kwh
 
-    @percent_increase_on_average_weekend = @average_weekend_gas_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @average_weekend_gas_kwh) / @average_weekend_gas_kwh
+    @percent_increase_on_average_weekend = @average_weekend_gas_kwh == 0.0 ? 0.0 : @increase_gas_weekend_kwh / @average_weekend_gas_kwh
     @projected_percent_of_annual = @last_week_end_kwh * 52.0 / annual_kwh(aggregate_meter, asof_date)
 
     @last_5_weeks_average_weekend_kwh = average_last_n_weekends_kwh(@weekend_dates, 5)
@@ -129,7 +141,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
 
     set_savings_capital_costs_payback(52.0 * (@last_weekend_cost_£ - @average_weekend_gas_£), 0.0)
 
-    @rating = @last_weekend_cost_£ < MAX_COST ? 10.0 : combined_rating
+    @rating = combined_rating
 
     @status = @rating < 5.0 ? :bad : :good
 

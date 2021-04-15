@@ -21,11 +21,15 @@ class DarkSkyWeatherInterface
   end
 
   def weather_forecast(latitude, longitude)
+    cache = cached_weather_forecast(latitude, longitude)
+    return cache unless cache.nil?
+
     url = weather_forecast_12_day_url(latitude, longitude)
     data = download_data(url)
     # ap(data)
     results = current_conditions(data)
     results.merge!(hourly_data(data))
+    save_forecast(results, latitude, longitude)  
     results
   end
 
@@ -254,5 +258,35 @@ class DarkSkyWeatherInterface
 
   private def fahrenheit_to_centigrade_conversion(fahrenheit)
     ((fahrenheit - 32.0) * 5.0 / 9.0).round(2)
+  end
+
+  private
+
+  # to avoid Dark Sky license fees in analytics testing
+  # store the data locally after the 1st call of the day
+  def cached_weather_forecast(latitude, longitude)
+    return nil if Object.const_defined?('Rails')
+    load_yaml(latitude, longitude)
+  end
+
+  def cache_key(latitude, longitude)
+    sprintf('%0.1f-%0.1f-', latitude, longitude) + Date.today.strftime('%d-%b-%Y')
+  end
+
+  def weather_forecast_cache_filename(latitude, longitude)
+    key = cache_key(latitude, longitude)
+    './InputData/darksky-forecast-' + key + '.yaml'
+  end
+
+  def load_yaml(latitude, longitude)
+    filename = weather_forecast_cache_filename(latitude, longitude)
+    return nil unless File.file?(filename)
+    YAML::load_file(filename)
+  end
+
+  def save_forecast(data, latitude, longitude)
+    return if Object.const_defined?('Rails')
+    filename = weather_forecast_cache_filename(latitude, longitude)
+    File.open(filename, 'w') { |f| f.write(YAML.dump(data)) }
   end
 end

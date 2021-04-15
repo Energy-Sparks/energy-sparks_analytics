@@ -95,7 +95,8 @@ class AlertHeatingOnOff < AlertGasModelBase
   end
 
   private def dark_sky_forecast
-    latitude, longitude = AreaNames.latitude_longitude(AreaNames.key_from_name(@school.area_name))
+    latitude  = @school.latitude
+    longitude = @school.longitude
 
     raise EnergySparksUnexpectedSchoolDataConfiguration.new('Cant find latitude for school, not setup?') if latitude.nil?
 

@@ -7,7 +7,7 @@ script = {
   # ruby_profiler:            true,
   no_schools:                  ['*ound*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
-  schools:                  ['st-richard*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   schools:                  ['*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   no_source:                :analytics_db, # :aggregated_meter_collection,
   source:                   :unvalidated_meter_data,
@@ -42,7 +42,7 @@ script = {
                 no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
                 no_benchmark:          %i[school alert ], # detail],
                 # asof_date:          (Date.new(2018,6,14)..Date.new(2019,6,14)).each_slice(7).map(&:first),
-               asof_date:      Date.new(2020,12,10)
+               asof_date:      Date.new(2021,4, 12)
               } 
   }
 }

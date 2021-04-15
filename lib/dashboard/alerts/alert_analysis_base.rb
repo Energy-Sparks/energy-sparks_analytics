@@ -13,6 +13,7 @@ require_rel '../charting_and_reports/content_base.rb'
 #
 
 class AlertAnalysisBase < ContentBase
+
   include Logging
 
   ALERT_HELP_URL = 'https://blog.energysparks.uk/alerts'.freeze
@@ -200,6 +201,30 @@ class AlertAnalysisBase < ContentBase
       description: 'Rating: 10 = relevant to time of year, 0 = irrelevant, 5 = average/normal',
       units: Float,
       priority_code:  'TYRL'
+    },
+    materiality_percent: {
+      description: 'Materiality of alert as a percent with reference to the issue',
+      units: :percent
+    },
+    materiality_£: {
+      description: 'Materiality of alert in £',
+      units: :£
+    },
+    materiality_kwh: {
+      description: 'Materiality of alert in kWh',
+      units: :kwh
+    },
+    materiality_annual_percent: {
+      description: 'Materiality of alert as a percent in with respect to annual energy consumption',
+      units: :percent
+    },
+    materiality_annual_£: {
+      description: 'Materiality of alert if issue scaled to annual amount in £',
+      units: :£
+    },
+    materiality_annual_kwh: {
+      description: 'Materiality of alert if issue scaled to annual amount in kWh',
+      units: :kwh
     }
   }.freeze
 
@@ -220,6 +245,19 @@ class AlertAnalysisBase < ContentBase
     # TODO(PH, 26Aug2019) - remove return in favour of raise once all derived classes defined
     # raise EnergySparksAbstractBaseClass, "Error: incorrect attempt to use abstract base class for time_of_year_relevance template variable #{self.class.name}"
   end
+
+  def material?
+    false
+  end
+
+  # return 0.0 if not implemented rather than raising an
+  # an exception as these are template variables
+  def materiality_percent;        0.0 end
+  def materiality_£;              0.0 end
+  def materiality_kwh;            0.0 end
+  def materiality_annual_percent; 0.0 end
+  def materiality_annual_£;       0.0 end
+  def materiality_annual_kwh;     0.0 end
 
   def valid_alert?
     valid_content? && meter_readings_up_to_date_enough?
