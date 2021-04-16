@@ -108,6 +108,15 @@ class TimeOfDay
   def - (value)
     relative_time - value.relative_time
   end
+
+  def eql?(other)
+    return self == other
+  end
+
+  def hash
+    return [hour, minutes].hash
+  end
+
 end
 
 class TimeOfDay30mins < TimeOfDay
