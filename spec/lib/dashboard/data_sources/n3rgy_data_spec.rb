@@ -64,6 +64,18 @@ describe MeterReadingsFeeds::N3rgyData do
       end
     end
 
+    describe 'list' do
+      context 'when consented meters exist' do
+        let(:response) { {"startAt"=>0, "maxResults"=>100, "total"=>3, "entries"=>["1234567891000", "1234567891002", "1234567891008"], "resource"=>"/", "responseTimestamp"=>"2021-03-29T15:48:37.637Z"} }
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:list).and_return(response)
+        end
+        it 'returns array of MPANs' do
+          expect(api.list).to match_array(["1234567891000", "1234567891002", "1234567891008"])
+        end
+      end
+    end
+
     describe 'for tariffs' do
 
       describe 'when date not specified' do
