@@ -69,7 +69,7 @@ class N3rgyTariffs
     indexed_group_rates.transform_values! do |rate|
       if rate.is_a?(Float)
         round_rate(rate)
-      elsif rate.is_a?(Hash) && rate[:type] == :tiered
+      elsif rate.is_a?(Hash) && rate[:type].to_sym == :tiered
         convert_tiered_tariff(rate)
       else
         raise UnexpectedRateType, rate.nil?  ? 'Unexpected Nil rate type' : "Unexpected type #{rate.class.name}"
