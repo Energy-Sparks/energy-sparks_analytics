@@ -41,7 +41,22 @@ class MeterCost
     name = "#{chart_name}_#{@meter.mpxn}".to_sym
     data = chart_manager.run_chart(chart_config, name)
     [
-      { type: :chart, data: data },
+      # { type: :chart, data: data },
+      { type: :chart_config, data: chart_config },
+      { type: :chart_data, data: data },
+      { type: :chart_name, content: chart_name, mpan_mprn: @meter.mpxn } # LEIGH this is the change asof 22Apr2021
+    ]
+  end
+
+
+  def run_chart_for_meter_deprecated(chart_name)
+    chart_manager = ChartManager.new(@school)
+    chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name].clone
+    chart_config[:meter_definition] =  @meter.mpxn
+    name = "#{chart_name}_#{@meter.mpxn}".to_sym
+    data = chart_manager.run_chart(chart_config, name)
+    [
+      # { type: :chart, data: data },
       { type: :chart_config, data: chart_config },
       { type: :chart_data, data: data }
     ]
@@ -53,7 +68,7 @@ class MeterCost
   end
 
   def tariffs
-    { type: :html,  content: FormatMeterTariffs.new(@school).tariff_tables_html([@meter]) }
+    { type: :html,  content: FormatMeterTariffs.new(@school, @meter).tariff_information_html }
   end
 
   def got_here(n)

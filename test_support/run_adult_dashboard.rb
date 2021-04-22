@@ -92,7 +92,8 @@ class RunAdultDashboard < RunCharts
 
     puts "                Page failed 1, as advice not available to users #{page}" unless advice.make_available_to_users?
     return unless advice.make_available_to_users?
-
+=begin
+    # deprecated/commented out PH 18Apr2021
     if advice.has_structured_content?
       begin
         # puts "Advice has structured content"
@@ -109,15 +110,23 @@ class RunAdultDashboard < RunCharts
         return
       end
     end
+=end
     content = advice.content(user_type: control[:user])
-    fe_content = advice.front_end_content(user_type: control[:user])
-        
+
     @failed_charts.concat(advice.failed_charts) unless advice.failed_charts.empty?
 
     puts "                Page failed 2, as advice not available to users #{page}" unless advice.make_available_to_users?
 
     comparison = CompareContentResults.new(control, @school.name)
     differences = comparison.save_and_compare_content(page, content, true)
+
+    puts "Got here: content type"
+    ap content.map { |c| c.keys }
+    content.each do |data|
+      if data[:type] == :chart_name
+        ap data
+      end
+    end
 
     html, charts = advice.analytics_split_charts_and_html(content)
 

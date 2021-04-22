@@ -717,7 +717,6 @@ class DashboardEnergyAdvice
     end
 
     def type_of_heating_model_html
-      puts "Got here: chosen non heat model: #{model.non_heating_model_type_description}"
       %{
         <h2>Chosen Non Heating Separation Model Type</h2>
         <blockquote>
