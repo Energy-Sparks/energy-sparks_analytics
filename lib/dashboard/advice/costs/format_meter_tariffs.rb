@@ -2,37 +2,35 @@
 class FormatMeterTariffs < DashboardChartAdviceBase
   class UnhandledTariffDescriptionError < StandardError; end
   class UnhandledTypeTariffDescriptionError < StandardError; end
-  def initialize(school)
+  attr_reader :meter
+  def initialize(school, meter)
     super(school, nil, nil, nil) # inherit from DashboardChartAdviceBase to get html_table functionality
+    @meter = meter
   end
 
-  def tariff_tables_html(meter_list = nil)
-    html = ''
-    all_meters = meter_list.nil? ? [@school.electricity_meters, @school.heat_meters].flatten : meter_list
-    all_meters.each do |meter|
-      html += tariff_table_for_meter_html(meter)
-    end
-    html
-  end
+  def tariff_information_html
+    html = meter_description_html
 
-  def tariff_table_for_meter_html(meter)
-    html = ''
-    html += meter_description_html(meter)
-    meter.meter_tariffs.accounting_tariffs.each do |tariff|
+    tariff_info = meter.meter_tariffs.most_recent_contiguous_real_accounting_tariffs
+
+    html += if_not_full_tariff_coverage_html(tariff_info)
+
+    tariff_info[:tariffs].each do |tariff|
       html += tariff_description_html(tariff)
     end
+
     html
   end
 
   private
 
-  def meter_description_html(meter)
+  def meter_description_html
     meter_description = %{
       <h3>
         <%= meter.fuel_type.to_s.capitalize %>
         meter
         <%= meter_identifier_type(meter.fuel_type) %>
-        <%= meter.mpan_mprn %> <%= meter_name(meter) %>:
+        <%= meter.mpan_mprn %> <%= meter_name %>:
       </h3>
     }
 
@@ -54,7 +52,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     generate_html(tariff_description, binding)
   end
 
-  def meter_name(meter)
+  def meter_name
     meter.name.nil? || meter.name.strip.empty? ?  '' : "(#{meter.name})"
   end
 
@@ -66,7 +64,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
                     else
                       tariff.tariff[:end_date].strftime('%d %b %Y')
                     end
-    
+
     dates_text = %{
       <%= start_date_text %> to <%= end_date_text %>
     }
@@ -97,8 +95,8 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     case rate_type.to_s
     when 'flat_rate'
       'Flat Rate'
-    when /rate[0-9]/
-      costs[:from].to_s + ' to ' + costs[:to].to_s
+    when /^rate[0-9]$/
+      time_range_description(costs)
     when 'daytime_rate', 'nighttime_rate'
       rate_type.to_s.humanize + ' ' + costs[:from].to_s + ' to ' + costs[:to].to_s
     else
@@ -106,13 +104,59 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     end
   end
 
-  def single_tariff_table_html(tariff)
-    rates = tariff.tariff[:rates].map do |rate_type, costs|
+  def time_range_description(costs)
+    costs[:from].to_s + ' to ' + costs[:to].to_s
+  end
+
+
+  def tiers_description(costs)
+    tiers = costs.select { |k, _v| k.to_s.match(/^tier[0-9]$/) }
+    desc = costs.map { |_k, v| one_tier_description(v[:low_threshold], v[:high_threshold])}.join(',')
+    '(' + desc + ')'
+  end
+
+  def one_tier_description(tier_config)
+    low_threshold  = tier_config[:low_threshold]
+    high_threshold = tier_config[:high_threshold]
+
+    if high_threshold.infinite?
+      "> #{low_threshold.round(0)} kwh"
+    elsif low_threshold.zero?
+      "< #{high_threshold.round(0)} kwh"
+    else
+      "#{low_threshold.round(0)} to #{high_threshold.round(0)} kwh"
+    end
+  end
+
+  def tier_rate_description(costs, tier_config)
+    time_range_description(costs) + ' ' + one_tier_description(tier_config)
+  end
+
+  def tier_rates_description(rate_type, costs)
+    tiers = costs.select { |k, _v| k.to_s.match(/^tier[0-9]$/) }
+
+    tiers.map do |_tier_name, tier_config|
       [
-        rate_type_description(rate_type, costs),
-        FormatEnergyUnit.format(:£, costs[:rate], :html, false, false, :accountant) + '/' + costs[:per].to_s
+        tier_rate_description(costs, tier_config),
+        FormatEnergyUnit.format(:£, tier_config[:rate], :html, false, false, :accountant) + '/kWh'
       ]
     end
+  end
+
+  def single_tariff_table_html(tariff)
+    rates = tariff.tariff[:rates].map do |rate_type, costs|
+      if tariff.tiered_rate_type?(rate_type)
+        tier_rates_description(rate_type, costs)
+      else
+        [
+          [
+            rate_type_description(rate_type, costs),
+            FormatEnergyUnit.format(:£, costs[:rate], :html, false, false, :accountant) + '/' + costs[:per].to_s
+          ]
+        ]
+      end
+    end.flatten(1)
+
     header = ['Tariff type', 'Rate']
     html_table(header, rates)
   end
@@ -124,5 +168,60 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     else
       raise UnhandledTariffDescriptionError, "Unable to display tariff of type #{tariff.class.name}"
     end
+  end
+
+  def if_not_full_tariff_coverage_html(tariff_info)
+    html = ''
+    contact_us_for_tariff_setup = false
+
+    if tariff_info[:start_date] > meter.amr_data.start_date
+      contact_us_for_tariff_setup = true
+      html += %{
+        Warning: information is only available on your tariffs
+        from <%= date_html(tariff_info[:start_date]) %> but we have
+        meter readings from <%= date_html(meter.amr_data.start_date) %>.
+      }
+    end
+
+    if tariff_info[:end_date] < meter.amr_data.end_date
+      contact_us_for_tariff_setup = true
+      html += %{
+        Warning: information is only available on your tariffs
+        up until <%= date_html(tariff_info[:end_date]) %> but we have
+        meter readings until <%= date_html(meter.amr_data.end_date) %>.
+      }
+    end
+
+    if contact_us_for_tariff_setup
+      html += %{
+        If you would like your tariff configuration updated
+        please contact Energy Sparks
+        <a href="mailto:hello@energysparks.uk?subject=Setup accounting tariff for meter <%= meter.mpxn %>?&">hello@energysparks.uk</a>.
+      }
+    end
+
+    html = "<p>" + html + "</p>" if html.length > 0
+
+    generate_html(html, binding)
+  end
+
+  def date_html(date)
+    date.strftime('%d-%m-%Y')
+  end
+end
+
+# for backwards compatibility with old financial advice classes
+class FormatMetersTariffs < DashboardChartAdviceBase
+  def initialize(school)
+    @school = school
+  end
+
+  def tariff_information_html(meter_list = nil)
+    html = ''
+    all_meters = meter_list.nil? ? [@school.electricity_meters, @school.heat_meters].flatten : meter_list
+    all_meters.each do |meter|
+      html += FormatMeterTariffs.new(@school, meter).tariff_information_html
+    end
+    html
   end
 end
