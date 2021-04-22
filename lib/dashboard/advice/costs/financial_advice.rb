@@ -222,7 +222,7 @@ class DashboardEnergyAdvice
 
     def generate_valid_advice
 
-      electricity_meter_tariff_tables = FormatMeterTariffs.new(@school).tariff_tables_html(@school.electricity_meters)
+      electricity_meter_tariff_tables = FormatMetersTariffs.new(@school).tariff_tables_html(@school.electricity_meters)
 
       header_template = concatenate_advice_with_body_start_end(
         [
@@ -274,7 +274,7 @@ class DashboardEnergyAdvice
     ).freeze
 
     def generate_valid_advice
-      gas_meter_tariff_tables = FormatMeterTariffs.new(@school).tariff_tables_html(@school.heat_meters)
+      gas_meter_tariff_tables = FormatMetersTariffs.new(@school).tariff_information_html(@school.heat_meters)
 
       header_template = concatenate_advice_with_body_start_end(
         [

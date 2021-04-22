@@ -1,6 +1,7 @@
 module Dashboard
   # meter: holds basic information descrbing a meter and hald hourly AMR data associated with it
   class Meter
+    class MissingOriginalMainsMeter < StandardError; end
     include Logging
 
     # Extra fields - potentially a concern or mix-in
@@ -138,6 +139,15 @@ module Dashboard
 
     def all_attributes
       @meter_attributes
+    end
+
+    def original_meter
+      if solar_pv_panels? || storage_heater?
+        raise MissingOriginalMainsMeter, "Missing original mains meter for #{mpxn}" unless sub_meters.key?(:mains_consume) && !sub_meters[:mains_consume].nil?
+        sub_meters[:mains_consume]
+      else
+        self
+      end
     end
 
     def storage_heater?

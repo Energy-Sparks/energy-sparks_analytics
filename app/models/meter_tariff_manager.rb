@@ -78,6 +78,25 @@ class MeterTariffManager
     end
   end
 
+  def most_recent_contiguous_real_accounting_tariffs
+    non_default_tariffs = all_tariffs_by_default(false)
+    reverse_sorted_tariffs = non_default_tariffs.sort { |t1, t2| t2.tariff[:end_date] <=> t1.tariff[:end_date] }
+
+    grouped_tariffs = reverse_sorted_tariffs.slice_when { |prev, curr| prev.tariff[:end_date] < prev.tariff[:start_date] - 1 }.to_a
+    
+    most_recent_contiguous_tariff_group = grouped_tariffs[0]
+
+    start_date = most_recent_contiguous_tariff_group.last.tariff[:start_date]
+    end_date   = most_recent_contiguous_tariff_group.first.tariff[:end_date]
+
+    {
+      start_date: start_date,
+      end_date:   end_date,
+      days:       (end_date - start_date + 1).to_i,
+      tariffs:    most_recent_contiguous_tariff_group.reverse
+    }
+  end
+
   def accounting_tariff_for_date(date)
     @accounting_tariff_cache       ||= {}
     @accounting_tariff_cache[date] ||= calculate_accounting_tariff_for_date(date)
@@ -114,6 +133,10 @@ class MeterTariffManager
   def select_default_tariffs(date, default)
     tariffs = @accounting_tariffs.select { |accounting_tariff| accounting_tariff.in_date_range?(date) }
     tariffs.select { |t| t.default? == default }
+  end
+
+  def all_tariffs_by_default(default)
+    @accounting_tariffs.select { |t| t.default? == default } 
   end
 
   def override_tariff(date)
@@ -171,12 +194,12 @@ class MeterTariffManager
   end
 
   def check_tariffs
-    check_overlapping_accounting_tariffs_default_type(@accounting_tariffs, true)
-    check_overlapping_accounting_tariffs_default_type(@accounting_tariffs, false)
+    check_overlapping_accounting_tariffs_default_type(true)
+    check_overlapping_accounting_tariffs_default_type(false)
   end
 
-  def check_overlapping_accounting_tariffs_default_type(tariff_type, default) 
-    tariffs = tariff_type.select { |t| t.default? == default }
+  def check_overlapping_accounting_tariffs_default_type(default) 
+    tariffs = all_tariffs_by_default(default)
 
     tariffs.combination(2) do |t1, t2|
       r = t1.tariff[:start_date]..t1.tariff[:end_date]

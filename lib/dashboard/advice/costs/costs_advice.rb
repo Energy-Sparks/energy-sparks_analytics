@@ -1,3 +1,11 @@
+# Present financial cost information using real tariff data
+# The presentation varies depending on what data is available
+# - if more than 1 meter: presents aggregate, plus individual meter billing
+# - currently can't do solar billing because of lack of tariff informations from schools; so not implemented
+# - presents individual meter billing slightly different depending on availability of:
+#   tariff data; > 13 months - year on year tablular and chart comparison, monthly chart
+#                < 1 month - no numeric tablular information as billing always monthly, daily chart
+#                1 to 13 months - monthly tabular and chart presentation, no comparison
 class CostAdviceBase < AdviceOldToNewConversion
   include MeterlessMixin
   def create_class(old_advice_class)
@@ -87,7 +95,7 @@ class MeterTariffInfo < CostAdviceBase
   def initialize(school)
     super(school)
     @summary = "Your meter #{fuel_type.to_s.capitalize} Tariffs"
-    tariff_table = FormatMeterTariffs.new(@school).tariff_tables_html(meters)
+    tariff_table = FormatMetersTariffs.new(@school).tariff_information_html(meters)
     @content_data = [
       { type: :text, advice_class: self.class, data: tariff_table },
     ]
@@ -118,6 +126,7 @@ class AdviceFuelTypeBase < AdviceStructuredOldToNewConversion
     content_information = []
     component_pages.each do |component_page_class|
       component_page = component_page_class.new(@school)
+puts "Got here #{component_page.summary}"
       content_information.push(
         {
           title:    component_page.summary,
@@ -125,7 +134,7 @@ class AdviceFuelTypeBase < AdviceStructuredOldToNewConversion
         }
       ) if component_page.relevance == :relevant
     end
-    content_information += meter_costs if has_dcc_meters?
+    content_information += meter_costs if has_dcc_meters? && real_meters.length > 1
     content_information
   end
   def advice_class; self.class end
@@ -133,8 +142,14 @@ class AdviceFuelTypeBase < AdviceStructuredOldToNewConversion
 
   def meter_costs
     real_meters.map do |meter|
-      MeterCost.new(@school,meter).content
+      MeterCost.new(@school, meter.original_meter).content
     end
+  end
+
+  def type_of_content
+    content_types = []
+
+puts "Got here: finish function"
   end
 
   def real_meters
@@ -161,12 +176,12 @@ class AdviceElectricityCosts < AdviceFuelTypeBase
     [
       ElectricityCostsIntroductionAdvice,
       CostsHowEnergySparksCalculatesThem,
-      ElectricityTariffs
+      # ElectricityTariffs
     ]
   end
 
   def aggregate_meter
-    @school.aggregated_electricity_meters
+    @school.aggregated_electricity_meters.original_meter
   end
 
   def underlying_meters; @school.electricity_meters end
@@ -190,12 +205,12 @@ class AdviceGasCosts < AdviceFuelTypeBase
     [
       GasCostsIntroductionAdvice,
       CostsHowEnergySparksCalculatesThem,
-      GasTariffs
+      # GasTariffs
     ]
   end
 
   def aggregate_meter
-    @school.aggregated_heat_meters
+    @school.aggregated_heat_meters.original_meter
   end
 
   def underlying_meters; @school.heat_meters end

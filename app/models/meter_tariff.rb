@@ -1,7 +1,7 @@
 class MeterTariff
   attr_reader :tariff
   def initialize(meter, tariff)
-    @meter  = meter
+    @mpxn  = meter.mpxn
     @tariff = tariff
   end
 
@@ -109,13 +109,13 @@ class AccountingTariff < EconomicTariff
 
   def check_complete_time_ranges(time_ranges)
     if count_rates_every_half_hour(time_ranges).any?{ |v| v == 0 }
-      raise_and_log_error(IncompleteTimeRanges, "Incomplete differential tariff time of day ranges #{@meter.mpxn}", time_ranges)
+      raise_and_log_error(IncompleteTimeRanges, "Incomplete differential tariff time of day ranges #{@mpxn}", time_ranges)
     end
   end
 
   def check_overlapping_time_ranges(time_ranges)
     if count_rates_every_half_hour(time_ranges).any?{ |v| v > 1 }
-      raise_and_log_error(OverlappingTimeRanges, "Overlapping differential tariff time of day ranges #{@meter.mpxn}", time_ranges)
+      raise_and_log_error(OverlappingTimeRanges, "Overlapping differential tariff time of day ranges #{@mpxn}", time_ranges)
     end
   end
 
@@ -129,7 +129,7 @@ class AccountingTariff < EconomicTariff
   def check_time_ranges_on_30_minute_boundaries(time_ranges)
     time_of_days = [time_ranges.map(&:first), time_ranges.map(&:last)].flatten
     if time_of_days.any?{ |tod| !tod.on_30_minute_interval? }
-      raise TimeRangesNotOn30MinuteBoundary, "Differential tariff time of day  rates not on 30 minute interval #{@meter.mpxn}"
+      raise TimeRangesNotOn30MinuteBoundary, "Differential tariff time of day  rates not on 30 minute interval #{@mpxn}"
     end
   end
 
@@ -165,19 +165,19 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def rate_rate_type?(type)
-    type.to_s.match(/rate[0-9]/)
+    type.to_s.match(/^rate[0-9]$/)
   end
 
   def tiered_rate_type?(type)
-    type.to_s.match(/tiered_rate[0-9]/)
+    type.to_s.match(/^tiered_rate[0-9]$/)
   end
 
   def rate?(_date)
-    rate_types.any? { |type| type.to_s.match(/rate[0-9]/) }
+    rate_types.any? { |type| type.to_s.match(/^rate[0-9]$/) }
   end
 
   def tiered?(_date)
-    rate_types.any? { |type| type.to_s.match(/tiered_rate[0-9]/) }
+    rate_types.any? { |type| type.to_s.match(/^tiered_rate[0-9]$/) }
   end
 
   def rate_types

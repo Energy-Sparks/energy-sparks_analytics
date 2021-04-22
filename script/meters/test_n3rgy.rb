@@ -69,6 +69,9 @@ class DCCMeters
       3 => { production: true }, # JH-E
       4 => { production: true, fuel_type: :gas }, # KH-G
       5 => { production: true }, #JB
+      6 => { production: true }, #JE-E
+      7 => { production: true, fuel_type: :gas }, #JE-G
+      8 => { production: true, fuel_type: :gas }, #JH-G
     }
   end
 
