@@ -119,7 +119,7 @@ class RunAdultDashboard < RunCharts
 
     comparison = CompareContentResults.new(control, @school.name)
     differences = comparison.save_and_compare_content(page, content, true)
-
+=begin
     puts "Got here: content type"
     ap content.map { |c| c.keys }
     content.each do |data|
@@ -127,7 +127,7 @@ class RunAdultDashboard < RunCharts
         ap data
       end
     end
-
+=end
     html, charts = advice.analytics_split_charts_and_html(content)
 
     worksheet_name = definition[:content_class].excel_worksheet_name
