@@ -1,6 +1,4 @@
 class AdviceMeterBreakdownBase < AdviceBase
-  attr_reader :summary
-
   def enough_data
     :enough 
   end

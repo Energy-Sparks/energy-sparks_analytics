@@ -71,70 +71,192 @@ class RunAdultDashboard < RunCharts
   end
 
   private def run_one_page(page, definition, control)
-    puts "Running page:   #{page}"
+    content = []
     logger.info "Running page #{page} has class #{definition.key?(:content_class)}"
 
-    # ap definition[:content_class].front_end_template_variables # front end variables
+    advice = definition[:content_class].new(@school)
 
-    advice = definition[:content_class].new(@school) # , )
+    return unless valid?(advice, page)
 
+    advice.calculate
+
+    return if calculation_failed?(advice, page)
+
+    if advice.has_structured_content?
+      content += [ accordion_style_css ]
+      advice.structured_content.each do |component_advice|
+        content += accordion_html(component_advice[:title], component_advice[:content])
+      end
+    else
+      content = advice.content(user_type: control[:user])
+    end
+
+    @failed_charts.concat(advice.failed_charts)
+
+    return if calculation_failed?(advice, page)
+
+    comparison = CompareContentResults.new(control, @school.name)
+
+    differences = comparison.save_and_compare_content(page, content, true)
+
+    chart_names = content.select { |h| h[:type] == :chart_name }
+
+    charts = chart_names.map { |chart_name| calculate_charts(chart_name) }
+
+    working_charts = charts.select { |c| !c[:content].nil? }
+    failed_charts  = charts.select { |c| c[:content].nil? }
+
+    @failed_charts.concat(failed_charts)
+
+    html, _deprecated_charts = advice.analytics_split_charts_and_html(content)
+
+    worksheet_name = definition[:content_class].excel_worksheet_name
+
+    @worksheets[worksheet_name] = working_charts.map { |c| c[:content] }
+    @all_html += html.join(' ')
+    differences
+  end
+
+  # similar to front end:
+  # https://github.com/Energy-Sparks/energy-sparks/blob/master/app/controllers/schools/charts_controller.rb
+  # https://github.com/Energy-Sparks/energy-sparks/blob/master/app/models/chart_data.rb
+  # variable naming convention and style to come extent mimics front end
+  def calculate_charts(chart_definition)
+    chart_name = original_chart_name = chart_definition[:content]
+    config_overrides = {}
+
+    if chart_definition.key?(:mpan_mprn)
+      config_overrides =  { meter_definition: chart_definition[:mpan_mprn] }
+      chart_name = (chart_name.to_s + "_#{chart_definition[:mpan_mprn]}").to_sym
+    end
+
+    begin
+      chart_manager = ChartManager.new(@school)
+      chart_config = chart_manager.get_chart_config(original_chart_name)
+      transformed_chart_config = chart_config.merge(config_overrides)
+      data = chart_manager.run_chart(transformed_chart_config, chart_name)
+
+      { type: :chart, chart_name: chart_name, content: data }
+    rescue => e
+      puts "Chart #{chart_name} failed to calculate"
+      logger.info "Chart #{chart_name} failed to calculate"
+      logger.info e.backtrace
+      { content: nil, school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name }
+    end
+  end
+
+  # the id reference needs to be unique
+  # for all the html otherwise the
+  # 2nd+ instance fails to open
+  def self.accordion_count
+    @@accordion_count ||= 0
+    @@accordion_count += 1
+  end
+
+  def accordion_html(title, content)
+    [
+      accordion_start(title),
+      content,
+      accordion_end
+    ].flatten
+  end
+
+  def accordion_start(title)
+    if title.include?('&pound;')
+      title, rhs = title.split('&pound;')
+      rhs = '&pound;' + rhs
+    end
+    index = "accordionindex#{self.class.accordion_count}"
+    text = %{
+      <input type="checkbox" id="<%= index %>" />
+      <label for="<%= index %>"><div class="split-para"><%= title %><span><%= rhs %></span></div></label>
+
+      <div class="content">
+    }
+    { type: :html, content: ERB.new(text).result(binding) }
+  end
+
+  def accordion_end
+    text = %{
+      </div>
+    }
+    { type: :html, content: text }
+  end
+
+  def accordion_style_css
+    {
+      type: :html,
+      content:  %{
+                    <title>CSS Accordion</title>
+
+                    <style>
+
+                      input {
+                          display: none;
+                      }
+
+                      label {
+                          display: block;    
+                          padding: 8px 22px;
+                          margin: 0 0 1px 0;
+                          cursor: pointer;
+                          background: #6AAB95;
+                          border-radius: 3px;
+                          color: #FFF;
+                          transition: ease .5s;
+                      }
+
+                      label:hover {
+                          background: #4E8774;
+                      }
+
+                      .content {
+                          background: #FFFFFF;
+                          padding: 10px 25px;
+                          border: 1px solid #A7A7A7;
+                          margin: 0 0 1px 0;
+                          border-radius: 3px;
+                      }
+
+                      input + label + .content {
+                          display: none;
+                      }
+
+                      input:checked + label + .content {
+                          display: block;
+                      }
+
+                      .split-para      {
+                        display:block;margin:10px;
+                      }
+
+                      .split-para span {
+                        display:block;float:right;width:15%;margin-left:10px;
+                      }
+
+                    </style>
+                }
+    }
+  end
+
+  def valid?(advice, page)
     unless advice.valid_alert?
       puts "                Page failed, as advice not valid #{page}" 
-      return
+      return false
     end
 
     unless advice.relevance == :relevant
       puts "                Page failed, as advice not relevant #{page}" 
-      return
+      return false
     end
 
-    advice.calculate
+    true
+  end
 
-    puts "                Page failed 1, as advice not available to users #{page}" unless advice.make_available_to_users?
-    return unless advice.make_available_to_users?
-=begin
-    # deprecated/commented out PH 18Apr2021
-    if advice.has_structured_content?
-      begin
-        # puts "Advice has structured content"
-        # puts "Has #{advice.structured_content.length} components and is called #{advice.class.name}"
-        
-        advice.structured_content.each do |component_advice|
-          # puts component_advice[:title]
-          # puts component_advice[:content].map { |component| component[:type] }.join('; ')
-        end
-      rescue NoMethodError => e
-        puts e
-        puts e.backtrace
-        puts "To DO Remove this code after fixing issue when have more time PH 15Oct2020"
-        return
-      end
-    end
-=end
-    content = advice.content(user_type: control[:user])
-
-    @failed_charts.concat(advice.failed_charts) unless advice.failed_charts.empty?
-
-    puts "                Page failed 2, as advice not available to users #{page}" unless advice.make_available_to_users?
-
-    comparison = CompareContentResults.new(control, @school.name)
-    differences = comparison.save_and_compare_content(page, content, true)
-=begin
-    puts "Got here: content type"
-    ap content.map { |c| c.keys }
-    content.each do |data|
-      if data[:type] == :chart_name
-        ap data
-      end
-    end
-=end
-    html, charts = advice.analytics_split_charts_and_html(content)
-
-    worksheet_name = definition[:content_class].excel_worksheet_name
-
-    @worksheets[worksheet_name] = charts
-    @all_html += html.join(' ')
-    differences
+  def calculation_failed?(advice, page)
+    return false if advice.make_available_to_users?
+    puts "                Page failed 1, as advice not available to users #{page}"
+    true
   end
 
   def write_html

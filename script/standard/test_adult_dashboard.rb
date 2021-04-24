@@ -5,7 +5,7 @@ require_rel '../../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['belv*'], # ['wimble*', 'tain*', 'kens*', 'pens*', 'king-e*', 'frome*', 'peven*', 'prender*', 'oakfi*', 'hugh*', 'trin*'],
+  schools:                  ['n3*'], # ['wimble*', 'tain*', 'kens*', 'pens*', 'king-e*', 'frome*', 'peven*', 'prender*', 'oakfi*', 'hugh*', 'trin*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
@@ -17,11 +17,12 @@ script = {
                                 report_failed_charts:   :summary, # :detailed
                                 user:          { user_role: :analytics, staff_role: nil }, # nil, # , # { user_role: :admin }, # guest
                                 no_pages: %i[electricity_profit_loss gas_profit_loss],
+                                no_pages1: %i[gas_out_of_hours],
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
                                   { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },
-                                  :summary,
-                                  :report_differences,
+                                  # :summary,
+                                  # :report_differences,
                                   #:report_differing_charts,
                                 ] # :quick_comparison,
                               }
