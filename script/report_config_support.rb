@@ -61,7 +61,7 @@ class ReportConfigSupport
     }
     @benchmarks = []
 
-    ENV['School Dashboard Advice'] = 'Include Header and Body'
+    # ENV['School Dashboard Advice'] = 'Include Header and Body'
     $SCHOOL_FACTORY = SchoolFactory.new
 
     @chart_manager = nil

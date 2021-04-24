@@ -123,7 +123,7 @@ class DashboardEnergyAdvice
               you might need to install a 7-day timer. For holidays, you can get Energy Sparks
               to send you or whoever is responsible a reminder just before a holiday - using its alerts system.
               If you don't know how to do this send us
-              <a href="mailto:hello@energysparks.uk?subject=Help with setting up an alert to remind us to turn our storage heaters off&">an email</a>.
+              <a href="mailto:hello@energysparks.uk?subject=Help%20with%20setting%20up%20an%20alert%20to%20remind%20us%20to%20turn%20our%20storage%20heaters%20off&">an email</a>.
           </p>
         <%= @body_end %>
       }.gsub(/^  /, '')
@@ -185,7 +185,7 @@ class DashboardEnergyAdvice
             heaters left on at your school during the weekend? Installing a '7-day'
             timer which might cost the school &#163;400 could save your school
             <%= annual_usage %> or <%= annual_usage('Weekend', :£) %> per year. Contact Energy Sparks
-            <a href="mailto:hello@energysparks.uk?subject=Help with changing storage heater timers&">hello@energysparks.uk</a>
+            <a href="mailto:hello@energysparks.uk?subject=Help%20with%20changing%20storage%20heater%20timers&">hello@energysparks.uk</a>
             for advice on changing timers if you
             need help?
           </p>
@@ -365,7 +365,7 @@ class DashboardEnergyAdvice
             turn the heating on and off depending on the upcoming weather forecast for
             the week. Please contact us if you would like help setting up the alert
             (
-              <a href="mailto:hello@energysparks.uk?subject=Help with setting up alerts for my school storage heaters&">hello@energysparks.uk</a>
+              <a href="mailto:hello@energysparks.uk?subject=Help%20with%20setting%20up%20alerts%20for%20my%20school%20storage%20heaters&">hello@energysparks.uk</a>
             )
           </p>
           <p>

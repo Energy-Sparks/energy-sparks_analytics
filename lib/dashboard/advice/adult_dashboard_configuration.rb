@@ -350,14 +350,8 @@ class DashboardConfiguration
       name:                   'Gas Costs',
       content_class:           AdviceGasCosts,
       excel_worksheet_name:   'GasCosts',
-      charts: %i[
-        gas_by_month_year_0_1_finance_advice
-        gas_cost_comparison_last_2_years_accounting
-        gas_cost_1_year_accounting_breakdown
-        accounting_cost_daytype_breakdown_gas
-      ],
-      promoted_variables: {
-      }
+      charts: %i[],
+      promoted_variables: {}
     },
     boiler_control_morning_start_time: {
       name:                   'Morning start time',

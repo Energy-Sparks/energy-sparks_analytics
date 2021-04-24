@@ -196,7 +196,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
       html += %{
         If you would like your tariff configuration updated
         please contact Energy Sparks
-        <a href="mailto:hello@energysparks.uk?subject=Setup accounting tariff for meter <%= meter.mpxn %>?&">hello@energysparks.uk</a>.
+        <a href="mailto:hello@energysparks.uk?subject=Setup%20accounting%20tariff%20for%20meter%20<%= meter.mpxn %>?&">hello@energysparks.uk</a>.
       }
     end
 
