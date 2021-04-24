@@ -12,7 +12,6 @@ end
 # backwards compatibility in short term
 class AdviceStructuredOldToNewConversion < AdviceBase
   include MeterlessMixin
-  attr_reader :summary
 
   def initialize(school)
     super(school)

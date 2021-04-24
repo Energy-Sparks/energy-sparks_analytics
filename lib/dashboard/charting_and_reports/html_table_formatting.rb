@@ -11,35 +11,33 @@ class HtmlTableFormatting
 
   def html(right_justified_columns: [1..1000])
     template = %{
-      <p>
-        <table class="table table-striped table-sm">
-          <% unless @header.nil? %>
-            <thead>
-              <tr class="thead-dark">
-                <% @header.each do |header_titles| %>
-                  <th scope="col" class="text-center"> <%= header_titles.to_s %> </th>
-                <% end %>
-              </tr>
-            </thead>
-          <% end %>
-          <tbody>
-            <% @rows.each do |row| %>
-              <tr>
-                <% row.each_with_index do |val, column_number| %>
-                  <%= cell_format(column_number, right_justified_columns, val) %>
-                <% end %>
-              </tr>
-            <% end %>
-          </tbody>
-          <% unless @total_row.nil? %>
-            <tr class="table-success">
-            <% @total_row.each_with_index do |total, column_number| %>
-              <%= column_th(column_number, right_justified_columns) %> <%= format_value(total, column_number) %> </th>
-            <% end %>
+      <table class="table table-striped table-sm">
+        <% unless @header.nil? %>
+          <thead>
+            <tr class="thead-dark">
+              <% @header.each do |header_titles| %>
+                <th scope="col" class="text-center"> <%= header_titles.to_s %> </th>
+              <% end %>
+            </tr>
+          </thead>
+        <% end %>
+        <tbody>
+          <% @rows.each do |row| %>
+            <tr>
+              <% row.each_with_index do |val, column_number| %>
+                <%= cell_format(column_number, right_justified_columns, val) %>
+              <% end %>
             </tr>
           <% end %>
-        </table>
-      </p>
+        </tbody>
+        <% unless @total_row.nil? %>
+          <tr class="table-success">
+          <% @total_row.each_with_index do |total, column_number| %>
+            <%= column_th(column_number, right_justified_columns) %> <%= format_value(total, column_number) %> </th>
+          <% end %>
+          </tr>
+        <% end %>
+      </table>
     }.gsub(/^  /, '')
 
     generate_html(template, binding)
