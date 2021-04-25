@@ -221,6 +221,7 @@ class MeterCost
     else
       text = "Meter #{@meter.mpxn}"
       text += " #{@meter.name}" unless @meter.name.empty?
+      text
     end
   end
 
