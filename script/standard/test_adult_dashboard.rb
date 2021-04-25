@@ -5,8 +5,9 @@ require_rel '../../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['n3*'], # ['wimble*', 'tain*', 'kens*', 'pens*', 'king-e*', 'frome*', 'peven*', 'prender*', 'oakfi*', 'hugh*', 'trin*'],
+  schools:                  ['*'], # ['wimble*', 'tain*', 'kens*', 'pens*', 'king-e*', 'frome*', 'peven*', 'prender*', 'oakfi*', 'hugh*', 'trin*'],
   source:                   :unvalidated_meter_data,
+  source:                   :dcc_n3rgy_override_with_files,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
                               control: {

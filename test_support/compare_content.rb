@@ -107,8 +107,8 @@ class CompareContentResults
       remove_content_classes(comparison_component)
       remove_content_classes(new_component)
       if comparison_component != new_component
-        puts "Differs: #{index}"
         if @control[:compare_results].include?(:report_differences)
+          puts "Differs: #{index}"
           h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
           puts h_diff
           puts 'Versus:'

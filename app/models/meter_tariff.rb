@@ -71,6 +71,10 @@ class AccountingTariff < EconomicTariff
     %i[rate daytime_rate nighttime_rate flat_rate].include?(type)
   end
 
+  def tiered_rate_type?(_type)
+    false
+  end
+
   def standing_charges(date, days_kwh)
     standing_charge = {}
     tariff[:rates].each do |standing_charge_type, rate|

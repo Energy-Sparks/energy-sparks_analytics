@@ -4,6 +4,8 @@ require_relative '../half_hourly_loader'
 class AMRData < HalfHourlyData
   attr_reader :economic_tariff, :accounting_tariff, :carbon_emissions
 
+  class UnexpectedDataType < StandardError; end
+
   def initialize(type)
     super(type)
     @total = {}
@@ -78,11 +80,30 @@ class AMRData < HalfHourlyData
   end
 
   def days_kwh_x48(date, type = :kwh)
+    check_type(type)
     kwhs = self[date].kwh_data_x48
     return kwhs if type == :kwh
     return @economic_tariff.days_cost_data_x48(date) if type == :£ || type == :economic_cost
     return @accounting_tariff.days_cost_data_x48(date) if type == :accounting_cost
     return @carbon_emissions.one_days_data_x48(date) if type == :co2
+  end
+
+  def date_exists_by_type?(date, type)
+    check_type(type)
+    case type
+    when :kwh
+      date_exists?(date)
+    when :economic_cost, :£
+      @economic_tariff.date_exists?(date)
+    when :accounting_cost
+      @accounting_tariff.date_exists?(date)
+    when :co2
+      @carbon_emissions.date_exists?(date)
+    end
+  end
+
+  def check_type(type)
+    raise UnexpectedDataType, "Unexpected data type #{type}" unless %i[kwh £ economic_cost co2 accounting_cost].include?(type)
   end
 
   def substitution_type(date)
@@ -146,6 +167,7 @@ class AMRData < HalfHourlyData
   end
 
   def kwh(date, halfhour_index, type = :kwh)
+    check_type(type)
     return self[date].kwh_halfhour(halfhour_index) if type == :kwh
     return @economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£ || type == :economic_cost
     return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cost
@@ -165,6 +187,7 @@ class AMRData < HalfHourlyData
   end
 
   def one_day_kwh(date, type = :kwh)
+    check_type(type)
     return self[date].one_day_kwh  if type == :kwh
     return @economic_tariff.one_day_total_cost(date) if type == :£ || type == :economic_cost
     return @accounting_tariff.one_day_total_cost(date) if type == :accounting_cost
@@ -177,14 +200,17 @@ class AMRData < HalfHourlyData
 
    # called from inherited half_hourly)data.one_day_total(date), shouldn't use generally
   def one_day_total(date, type = :kwh)
+    check_type(type)
     one_day_kwh(date, type)
   end
 
   def total(type = :kwh)
+    check_type(type)
     @total[type] ||= calculate_total(type)
   end
 
   def calculate_total(type)
+    check_type(type)
     t = 0.0
     (start_date..end_date).each do |date|
       t += one_day_kwh(date, type)
@@ -193,6 +219,7 @@ class AMRData < HalfHourlyData
   end
 
   def kwh_date_range(date1, date2, type = :kwh)
+    check_type(type)
     return one_day_kwh(date1, type) if date1 == date2
     total_kwh = 0.0
     (date1..date2).each do |date|
@@ -206,10 +233,12 @@ class AMRData < HalfHourlyData
   end
 
   def average_in_date_range(date1, date2, type = :kwh)
+    check_type(type)
     kwh_date_range(date1, date2, type) / (date2 - date1 + 1)
   end
 
   def average_in_date_range_ignore_missing(date1, date2, type = :kwh)
+    check_type(type)
     kwhs = []
     (date1..date2).each do |date|
       kwhs.push(one_day_kwh(date, type)) if date_exists?(date)
@@ -218,6 +247,7 @@ class AMRData < HalfHourlyData
   end
 
   def kwh_date_list(dates, type = :kwh)
+    check_type(type)
     total_kwh = 0.0
     dates.each do |date|
       total_kwh += one_day_kwh(date, type)

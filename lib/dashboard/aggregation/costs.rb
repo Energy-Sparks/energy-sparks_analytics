@@ -16,6 +16,7 @@ class CostsBase < HalfHourlyData
     @fuel_type = meter.fuel_type
     @bill_component_types_internal = Hash.new(nil) # only interested in (quick access) to keys, so maintain as hash rather than array
     @post_aggregation_state = false
+    @calculated = {}
   end
 
   def bill_component_types
@@ -152,7 +153,9 @@ class CostsBase < HalfHourlyData
 
   public def calculate_tariff_for_date(date, meter)
     kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
-    one_day_cost = OneDaysCostData.new(costs(date, meter, kwh_x48))
+    c = costs(date, meter, kwh_x48)
+    return nil if c.nil?
+    one_day_cost = OneDaysCostData.new(c)
     one_day_cost
   end
 
@@ -183,8 +186,21 @@ class CostsBase < HalfHourlyData
 
   public def add(date, costs)
     set_min_max_date(date)
-    add_to_list_of_bill_component_types(costs)
+    add_to_list_of_bill_component_types(costs) unless costs.nil?
     self[date] = costs
+  end
+
+  def calculated?(date)
+    @calculated[date] == true
+  end
+
+  def date_exists?(date)
+    !date_missing?(date)
+  end
+
+  def date_missing?(date)
+    c = one_days_cost_data(date)
+    c.nil?
   end
 
   private def total_in_period(start_date, end_date)
@@ -211,15 +227,14 @@ class EconomicCosts < CostsBase
     combined_economic_costs = EconomicCostsPreAggregated.new(combined_meter)
 
     (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
-      list_of_days_economic_costs = list_of_meters_on_date.map { |meter| meter.amr_data.economic_tariff.one_days_cost_data(date) }
+      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }
+      list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.economic_tariff.one_days_cost_data(date) }
       combined_economic_costs.add(date, combined_day_costs(list_of_days_economic_costs))
     end
 
     Logging.logger.info "Created combined meter economic #{combined_economic_costs.costs_summary}"
     combined_economic_costs
   end
-
 end
 
 # parameterised representation of economic costs until after agggregation to reduce memory footprint
@@ -232,7 +247,7 @@ class EconomicCostsParameterised < EconomicCosts
   # returns a x48 array of half hourly costs
   def one_days_cost_data(date)
     return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
+    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
     self[date]
   end
 
@@ -271,15 +286,13 @@ class AccountingCosts < CostsBase
     combined_accounting_costs = AccountingCostsPreAggregated.new(combined_meter)
 
     (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }.compact
-      missing_accounting_costs = list_of_meters_on_date.select { |meter| meter.amr_data.accounting_tariff.nil? }
-      if missing_accounting_costs.length > 0
-        missing_accounting_costs.each do |meter|
-          puts "Missing accounting costs for #{meter.mpan_mprn} on #{date}"
-        end
-      end
+      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }.compact
+      
+      missing_accounting_costs = list_of_meters_on_date.select { |m| !m.amr_data.date_exists_by_type?(date, :accounting_cost) }
+
+      # silently skip calculation
       next if missing_accounting_costs.length > 0 
-      list_of_days_accounting_costs = list_of_meters_on_date.map { |meter| meter.amr_data.accounting_tariff.one_days_cost_data(date) }
+      list_of_days_accounting_costs = list_of_meters_on_date.map { |m| m.amr_data.accounting_tariff.one_days_cost_data(date) }
       combined_accounting_costs.add(date, combined_day_costs(list_of_days_accounting_costs))
     end
 
@@ -290,7 +303,7 @@ class AccountingCosts < CostsBase
   # returns a x48 array of half hourly costs
   def one_days_cost_data(date)
     return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
+    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
     self[date]
   end
 
@@ -304,7 +317,7 @@ class AccountingCostsParameterised < AccountingCosts
   # returns a x48 array of half hourly costs, only caches post aggregation, and front end cache
   def one_days_cost_data(date)
     return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
+    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
     self[date]
   end
 

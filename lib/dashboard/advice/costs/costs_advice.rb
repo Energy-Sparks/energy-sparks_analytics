@@ -42,7 +42,7 @@ class CostAdviceBase < AdviceBase
 
   def structured_content(user_type: nil)
     content_information = []
-    content_information += meter_costs if only_breakdown_for_dcc_meters?
+    content_information += meter_costs
     content_information.push(introduction_to_school_finances)
     content_information
   end
@@ -56,6 +56,7 @@ class CostAdviceBase < AdviceBase
   end
 
   def full_tariff_coverage?
+    puts "Got here #{tariff_status}"
     tariff_status == :full_tariff_coverage
   end
 
@@ -63,17 +64,40 @@ class CostAdviceBase < AdviceBase
     return :solar_pv if @school.solar_pv_panels?
 
     kwh_start_date, kwh_end_date = year_start_end_dates
-    tariff_start_date, tariff_end_date = aggregate_meter.meter_tariffs.last_contiguous_range_of_tariffs_in_date_range(kwh_start_date, kwh_end_date, true)
+    tariff_date_range = last_contiguous_range_of_tariffs_in_date_range(kwh_start_date, kwh_end_date)
     
-    if tariff_start_date.nil?
+    if tariff_date_range.nil?
       :no_tariffs
     else
-      if kwh_start_date == tariff_start_date && kwh_end_date == tariff_end_date
+      if kwh_start_date == tariff_date_range.first && kwh_end_date == tariff_date_range.last
         :full_tariff_coverage
       else
         :partial_tariff_coverage
       end
     end
+  end
+
+  # inefficient: but simplest way of determining tariff
+  # availability for aggregate meter with potentially a
+  # large number of underlying meters with or without tariffs
+  # while staying within meter aggregation rules (e.g. deprecated meters)
+  def last_contiguous_range_of_tariffs_in_date_range(start_date, end_date)
+    valid_costs = (start_date..end_date).map do |date|
+      {
+        date:   date,
+        exists: aggregate_meter.amr_data.date_exists_by_type?(date, :accounting_cost)
+      }
+    end
+
+    grouped_valid_costs = valid_costs.slice_when do |curr, prev|
+      curr[:exists] != prev[:exists]
+    end.to_a
+
+    non_nil_costs = grouped_valid_costs.select { |cost_group| cost_group.first[:exists] }
+    return nil if non_nil_costs.empty?
+
+    last_range = non_nil_costs.last
+    last_range.first[:date]..last_range.last[:date]
   end
 
   def real_meters
@@ -87,13 +111,23 @@ class CostAdviceBase < AdviceBase
   end
 
   def meter_costs
-    show_aggregate_tariffs = real_meters.length == 1
-    start_date, end_date = year_start_end_dates
-    meter_cost_list = [ MeterCost.new(@school, aggregate_meter.original_meter, show_aggregate_tariffs, true, start_date, end_date).content ]
-    real_meters.each do |meter|
-      meter_cost_list.push(MeterCost.new(@school, meter.original_meter, true, false, start_date, end_date).content)
+    meter_cost_list = [aggregate_meter_costs]
+    
+    if only_breakdown_for_dcc_meters?
+      start_date, end_date = year_start_end_dates
+
+      # do remaining meters
+      real_meters.each do |meter|
+        meter_cost_list.push(MeterCost.new(@school, meter.original_meter, true, false, start_date, end_date).content)
+      end
     end
     meter_cost_list
+  end
+
+  def aggregate_meter_costs
+    show_aggregate_tariffs = real_meters.length == 1
+    start_date, end_date = year_start_end_dates
+    MeterCost.new(@school, aggregate_meter, show_aggregate_tariffs, true, start_date, end_date).content
   end
 
   def tariffs_not_set_html
@@ -107,7 +141,7 @@ class CostAdviceBase < AdviceBase
           You currently don't have any accounting tariffs set for this meter.
         <% else %>
           You have some tariff information setup for this meter but it doesn't
-          cover the <%= time_period_of_tariffs_needed %> months we need to provide analysis of your bill.
+          cover the <%= time_period_of_tariffs_needed %> we need to provide analysis of your bill.
         <% end %>
         If you would like us to provide a full analysis of your bills online
         please email <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">hello@energysparks.uk</a>
@@ -140,7 +174,7 @@ class CostAdviceBase < AdviceBase
   end
 
   def time_period_of_tariffs_needed
-    days = [@meter.amr_data.days, 2 * 365.0].min
+    days = [aggregate_meter.amr_data.days, 2 * 365.0].min
     FormatEnergyUnit.format(:years, days / 365.0, :html)
   end
 

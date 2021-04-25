@@ -8,9 +8,7 @@
 # - to work out whether its differential or not the code below looks up the meters accounting tariff
 # Accounting Tariffs
 # - there are potentially multiple of these for a given day, the manager decided which:
-# - a 'default' tariff  - i.e. a system wide tariff has lowest precedence and shouldn't be used
-#                       - as school groups typically don't have default tariffs, and the default
-#                       - shouldn't be used to determine whether the economic tariff is differential or not
+# - accounting_tariff
 # - override tariff     - highest precedence typically used to override bad data from dcc, only applies to generic
 # - merge tariff        - used to add tariff information e.g. DUOS rates not available on the DCC
 #
@@ -55,8 +53,7 @@ class MeterTariffManager
 
   def accounting_cost(date, kwh_x48)
     tariff = accounting_tariff_for_date(date)
-
-    raise MissingAccountingTariff, "Missing tariff data for #{@meter.mpxn} on #{date}" if tariff.nil?
+    return nil if tariff.nil?
 
     tariff.costs(date, kwh_x48)
   end
@@ -79,10 +76,9 @@ class MeterTariffManager
   end
 
   def most_recent_contiguous_real_accounting_tariffs
-    non_default_tariffs = all_tariffs_by_default(false)
-    return nil if non_default_tariffs.empty?
+    return nil if @accounting_tariffs.nil? || @accounting_tariffs.empty?
 
-    reverse_sorted_tariffs = non_default_tariffs.sort { |t1, t2| t2.tariff[:end_date] <=> t1.tariff[:end_date] }
+    reverse_sorted_tariffs = @accounting_tariffs.sort { |t1, t2| t2.tariff[:end_date] <=> t1.tariff[:end_date] }
 
     grouped_tariffs = reverse_sorted_tariffs.slice_when { |prev, curr| prev.tariff[:end_date] < prev.tariff[:start_date] - 1 }.to_a
 
@@ -99,41 +95,22 @@ class MeterTariffManager
     }
   end
 
-  def accounting_tariff_for_date(date, non_default_tariff_only = false)
-    @accounting_tariff_cache ||= {}
-    @accounting_tariff_cache[date] ||= {}
-    @accounting_tariff_cache[date][non_default_tariff_only] ||= calculate_accounting_tariff_for_date(date, non_default_tariff_only)
-  end
-
-  # inefficient
-  def last_contiguous_range_of_tariffs_in_date_range(start_date, end_date, non_default_tariff_only)
-    non_nil_groups = grouped_tariff_coverage_in_date_range(start_date, end_date, non_default_tariff_only)
-    return [nil, nil] if non_nil_groups.empty?
-    last_contiguous_tariffs = non_nil_groups.last
-    [last_contiguous_tariffs.first, last_contiguous_tariffs.last]
+  def accounting_tariff_for_date(date)
+    @accounting_tariff_cache       ||= {}
+    @accounting_tariff_cache[date] ||= calculate_accounting_tariff_for_date(date)
   end
 
   private
 
-  # inefficient, could for non-aggregate meters scan tariffs instead?
-  def grouped_tariff_coverage_in_date_range(start_date, end_date, non_default_tariff_only = false)
-    groups = (start_date..end_date).slice_when do |curr, prev|
-      accounting_tariff_for_date(curr, non_default_tariff_only).nil? != accounting_tariff_for_date(prev, non_default_tariff_only).nil?
-    end.to_a
-    non_nil_groups = groups.select { |g| !g[0].nil? }
-  end
-
-  def calculate_accounting_tariff_for_date(date, non_default_tariff_only = false)
+  def calculate_accounting_tariff_for_date(date)
     override = override_tariff(date)
     return override unless override.nil?
 
     return nil if @accounting_tariffs.nil?
 
-    accounting_tariff = if non_default_tariff_only
-                          default_tariff(date, false)
-                        else
-                          default_tariff(date, false) || default_tariff(date, true)
-                        end
+    accounting_tariff = find_tariff(date)
+
+    return nil if accounting_tariff.nil?
 
     merge = merge_tariff(date)
     return accounting_tariff.deep_merge(merge) unless merge.nil?
@@ -141,25 +118,16 @@ class MeterTariffManager
     accounting_tariff
   end
 
-  def default_tariff(date, default)
-    tariffs = select_default_tariffs(date, default)
+  def find_tariff(date)
+    tariffs = @accounting_tariffs.select { |accounting_tariff| accounting_tariff.in_date_range?(date) }
 
-    choosen_weekend_weekday_tariff = weekend_weekday_tariff(tariffs, date, default)
+    choosen_weekend_weekday_tariff = weekend_weekday_tariff(tariffs, date)
 
     if choosen_weekend_weekday_tariff.nil?
       tariffs.empty? ? nil : tariffs[0]
     else
       choosen_weekend_weekday_tariff
     end
-  end
-
-  def select_default_tariffs(date, default)
-    tariffs = @accounting_tariffs.select { |accounting_tariff| accounting_tariff.in_date_range?(date) }
-    tariffs.select { |t| t.default? == default }
-  end
-
-  def all_tariffs_by_default(default)
-    @accounting_tariffs.select { |t| t.default? == default } 
   end
 
   def override_tariff(date)
@@ -173,7 +141,7 @@ class MeterTariffManager
   end
 
   def differential_override(date)
-    return nil if @differential_tariff_override.nil?
+    return nil if @differential_tariff_override.empty?
 
     @differential_tariff_override.any? { |dr, tf| date >= dr.first && date <= dr.last && tf }
   end
@@ -189,7 +157,7 @@ class MeterTariffManager
   end
 
   def process_economic_tariff_override(differential_overrides)
-    return nil if differential_overrides.nil?
+    return {} if differential_overrides.nil?
 
     differential_overrides.map do |override|
       end_date = override[:end_date] || Date.new(2050, 1, 1)
@@ -201,15 +169,18 @@ class MeterTariffManager
   end
 
   def preprocess_accounting_tariffs(meter, accounting_tariffs)
-    return nil if accounting_tariffs.nil?
+    return [] if accounting_tariffs.nil?
 
-    accounting_tariffs.map do |accounting_tariff|
+    # TODO (PH, 25Apr2021) remove once all default accounting tariffs are removed from the database
+    non_defaults = accounting_tariffs.select { |t| t[:default] != true }
+
+    non_defaults.map do |accounting_tariff|
       AccountingTariff.new(meter, accounting_tariff)
     end
   end
 
   def preprocess_generic_accounting_tariffs(meter, accounting_tariffs)
-    return nil if accounting_tariffs.nil?
+    return [] if accounting_tariffs.nil?
 
     accounting_tariffs.map do |accounting_tariff|
       GenericAccountingTariff.new(meter, accounting_tariff)
@@ -217,18 +188,11 @@ class MeterTariffManager
   end
 
   def check_tariffs
-    check_overlapping_accounting_tariffs_default_type(true)
-    check_overlapping_accounting_tariffs_default_type(false)
-  end
-
-  def check_overlapping_accounting_tariffs_default_type(default) 
-    tariffs = all_tariffs_by_default(default)
-
-    tariffs.combination(2) do |t1, t2|
+    @accounting_tariffs.combination(2) do |t1, t2|
       r = t1.tariff[:start_date]..t1.tariff[:end_date]
       if r.cover?(t2.tariff[:start_date]) || r.cover?(t2.tariff[:end_date])
         if t1.tariff[:sub_type] != :weekday_weekend || t2.tariff[:sub_type] != :weekday_weekend
-          raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs default = #{default} #{@meter.mpxn}"
+          raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs #{@meter.mpxn}"
         elsif weekday_type?(t1) == weekday_type?(t2)
           raise OverlappingAccountingTariffsForWeekdayTariff, "Overlapping weekday accounting tariffs #{@meter.mpxn}"
         end
@@ -250,9 +214,7 @@ class MeterTariffManager
   # i.e. have same or very similar start and end dates, but are differentiated by having
   # [:weekday] or [:weekend] flags set, ultimately only 1 of the 2 tariffs is used depending on the date
   # generally you would expect zero or 1 weekday/weekend tariff on a given date 
-  def weekend_weekday_tariff(tariffs, date, default)
-    return nil if default
-
+  def weekend_weekday_tariff(tariffs, date)
     weekday_tariffs = tariffs.select { |tariff| tariff.tariff.key?(:weekday) }
     weekend_tariffs = tariffs.select { |tariff| tariff.tariff.key?(:weekend) }
 
