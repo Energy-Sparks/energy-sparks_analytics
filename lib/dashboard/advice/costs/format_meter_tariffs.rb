@@ -41,8 +41,10 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     table_data = single_tariff_table_html(tariff)
     tariff_description = %{
       <p>
+        <hr>
         <%= tariff.tariff[:name] %>:
         <%= tariff_dates_html(tariff) %>
+        <%= weekday_weekend_description(tariff) %>
       </p>
       <p>
         <%= table_data %>
@@ -54,6 +56,16 @@ class FormatMeterTariffs < DashboardChartAdviceBase
 
   def meter_name
     meter.name.nil? || meter.name.strip.empty? ?  '' : "(#{meter.name})"
+  end
+
+  def weekday_weekend_description(tariff)
+    if tariff.tariff[:weekend]
+      ' (weekends)'
+    elsif tariff.tariff[:weekday]
+      ' (weekdays)'
+    else
+      ''
+    end
   end
 
   def tariff_dates_html(tariff)
@@ -156,6 +168,9 @@ class FormatMeterTariffs < DashboardChartAdviceBase
         ]
       end
     end.flatten(1)
+
+    rates.push(['', 'at weekends'    ]) if tariff.tariff[:weekend]
+    rates.push(['', 'during weekdays']) if tariff.tariff[:weekday]
 
     header = ['Tariff type', 'Rate']
     html_table(header, rates)
