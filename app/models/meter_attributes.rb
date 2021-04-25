@@ -452,6 +452,20 @@ class MeterAttributes
     )
   end
 
+  class IndicativeStandingCharge < MeterAttributeTypes::AttributeBase
+    id  :indicative_standing_charge
+    key :indicative_standing_charge
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define,
+        end_date:   MeterAttributeTypes::Date.define,
+        per:        MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
+        rate:       MeterAttributeTypes::Float.define
+      }
+    )
+  end
+
   def self.default_tariff_rates
     {
       standing_charge: MeterAttributeTypes::Hash.define(
@@ -655,8 +669,8 @@ class MeterAttributes
             duos_amber:   MeterAttributeTypes::Float.define,
             duos_green:   MeterAttributeTypes::Float.define,
 
-            weekdays:     MeterAttributeTypes::Boolean.define,
-            weekends:     MeterAttributeTypes::Boolean.define,
+            weekday:     MeterAttributeTypes::Boolean.define,
+            weekend:     MeterAttributeTypes::Boolean.define,
           }.merge(MeterAttributes.default_tariff_rates)
         ),
         asc_limit_kw: MeterAttributeTypes::Float.define

@@ -4,38 +4,94 @@
 # - meter tariffs
 class MeterCost
   class UnexpectedRequestForTwoYearsData < StandardError; end
-  def initialize(school, meter, show_tariffs, aggregated)
+  def initialize(school, meter, show_tariffs, aggregated, aggregate_start_date, aggregate_end_date)
     @school = school
     @meter = meter
     @show_tariffs = show_tariffs
     @aggregated = aggregated
+    @aggregate_start_date = aggregate_start_date
+    @aggregate_end_date = aggregate_end_date
   end
 
   def content
-    c = {
+    {
       title:    summary,
       content:  [
-        intro_to_meter,
-        intro_to_chart_2_year_comparison,
-        chart_2_year_comparison,
-        change_in_usage_description_html,
-        intro_to_1_year_brokendown_chart,
-        chart_1_year_breakdown,
-        intro_to_cost_table,
-        cost_table
-      ].flatten
+                  intro_to_meter,
+                  term_dependent_content,
+                  tariff_information
+                ].flatten
     }
-    if @show_tariffs  # don't show tariffs if aggregate meter of multiple meters
-      c[:content].push()
-      c[:content].push()
-    end
-    c
   end
 
   private
 
   def summary
-    meter_description + ": " + meter_cost_and_time_description
+    meter_description + ": #{incomplete_coverage}" + meter_cost_and_time_description
+  end
+
+  def incomplete_coverage
+    coverage = ''
+    coverage += " from #{@meter.amr_data.start_date.strftime('%d-%m-%Y')}" if @meter.amr_data.start_date > @aggregate_start_date
+    coverage += " to #{@meter.amr_data.end_date_date.strftime('%d-%m-%Y')}" if @meter.amr_data.end_date != @aggregate_end_date
+    coverage
+  end
+
+  def term_dependent_content
+    cc =  [intro_to_meter]
+    cc += year_on_year_comparison if days_meter_data > 12 * 31
+    cc += breakdown_charges(days_meter_data)
+    cc
+  end
+
+  def breakdown_charges(days)
+    case days
+    when days_meter_data < 14
+      up_to_fourteen_day_breakdown
+    when days_meter_data < 7 * 10
+      up_to_ten_week_breakdown
+    else
+      up_to_one_year_breakdown
+    end
+  end
+
+  def year_on_year_comparison
+    [
+      intro_to_chart_2_year_comparison,
+      chart_2_year_comparison,
+      change_in_usage_description_html
+    ] 
+  end
+
+  def up_to_one_year_breakdown
+    [
+      intro_to_1_year_brokendown_chart,
+      chart_1_year_breakdown,
+      intro_to_cost_table,
+      cost_table
+    ]
+  end
+
+  def up_to_ten_week_breakdown
+    [
+      intro_to_less_than_one_years_data,
+      chart_breakdown_by_week
+    ]
+  end
+
+  def up_to_fourteen_day_breakdown
+    [
+      intro_to_less_than_one_years_data,
+      chart_breakdown_by_day
+    ]
+  end
+
+  def tariff_information
+    @show_tariffs ? [tariff_introduction_html, tariffs] : []
+  end
+
+  def days_meter_data
+    @meter.amr_data.days
   end
 
   def intro_to_meter
@@ -73,6 +129,26 @@ class MeterCost
     { type: :html, content: text }
   end
 
+  def intro_to_less_than_one_years_data
+    text = %{
+      <p>
+        We only have <%= timescale_description %> of meter readings
+        for this meter at the moment, so can't provide a year on year
+        comparison.
+      </p>
+      <p>
+        This is how your bill is currently broken down between its
+        different components:
+      </p>
+    }
+    html = ERB.new(text).result(binding)
+    { type: :html, content: html }
+  end
+
+  def timescale_description
+    FormatEnergyUnit.format(:years, days_meter_data / 365.0, :html)
+  end
+
   def chart_2_year_comparison
     run_chart_for_meter(:electricity_cost_comparison_last_2_years_accounting)
   end
@@ -81,17 +157,25 @@ class MeterCost
     run_chart_for_meter(:electricity_cost_1_year_accounting_breakdown)
   end
 
+  def chart_breakdown_by_week
+    run_chart_for_meter(:electricity_cost_1_year_accounting_breakdown_group_by_week)
+  end
+
+  def chart_breakdown_by_day
+    run_chart_for_meter(:electricity_cost_1_year_accounting_breakdown_group_by_day)
+  end
+
   def run_chart_for_meter(chart_name)
     chart_manager = ChartManager.new(@school)
     chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name].clone
     chart_config[:meter_definition] =  @meter.mpxn
     name = "#{chart_name}_#{@meter.mpxn}".to_sym
-    data = chart_manager.run_chart(chart_config, name)
+    # data = chart_manager.run_chart(chart_config, name)
     [
       # { type: :chart, data: data },
-      { type: :chart_config, data: chart_config },
-      { type: :chart_data, data: data },
-      { type: :chart_name, content: chart_name, mpan_mprn: @meter.mpxn }, # LEIGH this is the change asof 22Apr2021
+      # { type: :chart_config, data: chart_config },
+      # { type: :chart_data, data: data },
+      { type: :chart_name, content: chart_name, mpan_mprn: @meter.mpxn },
       { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(name) } 
     ]
   end

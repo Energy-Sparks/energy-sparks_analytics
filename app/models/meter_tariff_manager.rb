@@ -80,10 +80,12 @@ class MeterTariffManager
 
   def most_recent_contiguous_real_accounting_tariffs
     non_default_tariffs = all_tariffs_by_default(false)
+    return nil if non_default_tariffs.empty?
+
     reverse_sorted_tariffs = non_default_tariffs.sort { |t1, t2| t2.tariff[:end_date] <=> t1.tariff[:end_date] }
 
     grouped_tariffs = reverse_sorted_tariffs.slice_when { |prev, curr| prev.tariff[:end_date] < prev.tariff[:start_date] - 1 }.to_a
-    
+
     most_recent_contiguous_tariff_group = grouped_tariffs[0]
 
     start_date = most_recent_contiguous_tariff_group.last.tariff[:start_date]
@@ -97,20 +99,41 @@ class MeterTariffManager
     }
   end
 
-  def accounting_tariff_for_date(date)
-    @accounting_tariff_cache       ||= {}
-    @accounting_tariff_cache[date] ||= calculate_accounting_tariff_for_date(date)
+  def accounting_tariff_for_date(date, non_default_tariff_only = false)
+    @accounting_tariff_cache ||= {}
+    @accounting_tariff_cache[date] ||= {}
+    @accounting_tariff_cache[date][non_default_tariff_only] ||= calculate_accounting_tariff_for_date(date, non_default_tariff_only)
+  end
+
+  # inefficient
+  def last_contiguous_range_of_tariffs_in_date_range(start_date, end_date, non_default_tariff_only)
+    non_nil_groups = grouped_tariff_coverage_in_date_range(start_date, end_date, non_default_tariff_only)
+    return [nil, nil] if non_nil_groups.empty?
+    last_contiguous_tariffs = non_nil_groups.last
+    [last_contiguous_tariffs.first, last_contiguous_tariffs.last]
   end
 
   private
 
-  def calculate_accounting_tariff_for_date(date)
+  # inefficient, could for non-aggregate meters scan tariffs instead?
+  def grouped_tariff_coverage_in_date_range(start_date, end_date, non_default_tariff_only = false)
+    groups = (start_date..end_date).slice_when do |curr, prev|
+      accounting_tariff_for_date(curr, non_default_tariff_only).nil? != accounting_tariff_for_date(prev, non_default_tariff_only).nil?
+    end.to_a
+    non_nil_groups = groups.select { |g| !g[0].nil? }
+  end
+
+  def calculate_accounting_tariff_for_date(date, non_default_tariff_only = false)
     override = override_tariff(date)
     return override unless override.nil?
 
     return nil if @accounting_tariffs.nil?
 
-    accounting_tariff = default_tariff(date, false) || default_tariff(date, true)
+    accounting_tariff = if non_default_tariff_only
+                          default_tariff(date, false)
+                        else
+                          default_tariff(date, false) || default_tariff(date, true)
+                        end
 
     merge = merge_tariff(date)
     return accounting_tariff.deep_merge(merge) unless merge.nil?
@@ -214,9 +237,9 @@ class MeterTariffManager
   end
 
   def weekday_type?(tariff)
-    if tariff.tariff.key?(:weekday) && tariff.tariff[:weekday]
+    if tariff.tariff[:weekday]
       :weekday
-    elsif tariff.tariff.key?(:weekend) && tariff.tariff[:weekend]
+    elsif tariff.tariff[:weekend]
       :weekend
     else
       raise WeekdayTypeNotSetForWeekdayTariff, "Missing weekday type for tariff #{@meter.mpxn}"
