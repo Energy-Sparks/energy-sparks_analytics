@@ -572,7 +572,7 @@ class ValidateAMRData
         substitute_day_temperature = average_temperature(substitute_date)
         if heating_model == NO_MODEL
           if @amr_data.date_exists?(substitute_date) && daytype(substitute_date) == missing_daytype
-           return [date, create_substituted_data(date, substitute_date, sub_type_code, 'g')]
+           return [date, create_substituted_data(date, substitute_date, sub_type_code, 'G')]
           end
         elsif heating_on == heating_model.heat_on_missing_data?(substitute_date) &&
            within_temperature_range?(avg_temperature, substitute_day_temperature) &&
