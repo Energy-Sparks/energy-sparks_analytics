@@ -12,7 +12,7 @@ class CostAdviceBase < AdviceBase
   end
 
   def relevance
-    aggregate_meter.nil? || aggregate_meter.amr_data.days < 14 ? :never_relevant : :relevant
+    aggregate_meter.nil? ? :never_relevant : :relevant
   end
 
   def self.template_variables
@@ -27,10 +27,12 @@ class CostAdviceBase < AdviceBase
     'Financial analysis'
   end
 
-  def rating;           5.0       end
+  def rating
+    full_tariff_coverage? ? 10.0 : 0.0
+  end
 
   def has_structured_content?
-    true
+    full_tariff_coverage?
   end
 
   # only called when tariffs not set or not enough data
@@ -40,12 +42,39 @@ class CostAdviceBase < AdviceBase
 
   def structured_content(user_type: nil)
     content_information = []
-    content_information += meter_costs if has_dcc_meters? && real_meters.length > 1
+    content_information += meter_costs if only_breakdown_for_dcc_meters?
     content_information.push(introduction_to_school_finances)
     content_information
   end
 
   private
+
+  # TODO (PH, 25Apr2021) this needs removing once the front end
+  # per meter charging is working
+  def only_breakdown_for_dcc_meters?
+    has_dcc_meters? && real_meters.length > 1
+  end
+
+  def full_tariff_coverage?
+    tariff_status == :full_tariff_coverage
+  end
+
+  def tariff_status
+    return :solar_pv if @school.solar_pv_panels?
+
+    kwh_start_date, kwh_end_date = year_start_end_dates
+    tariff_start_date, tariff_end_date = aggregate_meter.meter_tariffs.last_contiguous_range_of_tariffs_in_date_range(kwh_start_date, kwh_end_date, true)
+    
+    if tariff_start_date.nil?
+      :no_tariffs
+    else
+      if kwh_start_date == tariff_start_date && kwh_end_date == tariff_end_date
+        :full_tariff_coverage
+      else
+        :partial_tariff_coverage
+      end
+    end
+  end
 
   def real_meters
     @school.real_meters.select { |m| m.fuel_type == fuel_type }
@@ -59,19 +88,28 @@ class CostAdviceBase < AdviceBase
 
   def meter_costs
     show_aggregate_tariffs = real_meters.length == 1
-    meter_cost_list = [ MeterCost.new(@school, aggregate_meter.original_meter, show_aggregate_tariffs, true).content ]
+    start_date, end_date = year_start_end_dates
+    meter_cost_list = [ MeterCost.new(@school, aggregate_meter.original_meter, show_aggregate_tariffs, true, start_date, end_date).content ]
     real_meters.each do |meter|
-      meter_cost_list.push(MeterCost.new(@school, meter.original_meter, true, false).content)
+      meter_cost_list.push(MeterCost.new(@school, meter.original_meter, true, false, start_date, end_date).content)
     end
     meter_cost_list
   end
 
   def tariffs_not_set_html
+    tariff_status == :solar_pv ? solar_pv_not_supported : tariffs_not_enough_tariff_data
+  end
+
+  def tariffs_not_enough_tariff_data
     text = %{
       <p>
-        Energy Sparks can provide analysis of your billing information.
-        Your tariffs are currently not set up in Energy Sparks.
-        If you would like us to provide analysis of your bills online
+        <% if tariff_status == :no_tariffs %>
+          You currently don't have any accounting tariffs set for this meter.
+        <% else %>
+          You have some tariff information setup for this meter but it doesn't
+          cover the <%= time_period_of_tariffs_needed %> months we need to provide analysis of your bill.
+        <% end %>
+        If you would like us to provide a full analysis of your bills online
         please email <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">hello@energysparks.uk</a>
         with some example bills.
         Your billing analysis will only be available to the school and not publicly displayed.
@@ -84,11 +122,39 @@ class CostAdviceBase < AdviceBase
     ]
   end
 
+  def solar_pv_not_supported
+    text = %{
+      <p>
+        Energy Sparks currently doesn't support billing calculations
+        if you have solar pv. If you think this would be a useful feature
+        and would help you please email us at
+        <a href="mailto:hello@energysparks.uk?subject=It%20would%20helpful%20to%20us%20if%20Energy%20Sparks%20council%20provide%20billing%20information%20for%20solar%20pv for <%= @school.name %>">hello@energysparks.uk</a>
+        with some example bills.
+        Your billing analysis will only be available to the school and not publicly displayed.
+      </p>
+    }
+    [
+      { type: :html, content: "<h2>Analysis of #{fuel_type} costs</h2>" },
+      { type: :html, content: ERB.new(text).result(binding) }
+    ]
+  end
+
+  def time_period_of_tariffs_needed
+    days = [@meter.amr_data.days, 2 * 365.0].min
+    FormatEnergyUnit.format(:years, days / 365.0, :html)
+  end
+
   def introduction_to_school_finances
     {
       title:    'How Energy Sparks calculates energy costs',
       content:  [ { type: :html, content: INTRO_TO_SCHOOL_FINANCES_2 } ]
     }
+  end
+
+  def year_start_end_dates
+    end_date = aggregate_meter.amr_data.end_date
+    start_date = [end_date - 365 - 364, aggregate_meter.amr_data.start_date].max
+    [start_date, end_date]
   end
 
   # COPY OF INTRO_TO_SCHOOL_FINANCES_1
