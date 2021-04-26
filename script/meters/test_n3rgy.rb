@@ -149,9 +149,14 @@ def tariffs(mpxn)
   meter = DCCMeters.meter(mpxn)
   tariff_data = load_yaml(meter.fuel_type, mpxn)
   td = N3rgyTariffs.new(tariff_data)
-  parameterised_tariff = td.parameterise
-  energy_sparks_tariffs = N3rgyToEnergySparksTariffs.new(parameterised_tariff)
-  meter_attributes = energy_sparks_tariffs.convert
+
+  meter_attributes = nil
+  bm = Benchmark.realtime {
+    parameterised_tariff = td.parameterise
+    energy_sparks_tariffs = N3rgyToEnergySparksTariffs.new(parameterised_tariff)
+    meter_attributes = energy_sparks_tariffs.convert
+  }
+  puts "The compression to attributes takes #{bm.round(3)}s"
   save_yaml(meter.fuel_type, meter_attributes, mpxn, 'meter-attributes-')
 end
 
