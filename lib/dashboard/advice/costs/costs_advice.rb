@@ -38,14 +38,20 @@ class CostAdviceBase < AdviceBase
 
   # only called when tariffs not set or not enough data
   def content(user_type: nil)
-    tariffs_not_set_html
+    content_information = {
+      title:   "Your school's #{fuel_type} costs",
+      content: tariffs_not_set_html
+    }
+    
+    remove_diagnostics_from_content(content_information, user_type)
   end
 
   def structured_content(user_type: nil)
     content_information = []
     content_information += meter_costs
     content_information.push(introduction_to_school_finances)
-    content_information
+
+    remove_diagnostics_from_structured_content(content_information, user_type)
   end
 
   private
