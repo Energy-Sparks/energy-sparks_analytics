@@ -77,11 +77,23 @@ module MeterReadingsFeeds
       elements['entries']
     end
 
+    def tariffs_available_date_range(mpxn, fuel_type)
+      result = api.get_tariff_data(mpxn: mpxn, fuel_type: fuel_type)
+      available_date_range(result['availableCacheRange'])
+    end
+
+    def readings_available_date_range(mpxn, fuel_type)
+      result = api.get_consumption_data(mpxn: mpxn, fuel_type: fuel_type)
+      available_date_range(result['availableCacheRange'])
+    end
+
+    # PH test
     def cache_start_datetime(mpxn: nil, fuel_type: nil, element: MeterReadingsFeeds::N3rgyDataApi::DEFAULT_ELEMENT, reading_type: MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
       start_date = cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type, type: 'start')
       DateTime.strptime(start_date, '%Y%m%d%H%M')
     end
 
+    # PH test
     def cache_end_datetime(mpxn: nil, fuel_type: nil, element: MeterReadingsFeeds::N3rgyDataApi::DEFAULT_ELEMENT, reading_type: MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
       end_date = cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type, type: 'end')
       DateTime.strptime(end_date, '%Y%m%d%H%M')
@@ -210,6 +222,19 @@ module MeterReadingsFeeds
       end
     end
 
+    def available_date_range(dates)
+      if dates
+        start_date = Date.parse(dates['start'])
+        end_date = Date.parse(dates['end'])
+        if start_date && end_date
+          return (start_date..end_date)
+        end
+      end
+    rescue => e
+      nil
+    end
+
+    # PH test
     def cache_data(mpxn:, fuel_type:, element:, reading_type:, type:)
       api.cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type)['availableCacheRange'][type]
     end
