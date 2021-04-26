@@ -98,8 +98,6 @@ class CostAdviceBase < AdviceBase
       curr[:exists] != prev[:exists]
     end.to_a
 
-    ap grouped_valid_costs, { limit: 4}
-
     non_nil_costs = grouped_valid_costs.select { |cost_group| cost_group.first[:exists] }
     return nil if non_nil_costs.empty?
 
