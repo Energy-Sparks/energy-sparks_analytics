@@ -1,24 +1,39 @@
 require 'mqtt'
-require 'require_all'
-require_relative '../../lib/dashboard.rb'
+require 'json'
+require 'date'
+require 'csv'
 
-# Subscribe example
+def decode(message)
+  w = message['elecMtr']['0702']['04']['00'].to_i(16).to_f
+  w -= 16777216 if w > 10000000
 
-puts "login = #{ENV['GLO_LOGIN']}, password = #{ENV['GLO_PASSWORD']}"
+  kwh = message['elecMtr']['0702']['04']['01'].to_i(16).to_f
+  m = message['elecMtr']['0702']['03']['01'].to_i(16).to_f
+  d = message['elecMtr']['0702']['03']['02'].to_i(16).to_f
+  kwh *= m /d
 
-device = 'SMART/HILD/' + ENV['GLO_DEVICE_MAC_ADDRESS']
+  {
+    d:    DateTime.now.strftime('%Y-%m-%d %H:%M:%S'),
+    w:    w,
+    kwh:  kwh
+  }
+end
+
+def save_to_csv(data)
+  CSV.open('./cad_device_data.csv', 'a') do |csv|
+    csv << data.values
+  end
+end
 
 MQTT::Client.connect(
   :host => 'glowmqtt.energyhive.com',
   :username => ENV['GLO_LOGIN'],
   :password => ENV['GLO_PASSWORD']
-)
-MQTT::Client.connect('glowmqtt.energyhive.com') do |client|
-  # If you pass a block to the get method, then it will loop
-  puts "Got here #{device}"
-  puts client
-  ap client.subscribe(device)
-  client.get do |topic, message|
-    puts "#{topic}: #{message}"
+) do |client|
+  client.subscribe('SMART/HILD/' + ENV['GLO_DEVICE_MAC_ADDRESS'])
+  client.get do |_topic, message|
+    data = decode(JSON.parse(message))
+    save_to_csv(data)
+    print '.'
   end
 end
