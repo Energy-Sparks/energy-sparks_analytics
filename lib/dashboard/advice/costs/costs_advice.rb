@@ -72,7 +72,7 @@ class CostAdviceBase < AdviceBase
     if tariff_date_range.nil?
       :no_tariffs
     else
-      if kwh_start_date == tariff_date_range.first && kwh_end_date == tariff_date_range.last
+      if kwh_start_date >= tariff_date_range.first && kwh_end_date <= tariff_date_range.last
         :full_tariff_coverage
       else
         :partial_tariff_coverage
