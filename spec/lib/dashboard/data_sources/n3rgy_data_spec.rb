@@ -113,6 +113,14 @@ describe MeterReadingsFeeds::N3rgyData do
             expect(tariffs[:missing_readings]).to eq([])
           end
 
+          it 'returns available date range' do
+            date_range = api.tariffs_available_date_range(mpxn, fuel_type)
+            expect(date_range.first.class).to eq(Date)
+            expect(date_range.first.to_s).to eq('2018-12-24')
+            expect(date_range.last.class).to eq(Date)
+            expect(date_range.last.to_s).to eq('2021-02-05')
+          end
+
           describe 'when adjusting for bad sandbox electricity standing charge units' do
             it 'should convert standing charge from pence to pounds' do
               tariffs = MeterReadingsFeeds::N3rgyData.new(api_key: apikey, base_url: base_url, bad_electricity_standing_charge_units: true).tariffs(mpxn, fuel_type, start_date, end_date)
@@ -197,6 +205,13 @@ describe MeterReadingsFeeds::N3rgyData do
           expect(day_reading.kwh_data_x48).to eq(expected_last_day_readings)
         end
 
+        it 'returns available date range' do
+          date_range = api.readings_available_date_range(mpxn, fuel_type)
+          expect(date_range.first.class).to eq(Date)
+          expect(date_range.first.to_s).to eq('2018-12-24')
+          expect(date_range.last.class).to eq(Date)
+          expect(date_range.last.to_s).to eq('2019-05-16')
+        end
       end
 
       describe 'when no data' do
@@ -209,11 +224,6 @@ describe MeterReadingsFeeds::N3rgyData do
             "end"=>"202001022359",
             "granularity"=>"halfhour",
             "values"=>[],
-            "availableCacheRange"=>
-              {
-                "start"=>"201812242330",
-                "end"=>"201905160230"
-              },
             "unit"=>"kWh"
           }
         end
@@ -230,6 +240,10 @@ describe MeterReadingsFeeds::N3rgyData do
           expect(readings[fuel_type][:missing_readings].count).to eq(2 * 48)
         end
 
+        it 'returns nil available date range' do
+          date_range = api.readings_available_date_range(mpxn, fuel_type)
+          expect(date_range).to be_nil
+        end
       end
     end
 
