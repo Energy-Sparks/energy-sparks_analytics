@@ -115,6 +115,17 @@ class AdviceBase < ContentBase
     charts_and_html
   end
 
+  protected def remove_diagnostics_from_content(content, user_type)
+    {
+      title:    content[:title],
+      content:  remove_diagnostics_from_html(content[:content], user_type)
+    }
+  end
+
+  protected def remove_diagnostics_from_structured_content(structured_content, user_type)
+    structured_content.map { |c| remove_diagnostics_from_content(c, user_type) }
+  end
+
   def analytics_split_charts_and_html(content_data)
     html_bits = content_data.select { |h| %i[html analytics_html].include?(h[:type]) }
     html = html_bits.map { |v| v[:content] }
