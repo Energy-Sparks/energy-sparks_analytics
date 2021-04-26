@@ -286,10 +286,8 @@ class AccountingCosts < CostsBase
     combined_accounting_costs = AccountingCostsPreAggregated.new(combined_meter)
 
     (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }.compact
-      
+      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }.compact    
       missing_accounting_costs = list_of_meters_on_date.select { |m| !m.amr_data.date_exists_by_type?(date, :accounting_cost) }
-
       # silently skip calculation
       next if missing_accounting_costs.length > 0 
       list_of_days_accounting_costs = list_of_meters_on_date.map { |m| m.amr_data.accounting_tariff.one_days_cost_data(date) }

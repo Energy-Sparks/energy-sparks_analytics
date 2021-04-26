@@ -7,8 +7,9 @@
 #                < 1 month - no numeric tablular information as billing always monthly, daily chart
 #                1 to 13 months - monthly tabular and chart presentation, no comparison
 class CostAdviceBase < AdviceBase
+  include Logging
   def enough_data
-    :enough 
+    :enough
   end
 
   def relevance
@@ -50,13 +51,13 @@ class CostAdviceBase < AdviceBase
   private
 
   # TODO (PH, 25Apr2021) this needs removing once the front end
-  # per meter charging is working
+  # per meter charting is working
   def only_breakdown_for_dcc_meters?
     has_dcc_meters? && real_meters.length > 1
   end
 
   def full_tariff_coverage?
-    puts "Got here #{tariff_status}"
+    logger.info "Tariff meter overall coverage: #{tariff_status}"
     tariff_status == :full_tariff_coverage
   end
 
@@ -65,6 +66,8 @@ class CostAdviceBase < AdviceBase
 
     kwh_start_date, kwh_end_date = year_start_end_dates
     tariff_date_range = last_contiguous_range_of_tariffs_in_date_range(kwh_start_date, kwh_end_date)
+
+    logger.info "Combined meters tariff date range: #{tariff_date_range}"
     
     if tariff_date_range.nil?
       :no_tariffs
@@ -82,6 +85,8 @@ class CostAdviceBase < AdviceBase
   # large number of underlying meters with or without tariffs
   # while staying within meter aggregation rules (e.g. deprecated meters)
   def last_contiguous_range_of_tariffs_in_date_range(start_date, end_date)
+    logger.info "Checking for availability of contiguous tariffs between #{start_date} and #{end_date}?"
+
     valid_costs = (start_date..end_date).map do |date|
       {
         date:   date,
@@ -93,10 +98,13 @@ class CostAdviceBase < AdviceBase
       curr[:exists] != prev[:exists]
     end.to_a
 
+    ap grouped_valid_costs, { limit: 4}
+
     non_nil_costs = grouped_valid_costs.select { |cost_group| cost_group.first[:exists] }
     return nil if non_nil_costs.empty?
 
     last_range = non_nil_costs.last
+    logger.info "Contiguous date range: #{last_range.first[:date]..last_range.last[:date]}"
     last_range.first[:date]..last_range.last[:date]
   end
 
@@ -104,7 +112,7 @@ class CostAdviceBase < AdviceBase
     @school.real_meters.select { |m| m.fuel_type == fuel_type }
   end
 
-  # TODO(PH, 9Apr2021) remove once testing complet on test
+  # TODO(PH, 9Apr2021) remove once testing complete on test
   #                    restricts meter breakdown to dcc only schools
   def has_dcc_meters?
     real_meters.any? { |m| m.dcc_meter }
@@ -242,36 +250,12 @@ end
 
 class AdviceElectricityCosts < CostAdviceBase
   def fuel_type; :electricity end
-
-  def component_pages
-    [
-      ElectricityCostsIntroductionAdvice,
-      CostsHowEnergySparksCalculatesThem,
-      # ElectricityTariffs
-    ]
-  end
-
-  def aggregate_meter
-    @school.aggregated_electricity_meters&.original_meter
-  end
-
+  def aggregate_meter; @school.aggregated_electricity_meters&.original_meter end
   def underlying_meters; @school.electricity_meters end
 end
 
 class AdviceGasCosts < CostAdviceBase
   def fuel_type; :gas end
-
-  def component_pages
-    [
-      GasCostsIntroductionAdvice,
-      CostsHowEnergySparksCalculatesThem,
-      # GasTariffs
-    ]
-  end
-
-  def aggregate_meter
-    @school.aggregated_heat_meters&.original_meter
-  end
-
+  def aggregate_meter; @school.aggregated_heat_meters&.original_meter end
   def underlying_meters; @school.heat_meters end
 end
