@@ -38,6 +38,7 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
       control: {
         root:    :adult_analysis_page,
         report_failed_charts:   :summary,
+        user:          { user_role: :analytics, staff_role: nil },
         pages: %i[electricity_profit_loss],
         compare_results: [
           { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },

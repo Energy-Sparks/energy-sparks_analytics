@@ -28,10 +28,25 @@ class CostsBase < HalfHourlyData
     combined = {
       rates_x48:        merge_costs_x48(costs.map(&:all_costs_x48)),
       standing_charges: combined_standing_charges(costs),
-      differential:     costs.any?{ |c| c.differential_tariff? }
+      differential:     costs.any?{ |c| c.differential_tariff? },
+      system_wide:      combined_system_wide(costs),
+      default:          combined_default(costs),
+      tariff:           costs.map { |c| c.tariff }
     }
 
     OneDaysCostData.new(combined)
+  end
+
+  def self.combined_system_wide(costs)
+    return true  if costs.all? { |c| c.system_wide == true }
+    return false if costs.all? { |c| c.system_wide != true }
+    :mixed
+  end
+
+  def self.combined_default(costs)
+    return true  if costs.all? { |c| c.default == true }
+    return false if costs.all? { |c| c.default != true }
+    :mixed
   end
 
   # merge array of hashes of x48 costs
@@ -70,16 +85,24 @@ class CostsBase < HalfHourlyData
     attr_reader :standing_charges, :total_standing_charge, :one_day_total_cost
     attr_reader :bill_components, :bill_component_costs_per_day
     attr_reader :all_costs_x48
+    # these could be true, false or :mixed
+    attr_reader :system_wide, :default
+    # either a single tariff, or an array for combined meters
+    attr_reader :tariff
 
     def initialize(costs)
-      @all_costs_x48 = costs[:rates_x48]
+      @all_costs_x48    = costs[:rates_x48]
       @standing_charges = costs[:standing_charges]
-      @differential =  costs[:differential] 
+      @differential     = costs[:differential]
+      @system_wide      = costs[:system_wide]
+      @default          = costs[:default]
+      @tariff           = costs[:tariff]
+
       @total_standing_charge = standing_charges.empty? ? 0.0 : standing_charges.values.sum
       @one_day_total_cost = total_x48_costs + @total_standing_charge
       calculate_day_bill_components
     end
-
+    
     def costs_x48
       @costs_x48 ||= AMRData.fast_add_multiple_x48_x_x48(@all_costs_x48.values)
     end

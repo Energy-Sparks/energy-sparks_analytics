@@ -33,17 +33,15 @@ class CostAdviceBase < AdviceBase
   end
 
   def has_structured_content?
-    full_tariff_coverage?
+    real_meters.length > 1
   end
 
-  # only called when tariffs not set or not enough data
   def content(user_type: nil)
-    content_information = {
-      title:   "Your school's #{fuel_type} costs",
-      content: tariffs_not_set_html
-    }
-    
-    remove_diagnostics_from_content(content_information, user_type)
+    c = [
+      aggregate_meter_costs[:content],
+      { type: :html, content: INTRO_TO_SCHOOL_FINANCES_2 }
+    ].flatten
+    remove_diagnostics_from_html(c, user_type)
   end
 
   def structured_content(user_type: nil)
@@ -56,83 +54,24 @@ class CostAdviceBase < AdviceBase
 
   private
 
-  # TODO (PH, 25Apr2021) this needs removing once the front end
-  # per meter charting is working
-  def only_breakdown_for_dcc_meters?
-    has_dcc_meters? && real_meters.length > 1
-  end
-
-  def full_tariff_coverage?
-    logger.info "Tariff meter overall coverage: #{tariff_status}"
-    tariff_status == :full_tariff_coverage
-  end
-
-  def tariff_status
-    return :solar_pv if @school.solar_pv_panels?
-
-    kwh_start_date, kwh_end_date = year_start_end_dates
-    tariff_date_range = last_contiguous_range_of_tariffs_in_date_range(kwh_start_date, kwh_end_date)
-
-    logger.info "Combined meters tariff date range: #{tariff_date_range}"
-    
-    if tariff_date_range.nil?
-      :no_tariffs
-    else
-      if kwh_start_date >= tariff_date_range.first && kwh_end_date <= tariff_date_range.last
-        :full_tariff_coverage
-      else
-        :partial_tariff_coverage
-      end
-    end
-  end
-
-  # inefficient: but simplest way of determining tariff
-  # availability for aggregate meter with potentially a
-  # large number of underlying meters with or without tariffs
-  # while staying within meter aggregation rules (e.g. deprecated meters)
-  def last_contiguous_range_of_tariffs_in_date_range(start_date, end_date)
-    logger.info "Checking for availability of contiguous tariffs between #{start_date} and #{end_date}?"
-
-    valid_costs = (start_date..end_date).map do |date|
-      {
-        date:   date,
-        exists: aggregate_meter.amr_data.date_exists_by_type?(date, :accounting_cost)
-      }
-    end
-
-    grouped_valid_costs = valid_costs.slice_when do |curr, prev|
-      curr[:exists] != prev[:exists]
-    end.to_a
-
-    non_nil_costs = grouped_valid_costs.select { |cost_group| cost_group.first[:exists] }
-    return nil if non_nil_costs.empty?
-
-    last_range = non_nil_costs.last
-    logger.info "Contiguous date range: #{last_range.first[:date]..last_range.last[:date]}"
-    last_range.first[:date]..last_range.last[:date]
-  end
-
   def real_meters
     @school.real_meters.select { |m| m.fuel_type == fuel_type }
   end
 
-  # TODO(PH, 9Apr2021) remove once testing complete on test
-  #                    restricts meter breakdown to dcc only schools
-  def has_dcc_meters?
-    real_meters.any? { |m| m.dcc_meter }
-  end
-
   def meter_costs
     meter_cost_list = [aggregate_meter_costs]
-    
-    if only_breakdown_for_dcc_meters?
-      start_date, end_date = year_start_end_dates
 
+    start_date, end_date = year_start_end_dates
+
+    # aggregate, already reported, so only report underlying meters
+
+    if real_meters.length > 1 
       # do remaining meters
       real_meters.each do |meter|
         meter_cost_list.push(MeterCost.new(@school, meter.original_meter, true, false, start_date, end_date).content)
       end
     end
+
     meter_cost_list
   end
 
@@ -140,54 +79,6 @@ class CostAdviceBase < AdviceBase
     show_aggregate_tariffs = real_meters.length == 1
     start_date, end_date = year_start_end_dates
     MeterCost.new(@school, aggregate_meter, show_aggregate_tariffs, true, start_date, end_date).content
-  end
-
-  def tariffs_not_set_html
-    tariff_status == :solar_pv ? solar_pv_not_supported : tariffs_not_enough_tariff_data
-  end
-
-  def tariffs_not_enough_tariff_data
-    text = %{
-      <p>
-        <% if tariff_status == :no_tariffs %>
-          You currently don't have any accounting tariffs set for this meter.
-        <% else %>
-          You have some tariff information setup for this meter but it doesn't
-          cover the <%= time_period_of_tariffs_needed %> we need to provide analysis of your bill.
-        <% end %>
-        If you would like us to provide a full analysis of your bills online
-        please email <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">hello@energysparks.uk</a>
-        with some example bills.
-        Your billing analysis will only be available to the school and not publicly displayed.
-      </p>
-    }
-    missing_tariffs_text = ERB.new(text).result(binding)
-    [
-      { type: :html, content: "<h2>Analysis of #{fuel_type} costs</h2>" },
-      { type: :html, content: missing_tariffs_text }
-    ]
-  end
-
-  def solar_pv_not_supported
-    text = %{
-      <p>
-        Energy Sparks currently doesn't support billing calculations
-        if you have solar pv. If you think this would be a useful feature
-        and would help you please email us at
-        <a href="mailto:hello@energysparks.uk?subject=It%20would%20helpful%20to%20us%20if%20Energy%20Sparks%20council%20provide%20billing%20information%20for%20solar%20pv for <%= @school.name %>">hello@energysparks.uk</a>
-        with some example bills.
-        Your billing analysis will only be available to the school and not publicly displayed.
-      </p>
-    }
-    [
-      { type: :html, content: "<h2>Analysis of #{fuel_type} costs</h2>" },
-      { type: :html, content: ERB.new(text).result(binding) }
-    ]
-  end
-
-  def time_period_of_tariffs_needed
-    days = [aggregate_meter.amr_data.days, 2 * 365.0].min
-    FormatEnergyUnit.format(:years, days / 365.0, :html)
   end
 
   def introduction_to_school_finances
@@ -250,6 +141,58 @@ class CostAdviceBase < AdviceBase
           </li>
         </ul>
   ).freeze
+
+=begin
+  # TODO(PH, 9Apr2021) remove once testing complete on test
+  #                    restricts meter breakdown to dcc only schools
+  def has_dcc_meters?
+    real_meters.any? { |m| m.dcc_meter }
+  end
+
+  def tariffs_not_enough_tariff_data
+    text = %{
+      <p>
+        <% if tariff_status == :no_tariffs %>
+          You currently don't have any accounting tariffs set for this meter.
+        <% else %>
+          You have some tariff information setup for this meter but it doesn't
+          cover the <%= time_period_of_tariffs_needed %> we need to provide analysis of your bill.
+        <% end %>
+        If you would like us to provide a full analysis of your bills online
+        please email <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">hello@energysparks.uk</a>
+        with some example bills.
+        Your billing analysis will only be available to the school and not publicly displayed.
+      </p>
+    }
+    missing_tariffs_text = ERB.new(text).result(binding)
+    [
+      { type: :html, content: "<h2>Analysis of #{fuel_type} costs</h2>" },
+      { type: :html, content: missing_tariffs_text }
+    ]
+  end
+
+  def solar_pv_not_supported
+    text = %{
+      <p>
+        Energy Sparks currently doesn't support billing calculations
+        if you have solar pv. If you think this would be a useful feature
+        and would help you please email us at
+        <a href="mailto:hello@energysparks.uk?subject=It%20would%20helpful%20to%20us%20if%20Energy%20Sparks%20council%20provide%20billing%20information%20for%20solar%20pv for <%= @school.name %>">hello@energysparks.uk</a>
+        with some example bills.
+        Your billing analysis will only be available to the school and not publicly displayed.
+      </p>
+    }
+    [
+      { type: :html, content: "<h2>Analysis of #{fuel_type} costs</h2>" },
+      { type: :html, content: ERB.new(text).result(binding) }
+    ]
+  end
+
+  def time_period_of_tariffs_needed
+    days = [aggregate_meter.amr_data.days, 2 * 365.0].min
+    FormatEnergyUnit.format(:years, days / 365.0, :html)
+  end
+=end
 end
 
 class AdviceElectricityCosts < CostAdviceBase

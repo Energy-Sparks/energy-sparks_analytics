@@ -1,7 +1,7 @@
 class MeterTariff
   attr_reader :tariff
   def initialize(meter, tariff)
-    @mpxn  = meter.mpxn
+    @mpxn = meter.mpxn
     @tariff = tariff
   end
 
@@ -52,24 +52,33 @@ class AccountingTariff < EconomicTariff
   end
 
   def costs(date, kwh_x48)
-    if differential?(date)
-      {
-        rates_x48: {
-          nighttime_rate:   weighted_cost(kwh_x48, :nighttime_rate),
-          daytime_rate:     weighted_cost(kwh_x48, :daytime_rate),
-        },
-        standing_charges: standing_charges(date, kwh_x48.sum),
-        differential: true
-      }
-    else
-      {
-        rates_x48: {
-          flat_rate:     AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:rate][:rate])
-        },
-        standing_charges: standing_charges(date, kwh_x48.sum),
-        differential: false
-      }
-    end
+    t = if differential?(date)
+          {
+            rates_x48: {
+              nighttime_rate:   weighted_cost(kwh_x48, :nighttime_rate),
+              daytime_rate:     weighted_cost(kwh_x48, :daytime_rate),
+            },
+            differential: true
+          }
+        else
+          {
+            rates_x48: {
+              flat_rate:     AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:rate][:rate])
+            },
+            differential: false
+          }
+        end
+
+    t.merge(common_data(date, kwh_x48))
+  end
+
+  def common_data(date, kwh_x48)
+    {
+      standing_charges: standing_charges(date, kwh_x48.sum),
+      system_wide:      system_wide?,
+      default:          default?,
+      tariff:           self
+    }
   end
 
   def rate_type?(type)
@@ -194,20 +203,21 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def costs(date, kwh_x48)
-    if differential?(date)
-      {
-        rates_x48: rate_types.map { |type| weighted_costs(kwh_x48, type)}.inject(:merge),
-        standing_charges: standing_charges(date, kwh_x48.sum)
-      }
-    else
-      {
-        rates_x48: {
-          flat_rate:     AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
-        },
-        standing_charges: standing_charges(date, kwh_x48.sum),
-        differential: true
-      }
-    end
+    t = if differential?(date)
+          {
+            rates_x48: rate_types.map { |type| weighted_costs(kwh_x48, type)}.inject(:merge),
+            differential: true
+          }
+        else
+          {
+            rates_x48: {
+              flat_rate:     AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
+            },
+            differential: false
+          }
+        end
+
+    t.merge(common_data(date, kwh_x48))
   end
 
   def all_times 

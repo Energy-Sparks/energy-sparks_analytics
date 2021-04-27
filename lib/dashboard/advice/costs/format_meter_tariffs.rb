@@ -3,19 +3,19 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   class UnhandledTariffDescriptionError < StandardError; end
   class UnhandledTypeTariffDescriptionError < StandardError; end
   attr_reader :meter
-  def initialize(school, meter)
+  def initialize(school, meter, start_date, end_date)
     super(school, nil, nil, nil) # inherit from DashboardChartAdviceBase to get html_table functionality
     @meter = meter
+    @start_date = start_date
+    @end_date   = end_date
   end
 
   def tariff_information_html
     html = meter_description_html
 
-    tariff_info = meter.meter_tariffs.most_recent_contiguous_real_accounting_tariffs
+    all_tariffs_in_range = tariffs_in_date_range(@start_date, @end_date)
 
-    html += if_not_full_tariff_coverage_html(tariff_info)
-
-    tariff_info[:tariffs].each do |tariff|
+    all_tariffs_in_range.each do |tariff|
       html += tariff_description_html(tariff)
     end
 
@@ -23,6 +23,18 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   end
 
   private
+
+  def tariffs_in_date_range(start_date, end_date)
+    tariffs = []
+    (start_date..end_date).each do |date|
+       tariffs += [accounting_tariff[date].tariff].flatten
+    end
+    tariffs.uniq
+  end
+
+  def accounting_tariff
+    @meter.amr_data.accounting_tariff
+  end
 
   def meter_description_html
     meter_description = %{
@@ -45,6 +57,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
         <%= tariff.tariff[:name] %>:
         <%= tariff_dates_html(tariff) %>
         <%= weekday_weekend_description(tariff) %>
+        <%= real_tariff_description_html(tariff) %>
       </p>
       <p>
         <%= table_data %>
@@ -66,6 +79,14 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     else
       ''
     end
+  end
+
+  def real_tariff_description_html(tariff)
+    real_tariff?(tariff) ? '' : ' <b>- default example tariff </b>'
+  end
+
+  def real_tariff?(tariff)
+    !(tariff.tariff[:default] || tariff.tariff[:system_wide])
   end
 
   def tariff_dates_html(tariff)
@@ -235,7 +256,7 @@ class FormatMetersTariffs < DashboardChartAdviceBase
     html = ''
     all_meters = meter_list.nil? ? [@school.electricity_meters, @school.heat_meters].flatten : meter_list
     all_meters.each do |meter|
-      html += FormatMeterTariffs.new(@school, meter).tariff_information_html
+      html += FormatMeterTariffs.new(@school, meter, meter.start_date, meter.end_date).tariff_information_html
     end
     html
   end

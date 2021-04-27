@@ -16,7 +16,7 @@ script = {
                                 display_average_calculation_rate: true,
                                 summarise_differences: true,
                                 report_failed_charts:   :summary, # :detailed
-                                user:          { user_role: :analytics, staff_role: nil }, # nil, # , # { user_role: :admin }, # guest
+                                user: { user_role: :analytics, staff_role: nil },
                                 pages: %i[electricity_profit_loss gas_profit_loss],
                                 no_pages1: %i[gas_out_of_hours],
                                 compare_results: [
