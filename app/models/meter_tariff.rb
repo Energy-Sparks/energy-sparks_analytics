@@ -41,9 +41,14 @@ class AccountingTariff < EconomicTariff
     super(meter, tariff)
     check_differential_times(all_times) if differential?(nil)
   end
-  
+
   def differential?(_date)
     tariff[:rates].key?(:nighttime_rate)
+  end
+
+  def system_wide?
+    # TODO(PH, 27Apr2021) - remove name mattern match which was for temp backwards compatibility
+    tariff[:system_wide] == true || tariff[:name].match(/^System Wide/)
   end
 
   def costs(date, kwh_x48)

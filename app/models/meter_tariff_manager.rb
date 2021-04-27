@@ -28,6 +28,10 @@ class MeterTariffManager
   def initialize(meter)
     @meter = meter
     pre_process_tariff_attributes(meter)
+    puts "Got here: meter tariff manager constructor: default tariffs for #{meter.mpxn}"
+    @default_accounting_tariffs.each do |tariff|
+      ap tariff.tariff
+    end
   end
 
   def economic_cost(date, kwh_x48)
@@ -110,6 +114,9 @@ class MeterTariffManager
 
     accounting_tariff = find_tariff(date)
 
+    accounting_tariff = find_default_tariff(date) if accounting_tariff.nil?
+
+    # TODO (PH, 27Apr2021) - this shouldn't happen once system wide default accounting tariff setup
     return nil if accounting_tariff.nil?
 
     merge = merge_tariff(date)
@@ -130,6 +137,20 @@ class MeterTariffManager
     end
   end
 
+  # deal with legacy issue of multiple default accounting tariffs
+  # pick up non-system wide first
+  def find_default_tariff(date)
+    tariffs = @default_accounting_tariffs.select { |accounting_tariff| accounting_tariff.in_date_range?(date) }
+
+    return nil if tariffs.empty?
+    return tariffs[0] if tariffs.length == 1
+
+    group_specific_tariffs = tariffs.select { |t| !t.system_wide? }
+    return group_specific_tariffs[0] unless group_specific_tariffs.empty?
+
+    tariffs[0]
+  end
+
   def override_tariff(date)
     override = @override_tariffs.select { |accounting_tariff| accounting_tariff.in_date_range?(date) }
     override.empty? ? nil : override[0]
@@ -148,7 +169,8 @@ class MeterTariffManager
 
   def pre_process_tariff_attributes(meter)
     @economic_tariff = EconomicTariff.new(meter, meter.attributes(:economic_tariff))
-    @accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs)) || []
+    @accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs), false) || []
+    @default_accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs), true) || []
     @accounting_tariffs += preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic)) || []
     @override_tariffs = preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic_override)) || []
     @merge_tariffs = preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic_merge)) || []
@@ -168,11 +190,11 @@ class MeterTariffManager
     end.to_h
   end
 
-  def preprocess_accounting_tariffs(meter, accounting_tariffs)
+  def preprocess_accounting_tariffs(meter, accounting_tariffs, default)
     return [] if accounting_tariffs.nil?
 
     # TODO (PH, 25Apr2021) remove once all default accounting tariffs are removed from the database
-    non_defaults = accounting_tariffs.select { |t| t[:default] != true }
+    non_defaults = accounting_tariffs.select { |t| t[:default] == default }
 
     non_defaults.map do |accounting_tariff|
       AccountingTariff.new(meter, accounting_tariff)

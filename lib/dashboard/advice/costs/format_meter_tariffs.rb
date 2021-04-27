@@ -188,7 +188,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   def if_not_full_tariff_coverage_html(tariff_info)
     html = ''
     contact_us_for_tariff_setup = false
-
+ 
     if tariff_info[:start_date] > meter.amr_data.start_date
       contact_us_for_tariff_setup = true
       html += %{
