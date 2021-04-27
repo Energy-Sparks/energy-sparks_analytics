@@ -10,9 +10,9 @@ n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_SANDBOX_API_KE
 # mpxn = 2234567891000
 
 # bad sandbox mpan
-mpxn = 9234567891000
+# mpxn = 9234567891000
 
-# mpxn = 1234567891000
+mpxn = 1234567891000
 # mpxn = 9234567891000
 # mpxn = 2200015678553
 # mpxn = 1100000000001
@@ -30,8 +30,24 @@ end_date = Date.parse('20210226')
 # status = n3rgyData.status(mpxn)
 # pp status.inspect
 
-response = n3rgyData.find(mpxn)
-pp response.inspect
-
+# response = n3rgyData.find(mpxn)
+# pp response.inspect
+#
 # resp = n3rgyData.inventory(mpxn)
 # puts resp
+
+# resp = n3rgyData.list
+# puts resp
+
+# resp = n3rgyData.cache_start_datetime(mpxn: mpxn, fuel_type: fuel_type)
+# puts resp
+
+
+resp = n3rgyData.readings_available_date_range(mpxn, fuel_type)
+puts resp
+
+resp = n3rgyData.tariffs_available_date_range(mpxn, fuel_type)
+puts resp
+
+# puts "start date is #{resp.first} (class #{resp.first.class})"
+# puts "start date is #{resp.last}"

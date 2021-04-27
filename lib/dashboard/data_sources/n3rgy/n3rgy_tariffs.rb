@@ -3,7 +3,7 @@ class N3rgyTariffs
   class UnexpectedRateType < StandardError; end
   # can't use Date::Ininity as only comparable on rhs of comparison
   # see this longstanding bug report: https://bugs.ruby-lang.org/issues/6753
-  INFINITE_DATE = Date.new(2050, 1, 1) 
+  INFINITE_DATE = Date.new(2050, 1, 1)
   def initialize(tariff_data)
     @tariff_data = tariff_data
   end
@@ -69,7 +69,7 @@ class N3rgyTariffs
     indexed_group_rates.transform_values! do |rate|
       if rate.is_a?(Float)
         round_rate(rate)
-      elsif rate.is_a?(Hash) && rate[:type] == :tiered
+      elsif rate.is_a?(Hash) && rate[:type].to_sym == :tiered
         convert_tiered_tariff(rate)
       else
         raise UnexpectedRateType, rate.nil?  ? 'Unexpected Nil rate type' : "Unexpected type #{rate.class.name}"
@@ -136,14 +136,14 @@ class N3rgyTariffs
       tariffs = weekday_groups.map do |weekdays, date_ranges_to_rates|
         log('Processing =============== weekdays: ', weekdays)
         same_rate_groups   = group_where_same_rates(date_ranges_to_rates)
-        continguous_groups = split_group_where_not_7_days_apart(same_rate_groups)
-        convert_to_tariff(continguous_groups, weekdays)
+        contiguous_groups = split_group_where_not_7_days_apart(same_rate_groups)
+        convert_to_tariff(contiguous_groups, weekdays)
       end.flatten
       log('Finals Resulting tariffs', tariffs)
       tariffs
     end
 
-    private 
+    private
 
     def log(message, data)
       if @debug

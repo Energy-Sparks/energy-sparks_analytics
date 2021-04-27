@@ -64,6 +64,18 @@ describe MeterReadingsFeeds::N3rgyData do
       end
     end
 
+    describe 'list' do
+      context 'when consented meters exist' do
+        let(:response) { {"startAt"=>0, "maxResults"=>100, "total"=>3, "entries"=>["1234567891000", "1234567891002", "1234567891008"], "resource"=>"/", "responseTimestamp"=>"2021-03-29T15:48:37.637Z"} }
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:list).and_return(response)
+        end
+        it 'returns array of MPANs' do
+          expect(api.list).to match_array(["1234567891000", "1234567891002", "1234567891008"])
+        end
+      end
+    end
+
     describe 'for tariffs' do
 
       describe 'when date not specified' do
@@ -99,6 +111,14 @@ describe MeterReadingsFeeds::N3rgyData do
 
             expect(tariffs[:standing_charges][start_date]).to eq(expected_standing_charge)
             expect(tariffs[:missing_readings]).to eq([])
+          end
+
+          it 'returns available date range' do
+            date_range = api.tariffs_available_date_range(mpxn, fuel_type)
+            expect(date_range.first.class).to eq(Date)
+            expect(date_range.first.to_s).to eq('2018-12-24')
+            expect(date_range.last.class).to eq(Date)
+            expect(date_range.last.to_s).to eq('2021-02-05')
           end
 
           describe 'when adjusting for bad sandbox electricity standing charge units' do
@@ -185,6 +205,13 @@ describe MeterReadingsFeeds::N3rgyData do
           expect(day_reading.kwh_data_x48).to eq(expected_last_day_readings)
         end
 
+        it 'returns available date range' do
+          date_range = api.readings_available_date_range(mpxn, fuel_type)
+          expect(date_range.first.class).to eq(Date)
+          expect(date_range.first.to_s).to eq('2018-12-24')
+          expect(date_range.last.class).to eq(Date)
+          expect(date_range.last.to_s).to eq('2019-05-16')
+        end
       end
 
       describe 'when no data' do
@@ -197,11 +224,6 @@ describe MeterReadingsFeeds::N3rgyData do
             "end"=>"202001022359",
             "granularity"=>"halfhour",
             "values"=>[],
-            "availableCacheRange"=>
-              {
-                "start"=>"201812242330",
-                "end"=>"201905160230"
-              },
             "unit"=>"kWh"
           }
         end
@@ -218,6 +240,10 @@ describe MeterReadingsFeeds::N3rgyData do
           expect(readings[fuel_type][:missing_readings].count).to eq(2 * 48)
         end
 
+        it 'returns nil available date range' do
+          date_range = api.readings_available_date_range(mpxn, fuel_type)
+          expect(date_range).to be_nil
+        end
       end
     end
 
