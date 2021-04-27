@@ -96,6 +96,7 @@ describe MeterReadingsFeeds::N3rgyData do
 
           let(:expected_first_day_tariffs)  { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
           let(:expected_last_day_tariffs)   { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
+          let(:original_standing_charge)    { 19.541 }
           let(:expected_standing_charge)    { 0.19541 }
 
           let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data.json')) }
@@ -119,6 +120,17 @@ describe MeterReadingsFeeds::N3rgyData do
             expect(date_range.first.to_s).to eq('2018-12-24')
             expect(date_range.last.class).to eq(Date)
             expect(date_range.last.to_s).to eq('2021-02-05')
+          end
+
+          it 'deduplicates standing charges' do
+            tariff_data['values'][0]['standingCharges'] = [{ 'startDate' => '2019-01-01', 'value' => original_standing_charge }]
+            tariff_data['values'][0]['standingCharges'] << { 'startDate' => '2019-01-02', 'value' => original_standing_charge } # should be removed
+            tariff_data['values'][0]['standingCharges'] << { 'startDate' => '2019-01-03', 'value' => original_standing_charge + 1}
+            tariff_data['values'][0]['standingCharges'] << { 'startDate' => '2019-01-04', 'value' => original_standing_charge }
+            tariff_data['values'][0]['standingCharges'] << { 'startDate' => '2019-01-05', 'value' => original_standing_charge } # should be removed
+            tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
+            expect(tariffs[:standing_charges].count).to eq(3)
+            expect(tariffs[:standing_charges].keys.map(&:to_s)).to match_array(['2019-01-01','2019-01-03','2019-01-04'])
           end
 
           describe 'when adjusting for bad sandbox electricity standing charge units' do

@@ -138,8 +138,10 @@ module MeterReadingsFeeds
           prices += unit_adjusted_prices(tariff['prices'])
         end
       end
+      standing_charges_deduped = [standing_charges.first]
+      standing_charges.each_cons(2){ |a,b| standing_charges_deduped << b if a[1] != b[1] }
       {
-        standing_charges: standing_charges,
+        standing_charges: standing_charges_deduped,
         prices:           prices
       }
     end
