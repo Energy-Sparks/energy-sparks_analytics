@@ -138,12 +138,16 @@ module MeterReadingsFeeds
           prices += unit_adjusted_prices(tariff['prices'])
         end
       end
-      standing_charges_deduped = [standing_charges.first]
-      standing_charges.each_cons(2){ |a,b| standing_charges_deduped << b if a[1] != b[1] }
       {
-        standing_charges: standing_charges_deduped,
+        standing_charges: deduplicate(standing_charges),
         prices:           prices
       }
+    end
+
+    def deduplicate(ary)
+      deduped = [ary.first]
+      ary.each_cons(2){ |a,b| deduped << b if a[1] != b[1] }
+      deduped
     end
 
     def convert_datetime_key_to_date(h)
