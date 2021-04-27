@@ -108,7 +108,7 @@ class AdviceBase < ContentBase
 
   protected def remove_diagnostics_from_html(charts_and_html, user_type)
     if ContentBase.analytics_user?(user_type)
-      charts_and_html = promote_analytics_html_to_frontend(charts_and_html) if ContentBase.analytics_user?(user_type)
+      charts_and_html = promote_analytics_html_to_frontend(charts_and_html)
     else
       charts_and_html.delete_if{ |content_component| %i[analytics_html].include?(content_component[:type]) }
     end

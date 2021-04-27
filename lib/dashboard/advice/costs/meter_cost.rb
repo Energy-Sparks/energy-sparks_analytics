@@ -11,6 +11,8 @@ class MeterCost
     @aggregated = aggregated
     @aggregate_start_date = aggregate_start_date
     @aggregate_end_date = aggregate_end_date
+    @meter_start_date = [meter.amr_data.start_date, aggregate_start_date].max
+    @meter_end_date   = [meter.amr_data.end_date,   aggregate_end_date].min
   end
 
   def content
@@ -30,6 +32,22 @@ class MeterCost
     meter_description + ": #{incomplete_coverage}" + meter_cost_and_time_description
   end
 
+  def all_real_tariffs?(start_date, end_date)
+    (start_date..end_date).all? do |date|
+      # these are tristate true, false and :mixed (combined meters)
+      cost = accounting_tariff.one_days_cost_data(date)
+      fully_real_tariff?(cost.system_wide) && fully_real_tariff?(cost.default) 
+    end
+  end
+
+  def fully_real_tariff?(type)
+    type == false && type != :mixed
+  end
+
+  def accounting_tariff
+    @meter.amr_data.accounting_tariff
+  end
+
   def incomplete_coverage
     coverage = ''
     coverage += " from #{@meter.amr_data.start_date.strftime('%d-%m-%Y')}" if @meter.amr_data.start_date > @aggregate_start_date
@@ -38,7 +56,7 @@ class MeterCost
   end
 
   def term_dependent_content
-    cc =  [intro_to_meter]
+    cc =  []
     cc += year_on_year_comparison if days_meter_data > 12 * 31
     cc += breakdown_charges(days_meter_data)
     cc
@@ -95,13 +113,25 @@ class MeterCost
   end
 
   def intro_to_meter
-    text = %{
-      <p>
-        The information below provides a good estimate of your annual
-        costs for this meter based on meter tariff information which
-        has been provided to Energy Sparks.
-      </p>
-    }
+    text =  if all_real_tariffs?(@meter_start_date, @meter_end_date)
+              %{
+                <p>
+                  The information below provides a good estimate of your annual
+                  costs for this meter based on meter tariff information which
+                  has been provided to Energy Sparks.
+                </p>
+              }
+            else
+              %{
+                <p>
+                  Energy Sparks currently doesn't have a record of all your tariffs
+                  and therefore this presentation indicates what it might look like
+                  if you can provide us with some billing information by emailing
+                    <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">mailto:hello@energysparks.uk</a>.
+                </p>
+              }
+            end
+
     { type: :html, content: text }
   end
 
@@ -166,9 +196,9 @@ class MeterCost
   end
 
   def run_chart_for_meter(chart_name)
-    chart_manager = ChartManager.new(@school)
-    chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name].clone
-    chart_config[:meter_definition] =  @meter.mpxn
+    # chart_manager = ChartManager.new(@school)
+    # chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name].clone
+    # chart_config[:meter_definition] =  @meter.mpxn
     name = "#{chart_name}_#{@meter.mpxn}".to_sym
     # data = chart_manager.run_chart(chart_config, name)
     [
@@ -203,7 +233,7 @@ class MeterCost
   end
 
   def tariffs
-    { type: :html,  content: FormatMeterTariffs.new(@school, @meter).tariff_information_html }
+    { type: :html,  content: FormatMeterTariffs.new(@school, @meter, @meter_start_date, @meter_end_date).tariff_information_html }
   end
 
   def tariff_introduction_html

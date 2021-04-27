@@ -28,31 +28,27 @@ class MeterTariffManager
   def initialize(meter)
     @meter = meter
     pre_process_tariff_attributes(meter)
-    puts "Got here: meter tariff manager constructor: default tariffs for #{meter.mpxn}"
-    @default_accounting_tariffs.each do |tariff|
-      ap tariff.tariff
-    end
   end
 
   def economic_cost(date, kwh_x48)
-    if differential_tariff_on_date?(date)
-      {
-        rates_x48: {
-          nighttime_rate: @economic_tariff.weighted_cost(kwh_x48, :nighttime_rate),
-          daytime_rate:   @economic_tariff.weighted_cost(kwh_x48, :daytime_rate)
-        },
-        standing_charges: {},
-        differential: true
-      }
-    else
-      {
-        rates_x48: {
-          flat_rate: AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(:rate))
-        },
-        standing_charges: {},
-        differential: false
-      }
-    end
+    t = if differential_tariff_on_date?(date)
+          {
+            rates_x48: {
+              nighttime_rate: @economic_tariff.weighted_cost(kwh_x48, :nighttime_rate),
+              daytime_rate:   @economic_tariff.weighted_cost(kwh_x48, :daytime_rate)
+            },
+            differential: true
+          }
+        else
+          {
+            rates_x48: {
+              flat_rate: AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(:rate))
+            },
+            differential: false
+          }
+        end
+
+    t.merge( { standing_charges: {}, system_wide: true, default: true } )
   end
 
   def accounting_cost(date, kwh_x48)
