@@ -527,11 +527,12 @@ class MeterAttributes
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        start_date: MeterAttributeTypes::Date.define,
-        end_date:   MeterAttributeTypes::Date.define,
-        name:       MeterAttributeTypes::String.define,
-        default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
-        rates:      MeterAttributeTypes::Hash.define(
+        start_date:   MeterAttributeTypes::Date.define,
+        end_date:     MeterAttributeTypes::Date.define,
+        name:         MeterAttributeTypes::String.define,
+        default:      MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
+        system_wide:  MeterAttributeTypes::Boolean.define(hint: 'only set at system wide level'),
+        rates:        MeterAttributeTypes::Hash.define(
           required: true,
           structure: {
             rate: MeterAttributeTypes::Hash.define(

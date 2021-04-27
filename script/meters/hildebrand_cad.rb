@@ -38,15 +38,23 @@ def save_to_csv(data)
   end
 end
 
-MQTT::Client.connect(
-  :host => 'glowmqtt.energyhive.com',
-  :username => ENV['GLO_LOGIN'],
-  :password => ENV['GLO_PASSWORD']
-) do |client|
-  client.subscribe('SMART/HILD/' + ENV['GLO_DEVICE_MAC_ADDRESS'])
-  client.get do |_topic, message|
-    data = decode(JSON.parse(message))
-    save_to_csv(data)
-    puts data
+loop do
+  begin
+    MQTT::Client.connect(
+      :host => 'glowmqtt.energyhive.com',
+      :username => ENV['GLO_LOGIN'],
+      :password => ENV['GLO_PASSWORD']
+    ) do |client|
+      client.subscribe('SMART/HILD/' + ENV['GLO_DEVICE_MAC_ADDRESS'])
+      client.get do |_topic, message|
+        data = decode(JSON.parse(message))
+        save_to_csv(data)
+        puts data
+      end
+    end
+  rescue => e
+    dt = DateTime.now.strftime('%Y-%m-%d %H:%M:%S')
+    puts e.message
+    save_to_csv({ dt: dt, w: 0.0, kwh: 0.0, status: e.message })
   end
 end
