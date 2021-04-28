@@ -48,7 +48,7 @@ class AccountingTariff < EconomicTariff
 
   def system_wide?
     # TODO(PH, 27Apr2021) - remove name mattern match which was for temp backwards compatibility
-    tariff[:system_wide] == true || tariff[:name].match(/^System Wide/)
+    tariff[:system_wide] == true || tariff[:name].match?(/^System Wide/)
   end
 
   def costs(date, kwh_x48)
@@ -183,19 +183,19 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def rate_rate_type?(type)
-    type.to_s.match(/^rate[0-9]$/)
+    type.to_s.match?(/^rate[0-9]$/)
   end
 
   def tiered_rate_type?(type)
-    type.to_s.match(/^tiered_rate[0-9]$/)
+    type.to_s.match?(/^tiered_rate[0-9]$/)
   end
 
   def rate?(_date)
-    rate_types.any? { |type| type.to_s.match(/^rate[0-9]$/) }
+    rate_types.any? { |type| type.to_s.match?(/^rate[0-9]$/) }
   end
 
   def tiered?(_date)
-    rate_types.any? { |type| type.to_s.match(/^tiered_rate[0-9]$/) }
+    rate_types.any? { |type| type.to_s.match?(/^tiered_rate[0-9]$/) }
   end
 
   def rate_types
@@ -281,7 +281,7 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def tiered_rate_sub_type?(type)
-    type.to_s.match(/tier[0-9]/)
+    type.to_s.match?(/tier[0-9]/)
   end
 
   def tier_description(tier_name, low_threshold, high_threshold, rate_config)

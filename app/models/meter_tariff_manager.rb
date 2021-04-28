@@ -26,7 +26,7 @@ class MeterTariffManager
   class MissingWeekdayWeekendTariffsOnDate                        < StandardError; end
 
   def initialize(meter)
-    @meter = meter
+    @mpxn = meter.mpxn
     pre_process_tariff_attributes(meter)
   end
 
@@ -210,9 +210,9 @@ class MeterTariffManager
       r = t1.tariff[:start_date]..t1.tariff[:end_date]
       if r.cover?(t2.tariff[:start_date]) || r.cover?(t2.tariff[:end_date])
         if t1.tariff[:sub_type] != :weekday_weekend || t2.tariff[:sub_type] != :weekday_weekend
-          raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs #{@meter.mpxn}"
+          raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs #{@mpxn}"
         elsif weekday_type?(t1) == weekday_type?(t2)
-          raise OverlappingAccountingTariffsForWeekdayTariff, "Overlapping weekday accounting tariffs #{@meter.mpxn}"
+          raise OverlappingAccountingTariffsForWeekdayTariff, "Overlapping weekday accounting tariffs #{@mpxn}"
         end
       end
     end
@@ -224,7 +224,7 @@ class MeterTariffManager
     elsif tariff.tariff[:weekend]
       :weekend
     else
-      raise WeekdayTypeNotSetForWeekdayTariff, "Missing weekday type for tariff #{@meter.mpxn}"
+      raise WeekdayTypeNotSetForWeekdayTariff, "Missing weekday type for tariff #{@mpxn}"
     end
   end
 
@@ -246,19 +246,19 @@ class MeterTariffManager
   # defensive programming on basis either user or dcc might setup tariffs incorrectly
   def check_weekday_weekend_tariffs(tariffs, weekday_tariffs, weekend_tariffs, date)
     if tariffs.length != weekday_tariffs.length + weekend_tariffs.length 
-      raise NotAllWeekdayWeekendTariffsOnDateAreWeekdayWeekendTariffs, "Not all tariffs on #{date} for mpxn #{@meter.mpxn} are  weekday weekend tariffs"
+      raise NotAllWeekdayWeekendTariffsOnDateAreWeekdayWeekendTariffs, "Not all tariffs on #{date} for mpxn #{@mpxn} are  weekday weekend tariffs"
     end
 
     if weekday_tariffs.length > 1 || weekend_tariffs.length > 1
-      raise TooManyWeekdayWeekendTariffsOnDate, "Too many weekend/weekday tariffs on #{date} for mpxn #{@meter.mpxn}"
+      raise TooManyWeekdayWeekendTariffsOnDate, "Too many weekend/weekday tariffs on #{date} for mpxn #{@mpxn}"
     end
 
     if weekend?(date)
       if weekend_tariffs.empty? || weekend_tariffs[0].tariff[:weekend] != true
-        raise MissingWeekdayWeekendTariffsOnDate, "Missing or set false weekend tariff on #{date} for mpxn #{@meter.mpxn}"
+        raise MissingWeekdayWeekendTariffsOnDate, "Missing or set false weekend tariff on #{date} for mpxn #{@mpxn}"
       end
     elsif weekday_tariffs.empty? || weekday_tariffs[0].tariff[:weekday] != true
-      raise MissingWeekdayWeekendTariffsOnDate, "Missing weekday or set false tariff on #{date} for mpxn #{@meter.mpxn}" 
+      raise MissingWeekdayWeekendTariffsOnDate, "Missing weekday or set false tariff on #{date} for mpxn #{@mpxn}" 
     end
   end
 

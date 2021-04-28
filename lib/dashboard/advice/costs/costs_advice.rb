@@ -29,7 +29,8 @@ class CostAdviceBase < AdviceBase
   end
 
   def rating
-    full_tariff_coverage? ? 10.0 : 0.0
+    puts "Got here rating = #{calculate_rating_from_range(1.0, 0.0, average_real_tariff_coverage_percent)}"
+    @rating ||= calculate_rating_from_range(1.0, 0.0, average_real_tariff_coverage_percent)
   end
 
   def has_structured_content?
@@ -45,6 +46,8 @@ class CostAdviceBase < AdviceBase
   end
 
   def structured_content(user_type: nil)
+    puts "Got here 44"; rating
+    
     content_information = []
     content_information += meter_costs
     content_information.push(introduction_to_school_finances)
@@ -58,6 +61,21 @@ class CostAdviceBase < AdviceBase
     @school.real_meters.select { |m| m.fuel_type == fuel_type }
   end
 
+  def average_real_tariff_coverage_percent
+    @average_real_tariff_coverage_percent ||= calculate_average_real_tariff_coverage
+  end
+
+  def calculate_average_real_tariff_coverage
+    start_date, end_date = year_start_end_dates
+
+    # map then sum to avoid statsample bug
+    total_percent = real_meters.map do |meter|
+      meter_cost(meter.original_meter, true, false, start_date, end_date).percent_real
+    end.sum
+
+    total_percent / real_meters.length
+  end
+
   def meter_costs
     meter_cost_list = [aggregate_meter_costs]
 
@@ -68,17 +86,21 @@ class CostAdviceBase < AdviceBase
     if real_meters.length > 1 
       # do remaining meters
       real_meters.each do |meter|
-        meter_cost_list.push(MeterCost.new(@school, meter.original_meter, true, false, start_date, end_date).content)
+        meter_cost_list.push(meter_cost(meter.original_meter, true, false, start_date, end_date).content)
       end
     end
 
     meter_cost_list
   end
 
+  def meter_cost(meter, show_tariffs, aggregated, start_date, end_date)
+    MeterCost.new(@school, meter, show_tariffs, aggregated, start_date, end_date)
+  end
+
   def aggregate_meter_costs
     show_aggregate_tariffs = real_meters.length == 1
     start_date, end_date = year_start_end_dates
-    MeterCost.new(@school, aggregate_meter, show_aggregate_tariffs, true, start_date, end_date).content
+    meter_cost(aggregate_meter, show_aggregate_tariffs, true, start_date, end_date).content
   end
 
   def introduction_to_school_finances

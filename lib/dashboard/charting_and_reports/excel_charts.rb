@@ -260,7 +260,7 @@ class ExcelCharts
 
   def encapsulate_worksheet_name(worksheet_name)
     # rubocop:disable all, Performance/RedundantMatch
-    if worksheet_name.match(/\s/)
+    if worksheet_name.match?(/\s/)
       "'" << worksheet_name << "'"
     else
       worksheet_name

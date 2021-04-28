@@ -150,8 +150,12 @@ module Dashboard
       end
     end
 
+    def analyse_sub_meters
+      puts "Submeters #{sub_meters.keys}"
+    end
+
     def storage_heater?
-      !@storage_heater_setup.nil? || @fuel_type == :storage_heater # TODO(PH, 14Sep2019) remove @sstorage_heater_setup test?
+      !@storage_heater_setup.nil? || @fuel_type == :storage_heater || sub_meters.key?(:storage_heaters) # TODO(PH, 14Sep2019) remove @sstorage_heater_setup test?
     end
 
     def solar_pv_panels?

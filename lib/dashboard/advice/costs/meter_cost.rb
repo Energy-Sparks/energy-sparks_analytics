@@ -26,6 +26,10 @@ class MeterCost
     }
   end
 
+  def percent_real
+    @percent_real ||= calculate_percent_real
+  end
+
   private
 
   def summary
@@ -33,11 +37,16 @@ class MeterCost
   end
 
   def all_real_tariffs?(start_date, end_date)
-    (start_date..end_date).all? do |date|
+    percent_real > 0.99
+  end
+
+  def calculate_percent_real
+    count = (@meter_start_date..@meter_end_date).count do |date|
       # these are tristate true, false and :mixed (combined meters)
       cost = accounting_tariff.one_days_cost_data(date)
       fully_real_tariff?(cost.system_wide) && fully_real_tariff?(cost.default) 
     end
+    count.to_f / (@meter_end_date - @meter_start_date + 1)
   end
 
   def fully_real_tariff?(type)
@@ -51,7 +60,7 @@ class MeterCost
   def incomplete_coverage
     coverage = ''
     coverage += " from #{@meter.amr_data.start_date.strftime('%d-%m-%Y')}" if @meter.amr_data.start_date > @aggregate_start_date
-    coverage += " to #{@meter.amr_data.end_date_date.strftime('%d-%m-%Y')}" if @meter.amr_data.end_date != @aggregate_end_date
+    coverage += " to #{@meter.amr_data.end_date.strftime('%d-%m-%Y')}" if @meter.amr_data.end_date != @aggregate_end_date
     coverage
   end
 
@@ -262,8 +271,11 @@ class MeterCost
 
   def meter_up_to_annual_cost
     start_date = [@meter.amr_data.end_date - 365, @meter.amr_data.start_date].max
+    
     # not necessarily 100% consistent with monthly tables due to date boundaries
+
     £ = @meter.amr_data.kwh_date_range(start_date, @meter.amr_data.end_date, :accounting_cost)
+
     days = @meter.amr_data.end_date - start_date + 1
     {
       £:                £,
@@ -327,6 +339,7 @@ class MeterCost
   end
 
   def adjective(percent_increase)
+    return 'an infinite increase' if percent_increase.nan?
     percent_increase.between?(-0.05, 0.05) ? 'about the same' : (percent_increase > 0.0 ? 'increase' : 'decrease')
   end
 end

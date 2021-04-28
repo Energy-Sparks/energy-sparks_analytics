@@ -297,7 +297,7 @@ class DashboardChartAdviceBase
               <% val = value[0] %>
               <% pct = val / total %>
               <td class="text-right"><%= YAxisScaling.convert(units, :kwh, fuel_type, val) %></td>
-              <% if row.match(/export/i) %>
+              <% if row.match?(/export/i) %>
                 <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val) %></td>
               <% else %>
                 <td class="text-right"><%= YAxisScaling.convert(units, :£, fuel_type, val) %></td>

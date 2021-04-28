@@ -27,7 +27,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   def tariffs_in_date_range(start_date, end_date)
     tariffs = []
     (start_date..end_date).each do |date|
-       tariffs += [accounting_tariff[date].tariff].flatten
+       tariffs += [accounting_tariff.one_days_cost_data(date).tariff].flatten
     end
     tariffs.uniq
   end
@@ -143,7 +143,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
 
 
   def tiers_description(costs)
-    tiers = costs.select { |k, _v| k.to_s.match(/^tier[0-9]$/) }
+    tiers = costs.select { |k, _v| k.to_s.match?(/^tier[0-9]$/) }
     desc = costs.map { |_k, v| one_tier_description(v[:low_threshold], v[:high_threshold])}.join(',')
     '(' + desc + ')'
   end
@@ -166,7 +166,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   end
 
   def tier_rates_description(rate_type, costs)
-    tiers = costs.select { |k, _v| k.to_s.match(/^tier[0-9]$/) }
+    tiers = costs.select { |k, _v| k.to_s.match?(/^tier[0-9]$/) }
 
     tiers.map do |_tier_name, tier_config|
       [

@@ -40,7 +40,8 @@ class AggregateDataService
   end
 
   private def disaggregate_one_storage_heater_meter(electricity_meter)
-    logger.info 'Disaggregating electricity meter into 1x storage heater only and 1 x remainder'
+    logger.info "=" * 80
+    logger.info "Disaggregating electricity meter #{electricity_meter.mpxn} into 1x storage heater only and 1 x remainder"
 
     # create a new sub meter with the original amr data as a sub meter
     # replace the existing electricity meters amr_date with just the non storag heater amr_data
@@ -76,7 +77,9 @@ class AggregateDataService
 
     proportion_out_accounting_standing_charges(storage_heater_meter, electricity_meter)
 
-    electricity_meter.sub_meters[:storage_heaters] = storage_heater_meter
+    electricity_meter.sub_meters[:storage_heaters] = [storage_heater_meter]
+
+    logger.info "=" * 80
 
     {
       electricity_minus_storage_heater_meter: electricity_meter,
@@ -120,6 +123,8 @@ class AggregateDataService
   private def calculate_aggregated_disaggregated_electricity_meter_for_storage_heater_school(disaggregated_meter_list, non_storage_heater_meters)
     disaggregated_electricity_meters_list = disaggregated_meter_list.map { |h| h[:electricity_minus_storage_heater_meter] }
 
+    original_meter = @meter_collection.aggregated_electricity_meters
+
     # including the non-storage heater meter data!
     disaggregated_electricity_meters_list += non_storage_heater_meters unless non_storage_heater_meters.empty?
 
@@ -127,7 +132,20 @@ class AggregateDataService
       disaggregated_electricity_meters_list,
       :electricity
     )
-    @meter_collection.aggregated_electricity_meters.amr_data = disaggregated_electricity_amr_data
+
+    aggregate_electricity_meter = create_modified_meter_copy(
+      original_meter, # pass in floor area, pupil numbers
+      disaggregated_electricity_amr_data,
+      :electricity,
+      Dashboard::Meter.synthetic_mpan_mprn(original_meter.id, :electricity_minus_storage_heater),
+      "#{original_meter.name} - aggregated non storage heaters consumption",
+      :storage_heater_disaggregated_electricity
+    )
+
+    aggregate_electricity_meter.sub_meters[:storage_heaters] = disaggregated_meter_list.map { |m| m[:storage_heater_meter] }.flatten
+    aggregate_electricity_meter.sub_meters[:mains_consume] = original_meter
+
+    @meter_collection.aggregated_electricity_meters = aggregate_electricity_meter
 
     calculate_meter_carbon_emissions_and_costs(@meter_collection.aggregated_electricity_meters, :electricity)
   end
