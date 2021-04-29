@@ -44,7 +44,7 @@ class MeterCost
     count = (@meter_start_date..@meter_end_date).count do |date|
       # these are tristate true, false and :mixed (combined meters)
       cost = accounting_tariff.one_days_cost_data(date)
-      fully_real_tariff?(cost.system_wide) && fully_real_tariff?(cost.default) 
+      fully_real_tariff?(cost.system_wide) && fully_real_tariff?(cost.default)
     end
     count.to_f / (@meter_end_date - @meter_start_date + 1)
   end
@@ -87,7 +87,7 @@ class MeterCost
       intro_to_chart_2_year_comparison,
       chart_2_year_comparison,
       change_in_usage_description_html
-    ] 
+    ]
   end
 
   def up_to_one_year_breakdown
@@ -211,7 +211,7 @@ class MeterCost
       # { type: :chart_config, data: chart_config },
       # { type: :chart_data, data: data },
       { type: :chart_name, content: chart_name, mpan_mprn: @meter.mpxn },
-      { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(name) } 
+      { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(name) }
     ]
   end
 
@@ -234,7 +234,7 @@ class MeterCost
 
   def cost_table
     monthly = MeterMonthlyCostsAdvice.new(@school, @meter)
-    { type: :html,  content: monthly.two_year_monthly_comparison_table_html } 
+    { type: :html,  content: monthly.two_year_monthly_comparison_table_html }
   end
 
   def tariffs
@@ -242,7 +242,7 @@ class MeterCost
   end
 
   def tariff_introduction_html
-    { type: :html,  content: "<h1>Your tariffs</h1>" } 
+    { type: :html,  content: "<h1>Your tariffs</h1>" }
   end
 
   # Accordion summary says: 'Total:' - if aggregate meter and has underlying meters from which it sums
@@ -262,12 +262,12 @@ class MeterCost
 
   def meter_cost_and_time_description
     data = meter_up_to_annual_cost
-    "#{data[:formatted_£]} (#{data[:formatted_years]})"
+    "<span class='float-right'>#{data[:formatted_£]} (#{data[:formatted_years]})</span>"
   end
 
   def meter_up_to_annual_cost
     start_date = [@meter.amr_data.end_date - 365, @meter.amr_data.start_date].max
-    
+
     # not necessarily 100% consistent with monthly tables due to date boundaries
 
     £ = @meter.amr_data.kwh_date_range(start_date, @meter.amr_data.end_date, :accounting_cost)
@@ -326,7 +326,7 @@ class MeterCost
 
     text = %q(
       This year you consumed <%= current_year[:formatted_kwh] %>
-      which cost <%= current_year[:formatted_£] %>, 
+      which cost <%= current_year[:formatted_£] %>,
       compared with <%= previous_year[:formatted_kwh] %> / <%= previous_year[:formatted_£] %>
       during the previous year. This is an <%= change_adjective_kwh %> in usage of <%= formatted_increase_kwh_percent %>,
       and an <%= change_adjective_kwh %> in costs of <%= abs_change_£ %>.
