@@ -106,6 +106,11 @@ describe MeterReadingsFeeds::N3rgyData do
 
           let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data.json')) }
 
+          it 'uses Date (not DateTime) for standing charge keys' do
+            tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
+            expect(tariffs[:standing_charges].keys.first.class).to eq(Date)
+          end
+
           it 'returns tariffs without duplicates' do
             tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
             expect(tariffs.keys).to match_array([:kwh_tariffs, :standing_charges, :missing_readings])

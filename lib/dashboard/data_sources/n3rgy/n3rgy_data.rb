@@ -36,7 +36,7 @@ module MeterReadingsFeeds
     def tariffs(mpxn, fuel_type, start_date, end_date)
       raise BadParameters.new("Please specify start and end date") if start_date.nil? || end_date.nil?
       tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
-      charges_by_date = convert_datetime_key_to_date(tariff_details[:standing_charges].to_h)
+      charges_by_date = tariff_details[:standing_charges].to_h
       prices_by_date = tariff_details[:prices].to_h
       tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
       {
@@ -156,10 +156,6 @@ module MeterReadingsFeeds
       deduped
     end
 
-    def convert_datetime_key_to_date(h)
-      h.transform_keys(&:to_date)
-    end
-
     def unit_adjusted_readings(raw_readings, units)
       adjust_kwh_units = to_kwh(units)
       raw_readings.map do |reading|
@@ -182,7 +178,7 @@ module MeterReadingsFeeds
     def unit_adjusted_standing_charges(raw_standing_charges, fuel_type)
       raw_standing_charges.map do |standing_charge|
         [
-          DateTime.parse(standing_charge['startDate']),
+          Date.parse(standing_charge['startDate']),
           convert_to_£(standing_charge['value'], fuel_type)
         ]
       end
