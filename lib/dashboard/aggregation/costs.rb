@@ -161,7 +161,7 @@ class CostsBase < HalfHourlyData
   end
 
   def cost_data_halfhour_broken_down(date, halfhour_index)
-    cost_hh_£ = rates_at_half_hour(halfhour_index)
+    cost_hh_£ = one_days_cost_data(date).rates_at_half_hour(halfhour_index)
     cost_hh_£.merge!(one_days_cost_data(date).standing_charges.transform_values{ |one_day_kwh| one_day_kwh / 48.0 })
     cost_hh_£
   end
