@@ -14,15 +14,27 @@ class MeterTariff
   end
 
   def times(type)
-    @tariff[:rates][type][:from]..@tariff[:rates][type][:to]
+    modified_type = remove_weekend_weekday_type(type)
+    @tariff[:rates][modified_type][:from]..@tariff[:rates][modified_type][:to]
   end
 
   def rate(type)
-    @tariff[:rates][type][:rate]
+    modified_type = remove_weekend_weekday_type(type)
+    @tariff[:rates][modified_type][:rate]
+  end
+
+  # TODO (PH, 29Apr2021) - last minute change for milestone
+  #                      - could do with cleaner implementaion
+  def remove_weekend_weekday_type(type)
+    type_str = type.to_s
+    type_str.gsub!('weekend_','')
+    type_str.gsub!('weekday_','')
+    type_str.to_sym
   end
 
   def weighted_cost(kwh_x48, type)
     weights = DateTimeHelper.weighted_x48_vector_single_range(times(type), rate(type))
+    # MB old sytyle tariffs have exclusive times
     AMRData.fast_multiply_x48_x_x48(weights, kwh_x48)
   end
 end
@@ -175,7 +187,7 @@ class GenericAccountingTariff < AccountingTariff
   def differential?(_date)
     # date needed for weekday/weekend tariffs?
     # TODO(PH, 8Apr2021)
-    rate_types.any? { |type| rate_rate_type?(type) || tiered_rate_type?(type) }
+    rate_types.any? { |type| rate_rate_type?(type) || tiered_rate_type?(type) || weekend_weekday_differential_type?(type) }
   end
 
   def rate_type?(type)
@@ -186,8 +198,24 @@ class GenericAccountingTariff < AccountingTariff
     type.to_s.match?(/^rate[0-9]$/)
   end
 
+  def weekend_weekday_differential_type?(type)
+    type.to_s.match?(/^weekend_rate[0-9]$/) || type.to_s.match?(/^weekday_rate[0-9]$/)
+  end
+
   def tiered_rate_type?(type)
     type.to_s.match?(/^tiered_rate[0-9]$/)
+  end
+
+  def weekend_type?
+    tariff.key?(:weekend)
+  end
+
+  def weekday_type?
+    tariff.key?(:weekday)
+  end
+
+  def create_weekday_weekend_type_rates(type, rates)
+    rates.map { |r| "#{type}_#{r}".to_sym }
   end
 
   def rate?(_date)
@@ -199,7 +227,10 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def rate_types
-    tariff[:rates].keys.select { |type| rate_type?(type) }
+    rates = tariff[:rates].keys.select { |type| rate_type?(type) }
+    rates = create_weekday_weekend_type_rates(:weekday, rates) if weekday_type?
+    rates = create_weekday_weekend_type_rates(:weekend, rates) if weekend_type?
+    rates
   end
 
   def costs(date, kwh_x48)
@@ -233,14 +264,15 @@ class GenericAccountingTariff < AccountingTariff
     if tiered_rate_type?(type)
       calculate_tiered_costs_x48(type, kwh_x48)
     else
-      weights = DateTimeHelper.weighted_x48_vector_single_range(times(type), rate(type))
+      weights = DateTimeHelper.weighted_x48_vector_fast_inclusive(times(type), rate(type))
       cost_x48 = AMRData.fast_multiply_x48_x_x48(weights, kwh_x48)
       { differential_rate_name(type) => cost_x48 }
     end
   end
 
   def differential_rate_name(type)
-    format_time_range(@tariff[:rates][type][:from], @tariff[:rates][type][:to]).to_sym
+    modified_type = remove_weekend_weekday_type(type)
+    format_time_range(@tariff[:rates][modified_type][:from], @tariff[:rates][modified_type][:to]).to_sym
   end
 
   def format_time_range(from, to)

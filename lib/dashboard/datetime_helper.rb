@@ -104,4 +104,14 @@ module DateTimeHelper
     end
     result
   end
+
+  def self.weighted_x48_vector_fast_inclusive(time_of_day_range, weight)
+    arr_x48 = Array.new(48, 0.0)
+    hh_index_start  = time_of_day_range.first.to_halfhour_index
+    hh_index_end    = time_of_day_range.last.to_halfhour_index
+    (hh_index_start..hh_index_end).each do |hh_index|
+      arr_x48[hh_index] = weight
+    end
+    arr_x48
+  end
 end
