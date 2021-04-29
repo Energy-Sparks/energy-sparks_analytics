@@ -40,7 +40,7 @@ module MeterReadingsFeeds
       prices_by_date = tariff_details[:prices].to_h
       tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
       {
-        kwh_tariffs:      tariff_readings[:readings],
+        kwh_tariffs:      deduplicate_prices(tariff_readings[:readings]),
         standing_charges: charges_by_date,
         missing_readings: tariff_readings[:missing_readings],
       }
@@ -139,14 +139,20 @@ module MeterReadingsFeeds
         end
       end
       {
-        standing_charges: deduplicate(standing_charges),
+        standing_charges: deduplicate_standing_charges(standing_charges),
         prices:           prices
       }
     end
 
-    def deduplicate(ary)
+    def deduplicate_standing_charges(ary)
       deduped = [ary.first]
-      ary.each_cons(2){ |a,b| deduped << b if a[1] != b[1] }
+      ary.each_cons(2) { |a,b| deduped << b if a[1] != b[1] }
+      deduped
+    end
+
+    def deduplicate_prices(hsh)
+      deduped = Hash[*hsh.first]
+      hsh.each_cons(2) { |(date1,prices1),(date2,prices2)| deduped[date2] = prices2 if prices1 != prices2 }
       deduped
     end
 

@@ -78,6 +78,9 @@ describe MeterReadingsFeeds::N3rgyData do
 
     describe 'for tariffs' do
 
+      let(:start_date)    { Date.parse('20190101') }
+      let(:end_date)      { Date.parse('20190103') }
+
       describe 'when date not specified' do
         it 'raises error' do
           expect {
@@ -94,14 +97,16 @@ describe MeterReadingsFeeds::N3rgyData do
 
         describe 'for normal tariffs' do
 
-          let(:expected_first_day_tariffs)  { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
-          let(:expected_last_day_tariffs)   { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
-          let(:original_standing_charge)    { 19.541 }
-          let(:expected_standing_charge)    { 0.19541 }
+          let(:usual_value)    { 0.15992 }
+          let(:other_value)    { 0.1234 }
+          let(:expected_first_day_tariffs)    { Array.new(48) { usual_value } }
+          let(:expected_last_day_tariffs)     { [other_value] + Array.new(47) { usual_value } }
+          let(:original_standing_charge)      { 19.541 }
+          let(:expected_standing_charge)      { 0.19541 }
 
           let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data.json')) }
 
-          it 'returns tariffs' do
+          it 'returns tariffs without duplicates' do
             tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
             expect(tariffs.keys).to match_array([:kwh_tariffs, :standing_charges, :missing_readings])
 
