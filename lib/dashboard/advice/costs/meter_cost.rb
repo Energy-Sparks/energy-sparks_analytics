@@ -146,9 +146,7 @@ class MeterCost
 
   def intro_to_chart_2_year_comparison
     text = %{
-      <p>
-        <b>Comparison of last 2 years costs for this meter</b>
-      </p>
+      <h2>Comparison of last 2 years costs for this meter</h2>
       <p>
         This first chart compares your monthly consumption over the last 2 years
       </p>
@@ -158,9 +156,7 @@ class MeterCost
 
   def intro_to_1_year_brokendown_chart
     text = %{
-      <p>
-        <b>Your last year's Electricity bill components</b>
-      </p>
+      <h2>Your last year's Electricity bill components</h2>
       <p>
       Last year's bill components were as follows:
       </p>

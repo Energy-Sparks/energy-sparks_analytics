@@ -55,6 +55,9 @@ class AggregateDataService
       electricity_meter.name,
       :storage_heater_disaggregated_electricity
     )
+
+    calculate_meter_carbon_emissions_and_costs(original_electricity_meter_copy, :electricity)
+
     electricity_meter.sub_meters[:mains_consume] = original_electricity_meter_copy
 
     electricity_meter.amr_data = electric_only_amr
@@ -143,6 +146,8 @@ class AggregateDataService
     )
 
     aggregate_electricity_meter.sub_meters[:storage_heaters] = disaggregated_meter_list.map { |m| m[:storage_heater_meter] }.flatten
+
+    calculate_meter_carbon_emissions_and_costs(original_meter, :electricity)
     aggregate_electricity_meter.sub_meters[:mains_consume] = original_meter
 
     @meter_collection.aggregated_electricity_meters = aggregate_electricity_meter

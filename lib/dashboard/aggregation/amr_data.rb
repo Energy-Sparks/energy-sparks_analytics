@@ -31,7 +31,7 @@ class AMRData < HalfHourlyData
   end
 
   def set_accounting_tariff(meter)
-    logger.info "Creating accounting costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
+    logger.info "Creating parameterised accounting costs in amr_meter #{meter.mpan_mprn} #{meter.fuel_type}"
     @accounting_tariff = AccountingCostsParameterised.create_costs(meter)
   end
 

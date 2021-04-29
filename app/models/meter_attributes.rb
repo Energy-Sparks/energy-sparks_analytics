@@ -646,7 +646,7 @@ class MeterAttributes
         sub_type:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:weekday_weekend]),
         # default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
         rates:      MeterAttributeTypes::Hash.define(
-          required: true,
+          required: false,
           structure: {
             flat_rate:    MeterAttributes.default_flat_rate,
 
