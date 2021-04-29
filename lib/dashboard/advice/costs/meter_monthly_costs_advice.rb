@@ -16,7 +16,7 @@ class MeterMonthlyCostsAdvice
   private
 
   def row_to_£(row)
-    row.map{ |value| value.is_a?(Float) ? format_£(value) : value }
+    row.map{ |value| value.is_a?(Numeric) ? format_£(value) : value }
   end
 
   def format_£(value)
