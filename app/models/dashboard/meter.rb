@@ -150,6 +150,10 @@ module Dashboard
       end
     end
 
+    def all_sub_meters
+      sub_meters.values.flatten
+    end
+    
     def analyse_sub_meters
       puts "Submeters #{sub_meters.keys}"
     end

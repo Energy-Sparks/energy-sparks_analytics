@@ -133,7 +133,7 @@ class MeterCollection
 
     if search_sub_meters
       all_meters.each do |meter|
-        sub_meter = search_meter_list_for_identifier(meter.sub_meters, identifier)
+        sub_meter = search_meter_list_for_identifier(meter.all_sub_meters, identifier)
         unless sub_meter.nil?
           @meter_identifier_lookup[identifier] = sub_meter
           return sub_meter
@@ -160,28 +160,27 @@ class MeterCollection
   private def search_meter_list_for_identifier(meter_list, identifier)
     return nil if identifier.nil?
     meter_list.each do |meter|
-      return nil if meter.id.nil?
+      next if meter.id.nil?
       return meter if meter.id.to_s == identifier.to_s
     end
     nil
   end
 
-  def all_meters(ensure_unique = true)
-    meter_groups = [
+  def all_meters(ensure_unique = true, include_sub_meters = true)
+    meter_list = [
       @heat_meters,
       @electricity_meters,
       @storage_heater_meters,
       @aggregated_heat_meters,
       @aggregated_electricity_meters
-    ].compact
+    ].compact.flatten
 
-    meter_list = []
-    meter_groups.each do |meter_group|
-      unless meter_group.nil?
-        meter_list += meter_group.is_a?(Dashboard::Meter) ? [meter_group] : meter_group
-      end
-    end
-    meter_list.uniq{ |meter| meter.mpan_mprn } if ensure_unique# for single meter schools aggregate and meter can be one and the same
+    meter_list += meter_list.map { |m| m.sub_meters.values.compact } if include_sub_meters
+
+    meter_list.flatten!
+
+    meter_list.uniq!{ |meter| meter.mpan_mprn } if ensure_unique
+
     meter_list
   end
 

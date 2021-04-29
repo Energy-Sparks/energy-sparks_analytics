@@ -958,7 +958,7 @@ private
         # aggregate all electricity meters
         @meters = [@meter_collection.aggregated_electricity_meters, nil]
       when :allelectricity_unmodified
-        @meters = [unmodified_aggregated_electricity_meter, nil]
+        @meters = [@meter_collection.aggregated_electricity_meters&.original_meter, nil]
       when :electricity_simulator
         @meters = [@meter_collection.electricity_simulation_meter, nil]
       when :storage_heater_meter
@@ -968,16 +968,8 @@ private
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
       # specified meter - typically by mpan or mprn
-      meter = @meter_collection.meter?(@meter_definition)
+      meter = @meter_collection.meter?(@meter_definition, true)
       @meters = meter.heat_meter? ? [nil, meter] : [meter, nil]
-    end
-  end
-
-  def unmodified_aggregated_electricity_meter
-    if @meter_collection.aggregated_electricity_meters.sub_meters.key?(:mains_consume)
-      @meter_collection.aggregated_electricity_meters.sub_meters[:mains_consume]
-    else
-      @meter_collection.aggregated_electricity_meters
     end
   end
 end
