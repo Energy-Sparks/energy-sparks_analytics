@@ -109,8 +109,15 @@ class ChartManager
       if reraise_exception
         raise
       else
-        logger.info e.message
-        logger.info e.backtrace
+#2021-04-29 These calls are causing the Rails app to hang. Any call to
+#print or inspect the exception or stack trace cause a CPU spike and a hang
+#A Ctrl-C clears and execution continues. There's some issue with the Rails logger
+#and/or the exceptions raised here that are causing a problem. Needs further
+#investigation. But in testing these exceptions were all NoMethodError so
+#shouldn't really be caught here.
+#
+#        logger.info e.message
+#        logger.info e.backtrace
         nil
       end
     end
