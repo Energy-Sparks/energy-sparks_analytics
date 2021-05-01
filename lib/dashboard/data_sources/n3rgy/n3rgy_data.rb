@@ -36,11 +36,11 @@ module MeterReadingsFeeds
     def tariffs(mpxn, fuel_type, start_date, end_date)
       raise BadParameters.new("Please specify start and end date") if start_date.nil? || end_date.nil?
       tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
-      charges_by_date = convert_datetime_key_to_date(tariff_details[:standing_charges].to_h)
+      charges_by_date = tariff_details[:standing_charges].to_h
       prices_by_date = tariff_details[:prices].to_h
       tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
       {
-        kwh_tariffs:      tariff_readings[:readings],
+        kwh_tariffs:      deduplicate_prices(tariff_readings[:readings]),
         standing_charges: charges_by_date,
         missing_readings: tariff_readings[:missing_readings],
       }
@@ -139,13 +139,21 @@ module MeterReadingsFeeds
         end
       end
       {
-        standing_charges: standing_charges,
+        standing_charges: deduplicate_standing_charges(standing_charges),
         prices:           prices
       }
     end
 
-    def convert_datetime_key_to_date(h)
-      h.transform_keys(&:to_date)
+    def deduplicate_standing_charges(ary)
+      deduped = [ary.first]
+      ary.each_cons(2) { |a,b| deduped << b if a[1] != b[1] }
+      deduped
+    end
+
+    def deduplicate_prices(hsh)
+      deduped = Hash[*hsh.first]
+      hsh.each_cons(2) { |(date1,prices1),(date2,prices2)| deduped[date2] = prices2 if prices1 != prices2 }
+      deduped
     end
 
     def unit_adjusted_readings(raw_readings, units)
@@ -170,7 +178,7 @@ module MeterReadingsFeeds
     def unit_adjusted_standing_charges(raw_standing_charges, fuel_type)
       raw_standing_charges.map do |standing_charge|
         [
-          DateTime.parse(standing_charge['startDate']),
+          Date.parse(standing_charge['startDate']),
           convert_to_£(standing_charge['value'], fuel_type)
         ]
       end
