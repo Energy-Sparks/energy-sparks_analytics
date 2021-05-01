@@ -77,6 +77,8 @@ class AccountingTariff < EconomicTariff
           }
         end
 
+    t[:rates_x48].merge!(rate_per_kwh_standard_charges(kwh_x48))
+
     t.merge(common_data(date, kwh_x48))
   end
 
@@ -100,7 +102,7 @@ class AccountingTariff < EconomicTariff
   def standing_charges(date, days_kwh)
     standing_charge = {}
     tariff[:rates].each do |standing_charge_type, rate|
-      next if rate_type?(standing_charge_type)
+      next if rate_type?(standing_charge_type) || rate[:per] == :kwh
       standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh)
     end
     standing_charge
@@ -120,11 +122,25 @@ class AccountingTariff < EconomicTariff
       rate / DateTimeHelper.days_in_month(date)
     when :quarter
       rate / DateTimeHelper.days_in_quarter(date)
-    when :kwh # treat these as day only rates for the moment TODO(PH, 8Apr2019), should be intraday
-      rate * days_kwh
+    when :kwh 
+      raise UnexpectedRateType, 'Unexpected internal error: unit rate type kwh should be handled as x48 rather than scalar'
     else
       raise UnexpectedRateType, "Unexpected unit rate type for tariff #{per}"
     end
+  end
+
+  # apply per kWh 'standing charges' per half hour
+  def rate_per_kwh_standard_charges(kwh_x48)
+    rates = tariff[:rates].select do |standing_charge_type, rate|
+      !rate_type?(standing_charge_type) && rate[:per] == :kwh
+    end
+
+    rates.map do |standing_charge_type, rate|
+      [
+        standing_charge_type.to_s.humanize,
+        AMRData.fast_multiply_x48_x_scalar(kwh_x48, rate[:rate])
+      ]
+    end.to_h
   end
 
   def check_differential_times(time_ranges)
@@ -245,6 +261,8 @@ class GenericAccountingTariff < AccountingTariff
             differential: true
           }
         end
+
+    t[:rates_x48].merge(rate_per_kwh_standard_charges(kwh_x48))
 
     t.merge(common_data(date, kwh_x48))
   end
