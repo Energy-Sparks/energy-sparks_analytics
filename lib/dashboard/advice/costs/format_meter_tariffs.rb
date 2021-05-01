@@ -197,15 +197,6 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     html_table(header, rates)
   end
 
-  def tariff_description_html_no_2(tariff)
-    case tariff.class.name
-    when AccountingTariff
-    when GenericAccountingTariff
-    else
-      raise UnhandledTariffDescriptionError, "Unable to display tariff of type #{tariff.class.name}"
-    end
-  end
-
   def if_not_full_tariff_coverage_html(tariff_info)
     html = ''
     contact_us_for_tariff_setup = false

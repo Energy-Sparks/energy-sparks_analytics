@@ -1,5 +1,8 @@
 class MeterTariff
   attr_reader :tariff
+  FLAT_RATE = 'Flat Rate'.freeze
+  DAYTIME_RATE = 'Daytime Rate'.freeze
+  NIGHTTIME_RATE = 'Nighttime Rate'.freeze
   def initialize(meter, tariff)
     @mpxn = meter.mpxn
     @tariff = tariff
@@ -14,28 +17,22 @@ class MeterTariff
   end
 
   def times(type)
-    modified_type = remove_weekend_weekday_type(type)
-    @tariff[:rates][modified_type][:from]..@tariff[:rates][modified_type][:to]
+    @tariff[:rates][type][:from]..@tariff[:rates][type][:to]
   end
 
   def rate(type)
-    modified_type = remove_weekend_weekday_type(type)
-    @tariff[:rates][modified_type][:rate]
-  end
-
-  # TODO (PH, 29Apr2021) - last minute change for milestone
-  #                      - could do with cleaner implementaion
-  def remove_weekend_weekday_type(type)
-    type_str = type.to_s
-    type_str.gsub!('weekend_','')
-    type_str.gsub!('weekday_','')
-    type_str.to_sym
+    @tariff[:rates][type][:rate]
   end
 
   def weighted_cost(kwh_x48, type)
     weights = DateTimeHelper.weighted_x48_vector_single_range(times(type), rate(type))
-    # MB old sytyle tariffs have exclusive times
+    # NB old style tariffs have exclusive times
     AMRData.fast_multiply_x48_x_x48(weights, kwh_x48)
+  end
+
+  
+  def self.format_time_range(rate)
+    "#{rate[:from]} to #{rate[:to]}".freeze
   end
 end
 
@@ -59,23 +56,22 @@ class AccountingTariff < EconomicTariff
   end
 
   def system_wide?
-    # TODO(PH, 27Apr2021) - remove name mattern match which was for temp backwards compatibility
-    tariff[:system_wide] == true || tariff[:name].match?(/^System Wide/)
+    tariff[:system_wide] == true
   end
 
   def costs(date, kwh_x48)
     t = if differential?(date)
           {
             rates_x48: {
-              nighttime_rate:   weighted_cost(kwh_x48, :nighttime_rate),
-              daytime_rate:     weighted_cost(kwh_x48, :daytime_rate),
+              MeterTariff::NIGHTTIME_RATE => weighted_cost(kwh_x48, :nighttime_rate),
+              MeterTariff::DAYTIME_RATE   => weighted_cost(kwh_x48, :daytime_rate),
             },
             differential: true
           }
         else
           {
             rates_x48: {
-              flat_rate:     AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:rate][:rate])
+              MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:rate][:rate])
             },
             differential: false
           }
@@ -152,8 +148,7 @@ class AccountingTariff < EconomicTariff
   def raise_and_log_error(exception, message, data)
     logger.info message
     logger.info data
-    # TODO(PH, 4Apr2021) - fix data in database, check upstream code works, then uncomment this code
-    # raise exception, message
+    raise exception, message
   end
 
   def check_time_ranges_on_30_minute_boundaries(time_ranges)
@@ -185,9 +180,11 @@ end
 
 class GenericAccountingTariff < AccountingTariff
   def differential?(_date)
-    # date needed for weekday/weekend tariffs?
-    # TODO(PH, 8Apr2021)
-    rate_types.any? { |type| rate_rate_type?(type) || tiered_rate_type?(type) || weekend_weekday_differential_type?(type) }
+    !flat_tariff?(_date)
+  end
+
+  def flat_tariff?(_date)
+    rate_types.all? { |type| flat_rate_type?(type) }
   end
 
   def rate_type?(type)
@@ -204,6 +201,10 @@ class GenericAccountingTariff < AccountingTariff
 
   def tiered_rate_type?(type)
     type.to_s.match?(/^tiered_rate[0-9]$/)
+  end
+
+  def flat_rate_type?(type)
+    type == :flat_rate
   end
 
   def weekend_type?
@@ -227,34 +228,29 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def rate_types
-    rates = tariff[:rates].keys.select { |type| rate_type?(type) }
-    rates = create_weekday_weekend_type_rates(:weekday, rates) if weekday_type?
-    rates = create_weekday_weekend_type_rates(:weekend, rates) if weekend_type?
-    rates
+    tariff[:rates].keys.select { |type| rate_type?(type) }
   end
 
   def costs(date, kwh_x48)
-    t = if differential?(date)
+    t = if flat_tariff?(date)
           {
-            rates_x48: rate_types.map { |type| weighted_costs(kwh_x48, type)}.inject(:merge),
-            differential: true
+            rates_x48: {
+              MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
+            },
+            differential: false
           }
         else
           {
-            rates_x48: {
-              flat_rate:     AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
-            },
-            differential: false
+            rates_x48: rate_types.map { |type| weighted_costs(kwh_x48, type)}.inject(:merge),
+            differential: true
           }
         end
 
     t.merge(common_data(date, kwh_x48))
   end
 
-  def all_times 
-    rate_types.map do |type|
-      times(type)
-    end
+  def all_times
+    rate_types.map { |rt| times(rt) }
   end
 
   # returns a hash, whereas other parent classes just return the value
@@ -271,12 +267,14 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def differential_rate_name(type)
-    modified_type = remove_weekend_weekday_type(type)
-    format_time_range(@tariff[:rates][modified_type][:from], @tariff[:rates][modified_type][:to]).to_sym
+    ttr = MeterTariff.format_time_range(@tariff[:rates][type])
+    append_weekday_weekend(ttr)
   end
 
-  def format_time_range(from, to)
-    "#{from}_to_#{to}"
+  def append_weekday_weekend(name)
+    name += ' (weekends)' if weekend_type?
+    name += ' (weekdays)' if weekday_type?
+    name
   end
 
   def calculate_tiered_costs_x48(type, kwh_x48)
@@ -292,6 +290,7 @@ class GenericAccountingTariff < AccountingTariff
         costs_x48[new_tier_name][hh_index] = cost
       end
     end
+
     costs_x48
   end
 
@@ -317,18 +316,19 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def tier_description(tier_name, low_threshold, high_threshold, rate_config)
-    time_range = format_time_range(rate_config[:from], rate_config[:to])
+    time_range = MeterTariff.format_time_range(rate_config)
     threshold_range = threshhold_range_description(tier_name, low_threshold, high_threshold)
-    "#{threshold_range}_#{time_range}".to_sym
+    trtr = "#{time_range}: #{threshold_range}"
+    append_weekday_weekend(trtr)
   end
 
   def threshhold_range_description(tier_name, low_threshold, high_threshold)
     if high_threshold.infinite?
-      "#{tier_name}_above_#{low_threshold.round(0)}_kwh"
+      "above #{low_threshold.round(0)} kwh"
     elsif low_threshold.zero?
-      "#{tier_name}_below_#{high_threshold.round(0)}_kwh"
+      "below #{high_threshold.round(0)} kwh"
     else
-      "#{tier_name}_#{low_threshold.round(0)}_to_#{high_threshold.round(0)}_kwh"
+      "#{low_threshold.round(0)} to #{high_threshold.round(0)} kwh"
     end
   end
 end

@@ -34,15 +34,15 @@ class MeterTariffManager
     t = if differential_tariff_on_date?(date)
           {
             rates_x48: {
-              nighttime_rate: @economic_tariff.weighted_cost(kwh_x48, :nighttime_rate),
-              daytime_rate:   @economic_tariff.weighted_cost(kwh_x48, :daytime_rate)
+              MeterTariff::NIGHTTIME_RATE => @economic_tariff.weighted_cost(kwh_x48, :nighttime_rate),
+              MeterTariff::DAYTIME_RATE   => @economic_tariff.weighted_cost(kwh_x48, :daytime_rate)
             },
             differential: true
           }
         else
           {
             rates_x48: {
-              flat_rate: AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(:rate))
+              MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(:rate))
             },
             differential: false
           }

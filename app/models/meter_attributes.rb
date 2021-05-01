@@ -656,11 +656,6 @@ class MeterAttributes
             rate2:        MeterAttributes.default_rate,
             rate3:        MeterAttributes.default_rate,
 
-            # included for backwards compatibility - probably shouldn't be used?
-            # favour rate0..rate3 as above
-            daytime_rate:   MeterAttributes.default_rate,
-            nighttime_rate: MeterAttributes.default_rate,
-
             tiered_rate0: MeterAttributes.default_tiered_rate,
             tiered_rate1: MeterAttributes.default_tiered_rate,
             tiered_rate2: MeterAttributes.default_tiered_rate,
