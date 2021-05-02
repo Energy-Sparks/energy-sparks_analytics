@@ -94,7 +94,7 @@ class CompareContentResults
       end
     else
       differences = new_content
-      puts "Number of content components differ: #{comparison_content.length} versus #{new_content.length}"
+      puts "Components differ: #{comparison_content.length}/#{new_content.length}"
     end
     differences.compact
   end

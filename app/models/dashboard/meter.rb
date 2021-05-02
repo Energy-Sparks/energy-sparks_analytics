@@ -143,7 +143,7 @@ module Dashboard
 
     def original_meter
       if solar_pv_panels? || storage_heater?
-        raise MissingOriginalMainsMeter, "Missing original mains meter for #{mpxn}" unless sub_meters.key?(:mains_consume) && !sub_meters[:mains_consume].nil?
+        raise MissingOriginalMainsMeter, "Missing original mains meter for #{mpxn} only got #{sub_meters&.keys}" unless sub_meters.key?(:mains_consume) && !sub_meters[:mains_consume].nil?
         sub_meters[:mains_consume]
       else
         self
@@ -277,9 +277,9 @@ module Dashboard
     def self.synthetic_mpan_mprn(mpan_mprn, type)
       mpan_mprn = mpan_mprn.to_i
       case type
-      when :storage_heater_only
+      when :storage_heater_only, :storage_heater_disaggregated_storage_heater
         70000000000000 + mpan_mprn
-      when :electricity_minus_storage_heater
+      when :electricity_minus_storage_heater, :storage_heater_disaggregated_electricity
         75000000000000 + mpan_mprn
       when :solar_pv
         80000000000000 + mpan_mprn

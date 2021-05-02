@@ -519,7 +519,7 @@ private
     # model calculated using the latest year's regression data,deliberately ignores chart request
     last_year = SchoolDatePeriod.year_to_date(:year_to_date, 'validate amr', @last_meter_date, @first_meter_date)
     meter = select_one_meter([:gas, :storage_heater])
-    logger.info "Calculating heating model for #{meter.id} - SeriesDataManager::calculate_model_by_type"
+    logger.info "Calculating heating model for #{meter.mpxn} - SeriesDataManager::calculate_model_by_type"
     meter.heating_model(last_year, model_type, non_heating_model_type)
   end
 
@@ -533,7 +533,7 @@ private
     if @meters[0].nil?
       @meters[1]
     elsif !preferred_fuel_types.nil?
-      if !@meters[0].nil? &&  [preferred_fuel_types].flatten.include?(@meters[0].fuel_type)
+      if !@meters[0].nil? && [preferred_fuel_types].flatten.include?(@meters[0].fuel_type)
         @meters[0]
       else
         @meters[1]

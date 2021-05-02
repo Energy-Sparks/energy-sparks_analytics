@@ -70,7 +70,7 @@ class CostAdviceBase < AdviceBase
 
     # map then sum to avoid statsample bug
     total_percent = real_meters.map do |meter|
-      meter_cost(meter.original_meter, true, false, start_date, end_date).percent_real
+      meter_cost(meter, true, false, start_date, end_date).percent_real
     end.sum
 
     total_percent / real_meters.length
@@ -86,7 +86,7 @@ class CostAdviceBase < AdviceBase
     if real_meters.length > 1 
       # do remaining meters
       real_meters.each do |meter|
-        meter_cost_list.push(meter_cost(meter.original_meter, true, false, start_date, end_date).content)
+        meter_cost_list.push(meter_cost(meter, true, false, start_date, end_date).content)
       end
     end
 
