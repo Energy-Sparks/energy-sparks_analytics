@@ -164,7 +164,8 @@ class AccountingTariff < EconomicTariff
   def raise_and_log_error(exception, message, data)
     logger.info message
     logger.info data
-    raise exception, message
+    # TODO(PH, 3May2021) - uncomment once system wide accounting tariffs are released
+    # raise exception, message
   end
 
   def check_time_ranges_on_30_minute_boundaries(time_ranges)

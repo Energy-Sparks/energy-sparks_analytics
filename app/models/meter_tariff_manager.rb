@@ -53,9 +53,18 @@ class MeterTariffManager
 
   def accounting_cost(date, kwh_x48)
     tariff = accounting_tariff_for_date(date)
+    
     return nil if tariff.nil?
 
     tariff.costs(date, kwh_x48)
+  end
+
+  # used by meter consolidation tariff; attempt real tariff, otherwise default indicative
+  def meter_standing_charge_£_per_day(date)
+    tariff = calculate_accounting_tariff_for_date(date, true)
+    return @indicative_standing_charge.daily_standing_charge_£_per_day if tariff.nil?
+    c = tariff.costs(date, AMRData.one_day_zero_kwh_x48)
+    c[:standing_charges].values.sum
   end
 
   def any_differential_tariff?(start_date, end_date)
@@ -102,7 +111,7 @@ class MeterTariffManager
 
   private
 
-  def calculate_accounting_tariff_for_date(date)
+  def calculate_accounting_tariff_for_date(date, ignore_defaults = false)
     override = override_tariff(date)
     return override unless override.nil?
 
@@ -110,9 +119,9 @@ class MeterTariffManager
 
     accounting_tariff = find_tariff(date)
 
-    accounting_tariff = find_default_tariff(date) if accounting_tariff.nil?
+    accounting_tariff = find_default_tariff(date) if !ignore_defaults && accounting_tariff.nil?
 
-    # TODO (PH, 27Apr2021) - this shouldn't happen once system wide default accounting tariff setup
+    # this should only happen for when ignore_defaults = true; meter consolidation alert
     return nil if accounting_tariff.nil?
 
     merge = merge_tariff(date)
@@ -171,6 +180,7 @@ class MeterTariffManager
     @override_tariffs = preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic_override)) || []
     @merge_tariffs = preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic_merge)) || []
     @differential_tariff_override = process_economic_tariff_override(meter.attributes(:economic_tariff_differential_accounting_tariff))
+    @indicative_standing_charge = MeterIndicativeStandingCharge.new(meter, meter.attributes(:indicative_standing_charge))
     check_tariffs
   end
 
@@ -190,9 +200,15 @@ class MeterTariffManager
     return [] if accounting_tariffs.nil?
 
     # TODO (PH, 25Apr2021) remove once all default accounting tariffs are removed from the database
-    non_defaults = accounting_tariffs.select { |t| t[:default] == default }
+    tariffs = accounting_tariffs.select do |t|
+      if default
+        t[:default] == true
+      else
+        t[:default] != true # nil || false
+      end
+    end
 
-    non_defaults.map do |accounting_tariff|
+    tariffs.map do |accounting_tariff|
       AccountingTariff.new(meter, accounting_tariff)
     end
   end
@@ -210,9 +226,9 @@ class MeterTariffManager
       r = t1.tariff[:start_date]..t1.tariff[:end_date]
       if r.cover?(t2.tariff[:start_date]) || r.cover?(t2.tariff[:end_date])
         if t1.tariff[:sub_type] != :weekday_weekend || t2.tariff[:sub_type] != :weekday_weekend
-          raise OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs #{@mpxn}"
+          raise_and_log_error(OverlappingAccountingTariffs, "Overlapping (date) accounting tariffs #{@mpxn}")
         elsif weekday_type?(t1) == weekday_type?(t2)
-          raise OverlappingAccountingTariffsForWeekdayTariff, "Overlapping weekday accounting tariffs #{@mpxn}"
+          raise_and_log_error(OverlappingAccountingTariffsForWeekdayTariff, "Overlapping weekday accounting tariffs #{@mpxn}")
         end
       end
     end
@@ -224,7 +240,7 @@ class MeterTariffManager
     elsif tariff.tariff[:weekend]
       :weekend
     else
-      raise WeekdayTypeNotSetForWeekdayTariff, "Missing weekday type for tariff #{@mpxn}"
+      raise_and_log_error(WeekdayTypeNotSetForWeekdayTariff, "Missing weekday type for tariff #{@mpxn}")
     end
   end
 
@@ -246,23 +262,31 @@ class MeterTariffManager
   # defensive programming on basis either user or dcc might setup tariffs incorrectly
   def check_weekday_weekend_tariffs(tariffs, weekday_tariffs, weekend_tariffs, date)
     if tariffs.length != weekday_tariffs.length + weekend_tariffs.length 
-      raise NotAllWeekdayWeekendTariffsOnDateAreWeekdayWeekendTariffs, "Not all tariffs on #{date} for mpxn #{@mpxn} are  weekday weekend tariffs"
+      raise_and_log_error(NotAllWeekdayWeekendTariffsOnDateAreWeekdayWeekendTariffs, "Not all tariffs on #{date} for mpxn #{@mpxn} are  weekday weekend tariffs")
     end
 
     if weekday_tariffs.length > 1 || weekend_tariffs.length > 1
-      raise TooManyWeekdayWeekendTariffsOnDate, "Too many weekend/weekday tariffs on #{date} for mpxn #{@mpxn}"
+      raise_and_log_error(TooManyWeekdayWeekendTariffsOnDate, "Too many weekend/weekday tariffs on #{date} for mpxn #{@mpxn}")
     end
 
     if weekend?(date)
       if weekend_tariffs.empty? || weekend_tariffs[0].tariff[:weekend] != true
-        raise MissingWeekdayWeekendTariffsOnDate, "Missing or set false weekend tariff on #{date} for mpxn #{@mpxn}"
+        raise_and_log_error(MissingWeekdayWeekendTariffsOnDate, "Missing or set false weekend tariff on #{date} for mpxn #{@mpxn}")
       end
     elsif weekday_tariffs.empty? || weekday_tariffs[0].tariff[:weekday] != true
-      raise MissingWeekdayWeekendTariffsOnDate, "Missing weekday or set false tariff on #{date} for mpxn #{@mpxn}" 
+      raise_and_log_error(MissingWeekdayWeekendTariffsOnDate, "Missing weekday or set false tariff on #{date} for mpxn #{@mpxn}")
     end
   end
 
   def weekend?(date)
     date.saturday? || date.sunday?
+  end
+
+  def raise_and_log_error(exception, message, data)
+    logger.info message
+    logger.info data
+    puts "Got here #{message}"
+    # TODO(PH, 3May2021) - uncomment once system wide accounting tariffs are released
+    # raise exception, message
   end
 end

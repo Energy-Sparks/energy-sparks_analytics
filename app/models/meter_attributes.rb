@@ -443,6 +443,8 @@ class MeterAttributes
     id  :economic_tariff_differential_accounting_tariff
     key :economic_tariff_differential_accounting_tariff
 
+    name 'Differential tariff'
+
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date:      MeterAttributeTypes::Date.define(required: true),
@@ -456,12 +458,11 @@ class MeterAttributes
     id  :indicative_standing_charge
     key :indicative_standing_charge
 
+    name 'Indicative standing charge'
+
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        start_date: MeterAttributeTypes::Date.define,
-        end_date:   MeterAttributeTypes::Date.define,
-        per:        MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
-        rate:       MeterAttributeTypes::Float.define
+        rate:         MeterAttributeTypes::Float.define(hint: 'daily rate')
       }
     )
   end
