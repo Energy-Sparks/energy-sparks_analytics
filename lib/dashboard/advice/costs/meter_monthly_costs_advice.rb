@@ -16,7 +16,9 @@ class MeterMonthlyCostsAdvice
   private
 
   def row_to_£(row)
-    row.map{ |value| value.is_a?(Numeric) ? format_£(value) : value }
+    # Julian JH this is the problematic code indicative of BigDecimal leaking into the analytics
+    # row.map{ |value| value.is_a?(Numeric) ? format_£(value) : value }
+    row.map{ |value| value.is_a?(Float) ? format_£(value) : value }
   end
 
   def format_£(value)

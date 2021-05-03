@@ -72,10 +72,9 @@ class MeterCost
   end
 
   def breakdown_charges(days)
-    case days
-    when days_meter_data < 14
+    if days < 14
       up_to_fourteen_day_breakdown
-    when days_meter_data < 7 * 10
+    elsif days < 8 * 10
       up_to_ten_week_breakdown
     else
       up_to_one_year_breakdown
@@ -305,6 +304,28 @@ class MeterCost
     { type: :html, content: change_in_usage_description }
   end
 
+  def general_usage_change_description(annual_change_abs_formatted, percent)
+    return 'This is the same as last year.' if percent == 0.0 # unlikely
+    text = %{
+      <%= adjective_general(percent) %> last year of <%= annual_change_abs_formatted %>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def adjective_general(percent)
+    if percent == 0.0
+      'the same as'
+    elsif percent > 0.01
+      'an increase on'
+    elsif percent > 0.0
+      'a slight increase on'
+    elsif percent < -0.01
+      'a decrease on'
+    else
+      'a slight decrease on'
+    end
+  end
+
   def change_in_usage_description
     return '' unless two_years_data?
 
@@ -314,28 +335,20 @@ class MeterCost
     annual_increase_kwh = current_year[:kwh] - previous_year[:kwh]
     annual_increase_£ = current_year[:£] - previous_year[:£]
 
-    percent_increase_kwh  = annual_increase_kwh / previous_year[:kwh]
-    percent_increase_£    = annual_increase_£ / previous_year[:£]
+    annual_increase_kwh_abs_html =  FormatEnergyUnit.format(:kwh, annual_increase_kwh.magnitude, :html)
+    annual_increase_£_abs_html   =  FormatEnergyUnit.format(:£,   annual_increase_£.magnitude,   :html)
 
-    # because the underlying rates might have changed the £ and kWh adjectives can be different
-    change_adjective_kwh  = adjective(percent_increase_kwh)
-    change_adjective_£    = adjective(percent_increase_£)
-
-    formatted_increase_kwh_percent = FormatEnergyUnit.format(:percent, percent_increase_kwh.magnitude, :html)
-    abs_change_£ = FormatEnergyUnit.format(:£, annual_increase_£.magnitude, :html, false, false, :no_decimals)
-
-    text = %q(
-      This year you consumed <%= current_year[:formatted_kwh] %>
+    text = %{
+      This year this meter consumed <%= current_year[:formatted_kwh] %>
       which cost <%= current_year[:formatted_£] %>,
       compared with <%= previous_year[:formatted_kwh] %> / <%= previous_year[:formatted_£] %>
-      during the previous year. This is an <%= change_adjective_kwh %> in usage of <%= formatted_increase_kwh_percent %>,
-      and an <%= change_adjective_kwh %> in costs of <%= abs_change_£ %>.
-    ).freeze
+      during the previous year.
+      This is 
+      <%= general_usage_change_description(annual_increase_£_abs_html, annual_increase_£) %>,
+      and
+      <%= general_usage_change_description(annual_increase_kwh_abs_html, annual_increase_kwh) %>
+      in energy consumption.
+    }.freeze
     ERB.new(text).result(binding)
-  end
-
-  def adjective(percent_increase)
-    return 'an infinite increase' if percent_increase.nan?
-    percent_increase.between?(-0.05, 0.05) ? 'about the same' : (percent_increase > 0.0 ? 'increase' : 'decrease')
   end
 end
