@@ -184,6 +184,23 @@ class MeterCollection
     meter_list
   end
 
+  # alternative approach to finding real meters, avoids synthetic_mpan_mprn?
+  # which can pickup real meters coming in from 3rd party systems like
+  # Orsis where the MPAN is made up; used to test whether this approach works
+  #  too big a change to replace real_meters function
+  # TODO (PH, 4May2021) - replace if working, fully tested - see costs_advice.rb: check_real_meters
+  def real_meters2
+    meter_list = [
+      @heat_meters,
+      @electricity_meters,
+      @storage_heater_meters
+    ].compact.flatten
+
+    meters = meter_list.map{ |m| m.sub_meters.fetch(:mains_consume, m) }
+
+    meters.uniq{ |meter| meter.mpxn }
+  end
+
   # some meters are 'artificial' e.g. split off storage meters and re aggregated solar PV meters
   def real_meters
     all_meters.select { |meter| !meter.synthetic_mpan_mprn? }.uniq{ |m| m.mpxn}

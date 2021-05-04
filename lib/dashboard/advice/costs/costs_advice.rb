@@ -58,7 +58,8 @@ class CostAdviceBase < AdviceBase
   private
 
   def real_meters
-    @school.real_meters.select { |m| m.fuel_type == fuel_type }
+    # check_real_meters_deprecated
+    @school.real_meters2.select { |m| m.fuel_type == fuel_type }
   end
 
   def average_real_tariff_coverage_percent
@@ -116,6 +117,18 @@ class CostAdviceBase < AdviceBase
     [start_date, end_date]
   end
 
+  def check_real_meters_deprecated
+    o = @school.real_meters.select { |m| m.fuel_type == fuel_type }
+    n = @school.real_meters2.select { |m| m.fuel_type == fuel_type }
+    so_mpans = o.map(&:mpxn).sort
+    sn_mpans = n.map(&:mpxn).sort
+    if so_mpans != sn_mpans
+      puts "Got here - real meters returning different values for #{@school.name}"
+      puts "Before: #{so_mpans}"
+      puts "After:  #{sn_mpans}"
+    end
+  end
+
   # COPY OF INTRO_TO_SCHOOL_FINANCES_1
   INTRO_TO_SCHOOL_FINANCES_2 = %q(
     <p>
@@ -163,58 +176,6 @@ class CostAdviceBase < AdviceBase
           </li>
         </ul>
   ).freeze
-
-=begin
-  # TODO(PH, 9Apr2021) remove once testing complete on test
-  #                    restricts meter breakdown to dcc only schools
-  def has_dcc_meters?
-    real_meters.any? { |m| m.dcc_meter }
-  end
-
-  def tariffs_not_enough_tariff_data
-    text = %{
-      <p>
-        <% if tariff_status == :no_tariffs %>
-          You currently don't have any accounting tariffs set for this meter.
-        <% else %>
-          You have some tariff information setup for this meter but it doesn't
-          cover the <%= time_period_of_tariffs_needed %> we need to provide analysis of your bill.
-        <% end %>
-        If you would like us to provide a full analysis of your bills online
-        please email <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">hello@energysparks.uk</a>
-        with some example bills.
-        Your billing analysis will only be available to the school and not publicly displayed.
-      </p>
-    }
-    missing_tariffs_text = ERB.new(text).result(binding)
-    [
-      { type: :html, content: "<h2>Analysis of #{fuel_type} costs</h2>" },
-      { type: :html, content: missing_tariffs_text }
-    ]
-  end
-
-  def solar_pv_not_supported
-    text = %{
-      <p>
-        Energy Sparks currently doesn't support billing calculations
-        if you have solar pv. If you think this would be a useful feature
-        and would help you please email us at
-        <a href="mailto:hello@energysparks.uk?subject=It%20would%20helpful%20to%20us%20if%20Energy%20Sparks%20council%20provide%20billing%20information%20for%20solar%20pv for <%= @school.name %>">hello@energysparks.uk</a>
-        with some example bills.
-        Your billing analysis will only be available to the school and not publicly displayed.
-      </p>
-    }
-    [
-      { type: :html, content: "<h2>Analysis of #{fuel_type} costs</h2>" },
-      { type: :html, content: ERB.new(text).result(binding) }
-    ]
-  end
-
-  def time_period_of_tariffs_needed
-    days = [aggregate_meter.amr_data.days, 2 * 365.0].min
-    FormatEnergyUnit.format(:years, days / 365.0, :html)
-  end
-=end
 end
 
 class AdviceElectricityCosts < CostAdviceBase
