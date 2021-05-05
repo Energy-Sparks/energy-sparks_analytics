@@ -1,6 +1,7 @@
 class RunAdultDashboard < RunCharts
 
   def run_flat_dashboard(control)
+    @accordion_count = 0
     @all_html = ''
     differing_pages = {}
     pages = control.fetch(:pages, page_list)
@@ -148,9 +149,8 @@ class RunAdultDashboard < RunCharts
   # the id reference needs to be unique
   # for all the html otherwise the
   # 2nd+ instance fails to open
-  def self.accordion_count
-    @@accordion_count ||= 0
-    @@accordion_count += 1
+  def accordion_count
+    @accordion_count += 1
   end
 
   def accordion_html(title, content)
@@ -166,7 +166,7 @@ class RunAdultDashboard < RunCharts
       title, rhs = title.split('&pound;')
       rhs = '&pound;' + rhs
     end
-    index = "accordionindex#{self.class.accordion_count}"
+    index = "accordionindex#{accordion_count}"
     text = %{
       <input type="checkbox" id="<%= index %>" />
       <label for="<%= index %>"><div class="split-para"><%= title %><span><%= rhs %></span></div></label>

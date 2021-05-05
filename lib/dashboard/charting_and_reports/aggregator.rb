@@ -56,7 +56,9 @@ class Aggregator
 
     bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
 
-    if bucketed_period_data.length > 1 || periods.length > 1
+    if up_to_a_year_month_comparison?(@chart_config)
+      @bucketed_data, @bucketed_data_count = merge_monthly_comparison_charts(bucketed_period_data)
+    elsif bucketed_period_data.length > 1 || periods.length > 1
       @bucketed_data, @bucketed_data_count = merge_multiple_charts(bucketed_period_data, schools)
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
@@ -360,6 +362,53 @@ class Aggregator
       bucketed_data_count.each do |series_name, count_data|
         new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data_count[new_series_name] = count_data
+      end
+    end
+    [@bucketed_data, @bucketed_data_count]
+  end
+
+  
+  def up_to_a_year_month_comparison?(chart_config)
+    timescales = chart_config[:timescale]
+    return false if timescales.nil? || !timescales.is_a?(Array) || chart_config[:x_axis] != :month
+    return false unless timescales.length > 1
+    timescales.all? do |timescale|
+      timescale.is_a?(Hash) && timescale.keys[0] == :up_to_a_year
+    end
+  end
+
+  # one of merging of multiple chart series for year on year up_to_a_year
+  # comparison reports - where there are mutliple years of data but not all
+  # complete, and incomplete years have less data which needs to be aligned
+  # to the correct month; TODO (PH, 5Apr2021) - consider redesign of whole bucketing system
+  def merge_monthly_comparison_charts(bucketed_period_data)
+    @bucketed_data = {}
+    @bucketed_data_count = {}
+    time_count, school_count = count_time_periods_and_school_names(bucketed_period_data)
+    raise EnergySparksBadChartSpecification, 'More than one school not supported' if school_count > 1
+    bucketed_period_data.reverse_each.with_index do |period_data, index|
+      bucketed_data, bucketed_data_count, time_description, school_name, x_axis, x_axis_date_ranges = period_data
+      if index == 0
+        @x_axis = x_axis.map{ |month_year| month_year[0..2]} # MMM YYYY to MMM
+        @bucketed_data[      time_description] = bucketed_data.values[0]
+        @bucketed_data_count[time_description] = bucketed_data_count.values[0]
+      else
+        time_description += "- partial year (from #{x_axis[0]})" if x_axis.length < @x_axis.length
+        
+        keys = x_axis.map{ |month_year| month_year[0..2]}
+
+        new_x_data = @x_axis.map do |month|
+          column = keys.find_index(month)
+          column.nil? ? 0.0 : bucketed_data.values[0][column]
+        end
+
+        new_x_count_data = @x_axis.map do |month|
+          column = keys.find_index(month)
+          column.nil? ? 0.0 : bucketed_data_count.values[0][column]
+        end
+
+        @bucketed_data[time_description]       = new_x_data
+        @bucketed_data_count[time_description] = new_x_count_data
       end
     end
     [@bucketed_data, @bucketed_data_count]
