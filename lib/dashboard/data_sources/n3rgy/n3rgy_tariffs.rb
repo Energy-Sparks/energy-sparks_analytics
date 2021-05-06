@@ -11,10 +11,10 @@ class N3rgyTariffs
   # compresses standing charges, and rates (1 row per half hour)
   # into meter attribute like descriptive tariffs
   # approx 16,000 to 2 compression
-  def parameterise
+  def parameterise(compressed_rates = true)
     return nil unless tariffs_available?
     {
-      kwh_rates:        process_kwh_rates(       @tariff_data[:kwh_tariffs]),
+      kwh_rates:        process_kwh_rates(       @tariff_data[:kwh_tariffs], compressed_rates),
       standing_charges: process_standing_charges(@tariff_data[:standing_charges])
     }
   end
@@ -25,11 +25,35 @@ class N3rgyTariffs
 
   private
 
-  def process_kwh_rates(rates)
+  def process_kwh_rates(rates, compressed_rates)
     daily_tariffs = parameterise_all_days(rates)
+    daily_tariffs = fill_in_missing_rates_between_dates(daily_tariffs) if compressed_rates
     grouped_data = group_tariffs_by_date(daily_tariffs)
     grouped_data = WeekdayRate.new.group_by_weekday(grouped_data) if WeekdayRate.weekday_tariff?(grouped_data)
     grouped_data
+  end
+
+  def fill_in_missing_rates_between_dates(compressed_tariffs)
+    start_date = compressed_tariffs.first[0]
+    end_date = compressed_tariffs.last[0]
+    current_tariff_index = 0
+    filled_in_rates = []
+
+    (start_date..end_date).each do |date|
+      if current_tariff_index < compressed_tariffs.length - 1 &&
+        compressed_tariffs[current_tariff_index+1][0] == date
+        current_tariff_index += 1
+      end
+
+      filled_in_rates.push(
+        [
+          date,
+          compressed_tariffs[current_tariff_index][1]
+        ]
+      )
+    end
+
+    filled_in_rates
   end
 
   def parameterise_all_days(rates)
