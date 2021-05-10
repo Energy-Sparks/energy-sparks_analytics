@@ -42,12 +42,6 @@ module AnalyseHeatingAndHotWater
 
     # either use a specific model, the 'best' model, or one defined by a meter attribute override
     def self.model_factory(type, heat_meter, model_overrides)
-=begin
-      puts "Got here: kwh override: #{model_overrides.heating_non_heating_day_fixed_kwh_separation}" unless model_overrides.heating_non_heating_day_fixed_kwh_separation.nil?
-      if !model_overrides.heating_non_heating_day_separation_model_override.nil? && !%i[no_idea either].include?(model_overrides.heating_non_heating_day_separation_model_override)
-        puts "Got here: model override: #{model_overrides.heating_non_heating_day_separation_model_override} #{heat_meter.mpan_mprn}"
-      end
-=end
       model = model_factory_private(type, heat_meter, model_overrides)
       Logging.logger.info "Using #{model.class.type} for heating/non heating model separation for mprn #{heat_meter.mpan_mprn}"
       model

@@ -1,9 +1,9 @@
 # test report manager
-require 'ruby-prof'
+# require 'ruby-prof'
 require 'benchmark/memory'
 require 'require_all'
-require_relative '../lib/dashboard.rb'
-require_rel '../test_support'
+require_relative '../../lib/dashboard.rb'
+require_rel '../../test_support'
 require './script/report_config_support.rb'
 
 script = {
@@ -17,7 +17,7 @@ script = {
   no_source:                   :aggregated_meter_collection,
   # generate_analytics_school_meta_data: true,
   schools:                  ['st-mart*','paul*','long*','prend*','saund*','fresh*'],
-  schools:                  ['trinity*'], #['pentrehafod*'],
+  schools:                  ['belv*'], #['pentrehafod*'],
   no_source:                   :analytics_db, # : analytics_db :aggregated_meter_collection :unvalidated_meter_data :load_unvalidated_meter_collection, 
   source:                   :unvalidated_meter_data, #  :aggregated_meter_collection,
   # 
@@ -26,9 +26,7 @@ script = {
                               charts: [
                                 # :dashboard,
                                 adhoc_worksheet: { name: 'Test', charts: %i[
-                                  group_by_week_electricity_meter_breakdown
-                                  temp_test
-                                  temp_test2
+                                  management_dashboard_group_by_week_gas
                                   ]},
 
                                   # management_dashboard_group_by_week_electricity

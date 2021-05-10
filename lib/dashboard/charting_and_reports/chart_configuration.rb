@@ -951,6 +951,14 @@ class ChartManager
       ignore_single_series_failure: true,
       chart1_subtype:   :stacked,
     },
+    electricity_cost_1_year_accounting_breakdown_group_by_week: {
+      inherits_from:    :electricity_cost_1_year_accounting_breakdown,
+      x_axis:           :week
+    },
+    electricity_cost_1_year_accounting_breakdown_group_by_day: {
+      inherits_from:    :electricity_cost_1_year_accounting_breakdown,
+      x_axis:           :day
+    },
     accounting_cost_daytype_breakdown_electricity: {
       name:             '',
       yaxis_units:      :accounting_cost,

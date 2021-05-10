@@ -105,19 +105,33 @@ class StorageHeater
     end
 
     def storage_heater_start_time_hh(date)
-      config_for_date(date)[:charge_start_time].to_halfhour_index_with_fraction[0]
+      @start_time_for_date ||= {}
+      @start_time_for_date[date] ||= fractional_hh_from_time(config_for_date(date)[:charge_start_time])
     end
 
     def storage_heater_end_time_hh(date)
-      config_for_date(date)[:charge_end_time].to_halfhour_index_with_fraction[0]
+      @end_time_for_date ||= {}
+      @end_time_for_date[date] ||= fractional_hh_from_time(config_for_date(date)[:charge_end_time])
     end
 
-    private def config_for_date(date)
+    private
+
+    def fractional_hh_from_time(t)
+      @fractional_hh_from_time ||= {}
+      @fractional_hh_from_time[t] ||= t.to_halfhour_index_with_fraction[0]
+    end
+
+    def config_for_date(date)
+      @config_for_date ||= {}
+      @config_for_date[1] ||= find_config_for_date(date)
+    end
+
+    def find_config_for_date(date)
       @config_by_date_range.select { |date_range, config| date >= date_range.first && date <= date_range.last }
       @config_by_date_range.empty? ? nil : @config_by_date_range.values[0]
     end
 
-    private def parse_meter_attributes_configuration(meter_attributes_config)
+    def parse_meter_attributes_configuration(meter_attributes_config)
       # puts "Storage heater attributes are #{meter_attributes_config}"
       # ap(meter_attributes_config)
       if meter_attributes_config.nil?
@@ -133,7 +147,7 @@ class StorageHeater
       end
     end
 
-    private def parse_meter_attributes_configuration_for_period(period_config)
+    def parse_meter_attributes_configuration_for_period(period_config)
       start_date = (!period_config.nil? && period_config.key?(:start_date)) ? period_config[:start_date] : MIN_DEFAULT_START_DATE
       end_date   = (!period_config.nil? && period_config.key?(:end_date) )  ? period_config[:end_date]   : MAX_DEFAULT_END_DATE
       {

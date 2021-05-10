@@ -176,9 +176,7 @@ end
 # e.g. baseload chart, still display if under a years data
 class UpToAYearPeriods < YearPeriods
   protected def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
-    periods = check_or_create_minimum_period(@meter_collection.holidays.years_to_date(first_meter_date, last_meter_date, false))
-    periods = [new_school_period(@first_meter_date, last_meter_date, 'short year')] if periods.empty?
-    periods
+    Holidays.periods_cadence(first_meter_date, last_meter_date, include_partial_period: true)
   end
 end
 

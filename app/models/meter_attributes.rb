@@ -107,6 +107,8 @@ class MeterAttributes
     structure MeterAttributeTypes::Date.define(required: true)
   end
 
+=begin
+# deprecated PH 13Apr2021
   class OverrideWithSyntheticSheffieldPVData < MeterAttributeTypes::AttributeBase
     id :meter_corrections_use_sheffield_pv_data
     key :set_to_sheffield_pv_data
@@ -120,6 +122,7 @@ class MeterAttributes
       }
     )
   end
+=end
 
   class ReadingsEndDate < MeterAttributeTypes::AttributeBase
     id :meter_corrections_readings_end_date
@@ -136,7 +139,7 @@ class MeterAttributes
     structure MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:set_all_missing_to_zero, :correct_zero_partial_data])
   end
 
-  class PartialMeterFloorAreaPupilNumbersolar_pvOverride < MeterAttributeTypes::AttributeBase
+  class PartialMeterFloorAreaPupilNumberOverride < MeterAttributeTypes::AttributeBase
     id :partial_meter_coverage
     key :partial_meter_coverage
     aggregate_over :partial_meter_coverage
@@ -336,6 +339,8 @@ class MeterAttributes
     )
   end
 
+=begin
+# deprecated PH 13Apr2021
   class SolarPVExternalMeterIdentifier < MeterAttributeTypes::AttributeBase
     id    :solar_pv_external_identifier
     key   :solar_pv_external_identifier
@@ -348,6 +353,7 @@ class MeterAttributes
       }
     )
   end
+=end
 
   class LowCarbonHub < MeterAttributeTypes::AttributeBase
 
@@ -437,11 +443,26 @@ class MeterAttributes
     id  :economic_tariff_differential_accounting_tariff
     key :economic_tariff_differential_accounting_tariff
 
+    name 'Differential tariff'
+
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date:      MeterAttributeTypes::Date.define(required: true),
         end_date:        MeterAttributeTypes::Date.define,
         differential:    MeterAttributeTypes::Boolean.define(required: true),
+      }
+    )
+  end
+
+  class IndicativeStandingCharge < MeterAttributeTypes::AttributeBase
+    id  :indicative_standing_charge
+    key :indicative_standing_charge
+
+    name 'Indicative standing charge'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        rate:         MeterAttributeTypes::Float.define(hint: 'daily rate')
       }
     )
   end
@@ -507,11 +528,12 @@ class MeterAttributes
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        start_date: MeterAttributeTypes::Date.define,
-        end_date:   MeterAttributeTypes::Date.define,
-        name:       MeterAttributeTypes::String.define,
-        default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
-        rates:      MeterAttributeTypes::Hash.define(
+        start_date:   MeterAttributeTypes::Date.define,
+        end_date:     MeterAttributeTypes::Date.define,
+        name:         MeterAttributeTypes::String.define,
+        default:      MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
+        system_wide:  MeterAttributeTypes::Boolean.define(hint: 'only set at system wide level'),
+        rates:        MeterAttributeTypes::Hash.define(
           required: true,
           structure: {
             rate: MeterAttributeTypes::Hash.define(
@@ -625,7 +647,7 @@ class MeterAttributes
         sub_type:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:weekday_weekend]),
         # default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
         rates:      MeterAttributeTypes::Hash.define(
-          required: true,
+          required: false,
           structure: {
             flat_rate:    MeterAttributes.default_flat_rate,
 
@@ -634,11 +656,6 @@ class MeterAttributes
             rate1:        MeterAttributes.default_rate,
             rate2:        MeterAttributes.default_rate,
             rate3:        MeterAttributes.default_rate,
-
-            # included for backwards compatibility - probably shouldn't be used?
-            # favour rate0..rate3 as above
-            daytime_rate:   MeterAttributes.default_rate,
-            nighttime_rate: MeterAttributes.default_rate,
 
             tiered_rate0: MeterAttributes.default_tiered_rate,
             tiered_rate1: MeterAttributes.default_tiered_rate,
@@ -649,8 +666,8 @@ class MeterAttributes
             duos_amber:   MeterAttributeTypes::Float.define,
             duos_green:   MeterAttributeTypes::Float.define,
 
-            weekdays:     MeterAttributeTypes::Boolean.define,
-            weekends:     MeterAttributeTypes::Boolean.define,
+            weekday:     MeterAttributeTypes::Boolean.define,
+            weekend:     MeterAttributeTypes::Boolean.define,
           }.merge(MeterAttributes.default_tariff_rates)
         ),
         asc_limit_kw: MeterAttributeTypes::Float.define

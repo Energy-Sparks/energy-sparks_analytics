@@ -16,6 +16,8 @@ class MeterMonthlyCostsAdvice
   private
 
   def row_to_£(row)
+    # Julian JH this is the problematic code indicative of BigDecimal leaking into the analytics
+    # row.map{ |value| value.is_a?(Numeric) ? format_£(value) : value }
     row.map{ |value| value.is_a?(Float) ? format_£(value) : value }
   end
 
@@ -37,7 +39,6 @@ class MeterMonthlyCostsAdvice
   end
 
   private def reorder_columns(components)
-
     # move to last 3 columns, in this order
     %i[standing_charge variance_versus_last_year total].each do |column_type|
       if components.include?(column_type)
@@ -50,7 +51,7 @@ class MeterMonthlyCostsAdvice
       components.delete(:rate)
       components.insert(0, :rate)
     end
-    
+
     if components.include?(:flat_rate) # put flat_rate in the first column
       components.delete(:flat_rate)
       components.insert(0, :flat_rate)
@@ -72,7 +73,7 @@ class MeterMonthlyCostsAdvice
   def total_row(up_to_13_most_recent_months, bill_components)
     exceptions = [] # don't add up non-full months
     totals = bill_components.map do |component|
-      total = up_to_13_most_recent_months.map do |month|
+      up_to_13_most_recent_months.map do |month|
         if month[:variance_versus_last_year].nil?
           exceptions.push(month[:month])
           0.0
@@ -112,7 +113,6 @@ class MeterMonthlyCostsAdvice
         months_billing_plus_12 = months_billing.values[month_index + 12]
         full_month = last_day_of_month(months_billing_plus_12[:start_date]) == months_billing_plus_12[:end_date]
         months_billing_plus_12[:variance_versus_last_year] = full_month ? months_billing_plus_12[:total] - month_billing[:total] : nil
-        
       end
     end
 

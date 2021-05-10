@@ -427,6 +427,25 @@ class Holidays
     yrs_to_date
   end
 
+  def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false)
+    days = end_date - start_date + 1
+    periods = days / cadence_days
+
+    whole_periods = include_partial_period ? periods.ceil : periods.floor
+
+    i = -1
+    period_index_list = Array.new(whole_periods){ i += 1 }
+
+    period_dates = period_index_list.map { |v| [[end_date - (v + 1) * cadence_days + 1, start_date].max, end_date - v * cadence_days] }
+
+    cadence = "cadence_#{cadence_days.to_i}_days".to_sym
+
+    period_dates.map.with_index do |period_range, period|
+      description = "period #{-period} cadence #{cadence_days}"
+      SchoolDatePeriod.new(cadence, description, period_range[0], period_range[1])
+    end
+  end
+
   # differs from 'year_to_date' as datum (0) if first whole year before activation
   # date hence return a hash, rather than an array, as offset is 2 directional
   def activation_years(activation_date, start_date, end_date, move_to_saturday_boundary)

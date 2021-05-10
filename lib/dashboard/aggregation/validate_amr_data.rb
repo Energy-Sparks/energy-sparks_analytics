@@ -150,9 +150,12 @@ class ValidateAMRData
     elsif rule.key?(:extend_meter_readings_for_substitution)
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
+=begin
+# deprecated PH 13Apr2021
     elsif rule.key?(:meter_corrections_use_sheffield_pv_data) || rule.key?(:set_to_sheffield_pv_data)
       config = rule[:meter_corrections_use_sheffield_pv_data] || rule[:set_to_sheffield_pv_data]
       override_with_sheffield_solar_pv_data(config[:start_date], config[:end_date])
+=end
     end
   end
 
@@ -569,7 +572,7 @@ class ValidateAMRData
         substitute_day_temperature = average_temperature(substitute_date)
         if heating_model == NO_MODEL
           if @amr_data.date_exists?(substitute_date) && daytype(substitute_date) == missing_daytype
-           return [date, create_substituted_data(date, substitute_date, sub_type_code, 'g')]
+           return [date, create_substituted_data(date, substitute_date, sub_type_code, 'G')]
           end
         elsif heating_on == heating_model.heat_on_missing_data?(substitute_date) &&
            within_temperature_range?(avg_temperature, substitute_day_temperature) &&

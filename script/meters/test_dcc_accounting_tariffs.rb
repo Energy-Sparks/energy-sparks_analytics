@@ -38,6 +38,7 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
       control: {
         root:    :adult_analysis_page,
         report_failed_charts:   :summary,
+        user:          { user_role: :analytics, staff_role: nil },
         pages: %i[electricity_profit_loss],
         compare_results: [
           { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
@@ -70,7 +71,7 @@ end
 
 # ap meter_attribute_overrides
 
-school_name_pattern_match = ['n3rgy*']
+school_name_pattern_match = ['n3rgy-*'] # 'n3rgy*', 
 source_db = :dcc_n3rgy_override_with_files
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
 

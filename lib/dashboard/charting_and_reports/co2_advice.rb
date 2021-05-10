@@ -876,11 +876,9 @@ class DashboardEnergyAdvice
         appliances. Specific suggestions, using information which Energy Sparks
         has calculated for your school include:
       </p>
-      <p>
-          <ul>
-            <%= energy_reduction_suggestions %>
-          </ul>
-      </p>
+      <ul>
+        <%= energy_reduction_suggestions %>
+      </ul>
       <p>
         Put together a plan to achieve each of these. Re-enter the new numbers
         into the spreadsheet and see how much carbon the school will save?

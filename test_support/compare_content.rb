@@ -94,7 +94,7 @@ class CompareContentResults
       end
     else
       differences = new_content
-      puts "Number of content components differ: #{comparison_content.length} versus #{new_content.length}"
+      puts "Components differ: #{comparison_content.length}/#{new_content.length}"
     end
     differences.compact
   end
@@ -107,8 +107,8 @@ class CompareContentResults
       remove_content_classes(comparison_component)
       remove_content_classes(new_component)
       if comparison_component != new_component
-        puts "Differs: #{index}"
         if @control[:compare_results].include?(:report_differences)
+          puts "Differs: #{index}"
           h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
           puts h_diff
           puts 'Versus:'
@@ -172,11 +172,11 @@ class CompareContentResults
 
   def remove_volatile_html(html)
     [
-      ['<p>This saving is equivalent', '</button></p>'],
+      ['This saving is equivalent', '</button>'],
       ['sourcing its electricity from in the last 5 minutes:', 'The first column'],
       ['National Electricity Grid is currently', ' kg CO2/kWh.'],
       ['<th scope="col"> Percentage of Carbon </th>', '<td> coal </td>'], # not ideal as doesn't quite match end of table
-      ['<th scope="col"> Percent of Energy </th>', '</tbody>']
+      ['<th scope="col"> Percent of Energy </th>', '</tbody>'],
     ].each do |start_match, end_match|
       html = strip_volatile_content(html, start_match, end_match)
     end

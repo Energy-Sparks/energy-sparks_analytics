@@ -58,17 +58,17 @@ end
 
 class AdviceGasBoilerMorningStart < AdviceGasBase
   def relevance
-    super &&  !non_heating_only? ? :relevant : :never_relevant
+    super == :relevant &&  !non_heating_only? ? :relevant : :never_relevant
   end
 end
 class AdviceGasBoilerSeasonalControl < AdviceGasBase
   def relevance
-    super &&  !non_heating_only? ? :relevant : :never_relevant
+    super == :relevant &&  !non_heating_only? ? :relevant : :never_relevant
   end
 end
 class AdviceGasBoilerThermostatic < AdviceGasBase
   def relevance
-    super &&  !non_heating_only? ? :relevant : :never_relevant
+    super == :relevant &&  !non_heating_only? ? :relevant : :never_relevant
   end
 end
 class AdviceGasBoilerFrost < AdviceGasBase
@@ -76,12 +76,12 @@ class AdviceGasBoilerFrost < AdviceGasBase
     5.0
   end
   def relevance
-    super &&  !non_heating_only? ? :relevant : :never_relevant
+    super == :relevant  &&  !non_heating_only? ? :relevant : :never_relevant
   end
 end
 class AdviceGasHotWater < AdviceGasBase
   def relevance
-    super &&  !heating_only? ? :relevant : :never_relevant
+    super == :relevant &&  !heating_only? ? :relevant : :never_relevant
   end
 end
 

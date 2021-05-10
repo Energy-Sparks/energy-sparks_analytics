@@ -116,7 +116,6 @@ class TimeOfDay
   def hash
     return [hour, minutes].hash
   end
-
 end
 
 class TimeOfDay30mins < TimeOfDay

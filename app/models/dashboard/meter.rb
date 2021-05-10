@@ -1,6 +1,7 @@
 module Dashboard
   # meter: holds basic information descrbing a meter and hald hourly AMR data associated with it
   class Meter
+    class MissingOriginalMainsMeter < StandardError; end
     include Logging
 
     # Extra fields - potentially a concern or mix-in
@@ -140,8 +141,25 @@ module Dashboard
       @meter_attributes
     end
 
+    def original_meter
+      if solar_pv_panels? || storage_heater?
+        raise MissingOriginalMainsMeter, "Missing original mains meter for #{mpxn} only got #{sub_meters&.keys}" unless sub_meters.key?(:mains_consume) && !sub_meters[:mains_consume].nil?
+        sub_meters[:mains_consume]
+      else
+        self
+      end
+    end
+
+    def all_sub_meters
+      sub_meters.values.flatten
+    end
+    
+    def analyse_sub_meters
+      puts "Submeters #{sub_meters.keys}"
+    end
+
     def storage_heater?
-      !@storage_heater_setup.nil? || @fuel_type == :storage_heater # TODO(PH, 14Sep2019) remove @sstorage_heater_setup test?
+      !@storage_heater_setup.nil? || @fuel_type == :storage_heater || sub_meters.key?(:storage_heaters) # TODO(PH, 14Sep2019) remove @sstorage_heater_setup test?
     end
 
     def solar_pv_panels?
@@ -259,9 +277,9 @@ module Dashboard
     def self.synthetic_mpan_mprn(mpan_mprn, type)
       mpan_mprn = mpan_mprn.to_i
       case type
-      when :storage_heater_only
+      when :storage_heater_only, :storage_heater_disaggregated_storage_heater
         70000000000000 + mpan_mprn
-      when :electricity_minus_storage_heater
+      when :electricity_minus_storage_heater, :storage_heater_disaggregated_electricity
         75000000000000 + mpan_mprn
       when :solar_pv
         80000000000000 + mpan_mprn

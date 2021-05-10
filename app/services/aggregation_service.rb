@@ -48,15 +48,12 @@ class AggregateDataService
 
   private
 
-  private def process_electricity_meters
-    # PH: commented out 7Dec2020 as may not be necessary
-    # create_unaltered_aggregate_electricity_meter_for_pv_and_storage_heaters
-
+  def process_electricity_meters
     process_solar_meters
 
     aggregate_electricity_meters
 
-    disaggregate_storage_heaters if @meter_collection.storage_heaters?
+    process_storage_heaters # TODO(PH, 2May2021) - work out why this needs to be after aggregation, or needs any aggregation
 
     combine_solar_pv_submeters_into_aggregate if more_than_one_solar_pv_sub_meter?
   end
@@ -71,7 +68,14 @@ class AggregateDataService
     end
   end
 
-  private def set_long_gap_boundary_on_all_meters
+  def process_storage_heaters
+    if @meter_collection.storage_heaters?
+      adssh = AggregateDataServiceStorageHeaters.new(@meter_collection)
+      adssh.disaggregate
+    end
+  end
+
+  def set_long_gap_boundary_on_all_meters
     @meter_collection.all_meters.each do |meter|
       logger.info "Considering setting long gap boundaries on #{meter.mpan_mprn}?"
       meter.amr_data.set_long_gap_boundary
@@ -85,13 +89,13 @@ class AggregateDataService
   # allows parameterised carbon/cost objects to cache data post
   # aggregation, reducing memory footprint in front end cache prior to this
   # while maintaining charting performance once out of cache
-  private def set_post_aggregation_state_on_all_meters
+  def set_post_aggregation_state_on_all_meters
     @meter_collection.all_meters.each do |meter|
       meter.amr_data.set_post_aggregation_state
     end
   end
 
-  private def validate_meter_list(list_of_meters)
+  def validate_meter_list(list_of_meters)
     logger.info "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
       begin
@@ -104,7 +108,7 @@ class AggregateDataService
     end
   end
 
-  private def add_rollbar_context_if_available(meter, exception)
+  def add_rollbar_context_if_available(meter, exception)
     if exception.respond_to?(:rollbar_context)
       exception.rollbar_context ||= { mpan_mprn: meter.id }
     end
@@ -145,7 +149,7 @@ class AggregateDataService
   # we need to artificially split up the standing charges
   # in any account scenario these probably need re-aggregating for any bill
   # reconciliation if kept seperate for these purposes
-  private def proportion_out_accounting_standing_charges(meter1, meter2)
+  def proportion_out_accounting_standing_charges(meter1, meter2)
     total_kwh_meter1 = meter1.amr_data.accounting_tariff.total_costs
     total_kwh_meter2 = meter2.amr_data.accounting_tariff.total_costs
     percent_meter1 = total_kwh_meter1 / (total_kwh_meter1 + total_kwh_meter2)
@@ -153,8 +157,7 @@ class AggregateDataService
     meter2.amr_data.accounting_tariff.scale_standing_charges(1.0 - percent_meter1)
   end
 
-
-  private def lookup_synthetic_meter(type)
+  def lookup_synthetic_meter(type)
     meter_id = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, type)
     @meter_collection.meter?(meter_id, true)
   end
@@ -184,7 +187,7 @@ class AggregateDataService
     @meter_collection.unaltered_aggregated_electricity_meters ||= meter
   end
 
-  private def combine_meter_meta_data(list_of_meters)
+  def combine_meter_meta_data(list_of_meters)
     meter_names = []
     ids = []
     floor_area = 0
@@ -216,7 +219,7 @@ class AggregateDataService
   end
 
   # copy meter and amr data - for pv, storage heater meters about to be disaggregated
-  private def copy_meter_and_amr_data(meter)
+  def copy_meter_and_amr_data(meter)
     logger.info "Creating cloned copy of meter #{meter.mpan_mprn}"
     new_meter = nil
     bm = Benchmark.realtime {
@@ -239,7 +242,7 @@ class AggregateDataService
     new_meter
   end
 
-  private def aggregate_meters(combined_meter, list_of_meters, fuel_type, copy_amr_data = false)
+  def aggregate_meters(combined_meter, list_of_meters, fuel_type, copy_amr_data = false)
     return nil if list_of_meters.nil? || list_of_meters.empty?
     if list_of_meters.length == 1
       meter = list_of_meters.first
@@ -287,7 +290,7 @@ class AggregateDataService
     combined_meter
   end
 
-  private def any_component_meter_differential?(list_of_meters, fuel_type, combined_meter_start_date, combined_meter_end_date)
+  def any_component_meter_differential?(list_of_meters, fuel_type, combined_meter_start_date, combined_meter_end_date)
     return false if fuel_type == :gas
     list_of_meters.each do |meter|
       return true if meter.meter_tariffs.any_differential_tariff?(combined_meter_start_date, combined_meter_end_date)
@@ -295,7 +298,7 @@ class AggregateDataService
     false
   end
 
-  private def set_costs_for_combined_meter(combined_meter, list_of_meters, has_differential_meter)
+  def set_costs_for_combined_meter(combined_meter, list_of_meters, has_differential_meter)
     mpan_mprn = combined_meter.mpan_mprn
     start_date = combined_meter.amr_data.start_date # use combined meter start and end dates to conform with (deprecated) meter aggregation rules
     end_date = combined_meter.amr_data.end_date
@@ -308,7 +311,7 @@ class AggregateDataService
     combined_meter.amr_data.set_accounting_tariff_schedule(accounting_costs)
   end
 
-  private def set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differential_meter)
+  def set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differential_meter)
     mpan_mprn = combined_meter.mpan_mprn
     if has_differential_meter # so need pre aggregated economic costs as kwh to £ no longer additive
       logger.info 'Creating a multiple economic costs for differential tariff meter'
