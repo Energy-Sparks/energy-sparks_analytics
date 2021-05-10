@@ -32,6 +32,13 @@ describe MeterReadingsFeeds::N3rgyDataDeduplicator do
       }
     end
 
+    describe 'with no data' do
+      it 'returns empty hash' do
+        deduped = MeterReadingsFeeds::N3rgyDataDeduplicator.deduplicate_prices({})
+        expect(deduped).to eq({})
+      end
+    end
+
     describe 'with simple values' do
 
       let(:usual_prices)    { Array.new(48) { usual_price } }
@@ -56,6 +63,13 @@ describe MeterReadingsFeeds::N3rgyDataDeduplicator do
   end
 
   describe 'when deduplicating standing charges' do
+
+    describe 'with no data' do
+      it 'returns empty array' do
+        deduped = MeterReadingsFeeds::N3rgyDataDeduplicator.deduplicate_standing_charges([])
+        expect(deduped).to eq([])
+      end
+    end
 
     describe 'with simple values' do
 
@@ -83,11 +97,6 @@ describe MeterReadingsFeeds::N3rgyDataDeduplicator do
       it 'returns standing charges without duplicates and NOT includng last date' do
         deduped = MeterReadingsFeeds::N3rgyDataDeduplicator.deduplicate_standing_charges(standing_charges)
         expect(deduped).to eq(expected_deduped)
-      end
-
-      it 'returns empty array if no standing charges' do
-        deduped = MeterReadingsFeeds::N3rgyDataDeduplicator.deduplicate_standing_charges([])
-        expect(deduped).to eq([])
       end
     end
   end
