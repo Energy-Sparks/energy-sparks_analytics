@@ -84,6 +84,11 @@ describe MeterReadingsFeeds::N3rgyDataDeduplicator do
         deduped = MeterReadingsFeeds::N3rgyDataDeduplicator.deduplicate_standing_charges(standing_charges)
         expect(deduped).to eq(expected_deduped)
       end
+
+      it 'returns empty array if no standing charges' do
+        deduped = MeterReadingsFeeds::N3rgyDataDeduplicator.deduplicate_standing_charges([])
+        expect(deduped).to eq([])
+      end
     end
   end
 end

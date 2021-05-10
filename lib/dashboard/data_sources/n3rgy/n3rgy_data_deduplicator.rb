@@ -1,7 +1,7 @@
 module MeterReadingsFeeds
   class N3rgyDataDeduplicator
     def self.deduplicate_standing_charges(ary)
-      deduped = [ary.first]
+      deduped = ary.first ? [ary.first] : []
       ary.each_cons(2) { |a,b| deduped << b if a[1] != b[1] }
       deduped
     end
