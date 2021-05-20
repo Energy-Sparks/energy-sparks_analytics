@@ -1,13 +1,12 @@
 require 'require_all'
-require_relative '../lib/dashboard.rb'
-require_rel '../test_support'
+require_relative '../../lib/dashboard.rb'
+require_rel '../../test_support'
 
-school_stub = 'pennyland-primary-school'
+school_stub = 'bathampton-primary-school'
 
 school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_stub, :unvalidated_meter_data)
 
-chart_name = :temp_test
-chart_name = :group_by_week_electricity_meter_breakdown
+chart_name = :electricity_cost_1_year_accounting_breakdown
 
 chart_manager = ChartManager.new(school)
 chart_data1 = chart_manager.run_standard_chart(chart_name)

@@ -289,7 +289,7 @@ class HotWaterInvestmentAnalysisText
         provided by your school&apos;s smart meter data, but it should provide an
         indication whether investments of this type are worthwhile investigating
         further?
-      </p
+      </p>
     }.gsub(/^  /, '')
   end
 

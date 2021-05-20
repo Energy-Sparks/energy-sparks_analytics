@@ -84,7 +84,7 @@ class LoadRawFrontEndMeterReadings
         elsif date_str.length == 'DD/MM/YY'.length
           Date.strptime(date_str, '%d/%m/%y')
         end
-      elsif date_str.match(/^(\d)+$/)
+      elsif date_str.match?(/^(\d)+$/)
         Date.new(1900, 3, 1) + Integer(date_str) - 61
       else
         Date.parse(date_str)

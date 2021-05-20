@@ -31,14 +31,19 @@ class DashboardChartAdviceBase
     @chart_symbol = chart_symbol
     @header_advice = nil
     @footer_advice = nil
+=begin
     @add_extra_markup = ENV['School Dashboard Advice'] == 'Include Header and Body'
     if @add_extra_markup
       @body_start = '<html><head>'
       @body_end = '</head></html>'
     else
+=end
       @body_start = ''
       @body_end = ''
+=begin
     end
+=end
+  
   end
 
   def self.advice_factory_group(chart_type, school, chart_definition, charts)
@@ -227,7 +232,7 @@ class DashboardChartAdviceBase
   end
 
   def equivalence_tool_tip_html(equivalence_text, calculation_text)
-    "<p>#{equivalence_text} <button class=\"btn btn-secondary\" data-toggle=\"popover\" data-container=\"body\" data-placement=\"top\" data-title=\"How we calculate this\" data-content=\"#{calculation_text}\"> See how we calculate this</button></p>"
+    "#{equivalence_text} <button class=\"btn btn-secondary\" data-toggle=\"popover\" data-container=\"body\" data-placement=\"top\" data-title=\"How we calculate this\" data-content=\"#{calculation_text}\"> See how we calculate this</button>"
   end
 
   def random_equivalence_text(kwh, fuel_type, uk_grid_carbon_intensity = EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH)
@@ -292,7 +297,7 @@ class DashboardChartAdviceBase
               <% val = value[0] %>
               <% pct = val / total %>
               <td class="text-right"><%= YAxisScaling.convert(units, :kwh, fuel_type, val) %></td>
-              <% if row.match(/export/i) %>
+              <% if row.match?(/export/i) %>
                 <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val) %></td>
               <% else %>
                 <td class="text-right"><%= YAxisScaling.convert(units, :£, fuel_type, val) %></td>
@@ -1082,7 +1087,6 @@ class ThermostaticAdvice < HeatingAnalysisBase
     logger.info @school.name
     header_template = %{
       <% if @add_extra_markup %>
-        <html>
           <head><h2>Thermostatic analysis</h2>
           <body>
       <% end %>
@@ -1145,7 +1149,6 @@ class ThermostaticAdvice < HeatingAnalysisBase
       <% if @add_extra_markup %>
           </body>
       <% end %>
-      </html>
     }.gsub(/^  /, '')
 
     @header_advice = generate_html(header_template, binding)
@@ -1209,8 +1212,7 @@ class CusumAdvice < DashboardChartAdviceBase
   def generate_advice
     logger.debug @school.name
     header_template = %{
-      <% if @add_extra_markup %>
-        <html>
+      <% if @add_extra_markup %>        
           <head><h2>Cusum analysis</h2>
           <body>
       <% end %>

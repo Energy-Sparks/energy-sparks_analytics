@@ -519,7 +519,7 @@ private
     # model calculated using the latest year's regression data,deliberately ignores chart request
     last_year = SchoolDatePeriod.year_to_date(:year_to_date, 'validate amr', @last_meter_date, @first_meter_date)
     meter = select_one_meter([:gas, :storage_heater])
-    logger.info "Calculating heating model for #{meter.id} - SeriesDataManager::calculate_model_by_type"
+    logger.info "Calculating heating model for #{meter.mpxn} - SeriesDataManager::calculate_model_by_type"
     meter.heating_model(last_year, model_type, non_heating_model_type)
   end
 
@@ -533,7 +533,7 @@ private
     if @meters[0].nil?
       @meters[1]
     elsif !preferred_fuel_types.nil?
-      if !@meters[0].nil? &&  [preferred_fuel_types].flatten.include?(@meters[0].fuel_type)
+      if !@meters[0].nil? && [preferred_fuel_types].flatten.include?(@meters[0].fuel_type)
         @meters[0]
       else
         @meters[1]
@@ -958,7 +958,7 @@ private
         # aggregate all electricity meters
         @meters = [@meter_collection.aggregated_electricity_meters, nil]
       when :allelectricity_unmodified
-        @meters = [unmodified_aggregated_electricity_meter, nil]
+        @meters = [@meter_collection.aggregated_electricity_meters&.original_meter, nil]
       when :electricity_simulator
         @meters = [@meter_collection.electricity_simulation_meter, nil]
       when :storage_heater_meter
@@ -968,16 +968,8 @@ private
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
       # specified meter - typically by mpan or mprn
-      meter = @meter_collection.meter?(@meter_definition)
+      meter = @meter_collection.meter?(@meter_definition, true)
       @meters = meter.heat_meter? ? [nil, meter] : [meter, nil]
-    end
-  end
-
-  def unmodified_aggregated_electricity_meter
-    if @meter_collection.aggregated_electricity_meters.sub_meters.key?(:mains_consume)
-      @meter_collection.aggregated_electricity_meters.sub_meters[:mains_consume]
-    else
-      @meter_collection.aggregated_electricity_meters
     end
   end
 end

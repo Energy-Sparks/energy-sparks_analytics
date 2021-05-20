@@ -7,7 +7,6 @@ class AggregateDataServiceSolar
 
   def initialize(meter_collection)
     @meter_collection   = meter_collection
-    @heat_meters        = @meter_collection.heat_meters
     @electricity_meters = @meter_collection.electricity_meters
   end
 

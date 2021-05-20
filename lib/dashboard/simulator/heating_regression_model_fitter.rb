@@ -8,14 +8,18 @@ class HeatingRegressionModelFitter
     @meter_collection = meter_collection
     @doc = MultiMediaPage.new
     @chart_manager = ChartManager.new(@meter_collection)
+=begin
     @add_extra_markup = ENV['School Dashboard Advice'] == 'Include Header and Body'
     if @add_extra_markup
       @body_start = '<html><head>'
       @body_end = '</head></html>'
     else
+=end
       @body_start = ''
       @body_end = ''
+=begin
     end
+=end
     @debug = true
   end
 

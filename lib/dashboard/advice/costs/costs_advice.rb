@@ -1,202 +1,191 @@
-class CostAdviceBase < AdviceOldToNewConversion
-  include MeterlessMixin
-  def create_class(old_advice_class)
-    return nil if old_advice_class.nil?
-    args = old_advice_class.instance_method(:initialize).arity
-    case args
-    when 1
-      old_advice_class.new(@school)
-    when 4, -5
-      old_advice_class.new(@school, nil, nil, nil)
-    else
-      raise EnergySparksUnexpectedStateException, "Unexpected number of arguments #{args}"
-    end
+# Present financial cost information using real tariff data
+# The presentation varies depending on what data is available
+# - if more than 1 meter: presents aggregate, plus individual meter billing
+# - currently can't do solar billing because of lack of tariff informations from schools; so not implemented
+# - presents individual meter billing slightly different depending on availability of:
+#   tariff data; > 13 months - year on year tablular and chart comparison, monthly chart
+#                < 1 month - no numeric tablular information as billing always monthly, daily chart
+#                1 to 13 months - monthly tabular and chart presentation, no comparison
+class CostAdviceBase < AdviceBase
+  include Logging
+  def enough_data
+    :enough
   end
 
-  def erb_bind(text)
-    ERB.new(text).result(binding)
-  end
-end
-
-class CostsIntroductionAdvice < CostAdviceBase
-  def initialize(school)
-    super(school)
-    @summary = "Your School\'s #{fuel_type.to_s.capitalize} Costs" 
-    @content_data = [
-      { type: :text, advice_class: advice_class, data: "<h2>#{@summary}</h2>"},
-      { type: :text, advice_class: advice_class, data: availability_of_meter_tariffs_text },
-      { type: :text, advice_class: advice_class, data: "<p><b>Comparison of last 2 years #{fuel_type.to_s.capitalize} costs</b></p>" },
-      { type: :chart_and_text, data: chart_2_year_comparison },
-      { type: :chart_and_text, data: chart_1_year_breakdown, components: [true, false, false] },
-      { type: :text, advice_class: advice_class, data: "<p><b>Your last year\'s #{fuel_type.capitalize} bill components</b></p>" },
-      { type: :text, advice_class: advice_class, data: "<p>Last year's bill components were as follows: </p>" },
-      { type: :chart_and_text, data: chart_1_year_breakdown, components: [false, true, true] }
-    ]
-  end
-
-  def advice_class
-    AdviceElectricityCosts
-  end
-
-  def availability_of_meter_tariffs_text
-    text = if rating == 10.0
-      %q(
-        <p>
-          The information below provides a good estimate of your annual
-          <%=  fuel_type %> costs based on meter tariff information which
-          has been provided to Energy Sparks.
-        </p>
-      )
-    elsif rating == 0.0
-      %q(
-        <p>
-          The information below is approximate as we don't have your meter tariffs
-          so are using average tariffs for your area. If you would like this web page
-          to provide accurate information please provide us with your
-          meter tariffs <%= email_us_html(@email_subject, 'via email') %> and we
-          can help setup the tariffs so you get accurate information on this page.
-        </p>
-      )
-    else
-      %q(
-        <p>
-          The information below is approximate as we don't have all your meter tariff information.
-          We are using a mix of your actual tariffs and some average tariffs for your
-          area. If you would like this web page
-          to provide accurate information please <%= email_us_html('Meter tariff information for my school', 'get in contact') %> 
-          and we can help setup the remaining tariffs.
-        </p>
-      )
-    end
-  end
-end
-
-
-class CostsHowEnergySparksCalculatesThem < CostAdviceBase
-  def initialize(school)
-    super(school)
-    @summary = 'How Energy Sparks calculates energy costs'
-    @content_data = [
-      { type: :text, advice_class: self.class, data: "<p><b>How Energy Sparks calculates costs</b></p>" },
-      { type: :text, advice_class: DashboardEnergyAdvice::FinancialAdviceBase, data: DashboardEnergyAdvice::FinancialAdviceBase::INTRO_TO_SCHOOL_FINANCES_1 },
-    ]
-  end
-end
-
-class MeterTariffInfo < CostAdviceBase
-  def initialize(school)
-    super(school)
-    @summary = "Your meter #{fuel_type.to_s.capitalize} Tariffs"
-    tariff_table = FormatMeterTariffs.new(@school).tariff_tables_html(meters)
-    @content_data = [
-      { type: :text, advice_class: self.class, data: tariff_table },
-    ]
-  end
-  def rating
-    @rating ||= 100.0 * MeterTariffs.accounting_tariff_availability_coverage(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, underlying_meters)
-  end
-end
-
-class ElectricityTariffs < MeterTariffInfo
-  def meters; @school.electricity_meters end
-  def fuel_type; :electricity end
-end
-
-class AdviceFuelTypeBase < AdviceStructuredOldToNewConversion
-  def initialize(school)
-    super(school)
-    @summary = fuel_type.to_s.capitalize + ' Costs'
-  end
   def relevance
-    return :never_relevant if aggregate_meter.nil?
-    tariffs = MeterTariffs.accounting_tariffs_available_for_period?(aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, underlying_meters)
-    tariffs ? :relevant : :never_relevant
+    aggregate_meter.nil? ? :never_relevant : :relevant
   end
-  # overwrite structured content old to new converter
-  # so can do per meter analysis
-  def structured_content(user_type: nil)
-    content_information = []
-    component_pages.each do |component_page_class|
-      component_page = component_page_class.new(@school)
-      content_information.push(
-        {
-          title:    component_page.summary,
-          content:  component_page.content
-        }
-      ) if component_page.relevance == :relevant
-    end
-    content_information += meter_costs if has_dcc_meters?
-    content_information
-  end
-  def advice_class; self.class end
-  def has_structured_content?; true end
 
-  def meter_costs
-    real_meters.map do |meter|
-      MeterCost.new(@school,meter).content
-    end
+  def self.template_variables
+    { 'Summary' => { summary: { description: 'Financial costs', units: String } } }
   end
+
+  def summary
+    @summary ||= summary_text
+  end
+
+  def summary_text
+    'Financial analysis'
+  end
+
+  def rating
+    puts "Got here rating = #{calculate_rating_from_range(1.0, 0.0, average_real_tariff_coverage_percent)}"
+    @rating ||= calculate_rating_from_range(1.0, 0.0, average_real_tariff_coverage_percent)
+  end
+
+  def has_structured_content?
+    real_meters.length > 1
+  end
+
+  def content(user_type: nil)
+    c = [
+      aggregate_meter_costs[:content],
+      { type: :html, content: INTRO_TO_SCHOOL_FINANCES_2 }
+    ].flatten
+    remove_diagnostics_from_html(c, user_type)
+  end
+
+  def structured_content(user_type: nil)
+    puts "Got here 44"; rating
+    
+    content_information = []
+    content_information += meter_costs
+    content_information.push(introduction_to_school_finances)
+
+    remove_diagnostics_from_structured_content(content_information, user_type)
+  end
+
+  private
 
   def real_meters
-    @school.real_meters.select { |m| m.fuel_type == fuel_type }
+    # check_real_meters_deprecated
+    @school.real_meters2.select { |m| m.fuel_type == fuel_type }
   end
 
-  # TODO(PH, 9Apr2021) remove once testing complet on test
-  #                    restricts meter breakdown to dcc only schools
-  def has_dcc_meters?
-    real_meters.any? { |m| m.dcc_meter }
+  def average_real_tariff_coverage_percent
+    @average_real_tariff_coverage_percent ||= calculate_average_real_tariff_coverage
   end
+
+  def calculate_average_real_tariff_coverage
+    start_date, end_date = year_start_end_dates
+
+    # map then sum to avoid statsample bug
+    total_percent = real_meters.map do |meter|
+      meter_cost(meter, true, false, start_date, end_date).percent_real
+    end.sum
+
+    total_percent / real_meters.length
+  end
+
+  def meter_costs
+    meter_cost_list = [aggregate_meter_costs]
+
+    start_date, end_date = year_start_end_dates
+
+    # aggregate, already reported, so only report underlying meters
+
+    if real_meters.length > 1 
+      # do remaining meters
+      real_meters.each do |meter|
+        meter_cost_list.push(meter_cost(meter, true, false, start_date, end_date).content)
+      end
+    end
+
+    meter_cost_list
+  end
+
+  def meter_cost(meter, show_tariffs, aggregated, start_date, end_date)
+    MeterCost.new(@school, meter, show_tariffs, aggregated, start_date, end_date)
+  end
+
+  def aggregate_meter_costs
+    show_aggregate_tariffs = real_meters.length == 1
+    start_date, end_date = year_start_end_dates
+    meter_cost(aggregate_meter, show_aggregate_tariffs, true, start_date, end_date).content
+  end
+
+  def introduction_to_school_finances
+    {
+      title:    'How Energy Sparks calculates energy costs',
+      content:  [ { type: :html, content: INTRO_TO_SCHOOL_FINANCES_2 } ]
+    }
+  end
+
+  def year_start_end_dates
+    end_date = aggregate_meter.amr_data.end_date
+    start_date = [end_date - 365 - 364, aggregate_meter.amr_data.start_date].max
+    [start_date, end_date]
+  end
+
+  def check_real_meters_deprecated
+    o = @school.real_meters.select { |m| m.fuel_type == fuel_type }
+    n = @school.real_meters2.select { |m| m.fuel_type == fuel_type }
+    so_mpans = o.map(&:mpxn).sort
+    sn_mpans = n.map(&:mpxn).sort
+    if so_mpans != sn_mpans
+      puts "Got here - real meters returning different values for #{@school.name}"
+      puts "Before: #{so_mpans}"
+      puts "After:  #{sn_mpans}"
+    end
+  end
+
+  # COPY OF INTRO_TO_SCHOOL_FINANCES_1
+  INTRO_TO_SCHOOL_FINANCES_2 = %q(
+    <p>
+      Energy Sparks calculates electricity and gas costs using 2 different
+      methods:
+    </p>
+    <p>
+      1. <strong>Economic Costs</strong>:
+    </p>
+      <ul>
+        <li>
+          this assumes a simple cost model, with electricity costing 12p/kWh
+          and gas 3p/kWh
+        </li>
+        <li>
+          generally, this method is used when information is presented to
+          pupils because it is easy to understand, and allows them to do simple maths
+          converting between kWh and &#163;
+        </li>
+        <li>
+          we also use it for economic forecasting, when doing cost benefit
+          analysis for suggested improvements to your energy management, as it better
+          represents future energy prices/tariffs than your current potentially
+          volatile tariffs as these can change from year to year
+        </li>
+      </ul>
+    <p>
+      2. <strong>Accounting Costs</strong>:
+    </p>
+        <ul>
+          <li>
+            These represent your real energy costs and represent all the
+            different types of standing charges applied to your account
+          </li>
+          <li>
+            To do this we need to know what these tariffs are, sometimes these
+            can be provided by all schools by a local authority, and sometimes you will
+            need to provide us the information is not available from the Local
+            Authority. MAT or Energy Supplier
+          </li>
+          <li>
+            We can use this more accurate tariff information to provide more
+            detailed advice on potential cost savings through tariff changes or meter
+            consolidation
+          </li>
+        </ul>
+  ).freeze
 end
 
-class ElectricityCostsIntroductionAdvice < CostsIntroductionAdvice
+class AdviceElectricityCosts < CostAdviceBase
   def fuel_type; :electricity end
-  def chart_2_year_comparison; :electricity_cost_comparison_last_2_years_accounting end
-  def chart_1_year_breakdown; :electricity_cost_1_year_accounting_breakdown end
-end
-
-class AdviceElectricityCosts < AdviceFuelTypeBase
-  def fuel_type; :electricity end
-
-  def component_pages
-    [
-      ElectricityCostsIntroductionAdvice,
-      CostsHowEnergySparksCalculatesThem,
-      ElectricityTariffs
-    ]
-  end
-
-  def aggregate_meter
-    @school.aggregated_electricity_meters
-  end
-
+  def aggregate_meter; @school.aggregated_electricity_meters&.original_meter end
   def underlying_meters; @school.electricity_meters end
 end
 
-class GasTariffs < MeterTariffInfo
-  def meters; @school.heat_meters end
+class AdviceGasCosts < CostAdviceBase
   def fuel_type; :gas end
-end
-
-class GasCostsIntroductionAdvice < CostsIntroductionAdvice
-  def fuel_type; :gas end
-  def chart_2_year_comparison; :gas_cost_comparison_last_2_years_accounting end
-  def chart_1_year_breakdown; :gas_cost_1_year_accounting_breakdown end
-end
-
-class AdviceGasCosts < AdviceFuelTypeBase
-  def fuel_type; :gas end
-
-  def component_pages
-    [
-      GasCostsIntroductionAdvice,
-      CostsHowEnergySparksCalculatesThem,
-      GasTariffs
-    ]
-  end
-
-  def aggregate_meter
-    @school.aggregated_heat_meters
-  end
-
+  def aggregate_meter; @school.aggregated_heat_meters&.original_meter end
   def underlying_meters; @school.heat_meters end
 end

@@ -165,7 +165,7 @@ class DashboardEnergyAdvice
         Unfortunately, we don't have detailed meter information for these meters
         <%= missing_accounting_tariff_meter_mpan_mprn_text %>
         so we are using defaults for your area. Could you
-        <a href="mailto:hello@energysparks.uk?subject=Meter tariff information for <%= @school.name %>">contact us</a>
+        <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">contact us</a>
         and let us know your current tariffs and we can set them up so the
         information on this page is accurate? This will also allow us to analyse
         your tariff to see if there are opportunities for cost reduction.
@@ -222,7 +222,7 @@ class DashboardEnergyAdvice
 
     def generate_valid_advice
 
-      electricity_meter_tariff_tables = FormatMeterTariffs.new(@school).tariff_tables_html(@school.electricity_meters)
+      electricity_meter_tariff_tables = FormatMetersTariffs.new(@school).tariff_tables_html(@school.electricity_meters)
 
       header_template = concatenate_advice_with_body_start_end(
         [
@@ -274,7 +274,7 @@ class DashboardEnergyAdvice
     ).freeze
 
     def generate_valid_advice
-      gas_meter_tariff_tables = FormatMeterTariffs.new(@school).tariff_tables_html(@school.heat_meters)
+      gas_meter_tariff_tables = FormatMetersTariffs.new(@school).tariff_information_html(@school.heat_meters)
 
       header_template = concatenate_advice_with_body_start_end(
         [

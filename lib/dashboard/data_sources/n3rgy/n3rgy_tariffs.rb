@@ -3,7 +3,7 @@ class N3rgyTariffs
   class UnexpectedRateType < StandardError; end
   # can't use Date::Ininity as only comparable on rhs of comparison
   # see this longstanding bug report: https://bugs.ruby-lang.org/issues/6753
-  INFINITE_DATE = Date.new(2050, 1, 1) 
+  INFINITE_DATE = Date.new(2050, 1, 1)
   def initialize(tariff_data)
     @tariff_data = tariff_data
   end
@@ -11,10 +11,10 @@ class N3rgyTariffs
   # compresses standing charges, and rates (1 row per half hour)
   # into meter attribute like descriptive tariffs
   # approx 16,000 to 2 compression
-  def parameterise
+  def parameterise(compressed_rates = true)
     return nil unless tariffs_available?
     {
-      kwh_rates:        process_kwh_rates(       @tariff_data[:kwh_tariffs]),
+      kwh_rates:        process_kwh_rates(       @tariff_data[:kwh_tariffs], compressed_rates),
       standing_charges: process_standing_charges(@tariff_data[:standing_charges])
     }
   end
@@ -25,11 +25,35 @@ class N3rgyTariffs
 
   private
 
-  def process_kwh_rates(rates)
+  def process_kwh_rates(rates, compressed_rates)
     daily_tariffs = parameterise_all_days(rates)
+    daily_tariffs = fill_in_missing_rates_between_dates(daily_tariffs) if compressed_rates
     grouped_data = group_tariffs_by_date(daily_tariffs)
     grouped_data = WeekdayRate.new.group_by_weekday(grouped_data) if WeekdayRate.weekday_tariff?(grouped_data)
     grouped_data
+  end
+
+  def fill_in_missing_rates_between_dates(compressed_tariffs)
+    start_date = compressed_tariffs.first[0]
+    end_date = compressed_tariffs.last[0]
+    current_tariff_index = 0
+    filled_in_rates = []
+
+    (start_date..end_date).each do |date|
+      if current_tariff_index < compressed_tariffs.length - 1 &&
+        compressed_tariffs[current_tariff_index+1][0] == date
+        current_tariff_index += 1
+      end
+
+      filled_in_rates.push(
+        [
+          date,
+          compressed_tariffs[current_tariff_index][1]
+        ]
+      )
+    end
+
+    filled_in_rates
   end
 
   def parameterise_all_days(rates)
@@ -69,7 +93,7 @@ class N3rgyTariffs
     indexed_group_rates.transform_values! do |rate|
       if rate.is_a?(Float)
         round_rate(rate)
-      elsif rate.is_a?(Hash) && rate[:type] == :tiered
+      elsif rate.is_a?(Hash) && rate[:type].to_sym == :tiered
         convert_tiered_tariff(rate)
       else
         raise UnexpectedRateType, rate.nil?  ? 'Unexpected Nil rate type' : "Unexpected type #{rate.class.name}"
@@ -136,14 +160,14 @@ class N3rgyTariffs
       tariffs = weekday_groups.map do |weekdays, date_ranges_to_rates|
         log('Processing =============== weekdays: ', weekdays)
         same_rate_groups   = group_where_same_rates(date_ranges_to_rates)
-        continguous_groups = split_group_where_not_7_days_apart(same_rate_groups)
-        convert_to_tariff(continguous_groups, weekdays)
+        contiguous_groups = split_group_where_not_7_days_apart(same_rate_groups)
+        convert_to_tariff(contiguous_groups, weekdays)
       end.flatten
       log('Finals Resulting tariffs', tariffs)
       tariffs
     end
 
-    private 
+    private
 
     def log(message, data)
       if @debug

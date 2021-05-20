@@ -11,7 +11,7 @@ module Logging
   @logger.level = :info # :debug
 end
 ENV['AWESOMEPRINT'] = 'off'
-ENV['School Dashboard Advice'] = 'Include Header and Body'
+# ENV['School Dashboard Advice'] = 'Include Header and Body'
 
 puts "========================================================================================"
 puts  "Heating Model Fitting"

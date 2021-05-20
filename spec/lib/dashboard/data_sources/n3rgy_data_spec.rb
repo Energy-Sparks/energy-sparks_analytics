@@ -64,7 +64,22 @@ describe MeterReadingsFeeds::N3rgyData do
       end
     end
 
+    describe 'list' do
+      context 'when consented meters exist' do
+        let(:response) { {"startAt"=>0, "maxResults"=>100, "total"=>3, "entries"=>["1234567891000", "1234567891002", "1234567891008"], "resource"=>"/", "responseTimestamp"=>"2021-03-29T15:48:37.637Z"} }
+        before do
+          expect_any_instance_of(MeterReadingsFeeds::N3rgyDataApi).to receive(:list).and_return(response)
+        end
+        it 'returns array of MPANs' do
+          expect(api.list).to match_array(["1234567891000", "1234567891002", "1234567891008"])
+        end
+      end
+    end
+
     describe 'for tariffs' do
+
+      let(:start_date)    { Date.parse('20190101') }
+      let(:end_date)      { Date.parse('20190103') }
 
       describe 'when date not specified' do
         it 'raises error' do
@@ -82,13 +97,21 @@ describe MeterReadingsFeeds::N3rgyData do
 
         describe 'for normal tariffs' do
 
-          let(:expected_first_day_tariffs)  { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
-          let(:expected_last_day_tariffs)   { [0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992, 0.15992] }
-          let(:expected_standing_charge)    { 0.19541 }
+          let(:usual_value)    { 0.15992 }
+          let(:other_value)    { 0.1234 }
+          let(:expected_first_day_tariffs)    { Array.new(48) { usual_value } }
+          let(:expected_last_day_tariffs)     { [other_value] + Array.new(47) { usual_value } }
+          let(:original_standing_charge)      { 19.541 }
+          let(:expected_standing_charge)      { 0.19541 }
 
           let(:tariff_data)                 { JSON.parse(File.read('spec/fixtures/n3rgy/get_tariff_data.json')) }
 
-          it 'returns tariffs' do
+          it 'uses Date (not DateTime) for standing charge keys' do
+            tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
+            expect(tariffs[:standing_charges].keys.first.class).to eq(Date)
+          end
+
+          it 'returns tariffs without duplicates' do
             tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
             expect(tariffs.keys).to match_array([:kwh_tariffs, :standing_charges, :missing_readings])
 
@@ -99,6 +122,25 @@ describe MeterReadingsFeeds::N3rgyData do
 
             expect(tariffs[:standing_charges][start_date]).to eq(expected_standing_charge)
             expect(tariffs[:missing_readings]).to eq([])
+          end
+
+          it 'returns available date range' do
+            date_range = api.tariffs_available_date_range(mpxn, fuel_type)
+            expect(date_range.first.class).to eq(Date)
+            expect(date_range.first.to_s).to eq('2018-12-24')
+            expect(date_range.last.class).to eq(Date)
+            expect(date_range.last.to_s).to eq('2021-02-05')
+          end
+
+          it 'deduplicates standing charges' do
+            tariff_data['values'][0]['standingCharges'] = [{ 'startDate' => '2019-01-01', 'value' => original_standing_charge }]
+            tariff_data['values'][0]['standingCharges'] << { 'startDate' => '2019-01-02', 'value' => original_standing_charge } # should be removed
+            tariff_data['values'][0]['standingCharges'] << { 'startDate' => '2019-01-03', 'value' => original_standing_charge + 1}
+            tariff_data['values'][0]['standingCharges'] << { 'startDate' => '2019-01-04', 'value' => original_standing_charge }
+            tariff_data['values'][0]['standingCharges'] << { 'startDate' => '2019-01-05', 'value' => original_standing_charge } # should be removed
+            tariffs = api.tariffs(mpxn, fuel_type, start_date, end_date)
+            expect(tariffs[:standing_charges].count).to eq(3)
+            expect(tariffs[:standing_charges].keys.map(&:to_s)).to match_array(['2019-01-01','2019-01-03','2019-01-04'])
           end
 
           describe 'when adjusting for bad sandbox electricity standing charge units' do
@@ -185,6 +227,13 @@ describe MeterReadingsFeeds::N3rgyData do
           expect(day_reading.kwh_data_x48).to eq(expected_last_day_readings)
         end
 
+        it 'returns available date range' do
+          date_range = api.readings_available_date_range(mpxn, fuel_type)
+          expect(date_range.first.class).to eq(Date)
+          expect(date_range.first.to_s).to eq('2018-12-24')
+          expect(date_range.last.class).to eq(Date)
+          expect(date_range.last.to_s).to eq('2019-05-16')
+        end
       end
 
       describe 'when no data' do
@@ -197,11 +246,6 @@ describe MeterReadingsFeeds::N3rgyData do
             "end"=>"202001022359",
             "granularity"=>"halfhour",
             "values"=>[],
-            "availableCacheRange"=>
-              {
-                "start"=>"201812242330",
-                "end"=>"201905160230"
-              },
             "unit"=>"kWh"
           }
         end
@@ -218,6 +262,10 @@ describe MeterReadingsFeeds::N3rgyData do
           expect(readings[fuel_type][:missing_readings].count).to eq(2 * 48)
         end
 
+        it 'returns nil available date range' do
+          date_range = api.readings_available_date_range(mpxn, fuel_type)
+          expect(date_range).to be_nil
+        end
       end
     end
 

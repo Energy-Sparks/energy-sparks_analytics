@@ -104,7 +104,7 @@ class N3rgyToEnergySparksTariffs
       elsif !([0, 6] & rates[:weekdays]).empty?
         config[:weekend] = true
       else
-        raise UnexpectedWeekdays, "Unexepected weekdays #{rate}"
+        raise UnexpectedWeekdays, "Unexpected weekdays #{rate}"
       end
     end
   end

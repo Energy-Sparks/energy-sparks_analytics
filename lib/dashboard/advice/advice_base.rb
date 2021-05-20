@@ -108,11 +108,22 @@ class AdviceBase < ContentBase
 
   protected def remove_diagnostics_from_html(charts_and_html, user_type)
     if ContentBase.analytics_user?(user_type)
-      charts_and_html = promote_analytics_html_to_frontend(charts_and_html) if ContentBase.analytics_user?(user_type)
+      charts_and_html = promote_analytics_html_to_frontend(charts_and_html)
     else
       charts_and_html.delete_if{ |content_component| %i[analytics_html].include?(content_component[:type]) }
     end
     charts_and_html
+  end
+
+  protected def remove_diagnostics_from_content(content, user_type)
+    {
+      title:    content[:title],
+      content:  remove_diagnostics_from_html(content[:content], user_type)
+    }
+  end
+
+  protected def remove_diagnostics_from_structured_content(structured_content, user_type)
+    structured_content.map { |c| remove_diagnostics_from_content(c, user_type) }
   end
 
   def analytics_split_charts_and_html(content_data)
@@ -132,6 +143,16 @@ class AdviceBase < ContentBase
   end
  
   def erb_bind(text)
+    ERB.new(text).result(binding)
+  end
+
+  # used by analytics - inserts location of chart, but real chart goes to Excel
+  def self.highlighted_dummy_chart_name_html(chart_name)
+    text = %{
+      <div style="background-color: #cfc ; padding: 10px; border: 1px solid green;">
+        <h3>Chart: <%= chart_name %></h3>
+      </div>
+    }
     ERB.new(text).result(binding)
   end
 
@@ -173,7 +194,7 @@ class AdviceBase < ContentBase
     charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_header]) } ) if chart.key?(:advice_header)
     charts_and_html.push( { type: :chart_name, content: chart[:config_name] } )
     charts_and_html.push( { type: :chart, content: chart } )
-    charts_and_html.push( { type: :analytics_html, content: "<h3>Chart: #{chart[:config_name]}</h3>" } )
+    charts_and_html.push( { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(chart[:config_name]) } )
     charts_and_html.push( { type: :html,  content: clean_html(chart[:advice_footer]) } ) if chart.key?(:advice_footer)
   end
 
@@ -187,10 +208,8 @@ class AdviceBase < ContentBase
 
   def format_enhanced_title_for_analytics(enhanced_title)
     text = %(
-      <p>
-        <h3>Summary rating information (provided by analytics)</h3>
-        <%= HtmlTableFormatting.new(['Variable', 'Value'], enhanced_title.to_a).html.gsub('£', '&pound;') %>
-      </p>
+      <h3>Summary rating information (provided by analytics)</h3>
+      <%= HtmlTableFormatting.new(['Variable', 'Value'], enhanced_title.to_a).html.gsub('£', '&pound;') %>
     )
     ERB.new(text).result(binding)
   end
@@ -240,7 +259,7 @@ class AdviceBase < ContentBase
       sub_content[:type] = :html if sub_content[:type] == :analytics_html
       sub_content
     end
-   end
+  end
 
   def format_£(value)
     FormatEnergyUnit.format(:£, value, :html)

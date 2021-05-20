@@ -36,11 +36,11 @@ module MeterReadingsFeeds
     def tariffs(mpxn, fuel_type, start_date, end_date)
       raise BadParameters.new("Please specify start and end date") if start_date.nil? || end_date.nil?
       tariff_details = tariff_data(mpxn, fuel_type, start_date, end_date)
-      charges_by_date = convert_datetime_key_to_date(tariff_details[:standing_charges].to_h)
+      charges_by_date = tariff_details[:standing_charges].to_h
       prices_by_date = tariff_details[:prices].to_h
       tariff_readings = X48Formatter.convert_dt_to_v_to_date_to_v_x48(start_date, end_date, prices_by_date)
       {
-        kwh_tariffs:      tariff_readings[:readings],
+        kwh_tariffs:      deduplicate_prices(tariff_readings[:readings]),
         standing_charges: charges_by_date,
         missing_readings: tariff_readings[:missing_readings],
       }
@@ -67,16 +67,33 @@ module MeterReadingsFeeds
       false
     end
 
+    def list
+      resp = api.list
+      resp['entries']
+    end
+
     def elements(mpxn, fuel_type, reading_type=MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
       elements = api.get_elements(mpxn: mpxn, fuel_type: fuel_type, reading_type: reading_type)
       elements['entries']
     end
 
+    def tariffs_available_date_range(mpxn, fuel_type)
+      result = api.get_tariff_data(mpxn: mpxn, fuel_type: fuel_type)
+      available_date_range(result['availableCacheRange'])
+    end
+
+    def readings_available_date_range(mpxn, fuel_type)
+      result = api.get_consumption_data(mpxn: mpxn, fuel_type: fuel_type)
+      available_date_range(result['availableCacheRange'])
+    end
+
+    # PH test
     def cache_start_datetime(mpxn: nil, fuel_type: nil, element: MeterReadingsFeeds::N3rgyDataApi::DEFAULT_ELEMENT, reading_type: MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
       start_date = cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type, type: 'start')
       DateTime.strptime(start_date, '%Y%m%d%H%M')
     end
 
+    # PH test
     def cache_end_datetime(mpxn: nil, fuel_type: nil, element: MeterReadingsFeeds::N3rgyDataApi::DEFAULT_ELEMENT, reading_type: MeterReadingsFeeds::N3rgyDataApi::DATA_TYPE_CONSUMPTION)
       end_date = cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type, type: 'end')
       DateTime.strptime(end_date, '%Y%m%d%H%M')
@@ -122,13 +139,17 @@ module MeterReadingsFeeds
         end
       end
       {
-        standing_charges: standing_charges,
+        standing_charges: deduplicate_standing_charges(standing_charges),
         prices:           prices
       }
     end
 
-    def convert_datetime_key_to_date(h)
-      h.transform_keys(&:to_date)
+    def deduplicate_standing_charges(ary)
+      N3rgyDataDeduplicator.deduplicate_standing_charges(ary)
+    end
+
+    def deduplicate_prices(hsh)
+      N3rgyDataDeduplicator.deduplicate_prices(hsh)
     end
 
     def unit_adjusted_readings(raw_readings, units)
@@ -153,7 +174,7 @@ module MeterReadingsFeeds
     def unit_adjusted_standing_charges(raw_standing_charges, fuel_type)
       raw_standing_charges.map do |standing_charge|
         [
-          DateTime.parse(standing_charge['startDate']),
+          Date.parse(standing_charge['startDate']),
           convert_to_£(standing_charge['value'], fuel_type)
         ]
       end
@@ -205,6 +226,19 @@ module MeterReadingsFeeds
       end
     end
 
+    def available_date_range(dates)
+      if dates
+        start_date = Date.parse(dates['start']) if dates['start']
+        end_date = Date.parse(dates['end']) if dates['end']
+        if start_date && end_date
+          return (start_date..end_date)
+        end
+      end
+    rescue => e
+      nil
+    end
+
+    # PH test
     def cache_data(mpxn:, fuel_type:, element:, reading_type:, type:)
       api.cache_data(mpxn: mpxn, fuel_type: fuel_type, element: element, reading_type: reading_type)['availableCacheRange'][type]
     end

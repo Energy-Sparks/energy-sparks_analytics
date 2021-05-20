@@ -16,6 +16,7 @@ class CostsBase < HalfHourlyData
     @fuel_type = meter.fuel_type
     @bill_component_types_internal = Hash.new(nil) # only interested in (quick access) to keys, so maintain as hash rather than array
     @post_aggregation_state = false
+    @calculated = {}
   end
 
   def bill_component_types
@@ -27,10 +28,25 @@ class CostsBase < HalfHourlyData
     combined = {
       rates_x48:        merge_costs_x48(costs.map(&:all_costs_x48)),
       standing_charges: combined_standing_charges(costs),
-      differential:     costs.any?{ |c| c.differential_tariff? }
+      differential:     costs.any?{ |c| c.differential_tariff? },
+      system_wide:      combined_system_wide(costs),
+      default:          combined_default(costs),
+      tariff:           costs.map { |c| c.tariff }
     }
 
     OneDaysCostData.new(combined)
+  end
+
+  def self.combined_system_wide(costs)
+    return true  if costs.all? { |c| c.system_wide == true }
+    return false if costs.all? { |c| c.system_wide != true }
+    :mixed
+  end
+
+  def self.combined_default(costs)
+    return true  if costs.all? { |c| c.default == true }
+    return false if costs.all? { |c| c.default != true }
+    :mixed
   end
 
   # merge array of hashes of x48 costs
@@ -69,16 +85,24 @@ class CostsBase < HalfHourlyData
     attr_reader :standing_charges, :total_standing_charge, :one_day_total_cost
     attr_reader :bill_components, :bill_component_costs_per_day
     attr_reader :all_costs_x48
+    # these could be true, false or :mixed
+    attr_reader :system_wide, :default
+    # either a single tariff, or an array for combined meters
+    attr_reader :tariff
 
     def initialize(costs)
-      @all_costs_x48 = costs[:rates_x48]
+      @all_costs_x48    = costs[:rates_x48]
       @standing_charges = costs[:standing_charges]
-      @differential =  costs[:differential] 
+      @differential     = costs[:differential]
+      @system_wide      = costs[:system_wide]
+      @default          = costs[:default]
+      @tariff           = costs[:tariff]
+
       @total_standing_charge = standing_charges.empty? ? 0.0 : standing_charges.values.sum
       @one_day_total_cost = total_x48_costs + @total_standing_charge
       calculate_day_bill_components
     end
-
+    
     def costs_x48
       @costs_x48 ||= AMRData.fast_add_multiple_x48_x_x48(@all_costs_x48.values)
     end
@@ -137,7 +161,7 @@ class CostsBase < HalfHourlyData
   end
 
   def cost_data_halfhour_broken_down(date, halfhour_index)
-    cost_hh_£ = rates_at_half_hour(halfhour_index)
+    cost_hh_£ = one_days_cost_data(date).rates_at_half_hour(halfhour_index)
     cost_hh_£.merge!(one_days_cost_data(date).standing_charges.transform_values{ |one_day_kwh| one_day_kwh / 48.0 })
     cost_hh_£
   end
@@ -152,7 +176,9 @@ class CostsBase < HalfHourlyData
 
   public def calculate_tariff_for_date(date, meter)
     kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
-    one_day_cost = OneDaysCostData.new(costs(date, meter, kwh_x48))
+    c = costs(date, meter, kwh_x48)
+    return nil if c.nil?
+    one_day_cost = OneDaysCostData.new(c)
     one_day_cost
   end
 
@@ -183,8 +209,21 @@ class CostsBase < HalfHourlyData
 
   public def add(date, costs)
     set_min_max_date(date)
-    add_to_list_of_bill_component_types(costs)
+    add_to_list_of_bill_component_types(costs) unless costs.nil?
     self[date] = costs
+  end
+
+  def calculated?(date)
+    @calculated[date] == true
+  end
+
+  def date_exists?(date)
+    !date_missing?(date)
+  end
+
+  def date_missing?(date)
+    c = one_days_cost_data(date)
+    c.nil?
   end
 
   private def total_in_period(start_date, end_date)
@@ -211,15 +250,14 @@ class EconomicCosts < CostsBase
     combined_economic_costs = EconomicCostsPreAggregated.new(combined_meter)
 
     (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }
-      list_of_days_economic_costs = list_of_meters_on_date.map { |meter| meter.amr_data.economic_tariff.one_days_cost_data(date) }
+      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }
+      list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.economic_tariff.one_days_cost_data(date) }
       combined_economic_costs.add(date, combined_day_costs(list_of_days_economic_costs))
     end
 
     Logging.logger.info "Created combined meter economic #{combined_economic_costs.costs_summary}"
     combined_economic_costs
   end
-
 end
 
 # parameterised representation of economic costs until after agggregation to reduce memory footprint
@@ -232,7 +270,7 @@ class EconomicCostsParameterised < EconomicCosts
   # returns a x48 array of half hourly costs
   def one_days_cost_data(date)
     return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
+    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
     self[date]
   end
 
@@ -271,15 +309,11 @@ class AccountingCosts < CostsBase
     combined_accounting_costs = AccountingCostsPreAggregated.new(combined_meter)
 
     (combined_start_date..combined_end_date).each do |date|
-      list_of_meters_on_date = list_of_meters.select { |meter| date >= meter.amr_data.start_date && date <= meter.amr_data.end_date }.compact
-      missing_accounting_costs = list_of_meters_on_date.select { |meter| meter.amr_data.accounting_tariff.nil? }
-      if missing_accounting_costs.length > 0
-        missing_accounting_costs.each do |meter|
-          puts "Missing accounting costs for #{meter.mpan_mprn} on #{date}"
-        end
-      end
+      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }.compact    
+      missing_accounting_costs = list_of_meters_on_date.select { |m| !m.amr_data.date_exists_by_type?(date, :accounting_cost) }
+      # silently skip calculation
       next if missing_accounting_costs.length > 0 
-      list_of_days_accounting_costs = list_of_meters_on_date.map { |meter| meter.amr_data.accounting_tariff.one_days_cost_data(date) }
+      list_of_days_accounting_costs = list_of_meters_on_date.map { |m| m.amr_data.accounting_tariff.one_days_cost_data(date) }
       combined_accounting_costs.add(date, combined_day_costs(list_of_days_accounting_costs))
     end
 
@@ -290,7 +324,7 @@ class AccountingCosts < CostsBase
   # returns a x48 array of half hourly costs
   def one_days_cost_data(date)
     return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
+    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
     self[date]
   end
 
@@ -304,7 +338,7 @@ class AccountingCostsParameterised < AccountingCosts
   # returns a x48 array of half hourly costs, only caches post aggregation, and front end cache
   def one_days_cost_data(date)
     return calculate_tariff_for_date(date, meter) unless post_aggregation_state
-    add(date, calculate_tariff_for_date(date, meter)) if date_missing?(date)
+    add(date, calculate_tariff_for_date(date, meter)) unless calculated?(date)
     self[date]
   end
 

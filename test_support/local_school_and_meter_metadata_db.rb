@@ -315,7 +315,7 @@ class AnalysticsSchoolAndMeterMetaData
     # front end maintains strict integer rule for mpan/mprn
     # analytics more ambiguous string or integer
     # need integer for attribute lookup
-    identifier = identifier.to_i if identifier.is_a?(String) && identifier.match(/^\d+$/)
+    identifier = identifier.to_i if identifier.is_a?(String) && identifier.match?(/^\d+$/)
 
     meter_attributes = all_attributes.fetch(identifier){ {} }
 
