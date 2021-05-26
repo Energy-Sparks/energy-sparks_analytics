@@ -31,6 +31,48 @@ module MeterReadingsFeeds
       self.class.handle_response(response)
     end
 
+    def periodic_data(systemId)
+      response = Faraday.get(BASE_URL + '/supportapi/system/smets2-periodic-data/' + systemId, nil, self.class.headers(@token))
+      self.class.handle_response(response)
+    end
+
+    def daily_data(systemId)
+      response = Faraday.get(BASE_URL + '/supportapi/system/smets2-daily-data/' + systemId, nil, self.class.headers(@token))
+      self.class.handle_response(response)
+    end
+
+    def historic_day(systemId, start_date, end_date)
+      url = "/supportapi/system/smets2-historic-day/#{systemId}?from=#{utc_date(start_date)}&to=#{utc_date(end_date)}"
+      response = Faraday.get(BASE_URL + url, nil, self.class.headers(@token))
+      self.class.handle_response(response)
+    end
+
+    def historic_week(systemId, start_date, end_date)
+      url = "/supportapi/system/smets2-historic-week/#{systemId}?from=#{utc_date(start_date)}&to=#{utc_date(end_date)}"
+      response = Faraday.get(BASE_URL + url, nil, self.class.headers(@token))
+      self.class.handle_response(response)
+    end
+
+    def historic_month(systemId, from_month, from_year, to_month, to_year)
+      url = "/supportapi/system/smets2-historic-month/#{systemId}?fromMonth=#{from_month}&fromYear=#{from_year}&toMonth=#{to_month}&toYear=#{to_year}"
+      response = Faraday.get(BASE_URL + url, nil, self.class.headers(@token))
+      self.class.handle_response(response)
+    end
+
+    def epochs(systemId, start_date, end_date)
+      url = "/supportapi/system/epochs/#{systemId}?from=#{utc_date(start_date)}&to=#{utc_date(end_date)}"
+      puts url
+      response = Faraday.get(BASE_URL + url, nil, self.class.headers(@token))
+      self.class.handle_response(response)
+    end
+
+    def summaries(systemId, start_date, end_date)
+      url = "/supportapi/system/summaries/#{systemId}?from=#{utc_date(start_date)}&to=#{utc_date(end_date)}"
+      puts url
+      response = Faraday.get(BASE_URL + url, nil, self.class.headers(@token))
+      self.class.handle_response(response)
+    end
+
     def self.headers(token = nil)
       hdr = { Accept: 'application/json', 'Content-Type': 'application/json' }
       hdr.merge!({Authorization: "Bearer #{token}"}) if token
@@ -60,6 +102,12 @@ module MeterReadingsFeeds
     rescue => e
       #problem parsing or traversing json, return original api error
       response.body
+    end
+
+    private
+
+    def utc_date(date)
+      date.strftime('%Y-%m-%d')
     end
   end
 end
