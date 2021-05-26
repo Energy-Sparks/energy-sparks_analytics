@@ -1469,7 +1469,7 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-
+      <h2><%= type.to_s.humanize %></h2>
       <% if type == :school_days %>
       <p>
       It is useful in diagnosing what changes have happened over the
