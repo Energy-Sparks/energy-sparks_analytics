@@ -68,7 +68,6 @@ module MeterReadingsFeeds
 
     def summaries(systemId, start_date, end_date)
       url = "/supportapi/system/summaries/#{systemId}?from=#{utc_date(start_date)}&to=#{utc_date(end_date)}"
-      puts url
       response = Faraday.get(BASE_URL + url, nil, self.class.headers(@token))
       self.class.handle_response(response)
     end
