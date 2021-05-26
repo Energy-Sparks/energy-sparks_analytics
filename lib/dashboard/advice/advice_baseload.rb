@@ -40,6 +40,9 @@ class AdviceBaseload < AdviceElectricityBase
       charts_and_html.push( { type: :chart_name, content: baseload_longterm_chart[:config_name] } )
       charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
     end
+
+    charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
+    
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
@@ -134,5 +137,19 @@ class AdviceBaseload < AdviceElectricityBase
         appliances - why not get the pupils to complete a survey?
       <p>
     }
+  end
+
+  def meter_name(meter)
+    name = " #{meter.name}" unless meter.name.nil? || meter.name.empty?
+    meter.mpxn.to_s + name
+  end
+
+  def baseload_charts_for_real_meters
+    @school.electricity_meters.map do |meter|
+      [
+        { type: :html, content: "<h2>Baseload for meter #{meter_name(meter)}" },
+        AdviceBase.meter_specific_chart_config(baseload_longterm_chart[:config_name], meter.mpxn),
+      ]
+    end.flatten
   end
 end
