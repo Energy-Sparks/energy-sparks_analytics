@@ -8,7 +8,8 @@ module MeterReadingsFeeds
 
     # instantiate with username and password, then call login to set (and return) token
     # - same instance can then be used for data calls
-    # OR instantiate with token from previous login and use without login call
+    # OR
+    # instantiate with token from previous login and use without login call
     def initialize(username: nil, password: nil, token: nil)
       @username = username
       @password = password
@@ -16,7 +17,6 @@ module MeterReadingsFeeds
     end
 
     def login
-      raise ApiFailure('Username and password must be set') if @username.blank? || @password.blank?
       url = '/userapi/account/login'
       payload = { emailAddress: @username, password: @password }
       data = post_data(url, payload)
@@ -40,7 +40,7 @@ module MeterReadingsFeeds
 
     def daily_data(systemId)
       url = '/supportapi/system/smets2-daily-data/' + systemId
-      get_data('/supportapi/system/smets2-daily-data/' + systemId)
+      get_data(url)
     end
 
     def historic_day(systemId, start_date, end_date)
@@ -80,12 +80,13 @@ module MeterReadingsFeeds
     end
 
     def get_data(path)
-      raise ApiFailure('token must be set') if @token.blank?
+      check_token
       response = Faraday.get(BASE_URL + path, nil, headers)
       handle_response(response)
     end
 
     def post_data(path, payload)
+      check_credentials
       response = Faraday.post(BASE_URL + path, payload.to_json, headers)
       handle_response(response)
     end
@@ -113,6 +114,14 @@ module MeterReadingsFeeds
     rescue => e
       #problem parsing or traversing json, return original api error
       response.body
+    end
+
+    def check_credentials
+      raise ApiFailure('Username and password, or token must be set') if @username.blank? || @password.blank?
+    end
+
+    def check_token
+      raise ApiFailure('token must be set') if @token.blank?
     end
 
     def utc_date(date)
