@@ -1,6 +1,6 @@
 require_relative '../../lib/dashboard.rb'
 
-token = MeterReadingsFeeds::GeoApi.login(ENV['GEO_API_USERNAME'], ENV['GEO_API_PASSWORD'])
+token = MeterReadingsFeeds::GeoApi.new(username: ENV['GEO_API_USERNAME'], password: ENV['GEO_API_PASSWORD']).login
 
 # puts "Token: #{token}"
 
@@ -49,7 +49,7 @@ puts
 puts "=" * 80
 puts "Live Data"
 
-api = MeterReadingsFeeds::GeoApi.new(token)
+api = MeterReadingsFeeds::GeoApi.new(token: token)
 result = api.trigger_fast_update(system_id)
 pp result
 sleep 3
