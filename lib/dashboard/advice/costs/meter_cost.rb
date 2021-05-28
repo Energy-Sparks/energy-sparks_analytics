@@ -200,31 +200,7 @@ class MeterCost
   end
 
   def run_chart_for_meter(chart_name)
-    # chart_manager = ChartManager.new(@school)
-    # chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name].clone
-    # chart_config[:meter_definition] =  @meter.mpxn
-    name = "#{chart_name}_#{@meter.mpxn}".to_sym
-    # data = chart_manager.run_chart(chart_config, name)
-    [
-      # { type: :chart, data: data },
-      # { type: :chart_config, data: chart_config },
-      # { type: :chart_data, data: data },
-      { type: :chart_name, content: chart_name, mpan_mprn: @meter.mpxn },
-      { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(name) }
-    ]
-  end
-
-  def run_chart_for_meter_deprecated(chart_name)
-    chart_manager = ChartManager.new(@school)
-    chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name].clone
-    chart_config[:meter_definition] =  @meter.mpxn
-    name = "#{chart_name}_#{@meter.mpxn}".to_sym
-    data = chart_manager.run_chart(chart_config, name)
-    [
-      # { type: :chart, data: data },
-      { type: :chart_config, data: chart_config },
-      { type: :chart_data, data: data },
-    ]
+    AdviceBase.meter_specific_chart_config(chart_name, @meter.mpxn)
   end
 
   def intro_to_cost_table

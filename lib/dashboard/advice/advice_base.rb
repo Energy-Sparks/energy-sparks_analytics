@@ -254,6 +254,14 @@ class AdviceBase < ContentBase
     end
   end
 
+  def self.meter_specific_chart_config(chart_name, mpxn)
+    name = "#{chart_name}_#{mpxn}".to_sym
+    [
+      { type: :chart_name,     content: chart_name, mpan_mprn: mpxn },
+      { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(name) }
+    ]
+  end
+
   def promote_analytics_html_to_frontend(charts_and_html)
     charts_and_html.map do |sub_content|
       sub_content[:type] = :html if sub_content[:type] == :analytics_html

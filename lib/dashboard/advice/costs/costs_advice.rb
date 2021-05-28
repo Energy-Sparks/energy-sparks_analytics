@@ -46,8 +46,6 @@ class CostAdviceBase < AdviceBase
   end
 
   def structured_content(user_type: nil)
-    puts "Got here 44"; rating
-    
     content_information = []
     content_information += meter_costs
     content_information.push(introduction_to_school_finances)
