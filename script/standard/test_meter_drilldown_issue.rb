@@ -11,31 +11,31 @@ school_stub = 'n3rgy-tiered-tariffs'
 
 school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_stub, :unvalidated_meter_data)
 
-chart_name = :electricity_cost_1_year_accounting_breakdown
+chart_name = :electricity_cost_comparison_last_2_years_accounting
 
 puts '=' * 80
 puts "Chart: #{chart_name}"
 chart_manager = ChartManager.new(school)
-chart_data1 = chart_manager.run_standard_chart(chart_name)
+chart_data = chart_manager.run_standard_chart(chart_name)
 
 existing_chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name]
 ap existing_chart_config
 
-charts = [chart_data1]
+charts = [chart_data]
 
 while chart_manager.drilldown_available?(existing_chart_config) do
   puts '=' * 80
-  column = chart_data1[:x_axis_ranges][1]
+  column = chart_data[:x_axis_ranges][1]
   new_chart_name, new_chart_config = chart_manager.drilldown(chart_name, existing_chart_config, nil, column)
   puts "Chart: #{chart_name}"
   ap new_chart_config
-  new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
-  charts.push(new_chart_results)
+  chart_data = chart_manager.run_chart(new_chart_config, new_chart_name)
+  charts.push(chart_data)
   existing_chart_config = new_chart_config
 end
 puts '=' * 80
 
-excel = ExcelCharts.new('Results\testchart.xlsx')
+excel = ExcelCharts.new('Results\meter-drilldown-test-charts.xlsx')
 
 excel.add_charts('Test', charts)
 

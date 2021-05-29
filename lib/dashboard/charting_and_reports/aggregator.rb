@@ -10,13 +10,14 @@ class Aggregator
 
   attr_reader :bucketed_data, :total_of_unit, :x_axis, :y2_axis
   attr_reader :x_axis_bucket_date_ranges, :data_labels, :x_axis_label
-  attr_reader :first_meter_date, :last_meter_date
+  attr_reader :first_meter_date, :last_meter_date, :multi_chart_x_axis_ranges
 
   def initialize(meter_collection, chart_config, show_reconciliation_values)
     @show_reconciliation_values = show_reconciliation_values
     @meter_collection = meter_collection
     @chart_config = chart_config
     @data_labels = nil
+    @multi_chart_x_axis_ranges = []
   end
 
   def title_summary
@@ -355,6 +356,9 @@ class Aggregator
       time_description = time_count <= 1 ? '' : (':' + time_description)
       school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + school_name)
       school_name = '' if school_count <= 1
+
+      @multi_chart_x_axis_ranges.push(x_axis_date_ranges)
+      
       bucketed_data.each do |series_name, x_data|
         new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data[new_series_name] = x_data
@@ -388,6 +392,9 @@ class Aggregator
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if school_count > 1
     bucketed_period_data.reverse_each.with_index do |period_data, index|
       bucketed_data, bucketed_data_count, time_description, school_name, x_axis, x_axis_date_ranges = period_data
+      
+      @multi_chart_x_axis_ranges.push(x_axis_date_ranges)
+
       if index == 0
         @x_axis = x_axis.map{ |month_year| month_year[0..2]} # MMM YYYY to MMM
         @bucketed_data[      time_description] = bucketed_data.values[0]
