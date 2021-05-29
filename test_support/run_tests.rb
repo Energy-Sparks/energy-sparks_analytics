@@ -438,7 +438,7 @@ class RunTests
     when :unvalidated_meter_data, :dcc_n3rgy_override_with_files
       matching_yaml_files_in_directory('unvalidated-data-', school_name_pattern_match)
     end
-    puts "Running tests for #{list.join('; ')}"
+    puts "Running tests for #{list.length} schools: #{list.join('; ')}"
     list
   end
 

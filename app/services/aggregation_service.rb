@@ -168,6 +168,8 @@ class AggregateDataService
   end
 
   def aggregate_electricity_meters
+    logger.info '=' * 80
+    logger.info 'Aggregating electricity meters'
     calculate_meters_carbon_emissions_and_costs(@electricity_meters, :electricity)
     @meter_collection.aggregated_electricity_meters = aggregate_main_meters(@meter_collection.aggregated_electricity_meters, @electricity_meters, :electricity)
     # assign_unaltered_electricity_meter(@meter_collection.aggregated_electricity_meters)

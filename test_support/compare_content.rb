@@ -110,7 +110,10 @@ class CompareContentResults
         if @control[:compare_results].include?(:report_differences)
           puts "Differs: #{index}"
           h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
+          puts "'Difference:"
           puts h_diff
+          puts 'Original:'
+          puts comparison_component
           puts 'Versus:'
           puts new_component
         end

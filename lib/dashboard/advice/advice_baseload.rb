@@ -140,7 +140,7 @@ class AdviceBaseload < AdviceElectricityBase
   end
 
   def meter_name(meter)
-    name = " #{meter.name}" unless meter.name.nil? || meter.name.empty?
+    name = meter.name.nil? || meter.name.empty? ? " #{meter.name}" : ''
     meter.mpxn.to_s + name
   end
 
