@@ -315,19 +315,20 @@ class GenericAccountingTariff < AccountingTariff
 
   # returns a hash with seperate key for each threhold bucket
   def tiered_rate(kwh, rate_config)
-    tiers = rate_config.select { |type, config| tiered_rate_sub_type?(type) }
+    tiers = rate_config.select { |type, _config| tiered_rate_sub_type?(type) }
 
     tiers.map do |tier_name, tier|
       # PH 8Apr2021 - there is an ambiguity on the boundary between 2 thresholds
       #             - which rate is take exactly on the boundary
       kwh_above_threshold_start = kwh - tier[:low_threshold]
+      next if kwh_above_threshold_start <= 0.0
       threshold_range = tier[:high_threshold] - tier[:low_threshold]
       kwh_in_threshold = [kwh_above_threshold_start, threshold_range].min
       [
         tier_description(tier_name, tier[:low_threshold], tier[:high_threshold], rate_config),
         tier[:rate] * kwh_in_threshold
       ]
-    end.to_h
+    end.compact.to_h
   end
 
   def tiered_rate_sub_type?(type)
