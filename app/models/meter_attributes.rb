@@ -645,6 +645,7 @@ class MeterAttributes
         name:       MeterAttributeTypes::String.define,
         type:       MeterAttributeTypes::Symbol.define(required: true, allowed_values: %i[flat differential differential_tiered]),
         sub_type:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:weekday_weekend]),
+        vat:        MeterAttributeTypes::Symbol.define(required: true, allowed_values: ['%5'.to_sym, '%20'.to_sym]),
         # default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
         rates:      MeterAttributeTypes::Hash.define(
           required: false,

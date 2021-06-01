@@ -261,7 +261,7 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def costs(date, kwh_x48)
-    t = if flat_tariff?(date)
+    c = if flat_tariff?(date)
           {
             rates_x48: {
               MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][:flat_rate][:rate])
@@ -275,13 +275,15 @@ class GenericAccountingTariff < AccountingTariff
           }
         end
 
-    t[:rates_x48].merge!(rate_per_kwh_standard_charges(kwh_x48))
+    c[:rates_x48].merge!(rate_per_kwh_standard_charges(kwh_x48))
 
-    t[:rates_x48].merge!(climate_change_level_costs(date, kwh_x48)) if climate_change_levy?
+    c[:rates_x48].merge!(climate_change_level_costs(date, kwh_x48)) if climate_change_levy?
 
-    # ap t[:rates_x48], { limit: 4 } if climate_change_levy?
+    c.merge!(common_data(date, kwh_x48))
 
-    t.merge(common_data(date, kwh_x48))
+    c.deep_merge!(apply_vat(c)) if vat > 0.0
+
+    c
   end
 
   def all_times
@@ -299,6 +301,36 @@ class GenericAccountingTariff < AccountingTariff
       cost_x48 = AMRData.fast_multiply_x48_x_x48(weights, kwh_x48)
       { differential_rate_name(type) => cost_x48 }
     end
+  end
+
+  def vat
+    if @tariff.key?(:vat) # required if manually entered, not if from dcc
+      @tariff[:vat].to_s[1..10].to_f / 100.0
+    else
+      return 0.0
+    end
+  end
+
+  def apply_vat(costs)
+    # spread standing charge VAT across every half hour
+    # so can see as one value in charts and tabular user presentation
+    vat_x48 = AMRData.fast_add_x48_x_x48(rates_vat_x48(costs), standing_charge_daily_vat_x48(costs))
+
+    { rates_x48: { vat_description.to_sym => vat_x48 } }
+  end
+
+  def standing_charge_daily_vat_x48(costs)
+    vat_daily = costs[:standing_charges].values.sum * vat
+    AMRData.single_value_kwh_x48(vat_daily / 48.0)
+  end
+
+  def rates_vat_x48(costs)
+    rates_x48 = AMRData.fast_add_multiple_x48_x_x48(costs[:rates_x48].values)
+    AMRData.fast_multiply_x48_x_scalar(rates_x48, vat)
+  end
+
+  def vat_description
+    "vat@#{(vat * 100).round(0)}%"
   end
 
   def differential_rate_name(type)

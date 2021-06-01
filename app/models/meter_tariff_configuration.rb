@@ -53,9 +53,9 @@ class MeterTariffs
       summary:      'Reactive Power Charge',
       description:  'Charge if delivered versus converted electricity differs - typically if your site has motors and similar industrial equipment'
     },
-    half_hourly_data_charge: {
-      summary:      'Half Hourly Metering Charge',
-      description:  'Charge for half hourly metering service'
+    site_fee: {
+      summary:      'Site Fee',
+      description:  'Site Fee'
     },
     other: {
       summary:      'Charge of type not in default list',
