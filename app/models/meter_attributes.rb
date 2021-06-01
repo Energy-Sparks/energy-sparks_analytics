@@ -670,14 +670,15 @@ class MeterAttributes
             weekend:     MeterAttributeTypes::Boolean.define,
           }.merge(MeterAttributes.default_tariff_rates)
         ),
-        asc_limit_kw: MeterAttributeTypes::Float.define
+        asc_limit_kw:           MeterAttributeTypes::Float.define,
+        climate_change_levy:    MeterAttributeTypes::Boolean.define
       }
     )
   end
 
   class AccountingGenericTariff < MeterAttributeTypes::AttributeBase
     id :accounting_tariff_generic
-    aggregate_over :accounting_tariffs
+    aggregate_over :accounting_tariff_generic
     name 'Accounting tariff (generic + DCC)'
 
     structure MeterAttributes.generic_accounting_tariff
@@ -685,7 +686,7 @@ class MeterAttributes
 
   class AccountingGenericTariffOverride < MeterAttributeTypes::AttributeBase
     id :accounting_tariff_generic_override
-    aggregate_over :accounting_tariffs
+    aggregate_over :accounting_tariff_generic_override
     name 'Accounting tariff override (generic + DCC)'
 
     structure MeterAttributes.generic_accounting_tariff
@@ -693,7 +694,7 @@ class MeterAttributes
 
   class AccountingGenericTariffMerge < MeterAttributeTypes::AttributeBase
     id :accounting_tariff_generic_merge
-    aggregate_over :accounting_tariffs
+    aggregate_over :accounting_tariff_generic_merge
     name 'Accounting tariff merge (generic + DCC)'
 
     structure MeterAttributes.generic_accounting_tariff

@@ -1,11 +1,12 @@
 class MeterTariff
-  attr_reader :tariff
+  attr_reader :tariff, :fuel_type
   FLAT_RATE = 'Flat Rate'.freeze
   DAYTIME_RATE = 'Daytime Rate'.freeze
   NIGHTTIME_RATE = 'Nighttime Rate'.freeze
   def initialize(meter, tariff)
-    @mpxn = meter.mpxn
-    @tariff = tariff
+    @mpxn       = meter.mpxn
+    @fuel_type  = meter.fuel_type
+    @tariff     = tariff
   end
 
   def default?
@@ -132,7 +133,9 @@ class AccountingTariff < EconomicTariff
   # apply per kWh 'standing charges' per half hour
   def rate_per_kwh_standard_charges(kwh_x48)
     rates = tariff[:rates].select do |standing_charge_type, rate|
-      !rate_type?(standing_charge_type) && rate[:per] == :kwh
+      standing_charge_type != :climate_change_levy &&
+      !rate_type?(standing_charge_type) &&
+      rate[:per] == :kwh
     end
 
     rates.map do |standing_charge_type, rate|
@@ -196,6 +199,11 @@ class AccountingTariff < EconomicTariff
 end
 
 class GenericAccountingTariff < AccountingTariff
+  def initialize(meter, tariff)
+    super(meter, tariff)
+    remove_climate_change_levy_from_standing_charges
+  end
+
   def differential?(_date)
     !flat_tariff?(_date)
   end
@@ -210,6 +218,10 @@ class GenericAccountingTariff < AccountingTariff
 
   def rate_rate_type?(type)
     type.to_s.match?(/^rate[0-9]$/)
+  end
+
+  def climate_change_levy?
+    @climate_change_levy
   end
 
   def weekend_weekday_differential_type?(type)
@@ -263,7 +275,11 @@ class GenericAccountingTariff < AccountingTariff
           }
         end
 
-    t[:rates_x48].merge(rate_per_kwh_standard_charges(kwh_x48))
+    t[:rates_x48].merge!(rate_per_kwh_standard_charges(kwh_x48))
+
+    t[:rates_x48].merge!(climate_change_level_costs(date, kwh_x48)) if climate_change_levy?
+
+    # ap t[:rates_x48], { limit: 4 } if climate_change_levy?
 
     t.merge(common_data(date, kwh_x48))
   end
@@ -294,6 +310,22 @@ class GenericAccountingTariff < AccountingTariff
     name += ' (weekends)' if weekend_type?
     name += ' (weekdays)' if weekday_type?
     name
+  end
+
+  def remove_climate_change_levy_from_standing_charges
+    if @tariff.key?(:climate_change_levy)
+      @climate_change_levy = @tariff[:climate_change_levy]
+      @tariff.delete(:climate_change_levy)
+    else
+      @climate_change_levy = false
+    end
+  end
+
+  def climate_change_level_costs(date, kwh_x48)
+    climate_change_levey_key, levy = ClimateChangeLevy.rate(@fuel_type, date)
+    {
+      climate_change_levey_key => AMRData.fast_multiply_x48_x_scalar(kwh_x48, levy)
+    }
   end
 
   def calculate_tiered_costs_x48(type, kwh_x48)
