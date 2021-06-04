@@ -77,6 +77,13 @@ school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match
 
 school_names.each do |school_name|
   school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db, meter_attributes_overrides: meter_attribute_overrides)
+meter = school.meter?(1580001320420)
+puts "kwh #{meter.amr_data.kwh_date_range(Date.new(2021, 4, 1), Date.new(2021, 4, 30))}"
+
+band_kwh = DUOSCharges.kwh_in_bands_between_dates(meter, Date.new(2021, 4, 1), Date.new(2021, 4, 30))
+ap band_kwh
+puts band_kwh.values.sum
+exit
 end
 
 script = test_script_config(school_name_pattern_match, source_db, meter_attribute_overrides)

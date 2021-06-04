@@ -15,6 +15,18 @@ class DUOSCharges
     band_by_region_daytype(region, daytype, half_hour_index)
   end
 
+  def self.kwh_in_bands_between_dates(meter, start_date, end_date)
+    band_kwh = {}
+    (start_date..end_date).each do |date|
+      (0..47).each do |hhi|
+        band = DUOSCharges.band(meter.mpxn, date, hhi)
+        band_kwh[band] ||= 0.0
+        band_kwh[band] += meter.amr_data.kwh(date, hhi)
+      end
+    end
+    band_kwh
+  end
+
   def self.check_for_completion_test
     banding = {}
     (10..23).each do |region|
@@ -127,7 +139,6 @@ class DUOSCharges
     DUOS_BY_REGION[region][:bands].each do |band, band_info|
       return band if band_info.key?(daytype) && in_time_range?(band_info[daytype], half_hour_index)
     end
-    ap @@band
     raise MissingDuosSetting, "Missing Duos setting for region: #{region} at/on #{daytype} half hour #{half_hour_index}"
   end
 
