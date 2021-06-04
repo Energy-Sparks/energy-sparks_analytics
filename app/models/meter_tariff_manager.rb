@@ -285,7 +285,6 @@ class MeterTariffManager
   def raise_and_log_error(exception, message, data)
     logger.info message
     logger.info data
-    puts "Got here #{message}"
     # TODO(PH, 3May2021) - uncomment once system wide accounting tariffs are released
     # raise exception, message
   end

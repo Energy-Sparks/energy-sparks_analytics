@@ -10,6 +10,8 @@ class Economy7Times
     end
   end
 
+  # https://sse.co.uk/help/energy/daylight-saving-time states economy 7 stays on GMT all year round?
+
   DEFAULT_TIMES = TimeOfDay.new( 0,  0)..TimeOfDay.new( 7,  0)
   private_constant :DEFAULT_TIMES
 

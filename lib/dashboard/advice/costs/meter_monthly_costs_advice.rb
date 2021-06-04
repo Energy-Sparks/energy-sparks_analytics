@@ -39,8 +39,6 @@ class MeterMonthlyCostsAdvice
   end
 
   private def reorder_columns(components)
-    puts "Got here"
-    ap components
     # move to last 3 columns, in this order
     [:standing_charge, "vat@20%".to_sym, "vat@5%".to_sym, :variance_versus_last_year, :total].each do |column_type|
       if components.include?(column_type)
@@ -58,9 +56,6 @@ class MeterMonthlyCostsAdvice
       components.delete(:flat_rate)
       components.insert(0, :flat_rate)
     end
-
-    puts "Got here after"
-    ap components
 
     components
   end

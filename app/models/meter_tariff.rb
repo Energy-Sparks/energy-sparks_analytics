@@ -78,7 +78,7 @@ class AccountingTariff < EconomicTariff
           }
         end
 
-    t[:rates_x48].merge!(rate_per_kwh_standard_charges(kwh_x48))
+    t[:rates_x48].merge!(rate_per_kwh_standing_charges(kwh_x48))
 
     t.merge(common_data(date, kwh_x48))
   end
@@ -100,11 +100,16 @@ class AccountingTariff < EconomicTariff
     false
   end
 
+  def duos_type?(type)
+    false
+  end
+
   def standing_charges(date, days_kwh)
     standing_charge = {}
     tariff[:rates].each do |standing_charge_type, rate|
-      next if rate_type?(standing_charge_type) || rate[:per] == :kwh
-      standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh)
+      if standard_standing_charge_type?(standing_charge_type) && rate[:per] != :kwh
+        standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh)
+      end
     end
     standing_charge
   end
@@ -131,19 +136,22 @@ class AccountingTariff < EconomicTariff
   end
 
   # apply per kWh 'standing charges' per half hour
-  def rate_per_kwh_standard_charges(kwh_x48)
+  def rate_per_kwh_standing_charges(kwh_x48)
     rates = tariff[:rates].select do |standing_charge_type, rate|
-      standing_charge_type != :climate_change_levy &&
-      !rate_type?(standing_charge_type) &&
+      standard_standing_charge_type?(standing_charge_type) &&
       rate[:per] == :kwh
     end
 
     rates.map do |standing_charge_type, rate|
       [
         standing_charge_type.to_s.humanize,
-        AMRData.fast_multiply_x48_x_scalar(kwh_x48, rate[:rate])
+        AMRData.fast_multiply_x48_x_scalar(kwh_x48, 1.0 / rate[:rate])
       ]
     end.to_h
+  end
+
+  def standard_standing_charge_type?(type)
+    !rate_type?(type)
   end
 
   def check_differential_times(time_ranges)
@@ -220,6 +228,18 @@ class GenericAccountingTariff < AccountingTariff
     type.to_s.match?(/^rate[0-9]$/)
   end
 
+  def duos_type?(type)
+    type.to_s.match?(/^duos/)
+  end
+
+  def climate_change_levy_type?(type)
+    type == :climate_change_levy
+  end
+
+  def standard_standing_charge_type?(type)
+    super(type) && !climate_change_levy_type?(type) && !duos_type?(type)
+  end
+
   def climate_change_levy?
     @climate_change_levy
   end
@@ -275,7 +295,7 @@ class GenericAccountingTariff < AccountingTariff
           }
         end
 
-    c[:rates_x48].merge!(rate_per_kwh_standard_charges(kwh_x48))
+    c[:rates_x48].merge!(rate_per_kwh_standing_charges(kwh_x48))
 
     c[:rates_x48].merge!(climate_change_level_costs(date, kwh_x48)) if climate_change_levy?
 

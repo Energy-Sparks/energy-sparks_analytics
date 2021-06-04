@@ -512,6 +512,12 @@ class MeterAttributes
           rate: MeterAttributeTypes::Float.define
         }
       ),
+      fixed_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
       other: MeterAttributeTypes::Hash.define(
         structure: {
           per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
