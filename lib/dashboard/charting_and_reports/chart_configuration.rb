@@ -951,6 +951,14 @@ class ChartManager
       ignore_single_series_failure: true,
       chart1_subtype:   :stacked,
     },
+    pie_chart_1_year_accounting_breakdown: {
+      name:             '',
+      inherits_from:    :electricity_cost_1_year_accounting_breakdown,
+      timescale:        [{ up_to_a_year: 0 }],
+      chart1_type:      :pie,
+      chart1_subtype:   nil,
+      x_axis:           :nodatebuckets
+    },
     electricity_cost_1_year_accounting_breakdown_group_by_week: {
       inherits_from:    :electricity_cost_1_year_accounting_breakdown,
       x_axis:           :week

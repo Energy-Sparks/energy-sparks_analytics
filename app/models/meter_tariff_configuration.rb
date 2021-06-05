@@ -58,8 +58,8 @@ class MeterTariffs
       description:  'Site Fee'
     },
     other: {
-      summary:      'Charge of type not in default list',
-      description:  'Miscellaneous not in default list'
+      summary:      'Miscellaneous charge',
+      description:  'Miscellaneous'
     }
   }.freeze
 

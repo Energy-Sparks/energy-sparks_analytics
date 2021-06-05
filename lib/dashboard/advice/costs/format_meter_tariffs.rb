@@ -186,8 +186,10 @@ class FormatMeterTariffs < DashboardChartAdviceBase
 
   def duos_description(rate_type, costs)
     [
-      rate_type.to_s.humanize,
-      FormatEnergyUnit.format(:£, costs, :html, false, false, :accountant) + '/kWh'
+      [
+        rate_type.to_s.humanize,
+        FormatEnergyUnit.format(:£, costs, :html, false, false, :accountant) + '/kWh'
+      ]
     ]
   end
 

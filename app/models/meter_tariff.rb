@@ -108,7 +108,7 @@ class AccountingTariff < EconomicTariff
     standing_charge = {}
     tariff[:rates].each do |standing_charge_type, rate|
       if standard_standing_charge_type?(standing_charge_type) && rate[:per] != :kwh
-        standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh)
+        standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh, standing_charge_type)
       end
     end
     standing_charge
@@ -120,7 +120,7 @@ class AccountingTariff < EconomicTariff
     [times(:nighttime_rate), times(:daytime_rate)]
   end
 
-  def daily_rate(date, per, rate, days_kwh)
+  def daily_rate(date, per, rate, days_kwh, type)
     case per
     when :day
       rate
@@ -128,6 +128,12 @@ class AccountingTariff < EconomicTariff
       rate / DateTimeHelper.days_in_month(date)
     when :quarter
       rate / DateTimeHelper.days_in_quarter(date)
+    when :kva
+      if type == :agreed_availability_charge
+        asc_rate(rate) / DateTimeHelper.days_in_month(date)
+      else # reactive charges - unknown as not provided by AMR meter feeds, and not passed through DCC yet (June2021)
+        0.0
+      end
     when :kwh 
       raise UnexpectedRateType, 'Unexpected internal error: unit rate type kwh should be handled as x48 rather than scalar'
     else
@@ -152,6 +158,11 @@ class AccountingTariff < EconomicTariff
 
   def standard_standing_charge_type?(type)
     !rate_type?(type)
+  end
+
+  # agreed supply capacity
+  def asc_rate(rate)
+    rate * tariff[:asc_limit_kw]
   end
 
   def check_differential_times(time_ranges)
@@ -280,6 +291,10 @@ class GenericAccountingTariff < AccountingTariff
     tariff[:rates].keys.select { |type| rate_type?(type) }
   end
 
+  def has_duos_charge?
+    tariff[:rates].keys.any?{ |type| duos_type?(type) }
+  end
+
   def costs(date, kwh_x48)
     c = if flat_tariff?(date)
           {
@@ -298,6 +313,8 @@ class GenericAccountingTariff < AccountingTariff
     c[:rates_x48].merge!(rate_per_kwh_standing_charges(kwh_x48))
 
     c[:rates_x48].merge!(climate_change_level_costs(date, kwh_x48)) if climate_change_levy?
+
+    c[:rates_x48].merge!(duos_costs(date, kwh_x48)) if has_duos_charge?
 
     c.merge!(common_data(date, kwh_x48))
 
@@ -351,6 +368,18 @@ class GenericAccountingTariff < AccountingTariff
 
   def vat_description
     "vat@#{(vat * 100).round(0)}%"
+  end
+
+  def duos_costs(date, kwh_x48)
+    costs = DUOSCharges.kwhs_x48(@mpxn, date, kwh_x48)
+
+    costs.map do |colour_key, kwh_x48|
+      duos_key = "duos_#{colour_key.to_s}".to_sym
+      [
+        duos_key,
+        AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][duos_key])
+      ]
+    end.to_h
   end
 
   def differential_rate_name(type)

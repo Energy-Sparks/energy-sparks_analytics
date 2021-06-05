@@ -494,6 +494,12 @@ class MeterAttributes
           rate: MeterAttributeTypes::Float.define
         }
       ),
+      agreed_availability_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kva]),
+          rate: MeterAttributeTypes::Float.define(hint: 'enter £ value per KVA, and units KVA in asc_limit_kw field')
+        }
+      ),
       settlement_agency_fee: MeterAttributeTypes::Hash.define(
         structure: {
           per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
@@ -502,7 +508,7 @@ class MeterAttributes
       ),
       reactive_power_charge: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kva]),
           rate: MeterAttributeTypes::Float.define
         }
       ),
@@ -513,6 +519,24 @@ class MeterAttributes
         }
       ),
       fixed_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      nhh_metering_agent_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter], hint: 'divide the total charge by the number of days in the month'),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      meter_asset_provider_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      site_fee: MeterAttributeTypes::Hash.define(
         structure: {
           per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define

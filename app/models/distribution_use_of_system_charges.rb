@@ -27,6 +27,18 @@ class DUOSCharges
     band_kwh
   end
 
+  def self.kwhs_x48(mpan, date, kwh_x48)
+    band_kwhs_x48 = {}
+
+    (0..47).each do |hhi|
+      band = DUOSCharges.band(mpan, date, hhi)
+      band_kwhs_x48[band] ||= Array.new(48, 0.0)
+      band_kwhs_x48[band][hhi] = kwh_x48[hhi]
+    end
+
+    band_kwhs_x48
+  end
+
   def self.check_for_completion_test
     banding = {}
     (10..23).each do |region|
