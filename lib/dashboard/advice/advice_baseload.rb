@@ -23,7 +23,7 @@ class AdviceBaseload < AdviceElectricityBase
 
   def content(user_type: nil)
     charts_and_html = []
-    charts_and_html.push( { type: :html, content: '<h2>Electricity Baseload</h2>' } )
+    charts_and_html.push( { type: :html, content: "<h2>Electricity Baseload#{multiple_meters_total}</h2>" } )
     charts_and_html += debug_content
     charts_and_html.push( { type: :html,  content: statement_of_baseload } )
     charts_and_html.push( { type: :html,  content: explanation_of_baseload } )
@@ -34,7 +34,7 @@ class AdviceBaseload < AdviceElectricityBase
     charts_and_html.push( { type: :html,  content: chart_drilldown_explanation } )
 
     if max_baseload_period_years > 1.1
-      charts_and_html.push( { type: :html,  content: '<h2>Electricity Baseload - Longer Term</h2>' } )
+      charts_and_html.push( { type: :html,  content: "<h2>Electricity Baseload - Longer Term#{multiple_meters_total}</h2>" } )
       charts_and_html.push( { type: :html,  content: longterm_chart_intro } )
       charts_and_html.push( { type: :chart, content: baseload_longterm_chart } )
       charts_and_html.push( { type: :chart_name, content: baseload_longterm_chart[:config_name] } )
@@ -42,11 +42,15 @@ class AdviceBaseload < AdviceElectricityBase
     end
 
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
-    
+
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
   private
+
+  def multiple_meters_total
+    @school.electricity_meters.length > 1 ? ' (all meters)' : ''
+  end
 
   def statement_of_baseload
     text = %{

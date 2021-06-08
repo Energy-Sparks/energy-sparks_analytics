@@ -1,3 +1,5 @@
+# probably due to be replaced by a fixed charge per day from April 2023
+#
 class TUOSCharges
   TRIAD_DATES = {
     '2020-2021' => [

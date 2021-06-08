@@ -1,6 +1,8 @@
 # https://www.catalyst-commercial.co.uk/dcp228-duos-charges/
 # https://en.wikipedia.org/wiki/Electricity_billing_in_the_UK/
 #
+# Due to be replaced by a fixed charge from April 2022
+#
 # Distributed use of system charges are charged by time of day / weekday/weekend
 # for use of the distribution network, labelled either 'red', 'amber' or 'green' times
 # to reflect network capacity required to service the grid during peak (red) periods
