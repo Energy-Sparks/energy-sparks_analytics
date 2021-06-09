@@ -17,6 +17,11 @@ class DUOSCharges
     band_by_region_daytype(region, daytype, half_hour_index)
   end
 
+  def self.regional_charge_table(mpan)
+    region = region_number(mpan)
+    DUOS_BY_REGION[region]
+  end
+
   def self.kwh_in_bands_between_dates(meter, start_date, end_date)
     band_kwh = {}
     (start_date..end_date).each do |date|

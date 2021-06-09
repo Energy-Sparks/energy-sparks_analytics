@@ -488,6 +488,12 @@ class MeterAttributes
           rate: MeterAttributeTypes::Float.define
         }
       ),
+      feed_in_tariff_levy: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
       agreed_capacity: MeterAttributeTypes::Hash.define(
         structure: {
           per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
