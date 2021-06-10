@@ -14,12 +14,12 @@ class AgreedSupplyCapacityAdvice
         is quite close to your agreed limit of <%= asc[:agreed_limit_kw] %> kW
         for meter <%= @meter.mpxn %>.
 
-        There is a risk of incurring signifcantly monthly penalty charges if
+        There is a risk of incurring significantly monthly penalty charges if
         you go over the limit. We suggest you contact your energy manager or energy
         supplier to discuss.
       <% else %>
         <b>Potential easy saving:</b>
-        Your current maximum annual capacity usage of <%= asc[:kw] %> kW is signifcantly
+        Your current maximum annual capacity usage of <%= asc[:kw] %> kW is significantly
         lower than your agreed limit of <%= asc[:agreed_limit_kw] %> kW
         for meter <%= @meter.mpxn %>.
         
