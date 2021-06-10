@@ -10,6 +10,10 @@ class Economy7Times
     end
   end
 
+  # https://www.electricityprices.org.uk/economy-7/
+  # https://www.businessjuice.co.uk/energy-guides/economy-7-times/
+  # 
+
   # https://sse.co.uk/help/energy/daylight-saving-time states economy 7 stays on GMT all year round?
 
   DEFAULT_TIMES = TimeOfDay.new( 0,  0)..TimeOfDay.new( 7,  0)

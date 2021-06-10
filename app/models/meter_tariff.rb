@@ -148,10 +148,11 @@ class AccountingTariff < EconomicTariff
       rate[:per] == :kwh
     end
 
+    
     rates.map do |standing_charge_type, rate|
       [
         standing_charge_type.to_s.humanize,
-        AMRData.fast_multiply_x48_x_scalar(kwh_x48, 1.0 / rate[:rate])
+        AMRData.fast_multiply_x48_x_scalar(kwh_x48, rate[:rate])
       ]
     end.to_h
   end
