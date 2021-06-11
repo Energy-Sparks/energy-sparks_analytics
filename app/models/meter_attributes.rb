@@ -470,7 +470,6 @@ class MeterAttributes
   def self.default_tariff_rates
     {
       standing_charge: MeterAttributeTypes::Hash.define(
-        required: true,
         structure: {
           per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define(required: true)
