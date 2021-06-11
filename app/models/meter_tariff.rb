@@ -343,7 +343,7 @@ class GenericAccountingTariff < AccountingTariff
 
   def vat
     if @tariff.key?(:vat) # required if manually entered, not if from dcc
-      @tariff[:vat].to_s[1..10].to_f / 100.0
+      @tariff[:vat].to_s.to_f / 100.0
     else
       return 0.0
     end
