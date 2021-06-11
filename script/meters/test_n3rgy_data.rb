@@ -1,7 +1,7 @@
 require_relative '../../lib/dashboard.rb'
 
 # for live
-n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_URL'])
+# n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_URL'])
 
 # for sandbox
 # n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_SANDBOX_API_KEY'], base_url: ENV['N3RGY_SANDBOX_DATA_URL'], bad_electricity_standing_charge_units: true)
@@ -23,13 +23,17 @@ mpxn = 2000027623304
 fuel_type = :electricity
 # fuel_type = :gas
 
-start_date = Date.parse('20200410')
-end_date = Date.parse('20210509')
 
-# readings = n3rgyData.readings(mpxn, fuel_type, start_date, end_date)
-# pp readings.inspect
+# n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_API_KEY'], base_url: ENV['N3RGY_DATA_URL']
 
-readings = n3rgyData.tariffs(mpxn, fuel_type, start_date, end_date)
+n3rgyData = MeterReadingsFeeds::N3rgyData.new(api_key: ENV['N3RGY_API_KEY'], base_url: 'https://api.data.n3rgy.com/')
+mpxn = 2000006185057
+start_date = end_date = Date.parse('20210530')
+readings = n3rgyData.readings(mpxn, :electricity, start_date, end_date)
+pp readings.inspect
+readings = n3rgyData.tariffs(mpxn, :electricity, start_date, end_date)
+pp readings.inspect
+
 # pp readings.inspect
 
 # status = n3rgyData.status(mpxn)

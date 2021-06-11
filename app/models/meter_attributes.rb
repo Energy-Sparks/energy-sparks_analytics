@@ -507,7 +507,7 @@ class MeterAttributes
       ),
       settlement_agency_fee: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       ),
@@ -525,7 +525,7 @@ class MeterAttributes
       ),
       fixed_charge: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       ),
@@ -537,13 +537,13 @@ class MeterAttributes
       ),
       meter_asset_provider_charge: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       ),
       site_fee: MeterAttributeTypes::Hash.define(
         structure: {
-          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh, :day, :month, :quarter]),
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       ),
