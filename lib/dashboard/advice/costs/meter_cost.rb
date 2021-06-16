@@ -21,6 +21,7 @@ class MeterCost
       content:  [
                   intro_to_meter,
                   term_dependent_content,
+                  agreed_supply_capacity_assessment,
                   tariff_information
                 ].flatten
     }
@@ -94,7 +95,9 @@ class MeterCost
       intro_to_1_year_brokendown_chart,
       chart_1_year_breakdown,
       intro_to_cost_table,
-      cost_table
+      cost_table,
+      intro_to_1_year_brokendown_pie_chart,
+      pie_chart_breakdown
     ]
   end
 
@@ -114,6 +117,10 @@ class MeterCost
 
   def tariff_information
     @show_tariffs ? [tariff_introduction_html, tariffs] : []
+  end
+
+  def agreed_supply_capacity_assessment
+    AgreedSupplyCapacityAdvice.new(@meter).advice
   end
 
   def days_meter_data
@@ -163,6 +170,15 @@ class MeterCost
     { type: :html, content: text }
   end
 
+  def intro_to_1_year_brokendown_pie_chart
+    text = %{
+      <p>
+        Last year's bill components were broken down as follows:
+      </p>
+    }
+    { type: :html, content: text }
+  end
+
   def intro_to_less_than_one_years_data
     text = %{
       <p>
@@ -189,6 +205,10 @@ class MeterCost
 
   def chart_1_year_breakdown
     run_chart_for_meter(:electricity_cost_1_year_accounting_breakdown)
+  end
+
+  def pie_chart_breakdown
+    run_chart_for_meter(:pie_chart_1_year_accounting_breakdown)
   end
 
   def chart_breakdown_by_week

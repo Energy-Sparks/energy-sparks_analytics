@@ -60,7 +60,8 @@ class AggregateDataServiceStorageHeaters
         map
       else
         map = SHMap.new
-        map[:original] = electricity_meter
+        map[:original]          = electricity_meter
+        map[:ex_storage_heater] = electricity_meter
         map
       end
     end
@@ -77,7 +78,7 @@ class AggregateDataServiceStorageHeaters
     map[:original] = meter
 
     electric_only_amr, storage_heater_amr = meter.storage_heater_setup.disaggregate_amr_data(meter.amr_data, meter.mpan_mprn)
-  
+
     map[:storage_heater]    = create_meter(meter, storage_heater_amr, :storage_heater_disaggregated_storage_heater, :storage_heater)
     map[:ex_storage_heater] = create_meter(meter, electric_only_amr,  :storage_heater_disaggregated_electricity)
     map

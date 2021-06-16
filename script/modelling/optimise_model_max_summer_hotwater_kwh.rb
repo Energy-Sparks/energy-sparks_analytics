@@ -207,7 +207,7 @@ end
   # st martins garden
   9116469608      => {  kwh: 0..0,   certainty: 0.9, comment: 'some weekend, heating only, model good' },
   11476701        => {  kwh: 825..1350,   certainty: 0.9, comment: 'some weekend, very bad r2, model good' },
-  11476903        => {  kwh: 0..0,   certainty: 0.4, comment: 'very strange summer usage signifcantly higher than winter, babelled as kitchen' },
+  11476903        => {  kwh: 0..0,   certainty: 0.4, comment: 'very strange summer usage significantly higher than winter, babelled as kitchen' },
   80000000143108  => {  kwh: 1250..1550,   certainty: 0.5, comment: 'despite very bad r2 model seems to be working' },
   # st michaels garden
   51068306      => {  kwh: 120..200,   certainty: 0.9, comment: 'poorish r2 but model provides good separation' },

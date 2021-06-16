@@ -9,11 +9,34 @@ class MeterMonthlyCostsAdvice
     header, rows, totals = two_year_monthly_comparison_table
     formatted_rows = rows.map{ |row| row_to_£(row) }
     formatted_totals = row_to_£(totals)
+    # header = add_tool_tips(header, @school, @meter)
     html_table = HtmlTableFormatting.new(header, formatted_rows, formatted_totals)
     html_table.html
   end
 
   private
+
+  def add_tool_tips(header, school, meter)
+    header.map do |column_heading|
+      tooltip = MeterTariffDescription.description_html(school, meter, column_heading)
+      tooltip.nil? ? column_heading : to_tooltip_html(column_heading, tooltip)
+    end
+  end
+
+  # doesn't seem to work with front end bootstrap CSS
+  def to_tooltip_html_deprecated(column_heading_name, text)
+    "<button class=\"btn btn-secondary\" data-toggle=\"popover\" data-container=\"body\" data-placement=\"top\" data-title=\"Explanation\" data-content=\"#{text}\">#{column_heading_name}</button>"
+  end
+
+  # doesn't seem to work with front end bootstrap CSS
+  def to_tooltip_html(column_heading_name, text)
+    html = %(
+      <div class="tooltip"><%= column_heading_name %>
+        <span class="tooltiptext"><%= text %></span>
+      </div>
+    )
+    ERB.new(html).result(binding)
+  end
 
   def row_to_£(row)
     # Julian JH this is the problematic code indicative of BigDecimal leaking into the analytics
@@ -40,7 +63,7 @@ class MeterMonthlyCostsAdvice
 
   private def reorder_columns(components)
     # move to last 3 columns, in this order
-    %i[standing_charge variance_versus_last_year total].each do |column_type|
+    [:standing_charge, "vat@20%".to_sym, "vat@5%".to_sym, :variance_versus_last_year, :total].each do |column_type|
       if components.include?(column_type)
         components.delete(column_type)
         components.push(column_type)

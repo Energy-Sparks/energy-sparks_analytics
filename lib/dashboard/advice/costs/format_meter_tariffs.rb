@@ -132,8 +132,16 @@ class FormatMeterTariffs < DashboardChartAdviceBase
       time_range_description(costs)
     when 'daytime_rate', 'nighttime_rate'
       rate_type.to_s.humanize + ' ' + costs[:from].to_s + ' to ' + costs[:to].to_s
+    when /^climate/
+      rate_type.to_s.humanize
+    when /^duos/
+      rate_type.to_s.humanize
     else
-      raise UnhandledTypeTariffDescriptionError, "Unknown type #{rate_type}"
+      if MeterAttributes.default_tariff_rates.key?(rate_type)
+        rate_type.to_s.humanize
+      else
+        raise UnhandledTypeTariffDescriptionError, "Unknown type #{rate_type}"
+      end
     end
   end
 
@@ -176,10 +184,21 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     end
   end
 
+  def duos_description(rate_type, costs)
+    [
+      [
+        rate_type.to_s.humanize,
+        FormatEnergyUnit.format(:£, costs, :html, false, false, :accountant) + '/kWh'
+      ]
+    ]
+  end
+
   def single_tariff_table_html(tariff)
     rates = tariff.tariff[:rates].map do |rate_type, costs|
       if tariff.tiered_rate_type?(rate_type)
         tier_rates_description(rate_type, costs)
+      elsif tariff.duos_type?(rate_type)
+        duos_description(rate_type, costs)
       else
         [
           [
@@ -190,11 +209,28 @@ class FormatMeterTariffs < DashboardChartAdviceBase
       end
     end.flatten(1)
 
+    rates += climate_change_levy_table_rows_html(tariff) if climate_change_levy?(tariff)
+
     rates.push(['', 'at weekends'    ]) if tariff.tariff[:weekend]
     rates.push(['', 'during weekdays']) if tariff.tariff[:weekday]
 
     header = ['Tariff type', 'Rate']
     html_table(header, rates)
+  end
+
+  def climate_change_levy?(tariff)
+    tariff.is_a?(GenericAccountingTariff) && tariff.climate_change_levy?
+  end
+
+  def climate_change_levy_table_rows_html(tariff)
+    ccl_rates = ClimateChangeLevy.keyed_rates_within_date_range(@meter.fuel_type, @start_date, @end_date)
+
+    ccl_rates.map do |description_key, rate|
+      [
+        description_key.to_s.humanize,
+        FormatEnergyUnit.format(:£, rate, :html, false, false, :accountant) + '/kWh'
+      ]
+    end
   end
 
   def if_not_full_tariff_coverage_html(tariff_info)

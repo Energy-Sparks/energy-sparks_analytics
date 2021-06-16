@@ -45,36 +45,13 @@ class ChartManager
 
     new_chart_name = (old_chart_name.to_s + '_drilldown').to_sym
 
-    chart_config[:name] = drilldown_title(chart_config, series_name, x_axis_range)
+    chart_config[:name] = drilldown_title(chart_config, series_name)
 
     ap(chart_config, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
 
     reformat_dates(chart_config)
 
     [new_chart_name, chart_config]
-  end
-
-  private def drilldown_title(chart_config, series_name, x_axis_range)
-    if chart_config.key?(:drilldown_name)
-      index = chart_config[:drilldown_name].index(chart_config[:name])
-      if !index.nil? && index < chart_config[:drilldown_name].length - 1
-        chart_config[:drilldown_name][index + 1] 
-      else
-        chart_config[:drilldown_name][0]
-      end
-    else
-      chart_config[:name] # + ((series_name.nil? && x_axis_range.nil?) ? ' no drilldown' : ' drilldown')
-    end
-  end
-
-  private def reformat_dates(chart_config)
-    if !chart_config[:x_axis].nil? && !%i[day datetime dayofweek intraday nodatebuckets datetime].include?(chart_config[:x_axis])
-      chart_config[:x_axis_reformat] = { date: '%d %b %Y' }
-    elsif !chart_config[:x_axis].nil? && %i[day].include?(chart_config[:x_axis])
-      chart_config[:x_axis_reformat] = { date: '%A %d %b %Y' }
-    elsif chart_config.key?(:x_axis_reformat)
-      chart_config.delete(:x_axis_reformat)
-    end
   end
 
   def parent_chart_timescale_description(chart_config)
@@ -103,6 +80,10 @@ class ChartManager
   end
 
   def drilldown_available?(chart_config_original)
+    # drilling down on comparison charts rarely makes sense
+    # and the date ranges stop matching for example Mondays to Mondays
+    return false if comparison_chart?(chart_config_original)
+
     drilldown_available(chart_config_original)
   end
 
@@ -123,6 +104,37 @@ class ChartManager
       nil
     else
       raise EnergySparksBadChartSpecification.new("Unhandled x_axis drilldown config #{existing_x_axis_config}")
+    end
+  end
+
+  private
+
+  def comparison_chart?(chart_config)
+    chart_config.key?(:timescale) &&
+    chart_config[:timescale].is_a?(Array) &&
+    chart_config[:timescale].length > 1
+  end
+
+  def drilldown_title(chart_config, series_name)
+    if chart_config.key?(:drilldown_name)
+      index = chart_config[:drilldown_name].index(chart_config[:name])
+      if !index.nil? && index < chart_config[:drilldown_name].length - 1
+        chart_config[:drilldown_name][index + 1] 
+      else
+        chart_config[:drilldown_name][0]
+      end
+    else
+      chart_config[:name]
+    end
+  end
+
+  def reformat_dates(chart_config)
+    if !chart_config[:x_axis].nil? && !%i[day datetime dayofweek intraday nodatebuckets datetime].include?(chart_config[:x_axis])
+      chart_config[:x_axis_reformat] = { date: '%d %b %Y' }
+    elsif !chart_config[:x_axis].nil? && %i[day].include?(chart_config[:x_axis])
+      chart_config[:x_axis_reformat] = { date: '%A %d %b %Y' }
+    elsif chart_config.key?(:x_axis_reformat)
+      chart_config.delete(:x_axis_reformat)
     end
   end
 end

@@ -123,8 +123,12 @@ class AMRData < HalfHourlyData
   end
 
   def self.one_day_zero_kwh_x48
-    Array.new(48, 0.0)
+    single_value_kwh_x48(0.0)
   end
+
+  def self.single_value_kwh_x48(kwh)
+    Array.new(48, kwh)
+  end 
 
   def self.fast_multiply_x48_x_x48(a, b)
     c = one_day_zero_kwh_x48

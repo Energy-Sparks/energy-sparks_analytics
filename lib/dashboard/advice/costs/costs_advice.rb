@@ -29,7 +29,6 @@ class CostAdviceBase < AdviceBase
   end
 
   def rating
-    puts "Got here rating = #{calculate_rating_from_range(1.0, 0.0, average_real_tariff_coverage_percent)}"
     @rating ||= calculate_rating_from_range(1.0, 0.0, average_real_tariff_coverage_percent)
   end
 
@@ -113,18 +112,6 @@ class CostAdviceBase < AdviceBase
     end_date = aggregate_meter.amr_data.end_date
     start_date = [end_date - 365 - 364, aggregate_meter.amr_data.start_date].max
     [start_date, end_date]
-  end
-
-  def check_real_meters_deprecated
-    o = @school.real_meters.select { |m| m.fuel_type == fuel_type }
-    n = @school.real_meters2.select { |m| m.fuel_type == fuel_type }
-    so_mpans = o.map(&:mpxn).sort
-    sn_mpans = n.map(&:mpxn).sort
-    if so_mpans != sn_mpans
-      puts "Got here - real meters returning different values for #{@school.name}"
-      puts "Before: #{so_mpans}"
-      puts "After:  #{sn_mpans}"
-    end
   end
 
   # COPY OF INTRO_TO_SCHOOL_FINANCES_1

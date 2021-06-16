@@ -1827,7 +1827,7 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
       <p>
         We can't automate this analysis, so you will need to look at the chart for you and
         decide: as the outside temperature rises (dark blue line), does the school's gas consumption
-        drop signifcantly?
+        drop significantly?
       </p>
       <% end %>
       <% if @chart_type == :thermostatic_control_large_diurnal_range %>

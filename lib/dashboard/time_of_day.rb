@@ -52,7 +52,7 @@ class TimeOfDay
 
   def self.add_hours_and_minutes(time_of_day, add_hours, add_minutes = 0.0)
     t = time_of_day.relative_time
-    t += add_hours * 60 * 60 + add_minutes * 60
+    t += (add_hours.to_f / 24.0) + (add_minutes.to_f / 24.0 / 60.0)
     TimeOfDay.new(t.hour, t.min)
   end
 
