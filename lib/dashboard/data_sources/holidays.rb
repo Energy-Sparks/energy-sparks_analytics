@@ -73,7 +73,8 @@ class Holidays
   include Logging
   attr_reader :holidays
 
-  def initialize(holiday_data)
+  def initialize(holiday_data, country = nil)
+    @country = country
     set_holidays_by_type(holiday_data)
     # remove_non_holidays
     set_holiday_types_and_academic_years
@@ -223,9 +224,9 @@ class Holidays
 
   def find_previous_holiday_to_current(current_holiday, number_holidays_before = 1, min_days_in_holiday = nil)
     raise EnergySparksUnexpectedStateException, "number holidays before = #{number_holidays_before} needs to be > 0" if number_holidays_before <= 0 
-  
+
     holiday_index = SchoolDatePeriod.find_period_index_for_date(current_holiday.middle_date, @holidays)
- 
+
     while number_holidays_before > 0 && holiday_index > 0
       if min_days_in_holiday.nil? || @holidays[holiday_index - 1].weekdays >= min_days_in_holiday
         number_holidays_before -= 1
@@ -550,7 +551,10 @@ class Holidays
       when :mayday
         return hol if hol.start_date.month == 5 && hol.days <= 2
       when :summer_half_term
-        return hol if hol.start_date.month == 5 && hol.days > 2
+        if (hol.start_date.month == 5 || (hol.start_date.month == 6 && hol.start_date.day < 10)) &&
+          hol.days > 2
+          return hol
+        end
       when :summer
         return hol if (hol.start_date.month == 6 || hol.start_date.month == 7) && hol.days > 10
       when :autumn_half_term
@@ -579,6 +583,8 @@ class Holidays
       else
         :summer_half_term
       end
+    when 6
+      date.day < 12 ? :summer_half_term : nil
     when 7, 8
       :summer
     when 9
