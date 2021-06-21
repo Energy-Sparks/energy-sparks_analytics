@@ -2,8 +2,7 @@ require 'date'
 require 'logger'
 
 require 'require_all'
-require_relative '../lib/dashboard.rb'
-require_relative '../test_support/csv_file_support.rb'
+require_relative '../../lib/dashboard.rb'
 
 def print_all_available_meter_data
   rbee = RbeeSolarPV.new
@@ -13,5 +12,8 @@ def print_all_available_meter_data
     ap rbee.full_installation_information(meter_id)
   end
 end
+
+puts "User:     #{ENV['ENERGYSPARKSRBEEUSERNAME']}"
+puts "Password: #{ENV['ENERGYSPARKSRBEEPASSWORD']}"
 
 print_all_available_meter_data
