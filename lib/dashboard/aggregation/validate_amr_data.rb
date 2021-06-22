@@ -38,6 +38,7 @@ class ValidateAMRData
     puts "Before validation #{missing_data} missing items of data" if debug_analysis
     # ap(@meter, limit: 5, :color => {:float  => :red})
     process_meter_attributes
+    remove_dcc_bad_data_readings if @meter.dcc_meter
     correct_nil_readings
     meter_corrections unless @meter.meter_correction_rules.nil?
     check_for_long_gaps_in_data
@@ -186,6 +187,59 @@ class ValidateAMRData
     year_count.each do |year, count|
       logger.info "set during #{year} * #{count} to zero"
     end
+  end
+
+  def remove_dcc_bad_data_readings
+    logger.info 'Checking dcc meter for bad values'
+    too_much_bad_data = {}
+    for_interpolation = {}
+    ok_data = {}
+    (@amr_data.start_date..@amr_data.end_date).each do |date|
+      if @amr_data.date_exists?(date)
+        days_kwh_x48 = @amr_data.days_kwh_x48(date)
+        bad_value_count = days_kwh_x48.count{ |kwh| bad_dcc_value?(kwh) }
+        if bad_value_count > 7
+          too_much_bad_data[date] = bad_value_count
+        elsif bad_value_count > 0
+          for_interpolation[date] = bad_value_count
+        else
+          ok_data[date] = 0
+        end
+      end
+    end
+
+    if too_much_bad_data.length > 0
+      logger.info "The following dates have too much DCC bad data, so removing them for future whole day substitution"
+      log_dates(too_much_bad_data)
+      too_much_bad_data.each do |date, _count|
+        @amr_data.delete(date)
+      end
+    end
+
+    if for_interpolation.length > 0
+      logger.info 'The following dates have bad half hour kWh value, so nullifying for future interpolation'
+      log_dates(for_interpolation)
+      for_interpolation.each do |date, count|
+        days_kwh_x48 = @amr_data.days_kwh_x48(date)
+        days_kwh_x48.map!{ |kwh| bad_dcc_value?(kwh) ? nil : kwh }
+        data = OneDayAMRReading.new(meter_id, date, 'DCCP', nil, DateTime.now, days_kwh_x48)
+        @amr_data.add(date, data)
+      end
+    end
+
+    logger.info "Leaving #{ok_data.length} days of dcc data with no bad values"
+  end
+
+  def log_dates(ds)
+    ds.keys.each_slice(8) do |dates|
+      logger.info dates.map{ |d| d.strftime('%d-%b-%Y') }.join(' ')
+    end
+  end
+
+  def bad_dcc_value?(kwh)
+    # there may be other bad values in future
+    # none of this is documented by the DCC......
+    kwh.between?(186227.0864, 186227.0866)
   end
 
   def correct_nil_readings
