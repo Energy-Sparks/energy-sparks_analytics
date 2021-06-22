@@ -8,18 +8,14 @@ script = {
   no_schools:                  ['*ound*'], # ['Round.*'],
   no_source:                   :aggregated_meter_collection,
   schools:                  ['marks*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
-  schools:                  ['trinity*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
+  schools:                  ['trinity*', 'king-e*'], # ['*astle*',], # ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
   no_source:                :analytics_db, # :aggregated_meter_collection,
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
     alerts:   nil,
     # alerts: [ AlertEnergyAnnualVersusBenchmark ],
-    alerts:   [
-      AlertSchoolWeekComparisonElectricity,
-      AlertPreviousHolidayComparisonElectricity,
-      AlertPreviousYearHolidayComparisonElectricity
-    ],
+    alerts:   nil, #  [AlertElectricityMeterConsolidationOpportunity],
     # nil [ AlertSummerHolidayRefridgerationAnalysis ],
     control:  {
                 # print_alert_banner: true,
@@ -45,7 +41,7 @@ script = {
                 no_benchmark:          %i[school alert ], # detail],
                 # asof_date:          (Date.new(2018,6,14)..Date.new(2019,6,14)).each_slice(7).map(&:first),
                asof_date:      Date.new(2021, 6, 18)
-              } 
+              }
   }
 }
 

@@ -25,7 +25,7 @@ class ConvertKwh
     when :£, :accounting_cost # these costs, typically called from dashboard_advice should be moved into the proper differential tariff supporting infrastructure
       case fuel_type
       when :electricity, :storage_heater, :aggregated_electricity
-        unit_scale = BenchmarkMetrics::ELECTRICITY_PRICE # 12p/kWh long term average
+        unit_scale = BenchmarkMetrics::ELECTRICITY_PRICE # 15p/kWh long term average
       when :solar_export
         unit_scale = BenchmarkMetrics::SOLAR_EXPORT_PRICE # 5p/kWh
       when :gas, :heat # TODO(PH,1Jun2018) - rationalise heat versus gas

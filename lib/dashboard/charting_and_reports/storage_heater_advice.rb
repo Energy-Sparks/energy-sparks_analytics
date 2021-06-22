@@ -61,8 +61,8 @@ class DashboardEnergyAdvice
           </p>
           <p>
             Storage heaters try to save money by making use of cheaper overnight
-            electricity (economy 7, differential tariff) which costs about 7p/kWh
-            compared with 12p/kWh for daytime electricity. Overnight electricity is
+            electricity (economy 7, differential tariff) which costs about 12p/kWh
+            compared with 15p/kWh for daytime electricity. Overnight electricity is
             cheaper to produce because there is less demand.
           </p>
           <p>

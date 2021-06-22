@@ -7,9 +7,9 @@ script = {
   # ruby_profiler:            true,
   no_schools:                  ['marks*', 'stanton*', 'penny*', 'plump*',
                               'combe*', 'catsfield', 'miller*','tomnac*',
-                              'nottingham*'
+                              'king-e*'
                             ],
-  schools: ['ph-sch*'],
+  schools: ['trinity*', 'king-e*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
