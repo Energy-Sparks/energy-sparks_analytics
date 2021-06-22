@@ -24,6 +24,8 @@ require 'json'
 require 'tzinfo'
 
 class RbeeSolarPV
+  class InvalidComponent < StandardError; end
+
   METER_TYPES = %i[solar_pv electricity exported_solar_pv].freeze
 
   def initialize(username = ENV['ENERGYSPARKSRBEEUSERNAME'], password = ENV['ENERGYSPARKSRBEEPASSWORD'])
@@ -95,6 +97,35 @@ class RbeeSolarPV
     data
   end
 
+  # aggregates underlying smart metering data by type 'prod', in1', 'out1'
+  # in order to understand meter setup for Newport schools where
+  # the inventory/full information call doesn't provide information about the underlying
+  # metering
+  def smart_meter_data_analysis(meter_id, start_date, end_date, datetime = Time.now.utc)
+    totals = {}
+    start_date = first_connection_date(meter_id) if start_date.nil?
+    raise EnergySparksUnexpectedStateException.new, 'Expecting start_date, end_time to be of class Date' unless start_date.is_a?(Date) && end_date.is_a?(Date)
+    (start_date..end_date).each_slice(6) do |six_days|
+      data = smart_meter_data_6_days_debug(meter_id, six_days.first, six_days.last, datetime)
+      data.each do |type, value|
+        totals[type] ||= 0.0
+        totals[type] += value.to_f
+      end
+    end
+    totals
+  end
+
+  def smart_meter_data_by_component(meter_id, start_date, end_date, component = nil, datetime = Time.now.utc)
+    raise InvalidComponent, "Component = #{component}" unless [nil, 'prod', 'in1', 'out1', 'in2'].include?(component)
+    data = {}
+    start_date = first_connection_date(meter_id) if start_date.nil?
+    raise EnergySparksUnexpectedStateException.new, 'Expecting start_date, end_time to be of class Date' unless start_date.is_a?(Date) && end_date.is_a?(Date)
+    (start_date..end_date).each_slice(6) do |six_days|
+      data = data.deep_merge(smart_meter_data_6_days_by_component(meter_id, component, six_days.first, six_days.last, datetime))
+    end
+    data
+  end
+
   def ping(datetime = Time.now.utc)
     get_service('ping', datetime)
   end
@@ -118,8 +149,31 @@ class RbeeSolarPV
     {
       solar_pv:           process_raw_data(raw_data, 'prod',  start_date, end_date, true),
       electricity:        process_raw_data(raw_data, 'in1',   start_date, end_date, true),
-      exported_solar_pv:  process_raw_data(raw_data, 'out1',  start_date, end_date, true, true)
+      exported_solar_pv:  process_raw_data(raw_data, 'out1',  start_date, end_date, true, true),
     }
+  end
+
+  private def smart_meter_data_6_days_by_component(meter_id, component, start_date, end_date, datetime)
+    start_date_minus_1_hour = extra_hour_for_british_summer_time(start_date)
+    url = meter_readings_url('getDeviceSmartData', meter_id, start_date_minus_1_hour, end_date + 1, datetime)
+    raw_data = get_data(url)
+    process_raw_data(raw_data, component,  start_date, end_date, true)
+  end
+
+  private def smart_meter_data_6_days_analysis(meter_id, start_date, end_date, datetime)
+    start_date_minus_1_hour = extra_hour_for_british_summer_time(start_date)
+    url = meter_readings_url('getDeviceSmartData', meter_id, start_date_minus_1_hour, end_date + 1, datetime)
+    raw_data = get_data(url)
+    results = {}
+    raw_data['records'].each do |record|
+      record.each do |type, value|
+        next if type == 'measureDate'
+        next if value.to_f == -1
+        results[type] ||= 0.0
+        results[type] += value.to_f / 1000.0
+      end
+    end
+    results
   end
 
   # to cope with BST, add an hour's extra data at the beginning of the data request
