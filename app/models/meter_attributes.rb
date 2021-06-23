@@ -702,6 +702,8 @@ class MeterAttributes
             duos_amber:   MeterAttributeTypes::Float.define,
             duos_green:   MeterAttributeTypes::Float.define,
 
+            tnuos:        MeterAttributeTypes::Float.define(hint: '£ per kW'),
+
             weekday:     MeterAttributeTypes::Boolean.define,
             weekend:     MeterAttributeTypes::Boolean.define,
           }.merge(MeterAttributes.default_tariff_rates)

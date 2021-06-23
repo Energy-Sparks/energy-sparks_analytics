@@ -5,6 +5,7 @@ class MeterTariff
   NIGHTTIME_RATE = 'Nighttime Rate'.freeze
   def initialize(meter, tariff)
     @mpxn       = meter.mpxn
+    @amr_data   = meter.amr_data
     @fuel_type  = meter.fuel_type
     @tariff     = tariff
   end
@@ -104,10 +105,17 @@ class AccountingTariff < EconomicTariff
     false
   end
 
+  def tnuos_type?(type)
+    false
+  end
+
+  # non per kWh standing charges
   def standing_charges(date, days_kwh)
     standing_charge = {}
     tariff[:rates].each do |standing_charge_type, rate|
-      if standard_standing_charge_type?(standing_charge_type) && rate[:per] != :kwh
+      if tnuos_type?(standing_charge_type)
+        standing_charge[standing_charge_type] = tnuos_cost(date)
+      elsif standard_standing_charge_type?(standing_charge_type) && rate[:per] != :kwh
         standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh, standing_charge_type)
       end
     end
@@ -144,11 +152,11 @@ class AccountingTariff < EconomicTariff
   # apply per kWh 'standing charges' per half hour
   def rate_per_kwh_standing_charges(kwh_x48)
     rates = tariff[:rates].select do |standing_charge_type, rate|
+      !tnuos_type?(standing_charge_type) &&
       standard_standing_charge_type?(standing_charge_type) &&
       rate[:per] == :kwh
     end
 
-    
     rates.map do |standing_charge_type, rate|
       [
         standing_charge_type.to_s.humanize,
@@ -244,6 +252,10 @@ class GenericAccountingTariff < AccountingTariff
     type.to_s.match?(/^duos/)
   end
 
+  def tnuos_type?(type)
+    type == :tnuos
+  end
+
   def climate_change_levy_type?(type)
     type == :climate_change_levy
   end
@@ -294,6 +306,10 @@ class GenericAccountingTariff < AccountingTariff
 
   def has_duos_charge?
     tariff[:rates].keys.any?{ |type| duos_type?(type) }
+  end
+
+  def has_tnuos_charge?
+    tariff[:rates].keys.any?{ |type| tnuos_type?(type) }
   end
 
   def costs(date, kwh_x48)
@@ -381,6 +397,14 @@ class GenericAccountingTariff < AccountingTariff
         AMRData.fast_multiply_x48_x_scalar(kwh_x48, tariff[:rates][duos_key])
       ]
     end.to_h
+  end
+
+  def tnuos_calculator
+    @tnuos_calculator ||= TNUOSCharges.new
+  end
+
+  def tnuos_cost(date)
+    tnuos_calculator.cost(date, @mpxn, @amr_data, self)
   end
 
   def differential_rate_name(type)
