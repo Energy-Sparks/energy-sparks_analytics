@@ -702,7 +702,7 @@ class MeterAttributes
             duos_amber:   MeterAttributeTypes::Float.define,
             duos_green:   MeterAttributeTypes::Float.define,
 
-            tnuos:        MeterAttributeTypes::Float.define(hint: '£ per kW'),
+            tnuos:        MeterAttributeTypes::Boolean.define(hint: 'tick if transmission network use of system appears on bill'),
 
             weekday:     MeterAttributeTypes::Boolean.define,
             weekend:     MeterAttributeTypes::Boolean.define,

@@ -113,7 +113,7 @@ class AccountingTariff < EconomicTariff
   def standing_charges(date, days_kwh)
     standing_charge = {}
     tariff[:rates].each do |standing_charge_type, rate|
-      if tnuos_type?(standing_charge_type)
+      if tnuos_type?(standing_charge_type) && rate == true
         standing_charge[standing_charge_type] = tnuos_cost(date)
       elsif standard_standing_charge_type?(standing_charge_type) && rate[:per] != :kwh
         standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh, standing_charge_type)
