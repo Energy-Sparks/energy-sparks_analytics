@@ -25,6 +25,7 @@ require 'tzinfo'
 
 class RbeeSolarPV
   class InvalidComponent < StandardError; end
+  COMPONENTS = ['prod', 'in1', 'out1', 'in2']
 
   METER_TYPES = %i[solar_pv electricity exported_solar_pv].freeze
 
@@ -116,7 +117,7 @@ class RbeeSolarPV
   end
 
   def smart_meter_data_by_component(meter_id, start_date, end_date, component = nil, datetime = Time.now.utc)
-    raise InvalidComponent, "Component = #{component}" unless ['prod', 'in1', 'out1', 'in2'].include?(component)
+    raise InvalidComponent, "Component = #{component}" unless COMPONENTS.include?(component)
     data = {}
     start_date = first_connection_date(meter_id) if start_date.nil?
     raise EnergySparksUnexpectedStateException.new, 'Expecting start_date, end_time to be of class Date' unless start_date.is_a?(Date) && end_date.is_a?(Date)
