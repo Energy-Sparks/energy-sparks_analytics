@@ -95,11 +95,11 @@ class AlertIntraweekBaseloadVariation < AlertElectricityOnlyBase
     @percent_intraday_variation = (@max_day_kw - @min_day_kw) / @min_day_kw
 
     week_saving_kwh = days_kw.values.map do |day_kw|
-      (max_day - day_kw) * 24.0
+      (@max_day_kw - day_kw) * 24.0
     end.sum
 
-    @annual_cost_kwh = week_saving_kwh * 52 # ignore holiday calc
-    @annual_cost_£ = week_saving_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @annual_cost_kwh = week_saving_kwh * 52.0 # ignore holiday calc
+    @annual_cost_£ = @annual_cost_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
 
     set_savings_capital_costs_payback(Range.new(@annual_cost_£, @annual_cost_£), nil)
 
