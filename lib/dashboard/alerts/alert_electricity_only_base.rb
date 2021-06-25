@@ -15,18 +15,20 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
 
   protected
 
+  def baseload_calculator
+    @baseload_calculator ||= ElectricityBaseloadAnalysis.new(aggregate_meter)
+  end
+
   def average_baseload(date1, date2)
-    amr_data = aggregate_meter.amr_data
-    amr_data.average_baseload_kw_date_range(date1, date2)
+    baseload_calculator.average_baseload(date1, date2)
   end
 
   def average_baseload_kw(asof_date)
-    start_date = [asof_date - 364, aggregate_meter.amr_data.start_date].max
-    average_baseload(start_date, asof_date)
+    baseload_calculator.average_baseload_kw(asof_date)
   end
 
   def annual_average_baseload_kwh(asof_date)
-    365.0 * 24.0 * average_baseload_kw(asof_date)
+    baseload_calculator.annual_average_baseload_kwh(asof_date)
   end
 
   def annual_average_baseload_£(asof_date)

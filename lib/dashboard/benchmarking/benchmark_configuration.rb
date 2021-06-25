@@ -93,6 +93,7 @@ module Benchmarking
           annual_electricity_out_of_hours_use
           recent_change_in_baseload
           baseload_per_pupil
+          seasonal_baseload_variation
           summer_holiday_electricity_analysis
           electricity_peak_kw_per_pupil
           solar_pv_benefit_estimate
@@ -331,6 +332,20 @@ module Benchmarking
           { data: ->{ elbb_lykw },  name: 'Average baseload kW', units: :w},
           { data: ->{ [0.0, elbb_svex].max },  name: 'Saving if moved to exemplar', units: :£},
           { data: ->{ elbb_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by:  [1],
+        type: %i[chart table]
+      },
+      seasonal_baseload_variation: {
+        benchmark_class: BenchmarkSeasonalBaseloadVariation,
+        name:     'Seasonal baseload variation',
+        columns:  [
+          { data: 'addp_name', name: 'School name', units: String, chart_data: true, content_class: AdviceBaseload },
+          { data: ->{ sblv_sblp }, name: 'Percent increase on winter baseload over summer', units: :relative_percent, chart_data: true},
+          { data: ->{ sblv_smbl },  name: 'Summer baseload kW', units: :kw},
+          { data: ->{ sblv_wtbl },  name: 'Winter baseload kW', units: :kw},
+          { data: ->{ sblv_cgbp },  name: 'Saving if same all year around', units: :£},
+          { data: ->{ sblv_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by:  [1],
         type: %i[chart table]

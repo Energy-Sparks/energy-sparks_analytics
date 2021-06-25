@@ -480,7 +480,8 @@ class AlertAnalysisBase < ContentBase
       AlertElectricityTarget4Week                   => 'etg4',
       AlertGasTarget4Week                           => 'gtg4',
       AlertElectricityTarget1Week                   => 'etg1',
-      AlertGasTarget1Week                           => 'gtg1'
+      AlertGasTarget1Week                           => 'gtg1',
+      AlertSeasonalBaseloadVariation                => 'sblv'
     }
   end
 
