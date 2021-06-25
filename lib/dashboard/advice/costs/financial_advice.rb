@@ -123,7 +123,7 @@ class DashboardEnergyAdvice
       </p>
         <ul>
           <li>
-            this assumes a simple cost model, with electricity costing 12p/kWh
+            this assumes a simple cost model, with electricity costing 15p/kWh
             and gas 3p/kWh
           </li>
           <li>

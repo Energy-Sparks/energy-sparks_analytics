@@ -1,7 +1,7 @@
 # benchmark metrics
 #
 module BenchmarkMetrics
-  ELECTRICITY_PRICE = 0.12
+  ELECTRICITY_PRICE = 0.15
   SOLAR_EXPORT_PRICE = 0.05
   GAS_PRICE = 0.03
   OIL_PRICE = 0.05

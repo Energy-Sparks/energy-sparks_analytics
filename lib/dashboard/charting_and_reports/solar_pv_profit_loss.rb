@@ -2,7 +2,7 @@ class SolarPVProfitLoss
   DAYS_IN_YEAR = 365
   SOLAR_FIT = 0.12
 
-  def initialize(meter_collection, mains_electricity_rate_£_per_kWh = 0.12, fit_£_per_kwh = 0.20, export_£_per_kwh = 0.05)
+  def initialize(meter_collection, mains_electricity_rate_£_per_kWh = 0.15, fit_£_per_kwh = 0.20, export_£_per_kwh = 0.05)
     @meter_collection = meter_collection
     @mains_electricity_rate_£_per_kWh = mains_electricity_rate_£_per_kWh
     @fit_£_per_kwh = fit_£_per_kwh

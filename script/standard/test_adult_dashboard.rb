@@ -7,7 +7,7 @@ script = {
   # ruby_profiler:            true,
   no_schools:                  ['marks*', 'stanton*', 'penny*', 'plump*',
                               'combe*', 'catsfield', 'miller*','tomnac*',
-                              'nottingham*'
+                              'king-e*'
                             ],
   schools: ['*'], # ['king-james*'],
   source:                   :unvalidated_meter_data,

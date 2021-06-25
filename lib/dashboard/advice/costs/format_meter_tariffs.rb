@@ -136,6 +136,8 @@ class FormatMeterTariffs < DashboardChartAdviceBase
       rate_type.to_s.humanize
     when /^duos/
       rate_type.to_s.humanize
+    when 'tnuos'
+      rate_type.to_s
     else
       if MeterAttributes.default_tariff_rates.key?(rate_type)
         rate_type.to_s.humanize
@@ -193,12 +195,23 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     ]
   end
 
+  def tnuos_description(rate_type, costs)
+    [
+      [
+        rate_type.to_s.humanize + ' charges',
+        costs ? 'yes' : 'no'
+      ]
+    ]
+  end
+
   def single_tariff_table_html(tariff)
     rates = tariff.tariff[:rates].map do |rate_type, costs|
       if tariff.tiered_rate_type?(rate_type)
         tier_rates_description(rate_type, costs)
       elsif tariff.duos_type?(rate_type)
         duos_description(rate_type, costs)
+      elsif tariff.tnuos_type?(rate_type)
+        tnuos_description(rate_type, costs)
       else
         [
           [

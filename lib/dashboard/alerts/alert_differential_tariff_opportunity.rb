@@ -2,8 +2,8 @@
 require_relative 'alert_electricity_only_base.rb'
 
 class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
-  NIGHTTIME_RATE_£_PER_KWH = 0.08
-  DAYTIME_RATE_£_PER_KWH = 0.12
+  NIGHTTIME_RATE_£_PER_KWH = 0.12
+  DAYTIME_RATE_£_PER_KWH = 0.16
   DIFFERENTIAL_DAYTIME_RATE_£_PER_KWH = 0.13
   MINIMUM_ANNUAL_SAVING_BEFORE_MAKING_RECOMMENDATION_£ = 100.0
   attr_reader :total_potential_savings_£, :total_potential_savings_percent

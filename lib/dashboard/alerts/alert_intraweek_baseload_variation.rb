@@ -170,7 +170,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   def calculate_adjective
     if rating > 7
       'well'
-    elsif rate > 4
+    elsif rating > 4
       'ok'
     else
       'poorly'

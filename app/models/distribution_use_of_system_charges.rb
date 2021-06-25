@@ -59,6 +59,13 @@ class DUOSCharges
     banding
   end
 
+  # reused by tnuos class
+  def self.region_number(mpan)
+    region = (mpan / 100000000000).to_i
+    check_region(mpan, region)
+    region
+  end
+
   private
 
   # generated from spreadsheet \Google Drive\Energy Sparks\Energy Sparks Project Team Documents\Analytics\Cost analysis\Duos charges\duos charges.xlsx
@@ -201,12 +208,6 @@ class DUOSCharges
     tod = TimeOfDay.new(hour_desc.to_i, minute_desc.to_i)
     tod = TimeOfDay.add_hours_and_minutes(tod, 0, -30) if rollback_30_minutes
     tod
-  end
-
-  private_class_method def self.region_number(mpan)
-    region = (mpan / 100000000000).to_i
-    check_region(mpan, region)
-    region
   end
 
   private_class_method def self.check_region(mpan, region)

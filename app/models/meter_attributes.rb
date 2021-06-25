@@ -686,7 +686,7 @@ class MeterAttributes
         name:       MeterAttributeTypes::String.define,
         type:       MeterAttributeTypes::Symbol.define(required: true, allowed_values: %i[flat differential differential_tiered]),
         sub_type:   MeterAttributeTypes::Symbol.define(required: false, allowed_values: [:weekday_weekend]),
-        vat:        MeterAttributeTypes::Symbol.define(required: true, allowed_values: ['5%'.to_sym, '20%'.to_sym]),
+        vat:        MeterAttributeTypes::Symbol.define(required: true, allowed_values: ['0%'.to_sym, '5%'.to_sym, '20%'.to_sym]),
         # default:    MeterAttributeTypes::Boolean.define(hint: 'Enable for group/site-wide tariffs where tariff is used as a fallback'),
         rates:      MeterAttributeTypes::Hash.define(
           required: false,
@@ -707,6 +707,8 @@ class MeterAttributes
             duos_red:     MeterAttributeTypes::Float.define,
             duos_amber:   MeterAttributeTypes::Float.define,
             duos_green:   MeterAttributeTypes::Float.define,
+
+            tnuos:        MeterAttributeTypes::Boolean.define(hint: 'tick if transmission network use of system appears on bill'),
 
             weekday:     MeterAttributeTypes::Boolean.define,
             weekend:     MeterAttributeTypes::Boolean.define,
