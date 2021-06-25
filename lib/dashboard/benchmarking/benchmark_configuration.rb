@@ -350,6 +350,22 @@ module Benchmarking
         sort_by:  [1],
         type: %i[chart table]
       },
+      weekday_baseload_variation: {
+        benchmark_class: BenchmarkWeekdayBaseloadVariation,
+        name:     'Weekday baseload variation',
+        columns:  [
+          { data: 'addp_name', name: 'School name', units: String, chart_data: true, content_class: AdviceBaseload },
+          { data: ->{ iblv_sblp }, name: 'Variation in baseload between days of week', units: :relative_percent, chart_data: true},
+          { data: ->{ iblv_mnbk },  name: 'Min average weekday baseload kW', units: :kw},
+          { data: ->{ iblv_mxbk },  name: 'Max average weekday baseload kW', units: :kw},
+          { data: ->{ iblv_mnbd },  name: 'Day of week with minimum baseload', units: String},
+          { data: ->{ iblv_mxbd },  name: 'Day of week with maximum baseload', units: String},
+          { data: ->{ iblv_cgbp },  name: 'Potential saving', units: :£},
+          { data: ->{ iblv_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by:  [1],
+        type: %i[chart table]
+      },
       summer_holiday_electricity_analysis: {
         benchmark_class: BenchmarkContentSummerHolidayBaseloadAnalysis,
         name:     'Reduction in baseload in the summer holidays',

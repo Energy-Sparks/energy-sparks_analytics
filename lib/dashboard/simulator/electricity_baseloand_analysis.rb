@@ -40,9 +40,27 @@ class ElectricityBaseloadAnalysis
     (winter_kw(asof_date) - kw_in_summer) /kw_in_summer
   end
 
-  def costs_of_baseload_above_minimum_kwh(asof_date = amr_data.end_date, minimum)
+  def average_intraweek_schoolday_kw(asof_date = amr_data.end_date)
+    return nil unless one_years_data?
+
+    weekday_kws = {}
     start_date = [asof_date - 364, amr_data.start_date].max
-    baseloads_kw = amr_data.statistical_baseloads_in_date_range(start_date, amr_data.end_date)
+
+    (start_date..amr_data.end_date).each do |date|
+      next if daytype(date) == :holiday
+      weekday_kws[date.wday] ||= []
+      weekday_kws[date.wday].push(amr_data.statistical_baseload_kw(date))
+    end
+
+    average_day_kw = weekday_kws.transform_values do |kws|
+      kws.sum / kws.length
+    end
+
+    average_day_kw
+  end
+
+  def costs_of_baseload_above_minimum_kwh(asof_date = amr_data.end_date, minimum)
+    baseloads_kw = years_baseloads(asof_date)
     above_minimum = baseloads_kw.select { |kw| kw > minimum }
     above_minimum.map do |kw|
       kw * 24.0
@@ -50,6 +68,11 @@ class ElectricityBaseloadAnalysis
   end
 
   private
+
+  def years_baseloads(asof_date)
+    start_date = [asof_date - 364, amr_data.start_date].max
+    amr_data.statistical_baseloads_in_date_range(start_date, amr_data.end_date)
+  end
 
   def baseload_kws_for_dates(dates)
     dates.map { |d| amr_data.baseload_kw(d) }

@@ -15,7 +15,7 @@ script = {
   alerts:                   {
     alerts:   nil,
     # alerts: [ AlertEnergyAnnualVersusBenchmark ],
-    alerts:   [AlertSeasonalBaseloadVariation],
+    alerts:   [AlertIntraweekBaseloadVariation],
     # nil [ AlertSummerHolidayRefridgerationAnalysis ],
     control:  {
                 # print_alert_banner: true,
