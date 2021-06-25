@@ -95,7 +95,6 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
   def calculate(asof_date)
     # def 'enough_data' doesn;t know the asof_date
     raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{asof_date}" unless calculator.one_years_data?(asof_date)
-
     @winter_kw = calculator.winter_kw(asof_date)
     @summer_kw = calculator.summer_kw(asof_date)
     @percent_seasonal_variation = calculator.percent_seasonal_variation(asof_date)
