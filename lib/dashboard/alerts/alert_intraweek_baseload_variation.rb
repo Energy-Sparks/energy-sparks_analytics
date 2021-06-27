@@ -1,7 +1,7 @@
 #======================== Change in Electricity Baseload Analysis =============
 require_relative 'alert_electricity_only_base.rb'
 
-class AlertIntraweekBaseloadVariation < AlertElectricityOnlyBase
+class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation
   attr_reader :max_day_str, :min_day_str
   attr_reader :annual_cost_kwh, :annual_cost_£
@@ -73,7 +73,7 @@ class AlertIntraweekBaseloadVariation < AlertElectricityOnlyBase
   private
 
   def calculator
-    @calculator ||= ElectricityBaseloadAnalysis.new(aggregate_meter)
+    @calculator ||= ElectricityBaseloadAnalysis.new(@meter)
   end
 
   def calculate(asof_date)

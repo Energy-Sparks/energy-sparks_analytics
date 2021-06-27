@@ -1,7 +1,7 @@
 #======================== Change in Electricity Baseload Analysis =============
 require_relative 'alert_electricity_only_base.rb'
 
-class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
+class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
   MAXBASELOADCHANGE = 1.15
 
   attr_reader :average_baseload_last_year_kw, :average_baseload_last_week_kw
@@ -115,9 +115,9 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
   end
 
   def calculate(asof_date)
-    @average_baseload_last_year_kw = average_baseload_kw(asof_date)
+    @average_baseload_last_year_kw = average_baseload_kw(asof_date, @meter)
     @kw_value_at_10_percent_saving = @average_baseload_last_year_kw * 0.9
-    @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date)
+    @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date, @meter)
     @change_in_baseload_kw = @average_baseload_last_week_kw - @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage = (@average_baseload_last_week_kw - @average_baseload_last_year_kw) / @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage_absolute = @predicted_percent_increase_in_usage.magnitude

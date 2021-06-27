@@ -15,24 +15,24 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
 
   protected
 
-  def baseload_calculator
-    @baseload_calculator ||= ElectricityBaseloadAnalysis.new(aggregate_meter)
+  def baseload_calculator(meter = aggregate_meter)
+    @baseload_calculator ||= ElectricityBaseloadAnalysis.new(meter)
   end
 
-  def average_baseload(date1, date2)
-    baseload_calculator.average_baseload(date1, date2)
+  def average_baseload(date1, date2, meter = aggregate_meter)
+    baseload_calculator(meter).average_baseload(date1, date2)
   end
 
-  def average_baseload_kw(asof_date)
-    baseload_calculator.average_baseload_kw(asof_date)
+  def average_baseload_kw(asof_date, meter = aggregate_meter)
+    baseload_calculator(meter).average_baseload_kw(asof_date)
   end
 
-  def annual_average_baseload_kwh(asof_date)
-    baseload_calculator.annual_average_baseload_kwh(asof_date)
+  def annual_average_baseload_kwh(asof_date, meter = aggregate_meter)
+    baseload_calculator(meter).annual_average_baseload_kwh(asof_date)
   end
 
-  def annual_average_baseload_£(asof_date)
-    kwh = annual_average_baseload_kwh(asof_date)
+  def annual_average_baseload_£(asof_date, meter = aggregate_meter)
+    kwh = annual_average_baseload_kwh(asof_date, meter)
     kwh * blended_electricity_£_per_kwh(asof_date)
   end
 

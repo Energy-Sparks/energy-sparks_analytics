@@ -2,7 +2,7 @@
 require_relative 'alert_analysis_base.rb'
 require_relative 'alert_floor_area_pupils_mixin.rb'
 
-class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
+class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
   include AlertFloorAreaMixin
   PERCENT_TOO_HIGH_MARGIN = 1.10
   attr_reader :average_baseload_last_year_kw, :average_baseload_last_year_£, :average_baseload_last_year_kwh
@@ -149,9 +149,9 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
   end
 
   private def calculate(asof_date)
-    @average_baseload_last_year_kw = average_baseload_kw(asof_date)
-    @average_baseload_last_year_£ = annual_average_baseload_£(asof_date)
-    @average_baseload_last_year_kwh = annual_average_baseload_kwh(asof_date)
+    @average_baseload_last_year_kw = average_baseload_kw(asof_date, @meter)
+    @average_baseload_last_year_£ = annual_average_baseload_£(asof_date, @meter)
+    @average_baseload_last_year_kwh = annual_average_baseload_kwh(asof_date, @meter)
 
     electricity_tariff = blended_electricity_£_per_kwh(asof_date)
 

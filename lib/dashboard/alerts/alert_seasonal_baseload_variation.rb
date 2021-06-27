@@ -1,7 +1,7 @@
 #======================== Change in Electricity Baseload Analysis =============
 require_relative 'alert_electricity_only_base.rb'
 
-class AlertSeasonalBaseloadVariation < AlertElectricityOnlyBase
+class AlertSeasonalBaseloadVariation < AlertBaseloadBase
   attr_reader :winter_kw, :summer_kw, :percent_seasonal_variation
   attr_reader :annual_cost_kwh, :annual_cost_£
   attr_reader :one_year_baseload_chart
@@ -62,7 +62,7 @@ class AlertSeasonalBaseloadVariation < AlertElectricityOnlyBase
   private
 
   def calculator
-    @calculator ||= ElectricityBaseloadAnalysis.new(aggregate_meter)
+    @calculator ||= ElectricityBaseloadAnalysis.new(@meter)
   end
 
   def calculate(asof_date)

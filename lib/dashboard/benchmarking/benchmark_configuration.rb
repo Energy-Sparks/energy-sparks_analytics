@@ -94,6 +94,7 @@ module Benchmarking
           recent_change_in_baseload
           baseload_per_pupil
           seasonal_baseload_variation
+          weekday_baseload_variation
           summer_holiday_electricity_analysis
           electricity_peak_kw_per_pupil
           solar_pv_benefit_estimate
