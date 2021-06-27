@@ -305,6 +305,11 @@ class AMRData < HalfHourlyData
   # alternative heuristic for baseload calculation (for storage heaters)
   # find the average of the bottom 8 samples (4 hours) in a day
   def statistical_baseload_kw(date)
+    @statistical_baseload_kw ||= {}
+    @statistical_baseload_kw[date] ||= calculate_statistical_baseload(date)
+  end
+
+  private def calculate_statistical_baseload(date)
     days_data = days_kwh_x48(date) # 48 x 1/2 hour kWh
     sorted_kwh = days_data.clone.sort
     lowest_sorted_kwh = sorted_kwh[0..7]
@@ -354,7 +359,11 @@ class AMRData < HalfHourlyData
     daily_peaks
   end
 
-  def average_baseload_kw_date_range(date1, date2)
+  def up_to_1_year_ago
+    [end_date - 365, start_date].max
+  end
+
+  def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date)
     baseload_kwh_date_range(date1, date2) / (date2 - date1 + 1)
   end
 
