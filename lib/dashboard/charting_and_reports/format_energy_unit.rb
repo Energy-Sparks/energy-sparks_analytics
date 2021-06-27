@@ -5,6 +5,7 @@ class FormatEnergyUnit
     kwh:                          'kWh',
     kwp:                          'kWp',
     kw:                           'kW',
+    kva:                          'kVA',
     w:                            'W',
     kwh_per_day:                  'kWh/day',
     kwh_per_day_per_c:            'kWh/day/C',
@@ -49,6 +50,7 @@ class FormatEnergyUnit
     years_decimal:                'years',
     £_range:                      '£',
     £_per_kwh:                    '£/kWh',
+    £_per_kva:                    '£/kVA',
     kg_co2_per_kwh:               'kg CO2/kWh',
     date:                         '',
     datetime:                     '',
@@ -99,6 +101,8 @@ class FormatEnergyUnit
       format_days(value)
     elsif unit == :£_per_kwh
       format_pounds(value, medium, user_numeric_comprehension_level) + '/kWh'
+    elsif unit == :£_per_kva
+      format_pounds(value, medium, user_numeric_comprehension_level) + '/kVA'
     elsif unit == :r2
       sprintf('%.2f', value)
     elsif unit == :£_range

@@ -1,6 +1,6 @@
 # probably due to be replaced by a fixed charge per day from April 2023
 #
-class TNUOSCharges
+class TNUOSCharges < MaxMonthlyDemandChargesBase
   class MissingTNUoSDataForThisYear < StandardError; end 
 
   YEAR_18_19 = Date.new(2018, 4, 1)..Date.new(2019, 3, 31)
@@ -101,14 +101,10 @@ class TNUOSCharges
     14 => 22
   }
 
-  def initialize
-    @month_max_demand_kw_cache = {}
-  end
-
-  def cost(date, mpan, amr_data, _tariff)
+  def cost(date, mpan)
     zone = tnuos_zone(mpan)
     tnuos_rate = rate(date, zone)
-    max_kw = max_demand_for_month_kw(date, amr_data)
+    max_kw = max_demand_for_month_kw(date, @amr_data)
     # its not clear whether this is an EDF specific calculation
     # but its used as a running calculation as a proxy estimate
     # for the real triad based calculation, this is then calculated
@@ -158,15 +154,5 @@ class TNUOSCharges
   def tnuos_zone(mpan)
     region = DUOSCharges.region_number(mpan)
     TNUOS_ZONES_TO_MPAN_REGION_MAP.key(region)
-  end
-
-  def max_demand_for_month_kw(date, amr_data)
-    start_of_month = DateTimeHelper.first_day_of_month(date)
-    end_of_month = DateTimeHelper.last_day_of_month(date)
-    @month_max_demand_kw_cache[start_of_month] ||= calculate_max_demand_kw(amr_data, start_of_month, end_of_month)
-  end
-
-  def calculate_max_demand_kw(amr_data, start_of_month, end_of_month)
-    (start_of_month..end_of_month).to_a.map { |date| amr_data.peak_kw(date) }.max
   end
 end
