@@ -144,15 +144,54 @@ class AdviceBaseload < AdviceElectricityBase
   end
 
   def meter_name(meter)
-    name = meter.name.nil? || meter.name.empty? ? " #{meter.name}" : ''
-    meter.mpxn.to_s + name
+    name = (meter.name.nil? || meter.name.empty?) ? '' : " #{meter.name}"
+    stats = meter_breakdown_baseload_analysis[meter.mpan_mprn]
+    avg = FormatEnergyUnit.format(:kw, stats[:kw], :html)
+    pct = "#{FormatEnergyUnit.format(:percent, stats[:percent], :html)}"
+    "#{meter.mpxn.to_s + name} (#{avg}, #{pct})"
+  end
+
+  def sorted_meters_by_baseload
+    meter_breakdown_baseload_analysis.sort_by { |mpan, v| -v[:percent] }.to_h
+  end
+
+  def meter_breakdown_baseload_analysis
+    @meter_breakdown_baseload_analysis ||= calculate_percentage_baseload
+  end
+
+  def calculate_percentage_baseload
+    total_baseload_kw = average_last_year_baseload_by_meter.values.map { |v| v[:kw] }.sum
+
+    average_last_year_baseload_by_meter.transform_values do |kw|
+      {
+        kw:       kw[:kw],
+        percent:  kw[:kw] / total_baseload_kw,
+        meter:    kw[:meter]
+      }
+    end
+  end
+
+  def average_last_year_baseload_by_meter
+    @average_last_year_baseload_by_meter ||= calculate_average_last_year_baseload_by_meter
+  end
+
+  def calculate_average_last_year_baseload_by_meter
+    @school.electricity_meters.map do |meter|
+      [
+        meter.mpan_mprn,
+        {
+          kw: meter.amr_data.average_baseload_kw_date_range,
+          meter: meter
+        }
+      ]
+    end.to_h
   end
 
   def baseload_charts_for_real_meters
-    @school.electricity_meters.map do |meter|
+    sorted_meters_by_baseload.map do |mpan, info|
       [
-        { type: :html, content: "<h2>Baseload for meter #{meter_name(meter)}" },
-        AdviceBase.meter_specific_chart_config(baseload_longterm_chart[:config_name], meter.mpxn),
+        { type: :html, content: "<h2>Baseload for meter #{meter_name(info[:meter])}" },
+        AdviceBase.meter_specific_chart_config(baseload_longterm_chart[:config_name], mpan),
       ]
     end.flatten
   end
