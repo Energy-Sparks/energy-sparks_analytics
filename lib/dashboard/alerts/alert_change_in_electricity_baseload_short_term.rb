@@ -14,8 +14,8 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
   attr_reader :one_year_baseload_chart
   attr_reader :predicted_percent_increase_in_usage_absolute, :next_year_change_in_baseload_absolute_£
 
-  def initialize(school)
-    super(school, :baseloadchangeshortterm)
+  def initialize(school, report_type = :baseloadchangeshortterm, meter = school.aggregated_electricity_meters)
+    super(school, report_type, meter)
   end
 
   protected def max_days_out_of_date_while_still_relevant

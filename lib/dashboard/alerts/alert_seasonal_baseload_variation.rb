@@ -6,8 +6,8 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
   attr_reader :annual_cost_kwh, :annual_cost_£
   attr_reader :one_year_baseload_chart
 
-  def initialize(school)
-    super(school, :seasonalbaseload)
+  def initialize(school, report_type = :seasonalbaseload, meter = school.aggregated_electricity_meters)
+    super(school, report_type, meter)
   end
 
   TEMPLATE_VARIABLES = {

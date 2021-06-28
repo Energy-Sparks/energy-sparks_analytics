@@ -5,10 +5,11 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation
   attr_reader :max_day_str, :min_day_str
   attr_reader :annual_cost_kwh, :annual_cost_£
+  attr_reader :adjective
   attr_reader :one_year_baseload_chart
 
-  def initialize(school)
-    super(school, :seasonalbaseload)
+  def initialize(school, report_type = :intraweekbaseload, meter = school.aggregated_electricity_meters)
+    super(school, report_type, meter)
   end
 
   TEMPLATE_VARIABLES = {
@@ -47,6 +48,10 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       units:  :£,
       benchmark_code: 'cgbp'
     },
+    adjective: {
+      description: 'how well the school is doing versus the rating: well, ok, poorly',
+      units:  String
+    },
     one_year_baseload_chart: {
       description: 'chart of last years baseload',
       units: :chart
@@ -68,6 +73,14 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
   def timescale
     'over the last year'
+  end
+
+  def commentary
+    charts_and_html = []
+    charts_and_html.push( { type: :html,  content: introductory_text_html } )
+    charts_and_html.push( { type: :html,  content: evaluation_html } )
+    charts_and_html.push( { type: :chart_name, content: :electricity_baseload_by_day_of_week } ) if rating < 4
+    charts_and_html
   end
 
   private
@@ -105,7 +118,62 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
     @rating = calculate_rating_from_range(0.1, 0.3, @percent_intraday_variation.magnitude)
 
+    @adjective = calculate_adjective
+
     @term = :longterm
   end
   alias_method :analyse_private, :calculate
+
+  def introductory_text_html
+    %(
+      <h3>Assessment of variation in baseload between week days and weekends:</h3>
+      <p>
+        One measure of how well your baseload is managed is to look at how much
+        baseload varies between days. If your electrical baseload
+        is similar on all days of the week then you are managing this aspect
+        of you baseload well, in that generally your electricity consumption
+        shouldn't be any different for example on a Saturday night night than for a
+        Wednesday night.
+      </p>
+      <p>
+        If there is a significant variation then you should consider why? Is something
+        being left on during the week overnight which could be switched off everynight
+        to save costs?
+      </p>
+    )
+  end
+
+  def calculate_adjective
+    if rating > 7
+      'well'
+    elsif rate > 4
+      'ok'
+    else
+      'poorly'
+    end
+  end
+
+  def evaluation_html
+    text = %(
+            <p>
+              <% if rating > 4 %>
+                You are doing <%= adjective %> there is limited variation between weekday and weekend usage.
+                You highest average daily usage occurs on <%= max_day_str %> of <%= format_kw(max_day_kw) %>,
+                and your lowest on <%= min_day_str %> of <%= format_kw(min_day_kw) %>.
+              <% else %>
+                Your usage between days of the week is inconsistent and could be improved,
+                doing this would save <%= FormatEnergyUnit.format(:£, @average_one_year_saving_£, :html) %>.
+                On <%= max_day_str %> your average baseload was <%= format_kw(max_day_kw) %>
+                but on <%= min_day_str %> it was <%= format_kw(min_day_kw) %>.
+                Look at the chart below to see the variation and then try to investigate
+                what is causing this variation, is something being left on overnight
+                when it shouldn't be? Is it something which needs for example a 7 day timer installed
+                to switch it off overnight when it is unnecessily consuming electricity? Examples include
+                ICT equipment, switched on on a Monday and switched off on a Friday, appliances on timers
+                where the timer is misprogrammed, water immersion heaters etc.
+              <% end %>
+            </p>
+            )
+    ERB.new(text).result(binding)
+  end
 end

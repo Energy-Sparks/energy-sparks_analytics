@@ -16,7 +16,7 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
   end
 
   def calculate_all_baseload_alerts(asof_date)
-    baseload_alerts.each do alert_class
+    self.class.baseload_alerts.map do |alert_class|
       alert = alert_class.new(@school, @report_type, @meter)
       [
         alert,
@@ -26,8 +26,8 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
   end
 
   def commentary
-    charts_and_html = {}
-    charts_and_html.push( { type: :html,  content: '<h3>No device yet</h3>' } )
+    charts_and_html = []
+    charts_and_html.push( { type: :html,  content: '<h3>No advice yet</h3>' } )
     charts_and_html.push( { type: :chart_name, content: :electricity_baseload_by_day_of_week } )
     charts_and_html
   end
@@ -38,5 +38,9 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
     return false unless alert.valid_alert?
     alert.analyse(asof_date, true)
     alert.make_available_to_users?
+  end
+
+  def format_kw(value)
+    FormatEnergyUnit.format(:kw, value, :html)
   end
 end
