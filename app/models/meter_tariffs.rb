@@ -9,7 +9,7 @@ require 'date'
 #                   an energy efficiency investment decision or
 #                   more simplistically for education purposes
 #                   as there are no standing charges and the values
-#                   are typically round figures e.g. 12p/kWh and 3p/kWh
+#                   are typically round figures e.g. 15p/kWh and 3p/kWh
 #                   the economic tariff do however rely on the 'accounting
 #                   tariffs' to determine whether the electricity is on a
 #                   differential (economy 7) tariff

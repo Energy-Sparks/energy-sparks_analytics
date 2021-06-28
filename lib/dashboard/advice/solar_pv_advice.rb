@@ -116,7 +116,7 @@ class AdviceSolarPV < AdviceElectricityBase
           already offering to pay you for any exported electricity.
         </li>
         <li>
-          The calculations are based on a current electricity price of 12p/kWh,
+          The calculations are based on a current electricity price of 15p/kWh,
           if mains electricity prices reduce there will be a lower economic benefit and
           longer payback to the installation.
         </li>

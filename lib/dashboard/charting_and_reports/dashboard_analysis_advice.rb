@@ -1052,7 +1052,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
             consume 1,500 watts of electricity, to a single more efficient server consuming 500 watts
             would reduce power consumption by 1,000 watts (1.0 kW) on every day of the year.
             This would save 1kW x 24 hours per day x 365 days per year = 8,760 kWh. Each kWh of electricity
-            costs about 12p, so this would save 8,760 x 12p = &pound;1,050 per year. If the new server lasted
+            costs about 15p, so this would save 8,760 x 15p = &pound;1,300 per year. If the new server lasted
             5 years then that would be a &pound;5,250 saving to the school which is far more than the
             likely &pound;750 cost of the new server!
           </p>

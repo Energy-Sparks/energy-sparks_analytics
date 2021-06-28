@@ -38,7 +38,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
       benchmark_code: 'lykw'
     },
     average_baseload_last_year_£: {
-      description: 'Average baseload last year - value in £s (so kW * 24.0 * 365 * 12p or blended rate for differential tariff)',
+      description: 'Average baseload last year - value in £s (so kW * 24.0 * 365 * 15p or blended rate for differential tariff)',
       units:  :£,
       benchmark_code: 'lygb'
     },
