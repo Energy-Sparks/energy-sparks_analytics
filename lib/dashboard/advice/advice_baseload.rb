@@ -41,6 +41,10 @@ class AdviceBaseload < AdviceElectricityBase
       charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
     end
 
+    ap analysis_of_baseload(@school.aggregated_electricity_meters).flatten
+
+    charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
+
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
 
     remove_diagnostics_from_html(charts_and_html, user_type)
@@ -50,6 +54,12 @@ class AdviceBaseload < AdviceElectricityBase
 
   def multiple_meters_total
     @school.electricity_meters.length > 1 ? ' (all meters)' : ''
+  end
+
+  def analysis_of_baseload(meter)
+    commentary = AdviceBaseloadCommentary.new(@school, meter)
+    commentary.evaluation_table_html
+    commentary.all_commentary
   end
 
   def statement_of_baseload
