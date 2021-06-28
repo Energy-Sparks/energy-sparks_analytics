@@ -71,7 +71,7 @@ end
 
 # ap meter_attribute_overrides
 
-school_name_pattern_match = ['batheast*','king-j*'] # 'n3rgy*', 
+school_name_pattern_match = ['king-james-3*'] # 'n3rgy*', 
 source_db = :dcc_n3rgy_override_with_files
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
 
