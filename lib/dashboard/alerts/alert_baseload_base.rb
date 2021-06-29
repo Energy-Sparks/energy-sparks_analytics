@@ -26,10 +26,11 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
   end
 
   def commentary
-    charts_and_html = []
-    charts_and_html.push( { type: :html,  content: '<h3>No advice yet</h3>' } )
-    charts_and_html.push( { type: :chart_name, content: :electricity_baseload_by_day_of_week } )
-    charts_and_html
+    [ { type: :html,  content: 'No advice yet' } ]
+  end
+
+  def self.background_and_advice_on_reducing_issue
+    []
   end
 
   private

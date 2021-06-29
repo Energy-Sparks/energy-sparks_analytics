@@ -6,7 +6,6 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   attr_reader :max_day_str, :min_day_str
   attr_reader :annual_cost_kwh, :annual_cost_£
   attr_reader :adjective
-  attr_reader :one_year_baseload_chart
 
   def initialize(school, report_type = :intraweekbaseload, meter = school.aggregated_electricity_meters)
     super(school, report_type, meter)
@@ -77,10 +76,13 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
   def commentary
     charts_and_html = []
-    charts_and_html.push( { type: :html,  content: introductory_text_html } )
     charts_and_html.push( { type: :html,  content: evaluation_html } )
     charts_and_html.push( { type: :chart_name, content: :electricity_baseload_by_day_of_week } ) if rating < 4
     charts_and_html
+  end
+
+  def self.background_and_advice_on_reducing_issue
+    [ { type: :html,  content: background_advice_html } ]
   end
 
   private
@@ -95,7 +97,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
     days_kw = calculator.average_intraweek_schoolday_kw(asof_date)
 
-    day_strs = %w[ sunday monday tuesday wednesday thursday friday saturday ]
+    day_strs = %w[sunday monday tuesday wednesday thursday friday saturday]
 
     @min_day_kw = days_kw.values.min
     min_day = days_kw.key(@min_day_kw)
@@ -124,9 +126,9 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   end
   alias_method :analyse_private, :calculate
 
-  def introductory_text_html
+  def self.background_advice_html
     %(
-      <h3>Assessment of variation in baseload between week days and weekends:</h3>
+      <h3>Assessment of variation in baseload between days of the week:</h3>
       <p>
         One measure of how well your baseload is managed is to look at how much
         baseload varies between days. If your electrical baseload
@@ -155,7 +157,6 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
   def evaluation_html
     text = %(
-            <p>
               <% if rating > 4 %>
                 You are doing <%= adjective %> there is limited variation between weekday and weekend usage.
                 You highest average daily usage occurs on <%= max_day_str %> of <%= format_kw(max_day_kw) %>,
@@ -165,14 +166,8 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
                 doing this would save <%= FormatEnergyUnit.format(:£, @average_one_year_saving_£, :html) %>.
                 On <%= max_day_str %> your average baseload was <%= format_kw(max_day_kw) %>
                 but on <%= min_day_str %> it was <%= format_kw(min_day_kw) %>.
-                Look at the chart below to see the variation and then try to investigate
-                what is causing this variation, is something being left on overnight
-                when it shouldn't be? Is it something which needs for example a 7 day timer installed
-                to switch it off overnight when it is unnecessily consuming electricity? Examples include
-                ICT equipment, switched on on a Monday and switched off on a Friday, appliances on timers
-                where the timer is misprogrammed, water immersion heaters etc.
               <% end %>
-            </p>
+              The chart below shows the average baseload over the last year by day of the week.
             )
     ERB.new(text).result(binding)
   end

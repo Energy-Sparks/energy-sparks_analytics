@@ -502,7 +502,13 @@ class MeterAttributes
       agreed_availability_charge: MeterAttributeTypes::Hash.define(
         structure: {
           per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kva]),
-          rate: MeterAttributeTypes::Float.define(hint: 'enter £ value per KVA, and units KVA in asc_limit_kw field')
+          rate: MeterAttributeTypes::Float.define(hint: 'enter £ value per KVA, and units KVA in the seperate Agreed Supply Capacity field')
+        }
+      ),
+      excess_availability_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kva]),
+          rate: MeterAttributeTypes::Float.define(hint: 'enter £ value per KVA, and units KVA in the seperate Agreed Supply Capacity field')
         }
       ),
       settlement_agency_fee: MeterAttributeTypes::Hash.define(

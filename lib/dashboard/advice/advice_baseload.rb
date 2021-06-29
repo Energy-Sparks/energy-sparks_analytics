@@ -30,7 +30,7 @@ class AdviceBaseload < AdviceElectricityBase
     charts_and_html.push( { type: :html,  content: benefit_of_moving_to_exemplar_baseload } )
     charts_and_html.push( { type: :chart, content: baseload_one_year_chart } )
     charts_and_html.push( { type: :chart_name, content: baseload_one_year_chart[:config_name] } )
-    charts_and_html.push( { type: :html,  content: chart_seasonal_trend_comment } ) if max_baseload_period_years > 0.75
+    # charts_and_html.push( { type: :html,  content: chart_seasonal_trend_comment } ) if max_baseload_period_years > 0.75
     charts_and_html.push( { type: :html,  content: chart_drilldown_explanation } )
 
     if max_baseload_period_years > 1.1
@@ -41,11 +41,11 @@ class AdviceBaseload < AdviceElectricityBase
       charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
     end
 
-    ap analysis_of_baseload(@school.aggregated_electricity_meters).flatten
-
     charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
+
+    charts_and_html += AdviceBaseloadCommentary.all_background_and_advice_on_reducing_issues
 
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
@@ -111,7 +111,7 @@ class AdviceBaseload < AdviceElectricityBase
     ERB.new(text).result(binding)
   end
 
-  def chart_seasonal_trend_comment
+  def chart_seasonal_trend_comment_deprecated
     %{
       <p>
         Ideally the baseload should stay the same throughout the year and
@@ -132,7 +132,7 @@ class AdviceBaseload < AdviceElectricityBase
   def longterm_chart_intro
     %{
       <p>
-        This chart shows you the same chart as above but for all the meter
+        This chart shows you the same chart as above but for all the
         data we have available for you school - so you can see longer term
         trends in your baseload.
       <p>
@@ -157,8 +157,10 @@ class AdviceBaseload < AdviceElectricityBase
     name = (meter.name.nil? || meter.name.empty?) ? '' : " #{meter.name}"
     stats = meter_breakdown_baseload_analysis[meter.mpan_mprn]
     avg = FormatEnergyUnit.format(:kw, stats[:kw], :html)
-    pct = "#{FormatEnergyUnit.format(:percent, stats[:percent], :html)}"
-    "#{meter.mpxn.to_s + name} (#{avg}, #{pct})"
+    pct = FormatEnergyUnit.format(:percent, stats[:percent], :html)
+    annual_cost_£ = stats[:kw] * 24.0 * 365.0 * BenchmarkMetrics::ELECTRICITY_PRICE
+    annual_cost_formatted = FormatEnergyUnit.format(:£, annual_cost_£, :html)
+    "#{meter.mpxn.to_s + name} (#{avg}, #{pct}, #{annual_cost_formatted})"
   end
 
   def sorted_meters_by_baseload

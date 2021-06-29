@@ -59,6 +59,14 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
     'over the last year'
   end
 
+  def commentary
+    [ { type: :html,  content: evaluation_html } ]
+  end
+
+  def self.background_and_advice_on_reducing_issue
+    [ { type: :html,  content: background_advice_html } ]
+  end
+
   private
 
   def calculator
@@ -83,4 +91,47 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
     @term = :longterm
   end
   alias_method :analyse_private, :calculate
+
+  def self.background_advice_html
+    %(
+      <h3>Assessment of seasonal variation in baseload:</h3>
+      <p>
+        Your out of hours baseload usage shouldn't really vary signifcantly between
+        seasons; you shouldn't be consuming more electricity overnight in the
+        winter than in the summer.
+      </p>
+      <p>
+        If your school has signifcant variation in consumption between seasons you
+        will need to do some detective work in your school to try to find out
+        why and to remedy the situation. What is turned on overnight in the winter
+        which is not turned on in the summer? Does it need to be turned on, and if so
+        could a timer be fitted to ensure it is not on overnight and at weekends?
+      </p>
+    )
+  end
+
+  def calculate_adjective
+    if rating > 7
+      'well'
+    elsif rate > 4
+      'ok'
+    else
+      'poorly'
+    end
+  end
+
+  def evaluation_html
+    text = %(
+              <% if rating > 4 %>
+                You are doing <%= adjective %> there is limited variation between seasons.
+                Your average usage in the winter is <%= format_kw(winter_kw) %> and
+                <%= format_kw(summer_kw) %> in the summer.
+              <% else %>
+                There is a large variation in your seasonal usage from <%= format_kw(winter_kw) %>
+                in the winter to <%= format_kw(summer_kw) %> in the summer. Reducing this difference
+                could save you <%= FormatEnergyUnit.format(:£, @average_one_year_saving_£, :html) %> annually.
+              <% end %>
+            )
+    ERB.new(text).result(binding)
+  end
 end
