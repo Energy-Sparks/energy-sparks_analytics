@@ -30,8 +30,8 @@ class AdviceBaseload < AdviceElectricityBase
     charts_and_html.push( { type: :html,  content: benefit_of_moving_to_exemplar_baseload } )
     charts_and_html.push( { type: :chart, content: baseload_one_year_chart } )
     charts_and_html.push( { type: :chart_name, content: baseload_one_year_chart[:config_name] } )
-    # charts_and_html.push( { type: :html,  content: chart_seasonal_trend_comment } ) if max_baseload_period_years > 0.75
     charts_and_html.push( { type: :html,  content: chart_drilldown_explanation } )
+    charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
     if max_baseload_period_years > 1.1
       charts_and_html.push( { type: :html,  content: "<h2>Electricity Baseload - Longer Term#{multiple_meters_total}</h2>" } )
@@ -40,8 +40,6 @@ class AdviceBaseload < AdviceElectricityBase
       charts_and_html.push( { type: :chart_name, content: baseload_longterm_chart[:config_name] } )
       charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
     end
-
-    charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
 
@@ -109,15 +107,6 @@ class AdviceBaseload < AdviceElectricityBase
       </p>
     }
     ERB.new(text).result(binding)
-  end
-
-  def chart_seasonal_trend_comment_deprecated
-    %{
-      <p>
-        Ideally the baseload should stay the same throughout the year and
-        not increase in winter (a heating problem) or the summer (air conditioning).
-      <p>
-    }
   end
 
   def chart_drilldown_explanation
@@ -202,8 +191,9 @@ class AdviceBaseload < AdviceElectricityBase
   def baseload_charts_for_real_meters
     sorted_meters_by_baseload.map do |mpan, info|
       [
-        { type: :html, content: "<h2>Baseload for meter #{meter_name(info[:meter])}" },
+        { type: :html, content: "<h2>Baseload for meter #{meter_name(info[:meter])}</h2>" },
         AdviceBase.meter_specific_chart_config(baseload_longterm_chart[:config_name], mpan),
+        analysis_of_baseload(info[:meter]).flatten
       ]
     end.flatten
   end

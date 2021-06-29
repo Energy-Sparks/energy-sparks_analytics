@@ -109,6 +109,27 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
     'last week compared with average over last year'
   end
 
+  def analysis_description
+    'Recent change in baseload'
+  end
+
+  def commentary
+    [ { type: :html,  content: evaluation_html } ]
+  end
+
+  def evaluation_html
+    text = %(
+              <% if change_in_baseload_kw < 0 %>
+                You have been doing well recently, your baseload last week was <%= format_kw(average_baseload_last_week_kw) %>
+                compared with <%= format_kw(average_baseload_last_year_kw) %> on average over the last year.
+              <% else %>
+              You baseload has increase, last week it was <%= format_kw(average_baseload_last_week_kw) %>
+              compared with <%= format_kw(average_baseload_last_year_kw) %> on average over the last year.
+              <% end %>
+            )
+    ERB.new(text).result(binding)
+  end
+
   def self.template_variables
     specific = {'Change In Baseload Short Term' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)

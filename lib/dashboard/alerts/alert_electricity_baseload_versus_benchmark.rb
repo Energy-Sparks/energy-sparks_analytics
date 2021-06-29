@@ -144,8 +144,35 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
     'last year'
   end
 
+  def commentary
+    [ { type: :html,  content: evaluation_html } ]
+  end
+  
+  def evaluation_html
+    text = %(
+              <% if average_baseload_last_year_kw < benchmark_per_pupil_kw %>
+                You are doing well your average annual baseload is
+                <%= format_kw(average_baseload_last_year_kw) %> compared with a
+                well managed school of a similar size's
+                <%= format_kw(benchmark_per_pupil_kw) %>, but there should still be
+                opportunities to improve further.
+              <% else %>
+                Your average baseload last year was
+                <%= format_kw(average_baseload_last_year_kw) %> compared with a
+                well managed school of a similar size's
+                <%= format_kw(benchmark_per_pupil_kw) %> - there is significant room
+                for improvement.
+              <% end %>
+            )
+    ERB.new(text).result(binding)
+  end
+
+  def analysis_description
+    'Comparison with other schools'
+  end
+
   def enough_data
-    days_amr_data >= 1 ? :enough : :not_enough
+    is_aggregate_meter? && days_amr_data >= 1 ? :enough : :not_enough
   end
 
   private def calculate(asof_date)
@@ -225,5 +252,9 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
       compared with average usage at other schools of <%= FormatEnergyUnit.format(:kw, @benchmark_per_pupil_kw) %> (pupil based).
     }
     ERB.new(text).result(binding)
+  end
+
+  def is_aggregate_meter?
+    @school.aggregated_electricity_meters.mpxn == @meter.mpxn
   end
 end

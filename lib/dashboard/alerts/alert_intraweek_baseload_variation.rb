@@ -70,6 +70,10 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     calculator.one_years_data? ? :enough : :not_enough
   end
 
+  def analysis_description
+    'Variation in baseload between days of week'
+  end
+
   def timescale
     'over the last year'
   end
@@ -77,12 +81,30 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   def commentary
     charts_and_html = []
     charts_and_html.push( { type: :html,  content: evaluation_html } )
-    charts_and_html.push( { type: :chart_name, content: :electricity_baseload_by_day_of_week } ) if rating < 4
+    AdviceBase.meter_specific_chart_config(:electricity_baseload_by_day_of_week, @meter.mpxn)
+    # charts_and_html.push( { type: :chart_name, content: :electricity_baseload_by_day_of_week } ) if rating < 4
     charts_and_html
   end
 
   def self.background_and_advice_on_reducing_issue
     [ { type: :html,  content: background_advice_html } ]
+  end
+
+  def evaluation_html
+    text = %(
+              <% if rating > 4 %>
+                You are doing <%= adjective %> there is limited variation between weekday and weekend usage.
+                You highest average daily usage occurs on <%= max_day_str %> of <%= format_kw(max_day_kw) %>,
+                and your lowest on <%= min_day_str %> of <%= format_kw(min_day_kw) %>.
+              <% else %>
+                Your usage between days of the week is inconsistent and could be improved,
+                doing this would save <%= FormatEnergyUnit.format(:£, @average_one_year_saving_£, :html) %>.
+                On <%= max_day_str %> your average baseload was <%= format_kw(max_day_kw) %>
+                but on <%= min_day_str %> it was <%= format_kw(min_day_kw) %>.
+                The chart below shows the average baseload over the last year by day of the week.
+              <% end %>
+            )
+    ERB.new(text).result(binding)
   end
 
   private
@@ -153,22 +175,5 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     else
       'poorly'
     end
-  end
-
-  def evaluation_html
-    text = %(
-              <% if rating > 4 %>
-                You are doing <%= adjective %> there is limited variation between weekday and weekend usage.
-                You highest average daily usage occurs on <%= max_day_str %> of <%= format_kw(max_day_kw) %>,
-                and your lowest on <%= min_day_str %> of <%= format_kw(min_day_kw) %>.
-              <% else %>
-                Your usage between days of the week is inconsistent and could be improved,
-                doing this would save <%= FormatEnergyUnit.format(:£, @average_one_year_saving_£, :html) %>.
-                On <%= max_day_str %> your average baseload was <%= format_kw(max_day_kw) %>
-                but on <%= min_day_str %> it was <%= format_kw(min_day_kw) %>.
-              <% end %>
-              The chart below shows the average baseload over the last year by day of the week.
-            )
-    ERB.new(text).result(binding)
   end
 end

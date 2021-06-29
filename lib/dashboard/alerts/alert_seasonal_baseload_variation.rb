@@ -59,12 +59,31 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
     'over the last year'
   end
 
+  def analysis_description
+    'Seasonal variation in baseload'
+  end
+
   def commentary
     [ { type: :html,  content: evaluation_html } ]
   end
 
   def self.background_and_advice_on_reducing_issue
     [ { type: :html,  content: background_advice_html } ]
+  end
+
+  def evaluation_html
+    text = %(
+              <% if rating > 4 %>
+                You are doing <%= adjective %> there is limited variation between seasons.
+                Your average usage in the winter is <%= format_kw(winter_kw) %> and
+                <%= format_kw(summer_kw) %> in the summer.
+              <% else %>
+                There is a large variation in your seasonal usage from <%= format_kw(winter_kw) %>
+                in the winter to <%= format_kw(summer_kw) %> in the summer. Reducing this difference
+                could save you <%= FormatEnergyUnit.format(:£, @average_one_year_saving_£, :html) %> annually.
+              <% end %>
+            )
+    ERB.new(text).result(binding)
   end
 
   private
@@ -76,7 +95,7 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
   def calculate(asof_date)
     # def 'enough_data' doesn;t know the asof_date
     raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{asof_date}" unless calculator.one_years_data?(asof_date)
-    
+
     @winter_kw = calculator.winter_kw(asof_date)
     @summer_kw = calculator.summer_kw(asof_date)
     @percent_seasonal_variation = calculator.percent_seasonal_variation(asof_date)
@@ -110,28 +129,17 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
     )
   end
 
+  def adjective
+    @adjective ||= calculate_adjective
+  end
+
   def calculate_adjective
     if rating > 7
       'well'
-    elsif rate > 4
+    elsif rating > 4
       'ok'
     else
       'poorly'
     end
-  end
-
-  def evaluation_html
-    text = %(
-              <% if rating > 4 %>
-                You are doing <%= adjective %> there is limited variation between seasons.
-                Your average usage in the winter is <%= format_kw(winter_kw) %> and
-                <%= format_kw(summer_kw) %> in the summer.
-              <% else %>
-                There is a large variation in your seasonal usage from <%= format_kw(winter_kw) %>
-                in the winter to <%= format_kw(summer_kw) %> in the summer. Reducing this difference
-                could save you <%= FormatEnergyUnit.format(:£, @average_one_year_saving_£, :html) %> annually.
-              <% end %>
-            )
-    ERB.new(text).result(binding)
   end
 end
