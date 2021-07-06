@@ -147,9 +147,10 @@ class AdviceBaseload < AdviceElectricityBase
     stats = meter_breakdown_baseload_analysis[meter.mpan_mprn]
     avg = FormatEnergyUnit.format(:kw, stats[:kw], :html)
     pct = FormatEnergyUnit.format(:percent, stats[:percent], :html)
+    pct_str = stats[:percent] == 1.0 ? '' : "#{pct},"
     annual_cost_£ = stats[:kw] * 24.0 * 365.0 * BenchmarkMetrics::ELECTRICITY_PRICE
     annual_cost_formatted = FormatEnergyUnit.format(:£, annual_cost_£, :html)
-    "#{meter.mpxn.to_s + name} (#{avg}, #{pct}, #{annual_cost_formatted})"
+    "#{meter.mpxn.to_s + name} (#{avg} average, #{pct_str} #{annual_cost_formatted}/year)"
   end
 
   def sorted_meters_by_baseload
