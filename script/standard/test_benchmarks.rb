@@ -1,9 +1,9 @@
 require 'require_all'
-require_relative '../lib/dashboard.rb'
-require_rel '../test_support'
+require_relative '../../lib/dashboard.rb'
+require_rel '../../test_support'
 ENV['ENERGYSPARKSTESTMODE'] = 'ON'
 
-run_date = Date.new(2021,1,31)
+run_date = Date.new(2021, 6, 20)
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/benchmark db %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
@@ -19,7 +19,7 @@ script = {
     },
     # filename:       './TestResults/benchmark_results_data analytics',
 
-    calculate_and_save_variables: false,
+    calculate_and_save_variables: true,
     asof_date:      run_date,
     # filter:         ->{ addp_area.include?('Sheffield') },
     # run_charts_and_tables: Date.new(2019,10,16),
