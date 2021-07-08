@@ -154,14 +154,18 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
                 You are doing well your average annual baseload is
                 <%= format_kw(average_baseload_last_year_kw) %> compared with a
                 well managed school of a similar size's
-                <%= format_kw(benchmark_per_pupil_kw) %>, but there should still be
-                opportunities to improve further.
+                <%= format_kw(benchmark_per_pupil_kw) %> and
+                an examplar schools's 
+                <%= FormatEnergyUnit.format(:kw, @exemplar_per_pupil_kw) %>,
+                but there should still be opportunities to improve further.
               <% else %>
                 Your average baseload last year was
                 <%= format_kw(average_baseload_last_year_kw) %> compared with a
                 well managed school of a similar size's
-                <%= format_kw(benchmark_per_pupil_kw) %> - there is significant room
-                for improvement.
+                <%= format_kw(benchmark_per_pupil_kw) %> and
+                <%= FormatEnergyUnit.format(:kw, @exemplar_per_pupil_kw) %>
+                at an exemplar school
+                - there is significant room for improvement.
               <% end %>
             )
     ERB.new(text).result(binding)
@@ -249,7 +253,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
   def dashboard_detail
     text = %{
       Your baseload over the last year of <%= FormatEnergyUnit.format(:kw, @average_baseload_last_year_kw) %> is <%= dashboard_adjective %>
-      compared with average usage at other schools of <%= FormatEnergyUnit.format(:kw, @benchmark_per_pupil_kw) %> (pupil based).
+      compared with average usage at other schools of <%= FormatEnergyUnit.format(:kw, @benchmark_per_pupil_kw) %> (pupil based),
+      and <%= FormatEnergyUnit.format(:kw, @exemplar_per_pupil_kw) %> at an exemplar school.
     }
     ERB.new(text).result(binding)
   end

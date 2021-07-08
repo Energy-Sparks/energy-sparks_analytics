@@ -61,10 +61,8 @@ class ElectricityBaseloadAnalysis
 
   def costs_of_baseload_above_minimum_kwh(asof_date = amr_data.end_date, minimum)
     baseloads_kw = years_baseloads(asof_date)
-    above_minimum = baseloads_kw.select { |kw| kw > minimum }
-    above_minimum.map do |kw|
-      kw * 24.0
-    end.sum
+    excess_of_minimum_kws = baseloads_kw.map { |kw| [kw - minimum, 0.0].max }
+    excess_of_minimum_kws.sum * 24.0 # convert to kWh
   end
 
   private

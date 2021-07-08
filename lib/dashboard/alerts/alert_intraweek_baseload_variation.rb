@@ -119,7 +119,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
     days_kw = calculator.average_intraweek_schoolday_kw(asof_date)
 
-    day_strs = %w[sunday monday tuesday wednesday thursday friday saturday]
+    day_strs = %w[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]
 
     @min_day_kw = days_kw.values.min
     min_day = days_kw.key(@min_day_kw)

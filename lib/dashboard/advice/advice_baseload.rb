@@ -56,7 +56,6 @@ class AdviceBaseload < AdviceElectricityBase
 
   def analysis_of_baseload(meter)
     commentary = AdviceBaseloadCommentary.new(@school, meter)
-    commentary.evaluation_table_html
     commentary.all_commentary
   end
 

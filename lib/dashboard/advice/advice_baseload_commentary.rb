@@ -5,8 +5,8 @@ class AdviceBaseloadCommentary
   end
 
   def all_commentary
-    advice = [ { type: :html, content: '<b>Comments:</b>' } ]
-    advice += html_unordered_list(valid_alerts.map{ |alert| alert.commentary }.flatten)
+    advice = [ { type: :html, content: '<b>Assessment of your baseload:</b>' } ]
+    # advice += html_unordered_list(valid_alerts.map{ |alert| alert.commentary }.flatten)
     advice.push( { type: :html, content: evaluation_table_html } ) 
     advice.push( { type: :html, content: more_information_at_bottom_of_page_html } )
     advice.flatten
@@ -18,7 +18,7 @@ class AdviceBaseloadCommentary
       { type: :html, content: general_advice_html },
       { type: :html, content: common_causes_html },
       { type: :html, content: what_to_do_html },
-      AlertBaseloadBase.baseload_alerts.map{ |alert_class| alert_class.background_and_advice_on_reducing_issue }
+      # AlertBaseloadBase.baseload_alerts.map{ |alert_class| alert_class.background_and_advice_on_reducing_issue }
     ].flatten
   end
 
@@ -38,12 +38,15 @@ class AdviceBaseloadCommentary
   private
 
   def html_unordered_list(items)
+    [{ type: :html, content: to_unordered_html_list(items) } ]
+  end
+
+  def to_unordered_html_list(items)
     html = '<ul>'
     items.each do |item|
       html += "<li> #{item[:content]}</li>"
     end
     html += '</ul>'
-    [{ type: :html, content: html } ]
   end
 
   def valid_alerts
@@ -74,7 +77,8 @@ class AdviceBaseloadCommentary
       <p>
         Reducing a school's baseload is often the fastest way of reducing a school's energy costs
         and reducing its carbon footprint. At a well-managed school the baseload should remain the same
-        throughout the year. Every 1 kW of baseload reduced will save a school £1,300 per year.
+        throughout the year. Every 1 kW of baseload reduced will save a school £1,300 per year,
+        and reduce its carbon footprint by 1,800 kg.
       </p>
     )
   end
@@ -96,11 +100,10 @@ class AdviceBaseloadCommentary
   end
 
   def self.what_to_do_html
-    %(
+    text = %(
       <h3>What you should do</h3>
-      Reducing a school's baseload is often the fastest way of reducing a school's
-      energy costs and reducing its carbon footprint. For each 1kW reduction in baseload,
-      the school will save £1,300 per year, and reduce its carbon footprint by 1,800 kg.
+      To fully determine the causes of your baseload usage you need to do a survey of what
+        appliances are being left on overnight and their power consumption.
       <ul>
         <li>Find out whether any electrical equipment or lights are running all the time.
             Do they need to run all the time?</li>
@@ -114,7 +117,18 @@ class AdviceBaseloadCommentary
             data in the 'cloud'. Removing the need for school ICT servers can also save energy previously
             used for air conditioning in school server rooms.</li>
       </ul>
+      <p>
+        There are a number of activities which can help you track down your baseload consumption:
+        <%= ActivityLists.unorder_activity_list(:baseload) %>
+      </p>
+
+      <p>
+        A more detailed explanation of how to interpret the charts and the analysis,
+        and what to do next is available
+        <a href="https://docs.google.com/document/d/1MvhMHdWaSrzmvjp4TaHJPWfDcw37xMEjFufn_kR6j-A/edit?usp=sharing" target ="_blank">here</a>.
+      </p>
     )
+    ERB.new(text).result(binding)
   end
 
   def more_information_at_bottom_of_page_html
