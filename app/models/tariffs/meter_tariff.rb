@@ -32,7 +32,7 @@ class MeterTariff
     AMRData.fast_multiply_x48_x_x48(weights, kwh_x48)
   end
 
-  
+
   def self.format_time_range(rate)
     "#{rate[:from]} to #{rate[:to]}".freeze
   end
@@ -149,7 +149,7 @@ class AccountingTariff < EconomicTariff
       else # reactive charges - unknown as not provided by AMR meter feeds, and not passed through DCC yet (June2021)
         0.0
       end
-    when :kwh 
+    when :kwh
       raise UnexpectedRateType, 'Unexpected internal error: unit rate type kwh should be handled as x48 rather than scalar'
     else
       raise UnexpectedRateType, "Unexpected unit rate type for tariff #{per}"
@@ -456,7 +456,7 @@ class GenericAccountingTariff < AccountingTariff
     (from_hh_index..to_hh_index).each do |hh_index|
       rates = tiered_rate(kwh_x48[hh_index], @tariff[:rates][type])
       rates.each do |new_tier_name, cost|
-        costs_x48[new_tier_name] ||= AMRData.one_day_zero_kwh_x48 
+        costs_x48[new_tier_name] ||= AMRData.one_day_zero_kwh_x48
         costs_x48[new_tier_name][hh_index] = cost
       end
     end
