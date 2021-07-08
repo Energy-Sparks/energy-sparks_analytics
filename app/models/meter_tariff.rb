@@ -198,7 +198,6 @@ class AccountingTariff < EconomicTariff
   def raise_and_log_error(exception, message, data)
     logger.info message
     logger.info data
-    puts data
     raise exception, message
   end
 
