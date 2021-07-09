@@ -523,6 +523,18 @@ class MeterAttributes
           rate: MeterAttributeTypes::Float.define
         }
       ),
+      data_collection_dcda_agent_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      nhh_automatic_meter_reading_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
       half_hourly_data_charge: MeterAttributeTypes::Hash.define(
         structure: {
           per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
