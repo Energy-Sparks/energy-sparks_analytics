@@ -109,9 +109,18 @@ module DateTimeHelper
     arr_x48 = Array.new(48, 0.0)
     hh_index_start  = time_of_day_range.first.to_halfhour_index
     hh_index_end    = time_of_day_range.last.to_halfhour_index
+    if hh_index_start <= hh_index_end
+      set_weights_in_date_range(arr_x48, hh_index_start, hh_index_end, weight)
+    else # crosses midnight e.g. 22:30 to 02:00
+      set_weights_in_date_range(arr_x48, hh_index_start, 47, weight)
+      set_weights_in_date_range(arr_x48, 0, hh_index_end, weight)
+    end
+    arr_x48
+  end
+
+  private_class_method def self.set_weights_in_date_range(arr_x48, hh_index_start, hh_index_end, weight)
     (hh_index_start..hh_index_end).each do |hh_index|
       arr_x48[hh_index] = weight
     end
-    arr_x48
   end
 end
