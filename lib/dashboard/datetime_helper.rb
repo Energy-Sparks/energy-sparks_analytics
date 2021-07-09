@@ -111,7 +111,7 @@ module DateTimeHelper
     hh_index_end    = time_of_day_range.last.to_halfhour_index
     if hh_index_start <= hh_index_end
       set_weights_in_date_range(arr_x48, hh_index_start, hh_index_end, weight)
-    else # crosses midnight e.g. 22:30 to 02:00
+    else # crosses midnight e.g. 22:30 to 02:00, translates to 22:30 to 23:30, 00:00 to 02:00
       set_weights_in_date_range(arr_x48, hh_index_start, 47, weight)
       set_weights_in_date_range(arr_x48, 0, hh_index_end, weight)
     end
