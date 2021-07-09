@@ -249,7 +249,9 @@ class RbeeSolarPV
   private def get_data(url)
     uri = URI(url)
     response = Net::HTTP.get(uri)
-    JSON.parse(response)
+    data = JSON.parse(response)
+    raise EnergySparksBadDataException.new data["message"] if data["httpStatus"] && data["httpStatus"] >= 400
+    data
   end
 
   private def service_url(service, datetime)
@@ -258,7 +260,7 @@ class RbeeSolarPV
   end
 
   private def meter_readings_url(service, meter_id, start_date, end_date, datetime = Time.now.utc)
-    service_url(service, datetime) + 
+    service_url(service, datetime) +
     "&serialNumber=#{meter_id}&" +
     ten_minute_meter_reading_interval_url(start_date, end_date)
   end
