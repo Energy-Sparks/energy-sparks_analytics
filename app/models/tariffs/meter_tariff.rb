@@ -220,22 +220,15 @@ class AccountingTariff < EconomicTariff
   end
 
   def count_rates_every_half_hour(time_ranges)
-    @count_rates_every_half_hour ||= calculate_rates_every_half_hour(time_ranges)
+    @count_rates_every_half_hour ||= calculate_count_rates_every_half_hour(time_ranges)
   end
 
-  def calculate_rates_every_half_hour(time_ranges)
-    hh_count = Array.new(48, 0)
-    hh_time_ranges = time_ranges.map{ |tr| tr.first.to_halfhour_index..tr.last.to_halfhour_index }
-    hh_time_ranges.each do |hh_range|
-      hh_range.each do |hh_i|
-        if hh_i == 48
-          logger.info 'differential tariff end date should really be set to 23:30 not 24:00'
-        else
-          hh_count[hh_i] += 1
-        end
-      end
-    end
-    hh_count
+  # given multiple time ranges coering a day
+  # returns x48 of count of overall time range coverage
+  # e.g. 0 value = missing, 2+ = duplicate/overlap
+  def calculate_count_rates_every_half_hour(time_ranges)
+    tr_masks = time_ranges.map{ |tr| DateTimeHelper.weighted_x48_vector_fast_inclusive(tr, 1) }
+    AMRData.fast_add_multiple_x48_x_x48(tr_masks)
   end
 end
 
