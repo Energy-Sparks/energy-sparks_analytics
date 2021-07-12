@@ -30,7 +30,7 @@ class LowCarbonHubMeterReadings
 
   def download_by_component(meter_id, component, synthetic_mpan, start_date, end_date)
     raw_data = @rbee.smart_meter_data_by_component(meter_id, start_date, end_date, component)
-    actual_start = start_date.nil? ? first_meter_reading_date(meter_id) : start_date
+    actual_start = start_date || first_meter_reading_date(meter_id)
     {
       mpan_mprn: synthetic_mpan,
       readings: convert_date_to_x48_to_one_day_readings(raw_data[:readings], synthetic_mpan, actual_start, end_date),
