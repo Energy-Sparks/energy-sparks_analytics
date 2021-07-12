@@ -1,6 +1,17 @@
 
 require 'benchmark'
 
+puts "Reorg of x48 array for gmt/bst shifting"
+kwh = Array.new(48,0.0)
+bm = Benchmark.measure {
+  1000.times do |i|
+    kwh_new = kwh[46..47] + kwh[0..45]
+    kwh_new.sum
+  end
+}
+puts "direct array creation: kwh[46..47] + kwh[0..45] t =  #{bm.to_s}"
+exit
+
 reports = 40
 years = 0.75
 hours = 75

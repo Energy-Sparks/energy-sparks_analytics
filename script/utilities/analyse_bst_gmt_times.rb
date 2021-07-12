@@ -33,6 +33,7 @@ end
 
 def amr_to_wallclock_time(amr_data, summer_times, mpxn)
   count = 0
+  now = DateTime.now
   bm = Benchmark.realtime {
     summer_times.reverse.each do |(summer_start_date, summer_end_date)|
       start_date = [summer_start_date, amr_data.start_date].max
@@ -43,7 +44,7 @@ def amr_to_wallclock_time(amr_data, summer_times, mpxn)
         kwh_x48_yesterday = date > amr_data.start_date ? amr_data.one_days_data_x48(date - 1) : amr_data.one_days_data_x48(date)
         kwh_x48_today = amr_data.one_days_data_x48(date)
         corrected_kwh_x48 = kwh_x48_yesterday[46..47] + kwh_x48_today[0..45]
-        days_data = OneDayAMRReading.new(mpxn, date, 'ORIG', nil, DateTime.now, corrected_kwh_x48)
+        days_data = OneDayAMRReading.new(mpxn, date, 'ORIG', nil, now, corrected_kwh_x48)
         amr_data.add(date, days_data)
         count += 1
       end
@@ -139,7 +140,7 @@ end
 transition_dates = summer_winter_time_transition_dates
 ap transition_dates
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['bath*']
 source_db = :unvalidated_meter_data
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
 data = {}
