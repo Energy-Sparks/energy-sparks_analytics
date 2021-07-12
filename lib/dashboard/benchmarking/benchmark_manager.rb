@@ -313,7 +313,7 @@ module Benchmarking
 
     def remove_first_column(row)
       # return the data, the 1st entry is the column heading/series/label
-      row[1..100]
+      row.drop(1)
     end
 
     def create_chart_data(config, table, chart_column_numbers, chart_columns_definitions)
