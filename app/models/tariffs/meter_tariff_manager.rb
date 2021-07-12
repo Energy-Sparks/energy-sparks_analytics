@@ -282,10 +282,9 @@ class MeterTariffManager
     date.saturday? || date.sunday?
   end
 
-  def raise_and_log_error(exception, message, data)
+  def raise_and_log_error(exception, message)
     logger.info message
     logger.info data
-    # TODO(PH, 3May2021) - uncomment once system wide accounting tariffs are released
-    # raise exception, message
+    raise exception, message
   end
 end

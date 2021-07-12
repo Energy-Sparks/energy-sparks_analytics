@@ -139,7 +139,6 @@ class TNUOSCharges < MaxMonthlyDemandChargesBase
     triads = TRIAD_DATETIMES[year(date)]
     kws = triads.map do |dt|
       d, hh_index = DateTimeHelper.date_and_half_hour_index(dt)
-      puts "Got here #{d} #{hh_index} #{amr_data.kw(d, hh_index)}"
       amr_data.kw(d, hh_index)
     end
     kws.sum / 3.0

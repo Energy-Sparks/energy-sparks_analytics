@@ -41,7 +41,7 @@ class AdviceBaseload < AdviceElectricityBase
       charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
     end
 
-    ap analysis_of_baseload(@school.aggregated_electricity_meters).flatten
+    # ap analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
     charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
