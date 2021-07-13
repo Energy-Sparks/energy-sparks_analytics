@@ -22,9 +22,9 @@ end
 puts "User:     #{ENV['ENERGYSPARKSRBEEUSERNAME']}"
 puts "Password: #{ENV['ENERGYSPARKSRBEEPASSWORD']}"
 
-start_date = Date.new(2021, 6, 1)
-end_date   = Date.new(2021, 6, 2)
-meter_id = 219207160
+start_date = nil # Date.new(2020, 6, 16)
+end_date   = Date.new(2021, 7, 12)
+meter_id = 219207092
 type = 'prod'
 
 data = rbee.smart_meter_data_by_component(meter_id, start_date, end_date, type)

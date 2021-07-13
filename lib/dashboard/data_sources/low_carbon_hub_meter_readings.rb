@@ -28,6 +28,16 @@ class LowCarbonHubMeterReadings
     convert_raw_readings_to_meter_readings(data, urn, start_date, end_date)
   end
 
+  def download_by_component(meter_id, component, synthetic_mpan, start_date, end_date)
+    raw_data = @rbee.smart_meter_data_by_component(meter_id, start_date, end_date, component)
+    actual_start = start_date || first_meter_reading_date(meter_id)
+    {
+      mpan_mprn: synthetic_mpan,
+      readings: convert_date_to_x48_to_one_day_readings(raw_data[:readings], synthetic_mpan, actual_start, end_date),
+      missing_readings: raw_data[:missing_readings]
+    }
+  end
+
   def first_meter_reading_date(meter_id)
     @rbee.first_connection_date(meter_id)
   end

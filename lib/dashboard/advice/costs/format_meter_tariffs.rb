@@ -204,6 +204,18 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     ]
   end
 
+  def availability_description(rate_type, costs, tariff)
+    limit_kva = FormatEnergyUnit.format(:kva, tariff.tariff[:asc_limit_kw], :html, false, false, :accountant)
+    rate_£_per_kva = FormatEnergyUnit.format(:£_per_kva, costs[:rate], :html, false, false, :accountant)
+    if rate_type == :agreed_availability_charge
+      [[ "Agreed availability charge (#{limit_kva})", rate_£_per_kva ]]
+    elsif rate_type == :excess_availability_charge
+      [[ "Excess availability charge (> #{limit_kva})", rate_£_per_kva ]]
+    else
+      [[ 'Internal error', 'Please report to hello@energysparks.uk']]
+    end
+  end
+
   def single_tariff_table_html(tariff)
     rates = tariff.tariff[:rates].map do |rate_type, costs|
       if tariff.tiered_rate_type?(rate_type)
@@ -212,6 +224,8 @@ class FormatMeterTariffs < DashboardChartAdviceBase
         duos_description(rate_type, costs)
       elsif tariff.tnuos_type?(rate_type)
         tnuos_description(rate_type, costs)
+      elsif tariff.availability_type?(rate_type)
+        availability_description(rate_type, costs, tariff)
       else
         [
           [

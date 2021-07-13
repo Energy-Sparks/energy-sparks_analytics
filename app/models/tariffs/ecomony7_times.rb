@@ -1,5 +1,5 @@
 require 'date'
-require_relative '../../lib/dashboard/time_of_day.rb'
+require_relative '../../../lib/dashboard/time_of_day.rb'
 class Economy7Times
   def self.times(mprn)
     region = (mprn / 100000000000).to_i
