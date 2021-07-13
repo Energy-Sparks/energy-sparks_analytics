@@ -908,6 +908,11 @@ class ChartManager
       inherits_from:    :electricity_by_day_of_week,
       timescale:        :up_to_a_year,
     },
+    electricity_baseload_by_day_of_week:  {
+      inherits_from:    :electricity_by_day_of_week_tolerant,
+      series_breakdown: :baseload,
+      yaxis_units:      :kw,
+    },
     electricity_by_month_acyear_0_1:  {
       name:             'Electricity Use By Month (previous 2 academic years)',
       chart1_type:      :column,

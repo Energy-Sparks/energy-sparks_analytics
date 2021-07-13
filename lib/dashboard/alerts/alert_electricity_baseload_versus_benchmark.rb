@@ -22,8 +22,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertElectricityOnlyBase
 
   attr_reader :summary
 
-  def initialize(school)
-    super(school, :baseloadbenchmark)
+  def initialize(school, report_type = :baseloadbenchmark, meter = school.aggregated_electricity_meters)
+    super(school, report_type, meter)
   end
 
   def self.template_variables
