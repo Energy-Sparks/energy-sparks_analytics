@@ -1,7 +1,7 @@
 #======================== Change in Electricity Baseload Analysis =============
 require_relative 'alert_electricity_only_base.rb'
 
-class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
+class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
   MAXBASELOADCHANGE = 1.15
 
   attr_reader :average_baseload_last_year_kw, :average_baseload_last_week_kw
@@ -109,15 +109,36 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertElectricityOnlyBase
     'last week compared with average over last year'
   end
 
+  def analysis_description
+    'Recent change in baseload'
+  end
+
+  def commentary
+    [ { type: :html,  content: evaluation_html } ]
+  end
+
+  def evaluation_html
+    text = %(
+              <% if change_in_baseload_kw < 0 %>
+                You have been doing well recently, your baseload last week was <%= format_kw(average_baseload_last_week_kw) %>
+                compared with <%= format_kw(average_baseload_last_year_kw) %> on average over the last year.
+              <% else %>
+              You baseload has increase, last week it was <%= format_kw(average_baseload_last_week_kw) %>
+              compared with <%= format_kw(average_baseload_last_year_kw) %> on average over the last year.
+              <% end %>
+            )
+    ERB.new(text).result(binding)
+  end
+
   def self.template_variables
     specific = {'Change In Baseload Short Term' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)
   end
 
   def calculate(asof_date)
-    @average_baseload_last_year_kw = average_baseload_kw(asof_date)
+    @average_baseload_last_year_kw = average_baseload_kw(asof_date, @meter)
     @kw_value_at_10_percent_saving = @average_baseload_last_year_kw * 0.9
-    @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date)
+    @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date, @meter)
     @change_in_baseload_kw = @average_baseload_last_week_kw - @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage = (@average_baseload_last_week_kw - @average_baseload_last_year_kw) / @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage_absolute = @predicted_percent_increase_in_usage.magnitude

@@ -259,7 +259,59 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-  
+
+  #=======================================================================================
+  class BenchmarkSeasonalBaseloadVariation < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          A school&apos;s baseload is the power it consumes out of hours when
+          the school is unoccupied.
+        </p>
+        <p>
+          In general, in general with very few exceptions the baseload in the winter
+          should be very slimiar to the summer. In practice many school accidently
+          leave electrically powered heating-related equipment on overnight whe
+          the school is unoccupied.
+        </p>
+        <p>
+          Identifying and turning off or better timing such equipment is a quick way
+          of saving electricity and costs.
+        </p>
+        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
+        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+
+  #=======================================================================================
+  class BenchmarkWeekdayBaseloadVariation < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          A school&apos;s baseload is the power it consumes out of hours when
+          the school is unoccupied.
+        </p>
+        <p>
+          In general, in general with very few exceptions the baseload shouldn&apos;t
+          vary between days of the week and even between weekdays and weekends.
+        </p>
+        <p>
+          If there is a big variation it often suggests that there is an opportunity
+          to reduce baseload by find out what is causing the baseload to be higher on
+          certain days of the week than others, and switch off whatever is causing
+          the difference.
+        </p>
+        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
+        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+
   #=======================================================================================  
   class BenchmarkContentPeakElectricityPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin

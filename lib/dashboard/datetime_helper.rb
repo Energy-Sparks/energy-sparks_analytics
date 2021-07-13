@@ -16,6 +16,15 @@ module DateTimeHelper
     end
   end
 
+  def self.daytype(date, holidays)
+    return :holiday if holidays.holiday?(date)
+    weekend?(date) ? :weekend : :schoolday
+  end
+
+  def self.weekend?(date)
+    date.saturday? || date.sunday?
+  end
+
   def self.days_in_month(date)
     Date.new(date.year, date.month, -1).day
   end

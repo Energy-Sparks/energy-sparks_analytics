@@ -30,8 +30,8 @@ class AdviceBaseload < AdviceElectricityBase
     charts_and_html.push( { type: :html,  content: benefit_of_moving_to_exemplar_baseload } )
     charts_and_html.push( { type: :chart, content: baseload_one_year_chart } )
     charts_and_html.push( { type: :chart_name, content: baseload_one_year_chart[:config_name] } )
-    charts_and_html.push( { type: :html,  content: chart_seasonal_trend_comment } ) if max_baseload_period_years > 0.75
     charts_and_html.push( { type: :html,  content: chart_drilldown_explanation } )
+    charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
     if max_baseload_period_years > 1.1
       charts_and_html.push( { type: :html,  content: "<h2>Electricity Baseload - Longer Term#{multiple_meters_total}</h2>" } )
@@ -47,6 +47,8 @@ class AdviceBaseload < AdviceElectricityBase
 
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
 
+    charts_and_html += AdviceBaseloadCommentary.all_background_and_advice_on_reducing_issues
+
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
@@ -58,7 +60,6 @@ class AdviceBaseload < AdviceElectricityBase
 
   def analysis_of_baseload(meter)
     commentary = AdviceBaseloadCommentary.new(@school, meter)
-    commentary.evaluation_table_html
     commentary.all_commentary
   end
 
@@ -79,7 +80,7 @@ class AdviceBaseload < AdviceElectricityBase
       <p>
         Electricity baseload is the electricity needed to provide power to appliances
         that keep running at all times.
-        It can be measured by looking at your school&apos;s out of hours electricity consumption. 
+        It can be measured by looking at your school&apos;s out of hours electricity consumption.
       <p>
     }
   end
@@ -111,15 +112,6 @@ class AdviceBaseload < AdviceElectricityBase
     ERB.new(text).result(binding)
   end
 
-  def chart_seasonal_trend_comment
-    %{
-      <p>
-        Ideally the baseload should stay the same throughout the year and
-        not increase in winter (a heating problem) or the summer (air conditioning).
-      <p>
-    }
-  end
-
   def chart_drilldown_explanation
     %{
       <p>
@@ -132,7 +124,7 @@ class AdviceBaseload < AdviceElectricityBase
   def longterm_chart_intro
     %{
       <p>
-        This chart shows you the same chart as above but for all the meter
+        This chart shows you the same chart as above but for all the
         data we have available for you school - so you can see longer term
         trends in your baseload.
       <p>
@@ -157,8 +149,11 @@ class AdviceBaseload < AdviceElectricityBase
     name = (meter.name.nil? || meter.name.empty?) ? '' : " #{meter.name}"
     stats = meter_breakdown_baseload_analysis[meter.mpan_mprn]
     avg = FormatEnergyUnit.format(:kw, stats[:kw], :html)
-    pct = "#{FormatEnergyUnit.format(:percent, stats[:percent], :html)}"
-    "#{meter.mpxn.to_s + name} (#{avg}, #{pct})"
+    pct = FormatEnergyUnit.format(:percent, stats[:percent], :html)
+    pct_str = stats[:percent] == 1.0 ? '' : "#{pct},"
+    annual_cost_£ = stats[:kw] * 24.0 * 365.0 * BenchmarkMetrics::ELECTRICITY_PRICE
+    annual_cost_formatted = FormatEnergyUnit.format(:£, annual_cost_£, :html)
+    "#{meter.mpxn.to_s + name} (#{avg} average, #{pct_str} #{annual_cost_formatted}/year)"
   end
 
   def sorted_meters_by_baseload
@@ -200,8 +195,9 @@ class AdviceBaseload < AdviceElectricityBase
   def baseload_charts_for_real_meters
     sorted_meters_by_baseload.map do |mpan, info|
       [
-        { type: :html, content: "<h2>Baseload for meter #{meter_name(info[:meter])}" },
+        { type: :html, content: "<h2>Baseload for meter #{meter_name(info[:meter])}</h2>" },
         AdviceBase.meter_specific_chart_config(baseload_longterm_chart[:config_name], mpan),
+        analysis_of_baseload(info[:meter]).flatten
       ]
     end.flatten
   end

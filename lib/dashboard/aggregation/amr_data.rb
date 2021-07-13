@@ -317,6 +317,10 @@ class AMRData < HalfHourlyData
     average_kwh * 2.0 # convert to kW
   end
 
+  def statistical_baseloads_in_date_range(start_date, end_date)
+    (start_date..end_date).to_a.map { |d| statistical_baseload_kw(d) }
+  end
+
   def statistical_peak_kw(date)
     days_data = days_kwh_x48(date) # 48 x 1/2 hour kWh
     sorted_kwh = days_data.clone.sort
