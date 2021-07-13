@@ -241,8 +241,25 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     rates.push(['', 'at weekends'    ]) if tariff.tariff[:weekend]
     rates.push(['', 'during weekdays']) if tariff.tariff[:weekday]
 
+    puts "Got here before"
+    ap rates
+    table = add_tooltips_to_table(rates)
+
+    puts "Got here after"
+    ap table
+
     header = ['Tariff type', 'Rate']
-    html_table(header, rates)
+    html_table(header, table)
+  end
+  
+  def add_tooltips_to_table(table)
+    table.map do |(tariff_type, rate)|
+      tooltip = MeterTariffDescription.description_html(@school, meter, tariff_type)
+      [
+        tooltip.nil? ? tariff_type : info_button(tariff_type, tooltip),
+        rate
+      ]
+    end
   end
 
   def climate_change_levy?(tariff)
@@ -258,6 +275,14 @@ class FormatMeterTariffs < DashboardChartAdviceBase
         FormatEnergyUnit.format(:£, rate, :html, false, false, :accountant) + '/kWh'
       ]
     end
+  end
+
+  # TODO(PH, 13Jul2021) - merge with idetnical version in meter_monthly_costs_advice once ok
+  def info_button(text, tooltip)
+    html = %(
+      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="<%= tooltip %>"><%= text %></i>
+    )
+    ERB.new(html).result(binding)
   end
 
   def if_not_full_tariff_coverage_html(tariff_info)

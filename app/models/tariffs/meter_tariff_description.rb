@@ -5,6 +5,8 @@ class MeterTariffDescription
       rate(attribute_type)
     when /^Duos.*$/
       duos(attribute_type, school, meter)
+    when /^Climate.*$/
+      'Climate change levy - reflecting your carbon emissions'
     else
       nil
     end

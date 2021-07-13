@@ -41,6 +41,13 @@ class MeterMonthlyCostsAdvice
 
   def info_button(text, tooltip)
     html = %(
+      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="<%= tooltip %>"><%= text %></i>
+    )
+    ERB.new(html).result(binding)
+  end
+
+  def info_button_deprecated(text, tooltip)
+    html = %(
       <span><%= text %><link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
       <div class="col-md-12">
@@ -56,9 +63,7 @@ class MeterMonthlyCostsAdvice
   end
 
   def row_to_£(row)
-    # Julian JH this is the problematic code indicative of BigDecimal leaking into the analytics
-    # row.map{ |value| value.is_a?(Numeric) ? format_£(value) : value }
-    row.map{ |value| value.is_a?(Float) ? format_£(value) : value }
+    row.map{ |value| value.is_a?(Numeric) ? format_£(value) : value }
   end
 
   def format_£(value)
