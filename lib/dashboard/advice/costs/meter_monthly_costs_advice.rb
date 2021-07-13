@@ -9,7 +9,7 @@ class MeterMonthlyCostsAdvice
     header, rows, totals = two_year_monthly_comparison_table
     formatted_rows = rows.map{ |row| row_to_£(row) }
     formatted_totals = row_to_£(totals)
-    # header = add_tool_tips(header, @school, @meter)
+    header = add_tool_tips(header, @school, @meter)
     html_table = HtmlTableFormatting.new(header, formatted_rows, formatted_totals)
     html_table.html
   end
@@ -19,7 +19,8 @@ class MeterMonthlyCostsAdvice
   def add_tool_tips(header, school, meter)
     header.map do |column_heading|
       tooltip = MeterTariffDescription.description_html(school, meter, column_heading)
-      tooltip.nil? ? column_heading : to_tooltip_html(column_heading, tooltip)
+      # tooltip.nil? ? column_heading : to_tooltip_html(column_heading, tooltip)
+      tooltip.nil? ? column_heading : info_button(column_heading, tooltip)
     end
   end
 
@@ -33,6 +34,22 @@ class MeterMonthlyCostsAdvice
     html = %(
       <div class="tooltip"><%= column_heading_name %>
         <span class="tooltiptext"><%= text %></span>
+      </div>
+    )
+    ERB.new(html).result(binding)
+  end
+
+  def info_button(text, tooltip)
+    html = %(
+      <span><%= text %><link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+      <div class="col-md-12">
+          <div class="info">
+            <i class="icon-info-sign"></i>
+            <span class="extra-info">
+              <%= tooltip %>
+            </span>
+          </div>
       </div>
     )
     ERB.new(html).result(binding)

@@ -233,6 +233,37 @@ class RunAdultDashboard < RunCharts
                       .split-para span {
                         display:block;float:right;width:15%;margin-left:10px;
                       }
+                      
+                      * {
+                        transition: all .2s ease;
+                      }
+                      
+                      .extra-info {
+                        display: none;
+                        line-height: 30px;
+                        font-size: 12px;
+                        position: absolute;
+                        top: 0;
+                        left: 50px;
+                      }
+                      
+                      .info:hover .extra-info {
+                        display: block;
+                      }
+                      
+                      .info {
+                        font-size: 20px;
+                        padding-left: 5px;
+                        width: 20px;
+                        border-radius: 15px;
+                      }
+                      
+                      .info:hover {
+                        background-color: white;
+                        padding: 0 0 0 5px;
+                        width: 315px;
+                        text-align: left !important;
+                      }
 
                     </style>
                 }
