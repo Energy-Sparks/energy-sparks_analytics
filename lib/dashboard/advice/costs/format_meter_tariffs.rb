@@ -241,12 +241,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     rates.push(['', 'at weekends'    ]) if tariff.tariff[:weekend]
     rates.push(['', 'during weekdays']) if tariff.tariff[:weekday]
 
-    puts "Got here before"
-    ap rates
     table = add_tooltips_to_table(rates)
-
-    puts "Got here after"
-    ap table
 
     header = ['Tariff type', 'Rate']
     html_table(header, table)
