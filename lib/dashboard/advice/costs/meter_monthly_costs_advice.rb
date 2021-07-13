@@ -41,7 +41,7 @@ class MeterMonthlyCostsAdvice
 
   def info_button(text, tooltip)
     html = %(
-      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="<%= tooltip %>"><%= text %></i>
+      <%= text %> <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="<%= tooltip %>"></i>
     )
     ERB.new(html).result(binding)
   end
