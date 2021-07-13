@@ -41,6 +41,10 @@ class AdviceBaseload < AdviceElectricityBase
       charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
     end
 
+    ap analysis_of_baseload(@school.aggregated_electricity_meters).flatten
+
+    charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
+
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
 
     charts_and_html += AdviceBaseloadCommentary.all_background_and_advice_on_reducing_issues
@@ -76,7 +80,7 @@ class AdviceBaseload < AdviceElectricityBase
       <p>
         Electricity baseload is the electricity needed to provide power to appliances
         that keep running at all times.
-        It can be measured by looking at your school&apos;s out of hours electricity consumption. 
+        It can be measured by looking at your school&apos;s out of hours electricity consumption.
       <p>
     }
   end

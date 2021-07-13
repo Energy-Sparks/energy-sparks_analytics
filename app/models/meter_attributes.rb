@@ -511,6 +511,12 @@ class MeterAttributes
           rate: MeterAttributeTypes::Float.define(hint: 'enter £ value per KVA, and units KVA in the separate Agreed Supply Capacity field')
         }
       ),
+      excess_availability_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kva]),
+          rate: MeterAttributeTypes::Float.define(hint: 'enter £ value per KVA, and units KVA in asc_limit_kw field')
+        }
+      ),
       settlement_agency_fee: MeterAttributeTypes::Hash.define(
         structure: {
           per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
@@ -520,6 +526,18 @@ class MeterAttributes
       reactive_power_charge: MeterAttributeTypes::Hash.define(
         structure: {
           per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kva]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      data_collection_dcda_agent_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
+          rate: MeterAttributeTypes::Float.define
+        }
+      ),
+      nhh_automatic_meter_reading_charge: MeterAttributeTypes::Hash.define(
+        structure: {
+          per:  MeterAttributeTypes::Symbol.define(allowed_values: [:day, :month, :quarter]),
           rate: MeterAttributeTypes::Float.define
         }
       ),

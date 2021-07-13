@@ -109,6 +109,10 @@ class AccountingTariff < EconomicTariff
     false
   end
 
+  def availability_type?(type)
+    %i[agreed_availability_charge excess_availability_charge].include?(type)
+  end
+
   # non per kWh standing charges
   def standing_charges(date, days_kwh)
     standing_charge = {}
@@ -116,7 +120,8 @@ class AccountingTariff < EconomicTariff
       if tnuos_type?(standing_charge_type) && rate == true
         standing_charge[standing_charge_type] = tnuos_cost(date)
       elsif standard_standing_charge_type?(standing_charge_type) && rate[:per] != :kwh
-        standing_charge[standing_charge_type] = daily_rate(date, rate[:per], rate[:rate], days_kwh, standing_charge_type)
+        dr = daily_rate(date, rate[:per], rate[:rate], days_kwh, standing_charge_type)
+        standing_charge[standing_charge_type] = dr unless dr.nil?
       end
     end
     standing_charge
@@ -138,7 +143,9 @@ class AccountingTariff < EconomicTariff
       rate / DateTimeHelper.days_in_quarter(date)
     when :kva
       if type == :agreed_availability_charge
-        asc_rate(rate) / DateTimeHelper.days_in_month(date)
+        agreed_supply_capacity_daily_cost(date)
+      elsif type == :excess_availability_charge
+        excess_supply_capacity_daily_cost(date)
       else # reactive charges - unknown as not provided by AMR meter feeds, and not passed through DCC yet (June2021)
         0.0
       end
@@ -147,6 +154,18 @@ class AccountingTariff < EconomicTariff
     else
       raise UnexpectedRateType, "Unexpected unit rate type for tariff #{per}"
     end
+  end
+
+  def agreed_supply_capacity_calculator
+    @agreed_supply_capacity_calculator ||= AgreedSupplyCapacityCharge.new(@amr_data, @tariff)
+  end
+
+  def agreed_supply_capacity_daily_cost(date)
+    agreed_supply_capacity_calculator.agreed_supply_capacity_daily_cost(date)
+  end
+
+  def excess_supply_capacity_daily_cost(date)
+    agreed_supply_capacity_calculator.excess_supply_capacity_daily_cost(date)
   end
 
   # apply per kWh 'standing charges' per half hour
@@ -169,11 +188,6 @@ class AccountingTariff < EconomicTariff
     !rate_type?(type)
   end
 
-  # agreed supply capacity
-  def asc_rate(rate)
-    rate * tariff[:asc_limit_kw]
-  end
-
   def check_differential_times(time_ranges)
     check_time_ranges_on_30_minute_boundaries(time_ranges)
     check_complete_time_ranges(time_ranges)
@@ -182,28 +196,27 @@ class AccountingTariff < EconomicTariff
 
   def check_complete_time_ranges(time_ranges)
     if count_rates_every_half_hour(time_ranges).any?{ |v| v == 0 }
-      raise_and_log_error(IncompleteTimeRanges, "Incomplete differential tariff time of day ranges #{@mpxn}", time_ranges)
+      tr_debug = time_ranges_compact_summary(time_ranges)
+      raise_and_log_error(IncompleteTimeRanges, "Incomplete differential tariff time of day ranges #{@mpxn}:  #{tr_debug}", time_ranges)
     end
   end
 
-  def check_overlapping_time_ranges(time_ranges)
-    if count_rates_every_half_hour(time_ranges).any?{ |v| v > 1 }
-      raise_and_log_error(OverlappingTimeRanges, "Overlapping differential tariff time of day ranges #{@mpxn}", time_ranges)
-    end
+  def check_overlapping_time_ranges(_time_ranges)
+  # do nothing, about to be deprecated errors on old accounting tariffs
+  end
+
+  def time_ranges_compact_summary(time_ranges)
+    time_ranges.map(&:to_s).join(', ')
   end
 
   def raise_and_log_error(exception, message, data)
     logger.info message
     logger.info data
-    # TODO(PH, 3May2021) - uncomment once system wide accounting tariffs are released
-    # raise exception, message
+    raise exception, message
   end
 
-  def check_time_ranges_on_30_minute_boundaries(time_ranges)
-    time_of_days = [time_ranges.map(&:first), time_ranges.map(&:last)].flatten
-    if time_of_days.any?{ |tod| !tod.on_30_minute_interval? }
-      raise TimeRangesNotOn30MinuteBoundary, "Differential tariff time of day  rates not on 30 minute interval #{@mpxn}"
-    end
+  def check_time_ranges_on_30_minute_boundaries(_time_ranges)
+    # do nothing, about to be deprecated errors on old accounting tariffs
   end
 
   def count_rates_every_half_hour(time_ranges)
@@ -400,11 +413,11 @@ class GenericAccountingTariff < AccountingTariff
   end
 
   def tnuos_calculator
-    @tnuos_calculator ||= TNUOSCharges.new
+    @tnuos_calculator ||= TNUOSCharges.new(@amr_data, @tariff)
   end
 
   def tnuos_cost(date)
-    tnuos_calculator.cost(date, @mpxn, @amr_data, self)
+    tnuos_calculator.cost(date, @mpxn)
   end
 
   def differential_rate_name(type)
@@ -487,6 +500,20 @@ class GenericAccountingTariff < AccountingTariff
       "below #{high_threshold.round(0)} kwh"
     else
       "#{low_threshold.round(0)} to #{high_threshold.round(0)} kwh"
+    end
+  end
+
+  def check_time_ranges_on_30_minute_boundaries(time_ranges)
+    time_of_days = [time_ranges.map(&:first), time_ranges.map(&:last)].flatten
+    if time_of_days.any?{ |tod| !tod.on_30_minute_interval? }
+      raise_and_log_error(TimeRangesNotOn30MinuteBoundary, "Differential tariff time of day rates not on 30 minute interval #{@mpxn}", time_ranges)
+    end
+  end
+
+  def check_overlapping_time_ranges(time_ranges)
+    if count_rates_every_half_hour(time_ranges).any?{ |v| v > 1 }
+      tr_debug = time_ranges_compact_summary(time_ranges)
+      raise_and_log_error(OverlappingTimeRanges, "Overlapping differential tariff time of day ranges #{@mpxn}:  #{tr_debug}", time_ranges)
     end
   end
 end

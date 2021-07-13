@@ -42,11 +42,7 @@ class MeterCost
   end
 
   def calculate_percent_real
-    count = (@meter_start_date..@meter_end_date).count do |date|
-      # these are tristate true, false and :mixed (combined meters)
-      cost = accounting_tariff.one_days_cost_data(date)
-      fully_real_tariff?(cost.system_wide) && fully_real_tariff?(cost.default)
-    end
+    count = missing_billing_periods.values.count { |missing| missing }
     count.to_f / (@meter_end_date - @meter_start_date + 1)
   end
 
@@ -138,16 +134,17 @@ class MeterCost
               }
             else
               %{
-                <p>
-                  Energy Sparks currently doesn't have a record of all your tariffs
-                  and therefore this presentation indicates what it might look like
-                  if you can provide us with some billing information by emailing
-                    <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">mailto:hello@energysparks.uk</a>.
+                <p>          
+                  Energy Sparks currently doesn't have a record of your real tariffs
+                  and is using default tariffs between <%= group_missing_tariffs_text %>, 
+                  which means your billing won't be accurate. If you would like to help
+                  us setup your billing correctly, please get in touch by mailing
+                  <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">mailto:hello@energysparks.uk</a>.                    
                 </p>
               }
             end
 
-    { type: :html, content: text }
+    { type: :html, content: ERB.new(text).result(binding) }
   end
 
   def intro_to_chart_2_year_comparison
@@ -346,5 +343,42 @@ class MeterCost
       in energy consumption.
     }.freeze
     ERB.new(text).result(binding)
+  end
+
+  def missing_billing_periods
+    @missing_billing_periods ||= calculate_missing_billing_periods
+  end
+
+  def calculate_missing_billing_periods
+    count = (billing_calculation_start_date..@meter_end_date).to_a.map do |date|
+      # these are tristate true, false and :mixed (combined meters)
+      cost = accounting_tariff.one_days_cost_data(date)
+      [
+        date,
+        fully_real_tariff?(cost.system_wide) && fully_real_tariff?(cost.default)
+      ]
+    end.to_h
+  end
+
+  def group_missing_tariffs_text
+    # split periods of real and non-real default system-wide tariffs
+    grouped_periods = missing_billing_periods.to_a.slice_when do |prev, curr|
+      prev[1] != curr[1]
+    end
+
+    # select only the non-real default system-wide tariffs
+    missing = grouped_periods.select { |period| period[0][1] == false }
+
+    # format
+    missing.map do |period|
+      sd = period.first[0].strftime('%d-%m-%Y')
+      ed = period.last[0].strftime('%d-%m-%Y')
+      "#{sd} and #{ed}"
+    end.join(', ')
+  end
+
+  def billing_calculation_start_date
+    twenty_five_months = 30 + 2 * 365 # approx 25 months, covers billing period of comparison chart and table
+    [@meter_end_date - twenty_five_months, @meter_start_date].max
   end
 end

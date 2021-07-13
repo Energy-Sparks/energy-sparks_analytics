@@ -1,5 +1,5 @@
-require_relative '../../lib/dashboard/time_of_year.rb'
-require_relative '../../lib/dashboard/time_of_day.rb'
+require_relative '../../../lib/dashboard/time_of_year.rb'
+require_relative '../../../lib/dashboard/time_of_day.rb'
 require 'amazing_print'
 require 'date'
 # economic and accounting tariff configuration and setup

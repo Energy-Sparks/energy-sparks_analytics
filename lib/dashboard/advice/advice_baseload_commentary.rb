@@ -7,7 +7,7 @@ class AdviceBaseloadCommentary
   def all_commentary
     advice = [ { type: :html, content: '<b>Assessment of your baseload:</b>' } ]
     # advice += html_unordered_list(valid_alerts.map{ |alert| alert.commentary }.flatten)
-    advice.push( { type: :html, content: evaluation_table_html } ) 
+    advice.push( { type: :html, content: evaluation_table_html } )
     advice.push( { type: :html, content: more_information_at_bottom_of_page_html } )
     advice.flatten
   end
@@ -90,7 +90,7 @@ class AdviceBaseloadCommentary
       <ul>
         <li>Old freezers and fridges running constantly</li>
         <li>Inefficient IT servers</li>
-        <li>Security lights</li> 
+        <li>Security lights</li>
         <li>Electric water heaters</li>
         <li>Water chillers</li>
         <li>Air conditioning</li>
@@ -109,7 +109,7 @@ class AdviceBaseloadCommentary
             Do they need to run all the time?</li>
         <li>You should check to see what lights and appliances are left on at the end of the school day
             and get pupils and staff to switch off lights and appliances when they go home,
-            and before the school holidays. Don't forget to look in offices or school kitchens.</li> 
+            and before the school holidays. Don't forget to look in offices or school kitchens.</li>
         <li>Use appliance monitors to check how much energy your school fridges and freezers are using,
             as these need to run all the time. A modern fridge or freezer uses £35 to £45 of electricity a year,
             but old models can use up to £600 of electricity a year.</li>
