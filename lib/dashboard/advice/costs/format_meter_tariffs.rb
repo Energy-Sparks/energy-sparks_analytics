@@ -246,7 +246,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     header = ['Tariff type', 'Rate']
     html_table(header, table)
   end
-  
+
   def add_tooltips_to_table(table)
     table.map do |(tariff_type, rate)|
       tooltip = MeterTariffDescription.description_html(@school, meter, tariff_type)
@@ -275,7 +275,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   # TODO(PH, 13Jul2021) - merge with idetnical version in meter_monthly_costs_advice once ok
   def info_button(text, tooltip)
     html = %(
-      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="<%= tooltip %>"><%= text %></i>
+      <%= text %> <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="<%= tooltip %>"></i>
     )
     ERB.new(html).result(binding)
   end
@@ -283,7 +283,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   def if_not_full_tariff_coverage_html(tariff_info)
     html = ''
     contact_us_for_tariff_setup = false
- 
+
     if tariff_info[:start_date] > meter.amr_data.start_date
       contact_us_for_tariff_setup = true
       html += %{
