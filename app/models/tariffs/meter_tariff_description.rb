@@ -1,4 +1,7 @@
 class MeterTariffDescription
+  include Logging
+  class UnknownDuosBand < StandardError; end
+
   def self.description_html(school, meter, attribute_type)
     case attribute_type
     when /^\d\d:\d\d to \d\d:\d\d$/
@@ -12,7 +15,87 @@ class MeterTariffDescription
     end
   end
 
+  def self.short_description_html(school, meter, attribute_type, in_tooltip: true)
+    desc = short_description(school, meter, attribute_type)
+
+    return attribute_type if !in_tooltip || desc.nil?
+
+    info_button(attribute_type, desc)
+  end
+
   private
+
+  private_class_method def self.short_description(school, meter, attribute_type)
+    case attribute_type
+    when /^\d\d:\d\d to \d\d:\d\d$/
+      rate(attribute_type)
+    when /^Flat.*$/
+      'The charge per kWh of consumption for the whole day'
+    when /^Duos.*$/
+      duos_succinct_description(attribute_type, school, meter)
+    when /^Tnuos.*$/
+      %q(
+        Transmission Network Use Of System Charge: based on the schools peak consumption on
+        winter weekdays between 17:00 and 19:30 - to reduce make sure as many appliances
+        as possible are turned off during the winter when the school closes for the day.
+      )
+    when /^Agreed availability.*$/
+      %q(
+        A charge for the cabling to provide an agreed maximum amount of power in KVA
+        of electricity to the school. This can often be reduced via discussions with
+        your energy supplier.
+      )
+    when /^Excess availability.*$/
+      %q(
+        A 'fine' for going over your 'Agreed Availability Limit' in a month.
+        If you are being 'fined' for more than a few months a year its generally
+        cheaper to ask your energy supplier to increase your 'Agreed Availability Limit'.
+      )
+    when /^Feed in tariff levy.*$/
+      %q(
+        A fee to cover the costs of supporting renewables on the electricity network.
+        You can reduce this by reducing your energy consumption.
+      )
+    when /^Standing charge.*$/, /^Standing Charge.*$/, /^Fixed charge.*$/
+      'Fixed fee for your energy supply.'
+    when /^Site fee.*$/, /^Site Fee.*$/
+      'Miscellaneous fixed fee.'
+    when /^Settlement agency fee.*$/, /^Settlement Agency Fee.*$/
+      'A fee to pay for the cost of maintaining and reading your meter'
+    when /^Reactive power charge.*$/, /^Reactive Power Charge.*$/
+      %q(
+        A charge based on how out of balance the voltage and current consumption of your school is.
+        If it is a large cost then its possible to rebalance your school but your will need an electrician
+        to help you. Energy Sparks can't calculate this because we currently don't have access to
+        the raw data to calculate this, so you will need to look at your paper bills; the cost
+        for most schools is less than £20 per month.
+      )
+    when /^Data collection.*$/, /^Nhh automatic meter reading.*$/,  /^Nhh metering agent charge.*$/
+      %q(
+        The cost of collecting your half hourly meter readings twice a day.
+        Energy Sparks uses this half hourly data to analyse your energy consumption.
+      )
+    when /^Meter asset provider charge.*$/
+      %q(
+        The cost of a third party maintaining your meter.
+      )
+    when /^Climate.*$/
+      'Climate Change Levy: based on your carbon emissions (per kWh of consumption).
+      If you reduce your consumption your CCL will reduce.'
+    when /^Month$/, /^Vat.*$/, /^Variance versus last year$/, /^Total$/, /^Cost per kWh$/
+      nil # no tooltip
+    else
+      Logging.logger.info "Missing billing tooltip description #{attribute_type}"
+      nil
+    end
+  end
+
+  private_class_method def self.info_button(text, tooltip)
+    html = %(
+      <%= text %> <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="<%= tooltip %>"></i>
+    )
+    ERB.new(html).result(binding)
+  end
 
   private_class_method def self.real_meter_example(school, meter)
     if meter.fuel_type == :electricity && school.electricity_meters.length > 1
@@ -27,15 +110,30 @@ class MeterTariffDescription
   private_class_method def self.rate(attribute_type)
     text = %( 
       This is the charge for electricity consumed
-      from <%= attribute_type %> per kWh.
+      between <%= include_end_of_bucket_time(attribute_type) %> per kWh.
     )
     ERB.new(text).result(binding)
+  end
+
+  # not ideal having to reverse engineer the key
+  # the bucket times represent the start of the bucket
+  # so 23:30 to 23:30 is really 23:30 to 24:00
+  def self.include_end_of_bucket_time(differential_tariff_range_str)
+    t1_str, t2_str = differential_tariff_range_str.split(' to ')
+    t2 = TimeOfDay.parse(t2_str)
+    t2_end = TimeOfDay.add_hours_and_minutes(t2, 0, 30)
+    "#{t1_str} and #{t2_end}"
   end
 
   private_class_method def self.duos(attribute_type, school, meter)
     duos_introduction_html +
     duos_regional_charge_table_html(school, meter) +
     duos_addedum_html
+  end
+
+  private_class_method def self.duos_succinct_description(attribute_type, school, meter)
+    charge_times = duos_regional_charge_summary_times(school, meter, attribute_type)
+    "Distributed use of system charge: - charge per kWh of usage during these times:  #{charge_times}. To reduce, reduce the schools usage during these times"
   end
 
   private_class_method def self.duos_introduction_html
@@ -52,6 +150,30 @@ class MeterTariffDescription
         between different regions of the UK. The periods for your region are:
       </p>
     )
+  end
+
+  private_class_method def self.duos_regional_charge_summary_times(school, meter, attribute_type)
+    real_meter = real_meter_example(school, meter)
+    data = DUOSCharges.regional_charge_table(real_meter.mpxn)
+    band = duos_band(attribute_type)
+    band_data = data[:bands][band]
+    text = ''
+    text += "weekdays: #{band_data[:weekdays]}" unless band_data[:weekdays].nil?
+    text += "weekends: #{band_data[:weekends]}" unless band_data[:weekends].nil?
+    text
+  end
+
+  private_class_method def self.duos_band(attribute_type)
+    case attribute_type
+    when /^.*green.*$/
+      :green
+    when /^.*amber.*$/
+      :amber
+    when /^.*red.*$/
+      :red
+    else
+       raise UnknownDuosBand, "Band #{attribute_type} colour incorrect"
+    end
   end
 
   private_class_method def self.duos_regional_charge_table_html(school, meter)

@@ -149,12 +149,12 @@ class MeterCost
 
   def intro_to_chart_2_year_comparison
     text = %{
-      <h2>Comparison of last 2 years costs for this meter</h2>
+      <h2>Comparison of last 2 years costs for this <%= @meter.fuel_type.to_s %> meter</h2>
       <p>
         This first chart compares your monthly consumption over the last 2 years
       </p>
     }
-    { type: :html, content: text }
+    { type: :html, content: ERB.new(text).result(binding) }
   end
 
   def intro_to_1_year_brokendown_chart
