@@ -32,7 +32,7 @@ class MeterTariff
     AMRData.fast_multiply_x48_x_x48(weights, kwh_x48)
   end
 
-  
+
   def self.format_time_range(rate)
     "#{rate[:from]} to #{rate[:to]}".freeze
   end
@@ -149,7 +149,7 @@ class AccountingTariff < EconomicTariff
       else # reactive charges - unknown as not provided by AMR meter feeds, and not passed through DCC yet (June2021)
         0.0
       end
-    when :kwh 
+    when :kwh
       raise UnexpectedRateType, 'Unexpected internal error: unit rate type kwh should be handled as x48 rather than scalar'
     else
       raise UnexpectedRateType, "Unexpected unit rate type for tariff #{per}"
@@ -220,22 +220,15 @@ class AccountingTariff < EconomicTariff
   end
 
   def count_rates_every_half_hour(time_ranges)
-    @count_rates_every_half_hour ||= calculate_rates_every_half_hour(time_ranges)
+    @count_rates_every_half_hour ||= calculate_count_rates_every_half_hour(time_ranges)
   end
 
-  def calculate_rates_every_half_hour(time_ranges)
-    hh_count = Array.new(48, 0)
-    hh_time_ranges = time_ranges.map{ |tr| tr.first.to_halfhour_index..tr.last.to_halfhour_index }
-    hh_time_ranges.each do |hh_range|
-      hh_range.each do |hh_i|
-        if hh_i == 48
-          logger.info 'differential tariff end date should really be set to 23:30 not 24:00'
-        else
-          hh_count[hh_i] += 1
-        end
-      end
-    end
-    hh_count
+  # given multiple time ranges coering a day
+  # returns x48 of count of overall time range coverage
+  # e.g. 0 value = missing, 2+ = duplicate/overlap
+  def calculate_count_rates_every_half_hour(time_ranges)
+    tr_masks = time_ranges.map{ |tr| DateTimeHelper.weighted_x48_vector_fast_inclusive(tr, 1) }
+    AMRData.fast_add_multiple_x48_x_x48(tr_masks)
   end
 end
 
@@ -456,7 +449,7 @@ class GenericAccountingTariff < AccountingTariff
     (from_hh_index..to_hh_index).each do |hh_index|
       rates = tiered_rate(kwh_x48[hh_index], @tariff[:rates][type])
       rates.each do |new_tier_name, cost|
-        costs_x48[new_tier_name] ||= AMRData.one_day_zero_kwh_x48 
+        costs_x48[new_tier_name] ||= AMRData.one_day_zero_kwh_x48
         costs_x48[new_tier_name][hh_index] = cost
       end
     end
