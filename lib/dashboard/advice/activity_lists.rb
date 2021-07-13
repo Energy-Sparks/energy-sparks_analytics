@@ -32,7 +32,6 @@ class ActivityLists
   end
 
   def self.activity_reference_html(activity)
-    puts "Got herev #{activity}"
     link = %(
       <a href="https://energysparks.uk/activity_types/<%= activity[:number] %>" target ="_blank"><%= activity[:name] %></a>
     )

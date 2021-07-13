@@ -321,7 +321,7 @@ class MeterAttributes
   end
 
   class SolarPVMeterMapping < MeterAttributeTypes::AttributeBase
-  
+
     id                  :solar_pv_mpan_meter_mapping
     aggregate_over      :solar_pv_mpan_meter_mapping
     name                'Solar PV MPAN Meter mapping'
@@ -640,7 +640,7 @@ class MeterAttributes
       }
     )
   end
-  
+
   def self.default_flat_rate
     MeterAttributeTypes::Hash.define(
       required: false,
