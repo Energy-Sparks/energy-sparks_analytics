@@ -11,7 +11,7 @@ class MeterMonthlyCostsAdvice
     formatted_totals = row_to_£(totals)
     header = add_tool_tips(header, @school, @meter)
     html_table = HtmlTableFormatting.new(header, formatted_rows, formatted_totals)
-    html_table.html
+    html_table.html(scrollable: true)
   end
 
   private
