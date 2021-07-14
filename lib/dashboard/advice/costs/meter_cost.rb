@@ -137,8 +137,10 @@ class MeterCost
                 <p>          
                   Energy Sparks currently doesn't have a record of your real tariffs
                   and is using default tariffs between <%= group_missing_tariffs_text %>, 
-                  which means your billing won't be accurate. If you would like to help
-                  us setup your billing correctly, please get in touch by mailing
+                  which means your billing won't be accurate. To edit your tariffs go to the
+                  'Manage School' drop down menu above and select 'Manage tariffs'.
+                  If you would like to help us setup your billing correctly,
+                  please get in touch by mailing
                   <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">mailto:hello@energysparks.uk</a>.                    
                 </p>
               }
