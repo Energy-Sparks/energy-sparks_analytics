@@ -15,6 +15,7 @@
 # Summary: the manager selects the most relevant tariff for a given date
 #
 class MeterTariffManager
+  include Logging
   attr_reader :accounting_tariffs
 
   class MissingAccountingTariff                                   < StandardError; end
@@ -284,7 +285,6 @@ class MeterTariffManager
 
   def raise_and_log_error(exception, message)
     logger.info message
-    logger.info data
     raise exception, message
   end
 end
