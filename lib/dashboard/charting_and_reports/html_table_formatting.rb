@@ -9,10 +9,10 @@ class HtmlTableFormatting
     @precision = precision
   end
 
-  def html(right_justified_columns: [1..1000], widths: nil, scrollable: false)
+  def html(right_justified_columns: [1..1000], widths: nil)
     template = %{
       <% if scrollable %>
-        <style> 
+        <style>
           .table_wrapper{
               display: block;
               overflow-x: auto;
@@ -49,7 +49,7 @@ class HtmlTableFormatting
         <% end %>
       </table>
       <% if scrollable %>
-        </div> 
+        </div>
       <% end %>
     }.gsub(/^  /, '')
 

@@ -32,7 +32,7 @@ class AdviceBaseloadCommentary
         start_ratings_html(alert.rating)
       ]
     end
-    HtmlTableFormatting.new(header, rows).html(right_justified_columns: [2])
+    HtmlTableFormatting.new(header, rows).html(right_justified_columns: [2], widths: [nil, nil, nil, '"15%"'])
   end
 
   private
@@ -125,7 +125,7 @@ class AdviceBaseloadCommentary
       <p>
         A more detailed explanation of how to interpret the charts and the analysis,
         and what to do next is available
-        <a href="https://docs.google.com/document/d/1MvhMHdWaSrzmvjp4TaHJPWfDcw37xMEjFufn_kR6j-A/edit?usp=sharing" target ="_blank">here</a>.
+        <a href="http://blog.energysparks.uk/wp-content/uploads/2021/07/Baseload-User-Documentation.pdf" target ="_blank">here</a>.
       </p>
     )
     ERB.new(text).result(binding)
@@ -133,7 +133,7 @@ class AdviceBaseloadCommentary
 
   def more_information_at_bottom_of_page_html
     %(
-      More detailed advice on reducing this baseload costs is provided at
+      More detailed advice on reducing baseload costs is provided at
       the bottom of the page.
     )
   end

@@ -74,7 +74,7 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
   def evaluation_html
     text = %(
               <% if rating > 4 %>
-                You are doing <%= adjective %> there is limited variation between seasons.
+                You are doing <%= adjective %>, there is limited variation between seasons.
                 Your average usage in the winter is <%= format_kw(winter_kw) %> and
                 <%= format_kw(summer_kw) %> in the summer.
               <% else %>
