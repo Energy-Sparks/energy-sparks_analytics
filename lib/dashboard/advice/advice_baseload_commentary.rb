@@ -133,7 +133,7 @@ class AdviceBaseloadCommentary
 
   def more_information_at_bottom_of_page_html
     %(
-      More detailed advice on reducing this baseload costs is provided at
+      More detailed advice on reducing baseload costs is provided at
       the bottom of the page.
     )
   end
