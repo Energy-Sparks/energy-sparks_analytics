@@ -151,7 +151,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
   def evaluation_html
     text = %(
               <% if average_baseload_last_year_kw < benchmark_per_pupil_kw %>
-                You are doing well your average annual baseload is
+                You are doing well, your average annual baseload is
                 <%= format_kw(average_baseload_last_year_kw) %> compared with a
                 well managed school of a similar size's
                 <%= format_kw(benchmark_per_pupil_kw) %> and

@@ -43,7 +43,7 @@ class AdviceBaseload < AdviceElectricityBase
 
     # ap analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
-    charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
+    # charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
 
