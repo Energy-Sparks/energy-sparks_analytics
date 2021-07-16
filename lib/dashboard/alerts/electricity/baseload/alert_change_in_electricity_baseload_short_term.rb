@@ -1,0 +1,172 @@
+#======================== Change in Electricity Baseload Analysis =============
+require_relative '../alert_electricity_only_base.rb'
+
+class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
+  MAXBASELOADCHANGE = 1.15
+
+  attr_reader :average_baseload_last_year_kw, :average_baseload_last_week_kw
+  attr_reader :change_in_baseload_kw, :kw_value_at_10_percent_saving
+  attr_reader :last_year_baseload_kwh, :last_week_baseload_kwh
+  attr_reader :last_week_change_in_baseload_kwh, :next_year_change_in_baseload_kwh
+  attr_reader :last_year_baseload_£, :last_week_baseload_£, :next_year_change_in_baseload_£
+  attr_reader :saving_in_annual_costs_through_10_percent_baseload_reduction
+  attr_reader :predicted_percent_increase_in_usage, :significant_increase_in_baseload
+  attr_reader :one_year_baseload_chart
+  attr_reader :predicted_percent_increase_in_usage_absolute, :next_year_change_in_baseload_absolute_£
+
+  def initialize(school, report_type = :baseloadchangeshortterm, meter = school.aggregated_electricity_meters)
+    super(school, report_type, meter)
+  end
+
+  protected def max_days_out_of_date_while_still_relevant
+    21
+  end
+
+  TEMPLATE_VARIABLES = {
+    average_baseload_last_year_kw: {
+      description: 'average baseload over last year',
+      units:  :kw,
+      benchmark_code: 'blly'
+    },
+    average_baseload_last_week_kw: {
+      description: 'average baseload over last week',
+      units:  :kw,
+      benchmark_code: 'bllw'
+    },
+    change_in_baseload_kw: {
+      description: 'change in baseload last week compared with the average over the last year',
+      units:  :kw,
+      benchmark_code: 'blch'
+    },
+    last_year_baseload_kwh: {
+      description: 'baseload last year (kwh)',
+      units:  {kwh: :electricity}
+    },
+    last_week_baseload_kwh: {
+      description: 'baseload last week (kwh)',
+      units:  {kwh: :electricity}
+    },
+    last_week_change_in_baseload_kwh: {
+      description: 'change in baseload between last week and average of last year (kwh)',
+      units:  {kwh: :electricity}
+    },
+    next_year_change_in_baseload_kwh: {
+      description: 'predicted impact of change in baseload over next year (kwh)',
+      units:  {kwh: :electricity}
+    },
+    last_year_baseload_£: {
+      description: 'cost of the baseload electricity consumption last year',
+      units:  :£
+    },
+    last_week_baseload_£: {
+      description: 'cost of the baseload electricity consumption last week',
+      units:  :£
+    },
+    next_year_change_in_baseload_£: {
+      description: 'projected addition cost of change in baseload next year',
+      units:  :£
+    },
+    next_year_change_in_baseload_absolute_£: {
+      description: 'projected addition cost of change in baseload next year - in absolute terms i.e. always positive',
+      units:  :£
+    },
+    predicted_percent_increase_in_usage: {
+      description: 'percentage increase in baseload',
+      units:  :percent,
+      benchmark_code: 'bspc'
+    },
+    predicted_percent_increase_in_usage_absolute: {
+      description: 'percentage increase in baseload = always positive',
+      units:  :percent,
+    },
+    significant_increase_in_baseload: {
+      description: 'significant increase in baseload flag',
+      units:  TrueClass
+    },
+    saving_in_annual_costs_through_10_percent_baseload_reduction:  {
+      description: 'cost saving if baseload reduced by 10%',
+      units:  :£
+    },
+    kw_value_at_10_percent_saving:  {
+      description: 'kw at 10 percent reduction on last years average baseload',
+      units:  :kw
+    },
+    one_year_baseload_chart: {
+      description: 'chart of last years baseload',
+      units: :chart
+    }
+  }.freeze
+
+  def one_year_baseload_chart
+    :alert_1_year_baseload
+  end
+
+  def enough_data
+    days_amr_data > 6 * 7 ? :enough : (days_amr_data > 3 * 7 ? :minimum_might_not_be_accurate : :not_enough)
+  end
+
+  def timescale
+    'last week compared with average over last year'
+  end
+
+  def analysis_description
+    'Recent change in baseload'
+  end
+
+  def commentary
+    [ { type: :html,  content: evaluation_html } ]
+  end
+
+  def evaluation_html
+    text = %(
+              <% if change_in_baseload_kw < 0 %>
+                You have been doing well recently, your baseload last week was <%= format_kw(average_baseload_last_week_kw) %>
+                compared with <%= format_kw(average_baseload_last_year_kw) %> on average over the last year.
+              <% else %>
+              You baseload has increase, last week it was <%= format_kw(average_baseload_last_week_kw) %>
+              compared with <%= format_kw(average_baseload_last_year_kw) %> on average over the last year.
+              <% end %>
+            )
+    ERB.new(text).result(binding)
+  end
+
+  def self.template_variables
+    specific = {'Change In Baseload Short Term' => TEMPLATE_VARIABLES}
+    specific.merge(self.superclass.template_variables)
+  end
+
+  def calculate(asof_date)
+    @average_baseload_last_year_kw = average_baseload_kw(asof_date, @meter)
+    @kw_value_at_10_percent_saving = @average_baseload_last_year_kw * 0.9
+    @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date, @meter)
+    @change_in_baseload_kw = @average_baseload_last_week_kw - @average_baseload_last_year_kw
+    @predicted_percent_increase_in_usage = (@average_baseload_last_week_kw - @average_baseload_last_year_kw) / @average_baseload_last_year_kw
+    @predicted_percent_increase_in_usage_absolute = @predicted_percent_increase_in_usage.magnitude
+
+    hours_in_year = 365.0 * 24.0
+    hours_in_week =   7.0 * 24.0
+
+    @last_year_baseload_kwh = @average_baseload_last_week_kw * hours_in_year
+    @last_week_baseload_kwh = @average_baseload_last_week_kw * hours_in_week
+    @last_week_change_in_baseload_kwh = @change_in_baseload_kw * hours_in_week
+    @next_year_change_in_baseload_kwh = @change_in_baseload_kw * hours_in_year
+
+    @last_year_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @last_year_baseload_kwh
+    @last_week_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @last_week_baseload_kwh
+    @next_year_change_in_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @next_year_change_in_baseload_kwh
+    @next_year_change_in_baseload_absolute_£ = @next_year_change_in_baseload_£.magnitude
+    @saving_in_annual_costs_through_10_percent_baseload_reduction = @last_year_baseload_£ * 0.1
+
+    set_savings_capital_costs_payback(Range.new(@next_year_change_in_baseload_£, @next_year_change_in_baseload_£), nil)
+
+    @rating = calculate_rating_from_range(-0.05, 0.15, @predicted_percent_increase_in_usage)
+
+    @significant_increase_in_baseload = @rating < 7.0
+
+    @status = @significant_increase_in_baseload ? :bad : :good
+
+    @term = :shortterm
+    @bookmark_url = add_book_mark_to_base_url('ElectricityBaseload')
+  end
+  alias_method :analyse_private, :calculate
+end
