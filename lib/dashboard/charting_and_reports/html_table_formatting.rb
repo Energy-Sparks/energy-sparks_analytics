@@ -9,7 +9,7 @@ class HtmlTableFormatting
     @precision = precision
   end
 
-  def html(right_justified_columns: [1..1000], widths: nil)
+  def html(right_justified_columns: [1..1000], widths: nil, scrollable: false)
     template = %{
       <% if scrollable %>
         <style>
