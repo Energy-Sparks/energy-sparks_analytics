@@ -26,6 +26,11 @@ class TimeOfDay
     @relative_time.to_time
   end
 
+  def self.parse(hh_mm)
+    h, m = hh_mm.split(':')
+    TimeOfDay.new(h.to_f, m.to_f)
+  end
+
   def on_30_minute_interval?
     [0, 30].include?(minutes)
   end

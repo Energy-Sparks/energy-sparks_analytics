@@ -11,54 +11,19 @@ class MeterMonthlyCostsAdvice
     formatted_totals = row_to_£(totals)
     header = add_tool_tips(header, @school, @meter)
     html_table = HtmlTableFormatting.new(header, formatted_rows, formatted_totals)
-    html_table.html
+    html_table.html(scrollable: true)
   end
 
   private
 
   def add_tool_tips(header, school, meter)
     header.map do |column_heading|
-      tooltip = MeterTariffDescription.description_html(school, meter, column_heading)
-      # tooltip.nil? ? column_heading : to_tooltip_html(column_heading, tooltip)
-      tooltip.nil? ? column_heading : info_button(column_heading, tooltip)
+      MeterTariffDescription.short_description_html(school, meter, column_heading)
     end
   end
 
-  # doesn't seem to work with front end bootstrap CSS
-  def to_tooltip_html_deprecated(column_heading_name, text)
-    "<button class=\"btn btn-secondary\" data-toggle=\"popover\" data-container=\"body\" data-placement=\"top\" data-title=\"Explanation\" data-content=\"#{text}\">#{column_heading_name}</button>"
-  end
-
-  # doesn't seem to work with front end bootstrap CSS
-  def to_tooltip_html(column_heading_name, text)
-    html = %(
-      <div class="tooltip"><%= column_heading_name %>
-        <span class="tooltiptext"><%= text %></span>
-      </div>
-    )
-    ERB.new(html).result(binding)
-  end
-
-  def info_button(text, tooltip)
-    html = %(
-      <span><%= text %><link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
-      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-      <div class="col-md-12">
-          <div class="info">
-            <i class="icon-info-sign"></i>
-            <span class="extra-info">
-              <%= tooltip %>
-            </span>
-          </div>
-      </div>
-    )
-    ERB.new(html).result(binding)
-  end
-
   def row_to_£(row)
-    # Julian JH this is the problematic code indicative of BigDecimal leaking into the analytics
-    # row.map{ |value| value.is_a?(Numeric) ? format_£(value) : value }
-    row.map{ |value| value.is_a?(Float) ? format_£(value) : value }
+    row.map{ |value| value.is_a?(Numeric) ? format_£(value) : value }
   end
 
   def format_£(value)
@@ -79,6 +44,10 @@ class MeterMonthlyCostsAdvice
   end
 
   private def reorder_columns(components)
+    sorted_list = components.sort_by { |column| column_order(column) }
+=begin
+    ap sorted_list
+
     # move to last 3 columns, in this order
     [:standing_charge, "vat@20%".to_sym, "vat@5%".to_sym, :variance_versus_last_year, :total].each do |column_type|
       if components.include?(column_type)
@@ -98,6 +67,48 @@ class MeterMonthlyCostsAdvice
     end
 
     components
+=end
+  end
+
+  # eccentrically sort columns logically for human consumption
+  def column_order(column)
+    return 0 if column == :flat_rate || column == "Flat Rate"
+    return 1 if column.match(/^\d\d:\d\d to \d\d:\d\d$/)
+    return 10 if column.to_s.downcase.match(/^climate.*$/)
+    
+    ordered_columns = {
+      'Feed in tariff levy' => 20,
+      :duos_green => 40,
+      :duos_amber => 50,
+      :duos_red => 60,
+
+      :tnuos => 90,
+
+      :agreed_availability_charge => 100,
+      :excess_availability_charge => 100,
+
+      :fixed_charge => 150,
+      :standing_charge => 160,
+      :site_fee => 165,
+
+      :settlement_agency_fee => 170,
+      :reactive_power_charge => 180,
+      
+      :nhh_automatic_meter_reading_charge => 200,
+      :data_collection_dcda_agent_charge => 210,
+      :nhh_metering_agent_charge => 220,
+      :meter_asset_provider_charge => 230,
+
+      'vat@5%'.to_sym => 300,
+      'vat@20%'.to_sym => 310,
+
+      :variance_versus_last_year => 400,
+      :total => 410
+    }
+
+    return ordered_columns[column] if ordered_columns.key?(column)
+
+    2000 # missing from list so put at end for the moment
   end
 
   def data_rows(up_to_13_most_recent_months, bill_components)

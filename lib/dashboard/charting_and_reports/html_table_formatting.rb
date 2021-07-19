@@ -9,14 +9,24 @@ class HtmlTableFormatting
     @precision = precision
   end
 
-  def html(right_justified_columns: [1..1000])
+  def html(right_justified_columns: [1..1000], widths: nil, scrollable: false)
     template = %{
+      <% if scrollable %>
+        <style>
+          .table_wrapper{
+              display: block;
+              overflow-x: auto;
+              white-space: nowrap;
+          }
+        </style>
+        <div class="table_wrapper">
+      <% end %>
       <table class="table table-striped table-sm">
         <% unless @header.nil? %>
           <thead>
             <tr class="thead-dark">
-              <% @header.each do |header_titles| %>
-                <th scope="col" class="text-center"> <%= header_titles.to_s %> </th>
+              <% @header.each_with_index do |header_titles, column_number| %>
+                <th scope="col" class="text-center" <%= width(widths, column_number) %>> <%= header_titles.to_s %> </th>
               <% end %>
             </tr>
           </thead>
@@ -38,6 +48,9 @@ class HtmlTableFormatting
           </tr>
         <% end %>
       </table>
+      <% if scrollable %>
+        </div>
+      <% end %>
     }.gsub(/^  /, '')
 
     generate_html(template, binding)
@@ -48,6 +61,11 @@ class HtmlTableFormatting
       <%= column_td(column_number, right_justified_columns) %><%= format_value(val, column_number) %> </td>
     }.gsub(/^  /, '')
     generate_html(template, binding)
+  end
+
+  private def width(widths, column_number)
+    return '' if widths.nil? || widths[column_number].nil?
+    "width=#{widths[column_number]}"
   end
 
   private def format_value(val, column_number)
