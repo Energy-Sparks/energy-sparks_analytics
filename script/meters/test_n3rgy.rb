@@ -145,6 +145,24 @@ def save_csv(fuel_type, readings, mpxn, dtt = '')
   end
 end
 
+# download tariff data either side of clocks changing
+# on March 28th 2021, to determine N3rgy datetime rules
+def download_gmt_bst_tariffs(mpxn, dtt = '')
+  # can't test with March 28th as N3rgy bug fix
+  start_date = Date.new(2021, 5, 7)
+  end_date = Date.new(2021, 5, 8)
+  
+  meter = DCCMeters.meter(mpxn)
+
+  puts "Base url: #{meter.base_url}"
+
+  n3rgy_data = MeterReadingsFeeds::N3rgyData.new(api_key: meter.api_key, base_url: meter.base_url)
+
+  tariffs = n3rgy_data.tariffs(mpxn, meter.fuel_type, start_date, end_date)
+
+  save_yaml(meter.fuel_type, tariffs, mpxn, dtt)
+end
+
 def tariffs(mpxn)
   meter = DCCMeters.meter(mpxn)
   tariff_data = load_yaml(meter.fuel_type, mpxn)
@@ -273,6 +291,7 @@ def command_line_options
     { arg: '-dates',    args: 0, var: :dates },
     { arg: '-export',   args: 0, var: :export },
     { arg: '-tariffs',  args: 0, var: :tariffs },
+    { arg: '-gmtbst',   args: 0, var: :gmtbst },
     { arg: '-available_meters',   args: 0, var: :available_meters }
   ]
 end
@@ -299,6 +318,7 @@ mpxns.each do |mpxn|
 
     tariffs(mpxn) if cmd.tariffs
     export(mpxn) if cmd.export
+    download_gmt_bst_tariffs(mpxn) if cmd.gmtbst
   rescue => e
     puts e.message
     puts e.backtrace

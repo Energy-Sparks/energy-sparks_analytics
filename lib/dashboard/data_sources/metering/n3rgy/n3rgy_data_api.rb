@@ -95,7 +95,10 @@ module MeterReadingsFeeds
       raise NotAllowed.new(error_message(response)) if response.status == 403
       raise NotFound.new(error_message(response)) if response.status == 404
       raise ApiFailure.new(error_message(response)) unless response.success?
-      JSON.parse(response.body)
+      x = JSON.parse(response.body)
+      ap url
+      ap x
+      x
     end
 
     def make_url(mpxn, fuel_type = nil, data_type = nil, element = nil, start_date = nil, end_date = nil)
