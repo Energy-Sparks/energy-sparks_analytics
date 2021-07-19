@@ -1,4 +1,4 @@
-require_relative '../../../../lib/dashboard/data_sources/meteostat_api'
+require_relative '../../../../lib/dashboard/data_sources/weather/historic/meteostat_api'
 
 describe MeteoStatApi do
 
