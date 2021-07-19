@@ -123,7 +123,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
                 You have been doing well recently, your baseload last week was <%= format_kw(average_baseload_last_week_kw) %>
                 compared with <%= format_kw(average_baseload_last_year_kw) %> on average over the last year.
               <% else %>
-              You baseload has increase, last week it was <%= format_kw(average_baseload_last_week_kw) %>
+              Your baseload has increased, last week it was <%= format_kw(average_baseload_last_week_kw) %>
               compared with <%= format_kw(average_baseload_last_year_kw) %> on average over the last year.
               <% end %>
             )

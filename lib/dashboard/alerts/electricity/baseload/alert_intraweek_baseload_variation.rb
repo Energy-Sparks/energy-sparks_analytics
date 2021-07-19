@@ -93,7 +93,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   def evaluation_html
     text = %(
               <% if rating > 4 %>
-                You are doing <%= adjective %> there is limited variation between weekday and weekend usage.
+                You are doing <%= adjective %>, there is limited variation between weekday and weekend usage.
                 You highest average daily usage occurs on <%= max_day_str %> of <%= format_kw(max_day_kw) %>,
                 and your lowest on <%= min_day_str %> of <%= format_kw(min_day_kw) %>.
               <% else %>

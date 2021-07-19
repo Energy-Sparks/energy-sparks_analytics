@@ -241,8 +241,19 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     rates.push(['', 'at weekends'    ]) if tariff.tariff[:weekend]
     rates.push(['', 'during weekdays']) if tariff.tariff[:weekday]
 
+    table = add_tooltips_to_table(rates)
+
     header = ['Tariff type', 'Rate']
-    html_table(header, rates)
+    html_table(header, table)
+  end
+  
+  def add_tooltips_to_table(table)
+    table.map do |(tariff_type, rate)|
+      [
+        MeterTariffDescription.short_description_html(@school, meter, tariff_type),
+        rate
+      ]
+    end
   end
 
   def climate_change_levy?(tariff)
