@@ -138,7 +138,10 @@ class TargetMeter < Dashboard::Meter
 
   def create_target_amr_data(meter_to_clone)
     start_date = @target.first_target_date
-    end_date   = meter_to_clone.amr_data.end_date + 363
+    # TODO(PH, 15Jul2021) better tie up end_date with target_start_date(date) calc
+    # which is end of academic year, currently Tain fails because target_start_date(date)
+    # = 31Jul2020, but request here is for 13Jul2020
+    end_date   = meter_to_clone.amr_data.end_date + 363 + 30
 
     amr_data = AMRData.new(meter_to_clone.meter_type)
     (start_date..end_date).each do |date|
