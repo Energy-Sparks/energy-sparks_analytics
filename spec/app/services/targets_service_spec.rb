@@ -7,7 +7,8 @@ describe TargetsService do
     context "#monthly_progress" do
 
       let(:meter_collection)        { build(:meter_collection) }
-      let(:service)                 { TargetsService.new(meter_collection) }
+      let(:fuel_type)               { :electricity }
+      let(:service)                 { TargetsService.new(meter_collection, fuel_type) }
 
       let(:raw_data) do
         {
