@@ -215,11 +215,22 @@ class ChartManager
       target:             {calculation_type: :day, extend_chart_into_future: false},
       inherits_from:      :group_by_week_electricity
     },
+    targeting_and_tracking_weekly_gas_to_date_line: {
+      inherits_from:    :targeting_and_tracking_weekly_electricity_to_date_line,
+      name:             :targeting_and_tracking_weekly_gas_to_date_line.to_s,
+      meter_definition: :allheat
+    },
     targeting_and_tracking_weekly_electricity_to_date_column: {
       name:           :targeting_and_tracking_weekly_electricity_to_date_column.to_s,
       chart1_type:    :column,
       chart1_subtype: nil,
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
+    },
+    targeting_and_tracking_weekly_gas_to_date_column: {
+      name:           :targeting_and_tracking_weekly_gas_to_date_column.to_s,
+      chart1_type:    :column,
+      chart1_subtype: nil,
+      inherits_from: :targeting_and_tracking_weekly_gas_to_date_line
     },
 
     targeting_and_tracking_weekly_electricity_one_year_line: {
@@ -227,10 +238,20 @@ class ChartManager
       target:             {calculation_type: :day, extend_chart_into_future: true},
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
     },
+    targeting_and_tracking_weekly_gas_one_year_line: {
+      name:           :targeting_and_tracking_weekly_gas_one_year_line.to_s,
+      target:             {calculation_type: :day, extend_chart_into_future: true},
+      inherits_from: :targeting_and_tracking_weekly_gas_to_date_line
+    },
     targeting_and_tracking_weekly_electricity_one_year_column: {
       name:           :targeting_and_tracking_weekly_electricity_one_year_column.to_s,
       target:             {calculation_type: :day, extend_chart_into_future: true},
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_column
+    },
+    targeting_and_tracking_weekly_gas_one_year_column: {
+      name:           :targeting_and_tracking_weekly_gas_one_year_column.to_s,
+      target:             {calculation_type: :day, extend_chart_into_future: true},
+      inherits_from: :targeting_and_tracking_weekly_gas_to_date_column
     },
 
     targeting_and_tracking_weekly_electricity_one_year_cumulative_line: {
@@ -238,10 +259,20 @@ class ChartManager
       cumulative:    true,
       inherits_from: :targeting_and_tracking_weekly_electricity_one_year_line
     },
+    targeting_and_tracking_weekly_gas_one_year_cumulative_line: {
+      name:          :targeting_and_tracking_weekly_gas_one_year_cumulative_line.to_s,
+      cumulative:    true,
+      inherits_from: :targeting_and_tracking_weekly_gas_one_year_line
+    },
     targeting_and_tracking_weekly_electricity_to_date_cumulative_line: {
       name:          :targeting_and_tracking_weekly_electricity_to_date_culmulative_line.to_s,
       target:        {calculation_type: :day, extend_chart_into_future: false},
       inherits_from: :targeting_and_tracking_weekly_electricity_one_year_cumulative_line
+    },
+    targeting_and_tracking_weekly_gas_to_date_cumulative_line: {
+      name:          :targeting_and_tracking_weekly_gas_to_date_culmulative_line.to_s,
+      target:        {calculation_type: :day, extend_chart_into_future: false},
+      inherits_from: :targeting_and_tracking_weekly_gas_one_year_cumulative_line
     },
 
 

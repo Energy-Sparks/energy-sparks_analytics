@@ -63,7 +63,7 @@ class RunCharts
   end
 
   def total_chart_calculation_time
-    @worksheets.map { |worksheet, charts| charts.map { |chart| chart[:calculation_time] }.sum }.sum
+    @worksheets.map { |worksheet, charts| charts.map { |chart| chart[:calculation_time] || 0.0 }.sum }.sum
   end
 
   def run_config_component(config_component)
@@ -154,6 +154,11 @@ class RunCharts
   def save_to_excel
     excel = ExcelCharts.new(@excel_filename)
     @worksheets.each do |worksheet_name, charts|
+puts "Got here adding charts"
+titles = charts.map { |v| v[:title] }
+ap titles
+ap charts, { limit: 10 }
+charts = charts.select { |v| !v[:title].nil? }
       excel.add_charts(worksheet_name, charts.compact)
     end
     excel.close
@@ -176,9 +181,12 @@ class RunCharts
   end
 
   def average_calculation_time
-    all_times = @worksheets.values.map { |charts| charts.map { |chart| chart[:calculation_time] } }.flatten
-    return Float::NAN if all_times.empty?
-    all_times.sum / all_times.length
+    calculation_times = @worksheets.values.map { |charts| charts.map { |chart| chart[:calculation_time] }}.flatten
+    invalid_times = calculation_times.select { |v| v.nil? }
+    valid_times = calculation_times.compact
+    puts "Unable to calculate average calculation time for #{invalid_times.length} charts" if invalid_times.length > 0
+    return Float::NAN if valid_times.empty?
+    valid_times.sum / valid_times.length
   end
 
   def average_calculation_rate

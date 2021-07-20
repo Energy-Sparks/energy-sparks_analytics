@@ -6,6 +6,10 @@ class ElectricitySimulator
   attr_reader :period, :holidays, :temperatures, :total, :appliance_definitions
   attr_reader :calc_components_results, :solar_irradiation, :school, :existing_electricity_meter
 
+  def self.sub_meter_keys
+    ElectricitySimulatorConfiguration::APPLIANCE_DEFINITIONS.values.map { |d| d[:title] }
+  end
+
   def initialize(school)
     @school = school
     @calc_components_results = {}
@@ -187,7 +191,7 @@ class ElectricitySimulator
     electricity_simulation_meter = create_new_meter(total_amr_data, :electricity, 'sim 1', 'Electrical Simulator')
     @calc_components_results.reverse_each do |key, value| # reverse as improves bar chart breakdown order a little
       meter = create_new_meter(value, :electricity, key, key)
-      electricity_simulation_meter.sub_meters.push(meter)
+      electricity_simulation_meter.sub_meters[key] = meter
     end
     logger.debug "Created #{electricity_simulation_meter.sub_meters.length} sub meters"
     electricity_simulation_meter

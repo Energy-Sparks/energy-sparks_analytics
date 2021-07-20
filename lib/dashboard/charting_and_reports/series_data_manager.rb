@@ -945,6 +945,7 @@ private
 
   def configure_meters
     logger.info "Configuring meter #{@meter_definition}"
+puts "Got here meter config #{@meter_definition}"
     # typically meter[0] is an electricity meter (electricity, solar_pv), and meter[1] is a heating meter (gas, storage)
     if @meter_definition.is_a?(Symbol)
       case @meter_definition
@@ -960,6 +961,7 @@ private
       when :allelectricity_unmodified
         @meters = [@meter_collection.aggregated_electricity_meters&.original_meter, nil]
       when :electricity_simulator
+        puts "Got here sim #{@meter_collection.electricity_simulation_meter.sub_meters.keys}"
         @meters = [@meter_collection.electricity_simulation_meter, nil]
       when :storage_heater_meter
         @meters = [@meter_collection.storage_heater_meter, nil]

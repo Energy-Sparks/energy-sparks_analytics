@@ -84,6 +84,8 @@ class RunTests
       when :reports
         $logger_format = 2
         run_reports(configuration[:charts], configuration[:control])
+      when :simulator
+        run_electrical_simlator(configuration[:control])
       when :alerts
         run_alerts(configuration[:alerts], configuration[:control])
       when :drilldown
@@ -154,6 +156,25 @@ class RunTests
   def run_reports(chart_list, control)
     logger.info '=' * 120
     logger.info 'RUNNING REPORTS'
+    failed_charts = []
+    start_profiler
+    schools_list.sort.each do |school_name|
+      puts banner(school_name)
+      @current_school_name = school_name
+      reevaluate_log_filename
+      school = load_school(school_name)
+      next if school.nil?
+      charts = RunCharts.new(school)
+      charts.run(chart_list, control)
+      failed_charts += charts.failed_charts
+    end
+    stop_profiler
+    RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
+  end
+
+  def run_simulator(chart_list, control)
+    logger.info '=' * 120
+    logger.info 'RUNNING SIMULATOR'
     failed_charts = []
     start_profiler
     schools_list.sort.each do |school_name|
@@ -361,15 +382,23 @@ class RunTests
   end
 
   def run_model_fitting(control)
+    run_chart_models(RunModelFitting, 'RUNNING MODEL FITTING', control)
+  end
+
+  def run_electrical_simlator(control)
+    run_chart_models(RunElectricalSimulatorChartList, 'Running Electrical Simulator', control)
+  end
+
+  def run_chart_models(chart_class_instance, description, control)
     logger.info '=' * 120
-    logger.info 'RUNNING MODEL FITTING'
+    logger.info description
     failed_charts = []
     schools_list.sort.each do |school_name|
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
       school = load_school(school_name)
-      charts = RunModelFitting.new(school)
+      charts = chart_class_instance.new(school)
       charts.run(control)
       failed_charts += charts.failed_charts
     end

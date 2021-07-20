@@ -24,18 +24,17 @@ class AdviceTargets < AdviceBase
     charts_and_html.push( { type: :html,  content: monthly_targeting_and_tracking_tables } )
 
     charts_and_html.push( { type: :html,  content: weekly_chart_intro } )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_line)
+    create_chart(charts_and_html, chart_type(:weekly_line))
     charts_and_html.push( { type: :html,  content: weekly_chart_drilldown} )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_column)
-
+    create_chart(charts_and_html, chart_type(:weekly_line))
+  
     charts_and_html.push( { type: :html,  content: weekly_chart_intro_shorter_timescales } )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_line)
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_column)
-
-
+    create_chart(charts_and_html, chart_type(:one_year_line))
+    create_chart(charts_and_html, chart_type(:one_year_column))
+  
     charts_and_html.push( { type: :html,  content: culmulative_weekly_chart_intro } )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_cumulative_line)
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_cumulative_line)
+    create_chart(charts_and_html, chart_type(:one_year_culmulative_line))
+    create_chart(charts_and_html, chart_type(:one_year_culmulative_to_date_line))
 
     charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
 
@@ -49,6 +48,10 @@ class AdviceTargets < AdviceBase
   def create_chart(charts_and_html, chart_name)
     charts_and_html.push( { type: :chart, content: run_chart(chart_name) } )
     charts_and_html.push( { type: :chart_name, content: chart_name } )
+  end
+
+  def chart_type(type)
+    @chart_config[type]
   end
 
   def current_targets
@@ -250,7 +253,16 @@ end
 class AdviceTargetsElectricity < AdviceTargets
   def initialize(school)
     super(school, :electricity)
+    @chart_config = {
+      weekly_line:                       :targeting_and_tracking_weekly_electricity_to_date_line,
+      weekly_column:                     :targeting_and_tracking_weekly_electricity_to_date_column,
+      one_year_line:                     :targeting_and_tracking_weekly_electricity_one_year_line,
+      one_year_column:                   :targeting_and_tracking_weekly_electricity_one_year_column,
+      one_year_culmulative_line:         :targeting_and_tracking_weekly_electricity_one_year_cumulative_line,
+      one_year_culmulative_to_date_line: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
+    }
   end
+
   protected def aggregate_meter
     @school.aggregated_electricity_meters
   end
@@ -271,6 +283,15 @@ end
 class AdviceTargetsGas < AdviceTargets
   def initialize(school)
     super(school, :gas)
+
+    @chart_config = {
+      weekly_line:                       :targeting_and_tracking_weekly_gas_to_date_line,
+      weekly_column:                     :targeting_and_tracking_weekly_gas_to_date_column,
+      one_year_line:                     :targeting_and_tracking_weekly_gas_one_year_line,
+      one_year_column:                   :targeting_and_tracking_weekly_gas_one_year_column,
+      one_year_culmulative_line:         :targeting_and_tracking_weekly_gas_one_year_cumulative_line,
+      one_year_culmulative_to_date_line: :targeting_and_tracking_weekly_gas_to_date_cumulative_line,
+    }
   end
   protected def aggregate_meter
     @school.aggregated_heat_meters

@@ -2,6 +2,6 @@ module TestDirectoryConfiguration
   LOG                 = './log'
   CHARTS              = './Reports'
   BENCHMARKFILENAME   = './TestResults/BenchmarkLog/benchmarks.csv'
-  CHARTCOMPARISONBASE = '../TestResults/Charts/Base/'
-  CHARTCOMPARISONNEW  = '../TestResults/Charts/New/'
+  CHARTCOMPARISONBASE = 'C:\Users\phili\Documents\TestResultsDontBackup/Charts/Base/'
+  CHARTCOMPARISONNEW  = 'C:\Users\phili\Documents\TestResultsDontBackup/Charts/New/'
 end

@@ -9,7 +9,7 @@ script = {
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
                             ],
-  schools: ['*'],
+  schools: ['trinity*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
