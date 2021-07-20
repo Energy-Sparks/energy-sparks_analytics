@@ -44,18 +44,32 @@ describe TargetsService do
         allow_any_instance_of(CalculateMonthlyTrackAndTraceData).to receive(:raw_data).and_return(raw_data)
       end
 
-      it 'returns monthly progress' do
-        monthly_progress = service.monthly_progress
-
-        expect(monthly_progress.keys).to include('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
-        expect(monthly_progress['Sep']).to eq({full_targets_kwh: '2,220', current_year_kwhs: '1,110', monthly_performance: '77.8'})
+      it 'returns months' do
+        expect(service.progress.months).to include('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
       end
 
-      it 'returns cumulative progress' do
-        cumulative_progress = service.cumulative_progress
+      it 'returns monthly targets' do
+        expect(service.progress.monthly_targets_kwh['Sep']).to eq(2222.22)
+      end
 
-        expect(cumulative_progress.keys).to include('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
-        expect(cumulative_progress['Sep']).to eq({full_cumulative_targets_kwhs: '5,560', full_cumulative_current_year_kwhs: '4,440', cumulative_performance: '88.9'})
+      it 'returns monthly usage' do
+        expect(service.progress.monthly_usage_kwh['Sep']).to eq(1111.11)
+      end
+
+      it 'returns monthly performance' do
+        expect(service.progress.monthly_performance['Sep']).to eq(77.77)
+      end
+
+      it 'returns cumulative targets' do
+        expect(service.progress.cumulative_targets_kwh['Sep']).to eq(5555.55)
+      end
+
+      it 'returns cumulative usage' do
+        expect(service.progress.cumulative_usage_kwh['Sep']).to eq(4444.44)
+      end
+
+      it 'returns cumulative_performance' do
+        expect(service.progress.cumulative_performance['Sep']).to eq(88.88)
       end
     end
   end
