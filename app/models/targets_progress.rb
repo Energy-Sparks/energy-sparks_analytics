@@ -1,4 +1,6 @@
 class TargetsProgress
+  attr_reader :fuel_type
+
   def initialize(fuel_type:, months:, monthly_targets_kwh:, monthly_usage_kwh:, monthly_performance:, cumulative_targets_kwh:, cumulative_usage_kwh:, cumulative_performance:)
     @fuel_type = fuel_type
     @months = months

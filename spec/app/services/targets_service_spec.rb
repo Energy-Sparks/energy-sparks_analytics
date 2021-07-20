@@ -72,6 +72,10 @@ describe TargetsService do
       it 'returns cumulative_performance' do
         expect(service.progress.cumulative_performance['Sep']).to eq(88.88)
       end
+
+      it 'returns fuel type' do
+        expect(service.progress.fuel_type).to eq(:electricity)
+      end
     end
   end
 end
