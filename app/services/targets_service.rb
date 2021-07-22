@@ -1,10 +1,12 @@
 class TargetsService
-  def initialize(aggregate_school)
+  def initialize(aggregate_school, fuel_type)
     @aggregate_school = aggregate_school
+    @fuel_type = fuel_type
   end
 
   def progress
     TargetsProgress.new(
+      fuel_type: @fuel_type,
       months: data_headers,
       monthly_targets_kwh: data_series(:full_targets_kwh),
       monthly_usage_kwh: data_series(:current_year_kwhs),
@@ -26,6 +28,6 @@ class TargetsService
   end
 
   def data
-    @data ||= CalculateMonthlyTrackAndTraceData.new(@aggregate_school, :electricity).raw_data
+    @data ||= CalculateMonthlyTrackAndTraceData.new(@aggregate_school, @fuel_type).raw_data
   end
 end

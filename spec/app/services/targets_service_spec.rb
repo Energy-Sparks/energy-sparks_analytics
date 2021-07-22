@@ -7,7 +7,8 @@ describe TargetsService do
     context "#monthly_progress" do
 
       let(:meter_collection)        { build(:meter_collection) }
-      let(:service)                 { TargetsService.new(meter_collection) }
+      let(:fuel_type)               { :electricity }
+      let(:service)                 { TargetsService.new(meter_collection, fuel_type) }
 
       let(:raw_data) do
         {
@@ -70,6 +71,10 @@ describe TargetsService do
 
       it 'returns cumulative_performance' do
         expect(service.progress.cumulative_performance['Sep']).to eq(88.88)
+      end
+
+      it 'returns fuel type' do
+        expect(service.progress.fuel_type).to eq(:electricity)
       end
     end
   end
