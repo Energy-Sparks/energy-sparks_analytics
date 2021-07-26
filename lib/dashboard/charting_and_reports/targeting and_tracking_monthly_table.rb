@@ -108,7 +108,7 @@ class TargetingAndTrackingTable < ContentBase
   end
 
   def header
-    ['Month', header_months(data[:current_year_date_ranges])].flatten
+    ['Month', header_months(data[:current_year_date_ranges], data[:partial_months])].flatten
   end
 
   def calculate
@@ -129,8 +129,11 @@ class TargetingAndTrackingTable < ContentBase
     [ name, format_rows(data, datatype) ].flatten
   end
 
-  def header_months(dates)
-    dates.map{ |date_range| date_range.first.strftime('%b') }
+  def header_months(dates, partial_months)
+    dates.map.with_index do |date_range, index|
+      partial = partial_months[index] ? ' (partial)' : ''
+      date_range.first.strftime('%b') + partial
+    end
   end
 
   def format_rows(years_values, datatype = :kwh)
