@@ -12,6 +12,10 @@ class RunCharts
     @failed_charts = []
   end
 
+  def valid?
+    true
+  end
+
   private def excel_variation
     '- charts test'
   end
@@ -154,11 +158,14 @@ class RunCharts
   def save_to_excel
     excel = ExcelCharts.new(@excel_filename)
     @worksheets.each do |worksheet_name, charts|
-puts "Got here adding charts"
-titles = charts.map { |v| v[:title] }
-ap titles
-ap charts, { limit: 10 }
-charts = charts.select { |v| !v[:title].nil? }
+      charts = charts.map do |chart|
+        if chart.key?(:config)
+          puts "Flattening #{chart[:charts].length} composite_charts for #{chart[:config][:name]}"
+          chart[:charts]
+        else
+          chart
+        end
+      end.flatten
       excel.add_charts(worksheet_name, charts.compact)
     end
     excel.close

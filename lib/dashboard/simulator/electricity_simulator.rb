@@ -74,10 +74,18 @@ class ElectricitySimulator
     @electricity_meter_data = @existing_electricity_meter.amr_data
   end
 
-  def set_start_end_date
+  def set_start_end_date_deprecated
     last_year = @holidays.years_to_date(@electricity_meter_data.start_date, @electricity_meter_data.end_date, false)[0]
+    puts "Got here ffff"
+    ap @holidays.years_to_date(@electricity_meter_data.start_date, @electricity_meter_data.end_date, false)
     # TODO(PH, 16Oct2018) - fudge to extend simulation to align to Saturday date boundaries for weekly charts - resolve
     @period = SchoolDatePeriod.new(last_year.type, '1 year electrical simulator', last_year.start_date - 7, last_year.end_date)
+  end
+
+  def set_start_end_date
+    end_date = [@electricity_meter_data.end_date, @solar_irradiation.end_date, @temperatures.end_date].min
+    start_date = [end_date - 364, @electricity_meter_data.start_date, @solar_irradiation.start_date, @temperatures.start_date].max
+    @period = SchoolDatePeriod.new(:simulation, 'up to 1 year electrical simulator', start_date, end_date)
   end
 
   def set_schedule_data(school)
@@ -116,6 +124,7 @@ class ElectricitySimulator
       calculate_heating_periods_from_temperatures
     else
       calculate_model
+      calculate_heating_periods_from_temperatures if @heating_model.nil?
     end
   end
 
@@ -138,7 +147,7 @@ class ElectricitySimulator
   end
 
   def heating_on?(date)
-    if @school.aggregated_heat_meters.nil?
+    if @school.aggregated_heat_meters.nil? || @heating_model.nil?
       @calculated_heating_dates.key?(date)
     else
       @heating_model.heating_on?(date)
@@ -167,6 +176,11 @@ class ElectricitySimulator
     end_date = @school.aggregated_heat_meters.amr_data.end_date
     periods = @school.holidays.years_to_date(start_date, end_date, false)
     @heating_model = @school.aggregated_heat_meters.heating_model(periods[0])
+  rescue => e
+    comment = "Model failed in simulator: #{e.message}"
+    logger.info comment
+    puts comment
+    nil
   end
 
   def empty_amr_data_set(type)
@@ -302,9 +316,13 @@ class ElectricitySimulator
 
     @cache_irradiance_for_speed = nil
     (lighting_data.start_date..lighting_data.end_date).each do |date|
+      if date > @solar_irradiation.end_date
+        puts "No solar PV/irradiance data for #{date}"
+        next
+      end
+
       (0..47).each do |half_hour_index|
         next if !occupied?(date)
-
         solar_insol = @solar_irradiation.solar_irradiance(date, half_hour_index)
         percent_of_peak = interpolate_y_value(@appliance_definitions[:lighting][:percent_on_as_function_of_solar_irradiance][:solar_irradiance],
                         @appliance_definitions[:lighting][:percent_on_as_function_of_solar_irradiance][:percent_of_peak],

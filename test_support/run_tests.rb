@@ -399,8 +399,12 @@ class RunTests
       reevaluate_log_filename
       school = load_school(school_name)
       charts = chart_class_instance.new(school)
-      charts.run(control)
-      failed_charts += charts.failed_charts
+      if charts.valid?
+        charts.run(control)
+        failed_charts += charts.failed_charts
+      else
+        puts "Not doing charts for this school as invalid"
+      end
     end
   end
 

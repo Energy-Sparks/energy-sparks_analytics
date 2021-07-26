@@ -12,7 +12,7 @@ class RunDashboardChartList < RunCharts
   def meters; nil end
 
   def run(control)
-    precalculation
+    precalculation(control)
 
     dashboard_configs.each do |dashboard_config|
       page_config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[dashboard_config]
