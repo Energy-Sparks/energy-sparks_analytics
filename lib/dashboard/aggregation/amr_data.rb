@@ -8,6 +8,7 @@ class AMRData < HalfHourlyData
 
   def initialize(type)
     super(type)
+    puts "Got here creating amr_data of type #{type}"
     @total = {}
   end
 
@@ -85,7 +86,27 @@ class AMRData < HalfHourlyData
     return kwhs if type == :kwh
     return @economic_tariff.days_cost_data_x48(date) if type == :£ || type == :economic_cost
     return @accounting_tariff.days_cost_data_x48(date) if type == :accounting_cost
-    return @carbon_emissions.one_days_data_x48(date) if type == :co2
+    return co2_x48(date) if type == :co2
+  end
+
+  private def co2_x48(date) 
+    if @type == :solar_pv
+      @solar_pv_co2_x48_cache ||= {}
+      @solar_pv_co2_x48_cache[date] ||= calculate_solar_pv_co2_x48(date)
+      return @solar_pv_co2_x48_cache[date]
+    else
+      return @carbon_emissions.one_days_data_x48(date)
+    end
+  end
+
+  def calculate_solar_pv_co2_x48(date)
+    co2_x48 = @carbon_emissions.one_days_data_x48(date)
+    num_positive = co2_x48.count?{ |c| c >= 0.0 }
+    if num_positive > 44 # arbitrary mainly +tve
+      fast_multiply_x48_x_scalar(co2_x48, -1.0)
+    else
+      co2_x48
+    end
   end
 
   def date_exists_by_type?(date, type)
@@ -174,8 +195,17 @@ class AMRData < HalfHourlyData
     check_type(type)
     return self[date].kwh_halfhour(halfhour_index) if type == :kwh
     return @economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£ || type == :economic_cost
-    return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cost
-    return @carbon_emissions.co2_data_halfhour(date, halfhour_index) if type == :co2
+    return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cos
+    return co2_half_hour(date, halfhour_index) if type == :co2
+  end
+
+  private def co2_half_hour(date, halfhour_index)
+    co2 = @carbon_emissions.co2_data_halfhour(date, halfhour_index)
+    if @type == :solar_pv
+      return -1 * co2.magnitude
+    else
+      return co2
+    end
   end
 
   def kw(date, halfhour_index)
@@ -196,6 +226,15 @@ class AMRData < HalfHourlyData
     return @economic_tariff.one_day_total_cost(date) if type == :£ || type == :economic_cost
     return @accounting_tariff.one_day_total_cost(date) if type == :accounting_cost
     return @carbon_emissions.one_day_total(date) if type == :co2
+  end
+
+  private def co2_one_day(date)
+    co2 = @carbon_emissions.one_day_total(date)
+    if @type == :solar_pv
+      return -1 * co2.magnitude
+    else
+      return co2
+    end
   end
 
   def clone_one_days_data(date)
