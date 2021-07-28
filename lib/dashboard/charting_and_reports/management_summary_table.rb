@@ -187,7 +187,8 @@ class ManagementSummaryTable < ContentBase
     scalar = ScalarkWhCO2CostValues.new(@school)
     consumption   = checked_get_aggregate({ year: 0}, :electricity, :co2)
     pv_production = checked_get_aggregate({ year: 0}, :solar_pv,    :co2)
-    net_co2 = consumption.nil? || pv_production.nil? ? nil : (consumption - pv_production)
+    # NB solar pv panel putput CO2 is -tve, sign reversed in AMRData
+    net_co2 = consumption.nil? || pv_production.nil? ? nil : (consumption + pv_production)
   end
 
   def comparison_out_of_date(period1, fuel_type, max_days_out_of_date)

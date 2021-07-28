@@ -8,7 +8,6 @@ class AMRData < HalfHourlyData
 
   def initialize(type)
     super(type)
-    puts "Got here creating amr_data of type #{type}"
     @total = {}
   end
 
@@ -225,7 +224,7 @@ class AMRData < HalfHourlyData
     return self[date].one_day_kwh  if type == :kwh
     return @economic_tariff.one_day_total_cost(date) if type == :£ || type == :economic_cost
     return @accounting_tariff.one_day_total_cost(date) if type == :accounting_cost
-    return @carbon_emissions.one_day_total(date) if type == :co2
+    return co2_one_day(date) if type == :co2
   end
 
   private def co2_one_day(date)
