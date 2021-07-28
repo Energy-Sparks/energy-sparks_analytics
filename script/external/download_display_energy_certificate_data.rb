@@ -16,10 +16,14 @@ def header
     es_electricity_kwh
     calculated_electricity_kwh
     es_electricity_status
+    es_days_electricity_data
+    es_electricity_last_reading
     heating_kwh
     es_gas_kwh
     calculated_heating_kwh
     es_gas_status
+    es_days_gas_data
+    es_gas_last_reading
     renewables_kwh
     date
     address
@@ -43,22 +47,31 @@ def annual_kwh(school, fuel_type, dec_date)
 
   meter = meter.original_meter
 
-  if !dec_date.nil? && dec_date - 365 >= meter.amr_data.start_date && dec_date <= meter.amr_data.end_date
+  data = if !dec_date.nil? && dec_date - 365 >= meter.amr_data.start_date && dec_date <= meter.amr_data.end_date
     {
-      kwh:     meter.amr_data.kwh_date_range(dec_date - 365, dec_date),
-      status:  :matches_dec_dates
+      kwh:              meter.amr_data.kwh_date_range(dec_date - 365, dec_date),
+      status:           :matches_dec_dates
     } 
   elsif meter.amr_data.days >= 365
     {
-      kwh:     meter.amr_data.kwh_date_range(meter.amr_data.end_date - 365, meter.amr_data.end_date),
-      status:  :latest_data_only
+      kwh:             meter.amr_data.kwh_date_range(meter.amr_data.end_date - 365, meter.amr_data.end_date),
+      status:          :latest_data_only
     } 
   else
     {
-      kwh:     meter.amr_data.kwh_date_range(meter.amr_data.start_date, meter.amr_data.end_date),
-      status:  :partial_year_only
+      kwh:             meter.amr_data.kwh_date_range(meter.amr_data.start_date, meter.amr_data.end_date),
+      status:          :partial_year_only
     } 
   end
+
+  data.merge! (
+    {
+      days_meter_data:    meter.amr_data.days,
+      last_meter_reading: meter.amr_data.end_date
+    }
+  )
+
+  data
 end
 
 def save_csv(data)
@@ -91,12 +104,16 @@ school_names.each do |school_name|
   es_gas = annual_kwh(school, :gas, dec_date)
 
   data[school_name] = {
-    es_name:                school_name,
-    es_floor_area:          school.floor_area,
-    es_electricity_kwh:     es_electric[:kwh],
-    es_electricity_status:  es_electric[:status],
-    es_gas_kwh:             es_gas[:kwh],
-    es_gas_status:          es_gas[:status]
+    es_name:                      school_name,
+    es_floor_area:                school.floor_area,
+    es_electricity_kwh:           es_electric[:kwh],
+    es_electricity_status:        es_electric[:status],
+    es_days_electricity_data:     es_electric[:days_meter_data],
+    es_electricity_last_reading:  es_electric[:last_meter_reading],
+    es_gas_kwh:                   es_gas[:kwh],
+    es_gas_status:                es_gas[:status],
+    es_days_gas_data:             es_gas[:days_meter_data],
+    es_gas_last_reading:          es_gas[:last_meter_reading],
   }
   data[school_name].merge!(dec_data) unless dec_data.nil?
 end

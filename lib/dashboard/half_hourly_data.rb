@@ -166,7 +166,7 @@ class HalfHourlyData < Hash
   end
 
   def days
-    end_date - start_date + 1
+    (end_date - start_date + 1).to_i
   end
 
   def set_validated(valid)
