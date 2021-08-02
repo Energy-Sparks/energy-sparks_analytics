@@ -23,7 +23,7 @@ class ElectricityAnnualProfileFitter
     school_weeks_kwh = aggregate_schoolweek_kwhs(@start_date, @end_date, exclude_date_ranges)
     return nil if school_weeks_kwh.empty?
     sd, _eps = fit_optimum_sd(school_weeks_kwh)
-    profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd, school_weeks_kwh).profile
+    profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd, school_weeks_kwh, week_of_year(@start_date), week_of_year(@end_date)).profile
     { profile: profile, actual: school_weeks_kwh, sd: sd }
   end
 
@@ -79,7 +79,7 @@ class ElectricityAnnualProfileFitter
   end
   
   def difference_to_theoretical_profile(sd, school_weeks_kwh)
-    theoretical_profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd.to_f, school_weeks_kwh).profile
+    theoretical_profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd.to_f, school_weeks_kwh, week_of_year(@start_date), week_of_year(@end_date)).profile
     difference(school_weeks_kwh, theoretical_profile)
   end
   
@@ -93,19 +93,18 @@ class ElectricityAnnualProfileFitter
 
   class SyntheticSeasonalSchoolWeeklyElectricityProfile
     attr_reader :profile
-    def initialize(sd, weekly_kwhs)
-      weeks_avg_kwh = map_to_weeks(LogNormProfile.new(sd).profile)
+    def initialize(sd, weekly_kwhs, start_week, end_week)
+      weeks_avg_kwh = map_to_weeks(LogNormProfile.new(sd).profile, start_week, end_week)
       @profile = weeks_avg_kwh.map { |v| v * 52.0 / school_weeks(weekly_kwhs) }
     end
   
     private
 
-    # norm profile lowest at either end, lowest in school in June
-    # so remap, at [25] to make up to 53 weeks in year
-    # i.e. norm profile Jul to Jun, gets transposed to Jan to Dec
-    def map_to_weeks(profile)
-       # profile[26..51] + profile[0..25] + profile[25..25]
-       centre_week = 23
+    # norm profile produces a profile staring at the lowest in July, peaking
+    # in December then low again for June
+    # so remap to the start/end dates of the year defined by the actual data
+    def map_to_weeks(profile, start_week, end_week)
+       centre_week = start_week - 3 # lowest consumption approx week 23 not mid year at week 26, for fitting purposes
        profile[centre_week..51] + profile[0...centre_week] + profile[centre_week..centre_week]
     end
   
