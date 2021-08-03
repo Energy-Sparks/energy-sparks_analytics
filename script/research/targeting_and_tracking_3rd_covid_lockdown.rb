@@ -11,6 +11,16 @@ def sub_nil_nan(arr)
   arr.map { |v| v.nan? ? nil : v }
 end
 
+def save_reductions(filename, data)
+  puts "Saving results to #{filename}"
+  CSV.open(filename, 'w') do |csv|
+    csv << ['school name', 'v. Autumn 2020 mirrored', 'v. Spring 2020']
+    data.each do |school_name, percent_reduction|
+      csv << [school_name, sub_nil_nan(percent_reduction)].flatten
+    end
+  end
+end
+
 def save_csv(filename, data)
   puts "Saving results to #{filename}"
   CSV.open(filename, 'w') do |csv|
@@ -23,7 +33,8 @@ end
 # CONFIG
 
 filename = "./Results/targeting_and_tracking_3rd covid lockdown schools.csv"
-school_name_pattern_match = ['batheast*'] # ' ['abbey*', 'bathamp*']
+reduction_filename = "./Results/targeting_and_tracking_3rd covid lockdown schools reduction stats.csv"
+school_name_pattern_match = ['*'] # ' ['abbey*', 'bathamp*']
 start_date = Date.new(2020, 7, 1)
 end_date = Date.new(2021, 6, 30)
 fuel_type = :electricity
@@ -35,12 +46,21 @@ school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match
 
 ap school_names
 data = {}
+lockdown_reduction = {}
 
 school_names.each do |school_name|
   school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
 
   meter = school.aggregate_meter(fuel_type)
   next if meter.nil?
+
+  seasonal = SeasonalMirroringCovidAdjustment.new(meter.amr_data, school.holidays)
+
+  lockdown_reduction[school_name] = []
+  lockdown_reduction[school_name].push(seasonal.lockdown_versus_mirror_percent_change)
+  lockdown_reduction[school_name].push(seasonal.lockdown_versus_previous_year_percent_change)
+  
+=begin
 
   fitter = ElectricityAnnualProfileFitter.new(meter.amr_data, school.holidays, start_date, end_date)
   fitted_data = fitter.fit
@@ -51,6 +71,9 @@ school_names.each do |school_name|
 
   data["#{school_name} - actual"] = fitted_data[:actual]
   data["#{school_name} - best fit #{fitted_data[:sd].round(1)}"] = fitted_data[:profile]
+=end
 end
 
+save_reductions(reduction_filename, lockdown_reduction)
+exit
 save_csv(filename, data)
