@@ -17,13 +17,19 @@ class ElectricityAnnualProfileFitter
     @end_date = end_date
   end
 
+  def self.week_of_year(date)
+    jan_1 = Date.new(date.year, 1, 1)
+    sunday_of_week1 = jan_1 - jan_1.wday
+    week = ((date - sunday_of_week1) / 7).to_i
+  end
+
   # returns a normalised fit of 52 or 53 weeks of estimated/fitted electricity
   # profile data for a school between start, end dates; summ of kWhs = 1.0
   def fit(exclude_date_ranges: [])
     school_weeks_kwh = aggregate_schoolweek_kwhs(@start_date, @end_date, exclude_date_ranges)
     return nil if school_weeks_kwh.empty?
     sd, _eps = fit_optimum_sd(school_weeks_kwh)
-    profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd, school_weeks_kwh, week_of_year(@start_date), week_of_year(@end_date)).profile
+    profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd, school_weeks_kwh, ElectricityAnnualProfileFitter.week_of_year(@start_date), ElectricityAnnualProfileFitter.week_of_year(@end_date)).profile
     { profile: profile, actual: school_weeks_kwh, sd: sd }
   end
 
@@ -40,7 +46,7 @@ class ElectricityAnnualProfileFitter
 
       next if in_date_ranges?(exclude_date_ranges, date)
   
-      week = week_of_year(date)
+      week = ElectricityAnnualProfileFitter.week_of_year(date)
   
       school_week_kwh[week]       += @amr_data.one_day_kwh(date)
       school_week_day_count[week] += 1.0
@@ -67,19 +73,14 @@ class ElectricityAnnualProfileFitter
     false
   end
 
-  def week_of_year(date)
-    jan_1 = Date.new(date.year, 1, 1)
-    sunday_of_week1 = jan_1 - jan_1.wday
-    week = ((date - sunday_of_week1) / 7).to_i
-  end
-
   def fit_optimum_sd(school_weeks_kwh)
     optimum = Minimiser.minimize(10.0, 50.0) {|sd| difference_to_theoretical_profile(sd, school_weeks_kwh) }
     [optimum.x_minimum, optimum.f_minimum]
   end
   
   def difference_to_theoretical_profile(sd, school_weeks_kwh)
-    theoretical_profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd.to_f, school_weeks_kwh, week_of_year(@start_date), week_of_year(@end_date)).profile
+    theoretical_profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd.to_f, school_weeks_kwh,
+      ElectricityAnnualProfileFitter.week_of_year(@start_date), ElectricityAnnualProfileFitter.week_of_year(@end_date)).profile
     difference(school_weeks_kwh, theoretical_profile)
   end
   

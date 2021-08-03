@@ -23,7 +23,7 @@ end
 # CONFIG
 
 filename = "./Results/targeting_and_tracking_3rd covid lockdown schools.csv"
-school_name_pattern_match = ['*'] # ' ['abbey*', 'bathamp*']
+school_name_pattern_match = ['batheast*'] # ' ['abbey*', 'bathamp*']
 start_date = Date.new(2020, 7, 1)
 end_date = Date.new(2021, 6, 30)
 fuel_type = :electricity
@@ -45,6 +45,9 @@ school_names.each do |school_name|
   fitter = ElectricityAnnualProfileFitter.new(meter.amr_data, school.holidays, start_date, end_date)
   fitted_data = fitter.fit
   next if fitted_data.nil?
+
+  covid_3 = ThirdLockdownElectricityCovidAdjustment.new(meter.amr_data, school.holidays, start_date, end_date)
+  covid_3.needs_adjustment?
 
   data["#{school_name} - actual"] = fitted_data[:actual]
   data["#{school_name} - best fit #{fitted_data[:sd].round(1)}"] = fitted_data[:profile]

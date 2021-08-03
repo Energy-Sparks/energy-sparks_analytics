@@ -18,10 +18,11 @@ class ThirdLockdownElectricityCovidAdjustment
   end
 
   def needs_adjustment?
-    return false if start_date > @lockdown_end_date
+    return false if @start_date > @lockdown_end_date
 
     fitter = ElectricityAnnualProfileFitter.new(@amr_data, @holidays, @start_date, @end_date)
-    fitted_data = fitter.fit
-
+    exclude_lockdown = @lockdown_start_date..@lockdown_end_date
+    fitted_data = fitter.fit(exclude_date_ranges: [exclude_lockdown])
+    ap fitted_data
   end
 end
