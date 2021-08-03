@@ -152,11 +152,24 @@ class TargetMeter < Dashboard::Meter
       # once a years worth of target data has been created then the target is compounded
       # e.g. for a 95% target, year 1 is 95%, year 2 95%^2 etc.
       clone_date = date - 364
+      clone_date = alternative_3rd_lockdown_electricity_date(meter_to_clone, clone_date)
+
       clone_amr_data = amr_data.date_exists?(clone_date) ? amr_data : meter_to_clone.amr_data
       target_kwh_x48 = target_amr_data(date, clone_date, clone_amr_data)
       amr_data.add(date, target_kwh_x48)
     end
     amr_data
+  end
+
+  def alternative_3rd_lockdown_electricity_date(meter_to_clone, date)
+    return date unless meter_to_clone.fuel_type == :electricity
+
+    unless @seasonal
+      @seasonal = SeasonalMirroringCovidAdjustment.new(meter_to_clone.amr_data, meter_collection.holidays)
+      @seasonal.log_mirror_amr_data_rules
+    end
+
+    @seasonal.alternative_date(date) || date
   end
 
   # TODO(PH, 14Jan2021) ~~~ duplicate of code in aggregation mixin

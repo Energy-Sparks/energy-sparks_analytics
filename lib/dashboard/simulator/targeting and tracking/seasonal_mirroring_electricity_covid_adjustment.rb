@@ -2,6 +2,8 @@
 # - by using data from Jan-Mar 2020 if available
 # - or using data from Oct - Dec 2020 (mirrored)
 class SeasonalMirroringCovidAdjustment
+  MAX_CHANGE_BEFORE_MIRRORING = 0.05
+  include Logging
   def initialize(amr_data, holidays)
     @amr_data = amr_data
     @holidays = holidays
@@ -19,15 +21,109 @@ class SeasonalMirroringCovidAdjustment
     @amr_data.end_date    >= mirrored_weeks_dates[:lockdown_weeks].last.last
   end
 
+  def alternative_date(date)
+    @alternative_date_cache ||= {}
+    return nil if !date.between?(@lockdown_start_date, @lockdown_end_date) # don't bother caching it
+    @alternative_date_cache[date] ||= calculate_alternative_date(date)
+  end
+
   def lockdown_versus_mirror_percent_change
-    reduction_percent(:lockdown_weeks, :mirror_weeks)
+    @lockdown_versus_mirror_percent_change ||= reduction_percent(:lockdown_weeks, :mirror_weeks)
   end
 
   def lockdown_versus_previous_year_percent_change
-    reduction_percent(:lockdown_weeks, :previous_year_weeks)
+    @lockdown_versus_previous_year_percent_change ||= reduction_percent(:lockdown_weeks, :previous_year_weeks)
+  end
+
+  def log_mirror_amr_data_rules
+    logger.info 'Correcting for 3rd lockdown (Jan-Mar 2021) electricity kWh school day reduction'
+    logger.info "Reduction v. Jan-Mar 2020 #{FormatEnergyUnit.format(:percent, lockdown_versus_previous_year_percent_change, :text)}"
+    logger.info "Reduction v. Oct-Dec 2020 #{FormatEnergyUnit.format(:percent, lockdown_versus_mirror_percent_change, :text)}"
+    logger.info "Will apply a correction if change > #{MAX_CHANGE_BEFORE_MIRRORING * 100.0}%"
+
+    rule_description = {
+      replace_with_jan_mar_2020:            'Copying Jan-Mar 2020 - over reduced Jan-Mar 2021 lockdown data',
+      replace_with_oct_dec_2020_reversed:   'Copying Oct-Dec 2020 (reversed) - over reduced Jan-Mar 2021 lockdown data',
+      no_change_not_a_big_enough_reduction: 'Not correcting as hasnt dropped enough',
+      not_enough_data:                      'Not enough data'
+    }
+
+    puts "Using the following adjustment #{rule_description[mirroring_rules]}"
+    logger.info "Using the following adjustment #{rule_description[mirroring_rules]}"
   end
 
   private
+
+  def calculate_alternative_date(date)
+    return nil if holiday_or_weekend?(date) # assume holidays and weekends not impacted
+
+    case mirroring_rules
+    when :no_change_not_a_big_enough_reduction
+      return nil
+    when :not_enough_data
+      # TODO(PH, 3Aug2021) implement interpolation alternative algorithm
+      return nil
+    when :replace_with_jan_mar_2020
+      alternative_jan_mar_2020_date(date)
+    when :replace_with_oct_dec_2020_reversed
+      alternative_oct_dec_2020_date(date)
+    end
+  end
+
+  def alternative_jan_mar_2020_date(date)
+    alternative_by_type_date(date, :previous_year_weeks)
+  end
+
+  def alternative_oct_dec_2020_date(date)
+    alternative_by_type_date(date, :mirror_weeks)
+  end
+
+  def alternative_by_type_date(date, type)
+    mirrored_weeks_dates[:lockdown_weeks].each_with_index do |lockdown_week, index|
+      if date.between?(lockdown_week.first, lockdown_week.last)
+        return alternative_date_in_week(date, mirrored_weeks_dates[type][index])
+      end
+    end
+    nil
+  end
+
+  def alternative_date_in_week(date, substitute_week)
+    weekday_index = date.wday - 1
+    substitute_day = substitute_week.first + weekday_index
+
+    if holiday_or_weekend?(substitute_day)
+      # if in the low probability of this being a holiday
+      # then pick another random school day in the week to substitute
+      substitute_week.each do |substitute_date|
+        return substitute_date unless holiday_or_weekend?(substitute_date)
+      end
+    else
+      substitute_day
+    end
+  end
+
+  def holiday_or_weekend?(date)
+    %i[holiday weekend].include?(@holidays.day_type(date))
+  end
+
+  def mirroring_rules
+    @mirroring_rules ||= calculate_mirroring_rules
+  end
+
+  def calculate_mirroring_rules
+    if !lockdown_versus_previous_year_percent_change.nan? &&
+      lockdown_versus_previous_year_percent_change > MAX_CHANGE_BEFORE_MIRRORING
+      :replace_with_jan_mar_2020
+    elsif !lockdown_versus_mirror_percent_change.nan? &&
+            lockdown_versus_mirror_percent_change > MAX_CHANGE_BEFORE_MIRRORING
+      :replace_with_oct_dec_2020_reversed
+    elsif !lockdown_versus_previous_year_percent_change.nan? &&
+            !lockdown_versus_mirror_percent_change.nan?
+      :no_change_not_a_big_enough_reduction
+    else
+      :not_enough_data
+    end
+  end
 
   def reduction_percent(type_1, type_2)
     paired_weeks = compare_mirrored_week_average_school_day_kwhs(type_1, type_2)

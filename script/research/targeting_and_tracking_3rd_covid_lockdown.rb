@@ -34,7 +34,7 @@ end
 
 filename = "./Results/targeting_and_tracking_3rd covid lockdown schools.csv"
 reduction_filename = "./Results/targeting_and_tracking_3rd covid lockdown schools reduction stats.csv"
-school_name_pattern_match = ['*'] # ' ['abbey*', 'bathamp*']
+school_name_pattern_match = ['trinity*'] # ' ['abbey*', 'bathamp*']
 start_date = Date.new(2020, 7, 1)
 end_date = Date.new(2021, 6, 30)
 fuel_type = :electricity
@@ -59,6 +59,12 @@ school_names.each do |school_name|
   lockdown_reduction[school_name] = []
   lockdown_reduction[school_name].push(seasonal.lockdown_versus_mirror_percent_change)
   lockdown_reduction[school_name].push(seasonal.lockdown_versus_previous_year_percent_change)
+
+  seasonal.log_mirror_amr_data_rules
+
+  (Date.new(2021, 1, 10)..Date.new(2021, 1, 16)).each do |date| # sunday to sunday
+    puts "Swapping #{date} for #{seasonal.alternative_date(date)}"
+  end
   
 =begin
 
