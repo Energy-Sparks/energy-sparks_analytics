@@ -80,7 +80,7 @@ class RunTests
       when :source
         @meter_readings_source = configuration
       when :meter_attribute_overrides
-        @meter_attribute_overrides = meter_attribute_overrides
+        @meter_attribute_overrides = configuration
       when :reports
         $logger_format = 2
         run_reports(configuration[:charts], configuration[:control])

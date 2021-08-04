@@ -75,6 +75,7 @@ module Dashboard
     end
 
     def enough_amr_data_to_set_target?
+      puts "Got here: this needs removing - as limits target setting for analysis pages"
       academic_year = @meter_collection.holidays.calculate_academic_year_tolerant_of_missing_data(amr_data.end_date)
       academic_year.start_date - 364 > amr_data.start_date
     end
