@@ -21,7 +21,7 @@ script = {
                                 report_failed_charts:   :summary, # :detailed
                                 user: { user_role: :analytics, staff_role: nil },
                                 no_pages: %i[electricity_profit_loss gas_profit_loss baseload],
-                                no_pages1: %i[gas_out_of_hours],
+                                no_pages: %i[electric_target],
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
                                   { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },
