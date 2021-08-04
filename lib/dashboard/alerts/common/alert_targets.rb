@@ -10,6 +10,11 @@ class AlertTargetBase < AlertAnalysisBase
     aggregate_meter.enough_amr_data_to_set_target? ? :enough : :not_enough
   end
 
+
+  def valid_alert?
+    super && enough_data == :enough
+  end
+
   def relevance
     (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
   end
@@ -362,11 +367,8 @@ class AlertTargetBase < AlertAnalysisBase
     saving..saving
   end
 
-  def academic_year
-    @academic_year ||= @school.holidays.calculate_academic_year_tolerant_of_missing_data(maximum_alert_date)
-  end
-
   def previous_year_total(datatype)
+    return nil if previous_year_start_date < aggregate_meter.amr_data.start_date
     total(false, previous_year_start_date, previous_year_end_date, datatype)
   end
 

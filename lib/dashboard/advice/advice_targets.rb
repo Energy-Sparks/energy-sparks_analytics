@@ -1,6 +1,7 @@
 
 require_relative './advice_general.rb'
 class AdviceTargets < AdviceBase
+  MAX_DAYS_OUT_OF_DATE_FOR_TARGETS = 30
   def initialize(school, fuel_type)
     super(school)
     @fuel_type = fuel_type
@@ -11,7 +12,8 @@ class AdviceTargets < AdviceBase
   end
 
   def relevance
-    (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
+    rel = !aggregate_meter.nil? && aggregate_meter.target_set? && aggregate_meter.amr_data.end_date > (Date.today - MAX_DAYS_OUT_OF_DATE_FOR_TARGETS)
+    rel ? :relevant : :never_relevant
   end
 
   def content(user_type: nil)

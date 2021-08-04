@@ -120,6 +120,11 @@ class TargetMeter < Dashboard::Meter
     [end_date - 365, target.first_target_date, @original_meter.amr_data.start_date].max
   end
 
+  def self.enough_amr_data_to_set_target?(meter)
+    meter.amr_data.end_date > Date.today - 30 &&
+    meter.amr_data.days > 365 + 30
+  end
+
   def target_start_date_deprecated(date)
     academic_year = @meter_collection.holidays.calculate_academic_year_tolerant_of_missing_data(date)
     start_of_academic_year = Date.new(academic_year.start_date.year, academic_year.start_date.month, 1)
