@@ -116,7 +116,11 @@ class TargetMeter < Dashboard::Meter
     logger.info calc_text
   end
 
-  def target_start_date(date)
+  def target_start_date(end_date)
+    [end_date - 365, target.first_target_date, @original_meter.amr_data.start_date].max
+  end
+
+  def target_start_date_deprecated(date)
     academic_year = @meter_collection.holidays.calculate_academic_year_tolerant_of_missing_data(date)
     start_of_academic_year = Date.new(academic_year.start_date.year, academic_year.start_date.month, 1)
     target_start_date = target.first_target_date
