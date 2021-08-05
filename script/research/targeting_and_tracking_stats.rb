@@ -28,6 +28,12 @@ def covid_stats(schools)
         stats["enough #{fuel_type} amr data"] ||= [] if enough_data
         stats["not enough #{fuel_type} amr data"] ||= [] unless enough_data
         stats[enough_data ? "enough #{fuel_type} amr data" : "not enough #{fuel_type} amr data"].push(school.name)
+
+        if meter.target_set?
+          target_set = "target already set #{fuel_type}"
+          stats[target_set] ||= []
+          stats[target_set].push(school.name)
+        end
       end
     end
   end
