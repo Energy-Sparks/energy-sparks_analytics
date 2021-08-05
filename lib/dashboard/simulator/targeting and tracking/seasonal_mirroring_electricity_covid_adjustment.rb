@@ -27,6 +27,10 @@ class SeasonalMirroringCovidAdjustment
     @alternative_date_cache[date] ||= calculate_alternative_date(date)
   end
 
+  def mirroring_rules
+    @mirroring_rules ||= calculate_mirroring_rules
+  end
+
   def lockdown_versus_mirror_percent_change
     @lockdown_versus_mirror_percent_change ||= reduction_percent(:lockdown_weeks, :mirror_weeks)
   end
@@ -104,10 +108,6 @@ class SeasonalMirroringCovidAdjustment
 
   def holiday_or_weekend?(date)
     %i[holiday weekend].include?(@holidays.day_type(date))
-  end
-
-  def mirroring_rules
-    @mirroring_rules ||= calculate_mirroring_rules
   end
 
   def calculate_mirroring_rules
