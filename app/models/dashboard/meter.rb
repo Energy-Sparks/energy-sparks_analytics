@@ -74,6 +74,11 @@ module Dashboard
       fa.round(0)
     end
 
+    def annual_kwh_estimate
+      return Float::NAN if @kwh_estimate.nil?
+      @kwh_estimate.annual_kwh
+    end
+
     def enough_amr_data_to_set_target?
       TargetMeter.enough_amr_data_to_set_target?(self)
     end
@@ -120,6 +125,7 @@ module Dashboard
       @solar_pv_overrides       = SolarPVPanels.new(attributes(:solar_pv_override), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv_override)
       @solar_pv_real_metering   = true if @meter_attributes.key?(:solar_pv_mpan_meter_mapping)
       @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
+      @kwh_estimate = EstimatePeriodConsumption.new(attributes(:estimated_period_consumption)) if @meter_attributes.key?(:estimated_period_consumption)
       @meter_tariffs = MeterTariffManager.new(self)
     end
 
