@@ -123,7 +123,7 @@ class Temperatures < HalfHourlyData
     dh
   end
 
-  def degree_days(date, base_temp)
+  def degree_days(date, base_temp = 15.5)
     # return modified_degree_days(date, base_temp)
     avg_temperature = average_temperature(date)
     avg_temperature <= base_temp ? (base_temp - avg_temperature) : 0.0

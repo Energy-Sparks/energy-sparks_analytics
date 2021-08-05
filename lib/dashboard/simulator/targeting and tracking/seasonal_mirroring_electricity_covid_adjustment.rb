@@ -1,12 +1,11 @@
 # correct for reduced consumption during the 3rd lockdown (Jan-Mar 2021)
 # - by using data from Jan-Mar 2020 if available
 # - or using data from Oct - Dec 2020 (mirrored)
-class SeasonalMirroringCovidAdjustment
+class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
   MAX_CHANGE_BEFORE_MIRRORING = 0.05
   include Logging
   def initialize(amr_data, holidays)
-    @amr_data = amr_data
-    @holidays = holidays
+    super(amr_data, holidays)
     @lockdown_start_date  = Date.new(2021, 1, 4)
     @lockdown_end_date    = Date.new(2021, 3, 7)
   end
@@ -142,18 +141,7 @@ class SeasonalMirroringCovidAdjustment
     end
   end
 
-  def average_kwh_for_daytype(start_date, end_date)
-    total = 0.0
-    count = 0
-    (start_date..end_date).each do |date|
-      next if @holidays.day_type(date) != :schoolday
-      if date.between?(@amr_data.start_date, @amr_data.end_date)
-        total += @amr_data.one_day_kwh(date)
-        count += 1
-      end
-    end
-    total / count
-  end
+
 
   def mirrored_weeks_dates
     @mirrored_weeks_dates ||= calculate_mirrored_week_dates
