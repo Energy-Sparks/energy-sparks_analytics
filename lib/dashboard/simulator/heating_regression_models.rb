@@ -1128,11 +1128,11 @@ module AnalyseHeatingAndHotWater
       model.predicted_kwh_temperature(temperature)
     end
 
-    private def heating_model_for_future_date(date)
+    def heating_model_for_future_date(date)
       holiday?(date) ? HEATINGHOLIDAYMODEL : weekend?(date) ? HEATINGWEEKENDMODEL : HEATINGOCCUPIEDMODEL
     end
 
-    private def non_heating_model_for_future_date(date)
+    def non_heating_model_for_future_date(date)
       holiday?(date) ? :holiday_hotwater_only : weekend?(date) ? :weekend_hotwater_only : :summer_occupied_all_days
     end
 
@@ -1169,7 +1169,7 @@ module AnalyseHeatingAndHotWater
       'Thermally massive'
     end
 
-    private def heating_model_for_future_date(date)
+    def heating_model_for_future_date(date)
       holiday?(date) ? HEATINGHOLIDAYMODEL : weekend?(date) ? HEATINGWEEKENDMODEL : school_day_model(date)
     end
 

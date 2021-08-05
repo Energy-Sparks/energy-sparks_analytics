@@ -4,7 +4,7 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 module Logging
-  @logger = Logger.new('log/targetting stats' + Time.now.strftime('%H %M') + '.log')
+  @logger = Logger.new('log/targetting not enough gas' + Time.now.strftime('%H %M') + '.log')
   logger.level = :debug
 end
 
@@ -21,7 +21,7 @@ def analyse_gas_meter(meter)
   puts "Total kwh = #{estimate.complete_year_amr_data.total}, estimate #{meter.annual_kwh_estimate}"
 end
 
-school_name_pattern_match = ['mundella*']
+school_name_pattern_match = ['wimble*'] # ['mundella*', ''] or MC school for modelling
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
@@ -33,6 +33,7 @@ end
 schools.each do |school|
   meter = school.aggregate_meter(:gas)
   unless meter.nil?
+    Logging.logger.info "Philip was here"
     analyse_gas_meter(meter)
   end
 end

@@ -2,6 +2,7 @@ class MissingGasEstimation < GasEstimationBase
   def complete_year_amr_data
     calc_class = case methodology
     when :model
+      ModelGasEstimation
     when :degree_days
       DegreeDayGasEstimation
     end
@@ -14,17 +15,7 @@ class MissingGasEstimation < GasEstimationBase
     heating_model
     :model
   rescue EnergySparksNotEnoughDataException => e
+    puts e.message
     :degree_days
-  end
-
-  private
-
-  def heating_model
-    @heating_model ||= calculate_heating_model
-  end
-
-  def calculate_heating_model
-    whole_meter_period = SchoolDatePeriod.year_to_date(:available, 'target model', @amr_data.start_date, @amr_data.end_date)
-    @meter.heating_model(whole_meter_period)
   end
 end
