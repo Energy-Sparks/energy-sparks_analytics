@@ -20,6 +20,14 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
     @amr_data.end_date    >= mirrored_weeks_dates[:lockdown_weeks].last.last
   end
 
+  def adjusted_amr_data
+    if mirroring_rules == :no_change_not_a_big_enough_reduction
+      @amr_data
+    else
+      adjust_amr_data
+    end
+  end
+
   def alternative_date(date)
     @alternative_date_cache ||= {}
     return nil if !date.between?(@lockdown_start_date, @lockdown_end_date) # don't bother caching it
@@ -57,6 +65,25 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
 
   private
 
+  def adjust_amr_data
+    @adjust_amr_data ||= calculate_adjust_amr_data
+  end
+
+  def calculate_adjust_amr_data
+    amr_copy = AMRData.copy_amr_data(@amr_data)
+
+    (@lockdown_start_date..@lockdown_end_date).each do |date|
+      substitute_date = alternative_date(date)
+      unless substitute_date.nil?
+        one_day = @amr_data.days_amr_data(substitute_date)
+        substituted_one_day = OneDayAMRReading.new(one_day.meter_id, date, 'COVD', substitute_date, DateTime.now, one_day.kwh_data_x48.clone)
+        amr_copy.add(date, substituted_one_day)
+      end
+    end
+
+    amr_copy
+  end
+
   def calculate_alternative_date(date)
     return nil if holiday_or_weekend?(date) # assume holidays and weekends not impacted
 
@@ -91,8 +118,7 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
   end
 
   def alternative_date_in_week(date, substitute_week)
-    weekday_index = date.wday - 1
-    substitute_day = substitute_week.first + weekday_index
+    substitute_day = substitute_week.first + date.wday
 
     if holiday_or_weekend?(substitute_day)
       # if in the low probability of this being a holiday

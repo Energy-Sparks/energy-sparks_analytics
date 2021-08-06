@@ -14,7 +14,7 @@ end
 def save_reductions(filename, data)
   puts "Saving results to #{filename}"
   CSV.open(filename, 'w') do |csv|
-    csv << ['school name', 'v. Autumn 2020 mirrored', 'v. Spring 2020']
+    csv << ['school name', 'v. Autumn 2020 mirrored', 'v. Spring 2020', '2020-2021 before', '2020-2021 after']
     data.each do |school_name, percent_reduction|
       csv << [school_name, sub_nil_nan(percent_reduction)].flatten
     end
@@ -34,7 +34,7 @@ end
 
 filename = "./Results/targeting_and_tracking_3rd covid lockdown schools.csv"
 reduction_filename = "./Results/targeting_and_tracking_3rd covid lockdown schools reduction stats.csv"
-school_name_pattern_match = ['trinity*'] # ' ['abbey*', 'bathamp*']
+school_name_pattern_match = ['abbey*', 'bathamp*']
 start_date = Date.new(2020, 7, 1)
 end_date = Date.new(2021, 6, 30)
 fuel_type = :electricity
@@ -60,9 +60,18 @@ school_names.each do |school_name|
   lockdown_reduction[school_name].push(seasonal.lockdown_versus_mirror_percent_change)
   lockdown_reduction[school_name].push(seasonal.lockdown_versus_previous_year_percent_change)
 
+  amr = seasonal.adjusted_amr_data
+  ed = meter.amr_data.end_date
+  sd = ed - 365
+  before = meter.amr_data.kwh_date_range(sd, ed)
+  after = amr.kwh_date_range(sd, ed)
+  puts "3rd lock down adjustment of AMRData before #{before} after #{after}"
+  lockdown_reduction[school_name].push(before)
+  lockdown_reduction[school_name].push(after)
+
   seasonal.log_mirror_amr_data_rules
 
-  (Date.new(2021, 1, 10)..Date.new(2021, 1, 16)).each do |date| # sunday to sunday
+  (Date.new(2021, 1, 10)..Date.new(2021, 1, 23)).each do |date| # sunday to sunday
     puts "Swapping #{date} for #{seasonal.alternative_date(date)}"
   end
   

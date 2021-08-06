@@ -66,6 +66,7 @@ class OneDayAMRReading
     'PSTD'  => { name: 'Partial data for end date - ignoring'},
     'PETD'  => { name: 'Partial data for end date - ignoring'},
     'DCCP'  => { name: 'Partial DCC data for interpolation'},
+    'COVD'  => { name: '3rd lockdown COVID adjustment T&T system'},
   }.freeze
 
   # allow access until front end changes made

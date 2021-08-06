@@ -147,34 +147,30 @@ class TargetMeter < Dashboard::Meter
 
   def create_target_amr_data(meter_to_clone)
     start_date = @target.first_target_date
-    # TODO(PH, 15Jul2021) better tie up end_date with target_start_date(date) calc
-    # which is end of academic year, currently Tain fails because target_start_date(date)
-    # = 31Jul2020, but request here is for 13Jul2020
-    end_date   = meter_to_clone.amr_data.end_date + 363 + 30
+    end_date   = meter_to_clone.amr_data.end_date + 363 + 30 # + 30 allow a margin
 
-    amr_data = AMRData.new(meter_to_clone.meter_type)
+    base_amr_data = adjusted_3rd_covid_lockdown_electricity_amr_data(meter_to_clone.amr_data)
+
+    target_amr_data = AMRData.new(meter_to_clone.meter_type)
+
     (start_date..end_date).each do |date|
-      # once a years worth of target data has been created then the target is compounded
-      # e.g. for a 95% target, year 1 is 95%, year 2 95%^2 etc.
       clone_date = date - 364
-      clone_date = alternative_3rd_lockdown_electricity_date(meter_to_clone, clone_date)
-
-      clone_amr_data = amr_data.date_exists?(clone_date) ? amr_data : meter_to_clone.amr_data
-      target_kwh_x48 = target_amr_data(date, clone_date, clone_amr_data)
-      amr_data.add(date, target_kwh_x48)
+      target_kwh_x48 = target_amr_data(date, clone_date, base_amr_data)
+      target_amr_data.add(date, target_kwh_x48)
     end
-    amr_data
+
+    target_amr_data
   end
 
-  def alternative_3rd_lockdown_electricity_date(meter_to_clone, date)
-    return date unless meter_to_clone.fuel_type == :electricity
+  def adjusted_3rd_covid_lockdown_electricity_amr_data(amr_data)
+    return meter_to_clone.amr_data unless meter_to_clone.fuel_type == :electricity
 
     unless @seasonal
-      @seasonal = SeasonalMirroringCovidAdjustment.new(meter_to_clone.amr_data, meter_collection.holidays)
+      @seasonal = SeasonalMirroringCovidAdjustment.new(amr_data, meter_collection.holidays)
       @seasonal.log_mirror_amr_data_rules
     end
 
-    @seasonal.alternative_date(date) || date
+    adjusted_amr_data
   end
 
   # TODO(PH, 14Jan2021) ~~~ duplicate of code in aggregation mixin
