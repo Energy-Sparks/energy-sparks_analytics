@@ -37,21 +37,21 @@ class ElectricityAnnualProfileFitter
 
   def aggregate_schoolweek_kwhs(start_date, end_date, exclude_date_ranges)
     return {} if @amr_data.start_date > start_date || @amr_data.end_date < end_date
-  
+
     school_week_kwh       = Array.new(MAXWEEKSANALYSIS, 0.0)
     school_week_day_count = Array.new(MAXWEEKSANALYSIS, 0.0)
-  
+
     (start_date..end_date).each do |date|
       next if @holidays.day_type(date) != :schoolday
 
       next if in_date_ranges?(exclude_date_ranges, date)
-  
+
       week = ElectricityAnnualProfileFitter.week_of_year(date)
-  
+
       school_week_kwh[week]       += @amr_data.one_day_kwh(date)
       school_week_day_count[week] += 1.0
     end
-  
+
     average_school_day_kwh_by_week = school_week_kwh.map.with_index do |kwh, week|
       if school_week_day_count[week] >= MINDAYSINWEEKFORANALYSIS
         kwh / school_week_day_count[week]
@@ -59,9 +59,9 @@ class ElectricityAnnualProfileFitter
         Float::NAN
       end
     end
-  
+
     total = average_school_day_kwh_by_week.map{ |v| v.nan? ? 0.0 : v }.sum
-  
+
     school_day_kwh_by_week_normalised_to_1 = average_school_day_kwh_by_week.map { |kwh| kwh / total }
   end
 
@@ -77,13 +77,13 @@ class ElectricityAnnualProfileFitter
     optimum = Minimiser.minimize(10.0, 50.0) {|sd| difference_to_theoretical_profile(sd, school_weeks_kwh) }
     [optimum.x_minimum, optimum.f_minimum]
   end
-  
+
   def difference_to_theoretical_profile(sd, school_weeks_kwh)
     theoretical_profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd.to_f, school_weeks_kwh,
       ElectricityAnnualProfileFitter.week_of_year(@start_date), ElectricityAnnualProfileFitter.week_of_year(@end_date)).profile
     difference(school_weeks_kwh, theoretical_profile)
   end
-  
+
   def difference(school_profile, standard_profile)
     diff = 0.0
     school_profile.each_with_index do |val, index|
@@ -98,17 +98,17 @@ class ElectricityAnnualProfileFitter
       weeks_avg_kwh = map_to_weeks(LogNormProfile.new(sd).profile, start_week, end_week)
       @profile = weeks_avg_kwh.map { |v| v * 52.0 / school_weeks(weekly_kwhs) }
     end
-  
+
     private
 
     # norm profile produces a profile staring at the lowest in July, peaking
     # in December then low again for June
     # so remap to the start/end dates of the year defined by the actual data
     def map_to_weeks(profile, start_week, end_week)
-       centre_week = start_week - 3 # lowest consumption approx week 23 not mid year at week 26, for fitting purposes
-       profile[centre_week..51] + profile[0...centre_week] + profile[centre_week..centre_week]
+      centre_week = start_week - 3 # lowest consumption approx week 23 not mid year at week 26, for fitting purposes
+      profile[centre_week..51] + profile[0...centre_week] + profile[centre_week..centre_week]
     end
-  
+
     def school_weeks(weekly_kwhs)
       weekly_kwhs.count{ |wkwh| !wkwh.nan? }
     end
@@ -120,15 +120,15 @@ class ElectricityAnnualProfileFitter
       @n = n
       @mean = mean
     end
-  
+
     def profile
       dist = (0...@n).to_a.map { |x| normal_distribution(@sd, @mean, x) }
       sum = dist.sum
       normalised_to_1 = dist.map { |v| v / sum }
     end
-  
+
     private
-  
+
     def normal_distribution(sd, mean, x)
       (1.0 / (sd * ((2.0 * Math::PI) ** 0.5)) ) * Math.exp( -0.5 * (((x - mean)/sd) ** 2.0) )
     end

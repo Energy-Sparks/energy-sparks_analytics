@@ -1,19 +1,30 @@
 require_relative './gas_estimation_base.rb'
 # for targeting and tracking:
 # - where there is less than 1 year of gas amr_data
-# - and the gas modelling is not working
-# estimate a complete year's worth of gas data using degree days
+# - and the gas modelling is working
+# estimate a complete year's worth of gas data using regression model data
 class ModelGasEstimation < GasEstimationBase
   HEATING_ON_DEGREE_DAYS = 0.0
 
   def complete_year_amr_data
-    calculate_missing_days
+    missing_days = calculate_missing_days
+
+    scale = if @annual_kwh.nil?
+              1.0
+            else
+              missing_days_scale(missing_days)
+            end
+        
+    add_scaled_missing_days(missing_days, scale)
+    
     one_year_amr_data
   end
 
   private
 
   def calculate_missing_days
+    missing_days = {}
+
     (start_of_year_date..@amr_data.end_date).each do |date|
       next if one_year_amr_data.date_exists?(date)
 
@@ -33,7 +44,24 @@ class ModelGasEstimation < GasEstimationBase
 
       profile = profiles_by_model_type_x48[model_type]
 
-      add_scaled_days_kwh(date, days_kwh, profile)
+      missing_days[date] = { days_kwh: days_kwh, profile: profile }
+    end
+    missing_days
+  end
+
+  def missing_days_scale(missing_days)
+    total_kwh_so_far = calculate_holey_amr_data_total_kwh(one_year_amr_data)
+
+    total_missing_days = missing_days.values.map { |missing_day| missing_day[:days_kwh] }.sum # statsample bug avoidance
+
+    remaining_kwh = @annual_kwh - total_kwh_so_far
+
+    remaining_kwh / total_missing_days
+  end
+
+  def add_scaled_missing_days(missing_days, scale)
+    missing_days.each do |date, missing_day|
+      add_scaled_days_kwh(date, scale * missing_day[:days_kwh], missing_day[:profile])
     end
   end
 

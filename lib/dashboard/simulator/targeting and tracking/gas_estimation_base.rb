@@ -14,7 +14,7 @@ class GasEstimationBase < TargetingAndTrackingFittingBase
   end
 
   def complete_year_amr_data
-    raise UnexpectedAbstractBaseClassRequest, "Unexepected call to base class #{self.class.name}"
+    raise UnexpectedAbstractBaseClassRequest, "Unexpected call to base class #{self.class.name}"
   end
 
   private
@@ -36,10 +36,25 @@ class GasEstimationBase < TargetingAndTrackingFittingBase
     @meter.heating_model(whole_meter_period)
   end
 
-  def add_scaled_days_kwh(date, scale, profile_x48)
+  def scaled_day(date, scale, profile_x48)
     days_x48 = AMRData.fast_multiply_x48_x_scalar(profile_x48, scale)
+    OneDayAMRReading.new(@meter.mpan_mprn, date, 'TARG', nil, DateTime.now, days_x48)
+  end
 
-    one_days_reading = OneDayAMRReading.new(@meter.mpan_mprn, date, 'TARG', nil, DateTime.now, days_x48)
+  def add_scaled_days_kwh(date, scale, profile_x48)
+    one_days_reading = scaled_day(date, scale, profile_x48)
+    add_day(date, one_days_reading)
+  end
+
+  def add_day(date, one_days_reading)
     one_year_amr_data.add(date, one_days_reading)
+  end
+
+  def calculate_holey_amr_data_total_kwh(holey_data)
+    total = 0.0
+    (holey_data.start_date..holey_data.end_date).each do |date|
+      total += holey_data.one_day_total(date) if holey_data.date_exists?(date)
+    end
+    total
   end
 end

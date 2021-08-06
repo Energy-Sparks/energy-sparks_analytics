@@ -53,12 +53,4 @@ class DegreeDayGasEstimation < GasEstimationBase
       degree_days
     end
   end
-
-  def calculate_holey_amr_data_total_kwh(holey_data)
-    total = 0.0
-    (holey_data.start_date..holey_data.end_date).each do |date|
-      total += holey_data.one_day_total(date) if holey_data.date_exists?(date)
-    end
-    total
-  end
 end

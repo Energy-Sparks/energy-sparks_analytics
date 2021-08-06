@@ -15,7 +15,6 @@ class MissingGasEstimation < GasEstimationBase
     heating_model
     :model
   rescue EnergySparksNotEnoughDataException => e
-    puts e.message
     :degree_days
   end
 end
