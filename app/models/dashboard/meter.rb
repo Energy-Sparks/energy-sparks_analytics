@@ -83,8 +83,32 @@ module Dashboard
       TargetMeter.enough_amr_data_to_set_target?(self)
     end
 
+    def target_attributes
+      combined_meter_and_aggregate_attributes(:targeting_and_tracking)
+    end
+
+    # there is already a aggregate_meter2? TODO(PH, 10Aug2021) deprecate other version is no errors raised
+    def aggregate_meter2?
+      mpxn == meter_collection.aggregate_meter(fuel_type).mpxn
+    end
+
+    def self.aggregate_pseudo_meter_attribute_key(fuel_type)
+      :"aggregated_#{fuel_type}"
+    end
+
+    def combined_meter_and_aggregate_attributes(type)
+      if aggregate_meter2?
+        [
+          attributes(type),
+          meter_collection.pseudo_meter_attributes(Meter.aggregate_pseudo_meter_attribute_key(fuel_type))[type]
+        ].compact.flatten
+      else
+        attributes(type)
+      end
+    end
+
     def target_set?
-      !attributes(:targeting_and_tracking).nil?
+      !target_attributes.empty?
     end
 
     def meter_number_of_pupils(local_school, start_date = nil, end_date = nil)
@@ -253,7 +277,10 @@ module Dashboard
 
     def aggregate_meter?
       # TODO(PH, 14Sep2019) - Make 90000000000000 etc. masks constants
-      90000000000000 & mpan_mprn > 0 || 80000000000000 & mpan_mprn > 0
+      aggregate = 90000000000000 & mpan_mprn > 0 || 80000000000000 & mpan_mprn > 0
+      # TODO(PH, 10Aug2021) deprecate in favour of aggregate_meter2? if continues to work
+      raise StandardError, "Unexpected inconsistency in aggregate meter logic see aggregate_meter2?" if aggregate != aggregate_meter2?
+      aggregate
     end
 
     def self.synthetic_combined_meter_mpan_mprn_from_urn(urn, fuel_type, group_number = 0)

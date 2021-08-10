@@ -50,7 +50,8 @@ def set_meter_attributes(schools, start_date = Date.new(2020, 9, 1), target = 0.
           }
         ]
 
-      meter.set_meter_attributes(attributes)
+      pseudo_attributes = { Dashboard::Meter.aggregate_pseudo_meter_attribute_key(fuel_type) => attributes }
+      school.merge_additional_pseudo_meter_attributes(pseudo_attributes)
     end
   end
 end
@@ -80,7 +81,7 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-school_name_pattern_match = ['b*']
+school_name_pattern_match = ['trinity*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
@@ -89,7 +90,7 @@ schools = school_names.map do |school_name|
   school_factory.load_or_use_cached_meter_collection(:name, school_name, source_db)
 end
 
-set_meter_attributes(schools)
+# set_meter_attributes(schools)
 
 schools.each do |school|
   test_service(school)

@@ -270,7 +270,7 @@ class AggregateDataService
         name: combined_name,
         floor_area: combined_floor_area,
         number_of_pupils: combined_pupils,
-        meter_attributes: @meter_collection.pseudo_meter_attributes(:"aggregated_#{fuel_type}")
+        meter_attributes: @meter_collection.pseudo_meter_attributes(Dashboard::Meter.aggregate_pseudo_meter_attribute_key(fuel_type))
       )
 
       combined_meter.add_aggregate_partial_meter_coverage_component(list_of_meters.map{ |m| m.partial_meter_coverage})

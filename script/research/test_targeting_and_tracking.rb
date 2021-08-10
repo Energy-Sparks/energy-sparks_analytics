@@ -50,7 +50,8 @@ def set_meter_attributes(schools, start_date = Date.new(2020, 9, 1), target = 0.
           }
         ]
 
-      meter.set_meter_attributes(attributes)
+      pseudo_attributes = { Dashboard::Meter.aggregate_pseudo_meter_attribute_key(fuel_type) => attributes }
+      school.merge_additional_pseudo_meter_attributes(pseudo_attributes)
     end
   end
 end

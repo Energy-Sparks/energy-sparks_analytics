@@ -44,7 +44,7 @@ class TargetAttributes
   def initialize(meter)
     @attributes = nil
     if meter.target_set?
-      @attributes = meter.attributes(:targeting_and_tracking).sort { |a, b| a[:start_date] <=> b[:start_date] } 
+      @attributes = meter.target_attributes.sort { |a, b| a[:start_date] <=> b[:start_date] } 
     end
   end
 
