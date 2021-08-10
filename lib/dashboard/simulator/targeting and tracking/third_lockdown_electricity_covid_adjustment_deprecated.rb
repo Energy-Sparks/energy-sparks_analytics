@@ -1,4 +1,4 @@
-# between 4 Jan 2021 and 8 Mar 2021 during the thrid UK lockdown
+# between 4 Jan 2021 and 8 Mar 2021 during the third UK lockdown
 # some schools saw up to a 30% reduction in electricity usage
 # this needs to be adjusted for for setting targets for 2021/2022
 #
@@ -7,7 +7,7 @@
 # 3. if not then:
 #    a. use data from the Autumn as a substitute
 #    b. adjust upwards the fit to the 2020/2021 data ex. the 3rd lockdown 
-class ThirdLockdownElectricityCovidAdjustment
+class ThirdLockdownElectricityCovidAdjustmentDeprecated
   def initialize(amr_data, holidays, start_date, end_date)
     @amr_data = amr_data
     @holidays = holidays

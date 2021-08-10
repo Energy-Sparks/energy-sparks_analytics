@@ -30,6 +30,11 @@ class TargetSchool < MeterCollection
   end
 
   def set_target?(meter)
+=begin
+    puts "Got here: setting meter #{meter.fuel_type} = 1: #{meter.nil?}"
+    puts "2: #{meter.target_set? }"
+    puts "3: #{meter.enough_amr_data_to_set_target? }"
+=end
     !meter.nil? && meter.target_set? && meter.enough_amr_data_to_set_target? 
   end
 end
@@ -149,28 +154,17 @@ class TargetMeter < Dashboard::Meter
     start_date = @target.first_target_date
     end_date   = meter_to_clone.amr_data.end_date + 363 + 30 # + 30 allow a margin
 
-    base_amr_data = adjusted_3rd_covid_lockdown_electricity_amr_data(meter_to_clone.amr_data)
+    adjusted_amr_data_info = OneYearTargetingAndTrackingAmrData.new(meter_to_clone).last_years_amr_data
 
     target_amr_data = AMRData.new(meter_to_clone.meter_type)
 
     (start_date..end_date).each do |date|
       clone_date = date - 364
-      target_kwh_x48 = target_amr_data(date, clone_date, base_amr_data)
+      target_kwh_x48 = target_one_day_amr_data(date, clone_date, adjusted_amr_data_info[:amr_data])
       target_amr_data.add(date, target_kwh_x48)
     end
 
     target_amr_data
-  end
-
-  def adjusted_3rd_covid_lockdown_electricity_amr_data(amr_data)
-    return meter_to_clone.amr_data unless meter_to_clone.fuel_type == :electricity
-
-    unless @seasonal
-      @seasonal = SeasonalMirroringCovidAdjustment.new(amr_data, meter_collection.holidays)
-      @seasonal.log_mirror_amr_data_rules
-    end
-
-    adjusted_amr_data
   end
 
   # TODO(PH, 14Jan2021) ~~~ duplicate of code in aggregation mixin
@@ -196,7 +190,7 @@ class TargetMeterMonthlyDayType < TargetMeter
   include Logging
   private
 
-  def target_amr_data(date, clone_date, clone_amr_data)
+  def target_one_day_amr_data(date, clone_date, clone_amr_data)
     day_type = @meter_collection.holidays.day_type(date)
     year_prior_average_profile_x48 = average_days_for_month_x48_xdaytype(clone_date, clone_amr_data)[day_type]
     target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(year_prior_average_profile_x48, @target.target(date))
@@ -259,7 +253,7 @@ class TargetMeterDailyDayType < TargetMeter
 
   private
 
-  def target_amr_data(date, clone_date, clone_amr_data)
+  def target_one_day_amr_data(date, clone_date, clone_amr_data)
     days_average_profile_x48 = average_profile_for_day_x48(clone_date, clone_amr_data)
     target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(days_average_profile_x48, @target.target(date))
     OneDayAMRReading.new(mpan_mprn, date, 'TARG', nil, DateTime.now, target_kwh_x48)

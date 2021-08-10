@@ -56,25 +56,26 @@ school_names.each do |school_name|
 
   seasonal = SeasonalMirroringCovidAdjustment.new(meter.amr_data, school.holidays)
 
-  lockdown_reduction[school_name] = []
-  lockdown_reduction[school_name].push(seasonal.lockdown_versus_mirror_percent_change)
-  lockdown_reduction[school_name].push(seasonal.lockdown_versus_previous_year_percent_change)
+  info = seasonal.adjusted_amr_data
 
-  amr = seasonal.adjusted_amr_data
+  lockdown_reduction[school_name] = []
+  lockdown_reduction[school_name].push(info[:percent_reduction_versus_Oct_Dec_2020])
+  lockdown_reduction[school_name].push(info[:percent_reduction_versus_Jan_Mar_2020])
+
   ed = meter.amr_data.end_date
   sd = ed - 365
   before = meter.amr_data.kwh_date_range(sd, ed)
-  after = amr.kwh_date_range(sd, ed)
+  after = info[:amr_data].kwh_date_range(sd, ed)
   puts "3rd lock down adjustment of AMRData before #{before} after #{after}"
   lockdown_reduction[school_name].push(before)
   lockdown_reduction[school_name].push(after)
 
-  seasonal.log_mirror_amr_data_rules
+  puts info[:adjustments_applied]
 
   (Date.new(2021, 1, 10)..Date.new(2021, 1, 23)).each do |date| # sunday to sunday
-    puts "Swapping #{date} for #{seasonal.alternative_date(date)}"
+    # puts "Swapping #{date} for #{seasonal.alternative_date(date)}"
   end
-  
+
 =begin
 
   fitter = ElectricityAnnualProfileFitter.new(meter.amr_data, school.holidays, start_date, end_date)
@@ -88,6 +89,8 @@ school_names.each do |school_name|
   data["#{school_name} - best fit #{fitted_data[:sd].round(1)}"] = fitted_data[:profile]
 =end
 end
+
+ap lockdown_reduction
 
 save_reductions(reduction_filename, lockdown_reduction)
 exit

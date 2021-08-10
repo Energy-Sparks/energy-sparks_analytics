@@ -16,12 +16,18 @@ def analyse_gas_meter(meter)
   puts "Analysing #{meter.mpxn}"
   puts "sd #{meter.amr_data.start_date} ed #{meter.amr_data.end_date}"
   puts "d1 #{meter.amr_data.keys.sort.first} d2 #{meter.amr_data.keys.sort.last}"
+  gas_estimate_info = OneYearTargetingAndTrackingAmrData.new(meter).last_years_amr_data
+  puts "Using method: #{gas_estimate_info[:adjustments_applied]}"
+  puts "Total kwh = #{gas_estimate_info[:amr_data].total}, estimate #{meter.annual_kwh_estimate}"
+=begin
+deprecated delete
   estimate = MissingGasEstimation.new(meter, meter.annual_kwh_estimate)
   puts "Using method #{estimate.methodology}"
   puts "Total kwh = #{estimate.complete_year_amr_data.total}, estimate #{meter.annual_kwh_estimate}"
+=end
 end
 
-school_name_pattern_match = ['wimble*'] # ['mundella*', ''] or MC school for modelling
+school_name_pattern_match = ['mundella*', 'wimble*'] # ['mundella*', ''] or MC school for modelling
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
@@ -31,6 +37,8 @@ schools = school_names.map do |school_name|
 end
 
 schools.each do |school|
+  puts '=' * 80
+  puts "Loading #{school.name}"
   meter = school.aggregate_meter(:gas)
   unless meter.nil?
     Logging.logger.info "Philip was here"

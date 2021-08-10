@@ -2,6 +2,7 @@
 # - by using data from Jan-Mar 2020 if available
 # - or using data from Oct - Dec 2020 (mirrored)
 class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
+  class Unexpected3rdLockdownCOVIDAdjustment < StandardError; end
   MAX_CHANGE_BEFORE_MIRRORING = 0.05
   include Logging
   def initialize(amr_data, holidays)
@@ -10,28 +11,50 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
     @lockdown_end_date    = Date.new(2021, 3, 7)
   end
 
-  def enough_data_for_annual_mirror?
-    @amr_data.start_date  <= @lockdown_start_date - 365 &&
-    @amr_data.end_date    >= @lockdown_end_date
+  def enough_data?
+    enough_data_for_annual_mirror? || enough_data_for_seasonal_mirror?
   end
 
-  def enough_data_for_seasonal_mirror?
-    @amr_data.start_date  <= mirrored_weeks_dates[:mirror_weeks].last.first &&
-    @amr_data.end_date    >= mirrored_weeks_dates[:lockdown_weeks].last.last
-  end
-
+  # returns a 3 part hash: { :amr_data => 1+year's amr data , :percent_real_data => Float, :adjustments_applied => text }
   def adjusted_amr_data
-    if mirroring_rules == :no_change_not_a_big_enough_reduction
-      @amr_data
+    case mirroring_rules
+    when :no_change_not_a_big_enough_reduction
+      unadjusted_amr_data
+    when :replace_with_jan_mar_2020, :replace_with_oct_dec_2020_reversed
+      adjusted_amr_data_private
     else
-      adjust_amr_data
+      raise Unexpected3rdLockdownCOVIDAdjustment, "of type #{mirroring_rules}"
     end
   end
+
+  private
 
   def alternative_date(date)
     @alternative_date_cache ||= {}
     return nil if !date.between?(@lockdown_start_date, @lockdown_end_date) # don't bother caching it
     @alternative_date_cache[date] ||= calculate_alternative_date(date)
+  end
+
+  def enough_data_for_annual_mirror?
+    @amr_data.start_date  <= @lockdown_start_date - 365 &&
+    @amr_data.end_date    >= @lockdown_end_date
+  end
+
+  def adjustment_description
+    msg = 'Correcting for 3rd lockdown (Jan-Mar 2021) electricity kWh school day reduction. '
+    msg += "Reduction v. Jan-Mar 2020 #{FormatEnergyUnit.format(:percent, lockdown_versus_previous_year_percent_change, :text)}. "
+    msg += "Reduction v. Oct-Dec 2020 #{FormatEnergyUnit.format(:percent, lockdown_versus_mirror_percent_change, :text)}. "
+    msg += "Will apply a correction if change > #{MAX_CHANGE_BEFORE_MIRRORING * 100.0}%. "
+
+    rule_description = {
+      replace_with_jan_mar_2020:            'Copying Jan-Mar 2020 - over reduced Jan-Mar 2021 lockdown data',
+      replace_with_oct_dec_2020_reversed:   'Copying Oct-Dec 2020 (reversed) - over reduced Jan-Mar 2021 lockdown data',
+      no_change_not_a_big_enough_reduction: 'Not correcting as hasnt dropped enough',
+      not_enough_data:                      'Not enough data'
+    }
+
+    msg += "Using the following adjustment #{rule_description[mirroring_rules]}"
+    msg
   end
 
   def mirroring_rules
@@ -46,31 +69,18 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
     @lockdown_versus_previous_year_percent_change ||= reduction_percent(:lockdown_weeks, :previous_year_weeks)
   end
 
-  def log_mirror_amr_data_rules
-    logger.info 'Correcting for 3rd lockdown (Jan-Mar 2021) electricity kWh school day reduction'
-    logger.info "Reduction v. Jan-Mar 2020 #{FormatEnergyUnit.format(:percent, lockdown_versus_previous_year_percent_change, :text)}"
-    logger.info "Reduction v. Oct-Dec 2020 #{FormatEnergyUnit.format(:percent, lockdown_versus_mirror_percent_change, :text)}"
-    logger.info "Will apply a correction if change > #{MAX_CHANGE_BEFORE_MIRRORING * 100.0}%"
-
-    rule_description = {
-      replace_with_jan_mar_2020:            'Copying Jan-Mar 2020 - over reduced Jan-Mar 2021 lockdown data',
-      replace_with_oct_dec_2020_reversed:   'Copying Oct-Dec 2020 (reversed) - over reduced Jan-Mar 2021 lockdown data',
-      no_change_not_a_big_enough_reduction: 'Not correcting as hasnt dropped enough',
-      not_enough_data:                      'Not enough data'
-    }
-
-    puts "Using the following adjustment #{rule_description[mirroring_rules]}"
-    logger.info "Using the following adjustment #{rule_description[mirroring_rules]}"
+  def enough_data_for_seasonal_mirror?
+    @amr_data.start_date  <= mirrored_weeks_dates[:mirror_weeks].last.first &&
+    @amr_data.end_date    >= mirrored_weeks_dates[:lockdown_weeks].last.last
   end
 
-  private
-
-  def adjust_amr_data
-    @adjust_amr_data ||= calculate_adjust_amr_data
+  def adjusted_amr_data_private
+    @adjusted_amr_data_private ||= calculate_adjust_amr_data
   end
 
   def calculate_adjust_amr_data
     amr_copy = AMRData.copy_amr_data(@amr_data)
+    adjusted_day_count = 0
 
     (@lockdown_start_date..@lockdown_end_date).each do |date|
       substitute_date = alternative_date(date)
@@ -78,10 +88,29 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
         one_day = @amr_data.days_amr_data(substitute_date)
         substituted_one_day = OneDayAMRReading.new(one_day.meter_id, date, 'COVD', substitute_date, DateTime.now, one_day.kwh_data_x48.clone)
         amr_copy.add(date, substituted_one_day)
+        adjusted_day_count += 1
       end
     end
 
-    amr_copy
+    {
+      amr_data:                               amr_copy,
+      percent_real_data:                      (365 - adjusted_day_count) / 365.0,
+      adjustments_applied:                    adjustment_description,
+      percent_reduction_versus_Oct_Dec_2020:  lockdown_versus_mirror_percent_change,
+      percent_reduction_versus_Jan_Mar_2020:  lockdown_versus_previous_year_percent_change,
+      rule:                                   mirroring_rules
+    }
+  end
+
+  def unadjusted_amr_data
+    {
+      amr_data:                               @amr_data,
+      percent_real_data:                      1.0,
+      adjustments_applied:                    'No 3rd Lockdown electricity amr data adjustment supplied as not enough of a reduction during the lockdown',
+      percent_reduction_versus_Oct_Dec_2020:  lockdown_versus_mirror_percent_change,
+      percent_reduction_versus_Jan_Mar_2020:  lockdown_versus_previous_year_percent_change,
+      rule:                                   mirroring_rules
+    }
   end
 
   def calculate_alternative_date(date)
@@ -167,15 +196,11 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
     end
   end
 
-
-
   def mirrored_weeks_dates
     @mirrored_weeks_dates ||= calculate_mirrored_week_dates
   end
 
   def calculate_mirrored_week_dates
-    results = {}
-
     starting_sunday = Date.new(2021, 1, 3)
     ending_saturday = Date.new(2021, 3, 6)
     lockdown_weeks = classify_weeks(starting_sunday, ending_saturday, :schoolday)
@@ -204,10 +229,10 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
   end
 
   def week_type(start_monday, end_friday)
-    type_count = { schoolday: 0,  weekend: 0,  holiday: 0 }
+    type_count = { schoolday: 0, weekend: 0, holiday: 0 }
     (start_monday..end_friday).each do |date|
       type_count[@holidays.day_type(date)] += 1
     end
-    type_count.sort_by { |daytype, count| -count }.to_h.keys[0]
+    type_count.sort_by { |_daytype, count| -count }.to_h.keys[0]
   end
 end

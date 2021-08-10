@@ -110,7 +110,7 @@ def save_csv(year, data)
   end
 end
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['b*']
 years = [2018, 2019, 2020]
 
 source_db = :unvalidated_meter_data

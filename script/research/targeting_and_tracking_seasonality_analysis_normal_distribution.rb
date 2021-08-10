@@ -155,7 +155,7 @@ def skip
   save_csv_dist(dist)
 end
 
-school_name_pattern_match = ['*'] # ' ['abbey*', 'bathamp*']
+school_name_pattern_match = ['b*'] # ' ['abbey*', 'bathamp*']
 
 source_db = :unvalidated_meter_data
 

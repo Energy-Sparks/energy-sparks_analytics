@@ -109,6 +109,7 @@ class CalculateMonthlyTrackAndTraceData
   end
 
   def target_meter
+    puts "Got here for fuel_type #{@fuel_type} got #{@school.target_school.aggregate_meter(@fuel_type)}"
     @school.target_school.aggregate_meter(@fuel_type)
   end
 end

@@ -20,8 +20,9 @@ def covid_stats(schools)
       else
         if fuel_type == :electricity
           season = SeasonalMirroringCovidAdjustment.new(meter.amr_data, school.holidays)
-          stats[season.mirroring_rules] ||= []
-          stats[season.mirroring_rules].push(school.name)
+          rule = season.enough_data? ? season.adjusted_amr_data[:rule] : 'not enough data'
+          stats[rule] ||= []
+          stats[rule].push(school.name)
         end
 
         enough_data = TargetMeter.enough_amr_data_to_set_target?(meter)
@@ -54,7 +55,7 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['b*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)

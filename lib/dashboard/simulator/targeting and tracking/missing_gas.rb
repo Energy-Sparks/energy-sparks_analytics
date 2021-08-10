@@ -1,5 +1,5 @@
 class MissingGasEstimation < GasEstimationBase
-  def complete_year_amr_data
+  def adjusted_amr_data
     calc_class = case methodology
     when :model
       ModelGasEstimation

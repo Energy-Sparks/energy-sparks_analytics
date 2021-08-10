@@ -55,6 +55,27 @@ def set_meter_attributes(schools, start_date = Date.new(2020, 9, 1), target = 0.
   end
 end
 
+def test_service(school)
+  puts '=' * 80
+  puts "Testing service for #{school.name}"
+  %i[electricity gas storage_heater].each do |fuel_type|
+    puts "For fuel type #{fuel_type}"
+    meter = school.aggregate_meter(fuel_type)
+    if meter.nil?
+      puts "Meter of fuel type #{fuel_type} not available"
+    else
+      if !meter.enough_amr_data_to_set_target?
+        puts 'not enough data to set target'
+      elsif !meter.target_set?
+        puts 'enough data but no target set'
+      else
+        service = TargetsService.new(school, fuel_type)
+        ap service.progress
+      end
+    end
+  end
+end
+
 def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
@@ -69,6 +90,10 @@ schools = school_names.map do |school_name|
 end
 
 set_meter_attributes(schools)
+
+schools.each do |school|
+  test_service(school)
+end
 
 script = test_script_config(school_name_pattern_match, source_db, {})
 RunTests.new(script).run

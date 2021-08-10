@@ -14,10 +14,16 @@ class ModelGasEstimation < GasEstimationBase
             else
               missing_days_scale(missing_days)
             end
+
+    scale_description = scale == 1.0 ? ' - no annual kwh estimate to scale' : ''
         
     add_scaled_missing_days(missing_days, scale)
-    
-    one_year_amr_data
+
+    {
+      amr_data:             one_year_amr_data,
+      percent_real_data:    (365 - missing_days.length)/ 365.0,
+      adjustments_applied:  "less than 1 years data, filling in missing using regression models #{scale_description}"
+    }
   end
 
   private

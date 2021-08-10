@@ -13,7 +13,8 @@ class TargetsService
       monthly_performance: data_series(:monthly_performance),
       cumulative_targets_kwh: data_series(:full_cumulative_targets_kwhs),
       cumulative_usage_kwh: data_series(:full_cumulative_current_year_kwhs),
-      cumulative_performance: data_series(:cumulative_performance)
+      cumulative_performance: data_series(:cumulative_performance),
+      partial_months: data_series(:partial_months)
     )
   end
 
