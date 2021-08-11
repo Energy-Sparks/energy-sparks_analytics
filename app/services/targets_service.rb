@@ -2,6 +2,7 @@ class TargetsService
   def initialize(aggregate_school, fuel_type)
     @aggregate_school = aggregate_school
     @fuel_type = fuel_type
+    @aggregate_meter = @aggregate_school.aggregate_meter(@fuel_type)
   end
 
   def progress

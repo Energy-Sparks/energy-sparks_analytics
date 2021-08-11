@@ -189,7 +189,7 @@ class Holidays
 
   def is_holiday(date)
     return nil unless find_holiday(date, @school_days).nil? # inset day out of school not a holiday
-    
+
     school_holiday      = find_holiday(date, @holidays)
     return school_holiday       unless school_holiday.nil?
 
@@ -223,7 +223,7 @@ class Holidays
   end
 
   def find_previous_holiday_to_current(current_holiday, number_holidays_before = 1, min_days_in_holiday = nil)
-    raise EnergySparksUnexpectedStateException, "number holidays before = #{number_holidays_before} needs to be > 0" if number_holidays_before <= 0 
+    raise EnergySparksUnexpectedStateException, "number holidays before = #{number_holidays_before} needs to be > 0" if number_holidays_before <= 0
 
     holiday_index = SchoolDatePeriod.find_period_index_for_date(current_holiday.middle_date, @holidays)
 
@@ -247,7 +247,7 @@ class Holidays
 
   def same_holiday_previous_year(this_years_holiday_period, max_days_search = 365 + 100)
     this_years_holiday_mid_date = this_years_holiday_period.start_date + (this_years_holiday_period.days / 2).floor
-    this_years_holiday_type = type(this_years_holiday_mid_date) 
+    this_years_holiday_type = type(this_years_holiday_mid_date)
     # start 200 days back, the only real concern is to mis Easter which moves by up to ~40 days
     (200..max_days_search).each do |num_days_offset_backwards|
       date = this_years_holiday_period.start_date - num_days_offset_backwards
@@ -453,9 +453,9 @@ class Holidays
     yrs_to_date = {}
 
     last_date_of_period = end_date
-    
+
     last_date_of_period = nearest_previous_saturday(last_date_of_period) if move_to_saturday_boundary
-    
+
     # go backwards
     offset = 0
     while activation_date - 365 * offset > start_date
