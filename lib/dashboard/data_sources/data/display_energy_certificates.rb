@@ -9,7 +9,6 @@ require 'json'
 require 'date'
 require 'logger'
 require 'faraday'
-require 'awesome_print'
 
 class DisplayEnergyCertificateJson
   def initialize(api_key = ENV['DECAPIKEY'])
