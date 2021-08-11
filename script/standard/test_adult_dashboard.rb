@@ -20,6 +20,7 @@ script = {
                                 summarise_differences: true,
                                 report_failed_charts:   :summary, # :detailed
                                 user: { user_role: :analytics, staff_role: nil },
+
                                 pages: %i[electric_target gas_target],
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
