@@ -21,6 +21,39 @@ class TargetsService
     )
   end
 
+  def culmulative_progress_chart
+    case @fuel_type
+    when :electricity
+      :targeting_and_tracking_weekly_electricity_to_date_cumulative_line
+    when :gas
+      :targeting_and_tracking_weekly_gas_to_date_cumulative_line
+    when :storage_heater
+      :targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line
+    end
+  end
+
+  def weekly_progress_chart
+    case @fuel_type
+    when :electricity
+      :targeting_and_tracking_weekly_electricity_to_date_line
+    when :gas
+      :targeting_and_tracking_weekly_gas_one_year_line
+    when :storage_heater
+      :targeting_and_tracking_weekly_storage_heater_one_year_line
+    end
+  end
+
+  def weekly_progress_to_date_chart
+    case @fuel_type
+    when :electricity
+      :targeting_and_tracking_weekly_electricity_one_year_line
+    when :gas
+      :targeting_and_tracking_weekly_gas_one_year_line
+    when :storage_heater
+      :targeting_and_tracking_weekly_storage_heater_one_year_line
+    end
+  end
+
   private
 
   def data_headers
