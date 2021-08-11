@@ -9,7 +9,7 @@ script = {
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
                             ],
-  schools: ['*'],
+  schools: ['trinity*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
@@ -20,8 +20,8 @@ script = {
                                 summarise_differences: true,
                                 report_failed_charts:   :summary, # :detailed
                                 user: { user_role: :analytics, staff_role: nil },
-                                no_pages: %i[electricity_profit_loss gas_profit_loss baseload],
-                                no_pages: %i[electric_target],
+
+                                pages: %i[electric_target gas_target],
                                 compare_results: [
                                   { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
                                   { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },

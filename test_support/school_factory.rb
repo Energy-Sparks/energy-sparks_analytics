@@ -11,6 +11,10 @@ class SchoolFactory
 
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
   def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {})
+
+    school = find_cached_school(identifier, source)
+    return school unless school.nil?
+
     meter_collection = case source
     when :aggregated_meter_collection
       load_aggregated_meter_collection(identifier)
@@ -23,7 +27,12 @@ class SchoolFactory
     when :unvalidated_meter_data
       load_unvalidated_meter_data(identifier, meter_attributes_overrides: meter_attributes_overrides)
     end
+
+    add_meter_collection_to_cache(identifier, source, meter_collection)
+
     return meter_collection unless meter_collection.nil?
+=begin
+# old meta data interface commented out PH 4Aug2021
     school = @schools_meta_data.school(identifier, identifier_type)
     if school.nil?
       nil
@@ -36,6 +45,7 @@ class SchoolFactory
       end
       meter_collection
     end
+=end
   end
 
   def self.unique_short_school_names_for_excel_worksheet_tab_names(full_names)
@@ -172,12 +182,12 @@ class SchoolFactory
     end
   end
 
-  def find_cached_school(urn, source)
-    @school_cache.dig(urn, source)
+  def find_cached_school(identifier, source)
+    @school_cache.dig(identifier, source)
   end
 
-  def add_meter_collection_to_cache(school, source, meter_collection)
-    (@school_cache[school.urn] ||= {})[source] = meter_collection
+  def add_meter_collection_to_cache(identifier, source, school)
+    (@school_cache[identifier] ||= {})[source] = school
   end
 
   def load_meter_readings(school, source, meter_attributes)

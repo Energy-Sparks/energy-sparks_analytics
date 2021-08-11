@@ -395,6 +395,21 @@ class MeterAttributes
     )
   end
 
+  class EstimatedPeriodConsumption < MeterAttributeTypes::AttributeBase
+
+    id :estimated_period_consumption
+    aggregate_over :estimated_period_consumption
+    name 'Estimated consumption for period in absence of amr data (typically a year)'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define(required: true),
+        end_date:   MeterAttributeTypes::Date.define(required: true),
+        kwh:        MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
+
   class EconomicTariff < MeterAttributeTypes::AttributeBase
     id :economic_tariff
     key :economic_tariff

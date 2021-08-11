@@ -1,6 +1,7 @@
 
 require_relative './advice_general.rb'
 class AdviceTargets < AdviceBase
+  MAX_DAYS_OUT_OF_DATE_FOR_TARGETS = 30
   def initialize(school, fuel_type)
     super(school)
     @fuel_type = fuel_type
@@ -11,7 +12,8 @@ class AdviceTargets < AdviceBase
   end
 
   def relevance
-    (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
+    rel = !aggregate_meter.nil? && aggregate_meter.target_set? && aggregate_meter.amr_data.end_date > (Date.today - MAX_DAYS_OUT_OF_DATE_FOR_TARGETS)
+    rel ? :relevant : :never_relevant
   end
 
   def content(user_type: nil)
@@ -19,12 +21,19 @@ class AdviceTargets < AdviceBase
     charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.to_s.humanize}</h2>" } )
     charts_and_html += debug_content
     charts_and_html.push( { type: :html,  content: brief_intro_to_targeting_and_tracking } )
-    
+
     charts_and_html.push( { type: :html,  content: current_targets } )
     charts_and_html.push( { type: :html,  content: monthly_targeting_and_tracking_tables } )
 
-    charts_and_html.push( { type: :html,  content: weekly_chart_intro } )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_line)
+    charts_and_html.push( { type: :html,  content: culmulative_weekly_chart_intro } )
+    create_chart(charts_and_html, culmulative_progress_chart)
+
+    charts_and_html.push( { type: :html,  content: weekly_chart_drilldown} )
+    create_chart(charts_and_html, weekly_progress_chart)
+
+    charts_and_html.push( { type: :html,  content: weekly_chart_intro_shorter_timescales } )
+    create_chart(charts_and_html, weekly_progress_to_date_chart)
+=begin
     charts_and_html.push( { type: :html,  content: weekly_chart_drilldown} )
     create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_column)
 
@@ -37,9 +46,9 @@ class AdviceTargets < AdviceBase
     create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_cumulative_line)
     create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_cumulative_line)
 
-    charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
-
     add_charts_for_testing(charts_and_html)
+=end
+    charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
 
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
@@ -78,7 +87,7 @@ class AdviceTargets < AdviceBase
 
   def target_table_html
     relative_percents = target_meter_attributes.table.map { |row| [row[0].strftime('%d-%b-%Y'), row[1] - 1.0] }
-    HtmlTableFormatting.new(['Start date','target'], relative_percents, nil, [String, :relative_percent]).html
+    HtmlTableFormatting.new(['Start date', 'target'], relative_percents, nil, [String, :relative_percent]).html
   end
 
   def monthly_tracking_table
@@ -245,6 +254,22 @@ class AdviceTargets < AdviceBase
     }
     ERB.new(text).result(binding)
   end
+
+  def targets_service
+    @targets_service ||= TargetsService.new(@school, @fuel_type)
+  end
+
+  def culmulative_progress_chart
+    targets_service.culmulative_progress_chart
+  end
+
+  def weekly_progress_chart
+    targets_service.weekly_progress_chart
+  end
+
+  def weekly_progress_to_date_chart
+    targets_service.weekly_progress_to_date_chart
+  end
 end
 
 class AdviceTargetsElectricity < AdviceTargets
@@ -253,18 +278,6 @@ class AdviceTargetsElectricity < AdviceTargets
   end
   protected def aggregate_meter
     @school.aggregated_electricity_meters
-  end
-  def monthly_chart
-    :targeting_and_tracking_weekly_electricity_1_year_line
-  end
-  def monthly_chart_cumulative
-    :targeting_and_tracking_weekly_electricity_1_year_cumulative_line
-  end
-  def add_charts_for_testing(charts_and_html)
-    %i[
-    ].each do |chart_name|
-      create_chart(charts_and_html, chart_name)
-    end
   end
 end
 
@@ -275,20 +288,6 @@ class AdviceTargetsGas < AdviceTargets
   protected def aggregate_meter
     @school.aggregated_heat_meters
   end
-  def monthly_chart
-    :targeting_and_tracking_weekly_gas_1_year_line
-  end
-  def monthly_chart_cumulative
-    :targeting_and_tracking_weekly_electricity_1_year_cumulative_line
-  end
-  def add_charts_for_testing(charts_and_html)
-    %i[
-    ].each do |chart_name|
-      create_chart(charts_and_html, chart_name)
-    end
-  end
-  def add_charts_for_testing(charts_and_html)
-  end
 end
 
 class AdviceTargetsStorageHeaters < AdviceTargets
@@ -297,7 +296,5 @@ class AdviceTargetsStorageHeaters < AdviceTargets
   end
   protected def aggregate_meter
     @school.storage_heater_meter
-  end
-  def add_charts_for_testing(charts_and_html)
   end
 end

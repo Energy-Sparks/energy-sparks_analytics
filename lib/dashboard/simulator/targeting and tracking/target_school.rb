@@ -30,6 +30,11 @@ class TargetSchool < MeterCollection
   end
 
   def set_target?(meter)
+=begin
+    puts "Got here: setting meter #{meter.fuel_type} = 1: #{meter.nil?}"
+    puts "2: #{meter.target_set? }"
+    puts "3: #{meter.enough_amr_data_to_set_target? }"
+=end
     !meter.nil? && meter.target_set? && meter.enough_amr_data_to_set_target? 
   end
 end
@@ -39,7 +44,7 @@ class TargetAttributes
   def initialize(meter)
     @attributes = nil
     if meter.target_set?
-      @attributes = meter.attributes(:targeting_and_tracking).sort { |a, b| a[:start_date] <=> b[:start_date] } 
+      @attributes = meter.target_attributes.sort { |a, b| a[:start_date] <=> b[:start_date] } 
     end
   end
 
@@ -120,6 +125,15 @@ class TargetMeter < Dashboard::Meter
     [end_date - 365, target.first_target_date, @original_meter.amr_data.start_date].max
   end
 
+  def self.enough_amr_data_to_set_target?(meter)
+    meter.amr_data.end_date > Date.today - 30 &&
+    meter.amr_data.days > 365 + 30
+  end
+
+  def self.annual_kwh_estimate_required?(meter)
+    meter.amr_data.days < 365
+  end
+
   def target_start_date_deprecated(date)
     academic_year = @meter_collection.holidays.calculate_academic_year_tolerant_of_missing_data(date)
     start_of_academic_year = Date.new(academic_year.start_date.year, academic_year.start_date.month, 1)
@@ -142,21 +156,19 @@ class TargetMeter < Dashboard::Meter
 
   def create_target_amr_data(meter_to_clone)
     start_date = @target.first_target_date
-    # TODO(PH, 15Jul2021) better tie up end_date with target_start_date(date) calc
-    # which is end of academic year, currently Tain fails because target_start_date(date)
-    # = 31Jul2020, but request here is for 13Jul2020
-    end_date   = meter_to_clone.amr_data.end_date + 363 + 30
+    end_date   = meter_to_clone.amr_data.end_date + 363 + 30 # + 30 allow a margin
 
-    amr_data = AMRData.new(meter_to_clone.meter_type)
+    adjusted_amr_data_info = OneYearTargetingAndTrackingAmrData.new(meter_to_clone).last_years_amr_data
+
+    target_amr_data = AMRData.new(meter_to_clone.meter_type)
+
     (start_date..end_date).each do |date|
-      # once a years worth of target data has been created then the target is compounded
-      # e.g. for a 95% target, year 1 is 95%, year 2 95%^2 etc.
       clone_date = date - 364
-      clone_amr_data = amr_data.date_exists?(clone_date) ? amr_data : meter_to_clone.amr_data
-      target_kwh_x48 = target_amr_data(date, clone_date, clone_amr_data)
-      amr_data.add(date, target_kwh_x48)
+      target_kwh_x48 = target_one_day_amr_data(date, clone_date, adjusted_amr_data_info[:amr_data])
+      target_amr_data.add(date, target_kwh_x48)
     end
-    amr_data
+
+    target_amr_data
   end
 
   # TODO(PH, 14Jan2021) ~~~ duplicate of code in aggregation mixin
@@ -182,7 +194,7 @@ class TargetMeterMonthlyDayType < TargetMeter
   include Logging
   private
 
-  def target_amr_data(date, clone_date, clone_amr_data)
+  def target_one_day_amr_data(date, clone_date, clone_amr_data)
     day_type = @meter_collection.holidays.day_type(date)
     year_prior_average_profile_x48 = average_days_for_month_x48_xdaytype(clone_date, clone_amr_data)[day_type]
     target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(year_prior_average_profile_x48, @target.target(date))
@@ -245,7 +257,7 @@ class TargetMeterDailyDayType < TargetMeter
 
   private
 
-  def target_amr_data(date, clone_date, clone_amr_data)
+  def target_one_day_amr_data(date, clone_date, clone_amr_data)
     days_average_profile_x48 = average_profile_for_day_x48(clone_date, clone_amr_data)
     target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(days_average_profile_x48, @target.target(date))
     OneDayAMRReading.new(mpan_mprn, date, 'TARG', nil, DateTime.now, target_kwh_x48)

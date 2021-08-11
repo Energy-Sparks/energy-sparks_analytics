@@ -43,6 +43,7 @@ Results/*
 DCC/*
 OldInputData/*
 OldMeterReadings/*
+Simulator/*
 documents/*
 TestResults/*
 BenchmarkLog/*

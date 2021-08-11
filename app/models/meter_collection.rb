@@ -57,6 +57,10 @@ class MeterCollection
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
   end
 
+  def merge_additional_pseudo_meter_attributes(pseudo_meter_attributes)
+    @pseudo_meter_attributes = @pseudo_meter_attributes.deep_merge(pseudo_meter_attributes)
+  end
+
   def matches_identifier?(identifier, identifier_type)
     case identifier_type
     when :name
