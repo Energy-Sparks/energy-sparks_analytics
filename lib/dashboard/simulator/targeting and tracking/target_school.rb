@@ -130,6 +130,10 @@ class TargetMeter < Dashboard::Meter
     meter.amr_data.days > 365 + 30
   end
 
+  def self.annual_kwh_estimate_required?(meter)
+    meter.amr_data.days < 365
+  end
+
   def target_start_date_deprecated(date)
     academic_year = @meter_collection.holidays.calculate_academic_year_tolerant_of_missing_data(date)
     start_of_academic_year = Date.new(academic_year.start_date.year, academic_year.start_date.month, 1)

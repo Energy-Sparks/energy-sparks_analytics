@@ -21,6 +21,25 @@ class TargetsService
     )
   end
 
+  def relevance
+    aggregate_meter.nil? ? :never_relevant : :relevant
+  end
+
+  def enough_data # or recent enough
+    aggregate_meter.enough_amr_data_to_set_target? ? :enough : :not_enough
+  end
+
+  def annual_kwh_estimate_required?
+    TargetMeter.annual_kwh_estimate_required?(aggregate_meter)
+  end
+
+  # for backwards compatibility
+  # schools without meter attributes set
+  # may not be needed by front end
+  def target_set?
+    aggregate_meter.target_set?
+  end
+
   def culmulative_progress_chart
     case @fuel_type
     when :electricity
@@ -66,5 +85,17 @@ class TargetsService
 
   def data
     @data ||= CalculateMonthlyTrackAndTraceData.new(@aggregate_school, @fuel_type).raw_data
+  end
+
+  def target_school
+    @target_school ||= @aggregate_school.target_school
+  end
+
+  def target_meter
+    @target_meter ||= target_school.aggregate_meter(@fuel_type)
+  end
+
+  def aggregate_meter
+    @aggregate_meter ||= @aggregate_school.aggregate_meter(@fuel_type)
   end
 end
