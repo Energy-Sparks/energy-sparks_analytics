@@ -7,7 +7,7 @@ class MissingGasEstimation < GasEstimationBase
       DegreeDayGasEstimation
     end
 
-    calculator = calc_class.new(@meter, @annual_kwh)
+    calculator = calc_class.new(@meter, @annual_kwh, @target_dates)
     calculator.complete_year_amr_data
   end
 

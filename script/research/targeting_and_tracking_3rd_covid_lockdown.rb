@@ -70,7 +70,7 @@ school_names.each do |school_name|
   lockdown_reduction[school_name].push(before)
   lockdown_reduction[school_name].push(after)
 
-  puts info[:adjustments_applied]
+  puts info[:feedback][:adjustments_applied]
 
   (Date.new(2021, 1, 10)..Date.new(2021, 1, 23)).each do |date| # sunday to sunday
     # puts "Swapping #{date} for #{seasonal.alternative_date(date)}"

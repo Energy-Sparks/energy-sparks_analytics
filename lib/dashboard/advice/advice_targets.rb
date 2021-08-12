@@ -17,6 +17,7 @@ class AdviceTargets < AdviceBase
   end
 
   def content(user_type: nil)
+    puts "Got here user type: #{user_type} "
     charts_and_html = []
     charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.to_s.humanize}</h2>" } )
     charts_and_html += debug_content
@@ -49,6 +50,8 @@ class AdviceTargets < AdviceBase
     add_charts_for_testing(charts_and_html)
 =end
     charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
+
+    charts_and_html.push( { type: :analytics_html,  content: targeting_and_tracking_debug_information } )
 
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
@@ -253,6 +256,44 @@ class AdviceTargets < AdviceBase
       </p>
     }
     ERB.new(text).result(binding)
+  end
+
+  def targeting_and_tracking_debug_information
+    text = %{
+      <h2>Targeting and Tracking: analytics debug information</h2>
+      <%= debug_configuration_table %>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def debug_configuration_table
+    header = ['Type', 'Information']
+    rows = []
+    rows.push(['Annual kwh estimate (attribute)', aggregate_meter.annual_kwh_estimate])
+
+    target_meter = @school.target_school.aggregate_meter(@fuel_type)
+
+    rows.push(['Target meter kwh',        target_meter.amr_data.total])
+
+    target_meter.feedback.each do |type, val|
+      rows.push([type,  val])
+    end
+
+    compact_print(target_meter)
+    
+    HtmlTableFormatting.new(header, rows).html
+  end
+
+  def compact_print(target_meter)
+    puts "Got here ---------ddddddddddddddddddddddddddddd #{target_meter.amr_data.start_date}  to #{target_meter.amr_data.end_date}"
+    a = []
+    (target_meter.amr_data.start_date..target_meter.amr_data.end_date).each do |date|
+    
+      a.push("#{date}: #{target_meter.amr_data.one_day_kwh(date).round(1)}".ljust(20))
+    end
+    a.each_slice(6) do |six_vals|
+      puts six_vals.join(' | ')
+    end
   end
 
   def targets_service

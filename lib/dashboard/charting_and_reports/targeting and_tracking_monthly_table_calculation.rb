@@ -59,6 +59,8 @@ class CalculateMonthlyTrackAndTraceData
   end
 
   def kwhs_for_date_ranges(date_ranges, meter)
+    puts "Got here"
+    ap date_ranges
     date_ranges.map do |date_range|
       date_range.nil? ? nil : kwh_date_range(meter, date_range.first, date_range.last)
     end
@@ -83,7 +85,7 @@ class CalculateMonthlyTrackAndTraceData
   end
 
   def calculate_month_dates
-    start_date = target_meter.target_start_date(@aggregate_meter.amr_data.end_date)
+    start_date = target_meter.target_dates.target_start_date
     months = start_date.day == 1 ? 12 : 13
 
     (0..(months - 1)).map do |month_index|

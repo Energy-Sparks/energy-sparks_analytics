@@ -29,8 +29,24 @@ class TargetsService
     aggregate_meter.enough_amr_data_to_set_target? ? :enough : :not_enough
   end
 
+  def recent_data?
+    TargetMeter.recent_data?(aggregate_meter)
+  end
+
+  def enough_holidays?
+    TargetMeter.enough_holidays?(aggregate_meter)
+  end
+
   def annual_kwh_estimate_required?
     TargetMeter.annual_kwh_estimate_required?(aggregate_meter)
+  end
+
+  def valid?
+    relevance == :relevant &&
+    enough_data == :enough &&
+    target_set? &&
+    recent_data? &&
+    enough_holidays?
   end
 
   # for backwards compatibility
@@ -38,6 +54,10 @@ class TargetsService
   # may not be needed by front end
   def target_set?
     aggregate_meter.target_set?
+  end
+
+  def analytics_debug_info
+    valid? ? target_meter.analytics_debug_info : {}
   end
 
   def culmulative_progress_chart
@@ -56,9 +76,9 @@ class TargetsService
     when :electricity
       :targeting_and_tracking_weekly_electricity_to_date_line
     when :gas
-      :targeting_and_tracking_weekly_gas_one_year_line
+      :targeting_and_tracking_weekly_gas_to_date_line
     when :storage_heater
-      :targeting_and_tracking_weekly_storage_heater_one_year_line
+      :targeting_and_tracking_weekly_storage_heater_to_date_line
     end
   end
 

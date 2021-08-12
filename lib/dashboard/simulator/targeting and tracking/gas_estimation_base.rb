@@ -5,10 +5,11 @@ class GasEstimationBase < TargetingAndTrackingFittingBase
   class UnexpectedAbstractBaseClassRequest < StandardError; end
   include Logging
 
-  def initialize(meter, annual_kwh)
+  def initialize(meter, annual_kwh, target_dates)
     super(meter.amr_data, meter.meter_collection.holidays)
     @meter = meter
-    @annual_kwh = annual_kwh
+    @annual_kwh = annual_kwh#
+    @target_dates = target_dates
     raise MoreDataAlreadyThanEstimate, "amr data total #{@amr_data.total.round(0)} kWh > #{annual_kwh.round(0)}" if @amr_data.total > annual_kwh
     raise EnoughGas, "Unexpected request to fill in missing gas data as > 365 days (#{@amr_data.days})" if @amr_data.days > 365
   end
@@ -32,8 +33,8 @@ class GasEstimationBase < TargetingAndTrackingFittingBase
   end
 
   def calculate_heating_model
-    whole_meter_period = SchoolDatePeriod.new(:available, 'target model', @amr_data.start_date, @amr_data.end_date)
-    @meter.heating_model(whole_meter_period)
+    basemark_period = SchoolDatePeriod.new(:available, 'target model', @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
+    @meter.heating_model(basemark_period)
   end
 
   def scaled_day(date, scale, profile_x48)
@@ -47,6 +48,7 @@ class GasEstimationBase < TargetingAndTrackingFittingBase
   end
 
   def add_day(date, one_days_reading)
+    puts "Got here adding backfilled #{date}"
     one_year_amr_data.add(date, one_days_reading)
   end
 

@@ -9,8 +9,9 @@
 # or adjusted data - going back 1+ year, so next year's target can be calculated
 #
 class OneYearTargetingAndTrackingAmrData
-  def initialize(meter)
+  def initialize(meter, target_dates)
     @meter = meter
+    @target_dates = target_dates
   end
 
   # returns
@@ -20,7 +21,7 @@ class OneYearTargetingAndTrackingAmrData
   #   adjustments_applied:  text description
   # }
   def last_years_amr_data
-    @calculate_last_years_amr_data ||= calculate_last_years_amr_data
+    @last_years_amr_data ||= calculate_one_year_historic_synthetic_data
   end
 
   def annual_kwh_estimate_required?
@@ -29,6 +30,12 @@ class OneYearTargetingAndTrackingAmrData
   end
 
   private
+
+  def calculate_one_year_historic_synthetic_data
+    data = calculate_last_years_amr_data
+    data[:feedback].merge!(@target_dates.serialised_dates_for_debug)
+    data
+  end
 
   def calculate_last_years_amr_data
     case @meter.fuel_type
@@ -41,7 +48,7 @@ class OneYearTargetingAndTrackingAmrData
         raise StandardError, 'targeting and tracking electric < 1 year not intergrated yet'
       end    
     when :gas
-      if enough_data?
+      if @target_dates.full_years_benchmark_data?
         enough_data_already
       else
         full_year_gas_estimate_amr_data
@@ -58,8 +65,11 @@ class OneYearTargetingAndTrackingAmrData
   def enough_data_already
     {
       amr_data:             @meter.amr_data,
-      percent_real_data:    1.0,
-      adjustments_applied:  "No adjustments necessary as > 1 year data (#{@meter.amr_data.days}) and recent (to #{@meter.amr_data.end_date})"
+      feedback: {
+        percent_real_data:    1.0,
+        adjustments_applied:  "No adjustments necessary as > 1 year data (#{@meter.amr_data.days}) and recent (to #{@meter.amr_data.end_date})",
+        rule:                 'Enough data already so no synthetic data'
+      }
     }
   end
 
@@ -72,7 +82,7 @@ class OneYearTargetingAndTrackingAmrData
   end
 
   def full_year_gas_estimate
-    @full_year_gas_estimate ||= MissingGasEstimation.new(@meter, @meter.annual_kwh_estimate)
+    @full_year_gas_estimate ||= MissingGasEstimation.new(@meter, @meter.annual_kwh_estimate, @target_dates)
   end
 
   def full_year_gas_estimate_amr_data

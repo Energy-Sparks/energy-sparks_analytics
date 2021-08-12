@@ -15,7 +15,7 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
     enough_data_for_annual_mirror? || enough_data_for_seasonal_mirror?
   end
 
-  # returns a 3 part hash: { :amr_data => 1+year's amr data , :percent_real_data => Float, :adjustments_applied => text }
+  # returns a 3 part hash: { :amr_data => 1+year's amr data , feedback: {:percent_real_data => Float, :adjustments_applied => text }}
   def adjusted_amr_data
     case mirroring_rules
     when :no_change_not_a_big_enough_reduction
@@ -94,22 +94,26 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
 
     {
       amr_data:                               amr_copy,
-      percent_real_data:                      (365 - adjusted_day_count) / 365.0,
-      adjustments_applied:                    adjustment_description,
-      percent_reduction_versus_Oct_Dec_2020:  lockdown_versus_mirror_percent_change,
-      percent_reduction_versus_Jan_Mar_2020:  lockdown_versus_previous_year_percent_change,
-      rule:                                   mirroring_rules
+      feedback: {
+        percent_real_data:                      (365 - adjusted_day_count) / 365.0,
+        adjustments_applied:                    adjustment_description,
+        percent_reduction_versus_Oct_Dec_2020:  lockdown_versus_mirror_percent_change,
+        percent_reduction_versus_Jan_Mar_2020:  lockdown_versus_previous_year_percent_change,
+        rule:                                   mirroring_rules
+      }
     }
   end
 
   def unadjusted_amr_data
     {
       amr_data:                               @amr_data,
-      percent_real_data:                      1.0,
-      adjustments_applied:                    'No 3rd Lockdown electricity amr data adjustment supplied as not enough of a reduction during the lockdown',
-      percent_reduction_versus_Oct_Dec_2020:  lockdown_versus_mirror_percent_change,
-      percent_reduction_versus_Jan_Mar_2020:  lockdown_versus_previous_year_percent_change,
-      rule:                                   mirroring_rules
+      feedback: {
+        percent_real_data:                      1.0,
+        adjustments_applied:                    'No 3rd Lockdown electricity amr data adjustment supplied as not enough of a reduction during the lockdown',
+        percent_reduction_versus_Oct_Dec_2020:  lockdown_versus_mirror_percent_change,
+        percent_reduction_versus_Jan_Mar_2020:  lockdown_versus_previous_year_percent_change,
+        rule:                                   mirroring_rules
+      }
     }
   end
 

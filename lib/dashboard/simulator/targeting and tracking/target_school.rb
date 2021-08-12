@@ -26,16 +26,11 @@ class TargetSchool < MeterCollection
   private
 
   def set_target(meter, calculation_type)
-    set_target?(meter) ? TargetMeter.calculation_factory(calculation_type, meter) : nil
+    target_set?(meter) ? TargetMeter.calculation_factory(calculation_type, meter) : nil
   end
 
-  def set_target?(meter)
-=begin
-    puts "Got here: setting meter #{meter.fuel_type} = 1: #{meter.nil?}"
-    puts "2: #{meter.target_set? }"
-    puts "3: #{meter.enough_amr_data_to_set_target? }"
-=end
-    !meter.nil? && meter.target_set? && meter.enough_amr_data_to_set_target? 
+  def target_set?(meter)
+    !meter.nil? && meter.target_set?
   end
 end
 
@@ -44,12 +39,18 @@ class TargetAttributes
   def initialize(meter)
     @attributes = nil
     if meter.target_set?
-      @attributes = meter.target_attributes.sort { |a, b| a[:start_date] <=> b[:start_date] } 
+      @attributes = meter.target_attributes.sort { |a, b| a[:start_date] <=> b[:start_date] }.uniq
     end
   end
 
   def table
+    return [[]] unless target_set?
+
     @attributes.map { |t| [t[:start_date], t[:target]] }
+  end
+
+  def target_set?
+    !@attributes.nil?
   end
 
   def target_date_ranges
@@ -57,6 +58,8 @@ class TargetAttributes
   end
 
   def average_target(start_date, end_date)
+    return Float::NAN unless target_set?
+
     weighted_values = target_date_ranges.map do |target_range, value|
       [
         overlap_days(start_date, end_date, target_range.first, target_range.last) * 1.0,
@@ -67,22 +70,28 @@ class TargetAttributes
     sumproduct / weighted_values.transpose[0].sum
   end
 
-  def overlap_days(sd1, ed1, sd2, ed2)
-    [[ed1, ed2].min - [sd1, sd2].max + 1, 0].max
-  end
-
   def target(date)
+    return Float::NAN unless target_set?
+
     # don't use date_range.include? or cover? as 500 times slower than:
     target_date_ranges.select{ |date_range, _target| date >= date_range.first && date <= date_range.last }.values[0]
   end
 
   def first_target_date
+    return nil unless target_set?
+
     @attributes[0][:start_date]
   end
 
   private
+  
+  def overlap_days(sd1, ed1, sd2, ed2)
+    [[ed1, ed2].min - [sd1, sd2].max + 1, 0].max
+  end
 
   def convert_target_date_ranges
+    return {} unless target_set?
+
     h = {}
     h[Date.new(2000, 1, 1)..(attributes[0][:start_date] - 1)] = 1.0
     last_index = attributes.length - 1
@@ -94,9 +103,87 @@ class TargetAttributes
   end
 end
 
+class TargetDates
+  def initialize(original_meter, target)
+    @original_meter = original_meter
+    @target = target
+  end
+
+  def target_start_date
+    [@target.first_target_date, @original_meter.amr_data.end_date - 365].max
+  end
+
+  def target_end_date
+    target_start_date + 365
+  end
+
+  # 'bnechmark' = up to 1 year period of real amr_data before target_start_date
+  def benchmark_start_date
+    [@original_meter.amr_data.start_date, target_start_date - 365].max
+  end
+
+  def benchmark_end_date
+    [target_start_date - 1, @original_meter.amr_data.start_date].max
+  end
+
+  def days_benchmark_data
+    (benchmark_end_date - benchmark_start_date + 1).to_i
+  end
+
+  def days_target_data
+    (target_end_date - target_start_date + 1).to_i
+  end
+
+  def full_years_benchmark_data?
+    if @target.target_set?
+      days_benchmark_data > 364
+    else
+      recent_data? && @original_meter.amr_data.days > 364
+    end
+  end
+
+  def final_holiday_date
+    hols = @original_meter.meter_collection.holidays
+    hols.holidays.last.end_date
+  end
+
+  def enough_holidays?
+    if @target.target_set?
+      final_holiday_date >= target_end_date
+    else
+      final_holiday_date >= today + 365
+    end
+  end
+
+  def recent_data?
+    today > Date.today - 30
+  end
+
+  def serialised_dates_for_debug
+    {
+      target_start_date:          target_start_date,
+      target_end_date:            target_end_date,
+      benchmark_start_date:       benchmark_start_date,
+      benchmark_end_date:         benchmark_end_date,
+      full_years_benchmark_data:  full_years_benchmark_data?,
+      final_holiday_date:         final_holiday_date,
+      enough_holidays:            enough_holidays?,
+      recent_data:                recent_data?
+    }
+    # or TargetDates.instance_methods(false).map { |m| [m, self.send(m)]}
+  end
+
+  private
+
+  def today
+    @original_meter.amr_data.end_date
+  end
+end
+
 class TargetMeter < Dashboard::Meter
+  class TargetStartDateBeforeFirstMeterDate < StandardError; end
   include Logging
-  attr_reader :target
+  attr_reader :target, :feedback, :target_dates
   def initialize(meter_to_clone)
     super(
       meter_collection: meter_to_clone.meter_collection,
@@ -112,6 +199,8 @@ class TargetMeter < Dashboard::Meter
     )
     @original_meter = meter_to_clone
     @target = TargetAttributes.new(meter_to_clone)
+    @target_dates = TargetDates.new(meter_to_clone, @target)
+
     bm = Benchmark.realtime {
       @amr_data = create_target_amr_data(meter_to_clone)
       calculate_carbon_emissions_for_meter
@@ -121,24 +210,33 @@ class TargetMeter < Dashboard::Meter
     logger.info calc_text
   end
 
-  def target_start_date(end_date)
-    [end_date - 365, target.first_target_date, @original_meter.amr_data.start_date].max
-  end
-
   def self.enough_amr_data_to_set_target?(meter)
-    meter.amr_data.end_date > Date.today - 30 &&
-    meter.amr_data.days > 365 + 30
+    if meter.fuel_type == :gas
+      true
+    else
+      meter.amr_data.end_date > Date.today - 30 &&
+      meter.amr_data.days > 365 + 30
+    end
   end
 
   def self.annual_kwh_estimate_required?(meter)
-    meter.amr_data.days < 365
+    !dates(meter).full_years_benchmark_data?
   end
 
-  def target_start_date_deprecated(date)
-    academic_year = @meter_collection.holidays.calculate_academic_year_tolerant_of_missing_data(date)
-    start_of_academic_year = Date.new(academic_year.start_date.year, academic_year.start_date.month, 1)
-    target_start_date = target.first_target_date
-    [start_of_academic_year, target_start_date].max
+  def self.recent_data?(meter)
+    dates(meter).recent_data?
+  end
+
+  def self.enough_holidays?(meter)
+    dates(meter).enough_holidays?
+  end
+
+  private_class_method def self.dates(meter)
+    TargetDates.new(meter, TargetAttributes.new(meter))
+  end
+
+  def analytics_debug_info
+    @feedback
   end
 
   def self.calculation_factory(type, meter_to_clone)
@@ -158,7 +256,9 @@ class TargetMeter < Dashboard::Meter
     start_date = @target.first_target_date
     end_date   = meter_to_clone.amr_data.end_date + 363 + 30 # + 30 allow a margin
 
-    adjusted_amr_data_info = OneYearTargetingAndTrackingAmrData.new(meter_to_clone).last_years_amr_data
+    adjusted_amr_data_info = OneYearTargetingAndTrackingAmrData.new(meter_to_clone, target_dates).last_years_amr_data
+
+    @feedback = adjusted_amr_data_info[:feedback]
 
     target_amr_data = AMRData.new(meter_to_clone.meter_type)
 
@@ -224,14 +324,7 @@ class TargetMeterMonthlyDayType < TargetMeter
       profiles[dt].push(amr_data.one_days_data_x48(date))
     end
 
-    x = average_kwh_x48(profiles)
-    x.each do |type, x48|
-      if x48.any?{ |z| z.nan? }
-        logger.info "Got here NaN #{first_of_month} #{type} TODO(PH, 14Jan2021) - change algorithm" 
-        x[type] = AMRData.one_day_zero_kwh_x48
-      end
-    end
-    x
+   average_kwh_x48(profiles)
   end
 
   def average_kwh_x48(profiles)
