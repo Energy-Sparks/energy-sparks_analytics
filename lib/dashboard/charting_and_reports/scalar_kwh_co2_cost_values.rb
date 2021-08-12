@@ -109,7 +109,6 @@ class ScalarkWhCO2CostValues
     dates = aggregator.x_axis_bucket_date_ranges
     check_dates(aggregator.last_meter_date, max_days_out_of_date)
     value = aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
-    puts "Got here #{timescale} #{fuel_type}, #{data_type} #{dates[0][0]} #{dates[0][1]} = #{value.round(0)}"
     { value: value, start_date: dates[0][0], end_date: dates[0][1] }
   end
 

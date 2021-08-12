@@ -4,13 +4,11 @@ require_relative './gas_estimation_base.rb'
 # - and the gas modelling is working
 # estimate a complete year's worth of gas data using regression model data
 class ModelGasEstimation < GasEstimationBase
+  class NoDefaultProfileForMissingModel < StandardError; end
   HEATING_ON_DEGREE_DAYS = 0.0
 
   def complete_year_amr_data
     missing_days = calculate_missing_days
-
-    puts "Got here: missing days"
-    ap missing_days.transform_values{ |oneday| oneday[:days_kwh] }
 
     scale = if @annual_kwh.nil?
               1.0
@@ -24,17 +22,12 @@ class ModelGasEstimation < GasEstimationBase
 
     model_description = heating_model.models.transform_values(&:to_s)
 
-    puts "Got here: one year data"
-    ap one_year_amr_data.transform_values{ |oneday| oneday.one_day_kwh }
-
     results = {
       amr_data:             one_year_amr_data,
       feedback: {
         percent_real_data:            (365 - missing_days.length)/ 365.0,
         adjustments_applied:          "less than 1 years data, filling in missing using regression models #{scale_description}",
         rule:                         self.class.name,
-        start_of_year:                start_of_year_date,
-        end_of_year:                  @amr_data.end_date,
         unadjusted_missing_days_kwh:  @total_missing_days,
         total_real_kwh:               @total_kwh_so_far,
         annual_estimated_kwh:         @annual_kwh,
@@ -52,7 +45,7 @@ class ModelGasEstimation < GasEstimationBase
   def calculate_missing_days
     missing_days = {}
 
-    (start_of_year_date..@amr_data.end_date).each do |date|
+    @target_dates.missing_date_range.each do |date|
       next if one_year_amr_data.date_exists?(date)
 
       avg_temp = @meter.meter_collection.temperatures.average_temperature(date)
@@ -67,11 +60,9 @@ class ModelGasEstimation < GasEstimationBase
                     heating_model.predicted_non_heating_kwh_future_date(date, avg_temp)
                   end
 
-      model_type = heating_on ? heating_model.heating_model_for_future_date(date) : heating_model.non_heating_model_for_future_date(date)
+      model_type = heating_on ? full_heating_model.heating_model_for_future_date(date) : heating_model.non_heating_model_for_future_date(date)
 
-      profile = profiles_by_model_type_x48[model_type]
-
-      missing_days[date] = { days_kwh: days_kwh, profile: profile }
+      missing_days[date] = { days_kwh: days_kwh, profile: profile_by_model_type(model_type) }
     end
     missing_days
   end
@@ -92,16 +83,43 @@ class ModelGasEstimation < GasEstimationBase
     end
   end
 
+  def profile_by_model_type(model_type)
+    # ideally just pickup the profile from the benchmark period i.e. before the target is set
+    # but in the event the bacnhamrk period, only for example contains winter heating data,
+    # or summer hot water data, then be more fault tolerant and use all available profile name
+    profiles_by_model_type_x48[:benchmark][model_type] || profiles_by_model_type_x48[:all][model_type] || missing_profile(model_type)
+  end
+
   def profiles_by_model_type_x48
     @profiles_by_model_type_x48 ||= calculate_profiles_by_model_type_x48
   end
 
   def calculate_profiles_by_model_type_x48
-    profiles_by_model_type = {}
-    (@amr_data.start_date..@amr_data.end_date).each do |date|
-      next unless one_year_amr_data.date_exists?(date)
+    {
+      benchmark: calculate_profiles_by_model_type_x48_by_date_range(@target_dates.benchmark_date_range, heating_model),
+      all:       calculate_profiles_by_model_type_x48_by_date_range(@target_dates.original_meter_date_range, full_heating_model)
+    }
+  end
 
-      model_type = heating_model.model_type?(date)
+  def missing_profile(model_type)
+    case model_type
+    when :unknown
+      profile_by_model_type(:heating_occupied_all_days) || profile_by_model_type(:heating_occupied_wednesday)
+    else
+      # TODO(PH, 12Aug2021, and ongoing) need to come up with default profiles,
+      #                                   either artificially or from other model results
+      #                                   as per the above example, which doesn't work
+      raise NoDefaultProfileForMissingModel, "Missing model type #{model_type}"
+    end
+  end
+
+  def calculate_profiles_by_model_type_x48_by_date_range(date_range, model)
+    profiles_by_model_type = {}
+
+    date_range.each do |date|
+      # next unless one_year_amr_data.date_exists?(date)
+
+      model_type = model.model_type?(date)
 
       profiles_by_model_type[model_type] ||= []
 

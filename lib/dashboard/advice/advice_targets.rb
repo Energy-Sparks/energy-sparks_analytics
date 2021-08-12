@@ -17,7 +17,6 @@ class AdviceTargets < AdviceBase
   end
 
   def content(user_type: nil)
-    puts "Got here user type: #{user_type} "
     charts_and_html = []
     charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.to_s.humanize}</h2>" } )
     charts_and_html += debug_content
@@ -279,13 +278,12 @@ class AdviceTargets < AdviceBase
       rows.push([type,  val])
     end
 
-    compact_print(target_meter)
+    # compact_print(target_meter)
     
     HtmlTableFormatting.new(header, rows).html
   end
 
   def compact_print(target_meter)
-    puts "Got here ---------ddddddddddddddddddddddddddddd #{target_meter.amr_data.start_date}  to #{target_meter.amr_data.end_date}"
     a = []
     (target_meter.amr_data.start_date..target_meter.amr_data.end_date).each do |date|
     

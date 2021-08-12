@@ -117,13 +117,41 @@ class TargetDates
     target_start_date + 365
   end
 
-  # 'bnechmark' = up to 1 year period of real amr_data before target_start_date
+  def target_date_range
+    target_start_date..target_end_date
+  end
+
+  # 'benchmark' = up to 1 year period of real amr_data before target_start_date
   def benchmark_start_date
-    [@original_meter.amr_data.start_date, target_start_date - 365].max
+    [@original_meter.amr_data.start_date, synthetic_benchmark_start_date].max
   end
 
   def benchmark_end_date
-    [target_start_date - 1, @original_meter.amr_data.start_date].max
+    [synthetic_benchmark_end_date, @original_meter.amr_data.start_date].max
+  end
+
+  def benchmark_date_range
+    benchmark_start_date..benchmark_end_date
+  end
+  
+  def original_meter_start_date
+    @original_meter.amr_data.start_date
+  end
+
+  def original_meter_end_date
+    @original_meter.amr_data.end_date
+  end
+
+  def original_meter_date_range
+    original_meter_start_date..original_meter_end_date
+  end
+
+  def synthetic_benchmark_start_date
+    target_start_date - 365
+  end
+
+  def synthetic_benchmark_end_date
+    target_start_date - 1
   end
 
   def days_benchmark_data
@@ -155,20 +183,26 @@ class TargetDates
     end
   end
 
+  def missing_date_range
+    synthetic_benchmark_start_date..benchmark_start_date
+  end
+
   def recent_data?
     today > Date.today - 30
   end
 
   def serialised_dates_for_debug
     {
-      target_start_date:          target_start_date,
-      target_end_date:            target_end_date,
-      benchmark_start_date:       benchmark_start_date,
-      benchmark_end_date:         benchmark_end_date,
-      full_years_benchmark_data:  full_years_benchmark_data?,
-      final_holiday_date:         final_holiday_date,
-      enough_holidays:            enough_holidays?,
-      recent_data:                recent_data?
+      target_start_date:              target_start_date,
+      target_end_date:                target_end_date,
+      benchmark_start_date:           benchmark_start_date,
+      benchmark_end_date:             benchmark_end_date,
+      synthetic_benchmark_start_date: synthetic_benchmark_start_date,
+      synthetic_benchmark_end_date:   synthetic_benchmark_end_date,
+      full_years_benchmark_data:      full_years_benchmark_data?,
+      final_holiday_date:             final_holiday_date,
+      enough_holidays:                enough_holidays?,
+      recent_data:                    recent_data?
     }
     # or TargetDates.instance_methods(false).map { |m| [m, self.send(m)]}
   end
@@ -253,16 +287,13 @@ class TargetMeter < Dashboard::Meter
   private
 
   def create_target_amr_data(meter_to_clone)
-    start_date = @target.first_target_date
-    end_date   = meter_to_clone.amr_data.end_date + 363 + 30 # + 30 allow a margin
-
     adjusted_amr_data_info = OneYearTargetingAndTrackingAmrData.new(meter_to_clone, target_dates).last_years_amr_data
 
     @feedback = adjusted_amr_data_info[:feedback]
 
     target_amr_data = AMRData.new(meter_to_clone.meter_type)
 
-    (start_date..end_date).each do |date|
+    @target_dates.target_date_range.each do |date|
       clone_date = date - 364
       target_kwh_x48 = target_one_day_amr_data(date, clone_date, adjusted_amr_data_info[:amr_data])
       target_amr_data.add(date, target_kwh_x48)

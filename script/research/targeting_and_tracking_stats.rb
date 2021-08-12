@@ -66,4 +66,4 @@ end
 
 stats = covid_stats(schools)
 
-print_stats(stats)
+# print_stats(stats)

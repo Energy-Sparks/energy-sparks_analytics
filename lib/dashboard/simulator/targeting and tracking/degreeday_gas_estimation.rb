@@ -37,7 +37,7 @@ class DegreeDayGasEstimation < GasEstimationBase
     school_day_profile_x48 = average_profile_for_day_type_x48(:schoolday)
     school_day_profile_total_kwh = school_day_profile_x48.sum
 
-    (start_of_year_date..@amr_data.end_date).each do |date|
+    @target_dates.missing_date_range.each do |date|
       next if @holidays.day_type(date) != :schoolday ||  one_year_amr_data.date_exists?(date)
 
       degree_days = @meter.meter_collection.temperatures.degree_days(date)
@@ -57,7 +57,7 @@ class DegreeDayGasEstimation < GasEstimationBase
   def fill_in_missing_data_by_daytype(daytype)
     avg_profile_x48 = average_profile_for_day_type_x48(daytype)
 
-    (start_of_year_date..@amr_data.end_date).each do |date|
+    @target_dates.missing_date_range.each do |date|
       next if @holidays.day_type(date) != daytype || one_year_amr_data.date_exists?(date)
 
       one_days_reading = OneDayAMRReading.new(@meter.mpan_mprn, date, 'TARG', nil, DateTime.now, avg_profile_x48)
@@ -68,7 +68,7 @@ class DegreeDayGasEstimation < GasEstimationBase
   def calculate_degree_days(one_year_amr_data)
     remaining_degree_days = 0.0
     total_degree_days = 0.0
-    (start_of_year_date..@amr_data.end_date).each do |date|
+    @target_dates.missing_date_range.each do |date|
       dd = @meter.meter_collection.temperatures.degree_days(date)
       remaining_degree_days += dd unless one_year_amr_data.date_exists?(date)
       total_degree_days += dd

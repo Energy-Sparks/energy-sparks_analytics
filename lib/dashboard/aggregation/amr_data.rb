@@ -11,9 +11,9 @@ class AMRData < HalfHourlyData
     @total = {}
   end
 
-  def self.copy_amr_data(original_amr_data)
+  def self.copy_amr_data(original_amr_data, sd = original_amr_data.start_date, ed = original_amr_data.end_date)
     new_amr_data = AMRData.new(original_amr_data.type)
-    (original_amr_data.start_date..original_amr_data.end_date).each do |date|
+    (sd..ed).each do |date|
       new_amr_data.add(date, original_amr_data.clone_one_days_data(date))
     end
     new_amr_data

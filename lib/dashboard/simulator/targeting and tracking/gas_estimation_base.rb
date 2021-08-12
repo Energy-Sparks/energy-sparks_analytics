@@ -21,11 +21,7 @@ class GasEstimationBase < TargetingAndTrackingFittingBase
   private
 
   def one_year_amr_data
-    @one_year_amr_data ||= AMRData.copy_amr_data(@amr_data)
-  end
-
-  def start_of_year_date
-    @amr_data.end_date - 364
+    @one_year_amr_data ||= AMRData.copy_amr_data(@amr_data, @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
   end
 
   def heating_model
@@ -33,8 +29,17 @@ class GasEstimationBase < TargetingAndTrackingFittingBase
   end
 
   def calculate_heating_model
-    basemark_period = SchoolDatePeriod.new(:available, 'target model', @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
-    @meter.heating_model(basemark_period)
+    benchmark_period = SchoolDatePeriod.new(:available, 'target model', @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
+    @meter.heating_model(benchmark_period)
+  end
+
+  def full_heating_model
+    @full_heating_model ||= calculate_full_heating_model
+  end
+
+  def calculate_full_heating_model
+    original_meter_period = SchoolDatePeriod.new(:available, 'target model', @target_dates.original_meter_start_date, @target_dates.original_meter_end_date)
+    @meter.heating_model(original_meter_period)
   end
 
   def scaled_day(date, scale, profile_x48)
@@ -48,7 +53,6 @@ class GasEstimationBase < TargetingAndTrackingFittingBase
   end
 
   def add_day(date, one_days_reading)
-    puts "Got here adding backfilled #{date}"
     one_year_amr_data.add(date, one_days_reading)
   end
 
