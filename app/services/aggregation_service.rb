@@ -43,7 +43,6 @@ class AggregateDataService
     }
     calc_text = "Calculated meter aggregation in #{bm.round(3)} seconds"
     logger.info calc_text
-    puts calc_text
   end
 
   private
