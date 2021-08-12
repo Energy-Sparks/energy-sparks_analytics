@@ -76,22 +76,6 @@ describe TargetsService do
     end
   end
 
-  context "#enough_amr_data_to_calculate_target" do
-
-    it "returns false when there are no meters/data" do
-      expect( service.enough_amr_data_to_calculate_target? ).to be false
-    end
-
-    context "with limited data" do
-      it "returns false"
-    end
-
-    context "with sufficient data" do
-      it "returns true"
-    end
-
-  end
-
   context "#enough_calendar_data_to_calculate_target" do
     it "returns false by default" do
       expect( service.enough_calendar_data_to_calculate_target? ).to be false
