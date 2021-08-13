@@ -31,6 +31,8 @@ class TargetMeter < Dashboard::Meter
   def self.enough_amr_data_to_set_target?(meter)
     if meter.fuel_type == :gas
       true
+    elsif meter.fuel_type == :electricity
+      true
     else
       meter.amr_data.end_date > Date.today - 30 &&
       meter.amr_data.days > 365 + 30

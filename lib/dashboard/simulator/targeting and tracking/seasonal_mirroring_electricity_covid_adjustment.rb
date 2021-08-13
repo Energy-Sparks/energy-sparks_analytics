@@ -14,6 +14,10 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
     enough_data_for_annual_mirror? || enough_data_for_seasonal_mirror?
   end
 
+  def lockdown_date_ranges
+    [@lockdown_start_date..@lockdown_end_date]
+  end
+
   # returns a 3 part hash: { :amr_data => 1+year's amr data , feedback: {:percent_real_data => Float, :adjustments_applied => text }}
   def adjusted_amr_data
     case mirroring_rules

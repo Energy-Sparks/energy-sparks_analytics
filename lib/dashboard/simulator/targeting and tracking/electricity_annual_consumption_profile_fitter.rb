@@ -29,7 +29,8 @@ class ElectricityAnnualProfileFitter
     school_weeks_kwh = aggregate_schoolweek_kwhs(@start_date, @end_date, exclude_date_ranges)
     return nil if school_weeks_kwh.empty?
     sd, _eps = fit_optimum_sd(school_weeks_kwh)
-    profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd, school_weeks_kwh, ElectricityAnnualProfileFitter.week_of_year(@start_date), ElectricityAnnualProfileFitter.week_of_year(@end_date)).profile
+    synthetic_profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd, school_weeks_kwh, self.class.week_of_year(@start_date), self.class.week_of_year(@end_date))
+    profile = synthetic_profile.profile
     { profile: profile, actual: school_weeks_kwh, sd: sd }
   end
 

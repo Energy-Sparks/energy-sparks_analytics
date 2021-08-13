@@ -13,6 +13,8 @@ class EstimatePeriodConsumption
   private
 
   def calculate_annual_kwh(end_date = nil)
+    return Float::NAN if @attributes.nil? || @attributes.empty?
+
     reverse_sorted = @attributes.sort_by { |attribute| attribute[:start_date] }.reverse
     end_date = reverse_sorted.first[:end_date]
     start_date = end_date - 364

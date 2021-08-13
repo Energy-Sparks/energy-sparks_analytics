@@ -40,13 +40,15 @@ class OneYearTargetingAndTrackingAmrData
   def calculate_last_years_amr_data
     case @meter.fuel_type
     when :electricity
-      if seasonal_electricity_covid_adjustment.enough_data?
+      if !@target_dates.full_years_benchmark_data?
+        fit_electricity
+      elsif seasonal_electricity_covid_adjustment.enough_data?
         seasonal_electricity_covid_adjustment_amr_data
       elsif enough_data?
         enough_data_already
       else
         raise StandardError, 'targeting and tracking electric < 1 year not intergrated yet'
-      end    
+      end
     when :gas
       if @target_dates.full_years_benchmark_data?
         enough_data_already
@@ -71,6 +73,11 @@ class OneYearTargetingAndTrackingAmrData
         rule:                 'Enough data already so no synthetic data'
       }
     }
+  end
+
+  def fit_electricity
+    electric_estimate = ElectricityEstimation.new(@meter, @target_dates)
+    electric_estimate.complete_year_amr_data
   end
 
   def seasonal_electricity_covid_adjustment

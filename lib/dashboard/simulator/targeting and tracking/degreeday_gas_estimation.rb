@@ -54,17 +54,6 @@ class DegreeDayGasEstimation < GasEstimationBase
     (365 - @adjustment_count) / 365.0
   end
 
-  def fill_in_missing_data_by_daytype(daytype)
-    avg_profile_x48 = average_profile_for_day_type_x48(daytype)
-
-    @target_dates.missing_date_range.each do |date|
-      next if @holidays.day_type(date) != daytype || one_year_amr_data.date_exists?(date)
-
-      one_days_reading = OneDayAMRReading.new(@meter.mpan_mprn, date, 'TARG', nil, DateTime.now, avg_profile_x48)
-      one_year_amr_data.add(date, one_days_reading)
-    end
-  end
-
   def calculate_degree_days(one_year_amr_data)
     remaining_degree_days = 0.0
     total_degree_days = 0.0

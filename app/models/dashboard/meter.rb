@@ -75,8 +75,14 @@ module Dashboard
     end
 
     def annual_kwh_estimate
-      return Float::NAN if @kwh_estimate.nil?
-      @kwh_estimate.annual_kwh
+      @annual_kwh_estimate ||= calculate_annual_kwh_estimate
+    end
+
+    private def calculate_annual_kwh_estimate
+      kwh_attr = combined_meter_and_aggregate_attributes(:estimated_period_consumption)
+      return Float::NAN if kwh_attr.nil? || kwh_attr.empty?
+      kwh_estimate = EstimatePeriodConsumption.new(kwh_attr)
+      kwh_estimate.annual_kwh
     end
 
     def enough_amr_data_to_set_target?
@@ -89,6 +95,8 @@ module Dashboard
 
     # there is already a aggregate_meter2? TODO(PH, 10Aug2021) deprecate other version is no errors raised
     def aggregate_meter2?
+      return false if meter_collection.aggregate_meter(fuel_type).nil?
+
       mpxn == meter_collection.aggregate_meter(fuel_type).mpxn
     end
 
@@ -149,7 +157,6 @@ module Dashboard
       @solar_pv_overrides       = SolarPVPanels.new(attributes(:solar_pv_override), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv_override)
       @solar_pv_real_metering   = true if @meter_attributes.key?(:solar_pv_mpan_meter_mapping)
       @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
-      @kwh_estimate = EstimatePeriodConsumption.new(attributes(:estimated_period_consumption)) if @meter_attributes.key?(:estimated_period_consumption)
       @meter_tariffs = MeterTariffManager.new(self)
     end
 

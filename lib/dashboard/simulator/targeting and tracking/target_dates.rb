@@ -49,6 +49,10 @@ class TargetDates
     target_start_date - 1
   end
 
+  def synthetic_benchmark_date_range
+    synthetic_benchmark_start_date..synthetic_benchmark_end_date
+  end
+
   def days_benchmark_data
     (benchmark_end_date - benchmark_start_date + 1).to_i
   end
