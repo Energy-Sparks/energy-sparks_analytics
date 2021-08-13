@@ -70,11 +70,16 @@ class TargetDates
     hols.holidays.last.end_date
   end
 
+  def first_holiday_date
+    hols = @original_meter.meter_collection.holidays
+    hols.holidays.first.start_date
+  end
+
   def enough_holidays?
     if @target.target_set?
-      final_holiday_date >= target_end_date
+      final_holiday_date >= target_end_date && first_holiday_date <= synthetic_benchmark_start_date
     else
-      final_holiday_date >= today + 365
+      final_holiday_date >= today + 365 && first_holiday_date <= today - 365
     end
   end
 
