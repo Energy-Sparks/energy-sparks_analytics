@@ -26,7 +26,7 @@ class TargetsService
   #
   #We require at least a years worth of calendar data, as well as ~1 year of AMR data OR an estimate of their annual consumption
   def enough_data_to_set_target?
-    return enough_calendar_data_to_calculate_target? && (enough_amr_data_to_set_target? || aggregate_meter.estimated_period_consumption_set? )
+    return enough_calendar_data_to_calculate_target? && (enough_amr_data_to_calculate_target? || aggregate_meter.estimated_period_consumption_set? )
   end
 
   #return true if there is sufficient historical data
