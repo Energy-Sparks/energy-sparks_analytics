@@ -109,6 +109,25 @@ class MeterCollection
     @calculated_floor_area_pupil_numbers.number_of_pupils(start_date, end_date)
   end
 
+  # somewhat approx, imperfect solutjon to determine 3rd lcokdown periods without external JSON call
+  def region
+    scotland_postcodes = %w[AB DD DG EH FK G HS IV KA KW KY ML PA PH TD ZE]
+    wales_postcodes    = %w[CF CH GL HR LD LL NP SA SY]
+    postcode_prefix = postcode.upcase[/^[[:alpha:]]+/]
+
+    return :scotland if scotland_postcodes.include?(postcode_prefix)
+
+    if wales_postcodes.include?(postcode_prefix)
+      if postcode_prefix == 'SY'
+        return postcode.upcase[/[[:digit:]]+/].to_i < 15 ? :england : :wales
+      else
+        return :wales
+      end
+    end
+
+    :england
+  end
+
   def calculate_floor_area_number_of_pupils
     @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(@floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
   end

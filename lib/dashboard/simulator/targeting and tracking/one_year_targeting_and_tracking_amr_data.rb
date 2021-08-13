@@ -74,7 +74,7 @@ class OneYearTargetingAndTrackingAmrData
   end
 
   def seasonal_electricity_covid_adjustment
-    @seasonal_electricity_covid_adjustment ||= SeasonalMirroringCovidAdjustment.new(@meter.amr_data, @meter.meter_collection.holidays)
+    @seasonal_electricity_covid_adjustment ||= SeasonalMirroringCovidAdjustment.new(@meter, @meter.meter_collection.holidays)
   end
 
   def seasonal_electricity_covid_adjustment_amr_data

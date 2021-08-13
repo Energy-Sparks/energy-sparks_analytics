@@ -12,6 +12,7 @@ end
 def covid_stats(schools)
   stats = {}
   schools.each do |school|
+    puts "Analysing #{school.name}"
     %i[electricity gas storage_heater].each do |fuel_type|
       meter = school.aggregate_meter(fuel_type)
       if meter.nil?
@@ -19,8 +20,12 @@ def covid_stats(schools)
         stats["No #{fuel_type} meter"].push(school.name)
       else
         if fuel_type == :electricity
-          season = SeasonalMirroringCovidAdjustment.new(meter.amr_data, school.holidays)
-          rule = season.enough_data? ? season.adjusted_amr_data[:rule] : 'not enough data'
+          season = SeasonalMirroringCovidAdjustment.new(meter, school.holidays)
+          begin
+            rule = season.enough_data? ? season.adjusted_amr_data[:rule] : 'not enough data'
+          rescue SeasonalMirroringCovidAdjustment::Unexpected3rdLockdownCOVIDAdjustment => e
+            rule = e
+          end
           stats[rule] ||= []
           stats[rule].push(school.name)
         end
@@ -55,7 +60,7 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['b*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)

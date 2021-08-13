@@ -54,7 +54,7 @@ school_names.each do |school_name|
   meter = school.aggregate_meter(fuel_type)
   next if meter.nil?
 
-  seasonal = SeasonalMirroringCovidAdjustment.new(meter.amr_data, school.holidays)
+  seasonal = SeasonalMirroringCovidAdjustment.new(meter, school.holidays)
 
   info = seasonal.adjusted_amr_data
 

@@ -5,10 +5,9 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
   class Unexpected3rdLockdownCOVIDAdjustment < StandardError; end
   MAX_CHANGE_BEFORE_MIRRORING = 0.05
   include Logging
-  def initialize(amr_data, holidays)
-    super(amr_data, holidays)
-    @lockdown_start_date  = Date.new(2021, 1, 4)
-    @lockdown_end_date    = Date.new(2021, 3, 7)
+  def initialize(meter, holidays)
+    super(meter.amr_data, holidays)
+    @lockdown_start_date, @lockdown_end_date = determine_3rd_lockdown_dates(meter.meter_collection.region)
   end
 
   def enough_data?
@@ -23,11 +22,20 @@ class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
     when :replace_with_jan_mar_2020, :replace_with_oct_dec_2020_reversed
       adjusted_amr_data_private
     else
-      raise Unexpected3rdLockdownCOVIDAdjustment, "of type #{mirroring_rules}"
+      raise Unexpected3rdLockdownCOVIDAdjustment, mirroring_rules
     end
   end
 
   private
+
+  def determine_3rd_lockdown_dates(region)
+    case region
+    when :england, :wales
+      [Date.new(2021, 1, 4), Date.new(2021, 3, 7)]
+    when :scotland
+      [Date.new(2021, 1, 4), Date.new(2021, 3, 30)]
+    end
+  end
 
   def alternative_date(date)
     @alternative_date_cache ||= {}
