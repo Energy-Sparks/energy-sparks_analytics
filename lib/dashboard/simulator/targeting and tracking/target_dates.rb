@@ -4,6 +4,10 @@ class TargetDates
     @target = target
   end
 
+  def to_s
+    serialised_dates_for_debug
+  end
+
   def target_start_date
     [@target.first_target_date, @original_meter.amr_data.end_date - 365].max
   end

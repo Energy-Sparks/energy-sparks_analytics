@@ -4,8 +4,8 @@ require_rel '../../test_support'
 
 def scenarios
   [
-    { target_start_date:  -7, truncate_amr_data: 265 * 2, fuel: %i[electricity gas] },
-    { target_start_date:  -7, truncate_amr_data: 265 * 1, fuel: %i[electricity gas] },
+    { target_start_date:  -7, truncate_amr_data: 265 * 2, fuel_types: %i[electricity gas], target: 0.95 },
+    { target_start_date:  -7, truncate_amr_data: 265 * 1, fuel_types: %i[electricity gas], target: 0.90 },
   ]
 end
 

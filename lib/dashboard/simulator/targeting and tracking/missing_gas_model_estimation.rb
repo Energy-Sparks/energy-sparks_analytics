@@ -105,6 +105,8 @@ class MissingGasModelEstimation < MissingGasEstimationBase
     case model_type
     when :unknown
       profile_by_model_type(:heating_occupied_all_days) || profile_by_model_type(:heating_occupied_wednesday)
+    when :weekend_heating
+      profile_by_model_type(:weekend_hotwater_only)
     else
       # TODO(PH, 12Aug2021, and ongoing) need to come up with default profiles,
       #                                   either artificially or from other model results

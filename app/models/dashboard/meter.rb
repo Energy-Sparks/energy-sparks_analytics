@@ -78,11 +78,16 @@ module Dashboard
       @annual_kwh_estimate ||= calculate_annual_kwh_estimate
     end
 
-    private def calculate_annual_kwh_estimate
+    def calculate_annual_kwh_estimate
       kwh_attr = combined_meter_and_aggregate_attributes(:estimated_period_consumption)
       return Float::NAN if kwh_attr.nil? || kwh_attr.empty?
       kwh_estimate = EstimatePeriodConsumption.new(kwh_attr)
       kwh_estimate.annual_kwh
+    end
+
+    def reset_targeting_and_tracking_for_testing
+      puts "Resetting target meter for testing #{mpxn}"
+      @annual_kwh_estimate = nil
     end
 
     def enough_amr_data_to_set_target?

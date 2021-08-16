@@ -188,7 +188,7 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
     elsif !lockdown_versus_mirror_percent_change.nan? &&
             lockdown_versus_mirror_percent_change > MAX_CHANGE_BEFORE_MIRRORING
       :replace_with_oct_dec_2020_reversed
-    elsif !lockdown_versus_previous_year_percent_change.nan? &&
+    elsif !lockdown_versus_previous_year_percent_change.nan? ||
             !lockdown_versus_mirror_percent_change.nan?
       :no_change_not_a_big_enough_reduction
     else
@@ -218,6 +218,7 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
   end
 
   def calculate_mirrored_week_dates
+    puts "Got here - remove fixed dates via dynamic countback"
     starting_sunday = Date.new(2021, 1, 3)
     ending_saturday = Date.new(2021, 3, 6)
     lockdown_weeks = classify_weeks(starting_sunday, ending_saturday, :schoolday)
