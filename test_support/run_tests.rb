@@ -98,6 +98,8 @@ class RunTests
         run_pupil_dashboard(configuration[:control])
       when :adult_dashboard
         run_adult_dashboard(configuration[:control])
+      when :targeting_and_tracking
+        run_targeting_and_tracking(configuration[:control])
       when :equivalences
         run_equivalences(configuration[:control])
       when :kpi_analysis
@@ -211,7 +213,7 @@ class RunTests
         new_chart_results = chart_manager.run_chart(new_chart_config, chart_name)
         chart_list.push(new_chart_results)
       end
-      
+
       excel = ExcelCharts.new(excel_filename)
       excel.add_charts('Test', chart_list)
       excel.close
@@ -219,17 +221,25 @@ class RunTests
   end
 
   def run_adult_dashboard(control)
+    run_specialised_dashboard(control, RunAdultDashboard)
+  end
+
+  def run_targeting_and_tracking(control)
+    run_specialised_dashboard(control, RunTargetingAndTracking)
+  end
+
+  def run_specialised_dashboard(control, run_class)
     differences = {}
     failed_charts = []
     schools_list.sort.each do |school_name|
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
-      test = RunAdultDashboard.new(school)
+      test = run_class.new(school)
       differences[school_name] = test.run_flat_dashboard(control)
       failed_charts += test.failed_charts
     end
-    RunAdultDashboard.summarise_differences(differences, control) if !control[:summarise_differences].nil? && control[:summarise_differences]
+    run_class.summarise_differences(differences, control) if !control[:summarise_differences].nil? && control[:summarise_differences]
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 

@@ -7,13 +7,8 @@ class RunCharts
   def initialize(school)
     @school = school
     @worksheets = Hash.new { |worksheet_name, charts| worksheet_name[charts] = [] }
-    @excel_filename = File.join(File.dirname(__FILE__), '../Results/') + @school.name + excel_variation + '.xlsx'
     @runtime = Time.now.strftime('%d/%m/%Y %H:%M:%S')
     @failed_charts = []
-  end
-
-  private def excel_variation
-    '- charts test'
   end
 
   def run(charts, control)
@@ -45,6 +40,14 @@ class RunCharts
   private_class_method def self.shorten_type(type)
     return type if type == "" || type.nil?
     type.to_s.gsub('EnergySparks', 'ES').gsub('Exception', 'EX')
+  end
+
+  def excel_variation
+    '- charts test'
+  end
+
+  def excel_filename
+    File.join(File.dirname(__FILE__), '../Results/') + @school.name + excel_variation + '.xlsx'
   end
 
   def report_calculation_time(control)
@@ -152,7 +155,7 @@ class RunCharts
   end
 
   def save_to_excel
-    excel = ExcelCharts.new(@excel_filename)
+    excel = ExcelCharts.new(excel_filename)
     @worksheets.each do |worksheet_name, charts|
       excel.add_charts(worksheet_name, charts.compact)
     end
