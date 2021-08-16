@@ -1,7 +1,8 @@
+require_relative './missing_energy_fitting_base.rb'
 # correct for reduced consumption during the 3rd lockdown (Jan-Mar 2021)
 # - by using data from Jan-Mar 2020 if available
 # - or using data from Oct - Dec 2020 (mirrored)
-class SeasonalMirroringCovidAdjustment < TargetingAndTrackingFittingBase
+class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
   class Unexpected3rdLockdownCOVIDAdjustment < StandardError; end
   MAX_CHANGE_BEFORE_MIRRORING = 0.05
   include Logging

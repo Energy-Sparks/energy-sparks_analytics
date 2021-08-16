@@ -1,4 +1,4 @@
-class TargetingAndTrackingFittingBase
+class MissingEnergyFittingBase
   def initialize(amr_data, holidays)
     @amr_data = amr_data
     @holidays = holidays

@@ -20,10 +20,10 @@ def covid_stats(schools)
         stats["No #{fuel_type} meter"].push(school.name)
       else
         if fuel_type == :electricity
-          season = SeasonalMirroringCovidAdjustment.new(meter, school.holidays)
+          season = Covid3rdLockdownElectricityCorrection.new(meter, school.holidays)
           begin
             rule = season.enough_data? ? season.adjusted_amr_data[:rule] : 'not enough data'
-          rescue SeasonalMirroringCovidAdjustment::Unexpected3rdLockdownCOVIDAdjustment => e
+          rescue Covid3rdLockdownElectricityCorrection::Unexpected3rdLockdownCOVIDAdjustment => e
             rule = e
           end
           stats[rule] ||= []

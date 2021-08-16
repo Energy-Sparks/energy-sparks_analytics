@@ -1,9 +1,11 @@
+# research test program for trying seasonal fitting
+# techniques for missing electricity data
 require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 module Logging
-  @logger = Logger.new('log/display energy certificates ' + Time.now.strftime('%H %M') + '.log')
+  @logger = Logger.new('log/seasonal electricity fitting analysis ' + Time.now.strftime('%H %M') + '.log')
   logger.level = :debug
 end
 
@@ -74,7 +76,7 @@ def save_csv(data)
   end
 end
 
-class LogNormProfile
+class NormalDistributionProfile
   def initialize(sd, mean = 26, n = 52)
     @sd = sd
     @n = n
@@ -97,7 +99,7 @@ end
 class SyntheticSeasonalSchoolWeeklyElectricityProfile
   attr_reader :profile
   def initialize(sd, weekly_kwhs)
-    weeks_avg_kwh = map_to_weeks(LogNormProfile.new(sd).profile)
+    weeks_avg_kwh = map_to_weeks(NormalDistributionProfile.new(sd).profile)
     @profile = weeks_avg_kwh.map { |v| v * 52.0 / school_weeks(weekly_kwhs) }
   end
 

@@ -1,9 +1,9 @@
-require_relative './gas_estimation_base.rb'
+require_relative './missing_gas_estimation_base.rb'
 # for targeting and tracking:
 # - where there is less than 1 year of gas amr_data
 # - and the gas modelling is working
 # estimate a complete year's worth of gas data using regression model data
-class ModelGasEstimation < GasEstimationBase
+class MissingGasModelEstimation < MissingGasEstimationBase
   class NoDefaultProfileForMissingModel < StandardError; end
   HEATING_ON_DEGREE_DAYS = 0.0
 

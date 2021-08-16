@@ -1,10 +1,11 @@
+# 
 # given up to 52 weeks of data fit a seasonal profile
 # to the weekly electricity data
 # general documentation for approach under:
 # Google Drive\Energy Sparks\Energy Sparks Project Team Documents\Analytics\Targeting and Tracking\Targeting and Tracking Modelling Analysis.gdoc
 #
 
-class ElectricityAnnualProfileFitter
+class MissingElectricityNormalDistributionProfileWeeklyFitter
   MAXWEEKSANALYSIS = 53 # to cover just over a year as 52.14 weeks in a year
   MINDAYSINWEEKFORANALYSIS = 3
   class TooMuchData < StandardError; end
@@ -47,7 +48,7 @@ class ElectricityAnnualProfileFitter
 
       next if in_date_ranges?(exclude_date_ranges, date)
 
-      week = ElectricityAnnualProfileFitter.week_of_year(date)
+      week = MissingElectricityNormalDistributionProfileWeeklyFitter.week_of_year(date)
 
       school_week_kwh[week]       += @amr_data.one_day_kwh(date)
       school_week_day_count[week] += 1.0
@@ -81,7 +82,8 @@ class ElectricityAnnualProfileFitter
 
   def difference_to_theoretical_profile(sd, school_weeks_kwh)
     theoretical_profile = SyntheticSeasonalSchoolWeeklyElectricityProfile.new(sd.to_f, school_weeks_kwh,
-      ElectricityAnnualProfileFitter.week_of_year(@start_date), ElectricityAnnualProfileFitter.week_of_year(@end_date)).profile
+      MissingElectricityNormalDistributionProfileWeeklyFitter.week_of_year(@start_date),
+      MissingElectricityNormalDistributionProfileWeeklyFitter.week_of_year(@end_date)).profile
     difference(school_weeks_kwh, theoretical_profile)
   end
 
@@ -96,7 +98,7 @@ class ElectricityAnnualProfileFitter
   class SyntheticSeasonalSchoolWeeklyElectricityProfile
     attr_reader :profile
     def initialize(sd, weekly_kwhs, start_week, end_week)
-      weeks_avg_kwh = map_to_weeks(LogNormProfile.new(sd).profile, start_week, end_week)
+      weeks_avg_kwh = map_to_weeks(NormalDistributionProfile.new(sd).profile, start_week, end_week)
       @profile = weeks_avg_kwh.map { |v| v * 52.0 / school_weeks(weekly_kwhs) }
     end
 
@@ -115,7 +117,7 @@ class ElectricityAnnualProfileFitter
     end
   end
 
-  class LogNormProfile
+  class NormalDistributionProfile
     def initialize(sd, mean = 26, n = 52)
       @sd = sd
       @n = n

@@ -1,9 +1,10 @@
+# writes actual kWh and degree day distributions to csv file for comparison
 require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 module Logging
-  @logger = Logger.new('log/display energy certificates ' + Time.now.strftime('%H %M') + '.log')
+  @logger = Logger.new('log/school weekly degree day distributions ' + Time.now.strftime('%H %M') + '.log')
   logger.level = :debug
 end
 
@@ -69,27 +70,6 @@ def save_csv(data)
     end
   end
 end
-
-class LogNormProfile
-  def initialize(sd, mean = 26, n = 52)
-    @sd = sd
-    @n = n
-    @mean = mean
-  end
-
-  def profile
-    dist = (0...@n).to_a.map { |x| normal_distribution(@sd, @mean, x) }
-    sum = dist.sum
-    normalised_to_1 = dist.map { |v| v / sum }
-  end
-
-  private
-
-  def normal_distribution(sd, mean, x)
-    (1.0 / (sd * ((2.0 * Math::PI) ** 0.5)) ) * Math.exp( -0.5 * (((x - mean)/sd) ** 2.0) )
-  end
-end
-
 
 regional_school_examples = ['bathampton', 'saunders', 'portsm*', 'peven*', 'long*', 'abbey*', 'durham*']
 

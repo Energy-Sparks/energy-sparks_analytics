@@ -53,7 +53,7 @@ class OneYearTargetingAndTrackingAmrData
       if @target_dates.full_years_benchmark_data?
         enough_data_already
       else
-        full_year_gas_estimate_amr_data
+        missing_gas_estimation.calculate_missing_gas
       end
     else
       raise StandardError, "targeting and tracking adjustment for fuel #{@meter.fuel_type} currently not supported"
@@ -76,23 +76,19 @@ class OneYearTargetingAndTrackingAmrData
   end
 
   def fit_electricity
-    electric_estimate = ElectricityEstimation.new(@meter, @target_dates)
+    electric_estimate = MissingElectricityEstimation.new(@meter, @target_dates)
     electric_estimate.complete_year_amr_data
   end
 
   def seasonal_electricity_covid_adjustment
-    @seasonal_electricity_covid_adjustment ||= SeasonalMirroringCovidAdjustment.new(@meter, @meter.meter_collection.holidays)
+    @seasonal_electricity_covid_adjustment ||= Covid3rdLockdownElectricityCorrection.new(@meter, @meter.meter_collection.holidays)
   end
 
   def seasonal_electricity_covid_adjustment_amr_data
     @seasonal_electricity_covid_adjustment_amr_data ||= seasonal_electricity_covid_adjustment.adjusted_amr_data
   end
 
-  def full_year_gas_estimate
-    @full_year_gas_estimate ||= MissingGasEstimation.new(@meter, @meter.annual_kwh_estimate, @target_dates)
-  end
-
-  def full_year_gas_estimate_amr_data
-    @full_year_gas_estimate_amr_data ||= full_year_gas_estimate.adjusted_amr_data
+  def missing_gas_estimation
+    @missing_gas_estimation ||= MissingGasEstimation.new(@meter, @meter.annual_kwh_estimate, @target_dates)
   end
 end

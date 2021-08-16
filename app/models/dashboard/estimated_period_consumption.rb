@@ -1,3 +1,4 @@
+# Interprets :estimated_period_consumption meter attribute
 # estimate of meter kWh consumption in absence of 1/2 hourly readings
 # typically used by targeting and tracking system for setting
 # targets where there is < 1 year of half hourly data 

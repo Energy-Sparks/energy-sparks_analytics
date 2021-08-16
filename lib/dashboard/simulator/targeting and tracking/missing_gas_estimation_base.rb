@@ -1,5 +1,5 @@
-require_relative './fitting_base.rb'
-class GasEstimationBase < TargetingAndTrackingFittingBase
+require_relative './missing_energy_fitting_base.rb'
+class MissingGasEstimationBase < MissingEnergyFittingBase
   class EnoughGas < StandardError; end
   class MoreDataAlreadyThanEstimate < StandardError; end
   class UnexpectedAbstractBaseClassRequest < StandardError; end

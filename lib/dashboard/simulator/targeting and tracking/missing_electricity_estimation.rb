@@ -1,4 +1,10 @@
-class ElectricityEstimation < TargetingAndTrackingFittingBase
+require_relative './missing_energy_fitting_base.rb'
+require_relative './missing_electricity_normal_distribution_profile_weekly_fitter.rb'
+# creates up to one year's amr_data for targeting and tracking system where
+# there is less than one year's data, via fitting to a (currently normal distribution)
+# and distributing the consumption out to half hourly readings capped by an annual
+# kWh consumption provided via meter attributes
+class MissingElectricityEstimation < MissingEnergyFittingBase
   def initialize(meter, target_dates)
     super(meter.amr_data, meter.meter_collection.holidays)
     @meter = meter
@@ -40,12 +46,12 @@ class ElectricityEstimation < TargetingAndTrackingFittingBase
   end
 
   def calculate_fit_to_log_norm_profile_by_week
-    fitter = ElectricityAnnualProfileFitter.new(@meter.amr_data, @meter.meter_collection.holidays, @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
+    fitter = MissingElectricityNormalDistributionProfileWeeklyFitter.new(@meter.amr_data, @meter.meter_collection.holidays, @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
     fitter.fit(exclude_date_ranges: lockdown_date_ranges)
   end
 
   def lockdown_date_ranges
-    adj = SeasonalMirroringCovidAdjustment.new(@meter, @meter.meter_collection.holidays)
+    adj = Covid3rdLockdownElectricityCorrection.new(@meter, @meter.meter_collection.holidays)
     adj.lockdown_date_ranges
   end
 
@@ -75,7 +81,7 @@ class ElectricityEstimation < TargetingAndTrackingFittingBase
     @target_dates.synthetic_benchmark_date_range.each do |date|
       next if @holidays.day_type(date) != :schoolday || one_year_amr_data.date_exists?(date)
 
-      week_of_year = ElectricityAnnualProfileFitter.week_of_year(date)
+      week_of_year = MissingElectricityNormalDistributionProfileWeeklyFitter.week_of_year(date)
       week_weight  = fit_to_log_norm_profile_by_week[:profile][week_of_year]
 
       days_estimated_kwh = (week_weight / total_normalised_missing) * remaining_kwh
@@ -108,7 +114,7 @@ class ElectricityEstimation < TargetingAndTrackingFittingBase
     total = 0.0
     @target_dates.synthetic_benchmark_date_range.each do |date|
       next if @holidays.day_type(date) != :schoolday || one_year_amr_data.date_exists?(date)
-      week_of_year = ElectricityAnnualProfileFitter.week_of_year(date)
+      week_of_year = MissingElectricityNormalDistributionProfileWeeklyFitter.week_of_year(date)
       total += fit_to_log_norm_profile_by_week[:profile][week_of_year]
     end
     total
