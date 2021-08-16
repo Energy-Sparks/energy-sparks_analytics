@@ -8,6 +8,7 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
   include Logging
   def initialize(meter, holidays)
     super(meter.amr_data, holidays)
+    @region = meter.meter_collection.region
     @lockdown_start_date, @lockdown_end_date = determine_3rd_lockdown_dates(meter.meter_collection.region)
   end
 
@@ -33,12 +34,12 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
 
   private
 
-  def determine_3rd_lockdown_dates(region)
+  def determine_3rd_lockdown_dates(region) # sunday to saturday dates only
     case region
     when :england, :wales
-      [Date.new(2021, 1, 4), Date.new(2021, 3, 7)]
+      [Date.new(2021, 1, 3), Date.new(2021, 3, 6)]
     when :scotland
-      [Date.new(2021, 1, 4), Date.new(2021, 3, 30)]
+      [Date.new(2021, 1, 3), Date.new(2021, 3, 27)]
     end
   end
 
@@ -218,18 +219,16 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
   end
 
   def calculate_mirrored_week_dates
-    puts "Got here - remove fixed dates via dynamic countback"
-    starting_sunday = Date.new(2021, 1, 3)
-    ending_saturday = Date.new(2021, 3, 6)
+    starting_sunday,  ending_saturday = determine_3rd_lockdown_dates(@region)
     lockdown_weeks = classify_weeks(starting_sunday, ending_saturday, :schoolday)
 
-    mirror_start_sunday = Date.new(2020,  9,  6)
-    mirror_end_saturday = Date.new(2020, 12, 19)
+    mirror_end_saturday = starting_sunday - 1
+    mirror_start_sunday = mirror_end_saturday - 6 - (lockdown_weeks.length + 4) * 7 # 4 = margin for differing holiday arrangements in each year
     mirror_weeks = classify_weeks(mirror_start_sunday, mirror_end_saturday, :schoolday).reverse[0...lockdown_weeks.length]
 
-    starting_sunday = Date.new(2020, 1, 5)
-    ending_saturday = Date.new(2020, 3, 7)
-    previous_year = classify_weeks(starting_sunday, ending_saturday, :schoolday)
+    year_before_starting_sunday = starting_sunday - 364
+    year_before_ending_saturday = year_before_starting_sunday + 6 + (lockdown_weeks.length + 2) * 7 # plus 2= margin for different holidat arrangements in each year
+    previous_year = classify_weeks(year_before_starting_sunday, year_before_ending_saturday, :schoolday)[0...lockdown_weeks.length]
 
     {
       lockdown_weeks:       lockdown_weeks,
