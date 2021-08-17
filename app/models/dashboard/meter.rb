@@ -129,6 +129,10 @@ module Dashboard
       !target_attributes.empty?
     end
 
+    def estimated_period_consumption_set?
+      attributes(:estimated_period_consumption).present?
+    end
+
     def meter_number_of_pupils(local_school, start_date = nil, end_date = nil)
       p = local_school.number_of_pupils(start_date, end_date) * partial_number_of_pupils(start_date, end_date)
       p.to_i
@@ -199,7 +203,7 @@ module Dashboard
     def all_sub_meters
       sub_meters.values.flatten
     end
-    
+
     def analyse_sub_meters
       puts "Submeters #{sub_meters.keys}"
     end
