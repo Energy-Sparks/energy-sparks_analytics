@@ -24,8 +24,8 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
                           pages: %i[electric_target gas_target],
 
                           compare_results: [
-                            { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Target\Base' },
-                            { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Target\New' },
+                            { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Target\Base' },
+                            { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Target\New' },
                             :summary,
                             :report_differences,
                             :report_differing_charts,

@@ -31,8 +31,8 @@ script = {
     },
     compare_results: [
       :report_differences,
-      { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Benchmark\Base\\' },
-      { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Benchmark\New\\' }
+      { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Benchmark\Base\\' },
+      { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Benchmark\New\\' }
     ]
   }
 }

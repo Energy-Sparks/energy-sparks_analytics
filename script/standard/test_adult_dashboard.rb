@@ -23,8 +23,8 @@ script = {
 
                                 pages: %i[electric_target gas_target],
                                 compare_results: [
-                                  { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
-                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },
+                                  { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
+                                  { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },
                                   :summary,
                                   :report_differences,
                                   :report_differing_charts,

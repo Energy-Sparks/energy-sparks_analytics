@@ -67,13 +67,13 @@ class AMRData < HalfHourlyData
 
   # warning doesn't set start_date, end_date
   def delete(date)
-    super(date)
     @cache_days_totals.delete(date)
+    super(date)
   end
 
   # warning doesn't set start_date, end_date
   def delete_date_range(d1, d2)
-    (d1..d2).each do |date|
+    (d1..d2).map do |date|
       delete(date)
     end
   end

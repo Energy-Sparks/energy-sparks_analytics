@@ -36,8 +36,8 @@ script = {
                                         front_end_template_chart_data
                                         front_end_template_table_data
                                       ],
-                                      comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Alerts\Base',
-                                      output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Alerts\New',
+                                      comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\Base',
+                                      output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\New',
                                     },
 
                 no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },

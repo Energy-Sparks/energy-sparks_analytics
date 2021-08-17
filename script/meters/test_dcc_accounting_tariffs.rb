@@ -18,8 +18,8 @@ def test_script_config1(school_name_pattern_match, source_db, attribute_override
         report_failed_charts:   :summary, 
         compare_results:        [ 
           :summary, 
-          { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Charts\Base' },
-          { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Charts\New' },
+          { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Charts\Base' },
+          { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Charts\New' },
           :report_differing_charts,
           :report_differences
         ]
@@ -41,8 +41,8 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
         user:          { user_role: :analytics, staff_role: nil },
         pages: %i[electricity_profit_loss],
         compare_results: [
-          { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\Base' },
-          { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\AdultDashboard\New' },
+          { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
+          { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },
           :summary,
           :report_differences,
         ]

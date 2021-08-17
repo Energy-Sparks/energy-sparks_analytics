@@ -48,8 +48,8 @@ script = {
                                 compare_results:        [ 
                                   :summary, 
                                   # :quick_comparison,
-                                  { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Charts\Base' },
-                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Charts\New' },
+                                  { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Charts\Base' },
+                                  { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Charts\New' },
                                   :report_differing_charts,
                                   :report_differences
                               ] # :quick_comparison,

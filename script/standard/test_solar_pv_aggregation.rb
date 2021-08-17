@@ -39,8 +39,8 @@ script = {
                                 display_average_calculation_rate: true,
                                 report_failed_charts:   :summary, 
                                 compare_results:        [ 
-                                  { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\SolarPVAggregation\Base' },
-                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\SolarPVAggregation\New' },
+                                  { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\SolarPVAggregation\Base' },
+                                  { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\SolarPVAggregation\New' },
                                   :summary, 
                                   :quick_comparison,
                                 ] 

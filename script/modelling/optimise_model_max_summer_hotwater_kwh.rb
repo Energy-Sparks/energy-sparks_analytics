@@ -368,8 +368,8 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
         compare_results: [
           :summary,
           :quick_comparison,
-          { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Models\Base\\' },
-          { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Models\New\\' }
+          { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Models\Base\\' },
+          { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Models\New\\' }
         ]
       }
     }, 

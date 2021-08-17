@@ -10,8 +10,8 @@ class RunTargetingAndTracking < RunAdultDashboard
 
         pages: %i[electric_target gas_target],
         compare_results: [
-          { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\TargetingAndTracking\Base' },
-          { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\TargetingAndTracking\New' },
+          { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\Base' },
+          { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\New' },
           :summary,
           :report_differences,
           :report_differing_charts,
@@ -23,7 +23,7 @@ class RunTargetingAndTracking < RunAdultDashboard
   def run_flat_dashboard(control)
     differing_pagess = {}
 
-    scenarios = reverse_sort_scenarios_by_triuncate_amr_data(control[:scenarios])
+    scenarios = control[:scenarios]
 
     annual_kwh_estimates = calculate_annual_kwh
 
@@ -33,10 +33,11 @@ class RunTargetingAndTracking < RunAdultDashboard
       @school.reset_target_school_for_testing
       set_filenames(scenario)
       set_page_name(scenario)
-      configure_scenario(scenario, annual_kwh_estimates)
+      deleted_amr_data = configure_scenario(scenario, annual_kwh_estimates)
       differing_pages = super(control)
       differing_pages.transform_keys!{ |k| :"#{k} #{@filename_type}" }
       differing_pagess.merge!(differing_pages)
+      reinstate_deleted_amr_data(deleted_amr_data)
     end
 
     differing_pagess
@@ -45,6 +46,8 @@ class RunTargetingAndTracking < RunAdultDashboard
   private
 
   def configure_scenario(scenario, annual_kwh_estimates)
+    deleted_amr_data = {}
+
     scenario[:fuel_types].each do |fuel_type|
       meter = @school.aggregate_meter(fuel_type)
 
@@ -54,9 +57,20 @@ class RunTargetingAndTracking < RunAdultDashboard
       
       set_target(meter, scenario[:target_start_date], scenario[:target])
 
-      truncate_amr_data(meter, scenario[:truncate_amr_data])
+      deleted_amr_data[fuel_type] = truncate_amr_data(meter, scenario[:truncate_amr_data])
  
       set_kwh_estimate(meter, annual_kwh_estimates[fuel_type], scenario[:target_start_date])
+    end
+
+    deleted_amr_data
+  end
+
+  def reinstate_deleted_amr_data(deleted_amr_data)
+    deleted_amr_data.each do |fuel_type, days_amr_data|
+      meter = @school.aggregate_meter(fuel_type)
+      days_amr_data.each do |one_day_amr_data|
+        meter.amr_data.add(one_day_amr_data.date, one_day_amr_data)
+      end
     end
   end
 
@@ -118,11 +132,13 @@ class RunTargetingAndTracking < RunAdultDashboard
   end
 
   def truncate_amr_data(meter, days_left)
+    deleted_amr_data = []
     if days_left < meter.amr_data.days
       last_truncate_date = meter.amr_data.end_date - days_left + 1
-      meter.amr_data.delete_date_range(meter.amr_data.start_date, last_truncate_date)
+      deleted_amr_data = meter.amr_data.delete_date_range(meter.amr_data.start_date, last_truncate_date)
       meter.amr_data.set_start_date(last_truncate_date + 1)
     end
+    deleted_amr_data
   end
 
   def calculate_annual_kwh
@@ -142,12 +158,6 @@ class RunTargetingAndTracking < RunAdultDashboard
     end
 
     estimates
-  end
-
-  # as the amr_data is gradually deleted by testing, then need to
-  # run scenarios in reverse order to avoid having to reload schools
-  def reverse_sort_scenarios_by_triuncate_amr_data(scenarios)
-    scenarios.sort_by{ |scenario| -scenario[:truncate_amr_data] }
   end
 
   def set_filenames(scenario)
