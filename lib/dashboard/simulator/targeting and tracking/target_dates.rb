@@ -118,6 +118,6 @@ class TargetDates
   private
 
   def today
-    @original_meter.amr_data.end_date
+    $ENERGYSPARKSTESTTODAYDATE || @original_meter.amr_data.end_date
   end
 end

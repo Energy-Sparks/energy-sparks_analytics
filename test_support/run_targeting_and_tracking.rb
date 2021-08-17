@@ -9,6 +9,9 @@ class RunTargetingAndTracking < RunAdultDashboard
         user: { user_role: :analytics, staff_role: nil },
 
         pages: %i[electric_target gas_target],
+
+        stats_csv_file_base: './Results/targeting and tracking stats',
+
         compare_results: [
           { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\Base' },
           { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\New' },
@@ -20,8 +23,26 @@ class RunTargetingAndTracking < RunAdultDashboard
     }
   end
 
+  def self.save_stats_to_csv(filename)
+    puts "Saving results to #{filename}"
+  
+    col_names = column_names(@@all_stats)
+    index_names = index_stats_column_names
+  
+    CSV.open(filename, 'w') do |csv|
+      csv << [index_names, col_names].flatten
+      @@all_stats.each do |index_key, stats|
+        row_data = extract_data_by_column_name(stats, col_names)
+        index_keys = index_key.split(',')
+        csv << [index_keys, row_data].flatten
+      end
+    end
+  end
+
   def run_flat_dashboard(control)
     differing_pagess = {}
+
+    @@all_stats ||= {}
 
     scenarios = control[:scenarios]
 
@@ -35,6 +56,7 @@ class RunTargetingAndTracking < RunAdultDashboard
       set_page_name(scenario)
       deleted_amr_data = configure_scenario(scenario, annual_kwh_estimates)
       differing_pages = super(control)
+      @@all_stats[stats_key(scenario)] = collect_targeting_and_tracking_stats(scenario[:fuel_types])
       differing_pages.transform_keys!{ |k| :"#{k} #{@filename_type}" }
       differing_pagess.merge!(differing_pages)
       reinstate_deleted_amr_data(deleted_amr_data)
@@ -45,6 +67,43 @@ class RunTargetingAndTracking < RunAdultDashboard
 
   private
 
+  def self.column_names(all_stats)
+    names = {}
+    all_stats.each do |_index_key, one_scenario_stats|
+      one_scenario_stats.each do |key, _value|
+        names[key] = 1 # do via hash for speed
+      end
+    end
+    names.keys
+  end
+
+  def self.extract_data_by_column_name(all_stats, column_names)
+    data = Array.new(column_names.length, nil)
+    all_stats.each do |col_name, value|
+      col_number = column_names.index(col_name)
+      data[col_number] = value
+    end
+    data
+  end
+
+  def collect_targeting_and_tracking_stats(fuel_types)
+    feedback = {}
+    fuel_types.each do |fuel_type|
+      feedback.merge!(collect_fuel_type_targeting_and_tracking_stats(fuel_type))
+    end
+    feedback
+  end
+
+  def collect_fuel_type_targeting_and_tracking_stats(fuel_type)
+    meter = @school.aggregate_meter(fuel_type)
+    return {} if meter.nil?
+
+    target_meter = meter.meter_collection.target_school.aggregate_meter(fuel_type)
+    return {} if target_meter.nil?
+
+    target_meter.feedback.transform_keys{ |type| :"#{fuel_type}_#{type}" }
+  end
+
   def configure_scenario(scenario, annual_kwh_estimates)
     deleted_amr_data = {}
 
@@ -54,10 +113,12 @@ class RunTargetingAndTracking < RunAdultDashboard
       meter.reset_targeting_and_tracking_for_testing
 
       next if meter.nil?
-      
+
+      deleted_amr_data[fuel_type]  = move_end_date(meter, scenario[:move_end_date])
+
       set_target(meter, scenario[:target_start_date], scenario[:target])
 
-      deleted_amr_data[fuel_type] = truncate_amr_data(meter, scenario[:truncate_amr_data])
+      deleted_amr_data[fuel_type] += truncate_amr_data(meter, scenario[:truncate_amr_data])
  
       set_kwh_estimate(meter, annual_kwh_estimates[fuel_type], scenario[:target_start_date])
     end
@@ -133,11 +194,26 @@ class RunTargetingAndTracking < RunAdultDashboard
 
   def truncate_amr_data(meter, days_left)
     deleted_amr_data = []
+
     if days_left < meter.amr_data.days
       last_truncate_date = meter.amr_data.end_date - days_left + 1
       deleted_amr_data = meter.amr_data.delete_date_range(meter.amr_data.start_date, last_truncate_date)
       meter.amr_data.set_start_date(last_truncate_date + 1)
     end
+
+    deleted_amr_data
+  end
+
+  def move_end_date(meter, days_moved)
+    deleted_amr_data = []
+
+    if days_moved > 0 && days_moved < meter.amr_data.days
+      new_end_date = meter.amr_data.end_date - days_moved
+      deleted_amr_data = meter.amr_data.delete_date_range(new_end_date + 1, meter.amr_data.end_date)
+      meter.amr_data.set_end_date(new_end_date)
+      $ENERGYSPARKSTESTTODAYDATE = new_end_date
+    end
+
     deleted_amr_data
   end
 
@@ -168,8 +244,16 @@ class RunTargetingAndTracking < RunAdultDashboard
     @page_type = "TnT #{type(scenario)}"
   end
 
+  def self.index_stats_column_names
+    ['School Name', 'target start date from end', 'Days AMR data truncated to', 'End date move', 'target']
+  end
+
+  def stats_key(scenario)
+    "#{@school.name},#{type(scenario)}"
+  end
+
   def type(scenario)
-    "sd=#{scenario[:target_start_date]},ad=#{scenario[:truncate_amr_data]},t=#{scenario[:target]}"
+    "sd=#{scenario[:target_start_date]},days=#{scenario[:truncate_amr_data]},new ed=#{scenario[:move_end_date]},t=#{scenario[:target]}"
   end
 
   def excel_variation

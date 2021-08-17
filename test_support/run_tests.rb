@@ -226,6 +226,8 @@ class RunTests
 
   def run_targeting_and_tracking(control)
     run_specialised_dashboard(control, RunTargetingAndTracking)
+    filename = "#{control[:stats_csv_file_base]} #{Time.now.strftime('%d-%m-%Y %H-%M')}.csv"
+    RunTargetingAndTracking.save_stats_to_csv(filename)
   end
 
   def run_specialised_dashboard(control, run_class)
