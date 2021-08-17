@@ -66,7 +66,7 @@ class TargetsService
       :targeting_and_tracking_weekly_electricity_to_date_cumulative_line
     when :gas
       :targeting_and_tracking_weekly_gas_to_date_cumulative_line
-    when :storage_heater
+    when :storage_heaters, :storage_heater
       :targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line
     end
   end
@@ -77,7 +77,7 @@ class TargetsService
       :targeting_and_tracking_weekly_electricity_to_date_line
     when :gas
       :targeting_and_tracking_weekly_gas_to_date_line
-    when :storage_heater
+    when :storage_heaters, :storage_heater
       :targeting_and_tracking_weekly_storage_heater_to_date_line
     end
   end
@@ -88,7 +88,7 @@ class TargetsService
       :targeting_and_tracking_weekly_electricity_one_year_line
     when :gas
       :targeting_and_tracking_weekly_gas_one_year_line
-    when :storage_heater
+    when :storage_heaters, :storage_heater
       :targeting_and_tracking_weekly_storage_heater_one_year_line
     end
   end

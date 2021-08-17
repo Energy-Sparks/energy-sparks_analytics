@@ -49,7 +49,7 @@ class OneYearTargetingAndTrackingAmrData
       else
         raise StandardError, 'targeting and tracking electric < 1 year not intergrated yet'
       end
-    when :gas
+    when :gas, :storage_heater
       if @target_dates.full_years_benchmark_data?
         enough_data_already
       else

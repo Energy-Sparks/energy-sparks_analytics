@@ -33,6 +33,8 @@ class TargetMeter < Dashboard::Meter
       true
     elsif meter.fuel_type == :electricity
       true
+    elsif meter.fuel_type == :storage_heater
+      true
     else
       meter.amr_data.end_date > Date.today - 30 &&
       meter.amr_data.days > 365 + 30
@@ -90,7 +92,7 @@ class TargetMeter < Dashboard::Meter
 
   # TODO(PH, 14Jan2021) ~~~ duplicate of code in aggregation mixin
   def calculate_carbon_emissions_for_meter
-    if fuel_type == :electricity || fuel_type == :aggregated_electricity # TODO(PH, 6Apr19) remove : aggregated_electricity once analytics meter meta data loading changed
+    if fuel_type == :electricity || fuel_type == :aggregated_electricity || fuel_type == :storage_heater
       @amr_data.set_carbon_emissions(id, nil, @meter_collection.grid_carbon_intensity)
     else
       @amr_data.set_carbon_emissions(id, EnergyEquivalences::UK_GAS_CO2_KG_KWH, nil)

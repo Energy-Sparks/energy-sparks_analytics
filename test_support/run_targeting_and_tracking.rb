@@ -8,7 +8,7 @@ class RunTargetingAndTracking < RunAdultDashboard
         report_failed_charts:   :summary,
         user: { user_role: :analytics, staff_role: nil },
 
-        pages: %i[electric_target gas_target],
+        pages: %i[electric_target gas_target storage_heater_target],
 
         stats_csv_file_base: './Results/targeting and tracking stats',
 

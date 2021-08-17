@@ -123,7 +123,7 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
       amr_data:                               @amr_data,
       feedback: {
         percent_real_data:                      1.0,
-        adjustments_applied:                    'No 3rd Lockdown electricity amr data adjustment supplied as not enough of a reduction during the lockdown',
+        adjustments_applied:                    'No 3rd Lockdown electricity amr data adjustment applied as not enough of a reduction during the lockdown',
         percent_reduction_versus_Oct_Dec_2020:  lockdown_versus_mirror_percent_change,
         percent_reduction_versus_Jan_Mar_2020:  lockdown_versus_previous_year_percent_change,
         rule:                                   mirroring_rules

@@ -14,7 +14,7 @@ end
 
 def example_central_case_scenario
   [
-    { fuel_types: %i[electricity gas], target: 0.95 }
+    { fuel_types: %i[electricity gas], target: 0.8 }
   ]
 end
 

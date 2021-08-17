@@ -106,7 +106,12 @@ module Dashboard
     end
 
     def self.aggregate_pseudo_meter_attribute_key(fuel_type)
-      :"aggregated_#{fuel_type}"
+      case fuel_type
+      when :storage_heater
+        :storage_heater_aggregated
+      else
+        :"aggregated_#{fuel_type}"
+      end
     end
 
     def combined_meter_and_aggregate_attributes(type)
