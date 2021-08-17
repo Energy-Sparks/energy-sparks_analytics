@@ -33,21 +33,12 @@ class AdviceTargets < AdviceBase
 
     charts_and_html.push( { type: :html,  content: weekly_chart_intro_shorter_timescales } )
     create_chart(charts_and_html, weekly_progress_to_date_chart)
-=begin
-    charts_and_html.push( { type: :html,  content: weekly_chart_drilldown} )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_column)
 
-    charts_and_html.push( { type: :html,  content: weekly_chart_intro_shorter_timescales } )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_line)
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_column)
+    if ContentBase.analytics_user?(user_type)
+      create_chart(charts_and_html, standard_up_to_one_year_group_by_week_chart)
+      create_chart(charts_and_html, target_only_up_to_one_year_group_by_week_chart)
+    end
 
-
-    charts_and_html.push( { type: :html,  content: culmulative_weekly_chart_intro } )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_cumulative_line)
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_cumulative_line)
-
-    add_charts_for_testing(charts_and_html)
-=end
     charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
 
     charts_and_html.push( { type: :analytics_html,  content: targeting_and_tracking_debug_information } )
@@ -318,6 +309,12 @@ class AdviceTargetsElectricity < AdviceTargets
   protected def aggregate_meter
     @school.aggregated_electricity_meters
   end
+  def standard_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_standard_group_by_week_electricity
+  end
+  def target_only_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_target_only_group_by_week_electricity
+  end
 end
 
 class AdviceTargetsGas < AdviceTargets
@@ -327,6 +324,12 @@ class AdviceTargetsGas < AdviceTargets
   protected def aggregate_meter
     @school.aggregated_heat_meters
   end
+  def standard_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_standard_group_by_week_gas
+  end
+  def target_only_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_target_only_group_by_week_gas
+  end
 end
 
 class AdviceTargetsStorageHeaters < AdviceTargets
@@ -335,5 +338,11 @@ class AdviceTargetsStorageHeaters < AdviceTargets
   end
   protected def aggregate_meter
     @school.storage_heater_meter
+  end
+  def standard_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_standard_group_by_week_storage_heater
+  end
+  def target_only_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_target_only_group_by_week_storage_heater
   end
 end

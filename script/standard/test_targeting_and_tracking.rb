@@ -4,10 +4,17 @@ require_rel '../../test_support'
 
 def example_manually_configured_scenarios
   [
+    { fuel_types: %i[electricity gas], target: 0.95 },
     { target_start_date:  -7, truncate_amr_data: 365 * 2, move_end_date: -90,  fuel_types: %i[electricity gas], target: 0.95 },
     { target_start_date:  -7, truncate_amr_data: 365 * 2, move_end_date: -90,  fuel_types: %i[electricity gas], target: 0.95 },
     { target_start_date:  -7, truncate_amr_data: 365 * 1, move_end_date:   0,  fuel_types: %i[electricity gas], target: 0.90 },
     { target_start_date:  -7, truncate_amr_data: 365 * 1, move_end_date: -180, fuel_types: %i[electricity gas], target: 0.90 },
+  ]
+end
+
+def example_central_case_scenario
+  [
+    { fuel_types: %i[electricity gas], target: 0.95 }
   ]
 end
 
@@ -25,4 +32,4 @@ def script(scenarios)
   }
 end
 
-RunTests.new(script(example_manually_configured_scenarios)).run
+RunTests.new(script(example_central_case_scenario)).run

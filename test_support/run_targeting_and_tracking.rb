@@ -33,7 +33,7 @@ class RunTargetingAndTracking < RunAdultDashboard
       csv << [index_names, col_names].flatten
       @@all_stats.each do |index_key, stats|
         row_data = extract_data_by_column_name(stats, col_names)
-        index_keys = index_key.split(',')
+        index_keys = split_index_key(index_key)
         csv << [index_keys, row_data].flatten
       end
     end
@@ -136,6 +136,8 @@ class RunTargetingAndTracking < RunAdultDashboard
   end
 
   def start_date_target(meter, target_start_date)
+    return meter.amr_data.end_date - 7 if target_start_date.nil?
+
     target_start_date.is_a?(Date) ? target_start_date : (meter.amr_data.end_date + target_start_date)
   end
 
@@ -195,7 +197,7 @@ class RunTargetingAndTracking < RunAdultDashboard
   def truncate_amr_data(meter, days_left)
     deleted_amr_data = []
 
-    if days_left < meter.amr_data.days
+    if !days_left.nil? && days_left < meter.amr_data.days
       last_truncate_date = meter.amr_data.end_date - days_left + 1
       deleted_amr_data = meter.amr_data.delete_date_range(meter.amr_data.start_date, last_truncate_date)
       meter.amr_data.set_start_date(last_truncate_date + 1)
@@ -207,7 +209,7 @@ class RunTargetingAndTracking < RunAdultDashboard
   def move_end_date(meter, days_moved)
     deleted_amr_data = []
 
-    if days_moved > 0 && days_moved < meter.amr_data.days
+    if !days_moved.nil? && days_moved > 0 && days_moved < meter.amr_data.days
       new_end_date = meter.amr_data.end_date - days_moved
       deleted_amr_data = meter.amr_data.delete_date_range(new_end_date + 1, meter.amr_data.end_date)
       meter.amr_data.set_end_date(new_end_date)
@@ -245,7 +247,16 @@ class RunTargetingAndTracking < RunAdultDashboard
   end
 
   def self.index_stats_column_names
-    ['School Name', 'target start date from end', 'Days AMR data truncated to', 'End date move', 'target']
+    ['School Name', 'target start date from meter end date', 'Days AMR data truncated to', 'End date move', 'target']
+  end
+
+  # breaks up composite column index as per above column names
+  # inserting nil if central case scenario
+  def self.split_index_key(index_key)
+    index_key.split(',').map.with_index do |key, index|
+      s = key.split('=')
+      s.length == 1 && index != 0 ? nil : s.last
+    end
   end
 
   def stats_key(scenario)
