@@ -12,12 +12,13 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-def analyse_gas_meter(meter)
+def analyse_gas_meter(school, meter)
   puts "Analysing #{meter.mpxn}"
   puts "sd #{meter.amr_data.start_date} ed #{meter.amr_data.end_date}"
   puts "d1 #{meter.amr_data.keys.sort.first} d2 #{meter.amr_data.keys.sort.last}"
-  gas_estimate_info = OneYearTargetingAndTrackingAmrData.new(meter).last_years_amr_data
-  puts "Using method: #{gas_estimate_info[:adjustments_applied]}"
+  target_dates = school.target_school.aggregate_meter(meter.fuel_type).target_dates
+  gas_estimate_info = OneYearTargetingAndTrackingAmrData.new(meter, target_dates).last_years_amr_data
+  puts "Using method: #{gas_estimate_info[:feedback][:adjustments_applied]}"
   puts "Total kwh = #{gas_estimate_info[:amr_data].total}, estimate #{meter.annual_kwh_estimate}"
 =begin
 deprecated delete
@@ -42,6 +43,6 @@ schools.each do |school|
   meter = school.aggregate_meter(:gas)
   unless meter.nil?
     Logging.logger.info "Philip was here"
-    analyse_gas_meter(meter)
+    analyse_gas_meter(school, meter)
   end
 end

@@ -33,22 +33,15 @@ class AdviceTargets < AdviceBase
 
     charts_and_html.push( { type: :html,  content: weekly_chart_intro_shorter_timescales } )
     create_chart(charts_and_html, weekly_progress_to_date_chart)
-=begin
-    charts_and_html.push( { type: :html,  content: weekly_chart_drilldown} )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_column)
 
-    charts_and_html.push( { type: :html,  content: weekly_chart_intro_shorter_timescales } )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_line)
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_column)
+    if ContentBase.analytics_user?(user_type)
+      create_chart(charts_and_html, standard_up_to_one_year_group_by_week_chart)
+      create_chart(charts_and_html, target_only_up_to_one_year_group_by_week_chart)
+    end
 
-
-    charts_and_html.push( { type: :html,  content: culmulative_weekly_chart_intro } )
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_one_year_cumulative_line)
-    create_chart(charts_and_html, :targeting_and_tracking_weekly_electricity_to_date_cumulative_line)
-
-    add_charts_for_testing(charts_and_html)
-=end
     charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
+
+    charts_and_html.push( { type: :analytics_html,  content: targeting_and_tracking_debug_information } )
 
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
@@ -255,6 +248,43 @@ class AdviceTargets < AdviceBase
     ERB.new(text).result(binding)
   end
 
+  def targeting_and_tracking_debug_information
+    text = %{
+      <h2>Targeting and Tracking: analytics debug information</h2>
+      <%= debug_configuration_table %>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def debug_configuration_table
+    header = ['Type', 'Information']
+    rows = []
+    rows.push(['Annual kwh estimate (attribute)', aggregate_meter.annual_kwh_estimate])
+
+    target_meter = @school.target_school.aggregate_meter(@fuel_type)
+
+    rows.push(['Target meter kwh',        target_meter.amr_data.total])
+
+    target_meter.feedback.each do |type, val|
+      rows.push([type,  val])
+    end
+
+    # compact_print(target_meter)
+    
+    HtmlTableFormatting.new(header, rows).html
+  end
+
+  def compact_print(target_meter)
+    a = []
+    (target_meter.amr_data.start_date..target_meter.amr_data.end_date).each do |date|
+    
+      a.push("#{date}: #{target_meter.amr_data.one_day_kwh(date).round(1)}".ljust(20))
+    end
+    a.each_slice(6) do |six_vals|
+      puts six_vals.join(' | ')
+    end
+  end
+
   def targets_service
     @targets_service ||= TargetsService.new(@school, @fuel_type)
   end
@@ -279,6 +309,12 @@ class AdviceTargetsElectricity < AdviceTargets
   protected def aggregate_meter
     @school.aggregated_electricity_meters
   end
+  def standard_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_standard_group_by_week_electricity
+  end
+  def target_only_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_target_only_group_by_week_electricity
+  end
 end
 
 class AdviceTargetsGas < AdviceTargets
@@ -288,6 +324,12 @@ class AdviceTargetsGas < AdviceTargets
   protected def aggregate_meter
     @school.aggregated_heat_meters
   end
+  def standard_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_standard_group_by_week_gas
+  end
+  def target_only_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_target_only_group_by_week_gas
+  end
 end
 
 class AdviceTargetsStorageHeaters < AdviceTargets
@@ -296,5 +338,11 @@ class AdviceTargetsStorageHeaters < AdviceTargets
   end
   protected def aggregate_meter
     @school.storage_heater_meter
+  end
+  def standard_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_standard_group_by_week_storage_heater
+  end
+  def target_only_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_target_only_group_by_week_storage_heater
   end
 end

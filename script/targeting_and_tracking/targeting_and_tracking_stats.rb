@@ -12,6 +12,7 @@ end
 def covid_stats(schools)
   stats = {}
   schools.each do |school|
+    puts "Analysing #{school.name}"
     %i[electricity gas storage_heater].each do |fuel_type|
       meter = school.aggregate_meter(fuel_type)
       if meter.nil?
@@ -19,8 +20,12 @@ def covid_stats(schools)
         stats["No #{fuel_type} meter"].push(school.name)
       else
         if fuel_type == :electricity
-          season = SeasonalMirroringCovidAdjustment.new(meter.amr_data, school.holidays)
-          rule = season.enough_data? ? season.adjusted_amr_data[:rule] : 'not enough data'
+          season = Covid3rdLockdownElectricityCorrection.new(meter, school.holidays)
+          begin
+            rule = season.enough_data? ? season.adjusted_amr_data[:rule] : 'not enough data'
+          rescue Covid3rdLockdownElectricityCorrection::Unexpected3rdLockdownCOVIDAdjustment => e
+            rule = e
+          end
           stats[rule] ||= []
           stats[rule].push(school.name)
         end
@@ -66,4 +71,4 @@ end
 
 stats = covid_stats(schools)
 
-print_stats(stats)
+# print_stats(stats)

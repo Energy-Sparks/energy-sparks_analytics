@@ -61,6 +61,10 @@ class MeterCollection
     @pseudo_meter_attributes = @pseudo_meter_attributes.deep_merge(pseudo_meter_attributes)
   end
 
+  def delete_pseudo_meter_attribute(pseudo_meter_key, attribute_key)
+    @pseudo_meter_attributes[pseudo_meter_key].delete(attribute_key)
+  end
+
   def matches_identifier?(identifier, identifier_type)
     case identifier_type
     when :name
@@ -107,6 +111,25 @@ class MeterCollection
   def number_of_pupils(start_date = nil, end_date = nil)
     calculate_floor_area_number_of_pupils
     @calculated_floor_area_pupil_numbers.number_of_pupils(start_date, end_date)
+  end
+
+  # somewhat approx, imperfect solutjon to determine 3rd lcokdown periods without external JSON call
+  def region
+    scotland_postcodes = %w[AB DD DG EH FK G HS IV KA KW KY ML PA PH TD ZE]
+    wales_postcodes    = %w[CF CH GL HR LD LL NP SA SY]
+    postcode_prefix = postcode.upcase[/^[[:alpha:]]+/]
+
+    return :scotland if scotland_postcodes.include?(postcode_prefix)
+
+    if wales_postcodes.include?(postcode_prefix)
+      if postcode_prefix == 'SY'
+        return postcode.upcase[/[[:digit:]]+/].to_i < 15 ? :england : :wales
+      else
+        return :wales
+      end
+    end
+
+    :england
   end
 
   def calculate_floor_area_number_of_pupils
@@ -386,6 +409,11 @@ class MeterCollection
   def target_school(type = :day)
     @target_school ||= {}
     @target_school[type] ||= TargetSchool.new(self, type)
+  end
+
+  def reset_target_school_for_testing(type = :day)
+    puts "Resetting target school #{name}"
+    @target_school.delete(type) unless @target_school.nil?
   end
 
   def pseudo_meter_attributes(type)

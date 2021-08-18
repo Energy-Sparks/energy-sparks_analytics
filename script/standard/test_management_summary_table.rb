@@ -13,8 +13,8 @@ script = {
       control: {
         combined_html_output_file:     "Management Summary Table #{Date.today}",
         compare_results: [
-          { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Management Summary Table\Base' },
-          { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Management Summary Table\New' },
+          { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Management Summary Table\Base' },
+          { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Management Summary Table\New' },
           :summary,
           :report_differences
         ]

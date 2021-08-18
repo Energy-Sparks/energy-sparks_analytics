@@ -39,7 +39,15 @@ class Aggregator
   def initialise_schools_date_range
     schools = @chart_config.key?(:schools) ? load_schools(@chart_config[:schools]) : [ @meter_collection ]
 
-    schools << @meter_collection.target_school(@chart_config[:target][:calculation_type]) if include_target?
+    if include_target?
+      target_school = @meter_collection.target_school(@chart_config[:target][:calculation_type])
+
+      if show_only_target_school?
+        schools = [target_school]
+      else
+        schools << target_school
+      end
+    end
 
     determine_multi_school_chart_date_range(schools, @chart_config)
 
@@ -103,6 +111,8 @@ class Aggregator
     @chart_config[:y_axis_label] = y_axis_label(nil)
 
     swap_NaN_for_nil if true || Object.const_defined?('Rails')
+
+    @chart_config[:name] = dynamic_chart_name
   end
 
   def subtitle
@@ -117,8 +127,18 @@ class Aggregator
   def y2_axis?
     !config_none_or_nil?(:y2_axis, @chart_config)
   end
-  
+
   private
+
+  def dynamic_chart_name
+    # make useful data available for binding
+    school        = @meter_collection.school
+    meter         = @series_manager.meters.compact.first
+    second_meter  = @series_manager.meters.compact.last
+    total_kwh = @bucketed_data.values.map{ |v| v.nil? ? 0.0 : v }.map(&:sum).sum.round(0) if @chart_config[:name].include?('total_kwh') rescue 0.0
+
+    ERB.new(@chart_config[:name]).result(binding)
+  end
 
   def chart_has_filter?
     !config_none_or_nil?(:filter, @chart_config)
@@ -126,6 +146,10 @@ class Aggregator
 
   def include_target?
     @chart_config.key?(:target) && !@chart_config[:target].nil?
+  end
+
+  def show_only_target_school?
+    @chart_config.key?(:target) && @chart_config[:show_target_only] == true
   end
 
   def cumulative?

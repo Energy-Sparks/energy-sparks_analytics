@@ -3,7 +3,7 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 module Logging
-  @logger = Logger.new('log/display energy certificates ' + Time.now.strftime('%H %M') + '.log')
+  @logger = Logger.new('log/seasonal electricity analysis' + Time.now.strftime('%H %M') + '.log')
   logger.level = :debug
 end
 

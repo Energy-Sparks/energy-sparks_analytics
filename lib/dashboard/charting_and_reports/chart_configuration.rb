@@ -239,6 +239,15 @@ class ChartManager
       target:             {calculation_type: :day, extend_chart_into_future: true},
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
     },
+    targeting_and_tracking_standard_group_by_week_electricity: {
+      name:          'Standard <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
+      inherits_from: :management_dashboard_group_by_week_electricity
+    },
+    targeting_and_tracking_target_only_group_by_week_electricity: {
+      name:          'Target only <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
+      target:        {calculation_type: :day, extend_chart_into_future: false, show_target_only: true},
+      inherits_from: :targeting_and_tracking_standard_group_by_week_electricity
+    },
 
     targeting_and_tracking_weekly_gas_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
@@ -252,6 +261,14 @@ class ChartManager
       inherits_from: :targeting_and_tracking_weekly_electricity_one_year_line,
       meter_definition:   :allheat
     },
+    targeting_and_tracking_standard_group_by_week_gas: {
+      meter_definition:   :allheat,
+      inherits_from:      :targeting_and_tracking_standard_group_by_week_electricity
+    },
+    targeting_and_tracking_target_only_group_by_week_gas: {
+      meter_definition:   :allheat,
+      inherits_from: :targeting_and_tracking_target_only_group_by_week_electricity
+    },
 
     targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
@@ -264,6 +281,14 @@ class ChartManager
     targeting_and_tracking_weekly_storage_heater_one_year_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_one_year_line,
       meter_definition:   :storage_heater_meter
+    },
+    targeting_and_tracking_standard_group_by_week_storage_heater: {
+      meter_definition:   :storage_heater_meter,
+      inherits_from:      :targeting_and_tracking_standard_group_by_week_electricity
+    },
+    targeting_and_tracking_target_only_group_by_week_storage_heater: {
+      meter_definition:   :storage_heater_meter,
+      inherits_from: :targeting_and_tracking_target_only_group_by_week_electricity
     },
 
     # inherited use only

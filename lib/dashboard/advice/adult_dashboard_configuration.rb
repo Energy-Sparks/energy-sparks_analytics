@@ -38,6 +38,7 @@ class DashboardConfiguration
     ],
     storage_heater_group: %i[
       storage_heater
+      storage_heater_target
     ],
     carbon_group: %i[
       carbon
@@ -439,6 +440,28 @@ class DashboardConfiguration
         storage_heater_thermostatic
       ],
       promoted_variables: {
+      },
+    },
+    storage_heater_target: {   
+      name:                   'Setting and tracking targets for your storage heaters',
+      content_class:           AdviceTargetsStorageHeaters,
+      excel_worksheet_name:   'TargetStorageHeater',
+      charts: %i[
+      ],
+      promoted_variables: {
+        AlertStorageHeaterTargetAnnual => {
+          rating:                                   :rating,
+          previous_year_kwh:                        :previous_year_kwh,
+          current_year_kwh:                         :current_year_kwh,
+          current_year_target_kwh:                  :current_year_target_kwh,
+          current_year_percent_of_target_absolute:  :current_year_percent_of_target_absolute,
+          current_year_percent_of_target_adjective: :current_year_percent_of_target_adjective,
+          current_year_percent_of_target:           :current_year_percent_of_target,
+          current_year_target_£_to_date:            :current_year_target_£_to_date,
+          current_year_£:                           :current_year_£,
+          current_year_target_kwh_to_date:          :current_year_target_kwh_to_date,
+          summary:                                  :summary
+        }
       },
     },
     solar_pv_group: {

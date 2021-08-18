@@ -54,7 +54,7 @@ class CalculateMonthlyTrackAndTraceData
 
   def performance(kwhs, target_kwhs)
     kwhs.map.with_index do |_kwh, i|
-      kwhs[i].nil? ? nil : ((kwhs[i] - target_kwhs[i]) / target_kwhs[i])
+      (kwhs[i].nil? || target_kwhs[i].nil?) ? nil : ((kwhs[i] - target_kwhs[i]) / target_kwhs[i])
     end
   end
 
@@ -83,11 +83,11 @@ class CalculateMonthlyTrackAndTraceData
   end
 
   def calculate_month_dates
-    start_date = target_meter.target_start_date(@aggregate_meter.amr_data.end_date)
+    start_date = target_meter.target_dates.target_start_date
     months = start_date.day == 1 ? 12 : 13
 
-    (0..(months - 1)).map do |month_index|
-      end_date = DateTimeHelper.last_day_of_month(start_date)
+    (0..(months - 1)).map do |_month_index|
+      end_date = [DateTimeHelper.last_day_of_month(start_date), target_meter.target_dates.target_end_date].min
       month_date_range = start_date..end_date
       start_date = end_date + 1
       month_date_range

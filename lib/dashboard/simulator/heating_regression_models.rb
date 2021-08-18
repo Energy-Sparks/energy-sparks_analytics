@@ -210,8 +210,8 @@ module AnalyseHeatingAndHotWater
       end
 
       def to_s
-        logger.info "a #{a} b #{b} r2 #{r2} x #{samples} bt #{base_temp_display}"
-        a.nan? ? 'kwh=NaN' : (sprintf('kwh=%.0f+%.0fxT,R2=%.2f,N=%d', a, b, r2, samples) + base_temp_display)
+        # logger.info "a #{a} b #{b} r2 #{r2} x #{samples} bt #{base_temp_display}"
+        a.nan? ? 'kwh=NaN' : sprintf('kwh=%.0f+%.0fxT,R2=%.2f,N=%d baseT=%sC', a, b, r2, samples, base_temp_display)
       end
 
       # for debugging, display

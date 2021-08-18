@@ -28,8 +28,8 @@ script = {
                                   {month: -1}                    
                                 ],
                                 compare_results: [
-                                  { comparison_directory: 'C:\Users\phili\Documents\TestResultsDontBackup\Equivalences\Base\\' },
-                                  { output_directory:     'C:\Users\phili\Documents\TestResultsDontBackup\Equivalences\New\\' }
+                                  { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Equivalences\Base\\' },
+                                  { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Equivalences\New\\' }
                                 ]
                               }
                             }

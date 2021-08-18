@@ -54,13 +54,13 @@ school_names.each do |school_name|
   meter = school.aggregate_meter(fuel_type)
   next if meter.nil?
 
-  seasonal = SeasonalMirroringCovidAdjustment.new(meter.amr_data, school.holidays)
+  seasonal = Covid3rdLockdownElectricityCorrection.new(meter, school.holidays)
 
   info = seasonal.adjusted_amr_data
 
   lockdown_reduction[school_name] = []
-  lockdown_reduction[school_name].push(info[:percent_reduction_versus_Oct_Dec_2020])
-  lockdown_reduction[school_name].push(info[:percent_reduction_versus_Jan_Mar_2020])
+  lockdown_reduction[school_name].push(info[:feedback][:percent_reduction_versus_Oct_Dec_2020])
+  lockdown_reduction[school_name].push(info[:feedback][:percent_reduction_versus_Jan_Mar_2020])
 
   ed = meter.amr_data.end_date
   sd = ed - 365
@@ -70,15 +70,9 @@ school_names.each do |school_name|
   lockdown_reduction[school_name].push(before)
   lockdown_reduction[school_name].push(after)
 
-  puts info[:adjustments_applied]
-
-  (Date.new(2021, 1, 10)..Date.new(2021, 1, 23)).each do |date| # sunday to sunday
-    # puts "Swapping #{date} for #{seasonal.alternative_date(date)}"
-  end
-
 =begin
 
-  fitter = ElectricityAnnualProfileFitter.new(meter.amr_data, school.holidays, start_date, end_date)
+  fitter = MissingELectricityNormalDistributionProfileWeeklyFitter.new(meter.amr_data, school.holidays, start_date, end_date)
   fitted_data = fitter.fit
   next if fitted_data.nil?
 

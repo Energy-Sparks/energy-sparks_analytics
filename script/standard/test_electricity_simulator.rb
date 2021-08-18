@@ -5,8 +5,8 @@ require_rel '../test_support'
 require './script/report_config_support.rb'
 
 @@energysparksanalyticsautotest = {
-  original_data: '../TestResults/Charts/Base/',
-  new_data:      '../TestResults/Charts/New/'
+  original_data: ENV['ANALYTICSTESTRESULTDIR'] + '\Charts/Base/',
+  new_data:      ENV['ANALYTICSTESTRESULTDIR'] + '\Charts/New/'
 }
 
 school_name = 'St Marks Secondary'

@@ -401,16 +401,18 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def target_start_date
-    @school.target_school.aggregate_meter(fuel_type).target_start_date(maximum_alert_date)
+    @school.target_school.aggregate_meter(fuel_type).target_dates.target_start_date
   end
 
   def total(use_target, start_date, end_date, datatype)
-    begin
-      chosen_school = use_target ? @school.target_school : @school
-      end_date = [end_date, aggregate_meter_end_date].min
+    chosen_school = use_target ? @school.target_school : @school
+    end_date = [end_date, aggregate_meter_end_date].min
+    amr_data = chosen_school.aggregate_meter(fuel_type).amr_data
+    if start_date >= amr_data.start_date && end_date <= amr_data.end_date
       chosen_school.aggregate_meter(fuel_type).amr_data.kwh_date_range(start_date, end_date, datatype)
-    rescue EnergySparksNotEnoughDataException => _e
-      nil
+    else
+      # TODO(PH, 11Aug2021) - resolve ambiguity of returned 'current year kwh' etc. - is this the target or actual
+      Float::NAN
     end
   end
 

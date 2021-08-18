@@ -106,7 +106,8 @@ class SeriesDataManager
   include Logging
   REMOVE_SOLAR_PV_FROM_FUEL_BREAKDOWN_CHARTS = true # TODO(PH, 26Sep2019) - remove if result satisfactory
 
-  attr_reader :first_meter_date, :last_meter_date, :first_chart_date, :last_chart_date, :periods, :adjust_by_temperature
+  attr_reader :first_meter_date, :last_meter_date, :first_chart_date, :last_chart_date
+  attr_reader :periods, :adjust_by_temperature, :meters
 
   def initialize(meter_collection, chart_configuration)
     @meter_collection = meter_collection

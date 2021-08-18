@@ -61,6 +61,7 @@ class RunAdultDashboard < RunCharts
       puts sprintf('%-30.30s: %3d differ %3d same', page_name, by_page_type[page_name][true], by_page_type[page_name][false])
     end
   end
+
   private def page_list
     @school.adult_report_groups.map do |report_group|
       DashboardConfiguration::ADULT_DASHBOARD_GROUPS[report_group]
@@ -96,9 +97,7 @@ class RunAdultDashboard < RunCharts
 
     return if calculation_failed?(advice, page)
 
-    comparison = CompareContentResults.new(control, @school.name)
-
-    differences = comparison.save_and_compare_content(page, content, true)
+    differences = comparison_differences(control, @school.name, page, content)
 
     chart_names = content.select { |h| h[:type] == :chart_name }
 
@@ -116,6 +115,12 @@ class RunAdultDashboard < RunCharts
     @worksheets[worksheet_name] = working_charts.map { |c| c[:content] }
     @all_html += html.join(' ')
     differences
+  end
+
+  def comparison_differences(control, school_name, page, content)
+    comparison = CompareContentResults.new(control, school_name)
+
+    comparison.save_and_compare_content(page, content, true)
   end
 
   # similar to front end:
@@ -290,8 +295,8 @@ class RunAdultDashboard < RunCharts
     true
   end
 
-  def write_html
-    html_file = HtmlFileWriter.new(@school.name + '- adult dashboard')
+  def write_html(filename_suffix: '- adult dashboard')
+    html_file = HtmlFileWriter.new(@school.name + filename_suffix)
     html_file.write_header_footer('', @all_html, nil)
     html_file.close
   end
