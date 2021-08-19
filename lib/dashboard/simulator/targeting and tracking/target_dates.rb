@@ -32,7 +32,7 @@ class TargetDates
   def benchmark_date_range
     benchmark_start_date..benchmark_end_date
   end
-  
+
   def original_meter_start_date
     @original_meter.amr_data.start_date
   end
