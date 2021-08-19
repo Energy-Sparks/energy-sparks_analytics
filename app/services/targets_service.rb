@@ -21,12 +21,29 @@ class TargetsService
     )
   end
 
-  def relevance
-    aggregate_meter.nil? ? :never_relevant : :relevant
+  #Called by application to determine if we have enough data for a school to
+  #set and calculate a target. Should cover all necessary data
+  #
+  #We require at least a years worth of calendar data, as well as ~1 year of AMR data OR an estimate of their annual consumption
+  def enough_data_to_set_target?
+    return enough_calendar_data_to_calculate_target? && (enough_amr_data_to_calculate_target? || aggregate_meter.estimated_period_consumption_set? )
   end
 
-  def enough_data # or recent enough
-    aggregate_meter.enough_amr_data_to_set_target? ? :enough : :not_enough
+  #return true if there is sufficient historical data
+  def enough_amr_data_to_calculate_target?
+    return false unless aggregate_meter.present?
+    aggregate_meter.enough_amr_data_to_set_target?
+  end
+
+  #return true if there is enough calendar data to calculate the target
+  def enough_calendar_data_to_calculate_target?
+    last_holiday = @aggregate_school.holidays.last
+    return false unless last_holiday.present? && last_holiday.academic_year.present?
+    last_holiday.academic_year.last >= Time.now.year + 1
+  end
+
+  def relevance
+    aggregate_meter.nil? ? :never_relevant : :relevant
   end
 
   def recent_data?
