@@ -108,6 +108,9 @@ class TargetDates
       synthetic_benchmark_start_date: synthetic_benchmark_start_date,
       synthetic_benchmark_end_date:   synthetic_benchmark_end_date,
       full_years_benchmark_data:      full_years_benchmark_data?,
+      original_meter_start_date:      original_meter_start_date,
+      original_meter_end_date:        original_meter_end_date,
+      first_holiday_date:             first_holiday_date,
       final_holiday_date:             final_holiday_date,
       enough_holidays:                enough_holidays?,
       recent_data:                    recent_data?

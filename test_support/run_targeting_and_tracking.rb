@@ -25,10 +25,10 @@ class RunTargetingAndTracking < RunAdultDashboard
 
   def self.save_stats_to_csv(filename)
     puts "Saving results to #{filename}"
-  
+
     col_names = column_names(@@all_stats)
     index_names = index_stats_column_names
-  
+
     CSV.open(filename, 'w') do |csv|
       csv << [index_names, col_names].flatten
       @@all_stats.each do |index_key, stats|
@@ -67,7 +67,7 @@ class RunTargetingAndTracking < RunAdultDashboard
 
   private
 
-  def self.column_names(all_stats)
+  private_class_method def self.column_names(all_stats)
     names = {}
     all_stats.each do |_index_key, one_scenario_stats|
       one_scenario_stats.each do |key, _value|
@@ -77,7 +77,7 @@ class RunTargetingAndTracking < RunAdultDashboard
     names.keys
   end
 
-  def self.extract_data_by_column_name(all_stats, column_names)
+  private_class_method def self.extract_data_by_column_name(all_stats, column_names)
     data = Array.new(column_names.length, nil)
     all_stats.each do |col_name, value|
       col_number = column_names.index(col_name)
@@ -119,7 +119,7 @@ class RunTargetingAndTracking < RunAdultDashboard
       set_target(meter, scenario[:target_start_date], scenario[:target])
 
       deleted_amr_data[fuel_type] += truncate_amr_data(meter, scenario[:truncate_amr_data])
- 
+
       set_kwh_estimate(meter, annual_kwh_estimates[fuel_type], scenario[:target_start_date])
     end
 
@@ -145,12 +145,12 @@ class RunTargetingAndTracking < RunAdultDashboard
     start_date = start_date_target(meter, target_start_date)
 
     pseudo_meter_key = Dashboard::Meter.aggregate_pseudo_meter_attribute_key(meter.fuel_type)
-    
+
     # historic: delete attributes manually configured via generic meter attribute editor
     meter.meter_attributes.delete(:targeting_and_tracking)
 
     @school.delete_pseudo_meter_attribute(pseudo_meter_key, :targeting_and_tracking)
-  
+
     new_attributes = {
                         targeting_and_tracking: [
                                                   {
@@ -178,7 +178,7 @@ class RunTargetingAndTracking < RunAdultDashboard
     @school.delete_pseudo_meter_attribute(pseudo_meter_key, :estimated_period_consumption)
 
     kwh = annual_kwh_estimate[:kwh] / annual_kwh_estimate[:percent]
-  
+
     new_attributes = {
                         estimated_period_consumption: [
                                                         {

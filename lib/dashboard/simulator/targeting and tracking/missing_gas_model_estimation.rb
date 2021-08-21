@@ -87,6 +87,7 @@ class MissingGasModelEstimation < MissingGasEstimationBase
     # ideally just pickup the profile from the benchmark period i.e. before the target is set
     # but in the event the bacnhamrk period, only for example contains winter heating data,
     # or summer hot water data, then be more fault tolerant and use all available profile name
+    # TODO(PH, 20Aug2021) - consider whether day of week specific profile might be more appropriate?
     profiles_by_model_type_x48[:benchmark][model_type] || profiles_by_model_type_x48[:all][model_type] || missing_profile(model_type)
   end
 

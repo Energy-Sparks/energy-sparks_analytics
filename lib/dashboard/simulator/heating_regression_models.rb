@@ -188,6 +188,10 @@ module AnalyseHeatingAndHotWater
         @base_temperature = nil
       end
 
+      def thermally_massive?
+        false
+      end
+
       def predicted_kwh_temperature(temperature)
         base_temp_problem = @base_temperature.nil? || @base_temperature.nan?
         @a + @b * (base_temp_problem ? temperature : [temperature, @base_temperature].min)
@@ -1110,6 +1114,14 @@ module AnalyseHeatingAndHotWater
       end
     end
 
+    def predicted_kwh_for_future_date(heating_on, date, temperature)
+      if heating_on
+        predicted_heating_kwh_future_date(date, temperature)
+      else
+        predicted_non_heating_kwh_future_date(date, temperature)
+      end
+    end
+
     # used by heating on/off alert when its using a forecast, so it doesn't know whether the heating is on or not
     def predicted_heating_kwh_future_date(date, temperature)
       model = @models[heating_model_for_future_date(date)]
@@ -1167,6 +1179,10 @@ module AnalyseHeatingAndHotWater
 
     def name
       'Thermally massive'
+    end
+
+    def thermally_massive?
+      true
     end
 
     def heating_model_for_future_date(date)
