@@ -54,15 +54,21 @@ class TargetsService
     TargetMeter.enough_holidays?(aggregate_meter)
   end
 
+  def enough_temperature_data?
+    @fuel_type == :electricity || @aggregate_school.temperatures.days > 365 * 4
+  end
+
   def annual_kwh_estimate_required?
     TargetMeter.annual_kwh_estimate_required?(aggregate_meter)
   end
 
   def valid?
     relevance == :relevant &&
-    enough_data == :enough &&
     target_set? &&
     recent_data? &&
+    enough_temperature_data? &&
+    enough_data_to_set_target? &&
+    enough_calendar_data_to_calculate_target? &&
     enough_holidays?
   end
 
