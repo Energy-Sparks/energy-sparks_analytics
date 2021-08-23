@@ -182,7 +182,27 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     debug.transform_keys!{ |key| :"temperature_compensation_#{key}" }
     debug[:temperature_compensation_model] = model.class.name
     debug[:temperature_compensation_thermally_massive] = model.thermally_massive?
+    debug.merge!(degree_day_debug)
     @feedback.merge!(debug)
     model
+  end
+
+  def degree_day_debug
+    annual_degree_days = {}
+    start_date = temperatures.end_date - 365
+
+    while start_date >=  temperatures.start_date
+      end_date = start_date + 365
+      dr = "Annual degree days: #{start_date.strftime('%b %Y')}/#{end_date.year}"
+      dd = temperatures.degree_days_in_date_range(start_date, end_date, DEGREEDAY_BASE_TEMPERATURE)
+      annual_degree_days[dr] = dd
+      start_date -= 365
+    end
+
+    return {} if annual_degree_days.empty?
+
+    average = annual_degree_days.values.sum / annual_degree_days.length
+
+    annual_degree_days.transform_values{ |dd| "#{dd.round(0)} dd: #{(100.0 * ((dd / average) - 1.0)).round(1)}%"}
   end
 end
