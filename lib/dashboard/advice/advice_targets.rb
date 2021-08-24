@@ -37,6 +37,7 @@ class AdviceTargets < AdviceBase
     if ContentBase.analytics_user?(user_type)
       create_chart(charts_and_html, standard_up_to_one_year_group_by_week_chart)
       create_chart(charts_and_html, target_only_up_to_one_year_group_by_week_chart)
+      create_chart(charts_and_html, unscaled_target_up_to_one_year_group_by_week_chart)
     end
 
     charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
@@ -315,6 +316,9 @@ class AdviceTargetsElectricity < AdviceTargets
   def target_only_up_to_one_year_group_by_week_chart
     :targeting_and_tracking_target_only_group_by_week_electricity
   end
+  def unscaled_target_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_unscaled_target_group_by_week_electricity
+  end
 end
 
 class AdviceTargetsGas < AdviceTargets
@@ -330,6 +334,9 @@ class AdviceTargetsGas < AdviceTargets
   def target_only_up_to_one_year_group_by_week_chart
     :targeting_and_tracking_target_only_group_by_week_gas
   end
+  def unscaled_target_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_unscaled_target_group_by_week_gas
+  end
 end
 
 class AdviceTargetsStorageHeaters < AdviceTargets
@@ -344,5 +351,8 @@ class AdviceTargetsStorageHeaters < AdviceTargets
   end
   def target_only_up_to_one_year_group_by_week_chart
     :targeting_and_tracking_target_only_group_by_week_storage_heater
+  end
+  def unscaled_target_up_to_one_year_group_by_week_chart
+    :targeting_and_tracking_unscaled_target_group_by_week_storage_heater
   end
 end

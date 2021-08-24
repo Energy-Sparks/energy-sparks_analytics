@@ -149,7 +149,7 @@ class Aggregator
   end
 
   def show_only_target_school?
-    @chart_config.key?(:target) && @chart_config[:show_target_only] == true
+    @chart_config.key?(:target) && @chart_config[:target][:show_target_only] == true
   end
 
   def cumulative?

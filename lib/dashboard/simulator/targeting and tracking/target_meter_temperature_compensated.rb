@@ -3,6 +3,14 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
   RECOMMENDED_HEATING_ON_TEMPERATURE = 14.5
   WITHIN_TEMPERATURE_RANGE = 3.0
 
+  def target_degreedays_average_in_date_range(d1, d2)
+    d_days = 0.0
+    (d1..d2).each do |date|
+      d_days += target_degree_days(date)
+    end
+    d_days / (d2 - d1 + 1)
+  end
+
   private
   
   def num_same_day_type_required(amr_data)
@@ -25,45 +33,50 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     meter_collection.holidays
   end
 
-  def average_profile_for_day_x48(target_date, amr_data, benchmark_date)
-    compensation_temperature = target_temperature(benchmark_date, target_date)
+  def average_profile_for_day_x48(target_date:, synthetic_amr_data:, synthetic_date:)
+    compensation_temperature = target_temperature(target_date: target_date, synthetic_date: synthetic_date)
 
-    profile = averaged_temperature_target_profile(amr_data, target_date, compensation_temperature)
+    profile = averaged_temperature_target_profile(synthetic_amr_data, synthetic_date, compensation_temperature)
 
     profile[:profile_x48]
   end
 
-  def target_temperature(benchmark_date, target_date)
+  def target_temperature(target_date:, synthetic_date:)
     @target_temperature ||= {}
-    @target_temperature[target_date] = calculate_target_temperature(benchmark_date, target_date)
+    @target_temperature[target_date] = calculate_target_temperature(synthetic_date, target_date)
+
+    @target_degree_days ||= {}
+    @target_degree_days[target_date] ||= [0.0, DEGREEDAY_BASE_TEMPERATURE - @target_temperature[target_date]].max
+
+    @target_temperature[target_date]
   end
 
-  # assumes @target_temperature already calculated
   def target_degree_days(date)
-    [0.0, DEGREEDAY_BASE_TEMPERATURE - @target_temperature[date]].max
+    @target_degree_days[date]
   end
 
-  def calculate_target_temperature(benchmark_date, target_date)
-    temperature_compensate_past_target = target_dates.original_meter_end_date >= benchmark_date
+  def calculate_target_temperature(synthetic_date, target_date)
+    past_target = target_date <= target_dates.original_meter_end_date
 
-    if temperature_compensate_past_target
+    if past_target
       temperatures.average_temperature(target_date)
     else
-      target_temperature = temperatures.average_temperature_for_time_of_year(time_of_year: TimeOfYear.to_toy(benchmark_date), days_either_side: 2)
+      target_temperature = temperatures.average_temperature_for_time_of_year(time_of_year: TimeOfYear.to_toy(synthetic_date), days_either_side: 4)
     end
   end
 
   # =========================================================================================
   # general functions both future and past target date
 
-  def averaged_temperature_target_profile(amr_data, target_date, target_temperature)
-    heating_on = should_heating_be_on?(target_date, target_temperature)
+  def averaged_temperature_target_profile(synthetic_amr_data, synthetic_date, target_temperature)
+    heating_on = should_heating_be_on?(synthetic_date, target_temperature)
 
-    profiles_to_average = find_matching_profiles(target_date, target_temperature, heating_on, amr_data)
+    profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_temperature, heating_on, synthetic_amr_data)
+    puts "Got here NAN #{synthetic_date}" if profiles_to_average.empty?
 
-    model = local_heating_model(amr_data)
+    model = local_heating_model(synthetic_amr_data)
 
-    predicated_kwh = model.predicted_kwh_for_future_date(heating_on, target_date, target_temperature)
+    predicated_kwh = model.predicted_kwh_for_future_date(heating_on, synthetic_date, target_temperature)
     
     {
       profile_x48:  normalised_profile_to_predicted_kwh_x48(profiles_to_average.values, predicated_kwh),
@@ -72,23 +85,35 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     }
   end
 
-  def find_matching_profiles(target_date, target_temperature, heating_on, amr_data)
+  def find_matching_profiles_with_retries(synthetic_date, target_temperature, heating_on, amr_data)
+    if holidays.day_type(synthetic_date) == :schoolday
+      profiles = find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, 14)
+      return profiles unless profiles.empty?
+      profiles = find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, 14, true)
+      return profiles unless profiles.empty?
+    else
+      find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data)
+    end
+  end
+
+  def find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, scan_distance = 100, ignore_weekday = false)
     profiles_to_average = {}
 
-    day_type = holidays.day_type(target_date)
+    day_type = holidays.day_type(synthetic_date)
 
     model = local_heating_model(amr_data)
     
     scan_days_offset.each do |days_offset|
-      date_offset = target_date + days_offset
-      benchmark_temperature = temperatures.average_temperature(date_offset)
+      date_offset = synthetic_date + days_offset
+      synthetic_temperature = temperatures.average_temperature(date_offset)
 
       if amr_data.date_exists?(date_offset) &&
-         matching_day?(date_offset, target_date, model.thermally_massive?) &&
-         temperature_within_range?(benchmark_temperature, target_temperature) &&
+         matching_day?(date_offset, synthetic_date, model.thermally_massive?, heating_on, ignore_weekday) &&
+         temperature_within_range?(synthetic_temperature, target_temperature, heating_on) &&
          model.heating_on?(date_offset) == heating_on
-        profiles_to_average[benchmark_temperature] = amr_data.one_days_data_x48(date_offset)
+        profiles_to_average[synthetic_temperature] = amr_data.one_days_data_x48(date_offset)
       end
+
       break if profiles_to_average.length >= num_same_day_type_required(amr_data)[day_type]
     end
 
@@ -134,20 +159,21 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     AMRData.fast_multiply_x48_x_scalar(sum_normalised_profiles_x48, predicated_kwh / normalised_profiles.length) 
   end
 
-  def temperature_within_range?(temperature, range_temperature)
-    temperature.between?(range_temperature - WITHIN_TEMPERATURE_RANGE, range_temperature + WITHIN_TEMPERATURE_RANGE)
+  def temperature_within_range?(temperature, range_temperature, heating_on)
+    within_range = heating_on ? WITHIN_TEMPERATURE_RANGE : 2.0 * WITHIN_TEMPERATURE_RANGE
+    temperature.between?(range_temperature - within_range, range_temperature + within_range)
   end
 
-  def matching_day?(benchmark_date, target_date, thermally_massive)
-    benchmark_day_type = holidays.day_type(benchmark_date)
+  def matching_day?(synthetic_date, target_date, thermally_massive, heating_on, ignore_weekday)
+    synthetic_day_type = holidays.day_type(synthetic_date)
 
-    return false unless benchmark_day_type == holidays.day_type(target_date)
+    return false unless synthetic_day_type == holidays.day_type(target_date)
 
-    return true if %i[holiday weekend].include?(benchmark_day_type)
+    return true if %i[holiday weekend].include?(synthetic_day_type)
 
-    return true unless thermally_massive
+    return true if !thermally_massive || !heating_on || ignore_weekday
     
-    benchmark_date.wday == target_date.wday
+    synthetic_date.wday == target_date.wday
   end
 
   # =========================================================================================

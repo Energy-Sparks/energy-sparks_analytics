@@ -248,6 +248,13 @@ class ChartManager
       target:        {calculation_type: :day, extend_chart_into_future: false, show_target_only: true},
       inherits_from: :targeting_and_tracking_standard_group_by_week_electricity
     },
+    targeting_and_tracking_unscaled_target_group_by_week_electricity: {
+      name:               'Unscaled target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
+      meter_definition:   :unscaled_aggregate_target_electricity,
+      timescale:          :up_to_a_year, # required as chart manager dynami x axis otherwise accesses school and not target school
+      x_axis:             :week,
+      inherits_from:      :targeting_and_tracking_target_only_group_by_week_electricity
+    },
 
     targeting_and_tracking_weekly_gas_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
@@ -269,6 +276,11 @@ class ChartManager
       meter_definition:   :allheat,
       inherits_from: :targeting_and_tracking_target_only_group_by_week_electricity
     },
+    targeting_and_tracking_unscaled_target_group_by_week_gas: {
+      meter_definition:   :unscaled_aggregate_target_gas,
+      y2_axis:            :target_degreedays,
+      inherits_from:      :targeting_and_tracking_unscaled_target_group_by_week_electricity
+    },
 
     targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
@@ -289,6 +301,10 @@ class ChartManager
     targeting_and_tracking_target_only_group_by_week_storage_heater: {
       meter_definition:   :storage_heater_meter,
       inherits_from: :targeting_and_tracking_target_only_group_by_week_electricity
+    },
+    targeting_and_tracking_unscaled_target_group_by_week_storage_heater: {
+      meter_definition:   :unscaled_aggregate_target_storage_heater,
+      inherits_from:      :targeting_and_tracking_unscaled_target_group_by_week_gas
     },
 
     # inherited use only
