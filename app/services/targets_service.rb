@@ -79,6 +79,9 @@ class TargetsService
     aggregate_meter.target_set?
   end
 
+    # returns hash, value-attribute list,
+  # .to_s key & value to view,
+  # needs to be called after target meter data calculated
   def analytics_debug_info
     valid? ? target_meter.analytics_debug_info : {}
   end
