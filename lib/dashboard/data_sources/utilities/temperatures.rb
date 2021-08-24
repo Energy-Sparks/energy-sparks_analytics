@@ -22,6 +22,24 @@ class Temperatures < HalfHourlyData
     average(date)
   end
 
+  def average_temperature_for_time_of_year(time_of_year:, days_either_side: 0)
+    time_of_year = TimeOfYear.new(2, 28) if time_of_year.month == 2 && time_of_year.day == 29
+
+    avg_temperatures = []
+
+    date = end_date
+
+    while date >= start_date
+      time_of_year_date_this_year = Date.new(date.year, time_of_year.month, time_of_year.day)
+      if time_of_year_date_this_year.between?(start_date + days_either_side, end_date - days_either_side)
+        avg_temperatures += (-days_either_side..days_either_side).map { |offset| average_temperature(time_of_year_date_this_year + offset) }
+      end
+      date = Date.new(date.year - 1, date.month, date.day)
+    end
+
+    avg_temperatures.sum / avg_temperatures.length
+  end
+
   def average_temperature_in_date_range(start_date, end_date)
     average_in_date_range(start_date, end_date)
   end

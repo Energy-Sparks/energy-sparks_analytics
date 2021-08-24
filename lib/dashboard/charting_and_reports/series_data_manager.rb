@@ -63,6 +63,7 @@ class SeriesNames
   IRRADIANCE      = 'Solar Irradiance'.freeze
   GRIDCARBON      = 'Carbon Intensity of Electricity Grid (kg/kWh)'.freeze
   GASCARBON       = 'Carbon Intensity of Gas (kg/kWh)'.freeze
+  TARGETDEGREEDAYS= 'Target degree days'.freeze
 
   STORAGEHEATERS  = 'storage heaters'
   SOLARPV         = 'solar pv (consumed onsite)'      
@@ -83,7 +84,8 @@ class SeriesNames
     temperature:  TEMPERATURE,
     irradiance:   IRRADIANCE,
     gridcarbon:   GRIDCARBON,
-    gascarbon:    GASCARBON
+    gascarbon:    GASCARBON,
+    target_degreedays:  TARGETDEGREEDAYS
   }.freeze
 
   def self.y2_axis_key(axis_sym, throw_exception = true)
@@ -410,6 +412,7 @@ class SeriesDataManager
       when :gridcarbon;     breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.average_in_date_range(d1, d2)
       when :gascarbon;      breakdown[SeriesNames::GASCARBON]   = EnergyEquivalences::UK_GAS_CO2_KG_KWH
       when :predictedheat;  breakdown[SeriesNames::PREDICTEDHEAT] = heating_model.predicted_kwh_daterange(d1, d2, @meter_collection.temperatures)
+      when :target_degreedays; breakdown[SeriesNames::TARGETDEGREEDAYS] = meter.target_degreedays_average_in_date_range(d1, d2)
       end
     end
     breakdown
@@ -966,6 +969,12 @@ private
         @meters = [@meter_collection.storage_heater_meter, nil]
       when :solar_pv_meter, :solar_pv
         @meters = [@meter_collection.aggregated_electricity_meters.sub_meters[:generation], nil]
+      when :unscaled_aggregate_target_electricity
+        @meters = [@meter_collection.unscaled_target_meters[:electricity], nil]
+      when :unscaled_aggregate_target_gas
+        @meters = [@meter_collection.unscaled_target_meters[:gas], nil]
+      when :unscaled_aggregate_target_storage_heater
+        @meters = [@meter_collection.unscaled_target_meters[:storage_heater], nil]
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
       # specified meter - typically by mpan or mprn

@@ -67,13 +67,15 @@ def test_service(school)
 
     info[fuel_type][:relevance] = service.relevance
     if service.relevance == :relevant
-      info[fuel_type][:enough_data] = service.enough_data
+      info[fuel_type][:enough_data_to_set_target] = service.enough_data_to_set_target?
+      info[fuel_type][:enough_calendar_data_to_calculate_target] = service.enough_calendar_data_to_calculate_target?
       info[fuel_type][:annual_kwh_required] = service.annual_kwh_estimate_required?
       info[fuel_type][:recent_data] = service.recent_data?
       info[fuel_type][:enough_holidays] = service.enough_holidays?
+      info[fuel_type][:enough_temperature_data] = service.enough_temperature_data?
       info[fuel_type][:valid] = service.valid?
       info[fuel_type].merge!(service.analytics_debug_info)
-      if service.enough_data == :enough && service.target_set?
+      if service.valid?
         ap service.progress
       end
     end

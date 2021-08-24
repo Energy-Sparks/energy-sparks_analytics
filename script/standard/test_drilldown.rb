@@ -75,7 +75,7 @@ end
 
 reports = ReportConfigSupport.new
 
-school_name = 'St Marks Secondary'
+school_name = 'Bath ampton'
 ReportConfigSupport.suppress_output(school_name) {
   reports.load_school(school_name, true)
 }

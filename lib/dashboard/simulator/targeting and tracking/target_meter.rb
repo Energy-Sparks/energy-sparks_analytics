@@ -1,8 +1,9 @@
 class TargetMeter < Dashboard::Meter
   class TargetStartDateBeforeFirstMeterDate < StandardError; end
+  class UnexpectedPluralStorageHeaterFuel < StandardError; end
   include Logging
-  attr_reader :target, :feedback, :target_dates
-  def initialize(meter_to_clone)
+  attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter
+  def initialize(meter_to_clone, do_calculations = true)
     super(
       meter_collection: meter_to_clone.meter_collection,
       amr_data: nil,
@@ -15,17 +16,23 @@ class TargetMeter < Dashboard::Meter
       storage_heater_config: meter_to_clone.storage_heater_setup,
       meter_attributes: meter_to_clone.meter_attributes
     )
-    @original_meter = meter_to_clone
-    @target = TargetAttributes.new(meter_to_clone)
-    @target_dates = TargetDates.new(meter_to_clone, @target)
 
-    bm = Benchmark.realtime {
-      @amr_data = create_target_amr_data(meter_to_clone)
-      calculate_carbon_emissions_for_meter
-      calculate_costs_for_meter
-    }
-    calc_text = "Calculated target meter #{mpan_mprn} in #{bm.round(3)} seconds"
-    logger.info calc_text
+    if do_calculations
+      @feedback = {}
+      @original_meter = meter_to_clone
+      @target = TargetAttributes.new(meter_to_clone)
+      @target_dates = TargetDates.new(meter_to_clone, @target)
+
+      bm = Benchmark.realtime {
+        create_target_amr_data(meter_to_clone)
+        calculate_carbon_emissions_for_meter
+        calculate_costs_for_meter
+      }
+      @feedback[:calculation_time] = bm
+      calc_text = "Calculated target meter #{mpan_mprn} in #{bm.round(3)} seconds"
+      puts "Got here: #{calc_text}"
+      logger.info calc_text
+    end
   end
 
   def self.enough_amr_data_to_set_target?(meter)
@@ -33,12 +40,18 @@ class TargetMeter < Dashboard::Meter
       true
     elsif meter.fuel_type == :electricity
       true
-    elsif meter.fuel_type == :storage_heater
+    elsif storage_heater_fuel_type?(meter.fuel_type) ||
       true
     else
       meter.amr_data.end_date > Date.today - 30 &&
       meter.amr_data.days > 365 + 30
     end
+  end
+
+  def self.storage_heater_fuel_type?(fuel_type)
+    raise UnexpectedPluralStorageHeaterFuel, "Unexpected plural storage heater fuel for #{@original_meter.mpxn}" if fuel_type == :storage_heaters
+    
+    fuel_type == :storage_heater
   end
 
   def self.annual_kwh_estimate_required?(meter)
@@ -51,6 +64,20 @@ class TargetMeter < Dashboard::Meter
 
   def self.enough_holidays?(meter)
     dates(meter).enough_holidays?
+  end
+
+  def target_degree_days(date)
+    @target_degree_days ||= {}
+    @target_degree_days[date] ||= @meter_collection.temperatures.degree_days(date)
+  end
+
+  def set_target_degree_days(degree_days)
+    @target_degree_days ||= {}
+    @target_degree_days.merge!(degree_days)
+  end
+
+  def all_degree_days
+    @target_degree_days ||= {}
   end
 
   private_class_method def self.dates(meter)
@@ -66,7 +93,11 @@ class TargetMeter < Dashboard::Meter
     when :month
       TargetMeterMonthlyDayType.new(meter_to_clone)
     when :day
-      TargetMeterDailyDayType.new(meter_to_clone)
+      if meter_to_clone.fuel_type == :gas || storage_heater_fuel_type?(meter_to_clone.fuel_type)
+        TargetMeterTemperatureCompensatedDailyDayType.new(meter_to_clone)
+      else
+        TargetMeterDailyDayType.new(meter_to_clone)
+      end
     else
       raise EnergySparksUnexpectedStateException, "Unexpected target averaging type #{type}"
     end
@@ -77,22 +108,41 @@ class TargetMeter < Dashboard::Meter
   def create_target_amr_data(meter_to_clone)
     adjusted_amr_data_info = OneYearTargetingAndTrackingAmrData.new(meter_to_clone, target_dates).last_years_amr_data
 
-    @feedback = adjusted_amr_data_info[:feedback]
+    @feedback.merge!(adjusted_amr_data_info[:feedback])
 
-    target_amr_data = AMRData.new(meter_to_clone.meter_type)
+    @amr_data = AMRData.new(meter_to_clone.meter_type)
+    @non_scaled_target_meter = create_non_scaled_meter(self)
 
-    @target_dates.target_date_range.each do |date|
-      clone_date = date - 364
-      target_kwh_x48 = target_one_day_amr_data(date, clone_date, adjusted_amr_data_info[:amr_data])
-      target_amr_data.add(date, target_kwh_x48)
+    @target_dates.target_date_range.each do |target_date|
+      synthetic_date = target_date - 364
+      days_amr_data = target_one_day_amr_data(target_date: target_date, synthetic_date: synthetic_date, synthetic_amr_data: adjusted_amr_data_info[:amr_data])
+      @amr_data.add(target_date, days_amr_data[:scaled])
+      @non_scaled_target_meter.amr_data.add(target_date, days_amr_data[:non_scaled])
     end
 
-    target_amr_data
+    @non_scaled_target_meter.set_target_degree_days(self.all_degree_days)
+  end
+
+  def create_non_scaled_meter(meter_to_clone)
+    non_scaled_meter = self.class.new(meter_to_clone, false)
+    non_scaled_meter.amr_data = AMRData.new(meter_to_clone.meter_type)
+    non_scaled_meter
+  end
+
+  def target_one_day_amr_data(target_date:, synthetic_date:, synthetic_amr_data:)
+    days_average_profile_x48 = profile_x48(target_date: target_date, synthetic_date: synthetic_date, synthetic_amr_data: synthetic_amr_data)
+    target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(days_average_profile_x48, @target.target(target_date))
+    {
+      scaled:     OneDayAMRReading.new(mpan_mprn, target_date, 'TARG', nil, DateTime.now, target_kwh_x48),
+      non_scaled: OneDayAMRReading.new(mpan_mprn, target_date, 'TARG', nil, DateTime.now, days_average_profile_x48)
+    }
   end
 
   # TODO(PH, 14Jan2021) ~~~ duplicate of code in aggregation mixin
   def calculate_carbon_emissions_for_meter
-    if fuel_type == :electricity || fuel_type == :aggregated_electricity || fuel_type == :storage_heater
+    if fuel_type == :electricity ||
+       fuel_type == :aggregated_electricity ||
+        TargetMeter.storage_heater_fuel_type?(fuel_type)
       @amr_data.set_carbon_emissions(id, nil, @meter_collection.grid_carbon_intensity)
     else
       @amr_data.set_carbon_emissions(id, EnergyEquivalences::UK_GAS_CO2_KG_KWH, nil)
@@ -111,13 +161,12 @@ end
 # takes about 24ms per 365 days to calculate
 class TargetMeterMonthlyDayType < TargetMeter
   include Logging
+
   private
 
-  def target_one_day_amr_data(date, clone_date, clone_amr_data)
-    day_type = @meter_collection.holidays.day_type(date)
-    year_prior_average_profile_x48 = average_days_for_month_x48_xdaytype(clone_date, clone_amr_data)[day_type]
-    target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(year_prior_average_profile_x48, @target.target(date))
-    OneDayAMRReading.new(mpan_mprn, date, 'TARG', nil, DateTime.now, target_kwh_x48)
+  def profile_x48(target_date:, synthetic_date:, synthetic_amr_data:)
+    day_type = @meter_collection.holidays.day_type(target_date)
+    average_days_for_month_x48_xdaytype(synthetic_date, synthetic_amr_data)[day_type]
   end
 
   def average_days_for_month_x48_xdaytype(date, amr_data)
@@ -169,28 +218,28 @@ class TargetMeterDailyDayType < TargetMeter
 
   private
 
-  def target_one_day_amr_data(date, clone_date, clone_amr_data)
-    days_average_profile_x48 = average_profile_for_day_x48(clone_date, clone_amr_data)
-    target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(days_average_profile_x48, @target.target(date))
-    OneDayAMRReading.new(mpan_mprn, date, 'TARG', nil, DateTime.now, target_kwh_x48)
+  def profile_x48(target_date:, synthetic_date:, synthetic_amr_data:)
+    average_profile_for_day_x48(synthetic_date: synthetic_date, synthetic_amr_data: synthetic_amr_data, target_date: target_date)
   end
 
-  def scan_days_offset
+  def scan_days_offset(distance = 100)
     # work outwards from target day with these offsets
     # [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6, 7, -7, 8, -8, 9, -9, 10, -10......-100]
-    @scan_days_offset ||= [0, (1..100).to_a.zip((-100..-1).to_a.reverse)].flatten
+    @scan_days_offset ||= [0, (1..distance).to_a.zip((-distance..-1).to_a.reverse)].flatten
   end
 
-  def average_profile_for_day_x48(date, amr_data)
-    day_type = @meter_collection.holidays.day_type(date)
+  def average_profile_for_day_x48(synthetic_date:, synthetic_amr_data:, target_date: nil)
+    day_type = @meter_collection.holidays.day_type(synthetic_date)
     profiles_to_average = []
     scan_days_offset.each do |days_offset|
-      date_offset = date + days_offset
-      if amr_data.date_exists?(date_offset) && @meter_collection.holidays.day_type(date_offset) == day_type
-        profiles_to_average.push(amr_data.one_days_data_x48(date_offset))
+      date_offset = synthetic_date + days_offset
+      if synthetic_amr_data.date_exists?(date_offset) && @meter_collection.holidays.day_type(date_offset) == day_type
+        profiles_to_average.push(synthetic_amr_data.one_days_data_x48(date_offset))
       end
       break if profiles_to_average.length >= NUM_SAME_DAYTYPE_REQUIRED[day_type]
     end
     AMRData.fast_average_multiple_x48(profiles_to_average)
   end
+  alias_method :average_profile_for_day_x48_super, :average_profile_for_day_x48
 end
+

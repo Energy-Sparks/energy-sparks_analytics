@@ -216,9 +216,10 @@ class ChartManager
     # ============================================================================================
     # used by front end via targets_service.rb
     targeting_and_tracking_weekly_electricity_to_date_cumulative_line: {
-      name:          'Cumulative progress versus target',
-      target:        {calculation_type: :day, extend_chart_into_future: false},
-      inherits_from: :targeting_and_tracking_weekly_electricity_one_year_cumulative_line
+      name:                         'Cumulative progress versus target',
+      target:                       {calculation_type: :day, extend_chart_into_future: false},
+      ignore_single_series_failure: true,
+      inherits_from:                :targeting_and_tracking_weekly_electricity_one_year_cumulative_line
     },
     targeting_and_tracking_weekly_electricity_to_date_line: {
       name:             'Weekly progress versus target',
@@ -226,13 +227,14 @@ class ChartManager
         ['Energy:<school_name>: target', 'target'],
         ['Energy:<school_name>', 'actual']
       ],
-      chart1_type:        :line,
-      series_breakdown:   :none,
-      x_axis:             :week,
-      nullify_zero_data:  true,
-      timescale:        nil,
-      target:             {calculation_type: :day, extend_chart_into_future: false},
-      inherits_from:      :group_by_week_electricity
+      chart1_type:                  :line,
+      series_breakdown:             :none,
+      x_axis:                       :week,
+      nullify_zero_data:            true,
+      timescale:                    nil,
+      ignore_single_series_failure: true,
+      target:                       {calculation_type: :day, extend_chart_into_future: false},
+      inherits_from:                :group_by_week_electricity
     },
     targeting_and_tracking_weekly_electricity_one_year_line: {
       name:           'Weekly progress versus target to date',
@@ -247,6 +249,13 @@ class ChartManager
       name:          'Target only <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
       target:        {calculation_type: :day, extend_chart_into_future: false, show_target_only: true},
       inherits_from: :targeting_and_tracking_standard_group_by_week_electricity
+    },
+    targeting_and_tracking_unscaled_target_group_by_week_electricity: {
+      name:               'Unscaled target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
+      meter_definition:   :unscaled_aggregate_target_electricity,
+      timescale:          :up_to_a_year, # required as chart manager dynami x axis otherwise accesses school and not target school
+      x_axis:             :week,
+      inherits_from:      :targeting_and_tracking_target_only_group_by_week_electricity
     },
 
     targeting_and_tracking_weekly_gas_to_date_cumulative_line: {
@@ -269,6 +278,11 @@ class ChartManager
       meter_definition:   :allheat,
       inherits_from: :targeting_and_tracking_target_only_group_by_week_electricity
     },
+    targeting_and_tracking_unscaled_target_group_by_week_gas: {
+      meter_definition:   :unscaled_aggregate_target_gas,
+      y2_axis:            :target_degreedays,
+      inherits_from:      :targeting_and_tracking_unscaled_target_group_by_week_electricity
+    },
 
     targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
@@ -289,6 +303,10 @@ class ChartManager
     targeting_and_tracking_target_only_group_by_week_storage_heater: {
       meter_definition:   :storage_heater_meter,
       inherits_from: :targeting_and_tracking_target_only_group_by_week_electricity
+    },
+    targeting_and_tracking_unscaled_target_group_by_week_storage_heater: {
+      meter_definition:   :unscaled_aggregate_target_storage_heater,
+      inherits_from:      :targeting_and_tracking_unscaled_target_group_by_week_gas
     },
 
     # inherited use only

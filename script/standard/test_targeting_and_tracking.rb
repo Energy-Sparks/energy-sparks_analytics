@@ -12,6 +12,17 @@ def example_manually_configured_scenarios
   ]
 end
 
+def test_heating_temperature_compensation_scenarios
+  [
+    # move target date back to mid winter, so about 50% of target already
+    # past, so temperature compensated, but leaving a remaining 50%
+    # on uncompensated future target
+    { target_start_date:  Date.new(Date.today.year,     1, 8), fuel_types: %i[electricity gas], target: 0.95 },
+    { target_start_date:  Date.new(Date.today.year - 1, 9, 1), fuel_types: %i[electricity gas], target: 0.95 },
+    { target_start_date:  Date.new(Date.today.year    , 7, 1), fuel_types: %i[electricity gas], target: 0.95 },
+  ]
+end
+
 def example_central_case_scenario
   [
     { fuel_types: %i[electricity gas], target: 0.8 }
@@ -32,4 +43,4 @@ def script(scenarios)
   }
 end
 
-RunTests.new(script(example_central_case_scenario)).run
+RunTests.new(script(test_heating_temperature_compensation_scenarios)).run
