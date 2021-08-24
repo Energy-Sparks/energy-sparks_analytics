@@ -216,9 +216,10 @@ class ChartManager
     # ============================================================================================
     # used by front end via targets_service.rb
     targeting_and_tracking_weekly_electricity_to_date_cumulative_line: {
-      name:          'Cumulative progress versus target',
-      target:        {calculation_type: :day, extend_chart_into_future: false},
-      inherits_from: :targeting_and_tracking_weekly_electricity_one_year_cumulative_line
+      name:                         'Cumulative progress versus target',
+      target:                       {calculation_type: :day, extend_chart_into_future: false},
+      ignore_single_series_failure: true,
+      inherits_from:                :targeting_and_tracking_weekly_electricity_one_year_cumulative_line
     },
     targeting_and_tracking_weekly_electricity_to_date_line: {
       name:             'Weekly progress versus target',
@@ -226,13 +227,14 @@ class ChartManager
         ['Energy:<school_name>: target', 'target'],
         ['Energy:<school_name>', 'actual']
       ],
-      chart1_type:        :line,
-      series_breakdown:   :none,
-      x_axis:             :week,
-      nullify_zero_data:  true,
-      timescale:        nil,
-      target:             {calculation_type: :day, extend_chart_into_future: false},
-      inherits_from:      :group_by_week_electricity
+      chart1_type:                  :line,
+      series_breakdown:             :none,
+      x_axis:                       :week,
+      nullify_zero_data:            true,
+      timescale:                    nil,
+      ignore_single_series_failure: true,
+      target:                       {calculation_type: :day, extend_chart_into_future: false},
+      inherits_from:                :group_by_week_electricity
     },
     targeting_and_tracking_weekly_electricity_one_year_line: {
       name:           'Weekly progress versus target to date',

@@ -232,9 +232,21 @@ class Aggregator
 
     logger.info '-' * 120
     logger.info "Determining maximum chart range for #{schools.length} schools:"
-    
-    min_date = schools.map { |school| SeriesDataManager.new(school, chart_config).first_meter_date }.max
-    last_meter_dates = schools.map { |school| SeriesDataManager.new(school, chart_config).last_meter_date }
+
+    min_date = schools.map do |school|
+      SeriesDataManager.new(school, chart_config).first_meter_date
+    rescue EnergySparksNotEnoughDataException => e_
+      raise unless ignore_single_series_failure?
+      nil
+    end.compact.max
+
+    last_meter_dates = schools.map do |school|
+      SeriesDataManager.new(school, chart_config).last_meter_date
+    rescue EnergySparksNotEnoughDataException => e_
+      raise unless ignore_single_series_failure?
+      nil
+    end.compact
+
     max_date = extend_to_future ? last_meter_dates.max : last_meter_dates.min
 
     chart_config[:min_combined_school_date] = @first_meter_date = min_date
@@ -416,7 +428,7 @@ class Aggregator
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if school_count > 1
     bucketed_period_data.reverse_each.with_index do |period_data, index|
       bucketed_data, bucketed_data_count, time_description, school_name, x_axis, x_axis_date_ranges = period_data
-      
+
       @multi_chart_x_axis_ranges.push(x_axis_date_ranges)
 
       if index == 0
@@ -425,7 +437,7 @@ class Aggregator
         @bucketed_data_count[time_description] = bucketed_data_count.values[0]
       else
         time_description += "- partial year (from #{x_axis[0]})" if x_axis.length < @x_axis.length
-        
+
         keys = x_axis.map{ |month_year| month_year[0..2]}
 
         new_x_data = @x_axis.map do |month|

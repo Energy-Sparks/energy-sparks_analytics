@@ -18,16 +18,14 @@ class ChartManager
     end
 
     if %i[baseload cusum hotwater heating].include?(chart_config[:series_breakdown])
-       
-       # these special case may need reviewing if we decide to aggregate
-       # these types of graphs by anything other than days
-       # therefore create a single date datetime drilldown
 
-       chart_config[:chart1_type] = :column
-       chart_config[:series_breakdown] = :none
+      # these special case may need reviewing if we decide to aggregate
+      # these types of graphs by anything other than days
+      # therefore create a single date datetime drilldown
+
+      chart_config[:chart1_type] = :column
+      chart_config[:series_breakdown] = :none
     else
-      ap(chart_config, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-
       chart_config.delete(:inject)
 
       unless series_name.nil?
@@ -47,8 +45,6 @@ class ChartManager
 
     chart_config[:name] = drilldown_title(chart_config, series_name)
 
-    ap(chart_config, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-
     reformat_dates(chart_config)
 
     [new_chart_name, chart_config]
@@ -56,6 +52,7 @@ class ChartManager
 
   def parent_chart_timescale_description(chart_config)
     return nil if !chart_config.key?(:parent_chart_xaxis_config) # || chart_config[:parent_chart_xaxis_config].nil?
+    
     # unlimited i.e. long term charts have no timescale, so set to :years
     timescale = chart_config[:parent_chart_xaxis_config].nil? ? :years : chart_config[:parent_chart_xaxis_config]
     ChartTimeScaleDescriptions.interpret_timescale_description(timescale)
