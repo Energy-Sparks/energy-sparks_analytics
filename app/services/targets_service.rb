@@ -26,7 +26,7 @@ class TargetsService
   #
   #We require at least a years worth of calendar data, as well as ~1 year of AMR data OR an estimate of their annual consumption
   def enough_data_to_set_target?
-    return enough_holidays? && (enough_readings_to_calculate_target? || enough_estimate_data_to_calculate_target? )
+    return enough_holidays? && enough_temperature_data? && (enough_readings_to_calculate_target? || enough_estimate_data_to_calculate_target? )
   end
 
   def enough_holidays?
@@ -65,14 +65,12 @@ class TargetsService
     @fuel_type == :electricity || @aggregate_school.temperatures.days > 365 * 4
   end
 
+  #Not used by application currently
   def valid?
     aggregate_meter.present? &&
     target_set? &&
     recent_data? &&
-    enough_temperature_data? &&
-    enough_data_to_set_target? &&
-    enough_calendar_data_to_calculate_target? &&
-    enough_holidays?
+    enough_data_to_set_target?
   end
 
   #Does the analytics think there's a target set?
