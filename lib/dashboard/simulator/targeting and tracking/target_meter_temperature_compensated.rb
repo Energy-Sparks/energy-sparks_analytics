@@ -77,7 +77,7 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     model = local_heating_model(synthetic_amr_data)
 
     predicated_kwh = model.predicted_kwh_for_future_date(heating_on, synthetic_date, target_temperature)
-    
+
     {
       profile_x48:  normalised_profile_to_predicted_kwh_x48(profiles_to_average.values, predicated_kwh),
       temperature:  target_temperature,
@@ -89,8 +89,8 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     if holidays.day_type(synthetic_date) == :schoolday
       profiles = find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, 14)
       return profiles unless profiles.empty?
-      profiles = find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, 14, true)
-      return profiles unless profiles.empty?
+
+      find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, 14, true)
     else
       find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data)
     end

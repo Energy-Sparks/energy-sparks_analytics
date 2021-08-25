@@ -41,7 +41,9 @@ class AggregateDataService
 
       set_post_aggregation_state_on_all_meters
     }
-    calc_text = "Calculated meter aggregation in #{bm.round(3)} seconds"
+    calc_text = "Calculated meter aggregation for |#{@meter_collection.name}| in |#{bm.round(3)}| seconds"
+
+    puts calc_text # needed by PH to monitor process
     logger.info calc_text
   end
 
