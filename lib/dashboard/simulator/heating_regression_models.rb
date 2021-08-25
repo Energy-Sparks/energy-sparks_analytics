@@ -600,6 +600,10 @@ module AnalyseHeatingAndHotWater
       'Simple'
     end
 
+    def thermally_massive?
+      false
+    end
+
     def all_heating_model_types
       ALLMODELTYPES
     end
