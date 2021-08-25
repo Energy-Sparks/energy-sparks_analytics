@@ -1,7 +1,7 @@
 class TargetsService
   def initialize(aggregate_school, fuel_type)
     @aggregate_school = aggregate_school
-    @fuel_type = fuel_type
+    @fuel_type = set_fuel_type(fuel_type)
   end
 
   def progress
@@ -26,44 +26,47 @@ class TargetsService
   #
   #We require at least a years worth of calendar data, as well as ~1 year of AMR data OR an estimate of their annual consumption
   def enough_data_to_set_target?
-    return enough_calendar_data_to_calculate_target? && (enough_amr_data_to_calculate_target? || aggregate_meter.estimated_period_consumption_set? )
-  end
-
-  #return true if there is sufficient historical data
-  def enough_amr_data_to_calculate_target?
-    return false unless aggregate_meter.present?
-    aggregate_meter.enough_amr_data_to_set_target?
-  end
-
-  #return true if there is enough calendar data to calculate the target
-  def enough_calendar_data_to_calculate_target?
-    last_holiday = @aggregate_school.holidays.last
-    return false unless last_holiday.present? && last_holiday.academic_year.present?
-    last_holiday.academic_year.last >= Time.now.year + 1
-  end
-
-  def relevance
-    aggregate_meter.nil? ? :never_relevant : :relevant
-  end
-
-  def recent_data?
-    TargetMeter.recent_data?(aggregate_meter)
+    return enough_holidays? && (enough_readings_to_calculate_target? || enough_estimate_data_to_calculate_target? )
   end
 
   def enough_holidays?
     TargetMeter.enough_holidays?(aggregate_meter)
   end
 
-  def enough_temperature_data?
-    @fuel_type == :electricity || @aggregate_school.temperatures.days > 365 * 4
+  #Are there enough historical meter readings to calculate a target?
+  #This should be checking whether there’s enough historical data, regardless of
+  #whether the data is currently lagging behind (see below). So checking for the
+  #oldest data, not the most recent.
+  def enough_readings_to_calculate_target?
+    return false unless aggregate_meter.present?
+    aggregate_meter.enough_amr_data_to_set_target?
+  end
+
+  #Is there enough data to produce an estimate of historical usage to calculate a target.
+  #Checks if the estimate attribute needs to be, and is, set
+  #Might also need some minimal readings
+  def enough_estimate_data_to_calculate_target?
+    annual_kwh_estimate_required? && annual_kwh_estimate?
+  end
+
+  def annual_kwh_estimate?
+    aggregate_meter.estimated_period_consumption_set?
   end
 
   def annual_kwh_estimate_required?
     TargetMeter.annual_kwh_estimate_required?(aggregate_meter)
   end
 
+  def recent_data?
+    TargetMeter.recent_data?(aggregate_meter)
+  end
+
+  def enough_temperature_data?
+    @fuel_type == :electricity || @aggregate_school.temperatures.days > 365 * 4
+  end
+
   def valid?
-    relevance == :relevant &&
+    aggregate_meter.present? &&
     target_set? &&
     recent_data? &&
     enough_temperature_data? &&
@@ -72,14 +75,12 @@ class TargetsService
     enough_holidays?
   end
 
-  # for backwards compatibility
-  # schools without meter attributes set
-  # may not be needed by front end
+  #Does the analytics think there's a target set?
   def target_set?
     aggregate_meter.target_set?
   end
 
-    # returns hash, value-attribute list,
+  # returns hash, value-attribute list,
   # .to_s key & value to view,
   # needs to be called after target meter data calculated
   def analytics_debug_info
@@ -92,7 +93,7 @@ class TargetsService
       :targeting_and_tracking_weekly_electricity_to_date_cumulative_line
     when :gas
       :targeting_and_tracking_weekly_gas_to_date_cumulative_line
-    when :storage_heaters, :storage_heater
+    when :storage_heater
       :targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line
     end
   end
@@ -103,7 +104,7 @@ class TargetsService
       :targeting_and_tracking_weekly_electricity_to_date_line
     when :gas
       :targeting_and_tracking_weekly_gas_to_date_line
-    when :storage_heaters, :storage_heater
+    when :storage_heater
       :targeting_and_tracking_weekly_storage_heater_to_date_line
     end
   end
@@ -114,7 +115,7 @@ class TargetsService
       :targeting_and_tracking_weekly_electricity_one_year_line
     when :gas
       :targeting_and_tracking_weekly_gas_one_year_line
-    when :storage_heaters, :storage_heater
+    when :storage_heater
       :targeting_and_tracking_weekly_storage_heater_one_year_line
     end
   end
@@ -143,5 +144,9 @@ class TargetsService
 
   def aggregate_meter
     @aggregate_meter ||= @aggregate_school.aggregate_meter(@fuel_type)
+  end
+
+  def set_fuel_type(fuel_type)
+    fuel_type == :storage_heaters ? :storage_heater : fuel_type
   end
 end
