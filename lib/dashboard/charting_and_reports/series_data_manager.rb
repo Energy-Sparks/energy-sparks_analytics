@@ -975,6 +975,12 @@ private
         @meters = [@meter_collection.unscaled_target_meters[:gas], nil]
       when :unscaled_aggregate_target_storage_heater
         @meters = [@meter_collection.unscaled_target_meters[:storage_heater], nil]
+      when :synthetic_aggregate_target_electricity
+        @meters = [@meter_collection.synthetic_target_meters[:electricity], nil]
+      when :synthetic_aggregate_target_gas
+        @meters = [@meter_collection.synthetic_target_meters[:gas], nil]
+      when :synthetic_aggregate_target_storage_heater
+        @meters = [@meter_collection.synthetic_target_meters[:storage_heater], nil]
       end
     elsif @meter_definition.is_a?(String) || @meter_definition.is_a?(Integer)
       # specified meter - typically by mpan or mprn

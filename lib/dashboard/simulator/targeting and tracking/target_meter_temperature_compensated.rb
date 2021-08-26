@@ -11,8 +11,14 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     d_days / (d2 - d1 + 1)
   end
 
+  def save_debug
+    unless @calculation_errors[:temperature_compensation_profile_matching].empty?
+      save_debug_to_csv(@calculation_errors[:temperature_compensation_profile_matching])
+    end
+  end
+
   private
-  
+
   def num_same_day_type_required(amr_data)
     # thermally massive model day of week dependent so
     # unlikely to be able to scan that far to find dates
@@ -99,25 +105,78 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
   def find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, scan_distance = 100, ignore_weekday = false)
     profiles_to_average = {}
 
+    scan_failures = []
+
     day_type = holidays.day_type(synthetic_date)
 
     model = local_heating_model(amr_data)
     
-    scan_days_offset.each do |days_offset|
+    scan_days_offset(scan_distance).each do |days_offset|
       date_offset = synthetic_date + days_offset
       synthetic_temperature = temperatures.average_temperature(date_offset)
 
       if amr_data.date_exists?(date_offset) &&
-         matching_day?(date_offset, synthetic_date, model.thermally_massive?, heating_on, ignore_weekday) &&
+         matching_day?(date_offset, synthetic_date, model.thermally_massive?, heating_on, ignore_weekday) == true &&
          temperature_within_range?(synthetic_temperature, target_temperature, heating_on) &&
          model.heating_on?(date_offset) == heating_on
         profiles_to_average[synthetic_temperature] = amr_data.one_days_data_x48(date_offset)
+      else
+        failure = {
+          scan_date:              date_offset,
+          amr_data:               amr_data.date_exists?(date_offset),
+          matching_day:           matching_day?(date_offset, synthetic_date, model.thermally_massive?, heating_on, ignore_weekday),
+          temperature_in_range:   temperature_within_range?(synthetic_temperature, target_temperature, heating_on),
+          heating_on_match:       model.heating_on?(date_offset) == heating_on
+        }
+        scan_failures.push(failure)
       end
 
       break if profiles_to_average.length >= num_same_day_type_required(amr_data)[day_type]
     end
 
+    if profiles_to_average.empty?
+      @calculation_errors[:temperature_compensation_profile_matching] ||= []
+      debug = {
+        day_type:           day_type,
+        synthetic_date:     synthetic_date,
+        target_temperature: target_temperature,
+        heating_on:         heating_on,
+        thermally_massive:  model.thermally_massive?,
+        ignore_weekday:     ignore_weekday,
+        scan_distance:      scan_distance,
+        scan_failures:      scan_failures
+      }
+
+      @calculation_errors[:temperature_compensation_profile_matching].push(debug)
+    end
+
     profiles_to_average
+  end
+
+  def save_debug_to_csv(calc_errors)
+    filename = "./Results/targeting and tracking profile scanning failures #{object_id}.csv"
+ 
+    puts "Saving results to #{filename}"
+    
+    col_names = [
+      calc_errors.first.select { |k, _v| k != :scan_failures }.keys,
+      calc_errors.first[:scan_failures].first.keys
+    ].flatten
+
+    CSV.open(filename, 'w') do |csv|
+      csv << col_names
+      calc_errors.each do |one_day_calc_error|
+        non_scan_failure_data = one_day_calc_error.select { |k, _v| k != :scan_failures }.values
+
+        one_day_calc_error[:scan_failures].each do |scan_failure_data|
+          csv << [non_scan_failure_data, scan_failure_data.values].flatten
+        end
+      end
+
+      Thread.current.backtrace.each do |line|
+        csv << ['Stacktrace', line]
+      end
+    end
   end
 
   # rather than following when the school turned its heating on or off in the previous year
@@ -165,15 +224,19 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
   end
 
   def matching_day?(synthetic_date, target_date, thermally_massive, heating_on, ignore_weekday)
+    match_failure_type?(synthetic_date, target_date, thermally_massive, heating_on, ignore_weekday)
+  end
+
+  def match_failure_type?(synthetic_date, target_date, thermally_massive, heating_on, ignore_weekday)
     synthetic_day_type = holidays.day_type(synthetic_date)
 
-    return false unless synthetic_day_type == holidays.day_type(target_date)
+    return :day_type unless synthetic_day_type == holidays.day_type(target_date)
 
     return true if %i[holiday weekend].include?(synthetic_day_type)
 
     return true if !thermally_massive || !heating_on || ignore_weekday
-    
-    synthetic_date.wday == target_date.wday
+
+    synthetic_date.wday == target_date.wday ? true : :weekday
   end
 
   # =========================================================================================
@@ -193,7 +256,7 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     start_date = [end_date - 364, amr_data.start_date].max
     period = SchoolDatePeriod.new(:target_meter, '1 yr benchmark', start_date, end_date)
   end
-  
+
   def local_heating_model(amr_data)
     @local_heating_model ||= calc_local_heating_model(amr_data)
   end

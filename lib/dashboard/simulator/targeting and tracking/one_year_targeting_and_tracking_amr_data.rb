@@ -9,6 +9,8 @@
 # or adjusted data - going back 1+ year, so next year's target can be calculated
 #
 class OneYearTargetingAndTrackingAmrData
+  class MissingAnnualKwhEstimate < StandardError; end
+
   def initialize(meter, target_dates)
     @meter = meter
     @target_dates = target_dates
@@ -76,6 +78,7 @@ class OneYearTargetingAndTrackingAmrData
   end
 
   def fit_electricity
+    raise MissingAnnualKwhEstimate, "No annual kwh estimate attribute set for #{@meter.fuel_type}" if @meter.annual_kwh_estimate.nil?
     electric_estimate = MissingElectricityEstimation.new(@meter, @target_dates)
     electric_estimate.complete_year_amr_data
   end
@@ -89,6 +92,7 @@ class OneYearTargetingAndTrackingAmrData
   end
 
   def missing_gas_estimation
+    raise MissingAnnualKwhEstimate, "No annual kwh estimate attribute set for #{@meter.fuel_type}" if @meter.annual_kwh_estimate.nil?
     @missing_gas_estimation ||= MissingGasEstimation.new(@meter, @meter.annual_kwh_estimate, @target_dates)
   end
 end

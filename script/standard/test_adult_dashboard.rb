@@ -22,6 +22,7 @@ script = {
                                 user: { user_role: :analytics, staff_role: nil },
 
                                 no_pages: %i[electric_target gas_target storage_heater_target],
+                                pages: %i[gas_target],
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },

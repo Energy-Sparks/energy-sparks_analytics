@@ -2,7 +2,7 @@ class TargetMeter < Dashboard::Meter
   class TargetStartDateBeforeFirstMeterDate < StandardError; end
   class UnexpectedPluralStorageHeaterFuel < StandardError; end
   include Logging
-  attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter
+  attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter, :synthetic_meter
   def initialize(meter_to_clone, do_calculations = true)
     super(
       meter_collection: meter_to_clone.meter_collection,
@@ -17,6 +17,8 @@ class TargetMeter < Dashboard::Meter
       meter_attributes: meter_to_clone.meter_attributes
     )
 
+    @calculation_errors = {}
+
     if do_calculations
       @feedback = {}
       @original_meter = meter_to_clone
@@ -29,7 +31,7 @@ class TargetMeter < Dashboard::Meter
         calculate_costs_for_meter
       }
       @feedback[:calculation_time] = bm
-      calc_text = "Calculated target meter #{mpan_mprn} in #{bm.round(3)} seconds"
+      calc_text = "Calculated target meter #{mpan_mprn} #{fuel_type} in #{bm.round(3)} seconds"
       puts "Got here: #{calc_text}"
       logger.info calc_text
     end
@@ -106,10 +108,29 @@ class TargetMeter < Dashboard::Meter
   private
 
   def create_target_amr_data(meter_to_clone)
+    # Stage 1: if there is less than 1 year of existing amr data, synthesize up to 1 year
+    adjusted_amr_data_info = if_less_than_one_year_historic_data_make_up_to_one_year_using_synthetic_calculated_data(meter_to_clone)
+puts "Got here #{adjusted_amr_data_info[:amr_data].total}"
+    # Stage 2: use one year or real and/or synthetic amr data to project a target for next year
+    create_averaged_and_or_temperature_compensated_target_data(adjusted_amr_data_info, meter_to_clone)
+  end
+
+  def if_less_than_one_year_historic_data_make_up_to_one_year_using_synthetic_calculated_data(meter_to_clone)
     adjusted_amr_data_info = OneYearTargetingAndTrackingAmrData.new(meter_to_clone, target_dates).last_years_amr_data
 
     @feedback.merge!(adjusted_amr_data_info[:feedback])
 
+    create_1_year_synthetic_historic_meter(adjusted_amr_data_info[:amr_data], meter_to_clone)
+
+    adjusted_amr_data_info
+  end
+
+  def create_1_year_synthetic_historic_meter(amr_data, meter_to_clone)
+    @synthetic_meter = create_non_scaled_meter(self)
+    @synthetic_meter.amr_data = amr_data
+  end
+
+  def create_averaged_and_or_temperature_compensated_target_data(adjusted_amr_data_info, meter_to_clone)   
     @amr_data = AMRData.new(meter_to_clone.meter_type)
     @non_scaled_target_meter = create_non_scaled_meter(self)
 
@@ -119,6 +140,8 @@ class TargetMeter < Dashboard::Meter
       @amr_data.add(target_date, days_amr_data[:scaled])
       @non_scaled_target_meter.amr_data.add(target_date, days_amr_data[:non_scaled])
     end
+
+    save_debug unless Object.const_defined?('Rails') || @calculation_errors.empty?
 
     @non_scaled_target_meter.set_target_degree_days(self.all_degree_days)
   end

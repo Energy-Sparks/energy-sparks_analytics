@@ -79,7 +79,9 @@ module Dashboard
     end
 
     def calculate_annual_kwh_estimate
-      kwh_attr = combined_meter_and_aggregate_attributes(:estimated_period_consumption)
+      # TODO(PH, 26Aug2021) - consider removing uniq once all of these attributes
+      # are against the pseudo meter, rather than the legacy individual meters
+      kwh_attr = combined_meter_and_aggregate_attributes(:estimated_period_consumption).uniq
       return Float::NAN if kwh_attr.nil? || kwh_attr.empty?
       kwh_estimate = EstimatePeriodConsumption.new(kwh_attr)
       kwh_estimate.annual_kwh
@@ -130,7 +132,7 @@ module Dashboard
     end
 
     def estimated_period_consumption_set?
-      attributes(:estimated_period_consumption).present?
+      combined_meter_and_aggregate_attributes(:estimated_period_consumption).present?
     end
 
     def meter_number_of_pupils(local_school, start_date = nil, end_date = nil)
