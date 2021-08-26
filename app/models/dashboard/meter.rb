@@ -179,7 +179,7 @@ module Dashboard
     end
 
     def inspect
-      "#{self.class.name} (object_id: #{"0x00%x" % (object_id << 1)})"
+      "#{self.class.name} (mpan: #{@mpan_mprn.to_s}, fuel_type: #{@fuel_type.to_s}, object_id: #{"0x00%x" % (object_id << 1)})"
     end
 
     def to_s

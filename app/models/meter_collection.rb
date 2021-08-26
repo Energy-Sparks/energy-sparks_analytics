@@ -145,7 +145,7 @@ class MeterCollection
   end
 
   def inspect
-    "Meter Collection (name: #{@name}, object_id: #{"0x00%x" % (object_id << 1)})"
+    "Meter Collection (name: '#{@name}', object_id: #{"0x00%x" % (object_id << 1)})"
   end
 
   def to_s

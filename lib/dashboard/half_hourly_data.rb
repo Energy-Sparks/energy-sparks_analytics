@@ -192,7 +192,7 @@ class HalfHourlyData < Hash
   end
 
   def inspect
-    "#{self.class.name} (object_id: #{"0x00%x" % (object_id << 1)})"
+    "#{self.class.name} (days: #{self.keys.count}, object_id: #{"0x00%x" % (object_id << 1)})"
   end
 
 end
