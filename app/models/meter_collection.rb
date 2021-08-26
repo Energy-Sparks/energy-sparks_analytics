@@ -39,7 +39,7 @@ class MeterCollection
     @temperatures = temperatures
     @solar_pv = solar_pv
     @solar_irradiation = solar_irradiation.nil? ? SolarIrradianceFromPV.new('solar irradiance from pv', solar_pv_data: solar_pv) : solar_irradiation
-    
+
     @grid_carbon_intensity = grid_carbon_intensity
 
     @heat_meters = []
@@ -142,6 +142,10 @@ class MeterCollection
 
   def last_combined_meter_date
     all_aggregate_meters.map{ |meter| meter.amr_data.end_date }.min
+  end
+
+  def inspect
+    "Meter Collection (name: '#{@name}', object_id: #{"0x00%x" % (object_id << 1)})"
   end
 
   def to_s
@@ -334,7 +338,7 @@ class MeterCollection
     types.push(:solar_pv)         if solar_pv_panels? && !exclude_solar_pv
     types
   end
- 
+
 =begin
 
   def solar_pv_sub_meters_to_be_aggregated

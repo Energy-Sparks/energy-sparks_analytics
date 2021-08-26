@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :meter_collection, class: MeterCollection do
     transient do
-      school
+      school                  { build(:school) }
       holidays                { HolidayData.new }
       temperatures            { Temperatures.new('temperatures') }
       solar_pv                { SolarPV.new('solar pv') }
