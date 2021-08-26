@@ -44,7 +44,7 @@ class HalfHourlyData < Hash
     one_day_total(date) / 48.0
   end
 
-  # returns an array, 1 greater in length than 'sorted_buckets', 
+  # returns an array, 1 greater in length than 'sorted_buckets',
   def histogram_half_hours_data(sorted_buckets, date1: start_date, date2: end_date)
     results = Array.new(sorted_buckets.length + 1, 0)
     (date1..date2).each do |date|
@@ -190,4 +190,9 @@ class HalfHourlyData < Hash
     end
     date
   end
+
+  def inspect
+    "#{self.class.name} (object_id: #{"0x00%x" % (object_id << 1)})"
+  end
+
 end
