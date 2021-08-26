@@ -76,24 +76,5 @@ describe TargetsService do
     end
   end
 
-  context "#enough_calendar_data_to_calculate_target" do
-    it "returns false by default" do
-      expect( service.enough_calendar_data_to_calculate_target? ).to be false
-    end
 
-    context "with just this year" do
-      let(:meter_collection)    { build(:meter_collection, holidays: build(:holidays, :with_academic_year))}
-      it "returns false" do
-        expect( service.enough_calendar_data_to_calculate_target? ).to be false
-      end
-    end
-
-    context "with next academic year" do
-      let(:meter_collection)    { build(:meter_collection, holidays: build(:holidays, :with_academic_year, year: Date.today.year+1))}
-      it "returns true" do
-        expect( service.enough_calendar_data_to_calculate_target? ).to be true
-      end
-    end
-
-  end
 end
