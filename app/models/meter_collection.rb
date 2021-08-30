@@ -114,7 +114,7 @@ class MeterCollection
   end
 
   # somewhat approx, imperfect solutjon to determine 3rd lcokdown periods without external JSON call
-  def region
+  def country
     scotland_postcodes = %w[AB DD DG EH FK G HS IV KA KW KY ML PA PH TD ZE]
     wales_postcodes    = %w[CF CH GL HR LD LL NP SA SY]
     postcode_prefix = postcode.upcase[/^[[:alpha:]]+/]
@@ -130,6 +130,35 @@ class MeterCollection
     end
 
     :england
+  end
+
+  # temporary, pending being captured by front end
+  def funding_status
+    [
+      135174,
+      102692,
+      100757,
+      900648,
+      100076,
+      123620,
+      109348,
+      101072,
+      116581,
+      123310,
+      923310,
+      122936,
+      306983,
+      901954,
+      108538,
+      3916001,
+      100509,
+      402018,
+      402019,
+      100648,
+      10076,
+      107166,
+      823310
+    ].include?(urn) ? :private : :state
   end
 
   def calculate_floor_area_number_of_pupils

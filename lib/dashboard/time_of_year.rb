@@ -23,6 +23,14 @@ class TimeOfYear
     end
   end
 
+  def self.date_within_range(date, toy_range)
+    if toy_range.is_a?(SchoolDatePeriod)
+      within_period(to_toy(date), toy_range.start_date, toy_range.end_date)
+    else
+      within_period(to_toy(date), toy_range.first, toy_range.last)
+    end
+  end
+
   def day
     relative_time.day
   end
