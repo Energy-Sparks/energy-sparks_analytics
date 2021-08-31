@@ -38,6 +38,7 @@ class ValidateAMRData
     logger.debug "Meter data from #{@meter.amr_data.start_date} to #{@meter.amr_data.end_date}"
     logger.debug "DCC Meter #{@meter.dcc_meter}"
     puts "Before validation #{missing_data} missing items of data" if debug_analysis
+    remove_final_meter_reading_if_today
     check_temperature_data_covers_gas_meter_data_range
     # ap(@meter, limit: 5, :color => {:float  => :red})
     process_meter_attributes
@@ -231,6 +232,17 @@ class ValidateAMRData
     end
 
     logger.info "Leaving #{ok_data.length} days of dcc data with no bad values"
+  end
+
+  # typical problem for DCC provided data, has partial data for today from 4.00am batch
+  def remove_final_meter_reading_if_today
+    if @meter.amr_data.end_date >= Date.today
+      (Date.today..@meter.amr_data.end_date).each do |date|
+        # would assume, unless spurious future readings are provided that the code only loops once
+        @amr_data.set_end_date(date - 1)
+        logger.info "Removing final partial dcc meter reading for today #{date}"
+      end
+    end
   end
 
   def log_dates(ds)
