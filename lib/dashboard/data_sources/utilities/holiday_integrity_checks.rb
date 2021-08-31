@@ -15,6 +15,8 @@ class Holidays
 
   def academic_years2
     summer_holidays = holidays_of_type(:summer)
+    summer_holidays = summer_holidays.select { |hol| hol.days > 20 }
+    
     summer_holidays.map.with_index do |holiday, index|
       if index < summer_holidays.length - 1
         year = holiday.end_date.year

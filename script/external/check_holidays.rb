@@ -7,7 +7,7 @@ module Logging
   logger.level = :debug
 end
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['Wimble*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
@@ -24,8 +24,6 @@ school_names.each do |school_name|
   puts school.name
 
   issues_by_school[school.name] = Holidays.check_school_holidays(school)
-
-  ap issues_by_school[school.name]
 end
 
 ap issues_by_school.select { |k, v| !v.empty? }
