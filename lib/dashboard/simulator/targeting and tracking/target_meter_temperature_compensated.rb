@@ -1,4 +1,5 @@
 class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
+  class UnableToFindMatchingProfile < StandardError; end
   DEGREEDAY_BASE_TEMPERATURE = 15.5
   RECOMMENDED_HEATING_ON_TEMPERATURE = 14.5
   WITHIN_TEMPERATURE_RANGE = 3.0
@@ -74,11 +75,17 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
   # =========================================================================================
   # general functions both future and past target date
 
-  def averaged_temperature_target_profile(synthetic_amr_data, synthetic_date, target_temperature)
+  def averaged_temperature_target_profile(synthetic_amr_data, synthetic_date, target_temperature)   
     heating_on = should_heating_be_on?(synthetic_date, target_temperature)
 
     profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_temperature, heating_on, synthetic_amr_data)
-    puts "Got here no profiles #{synthetic_date} #{target_temperature.round(1)} HO #{heating_on} #{fuel_type}" if profiles_to_average.empty?
+    
+    if profiles_to_average.empty?
+      error = "Unable to find matching profile for #{synthetic_date.strftime("%a %d %b %Y")} T = #{target_temperature.round(1)} Heating should be on: #{heating_on} on/at #{holidays.day_type(synthetic_date)} - csv search path debug available in the analytics"
+      raise UnableToFindMatchingProfile, error if Object.const_defined?('Rails')
+      
+      puts error
+    end
 
     model = local_heating_model(synthetic_amr_data)
 
@@ -98,7 +105,15 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
 
       find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, 14, true)
     else
-      find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data)
+      profiles = find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data)
+      return profiles unless profiles.empty?
+
+      return profiles if target_temperature > RECOMMENDED_HEATING_ON_TEMPERATURE || heating_on
+
+      # if heating should be off, but is actually on, then try setting a target with it on
+      # as long as its not too warm
+
+      find_matching_profiles(synthetic_date, target_temperature, true, amr_data)
     end
   end
 
@@ -110,7 +125,7 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     day_type = holidays.day_type(synthetic_date)
 
     model = local_heating_model(amr_data)
-    
+
     scan_days_offset(scan_distance).each do |days_offset|
       date_offset = synthetic_date + days_offset
       synthetic_temperature = temperatures.average_temperature(date_offset)
