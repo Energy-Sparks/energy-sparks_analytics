@@ -77,6 +77,10 @@ class TargetsService
     enough_data_to_set_target?
   end
 
+  def meter_present?
+    aggregate_meter.present?
+  end
+
   #Does the analytics think there's a target set?
   def target_set?
     aggregate_meter.target_set?

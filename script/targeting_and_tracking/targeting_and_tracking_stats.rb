@@ -60,7 +60,7 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-school_name_pattern_match = ['b*']
+school_name_pattern_match = ['ht*']
 source_db = :unvalidated_meter_data
 
 school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
@@ -71,4 +71,4 @@ end
 
 stats = covid_stats(schools)
 
-# print_stats(stats)
+print_stats(stats)

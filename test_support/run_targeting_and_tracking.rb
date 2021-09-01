@@ -110,9 +110,14 @@ class RunTargetingAndTracking < RunAdultDashboard
     scenario[:fuel_types].each do |fuel_type|
       meter = @school.aggregate_meter(fuel_type)
 
-      meter.reset_targeting_and_tracking_for_testing
-
       next if meter.nil?
+
+      unless TargetMeter.recent_data?(meter)
+        puts "Skipping #{fuel_type} because data not recent"
+        next
+      end
+
+      meter.reset_targeting_and_tracking_for_testing
 
       deleted_amr_data[fuel_type]  = move_end_date(meter, scenario[:move_end_date])
 
@@ -177,7 +182,7 @@ class RunTargetingAndTracking < RunAdultDashboard
 
     @school.delete_pseudo_meter_attribute(pseudo_meter_key, :estimated_period_consumption)
 
-    kwh = annual_kwh_estimate[:kwh] / annual_kwh_estimate[:percent]
+    kwh = calculate_apportioned_annual_estimate(meter, annual_kwh_estimate)
 
     new_attributes = {
                         estimated_period_consumption: [
@@ -192,6 +197,122 @@ class RunTargetingAndTracking < RunAdultDashboard
     pseudo_attributes = { pseudo_meter_key => new_attributes }
     @school.merge_additional_pseudo_meter_attributes(pseudo_attributes)
     meter.calculate_annual_kwh_estimate
+  end
+
+  def calculate_apportioned_annual_estimate(meter, annual_kwh_estimate)
+    return annual_kwh_estimate[:kwh] if annual_kwh_estimate[:percent] >= 0.98
+
+    if meter.fuel_type == :electricity
+      calculate_apportioned_annual_electricity_estimate(meter, annual_kwh_estimate)
+    else
+      calculate_apportioned_annual_heating_estimate(meter, annual_kwh_estimate)
+    end
+  end
+
+  def calculate_apportioned_annual_heating_estimate(meter, annual_kwh_estimate)
+    # degree day base set to 20.0C in an attempt to simulate hot water consumption over the summer
+    annnual_degreedays = meter.meter_collection.temperatures.degree_days_in_date_range(annual_kwh_estimate[:end_date] -365, annual_kwh_estimate[:end_date], 20.0)
+    meter_degreedays = meter.meter_collection.temperatures.degree_days_in_date_range(annual_kwh_estimate[:start_date], annual_kwh_estimate[:end_date], 20.0)
+    annual_kwh_estimate[:kwh] * annnual_degreedays / meter_degreedays
+  end
+
+  # uses degree days and solar irradiance to adjust but include baseload factor
+  # solar irradiance too difficult?
+  def calculate_apportioned_annual_electricity_estimate(meter, annual_kwh_estimate)
+    school = meter.meter_collection
+    ed = annual_kwh_estimate[:end_date]
+    sd = ed -365
+
+    baseload_kw = meter.amr_data.average_baseload_kw_date_range(annual_kwh_estimate[:start_date], ed)
+
+    puts "Got here baseload #{baseload_kw}"
+    
+    annnual_degreedays = school.temperatures.degree_days_in_date_range(sd, ed, 20.0)
+    meter_degreedays = school.temperatures.degree_days_in_date_range(annual_kwh_estimate[:start_date], ed, 20.0)
+
+    model = electrical_solar_degreeday_model(school, meter, annual_kwh_estimate[:start_date], ed)
+
+    ap model
+
+    annual_kwh = estimate_annual_electrical_kwh(meter, model, baseload_kw)
+    puts "Got here annual estimate = #{annual_kwh}"
+    annual_kwh
+  end
+
+  def in_third_lockdown?(date, school)
+    start_date, end_date = Covid3rdLockdownElectricityCorrection.determine_3rd_lockdown_dates(school.country)
+    date.between?(start_date, end_date)
+  end
+
+  def estimate_annual_electrical_kwh(meter, model, baseload_kw)
+    amr_data = meter.amr_data
+    school = meter.meter_collection
+    solar_ir = school.solar_irradiation
+    temperatures = school.temperatures
+    open_time = school.open_time..school.close_time
+    open_times_x48 = DateTimeHelper.weighted_x48_vector_multiple_ranges([open_time])
+
+    ((amr_data.end_date - 365)..amr_data.end_date).sum do |date|
+      if amr_data.date_exists?(date) && !in_third_lockdown?(date, school)
+        amr_data.one_day_kwh(date)
+      else
+        if school.holidays.day_type(date) == :schoolday
+          ir = AMRData.fast_multiply_x48_x_x48(school.solar_irradiation.one_days_data_x48(date), open_times_x48).sum
+          dd = school.temperatures.degree_days(date)
+
+          model[:insolation_coeff] * ir + model[:degreeday_coeff] * dd  + model[:constant]
+        else
+          # TODO(PH, 1Sep2021) should really be seasonally adjusted and modelled
+          baseload_kw * 24.0
+        end
+      end
+    end
+  end
+
+  def electrical_solar_degreeday_model(school, meter, sd, ed)
+    open_time = school.open_time..school.close_time
+    open_times_x48 = DateTimeHelper.weighted_x48_vector_multiple_ranges([open_time])
+
+    irs_by_day = (sd..ed).map do |date|
+      if school.holidays.day_type(date) == :schoolday && !in_third_lockdown?(date, school)
+        AMRData.fast_multiply_x48_x_x48(school.solar_irradiation.one_days_data_x48(date), open_times_x48).sum
+      else
+        nil
+      end
+    end.compact
+
+    dds_by_day  = (sd..ed).map do |date|
+      if school.holidays.day_type(date) == :schoolday && !in_third_lockdown?(date, school)
+        school.temperatures.degree_days(date)
+      else
+        nil
+      end
+    end.compact
+
+    kwhs_by_day = (sd..ed).map do |date|
+      if school.holidays.day_type(date) == :schoolday && !in_third_lockdown?(date, school)
+        AMRData.fast_multiply_x48_x_x48(meter.amr_data.days_kwh_x48(date), open_times_x48).sum
+      else
+        nil
+      end
+    end.compact
+
+    model = fit_lighting_electric_heating_regression_analysis(kwhs_by_day, dds_by_day, irs_by_day)
+  end
+
+  def fit_lighting_electric_heating_regression_analysis(days_kwh, degree_days, irradiation)
+    logger.debug "Regressing #{irradiation.length} samples"
+    x1 = Daru::Vector.new(degree_days)
+    x2 = Daru::Vector.new(irradiation)
+    y = Daru::Vector.new(days_kwh)
+    ds = Daru::DataFrame.new({:heating_dd => x1, :lighting_ir => x2, :kwh => y})
+    lr = Statsample::Regression.multiple(ds, :kwh)
+    {
+      r2:               lr.r2,
+      insolation_coeff: lr.coeffs[:lighting_ir],
+      degreeday_coeff:  lr.coeffs[:heating_dd],
+      constant:         lr.constant
+    }
   end
 
   def truncate_amr_data(meter, days_left)
@@ -230,8 +351,10 @@ class RunTargetingAndTracking < RunAdultDashboard
       sd = [meter.amr_data.start_date, ed - 364].max
 
       estimates[fuel_type] = {
-        kwh:      meter.amr_data.kwh_date_range(sd, ed),
-        percent:  (ed - sd + 1) / 365.0
+        kwh:        meter.amr_data.kwh_date_range(sd, ed),
+        percent:    (ed - sd + 1) / 365.0,
+        start_date: sd,
+        end_date:   ed
       }
     end
 

@@ -65,15 +65,15 @@ def test_service(school)
     puts "For fuel type #{fuel_type}"
     service = TargetsService.new(school, fuel_type)
 
-    info[fuel_type][:relevance] = service.relevance
-    if service.relevance == :relevant
+    info[fuel_type][:relevance] = service.meter_present?
+    if service.meter_present?
       info[fuel_type][:enough_data_to_set_target] = service.enough_data_to_set_target?
-      info[fuel_type][:enough_calendar_data_to_calculate_target] = service.enough_calendar_data_to_calculate_target?
       info[fuel_type][:annual_kwh_required] = service.annual_kwh_estimate_required?
       info[fuel_type][:recent_data] = service.recent_data?
       info[fuel_type][:enough_holidays] = service.enough_holidays?
       info[fuel_type][:enough_temperature_data] = service.enough_temperature_data?
       info[fuel_type][:valid] = service.valid?
+      info[fuel_type][:problems_with_holidays] = service.holiday_integrity_problems.join(' + ')
       info[fuel_type].merge!(service.analytics_debug_info)
       if service.valid?
         ap service.progress

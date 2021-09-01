@@ -78,7 +78,7 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     heating_on = should_heating_be_on?(synthetic_date, target_temperature)
 
     profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_temperature, heating_on, synthetic_amr_data)
-    puts "Got here NAN #{synthetic_date}" if profiles_to_average.empty?
+    puts "Got here no profiles #{synthetic_date} #{target_temperature.round(1)} HO #{heating_on} #{fuel_type}" if profiles_to_average.empty?
 
     model = local_heating_model(synthetic_amr_data)
 

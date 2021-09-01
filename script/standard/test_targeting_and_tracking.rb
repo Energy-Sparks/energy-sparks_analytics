@@ -25,7 +25,7 @@ end
 
 def example_central_case_scenario
   [
-    { fuel_types: %i[electricity gas], target: 0.8 }
+    { fuel_types: %i[electricity gas], target: 0.95 }
   ]
 end
 
@@ -34,7 +34,7 @@ def script(scenarios)
   {
     logger1:                { name: TestDirectoryConfiguration::LOG + "/test targeting and tracking %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
 
-    schools: ['trini*'],
+    schools:  ['b*'], # ['glyn*', 'pentrech*', 'west-w*'],
     source:                 :unvalidated_meter_data,
 
     logger2:                { name: TestDirectoryConfiguration::LOG + "/targeting and tracking %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
@@ -43,4 +43,4 @@ def script(scenarios)
   }
 end
 
-RunTests.new(script(test_heating_temperature_compensation_scenarios)).run
+RunTests.new(script(example_central_case_scenario)).run
