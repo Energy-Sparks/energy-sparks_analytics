@@ -254,26 +254,22 @@ class RunTargetingAndTracking < RunAdultDashboard
       if amr_data.date_exists?(date) && !in_third_lockdown?(date, school)
         amr_data.one_day_kwh(date)
       else
-        if school.holidays.day_type(date) == :schoolday
-          dd = school.temperatures.degree_days(date)
+        dd = school.temperatures.degree_days(date)
+        ir_x48 = school.solar_irradiation.one_days_data_x48(date)
 
-          model.interpolate(dd, school.solar_irradiation.one_days_data_x48(date))
-        else
-          # TODO(PH, 1Sep2021) should really be seasonally adjusted and modelled
-          baseload_kw * 24.0
-        end
+        model[school.holidays.day_type(date)].interpolate(dd, ir_x48)
       end
     end
-  end
-
-  def calc_test(school, meter, sd, ed)
-
   end
 
   def electrical_solar_degreeday_model(school, meter, sd, ed)
     model = BivariateSolarTemperatureModel.new(meter.amr_data, school.temperatures, school.solar_irradiation, school.holidays, open_time: school.open_time, close_time: school.close_time)
     third_lockdown = Covid3rdLockdownElectricityCorrection.determine_3rd_lockdown_dates(school.country)
-    model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :schoolday)
+    {
+      schoolday:  model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :schoolday),
+      weekend:    model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :weekend),
+      holiday:    model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :holiday)
+    }
   end
 
   def truncate_amr_data(meter, days_left)
