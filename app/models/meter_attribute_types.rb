@@ -1,5 +1,5 @@
-require_relative '../../lib/dashboard/time_of_year.rb'
-require_relative '../../lib/dashboard/time_of_day.rb'
+require_relative '../../lib/dashboard/utilities/time_of_year.rb'
+require_relative '../../lib/dashboard/utilities/time_of_day.rb'
 require 'date'
 require 'active_support/core_ext/class/attribute'
 require 'json'

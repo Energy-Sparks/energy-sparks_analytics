@@ -1,4 +1,4 @@
-require_relative '../../lib/dashboard/restricted_key_hash.rb'
+require_relative '../../lib/dashboard/utilities/restricted_key_hash.rb'
 # helper class for main solar aggregation service
 # keeps track of the 5 to 7 meters being manipulated
 class PVMap  < RestrictedKeyHash

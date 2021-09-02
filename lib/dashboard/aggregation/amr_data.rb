@@ -1,5 +1,5 @@
-require_relative '../half_hourly_data'
-require_relative '../half_hourly_loader'
+require_relative '../utilities/half_hourly_data'
+require_relative '../utilities/half_hourly_loader'
 
 class AMRData < HalfHourlyData
   attr_reader :economic_tariff, :accounting_tariff, :carbon_emissions

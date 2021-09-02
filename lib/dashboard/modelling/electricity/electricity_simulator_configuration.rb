@@ -1,5 +1,5 @@
-require_relative '../time_of_day.rb'
-require_relative '../time_of_year.rb'
+require_relative '../../utilities/time_of_day.rb'
+require_relative '../../utilities/time_of_year.rb'
 
 
 class ElectricitySimulatorConfiguration
