@@ -79,11 +79,11 @@ class TargetMeterTemperatureCompensatedDailyDayType < TargetMeterDailyDayType
     heating_on = should_heating_be_on?(synthetic_date, target_temperature)
 
     profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_temperature, heating_on, synthetic_amr_data)
-    
+
     if profiles_to_average.empty?
       error = "Unable to find matching profile for #{synthetic_date.strftime("%a %d %b %Y")} T = #{target_temperature.round(1)} Heating should be on: #{heating_on} on/at #{holidays.day_type(synthetic_date)} - csv search path debug available in the analytics"
       raise UnableToFindMatchingProfile, error if Object.const_defined?('Rails')
-      
+
       puts error
     end
 

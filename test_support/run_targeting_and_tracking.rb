@@ -221,18 +221,16 @@ class RunTargetingAndTracking < RunAdultDashboard
   def calculate_apportioned_annual_electricity_estimate(meter, annual_kwh_estimate)
     school = meter.meter_collection
     ed = annual_kwh_estimate[:end_date]
-    sd = ed -365
+    sd = ed - 365
 
     baseload_kw = meter.amr_data.average_baseload_kw_date_range(annual_kwh_estimate[:start_date], ed)
 
     puts "Got here baseload #{baseload_kw}"
-    
+
     annnual_degreedays = school.temperatures.degree_days_in_date_range(sd, ed, 20.0)
     meter_degreedays = school.temperatures.degree_days_in_date_range(annual_kwh_estimate[:start_date], ed, 20.0)
 
     model = electrical_solar_degreeday_model(school, meter, annual_kwh_estimate[:start_date], ed)
-
-    ap model
 
     annual_kwh = estimate_annual_electrical_kwh(meter, model, baseload_kw)
     puts "Got here annual estimate = #{annual_kwh}"
@@ -257,10 +255,9 @@ class RunTargetingAndTracking < RunAdultDashboard
         amr_data.one_day_kwh(date)
       else
         if school.holidays.day_type(date) == :schoolday
-          ir = AMRData.fast_multiply_x48_x_x48(school.solar_irradiation.one_days_data_x48(date), open_times_x48).sum
           dd = school.temperatures.degree_days(date)
 
-          model[:insolation_coeff] * ir + model[:degreeday_coeff] * dd  + model[:constant]
+          model.interpolate(dd, school.solar_irradiation.one_days_data_x48(date))
         else
           # TODO(PH, 1Sep2021) should really be seasonally adjusted and modelled
           baseload_kw * 24.0
@@ -269,50 +266,14 @@ class RunTargetingAndTracking < RunAdultDashboard
     end
   end
 
-  def electrical_solar_degreeday_model(school, meter, sd, ed)
-    open_time = school.open_time..school.close_time
-    open_times_x48 = DateTimeHelper.weighted_x48_vector_multiple_ranges([open_time])
+  def calc_test(school, meter, sd, ed)
 
-    irs_by_day = (sd..ed).map do |date|
-      if school.holidays.day_type(date) == :schoolday && !in_third_lockdown?(date, school)
-        AMRData.fast_multiply_x48_x_x48(school.solar_irradiation.one_days_data_x48(date), open_times_x48).sum
-      else
-        nil
-      end
-    end.compact
-
-    dds_by_day  = (sd..ed).map do |date|
-      if school.holidays.day_type(date) == :schoolday && !in_third_lockdown?(date, school)
-        school.temperatures.degree_days(date)
-      else
-        nil
-      end
-    end.compact
-
-    kwhs_by_day = (sd..ed).map do |date|
-      if school.holidays.day_type(date) == :schoolday && !in_third_lockdown?(date, school)
-        AMRData.fast_multiply_x48_x_x48(meter.amr_data.days_kwh_x48(date), open_times_x48).sum
-      else
-        nil
-      end
-    end.compact
-
-    model = fit_lighting_electric_heating_regression_analysis(kwhs_by_day, dds_by_day, irs_by_day)
   end
 
-  def fit_lighting_electric_heating_regression_analysis(days_kwh, degree_days, irradiation)
-    logger.debug "Regressing #{irradiation.length} samples"
-    x1 = Daru::Vector.new(degree_days)
-    x2 = Daru::Vector.new(irradiation)
-    y = Daru::Vector.new(days_kwh)
-    ds = Daru::DataFrame.new({:heating_dd => x1, :lighting_ir => x2, :kwh => y})
-    lr = Statsample::Regression.multiple(ds, :kwh)
-    {
-      r2:               lr.r2,
-      insolation_coeff: lr.coeffs[:lighting_ir],
-      degreeday_coeff:  lr.coeffs[:heating_dd],
-      constant:         lr.constant
-    }
+  def electrical_solar_degreeday_model(school, meter, sd, ed)
+    model = BivariateSolarTemperatureModel.new(meter.amr_data, school.temperatures, school.solar_irradiation, school.holidays, open_time: school.open_time, close_time: school.close_time)
+    third_lockdown = Covid3rdLockdownElectricityCorrection.determine_3rd_lockdown_dates(school.country)
+    model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :schoolday)
   end
 
   def truncate_amr_data(meter, days_left)
