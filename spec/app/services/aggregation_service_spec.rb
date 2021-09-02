@@ -15,10 +15,10 @@ describe AggregateDataService do
         attr_accessor :rollbar_context
       end
 
-      it "should validate empty readings" do
-        meter_collection.add_heat_meter(meter)
-        service.validate_meter_data.inspect
-      end
+     # it "should validate empty readings" do
+     #   meter_collection.add_heat_meter(meter)
+     #   service.validate_meter_data.inspect
+     # end
 
       it "should bubble up exception" do
         allow_any_instance_of(ValidateAMRData).to receive(:validate).and_raise("boom")

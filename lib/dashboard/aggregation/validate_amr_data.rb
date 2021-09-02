@@ -782,13 +782,18 @@ class ValidateAMRData
     date.sunday? || date.saturday?
   end
 
-  def check_temperature_data_covers_gas_meter_data_range
-    if @meter.fuel_type == :gas
-      raise NotEnoughTemperaturedata, "Nil or empty temperature data for meter #{@meter.mpxn} #{@meter.fuel_type}" if @temperatures.nil? || @temperatures.empty?
+  def no_readings?
+    @amr_data.nil? || @amr_data.days == 0
+  end
 
-      if @temperatures.start_date > @amr_data.start_date || @temperatures.end_date < @amr_data.end_date
-        raise NotEnoughTemperaturedata, "Temperature data from #{@temperatures.start_date} to #{@temperatures.end_date} doesnt cover period of #{@meter.mpxn} #{@meter.fuel_type} meter data from #{@amr_data.start_date} to #{@amr_data.end_date}"
-      end
+  def check_temperature_data_covers_gas_meter_data_range
+    return if @meter.fuel_type != :gas # no storage_heater as they are created later by the aggregation service
+    return if no_readings?
+
+    raise NotEnoughTemperaturedata, "Nil or empty temperature data for meter #{@meter.mpxn} #{@meter.fuel_type}" if @temperatures.nil? || @temperatures.empty?
+
+    if @temperatures.start_date > @amr_data.start_date || @temperatures.end_date < @amr_data.end_date
+      raise NotEnoughTemperaturedata, "Temperature data from #{@temperatures.start_date} to #{@temperatures.end_date} doesnt cover period of #{@meter.mpxn} #{@meter.fuel_type} meter data from #{@amr_data.start_date} to #{@amr_data.end_date}"
     end
   end
 end
