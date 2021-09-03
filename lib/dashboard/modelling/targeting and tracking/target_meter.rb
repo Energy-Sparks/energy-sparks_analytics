@@ -96,7 +96,13 @@ class TargetMeter < Dashboard::Meter
       TargetMeterMonthlyDayType.new(meter_to_clone)
     when :day
       if meter_to_clone.fuel_type == :gas || storage_heater_fuel_type?(meter_to_clone.fuel_type)
-        TargetMeterTemperatureCompensatedDailyDayType.new(meter_to_clone)
+        TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays.new(meter_to_clone)
+      else
+        TargetMeterDailyDayType.new(meter_to_clone)
+      end
+    when :stretch_target_day
+      if meter_to_clone.fuel_type == :gas || storage_heater_fuel_type?(meter_to_clone.fuel_type)
+        TargetMeterTemperatureCompensatedDailyDayTypeStretchTarget.new(meter_to_clone)
       else
         TargetMeterDailyDayType.new(meter_to_clone)
       end

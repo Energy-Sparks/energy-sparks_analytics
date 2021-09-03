@@ -38,9 +38,10 @@ def script(scenarios)
     schools: ['belv*', 'howel*', 'hXt*', 'nottXing-h*', 'portsm*', 'put*', 'roya*',
       'shrew*','south-hamp*', 'st-bede*', 'st-lou*', 'wimbl*'],
 
-    schools: ['putney*'],
+    
     schools: ['howel*', 'ht*', 'notting-h*'],
-    schools: ['ht*'],
+    schools: ['putney*'],
+    schools: ['*'],
 
 
     source:                 :unvalidated_meter_data,
