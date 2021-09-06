@@ -55,6 +55,34 @@ class HotWaterHeatingSplitter
     }
   end
 
+  def split_heat_and_hot_water_aggregate(meter, start_date, end_date)
+    heating_model = calculate_model(start_date, end_date, meter)
+
+    results = { heating_kwh: 0.0, non_heating_kwh: 0.0, heating_degree_days: [] }
+
+    (start_date..end_date).each do |date|
+      if heating_model.heating_on?(date)
+        results[:heating_kwh] += meter.amr_data.one_day_kwh(date)
+        results[:heating_degree_days].push(@school.temperatures.degree_days(date))
+      else
+        results[:non_heating_kwh] += meter.amr_data.one_day_kwh(date)
+      end
+    end
+
+    results[:heating_days]      = results[:heating_degree_days].length
+    results[:warm_heating_days] = results[:heating_degree_days].select { |dd| dd < 0.5 }.length
+
+    results[:average_heating_degree_days] = results[:heating_degree_days].sum / results[:heating_degree_days].length
+    results.delete(:heating_degree_days)
+
+    ap results
+
+    results
+  rescue => e
+    puts e.message
+    {}
+  end
+
   private
 
   # TODO(PH, 18Jun2020) probably needs a rethink as result is noisy so sum of inputs != output
@@ -100,8 +128,8 @@ class HotWaterHeatingSplitter
     AMRData.fast_multiply_x48_x_scalar(aggregated_hot_water_days, 1.0 / hot_water_days)
   end
 
-  def calculate_model(start_date, end_date)
+  def calculate_model(start_date, end_date, meter = @school.aggregated_heat_meters)
     model_period = SchoolDatePeriod.new(:heat_balance_simulation, 'Current Year', start_date, end_date)
-    @heating_model = @school.aggregated_heat_meters.heating_model(model_period)
+    meter.heating_model(model_period)
   end
 end
