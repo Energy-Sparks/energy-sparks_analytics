@@ -24,25 +24,35 @@ describe Dashboard::Meter do
       }
     }
 
-    it "creates a meter" do
-      meter = Dashboard::Meter.new(valid_params)
-      expect(meter.mpan_mprn).to eq(identifier)
-      expect(meter.dcc_meter).to be true
-    end
+    describe "#initialize" do
+      it "creates a meter" do
+        meter = Dashboard::Meter.new(valid_params)
+        expect(meter.mpan_mprn).to eq(identifier)
+        expect(meter.dcc_meter).to be true
+      end
 
-    it "creates a heat meter" do
-      [:gas, :storage_heater, :aggregated_heat].each do |type|
-        meter = Dashboard::Meter.new(valid_params.merge({type: type}))
-        expect(meter.heat_meter?).to be true
-        expect(meter.electricity_meter?).to be false
+      it "creates a heat meter" do
+        [:gas, :storage_heater, :aggregated_heat].each do |type|
+          meter = Dashboard::Meter.new(valid_params.merge({type: type}))
+          expect(meter.heat_meter?).to be true
+          expect(meter.electricity_meter?).to be false
+        end
+      end
+
+      it "creates an electricity meter" do
+        [:electricity, :solar_pv, :aggregated_electricity].each do |type|
+          meter = Dashboard::Meter.new(valid_params.merge({type: type}))
+          expect(meter.heat_meter?).to be false
+          expect(meter.electricity_meter?).to be true
+        end
       end
     end
 
-    it "creates an electricity meter" do
-      [:electricity, :solar_pv, :aggregated_electricity].each do |type|
-        meter = Dashboard::Meter.new(valid_params.merge({type: type}))
-        expect(meter.heat_meter?).to be false
-        expect(meter.electricity_meter?).to be true
+    describe '#inspect' do
+      let(:meter) { Dashboard::Meter.new(valid_params.merge({type: type})) }
+      it 'works as expected' do
+        expect(meter.inspect).to include(identifier.to_s)
+        expect(meter.inspect).to include(type.to_s)
       end
     end
 

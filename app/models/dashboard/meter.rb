@@ -180,6 +180,10 @@ module Dashboard
       raise EnergySparksUnexpectedStateException.new("Unexpected fuel type #{fuel_type}") if [:electricity, :gas].include?(fuel_type)
     end
 
+    def inspect
+      "#{self.class.name} (mpan: #{@mpan_mprn.to_s}, fuel_type: #{@fuel_type.to_s}, object_id: #{"0x00%x" % (object_id << 1)})"
+    end
+
     def to_s
       dates = amr_data.nil? ? ':no amr data' : ":#{amr_data.start_date} to #{amr_data.end_date}"
       @mpan_mprn.to_s + ':' + @fuel_type.to_s + 'x' + (@amr_data.nil? ? '0' : @amr_data.length.to_s) + dates
