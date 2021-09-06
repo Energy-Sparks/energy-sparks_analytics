@@ -14,6 +14,14 @@ class Holiday < SchoolDatePeriod
     raise EnergySparksNoMeterDataAvailableForFuelType.new('Start date after end date') if start_date > end_date
   end
 
+  def number_weekdays
+    d = 0
+    (start_date..end_date).each do |date|
+      d += 1 if date.wday.between?(1,5)
+    end
+    d
+  end
+
   private def roll_start_date_back_to_sunday(start_date)
     return start_date - 1 if start_date.monday?
     start_date

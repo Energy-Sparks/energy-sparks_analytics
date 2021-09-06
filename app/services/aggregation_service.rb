@@ -43,7 +43,8 @@ class AggregateDataService
     }
     calc_text = "Calculated meter aggregation for |#{@meter_collection.name}| in |#{bm.round(3)}| seconds"
 
-    puts calc_text # needed by PH to monitor process
+    puts calc_text unless Object.const_defined?('Rails')
+    
     logger.info calc_text
   end
 

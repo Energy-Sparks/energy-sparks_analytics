@@ -1,5 +1,5 @@
-require_relative '../half_hourly_data'
-require_relative '../half_hourly_loader'
+require_relative '../utilities/half_hourly_data'
+require_relative '../utilities/half_hourly_loader'
 
 # maintain costs information in parallel to AMRData
 # set of data per day: 48 x half hour costs, plus standing charges

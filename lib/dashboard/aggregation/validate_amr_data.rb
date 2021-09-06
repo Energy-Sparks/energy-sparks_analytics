@@ -9,6 +9,8 @@
 #   - if there are smaller gaps it attempts to fill them in using nearby data
 #   - and if its heat/gas data then it adjusts for temperature
 class ValidateAMRData
+  class NotEnoughTemperaturedata < StandardError; end
+
   include Logging
 
   FSTRDEF = '%a %d %b %Y'.freeze # fixed format for reporting dates for error messages
@@ -36,6 +38,8 @@ class ValidateAMRData
     logger.debug "Meter data from #{@meter.amr_data.start_date} to #{@meter.amr_data.end_date}"
     logger.debug "DCC Meter #{@meter.dcc_meter}"
     puts "Before validation #{missing_data} missing items of data" if debug_analysis
+    remove_final_meter_reading_if_today
+    check_temperature_data_covers_gas_meter_data_range
     # ap(@meter, limit: 5, :color => {:float  => :red})
     process_meter_attributes
     remove_dcc_bad_data_readings if @meter.dcc_meter
@@ -228,6 +232,17 @@ class ValidateAMRData
     end
 
     logger.info "Leaving #{ok_data.length} days of dcc data with no bad values"
+  end
+
+  # typical problem for DCC provided data, has partial data for today from 4.00am batch
+  def remove_final_meter_reading_if_today
+    if @meter.amr_data.end_date >= Date.today
+      (Date.today..@meter.amr_data.end_date).each do |date|
+        # would assume, unless spurious future readings are provided that the code only loops once
+        @amr_data.set_end_date(date - 1)
+        logger.info "Removing final partial dcc meter reading for today #{date}"
+      end
+    end
   end
 
   def log_dates(ds)
@@ -765,5 +780,20 @@ class ValidateAMRData
 
   def weekend?(date)
     date.sunday? || date.saturday?
+  end
+
+  def no_readings?
+    @amr_data.nil? || @amr_data.days == 0
+  end
+
+  def check_temperature_data_covers_gas_meter_data_range
+    return if @meter.fuel_type != :gas # no storage_heater as they are created later by the aggregation service
+    return if no_readings?
+
+    raise NotEnoughTemperaturedata, "Nil or empty temperature data for meter #{@meter.mpxn} #{@meter.fuel_type}" if @temperatures.nil? || @temperatures.empty?
+
+    if @temperatures.start_date > @amr_data.start_date || @temperatures.end_date < @amr_data.end_date
+      raise NotEnoughTemperaturedata, "Temperature data from #{@temperatures.start_date} to #{@temperatures.end_date} doesnt cover period of #{@meter.mpxn} #{@meter.fuel_type} meter data from #{@amr_data.start_date} to #{@amr_data.end_date}"
+    end
   end
 end

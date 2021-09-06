@@ -1,6 +1,6 @@
 require_relative './series_data_manager.rb'
 require_relative './chart_dynamic_x_axis.rb'
-require_relative '../simulator/solar_pv_panels.rb'
+require_relative '../modelling/solar/solar_pv_panels.rb'
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
@@ -257,6 +257,11 @@ class ChartManager
       x_axis:             :week,
       inherits_from:      :targeting_and_tracking_target_only_group_by_week_electricity
     },
+    targeting_and_tracking_synthetic_target_group_by_week_electricity: {
+      meter_definition:   :synthetic_aggregate_target_electricity,
+      y2_axis:            nil,
+      inherits_from:      :targeting_and_tracking_synthetic_target_group_by_week_gas
+    },
 
     targeting_and_tracking_weekly_gas_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
@@ -283,6 +288,12 @@ class ChartManager
       y2_axis:            :target_degreedays,
       inherits_from:      :targeting_and_tracking_unscaled_target_group_by_week_electricity
     },
+    targeting_and_tracking_synthetic_target_group_by_week_gas: {
+      name:               'Historic and or synthetic target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
+      meter_definition:   :synthetic_aggregate_target_gas,
+      y2_axis:            :degreedays,
+      inherits_from:      :targeting_and_tracking_unscaled_target_group_by_week_gas
+    },
 
     targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
@@ -307,6 +318,11 @@ class ChartManager
     targeting_and_tracking_unscaled_target_group_by_week_storage_heater: {
       meter_definition:   :unscaled_aggregate_target_storage_heater,
       inherits_from:      :targeting_and_tracking_unscaled_target_group_by_week_gas
+    },
+    targeting_and_tracking_synthetic_target_group_by_week_storage_heater: {
+      meter_definition:   :synthetic_aggregate_target_storage_heater,
+      y2_axis:            :degreedays,
+      inherits_from:      :targeting_and_tracking_synthetic_target_group_by_week_storage_heater
     },
 
     # inherited use only

@@ -97,6 +97,7 @@ class ElectricitySimulator
   end
 
   def fit_solar_pv_regression_analysis_kwp(kw, sol_yield, dt)
+    # TODO(PH, 2Sep2021) move to using BivariateSolarTemperatureModel
     x = Daru::Vector.new(sol_yield)
     y = Daru::Vector.new(kw)
     sr = Statsample::Regression.simple(x, y)

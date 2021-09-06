@@ -6,8 +6,6 @@ class HotWaterHeatingSplitter
   def split_heat_and_hot_water(start_date, end_date)
     average_hot_water_only_day_kwh_x48 = average_hot_water_day_x48(start_date, end_date)
     average_hot_water_only_day_kwh = average_hot_water_only_day_kwh_x48.sum
-    ap average_hot_water_only_day_kwh_x48
-    puts "average days hw #{average_hot_water_only_day_kwh_x48.sum}"
 
     heating_days  = AMRData.create_empty_dataset(:heating,    start_date, end_date)
     hotwater_days = AMRData.create_empty_dataset(:hot_water,  start_date, end_date)
@@ -32,8 +30,28 @@ class HotWaterHeatingSplitter
     error = total - total_heating - total_hot_water # would expect small error dur to 'max' function in remove_hot_water_from_heating_data
     puts "Total heating #{total_heating} total hot water #{total_hot_water} error #{error}"
     {
-      heating_only_amr:   heating_days,
-      hot_water_only_amr: hotwater_days
+      heating_only_amr:           heating_days,
+      hot_water_only_amr:         hotwater_days,
+      average_hot_water_day_kwh:  average_hot_water_only_day_kwh_x48.sum,
+      error_kwh:                  error,
+      error_percent:              error / total
+    }
+  end
+
+  def aggregate_heating_hot_water_split(start_date, end_date)
+    calc = split_heat_and_hot_water(start_date, end_date)
+    heating_kwh   = calc[:heating_only_amr].total
+    hotwater_kwh  = calc[:hot_water_only_amr].total
+    total_kwh = heating_kwh + hotwater_kwh
+    {
+      heating_kwh:                heating_kwh,
+      hotwater_kwh:               hotwater_kwh,
+      total_kwh:                  total_kwh,
+      heating_percent:            heating_kwh / total_kwh,
+      hotwater_percent:           hotwater_kwh / total_kwh,
+      average_hot_water_day_kwh:  calc[:average_hot_water_day_kwh],
+      error_kwh:                  calc[:error_kwh],
+      error_percent:              calc[:error_percent]
     }
   end
 

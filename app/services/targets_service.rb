@@ -33,6 +33,10 @@ class TargetsService
     TargetMeter.enough_holidays?(aggregate_meter)
   end
 
+  def holiday_integrity_problems
+    Holidays.check_school_holidays(@aggregate_school)
+  end
+
   #Are there enough historical meter readings to calculate a target?
   #This should be checking whether there’s enough historical data, regardless of
   #whether the data is currently lagging behind (see below). So checking for the
@@ -71,6 +75,10 @@ class TargetsService
     target_set? &&
     recent_data? &&
     enough_data_to_set_target?
+  end
+
+  def meter_present?
+    aggregate_meter.present?
   end
 
   #Does the analytics think there's a target set?

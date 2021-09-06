@@ -42,6 +42,9 @@ class ChartDynamicXAxis
     when :unscaled_aggregate_target_electricity     then @meter_collection.unscaled_target_meters[:electricity]
     when :unscaled_aggregate_target_gas             then @meter_collection.unscaled_target_meters[:gas]
     when :unscaled_aggregate_target_storage_heater  then @meter_collection.unscaled_target_meters[:storage_heater]
+    when :synthetic_aggregate_target_electricity    then @meter_collection.synthetic_target_meters[:electricity]
+    when :synthetic_aggregate_target_gas            then @meter_collection.synthetic_target_meters[:gas]
+    when :synthetic_aggregate_target_storage_heater then @meter_collection.synthetic_target_meters[:storage_heater]
     else
       raise EnergySparksUnsupportedFunctionalityException, "Dynamic x axis grouping not supported on #{@chart_config[:meter_definition]} meter_definition chart config"
     end

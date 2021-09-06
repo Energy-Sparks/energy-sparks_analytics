@@ -113,12 +113,18 @@ class TargetDates
       first_holiday_date:             first_holiday_date,
       final_holiday_date:             final_holiday_date,
       enough_holidays:                enough_holidays?,
+      holiday_problems:               holiday_problems.join(', '),
       recent_data:                    recent_data?
     }
     # or TargetDates.instance_methods(false).map { |m| [m, self.send(m)]}
   end
 
   private
+
+  def holiday_problems
+    school = @original_meter.meter_collection
+    Holidays.check_holidays(school, school.holidays, country: school.country)
+  end
 
   def today
     $ENERGYSPARKSTESTTODAYDATE || @original_meter.amr_data.end_date

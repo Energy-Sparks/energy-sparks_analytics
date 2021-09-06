@@ -6,7 +6,7 @@ require 'require_all'
 class TargetSchool < MeterCollection
   include Logging
 
-  attr_reader :unscaled_target_meters
+  attr_reader :unscaled_target_meters, :synthetic_target_meters
 
   def initialize(school, calculation_type)
     super(school.school,
@@ -19,6 +19,7 @@ class TargetSchool < MeterCollection
 
     @original_school = school
     @unscaled_target_meters = {}
+    @synthetic_target_meters = {}
 
     @aggregated_heat_meters         = set_target(school.aggregated_heat_meters,         calculation_type)
     @aggregated_electricity_meters  = set_target(school.aggregated_electricity_meters,  calculation_type)
@@ -36,6 +37,7 @@ class TargetSchool < MeterCollection
   def calculate_target(meter, calculation_type)
     meter = TargetMeter.calculation_factory(calculation_type, meter)
     @unscaled_target_meters[meter.fuel_type] = meter.non_scaled_target_meter
+    @synthetic_target_meters[meter.fuel_type] = meter.synthetic_meter
     meter
   end
 

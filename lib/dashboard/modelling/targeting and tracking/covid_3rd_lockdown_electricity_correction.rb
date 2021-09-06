@@ -8,8 +8,8 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
   include Logging
   def initialize(meter, holidays)
     super(meter.amr_data, holidays)
-    @region = meter.meter_collection.region
-    @lockdown_start_date, @lockdown_end_date = determine_3rd_lockdown_dates(meter.meter_collection.region)
+    @country = meter.meter_collection.country
+    @lockdown_start_date, @lockdown_end_date = self.class.determine_3rd_lockdown_dates(meter.meter_collection.country)
   end
 
   def enough_data?
@@ -32,16 +32,16 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
     end
   end
 
-  private
-
-  def determine_3rd_lockdown_dates(region) # sunday to saturday dates only
-    case region
+  def self.determine_3rd_lockdown_dates(country) # sunday to saturday dates only
+    case country
     when :england, :wales
       [Date.new(2021, 1, 3), Date.new(2021, 3, 6)]
     when :scotland
       [Date.new(2021, 1, 3), Date.new(2021, 3, 27)]
     end
   end
+
+  private
 
   def alternative_date(date)
     @alternative_date_cache ||= {}
@@ -219,7 +219,7 @@ class Covid3rdLockdownElectricityCorrection < MissingEnergyFittingBase
   end
 
   def calculate_mirrored_week_dates
-    starting_sunday,  ending_saturday = determine_3rd_lockdown_dates(@region)
+    starting_sunday,  ending_saturday = self.class.determine_3rd_lockdown_dates(@country)
     lockdown_weeks = classify_weeks(starting_sunday, ending_saturday, :schoolday)
 
     mirror_end_saturday = starting_sunday - 1

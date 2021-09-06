@@ -37,6 +37,8 @@ class Temperatures < HalfHourlyData
       date = Date.new(date.year - 1, date.month, date.day)
     end
 
+    logger.info "No data for time of year #{time_of_year}, have temperatures between #{start_date} and #{end_date}" if avg_temperatures.length == 0
+
     avg_temperatures.sum / avg_temperatures.length
   end
 
