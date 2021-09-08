@@ -12,30 +12,33 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-def unique_years(results)
-  years = []
-  results.each do |school_name, school_data|
-    school_data.each do |fuel_type, years_data|
-      years = [years + years_data.keys ].flatten.uniq
-    end
-  end
-  years.sort_by { |year_range| year_range.first }
-end
-
-def save_csv(results, funding_status)
-  filename = './Results/annual by fuel consumptions.csv'
-  uy = unique_years(results)
-
+def save_csv(results, funding_status, type)
+  filename = "./Results/annual by fuel consumptions #{type}.csv"
   puts "Saving results to #{filename}"
+
+  uy = unique_years(results, type)
+
   CSV.open(filename, 'w') do |csv|
     csv << ['school name', 'funding status', 'fuel type', 'can analyse',  uy].flatten
     results.each do |school_name, fuel_type_years|
       fuel_type_years.each do |fuel_type, annual_kwhs|
-        annual_kwh_by_year = uy.map { |y_y| annual_kwhs[y_y] }
-        csv << [school_name, funding_status[school_name], fuel_type, can_analyse?(fuel_type, annual_kwhs), annual_kwh_by_year].flatten
+        next if annual_kwhs[type].nil?
+
+        annual_kwh_by_year = uy.map { |y_y| annual_kwhs[type][y_y] }
+        csv << [school_name, funding_status[school_name], fuel_type, can_analyse?(fuel_type, annual_kwhs[type]), annual_kwh_by_year].flatten
       end
     end
   end
+end
+
+def unique_years(results, type)
+  years = []
+  results.each do |school_name, school_data|
+    school_data.each do |fuel_type, years_data|
+      years = [years + years_data[type].keys ].flatten.uniq unless years_data.empty?
+    end
+  end
+  years.sort_by { |year_range| year_range.first }
 end
 
 def open_times_x48(school)
@@ -76,6 +79,8 @@ def percent_out_of_hours(meter, start_date, end_date)
 end
 
 def can_analyse?(fuel_type, annual_kwhs)
+  return false if annual_kwhs.nil?
+
   case fuel_type
   when :electricity
     annual_kwhs.length >= 2
@@ -90,21 +95,28 @@ def years_history(meter, end_date)
   splitter = HotWaterHeatingSplitter.new(meter.meter_collection)
   end_date = meter.amr_data.end_date
 
-  years = {}
-  data = {}
-  out_of_hours = {}
+  years = { annual_kwh: {}, out_of_hours_percent: {}, heating_percent: {}}
+
+  date_ranges = []
 
   while end_date - 365 >= meter.amr_data.start_date
     start_date = end_date - 365 + 1
     date_range = start_date.year..end_date.year
-    years[date_range] = meter.amr_data.kwh_date_range(start_date, end_date)
-    data[date_range] = splitter.split_heat_and_hot_water_aggregate(meter, start_date, end_date)
-    out_of_hours[date_range] = percent_out_of_hours(meter, start_date, end_date)
+    years[:annual_kwh][date_range] = meter.amr_data.kwh_date_range(start_date, end_date)
+    years[:heating_percent][date_range] = splitter.aggregate_heating_hot_water_split(start_date, end_date, meter: meter)[:heating_percent] if meter.fuel_type != :electricity
+    years[:out_of_hours_percent][date_range] = percent_out_of_hours(meter, start_date, end_date)
+    date_ranges.push(start_date..end_date)
     end_date = start_date - 1
   end
-  ap data
-  ap out_of_hours
+
+  years[:adjusted_annual_kwh] = meter.fuel_type == :electricity ? {} : calculate_adjusted_heating(splitter, date_ranges)
+
   years
+end
+
+def calculate_adjusted_heating(splitter, date_ranges)
+  results = splitter.degree_day_adjust_heating(date_ranges)
+  results.transform_keys{ |dr| dr.first.year..dr.last.year }
 end
 
 def calculate_energy_history(school, today)
@@ -119,7 +131,7 @@ def calculate_energy_history(school, today)
   end.to_h
 end
 
-school_name_pattern_match = ['trin*']
+school_name_pattern_match = ['*']
 source_db = :unvalidated_meter_data
 today = Date.new(2021, 9, 6)
 
@@ -138,6 +150,8 @@ rescue => e
   puts e.backtrace
 end
 
-ap results
+save_csv(results, funding_status, :annual_kwh)
+save_csv(results, funding_status, :out_of_hours_percent)
+save_csv(results, funding_status, :heating_percent)
+save_csv(results, funding_status, :adjusted_annual_kwh)
 
-save_csv(results, funding_status)
