@@ -43,7 +43,14 @@ class TargetsService
   #oldest data, not the most recent.
   def enough_readings_to_calculate_target?
     return false unless aggregate_meter.present?
-    aggregate_meter.enough_amr_data_to_set_target?
+    #Originally this ends up calling TargetMeter.enough_amr_data_to_set_target?(self) which
+    #is still debug code and is always returning true. We need to check whether theres
+    #really enough readings, so use inverse of annual_kwh_estimate_required?
+    #The two methods should be based on the same code anyway.
+    #Checking whether there's enough readings for estimates should be covered within the
+    #other methods
+    #aggregate_meter.enough_amr_data_to_set_target?
+    !annual_kwh_estimate?
   end
 
   #Is there enough data to produce an estimate of historical usage to calculate a target.
