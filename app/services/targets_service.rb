@@ -50,7 +50,7 @@ class TargetsService
     #Checking whether there's enough readings for estimates should be covered within the
     #other methods
     #aggregate_meter.enough_amr_data_to_set_target?
-    !annual_kwh_estimate?
+    !annual_kwh_estimate_required?
   end
 
   #Is there enough data to produce an estimate of historical usage to calculate a target.
