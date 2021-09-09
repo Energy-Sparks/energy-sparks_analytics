@@ -12,7 +12,7 @@ class AlertTargetBase < AlertAnalysisBase
 
 
   def valid_alert?
-    super && enough_data == :enough
+    super && enough_data == :enough && !aggregate_target_meter.nil?
   end
 
   def relevance
@@ -316,7 +316,7 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def current_target_percent
-    @target_school.aggregate_meter(fuel_type).target.target(maximum_alert_date)
+    aggregate_target_meter.target.target(maximum_alert_date)
   end
 
   def current_target_relative_percent_reduction
@@ -336,7 +336,7 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def target_table
-    @target_school.aggregate_meter(fuel_type).target.table
+    aggregate_target_meter.target.table
   end
 
   def annual_target_cumulative_chart
@@ -401,15 +401,15 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def target_start_date
-    @school.target_school.aggregate_meter(fuel_type).target_dates.target_start_date
+    aggregate_target_meter.target_dates.target_start_date
   end
 
   def total(use_target, start_date, end_date, datatype)
-    chosen_school = use_target ? @school.target_school : @school
+    chosen_meter = use_target ? aggregate_target_meter : @school.aggregate_meter(fuel_type)
     end_date = [end_date, aggregate_meter_end_date].min
-    amr_data = chosen_school.aggregate_meter(fuel_type).amr_data
+    amr_data = chosen_meter.amr_data
     if start_date >= amr_data.start_date && end_date <= amr_data.end_date
-      chosen_school.aggregate_meter(fuel_type).amr_data.kwh_date_range(start_date, end_date, datatype)
+      chosen_meter.amr_data.kwh_date_range(start_date, end_date, datatype)
     else
       # TODO(PH, 11Aug2021) - resolve ambiguity of returned 'current year kwh' etc. - is this the target or actual
       Float::NAN

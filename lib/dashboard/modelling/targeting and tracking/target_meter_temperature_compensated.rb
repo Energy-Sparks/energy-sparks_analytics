@@ -12,12 +12,6 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     d_days / (d2 - d1 + 1)
   end
 
-  def save_debug
-    unless @calculation_errors[:temperature_compensation_profile_matching].empty?
-      save_debug_to_csv(@calculation_errors[:temperature_compensation_profile_matching])
-    end
-  end
-
   private
 
   def num_same_day_type_required(amr_data)
@@ -78,10 +72,14 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
   def averaged_temperature_target_profile(synthetic_amr_data, synthetic_date, target_date, target_temperature)   
     heating_on = should_heating_be_on?(synthetic_date, target_date, target_temperature, synthetic_amr_data)
 
-    profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_temperature, heating_on, synthetic_amr_data)
+    profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_date, target_temperature, heating_on, synthetic_amr_data)
+
+    @debug = false
 
     if profiles_to_average.empty?
-      error = "Unable to find matching profile for #{synthetic_date.strftime("%a %d %b %Y")} T = #{target_temperature.round(1)} Heating should be on: #{heating_on} on/at #{holidays.day_type(synthetic_date)} - csv search path debug available in the analytics"
+      target_day_type = holidays.day_type(target_date)
+      error = "Unable to find matching profile for on/at #{target_day_type} td: #{target_date.strftime("%a %d %b %Y")} sd: #{synthetic_date.strftime("%a %d %b %Y")} T = #{target_temperature.round(1)} heating: #{heating_on}"
+
       raise UnableToFindMatchingProfile, error if Object.const_defined?('Rails')
 
       puts error
@@ -92,107 +90,89 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     predicated_kwh = model.predicted_kwh_for_future_date(heating_on, synthetic_date, target_temperature)
 
     {
-      profile_x48:  normalised_profile_to_predicted_kwh_x48(profiles_to_average.values, predicated_kwh),
+      profile_x48:  normalised_profile_to_predicted_kwh_x48(profiles_to_average, predicated_kwh),
       temperature:  target_temperature,
       heating_on:   heating_on
     }
   end
 
-  def find_matching_profiles_with_retries(synthetic_date, target_temperature, heating_on, amr_data)
-    if holidays.day_type(synthetic_date) == :schoolday
-      profiles = find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, 14)
+  def find_matching_profiles_with_retries(synthetic_date, target_date, target_temperature, heating_on, amr_data)
+    [30, 90, 180, 360].each do |scan_distance|
+      profiles = find_matching_profiles(synthetic_date, target_date, target_temperature, heating_on, amr_data, scan_distance)
       return profiles unless profiles.empty?
-
-      find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, 14, true)
-    else
-      profiles = find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data)
-      return profiles unless profiles.empty?
-
-      return profiles if target_temperature > RECOMMENDED_HEATING_ON_TEMPERATURE || heating_on
-
-      # if heating should be off, but is actually on, then try setting a target with it on
-      # as long as its not too warm
-
-      find_matching_profiles(synthetic_date, target_temperature, true, amr_data)
     end
+
+    []
   end
 
-  def find_matching_profiles(synthetic_date, target_temperature, heating_on, amr_data, scan_distance = 100, ignore_weekday = false)
+  def find_matching_profiles(synthetic_date, target_date, target_temperature, heating_on, amr_data, matching_day_types)
     profiles_to_average = {}
+
+    target_day_type = holidays.day_type(target_date)
+    max_profiles_required = num_same_day_type_required(amr_data)[target_day_type]
 
     scan_failures = []
 
-    day_type = holidays.day_type(synthetic_date)
-
     model = local_heating_model(amr_data)
 
-    scan_days_offset(scan_distance).each do |days_offset|
-      date_offset = synthetic_date + days_offset
-      synthetic_temperature = temperatures.average_temperature(date_offset)
+    scan_dates = nearby_matching_days(synthetic_date, amr_data, target_day_type, matching_day_types)
 
-      if amr_data.date_exists?(date_offset) &&
-         matching_day?(date_offset, synthetic_date, model.thermally_massive?, heating_on, ignore_weekday) == true &&
-         temperature_within_range?(synthetic_temperature, target_temperature, heating_on) &&
-         model.heating_on?(date_offset) == heating_on
-        # small risk will lose 2 profiles on different days but with same average temperature
-        profiles_to_average[synthetic_temperature] = amr_data.one_days_data_x48(date_offset)
-      else
-        failure = {
-          scan_date:              date_offset,
-          amr_data:               amr_data.date_exists?(date_offset),
-          matching_day:           matching_day?(date_offset, synthetic_date, model.thermally_massive?, heating_on, ignore_weekday),
-          temperature_in_range:   temperature_within_range?(synthetic_temperature, target_temperature, heating_on),
-          heating_on_match:       model.heating_on?(date_offset) == heating_on
-        }
-        scan_failures.push(failure)
-      end
-
-      break if profiles_to_average.length >= num_same_day_type_required(amr_data)[day_type]
+    dates_with_matching_temperatures = scan_dates.select do |scan_date|
+      synthetic_temperature = temperatures.average_temperature(scan_date)
+      temperature_within_range?(synthetic_temperature, target_temperature, heating_on)
     end
 
-    if profiles_to_average.empty?
-      @calculation_errors[:temperature_compensation_profile_matching] ||= []
-      debug = {
-        day_type:           day_type,
-        synthetic_date:     synthetic_date,
-        target_temperature: target_temperature,
-        heating_on:         heating_on,
-        thermally_massive:  model.thermally_massive?,
-        ignore_weekday:     ignore_weekday,
-        scan_distance:      scan_distance,
-        scan_failures:      scan_failures
-      }
-
-      @calculation_errors[:temperature_compensation_profile_matching].push(debug)
+    dates_with_heating_on_within_temperature_range = dates_with_matching_temperatures.select do |scan_date|
+      model.heating_on?(scan_date) == heating_on
     end
 
-    profiles_to_average
+    if dates_with_heating_on_within_temperature_range.empty?
+      max_profiles_required = num_same_day_type_required(amr_data)[target_day_type]
+      debug "Unable to find match for #{synthetic_date}: #{target_day_type} dist #{matching_day_types} matching days: #{scan_dates.length} temperature ok #{dates_with_matching_temperatures.length} heating #{heating_on ? 'on' : 'off'} 0"
+      return []
+    end
+
+    dates_matching_model = dates_with_heating_on_within_temperature_range
+
+    if target_day_type == :schoolday && model.thermally_massive?
+      matches = dates_matching_model.select { |date| date.wday == target_date.wday }
+      dates_matching_model = matches if matches.length >= max_profiles_required
+    end
+
+    profile_dates = dates_matching_model[0...max_profiles_required]
+
+    debug "Shortage of profiles: for #{target_day_type} #{synthetic_date} dist #{matching_day_types} got #{dates_with_heating_on_within_temperature_range.length} need #{max_profiles_required} model match #{dates_matching_model.length}" if profile_dates.length < max_profiles_required
+
+    profile_dates.map { |profile_date| amr_data.one_days_data_x48(profile_date) }
   end
 
-  def save_debug_to_csv(calc_errors)
-    filename = "./Results/targeting and tracking profile scanning failures #{object_id}.csv"
+  def debug(message)
+    puts message if @debug && !Object.const_defined?('Rails')
+    logger.info message
+  end
 
-    puts "Saving results to #{filename}"
+  def nearby_matching_days(synthetic_date, amr_data, day_type, matching_days)
+    future_dates = dates_to_scan(synthetic_date    ,  1, matching_days, amr_data, day_type)
+    past_dates   = dates_to_scan(synthetic_date - 1, -1, matching_days, amr_data, day_type)
 
-    col_names = [
-      calc_errors.first.select { |k, _v| k != :scan_failures }.keys,
-      calc_errors.first[:scan_failures].first.keys
-    ].flatten
-
-    CSV.open(filename, 'w') do |csv|
-      csv << col_names
-      calc_errors.each do |one_day_calc_error|
-        non_scan_failure_data = one_day_calc_error.select { |k, _v| k != :scan_failures }.values
-
-        one_day_calc_error[:scan_failures].each do |scan_failure_data|
-          csv << [non_scan_failure_data, scan_failure_data.values].flatten
-        end
-      end
-
-      Thread.current.backtrace.each do |line|
-        csv << ['Stacktrace', line]
-      end
+    # zip truncates to length of object being zipped
+    if future_dates.length > past_dates.length
+      future_dates.zip(past_dates).flatten.compact[0...matching_days]
+    else
+      past_dates.zip(future_dates).flatten.compact[0...matching_days]
     end
+  end
+
+  def dates_to_scan(synthetic_date, direction, dates_needed, amr_data, day_type)
+    date_offset = 0
+    dates = []
+    while dates.length < dates_needed
+      date = synthetic_date + date_offset
+      date_offset += direction
+      return dates unless date.between?(amr_data.start_date, amr_data.end_date)
+      dates.push(date) if @meter_collection.holidays.day_type(date) == day_type
+    end
+    dates
   end
 
   def should_heating_be_on?(target_date, target_temperature, synthetic_amr_data)
@@ -229,22 +209,6 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
   def temperature_within_range?(temperature, range_temperature, heating_on)
     within_range = heating_on ? WITHIN_TEMPERATURE_RANGE : 2.0 * WITHIN_TEMPERATURE_RANGE
     temperature.between?(range_temperature - within_range, range_temperature + within_range)
-  end
-
-  def matching_day?(synthetic_date, target_date, thermally_massive, heating_on, ignore_weekday)
-    match_failure_type?(synthetic_date, target_date, thermally_massive, heating_on, ignore_weekday)
-  end
-
-  def match_failure_type?(synthetic_date, target_date, thermally_massive, heating_on, ignore_weekday)
-    synthetic_day_type = holidays.day_type(synthetic_date)
-
-    return :day_type unless synthetic_day_type == holidays.day_type(target_date)
-
-    return true if %i[holiday weekend].include?(synthetic_day_type)
-
-    return true if !thermally_massive || !heating_on || ignore_weekday
-
-    synthetic_date.wday == target_date.wday ? true : :weekday
   end
 
   # =========================================================================================

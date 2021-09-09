@@ -42,6 +42,7 @@ class TargetsService
   #whether the data is currently lagging behind (see below). So checking for the
   #oldest data, not the most recent.
   def enough_readings_to_calculate_target?
+    # TODO(PH, 9Sep2021) talk to LD about .present? Railsism
     return false unless aggregate_meter.present?
     aggregate_meter.enough_amr_data_to_set_target?
   end
@@ -74,7 +75,8 @@ class TargetsService
     aggregate_meter.present? &&
     target_set? &&
     recent_data? &&
-    enough_data_to_set_target?
+    enough_data_to_set_target? &&
+    !target_meter.nil?
   end
 
   def meter_present?
