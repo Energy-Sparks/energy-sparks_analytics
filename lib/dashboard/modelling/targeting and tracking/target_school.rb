@@ -39,6 +39,19 @@ class TargetSchool < MeterCollection
     @unscaled_target_meters[meter.fuel_type] = meter.non_scaled_target_meter
     @synthetic_target_meters[meter.fuel_type] = meter.synthetic_meter
     meter
+  rescue TargetMeterTemperatureCompensatedDailyDayTypeBase::UnableToFindMatchingProfile, StandardError => e
+    # TODO(PH, 9Sep2021) - be a bit more selective over which errors captured
+    #                      depending on experience of what throws errors
+    logger.error "Target meter calculation failed for #{meter.fuel_type} #{meter.mpxn}"
+    logger.error e
+    unless Object.const_defined?('Rails')
+      puts '-' * 60
+      puts "Target meter calculation failed for #{meter.fuel_type} #{meter.mpxn}"
+      puts e
+      puts e.backtrace[0]
+      puts '-' * 60
+    end
+    nil
   end
 
   def target_set?(meter)

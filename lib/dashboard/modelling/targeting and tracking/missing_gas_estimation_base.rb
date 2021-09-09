@@ -21,7 +21,7 @@ class MissingGasEstimationBase < MissingEnergyFittingBase
   private
 
   def one_year_amr_data
-    @one_year_amr_data ||= AMRData.copy_amr_data(@amr_data, @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
+    @one_year_amr_data ||= AMRData.copy_amr_data(@amr_data, @target_dates.benchmark_start_date, @target_dates.original_meter_end_date)
   end
 
   def heating_model

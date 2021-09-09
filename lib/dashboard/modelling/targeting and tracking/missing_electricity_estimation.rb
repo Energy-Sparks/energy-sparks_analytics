@@ -60,7 +60,7 @@ class MissingElectricityEstimation < MissingEnergyFittingBase
   end
 
   def create_amr_data_minus_lockdown_dates
-    amr_data = AMRData.copy_amr_data(@amr_data, @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
+    amr_data = AMRData.copy_amr_data(@amr_data, @target_dates.benchmark_start_date, @target_dates.original_meter_end_date)
     lockdown_date_ranges.each do |date_range|
       date_range.each do |date|
         amr_data.delete(date)

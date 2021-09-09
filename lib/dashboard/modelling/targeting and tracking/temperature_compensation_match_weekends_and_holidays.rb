@@ -31,6 +31,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays < Ta
       # typically this should only occur on more obscure shorter holidays
       # e.g. May Day public holiday if the school's calendars are setup correctly
       logger.info "Unable to find matching holiday for #{target_date} in previous year"
+      puts "Unable to find matching holiday for #{target_date} in previous year"  unless Object.const_defined?('Rails')
       return false
     end
 
@@ -41,7 +42,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays < Ta
     target_holiday_day_index = day_index_into_holiday(target_holiday, target_date, target_date_at_weekend)
 
     heating_on = historic_heating_on_xNdays[target_holiday_day_index % historic_heating_on_xNdays.length]
-    
+
     heating_on
   end
 
