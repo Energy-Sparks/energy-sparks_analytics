@@ -1,6 +1,7 @@
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
+  class ChartInheritanceConfigurationTooDeep < StandardError; end
   include Logging
 
   attr_reader :school
@@ -44,13 +45,22 @@ class ChartManager
   end
 
   # recursively inherit previous chart definitions config
-  def resolve_chart_inheritance(chart_config_original)
+  def resolve_chart_inheritance(chart_config_original, max_inheritance = 20)
     chart_config = chart_config_original.dup
     while chart_config.key?(:inherits_from)
       base_chart_config_param = chart_config[:inherits_from]
       base_chart_config = standard_chart(base_chart_config_param).dup
       chart_config.delete(:inherits_from)
       chart_config = base_chart_config.merge(chart_config)
+      max_inheritance -= 1
+      if max_inheritance == 0
+        logger.error "Chart inheritance too deep for #{chart_config_original}"
+        unless Object.const_defined?('Rails')
+          puts 'Chart inheritance too deep for'
+          ap chart_config_original
+        end
+        raise ChartInheritanceConfigurationTooDeep, "Inheritance too deep for #{chart_config_original}"
+      end
     end
     chart_config
   end

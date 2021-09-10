@@ -21,7 +21,7 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
                           summarise_differences: true,
                           report_failed_charts:   :summary,
                           user: { user_role: :analytics, staff_role: nil },
-                          pages: %i[electric_target gas_target],
+                          pages: %i[electric_target gas_target storage_heater_target],
 
                           compare_results: [
                             { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Target\Base' },

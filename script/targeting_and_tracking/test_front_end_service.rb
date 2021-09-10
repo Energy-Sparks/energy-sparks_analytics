@@ -74,6 +74,9 @@ def test_service(school)
       info[fuel_type][:enough_temperature_data] = service.enough_temperature_data?
       info[fuel_type][:valid] = service.valid?
       info[fuel_type][:problems_with_holidays] = service.holiday_integrity_problems.join(' + ')
+      info[fuel_type][:one_year_of_meter_readings_available_prior_to_1st_date] = service.one_year_of_meter_readings_available_prior_to_1st_date?
+      info[fuel_type][:can_calculate_one_year_of_synthetic_data] = service.can_calculate_one_year_of_synthetic_data?
+      
       info[fuel_type].merge!(service.analytics_debug_info)
       if service.valid?
         ap service.progress

@@ -93,7 +93,7 @@ class AlertStorageHeaterTargetAnnual < AlertGasTargetAnnual
   end
 
   def aggregate_target_meter
-    @target_school.storage_heater_meter
+    @school.target_school.storage_heater_meter
   end
 end
 

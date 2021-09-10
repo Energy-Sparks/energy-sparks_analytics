@@ -57,6 +57,23 @@ class TargetDates
     synthetic_benchmark_start_date..synthetic_benchmark_end_date
   end
 
+  # used by TargetsService
+  def self.one_year_of_meter_readings_available_prior_to_1st_date?(original_meter)
+    target = TargetAttributes.new(original_meter)
+    return original_meter.amr_data.days > 365 unless target.target_set?
+
+    target.first_target_date - original_meter.amr_data.start_date > 365
+  end
+
+    # used by TargetsService
+    def self.can_calculate_one_year_of_synthetic_data?(original_meter)
+      target = TargetAttributes.new(original_meter)
+      return original_meter.amr_data.days > 365 unless target.target_set?
+  
+      # TODO(PH, 10Sep2021) - this is arbitrarily set to 30 days for the moment, refine
+      target.first_target_date - original_meter.amr_data.start_date > 30
+    end
+
   def days_benchmark_data
     (benchmark_end_date - benchmark_start_date + 1).to_i
   end
