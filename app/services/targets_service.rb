@@ -16,7 +16,6 @@ class TargetsService
       cumulative_performance: data_series(:cumulative_performance),
       monthly_performance_versus_synthetic_last_year: data_series(:monthly_performance_versus_last_year),
       cumulative_performance_versus_synthetic_last_year: data_series(:cumulative_performance_versus_last_year),
-
       partial_months: data_series(:partial_months)
     )
   end

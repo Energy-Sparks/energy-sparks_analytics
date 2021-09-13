@@ -41,6 +41,10 @@ class TargetsProgress
     to_keyed_collection(months, @cumulative_usage_kwh)
   end
 
+  def current_cumulative_usage_kwh
+    @cumulative_usage_kwh.compact.last
+  end
+
   def cumulative_performance
     to_keyed_collection(months, @cumulative_performance)
   end
