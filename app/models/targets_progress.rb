@@ -58,7 +58,7 @@ class TargetsProgress
   end
 
   def partial_months
-    @partial_months
+    to_keyed_collection(months, @partial_months)
   end
 
   def months
