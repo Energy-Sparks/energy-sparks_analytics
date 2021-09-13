@@ -71,7 +71,11 @@ class TargetDates
       return original_meter.amr_data.days > 365 unless target.target_set?
   
       # TODO(PH, 10Sep2021) - this is arbitrarily set to 30 days for the moment, refine
-      target.first_target_date - original_meter.amr_data.start_date > 30
+      if original_meter.fuel_type == :electricity
+        TargetDates.minimum_5_school_days_1_weekend_meter_readings?(original_meter)
+      else
+        target.first_target_date - original_meter.amr_data.start_date > 30
+      end
     end
 
   def days_benchmark_data
@@ -145,5 +149,11 @@ class TargetDates
 
   def today
     $ENERGYSPARKSTESTTODAYDATE || @original_meter.amr_data.end_date
+  end
+
+  def self.minimum_5_school_days_1_weekend_meter_readings?(meter)
+    holidays = meter.meter_collection.holidays
+    stats = holidays.day_type_statistics(meter.amr_data.start_date, meter.amr_data.end_date)
+    stats[:weekend] >= 2 && stats[:schoolday] >= 5
   end
 end

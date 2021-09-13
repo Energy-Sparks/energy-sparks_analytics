@@ -19,8 +19,8 @@ class MissingEnergyFittingBase
     total / count
   end
 
-  def fill_in_missing_data_by_daytype(daytype, date_range = @target_dates.missing_date_range)
-    avg_profile_x48 = average_profile_for_day_type_x48(daytype)
+  def fill_in_missing_data_by_daytype(daytype, date_range = @target_dates.missing_date_range, override_daytype: daytype)
+    avg_profile_x48 = average_profile_for_day_type_x48(override_daytype)
 
     date_range.each do |date|
       next if @holidays.day_type(date) != daytype || one_year_amr_data.date_exists?(date)

@@ -17,13 +17,13 @@ class MissingElectricityEstimation < MissingEnergyFittingBase
 
     weekly_normalised_profile = fit_to_log_norm_profile_by_week
 
-    fill_in_missing_data_by_daytype(:holiday, @target_dates.synthetic_benchmark_date_range)
+    fill_in_missing_data_by_daytype(:holiday, @target_dates.synthetic_benchmark_date_range, override_daytype: use_weekends_if_too_little_holidays)
     fill_in_missing_data_by_daytype(:weekend, @target_dates.synthetic_benchmark_date_range)
 
     amr_kwh_after_holidays_and_weekend_created = calculate_holey_amr_data_total_kwh(one_year_amr_data)
 
     feedback1 = {
-      sd_fit:                           fit_to_log_norm_profile_by_week[:sd],
+      sd_fit:                           weekly_normalised_profile[:sd],
       original_kwh:                     original_amr_kwh,
       kwh_with_lockdown_data_removed:   amr_with_lockdown_dates_removed_kwh,
       kwh_after_weekend_holidays_added: amr_kwh_after_holidays_and_weekend_created
@@ -40,6 +40,13 @@ class MissingElectricityEstimation < MissingEnergyFittingBase
   end
 
   private
+
+  # if very little holiday meter readings available use weekend data as a proxy
+  def use_weekends_if_too_little_holidays
+    holidays = @meter.meter_collection.holidays
+    stats = holidays.day_type_statistics(@meter.amr_data.start_date, @meter.amr_data.end_date)
+    day_type_match = stats[:holiday] <= 2 && stats[:weekend] >= 2 ? :weekend : :holiday
+  end
 
   def fit_to_log_norm_profile_by_week
     @fit_to_log_norm_profile_by_week ||= calculate_fit_to_log_norm_profile_by_week
