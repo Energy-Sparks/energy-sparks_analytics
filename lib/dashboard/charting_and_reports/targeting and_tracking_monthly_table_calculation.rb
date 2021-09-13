@@ -55,7 +55,8 @@ class CalculateMonthlyTrackAndTraceData
   def performance(kwhs, target_kwhs)
     kwhs.map.with_index do |_kwh, i|
       percent = (kwhs[i].nil? || target_kwhs[i].nil?) ? nil : ((kwhs[i] - target_kwhs[i]) / target_kwhs[i])
-      percent = 0.0 if target_kwhs[i] == 0.0 && percent.nan?
+      puts "Got here #{percent}"
+      percent = 0.0 if target_kwhs[i] == 0.0 && (percent.nan? || percent.infinite?)
       percent
     end
   end
