@@ -54,6 +54,22 @@ class TargetsService
     annual_kwh_estimate_required? && annual_kwh_estimate?
   end
 
+  # one year of meter readings are required prior to the first target date
+  # in order to calculate a target for the following year in the abscence
+  # of needing to calculate a full year of data synthetically using an 'annual kWh estimate'
+  # however, a year after setting the target, the target_start date for calculaiton purposes
+  # will incrementally move at 1 year behind the most recent meter reading date - at this point
+  # there may be enough real historic meter readings for a meter which originally has less
+  # then 1 year's data to have 1 year of data and not required the 'annual kWh estimate' and
+  # therefore the synthetic calculation
+  def one_year_of_meter_readings_available_prior_to_1st_date?
+    TargetDates.one_year_of_meter_readings_available_prior_to_1st_date?(aggregate_meter)
+  end
+
+  def can_calculate_one_year_of_synthetic_data?
+    TargetDates.can_calculate_one_year_of_synthetic_data?(aggregate_meter)
+  end
+
   def annual_kwh_estimate?
     aggregate_meter.estimated_period_consumption_set?
   end

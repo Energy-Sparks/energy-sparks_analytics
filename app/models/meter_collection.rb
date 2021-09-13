@@ -62,7 +62,7 @@ class MeterCollection
   end
 
   def delete_pseudo_meter_attribute(pseudo_meter_key, attribute_key)
-    @pseudo_meter_attributes[pseudo_meter_key].delete(attribute_key)
+    @pseudo_meter_attributes[pseudo_meter_key]&.delete(attribute_key)
   end
 
   def matches_identifier?(identifier, identifier_type)

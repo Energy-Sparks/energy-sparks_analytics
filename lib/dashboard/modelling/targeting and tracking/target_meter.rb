@@ -42,7 +42,7 @@ class TargetMeter < Dashboard::Meter
       true
     elsif meter.fuel_type == :electricity
       true
-    elsif storage_heater_fuel_type?(meter.fuel_type) ||
+    elsif storage_heater_fuel_type?(meter.fuel_type)
       true
     else
       meter.amr_data.end_date > Date.today - 30 &&
@@ -52,7 +52,7 @@ class TargetMeter < Dashboard::Meter
 
   def self.storage_heater_fuel_type?(fuel_type)
     raise UnexpectedPluralStorageHeaterFuel, "Unexpected plural storage heater fuel for #{@original_meter.mpxn}" if fuel_type == :storage_heaters
-    
+
     fuel_type == :storage_heater
   end
 

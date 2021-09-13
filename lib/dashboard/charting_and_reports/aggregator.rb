@@ -92,7 +92,7 @@ class Aggregator
 
     scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
-    nullify_zero_data if nullify_zero_data?
+    nullify_trailing_zeros if nullify_trailing_zeros?
 
     accumulate_data if cumulative?
 
@@ -156,8 +156,8 @@ class Aggregator
     @chart_config.key?(:cumulative) && @chart_config[:cumulative]
   end
 
-  def nullify_zero_data?
-    @chart_config.key?(:nullify_zero_data) && @chart_config[:nullify_zero_data]
+  def nullify_trailing_zeros?
+    @chart_config.key?(:nullify_trailing_zeros) && @chart_config[:nullify_trailing_zeros]
   end
 
   #=================regrouping of chart data ======================================
@@ -500,11 +500,14 @@ class Aggregator
     end
   end
 
-  def nullify_zero_data
+  def nullify_trailing_zeros
     @bucketed_data.keys.each do |series_name|
-      @bucketed_data[series_name].map! do |val|
-        val == 0.0 ? nil : val
+      got_non_zero_value = false
+      reorged_values = @bucketed_data[series_name].reverse.map do |val|
+        got_non_zero_value = true if val != 0.0
+        val == 0.0 && !got_non_zero_value ? nil : val
       end
+      @bucketed_data[series_name] = reorged_values.reverse
     end
   end
 

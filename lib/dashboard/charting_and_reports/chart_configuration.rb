@@ -230,7 +230,7 @@ class ChartManager
       chart1_type:                  :line,
       series_breakdown:             :none,
       x_axis:                       :week,
-      nullify_zero_data:            true,
+      nullify_trailing_zeros:       true,
       timescale:                    nil,
       ignore_single_series_failure: true,
       target:                       {calculation_type: :day, extend_chart_into_future: false},
@@ -322,7 +322,7 @@ class ChartManager
     targeting_and_tracking_synthetic_target_group_by_week_storage_heater: {
       meter_definition:   :synthetic_aggregate_target_storage_heater,
       y2_axis:            :degreedays,
-      inherits_from:      :targeting_and_tracking_synthetic_target_group_by_week_storage_heater
+      inherits_from:      :targeting_and_tracking_synthetic_target_group_by_week_gas
     },
 
     # inherited use only

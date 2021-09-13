@@ -31,7 +31,7 @@ class TargetSchool < MeterCollection
   private
 
   def set_target(meter, calculation_type)
-    target_set?(meter) ?  calculate_target(meter, calculation_type) : nil
+    target_set?(meter) ? calculate_target(meter, calculation_type) : nil
   end
 
   def calculate_target(meter, calculation_type)
@@ -44,11 +44,12 @@ class TargetSchool < MeterCollection
     #                      depending on experience of what throws errors
     logger.error "Target meter calculation failed for #{meter.fuel_type} #{meter.mpxn}"
     logger.error e
+    logger.info  e.backtrace
     unless Object.const_defined?('Rails')
       puts '-' * 60
       puts "Target meter calculation failed for #{meter.fuel_type} #{meter.mpxn}"
       puts e
-      puts e.backtrace[0]
+      puts e.backtrace
       puts '-' * 60
     end
     nil

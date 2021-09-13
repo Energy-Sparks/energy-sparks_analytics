@@ -10,7 +10,6 @@ class AlertTargetBase < AlertAnalysisBase
     aggregate_meter.enough_amr_data_to_set_target? ? :enough : :not_enough
   end
 
-
   def valid_alert?
     super && enough_data == :enough && !aggregate_target_meter.nil?
   end
