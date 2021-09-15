@@ -1,6 +1,9 @@
 class TargetMeter < Dashboard::Meter
   class TargetStartDateBeforeFirstMeterDate < StandardError; end
   class UnexpectedPluralStorageHeaterFuel < StandardError; end
+  class UnableToFindMatchingProfile < StandardError; end
+  class UnableToCalculateTargetDates < StandardError; end
+  class MissingGasEstimationAmrData < StandardError; end
   include Logging
   attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter, :synthetic_meter
   def initialize(meter_to_clone, do_calculations = true)
@@ -31,9 +34,10 @@ class TargetMeter < Dashboard::Meter
         calculate_costs_for_meter
       }
       @feedback[:calculation_time] = bm
+      
       calc_text = "Calculated target meter #{mpan_mprn} #{fuel_type} in #{bm.round(3)} seconds"
-      puts "Got here: #{calc_text}"
-      logger.info calc_text
+      check_amr_data(amr_data, 'Completed calculations target data issues:')
+      debug calc_text
     end
   end
 
@@ -139,12 +143,26 @@ class TargetMeter < Dashboard::Meter
     @amr_data = AMRData.new(meter_to_clone.meter_type)
     @non_scaled_target_meter = create_non_scaled_meter(self)
 
+    target_day_calculation_failed = []
+
     @target_dates.target_date_range.each do |target_date|
       synthetic_date = target_date - 364
       days_amr_data = target_one_day_amr_data(target_date: target_date, synthetic_date: synthetic_date, synthetic_amr_data: adjusted_amr_data_info[:amr_data])
-      @amr_data.add(target_date, days_amr_data[:scaled])
-      @non_scaled_target_meter.amr_data.add(target_date, days_amr_data[:non_scaled])
+      if days_amr_data.empty?
+        debug "Target calculation failure for #{target_date}"
+        target_day_calculation_failed.push(target_date)
+      else
+        @amr_data.add(target_date, days_amr_data[:scaled])
+        @non_scaled_target_meter.amr_data.add(target_date, days_amr_data[:non_scaled])
+      end
     end
+
+    raise MissingGasEstimationAmrData, @feedback[:missing_gas_estimation_amr_data] if @feedback.key?(:missing_gas_estimation_amr_data)
+    raise UnableToFindMatchingProfile, @feedback[:missing_profiles] if @feedback.key?(:missing_profiles)
+    raise UnableToCalculateTargetDates, target_day_calculation_failed unless target_day_calculation_failed.empty?
+
+    check_amr_data(@amr_data, "Calculated target data with the following problems #{meter_to_clone.fuel_type} #{meter_to_clone.mpxn}")
+    check_amr_data(@non_scaled_target_meter.amr_data, "Calculated non scaled target data with the following problems #{meter_to_clone.fuel_type} #{meter_to_clone.mpxn}")
 
     @non_scaled_target_meter.set_target_degree_days(self.all_degree_days)
   end
@@ -157,6 +175,8 @@ class TargetMeter < Dashboard::Meter
 
   def target_one_day_amr_data(target_date:, synthetic_date:, synthetic_amr_data:)
     days_average_profile_x48 = profile_x48(target_date: target_date, synthetic_date: synthetic_date, synthetic_amr_data: synthetic_amr_data)
+    return {} if days_average_profile_x48.nil?
+
     target_kwh_x48 = AMRData.fast_multiply_x48_x_scalar(days_average_profile_x48, @target.target(target_date))
     {
       scaled:     OneDayAMRReading.new(mpan_mprn, target_date, 'TARG', nil, DateTime.now, target_kwh_x48),
@@ -179,6 +199,19 @@ class TargetMeter < Dashboard::Meter
     logger.info "Creating economic & accounting costs for target #{mpan_mprn} fuel #{fuel_type} from #{amr_data.start_date} to #{amr_data.end_date}"
     @amr_data.set_economic_tariff(self)
     @amr_data.set_accounting_tariff(self)
+  end
+
+  def debug(var)
+    logger.info var
+    puts var unless Object.const_defined?('Rails')
+  end
+
+  def check_amr_data(amr, text_type)
+    unless amr.check_for_bad_values.values.all?(&:empty?)
+      debug text_type
+      debug amr.check_for_bad_values
+      debug ''
+    end
   end
 end
 

@@ -402,4 +402,9 @@ class ContentBase
   def needs_storage_heater_data?
     false
   end
+
+  def debug(var)
+    logger.info var
+    puts var unless Object.const_defined?('Rails')
+  end
 end

@@ -1,5 +1,4 @@
 class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayType
-  class UnableToFindMatchingProfile < StandardError; end
   DEGREEDAY_BASE_TEMPERATURE = 15.5
   RECOMMENDED_HEATING_ON_TEMPERATURE = 14.5
   WITHIN_TEMPERATURE_RANGE = 3.0
@@ -74,15 +73,14 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
 
     profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_date, target_temperature, heating_on, synthetic_amr_data)
 
-    @debug = false
+    @debug = true
 
     if profiles_to_average.empty?
+      @feedback[:missing_profiles] ||= []
       target_day_type = holidays.day_type(target_date)
       error = "Unable to find matching profile for on/at #{target_day_type} td: #{target_date.strftime("%a %d %b %Y")} sd: #{synthetic_date.strftime("%a %d %b %Y")} T = #{target_temperature.round(1)} heating: #{heating_on}"
-
-      raise UnableToFindMatchingProfile, error if Object.const_defined?('Rails')
-
-      puts error
+      @feedback[:missing_profiles].push(error)
+      return {}
     end
 
     model = local_heating_model(synthetic_amr_data)
