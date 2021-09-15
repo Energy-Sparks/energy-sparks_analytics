@@ -25,7 +25,7 @@ class TargetsService
   #
   #We require at least a years worth of calendar data, as well as ~1 year of AMR data OR an estimate of their annual consumption
   def enough_data_to_set_target?
-    return enough_holidays? && enough_temperature_data? && (enough_readings_to_calculate_target? || enough_estimate_data_to_calculate_target? )
+    return !fuel_type_disabled? && enough_holidays? && enough_temperature_data? && (enough_readings_to_calculate_target? || enough_estimate_data_to_calculate_target? )
   end
 
   def enough_holidays?
@@ -143,6 +143,10 @@ class TargetsService
   end
 
   private
+
+  def fuel_type_disabled?
+    ENV["FEATURE_FLAG_TARGETS_DISABLE_#{@fuel_type.to_s.upcase}"] == 'true'
+  end
 
   def data_headers
     data[:current_year_date_ranges].map { |r| r.first.strftime('%b') }
