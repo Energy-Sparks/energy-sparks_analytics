@@ -93,7 +93,6 @@ class MeterCollection
   end
 
   def set_aggregate_meter(fuel_type, meter)
-    puts "Got here: setting target meter #{fuel_type} to nil? #{meter.nil?}"
     case fuel_type
     when :electricity
       @aggregated_electricity_meters = meter

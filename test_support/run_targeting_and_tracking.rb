@@ -26,6 +26,10 @@ class RunTargetingAndTracking < RunAdultDashboard
   def self.save_stats_to_csv(filename)
     puts "Saving results to #{filename}"
 
+    unless defined? @@all_stats
+      puts "No statistics to save"
+      return
+    end
     col_names = column_names(@@all_stats)
     index_names = index_stats_column_names
 

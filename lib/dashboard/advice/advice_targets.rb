@@ -12,13 +12,9 @@ class AdviceTargets < AdviceBase
   end
 
   def relevance
-    rel =   !aggregate_meter.nil?
-    rel &&= TargetMeter.recent_data?(aggregate_meter)
-    rel &&= aggregate_meter.target_set?
-    rel &&= aggregate_meter.amr_data.end_date > (Date.today - MAX_DAYS_OUT_OF_DATE_FOR_TARGETS)
-    result = rel ? :relevant : :never_relevant
-    debug "#{self.class.name} relevance: #{result}"
-    result
+    rel = TargetsService.analytics_relevant(aggregate_meter)
+    debug "#{self.class.name} relevance: #{rel}"
+    rel
   end
 
   def calculate

@@ -157,14 +157,39 @@ class TargetMeter < Dashboard::Meter
       end
     end
 
+    correct_missing_temperature_compensation_profiles(target_day_calculation_failed)
+
+    check_for_multiple_errors_and_raise_exception(target_day_calculation_failed)
+
+    log_amr_data_stats(meter_to_clone)
+
+    @non_scaled_target_meter.set_target_degree_days(self.all_degree_days)
+  end
+
+  # sometimes the heating temperature compensation analysis is unable to find a matching
+  # daily intrasday profile, if there aren't too many then substitute with dummy data
+  def correct_missing_temperature_compensation_profiles(target_day_calculation_failed)
+    if @feedback.key?(:missing_profiles)
+      if @feedback[:missing_profiles].length.between?(1,4)
+        amr_data_to_be_corrected = [@amr_data, @non_scaled_target_meter.amr_data]
+        create_dummy_profiles_for_limited_number_of_missing_dates(amr_data_to_be_corrected, @feedback[:missing_profiles], target_day_calculation_failed)
+        @feedback[:corrected_missing_profiles] = @feedback[:missing_profiles] 
+        @feedback.delete(:missing_profiles)
+      elsif @feedback[:missing_profiles].length > 4
+        @feedback[:missing_profiles].map! { |data| TargetMeterTemperatureCompensatedDailyDayTypeBase.format_missing_profiles(data) }
+      end
+    end
+  end
+
+  def check_for_multiple_errors_and_raise_exception(target_day_calculation_failed)
     raise MissingGasEstimationAmrData, @feedback[:missing_gas_estimation_amr_data] if @feedback.key?(:missing_gas_estimation_amr_data)
     raise UnableToFindMatchingProfile, @feedback[:missing_profiles] if @feedback.key?(:missing_profiles)
     raise UnableToCalculateTargetDates, target_day_calculation_failed unless target_day_calculation_failed.empty?
+  end
 
+  def log_amr_data_stats(meter_to_clone)
     check_amr_data(@amr_data, "Calculated target data with the following problems #{meter_to_clone.fuel_type} #{meter_to_clone.mpxn}")
     check_amr_data(@non_scaled_target_meter.amr_data, "Calculated non scaled target data with the following problems #{meter_to_clone.fuel_type} #{meter_to_clone.mpxn}")
-
-    @non_scaled_target_meter.set_target_degree_days(self.all_degree_days)
   end
 
   def create_non_scaled_meter(meter_to_clone)
@@ -212,6 +237,19 @@ class TargetMeter < Dashboard::Meter
       debug amr.check_for_bad_values
       debug ''
     end
+  end
+
+  def create_dummy_profiles_for_limited_number_of_missing_dates(amr_data_array, missing_profiles, target_day_calculation_failed)
+    missing_profiles.each do |missing_profile|
+      target_date = missing_profile[:target_date]
+      debug "Setting dummy missing profile for #{target_date}"
+      one_day_amr = OneDayAMRReading.new(@original_meter.mpan_mprn, target_date, 'TARG', nil, DateTime.now, AMRData.single_value_kwh_x48(1.0/48.0) )
+      amr_data_array.each do |amr_data|
+        amr_data.add(target_date, one_day_amr)
+      end
+      # only delete from missing list if missing profile
+      target_day_calculation_failed.delete(target_date)
+    end 
   end
 end
 

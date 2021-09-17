@@ -144,6 +144,11 @@ class TargetsService
     end
   end
 
+  def self.analytics_relevant(meter)
+    rel = !meter.nil? && meter.target_set? && TargetMeter.recent_data?(meter)
+    rel ? :relevant : :never_relevant
+  end
+
   private
 
   def data_headers

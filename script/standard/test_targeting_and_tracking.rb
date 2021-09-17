@@ -44,7 +44,18 @@ def script(scenarios)
   {
     logger1:                { name: TestDirectoryConfiguration::LOG + "/test targeting and tracking %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
 
-    schools:                ['notting-hill-ealing-high-senior-school*'], # ['cats*', 'marks*', 'mill*', 'penn*', 'stant*'],
+    schools:                [
+                              'Xnotting-hill-ealing-high-senior-sc*',
+                              'Xoxford-high-for-girls-prep*',
+                              'ralph*',
+                              'Xrogerst*',
+                              'Xst-jul*',
+                              'Xst-nic*',
+                              'Xtwerton*',
+                              'Xwootton*'
+                            ], 
+    
+    # ['cats*', 'marks*', 'mill*', 'penn*', 'stant*'],
 
     source:                 :unvalidated_meter_data,
 

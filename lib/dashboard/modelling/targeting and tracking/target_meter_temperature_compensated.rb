@@ -11,6 +11,10 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     d_days / (d2 - d1 + 1)
   end
 
+  def self.format_missing_profiles(d)
+    "Unable to find matching profile for on/at #{d[:target_day_type]} td: #{d[:target_date].strftime("%a %d %b %Y")} sd: #{d[:synthetic_date].strftime("%a %d %b %Y")} T = #{d[:target_temperature].round(1)} heating: #{d[:heating_on]}"
+  end
+
   private
 
   def num_same_day_type_required(amr_data)
@@ -78,7 +82,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     if profiles_to_average.empty?
       @feedback[:missing_profiles] ||= []
       target_day_type = holidays.day_type(target_date)
-      error = "Unable to find matching profile for on/at #{target_day_type} td: #{target_date.strftime("%a %d %b %Y")} sd: #{synthetic_date.strftime("%a %d %b %Y")} T = #{target_temperature.round(1)} heating: #{heating_on}"
+      error = { target_day_type: target_day_type, target_date: target_date, synthetic_date: synthetic_date, target_temperature: target_temperature, heating: heating_on }
       @feedback[:missing_profiles].push(error)
       return {}
     end
@@ -241,7 +245,11 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     debug.transform_keys!{ |key| :"temperature_compensation_#{key}" }
     debug[:temperature_compensation_model] = model.class.name
     debug[:temperature_compensation_thermally_massive] = model.thermally_massive?
+    debug[:temperature_compensation_non_heating_model] = model.non_heating_model.class.name
+    debug[:temperature_compensation_non_heating_model_avgmax_kwh] = model.non_heating_model.average_max_non_heating_day_kwh
     debug.merge!(degree_day_debug)
+    puts "Got here"
+    ap debug
     @feedback.merge!(debug)
     model
   end

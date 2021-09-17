@@ -14,6 +14,7 @@ class TargetSchool < MeterCollection
   ]
   NO_PARENT_METER = 'No parent meter for fuel type'
   NO_TARGET_SET   = 'No target set for fuel type'
+  FIRST_TARGET_DATE_IN_FUTURE = 'first target date set after last meter reading'
 
   attr_reader :unscaled_target_meters, :synthetic_target_meters
 
@@ -57,19 +58,29 @@ class TargetSchool < MeterCollection
 
   def calculate_target_meter(original_meter, fuel_type, calculation_type)
     debug "Calculating target meter of type #{fuel_type}".ljust(100, '-')
+
     if original_meter.nil?
       set_nil_meter_with_reason(fuel_type, NO_PARENT_METER)
     elsif !target_set?(original_meter)
       set_nil_meter_with_reason(fuel_type, NO_TARGET_SET)
+    elsif first_target_date(original_meter) > original_meter.amr_data.end_date
+      set_nil_meter_with_reason(fuel_type, FIRST_TARGET_DATE_IN_FUTURE)
     else
       begin
         target_meter = calculate_target_meter_data(original_meter, calculation_type)
         set_aggregate_meter(fuel_type, target_meter)
       rescue *POTENTIAL_EXPECTED_TARGET_METER_CREATION_ERRORS => e
-        set_nil_meter_with_reason(fuel_type, e)
+        set_nil_meter_with_reason(fuel_type, e.message.to_s + ' ' + e.class.name)
       end
     end
+    
     debug "Completed calculation of target meter of type #{fuel_type}".ljust(100, '-')
+  end
+
+  def first_target_date(meter)
+    return nil if meter.nil?
+    target = TargetAttributes.new(meter)
+    target.first_target_date
   end
 
   def set_nil_meter_with_reason(fuel_type, reason)

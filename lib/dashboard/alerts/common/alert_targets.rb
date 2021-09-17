@@ -15,8 +15,9 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def relevance
-    puts "#{self.class.name} relevant?"
-    (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
+    rel = TargetsService.analytics_relevant(aggregate_meter)
+    debug "#{self.class.name} relevance: #{rel}"
+    rel
   end
 
   def timescale
@@ -348,9 +349,7 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   private def calculate(asof_date)
-    puts "Got here alert calc: meter nil? #{@school.target_school.aggregate_meter(@fuel_type).nil?}"
     @summary = summary_text
-    
     @rating = calculate_rating_from_range(0.95, 1.05, rating_target_percent)
     set_savings_capital_costs_payback(potential_savings_range, nil)
   end

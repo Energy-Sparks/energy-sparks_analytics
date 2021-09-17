@@ -245,7 +245,7 @@ class AMRData < HalfHourlyData
           problems[bad_value].push(date) if one_day_kwh(date, type) == bad_value
         end
       else
-        problems[:missing] = date
+        problems[:missing].push(date)
       end
     end
     problems
