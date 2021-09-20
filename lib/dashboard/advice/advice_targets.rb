@@ -13,7 +13,7 @@ class AdviceTargets < AdviceBase
 
   def relevance
     rel = TargetsService.analytics_relevant(aggregate_meter)
-    debug "#{self.class.name} relevance: #{rel}"
+    # debug "#{self.class.name} relevance: #{rel}"
     rel
   end
 

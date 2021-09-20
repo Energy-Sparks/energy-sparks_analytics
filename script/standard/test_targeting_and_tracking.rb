@@ -2,7 +2,7 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
-FUEL_TYPES = %i[electricity gas  storage_heater]
+FUEL_TYPES = %i[gas  storage_heater]
 
 def example_manually_configured_scenarios
   [
@@ -35,7 +35,7 @@ end
 
 def example_central_case_scenario
   [
-    { fuel_types: FUEL_TYPES, target: 0.95 }
+    { fuel_types: FUEL_TYPES, target: 0.95, target_start_date: :front_end }
   ]
 end
 
@@ -54,6 +54,7 @@ def script(scenarios)
                               'twerton*',
                               'wootton*'
                             ], 
+                            schools:  ['st-jul*'],
     
     # ['cats*', 'marks*', 'mill*', 'penn*', 'stant*'],
 

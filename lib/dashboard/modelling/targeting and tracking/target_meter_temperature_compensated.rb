@@ -248,8 +248,6 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     debug[:temperature_compensation_non_heating_model] = model.non_heating_model.class.name
     debug[:temperature_compensation_non_heating_model_avgmax_kwh] = model.non_heating_model.average_max_non_heating_day_kwh
     debug.merge!(degree_day_debug)
-    puts "Got here"
-    ap debug
     @feedback.merge!(debug)
     model
   end

@@ -4,6 +4,7 @@ class TargetMeter < Dashboard::Meter
   class UnableToFindMatchingProfile < StandardError; end
   class UnableToCalculateTargetDates < StandardError; end
   class MissingGasEstimationAmrData < StandardError; end
+  MAX_MISSING_PROFILES_TO_IGNORE = 4
   include Logging
   attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter, :synthetic_meter
   def initialize(meter_to_clone, do_calculations = true)
@@ -34,7 +35,7 @@ class TargetMeter < Dashboard::Meter
         calculate_costs_for_meter
       }
       @feedback[:calculation_time] = bm
-      
+
       calc_text = "Calculated target meter #{mpan_mprn} #{fuel_type} in #{bm.round(3)} seconds"
       check_amr_data(amr_data, 'Completed calculations target data issues:')
       debug calc_text
@@ -70,6 +71,11 @@ class TargetMeter < Dashboard::Meter
 
   def self.enough_holidays?(meter)
     dates(meter).enough_holidays?
+  end
+
+  def max_profile_retries
+    retries = combined_meter_and_aggregate_attributes(:targeting_and_tracking_profiles_maximum_retries).uniq.first
+    @max_profile_retries ||= retries&.fetch(:number_of_retries, nil) || MAX_MISSING_PROFILES_TO_IGNORE
   end
 
   def target_degree_days(date)
@@ -169,13 +175,15 @@ class TargetMeter < Dashboard::Meter
   # sometimes the heating temperature compensation analysis is unable to find a matching
   # daily intrasday profile, if there aren't too many then substitute with dummy data
   def correct_missing_temperature_compensation_profiles(target_day_calculation_failed)
+    puts "Got here: correct_missing_temperature_compensation_profiles" * 5
     if @feedback.key?(:missing_profiles)
-      if @feedback[:missing_profiles].length.between?(1,4)
+puts "Got here with #{@feedback[:missing_profiles].length} missing profiles" * 6
+      if @feedback[:missing_profiles].length.between?(1, max_profile_retries)
         amr_data_to_be_corrected = [@amr_data, @non_scaled_target_meter.amr_data]
         create_dummy_profiles_for_limited_number_of_missing_dates(amr_data_to_be_corrected, @feedback[:missing_profiles], target_day_calculation_failed)
         @feedback[:corrected_missing_profiles] = @feedback[:missing_profiles] 
         @feedback.delete(:missing_profiles)
-      elsif @feedback[:missing_profiles].length > 4
+      elsif @feedback[:missing_profiles].length > max_profile_retries
         @feedback[:missing_profiles].map! { |data| TargetMeterTemperatureCompensatedDailyDayTypeBase.format_missing_profiles(data) }
       end
     end
@@ -183,8 +191,16 @@ class TargetMeter < Dashboard::Meter
 
   def check_for_multiple_errors_and_raise_exception(target_day_calculation_failed)
     raise MissingGasEstimationAmrData, @feedback[:missing_gas_estimation_amr_data] if @feedback.key?(:missing_gas_estimation_amr_data)
-    raise UnableToFindMatchingProfile, @feedback[:missing_profiles] if @feedback.key?(:missing_profiles)
+    raise UnableToFindMatchingProfile, structured_missing_profile_exception_data if @feedback.key?(:missing_profiles)
     raise UnableToCalculateTargetDates, target_day_calculation_failed unless target_day_calculation_failed.empty?
+  end
+
+  def structured_missing_profile_exception_data
+    {
+      number_of_missing_profiles:     @feedback[:missing_profiles].length,
+      limit_on_profiles_before_error: max_profile_retries,
+      missing_profiles:               @feedback[:missing_profiles]
+    }
   end
 
   def log_amr_data_stats(meter_to_clone)

@@ -78,7 +78,6 @@ class RunAdultDashboard < RunCharts
 
     advice = definition[:content_class].new(@school)
 
-    puts "Got here: run_one_page #{page} #{valid?(advice, page)}"
     return unless valid?(advice, page)
 
     advice.calculate
