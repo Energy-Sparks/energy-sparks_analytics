@@ -77,7 +77,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
 
     profiles_to_average = find_matching_profiles_with_retries(synthetic_date, target_date, target_temperature, heating_on, synthetic_amr_data)
 
-    @debug = true
+    @debug = false
 
     if profiles_to_average.empty?
       @feedback[:missing_profiles] ||= []
@@ -148,9 +148,15 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     profile_dates.map { |profile_date| amr_data.one_days_data_x48(profile_date) }
   end
 
-  def debug(message)
-    puts message if @debug && !Object.const_defined?('Rails')
-    logger.info message
+  def debug(var, ap: false)
+    logger.info var
+    if @debug && !Object.const_defined?('Rails')
+      if ap
+        ap var
+      else
+        puts var
+      end
+    end
   end
 
   def nearby_matching_days(synthetic_date, amr_data, day_type, matching_days)

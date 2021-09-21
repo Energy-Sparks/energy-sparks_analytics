@@ -2,7 +2,7 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
-FUEL_TYPES = %i[gas  storage_heater]
+FUEL_TYPES = %i[electricity gas  storage_heater]
 
 def example_manually_configured_scenarios
   [
@@ -44,19 +44,7 @@ def script(scenarios)
   {
     logger1:                { name: TestDirectoryConfiguration::LOG + "/test targeting and tracking %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
 
-    schools:                [
-                              'notting-hill-ealing-high-senior-sc*',
-                              'oxford-high-for-girls-prep*',
-                              'ralph*',
-                              'rogerst*',
-                              'st-jul*',
-                              'st-nic*',
-                              'twerton*',
-                              'wootton*'
-                            ], 
-                            schools:  ['st-jul*'],
-    
-    # ['cats*', 'marks*', 'mill*', 'penn*', 'stant*'],
+    schools:                ['*', 'bathxxxxxxampton*', 'bishop*'],
 
     source:                 :unvalidated_meter_data,
 

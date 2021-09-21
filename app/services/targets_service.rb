@@ -90,7 +90,7 @@ class TargetsService
   def valid?
     aggregate_meter.present? &&
     target_set? &&
-    recent_data? &&
+#    recent_data? &&
     enough_data_to_set_target? &&
     !target_meter.nil?
   end
@@ -145,7 +145,7 @@ class TargetsService
   end
 
   def self.analytics_relevant(meter)
-    rel = !meter.nil? && meter.target_set? && TargetMeter.recent_data?(meter)
+    rel = !meter.nil? && meter.target_set?
     rel ? :relevant : :never_relevant
   end
 

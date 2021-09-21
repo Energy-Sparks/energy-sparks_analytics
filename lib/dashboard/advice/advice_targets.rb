@@ -12,20 +12,16 @@ class AdviceTargets < AdviceBase
   end
 
   def relevance
-    rel = TargetsService.analytics_relevant(aggregate_meter)
-    # debug "#{self.class.name} relevance: #{rel}"
-    rel
+    TargetsService.analytics_relevant(aggregate_meter)
   end
 
   def calculate
-    debug "#{self.class.name} calculation:"
     if @school.target_school.aggregate_meter(@fuel_type).nil?
       debug "Target calculation failed for #{aggregate_meter.to_s}: #{@school.target_school.reason_for_nil_meter(@fuel_type)}"
       @calculation_worked = false
     else
       super
     end
-    debug "#{self.class.name} calculation complete"
   end
 
   def content(user_type: nil)

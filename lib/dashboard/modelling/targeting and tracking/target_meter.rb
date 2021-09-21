@@ -175,9 +175,7 @@ class TargetMeter < Dashboard::Meter
   # sometimes the heating temperature compensation analysis is unable to find a matching
   # daily intrasday profile, if there aren't too many then substitute with dummy data
   def correct_missing_temperature_compensation_profiles(target_day_calculation_failed)
-    puts "Got here: correct_missing_temperature_compensation_profiles" * 5
     if @feedback.key?(:missing_profiles)
-puts "Got here with #{@feedback[:missing_profiles].length} missing profiles" * 6
       if @feedback[:missing_profiles].length.between?(1, max_profile_retries)
         amr_data_to_be_corrected = [@amr_data, @non_scaled_target_meter.amr_data]
         create_dummy_profiles_for_limited_number_of_missing_dates(amr_data_to_be_corrected, @feedback[:missing_profiles], target_day_calculation_failed)
@@ -242,15 +240,21 @@ puts "Got here with #{@feedback[:missing_profiles].length} missing profiles" * 6
     @amr_data.set_accounting_tariff(self)
   end
 
-  def debug(var)
+  def debug(var, ap: false)
     logger.info var
-    puts var unless Object.const_defined?('Rails')
+    unless Object.const_defined?('Rails')
+      if ap
+        ap var
+      else
+        puts var
+      end
+    end
   end
 
   def check_amr_data(amr, text_type)
     unless amr.check_for_bad_values.values.all?(&:empty?)
       debug text_type
-      debug amr.check_for_bad_values
+      debug(amr.check_for_bad_values, ap: true)
       debug ''
     end
   end

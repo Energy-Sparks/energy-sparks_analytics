@@ -32,6 +32,8 @@ class TargetSchool < MeterCollection
     @synthetic_target_meters = {}
     @meter_nil_reason = {}
 
+    @debug = false
+
     calculate_target_meters(@original_school, calculation_type)
 
     @name += ': target'
@@ -107,7 +109,7 @@ class TargetSchool < MeterCollection
 
   def debug(var)
     logger.info var
-    puts var unless Object.const_defined?('Rails')
+    puts var if @debug && !Object.const_defined?('Rails')
   end
 end
 

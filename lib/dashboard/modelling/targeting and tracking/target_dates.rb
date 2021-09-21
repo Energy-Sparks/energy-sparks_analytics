@@ -90,7 +90,7 @@ class TargetDates
     if @target.target_set?
       days_benchmark_data > 364
     else
-      recent_data? && @original_meter.amr_data.days > 364
+      @original_meter.amr_data.days > 364
     end
   end
 
