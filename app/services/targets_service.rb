@@ -16,7 +16,6 @@ class TargetsService
       cumulative_performance: data_series(:cumulative_performance),
       monthly_performance_versus_synthetic_last_year: data_series(:monthly_performance_versus_last_year),
       cumulative_performance_versus_synthetic_last_year: data_series(:cumulative_performance_versus_last_year),
-
       partial_months: data_series(:partial_months)
     )
   end
@@ -26,7 +25,7 @@ class TargetsService
   #
   #We require at least a years worth of calendar data, as well as ~1 year of AMR data OR an estimate of their annual consumption
   def enough_data_to_set_target?
-    return enough_holidays? && enough_temperature_data? && (enough_readings_to_calculate_target? || enough_estimate_data_to_calculate_target? )
+    return !fuel_type_disabled? && enough_holidays? && enough_temperature_data? && (enough_readings_to_calculate_target? || enough_estimate_data_to_calculate_target? )
   end
 
   def enough_holidays?
@@ -42,20 +41,19 @@ class TargetsService
   #whether the data is currently lagging behind (see below). So checking for the
   #oldest data, not the most recent.
   def enough_readings_to_calculate_target?
-    # TODO(PH, 9Sep2021) talk to LD about .present? Railsism
-    return false unless aggregate_meter.present?
-    aggregate_meter.enough_amr_data_to_set_target?
+    return false if aggregate_meter.nil?
+    one_year_of_meter_readings_available_prior_to_1st_date?
   end
 
   #Is there enough data to produce an estimate of historical usage to calculate a target.
   #Checks if the estimate attribute needs to be, and is, set
   #Might also need some minimal readings
   def enough_estimate_data_to_calculate_target?
-    annual_kwh_estimate_required? && annual_kwh_estimate?
+    annual_kwh_estimate_required? && annual_kwh_estimate? && can_calculate_one_year_of_synthetic_data?
   end
 
   # one year of meter readings are required prior to the first target date
-  # in order to calculate a target for the following year in the abscence
+  # in order to calculate a target for the following year in the absence
   # of needing to calculate a full year of data synthetically using an 'annual kWh estimate'
   # however, a year after setting the target, the target_start date for calculaiton purposes
   # will incrementally move at 1 year behind the most recent meter reading date - at this point
@@ -88,7 +86,7 @@ class TargetsService
 
   #Not used by application currently
   def valid?
-    aggregate_meter.present? &&
+    !aggregate_meter.nil? &&
     target_set? &&
 #    recent_data? &&
     enough_data_to_set_target? &&
@@ -150,6 +148,10 @@ class TargetsService
   end
 
   private
+
+  def fuel_type_disabled?
+    ENV["FEATURE_FLAG_TARGETS_DISABLE_#{@fuel_type.to_s.upcase}"] == 'true'
+  end
 
   def data_headers
     data[:current_year_date_ranges].map { |r| r.first.strftime('%b') }
