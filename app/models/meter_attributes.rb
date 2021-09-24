@@ -232,6 +232,20 @@ class MeterAttributes
     )
   end
 
+  class TargetingAndTrackingProfilesMaximumRetries < MeterAttributeTypes::AttributeBase
+    id :targeting_and_tracking_profiles_maximum_retries
+    key :targeting_and_tracking_profiles_maximum_retries
+
+    name 'Targeting and tracking system profile substitution limit (temperature compensation)'
+    description 'Used to override targeting and tracking system maximum automatic nil profiles substituted in the event more are required - should only be added after review by an ebergy analyst'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        number_of_retries: MeterAttributeTypes::Integer.define(required: true)
+      }
+    )
+  end
+
   class HeatingNonHeatingDayFixedkWh < MeterAttributeTypes::AttributeBase
     id  :heating_non_heating_day_fixed_kwh_separation
     key :heating_non_heating_day_fixed_kwh_separation

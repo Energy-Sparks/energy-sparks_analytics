@@ -4,7 +4,6 @@ class AdviceBase < ContentBase
   attr_reader :summary
   def initialize(school)
     super(school)
-    # @user_type = user_type
     @failed_charts = []
   end
 
@@ -30,11 +29,11 @@ class AdviceBase < ContentBase
     promote_data if self.class.config.key?(:promoted_variables)
   end
 
-  # override alerts base class, ignore calculation_worked
+  # override alerts base class
   def make_available_to_users?
-    make_available = relevance == :relevant && enough_data == :enough && failed_charts_required.empty?
+    make_available = relevance == :relevant && enough_data == :enough && @calculation_worked && failed_charts_required.empty?
     unless make_available
-      message = "Alert #{self.class.name} not being made available to users: reason: #{relevance} #{enough_data} failed charts #{@failed_charts.length}"
+      message = "Analysis #{self.class.name} not being made available to users: reason: #{relevance} #{enough_data} calc: #{@calculation_worked} failed charts #{@failed_charts.length}"
       logger.info message
     end
     make_available

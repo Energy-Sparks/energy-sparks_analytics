@@ -6,6 +6,16 @@ require 'require_all'
 class TargetSchool < MeterCollection
   include Logging
 
+  POTENTIAL_EXPECTED_TARGET_METER_CREATION_ERRORS = [
+    TargetMeter::UnableToFindMatchingProfile,
+    TargetMeter::UnableToCalculateTargetDates,
+    TargetMeter::MissingGasEstimationAmrData,
+    EnergySparksNotEnoughDataException 
+  ]
+  NO_PARENT_METER = 'No parent meter for fuel type'
+  NO_TARGET_SET   = 'No target set for fuel type'
+  FIRST_TARGET_DATE_IN_FUTURE = 'first target date set after last meter reading'
+
   attr_reader :unscaled_target_meters, :synthetic_target_meters
 
   def initialize(school, calculation_type)
@@ -20,43 +30,86 @@ class TargetSchool < MeterCollection
     @original_school = school
     @unscaled_target_meters = {}
     @synthetic_target_meters = {}
+    @meter_nil_reason = {}
 
-    @aggregated_heat_meters         = set_target(school.aggregated_heat_meters,         calculation_type)
-    @aggregated_electricity_meters  = set_target(school.aggregated_electricity_meters,  calculation_type)
-    @storage_heater_meter           = set_target(school.storage_heater_meter,           calculation_type)
+    @debug = false
+
+    calculate_target_meters(@original_school, calculation_type)
 
     @name += ': target'
   end
 
-  private
-
-  def set_target(meter, calculation_type)
-    target_set?(meter) ? calculate_target(meter, calculation_type) : nil
+  def reason_for_nil_meter(fuel_type)
+    @meter_nil_reason[fuel_type]
   end
 
-  def calculate_target(meter, calculation_type)
+  private
+
+  def calculate_target_meters(original_school, calculation_type)
+    debug "Calculating all target meters for #{original_school.name}".ljust(140, '=')
+
+    bm = Benchmark.realtime {
+      %i[electricity gas storage_heater].each do |fuel_type|
+        original_meter = original_school.aggregate_meter(fuel_type)
+        calculate_target_meter(original_meter, fuel_type, calculation_type)
+      end
+    }
+
+    debug "Completed calculation of all target meters for #{original_school.name} in #{bm.round(3)} seconds".ljust(140, '=')
+  end
+
+  def calculate_target_meter(original_meter, fuel_type, calculation_type)
+    debug "Calculating target meter of type #{fuel_type}".ljust(100, '-')
+
+    if original_meter.nil?
+      set_nil_meter_with_reason(fuel_type, NO_PARENT_METER)
+    elsif !target_set?(original_meter)
+      set_nil_meter_with_reason(fuel_type, NO_TARGET_SET)
+    elsif first_target_date(original_meter) > original_meter.amr_data.end_date
+      set_nil_meter_with_reason(fuel_type, FIRST_TARGET_DATE_IN_FUTURE)
+    else
+      begin
+        target_meter = calculate_target_meter_data(original_meter, calculation_type)
+        set_aggregate_meter(fuel_type, target_meter)
+      rescue *POTENTIAL_EXPECTED_TARGET_METER_CREATION_ERRORS => e
+        set_nil_meter_with_reason(fuel_type, e.message.to_s + ' ' + e.class.name)
+      end
+    end
+    
+    debug "Completed calculation of target meter of type #{fuel_type}".ljust(100, '-')
+  end
+
+  def first_target_date(meter)
+    return nil if meter.nil?
+    target = TargetAttributes.new(meter)
+    target.first_target_date
+  end
+
+  def set_nil_meter_with_reason(fuel_type, reason)
+    reason_text = "Setting target meter of type #{fuel_type} calculation to nil because #{reason}"
+    debug reason_text
+    @meter_nil_reason[fuel_type] = reason
+    set_aggregate_meter(fuel_type, nil)
+  end
+
+  def set_target(meter, calculation_type)
+    target_set?(meter) ? calculate_target_meter(meter, calculation_type) : nil
+  end
+
+  def calculate_target_meter_data(meter, calculation_type)
     meter = TargetMeter.calculation_factory(calculation_type, meter)
     @unscaled_target_meters[meter.fuel_type] = meter.non_scaled_target_meter
     @synthetic_target_meters[meter.fuel_type] = meter.synthetic_meter
     meter
-  rescue TargetMeterTemperatureCompensatedDailyDayTypeBase::UnableToFindMatchingProfile, StandardError => e
-    # TODO(PH, 9Sep2021) - be a bit more selective over which errors captured
-    #                      depending on experience of what throws errors
-    logger.error "Target meter calculation failed for #{meter.fuel_type} #{meter.mpxn}"
-    logger.error e
-    logger.info  e.backtrace
-    unless Object.const_defined?('Rails')
-      puts '-' * 60
-      puts "Target meter calculation failed for #{meter.fuel_type} #{meter.mpxn}"
-      puts e
-      puts e.backtrace
-      puts '-' * 60
-    end
-    nil
   end
 
   def target_set?(meter)
     !meter.nil? && meter.target_set?
+  end
+
+  def debug(var)
+    logger.info var
+    puts var if @debug && !Object.const_defined?('Rails')
   end
 end
 

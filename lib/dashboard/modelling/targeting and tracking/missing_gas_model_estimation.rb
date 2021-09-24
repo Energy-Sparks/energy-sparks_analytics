@@ -36,6 +36,7 @@ class MissingGasModelEstimation < MissingGasEstimationBase
     }
 
     results[:feedback].merge!(model_description)
+    results[:feedback].merge!(@feedback) unless @feedback.nil?
 
     results
   end
@@ -120,13 +121,18 @@ class MissingGasModelEstimation < MissingGasEstimationBase
     profiles_by_model_type = {}
 
     date_range.each do |date|
-      # next unless one_year_amr_data.date_exists?(date)
+      if one_year_amr_data.date_exists?(date)
+        model_type = model.model_type?(date)
 
-      model_type = model.model_type?(date)
+        profiles_by_model_type[model_type] ||= []
 
-      profiles_by_model_type[model_type] ||= []
-
-      profiles_by_model_type[model_type].push(@amr_data.days_kwh_x48(date))
+        profiles_by_model_type[model_type].push(@amr_data.days_kwh_x48(date))
+      else
+        error = "Missing gas amr data: #{date.strftime("%a %d %b %Y")} #{@meter.fuel_type} #{@meter.mpxn}"
+        @feedback ||= {}
+        @feedback[:missing_gas_estimation_amr_data] ||= []
+        @feedback[:missing_gas_estimation_amr_data].push(error)
+      end
     end
 
     average_profiles = profiles_by_model_type.transform_values do |n_x_48|

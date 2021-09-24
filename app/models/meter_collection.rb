@@ -92,6 +92,19 @@ class MeterCollection
     end
   end
 
+  def set_aggregate_meter(fuel_type, meter)
+    case fuel_type
+    when :electricity
+      @aggregated_electricity_meters = meter
+    when :gas
+      @aggregated_heat_meters = meter
+    when :storage_heater, :storage_heaters
+      @storage_heater_meter = meter
+    when :solar_pv
+      @aggregated_electricity_meters.sub_meters[:generation] = meter
+    end
+  end
+
   def update_electricity_meters(electricity_meter_list)
     @electricity_meters = electricity_meter_list
   end

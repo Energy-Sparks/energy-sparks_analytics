@@ -26,6 +26,10 @@ class RunTargetingAndTracking < RunAdultDashboard
   def self.save_stats_to_csv(filename)
     puts "Saving results to #{filename}"
 
+    unless defined? @@all_stats
+      puts "No statistics to save"
+      return
+    end
     col_names = column_names(@@all_stats)
     index_names = index_stats_column_names
 
@@ -47,8 +51,6 @@ class RunTargetingAndTracking < RunAdultDashboard
     scenarios = control[:scenarios]
 
     annual_kwh_estimates = calculate_annual_kwh
-
-    ap annual_kwh_estimates
 
     scenarios.each do |scenario|
       @school.reset_target_school_for_testing
@@ -107,25 +109,26 @@ class RunTargetingAndTracking < RunAdultDashboard
   def configure_scenario(scenario, annual_kwh_estimates)
     deleted_amr_data = {}
 
-    scenario[:fuel_types].each do |fuel_type|
-      meter = @school.aggregate_meter(fuel_type)
+    meters = scenario[:fuel_types].map{ |fuel_type| @school.aggregate_meter(fuel_type)}.compact
 
-      next if meter.nil?
+    meters.each do |meter|
 
+      fuel_type = meter.fuel_type
+=begin
       unless TargetMeter.recent_data?(meter)
         puts "Skipping #{fuel_type} because data not recent"
         next
       end
-
+=end
       meter.reset_targeting_and_tracking_for_testing
 
-      deleted_amr_data[fuel_type]  = move_end_date(meter, scenario[:move_end_date])
+      deleted_amr_data[fuel_type] = move_end_date(meter, scenario[:move_end_date])
 
-      set_target(meter, scenario[:target_start_date], scenario[:target])
+      set_target(meter, scenario[:target_start_date], scenario[:target], meters)
 
       deleted_amr_data[fuel_type] += truncate_amr_data(meter, scenario[:truncate_amr_data])
 
-      set_kwh_estimate(meter, annual_kwh_estimates[fuel_type], scenario[:target_start_date])
+      set_kwh_estimate(meter, annual_kwh_estimates[fuel_type], scenario[:target_start_date], meters)
     end
 
     deleted_amr_data
@@ -140,14 +143,22 @@ class RunTargetingAndTracking < RunAdultDashboard
     end
   end
 
-  def start_date_target(meter, target_start_date)
+  def front_end_start_date(meters)
+    oldest_meter_date = meters.map{ |meter| meter.amr_data.end_date }.min
+    # TODO(PH, 20Sep2021) - doesn't obey all relevance/enough data rules so may include spurious meter
+    Date.new(oldest_meter_date.year, oldest_meter_date.month, 1)
+  end
+
+  def start_date_target(meter, target_start_date, meters)
     return meter.amr_data.end_date - 7 if target_start_date.nil?
+
+    return front_end_start_date(meters) if target_start_date == :front_end
 
     target_start_date.is_a?(Date) ? target_start_date : (meter.amr_data.end_date + target_start_date)
   end
 
-  def set_target(meter, target_start_date, target)
-    start_date = start_date_target(meter, target_start_date)
+  def set_target(meter, target_start_date, target, meters)
+    start_date = start_date_target(meter, target_start_date, meters)
 
     pseudo_meter_key = Dashboard::Meter.aggregate_pseudo_meter_attribute_key(meter.fuel_type)
 
@@ -165,12 +176,13 @@ class RunTargetingAndTracking < RunAdultDashboard
                                                 ]
                       }
 
+    puts "Setting target of #{target} on #{start_date} for #{meter.to_s}"
     pseudo_attributes = { pseudo_meter_key => new_attributes }
     @school.merge_additional_pseudo_meter_attributes(pseudo_attributes)
   end
 
-  def set_kwh_estimate(meter, annual_kwh_estimate, target_start_date)
-    start_date = start_date_target(meter, target_start_date)
+  def set_kwh_estimate(meter, annual_kwh_estimate, target_start_date, meters)
+    start_date = start_date_target(meter, target_start_date, meters)
 
     # don't set attribute if already enough data
     return if (start_date - meter.amr_data.start_date) > 365
@@ -194,9 +206,10 @@ class RunTargetingAndTracking < RunAdultDashboard
                                                       ]
                       }
 
+    puts "Incomplete year of historic data for #{meter.to_s} setting annual kwh meter attribute estimate to #{kwh.round(0)}"
     pseudo_attributes = { pseudo_meter_key => new_attributes }
     @school.merge_additional_pseudo_meter_attributes(pseudo_attributes)
-    meter.calculate_annual_kwh_estimate
+    # meter.calculate_annual_kwh_estimate
   end
 
   def calculate_apportioned_annual_estimate(meter, annual_kwh_estimate)
@@ -225,17 +238,15 @@ class RunTargetingAndTracking < RunAdultDashboard
 
     baseload_kw = meter.amr_data.average_baseload_kw_date_range(annual_kwh_estimate[:start_date], ed)
 
-    puts "Got here baseload #{baseload_kw}"
-
     annnual_degreedays = school.temperatures.degree_days_in_date_range(sd, ed, 20.0)
     meter_degreedays = school.temperatures.degree_days_in_date_range(annual_kwh_estimate[:start_date], ed, 20.0)
 
     model = electrical_solar_degreeday_model(school, meter, annual_kwh_estimate[:start_date], ed)
 
     annual_kwh = estimate_annual_electrical_kwh(meter, model, baseload_kw)
-    puts "Got here annual estimate = #{annual_kwh}"
     annual_kwh
   end
+
 
   def in_third_lockdown?(date, school)
     start_date, end_date = Covid3rdLockdownElectricityCorrection.determine_3rd_lockdown_dates(school.country)

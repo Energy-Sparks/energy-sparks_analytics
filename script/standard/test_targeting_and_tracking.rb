@@ -35,7 +35,7 @@ end
 
 def example_central_case_scenario
   [
-    { fuel_types: FUEL_TYPES, target: 0.95 }
+    { fuel_types: FUEL_TYPES, target: 0.95, target_start_date: :front_end }
   ]
 end
 
@@ -44,7 +44,7 @@ def script(scenarios)
   {
     logger1:                { name: TestDirectoryConfiguration::LOG + "/test targeting and tracking %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
 
-    schools:                ['*'],
+    schools:                ['*', 'bathxxxxxxampton*', 'bishop*'],
 
     source:                 :unvalidated_meter_data,
 

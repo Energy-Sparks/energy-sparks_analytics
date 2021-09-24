@@ -12,12 +12,16 @@ class AdviceTargets < AdviceBase
   end
 
   def relevance
-    rel =   !aggregate_meter.nil?
-    rel &&= TargetMeter.recent_data?(aggregate_meter)
-    rel &&= aggregate_meter.target_set?
-    rel &&= aggregate_meter.amr_data.end_date > (Date.today - MAX_DAYS_OUT_OF_DATE_FOR_TARGETS)
-    rel &&= !@school.target_school.aggregate_meter(@fuel_type).nil?
-    rel ? :relevant : :never_relevant
+    TargetsService.analytics_relevant(aggregate_meter)
+  end
+
+  def calculate
+    if @school.target_school.aggregate_meter(@fuel_type).nil?
+      debug "Target calculation failed for #{aggregate_meter.to_s}: #{@school.target_school.reason_for_nil_meter(@fuel_type)}"
+      @calculation_worked = false
+    else
+      super
+    end
   end
 
   def content(user_type: nil)

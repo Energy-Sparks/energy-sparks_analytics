@@ -38,7 +38,7 @@ class MissingGasDegreeDayEstimation < MissingGasEstimationBase
     school_day_profile_total_kwh = school_day_profile_x48.sum
 
     @target_dates.missing_date_range.each do |date|
-      next if @holidays.day_type(date) != :schoolday ||  one_year_amr_data.date_exists?(date)
+      next if @holidays.day_type(date) != :schoolday || one_year_amr_data.date_exists?(date)
 
       degree_days = @meter.meter_collection.temperatures.degree_days(date)
 

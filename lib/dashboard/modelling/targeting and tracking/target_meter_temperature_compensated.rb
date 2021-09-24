@@ -1,5 +1,4 @@
 class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayType
-  class UnableToFindMatchingProfile < StandardError; end
   DEGREEDAY_BASE_TEMPERATURE = 15.5
   RECOMMENDED_HEATING_ON_TEMPERATURE = 14.5
   WITHIN_TEMPERATURE_RANGE = 3.0
@@ -10,6 +9,10 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
       d_days += target_degree_days(date)
     end
     d_days / (d2 - d1 + 1)
+  end
+
+  def self.format_missing_profiles(d)
+    "Unable to find matching profile for on/at #{d[:target_day_type]} td: #{d[:target_date].strftime("%a %d %b %Y")} sd: #{d[:synthetic_date].strftime("%a %d %b %Y")} T = #{d[:target_temperature].round(1)} heating: #{d[:heating_on]}"
   end
 
   private
@@ -77,12 +80,11 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     @debug = false
 
     if profiles_to_average.empty?
+      @feedback[:missing_profiles] ||= []
       target_day_type = holidays.day_type(target_date)
-      error = "Unable to find matching profile for on/at #{target_day_type} td: #{target_date.strftime("%a %d %b %Y")} sd: #{synthetic_date.strftime("%a %d %b %Y")} T = #{target_temperature.round(1)} heating: #{heating_on}"
-
-      raise UnableToFindMatchingProfile, error if Object.const_defined?('Rails')
-
-      puts error
+      error = { target_day_type: target_day_type, target_date: target_date, synthetic_date: synthetic_date, target_temperature: target_temperature, heating: heating_on }
+      @feedback[:missing_profiles].push(error)
+      return {}
     end
 
     model = local_heating_model(synthetic_amr_data)
@@ -146,9 +148,15 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     profile_dates.map { |profile_date| amr_data.one_days_data_x48(profile_date) }
   end
 
-  def debug(message)
-    puts message if @debug && !Object.const_defined?('Rails')
-    logger.info message
+  def debug(var, ap: false)
+    logger.info var
+    if @debug && !Object.const_defined?('Rails')
+      if ap
+        ap var
+      else
+        puts var
+      end
+    end
   end
 
   def nearby_matching_days(synthetic_date, amr_data, day_type, matching_days)
@@ -243,6 +251,8 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     debug.transform_keys!{ |key| :"temperature_compensation_#{key}" }
     debug[:temperature_compensation_model] = model.class.name
     debug[:temperature_compensation_thermally_massive] = model.thermally_massive?
+    debug[:temperature_compensation_non_heating_model] = model.non_heating_model.class.name
+    debug[:temperature_compensation_non_heating_model_avgmax_kwh] = model.non_heating_model.average_max_non_heating_day_kwh
     debug.merge!(degree_day_debug)
     @feedback.merge!(debug)
     model

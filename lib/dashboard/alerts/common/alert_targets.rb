@@ -15,7 +15,7 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def relevance
-    (!aggregate_meter.nil? && aggregate_meter.target_set?) ? :relevant : :never_relevant
+    TargetsService.analytics_relevant(aggregate_meter)
   end
 
   def timescale
@@ -410,7 +410,6 @@ class AlertTargetBase < AlertAnalysisBase
     if start_date >= amr_data.start_date && end_date <= amr_data.end_date
       chosen_meter.amr_data.kwh_date_range(start_date, end_date, datatype)
     else
-      # TODO(PH, 11Aug2021) - resolve ambiguity of returned 'current year kwh' etc. - is this the target or actual
       Float::NAN
     end
   end

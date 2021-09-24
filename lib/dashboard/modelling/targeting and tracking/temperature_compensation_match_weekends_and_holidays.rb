@@ -31,7 +31,6 @@ class TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays < Ta
       # typically this should only occur on more obscure shorter holidays
       # e.g. May Day public holiday if the school's calendars are setup correctly
       logger.info "Unable to find matching holiday for #{target_date} in previous year"
-      puts "Unable to find matching holiday for #{target_date} in previous year"  unless Object.const_defined?('Rails')
       return false
     end
 

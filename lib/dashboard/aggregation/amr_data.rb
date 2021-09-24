@@ -235,6 +235,26 @@ class AMRData < HalfHourlyData
     return co2_one_day(date) if type == :co2
   end
 
+  def check_for_bad_values(sd: start_date, ed: end_date, type: :kwh)
+    problems = { missing: [], nan: [], infinite: [], nil: []}
+
+    (sd..ed).each do |date|
+      if date_exists?(date)
+        v = one_day_kwh(date, type)
+        if v.nil?
+          problems[:nil].push(date)
+        elsif v.nan?
+          problems[:nan].push(date)
+        elsif v.infinite?
+          problems[:infinite].push(date)
+        end
+      else
+        problems[:missing].push(date)
+      end
+    end
+    problems
+  end
+
   private def co2_one_day(date)
     co2 = @carbon_emissions.one_day_total(date)
     if @type == :solar_pv
