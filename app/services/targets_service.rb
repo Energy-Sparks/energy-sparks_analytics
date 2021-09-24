@@ -36,6 +36,10 @@ class TargetsService
     Holidays.check_school_holidays(@aggregate_school)
   end
 
+  def default_target_start_date
+    TargetDates.default_target_start_date(aggregate_meter)
+  end
+
   #Are there enough historical meter readings to calculate a target?
   #This should be checking whether there’s enough historical data, regardless of
   #whether the data is currently lagging behind (see below). So checking for the
