@@ -129,7 +129,6 @@ describe TargetsService do
       allow(ENV).to receive(:[]).with("FEATURE_FLAG_TARGETS_DISABLE_ELECTRICITY").and_return("false")
       expect(service.enough_data_to_set_target?).to be true
     end
-
   end
 
 end
