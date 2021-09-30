@@ -1,11 +1,11 @@
-class RefridgerationAnalysis
+class RefrigerationAnalysis
   def initialize(school)
     @school = school
     @amr_data = @school.aggregated_electricity_meters.amr_data
     @holidays = @school.holidays
   end
 
-  def attempt_to_detect_refridgeration_being_turned_off_over_summer_holidays(period, drop_criteria)
+  def attempt_to_detect_refrigeration_being_turned_off_over_summer_holidays(period, drop_criteria)
     weekend_baseloads, holiday_baseloads = weekend_versus_holiday_baseloads(period)
 
     holiday_average_baseload_kw = holiday_baseloads.sum / holiday_baseloads.length

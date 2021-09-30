@@ -47,7 +47,7 @@ class RunAlerts
     AlertStorageHeaterOutOfHours                  =>'StorageHOutOfHours',
     AlertStorageHeatersLongTermTrend              =>'StorageHLongTerm',
     AlertStorageHeaterThermostatic                =>'StorageHThermo',
-    AlertSummerHolidayRefridgerationAnalysis      =>'Fridge',
+    AlertSummerHolidayRefrigerationAnalysis      =>'Fridge',
     AlertElectricityTargetAnnual                  => 'ElectricTarget1yr',
     AlertGasTargetAnnual                          => 'GasTarget1yr',
     AlertElectricityTarget4Week                   => 'ElectricTarget4wk',
@@ -66,7 +66,7 @@ class RunAlerts
     AlertStorageHeaterOutOfHours                  => 'StorageHOutOfHours',
     AlertStorageHeatersLongTermTrend              => 'StorageHLongTerm',
     AlertStorageHeaterThermostatic                => 'StorageHThermo',
-    AlertSummerHolidayRefridgerationAnalysis      => 'Fridge'
+    AlertSummerHolidayRefrigerationAnalysis      => 'Fridge'
 =end
   RESULT_CALCULATION_METHOD_CALLS = {
     front_end_template_variables:   { on_class: true,   method: :front_end_template_variables, name: 'Front end template variables', args: nil, use_puts: false },

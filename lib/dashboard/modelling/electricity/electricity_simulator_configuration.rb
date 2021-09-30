@@ -76,11 +76,11 @@ class ElectricitySimulatorConfiguration
     },
     kitchen: {
       title: 'Kitchen',
-      editable:                 [:power, :start_time, :end_time, :average_refridgeration_power, :warming_oven_power, :warming_oven_start_time, :warming_oven_end_time],
+      editable:                 [:power, :start_time, :end_time, :average_refrigeration_power, :warming_oven_power, :warming_oven_start_time, :warming_oven_end_time],
       start_time:               TimeOfDay.new(8, 0),
       end_time:                 TimeOfDay.new(13, 0),
       power:                    3.0,
-      average_refridgeration_power: 0.4,
+      average_refrigeration_power: 0.4,
       warming_oven_power:          2.0,
       warming_oven_start_time:    TimeOfDay.new(11, 30),
       warming_oven_end_time:      TimeOfDay.new(13, 0)

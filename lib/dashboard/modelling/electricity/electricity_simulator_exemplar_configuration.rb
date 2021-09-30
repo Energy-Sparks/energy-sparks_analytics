@@ -21,7 +21,7 @@ class ElectricitySimulator
 
     config[:kitchen][:start_time] = TimeOfDay.new(11, 0)
     config[:kitchen][:end_time] = TimeOfDay.new(12, 30)
-    config[:kitchen][:average_refridgeration_power] = (250 + 250 + 350) / (365 * 24)
+    config[:kitchen][:average_refrigeration_power] = (250 + 250 + 350) / (365 * 24)
     config[:kitchen][:warming_oven_power] = 1.5
     config[:kitchen][:warming_oven_end_time] = TimeOfDay.new(12, 30)
 
