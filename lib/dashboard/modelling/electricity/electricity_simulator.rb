@@ -571,10 +571,10 @@ class ElectricitySimulator
         end
       end
     end
-    if @appliance_definitions[:kitchen].key?(:average_refridgeration_power)
+    if @appliance_definitions[:kitchen].key?(:average_refrigeration_power)
       (kitchen_data.start_date..kitchen_data.end_date).each do |date|
         (0..47).each do |half_hour_index|
-          kitchen_data.add_to_kwh(date, half_hour_index, @appliance_definitions[:kitchen][:average_refridgeration_power] / 2.0) # kW to kWh per 0.5 hour
+          kitchen_data.add_to_kwh(date, half_hour_index, @appliance_definitions[:kitchen][:average_refrigeration_power] / 2.0) # kW to kWh per 0.5 hour
         end
       end
     end

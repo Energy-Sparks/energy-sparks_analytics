@@ -474,7 +474,7 @@ class AlertAnalysisBase < ContentBase
       AlertGasLongTermTrend                         => 'gslt',
       AlertStorageHeatersLongTermTrend              => 'shlt',
       AlertOptimumStartAnalysis                     => 'opts',
-      AlertSummerHolidayRefridgerationAnalysis      => 'shol',
+      AlertSummerHolidayRefrigerationAnalysis      => 'free',
       AlertElectricityTargetAnnual                  => 'etga',
       AlertGasTargetAnnual                          => 'gtga',
       AlertElectricityTarget4Week                   => 'etg4',

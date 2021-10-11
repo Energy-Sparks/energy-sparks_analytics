@@ -1,7 +1,7 @@
 #======================== Heating coming on too early in morning ==============
 require_relative '../../gas/alert_gas_model_base.rb'
 
-class AlertSummerHolidayRefridgerationAnalysis < AlertElectricityOnlyBase
+class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
   MINIMUM_SUMMER_DROP_KW = 0.2
   RATING_BASED_ON_YEARS_DATA = 3
   SIGNIFICANT_£_DROP = 200
@@ -10,10 +10,11 @@ class AlertSummerHolidayRefridgerationAnalysis < AlertElectricityOnlyBase
   attr_reader :summer_holiday_analysis_table
   attr_reader :holiday_reduction_£, :annualised_reduction_£, :reduction_kw
   attr_reader :reduction_rating, :turn_off_rating
+  attr_reader :summary
 
   def initialize(school)
     super(school, :heatingcomingontooearly)
-    @fridge_analysis = RefridgerationAnalysis.new(@school) unless aggregate_meter.nil?
+    @fridge_analysis = RefrigerationAnalysis.new(@school) unless aggregate_meter.nil?
   end
 
   def self.template_variables
@@ -79,6 +80,10 @@ class AlertSummerHolidayRefridgerationAnalysis < AlertElectricityOnlyBase
       description: 'rating based on number of recent summers appliances has been turned off 10.0 = all, 0.0 = none',
       units:  :float,
       benchmark_code: 'trat'
+    },
+    summary: {
+      description: 'Annual benefit of reducing refrigeration costs',
+      units: String
     }
   }.freeze
 
@@ -106,12 +111,23 @@ class AlertSummerHolidayRefridgerationAnalysis < AlertElectricityOnlyBase
 
     @rating = [@turn_off_rating, @reduction_rating].min
 
+    @summary = summary_text
+
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url('HeatingComingOnTooEarly')
   end
   alias_method :analyse_private, :calculate
 
   private
+
+  def summary_text
+    if @annualised_reduction_£ > 0
+      'You have the potential to save ' +
+      FormatEnergyUnit.format(:£, @annualised_reduction_£, :text) + 'pa from more efficient refrigeration'
+    else
+      'Either you don\'t switch your firdges off over summer or they are very efficient'
+    end
+  end
 
   # difficulty to assign a range, if nothing changes then appliances
   # have not been turned off, if there are changes then it suggests
@@ -165,7 +181,7 @@ class AlertSummerHolidayRefridgerationAnalysis < AlertElectricityOnlyBase
   
   def summer_holiday_data
     @analysis_results ||= analysis_periods.map do |period_around_summer_holiday|
-      @fridge_analysis.attempt_to_detect_refridgeration_being_turned_off_over_summer_holidays(period_around_summer_holiday, -MINIMUM_SUMMER_DROP_KW)
+      @fridge_analysis.attempt_to_detect_refrigeration_being_turned_off_over_summer_holidays(period_around_summer_holiday, -MINIMUM_SUMMER_DROP_KW)
     end
   end
   
