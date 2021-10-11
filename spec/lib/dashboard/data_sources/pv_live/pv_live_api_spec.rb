@@ -60,7 +60,7 @@ describe DataSources::PVLiveAPI do
       it 'throws exception' do
         expect {
           client.gsp_list
-        }.to raise_error
+        }.to raise_error(DataSources::PVLiveAPI::ApiFailure)
       end
     end
     context 'with 404' do
@@ -70,7 +70,7 @@ describe DataSources::PVLiveAPI do
       it 'throws exception' do
         expect {
           client.gsp_list
-        }.to raise_error
+        }.to raise_error(DataSources::PVLiveAPI::ApiFailure)
       end
     end
   end

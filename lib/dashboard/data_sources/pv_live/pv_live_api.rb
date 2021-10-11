@@ -30,11 +30,13 @@ module DataSources
 
     def handle_response(response)
       raise ApiFailure.new(response.body) unless response.success?
-      body = JSON.parse(response.body, symbolize_names: true)
+      begin
+        body = JSON.parse(response.body, symbolize_names: true)
+      rescue => e
+        raise ApiFailure.new(response.body)
+      end
       raise ApiFailure.new(body[:error_description]) if body[:error_description]
       body
-    rescue => e
-      raise ApiFailure.new(response.body)
     end
 
     def date_to_url_format(date, start)
