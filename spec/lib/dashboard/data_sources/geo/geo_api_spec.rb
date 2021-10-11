@@ -27,16 +27,29 @@ describe MeterReadingsFeeds::GeoApi do
         token = MeterReadingsFeeds::GeoApi.new(username: username, password: password).login
         expect(token).to eq('abc123')
       end
+
+      context 'with error response' do
+
+        let(:status)      { 401 }
+
+        it "raises error" do
+          expect {
+            MeterReadingsFeeds::GeoApi.new(username: username, password: password).login
+          }.to raise_error(MeterReadingsFeeds::GeoApi::NotAuthorised)
+        end
+      end
+
     end
 
     context 'with missing credential' do
 
+      let(:username) { 'myUser' }
       let(:password) { '' }
 
       it "raises error" do
         expect {
           MeterReadingsFeeds::GeoApi.new(username: username, password: password).login
-        }.to raise_error
+        }.to raise_error(MeterReadingsFeeds::GeoApi::ApiFailure)
       end
     end
   end
