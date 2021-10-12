@@ -45,7 +45,7 @@ class DownloadSheffieldSolarPVData
 
     file.backup
 
-    pv_interface = SheffieldSolarPVV2.new
+    pv_interface = DataSources::PVLiveService.new
 
     nearest = pv_interface.find_nearest_areas(latitude, longitude)
 
