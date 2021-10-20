@@ -26,7 +26,7 @@ end
 require_rel '../app/**/*.rb'
 
 # load all ruby files in the directory "lib" and its subdirectories
-require_rel '../lib/dashboard/charting_and_reports/interpret_chart.rb'
+# require_rel '../lib/dashboard/charting_and_reports/interpret_chart.rb'
 require_rel '../lib/dashboard/**/*.rb'
 
 # From gems
