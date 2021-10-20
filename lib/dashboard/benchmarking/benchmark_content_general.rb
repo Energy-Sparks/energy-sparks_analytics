@@ -1,4 +1,5 @@
 require_relative './benchmark_no_text_mixin.rb'
+require_relative './benchmark_content_base.rb'
 module Benchmarking
   CAVEAT_TEXT = {
     es_doesnt_have_all_meter_data: %q(
@@ -228,6 +229,53 @@ module Benchmarking
           annual electricity costs of &pound;1,100.
         </p>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+  #=======================================================================================
+  class BenchmarkRefrigeration < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    def self.intro
+      text = %q(
+        <p>
+          This benchmark looks at any overnight reduction in electricity consumption
+          during the last summer holidays and assumes this is mainly from refrigeration
+          being turned off, using this information to assess the efficiency of schools&apos
+          refrigeration.
+        </p>
+        <p>
+          The analysis is experimental and can create false positives.
+          If no impact is detected either the school didn&apos;t
+          turn their fridges and freezers off during the summer holidays
+          or they are very efficient with very little reduction.
+        </p>
+        <p>
+          If a potential saving is identified then
+          <a href="https://www.amazon.co.uk/electricity-usage-monitor/s?k=electricity+usage+monitor"  target="_blank">appliance monitors</a>
+          can be used to determine which fridge or freezer is most inefficient and would be economic to replace
+          (please see the case study on Energy Sparks homepage
+            <a href="https://energysparks.uk/case-studies"  target="_blank">here</a>
+          ).
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+
+    private def introduction_text
+      BenchmarkRefrigeration.intro
+    end
+  end
+  #=======================================================================================
+  class BenchmarkElectricityTarget < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = %q(
+        <p>
+          How school is progressing versus the target it has set for this year.
+        </p>
       )
       ERB.new(text).result(binding)
     end

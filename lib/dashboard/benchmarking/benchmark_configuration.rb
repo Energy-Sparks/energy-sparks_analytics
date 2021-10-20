@@ -98,6 +98,8 @@ module Benchmarking
           summer_holiday_electricity_analysis
           electricity_peak_kw_per_pupil
           solar_pv_benefit_estimate
+          refrigeration
+          electricity_targets
           change_in_electricity_consumption_recent_school_weeks
           change_in_electricity_holiday_consumption_previous_holiday
           change_in_electricity_holiday_consumption_previous_years_holiday
@@ -291,6 +293,34 @@ module Benchmarking
           { data: ->{ elba_£lyr_last_year },  name: 'Annual electricity £ (last year)', units: :£}
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
+        type: %i[chart table]
+      },
+      refrigeration: {
+        benchmark_class:  BenchmarkRefrigeration,
+        name:     'Annual cost of running refrigeration',
+        columns:  [
+          { data:   'addp_name',    name: 'School name', units: String, chart_data: true, content_class: AdviceElectricityAnnual },
+          { data: ->{ free_ann£ },  name: 'Estimate of annual refrigeration cost', units: :£, chart_data: true },
+          { data: ->{ free_hol£ },  name: 'Saving over summer holiday', units: :£, chart_data: true },
+          { data: ->{ -1.0 * free_kwrd },  name: 'Reduction in kW over summer holiday', units: :kw},
+        ],
+        sort_by:  [1], # column 1 i.e. annual refrigeration costs
+        type: %i[chart table]
+      },
+      electricity_targets: {
+        benchmark_class:  BenchmarkElectricityTarget,
+        name:     'Progress versus electricity target',
+        columns:  [
+          { data:   'addp_name',    name: 'School name', units: String, chart_data: true, content_class: AdviceElectricityAnnual },
+          { data: ->{ etga_tptd },  name: 'Percent above or below target since target set', units: :relative_percent, chart_data: true },
+          { data: ->{ etga_aptd },  name: 'Percent above or below last year',  units: :relative_percent},
+          { data: ->{ etga_cktd },  name: 'kWh consumption since target set',  units: :kwh},
+          { data: ->{ etga_tktd },  name: 'target kWh consumption',            units: :kwh},
+          { data: ->{ etga_uktd },  name: 'last year kWh consumption',         units: :kwh},
+          { data: ->{ etga_trsd },  name: 'start date for target',             units: :date},
+          
+        ],
+        sort_by:  [1], # column 1 i.e. annual refrigeration costs
         type: %i[chart table]
       },
       annual_electricity_out_of_hours_use: {

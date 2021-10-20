@@ -3,6 +3,9 @@ module MeterReadingsFeeds
     include Logging
 
     class ApiFailure < StandardError; end
+    class NotFound < StandardError; end
+    class NotAllowed < StandardError; end
+    class NotAuthorised < StandardError; end
 
     BASE_URL = 'https://api.geotogether.com/api'
 
@@ -96,10 +99,12 @@ module MeterReadingsFeeds
       raise NotAllowed.new(error_message(response)) if response.status == 403
       raise NotFound.new(error_message(response)) if response.status == 404
       raise ApiFailure.new(error_message(response)) unless response.success?
-      JSON.parse(response.body)
-    rescue => e
-      #problem parsing or traversing json, return original body
-      response.body
+      begin
+        JSON.parse(response.body)
+      rescue => e
+        #problem parsing or traversing json, return original body
+        response.body
+      end
     end
 
     def error_message(response)
@@ -117,11 +122,11 @@ module MeterReadingsFeeds
     end
 
     def check_credentials
-      raise ApiFailure('Username and password, or token must be set') if @username.blank? || @password.blank?
+      raise ApiFailure.new('Username and password, or token must be set') if @username.blank? || @password.blank?
     end
 
     def check_token
-      raise ApiFailure('token must be set') if @token.blank?
+      raise ApiFailure.new('token must be set') if @token.blank?
     end
 
     def utc_date(date)

@@ -62,7 +62,9 @@ class AlertTargetBase < AlertAnalysisBase
         units:  :£
       },
       current_year_kwh: {
+        # used by analysis pages
         description: 'Current year year to date kwh',
+        benchmark_code:   'cktd',
         units:  :kwh
       },
       current_year_co2: {
@@ -70,11 +72,14 @@ class AlertTargetBase < AlertAnalysisBase
         units:  :co2
       },
       current_year_£: {
+        # used by analysis pages
         description: 'Current year year to date £cost',
+        benchmark_code:   'c£td',
         units:  :£
       },
       current_year_target_kwh: {
         description: 'Current year target kwh',
+        benchmark_code:   'tktd',
         units:  :kwh
       },
       current_year_target_co2: {
@@ -83,10 +88,17 @@ class AlertTargetBase < AlertAnalysisBase
       },
       current_year_target_£: {
         description: 'Current year target £cost',
+        benchmark_code:   't£td',
         units:  :£
       },
       current_year_target_kwh_to_date: {
+        # used by analysis pages
         description: 'Current year target kwh - up until the latest meter reading',
+        units:  :kwh
+      },
+      unscaled_target_kwh_to_date: {
+        description: 'Current year target kwh - up until the latest meter reading',
+        benchmark_code:   'uktd',
         units:  :kwh
       },
       current_year_target_co2_to_date: {
@@ -94,6 +106,7 @@ class AlertTargetBase < AlertAnalysisBase
         units:  :co2
       },
       current_year_target_£_to_date: {
+        # used by analysis pages
         description: 'Current year target £cost - up until the latest meter reading',
         units:  :£
       },
@@ -109,7 +122,16 @@ class AlertTargetBase < AlertAnalysisBase
         description: 'percent of target this year to date e.g. 95% (kWh)',
         units:  :percent
       },
-
+      current_year_percent_of_target_relative: {
+        description: 'percent of target this year to date e.g. -2.6% => 2.6% below target',
+        benchmark_code:   'tptd',
+        units:  :relative_percent
+      },
+      current_year_unscaled_percent_of_target_relative: {
+        description: 'percent of unscaled target this year to date e.g. -2.6% => 2.6% below target',
+        benchmark_code:   'aptd',
+        units:  :relative_percent
+      },
       last_4_weeks_start_date: {
         description: 'Start of current 4 weeks',
         units:  :date
@@ -152,6 +174,7 @@ class AlertTargetBase < AlertAnalysisBase
       },
       last_4_weeks_percent_of_target: {
         description: 'percent of target last 4 weeks e.g. 95% (kWh)',
+        benchmark_code:   '4wkp',
         units:  :percent
       },
 
@@ -189,6 +212,7 @@ class AlertTargetBase < AlertAnalysisBase
       },
       last_week_percent_of_target: {
         description: 'percent of target last week e.g. 95% (kWh)',
+        benchmark_code:   '1wkp',
         units:  :percent
       },
 
@@ -198,11 +222,20 @@ class AlertTargetBase < AlertAnalysisBase
       },
       current_target_relative_percent_reduction: {
         description: 'current relative target today e.g. 5% (= 95%)',
-        units:  :percent
+        units:  :relative_percent
       },
       average_target_to_date_percent: {
         description: 'weighted average target to date',
         units:  :percent
+      },
+      tracking_start_date: {
+        description: 'start date for targeting and tracking',
+        benchmark_code:   'trsd',
+        units:  :date
+      },
+      average_target_to_date_relative_percent: {
+        description: 'weighted average target to date - relative, e.g. -5%',
+        units:  :relative_percent
       },
       target_table: {
         description: 'Table of targets (Date, Percent)',
@@ -271,7 +304,26 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def current_year_percent_of_target
-    percent(current_year_target_kwh_to_date, current_year_target_kwh)
+    percent(current_year_target_kwh_to_date, current_year_kwh)
+  end
+
+  def current_year_percent_of_target_relative
+    current_year_percent_of_target - 1.0
+  end
+
+  def unscaled_target_kwh_to_date
+    unscaled_target_kwh_to_date ||= unscaled_target_to_date(:kwh)
+  end
+
+  def unscaled_target_to_date(datatype = :kwh)
+    unscaled_target_total(tracking_start_date, tracking_end_date, datatype)
+  end
+
+  def current_year_unscaled_percent_of_target_relative(datatype = :kwh)
+    unscaled = unscaled_target_to_date(datatype)
+    actual = current_year_total(datatype)
+    pct = percent(unscaled, actual)
+    pct - 1.0
   end
 
   def last_4_weeks_kwh;         @last_4_weeks_kwh ||= last_4_weeks_total(:kwh) end
@@ -324,6 +376,10 @@ class AlertTargetBase < AlertAnalysisBase
 
   def average_target_to_date_percent
     aggregate_target_meter.target.average_target(tracking_start_date, maximum_alert_date)
+  end
+
+  def average_target_to_date_relative_percent
+    average_target_to_date_percent - 1.0
   end
 
   def aggregate_meter_end_date
@@ -405,6 +461,15 @@ class AlertTargetBase < AlertAnalysisBase
 
   def total(use_target, start_date, end_date, datatype)
     chosen_meter = use_target ? aggregate_target_meter : @school.aggregate_meter(fuel_type)
+    meter_total(chosen_meter, start_date, end_date, datatype)
+  end
+
+  def unscaled_target_total(start_date, end_date, datatype)
+    meter = aggregate_target_meter.non_scaled_target_meter
+    meter_total(meter, start_date, end_date, datatype)
+  end
+
+  def meter_total(chosen_meter, start_date, end_date, datatype)
     end_date = [end_date, aggregate_meter_end_date].min
     amr_data = chosen_meter.amr_data
     if start_date >= amr_data.start_date && end_date <= amr_data.end_date
