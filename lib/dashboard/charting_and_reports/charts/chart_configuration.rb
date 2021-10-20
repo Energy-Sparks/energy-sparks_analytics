@@ -1,6 +1,6 @@
 require_relative './series_data_manager.rb'
 require_relative './chart_dynamic_x_axis.rb'
-require_relative '../modelling/solar/solar_pv_panels.rb'
+require_relative '../../modelling/solar/solar_pv_panels.rb'
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
