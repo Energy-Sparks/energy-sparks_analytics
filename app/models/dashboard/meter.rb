@@ -294,6 +294,10 @@ module Dashboard
       name.present? ? "#{meter_no} (#{name})" : display_meter_number
     end
 
+    def analytics_name
+      name.present? ? "#{name} (#{mpxn})" : mpxn.to_s
+    end
+
     def display_meter_number
       meter_no.present? ? meter_no : mpan_mprn.to_s
     end

@@ -75,15 +75,10 @@ class AdviceMeterBreakdownBase < AdviceBase
   end
 
   def table_breakdown_html
-    kwh_per_meter = breakdown_chart[:x_data].map { |meter_name, kwhs| [meter_name, kwhs.sum] }.to_h
-    total = kwh_per_meter.values.sum
-    rows = kwh_per_meter.map { |meter_name, kwh| [meter_name, kwh, kwh / total ] }
-    rows.sort! { |a, b| (a[2] + b[2]).nan? ? a[1] <=> b[1] : a[2] <=> b[2]}
-    total_row = ['Total', total, 1.0]
-    header = ['Meter Name', 'Kwh', 'Percent']
-    row_units = [String, :kwh, :percent]
-    html_table = HtmlTableFormatting.new(header, rows, total_row, row_units)
-    '<p> ' + html_table.html + ' </p>'
+    start_date, end_date = one_year_start_end_dates
+    puts "Got here #{start_date} #{end_date}"
+    table = MeterBreakdownTable.new(underlying_meters, start_date, end_date)
+    '<p> ' + table.formatted_html + ' </p>'
   end
 
   def table_comments
@@ -95,5 +90,94 @@ class AdviceMeterBreakdownBase < AdviceBase
       <p>
     }
     ERB.new(text).result(binding)
+  end
+
+  def one_year_start_end_dates
+    [
+      breakdown_chart[:x_axis_ranges].first.first,
+      breakdown_chart[:x_axis_ranges].last.last,
+    ]
+  end
+
+  class MeterBreakdownTable
+    def initialize(underlying_meters, start_date, end_date)
+      @underlying_meters = underlying_meters
+      @start_date        = start_date
+      @end_date          = end_date
+    end
+
+    def formatted_html
+      rows      = raw_table_data
+      total     = total_row(rows)
+      header    = columns.values.map{ |v| v[:name] }
+      row_units = columns.values.map{ |v| v[:datatype] }
+
+      html_table = HtmlTableFormatting.new(header, rows_to_values(rows), row_to_value(total), row_units)
+      html_table.html
+    end
+
+    private
+
+    def columns
+      {
+        name:     { name: 'Meter Name', datatype: String },
+        kwh:      { name: 'Kwh',        datatype: :kwh }, 
+        £:        { name: 'Cost',       datatype: :£ },
+        percent:  { name: 'Percent',    datatype: :percent },
+      }
+    end
+
+    def raw_table_data
+      raw_data = calculate_meter_breakdown
+      add_percent_kwh_to_table(raw_data)
+    end
+
+    def rows_to_values(rows)
+      rows.map do |row|
+        row_to_value(row)
+      end
+    end
+
+    def row_to_value(row)
+      columns.keys.map{ |dt| row[dt] }
+    end
+
+    def add_percent_kwh_to_table(table)
+      # map then sum to avoid statsample bug
+      total_kwh = table.map{ |v| v[:kwh] }.sum
+      with_percent = table.map{ |v| v.merge({percent: v[:kwh] / total_kwh})}
+      with_percent.sort { |a, b| (a[:percent] + b[:percent]).nan? ? a[:name] <=> b[:name] : a[:percent] <=> b[:percent]}
+    end
+
+    def data_column_types
+      columns.keys.select { |k| k != :name }
+    end
+  
+    def total_row(table)
+      data = data_column_types.map do |datatype|
+        [
+          datatype,
+          # map then sum to avoid statsample bug
+          table.map{ |r| r[datatype] }.sum
+        ]
+      end.to_h
+      {name: 'Total'}.merge(data)
+    end
+  
+    def calculate_meter_breakdown  
+      @underlying_meters.map do |meter|
+        start_date = [@start_date, meter.amr_data.start_date].max
+        end_date   = [@end_date,   meter.amr_data.end_date  ].min
+        if end_date < start_date
+          nil # 'retired' meter before aggregate start date
+        else
+          {
+            name: meter.analytics_name,
+            kwh:  meter.amr_data.kwh_date_range(start_date, end_date, :kwh),
+            £:    meter.amr_data.kwh_date_range(start_date, end_date, :£)
+          }
+        end
+      end.compact
+    end
   end
 end
