@@ -210,7 +210,7 @@ module Benchmarking
           { data: ->{ enba_kea }, name: 'Electricity consumption kWh (year before joined Energy Sparks)', units: :kwh },
           { data: ->{ enba_ke0 }, name: 'Electricity consumption kWh (last year)',                        units: :kwh },
           { data: ->{ enba_keap}, name: 'Change in electricity consumption (excluding solar)',            units: :relative_percent_0dp, chart_data: true },
-          
+
           { data: ->{ enba_kga }, name: 'Gas consumption kWh (year before joined)',               units: :kwh },
           { data: ->{ enba_kg0 }, name: 'Gas consumption kWh (last year)',                        units: :kwh },
           { data: ->{ enba_kgap}, name: 'Change in gas consumption',                              units: :relative_percent_0dp, chart_data: true },
@@ -218,11 +218,11 @@ module Benchmarking
           { data: ->{ enba_kha }, name: 'Storage heater consumption kWh (year before joined)', units: :kwh },
           { data: ->{ enba_kh0 }, name: 'Storage heater consumption kWh (last year)',          units: :kwh },
           { data: ->{ enba_khap}, name: 'Change in storage heater consumption',                units: :relative_percent_0dp, chart_data: true },
-          
+
           { data: ->{ enba_ksa }, name: 'Solar PV production kWh (year before joined)', units: :kwh },
           { data: ->{ enba_ks0 }, name: 'Solar PV production kWh (last year)',          units: :kwh },
           { data: ->{ enba_ksap}, name: 'Change in solar PV production',                units: :relative_percent_0dp, chart_data: true },
-          
+
           { data: ->{ enba_kxap },  name: 'Change in annual energy use since joined Energy Sparks', units: :relative_percent_0dp, y2_axis: true }
         ],
         sort_by:  [13],
@@ -252,11 +252,11 @@ module Benchmarking
           { data: ->{ enba_cen }, name: 'Electricity CO2 (previous year)',                    units: :co2 },
           { data: ->{ enba_ce0 }, name: 'Electricity CO2 (last year)',                        units: :co2 },
           { data: ->{ enba_cenp}, name: 'Change in annual electricity CO2 (excluding solar)', units: :relative_percent_0dp, chart_data: true },
-          
+
           { data: ->{ enba_cgn },  name: 'Gas CO2 (previous year)',   units: :co2 },
           { data: ->{ enba_cg0 },  name: 'Gas CO2 (last year)',       units: :co2 },
           { data: ->{ enba_cgnp},  name: 'Change in annual gas CO2',  units: :relative_percent_0dp, chart_data: true },
-          
+
           { data: ->{ enba_chn },  name: 'Storage Heater CO2 (previous year)',  units: :co2 },
           { data: ->{ enba_ch0 },  name: 'Storage Heater CO2 (last year)',      units: :co2 },
           { data: ->{ enba_chnp},  name: 'Change in annual storage heater CO2', units: :relative_percent_0dp, chart_data: true },
@@ -264,7 +264,7 @@ module Benchmarking
           { data: ->{ enba_csn },  name: 'Solar PV CO2 (previous year)',  units: :co2 },
           { data: ->{ enba_cs0 },  name: 'Solar PV CO2 (last year)',      units: :co2 },
           { data: ->{ enba_csnp},  name: 'Change in annual solar PV CO2', units: :relative_percent_0dp, chart_data: true },
-          
+
           { data: ->{ enba_cxnp},  name: 'Overall change', units: :relative_percent_0dp, y2_axis: true },
         ],
         sort_by:  [13],
@@ -304,6 +304,7 @@ module Benchmarking
           { data: ->{ free_hol£ },  name: 'Saving over summer holiday', units: :£, chart_data: true },
           { data: ->{ -1.0 * free_kwrd },  name: 'Reduction in kW over summer holiday', units: :kw},
         ],
+        analytics_user_type: true,
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
         type: %i[chart table]
       },
@@ -318,7 +319,7 @@ module Benchmarking
           { data: ->{ etga_tktd },  name: 'target kWh consumption',            units: :kwh},
           { data: ->{ etga_uktd },  name: 'last year kWh consumption',         units: :kwh},
           { data: ->{ etga_trsd },  name: 'start date for target',             units: :date},
-          
+
         ],
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
         type: %i[chart table]
