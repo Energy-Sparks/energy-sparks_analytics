@@ -4,7 +4,7 @@ require 'json'
 require 'amazing_print'
 require 'date'
 require 'csv'
-require_relative '../lib/dashboard/data_sources/solar_edge.rb'
+require_relative '../../lib/dashboard/data_sources/metering/solar edge/solar_edge.rb'
 
 def default_config
   {
@@ -20,10 +20,11 @@ end
 
 def parse_command_line(config)
   args = ARGV.clone
+  ap args
   while !args.empty?
     if args[0] == '-startdate' && args.length >= 2
       config[:start_date] = Date.parse(args[1])
-      args.shift(2)  
+      args.shift(2)
     elsif args[0] == '-enddate' && args.length >= 2
       config[:end_date] = Date.parse(args[1])
       args.shift(2)
@@ -87,17 +88,60 @@ def save_readings_to_csv(readings, filename, mpan)
   end
 end
 
-config = parse_command_line(default_config)
+def process_on_meter_set(config)
+  puts "=" * 80
+  puts "Config:"
+  ap config
+  solar_edge = SolarEdgeSolarPV.new(config[:api_key])
 
-solar_edge = SolarEdgeSolarPV.new(config[:api_key])
+  puts "Site details:"
+  if config[:site_id]
+    ap solar_edge.print_site_details
+  else
+    puts "No site details"
+  end
 
-solar_edge.print_site_details if config[:site_details]
+  readings = solar_edge.smart_meter_data(config[:site_id], config[:start_date], config[:end_date])
 
-readings = solar_edge.smart_meter_data(config[:site_id], config[:start_date], config[:end_date])
+  save_readings_to_csv(readings, config[:csv_filename], config[:mpan])
 
-save_readings_to_csv(readings, config[:csv_filename], config[:mpan])
-
-puts "Missing readings:"
-readings.values.each do |data|
-  ap data[:missing_readings] unless data[:missing_readings].empty?
+  puts "Missing readings:"
+  readings.values.each do |data|
+    ap data[:missing_readings] unless data[:missing_readings].empty?
+  end
+rescue => e
+  puts "Download failed"
+  puts e.message
+  puts e.backtrace
 end
+
+def process_file(filename)
+  puts "Processing config file #{filename}"
+  configs = CSV.read(filename)
+  configs.each do |config|
+    c = {
+      csv_filename: "Results/#{config[0]} solar edge.csv",
+      api_key:      config[1],
+      site_id:      config[2].nil? ? nil: config[2].to_i,
+      start_date:   config[3].nil? ? nil : Date.parse(config[3]),
+      end_date:     Date.today - 1,
+      mpan:         config[4].nil? ? nil: config[4].to_i,
+    }
+    process_on_meter_set(c)
+  end
+end
+
+def bulk_process(args)
+  ap args
+  index = args.index('-configfile')
+  process_file(args[index+1])
+end
+
+if ARGV.include?('-configfile')
+  bulk_process(ARGV)
+else
+  config = parse_command_line(default_config)
+  process_on_meter_set(config)
+end
+
+
