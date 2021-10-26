@@ -457,6 +457,11 @@ class MeterCollection
     @target_school[type] ||= TargetSchool.new(self, type)
   end
 
+  def benchmark_school(benchmark_type = :benchmark)
+    benchmark_school ||= {}
+    benchmark_school[benchmark_type] ||= BenchmarkSchool.new(self, benchmark_type: benchmark_type)
+  end
+
   def reset_target_school_for_testing(type = :day)
     puts "Resetting target school #{name}"
     @target_school.delete(type) unless @target_school.nil?

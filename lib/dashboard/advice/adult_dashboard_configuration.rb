@@ -82,6 +82,12 @@ class DashboardConfiguration
         electricity_longterm_trend
         group_by_week_electricity_unlimited
         electricity_by_month_year_0_1
+        group_by_week_electricity_versus_benchmark
+        group_by_week_electricity_versus_benchmark_line
+        group_by_week_electricity_versus_benchmark_line_on_y2
+        electricity_by_day_of_week_tolerant_versus_benchmarks
+        baseload_versus_benchmarks
+        intraday_line_school_days_reduced_data_versus_benchmarks
       ],
       skip_chart_and_advice_if_fails: %i[electricity_by_month_year_0_1],
       promoted_variables: {

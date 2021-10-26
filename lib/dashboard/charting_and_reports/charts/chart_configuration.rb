@@ -4,6 +4,14 @@ require_relative '../../modelling/solar/solar_pv_panels.rb'
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
+  def self.standard_series_label_substitution(type, school_type)
+    [
+      ["#{type}:<school_name>", school_type], 
+      ["#{type}:benchmark",     'benchmark'],
+      ["#{type}:exemplar",      'exemplar']
+    ]
+  end
+
   STANDARD_CHART_CONFIGURATION = {
     #
     # chart confif parameters:
@@ -211,6 +219,51 @@ class ChartManager
       name:           :targeting_and_tracking_weekly_electricity_one_year_column.to_s,
       target:             {calculation_type: :day, extend_chart_into_future: true},
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_column
+    },
+
+    # ============================================================================================
+    group_by_week_electricity_versus_benchmark: {
+      name:                 'By Week: Electricity - compared with benchmark',
+      chart1_type:          :line,
+      series_breakdown:     :none,
+      meter_definition:     :allelectricity,
+      x_axis:               :week,
+      yaxis_units:          :kwh,
+      yaxis_scaling:        :none,
+      timescale:            :year,
+      benchmark:            { calculation_types: %i[benchmark exemplar], config: { series_breakdown: :none } },
+      replace_series_label: standard_series_label_substitution('Energy', 'school')
+    },
+    group_by_week_electricity_versus_benchmark_line: {
+      inherits_from: :group_by_week_electricity_versus_benchmark,
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      series_breakdown: :daytype,
+      change_series_chart_configuration:  { series_names: ['benchmark', 'exemplar'], chart1_type: :line }
+    },
+    group_by_week_electricity_versus_benchmark_line_on_y2: {
+      inherits_from: :group_by_week_electricity_versus_benchmark_line,
+      change_series_chart_configuration:  { series_names: ['benchmark', 'exemplar'], axis: :y2 }
+    },
+    electricity_by_day_of_week_tolerant_versus_benchmarks: {
+      inherits_from:                      :electricity_by_day_of_week_tolerant,
+      replace_series_label:               standard_series_label_substitution('Energy', 'school day'),
+      benchmark:                          { calculation_types: %i[benchmark exemplar], config: { series_breakdown: :none } },
+      change_series_chart_configuration:  { series_names: ['benchmark', 'exemplar'], chart1_type: :line }
+    },
+    baseload_versus_benchmarks: {
+      inherits_from:                      :baseload,
+      replace_series_label:               standard_series_label_substitution('BASELOAD', 'baseload'),
+      benchmark:                          { calculation_types: %i[benchmark exemplar] },
+      change_series_chart_configuration:  { series_names: ['benchmark', 'exemplar'], chart1_type: :line }
+    },
+    intraday_line_school_days_reduced_data_versus_benchmarks: {
+      name:                               'Comparison of intraday consumption with benchmarks',
+      inherits_from:                      :intraday_line_school_days_reduced_data,
+      replace_series_label:               standard_series_label_substitution('Energy', 'school day'),
+      benchmark:                          { calculation_types: %i[benchmark exemplar] },
+      change_series_chart_configuration:  { series_names: ['benchmark', 'exemplar'], chart1_type: :line },
+      timescale:                          :up_to_a_year
     },
 
     # ============================================================================================

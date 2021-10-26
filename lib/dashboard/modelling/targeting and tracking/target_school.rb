@@ -18,6 +18,7 @@ class TargetSchool < MeterCollection
 
   attr_reader :unscaled_target_meters, :synthetic_target_meters
 
+  # TODO(PH, 26Oct2021) - inherit from SyntheticSchool, replace super() call
   def initialize(school, calculation_type)
     super(school.school,
           holidays:                 school.holidays,

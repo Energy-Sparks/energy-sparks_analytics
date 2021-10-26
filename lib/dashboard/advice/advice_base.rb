@@ -31,7 +31,7 @@ class AdviceBase < ContentBase
 
   # override alerts base class
   def make_available_to_users?
-    make_available = relevance == :relevant && enough_data == :enough && @calculation_worked && failed_charts_required.empty?
+    make_available = relevance == :relevant && enough_data == :enough && @calculation_worked #  && failed_charts_required.empty?
     unless make_available
       message = "Analysis #{self.class.name} not being made available to users: reason: #{relevance} #{enough_data} calc: #{@calculation_worked} failed charts #{@failed_charts.length}"
       logger.info message
