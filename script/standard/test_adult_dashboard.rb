@@ -22,6 +22,7 @@ script = {
                                 user: { user_role: :analytics, staff_role: nil },
 
                                 no_pages: %i[electric_annual boiler_control_morning_start_time],
+                                
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },
