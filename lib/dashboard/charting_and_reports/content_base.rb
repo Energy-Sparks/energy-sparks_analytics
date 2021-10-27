@@ -80,7 +80,6 @@ class ContentBase
   end
 
   def self.user_permission?(user_type, required_type)
-    puts "Got here ut #{user_type} rt #{required_type}"
     return true if required_type.nil?
     !user_type.nil? && user_type.key?(:user_role) && user_type[:user_role] == required_type
   end

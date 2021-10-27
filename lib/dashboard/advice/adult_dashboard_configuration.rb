@@ -100,6 +100,12 @@ class DashboardConfiguration
           summary:                              :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ group_by_week_electricity ],
+        fuel_type:          :electricity
+      }
     },
     electric_out_of_hours: {   
       name:                   'Your electricity use out of school hours',
@@ -117,6 +123,12 @@ class DashboardConfiguration
           summary:                :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ electricity_by_day_of_week_tolerant ],
+        fuel_type:          :electricity
+      }
     },
     baseload: {   
       name:                   'Your electricity baseload',
@@ -137,6 +149,12 @@ class DashboardConfiguration
           summary:                            :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ baseload_lastyear ],
+        fuel_type:          :electricity
+      }
     },
     refrigeration: {   
       name:                   'Experimental refrigeration analysis',
@@ -247,6 +265,12 @@ class DashboardConfiguration
           average_school_day_last_year_kw: :average_school_day_last_year_kw
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ intraday_line_school_days_reduced_data ],
+        fuel_type:          :electricity
+      }
     },
     electricity_profit_loss: {   
       name:                   'Electricity Costs',
@@ -277,6 +301,12 @@ class DashboardConfiguration
           summary:                              :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ group_by_week_gas ],
+        fuel_type:          :gas
+      } 
     },
     gas_out_of_hours: {   
       name:                   'Your gas use out of school hours',
@@ -295,6 +325,12 @@ class DashboardConfiguration
           summary:                :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ gas_by_day_of_week_tolerant gas_heating_season_intraday ],
+        fuel_type:          :gas
+      } 
     },
     gas_long_term_progress:  {   
       name:                   'Gas: long term',
@@ -374,6 +410,12 @@ class DashboardConfiguration
       ],
       promoted_variables: {
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ gas_heating_season_intraday last_7_days_intraday_gas ],
+        fuel_type:          :gas
+      }
     },
     gas_profit_loss: {   
       name:                   'Gas Costs',
@@ -416,6 +458,12 @@ class DashboardConfiguration
           one_year_saving_reduced_days_to_exemplar_£: :one_year_saving_reduced_days_to_exemplar_£
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ heating_on_off_by_week ],
+        fuel_type:          :gas
+      }
     },
     boiler_control_thermostatic: {
       name:                   'Thermostatic',
@@ -434,6 +482,12 @@ class DashboardConfiguration
           annual_saving_1_C_change_£: :annual_saving_1_C_change_£
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ thermostatic_up_to_1_year ],
+        fuel_type:          :gas
+      }
     },
     boiler_control_frost: {
       name:                   'Frost',

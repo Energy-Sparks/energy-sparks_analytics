@@ -9,7 +9,7 @@ script = {
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
                             ],
-  schools: ['king-jame*'], # ['st-nico*'],
+  schools: ['*'], # ['st-nico*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
@@ -21,7 +21,7 @@ script = {
                                 report_failed_charts:   :summary, # :detailed
                                 user: { user_role: :analytics, staff_role: nil },
 
-                                pages: %i[boiler_control_morning_start_time],
+                                no_pages: %i[electric_annual boiler_control_morning_start_time],
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },
