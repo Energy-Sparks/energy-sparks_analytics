@@ -87,42 +87,18 @@ class AdviceBase < ContentBase
   end
 
   def content(user_type: nil)
-    charts_and_html = []
-
-    header_content(charts_and_html)
-
-    charts_and_html += debug_content
-
-    charts.each do |chart|
-      begin
-        chart_content(chart, charts_and_html)
-      rescue StandardError => e
-        logger.info self.class.name
-        logger.info e.message
-        logger.info e.backtrace
-      end
-    end
-    remove_diagnostics_from_html(charts_and_html, user_type)
+    rsc = raw_structured_content(user_type: user_type)
+    content_info = rsc.length == 1 ? rsc[0][:content] : flatten_structured_content(rsc)
+    remove_diagnostics_from_html(content_info, user_type)
   end
 
-  protected def remove_diagnostics_from_html(charts_and_html, user_type)
-    if ContentBase.analytics_user?(user_type)
-      charts_and_html = promote_analytics_html_to_frontend(charts_and_html)
-    else
-      charts_and_html.delete_if{ |content_component| %i[analytics_html].include?(content_component[:type]) }
-    end
-    charts_and_html
+  def has_structured_content?(user_type: nil)
+    structured_meter_breakdown?(user_type) &&
+    self.class.config[:meter_breakdown][:presentation_style] == :structured
   end
 
-  protected def remove_diagnostics_from_content(content, user_type)
-    {
-      title:    content[:title],
-      content:  remove_diagnostics_from_html(content[:content], user_type)
-    }
-  end
-
-  protected def remove_diagnostics_from_structured_content(structured_content, user_type)
-    structured_content.map { |c| remove_diagnostics_from_content(c, user_type) }
+  def structured_content(user_type: nil)
+    raw_structured_content(user_type: user_type)
   end
 
   def analytics_split_charts_and_html(content_data)
@@ -140,7 +116,7 @@ class AdviceBase < ContentBase
   def self.excel_worksheet_name
     definition[:excel_worksheet_name]
   end
- 
+
   def erb_bind(text)
     ERB.new(text).result(binding)
   end
@@ -153,10 +129,6 @@ class AdviceBase < ContentBase
       </div>
     }
     ERB.new(text).result(binding)
-  end
-
-  private_class_method def self.definition
-    DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.select { |_key, defn| defn[:content_class] == self }.values[0]
   end
 
   def self.template_variables
@@ -179,7 +151,99 @@ class AdviceBase < ContentBase
     end
   end
 
+  protected
+
+  def remove_diagnostics_from_html(charts_and_html, user_type)
+    if ContentBase.analytics_user?(user_type)
+      charts_and_html = promote_analytics_html_to_frontend(charts_and_html)
+    else
+      charts_and_html.delete_if { |content_component| %i[analytics_html].include?(content_component[:type]) }
+    end
+    charts_and_html
+  end
+
+  def remove_diagnostics_from_content(content, user_type)
+    {
+      title:    content[:title],
+      content:  remove_diagnostics_from_html(content[:content], user_type)
+    }
+  end
+
+  def remove_diagnostics_from_structured_content(structured_content, user_type)
+    structured_content.map { |c| remove_diagnostics_from_content(c, user_type) }
+  end
+
   private
+
+  def raw_structured_content(user_type: nil)
+    base = [
+      {
+        title:    'All school meters aggregated:',
+        content:  raw_content(user_type: user_type)
+      }
+    ]
+
+    base += underlying_meters_structured_content(user_type: user_type) if structured_meter_breakdown?(user_type)
+
+    base
+  end
+
+  def flatten_structured_content(sc_content)
+    sc_content.map do |component|
+      [
+        { type: :html, content: component[:html_title] || "<h2>#{component[:title]}</h2>" },
+        component[:content]
+      ]
+    end.flatten
+  end
+
+  def raw_content(user_type: nil)
+    charts_and_html = []
+
+    header_content(charts_and_html)
+
+    charts_and_html += debug_content
+
+    charts.each do |chart|
+      begin
+        chart_content(chart, charts_and_html)
+      rescue StandardError => e
+        logger.info self.class.name
+        logger.info e.message
+        logger.info e.backtrace
+      end
+    end
+
+    # charts_and_html += underlying_meters_structured_content(user_type: user_type) if structured_meter_breakdown?(user_type)
+
+    # remove_diagnostics_from_html(charts_and_html, user_type)
+
+    # tack explanation of breakdown onto initial content
+    charts_and_html += [{ type: :html, content: individual_meter_level_description_html }] if structured_meter_breakdown?(user_type)
+
+    charts_and_html
+  end
+
+  # flatten structured content, so can be presented as single non-accordion html page
+  def underlying_meters_content_deprecated(user_type: nil)
+    underlying_meters_structured_content(user_type: user_type).map do |meter_content|
+      html_title = meter_content[:html_title] || "<h2>#{meter_content[:title]}</h2>"
+      [
+        { type: :html, content: html_title },
+        meter_content[:content]
+      ]
+    end.flatten
+  end
+  
+  def underlying_meters_structured_content(user_type: nil)
+    sorted_underlying_meters.map do |meter_data|
+      meter_breakdown_content(meter_data)
+    end
+  end
+
+  private_class_method def self.definition
+    DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.select { |_key, defn| defn[:content_class] == self }.values[0]
+  end
 
   def header_content(charts_and_html)
     charts_and_html.push( { type: :analytics_html, content: '<hr>' } )
@@ -287,6 +351,72 @@ class AdviceBase < ContentBase
     end
   end
 
+  def format_meter_data(meter_data)
+    {
+      name:     meter_data[:meter].analytics_name,
+      kwh:      FormatEnergyUnit.format(:kwh,     meter_data[:annual_kwh], :html),
+      £:        FormatEnergyUnit.format(:£,       meter_data[:annual_£],   :html),
+      percent:  FormatEnergyUnit.format(:percent, meter_data[:percent],    :html),
+      period:   FormatEnergyUnit.format(:years,   meter_data[:years],      :html)
+    }
+  end
+
+  def sort_underlying_meter_data_by_annual_kwh
+    end_date        = aggregate_meter.amr_data.end_date
+    start_date      = [end_date - 365, aggregate_meter.amr_data.start_date].max
+
+    total_kwh = aggregate_meter.amr_data.kwh_date_range(start_date, end_date)
+
+    meter_data = available_meters_for_breakdown.map do |meter|
+      if meter.amr_data.start_date > end_date || meter.amr_data.end_date < start_date
+        nil # deprecated meter outside last year
+      else
+        sd = [meter.amr_data.start_date, start_date].max
+        ed = [meter.amr_data.end_date,   end_date  ].min
+        kwh = meter.amr_data.kwh_date_range(sd, ed)
+        {
+          meter:      meter,
+          annual_kwh: kwh,
+          annual_£:   meter.amr_data.kwh_date_range(sd, ed, :£),
+          percent:    kwh / total_kwh,
+          years:      (ed - sd) / 365.0
+        }
+      end
+    end.compact.sort { |md1, md2| md2[:annual_kwh] <=> md1[:annual_kwh] }
+  end
+
+  def available_meters_for_breakdown
+    @school.underlying_meters(self.class.config[:meter_breakdown][:fuel_type])
+  end
+
+  def meter_breakdown_content(meter_data)
+    fmd = format_meter_data(meter_data)
+
+    charts_and_html = self.class.config[:meter_breakdown][:charts].map do |chart_name|
+      AdviceBase.meter_specific_chart_config(chart_name, meter_data[:meter].mpxn)
+    end
+    
+    {
+      title:      "#{fmd[:name]}: #{fmd[:kwh]} #{fmd[:£]} #{fmd[:percent]}",
+      html_title: "<h2 style=\"text-align:left;\">#{fmd[:name]}<span style=\"float:right;\">#{fmd[:kwh]} #{fmd[:£]} #{fmd[:percent]}</span></h2>",
+      content:    charts_and_html.flatten
+    }
+  end
+
+  def meter_breakdown_permission?(user_type)
+    self.class.config.key?(:meter_breakdown) &&
+    self.class.user_permission?(user_type, self.class.config[:meter_breakdown][:user_type][:user_role])
+  end
+
+  def structured_meter_breakdown?(user_type)
+    meter_breakdown_permission?(user_type) &&
+    available_meters_for_breakdown.length > 1
+  end
+
+  def sorted_underlying_meters
+    @sorted_underlying_meters ||= sort_underlying_meter_data_by_annual_kwh
+  end
+
   def alert_asof_date
     @asof_date ||= aggregate_meter.amr_data.end_date
   end
@@ -296,7 +426,16 @@ class AdviceBase < ContentBase
     HtmlTableFormatting.new(['Variable','Value'], rows).html
   end
 
-  private def create_and_set_attr_reader(key, value)
+  def individual_meter_level_description_html
+    %q(
+      <p>
+        To help further understand this analysis, the analysis is now
+        further broken down to individual meter level:
+      </p>
+    )
+  end
+
+  def create_and_set_attr_reader(key, value)
     status = variable_name_status(key)
     case status
     when :function

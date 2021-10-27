@@ -16,7 +16,7 @@ class ContentBase
     false
   end
 
-  def has_structured_content?
+  def has_structured_content?(user_type: nil)
     false
   end
 
@@ -72,11 +72,17 @@ class ContentBase
 
   # JJ spec: { user_role: :analytics, staff_role: nil }
   def self.analytics_user?(user_type)
-    !user_type.nil? && user_type.key?(:user_role) && user_type[:user_role] == :analytics
+    user_permission?(user_type, :analytics)
   end
 
   def self.public_user_type?(user_type)
-    user_type.nil? || (user_type.key?(:user_role) && user_type[:user_role] == :guest)
+    user_type.nil? || user_permission?(user_type, :guest)
+  end
+
+  def self.user_permission?(user_type, required_type)
+    puts "Got here ut #{user_type} rt #{required_type}"
+    return true if required_type.nil?
+    !user_type.nil? && user_type.key?(:user_role) && user_type[:user_role] == required_type
   end
 
   def self.priority_template_variables

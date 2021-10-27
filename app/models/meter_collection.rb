@@ -279,6 +279,19 @@ class MeterCollection
     all_meters.select { |meter| !meter.synthetic_mpan_mprn? }.uniq{ |m| m.mpxn}
   end
 
+  def underlying_meters(fuel_type)
+    case fuel_type
+    when :electricity
+      @electricity_meters
+    when :gas
+      @heat_meters
+    when :storage_heater
+      @storage_heater_meters
+    else
+      []
+    end
+  end
+
   def adult_report_groups
     report_groups = []
     report_groups.push(:benchmark)                    if electricity? && !solar_pv_panels?

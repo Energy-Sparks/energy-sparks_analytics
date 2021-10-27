@@ -396,6 +396,12 @@ class DashboardConfiguration
           one_year_optimum_start_saving_£: :one_year_optimum_start_saving_£
         }
       },
+      meter_breakdown: {
+        presentation_style: :structured, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ gas_heating_season_intraday_up_to_1_year ],
+        fuel_type:          :gas
+      }
     },
     boiler_control_seasonal: {
       name:                   'Seasonal Control',

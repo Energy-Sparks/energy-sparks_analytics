@@ -8,7 +8,7 @@ module MeterlessMixin
   end
 end
 
-# converts ols specialised advice to new content based advice to maintain
+# converts old specialised advice to new content based advice to maintain
 # backwards compatibility in short term
 class AdviceStructuredOldToNewConversion < AdviceBase
   include MeterlessMixin
@@ -18,7 +18,7 @@ class AdviceStructuredOldToNewConversion < AdviceBase
     promote_data if self.class.config.key?(:promoted_variables)
   end
 
-  def has_structured_content?
+  def has_structured_content?(user_type: nil)
     true
   end
 
@@ -50,7 +50,6 @@ class AdviceStructuredOldToNewConversion < AdviceBase
   end
 
   def enough_data
-    # TODO(PH, 16Jan2020) - temp comment out
     max_period_days > 364 ? :enough : :not_enough
   end
 
