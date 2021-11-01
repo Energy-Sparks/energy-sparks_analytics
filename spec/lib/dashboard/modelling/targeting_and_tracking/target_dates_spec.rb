@@ -26,7 +26,8 @@ describe TargetDates do
     context 'there is recent data' do
       #2 years
       let(:amr_start_date)    { Date.today.prev_year.prev_year}
-      let(:amr_end_date)      { Date.today - 1 }
+      #arbitrary day in this month, avoid Date.today - 1.
+      let(:amr_end_date)      { Date.today }
       let(:this_month)        { Date.new(Date.today.year, Date.today.month, 1) }
 
       it 'defaults to this month' do
