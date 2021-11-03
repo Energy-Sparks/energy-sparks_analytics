@@ -73,16 +73,16 @@ class MeterAttributes
     )
   end
 
-  class OverrideAllZeroDays < MeterAttributeTypes::AttributeBase
-    id  :override_zero_whole_days_electricity_readings
-    key :override_zero_whole_days_electricity_readings
+  class OverrideZeroDays < MeterAttributeTypes::AttributeBase
+    id  :override_zero_days_electricity_readings
+    key :override_zero_days_electricity_readings
     aggregate_over :meter_corrections
     name 'Meter correction > Override All Zero Days'
     structure MeterAttributeTypes::Hash.define(
       structure: {
         start_date: MeterAttributeTypes::Date.define,
         end_date:   MeterAttributeTypes::Date.define,
-        override:   MeterAttributeTypes::Boolean.define
+        override:   MeterAttributeTypes::Date.define(allowed_values: [:force, :intelligent_solar, :off, true, false])
       }
     )
   end
@@ -120,23 +120,6 @@ class MeterAttributes
     name 'Meter correction > Readings start date'
     structure MeterAttributeTypes::Date.define(required: true)
   end
-
-=begin
-# deprecated PH 13Apr2021
-  class OverrideWithSyntheticSheffieldPVData < MeterAttributeTypes::AttributeBase
-    id :meter_corrections_use_sheffield_pv_data
-    key :set_to_sheffield_pv_data
-    aggregate_over :meter_corrections
-    name 'Meter correction > Override solar pv production data with Sheffield University data'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        start_date:         MeterAttributeTypes::Date.define(required: true),
-        end_date:           MeterAttributeTypes::Date.define(required: true),
-      }
-    )
-  end
-=end
 
   class ReadingsEndDate < MeterAttributeTypes::AttributeBase
     id :meter_corrections_readings_end_date

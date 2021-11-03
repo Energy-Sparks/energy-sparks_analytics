@@ -152,10 +152,10 @@ class ValidateAMRData
         'X',
         true
       )
-    elsif rule.key?(:override_zero_whole_days_electricity_readings)
+    elsif rule.key?(:override_zero_days_electricity_readings)
       # called multiple times, but as applied to all raules of this type, only the 1st call does work
       # difficult to fix without restructuring, removing all rules of this type
-      override_zero_whole_days_electricity_readings_rules(rules)
+      override_zero_days_electricity_readings_rules(rules)
     elsif rule.key?(:extend_meter_readings_for_substitution)
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
@@ -607,7 +607,11 @@ class ValidateAMRData
   end
 
   def substitute_missing_electricity_data(date, sub_type_code)
-    substitute_missing_data(date, sub_type_code, 'E')
+    if @meter.solar_pv_panels?
+      substitute_missing_solar_mains_meter_data(date, sub_type_code, 'E')
+    else
+      substitute_missing_data(date, sub_type_code, 'E')
+    end
   end
 
   # iterate out from missing data date, looking for a similar day without missing data
@@ -622,25 +626,53 @@ class ValidateAMRData
     [date, nil]
   end
 
+  # makes several attempts to find a day with similar solar pv, with gradually greater tolerance
+  def substitute_missing_solar_mains_meter_data(date, sub_type_code, fuel_code)
+    [ [15, 0.1], [25, 0.15], [40, 0.25]].each do |days_search, criteria|
+      date, sub = similar_solar_pv_day(date, sub_type_code, fuel_code, days_search, criteria)
+      return [date, sub] unless sub.nil?
+    end
+
+    [date, nil]
+  end
+
+  def similar_solar_pv_day(date, sub_type_code, fuel_code, days_range, similar_pv_criteria)
+    missing_daytype = daytype(date)
+    alternating_search_days_offset(days_range).each do |days_offset|
+      substitute_date = date + days_offset
+      if original_matching_substitute_date?(date, substitute_date) && similar_solar_pv_day?(date, substitute_date, similar_pv_criteria)
+        return [date, create_substituted_data(date, substitute_date, sub_type_code, fuel_code)]
+      end
+    end
+
+    [date, nil]
+  end
+
+  def similar_solar_pv_day?(date1, date2, criteria)
+    pv1 = @meter.solar_pv.one_day_total(date1)
+    pv2 = @meter.solar_pv.one_day_total(date2)
+    ((pv1 - pv2) / pv2).magnitude < criteria
+  end
+
   def original_matching_substitute_date?(date, substitute_date)
     @amr_data.date_exists?(substitute_date)     &&
     daytype(substitute_date) == daytype(date) &&
     @amr_data.substitution_type(substitute_date) == 'ORIG'
   end
 
-  # :override_zero_whole_days_electricity_readings => [
+  # :override_zero_days_electricity_readings => [
   #  {
   #   start_date: => # optional, default to 1st meter reading
   #   end_date: => # optional, default to last meter reading
   #   override: => true || false # option, defaults to true, false available to turn off e.g. could set to true for all Bath schools, except 1 meter at Twerton
   #   }
   #  ]
-  def override_zero_whole_days_electricity_readings_rules(rules)
-    rule_dates = rule_override_dates(rules, :override_zero_whole_days_electricity_readings, override_field = :override)
+  def override_zero_days_electricity_readings_rules(rules)
+    rule_dates = rule_override_dates(rules, :override_zero_days_electricity_readings, override_field = :override)
 
     zero_dates = identify_all_zero_reading_days(rule_dates).uniq
 
-    override_zero_whole_days_electricity_readings(zero_dates)
+    override_zero_days_electricity_readings(zero_dates)
   end
 
   def rule_override_dates(rules, rule_type, override_field = :override)
@@ -650,13 +682,17 @@ class ValidateAMRData
     defaults     = matching_rules.select { |r| r[:default] == true }
     non_defaults = matching_rules.select { |r| r[:default] != true }
 
-    all_rules = [defaults, non_defaults].flatten
+    all_rules = [defaults, non_defaults].flatten # ensures default appear first
 
     application_dates = resolve_rule_override_dates(all_rules)
 
-     # ap summarise_date_ranges(application_dates) # keep use for future debugging
+    # ap summarise_date_ranges(application_dates.keys) # keep use for future debugging
 
     application_dates
+  end
+
+  def override_rule?(val)
+    [true, :force, :intelligent_solar].include?(val)
   end
 
   def summarise_date_ranges(dates)
@@ -668,14 +704,16 @@ class ValidateAMRData
   end
 
   def resolve_rule_override_dates(rules)
-    dates = []
+    dates = {}
 
     # assumes meter attributes appear in defined order from front end (false assumption?)
     rules.each do |rule|
-      if rule[:override]
-        dates += (rule[:start_date]..rule[:end_date]).to_a
+      if override_rule?(rule[:override])
+        (rule[:start_date]..rule[:end_date]).each do |date|
+          dates[date] = rule[:override]
+        end
       else
-        dates.reject! { |d| d.between?(rule[:start_date], rule[:end_date]) }
+        dates.delete_if { |d, _override| d.between?(rule[:start_date], rule[:end_date]) }
       end
     end
 
@@ -697,12 +735,12 @@ class ValidateAMRData
       {
         start_date: rule[:start_date] || @amr_data.start_date,
         end_date:   rule[:end_date]   || @amr_data.end_date,
-        override:   rule[override_field] == true || rule[override_field].nil?
+        override:   rule[override_field].nil? || rule[override_field]
       }
     end
   end
 
-  def override_zero_whole_days_electricity_readings(zero_days)
+  def override_zero_days_electricity_readings(zero_days)
     zero_days.each do |date|
       @amr_data.delete(date)
     end
@@ -717,15 +755,51 @@ class ValidateAMRData
   end
 
   def identify_all_zero_reading_days(dates)
-    dates.select do |date|
-      @amr_data.date_exists?(date) && @amr_data.one_days_data_x48(date).all?(&:zero?)
-    end
-  end   
+    dates.select do |date, override|
+      if override == :intelligent_solar && @meter.solar_pv_panels?
+        has_zero_readings_at_night?(date)
+      else
+        @amr_data.date_exists?(date) && @amr_data.one_days_data_x48(date).all?(&:zero?)
+      end
+    end.keys
+  end
+
+  def has_zero_readings_at_night?(date, margin_kw = 0.20)
+    night_half_hours = (0..47).map { |hh_i| !daytime?(DateTimeHelper.datetime(date, hh_i)) }
+
+    zero_night_readings = night_half_hours.map.with_index do |night, hh_i|
+      @amr_data.date_exists?(date) &&
+      night_half_hours[hh_i] &&
+      @amr_data.kwh(date, hh_i) < (margin_kw * 2.0) # v. kWh per half hour
+    end.count(true)
+
+    percent_zero_night_readings = zero_night_readings / night_half_hours.length
+
+    percent_zero_night_readings > 0.1 # more than 10% zero
+  end
+
+  # check for sunrise (margin = hours after sunrise, before sunset test applied)
+  def daytime?(datetime, margin_hours = -2.0)
+    latitude  = @meter.meter_collection.latitude
+    longitude = @meter.meter_collection.longitude
+
+    sun_times = SunTimes.new
+
+    sunrise = sun_times.rise(datetime, latitude, longitude)
+    sr_criteria = sunrise + 60 * 60 * margin_hours
+    sr_criteria_dt = DateTime.parse(sr_criteria.to_s) # crudely convert to datetime, avoid time as very slow on Windows
+
+    sunset = sun_times.set(datetime, latitude, longitude)
+    ss_criteria = sunset - 60 * 60 * margin_hours
+    ss_criteria_dt = DateTime.parse(ss_criteria.to_s) # crudely convert to datetime, avoid time as very slow on Windows
+
+    datetime > sr_criteria_dt && datetime < ss_criteria_dt
+  end
 
   # [1, -1, 2, -2 etc.]
-  def alternating_search_days_offset
-    max_days = MAXSEARCHRANGEFORCORRECTEDDATA
-    @alternating_search_days_offset ||= (1..max_days).to_a.zip((-max_days..-1).to_a.reverse).flatten
+  def alternating_search_days_offset(max_days = MAXSEARCHRANGEFORCORRECTEDDATA)
+    @alternating_search_days_offset ||= {}
+    @alternating_search_days_offset[max_days] ||= (1..max_days).to_a.zip((-max_days..-1).to_a.reverse).flatten
   end
 
   def substitute_missing_gas_data(date, sub_type_code)

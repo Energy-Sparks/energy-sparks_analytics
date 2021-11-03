@@ -92,6 +92,10 @@ class MeterCollection
     end
   end
 
+  def sheffield_solar_pv_data
+    solar_pv
+  end
+
   def set_aggregate_meter(fuel_type, meter)
     case fuel_type
     when :electricity
@@ -393,21 +397,6 @@ class MeterCollection
     types.push(:solar_pv)         if solar_pv_panels? && !exclude_solar_pv
     types
   end
-
-=begin
-
-  def solar_pv_sub_meters_to_be_aggregated
-    @solar_pv_sub_meters_to_be_aggregated ||= all_meters.count{ |meter| meter.solar_pv_sub_meters_to_be_aggregated }
-  end
-
-  def low_carbon_hub_solar_pv_panels?
-    @low_carbon_hub_solar_pv_panels ||= all_meters.any?{ |meter| meter.low_carbon_hub_solar_pv_panels? }
-  end
-
-  def solar_for_schools_solar_pv_panels?
-    @solar_for_schools_solar_pv_panels ||= all_meters.any?{ |meter| meter.solar_for_schools_solar_pv_panels? }
-  end
-=end
 
   def school_type
     @school.nil? ? nil : @school.school_type
