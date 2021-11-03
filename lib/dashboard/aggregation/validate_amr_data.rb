@@ -562,7 +562,7 @@ class ValidateAMRData
     end
     false
   end
-  
+
   def check_for_long_gaps_in_data
     gap_count = 0
     first_bad_date = Date.new(2050, 1, 1)
@@ -588,24 +588,31 @@ class ValidateAMRData
   end
 
   def fill_in_missing_data(sd = @amr_data.start_date, ed = @amr_data.end_date, sub_type_code = 'S', override = false)
-    missing_days = {}
-    (sd..ed).each do |date|
-      if @amr_data.date_missing?(date) || override
-        if @meter.meter_type == :electricity
-          missing_days[date] = substitute_missing_electricity_data(date, sub_type_code)
-        elsif @meter.meter_type == :gas
-          missing_days[date] = substitute_missing_gas_data(date, sub_type_code)
-        end
-      end
-    end
+ # puts "Got here fill_in_missing_data #{@meter.mpxn}"
 
-    list_of_date_substitutions = []
-    missing_days.each do |date, corrected_data|
-      unless corrected_data.nil?
-        substitute_date, substitute_data = corrected_data
-        @amr_data.add(date, substitute_data) unless substitute_data.nil? # TODO(PH) - handle nil? test by correction
+  @amr_data.delete_date_range(sd, ed) if override
+    
+  missing_days = {}
+  (sd..ed).each do |date|
+    if @amr_data.date_missing?(date)
+      if @meter.meter_type == :electricity
+        missing_days[date] = substitute_missing_electricity_data(date, sub_type_code)
+      elsif @meter.meter_type == :gas
+        missing_days[date] = substitute_missing_gas_data(date, sub_type_code)
       end
     end
+  end
+
+# puts "Got here substitute dates" if @meter.mpxn == 2199989617206
+# ap missing_days if @meter.mpxn == 2199989617206
+
+  list_of_date_substitutions = []
+  missing_days.each do |date, corrected_data|
+    unless corrected_data.nil?
+      substitute_date, substitute_data = corrected_data
+      @amr_data.add(date, substitute_data) unless substitute_data.nil? # TODO(PH) - handle nil? test by correction
+    end
+  end
   end
 
   def substitute_missing_electricity_data(date, sub_type_code)
@@ -617,11 +624,17 @@ class ValidateAMRData
     missing_daytype = daytype(date)
     alternating_search_days_offset.each do |days_offset|
       substitute_date = date + days_offset
-      if @amr_data.date_exists?(substitute_date) && daytype(substitute_date) == missing_daytype
+      if original_matching_substitute_date?(date, substitute_date)
         return [date, create_substituted_data(date, substitute_date, sub_type_code, fuel_code)]
       end
     end
     [date, nil]
+  end
+
+  def original_matching_substitute_date?(date, substitute_date)
+    @amr_data.date_exists?(substitute_date)     &&
+    daytype(substitute_date) == daytype(date) &&
+    @amr_data.substitution_type(substitute_date) == 'ORIG'
   end
 
   # [1, -1, 2, -2 etc.]
@@ -629,7 +642,7 @@ class ValidateAMRData
     max_days = MAXSEARCHRANGEFORCORRECTEDDATA
     @alternating_search_days_offset ||= (1..max_days).to_a.zip((-max_days..-1).to_a.reverse).flatten
   end
-  
+
   def substitute_missing_gas_data(date, sub_type_code)
     heating_on = heating_model.heat_on_missing_data?(date) if heating_model != NO_MODEL
     missing_daytype = daytype(date)
@@ -640,7 +653,7 @@ class ValidateAMRData
       if @amr_data.date_exists?(substitute_date)
         substitute_day_temperature = average_temperature(substitute_date)
         if heating_model == NO_MODEL
-          if @amr_data.date_exists?(substitute_date) && daytype(substitute_date) == missing_daytype
+          if original_matching_substitute_date?(date, substitute_date)
            return [date, create_substituted_data(date, substitute_date, sub_type_code, 'G')]
           end
         elsif heating_on == heating_model.heat_on_missing_data?(substitute_date) &&

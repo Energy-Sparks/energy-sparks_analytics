@@ -34,8 +34,8 @@ script = {
                 no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
                 no_benchmark:          %i[school alert ], # detail],
                 # asof_date:          (Date.new(2018,6,14)..Date.new(2019,6,14)).each_slice(7).map(&:first),
-               asof_date:      Date.new(2021, 10, 15)
-              } 
+               asof_date:      Date.new(2021, 10, 20)
+              }
   }
 }
 
