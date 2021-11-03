@@ -73,6 +73,20 @@ class MeterAttributes
     )
   end
 
+  class OverrideAllZeroDays < MeterAttributeTypes::AttributeBase
+    id  :override_zero_whole_days_electricity_readings
+    key :override_zero_whole_days_electricity_readings
+    aggregate_over :meter_corrections
+    name 'Meter correction > Override All Zero Days'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define,
+        end_date:   MeterAttributeTypes::Date.define,
+        override:   MeterAttributeTypes::Boolean.define
+      }
+    )
+  end
+
   class ExtendMeterReadingsForSubstitution < MeterAttributeTypes::AttributeBase
     id :meter_corrections_extend_meter_readings_for_substitution
     key :extend_meter_readings_for_substitution

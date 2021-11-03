@@ -41,6 +41,12 @@ class OneDayAMRReading
     'EXW1'  => { name: 'Override electricity - substituted weekend'},
     'EXh1'  => { name: 'Override electricity - substituted weekend/holiday'},
     'EXH1'  => { name: 'Override electricity - substituted holiday'},
+
+    'EZS1'  => { name: 'Substitute electricity school day with all zero data'},
+    'EZW1'  => { name: 'Substitute electricity substituted weekend with all zero data'},
+    'EZh1'  => { name: 'Substitute electricity substituted weekend/holiday with all zero data'},
+    'EZH1'  => { name: 'Substitute electricity substituted holiday with all zero data'},
+
     'ESBH'  => { name: 'Missing electricity - substituted holiday'},
     'BGG1'  => { name: 'Gap too big - ignored all previous days'},
     'BGG2'  => { name: 'Gap too big - ignored all previous days'},

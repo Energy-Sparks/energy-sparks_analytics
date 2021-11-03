@@ -83,12 +83,12 @@ class ValidateAMRData
   def meter_corrections
     unless @meter.meter_correction_rules.nil?
       @meter.meter_correction_rules.each do |rule|
-        apply_one_meter_correction(rule)
+        apply_one_meter_correction(rule, @meter.meter_correction_rules)
       end
     end
   end
 
-  def apply_one_meter_correction(rule)
+  def apply_one_meter_correction(rule, rules)
     logger.debug '-' * 80
     logger.debug "Manually defined meter corrections: #{rule}"
     if rule.is_a?(Symbol) && rule == :set_all_missing_to_zero
@@ -152,15 +152,13 @@ class ValidateAMRData
         'X',
         true
       )
+    elsif rule.key?(:override_zero_whole_days_electricity_readings)
+      # called multiple times, but as applied to all raules of this type, only the 1st call does work
+      # difficult to fix without restructuring, removing all rules of this type
+      override_zero_whole_days_electricity_readings_rules(rules)
     elsif rule.key?(:extend_meter_readings_for_substitution)
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
-=begin
-# deprecated PH 13Apr2021
-    elsif rule.key?(:meter_corrections_use_sheffield_pv_data) || rule.key?(:set_to_sheffield_pv_data)
-      config = rule[:meter_corrections_use_sheffield_pv_data] || rule[:set_to_sheffield_pv_data]
-      override_with_sheffield_solar_pv_data(config[:start_date], config[:end_date])
-=end
     end
   end
 
@@ -309,7 +307,6 @@ class ValidateAMRData
     count = (@amr_data.start_date..@amr_data.end_date).sum do |date|
       @amr_data.date_missing?(date) ? 48 : @amr_data.days_kwh_x48(date).count(&:nil?)
     end
-    puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Items of nil data #{count} for #{@meter.mpan_mprn}"
   end
 
   def missing_data_stats
@@ -588,31 +585,25 @@ class ValidateAMRData
   end
 
   def fill_in_missing_data(sd = @amr_data.start_date, ed = @amr_data.end_date, sub_type_code = 'S', override = false)
- # puts "Got here fill_in_missing_data #{@meter.mpxn}"
-
-  @amr_data.delete_date_range(sd, ed) if override
-    
-  missing_days = {}
-  (sd..ed).each do |date|
-    if @amr_data.date_missing?(date)
-      if @meter.meter_type == :electricity
-        missing_days[date] = substitute_missing_electricity_data(date, sub_type_code)
-      elsif @meter.meter_type == :gas
-        missing_days[date] = substitute_missing_gas_data(date, sub_type_code)
+    @amr_data.delete_date_range(sd, ed) if override
+      
+    missing_days = {}
+    (sd..ed).each do |date|
+      if @amr_data.date_missing?(date)
+        if @meter.meter_type == :electricity
+          missing_days[date] = substitute_missing_electricity_data(date, sub_type_code)
+        elsif @meter.meter_type == :gas
+          missing_days[date] = substitute_missing_gas_data(date, sub_type_code)
+        end
       end
     end
-  end
 
-# puts "Got here substitute dates" if @meter.mpxn == 2199989617206
-# ap missing_days if @meter.mpxn == 2199989617206
-
-  list_of_date_substitutions = []
-  missing_days.each do |date, corrected_data|
-    unless corrected_data.nil?
-      substitute_date, substitute_data = corrected_data
-      @amr_data.add(date, substitute_data) unless substitute_data.nil? # TODO(PH) - handle nil? test by correction
+    missing_days.each do |date, corrected_data|
+      unless corrected_data.nil?
+        _substitute_date, substitute_data = corrected_data
+        @amr_data.add(date, substitute_data) unless substitute_data.nil? # TODO(PH) - handle nil? test by correction
+      end
     end
-  end
   end
 
   def substitute_missing_electricity_data(date, sub_type_code)
@@ -636,6 +627,100 @@ class ValidateAMRData
     daytype(substitute_date) == daytype(date) &&
     @amr_data.substitution_type(substitute_date) == 'ORIG'
   end
+
+  # :override_zero_whole_days_electricity_readings => [
+  #  {
+  #   start_date: => # optional, default to 1st meter reading
+  #   end_date: => # optional, default to last meter reading
+  #   override: => true || false # option, defaults to true, false available to turn off e.g. could set to true for all Bath schools, except 1 meter at Twerton
+  #   }
+  #  ]
+  def override_zero_whole_days_electricity_readings_rules(rules)
+    rule_dates = rule_override_dates(rules, :override_zero_whole_days_electricity_readings, override_field = :override)
+
+    zero_dates = identify_all_zero_reading_days(rule_dates).uniq
+
+    override_zero_whole_days_electricity_readings(zero_dates)
+  end
+
+  def rule_override_dates(rules, rule_type, override_field = :override)
+    matching_rules_arr_to_hash = rules.select { |r| r.key?(rule_type) }
+    matching_rules = default_rules(matching_rules_arr_to_hash.map { |r| r[rule_type] }, override_field)
+
+    defaults     = matching_rules.select { |r| r[:default] == true }
+    non_defaults = matching_rules.select { |r| r[:default] != true }
+
+    all_rules = [defaults, non_defaults].flatten
+
+    application_dates = resolve_rule_override_dates(all_rules)
+
+     # ap summarise_date_ranges(application_dates) # keep use for future debugging
+
+    application_dates
+  end
+
+  def summarise_date_ranges(dates)
+    drs = dates.slice_when do |prev, curr|
+      prev + 1 != curr
+    end
+
+    drs.map { |ds| ds.first..ds.last }
+  end
+
+  def resolve_rule_override_dates(rules)
+    dates = []
+
+    # assumes meter attributes appear in defined order from front end (false assumption?)
+    rules.each do |rule|
+      if rule[:override]
+        dates += (rule[:start_date]..rule[:end_date]).to_a
+      else
+        dates.reject! { |d| d.between?(rule[:start_date], rule[:end_date]) }
+      end
+    end
+
+    dates
+  end
+
+  def default_rules(rules, override_field)
+    rules.map { |r| default_rule(r, override_field) }
+  end
+
+  def default_rule(rule, override_field)
+    if rule.nil?
+      {
+        start_date: @amr_data.start_date,
+        end_date:   @amr_data.end_date,
+        override:   true
+      }
+    else
+      {
+        start_date: rule[:start_date] || @amr_data.start_date,
+        end_date:   rule[:end_date]   || @amr_data.end_date,
+        override:   rule[override_field] == true || rule[override_field].nil?
+      }
+    end
+  end
+
+  def override_zero_whole_days_electricity_readings(zero_days)
+    zero_days.each do |date|
+      @amr_data.delete(date)
+    end
+
+    substituted_days = zero_days.map do |date|
+      substitute_missing_electricity_data(date, 'Z')
+    end.to_h
+
+    substituted_days.each do |date, one_days_data|
+      @amr_data.add(date, one_days_data)
+    end
+  end
+
+  def identify_all_zero_reading_days(dates)
+    dates.select do |date|
+      @amr_data.date_exists?(date) && @amr_data.one_days_data_x48(date).all?(&:zero?)
+    end
+  end   
 
   # [1, -1, 2, -2 etc.]
   def alternating_search_days_offset
@@ -661,40 +746,6 @@ class ValidateAMRData
            daytype(substitute_date) == missing_daytype
           return [date, create_substituted_gas_data(date, substitute_date, sub_type_code)]
         end
-      end
-    end
-    logger.debug "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype} heating? #{heating_on}"
-    [date, nil]
-  end
-
-  # iterate put from missing data, looking for a similar day without missing data
-  # then adjust for temperature
-  def substitute_missing_gas_data_deprecated(date, sub_type_code)
-    heating_on = heating_model.heat_on_missing_data?(date)
-    missing_daytype = daytype(date)
-    avg_temperature = average_temperature(date)
-
-    (1..MAXSEARCHRANGEFORCORRECTEDDATA).each do |days_offset|
-      # look for similar day after the missing date
-      day_after = date + days_offset
-
-      if day_after <= @amr_data.end_date && @amr_data.date_exists?(day_after)
-        temperature_after = average_temperature(day_after)
-        if heating_on == heating_model.heat_on_missing_data?(day_after) &&
-            within_temperature_range?(avg_temperature, temperature_after) &&
-            daytype(day_after) == missing_daytype
-          return [date, create_substituted_gas_data(date, day_after, sub_type_code)]
-        end
-      end
-      # look for similar day before the missing date
-      day_before = date - days_offset
-      temperature_before = average_temperature(day_before)
-      if day_before >= @amr_data.start_date &&
-          @amr_data.date_exists?(day_before) &&
-          heating_on == heating_model.heat_on_missing_data?(day_before) &&
-          within_temperature_range?(avg_temperature, temperature_before) &&
-          daytype(day_before) == missing_daytype
-        return [date, create_substituted_gas_data(date, day_before, sub_type_code)]
       end
     end
     logger.debug "Error: Unable to find suitable substitute for missing day of gas data #{date} temperature #{avg_temperature.round(0)} daytype #{missing_daytype} heating? #{heating_on}"
