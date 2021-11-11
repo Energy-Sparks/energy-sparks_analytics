@@ -9,6 +9,10 @@ class SolarPVPanelConfiguration
     parse_meter_attributes_configuration(meter_attributes_config)
   end
 
+  def first_installation_date
+    config_by_date_range.keys.first.first
+  end
+
   def degraded_kwp(date, override_key = :override_generation)
     @degraded_kwp ||= {}
     @degraded_kwp[date] ||= {}

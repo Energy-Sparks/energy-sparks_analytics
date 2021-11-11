@@ -224,6 +224,16 @@ module Dashboard
       solar_pv_sub_meters_to_be_aggregated > 0
     end
 
+    def first_solar_pv_panel_installation_date
+      if sheffield_simulated_solar_pv_panels?
+        @solar_pv_setup.first_installation_date
+      elsif solar_pv_real_metering?
+        @amr_data.start_date
+      else
+        nil
+      end
+    end
+
     def sheffield_simulated_solar_pv_panels?
       !@solar_pv_setup.nil? && @solar_pv_setup.instance_of?(SolarPVPanels)
     end

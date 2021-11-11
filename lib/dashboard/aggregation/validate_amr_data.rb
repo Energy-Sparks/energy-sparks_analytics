@@ -10,6 +10,7 @@
 #   - and if its heat/gas data then it adjusts for temperature
 class ValidateAMRData
   class NotEnoughTemperaturedata < StandardError; end
+  class UnexpectedGroupRule < StandardError; end
 
   include Logging
 
@@ -17,7 +18,9 @@ class ValidateAMRData
   MAXGASAVGTEMPDIFF = 5 # max average temperature difference over which to adjust temperatures
   MAXSEARCHRANGEFORCORRECTEDDATA = 100
   NO_MODEL = 0 # model calc failed
+
   attr_reader :data_problems, :meter_id
+
   def initialize(meter, max_days_missing_data, holidays, temperatures)
     @amr_data = meter.amr_data
     @meter = meter
@@ -51,6 +54,7 @@ class ValidateAMRData
     correct_holidays_with_adjacent_academic_years
     final_missing_data_set_to_small_negative
     @amr_data.summarise_bad_data
+    @amr_data.summarise_bad_data_stdout if debug?
     if debug_analysis
       puts "After validation #{missing_data} missing items of data"
       ap missing_data_stats
@@ -60,6 +64,8 @@ class ValidateAMRData
   end
 
   private
+
+  def debug?; false && [2199989617206].include?(@meter.mpxn.to_i) end
 
   def heating_model
     @heating_model ||= create_heating_model
@@ -81,14 +87,57 @@ class ValidateAMRData
   end
 
   def meter_corrections
-    unless @meter.meter_correction_rules.nil?
-      @meter.meter_correction_rules.each do |rule|
-        apply_one_meter_correction(rule, @meter.meter_correction_rules)
+    return if @meter.meter_correction_rules.nil?
+
+    single_rules, grouped_rules = split_into_single_and_grouped_rules(@meter.meter_correction_rules)
+
+    apply_single_rules(single_rules)
+
+    apply_grouped_rules(grouped_rules)
+  end
+
+  def split_into_single_and_grouped_rules(rules)
+    [
+      rules.select { |rule| !grouped_rule?(rule) },
+      rules.select { |rule|  grouped_rule?(rule) }
+    ]
+  end
+
+  def grouped_rule?(rule)
+    rule.is_a?(Hash) &&
+    !(%i[override_zero_days_electricity_readings] & rule.keys).empty?
+  end
+
+  def apply_single_rules(single_rules)
+    single_rules.each do |rule|
+      apply_one_meter_correction(rule)
+    end
+  end
+
+  def apply_grouped_rules(grouped_rules)
+    rules_grouped_by_type = group_rules_by_type(grouped_rules)
+    rules_grouped_by_type.each do |type, rules|
+      case type
+      when :override_zero_days_electricity_readings
+        override_zero_days_electricity_readings_rules(rules)
+      else
+        raise UnexpectedGroupRule, "Unexpected rule type #{type}"
       end
     end
   end
 
-  def apply_one_meter_correction(rule, rules)
+  def group_rules_by_type(grouped_rules)
+    groups = {}
+    grouped_rules.each do |rule|
+      rule.each do |type, config|
+        groups[type] ||= []
+        groups[type].push({ type => config })  
+      end
+    end
+    groups
+  end
+
+  def apply_one_meter_correction(rule)
     logger.debug '-' * 80
     logger.debug "Manually defined meter corrections: #{rule}"
     if rule.is_a?(Symbol) && rule == :set_all_missing_to_zero
@@ -123,7 +172,8 @@ class ValidateAMRData
     elsif rule.key?(:set_missing_data_to_zero)
       zero_missing_data_in_date_range(
         rule[:set_missing_data_to_zero][:start_date],
-        rule[:set_missing_data_to_zero][:end_date]
+        rule[:set_missing_data_to_zero][:end_date],
+        rule[:set_missing_data_to_zero][:zero_up_until_yesterday]
       )
     elsif rule.key?(:auto_insert_missing_readings)
       if (rule[:auto_insert_missing_readings].is_a?(Symbol) && # backwards compatibility
@@ -152,10 +202,6 @@ class ValidateAMRData
         'X',
         true
       )
-    elsif rule.key?(:override_zero_days_electricity_readings)
-      # called multiple times, but as applied to all raules of this type, only the 1st call does work
-      # difficult to fix without restructuring, removing all rules of this type
-      override_zero_days_electricity_readings_rules(rules)
     elsif rule.key?(:extend_meter_readings_for_substitution)
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
@@ -521,7 +567,11 @@ class ValidateAMRData
     end
   end
 
-  def zero_missing_data_in_date_range(start_date, end_date)
+  def zero_missing_data_in_date_range(sd, ed, zero_up_until_yesterday)
+    start_date = default_start_date(sd)
+    end_date   = default_end_date(ed, zero_up_until_yesterday)
+    zero_up_until_yesterday ||= false
+
     logger.info "Setting missing data between #{start_date} and #{end_date} to zero"
     (start_date..end_date).each do |date|
       if @amr_data.date_missing?(date)
@@ -529,6 +579,18 @@ class ValidateAMRData
         zero_data_day = OneDayAMRReading.new(meter_id, date, 'ZMDR', nil, DateTime.now, zero_data)
         @amr_data.add(date, zero_data_day)
       end
+    end
+  end
+
+  def default_start_date(sd_attribute)
+    sd_attribute || @amr_data.start_date
+  end
+
+  def default_end_date(ed_attribute, zero_up_until_yesterday)
+    if zero_up_until_yesterday
+      ed_attribute || Date.today - 1
+    else
+      ed_attribute || @amr_data.end_date
     end
   end
 
@@ -607,8 +669,13 @@ class ValidateAMRData
   end
 
   def substitute_missing_electricity_data(date, sub_type_code)
-    if @meter.solar_pv_panels?
-      substitute_missing_solar_mains_meter_data(date, sub_type_code, 'E')
+    if @meter.solar_pv_panels? && date >= @meter.first_solar_pv_panel_installation_date
+      date, subbed_reading = substitute_missing_solar_mains_meter_data(date, sub_type_code, 's')
+      if subbed_reading.nil?
+        substitute_missing_data(date, sub_type_code, 'E')
+      else
+        [date, subbed_reading]
+      end
     else
       substitute_missing_data(date, sub_type_code, 'E')
     end
@@ -640,6 +707,8 @@ class ValidateAMRData
     missing_daytype = daytype(date)
     alternating_search_days_offset(days_range).each do |days_offset|
       substitute_date = date + days_offset
+      next unless @amr_data.date_exists?(substitute_date) || substitute_date < @meter.first_solar_pv_panel_installation_date
+
       if original_matching_substitute_date?(date, substitute_date) && similar_solar_pv_day?(date, substitute_date, similar_pv_criteria)
         return [date, create_substituted_data(date, substitute_date, sub_type_code, fuel_code)]
       end
@@ -668,16 +737,18 @@ class ValidateAMRData
   #   }
   #  ]
   def override_zero_days_electricity_readings_rules(rules)
-    rule_dates = rule_override_dates(rules, :override_zero_days_electricity_readings, override_field = :override)
+    ap rules if debug?
 
-    zero_dates = identify_all_zero_reading_days(rule_dates).uniq
+    rule_dates = rule_override_dates(rules, :override_zero_days_electricity_readings)
+
+    zero_dates = identify_zero_or_partially_reading_days(rule_dates)
 
     override_zero_days_electricity_readings(zero_dates)
   end
 
-  def rule_override_dates(rules, rule_type, override_field = :override)
+  def rule_override_dates(rules, rule_type)
     matching_rules_arr_to_hash = rules.select { |r| r.key?(rule_type) }
-    matching_rules = default_rules(matching_rules_arr_to_hash.map { |r| r[rule_type] }, override_field)
+    matching_rules = default_rules(matching_rules_arr_to_hash.map { |r| r[rule_type] })
 
     defaults     = matching_rules.select { |r| r[:default] == true }
     non_defaults = matching_rules.select { |r| r[:default] != true }
@@ -686,13 +757,11 @@ class ValidateAMRData
 
     application_dates = resolve_rule_override_dates(all_rules)
 
-    # ap summarise_date_ranges(application_dates.keys) # keep use for future debugging
-
     application_dates
   end
 
   def override_rule?(val)
-    [true, :force, :intelligent_solar].include?(val)
+    [true, :on, :intelligent_solar].include?(val)
   end
 
   def summarise_date_ranges(dates)
@@ -720,7 +789,7 @@ class ValidateAMRData
     dates
   end
 
-  def default_rules(rules, override_field)
+  def default_rules(rules, override_field: :override)
     rules.map { |r| default_rule(r, override_field) }
   end
 
@@ -741,12 +810,12 @@ class ValidateAMRData
   end
 
   def override_zero_days_electricity_readings(zero_days)
-    zero_days.each do |date|
+    zero_days.keys.each do |date|
       @amr_data.delete(date)
     end
 
-    substituted_days = zero_days.map do |date|
-      substitute_missing_electricity_data(date, 'Z')
+    substituted_days = zero_days.map do |date, override_type|
+      substitute_missing_electricity_data(date, override_type == :all ? 'Z' : 'z')
     end.to_h
 
     substituted_days.each do |date, one_days_data|
@@ -754,46 +823,54 @@ class ValidateAMRData
     end
   end
 
-  def identify_all_zero_reading_days(dates)
-    dates.select do |date, override|
-      if override == :intelligent_solar && @meter.solar_pv_panels?
-        has_zero_readings_at_night?(date)
+  def identify_zero_or_partially_reading_days(dates)
+    dates.map do |date, override|
+      if @amr_data.date_exists?(date) && @amr_data.one_days_data_x48(date).all?(&:zero?)
+        [date, :all]
+      elsif override == :intelligent_solar && @meter.solar_pv_panels? && has_zero_readings_at_night?(date)
+          [date, :partial]
       else
-        @amr_data.date_exists?(date) && @amr_data.one_days_data_x48(date).all?(&:zero?)
+        nil
       end
-    end.keys
+    end.compact.to_h
   end
 
-  def has_zero_readings_at_night?(date, margin_kw = 0.20)
-    night_half_hours = (0..47).map { |hh_i| !daytime?(DateTimeHelper.datetime(date, hh_i)) }
+  def has_zero_readings_at_night?(date, margin_watts = 20)
+    kw_margin = margin_watts / 1000.0
+    night_half_hours = nighttime_half_hours(date)
 
     zero_night_readings = night_half_hours.map.with_index do |night, hh_i|
       @amr_data.date_exists?(date) &&
       night_half_hours[hh_i] &&
-      @amr_data.kwh(date, hh_i) < (margin_kw * 2.0) # v. kWh per half hour
-    end.count(true)
+      @amr_data.kwh(date, hh_i) < (kw_margin / 2.0) # v. kWh per half hour
+    end
 
-    percent_zero_night_readings = zero_night_readings / night_half_hours.length
+    zero_night_readings_count = zero_night_readings.count(true)
+
+    percent_zero_night_readings = zero_night_readings_count.to_f / night_half_hours.length
 
     percent_zero_night_readings > 0.1 # more than 10% zero
   end
 
-  # check for sunrise (margin = hours after sunrise, before sunset test applied)
-  def daytime?(datetime, margin_hours = -2.0)
+  # rather than querying sunrise and sunset for each half hour as used
+  # elsewhere in the code, do in 1 go for the whole day
+  def nighttime_half_hours(date, margin_hours = -1.5)
     latitude  = @meter.meter_collection.latitude
     longitude = @meter.meter_collection.longitude
 
     sun_times = SunTimes.new
 
-    sunrise = sun_times.rise(datetime, latitude, longitude)
+    sunrise = sun_times.rise(date, latitude, longitude)
     sr_criteria = sunrise + 60 * 60 * margin_hours
-    sr_criteria_dt = DateTime.parse(sr_criteria.to_s) # crudely convert to datetime, avoid time as very slow on Windows
-
-    sunset = sun_times.set(datetime, latitude, longitude)
+    hh_sunrise = DateTimeHelper.half_hour_index(sr_criteria)
+    
+    sunset = sun_times.set(date, latitude, longitude)
     ss_criteria = sunset - 60 * 60 * margin_hours
-    ss_criteria_dt = DateTime.parse(ss_criteria.to_s) # crudely convert to datetime, avoid time as very slow on Windows
+    hh_sunset = DateTimeHelper.half_hour_index(ss_criteria)
 
-    datetime > sr_criteria_dt && datetime < ss_criteria_dt
+    nighttime_hh = Array.new(hh_sunrise, true) + Array.new(hh_sunset - hh_sunrise, false)
+    nighttime_hh += Array.new(48 - nighttime_hh.length, true)
+    nighttime_hh
   end
 
   # [1, -1, 2, -2 etc.]
@@ -835,7 +912,7 @@ class ValidateAMRData
 
   def create_substituted_data(date, adjusted_date, sub_type_code, fuel_code)
     amr_day_type = day_type_to_amr_type_letter(daytype(date))
-    sub_type = fuel_code  + sub_type_code + amr_day_type + '1'
+    sub_type = fuel_code + sub_type_code + amr_day_type + '1'
     substitute_data = @amr_data.days_kwh_x48(adjusted_date).deep_dup
     OneDayAMRReading.new(meter_id, date, sub_type, adjusted_date, DateTime.now, substitute_data)
   end

@@ -497,6 +497,33 @@ class AMRData < HalfHourlyData
     logger.info "bad non finite data on these dates: #{bad_dates.join(';')}" unless bad_dates.empty?
   end
 
+  def summarise_bad_data_stdout
+    date, one_days_data = self.first
+    puts '=' * 80
+    puts "Bad data for meter #{one_days_data.meter_id}"
+    puts "Valid data between #{start_date} and #{end_date}"
+    key, _value = self.first
+    if key < start_date
+      puts "Ignored data between #{key} and #{start_date} - because of long gaps"
+    end
+    bad_data_stats = bad_data_count
+    percent_bad = 100.0
+    if bad_data_count.key?('ORIG')
+      percent_bad = (100.0 * (length - bad_data_count['ORIG'].length)/length).round(1)
+    end
+    puts "bad data summary: #{percent_bad}% substituted"
+    bad_data_count.each do |type, dates|
+      type_description = sprintf('%-60.60s', OneDayAMRReading.amr_types[type][:name])
+      puts " #{type}: #{type_description} * #{dates.length}"
+      if type != 'ORIG'
+        cpdp = CompactDatePrint.new(dates)
+        cpdp.print
+      end
+    end
+    bad_dates = dates_with_non_finite_values
+    puts "bad non finite data on these dates: #{bad_dates.join(';')}" unless bad_dates.empty?
+  end
+
   def dates_with_non_finite_values(sd = start_date, ed = end_date)
     list = []
     (sd..ed).each do |date|
