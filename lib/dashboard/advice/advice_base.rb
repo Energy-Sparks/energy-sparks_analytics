@@ -430,7 +430,7 @@ class AdviceBase < ContentBase
     %q(
       <p>
         To help further understand this analysis, the analysis is now
-        further broken down to individual meter level:
+        broken down to individual meter level:
       </p>
     )
   end

@@ -334,7 +334,7 @@ class AMRData < HalfHourlyData
     baseload_kw_between_half_hour_indices(date, 41, 47)
   end
 
-  def average_overnight_baseload_kw_date_range(date1, date2)
+  def average_overnight_baseload_kw_date_range(date1 = start_date, date2 = end_date)
     overnight_baseload_kwh_date_range(date1, date2) / (date2 - date1 + 1)
   end
 
@@ -404,7 +404,7 @@ class AMRData < HalfHourlyData
   end
 
   def peak_kw(date)
-    days_kwh_x48(date).sort.last * 2.0 # 2.0 = half hour kWh to kW
+    days_kwh_x48(date).max * 2.0 # 2.0 = half hour kWh to kW
   end
 
   def peak_kw_date_range_with_dates(date1 = start_date, date2 = end_date, top_n = 1)

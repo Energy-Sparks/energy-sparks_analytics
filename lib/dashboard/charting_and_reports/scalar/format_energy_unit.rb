@@ -143,6 +143,14 @@ class FormatEnergyUnit
     formatted_val
   end
 
+  def self.percent_to_1_dp(val, medium = :html)
+    if medium == :html
+      sprintf('%.1f', val * 100.0) + UNIT_DESCRIPTION_HTML[:percent]
+    else
+      sprintf('%.1f%', val * 100.0)
+    end
+  end
+
   def self.format_pound_range(range, medium, user_numeric_comprehension_level)
     if ((range.last - range.first) / range.last).magnitude < 0.05 ||
       (range.first.magnitude < 0.005 && range.last.magnitude < 0.005)

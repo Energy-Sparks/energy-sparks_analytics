@@ -7,13 +7,17 @@ class AverageSchoolCalculator
     calculate_school_amr_data(type: type)
   end
 
+  def normalised_amr_data(type:, fuel_type:)
+    calculate_school_amr_data(type: type, meter: @school.aggregate_meter(fuel_type), pupils: 1)
+  end
+
   private
 
   def calculate_school_amr_data(type: :benchmark, meter: @school.aggregated_electricity_meters, pupils: @school.number_of_pupils)
     school_types = averaged_school_type_map(@school.school_type)
     interpolators = school_types.map do |school_type|
       # interpolators take ~3 ms to setup, so fast enough
-      raw_data = AverageSchoolData.new.raw_data[type][school_type.to_sym]
+      raw_data = AverageSchoolData.new.raw_data[:electricity][type][school_type.to_sym]
       create_14_months_of_interpolations(raw_data)
     end
 
