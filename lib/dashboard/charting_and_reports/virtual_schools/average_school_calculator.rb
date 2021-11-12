@@ -1,4 +1,6 @@
 class AverageSchoolCalculator
+  class UnexpectedSchoolTypeException < StandardError;  end
+
   def initialize(school)
     @school = school
   end
@@ -52,7 +54,10 @@ class AverageSchoolCalculator
       mixed_primary_and_secondary:  [ :primary, :secondary ],
       middle:                       [ :primary, :secondary ],
       infant:                       [ :primary ],
+      junior:                       [ :primary ],
     }
+
+    raise UnexpectedSchoolTypeException, "Unknown school type #{school_type}" unless school_map.key?(school_type.to_sym)
 
     school_map[school_type.to_sym]
   end
