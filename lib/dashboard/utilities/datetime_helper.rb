@@ -66,8 +66,13 @@ module DateTimeHelper
 
   def self.date_and_half_hour_index(datetime)
     date = Date.new(datetime.year, datetime.month, datetime.day)
-    index = datetime.hour * 2 + (datetime.minute >= 30 ? 1 : 0)
+    index = datetime.hour * 2 + (datetime.min >= 30 ? 1 : 0)
     [date, index]
+  end
+
+  def self.half_hour_index(datetime)
+    _date, index = date_and_half_hour_index(datetime)
+    index
   end
 
   def self.time_to_date_and_half_hour_index(time)

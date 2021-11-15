@@ -41,6 +41,36 @@ class OneDayAMRReading
     'EXW1'  => { name: 'Override electricity - substituted weekend'},
     'EXh1'  => { name: 'Override electricity - substituted weekend/holiday'},
     'EXH1'  => { name: 'Override electricity - substituted holiday'},
+
+    'sSS1'  => { name: 'Missing electricity - substituted school day (solar day match)'},
+    'sSW1'  => { name: 'Missing electricity - substituted weekend (solar day match)'},
+    'sSh1'  => { name: 'Missing electricity - substituted weekend/holiday (solar day match)'},
+    'sSH1'  => { name: 'Missing electricity - substituted holiday (solar day match)'},
+    'sXS1'  => { name: 'Override electricity - substituted school day (solar day match)'},
+    'sXW1'  => { name: 'Override electricity - substituted weekend (solar day match)'},
+    'sXh1'  => { name: 'Override electricity - substituted weekend/holiday (solar day match)'},
+    'sXH1'  => { name: 'Override electricity - substituted holiday (solar day match)'},
+
+    'EZS1'  => { name: 'Substitute electricity school day with all zero data'},
+    'EZW1'  => { name: 'Substitute electricity substituted weekend with all zero data'},
+    'EZh1'  => { name: 'Substitute electricity substituted weekend/holiday with all zero data'},
+    'EZH1'  => { name: 'Substitute electricity substituted holiday with all zero data'},
+
+    'EzS1'  => { name: 'Substitute electricity school day with zero data at night'},
+    'EzW1'  => { name: 'Substitute electricity substituted weekend with zero data at night'},
+    'Ezh1'  => { name: 'Substitute electricity substituted weekend/holiday zero data at night'},
+    'EzH1'  => { name: 'Substitute electricity substituted holiday zero data at night'},
+
+    'sZS1'  => { name: 'Substitute electricity school day with all zero data matched to solar day'},
+    'sZW1'  => { name: 'Substitute electricity substituted weekend with all zero data matched to solar day'},
+    'sZh1'  => { name: 'Substitute electricity substituted weekend/holiday with all zero data  matched to solar day'},
+    'sZH1'  => { name: 'Substitute electricity substituted holiday with all zero data matched to solar day'},
+
+    'szS1'  => { name: 'Substitute electricity school day with zero data at night matched to solar day'},
+    'szW1'  => { name: 'Substitute electricity substituted weekend with zero data at night matched to solar day'},
+    'szh1'  => { name: 'Substitute electricity substituted weekend/holiday with zero data at night matched to solar day'},
+    'szH1'  => { name: 'Substitute electricity substituted holiday with zero data at night matched to solar day'},
+
     'ESBH'  => { name: 'Missing electricity - substituted holiday'},
     'BGG1'  => { name: 'Gap too big - ignored all previous days'},
     'BGG2'  => { name: 'Gap too big - ignored all previous days'},

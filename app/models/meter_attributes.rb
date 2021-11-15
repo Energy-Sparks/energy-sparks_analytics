@@ -54,8 +54,9 @@ class MeterAttributes
     name 'Meter correction > Set missing data to zero'
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        start_date: MeterAttributeTypes::Date.define(required: true),
-        end_date:   MeterAttributeTypes::Date.define(required: true)
+        start_date:               MeterAttributeTypes::Date.define(required: false),
+        end_date:                 MeterAttributeTypes::Date.define(required: false),
+        zero_up_until_yesterday:  MeterAttributeTypes::Boolean.define(required: false, hint: 'if set true will set zero values up until yesterday, else up until the last meter reading')
       }
     )
   end
@@ -69,6 +70,20 @@ class MeterAttributes
       structure: {
         start_date: MeterAttributeTypes::Date.define(required: true),
         end_date:   MeterAttributeTypes::Date.define(required: true)
+      }
+    )
+  end
+
+  class OverrideZeroDays < MeterAttributeTypes::AttributeBase
+    id  :override_zero_days_electricity_readings
+    key :override_zero_days_electricity_readings
+    aggregate_over :meter_corrections
+    name 'Meter correction > Override All Zero Days'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date: MeterAttributeTypes::Date.define,
+        end_date:   MeterAttributeTypes::Date.define,
+        override:   MeterAttributeTypes::Date.define(allowed_values: [:on, :intelligent_solar, :off])
       }
     )
   end
@@ -106,23 +121,6 @@ class MeterAttributes
     name 'Meter correction > Readings start date'
     structure MeterAttributeTypes::Date.define(required: true)
   end
-
-=begin
-# deprecated PH 13Apr2021
-  class OverrideWithSyntheticSheffieldPVData < MeterAttributeTypes::AttributeBase
-    id :meter_corrections_use_sheffield_pv_data
-    key :set_to_sheffield_pv_data
-    aggregate_over :meter_corrections
-    name 'Meter correction > Override solar pv production data with Sheffield University data'
-
-    structure MeterAttributeTypes::Hash.define(
-      structure: {
-        start_date:         MeterAttributeTypes::Date.define(required: true),
-        end_date:           MeterAttributeTypes::Date.define(required: true),
-      }
-    )
-  end
-=end
 
   class ReadingsEndDate < MeterAttributeTypes::AttributeBase
     id :meter_corrections_readings_end_date

@@ -22,6 +22,10 @@ class SolarPVPanels
     @synthetic_sheffield_solar_pv_yields = synthetic_sheffield_solar_pv_yields
   end
 
+  def first_installation_date
+    @solar_pv_panel_config.first_installation_date
+  end
+
   def process(pv_meter_map, meter_collection)
     create_generation_data(pv_meter_map, false)
     create_export_data(pv_meter_map, meter_collection)
