@@ -84,9 +84,9 @@ class RunAdultDashboard < RunCharts
 
     return if calculation_failed?(advice, page)
 
-    if advice.has_structured_content?
+    if advice.has_structured_content?(user_type: control[:user])
       content += [ accordion_style_css ]
-      advice.structured_content.each do |component_advice|
+      advice.structured_content(user_type: control[:user]).each do |component_advice|
         content += accordion_html(component_advice[:title], component_advice[:content])
       end
     else

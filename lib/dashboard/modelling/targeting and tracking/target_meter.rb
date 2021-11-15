@@ -7,6 +7,9 @@ class TargetMeter < Dashboard::Meter
   MAX_MISSING_PROFILES_TO_IGNORE = 4
   include Logging
   attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter, :synthetic_meter
+  
+  # TODO(PH, 26Oct2021) - inherit from SyntheticSchool, replace super() call
+  #                     - possibly replace CO2 and cost calcs through inheritance
   def initialize(meter_to_clone, do_calculations = true)
     super(
       meter_collection: meter_to_clone.meter_collection,

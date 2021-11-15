@@ -23,7 +23,7 @@ class AdviceMeterBreakdownBase < AdviceBase
     @bdown_chart ||= charts[0]
   end
 
-  def content(user_type: nil)
+  def raw_content(user_type: nil)
     charts_and_html = []
     charts_and_html.push( { type: :html, content: '<h2>Breakdown of underlying meters</h2>' } )
     charts_and_html += debug_content
@@ -34,7 +34,6 @@ class AdviceMeterBreakdownBase < AdviceBase
     charts_and_html.push( { type: :html,       content: table_timescale_html } )
     charts_and_html.push( { type: :html,       content: table_breakdown_html } )
     charts_and_html.push( { type: :html,       content: table_comments } )
-    remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
   def rating
@@ -76,7 +75,6 @@ class AdviceMeterBreakdownBase < AdviceBase
 
   def table_breakdown_html
     start_date, end_date = one_year_start_end_dates
-    puts "Got here #{start_date} #{end_date}"
     table = MeterBreakdownTable.new(underlying_meters, start_date, end_date)
     '<p> ' + table.formatted_html + ' </p>'
   end

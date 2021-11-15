@@ -32,7 +32,7 @@ class CostAdviceBase < AdviceBase
     @rating ||= calculate_rating_from_range(1.0, 0.0, average_real_tariff_coverage_percent)
   end
 
-  def has_structured_content?
+  def has_structured_content?(user_type: nil)
     real_meters.length > 1
   end
 

@@ -24,7 +24,7 @@ class AdviceTargets < AdviceBase
     end
   end
 
-  def content(user_type: nil)
+  def raw_content(user_type: nil)
     charts_and_html = []
     charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.to_s.humanize}</h2>" } )
     charts_and_html += debug_content
@@ -52,8 +52,6 @@ class AdviceTargets < AdviceBase
     charts_and_html.push( { type: :html,  content: introduction_to_targeting_and_tracking } )
 
     charts_and_html.push( { type: :analytics_html,  content: targeting_and_tracking_debug_information } )
-
-    remove_diagnostics_from_html(charts_and_html, user_type)
   end
 
   private

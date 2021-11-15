@@ -72,7 +72,7 @@ class DashboardConfiguration
         }
       }
     },
-    electric_annual: {   
+    electric_annual: {
       name:                   'Overview of annual electricity consumption',
       content_class:          AdviceElectricityAnnual,
       excel_worksheet_name:   'ElectricityAnnual',
@@ -82,6 +82,13 @@ class DashboardConfiguration
         electricity_longterm_trend
         group_by_week_electricity_unlimited
         electricity_by_month_year_0_1
+        group_by_week_electricity_versus_benchmark
+      ],
+      # these charts are mixed
+      unsupported_in_front_end_example_benchmark_exemplar_charts: %i[
+        group_by_week_electricity_versus_benchmark_line
+        group_by_week_electricity_versus_benchmark_line_on_y2
+        electricity_by_day_of_week_tolerant_versus_benchmarks
       ],
       skip_chart_and_advice_if_fails: %i[electricity_by_month_year_0_1],
       promoted_variables: {
@@ -94,8 +101,14 @@ class DashboardConfiguration
           summary:                              :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ group_by_week_electricity ],
+        fuel_type:          :electricity
+      }
     },
-    electric_out_of_hours: {   
+    electric_out_of_hours: {
       name:                   'Your electricity use out of school hours',
       content_class:           AdviceElectricityOutHours,
       excel_worksheet_name:   'ElectricOutOfHours',
@@ -111,14 +124,23 @@ class DashboardConfiguration
           summary:                :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ electricity_by_day_of_week_tolerant ],
+        fuel_type:          :electricity
+      }
     },
-    baseload: {   
+    baseload: {
       name:                   'Your electricity baseload',
       content_class:           AdviceBaseload,
       excel_worksheet_name:   'Baseload',
+      # these charts aren't automatically interpreted, but picked
+      # out of this list by AdviceBaseload code:
       charts: %i[
         baseload_lastyear
         baseload
+        baseload_versus_benchmarks
       ],
       promoted_variables: {
         AlertElectricityBaseloadVersusBenchmark => {
@@ -131,8 +153,14 @@ class DashboardConfiguration
           summary:                            :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ baseload_lastyear ],
+        fuel_type:          :electricity
+      }
     },
-    refrigeration: {   
+    refrigeration: {
       name:                   'Experimental refrigeration analysis',
       content_class:           AdviceRefrigeration,
       excel_worksheet_name:   'Fridge',
@@ -152,7 +180,7 @@ class DashboardConfiguration
         }
       },
     },
-    electric_target: {   
+    electric_target: {
       name:                   'Setting and tracking targets for your electricity',
       content_class:           AdviceTargetsElectricity,
       excel_worksheet_name:   'TargetElectric',
@@ -177,7 +205,7 @@ class DashboardConfiguration
         }
       },
     },
-    electric_long_term_progress:  {   
+    electric_long_term_progress:  {
       name:                   'Electricity: long term',
       content_class:           AdviceElectricityLongTerm,
       excel_worksheet_name:   'ElectricLongTerm',
@@ -198,7 +226,7 @@ class DashboardConfiguration
         }
       },
     },
-    electric_recent_progress: {   
+    electric_recent_progress: {
       name:                   'Electricity: recent',
       content_class:           AdviceElectricityRecent,
       excel_worksheet_name:   'ElectricRecent',
@@ -227,6 +255,7 @@ class DashboardConfiguration
       excel_worksheet_name:   'ElectricIntraday',
       charts: %i[
         intraday_line_school_days_reduced_data
+        intraday_line_school_days_reduced_data_versus_benchmarks
         intraday_line_holidays
         intraday_line_weekends
         intraday_line_school_days_last5weeks
@@ -241,6 +270,12 @@ class DashboardConfiguration
           average_school_day_last_year_kw: :average_school_day_last_year_kw
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ intraday_line_school_days_reduced_data ],
+        fuel_type:          :electricity
+      }
     },
     electricity_profit_loss: {   
       name:                   'Electricity Costs',
@@ -271,6 +306,12 @@ class DashboardConfiguration
           summary:                              :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ group_by_week_gas ],
+        fuel_type:          :gas
+      } 
     },
     gas_out_of_hours: {   
       name:                   'Your gas use out of school hours',
@@ -289,6 +330,12 @@ class DashboardConfiguration
           summary:                :summary
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ gas_by_day_of_week_tolerant gas_heating_season_intraday ],
+        fuel_type:          :gas
+      } 
     },
     gas_long_term_progress:  {   
       name:                   'Gas: long term',
@@ -368,6 +415,12 @@ class DashboardConfiguration
       ],
       promoted_variables: {
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ gas_heating_season_intraday last_7_days_intraday_gas ],
+        fuel_type:          :gas
+      }
     },
     gas_profit_loss: {   
       name:                   'Gas Costs',
@@ -390,6 +443,12 @@ class DashboardConfiguration
           one_year_optimum_start_saving_£: :one_year_optimum_start_saving_£
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: nil }, # permission for all users
+        charts:             %i[ gas_heating_season_intraday_up_to_1_year ],
+        fuel_type:          :gas
+      }
     },
     boiler_control_seasonal: {
       name:                   'Seasonal Control',
@@ -404,6 +463,12 @@ class DashboardConfiguration
           one_year_saving_reduced_days_to_exemplar_£: :one_year_saving_reduced_days_to_exemplar_£
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ heating_on_off_by_week ],
+        fuel_type:          :gas
+      }
     },
     boiler_control_thermostatic: {
       name:                   'Thermostatic',
@@ -422,6 +487,12 @@ class DashboardConfiguration
           annual_saving_1_C_change_£: :annual_saving_1_C_change_£
         }
       },
+      meter_breakdown: {
+        presentation_style: :flat, # :structured || :flat
+        user_type:          { user_role: :analytics },
+        charts:             %i[ thermostatic_up_to_1_year ],
+        fuel_type:          :gas
+      }
     },
     boiler_control_frost: {
       name:                   'Frost',

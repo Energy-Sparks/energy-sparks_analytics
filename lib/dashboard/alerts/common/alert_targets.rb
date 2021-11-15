@@ -32,9 +32,9 @@ class AlertTargetBase < AlertAnalysisBase
         description: 'Percent change to date versus target',
         units: String
       },
-
       tracking_start_date: {
-        description: 'Start of a academic year date for tracking',
+        description: 'start date for targeting and tracking',
+        benchmark_code:   'trsd',
         units:  :date
       },
       tracking_end_date: {
@@ -227,11 +227,6 @@ class AlertTargetBase < AlertAnalysisBase
       average_target_to_date_percent: {
         description: 'weighted average target to date',
         units:  :percent
-      },
-      tracking_start_date: {
-        description: 'start date for targeting and tracking',
-        benchmark_code:   'trsd',
-        units:  :date
       },
       average_target_to_date_relative_percent: {
         description: 'weighted average target to date - relative, e.g. -5%',

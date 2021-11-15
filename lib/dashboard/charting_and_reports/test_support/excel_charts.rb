@@ -80,7 +80,7 @@ class ExcelCharts
     end
   end
 
-  def add_data_and_chart_to_excel_worksheet(worksheet, column_number, xaxis_data, data, chart, second_y_axis, chart_type, data_labels = nil, trendline = nil)
+  def add_data_to_excel_worksheet(worksheet, column_number, xaxis_data, data, chart, second_y_axis, chart_type, data_labels = nil, trendline = nil)
     start_column_number = column_number
     first_data_column = start_column_number
     max_data_rows = 0
@@ -194,12 +194,12 @@ class ExcelCharts
 
     @colours = ChartColour.new(graph_definition)
 
-    ap(graph_definition, limit: 500, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
-
     logger.error "Error: null graph definition" if graph_definition.nil?
 
+    x_data_1, x_data_2 = split_xdata(graph_definition[:x_data], graph_definition.dig(:configuration, :change_series_chart_configuration, :series_names))
+
     main_axisx = graph_definition[:x_axis].clone
-    main_axisdata = graph_definition[:x_data].clone
+    main_axisdata = x_data_1.clone
 
     chart1 = new_chart(graph_definition[:chart1_type], graph_definition[:chart1_subtype])
 
@@ -208,15 +208,15 @@ class ExcelCharts
     chart1.set_y_axis(name: clean_text(graph_definition[:y_axis_label]))
 
     if graph_definition[:chart1_type] == :pie # special case for pie charts, need to swap axis
-      main_axisx = graph_definition[:x_data].keys
+      main_axisx = x_data_1.keys
       main_axisdata = {}
       main_axisdata['No Dates'] = Array.new(main_axisx.length, 0.0)
       (0..main_axisx.length - 1).each do |i|
-        main_axisdata['No Dates'][i] = graph_definition[:x_data][main_axisx[i]][0]
+        main_axisdata['No Dates'][i] = x_data_1[main_axisx[i]][0]
       end
     end
 
-    column_number = add_data_and_chart_to_excel_worksheet(
+    column_number = add_data_to_excel_worksheet(
       worksheet,
       data_col_offset,
       main_axisx,
@@ -228,25 +228,54 @@ class ExcelCharts
       graph_definition[:trendlines] || nil
     )
 
-    # second set of data but on secondary y axis, but sharing the same xaxis
-    if graph_definition.key?(:y2_chart_type) && !graph_definition[:y2_chart_type].nil?
-      chart2 = new_chart(graph_definition[:y2_chart_type], graph_definition[:y2_chart_subtype])
-      _column_number = add_data_and_chart_to_excel_worksheet(
-        worksheet,
-        column_number,
-        nil,
-        graph_definition[:y2_data],
-        chart2,
-        true,
-        graph_definition[:chart1_type]
-      )
+    if !x_data_2.empty?
+      if !graph_definition.dig(:configuration, :change_series_chart_configuration, :chart1_type).nil?
+        chart_type = graph_definition[:configuration][:change_series_chart_configuration][:chart1_type]
+        chart_2nd_x_axis, column_number = create_chart_series(worksheet, column_number, main_axisx, x_data_2, chart_type)
+        chart1.combine(chart_2nd_x_axis)
+      end
+      if !graph_definition.dig(:configuration, :change_series_chart_configuration, :axis).nil?
+        y2_chart, column_number = create_chart_series(worksheet, column_number, main_axisx, x_data_2, :line, nil, true)
+        chart1.combine(y2_chart)
+      end
     end
 
-    chart1.combine(chart2) unless chart2.nil?
+    # second set of data but on secondary y axis, but sharing the same xaxis
+    if graph_definition.key?(:y2_chart_type) && !graph_definition[:y2_chart_type].nil?
+      y2_chart, _column_number = create_chart_series(worksheet, column_number, nil, graph_definition[:y2_data], graph_definition[:y2_chart_type], graph_definition[:y2_chart_subtype], true)
+      chart1.combine(y2_chart) unless y2_chart.nil?
+    end
 
-    # insert chart into Excel offset each time so multiple charts don;t overlap
+    # insert chart into Excel offset each time so multiple charts don't overlap
     chart_cell_start_ref = single_cell_reference(1, chart_row_offset, false, false)
     worksheet.insert_chart(chart_cell_start_ref, chart1, 12, 5, 1.5, 1.5)
+  end
+
+  def create_chart_series(worksheet, column_number, x_axis, x_data, chart_type, sub_type = nil, on_y2_axis = false)
+    chart = new_chart(chart_type, sub_type)
+      
+    column_number = add_data_to_excel_worksheet(
+      worksheet,
+      column_number,
+      x_axis,
+      x_data,
+      chart,
+      on_y2_axis,
+      chart_type,
+      nil,
+      nil
+    )
+
+    [chart, column_number]
+  end
+
+  def split_xdata(xdata, series_names)
+    series_names ||= []
+
+    [
+      xdata.reject { |series_name, data| series_names.include?(series_name) },
+      xdata.select { |series_name, data| series_names.include?(series_name) }
+    ]
   end
 
   def cell_reference(worksheet_name, col_num_start, row_number_start, col_num_end, row_number_end)

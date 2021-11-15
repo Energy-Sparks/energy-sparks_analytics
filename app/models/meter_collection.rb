@@ -279,6 +279,19 @@ class MeterCollection
     all_meters.select { |meter| !meter.synthetic_mpan_mprn? }.uniq{ |m| m.mpxn}
   end
 
+  def underlying_meters(fuel_type)
+    case fuel_type
+    when :electricity
+      @electricity_meters
+    when :gas
+      @heat_meters
+    when :storage_heater
+      @storage_heater_meters
+    else
+      []
+    end
+  end
+
   def adult_report_groups
     report_groups = []
     report_groups.push(:benchmark)                    if electricity? && !solar_pv_panels?
@@ -455,6 +468,11 @@ class MeterCollection
   def target_school(type = :day)
     @target_school ||= {}
     @target_school[type] ||= TargetSchool.new(self, type)
+  end
+
+  def benchmark_school(benchmark_type = :benchmark)
+    benchmark_school ||= {}
+    benchmark_school[benchmark_type] ||= BenchmarkSchool.new(self, benchmark_type: benchmark_type)
   end
 
   def reset_target_school_for_testing(type = :day)

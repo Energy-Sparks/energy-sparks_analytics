@@ -56,29 +56,22 @@ class AdviceGasIntraday < AdviceGasBase
   end
 end
 
-class AdviceGasBoilerMorningStart < AdviceGasBase
+class AdviceBoilerHeatingBase < AdviceGasBase
   def relevance
     super == :relevant &&  !non_heating_only? ? :relevant : :never_relevant
   end
 end
-class AdviceGasBoilerSeasonalControl < AdviceGasBase
-  def relevance
-    super == :relevant &&  !non_heating_only? ? :relevant : :never_relevant
-  end
-end
-class AdviceGasBoilerThermostatic < AdviceGasBase
-  def relevance
-    super == :relevant &&  !non_heating_only? ? :relevant : :never_relevant
-  end
-end
-class AdviceGasBoilerFrost < AdviceGasBase
+
+class AdviceGasBoilerMorningStart     < AdviceBoilerHeatingBase; end
+class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase; end
+class AdviceGasBoilerThermostatic     < AdviceBoilerHeatingBase; end
+
+class AdviceGasBoilerFrost < AdviceBoilerHeatingBase
   def rating
     5.0
   end
-  def relevance
-    super == :relevant  &&  !non_heating_only? ? :relevant : :never_relevant
-  end
 end
+
 class AdviceGasHotWater < AdviceGasBase
   def relevance
     super == :relevant &&  !heating_only? ? :relevant : :never_relevant

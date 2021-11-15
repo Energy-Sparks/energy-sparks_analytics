@@ -13,7 +13,7 @@ reports = ReportConfigSupport.new
 
 reports.load_school('St Marks Secondary', true) # dummy load to keep  report config happy
 
-exemplar_school = ExemplarSchool.new(name: 'Exemplar School 1', floor_area: 1200, number_of_pupils: 200)
+exemplar_school = ExemplarSchoolDeprecated.new(name: 'Exemplar School 1', floor_area: 1200, number_of_pupils: 200)
 
 exemplar_school.calculate()
 

@@ -19,6 +19,8 @@ class AdviceElectricityIntraday < AdviceElectricityBase
     case chart[:config_name]
     when :intraday_line_school_days_reduced_data
       super(chart, charts_and_html) if daytype_statistics[:schoolday] > 1
+    when :intraday_line_school_days_reduced_data_versus_benchmarks
+      super(chart, charts_and_html) if daytype_statistics[:schoolday] > 1
     when :intraday_line_holidays
       super(chart, charts_and_html) if daytype_statistics[:holiday] > 1
     when :intraday_line_weekends

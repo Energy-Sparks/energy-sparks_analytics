@@ -168,6 +168,10 @@ class DashboardChartAdviceBase
           SimulatorMiscOtherAdvice.new(school, chart_definition, chart_data, chart_symbol, chart_type)
     when  :targeting_and_tracking_monthly_electricity
           TargetingAndTrackingAdvice.new(school, chart_definition, chart_data, chart_symbol)
+    when :intraday_line_school_days_reduced_data_versus_benchmarks
+      AdviceElectricitySchoolDayIntradayBenchmarkChart.new(school, chart_definition, chart_data, chart_symbol)
+    when :group_by_week_electricity_versus_benchmark
+      AdviceElectricityAnnualBenchmarkChart.new(school, chart_definition, chart_data, chart_symbol)
     else
       res = DashboardEnergyAdvice.heating_model_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol)
       res = DashboardEnergyAdvice.solar_pv_advice_factory(chart_type, school, chart_definition, chart_data, chart_symbol) if res.nil?
@@ -1563,6 +1567,18 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
     @footer_advice = generate_html(footer_template, binding)
   end
 end
+
+require_relative '../virtual_schools/average_school_data_interpretation.rb'
+
+class AdviceElectricitySchoolDayIntradayBenchmarkChart < DashboardChartAdviceBase
+  def generate_advice
+    @header_advice = AverageSchoolData.new.introduction_to_intraday_benchmark_and_exemplar_charts +
+                     AverageSchoolData.new.benchmark_and_exemplar_rankings(@school)
+
+    @footer_advice = AverageSchoolData.new.addendum_to_intraday_benchmark_and_exemplar_charts
+  end
+end
+
 #==============================================================================
 class ElectricityMonthOnMonth2yearAdvice < DashboardChartAdviceBase
   attr_reader :fuel_type, :fuel_type_str

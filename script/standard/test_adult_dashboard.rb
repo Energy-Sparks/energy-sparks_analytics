@@ -19,10 +19,10 @@ script = {
                                 display_average_calculation_rate: true,
                                 summarise_differences: true,
                                 report_failed_charts:   :summary, # :detailed
-                                user: { user_role: :analytics, staff_role: nil },
+                                user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },
 
-                                no_pages: %i[electric_target gas_target storage_heater_target],
-                                pages: %i[underlying_electricity_meters_breakdown underlying_gas_meters_breakdown],
+                                no_pages: %i[electric_annual electric_intraday baseload], # boiler_control_morning_start_time],
+
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },

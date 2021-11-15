@@ -119,15 +119,19 @@ class ChartManager
       if reraise_exception
         raise
       else
-#2021-04-29 These calls are causing the Rails app to hang. Any call to
+#LD(2021-04-29) These calls are causing the Rails app to hang. Any call to
 #print or inspect the exception or stack trace cause a CPU spike and a hang
 #A Ctrl-C clears and execution continues. There's some issue with the Rails logger
 #and/or the exceptions raised here that are causing a problem. Needs further
 #investigation. But in testing these exceptions were all NoMethodError so
 #shouldn't really be caught here.
 #
-#        logger.info e.message
-#        logger.info e.backtrace
+        # PH(12Nov2021) - bug code back in just for analytics to aid debugging
+        if !Object.const_defined?('Rails')
+          logger.info e.message
+          logger.info e.backtrace
+        end
+
         nil
       end
     end
@@ -148,8 +152,8 @@ class ChartManager
     graph_definition[:config_name]    = chart_param
     graph_definition[:data_labels]    = aggregator.data_labels unless aggregator.data_labels.nil?
     graph_definition[:subtitle]       = aggregator.subtitle unless aggregator.subtitle.nil?
-    
-    graph_definition[:multi_chart_x_axis_ranges]  = aggregator.multi_chart_x_axis_ranges
+
+    graph_definition[:multi_chart_x_axis_ranges] = aggregator.multi_chart_x_axis_ranges
 
     if aggregator.y2_axis?
       graph_definition[:y2_chart_type] = :line
@@ -168,6 +172,7 @@ class ChartManager
     end
     # ap(graph_definition, limit: 20)
     graph_definition[:calculation_time] = calculation_time
+
     graph_definition
   end
 

@@ -49,6 +49,13 @@ class Aggregator
       end
     end
 
+    if include_benchmark?
+      @chart_config[:benchmark][:calculation_types].each do |calculation_type|
+        benchmark_school = @meter_collection.benchmark_school(calculation_type)
+        schools << benchmark_school
+      end
+    end
+
     determine_multi_school_chart_date_range(schools, @chart_config)
 
     [@chart_config, schools]
@@ -146,6 +153,10 @@ class Aggregator
 
   def include_target?
     @chart_config.key?(:target) && !@chart_config[:target].nil?
+  end
+
+  def include_benchmark?
+    @chart_config.key?(:benchmark) && !@chart_config[:benchmark].nil?
   end
 
   def show_only_target_school?
@@ -289,7 +300,7 @@ class Aggregator
     end
   end
 
-  def run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by = nil)
+  def run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
     saved_meter_collection = @meter_collection
     error_messages = []
     aggregations = []
@@ -307,7 +318,7 @@ class Aggregator
             {
               school:       school,
               period:       period,
-              aggregation:  run_one_aggregation(@chart_config, period)
+              aggregation:  run_one_aggregation(@chart_config, period, school.name)
             }
           )
         rescue EnergySparksNotEnoughDataException => e_
@@ -377,10 +388,19 @@ class Aggregator
     direction * (s1[:school].name <=> s2[:school].name)
   end
 
-  def run_one_aggregation(chart_config, period)
+  def run_one_aggregation(chart_config, period, school_name)
     chartconfig_copy = chart_config.clone
     chartconfig_copy[:timescale] = period
+    chartconfig_copy.merge!(benchmark_school_config_override(school_name))
     aggregate_period(chartconfig_copy)
+  end
+
+  def benchmark_school_config_override(school_name)
+    return {} if @chart_config.dig(:benchmark, :calculation_types).nil? || @chart_config.dig(:benchmark, :config).nil?
+    calc_types = @chart_config[:benchmark][:calculation_types].map(&:to_s)
+    return {} unless calc_types.include?(school_name)
+
+    @chart_config[:benchmark][:config]
   end
 
   def merge_multiple_charts(bucketed_period_data, schools)
@@ -394,7 +414,7 @@ class Aggregator
       school_name = '' if school_count <= 1
 
       @multi_chart_x_axis_ranges.push(x_axis_date_ranges)
-      
+
       bucketed_data.each do |series_name, x_data|
         new_series_name = series_name.to_s + time_description + school_name
         @bucketed_data[new_series_name] = x_data

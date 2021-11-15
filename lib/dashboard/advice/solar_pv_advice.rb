@@ -16,9 +16,8 @@ class AdviceSolarPV < AdviceElectricityBase
     { 'Summary' => { summary: { description: 'benefit of existing or potential pv summary', units: String } } }
   end
 
-  def content(user_type: nil)
-    content_info = @school.solar_pv_panels? ? super : solar_pv_benefit_content
-    remove_diagnostics_from_html(content_info, user_type)
+  def raw_content(user_type: nil)
+    @school.solar_pv_panels? ? super : solar_pv_benefit_content
   end
 
   def summary

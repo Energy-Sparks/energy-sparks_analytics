@@ -13,6 +13,10 @@ class AdviceBaseload < AdviceElectricityBase
     @bdown_longterm_chart ||= charts[1]
   end
 
+  def baseload_benchmark_exemplar_chart
+    charts[2]
+  end
+
   def baseload_longterm_chart_timescales
     self.class.chart_timescale_and_dates(baseload_longterm_chart)
   end
@@ -23,23 +27,27 @@ class AdviceBaseload < AdviceElectricityBase
 
   def content(user_type: nil)
     charts_and_html = []
-    charts_and_html.push( { type: :html, content: "<h2>Electricity Baseload#{multiple_meters_total}</h2>" } )
+    charts_and_html.push( { type: :html,           content: "<h2>Electricity Baseload#{multiple_meters_total}</h2>" } )
     charts_and_html += debug_content
-    charts_and_html.push( { type: :html,  content: statement_of_baseload } )
-    charts_and_html.push( { type: :html,  content: explanation_of_baseload } )
-    charts_and_html.push( { type: :html,  content: benefit_of_moving_to_exemplar_baseload } )
-    charts_and_html.push( { type: :chart, content: baseload_one_year_chart } )
-    charts_and_html.push( { type: :chart_name, content: baseload_one_year_chart[:config_name] } )
-    charts_and_html.push( { type: :html,  content: chart_drilldown_explanation } )
+    charts_and_html.push( { type: :html,           content: statement_of_baseload } )
+    charts_and_html.push( { type: :html,           content: explanation_of_baseload } )
+    charts_and_html.push( { type: :html,           content: benefit_of_moving_to_exemplar_baseload } )
+    charts_and_html.push( { type: :chart,          content: baseload_one_year_chart } )
+    charts_and_html.push( { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(baseload_one_year_chart[:config_name] ) } )
+    charts_and_html.push( { type: :chart_name,     content: baseload_one_year_chart[:config_name] } )
+    charts_and_html.push( { type: :html,           content: chart_drilldown_explanation } )
     charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
     if max_baseload_period_years > 1.1
-      charts_and_html.push( { type: :html,  content: "<h2>Electricity Baseload - Longer Term#{multiple_meters_total}</h2>" } )
-      charts_and_html.push( { type: :html,  content: longterm_chart_intro } )
-      charts_and_html.push( { type: :chart, content: baseload_longterm_chart } )
-      charts_and_html.push( { type: :chart_name, content: baseload_longterm_chart[:config_name] } )
-      charts_and_html.push( { type: :html,  content: longterm_chart_trend_should_be_downwards } )
+      charts_and_html.push( { type: :html,            content: "<h2>Electricity Baseload - Longer Term#{multiple_meters_total}</h2>" } )
+      charts_and_html.push( { type: :html,            content: longterm_chart_intro } )
+      charts_and_html.push( { type: :chart,           content: baseload_longterm_chart } )
+      charts_and_html.push( { type: :analytics_html,  content: AdviceBase.highlighted_dummy_chart_name_html(baseload_longterm_chart[:config_name]) } )
+      charts_and_html.push( { type: :chart_name,      content: baseload_longterm_chart[:config_name] } )
+      charts_and_html.push( { type: :html,            content: longterm_chart_trend_should_be_downwards } )
     end
+
+    charts_and_html += benchmark_exemplar_comparison
 
     # ap analysis_of_baseload(@school.aggregated_electricity_meters).flatten
 
@@ -200,5 +208,25 @@ class AdviceBaseload < AdviceElectricityBase
         analysis_of_baseload(info[:meter]).flatten
       ]
     end.flatten
+  end
+
+  def benchmark_exemplar_comparison
+    chart_name = baseload_benchmark_exemplar_chart[:config_name]
+    [
+      { type: :html,            content: "<h2>Comparison with benchmark and exemplar schools</h2>" },
+      { type: :html,            content: intro_to_benchmark_exemplar_comparisons },
+      { type: :analytics_html,  content: AdviceBase.highlighted_dummy_chart_name_html(chart_name) },
+      { type: :chart_name,      content: chart_name },
+      { type: :html,            content: addendum_to_benchmark_exemplar_comparisons }
+    ]
+  end
+
+  def intro_to_benchmark_exemplar_comparisons
+    AverageSchoolData.new.introduction_to_benchmark_and_exemplar_charts +
+    AverageSchoolData.new.benchmark_and_exemplar_rankings(@school)
+  end
+
+  def addendum_to_benchmark_exemplar_comparisons
+    AverageSchoolData.new.addendum_to_benchmark_and_exemplar_charts
   end
 end
