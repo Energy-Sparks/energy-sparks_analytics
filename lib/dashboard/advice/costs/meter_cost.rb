@@ -161,12 +161,12 @@ class MeterCost
 
   def intro_to_1_year_brokendown_chart
     text = %{
-      <h2>Your last year's Electricity bill components</h2>
+      <h2>Your last year's <%= @meter.fuel_type.to_s %> bill components</h2>
       <p>
       Last year's bill components were as follows:
       </p>
     }
-    { type: :html, content: text }
+    { type: :html, content: ERB.new(text).result(binding) }
   end
 
   def intro_to_1_year_brokendown_pie_chart
