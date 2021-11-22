@@ -83,7 +83,7 @@ class MeterAttributes
       structure: {
         start_date: MeterAttributeTypes::Date.define,
         end_date:   MeterAttributeTypes::Date.define,
-        override:   MeterAttributeTypes::Date.define(allowed_values: [:on, :intelligent_solar, :off])
+        override:   MeterAttributeTypes::Symbol.define(allowed_values: [:on, :intelligent_solar, :off])
       }
     )
   end
