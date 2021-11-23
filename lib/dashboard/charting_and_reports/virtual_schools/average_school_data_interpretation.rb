@@ -31,10 +31,10 @@ class AverageSchoolData
   def benchmark_and_exemplar_rankings(school)
     html = %(
       <p>
-        A &apos;benchmark&apos; school represents the 
-        <%= average_school_percent_html(:benchmark) %> best ranked <%= school.school_type.to_s %> school
-        and &apos;exemplar&apos; the 
-        <%= average_school_percent_html(:exemplar) %> best.
+        A &apos;benchmark&apos; school represents the
+        <%= average_school_percent_html(:benchmark) %> best ranked <%= school.school_type.to_s %> schools
+        and &apos;exemplar&apos; the
+        <%= average_school_percent_html(:exemplar) %> best <%= school.school_type.to_s %> schools.
       </p>
     )
     ERB.new(html).result(binding)
