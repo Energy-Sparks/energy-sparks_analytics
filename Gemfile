@@ -34,6 +34,8 @@ gem 'hashdiff', '~> 1.0.0'
 gem 'ruby-prof'
 gem "benchmark-memory"
 
+gem 'dotenv'
+
 # For tests
 group :test do
   gem 'rspec', '~> 3.8.0'
