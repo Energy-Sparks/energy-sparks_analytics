@@ -1,7 +1,8 @@
 class RunManagementSummaryTable < RunCharts
   attr_reader :html
-  def run_management_table(control)
+  def run_management_table(control, version)
     results = calculate
+    @version = version
     compare_results(control, results)
     @html = results[:html]
   end
@@ -9,7 +10,7 @@ class RunManagementSummaryTable < RunCharts
   private
 
   def calculate
-    content = ManagementSummaryTable.new(@school)
+    content = @version == 1 ? ManagementSummaryTable.new(@school) : ManagementSummaryTable2.new(@school)
     puts 'Invalid content' unless content.valid_content?
     content.analyse(nil)
     puts 'Content failed' unless content.make_available_to_users?
