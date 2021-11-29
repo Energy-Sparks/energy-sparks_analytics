@@ -10,7 +10,7 @@ class ManagementSummaryTable < ContentBase
     DECREASED_MESSAGE
   ]
   attr_reader :scalar
-  attr_reader :summary_table
+  attr_reader :summary_table, :summary_data
   attr_reader :calculation_worked
 
   def initialize(school)
