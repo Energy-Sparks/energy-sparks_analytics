@@ -17,8 +17,12 @@ class RunManagementSummaryTable < RunCharts
     {
       front_end_template_tables:      ManagementSummaryTable.front_end_template_tables,
       front_end_template_table_data:  content.front_end_template_table_data,
-      html:                           content.html
+      html:                           combined_html(content)
     }
+  end
+
+  def combined_html(content)
+    content.html + content.multirow_html + content.meter_range_html
   end
 
   def compare_results(control, results)

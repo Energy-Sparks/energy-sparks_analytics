@@ -48,7 +48,7 @@ class ManagementSummaryTable < ContentBase
     { 'Head teacher\'s energy summary' => TEMPLATE_VARIABLES}
   end
 
-  KWH_NOT_ENOUGH_IN_COL_FORMAT = { units: :kwh, substitute_nil: 'Not enough data' }
+  KWH_NOT_ENOUGH_IN_COL_FORMAT = { units: :kwh, substitute_nil: NOT_ENOUGH_DATA_MESSAGE }
 
   COLUMN_TYPES = [
     :fuel_type,
@@ -59,7 +59,7 @@ class ManagementSummaryTable < ContentBase
     :relative_percent, # or text saying 'No recent data'
     :£
   ] # needs to be kept in sync with instance table
-  
+
   TEMPLATE_VARIABLES = {
     summary_table: {
       description: 'Summary of annual per fuel consumption, annual change, 4 week change, saving to exemplar',
@@ -94,6 +94,14 @@ class ManagementSummaryTable < ContentBase
 
   def html
     HtmlTableFormatting.new(self.class.header_html, format_rows(data_by_fuel_type)).html
+  end
+
+  def multirow_html
+    format_to_html(summary_data)
+  end
+
+  def meter_range_html
+    format_meter_range_html(summary_data)
   end
 
   private
@@ -174,15 +182,87 @@ class ManagementSummaryTable < ContentBase
   def format_rows(rows, medium = :html)
     rows.map do |row|
       row.map do |_field_name, field|
-        if !field[:data].nil? && (field[:data] == NO_RECENT_DATA_MESSAGE || field[:data] == INCREASED_MESSAGE || field[:data] == DECREASED_MESSAGE)
-          field[:data]
-        elsif field[:data].nil?
-          NOT_ENOUGH_DATA_MESSAGE
-        else
-          FormatEnergyUnit.format(field[:units], field[:data], medium, false, false) rescue 'error'
-        end
+        format_field(field[:data], field[:units])
       end
     end
+  end
+
+  def format_field(data, units, medium = :html)
+    if !data.nil? && (data== NO_RECENT_DATA_MESSAGE || data == INCREASED_MESSAGE || data == DECREASED_MESSAGE)
+      data
+    elsif data.nil?
+      NOT_ENOUGH_DATA_MESSAGE
+    else
+      FormatEnergyUnit.format(units, data, medium, false, true) rescue 'error'
+    end
+  end
+
+  def format_to_html(summary_data)
+    header = ['', '', ' (kWh)','CO2 (kg)', 'Cost', 'Potential savings', '% Change', '']
+
+    rows = []
+
+    summary_data.each do |fuel_type, period_data|
+      rows.push([fuel_type.to_s.humanize.capitalize, 'Last week', period_data_html(period_data[:workweek])].flatten)
+      rows.push(['',        'Annual',    period_data_html(period_data[:year])].flatten)
+    end
+
+    HtmlTableFormatting.new(header, rows).html
+  end
+
+  def period_data_html(data)
+    if data.key?(:available_from)
+      [
+        data[:available_from],
+        '-',
+        '-',
+        '-',
+        '-',
+        data[:recent]
+      ]
+    else
+      [
+        format_field(data[:kwh], :kwh),
+        format_field(data[:co2], :co2),
+        format_field(data[:£],   :£),
+        format_savings(data[:savings_£]),
+        format_percent(data[:percent_change]),
+        data[:recent]
+      ]
+    end
+  end
+
+  def format_percent(percent_change)
+    if percent_change.nil?
+      'none'
+    elsif percent_change == '-'
+      '-'
+    else
+      format_field(percent_change,  :percent)
+    end
+  end
+
+  def format_savings(savings)
+    puts "Saving #{savings}"
+    if savings == '-'
+      '-'
+    elsif savings.nil? || savings == 'none' || savings <= 0.0
+      'none'
+    else
+      format_field(savings,  :£)
+    end
+  end
+
+  def format_meter_range_html(summary_data)
+    text = summary_data.map do |fuel_type, period_data|
+      "#{fuel_type.to_s.humanize.capitalize} data range: #{formatted_date_range(period_data)}"
+    end.join(' ')
+
+    "<p style=\"text-align: right;\"><small>#{text}. <b><u>More information</u></b></small></p>"
+  end
+
+  def formatted_date_range(period_data)
+    "#{format_past_date(period_data[:start_date])} to #{format_past_date(period_data[:end_date])}"
   end
 
   def difference_to_exemplar_£(actual_£, fuel_type)
@@ -285,11 +365,18 @@ class ManagementSummaryTable < ContentBase
       "Data available from #{d.strftime('%a %d %b %Y')}"
     elsif period == :year
       d = fuel_type_data[:start_date] + 365
-      fd = d - @asof_date < 30 ? d.strftime('%a %d %b %Y') : d.strftime('%b %Y')
-      "Data available from #{fd}"
+      "Data available from #{format_future_date(d)}"
     else
       'Date available from: internal error'
     end
+  end
+
+  def format_future_date(d)
+    d - @asof_date < 30 ? d.strftime('%a %d %b %Y') : d.strftime('%b %Y')
+  end
+
+  def format_past_date(d)
+    @asof_date - d > 30 ? d.strftime('%b %Y') : d.strftime('%a %d %b %Y')
   end
 
   def positive_saving(val)
