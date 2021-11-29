@@ -1,4 +1,5 @@
 require 'json'
+
 class LatitudeLongitude
   def self.distance(from_latitude, from_longitude, to_latitude, to_longitude)
     radius_earth_km = 6371.0
@@ -10,7 +11,7 @@ class LatitudeLongitude
     c = 2.0 * Math.atan2(a**0.5, (1-a)**0.5)
     radius_earth_km * c
   end
-  
+
   def self.degrees_to_radians(degrees)
     degrees * Math::PI / 180.0
   end

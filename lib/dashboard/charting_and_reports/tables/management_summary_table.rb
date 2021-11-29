@@ -1,6 +1,4 @@
 class ManagementSummaryTable < ContentBase
-  MAX_DAYS_OUT_OF_DATE_FOR_4_WEEK_COMPARISON = 2 * 7
-  MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON = 3 * 30
   NO_RECENT_DATA_MESSAGE = 'no recent data'
   NOT_ENOUGH_DATA_MESSAGE = 'not enough data'
   INCREASED_MESSAGE = 'increased'
@@ -37,7 +35,7 @@ class ManagementSummaryTable < ContentBase
       'Annual Cost',
       'Change from last year',
       'Change in last 4 school weeks',
-      'Potential savings',
+      'Potential savings'
     ] 
   end
 
@@ -68,10 +66,17 @@ class ManagementSummaryTable < ContentBase
       units:          :table,
       header:         header_text,
       column_types:   COLUMN_TYPES 
+    },
+    summary_data: {
+      description: 'Summary of annual per fuel consumption, annual change, 1 week change, saving to exemplar',
+      # just returns a table like hash, doesn't fit within the existing alerts tabular framework
+      # data returned is relatively unformatted i.e. raw apart from some strings e.g. '-' to indicate no saving
     }
   }
 
-  def analyse(_asof_date)
+  def analyse(asof_date = Date.today)
+    asof_date ||= Date.today
+    @asof_date = asof_date
     calculate
   end
 
@@ -90,34 +95,75 @@ class ManagementSummaryTable < ContentBase
   def html
     HtmlTableFormatting.new(self.class.header_html, format_rows(data_by_fuel_type)).html
   end
-  
-  def values_for_fuel_type(fuel_type)
-    last_4_week_comparison  = compare_two_periods(fuel_type, { schoolweek: -3..0 }, { schoolweek: -7..-4 }, MAX_DAYS_OUT_OF_DATE_FOR_4_WEEK_COMPARISON)
-    last_2_years_comparison = compare_two_periods(fuel_type, { year: 0 }, { year: -1 }, MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON)
-    difference = difference_to_exemplar_£(last_2_years_comparison[:current_£], fuel_type)
-
-    {
-      fuel_type:          { data: fuel_type.to_s.humanize.capitalize,       units: :fuel_type },
-      this_year_kwh:      { data: last_2_years_comparison[:current_kwh],    units: KWH_NOT_ENOUGH_IN_COL_FORMAT },
-      this_year_co2:      { data: last_2_years_comparison[:current_co2],    units: :co2 },
-      this_year_£:        { data: last_2_years_comparison[:current_£],      units: :£ },
-      change_years:       { data: last_2_years_comparison[:percent_change], units: :relative_percent },
-      change_4_weeks:     { data: last_4_week_comparison[:percent_change],  units: :relative_percent },
-      examplar_benefit:   { data: difference,                               units: :£ }
-    }
-  end
 
   private
 
   def calculate
     @summary_table = format_rows(data_by_fuel_type, :raw)
+    puts 'Front end data'
+    ap summary_data
     @calculation_worked = true
   end
 
-  def data_by_fuel_type
+  def summary_data
+    @summary_data ||= extract_front_end_data(calculation_data)
+  end
+  
+  def calculation_data
+    @calculation_data ||= calculate_data
+  end
+
+  def calculation_configuration
+    {
+      year: { 
+        period0: { year: 0 },
+        period1: { year: -1 },
+        versus_exemplar: true,
+        recent_limit: 2 * 365
+      },
+      last_4_weeks: { 
+        period0: { schoolweek: -3..0 },
+        period1: { schoolweek: -7..-4 },
+        versus_exemplar: false,
+        recent_limit: 2 * 7
+      },
+      workweek: { 
+        period0: { workweek: 0 },
+        period1: { workweek: -1 },
+        versus_exemplar: false,
+        recent_limit: 2 * 7
+      }
+    }
+  end
+
+  def calculate_data
     @school.fuel_types(false).map do |fuel_type|
-      values_for_fuel_type(fuel_type)
-    end
+      [
+        fuel_type,
+        calculate_data_for_fuel(fuel_type)
+      ]
+    end.to_h
+  end
+
+  def calculate_data_for_fuel(fuel_type)
+    res = calculation_configuration.map do |name, config|
+      [
+        name,
+        calculate_period(fuel_type, config)
+      ]
+    end.to_h
+
+    meter = @school.aggregate_meter(fuel_type)
+    res[:start_date] = meter.amr_data.start_date
+    res[:end_date]   = meter.amr_data.end_date
+
+    res
+  end
+
+  def calculate_period(fuel_type, config)
+    res = compare_two_periods(fuel_type, config[:period0], config[:period1], config[:recent_limit])
+    res[:savings_£] = difference_to_exemplar_£(res[:£], fuel_type) if config[:versus_exemplar]
+    res
   end
 
   protected def format(unit, value, format, in_table, level)
@@ -153,13 +199,13 @@ class ManagementSummaryTable < ContentBase
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
     percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : percent_change_with_zero(current_period, previous_period) 
-    
+
     { 
-      current_kwh:    current_period_kwh,
-      current_co2:    current_period_co2,
-      current_£:      current_period, 
-      previous_£:     previous_period, 
-      percent_change: out_of_date ? NO_RECENT_DATA_MESSAGE : percent_change,
+      kwh:        current_period_kwh,
+      co2:        current_period_co2,
+      £:          current_period, 
+      # previous_£: previous_period, 
+      percent_change: out_of_date ? NO_RECENT_DATA_MESSAGE : percent_change
      }
   end
 
@@ -198,6 +244,86 @@ class ManagementSummaryTable < ContentBase
     rescue EnergySparksMeterDataTooOutOfDate => _e
       true
     end
+  end
+
+  # explicitly extract data rather than convert
+  def extract_front_end_data(calc)
+    front_end = {}
+
+    calc.each do |fuel_type, fuel_type_data|
+      front_end[fuel_type] = {}
+
+      front_end[fuel_type][:start_date] = fuel_type_data[:start_date]
+      front_end[fuel_type][:end_date]   = fuel_type_data[:end_date]
+
+      fuel_type_data.each do |period, period_data|
+        next if %i[last_4_weeks start_date end_date].include?(period)
+
+        front_end[fuel_type][period] = {}
+
+        if period_data[:kwh].nil?
+          front_end[fuel_type][period][:available_from] = date_available_from(period, fuel_type_data)
+        else
+          if @asof_date - fuel_type_data[:end_date] > calculation_configuration[period][:recent_limit]
+            front_end[fuel_type][period][:recent] = 'No recent data'
+          end
+          front_end[fuel_type][period][:kwh]            = period_data[:kwh]
+          front_end[fuel_type][period][:co2]            = period_data[:co2]
+          front_end[fuel_type][period][:£]              = period_data[:£]
+          front_end[fuel_type][period][:savings_£]      = positive_saving(period_data[:savings_£])
+          front_end[fuel_type][period][:percent_change] = percent_change(period_data[:percent_change])
+        end
+      end
+    end
+
+    front_end
+  end
+
+  def date_available_from(period, fuel_type_data)
+    if period == :workweek
+      d = fuel_type_data[:start_date] + ((7 - fuel_type_data[:start_date].wday) % 7)
+      "Data available from #{d.strftime('%a %d %b %Y')}"
+    elsif period == :year
+      d = fuel_type_data[:start_date] + 365
+      fd = d - @asof_date < 30 ? d.strftime('%a %d %b %Y') : d.strftime('%b %Y')
+      "Data available from #{fd}"
+    else
+      'Date available from: internal error'
+    end
+  end
+
+  def positive_saving(val)
+    if val.nil?
+      '-'
+    elsif val <= 0.0
+      'none'
+    else
+      val
+    end
+  end
+
+  def percent_change(percent)
+    percent.nil? || !percent.is_a?(Float) ? '-' : percent
+  end
+
+  # ====================== Legacy Summary Table Interface calculations to Nov 2021 ==========================
+  def data_by_fuel_type
+    @school.fuel_types(false).map do |fuel_type|
+      values_for_fuel_type(fuel_type, calculation_data)
+    end
+  end
+
+  def values_for_fuel_type(fuel_type, calculations)
+    calc = calculations[fuel_type]
+    {
+      fuel_type:          { data: fuel_type.to_s.humanize.capitalize,   units: :fuel_type },
+      this_year_kwh:      { data: calc[:year][:kwh],               units: KWH_NOT_ENOUGH_IN_COL_FORMAT },
+      this_year_co2:      { data: calc[:year][:co2],               units: :co2 },
+      this_year_£:        { data: calc[:year][:£],                 units: :£ },
+      change_years:       { data: calc[:year][:percent_change],    units: :relative_percent },
+      change_4_weeks:     { data: calc[:last_4_weeks][:percent_change], units: :relative_percent },
+      exemplar_benefit:   { data: calc[:year][:savings_£],         units: :£ }
+    }
   end
 end
 
