@@ -108,8 +108,6 @@ class ManagementSummaryTable < ContentBase
 
   def calculate
     @summary_table = format_rows(data_by_fuel_type, :raw)
-    puts 'Front end data'
-    ap summary_data
     @calculation_worked = true
   end
 
@@ -188,7 +186,7 @@ class ManagementSummaryTable < ContentBase
   end
 
   def format_field(data, units, medium = :html)
-    if !data.nil? && (data== NO_RECENT_DATA_MESSAGE || data == INCREASED_MESSAGE || data == DECREASED_MESSAGE)
+    if !data.nil? && (data == NO_RECENT_DATA_MESSAGE || data == INCREASED_MESSAGE || data == DECREASED_MESSAGE)
       data
     elsif data.nil?
       NOT_ENOUGH_DATA_MESSAGE
@@ -204,7 +202,7 @@ class ManagementSummaryTable < ContentBase
 
     summary_data.each do |fuel_type, period_data|
       rows.push([fuel_type.to_s.humanize.capitalize, 'Last week', period_data_html(period_data[:workweek])].flatten)
-      rows.push(['',        'Annual',    period_data_html(period_data[:year])].flatten)
+      rows.push(['', 'Annual', period_data_html(period_data[:year])].flatten)
     end
 
     HtmlTableFormatting.new(header, rows).html
@@ -243,7 +241,6 @@ class ManagementSummaryTable < ContentBase
   end
 
   def format_savings(savings)
-    puts "Saving #{savings}"
     if savings == '-'
       '-'
     elsif savings.nil? || savings == 'none' || savings <= 0.0
@@ -274,17 +271,16 @@ class ManagementSummaryTable < ContentBase
   def compare_two_periods(fuel_type, period1, period2, max_days_out_of_date)
     current_period_kwh  = checked_get_aggregate(period1, fuel_type, :kwh)
     current_period_co2  = checked_get_aggregate(period1, fuel_type, :co2)
-    current_period_co2  = electricity_co2_with_solar_offset if @school.solar_pv_panels? && fuel_type == :electricity
+    current_period_co2  = electricity_co2_with_solar_offset(period1) if @school.solar_pv_panels? && fuel_type == :electricity
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
     percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : percent_change_with_zero(current_period, previous_period)
 
     {
-      kwh:        current_period_kwh,
-      co2:        current_period_co2,
-      £:          current_period,
-      # previous_£: previous_period,
+      kwh:            current_period_kwh,
+      co2:            current_period_co2,
+      £:              current_period,
       percent_change: out_of_date ? NO_RECENT_DATA_MESSAGE : percent_change
      }
   end
@@ -309,10 +305,10 @@ class ManagementSummaryTable < ContentBase
     end
   end
 
-  def electricity_co2_with_solar_offset
+  def electricity_co2_with_solar_offset(period = { year: 0})
     scalar = ScalarkWhCO2CostValues.new(@school)
-    consumption   = checked_get_aggregate({ year: 0}, :electricity, :co2)
-    pv_production = checked_get_aggregate({ year: 0}, :solar_pv,    :co2)
+    consumption   = checked_get_aggregate(period, :electricity, :co2)
+    pv_production = checked_get_aggregate(period, :solar_pv,    :co2)
     # NB solar pv panel putput CO2 is -tve, sign reversed in AMRData
     net_co2 = consumption.nil? || pv_production.nil? ? nil : (consumption + pv_production)
   end
@@ -333,8 +329,8 @@ class ManagementSummaryTable < ContentBase
     calc.each do |fuel_type, fuel_type_data|
       front_end[fuel_type] = {}
 
-      front_end[fuel_type][:start_date] = fuel_type_data[:start_date].iso8601
-      front_end[fuel_type][:end_date]   = fuel_type_data[:end_date].iso8601
+      front_end[fuel_type][:start_date] = rails_date(fuel_type_data[:start_date])
+      front_end[fuel_type][:end_date]   = rails_date(fuel_type_data[:end_date])
 
       fuel_type_data.each do |period, period_data|
         next if %i[last_4_weeks start_date end_date].include?(period)
@@ -357,6 +353,11 @@ class ManagementSummaryTable < ContentBase
     end
 
     front_end
+  end
+
+  def rails_date(date)
+    # iso8601 blows up non railes/ActiveSupport code
+    Object.const_defined?('Rails') ? date.iso8601 : date  
   end
 
   def date_available_from(period, fuel_type_data)
