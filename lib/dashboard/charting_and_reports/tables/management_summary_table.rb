@@ -198,7 +198,7 @@ class ManagementSummaryTable < ContentBase
   end
 
   def format_to_html(summary_data)
-    header = ['', '', ' (kWh)','CO2 (kg)', 'Cost', 'Potential savings', '% Change', '']
+    header = ['', '', 'Use (kWh)','CO2 (kg)', 'Cost', 'Potential savings', '% Change', '']
 
     rows = []
 
