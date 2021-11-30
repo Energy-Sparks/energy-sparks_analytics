@@ -36,7 +36,7 @@ class ManagementSummaryTable < ContentBase
       'Change from last year',
       'Change in last 4 school weeks',
       'Potential savings'
-    ] 
+    ]
   end
 
   def self.header_text
@@ -65,7 +65,7 @@ class ManagementSummaryTable < ContentBase
       description: 'Summary of annual per fuel consumption, annual change, 4 week change, saving to exemplar',
       units:          :table,
       header:         header_text,
-      column_types:   COLUMN_TYPES 
+      column_types:   COLUMN_TYPES
     },
     summary_data: {
       description: 'Summary of annual per fuel consumption, annual change, 1 week change, saving to exemplar',
@@ -116,26 +116,26 @@ class ManagementSummaryTable < ContentBase
   def summary_data
     @summary_data ||= extract_front_end_data(calculation_data)
   end
-  
+
   def calculation_data
     @calculation_data ||= calculate_data
   end
 
   def calculation_configuration
     {
-      year: { 
+      year: {
         period0: { year: 0 },
         period1: { year: -1 },
         versus_exemplar: true,
         recent_limit: 2 * 365
       },
-      last_4_weeks: { 
+      last_4_weeks: {
         period0: { schoolweek: -3..0 },
         period1: { schoolweek: -7..-4 },
         versus_exemplar: false,
         recent_limit: 2 * 7
       },
-      workweek: { 
+      workweek: {
         period0: { workweek: 0 },
         period1: { workweek: -1 },
         versus_exemplar: false,
@@ -278,13 +278,13 @@ class ManagementSummaryTable < ContentBase
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
-    percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : percent_change_with_zero(current_period, previous_period) 
+    percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : percent_change_with_zero(current_period, previous_period)
 
-    { 
+    {
       kwh:        current_period_kwh,
       co2:        current_period_co2,
-      £:          current_period, 
-      # previous_£: previous_period, 
+      £:          current_period,
+      # previous_£: previous_period,
       percent_change: out_of_date ? NO_RECENT_DATA_MESSAGE : percent_change
      }
   end
@@ -333,8 +333,8 @@ class ManagementSummaryTable < ContentBase
     calc.each do |fuel_type, fuel_type_data|
       front_end[fuel_type] = {}
 
-      front_end[fuel_type][:start_date] = fuel_type_data[:start_date]
-      front_end[fuel_type][:end_date]   = fuel_type_data[:end_date]
+      front_end[fuel_type][:start_date] = fuel_type_data[:start_date].iso8601
+      front_end[fuel_type][:end_date]   = fuel_type_data[:end_date].iso8601
 
       fuel_type_data.each do |period, period_data|
         next if %i[last_4_weeks start_date end_date].include?(period)
