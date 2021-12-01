@@ -3,8 +3,8 @@ require 'optparse'
 require 'dotenv/load'
 require_relative 'support.rb'
 
-RETRY_INTERVAL = 15
-MAX_RETRIES = 5
+RETRY_INTERVAL = 8
+MAX_RETRIES = 10
 
 def log(msg, verbose)
   $stderr.puts(msg) if verbose
