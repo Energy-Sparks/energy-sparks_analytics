@@ -1,6 +1,7 @@
 class ManagementSummaryTable < ContentBase
   NO_RECENT_DATA_MESSAGE = 'no recent data'
   NOT_ENOUGH_DATA_MESSAGE = 'not enough data'
+  MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON = 3 * 30 # used elsewhere in alerts code base TODO(PH, 1Dec2021) rationalise with calculaiton config below at some point
   INCREASED_MESSAGE = 'increased'
   DECREASED_MESSAGE = 'decreased'
   NON_NUMERIC_DATA = [
@@ -341,7 +342,7 @@ class ManagementSummaryTable < ContentBase
           front_end[fuel_type][period][:available_from] = date_available_from(period, fuel_type_data)
         else
           if @asof_date - fuel_type_data[:end_date] > calculation_configuration[period][:recent_limit]
-            front_end[fuel_type][period][:recent] = 'No recent data'
+            front_end[fuel_type][period][:recent] = NO_RECENT_DATA_MESSAGE
           end
           front_end[fuel_type][period][:kwh]            = period_data[:kwh]
           front_end[fuel_type][period][:co2]            = period_data[:co2]
@@ -356,7 +357,7 @@ class ManagementSummaryTable < ContentBase
   end
 
   def rails_date(date)
-    # iso8601 blows up non railes/ActiveSupport code
+    # iso8601 blows up non rails/ActiveSupport code
     Object.const_defined?('Rails') ? date.iso8601 : date  
   end
 
