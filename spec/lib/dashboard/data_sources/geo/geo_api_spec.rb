@@ -76,10 +76,11 @@ describe MeterReadingsFeeds::GeoApi do
     end
 
     context 'with missing token' do
+      let(:token) { nil }
       it "raises error" do
         expect {
           ret = MeterReadingsFeeds::GeoApi.new(token: token).trigger_fast_update(system_id)
-        }.to raise_error
+        }.to raise_error MeterReadingsFeeds::GeoApi::ApiFailure
       end
     end
   end
