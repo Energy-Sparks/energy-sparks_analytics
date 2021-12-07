@@ -1,6 +1,7 @@
 class ManagementSummaryTable < ContentBase
   NO_RECENT_DATA_MESSAGE = 'no recent data'
   NOT_ENOUGH_DATA_MESSAGE = 'not enough data'
+  NOTAVAILABLE = 'n/a'
   MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON = 3 * 30 # used elsewhere in alerts code base TODO(PH, 1Dec2021) rationalise with calculaiton config below at some point
   INCREASED_MESSAGE = 'increased'
   DECREASED_MESSAGE = 'decreased'
@@ -71,7 +72,7 @@ class ManagementSummaryTable < ContentBase
     summary_data: {
       description: 'Summary of annual per fuel consumption, annual change, 1 week change, saving to exemplar',
       # just returns a table like hash, doesn't fit within the existing alerts tabular framework
-      # data returned is relatively unformatted i.e. raw apart from some strings e.g. '-' to indicate no saving
+      # data returned is relatively unformatted i.e. raw apart from some strings e.g. '-n/a' to indicate no saving
     }
   }
 
@@ -213,10 +214,10 @@ class ManagementSummaryTable < ContentBase
     if data.key?(:available_from)
       [
         data[:available_from],
-        '-',
-        '-',
-        '-',
-        '-',
+        NOTAVAILABLE,
+        NOTAVAILABLE,
+        NOTAVAILABLE,
+        NOTAVAILABLE,
         data[:recent]
       ]
     else
@@ -234,16 +235,16 @@ class ManagementSummaryTable < ContentBase
   def format_percent(percent_change)
     if percent_change.nil?
       'none'
-    elsif percent_change == '-'
-      '-'
+    elsif percent_change == NOTAVAILABLE
+      NOTAVAILABLE
     else
       format_field(percent_change,  :percent)
     end
   end
 
   def format_savings(savings)
-    if savings == '-'
-      '-'
+    if savings == NOTAVAILABLE
+      NOTAVAILABLE
     elsif savings.nil? || savings == 'none' || savings <= 0.0
       'none'
     else
@@ -383,7 +384,7 @@ class ManagementSummaryTable < ContentBase
 
   def positive_saving(val)
     if val.nil?
-      '-'
+      NOTAVAILABLE
     elsif val <= 0.0
       'none'
     else
@@ -392,7 +393,7 @@ class ManagementSummaryTable < ContentBase
   end
 
   def percent_change(percent)
-    percent.nil? || !percent.is_a?(Float) ? '-' : percent
+    percent.nil? || !percent.is_a?(Float) ? NOTAVAILABLE : percent
   end
 
   # ====================== Legacy Summary Table Interface calculations to Nov 2021 ==========================
