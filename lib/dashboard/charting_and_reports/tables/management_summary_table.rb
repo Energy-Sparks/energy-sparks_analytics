@@ -1,4 +1,5 @@
 class ManagementSummaryTable < ContentBase
+  # rubocop:disable Metrics/ClassLength
   NO_RECENT_DATA_MESSAGE = 'no recent data'
   NOT_ENOUGH_DATA_MESSAGE = 'not enough data'
   NOTAVAILABLE = 'n/a'

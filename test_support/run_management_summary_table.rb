@@ -17,6 +17,7 @@ class RunManagementSummaryTable < RunCharts
     {
       front_end_template_tables:      ManagementSummaryTable.front_end_template_tables,
       front_end_template_table_data:  content.front_end_template_table_data,
+      raw_variables_for_saving:       content.raw_variables_for_saving,
       html:                           combined_html(content)
     }
   end
