@@ -182,7 +182,7 @@ class ManagementSummaryTable < ContentBase
   def format_rows(rows, medium = :html)
     rows.map do |row|
       row.map do |_field_name, field|
-        format_field(field[:data], field[:units])
+        format_field(field[:data], field[:units], medium)
       end
     end
   end
@@ -359,7 +359,7 @@ class ManagementSummaryTable < ContentBase
 
   def rails_date(date)
     # iso8601 blows up non rails/ActiveSupport code
-    Object.const_defined?('Rails') ? date.iso8601 : date  
+    Object.const_defined?('Rails') ? date.iso8601 : date
   end
 
   def date_available_from(period, fuel_type_data)
