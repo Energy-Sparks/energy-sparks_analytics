@@ -8,6 +8,7 @@ class ManagementSummaryTable < ContentBase
   NON_NUMERIC_DATA = [
     NO_RECENT_DATA_MESSAGE,
     NOT_ENOUGH_DATA_MESSAGE,
+    NOTAVAILABLE,
     INCREASED_MESSAGE,
     DECREASED_MESSAGE
   ]
@@ -71,6 +72,7 @@ class ManagementSummaryTable < ContentBase
     },
     summary_data: {
       description: 'Summary of annual per fuel consumption, annual change, 1 week change, saving to exemplar',
+      units: :hash,
       # just returns a table like hash, doesn't fit within the existing alerts tabular framework
       # data returned is relatively unformatted i.e. raw apart from some strings e.g. '-n/a' to indicate no saving
     }
