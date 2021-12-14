@@ -13,10 +13,10 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   def tariff_information_html
     html = meter_description_html
 
-    all_tariffs_in_range = tariffs_in_date_range(@start_date, @end_date)
+    all_tariffs_in_range = group_tariff_by_date_ranges(@start_date, @end_date)
 
-    all_tariffs_in_range.each do |tariff|
-      html += tariff_description_html(tariff)
+    all_tariffs_in_range.each do |date_range, tariff|
+      html += tariff_description_html(date_range, tariff)
     end
 
     html
@@ -24,12 +24,19 @@ class FormatMeterTariffs < DashboardChartAdviceBase
 
   private
 
-  def tariffs_in_date_range(start_date, end_date)
-    tariffs = []
-    (start_date..end_date).each do |date|
-       tariffs += [accounting_tariff.one_days_cost_data(date).tariff].flatten
+  def group_tariff_by_date_ranges(start_date, end_date)
+    drs = (start_date..end_date).to_a.slice_when do |curr, prev|
+      accounting_tariff.one_days_cost_data(curr).tariff != accounting_tariff.one_days_cost_data(prev).tariff
     end
-    tariffs.uniq
+
+    drs_grouped = drs.map { |ds| ds.first..ds.last }
+
+    drs_grouped.map do |dr|
+      [
+        dr,
+        accounting_tariff.one_days_cost_data(dr.first).tariff
+      ]
+    end.to_h.reverse_each.to_h
   end
 
   def accounting_tariff
@@ -49,7 +56,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     generate_html(meter_description, binding)
   end
 
-  def tariff_description_html(tariff)
+  def tariff_description_html(date_range, tariff)
     table_data = single_tariff_table_html(tariff)
     tariff_description = %{
       <p>
@@ -58,6 +65,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
         <%= tariff_dates_html(tariff) %>
         <%= weekday_weekend_description(tariff) %>
         <%= real_tariff_description_html(tariff) %>
+        <%= applied_between_html(date_range) %>
       </p>
       <p>
         <%= table_data %>
@@ -69,6 +77,10 @@ class FormatMeterTariffs < DashboardChartAdviceBase
 
   def meter_name
     meter.name.nil? || meter.name.strip.empty? ?  '' : "(#{meter.name})"
+  end
+
+  def applied_between_html(date_range)
+    ", applied between #{date_range.first.strftime('%d %b %Y')} and #{date_range.last.strftime('%d %b %Y')}"
   end
 
   def weekday_weekend_description(tariff)
@@ -93,7 +105,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     start_date_text = tariff.tariff[:start_date].strftime('%d %b %Y')
 
     end_date_text = if tariff.tariff[:end_date] == N3rgyTariffs::INFINITE_DATE
-                      'to date'
+                      'date'
                     else
                       tariff.tariff[:end_date].strftime('%d %b %Y')
                     end
