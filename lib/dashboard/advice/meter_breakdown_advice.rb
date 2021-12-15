@@ -127,7 +127,7 @@ class AdviceMeterBreakdownBase < AdviceBase
         kwh:                    { name: 'Kwh',              datatype: :kwh }, 
         £:                      { name: 'Cost',             datatype: :£ },
         percent:                { name: 'Percent',          datatype: :percent },
-        annual_percent_change:  { name: 'Annual change',    datatype: :relative_percent } # TODO(PH, 15Dec2021) change to :comparison_percent - currently defined in a non-merged branch
+        annual_percent_change:  { name: 'Annual change',    datatype: :comparison_percent }
       }
 
       cols.delete(:annual_percent_change) unless has_annual_change?
