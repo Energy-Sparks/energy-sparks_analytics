@@ -9,7 +9,7 @@ script = {
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
                             ],
-  schools: ['cefn-*'], # ['st-nico*'],
+  schools: ['ralph*'], # ['st-nico*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
@@ -25,6 +25,7 @@ script = {
 
                                 no_pages: %i[electric_target gas_target storage_heater_target],
                                 no_pages: %i[underlying_electricity_meters_breakdown underlying_gas_meters_breakdown],
+                                pages: %i[baseload],
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },

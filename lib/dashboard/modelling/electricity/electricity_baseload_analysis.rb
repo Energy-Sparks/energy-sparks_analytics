@@ -5,7 +5,7 @@ class ElectricityBaseloadAnalysis
   end
 
   def average_baseload(date1, date2)
-    amr_data.average_baseload_kw_date_range(date1, date2)
+    amr_data.average_baseload_kw_date_range(date1, date2, sheffield_solar_pv: @meter.sheffield_simulated_solar_pv_panels?)
   end
 
   def average_baseload_kw(asof_date)
@@ -49,7 +49,7 @@ class ElectricityBaseloadAnalysis
     (start_date..amr_data.end_date).each do |date|
       next if daytype(date) == :holiday
       weekday_kws[date.wday] ||= []
-      weekday_kws[date.wday].push(amr_data.statistical_baseload_kw(date))
+      weekday_kws[date.wday].push(amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?))
     end
 
     average_day_kw = weekday_kws.transform_values do |kws|
@@ -73,7 +73,7 @@ class ElectricityBaseloadAnalysis
   end
 
   def baseload_kws_for_dates(dates)
-    dates.map { |d| amr_data.baseload_kw(d) }
+    dates.map { |d| amr_data.baseload_kw(d, @meter.sheffield_simulated_solar_pv_panels?) }
   end
 
   def average_top_n(baseload_kws, n)

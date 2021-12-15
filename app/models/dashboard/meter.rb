@@ -23,6 +23,7 @@ module Dashboard
                     storage_heater_config: nil, # now redundant PH 20Mar2019
                     external_meter_id: nil,
                     dcc_meter: false,
+                    has_sheffield_solar_pv: false, # set for aggregate if component meters have sheffield data, for baseload calcs
                     meter_attributes: {})
       @amr_data = amr_data
       @meter_collection = meter_collection
@@ -38,6 +39,7 @@ module Dashboard
       @sub_meters = Dashboard::SubMeters.new
       @external_meter_id = external_meter_id
       @dcc_meter = dcc_meter
+      @has_sheffield_solar_pv = has_sheffield_solar_pv
       set_meter_attributes(meter_attributes)
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
@@ -235,7 +237,7 @@ module Dashboard
     end
 
     def sheffield_simulated_solar_pv_panels?
-      !@solar_pv_setup.nil? && @solar_pv_setup.instance_of?(SolarPVPanels)
+      @has_sheffield_solar_pv || !@solar_pv_setup.nil? && @solar_pv_setup.instance_of?(SolarPVPanels)
     end
 
     def solar_pv_real_metering?
