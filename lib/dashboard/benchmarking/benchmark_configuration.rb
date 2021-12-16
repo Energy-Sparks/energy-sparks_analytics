@@ -710,7 +710,6 @@ module Benchmarking
           { data: ->{ ihol_glyr },  name: 'Gas',                        units: :£, chart_data: true  },
           { data: ->{ ihol_elyr },  name: 'Electricity',                units: :£, chart_data: true },
           { data: ->{ ihol_gpfa },  name: 'Gas kWh per floor area',     units: :kwh },
-          { data: ->{ ihol_elyr },  name: 'Electricity',                units: :£ },
           { data: ->{ ihol_epup },  name: 'Electricity kWh per pupil',  units: :kwh },
           { data: ->{ ihol_pper },  name: 'Holiday',                    units: String },
         ],
