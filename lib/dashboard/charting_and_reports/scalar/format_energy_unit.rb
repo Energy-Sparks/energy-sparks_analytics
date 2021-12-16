@@ -40,6 +40,7 @@ class FormatEnergyUnit
     percent_0dp:                  '%',
     relative_percent:             '%',
     relative_percent_0dp:         '%',
+    comparison_percent:           '%',
     r2:                           '',
     opt_start_standard_deviation: 'standard deviation (hours)',
     morning_start_time:           'time of day',
@@ -125,6 +126,8 @@ class FormatEnergyUnit
       formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
       formatted_val = '+' + formatted_val if value > 0.0
       formatted_val
+    elsif unit == :comparison_percent
+      format_comparison_percent(value, medium)
     elsif unit == :date
       value.strftime('%A %e %b %Y')
     elsif unit == :datetime
@@ -149,6 +152,23 @@ class FormatEnergyUnit
     else
       sprintf('%.1f%', val * 100.0)
     end
+  end
+
+  # 1.234 => +1,230%, 0.105 => +10%, 0.095 => +9.5%, 0.005 => +0.5%, 0.0005 => +0.0%
+  def self.format_comparison_percent(value, medium)
+    percent = value * 100.0
+
+    pct_str = if !percent.infinite?.nil?
+                'Infinity'
+              elsif percent.magnitude < 10.0
+                sprintf('%+.1f', percent)
+              elsif percent.magnitude < 150.0
+                sprintf('%+.0f', percent)
+              else
+                scale_num(percent)
+              end
+
+    pct_str + type_format(:percent, medium)
   end
 
   def self.format_pound_range(range, medium, user_numeric_comprehension_level)
@@ -284,8 +304,6 @@ class FormatEnergyUnit
     BigDecimal(value, significant_figures).to_f # value.round(-(Math.log10(value).ceil - significant_figures))
   end
 end
-
-
 
 # eventually migrate from FormatEnergyUnit to more generic FormatUnit
 class FormatUnit < FormatEnergyUnit

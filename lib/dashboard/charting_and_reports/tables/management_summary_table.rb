@@ -59,8 +59,8 @@ class ManagementSummaryTable < ContentBase
     KWH_NOT_ENOUGH_IN_COL_FORMAT,
     :co2,
     :£,
-    :relative_percent, # or text saying 'No recent data'
-    :relative_percent, # or text saying 'No recent data'
+    :comparison_percent, # or text saying 'No recent data'
+    :comparison_percent, # or text saying 'No recent data'
     :£
   ] # needs to be kept in sync with instance table
 
@@ -241,7 +241,7 @@ class ManagementSummaryTable < ContentBase
     elsif percent_change == NOTAVAILABLE
       NOTAVAILABLE
     else
-      format_field(percent_change,  :percent)
+      format_field(percent_change,  :comparison_percent)
     end
   end
 
@@ -367,11 +367,13 @@ class ManagementSummaryTable < ContentBase
 
   def date_available_from(period, fuel_type_data)
     if period == :workweek
-      d = fuel_type_data[:start_date] + ((7 - fuel_type_data[:start_date].wday) % 7)
-      "Data available from #{d.strftime('%a %d %b %Y')}"
+      d = fuel_type_data[:start_date] + ((7 - fuel_type_data[:start_date].wday) % 7) + 7
+      dd = [d, @asof_date].max
+      "Data available from #{dd.strftime('%a %d %b %Y')}"
     elsif period == :year
       d = fuel_type_data[:start_date] + 365
-      "Data available from #{format_future_date(d)}"
+      dd = [d, @asof_date].max
+      "Data available from #{format_future_date(dd)}"
     else
       'Date available from: internal error'
     end
@@ -413,13 +415,13 @@ class ManagementSummaryTable < ContentBase
       this_year_kwh:      { data: calc[:year][:kwh],               units: KWH_NOT_ENOUGH_IN_COL_FORMAT },
       this_year_co2:      { data: calc[:year][:co2],               units: :co2 },
       this_year_£:        { data: calc[:year][:£],                 units: :£ },
-      change_years:       { data: calc[:year][:percent_change],    units: :relative_percent },
-      change_4_weeks:     { data: calc[:last_4_weeks][:percent_change], units: :relative_percent },
+      change_years:       { data: calc[:year][:percent_change],    units: :comparison_percent },
+      change_4_weeks:     { data: calc[:last_4_weeks][:percent_change], units: :comparison_percent },
       exemplar_benefit:   { data: calc[:year][:savings_£],         units: :£ }
     }
   end
 end
 
 # old name for backwards compatibility with front end
-class HeadTeachersSchoolSummaryTable < ManagementSummaryTable
-end
+# class HeadTeachersSchoolSummaryTable < ManagementSummaryTable
+# end
