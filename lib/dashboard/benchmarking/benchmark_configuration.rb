@@ -83,6 +83,7 @@ module Benchmarking
         benchmarks: %i[
           change_in_energy_use_since_joined_energy_sparks
           change_in_co2_emissions_since_last_year
+          holiday_usage_last_year
         ]
       },
       {
@@ -697,6 +698,21 @@ module Benchmarking
           { data: ->{ gpyc_cper },  name: 'Most recent holiday', units: String },
           { data: ->{ gpyc_pper },  name: 'Previous holiday', units: String },
           { data: ->{ gpyc_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
+      holiday_usage_last_year:  {
+        benchmark_class: BenchmarkEnergyConsumptionInUpcomingHolidayLastYear,
+        name:     'Energy Consumption in upcoming holiday last year',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',                units: String, chart_data: true },
+          { data: ->{ ihol_glyr },  name: 'Gas',                        units: :£, chart_data: true  },
+          { data: ->{ ihol_elyr },  name: 'Electricity',                units: :£, chart_data: true },
+          { data: ->{ ihol_gpfa },  name: 'Gas kWh per floor area',     units: :kwh },
+          { data: ->{ ihol_elyr },  name: 'Electricity',                units: :£ },
+          { data: ->{ ihol_epup },  name: 'Electricity kWh per pupil',  units: :kwh },
+          { data: ->{ ihol_pper },  name: 'Holiday',                    units: String },
         ],
         sort_by: [1],
         type: %i[table chart]

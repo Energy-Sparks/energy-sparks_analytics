@@ -269,6 +269,10 @@ class Holidays
     nil
   end
 
+  def self.holiday_month_year_str(holiday)
+    holiday.type.to_s.humanize + ' ' + holiday.start_date.year.to_s
+  end
+
   # finds nth holiday before or after date, including/excluding current holiday if date within a holiday
   # Test Code:
   # [-100, -2, -1, 0, 1, 2, 50].each do |nth_holiday_number|
