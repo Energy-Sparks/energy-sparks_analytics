@@ -8,7 +8,7 @@ run_date = Date.new(2022, 1, 2)
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/benchmark db %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['king-j*', 'belv*', 'marksb*'],
+  schools:                  ['*', 'king-j*', 'belv*', 'marksb*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/benchmark %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
 

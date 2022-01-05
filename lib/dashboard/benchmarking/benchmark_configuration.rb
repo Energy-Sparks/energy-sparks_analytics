@@ -704,7 +704,7 @@ module Benchmarking
       },
       gas_consumption_during_holiday: {
         benchmark_class: BenchmarkGasHeatingHotWaterOnDuringHoliday,
-        name:     'Change in gas consumption between this holiday and the same the previous year',
+        name:     'Gas consumption during current holiday',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ hdhl_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
@@ -716,7 +716,7 @@ module Benchmarking
       },
       storage_heater_consumption_during_holiday: {
         benchmark_class: BenchmarkStorageHeatersOnDuringHoliday,
-        name:     'Change in storage heater consumption between this holiday and the same the previous year',
+        name:     'Storage heater consumption during current holiday',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ shoh_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
