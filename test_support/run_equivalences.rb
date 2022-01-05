@@ -2,7 +2,7 @@ class RunEquivalences < RunCharts
 
   def run_equivalences(control)
     periods = control[:periods]
-    fuel_types = @school.fuel_types(false, false)
+    fuel_types = @school.fuel_types(false, true)
     conversion = EnergyConversions.new(@school)
     list_of_conversions = EnergyConversions.front_end_conversion_list
     fuel_types.each do |fuel_type|
