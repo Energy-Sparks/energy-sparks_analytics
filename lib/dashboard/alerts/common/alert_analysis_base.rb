@@ -483,7 +483,8 @@ class AlertAnalysisBase < ContentBase
       AlertGasTarget1Week                           => 'gtg1',
       AlertSeasonalBaseloadVariation                => 'sblv',
       AlertIntraweekBaseloadVariation               => 'iblv',
-      AlertHeatingHotWaterOnDuringHoliday           => 'hdhl',          
+      AlertGasHeatingHotWaterOnDuringHoliday        => 'hdhl',
+      AlertStorageHeaterHeatingOnDuringHoliday      => 'shoh'         
     }
   end
 

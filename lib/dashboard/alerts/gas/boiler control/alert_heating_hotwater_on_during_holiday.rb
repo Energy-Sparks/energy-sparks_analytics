@@ -1,13 +1,14 @@
 # only during holidays this alert send message about heating or hot water
-class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
-  attr_reader :holiday_name, :summary
+class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
+  attr_reader :holiday_name, :summary, :fuel_type, :heating_type
   attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh
   attr_reader :holiday_usage_to_date_£,   :holiday_projected_usage_£
   attr_reader :holiday_usage_to_date_co2, :holiday_projected_usage_co2
   attr_reader :heating_days_so_far_this_holiday, :hotwater_days_so_far_this_holiday
 
-  def initialize(school)
+  def initialize(school, fuel_type)
     super(school, :heating_hotwater_on_during_holidays)
+    @fuel_type = fuel_type
     @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
   end
 
@@ -60,6 +61,15 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
       description: 'Summary of holiday usage',
       units:  String
     },
+    fuel_type: {
+      description: 'Fuel: gas or storage heaters',
+      units:  :fuel_type
+    },
+    heating_type: {
+      description: 'gas boiler or storage heaters',
+      units:  String,
+      benchmark_code: 'ftyp',
+    }
   }
 
   def relevance
@@ -86,7 +96,7 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
     if @school.holidays.holiday?(asof_date)
       @relevance = :relevant
 
-      holiday_period     = @school.holidays.holiday(asof_date)
+      holiday_period      = @school.holidays.holiday(asof_date)
       @holiday_name       = holiday_period.title
       holiday_date_range  = holiday_period.start_date..holiday_period.end_date
 
@@ -108,10 +118,12 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
 
       @rating = 0.0
     else
-      @holiday_usage_to_date_£   = 0.0
-      @holiday_projected_usage_£ = 0.0
       @relevance = :never_relevant
       @holiday_name = 'Not a holiday'
+
+      @holiday_usage_to_date_£   = 0.0
+      @holiday_projected_usage_£ = 0.0
+
       @rating = 10.0
     end
 
@@ -124,7 +136,7 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
   def summary_text
     text =  if @rating == 0.0
               %q(
-                Your boiler has been left on over the <%= @holiday_name %> holiday.
+                Your <%= heating_type %> has been left on over the <%= @holiday_name %> holiday.
                 Up until <%= @asof_date.strftime('%A %e %b %Y') %>
                 <% if @heating_days_so_far_this_holiday == 0 %>
                   the hot water has been left on on <%= @hotwater_days_so_far_this_holiday %> days 
@@ -134,16 +146,17 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
                   the hot water has been left on on <%= @hotwater_days_so_far_this_holiday %> days and
                   the heating on <%= @heating_days_so_far_this_holiday %> days
                 <% end %>
-                
+
                 costing <%= FormatEnergyUnit.format(:£, @holiday_usage_to_date_£, :html) %>,
                 and a projected <%= FormatEnergyUnit.format(:£, @holiday_projected_usage_£, :html) %>
                 by the end of the holiday.
               )
             else
               %q(
-                Well done you have used no gas this holiday
+                Well done you have used no gas this holiday.
               )
             end
+
     ERB.new(text).result(binding)
   end
 
@@ -163,7 +176,7 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
           date,
           {
             usage:    boiler_usage(date),
-            weekend:  [0, 6].include?(date.wday),
+            weekend:  weekend?(date),
             val:      aggregate_meter.amr_data.one_day_kwh(date, data_type),
           }
         ]
@@ -171,6 +184,10 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
         [ date, nil ]
       end
     end.to_h
+  end
+
+  def weekend?(date)
+    [0, 6].include?(date.wday)
   end
 
   def count_days(calc, usage)
@@ -193,7 +210,7 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
 
   def days_in_holiday_by_type(holiday_date_range, weekend)
     holiday_date_range.count do |date|
-      weekend == [0, 6].include?(date.wday)
+      weekend == weekend?(date)
     end
   end
 
@@ -202,13 +219,13 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
     if valid_days.empty?
       0.0
     else
-      valid_days.map{ |v| v[:val] }.sum / valid_days.length
+      valid_days.map { |v| v[:val] }.sum / valid_days.length
     end
   end
 
   def calculate_totals_to_date(boiler_usage)
     valid_days = boiler_usage.values.compact
-    valid_days.map{ |v| v[:val] }.sum
+    valid_days.map { |v| v[:val] }.sum
   end
 
   def boiler_usage(date)
@@ -222,3 +239,12 @@ class AlertHeatingHotWaterOnDuringHoliday < AlertGasModelBase
   end
 end
 
+class AlertGasHeatingHotWaterOnDuringHoliday < AlertHeatingHotWaterOnDuringHolidayBase
+  def initialize(school)
+    super(school, :gas)
+  end
+
+  def heating_type
+    'gas boiler'
+  end
+end

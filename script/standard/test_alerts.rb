@@ -5,11 +5,11 @@ require_rel '../../test_support'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['king-j*', 'belv*'],
+  schools:                  ['king-j*', 'belv*', 'marksb*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
-    alerts:   [ AlertHeatingHotWaterOnDuringHoliday ],
+    alerts:   [ AlertGasHeatingHotWaterOnDuringHoliday, AlertStorageHeaterHeatingOnDuringHoliday ],
     # alerts: nil,
     control:  {
                 # print_alert_banner: true,
