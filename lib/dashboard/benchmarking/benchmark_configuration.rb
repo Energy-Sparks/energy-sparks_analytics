@@ -121,6 +121,7 @@ module Benchmarking
           change_in_gas_holiday_consumption_previous_holiday
           change_in_gas_holiday_consumption_previous_years_holiday
           gas_consumption_during_holiday
+          storage_heater_consumption_during_holiday
         ]
       },
       {
