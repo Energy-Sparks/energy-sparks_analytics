@@ -1152,4 +1152,16 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+    #=======================================================================================  
+    class BenchmarkEnergyConsumptionInUpcomingHolidayLastYear < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+      private def introduction_text
+        text = %q(
+          <p>
+            This comparison shows cost of electricity and gas last year for an upcoming holiday.
+          </p>
+        )
+        ERB.new(text).result(binding)
+      end
+    end
 end

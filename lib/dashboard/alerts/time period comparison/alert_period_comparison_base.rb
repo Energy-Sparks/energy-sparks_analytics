@@ -64,7 +64,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       previous_period_start_date: { description: 'Previous period start date',      units:  :date  },
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
-      name_of_previous_period:    { description: 'name of pervious period',         units: String, benchmark_code: 'pper' },
+      name_of_previous_period:    { description: 'name of previous period',         units: String, benchmark_code: 'pper' },
 
       current_period_average_kwh:  { description: 'Current period average daily kwh', units:  { kwh: fuel_type } },
       previous_period_average_kwh: { description: 'Previous period average daily',    units:  { kwh: fuel_type } },
