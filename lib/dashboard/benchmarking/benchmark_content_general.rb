@@ -1152,4 +1152,26 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+  #=======================================================================================  
+  class BenchmarkHeatingHotWaterOnDuringHolidayBase < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = %q(
+        <p>
+          This chart shows the projected <%= fuel %> costs for the current holiday.
+          No comparative data will be shown once the holiday is over. The projection
+          calculation is based on the consumption patterns during the holiday so far.
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+
+  class BenchmarkGasHeatingHotWaterOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
+    def fuel; 'gas' end
+  end
+
+  class BenchmarkStorageHeatersOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
+    def fuel; 'storage heeaters' end
+  end
 end

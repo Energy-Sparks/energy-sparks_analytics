@@ -114,7 +114,6 @@ class AlertStorageHeaterHeatingOnDuringHoliday < AlertHeatingHotWaterOnDuringHol
   def initialize(school)
     super(school, :storage_heaters)
     @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
-    puts "Got here #{valid_content?} #{meter_readings_up_to_date_enough?} #{@relevance} #{needs_storage_heater_data?}"
   end
 
   def heating_type

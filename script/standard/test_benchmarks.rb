@@ -3,12 +3,12 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 ENV['ENERGYSPARKSTESTMODE'] = 'ON'
 
-run_date = Date.new(2021, 12, 20)
+run_date = Date.new(2022, 1, 2)
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/benchmark db %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['*'],
+  schools:                  ['king-j*', 'belv*', 'marksb*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/benchmark %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
 
