@@ -724,6 +724,10 @@ module Benchmarking
           { data: ->{ shoh_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
           { data: ->{ shoh_£sfr },  name: 'Holiday usage to date', units: :£ },
           { data: ->{ shoh_hnam },  name: 'Holiday', units: String }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
       holiday_usage_last_year:  {
         benchmark_class: BenchmarkEnergyConsumptionInUpcomingHolidayLastYear,
         name:     'Energy Consumption in upcoming holiday last year',
