@@ -14,6 +14,15 @@ class MeterTariff
     @tariff[:default] == true
   end
 
+  def dcc?
+    @tariff[:source] == :dcc
+  end
+
+  def backdate_tariff(start_date)
+    logger.info "Backdating (DCC) tariff for #{@mpxn} start date to #{start_date}"
+    @tariff[:start_date] = start_date
+  end
+
   def in_date_range?(date)
     date >= @tariff[:start_date] && date <= @tariff[:end_date]
   end

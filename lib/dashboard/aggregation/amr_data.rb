@@ -325,8 +325,13 @@ class AMRData < HalfHourlyData
     total_kwh
   end
 
-  def baseload_kw(date)
-    statistical_baseload_kw(date)
+  def baseload_kw(date, sheffield_solar_pv = false)
+    # sheffield solar PV data artificially creates PV data which
+    # is not always 100% consistent with real PV data e.g. if orientation is different
+    # so the calculated statistics baseload can pick up morning and evening baseloads
+    # lower than reality, resulting in volatile and less accurate baseload
+    # test is on aggregate
+    sheffield_solar_pv ? overnight_baseload_kw(date) : statistical_baseload_kw(date)
   end
 
   def overnight_baseload_kw(date)
@@ -429,14 +434,14 @@ class AMRData < HalfHourlyData
     [end_date - 365, start_date].max
   end
 
-  def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date)
-    baseload_kwh_date_range(date1, date2) / (date2 - date1 + 1)
+  def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
+    baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / (date2 - date1 + 1)
   end
 
-  def baseload_kwh_date_range(date1, date2)
+  def baseload_kwh_date_range(date1, date2, sheffield_solar_pv = false)
     total = 0.0
     (date1..date2).each do |date|
-      total += baseload_kw(date)
+      total += baseload_kw(date, sheffield_solar_pv)
     end
     total
   end

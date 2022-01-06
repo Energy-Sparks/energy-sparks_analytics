@@ -15,7 +15,7 @@ class ElectricitySimulator
 
     def calculate
       results[:annual_kwh] = @meter.amr_data.total_in_period(@start_date, @end_date)
-      results[:baseload_kw] = @meter.amr_data.average_baseload_kw_date_range(@start_date, @end_date)
+      results[:baseload_kw] = @meter.amr_data.average_baseload_kw_date_range(@start_date, @end_date, sheffield_solar_pv: @meter.sheffield_solar_pv?)
       results[:night_baseload_kw] = @meter.amr_data.average_overnight_baseload_kw_date_range(@start_date, @end_date)
       results[:occupied_peak_kw] = calculate_peak_kw(true)
       results[:unoccupied_peak_kw] = calculate_peak_kw(false)
@@ -54,7 +54,7 @@ class ElectricitySimulator
       (@start_date..@end_date).each do |date|
         month_name = date.strftime('%b')
         stats_by_month[month_name][:annual_kwh] += @meter.amr_data.one_day_kwh(date)
-        stats_by_month[month_name][:baseload_kw] += @meter.amr_data.baseload_kw(date)
+        stats_by_month[month_name][:baseload_kw] += @meter.amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?)
         stats_by_month[month_name][:night_baseload_kw] += @meter.amr_data.overnight_baseload_kw(date)
         stats_by_month[month_name][:day_count] += 1
         if @holidays.occupied?(date)

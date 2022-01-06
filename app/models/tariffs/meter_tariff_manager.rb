@@ -16,6 +16,7 @@
 #
 class MeterTariffManager
   include Logging
+  MAX_DAYS_BACKDATE_TARIFF = 30
   attr_reader :accounting_tariffs
 
   class MissingAccountingTariff                                   < StandardError; end
@@ -29,6 +30,7 @@ class MeterTariffManager
   def initialize(meter)
     @mpxn = meter.mpxn
     pre_process_tariff_attributes(meter)
+    backdate_dcc_tariffs(meter)
   end
 
   def economic_cost(date, kwh_x48)
@@ -212,6 +214,29 @@ class MeterTariffManager
     tariffs.map do |accounting_tariff|
       AccountingTariff.new(meter, accounting_tariff)
     end
+  end
+
+  # tariffs for new SMETS2 meters are often setup several days after
+  # kWh data has started recording, the earlier kWh readings therefore
+  # have no DCC tariff and default to default accounting tariffs
+  # in this circumstance, unless overridden backdate the existing DCC tariff
+  # to the start of the meter readings, so the default is no longer used
+  def backdate_dcc_tariffs(meter)
+    return if dcc_tariffs.empty?
+
+    days_gap = dcc_tariffs.first.tariff[:start_date] - meter.amr_data.start_date
+   
+    override_days = meter.meter_attributes[:backdate_tariff].first[:days] if meter.meter_attributes.key?(:backdate_tariff)
+
+    if override_days.nil?
+      dcc_tariffs.first.backdate_tariff(meter.amr_data.start_date) if days_gap.between?(1, MAX_DAYS_BACKDATE_TARIFF)
+    else
+      dcc_tariffs.first.backdate_tariff(dcc_tariffs.first.tariff[:start_date] - override_days)
+    end
+  end
+
+  def dcc_tariffs
+    @dcc_tariffs ||= @accounting_tariffs.select { |t| t.dcc? }.sort{ |a, b| a.tariff[:start_date] <=> b.tariff[:start_date]}
   end
 
   def preprocess_generic_accounting_tariffs(meter, accounting_tariffs)

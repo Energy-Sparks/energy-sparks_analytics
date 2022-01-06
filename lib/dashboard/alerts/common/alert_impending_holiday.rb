@@ -6,6 +6,7 @@ require_relative '../gas/alert_gas_only_base.rb'
 
 class AlertImpendingHoliday < AlertGasOnlyBase
   WEEKDAYS_HOLIDAY_LOOKAHEAD_PERIOD = 15
+  include AlertFloorAreaMixin
 
   attr_reader :saving_kwh, :daytype_breakdown_table, :total_annual_£, :holidays_percent
   attr_reader :holiday_short_name, :holiday_long_name, :holiday_length_days
@@ -14,6 +15,8 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   attr_reader :last_year_holiday_gas_kwh, :last_year_holiday_gas_£
   attr_reader :last_year_holiday_electricity_kwh, :last_year_holiday_electricity_£
   attr_reader :last_year_holiday_energy_costs_£
+  attr_reader :name_of_last_year_holiday
+  attr_reader :holiday_floor_area, :holiday_pupils, :last_year_holiday_gas_kwh_per_floor_area, :last_year_holiday_electricity_kwh_per_floor_area
 
   def initialize(school)
     super(school, :impendingholiday)
@@ -90,11 +93,33 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     },
     last_year_holiday_gas_£: {
       description: 'Gas consumption (£) in corresponding holiday last year',
-      units:  :£
+      units:  :£,
+      benchmark_code:   'glyr',
     },
     last_year_holiday_electricity_kwh: {
       description: 'Electricity consumption (kWh) in corresponding holiday last year',
-      units:  { kwh: :electricity }
+      units:  { kwh: :electricity },
+      benchmark_code:   'elyr',
+    },
+    holiday_floor_area: {
+      description: 'Floor area during holiday',
+      units:  { kwh: :electricity },
+      benchmark_code:   'fahl',
+    },
+    holiday_pupils: {
+      description: 'Pupils in year of holiday',
+      units:  { kwh: :electricity },
+      benchmark_code:   'pnhl',
+    },
+    last_year_holiday_gas_kwh_per_floor_area: {
+      description: 'Gas kWh per floor area during holiday',
+      units:  { kwh: :gas },
+      benchmark_code:   'gpfa',
+    },
+    last_year_holiday_electricity_kwh_per_floor_area: {
+      description: 'Electricity kWh per floor area during holiday',
+      units:  { kwh: :electricity },
+      benchmark_code:   'epup',
     },
     last_year_holiday_electricity_£: {
       description: 'Electricity consumption (£) in corresponding holiday last year',
@@ -103,6 +128,10 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     last_year_holiday_energy_costs_£: {
       description: 'Gas plus electricity cost (£) in corresponding holiday last year',
       units:  :£
+    },
+    name_of_last_year_holiday: {
+      description: 'name of holiday last year',
+      units: String, benchmark_code: 'pper'
     },
     daytype_breakdown_table: {
       description: 'Table broken down by school day in/out hours, weekends, holidays - percent in £ terms, £ (annual)',
@@ -193,6 +222,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     @holiday_period = holiday_information[:period]
     set_holiday_variables(holiday_information)
     last_year_holiday = same_holiday_previous_year(@holiday_period)
+    @name_of_last_year_holiday = Holidays.holiday_month_year_str(last_year_holiday)
     set_last_year_holiday_consumption_variables(last_year_holiday.start_date, last_year_holiday.end_date, last_year_holiday.nil?)
     potential_saving = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
     set_savings_capital_costs_payback(potential_saving, 0.0)
@@ -227,10 +257,16 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       @last_year_holiday_electricity_£ = 0.0
       @last_year_holiday_energy_costs_£ = 0.0
     else
+      @holiday_floor_area = floor_area(start_date, end_date)
+      @holiday_pupils     = pupils(start_date, end_date)
+
       @last_year_holiday_gas_kwh, @last_year_holiday_gas_£ =
         consumption_in_holiday_period(gas?, @school.aggregated_heat_meters, start_date, end_date)
+      @last_year_holiday_gas_kwh_per_floor_area = @last_year_holiday_gas_kwh / @holiday_floor_area unless @last_year_holiday_gas_kwh.nil?
+
       @last_year_holiday_electricity_kwh, @last_year_holiday_electricity_£ =
         consumption_in_holiday_period(electricity?, @school.aggregated_electricity_meters, start_date, end_date)
+      @last_year_holiday_electricity_kwh_per_floor_area = @last_year_holiday_electricity_kwh / @holiday_pupils unless @last_year_holiday_gas_kwh.nil?
 
       @last_year_holiday_energy_costs_£ = nil_to_zero(@last_year_holiday_gas_£) + nil_to_zero(@last_year_holiday_electricity_£)
     end
