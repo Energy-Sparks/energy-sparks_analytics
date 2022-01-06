@@ -138,8 +138,12 @@ class MeterMonthlyCostsAdvice
   end
 
   def monthly_accounts
-    months_billing = Hash.new {|hash, month| hash[month] = Hash.new{|h, bill_component_types| h[bill_component_types] = 0.0 }}
+    @monthly_accounts ||= calculate_monthly_accounts
+  end
 
+  def calculate_monthly_accounts
+    months_billing = Hash.new {|hash, month| hash[month] = Hash.new{|h, bill_component_types| h[bill_component_types] = 0.0 }}
+puts "Got here doing calc for #{@meter.amr_data.start_date} to #{@meter.amr_data.end_date}"
     (@meter.amr_data.start_date..@meter.amr_data.end_date).each do |date|
       day1_month = first_day_of_month(date)
       bc = @meter.amr_data.accounting_tariff.bill_component_costs_for_day(date)

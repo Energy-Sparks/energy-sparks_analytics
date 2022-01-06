@@ -80,18 +80,22 @@ class RunAdultDashboard < RunCharts
 
     return unless valid?(advice, page)
 
-    advice.calculate
+    bm = Benchmark.realtime {
+      advice.calculate
 
-    return if calculation_failed?(advice, page)
+      return if calculation_failed?(advice, page)
 
-    if advice.has_structured_content?(user_type: control[:user])
-      content += [ accordion_style_css ]
-      advice.structured_content(user_type: control[:user]).each do |component_advice|
-        content += accordion_html(component_advice[:title], component_advice[:content])
+      if advice.has_structured_content?(user_type: control[:user])
+        content += [ accordion_style_css ]
+        advice.structured_content(user_type: control[:user]).each do |component_advice|
+          content += accordion_html(component_advice[:title], component_advice[:content])
+        end
+      else
+        content = advice.content(user_type: control[:user])
       end
-    else
-      content = advice.content(user_type: control[:user])
-    end
+    }
+    puts "#{sprintf('%20.20s', page)} = #{bm.round(3)}" if control[:page_calculation_time] == true
+
 
     @failed_charts.concat(advice.failed_charts)
 

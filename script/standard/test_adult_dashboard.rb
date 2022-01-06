@@ -4,7 +4,7 @@ require_rel '../../test_support'
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  ruby_profiler:            true,
+  ruby_profiler:            false,
   no_schools:                  ['marks*', 'stanton*', 'penny*', 'plump*',
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
@@ -19,9 +19,10 @@ script = {
                                 display_average_calculation_rate: true,
                                 summarise_differences: true,
                                 report_failed_charts:   :summary, # :detailed
+                                page_calculation_time: true,
                                 user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },
 
-                                no_pages: %i[baseload],
+                                pages: %i[electricity_profit_loss],
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },
