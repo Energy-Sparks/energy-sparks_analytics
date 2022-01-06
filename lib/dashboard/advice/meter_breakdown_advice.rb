@@ -171,7 +171,7 @@ class AdviceMeterBreakdownBase < AdviceBase
         [
           datatype,
           # map then sum to avoid statsample bug
-          table.map{ |r| r[datatype] }.sum
+          table.map{ |r| r[datatype] || 0.0 }.sum
         ]
       end.to_h
 
