@@ -1,6 +1,6 @@
 require_relative './logger_control.rb'
 require_relative './test_directory_configuration.rb'
-# require 'ruby-prof'
+require 'ruby-prof'
 $logger_format = 1
 
 class RunTests
@@ -9,7 +9,7 @@ class RunTests
 
   DEFAULT_TEST_SCRIPT = {
     logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-    # ruby_profiler:            true,
+    ruby_profiler:            true,
 =begin
     dark_sky_temperatures:    nil,
     grid_carbon_intensity:    nil,
@@ -168,7 +168,7 @@ class RunTests
       charts.run(chart_list, control)
       failed_charts += charts.failed_charts
     end
-    stop_profiler
+    stop_profiler('reports')
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 
@@ -237,8 +237,10 @@ class RunTests
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
+      start_profiler
       test = run_class.new(school)
       differences[school_name] = test.run_flat_dashboard(control)
+      stop_profiler('adult dashboard')
       failed_charts += test.failed_charts
     end
     run_class.summarise_differences(differences, control) if !control[:summarise_differences].nil? && control[:summarise_differences]
@@ -251,8 +253,10 @@ class RunTests
       school = load_school(school_name)
       puts "=" * 30
       puts "running for summary management table for #{school_name}"
+      start_profiler
       test = RunManagementSummaryTable.new(school)
       test.run_management_table(control)
+      stop_profiler('management table')
       html += "<h2>#{school.name}</h2>" + test.html
     end
     html_writer = HtmlFileWriter.new(control[:combined_html_output_file])
@@ -402,7 +406,7 @@ class RunTests
         start_profiler
         alerts = RunAlerts.new(school)
         alerts.run_alerts(alert_list, control, asof_date)
-        stop_profiler
+        stop_profiler('alerts')
       end
       # failed_alerts += alerts.failed_charts
     end
@@ -415,11 +419,11 @@ class RunTests
     RubyProf.start if @test_script.key?(:ruby_profiler)
   end
 
-  private def stop_profiler
+  private def stop_profiler(name)
     if @test_script.key?(:ruby_profiler)
       prof_result = RubyProf.stop
       printer = RubyProf::GraphHtmlPrinter.new(prof_result)
-      printer.print(File.open('log\code-profile - alerts' + Date.today.to_s + '.html','w'))
+      printer.print(File.open('log\code-profile - ' + name + Date.today.to_s + '.html','w'))
     end
   end
 
