@@ -416,11 +416,11 @@ class RunTests
   end
 
   private def start_profiler
-    RubyProf.start if @test_script.key?(:ruby_profiler)
+    RubyProf.start if @test_script[:ruby_profiler] == true
   end
 
   private def stop_profiler(name)
-    if @test_script.key?(:ruby_profiler)
+    if @test_script[:ruby_profiler] == true
       prof_result = RubyProf.stop
       printer = RubyProf::GraphHtmlPrinter.new(prof_result)
       printer.print(File.open('log\code-profile - ' + name + Date.today.to_s + '.html','w'))
