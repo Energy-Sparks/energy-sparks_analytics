@@ -21,12 +21,7 @@ script = {
                                 report_failed_charts:   :summary, # :detailed
                                 user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },
 
-                                pages: %i[electricity_profit_loss],
-                                no_pages: %i[electric_annual electric_intraday baseload], # boiler_control_morning_start_time],
-
-                                no_pages: %i[electric_target gas_target storage_heater_target],
-                                no_pages: %i[underlying_electricity_meters_breakdown underlying_gas_meters_breakdown],
-                                pages: %i[baseload],
+                                no_pages: %i[baseload],
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },
