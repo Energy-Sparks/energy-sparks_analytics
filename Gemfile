@@ -37,7 +37,7 @@ gem "benchmark-memory"
 # For tests
 group :test do
   gem 'rspec', '~> 3.8.0'
-  gem 'bundler-audit' if RUBY_PLATFORM=~ /win32/
+  gem 'bundler-audit', platforms: :ruby
   gem 'factory_bot'
   gem 'simplecov', require: false
 end

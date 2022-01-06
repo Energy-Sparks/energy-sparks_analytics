@@ -22,7 +22,7 @@ script = {
                                 page_calculation_time: true,
                                 user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },
 
-                                pages: %i[electricity_profit_loss],
+                                no_pages: %i[electricity_profit_loss],
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },

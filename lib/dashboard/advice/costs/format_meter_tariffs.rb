@@ -25,8 +25,12 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   private
 
   def group_tariff_by_date_ranges(start_date, end_date)
+    @tariff_cache = {} # this slice_when is slow, cache lookup to double speed but still slow
+
     drs = (start_date..end_date).to_a.slice_when do |curr, prev|
-      accounting_tariff.one_days_cost_data(curr).tariff != accounting_tariff.one_days_cost_data(prev).tariff
+      @tariff_cache[curr] ||= accounting_tariff.one_days_cost_data(curr).tariff
+      @tariff_cache[prev] ||= accounting_tariff.one_days_cost_data(prev).tariff
+      @tariff_cache[curr] != @tariff_cache[prev]
     end
 
     drs_grouped = drs.map { |ds| ds.first..ds.last }

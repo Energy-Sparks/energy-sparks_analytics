@@ -212,6 +212,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport (~> 6.0.0)
   benchmark-memory
+  bundler-audit
   chroma
   factory_bot
   faraday
