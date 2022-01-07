@@ -122,11 +122,11 @@ class RunTests
     $SCHOOL_FACTORY ||= SchoolFactory.new
   end
 
-  def load_school(school_name)
+  def load_school(school_name, cache_school = false)
     school = nil
     begin
       attributes_override = @meter_attribute_overrides.nil? ? {} : @meter_attribute_overrides
-      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source, meter_attributes_overrides: attributes_override)
+      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source, meter_attributes_overrides: attributes_override, cache: cache_school == true)
     rescue Exception => e
       puts "=" * 100
       puts "Load of school #{school_name} failed"
@@ -162,7 +162,7 @@ class RunTests
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       next if school.nil?
       charts = RunCharts.new(school)
       charts.run(chart_list, control)

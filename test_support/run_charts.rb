@@ -4,11 +4,16 @@ class RunCharts
 
   attr_reader :failed_charts
 
-  def initialize(school)
+  def initialize(school, timer_type = 'unknown')
     @school = school
+    @timer_type = timer_type
     @worksheets = Hash.new { |worksheet_name, charts| worksheet_name[charts] = [] }
     @runtime = Time.now.strftime('%d/%m/%Y %H:%M:%S')
     @failed_charts = []
+  end
+
+  def timer
+    @@timer ||= RecordTestTimes.new(@timer_type)
   end
 
   def run(charts, control)

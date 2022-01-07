@@ -1,19 +1,28 @@
 class RunAdultDashboard < RunCharts
 
+  def initialize(school)
+    super(school, 'energy analysis')
+  end
+
   def run_flat_dashboard(control)
     @accordion_count = 0
     @all_html = ''
     differing_pages = {}
+    
     pages = control.fetch(:pages, page_list)
     pages.each do |page|
       if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)
+        differences = nil
         definition = DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS[page]
-        differences = run_one_page(page, definition, control)
+        timer.record_time(@school.name, page){
+          differences = run_one_page(page, definition, control)
+        }
         differing_pages[page] = !differences.nil? && !differences.empty?
       else
         puts "Not running page #{page}"
       end
     end
+    timer.save_csv
     save_to_excel
     write_html
     differing_pages

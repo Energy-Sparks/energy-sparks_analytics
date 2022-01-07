@@ -10,7 +10,7 @@ class SchoolFactory
   end
 
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
-  def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {})
+  def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {}, cache: true)
 
     school = find_cached_school(identifier, source)
     return school unless school.nil?
@@ -28,7 +28,7 @@ class SchoolFactory
       load_unvalidated_meter_data(identifier, meter_attributes_overrides: meter_attributes_overrides)
     end
 
-    add_meter_collection_to_cache(identifier, source, meter_collection)
+    add_meter_collection_to_cache(identifier, source, meter_collection) unless cache
 
     return meter_collection unless meter_collection.nil?
 =begin
