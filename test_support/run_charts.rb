@@ -12,10 +12,6 @@ class RunCharts
     @failed_charts = []
   end
 
-  def timer
-    @@timer ||= RecordTestTimes.new(@timer_type)
-  end
-
   def run(charts, control)
     charts = [charts] unless charts.is_a?(Array)
     charts.each do |config_component|

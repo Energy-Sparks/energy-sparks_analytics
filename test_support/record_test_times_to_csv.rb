@@ -1,18 +1,19 @@
 require 'fileutils'
 
 class RecordTestTimes
-  def initialize(type, directory: 'Results/testtimes/')
+  include Singleton
+  
+  def initialize(directory: 'Results/testtimes/')
     @directory = directory
-    @type = type
     create_directory
     @time_log = {}
   end
 
-  def record_time(school_name, type)
+  def record_time(school_name, test_type, type)
     r0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     yield
     t = Process.clock_gettime(Process::CLOCK_MONOTONIC) - r0
-    log_time(school_name, type, t)
+    log_time(school_name, test_type, type, t)
   end
 
   def save_csv
@@ -20,8 +21,10 @@ class RecordTestTimes
   
     CSV.open(filename, 'w') do |csv|
       @time_log.each do |school_name, data|
-        data.each do |type, seconds|
-          csv << [school_name, type, seconds]
+        data.each do |test_type, test_data|
+          test_data.each do |type, seconds|
+            csv << [test_type, school_name, type, seconds]
+          end
         end
       end
     end
@@ -29,9 +32,10 @@ class RecordTestTimes
 
   private
 
-  def log_time(school_name, type, seconds)
+  def log_time(school_name, test_type, type, seconds)
     @time_log[school_name] ||= {}
-    @time_log[school_name][type] = seconds
+    @time_log[school_name][test_type] ||= {}
+    @time_log[school_name][test_type][type] = seconds
   end
 
   def create_directory
@@ -39,6 +43,6 @@ class RecordTestTimes
   end
 
   def filename
-    "#{@directory}#{@type} #{DateTime.now.strftime('%Y%m%d %H %M %S')}.csv"
+    "#{@directory}test timings #{DateTime.now.strftime('%Y%m%d %H%M%S')}.csv"
   end
 end

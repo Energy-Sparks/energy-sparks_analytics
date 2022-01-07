@@ -114,6 +114,8 @@ class RunTests
         configure_log_file(configuration) if component.to_s.include?('logger')
       end
     end
+
+    RecordTestTimes.instance.save_csv
   end
 
   private

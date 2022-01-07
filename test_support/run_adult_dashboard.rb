@@ -14,7 +14,7 @@ class RunAdultDashboard < RunCharts
       if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)
         differences = nil
         definition = DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS[page]
-        timer.record_time(@school.name, page){
+        RecordTestTimes.instance.record_time(@school.name, 'energy analysis', page){
           differences = run_one_page(page, definition, control)
         }
         differing_pages[page] = !differences.nil? && !differences.empty?
@@ -22,7 +22,6 @@ class RunAdultDashboard < RunCharts
         puts "Not running page #{page}"
       end
     end
-    timer.save_csv
     save_to_excel
     write_html
     differing_pages
