@@ -1,15 +1,64 @@
 # runs charts and advice and outputs html and Excel files
-class RunCharts
+class RunAnalyticsTest
   include Logging
 
   attr_reader :failed_charts
 
-  def initialize(school, timer_type = 'unknown')
+  def initialize(school, timer_type = :known)
     @school = school
     @timer_type = timer_type
     @worksheets = Hash.new { |worksheet_name, charts| worksheet_name[charts] = [] }
     @runtime = Time.now.strftime('%d/%m/%Y %H:%M:%S')
     @failed_charts = []
+  end
+
+  def class_names_to_excel_tab_names(classes)
+    class_name_map = classes.map { |c| [c, (c.name.scan /\p{Upper}/).join.downcase] }.to_h
+    groups = class_name_map.then { |h| h.keys.group_by { |k| h[k] } }.to_h
+
+    unique_list = {}
+
+    groups.each do |excel_tab_name, class_names|
+      if class_names.length == 1
+        unique_list[class_names.first] = excel_tab_name
+      else
+        class_names.each.with_index do |cn, i|
+          unique_list[class_names.first] = "#{excel_tab_name}#{i}"
+        end
+      end
+    end
+
+    unique_list
+  end
+
+  def compare_results(control, object_name, results, asof_date)
+    results.each do |type, content|
+      comparison = CompareContent2.new(@school, control)
+      name = "#{asof_date.strftime('%Y%m%d')} #{object_name} #{type}"
+      comparison.save_and_compare(name, content)
+    end
+  end
+
+  def print_banner(title, lines_before_after = 0)
+    lines_before_after.times { puts banner }
+    puts banner(title)
+    lines_before_after.times { puts banner }
+  end
+
+  def banner(title= '')
+    len_before = ((150 - title.length) / 2).floor
+    len_after = 150 - title.length - len_before
+    '=' * len_before + title + '=' * len_after
+  end
+
+  def self.convert_asof_dates(date_spec)
+    if date_spec.is_a?(Date)
+      [date_spec]
+    elsif date_spec.is_a?(Range)
+      date_spec.to_a
+    elsif date_spec.is_a?(Array)
+      date_spec
+    end
   end
 
   def run(charts, control)
@@ -203,4 +252,7 @@ class RunCharts
     end
     html_file.close
   end
+end
+
+class RunCharts < RunAnalyticsTest
 end

@@ -412,8 +412,6 @@ class RunTests
       end
       # failed_alerts += alerts.failed_charts
     end
-    RunAlerts.print_calculation_time(control[:benchmark]) if control.key?(:benchmark)
-    RunAlerts.save_priority_data(control[:save_priority_variables])
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 

@@ -247,3 +247,63 @@ class CompareContentResults
     yaml_filename.length > 259 ? shorten_filename(yaml_filename) : yaml_filename
   end
 end
+
+
+class CompareContent2 < CompareContentResults
+  def initialize(school, control)
+    @school = school
+    @control = control
+  end
+
+  def save_and_compare(type, content)
+    benchmark = load_yaml(yaml_filename(comparison_directory, type))
+    save_yaml(yaml_filename(output_directory, type), content)
+    differs = benchmark != content
+    report_difference(type, benchmark, content, differs) if differs || !@control[:compare_results][:report_if_differs]
+  end
+
+  private
+
+  def yaml_filename(directory, type)
+    directory + '\\' + @school.name + ' ' + type + '.yaml'
+  end
+
+  def load_yaml(filename)
+    YAML::load_file(filename) rescue nil
+  end
+
+  def save_yaml(filename, content)
+    File.open(filename, 'w') { |f| f.write(YAML.dump(content)) }
+  end
+
+  def comparison_directory
+    @control[:compare_results][:comparison_directory]
+  end
+
+  def output_directory
+    control[:compare_results][:output_directory]
+  end
+
+  def report_difference(type, benchmark, new_content, differs)
+    if differs && benchmark.nil?
+      puts "#{type} benchmark content missing"
+    elsif differs && new_content.nil?
+      puts "#{type} new content missing"
+    elsif @control[:compare_results][:summary] == true
+      puts "#{type} differs"
+    elsif @control[:compare_results][:summary] == :detail && differs
+      detailed_differences(type, benchmark, new_content, @control[:compare_results][:h_diff] )
+    end
+  end
+
+  def detailed_differences(type, benchmark, new_content, tolerance)
+    tolerance ||= { use_lcs: false, :numeric_tolerance => 0.000001 }
+    h_diff = Hashdiff.diff(benchmark, new_content, tolerance) 
+    puts "'Difference for #{type}:"
+    puts h_diff
+    puts 'Original:'
+    puts benchmark
+    puts 'Versus:'
+    puts new_content
+  end
+end

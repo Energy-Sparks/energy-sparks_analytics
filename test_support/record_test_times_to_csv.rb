@@ -2,7 +2,7 @@ require 'fileutils'
 
 class RecordTestTimes
   include Singleton
-  
+
   def initialize(directory: 'Results/testtimes/')
     @directory = directory
     create_directory
@@ -17,7 +17,7 @@ class RecordTestTimes
   end
 
   def save_csv
-    puts "Saving results to #{filename}"
+    puts "Saving timing results to #{filename}"
   
     CSV.open(filename, 'w') do |csv|
       @time_log.each do |school_name, data|
