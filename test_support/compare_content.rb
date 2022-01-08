@@ -250,22 +250,35 @@ end
 
 
 class CompareContent2 < CompareContentResults
-  def initialize(school, control)
-    @school = school
+  def initialize(school_name, control)
+    @school_name = school_name
     @control = control
   end
 
   def save_and_compare(type, content)
     benchmark = load_yaml(yaml_filename(comparison_directory, type))
     save_yaml(yaml_filename(output_directory, type), content)
-    differs = benchmark != content
-    report_difference(type, benchmark, content, differs) if differs || !@control[:compare_results][:report_if_differs]
+
+    non_volatile_benchmark = strip_volatile_data(benchmark)
+    non_volatile_content   = strip_volatile_data(content)
+    differs = non_volatile_benchmark != non_volatile_content
+    report_difference(type, non_volatile_benchmark, non_volatile_content, differs) if differs || !@control[:compare_results][:report_if_differs]
   end
 
   private
 
+  def strip_volatile_data(content)
+    return nil if content.nil?
+
+    s_c = content.deep_dup
+    s_c.each do |component|
+      component.delete(:calculation_time)
+    end
+    s_c
+  end
+
   def yaml_filename(directory, type)
-    directory + '\\' + @school.name + ' ' + type + '.yaml'
+    directory + '\\' + @school_name + ' ' + type + '.yaml'
   end
 
   def load_yaml(filename)
@@ -286,14 +299,19 @@ class CompareContent2 < CompareContentResults
 
   def report_difference(type, benchmark, new_content, differs)
     if differs && benchmark.nil?
-      puts "#{type} benchmark content missing"
+      puts "#{format_type(type)} benchmark content missing"
     elsif differs && new_content.nil?
-      puts "#{type} new content missing"
+      puts "#{format_type(type)} new content missing"
     elsif @control[:compare_results][:summary] == true
-      puts "#{type} differs"
-    elsif @control[:compare_results][:summary] == :detail && differs
+      puts "#{format_type(type)} differs"
+    elsif %i[detail differences].include?(@control[:compare_results][:summary]) && differs
       detailed_differences(type, benchmark, new_content, @control[:compare_results][:h_diff] )
+      print_raw_data(benchmark, new_content) if @control[:compare_results][:h_diff] == :detail
     end
+  end
+
+  def format_type(type)
+    sprintf('%-60.60s', type)
   end
 
   def detailed_differences(type, benchmark, new_content, tolerance)
@@ -301,6 +319,9 @@ class CompareContent2 < CompareContentResults
     h_diff = Hashdiff.diff(benchmark, new_content, tolerance) 
     puts "'Difference for #{type}:"
     puts h_diff
+  end
+
+  def print_raw_data(benchmark, new_content)
     puts 'Original:'
     puts benchmark
     puts 'Versus:'

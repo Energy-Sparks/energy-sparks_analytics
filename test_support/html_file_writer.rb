@@ -4,7 +4,7 @@ class HtmlFileWriter
   FRONTEND_CSS = '<link rel="stylesheet" media="all" href="C:/Users/phili/OneDrive/ESDev/energy-sparks_analytics/InputData/application-1.css" />
   <link rel="stylesheet" media="screen" href="/Users/phili/OneDrive/ESDev/energy-sparks_analytics/InputData/application-2.css" />'
   def initialize(school_name, frontend_css = true)
-    filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + ' - advice.html'
+    filename = File.join(TestDirectory.instance.results_directory) + school_name + ' - advice.html'
     @file = File.new(filename, 'w')
     @file.write('<!DOCTYPE html>')
     @file.write(FRONTEND_CSS) if frontend_css

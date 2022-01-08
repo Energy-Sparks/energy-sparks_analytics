@@ -10,7 +10,7 @@ class RunTargetingAndTracking < RunAdultDashboard
 
         pages: %i[electric_target gas_target storage_heater_target],
 
-        stats_csv_file_base: './Results/targeting and tracking stats',
+        stats_csv_file_base: TestDirectory.instance.results_directory + ' targeting and tracking stats',
 
         compare_results: [
           { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\Base' },

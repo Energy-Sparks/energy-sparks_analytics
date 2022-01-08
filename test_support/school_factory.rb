@@ -3,10 +3,15 @@ require_relative 'load_amr_from_bath_hacked'
 # School Factory: deals with getting school, meter data from different sources:
 #                 caches data so only loads once
 class SchoolFactory
-  METER_COLLECTION_DIRECTORY = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\\'
   def initialize
     @school_cache = {}  # [urn][source] = meter_collection
     @schools_meta_data = AnalysticsSchoolAndMeterMetaData.new
+  end
+
+  def self.meter_collection_directory
+    e = ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY']
+    e += '\\' unless e[-1] == '\\'
+    e
   end
 
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
@@ -124,8 +129,7 @@ class SchoolFactory
   end
 
   private def meter_collection_filename(school_filename, file_type, extension)
-    METER_COLLECTION_DIRECTORY +
-    file_type + school_filename + extension
+    self.class.meter_collection_directory + file_type + school_filename + extension
   end
 
   private def save_marshal_copy(filename, school)
@@ -199,5 +203,4 @@ class SchoolFactory
     puts "loaded marshal meter readings in #{bm.round(5)}"
     school_copy
   end
-
 end

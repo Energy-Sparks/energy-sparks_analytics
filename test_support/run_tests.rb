@@ -176,7 +176,7 @@ class RunTests
 
   def run_drilldown
     schools_list.each do |school_name|
-      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- drilldown.xlsx'
+      excel_filename = TestDirectory.instance.results_directory + school_name + '- drilldown.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_name = :group_by_week_electricity
@@ -194,7 +194,7 @@ class RunTests
 
   def run_timescales
     schools_list.each do |school_name|
-      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- timescale shift.xlsx'
+      excel_filename = TestDirectory.instance.results_directory + school_name + '- timescale shift.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_name = :activities_14_days_daytype_electricity_cost 
@@ -291,7 +291,7 @@ class RunTests
   def run_timescales_drilldown
     schools_list.each do |school_name|
       chart_list = []
-      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- drilldown and timeshift.xlsx'
+      excel_filename = TestDirectory.instance.results_directory + school_name + '- drilldown and timeshift.xlsx'
       school = load_school(school_name)
 
       puts 'Calculating standard chart'
@@ -407,11 +407,13 @@ class RunTests
         school = load_school(school_name)
         start_profiler
         alerts = RunAlerts.new(school)
-        alerts.run_alerts(alert_list, control, asof_date)
+        alerts.run(alert_list, control, asof_date)
         stop_profiler('alerts')
       end
       # failed_alerts += alerts.failed_charts
     end
+    RecordTestTimes.instance.print_stats
+    RecordTestTimes.instance.save_summary_stats_to_csv
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 
@@ -461,7 +463,7 @@ class RunTests
   def self.matching_yaml_files_in_directory(file_type, school_pattern_matches)
     filenames = school_pattern_matches.map do |school_pattern_match|
       match = file_type + school_pattern_match + '.yaml'
-      Dir[match, base: SchoolFactory::METER_COLLECTION_DIRECTORY]
+      Dir[match, base: SchoolFactory.meter_collection_directory]
     end.flatten.uniq
     filenames.map { |filename| filename.gsub(file_type,'').gsub('.yaml','') }
   end

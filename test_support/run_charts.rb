@@ -33,7 +33,7 @@ class RunAnalyticsTest
 
   def compare_results(control, object_name, results, asof_date)
     results.each do |type, content|
-      comparison = CompareContent2.new(@school, control)
+      comparison = CompareContent2.new(@school.name, control)
       name = "#{asof_date.strftime('%Y%m%d')} #{object_name} #{type}"
       comparison.save_and_compare(name, content)
     end
@@ -71,7 +71,7 @@ class RunAnalyticsTest
     save_chart_calculation_times
     report_calculation_time(control)
     CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
-    log_results
+    log_all_results
   end
 
   def self.report_failed_charts(failed_charts, detail)
@@ -97,14 +97,14 @@ class RunAnalyticsTest
   end
 
   def excel_filename
-    File.join(File.dirname(__FILE__), '../Results/') + @school.name + excel_variation + '.xlsx'
+    TestDirectory.instance.results_directory + @school.name + excel_variation + '.xlsx'
   end
 
   def report_calculation_time(control)
     puts "Average calculation rate #{average_calculation_rate.round(1)} charts per second" if control.key?(:display_average_calculation_rate)
   end
 
-  def log_results
+  def log_all_results
     failed = @failed_charts.nil? ? -1 : @failed_charts.length
     charts = number_of_charts.nil? ? 0 : number_of_charts
     calc_time = total_chart_calculation_time.nil? ? 0.0 : total_chart_calculation_time
