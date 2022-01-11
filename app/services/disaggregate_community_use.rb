@@ -1,3 +1,4 @@
+# Centrica
 class DisaggregateCommunityUsage
   def initialize(school)
   end

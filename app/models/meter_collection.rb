@@ -29,6 +29,11 @@ class MeterCollection
                 :solar_pv,
                 :grid_carbon_intensity
 
+  # Centrica
+  attr_accessor :aggregated_electricity_meter_without_community_usage
+  attr_accessor :aggregated_heat_meters_without_community_usage
+  attr_accessor :storage_heater_meter_without_community_usage
+
   def initialize(school, holidays:, temperatures:, solar_irradiation: nil, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
     @name = school.name
     @address = school.address

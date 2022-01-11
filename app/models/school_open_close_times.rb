@@ -1,3 +1,4 @@
+# Centrica
 class SchoolOpenCloseTimes
   class TooManyMatchingOpeningTimes < StandardError; end
 
@@ -30,6 +31,7 @@ class SchoolOpenCloseTimes
         # should be disaggreable as outside school hours
         open_times: {
                       1..5 => [ TimeOfDay.new(18, 0)..TimeOfDay.new(20, 0) ],
+                      # single weekdays ratherv than range may not be allowed by mater attribute framework?
                       0    => [ TimeOfDay.new(10, 0)..TimeOfDay.new(16, 0) ],
                       6    => [ TimeOfDay.new(10, 0)..TimeOfDay.new(18, 0) ]
                     }
@@ -94,7 +96,7 @@ class SchoolOpenCloseTimes
   end
 
   def convert_times_to_weights_x48(date, opening_times)
-    matched_opening_times = opening_times.keys.select { |dow_range| date.wday.between?(dow_range.first, dow_range.last) }
+    matched_opening_times = opening_times.keys.select { |dow_range| date.wday == dow_range || date.wday.between?(dow_range.first, dow_range.last) }
     return nil if opening_times.empty?
 
     raise TooManyMatchingOpeningTimes, "Too many opening times for #{date}" if opening_times.length > 1

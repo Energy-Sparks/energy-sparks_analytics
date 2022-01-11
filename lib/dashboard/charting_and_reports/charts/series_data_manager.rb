@@ -56,6 +56,7 @@ class SeriesNames
   WEEKEND         = 'Weekend'.freeze
   SCHOOLDAYOPEN   = 'School Day Open'.freeze
   SCHOOLDAYCLOSED = 'School Day Closed'.freeze
+  # Centrica: this will need to become dynamic depending on series generated
   DAYTYPESERIESNAMES = [HOLIDAY.freeze, WEEKEND.freeze, SCHOOLDAYOPEN.freeze, SCHOOLDAYCLOSED.freeze].freeze
 
   DEGREEDAYS      = 'Degree Days'.freeze
@@ -558,6 +559,8 @@ private
     }
     (date_range[0]..date_range[1]).each do |date|
       begin
+        # Centrica
+        # now more complex - TODO
         if @meter_collection.holidays.holiday?(date)
           daytype_data[SeriesNames::HOLIDAY] += amr_data_one_day(meter, date, data_type)
         elsif DateTimeHelper.weekend?(date)
@@ -591,6 +594,8 @@ private
       # start_time = meter.meter_type == :storage_heater ? TimeOfDay.new(0, 0) : @meter_collection.open_time
       start_time = @meter_collection.open_time
       open_time = start_time..@meter_collection.close_time
+      # Centrica
+      # meter.community_opening_times.open_close_weights_x48(date)
       @cached_weighted_open_x48 = DateTimeHelper.weighted_x48_vector_multiple_ranges([open_time])
     end
     one_day_readings = amr_data_one_day_readings(meter, date, data_type)
@@ -609,6 +614,9 @@ private
       SeriesNames::SCHOOLDAYOPEN => 0.0,
       SeriesNames::SCHOOLDAYCLOSED => 0.0
     }
+
+    # Centrica
+    # meter.community_opening_times.open_close_weights_x48(date)
 
     if @meter_collection.holidays.holiday?(date)
       daytype_data[SeriesNames::HOLIDAY] = val

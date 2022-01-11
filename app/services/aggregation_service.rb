@@ -39,6 +39,8 @@ class AggregateDataService
 
       process_electricity_meters
 
+      process_community_usage_open_close_times
+
       set_post_aggregation_state_on_all_meters
     }
     calc_text = "Calculated meter aggregation for |#{@meter_collection.name}| in |#{bm.round(3)}| seconds"
@@ -75,6 +77,15 @@ class AggregateDataService
       adssh = AggregateDataServiceStorageHeaters.new(@meter_collection)
       adssh.disaggregate
     end
+  end
+
+  def process_community_usage_open_close_times
+    # Centrica
+    # this is kind of complex
+    # some of this can be deferred to later, on the fly if representation simple
+    # some needs processing here e.g. storage heater like floodlighting
+    # probably generate extra community/noncommunity aggregate and perhaps non aggregate meters here
+    DisaggregateCommunityUsage.new(@meter_collection)
   end
 
   def set_long_gap_boundary_on_all_meters
