@@ -27,13 +27,13 @@ ChartYAxisManipulation.new(school).y1_axis_choices(existing_chart_config).each d
   charts.push(chart_data)
 end
 
-puts 'Testing exception checking:'
 ChartYAxisManipulation.new(school).y2_axis_choices(existing_chart_config).each do |y2_axis_unit|
   chart_config = ChartYAxisManipulation.new(school).change_y2_axis_config(existing_chart_config, y2_axis_unit)
   chart_data = chart_manager.run_chart(chart_config, chart_name)
   charts.push(chart_data)
 end
 
+puts 'Testing exception checking:'
 begin
   chart_config = ChartYAxisManipulation.new(school).change_y1_axis_config(existing_chart_config, :rubbish)
 rescue ChartYAxisManipulation::CantChangeY1AxisException => e
