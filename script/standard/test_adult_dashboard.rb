@@ -13,7 +13,7 @@ script = {
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
                             ],
-  schools: ['*'], # ['st-nico*'],
+  schools: ['*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
@@ -26,7 +26,7 @@ script = {
                                 page_calculation_time: false,
                                 user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },
 
-                                no_pages: %i[solar_pv_group],
+                                no_pages: %i[baseload],
                                 compare_results: [
                                   { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\Base' },
                                   { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\AdultDashboard\New' },
