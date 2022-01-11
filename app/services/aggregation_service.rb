@@ -85,7 +85,8 @@ class AggregateDataService
     # some of this can be deferred to later, on the fly if representation simple
     # some needs processing here e.g. storage heater like floodlighting
     # probably generate extra community/noncommunity aggregate and perhaps non aggregate meters here
-    DisaggregateCommunityUsage.new(@meter_collection)
+    community_disaggregator = DisaggregateCommunityUsage.new(@meter_collection)
+    community_disaggregator.disaggregate
   end
 
   def set_long_gap_boundary_on_all_meters

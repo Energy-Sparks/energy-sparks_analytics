@@ -8,6 +8,20 @@ class SchoolOpenCloseTimes
     @meter = meter
   end
 
+  def self.community_use_types
+    %i[
+      school
+      flood_lighting
+      community
+      swimming_pool
+      dormitory
+      kitchen
+      sports_centre
+      library
+      other
+    ]
+  end
+
   def self.example_open_close_times(school)
     [ # maps onto meter attribute hash?
       {
@@ -51,7 +65,8 @@ class SchoolOpenCloseTimes
                       0..7 => [ TimeOfDay.new(6, 0)..TimeOfDay.new(8, 0),
                                 TimeOfDay.new(18, 0)..TimeOfDay.new(20, 0) ]
                     }
-      }
+      },
+      # { type: community } - defines a whole meter being for community use etc.
     ]
   end
 
