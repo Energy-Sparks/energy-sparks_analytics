@@ -1,14 +1,22 @@
 class RunAdultDashboard < RunCharts
 
+  def initialize(school)
+    super(school, 'energy analysis')
+  end
+
   def run_flat_dashboard(control)
     @accordion_count = 0
     @all_html = ''
     differing_pages = {}
+    
     pages = control.fetch(:pages, page_list)
     pages.each do |page|
       if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)
+        differences = nil
         definition = DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS[page]
-        differences = run_one_page(page, definition, control)
+        RecordTestTimes.instance.record_time(@school.name, 'energy analysis', page){
+          differences = run_one_page(page, definition, control)
+        }
         differing_pages[page] = !differences.nil? && !differences.empty?
       else
         puts "Not running page #{page}"
@@ -80,18 +88,22 @@ class RunAdultDashboard < RunCharts
 
     return unless valid?(advice, page)
 
-    advice.calculate
+    bm = Benchmark.realtime {
+      advice.calculate
 
-    return if calculation_failed?(advice, page)
+      return if calculation_failed?(advice, page)
 
-    if advice.has_structured_content?(user_type: control[:user])
-      content += [ accordion_style_css ]
-      advice.structured_content(user_type: control[:user]).each do |component_advice|
-        content += accordion_html(component_advice[:title], component_advice[:content])
+      if advice.has_structured_content?(user_type: control[:user])
+        content += [ accordion_style_css ]
+        advice.structured_content(user_type: control[:user]).each do |component_advice|
+          content += accordion_html(component_advice[:title], component_advice[:content])
+        end
+      else
+        content = advice.content(user_type: control[:user])
       end
-    else
-      content = advice.content(user_type: control[:user])
-    end
+    }
+    puts "#{sprintf('%20.20s', page)} = #{bm.round(3)}" if control[:page_calculation_time] == true
+
 
     @failed_charts.concat(advice.failed_charts)
 

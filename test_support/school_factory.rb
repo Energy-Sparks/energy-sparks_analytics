@@ -3,14 +3,19 @@ require_relative 'load_amr_from_bath_hacked'
 # School Factory: deals with getting school, meter data from different sources:
 #                 caches data so only loads once
 class SchoolFactory
-  METER_COLLECTION_DIRECTORY = 'C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\AggregatedMeterCollections\\'
   def initialize
     @school_cache = {}  # [urn][source] = meter_collection
     @schools_meta_data = AnalysticsSchoolAndMeterMetaData.new
   end
 
+  def self.meter_collection_directory
+    e = ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY']
+    e += '\\' unless e[-1] == '\\'
+    e
+  end
+
   # e.g. meter_collection = load_school(:urn, 123456, :analytics_db) source: or :bathcsv, :bathhacked etc.
-  def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {})
+  def load_or_use_cached_meter_collection(identifier_type, identifier, source, meter_attributes_overrides: {}, cache: true)
 
     school = find_cached_school(identifier, source)
     return school unless school.nil?
@@ -28,7 +33,7 @@ class SchoolFactory
       load_unvalidated_meter_data(identifier, meter_attributes_overrides: meter_attributes_overrides)
     end
 
-    add_meter_collection_to_cache(identifier, source, meter_collection)
+    add_meter_collection_to_cache(identifier, source, meter_collection) unless cache
 
     return meter_collection unless meter_collection.nil?
 =begin
@@ -124,8 +129,7 @@ class SchoolFactory
   end
 
   private def meter_collection_filename(school_filename, file_type, extension)
-    METER_COLLECTION_DIRECTORY +
-    file_type + school_filename + extension
+    self.class.meter_collection_directory + file_type + school_filename + extension
   end
 
   private def save_marshal_copy(filename, school)
@@ -199,5 +203,4 @@ class SchoolFactory
     puts "loaded marshal meter readings in #{bm.round(5)}"
     school_copy
   end
-
 end
