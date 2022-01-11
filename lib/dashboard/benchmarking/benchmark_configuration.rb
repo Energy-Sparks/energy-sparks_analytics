@@ -121,6 +121,8 @@ module Benchmarking
           change_in_gas_consumption_recent_school_weeks
           change_in_gas_holiday_consumption_previous_holiday
           change_in_gas_holiday_consumption_previous_years_holiday
+          gas_consumption_during_holiday
+          storage_heater_consumption_during_holiday
         ]
       },
       {
@@ -698,6 +700,30 @@ module Benchmarking
           { data: ->{ gpyc_cper },  name: 'Most recent holiday', units: String },
           { data: ->{ gpyc_pper },  name: 'Previous holiday', units: String },
           { data: ->{ gpyc_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
+      gas_consumption_during_holiday: {
+        benchmark_class: BenchmarkGasHeatingHotWaterOnDuringHoliday,
+        name:     'Gas consumption during current holiday',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: ->{ hdhl_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
+          { data: ->{ hdhl_£sfr },  name: 'Holiday usage to date', units: :£ },
+          { data: ->{ hdhl_hnam },  name: 'Holiday', units: String }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
+      storage_heater_consumption_during_holiday: {
+        benchmark_class: BenchmarkStorageHeatersOnDuringHoliday,
+        name:     'Storage heater consumption during current holiday',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: ->{ shoh_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
+          { data: ->{ shoh_£sfr },  name: 'Holiday usage to date', units: :£ },
+          { data: ->{ shoh_hnam },  name: 'Holiday', units: String }
         ],
         sort_by: [1],
         type: %i[table chart]
