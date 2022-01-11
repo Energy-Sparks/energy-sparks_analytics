@@ -16,13 +16,14 @@ class AlertAnalysisBase < ContentBase
   include Logging
 
   ALERT_HELP_URL = 'https://blog.energysparks.uk/alerts'.freeze
-  
+
   attr_reader :status, :rating, :term, :default_summary, :default_content, :bookmark_url
   attr_reader :analysis_date, :max_asofdate, :calculation_worked
 
   attr_reader :capital_cost, :one_year_saving_£, :ten_year_saving_£, :payback_years
   attr_reader :average_capital_cost, :average_one_year_saving_£, :average_payback_years
   attr_reader :average_ten_year_saving_£
+  attr_reader :error_message, :backtrace
 
   attr_reader :time_of_year_relevance
 
@@ -59,10 +60,9 @@ class AlertAnalysisBase < ContentBase
   end
 
   def log_stack_trace(e)
-    if self.class.test_mode
-      puts e.message
-      puts e.backtrace unless exclude_backtrace?(e.message)
-    end
+    @error_message = e.message
+    @backtrace = e.backtrace
+
     logger.warn e.message
     logger.warn e.backtrace
   end

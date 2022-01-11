@@ -12,24 +12,14 @@ script = {
     alerts:   [ AlertGasHeatingHotWaterOnDuringHoliday, AlertStorageHeaterHeatingOnDuringHoliday ],
     # alerts: nil,
     control:  {
-                # print_alert_banner: true,
-                # alerts_history: true,
-                print_school_name_banner: true,
-                # raw_variables_for_saving
-                no_outputs:           %i[front_end_template_variables front_end_template_data front_end_template_tables front_end_template_table_data], # front_end_template_variables front_end_template_data raw_variables_for_saving],
-                save_and_compare:  {
-                                      summary:      true,
-                                      h_diff:     { use_lcs: false, :numeric_tolerance => 0.000001 },
-                                      data: %i[
-                                        front_end_template_variables
-                                        raw_variables_for_saving
-                                        front_end_template_data
-                                        front_end_template_chart_data
-                                        front_end_template_table_data
-                                      ],
-                                      comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\Base',
-                                      output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\New',
-                                    },
+                compare_results: {
+                  summary:              :differences, # true || false || :detail || :differences
+                  report_if_differs:    true,
+                  methods:              %i[raw_variables_for_saving],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
+                  class_methods:        %i[front_end_template_variables],
+                  comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\Base',
+                  output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\New'
+                },
 
                 no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
                 no_benchmark:          %i[school alert ], # detail],

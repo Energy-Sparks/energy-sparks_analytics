@@ -460,8 +460,8 @@ class MeterCollection
   end
 
   def benchmark_school(benchmark_type = :benchmark)
-    benchmark_school ||= {}
-    benchmark_school[benchmark_type] ||= BenchmarkSchool.new(self, benchmark_type: benchmark_type)
+    @benchmark_school ||= {}
+    @benchmark_school[benchmark_type] ||= BenchmarkSchool.new(self, benchmark_type: benchmark_type)
   end
 
   def reset_target_school_for_testing(type = :day)

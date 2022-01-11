@@ -1,14 +1,64 @@
 # runs charts and advice and outputs html and Excel files
-class RunCharts
+class RunAnalyticsTest
   include Logging
 
   attr_reader :failed_charts
 
-  def initialize(school)
+  def initialize(school, timer_type = :known)
     @school = school
+    @timer_type = timer_type
     @worksheets = Hash.new { |worksheet_name, charts| worksheet_name[charts] = [] }
     @runtime = Time.now.strftime('%d/%m/%Y %H:%M:%S')
     @failed_charts = []
+  end
+
+  def class_names_to_excel_tab_names(classes)
+    class_name_map = classes.map { |c| [c, (c.name.scan /\p{Upper}/).join.downcase] }.to_h
+    groups = class_name_map.then { |h| h.keys.group_by { |k| h[k] } }.to_h
+
+    unique_list = {}
+
+    groups.each do |excel_tab_name, class_names|
+      if class_names.length == 1
+        unique_list[class_names.first] = excel_tab_name
+      else
+        class_names.each.with_index do |cn, i|
+          unique_list[class_names.first] = "#{excel_tab_name}#{i}"
+        end
+      end
+    end
+
+    unique_list
+  end
+
+  def compare_results(control, object_name, results, asof_date)
+    results.each do |type, content|
+      comparison = CompareContent2.new(@school.name, control)
+      name = "#{asof_date.strftime('%Y%m%d')} #{object_name} #{type}"
+      comparison.save_and_compare(name, content)
+    end
+  end
+
+  def print_banner(title, lines_before_after = 0)
+    lines_before_after.times { puts banner }
+    puts banner(title)
+    lines_before_after.times { puts banner }
+  end
+
+  def banner(title= '')
+    len_before = ((150 - title.length) / 2).floor
+    len_after = 150 - title.length - len_before
+    '=' * len_before + title + '=' * len_after
+  end
+
+  def self.convert_asof_dates(date_spec)
+    if date_spec.is_a?(Date)
+      [date_spec]
+    elsif date_spec.is_a?(Range)
+      date_spec.to_a
+    elsif date_spec.is_a?(Array)
+      date_spec
+    end
   end
 
   def run(charts, control)
@@ -21,7 +71,7 @@ class RunCharts
     save_chart_calculation_times
     report_calculation_time(control)
     CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
-    log_results
+    log_all_results
   end
 
   def self.report_failed_charts(failed_charts, detail)
@@ -47,14 +97,14 @@ class RunCharts
   end
 
   def excel_filename
-    File.join(File.dirname(__FILE__), '../Results/') + @school.name + excel_variation + '.xlsx'
+    TestDirectory.instance.results_directory + @school.name + excel_variation + '.xlsx'
   end
 
   def report_calculation_time(control)
     puts "Average calculation rate #{average_calculation_rate.round(1)} charts per second" if control.key?(:display_average_calculation_rate)
   end
 
-  def log_results
+  def log_all_results
     failed = @failed_charts.nil? ? -1 : @failed_charts.length
     charts = number_of_charts.nil? ? 0 : number_of_charts
     calc_time = total_chart_calculation_time.nil? ? 0.0 : total_chart_calculation_time
@@ -202,4 +252,7 @@ class RunCharts
     end
     html_file.close
   end
+end
+
+class RunCharts < RunAnalyticsTest
 end

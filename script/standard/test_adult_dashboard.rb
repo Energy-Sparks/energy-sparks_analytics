@@ -2,9 +2,13 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
+module Logging
+  logger.level = :error
+end
+
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  # ruby_profiler:            true,
+  ruby_profiler:            false,
   no_schools:                  ['marks*', 'stanton*', 'penny*', 'plump*',
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
@@ -17,8 +21,9 @@ script = {
                                 root:    :adult_analysis_page, # :pupil_analysis_page,
                                 no_chart_manipulation: %i[drilldown timeshift],
                                 display_average_calculation_rate: true,
-                                summarise_differences: true,
+                                summarise_differences: false,
                                 report_failed_charts:   :summary, # :detailed
+                                page_calculation_time: false,
                                 user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },
 
                                 no_pages: %i[baseload],
