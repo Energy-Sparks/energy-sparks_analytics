@@ -1,3 +1,4 @@
+# Centrica
 require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'

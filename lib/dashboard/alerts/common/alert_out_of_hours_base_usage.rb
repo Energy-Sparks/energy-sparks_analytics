@@ -143,6 +143,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @total_annual_kwh = @holidays_kwh + @weekends_kwh + @schoolday_open_kwh + @schoolday_closed_kwh
     @out_of_hours_kwh = @total_annual_kwh - @schoolday_open_kwh
 
+    # will need adjustment for Centrica - TODO
     @out_of_hours_percent = @out_of_hours_kwh / @total_annual_kwh
 
     @holidays_percent         = @holidays_kwh         / @total_annual_kwh

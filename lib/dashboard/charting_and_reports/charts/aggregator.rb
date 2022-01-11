@@ -1123,6 +1123,8 @@ class Aggregator
       )
     end
 
+    # Centrica: need to support 2x series 1 for community use, 1 without
+
     if benchmark_required?(SeriesNames::SOLARPV)
       set_benchmark_buckets(@bucketed_data[SeriesNames::STORAGEHEATERS], 0.0, 0.0, 0.0)
     end
