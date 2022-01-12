@@ -971,6 +971,12 @@ private
         @meters = [@meter_collection.aggregated_electricity_meters, nil]
       when :allelectricity_unmodified
         @meters = [@meter_collection.aggregated_electricity_meters&.original_meter, nil]
+      when :allelectricity_without_community_use
+        @meters = [@meter_collection.aggregated_electricity_meter_without_community_usage, nil]
+      when :allheat_without_community_use
+        @meters = [@meter_collection.aggregated_heat_meters_without_community_usage, nil]
+      when :storage_heaters_without_community_use
+        @meters = [@meter_collection.storage_heater_meter_without_community_usage, nil]
       when :electricity_simulator
         @meters = [@meter_collection.electricity_simulation_meter, nil]
       when :storage_heater_meter

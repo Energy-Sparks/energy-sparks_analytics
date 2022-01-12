@@ -89,6 +89,7 @@ class AMRData < HalfHourlyData
 
   def days_kwh_x48(date, type = :kwh)
     check_type(type)
+    # Centrica: potential at an aggregate level to store per community use breakdown
     kwhs = self[date].kwh_data_x48
     return kwhs if type == :kwh
     return @economic_tariff.days_cost_data_x48(date) if type == :£ || type == :economic_cost
@@ -200,9 +201,10 @@ class AMRData < HalfHourlyData
 
   def kwh(date, halfhour_index, type = :kwh)
     check_type(type)
+    # Centrica: this code would be better to call days_kwh_x48, to avoid repeat of switch
     return self[date].kwh_halfhour(halfhour_index) if type == :kwh
     return @economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£ || type == :economic_cost
-    return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cos
+    return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cost
     return co2_half_hour(date, halfhour_index) if type == :co2
   end
 
