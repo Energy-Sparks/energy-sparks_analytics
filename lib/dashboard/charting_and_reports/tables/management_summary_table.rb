@@ -369,12 +369,12 @@ class ManagementSummaryTable < ContentBase
       d = fuel_type_data[:start_date] + ((7 - fuel_type_data[:start_date].wday) % 7) + 7
       dd = [d, @asof_date].max
       # "Data available from #{dd.strftime('%a %d %b %Y')}"
-      dd
+      rails_date(dd)
     elsif period == :year
       d = fuel_type_data[:start_date] + 365
       dd = [d, @asof_date].max
       # "Data available from #{format_future_date(dd)}"
-      dd
+      rails_date(dd)
     else
       'Date available from: internal error'
     end
