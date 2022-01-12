@@ -345,9 +345,8 @@ class ManagementSummaryTable < ContentBase
         if period_data[:kwh].nil?
           front_end[fuel_type][period][:available_from] = date_available_from(period, fuel_type_data)
         else
-          if @asof_date - fuel_type_data[:end_date] > calculation_configuration[period][:recent_limit]
-            front_end[fuel_type][period][:recent] = NO_RECENT_DATA_MESSAGE
-          end
+          is_recent = @asof_date - fuel_type_data[:end_date] < calculation_configuration[period][:recent_limit]
+          front_end[fuel_type][period][:recent] = is_recent
           front_end[fuel_type][period][:kwh]            = period_data[:kwh]
           front_end[fuel_type][period][:co2]            = period_data[:co2]
           front_end[fuel_type][period][:£]              = period_data[:£]
@@ -369,11 +368,13 @@ class ManagementSummaryTable < ContentBase
     if period == :workweek
       d = fuel_type_data[:start_date] + ((7 - fuel_type_data[:start_date].wday) % 7) + 7
       dd = [d, @asof_date].max
-      "Data available from #{dd.strftime('%a %d %b %Y')}"
+      # "Data available from #{dd.strftime('%a %d %b %Y')}"
+      dd
     elsif period == :year
       d = fuel_type_data[:start_date] + 365
       dd = [d, @asof_date].max
-      "Data available from #{format_future_date(dd)}"
+      # "Data available from #{format_future_date(dd)}"
+      dd
     else
       'Date available from: internal error'
     end
