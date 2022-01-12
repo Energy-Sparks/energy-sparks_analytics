@@ -181,6 +181,18 @@ module Dashboard
       @meter_tariffs = MeterTariffManager.new(self)
     end
 
+    # Centrica
+    def has_community_use?
+      # TODO check real attribute
+      mpxn.to_i % 2 == 1
+    end
+
+    # Centrica
+    def has_exclusive_community_use?
+      # TODO check real attribute
+      mpxn.to_i % 2 == 1
+    end
+
     private def check_fuel_type(fuel_type)
       raise EnergySparksUnexpectedStateException.new("Unexpected fuel type #{fuel_type}") if [:electricity, :gas].include?(fuel_type)
     end
