@@ -29,7 +29,7 @@ class DayTypeBreakDownTable
     end
     units = [String, :kwh, :£, :co2, :percent]
     use_table_formats = [true, true, true, true, false]
-    html_tbl = HtmlTableFormatting.new(header, raw_table[0..3], raw_table[4], units, use_table_formats)
+    html_tbl = HtmlTableFormatting.new(header, raw_table[0..(raw_table.length - 2)], raw_table.last, units, use_table_formats)
     html_tbl.html
   end
 
@@ -44,13 +44,15 @@ class DayTypeBreakDownTable
   end
 
   def transform_hash_to_table(hash_table)
-    table = Array.new(5){Array.new(5)}
+    row_names = hash_table[:kwh].keys
+    table = Array.new(row_names.length){Array.new(5)}
     %i[kwh £ co2 percent].each_with_index do |unit, col_index|
-      ['Holiday', 'Weekend', 'School Day Open', 'School Day Closed', 'Total'].each_with_index do |row_name, row_index|
+      row_names.each_with_index do |row_name, row_index|
         table[row_index][0] = row_name
-        table[row_index][col_index+1] = hash_table[unit][row_name]
+        table[row_index][col_index + 1] = hash_table[unit][row_name]
       end
     end
+
     table
   end
 end
