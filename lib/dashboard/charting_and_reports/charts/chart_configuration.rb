@@ -1104,6 +1104,23 @@ class ChartManager
       yaxis_scaling:    :none,
       subtitle:         :daterange
     },
+    community_use_test_electricity: {
+      name:             'Community use test chart electricity',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allelectricity,
+      timescale:        :year,
+      series_breakdown: :daytype,
+      x_axis:           :intraday,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      subtitle:         :daterange
+    },
+    community_use_test_gas: {
+      name:          'Community use test chart gas',
+      meter_definition: :allheat,
+      inherits_from: :community_use_test_electricity,
+    },
     gas_heating_season_intraday_up_to_1_year: {
       inherits_from: :gas_heating_season_intraday,
       timescale:        :up_to_a_year

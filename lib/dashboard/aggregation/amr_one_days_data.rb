@@ -16,7 +16,6 @@ class OneDayAMRReading
     @upload_datetime = upload_datetime
     @type = type
     @substitute_date = substitute_date
-    # Centrica: potential to store Nx community use kwh_data_x48 data
     @kwh_data_x48 = kwh_data_x48
     valid = validate_data(nils_valid)
     if valid != 48

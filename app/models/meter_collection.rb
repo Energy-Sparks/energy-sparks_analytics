@@ -33,6 +33,7 @@ class MeterCollection
   attr_accessor :aggregated_electricity_meter_without_community_usage
   attr_accessor :aggregated_heat_meters_without_community_usage
   attr_accessor :storage_heater_meter_without_community_usage
+  attr_accessor :community_disaggregator
 
   def initialize(school, holidays:, temperatures:, solar_irradiation: nil, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
     @name = school.name
@@ -470,6 +471,10 @@ class MeterCollection
 
   def close_time
     @cached_close_time
+  end
+
+  def open_close_times
+    @open_close_times ||= OpenCloseTimes.new(pseudo_meter_attributes(:school_level_data), holidays)
   end
 
   def target_school(type = :day)
