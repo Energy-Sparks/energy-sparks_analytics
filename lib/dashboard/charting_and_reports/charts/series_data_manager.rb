@@ -56,8 +56,6 @@ class SeriesNames
   WEEKEND         = 'Weekend'.freeze
   SCHOOLDAYOPEN   = 'School Day Open'.freeze
   SCHOOLDAYCLOSED = 'School Day Closed'.freeze
-  # Centrica: this will need to become dynamic depending on series generated
-  DAYTYPESERIESNAMES = [HOLIDAY.freeze, WEEKEND.freeze, SCHOOLDAYOPEN.freeze, SCHOOLDAYCLOSED.freeze].freeze
 
   DEGREEDAYS      = 'Degree Days'.freeze
   TEMPERATURE     = 'Temperature'.freeze
@@ -194,7 +192,7 @@ class SeriesDataManager
       case breakdown
       when :heating;                buckets = combinatorially_combine(buckets, SeriesNames::HEATINGSERIESNAMES)
       when :heating_daytype;        buckets = combinatorially_combine(buckets, SeriesNames::HEATINGDAYTYPESERIESNAMES)
-      when :daytype;                buckets = combinatorially_combine(buckets, SeriesNames::DAYTYPESERIESNAMES)
+      when :daytype;                buckets = combinatorially_combine(buckets, day_type_names) # Centrica
       when :meter;                  buckets = combinatorially_combine(buckets, meter_names)
 
       when :model_type;             buckets += heating_model_types
@@ -303,6 +301,12 @@ class SeriesDataManager
       end
     end
     names
+  end
+
+  def day_type_names
+    @day_type_names ||= @meters.compact.map do |meter|
+      meter.amr_data.open_close_breakdown.series_names
+    end.flatten.uniq
   end
 
   def target_extend?
@@ -548,34 +552,34 @@ private
     end
   end
 
+  def new_day_type_breakdown
+    day_type_names.map { |type_str| [type_str, 0.0] }.to_h
+  end
+
   def daytype_breakdown(date_range, meter)
+    daytype_data = new_day_type_breakdown
     data_type = kwh_cost_or_co2
 
-    daytype_data = {
-      SeriesNames::HOLIDAY => 0.0,
-      SeriesNames::WEEKEND => 0.0,
-      SeriesNames::SCHOOLDAYOPEN => 0.0,
-      SeriesNames::SCHOOLDAYCLOSED => 0.0
-    }
     (date_range[0]..date_range[1]).each do |date|
       begin
         # Centrica
-        # now more complex - TODO
-        if @meter_collection.holidays.holiday?(date)
-          daytype_data[SeriesNames::HOLIDAY] += amr_data_one_day(meter, date, data_type)
-        elsif DateTimeHelper.weekend?(date)
-          daytype_data[SeriesNames::WEEKEND] += amr_data_one_day(meter, date, data_type)
-        else
-          open_kwh, close_kwh = intraday_breakdown(meter, date, data_type)
-          daytype_data[SeriesNames::SCHOOLDAYOPEN] += open_kwh
-          daytype_data[SeriesNames::SCHOOLDAYCLOSED] += close_kwh
+        breakdown = meter.amr_data.open_close_breakdown.one_day_kwh(date, data_type)
+
+        breakdown.each do |type, kwh|
+          display_type = OpenCloseTime.name(type)
+          daytype_data[display_type] += kwh
         end
       rescue StandardError => e
         logger.error "Unable to aggregate data for #{date} - exception raise"
         raise e
       end
     end
+
     daytype_data
+  rescue => e
+    puts e.message
+    puts e.backtrace
+    raise
   end
 
   def close_to(v1, v2, max_diff)
@@ -586,46 +590,15 @@ private
     end
   end
 
-  # for speed aggregate single day breakdown using ranges
-  # does fractional calculation if open/close time not on 30 minute boundary (TODO (PH, 6Feb2019) currently untested)
-  def intraday_breakdown(meter, date, data_type)
-    if @cached_weighted_open_x48.nil?
-      # fudge: override start time if storage heater: TODO(PH, 30Oct2019) move to specialised Meter class
-      # start_time = meter.meter_type == :storage_heater ? TimeOfDay.new(0, 0) : @meter_collection.open_time
-      start_time = @meter_collection.open_time
-      open_time = start_time..@meter_collection.close_time
-      # Centrica
-      # meter.community_opening_times.open_close_weights_x48(date)
-      @cached_weighted_open_x48 = DateTimeHelper.weighted_x48_vector_multiple_ranges([open_time])
-    end
-    one_day_readings = amr_data_one_day_readings(meter, date, data_type)
-    open_kwh_x48 = AMRData.fast_multiply_x48_x_x48(one_day_readings, @cached_weighted_open_x48)
-    open_kwh =  open_kwh_x48.sum
-    close_kwh = amr_data_one_day(meter, date, data_type) - open_kwh
-    [open_kwh, close_kwh]
-  end
-
   def daytype_breakdown_halfhour(date, halfhour_index, meter)
-    val = amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2)
-
-    daytype_data = {
-      SeriesNames::HOLIDAY => 0.0,
-      SeriesNames::WEEKEND => 0.0,
-      SeriesNames::SCHOOLDAYOPEN => 0.0,
-      SeriesNames::SCHOOLDAYCLOSED => 0.0
-    }
+    daytype_data = new_day_type_breakdown
 
     # Centrica
-    # meter.community_opening_times.open_close_weights_x48(date)
+    breakdown = meter.amr_data.open_close_breakdown.kwh(date, halfhour_index, kwh_cost_or_co2)
 
-    if @meter_collection.holidays.holiday?(date)
-      daytype_data[SeriesNames::HOLIDAY] = val
-    elsif DateTimeHelper.weekend?(date)
-      daytype_data[SeriesNames::WEEKEND] = val
-    else
-      time_of_day = DateTimeHelper.time_of_day(halfhour_index)
-      daytype_type = @meter_collection.is_school_usually_open?(date, time_of_day) ? SeriesNames::SCHOOLDAYOPEN : SeriesNames::SCHOOLDAYCLOSED
-      daytype_data[daytype_type] = val
+    breakdown.each do |type, kwh|
+      display_type = OpenCloseTime.name(type)
+      daytype_data[display_type] = kwh
     end
 
     daytype_data
