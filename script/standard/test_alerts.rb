@@ -2,14 +2,15 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
+ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Working'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['king-j*', 'belv*', 'marksb*'],
+  schools:                  ['king-j*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
-    alerts:   [ AlertGasHeatingHotWaterOnDuringHoliday, AlertStorageHeaterHeatingOnDuringHoliday ],
+    alerts:   [ AlertPreviousYearHolidayComparisonGas ],
     # alerts: nil,
     control:  {
                 compare_results: {
@@ -20,6 +21,9 @@ script = {
                   comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\Base',
                   output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\New'
                 },
+
+                outputs: %i[raw_variables_for_saving],
+                log: %i[],
 
                 no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
                 no_benchmark:          %i[school alert ], # detail],

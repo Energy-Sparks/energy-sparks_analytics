@@ -189,7 +189,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     definition
   end
 
-
   private def assign_third_party_alert_variables(class_type, third_party_alert)
     ALERT_INHERITANCE.each do |new_variable_name, third_party_alert_variable|
       if class_type == third_party_alert_variable[:class_type]

@@ -1,4 +1,6 @@
 class GridCarbonIntensity < HalfHourlyData
+  class NotInYearRange < StandardError; end
+
   def initialize
     super('UK Grid Carbon Intensity')
   end
@@ -39,6 +41,11 @@ class GridCarbonIntensity < HalfHourlyData
     raise EnergySparksUnexpectedStateException, 'co2 maintained as holey data, so end_date not valid'
   end
 
+  def self.grid_carbon_intensity_for_year_kg(year)
+    @@grid_carbon_intensity_for_year_kg ||= {}
+    @@grid_carbon_intensity_for_year_kg[year] ||= calculate_grid_carbon_intensity_for_year_kg(year)
+  end
+
   private
 
   # lazy load dates outside range provided by the UK grid
@@ -51,10 +58,22 @@ class GridCarbonIntensity < HalfHourlyData
   end
 
   def hard_coded_mains_grid_intensity
+    grid_intensity_parameters
+  end
+
+  def self.grid_intensity_parameters
     @@grid_intensity_parameters ||= create_data
   end
 
-  def create_data
+  private_class_method def self.calculate_grid_carbon_intensity_for_year_kg(year)
+    raise NotInYearRange, "not in year range #{year}" unless year.between?(grid_intensity_parameters.keys.first.first.year, grid_intensity_parameters.keys.last.last.year)
+    grid_intensity_parameters.each do |year_range, carbon_intensity|
+      return carbon_intensity / 1000.0 if year == year_range.first.year
+    end
+    Float::NAN
+  end
+
+  def self.create_data
     {
       # https://www.mygridgb.co.uk/historicaldata/ - however (PH, 24Mar2019) thinks these are perhaps 30g/kWh too low?
       Date.new(2007,  1, 1)..Date.new(2007,  12, 31)  => 510.0,
@@ -151,15 +170,27 @@ class GridCarbonIntensity < HalfHourlyData
       Date.new(2019,  3, 12)..Date.new(2019,  3, 18)  => 174.4,
       Date.new(2019,  3, 19)..Date.new(2019,  3, 25)  => 231.9,
       Date.new(2019,  3, 20)..Date.new(2019,  12, 31)  => 210.0,
-      # https://www.icax.co.uk/Grid_Carbon_Factors.html
-      # https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/671187/Updated_energy_and_emissions_projections_2017.pdf Fig 5.2
-      # made these up a little as some of the projections for this year are already wrong
-      # probably a little higher than projected (PH, 24Mar2019):
-      Date.new(2020,  1, 1)..Date.new(2020,  12, 31)  => 210.0,
-      Date.new(2021,  1, 1)..Date.new(2021,  12, 31)  => 180.0,
-      Date.new(2022,  1, 1)..Date.new(2022,  12, 31)  => 160.0,
-      Date.new(2023,  1, 1)..Date.new(2023,  12, 31)  => 150.0,
-      Date.new(2024,  1, 1)..Date.new(2025,  12, 31)  => 140.0,
+      # https://www.gov.uk/government/publications/valuation-of-energy-use-and-greenhouse-gas-emissions-for-appraisal
+      # average of marginal and grid average values in Table 1 * 92% - seems best fit
+      Date.new(2020,  1, 1)..Date.new(2020,  12, 31)  => 192.4,
+      Date.new(2021,  1, 1)..Date.new(2021,  12, 31)  => 182.4,
+      Date.new(2022,  1, 1)..Date.new(2022,  12, 31)  => 172.6,
+      Date.new(2023,  1, 1)..Date.new(2023,  12, 31)  => 164.1,
+      Date.new(2024,  1, 1)..Date.new(2024,  12, 31)  => 163.0,
+      Date.new(2025,  1, 1)..Date.new(2025,  12, 31)  => 146.7,
+      Date.new(2026,  1, 1)..Date.new(2026,  12, 31)  => 125.8,
+      Date.new(2027,  1, 1)..Date.new(2027,  12, 31)  => 111.6,
+      Date.new(2028,  1, 1)..Date.new(2028,  12, 31)  => 101.3,
+      Date.new(2029,  1, 1)..Date.new(2029,  12, 31)  => 91.1,
+      Date.new(2030,  1, 1)..Date.new(2030,  12, 31)  => 76.5,
+      Date.new(2031,  1, 1)..Date.new(2031,  12, 31)  => 61.5,
+      Date.new(2032,  1, 1)..Date.new(2032,  12, 31)  => 50.8,
+      Date.new(2033,  1, 1)..Date.new(2033,  12, 31)  => 42.0,
+      Date.new(2034,  1, 1)..Date.new(2034,  12, 31)  => 35.2,
+      Date.new(2035,  1, 1)..Date.new(2035,  12, 31)  => 29.5,
+      Date.new(2036,  1, 1)..Date.new(2036,  12, 31)  => 24.1,
+      Date.new(2037,  1, 1)..Date.new(2037,  12, 31)  => 20.2,
+      Date.new(2038,  1, 1)..Date.new(2038,  12, 31)  => 17.6
     }.freeze
   end
 end

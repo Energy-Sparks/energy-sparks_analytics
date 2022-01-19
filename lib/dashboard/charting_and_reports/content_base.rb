@@ -127,6 +127,32 @@ class ContentBase
     front_end_template
   end
 
+  def self.convert_equivalence_template_variables(equivalences, existing_template_variables)
+    equivalences.map do |equivalence|
+      config = existing_template_variables.values.to_a.flatten.first[equivalence[:existing_variable]]
+      [
+        equivalence_key(equivalence),
+        {
+          description:  "#{equivalence[:existing_variable]}: #{config[:description]} converted to #{equivalence[:convert_to]}",
+          units:        equivalence[:convert_to]
+        }
+      ]
+    end.to_h
+  end
+
+  def self.equivalence_key(equivalence)
+    "#{equivalence[:existing_variable]}_#{equivalence[:convert_to]}_#{equivalence[:convert_via]}".to_sym
+  end
+
+  def set_equivalence_variables(equivalences)
+    equivalences.each do |equivalence|
+      self.class.send(:attr_reader, self.class.equivalence_key(equivalence))
+      existing_val = send(equivalence[:existing_variable])
+      converted_val = Equivalences.instance.convert(existing_val, equivalence[:convert_to], equivalence[:convert_via])
+      instance_variable_set('@' + self.class.equivalence_key(equivalence).to_s, converted_val.magnitude)
+    end
+  end
+
   # the front end needs the range type values split into high and low versions
   def self.front_end_high_low_range_values(high_low_type, data, high_low_description_suffix)
     {
