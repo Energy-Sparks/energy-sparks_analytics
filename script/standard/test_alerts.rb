@@ -6,23 +6,23 @@ ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Working'
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['king-j*'],
+  schools:                  ['*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   alerts:                   {
-    alerts:   [ AlertPreviousYearHolidayComparisonGas ],
-    # alerts: nil,
+    alerts:   [ AlertWeekendGasConsumptionShortTerm ],
+    alerts: nil,
     control:  {
                 compare_results: {
                   summary:              :differences, # true || false || :detail || :differences
                   report_if_differs:    true,
-                  methods:              %i[raw_variables_for_saving],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
+                  methods:              %i[raw_variables_for_saving front_end_template_data],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
                   class_methods:        %i[front_end_template_variables],
                   comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\Base',
                   output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Alerts\New'
                 },
 
-                outputs: %i[raw_variables_for_saving],
+                outputs: [], # %i[raw_variables_for_saving],
                 log: %i[],
 
                 no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },

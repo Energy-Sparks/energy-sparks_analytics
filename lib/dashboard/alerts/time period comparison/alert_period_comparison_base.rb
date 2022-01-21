@@ -32,6 +32,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD = 4
   MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£ = 10.0
   attr_reader :difference_kwh, :difference_£, :difference_co2, :difference_percent, :abs_difference_percent
+  attr_reader :abs_difference_kwh, :abs_difference_£, :abs_difference_co2
   attr_reader :current_period_kwh, :current_period_£, :current_period_start_date, :current_period_end_date
   attr_reader :previous_period_kwh, :previous_period_£, :previous_period_start_date, :previous_period_end_date
   attr_reader :days_in_current_period, :days_in_previous_period
@@ -49,7 +50,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     vars = {
       difference_kwh:     { description: 'Difference in kwh between last 2 periods',      units:  { kwh: fuel_type } },
       difference_£:       { description: 'Difference in £ between last 2 periods',        units:  :£, benchmark_code: 'dif£'},
-      difference_co2:       { description: 'Difference in co2 kg between last 2 periods', units:  :co2 },
+      difference_co2:     { description: 'Difference in co2 kg between last 2 periods', units:  :co2 },
+      abs_difference_kwh: { description: 'Difference in kwh between last 2 periods - absolute',    units:  { kwh: fuel_type } },
+      abs_difference_£:   { description: 'Difference in £ between last 2 periods - absolute',      units:  :£},
+      abs_difference_co2: { description: 'Difference in co2 kg between last 2 periods - absolute', units:  :co2 },
       difference_percent: { description: 'Difference in % between last 2 periods',   units:  :percent, benchmark_code: 'difp'  },
       abs_difference_percent: { description: 'Difference in % between last 2 periods - absolute, positive number only',   units:  :percent },
 
@@ -138,6 +142,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @difference_£       = current_period_data[:£]   - previous_period_data[:£]
     @difference_co2     = current_period_data[:co2] - previous_period_data[:co2]
 
+    @abs_difference_kwh = @difference_kwh.magnitude
+    @abs_difference_£   = @difference_£.magnitude
+    @abs_difference_co2 = @difference_co2.magnitude
+
     # put in a large percent if the usage was zero during the last period
     # fixes St Louis autumn 2019 half term verus zero summer holiday -inf in benchmarking (PH, 17Dec2019)
     # reinstated (PH, 19Sep2020) - King Edwards + 1 other gas school week comparison
@@ -184,16 +192,11 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     set_equivalence_variables(self.class.equivalence_template_variables)
 
-    set_savings_capital_costs_payback(@difference_£, 0.0)
+    set_savings_capital_costs_payback(@difference_£, 0.0, @difference_co2)
     @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
 
     @bookmark_url = add_book_mark_to_base_url(url_bookmark)
     @term = :shortterm
-  rescue => e
-    puts "Got here 1"
-    puts e.message
-    puts e.backtrace
-    exit
   end
   alias_method :analyse_private, :calculate
 

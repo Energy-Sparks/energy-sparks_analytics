@@ -21,6 +21,7 @@ class AlertAnalysisBase < ContentBase
   attr_reader :analysis_date, :max_asofdate, :calculation_worked
 
   attr_reader :capital_cost, :one_year_saving_£, :ten_year_saving_£, :payback_years
+  attr_reader :one_year_saving_co2, :ten_year_saving_co2
   attr_reader :average_capital_cost, :average_one_year_saving_£, :average_payback_years
   attr_reader :average_ten_year_saving_£
   attr_reader :error_message, :backtrace
@@ -159,6 +160,14 @@ class AlertAnalysisBase < ContentBase
       description: 'Estimated one year saving range',
       units: :£_range
     },
+    one_year_saving_co2: {
+      description: 'Estimated one year saving co2',
+      units: :co2
+    },
+    ten_year_saving_co2: {
+      description: 'Estimated ten year saving co2',
+      units: :co2
+    },
     average_one_year_saving_£: {
       description: 'Estimated one year saving range',
       units: :£,
@@ -251,8 +260,12 @@ class AlertAnalysisBase < ContentBase
     Range.new(min_saving, max_saving)
   end
 
-  def set_savings_capital_costs_payback(one_year_saving_£, capital_cost)
+  def set_savings_capital_costs_payback(one_year_saving_£, capital_cost, one_year_saving_co2)
     one_year_saving_£ = Range.new(one_year_saving_£, one_year_saving_£) if one_year_saving_£.is_a?(Float)
+
+    @one_year_saving_co2 = one_year_saving_co2
+    @ten_year_saving_co2 = one_year_saving_co2 * 10.0
+
     capital_cost = Range.new(capital_cost, capital_cost) if capital_cost.is_a?(Float)
     @capital_cost = capital_cost
     @average_capital_cost = capital_cost.nil? ? 0.0 : ((capital_cost.first + capital_cost.last)/ 2.0)

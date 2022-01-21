@@ -58,7 +58,7 @@ class GridCarbonIntensity < HalfHourlyData
   end
 
   def hard_coded_mains_grid_intensity
-    grid_intensity_parameters
+    self.class.grid_intensity_parameters
   end
 
   def self.grid_intensity_parameters

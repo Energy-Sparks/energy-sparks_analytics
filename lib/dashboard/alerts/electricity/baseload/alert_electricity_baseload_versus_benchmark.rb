@@ -10,7 +10,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
   attr_reader :benchmark_per_pupil_kw, :exemplar_per_pupil_kw
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
-  attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
+  attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£, :one_year_saving_versus_benchmark_co2
   attr_reader :one_year_saving_versus_benchmark_adjective
 
   attr_reader :one_year_exemplar_by_pupil_kwh, :one_year_exemplar_by_pupil_£
@@ -19,6 +19,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
 
   attr_reader :one_year_baseload_per_pupil_kw, :one_year_baseload_per_pupil_kwh, :one_year_baseload_per_pupil_£
   attr_reader :one_year_baseload_per_floor_area_kw, :one_year_baseload_per_floor_area_kwh, :one_year_baseload_per_floor_area_£
+  attr_reader :average_baseload_last_year_co2, :one_year_benchmark_by_pupil_co2, :one_year_exemplar_by_pupil_co2
+  attr_reader :one_year_saving_versus_exemplar_co2, :one_year_baseload_per_pupil_co2, :one_year_baseload_per_floor_area_co2
 
   attr_reader :summary
 
@@ -42,6 +44,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
       units:  :£,
       benchmark_code: 'lygb'
     },
+    average_baseload_last_year_co2: {
+      description: 'Average baseload last year - value in co2 (so kW * 24.0 * 365 * blended co2 rate for last year)',
+      units:  :co2
+    },
     average_baseload_last_year_kwh: {
       description: 'Average baseload last year - value in £s (so kW * 24.0 * 365)',
       units:  { kwh: :electricity}
@@ -63,6 +69,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
       description: 'Benchmark annual baseload cost £ for a school of this number of pupils and type (secondaries have higher baseloads)',
       units:  :£
     },
+    one_year_benchmark_by_pupil_co2: {
+      description: 'Benchmark annual baseload cco2 emissions for a school of this number of pupils and type (secondaries have higher baseloads)',
+      units:  :co2
+    },
     one_year_saving_versus_benchmark_kwh: {
       description: 'Potential annual kWh saving if school matched benchmark - absolute value, so needs to be used in conjuction with adjective',
       units:  { kwh: :electricity}
@@ -70,6 +80,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
     one_year_saving_versus_benchmark_£: {
       description: 'Potential annual £ saving if school matched benchmark - absolute value, so needs to be used in conjuction with adjective',
       units:  :£
+    },
+    one_year_saving_versus_benchmark_co2: {
+      description: 'Potential annual co2 saving if school matched benchmark - absolute value, so needs to be used in conjuction with adjective',
+      units:  :co2
     },
     one_year_saving_versus_benchmark_adjective: {
       description: 'Adjective associated with whether saving is higher of lower than benchmark (higher or lower)',
@@ -84,14 +98,22 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
       description: 'Exemplar annual baseload cost £ for a school of this number of pupils and type (secondaries have higher baseloads)',
       units:  :£,
     },
+    one_year_exemplar_by_pupil_co2: {
+      description: 'Exemplar annual baseload co2 emissions for a school of this number of pupils and type (secondaries have higher baseloads)',
+      units:  :co2,
+    },
     one_year_saving_versus_exemplar_kwh: {
-      description: 'Potential annual kWh saving if school matched exemplar - absolute value, so needs to be used in conjuction with adjective',
+      description: 'Potential annual kWh saving if school matched exemplar - absolute value, so needs to be used in conjunction with adjective',
       units:  { kwh: :electricity}
     },
     one_year_saving_versus_exemplar_£: {
-      description: 'Potential annual £ saving if school matched exemplar - absolute value, so needs to be used in conjuction with adjective',
+      description: 'Potential annual £ saving if school matched exemplar - absolute value, so needs to be used in conjunction with adjective',
       units:  :£,
       benchmark_code: 'svex'
+    },
+    one_year_saving_versus_exemplar_co2: {
+      description: 'Potential CO2 saving if school matched exemplar - absolute value, so needs to be used in conjunction with adjective',
+      units:  :co2
     },
     one_year_saving_versus_exemplar_adjective: {
       description: 'Adjective associated with whether saving is higher of lower than exemplar (higher or lower)',
@@ -111,6 +133,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
       description: '£ baseload for school per pupil - for energy expert use',
       units:  :£
     },
+    one_year_baseload_per_pupil_co2: {
+      description: 'co2 baseload for school per pupil - for energy expert use',
+      units:  :co2
+    },
 
     one_year_baseload_per_floor_area_kw: {
       description: 'kW baseload for school per floor area - for energy expert use',
@@ -123,6 +149,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
     one_year_baseload_per_floor_area_£: {
       description: '£ baseload for school per floor area - for energy expert use',
       units:  :£
+    },
+    one_year_baseload_per_floor_area_co2: {
+      description: 'co2 baseload for school per floor area - for energy expert use',
+      units:  :co2
     },
 
     one_year_baseload_chart: {
@@ -180,46 +210,49 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
   end
 
   private def calculate(asof_date)
-    @average_baseload_last_year_kw = average_baseload_kw(asof_date, @meter)
-    @average_baseload_last_year_£ = annual_average_baseload_£(asof_date, @meter)
+    @average_baseload_last_year_kw  = average_baseload_kw(asof_date, @meter)
+    @average_baseload_last_year_£   = annual_average_baseload_£(asof_date, @meter)
     @average_baseload_last_year_kwh = annual_average_baseload_kwh(asof_date, @meter)
+    @average_baseload_last_year_co2 = annual_average_baseload_co2(asof_date, @meter)
 
-    electricity_tariff = blended_electricity_£_per_kwh(asof_date)
+    electricity_tariff = blended_electricity_£_per_kwh
 
     @benchmark_per_pupil_kw = BenchmarkMetrics.recommended_baseload_for_pupils(pupils(asof_date - 365, asof_date), school_type)
     hours_in_year = 24.0 * 365.0
 
     @one_year_benchmark_by_pupil_kwh   = @benchmark_per_pupil_kw * hours_in_year
     @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * electricity_tariff
+    @one_year_benchmark_by_pupil_co2   = @one_year_benchmark_by_pupil_kwh * blended_co2_per_kwh
 
     @one_year_saving_versus_benchmark_kwh = @average_baseload_last_year_kwh - @one_year_benchmark_by_pupil_kwh
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * electricity_tariff
+    @one_year_saving_versus_benchmark_£   = @one_year_saving_versus_benchmark_kwh * electricity_tariff
+    @one_year_saving_versus_benchmark_co2 = @one_year_saving_versus_benchmark_kwh * blended_co2_per_kwh  
     @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'
-    @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£
 
     @exemplar_per_pupil_kw = BenchmarkMetrics.exemplar_baseload_for_pupils(pupils(asof_date - 365, asof_date), school_type)
 
     @one_year_exemplar_by_pupil_kwh   = @exemplar_per_pupil_kw * hours_in_year
     @one_year_exemplar_by_pupil_£     = @one_year_exemplar_by_pupil_kwh * electricity_tariff
+    @one_year_exemplar_by_pupil_co2   = @one_year_exemplar_by_pupil_kwh * blended_co2_per_kwh
 
-    @one_year_saving_versus_exemplar_kwh = @average_baseload_last_year_kwh - @one_year_exemplar_by_pupil_kwh
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * electricity_tariff
+    @one_year_saving_versus_exemplar_kwh  = @average_baseload_last_year_kwh - @one_year_exemplar_by_pupil_kwh
+    @one_year_saving_versus_exemplar_£    = @one_year_saving_versus_exemplar_kwh * electricity_tariff
+    @one_year_saving_versus_exemplar_co2  = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
     @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? 'higher' : 'lower'
-    @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£
 
-    @one_year_baseload_per_pupil_kw        = @average_baseload_last_year_kw / pupils(asof_date - 365, asof_date)
-    @one_year_baseload_per_pupil_kwh       = @average_baseload_last_year_kwh / pupils(asof_date - 365, asof_date)
-    @one_year_baseload_per_pupil_£         = @average_baseload_last_year_£ / pupils(asof_date - 365, asof_date)
+    @one_year_baseload_per_pupil_kw        = @average_baseload_last_year_kw   / pupils(asof_date - 365, asof_date)
+    @one_year_baseload_per_pupil_kwh       = @average_baseload_last_year_kwh  / pupils(asof_date - 365, asof_date)
+    @one_year_baseload_per_pupil_£         = @average_baseload_last_year_£    / pupils(asof_date - 365, asof_date)
+    @one_year_baseload_per_pupil_co2       = @average_baseload_last_year_co2  / pupils(asof_date - 365, asof_date)
 
-    @one_year_baseload_per_floor_area_kw   = @average_baseload_last_year_kw / floor_area(asof_date - 365, asof_date)
-    @one_year_baseload_per_floor_area_kwh  = @average_baseload_last_year_kwh / floor_area(asof_date - 365, asof_date)
-    @one_year_baseload_per_floor_area_£    = @average_baseload_last_year_£ / floor_area(asof_date - 365, asof_date)
+    @one_year_baseload_per_floor_area_kw   = @average_baseload_last_year_kw   / floor_area(asof_date - 365, asof_date)
+    @one_year_baseload_per_floor_area_kwh  = @average_baseload_last_year_kwh  / floor_area(asof_date - 365, asof_date)
+    @one_year_baseload_per_floor_area_£    = @average_baseload_last_year_£    / floor_area(asof_date - 365, asof_date)
+    @one_year_baseload_per_floor_area_co2  = @average_baseload_last_year_co2  / floor_area(asof_date - 365, asof_date)
 
     @summary = summary_text
 
-    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil)
+    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil, @one_year_saving_versus_exemplar_co2)
 
     # rating: benchmark value = 4.0, exemplar = 10.0
     percent_from_benchmark_to_exemplar = (@average_baseload_last_year_kwh - @one_year_benchmark_by_pupil_kwh) / (@one_year_exemplar_by_pupil_kwh - @one_year_benchmark_by_pupil_kwh)

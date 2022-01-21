@@ -21,6 +21,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
 
   attr_reader :one_year_exemplar_floor_area_kwh, :one_year_exemplar_floor_area_£
   attr_reader :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_£
+  attr_reader :one_year_saving_versus_exemplar_co2, :one_year_exemplar_floor_area_co2
   attr_reader :one_year_saving_versus_exemplar_adjective
 
   attr_reader :one_year_gas_per_pupil_kwh, :one_year_gas_per_pupil_£
@@ -92,6 +93,10 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
         units:  {£: :gas},
         benchmark_code: '£exa'
       },
+      one_year_exemplar_floor_area_co2: {
+        description: 'Last years gas consumption for exemplar school, normalised by floor area - CO2 kg',
+        units:  :co2
+      },
       one_year_saving_versus_exemplar_kwh: {
         description: 'Annual difference in gas consumption versus exemplar school - kwh (use adjective for sign)',
         units:  {kwh: :gas}
@@ -100,6 +105,10 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
         description: 'Annual difference in gas consumption versus exemplar school - £ (use adjective for sign)',
         units:  {£: :gas},
         benchmark_code: 's£ex'
+      },
+      one_year_saving_versus_exemplar_co2: {
+        description: 'Annual difference in gas consumption versus exemplar school - CO2 kg (use adjective for sign)',
+        units:  :co2
       },
       one_year_saving_versus_exemplar_adjective: {
         description: 'Adjective: higher or lower: gas consumption versus exemplar school',
@@ -216,10 +225,12 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'
 
     @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
-    @one_year_exemplar_floor_area_£     = @one_year_exemplar_floor_area_kwh * BenchmarkMetrics::GAS_PRICE
+    @one_year_exemplar_floor_area_£     = gas_cost(@one_year_exemplar_floor_area_kwh)
+    @one_year_exemplar_floor_area_co2   = gas_co2(@one_year_exemplar_floor_area_kwh)
 
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_floor_area_kwh
     @one_year_saving_versus_exemplar_£   = @last_year_£   - @one_year_exemplar_floor_area_£
+    @one_year_saving_versus_exemplar_co2 = @last_year_co2 - @one_year_exemplar_floor_area_co2
     @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? 'higher' : 'lower'
 
     @one_year_gas_per_pupil_kwh       = @last_year_kwh / pupils(asof_date - 365, asof_date)
@@ -243,7 +254,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
 
     @summary = summary_text
 
-    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil)
+    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil, @one_year_saving_versus_exemplar_co2)
 
     # rating: benchmark value = 4.0, exemplar = 10.0
     percent_from_benchmark_to_exemplar = (@last_year_kwh - @one_year_benchmark_floor_area_kwh) / (@one_year_exemplar_floor_area_kwh - @one_year_benchmark_floor_area_kwh)

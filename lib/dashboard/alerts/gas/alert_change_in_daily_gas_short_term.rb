@@ -14,6 +14,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
   attr_reader :predicted_this_week_cost, :predicted_last_week_cost, :predicted_change_in_cost
   attr_reader :signficant_increase_in_gas_consumption
   attr_reader :beginning_of_week, :beginning_of_last_week
+  attr_reader :this_week_co2, :last_week_co2, :predicted_this_week_co2, :predicted_last_week_co2, :predicted_change_in_co2
 
   def initialize(school)
     super(school, :changeingasconsumption)
@@ -77,6 +78,26 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
       description: 'predicted cost of school day gas consumption last week (temperature compensated)',
       units:  :£
     },
+    this_week_co2: {
+      description: 'actual co2 emissions of school day gas consumption this week',
+      units:  :co2
+    },
+    last_week_co2: {
+      description: 'actual co2 emissions of school day gas consumption last week',
+      units:  :co2
+    },
+    predicted_this_week_co2: {
+      description: 'predicted co2 emissions of school day gas consumption this week (temperature compensated)',
+      units:  :co2
+    },
+    predicted_last_week_co2: {
+      description: 'predicted co2 emissions of school day gas consumption last week (temperature compensated)',
+      units:  :co2
+    },
+    predicted_change_in_co2: {
+      description: 'predicted co2 emissions of school day gas consumption last week (temperature compensated)',
+      units:  :co2
+    },
     difference_in_actual_versus_predicted_change_percent: {
       description: 'percentage difference between actual and predicted changes between this week and last week',
       units:  :percent
@@ -135,6 +156,10 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     @predicted_last_week_cost = BenchmarkMetrics::GAS_PRICE * @predicted_kwh_last_week
     @predicted_change_in_cost = @predicted_this_week_cost - @predicted_last_week_cost
 
+    @predicted_this_week_co2 = gas_co2(@predicted_kwh_this_week)
+    @predicted_last_week_co2 = gas_co2(@predicted_kwh_last_week)
+    @predicted_change_in_co2 = @predicted_this_week_co2 - @predicted_last_week_co2
+
     @actual_kwh_this_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(this_weeks_school_days)
     @actual_kwh_last_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(last_weeks_school_days)
     @actual_changein_kwh = @actual_kwh_this_week - @actual_kwh_last_week
@@ -143,12 +168,19 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     @this_week_cost = BenchmarkMetrics::GAS_PRICE * @actual_kwh_this_week
     @last_week_cost = BenchmarkMetrics::GAS_PRICE * @actual_kwh_last_week
 
+    @this_week_co2 = gas_co2(@actual_kwh_this_week)
+    @last_week_co2 = gas_co2(@actual_kwh_last_week)
     @difference_in_actual_versus_predicted_change_percent = @actual_percent_increase_in_usage - @predicted_percent_increase_in_usage
 
     heating_weeks = @heating_model.number_of_heating_days / days_in_week
+
     saving_£ = heating_weeks * (@predicted_this_week_cost - @predicted_last_week_cost)
     saving_£ = 0.0 if saving_£.nan?
-    set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil)
+
+    saving_co2 = heating_weeks * (@predicted_this_week_co2 - @predicted_last_week_co2)
+    saving_co2 = 0.0 if saving_co2.nan?
+
+    set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil, saving_co2)
 
     # PH, 16Aug2019 - as this alert is being deprecated, make more fault tolerant: St Louis school only
     @difference_in_actual_versus_predicted_change_percent = 0.0 if @difference_in_actual_versus_predicted_change_percent.nan?

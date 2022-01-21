@@ -7,8 +7,16 @@ class Equivalences
     EnergyEquivalences.equivalence_choice_by_via_type(kwh_or_co2_or_£)
   end
 
-  def convert(val, equivalence_type = :tree, kwh_or_co2_or_£ = :kwh)
-    val / conversion(equivalence_type, kwh_or_co2_or_£)[:rate]
+  def all_eqivalence_types
+    {
+      kwh: available_equivalence_types(:kwh),
+      co2: available_equivalence_types(:co2),
+      £:   available_equivalence_types(:£)
+    }
+  end
+
+  def convert(val, equivalence_type = :tree, via_kwh_or_co2_or_£ = :kwh)
+    val / conversion(equivalence_type, via_kwh_or_co2_or_£)[:rate]
   end
 
   def front_end_description(equivalence_type = tree,  kwh_or_co2_or_£ = :kwh)

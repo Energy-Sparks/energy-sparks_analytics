@@ -5,6 +5,7 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
   attr_reader :annual_hotwater_poor_insulation_heatloss_estimate_kwh
   attr_reader :annual_hotwater_poor_insulation_heatloss_estimate_percent
   attr_reader :annual_hotwater_poor_insulation_heatloss_estimate_£
+  attr_reader :annual_hotwater_poor_insulation_heatloss_estimate_co2
   attr_reader :hotwater_poor_insulation_heatloss_chart
 
   def initialize(school)
@@ -20,6 +21,10 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     annual_hotwater_poor_insulation_heatloss_estimate_£: {
       description: 'Potential annual loss from poorly insulated hot water system - £',
       units:  :£,
+    },
+    annual_hotwater_poor_insulation_heatloss_estimate_co2: {
+      description: 'Potential annual loss from poorly insulated hot water system - co2',
+      units:  :co2,
     },
     annual_hotwater_poor_insulation_heatloss_estimate_percent: {
       description: 'Potential annual loss from poorly insulated hot water system - percent',
@@ -72,11 +77,12 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
     savings_kwh, savings_percent = 
       heating_model.hot_water_poor_insulation_cost_kwh(start_date, asof_date)
     @annual_hotwater_poor_insulation_heatloss_estimate_£ = savings_kwh * ConvertKwh.scale_unit_from_kwh(:£, :gas)
+    @annual_hotwater_poor_insulation_heatloss_estimate_co2 = savings_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
     @annual_hotwater_poor_insulation_heatloss_estimate_kwh = savings_kwh
     @annual_hotwater_poor_insulation_heatloss_estimate_percent = savings_percent
 
     one_year_saving_£ = Range.new(@annual_hotwater_poor_insulation_heatloss_estimate_£ * 0.7, @annual_hotwater_poor_insulation_heatloss_estimate_£ * 1.3)
-    set_savings_capital_costs_payback(one_year_saving_£, nil)
+    set_savings_capital_costs_payback(one_year_saving_£, nil, @annual_hotwater_poor_insulation_heatloss_estimate_co2)
   end
 
   private def calculate(asof_date)

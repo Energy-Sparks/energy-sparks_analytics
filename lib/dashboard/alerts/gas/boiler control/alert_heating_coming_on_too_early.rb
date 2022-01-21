@@ -8,7 +8,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   attr_reader :last_year_kwh, :last_year_£
   attr_reader :heating_on_times_table
 
-  attr_reader :one_year_optimum_start_saving_kwh, :one_year_optimum_start_saving_£
+  attr_reader :one_year_optimum_start_saving_kwh, :one_year_optimum_start_saving_£, :one_year_optimum_start_saving_co2
   attr_reader :percent_of_annual_gas, :avg_week_start_time
   
   def initialize(school)
@@ -28,8 +28,8 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
     heating_on_times_table: {
       description: 'Last 7 days, heating on times and recommended heating start times with optimal start control and frost protection',
       units: :table,
-      header: ['Date', 'Heating on time', 'Recommended on time', 'Overnight temperature', 'Timing', 'Potential Saving (kWh)', 'Potential Saving (£)'],
-      column_types: [:date, TimeOfDay, TimeOfDay, :temperature, String, { kwh: :gas }, :£]
+      header: ['Date', 'Heating on time', 'Recommended on time', 'Overnight temperature', 'Timing', 'Potential Saving (kWh)', 'Potential Saving (£)', 'Potential Saving (CO2kg)'],
+      column_types: [:date, TimeOfDay, TimeOfDay, :temperature, String, { kwh: :gas }, :£, :co2]
     },
     one_year_optimum_start_saving_kwh: {
       description: 'Estimates (up to saving) of benefit of starting boiler later in morning using a crude optimum start and frost model - kWh',
@@ -39,6 +39,10 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
       description: 'Estimates (up to saving) of benefit of starting boiler later in morning using a crude optimum start and frost model - £',
       units:  :£,
       benchmark_code: 'oss£'
+    },
+    one_year_optimum_start_saving_co2: {
+      description: 'Estimates CO2 (up to saving) of benefit of starting boiler later in morning using a crude optimum start and frost model - CO2',
+      units:  :co2
     },
     avg_week_start_time: {
       description: 'Average time heating started in last week',
@@ -77,13 +81,14 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
 
   def calculate(asof_date)
     calculate_model(asof_date) # heating model call
-    
+
     @heating_on_times_table, rating_7_day, @avg_week_start_time = heating_on_time_assessment(asof_date)
 
     @one_year_optimum_start_saving_kwh, @percent_of_annual_gas = heating_model.one_year_saving_from_better_boiler_start_time(asof_date)
-    @one_year_optimum_start_saving_£ = @one_year_optimum_start_saving_kwh * BenchmarkMetrics::GAS_PRICE
- 
-    set_savings_capital_costs_payback(Range.new(0.0, @one_year_optimum_start_saving_£), Range.new(0.0, 700.0))
+    @one_year_optimum_start_saving_£   = gas_cost(@one_year_optimum_start_saving_kwh)
+    @one_year_optimum_start_saving_co2 = gas_co2( @one_year_optimum_start_saving_kwh)
+
+    set_savings_capital_costs_payback(Range.new(0.0, @one_year_optimum_start_saving_£), Range.new(0.0, 700.0), @one_year_optimum_start_saving_co2)
 
     @rating = [[10 - (rating_7_day + 5), 10].min, 0.0].max
 
@@ -104,9 +109,10 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
       start_times.push(heating_on_time) unless heating_on_time.nil?
       kwh_saving = kwh_saving.nil? ? 0.0 : kwh_saving
       saving_£ = (kwh_saving.nil? || kwh_saving < 0.0) ? 0.0 : kwh_saving * BenchmarkMetrics::GAS_PRICE
+      saving_co2 = (kwh_saving.nil? || kwh_saving < 0.0) ? 0.0 : kwh_saving * EnergyEquivalences::UK_GAS_CO2_KG_KWH
       timing = heating_on_time.nil? ? 'no heating' : (heating_on_time > recommended_time ? 'on time' : 'too early')
       rating += heating_on_time.nil? ? 0 : (heating_on_time > recommended_time ? -1 : 1)
-      days_assessment.push([date, heating_on_time, recommended_time, temperature, timing, kwh_saving, saving_£])
+      days_assessment.push([date, heating_on_time, recommended_time, temperature, timing, kwh_saving, saving_£, saving_co2])
     end
     average_heat_start_time = start_times.empty? ? nil : TimeOfDay.average_time_of_day(start_times)
     [days_assessment, rating, average_heat_start_time]

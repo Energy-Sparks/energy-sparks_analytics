@@ -11,6 +11,7 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
   attr_reader :one_year_saving_reduced_days_to_average_kwh, :total_heating_day_kwh
   attr_reader :one_year_saving_reduced_days_to_exemplar_kwh
   attr_reader :one_year_saving_reduced_days_to_average_£, :one_year_saving_reduced_days_to_exemplar_£
+  attr_reader :one_year_saving_reduced_days_to_average_co2, :one_year_saving_reduced_days_to_exemplar_co2
   attr_reader :one_year_saving_reduced_days_to_average_percent, :one_year_saving_reduced_days_to_exemplar_percent
 
   def initialize(school, type = :heating_on_days)
@@ -63,6 +64,14 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
       units:  :£,
       benchmark_code: 'svex'
     },
+    one_year_saving_reduced_days_to_average_co2: {
+      description: 'Saving through matching average schools heating days (turning off earlier and on later in year, not on holidays, weekends) kg CO2',
+      units:  :co2
+    },
+    one_year_saving_reduced_days_to_exemplar_co2: {
+      description: 'Saving through matching exemplar schools heating days (turning off earlier and on later in year, not on holidays, weekends) kg CO2',
+      units:  :co2
+    },
     one_year_saving_reduced_days_to_average_percent: {
       description: 'Saving through matching average schools heating days (turning off earlier and on later in year, not on holidays, weekends) percent of annual consumption',
       units:  :percent
@@ -113,8 +122,11 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     @one_year_saving_reduced_days_to_average_£ = gas_cost(@one_year_saving_reduced_days_to_average_kwh)
     @one_year_saving_reduced_days_to_exemplar_£ = gas_cost(@one_year_saving_reduced_days_to_exemplar_kwh)
 
+    @one_year_saving_reduced_days_to_average_co2 = gas_co2(@one_year_saving_reduced_days_to_average_kwh)
+    @one_year_saving_reduced_days_to_exemplar_co2 = gas_co2(@one_year_saving_reduced_days_to_exemplar_kwh)
+
     one_year_saving_£ = Range.new(@one_year_saving_reduced_days_to_average_£, @one_year_saving_reduced_days_to_exemplar_£)
-    set_savings_capital_costs_payback(one_year_saving_£, nil)
+    set_savings_capital_costs_payback(one_year_saving_£, nil, @one_year_saving_reduced_days_to_exemplar_co2)
 
     @rating = statistics.school_day_heating_rating_out_of_10(days)
 

@@ -1,6 +1,7 @@
 class AlertLongTermTrend < AlertAnalysisBase
   attr_reader :this_year_£, :last_year_£, :year_change_£, :relevance
   attr_reader :percent_change_£, :summary, :prefix_1, :prefix_2
+  attr_reader :this_year_co2, :last_year_co2, :year_change_co2, :percent_change_co2
 
   def initialize(school, type = :electricitylongtermtrend)
     super(school, type)
@@ -33,6 +34,22 @@ class AlertLongTermTrend < AlertAnalysisBase
         description: "Change between this year\'s and last year\'s #{fuel_type} consumption %",
         units:  :relative_percent
       },
+      this_year_co2: {
+        description: "This years #{fuel_type} consumption co2",
+        units:  :co2
+      },
+      last_year_co2: {
+        description: "Last years #{fuel_type} consumption co2",
+        units:  :co2
+      },
+      year_change_co2: {
+        description: "Change between this year\'s and last year\'s #{fuel_type} consumption co2",
+        units:  :co2
+      },
+      percent_change_co2: {
+        description: "Change between this year\'s and last year\'s #{fuel_type} consumption %",
+        units:  :relative_percent
+      },
       summary: {
         description: 'Change in £spend, relative to previous year',
         units: String
@@ -54,18 +71,26 @@ class AlertLongTermTrend < AlertAnalysisBase
 
   private def calculate(asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 2 years of data required, got #{days_amr_data} days" if enough_data == :not_enough
+    
     scalar = ScalarkWhCO2CostValues.new(@school)
-    @this_year_£        = scalar.aggregate_value({ year:  0 }, fuel_type, :£, { asof_date: asof_date})
-    @last_year_£        = scalar.aggregate_value({ year: -1 }, fuel_type, :£, { asof_date: asof_date})
+
+    @this_year_£        = scalar.aggregate_value({ year:  0 }, fuel_type, :£,   { asof_date: asof_date})
+    @last_year_£        = scalar.aggregate_value({ year: -1 }, fuel_type, :£,   { asof_date: asof_date})
     @year_change_£      = @this_year_£ - @last_year_£
     @percent_change_£   = @year_change_£ / @last_year_£
+
+    @this_year_co2      = scalar.aggregate_value({ year:  0 }, fuel_type, :co2, { asof_date: asof_date})
+    @last_year_co2      = scalar.aggregate_value({ year: -1 }, fuel_type, :co2, { asof_date: asof_date})
+    @year_change_co2    = @this_year_co2 - @last_year_co2
+    @percent_change_co2 = @year_change_co2 / @last_year_co2
+
     @prefix_1 = @year_change_£ > 0 ? 'up' : 'down'
     @prefix_2 = @year_change_£ > 0 ? 'increase' : 'reduction'
     @summary            = summary_text
 
     @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_£)
 
-    set_savings_capital_costs_payback(Range.new(year_change_£, year_change_£), nil)
+    set_savings_capital_costs_payback(Range.new(year_change_£, year_change_£), nil, @year_change_co2)
   end
   alias_method :analyse_private, :calculate
 

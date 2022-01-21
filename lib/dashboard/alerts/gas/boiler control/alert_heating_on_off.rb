@@ -18,6 +18,7 @@ class AlertHeatingOnOff < AlertGasModelBase
   attr_reader :potential_saving_next_week_kwh, :potential_saving_next_week_£
   attr_reader :percent_saving_next_week
   attr_reader :last_5_school_days_consumption_kwh, :last_5_school_days_consumption_£
+  attr_reader :last_5_school_days_consumption_co2, :potential_saving_next_week_co2, :next_weeks_predicted_consumption_co2
   attr_reader :heating_on_off_description
   attr_reader :latest_meter_data_date, :forecast_date_time
   attr_reader :days_between_forecast_and_last_meter_date
@@ -52,6 +53,10 @@ class AlertHeatingOnOff < AlertGasModelBase
       description: 'Predicted heating consumption (£) if heating left on',
       units:  :£
     },
+    next_weeks_predicted_consumption_co2: {
+      description: 'Predicted heating consumption (co2) if heating left on',
+      units:  :co2
+    },
     potential_saving_next_week_kwh: {
       description: 'Potential saving next week (kWh) - attempts to model benefit to turning heating off if temperatures are high enough',
       units:  {kwh: :gas}
@@ -59,6 +64,10 @@ class AlertHeatingOnOff < AlertGasModelBase
     potential_saving_next_week_£: {
       description: 'Potential saving next week (£) - attempts to model benefit to turning heating off if temperatures are high enough',
       units:  :£
+    },
+    potential_saving_next_week_co2: {
+      description: 'Potential saving next week (co2) - attempts to model benefit to turning heating off if temperatures are high enough',
+      units:  :co2
     },
     percent_saving_next_week: {
       description: 'Potential saving next week (%) - attempts to model benefit to turning heating off if temperatures are high enough',
@@ -71,6 +80,10 @@ class AlertHeatingOnOff < AlertGasModelBase
     last_5_school_days_consumption_£: {
       description: 'Gas consumption (£) for the last 5 school days (skips holidays, weekends)',
       units:  :£
+    },
+    last_5_school_days_consumption_co2: {
+      description: 'Gas consumption (co2) for the last 5 school days (skips holidays, weekends)',
+      units:  :co2
     },
     heating_on_off_description: {
       description: 'Is the heating currently on or off: on >= 60% last 5 days, off < 60%, caveat with latest meter date',
@@ -211,9 +224,13 @@ class AlertHeatingOnOff < AlertGasModelBase
     @last_5_school_days_consumption_£ = @last_5_school_days_consumption_kwh * BenchmarkMetrics::GAS_PRICE
     @percent_saving_next_week = @next_weeks_predicted_consumption_kwh == 0.0 ? 0.0 : (@potential_saving_next_week_kwh / @next_weeks_predicted_consumption_kwh)
 
+    @next_weeks_predicted_consumption_co2 = @next_weeks_predicted_consumption_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+    @potential_saving_next_week_co2       = @potential_saving_next_week_kwh       * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+    @last_5_school_days_consumption_co2   = @last_5_school_days_consumption_kwh   * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+
     @days_between_forecast_and_last_meter_date = calculate_days_between_forecast_and_last_meter_date
 
-    set_savings_capital_costs_payback(4 * @potential_saving_next_week_£, 0.0) # arbitrarily set 4 weeks of savings
+    set_savings_capital_costs_payback(4 * @potential_saving_next_week_£, 0.0, 4 * @potential_saving_next_week_co2) # arbitrarily set 4 weeks of savings
 
     if @days_between_forecast_and_last_meter_date > 10
       @rating = 0 # special case, data out of date/stale
