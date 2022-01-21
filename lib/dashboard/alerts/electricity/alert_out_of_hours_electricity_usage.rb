@@ -9,7 +9,6 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
     super(school, 'electricity', BenchmarkMetrics::PERCENT_ELECTRICITY_OUT_OF_HOURS_BENCHMARK,
           :electricityoutofhours, 'ElectricityOutOfHours', :allelectricity,
           0.35, 0.65)
-    puts "Got here AAAAAA #{@school.aggregated_electricity_meters.nil?} #{aggregate_meter} #{relevance} #{relevance}"
   end
 
   protected def aggregate_meter
