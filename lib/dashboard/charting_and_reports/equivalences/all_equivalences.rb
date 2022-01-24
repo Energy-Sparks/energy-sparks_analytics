@@ -1,5 +1,5 @@
 require 'singleton'
-class Equivalences
+class AllEquivalences
   include Singleton
 
   def available_equivalence_types(kwh_or_co2_or_£ = :kwh)

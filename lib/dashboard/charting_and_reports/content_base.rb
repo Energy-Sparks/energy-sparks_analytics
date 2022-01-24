@@ -148,7 +148,7 @@ class ContentBase
     equivalences.each do |equivalence|
       self.class.send(:attr_reader, self.class.equivalence_key(equivalence))
       existing_val = send(equivalence[:existing_variable])
-      converted_val = Equivalences.instance.convert(existing_val, equivalence[:convert_to], equivalence[:convert_via])
+      converted_val = AllEquivalences.instance.convert(existing_val, equivalence[:convert_to], equivalence[:convert_via])
       instance_variable_set('@' + self.class.equivalence_key(equivalence).to_s, converted_val.magnitude)
     end
   end
