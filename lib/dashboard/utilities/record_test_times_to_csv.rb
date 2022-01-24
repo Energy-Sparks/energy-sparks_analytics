@@ -16,20 +16,20 @@ class RecordTestTimes
   end
 
   def record_time(school_name, test_type, type)
-    unless rails?
-      r0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      yield
-      t = Process.clock_gettime(Process::CLOCK_MONOTONIC) - r0
-      log_time(school_name, test_type, type, t)
-    end
+    return if rails?
+
+    r0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    yield
+    t = Process.clock_gettime(Process::CLOCK_MONOTONIC) - r0
+    log_time(school_name, test_type, type, t)
   end
 
   def log_calculation_status(school_name, test_type, type, status)
-    unless rails?
-      @calc_status[school_name] ||= {}
-      @calc_status[school_name][test_type] ||= {}
-      @calc_status[school_name][test_type][type] = status
-    end
+    return if rails?
+
+    @calc_status[school_name] ||= {}
+    @calc_status[school_name][test_type] ||= {}
+    @calc_status[school_name][test_type][type] = status
   end
 
   def save_csv
@@ -53,12 +53,14 @@ class RecordTestTimes
 
   def print_stats
     return if rails?
+
     print_calc_stats_times(school_calc_times)
     print_calc_stats_times(type_calc_times)
   end
 
   def save_summary_stats_to_csv
     return if rails?
+    
     save_summary_stats_to_csv_private(school_calc_times.deep_merge(type_calc_times))
   end
 
