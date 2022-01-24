@@ -42,12 +42,12 @@ class DisaggregateCommunityUsage
     # if a mix of representations occured over time
     # then its likely all processing will be down the partial_meter route
 
-    RecordTestTimes.instance.record_time(@school.name, 'community disaggregation', 'partial'){
+    # RecordTestTimes.instance.record_time(@school.name, 'community disaggregation', 'partial'){
       disaggregate_partial_meters(fuel_type)
-    }
-    RecordTestTimes.instance.record_time(@school.name, 'community disaggregation', 'whole'){
+    # }
+    # RecordTestTimes.instance.record_time(@school.name, 'community disaggregation', 'whole'){
       disaggregate_whole_meters(fuel_type)
-    }
+    # }
   end
 
   def community_weight(date, meter)
