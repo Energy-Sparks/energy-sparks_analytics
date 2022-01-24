@@ -52,11 +52,13 @@ class RecordTestTimes
   end
 
   def print_stats
+    return if rails?
     print_calc_stats_times(school_calc_times)
     print_calc_stats_times(type_calc_times)
   end
 
   def save_summary_stats_to_csv
+    return if rails?
     save_summary_stats_to_csv_private(school_calc_times.deep_merge(type_calc_times))
   end
 
