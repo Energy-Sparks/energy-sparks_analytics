@@ -98,13 +98,13 @@ class ChartManager
       aggregator = nil
       calculation_time = nil
 
-      RecordTestTimes.instance.record_time(@school.name, 'chart', chart_param){
+      # RecordTestTimes.instance.record_time(@school.name, 'chart', chart_param){
         calculation_time = Benchmark.realtime {
           aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)
 
           aggregator.aggregate
         }
-      }
+      # }
 
       if aggregator.valid
         graph_data = configure_graph(aggregator, chart_config, chart_param, calculation_time)
