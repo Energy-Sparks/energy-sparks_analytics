@@ -4,26 +4,37 @@ class RecordTestTimes
   include Singleton
 
   def initialize(directory: 'Results/testtimes/')
+    @rails = Object.const_defined?('Rails')
     @directory = directory
-    create_directory
+    create_directory unless rails?
     @time_log = {}
     @calc_status = {}
   end
 
+  def rails?
+    @rails
+  end
+
   def record_time(school_name, test_type, type)
-    r0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    yield
-    t = Process.clock_gettime(Process::CLOCK_MONOTONIC) - r0
-    log_time(school_name, test_type, type, t)
+    unless rails?
+      r0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      yield
+      t = Process.clock_gettime(Process::CLOCK_MONOTONIC) - r0
+      log_time(school_name, test_type, type, t)
+    end
   end
 
   def log_calculation_status(school_name, test_type, type, status)
-    @calc_status[school_name] ||= {}
-    @calc_status[school_name][test_type] ||= {}
-    @calc_status[school_name][test_type][type] = status
+    unless rails?
+      @calc_status[school_name] ||= {}
+      @calc_status[school_name][test_type] ||= {}
+      @calc_status[school_name][test_type][type] = status
+    end
   end
 
   def save_csv
+    return if rails?
+
     puts "Saving timing results to #{filename}"
 
     merged_results = @time_log.deep_merge(@calc_status)
@@ -84,7 +95,7 @@ class RecordTestTimes
     @time_log.each do |school_name, test_type_data|
       test_type_data.each do |test_type, type_data|
         calc_times[test_type] ||= {}
-        
+
         type_data.each do |type, seconds|
           calc_times[test_type][type] ||= 0.0
           calc_times[test_type][type] += seconds || 0.0
