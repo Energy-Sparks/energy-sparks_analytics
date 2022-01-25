@@ -130,7 +130,7 @@ class ManagementSummaryTable < ContentBase
         period0: { year: 0 },
         period1: { year: -1 },
         versus_exemplar: true,
-        recent_limit: 2 * 365
+        recent_limit: 3 * 30
       },
       last_4_weeks: {
         period0: { schoolweek: -3..0 },
