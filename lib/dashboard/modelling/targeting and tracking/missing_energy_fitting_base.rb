@@ -39,7 +39,7 @@ class MissingEnergyFittingBase
     end
 
     if matching_days.empty?
-      AMDData.one_day_zero_kwh_x48
+      AMRData.one_day_zero_kwh_x48
     else
       total_all_days_x48 = AMRData.fast_add_multiple_x48_x_x48(matching_days)
       AMRData.fast_multiply_x48_x_scalar(total_all_days_x48, 1.0 / matching_days.length)
