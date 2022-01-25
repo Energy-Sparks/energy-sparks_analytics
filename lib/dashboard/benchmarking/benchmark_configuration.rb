@@ -295,6 +295,7 @@ module Benchmarking
           { data: ->{ elba_£lyr },  name: 'Annual electricity £ (this year)', units: :£},
           { data: ->{ elba_£lyr_last_year },  name: 'Annual electricity £ (last year)', units: :£}
         ],
+        where:   ->{ !elba_£lyr_last_year.nil? },
         sort_by:  [1], # column 1 i.e. Annual kWh
         type: %i[chart table]
       },
@@ -308,6 +309,7 @@ module Benchmarking
           { data: ->{ -1.0 * free_kwrd },  name: 'Reduction in kW over summer holiday', units: :kw},
         ],
         analytics_user_type: true,
+        where:   ->{ !free_kwrd.nil? },
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
         type: %i[chart table]
       },
@@ -322,7 +324,6 @@ module Benchmarking
           { data: ->{ etga_tktd },  name: 'target kWh consumption',            units: :kwh},
           { data: ->{ etga_uktd },  name: 'last year kWh consumption',         units: :kwh},
           { data: ->{ etga_trsd },  name: 'start date for target',             units: :date},
-
         ],
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
         type: %i[chart table]
@@ -368,6 +369,7 @@ module Benchmarking
           { data: ->{ [0.0, elbb_svex].max },  name: 'Saving if moved to exemplar', units: :£},
           { data: ->{ elbb_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
+        where:   ->{ !elbb_blpp.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },
@@ -428,6 +430,7 @@ module Benchmarking
           { data: ->{ epkb_tex£ },  name: 'saving if match exemplar (£)', units: :£ },
           { data: ->{ epkb_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
+        where:   ->{ !epkb_kwfa.nil? },
         sort_by: [1],
         type: %i[table chart]
       },
@@ -455,6 +458,7 @@ module Benchmarking
           { data: ->{ sum_data([gsba_co2y, shan_co2y], true) / 1000.0 },  name: 'Annual carbon emissions (tonnes CO2)', units: :co2},
           { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: 'rating', units: Float, y2_axis: true }
         ],
+        where:   ->{ !gsba_co2y.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },
