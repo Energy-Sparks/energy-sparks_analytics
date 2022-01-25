@@ -129,6 +129,7 @@ class SchoolFactory
   end
 
   private def meter_collection_filename(school_filename, file_type, extension)
+    puts "1 #{self.class.meter_collection_directory} 2 #{file_type} 3 #{school_filename} 4 #{extension}"
     self.class.meter_collection_directory + file_type + school_filename + extension
   end
 

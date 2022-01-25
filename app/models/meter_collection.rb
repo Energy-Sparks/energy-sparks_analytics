@@ -29,6 +29,12 @@ class MeterCollection
                 :solar_pv,
                 :grid_carbon_intensity
 
+  # Centrica
+  attr_accessor :aggregated_electricity_meter_without_community_usage
+  attr_accessor :aggregated_heat_meters_without_community_usage
+  attr_accessor :storage_heater_meter_without_community_usage
+  attr_accessor :community_disaggregator
+
   def initialize(school, holidays:, temperatures:, solar_irradiation: nil, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
     @name = school.name
     @address = school.address
@@ -106,6 +112,19 @@ class MeterCollection
       @storage_heater_meter = meter
     when :solar_pv
       @aggregated_electricity_meters.sub_meters[:generation] = meter
+    end
+  end
+
+  def set_aggregate_meter_non_community_use_meter(fuel_type, meter)
+    case fuel_type
+    when :electricity
+      puts "Got here setting non community use electricity meter"
+      @aggregated_electricity_meter_without_community_usage = meter
+    when :gas
+      puts "Got here setting non community use gas meter"
+      @aggregated_heat_meters_without_community_usage = meter
+    when :storage_heater, :storage_heaters
+      @storage_heater_meter_without_community_usage = meter
     end
   end
 
@@ -452,6 +471,10 @@ class MeterCollection
 
   def close_time
     @cached_close_time
+  end
+
+  def open_close_times
+    @open_close_times ||= OpenCloseTimes.new(pseudo_meter_attributes(:school_level_data), holidays)
   end
 
   def target_school(type = :day)

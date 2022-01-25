@@ -1,3 +1,4 @@
+# Centrica
 class ChartYAxisManipulation
   class CantChangeY1AxisException < StandardError; end
   class CantChangeY2AxisException < StandardError; end
