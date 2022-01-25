@@ -4,11 +4,11 @@ require_relative '../common/alert_out_of_hours_base_usage.rb'
 class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
   attr_reader :daytype_breakdown_table
   def initialize(school, fuel = 'gas', oo_percent = BenchmarkMetrics::PERCENT_GAS_OUT_OF_HOURS_BENCHMARK,
-          fuel_price = BenchmarkMetrics::GAS_PRICE, type = :gasoutofhours,
+          type = :gasoutofhours,
           bookmark = 'GasOutOfHours', meter_defn_not_used = :allheat,
           good_out_of_hours_use_percent = 0.3, bad_out_of_hours_use_percent = 0.7)
     super(school, fuel, oo_percent,
-          fuel_price, type, bookmark, meter_defn_not_used,
+          type, bookmark, meter_defn_not_used,
           good_out_of_hours_use_percent, bad_out_of_hours_use_percent)
   end
 
@@ -49,5 +49,13 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
       'Out of hours energy consumption' => superclass.static_template_variables(:gas)
     }
     specific.merge(superclass.template_variables)
+  end
+
+  def tariff
+    BenchmarkMetrics::GAS_PRICE
+  end
+
+  def co2_intensity_per_kwh
+    EnergyEquivalences::UK_GAS_CO2_KG_KWH
   end
 end

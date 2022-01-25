@@ -3,7 +3,7 @@ require_relative '../alert_electricity_only_base.rb'
 
 class AlertSeasonalBaseloadVariation < AlertBaseloadBase
   attr_reader :winter_kw, :summer_kw, :percent_seasonal_variation
-  attr_reader :annual_cost_kwh, :annual_cost_£
+  attr_reader :annual_cost_kwh, :annual_cost_£, :annual_cost_co2
   attr_reader :one_year_baseload_chart
 
   def initialize(school, report_type = :seasonalbaseload, meter = school.aggregated_electricity_meters)
@@ -35,6 +35,10 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
       description: 'annual cost of seasonal baseload variation (£)',
       units:  :£,
       benchmark_code: 'cgbp'
+    },
+    annual_co2: {
+      description: 'annual cost of seasonal baseload variation (co2)',
+      units:  :co2
     },
     one_year_baseload_chart: {
       description: 'chart of last years baseload',
@@ -100,9 +104,10 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
     @percent_seasonal_variation = calculator.percent_seasonal_variation(asof_date)
 
     @annual_cost_kwh = calculator.costs_of_baseload_above_minimum_kwh(asof_date, @summer_kw)
-    @annual_cost_£ = @annual_cost_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @annual_cost_£   = @annual_cost_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @annual_co2      = @annual_cost_kwh * blended_co2_per_kwh
 
-    set_savings_capital_costs_payback(Range.new(@annual_cost_£ , @annual_cost_£ ), nil)
+    set_savings_capital_costs_payback(Range.new(@annual_cost_£, @annual_cost_£ ), nil, @annual_co2)
 
     @rating = calculate_rating_from_range(0, 0.50, @percent_seasonal_variation.magnitude)
 

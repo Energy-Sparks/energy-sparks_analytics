@@ -19,7 +19,7 @@ class ElectricityBaseloadAnalysis
 
   def annual_average_baseload_£(asof_date)
     kwh = annual_average_baseload_kwh(asof_date)
-    kwh * blended_electricity_£_per_kwh(asof_date)
+    kwh * blended_electricity_£_per_kwh
   end
 
   def one_years_data?(asof_date = amr_data.end_date)

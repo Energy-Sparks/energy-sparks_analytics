@@ -31,6 +31,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
       'Annual output from panels (kWh)',
       'Reduction in mains consumption',
       'Annual saving',
+      'Annual saving (CO2)',
       'Estimated cost',
       'Payback years'
     ]
@@ -71,9 +72,9 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     optimum_scenario = find_optimum_kwp(scenarios, round_optimum_kwp(optimum_kwp))
     promote_optimum_variables(optimum_scenario)
 
-    one_year_saving  = optimum_scenario[:total_annual_saving_£]
+    one_year_saving = optimum_scenario[:total_annual_saving_£]
     savings_range = Range.new(one_year_saving, one_year_saving)
-    set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£])
+    set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£], optimum_scenario[:total_annual_saving_co2])
 
     @rating = 5.0
   end
@@ -116,6 +117,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
       'Annual output from panels (kWh)',
       'Reduction in mains consumption',
       'Annual saving',
+      'Annual saving (CO2)',
       'Estimated capital cost',
       'Payback years'
     ]
@@ -132,6 +134,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
         format_t(scenario[:solar_pv_output_kwh],         :kwh,     medium),
         format_t(scenario[:reduction_in_mains_percent],  :percent, medium),
         format_t(scenario[:total_annual_saving_£],       :£,       medium),
+        format_t(scenario[:total_annual_saving_co2],     :co2,     medium),
         format_t(scenario[:capital_cost_£],              :£,       medium),
         format_t(scenario[:payback_years],               :years,   medium)
       ]
@@ -189,7 +192,8 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
       reduction_in_mains_percent:   (kwh - kwh_totals[:new_mains_consumption]) / kwh,
       solar_consumed_onsite_kwh:    kwh_totals[:solar_consumed_onsite],
       exported_kwh:                 kwh_totals[:exported],
-      solar_pv_output_kwh:          kwh_totals[:solar_pv_output]
+      solar_pv_output_kwh:          kwh_totals[:solar_pv_output],
+      solar_pv_output_co2:          kwh_totals[:solar_pv_output] * blended_co2_per_kwh
     }
   end
 
@@ -222,6 +226,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
       export_income_£:          export_income,
       mains_savings_£:          mains_savings,
       total_annual_saving_£:    saving,
+      total_annual_saving_co2:  kwh_data[:solar_pv_output_co2],
       capital_cost_£:           capital_cost,
       payback_years:            payback
     }

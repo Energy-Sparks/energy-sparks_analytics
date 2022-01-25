@@ -13,17 +13,17 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :holidays_percent, :weekends_percent, :schoolday_open_percent, :schoolday_closed_percent
   attr_reader :percent_out_of_hours
   attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£, :out_of_hours_£
+  attr_reader :holidays_co2, :weekends_co2, :schoolday_open_co2, :schoolday_closed_co2, :out_of_hours_co2
   attr_reader :daytype_breakdown_table
-  attr_reader :percent_improvement_to_exemplar, :potential_saving_kwh, :potential_saving_£
-  attr_reader :total_annual_£, :summary
+  attr_reader :percent_improvement_to_exemplar, :potential_saving_kwh, :potential_saving_£, :potential_saving_co2
+  attr_reader :total_annual_£, :total_annual_co2, :summary
 
   def initialize(school, fuel, benchmark_out_of_hours_percent,
-                 fuel_cost, alert_type, bookmark, meter_definition,
+                 alert_type, bookmark, meter_definition,
                  good_out_of_hours_use_percent, bad_out_of_hours_use_percent)
     super(school, alert_type)
     @fuel = fuel
     @fuel_description = fuel.to_s
-    @fuel_cost = fuel_cost
     @bookmark = bookmark
     @good_out_of_hours_use_percent = good_out_of_hours_use_percent
     @bad_out_of_hours_use_percent = bad_out_of_hours_use_percent
@@ -52,6 +52,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
         description: 'Annual total fuel cost (£)',
         units: :£
       },
+      total_annual_co2: {
+        description: 'Annual total fuel emissions (co2)',
+        units: :co2
+      },
 
       schoolday_open_kwh:   { description: 'Annual school day open kwh usage',   units: fuel_kwh },
       schoolday_closed_kwh: { description: 'Annual school day closed kwh usage', units: fuel_kwh },
@@ -71,6 +75,12 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       holidays_£:               { description: 'Annual holiday cost usage',           units: :£, benchmark_code: 'ahl£' },
       weekends_£:               { description: 'Annual weekend cost usage',           units: :£, benchmark_code: 'awk£' },
       out_of_hours_£:           { description: 'Annual £ out of hours usage',         units: :£, benchmark_code: 'aoo£' },
+
+      schoolday_open_co2:         { description: 'Annual school day open emissions',   units: :co2 },
+      schoolday_closed_co2:       { description: 'Annual school day closed emissions', units: :co2 },
+      holidays_co2:               { description: 'Annual holiday emissions',           units: :co2 },
+      weekends_co2:               { description: 'Annual weekend emissions',           units: :co2 },
+      out_of_hours_co2:           { description: 'Annual out of hours emissions',      units: :co2 },
 
       good_out_of_hours_use_percent: {
         description: 'Good/Exemplar out of hours use percent (suggested benchmark comparison)',
@@ -97,15 +107,19 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
         units: :£,
         benchmark_code: 'esv£'
       },
+      potential_saving_co2: {
+        description: 'annual co2 kg reduction if move to examplar out of hours usage',
+        units: :co2,
+      },
       summary: {
         description: 'Description: £spend/yr, percent out of hours',
         units: String
       },
       daytype_breakdown_table: {
-        description: 'Table broken down by school day in/out hours, weekends, holidays - kWh, percent, £ (annual)',
+        description: 'Table broken down by school day in/out hours, weekends, holidays - kWh, percent, £ (annual), CO2',
         units: :table,
-        header: [ 'Day type', 'kWh', 'Percent', '£' ],
-        column_types: [String, {kwh: fuel}, :percent, :£ ]
+        header: [ 'Day type', 'kWh', 'Percent', '£', 'co2' ],
+        column_types: [String, {kwh: fuel}, :percent, :£, :co2 ]
       }
     }
   end
@@ -121,10 +135,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   def calculate(_asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
     daytype_breakdown = extract_kwh_from_chart_data(out_of_hours_energy_consumption)
-    @holidays_kwh         = daytype_breakdown['Holiday']
-    @weekends_kwh         = daytype_breakdown['Weekend']
-    @schoolday_open_kwh   = daytype_breakdown['School Day Open']
-    @schoolday_closed_kwh = daytype_breakdown['School Day Closed']
+    @holidays_kwh         = daytype_breakdown[SeriesNames::HOLIDAY]
+    @weekends_kwh         = daytype_breakdown[SeriesNames::WEEKEND]
+    @schoolday_open_kwh   = daytype_breakdown[SeriesNames::SCHOOLDAYOPEN]
+    @schoolday_closed_kwh = daytype_breakdown[SeriesNames::SCHOOLDAYCLOSED]
 
     @total_annual_kwh = @holidays_kwh + @weekends_kwh + @schoolday_open_kwh + @schoolday_closed_kwh
     @out_of_hours_kwh = @total_annual_kwh - @schoolday_open_kwh
@@ -136,18 +150,25 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @schoolday_open_percent   = @schoolday_open_kwh   / @total_annual_kwh
     @schoolday_closed_percent = @schoolday_closed_kwh / @total_annual_kwh
 
-    @holidays_£         = @holidays_kwh         * @fuel_cost
-    @weekends_£         = @weekends_kwh         * @fuel_cost
-    @schoolday_open_£   = @schoolday_open_kwh   * @fuel_cost
-    @schoolday_closed_£ = @schoolday_closed_kwh * @fuel_cost
+    @holidays_£         = @holidays_kwh         * tariff
+    @weekends_£         = @weekends_kwh         * tariff
+    @schoolday_open_£   = @schoolday_open_kwh   * tariff
+    @schoolday_closed_£ = @schoolday_closed_kwh * tariff
     @out_of_hours_£     = @schoolday_closed_£ + @weekends_£ + @holidays_£
     @total_annual_£     = @holidays_£ + @weekends_£ + @schoolday_open_£ + @schoolday_closed_£
 
+    @holidays_co2         = @holidays_kwh         * co2_intensity_per_kwh
+    @weekends_co2         = @weekends_kwh         * co2_intensity_per_kwh
+    @schoolday_open_co2   = @schoolday_open_kwh   * co2_intensity_per_kwh
+    @schoolday_closed_co2 = @schoolday_closed_kwh * co2_intensity_per_kwh
+    @out_of_hours_co2     = @schoolday_closed_co2 + @weekends_co2 + @holidays_co2
+    @total_annual_co2     = @holidays_co2 + @weekends_co2 + @schoolday_open_co2 + @schoolday_closed_co2
+
     @daytype_breakdown_table = [
-      ['Holiday',            @holidays_kwh,         @holidays_percent,          @holidays_£],
-      ['Weekend',            @weekends_kwh,         @weekends_percent,          @weekends_£],
-      ['School Day Open',    @schoolday_open_kwh,   @schoolday_open_percent,    @schoolday_open_£],
-      ['School Day Closed',  @schoolday_closed_kwh, @schoolday_closed_percent,  @schoolday_closed_£]
+      [SeriesNames::HOLIDAY,          @holidays_kwh,         @holidays_percent,          @holidays_£,         @holidays_co2],
+      [SeriesNames::WEEKEND,          @weekends_kwh,         @weekends_percent,          @weekends_£,         @weekends_co2],
+      [SeriesNames::SCHOOLDAYOPEN,    @schoolday_open_kwh,   @schoolday_open_percent,    @schoolday_open_£,   @schoolday_open_co2],
+      [SeriesNames::SCHOOLDAYCLOSED,  @schoolday_closed_kwh, @schoolday_closed_percent,  @schoolday_closed_£, @schoolday_closed_co2]
     ]
 
     @table_results = :daytype_breakdown_table # only used for backwards compatibility 17Mar19 - can be removed at some point
@@ -155,9 +176,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
     @percent_improvement_to_exemplar = [out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
     @potential_saving_kwh = @total_annual_kwh * @percent_improvement_to_exemplar
-    @potential_saving_£ = @potential_saving_kwh * @fuel_cost
+    @potential_saving_£ = @potential_saving_kwh * tariff
+    @potential_saving_co2 = @potential_saving_kwh * co2_intensity_per_kwh
 
-    set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil)
+    set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil, @potential_saving_co2)
 
     @summary = summary_text
 
@@ -181,7 +203,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     html_table = []
     breakdown[:x_data].each do |daytype, consumption|
       formatted_consumption = sprintf('%.0f kWh', consumption[0])
-      formatted_cost = sprintf('£%.0f', consumption[0] * @fuel_cost)
+      formatted_cost = sprintf('£%.0f', consumption[0] * tariff)
       html_table.push([daytype, formatted_consumption, formatted_cost])
     end
     html_table
@@ -228,14 +250,16 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
             <th scope="col">Out of hours</th>
             <th scope="col" class="text-center">Energy usage</th>
             <th scope="col" class="text-center">Cost &pound;</th>
+            <th scope="col" class="text-center">CO2 kg</th>
           </tr>
         </thead>
         <tbody>
-          <% data.each do |row, usage, cost| %>
+          <% data.each do |row, usage, cost, co2| %>
             <tr>
               <td><%= row %></td>
               <td class="text-right"><%= usage %></td>
               <td class="text-right"><%= cost %></td>
+              <td class="text-right"><%= co2 %></td>
             </tr>
           <% end %>
         </tbody>

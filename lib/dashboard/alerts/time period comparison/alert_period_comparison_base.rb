@@ -31,7 +31,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   # the averaging process
   MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD = 4
   MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£ = 10.0
-  attr_reader :difference_kwh, :difference_£, :difference_percent, :abs_difference_percent
+  attr_reader :difference_kwh, :difference_£, :difference_co2, :difference_percent, :abs_difference_percent
+  attr_reader :abs_difference_kwh, :abs_difference_£, :abs_difference_co2
   attr_reader :current_period_kwh, :current_period_£, :current_period_start_date, :current_period_end_date
   attr_reader :previous_period_kwh, :previous_period_£, :previous_period_start_date, :previous_period_end_date
   attr_reader :days_in_current_period, :days_in_previous_period
@@ -46,9 +47,13 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :summary, :prefix_1, :prefix_2
 
   def self.dynamic_template_variables(fuel_type)
-    {
-      difference_kwh:     { description: 'Difference in kwh between last 2 periods', units:  { kwh: fuel_type } },
-      difference_£:       { description: 'Difference in £ between last 2 periods',   units:  :£, benchmark_code: 'dif£'},
+    vars = {
+      difference_kwh:     { description: 'Difference in kwh between last 2 periods',      units:  { kwh: fuel_type } },
+      difference_£:       { description: 'Difference in £ between last 2 periods',        units:  :£, benchmark_code: 'dif£'},
+      difference_co2:     { description: 'Difference in co2 kg between last 2 periods', units:  :co2 },
+      abs_difference_kwh: { description: 'Difference in kwh between last 2 periods - absolute',    units:  { kwh: fuel_type } },
+      abs_difference_£:   { description: 'Difference in £ between last 2 periods - absolute',      units:  :£},
+      abs_difference_co2: { description: 'Difference in co2 kg between last 2 periods - absolute', units:  :co2 },
       difference_percent: { description: 'Difference in % between last 2 periods',   units:  :percent, benchmark_code: 'difp'  },
       abs_difference_percent: { description: 'Difference in % between last 2 periods - absolute, positive number only',   units:  :percent },
 
@@ -93,6 +98,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       prefix_1: { description: 'Change: up or down', units: String },
       prefix_2: { description: 'Change: increase or reduction', units: String }
     }
+
+    vars.merge(convert_equivalence_template_variables(equivalence_template_variables, { '_test' => vars  }))
   end
 
   protected def comparison_chart
@@ -133,6 +140,12 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     @difference_kwh     = current_period_data[:kwh] - previous_period_data[:kwh]
     @difference_£       = current_period_data[:£]   - previous_period_data[:£]
+    @difference_co2     = current_period_data[:co2] - previous_period_data[:co2]
+
+    @abs_difference_kwh = @difference_kwh.magnitude
+    @abs_difference_£   = @difference_£.magnitude
+    @abs_difference_co2 = @difference_co2.magnitude
+
     # put in a large percent if the usage was zero during the last period
     # fixes St Louis autumn 2019 half term verus zero summer holiday -inf in benchmarking (PH, 17Dec2019)
     # reinstated (PH, 19Sep2020) - King Edwards + 1 other gas school week comparison
@@ -177,13 +190,35 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @prefix_2 = prefix(@difference_percent, 'increase', 'unchanged', 'reduction')
     @summary  = summary_text
 
-    set_savings_capital_costs_payback(@difference_£, 0.0)
+    set_equivalence_variables(self.class.equivalence_template_variables)
+
+    set_savings_capital_costs_payback(@difference_£, 0.0, @difference_co2)
     @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
 
     @bookmark_url = add_book_mark_to_base_url(url_bookmark)
     @term = :shortterm
   end
   alias_method :analyse_private, :calculate
+
+  def self.equivalence_template_variables
+    additional_vars = [
+      {
+        existing_variable:  :difference_kwh,
+        convert_to:         :tree,
+        convert_via:        :co2
+      },
+      {
+        existing_variable:  :difference_co2,
+        convert_to:         :ice_car,
+        convert_via:        :kwh
+      },
+      {
+        existing_variable:  :difference_co2,
+        convert_to:         :smartphone,
+        convert_via:        :kwh
+      },
+    ]
+  end
 
   private def period_debug(current_period,  asof_date)
     "#{current_period.nil? ? 'no current period' : current_period}, asof #{asof_date}"
@@ -240,14 +275,16 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   protected def meter_values_period(current_period)
     {
       kwh:    kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :kwh),
-      £:      kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :£)
+      £:      kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :£),
+      co2:    kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :co2)
     }
   end
 
   protected def normalised_period_data(current_period, previous_period)
     {
       kwh:    normalise_previous_period_data_to_current_period(current_period, previous_period, :kwh),
-      £:      normalise_previous_period_data_to_current_period(current_period, previous_period, :£)
+      £:      normalise_previous_period_data_to_current_period(current_period, previous_period, :£),
+      co2:    normalise_previous_period_data_to_current_period(current_period, previous_period, :co2)
     }
   end
 

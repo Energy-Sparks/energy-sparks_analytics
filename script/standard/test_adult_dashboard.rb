@@ -5,6 +5,7 @@ require_rel '../../test_support'
 module Logging
   logger.level = :error
 end
+ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Working'
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },

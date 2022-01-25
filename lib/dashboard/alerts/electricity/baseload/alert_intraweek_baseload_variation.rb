@@ -4,7 +4,7 @@ require_relative '../alert_electricity_only_base.rb'
 class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation
   attr_reader :max_day_str, :min_day_str
-  attr_reader :annual_cost_kwh, :annual_cost_£
+  attr_reader :annual_cost_kwh, :annual_cost_£, :annual_co2
   attr_reader :adjective
 
   def initialize(school, report_type = :intraweekbaseload, meter = school.aggregated_electricity_meters)
@@ -46,6 +46,10 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       description: 'annual cost of seasonal baseload variation (£)',
       units:  :£,
       benchmark_code: 'cgbp'
+    },
+    annual_co2: {
+      description: 'annual cost of seasonal baseload variation (CO2)',
+      units:  :co2
     },
     adjective: {
       description: 'how well the school is doing versus the rating: well, ok, poorly',
@@ -137,8 +141,9 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
     @annual_cost_kwh = week_saving_kwh * 52.0 # ignore holiday calc
     @annual_cost_£ = @annual_cost_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @annual_co2 = @annual_cost_kwh * blended_electricity_£_per_kwh
 
-    set_savings_capital_costs_payback(Range.new(@annual_cost_£, @annual_cost_£), nil)
+    set_savings_capital_costs_payback(Range.new(@annual_cost_£, @annual_cost_£), nil, @annual_co2)
 
     @rating = calculate_rating_from_range(0.1, 0.3, @percent_intraday_variation.magnitude)
 

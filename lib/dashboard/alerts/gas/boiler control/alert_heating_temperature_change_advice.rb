@@ -5,7 +5,7 @@ require_relative '../../common/alert_floor_area_pupils_mixin.rb'
 class AlertHeatingSensitivityAdvice < AlertGasModelBase
   include AlertFloorAreaMixin
   MIN_REPORTED_SENSITIVITY_£ = 50.0
-  attr_reader :annual_saving_1_C_change_kwh, :annual_saving_1_C_change_£, :annual_saving_1_C_change_percent
+  attr_reader :annual_saving_1_C_change_kwh, :annual_saving_1_C_change_£, :annual_saving_1_C_change_co2, :annual_saving_1_C_change_percent
   attr_reader :fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day
 
   def initialize(school)
@@ -36,6 +36,11 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
       units:  :£,
       benchmark_code: 'td1c'
     },
+    annual_saving_1_C_change_co2: {
+      description: 'Predicted annual reduction in heating consumption if thermostat turned down 1C (co2)',
+      units:  :co2,
+      benchmark_code: 'tc1c'
+    },
     annual_saving_1_C_change_percent: {
       description: 'Predicted annual reduction in heating consumption if thermostat turned down 1C (% of annual gas consumption)',
       units:  :percent
@@ -54,8 +59,9 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     @annual_kwh = kwh(start_date, asof_date)
     @annual_saving_1_C_change_percent = @annual_saving_1_C_change_kwh / @annual_kwh
     @annual_saving_1_C_change_kwh *= (365 / (asof_date - start_date)) # scale to 1 year
-    @annual_saving_1_C_change_£ = @annual_saving_1_C_change_kwh * BenchmarkMetrics::GAS_PRICE
-    set_savings_capital_costs_payback(Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£), nil)
+    @annual_saving_1_C_change_£   = @annual_saving_1_C_change_kwh * BenchmarkMetrics::GAS_PRICE
+    @annual_saving_1_C_change_co2 = @annual_saving_1_C_change_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+    set_savings_capital_costs_payback(Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£), nil, @annual_saving_1_C_change_co2)
 
     @fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day = 1000.0 * heating_model.average_heating_b_kwh_per_1_C_per_day / floor_area(asof_date - 365, asof_date)
     @rating = @annual_saving_1_C_change_£ > MIN_REPORTED_SENSITIVITY_£ ? 5.0 : 10.0

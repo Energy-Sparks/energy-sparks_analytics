@@ -13,6 +13,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
   attr_reader :predicted_percent_increase_in_usage, :significant_increase_in_baseload
   attr_reader :one_year_baseload_chart
   attr_reader :predicted_percent_increase_in_usage_absolute, :next_year_change_in_baseload_absolute_£
+  attr_reader :last_year_baseload_co2, :last_week_baseload_co2, :next_year_change_in_baseload_co2, :next_year_change_in_baseload_absolute_co2
 
   def initialize(school, report_type = :baseloadchangeshortterm, meter = school.aggregated_electricity_meters)
     super(school, report_type, meter)
@@ -69,6 +70,22 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
     next_year_change_in_baseload_absolute_£: {
       description: 'projected addition cost of change in baseload next year - in absolute terms i.e. always positive',
       units:  :£
+    },
+    last_year_baseload_co2: {
+      description: 'co2 emissions from baseload electricity consumption last year',
+      units:  :co2
+    },
+    last_week_baseload_co2: {
+      description: 'co2 emissions from baseload electricity consumption last week',
+      units:  :co2
+    },
+    next_year_change_in_baseload_co2: {
+      description: 'projected addition co2 emissions from change in baseload next year',
+      units:  :co2
+    },
+    next_year_change_in_baseload_absolute_co2: {
+      description: 'projected co2 emissions from in baseload next year - in absolute terms i.e. always positive',
+      units:  :co2
     },
     predicted_percent_increase_in_usage: {
       description: 'percentage increase in baseload',
@@ -146,18 +163,24 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
     hours_in_year = 365.0 * 24.0
     hours_in_week =   7.0 * 24.0
 
-    @last_year_baseload_kwh = @average_baseload_last_week_kw * hours_in_year
-    @last_week_baseload_kwh = @average_baseload_last_week_kw * hours_in_week
+    @last_year_baseload_kwh           = @average_baseload_last_week_kw * hours_in_year
+    @last_week_baseload_kwh           = @average_baseload_last_week_kw * hours_in_week
     @last_week_change_in_baseload_kwh = @change_in_baseload_kw * hours_in_week
     @next_year_change_in_baseload_kwh = @change_in_baseload_kw * hours_in_year
 
-    @last_year_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @last_year_baseload_kwh
-    @last_week_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @last_week_baseload_kwh
-    @next_year_change_in_baseload_£ = BenchmarkMetrics::ELECTRICITY_PRICE * @next_year_change_in_baseload_kwh
-    @next_year_change_in_baseload_absolute_£ = @next_year_change_in_baseload_£.magnitude
+    @last_year_baseload_£                     = blended_electricity_£_per_kwh * @last_year_baseload_kwh
+    @last_week_baseload_£                     = blended_electricity_£_per_kwh * @last_week_baseload_kwh
+    @next_year_change_in_baseload_£           = blended_electricity_£_per_kwh * @next_year_change_in_baseload_kwh
+    @next_year_change_in_baseload_absolute_£  = @next_year_change_in_baseload_£.magnitude
+
+    @last_year_baseload_co2                     = blended_co2_per_kwh * @last_year_baseload_kwh
+    @last_week_baseload_co2                     = blended_co2_per_kwh * @last_week_baseload_kwh
+    @next_year_change_in_baseload_co2           = blended_co2_per_kwh * @next_year_change_in_baseload_kwh
+    @next_year_change_in_baseload_absolute_co2  = @next_year_change_in_baseload_co2.magnitude
+
     @saving_in_annual_costs_through_10_percent_baseload_reduction = @last_year_baseload_£ * 0.1
 
-    set_savings_capital_costs_payback(Range.new(@next_year_change_in_baseload_£, @next_year_change_in_baseload_£), nil)
+    set_savings_capital_costs_payback(Range.new(@next_year_change_in_baseload_£, @next_year_change_in_baseload_£), nil, @next_year_change_in_baseload_co2)
 
     @rating = calculate_rating_from_range(-0.05, 0.15, @predicted_percent_increase_in_usage)
 

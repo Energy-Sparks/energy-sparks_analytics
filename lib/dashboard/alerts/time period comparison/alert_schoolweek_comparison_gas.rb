@@ -92,14 +92,16 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   protected def meter_values_period(_current_period)
     {
       kwh:    @current_week_kwh_total,
-      £:      @current_week_kwh_total * BenchmarkMetrics::GAS_PRICE
+      £:      @current_week_kwh_total * BenchmarkMetrics::GAS_PRICE,
+      co2:    @current_week_kwh_total * EnergyEquivalences::UK_GAS_CO2_KG_KWH
     }
   end
 
   protected def normalised_period_data(_current_period, _previous_period)
     {
       kwh:    @previous_week_kwh_total ,
-      £:      @previous_week_kwh_total * BenchmarkMetrics::GAS_PRICE
+      £:      @previous_week_kwh_total * BenchmarkMetrics::GAS_PRICE,
+      co2:    @previous_week_kwh_total * EnergyEquivalences::UK_GAS_CO2_KG_KWH
     }
   end
 

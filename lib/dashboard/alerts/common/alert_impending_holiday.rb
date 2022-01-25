@@ -8,13 +8,13 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   WEEKDAYS_HOLIDAY_LOOKAHEAD_PERIOD = 15
   include AlertFloorAreaMixin
 
-  attr_reader :saving_kwh, :daytype_breakdown_table, :total_annual_£, :holidays_percent
+  attr_reader :saving_kwh, :saving_co2, :daytype_breakdown_table, :total_annual_£, :holidays_percent
   attr_reader :holiday_short_name, :holiday_long_name, :holiday_length_days
   attr_reader :holiday_length_weekdays, :holiday_length_weeks
   attr_reader :holiday_start_date, :holiday_end_date, :holiday_start_date_doy
-  attr_reader :last_year_holiday_gas_kwh, :last_year_holiday_gas_£
-  attr_reader :last_year_holiday_electricity_kwh, :last_year_holiday_electricity_£
-  attr_reader :last_year_holiday_energy_costs_£
+  attr_reader :last_year_holiday_gas_kwh, :last_year_holiday_gas_£, :last_year_holiday_gas_co2
+  attr_reader :last_year_holiday_electricity_kwh, :last_year_holiday_electricity_£, :last_year_holiday_electricity_co2
+  attr_reader :last_year_holiday_energy_costs_£, :last_year_holiday_energy_costs_co2
   attr_reader :name_of_last_year_holiday
   attr_reader :holiday_floor_area, :holiday_pupils, :last_year_holiday_gas_kwh_per_floor_area, :last_year_holiday_electricity_kwh_per_floor_area
 
@@ -44,8 +44,12 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       units:  { kwh: :gas }
     },
     total_annual_£: {
-      description: 'Combined annual gas and electricity consumption (£, for available meters)',
+      description: 'Combined annual gas and electricity saving consumption (£, for available meters)',
       units:  :£
+    },
+    saving_co2: {
+      description: 'Combined annual gas and electricity saving consumption (co2, for available meters)',
+      units:  :co2
     },
     holidays_percent: {
       description: 'Holidays as a percent of total annual energy cost',
@@ -96,6 +100,10 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       units:  :£,
       benchmark_code:   'glyr',
     },
+    last_year_holiday_gas_co2: {
+      description: 'Gas emissions (co2) in corresponding holiday last year',
+      units:  :co2,
+    },
     last_year_holiday_electricity_kwh: {
       description: 'Electricity consumption (kWh) in corresponding holiday last year',
       units:  { kwh: :electricity },
@@ -125,9 +133,17 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       description: 'Electricity consumption (£) in corresponding holiday last year',
       units:  :£
     },
+    last_year_holiday_electricity_co2: {
+      description: 'Electricity CO2 emissions in corresponding holiday last year',
+      units:  :co2
+    },
     last_year_holiday_energy_costs_£: {
       description: 'Gas plus electricity cost (£) in corresponding holiday last year',
       units:  :£
+    },
+    last_year_holiday_energy_costs_co2: {
+      description: 'Gas plus electricity CO2 emissions in corresponding holiday last year',
+      units:  :co2
     },
     name_of_last_year_holiday: {
       description: 'name of holiday last year',
@@ -149,6 +165,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     electricity_total_annual_£:           { class_type: AlertOutOfHoursElectricityUsage, variable_name: :total_annual_£ },
     electricity_potential_saving_kwh:     { class_type: AlertOutOfHoursElectricityUsage, variable_name: :potential_saving_kwh },
     electricity_potential_saving_£:       { class_type: AlertOutOfHoursElectricityUsage, variable_name: :potential_saving_£ },
+    electricity_potential_saving_co2:     { class_type: AlertOutOfHoursElectricityUsage, variable_name: :potential_saving_co2 },
     electricity_daytype_breakdown_table:  { class_type: AlertOutOfHoursElectricityUsage, variable_name: :daytype_breakdown_table },
     electricity_breakdown_chart:          { class_type: AlertOutOfHoursElectricityUsage, variable_name: :breakdown_chart },
     electricity_weekly_chart:             { class_type: AlertOutOfHoursElectricityUsage, variable_name: :group_by_week_day_type_chart },
@@ -161,6 +178,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     gas_total_annual_£:           { class_type: AlertOutOfHoursGasUsage, variable_name: :total_annual_£ },
     gas_potential_saving_kwh:     { class_type: AlertOutOfHoursGasUsage, variable_name: :potential_saving_kwh },
     gas_potential_saving_£:       { class_type: AlertOutOfHoursGasUsage, variable_name: :potential_saving_£ },
+    gas_potential_saving_co2:     { class_type: AlertOutOfHoursGasUsage, variable_name: :potential_saving_co2 },
     gas_daytype_breakdown_table:  { class_type: AlertOutOfHoursGasUsage, variable_name: :daytype_breakdown_table },
     gas_breakdown_chart:          { class_type: AlertOutOfHoursGasUsage, variable_name: :breakdown_chart },
     gas_weekly_chart:             { class_type: AlertOutOfHoursGasUsage, variable_name: :group_by_week_day_type_chart },
@@ -188,7 +206,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     definition[:description] = definition[:description] + ' (' + fuel_type + ')'
     definition
   end
-
 
   private def assign_third_party_alert_variables(class_type, third_party_alert)
     ALERT_INHERITANCE.each do |new_variable_name, third_party_alert_variable|
@@ -224,10 +241,12 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     last_year_holiday = same_holiday_previous_year(@holiday_period)
     @name_of_last_year_holiday = Holidays.holiday_month_year_str(last_year_holiday)
     set_last_year_holiday_consumption_variables(last_year_holiday.start_date, last_year_holiday.end_date, last_year_holiday.nil?)
-    potential_saving = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
-    set_savings_capital_costs_payback(potential_saving, 0.0)
+    potential_saving_kwh = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
+    potential_saving_co2 = nil_to_zero(@electricity_potential_saving_co2) + nil_to_zero(@gas_potential_saving_co2)
+    set_savings_capital_costs_payback(potential_saving_kwh, 0.0, potential_saving_co2)
 
-    @saving_kwh = potential_saving
+    @saving_kwh = potential_saving_kwh
+    @saving_co2 = potential_saving_co2
 
     rating_list = [@gas_rating, @electricity_rating].compact
 
@@ -251,24 +270,28 @@ class AlertImpendingHoliday < AlertGasOnlyBase
 
   private def set_last_year_holiday_consumption_variables(start_date, end_date, no_data)
     if no_data
-      @last_year_holiday_gas_kwh = 0.0
-      @last_year_holiday_gas_£ = 0.0
-      @last_year_holiday_electricity_kwh = 0.0
-      @last_year_holiday_electricity_£ = 0.0
-      @last_year_holiday_energy_costs_£ = 0.0
+      @last_year_holiday_gas_kwh          = 0.0
+      @last_year_holiday_gas_£            = 0.0
+      @last_year_holiday_gas_co2          = 0.0
+      @last_year_holiday_electricity_kwh  = 0.0
+      @last_year_holiday_electricity_£    = 0.0
+      @last_year_holiday_electricity_co2  = 0.0
+      @last_year_holiday_energy_costs_£   = 0.0
+      @last_year_holiday_energy_costs_co2 = 0.0
     else
       @holiday_floor_area = floor_area(start_date, end_date)
       @holiday_pupils     = pupils(start_date, end_date)
 
-      @last_year_holiday_gas_kwh, @last_year_holiday_gas_£ =
+      @last_year_holiday_gas_kwh, @last_year_holiday_gas_£, @last_year_holiday_gas_co2 =
         consumption_in_holiday_period(gas?, @school.aggregated_heat_meters, start_date, end_date)
       @last_year_holiday_gas_kwh_per_floor_area = @last_year_holiday_gas_kwh / @holiday_floor_area unless @last_year_holiday_gas_kwh.nil?
 
-      @last_year_holiday_electricity_kwh, @last_year_holiday_electricity_£ =
+      @last_year_holiday_electricity_kwh, @last_year_holiday_electricity_£, @last_year_holiday_electricity_co2 =
         consumption_in_holiday_period(electricity?, @school.aggregated_electricity_meters, start_date, end_date)
       @last_year_holiday_electricity_kwh_per_floor_area = @last_year_holiday_electricity_kwh / @holiday_pupils unless @last_year_holiday_gas_kwh.nil?
 
       @last_year_holiday_energy_costs_£ = nil_to_zero(@last_year_holiday_gas_£) + nil_to_zero(@last_year_holiday_electricity_£)
+      @last_year_holiday_energy_costs_co2 = nil_to_zero(@last_year_holiday_gas_co2) + nil_to_zero(@last_year_holiday_electricity_co2)
     end
   end
 
@@ -281,7 +304,8 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     return [0.0, 0.0] unless set
     [
       kwh_date_range(meter, start_date, end_date, :kwh),
-      kwh_date_range(meter, start_date, end_date, :economic_cost)
+      kwh_date_range(meter, start_date, end_date, :economic_cost),
+      kwh_date_range(meter, start_date, end_date, :co2)
     ]
   end
 

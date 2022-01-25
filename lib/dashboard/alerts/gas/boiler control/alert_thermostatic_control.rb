@@ -4,7 +4,7 @@ require_relative '../alert_gas_model_base.rb'
 class AlertThermostaticControl < AlertGasModelBase
   MIN_R2 = 0.8
 
-  attr_reader :r2_rating_out_of_10, :potential_saving_kwh, :potential_saving_£
+  attr_reader :r2_rating_out_of_10, :potential_saving_kwh, :potential_saving_£, :potential_saving_co2
 
   def initialize(school, type = :thermostaticcontrol)
     super(school, type)
@@ -58,6 +58,10 @@ class AlertThermostaticControl < AlertGasModelBase
       description: 'Potential savings £ through perfect themostatic control',
       units: :£,
       benchmark_code: 'sav£'
+    },
+    potential_saving_co2: {
+      description: 'Potential savings co2 through perfect themostatic control',
+      units: :co2,
     }
   }.freeze
 
@@ -93,9 +97,10 @@ class AlertThermostaticControl < AlertGasModelBase
     calculate_model(asof_date)
 
     @potential_saving_kwh = calculate_annual_heating_deviance_from_model_kwh(asof_date)
-    @potential_saving_£ = calculate_annual_heating_deviance_from_model_kwh(asof_date) * BenchmarkMetrics::GAS_PRICE
+    @potential_saving_£ = @potential_saving_kwh * BenchmarkMetrics::GAS_PRICE
+    @potential_saving_co2 = @potential_saving_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
 
-    set_savings_capital_costs_payback(@potential_saving_£, 1000.0) # suggested £1,000 cost
+    set_savings_capital_costs_payback(@potential_saving_£, 1000.0, @potential_saving_co2) # suggested £1,000 cost
 
     @rating = r2_rating_out_of_10
 
