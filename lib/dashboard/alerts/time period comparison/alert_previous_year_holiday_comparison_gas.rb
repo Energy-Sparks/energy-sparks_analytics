@@ -10,6 +10,7 @@ class AlertPreviousYearHolidayComparisonGas < AlertPreviousYearHolidayComparison
   def self.template_variables
     specific = { 'Adjusted gas school week specific (debugging)' => holiday_adjusted_gas_variables }
     specific['Change in between last 2 holidays'] = dynamic_template_variables(:gas)
+    specific['Unadjusted previous period consumption'] = self.class.unadjusted_template_variables
     specific.merge(superclass.template_variables)
   end
 
@@ -30,6 +31,7 @@ class AlertPreviousYearHolidayComparisonGas < AlertPreviousYearHolidayComparison
   def calculate(asof_date)
     model_calculation(asof_date)
     super(asof_date)
+    set_previous_period_unadjusted_kwh_£_co2_variables
   end
   alias_method :analyse_private, :calculate
 end

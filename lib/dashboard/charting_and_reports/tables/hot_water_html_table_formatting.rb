@@ -30,8 +30,8 @@ class HotWaterDayTypeTableFormatting < HotWaterFormattingBase
       'Annual ' + self.class.formatted_pound(medium)
     ]
     rows = [
-        row_data('School day (open)',   :schoolday_open,    medium),
-        row_data('School day (closed)', :schoolday_closed,  medium),
+        row_data('School day (open)',   :school_day_open,    medium),
+        row_data('School day (closed)', :school_day_closed,  medium),
         row_data('Weekends',            :weekend,           medium),
         row_data('Holidays',            :holiday,           medium)
     ]
@@ -56,7 +56,7 @@ class HotWaterDayTypeTableFormatting < HotWaterFormattingBase
 
   def self.template_variables
     variables = {}
-    %i[schoolday_open schoolday_closed weekend holiday total].each do |daytype|
+    %i[school+day_open school_day_closed weekend holiday total].each do |daytype|
       %i[daily annual].each do |period|
         %i[kwh £].each do |unit|
           composite_key = [daytype, period, unit]

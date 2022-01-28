@@ -57,36 +57,86 @@ def random_dates(school)
   end
 end
 
+def test_community_use_breakdowns(school)
+  d = Date.new(2021,11,4)
+
+  tests = [
+    nil,
+    { filter: :community_only, aggregate: :none },
+    { filter: :school_only, aggregate: :none },
+    { filter: :all, aggregate: :none },
+    { filter: :all, aggregate: :all_to_single_value },
+    { filter: :all, aggregate: :all_to_single_value },
+    { filter: :all, aggregate: :community_use },
+    { filter: :community_only, aggregate: :all_to_single_value },
+    { filter: :school_only, aggregate: :all_to_single_value },
+  ]
+
+  tests.each do |test|
+    puts "=" * 100
+    ap test
+    puts 'one_day_kwh'
+    ap school.aggregated_electricity_meters.amr_data.one_day_kwh(d, :kwh, community_use: test)
+    puts 'kwh'
+    ap school.aggregated_electricity_meters.amr_data.kwh(d, 10, :kwh, community_use: test)
+    puts 'days_kwh_x48'
+    ap school.aggregated_electricity_meters.amr_data.days_kwh_x48(d, :kwh, community_use: test)
+    puts 'kwh_date_range'
+    ap school.aggregated_electricity_meters.amr_data.kwh_date_range(d, d + 7, :kwh, community_use: test)
+  end
+end
+
+def run_charts(school)
+  charts = []
+
+  if school.electricity?
+    charts += intraday_chart(school, :management_dashboard_group_by_week_electricity)
+    charts += intraday_chart(school, :community_use_test_electricity)
+    charts += intraday_chart(school, :community_use_test_electricity_community_use_only)
+    charts += intraday_chart(school, :community_use_test_electricity_school_use_only)
+    charts += intraday_chart(school, :community_use_test_electricity_community_use_only_aggregated)
+  end
+
+  if school.gas?
+    charts += intraday_chart(school, :management_dashboard_group_by_week_gas)
+    charts += intraday_chart(school, :community_use_test_gas)
+  end
+
+  charts
+end
+
 profiler = false
 
-school_name_pattern_match = ['green*']
+filename = 'Results\\test-community-use.xlsx'
+school_name_pattern_match = ['KJ*', 'bath*']
 source_db = :unvalidated_meter_data
-charts = []
 
-school_name = RunTests.resolve_school_list(source_db, school_name_pattern_match).first
-school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
+school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
 
 RubyProf.start if profiler
 
-# random_dates(school)
 
-charts = []
-charts += intraday_chart(school, :management_dashboard_group_by_week_electricity)
-charts += intraday_chart(school, :management_dashboard_group_by_week_gas)
-charts += intraday_chart(school, :community_use_test_electricity)
-charts += intraday_chart(school, :community_use_test_gas)
+excel = ExcelCharts.new(filename)
+
+school_names.each do |school_name|
+  school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
+
+  # test_community_use_breakdowns(school)
+
+  # random_dates(school)
+  
+  charts = run_charts(school)
+
+  excel_school_name = school_name.gsub(' ', '').gsub('-', '')[0..10]
+
+  excel.add_charts(excel_school_name, charts)
+end
 
 if profiler
   prof_result = RubyProf.stop
   printer = RubyProf::GraphHtmlPrinter.new(prof_result)
   printer.print(File.open('log\code-profile - ' + Date.today.to_s + '.html','w'))
 end
-
-filename = 'Results\\test-community-use.xlsx'
-
-excel = ExcelCharts.new(filename)
-
-excel.add_charts('Test', charts)
 
 excel.close
 

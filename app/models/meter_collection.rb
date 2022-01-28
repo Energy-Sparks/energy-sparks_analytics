@@ -408,6 +408,10 @@ class MeterCollection
     ].compact
   end
 
+  def community_usage?
+    open_close_times.community_usage?
+  end
+
   def fuel_types(exclude_storage_heaters = true, exclude_solar_pv = true)
     types = []
     types.push(:electricity)      if electricity?

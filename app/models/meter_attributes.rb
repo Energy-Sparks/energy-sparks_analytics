@@ -175,6 +175,7 @@ class MeterAttributes
         holiday_calendar: MeterAttributeTypes::Symbol.define(required: true, allowed_values: OpenCloseTime.calendar_types),
         start_date:       MeterAttributeTypes::Date.define,
         end_date:         MeterAttributeTypes::Date.define,
+        fuel_types:       MeterAttributeTypes::Symbol.define(required: true, allowed_values: OpenCloseTime.fuel_type_choices),
         time0:            MeterAttributes.time_of_day_range,
         time1:            MeterAttributes.time_of_day_range,
         time2:            MeterAttributes.time_of_day_range,

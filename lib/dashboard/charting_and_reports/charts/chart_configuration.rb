@@ -1116,6 +1116,21 @@ class ChartManager
       yaxis_scaling:    :none,
       subtitle:         :daterange
     },
+    community_use_test_electricity_community_use_only: {
+      name:          'Community use test chart electricity community use only',
+      inherits_from: :community_use_test_electricity,
+      community_use:  { filter: :community_only, aggregate: :none } 
+    },
+    community_use_test_electricity_school_use_only: {
+      name:          'Community use test chart electricity school use only',
+      inherits_from: :community_use_test_electricity,
+      community_use:  { filter: :school_only, aggregate: :none } 
+    },
+    community_use_test_electricity_community_use_only_aggregated: {
+      name:          'Community use test chart electricity community use only aggregated - series name = community',
+      inherits_from: :community_use_test_electricity,
+      community_use:  { filter: :community_only, aggregate: :community_use }
+    },
     community_use_test_gas: {
       name:          'Community use test chart gas',
       meter_definition: :allheat,
@@ -1909,6 +1924,16 @@ class ChartManager
       adjust_by_average_temperature:  { holiday: 0 },
       #asof_date:                     Date.new(2019, 3, 7), # gets overridden by alert
       inherits_from:                  :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted_community_only: {
+      name:           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation, community use only',
+      community_use:  { filter: :community_only, aggregate: :community_use },
+      inherits_from:  :schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted_community_only: {
+      name:           'Comparison of last 2 weeks gas consumption - temperature unadjusted alert calculation, community use only',
+      community_use:  { filter: :community_only, aggregate: :community_use },
+      inherits_from:  :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
     },
     teachers_landing_page_gas: {
       timescale:        [{ workweek: 0 }, { workweek: -1 }],

@@ -124,6 +124,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   def maximum_alert_date; aggregate_meter.amr_data.end_date end
 
   def calculate(asof_date)
+    @asof_date ||= asof_date
     configure_models(asof_date)
     current_period, previous_period = last_two_periods(asof_date)
 
@@ -175,8 +176,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     previous_period_range = @previous_period_start_date..@previous_period_end_date
     @previous_holiday_temperatures, @previous_holiday_average_temperature = weeks_temperatures(previous_period_range)
 
-    @current_period_kwhs, _avg = formatted_kwh_period_unadjusted(previous_period_range)
-    @previous_period_kwhs_unadjusted,  @previous_period_average_kwh_unadjusted = formatted_kwh_period_unadjusted(previous_period_range)
+    @current_period_kwhs, _avg = formatted_kwh_period_unadjusted(current_period_range)
+    @previous_period_kwhs_unadjusted, @previous_period_average_kwh_unadjusted = formatted_kwh_period_unadjusted(previous_period_range)
 
     @current_period_weekly_kwh  = normalised_average_weekly_kwh(current_period,   :kwh)
     @current_period_weekly_£    = normalised_average_weekly_kwh(current_period,   :£)
@@ -218,6 +219,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
         convert_via:        :kwh
       },
     ]
+  end
+
+  protected def community_use
+    nil
   end
 
   private def period_debug(current_period,  asof_date)
@@ -272,6 +277,10 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     1.0 # no adjustment for electricity, the default
   end
 
+  private def kwh_date_range(meter, start_date, end_date, data_type)
+    super(aggregate_meter, start_date, end_date, :kwh, community_use: community_use)
+  end
+
   protected def meter_values_period(current_period)
     {
       kwh:    kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :kwh),
@@ -316,8 +325,13 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   private def average_period_value(period, days_of_week, data_type)
     dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(period, days_of_week)
-    values = dates.map { |date| kwh_date_range(aggregate_meter, date, date, data_type) }.compact
+    values = dates.map { |date| previous_kwh(aggregate_meter, date, data_type) }.compact
     values.sum / values.length
+  end
+
+  # overridden by gas classes where this value is temperature compensated
+  protected def previous_kwh(aggregate_meter, date, data_type)
+    kwh_date_range(aggregate_meter, date, date, data_type)
   end
 
   protected def calculate_time_of_year_relevance(asof_date)

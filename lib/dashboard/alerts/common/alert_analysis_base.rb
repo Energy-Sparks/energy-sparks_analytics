@@ -64,6 +64,10 @@ class AlertAnalysisBase < ContentBase
     @error_message = e.message
     @backtrace = e.backtrace
 
+    puts "Got here"
+    puts e.message
+    puts e.backtrace
+
     logger.warn e.message
     logger.warn e.backtrace
   end
@@ -371,9 +375,9 @@ class AlertAnalysisBase < ContentBase
     [asof_date - 365, meter.amr_data.start_date].max
   end
 
-  protected def kwh_date_range(meter, start_date, end_date, data_type = :kwh)
+  protected def kwh_date_range(meter, start_date, end_date, data_type = :kwh, community_use: nil)
     return nil if meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date
-    meter.amr_data.kwh_date_range(start_date, end_date, data_type)
+    meter.amr_data.kwh_date_range(start_date, end_date, data_type, community_use: community_use)
   end
 
   protected def kwhs_date_range(meter, start_date, end_date, data_type = :kwh, min_days_data = nil)
@@ -497,7 +501,10 @@ class AlertAnalysisBase < ContentBase
       AlertSeasonalBaseloadVariation                => 'sblv',
       AlertIntraweekBaseloadVariation               => 'iblv',
       AlertGasHeatingHotWaterOnDuringHoliday        => 'hdhl',
-      AlertStorageHeaterHeatingOnDuringHoliday      => 'shoh'         
+      AlertStorageHeaterHeatingOnDuringHoliday      => 'shoh',
+      AlertCommunitySchoolWeekComparisonElectricity => 'cswe',
+      AlertCommunitySchoolWeekComparisonGas         => 'cswg',
+      AlertCommunityPreviousHolidayComparisonGas    => 'cphg'
     }
   end
 

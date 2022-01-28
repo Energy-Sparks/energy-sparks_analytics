@@ -1,3 +1,4 @@
+require_relative './../../../../app/models/open_close_times.rb'
 # Series Data Manager
 # - acts as a single interface for all requests from the aggregation process
 # - and other sources e.g. alerts for all energy related data
@@ -52,10 +53,10 @@ class SeriesNames
   NONHEATINGDAYMODEL   = 'Non Heating Day Model'.freeze
   HEATINGMODELSERIESNAMES = [HEATINGDAYMODEL.freeze, NONHEATINGDAYMODEL.freeze].freeze
 
-  HOLIDAY         = 'Holiday'.freeze
-  WEEKEND         = 'Weekend'.freeze
-  SCHOOLDAYOPEN   = 'School Day Open'.freeze
-  SCHOOLDAYCLOSED = 'School Day Closed'.freeze
+  HOLIDAY         = OpenCloseTime.humanize_symbol(OpenCloseTime::HOLIDAY)
+  WEEKEND         = OpenCloseTime.humanize_symbol(OpenCloseTime::WEEKEND)
+  SCHOOLDAYOPEN   = OpenCloseTime.humanize_symbol(OpenCloseTime::SCHOOL_OPEN)
+  SCHOOLDAYCLOSED = OpenCloseTime.humanize_symbol(OpenCloseTime::SCHOOL_CLOSED)
 
   DEGREEDAYS      = 'Degree Days'.freeze
   TEMPERATURE     = 'Temperature'.freeze
@@ -158,6 +159,26 @@ class SeriesDataManager
     end
   end
 
+  def community_use
+    if @calculated_community_use.nil? # as @community_use can be nil, for speed
+      @community_use = calculate_community_use
+      @calculated_community_use = true
+    end
+    @community_use
+  end
+
+  def calculate_community_use
+    # return nil unless @meter_collection.community_usage?
+    if @chart_configuration.key?(:community_use)
+      @chart_configuration[:community_use]
+    elsif @chart_configuration[:series_breakdown] == :daytype
+      #backwards compatibility, day type break down charts have single 'community' aggregate usage
+      { filter: :all, aggregate: :community_use }
+    else
+      nil
+    end
+  end
+
   private def adjusted_temperature_values_for_period(period_config)
     period_calc = PeriodsBase.period_factory({timescale: period_config}, @meter_collection, @first_meter_date, @last_meter_date)
     period = period_calc.periods[0]
@@ -192,7 +213,7 @@ class SeriesDataManager
       case breakdown
       when :heating;                buckets = combinatorially_combine(buckets, SeriesNames::HEATINGSERIESNAMES)
       when :heating_daytype;        buckets = combinatorially_combine(buckets, SeriesNames::HEATINGDAYTYPESERIESNAMES)
-      when :daytype;                buckets = combinatorially_combine(buckets, day_type_names) # Centrica
+      when :daytype;                buckets = combinatorially_combine(buckets, day_type_names)
       when :meter;                  buckets = combinatorially_combine(buckets, meter_names)
 
       when :model_type;             buckets += heating_model_types
@@ -305,7 +326,7 @@ class SeriesDataManager
 
   def day_type_names
     @day_type_names ||= @meters.compact.map do |meter|
-      meter.amr_data.open_close_breakdown.series_names
+      meter.amr_data.open_close_breakdown.series_names(community_use)
     end.flatten.uniq
   end
 
@@ -424,15 +445,15 @@ class SeriesDataManager
   end
 
   def amr_data_by_half_hour(meter, date, halfhour_index, data_type = :kwh)
-    meter.amr_data.kwh(date, halfhour_index, data_type)
+    meter.amr_data.kwh(date, halfhour_index, data_type, community_use: community_use)
   end
 
   def amr_data_one_day_readings(meter, date, data_type = :kwh)
-    meter.amr_data.days_kwh_x48(date, data_type)
+    meter.amr_data.days_kwh_x48(date, data_type, community_use: community_use)
   end
 
   def amr_data_one_day(meter, date, data_type = :kwh) 
-    meter.amr_data.one_day_kwh(date, data_type)
+    meter.amr_data.one_day_kwh(date, data_type, community_use: community_use)
   end
 
   def predicted_amr_data_one_day(date)
@@ -468,17 +489,16 @@ class SeriesDataManager
     elsif override_meter_end_date?
       total = 0.0
       (start_date..end_date).each do |date|
-        total += date > meter.amr_data.end_date ? 0.0 : meter.amr_data.one_day_kwh(date, data_type)
+        total += date > meter.amr_data.end_date ? 0.0 : meter.amr_data.one_day_kwh(date, data_type, community_use: community_use)
       end
       total
     else
-      meter.amr_data.kwh_date_range(start_date, end_date, data_type)
+      meter.amr_data.kwh_date_range(start_date, end_date, data_type, community_use: community_use)
     end
   end
 
   def heating_model
-    @heating_model = calculate_model if @heating_model.nil?
-    @heating_model
+    @heating_model ||= calculate_model
   end
 
   def kwh_cost_or_co2
@@ -562,12 +582,10 @@ private
 
     (date_range[0]..date_range[1]).each do |date|
       begin
-        # Centrica
-        breakdown = meter.amr_data.open_close_breakdown.one_day_kwh(date, data_type)
+        breakdown = meter.amr_data.one_day_kwh(date, data_type, community_use: community_use)
 
         breakdown.each do |type, kwh|
-          display_type = OpenCloseTime.name(type)
-          daytype_data[display_type] += kwh
+          daytype_data[type] += kwh
         end
       rescue StandardError => e
         logger.error "Unable to aggregate data for #{date} - exception raise"
@@ -593,12 +611,10 @@ private
   def daytype_breakdown_halfhour(date, halfhour_index, meter)
     daytype_data = new_day_type_breakdown
 
-    # Centrica
-    breakdown = meter.amr_data.open_close_breakdown.kwh(date, halfhour_index, kwh_cost_or_co2)
+    breakdown = meter.amr_data.kwh(date, halfhour_index, kwh_cost_or_co2, community_use: community_use)
 
     breakdown.each do |type, kwh|
-      display_type = OpenCloseTime.name(type)
-      daytype_data[display_type] = kwh
+      daytype_data[type] = kwh
     end
 
     daytype_data

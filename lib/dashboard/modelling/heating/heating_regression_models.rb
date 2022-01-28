@@ -1088,12 +1088,12 @@ module AnalyseHeatingAndHotWater
       }
     end
 
-    def temperature_compensated_one_day_gas_kwh(date, temperature)
+    def temperature_compensated_one_day_gas_kwh(date, temperature, actual_kwh = @amr_data.one_day_kwh(date))
       model_type = model_type?(date)
       model = @models[model_type]
-      actual_kwh = @amr_data.one_day_kwh(date)
       return actual_kwh if model_type == :none && model.nil?
       actual_temperature = temperatures.average_temperature(date)
+      puts "Got here [#{date}, #{temperature}] => #{actual_kwh + model.b * (temperature - actual_temperature)} = #{actual_kwh} + #{model.b} * (#{temperature} - #{actual_temperature}) "
       actual_kwh + model.b * (temperature - actual_temperature)
     end
 

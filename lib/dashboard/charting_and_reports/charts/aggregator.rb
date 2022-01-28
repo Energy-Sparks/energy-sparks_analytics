@@ -626,7 +626,11 @@ class Aggregator
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
     post_process_aggregation(chart_config, bucketed_data, bucketed_data_count)
-    [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description, @meter_collection.name, @x_axis, @x_axis_bucket_date_ranges]
+    [humanize_symbols(bucketed_data), humanize_symbols(bucketed_data_count), @xbucketor.compact_date_range_description, @meter_collection.name, @x_axis, @x_axis_bucket_date_ranges]
+  end
+
+  def humanize_symbols(hash)
+    hash.transform_keys{ |k| OpenCloseTime.humanize_symbol(k) }
   end
 
   private

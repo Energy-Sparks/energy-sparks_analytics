@@ -10,12 +10,16 @@ class ClimateChangeLevy
       Date.new(2019, 4, 1)..Date.new(2020, 3, 31) => 0.00847,
       Date.new(2020, 4, 1)..Date.new(2021, 3, 31) => 0.00811,
       Date.new(2021, 4, 1)..Date.new(2022, 3, 31) => 0.00775,
+      Date.new(2022, 4, 1)..Date.new(2023, 3, 31) => 0.00775, # 22/23 numbers not set formally as of 26Jan2022?
+      Date.new(2023, 4, 1)..Date.new(2024, 3, 31) => 0.00775
     },
     gas: {
       Date.new(2018, 4, 1)..Date.new(2019, 3, 31) => 0.00203,
       Date.new(2019, 4, 1)..Date.new(2020, 3, 31) => 0.00339,
       Date.new(2020, 4, 1)..Date.new(2021, 3, 31) => 0.00406,
       Date.new(2021, 4, 1)..Date.new(2022, 3, 31) => 0.00465,
+      Date.new(2022, 4, 1)..Date.new(2023, 3, 31) => 0.00568, # 22/23 numbers not set formally as of 26Jan2022?
+      Date.new(2023, 4, 1)..Date.new(2024, 3, 31) => 0.00672
     }
   }
 
