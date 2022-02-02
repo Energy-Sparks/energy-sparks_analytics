@@ -55,11 +55,11 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   end
 
   def adjusted_temperature_comparison_chart
-    :schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted
+    :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted
   end
 
   def unadjusted_temperature_comparison_chart
-    :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
+    :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
   end
 
   def calculate(asof_date)
@@ -114,9 +114,7 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
 
   protected def kwh_values_from_2_weekly_chart(chart_name, asof_date)
     chart_manager = ChartManager.new(@school)
-
     results = chart_manager.run_standard_chart(chart_name, { asof_date: asof_date }, true)
-
     process_2_weekly_chart_results(results[:x_data])
   end
 

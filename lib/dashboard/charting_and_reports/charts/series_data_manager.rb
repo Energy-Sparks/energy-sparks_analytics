@@ -469,23 +469,9 @@ class SeriesDataManager
   end
 
   def amr_data_date_range(meter, start_date, end_date, data_type)
+
     if @adjust_by_temperature && meter.fuel_type == :gas
-      scale = scaling_factor_for_model_derived_gas_data(data_type)
-      if @adjust_by_temperature_value.is_a?(Float)
-        scale * heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_temperature_value, 0.0)
-      elsif !@adjust_by_average_temperature.nil?
-        scale * heating_model.temperature_compensated_date_range_gas_kwh(start_date, end_date, @adjust_by_average_temperature, 0.0)
-      elsif @adjust_by_temperature_value.is_a?(Hash)
-        # see aggregator.temperature_compensation_temperature_map comments for more detailed explanation
-        # but adjusts gas data to corresponding temperatures of first series
-        total_adjusted_kwh = 0.0
-        (start_date..end_date).each do |date|
-          total_adjusted_kwh += heating_model.temperature_compensated_one_day_gas_kwh(date, @adjust_by_temperature_value[date])
-        end
-        [scale * total_adjusted_kwh, 0.0].max
-      else
-        raise EnergySparksUnexpectedStateException, "Expecting Float or Hash for @adjust_by_temperature_value when @adjust_by_temperature true: #{@adjust_by_temperature_value}"
-      end
+      adjust_for_temperature(meter, start_date, end_date, data_type)
     elsif override_meter_end_date?
       total = 0.0
       (start_date..end_date).each do |date|
@@ -494,6 +480,31 @@ class SeriesDataManager
       total
     else
       meter.amr_data.kwh_date_range(start_date, end_date, data_type, community_use: community_use)
+    end
+  end
+
+  def adjust_for_temperature(meter, start_date, end_date, data_type)
+    dates = (start_date..end_date).to_a
+    kwhs = dates.map { |date| meter.amr_data.one_day_kwh(date, data_type, community_use: community_use) }
+    scale = scaling_factor_for_model_derived_gas_data(data_type)
+    adj_temperatures = adjustment_temperatures(dates)
+
+    total_adjusted_kwh = 0.0
+    (start_date..end_date).each_with_index do |date, i|
+      total_adjusted_kwh += heating_model.temperature_compensated_one_day_gas_kwh(date, adj_temperatures[i], kwhs[i], 0.0, community_use: community_use)
+    end
+    total_adjusted_kwh
+  end
+
+  def adjustment_temperatures(dates)
+    if @adjust_by_temperature_value.is_a?(Float)
+      Array.new(dates.length, @adjust_by_temperature_value)
+    elsif !@adjust_by_average_temperature.nil?
+      Array.new(dates.length, @adjust_by_average_temperature)
+    elsif @adjust_by_temperature_value.is_a?(Hash)
+      dates.map{ |date| @adjust_by_temperature_value[date] }
+    else
+      raise EnergySparksUnexpectedStateException, "Expecting Float or Hash for @adjust_by_temperature_value when @adjust_by_temperature true: #{@adjust_by_temperature_value}"
     end
   end
 

@@ -56,7 +56,7 @@ class HotWaterDayTypeTableFormatting < HotWaterFormattingBase
 
   def self.template_variables
     variables = {}
-    %i[school+day_open school_day_closed weekend holiday total].each do |daytype|
+    %i[school_day_open school_day_closed weekend holiday total].each do |daytype|
       %i[daily annual].each do |period|
         %i[kwh £].each do |unit|
           composite_key = [daytype, period, unit]

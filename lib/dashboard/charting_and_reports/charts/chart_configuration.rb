@@ -1908,32 +1908,33 @@ class ChartManager
       y2_axis:          nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
-    schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted: {
+    schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted: {
       name:             'Comparison of last 2 weeks gas consumption - unadjusted alert calculation',
       y2_axis:          nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
-    schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted: {
+    schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted: {
       name:                   'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
       adjust_by_temperature:  { schoolweek: 0 },
+ 
       #asof_date:              Date.new(2019, 3, 7), # gets overridden by alert
-      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
     },
-    schoolweek_alert_2_previous_holiday_comparison_adjusted: {
+    schoolweek_alert_2_previous_holiday_comparison_gas_adjusted: {
       name:                           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
       adjust_by_average_temperature:  { holiday: 0 },
       #asof_date:                     Date.new(2019, 3, 7), # gets overridden by alert
-      inherits_from:                  :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
+      inherits_from:                  :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
     },
-    schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted_community_only: {
-      name:           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation, community use only',
-      community_use:  { filter: :community_only, aggregate: :community_use },
-      inherits_from:  :schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted
-    },
-    schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted_community_only: {
+    schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted_community_only: {
       name:           'Comparison of last 2 weeks gas consumption - temperature unadjusted alert calculation, community use only',
-      community_use:  { filter: :community_only, aggregate: :community_use },
-      inherits_from:  :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
+      community_use:  { filter: :community_only, aggregate: :all_to_single_value },
+      inherits_from:  :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted_community_only: {
+      name:           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation, community use only',
+      community_use:  { filter: :community_only, aggregate: :all_to_single_value },
+      inherits_from:  :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted
     },
     teachers_landing_page_gas: {
       timescale:        [{ workweek: 0 }, { workweek: -1 }],

@@ -100,6 +100,8 @@ def run_charts(school)
   if school.gas?
     charts += intraday_chart(school, :management_dashboard_group_by_week_gas)
     charts += intraday_chart(school, :community_use_test_gas)
+    charts += intraday_chart(school, :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted_community_only)
+    charts += intraday_chart(school, :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted_community_only)
   end
 
   charts

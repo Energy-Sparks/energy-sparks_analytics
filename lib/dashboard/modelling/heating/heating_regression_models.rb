@@ -577,6 +577,7 @@ module AnalyseHeatingAndHotWater
   #=====================================================================================
   # alternative model for fitting, in temperature space not degree days
   class HeatingModelTemperatureSpace < HeatingModel
+    class ScalingModelCalculationDoesntCoverAllModelTypes < StandardError; end
     HEATINGOCCUPIEDMODEL = :heating_occupied_all_days
     HEATINGWEEKENDMODEL = :weekend_heating
     HEATINGHOLIDAYMODEL = :holiday_heating
@@ -792,6 +793,7 @@ module AnalyseHeatingAndHotWater
 
       bm = Benchmark.realtime {
         @non_heating_model = HeatingNonHeatingDisaggregationModelBase.model_factory(non_heating_model_type, @heat_meter, @model_overrides)
+        @heating_model_period = period
         @non_heating_model.calculate_max_summer_hotwater_kitchen_kwh(period)
         x_data, y_data = assign_models(period)
         calculate_regressions(x_data, y_data)
@@ -956,7 +958,7 @@ module AnalyseHeatingAndHotWater
 
       if winter_model.nil?
         return nil if summer_model.nil?
-        
+
         base_temperature = - summer_model.a / summer_model.b
       else
         if summer_model.nil?
@@ -1088,21 +1090,52 @@ module AnalyseHeatingAndHotWater
       }
     end
 
-    def temperature_compensated_one_day_gas_kwh(date, temperature, actual_kwh = @amr_data.one_day_kwh(date))
-      model_type = model_type?(date)
-      model = @models[model_type]
-      return actual_kwh if model_type == :none && model.nil?
-      actual_temperature = temperatures.average_temperature(date)
-      puts "Got here [#{date}, #{temperature}] => #{actual_kwh + model.b * (temperature - actual_temperature)} = #{actual_kwh} + #{model.b} * (#{temperature} - #{actual_temperature}) "
-      actual_kwh + model.b * (temperature - actual_temperature)
+    # community use is generally signifcantly lower than overall usage
+    # so use the overall usage for the modelling but scale down
+    # proportionally to the community use - not ideal but
+    # there isn't a better solution
+    def community_use_model_scaling_factor(date, community_use)
+      @community_use_model_scaling_factors ||= calculate_community_use_model_scaling_factors(community_use)
+      raise ScalingModelCalculationDoesntCoverAllModelTypes, "Extend sd, ed calc below to cover #{date}" unless @community_use_model_scaling_factors.key?(model_type?(date))
+      @community_use_model_scaling_factors[model_type?(date)] 
     end
 
-    def temperature_compensated_date_range_gas_kwh(start_date, end_date, temperature, floor_at = nil)
-      total_adjusted_kwh = 0.0
+    def no_scaling_models
+      @models.transform_values { |_v| 1.0 }
+    end
+
+    def calculate_community_use_model_scaling_factors(community_use)
+      return no_scaling_models if community_use.nil?
+
+      # don't go back more than a year to calculate the scaling factors
+      # slight risk model type not represent in this period and exception thrown above
+      end_date   = @heating_model_period.end_date
+      # see ScalingModelCalculationDoesntCoverAllModelTypes exception above
+      start_date = [@heating_model_period.start_date, end_date - 365].max
+
+      scaling_factor_by_model_type = {}
+
       (start_date..end_date).each do |date|
-        total_adjusted_kwh += temperature_compensated_one_day_gas_kwh(date, temperature)
+        model_type = model_type?(date)
+        scaling_factor_by_model_type[model_type] ||= []
+        day_kwh       = @amr_data.one_day_kwh(date, :kwh, community_use: nil)
+        community_kwh = @amr_data.one_day_kwh(date, :kwh, community_use: community_use)
+        scaling_factor_by_model_type[model_type].push([community_kwh, day_kwh])
       end
-      floor_at.nil? ? total_adjusted_kwh : [total_adjusted_kwh, floor_at].max
+
+      scaling_factor_by_model_type.transform_values do |kwhs|
+        kwhs.map { |kk| kk[0] }.sum / kwhs.map { |kk| kk[1] }.sum
+      end
+    end
+
+    def temperature_compensated_one_day_gas_kwh(from_date, to_temperature, from_kwh = @amr_data.one_day_kwh(from_date), floor, community_use: nil)
+      model_type = model_type?(from_date)
+      model = @models[model_type]
+      return from_kwh if model_type == :none && model.nil?
+      from_temperature = temperatures.average_temperature(from_date)
+      scale = community_use_model_scaling_factor(from_date, community_use)
+      to_kwh = from_kwh + scale * model.b * (to_temperature - from_temperature)
+      floor.nil? ? to_kwh : [to_kwh, 0.0].max
     end
 
     def predicted_kwh(date, temperature, substitute_model_date = nil)

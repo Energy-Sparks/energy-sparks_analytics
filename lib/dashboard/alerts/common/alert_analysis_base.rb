@@ -57,16 +57,13 @@ class AlertAnalysisBase < ContentBase
   end
 
   def self.test_mode
-    !ENV['ENERGYSPARKSTESTMODE'].nil? && ENV['ENERGYSPARKSTESTMODE'] == 'ON'
+    !Object.const_defined?('Rails')
+    # !ENV['ENERGYSPARKSTESTMODE'].nil? && ENV['ENERGYSPARKSTESTMODE'] == 'ON'
   end
 
   def log_stack_trace(e)
     @error_message = e.message
     @backtrace = e.backtrace
-
-    puts "Got here"
-    puts e.message
-    puts e.backtrace
 
     logger.warn e.message
     logger.warn e.backtrace
@@ -380,10 +377,10 @@ class AlertAnalysisBase < ContentBase
     meter.amr_data.kwh_date_range(start_date, end_date, data_type, community_use: community_use)
   end
 
-  protected def kwhs_date_range(meter, start_date, end_date, data_type = :kwh, min_days_data = nil)
+  protected def kwhs_date_range(meter, start_date, end_date, data_type = :kwh, min_days_data = nil, community_use: nil)
     if min_days_data.nil?
       return nil if meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date
-      (start_date..end_date).to_a.map { |date| meter.amr_data.one_day_kwh(date, data_type) }
+      (start_date..end_date).to_a.map { |date| meter.amr_data.one_day_kwh(date, data_type, community_use: community_use) }
     else
       sd = [meter.amr_data.start_date, start_date].max
       ed = [meter.amr_data.end_date  , end_date].min
@@ -391,7 +388,7 @@ class AlertAnalysisBase < ContentBase
       if (meter.amr_data.start_date > start_date || meter.amr_data.end_date < end_date) && days < min_days_data
         nil
       else
-        (sd..ed).to_a.map { |date| meter.amr_data.one_day_kwh(date, data_type) }
+        (sd..ed).to_a.map { |date| meter.amr_data.one_day_kwh(date, data_type, community_use: community_use) }
       end
     end
   end
@@ -451,60 +448,63 @@ class AlertAnalysisBase < ContentBase
 
   def self.all_alerts
     {
-      AlertChangeInDailyElectricityShortTerm        => 'elst',
-      AlertChangeInDailyGasShortTerm                => 'gsst',
-      AlertChangeInElectricityBaseloadShortTerm     => 'elbc',
-      AlertEnergyAnnualVersusBenchmark              => 'enba',
-      AlertElectricityAnnualVersusBenchmark         => 'elba',
-      AlertElectricityBaseloadVersusBenchmark       => 'elbb',
-      AlertGasAnnualVersusBenchmark                 => 'gsba',
-      AlertHeatingComingOnTooEarly                  => 'hthe',
-      AlertHeatingOnOff                             => 'htoo',
-      AlertHeatingSensitivityAdvice                 => 'htsa',
-      AlertHotWaterEfficiency                       => 'hotw',
-      AlertImpendingHoliday                         => 'ihol',
-      AlertHeatingOnNonSchoolDays                   => 'htns',
-      AlertOutOfHoursElectricityUsage               => 'eloo',
-      AlertOutOfHoursGasUsage                       => 'gsoo',
-      AlertHotWaterInsulationAdvice                 => 'hwia',
-      AlertHeatingOnSchoolDays                      => 'htsd',
-      AlertThermostaticControl                      => 'httc',
-      AlertWeekendGasConsumptionShortTerm           => 'gswe',
-      AlertElectricityMeterConsolidationOpportunity => 'emtc',
-      AlertGasMeterConsolidationOpportunity         => 'gmtc',
-      AlertMeterASCLimit                            => 'masc',
-      AlertDifferentialTariffOpportunity            => 'dtaf',
-      AlertSchoolWeekComparisonElectricity          => 'eswc',
-      AlertPreviousHolidayComparisonElectricity     => 'ephc',
-      AlertPreviousYearHolidayComparisonElectricity => 'epyc',
-      AlertSchoolWeekComparisonGas                  => 'gswc',
-      AlertPreviousHolidayComparisonGas             => 'gphc',
-      AlertPreviousYearHolidayComparisonGas         => 'gpyc',
-      AlertAdditionalPrioritisationData             => 'addp',
-      AlertElectricityPeakKWVersusBenchmark         => 'epkb',
-      AlertStorageHeaterAnnualVersusBenchmark       => 'shan',
-      AlertStorageHeaterThermostatic                => 'shtc',
-      AlertStorageHeaterOutOfHours                  => 'shoo',
-      AlertHeatingOnSchoolDaysStorageHeaters        => 'shhd',
-      AlertSolarPVBenefitEstimator                  => 'sole',
-      AlertElectricityLongTermTrend                 => 'ellt',
-      AlertGasLongTermTrend                         => 'gslt',
-      AlertStorageHeatersLongTermTrend              => 'shlt',
-      AlertOptimumStartAnalysis                     => 'opts',
-      AlertSummerHolidayRefrigerationAnalysis      => 'free',
-      AlertElectricityTargetAnnual                  => 'etga',
-      AlertGasTargetAnnual                          => 'gtga',
-      AlertElectricityTarget4Week                   => 'etg4',
-      AlertGasTarget4Week                           => 'gtg4',
-      AlertElectricityTarget1Week                   => 'etg1',
-      AlertGasTarget1Week                           => 'gtg1',
-      AlertSeasonalBaseloadVariation                => 'sblv',
-      AlertIntraweekBaseloadVariation               => 'iblv',
-      AlertGasHeatingHotWaterOnDuringHoliday        => 'hdhl',
-      AlertStorageHeaterHeatingOnDuringHoliday      => 'shoh',
-      AlertCommunitySchoolWeekComparisonElectricity => 'cswe',
-      AlertCommunitySchoolWeekComparisonGas         => 'cswg',
-      AlertCommunityPreviousHolidayComparisonGas    => 'cphg'
+      AlertChangeInDailyElectricityShortTerm                  => 'elst',
+      AlertChangeInDailyGasShortTerm                          => 'gsst',
+      AlertChangeInElectricityBaseloadShortTerm               => 'elbc',
+      AlertEnergyAnnualVersusBenchmark                        => 'enba',
+      AlertElectricityAnnualVersusBenchmark                   => 'elba',
+      AlertElectricityBaseloadVersusBenchmark                 => 'elbb',
+      AlertGasAnnualVersusBenchmark                           => 'gsba',
+      AlertHeatingComingOnTooEarly                            => 'hthe',
+      AlertHeatingOnOff                                       => 'htoo',
+      AlertHeatingSensitivityAdvice                           => 'htsa',
+      AlertHotWaterEfficiency                                 => 'hotw',
+      AlertImpendingHoliday                                   => 'ihol',
+      AlertHeatingOnNonSchoolDays                             => 'htns',
+      AlertOutOfHoursElectricityUsage                         => 'eloo',
+      AlertOutOfHoursGasUsage                                 => 'gsoo',
+      AlertHotWaterInsulationAdvice                           => 'hwia',
+      AlertHeatingOnSchoolDays                                => 'htsd',
+      AlertThermostaticControl                                => 'httc',
+      AlertWeekendGasConsumptionShortTerm                     => 'gswe',
+      AlertElectricityMeterConsolidationOpportunity           => 'emtc',
+      AlertGasMeterConsolidationOpportunity                   => 'gmtc',
+      AlertMeterASCLimit                                      => 'masc',
+      AlertDifferentialTariffOpportunity                      => 'dtaf',
+      AlertSchoolWeekComparisonElectricity                    => 'eswc',
+      AlertPreviousHolidayComparisonElectricity               => 'ephc',
+      AlertPreviousYearHolidayComparisonElectricity           => 'epyc',
+      AlertSchoolWeekComparisonGas                            => 'gswc',
+      AlertPreviousHolidayComparisonGas                       => 'gphc',
+      AlertPreviousYearHolidayComparisonGas                   => 'gpyc',
+      AlertAdditionalPrioritisationData                       => 'addp',
+      AlertElectricityPeakKWVersusBenchmark                   => 'epkb',
+      AlertStorageHeaterAnnualVersusBenchmark                 => 'shan',
+      AlertStorageHeaterThermostatic                          => 'shtc',
+      AlertStorageHeaterOutOfHours                            => 'shoo',
+      AlertHeatingOnSchoolDaysStorageHeaters                  => 'shhd',
+      AlertSolarPVBenefitEstimator                            => 'sole',
+      AlertElectricityLongTermTrend                           => 'ellt',
+      AlertGasLongTermTrend                                   => 'gslt',
+      AlertStorageHeatersLongTermTrend                        => 'shlt',
+      AlertOptimumStartAnalysis                               => 'opts',
+      AlertSummerHolidayRefrigerationAnalysis                 => 'free',
+      AlertElectricityTargetAnnual                            => 'etga',
+      AlertGasTargetAnnual                                    => 'gtga',
+      AlertElectricityTarget4Week                             => 'etg4',
+      AlertGasTarget4Week                                     => 'gtg4',
+      AlertElectricityTarget1Week                             => 'etg1',
+      AlertGasTarget1Week                                     => 'gtg1',
+      AlertSeasonalBaseloadVariation                          => 'sblv',
+      AlertIntraweekBaseloadVariation                         => 'iblv',
+      AlertGasHeatingHotWaterOnDuringHoliday                  => 'hdhl',
+      AlertStorageHeaterHeatingOnDuringHoliday                => 'shoh',
+      AlertCommunitySchoolWeekComparisonElectricity           => 'cswe',
+      AlertCommunitySchoolWeekComparisonGas                   => 'cswg',
+      AlertCommunityPreviousHolidayComparisonElectricity      => 'cphe',
+      AlertCommunityPreviousHolidayComparisonGas              => 'cphg',
+      AlertCommunityPreviousYearHolidayComparisonElectricity  => 'cpye',
+      AlertCommunityPreviousYearHolidayComparisonGas          => 'cpyg'
     }
   end
 

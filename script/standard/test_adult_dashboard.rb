@@ -5,7 +5,7 @@ require_rel '../../test_support'
 module Logging
   logger.level = :error
 end
-ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Working'
+ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Community'
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
@@ -14,7 +14,7 @@ script = {
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
                             ],
-  schools: ['*'],
+  schools: ['KJ*','b*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
