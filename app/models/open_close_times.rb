@@ -68,6 +68,7 @@ class OpenCloseTime
   SCHOOL_CLOSED = :school_day_closed
   HOLIDAY       = :holiday
   WEEKEND       = :weekend
+  COMMUNITY     = :community
 
   def initialize(open_close_time, holidays)
     @open_close_time = open_close_time
@@ -124,7 +125,7 @@ class OpenCloseTime
       HOLIDAY       =>    { user_configurable: false },
       WEEKEND       =>    { user_configurable: false },
       flood_lighting:     { community_use: true, benchmark_code: 'f', fuel_type: :electricity },
-      community:          { community_use: true, benchmark_code: 'c' },
+      COMMUNITY     =>    { community_use: true, benchmark_code: 'c' },
       swimming_pool:      { community_use: true, benchmark_code: 's' },
       dormitory:          { community_use: true, benchmark_code: 'd' },
       kitchen:            { community_use: true, benchmark_code: 'k' },

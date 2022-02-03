@@ -33,13 +33,15 @@ class BenchmarkDatabase
 
   def save_database(data = database)
     if database.empty?
-      puts 'Unable to save: database empty'
-    else
-      # data_without_default_proc = remove_proc_from_hash(data.deep_dup)
-      logger.info "Saving data to database file #{@db_filename}"
+      puts "Creating new empty database file as not database file #{@db_filename}"
       writer = FileWriter.new(@db_filename)
-      writer.save(data)
+      writer.save_yaml_file({})
     end
+
+    # data_without_default_proc = remove_proc_from_hash(data.deep_dup)
+    logger.info "Saving data to database file #{@db_filename}"
+    writer = FileWriter.new(@db_filename)
+    writer.save(data)
   end
 
   def remove_proc_from_hash(hash, set = false) # as marshal can't dump default procs

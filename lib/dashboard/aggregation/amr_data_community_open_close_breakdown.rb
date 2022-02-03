@@ -234,7 +234,7 @@ class AMRDataCommunityOpenCloseBreakdown
     when :community_use
       use           = filter_community_use(data, :school_only)
       community_use = filter_community_use(data, :community_only)
-      use[:community] = aggregate_values(community_use.values) if @meter.meter_collection.community_usage?
+      use[OpenCloseTime::COMMUNITY] = aggregate_values(community_use.values) if @meter.meter_collection.community_usage?
       use
     when :all_to_single_value
       # return summed values, no hash/key indexing
