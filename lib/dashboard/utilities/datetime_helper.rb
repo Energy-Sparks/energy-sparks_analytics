@@ -35,7 +35,7 @@ module DateTimeHelper
 
   def self.last_day_of_month(date)
     if date.month == 12
-      Date.new(date.year + 1, 1, 1)  - 1
+      Date.new(date.year + 1, 1, 1) - 1
     else
       Date.new(date.year, date.month + 1, 1) - 1
     end
