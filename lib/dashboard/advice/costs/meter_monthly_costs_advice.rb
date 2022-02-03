@@ -45,37 +45,16 @@ class MeterMonthlyCostsAdvice
 
   private def reorder_columns(components)
     sorted_list = components.sort_by { |column| column_order(column) }
-=begin
-    ap sorted_list
-
-    # move to last 3 columns, in this order
-    [:standing_charge, "vat@20%".to_sym, "vat@5%".to_sym, :variance_versus_last_year, :total].each do |column_type|
-      if components.include?(column_type)
-        components.delete(column_type)
-        components.push(column_type)
-      end
-    end
-
-    if components.include?(:rate) # put rate in the first column
-      components.delete(:rate)
-      components.insert(0, :rate)
-    end
-
-    if components.include?(:flat_rate) # put flat_rate in the first column
-      components.delete(:flat_rate)
-      components.insert(0, :flat_rate)
-    end
-
-    components
-=end
   end
 
   # eccentrically sort columns logically for human consumption
   def column_order(column)
-    return 0 if column == :flat_rate || column == "Flat Rate"
-    return 1 if column.match(/^\d\d:\d\d to \d\d:\d\d$/)
+    return 0 if column == :flat_rate          || column == 'Flat Rate'
+    return 1 if column == :commodity_rate     || column == 'Commodity rate'
+    return 2 if column == :non_commodity_rate || column == 'Non commodity rate'
+    return 3 if column.match(/^\d\d:\d\d to \d\d:\d\d$/)
     return 10 if column.to_s.downcase.match(/^climate.*$/)
-    
+
     ordered_columns = {
       'Feed in tariff levy' => 20,
       :duos_green => 40,
@@ -93,7 +72,7 @@ class MeterMonthlyCostsAdvice
 
       :settlement_agency_fee => 170,
       :reactive_power_charge => 180,
-      
+
       :nhh_automatic_meter_reading_charge => 200,
       :data_collection_dcda_agent_charge => 210,
       :nhh_metering_agent_charge => 220,

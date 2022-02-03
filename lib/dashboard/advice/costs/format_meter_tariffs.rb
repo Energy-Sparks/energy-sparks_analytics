@@ -144,6 +144,10 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     case rate_type.to_s
     when 'flat_rate'
       'Flat Rate'
+    when 'commodity_rate'
+      'Commodity Rate'
+    when 'non_commodity_rate'
+      'Non Commodity Rate'
     when /^rate[0-9]$/
       time_range_description(costs)
     when 'daytime_rate', 'nighttime_rate'
