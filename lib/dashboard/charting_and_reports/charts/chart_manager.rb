@@ -62,7 +62,7 @@ class ChartManager
         raise ChartInheritanceConfigurationTooDeep, "Inheritance too deep for #{chart_config_original}"
       end
     end
-    chart_config
+    resolve_x_axis_grouping(chart_config)
   end
 
   # Used by ES Web application

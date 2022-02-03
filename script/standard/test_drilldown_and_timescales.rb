@@ -1,15 +1,17 @@
 require 'require_all'
-require_relative '../lib/dashboard.rb'
-require_rel '../test_support'
+require_relative '../../lib/dashboard.rb'
+require_rel '../../test_support'
+
+ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Working'
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
-  schools:                  ['Trin.*'], # ['Round.*'],
-  source:                   :analytics_db,
+  schools:                  ['bathamp*'], # ['Round.*'],
+  source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   # drilldown:                true
-  timescales:               true
+  timescales:               { chart_name: :management_dashboard_group_by_week_electricity }
   # timescale_and_drilldown:    true
 }
 

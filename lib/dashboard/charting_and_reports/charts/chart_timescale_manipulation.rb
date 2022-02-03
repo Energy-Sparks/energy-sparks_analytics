@@ -158,7 +158,7 @@ class ChartManagerTimescaleManipulation
     start_date, end_date = determine_chart_range(chart_config_original)
     timescale_type, value = timescale_type(chart_config_original)
     case timescale_type
-    when :year
+    when :year, :up_to_a_year
       ((end_date - start_date + 1) / 365.0).floor
     when :academicyear
       @school.holidays.academic_years(start_date, end_date).length
