@@ -91,7 +91,7 @@ class RunTests
       when :generate_analytics_school_meta_data
         generate_analytics_school_meta_data
       when :timescales
-        run_timescales
+        run_timescales(configuration)
       when :timescale_and_drilldown
         run_timescales_drilldown
       when :pupil_dashboard
@@ -192,12 +192,13 @@ class RunTests
     end
   end
 
-  def run_timescales
+  def run_timescales(control)
+    chart_name = control[:chart_name]
+
     schools_list.each do |school_name|
       excel_filename = TestDirectory.instance.results_directory + school_name + '- timescale shift.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
-      chart_name = :activities_14_days_daytype_electricity_cost 
       chart_config = chart_manager.get_chart_config(chart_name)
       result = chart_manager.run_chart(chart_config, chart_name)
 
