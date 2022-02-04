@@ -303,12 +303,12 @@ class SeriesDataManager
   def meter_names
     names = []
     if !@meters[0].nil? # indication of solar pv meters only
-      names += @meter_collection.electricity_meters.map(&:display_name)
-      # names += @meter_collection.solar_pv_meters.map(&:display_name)
+      names += @meter_collection.electricity_meters.map(&:series_name)
+      # names += @meter_collection.solar_pv_meters.map(&:series_name)
     end
     if !@meters[1].nil? # indication of heat meters only
-      names += @meter_collection.heat_meters.map(&:display_name)
-      names += @meter_collection.storage_heater_meters.map(&:display_name)
+      names += @meter_collection.heat_meters.map(&:series_name)
+      names += @meter_collection.storage_heater_meters.map(&:series_name)
     end
     names
   end
@@ -705,16 +705,16 @@ private
         begin
           if halfhour_index.nil?
             sd, ed, ok = truncate_date_range(aggregate_meter, meter, start_date, end_date)
-            breakdown[meter.display_name] = ok ? amr_data_date_range(meter, sd, ed, kwh_cost_or_co2) : 0.0
+            breakdown[meter.series_name] = ok ? amr_data_date_range(meter, sd, ed, kwh_cost_or_co2) : 0.0
           else
-            breakdown[meter.display_name] = 0.0
+            breakdown[meter.series_name] = 0.0
             (start_date..end_date).each do |date|
               ok = within_aggregate_date_range?(aggregate_meter, date)
-              breakdown[meter.display_name] = set_zero(amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2), !ok)
+              breakdown[meter.series_name] = set_zero(amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2), !ok)
             end
           end
         rescue Exception => e
-          logger.error "Failure getting meter breakdown data for #{meter.display_name} between #{start_date} and #{end_date}"
+          logger.error "Failure getting meter breakdown data for #{meter.series_name} between #{start_date} and #{end_date}"
           logger.error e
         end
       end
