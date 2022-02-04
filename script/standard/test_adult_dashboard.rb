@@ -14,11 +14,7 @@ script = {
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
                             ],
-<<<<<<< HEAD
-  schools: ['long*'],
-=======
   schools: ['royal-h*'],
->>>>>>> 945c4ec23cdff3813d49fd1735ce0b0bf3f957ef
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {
