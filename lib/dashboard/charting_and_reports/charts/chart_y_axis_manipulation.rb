@@ -8,17 +8,13 @@ class ChartYAxisManipulation
   end
 
   def y1_axis_choices(inherited_chart_config)
-    chart_config = @chart_manager.resolve_chart_inheritance(inherited_chart_config)
-
-    if self.class.manipulatable_y1_axis_choices.include?(chart_config[:yaxis_units])
-      return self.class.manipulatable_y1_axis_choices
-    else
-      nil
-    end
+    full_y1_choices = %i[kwh £ co2]
+    chart_axis_choices(inherited_chart_config, full_y1_choices, :yaxis_units, :restrict_y1_axis)
   end
 
   def change_y1_axis_config(inherited_chart_config, new_axis_units)
-    raise CantChangeY1AxisException, "Unable to change y1 axis to #{new_axis_units}" unless y1_axis_choices(inherited_chart_config).include?(new_axis_units)
+    choices = y1_axis_choices(inherited_chart_config)
+    raise CantChangeY1AxisException, "Unable to change y1 axis to #{new_axis_units}" if choices.nil? ||  !choices.include?(new_axis_units)
 
     new_config = @chart_manager.resolve_chart_inheritance(inherited_chart_config)
 
@@ -26,29 +22,30 @@ class ChartYAxisManipulation
   end
 
   def y2_axis_choices(inherited_chart_config)
-    chart_config = @chart_manager.resolve_chart_inheritance(inherited_chart_config)
-
-    if self.class.manipulatable_y2_axis_choices.include?(chart_config[:y2_axis])
-      return self.class.manipulatable_y2_axis_choices
-    else
-      nil
-    end
+    full_y2_choices = %i[temperature degreedays irradiance gridcarbon gascarbon]
+    chart_axis_choices(inherited_chart_config, full_y2_choices, :y2_axis, :restrict_y2_axis)
   end
 
   def change_y2_axis_config(inherited_chart_config, new_axis_units)
-    raise CantChangeY2AxisException, "Unable to change y2 axis to #{new_axis_units}" unless y2_axis_choices(inherited_chart_config).include?(new_axis_units)
+    choices = y2_axis_choices(inherited_chart_config)
+    raise CantChangeY2AxisException, "Unable to change y2 axis to #{new_axis_units}"  if choices.nil? ||  !choices.include?(new_axis_units)
 
     new_config = @chart_manager.resolve_chart_inheritance(inherited_chart_config)
 
     new_config.merge({y2_axis: new_axis_units})
   end
 
-  
-  def self.manipulatable_y1_axis_choices
-    %i[kwh £ co2]
-  end
+  def chart_axis_choices(inherited_chart_config, choices, axis_key, restriction_key)
+    chart_config = @chart_manager.resolve_chart_inheritance(inherited_chart_config)
 
-  def self.manipulatable_y2_axis_choices
-    %i[degreedays temperature]
+    current_unit = chart_config[axis_key]
+
+    if chart_config[restriction_key] != nil
+      chart_config[restriction_key] == [current_unit] ? nil : chart_config[restriction_key]
+    elsif choices.include?(current_unit)
+      return choices
+    else
+      nil
+    end
   end
 end

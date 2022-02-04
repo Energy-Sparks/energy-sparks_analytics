@@ -14,7 +14,7 @@ class ChartManager
 
   STANDARD_CHART_CONFIGURATION = {
     #
-    # chart confif parameters:
+    # chart config parameters:
     # name:               As appears in title of chart; passed through back to output with addition data e.g. total kWh
     # series_breakdown:   :fuel || :daytype || :heatingon - so fuel auto splits into [gas, electricity]
     #                      daytype into holidays, weekends, schools in and out of hours
@@ -35,6 +35,7 @@ class ChartManager
       x_axis:           :year,
       series_breakdown: :fuel,
       yaxis_units:      :£,
+      restrict_y1_axis: [:£, :co2],
       yaxis_scaling:    :none,
       inject:           :benchmark
     },
@@ -542,6 +543,7 @@ class ChartManager
     solar_pv_group_by_week: {
       name:               'Solar PV by week of the year',
       inherits_from:      :storage_heater_group_by_week,
+      restrict_y1_axis:   [:kwh],
       y2_axis:            :irradiance,
       meter_definition:   :solar_pv_meter
     },
