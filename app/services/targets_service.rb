@@ -33,7 +33,7 @@ class TargetsService
   end
 
   def holiday_integrity_problems
-    Holidays.check_school_holidays(@aggregate_school)
+    @aggregate_school.holidays.check_school_holidays(@aggregate_school)
   end
 
   def default_target_start_date
