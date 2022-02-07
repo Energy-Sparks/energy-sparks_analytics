@@ -743,7 +743,9 @@ class MeterAttributes
         rates:      MeterAttributeTypes::Hash.define(
           required: false,
           structure: {
-            flat_rate:    MeterAttributes.default_flat_rate,
+            flat_rate:          MeterAttributes.default_flat_rate,
+            commodity_rate:     MeterAttributes.default_flat_rate,
+            non_commodity_rate: MeterAttributes.default_flat_rate,
 
             # enumerated hash keys as not sure front end can copy with an array?
             rate0:        MeterAttributes.default_rate,

@@ -31,6 +31,10 @@ class MeterTariffDescription
       rate(attribute_type)
     when /^Flat.*$/
       'The charge per kWh of consumption for the whole day'
+    when /^Commodity.*$/
+      'The charge per kWh of consumption for the whole day'
+    when /^Non Commodity.*$/
+      'All non-rate charges proportion to kWh consumption (for some contracts these include network charges)'
     when /^Duos.*$/
       duos_succinct_description(attribute_type, school, meter)
     when /^Tnuos.*$/
