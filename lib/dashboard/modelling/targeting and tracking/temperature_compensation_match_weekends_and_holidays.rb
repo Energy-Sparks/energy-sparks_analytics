@@ -40,7 +40,12 @@ class TargetMeterTemperatureCompensatedDailyDayTypeMatchWeekendsAndHolidays < Ta
 
     target_holiday_day_index = day_index_into_holiday(target_holiday, target_date, target_date_at_weekend)
 
-    heating_on = historic_heating_on_xNdays[target_holiday_day_index % historic_heating_on_xNdays.length]
+    heating_on =  if historic_heating_on_xNdays.empty?
+                    # should only occur if holiday setup badly
+                    false
+                  else
+                    historic_heating_on_xNdays[target_holiday_day_index % historic_heating_on_xNdays.length]
+                  end
 
     heating_on
   end
