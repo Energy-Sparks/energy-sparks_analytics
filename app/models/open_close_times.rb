@@ -48,7 +48,7 @@ class OpenCloseTimes
   end
 
   def series_names
-    @series_names ||= time_types.sort_by { |type| OpenCloseTime.community_use_types[:sort_order] }
+    @series_names ||= time_types.sort_by { |type| OpenCloseTime.community_use_types[type][:sort_order] }
   end
 
   def remainder_type(date)

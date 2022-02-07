@@ -325,9 +325,13 @@ class SeriesDataManager
   end
 
   def day_type_names
-    @day_type_names ||= @meters.compact.map do |meter|
+    @day_type_names ||= calculate_day_type_names
+  end
+
+  def calculate_day_type_names
+    @meters.compact.map do |meter|
       meter.amr_data.open_close_breakdown.series_names(community_use)
-    end.flatten.uniq
+    end.flatten.uniq.sort_by { |type| OpenCloseTime.community_use_types[type][:sort_order] }
   end
 
   def target_extend?
