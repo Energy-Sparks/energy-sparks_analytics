@@ -44,8 +44,9 @@ class ChartManager
     chart_group_result
   end
 
-  # recursively inherit previous chart definitions config
-  def resolve_chart_inheritance(chart_config_original, max_inheritance = 20)
+  #Recursively build up complete chart config from the inheritance tree
+  #Does not resolve any data specific chart options, e.g. x axis groupings
+  def self.build_chart_config(chart_config_original, max_inheritance = 20)
     chart_config = chart_config_original.dup
     while chart_config.key?(:inherits_from)
       base_chart_config_param = chart_config[:inherits_from]
@@ -62,6 +63,12 @@ class ChartManager
         raise ChartInheritanceConfigurationTooDeep, "Inheritance too deep for #{chart_config_original}"
       end
     end
+    chart_config
+  end
+
+  # recursively inherit previous chart definitions config, then resolve x-axis against available data
+  def resolve_chart_inheritance(chart_config_original, max_inheritance = 20)
+    chart_config = build_chart_config(chart_config_original, max_inheritance)
     resolve_x_axis_grouping(chart_config)
   end
 
