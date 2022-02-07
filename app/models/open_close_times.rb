@@ -48,7 +48,7 @@ class OpenCloseTimes
   end
 
   def series_names
-    time_types
+    @series_names ||= time_types.sort_by { |type| OpenCloseTime.community_use_types[:sort_order] }
   end
 
   def remainder_type(date)
@@ -120,18 +120,18 @@ class OpenCloseTime
 
   def self.community_use_types
     @@community_use_types ||= {
-      SCHOOL_OPEN   =>    { },
-      SCHOOL_CLOSED =>    { user_configurable: false },
-      HOLIDAY       =>    { user_configurable: false },
-      WEEKEND       =>    { user_configurable: false },
-      flood_lighting:     { community_use: true, benchmark_code: 'f', fuel_type: :electricity },
-      COMMUNITY     =>    { community_use: true, benchmark_code: 'c' },
-      swimming_pool:      { community_use: true, benchmark_code: 's' },
-      dormitory:          { community_use: true, benchmark_code: 'd' },
-      kitchen:            { community_use: true, benchmark_code: 'k' },
-      sports_centre:      { community_use: true, benchmark_code: 's' },
-      library:            { community_use: true, benchmark_code: 'l' },
-      other:              { community_use: true, benchmark_code: 'o' }
+      SCHOOL_CLOSED =>    { user_configurable: false, sort_order: 1 },
+      SCHOOL_OPEN   =>    {                           sort_order: 2},
+      WEEKEND       =>    { user_configurable: false, sort_order: 3 },
+      HOLIDAY       =>    { user_configurable: false, sort_order: 4 },
+      COMMUNITY     =>    { community_use: true, sort_order:  5, benchmark_code: 'c' },
+      dormitory:          { community_use: true, sort_order:  6, benchmark_code: 'd' },
+      sports_centre:      { community_use: true, sort_order:  7, benchmark_code: 's' },
+      swimming_pool:      { community_use: true, sort_order:  8, benchmark_code: 's' },
+      kitchen:            { community_use: true, sort_order:  9, benchmark_code: 'k' },
+      library:            { community_use: true, sort_order: 10, benchmark_code: 'l' },
+      flood_lighting:     { community_use: true, sort_order: 11, benchmark_code: 'f', fuel_type: :electricity },
+      other:              { community_use: true, sort_order: 12, benchmark_code: 'o' }
     }
   end
 
