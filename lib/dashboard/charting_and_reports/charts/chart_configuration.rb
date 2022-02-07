@@ -1403,18 +1403,14 @@ class ChartManager
       series_breakdown: :baseload,
       meter_definition: :allelectricity,
       x_axis:           :day,
+      x_axis_reformat:  { date: '%d-%m-%Y' },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
     baseload_lastyear: {
       name:             'Baseload kW - last year',
-      chart1_type:      :line,
-      series_breakdown: :baseload,
-      meter_definition: :allelectricity,
       timescale:        :up_to_a_year,
-      x_axis:           :day,
-      yaxis_units:      :kw,
-      yaxis_scaling:    :none
+      inherits_from:    :baseload
     },
     peak_kw: {
       inherits_from:    :baseload,
