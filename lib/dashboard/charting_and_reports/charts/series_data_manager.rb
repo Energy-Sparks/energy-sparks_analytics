@@ -329,9 +329,10 @@ class SeriesDataManager
   end
 
   def calculate_day_type_names
+    # reverse sort order for front end
     @meters.compact.map do |meter|
       meter.amr_data.open_close_breakdown.series_names(community_use)
-    end.flatten.uniq.sort_by { |type| OpenCloseTime.community_use_types[type][:sort_order] }
+    end.flatten.uniq.sort_by { |type| - OpenCloseTime.community_use_types[type][:sort_order] }
   end
 
   def target_extend?
