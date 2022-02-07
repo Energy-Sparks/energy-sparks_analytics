@@ -5,6 +5,7 @@ class ChartTimeScaleDescriptions
 
   TIME_SCALE_TYPES = { 
     year:           'year',
+    up_to_a_year:   'up to 1 year',
     years:          'long term',
     academicyear:   'academic year',
     month:          'month',
