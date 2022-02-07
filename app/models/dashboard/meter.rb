@@ -10,6 +10,7 @@ module Dashboard
     attr_reader :meter_correction_rules, :model_cache
     attr_reader :partial_meter_coverage
     attr_reader :meter_tariffs
+    attr_reader :community_opening_times
     attr_accessor :amr_data, :floor_area, :number_of_pupils, :solar_pv_setup, :solar_pv_overrides
 
     # Energy Sparks activerecord fields:
@@ -175,7 +176,21 @@ module Dashboard
       @solar_pv_overrides       = SolarPVPanels.new(attributes(:solar_pv_override), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv_override)
       @solar_pv_real_metering   = true if @meter_attributes.key?(:solar_pv_mpan_meter_mapping)
       @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
+      # Centrica attributes(:open_close_times)
+      # @community_opening_times = SchoolOpenCloseTimes.new(@meter_collection, self)
       @meter_tariffs = MeterTariffManager.new(self)
+    end
+
+    # Centrica
+    def has_community_use?
+      # TODO check real attribute
+      mpxn.to_i % 2 == 1
+    end
+
+    # Centrica
+    def has_exclusive_community_use?
+      # TODO check real attribute
+      mpxn.to_i % 2 == 1
     end
 
     private def check_fuel_type(fuel_type)

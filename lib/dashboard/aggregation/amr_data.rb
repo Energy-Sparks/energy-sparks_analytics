@@ -3,6 +3,7 @@ require_relative '../utilities/half_hourly_loader'
 
 class AMRData < HalfHourlyData
   attr_reader :economic_tariff, :accounting_tariff, :carbon_emissions
+  attr_accessor :open_close_breakdown
 
   class UnexpectedDataType < StandardError; end
 
@@ -87,8 +88,11 @@ class AMRData < HalfHourlyData
     days_kwh_x48(date)
   end
 
-  def days_kwh_x48(date, type = :kwh)
+  def days_kwh_x48(date, type = :kwh, community_use: nil)
     check_type(type)
+
+    return open_close_breakdown.days_kwh_x48(date, type, community_use: community_use) unless community_use.nil?
+
     kwhs = self[date].kwh_data_x48
     return kwhs if type == :kwh
     return @economic_tariff.days_cost_data_x48(date) if type == :£ || type == :economic_cost
@@ -198,11 +202,14 @@ class AMRData < HalfHourlyData
     end
   end
 
-  def kwh(date, halfhour_index, type = :kwh)
+  def kwh(date, halfhour_index, type = :kwh, community_use: nil)
     check_type(type)
+
+    return open_close_breakdown.kwh(date, halfhour_index, type, community_use: community_use) unless community_use.nil?
+
     return self[date].kwh_halfhour(halfhour_index) if type == :kwh
     return @economic_tariff.cost_data_halfhour(date, halfhour_index) if type == :£ || type == :economic_cost
-    return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cos
+    return @accounting_tariff.cost_data_halfhour(date, halfhour_index) if type == :accounting_cost
     return co2_half_hour(date, halfhour_index) if type == :co2
   end
 
@@ -227,8 +234,11 @@ class AMRData < HalfHourlyData
     self[date].set_kwh_halfhour(halfhour_index, kwh + kwh(date, halfhour_index))
   end
 
-  def one_day_kwh(date, type = :kwh)
+  def one_day_kwh(date, type = :kwh, community_use: nil)
     check_type(type)
+
+    return open_close_breakdown.one_day_kwh(date, type, community_use: community_use) unless community_use.nil?
+
     return self[date].one_day_kwh  if type == :kwh
     return @economic_tariff.one_day_total_cost(date) if type == :£ || type == :economic_cost
     return @accounting_tariff.one_day_total_cost(date) if type == :accounting_cost
@@ -288,8 +298,11 @@ class AMRData < HalfHourlyData
     t
   end
 
-  def kwh_date_range(date1, date2, type = :kwh)
+  def kwh_date_range(date1, date2, type = :kwh, community_use: nil)
     check_type(type)
+
+    return open_close_breakdown.kwh_date_range(date1, date2, type, community_use: community_use) unless community_use.nil?
+
     return one_day_kwh(date1, type) if date1 == date2
     total_kwh = 0.0
     (date1..date2).each do |date|
@@ -325,18 +338,18 @@ class AMRData < HalfHourlyData
     total_kwh
   end
 
-  def baseload_kw(date, sheffield_solar_pv = false)
+  def baseload_kw(date, sheffield_solar_pv = false, data_type = :kwh)
     # sheffield solar PV data artificially creates PV data which
     # is not always 100% consistent with real PV data e.g. if orientation is different
     # so the calculated statistics baseload can pick up morning and evening baseloads
     # lower than reality, resulting in volatile and less accurate baseload
     # test is on aggregate
-    sheffield_solar_pv ? overnight_baseload_kw(date) : statistical_baseload_kw(date)
+    sheffield_solar_pv ? overnight_baseload_kw(date, data_type) : statistical_baseload_kw(date, data_type)
   end
 
-  def overnight_baseload_kw(date)
+  def overnight_baseload_kw(date, data_type = :kwh)
     raise EnergySparksNotEnoughDataException.new("Missing electric data (2) for #{date}") if date_missing?(date)
-    baseload_kw_between_half_hour_indices(date, 41, 47)
+    baseload_kw_between_half_hour_indices(date, 41, 47, data_type)
   end
 
   def average_overnight_baseload_kw_date_range(date1 = start_date, date2 = end_date)
@@ -352,21 +365,21 @@ class AMRData < HalfHourlyData
     total
   end
 
-  def baseload_kw_between_half_hour_indices(date, hhi1, hhi2)
+  def baseload_kw_between_half_hour_indices(date, hhi1, hhi2, data_type = :kwh)
     total_kwh = 0.0
     count = 0
     if hhi2 > hhi1 # same day
       (hhi1..hhi2).each do |halfhour_index|
-        total_kwh += kwh(date, halfhour_index)
+        total_kwh += kwh(date, halfhour_index, data_type)
         count += 1
       end
     else
       (hhi1..48).each do |halfhour_index| # before midnight
-        total_kwh += kwh(date, halfhour_index)
+        total_kwh += kwh(date, halfhour_index, data_type)
         count += 1
       end
       (0..hhi2).each do |halfhour_index| # after midnight
-        total_kwh += kwh(date, halfhour_index)
+        total_kwh += kwh(date, halfhour_index, data_type)
         count += 1
       end
     end
@@ -375,13 +388,14 @@ class AMRData < HalfHourlyData
 
   # alternative heuristic for baseload calculation (for storage heaters)
   # find the average of the bottom 8 samples (4 hours) in a day
-  def statistical_baseload_kw(date)
+  def statistical_baseload_kw(date, data_type = :kwh)
     @statistical_baseload_kw ||= {}
-    @statistical_baseload_kw[date] ||= calculate_statistical_baseload(date)
+    @statistical_baseload_kw[data_type] ||= {}
+    @statistical_baseload_kw[data_type][date] ||= calculate_statistical_baseload(date, data_type)
   end
 
-  private def calculate_statistical_baseload(date)
-    days_data = days_kwh_x48(date) # 48 x 1/2 hour kWh
+  private def calculate_statistical_baseload(date, data_type)
+    days_data = days_kwh_x48(date, data_type) # 48 x 1/2 hour kWh
     sorted_kwh = days_data.clone.sort
     lowest_sorted_kwh = sorted_kwh[0..7]
     average_kwh = lowest_sorted_kwh.inject { |sum, el| sum + el }.to_f / lowest_sorted_kwh.size

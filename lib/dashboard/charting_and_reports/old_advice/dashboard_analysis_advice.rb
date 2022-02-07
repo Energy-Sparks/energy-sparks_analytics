@@ -723,6 +723,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
+    # Centrica TODO
     equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence if days > 360
     in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
     percent_value = out_of_hours / (in_hours + out_of_hours)

@@ -626,7 +626,11 @@ class Aggregator
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
     post_process_aggregation(chart_config, bucketed_data, bucketed_data_count)
-    [bucketed_data, bucketed_data_count, @xbucketor.compact_date_range_description, @meter_collection.name, @x_axis, @x_axis_bucket_date_ranges]
+    [humanize_symbols(bucketed_data), humanize_symbols(bucketed_data_count), @xbucketor.compact_date_range_description, @meter_collection.name, @x_axis, @x_axis_bucket_date_ranges]
+  end
+
+  def humanize_symbols(hash)
+    hash.transform_keys{ |k| OpenCloseTime.humanize_symbol(k) }
   end
 
   private
@@ -1122,6 +1126,8 @@ class Aggregator
         national_benchmark_storage_heater_usage_in_units
       )
     end
+
+    # Centrica: need to support 2x series 1 for community use, 1 without
 
     if benchmark_required?(SeriesNames::SOLARPV)
       set_benchmark_buckets(@bucketed_data[SeriesNames::STORAGEHEATERS], 0.0, 0.0, 0.0)

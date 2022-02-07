@@ -148,8 +148,8 @@ module AnalyseHeatingAndHotWater
 
     private def daily_kwh_averages
       {
-        schoolday_open:   avg_school_day_open_kwh,
-        schoolday_closed: avg_school_day_closed_kwh,
+        school_day_open:   avg_school_day_open_kwh,
+        school_day_closed: avg_school_day_closed_kwh,
         holiday:          avg_holiday_day_gas_consumption,
         weekend:          avg_weekend_day_gas_consumption,
         total:            nil
@@ -161,8 +161,8 @@ module AnalyseHeatingAndHotWater
       school_weeks  = 52 - weeks_holiday
 
       annual_kwh = {
-        schoolday_open:   daily_kwhs[:schoolday_open]   * school_weeks  * 5,
-        schoolday_closed: daily_kwhs[:schoolday_closed] * school_weeks  * 5,
+        school_day_open:   daily_kwhs[:school_day_open]   * school_weeks  * 5,
+        school_day_closed: daily_kwhs[:school_day_closed] * school_weeks  * 5,
         holiday:          daily_kwhs[:holiday]          * weeks_holiday * 7,
         weekend:          daily_kwhs[:weekend]          * school_weeks  * 2,
       }

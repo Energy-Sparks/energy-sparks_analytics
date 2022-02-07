@@ -14,6 +14,16 @@ module AggregationMixin
     )
   end
 
+  private def create_aggregate_meter(aggregate_meter, meters, fuel_type, identifier, name, pseudo_meter_name)
+    aggregate_amr_data = aggregate_amr_data_between_dates(meters, fuel_type, aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, aggregate_meter.mpxn)
+
+    new_aggregate_meter = create_modified_meter_copy(aggregate_meter, aggregate_amr_data, fuel_type, identifier, name, pseudo_meter_name)
+
+    calculate_meter_carbon_emissions_and_costs(new_aggregate_meter, fuel_type)
+
+    new_aggregate_meter
+  end
+
   private def aggregate_amr_data(meters, type, ignore_rules = false)
     if meters.length == 1
       logger.info "Single meter, so aggregation is a reference to itself not an aggregate meter"

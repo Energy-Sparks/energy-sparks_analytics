@@ -22,14 +22,14 @@ class FileWriter
     data
   end
 
+  def save_yaml_file(data)
+    File.open(yaml_filename, 'w') { |f| f.write(YAML.dump(data)) }
+  end
+
   private
 
   def save_marshal_file(data)
     File.open(marshal_filename, 'wb') { |f| f.write(Marshal.dump(data)) }
-  end
-
-  def save_yaml_file(data)
-    File.open(yaml_filename, 'w') { |f| f.write(YAML.dump(data)) }
   end
 
   def load_marshal_file(filename = marshal_filename)

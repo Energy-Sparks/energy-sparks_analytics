@@ -11,15 +11,14 @@ require_relative './../gas/alert_model_cache_mixin.rb'
 #
 class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   include AlertModelCacheMixin
-  TEMPERATURE_ADJUSTED_CHART = :schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted
   # include AlertPeriodComparisonTemperatureAdjustmentMixin
   attr_reader :current_week_kwhs, :previous_week_kwhs_unadjusted, :previous_week_kwhs_adjusted
   attr_reader :current_weeks_temperatures, :previous_weeks_temperatures
   attr_reader :current_week_kwh_total, :previous_week_kwh_unadjusted_total,  :previous_week_kwh_total
   attr_reader :current_weeks_average_temperature, :previous_weeks_average_temperature
 
-  def initialize(school)
-    super(school, :gaspreviousschoolweekcomparison)
+  def initialize(school, type = :gaspreviousschoolweekcomparison)
+    super(school, type)
   end
 
   def self.template_variables
@@ -43,9 +42,9 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
       current_weeks_average_temperature:  { description: 'Current weeks average temperature',  units:  :temperature },
       previous_weeks_average_temperature: { description: 'Previous weeks average temperature', units:  :temperature },
 
-      current_week_kwh_total:             { description: 'Current week total kWh',                units:  { gas: :kwh}  },
-      previous_week_kwh_unadjusted_total: { description: 'Previous week total kWh (unadjusted)' , units:  { gas: :kwh}  },
-      previous_week_kwh_total:            { description: 'Previous week total kWh (adjusted)',    units:  { gas: :kwh}  },
+      current_week_kwh_total:             { description: 'Current week total kWh',                units:  :kwh  },
+      previous_week_kwh_unadjusted_total: { description: 'Previous week total kWh (unadjusted)' , units:  :kwh, benchmark_code: 'najk'  },
+      previous_week_kwh_total:            { description: 'Previous week total kWh (adjusted)',    units:  :kwh, benchmark_code: 'ajkw'  },
     }
   end
 
@@ -55,8 +54,12 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
     'school week'
   end
 
-  def comparison_chart
-    TEMPERATURE_ADJUSTED_CHART
+  def adjusted_temperature_comparison_chart
+    :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted
+  end
+
+  def unadjusted_temperature_comparison_chart
+    :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
   end
 
   def calculate(asof_date)
@@ -67,8 +70,8 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   alias_method :analyse_private, :calculate
 
   protected def calculate_temperature_adjusted_and_unadjusted_gas_from_chart_data(asof_date)
-    unadjusted_data = kwh_values_from_2_weekly_chart(:schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted, asof_date)
-    adjusted_data = kwh_values_from_2_weekly_chart(TEMPERATURE_ADJUSTED_CHART, asof_date)
+    unadjusted_data = kwh_values_from_2_weekly_chart(unadjusted_temperature_comparison_chart, asof_date)
+    adjusted_data = kwh_values_from_2_weekly_chart(adjusted_temperature_comparison_chart, asof_date)
 
     @current_week_kwhs              = format_a_weeks_kwh_values(unadjusted_data.values[1])
     @previous_week_kwhs_unadjusted  = format_a_weeks_kwh_values(unadjusted_data.values[0])
@@ -111,9 +114,7 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
 
   protected def kwh_values_from_2_weekly_chart(chart_name, asof_date)
     chart_manager = ChartManager.new(@school)
-
     results = chart_manager.run_standard_chart(chart_name, { asof_date: asof_date }, true)
-
     process_2_weekly_chart_results(results[:x_data])
   end
 

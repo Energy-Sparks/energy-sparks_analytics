@@ -337,6 +337,8 @@ module Benchmarking
           { data: ->{ eloo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
           { data: ->{ eloo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
           { data: ->{ eloo_wkep },  name: 'Weekend',                      units: :percent, chart_data: true },
+          { data: ->{ eloo_comp },  name: 'Community',                    units: :percent, chart_data: true },
+          { data: ->{ eloo_com£ },  name: 'Community usage cost',         units: :£ },
           { data: ->{ eloo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ eloo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ eloo_ratg },  name: 'rating',                       units: Float, y2_axis: true }
@@ -487,6 +489,8 @@ module Benchmarking
           { data: ->{ gsoo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
           { data: ->{ gsoo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
           { data: ->{ gsoo_wkep },  name: 'Weekend',                      units: :percent, chart_data: true },
+          { data: ->{ gsoo_comp },  name: 'Community',                    units: :percent, chart_data: true },
+          { data: ->{ gsoo_com£ },  name: 'Community usage cost',         units: :£ },
           { data: ->{ gsoo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ gsoo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ gsoo_ratg },  name: 'rating', units: Float, y2_axis: true }

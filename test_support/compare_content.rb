@@ -54,7 +54,7 @@ class CompareContentResults
     content = []
     if merge_page
       filenames = Dir.glob("#{school_or_type} #{page}*.yaml".strip, base: comparison_directory)
-      raise EnergySparksUnexpectedStateException, "Only expecting 1 filename , got #{filenames.length}" if filenames.length > 1
+      raise EnergySparksUnexpectedStateException, "Only expecting 1 filename , got #{filenames.length} #{filenames}" if filenames.length > 1
       return [] if filenames.length == 0
       full_filename = File.join(comparison_directory, filenames[0])
       content = load_yaml_file(full_filename)

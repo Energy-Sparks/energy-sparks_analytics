@@ -400,7 +400,10 @@ class AlertTargetBase < AlertAnalysisBase
   private def calculate(asof_date)
     @summary = summary_text
     @rating = calculate_rating_from_range(0.95, 1.05, rating_target_percent)
-    set_savings_capital_costs_payback(potential_savings_range, nil)
+
+    potential_saving_co2 = previous_year_co2 - current_year_target_co2
+
+    set_savings_capital_costs_payback(potential_savings_range, nil, potential_saving_co2)
   end
   alias_method :analyse_private, :calculate
 
