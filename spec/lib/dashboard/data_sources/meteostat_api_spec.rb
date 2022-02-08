@@ -13,7 +13,7 @@ describe MeteoStatApi do
     it 'is limited' do
       start_time = Time.now
       api = MeteoStatApi.new('123')
-      5.times { api.find_station('xyz') }
+      10.times { api.find_station('xyz') }
       end_time = Time.now
       expect(end_time).to be > start_time + 2
     end
