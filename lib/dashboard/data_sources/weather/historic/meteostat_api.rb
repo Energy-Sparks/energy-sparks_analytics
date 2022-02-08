@@ -10,9 +10,9 @@ require 'limiter'
 class MeteoStatApi
   extend Limiter::Mixin
 
-  # limit rate of 'get' method calls to 2 per second
+  # limit rate of 'get' method calls to 4 requests per second, although we can do up to 10
   # https://github.com/Shopify/limiter
-  limit_method :get, rate: 2, interval: 1
+  limit_method :get, rate: 4, interval: 1
 
   class RateLimitError < StandardError; end
   class HttpError < StandardError; end
@@ -54,8 +54,8 @@ class MeteoStatApi
   end
 
   def find_station_url(identifier)
-    '/stations/search' +
-    "?query=#{identifier}"
+    '/stations/meta' +
+    "?id=#{identifier}"
   end
 
   def url_date(date)
@@ -63,13 +63,17 @@ class MeteoStatApi
   end
 
   def headers
-    { 'x-api-key' => @api_key }
+    {
+      'x-rapidapi-host' => 'meteostat.p.rapidapi.com',
+      'x-rapidapi-key' => @api_key
+    }
   end
 
   def base_url
-    'https://api.meteostat.net/v2'
+    'https://meteostat.p.rapidapi.com'
   end
 
+  #TODO not clear if used in rapidapi version, but keep in place for now
   def retry_options
     {
       retry_statuses: [429],
@@ -90,7 +94,7 @@ class MeteoStatApi
 
   def get(url)
     response = client(base_url + url, headers).get
-    raise HttpError, "status #{response.status}" unless response.status == 200
+    raise HttpError, "status #{response.status} #{response.body}" unless response.status == 200
     JSON.parse(response.body)
   end
 end

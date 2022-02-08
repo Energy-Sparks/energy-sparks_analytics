@@ -8,19 +8,20 @@ describe MeteoStat do
 
   describe 'historic_temperatures' do
 
+    #this includes interpolated data
     let(:expected_historic_temperatures) do
       {
         :temperatures=>
           {
-            Date.parse('Wed, 27 Jan 2021')=>[4.9, 4.95, 5.0, 5.1, 5.2, 5.25, 5.3, 5.5, 5.7, 5.75, 5.8, 5.85, 5.9, 5.9, 5.9, 5.95, 6.0, 6.2, 6.4, 6.6, 6.8, 7.15, 7.5, 7.8, 8.1, 8.4, 8.7, 8.9, 9.1, 8.9, 8.7, 8.35, 8.0, 7.5, 7.0, 6.85, 6.7, 6.35, 6.0, 5.9, 5.8, 6.0, 6.2, 6.1, 6.0, 6.05, 6.1, 6.2],
-            Date.parse('Thu, 28 Jan 2021')=>[6.3, 6.3, 6.3, 6.3, 6.3, 6.3, 6.3, 6.2, 6.1, 6.15, 6.2, 6.05, 5.9, 5.75, 5.6, 5.55, 5.5, 5.6, 5.7, 5.9, 6.1, 6.4, 6.7, 7.05, 7.4, 7.75, 8.1, 8.45, 8.8, 9.0, 9.2, 9.0, 8.8, 8.45, 8.1, 8.05, 8.0, 8.1, 8.2, 8.2, 8.2, 8.2, 8.2, 8.3, 8.4, 8.45, 8.5, 8.5]
+            Date.parse('2022-02-05')=>[4.3, 4.15, 4.0, 3.85, 3.7, 3.65, 3.6, 3.65, 3.7, 3.75, 3.8, 3.8, 3.8, 3.95, 4.1, 4.45, 4.8, 5.35, 5.9, 6.55, 7.2, 7.5, 7.8, 8.1, 8.4, 8.55, 8.7, 8.85, 9.0, 9.05, 9.1, 9.05, 9.0, 9.05, 9.1, 9.1, 9.1, 9.15, 9.2, 9.1, 9.0, 9.05, 9.1, 9.1, 9.1, 9.1, 9.1, 9.1],
+            Date.parse('20220206')=>[9.1, 9.2, 9.3, 9.35, 9.4, 9.45, 9.5, 9.5, 9.5, 9.5, 9.5, 9.55, 9.6, 9.55, 9.5, 9.45, 9.4, 9.3, 9.2, 9.1, 9.0, 9.1, 9.2, 9.3, 9.4, 9.35, 9.3, 9.3, 9.3, 9.25, 9.2, 9.25, 9.3, 9.0, 8.7, 8.6, 8.5, 8.2, 7.9, 7.7, 7.5, 7.4, 7.3, 7.1, 6.9, 6.8, 6.7, 6.7]
           },
         :missing=>[]
       }
     end
 
-    let(:start_date)  { Date.parse('20210127') }
-    let(:end_date)    { Date.parse('20210128') }
+    let(:start_date)  { Date.parse('20220205') }
+    let(:end_date)    { Date.parse('20220206') }
     let(:temperature_json)        { JSON.parse(File.read('spec/fixtures/meteostat/historic_temperatures.json')) }
 
     before do
@@ -39,13 +40,13 @@ describe MeteoStat do
 
     describe 'for longer date ranges' do
 
-      let(:api_call_count) { 3 }
-      let(:start_date)  { Date.parse('20210101') }
-      let(:end_date)    { Date.parse('20210128') }
+      let(:api_call_count) { 1 }
+      let(:start_date)  { Date.parse('20220201') }
+      let(:end_date)    { Date.parse('20220206') }
 
-      it 'requests 10 days at a time for 28 day span but shows 24 hours * 26 days missing' do
+      it 'requests 30 days at a time for 6 day span but shows 24 hours * 4 days missing' do
         data = MeteoStat.new.historic_temperatures(latitude, longitude, start_date, end_date)
-        expect(data[:missing].count).to eq(24*26)
+        expect(data[:missing].count).to eq(24*4)
       end
 
     end
@@ -56,8 +57,8 @@ describe MeteoStat do
     describe 'when stations exist' do
       let(:expected_nearest_weather_stations) do
         [
-          {:name=>"Nottingham Weather Centre", :latitude=>53, :longitude=>-1.25, :elevation=>117, :distance=>0},
-          {:name=>"Newton / Saxondale", :latitude=>52.9667, :longitude=>-0.9833, :elevation=>55, :distance=>18.2},
+          {:id=>'03354', :name=>"Nottingham Weather Centre", :latitude=>53.0, :longitude=>-1.25, :elevation=>117, :distance=>0.0},
+          {:id=>'EGXN0', :name=>"Newton / Saxondale", :latitude=>52.9667, :longitude=>-0.9833, :elevation=>55, :distance=>18234.0},
         ]
       end
 
