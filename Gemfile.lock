@@ -49,6 +49,7 @@ GEM
     docile (1.4.0)
     domain_name (0.5.20190701)
       unf (>= 0.0.5, < 1.0.0)
+    dotenv (2.7.6)
     extendmatrix (0.4)
     factory_bot (6.2.0)
       activesupport (>= 5.0.0)
@@ -218,6 +219,7 @@ DEPENDENCIES
   benchmark-memory
   bundler-audit
   chroma
+  dotenv
   factory_bot
   faraday
   faraday_middleware

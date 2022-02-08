@@ -43,9 +43,10 @@ module MeterReadingsFeeds
       get_data(url)
     end
 
-    def read_inventory(mpxn: )
+    def read_inventory(mpxn: nil, uprn: nil, device_id: nil)
       url = '/read-inventory'
-      body = { mpxns: [mpxn] }
+      raise if mpxn == nil && uprn == nil && device_id == nil
+      body = create_inventory_body(mpxn: mpxn, uprn: uprn, device_id: device_id)
       response = connection.post(url) do |req|
         req.headers['Authorization'] = @api_key
         req.body = body.to_json
@@ -129,6 +130,20 @@ module MeterReadingsFeeds
     rescue => e
       #problem parsing or traversing json, return original api error
       response.body
+    end
+
+    def create_inventory_body(mpxn: nil, uprn: nil, device_id: nil)
+      body = {}
+      unless mpxn.nil?
+        body[:mpxns] = mpxn.is_a?(Array) ? mpxn : [mpxn]
+      end
+      unless uprn.nil?
+        body[:uprns] = uprn.is_a?(Array) ? uprn : [uprn]
+      end
+      unless device_id.nil?
+        body[:deviceIds] = device_id.is_a?(Array) ? device_id : [device_id]
+      end
+      body
     end
   end
 end
