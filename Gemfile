@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '>=2.5.1'
+ruby '~> 2.7.4'
 
 gem 'require_all'
 gem 'activesupport', '~> 6.0.0'
@@ -39,7 +39,7 @@ gem 'dotenv'
 # For tests
 group :test do
   gem 'rspec', '~> 3.8.0'
-  gem 'bundler-audit'
+  gem 'bundler-audit', platforms: :ruby
   gem 'factory_bot'
   gem 'simplecov', require: false
 end

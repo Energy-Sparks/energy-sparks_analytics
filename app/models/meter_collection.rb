@@ -29,6 +29,12 @@ class MeterCollection
                 :solar_pv,
                 :grid_carbon_intensity
 
+  # Centrica
+  attr_accessor :aggregated_electricity_meter_without_community_usage
+  attr_accessor :aggregated_heat_meters_without_community_usage
+  attr_accessor :storage_heater_meter_without_community_usage
+  attr_accessor :community_disaggregator
+
   def initialize(school, holidays:, temperatures:, solar_irradiation: nil, solar_pv:, grid_carbon_intensity:, pseudo_meter_attributes: {})
     @name = school.name
     @address = school.address
@@ -109,6 +115,19 @@ class MeterCollection
     end
   end
 
+  def set_aggregate_meter_non_community_use_meter(fuel_type, meter)
+    case fuel_type
+    when :electricity
+      puts "Got here setting non community use electricity meter"
+      @aggregated_electricity_meter_without_community_usage = meter
+    when :gas
+      puts "Got here setting non community use gas meter"
+      @aggregated_heat_meters_without_community_usage = meter
+    when :storage_heater, :storage_heaters
+      @storage_heater_meter_without_community_usage = meter
+    end
+  end
+
   def update_electricity_meters(electricity_meter_list)
     @electricity_meters = electricity_meter_list
   end
@@ -152,29 +171,34 @@ class MeterCollection
   # temporary, pending being captured by front end
   def funding_status
     [
-      135174,
-      102692,
-      100757,
-      900648,
+      10076,
       100076,
-      123620,
-      109348,
-      101072,
-      116581,
-      123310,
-      923310,
-      122936,
-      306983,
-      901954,
-      108538,
-      3916001,
       100509,
+      100648,
+      100756,
+      100757,
+      101072,
+      101845,
+      102452,
+      102692,
+      107166,
+      108538,
+      109348,
+      116581,
+      121241,
+      122936,
+      123310,
+      123620,
+      131166,
+      135174,
+      306983,
       402018,
       402019,
-      100648,
-      10076,
-      107166,
-      823310
+      823310,
+      900648,
+      901954,
+      923310,
+      3916001
     ].include?(urn) ? :private : :state
   end
 
@@ -389,6 +413,10 @@ class MeterCollection
     ].compact
   end
 
+  def community_usage?
+    open_close_times.community_usage?
+  end
+
   def fuel_types(exclude_storage_heaters = true, exclude_solar_pv = true)
     types = []
     types.push(:electricity)      if electricity?
@@ -454,14 +482,18 @@ class MeterCollection
     @cached_close_time
   end
 
+  def open_close_times
+    @open_close_times ||= OpenCloseTimes.new(pseudo_meter_attributes(:school_level_data), holidays)
+  end
+
   def target_school(type = :day)
     @target_school ||= {}
     @target_school[type] ||= TargetSchool.new(self, type)
   end
 
   def benchmark_school(benchmark_type = :benchmark)
-    benchmark_school ||= {}
-    benchmark_school[benchmark_type] ||= BenchmarkSchool.new(self, benchmark_type: benchmark_type)
+    @benchmark_school ||= {}
+    @benchmark_school[benchmark_type] ||= BenchmarkSchool.new(self, benchmark_type: benchmark_type)
   end
 
   def reset_target_school_for_testing(type = :day)

@@ -83,6 +83,7 @@ module Benchmarking
         benchmarks: %i[
           change_in_energy_use_since_joined_energy_sparks
           change_in_co2_emissions_since_last_year
+          holiday_usage_last_year
         ]
       },
       {
@@ -120,6 +121,8 @@ module Benchmarking
           change_in_gas_consumption_recent_school_weeks
           change_in_gas_holiday_consumption_previous_holiday
           change_in_gas_holiday_consumption_previous_years_holiday
+          gas_consumption_during_holiday
+          storage_heater_consumption_during_holiday
         ]
       },
       {
@@ -292,6 +295,7 @@ module Benchmarking
           { data: ->{ elba_£lyr },  name: 'Annual electricity £ (this year)', units: :£},
           { data: ->{ elba_£lyr_last_year },  name: 'Annual electricity £ (last year)', units: :£}
         ],
+        where:   ->{ !elba_£lyr_last_year.nil? },
         sort_by:  [1], # column 1 i.e. Annual kWh
         type: %i[chart table]
       },
@@ -305,6 +309,7 @@ module Benchmarking
           { data: ->{ -1.0 * free_kwrd },  name: 'Reduction in kW over summer holiday', units: :kw},
         ],
         analytics_user_type: true,
+        where:   ->{ !free_kwrd.nil? },
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
         type: %i[chart table]
       },
@@ -319,7 +324,6 @@ module Benchmarking
           { data: ->{ etga_tktd },  name: 'target kWh consumption',            units: :kwh},
           { data: ->{ etga_uktd },  name: 'last year kWh consumption',         units: :kwh},
           { data: ->{ etga_trsd },  name: 'start date for target',             units: :date},
-
         ],
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
         type: %i[chart table]
@@ -333,6 +337,8 @@ module Benchmarking
           { data: ->{ eloo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
           { data: ->{ eloo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
           { data: ->{ eloo_wkep },  name: 'Weekend',                      units: :percent, chart_data: true },
+          { data: ->{ eloo_comp },  name: 'Community',                    units: :percent, chart_data: true },
+          { data: ->{ eloo_com£ },  name: 'Community usage cost',         units: :£ },
           { data: ->{ eloo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ eloo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ eloo_ratg },  name: 'rating',                       units: Float, y2_axis: true }
@@ -365,6 +371,7 @@ module Benchmarking
           { data: ->{ [0.0, elbb_svex].max },  name: 'Saving if moved to exemplar', units: :£},
           { data: ->{ elbb_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
+        where:   ->{ !elbb_blpp.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },
@@ -425,6 +432,7 @@ module Benchmarking
           { data: ->{ epkb_tex£ },  name: 'saving if match exemplar (£)', units: :£ },
           { data: ->{ epkb_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
+        where:   ->{ !epkb_kwfa.nil? },
         sort_by: [1],
         type: %i[table chart]
       },
@@ -452,6 +460,7 @@ module Benchmarking
           { data: ->{ sum_data([gsba_co2y, shan_co2y], true) / 1000.0 },  name: 'Annual carbon emissions (tonnes CO2)', units: :co2},
           { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: 'rating', units: Float, y2_axis: true }
         ],
+        where:   ->{ !gsba_co2y.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },
@@ -480,6 +489,8 @@ module Benchmarking
           { data: ->{ gsoo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
           { data: ->{ gsoo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
           { data: ->{ gsoo_wkep },  name: 'Weekend',                      units: :percent, chart_data: true },
+          { data: ->{ gsoo_comp },  name: 'Community',                    units: :percent, chart_data: true },
+          { data: ->{ gsoo_com£ },  name: 'Community usage cost',         units: :£ },
           { data: ->{ gsoo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ gsoo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ gsoo_ratg },  name: 'rating', units: Float, y2_axis: true }
@@ -697,6 +708,44 @@ module Benchmarking
           { data: ->{ gpyc_cper },  name: 'Most recent holiday', units: String },
           { data: ->{ gpyc_pper },  name: 'Previous holiday', units: String },
           { data: ->{ gpyc_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
+      gas_consumption_during_holiday: {
+        benchmark_class: BenchmarkGasHeatingHotWaterOnDuringHoliday,
+        name:     'Gas consumption during current holiday',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: ->{ hdhl_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
+          { data: ->{ hdhl_£sfr },  name: 'Holiday usage to date', units: :£ },
+          { data: ->{ hdhl_hnam },  name: 'Holiday', units: String }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
+      storage_heater_consumption_during_holiday: {
+        benchmark_class: BenchmarkStorageHeatersOnDuringHoliday,
+        name:     'Storage heater consumption during current holiday',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: ->{ shoh_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
+          { data: ->{ shoh_£sfr },  name: 'Holiday usage to date', units: :£ },
+          { data: ->{ shoh_hnam },  name: 'Holiday', units: String }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
+      holiday_usage_last_year:  {
+        benchmark_class: BenchmarkEnergyConsumptionInUpcomingHolidayLastYear,
+        name:     'Energy Consumption in upcoming holiday last year',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',                units: String, chart_data: true },
+          { data: ->{ ihol_glyr },  name: 'Gas',                        units: :£, chart_data: true  },
+          { data: ->{ ihol_elyr },  name: 'Electricity',                units: :£, chart_data: true },
+          { data: ->{ ihol_gpfa },  name: 'Gas kWh per floor area',     units: :kwh },
+          { data: ->{ ihol_epup },  name: 'Electricity kWh per pupil',  units: :kwh },
+          { data: ->{ ihol_pper },  name: 'Holiday',                    units: String },
         ],
         sort_by: [1],
         type: %i[table chart]

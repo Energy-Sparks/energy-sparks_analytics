@@ -6,20 +6,20 @@ require './script/report_config_support.rb'
 
 script = {
   logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  schools:                   ['*', 'cefn*'],
+  schools:                   ['b*'],
   source:                   :unvalidated_meter_data, # :dcc_n3rgy_override_with_files, 
   logger2:                  { name: "./log/management summary %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   management_summary_table:          {
-      control: {
-        combined_html_output_file:     "Management Summary Table #{Date.today}",
-        compare_results: [
-          { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Management Summary Table\Base' },
-          { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Management Summary Table\New' },
-          :summary,
-          :report_differences
-        ]
-      }
+    control: {
+      combined_html_output_file:     "Management Summary Table #{Date.today}",
+      compare_results: [
+        { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Management Summary Table\Base' },
+        { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Management Summary Table\New' },
+        :summary,
+        :report_differences
+      ]
     }
+  }
 }
 
 RunTests.new(script).run

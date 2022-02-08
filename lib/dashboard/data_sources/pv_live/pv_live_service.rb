@@ -7,6 +7,7 @@ module DataSources
   #conversion of data into preferred structure, interpolation of missing values,
   #determination of nearest areas, etc
   class PVLiveService
+    include Logging
 
     def initialize(pv_live_api=DataSources::PVLiveAPI.new)
       @pv_live_api = pv_live_api
@@ -71,8 +72,7 @@ module DataSources
         if missing_on_day > 5 && date > start_date
           too_little_data_on_day.push(date)
         elsif days_data.sum <= 0.0
-          logger.error "Data sums to zero on #{date}"
-          puts "Data sums to zero on #{date}"
+          Logging.logger.error { "Data sums to zero on #{date}" }
           too_little_data_on_day.push(date)
         else
           date_to_halfhour_yields_x48[date] = days_data

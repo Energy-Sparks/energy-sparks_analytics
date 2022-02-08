@@ -1,6 +1,7 @@
 require_relative '../common/alert_analysis_base.rb'
 
 class AlertElectricityOnlyBase < AlertAnalysisBase
+  include ElectricityCostCo2Mixin
   def initialize(school, _report_type)
     super(school, _report_type)
   end
@@ -33,25 +34,18 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
 
   def annual_average_baseload_£(asof_date, meter = aggregate_meter)
     kwh = annual_average_baseload_kwh(asof_date, meter)
-    kwh * blended_electricity_£_per_kwh(asof_date)
+    kwh * blended_electricity_£_per_kwh
+  end
+
+  def annual_average_baseload_co2(asof_date, meter = aggregate_meter)
+    kwh = annual_average_baseload_kwh(asof_date, meter)
+    kwh * blended_co2_per_kwh
   end
 
   protected def aggregate_meter
     @school.aggregated_electricity_meters
   end
-
-  def blended_electricity_£_per_kwh(asof_date)
-    rate = MeterTariffs::DEFAULT_ELECTRICITY_ECONOMIC_TARIFF
-    if @school.aggregated_electricity_meters.amr_data.economic_tariff.differential_tariff?(asof_date)
-      # assume its been on a differential tariff for the period
-      # a slightly false assumption but it might be slow to recalculate
-      # the cost for the whole period looking up potentially different tariffs
-      # on different days
-      rate = MeterTariffs::BLENDED_DIFFERNTIAL_RATE_APPROX
-    end
-    rate
-  end
-
+  
   def needs_gas_data?
     false
   end

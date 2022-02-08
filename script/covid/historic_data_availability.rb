@@ -53,7 +53,7 @@ def school_day_open_close_kwh(meter, date)
 end
 
 def out_of_hours_consumption(meter, start_date, end_date)
-  results = { holiday: [], weekend: [], schoolday_open: [], schoolday_closed: [] }
+  results = { holiday: [], weekend: [], school_day_open: [], school_day_closed: [] }
   (start_date..end_date).each do |date|
     day_type = meter.meter_collection.holidays.day_type(date)
     case day_type
@@ -61,8 +61,8 @@ def out_of_hours_consumption(meter, start_date, end_date)
       results[day_type].push(meter.amr_data.one_day_kwh(date))
     when :schoolday
       open_kwh, closed_kwh = school_day_open_close_kwh(meter, date)
-      results[:schoolday_open].push(open_kwh)
-      results[:schoolday_closed].push(closed_kwh)
+      results[:school_day_open].push(open_kwh)
+      results[:school_day_closed].push(closed_kwh)
     end
   end
   results
@@ -75,7 +75,7 @@ def out_of_hours_consumption_percent(meter, start_date, end_date)
 end
 
 def percent_out_of_hours(meter, start_date, end_date)
-  1.0 - out_of_hours_consumption_percent(meter, start_date, end_date)[:schoolday_open]
+  1.0 - out_of_hours_consumption_percent(meter, start_date, end_date)[:school_day_open]
 end
 
 def can_analyse?(fuel_type, annual_kwhs)

@@ -75,7 +75,7 @@ class AdviceMeterBreakdownBase < AdviceBase
 
   def table_breakdown_html
     start_date, end_date = one_year_start_end_dates
-    table = MeterBreakdownTable.new(underlying_meters, start_date, end_date)
+    table = MeterBreakdownTable.new(aggregate_meter, underlying_meters, start_date, end_date)
     '<p> ' + table.formatted_html + ' </p>'
   end
 
@@ -98,10 +98,12 @@ class AdviceMeterBreakdownBase < AdviceBase
   end
 
   class MeterBreakdownTable
-    def initialize(underlying_meters, start_date, end_date)
+    def initialize(aggregate_meter, underlying_meters, start_date, end_date)
+      @aggregate_meter   = aggregate_meter
       @underlying_meters = underlying_meters
       @start_date        = start_date
       @end_date          = end_date
+      @annual_change     = false
     end
 
     def formatted_html
@@ -109,6 +111,9 @@ class AdviceMeterBreakdownBase < AdviceBase
       total     = total_row(rows)
       header    = columns.values.map{ |v| v[:name] }
       row_units = columns.values.map{ |v| v[:datatype] }
+      
+      if has_annual_change?
+      end
 
       html_table = HtmlTableFormatting.new(header, rows_to_values(rows), row_to_value(total), row_units)
       html_table.html
@@ -117,12 +122,17 @@ class AdviceMeterBreakdownBase < AdviceBase
     private
 
     def columns
-      {
-        name:     { name: 'Meter Name', datatype: String },
-        kwh:      { name: 'Kwh',        datatype: :kwh }, 
-        £:        { name: 'Cost',       datatype: :£ },
-        percent:  { name: 'Percent',    datatype: :percent },
+      cols = {
+        name:                   { name: 'Meter Name',       datatype: String },
+        kwh:                    { name: 'Kwh',              datatype: :kwh }, 
+        £:                      { name: 'Cost',             datatype: :£ },
+        percent:                { name: 'Percent',          datatype: :percent },
+        annual_percent_change:  { name: 'Annual change',    datatype: :comparison_percent }
       }
+
+      cols.delete(:annual_percent_change) unless has_annual_change?
+
+      cols
     end
 
     def raw_table_data
@@ -134,6 +144,10 @@ class AdviceMeterBreakdownBase < AdviceBase
       rows.map do |row|
         row_to_value(row)
       end
+    end
+
+    def has_annual_change?
+      @annual_change
     end
 
     def row_to_value(row)
@@ -150,32 +164,70 @@ class AdviceMeterBreakdownBase < AdviceBase
     def data_column_types
       columns.keys.select { |k| k != :name }
     end
-  
+
     def total_row(table)
+      
       data = data_column_types.map do |datatype|
         [
           datatype,
           # map then sum to avoid statsample bug
-          table.map{ |r| r[datatype] }.sum
+          table.map{ |r| r[datatype] || 0.0 }.sum
         ]
       end.to_h
+
+      data.merge!({ annual_percent_change: annual_percent_kwh_change(@aggregate_meter, data[:kwh])} )
+
       {name: 'Total'}.merge(data)
     end
-  
-    def calculate_meter_breakdown  
+
+    def calculate_meter_breakdown
       @underlying_meters.map do |meter|
         start_date = [@start_date, meter.amr_data.start_date].max
         end_date   = [@end_date,   meter.amr_data.end_date  ].min
+
         if end_date < start_date
           nil # 'retired' meter before aggregate start date
         else
+          this_year_kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
           {
-            name: meter.analytics_name,
-            kwh:  meter.amr_data.kwh_date_range(start_date, end_date, :kwh),
-            £:    meter.amr_data.kwh_date_range(start_date, end_date, :£)
+            name:                   meter.analytics_name,
+            kwh:                    this_year_kwh,
+            £:                      meter.amr_data.kwh_date_range(start_date, end_date, :£),
+            annual_percent_change:  annual_percent_kwh_change(meter, this_year_kwh)
           }
         end
       end.compact
+    end
+
+    def annual_percent_kwh_change(meter, this_year_kwh)
+      this_year_start_date     = @end_date              - 363 # 52 weeks
+      previous_year_end_date   = this_year_start_date - 1
+      previous_year_start_date = previous_year_end_date - 363 # 52 weeks
+      
+      whole_aggregate_previous_year = @aggregate_meter.amr_data.start_date <= previous_year_start_date
+
+      # calculate annual change but only if aggregate and individual meter cover whole of previous year
+      if whole_aggregate_previous_year
+        whole_meter_this_year     = whole_meter_in_range(meter, this_year_start_date,     @end_date)
+        whole_meter_previous_year = whole_meter_in_range(meter, previous_year_start_date, previous_year_end_date)
+
+        if whole_meter_this_year && whole_meter_previous_year
+          previous_year_kwh = meter.amr_data.kwh_date_range(previous_year_start_date, previous_year_end_date, :kwh)
+          pct = percent_change(this_year_kwh, previous_year_kwh)
+          @annual_change = true unless pct.nil?
+          return pct
+        end
+      end
+      nil
+    end
+
+    def whole_meter_in_range(meter, start_date, end_date)
+      meter.amr_data.start_date <= start_date && meter.amr_data.end_date >= end_date
+    end
+
+    def percent_change(this_year_kwh, previous_year_kwh)
+      return nil if previous_year_kwh.zero?
+      (this_year_kwh - previous_year_kwh) / previous_year_kwh
     end
   end
 end

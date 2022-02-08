@@ -54,7 +54,7 @@ class CompareContentResults
     content = []
     if merge_page
       filenames = Dir.glob("#{school_or_type} #{page}*.yaml".strip, base: comparison_directory)
-      raise EnergySparksUnexpectedStateException, "Only expecting 1 filename , got #{filenames.length}" if filenames.length > 1
+      raise EnergySparksUnexpectedStateException, "Only expecting 1 filename , got #{filenames.length} #{filenames}" if filenames.length > 1
       return [] if filenames.length == 0
       full_filename = File.join(comparison_directory, filenames[0])
       content = load_yaml_file(full_filename)
@@ -245,5 +245,86 @@ class CompareContentResults
     extension = control_contains?(:name_extension) ? ('- ' + hash_controls[:name_extension].to_s) : ''
     yaml_filename = full_path + @school_name + '-' + chart_name.to_s + extension + '.yaml'
     yaml_filename.length > 259 ? shorten_filename(yaml_filename) : yaml_filename
+  end
+end
+
+
+class CompareContent2 < CompareContentResults
+  def initialize(school_name, control)
+    @school_name = school_name
+    @control = control
+  end
+
+  def save_and_compare(type, content)
+    benchmark = load_yaml(yaml_filename(comparison_directory, type))
+    save_yaml(yaml_filename(output_directory, type), content)
+
+    non_volatile_benchmark = strip_volatile_data(benchmark)
+    non_volatile_content   = strip_volatile_data(content)
+    differs = non_volatile_benchmark != non_volatile_content
+    report_difference(type, non_volatile_benchmark, non_volatile_content, differs) if differs || !@control[:compare_results][:report_if_differs]
+  end
+
+  private
+
+  def strip_volatile_data(content)
+    return nil if content.nil?
+
+    s_c = content.deep_dup
+    s_c.each do |component|
+      component.delete(:calculation_time)
+    end
+    s_c
+  end
+
+  def yaml_filename(directory, type)
+    directory + '\\' + @school_name + ' ' + type + '.yaml'
+  end
+
+  def load_yaml(filename)
+    YAML::load_file(filename) rescue nil
+  end
+
+  def save_yaml(filename, content)
+    File.open(filename, 'w') { |f| f.write(YAML.dump(content)) }
+  end
+
+  def comparison_directory
+    @control[:compare_results][:comparison_directory]
+  end
+
+  def output_directory
+    control[:compare_results][:output_directory]
+  end
+
+  def report_difference(type, benchmark, new_content, differs)
+    if differs && benchmark.nil?
+      puts "#{format_type(type)} benchmark content missing"
+    elsif differs && new_content.nil?
+      puts "#{format_type(type)} new content missing"
+    elsif @control[:compare_results][:summary] == true
+      puts "#{format_type(type)} differs"
+    elsif %i[detail differences].include?(@control[:compare_results][:summary]) && differs
+      detailed_differences(type, benchmark, new_content, @control[:compare_results][:h_diff] )
+      print_raw_data(benchmark, new_content) if @control[:compare_results][:h_diff] == :detail
+    end
+  end
+
+  def format_type(type)
+    sprintf('%-60.60s', type)
+  end
+
+  def detailed_differences(type, benchmark, new_content, tolerance)
+    tolerance ||= { use_lcs: false, :numeric_tolerance => 0.000001 }
+    h_diff = Hashdiff.diff(benchmark, new_content, tolerance) 
+    puts "'Difference for #{type}:"
+    puts h_diff
+  end
+
+  def print_raw_data(benchmark, new_content)
+    puts 'Original:'
+    puts benchmark
+    puts 'Versus:'
+    puts new_content
   end
 end

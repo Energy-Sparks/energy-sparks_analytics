@@ -39,12 +39,14 @@ class AggregateDataService
 
       process_electricity_meters
 
+      process_community_usage_open_close_times
+
       set_post_aggregation_state_on_all_meters
     }
     calc_text = "Calculated meter aggregation for |#{@meter_collection.name}| in |#{bm.round(3)}| seconds"
 
     puts calc_text unless Object.const_defined?('Rails')
-    
+
     logger.info calc_text
   end
 
@@ -76,6 +78,27 @@ class AggregateDataService
       adssh.disaggregate
     end
   end
+
+  def process_community_usage_open_close_times
+=begin
+    # Centrica
+    # this is kind of complex
+    # some of this can be deferred to later, on the fly if representation simple
+    # some needs processing here e.g. storage heater like floodlighting
+    # probably generate extra community/noncommunity aggregate and perhaps non aggregate meters here
+    puts "Got here process_community_usage_open_close_times"
+    @meter_collection.community_disaggregator = DisaggregateCommunityUsage.new(@meter_collection)
+    @meter_collection.community_disaggregator.disaggregate
+=end
+    [
+      @meter_collection.aggregated_electricity_meters,
+      @meter_collection.aggregated_heat_meters,
+      @meter_collection.storage_heater_meter
+    ].compact.each do |meter|
+      oc_breakdown = AMRDataCommunityOpenCloseBreakdown.new(meter, @meter_collection.open_close_times)
+      meter.amr_data.open_close_breakdown = oc_breakdown
+    end
+  end 
 
   def set_long_gap_boundary_on_all_meters
     @meter_collection.all_meters.each do |meter|
@@ -259,6 +282,8 @@ class AggregateDataService
 
     combined_amr_data = aggregate_amr_data(list_of_meters, fuel_type)
 
+    has_sheffield_solar_pv = list_of_meters.any?{ |m| m.sheffield_simulated_solar_pv_panels? }
+
     combined_name, combined_id, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
 
     if combined_meter.nil?
@@ -272,6 +297,7 @@ class AggregateDataService
         name: combined_name,
         floor_area: combined_floor_area,
         number_of_pupils: combined_pupils,
+        has_sheffield_solar_pv: has_sheffield_solar_pv,
         meter_attributes: @meter_collection.pseudo_meter_attributes(Dashboard::Meter.aggregate_pseudo_meter_attribute_key(fuel_type))
       )
 

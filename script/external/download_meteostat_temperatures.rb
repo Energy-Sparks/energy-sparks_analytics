@@ -20,7 +20,7 @@ end
 
 def nearest_weather_stations(latitude, longitude)
   met = MeteoStat.new
-  met.nearest_weather_stations(latitude, longitude, 4, 100)
+  met.nearest_weather_stations(latitude, longitude, 4, 100000)
 end
 
 start_date = Date.new(2016, 1, 1)

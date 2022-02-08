@@ -1,11 +1,13 @@
 #======================== Electricity: Out of hours usage =====================
 require_relative '../common/alert_out_of_hours_base_usage.rb'
+require_relative './electricity_cost_co2_mixin.rb'
 
 class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
+  include ElectricityCostCo2Mixin
   attr_reader :daytype_breakdown_table
   def initialize(school)
     super(school, 'electricity', BenchmarkMetrics::PERCENT_ELECTRICITY_OUT_OF_HOURS_BENCHMARK,
-          BenchmarkMetrics::ELECTRICITY_PRICE, :electricityoutofhours, 'ElectricityOutOfHours', :allelectricity,
+          :electricityoutofhours, 'ElectricityOutOfHours', :allelectricity,
           0.35, 0.65)
   end
 
@@ -46,5 +48,13 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
       'Out of hours energy consumption' => superclass.static_template_variables(:electricity)
     }
     specific.merge(superclass.template_variables)
+  end
+
+  def tariff
+    blended_electricity_£_per_kwh
+  end
+
+  def co2_intensity_per_kwh
+    blended_co2_per_kwh
   end
 end

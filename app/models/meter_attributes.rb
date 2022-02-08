@@ -1,4 +1,5 @@
 require_relative './meter_attribute_types'
+require_relative './open_close_times.rb'
 class MeterAttributes
 
   class AutoInsertMissingReadings < MeterAttributeTypes::AttributeBase
@@ -148,6 +149,39 @@ class MeterAttributes
         end_date:   MeterAttributeTypes::Date.define,
         percent_floor_area:      MeterAttributeTypes::Float.define(required: true),
         percent_pupil_numbers:   MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
+
+  
+  def self.time_of_day_range
+    MeterAttributeTypes::Hash.define(
+      required: false,
+      structure: {
+        day_of_week:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: OpenCloseTime.day_of_week_types),
+        from:         MeterAttributeTypes::TimeOfDay.define(required: true),
+        to:           MeterAttributeTypes::TimeOfDay.define(required: true)
+      }
+    )
+  end
+
+  class OpenCloseTimesAttributes < MeterAttributeTypes::AttributeBase
+    id :open_close_times
+    aggregate_over :open_close_times
+    name 'School and community function opening and closing times'
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        type:             MeterAttributeTypes::Symbol.define(required: true, allowed_values: OpenCloseTime.user_configurable_community_use_types.keys),
+        holiday_calendar: MeterAttributeTypes::Symbol.define(required: true, allowed_values: OpenCloseTime.calendar_types),
+        start_date:       MeterAttributeTypes::Date.define,
+        end_date:         MeterAttributeTypes::Date.define,
+        fuel_types:       MeterAttributeTypes::Symbol.define(required: true, allowed_values: OpenCloseTime.fuel_type_choices),
+        time0:            MeterAttributes.time_of_day_range,
+        time1:            MeterAttributes.time_of_day_range,
+        time2:            MeterAttributes.time_of_day_range,
+        time3:            MeterAttributes.time_of_day_range,
+
+        fixed_power_kw:   MeterAttributeTypes::Float.define(min: 0.0, hint: 'flood lighting only')
       }
     )
   end
@@ -716,6 +750,19 @@ class MeterAttributes
     )
   end
 
+  class BackdateTariff < MeterAttributeTypes::AttributeBase
+
+    id :backdate_tariff
+    key :backdate_tariff
+    name 'Backdate tariff'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        days: MeterAttributeTypes::Integer.define(required: true, hint: 'by default backdates up to 30 days, if you set to 0 then wont backdate')
+      }
+    )
+  end
+
   def self.generic_accounting_tariff
     MeterAttributeTypes::Hash.define(
       structure: {
@@ -730,7 +777,9 @@ class MeterAttributes
         rates:      MeterAttributeTypes::Hash.define(
           required: false,
           structure: {
-            flat_rate:    MeterAttributes.default_flat_rate,
+            flat_rate:          MeterAttributes.default_flat_rate,
+            commodity_rate:     MeterAttributes.default_flat_rate,
+            non_commodity_rate: MeterAttributes.default_flat_rate,
 
             # enumerated hash keys as not sure front end can copy with an array?
             rate0:        MeterAttributes.default_rate,

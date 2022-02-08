@@ -193,7 +193,7 @@ class AdviceBaseload < AdviceElectricityBase
       [
         meter.mpan_mprn,
         {
-          kw: meter.amr_data.average_baseload_kw_date_range,
+          kw: meter.amr_data.average_baseload_kw_date_range(sheffield_solar_pv: meter.sheffield_simulated_solar_pv_panels?),
           meter: meter
         }
       ]

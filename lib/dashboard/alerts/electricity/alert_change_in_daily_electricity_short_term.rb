@@ -6,6 +6,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
 
   attr_reader :last_weeks_consumption_kwh, :week_befores_consumption_kwh
   attr_reader :last_weeks_consumption_£, :week_befores_consumption_£
+  attr_reader :last_weeks_consumption_co2, :week_befores_consumption_co2
   attr_reader :signifcant_increase_in_electricity_consumption
   attr_reader :beginning_of_week, :beginning_of_last_week
   attr_reader :percent_change_in_consumption
@@ -39,6 +40,14 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     week_befores_consumption_£: {
       description: 'The week befores electricity consumption on school days - £',
       units:  :£,
+    },
+    last_weeks_consumption_co2: {
+      description: 'Last weeks electricity consumption on school days - co2',
+      units:  :co2
+    },
+    week_befores_consumption_co2: {
+      description: 'The week befores electricity consumption on school days - co2',
+      units:  :co2,
     },
     signifcant_increase_in_electricity_consumption: {
       description: 'More than 5% increase in weekly electricity consumption in last 2 weeks',
@@ -101,12 +110,16 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     @last_weeks_consumption_£ = @last_weeks_consumption_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
     @week_befores_consumption_£ = @week_befores_consumption_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
 
+    @last_weeks_consumption_co2   = @last_weeks_consumption_kwh   * blended_co2_per_kwh
+    @week_befores_consumption_co2 = @week_befores_consumption_kwh * blended_co2_per_kwh
+
     @signifcant_increase_in_electricity_consumption = @last_weeks_consumption_kwh > @week_befores_consumption_kwh * MAXDAILYCHANGE
 
     @percent_change_in_consumption = ((@last_weeks_consumption_kwh - @week_befores_consumption_kwh) / @week_befores_consumption_kwh)
 
-    saving_£ = 195.0 * (@last_weeks_consumption_£ - @week_befores_consumption_£) / days_in_week
-    set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil)
+    saving_£    = 195.0 * (@last_weeks_consumption_£   - @week_befores_consumption_£)   / days_in_week
+    saving_co2  = 195.0 * (@last_weeks_consumption_co2 - @week_befores_consumption_co2) / days_in_week
+    set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil, saving_co2)
 
     @rating = calculate_rating_from_range(-0.05, 0.15, @percent_change_in_consumption)
     @status = @signifcant_increase_in_electricity_consumption ? :bad : :good

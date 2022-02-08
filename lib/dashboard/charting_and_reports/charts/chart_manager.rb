@@ -62,7 +62,7 @@ class ChartManager
         raise ChartInheritanceConfigurationTooDeep, "Inheritance too deep for #{chart_config_original}"
       end
     end
-    chart_config
+    resolve_x_axis_grouping(chart_config)
   end
 
   # Used by ES Web application
@@ -98,10 +98,12 @@ class ChartManager
       aggregator = nil
       calculation_time = nil
 
-      calculation_time = Benchmark.realtime {
-        aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)
+      RecordTestTimes.instance.record_time(@school.name, 'chart', chart_param){
+        calculation_time = Benchmark.realtime {
+          aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)
 
-        aggregator.aggregate
+          aggregator.aggregate
+        }
       }
 
       if aggregator.valid

@@ -1,6 +1,6 @@
 require_relative './logger_control.rb'
 require_relative './test_directory_configuration.rb'
-# require 'ruby-prof'
+require 'ruby-prof'
 $logger_format = 1
 
 class RunTests
@@ -9,7 +9,7 @@ class RunTests
 
   DEFAULT_TEST_SCRIPT = {
     logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-    # ruby_profiler:            true,
+    ruby_profiler:            true,
 =begin
     dark_sky_temperatures:    nil,
     grid_carbon_intensity:    nil,
@@ -91,7 +91,7 @@ class RunTests
       when :generate_analytics_school_meta_data
         generate_analytics_school_meta_data
       when :timescales
-        run_timescales
+        run_timescales(configuration)
       when :timescale_and_drilldown
         run_timescales_drilldown
       when :pupil_dashboard
@@ -114,6 +114,8 @@ class RunTests
         configure_log_file(configuration) if component.to_s.include?('logger')
       end
     end
+
+    RecordTestTimes.instance.save_csv
   end
 
   private
@@ -122,11 +124,11 @@ class RunTests
     $SCHOOL_FACTORY ||= SchoolFactory.new
   end
 
-  def load_school(school_name)
+  def load_school(school_name, cache_school = false)
     school = nil
     begin
       attributes_override = @meter_attribute_overrides.nil? ? {} : @meter_attribute_overrides
-      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source, meter_attributes_overrides: attributes_override)
+      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source, meter_attributes_overrides: attributes_override, cache: cache_school == true)
     rescue Exception => e
       puts "=" * 100
       puts "Load of school #{school_name} failed"
@@ -162,19 +164,19 @@ class RunTests
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       next if school.nil?
       charts = RunCharts.new(school)
       charts.run(chart_list, control)
       failed_charts += charts.failed_charts
     end
-    stop_profiler
+    stop_profiler('reports')
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 
   def run_drilldown
     schools_list.each do |school_name|
-      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- drilldown.xlsx'
+      excel_filename = TestDirectory.instance.results_directory + school_name + '- drilldown.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_name = :group_by_week_electricity
@@ -190,12 +192,13 @@ class RunTests
     end
   end
 
-  def run_timescales
+  def run_timescales(control)
+    chart_name = control[:chart_name]
+
     schools_list.each do |school_name|
-      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- timescale shift.xlsx'
+      excel_filename = TestDirectory.instance.results_directory + school_name + '- timescale shift.xlsx'
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
-      chart_name = :activities_14_days_daytype_electricity_cost 
       chart_config = chart_manager.get_chart_config(chart_name)
       result = chart_manager.run_chart(chart_config, chart_name)
 
@@ -237,8 +240,10 @@ class RunTests
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
+      start_profiler
       test = run_class.new(school)
       differences[school_name] = test.run_flat_dashboard(control)
+      stop_profiler('adult dashboard')
       failed_charts += test.failed_charts
     end
     run_class.summarise_differences(differences, control) if !control[:summarise_differences].nil? && control[:summarise_differences]
@@ -251,8 +256,10 @@ class RunTests
       school = load_school(school_name)
       puts "=" * 30
       puts "running for summary management table for #{school_name}"
+      start_profiler
       test = RunManagementSummaryTable.new(school)
       test.run_management_table(control)
+      stop_profiler('management table')
       html += "<h2>#{school.name}</h2>" + test.html
     end
     html_writer = HtmlFileWriter.new(control[:combined_html_output_file])
@@ -285,7 +292,7 @@ class RunTests
   def run_timescales_drilldown
     schools_list.each do |school_name|
       chart_list = []
-      excel_filename = File.join(File.dirname(__FILE__), '../Results/') + school_name + '- drilldown and timeshift.xlsx'
+      excel_filename = TestDirectory.instance.results_directory + school_name + '- drilldown and timeshift.xlsx'
       school = load_school(school_name)
 
       puts 'Calculating standard chart'
@@ -401,25 +408,25 @@ class RunTests
         school = load_school(school_name)
         start_profiler
         alerts = RunAlerts.new(school)
-        alerts.run_alerts(alert_list, control, asof_date)
-        stop_profiler
+        alerts.run(alert_list, control, asof_date)
+        stop_profiler('alerts')
       end
       # failed_alerts += alerts.failed_charts
     end
-    RunAlerts.print_calculation_time(control[:benchmark]) if control.key?(:benchmark)
-    RunAlerts.save_priority_data(control[:save_priority_variables])
+    RecordTestTimes.instance.print_stats
+    RecordTestTimes.instance.save_summary_stats_to_csv
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 
   private def start_profiler
-    RubyProf.start if @test_script.key?(:ruby_profiler)
+    RubyProf.start if @test_script[:ruby_profiler] == true
   end
 
-  private def stop_profiler
-    if @test_script.key?(:ruby_profiler)
+  private def stop_profiler(name)
+    if @test_script[:ruby_profiler] == true
       prof_result = RubyProf.stop
       printer = RubyProf::GraphHtmlPrinter.new(prof_result)
-      printer.print(File.open('log\code-profile - alerts' + Date.today.to_s + '.html','w'))
+      printer.print(File.open('log\code-profile - ' + name + Date.today.to_s + '.html','w'))
     end
   end
 
@@ -457,7 +464,7 @@ class RunTests
   def self.matching_yaml_files_in_directory(file_type, school_pattern_matches)
     filenames = school_pattern_matches.map do |school_pattern_match|
       match = file_type + school_pattern_match + '.yaml'
-      Dir[match, base: SchoolFactory::METER_COLLECTION_DIRECTORY]
+      Dir[match, base: SchoolFactory.meter_collection_directory]
     end.flatten.uniq
     filenames.map { |filename| filename.gsub(file_type,'').gsub('.yaml','') }
   end

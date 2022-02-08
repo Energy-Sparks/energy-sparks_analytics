@@ -14,7 +14,7 @@ class ChartManager
 
   STANDARD_CHART_CONFIGURATION = {
     #
-    # chart confif parameters:
+    # chart config parameters:
     # name:               As appears in title of chart; passed through back to output with addition data e.g. total kWh
     # series_breakdown:   :fuel || :daytype || :heatingon - so fuel auto splits into [gas, electricity]
     #                      daytype into holidays, weekends, schools in and out of hours
@@ -35,6 +35,7 @@ class ChartManager
       x_axis:           :year,
       series_breakdown: :fuel,
       yaxis_units:      :£,
+      restrict_y1_axis: [:£, :co2],
       yaxis_scaling:    :none,
       inject:           :benchmark
     },
@@ -542,6 +543,7 @@ class ChartManager
     solar_pv_group_by_week: {
       name:               'Solar PV by week of the year',
       inherits_from:      :storage_heater_group_by_week,
+      restrict_y1_axis:   [:kwh],
       y2_axis:            :irradiance,
       meter_definition:   :solar_pv_meter
     },
@@ -1104,6 +1106,38 @@ class ChartManager
       yaxis_scaling:    :none,
       subtitle:         :daterange
     },
+    community_use_test_electricity: {
+      name:             'Community use test chart electricity',
+      chart1_type:      :column,
+      chart1_subtype:   :stacked,
+      meter_definition: :allelectricity,
+      timescale:        :year,
+      series_breakdown: :daytype,
+      x_axis:           :intraday,
+      yaxis_units:      :kwh,
+      yaxis_scaling:    :none,
+      subtitle:         :daterange
+    },
+    community_use_test_electricity_community_use_only: {
+      name:          'Community use test chart electricity community use only',
+      inherits_from: :community_use_test_electricity,
+      community_use:  { filter: :community_only, aggregate: :none } 
+    },
+    community_use_test_electricity_school_use_only: {
+      name:          'Community use test chart electricity school use only',
+      inherits_from: :community_use_test_electricity,
+      community_use:  { filter: :school_only, aggregate: :none } 
+    },
+    community_use_test_electricity_community_use_only_aggregated: {
+      name:          'Community use test chart electricity community use only aggregated - series name = community',
+      inherits_from: :community_use_test_electricity,
+      community_use:  { filter: :community_only, aggregate: :community_use }
+    },
+    community_use_test_gas: {
+      name:          'Community use test chart gas',
+      meter_definition: :allheat,
+      inherits_from: :community_use_test_electricity,
+    },
     gas_heating_season_intraday_up_to_1_year: {
       inherits_from: :gas_heating_season_intraday,
       timescale:        :up_to_a_year
@@ -1403,18 +1437,14 @@ class ChartManager
       series_breakdown: :baseload,
       meter_definition: :allelectricity,
       x_axis:           :day,
+      x_axis_reformat:  { date: '%d-%m-%Y' },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
     baseload_lastyear: {
       name:             'Baseload kW - last year',
-      chart1_type:      :line,
-      series_breakdown: :baseload,
-      meter_definition: :allelectricity,
       timescale:        :up_to_a_year,
-      x_axis:           :day,
-      yaxis_units:      :kw,
-      yaxis_scaling:    :none
+      inherits_from:    :baseload
     },
     peak_kw: {
       inherits_from:    :baseload,
@@ -1876,22 +1906,33 @@ class ChartManager
       y2_axis:          nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
-    schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted: {
+    schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted: {
       name:             'Comparison of last 2 weeks gas consumption - unadjusted alert calculation',
       y2_axis:          nil,
       inherits_from:    :last_2_weeks_gas_comparison
     },
-    schoolweek_alert_2_week_comparison_for_internal_calculation_adjusted: {
+    schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted: {
       name:                   'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
       adjust_by_temperature:  { schoolweek: 0 },
+ 
       #asof_date:              Date.new(2019, 3, 7), # gets overridden by alert
-      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
     },
-    schoolweek_alert_2_previous_holiday_comparison_adjusted: {
+    schoolweek_alert_2_previous_holiday_comparison_gas_adjusted: {
       name:                           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
       adjust_by_average_temperature:  { holiday: 0 },
       #asof_date:                     Date.new(2019, 3, 7), # gets overridden by alert
-      inherits_from:                  :schoolweek_alert_2_week_comparison_for_internal_calculation_unadjusted
+      inherits_from:                  :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted_community_only: {
+      name:           'Comparison of last 2 weeks gas consumption - temperature unadjusted alert calculation, community use only',
+      community_use:  { filter: :community_only, aggregate: :all_to_single_value },
+      inherits_from:  :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted_community_only: {
+      name:           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation, community use only',
+      community_use:  { filter: :community_only, aggregate: :all_to_single_value },
+      inherits_from:  :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted
     },
     teachers_landing_page_gas: {
       timescale:        [{ workweek: 0 }, { workweek: -1 }],

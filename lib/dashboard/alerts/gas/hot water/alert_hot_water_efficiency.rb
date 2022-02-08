@@ -5,7 +5,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   attr_reader :investment_choices_table, :daytype_breakdown_table
   attr_reader :theoretical_annual_hot_water_requirement_litres, :theoretical_annual_hot_water_requirement_kwh
   attr_reader :avg_gas_per_pupil_£, :benchmark_existing_gas_efficiency
-  attr_reader :benchmark_gas_better_control_saving_£, :benchmark_point_of_use_electric_saving_£
+  attr_reader :benchmark_gas_better_control_saving_£, :benchmark_point_of_use_electric_saving_£, :electric_hot_water_saving_co2
 
   def initialize(school)
     super(school, :hotwaterefficiency) 
@@ -83,6 +83,10 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       description: 'Saving through moving to POU electric: for benchmark reporting only',
       units:          :£,
       benchmark_code: 'esav'
+    },
+    electric_hot_water_saving_co2: {
+      description: 'CO2 aving through moving to POU electric',
+      units:       :co2,
     }
   }
 
@@ -116,12 +120,13 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       @benchmark_existing_gas_efficiency = @existing_gas_efficiency
       @benchmark_gas_better_control_saving_£ = @gas_better_control_saving_£
       @benchmark_point_of_use_electric_saving_£ = @point_of_use_electric_saving_£
+      @electric_hot_water_saving_co2 = investment.point_of_use_electric_co2_saving_kg
 
       @relevance = :relevant
 
       one_year_saving_£ = one_year_saving_calculation
       capital_costs_£ = @existing_gas_capex..@point_of_use_electric_capex
-      set_savings_capital_costs_payback(one_year_saving_£, electric_point_of_use_hotwater_costs)
+      set_savings_capital_costs_payback(one_year_saving_£, electric_point_of_use_hotwater_costs, @electric_hot_water_saving_co2)
 
       @rating = calculate_rating_from_range(0.6, 0.05, @existing_gas_efficiency)
 

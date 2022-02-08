@@ -10,6 +10,7 @@ module Dashboard
     attr_reader :meter_correction_rules, :model_cache
     attr_reader :partial_meter_coverage
     attr_reader :meter_tariffs
+    attr_reader :community_opening_times
     attr_accessor :amr_data, :floor_area, :number_of_pupils, :solar_pv_setup, :solar_pv_overrides
 
     # Energy Sparks activerecord fields:
@@ -23,6 +24,7 @@ module Dashboard
                     storage_heater_config: nil, # now redundant PH 20Mar2019
                     external_meter_id: nil,
                     dcc_meter: false,
+                    has_sheffield_solar_pv: false, # set for aggregate if component meters have sheffield data, for baseload calcs
                     meter_attributes: {})
       @amr_data = amr_data
       @meter_collection = meter_collection
@@ -38,6 +40,7 @@ module Dashboard
       @sub_meters = Dashboard::SubMeters.new
       @external_meter_id = external_meter_id
       @dcc_meter = dcc_meter
+      @has_sheffield_solar_pv = has_sheffield_solar_pv
       set_meter_attributes(meter_attributes)
       @model_cache = AnalyseHeatingAndHotWater::ModelCache.new(self)
       logger.info "Creating new meter: type #{type} id: #{identifier} name: #{name} floor area: #{floor_area} pupils: #{number_of_pupils}"
@@ -173,7 +176,21 @@ module Dashboard
       @solar_pv_overrides       = SolarPVPanels.new(attributes(:solar_pv_override), meter_collection.solar_pv) if @meter_attributes.key?(:solar_pv_override)
       @solar_pv_real_metering   = true if @meter_attributes.key?(:solar_pv_mpan_meter_mapping)
       @partial_meter_coverage ||= PartialMeterCoverage.new(attributes(:partial_meter_coverage))
+      # Centrica attributes(:open_close_times)
+      # @community_opening_times = SchoolOpenCloseTimes.new(@meter_collection, self)
       @meter_tariffs = MeterTariffManager.new(self)
+    end
+
+    # Centrica
+    def has_community_use?
+      # TODO check real attribute
+      mpxn.to_i % 2 == 1
+    end
+
+    # Centrica
+    def has_exclusive_community_use?
+      # TODO check real attribute
+      mpxn.to_i % 2 == 1
     end
 
     private def check_fuel_type(fuel_type)
@@ -235,7 +252,7 @@ module Dashboard
     end
 
     def sheffield_simulated_solar_pv_panels?
-      !@solar_pv_setup.nil? && @solar_pv_setup.instance_of?(SolarPVPanels)
+      @has_sheffield_solar_pv || !@solar_pv_setup.nil? && @solar_pv_setup.instance_of?(SolarPVPanels)
     end
 
     def solar_pv_real_metering?
@@ -302,6 +319,10 @@ module Dashboard
     # Matches ES AR version
     def display_name
       name.present? ? "#{meter_no} (#{name})" : display_meter_number
+    end
+
+    def series_name
+      name.present? ? name : mpxn.to_s
     end
 
     def analytics_name

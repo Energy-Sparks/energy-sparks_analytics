@@ -7,10 +7,14 @@ module AlertGasToStorageHeaterSubstitutionMixIn
     true
   end
 
+  def aggregate_meter
+    @school.storage_heater_meter
+  end
+
   def fuel_price
     BenchmarkMetrics::ELECTRICITY_PRICE
   end
-  
+
   def self.fuel_lc
     'storage heater'
   end
@@ -37,5 +41,14 @@ module AlertGasToStorageHeaterSubstitutionMixIn
       end
     end
     variable_groups
+  end
+
+  # needs electricity_cost_co2_mixin.rb
+  def gas_cost(kwh)
+    kwh * blended_electricity_£_per_kwh
+  end
+
+  def gas_co2(kwh)
+    kwh * blended_co2_per_kwh
   end
 end

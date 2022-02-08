@@ -314,7 +314,6 @@ class DashboardEnergyAdvice
     ).freeze
 
     private def aggregate_meter_p_and_l_table
-
       ma = MeterMonthlyCostsAdvice.new(@school, meter)
       ma.two_year_monthly_comparison_table_html
       

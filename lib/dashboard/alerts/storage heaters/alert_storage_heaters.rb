@@ -2,10 +2,12 @@ require_relative './alert_storage_heater_mixin.rb'
 require_relative './../gas/boiler control/alert_thermostatic_control.rb'
 require_relative './../gas/boiler control/alert_school_heating_days.rb'
 require_relative './../gas/boiler control/alert_heating_day_base.rb'
+require_relative './../gas/boiler control/alert_heating_hotwater_on_during_holiday.rb'
 require_relative './../common/alert_targets.rb'
 
 class AlertStorageHeaterAnnualVersusBenchmark < AlertGasAnnualVersusBenchmark
   include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heater_annual_benchmark)
     @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
@@ -18,6 +20,7 @@ end
 
 class AlertStorageHeaterThermostatic < AlertThermostaticControl
   include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heater_thermostatic)
     @relevance = @school.storage_heaters? ? :relevant : :never_relevant
@@ -30,9 +33,10 @@ end
 
 class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
   include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, 'electricity', BenchmarkMetrics::PERCENT_STORAGE_HEATER_OUT_OF_HOURS_BENCHMARK,
-          BenchmarkMetrics::ELECTRICITY_PRICE, :storageheateroutofhours,
+          :storageheateroutofhours,
           '', :allstorageheater, 0.2, 0.5)
     @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
   end
@@ -48,6 +52,7 @@ end
 
 class AlertHeatingOnSchoolDaysStorageHeaters < AlertHeatingOnSchoolDays
   include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heater_heating_days)
     @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
@@ -59,6 +64,8 @@ class AlertHeatingOnSchoolDaysStorageHeaters < AlertHeatingOnSchoolDays
 end
 
 class AlertStorageHeatersLongTermTrend < AlertLongTermTrend
+  include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heater_heating_days)
     @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
@@ -79,6 +86,8 @@ class AlertStorageHeatersLongTermTrend < AlertLongTermTrend
 end
 
 class AlertStorageHeaterTargetAnnual < AlertGasTargetAnnual
+  include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
   def self.template_variables
     specific = { 'Storage heaters targetting and tracking' => long_term_variables('storage heaters')}
     specific.merge(self.superclass.template_variables)
@@ -106,5 +115,26 @@ end
 class AlertStorageHeaterTarget1Week < AlertStorageHeaterTargetAnnual
   def rating_target_percent
     last_week_percent_of_target
+  end
+end
+
+class AlertStorageHeaterHeatingOnDuringHoliday < AlertHeatingHotWaterOnDuringHolidayBase
+  include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
+  def initialize(school)
+    super(school, :storage_heaters)
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+  end
+
+  def heating_type
+    'storage_heaters'
+  end
+
+  def aggregate_meter
+    @school.storage_heater_meter
+  end
+
+  def needs_storage_heater_data?
+    true
   end
 end

@@ -135,7 +135,7 @@ class MeterCost
             else
               %{
                 <p>          
-                  Energy Sparks currently doesn't have a record of your real tariffs
+                  Energy Sparks currently doesn't have a complete record of your real tariffs
                   and is using default tariffs between <%= group_missing_tariffs_text %>, 
                   which means your billing won't be accurate. To edit your tariffs go to the
                   'Manage School' drop down menu above and select 'Manage tariffs'.

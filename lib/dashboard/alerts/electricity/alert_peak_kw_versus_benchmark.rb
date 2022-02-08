@@ -3,7 +3,7 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
   include AlertFloorAreaMixin
   attr_reader :average_school_day_last_year_kw, :average_school_day_last_year_kw_per_pupil
   attr_reader :average_school_day_last_year_kw_per_floor_area, :exemplar_kw
-  attr_reader :one_year_saving_versus_exemplar_£, :one_year_saving_versus_exemplar_kwh
+  attr_reader :one_year_saving_versus_exemplar_£, :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_co2
 
   def initialize(school)
     super(school, :peakelectricbenchmark)
@@ -44,6 +44,10 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
       units:  :£,
       benchmark_code: 'tex£'
     },
+    one_year_saving_versus_exemplar_co2: {
+      description: 'One year savings co2 versus exemplar for school of same floor area',
+      units:  :co2
+    },
     electricity_intraday_comparison_chart_6_months_apart: {
       description: 'Compares intraday usage 6 months apart',
       units: :chart
@@ -74,8 +78,9 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
     # arbitrarily saving is 4 hours of peak usage for every school day of the year
     @one_year_saving_versus_exemplar_kwh = 4.0 * 190.0 * [@average_school_day_last_year_kw_per_floor_area - benchmark_kw_m2, 0.0].max * floor_area(asof_date - 365, asof_date)
     @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
 
-    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil)
+    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil, @one_year_saving_versus_exemplar_co2)
 
     @term = :longterm
   end

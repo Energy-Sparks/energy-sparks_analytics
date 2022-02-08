@@ -9,7 +9,8 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
   attr_reader :exemplar_number_of_non_heating_days_last_year
   attr_reader :non_heating_day_adjective
   attr_reader :total_kwh_on_unoccupied_days, :kwh_below_frost_on_unoccupied_days, :one_year_saving_kwh
-  attr_reader :below_frost_£, :unoccupied_above_frost_£, :total_on_unoccupied_days_£
+  attr_reader :below_frost_£, :unoccupied_above_frost_£, :total_on_unoccupied_days_£, :total_on_unoccupied_days_co2
+  attr_reader :unoccupied_above_frost_co2
 
   def initialize(school)
     super(school, :heating_on_days)
@@ -58,9 +59,17 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
       description: 'Total usage during unoccupied days £',
       units:  :£
     },
+    total_on_unoccupied_days_co2: {
+      description: 'Total carbon emissions during unoccupied days kg CO2',
+      units:  :co2
+    },
     unoccupied_above_frost_£: {
       description: 'Minimum saving through turning heat off on non occupied days £',
       units:  :£
+    },
+    unoccupied_above_frost_co2: {
+      description: 'Minimum saving through turning heat off on non occupied days CO2',
+      units:  :co2
     },
     heating_on_off_chart: {
       description: 'heating on off weekly chart',
@@ -89,9 +98,11 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
 
     @below_frost_£ = @kwh_below_frost_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE
     @unoccupied_above_frost_£ = @one_year_saving_kwh * BenchmarkMetrics::GAS_PRICE
-    @total_on_unoccupied_days_£ = @total_kwh_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE
+    @unoccupied_above_frost_co2 = @one_year_saving_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+    @total_on_unoccupied_days_£   = @total_kwh_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE
+    @total_on_unoccupied_days_co2 = @total_kwh_on_unoccupied_days * EnergyEquivalences::UK_GAS_CO2_KG_KWH
 
-    set_savings_capital_costs_payback(Range.new(@unoccupied_above_frost_£ , @unoccupied_above_frost_£), nil)
+    set_savings_capital_costs_payback(Range.new(@unoccupied_above_frost_£ , @unoccupied_above_frost_£), nil, @unoccupied_above_frost_co2)
 
     @rating = statistics.non_school_day_heating_rating_out_of_10(days)
 

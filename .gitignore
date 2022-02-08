@@ -54,3 +54,4 @@ Rails/webapp/*
 webapp/*
 webapp
 AggregatedMeterCollections/*
+MeterCollections/*
