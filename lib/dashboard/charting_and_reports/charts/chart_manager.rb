@@ -93,6 +93,7 @@ class ChartManager
     logger.info '>' * 120
 
     chart_config = resolve_chart_inheritance(chart_config) if resolve_inheritance
+    chart_config = resolve_x_axis_grouping(chart_config) unless resolve_inheritance #dont do it twice
 
     # overrides standard chart config, for example if you want to override
     # the default meter if providing charts at meter rather than aggregate level
