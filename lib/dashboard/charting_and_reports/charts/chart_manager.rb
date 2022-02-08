@@ -68,7 +68,7 @@ class ChartManager
 
   # recursively inherit previous chart definitions config, then resolve x-axis against available data
   def resolve_chart_inheritance(chart_config_original, max_inheritance = 20)
-    chart_config = build_chart_config(chart_config_original, max_inheritance)
+    chart_config = self.class.build_chart_config(chart_config_original, max_inheritance)
     resolve_x_axis_grouping(chart_config)
   end
 
@@ -81,7 +81,7 @@ class ChartManager
 
   # Used by ES Web application
   def get_chart_config(chart_param, override_config = nil)
-    resolved_chart = resolve_chart_inheritance(standard_chart(chart_param))
+    resolved_chart = resolve_chart_inheritance(self.class.standard_chart(chart_param))
     resolved_chart = resolve_x_axis_grouping(resolved_chart)
     resolved_chart.merge!(override_config) unless override_config.nil?
     resolved_chart
@@ -187,7 +187,7 @@ class ChartManager
 
   private
 
-  def standard_chart(chart_name)
+  def self.standard_chart(chart_name)
     STANDARD_CHART_CONFIGURATION[chart_name]
   end
 
