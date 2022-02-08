@@ -1,13 +1,3 @@
-# Interface to Meteostat weather data
-#
-# - Daily limit of 2,000 queries per day, no paid option above that
-# - JSON limited to 10 days historic hourly data at a time
-# - so 20,000 days capacity per day => 60 location years
-# - suggest downloading 8 days of data when querying most recent data in front end
-# - the interface below interpolates for missing data and the half hour points
-# - interface requires an altitude, currently defaulted to 30m
-# - data seems to go back before 2008
-# - you will need to set environment variable: ENERGYSPARKSMETEOSTATAPIKEY
 require 'net/http'
 require 'date'
 require 'time'
@@ -17,7 +7,6 @@ require 'tzinfo'
 
 class MeteoStat
 
-  #As specified by Meteostat API
   DAYS_PER_REQUEST = 30
   DEFAULT_ALTITUDE = 30.0
   DEFAULT_RADIUS_METERS = 100000
@@ -51,6 +40,8 @@ class MeteoStat
     datetime_to_temperature.to_h
   end
 
+  #Interpolates to half-hourly data from hourly readings
+  #Also interpolates missing days from the data available in the response
   def convert_to_datetime_to_x48(temperatures, start_date, end_date)
     interpolator = Interpolate::Points.new(convert_weather_data_for_interpolation(temperatures))
     dated_temperatures = {}
@@ -58,7 +49,8 @@ class MeteoStat
     (start_date..end_date).each do |date|
       dated_temperatures[date] = []
       (0..23).each do |hour|
-        #Note: we're creating date in default timezone here
+        #Note: we're creating date in default timezone here, should probably have
+        #an explicit timezone here
         dt = Time.new(date.year, date.month, date.day, hour, 0, 0)
         missing.push(dt) unless temperatures.key?(dt) && time_exists?(dt)
         [0, 30].each do |halfhour|
