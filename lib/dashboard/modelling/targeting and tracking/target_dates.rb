@@ -178,7 +178,7 @@ class TargetDates
       first_holiday_date:             first_holiday_date,
       final_holiday_date:             final_holiday_date,
       enough_holidays:                enough_holidays?,
-      holiday_problems:               holiday_problems.join(', '),
+      holiday_problems:               "", #holiday_problems.join(', '),
       recent_data:                    recent_data?
     }
     # or TargetDates.instance_methods(false).map { |m| [m, self.send(m)]}
