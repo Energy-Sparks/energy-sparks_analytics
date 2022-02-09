@@ -44,8 +44,9 @@ class ChartManager
     chart_group_result
   end
 
-  # recursively inherit previous chart definitions config
-  def resolve_chart_inheritance(chart_config_original, max_inheritance = 20)
+  #Recursively build up complete chart config from the inheritance tree
+  #Does not resolve any data specific chart options, e.g. x axis groupings
+  def self.build_chart_config(chart_config_original, max_inheritance = 20)
     chart_config = chart_config_original.dup
     while chart_config.key?(:inherits_from)
       base_chart_config_param = chart_config[:inherits_from]
@@ -62,6 +63,12 @@ class ChartManager
         raise ChartInheritanceConfigurationTooDeep, "Inheritance too deep for #{chart_config_original}"
       end
     end
+    chart_config
+  end
+
+  # recursively inherit previous chart definitions config, then resolve x-axis against available data
+  def resolve_chart_inheritance(chart_config_original, max_inheritance = 20)
+    chart_config = self.class.build_chart_config(chart_config_original, max_inheritance)
     resolve_x_axis_grouping(chart_config)
   end
 
@@ -74,8 +81,7 @@ class ChartManager
 
   # Used by ES Web application
   def get_chart_config(chart_param, override_config = nil)
-    resolved_chart = resolve_chart_inheritance(standard_chart(chart_param))
-    resolved_chart = resolve_x_axis_grouping(resolved_chart)
+    resolved_chart = resolve_chart_inheritance(self.class.standard_chart(chart_param))
     resolved_chart.merge!(override_config) unless override_config.nil?
     resolved_chart
   end
@@ -87,7 +93,7 @@ class ChartManager
     logger.info '>' * 120
 
     chart_config = resolve_chart_inheritance(chart_config) if resolve_inheritance
-    chart_config = resolve_x_axis_grouping(chart_config)
+    chart_config = resolve_x_axis_grouping(chart_config) unless resolve_inheritance #dont do it twice
 
     # overrides standard chart config, for example if you want to override
     # the default meter if providing charts at meter rather than aggregate level
@@ -180,7 +186,7 @@ class ChartManager
 
   private
 
-  def standard_chart(chart_name)
+  def self.standard_chart(chart_name)
     STANDARD_CHART_CONFIGURATION[chart_name]
   end
 

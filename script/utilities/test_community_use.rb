@@ -17,8 +17,8 @@ def calculate_charts_with_and_without_community_use(school, chart_name, non_comm
 
   existing_chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name]
 
-  ChartYAxisManipulation.new(school).y1_axis_choices(existing_chart_config).each do |y1_axis_unit|
-    chart_config = ChartYAxisManipulation.new(school).change_y1_axis_config(existing_chart_config, y1_axis_unit)
+  ChartYAxisManipulation.new.y1_axis_choices(existing_chart_config).each do |y1_axis_unit|
+    chart_config = ChartYAxisManipulation.new.change_y1_axis_config(existing_chart_config, y1_axis_unit)
 
     chart_data = chart_manager.run_chart(chart_config, chart_name, true)
     charts.push(chart_data)
@@ -126,7 +126,7 @@ school_names.each do |school_name|
   # test_community_use_breakdowns(school)
 
   # random_dates(school)
-  
+
   charts = run_charts(school)
 
   excel_school_name = school_name.gsub(' ', '').gsub('-', '')[0..10]
