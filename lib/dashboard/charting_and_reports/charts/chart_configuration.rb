@@ -42,6 +42,7 @@ class ChartManager
     benchmark_co2: {
       inherits_from:    :benchmark,
       name:             'School Carbon Emissions from Electricity and Gas Usage',
+      restrict_y1_axis: [:co2],
       yaxis_units:      :co2
     },
     benchmark_kwh: {
@@ -107,6 +108,7 @@ class ChartManager
       name:             'Your School Gas Carbon Emissions over the last few years',
       inherits_from:    :gas_longterm_trend,
       series_breakdown: :none,
+      restrict_y1_axis: [:co2],
       y2_axis:          :gascarbon
     },
     gas_longterm_trend_carbon: {
@@ -394,9 +396,14 @@ class ChartManager
       yaxis_units:      :co2,
       y2_axis:          :gridcarbon
     },
+    electricity_co2_last_year_weekly_with_co2_intensity_co2_only: {
+      inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
+      restrict_y1_axis:   [:co2]
+    },
     electricity_co2_last_year_weekly_with_co2_intensity_unmodified: {
       inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
-      meter_definition: :allelectricity_unmodified
+      meter_definition: :allelectricity_unmodified,
+      restrict_y1_axis:  [:co2]
     },
     electricity_co2_last_7_days_with_co2_intensity: {
       name:             'Variation in the electricity carbon emissions of your school over the last week',

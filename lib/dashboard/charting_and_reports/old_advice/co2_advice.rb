@@ -13,7 +13,7 @@ class DashboardEnergyAdvice
       CO2ElectricityKwhLongTerm.new(school, chart_definition, chart_data, chart_symbol)
     when :electricity_longterm_trend_carbon
       CO2ElectricityCO2LongTerm.new(school, chart_definition, chart_data, chart_symbol)
-    when :electricity_co2_last_year_weekly_with_co2_intensity
+    when :electricity_co2_last_year_weekly_with_co2_intensity_co2_only
       CO2ElectricityCO2LastYear.new(school, chart_definition, chart_data, chart_symbol)
     when :electricity_co2_last_7_days_with_co2_intensity
       CO2ElectricityCO2LastWeek.new(school, chart_definition, chart_data, chart_symbol)
@@ -390,16 +390,34 @@ class DashboardEnergyAdvice
         Your School's Electricity Carbon Emissions over the last few years
       </h2>
       <p>
-        This chart shows your school's electricity consumption in kWh over the last
+        This chart shows your school's electricity consumption over the last
         few years, with the average UK grid carbon intensity on the second y axis:
       </p>
     ).freeze
+
+    SUGGEST_SWITCHING_YAXIS_UNITS = %q(
+      <p>
+        Try switching between between the units (Change units: kWh, £ or kg CO2) and drilling
+        down by clicking on the bars.
+      </p>
+    )
+
+    LAST_FEW_YEARS_CO2_QUESTION_2 = %q(
+      <p>
+        <strong>Question</strong>
+        : By switching the Y axis between kWh and kg CO2 has your school
+        reduced its carbon emissions more from reducing its electricity
+        energy consumption (kWh) or from the National Electricity Grid decarbonisation?
+      </p>
+    ).freeze
+
+    POST_CHART_ADVICE = [SUGGEST_SWITCHING_YAXIS_UNITS, LAST_FEW_YEARS_CO2_QUESTION_2]
 
     def generate_valid_advice
       header_template = concatenate_advice_with_body_start_end(LAST_FEW_YEARS_KWH_1)
       @header_advice = generate_html(header_template, binding)
 
-      @footer_advice = nil_advice
+      @footer_advice = concatenate_advice_with_body_start_end(POST_CHART_ADVICE)
     end
   end
 
