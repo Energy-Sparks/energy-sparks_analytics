@@ -354,7 +354,7 @@ class DashboardConfiguration
                                   benchmark_co2
                                   electricity_longterm_trend_kwh_with_carbon
                                   electricity_longterm_trend_carbon
-                                  electricity_co2_last_year_weekly_with_co2_intensity
+                                  electricity_co2_last_year_weekly_with_co2_intensity_co2_only
                                   electricity_co2_last_7_days_with_co2_intensity
                                   electricity_kwh_last_7_days_with_co2_intensity
                                   gas_longterm_trend_kwh_with_carbon

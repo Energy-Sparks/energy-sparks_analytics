@@ -96,7 +96,7 @@ class AdviceCarbon < AdviceStructuredOldToNewConversion
   class CO2ElectricityAdvice < CO2AdviceComponentBase
     include MeterlessMixin
     class KwhLongTerm < DashboardEnergyAdvice::CO2ElectricityKwhLongTerm; end
-    class CO2LongTerm < DashboardEnergyAdvice::CO2ElectricityCO2LongTerm; end
+    # class CO2LongTerm < DashboardEnergyAdvice::CO2ElectricityCO2LongTerm; end
     class CO2LastYear < DashboardEnergyAdvice::CO2ElectricityCO2LastYear; end
     class KwhLastWeek < DashboardEnergyAdvice::CO2ElectricitykWhLastWeek; end
     class CO2LastWeek < DashboardEnergyAdvice::CO2ElectricityCO2LastWeek; end
@@ -106,10 +106,8 @@ class AdviceCarbon < AdviceStructuredOldToNewConversion
       @content_data = [
         { type: :text,  advice_class: KwhLongTerm, data: KwhLongTerm::LAST_FEW_YEARS_KWH_1 },
         { type: :chart, advice_class: KwhLongTerm, data: :electricity_longterm_trend_kwh_with_carbon_unmodified },
-
-        { type: :text,  advice_class: CO2LongTerm, data: CO2LongTerm::LAST_FEW_YEARS_CO2_1 },
-        { type: :chart, advice_class: CO2LongTerm, data: :electricity_longterm_trend_carbon_unmodified },
-        { type: :text,  advice_class: CO2LongTerm, data: CO2LongTerm::LAST_FEW_YEARS_CO2_QUESTION_2 },
+        { type: :text,  advice_class: KwhLongTerm, data: KwhLongTerm::SUGGEST_SWITCHING_YAXIS_UNITS },
+        { type: :text,  advice_class: KwhLongTerm, data: KwhLongTerm::LAST_FEW_YEARS_CO2_QUESTION_2 },
 
         { type: :text,  advice_class: CO2LastYear, data: CO2LastYear::LAST_YEAR_CO2_1 },
         { type: :chart, advice_class: CO2LastYear, data: :electricity_co2_last_year_weekly_with_co2_intensity_unmodified },
