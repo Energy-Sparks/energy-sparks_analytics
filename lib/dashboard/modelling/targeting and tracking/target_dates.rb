@@ -188,7 +188,7 @@ class TargetDates
 
   def holiday_problems
     school = @original_meter.meter_collection
-    Holidays.check_holidays(school, school.holidays, country: school.country)
+    school.holidays.check_holidays(school, school.holidays, country: school.country)
   end
 
   def today
