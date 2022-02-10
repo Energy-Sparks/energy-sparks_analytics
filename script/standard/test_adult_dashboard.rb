@@ -1,6 +1,6 @@
 require 'require_all'
 require_relative '../../lib/dashboard.rb'
-require_rel '../../test_support'
+require_all './test_support/'
 
 module Logging
   logger.level = :error
@@ -14,7 +14,7 @@ script = {
                               'combe*', 'catsfield', 'miller*','tomnac*',
                               'king-e*'
                             ],
-  schools: ['royal-h*'],
+  schools: ['king-ja*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
   adult_dashboard:          {

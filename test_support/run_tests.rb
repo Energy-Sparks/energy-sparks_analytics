@@ -103,7 +103,7 @@ class RunTests
       when :equivalences
         run_equivalences(configuration[:control])
       when :kpi_analysis
-        run_kpi_calculations(configuration)
+        run_kpi_calculations_deprecated(configuration)
       when :model_fitting
         run_model_fitting(configuration[:control])
       when :run_benchmark_charts_and_tables
@@ -363,7 +363,7 @@ class RunTests
     chart_results.push(new_chart_results)
   end
 
-  def run_kpi_calculations(config)
+  def run_kpi_calculations_deprecated(config)
     calculation_results = Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
     schools_list.sort.each do |school_name|
       school = load_school(school_name)
@@ -446,8 +446,6 @@ class RunTests
 
   def self.resolve_school_list(source, school_name_pattern_match)
     list = case source
-    when :analytics_db
-      AnalysticsSchoolAndMeterMetaData.new.match_school_names(school_name_pattern_match)
     when :aggregated_meter_collection
       matching_yaml_files_in_directory('aggregated-meter-collection-', school_name_pattern_match)
     when :validated_meter_collection

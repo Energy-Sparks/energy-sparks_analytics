@@ -1,11 +1,9 @@
 
-require_relative 'load_amr_from_bath_hacked'
 # School Factory: deals with getting school, meter data from different sources:
 #                 caches data so only loads once
 class SchoolFactory
   def initialize
     @school_cache = {}  # [urn][source] = meter_collection
-    @schools_meta_data = AnalysticsSchoolAndMeterMetaData.new
   end
 
   def self.meter_collection_directory
