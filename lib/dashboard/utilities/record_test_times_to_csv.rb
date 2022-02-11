@@ -3,10 +3,9 @@ require 'fileutils'
 class RecordTestTimes
   include Singleton
 
-  def initialize(directory: 'Results/testtimes/')
+  def initialize(directory: TestDirectory.instance.timing_directory)
     @rails = Object.const_defined?('Rails')
     @directory = directory
-    create_directory unless rails?
     @time_log = {}
     @calc_status = {}
   end
@@ -136,10 +135,10 @@ class RecordTestTimes
   end
 
   def filename
-    "#{@directory}test timings #{DateTime.now.strftime('%Y%m%d %H%M%S')}.csv"
+    File.join(@directory, "test timings #{DateTime.now.strftime('%Y%m%d %H%M%S')}.csv")
   end
 
   def stats_filename
-    "#{@directory}calc stats #{DateTime.now.strftime('%Y%m%d %H%M%S')}.csv"
+    File.join(@directory, "calc stats #{DateTime.now.strftime('%Y%m%d %H%M%S')}.csv")
   end
 end

@@ -13,9 +13,8 @@ class TestDirectory
 
   def meter_collection_directory
     unless File.exists?(meter_collection_dir_path)
-      puts "Creating #{meter_collection_dir_path}"
+      make_dir(meter_collection_dir_path)
       puts "Please add meter collection files to #{meter_collection_dir_path}"
-      Dir.mkdir(meter_collection_dir_path)
     end
     meter_collection_dir_path
   end
@@ -40,6 +39,10 @@ class TestDirectory
 
   def log_directory
     make_dir(File.join(base_dir, 'log'))
+  end
+
+  def timing_directory
+    make_dir(File.join(base_dir, 'timing'))
   end
 
   private
@@ -88,7 +91,7 @@ class TestDirectory
 
   def create_test_sub_directories(test_name_type)
     test_dir = test_base_dir_name(test_name_type)
-    make_dir(test_name_type)
+    make_dir(test_dir)
 
     sub_directories.values.each do |sub_directory_name|
       sub_dir_path = File.join(test_dir, sub_directory_name)
@@ -98,6 +101,8 @@ class TestDirectory
   end
 
   def make_dir(dir_name)
+    return if Object.const_defined?('Rails')
+    
     unless File.exists?(dir_name)
       puts "Creating directory #{dir_name}"
       Dir.mkdir(dir_name)
