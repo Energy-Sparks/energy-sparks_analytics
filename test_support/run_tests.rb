@@ -201,7 +201,7 @@ class RunTests
       stop_profiler('management table')
       html += "<h2>#{school.name}</h2>" + test.html
     end
-    html_writer = HtmlFileWriter.new(control[:combined_html_output_file], results_sub_directory_type: 'ManagementSummaryTable')
+    html_writer = HtmlFileWriter.new(control[:combined_html_output_file], results_sub_directory_type: RunManagementSummaryTable.test_type)
     html_writer.write(html)
     html_writer.close
   end

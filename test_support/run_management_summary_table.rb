@@ -1,9 +1,34 @@
 class RunManagementSummaryTable < RunCharts
   attr_reader :html
+
+  def initialize(school)
+    super(school, results_sub_directory_type: self.class.test_type)
+  end
+
   def run_management_table(control)
     results = calculate
     compare_results(control, results)
     @html = results[:html]
+  end
+
+  def self.test_type
+    'ManagementSummaryTable'
+  end
+
+  def self.default_config
+    self.superclass.default_config.merge({ management_summary_table: self.management_summary_table_config })
+  end
+
+  def self.management_summary_table_config
+    {
+      control: {
+        combined_html_output_file: "Management Summary Table #{Date.today}",
+        compare_results: [
+          :summary,
+          :report_differences
+        ]
+      }
+    }
   end
 
   private
@@ -28,7 +53,7 @@ class RunManagementSummaryTable < RunCharts
 
   def compare_results(control, results)
     results.each do |type, content|
-      comparison = CompareContentResults.new(control, @school.name)
+      comparison = CompareContentResults.new(control, @school.name, results_sub_directory_type: self.class.test_type)
       comparison.save_and_compare_content(type.to_s, [{ type: type, content: content }])
     end
   end
