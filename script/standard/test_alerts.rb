@@ -9,6 +9,4 @@ overrides = {
 
 script = RunAlerts.default_config.deep_merge(overrides)
 
-ap script
-
 RunTests.new(script).run
