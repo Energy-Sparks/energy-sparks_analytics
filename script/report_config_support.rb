@@ -76,7 +76,7 @@ class ReportConfigSupport
   def self.suppress_output(school_name)
     begin
       original_stdout = $stdout.clone
-      $stdout.reopen(File.new(TestDirectory.instance.results_directory + school_name + 'loading log.txt', 'w'))
+      $stdout.reopen(File.new(File.join(TestDirectory.instance.log_directory, school_name + 'loading log.txt', 'w')))
       retval = yield
     rescue StandardError => e
       $stdout.reopen(original_stdout)

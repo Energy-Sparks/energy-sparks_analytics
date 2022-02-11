@@ -1,7 +1,7 @@
 class RunAdultDashboard < RunCharts
 
   def initialize(school)
-    super(school, 'energy analysis')
+    super(school, results_sub_directory_type: 'AdultDashboard')
   end
 
   def run_flat_dashboard(control)
@@ -130,7 +130,7 @@ class RunAdultDashboard < RunCharts
   end
 
   def comparison_differences(control, school_name, page, content)
-    comparison = CompareContentResults.new(control, school_name)
+    comparison = CompareContentResults.new(control, school_name, results_sub_directory_type: @results_sub_directory_type)
 
     comparison.save_and_compare_content(page, content, true)
   end
@@ -308,7 +308,7 @@ class RunAdultDashboard < RunCharts
   end
 
   def write_html(filename_suffix: '- adult dashboard')
-    html_file = HtmlFileWriter.new(@school.name + filename_suffix)
+    html_file = HtmlFileWriter.new(@school.name + filename_suffix, results_sub_directory_type: @results_sub_directory_type)
     html_file.write_header_footer('', @all_html, nil)
     html_file.close
   end

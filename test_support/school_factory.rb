@@ -58,19 +58,13 @@ class SchoolFactory
     school
   end
 
-  def self.meter_collection_directory
-    e = ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY']
-    e += '\\' unless e[-1] == '\\'
-    e
-  end
-
   def matching_yaml_files_in_directory(file_type, school_pattern_matches)
     filenames = school_pattern_matches.map do |school_pattern_match|
       match = file_type + school_pattern_match + '.yaml'
-      Dir[match, base: SchoolFactory.meter_collection_directory]
+      Dir[match, base: meter_collection_directory]
     end.flatten.uniq
     files = filenames.map { |filename| filename.gsub(file_type,'').gsub('.yaml','') }
-    compact_print(file_type, files, SchoolFactory.meter_collection_directory)
+    compact_print(file_type, files, meter_collection_directory)
     files
   end
 
@@ -84,43 +78,40 @@ class SchoolFactory
 
   def load_meter_collections(school_filename, file_type)
     school = nil
-    yaml_filename     = meter_collection_filename(school_filename, file_type, '.yaml')
-    marshal_filename  = meter_collection_filename(school_filename, file_type, '.marshal')
+    yaml_filename     = build_filename(school_filename, file_type, '.yaml')
+    marshal_filename  = build_filename(school_filename, file_type, '.marshal')
 
     if !File.exist?(marshal_filename) || File.mtime(yaml_filename) > File.mtime(marshal_filename)
       RecordTestTimes.instance.record_time(school_filename, 'yamlload', ''){
         school = YAML.load_file(yaml_filename)
       }
-      save_marshal_copy(marshal_filename, school)
+      # save to marshal for subsequent speedy load
+      File.open(filename, 'wb') { |f| f.write(Marshal.dump(school)) }
     else
       RecordTestTimes.instance.record_time(school_filename, 'marshalload', ''){
-        school = load_marshal_copy(marshal_filename)
+        school = Marshal.load(File.open(marshal_filename))
       }
     end
     school
   end
 
-  def meter_collection_filename(school_filename, file_type, extension)
-    self.class.meter_collection_directory + file_type + school_filename + extension
+  def build_filename(school_filename, file_type, extension)
+    filename = file_type + school_filename + extension
+    File.join(meter_collection_directory, filename)
   end
 
-  def save_marshal_copy(filename, school)
-    File.open(filename, 'wb') { |f| f.write(Marshal.dump(school)) }
-    school
-  end
-
-  def load_marshal_copy(marshal_filename)
-    Marshal.load(File.open(marshal_filename))
+  def meter_collection_directory
+    TestDirectory.instance.meter_collection_directory
   end
 
   def split_pseudo_and_non_pseudo_override_attributes(meter_attributes_overrides)
     pseudo_meter_attributes = meter_attributes_overrides.select { |k, _v| k.is_a?(Symbol) }
-    meter_attributes = meter_attributes_overrides.select { |k, _v| k.is_a?(Integer) }
+    meter_attributes        = meter_attributes_overrides.select { |k, _v| k.is_a?(Integer) }
     [pseudo_meter_attributes, meter_attributes]
   end
 
   def build_meter_collection(data, meter_attributes_overrides: {})
-    pseudo_meter_overrides, meter_overrides = split_pseudo_and_non_pseudo_override_attributes(meter_attributes_overrides)
+    pseudo_meter_overrides, _meter_overrides = split_pseudo_and_non_pseudo_override_attributes(meter_attributes_overrides)
     meter_attributes = data[:pseudo_meter_attributes]
 
     MeterCollectionFactory.new(

@@ -1,11 +1,12 @@
 class CompareContentResults
   attr_reader :control, :school_or_type
-  def initialize(control, school_or_type)
+  def initialize(control, school_or_type, results_sub_directory_type:)
     @control = control # [ :summary, :quick_comparison, :report_differing_charts, :report_differences ]
     @school_or_type = school_or_type
     @identical_result_count = 0
     @differing_results = {} # [chart_name] => differences
     @missing = []
+    @results_sub_directory_type = results_sub_directory_type
   end
 
   def save_and_compare_content(page, content, merge_page = false)
@@ -26,11 +27,11 @@ class CompareContentResults
   private
 
   def comparison_directory
-    File.join(control_hash_value(:comparison_directory))
+    TestDirectory.instance.base_comparison_directory(@results_sub_directory_type)
   end
 
   def output_directory
-    File.join(control_hash_value(:output_directory))
+    TestDirectory.instance.results_comparison_directory(@results_sub_directory_type)
   end
 
   def control_hash_value(type)

@@ -165,7 +165,7 @@ class RunBenchmarks
   end
 
   def save_html(html)
-    html_writer = HtmlFileWriter.new('benchmark')
+    html_writer = HtmlFileWriter.new('benchmark', results_sub_directory_type: @results_sub_directory_type)
     html_writer.write(html)
     html_writer.close
   end

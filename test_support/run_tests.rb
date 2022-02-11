@@ -116,7 +116,7 @@ class RunTests
 
   def run_drilldown
     schools_list.each do |school_name|
-      excel_filename = TestDirectory.instance.results_directory + school_name + '- drilldown.xlsx'
+      excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- drilldown.xlsx')
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_name = :group_by_week_electricity
@@ -136,7 +136,7 @@ class RunTests
     chart_name = control[:chart_name]
 
     schools_list.each do |school_name|
-      excel_filename = TestDirectory.instance.results_directory + school_name + '- timescale shift.xlsx'
+      excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- timescale shift.xlsx')
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_config = chart_manager.get_chart_config(chart_name)
@@ -202,7 +202,7 @@ class RunTests
       stop_profiler('management table')
       html += "<h2>#{school.name}</h2>" + test.html
     end
-    html_writer = HtmlFileWriter.new(control[:combined_html_output_file])
+    html_writer = HtmlFileWriter.new(control[:combined_html_output_file], results_sub_directory_type: 'ManagementSummaryTable')
     html_writer.write(html)
     html_writer.close
   end
@@ -232,7 +232,7 @@ class RunTests
   def run_timescales_drilldown
     schools_list.each do |school_name|
       chart_list = []
-      excel_filename = TestDirectory.instance.results_directory + school_name + '- drilldown and timeshift.xlsx'
+      excel_filename = File.join(TestDirectory.instance.results_directory('Timescales'), school_name + '- drilldown and timeshift.xlsx')
       school = load_school(school_name)
 
       puts 'Calculating standard chart'

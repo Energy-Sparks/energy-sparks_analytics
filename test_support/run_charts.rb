@@ -4,12 +4,12 @@ class RunAnalyticsTest
 
   attr_reader :failed_charts
 
-  def initialize(school, timer_type = :known)
+  def initialize(school, results_sub_directory_type:)
     @school = school
-    @timer_type = timer_type
     @worksheets = Hash.new { |worksheet_name, charts| worksheet_name[charts] = [] }
     @runtime = Time.now.strftime('%d/%m/%Y %H:%M:%S')
     @failed_charts = []
+    @results_sub_directory_type = results_sub_directory_type
   end
 
   def class_names_to_excel_tab_names(classes)
@@ -97,7 +97,9 @@ class RunAnalyticsTest
   end
 
   def excel_filename
-    TestDirectory.instance.results_directory + @school.name + excel_variation + '.xlsx'
+    x = File.join(TestDirectory.instance.results_directory(@results_sub_directory_type), @school.name + excel_variation + '.xlsx')
+    puts "Gort here #{x} type #{@results_sub_directory_type}"
+    x
   end
 
   def report_calculation_time(control)
@@ -243,7 +245,7 @@ class RunAnalyticsTest
   end
 
   def write_html(filename_suffix = '')
-    html_file = HtmlFileWriter.new(@school.name + filename_suffix)
+    html_file = HtmlFileWriter.new(@school.name + filename_suffix, results_sub_directory_type: results_sub_directory_type)
     @worksheets.each do |worksheet_name, charts|
       html_file.write_header(worksheet_name)
       charts.compact.each do |chart|
