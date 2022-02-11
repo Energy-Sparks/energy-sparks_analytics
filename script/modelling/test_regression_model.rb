@@ -6,7 +6,7 @@ require_rel '../test_support'
 require './script/report_config_support.rb'
 
 script = {
-  logger1:                  { name: TestDirectoryConfiguration::LOG + "/model fitting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+  logger1:                  { name: TestDirectory.instance.log_directory + "/model fitting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   schools:                  ['.*'],
   source:                   :analytics_db,
   model_fitting:            {

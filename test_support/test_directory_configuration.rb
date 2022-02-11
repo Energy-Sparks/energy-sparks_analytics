@@ -1,12 +1,7 @@
-module TestDirectoryConfiguration
-  LOG                 = './log'
-  CHARTS              = './Reports'
-  BENCHMARKFILENAME   = './Results/testtimes/benchmarks.csv'
-  RESULTS             = './Results'       
-  CHARTCOMPARISONBASE = ENV['ANALYTICSTESTRESULTDIR'] + '/Charts/Base/'
-  CHARTCOMPARISONNEW  = ENV['ANALYTICSTESTRESULTDIR'] + '/Charts/New/'
-end
-
+# manages test directory structure, creating directories as necessary
+# asks for environment variable 'ANALYTICSTESTDIR' to be set, if not already
+# then if run again creates meter collection directory, to which the user needs
+# to copy files
 class TestDirectory
   include Singleton
   class EnvironmentVariableNotSet < StandardError; end
@@ -75,7 +70,8 @@ class TestDirectory
   end
 
   def test_base_dir_name(test_name_type)
-    File.join(base_dir, test_name_type)
+    dir_name = File.join(base_dir, test_name_type)
+    make_dir(dir_name)
   end
 
   def base_dir_env_variable

@@ -42,13 +42,13 @@ end
 def script(scenarios)
   control = RunTargetingAndTracking.default_control_settings.deep_merge({ control: {scenarios: scenarios}})
   {
-    logger1:                { name: TestDirectoryConfiguration::LOG + "/test targeting and tracking %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+    logger1:                { name: TestDirectory.instance.log_directory + "/test targeting and tracking %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
 
     schools:                ['*', 'bathxxxxxxampton*', 'bishop*'],
 
     source:                 :unvalidated_meter_data,
 
-    logger2:                { name: TestDirectoryConfiguration::LOG + "/targeting and tracking %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
+    logger2:                { name: TestDirectory.instance.log_directory + "/targeting and tracking %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
 
     targeting_and_tracking: control
   }

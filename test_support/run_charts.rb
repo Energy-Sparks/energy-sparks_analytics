@@ -4,6 +4,16 @@ class RunAnalyticsTest
 
   attr_reader :failed_charts
 
+  def self.default_config
+    {
+      logger1:        { name: TestDirectory.instance.log_directory + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+      ruby_profiler:  false,
+      schools:        ['*'],
+      source:         :unvalidated_meter_data,
+      logger2:        { name: TestDirectory.instance.log_directory + "/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
+    }
+  end
+
   def initialize(school, results_sub_directory_type:)
     @school = school
     @worksheets = Hash.new { |worksheet_name, charts| worksheet_name[charts] = [] }
@@ -33,7 +43,7 @@ class RunAnalyticsTest
 
   def compare_results(control, object_name, results, asof_date)
     results.each do |type, content|
-      comparison = CompareContent2.new(@school.name, control)
+      comparison = CompareContent2.new(@school.name, control, results_sub_directory_type: @results_sub_directory_type)
       name = "#{asof_date.strftime('%Y%m%d')} #{object_name} #{type}"
       comparison.save_and_compare(name, content)
     end
@@ -68,7 +78,6 @@ class RunAnalyticsTest
     end
     save_to_excel
     write_html
-    save_chart_calculation_times
     report_calculation_time(control)
     CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
     log_all_results
@@ -97,9 +106,7 @@ class RunAnalyticsTest
   end
 
   def excel_filename
-    x = File.join(TestDirectory.instance.results_directory(@results_sub_directory_type), @school.name + excel_variation + '.xlsx')
-    puts "Gort here #{x} type #{@results_sub_directory_type}"
-    x
+    File.join(TestDirectory.instance.results_directory(@results_sub_directory_type), @school.name + excel_variation + '.xlsx')
   end
 
   def report_calculation_time(control)
@@ -212,22 +219,6 @@ class RunAnalyticsTest
       excel.add_charts(worksheet_name, charts.compact)
     end
     excel.close
-  end
-
-  def save_chart_calculation_times
-    File.open(TestDirectoryConfiguration::BENCHMARKFILENAME, 'a') do |file|
-      @worksheets.each_value do |charts|
-        charts.each do |chart|
-          data = [
-            @school.name,
-            chart[:name],
-            @runtime,
-            chart[:calculation_time]
-          ]
-          file.puts data.join(',')
-        end
-      end
-    end
   end
 
   def average_calculation_time

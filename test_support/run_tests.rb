@@ -5,7 +5,6 @@ $logger_format = 1
 
 class RunTests
   include Logging
-  include TestDirectoryConfiguration
 
   def initialize(test_script)
     @test_script = test_script

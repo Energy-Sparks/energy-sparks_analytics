@@ -151,8 +151,9 @@ class CompareContentResults
       puts 'Unable to save and compare composite chart'
       return
     end
-    save_chart(TestDirectoryConfiguration::CHARTCOMPARISONNEW, chart_name, charts)
-    previous_chart = load_chart(TestDirectoryConfiguration::CHARTCOMPARISONBASE, chart_name)
+
+    save_chart(TestDirectory.instance.results_directory(@results_sub_directory_type), chart_name, charts)
+    previous_chart = load_chart(TestDirectory.instance.base_comparison_directory(@results_sub_directory_type), chart_name)
     if previous_chart.nil?
       @missing.push(chart_name)
       return
@@ -249,11 +250,11 @@ class CompareContentResults
   end
 end
 
-
 class CompareContent2 < CompareContentResults
-  def initialize(school_name, control)
+  def initialize(school_name, control, results_sub_directory_type:)
     @school_name = school_name
     @control = control
+    @results_sub_directory_type =  results_sub_directory_type
   end
 
   def save_and_compare(type, content)
@@ -291,11 +292,11 @@ class CompareContent2 < CompareContentResults
   end
 
   def comparison_directory
-    @control[:compare_results][:comparison_directory]
+    TestDirectory.instance.base_comparison_directory(@results_sub_directory_type)
   end
 
   def output_directory
-    control[:compare_results][:output_directory]
+    TestDirectory.instance.results_comparison_directory(@results_sub_directory_type)
   end
 
   def report_difference(type, benchmark, new_content, differs)

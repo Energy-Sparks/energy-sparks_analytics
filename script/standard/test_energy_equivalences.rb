@@ -10,7 +10,7 @@ module Logging
 end
 
 script = {
-  logger1:                  { name: TestDirectoryConfiguration::LOG + "/equivalences %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+  logger1:                  { name: TestDirectory.instance.log_directory + "/equivalences %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   schools:                  ['*'], # ['Round.*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/equivalences %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
