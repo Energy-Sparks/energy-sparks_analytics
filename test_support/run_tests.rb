@@ -55,8 +55,8 @@ class RunTests
         run_kpi_calculations_deprecated(configuration)
       when :model_fitting
         run_model_fitting(configuration[:control])
-      when :run_benchmark_charts_and_tables
-        run_benchmark_charts_and_tables(configuration, @test_script[:schools], @test_script[:source])
+      when :benchmarks
+        run_benchmarks(configuration, @test_script[:schools], @test_script[:source])
       when :management_summary_table
         run_management_summary_tables(configuration[:combined_html_output_file], configuration[:control])
       else
@@ -313,7 +313,7 @@ class RunTests
     end
   end
 
-  def run_benchmark_charts_and_tables(control, schools, source)
+  def run_benchmarks(control, schools, source)
     benchmark = RunBenchmarks.new(control, schools, source)
     benchmark.run
   end

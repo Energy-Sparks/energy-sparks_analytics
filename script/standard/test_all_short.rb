@@ -83,28 +83,6 @@ script = {
       ]
     }
   },
-
-  run_benchmark_charts_and_tables: {
-    filename:       './TestResults/benchmark database',
-    no_transform_frontend_yaml: {
-      from_filename: ENV['ANALYTICSTESTRESULTDIR'] + 'benchmark_results_data',
-      to_filename:   ENV['ANALYTICSTESTRESULTDIR'] + 'benchmark_results_data analytics'
-    },
-
-    calculate_and_save_variables: true,
-    asof_date:      run_date,
-
-    run_content:    {
-      asof_date:      run_date,
-      user:          { user_role: :admin }, 
-      filter:        nil,
-    },
-    compare_results: [
-      :report_differences,
-      { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Benchmark\Base\\' },
-      { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Benchmark\New\\' }
-    ]
-  }
 }
 
 RunTests.new(script).run
