@@ -5,7 +5,7 @@ require_rel '../../test_support'
 ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Working'
 
 script = {
-  logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+  logger1:                  { name: TestDirectory.instance.log_directory + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
   schools:                  ['bathamp*'], # ['Round.*'],
   source:                   :unvalidated_meter_data,

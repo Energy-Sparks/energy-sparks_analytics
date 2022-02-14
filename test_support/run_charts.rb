@@ -4,12 +4,22 @@ class RunAnalyticsTest
 
   attr_reader :failed_charts
 
-  def initialize(school, timer_type = :known)
+  def self.default_config
+    {
+      logger1:        { name: TestDirectory.instance.log_directory + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+      ruby_profiler:  false,
+      schools:        ['*'],
+      source:         :unvalidated_meter_data,
+      logger2:        { name: TestDirectory.instance.log_directory + "/pupil dashboard %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
+    }
+  end
+
+  def initialize(school, results_sub_directory_type:)
     @school = school
-    @timer_type = timer_type
     @worksheets = Hash.new { |worksheet_name, charts| worksheet_name[charts] = [] }
     @runtime = Time.now.strftime('%d/%m/%Y %H:%M:%S')
     @failed_charts = []
+    @results_sub_directory_type = results_sub_directory_type
   end
 
   def class_names_to_excel_tab_names(classes)
@@ -33,7 +43,7 @@ class RunAnalyticsTest
 
   def compare_results(control, object_name, results, asof_date)
     results.each do |type, content|
-      comparison = CompareContent2.new(@school.name, control)
+      comparison = CompareContent2.new(@school.name, control, results_sub_directory_type: @results_sub_directory_type)
       name = "#{asof_date.strftime('%Y%m%d')} #{object_name} #{type}"
       comparison.save_and_compare(name, content)
     end
@@ -68,7 +78,6 @@ class RunAnalyticsTest
     end
     save_to_excel
     write_html
-    save_chart_calculation_times
     report_calculation_time(control)
     CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
     log_all_results
@@ -97,7 +106,7 @@ class RunAnalyticsTest
   end
 
   def excel_filename
-    TestDirectory.instance.results_directory + @school.name + excel_variation + '.xlsx'
+    File.join(TestDirectory.instance.results_directory(@results_sub_directory_type), @school.name + excel_variation + '.xlsx')
   end
 
   def report_calculation_time(control)
@@ -212,22 +221,6 @@ class RunAnalyticsTest
     excel.close
   end
 
-  def save_chart_calculation_times
-    File.open(TestDirectoryConfiguration::BENCHMARKFILENAME, 'a') do |file|
-      @worksheets.each_value do |charts|
-        charts.each do |chart|
-          data = [
-            @school.name,
-            chart[:name],
-            @runtime,
-            chart[:calculation_time]
-          ]
-          file.puts data.join(',')
-        end
-      end
-    end
-  end
-
   def average_calculation_time
     all_times = @worksheets.values.map { |charts| charts.map { |chart| chart[:calculation_time] } }.flatten
     return Float::NAN if all_times.empty?
@@ -243,7 +236,7 @@ class RunAnalyticsTest
   end
 
   def write_html(filename_suffix = '')
-    html_file = HtmlFileWriter.new(@school.name + filename_suffix)
+    html_file = HtmlFileWriter.new(@school.name + filename_suffix, results_sub_directory_type: results_sub_directory_type)
     @worksheets.each do |worksheet_name, charts|
       html_file.write_header(worksheet_name)
       charts.compact.each do |chart|

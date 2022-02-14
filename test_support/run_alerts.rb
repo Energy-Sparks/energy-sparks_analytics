@@ -7,8 +7,37 @@ require 'hashdiff'
 
 class RunAlerts < RunAnalyticsTest
   def initialize(school)
-    super(school, :alert)
+    super(school, results_sub_directory_type: self.class.test_type)
     @@class_methods_run ||= []
+  end
+
+  def self.test_type
+    'Alerts'
+  end
+
+  def self.default_config
+    self.superclass.default_config.merge({ alerts: self.alerts_default_config })
+  end
+
+  def self.alerts_default_config
+    {
+      no_alerts:   [ AlertSchoolWeekComparisonGas ], #,  AlertCommunitySchoolWeekComparisonElectricity  AlertCommunityPreviousHolidayComparisonGas,
+      alerts: nil,
+      control:  {
+                  compare_results: {
+                    summary:              :differences, # true || false || :detail || :differences
+                    report_if_differs:    true,
+                    methods:              %i[raw_variables_for_saving front_end_template_data],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
+                    class_methods:        %i[front_end_template_variables],
+                  },
+  
+                  no_outputs: %i[raw_variables_for_saving],
+                  log: %i[],
+  
+                  no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
+                  no_benchmark:          %i[school alert ], # detail],
+                }
+    }
   end
 
   def run(alerts, control, asof_date)
@@ -54,7 +83,7 @@ class RunAlerts < RunAnalyticsTest
 
   def save_class_methods_to_yaml_and_compare_results(alert_class, alert, control, asof_date)
     control[:compare_results][:class_methods].each do |method|
-      comparison = CompareContent2.new(alert_class.name, control)
+      comparison = CompareContent2.new(alert_class.name, control, results_sub_directory_type: @results_sub_directory_type)
       name = "#{alert_class.name} #{method}"
       unless @@class_methods_run.include?(name)
         comparison.save_and_compare(name, method_call_results(alert_class, alert, method)) 

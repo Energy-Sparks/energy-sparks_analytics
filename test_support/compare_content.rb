@@ -1,11 +1,12 @@
 class CompareContentResults
   attr_reader :control, :school_or_type
-  def initialize(control, school_or_type)
+  def initialize(control, school_or_type, results_sub_directory_type:)
     @control = control # [ :summary, :quick_comparison, :report_differing_charts, :report_differences ]
     @school_or_type = school_or_type
     @identical_result_count = 0
     @differing_results = {} # [chart_name] => differences
     @missing = []
+    @results_sub_directory_type = results_sub_directory_type
   end
 
   def save_and_compare_content(page, content, merge_page = false)
@@ -26,11 +27,11 @@ class CompareContentResults
   private
 
   def comparison_directory
-    File.join(control_hash_value(:comparison_directory))
+    TestDirectory.instance.base_comparison_directory(@results_sub_directory_type)
   end
 
   def output_directory
-    File.join(control_hash_value(:output_directory))
+    TestDirectory.instance.results_comparison_directory(@results_sub_directory_type)
   end
 
   def control_hash_value(type)
@@ -150,8 +151,9 @@ class CompareContentResults
       puts 'Unable to save and compare composite chart'
       return
     end
-    save_chart(TestDirectoryConfiguration::CHARTCOMPARISONNEW, chart_name, charts)
-    previous_chart = load_chart(TestDirectoryConfiguration::CHARTCOMPARISONBASE, chart_name)
+
+    save_chart(TestDirectory.instance.results_directory(@results_sub_directory_type), chart_name, charts)
+    previous_chart = load_chart(TestDirectory.instance.base_comparison_directory(@results_sub_directory_type), chart_name)
     if previous_chart.nil?
       @missing.push(chart_name)
       return
@@ -248,11 +250,11 @@ class CompareContentResults
   end
 end
 
-
 class CompareContent2 < CompareContentResults
-  def initialize(school_name, control)
+  def initialize(school_name, control, results_sub_directory_type:)
     @school_name = school_name
     @control = control
+    @results_sub_directory_type =  results_sub_directory_type
   end
 
   def save_and_compare(type, content)
@@ -290,11 +292,11 @@ class CompareContent2 < CompareContentResults
   end
 
   def comparison_directory
-    @control[:compare_results][:comparison_directory]
+    TestDirectory.instance.base_comparison_directory(@results_sub_directory_type)
   end
 
   def output_directory
-    control[:compare_results][:output_directory]
+    TestDirectory.instance.results_comparison_directory(@results_sub_directory_type)
   end
 
   def report_difference(type, benchmark, new_content, differs)

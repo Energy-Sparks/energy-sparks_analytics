@@ -37,21 +37,9 @@ profiles
 .idea
 
 InputData/*
-MeterReadings/*
-DCC/
-Results/*
 DCC/*
-OldInputData/*
-OldMeterReadings/*
 Simulator/*
-documents/*
-TestResults/*
-BenchmarkLog/*
-Charts/*
-Alerts/*
 Rails/*
 Rails/webapp/*
 webapp/*
 webapp
-AggregatedMeterCollections/*
-MeterCollections/*

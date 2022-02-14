@@ -9,30 +9,10 @@ module Logging
   logger.level = :debug
 end
 
-script = {
-  logger1:                  { name: TestDirectoryConfiguration::LOG + "/equivalences %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-  schools:                  ['*'], # ['Round.*'],
-  source:                   :unvalidated_meter_data,
-  logger2:                  { name: "./log/equivalences %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
-  equivalences:          {
-                              control: {
-                                periods: [
-                                  {academicyear: 0},
-                                  {academicyear: -1},
-                                  {year: 0},
-                                  {workweek: 0},
-                                  {week: 0},
-                                  {schoolweek: 0},
-                                  {schoolweek: -1},
-                                  {month: 0},
-                                  {month: -1}                    
-                                ],
-                                compare_results: [
-                                  { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Equivalences\Base\\' },
-                                  { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Equivalences\New\\' }
-                                ]
-                              }
-                            }
+overrides = {
+  schools:  ['bath*']
 }
+
+script = RunEquivalences.default_config.deep_merge(overrides)
 
 RunTests.new(script).run

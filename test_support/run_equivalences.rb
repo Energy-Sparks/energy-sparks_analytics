@@ -1,4 +1,33 @@
 class RunEquivalences < RunCharts
+  def initialize(school)
+    super(school, results_sub_directory_type: self.class.test_type)
+  end
+
+  def self.test_type
+    'Equivalences'
+  end
+
+  def self.default_config
+    self.superclass.default_config.merge({ equivalences: self.equivalence_default_config })
+  end
+
+  def self.equivalence_default_config
+    {
+      control: {
+        periods: [
+          {academicyear: 0},
+          {academicyear: -1},
+          {year: 0},
+          {workweek: 0},
+          {week: 0},
+          {schoolweek: 0},
+          {schoolweek: -1},
+          {month: 0},
+          {month: -1}                    
+        ],
+      }
+    }
+  end
 
   def run_equivalences(control)
     periods = control[:periods]
@@ -14,7 +43,7 @@ class RunEquivalences < RunCharts
           equivalences[name.to_sym] = equivalence
         end
       end
-      comparison = CompareContentResults.new(control, @school.name)
+      comparison = CompareContentResults.new(control, @school.name, results_sub_directory_type: self.class.test_type)
       comparison.save_and_compare_content(fuel_type.to_s, [{ type: :eq, content: equivalences }])
     end
   end

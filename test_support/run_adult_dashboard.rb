@@ -1,7 +1,36 @@
 class RunAdultDashboard < RunCharts
 
   def initialize(school)
-    super(school, 'energy analysis')
+    super(school, results_sub_directory_type: self.class.test_type)
+  end
+
+  def self.test_type
+    'AdultDashboard'
+  end
+
+  def self.default_config
+    self.superclass.default_config.merge({ adult_dashboard: self.adult_dashboard_default_config })
+  end
+
+  def self.adult_dashboard_default_config
+    {
+      control: {
+        root:    :adult_analysis_page, # :pupil_analysis_page,
+        no_chart_manipulation: %i[drilldown timeshift],
+        display_average_calculation_rate: true,
+        summarise_differences: false,
+        report_failed_charts:   :summary, # :detailed
+        page_calculation_time: false,
+        user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },
+
+        no_pages: %i[baseload],
+        compare_results: [
+          :summary,
+          #:report_differences,
+          #:report_differing_charts,
+        ] # :quick_comparison,
+      }
+    }
   end
 
   def run_flat_dashboard(control)
@@ -130,7 +159,7 @@ class RunAdultDashboard < RunCharts
   end
 
   def comparison_differences(control, school_name, page, content)
-    comparison = CompareContentResults.new(control, school_name)
+    comparison = CompareContentResults.new(control, school_name, results_sub_directory_type: @results_sub_directory_type)
 
     comparison.save_and_compare_content(page, content, true)
   end
@@ -308,7 +337,7 @@ class RunAdultDashboard < RunCharts
   end
 
   def write_html(filename_suffix: '- adult dashboard')
-    html_file = HtmlFileWriter.new(@school.name + filename_suffix)
+    html_file = HtmlFileWriter.new(@school.name + filename_suffix, results_sub_directory_type: @results_sub_directory_type)
     html_file.write_header_footer('', @all_html, nil)
     html_file.close
   end

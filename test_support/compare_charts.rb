@@ -5,6 +5,7 @@ class CompareChartResults
     @school_name = school_name
     @identical_result_count = 0
     @differing_results = {} # [chart_name] => differences
+    @directory_name = 'Charts'
     @missing = []
   end
 
@@ -38,11 +39,11 @@ class CompareChartResults
   end
 
   def comparison_directory
-    config_directory(:comparison_directory) || TestDirectoryConfiguration::CHARTCOMPARISONBASE
+    TestDirectory.instance.base_comparison_directory(@directory_name)
   end
 
   def output_directory
-    config_directory(:output_directory) || TestDirectoryConfiguration::CHARTCOMPARISONNEW
+    TestDirectory.instance.results_directory(@directory_name)
   end
 
   def config_directory(type)

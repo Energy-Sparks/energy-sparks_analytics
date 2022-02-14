@@ -5,59 +5,8 @@ $logger_format = 1
 
 class RunTests
   include Logging
-  include TestDirectoryConfiguration
 
-  DEFAULT_TEST_SCRIPT = {
-    logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
-    ruby_profiler:            true,
-=begin
-    dark_sky_temperatures:    nil,
-    grid_carbon_intensity:    nil,
-    sheffield_solar_pv:       nil,
-=end
-    schools:                  ['White.*', 'Trin.*', 'Round.*' ,'St John.*'],
-    source:                   :analytics_db,
-    logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
-    drilldown: true,
-    no_reports:                  {
-                                charts: [
-                                  :dashboard,
-                                  # adhoc_worksheet: { name: 'Test', charts: [:gas_latest_years, :gas_by_day_of_week] }
-                                ],
-                                control: {
-                                  display_average_calculation_rate: true,
-                                  report_failed_charts:   :summary,
-                                  compare_results:        [ :summary, :report_differing_charts, :report_differences ] # :quick_comparison,
-                                }
-                              }, 
-
-    alerts:                   {
-                                  alerts:   nil, # [ AlertOutOfHoursElectricityUsage ],
-                                  control:  {
-                                              # print_alert_banner: true,
-                                              # alerts_history: true,
-                                              print_school_name_banner: true,
-                                              outputs:           %i[], # front_end_template_variables front_end_template_data raw_variables_for_saving],
-                                              not_save_and_compare:  {
-                                                                    summary:      true,
-                                                                    h_diff:     { use_lcs: false, :numeric_tolerance => 0.000001 },
-                                                                    data: %i[
-                                                                      front_end_template_variables
-                                                                      raw_variables_for_saving
-                                                                      front_end_template_data
-                                                                      front_end_template_chart_data
-                                                                      front_end_template_table_data
-                                                                    ]
-                                                                  },
-
-                                              save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
-                                              benchmark:          %i[school alert ], # detail],
-                                              asof_date:          (Date.new(2018,6,14)..Date.new(2019,6,14)).each_slice(7).map(&:first)
-                                            } 
-                              }
-  }.freeze
-
-  def initialize(test_script = DEFAULT_TEST_SCRIPT)
+  def initialize(test_script)
     @test_script = test_script
     @log_filename = STDOUT
   end
@@ -103,11 +52,11 @@ class RunTests
       when :equivalences
         run_equivalences(configuration[:control])
       when :kpi_analysis
-        run_kpi_calculations(configuration)
+        run_kpi_calculations_deprecated(configuration)
       when :model_fitting
         run_model_fitting(configuration[:control])
-      when :run_benchmark_charts_and_tables
-        run_benchmark_charts_and_tables(configuration, @test_script[:schools], @test_script[:source])
+      when :benchmarks
+        run_benchmarks(configuration, @test_script[:schools], @test_script[:source])
       when :management_summary_table
         run_management_summary_tables(configuration[:combined_html_output_file], configuration[:control])
       else
@@ -120,23 +69,13 @@ class RunTests
 
   private
 
-  def school_factory
-    $SCHOOL_FACTORY ||= SchoolFactory.new
+  def load_school(school_name, cache_school = false)
+    override = @meter_attribute_overrides || {}
+    SchoolFactory.instance.load_school(@meter_readings_source, school_name, meter_attributes_overrides: override, cache: cache_school == true)
   end
 
-  def load_school(school_name, cache_school = false)
-    school = nil
-    begin
-      attributes_override = @meter_attribute_overrides.nil? ? {} : @meter_attribute_overrides
-      school = school_factory.load_or_use_cached_meter_collection(:name, school_name, @meter_readings_source, meter_attributes_overrides: attributes_override, cache: cache_school == true)
-    rescue Exception => e
-      puts "=" * 100
-      puts "Load of school #{school_name} failed"
-      puts "=" * 100
-      puts e.message
-      puts e.backtrace
-    end
-    school
+  def schools_list
+    SchoolFactory.instance.school_file_list(@meter_readings_source, @school_name_pattern_match)
   end
 
   def update_dark_sky_temperatures
@@ -176,7 +115,7 @@ class RunTests
 
   def run_drilldown
     schools_list.each do |school_name|
-      excel_filename = TestDirectory.instance.results_directory + school_name + '- drilldown.xlsx'
+      excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- drilldown.xlsx')
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_name = :group_by_week_electricity
@@ -196,7 +135,7 @@ class RunTests
     chart_name = control[:chart_name]
 
     schools_list.each do |school_name|
-      excel_filename = TestDirectory.instance.results_directory + school_name + '- timescale shift.xlsx'
+      excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- timescale shift.xlsx')
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_config = chart_manager.get_chart_config(chart_name)
@@ -262,7 +201,7 @@ class RunTests
       stop_profiler('management table')
       html += "<h2>#{school.name}</h2>" + test.html
     end
-    html_writer = HtmlFileWriter.new(control[:combined_html_output_file])
+    html_writer = HtmlFileWriter.new(control[:combined_html_output_file], results_sub_directory_type: RunManagementSummaryTable.test_type)
     html_writer.write(html)
     html_writer.close
   end
@@ -292,7 +231,7 @@ class RunTests
   def run_timescales_drilldown
     schools_list.each do |school_name|
       chart_list = []
-      excel_filename = TestDirectory.instance.results_directory + school_name + '- drilldown and timeshift.xlsx'
+      excel_filename = File.join(TestDirectory.instance.results_directory('Timescales'), school_name + '- drilldown and timeshift.xlsx')
       school = load_school(school_name)
 
       puts 'Calculating standard chart'
@@ -363,7 +302,7 @@ class RunTests
     chart_results.push(new_chart_results)
   end
 
-  def run_kpi_calculations(config)
+  def run_kpi_calculations_deprecated(config)
     calculation_results = Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
     schools_list.sort.each do |school_name|
       school = load_school(school_name)
@@ -374,7 +313,7 @@ class RunTests
     end
   end
 
-  def run_benchmark_charts_and_tables(control, schools, source)
+  def run_benchmarks(control, schools, source)
     benchmark = RunBenchmarks.new(control, schools, source)
     benchmark.run
   end
@@ -440,34 +379,8 @@ class RunTests
     @@es_logger_file.file = filename
   end
 
-  def schools_list
-    RunTests.resolve_school_list(@meter_readings_source, @school_name_pattern_match)
-  end
 
-  def self.resolve_school_list(source, school_name_pattern_match)
-    list = case source
-    when :analytics_db
-      AnalysticsSchoolAndMeterMetaData.new.match_school_names(school_name_pattern_match)
-    when :aggregated_meter_collection
-      matching_yaml_files_in_directory('aggregated-meter-collection-', school_name_pattern_match)
-    when :validated_meter_collection
-      matching_yaml_files_in_directory('validated-data-', school_name_pattern_match)
-    when :unvalidated_meter_collection
-      matching_yaml_files_in_directory('unvalidated-meter-collection', school_name_pattern_match)
-    when :unvalidated_meter_data, :dcc_n3rgy_override_with_files
-      matching_yaml_files_in_directory('unvalidated-data-', school_name_pattern_match)
-    end
-    puts "Running tests for #{list.length} schools: #{list.join('; ')}"
-    list
-  end
 
-  def self.matching_yaml_files_in_directory(file_type, school_pattern_matches)
-    filenames = school_pattern_matches.map do |school_pattern_match|
-      match = file_type + school_pattern_match + '.yaml'
-      Dir[match, base: SchoolFactory.meter_collection_directory]
-    end.flatten.uniq
-    filenames.map { |filename| filename.gsub(file_type,'').gsub('.yaml','') }
-  end
 
   def generate_analytics_school_meta_data
     meta_data = {}

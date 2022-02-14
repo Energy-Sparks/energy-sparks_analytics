@@ -8,7 +8,7 @@ ENV['ANALYTICSTESTRESULTDIR']               += '\BenchmarkResults'
 run_date = Date.new(2021, 12, 10)
 
 script = {
-  logger1:                  { name: TestDirectoryConfiguration::LOG + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+  logger1:                  { name: TestDirectory.instance.log_directory + "/datafeeds %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
   schools:                  ['*'],
   source:                   :unvalidated_meter_data,
@@ -83,28 +83,6 @@ script = {
       ]
     }
   },
-
-  run_benchmark_charts_and_tables: {
-    filename:       './TestResults/benchmark database',
-    no_transform_frontend_yaml: {
-      from_filename: ENV['ANALYTICSTESTRESULTDIR'] + 'benchmark_results_data',
-      to_filename:   ENV['ANALYTICSTESTRESULTDIR'] + 'benchmark_results_data analytics'
-    },
-
-    calculate_and_save_variables: true,
-    asof_date:      run_date,
-
-    run_content:    {
-      asof_date:      run_date,
-      user:          { user_role: :admin }, 
-      filter:        nil,
-    },
-    compare_results: [
-      :report_differences,
-      { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Benchmark\Base\\' },
-      { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Benchmark\New\\' }
-    ]
-  }
 }
 
 RunTests.new(script).run

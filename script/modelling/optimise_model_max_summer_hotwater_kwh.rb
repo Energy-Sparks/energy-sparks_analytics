@@ -357,7 +357,7 @@ end
 
 def test_script_config(school_name_pattern_match, source_db, attribute_overrides)
   {
-    logger1:                  { name: TestDirectoryConfiguration::LOG + "/model fitting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+    logger1:                  { name: TestDirectory.instance.log_directory + "/model fitting %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
     schools:                    school_name_pattern_match,
     source:                     source_db,
     meter_attribute_overrides:  attribute_overrides,

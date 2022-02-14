@@ -7,7 +7,7 @@ require_rel '../test_support'
 require './script/report_config_support.rb'
 
 script = {
-  logger1:                  { name: TestDirectoryConfiguration::LOG + "/pv %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
+  logger1:                  { name: TestDirectory.instance.log_directory + "/pv %{time}.log", format: "%{severity.ljust(5, ' ')}: %{msg}\n" },
   # ruby_profiler:            true,
   schools:                  [
                               'long*',

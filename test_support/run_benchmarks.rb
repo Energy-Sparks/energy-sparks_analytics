@@ -10,7 +10,6 @@ class RunBenchmarks
     @control = control
     @source = source
     @school_pattern_match = schools
-    transform_front_end_yaml_file(control[:transform_frontend_yaml]) if control.key?(:transform_frontend_yaml)
     @database = BenchmarkDatabase.new(control[:filename])
     @source_of_school_data = control[:source]
   end
@@ -21,7 +20,33 @@ class RunBenchmarks
     run_content(control[:run_content]) if control.key?(:run_content)
   end
 
+  def self.default_config
+    RunAnalyticsTest.default_config.merge({ benchmarks: benchmark_default_config })
+  end
+
+  def self.benchmark_default_config
+    {
+      filename:       File.join(TestDirectory.instance.test_directory_name(test_type), 'benchmark database'),
+      calculate_and_save_variables: true,
+      asof_date:      Date.new(2022, 1, 20),
+      # filter:         ->{ addp_area.include?('Sheffield') },
+      # run_charts_and_tables: Date.new(2019,10,16),
+      run_content:    {
+        asof_date:      Date.new(2022, 1, 20),
+        user:          { user_role: :admin }, # { user_role: :analytics, staff_role: nil }, # { user_role: :admin },
+        filter:        nil, #->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
+      },
+      compare_results: [
+        :report_differences,
+      ]
+    }
+  end
+  
   private
+
+  def self.test_type
+    'Benchmarks'
+  end
 
   # front end uses strings for keys, analytics symbols
   def transform_front_end_yaml_file(filenames)
@@ -37,9 +62,9 @@ class RunBenchmarks
   end
 
   def run_alerts_to_update_database
-    school_list = RunTests.resolve_school_list(@source, @school_pattern_match)
+    school_list = SchoolFactory.instance.school_file_list(@source, @school_pattern_match)
     school_list.sort.each do |school_name|
-      school = load_school(school_name, @source)
+      school = SchoolFactory.instance.load_school(@source, school_name)
       calculate_alerts(school, control[:asof_date])
     end
 
@@ -65,7 +90,7 @@ class RunBenchmarks
 
       content = content_manager.content(db, page_name, filter: config[:filter], user_type: config[:user])
 
-      comparison = CompareContentResults.new(control, '')
+      comparison = CompareContentResults.new(control, '', results_sub_directory_type: self.class.test_type)
       comparison.save_and_compare_content(page_name, content)
 
       page_html, page_charts, page_tables, page_table_composites = process_content(content)
@@ -165,7 +190,7 @@ class RunBenchmarks
   end
 
   def save_html(html)
-    html_writer = HtmlFileWriter.new('benchmark')
+    html_writer = HtmlFileWriter.new('benchmark', results_sub_directory_type: self.class.test_type)
     html_writer.write(html)
     html_writer.close
   end
