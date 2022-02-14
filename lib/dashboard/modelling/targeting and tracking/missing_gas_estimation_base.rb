@@ -11,7 +11,7 @@ class MissingGasEstimationBase < MissingEnergyFittingBase
     @annual_kwh = annual_kwh
     @target_dates = target_dates
     raise MoreDataAlreadyThanEstimate, "amr data total #{@amr_data.total.round(0)} kWh > #{annual_kwh.round(0)}" if @amr_data.total > annual_kwh
-    raise EnoughGas, "Unexpected request to fill in missing gas data as > 365 days (#{@amr_data.days})" if @amr_data.days > 365
+    raise EnoughGas, "Unexpected request to fill in missing gas data as > 365 days (#{@amr_data.days})" if target_dates.days_benchmark_data > 365
   end
 
   def complete_year_amr_data
