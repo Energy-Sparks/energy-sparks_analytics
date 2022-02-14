@@ -7,7 +7,7 @@ module Logging
 end
 
 overrides = { 
-  schools: ['bath*'],
+  schools: ['king-ja*'],
   # adult_dashboard: { control: { pages: pages: %i[baseload] } }
 }
 
