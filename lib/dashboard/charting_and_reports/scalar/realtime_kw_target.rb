@@ -2,7 +2,7 @@
 # at a time - internded for CAD device target setting
 class RealTimeKwTarget
   MAXMATCHDATES = 5
-  MIDDLEOFBUCKET15MINS = 5 * 60 # half hour kWh reading centred 15 minutes into bucket
+  MIDDLEOFBUCKET15MINS = 15 * 60 # half hour kWh reading centred 15 minutes into bucket
   SECONDSINBUCKET = 30 * 60
 
   # result < 2KB
