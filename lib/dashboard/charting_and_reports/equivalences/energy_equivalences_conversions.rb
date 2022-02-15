@@ -78,7 +78,7 @@ class EnergyEquivalences
 
   LIBRARY_BOOK_£ = 5
 
-  TEACHING_ASSISTANT_£_HOUR = 8.33
+  TEACHING_ASSISTANT_£_HOUR = 9.64
 
   # https://www.fcrn.org.uk/research-library/quantifying-carbon-footprint-catering-service-public-schools => 1.7kg meat, 1.3kg veggie in Italy
   # https://www.fcrn.org.uk/research-library/contribution-healthy-and-unhealthy-primary-school-meals-greenhouse-gas-emissions => 0.7kg

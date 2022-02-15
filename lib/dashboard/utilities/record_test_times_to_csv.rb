@@ -45,7 +45,7 @@ class RecordTestTimes
         data.each do |test_type, test_data|
           test_data.each do |type, seconds|
             status = @calc_status.dig(school_name, test_type, type)
-            csv << [test_type, school_name, type, @time_log[school_name][test_type][type], status]
+            csv << [test_type, school_name, type, @time_log[school_name][test_type][type], status] unless @time_log.dig(school_name, test_type, type).nil?
           end
         end
       end
