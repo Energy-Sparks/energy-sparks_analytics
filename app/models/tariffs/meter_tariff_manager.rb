@@ -56,7 +56,7 @@ class MeterTariffManager
 
   def accounting_cost(date, kwh_x48)
     tariff = accounting_tariff_for_date(date)
-    
+
     return nil if tariff.nil?
 
     tariff.costs(date, kwh_x48)
@@ -224,8 +224,13 @@ class MeterTariffManager
   def backdate_dcc_tariffs(meter)
     return if dcc_tariffs.empty?
 
+    if meter.amr_data.nil?
+      logger.info 'Nil amr data - for benchmark/exemplar(?) dcc meter - not backdating dcc tariffs'
+      return
+    end
+
     days_gap = dcc_tariffs.first.tariff[:start_date] - meter.amr_data.start_date
-   
+
     override_days = meter.meter_attributes[:backdate_tariff].first[:days] if meter.meter_attributes.key?(:backdate_tariff)
 
     if override_days.nil?

@@ -86,7 +86,7 @@ class SchoolFactory
         school = YAML.load_file(yaml_filename)
       }
       # save to marshal for subsequent speedy load
-      File.open(filename, 'wb') { |f| f.write(Marshal.dump(school)) }
+      File.open(marshal_filename, 'wb') { |f| f.write(Marshal.dump(school)) }
     else
       RecordTestTimes.instance.record_time(school_filename, 'marshalload', ''){
         school = Marshal.load(File.open(marshal_filename))
