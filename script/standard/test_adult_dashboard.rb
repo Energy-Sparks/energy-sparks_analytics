@@ -7,8 +7,8 @@ module Logging
 end
 
 overrides = { 
-  schools: ['*'],
-  adult_dashboard: { control: { pages: %i[electric_target, gas_target] } }
+  schools: ['king-ja*'],
+  # adult_dashboard: { control: { pages: pages: %i[baseload] } }
 }
 
 script = RunAdultDashboard.default_config.deep_merge(overrides)

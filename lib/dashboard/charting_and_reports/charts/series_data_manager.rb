@@ -37,7 +37,7 @@ require_relative './../../../../app/models/open_close_times.rb'
 # single location containing text name of each series which appears in chart legend
 class SeriesNames
   HEATINGDAY      = 'Heating Day'.freeze
-  NONHEATINGDAY   = 'Non Heating Day'.freeze
+  NONHEATINGDAY   = 'Hot Water (& Kitchen)'.freeze
   HEATINGSERIESNAMES = [HEATINGDAY.freeze, NONHEATINGDAY.freeze].freeze
 
   SCHOOLDAYHEATING  = 'Heating On School Days'.freeze

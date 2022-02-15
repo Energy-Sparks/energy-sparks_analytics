@@ -1358,9 +1358,14 @@ class DashboardEnergyAdvice
     def generate_valid_advice
       header_template = %{
         <%= @body_start %>
-          <p>
-            This chart splits the last year into heating and non-heating days:
-          </p>
+        <p>
+          <%= school_name %> has its heating on for <%= school_heating_days %> school days each year,
+          which is <%= school_heating_day_adjective(school_heating_days) %>,
+          the average for schools is <%= average_school_heating_days %> days
+          The school has its heating on for <%= non_school_heating_days %> non-school days each year,
+          which is <%= non_school_heating_day_adjective(non_school_heating_days) %>,
+          the average for schools is <%= average_non_school_heating_days %> days
+      <p>
         <%= @body_end %>
       }.gsub(/^  /, '')
 
@@ -1369,19 +1374,24 @@ class DashboardEnergyAdvice
         footer_template = %{
           <%= @body_start %>
             <p>
-              This indicates whether the Energy Sparks modelling process is working correctly
-              and gives a visual representation on whether the school is energy efficient in
-              turning its heating on as late in the Autumn as other schools and off as early
-              in the spring.
+              Schools are able to reduce their heating consumption by reducing the length of the
+              heating season, remembering to turn the heating off in the Spring when warm weather
+              arrives and only on again in the Autumn when it gets cold. If the heating
+              is left on in warm weather, then it&apos;s often wasted as classroom windows
+              are opened to stop classrooms getting too hot, rather than the radiators being
+              turned off.
             </p>
             <p>
-              <%= school_name %> has its heating on for <%= school_heating_days %> school days each year,
-              which is <%= school_heating_day_adjective(school_heating_days) %>,
-              the average for schools is <%= average_school_heating_days %> days
-              The school has its heating on for <%= non_school_heating_days %> non-school days each year,
-              which is <%= non_school_heating_day_adjective(non_school_heating_days) %>,
-              the average for schools is <%= average_non_school_heating_days %> days
+              In the summer when the heating is off then the remaining gas consumption
+              is typically for hot water and in some schools for kitchens (which should
+              only consume gas in the mornings).
+            </p>
             <p>
+              This chart also makes it obvious if the heating has been left on during holidays.
+              Has your school left its heating on during holidays in the last year
+              and when did it turn the heating off in the summer?
+            </p>
+
           <%= @body_end %>
         }.gsub(/^  /, '')
 
