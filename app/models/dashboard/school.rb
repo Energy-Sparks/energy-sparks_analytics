@@ -10,7 +10,7 @@ module Dashboard
 
     # Activation date is when the school was activated by an administrator in the Energy Sparks front end - it is a date
     # Created at is when the school was created during the onboarding process - it is a timestamp
-    attr_reader :name, :address, :floor_area, :number_of_pupils, :school_type, :area_name, :postcode, :activation_date, :created_at
+    attr_reader :name, :address, :floor_area, :number_of_pupils, :school_type, :area_name, :postcode, :activation_date, :created_at, :school_times, :community_use_times
     attr_accessor :urn
 
     def initialize(
@@ -23,7 +23,9 @@ module Dashboard
       urn: nil,
       postcode: nil,
       activation_date: nil,
-      created_at: nil
+      created_at: nil,
+      school_times: [],
+      community_use_times: []
     )
       @school_type = school_type
       @name = name
@@ -36,6 +38,8 @@ module Dashboard
       @postcode = postcode
       @activation_date = activation_date
       @created_at = created_at
+      @school_times = school_times
+      @community_use_times = community_use_times
     end
 
     def to_s
