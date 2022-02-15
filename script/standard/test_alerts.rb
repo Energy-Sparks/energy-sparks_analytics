@@ -3,8 +3,8 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 overrides = {
-  schools:  ['bath*'],
-  alerts:   { alerts: nil, control: { asof_date: Date.new(2022, 1, 22) } }
+  schools:  ['*'],
+  alerts:   { alerts: [ AlertElectricityTarget1Week, AlertGasTarget1Week ], control: { asof_date: Date.new(2022, 2, 1) } }
 }
 
 script = RunAlerts.default_config.deep_merge(overrides)
