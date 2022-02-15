@@ -23,8 +23,9 @@ class RunEquivalences < RunCharts
           {schoolweek: 0},
           {schoolweek: -1},
           {month: 0},
-          {month: -1}                    
+          {month: -1}
         ],
+        compare_results: [ :report_differences ]
       }
     }
   end

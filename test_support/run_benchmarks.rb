@@ -197,7 +197,8 @@ class RunBenchmarks
 
   def save_charts_to_excel(charts)
     worksheets = { 'Test' => charts }
-    excel_filename = File.join(File.dirname(__FILE__), '../Results/benchmark' + '.xlsx')
+    dir = TestDirectory.instance.results_directory('Benchmarks')
+    excel_filename = File.join(dir, 'benchmark' + '.xlsx')
     excel = ExcelCharts.new(excel_filename)
     worksheets.each do |worksheet_name, charts|
       excel.add_charts(worksheet_name, charts.compact)
