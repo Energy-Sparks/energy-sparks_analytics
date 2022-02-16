@@ -61,6 +61,7 @@ class MeterCollection
     @pseudo_meter_attributes = pseudo_meter_attributes
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
+    process_school_times(school.school_times, school.community_use_times)
   end
 
   def merge_additional_pseudo_meter_attributes(pseudo_meter_attributes)
@@ -484,6 +485,10 @@ class MeterCollection
 
   def open_close_times
     @open_close_times ||= OpenCloseTimes.new(pseudo_meter_attributes(:school_level_data), holidays)
+  end
+
+  def process_school_times(school_day_times, community_times)
+    @open_close_times = OpenCloseTimes.convert_frontend_times(school_day_times, community_times, holidays)
   end
 
   def target_school(type = :day)
