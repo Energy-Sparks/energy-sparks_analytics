@@ -27,24 +27,18 @@ class OpenCloseTimes
   end
 
   def self.convert_frontend_times(school_times, community_times, holidays)
-    puts "Got here"
-    ap school_times
-    # ap community_times
     st = convert_frontend_time(school_times)
     ct = convert_frontend_time(community_times)
     OpenCloseTimes.new({ open_close_times: st + ct}, holidays)
   end
 
   def self.convert_frontend_time(times)
-    tttt = times.map do |time_period|
+    times.map do |time_period|
       convert_front_end_time_period(time_period)
     end
-    ap tttt
-    tttt
   end
 
   def self.convert_front_end_time_period(time_period)
-    ap time_period
     {
       type:             convert_front_end_usage_type(time_period[:usage_type]),
       holiday_calendar: convert_front_end_calendar_type(time_period[:calendar_period]),
@@ -76,6 +70,8 @@ class OpenCloseTimes
       :follows_school_calendar
     when :only_holidays
       :holidays_only
+    when :all_year
+      :no_holidays
     else
       raise UnknownFrontEndType, "Calendar period #{type}"
     end
