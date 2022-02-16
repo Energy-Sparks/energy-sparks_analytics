@@ -626,11 +626,23 @@ class Aggregator
       aggregate_by_day(bucketed_data, bucketed_data_count)
     end
     post_process_aggregation(chart_config, bucketed_data, bucketed_data_count)
-    [humanize_symbols(bucketed_data), humanize_symbols(bucketed_data_count), @xbucketor.compact_date_range_description, @meter_collection.name, @x_axis, @x_axis_bucket_date_ranges]
+
+    [
+      humanize_symbols(chart_config, bucketed_data),
+      humanize_symbols(chart_config, bucketed_data_count),
+      @xbucketor.compact_date_range_description,
+      @meter_collection.name,
+      @x_axis,
+      @x_axis_bucket_date_ranges
+    ]
   end
 
-  def humanize_symbols(hash)
-    hash.transform_keys{ |k| OpenCloseTime.humanize_symbol(k) }
+  def humanize_symbols(chart_config, hash)
+    if chart_config[:series_breakdown] == :daytype
+      hash.transform_keys{ |k| OpenCloseTime.humanize_symbol(k) }
+    else
+      hash
+    end
   end
 
   private
@@ -908,7 +920,6 @@ class Aggregator
     @x_axis = @bucketed_data[dd_or_temp_key]
     @x_axis_bucket_date_ranges = @xbucketor.x_axis_bucket_date_ranges # may not work? PH 7Oct2018
     @bucketed_data.delete(dd_or_temp_key)
-
     # insert dates back in as 'silent' y2_axis
     @data_labels = x_axis
   end
@@ -978,7 +989,6 @@ class Aggregator
     end
 
     keep_key_list += pattern_match_y2_axis_names
-
     remove_list = []
     @bucketed_data.each_key do |series_name|
       remove_list.push(series_name) unless keep_key_list.include?(series_name)
@@ -1055,7 +1065,6 @@ class Aggregator
     logger.warn "Unknown series name #{series_name} not in #{bucketed_data.keys}" if !bucketed_data.key?(series_name)
     logger.warn "nil value for #{series_name}" if value.nil?
     bucketed_data[series_name][x_index] += value
-
     count = 1
     if add_daycount_to_legend?
       count = value != 0.0 ? 1 : 0
