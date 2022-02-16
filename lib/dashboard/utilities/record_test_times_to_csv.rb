@@ -3,7 +3,7 @@ require 'fileutils'
 class RecordTestTimes
   include Singleton
 
-  def initialize(directory: TestDirectory.instance.timing_directory)
+  def initialize(directory: default_test_directory)
     @rails = Object.const_defined?('Rails')
     @directory = directory
     @time_log = {}
@@ -67,6 +67,12 @@ class RecordTestTimes
 
   private
 
+  def default_test_directory
+    return nil if Object.const_defined?('Rails')
+
+    TestDirectory.instance.timing_directory
+  end
+
   def log_time(school_name, test_type, type, seconds)
     @time_log[school_name] ||= {}
     @time_log[school_name][test_type] ||= {}
@@ -128,10 +134,6 @@ class RecordTestTimes
         end
       end
     end
-  end
-
-  def create_directory
-    FileUtils.mkdir_p @directory
   end
 
   def filename

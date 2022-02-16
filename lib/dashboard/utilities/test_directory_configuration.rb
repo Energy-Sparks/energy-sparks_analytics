@@ -102,7 +102,7 @@ class TestDirectory
 
   def make_dir(dir_name)
     return if Object.const_defined?('Rails')
-    
+
     unless File.exists?(dir_name)
       puts "Creating directory #{dir_name}"
       Dir.mkdir(dir_name)
