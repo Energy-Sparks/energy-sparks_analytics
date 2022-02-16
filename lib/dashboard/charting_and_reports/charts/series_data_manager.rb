@@ -857,10 +857,12 @@ private
     # puts "non heat meter #{electricity_meter} #{electricity_meter.storage_heater?}"
     meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
     breakdown = {}
+=begin
     regression_regimes = heating_model_types
     regression_regimes.each do |regime|
       breakdown[regime] = Float::NAN
     end
+=end
 
     (date_range[0]..date_range[1]).each do |date|
       begin
