@@ -1,5 +1,5 @@
 require_relative './logger_control.rb'
-require_relative './test_directory_configuration.rb'
+# require_relative './test_directory_configuration.rb'
 require 'ruby-prof'
 $logger_format = 1
 
