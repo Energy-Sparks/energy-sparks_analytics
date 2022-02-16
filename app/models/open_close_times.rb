@@ -2,6 +2,7 @@
 # require_relative '../../lib/dashboard/charting_and_reports/charts/series_data_manager.rb'
 # Centrica
 class OpenCloseTimes
+  class UnknownFrontEndType < StandardError; end
   attr_reader :open_times
 
   def initialize(attributes, holidays)
@@ -23,6 +24,66 @@ class OpenCloseTimes
   def print_usages(date)
     puts date.strftime('%a %d %b %Y')
     ap usage(date)
+  end
+
+  def self.convert_frontend_times(school_times, community_times, holidays)
+    puts "Got here"
+    ap school_times
+    # ap community_times
+    st = convert_frontend_time(school_times)
+    ct = convert_frontend_time(community_times)
+    OpenCloseTimes.new({ open_close_times: st + ct}, holidays)
+  end
+
+  def self.convert_frontend_time(times)
+    tttt = times.map do |time_period|
+      convert_front_end_time_period(time_period)
+    end
+    ap tttt
+    tttt
+  end
+
+  def self.convert_front_end_time_period(time_period)
+    ap time_period
+    {
+      type:             convert_front_end_usage_type(time_period[:usage_type]),
+      holiday_calendar: convert_front_end_calendar_type(time_period[:calendar_period]),
+      time0:            {
+        day_of_week: convert_front_end_day(time_period[:day]),
+        from: time_period[:opening_time],
+        to:   time_period[:closing_time]
+      }
+    }
+  rescue => e
+    puts e.message
+    raise
+  end
+
+  def self.convert_front_end_usage_type(type)
+    case type
+    when :school_day
+      :school_day_open
+    when :community_use
+      OpenCloseTime::COMMUNITY
+    else
+      raise UnknownFrontEndType, "Opening type #{type}"
+    end
+  end
+
+  def self.convert_front_end_calendar_type(type)
+    case type
+    when :term_times
+      :follows_school_calendar
+    when :only_holidays
+      :holidays_only
+    else
+      raise UnknownFrontEndType, "Calendar period #{type}"
+    end
+  end
+
+  def self.convert_front_end_day(type)
+    raise UnknownFrontEndType, "Day type #{type}" unless OpenCloseTime.day_of_week_types.include?(type)
+    type
   end
 
   def self.default_school_open_close_times
