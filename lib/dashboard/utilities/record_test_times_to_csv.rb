@@ -68,7 +68,7 @@ class RecordTestTimes
   private
 
   def default_test_directory
-    return nil if rails?
+    return nil if Object.const_defined?('Rails')
 
     TestDirectory.instance.timing_directory
   end
