@@ -969,7 +969,7 @@ class GasHeatingIntradayAdvice < DashboardChartAdviceBase
         It&apos;s a useful graph for determining how well controlled the timing of the boiler is.
         A well timed boiler should only come on at about 6:00am in the morning
         to get the school up to temperature by 8:00am, and then turn off again about half
-        and hour before the school closes.
+        an hour before the school closes.
         </p>
         <p>
         Does your school&apos;s boiler in the graph above do this?
@@ -1009,7 +1009,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
             The blue line on the graph shows the number of 'degrees days' which is a measure of how cold
             it was during each week. Degree days are the inverse of temperature.
             The higher the degree days the lower the temperature. See a more detailed -
-              <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">explanation here</a> .
+              <a href="https://www.sustainabilityexchange.ac.uk/files/degree_days_for_energy_management_carbon_trust.pdf" target="_blank">explanation here</a> .
               If the heating boiler is working well at your school the blue line should track the gas usage quite closely.
               Look along the graph, does the usage (bars) track the degree days well?
           </p>
@@ -1223,7 +1223,7 @@ class CusumAdvice < DashboardChartAdviceBase
       <% end %>
 
         <p>
-        <a href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf" target="_blank">Cusum (culmulative sum) graphs</a>
+        <a href="https://www.sustainabilityexchange.ac.uk/files/degree_days_for_energy_management_carbon_trust.pdf" target="_blank">Cusum (culmulative sum) graphs</a>
         shows how the school's actual gas consumption differs
         from the predicted gas consumption (see the explanation about the
         formula for the trend line in the thermostatic graph above).
@@ -1449,10 +1449,10 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
       at the school during the last 2 years <%= @period %>. )
     elsif days.between?(364 + 1, 364 * 2) && chart_interpretation.charts_completed >= 2
       %( This graph compares the average electricity consumption
-      at the school during the last <%= FormatEnergyUnit.format(:years, days / 365, :html) %>  <%= @period %>. )
+      at the school during the last <%= FormatEnergyUnit.format(:years, days / 365.0, :html) %>  <%= @period %>. )
     else
       %( This graph shows the average electricity consumption
-      at the school over the last <%= FormatEnergyUnit.format(:years, days / 365, :html) %>  <%= @period %>. )
+      at the school over the last <%= FormatEnergyUnit.format(:years, days / 365.0, :html) %>  <%= @period %>. )
     end
     ERB.new(text).result(binding)
   end
@@ -1460,6 +1460,7 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
   def generate_advice
     header_template = %{
       <%= @body_start %>
+      <h2><%= type.to_s.humanize %></h2>
       <p>
         <%= text_for_period_of_data %>
         <% if type == :school_days %>
@@ -1474,93 +1475,92 @@ class ElectricityLongTermIntradayAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
-      <h2><%= type.to_s.humanize %></h2>
       <% if type == :school_days %>
-      <p>
-      It is useful in diagnosing what changes have happened over the
-      the last year which may have changed electricity consumption.
-      </p>
-      <p>
-      At most schools the overnight consumption between 7:00pm in the
-      evening and 6:00am in the morning is relatively constant. Is this
-      the case at you school? There are a few reasons why there might
-      be a small change during the night e.g. central heating boiler
-      pumps sometimes runing on cold nights in the winter (frost protection)
-      but any significant change should be investigated as you might be
-      able to save electricity and costs through fixing the problem.
-      </p>
-      <p>
-      During the day electricity power consumption rises rapidly and
-      often peaks around midday.
-      </p>
-      <p>
-      See if you can spot some of the following typical characteristics in the
-      chart:
-      </p>
-      <ul>
-      <li>
-        Electricity consumption starting to increase from about 7:00am
-        when the school opens, and lights and computers are switched
-        on rapidly increasing consumption. What time does your school
-        open and who is first to arrive?
-      </li>
-      <li>
-        Its often possible to see when cleaners arrive at the school,
-        in some schools its in the morning before school opens,
-        at others its in the evening after school closes. Can you
-        spot the cleaners on the chart? Its common for cleaners to
-        switch all the school lights on; its possible to save electricity
-        by asking them to only turn the lights on in the rooms they are cleaning
-      </li>
-      <li>
-        The highest point on the charts is often around lunchtime
-        when all the school lights and computers are switched on.
-        You can often see a peak between 11:30am and 1:00pm when
-        hot plates are switched on for school meals. Can you see
-        a jump in consumption of between 2kW and 4kW at this time
-        which might be the hot plates?
-      </li>
-      <li>
-          After the school closes there should be a gradual reduction
-          in electricity consumption as teachers leave and lights
-          and computers are switched off
-      </li>
-      <li>
-          Sometimes there is a regular evening event which increases consumption
-      </li>
-      </ul>
-      <% elsif type == :weekends || type == :holidays %>
-      <p>
-          The graph above shows consumption <%= @period %>. At most schools this
-          should be relatively constant <%= @period %>, unless:
-      </p>
-          <ul>
-          <li>
-          The school is occupied <%= @period %> when consumption might increase
-          during the day
-          </li>
-          <li>
-          The school has solar panels which might cause consumption to drop
-          during the middle of the day when the sun is out
-          </li>
-          <li>
-          Electrical hot water heaters left on during the holidays causing
-          peaks in consumption often in the morning, but sometimes throughout the day.
-          </li>
-          <li>
-          The school has security lights which causes consumption to rise
-          overnight when the sun goes down
-          </li>
-          <li>
-          The school has electrical water heaters running through the weekend,
-          which will cause peaks in consumption often in the morning, but
-          sometimes  throughout the day.
-          </li>
-          </ul>
         <p>
-          Can you see any of these characteristics at your school
-          in the graph above?
+        It is useful in diagnosing what changes have happened over the
+        the last year which may have changed electricity consumption.
         </p>
+        <p>
+        At most schools the overnight consumption between 7:00pm in the
+        evening and 6:00am in the morning is relatively constant. Is this
+        the case at you school? There are a few reasons why there might
+        be a small change during the night e.g. central heating boiler
+        pumps sometimes runing on cold nights in the winter (frost protection)
+        but any significant change should be investigated as you might be
+        able to save electricity and costs through fixing the problem.
+        </p>
+        <p>
+        During the day electricity power consumption rises rapidly and
+        often peaks around midday.
+        </p>
+        <p>
+        See if you can spot some of the following typical characteristics in the
+        chart:
+        </p>
+        <ul>
+        <li>
+          Electricity consumption starting to increase from about 7:00am
+          when the school opens, and lights and computers are switched
+          on rapidly increasing consumption. What time does your school
+          open and who is first to arrive?
+        </li>
+        <li>
+          Its often possible to see when cleaners arrive at the school,
+          in some schools its in the morning before school opens,
+          at others its in the evening after school closes. Can you
+          spot the cleaners on the chart? Its common for cleaners to
+          switch all the school lights on; its possible to save electricity
+          by asking them to only turn the lights on in the rooms they are cleaning
+        </li>
+        <li>
+          The highest point on the charts is often around lunchtime
+          when all the school lights and computers are switched on.
+          You can often see a peak between 11:30am and 1:00pm when
+          hot plates are switched on for school meals. Can you see
+          a jump in consumption of between 2kW and 4kW at this time
+          which might be the hot plates?
+        </li>
+        <li>
+            After the school closes there should be a gradual reduction
+            in electricity consumption as teachers leave and lights
+            and computers are switched off
+        </li>
+        <li>
+            Sometimes there is a regular evening event which increases consumption
+        </li>
+        </ul>
+      <% elsif type == :weekends || type == :holidays %>
+        <p>
+            The graph above shows consumption <%= @period %>. At most schools this
+            should be relatively constant <%= @period %>, unless:
+        </p>
+            <ul>
+            <li>
+            The school is occupied <%= @period %> when consumption might increase
+            during the day
+            </li>
+            <li>
+            The school has solar panels which might cause consumption to drop
+            during the middle of the day when the sun is out
+            </li>
+            <li>
+            Electrical hot water heaters left on during the holidays causing
+            peaks in consumption often in the morning, but sometimes throughout the day.
+            </li>
+            <li>
+            The school has security lights which causes consumption to rise
+            overnight when the sun goes down
+            </li>
+            <li>
+            The school has electrical water heaters running through the weekend,
+            which will cause peaks in consumption often in the morning, but
+            sometimes  throughout the day.
+            </li>
+            </ul>
+          <p>
+            Can you see any of these characteristics at your school
+            in the graph above?
+          </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1896,7 +1896,7 @@ class HeatingOptimumStartAdvice < DashboardChartAdviceBase
         the morning wasting even more energy than those schools without it.
         </p>
         <p>
-        The chart below compares 2 days, one colder than the other:
+        The chart below compares 5 days with a range of temperatures:
         </p>
 
       <% end %>
@@ -1908,20 +1908,23 @@ class HeatingOptimumStartAdvice < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
       <% if @chart_type == :optimum_start %>
-      <p>
-        Does your school have optimum start control? If it does you would expect the boiler
-        to start later on the milder day? Does it start earlier on the colder day?
+        <p>
+        You can click on the legend on the chart to add and remove days.
       </p>
-      <p>
-      This graph is also useful in determining whether your boiler is starting at a reasonable
-      time in the morning. It depends a little on the school, but for these 2 days you might expect
-      the boiler to start at 5:30am on the colder day and perhaps 06:30am on the milder day. Is this
-      the case for your school?
-      </p>
-      <p>
-      Is the heating also turning off at a reasonable time, perhaps half an hour before school closing time?
-      The school could save energy by ensuring the boiler turns off at the right time.
-      </p>
+        <p>
+          Does your school have optimum start control? If it does you would expect the boiler
+          to start later on the milder day? Does it start earlier on the colder day?
+        </p>
+        <p>
+        This graph is also useful in determining whether your boiler is starting at a reasonable
+        time in the morning. It depends a little on the school, but for these 2 days you might expect
+        the boiler to start at 5:30am on the colder day and perhaps 06:30am on the milder day. Is this
+        the case for your school?
+        </p>
+        <p>
+        Is the heating also turning off at a reasonable time, perhaps half an hour before school closing time?
+        The school could save energy by ensuring the boiler turns off at the right time.
+        </p>
       <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')

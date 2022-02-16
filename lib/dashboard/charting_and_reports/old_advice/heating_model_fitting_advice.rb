@@ -1290,7 +1290,7 @@ class DashboardEnergyAdvice
           </h3>
           <p>
               <a
-                  href="https://www.carbontrust.com/media/137002/ctg075-degree-days-for-energy-management.pdf"
+                  href="https://www.sustainabilityexchange.ac.uk/files/degree_days_for_energy_management_carbon_trust.pdf"
                   target="_blank"
               >
                   Cusum (culmulative sum) graphs
