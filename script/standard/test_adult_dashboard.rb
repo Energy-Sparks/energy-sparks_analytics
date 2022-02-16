@@ -7,7 +7,7 @@ module Logging
 end
 
 overrides = { 
-  schools: ['green-lane*'],
+  schools: ['bathampton*'],
   adult_dashboard: { control: { pages: %i[electric_annual] } }
 }
 

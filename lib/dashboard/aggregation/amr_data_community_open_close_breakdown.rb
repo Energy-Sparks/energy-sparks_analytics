@@ -142,7 +142,7 @@ class AMRDataCommunityOpenCloseBreakdown
       end
     end
 
-    check_totals(kwh_breakdown, date, data_type)
+    # check_totals(kwh_breakdown, date, data_type)
 
     kwh_breakdown
   end
@@ -151,6 +151,7 @@ class AMRDataCommunityOpenCloseBreakdown
     # TODO(PH, 18Jan2022) remove if never thrown as has computation impact
     breakdown_total = kwh_breakdown.values.flatten.sum
     original_total  = @meter.amr_data.one_day_kwh(date, data_type)
+    puts "breakdown = #{breakdown_total} #{data_type} original = #{original_total} for #{date}" unless similar?(breakdown_total, original_total)
     raise InternalSelfTestAggregationError, "breakdown = #{breakdown_total} #{data_type} original = #{original_total} for #{date}" unless similar?(breakdown_total, original_total)
   end
 
@@ -176,12 +177,16 @@ class AMRDataCommunityOpenCloseBreakdown
   # but if this period includes school closure then this needs to be calculated
   # and account for baseload assignment to community use
   def bucket_time_weights(weights)
+    # puts "Got here"
+    # ap weights
+    
     # divide half hour bucket up into 3 by time - open, closed, community
     school_open_time_in_half_hour = weights[:school_day_open] || 0.0
+
     community_open_time_in_half_hour = [
       1.0 - school_open_time_in_half_hour, # time remaining in half hour when school not open
       community_type_weights(weights).values.max # longest of all community weights
-    ].min
+    ].compact.min
     school_closed_time_in_half_hour = [1.0 - school_open_time_in_half_hour - community_open_time_in_half_hour, 0.0].max
     [school_open_time_in_half_hour, community_open_time_in_half_hour, school_closed_time_in_half_hour]
   end
