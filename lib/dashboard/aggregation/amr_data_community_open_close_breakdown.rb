@@ -126,7 +126,6 @@ class AMRDataCommunityOpenCloseBreakdown
         set_hhi_value(kwh_breakdown, :school_day_open, hhi, kwh)
       else # slower more complex split half hour periods
         open_kwh, community_kwh, closed_kwh = split_half_hour_kwhs(hhi_weights, baseload_kwh, kwh)
-
         set_hhi_value(kwh_breakdown, :school_day_open,   hhi, open_kwh)   unless open_kwh.zero?
         set_hhi_value(kwh_breakdown, type_of_remainder, hhi, closed_kwh) unless closed_kwh.zero?
 
@@ -178,12 +177,19 @@ class AMRDataCommunityOpenCloseBreakdown
   def bucket_time_weights(weights)
     # divide half hour bucket up into 3 by time - open, closed, community
     school_open_time_in_half_hour = weights[:school_day_open] || 0.0
-    community_open_time_in_half_hour = [
-      1.0 - school_open_time_in_half_hour, # time remaining in half hour when school not open
-      community_type_weights(weights).values.max # longest of all community weights
-    ].min
-    school_closed_time_in_half_hour = [1.0 - school_open_time_in_half_hour - community_open_time_in_half_hour, 0.0].max
-    [school_open_time_in_half_hour, community_open_time_in_half_hour, school_closed_time_in_half_hour]
+
+    total_community_weights = community_type_weights(weights).values.max
+
+    if total_community_weights.nil?
+      [school_open_time_in_half_hour, 0.0, 1 - school_open_time_in_half_hour]
+    else
+      community_open_time_in_half_hour = [
+        1.0 - school_open_time_in_half_hour, # time remaining in half hour when school not open
+        community_type_weights(weights).values.max # longest of all community weights
+      ].compact.min
+      school_closed_time_in_half_hour = [1.0 - school_open_time_in_half_hour - community_open_time_in_half_hour, 0.0].max
+      [school_open_time_in_half_hour, community_open_time_in_half_hour, school_closed_time_in_half_hour]
+    end
   end
 
   # refer to charts in \Energy Sparks\Energy Sparks Project Team Documents\Analytics\Community use etc\
