@@ -166,18 +166,7 @@ class AlertHeatingOnOff < AlertGasModelBase
 
   # reduces potential bill caused by making more than 1000 calls per day, a bit hacky
   private def cached_dark_sky_for_testing
-    unless defined?(@@dark_sky_cache)
-      filename = File.join('./TestResults/Alerts/dark_sky_forecast_cache.yaml')
-      if File.exist?(filename)
-        @@dark_sky_cache, @@cached_forecast_date_time = YAML::load_file(filename)
-      else
-        @@dark_sky_cache = dark_sky_forecast unless defined?(@@dark_sky_cache)
-        @@cached_forecast_date_time = @forecast_date_time
-        File.open(filename, 'w') { |f| f.write(YAML.dump([@@dark_sky_cache, @@cached_forecast_date_time])) }
-      end
-    end
-    @forecast_date_time = @@cached_forecast_date_time
-    @@dark_sky_cache
+    # stub for monkey patched test only code
   end
 
   def enough_data
