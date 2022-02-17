@@ -123,8 +123,6 @@ class ChartManager
         nil
       end
     rescue StandardError => e
-      puts e
-      puts e.backtrace
       logger.warn "Unable to create chart"
       if reraise_exception
         raise
