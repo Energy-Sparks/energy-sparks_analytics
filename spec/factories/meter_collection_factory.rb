@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :meter_collection, class: MeterCollection do
     transient do
       school                  { build(:school) }
-      holidays                { HolidayData.new }
+      holidays                { build(:holidays, :with_academic_year) }
       temperatures            { Temperatures.new('temperatures') }
       solar_pv                { SolarPV.new('solar pv') }
       grid_carbon_intensity   { GridCarbonIntensity.new }

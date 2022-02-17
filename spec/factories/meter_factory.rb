@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :meter, class: "Dashboard::Meter" do
     transient do
       meter_collection        { nil }
-      amr_data                { build(:amr_data) }
+      amr_data                { build(:amr_data, :with_days, day_count: 30) }
       type                    { :gas }
       sequence(:identifier)   { |n| n }
       sequence(:name)         { |n| "Meter #{n}" }

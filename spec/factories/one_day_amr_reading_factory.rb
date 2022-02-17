@@ -6,7 +6,7 @@ FactoryBot.define do
       type                  { 'ORIG' }
       substitute_date       { nil }
       upload_datetime       { DateTime.now }
-      kwh_data_x48          { Array.new(48, 0.0) }
+      kwh_data_x48          { Array.new(48) { rand(0.0..1.0).round(2) } }
     end
 
     initialize_with{ new(meter_id, date, type, substitute_date,
