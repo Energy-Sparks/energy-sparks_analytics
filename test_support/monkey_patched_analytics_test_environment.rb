@@ -5,20 +5,34 @@
 # the risk of the analytics testing  different code
 # than used in the front end; so great care needs to
 # be taken with its use
-class AlertHeatingOnOff
-  private def cached_dark_sky_for_testing
-    unless defined?(@@dark_sky_cache)
-      test_dir = TestDirectory.instance.test_directory_name('Alerts')
-      filename = File.join(test_dir, 'dark_sky_forecast_cache.yaml')
-      if File.exist?(filename)
-        @@dark_sky_cache, @@cached_forecast_date_time = YAML::load_file(filename)
+class WeatherForecastCache
+  private
+
+  def add_cache(forecast_data, asof_date)
+    cache(asof_date).push(forecast_data)
+    # a little inefficient as will save ~30/multiple times on 1st batch run
+    file_writer(asof_date).save(cache(asof_date))
+  end
+
+  def filename_stub(asof_date)
+    File.join(TestDirectory.instance.test_directory_name('Alerts'), "weatherforecastcache #{asof_date}")
+  end
+
+  def file_writer(asof_date)
+    FileWriter.new(filename_stub(asof_date))
+  end
+
+  def cache(asof_date)
+    if @cache.nil? || @cache[asof_date].nil?
+      if file_writer(asof_date).exists?
+        @cache ||= {}
+        @cache[asof_date] = file_writer(asof_date).load
       else
-        @@dark_sky_cache = dark_sky_forecast unless defined?(@@dark_sky_cache)
-        @@cached_forecast_date_time = @forecast_date_time
-        File.open(filename, 'w') { |f| f.write(YAML.dump([@@dark_sky_cache, @@cached_forecast_date_time])) }
+        @cache ||= {}
+        @cache[asof_date] ||= []
       end
     end
-    @forecast_date_time = @@cached_forecast_date_time
-    @@dark_sky_cache
+
+    @cache[asof_date]
   end
 end
