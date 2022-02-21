@@ -1,8 +1,6 @@
-# test report manager
 require 'require_all'
-require_relative '../lib/dashboard.rb'
-require_rel '../test_support'
-require './script/report_config_support.rb'
+require_relative '../../lib/dashboard.rb'
+require_all './test_support/'
 
 module Logging
   @logger = Logger.new(STDOUT)
@@ -14,6 +12,12 @@ locations = {
   'Frome'     => [51.2308, -2.3201],
   'Bristol'   => [51.4545, -2.5879]
 }
+
+def manual_test
+  ap VisualCrossingWeatherForecast.new.forecast
+end
+
+manual_test
 
 nearest_weather_station = MetOfficeDatapointWeatherForecast.find_nearest_weather_station(51.39, -2.37)
 
