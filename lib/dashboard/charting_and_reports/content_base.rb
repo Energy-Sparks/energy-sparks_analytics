@@ -50,6 +50,17 @@ class ContentBase
     formatted_template_variables(:html)
   end
 
+  def format_variables_as_html
+    scalars, tables = variable_list(true, :html, true)
+
+    header  = [ 'Variable', 'Value' ]
+    units   = [ String,     String  ]
+
+    tb_format = tables.map { |k,t| "<h3>#{k}</h3>" + t }.join(' ')
+
+    HtmlTableFormatting.new(header, scalars.to_a, units).html + tb_format
+  end
+
   def text_template_variables
     formatted_template_variables(:text)
   end
@@ -352,14 +363,15 @@ class ContentBase
     list
   end
 
-  private def variable_list(formatted, format = :text)
+  private def variable_list(formatted, format = :text, split_out_tables = false)
     list = {}
+    tables = {}
     flatten_template_variables.each do |type, data|
       begin
         if [TrueClass, FalseClass].include?(data[:units])
           list[type] = send(type) # don't reformat flags so can be bound in if tests
         elsif data[:units] == :table
-          list[type] = format_table(type, data, formatted, format)
+          tables[type] = format_table(type, data, formatted, format)
         else
           if respond_to?(type, true)
             if formatted && send(type).nil?
@@ -376,7 +388,7 @@ class ContentBase
       end
     end
     missing_variable_summary
-    list
+    split_out_tables ? [list, tables] : list.merge(tables)
   end
 
   private def log_missing_variable(type)
