@@ -27,7 +27,7 @@ class RunAlerts < RunAnalyticsTest
                   compare_results: {
                     summary:              :differences, # true || false || :detail || :differences
                     report_if_differs:    true,
-                    methods:              %i[raw_variables_for_saving front_end_template_data],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
+                    methods:              %i[raw_variables_for_saving front_end_template_data html_template_variables],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
                     class_methods:        %i[front_end_template_variables],
                   },
   
@@ -66,13 +66,24 @@ class RunAlerts < RunAnalyticsTest
 
       print_results(alert_class, alert, control[:outputs])
 
+      html = alert.format_variables_as_html
+
+      save_formatted_results(alert.class.name, html)
+
       save_to_yaml_and_compare_results(alert_class, alert, control, asof_date)
       save_class_methods_to_yaml_and_compare_results(alert_class, alert, control, asof_date)
-      
+
       log_results(alert, control)
 
       save_to_excel if control.dig(:charts, :write_to_excel) == true
     end
+  end
+
+  def save_formatted_results(type, html)
+    filename = "Alerts - #{type}.hmtl"
+    html_file = HtmlFileWriter.new(filename, results_sub_directory_type: @results_sub_directory_type)
+    html_file.write_header_footer('', html, nil)
+    html_file.close
   end
 
   private

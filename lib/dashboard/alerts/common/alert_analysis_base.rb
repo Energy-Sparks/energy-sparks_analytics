@@ -456,7 +456,6 @@ class AlertAnalysisBase < ContentBase
       AlertElectricityBaseloadVersusBenchmark                 => 'elbb',
       AlertGasAnnualVersusBenchmark                           => 'gsba',
       AlertHeatingComingOnTooEarly                            => 'hthe',
-      AlertHeatingOnOff                                       => 'htoo',
       AlertHeatingSensitivityAdvice                           => 'htsa',
       AlertHotWaterEfficiency                                 => 'hotw',
       AlertImpendingHoliday                                   => 'ihol',
@@ -504,7 +503,9 @@ class AlertAnalysisBase < ContentBase
       AlertCommunityPreviousHolidayComparisonElectricity      => 'cphe',
       AlertCommunityPreviousHolidayComparisonGas              => 'cphg',
       AlertCommunityPreviousYearHolidayComparisonElectricity  => 'cpye',
-      AlertCommunityPreviousYearHolidayComparisonGas          => 'cpyg'
+      AlertCommunityPreviousYearHolidayComparisonGas          => 'cpyg',
+      AlertHeatingOn                                          => 'hton',
+      AlertHeatingOff                                         => 'htof',
     }
   end
 

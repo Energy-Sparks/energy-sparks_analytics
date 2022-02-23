@@ -23,15 +23,9 @@ class WeatherForecastCache
   end
 
   def cache(asof_date)
-    if @cache.nil? || @cache[asof_date].nil?
-      if file_writer(asof_date).exists?
-        @cache ||= {}
-        @cache[asof_date] = file_writer(asof_date).load
-      else
-        @cache ||= {}
-        @cache[asof_date] ||= []
-      end
-    end
+    @cache ||= Hash.new { |hash, key| hash[key] = [] }
+    
+    @cache[asof_date] = file_writer(asof_date).load if @cache[asof_date].nil? && file_writer(asof_date).exists?
 
     @cache[asof_date]
   end

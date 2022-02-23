@@ -6,6 +6,8 @@
 # currently caches requests to within MIN_CACHE_DISTANCE_KM
 # of an existing request
 class WeatherForecast
+  attr_reader :forecast
+
   def self.nearest_cached_forecast_factory(latitude, longitude, asof_date)
     f = WeatherForecastCache.instance.nearest_cached_forecast(latitude, longitude, asof_date)
     WeatherForecast.new(f)
@@ -30,6 +32,10 @@ class WeatherForecast
   def average_data_within_hours(date, start_hour,  end_hour, type)
     data = @forecast[date].select { |d| d[:time_of_day].hour.between?(start_hour, end_hour) }
     data.empty? ? nil : data.map{ |d| d[type] }.sum / data.length
+  end
+
+  def self.truncated_forecast(weather, date)
+    WeatherForecast.new(weather.forecast.select { |d, _f| d <= date })
   end
 
   private
