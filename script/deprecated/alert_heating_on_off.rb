@@ -364,20 +364,3 @@ class AlertHeatingOn < AlertHeatingOnOffBase
   end
 end
 
-# typically fires in Spring when weather warm enough to turn heating off
-class AlertHeatingOff < AlertHeatingOnOffBase
-  def heating_on_alert?
-    false
-  end
-
-  # if the heating is recommended to be off in any day recommended to be off
-  def calculate_time_of_year_relevance(summary_forecast)
-    school_day_dates = summary_forecast.keys.select { |d| @school.holidays.occupied?(d) }
-    return 0.0 if school_day_dates.empty?
-
-    days_recommended_on = school_day_dates.any? do |date|
-      off_overnight, off_daytime = recommended_heating_on_off_morning_daytime(date, summary_forecast[date])
-      recommend_heating_off = off_overnight || off_daytime
-    end
-  end
-end

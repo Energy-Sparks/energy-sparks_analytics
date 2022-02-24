@@ -86,7 +86,10 @@ class ChartManager
 
   def drilldown_available(chart_config_original)
     chart_config = resolve_chart_inheritance(chart_config_original)
-    !x_axis_drilldown(chart_config[:x_axis]).nil? && chart_config_original[:series_breakdown] != :fuel
+
+    drilldown?(chart_config) &&
+    !fuel_breakdown_chart?(chart_config_original) &&
+    !seasonal_analysis_drilled_down_to_far?(chart_config)
   end
 
   def x_axis_drilldown(existing_x_axis_config)
@@ -105,6 +108,19 @@ class ChartManager
   end
 
   private
+
+  def drilldown?(chart_config)
+    !x_axis_drilldown(chart_config[:x_axis]).nil?
+  end
+
+  def fuel_breakdown_chart?(chart_config)
+    chart_config[:series_breakdown] == :fuel
+  end
+
+  def seasonal_analysis_drilled_down_to_far?(chart_config)
+    chart_config[:series_breakdown] == :heating &&
+    x_axis_drilldown(chart_config) == :datetime
+  end
 
   def comparison_chart?(chart_config)
     chart_config.key?(:timescale) &&

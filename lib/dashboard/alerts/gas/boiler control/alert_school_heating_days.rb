@@ -105,6 +105,8 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     statistics = AnalyseHeatingAndHotWater::HeatingModel # alias long name
     @breakdown = heating_day_breakdown_current_year(asof_date)
 
+    analysis = @heating_model.heating_on_seasonal_analysis
+
     @exemplar_number_of_heating_days_last_year = 90
 
     days = school_days_heating

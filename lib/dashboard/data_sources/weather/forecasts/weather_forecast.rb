@@ -29,9 +29,9 @@ class WeatherForecast
     average_data_within_hours(date, start_hour,  end_hour, :cloud_cover)
   end
 
-  def average_data_within_hours(date, start_hour,  end_hour, type)
+  def average_data_within_hours(date, start_hour, end_hour, type)
     data = @forecast[date].select { |d| d[:time_of_day].hour.between?(start_hour, end_hour) }
-    data.empty? ? nil : data.map{ |d| d[type] }.sum / data.length
+    data.empty? ? nil : data.map { |d| d[type] }.sum / data.length
   end
 
   def self.truncated_forecast(weather, date)

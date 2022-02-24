@@ -5,9 +5,10 @@ require_rel '../../test_support'
 overrides = {
   schools:  ['uptodate*'],
   alerts:   {
-    alerts: [ AlertHeatingOn, AlertHeatingOff ],
+    alerts: [ AlertTurnHeatingOff ],
     control: {
-      asof_date: Date.new(2022, 2, 20),
+      asof_date: Date.new(2022, 2, 21),
+      outputs: %i[raw_variables_for_saving],
     }
   }
 }

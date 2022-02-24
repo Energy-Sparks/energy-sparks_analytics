@@ -36,9 +36,10 @@ require_relative './../../../../app/models/open_close_times.rb'
 
 # single location containing text name of each series which appears in chart legend
 class SeriesNames
-  HEATINGDAY      = 'Heating Day'.freeze
+  HEATINGDAY      = 'Heating on in cold weather'.freeze
   NONHEATINGDAY   = 'Hot Water (& Kitchen)'.freeze
-  HEATINGSERIESNAMES = [HEATINGDAY.freeze, NONHEATINGDAY.freeze].freeze
+  HEATINGDATWARMWEATHER = 'Heating on in warm weather'.freeze
+  HEATINGSERIESNAMES = [HEATINGDATWARMWEATHER.freeze, HEATINGDAY.freeze, NONHEATINGDAY.freeze].freeze
 
   SCHOOLDAYHEATING  = 'Heating On School Days'.freeze
   HOLIDAYHEATING    = 'Heating On Holidays'.freeze
@@ -424,7 +425,7 @@ class SeriesDataManager
       case breakdown_type
       when :daytype;          breakdown = daytype_breakdown([d1, d2], meter)
       when :fuel;             breakdown = fuel_breakdown([d1, d2], @meters[0], @meters[1])
-      when :heating;          breakdown = heating_breakdown([d1, d2], @meters[0], @meters[1])
+      when :heating;          breakdown = heating_breakdown(d1, d2, @meters[0], @meters[1])
       when :heating_daytype;  breakdown = heating_daytype_breakdown([d1, d2], @meters[0], @meters[1])
       when :model_type;       breakdown = heating_model_breakdown([d1, d2], @meters[0], @meters[1])
       when :meter;            breakdown = breakdown_to_meter_level(d1, d2)
@@ -800,24 +801,46 @@ private
     fuel_data
   end
 
-  def heating_breakdown(date_range, electricity_meter, heat_meter)
+  def zero_breakdown(series_names, val = 0.0)
+    series_names.map { |heating_daytype| [heating_daytype, val] }.to_h
+  end
+
+  def heating_breakdown(start_date, end_date, electricity_meter, heat_meter)
     meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
-    heating_data = { SeriesNames::HEATINGDAY => 0.0, SeriesNames::NONHEATINGDAY => 0.0 }
-    (date_range[0]..date_range[1]).each do |date|
+
+    heating_data = zero_breakdown(SeriesNames::HEATINGSERIESNAMES)
+
+    (start_date..end_date).each do |date|
       begin
-        type = heating_model.heating_on?(date) ? SeriesNames::HEATINGDAY : SeriesNames::NONHEATINGDAY
-        heating_data[type] += amr_data_one_day(meter, date, kwh_cost_or_co2)
+        breakdown_data = heating_model.heating_breakdown(date, kwh_cost_or_co2)
+ 
+        breakdown_data.each do |heating_type, val_kwh_co2_or_£|
+          readable_type = humanize_heating_type(heating_type)
+          heating_data[readable_type] += val_kwh_co2_or_£
+        end
       rescue StandardError => e
         logger.error e
         logger.error "Warning: unable to calculate heating breakdown on #{date}"
       end
     end
+
     heating_data
+  end
+
+  def humanize_heating_type(type)
+    case type
+    when :heating_warm_weather
+      SeriesNames::HEATINGDATWARMWEATHER
+    when :heating_cold_weather
+      SeriesNames::HEATINGDAY
+    when :heating_off
+      SeriesNames::NONHEATINGDAY
+    end
   end
 
   def heating_daytype_breakdown(date_range, electricity_meter, heat_meter)
     meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
-    heating_data = SeriesNames::HEATINGDAYTYPESERIESNAMES.map { |heating_daytype| [heating_daytype, 0.0] }.to_h
+    heating_data = zero_breakdown(SeriesNames::HEATINGDAYTYPESERIESNAMES)
     (date_range[0]..date_range[1]).each do |date|
       begin
         type = convert_model_name_to_heating_daytype(date)
@@ -856,13 +879,8 @@ private
   def heating_model_breakdown(date_range, electricity_meter, heat_meter)
     # puts "non heat meter #{electricity_meter} #{electricity_meter.storage_heater?}"
     meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
-    breakdown = {}
-=begin
-    regression_regimes = heating_model_types
-    regression_regimes.each do |regime|
-      breakdown[regime] = Float::NAN
-    end
-=end
+    
+    breakdown = zero_breakdown(heating_model_types, Float::NAN)
 
     (date_range[0]..date_range[1]).each do |date|
       begin

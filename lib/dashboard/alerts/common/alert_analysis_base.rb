@@ -504,8 +504,7 @@ class AlertAnalysisBase < ContentBase
       AlertCommunityPreviousHolidayComparisonGas              => 'cphg',
       AlertCommunityPreviousYearHolidayComparisonElectricity  => 'cpye',
       AlertCommunityPreviousYearHolidayComparisonGas          => 'cpyg',
-      AlertHeatingOn                                          => 'hton',
-      AlertHeatingOff                                         => 'htof',
+      AlertTurnHeatingOff                                     => 'htof',
     }
   end
 
