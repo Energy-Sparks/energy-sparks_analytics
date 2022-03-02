@@ -510,7 +510,8 @@ class AlertAnalysisBase < ContentBase
       AlertCommunityPreviousYearHolidayComparisonElectricity  => 'cpye',
       AlertCommunityPreviousYearHolidayComparisonGas          => 'cpyg',
       AlertTurnHeatingOff                                     => 'htof',
-      AlertSeasonalHeatingSchoolDays                          => 'shsd'
+      AlertSeasonalHeatingSchoolDays                          => 'shsd',
+      AlertSeasonalHeatingSchoolDaysStorageHeaters            => 'shsh'
     }
   end
 

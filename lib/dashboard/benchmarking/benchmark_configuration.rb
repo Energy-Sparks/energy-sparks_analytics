@@ -572,15 +572,15 @@ module Benchmarking
       },
       heating_in_warm_weather: {
         benchmark_class:  BenchmarkContentHeatingInWarmWeather,
-        name:     'Gas consumption for heating in warm weather',
+        name:     'Gas or storage heater consumption for heating in warm weather',
         columns:  [
           { data: 'addp_name',      name: 'School name',           units: String, chart_data: true, content_class: AdviceGasBoilerSeasonalControl },
-          { data: ->{ shsd_wpan },  name: 'Percentage of annual heating consumed in warm weather', units: :percent, chart_data: true },
-          { data: ->{ shsd_wkwh },  name: 'Saving through turning heating off in warm weather (kWh)', units: :kwh },
-          { data: ->{ shsd_wco2 },  name: 'Saving CO2 kg', units: :co2 },
-          { data: ->{ shsd_w£__ },  name: 'Saving £', units: :£ },
-          { data: ->{ shsd_wdys },  name: 'Number of days heating on in warm weather', units: :days },
-          { data: ->{ shsd_ratg },  name: 'rating', units: Float, y2_axis: true }
+          { data: ->{ or_nil([shsd_wpan, shsh_wpan]) },  name: 'Percentage of annual heating consumed in warm weather', units: :percent, chart_data: true },
+          { data: ->{ or_nil([shsd_wkwh, shsh_wkwh]) },  name: 'Saving through turning heating off in warm weather (kWh)', units: :kwh },
+          { data: ->{ or_nil([shsd_wco2, shsh_wco2]) },  name: 'Saving CO2 kg', units: :co2 },
+          { data: ->{ or_nil([shsd_w£__, shsh_w£__]) },  name: 'Saving £', units: :£ },
+          { data: ->{ or_nil([shsd_wdys, shsh_wdys]) },  name: 'Number of days heating on in warm weather', units: :days },
+          { data: ->{ or_nil([shsd_ratg, shsh_ratg]) },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by: [1],
         type: %i[chart table]
