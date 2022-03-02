@@ -2,7 +2,7 @@
 require_relative '../alert_gas_model_base.rb'
 require_relative './alert_heating_day_base.rb'
 
-# alerts for leaving the heating on for too long over winter
+# alert for leaving heating on in warm weather
 class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
   attr_reader :percent_of_annual_gas, :percent_of_annual_heating, :warm_weather_heating_days_adjective
   attr_reader :heating_percent_of_total_gas
@@ -146,7 +146,7 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
     all_kwh = @cold_and_warm_weather_heating_days_all_days_kwh + @hot_water_and_kitchen_all_days_kwh
     @percent_of_annual_gas = percent(@warm_weather_heating_days_all_days_kwh, all_kwh)
     @percent_of_annual_heating = percent(@warm_weather_heating_days_all_days_kwh, @cold_and_warm_weather_heating_days_all_days_kwh)
-    @warm_weather_heating_days_adjective = AdviceGasBoilerSeasonalControl.warm_weather_on_days_rating(@warm_weather_heating_days_all_days_days)
+    @warm_weather_heating_days_adjective = AdviceGasBoilerSeasonalControl.warm_weather_on_days_rating(@warm_weather_heating_days_all_days_days)[:adjective]
     @heating_percent_of_total_gas = @cold_and_warm_weather_heating_days_all_days_kwh / all_kwh
   end
 end

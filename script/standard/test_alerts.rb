@@ -3,12 +3,12 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 asof_date = Date.new(2022, 2, 27)
-schools = ['king-jame*']
+schools = ['marksb*']
 
 overrides = {
   schools:  schools,
   alerts:   {
-    alerts:  [ AlertSeasonalHeatingSchoolDays ], # [ AlertTurnHeatingOff, AlertHeatingOnSchoolDays ],
+    alerts:  [ AlertSeasonalHeatingSchoolDaysStorageHeaters ], # [ AlertTurnHeatingOff, AlertHeatingOnSchoolDays ],
     control: {
       asof_date: asof_date,
       no_outputs: %i[raw_variables_for_saving],
