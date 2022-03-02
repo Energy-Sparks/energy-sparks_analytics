@@ -31,6 +31,7 @@ class TargetMeter < Dashboard::Meter
       @original_meter = meter_to_clone
       @target = TargetAttributes.new(meter_to_clone)
       @target_dates = TargetDates.new(meter_to_clone, @target)
+      @target_dates.check_consistent
 
       bm = Benchmark.realtime {
         create_target_amr_data(meter_to_clone)

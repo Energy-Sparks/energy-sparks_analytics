@@ -1,4 +1,5 @@
 class TargetDates
+  class TargetBeforeExistingDataStartBackfillNotSupported < StandardError; end
   def initialize(original_meter, target)
     @original_meter = original_meter
     @target = target
@@ -6,6 +7,13 @@ class TargetDates
 
   def to_s
     serialised_dates_for_debug
+  end
+
+  def check_consistent
+    # TODO(PH, 2Mar2022) - could do with further checks for date self-consistency and support
+    if target_start_date < original_meter_start_date
+      raise TargetBeforeExistingDataStartBackfillNotSupported, "Target start date #{target_start_date} must be after first meter reading #{original_meter_start_date}"
+    end
   end
 
   def target_start_date

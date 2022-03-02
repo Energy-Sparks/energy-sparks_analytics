@@ -1,4 +1,9 @@
 class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
+  include Logging
+
+  def enough_data
+    aggregate_meter.amr_data.days > 364 && valid_model? ? :enough : :not_enough
+  end
 
   def raw_content(user_type: nil)
     charts_and_html = []
@@ -91,6 +96,15 @@ class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
 
   def heating_model
     @heating_model ||= calculate_heating_model
+  end
+
+  def valid_model?
+    heating_model
+    true
+  rescue EnergySparksNotEnoughDataException => e
+    logger.info "Not running #{self.class.name} because model hant fitted"
+    logger.info e.message
+    false
   end
 
   def calculate_heating_model
