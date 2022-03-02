@@ -37,6 +37,12 @@ class SchoolFactory
         validate:     true,
         aggregate:    true
       },
+      unvalidated_meter_data_bulk_load_dont_process: {
+        file_prefix:  'unvalidated-data-',
+        validate:     false,
+        aggregate:    false,
+        dont_load:    true
+      },
       unvalidated_meter_data: {
         file_prefix:  'unvalidated-data-',
         validate:     true,
@@ -46,7 +52,9 @@ class SchoolFactory
   end
 
   def load_and_build_school(source, filename_prefix, meter_attributes_overrides)
-    school = load_meter_collections(filename_prefix, config[source][:file_prefix])
+    school = load_meter_collections(filename_prefix, config[source][:file_prefix], config[source][:dont_load])
+    return nil if config[source][:dont_load] == true
+
     school = build_meter_collection(school, meter_attributes_overrides: meter_attributes_overrides)
     validate_and_aggregate(school, source)
     school
@@ -76,7 +84,7 @@ class SchoolFactory
     end
   end
 
-  def load_meter_collections(school_filename, file_type)
+  def load_meter_collections(school_filename, file_type, dont_load)
     school = nil
     yaml_filename     = build_filename(school_filename, file_type, '.yaml')
     marshal_filename  = build_filename(school_filename, file_type, '.marshal')
@@ -89,7 +97,7 @@ class SchoolFactory
       File.open(marshal_filename, 'wb') { |f| f.write(Marshal.dump(school)) }
     else
       RecordTestTimes.instance.record_time(school_filename, 'marshalload', ''){
-        school = Marshal.load(File.open(marshal_filename))
+        school = Marshal.load(File.open(marshal_filename)) unless dont_load == true
       }
     end
     school

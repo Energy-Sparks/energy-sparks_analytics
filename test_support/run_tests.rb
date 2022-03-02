@@ -70,7 +70,7 @@ class RunTests
 
   private
 
-  def load_school(school_name, cache_school = false)
+  def load_school(school_name, cache_school = true)
     override = @meter_attribute_overrides || {}
     SchoolFactory.instance.load_school(@meter_readings_source, school_name, meter_attributes_overrides: override, cache: cache_school == true)
   end

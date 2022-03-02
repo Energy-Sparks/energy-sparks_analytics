@@ -53,10 +53,10 @@ class ContentBase
   def format_variables_as_html
     scalars, tables = variable_list(true, :html, true)
 
-    header  = [ 'Variable', 'Value' ]
-    units   = [ String,     String  ]
+    header  = ['Variable', 'Value']
+    units   = [String,     String ]
 
-    tb_format = tables.map { |k,t| "<h3>#{k}</h3>" + t }.join(' ')
+    tb_format = tables.map { |k, t| "<h3>#{k}</h3>" + t }.join(' ')
 
     HtmlTableFormatting.new(header, scalars.to_a, units).html + tb_format
   end
@@ -226,6 +226,11 @@ class ContentBase
     return nil if old_value.nil? || new_value.nil?
     return 0.0 if !old_value.nan? && old_value == new_value # both 0.0 case
     (new_value - old_value) / old_value
+  end
+
+  private def percent(v1, v2)
+    return nil if v1.nil? || v2.nil? || v2 == 0.0
+    v1 / v2
   end
 
   private def convert_range_template_data_to_high_low(template_data, lookup, raw_data)

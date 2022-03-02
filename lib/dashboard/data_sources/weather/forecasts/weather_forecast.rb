@@ -3,14 +3,12 @@
 # reduced their functionality: met office data point
 # forecast come back in differing formats, so try to separate
 # out the data provided from the applications use of it
-# currently caches requests to within MIN_CACHE_DISTANCE_KM
-# of an existing request
+# currently caches requests on an approx 30km grid
 class WeatherForecast
-  attr_reader :forecast
+  attr_reader :forecast, :latitude, :longitude, :date
 
-  def self.nearest_cached_forecast_factory(latitude, longitude, asof_date)
-    f = WeatherForecastCache.instance.nearest_cached_forecast(latitude, longitude, asof_date)
-    WeatherForecast.new(f)
+  def self.nearest_cached_forecast_factory(asof_date, latitude, longitude)
+    get_live_forecast(asof_date, latitude, longitude)
   end
 
   def start_date
@@ -38,10 +36,35 @@ class WeatherForecast
     WeatherForecast.new(weather.forecast.select { |d, _f| d <= date })
   end
 
+  def self.artificial_forecast(config)
+    forecast_temperatures = (config[:start_date]..config[:end_date]).map do |date|
+      [
+        date,
+        (0..47).step(4).map do |hh_i|
+          {
+            time_of_day: TimeOfDay.time_of_day_from_halfhour_index(hh_i),
+            temperature: config[:temperature]
+          }
+        end
+      ]
+    end.to_h
+
+    WeatherForecast.new(forecast_temperatures, config[:start_date], 0.0, 0.0)
+  end
+
   private
 
-  def initialize(forecast)
-    @forecast = forecast
+  def initialize(forecast, date, latitude, longitude)
+    @forecast   = forecast
+    @date       = date
+    @latitude   = latitude
+    @longitude  = longitude
+  end
+
+  # monkey patched to pickup artificial forecast in test environment
+  private_class_method def self.get_live_forecast(asof_date, latitude, longitude)
+    f = WeatherForecastCache.instance.cached_forecast(asof_date, latitude, longitude)
+    WeatherForecast.new(f, asof_date, latitude, longitude)
   end
 end
 
@@ -49,48 +72,45 @@ class WeatherForecastCache
   include Logging
   include Singleton
   MIN_CACHE_DISTANCE_KM=30
+  LONGITUDE_GRID=0.35 # approx 30km longitude, > for latitude
 
-  def nearest_cached_forecast(latitude, longitude, asof_date)
-    download_cached_forecast(latitude, longitude, asof_date) if cache(asof_date).empty?
-
-    nearest = sort_nearest(latitude, longitude, asof_date)
-    nearest_latitude = nearest.keys.first[0]
-    nearest_longitude = nearest.keys.first[1]
-
-    if LatitudeLongitude.distance(latitude, longitude, nearest_latitude, nearest_longitude) < MIN_CACHE_DISTANCE_KM
-      nearest.values.first
-    else
-      download_cached_forecast(latitude, longitude, asof_date)
-    end
+  def cached_forecast(asof_date, latitude, longitude)
+    lat, long = round_latitude_longitude_to_grid(latitude, longitude)
+    cache(asof_date)[cache_key(lat, long)] || download_cached_forecast(asof_date, lat, long)
   end
 
   private
 
-  def sort_nearest(from_latitude, from_longitude, asof_date)
-    cache(asof_date).sort_by do |forecast|
-      to_latitude, to_longitude = forecast.keys.first
-      LatitudeLongitude.distance(from_latitude, from_longitude, to_latitude, to_longitude)
-    end.first
+  def round_latitude_longitude_to_grid(latitude, longitude)
+    [round_to_grid(latitude), round_to_grid(longitude)]
   end
 
-  def download_cached_forecast(latitude, longitude, asof_date)
-    add_cache(download_forecast(latitude, longitude), asof_date)
+  def round_to_grid(coordinate_1)
+    ((coordinate_1 / LONGITUDE_GRID).round(0) * LONGITUDE_GRID).round(2)
   end
 
-  def add_cache(forecast_data, _asof_date)
+  def cache_key(latitude, longitude)
+    {latitude: latitude, longitude: longitude}
+  end
+
+  def download_cached_forecast(asof_date, latitude, longitude)
+    add_cache(asof_date, latitude, longitude, download_forecast(latitude, longitude))
+  end
+
+  def add_cache(_asof_date, latitude, longitude, forecast_data)
     # monkey patched in test environment to speedup, save API requests
     # asof_date not used in live environment
-    cache(asof_date).push(forecast_data)
+    cache(asof_date)[cache_key(latitude, longitude)] = forecast_data
   end
 
   def cache(_asof_date)
     # monkey patched in test environment to speedup, save API requests
     # asof_date not used in live environment
-    @cache ||= []
+    @cache ||= {}
   end
 
   def download_forecast(latitude, longitude)
     logger.info "Downloading a forecast for #{latitude} #{longitude}"
-    { [latitude, longitude] => VisualCrossingWeatherForecast.new.forecast(latitude, longitude) }
+    VisualCrossingWeatherForecast.new.forecast(latitude, longitude)
   end
 end

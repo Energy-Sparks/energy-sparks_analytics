@@ -50,7 +50,7 @@ module AnalyseHeatingAndHotWater
       logger.info "create_and_fit_model start heat #{heating_model_type} hw #{non_heating_model_type} #{period.start_date} to #{period.end_date}"
       # use composite key to index model for caching
       model_type = { heat_model: heating_model_type, period: period, years: allow_more_than_1_year, non_heating_model: non_heating_model_type}
-      
+
       unless @processed_model_overrides # deferred until meter available
         @model_overrides = HeatingModelOverrides.new(@meter)
         @processed_model_overrides = true
@@ -96,6 +96,7 @@ module AnalyseHeatingAndHotWater
         raise EnergySparksUnexpectedStateException.new("Unexpected model_type #{model_type}")
       end
       logger.info "create_and_fit_model end"
+
       @models[model_type]
     end
 
@@ -150,7 +151,7 @@ module AnalyseHeatingAndHotWater
         return simple_model if simple_model.enough_samples_for_good_fit && !thermal_mass_model.enough_samples_for_good_fit
 
         if !simple_model.enough_samples_for_good_fit
-          raise EnergySparksNotEnoughDataException, "Not enough samples for model to provide good regression fit simple: #{simple_model.winter_heating_samples} massive: #{thermal_mass_model.winter_heating_samples} mpan or mprn #{@meter.mpan_mprn}"
+          raise EnergySparksNotEnoughDataException, "Not enough samples for model to provide good regression fit simple: #{simple_model.winter_heating_samples} massive: #{thermal_mass_model.winter_heating_samples} mpan or mprn #{@meter.mpan_mprn} period: #{period.start_date} to #{period.end_date}"
         end
         thermal_mass_model.standard_deviation_percent < simple_model.standard_deviation_percent ? thermal_mass_model : simple_model
       end

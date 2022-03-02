@@ -2,17 +2,22 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
+asof_date = Date.new(2022, 2, 27)
+schools = ['king-jame*']
+
 overrides = {
-  schools:  ['uptodate*'],
+  schools:  schools,
   alerts:   {
-    alerts: [ AlertTurnHeatingOff ],
+    alerts:  [ AlertSeasonalHeatingSchoolDays ], # [ AlertTurnHeatingOff, AlertHeatingOnSchoolDays ],
     control: {
-      asof_date: Date.new(2022, 2, 21),
-      outputs: %i[raw_variables_for_saving],
-    }
+      asof_date: asof_date,
+      no_outputs: %i[raw_variables_for_saving],
+    }, 
   }
 }
+
 
 script = RunAlerts.default_config.deep_merge(overrides)
 
 RunTests.new(script).run
+

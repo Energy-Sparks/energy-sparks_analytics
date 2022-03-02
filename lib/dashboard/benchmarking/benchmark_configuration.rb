@@ -116,6 +116,7 @@ module Benchmarking
           heating_coming_on_too_early
           thermostat_sensitivity
           length_of_school_day_heating_season
+          heating_in_warm_weather
           thermostatic_control
           hot_water_efficiency
           change_in_gas_consumption_recent_school_weeks
@@ -566,6 +567,21 @@ module Benchmarking
           { data: ->{ htsd_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         number_non_null_columns_for_filtering_tables: 3,
+        sort_by: [1],
+        type: %i[chart table]
+      },
+      heating_in_warm_weather: {
+        benchmark_class:  BenchmarkContentHeatingInWarmWeather,
+        name:     'Gas consumption for heating in warm weather',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',           units: String, chart_data: true, content_class: AdviceGasBoilerSeasonalControl },
+          { data: ->{ shsd_wpan },  name: 'Percentage of annual heating consumed in warm weather', units: :percent, chart_data: true },
+          { data: ->{ shsd_wkwh },  name: 'Saving through turning heating off in warm weather (kWh)', units: :kwh },
+          { data: ->{ shsd_wco2 },  name: 'Saving CO2 kg', units: :co2 },
+          { data: ->{ shsd_w£__ },  name: 'Saving £', units: :£ },
+          { data: ->{ shsd_wdys },  name: 'Number of days heating on in warm weather', units: :days },
+          { data: ->{ shsd_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
         sort_by: [1],
         type: %i[chart table]
       },

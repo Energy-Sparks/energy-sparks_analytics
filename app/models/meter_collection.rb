@@ -489,7 +489,7 @@ class MeterCollection
 
   def process_school_times(school_day_times, community_times)
     if school_day_times.nil? # TODO(PH, 17Feb2022) remove once new school timing code has migrated to production, backwards compatibility with old YAML files
-      @open_close_times = OpenCloseTimes.default_school_open_close_times
+      @open_close_times = OpenCloseTimes.default_school_open_close_times(holidays)
     else
       @open_close_times = OpenCloseTimes.convert_frontend_times(school_day_times, community_times, holidays)
     end
