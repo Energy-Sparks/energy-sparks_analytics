@@ -128,7 +128,7 @@ class AlertHeatingOnOffBase < AlertGasModelBase
 
     @weather_forecast_table = []
 
-    forecast = WeatherForecast.nearest_cached_forecast_factory(@school.latitude, @school.longitude, asof_date)
+    forecast = WeatherForecast.nearest_cached_forecast_factory(asof_date, @school.latitude, @school.longitude)
     
     forecast = WeatherForecast.truncated_forecast(forecast, analysis_horizon_date(forecast.start_date))
 

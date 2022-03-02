@@ -38,7 +38,7 @@ def test_school_forecasts(school_pattern_match, source, asof_date)
 
   school_list.sort.each do |school_name|
     school = SchoolFactory.instance.load_school(source, school_name)
-    forecast = WeatherForecast.nearest_cached_forecast_factory(school.latitude, school.longitude, asof_date)
+    forecast = WeatherForecast.nearest_cached_forecast_factory(asof_date, school.latitude, school.longitude)
     forecast_date = forecast.start_date + 4
     t = forecast.average_temperature_within_hours(forecast_date, 8,  16)
     c = forecast.average_cloud_cover_within_hours(forecast_date, 8,  16)
@@ -49,5 +49,5 @@ end
 if false
   test_visual_crossing_api
 else
-  test_school_forecasts(['b*'], :unvalidated_meter_data, Date.new(2022, 1, 25))
+  test_school_forecasts(['*'], :unvalidated_meter_data, Date.new(2022, 2, 27))
 end

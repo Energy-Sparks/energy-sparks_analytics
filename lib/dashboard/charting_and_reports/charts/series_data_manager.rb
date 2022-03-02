@@ -879,7 +879,7 @@ private
   def heating_model_breakdown(date_range, electricity_meter, heat_meter)
     # puts "non heat meter #{electricity_meter} #{electricity_meter.storage_heater?}"
     meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
-    
+
     breakdown = zero_breakdown(heating_model_types, Float::NAN)
 
     (date_range[0]..date_range[1]).each do |date|
