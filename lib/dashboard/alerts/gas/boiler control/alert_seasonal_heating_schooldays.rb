@@ -45,7 +45,7 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
   }
 
   def time_of_year_relevance
-    toy_rating = [10, 11, 4, 5, 6].include?(@asof_date.month) ? 7.5 : 2.5
+    toy_rating = [9, 10, 11, 4, 5, 6].include?(@asof_date.month) ? 7.5 : 2.5
     set_time_of_year_relevance(toy_rating)
   end
 
@@ -56,17 +56,15 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
   private def calculate(asof_date)
     calculate_model(asof_date)
 
-    ap seasonal_analysis(asof_date)
-
     calculate_seasonal_values(asof_date)
 
     calculate_adhoc_values(asof_date)
 
     set_savings_capital_costs_payback(warm_weather_heating_days_all_days_£, 0.0, warm_weather_heating_days_all_days_co2)
 
-    @rating = calculate_rating_from_range(0.0, 0.1, @percent_of_annual_heating)
+    @rating = calculate_rating_from_range(0.03, 0.12, percent_of_annual_heating)
 
-    @term = :shortterm
+    @term = :longterm
   end
   alias_method :analyse_private, :calculate
 
@@ -113,13 +111,11 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
   end
 
   def calculate_seasonal_values(asof_date)
-    puts "Calculating values"
     self.class.dynamic_template_variables.each do |name, config|
       calc = config[:calculation]
       value = seasonal_value(asof_date, calc[:day_type], calc[:heating], calc[:data_type])
       self.class.send(:attr_reader, name)
       instance_variable_set("@#{name}", value)
-      puts "Calculation for #{sprintf('%-60.60s', name)} = #{value}"
     end
   end
 

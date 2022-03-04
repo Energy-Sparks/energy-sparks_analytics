@@ -598,7 +598,7 @@ module Benchmarking
     end
   end
   #=======================================================================================  
-  class BenchmarkContentLengthOfHeatingSeason < BenchmarkContentBase
+  class BenchmarkContentLengthOfHeatingSeasonDeprecated < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       %q(
