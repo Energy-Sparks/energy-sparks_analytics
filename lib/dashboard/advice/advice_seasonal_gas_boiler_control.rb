@@ -44,7 +44,7 @@ class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
 
     text = %{
       <p>
-        <%= @school.name %> has its heating on for <%= days.to_i %> days
+        <%= @school.name %> has had its heating on for <%= days.to_i %> days
         in warm weather in the last year which is <%= self.class.warm_weather_on_days_adjective(days) %>.
       </p>
       <p>

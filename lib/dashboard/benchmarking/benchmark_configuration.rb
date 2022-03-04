@@ -115,7 +115,6 @@ module Benchmarking
           annual_storage_heater_out_of_hours_use
           heating_coming_on_too_early
           thermostat_sensitivity
-          length_of_school_day_heating_season
           heating_in_warm_weather
           thermostatic_control
           hot_water_efficiency
@@ -555,8 +554,8 @@ module Benchmarking
         sort_by:  [1],
         type: %i[chart table]
       },
-      length_of_school_day_heating_season: {
-        benchmark_class:  BenchmarkContentLengthOfHeatingSeason,
+      length_of_school_day_heating_season_deprecated: {
+        benchmark_class:  BenchmarkContentLengthOfHeatingSeasonDeprecated,
         name:     'Number of days heating was on last year',
         columns:  [
           { data: 'addp_name',                   name: 'School name',           units: String, chart_data: true, content_class: AdviceGasBoilerSeasonalControl },

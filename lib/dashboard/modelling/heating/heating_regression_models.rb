@@ -452,7 +452,7 @@ module AnalyseHeatingAndHotWater
           avg_temp = temperatures.average_temperature(date)
           temperature_sensitivity_kwh += temperature_sensitivity_kwh_per_c * [20.0 - avg_temp, 0.0].max
           base_hot_water_usage += base_hotwater_usage_at_20c
-          
+
           unless boiler_off?(date)
             if heating_on?(date)
               total_heating_on_kwh += @amr_data.one_day_kwh(date)
