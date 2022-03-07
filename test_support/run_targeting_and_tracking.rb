@@ -10,17 +10,21 @@ class RunTargetingAndTracking < RunAdultDashboard
 
         pages: %i[electric_target gas_target storage_heater_target],
 
-        stats_csv_file_base: File.join(TestDirectory.instance.results_directory('TargetingAndTracking'), ' targeting and tracking stats'),
+        stats_csv_file_base: File.join(TestDirectory.instance.results_directory(test_type), ' targeting and tracking stats'),
 
         compare_results: [
-          { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\Base' },
-          { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\New' },
+          # { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\Base' },
+          # { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\TargetingAndTracking\New' },
           :summary,
           :report_differences,
           :report_differing_charts,
         ]
       }
     }
+  end
+
+  def self.test_type
+    'TargetingAndTracking'
   end
 
   def self.save_stats_to_csv(filename)
@@ -367,7 +371,7 @@ class RunTargetingAndTracking < RunAdultDashboard
   end
 
   def comparison_differences(control, school_name, page, content)
-    comparison = CompareContentResults.new(control, school_name)
+    comparison = CompareContentResults.new(control, school_name, results_sub_directory_type: self.class.test_type)
 
     page_name = :"#{page}#{@page_type}"
     comparison.save_and_compare_content(page_name, content, true)
