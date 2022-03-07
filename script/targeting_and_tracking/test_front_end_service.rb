@@ -110,7 +110,8 @@ def extract_data(stats, column_names)
 end
 
 def save_stats(stats)
-  filename = './Results/targeting and tracking stats v2.csv'
+  dir = TestDirectory.instance.results_directory('TargetingAndTracking')
+  filename = File.join(dir, 'targeting and tracking stats v2.csv')
   puts "Saving results to #{filename}"
 
   col_names = column_names(stats)
@@ -128,13 +129,13 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['wimbledon-high*']
 source_db = :unvalidated_meter_data
 
-school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
+school_names = SchoolFactory.instance.school_file_list(source_db, school_name_pattern_match)
 
 schools = school_names.map do |school_name|
-  school_factory.load_or_use_cached_meter_collection(:name, school_name, source_db)
+  SchoolFactory.instance.load_school(source_db, school_name)
 end
 
 # set_meter_attributes(schools)

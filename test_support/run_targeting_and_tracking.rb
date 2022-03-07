@@ -66,6 +66,8 @@ class RunTargetingAndTracking < RunAdultDashboard
       differing_pages.transform_keys!{ |k| :"#{k} #{@filename_type}" }
       differing_pagess.merge!(differing_pages)
       reinstate_deleted_amr_data(deleted_amr_data)
+    rescue => e
+      puts "Failed targeting and tracking scenario: #{e.message}"
     end
 
     differing_pagess
