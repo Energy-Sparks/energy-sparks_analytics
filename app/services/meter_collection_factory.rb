@@ -26,7 +26,9 @@ class MeterCollectionFactory
       activation_date: school_data[:activation_date],
       created_at: school_data[:created_at],
       school_times: school_data[:school_times],
-      community_use_times: school_data[:community_use_times]
+      community_use_times: school_data[:community_use_times],
+      location: school_data[:location],
+      data_enabled: school_data[:data_enabled]
     )
 
     meter_collection = MeterCollection.new(school,
