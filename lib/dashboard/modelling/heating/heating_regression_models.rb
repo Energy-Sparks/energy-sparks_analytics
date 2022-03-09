@@ -711,10 +711,33 @@ module AnalyseHeatingAndHotWater
       @heat_meter.amr_data.kw(date, halfhour_index) > min_load_kw
     end
 
-    def optimum_start_analysis(start_date = [@amr_data.start_date, @amr_data.end_date - 364].max, end_date = @amr_data.end_date)
-      start_time_temperature_pairs = optimum_start_times_temperatures(start_date, end_date)
+    def one_year_start_date
+      [@amr_data.start_date, @amr_data.end_date - 364, temperatures.start_date].max
+    end
+
+    def one_year_end_date
+      [@amr_data.end_date, temperatures.end_date].min
+    end
+
+
+    def optimum_start_analysis(start_date: one_year_start_date, end_date: one_year_end_date, days_of_the_week: nil, months_of_year: nil)
+      start_time_temperature_pairs = optimum_start_times_temperatures(start_date, end_date, days_of_the_week, months_of_year)
+      return nil_optimum_start_model_result if start_time_temperature_pairs.empty?
+
       # print_optimum_start_times_temperatures(start_time_temperature_pairs)
+
       calculate_optimum_start_regression(start_time_temperature_pairs)
+    end
+
+    def nil_optimum_start_model_result
+      {
+        regression_start_time:        nil,
+        optimum_start_sensitivity:    nil,
+        regression_r2:                nil,
+        average_start_time:           nil,
+        start_time_standard_devation: nil,
+        days:                         0
+      }
     end
 
     def calculate_optimum_start_regression(time_temp_pairs)
@@ -727,7 +750,8 @@ module AnalyseHeatingAndHotWater
         optimum_start_sensitivity:    sr.b,
         regression_r2:                sr.r2,
         average_start_time:           start_times.sum / start_times.length,
-        start_time_standard_devation: EnergySparks::Maths.standard_deviation(start_times)
+        start_time_standard_devation: EnergySparks::Maths.standard_deviation(start_times),
+        days:                         time_temp_pairs.length
       }
     end
 
@@ -736,10 +760,17 @@ module AnalyseHeatingAndHotWater
         puts "#{time_temp_pair[0].round(2)} #{time_temp_pair[1].round(2)}"
       end
     end
-    def optimum_start_times_temperatures(start_date, end_date)
+
+    def optimum_start_times_temperatures(start_date, end_date, days_of_the_week, months)
       start_times = (start_date..end_date).map do |date|
-        on_time, _recommend_time, temperature, _kwh_saving = heating_on_time_assessment(date)
-        on_time.nil? ? nil : [on_time.hours_fraction, temperature]
+        if !days_of_the_week.nil? && !days_of_the_week.include?(date.wday)
+          nil
+        elsif !months.nil? && !months.include?(date.month)
+          nil
+        else
+          on_time, _recommend_time, temperature, _kwh_saving = heating_on_time_assessment(date)
+          on_time.nil? ? nil : [on_time.hours_fraction, temperature]
+        end
       end.compact
     end
 

@@ -10,42 +10,42 @@ end
 
 def save_csv(results)
   filename = File.join(TestDirectory.instance.results_directory('modelling'), 'optimum start.csv')
-  
+
   puts "Writing results to #{filename}"
 
+  ap results, { limit: 4 }
+
+  column_names = results.values.first.values.first.map { |type, data| data.keys.map { |t| "#{type}: #{t}" } }.flatten
+
   CSV.open(filename, 'w') do |csv|
-    csv << ['School name', results.values.first.keys].flatten
-    results.each do |name, d|
-      next if d.nil?
-      csv << [name, d.values].flatten
+    csv << ['School name', 'mpxn', column_names].flatten
+    
+    results.each do |name, school_data|
+      next if school_data.nil?
+      school_data.each do |mpxn, d|
+        next if d.nil?
+        row_data = d.map { |type, data| data.values }.flatten
+        csv << [name, mpxn, row_data].flatten
+      end     
     end
   end
 end
 
-def calc_heating_model(meter)
-  start_date = [meter.amr_data.end_date - 365, meter.amr_data.start_date].max
-  end_date = meter.amr_data.end_date
-  period = SchoolDatePeriod.new(:analysis, 'Up to a year', start_date, end_date)
-  meter.heating_model(period)
-rescue
-  nil
-end
 
 def school_optimum_start_analysis(school)
-  if school.aggregated_heat_meters.nil?
-    puts "No gas data for #{school.name}"
-    return
+  meters = BoilerStartAndEndTimeAnalysis.all_gas_meters(school)
+
+  results = {}
+
+  meters.each do |meter|
+    analyser = BoilerStartAndEndTimeAnalysis.new(school, meter)
+
+    results[meter.analytics_name] = {}
+    results[meter.analytics_name][:interpretation] = analyser.interpret
+    results[meter.analytics_name].merge!(analyser.analyse)
   end
 
-  puts "Processing #{school.name}"
-  heating_model = calc_heating_model(school.aggregated_heat_meters)
-
-  if heating_model.nil?
-    puts "Model calculation failed for #{school.name}"
-    return
-  end
-
-  heating_model.optimum_start_analysis
+  results
 end
 
 school_pattern_match = ['*']
@@ -59,7 +59,5 @@ school_list.sort.each do |school_name|
   school = SchoolFactory.instance.load_school(source, school_name)
   results[school.name] = school_optimum_start_analysis(school)
 end
-
-ap results
 
 save_csv(results)
