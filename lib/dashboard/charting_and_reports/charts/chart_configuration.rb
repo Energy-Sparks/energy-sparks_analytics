@@ -1826,6 +1826,21 @@ class ChartManager
       yaxis_scaling:    :none,
       y2_axis:          :temperature
     },
+    boiler_start_time: {
+      name:             'Boiler start time',
+      chart1_type:      :line,
+      series_breakdown: :boiler_start_time,
+      meter_definition: :allheat,
+      x_axis:           :day,
+      x_axis_reformat:  { date: '%d-%m-%Y' },
+      yaxis_units:      :boiler_start_time,
+      yaxis_scaling:    :none,
+      y2_axis:          :temperature
+    },
+    boiler_start_time_up_to_one_year: {
+      inherits_from:    :boiler_start_time,
+      timescale:        :up_to_a_year
+    },
     hotwater: {
       name:             'Hot Water Analysis',
       chart1_type:      :column,

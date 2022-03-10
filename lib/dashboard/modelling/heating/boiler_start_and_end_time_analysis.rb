@@ -49,7 +49,7 @@ class BoilerStartAndEndTimeAnalysis
   end
   
   def optimum_start_analysis
-    return nil if heating_model.nil?
+    return {} if heating_model.nil?
 
     # use GMT only months to avoid statistical error
     # from picking up BST months

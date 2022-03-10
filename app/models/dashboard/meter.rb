@@ -288,7 +288,12 @@ module Dashboard
       !function.nil? && !(function_list & function).empty?
     end
 
-    def heating_model(period, model_type = :best, non_heating_model_type = nil)
+    def up_to_one_year_model_period
+      start_date = [amr_data.end_date - 364, amr_data.start_date].max
+      SchoolDatePeriod.new(:up_to_1_year_meter, 'Current Year', start_date, amr_data.end_date)
+    end
+
+    def heating_model(period = up_to_one_year_model_period, model_type = :best, non_heating_model_type = nil)
       @model_cache.create_and_fit_model(model_type, period, false, non_heating_model_type)
     end
 

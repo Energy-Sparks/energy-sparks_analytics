@@ -687,20 +687,39 @@ module AnalyseHeatingAndHotWater
     def heating_on_time_assessment(date)
       temperature = temperatures.average_temperature_in_time_range(date, 0, 10).round(1) # between midnight and 5:00am
       return [nil, nil, temperature, nil] if !heating_on?(date)
-
-      baseload_kw = @heat_meter.amr_data.statistical_baseload_kw(date)
-      peakload_kw = @heat_meter.amr_data.statistical_peak_kw(date)
-      half_load_kw = baseload_kw + ((peakload_kw - baseload_kw) * 0.5)
-      days_data = @heat_meter.amr_data.days_kwh_x48(date)
-      heating_on_halfhour_index = days_data.index{ |kwh| (kwh * 2.0) > half_load_kw }
+      
+      heating_on_halfhour_index = heating_on_half_hour_index(date)
       return [nil, nil, temperature, nil] if heating_on_halfhour_index.nil?
 
+      days_data = @heat_meter.amr_data.days_kwh_x48(date)
       actual_on_time = heating_on_halfhour_index.nil? ? nil : TimeOfDay.time_of_day_from_halfhour_index(heating_on_halfhour_index)
       recommended_start_time, recommended_start_time_halfhour_index = recommended_optimum_start_time(nil, temperature)
       started_too_early = heating_on_halfhour_index < recommended_start_time_halfhour_index
       kwh_saving = started_too_early ? days_data[heating_on_halfhour_index..recommended_start_time_halfhour_index].sum : 0.0
 
       [actual_on_time, recommended_start_time, temperature, kwh_saving]
+    end
+
+    def heating_on_time(date)
+      hhi = heating_on_half_hour_index(date)
+
+      return nil if hhi.nil?
+
+      TimeOfDay.time_of_day_from_halfhour_index(hhi)
+    end
+
+    def heating_on_half_hour_index_checked(date)
+      return Float::NAN unless heating_on?(date)
+
+      heating_on_half_hour_index(date)
+    end
+
+    def heating_on_half_hour_index(date)
+      baseload_kw   = @heat_meter.amr_data.statistical_baseload_kw(date)
+      peakload_kw   = @heat_meter.amr_data.statistical_peak_kw(date)
+      half_load_kwh = (baseload_kw + ((peakload_kw - baseload_kw) * 0.5)) / 2.0
+      days_data = @heat_meter.amr_data.days_kwh_x48(date)
+      days_data.index{ |kwh| kwh > half_load_kwh }
     end
 
     # perhaps needs merging with def heating_on_time_assessment, but not in this test cycle TODO(PH, 25Jul2020)

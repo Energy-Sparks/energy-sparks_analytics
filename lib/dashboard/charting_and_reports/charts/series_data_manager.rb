@@ -104,6 +104,86 @@ class SeriesNames
   # plus dynamically generated names, for example meter names
 end
 
+module Series
+  class ManagerBase
+
+    class UnexpectedSeriesManagerConfiguration < StandardError; end
+
+    def initialize(meter_collection, chart_config)
+      @school = meter_collection
+      @chart_config = chart_config
+    end
+
+    def self.factories(school, chart_config)
+      series_breakdowns = [chart_config[:series_breakdown]].flatten
+      series_breakdowns.map { |sb| factory(school, chart_config, sb) }.compact
+    end
+
+    def self.combined_series_names(series_classes)
+      series_classes.map(&:series_names).flatten
+    end
+
+    private
+
+    private_class_method def self.factory(school, chart_config, series_breakdown_type)
+      case series_breakdown_type
+      when :boiler_start_time
+        BoilerStartTime.new(school, chart_config)
+      when :temperature_temp_excluded
+        Temperature.new(school, chart_config)
+      end
+    end
+
+    def meter
+      @meter || determine_meter
+    end
+
+    def determine_meter
+      meter_map[@chart_config[:meter_definition]]
+    end
+
+    def meter_map
+      {
+        allheat:  @school.aggregated_heat_meters
+      }
+    end
+
+    def series_names
+      [self.class.name.gsub!(/(.)([A-Z])/,'\1_\2').downcase.to_sym]
+    end
+
+    def day_breakdown(date)
+      raise EnergySparksAbstractBaseClass, "Unsupported day_breakdown request for #{self.class.name}"
+    end
+
+    def half_hour_breakdown(date, half_hour_index)
+      raise EnergySparksAbstractBaseClass, "Unsupported half_hour_breakdown request for #{self.class.name}"
+    end
+  end
+
+  class ModelManagerBase < ManagerBase
+
+    private
+
+    def heating_model
+      @heating_model ||= meter.heating_model
+    end
+  end
+
+  class BoilerStartTime < ModelManagerBase
+    def series_names;         %i[boiler_start_time]; end
+    def day_breakdown(date)
+      hhi = heating_model.heating_on_half_hour_index_checked(date)
+      { boiler_start_time: hhi * 0.5 }
+    end
+  end
+
+  class Temperature < ManagerBase
+    def series_names;         %i[temperature]; end
+    def day_breakdown(date);  { temperature: school.temperature.average_temperature(date) }; end
+  end
+end
+
 class SeriesDataManager
   include Logging
   REMOVE_SOLAR_PV_FROM_FUEL_BREAKDOWN_CHARTS = true # TODO(PH, 26Sep2019) - remove if result satisfactory
@@ -114,6 +194,7 @@ class SeriesDataManager
   def initialize(meter_collection, chart_configuration)
     @meter_collection = meter_collection
     @meter_definition = chart_configuration[:meter_definition]
+    @series_managers = Series::ManagerBase.factories(meter_collection, chart_configuration)
     @breakdown_list = convert_variable_to_array(chart_configuration[:series_breakdown])
     @y2_axis_list = process_y_axis_config(chart_configuration[:y2_axis])
     @data_types = convert_variable_to_array(chart_configuration[:data_types])
@@ -227,11 +308,16 @@ class SeriesDataManager
       when :cusum;                  buckets.push(SeriesNames::CUSUM)
       when :baseload;               buckets.push(SeriesNames::BASELOAD)
       when :peak_kw;                buckets.push(SeriesNames::PEAK_KW)
-      when :predictedheat;          buckets.push(SeriesNames::PREDICTEDHEAT)
+      when :predictedheat;          buckets.push(SeriesNames::PREDICTEDHEAT) 
       else
+        if !@series_managers.empty?
+          buckets += Series::ManagerBase.combined_series_names(@series_managers)
+          buckets = buckets.uniq # TODO(PH, 10Mar2022) remove once whole of series data manager restructured
+        end
+        
         if SeriesNames::Y2SERIESYMBOLTONAMEMAP.key?(breakdown)
           buckets.push(SeriesNames::Y2SERIESYMBOLTONAMEMAP[breakdown])
-        else
+        elsif @series_managers.empty?
           # TODO(PH,6Feb2019) - y2 sometimes comes through as nil - not clear why this is happening upstream
           raise EnergySparksBadChartSpecification.new("Unknown series_definition #{breakdown}") unless breakdown.nil?
         end
@@ -420,6 +506,14 @@ class SeriesDataManager
 
   def getdata_by_daterange(meter, d1, d2)
     breakdown = {}
+
+    if !@series_managers.empty?
+      raise StandardError, "Unexpected different date #{d1} v. #{d2}" if d1 != d2
+      @series_managers.each do |series_manager|
+        breakdown.merge!(series_manager.day_breakdown(d1))
+      end
+    end
+
     [@breakdown_list + @y2_axis_list].flatten.each do |breakdown_type|
       case breakdown_type
       when :daytype;          breakdown = daytype_breakdown([d1, d2], meter)
@@ -446,6 +540,7 @@ class SeriesDataManager
       when :target_degreedays; breakdown[SeriesNames::TARGETDEGREEDAYS] = meter.target_degreedays_average_in_date_range(d1, d2)
       end
     end
+
     breakdown
   end
 

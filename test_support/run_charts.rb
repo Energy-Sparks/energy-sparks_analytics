@@ -72,7 +72,7 @@ class RunAnalyticsTest
   end
 
   def run(charts, control)
-    charts = [charts] unless charts.is_a?(Array)
+    charts = [charts].flatten
     charts.each do |config_component|
       run_config_component(config_component)
     end
@@ -92,6 +92,19 @@ class RunAnalyticsTest
         shorten_type(failed_chart[:type]))
       puts failed_chart[:backtrace] if detail == :detailed
     end
+  end
+
+  def run_structured_chart_list(structured_list, control)
+    structured_list.each do |excel_tab_name, chart_list|
+      chart_list.each do |chart_name|
+        puts "Got here running #{excel_tab_name}: #{chart_name}"
+        run_chart(excel_tab_name.to_s, chart_name)
+      end
+    end
+    save_to_excel
+    report_calculation_time(control)
+    CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
+    log_all_results
   end
 
   private
@@ -188,7 +201,7 @@ class RunAnalyticsTest
     end
   end
 
-  def run_chart(page_name, chart_name, override = nil)
+  public def run_chart(page_name, chart_name, override = nil)
     logger.info "            #{chart_name}"
     chart_manager = ChartManager.new(@school)
     chart_results = nil
