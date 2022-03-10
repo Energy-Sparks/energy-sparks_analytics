@@ -106,11 +106,12 @@ end
 
 module Series
   class ManagerBase
+    attr_reader :school, :chart_config
 
     class UnexpectedSeriesManagerConfiguration < StandardError; end
 
-    def initialize(meter_collection, chart_config)
-      @school = meter_collection
+    def initialize(school, chart_config)
+      @school       = school
       @chart_config = chart_config
     end
 
@@ -139,24 +140,18 @@ module Series
     end
 
     def determine_meter
-      meter_map[@chart_config[:meter_definition]]
-    end
-
-    def meter_map
-      {
-        allheat:  @school.aggregated_heat_meters
-      }
+      ChartToMeterMap.instance.meter(school, chart_config[:meter_definition])
     end
 
     def series_names
       [self.class.name.gsub!(/(.)([A-Z])/,'\1_\2').downcase.to_sym]
     end
 
-    def day_breakdown(date)
+    def day_breakdown(_date)
       raise EnergySparksAbstractBaseClass, "Unsupported day_breakdown request for #{self.class.name}"
     end
 
-    def half_hour_breakdown(date, half_hour_index)
+    def half_hour_breakdown(_date, _half_hour_index)
       raise EnergySparksAbstractBaseClass, "Unsupported half_hour_breakdown request for #{self.class.name}"
     end
   end
@@ -1014,7 +1009,7 @@ private
     @last_chart_date = periods.first.end_date # years in reverse chronological order
   end
 
-  def y2_axis_uses_temperatures
+  def y2_axis_uses_temperatures?
     @chart_configuration.key?(:y2_axis) && (@chart_configuration[:y2_axis] == :degreedays ||  @chart_configuration[:y2_axis] == :temperature)
   end
 
@@ -1023,41 +1018,46 @@ private
   end
 
   def calculate_first_meter_date
-    meter_date = Date.new(1995, 1, 1)
-    unless @meters[0].nil?
-      meter_date = @meters[0].amr_data.start_date
-    end
-    if !@meters[1].nil? && @meters[1].amr_data.start_date > meter_date
-      meter_date = @meters[1].amr_data.start_date
-    end
-    if y2_axis_uses_temperatures && @meter_collection.temperatures.start_date > meter_date
+    meter_date = @meters.compact.map { |m| m.amr_data.start_date }.max
+
+    if y2_axis_uses_temperatures? && @meter_collection.temperatures.start_date > meter_date
       logger.info "Reducing meter range because temperature axis with less data on chart #{meter_date} versus #{@meter_collection.temperatures.start_date}"
-      meter_date = @meter_collection.temperatures.start_date # this may not be strict enough?
+      meter_date = @meter_collection.temperatures.start_date
     end
+    
     if y2_axis_uses_solar_irradiance? && @meter_collection.solar_irradiation.start_date > meter_date
       logger.info "Reducing meter range because irradiance axis with less data on chart #{meter_date} versus #{@meter_collection.solar_irradiation.start_date}"
       meter_date = @meter_collection.solar_irradiation.start_date
     end
+
     meter_date = @chart_configuration[:min_combined_school_date] if @chart_configuration.key?(:min_combined_school_date)
     meter_date
   end
 
   def calculate_last_meter_date
-    meter_date = [Date.new(2040, 1, 1), @meters.compact.map { |meter| meter.amr_data.end_date }].flatten.min
-    if y2_axis_uses_temperatures && @meter_collection.temperatures.end_date < meter_date
+    meter_date = @meters.compact.map{ |meter| meter.amr_data.end_date }.min
+
+    if y2_axis_uses_temperatures? && @meter_collection.temperatures.end_date < meter_date
       logger.info "Reducing meter range because temperature axis with less data on chart #{meter_date} versus #{@meter_collection.temperatures.end_date}"
       meter_date = @meter_collection.temperatures.end_date # this may not be strict enough?
     end
+
     if y2_axis_uses_solar_irradiance? && @meter_collection.solar_irradiation.end_date < meter_date
       logger.info "Reducing meter range because irradiance axis with less data on chart #{meter_date} versus #{@meter_collection.solar_irradiation.end_date}"
       meter_date = @meter_collection.solar_irradiation.end_date # this may not be strict enough?
     end
+
     meter_date = @chart_configuration[:max_combined_school_date] if @chart_configuration.key?(:max_combined_school_date)
     meter_date = @chart_configuration[:asof_date] if @chart_configuration.key?(:asof_date)
     meter_date
   end
 
   def configure_meters
+    @meters = ChartToMeterMap.instance.backwards_compatible_series_data_manager_meter_map(@meter_collection, @meter_definition)
+    logger.info "Configuring the following meters for charts: #{@meters}"
+  end
+
+  def configure_meters_deprecated
     logger.info "Configuring meter #{@meter_definition}"
     # typically meter[0] is an electricity meter (electricity, solar_pv), and meter[1] is a heating meter (gas, storage)
     if @meter_definition.is_a?(Symbol)
