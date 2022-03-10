@@ -100,7 +100,7 @@ class RunAnalyticsTest
         run_chart(excel_tab_name.to_s, chart_name, provide_advice: false) if ChartManager.new(@school).standard_chart_valid?(chart_name)
       end
     end
-    save_to_excel
+    save_to_excel if control[:save_to_excel] == true
     report_calculation_time(control)
     CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
     log_all_results

@@ -587,8 +587,10 @@ class Aggregator
   def relabel_legend
     @chart_config[:replace_series_label].each do |substitute_pair|
       @bucketed_data.keys.each do |series_name|
-        substitute_pair[0] = substitute_pair[0].gsub('<school_name>', @meter_collection.name) if substitute_pair[0].include?('<school_name>')
-        new_series_name = series_name.gsub(substitute_pair[0], substitute_pair[1])
+        original    = substitute_pair[0]
+        replacement = substitute_pair[1]
+        original = original.gsub('<school_name>', @meter_collection.name) if original.include?('<school_name>')
+        new_series_name = series_name.gsub(original, replacement)
         @bucketed_data[new_series_name] = @bucketed_data.delete(series_name)
         @bucketed_data_count[new_series_name] = @bucketed_data_count.delete(series_name)
       end

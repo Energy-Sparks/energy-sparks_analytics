@@ -116,7 +116,7 @@ module Series
     end
 
     def self.factories(school, chart_config)
-      series_breakdowns = [chart_config[:series_breakdown]].flatten
+      series_breakdowns = [chart_config[:series_breakdown], chart_config[:y2_axis]].flatten
       series_breakdowns.map { |sb| factory(school, chart_config, sb) }.compact
     end
 
@@ -128,10 +128,12 @@ module Series
 
     private_class_method def self.factory(school, chart_config, series_breakdown_type)
       case series_breakdown_type
-      when :boiler_start_time
-        BoilerStartTime.new(school, chart_config)
-      when :temperature_temp_excluded
-        Temperature.new(school, chart_config)
+      when :boiler_start_time;  BoilerStartTime.new(school, chart_config)
+      when :temperature;        Temperature.new(school, chart_config)
+      when :degreedays;         DegreeDays.new(school, chart_config)
+      when :irradiance;         Irradiance.new(school, chart_config)
+      when :gridcarbon;         GridCarbon.new(school, chart_config)
+      when :gascarbon;          GasCarbon.new(school, chart_config)
       end
     end
 
@@ -147,18 +149,30 @@ module Series
       [self.class.name.gsub!(/(.)([A-Z])/,'\1_\2').downcase.to_sym]
     end
 
-    def day_breakdown(_date)
+    def day_breakdown(_date1, _date2)
       raise EnergySparksAbstractBaseClass, "Unsupported day_breakdown request for #{self.class.name}"
     end
 
     def half_hour_breakdown(_date, _half_hour_index)
       raise EnergySparksAbstractBaseClass, "Unsupported half_hour_breakdown request for #{self.class.name}"
     end
+
+    def humanize(names)
+      if names.is_a?(Array)
+        names.map(&:to_s).map(&:humanize)
+      else
+        names.to_s.humanize
+      end
+    end
+
+    def single_name; nil end
   end
 
   class ModelManagerBase < ManagerBase
 
     private
+
+    def degreeday_base_temperature; 15.5 end
 
     def heating_model
       @heating_model ||= meter.heating_model
@@ -167,15 +181,51 @@ module Series
 
   class BoilerStartTime < ModelManagerBase
     def series_names;         %i[boiler_start_time]; end
-    def day_breakdown(date)
+    def day_breakdown(d1, d2)
+      raise UnexpectedSeriesManagerConfiguration, "Date range not supported #{d1} #{d2}" if d1 != d2
       hhi = heating_model.heating_on_half_hour_index_checked(date)
       { boiler_start_time: hhi * 0.5 }
     end
   end
 
   class Temperature < ManagerBase
-    def series_names;         %i[temperature]; end
-    def day_breakdown(date);  { temperature: school.temperature.average_temperature(date) }; end
+    def series_names;                    [single_name]; end
+    def day_breakdown(d1, d2);           { single_name => school.temperatures.average_temperature_in_date_range(d1, d2) }; end
+    def half_hour_breakdown(date, hhi);  { single_name => school.temperatures.temperature(date, hhi) }; end
+    private
+    def single_name; 'Temperature' end
+  end
+
+  class DegreeDays < ModelManagerBase
+    def series_names;                    [single_name]; end
+    def day_breakdown(d1, d2);           { single_name => school.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2) }; end
+    def half_hour_breakdown(date, hhi);  { single_name => school.temperatures.degree_hour(date, hhi, degreeday_base_temperature) }; end
+    private
+    def single_name; 'Degree Days' end
+  end
+
+  class Irradiance < ManagerBase
+    def series_names;                    [single_name]; end
+    def day_breakdown(d1, d2);           { single_name => school.solar_irradiation.average_daytime_irradiance_in_date_range(d1, d2) }; end
+    def half_hour_breakdown(date, hhi);  { single_name => school.solar_irradiation.solar_irradiance(date, hhi) }; end
+    private
+    def single_name; 'Solar Irradiance' end
+  end
+
+  class GridCarbon < ManagerBase
+    def series_names;                    [single_name]; end
+    def day_breakdown(d1, d2);           { single_name => school.grid_carbon_intensity.average_in_date_range(d1, d2) }; end
+    def half_hour_breakdown(date, hhi);  { single_name => school.grid_carbon_intensity.grid_carbon_intensity(date, hhi) }; end
+    private
+    def single_name; 'Carbon Intensity of Electricity Grid (kg/kWh)' end
+  end
+
+  class GasCarbon < ManagerBase
+    def series_names;                     [single_name]; end
+    def day_breakdown(_d1, _d2);          { single_name => EnergyEquivalences::UK_GAS_CO2_KG_KWH }; end
+    def half_hour_breakdown(_date, _hhi); { single_name => EnergyEquivalences::UK_GAS_CO2_KG_KWH }; end
+    private
+    def single_name; 'Carbon Intensity of Gas (kg/kWh)' end
   end
 end
 
@@ -475,6 +525,12 @@ class SeriesDataManager
   def getdata_by_halfhour(meter, date, halfhour_index)
     breakdown = {}
 
+    if !@series_managers.empty?
+      @series_managers.each do |series_manager|
+        breakdown.merge!(series_manager.half_hour_breakdown(date, halfhour_index))
+      end
+    end
+
     @breakdown_list.each do |breakdown_type|
       case breakdown_type
       when :submeter;         breakdown.merge!(submeter_datetime_breakdown(meter, date, halfhour_index))
@@ -485,16 +541,17 @@ class SeriesDataManager
       else;                   breakdown[SeriesNames::NONE] = amr_data_by_half_hour(meter, date, halfhour_index, kwh_cost_or_co2)
       end
     end
-
+=begin
     @y2_axis_list.each do |breakdown_type|
       case breakdown_type
-      when :degreedays;   breakdown[SeriesNames::DEGREEDAYS]  = @meter_collection.temperatures.degree_hour(date, halfhour_index, degreeday_base_temperature)
-      when :temperature;  breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.temperature(date, halfhour_index)
-      when :irradiance;   breakdown[SeriesNames::IRRADIANCE]  = @meter_collection.solar_irradiation.solar_irradiance(date, halfhour_index)
-      when :gridcarbon;   breakdown[SeriesNames::GRIDCARBON]  = @meter_collection.grid_carbon_intensity.grid_carbon_intensity(date, halfhour_index)
-      when :gascarbon;    breakdown[SeriesNames::GASCARBON]   = EnergyEquivalences::UK_GAS_CO2_KG_KWH
+        when :degreedays;   breakdown[SeriesNames::DEGREEDAYS]  = @meter_collection.temperatures.degree_hour(date, halfhour_index, degreeday_base_temperature)
+        when :temperature;  breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.temperature(date, halfhour_index)
+        when :irradiance;   breakdown[SeriesNames::IRRADIANCE]  = @meter_collection.solar_irradiation.solar_irradiance(date, halfhour_index)
+        when :gridcarbon;   breakdown[SeriesNames::GRIDCARBON]  = @meter_collection.grid_carbon_intensity.grid_carbon_intensity(date, halfhour_index)
+        when :gascarbon;    breakdown[SeriesNames::GASCARBON]   = EnergyEquivalences::UK_GAS_CO2_KG_KWH
       end
     end
+=end
 
     breakdown
   end
@@ -502,22 +559,23 @@ class SeriesDataManager
   def getdata_by_daterange(meter, d1, d2)
     breakdown = {}
 
+    combined_list = [@breakdown_list + @y2_axis_list].flatten
+
     if !@series_managers.empty?
-      raise StandardError, "Unexpected different date #{d1} v. #{d2}" if d1 != d2
       @series_managers.each do |series_manager|
-        breakdown.merge!(series_manager.day_breakdown(d1))
+        breakdown.merge!(series_manager.day_breakdown(d1, d2))
       end
     end
 
-    [@breakdown_list + @y2_axis_list].flatten.each do |breakdown_type|
+    combined_list.each do |breakdown_type|
       case breakdown_type
-      when :daytype;          breakdown = daytype_breakdown([d1, d2], meter)
-      when :fuel;             breakdown = fuel_breakdown([d1, d2], @meters[0], @meters[1])
-      when :heating;          breakdown = heating_breakdown([d1, d2], @meters[0], @meters[1])
-      when :heating_daytype;  breakdown = heating_daytype_breakdown([d1, d2], @meters[0], @meters[1])
-      when :model_type;       breakdown = heating_model_breakdown([d1, d2], @meters[0], @meters[1])
-      when :meter;            breakdown = breakdown_to_meter_level(d1, d2)
-      when :accounting_cost;  breakdown = breakdown_to_bill_components_date_range(d1, d2)
+      when :daytype;          breakdown.merge!(daytype_breakdown([d1, d2], meter))
+      when :fuel;             breakdown.merge!(fuel_breakdown([d1, d2], @meters[0], @meters[1]))
+      when :heating;          breakdown.merge!(heating_breakdown([d1, d2], @meters[0], @meters[1]))
+      when :heating_daytype;  breakdown.merge!(heating_daytype_breakdown([d1, d2], @meters[0], @meters[1]))
+      when :model_type;       breakdown.merge!(heating_model_breakdown([d1, d2], @meters[0], @meters[1]))
+      when :meter;            breakdown.merge!(breakdown_to_meter_level(d1, d2))
+      when :accounting_cost;  breakdown.merge!(breakdown_to_bill_components_date_range(d1, d2))
 
       when :hotwater;       breakdown.merge!(hotwater_breakdown(d1, d2))
       when :submeter;       breakdown.merge!(submeter_breakdown(meter, d1, d2))
@@ -526,11 +584,11 @@ class SeriesDataManager
       when :baseload;       breakdown[SeriesNames::BASELOAD] = meter.amr_data.baseload_kwh_date_range(d1, d2, meter.sheffield_simulated_solar_pv_panels?)
       when :peak_kw;        breakdown[SeriesNames::PEAK_KW] = meter.amr_data.peak_kw_kwh_date_range(d1, d2)
       when :cusum;          breakdown[SeriesNames::CUSUM] = cusum(meter, d1, d2)
-      when :degreedays;     breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2)
-      when :temperature;    breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(d1, d2)
-      when :irradiance;     breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.average_daytime_irradiance_in_date_range(d1, d2)
-      when :gridcarbon;     breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.average_in_date_range(d1, d2)
-      when :gascarbon;      breakdown[SeriesNames::GASCARBON]   = EnergyEquivalences::UK_GAS_CO2_KG_KWH
+      # when :degreedays;     breakdown[SeriesNames::DEGREEDAYS] = @meter_collection.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2)
+      # when :temperature;    breakdown[SeriesNames::TEMPERATURE] = @meter_collection.temperatures.average_temperature_in_date_range(d1, d2)
+      # when :irradiance;     breakdown[SeriesNames::IRRADIANCE] = @meter_collection.solar_irradiation.average_daytime_irradiance_in_date_range(d1, d2)
+      # when :gridcarbon;     breakdown[SeriesNames::GRIDCARBON] = @meter_collection.grid_carbon_intensity.average_in_date_range(d1, d2)
+      # when :gascarbon;      breakdown[SeriesNames::GASCARBON]   = EnergyEquivalences::UK_GAS_CO2_KG_KWH
       when :predictedheat;  breakdown[SeriesNames::PREDICTEDHEAT] = heating_model.predicted_kwh_daterange(d1, d2, @meter_collection.temperatures)
       when :target_degreedays; breakdown[SeriesNames::TARGETDEGREEDAYS] = meter.target_degreedays_average_in_date_range(d1, d2)
       end
