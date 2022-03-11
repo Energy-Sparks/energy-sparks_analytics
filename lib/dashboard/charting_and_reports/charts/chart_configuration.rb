@@ -1106,7 +1106,7 @@ class ChartManager
       chart1_type:      :column,
       meter_definition: :allheat,
       timescale:        :year,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ], heating: true },
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ], heating: true },
       series_breakdown: :none,
       x_axis:           :intraday,
       yaxis_units:      :kwh,
@@ -1161,7 +1161,7 @@ class ChartManager
       name:             'Intra-school day gas consumption profile',
       inherits_from:    :gas_heating_season_intraday,
       series_breakdown: :none,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] }
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ] }
     },
     meter_breakdown_pie_1_year: { # used by heating regression fitter
       name:             'Breakdown by meter (this year): Gas',
@@ -1353,9 +1353,9 @@ class ChartManager
       inherits_from:            :heating_on_off_by_week_with_breakdown_all,
       filter:                   { 
                                   heating_daytype: [
-                                    SeriesNames::SCHOOLDAYHEATING,
-                                    SeriesNames::HOLIDAYHEATING,
-                                    SeriesNames::WEEKENDHEATING
+                                    Series::HeatingDayType::SCHOOLDAYHEATING,
+                                    Series::HeatingDayType::HOLIDAYHEATING,
+                                    Series::HeatingDayType::WEEKENDHEATING
                                   ]
                                 }
     },
@@ -1367,7 +1367,7 @@ class ChartManager
       inherits_from:  :heating_on_off_by_week_with_breakdown_all,
       filter: { 
                 heating_daytype: [
-                  SeriesNames::SCHOOLDAYHEATING
+                  Series::HeatingDayType::SCHOOLDAYHEATING
                 ]
               }
     },
@@ -1375,9 +1375,9 @@ class ChartManager
       inherits_from:  :heating_on_off_by_week_with_breakdown_all,
       filter: { 
                 heating_daytype: [
-                  SeriesNames::SCHOOLDAYHOTWATER,
-                  SeriesNames::WEEKENDHOTWATER,
-                  SeriesNames::HOLIDAYHOTWATER
+                  Series::HeatingDayType::SCHOOLDAYHOTWATER,
+                  Series::HeatingDayType::WEEKENDHOTWATER,
+                  Series::HeatingDayType::HOLIDAYHOTWATER
                 ]
               }
     },
@@ -1387,7 +1387,7 @@ class ChartManager
     },
     heating_on_off_by_week_heating_school_non_school_days_only: {
       inherits_from:    :heating_on_off_by_week_heating_school_days_and_holidays_only,
-      filter:           { daytype: [ SeriesNames::HOLIDAY, SeriesNames::WEEKEND ], heating: true },
+      filter:           { daytype: [ Series::DayType::HOLIDAY, Series::DayType::WEEKEND ], heating: true },
       y2_axis:          nil
     },
     thermostatic_model_categories_pie_chart: {
@@ -1412,12 +1412,12 @@ class ChartManager
       x_axis:           :nodatebuckets,
       subtitle:         :daterange
     },
-    thermostatic_non_heating: {
+    thermostatic_non_heating_deprecated: {
       name:             'Thermostatic (Non Heating Season, School Day)',
       chart1_type:      :scatter,
       meter_definition: :allheat,
       timescale:        :year,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ], heating: false },
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ], heating: false },
       series_breakdown: %i[heating heatingmodeltrendlines degreedays],
       x_axis:           :day,
       yaxis_units:      :kwh,
@@ -1468,7 +1468,7 @@ class ChartManager
       timescale:        [{ year: 0 }, { year: -1 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1479,7 +1479,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -1 }, { schoolweek: -2 }, { schoolweek: -3 }, { schoolweek: -4 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1490,7 +1490,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -20 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1501,7 +1501,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -20 }],
       x_axis:           :intraday,
       meter_definition: :allelectricity,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1531,12 +1531,12 @@ class ChartManager
     intraday_line_holidays:  {
       inherits_from:    :intraday_line_school_days_reduced_data,
       name:             'Intraday (holidays)',
-      filter:           { daytype: [ SeriesNames::HOLIDAY] }
+      filter:           { daytype: [ Series::DayType::HOLIDAY] }
     },
     intraday_line_weekends:  {
       inherits_from:    :intraday_line_school_days_reduced_data,
       name:             'Intraday (weekends)',
-      filter:           { daytype: [ SeriesNames::WEEKEND] },
+      filter:           { daytype: [ Series::DayType::WEEKEND] },
     },
     group_by_week_electricity_dd: {
       name:             'By Week: Electricity',
@@ -1737,7 +1737,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -20 }],
       x_axis:           :intraday,
       meter_definition: :electricity_simulator,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1748,7 +1748,7 @@ class ChartManager
       timescale:        [{ schoolweek: 0 }, { schoolweek: -20 }],
       x_axis:           :intraday,
       meter_definition: :electricity_simulator,
-      filter:           { daytype: [ SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYCLOSED ] },
+      filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ] },
       yaxis_units:      :kw,
       yaxis_scaling:    :none
     },
@@ -1885,7 +1885,7 @@ class ChartManager
     recent_holiday_electricity_comparison_alert: {
       name:             'Comparison of electricity consumption for recent holidays',
       inherits_from:    :group_by_week_electricity,
-      filter:           { daytype: [ SeriesNames::HOLIDAY ] },
+      filter:           { daytype: [ Series::DayType::HOLIDAY ] },
       timescale:        { week: -10..0 }
     },
     alert_weekend_last_week_gas_datetime_kwh: {
