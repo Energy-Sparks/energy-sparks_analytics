@@ -97,6 +97,7 @@ class RunAnalyticsTest
   def run_structured_chart_list(structured_list, control)
     structured_list.each do |excel_tab_name, chart_list|
       chart_list.each do |chart_name|
+puts "Got here running chart #{chart_name}"
         run_chart(excel_tab_name.to_s, chart_name, provide_advice: false) if ChartManager.new(@school).standard_chart_valid?(chart_name)
       end
     end
