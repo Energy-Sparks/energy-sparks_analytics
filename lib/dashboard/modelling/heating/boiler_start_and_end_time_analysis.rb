@@ -10,14 +10,14 @@ class BoilerStartAndEndTimeAnalysis
     bm = Benchmark.realtime {
       @analysis ||= optimum_start_analysis
     }
-    puts "Calced in #{bm.round(3)} seconds"
+    # puts "Calced in #{bm.round(3)} seconds"
     @analysis
   end
 
   def interpret
     analysis = analyse
     hours_earlier_on_monday = analysis[:restofweek][:average_start_time] - analysis[:monday][:average_start_time] 
-    
+
     {
       fixed_start_time:                 analysis[:restofweek][:start_time_standard_devation] < 1.0,
       starts_earlier_on_monday:         hours_earlier_on_monday > 1.0,
@@ -26,7 +26,7 @@ class BoilerStartAndEndTimeAnalysis
     }
   rescue => e
     logger.info "Interpretation failed #{e.message}"
-    puts "Got here: Interpretation failed #{e.message}"
+
     {}
   end
 

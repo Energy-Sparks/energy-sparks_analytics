@@ -1838,7 +1838,14 @@ class ChartManager
       y2_axis:          :temperature
     },
     boiler_start_time_up_to_one_year: {
+      name:             'Boiler start time: in last year',
       inherits_from:    :boiler_start_time,
+      timescale:        :up_to_a_year
+    },
+    boiler_start_time_up_to_one_year_no_frost: {
+      name:             'Boiler start time on non frosty mornings',
+      inherits_from:    :boiler_start_time,
+      boiler_start_time:  { ignore_frosty_days_temperature: 4.0 },
       timescale:        :up_to_a_year
     },
     hotwater: {

@@ -446,7 +446,13 @@ class DashboardConfiguration
       meter_breakdown: {
         presentation_style: :flat, # :structured || :flat
         user_type:          { user_role: nil }, # permission for all users
-        charts:             %i[ gas_heating_season_intraday_up_to_1_year ],
+        charts:             [ 
+          :gas_heating_season_intraday_up_to_1_year,
+          { type: :html,           method:  :boiler_start_time_analysis,                user_type: { user_role: :analytics } },
+          { type: :chart_name,     content: :boiler_start_time,                         user_type: { user_role: :analytics } },
+          { type: :chart_name,     content: :boiler_start_time_up_to_one_year,          user_type: { user_role: :analytics } },
+          { type: :chart_name,     content: :boiler_start_time_up_to_one_year_no_frost, user_type: { user_role: :analytics } }
+        ],
         fuel_type:          :gas
       }
     },

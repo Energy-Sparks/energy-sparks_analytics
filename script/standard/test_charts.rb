@@ -3,11 +3,11 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 charts = {
-  standard: %i[benchmark],
-  # boiler:   %i[boiler_start_time boiler_start_time_up_to_one_year]
+  # standard: %i[group_by_week_electricity_meter_breakdown_one_year],
+  boiler:   %i[boiler_start_time boiler_start_time_up_to_one_year boiler_start_time_up_to_one_year_no_frost]
 }
 
-charts = RunCharts.standard_charts_for_school
+no_charts = RunCharts.standard_charts_for_school
 
 control = {
   save_to_excel:  true,
@@ -20,7 +20,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['king-ja*'], # ['king-ja*', 'marksb*', 'long*'],
   charts:   { charts: charts, control: control }
 }
 

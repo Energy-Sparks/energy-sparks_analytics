@@ -214,30 +214,15 @@ class AdviceBase < ContentBase
       end
     end
 
-    # charts_and_html += underlying_meters_structured_content(user_type: user_type) if structured_meter_breakdown?(user_type)
-
-    # remove_diagnostics_from_html(charts_and_html, user_type)
-
     # tack explanation of breakdown onto initial content
     charts_and_html += [{ type: :html, content: individual_meter_level_description_html }] if structured_meter_breakdown?(user_type)
 
     charts_and_html
   end
 
-  # flatten structured content, so can be presented as single non-accordion html page
-  def underlying_meters_content_deprecated(user_type: nil)
-    underlying_meters_structured_content(user_type: user_type).map do |meter_content|
-      html_title = meter_content[:html_title] || "<h2>#{meter_content[:title]}</h2>"
-      [
-        { type: :html, content: html_title },
-        meter_content[:content]
-      ]
-    end.flatten
-  end
-  
   def underlying_meters_structured_content(user_type: nil)
     sorted_underlying_meters.map do |meter_data|
-      meter_breakdown_content(meter_data)
+      meter_breakdown_content(meter_data, user_type)
     end
   end
 
@@ -325,6 +310,24 @@ class AdviceBase < ContentBase
     ]
   end
 
+  def meter_specific_config(config, mpxn, user_type)
+    if self.class.user_permission?(user_type, config.dig(:user_type, :user_role))
+      evaluate_meter_breakdown_content(config, mpxn)
+    else
+      nil
+    end
+  end
+
+  def evaluate_meter_breakdown_content(config, mpxn)
+    case config[:type]
+    when :chart_name
+      AdviceBase.meter_specific_chart_config(config[:content], mpxn)
+    when :html
+      html_content = send(config[:method], { config: config, mpan_mprn: mpxn })
+      { type: config[:type], content: html_content, mpan_mprn: mpxn }
+    end
+  end
+
   def promote_analytics_html_to_frontend(charts_and_html)
     charts_and_html.map do |sub_content|
       sub_content[:type] = :html if sub_content[:type] == :analytics_html
@@ -389,17 +392,21 @@ class AdviceBase < ContentBase
     @school.underlying_meters(self.class.config[:meter_breakdown][:fuel_type])
   end
 
-  def meter_breakdown_content(meter_data)
+  def meter_breakdown_content(meter_data, user_type)
     fmd = format_meter_data(meter_data)
 
-    charts_and_html = self.class.config[:meter_breakdown][:charts].map do |chart_name|
-      AdviceBase.meter_specific_chart_config(chart_name, meter_data[:meter].mpxn)
+    charts_and_html = self.class.config[:meter_breakdown][:charts].map do |content_config|
+      if content_config.is_a?(Symbol)
+        AdviceBase.meter_specific_chart_config(content_config, meter_data[:meter].mpxn)
+      else
+        meter_specific_config(content_config, meter_data[:meter].mpxn, user_type)
+      end
     end
-    
+
     {
       title:      "#{fmd[:name]}: #{fmd[:kwh]} #{fmd[:£]} #{fmd[:percent]}",
       html_title: "<h2 style=\"text-align:left;\">#{fmd[:name]}<span style=\"float:right;\">#{fmd[:kwh]} #{fmd[:£]} #{fmd[:percent]}</span></h2>",
-      content:    charts_and_html.flatten
+      content:    charts_and_html.compact.flatten
     }
   end
 

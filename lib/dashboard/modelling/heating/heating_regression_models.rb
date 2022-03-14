@@ -708,10 +708,22 @@ module AnalyseHeatingAndHotWater
       TimeOfDay.time_of_day_from_halfhour_index(hhi)
     end
 
-    def heating_on_half_hour_index_checked(date)
+    def heating_on_half_hour_index_checked(date, ignore_frosty_days_temperature: nil)
       return Float::NAN unless heating_on?(date)
 
+      return Float::NAN if frosty_morning?(date, ignore_frosty_days_temperature)
+
       heating_on_half_hour_index(date)
+    end
+
+    def frosty_morning?(date, frost_temperature)
+      return false if frost_temperature.nil?
+
+      # assume heating comes on at 5am normally, so only test temperature before 5am
+      # TODO(PH, 14Mar20202): consider more nuanced if temperature dips below a frost
+      #                       temperature during the morning period prior to the heating
+      #                       normally coming on?
+      temperatures.average_temperature_in_time_range(date, 0, 10) < frost_temperature
     end
 
     def heating_on_half_hour_index(date)

@@ -160,11 +160,11 @@ module Series
     def amr_data_by_half_hour(meter, date, halfhour_index, data_type = :kwh)
       meter.amr_data.kwh(date, halfhour_index, data_type, community_use: community_use)
     end
-  
+
     def amr_data_one_day_readings(meter, date, data_type = :kwh)
       meter.amr_data.days_kwh_x48(date, data_type, community_use: community_use)
     end
-  
+
     def amr_data_one_day(meter, date, data_type = :kwh) 
       meter.amr_data.one_day_kwh(date, data_type, community_use: community_use)
     end
@@ -184,13 +184,13 @@ module Series
         meter.amr_data.kwh_date_range(start_date, end_date, data_type, community_use: community_use)
       end
     end
-  
+
     def adjust_for_temperature(meter, start_date, end_date, data_type)
       dates = (start_date..end_date).to_a
       kwhs = dates.map { |date| meter.amr_data.one_day_kwh(date, data_type, community_use: community_use) }
       scale = scaling_factor_for_model_derived_gas_data(data_type)
       adj_temperatures = adjustment_temperatures(dates)
-  
+
       total_adjusted_kwh = 0.0
       (start_date..end_date).each_with_index do |date, i|
         total_adjusted_kwh += heating_model.temperature_compensated_one_day_gas_kwh(date, adj_temperatures[i], kwhs[i], 0.0, community_use: community_use)
@@ -205,7 +205,7 @@ module Series
       when :co2;                    EnergyEquivalences::UK_GAS_CO2_KG_KWH
       else;                         1.0 end
     end
-  
+
     def adjustment_temperatures(dates)
       if @adjust_by_temperature_value.is_a?(Float)
         Array.new(dates.length, @adjust_by_temperature_value)
@@ -243,7 +243,7 @@ module Series
         end
       end
     end
-  
+
     def self.trendline_for_series_name(series_name)
       ('trendline_' + series_name.to_s).to_sym
     end
@@ -251,13 +251,13 @@ module Series
     def target_extend?
       !chart_config.dig(:target, :extend_chart_into_future).nil?
     end
-  
+
     # truncate requested dates to non-target meter range or return nil
     def target_extended_other_meter_end_date(meter, start_date, end_date)
       end_date = [meter.amr_data.end_date, end_date].min
       start_date > end_date ? [nil, nil] : [start_date, end_date]
     end
-  
+
     def request_start_end_dates(meter, start_date, end_date)
       target_extend? ? target_extended_other_meter_end_date(meter, start_date, end_date) : [start_date, end_date]
     end
@@ -272,39 +272,39 @@ module Series
         end
       end
     end
-  
+
     def calculate_periods
       period_calc = PeriodsBase.period_factory(chart_config, school, first_meter_date, last_meter_date)
       @periods = period_calc.periods
     end
-  
+
     def calculate_first_chart_date
       nil_period_count = periods.count(&:nil?)
       raise EnergySparksNotEnoughDataException, "Not enough data for chart (nil period x#{nil_period_count})" if nil_period_count > 0 || periods.length == 0
       periods.last.start_date # years in reverse chronological order
     end
-  
+
     def y2_axis_uses_temperatures?
       %i[temperature degreedays].include?(chart_config[:y2_axis])
     end
-  
+
     def y2_axis_uses_solar_irradiance?
       chart_config[:y2_axis] == :irradiance
     end
-  
+
     def calculate_first_meter_date
       meter_date = [meter].flatten.compact.map { |m| m.amr_data.start_date }.max
-  
+
       if y2_axis_uses_temperatures? && school.temperatures.start_date > meter_date
         logger.info "Reducing meter range because temperature axis with less data on chart #{meter_date} versus #{school.temperatures.start_date}"
         meter_date = school.temperatures.start_date
       end
-      
+
       if y2_axis_uses_solar_irradiance? && school.solar_irradiation.start_date > meter_date
         logger.info "Reducing meter range because irradiance axis with less data on chart #{meter_date} versus #{school.solar_irradiation.start_date}"
         meter_date = school.solar_irradiation.start_date
       end
-  
+
       meter_date = chart_config[:min_combined_school_date] if chart_config.key?(:min_combined_school_date)
       meter_date
     end
@@ -327,7 +327,7 @@ module Series
       meter_date
     end
   end
-
+  #=====================================================================================================
   class Multiple < ManagerBase
     class TooManyMeters < StandardError;  end
     def initialize(school, chart_config)
@@ -343,7 +343,7 @@ module Series
       @series_managers.each do |series_manager|
         return series_manager.heating_model if series_manager.is_a?(ModelManagerBase)
       end
-      
+
       nil
     end
 
@@ -361,7 +361,7 @@ module Series
 
     def half_hour_breakdown(date, halfhour_index)
       breakdown = {}
-  
+
       @series_managers.each do |series_manager|
         breakdown.merge!(series_manager.half_hour_breakdown(date, halfhour_index))
       end
@@ -383,7 +383,7 @@ module Series
       breakdown = {}
 
       timetype, dates, hhi = time_period
-      
+
       case timetype
       when :halfhour, :datetime
         check_requested_meter_date(meter, dates, dates)
@@ -400,6 +400,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class Temperature < ManagerBase
     TEMPERATURE = 'Temperature'
     def series_names;                    [single_name]; end
@@ -409,6 +410,7 @@ module Series
     def single_name; TEMPERATURE end
   end
 
+  #=====================================================================================================
   class Irradiance < ManagerBase
     IRRADIANCE = 'Solar Irradiance'
     def series_names;                    [single_name]; end
@@ -418,6 +420,7 @@ module Series
     def single_name; IRRADIANCE end
   end
 
+  #=====================================================================================================
   class GridCarbon < ManagerBase
     GRIDCARBON = 'Carbon Intensity of Electricity Grid (kg/kWh)'
     def series_names;                    [single_name]; end
@@ -427,6 +430,7 @@ module Series
     def single_name; GRIDCARBON end
   end
 
+  #=====================================================================================================
   class GasCarbon < ManagerBase
     GASCARBON = 'Carbon Intensity of Gas (kg/kWh)'
     def series_names;                     [single_name]; end
@@ -436,6 +440,7 @@ module Series
     def single_name; GASCARBON end
   end
 
+  #=====================================================================================================
   class MeterBreakdown < ManagerBase
     def initialize(school, chart_config)
       super(school, chart_config)
@@ -445,7 +450,7 @@ module Series
     def series_names; meter_names; end
 
     def half_hour_breakdown(date, hhi);  { single_name => school.solar_irradiation.solar_irradiance(date, hhi) }; end
-    
+
     def day_breakdown(d1, d2)
       breakdown = default_breakdown
       @component_meters.each do |component_meter|
@@ -489,6 +494,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class SubMeterBreakdown < MeterBreakdown
     private
 
@@ -498,6 +504,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class DayType < ManagerBase
     HOLIDAY         = OpenCloseTime.humanize_symbol(OpenCloseTime::HOLIDAY)
     WEEKEND         = OpenCloseTime.humanize_symbol(OpenCloseTime::WEEKEND)
@@ -513,7 +520,7 @@ module Series
     def day_type_names
       @day_type_names ||= calculate_day_type_names
     end
-  
+
     def calculate_day_type_names
       types = meter.amr_data.open_close_breakdown.series_names(community_use)
       types.uniq.sort_by { |type| - OpenCloseTime.community_use_types[type][:sort_order] }
@@ -521,24 +528,24 @@ module Series
 
     def daytype_breakdown_halfhour(date, halfhour_index)
       daytype_data = default_breakdown
-  
+
       breakdown = meter.amr_data.kwh(date, halfhour_index, kwh_cost_or_co2, community_use: community_use)
-  
+
       breakdown.each do |type, kwh|
         daytype_data[type] = kwh
       end
-  
+
       daytype_data
     end
-  
+
     def daytype_breakdown(d1, d2)
       daytype_data = default_breakdown
       data_type = kwh_cost_or_co2
-  
+
       (d1..d2).each do |date|
         begin
           breakdown = meter.amr_data.one_day_kwh(date, data_type, community_use: community_use)
-  
+
           breakdown.each do |type, kwh|
             daytype_data[type] += kwh
           end
@@ -549,6 +556,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class ModelManagerBase < ManagerBase
 
     def heating_model
@@ -564,6 +572,7 @@ module Series
     def degreeday_base_temperature; 15.5 end
   end
 
+  #=====================================================================================================
   class DegreeDays < ModelManagerBase
     DEGREEDAYS = 'Degree Days'
     def series_names;                    [single_name]; end
@@ -573,15 +582,21 @@ module Series
     def single_name; DEGREEDAYS end
   end
 
+  #=====================================================================================================
   class BoilerStartTime < ModelManagerBase
     def series_names;         %i[boiler_start_time]; end
     def day_breakdown(d1, d2)
       raise UnexpectedSeriesManagerConfiguration, "Date range not supported #{d1} #{d2}" if d1 != d2
-      hhi = heating_model.heating_on_half_hour_index_checked(date)
+      hhi = heating_model.heating_on_half_hour_index_checked(d1, ignore_frosty_days_temperature: filter_out_frost_temperature)
       { boiler_start_time: hhi * 0.5 }
+    end
+
+    def filter_out_frost_temperature
+      chart_config.dig(:boiler_start_time, :ignore_frosty_days_temperature)
     end
   end
 
+  #=====================================================================================================
   class HeatingNonHeating < ModelManagerBase
     HEATINGDAY      = 'Heating Day'.freeze
     NONHEATINGDAY   = 'Hot Water (& Kitchen)'.freeze
@@ -601,6 +616,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class ModelType < ModelManagerBase
     def series_names;  heating_model.all_heating_model_types; end
 
@@ -621,11 +637,12 @@ module Series
           breakdown[type] += amr_data_one_day(meter, date, kwh_cost_or_co2)
         end
       end
-      
+
       breakdown
     end
   end
 
+  #=====================================================================================================
   class HotWater < ModelManagerBase
     USEFULHOTWATERUSAGE = 'Hot Water Usage'
     WASTEDHOTWATERUSAGE = 'Wasted Hot Water Usage'
@@ -634,12 +651,12 @@ module Series
     def series_names;  HOTWATERSERIESNAMES; end
 
     def day_breakdown(d1, d2)
-        breakdown = {}
-        scale = scaling_factor_for_model_derived_gas_data(kwh_cost_or_co2)
-        useful_kwh, wasted_kwh = hotwater_model.kwh_daterange(d1, d2)
-        breakdown[USEFULHOTWATERUSAGE] = useful_kwh * scale
-        breakdown[WASTEDHOTWATERUSAGE] = wasted_kwh * scale
-        breakdown
+      breakdown = {}
+      scale = scaling_factor_for_model_derived_gas_data(kwh_cost_or_co2)
+      useful_kwh, wasted_kwh = hotwater_model.kwh_daterange(d1, d2)
+      breakdown[USEFULHOTWATERUSAGE] = useful_kwh * scale
+      breakdown[WASTEDHOTWATERUSAGE] = wasted_kwh * scale
+      breakdown
     end
 
     def hotwater_model
@@ -647,6 +664,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class NoBreakdown < ModelManagerBase
     NONE = 'Energy'
     def series_names;  [NONE]; end
@@ -660,6 +678,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class AccountingCost < ManagerBase
     def series_names
       meter.amr_data.accounting_tariff.bill_component_types.uniq
@@ -683,6 +702,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class MultipleFuels < ModelManagerBase
     ELECTRICITY     = 'electricity'
     GAS             = 'gas'
@@ -736,6 +756,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class PredictedHeat < ModelManagerBase
     PREDICTEDHEAT = 'Predicted Heat'
     def series_names;  [PREDICTEDHEAT]; end
@@ -745,6 +766,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class TargetDegreeDays < ModelManagerBase
     TARGETDEGREEDAYS = 'Target degree days'
     def series_names;  [TARGETDEGREEDAYS]; end
@@ -754,6 +776,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class Cusum < ModelManagerBase
     CUSUM = 'CUSUM'
     def series_names;  [CUSUM]; end
@@ -766,6 +789,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class Baseload < ManagerBase
     BASELOAD = 'BASELOAD'
     def series_names;  [BASELOAD]; end
@@ -776,6 +800,7 @@ module Series
     end
   end
 
+  #=====================================================================================================
   class PeakKw < ManagerBase
     PEAK_KW = 'Peak (kW)'
     def series_names;  [PEAK_KW]; end
@@ -785,7 +810,7 @@ module Series
     end
   end
 
-
+  #=====================================================================================================
   class HeatingDayType < ModelManagerBase
     SCHOOLDAYHEATING  = 'Heating On School Days'
     HOLIDAYHEATING    = 'Heating On Holidays'
@@ -799,34 +824,34 @@ module Series
     def series_names;  HEATINGDAYTYPESERIESNAMES; end
 
     def day_breakdown(d1, d2)
-        # meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
-        heating_data = default_breakdown
-        (d1..d2).each do |date|
-          type = convert_model_name_to_heating_daytype(date)
-          one_day_value = amr_data_one_day(meter, date, kwh_cost_or_co2)
-          # this is a fudge, to avoid restructuring of aggregation/series data manager interface
-          # based back to allow count to work for adding 'XXX days' to legend
-          # the modelling of 'BOILEROFF' allows days with small kWh, assuming its meter noise
-          one_day_value = Float::MIN if one_day_value == 0.0 && type == BOILEROFF
-          heating_data[type] += one_day_value
-        end
-        heating_data
+      # meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
+      heating_data = default_breakdown
+      (d1..d2).each do |date|
+        type = convert_model_name_to_heating_daytype(date)
+        one_day_value = amr_data_one_day(meter, date, kwh_cost_or_co2)
+        # this is a fudge, to avoid restructuring of aggregation/series data manager interface
+        # based back to allow count to work for adding 'XXX days' to legend
+        # the modelling of 'BOILEROFF' allows days with small kWh, assuming its meter noise
+        one_day_value = Float::MIN if one_day_value == 0.0 && type == BOILEROFF
+        heating_data[type] += one_day_value
       end
+      heating_data
+    end
 
-      def convert_model_name_to_heating_daytype(date)
-        # use daytype logic here, rather than switching on model types
-        # which have also had daytype logic applied to them
-        # small risk of inconsistancy, but reduces dependancy between
-        # this code and the regression models
-        return BOILEROFF if heating_model.boiler_off?(date)
-    
-        heating_on = heating_model.heating_on?(date)
-        if school.holidays.holiday?(date)
-          heating_on ? HOLIDAYHEATING : HOLIDAYHOTWATER
-        elsif DateTimeHelper.weekend?(date)
-          heating_on ? WEEKENDHEATING : WEEKENDHOTWATER
-        else
-          heating_on ? SCHOOLDAYHEATING : SCHOOLDAYHOTWATER
+    def convert_model_name_to_heating_daytype(date)
+      # use daytype logic here, rather than switching on model types
+      # which have also had daytype logic applied to them
+      # small risk of inconsistancy, but reduces dependancy between
+      # this code and the regression models
+      return BOILEROFF if heating_model.boiler_off?(date)
+
+      heating_on = heating_model.heating_on?(date)
+      if school.holidays.holiday?(date)
+        heating_on ? HOLIDAYHEATING : HOLIDAYHOTWATER
+      elsif DateTimeHelper.weekend?(date)
+        heating_on ? WEEKENDHEATING : WEEKENDHOTWATER
+      else
+        heating_on ? SCHOOLDAYHEATING : SCHOOLDAYHOTWATER
       end
     end
   end
