@@ -22,6 +22,7 @@ class BivariateSolarTemperatureModel
   private
 
   class BivariateModel
+    class BivariateModelCalculationFailed < StandardError; end
     def initialize(name, kwhs, degree_days, solar_irradiance, open_times_x48)
       @name             = name
       @kwhs             = kwhs
@@ -70,6 +71,8 @@ class BivariateSolarTemperatureModel
       @model_results.merge!({calculation_time: bm})
 
       @model_results
+    rescue Statsample::Regression::LinearDependency => x
+      raise BivariateModelCalculationFailed, "Linear dependence error in statsample"
     end
   end
 

@@ -7,7 +7,7 @@ class OpenCloseTimes
 
   def initialize(attributes, holidays)
     @holidays = holidays
-    oct = attributes[:open_close_times] || self.class.default_school_open_close_times
+    oct = attributes[:open_close_times] || self.class.default_school_open_close_times_config
     @open_times = oct.map { |t| OpenCloseTime.new(t, holidays) }
   end
 
@@ -82,7 +82,7 @@ class OpenCloseTimes
     type
   end
 
-  def self.default_school_open_close_times
+  def self.default_school_open_close_times_config
     [
       {
         type:             :school_day_open,
@@ -90,6 +90,10 @@ class OpenCloseTimes
         time0:            { day_of_week: :weekdays, from: TimeOfDay.new(7, 0), to: TimeOfDay.new(16, 30) }
       }
     ]
+  end
+
+  def self.default_school_open_close_times(holidays)
+    OpenCloseTimes.new({}, holidays)
   end
 
   def time_types
