@@ -51,4 +51,12 @@ module AlertGasToStorageHeaterSubstitutionMixIn
   def gas_co2(kwh)
     kwh * blended_co2_per_kwh
   end
+
+  def tariff
+    blended_electricity_£_per_kwh
+  end
+
+  def co2_intensity_per_kwh
+    blended_co2_per_kwh
+  end
 end
