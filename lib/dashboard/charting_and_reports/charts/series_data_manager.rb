@@ -308,25 +308,26 @@ module Series
       meter_date = chart_config[:min_combined_school_date] if chart_config.key?(:min_combined_school_date)
       meter_date
     end
-  
+
     def calculate_last_meter_date
       meter_date = [meter].flatten.compact.map{ |m| m.amr_data.end_date }.min
-  
+
       if y2_axis_uses_temperatures? && school.temperatures.end_date < meter_date
         logger.info "Reducing meter rage becausne temperature axis with less data on chart #{meter_date} versus #{school.temperatures.end_date}"
-        meter_date = @meter_collection.temperatures.end_date # this may not be strict enough?
+        meter_date = school.temperatures.end_date # this may not be strict enough?
       end
-  
+
       if y2_axis_uses_solar_irradiance? && school.solar_irradiation.end_date < meter_date
         logger.info "Reducing meter range because irradiance axis with less data on chart #{meter_date} versus #{school.solar_irradiation.end_date}"
         meter_date = school.solar_irradiation.end_date # this may not be strict enough?
       end
-  
+
       meter_date = chart_config[:max_combined_school_date] if chart_config.key?(:max_combined_school_date)
       meter_date = chart_config[:asof_date] if chart_config.key?(:asof_date)
       meter_date
     end
   end
+
   #=====================================================================================================
   class Multiple < ManagerBase
     class TooManyMeters < StandardError;  end

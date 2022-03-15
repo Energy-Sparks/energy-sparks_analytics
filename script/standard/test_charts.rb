@@ -7,7 +7,7 @@ charts = {
   boiler:   %i[boiler_start_time boiler_start_time_up_to_one_year boiler_start_time_up_to_one_year_no_frost]
 }
 
-no_charts = RunCharts.standard_charts_for_school
+charts = RunCharts.standard_charts_for_school
 
 control = {
   save_to_excel:  true,
@@ -20,7 +20,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['king-ja*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['chase*'], # ['king-ja*', 'marksb*', 'long*'],
   charts:   { charts: charts, control: control }
 }
 

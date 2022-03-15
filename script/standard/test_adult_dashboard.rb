@@ -6,9 +6,9 @@ module Logging
   logger.level = :debug
 end
 
-overrides = { 
-  schools: ['king-ja*'],
-  adult_dashboard: { control: { pages: %i[boiler_control_morning_start_time], user: { user_role: :analytics, staff_role: nil } } }
+overrides = {
+  schools: ['*'],
+  # adult_dashboard: { control: { pages: %i[boiler_control_morning_start_time], user: { user_role: :analytics, staff_role: nil } } }
   # adult_dashboard: { control: { pages: %i[electric_annual] } }
 }
 
