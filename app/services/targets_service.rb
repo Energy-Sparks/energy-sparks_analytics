@@ -7,16 +7,16 @@ class TargetsService
   def progress
     TargetsProgress.new(
       fuel_type: @fuel_type,
-      months: data_headers,
-      monthly_targets_kwh: data_series(:full_targets_kwh),
-      monthly_usage_kwh: data_series(:current_year_kwhs),
-      monthly_performance: data_series(:monthly_performance),
-      cumulative_targets_kwh: data_series(:full_cumulative_targets_kwhs),
-      cumulative_usage_kwh: data_series(:full_cumulative_current_year_kwhs),
-      cumulative_performance: data_series(:cumulative_performance),
-      monthly_performance_versus_synthetic_last_year: data_series(:monthly_performance_versus_last_year),
-      cumulative_performance_versus_synthetic_last_year: data_series(:cumulative_performance_versus_last_year),
-      partial_months: data_series(:partial_months)
+      months: data_headers, #populate table in report
+      monthly_targets_kwh: data_series(:full_targets_kwh), #populate report, Target consumption
+      monthly_usage_kwh: data_series(:current_year_kwhs), #populate report, Actual consumption
+      monthly_performance: data_series(:monthly_performance), #UNUSED
+      cumulative_targets_kwh: data_series(:full_cumulative_targets_kwhs), #populate report, Target consumption
+      cumulative_usage_kwh: data_series(:full_cumulative_current_year_kwhs),#populate report, Actual consumption
+      cumulative_performance: data_series(:cumulative_performance), #UNUSED
+      monthly_performance_versus_synthetic_last_year: data_series(:monthly_performance_versus_last_year), #populate report, Overall change since last year
+      cumulative_performance_versus_synthetic_last_year: data_series(:cumulative_performance_versus_last_year), #populate report, Overall change since last year, latest progress
+      partial_months: data_series(:partial_months) #add colour coding to annotate tables
     )
   end
 

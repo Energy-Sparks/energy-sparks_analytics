@@ -112,13 +112,13 @@ class TargetDates
   # used by TargetsService
   def self.can_calculate_one_year_of_synthetic_data?(original_meter)
     target = TargetAttributes.new(original_meter)
-    return original_meter.amr_data.days > 365 unless target.target_set?
 
     # TODO(PH, 10Sep2021) - this is arbitrarily set to 30 days for the moment, refine
     if original_meter.fuel_type == :electricity
       TargetDates.minimum_5_school_days_1_weekend_meter_readings?(original_meter)
     else
-      target.first_target_date - original_meter.amr_data.start_date > 30
+      start_date = target.target_set? ? target.first_target_date : default_target_start_date(original_meter)
+      start_date - original_meter.amr_data.start_date > 30
     end
   end
 
