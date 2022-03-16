@@ -6,9 +6,11 @@ module Logging
   logger.level = :debug
 end
 
+storage_heater_schools = ['penny*', 'tomna*', 'plump*', 'cats*', 'combe', 'inver*','marks*', 'miller*','stanton*', 'st-jul*','tomna*']
+
 overrides = { 
-  schools: ['wimble*'],
-  adult_dashboard: { control: { pages: %i[electric_annual] } }
+  schools: storage_heater_schools,
+  # adult_dashboard: { control: { pages: %i[electric_annual] } }
 }
 
 script = RunAdultDashboard.default_config.deep_merge(overrides)
