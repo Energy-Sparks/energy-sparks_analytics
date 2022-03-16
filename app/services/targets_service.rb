@@ -56,6 +56,17 @@ class TargetsService
     annual_kwh_estimate_required? && annual_kwh_estimate? && can_calculate_one_year_of_synthetic_data?
   end
 
+  #Used by the front-end to check whether to suggest to users that they provide
+  #an estimate.
+  #
+  #Checks whether one is needed, whether one has been set and whether
+  #we can calculate the synthetic data is one is eventually provided
+  #
+  #This avoids suggesting an estimate if we using it won't help
+  def suggest_use_of_estimate?
+    annual_kwh_estimate_required? && !annual_kwh_estimate? && can_calculate_one_year_of_synthetic_data?
+  end
+
   # one year of meter readings are required prior to the first target date
   # in order to calculate a target for the following year in the absence
   # of needing to calculate a full year of data synthetically using an 'annual kWh estimate'
