@@ -58,7 +58,7 @@ class AlertOptimumStartAnalysis < AlertGasModelBase
 
   def calculate(asof_date)
     calculate_model(asof_date) # heating model call
-    
+
     results = heating_model.optimum_start_analysis
 
     @regression_start_time        = results[:regression_start_time]

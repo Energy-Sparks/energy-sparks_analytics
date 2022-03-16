@@ -810,7 +810,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     in_hours = 0.0
     out_of_hours = 0.0
     breakdown[:x_data].each do |daytype, consumption|
-      if daytype == SeriesNames::SCHOOLDAYOPEN
+      if daytype == Series::DayType::SCHOOLDAYOPEN
         in_hours += consumption[0]
       else
         out_of_hours += consumption[0]

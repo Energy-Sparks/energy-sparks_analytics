@@ -139,10 +139,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   def calculate(_asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
     daytype_breakdown = extract_kwh_from_chart_data(out_of_hours_energy_consumption)
-    @holidays_kwh         = daytype_breakdown[SeriesNames::HOLIDAY]
-    @weekends_kwh         = daytype_breakdown[SeriesNames::WEEKEND]
-    @schoolday_open_kwh   = daytype_breakdown[SeriesNames::SCHOOLDAYOPEN]
-    @schoolday_closed_kwh = daytype_breakdown[SeriesNames::SCHOOLDAYCLOSED]
+    @holidays_kwh         = daytype_breakdown[Series::DayType::HOLIDAY]
+    @weekends_kwh         = daytype_breakdown[Series::DayType::WEEKEND]
+    @schoolday_open_kwh   = daytype_breakdown[Series::DayType::SCHOOLDAYOPEN]
+    @schoolday_closed_kwh = daytype_breakdown[Series::DayType::SCHOOLDAYCLOSED]
     community_name        = OpenCloseTime.humanize_symbol(OpenCloseTime::COMMUNITY)
     @community_kwh        = daytype_breakdown[community_name] || 0.0
 
@@ -175,10 +175,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @total_annual_co2     = @holidays_co2 + @weekends_co2 + @schoolday_open_co2 + @schoolday_closed_co2
 
     @daytype_breakdown_table = [
-      [SeriesNames::HOLIDAY,          @holidays_kwh,         @holidays_percent,          @holidays_£,         @holidays_co2],
-      [SeriesNames::WEEKEND,          @weekends_kwh,         @weekends_percent,          @weekends_£,         @weekends_co2],
-      [SeriesNames::SCHOOLDAYOPEN,    @schoolday_open_kwh,   @schoolday_open_percent,    @schoolday_open_£,   @schoolday_open_co2],
-      [SeriesNames::SCHOOLDAYCLOSED,  @schoolday_closed_kwh, @schoolday_closed_percent,  @schoolday_closed_£, @schoolday_closed_co2]
+      [Series::DayType::HOLIDAY,          @holidays_kwh,         @holidays_percent,          @holidays_£,         @holidays_co2],
+      [Series::DayType::WEEKEND,          @weekends_kwh,         @weekends_percent,          @weekends_£,         @weekends_co2],
+      [Series::DayType::SCHOOLDAYOPEN,    @schoolday_open_kwh,   @schoolday_open_percent,    @schoolday_open_£,   @schoolday_open_co2],
+      [Series::DayType::SCHOOLDAYCLOSED,  @schoolday_closed_kwh, @schoolday_closed_percent,  @schoolday_closed_£, @schoolday_closed_co2]
     ]
 
     if @school.community_usage?
@@ -232,7 +232,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     kwh_in_hours = 0.0
     kwh_out_of_hours = 0.0
     breakdown[:x_data].each do |daytype, consumption|
-      if daytype == SeriesNames::SCHOOLDAYOPEN
+      if daytype == Series::DayType::SCHOOLDAYOPEN
         kwh_in_hours += consumption[0]
       else
         kwh_out_of_hours += consumption[0]

@@ -11,9 +11,9 @@ class ChartManager
     @show_reconciliation_values = show_reconciliation_values
   end
 
-  def run_chart_group(chart_param, override_config = nil, reraise_exception = false)
+  def run_chart_group(chart_param, override_config = nil, reraise_exception = false, provide_advice: true)
     if chart_param.is_a?(Symbol)
-      run_standard_chart(chart_param, override_config, reraise_exception)
+      run_standard_chart(chart_param, override_config, reraise_exception, provide_advice: provide_advice)
     elsif chart_param.is_a?(Hash)
       run_composite_chart(chart_param, override_config, reraise_exception)
     end
@@ -73,9 +73,9 @@ class ChartManager
   end
 
   # Used by ES Web application
-  def run_standard_chart(chart_param, override_config = nil, reraise_exception = false)
+  def run_standard_chart(chart_param, override_config = nil, reraise_exception = false, provide_advice: true)
     chart_config = get_chart_config(chart_param, override_config)
-    chart_definition = run_chart(chart_config, chart_param, false, override_config, reraise_exception)
+    chart_definition = run_chart(chart_config, chart_param, false, override_config, reraise_exception, provide_advice: provide_advice)
     chart_definition
   end
 
@@ -87,7 +87,7 @@ class ChartManager
   end
 
   # Used by ES Web application
-  def run_chart(chart_config, chart_param, resolve_inheritance = true, override_config = nil, reraise_exception = false)
+  def run_chart(chart_config, chart_param, resolve_inheritance = true, override_config = nil, reraise_exception = false, provide_advice: true)
     logger.info '>' * 120
     logger.info chart_config[:name]
     logger.info '>' * 120
@@ -113,7 +113,7 @@ class ChartManager
       }
 
       if aggregator.valid
-        graph_data = configure_graph(aggregator, chart_config, chart_param, calculation_time)
+        graph_data = configure_graph(aggregator, chart_config, chart_param, calculation_time, provide_advice: provide_advice)
 
         ap(graph_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
         logger.info '<' * 120
@@ -145,7 +145,7 @@ class ChartManager
     end
   end
 
-  def configure_graph(aggregator, chart_config, chart_param, calculation_time)
+  def configure_graph(aggregator, chart_config, chart_param, calculation_time, provide_advice: true)
     graph_definition = {}
 
     graph_definition[:title]          = chart_config[:name] # + ' ' + aggregator.title_summary
@@ -171,17 +171,24 @@ class ChartManager
     graph_definition[:configuration] = chart_config
     graph_definition[:name] = chart_param
 
-    advice = DashboardChartAdviceBase.advice_factory(chart_param, @school, chart_config, graph_definition, chart_param)
+    if provide_advice
+      advice = DashboardChartAdviceBase.advice_factory(chart_param, @school, chart_config, graph_definition, chart_param)
 
-    unless advice.nil?
-      advice.generate_advice
-      graph_definition[:advice_header] = advice.header_advice
-      graph_definition[:advice_footer] = advice.footer_advice
+      unless advice.nil?
+        advice.generate_advice
+        graph_definition[:advice_header] = advice.header_advice
+        graph_definition[:advice_footer] = advice.footer_advice
+      end
     end
+
     # ap(graph_definition, limit: 20)
     graph_definition[:calculation_time] = calculation_time
 
     graph_definition
+  end
+
+  def standard_chart_valid?(chart_name)
+    valid?(self.class.standard_chart(chart_name))
   end
 
   private
@@ -196,5 +203,27 @@ class ChartManager
     else
       chart_config
     end
+  end
+
+  def valid?(chart_config)
+    expected_to_run?(chart_config) != :no
+  end
+
+  def expected_to_run?(original_chart_config)
+    chart_config = resolve_chart_inheritance(original_chart_config)
+
+    meter = ChartToMeterMap.instance.meter(school, chart_config[:meter_definition])
+    return :no if [meter].flatten.compact.empty?
+
+    if chart_config[:series_breakdown] == :submeter
+      return :no if meter.sub_meters.empty? 
+    end
+
+    if chart_config[:series_breakdown] == :fuel &&
+       chart_config.dig(:filter, :fuel) == ['storage heaters']
+      return :no
+    end
+
+    :yes
   end
 end

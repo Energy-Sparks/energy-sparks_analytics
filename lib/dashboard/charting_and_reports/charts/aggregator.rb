@@ -140,8 +140,8 @@ class Aggregator
   def dynamic_chart_name
     # make useful data available for binding
     school        = @meter_collection.school
-    meter         = @series_manager.meters.compact.first
-    second_meter  = @series_manager.meters.compact.last
+    meter         = [@series_manager.meter].flatten.first
+    second_meter  = [@series_manager.meter].flatten.last
     total_kwh = @bucketed_data.values.map{ |v| v.nil? ? 0.0 : v }.map(&:sum).sum.round(0) if @chart_config[:name].include?('total_kwh') rescue 0.0
 
     ERB.new(@chart_config[:name]).result(binding)
@@ -245,14 +245,14 @@ class Aggregator
     logger.info "Determining maximum chart range for #{schools.length} schools:"
 
     min_date = schools.map do |school|
-      SeriesDataManager.new(school, chart_config).first_meter_date
+      Series::ManagerBase.new(school, chart_config).first_meter_date
     rescue EnergySparksNotEnoughDataException => e_
       raise unless ignore_single_series_failure?
       nil
     end.compact.max
 
     last_meter_dates = schools.map do |school|
-      SeriesDataManager.new(school, chart_config).last_meter_date
+      Series::ManagerBase.new(school, chart_config).last_meter_date
     rescue EnergySparksNotEnoughDataException => e_
       raise unless ignore_single_series_failure?
       nil
@@ -279,7 +279,7 @@ class Aggregator
     periods = chart_config[:timescale]
     periods.each do |period|
       chart_config[:timescale] = date_to_temperature_map.empty? ? chart_config[:adjust_by_temperature] : period
-      series_manager = SeriesDataManager.new(school, chart_config)
+      series_manager = Series::ManagerBase.new(school, chart_config).new(school, chart_config)
       if date_to_temperature_map.empty?
         series_manager.periods[0].dates.each do |date|
           date_to_temperature_map[date] = school.temperatures.average_temperature(date)
@@ -587,8 +587,10 @@ class Aggregator
   def relabel_legend
     @chart_config[:replace_series_label].each do |substitute_pair|
       @bucketed_data.keys.each do |series_name|
-        substitute_pair[0] = substitute_pair[0].gsub('<school_name>', @meter_collection.name) if substitute_pair[0].include?('<school_name>')
-        new_series_name = series_name.gsub(substitute_pair[0], substitute_pair[1])
+        original    = substitute_pair[0]
+        replacement = substitute_pair[1]
+        original = original.gsub('<school_name>', @meter_collection.name) if original.include?('<school_name>')
+        new_series_name = series_name.gsub(original, replacement)
         @bucketed_data[new_series_name] = @bucketed_data.delete(series_name)
         @bucketed_data_count[new_series_name] = @bucketed_data_count.delete(series_name)
       end
@@ -596,7 +598,7 @@ class Aggregator
   end
 
   def aggregate_period(chart_config)
-    @series_manager = SeriesDataManager.new(@meter_collection, chart_config)
+    @series_manager = Series::Multiple.new(@meter_collection, chart_config)
     @series_names = @series_manager.series_bucket_names
     logger.info "Aggregating these series #{@series_names}"
     logger.info "aggregate_period Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"
@@ -686,7 +688,7 @@ class Aggregator
 
   def analytics_excel_trendlines(bucketed_data, regression_parameters)
     @series_manager.trendlines.each do |trendline_series_name|
-      model_type_for_trendline = SeriesDataManager.series_name_for_trendline(trendline_series_name)
+      model_type_for_trendline = Series::ManagerBase.series_name_for_trendline(trendline_series_name)
       trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline, regression_parameters)
       bucketed_data[trendline_name_with_parameters] = model_type_for_trendline # set model symbol
     end
@@ -694,7 +696,7 @@ class Aggregator
 
   def add_trendlines_for_rails_all_points(bucketed_data, regression_parameters)
     @series_manager.trendlines.each do |trendline_series_name|
-      model_type_for_trendline = SeriesDataManager.series_name_for_trendline(trendline_series_name)
+      model_type_for_trendline = Series::ManagerBase.series_name_for_trendline(trendline_series_name)
       trendline_name_with_parameters = add_regression_parameters_to_trendline_symbol(trendline_series_name, model_type_for_trendline, regression_parameters)
       bucketed_data[trendline_name_with_parameters] = Array.new(@x_axis.length, Float::NAN)
       @x_axis.each_with_index do |date, index|
@@ -717,7 +719,7 @@ class Aggregator
     series_model_types.each do |model_type|
       model_temperatures_and_index = bucketed_data[model_type].each_with_index.map { | kwh, index| kwh.nan? ? nil : [temperatures[index], index, @x_axis[index]] }.compact
       min, max = model_temperatures_and_index.minmax_by { |temp, _index, _date| temp }
-      trendline = add_regression_parameters_to_trendline_symbol(SeriesDataManager.trendline_for_series_name(model_type), model_type. regression_parameters)
+      trendline = add_regression_parameters_to_trendline_symbol(Series::ManagerBase.trendline_for_series_name(model_type), model_type. regression_parameters)
       bucketed_data[trendline] = Array.new(@x_axis.length, Float::NAN)
       bucketed_data[trendline][min[1]] = @series_manager.predicted_amr_data_one_day(min[2]) * trendline_scale
       bucketed_data[trendline][max[1]] = @series_manager.predicted_amr_data_one_day(max[2]) * trendline_scale
@@ -738,8 +740,8 @@ class Aggregator
 
   private def calculate_regression_parameters_outside_model(bucketed_data)
     regression_parameters = {}
-    temperatures = bucketed_data[SeriesNames::TEMPERATURE]
-    model_names = bucketed_data.select { |bucket_name, _data| bucket_name != SeriesNames::TEMPERATURE }
+    temperatures = bucketed_data[Series::Temperature::TEMPERATURE]
+    model_names = bucketed_data.select { |bucket_name, _data| bucket_name != Series::Temperature::TEMPERATURE }
     model_names.each_key do |model_name|
       x_data, y_data = compact_to_non_nan_data(temperatures, bucketed_data[model_name])
       regression_parameters[model_name]  = calculate_regression_parameters(x_data, y_data)
@@ -853,11 +855,11 @@ class Aggregator
     match = false
     [filter].flatten.each do |one_filter|
       case one_filter
-      when SeriesNames::HOLIDAY
+      when Series::DayType::HOLIDAY
         match ||= true if holidays.holiday?(date)
-      when SeriesNames::WEEKEND
+      when Series::DayType::WEEKEND
         match ||= true if DateTimeHelper.weekend?(date) && !holidays.holiday?(date)
-      when SeriesNames::SCHOOLDAYOPEN, SeriesNames::SCHOOLDAYOPEN
+      when Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYOPEN
         match ||= true if !(DateTimeHelper.weekend?(date) || holidays.holiday?(date))
       end
     end
@@ -868,7 +870,7 @@ class Aggregator
 
   def aggregate_by_halfhour(start_date, end_date, bucketed_data, bucketed_data_count)
     # Change Line Below 22Mar2019
-    if bucketed_data.length == 1 && bucketed_data.keys[0] == SeriesNames::NONE
+    if bucketed_data.length == 1 && bucketed_data.keys[0] == Series::NoBreakdown::NONE
       aggregate_by_halfhour_simple_fast(start_date, end_date, bucketed_data, bucketed_data_count)
     else
       (start_date..end_date).each do |date|
@@ -893,8 +895,8 @@ class Aggregator
       total = AMRData.fast_add_x48_x_x48(total, data)
       count += 1
     end
-    bucketed_data[SeriesNames::NONE] = total
-    bucketed_data_count[SeriesNames::NONE] = Array.new(48, count)
+    bucketed_data[Series::NoBreakdown::NONE] = total
+    bucketed_data_count[Series::NoBreakdown::NONE] = Array.new(48, count)
   end
 
   def aggregate_by_datetime(start_date, end_date, bucketed_data, bucketed_data_count)
@@ -914,7 +916,7 @@ class Aggregator
   # in the wrong order by default for most graphing packages, so the columns of data need
   # reorganising
   def reorganise_buckets
-    dd_or_temp_key = @bucketed_data.key?(SeriesNames::DEGREEDAYS) ? SeriesNames::DEGREEDAYS : SeriesNames::TEMPERATURE
+    dd_or_temp_key = @bucketed_data.key?(Series::DegreeDays::DEGREEDAYS) ? Series::DegreeDays::DEGREEDAYS : Series::Temperature::TEMPERATURE
     # replace dates on x axis with degree days, but retain them for future point labelling
     x_axis = @x_axis
     @x_axis = @bucketed_data[dd_or_temp_key]
@@ -926,7 +928,7 @@ class Aggregator
 
   # called only for scatter charts
   def add_x_axis_label
-    @x_axis_label = @bucketed_data.key?(SeriesNames::DEGREEDAYS) ? SeriesNames::DEGREEDAYS : SeriesNames::TEMPERATURE
+    @x_axis_label = @bucketed_data.key?(Series::DegreeDays::DEGREEDAYS) ? Series::DegreeDays::DEGREEDAYS : Series::Temperature::TEMPERATURE
   end
 
   # remove zero data - issue with filtered scatter charts, and the difficulty or representing nan (NaN) in Excel charts
@@ -971,13 +973,14 @@ class Aggregator
       end
     end
     if @chart_config[:filter].key?(:heating)
-      filter = @chart_config[:filter][:heating] ? [SeriesNames::HEATINGDAY, SeriesNames::HEATINGDAYMODEL] : [SeriesNames::NONHEATINGDAY, SeriesNames::NONHEATINGDAYMODEL]
+      raise EnergySparksBadChartSpecification, "Filter: :heating should always be true #{[:filter][:heating]}" unless @chart_config[:filter][:heating] == true
+      filter = [Series::HeatingNonHeating::HEATINGDAY] # PH 22Mar2022 changed, uncertain of impact
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, filter)
     end
     if @chart_config[:filter].key?(:model_type)
       # for model filters, copy in any trendlines for those models to avoid filtering 
       model_filter = [@chart_config[:filter][:model_type]].flatten(1)
-      trendline_filters = model_filter.map { |model_name| SeriesDataManager.trendline_for_series_name(model_name) }
+      trendline_filters = model_filter.map { |model_name| Series::ManagerBase.trendline_for_series_name(model_name) }
       trendline_filters_with_parameters = pattern_match_two_symbol_lists(trendline_filters, @bucketed_data.keys)
       keep_key_list += pattern_match_list_with_list(@bucketed_data.keys, model_filter + trendline_filters_with_parameters)
     end
@@ -1031,7 +1034,7 @@ class Aggregator
   # need to deal with case where multiple merged charts and date or school suffix has been added to the end of the series name
   def pattern_match_y2_axis_names
     matched = []
-    SeriesNames::Y2SERIESYMBOLTONAMEMAP.values.each do |y2_series_name|
+    Series::ManagerBase.y2_series_types.values.each do |y2_series_name|
       base_name_length = y2_series_name.length
       matched += @bucketed_data.keys.select{ |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
     end
@@ -1127,9 +1130,9 @@ class Aggregator
       )
     end
 
-    if benchmark_required?(SeriesNames::STORAGEHEATERS)
+    if benchmark_required?(Series::MultipleFuels::STORAGEHEATERS)
       set_benchmark_buckets(
-        @bucketed_data[SeriesNames::STORAGEHEATERS],
+        @bucketed_data[Series::MultipleFuels::STORAGEHEATERS],
         regional_exemplar_storage_heater_usage_in_units,
         regional_benchmark_storage_heater_usage_in_units,
         national_benchmark_storage_heater_usage_in_units
@@ -1138,8 +1141,8 @@ class Aggregator
 
     # Centrica: need to support 2x series 1 for community use, 1 without
 
-    if benchmark_required?(SeriesNames::SOLARPV)
-      set_benchmark_buckets(@bucketed_data[SeriesNames::STORAGEHEATERS], 0.0, 0.0, 0.0)
+    if benchmark_required?(Series::MultipleFuels::SOLARPV)
+      set_benchmark_buckets(@bucketed_data[Series::MultipleFuels::STORAGEHEATERS], 0.0, 0.0, 0.0)
     end
   end
 
@@ -1156,7 +1159,7 @@ class Aggregator
   # performs scaling to 200, 1000 pupils or primary/secondary default sized floor areas
   private def scale_x_data(bucketed_data)
     # exclude y2_axis values e.g. temperature, degree days
-    x_data_keys = bucketed_data.select { |series_name, _data| !SeriesNames::Y2SERIESYMBOLTONAMEMAP.values.include?(series_name) }
+    x_data_keys = bucketed_data.select { |series_name, _data| !Series::ManagerBase.y2_series_types.values.include?(series_name) }
     scale_factor = YAxisScaling.new.scaling_factor(@chart_config[:yaxis_scaling], @meter_collection)
     x_data_keys.each_key do |data_series_name|
       bucketed_data[data_series_name].each_with_index do |value, index|

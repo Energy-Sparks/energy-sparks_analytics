@@ -1,6 +1,4 @@
-# TODO (PH, 16Jan2022) remove reference to series_data_manager.rb once SeriesNames:: removed
-# require_relative '../../lib/dashboard/charting_and_reports/charts/series_data_manager.rb'
-# Centrica
+# manages school open and close times
 class OpenCloseTimes
   class UnknownFrontEndType < StandardError; end
   attr_reader :open_times
