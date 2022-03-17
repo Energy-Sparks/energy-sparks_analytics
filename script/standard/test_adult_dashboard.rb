@@ -9,7 +9,7 @@ end
 storage_heater_schools = ['penny*', 'tomna*', 'plump*', 'cats*', 'combe', 'inver*','marks*', 'miller*','stanton*', 'st-jul*','tomna*']
 
 overrides = { 
-  schools: storage_heater_schools,
+  schools: storage_heater_schools
   # adult_dashboard: { control: { pages: %i[electric_annual] } }
 }
 

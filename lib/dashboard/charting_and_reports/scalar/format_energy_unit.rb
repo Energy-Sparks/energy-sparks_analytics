@@ -45,6 +45,7 @@ class FormatEnergyUnit
     opt_start_standard_deviation: 'standard deviation (hours)',
     morning_start_time:           'time of day',
     optimum_start_sensitivity:    'hours/C',
+    boiler_start_time:            'boiler start time',
     temperature:                  'C',
     years_range:                  'years',
     years:                        'years',

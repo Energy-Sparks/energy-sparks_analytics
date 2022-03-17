@@ -687,20 +687,51 @@ module AnalyseHeatingAndHotWater
     def heating_on_time_assessment(date)
       temperature = temperatures.average_temperature_in_time_range(date, 0, 10).round(1) # between midnight and 5:00am
       return [nil, nil, temperature, nil] if !heating_on?(date)
-
-      baseload_kw = @heat_meter.amr_data.statistical_baseload_kw(date)
-      peakload_kw = @heat_meter.amr_data.statistical_peak_kw(date)
-      half_load_kw = baseload_kw + ((peakload_kw - baseload_kw) * 0.5)
-      days_data = @heat_meter.amr_data.days_kwh_x48(date)
-      heating_on_halfhour_index = days_data.index{ |kwh| (kwh * 2.0) > half_load_kw }
+      
+      heating_on_halfhour_index = heating_on_half_hour_index(date)
       return [nil, nil, temperature, nil] if heating_on_halfhour_index.nil?
 
+      days_data = @heat_meter.amr_data.days_kwh_x48(date)
       actual_on_time = heating_on_halfhour_index.nil? ? nil : TimeOfDay.time_of_day_from_halfhour_index(heating_on_halfhour_index)
       recommended_start_time, recommended_start_time_halfhour_index = recommended_optimum_start_time(nil, temperature)
       started_too_early = heating_on_halfhour_index < recommended_start_time_halfhour_index
       kwh_saving = started_too_early ? days_data[heating_on_halfhour_index..recommended_start_time_halfhour_index].sum : 0.0
 
       [actual_on_time, recommended_start_time, temperature, kwh_saving]
+    end
+
+    def heating_on_time(date)
+      hhi = heating_on_half_hour_index(date)
+
+      return nil if hhi.nil?
+
+      TimeOfDay.time_of_day_from_halfhour_index(hhi)
+    end
+
+    def heating_on_half_hour_index_checked(date, ignore_frosty_days_temperature: nil)
+      return Float::NAN unless heating_on?(date)
+
+      return Float::NAN if frosty_morning?(date, ignore_frosty_days_temperature)
+
+      heating_on_half_hour_index(date)
+    end
+
+    def frosty_morning?(date, frost_temperature)
+      return false if frost_temperature.nil?
+
+      # assume heating comes on at 5am normally, so only test temperature before 5am
+      # TODO(PH, 14Mar20202): consider more nuanced if temperature dips below a frost
+      #                       temperature during the morning period prior to the heating
+      #                       normally coming on?
+      temperatures.average_temperature_in_time_range(date, 0, 10) < frost_temperature
+    end
+
+    def heating_on_half_hour_index(date)
+      baseload_kw   = @heat_meter.amr_data.statistical_baseload_kw(date)
+      peakload_kw   = @heat_meter.amr_data.statistical_peak_kw(date)
+      half_load_kwh = (baseload_kw + ((peakload_kw - baseload_kw) * 0.5)) / 2.0
+      days_data = @heat_meter.amr_data.days_kwh_x48(date)
+      days_data.index{ |kwh| kwh > half_load_kwh }
     end
 
     # perhaps needs merging with def heating_on_time_assessment, but not in this test cycle TODO(PH, 25Jul2020)
@@ -711,10 +742,33 @@ module AnalyseHeatingAndHotWater
       @heat_meter.amr_data.kw(date, halfhour_index) > min_load_kw
     end
 
-    def optimum_start_analysis(start_date = [@amr_data.start_date, @amr_data.end_date - 364].max, end_date = @amr_data.end_date)
-      start_time_temperature_pairs = optimum_start_times_temperatures(start_date, end_date)
+    def one_year_start_date
+      [@amr_data.start_date, @amr_data.end_date - 364, temperatures.start_date].max
+    end
+
+    def one_year_end_date
+      [@amr_data.end_date, temperatures.end_date].min
+    end
+
+
+    def optimum_start_analysis(start_date: one_year_start_date, end_date: one_year_end_date, days_of_the_week: nil, months_of_year: nil)
+      start_time_temperature_pairs = optimum_start_times_temperatures(start_date, end_date, days_of_the_week, months_of_year)
+      return nil_optimum_start_model_result if start_time_temperature_pairs.empty?
+
       # print_optimum_start_times_temperatures(start_time_temperature_pairs)
+
       calculate_optimum_start_regression(start_time_temperature_pairs)
+    end
+
+    def nil_optimum_start_model_result
+      {
+        regression_start_time:        nil,
+        optimum_start_sensitivity:    nil,
+        regression_r2:                nil,
+        average_start_time:           nil,
+        start_time_standard_devation: nil,
+        days:                         0
+      }
     end
 
     def calculate_optimum_start_regression(time_temp_pairs)
@@ -727,7 +781,8 @@ module AnalyseHeatingAndHotWater
         optimum_start_sensitivity:    sr.b,
         regression_r2:                sr.r2,
         average_start_time:           start_times.sum / start_times.length,
-        start_time_standard_devation: EnergySparks::Maths.standard_deviation(start_times)
+        start_time_standard_devation: EnergySparks::Maths.standard_deviation(start_times),
+        days:                         time_temp_pairs.length
       }
     end
 
@@ -736,10 +791,17 @@ module AnalyseHeatingAndHotWater
         puts "#{time_temp_pair[0].round(2)} #{time_temp_pair[1].round(2)}"
       end
     end
-    def optimum_start_times_temperatures(start_date, end_date)
+
+    def optimum_start_times_temperatures(start_date, end_date, days_of_the_week, months)
       start_times = (start_date..end_date).map do |date|
-        on_time, _recommend_time, temperature, _kwh_saving = heating_on_time_assessment(date)
-        on_time.nil? ? nil : [on_time.hours_fraction, temperature]
+        if !days_of_the_week.nil? && !days_of_the_week.include?(date.wday)
+          nil
+        elsif !months.nil? && !months.include?(date.month)
+          nil
+        else
+          on_time, _recommend_time, temperature, _kwh_saving = heating_on_time_assessment(date)
+          on_time.nil? ? nil : [on_time.hours_fraction, temperature]
+        end
       end.compact
     end
 
