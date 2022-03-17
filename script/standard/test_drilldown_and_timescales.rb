@@ -10,7 +10,7 @@ script = {
   schools:                  ['bathamp*'], # ['Round.*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
-  # drilldown:                true
+  drilldown:                { chart_name: :baseload_versus_benchmarks },
   timescales:               { chart_name: :management_dashboard_group_by_week_electricity }
   # timescale_and_drilldown:    true
 }
