@@ -33,7 +33,7 @@ class TargetSchool < MeterCollection
     @synthetic_target_meters = {}
     @meter_nil_reason = {}
 
-    @debug = false
+    @debug = true
 
     calculate_target_meters(@original_school, calculation_type)
 

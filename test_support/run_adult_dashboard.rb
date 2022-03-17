@@ -18,7 +18,7 @@ class RunAdultDashboard < RunCharts
         root:    :adult_analysis_page, # :pupil_analysis_page,
         no_chart_manipulation: %i[drilldown timeshift],
         display_average_calculation_rate: true,
-        summarise_differences: false,
+        summarise_differences: true,
         report_failed_charts:   :summary, # :detailed
         page_calculation_time: false,
         user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },

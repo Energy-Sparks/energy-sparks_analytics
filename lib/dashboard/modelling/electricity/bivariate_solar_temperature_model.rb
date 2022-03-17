@@ -71,8 +71,10 @@ class BivariateSolarTemperatureModel
       @model_results.merge!({calculation_time: bm})
 
       @model_results
-    rescue Statsample::Regression::LinearDependency => x
+    rescue Statsample::Regression::LinearDependency => _x
       raise BivariateModelCalculationFailed, "Linear dependence error in statsample"
+    rescue NoMethodError => x
+      raise BivariateModelCalculationFailed, "nil method failure"
     end
   end
 

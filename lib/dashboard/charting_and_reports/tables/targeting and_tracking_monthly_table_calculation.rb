@@ -23,6 +23,9 @@ class CalculateMonthlyTrackAndTraceData
     full_targets_kwh    = kwhs_for_date_ranges(month_dates,         target_meter)
     partial_targets_kwh = kwhs_for_date_ranges(partial_month_dates, target_meter)
 
+    prior_year_months = prior_year_month_dates(month_dates)
+    percentage_synthetic = percent_synthetic_data(prior_year_months, target_meter)
+
     partial_last_year_unadjusted_kwh = unadjusted_target(partial_month_dates, target_meter)
     full_last_year_unadjusted_kwh    = unadjusted_target(month_dates,         target_meter)
 
@@ -39,7 +42,8 @@ class CalculateMonthlyTrackAndTraceData
 
       full_cumulative_current_year_kwhs:  full_cumulative_current_year_kwhs,
       full_cumulative_targets_kwhs:       accumulate(full_targets_kwh),
-      partial_cumulative_targets_kwhs:    partial_cumulative_targets_kwhs,      
+      partial_cumulative_targets_kwhs:    partial_cumulative_targets_kwhs,
+      percentage_synthetic:               percentage_synthetic,
 
       monthly_performance:                performance(current_year_kwhs, partial_targets_kwh),
       cumulative_performance:             performance(full_cumulative_current_year_kwhs, partial_cumulative_targets_kwhs),
@@ -63,6 +67,16 @@ class CalculateMonthlyTrackAndTraceData
   def kwhs_for_date_ranges(date_ranges, meter)
     date_ranges.map do |date_range|
       date_range.nil? ? nil : kwh_date_range(meter, date_range.first, date_range.last)
+    end
+  end
+
+  def percent_synthetic_data(date_ranges, target_meter)
+    date_ranges.map do |date_range|
+      if date_range.nil?
+        nil
+      else
+        target_meter.target_dates.percentage_synthetic_data_in_date_range(date_range.first, date_range.last)
+      end
     end
   end
 
@@ -93,6 +107,26 @@ class CalculateMonthlyTrackAndTraceData
       month_date_range = start_date..end_date
       start_date = end_date + 1
       month_date_range
+    end
+  end
+
+  def prior_year_month_dates(month_dates)
+    month_dates.map do |partial_month_range|
+      month_in_of_previous_year(partial_month_range)
+    end
+  end
+
+  def month_in_of_previous_year(partial_month_range)
+    sd = corresponding_date_in_previous_year(partial_month_range.first)
+    ed = corresponding_date_in_previous_year(partial_month_range.last)
+    sd..ed
+  end
+  
+  def corresponding_date_in_previous_year(date)
+    if Date.leap?(date.year) && date.month == 2 && date.day == 29
+      Date.new(date.year - 1, date.month, 28)
+    else
+      Date.new(date.year - 1, date.month, date.day)
     end
   end
 
