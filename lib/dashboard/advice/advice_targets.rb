@@ -116,7 +116,14 @@ class AdviceTargets < AdviceBase
       <p>
         <%=monthly_tracking_table.simple_culmulative_target_table_html %>
       </p>
-      <% if monthly_tracking_table.cumulative_target_percent > 0.0 %>
+      <% if monthly_tracking_table.cumulative_target_percent.nil? %>
+        <p>
+          We currently don&apos;t have enough data to compare your performance
+          versus the target. Data will be available from
+          <%= monthly_tracking_table.first_target_date.strftime('%a %d %b %Y') %>,
+          or you can provide an annual estimate of your <%= fuel_type_html %> consumption.
+        </p>
+      <% elsif monthly_tracking_table.cumulative_target_percent > 0.0 %>
         <p>
           Unfortunately you are currently running
           <%= monthly_tracking_table.year_to_date_percent_absolute_html %> above target.
@@ -127,12 +134,14 @@ class AdviceTargets < AdviceBase
           <%= monthly_tracking_table.year_to_date_percent_absolute_html %> below the target.
         </p>
       <% end  %>
-      <p>
-        So far you have spent
-          <%= format_cell(:£, current_year_£) %> (<%= format_cell(:kwh, current_year_kwh) %>)
-        versus your target of
-          <%= format_cell(:£, current_year_target_£_to_date) %> (<%= format_cell(:kwh, current_year_target_kwh_to_date) %>).
-      </p>
+      <% unless monthly_tracking_table.cumulative_target_percent.nil? %>
+        <p>
+          So far you have spent
+            <%= format_cell(:£, current_year_£) %> (<%= format_cell(:kwh, current_year_kwh) %>)
+          versus your target of
+            <%= format_cell(:£, current_year_target_£_to_date) %> (<%= format_cell(:kwh, current_year_target_kwh_to_date) %>).
+        </p>
+      <% end %>
     }
     ERB.new(text).result(binding)
   end
@@ -278,14 +287,14 @@ class AdviceTargets < AdviceBase
     end
 
     # compact_print(target_meter)
-    
+
     HtmlTableFormatting.new(header, rows).html
   end
 
   def compact_print(target_meter)
     a = []
     (target_meter.amr_data.start_date..target_meter.amr_data.end_date).each do |date|
-    
+
       a.push("#{date}: #{target_meter.amr_data.one_day_kwh(date).round(1)}".ljust(20))
     end
     a.each_slice(6) do |six_vals|

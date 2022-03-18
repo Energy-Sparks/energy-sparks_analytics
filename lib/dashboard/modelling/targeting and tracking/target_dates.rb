@@ -15,7 +15,20 @@ class TargetDates
   end
 
   def target_end_date
-    target_start_date + DAYSINYEAR
+    original_target_start_date + DAYSINYEAR - 1
+  end
+
+  def original_target_start_date
+    [@target.first_target_date, @original_meter.amr_data.end_date - DAYSINYEAR].max
+  end
+
+  # case where user set target date where < 1 year data and no annual_kwh estimate
+  # target only available after 1 year data point, so no target from user set
+  # target date until 1 year's data, then target data for remainder of year
+  # e.g. user target date = 1 Dec 2021, 1st meter date = 1 Mar 2021
+  #      targets from 1 Mar 2022 to 1 Dec 2022 but not 1 Dec 2021 to 28 Feb 2022
+  def pre_target_date?(date)
+    date.between?(original_target_start_date, target_start_date - 1)
   end
 
   def target_date_range
@@ -188,21 +201,20 @@ class TargetDates
       enough_holidays:                  enough_holidays?,
       holiday_problems:                 holiday_problems.join(', '),
       recent_data:                      recent_data?,
-      moved_target_start_date_forward:  @moved_target_start_date_forward_because_no_estimate
+      moved_target_start_date_forward:  original_target_start_date != target_start_date,
+      original_target_start_date:       original_target_start_date
     }
     # or TargetDates.instance_methods(false).map { |m| [m, self.send(m)]}
   end
 
   private
 
-  def calculate_target_start_date
+  def calculate_target_start_date   
     if @original_meter.annual_kwh_estimate.nan? &&
       @target.first_target_date - DAYSINYEAR < @original_meter.amr_data.start_date
-      @moved_target_start_date_forward_because_no_estimate = true
       logger.info "Moving target start date forward to #{@original_meter.amr_data.start_date + DAYSINYEAR} as target not set"
-      @original_meter.amr_data.start_date + DAYSINYEAR 
-    else     
-      @moved_target_start_date_forward_because_no_estimate = false
+      [@original_meter.amr_data.start_date + DAYSINYEAR, @original_meter.amr_data.end_date - DAYSINYEAR].max
+    else
       [@target.first_target_date, @original_meter.amr_data.end_date - DAYSINYEAR].max
     end
   end
