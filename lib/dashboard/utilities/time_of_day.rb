@@ -77,7 +77,7 @@ class TimeOfDay
 
   # returns the halfhour index in which the time of day starts,
   # plus the proportion of the way through the half hour bucket the time is
-  # code obscificated for performancce
+  # code a little obscure for performancce
   def to_halfhour_index_with_fraction
     if @minutes == 0
       [@hour * 2, 0.0]
