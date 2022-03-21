@@ -196,6 +196,10 @@ class TargetsService
     data[key]
   end
 
+  def data
+    @data ||= CalculateMonthlyTrackAndTraceData.new(@aggregate_school, @fuel_type).raw_data
+  end
+
   def target_school
     @target_school ||= @aggregate_school.target_school
   end
