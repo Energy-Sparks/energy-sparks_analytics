@@ -24,8 +24,6 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
                           pages: %i[electric_target gas_target],
 
                           compare_results: [
-                            { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Target\Base' },
-                            { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Target\New' },
                             :summary,
                             :report_differences,
                             :report_differing_charts,
@@ -67,16 +65,17 @@ def test_service(school)
 
     info[fuel_type][:relevance] = service.meter_present?
     if service.meter_present?
-      info[fuel_type][:enough_data_to_set_target] = service.enough_data_to_set_target?
-      info[fuel_type][:annual_kwh_required] = service.annual_kwh_estimate_required?
-      info[fuel_type][:recent_data] = service.recent_data?
-      info[fuel_type][:enough_holidays] = service.enough_holidays?
-      info[fuel_type][:enough_temperature_data] = service.enough_temperature_data?
-      info[fuel_type][:valid] = service.valid?
-      info[fuel_type][:problems_with_holidays] = service.holiday_integrity_problems.join(' + ')
+      info[fuel_type][:enough_data_to_set_target]       = service.enough_data_to_set_target?
+      info[fuel_type][:annual_kwh_required]             = service.annual_kwh_estimate_required?
+      info[fuel_type][:suggest_annual_kwh_estimate]     = service.suggest_use_of_estimate?
+      info[fuel_type][:recent_data]                     = service.recent_data?
+      info[fuel_type][:enough_holidays]                 = service.enough_holidays?
+      info[fuel_type][:enough_temperature_data]         = service.enough_temperature_data?
+      info[fuel_type][:valid]                           = service.valid?
+      info[fuel_type][:problems_with_holidays]          = service.holiday_integrity_problems.join(' + ')
       info[fuel_type][:one_year_of_meter_readings_available_prior_to_1st_date] = service.one_year_of_meter_readings_available_prior_to_1st_date?
       info[fuel_type][:can_calculate_one_year_of_synthetic_data] = service.can_calculate_one_year_of_synthetic_data?
-      
+
       info[fuel_type].merge!(service.analytics_debug_info)
       if service.valid?
         ap service.progress
@@ -129,7 +128,7 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-school_name_pattern_match = ['wimbledon-high*']
+school_name_pattern_match = ['ballifield-no*']
 source_db = :unvalidated_meter_data
 
 school_names = SchoolFactory.instance.school_file_list(source_db, school_name_pattern_match)

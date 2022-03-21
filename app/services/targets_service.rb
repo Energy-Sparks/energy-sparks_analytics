@@ -66,7 +66,7 @@ class TargetsService
   #
   #This avoids suggesting an estimate if we using it won't help
   def suggest_use_of_estimate?
-    annual_kwh_estimate_required? && !annual_kwh_estimate? && can_calculate_one_year_of_synthetic_data?
+    annual_kwh_estimate_helpful? && can_calculate_one_year_of_synthetic_data?
   end
 
   # one year of meter readings are required prior to the first target date
@@ -91,6 +91,10 @@ class TargetsService
 
   def annual_kwh_estimate_required?
     TargetMeter.annual_kwh_estimate_required?(aggregate_meter)
+  end
+
+  def annual_kwh_estimate_helpful?
+    TargetMeter.annual_kwh_estimate_helpful?(aggregate_meter)
   end
 
   # use model to calculate prorata type estimate of annual kwh in abscence of full year data
