@@ -3,7 +3,7 @@ class TargetsProgress
 
   def initialize(fuel_type:, months:, monthly_targets_kwh:, monthly_usage_kwh:, monthly_performance:,
                                       cumulative_targets_kwh:, cumulative_usage_kwh:, cumulative_performance:,
-                                      monthly_performance_versus_synthetic_last_year:, cumulative_performance_versus_synthetic_last_year:, partial_months:)
+                                      monthly_performance_versus_synthetic_last_year:, cumulative_performance_versus_synthetic_last_year:, partial_months:, percentage_synthetic:)
     @fuel_type = fuel_type
     @months = months
     @monthly_targets_kwh = monthly_targets_kwh
@@ -15,6 +15,7 @@ class TargetsProgress
     @monthly_performance_versus_synthetic_last_year = monthly_performance_versus_synthetic_last_year
     @cumulative_performance_versus_synthetic_last_year = cumulative_performance_versus_synthetic_last_year
     @partial_months = partial_months
+    @percentage_synthetic = percentage_synthetic
   end
 
   def monthly_targets_kwh
@@ -35,6 +36,10 @@ class TargetsProgress
 
   def cumulative_targets_kwh
     to_keyed_collection(months, @cumulative_targets_kwh)
+  end
+
+  def percentage_synthetic
+    to_keyed_collection(months, @percentage_synthetic)
   end
 
   def cumulative_usage_kwh
