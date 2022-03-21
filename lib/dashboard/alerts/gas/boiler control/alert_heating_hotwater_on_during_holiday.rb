@@ -84,6 +84,10 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
     set_time_of_year_relevance(@relevance == :relevant ? 10.0 : 0.0)
   end
 
+  protected def max_days_out_of_date_while_still_relevant
+    14
+  end
+
   def timescale
     'this holiday'
   end
