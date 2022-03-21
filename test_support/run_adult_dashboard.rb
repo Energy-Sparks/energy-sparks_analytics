@@ -26,7 +26,7 @@ class RunAdultDashboard < RunCharts
         no_pages: %i[baseload],
         compare_results: [
           :summary,
-          #:report_differences,
+          # :report_differences,
           #:report_differing_charts,
         ] # :quick_comparison,
       }
@@ -37,7 +37,7 @@ class RunAdultDashboard < RunCharts
     @accordion_count = 0
     @all_html = ''
     differing_pages = {}
-    
+
     pages = control.fetch(:pages, page_list)
     pages.each do |page|
       if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)
