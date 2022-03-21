@@ -71,7 +71,7 @@ class TargetingAndTrackingTable < ContentBase
         cumulative_performance
       ]
     )
-    html_table_formatting(header, rows)
+    html_table_formatting(header, rows, row_estimates: { 0 => data[:percentage_synthetic] } )
   end
 
   def simple_target_table_html
@@ -82,11 +82,15 @@ class TargetingAndTrackingTable < ContentBase
         monthly_performance
       ]
     )
-    html_table_formatting(header, rows)
+    html_table_formatting(header, rows, row_estimates: { 0 => data[:percentage_synthetic] } )
   end
 
   def first_month_html
     data[:current_year_date_ranges][0].first.strftime('%B')
+  end
+
+  def first_target_date
+    data[:first_target_date]
   end
 
   def cumulative_target_percent
@@ -144,7 +148,7 @@ class TargetingAndTrackingTable < ContentBase
     FormatEnergyUnit.format(datatype, value, :html, false, true, :target) 
   end
 
-  def html_table_formatting(header, rows)
-    HtmlTableFormattingWithHighlightedCells.new(header, rows, nil, nil, nil, :target).html
+  def html_table_formatting(header, rows, row_estimates: nil)
+    HtmlTableFormattingWithHighlightedCellsEstimatedData.new(header, rows, nil, nil, nil, :target, row_estimates: row_estimates).html
   end
 end

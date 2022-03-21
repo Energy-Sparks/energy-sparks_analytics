@@ -1,4 +1,5 @@
 class TargetsService
+  include Logging
   def initialize(aggregate_school, fuel_type)
     @aggregate_school = aggregate_school
     @fuel_type = set_fuel_type(fuel_type)
@@ -16,7 +17,8 @@ class TargetsService
       cumulative_performance: data_series(:cumulative_performance), #UNUSED
       monthly_performance_versus_synthetic_last_year: data_series(:monthly_performance_versus_last_year), #populate report, Overall change since last year
       cumulative_performance_versus_synthetic_last_year: data_series(:cumulative_performance_versus_last_year), #populate report, Overall change since last year, latest progress
-      partial_months: data_series(:partial_months) #add colour coding to annotate tables
+      partial_months: data_series(:partial_months), #add colour coding to annotate tables
+      percentage_synthetic: data_series(:percentage_synthetic)
     )
   end
 
@@ -89,6 +91,24 @@ class TargetsService
 
   def annual_kwh_estimate_required?
     TargetMeter.annual_kwh_estimate_required?(aggregate_meter)
+  end
+
+  # use model to calculate prorata type estimate of annual kwh in abscence of full year data
+  def annual_kwh_estimate_kwh
+    return nil if aggregate_meter.nil?
+
+    estimator = TargetingAndTrackingAnnualKwhEstimate.new(aggregate_meter)
+    estimator.calculate_apportioned_annual_estimate
+  rescue BivariateSolarTemperatureModel::BivariateModel::BivariateModelCalculationFailed => e
+    # statsample error: blows up without raising named exception, so reraise from ES wrapped library
+    logger.info "Electrical model failure: #{e.message}"
+    nil
+  end
+
+  # go off to internet to pick up DEC data
+  def dec_annual_kwh_estimate_kwh
+    dec  = DisplayEnergyCertificate.new.recent_aggregate_data(@aggregate_school.postcode)
+    @fuel_type == :electricity ? dec[:electricity_kwh] : dec[:heating_kwh]
   end
 
   def recent_data?
