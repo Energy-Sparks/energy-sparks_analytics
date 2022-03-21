@@ -279,7 +279,7 @@ class Aggregator
     periods = chart_config[:timescale]
     periods.each do |period|
       chart_config[:timescale] = date_to_temperature_map.empty? ? chart_config[:adjust_by_temperature] : period
-      series_manager = Series::ManagerBase.new(school, chart_config).new(school, chart_config)
+      series_manager = Series::ManagerBase.new(school, chart_config)
       if date_to_temperature_map.empty?
         series_manager.periods[0].dates.each do |date|
           date_to_temperature_map[date] = school.temperatures.average_temperature(date)
