@@ -41,7 +41,13 @@ module AlertPeriodComparisonTemperatureAdjustmentMixin
     @previous_kwh_cache[previous_date] ||= {}
     return @previous_kwh_cache[previous_date][data_type] if @previous_kwh_cache[previous_date].key?(data_type)
 
-    kwh = @model_calc.temperature_compensated_one_day_gas_kwh(previous_date, average_current_period_temperature, target_kwh(previous_date, data_type), 0.0, community_use: community_use)
+    t_kwh = target_kwh(previous_date, :kwh)
+
+    adjustment_kwh = @model_calc.temperature_compensated_one_day_gas_kwh(previous_date, average_current_period_temperature, t_kwh, 0.0, community_use: community_use)
+    
+    adjustment = t_kwh == 0.0 ? 1.0 : adjustment_kwh / t_kwh
+    
+    kwh = target_kwh(previous_date, data_type) * adjustment
 
     saved_adjusted_kwhs_in_date_order(previous_date, kwh) if data_type == :kwh
 
