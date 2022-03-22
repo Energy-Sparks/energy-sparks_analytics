@@ -32,7 +32,7 @@ class CalculateMonthlyTrackAndTraceData
     full_cumulative_current_year_kwhs           = accumulate(current_year_kwhs)
     partial_cumulative_targets_kwhs             = accumulate(partial_targets_kwh)
     partial_cumulative_last_year_unadjusted_kwh = accumulate(partial_last_year_unadjusted_kwh)
-
+    
     {
       current_year_kwhs:                  current_year_kwhs,
       full_targets_kwh:                   full_targets_kwh,
@@ -108,8 +108,8 @@ class CalculateMonthlyTrackAndTraceData
         nil
       else
         (date_range.first..date_range.last).map do |date|
-          target_kwh = kwh_zero_if_not_exists(target_meter, date)
-          target_kwh == 0.0 ? 0.0 : (meter.amr_data.one_day_kwh(date) / target_kwh)
+          target_kwh = target_meter.target.target(date)
+          target_kwh == 0.0 ? 0.0 : (kwh_zero_if_not_exists(meter, date) / target_kwh)
         end.sum
       end
     end
