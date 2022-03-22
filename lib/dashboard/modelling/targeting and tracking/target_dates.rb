@@ -153,6 +153,15 @@ class TargetDates
     end
   end
 
+  # circumstance where meter target start date has been bumped
+  # forward but would be better if annual estimate provided and
+  # full synthetic calculation takes place
+  def annual_kwh_estimate_helpful?
+    @original_meter.annual_kwh_estimate.nan? &&
+    moved_target_start_date_forward? &&
+    original_target_start_date - original_meter_start_date < DAYSINYEAR
+  end
+
   def percentage_synthetic_data_in_date_range(start_date, end_date)
     total_days = end_date - start_date + 1
     synthetic_days = (start_date..end_date).count{ |date| date < benchmark_start_date && date >= synthetic_benchmark_start_date }
@@ -201,13 +210,17 @@ class TargetDates
       enough_holidays:                  enough_holidays?,
       holiday_problems:                 holiday_problems.join(', '),
       recent_data:                      recent_data?,
-      moved_target_start_date_forward:  original_target_start_date != target_start_date,
+      moved_target_start_date_forward:  moved_target_start_date_forward?,
       original_target_start_date:       original_target_start_date
     }
     # or TargetDates.instance_methods(false).map { |m| [m, self.send(m)]}
   end
 
   private
+
+  def moved_target_start_date_forward?
+    original_target_start_date != target_start_date
+  end
 
   def calculate_target_start_date   
     if @original_meter.annual_kwh_estimate.nan? &&

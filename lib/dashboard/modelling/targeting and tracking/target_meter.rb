@@ -70,6 +70,10 @@ class TargetMeter < Dashboard::Meter
     !dates(meter).full_years_benchmark_data?
   end
 
+  def self.annual_kwh_estimate_helpful?(meter)
+    dates(meter).annual_kwh_estimate_helpful?
+  end
+
   def self.recent_data?(meter)
     dates(meter).recent_data?
   end
