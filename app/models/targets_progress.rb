@@ -66,12 +66,37 @@ class TargetsProgress
     @cumulative_performance_versus_synthetic_last_year.compact.last
   end
 
+  #Used to colour code the readings
   def partial_months
     to_keyed_collection(months, @partial_months)
   end
 
   def months
     @months
+  end
+
+  #do we have partial data for any months?
+  #if so we'll display a footnote
+  def partial_consumption_data?
+    @partial_months.any?(true)
+  end
+
+  #have we only been able to generate targets for some months?
+  #e.g. due to lack of historical data or no estimate?
+  def partial_target_data?
+    @monthly_targets_kwh.any?(nil)
+  end
+
+  #does the reporting period start before we have consumption data?
+  #if so, we'll display a footnote
+  def reporting_period_before_consumption_data?
+    @monthly_usage_kwh.first.nil?
+  end
+
+  #are any of the monthly targets calculated from estimated data, rather than
+  #real consumption?
+  def targets_derived_from_synthetic_data?
+    @percentage_synthetic.any? {|v| v > 0.0 }
   end
 
   private
