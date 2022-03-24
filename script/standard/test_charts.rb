@@ -9,7 +9,7 @@ charts = {
 
 charts = RunCharts.standard_charts_for_school
 
-charts = RunCharts.targeting_and_tracking_charts
+# charts = RunCharts.targeting_and_tracking_charts
 
 control = {
   save_to_excel:  true,
@@ -22,7 +22,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['ayc*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['a*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   charts:   { charts: charts, control: control }
 }
 

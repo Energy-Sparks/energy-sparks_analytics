@@ -641,10 +641,6 @@ class Aggregator
       @x_axis,
       @x_axis_bucket_date_ranges
     ]
-  rescue => e
-    puts "Got here BIG ERRROR"
-    puts e.message
-    puts e.backtrace
   end
 
   def humanize_symbols(chart_config, hash)
@@ -761,7 +757,7 @@ class Aggregator
     x_data = []
     y_data = []
     (0...temperatures.length).each do |i|
-      unless kwhs[i].nan?
+      if !kwhs[i].nil? && !kwhs[i].nan?
         x_data.push(temperatures[i])
         y_data.push(kwhs[i])
       end
