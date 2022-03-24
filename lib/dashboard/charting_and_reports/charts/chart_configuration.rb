@@ -287,7 +287,7 @@ class ChartManager
       series_breakdown:             :none,
       x_axis:                       :week,
       nullify_trailing_zeros:       true,
-      timescale:                    nil,
+      timescale:                    :up_to_a_year,
       ignore_single_series_failure: true,
       target:                       {calculation_type: :day, extend_chart_into_future: false},
       inherits_from:                :group_by_week_electricity

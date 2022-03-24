@@ -55,6 +55,10 @@ module Series
       @meter || determine_meter
     end
 
+    def ignore_missing_amr_data?
+      meter.is_a?(TargetMeter)
+    end
+
     def kwh_cost_or_co2
       case chart_config[:yaxis_units]
       when :£;               :economic_cost
@@ -157,7 +161,12 @@ module Series
       end
     end
 
+    def missing_data
+      nil
+    end
+
     def amr_data_by_half_hour(meter, date, halfhour_index, data_type = :kwh)
+      return missing_data if ignore_missing_amr_data? && !meter.amr_data.date_exists?(date)
       meter.amr_data.kwh(date, halfhour_index, data_type, community_use: community_use)
     end
 
@@ -174,6 +183,16 @@ module Series
     def amr_data_date_range(meter, start_date, end_date, data_type)
       if @adjust_by_temperature && meter.fuel_type == :gas
         adjust_for_temperature(meter, start_date, end_date, data_type)
+      elsif ignore_missing_amr_data?
+        values = (start_date..end_date).map do |date|
+          meter.amr_data.date_exists?(date) ? meter.amr_data.one_day_kwh(date, data_type, community_use: community_use) : missing_data
+        end
+
+        if values.all?{ |v| v == missing_data }
+          missing_data
+        else
+          values.map { |v| v == missing_data ? 0.0 : v }.sum
+        end
       elsif override_meter_end_date?
         total = 0.0
         (start_date..end_date).each do |date|
@@ -263,6 +282,7 @@ module Series
     end
 
     def check_requested_meter_date(meters, start_date, end_date)
+      return if ignore_missing_amr_data?
       # TODO(PH, 11Mar2022) - perhaps revisit as pre-refactor implementation only selected one meter for this test
       [meters].flatten.compact.each do |meter|
         if start_date < meter.amr_data.start_date || end_date > meter.amr_data.end_date
