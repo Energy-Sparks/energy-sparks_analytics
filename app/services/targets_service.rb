@@ -109,6 +109,17 @@ class TargetsService
     nil
   end
 
+  def invalid_annual_estimate_less_than_historic_kwh_data_to_date?
+    !target_meter_calculation_problem.nil? &&
+    target_meter_calculation_problem[:type] == MissingGasEstimationBase::MoreDataAlreadyThanEstimate
+  end
+
+  # returns nil if ok, otherwise { text: "error message", type: ExceptionClass from POTENTIAL_EXPECTED_TARGET_METER_CREATION_ERRORS }
+  def target_meter_calculation_problem
+    target_meter # forces calculation
+    target_school.reason_for_nil_meter(@fuel_type)
+  end
+
   # go off to internet to pick up DEC data
   def dec_annual_kwh_estimate_kwh
     dec  = DisplayEnergyCertificate.new.recent_aggregate_data(@aggregate_school.postcode)
