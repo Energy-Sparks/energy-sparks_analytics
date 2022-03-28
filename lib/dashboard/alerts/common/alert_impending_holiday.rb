@@ -107,7 +107,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     last_year_holiday_electricity_kwh: {
       description: 'Electricity consumption (kWh) in corresponding holiday last year',
       units:  { kwh: :electricity },
-      benchmark_code:   'elyr',
     },
     holiday_floor_area: {
       description: 'Floor area during holiday',
@@ -131,7 +130,8 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     },
     last_year_holiday_electricity_£: {
       description: 'Electricity consumption (£) in corresponding holiday last year',
-      units:  :£
+      units:  :£,
+      benchmark_code:   'elyr'
     },
     last_year_holiday_electricity_co2: {
       description: 'Electricity CO2 emissions in corresponding holiday last year',
