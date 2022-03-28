@@ -9,18 +9,20 @@ charts = {
 
 charts = RunCharts.standard_charts_for_school
 
+# charts = RunCharts.targeting_and_tracking_charts
+
 control = {
   save_to_excel:  true,
 
   compare_results: [
     :summary,
     :report_differences,
-    :report_differing_charts,
+    :report_differing_charts
   ]
 }
 
 overrides = {
-  schools:  ['chase*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['a*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   charts:   { charts: charts, control: control }
 }
 

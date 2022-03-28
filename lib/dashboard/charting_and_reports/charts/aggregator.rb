@@ -260,6 +260,11 @@ class Aggregator
 
     max_date = extend_to_future ? last_meter_dates.max : last_meter_dates.min
 
+    if extend_to_future && %i[up_to_a_year year].include?(chart_config[:timescale])
+      # special case for targeting and tracking charts
+      min_date = [min_date, max_date - 364].min
+    end
+
     chart_config[:min_combined_school_date] = @first_meter_date = min_date
     chart_config[:max_combined_school_date] = @last_meter_date  = max_date
 
@@ -602,7 +607,6 @@ class Aggregator
     @series_names = @series_manager.series_bucket_names
     logger.info "Aggregating these series #{@series_names}"
     logger.info "aggregate_period Between #{@series_manager.first_chart_date} and #{@series_manager.last_chart_date}"
-
     if @series_manager.periods.empty?
       raise "Error: not enough data available to create requested chart"
     end
@@ -753,7 +757,7 @@ class Aggregator
     x_data = []
     y_data = []
     (0...temperatures.length).each do |i|
-      unless kwhs[i].nan?
+      if !kwhs[i].nil? && !kwhs[i].nan?
         x_data.push(temperatures[i])
         y_data.push(kwhs[i])
       end
@@ -1067,7 +1071,15 @@ class Aggregator
   def add_to_bucket(bucketed_data, bucketed_data_count, series_name, x_index, value)
     logger.warn "Unknown series name #{series_name} not in #{bucketed_data.keys}" if !bucketed_data.key?(series_name)
     logger.warn "nil value for #{series_name}" if value.nil?
-    bucketed_data[series_name][x_index] += value
+
+    return if value.nil?
+
+    if bucketed_data[series_name][x_index].nil?
+      bucketed_data[series_name][x_index] = value
+    else
+      bucketed_data[series_name][x_index] += value
+    end
+
     count = 1
     if add_daycount_to_legend?
       count = value != 0.0 ? 1 : 0
@@ -1232,7 +1244,7 @@ class Aggregator
     bucketed_data = {}
     bucketed_data_count = {}
     @series_names.each do |series_name|
-      bucketed_data[series_name] = Array.new(@x_axis.length, 0.0)
+      bucketed_data[series_name] = Array.new(@x_axis.length, nil)
       bucketed_data_count[series_name] = Array.new(@x_axis.length, 0)
     end
     [bucketed_data, bucketed_data_count]

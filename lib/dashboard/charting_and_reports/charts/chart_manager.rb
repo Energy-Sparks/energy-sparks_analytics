@@ -66,6 +66,18 @@ class ChartManager
     chart_config
   end
 
+  # used for testing, within reasonable accuracy tries to determine
+  # whether a chart is valid e.g. having the right meter etc.
+  def approx_valid_chart?(chart_name)
+    chart_config = get_chart_config(chart_name)
+    chosen_meter = ChartToMeterMap.instance.meter(@school, chart_config[:meter_definition])
+    return false if chosen_meter.nil?
+    return false if chart_config.key?(:target) && !chosen_meter.target_set?
+    true
+  rescue UnknownChartMeterDefinition => _e
+    false
+  end
+
   # recursively inherit previous chart definitions config, then resolve x-axis against available data
   def resolve_chart_inheritance(chart_config_original, max_inheritance = 20)
     chart_config = self.class.build_chart_config(chart_config_original, max_inheritance)

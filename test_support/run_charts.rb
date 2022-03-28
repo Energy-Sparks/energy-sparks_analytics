@@ -97,7 +97,6 @@ class RunAnalyticsTest
   def run_structured_chart_list(structured_list, control)
     structured_list.each do |excel_tab_name, chart_list|
       chart_list.each do |chart_name|
-puts "Got here running chart #{chart_name}"
         run_chart(excel_tab_name.to_s, chart_name, provide_advice: false) if ChartManager.new(@school).standard_chart_valid?(chart_name)
       end
     end
@@ -108,7 +107,11 @@ puts "Got here running chart #{chart_name}"
   end
 
   def self.standard_charts_for_school
-    management_dashboard_charts.merge(public_dashboard_charts_for_school)
+    [
+      management_dashboard_charts,
+      public_dashboard_charts_for_school,
+      targeting_and_tracking_charts
+    ].inject(:merge)
   end
 
   private
@@ -119,6 +122,22 @@ puts "Got here running chart #{chart_name}"
         management_dashboard_group_by_week_electricity
         management_dashboard_group_by_week_gas
         management_dashboard_group_by_week_storage_heater
+      ]
+    }
+  end
+
+  def self.targeting_and_tracking_charts
+    {
+      'Target' => %i[
+        targeting_and_tracking_weekly_electricity_to_date_cumulative_line
+        targeting_and_tracking_weekly_gas_to_date_cumulative_line
+        targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line
+        targeting_and_tracking_weekly_electricity_to_date_line
+        targeting_and_tracking_weekly_gas_to_date_line
+        targeting_and_tracking_weekly_storage_heater_to_date_line
+        targeting_and_tracking_weekly_electricity_one_year_line
+        targeting_and_tracking_weekly_gas_one_year_line
+        targeting_and_tracking_weekly_storage_heater_one_year_line
       ]
     }
   end
@@ -232,7 +251,16 @@ puts "Got here running chart #{chart_name}"
 
   public def run_chart(page_name, chart_name, override = nil, provide_advice: true)
     logger.info "            #{chart_name}"
+    
     chart_manager = ChartManager.new(@school)
+
+    unless chart_manager.approx_valid_chart?(chart_name)
+      puts "Skipping chart #{chart_name}"
+      return nil
+    end
+
+    puts "Running  chart: #{chart_name}"
+
     chart_results = nil
     begin
       chart_results = chart_manager.run_chart_group(chart_name, override, true, provide_advice: provide_advice) # chart_override)
