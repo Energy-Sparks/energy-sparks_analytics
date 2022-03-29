@@ -146,6 +146,8 @@ class OpenCloseTime
       wednesday
       thursday
       friday
+      saturday
+      sunday
     ]
   end
 
