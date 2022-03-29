@@ -226,10 +226,17 @@ class TargetDates
     if @original_meter.annual_kwh_estimate.nan? &&
       @target.first_target_date - DAYSINYEAR < @original_meter.amr_data.start_date
       logger.info "Moving target start date forward to #{@original_meter.amr_data.start_date + DAYSINYEAR} as target not set"
-      [@original_meter.amr_data.start_date + DAYSINYEAR, @original_meter.amr_data.end_date - DAYSINYEAR].max
+      [
+        first_day_of_next_month(@original_meter.amr_data.start_date + DAYSINYEAR),
+        @original_meter.amr_data.end_date - DAYSINYEAR
+      ].max
     else
       [@target.first_target_date, @original_meter.amr_data.end_date - DAYSINYEAR].max
     end
+  end
+
+  def first_day_of_next_month(date)
+    date.day == 1 ? date : date.next_month.beginning_of_month
   end
 
   def holiday_problems
