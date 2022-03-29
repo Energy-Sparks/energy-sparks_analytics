@@ -12,7 +12,8 @@ class TargetSchool < MeterCollection
     TargetMeter::MissingGasEstimationAmrData,
     EnergySparksNotEnoughDataException,
     MissingElectricityEstimation::MoreDataAlreadyThanEstimate,
-    MissingGasEstimationBase::MoreDataAlreadyThanEstimate
+    MissingGasEstimationBase::MoreDataAlreadyThanEstimate,
+    TargetDates::TargetDateBeforeFirstMeterStartDate
   ]
   NO_PARENT_METER = 'No parent meter for fuel type'
   NO_TARGET_SET   = 'No target set for fuel type'
