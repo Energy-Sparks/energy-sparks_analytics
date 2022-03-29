@@ -266,6 +266,10 @@ class OpenCloseTime
       date.wday == 4
     when :friday
       date.wday == 5
+    when :saturday
+      date.wday == 6
+    when :sunday
+      date.wday == 0
     end
   end
 
