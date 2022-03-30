@@ -397,13 +397,18 @@ class Aggregator
     chartconfig_copy = chart_config.clone
     chartconfig_copy[:timescale] = period
     chartconfig_copy.merge!(benchmark_school_config_override(school_name))
-=begin
+
     res = AggregatorResults.create(@bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis)
     ass = AggregatorSingleSeries.new(@meter_collection, chartconfig_copy, res)
-    ass.aggregate_period
-    unpack_results(res)
-=end
-    aggregate_period(chartconfig_copy)
+    single_result_set = ass.aggregate_period
+    unpack_results2(res)
+    
+    # aggregate_period(chartconfig_copy)
+    single_result_set
+  end
+
+  def unpack_results2(res)
+    @bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis, @series_manager, @series_names, @xbucketor = res.unpack2
   end
 
   def benchmark_school_config_override(school_name)

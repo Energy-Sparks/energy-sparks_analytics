@@ -27,4 +27,9 @@ overrides = {
 
 script = RunAnalyticsTest.default_config.deep_merge(overrides)
 
-RunTests.new(script).run
+begin
+  RunTests.new(script).run
+rescue => e
+  puts e.message
+  puts e.backtrace
+end

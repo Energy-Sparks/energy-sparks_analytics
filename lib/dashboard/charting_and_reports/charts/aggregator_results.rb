@@ -25,6 +25,15 @@ class AggregatorResults < OpenStruct
     list.map { |k| [k, self[k]] }.to_h
   end
 
+  def unpack2
+    all_results.values
+  end
+
+  def all_results
+    list = %i[bucketed_data bucketed_data_count x_axis x_axis_bucket_date_ranges y2_axis series_manager series_names xbucketor]
+    list.map { |k| [k, self[k]] }.to_h
+  end
+
   def reverse_x_axis
     self.x_axis = self.x_axis.reverse
     self.x_axis_bucket_date_ranges = self.x_axis_bucket_date_ranges.reverse
