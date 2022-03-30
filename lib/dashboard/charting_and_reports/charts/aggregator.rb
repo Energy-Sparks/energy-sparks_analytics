@@ -1114,6 +1114,17 @@ class Aggregator
   end
 
   def inject_benchmarks
+    res = AggregatorResults.create(@bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis)
+    bm = AggregatorBenchmarks.new(@meter_collection, @chart_config, res)
+    bm.inject_benchmarks
+    unpack_results(res)
+  end
+
+  def unpack_results(res)
+    @bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis = res.unpack
+  end
+=begin
+  def inject_benchmarks
 
     # reverse X axis on benchmarks only following PM/CT request 18Jan2020
     reverse_x_axis
@@ -1238,6 +1249,7 @@ class Aggregator
   def regional_exemplar_storage_heater_usage_in_units
     benchmark_heating_usage(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2, :storage_heaters, true)
   end
+=end
 
   def create_empty_bucket_series
     logger.debug "Creating empty data buckets #{@series_names} x #{@x_axis.length}"
