@@ -67,7 +67,8 @@ def test_service(school)
     if service.meter_present?
       info[fuel_type][:enough_data_to_set_target]       = service.enough_data_to_set_target?
       info[fuel_type][:annual_kwh_required]             = service.annual_kwh_estimate_required?
-      info[fuel_type][:suggest_annual_kwh_estimate]     = service.suggest_use_of_estimate?
+      info[fuel_type][:annual_kwh_estimate_bad]         = service.invalid_annual_estimate_less_than_historic_kwh_data_to_date?
+      info[fuel_type][:suggest_annual_kwh_estimate]     = service.suggest_use_of_estimate? if service.annual_kwh_estimate_required?
       info[fuel_type][:recent_data]                     = service.recent_data?
       info[fuel_type][:enough_holidays]                 = service.enough_holidays?
       info[fuel_type][:enough_temperature_data]         = service.enough_temperature_data?
@@ -128,7 +129,7 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-school_name_pattern_match = ['ballifield-no*']
+school_name_pattern_match = ['wimbledon-t*', 'ayc*']
 source_db = :unvalidated_meter_data
 
 school_names = SchoolFactory.instance.school_file_list(source_db, school_name_pattern_match)
@@ -145,7 +146,7 @@ schools.each do |school|
   stats[school.name] = test_service(school)
 end
 
-save_stats(stats)
-
 script = test_script_config(school_name_pattern_match, source_db, {})
 RunTests.new(script).run
+
+save_stats(stats)
