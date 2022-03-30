@@ -11,6 +11,7 @@ class TargetSchool < MeterCollection
     TargetMeter::UnableToCalculateTargetDates,
     TargetMeter::MissingGasEstimationAmrData,
     EnergySparksNotEnoughDataException,
+    MissingElectricityEstimation::MoreDataAlreadyThanEstimate,
     MissingGasEstimationBase::MoreDataAlreadyThanEstimate
   ]
   NO_PARENT_METER = 'No parent meter for fuel type'
@@ -96,7 +97,8 @@ class TargetSchool < MeterCollection
         calculate_target_meter_data(original_meter, calculation_type)
         # set_aggregate_meter(fuel_type, target_meter)
       rescue *POTENTIAL_EXPECTED_TARGET_METER_CREATION_ERRORS => e
-        set_nil_meter_with_reason(fuel_type, e.message.to_s, e.class)
+        msg = e.is_a?(Hash) ? e : e.to_s
+        set_nil_meter_with_reason(fuel_type, msg, e.class)
       end
     end
 
@@ -112,10 +114,14 @@ class TargetSchool < MeterCollection
 
   def set_nil_meter_with_reason(fuel_type, reason, exception_class)
     class_name = exception_class.nil? ? '' : "for #{exception_class.name}"
-    fault = {
-      text: "Setting target meter of type #{fuel_type} calculation to nil because #{reason} #{class_name}",
-      type: exception_class
-    }
+    fault = if reason.is_a?(Hash)
+              reason
+            else
+              {
+                text: "Setting target meter of type #{fuel_type} calculation to nil because #{reason} #{class_name}",
+                type: exception_class
+              }
+            end
 
     debug fault[:text]
     @meter_nil_reason[fuel_type] = fault

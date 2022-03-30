@@ -5,6 +5,7 @@ require_relative './missing_electricity_normal_distribution_profile_weekly_fitte
 # and distributing the consumption out to half hourly readings capped by an annual
 # kWh consumption provided via meter attributes
 class MissingElectricityEstimation < MissingEnergyFittingBase
+  class MoreDataAlreadyThanEstimate < StandardError; end
   def initialize(meter, target_dates)
     super(meter.amr_data, meter.meter_collection.holidays)
     @meter = meter
@@ -80,6 +81,17 @@ class MissingElectricityEstimation < MissingEnergyFittingBase
     adjustment_count = 0
     total_kwh_so_far = calculate_holey_amr_data_total_kwh(one_year_amr_data)
     remaining_kwh = @meter.annual_kwh_estimate - total_kwh_so_far
+
+    if remaining_kwh < 0.0
+      error = {
+        text:                     "The estimate you've supplied (#{@meter.annual_kwh_estimate.round(0)} kWh annualised) is less than your historic data (#{total_kwh_so_far.round(0)} kWh), so has not been applied. Please revise your estimate",
+        total_kwh_so_far:         total_kwh_so_far,
+        annualised_estimate_kwh:  @meter.annual_kwh_estimate,
+        type:                     MoreDataAlreadyThanEstimate
+      }
+      raise MoreDataAlreadyThanEstimate, error
+    end
+    
     total_normalised_missing = missing_days_normalised_total
 
     school_day_profile_x48 = average_profile_for_day_type_x48(:schoolday)

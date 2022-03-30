@@ -72,7 +72,7 @@ class TargetsService
   # one year of meter readings are required prior to the first target date
   # in order to calculate a target for the following year in the absence
   # of needing to calculate a full year of data synthetically using an 'annual kWh estimate'
-  # however, a year after setting the target, the target_start date for calculaiton purposes
+  # however, a year after setting the target, the target_start date for calculation purposes
   # will incrementally move at 1 year behind the most recent meter reading date - at this point
   # there may be enough real historic meter readings for a meter which originally has less
   # then 1 year's data to have 1 year of data and not required the 'annual kWh estimate' and
@@ -111,7 +111,10 @@ class TargetsService
 
   def invalid_annual_estimate_less_than_historic_kwh_data_to_date?
     !target_meter_calculation_problem.nil? &&
-    target_meter_calculation_problem[:type] == MissingGasEstimationBase::MoreDataAlreadyThanEstimate
+    (
+      target_meter_calculation_problem[:type] == MissingGasEstimationBase::MoreDataAlreadyThanEstimate ||
+      target_meter_calculation_problem[:type] == MissingElectricityEstimation::MoreDataAlreadyThanEstimate
+    )
   end
 
   # returns nil if ok, otherwise { text: "error message", type: ExceptionClass from POTENTIAL_EXPECTED_TARGET_METER_CREATION_ERRORS }
