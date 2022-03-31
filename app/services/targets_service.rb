@@ -66,7 +66,17 @@ class TargetsService
   #
   #This avoids suggesting an estimate if we using it won't help
   def suggest_use_of_estimate?
-    annual_kwh_estimate_helpful? && can_calculate_one_year_of_synthetic_data?
+    #TEMPORARY: the call to annual_kwh_estimate_helpful? fails if there's no target set
+    #the application calls this method for all schools regardless of whether a target has
+    #been set to determine whether an estimate might be useful. This allows us to immediately
+    #prompt for an estimate when they've set a target. Handling this here, pending any changes
+    #to the date logic. In the case where there's no target, the TargetDates should be answering
+    #as if the target started from today.
+    if target_set?
+      annual_kwh_estimate_helpful? && can_calculate_one_year_of_synthetic_data?
+    else
+      annual_kwh_estimate_required? && !annual_kwh_estimate? && can_calculate_one_year_of_synthetic_data?
+    end
   end
 
   # one year of meter readings are required prior to the first target date
