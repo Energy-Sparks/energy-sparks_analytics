@@ -10,7 +10,7 @@ class AggregatorSingleSeries < AggregatorBase
 
     create_empty_bucket_series
 
-    aggregate
+    aggregate # test
 
     post_process_aggregation
 

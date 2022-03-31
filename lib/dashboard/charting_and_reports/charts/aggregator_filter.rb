@@ -4,8 +4,6 @@ class AggregatorFilter < AggregatorBase
     super(school, chart_config, results)
   end
 
-
-
   def match_filter_by_day(date)
     # heating_daytype filter gets filtered out post aggregation, reduced performance but simpler
     return true if !chart_config.chart_has_filter?
