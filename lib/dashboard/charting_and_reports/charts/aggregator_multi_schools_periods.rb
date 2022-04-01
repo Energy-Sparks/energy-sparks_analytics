@@ -4,14 +4,15 @@
 #      a school versus its target (school) combines 2 charts
 # or   a chart compariing multiple time periods e.g. this year versus last year
 class AggregatorMultiSchoolsPeriods < AggregatorBase
-  attr_reader :series_manager, :final_results
+  attr_reader :series_manager, :final_results, :periods, :schools
+  attr_reader :min_combined_school_date, :max_combined_school_date
 
   def calculate
-    schools = schools_list
+    @schools = schools_list
 
     determine_multi_school_chart_date_range(schools) # directly modifies chart_config
 
-    periods = [chart_config.timescale].flatten
+    @periods = [chart_config.timescale].flatten
 
     run_charts_for_multiple_schools_and_time_periods(schools, periods)
   end
@@ -69,8 +70,8 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
       min_date = [min_date, max_date - 364].min
     end
 
-    chart_config.min_combined_school_date = min_date
-    chart_config.max_combined_school_date = max_date
+    chart_config.min_combined_school_date = @min_combined_school_date = min_date
+    chart_config.max_combined_school_date = @max_combined_school_date = max_date
 
     description = schools.length > 1 ? 'Combined school charts' : 'School chart'
     logger.info description + " date range #{min_date} to #{max_date}"
