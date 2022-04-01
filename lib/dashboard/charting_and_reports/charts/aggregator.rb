@@ -64,16 +64,20 @@ class Aggregator
   def aggregate
     bucketed_period_data = nil
 
-    _chart_config, schools = initialise_schools_date_range
+    # _chart_config, schools = initialise_schools_date_range
 
-    periods = time_periods
+    # periods = time_periods
 
-    sort_by = @chart_config.key?(:sort_by) ? @chart_config[:sort_by] : nil
+    # sort_by = @chart_config.key?(:sort_by) ? @chart_config[:sort_by] : nil
 
     # bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
     amsp = AggregatorMultiSchoolsPeriods.new(@meter_collection, @chart_config, nil)
     bucketed_period_data = amsp.calculate
     unpack_results2(amsp.final_results)
+    periods = amsp.periods
+    schools = amsp.schools
+    @chart_config[:min_combined_school_date] = amsp.min_combined_school_date
+    @chart_config[:max_combined_school_date] = amsp.max_combined_school_date
 
     if up_to_a_year_month_comparison?(@chart_config)
       @bucketed_data, @bucketed_data_count = merge_monthly_comparison_charts(bucketed_period_data)
@@ -174,6 +178,7 @@ class Aggregator
     @chart_config.key?(:nullify_trailing_zeros) && @chart_config[:nullify_trailing_zeros]
   end
 
+=begin
   def determine_multi_school_chart_date_range(schools, chart_config)
     extend_to_future = include_target? && !@chart_config[:target][:extend_chart_into_future].nil? && !@chart_config[:target][:extend_chart_into_future]
 
@@ -209,6 +214,7 @@ class Aggregator
     logger.info '-' * 120
   end
 
+
   # for a chart_config e.g. :  {[ timescale: [ { schoolweek: 0 } , { schoolweek: -1 }, adjust_by_temperature:{ schoolweek: 0 } }
   # copy the corresponding temperatures from the :adjust_by_temperature onto all the corresponding :timescale periods
   # into a [date] => temperature hash
@@ -234,6 +240,7 @@ class Aggregator
     end
     date_to_temperature_map
   end
+
 
   private def temperature_adjustment_map(school)
     if @chart_config.key?(:adjust_by_temperature) && @chart_config[:adjust_by_temperature].is_a?(Hash) && !@chart_config.key?(:temperature_adjustment_map)
@@ -280,7 +287,7 @@ class Aggregator
 
     bucketed_period_data
   end
-
+=end
   def ignore_single_series_failure?
     @chart_config.key?(:ignore_single_series_failure) && @chart_config[:ignore_single_series_failure]
   end
@@ -328,7 +335,7 @@ class Aggregator
     direction = direction_definition == :asc ? 1 : -1
     direction * (s1[:school].name <=> s2[:school].name)
   end
-
+=begin
   def run_one_aggregation(chart_config, period, school_name)
     chartconfig_copy = chart_config.clone
     chartconfig_copy[:timescale] = period
@@ -342,7 +349,7 @@ class Aggregator
     # aggregate_period(chartconfig_copy)
     single_result_set
   end
-
+=end
   def unpack_results2(res)
     @bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis, @series_manager, @series_names, @xbucketor = res.unpack2
   end
@@ -500,7 +507,7 @@ class Aggregator
       raise EnergySparksBadChartSpecification.new("Unexpected x axis reformat chart configuration #{format}")
     end
   end
-
+=begin
   # charts can be specified as working over a single time period
   # or for comparison's between dates over muliple time periods
   # convert single hashes into an array with a single value
@@ -518,7 +525,7 @@ class Aggregator
     end
     periods
   end
-
+=end
   def mark_up_legend_with_day_count
     @bucketed_data.keys.each do |series_name|
       days = @bucketed_data_count[series_name].sum
@@ -551,7 +558,7 @@ class Aggregator
 
   private
 
-  # the analystics code treats missing and incorrectly calculated numbers as NaNs
+  # the analytics code treats missing and incorrectly calculated numbers as NaNs
   # unforunately the front end (Rails) prefers nil, so post process the entire
   # result set if running for rails to swap NaN for nil
   # analytics more performant in mainly using NaNs, as fewer tests required
