@@ -64,13 +64,6 @@ class Aggregator
   def aggregate
     bucketed_period_data = nil
 
-    # _chart_config, schools = initialise_schools_date_range
-
-    # periods = time_periods
-
-    # sort_by = @chart_config.key?(:sort_by) ? @chart_config[:sort_by] : nil
-
-    # bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
     amsp = AggregatorMultiSchoolsPeriods.new(@meter_collection, @chart_config, nil)
     bucketed_period_data = amsp.calculate
     unpack_results2(amsp.final_results)
@@ -86,11 +79,7 @@ class Aggregator
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
-=begin
-    group_by = @chart_config.key?(:group_by) ? @chart_config[:group_by] : nil
 
-    group_chart(group_by) unless group_by.nil?
-=end
     inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
 
     remove_filtered_series if chart_has_filter? && @chart_config[:series_breakdown] != :none
@@ -178,116 +167,6 @@ class Aggregator
     @chart_config.key?(:nullify_trailing_zeros) && @chart_config[:nullify_trailing_zeros]
   end
 
-=begin
-  def determine_multi_school_chart_date_range(schools, chart_config)
-    extend_to_future = include_target? && !@chart_config[:target][:extend_chart_into_future].nil? && !@chart_config[:target][:extend_chart_into_future]
-
-    logger.info '-' * 120
-    logger.info "Determining maximum chart range for #{schools.length} schools:"
-
-    min_date = schools.map do |school|
-      Series::ManagerBase.new(school, chart_config).first_meter_date
-    rescue EnergySparksNotEnoughDataException => e_
-      raise unless ignore_single_series_failure?
-      nil
-    end.compact.max
-
-    last_meter_dates = schools.map do |school|
-      Series::ManagerBase.new(school, chart_config).last_meter_date
-    rescue EnergySparksNotEnoughDataException => e_
-      raise unless ignore_single_series_failure?
-      nil
-    end.compact
-
-    max_date = extend_to_future ? last_meter_dates.max : last_meter_dates.min
-
-    if extend_to_future && %i[up_to_a_year year].include?(chart_config[:timescale])
-      # special case for targeting and tracking charts
-      min_date = [min_date, max_date - 364].min
-    end
-
-    chart_config[:min_combined_school_date] = @first_meter_date = min_date
-    chart_config[:max_combined_school_date] = @last_meter_date  = max_date
-
-    description = schools.length > 1 ? 'Combined school charts' : 'School chart'
-    logger.info description + " date range #{min_date} to #{max_date}"
-    logger.info '-' * 120
-  end
-
-
-  # for a chart_config e.g. :  {[ timescale: [ { schoolweek: 0 } , { schoolweek: -1 }, adjust_by_temperature:{ schoolweek: 0 } }
-  # copy the corresponding temperatures from the :adjust_by_temperature onto all the corresponding :timescale periods
-  # into a [date] => temperature hash
-  # this allows in this example, for examples for all mondays to be compensated to the temperature of {schoolweek: 0}
-  private def temperature_compensation_temperature_map(school, chart_config_original)
-    chart_config = chart_config_original.clone
-    raise EnergySparksBadChartSpecification, 'Expected chart config timescale for array temperature compensation' unless chart_config.key?(:timescale) && chart_config[:timescale].is_a?(Array)
-    date_to_temperature_map = {}
-    periods = chart_config[:timescale]
-    periods.each do |period|
-      chart_config[:timescale] = date_to_temperature_map.empty? ? chart_config[:adjust_by_temperature] : period
-      series_manager = Series::ManagerBase.new(school, chart_config)
-      if date_to_temperature_map.empty?
-        series_manager.periods[0].dates.each do |date|
-          date_to_temperature_map[date] = school.temperatures.average_temperature(date)
-        end
-      else
-        subsequent_period_dates = series_manager.periods[0].dates
-        subsequent_period_dates.each_with_index do |date, index|
-          date_to_temperature_map[date] = date_to_temperature_map.values[index]
-        end
-      end
-    end
-    date_to_temperature_map
-  end
-
-
-  private def temperature_adjustment_map(school)
-    if @chart_config.key?(:adjust_by_temperature) && @chart_config[:adjust_by_temperature].is_a?(Hash) && !@chart_config.key?(:temperature_adjustment_map)
-      @chart_config[:temperature_adjustment_map] = temperature_compensation_temperature_map(school, @chart_config)
-    end
-  end
-
-  def run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
-    saved_meter_collection = @meter_collection
-    error_messages = []
-    aggregations = []
-
-    # iterate through the time periods aggregating
-    schools.each do |school|
-      @meter_collection = school
-
-      # do it here so it maps to the 1st school
-      temperature_adjustment_map(school)
-
-      periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-        begin
-          aggregations.push(
-            {
-              school:       school,
-              period:       period,
-              aggregation:  run_one_aggregation(@chart_config, period, school.name)
-            }
-          )
-        rescue EnergySparksNotEnoughDataException => e_
-          raise unless ignore_single_series_failure?
-        end
-      end
-    end
-
-    if (schools.length * periods.length) == error_messages.length
-      raise EnergySparksNotEnoughDataException.new('All requested chart aggregations failed :' + error_messages.join(' + '))
-    end
-
-    aggregations = sort_aggregations(aggregations, sort_by) unless sort_by.nil?
-
-    bucketed_period_data = aggregations.map { |aggregation_description| aggregation_description[:aggregation] }
-
-    @meter_collection = saved_meter_collection
-
-    bucketed_period_data
-  end
-=end
   def ignore_single_series_failure?
     @chart_config.key?(:ignore_single_series_failure) && @chart_config[:ignore_single_series_failure]
   end
@@ -335,21 +214,7 @@ class Aggregator
     direction = direction_definition == :asc ? 1 : -1
     direction * (s1[:school].name <=> s2[:school].name)
   end
-=begin
-  def run_one_aggregation(chart_config, period, school_name)
-    chartconfig_copy = chart_config.clone
-    chartconfig_copy[:timescale] = period
-    chartconfig_copy.merge!(benchmark_school_config_override(school_name))
 
-    res = AggregatorResults.create(@bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis)
-    ass = AggregatorSingleSeries.new(@meter_collection, chartconfig_copy, res)
-    single_result_set = ass.aggregate_period
-    unpack_results2(res)
-    
-    # aggregate_period(chartconfig_copy)
-    single_result_set
-  end
-=end
   def unpack_results2(res)
     @bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis, @series_manager, @series_names, @xbucketor = res.unpack2
   end
