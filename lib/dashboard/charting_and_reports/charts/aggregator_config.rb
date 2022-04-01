@@ -4,6 +4,70 @@ class AggregatorConfig < OpenStruct
     !key?(config_key) || self[config_key].nil? || self[config_key] == :none
   end
 
+  def include_benchmark?
+    !config_none_or_nil?(:benchmark)
+  end
+
+  def benchmark_calculation_types
+    dig(:benchmark, :calculation_types)
+  end
+
+  def benchmark_override(school_name)
+    return {} if dig(:benchmark, :calculation_types).nil? || dig(:benchmark, :config).nil?
+
+    calc_types = dig(:benchmark, :calculation_types).map(&:to_s)
+
+    return {} unless calc_types.include?(school_name)
+
+    dig(:benchmark, :config)
+  end
+
+  def temperature_compensation_hash?
+    adjust_by_temperature? &&
+    dig(:adjust_by_temperature).is_a?(Hash) &&
+    !key?(:temperature_adjustment_map)
+  end
+
+  def adjust_by_temperature?
+    !dig(:adjust_by_temperature).nil?
+  end
+
+  def include_target?
+    !config_none_or_nil?(:target)
+  end
+
+  def target_calculation_type
+    dig(:target, :calculation_type)
+  end
+
+  def extend_chart_into_future?
+    dig(:target, :extend_chart_into_future) == true
+  end
+
+  def sort_by?
+    !sort_by.nil?
+  end
+
+  def sort_by
+    dig(:sort_by)
+  end
+
+  def show_only_target_school?
+    dig(:target, :show_target_only) == true
+  end
+
+  def timescale?
+    !timescale.nil?
+  end
+
+  def timescale
+    dig(:timescale)
+  end
+
+  def array_of_timescales?
+    timescale? && timescale.is_a?(Array)
+  end
+
   def add_daycount_to_legend?
     flag_is_true?(:add_day_count_to_legend)
   end
