@@ -37,7 +37,7 @@ class Aggregator
   end
 
   def initialise_schools_date_range
-    schools = @chart_config.key?(:schools) ? load_schools(@chart_config[:schools]) : [ @meter_collection ]
+    schools = [ @meter_collection ]
 
     if include_target?
       target_school = @meter_collection.target_school(@chart_config[:target][:calculation_type])
@@ -70,7 +70,10 @@ class Aggregator
 
     sort_by = @chart_config.key?(:sort_by) ? @chart_config[:sort_by] : nil
 
-    bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
+    # bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
+    amsp = AggregatorMultiSchoolsPeriods.new(@meter_collection, @chart_config, nil)
+    bucketed_period_data = amsp.calculate
+    unpack_results2(amsp.final_results)
 
     if up_to_a_year_month_comparison?(@chart_config)
       @bucketed_data, @bucketed_data_count = merge_monthly_comparison_charts(bucketed_period_data)
@@ -79,11 +82,11 @@ class Aggregator
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
-
+=begin
     group_by = @chart_config.key?(:group_by) ? @chart_config[:group_by] : nil
 
     group_chart(group_by) unless group_by.nil?
-
+=end
     inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
 
     remove_filtered_series if chart_has_filter? && @chart_config[:series_breakdown] != :none
@@ -119,7 +122,7 @@ class Aggregator
 
     swap_NaN_for_nil if true || Object.const_defined?('Rails')
 
-    @chart_config[:name] = dynamic_chart_name
+    @chart_config[:name] = dynamic_chart_name(amsp.series_manager)
   end
 
   def subtitle
@@ -137,11 +140,11 @@ class Aggregator
 
   private
 
-  def dynamic_chart_name
+  def dynamic_chart_name(series_manager)
     # make useful data available for binding
     school        = @meter_collection.school
-    meter         = [@series_manager.meter].flatten.first
-    second_meter  = [@series_manager.meter].flatten.last
+    meter         = [series_manager.meter].flatten.first
+    second_meter  = [series_manager.meter].flatten.last
     total_kwh = @bucketed_data.values.map{ |v| v.nil? ? 0.0 : v }.map(&:sum).sum.round(0) if @chart_config[:name].include?('total_kwh') rescue 0.0
 
     ERB.new(@chart_config[:name]).result(binding)
@@ -169,73 +172,6 @@ class Aggregator
 
   def nullify_trailing_zeros?
     @chart_config.key?(:nullify_trailing_zeros) && @chart_config[:nullify_trailing_zeros]
-  end
-
-  #=================regrouping of chart data ======================================
-  # converts a flat structure e.g. :
-  #     "electricity:Castle Primary School"=>[5.544020340000004, 2.9061917400000006, 0.45056400000000013],
-  #     "gas:Castle Primary School"=>[1.555860000000001, 1.4714710106863198, 1.405058200146572]
-  # into a hierarchical 'grouped' structure e.g.
-  #   {"electricity"=>
-  #     {"Castle Primary School"=>[5.544020340000004, 2.9061917400000006, 0.45056400000000013],
-  #      "Paulton Junior School"=>[2.47196688, 3.4770422399999985, 2.320555619999999],
-  # to better represent the grouping of clustered/grouped/stacked charts to downstream graphing/display
-
-  def group_chart(group_by)
-    @bucketed_data = regroup_bucketed_data(@bucketed_data, group_by)
-    @bucketed_data_count = regroup_bucketed_data(@bucketed_data_count, group_by)
-    @x_axis = regroup_xaxis(bucketed_data, @x_axis)
-  end
-
-  # rubocop:enable MethodComplexity
-  def regroup_bucketed_data(bucketed_data, group_by)
-    logger.info "Reorganising grouping of chart bucketed data, grouping by #{group_by.inspect}"
-    logger.info "Original bucketed data: #{bucketed_data.inspect}"
-
-    grouped_bucketed_data = Hash.new{ |h, k| h[k] = Hash.new(&h.default_proc)}
-    final_hash = {}
-
-    bucketed_data.each do |main_key, data|
-      sub_keys = main_key.split(':')
-      case  sub_keys.length
-      when 1
-        grouped_bucketed_data[sub_keys[0]] = data
-      when 2
-        grouped_bucketed_data[sub_keys[0]][sub_keys[1]] = data
-      when 3
-        grouped_bucketed_data[sub_keys[0]][sub_keys[1]][sub_keys[2]] = data
-      else
-        raise EnergySparksBadChartSpecification.new("Bad grouping specification too much grouping depth #{sub_keys.length}")
-      end
-    end
-    logger.info  "Reorganised bucketed data: #{grouped_bucketed_data.inspect}"
-    grouped_bucketed_data
-  end
-
-  def regroup_xaxis(bucketed_data, x_axis)
-    new_x_axis = {}
-    bucketed_data.each do |series_name, school_data| # electricity|gas =>  school => [array of kwh 1 per year]
-      school_data.each do |school_name, _kwhs|
-        new_x_axis[school_name] = x_axis
-      end
-    end
-  end
-  # rubocop:disable MethodComplexity
-  #=============================================================================
-  def load_schools(school_list)
-    average = false
-    if school_list.include?(:average)
-      school_list = school_list.select{ |school| !school.is_a?(Symbol)} # remove symbols from list
-      average = true
-    end
-    schools = AnalyticsLoadSchools.load_schools(school_list)
-    if average
-      config = AverageSchoolAggregator.simple_config(school_list, nil, nil, 1200, 200)
-      school_averager = AverageSchoolAggregator.new(config)
-      school_averager.calculate()
-      schools.push(school_averager.school)
-    end
-    schools
   end
 
   def determine_multi_school_chart_date_range(schools, chart_config)

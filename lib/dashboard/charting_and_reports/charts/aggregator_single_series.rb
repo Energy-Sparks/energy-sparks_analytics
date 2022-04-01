@@ -1,7 +1,7 @@
 class AggregatorSingleSeries < AggregatorBase
   attr_reader :filter
 
-  def aggregate_period
+  def aggregate_period # or school
     configure_filters
 
     configure_series_manager
@@ -10,7 +10,7 @@ class AggregatorSingleSeries < AggregatorBase
 
     create_empty_bucket_series
 
-    aggregate # test
+    aggregate
 
     post_process_aggregation
 

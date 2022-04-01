@@ -70,7 +70,9 @@ class AggregatorDeprecated
 
     sort_by = @chart_config.key?(:sort_by) ? @chart_config[:sort_by] : nil
 
-    bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
+    # bucketed_period_data = run_charts_for_multiple_schools_and_time_periods(schools, periods, sort_by)
+
+    ass = AggregatorSingleSeries.new(@meter_collection, @chart_config, res)
 
     if up_to_a_year_month_comparison?(@chart_config)
       @bucketed_data, @bucketed_data_count = merge_monthly_comparison_charts(bucketed_period_data)

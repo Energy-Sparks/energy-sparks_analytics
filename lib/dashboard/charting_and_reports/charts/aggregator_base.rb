@@ -1,6 +1,6 @@
 class AggregatorBase
   include Logging
-  
+
   attr_reader :results, :chart_config, :school
 
   def initialize(school, chart_config, results)
