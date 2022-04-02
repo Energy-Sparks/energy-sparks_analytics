@@ -3,7 +3,7 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 charts = {
-  bm:   %i[management_dashboard_group_by_week_electricity]
+  bm:   %i[electricity_by_month_year_0_1]
 }
 
 charts = RunCharts.standard_charts_for_school

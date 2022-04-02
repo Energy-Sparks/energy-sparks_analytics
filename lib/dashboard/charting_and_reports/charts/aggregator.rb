@@ -72,6 +72,11 @@ class Aggregator
     @chart_config[:min_combined_school_date] = amsp.min_combined_school_date
     @chart_config[:max_combined_school_date] = amsp.max_combined_school_date
 
+    @bucketed_data        = amsp.results.bucketed_data
+    @bucketed_data_count  = amsp.results.bucketed_data_count
+
+    @multi_chart_x_axis_ranges = amsp.multi_chart_x_axis_ranges # TODO(PH, 1Spr2022) remove post refactor
+=begin
     if up_to_a_year_month_comparison?(@chart_config)
       @bucketed_data, @bucketed_data_count = merge_monthly_comparison_charts(bucketed_period_data)
     elsif bucketed_period_data.length > 1 || periods.length > 1
@@ -79,8 +84,13 @@ class Aggregator
     else
       @bucketed_data, @bucketed_data_count = bucketed_period_data[0]
     end
+=end
 
-    inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
+    post_process = AggregatorPostProcess.new(amsp)
+    post_process.calculate
+    unpack_results2(post_process.results)
+
+    # inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
 
     remove_filtered_series if chart_has_filter? && @chart_config[:series_breakdown] != :none
 

@@ -14,6 +14,13 @@ class AggregatorSingleSeries < AggregatorBase
 
     post_process_aggregation
 
+    results.bucketed_data       = humanize_symbols(results.bucketed_data)
+    results.bucketed_data_count = humanize_symbols(results.bucketed_data_count)
+    results.time_description    = results.xbucketor.compact_date_range_description
+    results.school_name         = school.name
+    results.x_axis_date_ranges  = results.x_axis_bucket_date_ranges # TODO(PH,1Apr2022) rename from legacy refactor
+
+    # legacy
     [
       humanize_symbols(results.bucketed_data),
       humanize_symbols(results.bucketed_data_count),
