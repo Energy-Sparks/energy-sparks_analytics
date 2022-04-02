@@ -4,8 +4,19 @@
 #      a school versus its target (school) combines 2 charts
 # or   a chart compariing multiple time periods e.g. this year versus last year
 class AggregatorMultiSchoolsPeriods < AggregatorBase
-  attr_reader :series_manager, :final_results, :periods, :schools
+  class InternalErrorOnlyOneResultExpected < StandardError; end
+
+  attr_reader :periods, :schools
   attr_reader :min_combined_school_date, :max_combined_school_date
+  attr_reader :single_series_aggregators
+  attr_reader :multi_chart_x_axis_ranges # TODO(PH, 1Spr2022) remove post refactor
+
+  def initialize(school, chart_config, results)
+    @single_series_aggregators = []
+    # results = new_results if results.nil?
+    @multi_chart_x_axis_ranges = [] # TODO(PH, 1Apr2022) remove legacy refactor result return
+    super(school, chart_config, results)
+  end
 
   def calculate
     @schools = schools_list
@@ -14,10 +25,120 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
 
     @periods = [chart_config.timescale].flatten
 
-    run_charts_for_multiple_schools_and_time_periods(schools, periods)
+    res = run_charts_for_multiple_schools_and_time_periods(schools, periods)
+
+    @results = selective_copy_of_first_results
+
+    merge_charts
+
+    res # TODO(PH, 1Apr2022) remove legacy refactor result return
+  end
+
+  def final_results
+    single_series_aggregators.last.results
+  end
+
+  def series_manager
+    final_results.series_manager
   end
 
   private
+
+  # copy 1 example result apart from bucketed_data and bucketed_data_count
+  # so the final returned results default x and y axis configration from 1
+  # chart where there are mutliple charts, results for different time periods or
+  # schools, so for example for multiple time periods the 1st result's x-axis is used
+  def selective_copy_of_first_results
+    # the results are calculated in reverse order (legacy design)
+    res = single_series_aggregators.last.results.to_h.reject { |k, _v| %i[bucketed_data, bucketed_data_count].include?(k) }
+    AggregatorResults.new(res)
+  end
+
+  def number_of_periods
+    periods.uniq.length
+  end
+
+  def number_of_schools
+    schools.map(&:name).uniq.length
+  end
+
+  def merge_charts
+    results.bucketed_data       = {}
+    results.bucketed_data_count = {}
+
+    if chart_config.up_to_a_year_month_comparison?
+      merge_monthly_comparison_charts
+    elsif single_series_aggregators.length > 1 || number_of_periods > 1
+      merge_multiple_charts
+    else
+      raise InternalErrorOnlyOneResultExpected, "Number of results = #{single_series_aggregators.length}" if single_series_aggregators.length != 1
+
+      results.bucketed_data       = single_series_aggregators.first.results.bucketed_data
+      results.bucketed_data_count = single_series_aggregators.first.results.bucketed_data_count
+    end
+  end
+
+  def merge_monthly_comparison_charts
+    raise EnergySparksBadChartSpecification, 'More than one school not supported' if number_of_schools > 1
+
+    single_series_aggregators.reverse.with_index do |period_data, index|
+      @multi_chart_x_axis_ranges.push(period_data.x_axis_date_ranges) # TODO(PH, 1Apr2022) remove after refactor not used
+
+      if index == 0
+        results.x_axis = period_data.results.x_axis.map{ |month_year| month_year[0..2]} # MMM YYYY to MMM
+        results.bucketed_data[      time_description] = period_data.results.bucketed_data.values[0]
+        results.bucketed_data_count[time_description] = period_data.results.bucketed_data_count.values[0]
+      else
+        time_description += "- partial year (from #{period_data.results[0]})" if period_data.results.x_axis.length < results.length
+
+        keys = period_data.results.x_axis.map{ |month_year| month_year[0..2]}
+
+        new_x_data = results.x_axis.map do |month|
+          column = keys.find_index(month)
+          column.nil? ? 0.0 : period_data.results.bucketed_data.values[0][column]
+        end
+
+        new_x_count_data = results.x_axis.map do |month|
+          column = keys.find_index(month)
+          column.nil? ? 0.0 : period_data.results.bucketed_data_count.values[0][column]
+        end
+
+        results.bucketed_data[time_description]       = new_x_data
+        results.bucketed_data_count[time_description] = new_x_count_data
+      end
+    end
+  end
+
+  def merge_multiple_charts
+    single_series_aggregators.each do |data|
+      time_description = number_of_periods <= 1 ? '' : (':' + data.results.time_description)
+      school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + data.results.school_name)
+      school_name = '' if number_of_schools <= 1
+
+      @multi_chart_x_axis_ranges.push(data.results[:x_axis_date_ranges]) # TODO(PH, 1Apr2022) remove after refactor not used
+
+      data.results.bucketed_data.each do |series_name, x_data|
+        new_series_name = series_name.to_s + time_description + school_name
+        results.bucketed_data[new_series_name] = x_data
+      end
+
+      data.results.bucketed_data_count.each do |series_name, count_data|
+        new_series_name = series_name.to_s + time_description + school_name
+        results.bucketed_data_count[new_series_name] = count_data
+      end
+    end
+  end
+
+  def count_time_periods_and_school_names(bucketed_period_data)
+    time_period_descriptions = {}
+    school_names = {}
+    bucketed_period_data.each do |period_data|
+      bucketed_data, bucketed_data_count, time_description, school_name = period_data
+      time_period_descriptions[time_description] = true
+      school_names[school_name] = true
+    end
+    [time_period_descriptions.keys.length, school_names.keys.length]
+  end
 
   def schools_list
     schools = chart_config.include_target? ? target_schools : [ school ]
@@ -115,11 +236,11 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     one_chart_config_hash = create_one_aggregation_chart_config(one_period, one_school)
 
     one_set_of_results = AggregatorResults.new
-    ass = AggregatorSingleSeries.new(one_school, one_chart_config_hash, one_set_of_results)
-    aggregate = ass.aggregate_period
 
-    @series_manager = ass.results.series_manager # TODO(PH, 1Apr2022) remove after refactor, backwards compatibility
-    @final_results  = ass.results                # TODO(PH, 1Apr2022) remove after refactor, backwards compatibility
+    ass = AggregatorSingleSeries.new(one_school, one_chart_config_hash, one_set_of_results)
+    @single_series_aggregators.push(ass)
+
+    aggregate = ass.aggregate_period
 
     aggregate
   end
@@ -146,7 +267,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   # this allows in this example, for examples for all mondays to be compensated to the temperature of {schoolweek: 0}
   def temperature_compensation_temperature_map(school)
     raise EnergySparksBadChartSpecification, 'Expected chart config timescale for array temperature compensation' unless chart_config.array_of_timescales?
-    
+
     date_to_temperature_map = {}
     periods = chart_config.timescale
     chart_config_hash = chart_config.to_h
@@ -166,5 +287,12 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     end
 
     date_to_temperature_map
+  end
+
+  def new_results_deprecated
+    results = AggregatorResults.new
+    results.bucketed_data = {}
+    results.bucketed_data_count = {}
+    results
   end
 end

@@ -22,10 +22,28 @@ class AggregatorConfig < OpenStruct
     dig(:benchmark, :config)
   end
 
+  def inject_benchmark?
+    dig(:inject) == :benchmark
+  end
+
   def temperature_compensation_hash?
     adjust_by_temperature? &&
     dig(:adjust_by_temperature).is_a?(Hash) &&
     !key?(:temperature_adjustment_map)
+  end
+
+  def up_to_a_year_month_comparison?
+    return false if timescale.nil? || !timescale.is_a?(Array) || x_axis!= :month
+
+    return false unless timescale.length > 1
+
+    timescale.all? do |ts|
+      ts.is_a?(Hash) && ts.keys[0] == :up_to_a_year
+    end
+  end
+
+  def x_axis
+    dig(:x_axis)
   end
 
   def adjust_by_temperature?
