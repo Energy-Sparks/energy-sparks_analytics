@@ -5,7 +5,7 @@ require_rel '../../test_support'
 require './script/report_config_support.rb'
 
 overrides = {
-  schools:  ['lamp*']
+  schools:  ['*']
 }
 
 script = RunManagementSummaryTable.default_config.deep_merge(overrides)
