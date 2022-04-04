@@ -1,9 +1,5 @@
 class AggregatorSingleSeries < AggregatorBase
-  attr_reader :filter
-
   def aggregate_period # or school
-    configure_filters
-
     configure_series_manager
 
     configure_xaxis_buckets
@@ -47,10 +43,6 @@ class AggregatorSingleSeries < AggregatorBase
     else
       aggregate_by_day
     end
-  end
-
-  def configure_filters
-    @filter = AggregatorFilter.new(school, chart_config, results)
   end
 
   def configure_series_manager

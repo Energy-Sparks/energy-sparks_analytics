@@ -5,6 +5,8 @@ class AggregatorPostProcess < AggregatorBase
 
   def calculate
     inject_benchmarks if chart_config.inject_benchmark?
+
+    filter.remove_filtered_series if chart_config.chart_has_filter? && chart_config.series_breakdown != :none
   end
 
   private

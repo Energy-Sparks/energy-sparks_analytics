@@ -26,6 +26,14 @@ class AggregatorConfig < OpenStruct
     dig(:inject) == :benchmark
   end
 
+  def series_breakdown?
+    !series_breakdown.nil?
+  end
+
+  def series_breakdown
+    dig(:series_breakdown)
+  end
+
   def temperature_compensation_hash?
     adjust_by_temperature? &&
     dig(:adjust_by_temperature).is_a?(Hash) &&
@@ -118,16 +126,28 @@ class AggregatorConfig < OpenStruct
     dig(:filter, :model_type)
   end
 
+  def filter_by_type(filter_type)
+    dig(:filter, filter_type)
+  end
+
+  def filters
+    dig(:filter)
+  end
+
   def submeter_filter?
     has_filter?(:submeter)
   end
 
-  def 
-    heating_daytype
+  def submeter_filter
+    dig(:filter, :submeter)
   end
 
   def chart_has_filter?
     !config_none_or_nil?(:filter)
+  end
+
+  def has_filter?(type)
+    chart_has_filter? && filter.key?(type) && !filter[type].nil?
   end
 
   # TODO)PH, 30Mar2022) make key private once SeriesDataManager has been upgraded to use new interfaces
@@ -140,9 +160,5 @@ class AggregatorConfig < OpenStruct
 
   def flag_is_true?(k)
     key?(k) && send(k)
-  end
-
-  def has_filter?(type)
-    chart_has_filter? && filter.key?(type) && !filter[type].nil?
   end
 end

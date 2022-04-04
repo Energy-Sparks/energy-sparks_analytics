@@ -25,6 +25,11 @@ class AggregatorResults < OpenStruct
     list.map { |k| [k, self[k]] }.to_h
   end
 
+  def bucketless_result_copy
+    hash = self.to_h.reject { |k, _v| %i[bucketed_data, bucketed_data_count].include?(k) }
+    AggregatorResults.new(hash)
+  end
+
   def unpack2
     all_results.values
   end
