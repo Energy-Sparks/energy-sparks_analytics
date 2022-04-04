@@ -34,6 +34,71 @@ class AggregatorConfig < OpenStruct
     dig(:series_breakdown)
   end
 
+  def yaxis_units
+    dig(:yaxis_units)
+  end
+
+  def yaxis_scaling
+    dig(:yaxis_scaling)
+  end
+
+  def yaxis_units_in_kw?
+    yaxis_units == :kw
+  end
+
+  def nullify_trailing_zeros?
+    dig(:nullify_trailing_zeros) == true
+  end
+
+  def cumulative?
+    dig(:cumulative) == true
+  end
+
+  def reverse_name_order?
+    key?(:series_name_order) && dig(:series_name_order) == :reverse
+  end
+
+  def reverse_xaxis?
+    key?(:reverse_xaxis) && dig(:reverse_xaxis) == true
+  end
+
+  def x_axis_reformat?
+    key?(:x_axis_reformat) && !dig(:x_axis_reformat).nil?
+  end
+
+  def x_axis_reformat
+    dig(:x_axis_reformat)
+  end
+
+  def add_daycount_to_legend?
+    key?(:add_day_count_to_legend) && dig(:add_day_count_to_legend) == true
+  end
+
+  def humanize_legend?
+    key?(:humanize_legend) && dig(:humanize_legend) && Object.const_defined?('Rails')
+  end
+
+  def relabel_legend?
+    # note set to a value:
+    key?(:replace_series_label) && dig(:replace_series_label)
+  end
+
+  def replace_series_label
+    dig(:replace_series_label)
+  end
+
+  def chart1_type
+    dig(:chart1_type)
+  end
+
+  def y2_axis?
+    !y2_axis.nil?
+  end
+
+  def y2_axis
+    dig(:y2_axis)
+  end
+
   def temperature_compensation_hash?
     adjust_by_temperature? &&
     dig(:adjust_by_temperature).is_a?(Hash) &&
@@ -52,6 +117,10 @@ class AggregatorConfig < OpenStruct
 
   def x_axis
     dig(:x_axis)
+  end
+
+  def half_hourly_x_axis?
+    x_axis == :datetime || x_axis == :intraday
   end
 
   def adjust_by_temperature?
