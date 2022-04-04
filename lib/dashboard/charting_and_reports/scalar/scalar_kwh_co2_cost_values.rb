@@ -108,7 +108,7 @@ class ScalarkWhCO2CostValues
     aggregator = generic_aggregation_calculation(timescale, fuel_type, data_type, override)   
     dates = aggregator.x_axis_bucket_date_ranges
     check_dates(aggregator.last_meter_date, max_days_out_of_date)
-    value = aggregator.valid ? aggregator.bucketed_data['Energy'][0] : nil
+    value = aggregator.valid? ? aggregator.bucketed_data['Energy'][0] : nil
     { value: value, start_date: dates[0][0], end_date: dates[0][1] }
   end
 
@@ -148,7 +148,7 @@ class ScalarkWhCO2CostValues
 
     config.merge!(override) unless override.nil?
 
-    aggregator = Aggregator.new(@meter_collection, config, false)
+    aggregator = Aggregator.new(@meter_collection, config)
 
     aggregator.aggregate
 

@@ -64,7 +64,7 @@ class AggregatorFilter < AggregatorBase
     logger.debug "Filters are: #{chart_config.filters}" 
     if chart_config.series_breakdown == :submeter
       if chart_config.submeter_filter?
-        keep_key_list += pattern_match_list_with_list(results.bucketed_data.keys, @hart_config.submeter_filter)
+        keep_key_list += pattern_match_list_with_list(results.bucketed_data.keys, chart_config.submeter_filter)
       else
         keep_key_list += results.bucketed_data.keys
       end

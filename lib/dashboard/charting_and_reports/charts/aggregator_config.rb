@@ -22,6 +22,14 @@ class AggregatorConfig < OpenStruct
     dig(:benchmark, :config)
   end
 
+  def daterange_subtitle?
+    dig(:subtitle) == :daterange
+  end
+
+  def ignore_single_series_failure?
+    key?(:ignore_single_series_failure) && dig(:ignore_single_series_failure)
+  end
+
   def inject_benchmark?
     dig(:inject) == :benchmark
   end
@@ -40,6 +48,10 @@ class AggregatorConfig < OpenStruct
 
   def yaxis_scaling
     dig(:yaxis_scaling)
+  end
+
+  def name
+    dig(:name)
   end
 
   def yaxis_units_in_kw?
@@ -92,7 +104,7 @@ class AggregatorConfig < OpenStruct
   end
 
   def y2_axis?
-    !y2_axis.nil?
+    !y2_axis.nil? && y2_axis != :none
   end
 
   def y2_axis
