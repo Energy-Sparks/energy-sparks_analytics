@@ -30,12 +30,16 @@ class AggregatorResults < OpenStruct
     AggregatorResults.new(hash)
   end
 
+  def set_y_axis_label(label)
+    self.y_axis_label = label
+  end
+
   def unpack2
     all_results.values
   end
 
   def all_results
-    list = %i[bucketed_data bucketed_data_count x_axis x_axis_bucket_date_ranges y2_axis series_manager series_names xbucketor]
+    list = %i[bucketed_data bucketed_data_count x_axis x_axis_bucket_date_ranges y2_axis series_manager series_names xbucketor data_labels x_axis_label y_axis_label]
     list.map { |k| [k, self[k]] }.to_h
   end
 

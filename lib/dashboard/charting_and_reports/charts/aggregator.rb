@@ -88,42 +88,43 @@ class Aggregator
 
     post_process = AggregatorPostProcess.new(amsp)
     post_process.calculate
-    unpack_results2(post_process.results)
 
     # inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
 
     # remove_filtered_series if chart_has_filter? && @chart_config[:series_breakdown] != :none
 
-    create_y2_axis_data if y2_axis?
+    # create_y2_axis_data if y2_axis?
 
-    reorganise_buckets if @chart_config[:chart1_type] == :scatter
+    # reorganise_buckets if @chart_config[:chart1_type] == :scatter
 
-    add_x_axis_label if @chart_config[:chart1_type] == :scatter
+    unpack_results2(post_process.results)
+
+    # add_x_axis_label if @chart_config[:chart1_type] == :scatter
 
     # deprecated 28Feb2019
     # remove_zero_data if @chart_config[:chart1_type] == :scatter
 
-    scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
+    # scale_y_axis_to_kw if @chart_config[:yaxis_units] == :kw
 
-    nullify_trailing_zeros if nullify_trailing_zeros?
+    # nullify_trailing_zeros if nullify_trailing_zeros?
 
-    accumulate_data if cumulative?
+    # accumulate_data if cumulative?
 
-    reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order) && @chart_config[:series_name_order] == :reverse
+    # reverse_series_name_order(@chart_config[:series_name_order]) if @chart_config.key?(:series_name_order) && @chart_config[:series_name_order] == :reverse
 
-    reverse_x_axis if @chart_config.key?(:reverse_xaxis) && @chart_config[:reverse_xaxis] == true
+    # reverse_x_axis if @chart_config.key?(:reverse_xaxis) && @chart_config[:reverse_xaxis] == true
 
-    reformat_x_axis if @chart_config.key?(:x_axis_reformat) && !@chart_config[:x_axis_reformat].nil?
+    # reformat_x_axis if @chart_config.key?(:x_axis_reformat) && !@chart_config[:x_axis_reformat].nil?
 
-    mark_up_legend_with_day_count if add_daycount_to_legend?
+    # mark_up_legend_with_day_count if add_daycount_to_legend?
 
-    humanize_legend if humanize_legend?
+    # humanize_legend if humanize_legend?
 
-    relabel_legend if relabel_legend?
+    # relabel_legend if relabel_legend?
 
-    @chart_config[:y_axis_label] = y_axis_label(nil)
+    # @chart_config[:y_axis_label] = y_axis_label(nil)
 
-    swap_NaN_for_nil if true || Object.const_defined?('Rails')
+    # swap_NaN_for_nil if true || Object.const_defined?('Rails')
 
     @chart_config[:name] = dynamic_chart_name(amsp.series_manager)
   end
@@ -226,7 +227,7 @@ class Aggregator
   end
 
   def unpack_results2(res)
-    @bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis, @series_manager, @series_names, @xbucketor = res.unpack2
+    @bucketed_data, @bucketed_data_count, @x_axis, @x_axis_bucket_date_ranges, @y2_axis, @series_manager, @series_names, @xbucketor, @data_labels, @x_axis_label, @chart_config[:y_axis_label] = res.unpack2
   end
 
   def benchmark_school_config_override(school_name)
