@@ -3,7 +3,7 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 charts = {
-  bm:   %i[intraday_line_school_days_reduced_data]
+  bm:   %i[targeting_and_tracking_weekly_electricity_one_year_line]
 }
 
 charts = RunCharts.standard_charts_for_school
@@ -21,7 +21,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['lamp*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   charts:   { charts: charts, control: control }
 }
 
