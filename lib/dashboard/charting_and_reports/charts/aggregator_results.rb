@@ -1,19 +1,8 @@
 # warning this is an OpenStruct so internal local variables
 # can potentially be accidently instantiated as class values
 class AggregatorResults < OpenStruct
-
-  def self.create(bucketed_data, bucketed_data_count, x_axis, x_axis_bucket_date_ranges, y2_axis)
-    data_copy = {
-      bucketed_data:              bucketed_data,
-      bucketed_data_count:        bucketed_data_count,
-      x_axis:                     x_axis,
-      x_axis_bucket_date_ranges:  x_axis_bucket_date_ranges,
-      y2_axis:                    y2_axis,
-      series_manager:             nil,
-      series_names:               nil,
-      xbucketor:                  nil
-    }
-    AggregatorResults.new(data_copy)
+  def valid?
+    !bucketed_data.nil? && !bucketed_data.empty?
   end
 
   def unpack
@@ -41,6 +30,10 @@ class AggregatorResults < OpenStruct
   def all_results
     list = %i[bucketed_data bucketed_data_count x_axis x_axis_bucket_date_ranges y2_axis series_manager series_names xbucketor data_labels x_axis_label y_axis_label]
     list.map { |k| [k, self[k]] }.to_h
+  end
+
+  def time_description
+    self.xbucketor.compact_date_range_description
   end
 
   def reverse_x_axis

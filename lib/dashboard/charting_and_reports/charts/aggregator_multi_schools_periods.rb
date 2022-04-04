@@ -6,7 +6,6 @@
 class AggregatorMultiSchoolsPeriods < AggregatorBase
   class InternalErrorOnlyOneResultExpected < StandardError; end
 
-  attr_reader :periods, :schools
   attr_reader :min_combined_school_date, :max_combined_school_date
   attr_reader :single_series_aggregators
   attr_reader :multi_chart_x_axis_ranges # TODO(PH, 1Spr2022) remove post refactor
@@ -19,11 +18,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   end
 
   def calculate
-    @schools = schools_list
-
-    determine_multi_school_chart_date_range(schools) # directly modifies chart_config
-
-    @periods = [chart_config.timescale].flatten
+    determine_multi_school_chart_date_range # directly modifies chart_config
 
     res = run_charts_for_multiple_schools_and_time_periods(schools, periods)
 
@@ -32,6 +27,18 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     merge_charts
 
     res # TODO(PH, 1Apr2022) remove legacy refactor result return
+  end
+
+  def determine_multi_school_chart_date_range
+    determine_multi_school_chart_date_range_private
+  end
+
+  def schools
+    @schools ||= schools_list
+  end
+
+  def periods
+    @periods ||= [chart_config.timescale].flatten
   end
 
   def final_results
@@ -54,7 +61,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   end
 
   def number_of_periods
-    periods.uniq.length
+    periods.uniq.compact.length
   end
 
   def number_of_schools
@@ -88,7 +95,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
         results.bucketed_data[      time_description] = period_data.results.bucketed_data.values[0]
         results.bucketed_data_count[time_description] = period_data.results.bucketed_data_count.values[0]
       else
-        time_description += "- partial year (from #{period_data.results[0]})" if period_data.results.x_axis.length < results.length
+        results.time_description += "- partial year (from #{period_data.results[0]})" if period_data.results.x_axis.length < results.length
 
         keys = period_data.results.x_axis.map{ |month_year| month_year[0..2]}
 
@@ -108,9 +115,17 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     end
   end
 
+  def valid_aggregators
+    single_series_aggregators.select { |agg| agg.results.valid? }
+  end
+
+  def unique_periods
+    @unique_periods ||= valid_aggregators.map { |agg| agg.results.time_description }.uniq.length
+  end
+
   def merge_multiple_charts
-    single_series_aggregators.each do |data|
-      time_description = number_of_periods <= 1 ? '' : (':' + data.results.time_description)
+    valid_aggregators.each do |data|
+      time_description = unique_periods <= 1 ? '' : (':' + data.results.time_description)
       school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + data.results.school_name)
       school_name = '' if number_of_schools <= 1
 
@@ -163,7 +178,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     end
   end
 
-  def determine_multi_school_chart_date_range(schools)
+  def determine_multi_school_chart_date_range_private
     extend_to_future = chart_config.include_target? && chart_config.extend_chart_into_future?
 
     logger.info '-' * 120
@@ -172,14 +187,14 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     min_date = schools.map do |school|
       Series::ManagerBase.new(school, chart_config).first_meter_date
     rescue EnergySparksNotEnoughDataException => e_
-      raise unless ignore_single_series_failure?
+      raise unless chart_config.ignore_single_series_failure?
       nil
     end.compact.max
 
     last_meter_dates = schools.map do |school|
       Series::ManagerBase.new(school, chart_config).last_meter_date
     rescue EnergySparksNotEnoughDataException => e_
-      raise unless ignore_single_series_failure?
+      raise unless chart_config.ignore_single_series_failure?
       nil
     end.compact
 
@@ -217,7 +232,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
             }
           )
         rescue EnergySparksNotEnoughDataException => e_
-          raise unless ignore_single_series_failure?
+          raise unless chart_config.ignore_single_series_failure?
         end
       end
     end

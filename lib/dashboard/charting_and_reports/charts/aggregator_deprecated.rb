@@ -404,7 +404,7 @@ class AggregatorDeprecated
     ass = AggregatorSingleSeries.new(@meter_collection, chartconfig_copy, res)
     single_result_set = ass.aggregate_period
     unpack_results2(res)
-    
+
     # aggregate_period(chartconfig_copy)
     single_result_set
   end
