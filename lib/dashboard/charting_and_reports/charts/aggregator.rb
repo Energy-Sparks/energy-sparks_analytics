@@ -92,7 +92,7 @@ class Aggregator
 
     # inject_benchmarks if @chart_config[:inject] == :benchmark && !@chart_config[:inject].nil?
 
-    remove_filtered_series if chart_has_filter? && @chart_config[:series_breakdown] != :none
+    # remove_filtered_series if chart_has_filter? && @chart_config[:series_breakdown] != :none
 
     create_y2_axis_data if y2_axis?
 

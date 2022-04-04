@@ -50,8 +50,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   # schools, so for example for multiple time periods the 1st result's x-axis is used
   def selective_copy_of_first_results
     # the results are calculated in reverse order (legacy design)
-    res = single_series_aggregators.last.results.to_h.reject { |k, _v| %i[bucketed_data, bucketed_data_count].include?(k) }
-    AggregatorResults.new(res)
+    single_series_aggregators.last.results.bucketless_result_copy
   end
 
   def number_of_periods
