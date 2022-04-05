@@ -10,7 +10,10 @@ class TargetSchool < MeterCollection
     TargetMeter::UnableToFindMatchingProfile,
     TargetMeter::UnableToCalculateTargetDates,
     TargetMeter::MissingGasEstimationAmrData,
-    EnergySparksNotEnoughDataException 
+    EnergySparksNotEnoughDataException,
+    MissingElectricityEstimation::MoreDataAlreadyThanEstimate,
+    MissingGasEstimationBase::MoreDataAlreadyThanEstimate,
+    TargetDates::TargetDateBeforeFirstMeterStartDate
   ]
   NO_PARENT_METER = 'No parent meter for fuel type'
   NO_TARGET_SET   = 'No target set for fuel type'
@@ -32,10 +35,12 @@ class TargetSchool < MeterCollection
     @unscaled_target_meters = {}
     @synthetic_target_meters = {}
     @meter_nil_reason = {}
+    @aggregated_meters_by_fuel_type = {}
+    @calculation_type = calculation_type
 
-    @debug = false
+    @debug = true
 
-    calculate_target_meters(@original_school, calculation_type)
+    # calculate_target_meters(@original_school, calculation_type)
 
     @name += ': target'
   end
@@ -44,9 +49,27 @@ class TargetSchool < MeterCollection
     @meter_nil_reason[fuel_type]
   end
 
+  def aggregated_electricity_meters
+    aggregated_meters_by_fuel_type(:electricity)
+  end
+
+  def aggregated_heat_meters
+    aggregated_meters_by_fuel_type(:gas)
+  end
+
+  def storage_heater_meter
+    aggregated_meters_by_fuel_type(:storage_heater)
+  end
+
   private
 
-  def calculate_target_meters(original_school, calculation_type)
+  def aggregated_meters_by_fuel_type(fuel)
+    return nil if @meter_nil_reason.key?(fuel)
+
+    @aggregated_meters_by_fuel_type[fuel] ||= calculate_target_meter(fuel)
+  end
+
+  def calculate_target_meters_deprecated(original_school, calculation_type = @calculation_type)
     debug "Calculating all target meters for #{original_school.name}".ljust(140, '=')
 
     bm = Benchmark.realtime {
@@ -59,25 +82,29 @@ class TargetSchool < MeterCollection
     debug "Completed calculation of all target meters for #{original_school.name} in #{bm.round(3)} seconds".ljust(140, '=')
   end
 
-  def calculate_target_meter(original_meter, fuel_type, calculation_type)
+  def calculate_target_meter(fuel_type, calculation_type = @calculation_type)
+    original_meter = @original_school.aggregate_meter(fuel_type)
+
     debug "Calculating target meter of type #{fuel_type}".ljust(100, '-')
 
-    if original_meter.nil?
-      set_nil_meter_with_reason(fuel_type, NO_PARENT_METER)
+    target_meter = if original_meter.nil?
+      set_nil_meter_with_reason(fuel_type, NO_PARENT_METER, nil)
     elsif !target_set?(original_meter)
-      set_nil_meter_with_reason(fuel_type, NO_TARGET_SET)
+      set_nil_meter_with_reason(fuel_type, NO_TARGET_SET, nil)
     elsif first_target_date(original_meter) > original_meter.amr_data.end_date
-      set_nil_meter_with_reason(fuel_type, FIRST_TARGET_DATE_IN_FUTURE)
+      set_nil_meter_with_reason(fuel_type, FIRST_TARGET_DATE_IN_FUTURE, nil)
     else
       begin
-        target_meter = calculate_target_meter_data(original_meter, calculation_type)
-        set_aggregate_meter(fuel_type, target_meter)
+        calculate_target_meter_data(original_meter, calculation_type)
+        # set_aggregate_meter(fuel_type, target_meter)
       rescue *POTENTIAL_EXPECTED_TARGET_METER_CREATION_ERRORS => e
-        set_nil_meter_with_reason(fuel_type, e.message.to_s + ' ' + e.class.name)
+        msg = e.is_a?(Hash) ? e : e.to_s
+        set_nil_meter_with_reason(fuel_type, msg, e.class)
       end
     end
-    
+
     debug "Completed calculation of target meter of type #{fuel_type}".ljust(100, '-')
+    target_meter
   end
 
   def first_target_date(meter)
@@ -86,14 +113,24 @@ class TargetSchool < MeterCollection
     target.first_target_date
   end
 
-  def set_nil_meter_with_reason(fuel_type, reason)
-    reason_text = "Setting target meter of type #{fuel_type} calculation to nil because #{reason}"
-    debug reason_text
-    @meter_nil_reason[fuel_type] = reason
-    set_aggregate_meter(fuel_type, nil)
+  def set_nil_meter_with_reason(fuel_type, reason, exception_class)
+    class_name = exception_class.nil? ? '' : "for #{exception_class.name}"
+    fault = if reason.is_a?(Hash)
+              reason
+            else
+              {
+                text: "Setting target meter of type #{fuel_type} calculation to nil because #{reason} #{class_name}",
+                type: exception_class
+              }
+            end
+
+    debug fault[:text]
+    @meter_nil_reason[fuel_type] = fault
+    # set_aggregate_meter(fuel_type, nil)
+    nil
   end
 
-  def set_target(meter, calculation_type)
+  def set_target_deprecated(meter, calculation_type)
     target_set?(meter) ? calculate_target_meter(meter, calculation_type) : nil
   end
 

@@ -11,12 +11,15 @@ FactoryBot.define do
       postcode        { 'ab1 2cd' }
       activation_date { Date.today }
       created_at      { Date.today }
+      latitude        { 51.509865 }
+      longitude       { -0.118092 }
+      data_enabled    { true }
     end
 
     initialize_with{ new(name: name, address: address, floor_area:
       floor_area, number_of_pupils: number_of_pupils,
       school_type: school_type, area_name: area_name,
       urn: urn, postcode: postcode, activation_date: activation_date,
-      created_at: created_at) }
+      created_at: created_at, location: [latitude, longitude], data_enabled: data_enabled) }
   end
 end

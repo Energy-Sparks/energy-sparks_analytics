@@ -32,10 +32,10 @@ class HtmlTableFormatting
           </thead>
         <% end %>
         <tbody>
-          <% @rows.each do |row| %>
+          <% @rows.each_with_index do |row, row_number| %>
             <tr>
               <% row.each_with_index do |val, column_number| %>
-                <%= cell_format(column_number, right_justified_columns, val) %>
+                <%= cell_format(row_number, column_number, right_justified_columns, val) %>
               <% end %>
             </tr>
           <% end %>
@@ -56,7 +56,7 @@ class HtmlTableFormatting
     generate_html(template, binding)
   end
 
-  def cell_format(column_number, right_justified_columns, val)
+  def cell_format(_row_number, column_number, right_justified_columns, val)
     template = %{
       <%= column_td(column_number, right_justified_columns) %><%= format_value(val, column_number) %> </td>
     }.gsub(/^  /, '')
@@ -126,7 +126,7 @@ class HtmlTableFormattingWithHighlightedCells < HtmlTableFormatting
 
   private
 
-  def cell_format(column_number, right_justified_columns, val)
+  def cell_format(_row_number, column_number, right_justified_columns, val)
     template = %{
       <%= column_td(column_number, right_justified_columns, val) %><%= format_value(val, column_number) %> </td>
     }.gsub(/^  /, '')
@@ -158,5 +158,34 @@ class HtmlTableFormattingWithHighlightedCells < HtmlTableFormatting
 
   def cell_negative?(val)
     val.include?('-')
+  end
+end
+
+class HtmlTableFormattingWithHighlightedCellsEstimatedData < HtmlTableFormattingWithHighlightedCells
+  def initialize(header, rows, total_row = nil, row_units = nil, use_table_formats = nil, precision = :ks2, row_estimates: nil)
+    super(header, rows, total_row, row_units, use_table_formats, precision)
+    @row_estimates = row_estimates
+  end
+
+  def cell_format(row_number, column_number, right_justified_columns, val)
+    if highlight_estimate?(column_number - 1, row_number) # non html 5
+      highlight_start = '<font color="green"><b>'
+      highlight_end   = '</b></font>'
+    end
+
+    template = %{
+      <%= column_td(column_number, right_justified_columns, val) %>
+      <%= highlight_start %><%= format_value(val, column_number) %> <%= highlight_end %></td>
+    }.gsub(/^  /, '')
+ 
+    generate_html(template, binding)
+  end
+
+  def highlight_estimate?(data_column_number, row_number)
+    return false if @row_estimates.nil?
+
+    return false unless @row_estimates.key?(row_number)
+    
+    @row_estimates[row_number][data_column_number] > 0.0
   end
 end

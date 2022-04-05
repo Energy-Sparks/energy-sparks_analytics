@@ -43,7 +43,7 @@ class CompareChartResults
   end
 
   def output_directory
-    TestDirectory.instance.results_directory(@directory_name)
+    TestDirectory.instance.results_comparison_directory(@directory_name)
   end
 
   def config_directory(type)

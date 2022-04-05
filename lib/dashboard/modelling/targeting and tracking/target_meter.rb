@@ -7,7 +7,7 @@ class TargetMeter < Dashboard::Meter
   MAX_MISSING_PROFILES_TO_IGNORE = 4
   include Logging
   attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter, :synthetic_meter
-  
+
   # TODO(PH, 26Oct2021) - inherit from SyntheticSchool, replace super() call
   #                     - possibly replace CO2 and cost calcs through inheritance
   def initialize(meter_to_clone, do_calculations = true)
@@ -31,6 +31,7 @@ class TargetMeter < Dashboard::Meter
       @original_meter = meter_to_clone
       @target = TargetAttributes.new(meter_to_clone)
       @target_dates = TargetDates.new(meter_to_clone, @target)
+      #TODO can be removed now?
       @target_dates.check_consistent
 
       bm = Benchmark.realtime {
@@ -43,6 +44,8 @@ class TargetMeter < Dashboard::Meter
       calc_text = "Calculated target meter #{mpan_mprn} #{fuel_type} in #{bm.round(3)} seconds"
       check_amr_data(amr_data, 'Completed calculations target data issues:')
       debug calc_text
+      ap analytics_debug_info
+      debug analytics_debug_info
     end
   end
 
@@ -67,6 +70,10 @@ class TargetMeter < Dashboard::Meter
 
   def self.annual_kwh_estimate_required?(meter)
     !dates(meter).full_years_benchmark_data?
+  end
+
+  def self.annual_kwh_estimate_helpful?(meter)
+    dates(meter).annual_kwh_estimate_helpful?
   end
 
   def self.recent_data?(meter)
@@ -149,7 +156,7 @@ class TargetMeter < Dashboard::Meter
     @synthetic_meter.amr_data = amr_data
   end
 
-  def create_averaged_and_or_temperature_compensated_target_data(adjusted_amr_data_info, meter_to_clone)   
+  def create_averaged_and_or_temperature_compensated_target_data(adjusted_amr_data_info, meter_to_clone)
     @amr_data = AMRData.new(meter_to_clone.meter_type)
     @non_scaled_target_meter = create_non_scaled_meter(self)
 
@@ -183,7 +190,7 @@ class TargetMeter < Dashboard::Meter
       if @feedback[:missing_profiles].length.between?(1, max_profile_retries)
         amr_data_to_be_corrected = [@amr_data, @non_scaled_target_meter.amr_data]
         create_dummy_profiles_for_limited_number_of_missing_dates(amr_data_to_be_corrected, @feedback[:missing_profiles], target_day_calculation_failed)
-        @feedback[:corrected_missing_profiles] = @feedback[:missing_profiles] 
+        @feedback[:corrected_missing_profiles] = @feedback[:missing_profiles]
         @feedback.delete(:missing_profiles)
       elsif @feedback[:missing_profiles].length > max_profile_retries
         @feedback[:missing_profiles].map! { |data| TargetMeterTemperatureCompensatedDailyDayTypeBase.format_missing_profiles(data) }
@@ -273,7 +280,7 @@ class TargetMeter < Dashboard::Meter
       end
       # only delete from missing list if missing profile
       target_day_calculation_failed.delete(target_date)
-    end 
+    end
   end
 end
 
@@ -363,4 +370,3 @@ class TargetMeterDailyDayType < TargetMeter
   end
   alias_method :average_profile_for_day_x48_super, :average_profile_for_day_x48
 end
-

@@ -24,8 +24,6 @@ def test_script_config(school_name_pattern_match, source_db, attribute_overrides
                           pages: %i[electric_target gas_target],
 
                           compare_results: [
-                            { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Target\Base' },
-                            { output_directory:     ENV['ANALYTICSTESTRESULTDIR'] + '\Target\New' },
                             :summary,
                             :report_differences,
                             :report_differing_charts,
@@ -67,16 +65,18 @@ def test_service(school)
 
     info[fuel_type][:relevance] = service.meter_present?
     if service.meter_present?
-      info[fuel_type][:enough_data_to_set_target] = service.enough_data_to_set_target?
-      info[fuel_type][:annual_kwh_required] = service.annual_kwh_estimate_required?
-      info[fuel_type][:recent_data] = service.recent_data?
-      info[fuel_type][:enough_holidays] = service.enough_holidays?
-      info[fuel_type][:enough_temperature_data] = service.enough_temperature_data?
-      info[fuel_type][:valid] = service.valid?
-      info[fuel_type][:problems_with_holidays] = service.holiday_integrity_problems.join(' + ')
+      info[fuel_type][:enough_data_to_set_target]       = service.enough_data_to_set_target?
+      info[fuel_type][:annual_kwh_required]             = service.annual_kwh_estimate_required?
+      info[fuel_type][:annual_kwh_estimate_bad]         = service.invalid_annual_estimate_less_than_historic_kwh_data_to_date?
+      info[fuel_type][:suggest_annual_kwh_estimate]     = service.suggest_use_of_estimate? if service.annual_kwh_estimate_required?
+      info[fuel_type][:recent_data]                     = service.recent_data?
+      info[fuel_type][:enough_holidays]                 = service.enough_holidays?
+      info[fuel_type][:enough_temperature_data]         = service.enough_temperature_data?
+      info[fuel_type][:valid]                           = service.valid?
+      info[fuel_type][:problems_with_holidays]          = service.holiday_integrity_problems.join(' + ')
       info[fuel_type][:one_year_of_meter_readings_available_prior_to_1st_date] = service.one_year_of_meter_readings_available_prior_to_1st_date?
       info[fuel_type][:can_calculate_one_year_of_synthetic_data] = service.can_calculate_one_year_of_synthetic_data?
-      
+
       info[fuel_type].merge!(service.analytics_debug_info)
       if service.valid?
         ap service.progress
@@ -110,7 +110,8 @@ def extract_data(stats, column_names)
 end
 
 def save_stats(stats)
-  filename = './Results/targeting and tracking stats v2.csv'
+  dir = TestDirectory.instance.results_directory('TargetingAndTracking')
+  filename = File.join(dir, 'targeting and tracking stats v2.csv')
   puts "Saving results to #{filename}"
 
   col_names = column_names(stats)
@@ -128,13 +129,13 @@ def school_factory
   $SCHOOL_FACTORY ||= SchoolFactory.new
 end
 
-school_name_pattern_match = ['*']
+school_name_pattern_match = ['wimbledon-t*', 'ayc*']
 source_db = :unvalidated_meter_data
 
-school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
+school_names = SchoolFactory.instance.school_file_list(source_db, school_name_pattern_match)
 
 schools = school_names.map do |school_name|
-  school_factory.load_or_use_cached_meter_collection(:name, school_name, source_db)
+  SchoolFactory.instance.load_school(source_db, school_name)
 end
 
 # set_meter_attributes(schools)
@@ -145,7 +146,7 @@ schools.each do |school|
   stats[school.name] = test_service(school)
 end
 
-save_stats(stats)
-
 script = test_script_config(school_name_pattern_match, source_db, {})
 RunTests.new(script).run
+
+save_stats(stats)

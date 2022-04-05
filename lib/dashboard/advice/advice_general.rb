@@ -62,7 +62,11 @@ class AdviceBoilerHeatingBase < AdviceGasBase
   end
 end
 
+<<<<<<< HEAD
 class AdviceGasBoilerMorningStart     < AdviceBoilerHeatingBase; end
+=======
+class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase; end
+>>>>>>> master
 class AdviceGasBoilerThermostatic     < AdviceBoilerHeatingBase; end
 
 class AdviceGasBoilerFrost < AdviceBoilerHeatingBase

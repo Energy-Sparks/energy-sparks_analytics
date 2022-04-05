@@ -18,7 +18,7 @@ class RunAdultDashboard < RunCharts
         root:    :adult_analysis_page, # :pupil_analysis_page,
         no_chart_manipulation: %i[drilldown timeshift],
         display_average_calculation_rate: true,
-        summarise_differences: false,
+        summarise_differences: true,
         report_failed_charts:   :summary, # :detailed
         page_calculation_time: false,
         user: { user_role: nil, staff_role: nil }, # { user_role: :analytics, staff_role: nil },
@@ -26,7 +26,7 @@ class RunAdultDashboard < RunCharts
         no_pages: %i[baseload],
         compare_results: [
           :summary,
-          #:report_differences,
+          # :report_differences,
           #:report_differing_charts,
         ] # :quick_comparison,
       }
@@ -37,7 +37,7 @@ class RunAdultDashboard < RunCharts
     @accordion_count = 0
     @all_html = ''
     differing_pages = {}
-    
+
     pages = control.fetch(:pages, page_list)
     pages.each do |page|
       if DashboardConfiguration::ADULT_DASHBOARD_GROUP_CONFIGURATIONS.key?(page)

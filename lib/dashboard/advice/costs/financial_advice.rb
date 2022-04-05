@@ -431,10 +431,9 @@ class DashboardEnergyAdvice
 
     def generate_valid_advice
       timescale = { up_to_a_year: 0 }
-      # SeriesNames [HOLIDAY.freeze, WEEKEND.freeze, SCHOOLDAYOPEN.freeze, SCHOOLDAYCLOSED.freeze].freeze
       total_cost_£ = ScalarkWhCO2CostValues.new(@school).aggregate_value(timescale, fuel_type, :accounting_cost)
       day_type_percent = ScalarkWhCO2CostValues.new(@school).day_type_breakdown(timescale, fuel_type, :kwh, false, true)
-      out_of_hours_percent = 1.0 - day_type_percent[SeriesNames::SCHOOLDAYOPEN]
+      out_of_hours_percent = 1.0 - day_type_percent[Series::DayType::SCHOOLDAYOPEN]
       formatted_out_of_hours_percent = FormatEnergyUnit.format(:percent, out_of_hours_percent, :html)
       variable_costs_£ = total_cost_£ - total_standing_charges
       saving_to_exemplar_percent = out_of_hours_percent - exemplar_out_of_hours_percent

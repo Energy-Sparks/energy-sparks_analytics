@@ -1,7 +1,11 @@
 require 'rubygems'
 require 'write_xlsx'
+require 'require_all'
+require_relative '../../lib/dashboard.rb'
 
-workbook  = WriteXLSX.new( 'Results\chart.xlsx' )
+dir = TestDirectory.instance.results_directory('TestWriteXlsx')
+
+workbook  = WriteXLSX.new(File.join(dir, 'chart.xlsx'))
 worksheet = workbook.add_worksheet
 
 # Add the worksheet data the chart refers to.
@@ -24,9 +28,35 @@ chart.add_series(
 workbook.close
 
 #============================================================================
+# line chart missing points
+#
+
+workbook  = WriteXLSX.new(File.join(dir, 'line missing points.xlsx'))
+worksheet = workbook.add_worksheet
+
+# Add the worksheet data the chart refers to.
+data = [
+    [ 'Category', 2, 3, 4, 5, 6, 7 ],
+    [ 'Value',    1, 4, 5, nil, 12, 5 ]
+]
+
+worksheet.write( 'A1', data )
+
+# Add a worksheet chart.
+chart = workbook.add_chart( type: 'line' )
+
+# Configure the chart.
+chart.add_series(
+    :categories => '=Sheet1!$A$2:$A$7',
+    :values     => '=Sheet1!$B$2:$B$7'
+)
+
+workbook.close
+
+#============================================================================
 # working combo and line chart on same axis
 #
-workbook  = WriteXLSX.new('Results\chart_combined.xlsx')
+workbook  = WriteXLSX.new(File.join(dir, 'chart_combined.xlsx'))
 worksheet = workbook.add_worksheet
 bold      = workbook.add_format(:bold => 1)
 

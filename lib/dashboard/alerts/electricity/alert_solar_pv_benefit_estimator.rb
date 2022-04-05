@@ -41,7 +41,7 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     solar_pv_scenario_table: {
       description: 'Estimate of benefits of solar PV for a range of capacity/panels',
       units:    :table,
-      column_types: [:kwp, :panels, :m2, :kwh, :kwh, :kwh, :percent, :£, :£, :years],
+      column_types: [:kwp, :panels, :m2, :kwh, :kwh, :kwh, :percent, :£, :co2, :£, :years],
       header:   scenario_table_text
     },
     optimum_kwp: {

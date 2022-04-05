@@ -36,8 +36,10 @@ class RunTests
         run_reports(configuration[:charts], configuration[:control])
       when :alerts
         run_alerts(configuration[:alerts], configuration[:control])
+      when :charts
+        run_charts(configuration[:charts], configuration[:control])
       when :drilldown
-        run_drilldown
+        run_drilldown(configuration)
       when :generate_analytics_school_meta_data
         generate_analytics_school_meta_data
       when :timescales
@@ -114,12 +116,13 @@ class RunTests
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 
-  def run_drilldown
+  def run_drilldown(control)
+    chart_name = control[:chart_name]
+
     schools_list.each do |school_name|
       excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- drilldown.xlsx')
       school = load_school(school_name)
       chart_manager = ChartManager.new(school)
-      chart_name = :group_by_week_electricity
       chart_config = chart_manager.get_chart_config(chart_name)
       next unless chart_manager.drilldown_available?(chart_config)
       result = chart_manager.run_chart(chart_config, chart_name)
@@ -352,6 +355,27 @@ class RunTests
         stop_profiler('alerts')
       end
       # failed_alerts += alerts.failed_charts
+    end
+    RecordTestTimes.instance.print_stats
+    RecordTestTimes.instance.save_summary_stats_to_csv
+    RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
+  end
+
+  def run_charts(charts, control)
+    logger.info '=' * 120
+    logger.info 'RUNNING CHARTS'
+    failed_charts = []
+    ENV['ENERGYSPARKSTESTMODE'] = 'ON'
+
+    schools_list.each do |school_name|
+      @current_school_name = school_name
+      reevaluate_log_filename
+      school = load_school(school_name)
+      start_profiler
+      charts_runner = RunCharts.new(school, results_sub_directory_type: 'Charts')
+      charts_runner.run_structured_chart_list(charts, control)
+      stop_profiler('charts')
+      failed_charts += charts_runner.failed_charts
     end
     RecordTestTimes.instance.print_stats
     RecordTestTimes.instance.save_summary_stats_to_csv

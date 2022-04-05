@@ -17,13 +17,17 @@ class ChartManager
       chart_config.delete(:trendlines)
     end
 
-    if %i[baseload cusum hotwater heating].include?(chart_config[:series_breakdown])
+    if %i[cusum hotwater heating].include?(chart_config[:series_breakdown])
 
       # these special case may need reviewing if we decide to aggregate
       # these types of graphs by anything other than days
       # therefore create a single date datetime drilldown
 
       chart_config[:chart1_type] = :column
+      chart_config[:series_breakdown] = :none
+    elsif chart_config[:series_breakdown] == :baseload
+      # maintain as line chart, but present intraday profile
+      # as baseload is aonly a single value not 48 x 1/2 hour values
       chart_config[:series_breakdown] = :none
     else
       chart_config.delete(:inject)
