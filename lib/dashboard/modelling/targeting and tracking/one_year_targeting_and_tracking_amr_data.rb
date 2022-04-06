@@ -42,7 +42,7 @@ class OneYearTargetingAndTrackingAmrData
   def calculate_last_years_amr_data
     case @meter.fuel_type
     when :electricity
-      if !@target_dates.full_years_benchmark_data?
+      if synthetic_data_calculaton_needed?
         fit_electricity
       elsif seasonal_electricity_covid_adjustment.enough_data?
         seasonal_electricity_covid_adjustment_amr_data
@@ -52,14 +52,19 @@ class OneYearTargetingAndTrackingAmrData
         raise StandardError, 'targeting and tracking electric < 1 year not intergrated yet'
       end
     when :gas, :storage_heater
-      if @target_dates.full_years_benchmark_data?
-        enough_data_already
-      else
+      if synthetic_data_calculaton_needed?
         missing_gas_estimation.calculate_missing_gas
+      else
+        enough_data_already
       end
     else
       raise StandardError, "targeting and tracking adjustment for fuel #{@meter.fuel_type} currently not supported"
     end
+  end
+
+  def synthetic_data_calculaton_needed?
+    !@target_dates.full_years_benchmark_data? &&
+    !@target_dates.less_than_1_year_data_bumped_start_date_forward_no_annual_estimate?
   end
 
   def enough_data?
@@ -67,18 +72,31 @@ class OneYearTargetingAndTrackingAmrData
   end
 
   def enough_data_already
-    {
-      amr_data:             @meter.amr_data,
-      feedback: {
-        percent_real_data:    1.0,
-        adjustments_applied:  "No adjustments necessary as > 1 year data (#{@meter.amr_data.days}) and recent (to #{@meter.amr_data.end_date})",
-        rule:                 'Enough data already so no synthetic data'
+    if @target_dates.less_than_1_year_data_bumped_start_date_forward_no_annual_estimate?
+      days = (@target_dates.benchmark_end_date - @target_dates.benchmark_start_date).to_i
+      historic_data_info = "#{days} days #{@target_dates.benchmark_start_date} to #{@target_dates.benchmark_end_date}"
+      {
+        amr_data:             @meter.amr_data,
+        feedback: {
+          percent_real_data:    1.0,
+          adjustments_applied:  "No synthetic calculation: as < 1 year (#{historic_data_info}), no annual estimate but target start date bumped forward",
+          rule:                 'Enough but limited data for partial year target so no synthetic data'
+        }
       }
-    }
+    else
+      {
+        amr_data:             @meter.amr_data,
+        feedback: {
+          percent_real_data:    1.0,
+          adjustments_applied:  "No adjustments necessary as > 1 year data (#{@meter.amr_data.days}) and recent (to #{@meter.amr_data.end_date})",
+          rule:                 'Enough data already so no synthetic data'
+        }
+      }
+    end
   end
 
   def fit_electricity
-    raise MissingAnnualKwhEstimate, "No annual kwh estimate attribute set for #{@meter.fuel_type}" if @meter.annual_kwh_estimate.nil?
+    raise MissingAnnualKwhEstimate, "No annual kwh estimate attribute set for #{@meter.fuel_type}"
     electric_estimate = MissingElectricityEstimation.new(@meter, @target_dates)
     electric_estimate.complete_year_amr_data
   end

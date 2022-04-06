@@ -195,7 +195,17 @@ class TargetsService
     end
   end
 
-  def self.analytics_relevant(meter)
+  # display analysis if even only small amount of data
+  # but if missing estimate, not 1 year's data then
+  #     display message saying missing, no charts, and actual kWh table
+  def self.analytics_advice_relevant(meter)
+    rel = !meter.nil? && TargetDates.can_calculate_one_year_of_synthetic_data?(meter)
+    rel ? :relevant : :never_relevant
+  end
+
+  def self.analytics_alerts_relevant(meter)
+    # now relevent if only a little data and
+    !meter.nil? && TargetDates.can_calculate_one_year_of_synthetic_data?(meter)
     rel = !meter.nil? && meter.target_set?
     rel ? :relevant : :never_relevant
   end

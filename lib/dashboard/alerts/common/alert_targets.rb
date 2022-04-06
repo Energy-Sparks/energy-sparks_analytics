@@ -15,7 +15,7 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def relevance
-    TargetsService.analytics_relevant(aggregate_meter)
+    TargetsService.analytics_alerts_relevant(aggregate_meter)
   end
 
   def timescale

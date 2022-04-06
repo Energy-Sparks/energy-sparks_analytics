@@ -38,11 +38,19 @@ class TargetDates
 
   # 'benchmark' = up to 1 year period of real amr_data before target_start_date
   def benchmark_start_date
-    [@original_meter.amr_data.start_date, synthetic_benchmark_start_date].max
+    if less_than_1_year_data_bumped_start_date_forward_no_annual_estimate?
+      @original_meter.amr_data.start_date
+    else
+      [@original_meter.amr_data.start_date, synthetic_benchmark_start_date].max
+    end
   end
 
   def benchmark_end_date
-    [synthetic_benchmark_end_date, @original_meter.amr_data.start_date].max
+    if less_than_1_year_data_bumped_start_date_forward_no_annual_estimate?
+      original_target_start_date
+    else
+      [synthetic_benchmark_end_date, @original_meter.amr_data.start_date].max
+    end
   end
 
   def benchmark_date_range
@@ -62,11 +70,19 @@ class TargetDates
   end
 
   def synthetic_benchmark_start_date
-    target_start_date - DAYSINYEAR
+    if less_than_1_year_data_bumped_start_date_forward_no_annual_estimate?
+      benchmark_start_date
+    else
+      target_start_date - DAYSINYEAR
+    end
   end
 
   def synthetic_benchmark_end_date
-    target_start_date - 1
+    if less_than_1_year_data_bumped_start_date_forward_no_annual_estimate?
+      benchmark_end_date
+    else
+      target_start_date - 1
+    end
   end
 
   def synthetic_benchmark_date_range
@@ -158,6 +174,10 @@ class TargetDates
   # forward but would be better if annual estimate provided and
   # full synthetic calculation takes place
   def annual_kwh_estimate_helpful?
+    less_than_1_year_data_bumped_start_date_forward_no_annual_estimate?
+  end
+
+  def less_than_1_year_data_bumped_start_date_forward_no_annual_estimate?
     @original_meter.annual_kwh_estimate.nan? &&
     moved_target_start_date_forward? &&
     original_target_start_date - original_meter_start_date < DAYSINYEAR

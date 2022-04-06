@@ -12,7 +12,7 @@ class AdviceTargets < AdviceBase
   end
 
   def relevance
-    TargetsService.analytics_relevant(aggregate_meter)
+    TargetsService.analytics_advice_relevant(aggregate_meter)
   end
 
   def calculate
