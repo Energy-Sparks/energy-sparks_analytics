@@ -101,12 +101,7 @@ class TargetsService
   def annual_kwh_estimate_kwh
     return nil if aggregate_meter.nil?
 
-    estimator = TargetingAndTrackingAnnualKwhEstimate.new(aggregate_meter)
-    estimator.calculate_apportioned_annual_estimate
-  rescue BivariateSolarTemperatureModel::BivariateModel::BivariateModelCalculationFailed => e
-    # statsample error: blows up without raising named exception, so reraise from ES wrapped library
-    logger.info "Electrical model failure: #{e.message}"
-    nil
+    target_school.annual_kwh_estimate_kwh(aggregate_meter)
   end
 
   def invalid_annual_estimate_less_than_historic_kwh_data_to_date?

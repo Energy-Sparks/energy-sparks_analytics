@@ -22,7 +22,6 @@ class TargetingAndTrackingAnnualKwhEstimate
   def calculate_crude_annual_kwh
     ed = meter.amr_data.end_date
     sd = [meter.amr_data.start_date, ed - 364].max
-
     {
       kwh:        meter.amr_data.kwh_date_range(sd, ed),
       percent:    (ed - sd + 1) / 365.0,
@@ -33,9 +32,9 @@ class TargetingAndTrackingAnnualKwhEstimate
 
   def calculate_apportioned_annual_heating_estimate(annual_kwh_estimate)
     # degree day base set to 20.0C in an attempt to simulate hot water consumption over the summer
-    annnual_degreedays = meter.meter_collection.temperatures.degree_days_in_date_range(annual_kwh_estimate[:end_date] -365, annual_kwh_estimate[:end_date], 20.0)
+    annual_degreedays = meter.meter_collection.temperatures.degree_days_in_date_range(annual_kwh_estimate[:end_date] -365, annual_kwh_estimate[:end_date], 20.0)
     meter_degreedays = meter.meter_collection.temperatures.degree_days_in_date_range(annual_kwh_estimate[:start_date], annual_kwh_estimate[:end_date], 20.0)
-    annual_kwh_estimate[:kwh] * annnual_degreedays / meter_degreedays
+    annual_kwh_estimate[:kwh] * annual_degreedays / meter_degreedays
   end
 
   # uses degree days and solar irradiance to adjust but include baseload factor
@@ -45,14 +44,9 @@ class TargetingAndTrackingAnnualKwhEstimate
     ed = annual_kwh_estimate[:end_date]
     sd = ed - 365
 
-    baseload_kw = meter.amr_data.average_baseload_kw_date_range(annual_kwh_estimate[:start_date], ed)
-
-    annnual_degreedays = school.temperatures.degree_days_in_date_range(sd, ed, 20.0)
-    meter_degreedays = school.temperatures.degree_days_in_date_range(annual_kwh_estimate[:start_date], ed, 20.0)
-
     model = electrical_solar_degreeday_model(annual_kwh_estimate[:start_date], ed)
 
-    annual_kwh = estimate_annual_electrical_kwh(model, baseload_kw)
+    annual_kwh = estimate_annual_electrical_kwh(model)
     annual_kwh
   end
 
@@ -61,7 +55,7 @@ class TargetingAndTrackingAnnualKwhEstimate
     date.between?(start_date, end_date)
   end
 
-  def estimate_annual_electrical_kwh(model, baseload_kw)
+  def estimate_annual_electrical_kwh(model)
     amr_data = meter.amr_data
     solar_ir = school.solar_irradiation
     temperatures = school.temperatures
@@ -75,18 +69,26 @@ class TargetingAndTrackingAnnualKwhEstimate
         dd = school.temperatures.degree_days(date)
         ir_x48 = school.solar_irradiation.one_days_data_x48(date)
 
-        model[school.holidays.day_type(date)].interpolate(dd, ir_x48)
+        model[school.holidays.day_type(date)].interpolate(dd, ir_x48, date)
       end
     end
   end
 
+  def model_factors(sd, ed)
+    # if more than 20 days data use a 2 factor model for holidays
+    # and weekends, otherwise if less then a 0 factor baseload only model
+    # if too little data the 2 factor model may be unstable
+    (ed - sd).to_i > 20 ? 2 : 0
+  end
+
   def electrical_solar_degreeday_model(sd, ed)
-    model = BivariateSolarTemperatureModel.new(meter.amr_data, school.temperatures, school.solar_irradiation, school.holidays, open_time: school.open_time, close_time: school.close_time)
+    unoccupied_model_factors = model_factors(sd, ed)
+    model = BivariateSolarTemperatureModel.new(meter.amr_data, school.temperatures, school.solar_irradiation, school.holidays, open_time: school.open_time, close_time: school.close_time, open_close_times: school.open_close_times)
     third_lockdown = Covid3rdLockdownElectricityCorrection.determine_3rd_lockdown_dates(school.country)
     {
       schoolday:  model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :schoolday),
-      weekend:    model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :weekend),
-      holiday:    model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :holiday)
+      weekend:    model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :weekend, unoccupied_model_factors: unoccupied_model_factors),
+      holiday:    model.fit(sd..ed, exclude_dates_or_ranges: third_lockdown, day_type: :holiday, unoccupied_model_factors: unoccupied_model_factors)
     }
   end
 end

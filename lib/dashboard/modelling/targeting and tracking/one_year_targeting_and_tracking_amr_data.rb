@@ -96,7 +96,7 @@ class OneYearTargetingAndTrackingAmrData
   end
 
   def fit_electricity
-    raise MissingAnnualKwhEstimate, "No annual kwh estimate attribute set for #{@meter.fuel_type}"
+    raise MissingAnnualKwhEstimate, "No annual kwh estimate attribute set for #{@meter.fuel_type}" if @meter.annual_kwh_estimate.nil?
     electric_estimate = MissingElectricityEstimation.new(@meter, @target_dates)
     electric_estimate.complete_year_amr_data
   end

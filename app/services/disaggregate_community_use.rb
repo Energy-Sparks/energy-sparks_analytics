@@ -6,7 +6,7 @@ class DisaggregateCommunityUsage
   attr_reader :meter_collection # to keep mixin happy, not ideal
 
   def initialize(school)
-    @school = @meter_collection = school
+    @school = school
   end
 
   def can_disaggregate?(fuel_type)
@@ -29,7 +29,6 @@ class DisaggregateCommunityUsage
   end
 
   def disaggregate_by_fuel_type(fuel_type)
-    puts "Disaggregating for community use"
     # there are 2 types of disaggregation
     # whole meter   - the meter aggregation is similar to the normal but
     #               - the fewer meters are aggregated than normal
@@ -71,7 +70,7 @@ class DisaggregateCommunityUsage
 
   def community_weights(date, meter)
     oc = SchoolOpenCloseTimes.new(@school, SchoolOpenCloseTimes.example_open_close_times, meter)
-    
+
     @one_days_community_aggregates ||= {}
     @one_days_community_aggregates[date] ||= oc.one_day_disaggregation(meter, date).transform_values(&:sum)
     meter.amr_data.days_amr_data(date).set_community_open_close_usage_x48(@one_days_community_aggregates[date])

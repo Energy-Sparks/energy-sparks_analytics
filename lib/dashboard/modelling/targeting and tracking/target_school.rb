@@ -130,15 +130,33 @@ class TargetSchool < MeterCollection
     nil
   end
 
+  # use model to calculate prorata type estimate of annual kwh in abscence of full year data
+  def annual_kwh_estimate_kwh(aggregate_meter)
+    return nil if aggregate_meter.nil?
+
+    estimator = TargetingAndTrackingAnnualKwhEstimate.new(aggregate_meter)
+    estimator.calculate_apportioned_annual_estimate
+  rescue BivariateSolarTemperatureModel::BivariateModel::BivariateModelCalculationFailed => e
+    # statsample error: blows up without raising named exception, so reraise from ES wrapped library
+    logger.info "Electrical model failure: #{e.message}"
+    nil
+  end
+
   def set_target_deprecated(meter, calculation_type)
     target_set?(meter) ? calculate_target_meter(meter, calculation_type) : nil
   end
 
-  def calculate_target_meter_data(meter, calculation_type)
-    meter = TargetMeter.calculation_factory(calculation_type, meter)
-    @unscaled_target_meters[meter.fuel_type] = meter.non_scaled_target_meter
-    @synthetic_target_meters[meter.fuel_type] = meter.synthetic_meter
-    meter
+  def calculate_target_meter_data(original_meter, calculation_type)
+    target_meter = TargetMeter.calculation_factory(calculation_type, original_meter)
+    @unscaled_target_meters[target_meter.fuel_type]  = target_meter.non_scaled_target_meter
+    @synthetic_target_meters[target_meter.fuel_type] = target_meter.synthetic_meter
+    add_annual_estimate_to_feedback(original_meter, target_meter) unless Object.const_defined?('Rails') # time costly call
+    target_meter
+  end
+
+  def add_annual_estimate_to_feedback(original_meter, target_meter)
+    target_meter.feedback[:analytics_estimated_annual_kwh] = annual_kwh_estimate_kwh(original_meter)
+    ap target_meter.feedback
   end
 
   def target_set?(meter)

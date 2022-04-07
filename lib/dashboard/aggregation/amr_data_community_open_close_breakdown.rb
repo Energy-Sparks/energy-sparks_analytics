@@ -73,6 +73,10 @@ class AMRDataCommunityOpenCloseBreakdown
     @open_close_weights_x48[date] ||= calculate_open_close_weights_x48(date)
   end
 
+  def self.simplified_open_close_times_x48(weights_x48)
+    AMRData.fast_add_multiple_x48_x_x48(weights_x48.values).map { |v| v > 0.0 ? 1.0 : 0.0 }
+  end
+
   def compact_print_weights(date)
     open_close_weights_x48(date).each do |type, weight_x48|
       puts "#{sprintf('%-15.15s',type.to_s)} #{weight_x48.map(&:to_i).join('')}"
