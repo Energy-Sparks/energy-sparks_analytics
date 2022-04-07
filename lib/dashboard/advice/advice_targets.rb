@@ -15,7 +15,7 @@ class AdviceTargets < AdviceBase
     TargetsService.analytics_advice_relevant(aggregate_meter)
   end
 
-  def calculate
+  def calculate_deprecated
     if @school.target_school.aggregate_meter(@fuel_type).nil?
       debug "Target calculation failed for #{aggregate_meter.to_s}: #{@school.target_school.reason_for_nil_meter(@fuel_type)}"
       @calculation_worked = false
@@ -25,6 +25,16 @@ class AdviceTargets < AdviceBase
   end
 
   def raw_content(user_type: nil)
+    if monthly_tracking_table.limited_data?
+      raw_content_limited_data(user_type: user_type)
+    else
+      raw_content_full_data(user_type: user_type)
+    end
+  end
+
+  private
+
+  def raw_content_full_data(user_type: nil)
     charts_and_html = []
     charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.to_s.humanize}</h2>" } )
     charts_and_html += debug_content
@@ -54,7 +64,11 @@ class AdviceTargets < AdviceBase
     charts_and_html.push( { type: :analytics_html,  content: targeting_and_tracking_debug_information } )
   end
 
-  private
+  def raw_content_limited_data(user_type: nil)
+    charts_and_html = []
+    charts_and_html.push( { type: :html, content: "<h2>Setting and tracking targets for your #{@fuel_type.to_s.humanize}</h2>" } )
+    charts_and_html.push( { type: :html, content: monthly_targeting_and_tracking_tables_limited } )
+  end
 
   def create_chart(charts_and_html, chart_name)
     charts_and_html.push( { type: :chart, content: run_chart(chart_name) } )
@@ -142,6 +156,26 @@ class AdviceTargets < AdviceBase
             <%= format_cell(:£, current_year_target_£_to_date) %> (<%= format_cell(:kwh, current_year_target_kwh_to_date) %>).
         </p>
       <% end %>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def monthly_targeting_and_tracking_tables_limited
+    text = %{
+      <%= HtmlTableFormattingWithHighlightedCells.cell_highlight_style %>
+      <p>
+        You have not set a target or an annual estimate, so we are unable to
+        show you any target information.
+      </p>
+      <p>
+        This table shows your historic monthly <%= @fuel_type.to_s %> consumption:
+      </p>
+      <p>
+        <%=monthly_tracking_table.simple_target_table_html %>
+      </p>
+      <p>
+        Once you have set a target, targets will appear in this table and charts below.
+      </p>
     }
     ERB.new(text).result(binding)
   end
@@ -280,10 +314,13 @@ class AdviceTargets < AdviceBase
 
     target_meter = @school.target_school.aggregate_meter(@fuel_type)
 
-    rows.push(['Target meter kwh',        target_meter.amr_data.total])
-
-    target_meter.feedback.each do |type, val|
-      rows.push([type,  val])
+    if target_meter.nil?
+      rows.push(['Target meter kwh', 'no target set or annual estimate?'])
+    else
+      rows.push(['Target meter kwh', target_meter.amr_data.total])
+      target_meter.feedback.each do |type, val|
+        rows.push([type,  val])
+      end
     end
 
     # compact_print(target_meter)

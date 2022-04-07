@@ -101,6 +101,14 @@ class TargetingAndTrackingTable < ContentBase
     format_cell(:relative_percent, cumulative_target_percent.magnitude) 
   end
 
+  def display_charts?
+    data[:show_charts]
+  end
+
+  def limited_data?
+    data[:limited_data]
+  end
+
   private
 
   def select_rows(types)

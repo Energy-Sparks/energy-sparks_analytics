@@ -125,7 +125,7 @@ class BivariateSolarTemperatureModel
     end
 
     def calculate
-      case @model_factors
+      @model_results = case @model_factors
       when 2
         calculate_bivariate_regression
       when 0
@@ -172,8 +172,7 @@ class BivariateSolarTemperatureModel
       }
 
       @model_results.merge!({calculation_time: bm})
-
-      @model_results
+      
     rescue Statsample::Regression::LinearDependency => _x
       raise BivariateModelCalculationFailed, "Linear dependence error in statsample"
     rescue NoMethodError => _x
@@ -181,7 +180,7 @@ class BivariateSolarTemperatureModel
     end
 
     def baseload_model
-      @model_results ||= {
+      @model_results = {
         r2:               Float::NAN,
         insolation_coeff: 0.0,
         degreeday_coeff:  0.0,

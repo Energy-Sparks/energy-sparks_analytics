@@ -8,16 +8,47 @@ class CalculateMonthlyTrackAndTraceData
   end
 
   def raw_data
-    @raw_data ||= calculate_raw_data
+    @raw_data ||= calculate
   end
 
   private
 
+  def calculate
+    if target_meter.nil?
+      calculate_limited_data
+    else
+      calculate_raw_data
+    end
+  rescue => e
+    calculate_limited_data
+  end
+
+  def calculate_limited_data
+    month_dates, partial_month_dates_info, partial_month_dates, partial_months = calculate_dates(month_dates_no_target)
+    current_year_kwhs   = kwhs_for_date_ranges(partial_month_dates, @aggregate_meter)
+    nil_data = Array.new(current_year_kwhs.length)
+    zero_data = Array.new(current_year_kwhs.length, 0.0)
+    {
+      current_year_kwhs:                        current_year_kwhs,
+      current_year_date_ranges:                 month_dates,
+      partial_months:                           partial_months,
+      full_targets_kwh:                         nil_data,
+      full_cumulative_targets_kwhs:             nil_data,
+      full_cumulative_current_year_kwhs:        nil_data,
+      cumulative_usage_kwh:                     nil_data,
+      monthly_performance_versus_last_year:     nil_data,
+      cumulative_performance_versus_last_year:  nil_data,
+      monthly_performance:                      nil_data,
+      cumulative_performance:                   nil_data,
+      percentage_synthetic:                     zero_data,
+      first_target_date:                        month_dates.first.first,
+      show_charts:                              false,
+      limited_data:                             true
+    }
+  end
+
   def calculate_raw_data
-    month_dates = calculate_month_dates
-    partial_month_dates_info = calculate_partial_month_dates(month_dates, @aggregate_meter.amr_data.end_date)
-    partial_month_dates = partial_month_dates_info.map { |i| i[:date_range] }
-    partial_months = partial_month_dates_info.map { |i| i[:partial_month] }
+    month_dates, partial_month_dates_info, partial_month_dates, partial_months = calculate_dates(calculate_month_dates)
 
     current_year_kwhs   = kwhs_for_date_ranges(partial_month_dates, @aggregate_meter)
     full_targets_kwh    = kwhs_for_target_date_ranges(month_dates)
@@ -53,8 +84,17 @@ class CalculateMonthlyTrackAndTraceData
 
       current_year_date_ranges:           month_dates,
       partial_months:                     partial_months,
-      first_target_date:                  target_meter.target_dates.target_start_date
+      first_target_date:                  target_meter.target_dates.target_start_date,
+      show_charts:                        true,
+      limited_data:                       false
     }
+  end
+
+  def calculate_dates(month_dates)
+    partial_month_dates_info = calculate_partial_month_dates(month_dates, @aggregate_meter.amr_data.end_date)
+    partial_month_dates = partial_month_dates_info.map { |i| i[:date_range] }
+    partial_months = partial_month_dates_info.map { |i| i[:partial_month] }
+    [month_dates, partial_month_dates_info, partial_month_dates, partial_months]
   end
 
   def performance(kwhs, target_kwhs)
@@ -146,7 +186,7 @@ class CalculateMonthlyTrackAndTraceData
     ed = corresponding_date_in_previous_year(partial_month_range.last)
     sd..ed
   end
-  
+
   def corresponding_date_in_previous_year(date)
     if Date.leap?(date.year) && date.month == 2 && date.day == 29
       Date.new(date.year - 1, date.month, 28)
@@ -178,6 +218,19 @@ class CalculateMonthlyTrackAndTraceData
           days_in_month:  month_date_range.last - month_date_range.first + 1
         }
       end
+    end
+  end
+
+  def month_dates_no_target
+    start_date = [@aggregate_meter.amr_data.start_date, @aggregate_meter.amr_data.end_date - 364].max
+    end_date = start_date + 364
+    months = start_date.day == 1 ? 12 : 13
+
+    (0..(months - 1)).map do |_month_index|
+      end_date = DateTimeHelper.last_day_of_month(start_date)
+      month_date_range = start_date..end_date
+      start_date = end_date + 1
+      month_date_range
     end
   end
 
