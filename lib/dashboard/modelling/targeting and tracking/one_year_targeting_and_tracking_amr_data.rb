@@ -33,9 +33,16 @@ class OneYearTargetingAndTrackingAmrData
 
   private
 
+  def quality_of_estimate(data)
+    quality = QualityOfUserTargetAndTrackingAnnualEstimate.new(@meter, @target_dates, data)
+    res = quality.calculate
+    data.merge!{res}
+  end
+
   def calculate_one_year_historic_synthetic_data
     data = calculate_last_years_amr_data
     data[:feedback].merge!(@target_dates.serialised_dates_for_debug)
+    quality_of_estimate(data)
     data
   end
 

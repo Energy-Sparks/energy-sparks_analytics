@@ -61,6 +61,17 @@ class TargetSchool < MeterCollection
     aggregated_meters_by_fuel_type(:storage_heater)
   end
 
+  # use model to calculate prorata type estimate of annual kwh in abscence of full year data
+  def annual_kwh_estimate_kwh(aggregate_meter)
+    @calculated_estimate ||= {}
+    @annual_kwh_estimate_kwh ||= {}
+    if @calculated_estimate[aggregate_meter.mpxn] != true # needed as nil on error returned
+      @calculated_estimate[aggregate_meter.mpxn] = true
+      @annual_kwh_estimate_kwh[aggregate_meter.mpxn] = calculate_annual_kwh_estimate_kwh(aggregate_meter)
+    end
+    @annual_kwh_estimate_kwh[aggregate_meter.mpxn]
+  end
+
   private
 
   def aggregated_meters_by_fuel_type(fuel)
@@ -130,8 +141,7 @@ class TargetSchool < MeterCollection
     nil
   end
 
-  # use model to calculate prorata type estimate of annual kwh in abscence of full year data
-  def annual_kwh_estimate_kwh(aggregate_meter)
+  def calculate_annual_kwh_estimate_kwh(aggregate_meter)
     return nil if aggregate_meter.nil?
 
     estimator = TargetingAndTrackingAnnualKwhEstimate.new(aggregate_meter)

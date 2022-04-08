@@ -170,6 +170,68 @@ class Holidays
     stats
   end
 
+  def daytype_analysis(start_date, end_date, lambda, calculations: %i[raw average count total], add_unoccupied: true, add_all: true)
+    all_calcs = %i[raw average count total]
+
+    # initialize data structures
+    results = %i[holiday weekend schoolday].map do |daytype|
+      [
+        daytype,
+        all_calcs.map { |type| [type, type == :raw ? [] : type == :count ? 0 : 0.0] }.to_h
+      ]
+    end.to_h
+
+    # do calculations
+    (start_date..end_date).each do |date|
+      calc = lambda.call(date)
+      dt = day_type(date)
+      calculations.each do |calc_type|
+        case calc_type
+        when :raw
+          results[dt][calc_type].push(calc)
+        when :total
+          results[dt][calc_type] += calc
+        when :count
+          results[dt][calc_type] += 1
+        end
+      end
+    end
+
+    # calculate unoccupied
+    if add_unoccupied
+      unoccupied = {
+        raw:      results[:holiday][:raw]   + results[:weekend][:raw],
+        count:    results[:holiday][:count] + results[:weekend][:count],
+        total:    results[:holiday][:total] + results[:weekend][:total],
+      }
+      results[:unoccupied] = unoccupied
+    end
+
+    # calculate all
+    if add_unoccupied
+      all = {
+        raw:      results[:holiday][:raw]   + results[:weekend][:raw]   + results[:schoolday][:raw],
+        count:    results[:holiday][:count] + results[:weekend][:count] + results[:schoolday][:count],
+        total:    results[:holiday][:total] + results[:weekend][:total] + results[:schoolday][:total],
+      }
+      results[:all] = all
+    end
+
+    # calculate average
+    if calculations.include?(:average)
+      results.each do |day_type, calc_type|
+        calc_type[:average] = calc_type[:count].zero? ? 0.0 : calc_type[:total] / calc_type[:count]
+      end
+    end
+
+    # remove results caller didn't request
+    results.transform_values! do |calcs|
+      calcs.select{ |t, _v| calculations.include?(t) }
+    end
+
+    results
+  end
+
   def day_type(date)
     if holiday?(date)
       :holiday
