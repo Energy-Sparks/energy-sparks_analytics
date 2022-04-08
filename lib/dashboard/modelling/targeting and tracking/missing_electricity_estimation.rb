@@ -68,7 +68,7 @@ class MissingElectricityEstimation < MissingEnergyFittingBase
   end
 
   def create_amr_data_minus_lockdown_dates
-    amr_data = AMRData.copy_amr_data(@amr_data, @target_dates.benchmark_start_date, @target_dates.original_meter_end_date)
+    amr_data = AMRData.copy_amr_data(@amr_data, @target_dates.benchmark_start_date, @target_dates.benchmark_end_date)
     lockdown_date_ranges.each do |date_range|
       date_range.each do |date|
         amr_data.delete(date)
@@ -111,7 +111,7 @@ class MissingElectricityEstimation < MissingEnergyFittingBase
 
       adjustment_count += 1
     end
-
+puts "Got here final_post_calc_kwh one_year_amr_data #{one_year_amr_data.start_date} #{one_year_amr_data.end_date}"
     final_post_calc_kwh = calculate_holey_amr_data_total_kwh(one_year_amr_data)
 
     {

@@ -284,6 +284,7 @@ class ChartManager
         ['Energy:<school_name>', 'actual']
       ],
       chart1_type:                  :line,
+      chart1_subtype:               nil,
       series_breakdown:             :none,
       x_axis:                       :week,
       nullify_trailing_zeros:       true,
