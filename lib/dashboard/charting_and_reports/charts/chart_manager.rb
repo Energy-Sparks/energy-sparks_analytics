@@ -6,9 +6,8 @@ class ChartManager
 
   attr_reader :school
 
-  def initialize(school, show_reconciliation_values = true)
+  def initialize(school)
     @school = school
-    @show_reconciliation_values = show_reconciliation_values
   end
 
   def run_chart_group(chart_param, override_config = nil, reraise_exception = false, provide_advice: true)
@@ -118,13 +117,13 @@ class ChartManager
 
       RecordTestTimes.instance.record_time(@school.name, 'chart', chart_param){
         calculation_time = Benchmark.realtime {
-          aggregator = Aggregator.new(@school, chart_config, @show_reconciliation_values)
+          aggregator = Aggregator.new(@school, chart_config)
 
           aggregator.aggregate
         }
       }
 
-      if aggregator.valid
+      if aggregator.valid?
         graph_data = configure_graph(aggregator, chart_config, chart_param, calculation_time, provide_advice: provide_advice)
 
         ap(graph_data, limit: 20, color: { float: :red }) if ENV['AWESOMEPRINT'] == 'on'
@@ -160,7 +159,7 @@ class ChartManager
   def configure_graph(aggregator, chart_config, chart_param, calculation_time, provide_advice: true)
     graph_definition = {}
 
-    graph_definition[:title]          = chart_config[:name] # + ' ' + aggregator.title_summary
+    graph_definition[:title]          = chart_config[:name]
 
     graph_definition[:x_axis]         = aggregator.x_axis
     graph_definition[:x_axis_ranges]  = aggregator.x_axis_bucket_date_ranges

@@ -200,7 +200,9 @@ class AMRDataCommunityOpenCloseBreakdown
     community_kwh = [(kwh - baseload_kwh) * community_t, 0.0].max
     closed_kwh    = kwh - open_kwh - community_kwh
 
-    raise NegativeClosedkWhCalculation, "Negative closed allocation #{closed_kwh}" if closed_kwh < 0.0
+    # TODO(PH, 4Apr2022) there seems to be a problem with some Orsis solar schools providing small -tbe mains consumption
+    #                    hence kwh > 0.0 additjon below, needs further investigation of root cause
+    raise NegativeClosedkWhCalculation, "Negative closed allocation #{closed_kwh} Before #{kwh} => Open #{open_kwh} + Closed #{closed_kwh} + Coms time #{community_t}" if closed_kwh < 0.0 && kwh > 0.0
 
     [open_kwh, community_kwh, closed_kwh]
   end
