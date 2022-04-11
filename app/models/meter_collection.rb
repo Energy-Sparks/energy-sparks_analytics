@@ -48,6 +48,11 @@ class MeterCollection
 
     @grid_carbon_intensity = grid_carbon_intensity
 
+    unless school.location.nil?
+      @latitude  = school.location[0].to_f
+      @longitude = school.location[1].to_f
+    end
+
     @heat_meters = []
     @electricity_meters = []
     @storage_heater_meters = []

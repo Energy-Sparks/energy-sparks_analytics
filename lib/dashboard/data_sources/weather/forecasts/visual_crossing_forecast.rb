@@ -9,8 +9,14 @@ class VisualCrossingWeatherForecastRaw
   def forecast(latitude, longitude)
     url = forecast_url(latitude, longitude)
     uri = URI(url)
-    response = Net::HTTP.get(uri)
-    JSON.parse(response)
+
+    res = Net::HTTP.get_response(uri)
+    
+    if res.is_a?(Net::HTTPSuccess)
+      JSON.parse(res.body)
+    else
+      raise HttpError, "status #{response.status} #{response.body}"
+    end 
   end
 
   private

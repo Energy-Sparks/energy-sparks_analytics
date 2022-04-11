@@ -103,10 +103,12 @@ class WeatherForecastCache
     cache(asof_date)[cache_key(latitude, longitude)] = forecast_data
   end
 
-  def cache(_asof_date)
+  def cache(asof_date)
     # monkey patched in test environment to speedup, save API requests
     # asof_date not used in live environment
-    @cache ||= {}
+    @cache ||= Hash.new { |hash, key| hash[key] = {} }
+
+    @cache[asof_date]
   end
 
   def download_forecast(latitude, longitude)
