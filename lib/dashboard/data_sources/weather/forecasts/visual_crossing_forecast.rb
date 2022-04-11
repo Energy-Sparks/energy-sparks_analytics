@@ -11,11 +11,11 @@ class VisualCrossingWeatherForecastRaw
     uri = URI(url)
 
     res = Net::HTTP.get_response(uri)
-    
+
     if res.is_a?(Net::HTTPSuccess)
       JSON.parse(res.body)
     else
-      raise HttpError, "status #{response.status} #{response.body}"
+      raise HttpError, "status #{res.status} #{res.body}"
     end 
   end
 
