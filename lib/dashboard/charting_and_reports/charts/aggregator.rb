@@ -32,9 +32,7 @@ class Aggregator
   end
 
   def aggregate
-    bucketed_period_data = nil
-
-    bucketed_period_data = multi_school_period_aggregator.calculate
+    multi_school_period_aggregator.calculate
     unpack_results2(multi_school_period_aggregator.final_results)
     periods = multi_school_period_aggregator.periods
     schools = multi_school_period_aggregator.schools

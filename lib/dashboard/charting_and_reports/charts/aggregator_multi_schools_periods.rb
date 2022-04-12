@@ -84,19 +84,25 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     end
   end
 
+  # monthly comparison charts e.g. electricity_cost_comparison_last_2_years_accounting
+  # can be awkward as some years may occasionally have subtely different numbers of months e.g. 12 v. 13
+  # so specific month date matching occurs to match one year with the next
   def merge_monthly_comparison_charts
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if number_of_schools > 1
 
-    single_series_aggregators.reverse.with_index do |period_data, index|
-      @multi_chart_x_axis_ranges.push(period_data.x_axis_date_ranges) # TODO(PH, 1Apr2022) remove after refactor not used
+    valid_aggregators.reverse.each.with_index do |period_data, index|
+      bucket_date_ranges = period_data.results.x_axis_bucket_date_ranges
+      @multi_chart_x_axis_ranges.push(bucket_date_ranges) # TODO(PH, 1Apr2022) remove after refactor not used
+
+      time_description = period_data.results.xbucketor.compact_date_range_description
 
       if index == 0
         results.x_axis = period_data.results.x_axis.map{ |month_year| month_year[0..2]} # MMM YYYY to MMM
+        time_description = number_of_periods <= 1 ? '' : (':' + time_description)
         results.bucketed_data[      time_description] = period_data.results.bucketed_data.values[0]
         results.bucketed_data_count[time_description] = period_data.results.bucketed_data_count.values[0]
-      else
-        results.time_description += "- partial year (from #{period_data.results[0]})" if period_data.results.x_axis.length < results.length
-
+      else      
+        time_description += "- partial year (from #{period_data.results[0]})" if period_data.results.x_axis.length < results.x_axis.length
         keys = period_data.results.x_axis.map{ |month_year| month_year[0..2]}
 
         new_x_data = results.x_axis.map do |month|
@@ -214,36 +220,16 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   end
 
   def run_charts_for_multiple_schools_and_time_periods(schools, periods)
-    error_messages = []
-    aggregations = []
-
-    # iterate through the time periods aggregating
     schools.each do |school|
       # do it here so it maps to the 1st school
       temperature_adjustment_map(school)
 
       periods.reverse.each do |period| # do in reverse so final iteration represents the x-axis dates
-        begin
-          aggregations.push(
-            {
-              school:       school,
-              period:       period,
-              aggregation:  run_one_aggregation(period, school)
-            }
-          )
-        rescue EnergySparksNotEnoughDataException => e_
-          raise unless chart_config.ignore_single_series_failure?
-        end
+        run_one_aggregation(period, school)
+      rescue EnergySparksNotEnoughDataException => e_
+        raise unless chart_config.ignore_single_series_failure?
       end
     end
-
-    if (schools.length * periods.length) == error_messages.length
-      raise EnergySparksNotEnoughDataException, 'All requested chart aggregations failed :' + error_messages.join(' + ')
-    end
-
-    aggregations = sort_aggregations(aggregations, sort_by) if chart_config.sort_by?
-
-    aggregations.map { |aggregation_description| aggregation_description[:aggregation] }
   end
 
   def run_one_aggregation(one_period, one_school)
@@ -254,9 +240,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     ass = AggregatorSingleSeries.new(one_school, one_chart_config_hash, one_set_of_results)
     @single_series_aggregators.push(ass)
 
-    aggregate = ass.aggregate_period
-
-    aggregate
+    ass.aggregate_period
   end
 
   def create_one_aggregation_chart_config(one_period, one_school)
