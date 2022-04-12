@@ -55,12 +55,15 @@ class RunTargetingAndTracking < RunAdultDashboard
     scenarios = control[:scenarios]
 
     annual_kwh_estimates = calculate_annual_kwh
+    puts "Got here annual estimates:"
+    ap calculate_annual_kwh
 
     scenarios.each do |scenario|
       @school.reset_target_school_for_testing
       set_filenames(scenario)
       set_page_name(scenario)
       deleted_amr_data = configure_scenario(scenario, annual_kwh_estimates)
+      calculate_annual_estimate_before_one_set(stats_key(scenario))
       differing_pages = super(control)
       @@all_stats[stats_key(scenario)] = collect_targeting_and_tracking_stats(scenario[:fuel_types])
       differing_pages.transform_keys!{ |k| :"#{k} #{@filename_type}" }
@@ -74,6 +77,18 @@ class RunTargetingAndTracking < RunAdultDashboard
   end
 
   private
+
+  def calculate_annual_estimate_before_one_set(scen)
+    puts "y" * 100
+    puts scen
+    estimator = TargetingAndTrackingAnnualKwhEstimate.new(@school.aggregated_electricity_meters)
+    x = estimator.calculate_apportioned_annual_estimate
+    ap x
+    estimator = TargetingAndTrackingAnnualKwhEstimate.new(@school.aggregated_heat_meters)
+    x = estimator.calculate_apportioned_annual_estimate
+    ap x
+    puts "z" * 100
+  end
 
   private_class_method def self.column_names(all_stats)
     names = {}
