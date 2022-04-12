@@ -84,19 +84,25 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
     end
   end
 
+  # monthly comparison charts e.g. electricity_cost_comparison_last_2_years_accounting
+  # can be awkward as some years may occasionally have subtely different numbers of months e.g. 12 v. 13
+  # so specific month date matching occurs to match one year with the next
   def merge_monthly_comparison_charts
     raise EnergySparksBadChartSpecification, 'More than one school not supported' if number_of_schools > 1
 
-    single_series_aggregators.reverse.with_index do |period_data, index|
-      @multi_chart_x_axis_ranges.push(period_data.x_axis_date_ranges) # TODO(PH, 1Apr2022) remove after refactor not used
+    single_series_aggregators.reverse.each.with_index do |period_data, index|
+      bucket_date_ranges = period_data.results.x_axis_bucket_date_ranges
+      @multi_chart_x_axis_ranges.push(bucket_date_ranges) # TODO(PH, 1Apr2022) remove after refactor not used
+
+      time_description = results.xbucketor.compact_date_range_description
 
       if index == 0
         results.x_axis = period_data.results.x_axis.map{ |month_year| month_year[0..2]} # MMM YYYY to MMM
+        time_description = number_of_periods <= 1 ? '' : (':' + time_description)
         results.bucketed_data[      time_description] = period_data.results.bucketed_data.values[0]
         results.bucketed_data_count[time_description] = period_data.results.bucketed_data_count.values[0]
       else
-        results.time_description += "- partial year (from #{period_data.results[0]})" if period_data.results.x_axis.length < results.length
-
+        time_description += "- partial year (from #{period_data.results[0]})" if period_data.results.x_axis.length < results.x_axis.length
         keys = period_data.results.x_axis.map{ |month_year| month_year[0..2]}
 
         new_x_data = results.x_axis.map do |month|
