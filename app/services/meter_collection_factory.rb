@@ -16,6 +16,7 @@ class MeterCollectionFactory
 
     school = Dashboard::School.new(
       name: school_data[:name],
+      id: school_data[:id],
       address: school_data[:address],
       floor_area: school_data[:floor_area],
       number_of_pupils: school_data[:number_of_pupils],
