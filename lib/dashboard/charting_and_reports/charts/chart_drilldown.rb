@@ -56,7 +56,7 @@ class ChartManager
 
   def parent_chart_timescale_description(chart_config)
     return nil if !chart_config.key?(:parent_chart_xaxis_config) # || chart_config[:parent_chart_xaxis_config].nil?
-    
+
     # unlimited i.e. long term charts have no timescale, so set to :years
     timescale = chart_config[:parent_chart_xaxis_config].nil? ? :years : chart_config[:parent_chart_xaxis_config]
     ChartTimeScaleDescriptions.interpret_timescale_description(timescale)
@@ -123,7 +123,7 @@ class ChartManager
 
   def seasonal_analysis_drilled_down_to_far?(chart_config)
     chart_config[:series_breakdown] == :heating &&
-    x_axis_drilldown(chart_config) == :datetime
+    x_axis_drilldown(chart_config[:x_axis]) == :datetime
   end
 
   def comparison_chart?(chart_config)
@@ -136,7 +136,7 @@ class ChartManager
     if chart_config.key?(:drilldown_name)
       index = chart_config[:drilldown_name].index(chart_config[:name])
       if !index.nil? && index < chart_config[:drilldown_name].length - 1
-        chart_config[:drilldown_name][index + 1] 
+        chart_config[:drilldown_name][index + 1]
       else
         chart_config[:drilldown_name][0]
       end
