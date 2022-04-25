@@ -1,8 +1,10 @@
 class SchoolDatePeriod
+  class EndDateBeforeStartDate < StandardError; end
   include Logging
 
   attr_reader :type, :title, :start_date, :end_date, :calendar_event_type_id
   def initialize(type, title, start_date, end_date)
+    raise EndDateBeforeStartDate, "period end date #{end_date} before period start date #{start_date}" if end_date < start_date
     @type = type
     @title = title
     @start_date = check_is_date(start_date, 'start date')

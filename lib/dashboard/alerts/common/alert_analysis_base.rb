@@ -48,7 +48,7 @@ class AlertAnalysisBase < ContentBase
         end
       end
     rescue EnergySparksNotEnoughDataException => e
-      log_stack_trace(e)
+      log_stack_trace(e, false)
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
     rescue StandardError => e
       log_stack_trace(e)
@@ -61,12 +61,12 @@ class AlertAnalysisBase < ContentBase
     # !ENV['ENERGYSPARKSTESTMODE'].nil? && ENV['ENERGYSPARKSTESTMODE'] == 'ON'
   end
 
-  def log_stack_trace(e)
+  def log_stack_trace(e, backtrace = true)
     @error_message = e.message
     @backtrace = e.backtrace
 
     logger.warn e.message
-    logger.warn e.backtrace
+    logger.warn e.backtrace if backtrace
   end
 
   private def exclude_backtrace?(message)
@@ -406,6 +406,11 @@ class AlertAnalysisBase < ContentBase
     kwh(start_date, asof_date) * scale_up_to_one_year(meter, asof_date)
   end
 
+  protected def calculate_up_to_annual_kwh(meter, asof_date)
+    start_date = meter_date_one_year_before(meter, asof_date)
+    kwh(start_date, asof_date)
+  end
+
   protected def scale_up_to_one_year(meter, asof_date)
     365.0 / (asof_date - meter_date_one_year_before(meter, asof_date))
   end
@@ -456,7 +461,6 @@ class AlertAnalysisBase < ContentBase
       AlertElectricityBaseloadVersusBenchmark                 => 'elbb',
       AlertGasAnnualVersusBenchmark                           => 'gsba',
       AlertHeatingComingOnTooEarly                            => 'hthe',
-      AlertHeatingOnOff                                       => 'htoo',
       AlertHeatingSensitivityAdvice                           => 'htsa',
       AlertHotWaterEfficiency                                 => 'hotw',
       AlertImpendingHoliday                                   => 'ihol',
@@ -504,7 +508,11 @@ class AlertAnalysisBase < ContentBase
       AlertCommunityPreviousHolidayComparisonElectricity      => 'cphe',
       AlertCommunityPreviousHolidayComparisonGas              => 'cphg',
       AlertCommunityPreviousYearHolidayComparisonElectricity  => 'cpye',
-      AlertCommunityPreviousYearHolidayComparisonGas          => 'cpyg'
+      AlertCommunityPreviousYearHolidayComparisonGas          => 'cpyg',
+      AlertTurnHeatingOff                                     => 'htof',
+      AlertSeasonalHeatingSchoolDays                          => 'shsd',
+      AlertSeasonalHeatingSchoolDaysStorageHeaters            => 'shsh',
+      AlertTurnHeatingOffStorageHeaters                       => 'tosh'
     }
   end
 

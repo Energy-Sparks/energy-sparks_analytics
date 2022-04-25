@@ -1,4 +1,5 @@
 class TargetDates
+  class TargetBeforeExistingDataStartBackfillNotSupported < StandardError; end
   class TargetDateBeforeFirstMeterStartDate < StandardError; end
   include Logging
   DAYSINYEAR = 365
@@ -9,6 +10,14 @@ class TargetDates
 
   def to_s
     serialised_dates_for_debug
+  end
+
+  def check_consistent
+    # TODO(PH, 2Mar2022) - could do with further checks for date self-consistency and support
+    # TODO can be removed now?
+    if target_start_date < original_meter_start_date
+      raise TargetBeforeExistingDataStartBackfillNotSupported, "Target start date #{target_start_date} must be after first meter reading #{original_meter_start_date}"
+    end
   end
 
   def target_start_date
@@ -166,7 +175,7 @@ class TargetDates
   def percentage_synthetic_data_in_date_range(start_date, end_date)
     total_days = end_date - start_date + 1
     synthetic_days = (start_date..end_date).count{ |date| date < benchmark_start_date && date >= synthetic_benchmark_start_date }
-    (synthetic_days / total_days).to_f 
+    (synthetic_days / total_days).to_f
   end
 
   def final_holiday_date
@@ -223,7 +232,7 @@ class TargetDates
     original_target_start_date != target_start_date
   end
 
-  def calculate_target_start_date   
+  def calculate_target_start_date
     t_date = if @original_meter.annual_kwh_estimate.nan? &&
       @target.first_target_date - DAYSINYEAR < @original_meter.amr_data.start_date
       logger.info "Moving target start date forward to #{@original_meter.amr_data.start_date + DAYSINYEAR} as target not set"

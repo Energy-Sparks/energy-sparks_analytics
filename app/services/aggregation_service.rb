@@ -43,7 +43,7 @@ class AggregateDataService
 
       set_post_aggregation_state_on_all_meters
     }
-    calc_text = "Calculated meter aggregation for |#{@meter_collection.name}| in |#{bm.round(3)}| seconds"
+    calc_text = "Calculated meter aggregation for |#{sprintf('%-35.35s', @meter_collection.name)}| in |#{bm.round(3)}| seconds"
 
     puts calc_text unless Object.const_defined?('Rails')
 

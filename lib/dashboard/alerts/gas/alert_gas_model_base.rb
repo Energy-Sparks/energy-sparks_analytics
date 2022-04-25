@@ -126,8 +126,9 @@ class AlertGasModelBase < AlertGasOnlyBase
     AnalyseHeatingAndHotWater::HeatingModel.average_non_school_day_heating_days
   end
 
-  protected def enough_data_for_model_fit
-    @heating_model = calculate_model(@asof_date) if @heating_model.nil?
+  protected def enough_data_for_model_fit(asof_date = @asof_date)
+    # not sure caching is right here potentially for mismatch on asof_dates in analystics testing
+    @heating_model = calculate_model(asof_date) if @heating_model.nil?
     @heating_model.enough_samples_for_good_fit
   rescue EnergySparksNotEnoughDataException, NoMethodError => e
     false

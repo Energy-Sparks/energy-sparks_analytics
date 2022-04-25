@@ -174,7 +174,7 @@ module Series
       meter.amr_data.days_kwh_x48(date, data_type, community_use: community_use)
     end
 
-    def amr_data_one_day(meter, date, data_type = :kwh) 
+    def amr_data_one_day(meter, date, data_type = :kwh)
       meter.amr_data.one_day_kwh(date, data_type, community_use: community_use)
     end
 
@@ -619,21 +619,43 @@ module Series
 
   #=====================================================================================================
   class HeatingNonHeating < ModelManagerBase
-    HEATINGDAY      = 'Heating Day'.freeze
-    NONHEATINGDAY   = 'Hot Water (& Kitchen)'.freeze
+    HEATINGDAY              = 'Heating on in cold weather'.freeze
+    NONHEATINGDAY           = 'Hot Water (& Kitchen)'.freeze
+    HEATINGDAYWARMWEATHER   = 'Heating on in warm weather'.freeze
 
-    def series_names;  [HEATINGDAY, NONHEATINGDAY]; end
+    def series_names;  [HEATINGDAYWARMWEATHER, HEATINGDAY, NONHEATINGDAY]; end
 
-    def day_breakdown(d1, d2)
+    def day_breakdown(start_date, end_date)
       heating_data = default_breakdown
-      # meter = (!electricity_meter.nil? && electricity_meter.storage_heater?) ? electricity_meter : heat_meter
+  
+      (start_date..end_date).each do |date|
+        begin
+          breakdown_data = heating_model.heating_breakdown(date, kwh_cost_or_co2)
 
-      (d1..d2).each do |date|
-        type = heating_model.heating_on?(date) ? HEATINGDAY : NONHEATINGDAY
-        heating_data[type] += amr_data_one_day(meter, date, kwh_cost_or_co2)
+          breakdown_data.each do |heating_type, val_kwh_co2_or_£|
+            readable_type = humanize_heating_type(heating_type)
+            heating_data[readable_type] += val_kwh_co2_or_£
+          end
+        rescue StandardError => e
+          logger.error e
+          logger.error "Warning: unable to calculate heating breakdown on #{date}"
+        end
       end
 
       heating_data
+    end
+
+    private
+
+    def humanize_heating_type(type)
+      case type
+      when :heating_warm_weather
+        HEATINGDAYWARMWEATHER
+      when :heating_cold_weather
+        HEATINGDAY
+      when :heating_off
+        NONHEATINGDAY
+      end
     end
   end
 

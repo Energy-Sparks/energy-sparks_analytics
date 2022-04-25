@@ -1,4 +1,5 @@
 require_relative './logger_control.rb'
+require_relative './monkey_patched_analytics_test_environment.rb'
 # require_relative './test_directory_configuration.rb'
 require 'ruby-prof'
 $logger_format = 1
@@ -71,7 +72,7 @@ class RunTests
 
   private
 
-  def load_school(school_name, cache_school = false)
+  def load_school(school_name, cache_school = true)
     override = @meter_attribute_overrides || {}
     SchoolFactory.instance.load_school(@meter_readings_source, school_name, meter_attributes_overrides: override, cache: cache_school == true)
   end

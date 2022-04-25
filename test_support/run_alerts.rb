@@ -27,7 +27,7 @@ class RunAlerts < RunAnalyticsTest
                   compare_results: {
                     summary:              :differences, # true || false || :detail || :differences
                     report_if_differs:    true,
-                    methods:              %i[raw_variables_for_saving front_end_template_data],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
+                    methods:              %i[raw_variables_for_saving front_end_template_data html_template_variables],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
                     class_methods:        %i[front_end_template_variables],
                   },
   
@@ -40,10 +40,41 @@ class RunAlerts < RunAnalyticsTest
     }
   end
 
+  def self.run_heating_on_alert_seasonal_tests(asof_date, schools_list)
+    seasonal_test_datesand_temperatures(asof_date).map do |config|
+      {
+          schools:  schools_list,
+          alerts:   {
+            alerts: [ AlertTurnHeatingOff ],
+            control: {
+              asof_date:  config[:asof_date],
+              forecast:   config[:forecast]
+            },
+          }
+        }
+      end
+  end
+
+  def self.seasonal_test_datesand_temperatures(asof_date)
+    y = asof_date.year
+    dates =        [ Date.new(y, 7, 1), Date.new(y, 10, 1), Date.new(y, 2, 1), Date.new(y, 5, 1) ]
+    temperatures = [ 20.0,              15.0,               5.0,                18.0 ]
+    dates.map.with_index do |date, i|
+      config = {
+        asof_date: date > asof_date ? Date.new(date.year - 1, date.month, date.day) : date,
+        forecast: { temperature: temperatures[i] }
+      }
+    end
+  end
+
   def run(alerts, control, asof_date)
+    ENV['ENERGYSPARKSTODAY'] = asof_date.to_s # allow constructor to know run date
+
     alerts = AlertAnalysisBase.all_available_alerts if alerts.nil?
 
     @excel_tab_names = class_names_to_excel_tab_names(alerts)
+
+    set_forecast(control[:forecast], asof_date)
 
     alerts.sort_by(&:name).each do |alert_class|
 
@@ -66,13 +97,26 @@ class RunAlerts < RunAnalyticsTest
 
       print_results(alert_class, alert, control[:outputs])
 
+      html = alert.format_variables_as_html
+
+      save_formatted_results(alert.class.name, html)
+
       save_to_yaml_and_compare_results(alert_class, alert, control, asof_date)
       save_class_methods_to_yaml_and_compare_results(alert_class, alert, control, asof_date)
-      
+
       log_results(alert, control)
 
       save_to_excel if control.dig(:charts, :write_to_excel) == true
+
+      unset_forecast
     end
+  end
+
+  def save_formatted_results(type, html)
+    filename = "Alerts - #{type}.hmtl"
+    html_file = HtmlFileWriter.new(filename, results_sub_directory_type: @results_sub_directory_type)
+    html_file.write_header_footer('', html, nil)
+    html_file.close
   end
 
   private
@@ -162,7 +206,24 @@ class RunAlerts < RunAnalyticsTest
     return if results.nil?
 
     chart_results = results.transform_keys{ |k| "chart_#{k}".to_sym }
-    
+
     compare_results(control, alert_class.name, chart_results, asof_date)
+  end
+
+  # pass test forecast through as environment variables so the production,
+  # front end code doesn't know about this interface being passed through
+  def set_forecast(forecast, asof_date)
+    return if forecast.nil?
+
+    dates = { 
+      start_date: forecast[:start_date] || asof_date,
+      end_date:   forecast[:end_date]   || asof_date + 14
+    }
+
+    ENV['ENERGYSPARKSFORECAST'] = YAML.dump(forecast.merge(dates))
+  end
+
+  def unset_forecast
+    ENV.delete('ENERGYSPARKSFORECAST')
   end
 end

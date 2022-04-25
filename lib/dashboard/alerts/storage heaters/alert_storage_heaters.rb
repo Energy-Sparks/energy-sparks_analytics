@@ -3,6 +3,8 @@ require_relative './../gas/boiler control/alert_thermostatic_control.rb'
 require_relative './../gas/boiler control/alert_school_heating_days.rb'
 require_relative './../gas/boiler control/alert_heating_day_base.rb'
 require_relative './../gas/boiler control/alert_heating_hotwater_on_during_holiday.rb'
+require_relative './../gas/boiler control/alert_seasonal_heating_schooldays.rb'
+require_relative './../gas/boiler control/alert_heating_off.rb'
 require_relative './../common/alert_targets.rb'
 
 class AlertStorageHeaterAnnualVersusBenchmark < AlertGasAnnualVersusBenchmark
@@ -47,6 +49,29 @@ class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
 
   def group_by_week_day_type_chart
     :alert_group_by_week_storage_heaters
+  end
+end
+
+class AlertSeasonalHeatingSchoolDaysStorageHeaters < AlertSeasonalHeatingSchoolDays
+  include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
+  def initialize(school)
+    super(school, :storage_heater_heating_days)
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+  end
+
+  def heating_on_off_chart
+    :heating_on_by_week_with_breakdown_storage_heaters
+  end
+end
+
+class AlertTurnHeatingOffStorageHeaters < AlertTurnHeatingOff
+  include AlertGasToStorageHeaterSubstitutionMixIn
+  include ElectricityCostCo2Mixin
+  def initialize(school)
+    super(school, :storage_heater_heating_days)
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
+    set_relevance
   end
 end
 

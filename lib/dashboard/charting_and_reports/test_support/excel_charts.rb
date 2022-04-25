@@ -124,7 +124,7 @@ class ExcelCharts
 
     (first_data_column..last_data_column).each do |col_num|
       col_name = column_number_to_name_map[col_num]
-      colour_hex = @colours.series_colour(col_name) unless col_name.nil?
+      # colour_hex = @colours.series_colour(col_name) unless col_name.nil?
       name_range = cell_reference(worksheet.name, col_num, 1, col_num, 1)
       value_range = cell_reference(worksheet.name, col_num, 2, col_num, max_data_rows + 1)
 
@@ -143,7 +143,7 @@ class ExcelCharts
           end
         end
       end
-      args.merge!(fill: { color: colour_hex }, line: { color: colour_hex }) unless [:pie, :scatter].include?(chart_type)
+      # args.merge!(fill: { color: colour_hex }, line: { color: colour_hex }) unless [:pie, :scatter].include?(chart_type)
 
       chart.add_series(args) unless col_name.nil?
     end
@@ -192,7 +192,7 @@ class ExcelCharts
   def add_chart(worksheet, graph_definition, data_col_offset, chart_row_offset)
     chart2 = nil
 
-    @colours = ChartColour.new(graph_definition)
+    # @colours = ChartColour.new(graph_definition)
 
     logger.error "Error: null graph definition" if graph_definition.nil?
 

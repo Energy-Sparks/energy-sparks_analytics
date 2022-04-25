@@ -50,7 +50,7 @@ module AnalyseHeatingAndHotWater
       logger.info "create_and_fit_model start heat #{heating_model_type} hw #{non_heating_model_type} #{period.start_date} to #{period.end_date}"
       # use composite key to index model for caching
       model_type = { heat_model: heating_model_type, period: period, years: allow_more_than_1_year, non_heating_model: non_heating_model_type}
-      
+
       unless @processed_model_overrides # deferred until meter available
         @model_overrides = HeatingModelOverrides.new(@meter)
         @processed_model_overrides = true
@@ -96,6 +96,7 @@ module AnalyseHeatingAndHotWater
         raise EnergySparksUnexpectedStateException.new("Unexpected model_type #{model_type}")
       end
       logger.info "create_and_fit_model end"
+
       @models[model_type]
     end
 
@@ -150,7 +151,7 @@ module AnalyseHeatingAndHotWater
         return simple_model if simple_model.enough_samples_for_good_fit && !thermal_mass_model.enough_samples_for_good_fit
 
         if !simple_model.enough_samples_for_good_fit
-          raise EnergySparksNotEnoughDataException, "Not enough samples for model to provide good regression fit simple: #{simple_model.winter_heating_samples} massive: #{thermal_mass_model.winter_heating_samples} mpan or mprn #{@meter.mpan_mprn}"
+          raise EnergySparksNotEnoughDataException, "Not enough samples for model to provide good regression fit simple: #{simple_model.winter_heating_samples} massive: #{thermal_mass_model.winter_heating_samples} mpan or mprn #{@meter.mpan_mprn} period: #{period.start_date} to #{period.end_date}"
         end
         thermal_mass_model.standard_deviation_percent < simple_model.standard_deviation_percent ? thermal_mass_model : simple_model
       end
@@ -451,7 +452,7 @@ module AnalyseHeatingAndHotWater
           avg_temp = temperatures.average_temperature(date)
           temperature_sensitivity_kwh += temperature_sensitivity_kwh_per_c * [20.0 - avg_temp, 0.0].max
           base_hot_water_usage += base_hotwater_usage_at_20c
-          
+
           unless boiler_off?(date)
             if heating_on?(date)
               total_heating_on_kwh += @amr_data.one_day_kwh(date)
@@ -1065,6 +1066,87 @@ module AnalyseHeatingAndHotWater
 
     def boiler_on?(date)
       !@amr_data.date_missing?(date) && @amr_data.one_day_kwh(date) >= @max_zero_daily_kwh
+    end
+
+    # see Energy Sparks\Energy Sparks Project Team Documents\Analytics\Modelling\Reassessment of Seasonal Heating Control.gdoc
+    # return as method as could eventually be dynamic, but hard code from CONSTANT for the moment
+    BALANCE_POINT_TEMPERATURE = 11.0 # used by alerts
+
+    def balance_point_temperature(_date)
+      BALANCE_POINT_TEMPERATURE
+    end
+
+    def heating_on_seasonal_type(date)
+      if heating_on?(date)
+        temperature = temperatures.average_temperature(date)
+        if temperature > balance_point_temperature(date)
+          :heating_warm_weather
+        else
+          :heating_cold_weather
+        end
+      else
+        :heating_off
+      end
+    end
+
+    def percent_hot_water(date)
+      return 0.0 if @models[:summer_occupied_all_days].nil?
+
+      total_usage = @amr_data.one_day_kwh(date)
+
+      return nil if total_usage.zero?
+
+      hot_water_kwh = @models[:summer_occupied_all_days].predicted_kwh_temperature(temperatures.average_temperature(date))
+
+      percent = hot_water_kwh / total_usage
+
+      [[percent, 0.0].max, 1.0].min
+    end
+
+    def heating_on_seasonal_analysis(start_date: [@amr_data.end_date - 365, @amr_data.start_date].max, end_date: @amr_data.end_date, split_out_hotwater: true)
+      analysis = Hash.new { |h, k| h[k] = Hash.new { |h, k| h[k] = Hash.new { |h, k| h[k] = 0.0 } } }
+
+      (start_date..end_date).each do |date|
+        day_type  = holidays.day_type(date)
+        heat_type = heating_on_seasonal_type(date)
+
+        %i[kwh £ co2].each do |data_type|
+          if split_out_hotwater
+            bdown = heating_breakdown(date, data_type)
+            bdown.each do |heating_type, val|
+              analysis[day_type][heating_type][data_type] += val
+            end
+          else
+            analysis[day_type][heat_type][data_type] += @amr_data.one_day_kwh(date, data_type)
+          end
+        end
+
+        analysis[day_type][heat_type][:days] += 1
+        analysis[day_type][heat_type][:degree_days] += temperatures.degree_days(date)
+      end
+
+      analysis
+    end
+
+    def heating_breakdown(date, data_type)
+      heat_type = heating_on_seasonal_type(date)
+      total = @amr_data.one_day_kwh(date, data_type)
+
+      if heat_type == :heating_off
+        {
+          heating_cold_weather: 0.0,
+          heating_off:          total
+        }
+      else
+        # co2 and £ datatype linear for gas so kWh based disaggregation
+        # acceptable, storage heaters not relevant as no HW
+        pct_hw = percent_hot_water(date)
+
+        {
+          heat_type =>   total * (1.0 - pct_hw),
+          heating_off:   total * pct_hw
+        }
+      end
     end
 
     def heating_on?(date)
