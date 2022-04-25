@@ -110,6 +110,7 @@ class RunAnalyticsTest
     [
       management_dashboard_charts,
       public_dashboard_charts_for_school,
+      other_charts,
       targeting_and_tracking_charts
     ].inject(:merge)
   end
@@ -122,6 +123,14 @@ class RunAnalyticsTest
         management_dashboard_group_by_week_electricity
         management_dashboard_group_by_week_gas
         management_dashboard_group_by_week_storage_heater
+      ]
+    }
+  end
+
+  def self.other_charts
+    {
+      'Other' => %i[
+        electricity_cost_comparison_last_2_years_accounting
       ]
     }
   end

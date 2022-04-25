@@ -273,7 +273,7 @@ class ChartManager
     # used by front end via targets_service.rb
     targeting_and_tracking_weekly_electricity_to_date_cumulative_line: {
       name:                         'Cumulative progress versus target',
-      target:                       {calculation_type: :day, extend_chart_into_future: false},
+      target:                       {calculation_type: :day, extend_chart_into_future: true},
       ignore_single_series_failure: true,
       inherits_from:                :targeting_and_tracking_weekly_electricity_one_year_cumulative_line
     },
@@ -289,12 +289,12 @@ class ChartManager
       nullify_trailing_zeros:       true,
       timescale:                    :up_to_a_year,
       ignore_single_series_failure: true,
-      target:                       {calculation_type: :day, extend_chart_into_future: false},
+      target:                       {calculation_type: :day, extend_chart_into_future: true},
       inherits_from:                :group_by_week_electricity
     },
     targeting_and_tracking_weekly_electricity_one_year_line: {
       name:           'Weekly progress versus target to date',
-      target:             {calculation_type: :day, extend_chart_into_future: true},
+      target:             {calculation_type: :day, extend_chart_into_future: false},
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
     },
     targeting_and_tracking_standard_group_by_week_electricity: {
@@ -625,77 +625,9 @@ class ChartManager
       series_breakdown: :none,
       yaxis_units:      :kw
     },
-    group_by_week_electricity_school_comparison: {
-      inherits_from:    :group_by_week_electricity,
-      name:             'By Week: Electricity - School Comparison',
-      series_breakdown: :none,
-      chart1_subtype:   nil,
-      yaxis_scaling:    :per_floor_area,
-      schools: [
-        { urn: 109089 },  # Paulton Junior
-        { urn: 109328 },  # St Marks
-        { urn: 109005 },  # St Johns
- #       { urn: 109081 }   # Castle
-      ]
-    },
-    group_by_week_electricity_school_comparison_with_average: {
-      inherits_from:    :group_by_week_electricity,
-      name:             'By Week: Electricity - School Comparison',
-      series_breakdown: :none,
-      chart1_subtype:   nil,
-      yaxis_scaling:    :per_floor_area,
-      schools: [
-        { urn: 109089 },  # Paulton Junior
-        { urn: 109328 },  # St Marks
-        { urn: 109005 },  # St Johns
-        { urn: 109081 },  # Castle
-        :average
-      ]
-    },
-    benchmark_school_comparison: {
-      name:             'Benchmark - School Comparison - Annual Electricity and Gas',
-      inherits_from:    :benchmark,
-      yaxis_scaling:    :per_floor_area,
-      chart1_subtype:   nil,
-      sort_by:          [ { school: :asc }, { time: :asc } ],
-      group_by:         [:fuel, :school],
-      # timescale:        :year,
-# inject:           nil,
-      schools: [
-        { urn: 109089 },  # Paulton Junior
-        { urn: 109328 },  # St Marks
-        { urn: 109005 },  # St Johns
-        { urn: 109081 }   # Castle
-      ]
-    },
     group_by_week_electricity_school_comparison_line: {
       inherits_from:    :group_by_week_electricity_school_comparison,
       chart1_type:      :line
-    },
-    electricity_longterm_trend_school_comparison: {
-      inherits_from:    :electricity_longterm_trend,
-      name:             'Electricity: long term trends school comparison',
-      series_breakdown: :none,
-      chart1_subtype:   nil,
-      yaxis_scaling:    :per_floor_area,
-      schools: [
-        { urn: 109089 },  # Paulton Junior
-        { urn: 109328 },  # St Marks
-        { urn: 109005 },  # St Johns
-        { urn: 109081 }   # Castle
-      ]
-    },
-    intraday_line_school_days_school_comparison: {
-      inherits_from:    :intraday_line_school_days,
-      name:             'Electricity: comparison of last 2 years and school comparison',
-      series_breakdown: :none,
-      yaxis_scaling:    :per_200_pupils,
-      schools: [
-        { urn: 109089 },  # Paulton Junior
-        { urn: 109328 },  # St Marks
-        { urn: 109005 },  # St Johns
-        { urn: 109081 }   # Castle
-      ]
     },
     group_by_week_electricity_unlimited: {
       name:             'By Week: Electricity (multi-year)',

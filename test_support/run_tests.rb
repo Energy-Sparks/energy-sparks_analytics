@@ -368,6 +368,7 @@ class RunTests
     ENV['ENERGYSPARKSTESTMODE'] = 'ON'
 
     schools_list.each do |school_name|
+      puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
       school = load_school(school_name)
