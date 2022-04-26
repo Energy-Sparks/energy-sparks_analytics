@@ -11,6 +11,13 @@ class SchoolFactory
     @school_cache ||= {}
     return @school_cache[filename_prefix] if @school_cache.key?(filename_prefix)
 
+    unless cache
+      puts "Got here running garbage collector"
+      RecordTestTimes.instance.record_time(filename_prefix, 'garbage collect', ''){
+        GC.start
+      }
+    end
+
     school = load_and_build_school(source, filename_prefix, meter_attributes_overrides)
 
     @school_cache[filename_prefix] = school if cache

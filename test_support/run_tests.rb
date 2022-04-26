@@ -93,8 +93,8 @@ class RunTests
     DownloadSheffieldSolarPVData.new.download
   end
 
-  def banner(title)
-    '=' * 60 + title.ljust(60, '=')
+  def banner(title, width = 60)
+    '=' * width + title.ljust(width, '=')
   end
 
   def run_reports(chart_list, control)
@@ -180,7 +180,7 @@ class RunTests
     differences = {}
     failed_charts = []
     schools_list.sort.each do |school_name|
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       puts "=" * 100
       puts "Running for #{school_name}"
       start_profiler
@@ -189,6 +189,8 @@ class RunTests
       stop_profiler('adult dashboard')
       failed_charts += test.failed_charts
     end
+    RecordTestTimes.instance.print_stats
+    RecordTestTimes.instance.save_summary_stats_to_csv
     run_class.summarise_differences(differences, control) if !control[:summarise_differences].nil? && control[:summarise_differences]
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
@@ -196,7 +198,7 @@ class RunTests
   def run_management_summary_tables(combined_html_output_file, control)
     html = ""
     schools_list.sort.each do |school_name|
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       puts "=" * 30
       puts "running for summary management table for #{school_name}"
       start_profiler
@@ -212,7 +214,7 @@ class RunTests
 
   def run_equivalences(control)
     schools_list.sort.each do |school_name|
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       puts "=" * 100
       puts "Running for #{school_name}"
       test = RunEquivalences.new(school)
@@ -345,10 +347,11 @@ class RunTests
     dates = RunAlerts.convert_asof_dates(control[:asof_date])
 
     schools_list.each do |school_name|
+      STDERR.puts banner(school_name)
       @current_school_name = school_name
       dates.each do |asof_date|
         reevaluate_log_filename
-        school = load_school(school_name)
+        school = load_school(school_name, control[:cache_school])
         start_profiler
         alerts = RunAlerts.new(school)
         alerts.run(alert_list, control, asof_date)

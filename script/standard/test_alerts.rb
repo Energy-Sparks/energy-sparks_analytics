@@ -2,15 +2,15 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
-asof_date = Date.new(2022, 3, 3)
-schools = ['marksb*']
+asof_date = Date.new(2022, 4, 10)
+schools = ['a*']
 
 overrides = {
-  schools:  ['*'],
-  alerts:   { alerts: nil, control: { asof_date: Date.new(2022, 2, 1) } }
-  # alerts:   { alerts: [ AlertElectricityTarget1Week, AlertGasTarget1Week ], control: { asof_date: Date.new(2022, 2, 1) } }
+  schools:  schools,
+  control: { cache_school: false },
+  alerts:   { alerts: nil, control: { asof_date: asof_date }  },
+  # alerts:   { alerts: [ AlertHotWaterEfficiency ], control: { asof_date: asof_date } }
 }
-
 
 script = RunAlerts.default_config.deep_merge(overrides)
 

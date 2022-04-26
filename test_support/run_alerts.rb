@@ -77,8 +77,8 @@ class RunAlerts < RunAnalyticsTest
     set_forecast(control[:forecast], asof_date)
 
     alerts.sort_by(&:name).each do |alert_class|
-
       alert = alert_class.new(@school)
+      puts "Got here doing #{alert_class.name}"
 
       unless alert.meter_readings_up_to_date_enough?
         log_result(alert, 'Meter out of date') # not stored for stats as code runs on to subsequent call in loop
@@ -86,6 +86,11 @@ class RunAlerts < RunAnalyticsTest
 
       unless alert.valid_alert?
         log_result(alert, 'Invalid alert before analysis', control[:log].include?(:invalid_alerts))
+        next
+      end
+
+      unless enough_data?(alert)
+        log_result(alert, 'Invalid alert before analysis - not enough data', control[:log].include?(:invalid_alerts))
         next
       end
 
@@ -123,6 +128,12 @@ class RunAlerts < RunAnalyticsTest
 
   def excel_variation
     '- alerts charts test'
+  end
+
+  def enough_data?(alert)
+    alert.enough_data != :not_enough
+  rescue => e
+    puts "Failure checking for enough data #{e.message} #{alert.class.name}"
   end
 
   def save_class_methods_to_yaml_and_compare_results(alert_class, alert, control, asof_date)
