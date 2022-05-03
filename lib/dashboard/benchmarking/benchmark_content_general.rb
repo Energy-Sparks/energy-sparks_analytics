@@ -424,7 +424,7 @@ module Benchmarking
         <p>
           The most common reduction is due to some or all of kitchen fridges and
           freezers being turned off over the summer.
-          Our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a>
+          Our <a href="https://energysparks.uk/case_studies/1/link" target ="_blank">case study</a>
           on this demonstrates that it is possible to get a short return on investment
           replacing old inefficient refrigeration with more efficient modern equipment.
           It is also good practice to empty and turn off refrigeration over the summer holidays
