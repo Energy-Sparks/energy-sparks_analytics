@@ -54,7 +54,7 @@ module Benchmarking
           <li>
             ICT servers - can be inefficient, newer ones can often payback their
             capital costs in electricity savings within a few years, see our
-            <a href="https://blog.energysparks.uk/wp-content/uploads/2019/11/Energy-Sparks-Case-Study-4-Trinity-School-ICT-Servers.pdf" target ="_blank">case study</a>
+            <a href="https://energysparks.uk/case_studies/4/link" target ="_blank">case study</a>
             on this
           </li>
           <li>
@@ -63,8 +63,8 @@ module Benchmarking
           </li>
           <li>
             Fridges and freezers, particularly inefficient commercial kitchen appliances, which if
-            replaced can provide a very short payback on investment (see 
-            our <a href="https://cdn.energysparks.uk/static-assets/Energy_Sparks_Case_Study_1_-_Freshford_Freezer-b6f1a27e010c019004aa72929a9f8663c85ecb0d4723f0fe4de1798b26e6afde.pdf" target ="_blank">case study</a> on this).
+            replaced can provide a very short payback on investment (see
+            our <a href="https://energysparks.uk/case_studies/1/link" target ="_blank">case study</a> on this).
           </li>
           <li>
             Hot water heaters and boilers left on outside school hours - installing a timer or getting
@@ -84,7 +84,7 @@ module Benchmarking
           This benchmark compares the energy consumed per pupil each year in &pound;.
         </p>
         <p>
-          This benchmark is best used for economic comparisons. 
+          This benchmark is best used for economic comparisons.
           <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
         </p>
       )
@@ -360,7 +360,7 @@ module Benchmarking
     end
   end
 
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentPeakElectricityPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -387,7 +387,7 @@ module Benchmarking
       )
     end
   end
-    #=======================================================================================  
+    #=======================================================================================
     class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
       include BenchmarkingNoTextMixin
       private def introduction_text
@@ -441,7 +441,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
     protected def table_introduction_text
-      %q( 
+      %q(
         <p>
           Large domestic A++ rated fridges
           and freezers typically use £40 of electricity per year each.
@@ -479,11 +479,11 @@ module Benchmarking
       )
     end
     protected def table_introduction_text
-      %q( 
+      %q(
         <p>
           Schools with negative 'Saving if matched exemplar school' have
           heating consumption below that of the best schools, which is good. For
-          schools with storage heaters, heating costs are calculated using 
+          schools with storage heaters, heating costs are calculated using
           electricity tariff prices (differential/economy-7 if schools is on such a tariff) versus
           costs of exemplar schools using gas heating or an air source heat pump.
         </p>
@@ -524,7 +524,7 @@ module Benchmarking
           This chart shows the breakdown of when schools are using gas
           - school day open: when the school is open to pupils and staff,
           school day closed: when the school is closed to pupils and
-          staff overnight, weekends and evenings. 
+          staff overnight, weekends and evenings.
         </p>
         <p>
           Most schools are unoccupied for about 85% of the year;
@@ -551,7 +551,7 @@ module Benchmarking
       )
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentStorageHeaterOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -578,7 +578,7 @@ module Benchmarking
       )
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentThermostaticSensitivity < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -597,7 +597,7 @@ module Benchmarking
       )
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentLengthOfHeatingSeasonDeprecated < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -620,7 +620,7 @@ module Benchmarking
       )
     end
   end
-    #=======================================================================================  
+    #=======================================================================================
     class BenchmarkContentHeatingInWarmWeather < BenchmarkContentBase
       include BenchmarkingNoTextMixin
       private def introduction_text
@@ -645,7 +645,7 @@ module Benchmarking
         )
       end
     end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentThermostaticControl < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -689,7 +689,7 @@ module Benchmarking
       )
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentHotWaterEfficiency < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -796,7 +796,7 @@ module Benchmarking
     end
 
     private
-    
+
     def optimum_start_content(school_ids:, filter:)
       content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
       db = @benchmark_manager.benchmark_database
@@ -850,7 +850,7 @@ module Benchmarking
     end
 
     private
-    
+
     def full_energy_change_breakdown(school_ids:, filter:)
       content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
       db = @benchmark_manager.benchmark_database
@@ -893,7 +893,7 @@ module Benchmarking
     end
 
     private
-    
+
     def full_co2_breakdown(school_ids:, filter:)
       content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
       db = @benchmark_manager.benchmark_database
@@ -921,7 +921,7 @@ module Benchmarking
     end
 
     protected def table_introduction_text
-      %q( 
+      %q(
         <p>
           The solar PV CO2 columns in the table below are emissions the school saves from consuming
           electricity produced by its solar panels, and the benefit to the national grid from exporting
@@ -952,7 +952,7 @@ module Benchmarking
     end
 
     protected def table_introduction_text
-      %q( 
+      %q(
         <p>
           The &apos;standard deviation&apos; column shows over how many hours
           the starting time has varied over the last year. If this is more than
@@ -980,7 +980,7 @@ module Benchmarking
       )
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentElectricityMeterConsolidation < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1020,7 +1020,7 @@ module Benchmarking
       )
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentGasMeterConsolidation < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1045,7 +1045,7 @@ module Benchmarking
       )
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentDifferentialTariffOpportunity < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1072,7 +1072,7 @@ module Benchmarking
       )
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1088,7 +1088,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentChangeInElectricityBetweenLast2Holidays < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1101,7 +1101,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentChangeInElectricityBetween2HolidaysYearApart < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1118,7 +1118,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1134,7 +1134,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentChangeInGasBetweenLast2Holidays < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1158,7 +1158,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkContentChangeInGasBetween2HolidaysYearApart < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1177,7 +1177,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkHeatingHotWaterOnDuringHolidayBase < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -1199,7 +1199,7 @@ module Benchmarking
   class BenchmarkStorageHeatersOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
     def fuel; 'storage heeaters' end
   end
-  #=======================================================================================  
+  #=======================================================================================
   class BenchmarkEnergyConsumptionInUpcomingHolidayLastYear < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
