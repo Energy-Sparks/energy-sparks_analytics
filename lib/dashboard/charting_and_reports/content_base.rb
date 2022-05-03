@@ -56,7 +56,7 @@ class ContentBase
     header  = ['Variable', 'Value']
     units   = [String,     String ]
 
-    tb_format = tables.map { |k, t| "<h3>#{k}</h3>" + t }.join(' ')
+    tb_format = tables.map { |k, t| "<h3>#{k}</h3>" + (t || "<b>Nil table</b>") }.join(' ')
 
     HtmlTableFormatting.new(header, scalars.to_a, units).html + tb_format
   end

@@ -3,7 +3,7 @@
 class AlertAdditionalPrioritisationData < AlertAnalysisBase
   include Logging
   attr_reader :days_to_next_holiday, :days_from_last_holiday
-  attr_reader :average_temperature_last_week, :average_forecast_temperature_next_week
+  attr_reader :average_temperature_last_week, :average_forecast_temperature_next_week_deprecated
   attr_reader :annual_electricity_kwh, :annual_gas_kwh, :annual_storage_heater_kwh
   attr_reader :annual_electricity_£, :annual_gas_£, :annual_storage_heater_£
   attr_reader :degree_days_15_5C_domestic
@@ -77,7 +77,7 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
       units: Float,
       priority_code:  'AVGT'
     },
-    average_forecast_temperature_next_week: {
+    average_forecast_temperature_next_week_deprecated: {
       description: 'average forecast temperature next week',
       units: Float,
       priority_code:  'FAVT'
@@ -142,8 +142,8 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     @days_to_next_holiday = calculate_days_to_next_holiday(asof_date)
     @days_from_last_holiday = calculate_days_to_previous_holiday(asof_date)
     temperatures = AverageHistoricOrForecastTemperatures.new(@school)
-    @average_temperature_last_week = temperatures.calculate_average_temperature_for_week_following(asof_date - 7)
-    @average_forecast_temperature_next_week = temperatures.calculate_average_temperature_for_week_following(asof_date)
+    # @average_temperature_last_week = temperatures.calculate_average_temperature_for_week_following(asof_date - 7)
+    # @average_forecast_temperature_next_week = temperatures.calculate_average_temperature_for_week_following(asof_date)
 
     @annual_electricity_kwh     = annual_kwh(@school.aggregated_electricity_meters, :electricity,     asof_date, :kwh)
     @annual_gas_kwh             = annual_kwh(@school.aggregated_heat_meters,        :gas,             asof_date, :kwh)

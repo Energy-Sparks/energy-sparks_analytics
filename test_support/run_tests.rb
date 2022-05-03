@@ -40,8 +40,6 @@ class RunTests
         run_charts(configuration[:charts], configuration[:control])
       when :drilldown
         run_drilldown(configuration)
-      when :generate_analytics_school_meta_data
-        generate_analytics_school_meta_data
       when :timescales
         run_timescales(configuration)
       when :timescale_and_drilldown
@@ -121,7 +119,7 @@ class RunTests
 
     schools_list.each do |school_name|
       excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- drilldown.xlsx')
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       chart_manager = ChartManager.new(school)
       chart_config = chart_manager.get_chart_config(chart_name)
       next unless chart_manager.drilldown_available?(chart_config)
@@ -140,7 +138,7 @@ class RunTests
 
     schools_list.each do |school_name|
       excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- timescale shift.xlsx')
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       chart_manager = ChartManager.new(school)
       chart_config = chart_manager.get_chart_config(chart_name)
       result = chart_manager.run_chart(chart_config, chart_name)
@@ -180,7 +178,7 @@ class RunTests
     differences = {}
     failed_charts = []
     schools_list.sort.each do |school_name|
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       puts "=" * 100
       puts "Running for #{school_name}"
       start_profiler
@@ -196,7 +194,7 @@ class RunTests
   def run_management_summary_tables(combined_html_output_file, control)
     html = ""
     schools_list.sort.each do |school_name|
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       puts "=" * 30
       puts "running for summary management table for #{school_name}"
       start_profiler
@@ -215,7 +213,7 @@ class RunTests
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
-      test = RunEquivalences.new(school)
+      test = RunEquivalences.new(school, control[:cache_school])
       test.run_equivalences(control)
     end
   end
@@ -226,7 +224,7 @@ class RunTests
 
   private def run_dashboard(control)
     schools_list.each do |school_name|
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       test = PupilDashboardTests.new(school)
       test.run_tests(control)
     end
@@ -236,7 +234,7 @@ class RunTests
     schools_list.each do |school_name|
       chart_list = []
       excel_filename = File.join(TestDirectory.instance.results_directory('Timescales'), school_name + '- drilldown and timeshift.xlsx')
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
 
       puts 'Calculating standard chart'
 
@@ -309,7 +307,7 @@ class RunTests
   def run_kpi_calculations_deprecated(config)
     calculation_results = Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
     schools_list.sort.each do |school_name|
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       calculation = KPICalculation.new(school)
       calculation.run_kpi_calculations
       calculation_results = calculation_results.deep_merge(calculation.calculation_results)
@@ -330,7 +328,7 @@ class RunTests
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       charts = RunModelFitting.new(school)
       charts.run(control)
       failed_charts += charts.failed_charts
@@ -348,7 +346,7 @@ class RunTests
       @current_school_name = school_name
       dates.each do |asof_date|
         reevaluate_log_filename
-        school = load_school(school_name)
+        school = load_school(school_name, control[:cache_school])
         start_profiler
         alerts = RunAlerts.new(school)
         alerts.run(alert_list, control, asof_date)
@@ -371,7 +369,7 @@ class RunTests
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       start_profiler
       charts_runner = RunCharts.new(school, results_sub_directory_type: 'Charts')
       charts_runner.run_structured_chart_list(charts, control)
@@ -401,53 +399,17 @@ class RunTests
   end
 
   def reevaluate_log_filename
+    puts "Got here reevaluate_log_filename"
+    return
+
     filename = @log_filename.is_a?(IO) ? @log_filename : (@log_filename % { school_name: @current_school_name, time: Time.now.strftime('%d %b %H %M') })
-    @@es_logger_file.file = filename
-  end
-
-
-
-
-  def generate_analytics_school_meta_data
-    meta_data = {}
-    schools_list.sort.each do |school_name|
-      school = load_school(school_name)
-      puts "Loaded School #{school.name}"
-      meta_data[school.name] = {}
-      meta_data[school.name][:name]         = school.name
-      meta_data[school.name][:postcode]     = school.postcode
-      meta_data[school.name][:urn]         = school.urn
-      meta_data[school.name][:area]         = school.area_name
-      meta_data[school.name][:floor_area]   = school.floor_area
-      meta_data[school.name][:pupils]       = school.number_of_pupils
-      meta_data[school.name][:school_type]  = school.school_type
-      meta_data[school.name][:meters]  = []
-      unless school.electricity_meters.empty?
-        school.electricity_meters.each do |meter|
-          meta_data[school.name][:meters].push(
-            {
-              mpan:         meter.mpan_mprn,
-              meter_type:   meter.fuel_type,
-              name:         meter.name.empty? ? 'Unknown' : meter.name
-            }
-          )
-        end
-      end
-      unless school.heat_meters.empty?
-        school.heat_meters.each do |meter|
-          meta_data[school.name][:meters].push(
-            {
-              mprn:         meter.mpan_mprn,
-              meter_type:   meter.fuel_type,
-              name:         meter.name.empty? ? 'Unknown' : meter.name
-            }
-          )
-        end
-      end
+    if !@@es_logger_file.nil? &&
+      @@es_logger_file.file.is_a?(IO) &&
+      @@es_logger_file.file != STDOUT &&
+      @@es_logger_file.file != filename &&
+      @@es_logger_file.file.close
     end
-    filename = './MeterReadings/autogeneratedschoolsandmeters.yml'
-    puts "Saving #{filename}"
-    File.open(filename, 'w') { |f| f.write(YAML.dump(meta_data)) }
-    # puts YAML.dump(meta_data)
+
+    @@es_logger_file.file = filename
   end
 end

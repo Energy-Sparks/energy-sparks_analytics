@@ -16,6 +16,10 @@ module Logging
       @history = StringIO.new "", "w"
     end
 
+    def file
+      @file
+    end
+
     def file=(filename_or_io)
       @file = filename_or_io.is_a?(IO) ? filename_or_io : File.open(filename_or_io, 'a+')
       @file.write @history.string if @history
@@ -35,6 +39,4 @@ module Logging
   @@es_logger_file = MyIO.new
   @@es_logger_file.file = STDOUT
   @logger = Logger.new(@@es_logger_file)
-
 end
-
