@@ -182,7 +182,7 @@ class RunTests
     schools_list.sort.each do |school_name|
       school = load_school(school_name, control[:cache_school])
       puts "=" * 100
-      puts "Running for #{school_name}"
+      STDERR.puts "Running for #{DateTime.now.strftime('%H:%M:%S')} #{school_name}"
       start_profiler
       test = run_class.new(school)
       differences[school_name] = test.run_flat_dashboard(control)
@@ -374,7 +374,7 @@ class RunTests
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
-      school = load_school(school_name)
+      school = load_school(school_name, control[:cache_school])
       start_profiler
       charts_runner = RunCharts.new(school, results_sub_directory_type: 'Charts')
       charts_runner.run_structured_chart_list(charts, control)
@@ -404,7 +404,17 @@ class RunTests
   end
 
   def reevaluate_log_filename
+    puts "Got here reevaluate_log_filename"
+    return
+
     filename = @log_filename.is_a?(IO) ? @log_filename : (@log_filename % { school_name: @current_school_name, time: Time.now.strftime('%d %b %H %M') })
+    if !@@es_logger_file.nil? &&
+      @@es_logger_file.file.is_a?(IO) &&
+      @@es_logger_file.file != STDOUT &&
+      @@es_logger_file.file != filename &&
+      @@es_logger_file.file.close
+    end
+
     @@es_logger_file.file = filename
   end
 

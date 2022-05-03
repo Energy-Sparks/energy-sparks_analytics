@@ -1,20 +1,20 @@
 
 require_relative './advice_general.rb'
 class AdviceBaseload < AdviceElectricityBase
+  def initialize(school)
+    super(school)
+  end
+
   def baseload_one_year_chart
-    @bdown_1year_chart ||= charts[0]
+    @bdown_1year_chart ||= (charts[0] || run_chart(:baseload_lastyear))
   end
 
   def baseload_one_year_chart_timescales
-    self.class.chart_timescale_and_dates(baseload_one_year_chart)
+    @baseload_one_year_chart_timescales ||= self.class.chart_timescale_and_dates(baseload_one_year_chart)
   end
 
   def baseload_longterm_chart
-    @bdown_longterm_chart ||= charts[1]
-  end
-
-  def baseload_benchmark_exemplar_chart
-    charts[2]
+    @bdown_longterm_chart ||= (charts[1] || run_chart(:baseload))
   end
 
   def baseload_longterm_chart_timescales
@@ -26,25 +26,23 @@ class AdviceBaseload < AdviceElectricityBase
   end
 
   def content(user_type: nil)
-    charts_and_html = []
-    charts_and_html.push( { type: :html,           content: "<h2>Electricity Baseload#{multiple_meters_total}</h2>" } )
-    charts_and_html += debug_content
-    charts_and_html.push( { type: :html,           content: statement_of_baseload } )
-    charts_and_html.push( { type: :html,           content: explanation_of_baseload } )
-    charts_and_html.push( { type: :html,           content: benefit_of_moving_to_exemplar_baseload } )
-    charts_and_html.push( { type: :chart,          content: baseload_one_year_chart } )
-    charts_and_html.push( { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(baseload_one_year_chart[:config_name] ) } )
-    charts_and_html.push( { type: :chart_name,     content: baseload_one_year_chart[:config_name] } )
-    charts_and_html.push( { type: :html,           content: chart_drilldown_explanation } )
-    charts_and_html += analysis_of_baseload(@school.aggregated_electricity_meters).flatten
+    charts_and_html = [
+      { type: :html,           content: "<h2>Electricity Baseload#{multiple_meters_total}</h2>" },
+      debug_content,
+      { type: :html,           content: statement_of_baseload },
+      { type: :html,           content: explanation_of_baseload },
+      { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(baseload_one_year_chart[:config_name] ) },
+      analysis_of_baseload(@school.aggregated_electricity_meters)
+    ].flatten
 
     if max_baseload_period_years > 1.1
-      charts_and_html.push( { type: :html,            content: "<h2>Electricity Baseload - Longer Term#{multiple_meters_total}</h2>" } )
-      charts_and_html.push( { type: :html,            content: longterm_chart_intro } )
-      charts_and_html.push( { type: :chart,           content: baseload_longterm_chart } )
-      charts_and_html.push( { type: :analytics_html,  content: AdviceBase.highlighted_dummy_chart_name_html(baseload_longterm_chart[:config_name]) } )
-      charts_and_html.push( { type: :chart_name,      content: baseload_longterm_chart[:config_name] } )
-      charts_and_html.push( { type: :html,            content: longterm_chart_trend_should_be_downwards } )
+      charts_and_html += [
+        { type: :html,            content: "<h2>Electricity Baseload - Longer Term#{multiple_meters_total}</h2>" },
+        { type: :html,            content: longterm_chart_intro },
+        { type: :analytics_html,  content: AdviceBase.highlighted_dummy_chart_name_html(baseload_longterm_chart[:config_name]) },
+        { type: :chart_name,      content: baseload_longterm_chart[:config_name] },
+        { type: :html,            content: longterm_chart_trend_should_be_downwards }
+      ]
     end
 
     charts_and_html += benchmark_exemplar_comparison
@@ -211,7 +209,7 @@ class AdviceBaseload < AdviceElectricityBase
   end
 
   def benchmark_exemplar_comparison
-    chart_name = baseload_benchmark_exemplar_chart[:config_name]
+    chart_name = :baseload_versus_benchmarks
     [
       { type: :html,            content: "<h2>Comparison with benchmark and exemplar schools</h2>" },
       { type: :html,            content: intro_to_benchmark_exemplar_comparisons },

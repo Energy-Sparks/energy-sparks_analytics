@@ -5,6 +5,7 @@ module AlertModelCacheMixin
     @@model_cache_results = {} unless defined?(@@model_cache_results)
     composite_key = urn.to_s + ':' + asof_date.to_s
     return @@model_cache_results[composite_key] if @@model_cache_results.key?(composite_key)
+    @@model_cache_results.delete(@@model_cache_results.keys.first) if a.length > 10 # limit cache size else memory leak
     @@model_cache_results[composite_key] = call_model(asof_date)
   end
 

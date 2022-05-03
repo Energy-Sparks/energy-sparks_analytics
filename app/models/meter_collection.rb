@@ -124,10 +124,8 @@ class MeterCollection
   def set_aggregate_meter_non_community_use_meter(fuel_type, meter)
     case fuel_type
     when :electricity
-      puts "Got here setting non community use electricity meter"
       @aggregated_electricity_meter_without_community_usage = meter
     when :gas
-      puts "Got here setting non community use gas meter"
       @aggregated_heat_meters_without_community_usage = meter
     when :storage_heater, :storage_heaters
       @storage_heater_meter_without_community_usage = meter

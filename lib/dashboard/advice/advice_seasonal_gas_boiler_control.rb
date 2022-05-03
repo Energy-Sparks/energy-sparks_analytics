@@ -1,4 +1,4 @@
-class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
+class AdviceGasBoilerSeasonalControl < AdviceBoilerHeatingBase
   include Logging
 
   def enough_data
@@ -11,7 +11,7 @@ class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
     charts_and_html.push( { type: :html,        content: "<h2>Seasonal Control</h2>" } )
     charts_and_html += debug_content
     charts_and_html.push( { type: :html,        content: introduction } )
-    charts_and_html.push( { type: :chart_name,  content: heating_on_off_by_week_chart[:config_name] } )
+    charts_and_html.push( { type: :chart_name,  content: breakdown_chart_name } )
     charts_and_html.push( { type: :html,        content: chart_explanation } )
 
     charts_and_html
@@ -35,7 +35,11 @@ class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
 
   private
 
-  def heating_on_off_by_week_chart
+  def breakdown_chart_name
+    self.class.config[:charts][0]
+  end
+
+  def heating_on_off_by_week_chart # TODO(PH, 26Apr2022) deprecate
     charts[0]
   end
 

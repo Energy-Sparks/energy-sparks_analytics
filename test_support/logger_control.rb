@@ -1,5 +1,6 @@
 # to aid debugging output is distributed between different logfiles and STDOUT
 module Logging
+
   logger.formatter = proc do |severity, datetime, progname, msg|
     case $logger_format
     when 1
@@ -14,6 +15,10 @@ module Logging
     def initialize
       @file = nil
       @history = StringIO.new "", "w"
+    end
+
+    def file
+      @file
     end
 
     def file=(filename_or_io)
@@ -35,6 +40,5 @@ module Logging
   @@es_logger_file = MyIO.new
   @@es_logger_file.file = STDOUT
   @logger = Logger.new(@@es_logger_file)
-
 end
 

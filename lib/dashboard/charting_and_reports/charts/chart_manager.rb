@@ -63,6 +63,12 @@ class ChartManager
       end
     end
     chart_config
+  rescue => e
+    # TODO(PH, 26Apr2022) remove
+    puts "Got here build_chart_config"
+    puts chart_config_original
+    puts e.message
+    puts e.backtrace
   end
 
   # used for testing, within reasonable accuracy tries to determine

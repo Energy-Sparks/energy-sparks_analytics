@@ -130,9 +130,9 @@ class RunAdultDashboard < RunCharts
       else
         content = advice.content(user_type: control[:user])
       end
+
     }
     puts "#{sprintf('%20.20s', page)} = #{bm.round(3)}" if control[:page_calculation_time] == true
-
 
     @failed_charts.concat(advice.failed_charts)
 

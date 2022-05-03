@@ -20,7 +20,11 @@ class AdviceMeterBreakdownBase < AdviceBase
   end
 
   def breakdown_chart
-    @bdown_chart ||= charts[0]
+    @bdown_chart ||= (charts[0] || run_chart(breakdown_chart_name))
+  end
+
+  def breakdown_chart_name
+    self.class.config[:charts][0]
   end
 
   def raw_content(user_type: nil)
@@ -29,8 +33,8 @@ class AdviceMeterBreakdownBase < AdviceBase
     charts_and_html += debug_content
     charts_and_html.push( { type: :html,       content: introduction } )
     charts_and_html.push( { type: :html,       content: chart_intro } )
-    charts_and_html.push( { type: :chart,      content: breakdown_chart } )
-    charts_and_html.push( { type: :chart_name, content: breakdown_chart[:config_name] } )
+    # charts_and_html.push( { type: :chart,      content: breakdown_chart } )
+    charts_and_html.push( { type: :chart_name, content: breakdown_chart_name } )
     charts_and_html.push( { type: :html,       content: table_timescale_html } )
     charts_and_html.push( { type: :html,       content: table_breakdown_html } )
     charts_and_html.push( { type: :html,       content: table_comments } )

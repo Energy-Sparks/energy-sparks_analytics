@@ -7,6 +7,10 @@ class AdviceRecentChangeBase < AdviceElectricityBase
     @fuel_type = fuel_type
   end
 
+  def relevance   
+    @school.aggregate_meter(@fuel_type).nil? ? :never_relevant : :relevant
+  end
+
   def self.template_variables
     { 'Summary' => TEMPLATE_VARIABLES }
   end

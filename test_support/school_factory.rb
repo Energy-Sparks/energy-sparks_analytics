@@ -11,12 +11,7 @@ class SchoolFactory
     @school_cache ||= {}
     return @school_cache[filename_prefix] if @school_cache.key?(filename_prefix)
 
-    unless cache
-      puts "Got here running garbage collector"
-      RecordTestTimes.instance.record_time(filename_prefix, 'garbage collect', ''){
-        GC.start
-      }
-    end
+    garbage_collect(filename_prefix) unless cache
 
     school = load_and_build_school(source, filename_prefix, meter_attributes_overrides)
 
@@ -65,6 +60,17 @@ class SchoolFactory
     school = build_meter_collection(school, meter_attributes_overrides: meter_attributes_overrides)
     validate_and_aggregate(school, source)
     school
+  end
+
+  def garbage_collect(name)
+    puts "GC before"
+    ap GC.stat
+    puts "Got here running garbage collector"
+    RecordTestTimes.instance.record_time(name, 'garbage collect', ''){
+      GC.start
+    }
+    puts "GC after"
+    ap GC.stat
   end
 
   def validate_and_aggregate(school, source)

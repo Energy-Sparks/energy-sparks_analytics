@@ -78,7 +78,6 @@ class RunAlerts < RunAnalyticsTest
 
     alerts.sort_by(&:name).each do |alert_class|
       alert = alert_class.new(@school)
-      puts "Got here doing #{alert_class.name}"
 
       unless alert.meter_readings_up_to_date_enough?
         log_result(alert, 'Meter out of date') # not stored for stats as code runs on to subsequent call in loop

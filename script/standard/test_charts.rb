@@ -2,6 +2,11 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
+module Logging
+  @logger = Logger.new('log\chart logs.log')
+  logger.level = :error
+end
+
 charts = {
   bm:   %i[group_by_week_electricity_unlimited]
 }
@@ -22,7 +27,8 @@ control = {
 
 overrides = {
   schools:  ['*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
-  charts:   { charts: charts, control: control }
+  charts:   { charts: charts, control: control },
+  control: { cache_school: false },
 }
 
 script = RunAnalyticsTest.default_config.deep_merge(overrides)

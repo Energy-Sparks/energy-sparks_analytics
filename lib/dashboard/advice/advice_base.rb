@@ -66,9 +66,12 @@ class AdviceBase < ContentBase
   def charts
     chart_results = []
 
-    chart_names.each do |chart_name|
-      chart_results.push(run_chart(chart_name))
+    if false # TODO(PH, 26Apr2022) remove
+      chart_names.each do |chart_name|
+        chart_results.push(run_chart(chart_name))
+      end
     end
+
     chart_results
   end
 
