@@ -27,6 +27,8 @@ class RunTests
         update_sheffield_solar_pv
       when :schools
         @school_name_pattern_match = configuration
+        @cache_school          = @test_script.fetch(:cache_school, true)
+        @meter_readings_source = @test_script.fetch(:source, :unvalidated_meter_data)
       when :source
         @meter_readings_source = configuration
       when :meter_attribute_overrides
@@ -57,7 +59,7 @@ class RunTests
       when :model_fitting
         run_model_fitting(configuration[:control])
       when :benchmarks
-        run_benchmarks(configuration, @test_script[:schools], @test_script[:source])
+        run_benchmarks(configuration, @test_script[:schools], @test_script[:source], @test_script[:cache_school])
       when :management_summary_table
         run_management_summary_tables(configuration[:combined_html_output_file], configuration[:control])
       else
@@ -70,9 +72,9 @@ class RunTests
 
   private
 
-  def load_school(school_name, cache_school = true)
+  def load_school(school_name)
     override = @meter_attribute_overrides || {}
-    SchoolFactory.instance.load_school(@meter_readings_source, school_name, meter_attributes_overrides: override, cache: cache_school == true)
+    SchoolFactory.instance.load_school(@meter_readings_source, school_name, meter_attributes_overrides: override, cache: @cache_school)
   end
 
   def schools_list
@@ -104,7 +106,7 @@ class RunTests
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       next if school.nil?
       charts = RunCharts.new(school)
       charts.run(chart_list, control)
@@ -119,7 +121,7 @@ class RunTests
 
     schools_list.each do |school_name|
       excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- drilldown.xlsx')
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_config = chart_manager.get_chart_config(chart_name)
       next unless chart_manager.drilldown_available?(chart_config)
@@ -138,7 +140,7 @@ class RunTests
 
     schools_list.each do |school_name|
       excel_filename = File.join(TestDirectory.instance.results_directory('TimeScales'), school_name + '- timescale shift.xlsx')
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       chart_manager = ChartManager.new(school)
       chart_config = chart_manager.get_chart_config(chart_name)
       result = chart_manager.run_chart(chart_config, chart_name)
@@ -178,7 +180,7 @@ class RunTests
     differences = {}
     failed_charts = []
     schools_list.sort.each do |school_name|
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
       start_profiler
@@ -194,7 +196,7 @@ class RunTests
   def run_management_summary_tables(combined_html_output_file, control)
     html = ""
     schools_list.sort.each do |school_name|
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       puts "=" * 30
       puts "running for summary management table for #{school_name}"
       start_profiler
@@ -213,7 +215,7 @@ class RunTests
       school = load_school(school_name)
       puts "=" * 100
       puts "Running for #{school_name}"
-      test = RunEquivalences.new(school, control[:cache_school])
+      test = RunEquivalences.new(school)
       test.run_equivalences(control)
     end
   end
@@ -224,7 +226,7 @@ class RunTests
 
   private def run_dashboard(control)
     schools_list.each do |school_name|
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       test = PupilDashboardTests.new(school)
       test.run_tests(control)
     end
@@ -234,7 +236,7 @@ class RunTests
     schools_list.each do |school_name|
       chart_list = []
       excel_filename = File.join(TestDirectory.instance.results_directory('Timescales'), school_name + '- drilldown and timeshift.xlsx')
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
 
       puts 'Calculating standard chart'
 
@@ -307,7 +309,7 @@ class RunTests
   def run_kpi_calculations_deprecated(config)
     calculation_results = Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
     schools_list.sort.each do |school_name|
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       calculation = KPICalculation.new(school)
       calculation.run_kpi_calculations
       calculation_results = calculation_results.deep_merge(calculation.calculation_results)
@@ -315,8 +317,8 @@ class RunTests
     end
   end
 
-  def run_benchmarks(control, schools, source)
-    benchmark = RunBenchmarks.new(control, schools, source)
+  def run_benchmarks(control, schools, source, cache_school)
+    benchmark = RunBenchmarks.new(control, schools, source, cache_school)
     benchmark.run
   end
 
@@ -328,7 +330,7 @@ class RunTests
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       charts = RunModelFitting.new(school)
       charts.run(control)
       failed_charts += charts.failed_charts
@@ -346,7 +348,7 @@ class RunTests
       @current_school_name = school_name
       dates.each do |asof_date|
         reevaluate_log_filename
-        school = load_school(school_name, control[:cache_school])
+        school = load_school(school_name)
         start_profiler
         alerts = RunAlerts.new(school)
         alerts.run(alert_list, control, asof_date)
@@ -369,7 +371,7 @@ class RunTests
       puts banner(school_name)
       @current_school_name = school_name
       reevaluate_log_filename
-      school = load_school(school_name, control[:cache_school])
+      school = load_school(school_name)
       start_profiler
       charts_runner = RunCharts.new(school, results_sub_directory_type: 'Charts')
       charts_runner.run_structured_chart_list(charts, control)

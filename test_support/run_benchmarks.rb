@@ -6,10 +6,11 @@ class RunBenchmarks
   FRONTEND_CSS = '<link rel="stylesheet" media="all" href="C:\Users\phili\OneDrive\ESDev\energy-sparks_analytics\InputData\application-1.css" />
   <link rel="stylesheet" media="screen" href="\Users\phili\OneDrive\ESDev\energy-sparks_analytics\InputData\application-2.css" />'
   attr_reader :control
-  def initialize(control, schools, source)
+  def initialize(control, schools, source, cache_school)
     @control = control
     @source = source
     @school_pattern_match = schools
+    @cache_school = cache_school
     @database = BenchmarkDatabase.new(control[:filename])
     @source_of_school_data = control[:source]
   end
@@ -64,7 +65,7 @@ class RunBenchmarks
   def run_alerts_to_update_database
     school_list = SchoolFactory.instance.school_file_list(@source, @school_pattern_match)
     school_list.sort.each do |school_name|
-      school = SchoolFactory.instance.load_school(@source, school_name)
+      school = SchoolFactory.instance.load_school(@source, school_name, cache: @cache_school)
       calculate_alerts(school, control[:asof_date])
     end
 

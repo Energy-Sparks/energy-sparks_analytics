@@ -63,7 +63,7 @@ class SchoolFactory
   end
 
   def garbage_collect(name)
-    puts "Garbage collecting"
+    puts 'Garbage collecting'
     GC.start
   end
 

@@ -12,8 +12,8 @@ end
 run_date = Date.new(2022, 4, 23)
 
 overrides = {
-  schools:  ['*'],
-  control: { cache_school: false }
+  schools:      ['*'],
+  cache_school: false
 }
 
 benchmark_overrides = overrides.merge(
