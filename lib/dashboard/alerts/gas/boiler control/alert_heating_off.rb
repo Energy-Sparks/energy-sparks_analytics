@@ -9,6 +9,7 @@ class AlertTurnHeatingOff < AlertGasModelBase
   attr_reader :future_saving_kwh, :future_saving_£, :future_saving_co2
   attr_reader :average_temperature, :average_day_temperature, :average_night_temperature
   attr_reader :up_to_annual_kwh, :percent_of_annual
+  attr_reader :last_meter_reading_date, :days_since_last_meter_reading_date, :days_ago_plural
 
   def initialize(school, type = :turnheatingonoff)
     super(school, type)
@@ -86,6 +87,18 @@ class AlertTurnHeatingOff < AlertGasModelBase
     percent_of_annual: {
       description: 'warm weather consumption as a percentage of annual (or partial if not enough data)',
       units:  :percent
+    },
+    last_meter_reading_date: {
+      description: 'date of last meter reading',
+      units:  Date
+    },
+    days_since_last_meter_reading_date: {
+      description: 'days since last meter reading date',
+      units:  Integer
+    },
+    days_ago_plural: {
+      description: 'set to s if days since last meter reading date > 1 so can say day or days ago',
+      units:  String
     }
   }
   
@@ -100,7 +113,7 @@ class AlertTurnHeatingOff < AlertGasModelBase
   end
 
   def time_of_year_relevance
-    10.0 - @rating
+    in_season?(@today) ? (10.0 - (@rating / 2)) : 0.0
   end
 
   protected def max_days_out_of_date_while_still_relevant
@@ -120,7 +133,8 @@ class AlertTurnHeatingOff < AlertGasModelBase
   # reduce season forecast queried for to save costs
   # check env variable so always run in test environment
   def in_season?(today)
-    !ENV['ENERGYSPARKSTODAY'].nil? || today.month.between?(4, 10)
+    td = !ENV['ENERGYSPARKSTODAY'].nil? ? Date.parse(ENV['ENERGYSPARKSTODAY']) :  today
+    td.month.between?(3, 10)
   end
 
   # ================================== Calculation ==============================================
@@ -138,11 +152,20 @@ class AlertTurnHeatingOff < AlertGasModelBase
 
     set_savings_capital_costs_payback(@future_saving_£, 0.0, @future_saving_co2)
 
-    @rating = calculate_rating_from_range(0, 30.0, @future_degree_days)
+    set_up_to_dateness_of_meter
+
+    @rating = calculate_rating_from_range(0, 1.5, @future_degree_days / @horizon_days)
 
     @term = :shortterm
   end
   alias_method :analyse_private, :calculate
+
+
+  def set_up_to_dateness_of_meter
+    @last_meter_reading_date = aggregate_meter.amr_data.end_date
+    @days_since_last_meter_reading_date = (@today - @last_meter_reading_date).to_i
+    @days_ago_plural = @days_since_last_meter_reading_date == 1 ? '' : 's'
+  end
 
   # ================================== Future Analysis ==========================================
 
@@ -154,10 +177,11 @@ class AlertTurnHeatingOff < AlertGasModelBase
 
     @future_degree_days = future_degreedays(forecast, future_date_range)
     @future_saving_kwh  = predicted_savings_kwh(forecast, future_date_range)
-    @future_saving_co2  = @future_saving_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    @future_saving_£    = @future_saving_kwh * BenchmarkMetrics::GAS_PRICE
+    @future_saving_co2  = gas_co2(@future_saving_kwh)
+    @future_saving_£    = gas_cost(@future_saving_kwh)
     @horizon_start_date = future_date_range.first
     @horizon_end_date   = future_date_range.last
+    @horizon_days       = (future_date_range.last - future_date_range.first).to_i
 
     @average_temperature        = average_forecast_temperature(forecast, future_date_range,  0, 24)
     @average_day_temperature    = average_forecast_temperature(forecast, future_date_range, 10, 15)
