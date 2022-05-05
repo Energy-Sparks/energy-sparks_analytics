@@ -3,10 +3,10 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 charts = {
-  bm:   %i[group_by_week_electricity_unlimited]
+  bm:   %i[targeting_and_tracking_weekly_gas_to_date_cumulative_line targeting_and_tracking_weekly_gas_to_date_line targeting_and_tracking_weekly_gas_one_year_line]
 }
 
-charts = RunCharts.standard_charts_for_school
+no_charts = RunCharts.standard_charts_for_school
 
 # charts = RunCharts.targeting_and_tracking_charts
 

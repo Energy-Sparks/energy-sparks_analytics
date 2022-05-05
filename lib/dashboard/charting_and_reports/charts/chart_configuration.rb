@@ -220,7 +220,7 @@ class ChartManager
     },
     targeting_and_tracking_weekly_electricity_one_year_column_deprecated: {
       name:           :targeting_and_tracking_weekly_electricity_one_year_column.to_s,
-      target:             {calculation_type: :day, extend_chart_into_future: true},
+      target:             {calculation_type: :day, extend_chart_into_future: true, truncate_before_start_date: true},
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_column
     },
 
@@ -273,7 +273,7 @@ class ChartManager
     # used by front end via targets_service.rb
     targeting_and_tracking_weekly_electricity_to_date_cumulative_line: {
       name:                         'Cumulative progress versus target',
-      target:                       {calculation_type: :day, extend_chart_into_future: true},
+      target:                       {calculation_type: :day, extend_chart_into_future: true, truncate_before_start_date: true},
       ignore_single_series_failure: true,
       inherits_from:                :targeting_and_tracking_weekly_electricity_one_year_cumulative_line
     },
@@ -284,17 +284,18 @@ class ChartManager
         ['Energy:<school_name>', 'actual']
       ],
       chart1_type:                  :line,
+      chart1_subtype:               nil,
       series_breakdown:             :none,
       x_axis:                       :week,
       nullify_trailing_zeros:       true,
       timescale:                    :up_to_a_year,
       ignore_single_series_failure: true,
-      target:                       {calculation_type: :day, extend_chart_into_future: true},
+      target:                       {calculation_type: :day, extend_chart_into_future: true, truncate_before_start_date: true},
       inherits_from:                :group_by_week_electricity
     },
     targeting_and_tracking_weekly_electricity_one_year_line: {
       name:           'Weekly progress versus target to date',
-      target:             {calculation_type: :day, extend_chart_into_future: false},
+      target:             {calculation_type: :day, extend_chart_into_future: false, truncate_before_start_date: true},
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
     },
     targeting_and_tracking_standard_group_by_week_electricity: {
@@ -303,7 +304,7 @@ class ChartManager
     },
     targeting_and_tracking_target_only_group_by_week_electricity: {
       name:          'Target only <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
-      target:        {calculation_type: :day, extend_chart_into_future: false, show_target_only: true},
+      target:        {calculation_type: :day, extend_chart_into_future: false, show_target_only: true, truncate_before_start_date: true},
       inherits_from: :targeting_and_tracking_standard_group_by_week_electricity
     },
     targeting_and_tracking_unscaled_target_group_by_week_electricity: {
