@@ -3,10 +3,10 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 charts = {
-  bm:   %i[group_by_week_electricity_unlimited]
+  bm:   %i[management_dashboard_group_by_week_storage_heater]
 }
 
-charts = RunCharts.standard_charts_for_school
+no_charts = RunCharts.standard_charts_for_school
 
 # charts = RunCharts.targeting_and_tracking_charts
 
@@ -21,7 +21,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['miller*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   charts:   { charts: charts, control: control }
 }
 

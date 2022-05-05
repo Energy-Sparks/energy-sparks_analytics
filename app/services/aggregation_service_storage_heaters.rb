@@ -29,7 +29,7 @@ class AggregateDataServiceStorageHeaters
 
     bm = Benchmark.realtime {
       reworked_meter_maps = disaggregate_meters
-
+      
       calculate_meters_carbon_emissions_and_costs(reworked_meter_maps)
 
       summarise_maps(reworked_meter_maps) if @debug
@@ -39,7 +39,7 @@ class AggregateDataServiceStorageHeaters
                   else
                     reworked_meter_maps[0]
                   end
-
+      
       assign_aggregate(aggregate)
     }
 
@@ -108,6 +108,7 @@ class AggregateDataServiceStorageHeaters
   # replace the original mains meter, with the mains meter ex storage heaters
   # asign the original and the storage heater only meters as sub meters
   def reassign_meters(map)
+    map[:ex_storage_heater].sub_meters.merge!(map[:original].sub_meters) # merge in solar meters
     map[:ex_storage_heater].sub_meters[:mains_consume]   = map[:original]
     map[:ex_storage_heater].sub_meters[:storage_heaters] = map[:storage_heater]
     map[:ex_storage_heater]
@@ -199,10 +200,10 @@ class AggregateDataServiceStorageHeaters
       calculate_meter_carbon_emissions_and_costs(meter, :electricity)
     end
   end
-  
+
   def log(str)
     logger.info str
-    
+
     puts str if @debug
   end
 end
