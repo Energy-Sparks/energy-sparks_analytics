@@ -45,6 +45,10 @@ class TargetSchool < MeterCollection
     @name += ': target'
   end
 
+  def target_school?
+    true
+  end
+
   def reason_for_nil_meter(fuel_type)
     @meter_nil_reason[fuel_type]
   end

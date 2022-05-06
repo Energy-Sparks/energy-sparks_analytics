@@ -3,7 +3,7 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 charts = {
-  bm:   %i[management_dashboard_group_by_week_storage_heater]
+  bm:   %i[targeting_and_tracking_weekly_gas_to_date_cumulative_line targeting_and_tracking_weekly_gas_to_date_line targeting_and_tracking_weekly_gas_one_year_line]
 }
 
 no_charts = RunCharts.standard_charts_for_school
