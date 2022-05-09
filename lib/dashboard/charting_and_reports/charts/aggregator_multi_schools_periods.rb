@@ -132,8 +132,8 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
   def merge_multiple_charts
     valid_aggregators.each do |data|
       time_description = unique_periods <= 1 ? '' : (':' + data.results.time_description)
-      school_name = (schools.nil? || schools.length <= 1) ? '' : (':' + data.results.school_name)
-      school_name = '' if number_of_schools <= 1
+      school_name = (schools.nil? || schools.length <= 1 || data.results.school_name.nil?) ? '' : (':' + data.results.school_name)
+      school_name = '' if number_of_schools <= 1 # TODO(PH, 9May2022) is schools.length <= 1 test in line above sufficient?
 
       @multi_chart_x_axis_ranges.push(data.results[:x_axis_date_ranges]) # TODO(PH, 1Apr2022) remove after refactor not used
 

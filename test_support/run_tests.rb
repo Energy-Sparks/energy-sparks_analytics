@@ -40,6 +40,8 @@ class RunTests
         run_charts(configuration[:charts], configuration[:control])
       when :drilldown
         run_drilldown(configuration)
+      when :specific_drilldowns
+        run_specific_drilldowns(configuration)
       when :generate_analytics_school_meta_data
         generate_analytics_school_meta_data
       when :timescales
@@ -78,6 +80,7 @@ class RunTests
   end
 
   def schools_list
+    puts "Loading #{@meter_readings_source} #{@school_name_pattern_match}"
     SchoolFactory.instance.school_file_list(@meter_readings_source, @school_name_pattern_match)
   end
 
@@ -131,6 +134,50 @@ class RunTests
       new_chart_results = chart_manager.run_chart(new_chart_config, new_chart_name)
       excel = ExcelCharts.new(excel_filename)
       excel.add_charts('Test', [result, new_chart_results])
+      excel.close
+    end
+  end
+
+  def run_specific_drilldowns(control)
+    excel_charts = {} # [worksheet_name] = [charts]
+    schools_list.each do |school_name|
+      excel_filename = File.join(TestDirectory.instance.results_directory('SpecificDrilldowns'), school_name + '- drilldown.xlsx')
+      school = load_school(school_name)
+      chart_manager = ChartManager.new(school)
+      control.each do |test|
+        test[:charts].each do |chart_setup|
+          chart_setup.each do |excel_workheet_name, list_of_charts|
+            excel_charts[excel_workheet_name] ||= []
+            list_of_charts.each do |chart_name|
+              chart_config = chart_manager.get_chart_config(chart_name)
+              next unless chart_manager.drilldown_available?(chart_config)
+              puts "Running standard chart #{chart_name}"
+              result = chart_manager.run_chart(chart_config, chart_name)
+              excel_charts[excel_workheet_name].push(result)
+
+              test[:drilldown_columns].each do |drilldown_column_groups|
+                drilldown_column_groups.each.with_index do |drilldown_column, depth|
+                  next unless chart_manager.drilldown_available?(chart_config)
+
+                  chart_column = result[:x_axis_ranges][drilldown_column]
+                  puts "Drilling down on standard chart #{chart_name} by column (#{drilldown_column}) #{chart_column.map(&:to_s)}"
+                  chart_config[:name] += " (drilldown col #{drilldown_column})"
+                  chart_name, chart_config = chart_manager.drilldown(chart_name, chart_config, nil, chart_column)
+                  
+                  result = chart_manager.run_chart(chart_config, chart_name)
+
+                  excel_charts[excel_workheet_name].push(result)
+                end
+              end
+            end
+          end
+        end
+      end
+
+      excel = ExcelCharts.new(excel_filename)
+      excel_charts.each do |worksheet_name, charts|
+        excel.add_charts(worksheet_name.to_s, charts)
+      end
       excel.close
     end
   end
