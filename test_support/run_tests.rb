@@ -80,7 +80,6 @@ class RunTests
   end
 
   def schools_list
-    puts "Loading #{@meter_readings_source} #{@school_name_pattern_match}"
     SchoolFactory.instance.school_file_list(@meter_readings_source, @school_name_pattern_match)
   end
 
