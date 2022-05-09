@@ -8,7 +8,7 @@ class AverageHistoricOrForecastTemperatures
     @school = school
   end
 
-  def calculate_average_temperature_for_week_following(asof_date)
+  def calculate_average_temperature_for_week_following_deprecated(asof_date)
     calculate_average_temperature_from_forecast_or_historic(asof_date, 7)
   end
 

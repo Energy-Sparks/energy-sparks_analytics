@@ -151,6 +151,10 @@ class AggregatorConfig < OpenStruct
     dig(:target, :extend_chart_into_future) == true
   end
 
+  def truncate_before_start_date?
+    dig(:target, :truncate_before_start_date) == true
+  end
+
   def sort_by?
     !sort_by.nil?
   end

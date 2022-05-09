@@ -3,7 +3,8 @@ require_relative '../../lib/dashboard.rb'
 require_all './test_support/'
 
 module Logging
-  logger.level = :debug
+  @logger = Logger.new('log\logs.log')
+  logger.level = :error
 end
 
 schools = ['ullapool-pv*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
@@ -11,7 +12,7 @@ schools = ['ullapool-pv*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + Sch
 overrides = {
   schools: schools,
   # adult_dashboard: { control: { pages: %i[boiler_control_morning_start_time], user: { user_role: :analytics, staff_role: nil } } }
-  # adult_dashboard: { control: { pages: %i[ gas_target] } }
+  adult_dashboard: { control: { pages: %i[electric_target gas_target] } }
 }
 
 script = RunAdultDashboard.default_config.deep_merge(overrides)

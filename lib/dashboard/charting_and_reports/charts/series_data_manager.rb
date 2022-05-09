@@ -167,6 +167,9 @@ module Series
 
     def amr_data_by_half_hour(meter, date, halfhour_index, data_type = :kwh)
       return missing_data if ignore_missing_amr_data? && !meter.amr_data.date_exists?(date)
+      
+      return nil if target_truncate_before_start_date? && date < target_start_date(meter)
+
       meter.amr_data.kwh(date, halfhour_index, data_type, community_use: community_use)
     end
 
@@ -180,7 +183,28 @@ module Series
 
     def single_name; nil end
 
+    def target_school
+      @school.target_school? ? @school : @school.target_school(target_calculation_type)
+    end
+
+    def target_meter(meter)
+      original_school = school.target_school? ? @school : @school.target_school(target_calculation_type)
+      target_school.aggregate_meter(meter.fuel_type)
+    end
+
+    # only call if dealing with target meter, else will force expensive
+    # lazy target meter calculation
+    def target_start_date(meter)
+      target_meter(meter).target_dates.target_start_date
+    end
+
     def amr_data_date_range(meter, start_date, end_date, data_type)
+
+      if target_truncate_before_start_date?
+        start_date = [start_date, target_start_date(meter)].max
+        return nil if start_date > end_date
+      end
+
       if @adjust_by_temperature && meter.fuel_type == :gas
         adjust_for_temperature(meter, start_date, end_date, data_type)
       elsif ignore_missing_amr_data?
@@ -268,7 +292,15 @@ module Series
     end
 
     def target_extend?
-      !chart_config.dig(:target, :extend_chart_into_future).nil?
+      chart_config.dig(:target, :extend_chart_into_future) == true
+    end
+
+    def target_truncate_before_start_date?
+      chart_config.dig(:target, :truncate_before_start_date) == true
+    end
+
+    def target_calculation_type
+      chart_config.dig(:target, :calculation_type)
     end
 
     # truncate requested dates to non-target meter range or return nil
