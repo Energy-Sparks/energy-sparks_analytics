@@ -27,6 +27,8 @@ class SchoolFactory
     @school_cache ||= {}
     return @school_cache[filename_prefix] if @school_cache.key?(filename_prefix)
 
+    garbage_collect(filename_prefix) unless cache
+
     school = load_and_build_school(source, filename_prefix, meter_attributes_overrides)
 
     @school_cache[filename_prefix] = school if cache
@@ -74,6 +76,11 @@ class SchoolFactory
     school = build_meter_collection(school, meter_attributes_overrides: meter_attributes_overrides)
     validate_and_aggregate(school, source)
     school
+  end
+
+  def garbage_collect(name)
+    puts 'Garbage collecting'
+    GC.start
   end
 
   def validate_and_aggregate(school, source)

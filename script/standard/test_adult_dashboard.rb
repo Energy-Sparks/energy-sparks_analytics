@@ -3,7 +3,8 @@ require_relative '../../lib/dashboard.rb'
 require_all './test_support/'
 
 module Logging
-  logger.level = :debug
+  @logger = Logger.new('log\logs.log')
+  logger.level = :error
 end
 
 schools = ['ullapool-pv*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
