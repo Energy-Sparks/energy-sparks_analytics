@@ -159,7 +159,7 @@ class RunTests
                   next unless chart_manager.drilldown_available?(chart_config)
 
                   chart_column = result[:x_axis_ranges][drilldown_column]
-                  puts "Drilling down on standard chart #{chart_name} by column (#{drilldown_column}) #{chart_column.map(&:to_s)}"
+                  puts "Drilling down onto standard chart #{chart_name} by column (#{drilldown_column}) #{chart_column.map(&:to_s)}"
                   chart_config[:name] += " (drilldown col #{drilldown_column})"
                   chart_name, chart_config = chart_manager.drilldown(chart_name, chart_config, nil, chart_column)
                   
