@@ -234,14 +234,24 @@ class TargetDates
 
   def calculate_target_start_date
     t_date = if @original_meter.annual_kwh_estimate.nan? &&
-      @target.first_target_date - DAYSINYEAR < @original_meter.amr_data.start_date
-      logger.info "Moving target start date forward to #{@original_meter.amr_data.start_date + DAYSINYEAR} as target not set"
-      [@original_meter.amr_data.start_date + DAYSINYEAR, @original_meter.amr_data.end_date - DAYSINYEAR].max
-    else
-      [@target.first_target_date, @original_meter.amr_data.end_date - DAYSINYEAR].max
-    end
+                @target.first_target_date - DAYSINYEAR < @original_meter.amr_data.start_date
+
+                td = [
+                  first_day_of_next_month(@original_meter.amr_data.start_date + DAYSINYEAR),
+                  @original_meter.amr_data.end_date - DAYSINYEAR
+                ].max
+                logger.info "Moving target start date forward to #{td} as target not set"
+                td
+              else
+                [@target.first_target_date, @original_meter.amr_data.end_date - DAYSINYEAR].max
+              end
+
     check_target_start_date_after_first_meter_date(t_date)
     t_date
+  end
+
+  def first_day_of_next_month(date)
+    date.day == 1 ? date : date.next_month.beginning_of_month
   end
 
   def check_target_start_date_after_first_meter_date(date)

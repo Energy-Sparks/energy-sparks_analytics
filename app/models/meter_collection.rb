@@ -91,6 +91,10 @@ class MeterCollection
     end
   end
 
+  def target_school?
+    false
+  end
+
   def aggregate_meter(fuel_type)
     case fuel_type
     when :electricity

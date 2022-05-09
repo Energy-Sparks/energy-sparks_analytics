@@ -19,7 +19,7 @@ class CalculateMonthlyTrackAndTraceData
     partial_month_dates = partial_month_dates_info.map { |i| i[:date_range] }
     partial_months = partial_month_dates_info.map { |i| i[:partial_month] }
 
-    current_year_kwhs   = kwhs_for_date_ranges(partial_month_dates, @aggregate_meter)
+    current_year_kwhs   = kwhs_for_date_ranges(partial_month_dates, @aggregate_meter, target_meter.target_dates.target_start_date)
     full_targets_kwh    = kwhs_for_target_date_ranges(month_dates)
     partial_targets_kwh = kwhs_for_target_date_ranges(partial_month_dates)
 
@@ -60,14 +60,20 @@ class CalculateMonthlyTrackAndTraceData
   def performance(kwhs, target_kwhs)
     kwhs.map.with_index do |_kwh, i|
       percent = (kwhs[i].nil? || target_kwhs[i].nil?) ? nil : ((kwhs[i] - target_kwhs[i]) / target_kwhs[i])
-      percent = 0.0 if target_kwhs[i] == 0.0 && (percent.nan? || percent.infinite?)
+      percent = 0.0 if target_kwhs[i] == 0.0 && (percent.nil? || percent.nan? || percent.infinite?)
       percent
     end
   end
 
-  def kwhs_for_date_ranges(date_ranges, meter)
+  def kwhs_for_date_ranges(date_ranges, meter, target_start_date)
     date_ranges.map do |date_range|
-      date_range.nil? ? nil : kwh_date_range(meter, date_range.first, date_range.last)
+      if date_range.nil? || target_start_date > date_range.last
+        nil
+      else
+        month_start = [target_start_date, date_range.first].max
+        month_end   = [target_start_date, date_range.last ].max
+        kwh_date_range(meter, date_range.first, date_range.last)
+      end
     end
   end
 

@@ -125,7 +125,7 @@ class AdviceBaseloadCommentary
       <p>
         A more detailed explanation of how to interpret the charts and the analysis,
         and what to do next is available
-        <a href="http://blog.energysparks.uk/wp-content/uploads/2021/07/Baseload-User-Documentation.pdf" target ="_blank">here</a>.
+        <a href="https://drive.google.com/file/d/1E7gKOHnOYlAtBddfZyse2sPh2BGzfCUq/view?usp=sharing" target ="_blank">here</a>.
       </p>
     )
     ERB.new(text).result(binding)

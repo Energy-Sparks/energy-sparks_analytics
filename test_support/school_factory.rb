@@ -2,6 +2,22 @@
 class SchoolFactory
   include Singleton
 
+  def self.storage_heater_schools
+    [
+      'catsfield*',
+      'combe-down*',
+      'inver-pri*',
+      'mallaig-high*',
+      'marksbury*',
+      'miller-ac*',
+      'pennyland*',
+      'plumpton*',
+      'st-julian-s-church*',
+      'stanton*',
+      'tomnacross*'
+    ]
+  end
+
   def school_file_list(source, school_name_pattern_match)
     matches = [school_name_pattern_match].flatten
     matching_yaml_files_in_directory(config[source][:file_prefix], matches)
