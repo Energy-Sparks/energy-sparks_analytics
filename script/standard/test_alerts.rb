@@ -11,7 +11,7 @@ asof_date = Date.new(2022, 4, 20)
 schools = ['*']
 
 overrides = {
-  schools:  ['cefn*'],
+  schools:  schools,
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
   # alerts:   { alerts: [ AlertTurnHeatingOff ], control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving], log: [:invalid_alerts] } }
 }
