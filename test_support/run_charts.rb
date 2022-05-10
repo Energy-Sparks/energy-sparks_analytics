@@ -111,7 +111,8 @@ class RunAnalyticsTest
       management_dashboard_charts,
       public_dashboard_charts_for_school,
       other_charts,
-      targeting_and_tracking_charts
+      targeting_and_tracking_charts,
+      pupil_dashboard_charts
     ].inject(:merge)
   end
 
@@ -148,6 +149,15 @@ class RunAnalyticsTest
         targeting_and_tracking_weekly_gas_one_year_line
         targeting_and_tracking_weekly_storage_heater_one_year_line
       ]
+    }
+  end
+
+  def self.pupil_dashboard_charts
+    pages = []
+    page_config = DashboardConfiguration::DASHBOARD_PAGE_GROUPS[:pupil_analysis_page]
+    RunAnalyticsTest.charts_on_pages_recursive(page_config, pages)
+    {
+      'Pupils' => pages.flatten.uniq
     }
   end
 
@@ -247,6 +257,17 @@ class RunAnalyticsTest
       end
     else
       puts 'Error in recursive dashboard definition 1'
+    end
+  end
+
+  def self.charts_on_pages_recursive(page,  pages) 
+    if page.is_a?(Hash)
+      pages.push([page[:charts]].flatten.compact)
+      if page.key?(:sub_pages)
+        page[:sub_pages].each do |sub_page|
+          charts_on_pages_recursive(sub_page,  pages)
+        end
+      end
     end
   end
 
