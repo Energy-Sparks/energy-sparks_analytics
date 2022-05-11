@@ -10,6 +10,7 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
     super(school, :heating_hotwater_on_during_holidays)
     @fuel_type = fuel_type
     @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
+    @relevance = :never_relevant unless @school.holidays.holiday?(@today)
   end
 
   def self.template_variables
