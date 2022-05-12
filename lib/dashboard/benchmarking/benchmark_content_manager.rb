@@ -26,17 +26,17 @@ module Benchmarking
     end
 
     #Used by application
-    def content(benchmark_database, page_name, school_ids: nil, filter: nil, user_type: nil)
-      content = content_handler(benchmark_database, page_name)
+    def content(benchmark_database, page_name, school_ids: nil, filter: nil, user_type: nil, online: false)
+      content = content_handler(benchmark_database, page_name, online)
       content.content(school_ids: school_ids, filter: filter, user_type: user_type)
     end
 
     private
 
-    def content_handler(benchmark_database, page_name)
+    def content_handler(benchmark_database, page_name, online)
       chart_table_config = BenchmarkManager.chart_table_config(page_name)
       content_class = chart_table_config.key?(:benchmark_class) ? chart_table_config[:benchmark_class] : BenchmarkContentBase
-      content_class.new(benchmark_database, asof_date, page_name, chart_table_config)
+      content_class.new(benchmark_database, asof_date, page_name, chart_table_config, online)
     end
   end
 end

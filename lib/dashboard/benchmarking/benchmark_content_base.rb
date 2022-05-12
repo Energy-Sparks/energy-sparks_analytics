@@ -1,11 +1,12 @@
 module Benchmarking
   class BenchmarkContentBase
     attr_reader :benchmark_manager, :asof_date, :page_name, :chart_table_config
-    def initialize(benchmark_database, asof_date, page_name, chart_table_config)
+    def initialize(benchmark_database, asof_date, page_name, chart_table_config, online=false)
       @benchmark_manager = BenchmarkManager.new(benchmark_database)
       @asof_date = asof_date
       @page_name = page_name
       @chart_table_config = chart_table_config
+      @online = online
     end
 
     def front_end_content(school_ids: nil, filter: nil)
@@ -18,11 +19,9 @@ module Benchmarking
       caveats = nil
 
       chart       = run_chart(school_ids, filter, user_type)                if charts?
-      table_html  = run_table(school_ids, filter, :html, user_type)         if tables?
-      table_text  = run_table(school_ids, filter, :text, user_type)         if tables?
       composite   = run_table(school_ids, filter, :text_and_raw, user_type) if tables?
 
-      if (tables? || charts?) && table_text[:rows].empty?
+      if (tables? || charts?) && composite[:rows].empty?
         tables = { type: :html, content: '<h3>There are no schools to report using this filter for this benchmark</h3>' }
       else
         charts = [
@@ -32,16 +31,25 @@ module Benchmarking
           { type: :html,                  content: chart_interpretation_text }
         ] if charts? && !chart_empty?(chart)
 
-        tables = [
-          { type: :html,                  content: table_introduction_text},
-          { type: :table_html,            content: table_html },
-          { type: :table_text,            content: table_text },
-          { type: :table_composite,       content: composite },
-          { type: :html,                  content: table_interpretation_text }
-        ] if tables?
+        if tables?
+          tables = [{ type: :html,                  content: table_introduction_text}]
+
+          #only generate these additional versions of the table if we're not running
+          #as part of the application, as they're unused and result in extra memory usage
+          if !online?
+            table_html  = run_table(school_ids, filter, :html, user_type)
+            tables.push({ type: :table_html,            content: table_html })
+
+            table_text  = run_table(school_ids, filter, :text, user_type)
+            tables.push({type: :table_text,            content: table_text })
+          end
+
+          tables.push({ type: :table_composite,       content: composite })
+          tables.push({ type: :html,                  content: table_interpretation_text })
+        end
 
         caveats = [{ type: :html,         content: caveat_text}]
-      end 
+      end
 
       [preamble_content, charts, tables, caveats, drilldown(school_ids, user_type)].compact.flatten
     end
@@ -53,6 +61,10 @@ module Benchmarking
         { type: :title,                 content: chart_table_config[:name]},
         { type: :html,                  content: introduction_text },
       ]
+    end
+
+    private def online?
+      @online
     end
 
     private def drilldown(school_ids, user_type)
