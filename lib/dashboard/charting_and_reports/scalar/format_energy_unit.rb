@@ -1,6 +1,9 @@
 require 'bigdecimal'
 
 class FormatEnergyUnit
+  INFINITY = 'Infinity'.freeze
+  ZERO = '0'.freeze
+
   UNIT_DESCRIPTION_TEXT = {
     kwh:                          'kWh',
     kwp:                          'kWp',
@@ -87,7 +90,7 @@ class FormatEnergyUnit
     end
     format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
   end
-  
+
   def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
     return value if medium == :raw || no_recent_or_not_enough_data?(value)
     return '' if value.nil? #  && in_table - PH 20Nov2019 experimental change to tidying blank cells on heads summary table
@@ -160,7 +163,7 @@ class FormatEnergyUnit
     percent = value * 100.0
 
     pct_str = if !percent.infinite?.nil?
-                'Infinity'
+                INFINITY
               elsif percent.magnitude < 10.0
                 sprintf('%+.1f', percent)
               elsif percent.magnitude < 150.0
@@ -254,18 +257,19 @@ class FormatEnergyUnit
   end
 
   def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)
-    return 'Infinity' unless value.infinite?.nil?
+    return INFINITY unless value.infinite?.nil?
     number = significant_figures_user_type(value, user_numeric_comprehension_level)
-    return 0.to_s if number.zero?
-    before_decimal_point = number.to_s.gsub(/^(.*)\..*$/, '\1')
+    return ZERO if number.zero?
+    number_as_string = number.to_s
+    before_decimal_point = number_as_string.gsub(/^(.*)\..*$/, '\1')
     # for some reason a number without dp e.g. 15042 when mathed with gsub(/.*(\..*)/, '\1') returns 15042 and not null as it should match ./?
-    after_decimal_point = number.to_s.include?('.') ? number.to_s.gsub(/.*(\..*)/, '\1').gsub(/^.*\.0$/, '') : ''
+    after_decimal_point = number_as_string.include?('.') ? number_as_string.gsub!(/.*(\..*)/, '\1').gsub(/^.*\.0$/, '') : ''
     if in_pounds && !after_decimal_point.empty? && after_decimal_point.length < 3
       # add zero pence onto e.g. £23.1 so it becomes £23.10
-      after_decimal_point += '0'
+      after_decimal_point += ZERO
     elsif number.magnitude >= 1000
-      return 'Infinity' unless number.infinite?.nil?
-      return number.round(0).to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse + after_decimal_point
+      return INFINITY unless number.infinite?.nil?
+      return number.round(0).to_s.reverse!.gsub(/(\d{3})(?=\d)/, '\\1,').reverse! + after_decimal_point
     end
     before_decimal_point + after_decimal_point
   end
@@ -289,7 +293,7 @@ class FormatEnergyUnit
 
   def self.no_recent_or_not_enough_data?(value)
     [
-      ManagementSummaryTable::NO_RECENT_DATA_MESSAGE, 
+      ManagementSummaryTable::NO_RECENT_DATA_MESSAGE,
       ManagementSummaryTable::NOT_ENOUGH_DATA_MESSAGE
     ].include?(value)
   end
