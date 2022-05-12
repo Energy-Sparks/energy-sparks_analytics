@@ -97,7 +97,7 @@ class WeatherForecastCache
     add_cache(asof_date, latitude, longitude, download_forecast(latitude, longitude))
   end
 
-  def add_cache(_asof_date, latitude, longitude, forecast_data)
+  def add_cache(asof_date, latitude, longitude, forecast_data)
     # monkey patched in test environment to speedup, save API requests
     # asof_date not used in live environment
     cache(asof_date)[cache_key(latitude, longitude)] = forecast_data
