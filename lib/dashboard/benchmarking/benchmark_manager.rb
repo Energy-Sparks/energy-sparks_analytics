@@ -62,7 +62,8 @@ module Benchmarking
 
     # filter e.g. for area: ->{ addp_area.include?('Highlands') }
     def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
-      @school_name_urn_map = school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
+      create_and_store_school_map(report, today, school_ids, user_type)
+      #@school_name_urn_map = school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
       run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, user_type)
     end
 
@@ -71,6 +72,12 @@ module Benchmarking
     end
 
     private
+
+    def create_and_store_school_map(report, today, school_ids, user_type)
+      if benchmark_has_drilldown?(report)
+        @school_name_urn_map ||= school_map(today, school_ids, user_type)
+      end
+    end
 
     def benchmark_has_drilldown?(report)
       config = self.class.chart_table_config(report)
@@ -106,7 +113,7 @@ module Benchmarking
       schools = run_benchmark_table_private(asof_date, :school_information, school_ids, false, nil, :raw, user_type)
       schools.map do |school_data|
         [
-          school_data[2], 
+          school_data[2],
           { name: school_data[0], urn: school_data[1]}
         ]
       end.to_h
@@ -218,7 +225,7 @@ module Benchmarking
       {
         school_name:    school_name,
         urn:            @school_name_urn_map[school_name],
-        content_class:  content_class   
+        content_class:  content_class
       }
     end
 
