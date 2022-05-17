@@ -64,4 +64,22 @@ describe FormatEnergyUnit do
     end
   end
 
+  context 'date formatting' do
+    it 'formats Dates' do
+      date = Date.new(2000,1,1)
+      expect(FormatEnergyUnit.format(:date, date, :text)).to eq "Saturday  1 Jan 2000"
+    end
+    it 'formats String as a date' do
+      expect(FormatEnergyUnit.format(:date, "2000-01-01", :text)).to eq "Saturday  1 Jan 2000"
+    end
+    it 'formats Date as a date time' do
+      date = Date.new(2000,1,1)
+      expect(FormatEnergyUnit.format(:datetime, date, :text)).to eq "Saturday  1 Jan 2000 00:00"
+      date = DateTime.new(2000,1,1,14,40)
+      expect(FormatEnergyUnit.format(:datetime, date, :text)).to eq "Saturday  1 Jan 2000 14:40"
+    end
+    it 'formats String as a date time' do
+      expect(FormatEnergyUnit.format(:datetime, "2000-01-01", :text)).to eq "Saturday  1 Jan 2000 00:00"
+    end
+  end
 end
