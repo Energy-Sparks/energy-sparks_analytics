@@ -75,6 +75,10 @@ class TimeOfDay
     to_s
   end
 
+  def to_json
+    to_s
+  end
+
   # returns the halfhour index in which the time of day starts,
   # plus the proportion of the way through the half hour bucket the time is
   # code a little obscure for performancce
