@@ -344,10 +344,17 @@ module Benchmarking
           chart_data[series_name] = data
           percent_type = %i[percent relative_percent percent_0dp relative_percent_0dp].include?(chart_columns_definitions[1][:units])
           chart_data[series_name].map! { |val| val.nil? ? nil : val * 100.0 } if percent_type
+          #when benchmark data is stored as json, TimeOfDay is stored as Strings.
+          #for the chart data we want the TimeOfDay objects so they can be converted to relative time
+          #so create objects if needed
+          if chart_columns_definitions[1][:units] == :timeofday
+            chart_data[series_name].map! { |val| val.is_a?(String) ? TimeOfDay.parse(val) : val }
+          end
         elsif axis == :y2 && self.class.y2_axis_column?(chart_columns_definitions[index])
           y2_data[series_name] = data
         end
       end
+
       [chart_data, y2_data]
     end
 
