@@ -133,9 +133,9 @@ class FormatEnergyUnit
     elsif unit == :comparison_percent
       format_comparison_percent(value, medium)
     elsif unit == :date
-      value.strftime('%A %e %b %Y')
+      value.is_a?(String) ? Date.parse(value).strftime('%A %e %b %Y') : value.strftime('%A %e %b %Y')
     elsif unit == :datetime
-      value.strftime('%A %e %b %Y %H:%M')
+      value.is_a?(String) ? DateTime.parse(value).strftime('%A %e %b %Y %H:%M') : value.strftime('%A %e %b %Y %H:%M')
     elsif unit == :timeofday || unit == :fuel_type
       value.to_s
     else

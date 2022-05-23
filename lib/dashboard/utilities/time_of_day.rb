@@ -75,6 +75,13 @@ class TimeOfDay
     to_s
   end
 
+  #override this to avoid using default ActiveSupport serialisation
+  #which will turn this into a hash of string values, rather than
+  #simple literal
+  def as_json(options={})
+    to_s
+  end
+
   # returns the halfhour index in which the time of day starts,
   # plus the proportion of the way through the half hour bucket the time is
   # code a little obscure for performancce
