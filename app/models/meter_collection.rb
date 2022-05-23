@@ -161,59 +161,6 @@ class MeterCollection
     @calculated_floor_area_pupil_numbers.number_of_pupils(start_date, end_date)
   end
 
-  # # somewhat approx, imperfect solutjon to determine 3rd lcokdown periods without external JSON call
-  # def country
-  #   scotland_postcodes = %w[AB DD DG EH FK G HS IV KA KW KY ML PA PH TD ZE]
-  #   wales_postcodes    = %w[CF CH GL HR LD LL NP SA SY]
-  #   postcode_prefix = postcode.upcase[/^[[:alpha:]]+/]
-  #
-  #   return :scotland if scotland_postcodes.include?(postcode_prefix)
-  #
-  #   if wales_postcodes.include?(postcode_prefix)
-  #     if postcode_prefix == 'SY'
-  #       return postcode.upcase[/[[:digit:]]+/].to_i < 15 ? :england : :wales
-  #     else
-  #       return :wales
-  #     end
-  #   end
-  #
-  #   :england
-  # end
-  #
-  # # temporary, pending being captured by front end
-  # def funding_status
-  #   [
-  #     10076,
-  #     100076,
-  #     100509,
-  #     100648,
-  #     100756,
-  #     100757,
-  #     101072,
-  #     101845,
-  #     102452,
-  #     102692,
-  #     107166,
-  #     108538,
-  #     109348,
-  #     116581,
-  #     121241,
-  #     122936,
-  #     123310,
-  #     123620,
-  #     131166,
-  #     135174,
-  #     306983,
-  #     402018,
-  #     402019,
-  #     823310,
-  #     900648,
-  #     901954,
-  #     923310,
-  #     3916001
-  #   ].include?(urn) ? :private : :state
-  # end
-
   def calculate_floor_area_number_of_pupils
     @calculated_floor_area_pupil_numbers ||= FloorAreaPupilNumbers.new(@floor_area, @number_of_pupils, pseudo_meter_attributes(:school_level_data))
   end
