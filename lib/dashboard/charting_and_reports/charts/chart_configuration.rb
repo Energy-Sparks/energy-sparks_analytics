@@ -593,6 +593,10 @@ class ChartManager
       inherits_from:      :solar_pv_group_by_month,
       x_axis:           ChartDynamicXAxis.standard_solar_up_to_1_year_dynamic_x_axis,
     },
+    management_dashboard_group_by_month_solar_pv_unlimited: {
+      inherits_from:    :management_dashboard_group_by_month_solar_pv,
+      timescale:        nil
+    },
     solar_pv_last_7_days_by_submeter: {
       name:               'The last 7 days of your school’s electricity consumption',
       inherits_from:      :solar_pv_group_by_week,

@@ -279,9 +279,9 @@ class RunAnalyticsTest
     end
   end
 
-  public def run_chart(page_name, chart_name, override = nil, provide_advice: true)
+  public def run_chart(page_name, chart_name, override: nil, provide_advice: true)
     logger.info "            #{chart_name}"
-    
+
     chart_manager = ChartManager.new(@school)
 
     unless chart_manager.approx_valid_chart?(chart_name)
@@ -336,7 +336,7 @@ class RunAnalyticsTest
   end
 
   def write_html(filename_suffix = '')
-    html_file = HtmlFileWriter.new(@school.name + filename_suffix, results_sub_directory_type: results_sub_directory_type)
+    html_file = HtmlFileWriter.new(@school.name + filename_suffix, results_sub_directory_type: @results_sub_directory_type)
     @worksheets.each do |worksheet_name, charts|
       html_file.write_header(worksheet_name)
       charts.compact.each do |chart|

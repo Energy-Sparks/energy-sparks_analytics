@@ -8,10 +8,10 @@ module Logging
 end
 
 charts = {
-  bm:   %i[targeting_and_tracking_weekly_gas_to_date_cumulative_line targeting_and_tracking_weekly_gas_to_date_line targeting_and_tracking_weekly_gas_one_year_line]
+  bm:   %i[management_dashboard_group_by_month_solar_pv_unlimited solar_pv_last_7_days_by_submeter]
 }
 
-charts = RunCharts.standard_charts_for_school
+no_charts = RunCharts.standard_charts_for_school
 
 control = {
   save_to_excel:  true,
@@ -24,7 +24,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   charts:   { charts: charts, control: control }
 }
 

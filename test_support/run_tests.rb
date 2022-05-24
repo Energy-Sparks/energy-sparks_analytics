@@ -379,7 +379,7 @@ class RunTests
       @current_school_name = school_name
       reevaluate_log_filename
       school = load_school(school_name)
-      charts = RunModelFitting.new(school)
+      charts = RunModelFitting.new(school, results_sub_directory_type: 'Modelling')
       charts.run(control)
       failed_charts += charts.failed_charts
     end

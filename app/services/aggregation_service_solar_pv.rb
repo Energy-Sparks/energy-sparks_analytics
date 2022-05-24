@@ -41,8 +41,10 @@ class AggregateDataServiceSolar
 
     aggregate_multiple_generation_meters(pv_meter_map) if pv_meter_map.number_of_generation_meters > 1
 
-    if pv_meter_map[:mains_consume].sheffield_simulated_solar_pv_panels?
-      create_solar_pv_sub_meters_using_sheffield_pv_estimates(pv_meter_map) 
+    if !pv_meter_map[:generation].nil? && pv_meter_map[:export].nil?
+      create_export_self_consumption_where_real_generation_data_but_no_export(pv_meter_map)
+    elsif pv_meter_map[:mains_consume].sheffield_simulated_solar_pv_panels?
+      create_solar_pv_sub_meters_using_sheffield_pv_estimates(pv_meter_map)
     else
       clean_pv_meter_start_and_end_dates(pv_meter_map)
 
@@ -54,7 +56,7 @@ class AggregateDataServiceSolar
     create_mains_plus_self_consume_meter(pv_meter_map)
 
     raise EnergySparksUnexpectedStateException, 'Not all solar pv meters assigned' unless pv_meter_map.all_required_key_values_non_nil?
-    
+
     assign_meter_names(pv_meter_map)
 
     calculate_carbon_emissions_and_costs(pv_meter_map)
@@ -83,16 +85,16 @@ class AggregateDataServiceSolar
   def print_meter_map(pv_meter_map)
     log 'PV Meter map:'
     pv_meter_map.each do |meter_type, meter|
-     if meter.is_a?(Array)
+      if meter.is_a?(Array)
         log "    #{meter_type} => #{meter.map{|m| format_meter(m)}.join('; ')}"
       else
-        log "    #{meter_type} => #{format_meter(meter)}"
+        log "    #{'%-25.25s' % [meter_type]} -> #{format_meter(meter)}"
       end
     end
   end
 
   def format_meter(meter)
-    meter.nil? ? 'nil' : "#{meter.to_s} #{meter.amr_data.total.round(0)} kWh"
+    meter.nil? ? 'nil' : "#{'%-60.60s' % [meter.to_s]} = #{meter.amr_data.total.round(0)} kWh"
   end
 
   def print_final_setup(meter)
@@ -104,7 +106,6 @@ class AggregateDataServiceSolar
 
   def log(str)
     logger.info str
-    
     # puts str # "Got here" # comment out for release to production
   end
 
@@ -124,7 +125,7 @@ class AggregateDataServiceSolar
 
   def create_export_and_calculate_self_consumption_meters(pv_meter_map)
     if pv_meter_map[:export].nil?
-      create_export_meter(pv_meter_map) if pv_meter_map[:export].nil?
+      create_export_meter(pv_meter_map)
     else
       negate_sign_of_export_meter_data(pv_meter_map)
     end
@@ -134,6 +135,7 @@ class AggregateDataServiceSolar
   # TODO(PH, 20Nov2020) - untested
   def create_export_meter(pv_meter_map)
     date_range = pv_meter_map[:mains_consume].amr_data.date_range
+    log "Creating empty export meter between #{date_range.first} and #{date_range.last}"
     amr_data = AMRData.create_empty_dataset(:exported_solar_pv, date_range.first, date_range.last, 'SOLE')
     create_modified_meter_copy(
       pv_meter_map[:mains_consume],
@@ -146,6 +148,7 @@ class AggregateDataServiceSolar
   end
 
   def create_and_calculate_self_consumption_meter(pv_meter_map)
+    log 'Creating and calculating self consumption meter'
     # take the mains consumption, export and solar pv production
     # meter readings and calculate self consumption =
     # self_consumption = solar pv production - export
@@ -275,7 +278,7 @@ class AggregateDataServiceSolar
         meter.amr_data.set_start_date(mains_electricity_meter.amr_data.start_date)
       end
       if meter.amr_data.end_date > mains_electricity_meter.amr_data.end_date
-        log "Truncating meter #{meter.mpan_mprn} to end date of electricity meter #{mains_electricity_meter.amr_data.start_date}"
+        log "Truncating meter #{meter.mpan_mprn} to end date of electricity meter #{mains_electricity_meter.amr_data.end_date}"
         meter.amr_data.set_end_date(mains_electricity_meter.amr_data.end_date)
       end
     end
@@ -376,6 +379,31 @@ class AggregateDataServiceSolar
   def truncate_meter_dates(meter, map)
     truncate_start_date(meter, map[:start_date])
     truncate_end_date(meter, map[:end_date])
+  end
+
+  def create_export_self_consumption_where_real_generation_data_but_no_export(pv_meter_map)
+    am = pv_meter_map[:generation].amr_data
+
+    if @apply_scaling_factor_for_debug
+      scale_factor = 1.0
+      puts "*" * 50
+      puts "Scaling data by a factor of #{scale_factor} "
+      pv_meter_map[:generation].amr_data.scale_kwh(scale_factor, date1: am.start_date, date2: am.end_date)
+      puts "*" * 50
+    end
+
+    # real generation data but no export, so calculate
+    SolarPVPanelsMeteredProduction.new.process(pv_meter_map, @meter_collection)
+
+    truncate_to_mains_meter_dates(pv_meter_map)
+
+    # potentially override or extend with Sheffield Synthetic
+    if pv_meter_map[:mains_consume].sheffield_simulated_solar_pv_panels?
+      create_solar_pv_sub_meters_using_sheffield_pv_estimates(pv_meter_map)
+    end
+
+    # and with solar override attributes as well
+    fix_missing_or_bad_meter_data(pv_meter_map)
   end
 
   def truncate_start_date(meter, start_date)
