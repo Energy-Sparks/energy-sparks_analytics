@@ -400,6 +400,23 @@ module Series
       nil
     end
 
+    def model_type?(date)
+      heating_model.model_type?(date)
+    end
+
+    def predicted_amr_data_one_day(date)
+      temperature = school.temperatures.average_temperature(date)
+      heating_model.predicted_kwh(date, temperature)
+    end
+
+    def trendline_scale
+      scaling_factor_for_model_derived_gas_data(kwh_cost_or_co2)
+    end
+
+    def heating_model_types
+      heating_model.all_heating_model_types
+    end
+
     def get_data(time_period)
       data_private(time_period)
     end
@@ -618,6 +635,10 @@ module Series
       period                 = meter.up_to_one_year_model_period
 
       @heating_model ||= meter.heating_model(period, heating_model_type, non_heating_model_type)
+    end
+
+    def model_type?(date)
+      heating_model.model_type?(date)
     end
 
     private

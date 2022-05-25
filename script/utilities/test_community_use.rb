@@ -109,11 +109,13 @@ end
 
 profiler = false
 
-filename = 'Results\\test-community-use.xlsx'
-school_name_pattern_match = ['KJ*', 'bath*']
+dir = TestDirectory.instance.results_directory('CommunityUse')
+filename = File.join(dir, 'test-community-use.xlsx')
+
+school_name_pattern_match = ['king*']
 source_db = :unvalidated_meter_data
 
-school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
+school_names = SchoolFactory.instance.school_file_list(source_db, school_name_pattern_match)
 
 RubyProf.start if profiler
 
@@ -121,7 +123,7 @@ RubyProf.start if profiler
 excel = ExcelCharts.new(filename)
 
 school_names.each do |school_name|
-  school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
+  school = SchoolFactory.instance.load_school(source_db, school_name)
 
   # test_community_use_breakdowns(school)
 
@@ -131,7 +133,7 @@ school_names.each do |school_name|
 
   excel_school_name = school_name.gsub(' ', '').gsub('-', '')[0..10]
 
-  excel.add_charts(excel_school_name, charts)
+  excel.add_charts(excel_school_name, charts.compact)
 end
 
 if profiler
