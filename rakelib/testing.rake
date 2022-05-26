@@ -60,6 +60,7 @@ namespace :testing do
     require 'aws-sdk-s3'
     args.with_defaults(schools: '')
     bucket = ENV['UNVALIDATED_SCHOOL_CACHE_BUCKET']
+    $stderr.puts "Downloading list of files from #{bucket}"
     client = Aws::S3::Client.new
     resp = client.list_objects_v2({
         bucket: bucket,
@@ -67,6 +68,7 @@ namespace :testing do
     })
     resp.contents.each do |entry|
       filename = "#{ENV['ANALYTICSTESTDIR']}/MeterCollections/#{entry.key}"
+      $stderr.puts "Saving data to #{filename}"
       File.open(filename, 'w') do |file|
         resp = client.get_object({ bucket: bucket, key: entry.key }, target: file)
       end
