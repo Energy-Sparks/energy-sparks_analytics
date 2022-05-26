@@ -63,7 +63,7 @@ class CompareChartResults
     chart
   end
 
-  
+
   def remove_volatile_html(html, start_match, end_match)
     start_index = html.index(start_match)
     end_index = html.index(end_match)
@@ -119,7 +119,7 @@ class CompareChartResults
   def yml_filepath(full_path, chart_name)
     Dir.mkdir(full_path) unless File.exist?(full_path)
     extension = control_contains?(:name_extension) ? ('- ' + hash_controls[:name_extension].to_s) : ''
-    yaml_filename = full_path + '\\' + @school_name + '-' + chart_name.to_s + extension + '.yaml'
+    yaml_filename = full_path + '/' + @school_name + '-' + chart_name.to_s + extension + '.yaml'
     yaml_filename.length > 259 ? shorten_filename(yaml_filename) : yaml_filename
   end
 

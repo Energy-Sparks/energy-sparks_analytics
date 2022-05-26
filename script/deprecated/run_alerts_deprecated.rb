@@ -129,14 +129,14 @@ class RunAlerts2
 
   def full_filename(filename, base)
     if base
-      @comparison_directory + '\\' + filename
+      @comparison_directory + '/' + filename
     else
-      @output_directory + '\\' + filename
+      @output_directory + '/' + filename
     end
   end
 
   def yaml_filename(alert_type, output_type, asof_date)
-    "#{@school.name} #{asof_date.strftime('%Y%m%d')} #{alert_type} #{output_type}.yml" 
+    "#{@school.name} #{asof_date.strftime('%Y%m%d')} #{alert_type} #{output_type}.yml"
   end
 
   def save_and_compare(alert_class, alert, control, asof_date)
@@ -234,12 +234,12 @@ class RunAlerts2
   end
 
   def run_charts(alert)
-    return if alert.front_end_template_chart_data.empty? 
+    return if alert.front_end_template_chart_data.empty?
     control = {
       charts: [ adhoc_worksheet: { name: 'Test', charts: [ alert.front_end_template_chart_data ] } ],
       control: {
         report_failed_charts:   :summary,
-        compare_results:        [ :summary, :report_differing_charts, :report_differences ] 
+        compare_results:        [ :summary, :report_differing_charts, :report_differences ]
       }
     }
     charts = RunCharts.new(@school)
@@ -260,7 +260,7 @@ class RunAlerts2
     print_banner("asof date: #{asof_date.strftime('%a %d-%m-%Y')}", 0)
 
     failed_alerts = []
- 
+
     generate_charts = false
     # excel_charts = ReportConfigSupport.new if generate_charts
 
@@ -302,7 +302,7 @@ class RunAlerts2
             puts "#{alert_class}: Not make_available_to_users after analysis"
             next
           end
-          raw_data = alert.raw_variables_for_saving          
+          raw_data = alert.raw_variables_for_saving
           if control.key?(:benchmark_alert)
             new_data = alert.benchmark_template_data
             alert_short_code = alert_class.short_code
