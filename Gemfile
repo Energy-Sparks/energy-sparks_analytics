@@ -30,11 +30,15 @@ gem 'ruby-limiter', '~> 1.1.0'
 gem 'pry-byebug'
 gem 'hashdiff', '~> 1.0.0'
 
-# For profiling code
-gem 'ruby-prof'
-gem "benchmark-memory"
-
 gem 'dotenv'
+
+group :development do
+  gem 'aws-sdk-s3'
+
+  # For profiling code
+  gem 'ruby-prof'
+  gem "benchmark-memory"
+end
 
 # For tests
 group :test do
