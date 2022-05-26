@@ -22,6 +22,11 @@ module Logging
   end
 end
 
+require 'active_support'
+require 'active_support/core_ext/date/calculations'
+require 'active_support/core_ext/numeric/conversions'
+require 'active_support/core_ext/object/deep_dup'
+
 # Ultimately based on AR models
 require_rel '../app/**/*.rb'
 
@@ -43,11 +48,7 @@ require 'statsample'
 
 require 'html-table'
 
-require 'active_support'
-require 'active_support/core_ext/date/calculations'
-require 'active_support/core_ext/numeric/conversions'
-require 'active_support/core_ext/object/deep_dup'
+
 
 # downloadregionalsolardatafromsheffieldluniversity
 # downloadSolarAndTemperatureData
-
