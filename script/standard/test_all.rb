@@ -5,7 +5,7 @@ require_rel '../../test_support'
 require './script/report_config_support.rb'
 
 module Logging
-  @logger = Logger.new('log\logs.log')
+  @logger = Logger.new(File.join('log', 'logs.log'))
   logger.level = :error
 end
 

@@ -13,7 +13,7 @@ script = {
   schools:                  ['*'],
   source:                   :unvalidated_meter_data,
   logger2:                  { name: "./log/reports %{school_name} %{time}.log", format: "%{datetime} %{severity.ljust(5, ' ')}: %{msg}\n" },
-  
+
   management_summary_table:          {
     control: {
       combined_html_output_file:     "Management Summary Table #{Date.today}",
@@ -75,7 +75,7 @@ script = {
         {schoolweek: 0},
         {schoolweek: -1},
         {month: 0},
-        {month: -1}                    
+        {month: -1}
       ],
       compare_results: [
         { comparison_directory: ENV['ANALYTICSTESTRESULTDIR'] + '\Equivalences\Base\\' },
