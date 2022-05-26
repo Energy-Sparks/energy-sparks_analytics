@@ -34,7 +34,7 @@ gem 'dotenv'
 
 group :development do
   gem 'aws-sdk-s3'
-
+  gem 'i18n-tasks', '~> 1.0.10'
   # For profiling code
   gem 'ruby-prof'
   gem "benchmark-memory"
