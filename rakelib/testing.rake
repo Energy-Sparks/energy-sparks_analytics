@@ -54,4 +54,22 @@ namespace :testing do
     end
   end
 
+  desc 'download unvalidated data, specify school name prefix with parameter'
+  task :download_unvalidated_data, :schools do |t,args|
+    fail "Set test directory and bucket environment variables" unless ENV["ANALYTICSTESTDIR"] && ENV['UNVALIDATED_SCHOOL_CACHE_BUCKET']
+    require 'aws-sdk-s3'
+    args.with_defaults(schools: '')
+    bucket = ENV['UNVALIDATED_SCHOOL_CACHE_BUCKET']
+    client = Aws::S3::Client.new
+    resp = client.list_objects_v2({
+        bucket: bucket,
+        prefix: "unvalidated-data-" + args.schools,
+    })
+    resp.contents.each do |entry|
+      filename = "#{ENV['ANALYTICSTESTDIR']}/MeterCollections/#{entry.key}"
+      File.open(filename, 'w') do |file|
+        resp = client.get_object({ bucket: bucket, key: entry.key }, target: file)
+      end
+    end
+  end
 end
