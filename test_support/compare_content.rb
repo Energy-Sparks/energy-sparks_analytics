@@ -43,7 +43,7 @@ class CompareContentResults
       filename = File.join(output_directory, "#{school_or_type} #{page}.yaml".strip)
       save_yaml_file(filename, content)
     else
-      split_content = split_content(content) 
+      split_content = split_content(content)
       split_content.each do |key, contents|
         filename = File.join(output_directory, "#{school_or_type} #{page} #{key}.yaml".strip)
         save_yaml_file(filename, contents)
@@ -67,7 +67,7 @@ class CompareContentResults
         full_filename = File.join(comparison_directory, filename)
         content[index_string.to_i] = { type: key.to_sym, content: load_yaml_file(full_filename) }
       end
-    end 
+    end
     content
   end
 
@@ -110,7 +110,7 @@ class CompareContentResults
       if comparison_component != new_component
         if @control[:compare_results].include?(:report_differences)
           puts "Differs: #{index}"
-          h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001) 
+          h_diff = Hashdiff.diff(comparison_component, new_component, use_lcs: false, :numeric_tolerance => 0.000001)
           puts "'Difference:"
           puts h_diff
           puts 'Original:'
@@ -165,7 +165,7 @@ class CompareContentResults
     # puts "Removing volatile content"
     content = content.deep_dup
     if content[:content].is_a?(Hash)
-      content[:content] = content[:content].except(:calculation_time) 
+      content[:content] = content[:content].except(:calculation_time)
       unless content[:content][:advice_header].nil?
         content[:content][:advice_header] = remove_volatile_html(content[:content][:advice_header])
       end
@@ -280,7 +280,7 @@ class CompareContent2 < CompareContentResults
   end
 
   def yaml_filename(directory, type)
-    directory + '\\' + @school_name + ' ' + type + '.yaml'
+    directory + '/' + @school_name + ' ' + type + '.yaml'
   end
 
   def load_yaml(filename)
@@ -318,7 +318,7 @@ class CompareContent2 < CompareContentResults
 
   def detailed_differences(type, benchmark, new_content, tolerance)
     tolerance ||= { use_lcs: false, :numeric_tolerance => 0.000001 }
-    h_diff = Hashdiff.diff(benchmark, new_content, tolerance) 
+    h_diff = Hashdiff.diff(benchmark, new_content, tolerance)
     puts "'Difference for #{type}:"
     puts h_diff
   end

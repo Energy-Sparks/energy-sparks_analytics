@@ -3,7 +3,7 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 module Logging
-  @logger = Logger.new('log\logs.log')
+  @logger = Logger.new(File.join('log', 'logs.log'))
   logger.level = :error
 end
 
