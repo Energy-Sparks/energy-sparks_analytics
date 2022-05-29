@@ -1,6 +1,10 @@
 
 require_relative './advice_general.rb'
 class AdviceBaseload < AdviceElectricityBase
+  def enough_data
+    aggregate_meter.amr_data.days > 20 ? :enough : :not_enough
+  end
+
   def baseload_one_year_chart
     @bdown_1year_chart ||= charts[0]
   end

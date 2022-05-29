@@ -123,11 +123,12 @@ class OpenCloseTimes
 end
 
 class OpenCloseTime
-  SCHOOL_OPEN   = :school_day_open
-  SCHOOL_CLOSED = :school_day_closed
-  HOLIDAY       = :holiday
-  WEEKEND       = :weekend
-  COMMUNITY     = :community
+  SCHOOL_OPEN         = :school_day_open
+  SCHOOL_CLOSED       = :school_day_closed
+  HOLIDAY             = :holiday
+  WEEKEND             = :weekend
+  COMMUNITY           = :community
+  COMMUNITY_BASELOAD  = :community_baseload
 
   def initialize(open_close_time, holidays)
     @open_close_time = open_close_time
@@ -181,18 +182,19 @@ class OpenCloseTime
 
   def self.community_use_types
     @@community_use_types ||= {
-      SCHOOL_CLOSED =>    { user_configurable: false, sort_order: 1 },
-      SCHOOL_OPEN   =>    {                           sort_order: 2},
-      WEEKEND       =>    { user_configurable: false, sort_order: 3 },
-      HOLIDAY       =>    { user_configurable: false, sort_order: 4 },
-      COMMUNITY     =>    { community_use: true, sort_order:  5, benchmark_code: 'c' },
-      dormitory:          { community_use: true, sort_order:  6, benchmark_code: 'd' },
-      sports_centre:      { community_use: true, sort_order:  7, benchmark_code: 's' },
-      swimming_pool:      { community_use: true, sort_order:  8, benchmark_code: 's' },
-      kitchen:            { community_use: true, sort_order:  9, benchmark_code: 'k' },
-      library:            { community_use: true, sort_order: 10, benchmark_code: 'l' },
-      flood_lighting:     { community_use: true, sort_order: 11, benchmark_code: 'f', fuel_type: :electricity },
-      other:              { community_use: true, sort_order: 12, benchmark_code: 'o' }
+      SCHOOL_CLOSED       =>    { user_configurable: false, sort_order: 1 },
+      SCHOOL_OPEN         =>    {                           sort_order: 2},
+      WEEKEND             =>    { user_configurable: false, sort_order: 3 },
+      HOLIDAY             =>    { user_configurable: false, sort_order: 4 },
+      COMMUNITY           =>    { community_use: true, sort_order:  5, benchmark_code: 'c' },
+      COMMUNITY_BASELOAD  =>    { community_use: true, sort_order:  6, benchmark_code: 'b' },
+      dormitory:          { community_use: true, sort_order:  7, benchmark_code: 'd' },
+      sports_centre:      { community_use: true, sort_order:  8, benchmark_code: 's' },
+      swimming_pool:      { community_use: true, sort_order:  9, benchmark_code: 's' },
+      kitchen:            { community_use: true, sort_order: 10, benchmark_code: 'k' },
+      library:            { community_use: true, sort_order: 11, benchmark_code: 'l' },
+      flood_lighting:     { community_use: true, sort_order: 12, benchmark_code: 'f', fuel_type: :electricity },
+      other:              { community_use: true, sort_order: 13, benchmark_code: 'o' }
     }
   end
 
