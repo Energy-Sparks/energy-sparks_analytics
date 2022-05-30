@@ -311,7 +311,7 @@ module Benchmarking
                      timeofday: 'Time of day',
                      percent: 'percent', percent_0dp: 'percent',
                      relative_percent: 'percent', relative_percent_0dp: 'percent',
-                     days: 'days' }
+                     days: 'days', r2: ''}
       return unit_names[unit] if unit_names.key?(unit)
       logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
       puts "Unexpected untranslated unit type for benchmark chart #{unit}"

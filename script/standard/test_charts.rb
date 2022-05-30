@@ -3,15 +3,15 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
 module Logging
-  @logger = Logger.new(File.join('log', 'logs.log'))
+  @logger = Logger.new(File.join('log', 'test charts.log'))
   logger.level = :error
 end
 
 charts = {
-  bm:   %i[management_dashboard_group_by_month_solar_pv_unlimited solar_pv_last_7_days_by_submeter]
+  bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]
 }
 
-no_charts = RunCharts.standard_charts_for_school
+charts = RunCharts.standard_charts_for_school
 
 control = {
   save_to_excel:  true,
@@ -25,6 +25,7 @@ control = {
 
 overrides = {
   schools:  ['*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  cache_school: false,
   charts:   { charts: charts, control: control }
 }
 

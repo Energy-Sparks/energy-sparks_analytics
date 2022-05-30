@@ -13,13 +13,16 @@ class AMRDataCommunityOpenCloseBreakdown
     # filter:    is a filter, just return community_only use, of school use only or both
     # aggregate: into all types of community use, aggregate the community use components,
     #            or just return a total single total
+    # split_electricity_baseload: assign electricity baseload to separate
+    #                             category or combine with community use
     # the returned values could be a single kwh/co2/£ value,
     # or a hash keyed by :school_day_open, closed etc. to kwh/co2/£ values
     # community_use: nil won't get this far as no breakdown and so handled within class AMRdata
     {
       community_use: {
         filter:    :community_only || :school_only || :all,
-        aggregate: :none || :community_use || :all_to_single_value
+        aggregate: :none || :community_use || :all_to_single_value,
+        split_electricity_baseload: true || false
       }
     }
   end
@@ -83,9 +86,9 @@ class AMRDataCommunityOpenCloseBreakdown
     usage_types = @open_close_times.time_types.map { |t| [t, 0.0] }.to_h
 
     if community_use.nil?
-      aggregate_data(usage_types, :community_use).keys
+      aggregate_data(usage_types, :community_use, false).keys
     else
-      aggregate_data(usage_types, community_use[:aggregate]).keys
+      aggregate_data(usage_types, community_use[:aggregate], community_use[:split_electricity_baseload]).keys
     end
   end
 
@@ -122,12 +125,14 @@ class AMRDataCommunityOpenCloseBreakdown
 
       if hhi_weights.empty? || hhi_weights.values.all?(&:zero?) # whole half hour nothing open
         set_hhi_value(kwh_breakdown, type_of_remainder, hhi, kwh)
-      elsif hhi_weights[:school_day_open] == 1.0 # whole half hour school open
-        set_hhi_value(kwh_breakdown, :school_day_open, hhi, kwh)
+      elsif hhi_weights[OpenCloseTime::SCHOOL_OPEN] == 1.0 # whole half hour school open
+        set_hhi_value(kwh_breakdown, OpenCloseTime::SCHOOL_OPEN, hhi, kwh)
       else # slower more complex split half hour periods
-        open_kwh, community_kwh, closed_kwh = split_half_hour_kwhs(hhi_weights, baseload_kwh, kwh)
-        set_hhi_value(kwh_breakdown, :school_day_open,   hhi, open_kwh)   unless open_kwh.zero?
-        set_hhi_value(kwh_breakdown, type_of_remainder, hhi, closed_kwh) unless closed_kwh.zero?
+        open_kwh, community_kwh, community_baseload_kwh, closed_kwh = split_half_hour_kwhs(hhi_weights, baseload_kwh, kwh)
+
+        set_hhi_value(kwh_breakdown, OpenCloseTime::SCHOOL_OPEN,        hhi, open_kwh              ) unless open_kwh.zero?
+        set_hhi_value(kwh_breakdown, OpenCloseTime::COMMUNITY_BASELOAD, hhi, community_baseload_kwh) unless community_baseload_kwh.zero?
+        set_hhi_value(kwh_breakdown, type_of_remainder,                 hhi, closed_kwh            ) unless closed_kwh.zero?
 
         unless community_kwh.zero?
           community_weights = community_type_weights(hhi_weights)
@@ -194,17 +199,19 @@ class AMRDataCommunityOpenCloseBreakdown
 
   # refer to charts in \Energy Sparks\Energy Sparks Project Team Documents\Analytics\Community use etc\
   def split_half_hour_kwhs(weights, baseload_kwh, kwh)
-    open_t, community_t, closed_t = bucket_time_weights(weights)
+    open_t, community_t, _closed_t = bucket_time_weights(weights)
 
-    open_kwh      = kwh * open_t
-    community_kwh = [(kwh - baseload_kwh) * community_t, 0.0].max
-    closed_kwh    = kwh - open_kwh - community_kwh
+    open_kwh                = kwh * open_t
+    community_kwh           = [(kwh - baseload_kwh) * community_t, 0.0].max
+    community_baseload_kwh  = [baseload_kwh * community_t, kwh].min
+    closed_kwh              = kwh - open_kwh - community_kwh - community_baseload_kwh
+    closed_kwh              = 0.0 if closed_kwh.magnitude < 0.00000001 # remove floating point noise
 
     # TODO(PH, 4Apr2022) there seems to be a problem with some Orsis solar schools providing small -tbe mains consumption
     #                    hence kwh > 0.0 additjon below, needs further investigation of root cause
-    raise NegativeClosedkWhCalculation, "Negative closed allocation #{closed_kwh} Before #{kwh} => Open #{open_kwh} + Closed #{closed_kwh} + Coms time #{community_t}" if closed_kwh < 0.0 && kwh > 0.0
+    raise NegativeClosedkWhCalculation, "Negative closed allocation #{closed_kwh} Before #{kwh} => Open #{open_kwh} + Closed #{closed_kwh} + Comms baseload #{community_baseload_kwh} + Comms #{community_kwh} (Comms time #{community_t})" if closed_kwh < 0.0 && kwh > 0.0
 
-    [open_kwh, community_kwh, closed_kwh]
+    [open_kwh, community_kwh, community_baseload_kwh, closed_kwh]
   end
 
   def calc_baseload_kw(meter, date, data_type)
@@ -219,13 +226,16 @@ class AMRDataCommunityOpenCloseBreakdown
     community_use ||= { aggregate: :none, filter: :all}
 
     filtered_data = filter_community_use(data, community_use[:filter])
-    aggregate_data(filtered_data, community_use[:aggregate])
+    aggregate_data(filtered_data, community_use[:aggregate], community_use[:split_electricity_baseload])
   end
 
-  def filter_community_use(data, community_use_use)
+  def filter_community_use(data, community_use_use, split_electricity_baseload = false)
     case community_use_use
     when :community_only
-      data.select { |usage_type, _kwh_or_£_co2_x_scalar_or_x48| OpenCloseTime.community_usage_types.include?(usage_type) }
+      data.select do |usage_type, _kwh_or_£_co2_x_scalar_or_x48|
+        OpenCloseTime.community_usage_types.include?(usage_type) &&
+          !include_electricity_baseload?(usage_type,  split_electricity_baseload)
+      end
     when :school_only
       data.reject { |usage_type, _kwh_or_£_co2_x_scalar_or_x48| OpenCloseTime.community_usage_types.include?(usage_type) }
     when :all
@@ -235,14 +245,25 @@ class AMRDataCommunityOpenCloseBreakdown
     end
   end
 
-  def aggregate_data(data, breakdown)
+  def include_electricity_baseload?(usage_type,  split_electricity_baseload)
+    usage_type == OpenCloseTime::COMMUNITY_BASELOAD && split_electricity_baseload
+  end
+
+  def aggregate_data(data, breakdown, split_electricity_baseload)
     case breakdown
     when :none
       data
     when :community_use
       use           = filter_community_use(data, :school_only)
-      community_use = filter_community_use(data, :community_only)
-      use[OpenCloseTime::COMMUNITY] = aggregate_values(community_use.values) if @meter.meter_collection.community_usage?
+      community_use = filter_community_use(data, :community_only, split_electricity_baseload)
+      if @meter.meter_collection.community_usage?
+        if split_electricity_baseload
+          use[OpenCloseTime::COMMUNITY]          = aggregate_values(community_use.values)
+          use[OpenCloseTime::COMMUNITY_BASELOAD] = data[OpenCloseTime::COMMUNITY_BASELOAD] || 0.0
+        else
+          use[OpenCloseTime::COMMUNITY]          = aggregate_values(community_use.values)
+        end
+      end
       use
     when :all_to_single_value
       # return summed values, no hash/key indexing

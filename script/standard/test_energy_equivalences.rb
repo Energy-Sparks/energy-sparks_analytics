@@ -10,7 +10,7 @@ module Logging
 end
 
 overrides = {
-  schools:  ['bath*']
+  schools:  ['*']
 }
 
 script = RunEquivalences.default_config.deep_merge(overrides)

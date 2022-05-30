@@ -209,6 +209,7 @@ class ChartManager
     management_dashboard_group_by_week_electricity: {
       inherits_from:    :group_by_week_electricity,
       x_axis:           ChartDynamicXAxis.standard_up_to_1_year_dynamic_x_axis,
+      community_use:    { filter: :all, aggregate: :community_use, split_electricity_baseload: true },
       timescale:        :up_to_a_year
     },
 
@@ -1060,7 +1061,8 @@ class ChartManager
       x_axis:           :intraday,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
-      subtitle:         :daterange
+      subtitle:         :daterange,
+      community_use:  { filter: :all, aggregate: :community_use, split_electricity_baseload: true }
     },
     community_use_test_electricity_community_use_only: {
       name:          'Community use test chart electricity community use only',

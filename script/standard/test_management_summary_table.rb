@@ -4,8 +4,14 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 require './script/report_config_support.rb'
 
+module Logging
+  @logger = Logger.new(File.join('log', 'management summary table.log'))
+  logger.level = :error
+end
+
 overrides = {
-  schools:  ['ullapool-pv-storage_heaters_not_relevant*']
+  schools:  ['*'],
+  cache_school: false
 }
 
 script = RunManagementSummaryTable.default_config.deep_merge(overrides)

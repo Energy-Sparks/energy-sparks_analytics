@@ -554,6 +554,7 @@ module Benchmarking
         sort_by:  [1],
         type: %i[chart table]
       },
+=begin
       length_of_school_day_heating_season_deprecated: {
         benchmark_class:  BenchmarkContentLengthOfHeatingSeasonDeprecated,
         name:     'Number of days heating was on last year',
@@ -569,6 +570,7 @@ module Benchmarking
         sort_by: [1],
         type: %i[chart table]
       },
+=end
       heating_in_warm_weather: {
         benchmark_class:  BenchmarkContentHeatingInWarmWeather,
         name:     'Gas or storage heater consumption for heating in warm weather',
@@ -589,7 +591,7 @@ module Benchmarking
         name:     'Quality of thermostatic control',
         columns:  [
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true, content_class: AdviceGasBoilerThermostatic },
-          { data: ->{ or_nil([httc_r2, shtc_r2]) },    name: 'Thermostatic R2', units: Float,  chart_data: true },
+          { data: ->{ or_nil([httc_r2, shtc_r2]) },    name: 'Thermostatic R2', units: :r2,  chart_data: true },
           { data: ->{ sum_data([httc_sav£, shtc_sav£], true) },  name: 'Saving through improved thermostatic control', units: :£ },
           { data: ->{ httc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
