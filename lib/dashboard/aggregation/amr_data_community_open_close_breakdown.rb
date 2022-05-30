@@ -13,13 +13,16 @@ class AMRDataCommunityOpenCloseBreakdown
     # filter:    is a filter, just return community_only use, of school use only or both
     # aggregate: into all types of community use, aggregate the community use components,
     #            or just return a total single total
+    # split_electricity_baseload: assign electricity baseload to separate
+    #                             category or combine with community use
     # the returned values could be a single kwh/co2/£ value,
     # or a hash keyed by :school_day_open, closed etc. to kwh/co2/£ values
     # community_use: nil won't get this far as no breakdown and so handled within class AMRdata
     {
       community_use: {
         filter:    :community_only || :school_only || :all,
-        aggregate: :none || :community_use || :all_to_single_value
+        aggregate: :none || :community_use || :all_to_single_value,
+        split_electricity_baseload: true || false
       }
     }
   end
