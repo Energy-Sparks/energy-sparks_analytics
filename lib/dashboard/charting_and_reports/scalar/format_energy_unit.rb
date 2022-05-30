@@ -4,6 +4,9 @@ class FormatEnergyUnit
   INFINITY = 'Infinity'.freeze
   ZERO = '0'.freeze
 
+  #As part of I18n work the text for this will move to the YML files
+  #This has been left here temporarily for the moment as the keys are also used to
+  #identify known units
   UNIT_DESCRIPTION_TEXT = {
     kwh:                          'kWh',
     kwp:                          'kWp',
@@ -96,10 +99,14 @@ class FormatEnergyUnit
     return '' if value.nil? #  && in_table - PH 20Nov2019 experimental change to tidying blank cells on heads summary table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
     return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
+
+    #TODO in what circumstances would we want to only convert some units to strings but
+    #raise an error for others?
     return value.to_s if convert_missing_types_to_strings && !UNIT_DESCRIPTION_TEXT.key?(unit)
     check_units(UNIT_DESCRIPTION_TEXT, unit)
+
     if value.nil? && unit != :temperature
-      UNIT_DESCRIPTION_TEXT[unit]
+      I18n.t("energy_units.#{unit}")
     elsif unit == :£ || unit == :£_0dp
       format_pounds(value, medium, user_numeric_comprehension_level, unit == :£_0dp)
     elsif unit == :days
@@ -246,7 +253,7 @@ class FormatEnergyUnit
     if medium == :html && UNIT_DESCRIPTION_HTML.key?(unit)
       UNIT_DESCRIPTION_HTML[unit]
     else
-      UNIT_DESCRIPTION_TEXT[unit]
+      I18n.t("energy_units.#{unit}")
     end
   end
 

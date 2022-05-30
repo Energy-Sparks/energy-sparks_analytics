@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 ruby '~> 2.7.4'
 
 gem 'require_all'
-gem 'activesupport', '~> 6.0.0'
+gem 'activesupport', '~> 6.0.4'
 
 # Forked statsample to do proper relases and to remove dependency on awesome_print which is no longer supported
 # Last official release of statsample also had a problem where it overrode the definition of Array#sum with dodgy results
@@ -34,7 +34,7 @@ gem 'dotenv'
 
 group :development do
   gem 'aws-sdk-s3'
-
+  gem 'i18n-tasks', '~> 1.0.10'
   # For profiling code
   gem 'ruby-prof'
   gem "benchmark-memory"

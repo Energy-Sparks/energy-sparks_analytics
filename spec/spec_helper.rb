@@ -26,6 +26,9 @@ end
 require 'dashboard'
 require 'factory_bot'
 
+#Load YAML files for translations
+I18n.load_path += Dir[File.join('config', 'locales', '**', '*.yml').to_s]
+
 # switch off most logging while testing
 module Logging
   logger.level = :error
