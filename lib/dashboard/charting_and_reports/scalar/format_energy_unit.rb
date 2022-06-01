@@ -106,7 +106,7 @@ class FormatEnergyUnit
     check_units(UNIT_DESCRIPTION_TEXT, unit)
 
     if value.nil? && unit != :temperature
-      I18n.t("energy_units.#{unit}")
+      I18n.t("analytics.energy_units.#{unit}")
     elsif unit == :£ || unit == :£_0dp
       format_pounds(value, medium, user_numeric_comprehension_level, unit == :£_0dp)
     elsif unit == :days
@@ -253,7 +253,7 @@ class FormatEnergyUnit
     if medium == :html && UNIT_DESCRIPTION_HTML.key?(unit)
       UNIT_DESCRIPTION_HTML[unit]
     else
-      I18n.t("energy_units.#{unit}")
+      I18n.t("analytics.energy_units.#{unit}")
     end
   end
 
