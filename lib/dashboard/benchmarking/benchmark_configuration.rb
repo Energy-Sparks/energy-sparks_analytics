@@ -195,7 +195,8 @@ module Benchmarking
           { data: ->{ enba_kxap },  name: 'Change in annual energy use since joined Energy Sparks', units: :relative_percent_0dp, chart_data: true, content_class: AdviceBenchmark },
           { data: ->{ enba_keap },  name: 'Change in annual electricity use since joined Energy Sparks', units: :relative_percent_0dp },
           { data: ->{ enba_kgap },  name: 'Change in annual gas use since joined Energy Sparks', units: :relative_percent_0dp },
-          { data: ->{ enba_khap },  name: 'Change in annual storage heater use since joined Energy Sparks', units: :relative_percent_0dp }
+          { data: ->{ enba_khap },  name: 'Change in annual storage heater use since joined Energy Sparks', units: :relative_percent_0dp },
+          { data: ->{ enba_sact },  name: 'Energy Sparks join date', units: :date }
         ],
         treat_as_nil:   ['no recent data', 'not enough data'], # from ManagementSummaryTable:: not referenced because not on path
         sort_by:  [1],
@@ -209,7 +210,7 @@ module Benchmarking
         name:     'breakdown in the change in energy use since the school joined Energy Sparks',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
-
+          { data: ->{ enba_sact },  name: 'Energy Sparks join date', units: :date },
           { data: ->{ enba_kea }, name: 'Electricity consumption kWh (year before joined Energy Sparks)', units: :kwh },
           { data: ->{ enba_ke0 }, name: 'Electricity consumption kWh (last year)',                        units: :kwh },
           { data: ->{ enba_keap}, name: 'Change in electricity consumption (excluding solar)',            units: :relative_percent_0dp, chart_data: true },

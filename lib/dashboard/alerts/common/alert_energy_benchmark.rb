@@ -57,6 +57,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   attr_reader :change_in_gas_use_since_joined_percent, :change_in_storage_heater_use_since_joined_percent
   attr_reader :last_year_electricity_co2, :last_year_gas_co2
   attr_reader :last_year_storage_heater_co2, :last_year_solar_pv_co2
+  attr_reader :activation_date
   attr_reader :recent_fuel_types_for_debug
 
   def initialize(school)
@@ -188,6 +189,11 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       description: 'Debugging information - list of up to date fuel types',
       units:  String
     },
+    activation_date: {
+      description: 'school activation date',
+      units:  Date,
+      benchmark_code: 'sact'
+    }
   }
 
   def trees_electricity
@@ -213,6 +219,8 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     res = change_in_energy.calculate
 
     set_template_variables(res)
+
+    @activation_date = @school.energysparks_start_date
   
     assign_legacy_variables
 
