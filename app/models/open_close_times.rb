@@ -10,13 +10,15 @@ class OpenCloseTimes
   end
 
   def usage(date)
-    @open_times.map do |usage_time|
+    usages = Hash.new{|h, k| h[k] = []}
+
+    @open_times.each do |usage_time|
       if usage_time.matched_usage?(date)
-        [ usage_time.type, usage_time.time_ranges_for_week_day(date) ]
-      else
-        nil
+        usages[usage_time.type] += usage_time.time_ranges_for_week_day(date)
       end
-    end.compact.to_h
+    end
+
+    usages
   end
 
   def print_usages(date)

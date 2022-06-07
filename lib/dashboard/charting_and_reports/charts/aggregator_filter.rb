@@ -45,7 +45,7 @@ class AggregatorFilter < AggregatorBase
         match ||= true if holidays.holiday?(date)
       when Series::DayType::WEEKEND
         match ||= true if DateTimeHelper.weekend?(date) && !holidays.holiday?(date)
-      when Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYOPEN
+      when Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED
         match ||= true if !(DateTimeHelper.weekend?(date) || holidays.holiday?(date))
       end
     end
