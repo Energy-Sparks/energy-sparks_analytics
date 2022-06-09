@@ -73,6 +73,11 @@ module Benchmarking
           </li>
         </ul>
       <p>
+    ),
+    covid_lockdown: %q(
+      <p>
+        This comparison may include COVID lockdown periods which may skew the results.
+      </p>
     )
   }
   #=======================================================================================
@@ -174,7 +179,7 @@ module Benchmarking
           increase in pupil numbers is inexcusable if a school is planning on contributing
           to reducing global carbon emissions.
         </p>
-      )
+      ) + CAVEAT_TEXT[:covid_lockdown]
     end
   end
   #=======================================================================================
@@ -229,6 +234,7 @@ module Benchmarking
           annual electricity costs of &pound;1,100.
         </p>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+        <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
       ERB.new(text).result(binding)
     end
@@ -512,7 +518,7 @@ module Benchmarking
           to point of use electric hot water, and installing boiler optimum start control
           and weather compensation which require investment will reduce costs further.
         </p>
-      )
+      ) + CAVEAT_TEXT[:covid_lockdown]
     end
   end
   #=======================================================================================
@@ -827,8 +833,10 @@ module Benchmarking
       text = %q(
         <p>
           This benchmark compares the change in annual energy use since the school
-          joined Energy Sparks.
+          joined Energy Sparks. So for the year before the school joined Energy Sparks versus
+          the latest year.
         </p>
+        <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
       ERB.new(text).result(binding)
     end
@@ -865,7 +873,7 @@ module Benchmarking
       text = %q(
         <p>
           This table provides a more detailed breakdown of the data provided in the chart
-          and table above.
+          and table above. <%= CAVEAT_TEXT[:covid_lockdown] %>
         </p>
       )
       ERB.new(text).result(binding)
@@ -882,6 +890,7 @@ module Benchmarking
           This benchmark compares the change in annual CO2 emissions between the last two years.
           All CO2 is expressed in kg (kilograms).
         </p>
+        <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
       ERB.new(text).result(binding)
     end

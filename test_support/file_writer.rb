@@ -14,7 +14,9 @@ class FileWriter
   def load
     data = nil
     puts "Loading ? #{filename_stub}"
-    if File.exist?(marshal_filename) && File.mtime(marshal_filename) > File.mtime(yaml_filename)
+    if !File.exist?(yaml_filename)
+      return {}
+    elsif File.exist?(marshal_filename) && File.mtime(marshal_filename) > File.mtime(yaml_filename)
       data = load_marshal_file
     elsif File.exist?(yaml_filename)
       data = load_yaml_file

@@ -12,7 +12,7 @@ end
 run_date = Date.new(2022, 5, 22)
 
 overrides = { 
-  schools: ['*'],
+  schools: ['king*'],
   cache_school: false,
   benchmarks: {
     calculate_and_save_variables: true,
