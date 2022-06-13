@@ -179,7 +179,7 @@ module Benchmarking
         {header: header, rows: formatted_rows}
       when :html
         formatted_rows = format_rows(raw_rows, table_definition[:columns], medium, school_ids)
-        HtmlTableFormatting.new(header, formatted_rows).html
+        HtmlTableFormatting.new(header, formatted_rows).html(column_groups: table_definition[:column_groups])
       end
     end
 

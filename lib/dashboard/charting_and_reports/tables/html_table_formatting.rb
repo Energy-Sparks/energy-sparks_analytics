@@ -9,7 +9,7 @@ class HtmlTableFormatting
     @precision = precision
   end
 
-  def html(right_justified_columns: [1..1000], widths: nil, scrollable: false)
+  def html(right_justified_columns: [1..1000], widths: nil, scrollable: false, column_groups: nil)
     template = %{
       <% if scrollable %>
         <style>
@@ -23,7 +23,9 @@ class HtmlTableFormatting
       <% end %>
       <table class="table table-striped table-sm">
         <% unless @header.nil? %>
+          <%= column_groupings(column_groups) %>
           <thead>
+            <%= column_grouping_header(column_groups) %>
             <tr class="thead-dark">
               <% @header.each_with_index do |header_titles, column_number| %>
                 <th scope="col" class="text-center" <%= width(widths, column_number) %>> <%= header_titles.to_s %> </th>
@@ -61,6 +63,28 @@ class HtmlTableFormatting
       <%= column_td(column_number, right_justified_columns) %><%= format_value(val, column_number) %> </td>
     }.gsub(/^  /, '')
     generate_html(template, binding)
+  end
+
+  private
+
+  def column_groupings(column_groups)
+    return '' if column_groups.nil?
+
+    column_groups.map do  |span|
+        "\t\t\t<colgroup span=\"#{span[:span]}\"></colgroup>\n"
+    end.join
+  end
+
+  def column_grouping_header(column_groups)
+    return '' if column_groups.nil?
+
+    colspans = column_groups.map do  |span|
+      "\t\t\t" +
+      (span[:span] == 1 ? "<th>#{span[:name]}</th>" : "<th colspan=\"#{span[:span]}\">#{span[:name]}</th>") +
+      "\n"
+    end.join
+
+    '<tr>' + "\n" + colspans + "\n\t\t" + '</tr>'
   end
 
   private def width(widths, column_number)

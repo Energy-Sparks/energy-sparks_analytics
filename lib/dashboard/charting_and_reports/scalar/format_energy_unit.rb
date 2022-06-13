@@ -61,6 +61,7 @@ class FormatEnergyUnit
     £_per_kva:                    '£/kVA',
     kg_co2_per_kwh:               'kg CO2/kWh',
     date:                         '',
+    date_mmm_yyyy:                '',
     datetime:                     '',
     timeofday:                    '',
     gas:                          'gas',
@@ -141,6 +142,8 @@ class FormatEnergyUnit
       format_comparison_percent(value, medium)
     elsif unit == :date
       value.is_a?(String) ? Date.parse(value).strftime('%A %e %b %Y') : value.strftime('%A %e %b %Y')
+    elsif unit == :date_mmm_yyyy
+      value.is_a?(String) ? Date.parse(value).strftime('%b %Y') : value.strftime('%b %Y')
     elsif unit == :datetime
       value.is_a?(String) ? DateTime.parse(value).strftime('%A %e %b %Y %H:%M') : value.strftime('%A %e %b %Y %H:%M')
     elsif unit == :timeofday || unit == :fuel_type
