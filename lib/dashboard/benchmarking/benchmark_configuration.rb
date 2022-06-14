@@ -218,7 +218,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name', units: :short_school_name, chart_data: true },
           { data: ->{ enba_sact },  name: 'Energy Sparks join date', units: :date_mmm_yyyy },
           
-          { data: ->{ enba_kea }, name: 'Year',                     units: :kwh },
+          { data: ->{ enba_kea }, name: 'Year before joined',       units: :kwh },
           { data: ->{ enba_ke0 }, name: 'Last year',                units: :kwh },
           { data: ->{ enba_keap}, name: 'Change (excluding solar)', units: :relative_percent_0dp, chart_data: true },
 
