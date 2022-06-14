@@ -11,8 +11,8 @@ en:
       comparison_percent: "%"
       computer_console: computer consoles
       date: ''
-      datetime: ''
       date_mmm_yyyy: ''
+      datetime: ''
       days: days
       electricity: electricity
       fuel_type: ''
