@@ -191,7 +191,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInEnergyUseSinceJoined,
         name:     'Change in energy use since the school joined Energy Sparks',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
+          { data: 'addp_name',      name: 'School name', units: :short_school_name, chart_data: true },
           { data: ->{ enba_sact },  name: 'Energy Sparks join date', units: :date_mmm_yyyy },
           { data: ->{ enba_kxap },  name: 'Energy (total)',   units: :relative_percent_0dp, chart_data: true, content_class: AdviceBenchmark },
           { data: ->{ enba_keap },  name: 'Electricity',      units: :relative_percent_0dp },
@@ -215,7 +215,7 @@ module Benchmarking
         filter_out:       :dont_make_available_directly,
         name:     'breakdown in the change in energy use since the school joined Energy Sparks',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
+          { data: 'addp_name',      name: 'School name', units: :short_school_name, chart_data: true },
           { data: ->{ enba_sact },  name: 'Energy Sparks join date', units: :date_mmm_yyyy },
           
           { data: ->{ enba_kea }, name: 'Year',                     units: :kwh },

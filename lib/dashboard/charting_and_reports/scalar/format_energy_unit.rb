@@ -64,6 +64,8 @@ class FormatEnergyUnit
     date_mmm_yyyy:                '',
     datetime:                     '',
     timeofday:                    '',
+    school_name:                  '',
+    short_school_name:            '',
     gas:                          'gas',
     electricity:                  'electricity',
     teaching_assistant:           'teaching assistant',
@@ -122,6 +124,10 @@ class FormatEnergyUnit
       format_pound_range(value, medium, user_numeric_comprehension_level)
     elsif unit == :temperature
       "#{value.round(1)}C"
+    elsif unit == :school_name
+      value
+    elsif unit == :short_school_name
+      shorten_school_name(value)
     elsif unit == :years_range
       format_years_range(value)
     elsif unit == :years
@@ -200,6 +206,10 @@ class FormatEnergyUnit
     else
       format_time(range.first) + ' to ' + format_time(range.last)
     end
+  end
+
+  def self.shorten_school_name(value)
+    value.sub(' School', '').sub('Ysgol ', '')
   end
 
   def self.format_pounds(value, medium, user_numeric_comprehension_level, no_dp = false)
