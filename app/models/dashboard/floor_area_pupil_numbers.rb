@@ -1,5 +1,8 @@
 
 class FloorAreaPupilNumbersBase
+  DEFAULT_START_DATE = Date.new(2000, 1, 1)
+  DEFAULT_END_DATE   = Date.new(2050, 1, 1)
+
   def initialize(school_attributes, floor_area_key, pupil_key)
     return if school_attributes.nil?
     @floor_area_key = floor_area_key
@@ -20,10 +23,10 @@ class FloorAreaPupilNumbersBase
   def process_meter_attributes(attributes)
     return nil if attributes.nil?
 
-    attributes.map do |period|
+    user_defined_meter_attributes = attributes.map do |period|
       {
-        start_date:         period.fetch(:start_date, Date.new(2000, 1, 1)),
-        end_date:           period.fetch(:end_date,   Date.new(2050, 1, 1)),
+        start_date:         period.fetch(:start_date, DEFAULT_START_DATE),
+        end_date:           period.fetch(:end_date,   DEFAULT_END_DATE),
         @floor_area_key =>  period[@floor_area_key],
         @pupil_key      =>  period[@pupil_key],
       }
@@ -40,7 +43,8 @@ class FloorAreaPupilNumbersBase
 
   def calculate_days_weighted_value(field, start_date, end_date)
     start_date = end_date = Date.today if start_date.nil? || end_date.nil?
-    
+puts "Got here #{field} sd #{start_date} #{end_date}"
+ap @area_pupils_history
     start_index = date_index(@area_pupils_history, start_date)
     end_index   = date_index(@area_pupils_history, end_date)
 
@@ -77,6 +81,31 @@ class FloorAreaPupilNumbers < FloorAreaPupilNumbersBase
 
   def number_of_pupils(start_date = nil, end_date = nil)
     @area_pupils_history.nil? ? @number_of_pupils : calculate_weighted_number_of_pupils(start_date, end_date)
+  end
+
+  def process_meter_attributes(attributes)
+    user_defined_meter_attributes = super(attributes)
+    return nil if user_defined_meter_attributes.nil?
+
+    # cope with case where user inserts an incomplete set of meter attributes
+    if user_defined_meter_attributes.first[:start_date] > DEFAULT_START_DATE
+      df = defaulted_floor_area_pupils(DEFAULT_START_DATE, user_defined_meter_attributes.first[:start_date] - 1)
+      user_defined_meter_attributes.insert(0, df)
+    end
+
+    if user_defined_meter_attributes.last[:end_date] < DEFAULT_END_DATE
+      df = defaulted_floor_area_pupils(user_defined_meter_attributes.last[:end_date] + 1, DEFAULT_END_DATE)
+      user_defined_meter_attributes.push(df)
+    end
+  end
+
+  def defaulted_floor_area_pupils(start_date, end_date)
+    {
+      start_date:         start_date,
+      end_date:           end_date,
+      floor_area:         @floor_area,
+      number_of_pupils:   @number_of_pupils
+    }
   end
 end
 
