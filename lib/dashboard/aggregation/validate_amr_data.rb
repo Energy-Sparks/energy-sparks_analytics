@@ -65,7 +65,7 @@ class ValidateAMRData
 
   private
 
-  def debug?; false && [2199989617206].include?(@meter.mpxn.to_i) end
+  def debug?; false && [2380001730739].include?(@meter.mpxn.to_i) end
 
   def heating_model
     @heating_model ||= create_heating_model
@@ -170,11 +170,15 @@ class ValidateAMRData
         rule[:set_bad_data_to_zero][:end_date]
       )
     elsif rule.key?(:set_missing_data_to_zero)
-      zero_missing_data_in_date_range(
-        rule[:set_missing_data_to_zero][:start_date],
-        rule[:set_missing_data_to_zero][:end_date],
-        rule[:set_missing_data_to_zero][:zero_up_until_yesterday]
-      )
+      if rule[:set_missing_data_to_zero].nil?
+        zero_missing_data_in_date_range(nil, nil, true)
+      else
+        zero_missing_data_in_date_range(
+          rule[:set_missing_data_to_zero][:start_date],
+          rule[:set_missing_data_to_zero][:end_date],
+          rule[:set_missing_data_to_zero][:zero_up_until_yesterday]
+        )
+      end
     elsif rule.key?(:auto_insert_missing_readings)
       if (rule[:auto_insert_missing_readings].is_a?(Symbol) && # backwards compatibility
           rule[:auto_insert_missing_readings] == :weekends) ||
