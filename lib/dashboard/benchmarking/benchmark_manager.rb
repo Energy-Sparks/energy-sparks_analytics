@@ -4,15 +4,18 @@ module Benchmarking
     include Logging
     class DatabaseRow < OpenStruct
       attr_reader :school_id
+
       def initialize(school_id, school_data)
         super(school_data)
         @school_id = school_id
       end
+
       def zero(value)
         value.nil? ? 0.0 : value
       end
 
       def percent_change(base, new_val, to_nil_if_sum_zero = false)
+        return nil if to_nil_if_sum_zero && sum_data(base) == 0.0
         return 0.0 if sum_data(base) == 0.0
         change = (sum_data(new_val) - sum_data(base)) / sum_data(base)
         (to_nil_if_sum_zero && change == 0.0) ? nil : change
@@ -33,6 +36,17 @@ module Benchmarking
         data.map! { |value| zero(value) } # create array 1st to avoid statsample map/sum bug
         val = data.sum
         (to_nil_if_sum_zero && val == 0.0) ? nil : val
+      end
+
+      # specialist sum, only adds if 1st 2 vals i.e. electricity & gas present or same
+      # between 2 years, so doesn't display sum for previous year if data incomplete
+      def sum_if_complete(data_prev, data_curr)
+        eg_prev = data_prev[0..1].map(&:nil?)
+        eg_curr = data_curr[0..1].map(&:nil?)
+
+        return nil if eg_prev != eg_curr
+
+        sum_data(data_prev)
       end
 
       def area

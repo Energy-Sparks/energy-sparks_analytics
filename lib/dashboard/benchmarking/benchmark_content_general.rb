@@ -947,6 +947,177 @@ module Benchmarking
     end
   end
   #=======================================================================================
+  class BenchmarkChangeInEnergySinceLastYear < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      %q(
+        <p>
+          This table compares energy use between this year (last year) to date
+          and the corresponding period from the year before (previous year).
+        </p>
+        <p>
+          Comments:
+          <ul>
+            <li>
+              the kWh, CO2, £ values can move in opposite directions
+              and by different percentages because
+              <ul>
+                <li>the mix of electricity and gas</li>
+                <li>the carbon intensity of the electricity grid</li>
+                <li>
+                    the proportion of electricity consumed between night and day
+                    for schools with differential tariffs (economy 7)
+                </li>
+              </ul>
+              may vary between the two years
+            </li>
+            <li>
+              data only appears in the 'previous year' column if two years of
+              data are available for the school
+            </li>
+            <li> the fuel column is keyed as follows
+              <table  class="table table-striped table-sm">
+                <tr><td>E</td><td>Electricity</td></tr>
+                <tr><td>G</td><td>Gas</td></tr>
+                <tr><td>SH</td><td>Storage heaters</td></tr>
+                <tr><td>S</td><td>Solar: Metered i.e. accurate kWh, CO2</td></tr>
+                <tr><td>s</td><td>Solar: Estimated</td></tr>
+              </table>
+            </li>
+            <li>
+              the cost column for schools with solar PV only represents the cost
+              of consumption i.e. mains plus electricity consumed from the solar
+              panels using a long term economic value. It doesn't use the electricity
+              or solar PV tariffs for the school
+            </li>
+            <li>
+              the energy CO2 and kWh includes the net of the electricity and solar PV values
+            </li>
+          </ul>
+        </p>
+      ) + CAVEAT_TEXT[:covid_lockdown]
+    end
+
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      content1 = super(school_ids: school_ids, filter: filter)
+      # content2 = full_co2_breakdown(school_ids: school_ids, filter: filter)
+      # content3 = full_energy_breakdown(school_ids: school_ids, filter: filter)
+      content1 # + content2 + content3
+    end
+
+    private
+
+    def full_co2_breakdown(school_ids:, filter:)
+      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
+      db = @benchmark_manager.benchmark_database
+      content_manager.content(db, :change_in_co2_emissions_since_last_year_full_table, filter: filter)
+    end
+
+    def full_energy_breakdown(school_ids:, filter:)
+      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
+      db = @benchmark_manager.benchmark_database
+      content_manager.content(db, :change_in_energy_since_last_year_full_table, filter: filter)
+    end
+  end
+  #=======================================================================================
+  class BenchmarkChangeInElectricitySinceLastYear  < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    # some text duplication with the BenchmarkChangeInEnergySinceLastYear class
+    private def introduction_text
+      %q(
+        <p>
+          This table compares electricity consumption between this year (last year) to date
+          and the corresponding period from the year before (previous year).
+          It excludes savings from solar PV, and consumption from storage heaters.
+          It is subject to the same comments in the list of the first table on this page.
+        </p>
+        <p>
+          Comments:
+          <ul>
+            <li>
+              the kWh, CO2, £ values can move in opposite directions
+              and by different percentages because
+              <ul>
+                <li>the carbon intensity of the electricity grid</li>
+                <li>
+                    the proportion of electricity consumed between night and day
+                    for schools with differential tariffs (economy 7)
+                </li>
+                <li>self consumption is estimated where we don't have metered solar PV</li>
+              </ul>
+              may vary between the two years
+            </li>
+            <li>
+              data only appears in the 'previous year' column if two years of
+              data are available for the school
+            </li>
+          </ul>
+        </p>
+      ) + CAVEAT_TEXT[:covid_lockdown]
+    end
+  end
+  #=======================================================================================
+  class BenchmarkChangeInGasSinceLastYear  < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      %q(
+        <p>
+          This table compares gas consumption between this year (last year) to date
+          and the corresponding period from the year before (previous year).
+        </p>
+      ) + CAVEAT_TEXT[:covid_lockdown]
+    end
+  end
+  #=======================================================================================
+  class BenchmarkChangeInStorageHeatersSinceLastYear  < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      %q(
+        <p>
+          This table compares storage heater consumption between this year (last year) to date
+          and the corresponding period from the year before (previous year).
+          The storage heater consumption is a reasonably accurate estimate
+          as for most schools we disaggregate it from mains consumption as storage
+          heaters are typically not separately metered.
+        </p>
+        <p>
+          For most schools the cost values are over-estimated because we
+          don&apos;t have information on whether your school&apos;s tariff is
+          differential (economy 7) - we can set this up for you if you
+          <a href="mailto:hello@energysparks.uk?subject=Please%20configure%20a%20differential%20tariff%20for<%= @school.name %>">email us</a>?
+        </p>
+      ) + CAVEAT_TEXT[:covid_lockdown]
+    end
+  end
+  #=======================================================================================
+  class BenchmarkChangeInSolarPVSinceLastYear  < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      %q(
+        <p>
+        This table compares solar PV production/generation use between this year (last year) to date
+        and the corresponding period from the year before (previous year).
+        </p>
+        <p>
+          Where we don't have metered data we used localised estimates; the percentage
+          change should be reasonably accurate but kWh values may be less accurate
+          as we currently assume for the estimate that the school&apos;s panels
+          face south and are inclined at 30 degrees.
+        <p/>
+        <p>
+          The CO2 emissions (reduction) are calculated using the carbon intensity of the
+          national electricity grid. As the grid decarbonises the CO2 offset by
+          the school&apos;s solar panels will gradually reduce i.e. the CO2 benefit will diminish.
+        </p>
+      )
+    end
+  end
+  #=======================================================================================
   class BenchmarkOptimumStartAnalysis  < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 
