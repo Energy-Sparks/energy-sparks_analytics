@@ -75,11 +75,11 @@ module Benchmarking
       if row1[3].nil? && row2[3].nil?
         row1[2] <=> row2[2] # sort by this year kWh
       else
-        nil_to_neg_infinity(row1[3]) <=> nil_to_neg_infinity(row2[3])
+        nil_to_infinity(row1[3]) <=> nil_to_infinity(row2[3])
       end
     end
 
-    def self.nil_to_neg_infinity(val)
+    def self.nil_to_infinity(val)
       val.nil? ? Float::INFINITY : val
     end
 
