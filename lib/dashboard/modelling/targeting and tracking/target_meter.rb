@@ -43,9 +43,9 @@ class TargetMeter < Dashboard::Meter
 
       calc_text = "Calculated target meter #{mpan_mprn} #{fuel_type} in #{bm.round(3)} seconds"
       check_amr_data(amr_data, 'Completed calculations target data issues:')
-      debug calc_text
-      ap analytics_debug_info
-      debug analytics_debug_info
+      # debug calc_text
+      # ap analytics_debug_info
+      # debug analytics_debug_info
     end
   end
 

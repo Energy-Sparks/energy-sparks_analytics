@@ -8,9 +8,7 @@ module Logging
   logger.level = :debug
 end
 
-def school_factory
-  $SCHOOL_FACTORY ||= SchoolFactory.new
-end
+$dir = TestDirectory.instance.results_directory('Ovo Annual Comparison')
 
 def unique_years(results, fuel_type_type, data_type_type)
   years = []
@@ -25,7 +23,7 @@ def unique_years(results, fuel_type_type, data_type_type)
 end
 
 def save_csv(results, meta_data_keys, meta_data, fuel_type, data_type)
-  filename = "./Results/annual #{fuel_type} #{data_type}.csv"
+  filename = File.join($dir, "annual #{fuel_type} #{data_type}.csv")
   puts "Saving results to #{filename}"
 
   years = unique_years(results, fuel_type, data_type)
@@ -93,7 +91,8 @@ def save_aggregate_per_pupil_data_to_csv(meta_data, data)
   data = calculate_aggregate_per_pupil_data(meta_data, data)
   unique_years = data.values.map(&:keys).flatten.uniq
 
-  filename = "./Results/per pupil year data.csv"
+  filename = File.join($dir, "per pupil year data.csv")
+
   puts "Saving to #{filename}"
   CSV.open(filename, 'w') do |csv|
     csv << [data.keys.first.keys, unique_years].flatten
@@ -111,7 +110,8 @@ def calculate_cumulative_pupil(meta_data)
 end
 
 def save_cumulative_pupils_to_csv(meta_data)
-  filename = "./Results/cumulative pupils.csv"
+  filename = File.join($dir, "cumulative pupils.csv")
+
   puts "Saving to #{filename}"
 
   CSV.open(filename, 'w') do |csv|
@@ -149,8 +149,9 @@ def moving_average_dates(moving_average_kwhs)
 end
 
 def save_moving_averages_to_csv(moving_average_kwhs, file_type)
-  filename = "./Results/moving averages #{file_type}.csv"
-  puts "Saving to #{filename}"
+  filename = File.join($dir, "moving averages #{file_type}.csv")
+
+  puts "Saving results to #{filename} x#{moving_average_kwhs.length}"
   keys = moving_average_dates(moving_average_kwhs)
   CSV.open(filename, 'w') do |csv|
     csv << ['school type', 'fuel', 'data type', keys[:dates]].flatten
@@ -166,7 +167,8 @@ def save_moving_averages_to_csv(moving_average_kwhs, file_type)
 end
 
 def save_start_end_dates_to_csv(aggregated_meter_start_end_dates, meta_data)
-  filename = "./Results/aggregated meter start-end dates.csv"
+  filename = File.join($dir, "aggregated meter start-end dates.csv")
+
   puts "Saving to #{filename}"
   CSV.open(filename, 'w') do |csv|
     aggregated_meter_start_end_dates.each do |school_name, fuel_data|
@@ -179,7 +181,8 @@ end
 
 def load_activation_dates
   # downloaded from https://energysparks.uk/admin/school_setup/completed, cut and paste into Excel, save
-  filename = "./Results/school activation dates.csv"
+  filename = File.join($dir, "school activation dates.csv")
+
   puts "Loading activation dates from #{filename}"
   data = CSV.read(filename)
   data.drop(1).map { |row| [row[0], parse_activation_date(row[2])]}.to_h
@@ -315,7 +318,7 @@ def school_meta_data(school)
   meta_data[:type]                = school.school_type
   meta_data[:creation_date]       = school.creation_date
   meta_data[:activation_date]     = school.activation_date
-  meta_data[:activation_date2]    = @activation_dates[school.name]
+  meta_data[:activation_date2]    = @activation_dates[school.activation_date]
   meta_data[:date]                = meta_data.select { |k, _v| k.to_s.match?(/date/) }.values.compact.max
   meta_data[:floor_area]          = school.floor_area
   meta_data[:pupils]              = school.number_of_pupils
@@ -341,7 +344,7 @@ end
 ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Community'
 school_name_pattern_match = ['*']
 source_db = :unvalidated_meter_data
-today = Date.new(2021, 12, 31) # warning will exclude schools whose meter data is not up to date, so today ~= reporting date
+today = Date.new(2022, 6, 20) # warning will exclude schools whose meter data is not up to date, so today ~= reporting date
 use_activation_date = false # generally avoid the activation date as it reduces the amount of data for analysis
 include_private_schools = false
 meta_data = {}
@@ -350,10 +353,10 @@ moving_average_kwhs = {}
 moving_average_kwhs_since_energy_sparks = {}
 aggregated_meter_start_end_dates = {}
 
-school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
+school_names = SchoolFactory.instance.school_file_list(source_db, school_name_pattern_match)
 
 schools = school_names.map do |school_name|
-  school = school_factory.load_or_use_cached_meter_collection(:name, school_name, source_db)
+  school = SchoolFactory.instance.load_school(source_db, school_name, cache: false)
 
   next if school.funding_status == :private && !include_private_schools
 
@@ -376,7 +379,7 @@ schools = school_names.map do |school_name|
         annual_kwhs[school.name] ||= {}
         annual_kwhs[school.name][fuel_type] ||= {}
         annual_kwhs[school.name][fuel_type][data_type] = data
-        
+
         if %i[gas storage_heater].include?(fuel_type)
           adjusted_data_type_key = "adjusted_heating_#{data_type}".to_sym
           annual_kwhs[school.name][fuel_type][adjusted_data_type_key] = analyse_school(school, fuel_type, true, data_type, activation_date, today)
