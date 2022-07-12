@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'require_all', '~> 2.0.0'
   s.add_dependency 'activesupport', '~> 6.0.0'
   s.add_dependency 'statsample', '~> 2.1.0'
-  s.add_dependency 'mechanize', '~> 2.7.6'
+  s.add_dependency 'mechanize', '>= 2.7.6', '< 2.9.0'
   s.add_dependency 'write_xlsx', '~> 0.85.5'
   s.add_dependency 'roo', '~> 2.7.1'
   s.add_dependency 'roo-xls', '~> 1.2.0'
