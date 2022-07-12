@@ -9,7 +9,6 @@ gem 'activesupport', '~> 6.0.4'
 # Last official release of statsample also had a problem where it overrode the definition of Array#sum with dodgy results
 # This is fixed in master, which is what this release is based upon.
 gem 'statsample', git: 'https://github.com/Energy-Sparks/statsample', tag: '2.1.1-energy-sparks', branch: 'update-gems-and-awesome-print'
-gem 'mechanize'
 gem 'write_xlsx'
 gem 'roo'
 gem 'roo-xls'
