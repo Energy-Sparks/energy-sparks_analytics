@@ -321,7 +321,7 @@ class ValidateAMRData
     if @amr_data.days_kwh_x48(@amr_data.end_date).any?(&:nil?)
       logger.info "Moving meter end date #{@amr_data.end_date} one day back as only partial data on end date"
       @amr_data[@amr_data.end_date].set_type('PETD')
-      @amr_data.set_start_date(@amr_data.end_date - 1)
+      @amr_data.set_end_date(@amr_data.end_date - 1)
     end
   end
 
@@ -464,6 +464,7 @@ class ValidateAMRData
             elsif @meter.meter_type == :gas
               # perhaps would be better if substitute similar weekday had matching temperatures?
               # probably better this way if thermally massive building?
+              raise EnergySparksNotEnoughDataException, "Failed to calculate model unable to substitute holiday day #{date} #{@meter_id}" if heating_model == NO_MODEL
               substitute_gas_data = adjusted_substitute_heating_kwh(date, adjusted_date)
               substituted_gas_holiday_data = OneDayAMRReading.new(meter_id, date, 'GSBH', adjusted_date, DateTime.now, substitute_gas_data)
               @amr_data.add(date, substituted_gas_holiday_data)

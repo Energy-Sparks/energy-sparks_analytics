@@ -6,7 +6,7 @@ require './script/report_config_support.rb'
 
 module Logging
   @logger = Logger.new(File.join('log', 'management summary table.log'))
-  logger.level = :error
+  logger.level = Logger::DEBUG
 end
 
 overrides = {

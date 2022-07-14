@@ -38,7 +38,7 @@ class AggregatorSingleSeries < AggregatorBase
   def configure_series_manager
     results.series_manager = Series::Multiple.new(school, chart_config)
     results.series_names = results.series_manager.series_bucket_names
-    logger.info "Aggregating these series #{results.series_names}"
+    logger.info "Aggregating these series #{results.series_names} for #{school.name}"
     logger.info "aggregate_period Between #{results.series_manager.first_chart_date} and #{results.series_manager.last_chart_date}"
     if results.series_manager.periods.empty?
       raise "Error: not enough data available to create requested chart"
