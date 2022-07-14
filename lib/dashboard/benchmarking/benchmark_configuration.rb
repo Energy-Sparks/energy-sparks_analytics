@@ -1,5 +1,7 @@
 require_relative './benchmark_content_base.rb'
 require_relative './benchmark_content_general.rb'
+require_relative '../charting_and_reports/tables/management_summary_table.rb'
+
 module Benchmarking
   class BenchmarkManager
 
@@ -69,6 +71,18 @@ module Benchmarking
       end
     end
 
+    def self.sort_by_nil(row1, row2)
+      if row1[3].nil? && row2[3].nil?
+        row1[2] <=> row2[2] # sort by this year kWh
+      else
+        nil_to_infinity(row1[3]) <=> nil_to_infinity(row2[3])
+      end
+    end
+
+    def self.nil_to_infinity(val)
+      val.nil? ? Float::INFINITY : val
+    end
+
     CHART_TABLE_GROUPING = [
       {
         name:       'Energy Cost Benchmarks',
@@ -82,6 +96,11 @@ module Benchmarking
         name:       'Change in Energy Use',
         benchmarks: %i[
           change_in_energy_use_since_joined_energy_sparks
+          change_in_energy_since_last_year
+          change_in_electricity_since_last_year
+          change_in_gas_since_last_year
+          change_in_storage_heaters_since_last_year
+          change_in_solar_pv_since_last_year
           change_in_co2_emissions_since_last_year
           holiday_usage_last_year
         ]
@@ -198,13 +217,12 @@ module Benchmarking
           { data: ->{ enba_kgap },  name: 'Gas',              units: :relative_percent_0dp },
           { data: ->{ enba_khap },  name: 'Storage heaters',  units: :relative_percent_0dp },
           { data: ->{ enba_ksap },  name: 'Solar PV',         units: :relative_percent_0dp }
-          
         ],
         column_groups: [
           { name: '',                                     span: 2 },
           { name: 'Change since joined Energy Sparks',    span: 5 },
         ],
-        treat_as_nil:   ['no recent data', 'not enough data'], # from ManagementSummaryTable:: not referenced because not on path
+        treat_as_nil:   [ManagementSummaryTable::NO_RECENT_DATA_MESSAGE, ManagementSummaryTable::NOT_ENOUGH_DATA_MESSAGE], # from ManagementSummaryTable:: not referenced because not on path
         sort_by:  [2],
         type: %i[chart table]
       },
@@ -217,7 +235,7 @@ module Benchmarking
         columns:  [
           { data: 'addp_name',      name: 'School name', units: :short_school_name, chart_data: true },
           { data: ->{ enba_sact },  name: 'Energy Sparks join date', units: :date_mmm_yyyy },
-          
+
           { data: ->{ enba_kea }, name: 'Year before joined',       units: :kwh },
           { data: ->{ enba_ke0 }, name: 'Last year',                units: :kwh },
           { data: ->{ enba_keap}, name: 'Change (excluding solar)', units: :relative_percent_0dp, chart_data: true },
@@ -288,6 +306,203 @@ module Benchmarking
         ],
         sort_by:  [13],
         type: %i[chart table]
+      },
+      change_in_energy_since_last_year: {
+        benchmark_class:  BenchmarkChangeInEnergySinceLastYear,
+        name:     'Change in energy use since last year',
+        columns:  [
+          { data: 'addp_name',              name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: ->{ sum_if_complete([enba_ken, enba_kgn, enba_khn, enba_ksn], 
+                                      [enba_ke0, enba_kg0, enba_kh0, enba_ks0]) }, name: 'previous year', units: :kwh },
+          { data: ->{ sum_data([enba_ke0, enba_kg0, enba_kh0, enba_ks0]) }, name: 'last year', units: :kwh },
+          { data: ->{ percent_change(
+                        sum_if_complete(
+                          [enba_ken, enba_kgn, enba_khn, enba_ksn],
+                          [enba_ke0, enba_kg0, enba_kh0, enba_ks0]
+                        ),
+                        sum_data([enba_ke0, enba_kg0, enba_kh0, enba_ks0]),
+                        true
+                      )
+                    },
+                    name: 'change', units: :relative_percent_0dp
+          },
+
+          { data: ->{ sum_if_complete([enba_cen, enba_cgn, enba_chn, enba_csn], 
+                                      [enba_ce0, enba_cg0, enba_ch0, enba_cs0]) }, name: 'previous year', units: :co2 },
+          { data: ->{ sum_data([enba_ce0, enba_cg0, enba_ch0, enba_cs0]) }, name: 'last year', units: :co2 },
+          { data: ->{ percent_change(
+                        sum_if_complete(
+                          [enba_cen, enba_cgn, enba_chn, enba_csn],
+                          [enba_ce0, enba_cg0, enba_ch0, enba_cs0]
+                        ),
+                        sum_data([enba_ce0, enba_cg0, enba_ch0, enba_cs0]),
+                        true
+                      )
+                    },
+                    name: 'change', units: :relative_percent_0dp
+          },
+
+          { data: ->{ sum_if_complete([enba_pen, enba_pgn, enba_phn, enba_psn], 
+                                      [enba_pe0, enba_pg0, enba_ph0, enba_ps0]) }, name: 'previous year', units: :£ },
+          { data: ->{ sum_data([enba_pe0, enba_pg0, enba_ph0, enba_ps0]) }, name: 'last year', units: :£ },
+          { data: ->{ percent_change(
+                        sum_if_complete(
+                          [enba_pen, enba_pgn, enba_phn, enba_psn],
+                          [enba_pe0, enba_pg0, enba_ph0, enba_ps0]
+                        ),
+                        sum_data([enba_pe0, enba_pg0, enba_ph0, enba_ps0]),
+                        true
+                      )
+                    },
+                    name: 'change', units: :relative_percent_0dp
+          },
+          {
+            data: ->{ 
+              [
+                enba_pe0.nil?     ? nil : 'E',
+                enba_pg0.nil?     ? nil : 'G',
+                enba_ph0.nil?     ? nil : 'SH',
+                enba_solr == ''   ? nil : (enba_solr == 'synthetic' ? 's' : 'S')
+              ].compact.join(' + ')
+            },
+            name: 'Fuel', units: String
+          },
+          { 
+            data: ->{ 
+              (enba_peap == ManagementSummaryTable::NO_RECENT_DATA_MESSAGE ||
+               enba_pgap == ManagementSummaryTable::NO_RECENT_DATA_MESSAGE) ? 'Y' : ''
+             },
+             name: 'No recent data', units: String
+          }
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 3 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 },
+          { name: 'Metering', span: 2 },
+        ],
+        where:   ->{ !sum_data([enba_ke0, enba_kg0, enba_kh0, enba_ks0], true).nil? },
+        sort_by:  method(:sort_by_nil),
+        type: %i[table],
+        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark }
+      },
+      change_in_electricity_since_last_year: {
+        benchmark_class:  BenchmarkChangeInElectricitySinceLastYear,
+        name:     'Change in electricity consumption since last year',
+        columns:  [
+          { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          
+          { data: ->{ enba_ken },                          name: 'previous year',  units: :kwh },
+          { data: ->{ enba_ke0 },                          name: 'last year',      units: :kwh },
+          { data: ->{ percent_change(enba_ken, enba_ke0)}, name: 'change',         units: :relative_percent_0dp },
+
+          { data: ->{ enba_cen },                          name: 'previous year',  units: :co2 },
+          { data: ->{ enba_ce0 },                          name: 'last year',      units: :co2 },
+          { data: ->{ percent_change(enba_cen, enba_ce0)}, name: 'change',         units: :relative_percent_0dp },
+
+          { data: ->{ enba_pen },                          name: 'previous year',  units: :£ },
+          { data: ->{ enba_pe0 },                          name: 'last year',      units: :£ },
+          { data: ->{ percent_change(enba_pen, enba_pe0)}, name: 'change',         units: :relative_percent_0dp },
+
+          { data: ->{ enba_solr == 'synthetic' ? 'Y' : '' }, name: 'estimated',  units: String },
+        ],
+        column_groups: [
+          { name: '',                       span: 1 },
+          { name: 'kWh',                    span: 3 },
+          { name: 'CO2 (kg)',               span: 3 },
+          { name: '£',                      span: 3 },
+          { name: 'Solar self consumption', span: 1 },
+        ],
+        where:   ->{ !enba_ken.nil? && enba_peap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
+        sort_by:  [3],
+        type: %i[table],
+        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark }
+      },
+      change_in_gas_since_last_year: {
+        benchmark_class:  BenchmarkChangeInGasSinceLastYear,
+        name:     'Change in gas consumption since last year',
+        columns:  [
+          { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          
+          { data: ->{ enba_kgn },                          name: 'previous year',  units: :kwh },
+          { data: ->{ enba_kg0 },                          name: 'last year',      units: :kwh },
+
+          { data: ->{ enba_cgn },                          name: 'previous year',  units: :co2 },
+          { data: ->{ enba_cg0 },                          name: 'last year',      units: :co2 },
+
+          { data: ->{ enba_pgn },                          name: 'previous year',  units: :£ },
+          { data: ->{ enba_pg0 },                          name: 'last year',      units: :£ },
+
+          { data: ->{ percent_change(enba_kgn, enba_kg0)}, name: '',               units: :relative_percent_0dp },
+        ],
+        column_groups: [
+          { name: '',                 span: 1 },
+          { name: 'kWh',              span: 2 },
+          { name: 'CO2 (kg)',         span: 2 },
+          { name: '£',                span: 2 },
+          { name: 'percent changed',  span: 1 },
+        ],
+        where:   ->{ !enba_kgn.nil? && enba_pgap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
+        sort_by:  [3],
+        type: %i[table],
+        drilldown:  { type: :adult_dashboard, content_class: AdviceGasLongTerm }
+      },
+      change_in_storage_heaters_since_last_year: {
+        benchmark_class:  BenchmarkChangeInStorageHeatersSinceLastYear,
+        name:     'Change in storage heater consumption since last year',
+        columns:  [
+          { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          
+          { data: ->{ enba_khn },                          name: 'previous year',  units: :kwh },
+          { data: ->{ enba_kh0 },                          name: 'last year',      units: :kwh },
+          { data: ->{ percent_change(enba_khn, enba_kh0)}, name: 'change',         units: :relative_percent_0dp },
+
+          { data: ->{ enba_chn },                          name: 'previous year',  units: :co2 },
+          { data: ->{ enba_ch0 },                          name: 'last year',      units: :co2 },
+          { data: ->{ percent_change(enba_chn, enba_ch0)}, name: 'change',         units: :relative_percent_0dp },
+
+          { data: ->{ enba_phn },                          name: 'previous year',  units: :£ },
+          { data: ->{ enba_ph0 },                          name: 'last year',      units: :£ },
+          { data: ->{ percent_change(enba_phn, enba_ph0)}, name: 'change',         units: :relative_percent_0dp },
+        ],
+        column_groups: [
+          { name: '',                       span: 1 },
+          { name: 'kWh',                    span: 3 },
+          { name: 'CO2 (kg}',               span: 3 },
+          { name: '£',                      span: 3 },
+        ],
+        where:   ->{ !enba_khn.nil? && enba_psap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
+        sort_by:  [3],
+        type: %i[table],
+        drilldown:  { type: :adult_dashboard, content_class: AdviceStorageHeaters }
+      },
+      change_in_solar_pv_since_last_year: {
+        benchmark_class:  BenchmarkChangeInSolarPVSinceLastYear,
+        name:     'Change in solar PV production since last year',
+        columns:  [
+          { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          
+          { data: ->{ enba_ksn },                          name: 'previous year',  units: :kwh },
+          { data: ->{ enba_ks0 },                          name: 'last year',      units: :kwh },
+          { data: ->{ percent_change(enba_ksn, enba_ks0)}, name: 'change',         units: :relative_percent_0dp },
+
+          { data: ->{ enba_csn },                          name: 'previous year',  units: :co2 },
+          { data: ->{ enba_cs0 },                          name: 'last year',      units: :co2 },
+          { data: ->{ percent_change(enba_csn, enba_cs0)}, name: 'change',         units: :relative_percent_0dp },
+
+          { data: ->{ enba_solr == 'synthetic' ? 'Y' : '' }, name: 'estimated',  units: String },
+        ],
+        column_groups: [
+          { name: '',                       span: 1 },
+          { name: 'kWh',                    span: 3 },
+          { name: 'CO2 (kg)',               span: 3 },
+          { name: 'Solar',                  span: 1 },
+        ],
+        where:   ->{ !enba_ksn.nil? && enba_psap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
+        sort_by:  [3],
+        type: %i[table],
+        drilldown:  { type: :adult_dashboard, content_class: AdviceSolarPV }
       },
       annual_electricity_costs_per_pupil: {
         benchmark_class:  BenchmarkContentElectricityPerPupil,

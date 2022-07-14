@@ -58,6 +58,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   attr_reader :last_year_electricity_co2, :last_year_gas_co2
   attr_reader :last_year_storage_heater_co2, :last_year_solar_pv_co2
   attr_reader :activation_date
+  attr_reader :solar_type
   attr_reader :recent_fuel_types_for_debug
 
   def initialize(school)
@@ -193,6 +194,11 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
       description: 'school activation date',
       units:  Date,
       benchmark_code: 'sact'
+    },
+    solar_type: {
+      description: 'Solar type - metered or synthetic',
+      units:  String,
+      benchmark_code: 'solr'
     }
   }
 
@@ -221,7 +227,9 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     set_template_variables(res)
 
     @activation_date = @school.energysparks_start_date
-  
+
+    @solar_type = calculate_solar_type
+
     assign_legacy_variables
 
     available_recent_fuel_types = fuel_types_with_up_to_date_data_in_last_year(asof_date)
@@ -255,6 +263,18 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   alias_method :analyse_private, :calculate
 
   private
+
+  # string matching in benchmark_configuration.rb so careful when translating!
+  # PH wouldn't translate as used for keying tables
+  def calculate_solar_type
+    if @school.sheffield_simulated_solar_pv_panels?
+      'synthetic'
+    elsif @school.solar_pv_real_metering?
+      'metered'
+    else
+      ''
+    end
+  end
 
   private def log_missing_variable(type)
     # do nothing, overriding base class, as this alert
@@ -516,7 +536,7 @@ class ChangeInEnergyUse < AlertAnalysisBase
     end
 
     private
-    
+
     def reject_fuels_with_no_recent_data
       @basic_fuel_types.each do |fuel_type|
         reject_fuel_type_with_no_recent_data(fuel_type)
