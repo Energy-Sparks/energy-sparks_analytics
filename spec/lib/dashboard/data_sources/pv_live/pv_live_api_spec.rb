@@ -24,21 +24,15 @@ describe DataSources::PVLiveAPI do
             [
               0,
               "NATIONAL",
-              nil,
-              nil,
               0,
               "_0",
-              1
             ]
           ],
           "meta": [
           "gsp_id",
           "gsp_name",
-          "gsp_lat",
-          "gsp_lon",
           "pes_id",
-          "pes_name",
-          "n_ggds"
+          "pes_name"
           ]
         }
       }
@@ -84,14 +78,12 @@ describe DataSources::PVLiveAPI do
           [
             0,
             "2021-10-11T13:30:00Z",
-            1,
             4670.0
           ]
         ],
         "meta": [
           "gsp_id",
           "datetime_gmt",
-          "n_ggds",
           "generation_mw"
         ]
       }
