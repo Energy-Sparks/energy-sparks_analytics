@@ -15,6 +15,15 @@ module DataSources
       @schools_timezone = TZInfo::Timezone.get('Europe/London')
     end
 
+    #find area matching by gsp_name
+    def find_areas(name)
+      data = @pv_live_api.gsp_list
+      areas  = decode_areas(data[:data], data[:meta])
+      areas.select do |area|
+        area[:gsp_name] == name
+      end
+    end
+
     # should run minimum to 10 days, to create overlap for interpolation (missing days data only slightly fault tolerant)
     def historic_solar_pv_data(gsp_id, sunrise_sunset_latitude, sunrise_sunset_longitude, start_date, end_date)
       raise "Error: requested start_date #{start_date} earlier than first available date 2014-01-01" if start_date < Date.new(2014, 1, 1)
@@ -22,22 +31,6 @@ module DataSources
       datetime_to_yield_hash = process_pv_data(pv_data, meta_data_dictionary, sunrise_sunset_latitude, sunrise_sunset_longitude)
       pv_date_hash_to_x48_yield_array, missing_date_times, whole_day_substitutes = convert_to_date_to_x48_yield_hash(start_date, end_date, datetime_to_yield_hash)
       [pv_date_hash_to_x48_yield_array, missing_date_times, whole_day_substitutes]
-    end
-
-    def find_nearest_areas(latitude, longitude, number = 5)
-      data = @pv_live_api.gsp_list
-
-      meta_data_dictionary      = data[:meta]
-      geographic_location_data  = data[:data]
-
-      location_database = []
-
-      geographic_location_data.each do |location_data|
-        one_area = decode_one_area(location_data, latitude, longitude, meta_data_dictionary)
-        location_database.push(one_area) unless one_area.nil?
-      end
-
-      nearest_areas(location_database, number)
     end
 
     # ======================= HISTORIC DATA SUPPORT METHODS ================================================
@@ -170,51 +163,14 @@ module DataSources
       [pv_data, meta_data_dictionary]
     end
 
-    # ======================= NEAREST AREA SUPPORT METHODS ================================================
-
-    private def nearest_areas(location_database, number = 5)
-      nearest_locations = location_database.sort {|loc1, loc2| loc1[:distance_km] <=> loc2[:distance_km] }
-      nearest_locations[0...number]
+    private def decode_areas(areas, meta)
+      areas.map do |area|
+        {
+          gsp_id: area[ meta.index('gsp_id') ],
+          gsp_name: area[ meta.index('gsp_name') ],
+          pes_id: area[ meta.index('pes_id')]
+        }
+      end
     end
-
-    private def decode_one_area(location_data, latitude, longitude, meta_data_dictionary)
-      # ["gsp_id","gsp_name","gsp_lat","gsp_lon","pes_id","pes_name","n_ggds"]
-
-      gsp_latitude  = location_data[meta_data_dictionary.index('gsp_lat')]
-      gsp_longitude = location_data[meta_data_dictionary.index('gsp_lon')]
-
-      return nil if gsp_latitude.nil? || gsp_longitude.nil? # first station 'NATIONAL' always seems to be null
-
-      {
-        gsp_id:           location_data[meta_data_dictionary.index('gsp_id')],
-        gsp_name:         location_data[meta_data_dictionary.index('gsp_name')],
-        latitude:         gsp_latitude,
-        longitude:        gsp_longitude,
-        distance_km:      distance_km(latitude, longitude, gsp_latitude, gsp_longitude),
-        compass_ordinal:  compass_ordinal(latitude, longitude, gsp_latitude, gsp_longitude)
-      }
-    end
-
-    private def compass_ordinal(latitude, longitude, gsp_latitude, gsp_longitude)
-      degrees = direction(latitude, longitude, gsp_latitude, gsp_longitude)
-      compass_points(degrees)
-    end
-
-    private def distance_km(latitude, longitude, gsp_latitude, gsp_longitude)
-      LatitudeLongitude.distance(latitude, longitude, gsp_latitude, gsp_longitude)
-    end
-
-    private def direction(latitude, longitude, gsp_latitude, gsp_longitude)
-      latitude_difference  = gsp_latitude - latitude
-      longitude_difference = gsp_longitude - longitude
-      Math.atan2(longitude_difference, latitude_difference) * 180.0 / Math::PI
-    end
-
-    private def compass_points(degrees)
-      degrees = (degrees + 22.5) % 360.0 # rotate by 22.5 degrees to provide margin either side of compass ordinal
-      index = ((8.0 * degrees) / 360.0).to_i # split into 8 points of compass
-      %w[N NE E SE S SW W NW][index]
-    end
-
   end
 end
