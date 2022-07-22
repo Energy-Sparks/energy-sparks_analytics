@@ -1089,7 +1089,12 @@ class ThermostaticAdvice < HeatingAnalysisBase
   end
 
   def generate_advice
+  end
+=begin
+deprecated PH 22 Jul 2022
+  def generate_advice
     logger.info @school.name
+
     header_template = %{
       <% if @add_extra_markup %>
           <head><h2>Thermostatic analysis</h2>
@@ -1121,12 +1126,11 @@ class ThermostaticAdvice < HeatingAnalysisBase
           <p>
             The scatter chart below shows a thermostatic analysis of your school's heating system.
             The y axis shows the energy consumption in kWh on any given day.
-            The x axis the outside temperature. This is inverse of temperature,
-            the higher the degree days the colder the temperature.
+            The x axis the outside temperature.
           </p>
           <p>
             If the heating has good thermostatic control then the points at the top of
-            chart when the heating is on and the school occupied should be close to the trend line (red squares).
+            chart when the heating is on and the school occupied should be close to the trend line.
             This is because the amount of heating required on a single day is linearly proportional to
             the difference between the inside and outside temperature, and any variation from the
             trend line would suggest thermostatic control isn't working too well.
@@ -1138,7 +1142,7 @@ class ThermostaticAdvice < HeatingAnalysisBase
           <p>
             The second set of data at the bottom of the chart is for gas consumption in the summer when the
             heating is not on; typically this is from hot water and kitchen consumption. The slope of this line
-            is often an indicaton of how well insulated the hot water system is; of the consumption increases
+            is often an indicaton of how well insulated the hot water system is; if the consumption increases
             as it gets colder it suggests a lack of insulation. An estimate of this loss across the last
             year is <%= kwh_to_pounds_and_kwh(insulation_hotwater_heat_loss_estimate, :gas)  %>.
           </p>
@@ -1170,7 +1174,7 @@ class ThermostaticAdvice < HeatingAnalysisBase
           which is a measure of how far the points are
           from the trend line. A perfect R<sup>2</sup> of 1.0 would mean all the points were on the line,
           if points appear as a cloud with no apparent pattern (random) then the R<sup>2</sup> would
-          be close to 1.0. For heating systems in schools a good value is 0.8.
+          be close to 0.0. For heating systems in schools a good value is 0.8.
         </p>
         <p>
           Your school's r2 of <%= r2.round(2) %> is <%= r2_rating_adjective %>.
@@ -1205,6 +1209,7 @@ class ThermostaticAdvice < HeatingAnalysisBase
 
     @footer_advice = generate_html(footer_template, binding)
   end
+=end
 end
 
 #==============================================================================
@@ -1215,6 +1220,11 @@ class CusumAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
+  end
+=begin
+deprecated PH 22 Jul 2022
+  def generate_advice
+
     logger.debug @school.name
     header_template = %{
       <% if @add_extra_markup %>        
@@ -1247,7 +1257,9 @@ class CusumAdvice < DashboardChartAdviceBase
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+
   end
+=end
 end
 
 #==============================================================================
@@ -1808,13 +1820,14 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
   end
 
   def generate_advice
+  end
+=begin
+deprecated PH 22 Jul 2022
+  def generate_advice
+
     header_template = %{
       <%= @body_start %>
       <% if @chart_type == :thermostatic_control_large_diurnal_range  || @chart_type == :thermostatic_control_large_diurnal_range_1%>
-        <p>
-        Sometimes the 'thermostatic' scatter plot on the graph can be misleading, and
-        thermostatic control is either better or worse than the R<sup>2</sup> suggests.
-        </p>
         <p>
         An alternative way of looking at the thermostatic control is to look at whether
         a school's gas consumption changes on a day when the outside temperature changes
@@ -1842,7 +1855,7 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
       <%= @body_start %>
       <% if @chart_type == :thermostatic_control_large_diurnal_range || @chart_type == :thermostatic_control_large_diurnal_range_1 %>
       <p>
-        We can't automate this analysis, so you will need to look at the chart for you and
+        We can't automate this analysis, so you will need to look at the chart and
         decide: as the outside temperature rises (dark blue line), does the school's gas consumption
         drop significantly?
       </p>
@@ -1863,6 +1876,7 @@ class HeatingThermostaticDiurnalRangeAdvice < DashboardChartAdviceBase
 
     @footer_advice = generate_html(footer_template, binding)
   end
+=end
 end
 
 #==============================================================================

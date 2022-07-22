@@ -194,8 +194,8 @@ module AnalyseHeatingAndHotWater
       end
 
       def predicted_kwh_temperature(temperature)
-        base_temp_problem = @base_temperature.nil? || @base_temperature.nan?
-        @a + @b * (base_temp_problem ? temperature : [temperature, @base_temperature].min)
+        base_temp_problem_or_not_set = @base_temperature.nil? || @base_temperature.nan?
+        @a + @b * (base_temp_problem_or_not_set ? temperature : [temperature, @base_temperature].min)
       end
 
       def valid?
@@ -688,7 +688,7 @@ module AnalyseHeatingAndHotWater
     def heating_on_time_assessment(date)
       temperature = temperatures.average_temperature_in_time_range(date, 0, 10).round(1) # between midnight and 5:00am
       return [nil, nil, temperature, nil] if !heating_on?(date)
-      
+
       heating_on_halfhour_index = heating_on_half_hour_index(date)
       return [nil, nil, temperature, nil] if heating_on_halfhour_index.nil?
 
@@ -777,6 +777,7 @@ module AnalyseHeatingAndHotWater
       x = Daru::Vector.new(start_times)
       y = Daru::Vector.new(time_temp_pairs.map(&:last))
       sr = Statsample::Regression.simple(x, y)
+
       {
         regression_start_time:        sr.a,
         optimum_start_sensitivity:    sr.b,

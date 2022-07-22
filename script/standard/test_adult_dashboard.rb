@@ -7,11 +7,12 @@ module Logging
   # logger.level = :error
 end
 
-schools = ['*'] # ['king-james-1-community-use-test*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
+schools = ['king-james-1-community-academy*'] # ['king-james-1-community-use-test*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
 
 overrides = {
   schools: schools,
-  cache_school: false
+  cache_school: false,
+  adult_dashboard: { control: { pages: %i[boiler_control_thermostatic], user: { user_role: :analytics, staff_role: nil } } }
   # adult_dashboard: { control: { pages: %i[boiler_control_morning_start_time], user: { user_role: :analytics, staff_role: nil } } }
   # adult_dashboard: { control: { pages: %i[electric_target gas_target] } }
 }

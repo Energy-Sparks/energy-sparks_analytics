@@ -67,7 +67,7 @@ class AggregatorTrendlines < AggregatorBase
 
   def add_regression_parameters_to_trendline_symbol(trendline_symbol, model_type)
     reg = @regression_parameters[model_type]
-    parameters = reg.nil? ? ' =no model' : sprintf(' =%.0f + %.1fT r2 = %.2f x %d', reg[:a], reg[:b], reg[:r2], reg[:n])
+    parameters = reg.nil? ? ' =no model' : sprintf(' =%.1fT + %.0f, r2 = %.2f, n=%d', reg[:b], reg[:a], reg[:r2], reg[:n])
     (trendline_symbol.to_s + parameters).to_sym
   end
 
@@ -77,7 +77,7 @@ class AggregatorTrendlines < AggregatorBase
     model_names = results.bucketed_data.select { |bucket_name, _data| bucket_name != Series::Temperature::TEMPERATURE }
     model_names.each_key do |model_name|
       x_data, y_data = compact_to_non_nan_data(temperatures, results.bucketed_data[model_name])
-      regression_parameters[model_name]  = calculate_regression_parameters(x_data, y_data)
+      regression_parameters[model_name] = calculate_regression_parameters(x_data, y_data)
     end
   end
 
