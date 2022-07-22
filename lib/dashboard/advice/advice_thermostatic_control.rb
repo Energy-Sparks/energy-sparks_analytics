@@ -7,9 +7,11 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
   end
 
   def raw_content(user_type: nil)
-    thermostatic_control(user_type: user_type) +
-    diurnal_control(user_type: user_type) +
-    cusum(user_type: user_type)
+    [
+      thermostatic_control(user_type: user_type),
+      diurnal_control(user_type: user_type),
+      cusum(user_type: user_type)
+    ].flatten.compact
   end
 
   private
@@ -344,7 +346,7 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
   end
 
   def cusum(user_type: nil)
-    return '' unless ContentBase.analytics_user?(user_type)
+    return [nil] unless ContentBase.analytics_user?(user_type)
 
     charts_and_html = [
       { type: :html,        content: '<h2>Cusum chart (analytics user only)</h2>' },
