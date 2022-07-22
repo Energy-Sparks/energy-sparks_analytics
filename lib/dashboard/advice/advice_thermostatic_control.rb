@@ -187,7 +187,7 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
         heating values are. At your school this is <%= r2_html %>
         which is <strong><%= r2_adjective %></strong>,
         a value of 1.0 is perfect,
-        0.0 indicated no relationship between how cold
+        0.0 indicates no relationship between how cold
         it is outside and how much gas is consumed which
         would be very bad for the school’s carbon emissions
         and running costs.

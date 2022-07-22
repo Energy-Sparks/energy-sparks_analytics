@@ -4,7 +4,7 @@ require_all './test_support/'
 
 module Logging
   @logger = Logger.new(File.join('log', 'adult dashboard.log'))
-  # logger.level = :error
+  logger.level = :info
 end
 
 schools = ['*'] # ['king-james-1-community-academy*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools

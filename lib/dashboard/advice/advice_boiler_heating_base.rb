@@ -31,4 +31,12 @@ class AdviceBoilerHeatingBase < AdviceGasBase
     last_year = SchoolDatePeriod.new(:analysis, 'validate amr', start_date, meter.amr_data.end_date)
     meter.heating_model(last_year, model_type)
   end
+
+  def one_year_before_last_meter_date
+    [last_meter_date - 364, aggregate_meter.amr_data.start_date].max
+  end
+
+  def last_meter_date
+    aggregate_meter.amr_data.end_date
+  end
 end
