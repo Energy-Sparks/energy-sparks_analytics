@@ -946,36 +946,114 @@ module Benchmarking
       )
     end
   end
+
   #=======================================================================================
-  class BenchmarkChangeInEnergySinceLastYear < BenchmarkContentBase
+  # shared wording save some translation costs
+  class BenchmarkAnnualChangeBase < BenchmarkContentBase
+    def table_introduction(fuel_types, direction = 'use')
+      text = %q(
+        <p>
+          This table compares <%= fuel_types %> <%= direction %> between this year to date
+          (defined as ‘last year’ in the table below) and the corresponding period
+          from the year before (defined as ‘previous year’).
+        </p>
+      )
+
+      ERB.new(text).result(binding)
+    end
+
+    def varying_directions(list, in_list = true)
+      text = %q(
+        <%= in_list ? 't' : 'T'%>he kWh, CO2, £ values can move in opposite directions and by
+        different percentages because the following may vary between
+        the two years:
+        <%= to_bulleted_list(list) %>
+      )
+
+      ERB.new(text).result(binding)
+    end
+
+    def electric_and_gas_mix
+      %q( the mix of electricity and gas )
+    end
+
+    def carbon_intensity
+      %q( the carbon intensity of the electricity grid )
+    end
+
+    def day_night_tariffs
+      %q(
+        the proportion of electricity consumed between night and day for schools
+        with differential tariffs (economy 7)
+      )
+    end
+
+    def only_in_previous_column
+      %q(
+        data only appears in the 'previous year' column if two years
+        of data are available for the school
+      )
+    end
+
+    def to_bulleted_list(list)
+      text = %q(
+        <ul>
+          <%= list.map { |li| "<li>#{li}</li>" }.join('') %>
+        </ul>
+      )
+
+      ERB.new(text).result(binding)
+    end
+
+    def cost_solar_pv
+      %q(
+        the cost column for schools with solar PV only represents the cost of consumption
+        i.e. mains plus electricity consumed from the solar panels using a long term economic value.
+        It doesn't use the electricity or solar PV tariffs for the school
+      )
+    end
+
+    def solar_pv_electric_calc
+      %q(
+        the electricity consumption for schools with solar PV is the total
+        of electricity consumed from the national grid plus electricity
+        consumed from the solar PV (self-consumption)
+        but excludes any excess solar PV exported to the grid
+      )
+    end
+
+    def sheffield_estimate
+      %q(
+        self-consumption is estimated where we don't have metered solar PV,
+        and so the overall electricity consumption will also not be 100% accurate,
+        but will be a ‘good’ estimate of the year on year change
+      )
+    end
+    
+    def storage_heater_comparison
+      %q(
+        The electricity consumption also excludes storage heaters
+        which are compared in a separate comparison
+      )
+    end
+  end 
+  #=======================================================================================
+  class BenchmarkChangeInEnergySinceLastYear < BenchmarkAnnualChangeBase
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      %q(
-        <p>
-          This table compares energy use between this year (last year) to date
-          and the corresponding period from the year before (previous year).
-        </p>
+      text = %q(
+        <%= table_introduction('energy') %>
         <p>
           Comments:
           <ul>
             <li>
-              the kWh, CO2, £ values can move in opposite directions
-              and by different percentages because
-              <ul>
-                <li>the mix of electricity and gas</li>
-                <li>the carbon intensity of the electricity grid</li>
-                <li>
-                    the proportion of electricity consumed between night and day
-                    for schools with differential tariffs (economy 7)
-                </li>
-              </ul>
-              may vary between the two years
+              <%= varying_directions([electric_and_gas_mix, carbon_intensity, day_night_tariffs]) %>
             </li>
             <li>
-              data only appears in the 'previous year' column if two years of
-              data are available for the school
+              <%= only_in_previous_column %>
             </li>
+  
             <li> the fuel column is keyed as follows
               <table  class="table table-striped table-sm">
                 <tr><td>E</td><td>Electricity</td></tr>
@@ -986,17 +1064,17 @@ module Benchmarking
               </table>
             </li>
             <li>
-              the cost column for schools with solar PV only represents the cost
-              of consumption i.e. mains plus electricity consumed from the solar
-              panels using a long term economic value. It doesn't use the electricity
-              or solar PV tariffs for the school
+              <%= cost_solar_pv %>
             </li>
             <li>
               the energy CO2 and kWh includes the net of the electricity and solar PV values
             </li>
           </ul>
         </p>
-      ) + CAVEAT_TEXT[:covid_lockdown]
+        <%= CAVEAT_TEXT[:covid_lockdown] %>
+      )
+
+      ERB.new(text).result(binding)
     end
 
     def content(school_ids: nil, filter: nil, user_type: nil)
@@ -1021,100 +1099,91 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkChangeInElectricitySinceLastYear  < BenchmarkContentBase
+  class BenchmarkChangeInElectricitySinceLastYear < BenchmarkAnnualChangeBase
     include BenchmarkingNoTextMixin
 
     # some text duplication with the BenchmarkChangeInEnergySinceLastYear class
     private def introduction_text
-      %q(
-        <p>
-          This table compares electricity consumption between this year (last year) to date
-          and the corresponding period from the year before (previous year).
-          It excludes savings from solar PV, and consumption from storage heaters.
-          It is subject to the same comments in the list of the first table on this page.
-        </p>
+      text = %q(
+        <%= table_introduction('electricity') %>
         <p>
           Comments:
           <ul>
-            <li>
-              the kWh, CO2, £ values can move in opposite directions
-              and by different percentages because
-              <ul>
-                <li>the carbon intensity of the electricity grid</li>
-                <li>
-                    the proportion of electricity consumed between night and day
-                    for schools with differential tariffs (economy 7)
-                </li>
-                <li>self consumption is estimated where we don't have metered solar PV</li>
-              </ul>
-              may vary between the two years
-            </li>
-            <li>
-              data only appears in the 'previous year' column if two years of
-              data are available for the school
-            </li>
+            <li><%= varying_directions([carbon_intensity, day_night_tariffs]) %></li>
+            <li><%= only_in_previous_column %></li>
+            <li><%= solar_pv_electric_calc %></li>
+            <li><%= sheffield_estimate %></li>
+            <li><%= storage_heater_comparison %></li>
           </ul>
         </p>
-      ) + CAVEAT_TEXT[:covid_lockdown]
+        <%= CAVEAT_TEXT[:covid_lockdown] %>
+      )
+
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================
-  class BenchmarkChangeInGasSinceLastYear  < BenchmarkContentBase
+  class BenchmarkChangeInGasSinceLastYear < BenchmarkAnnualChangeBase
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      %q(
-        <p>
-          This table compares gas consumption between this year (last year) to date
-          and the corresponding period from the year before (previous year).
-        </p>
-      ) + CAVEAT_TEXT[:covid_lockdown]
+      text = %q(
+        <%= table_introduction('gas') %>
+        <%= CAVEAT_TEXT[:covid_lockdown] %>
+      )
+
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================
-  class BenchmarkChangeInStorageHeatersSinceLastYear  < BenchmarkContentBase
+  class BenchmarkChangeInStorageHeatersSinceLastYear < BenchmarkAnnualChangeBase
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      %q(
+      text = %q(
+        <%= table_introduction('storage heater') %>
         <p>
-          This table compares storage heater consumption between this year (last year) to date
-          and the corresponding period from the year before (previous year).
           The storage heater consumption is a reasonably accurate estimate
-          as for most schools we disaggregate it from mains consumption as storage
-          heaters are typically not separately metered.
+          as for most schools we disaggregate it from mains consumption as
+          storage heaters are typically not separately metered.
         </p>
         <p>
-          For most schools the cost values are over-estimated because we
-          don&apos;t have information on whether your school&apos;s tariff is
-          differential (economy 7) - we can set this up for you if you
-          <a href="mailto:hello@energysparks.uk?subject=Please%20configure%20a%20differential%20tariff%20for<%= @school.name %>">email us</a>?
+          For some schools the cost values may be overestimated because
+          we don't have information on whether your school&apos;s storage heaters
+          use a lower differential or economy 7 tariff.
         </p>
-      ) + CAVEAT_TEXT[:covid_lockdown]
+        <p>
+          <%= varying_directions([carbon_intensity, day_night_tariffs], false) %>
+        </p>
+        <%= CAVEAT_TEXT[:covid_lockdown] %>
+      )
+
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================
-  class BenchmarkChangeInSolarPVSinceLastYear  < BenchmarkContentBase
+  class BenchmarkChangeInSolarPVSinceLastYear < BenchmarkAnnualChangeBase
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      %q(
+      text = %q(
+        <%= table_introduction('solar PV', 'production/generation') %>
         <p>
-        This table compares solar PV production/generation use between this year (last year) to date
-        and the corresponding period from the year before (previous year).
-        </p>
-        <p>
-          Where we don't have metered data we used localised estimates; the percentage
-          change should be reasonably accurate but kWh values may be less accurate
-          as we currently assume for the estimate that the school&apos;s panels
-          face south and are inclined at 30 degrees.
+          Where we don't have metered data we used localised estimates;
+          the percentage change should be reasonably accurate
+          but kWh values may be less accurate as we currently assume
+          that the school's panels face south and are inclined at 30 degrees.
+          If your school&apos;s panels have a different set up, the kWh values will vary from our estimates.
         <p/>
         <p>
-          The CO2 emissions (reduction) are calculated using the carbon intensity of the
-          national electricity grid. As the grid decarbonises the CO2 offset by
-          the school&apos;s solar panels will gradually reduce i.e. the CO2 benefit will diminish.
+          The CO2 savings achieved by generating electricity from your solar panels
+          are calculated using the carbon intensity of the national electricity grid.
+          As the grid decarbonises the CO2 offset by the school's solar panels will
+          gradually reduce i.e. the CO2 benefit will diminish.
         </p>
       )
+
+      ERB.new(text).result(binding)
     end
   end
   #=======================================================================================
