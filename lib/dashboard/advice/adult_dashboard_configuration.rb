@@ -2,6 +2,7 @@ require_rel './*.rb'
 require_rel './costs/*.rb'
 require_rel './../alerts/*/*.rb'
 require_rel './../alerts/*/*/*.rb'
+
 class DashboardConfiguration
   ADULT_DASHBOARD_GROUPS = {
     benchmark:      %i[benchmark],
@@ -477,8 +478,8 @@ class DashboardConfiguration
       }
     },
     boiler_control_thermostatic: {
-      name:                   'Thermostatic',
-      content_class:           AdviceGasBoilerThermostatic,
+      name:                   'Thermostatic Control',
+      content_class:           AdviceGasThermostaticControl,
       excel_worksheet_name:   'GasThermostatic',
       charts: %i[
         thermostatic_up_to_1_year
