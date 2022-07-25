@@ -54,7 +54,7 @@ class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
         <%= formatted_impact(:kwh) %>
         by turning its boiler off in warm weather,
         for example earlier in the Spring and later in the Autumn.
-      <p>
+      </p>
     }
 
     ERB.new(text).result(binding)
