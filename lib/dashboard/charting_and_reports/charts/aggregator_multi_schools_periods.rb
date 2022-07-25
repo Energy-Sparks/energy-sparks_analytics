@@ -101,7 +101,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
         time_description = number_of_periods <= 1 ? '' : (':' + time_description)
         results.bucketed_data[      time_description] = period_data.results.bucketed_data.values[0]
         results.bucketed_data_count[time_description] = period_data.results.bucketed_data_count.values[0]
-      else      
+      else
         time_description += "- partial year (from #{period_data.results[0]})" if period_data.results.x_axis.length < results.x_axis.length
         keys = period_data.results.x_axis.map{ |month_year| month_year[0..2]}
 

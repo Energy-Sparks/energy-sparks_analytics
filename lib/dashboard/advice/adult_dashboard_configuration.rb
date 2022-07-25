@@ -422,7 +422,7 @@ class DashboardConfiguration
         fuel_type:          :gas
       }
     },
-    gas_profit_loss: {   
+    gas_profit_loss: {
       name:                   'Gas Costs',
       content_class:           AdviceGasCosts,
       excel_worksheet_name:   'GasCosts',

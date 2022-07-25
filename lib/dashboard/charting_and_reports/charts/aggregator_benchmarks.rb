@@ -88,35 +88,43 @@ class AggregatorBenchmarks < AggregatorBase
     scale_benchmarks(target_benchmark_per_m2 * @school.floor_area, fuel_type) * dd_adjustment
   end
 
+  def benchmark_gas_usage_kwh_per_m2
+    BenchmarkMetrics.benchmark_gas_usage_kwh_per_m2(@school)
+  end
+
+  def exemplar_gas_usage_kwh_per_m2
+    BenchmarkMetrics.exemplar_gas_usage_kwh_per_m2(@school)
+  end
+
   def national_benchmark_gas_usage_in_units
-    benchmark_heating_usage(BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2, :gas, false)
+    benchmark_heating_usage(benchmark_gas_usage_kwh_per_m2, :gas, false)
   end
 
   def national_benchmark_storage_heater_usage_in_units
-    benchmark_heating_usage(BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2, :storage_heaters, false)
+    benchmark_heating_usage(benchmark_gas_usage_kwh_per_m2, :storage_heaters, false)
   end
 
   def national_exemplar_gas_usage_in_units
-    benchmark_heating_usage(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2, :storage_heaters, false)
+    benchmark_heating_usage(exemplar_gas_usage_kwh_per_m2, :storage_heaters, false)
   end
 
   def national_exemplar_storage_heater_usage_in_units
-    benchmark_heating_usage(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2, :storage_heaters, false)
+    benchmark_heating_usage(exemplar_gas_usage_kwh_per_m2, :storage_heaters, false)
   end
 
   def regional_benchmark_gas_usage_in_units
-    benchmark_heating_usage(BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2, :gas, true)
+    benchmark_heating_usage(benchmark_gas_usage_kwh_per_m2, :gas, true)
   end
 
   def regional_benchmark_storage_heater_usage_in_units
-    benchmark_heating_usage(BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2, :storage_heaters, true)
+    benchmark_heating_usage(benchmark_gas_usage_kwh_per_m2, :storage_heaters, true)
   end
 
   def regional_exemplar_gas_usage_in_units
-    benchmark_heating_usage(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2, :gas, true)
+    benchmark_heating_usage(exemplar_gas_usage_kwh_per_m2, :gas, true)
   end
 
   def regional_exemplar_storage_heater_usage_in_units
-    benchmark_heating_usage(BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2, :storage_heaters, true)
+    benchmark_heating_usage(exemplar_gas_usage_kwh_per_m2, :storage_heaters, true)
   end
 end

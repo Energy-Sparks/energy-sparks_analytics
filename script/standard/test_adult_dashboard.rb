@@ -7,7 +7,7 @@ module Logging
   # logger.level = :error
 end
 
-schools = ['*'] # ['king-james-1-community-use-test*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
+schools = ['*'] # ['bishopston-nu*', 'king-ja*'] # ['king-james-1-community-use-test*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
 
 overrides = {
   schools: schools,

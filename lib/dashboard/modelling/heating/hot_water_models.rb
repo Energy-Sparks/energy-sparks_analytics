@@ -92,7 +92,7 @@ module AnalyseHeatingAndHotWater
       analysis_period, first_holiday_date = find_period_before_and_during_summer_holidays(holidays, meter.amr_data)
 
       raise EnergySparksNotEnoughDataException, 'Meter data does not cover a period starting before and including a sumer holiday - unable to complete hot water efficiency analysis' if analysis_period.nil?
-      
+
       data = %i[holiday_kwhs weekend_kwhs school_day_open_kwhs school_day_closed_kwhs].map { |daytype| [daytype, []] }.to_h
 
       (analysis_period.start_date..analysis_period.end_date).each do |date|

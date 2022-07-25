@@ -55,6 +55,8 @@ class AverageSchoolCalculator
       middle:                       [ :primary, :secondary ],
       infant:                       [ :primary ],
       junior:                       [ :primary ],
+      nursery:                      [ :primary ],
+      nursery_no_holidays:          [ :primary ],
     }
 
     raise UnexpectedSchoolTypeException, "Unknown school type #{school_type}" unless school_map.key?(school_type.to_sym)

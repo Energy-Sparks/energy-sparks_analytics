@@ -9,7 +9,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
 
   def initialize(school)
     super(school, :hotwaterefficiency) 
-    @relevance = :never_relevant if @relevance != :never_relevant && heating_only # set before calculation
+    @relevance = :never_relevant if unable_to_analyse_hot_water? # set before calculation
   end
 
   def timescale
@@ -99,9 +99,14 @@ class AlertHotWaterEfficiency < AlertGasModelBase
     set_time_of_year_relevance(@heating_on.nil? ? 5.0 : (@heating_on ? 5.0 : 7.5))
   end
 
+  private def unable_to_analyse_hot_water?
+    (@relevance != :never_relevant && heating_only) || @school.no_holidays?
+  end
+
   private def calculate(asof_date)
     calculate_model(asof_date) # so gas_model_only base varaiables are expressed even if no hot water
-    if @relevance != :never_relevant && heating_only
+
+    if unable_to_analyse_hot_water?
       @relevance = :never_relevant
       @rating = nil
     else

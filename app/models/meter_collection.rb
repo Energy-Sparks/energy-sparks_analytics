@@ -12,6 +12,8 @@
 class MeterCollection
   include Logging
 
+  SCHOOL_TYPES = %i[primary infant junior special secondary middle mixed_primary_and_secondary nursery nursery_no_holidays]
+
   attr_reader :heat_meters, :electricity_meters, :storage_heater_meters
 
   # From school/building
@@ -68,6 +70,7 @@ class MeterCollection
     @pseudo_meter_attributes = pseudo_meter_attributes
     @cached_open_time = TimeOfDay.new(7, 0) # for speed
     @cached_close_time = TimeOfDay.new(16, 30) # for speed
+    validate_school_type
     process_school_times(school.school_times, school.community_use_times)
   end
 
@@ -386,7 +389,21 @@ class MeterCollection
   end
 
   def school_type
-    @school.nil? ? nil : @school.school_type
+    if @school.nil?
+      nil
+    elsif @school.school_type.instance_of? String
+      @school.school_type.to_sym
+    else
+      @school.school_type
+    end
+  end
+
+  def validate_school_type
+    !SCHOOL_TYPES.include?(school_type)
+  end
+
+  def no_holidays?
+    school_type == :nursery_no_holidays
   end
 
   def energysparks_start_date

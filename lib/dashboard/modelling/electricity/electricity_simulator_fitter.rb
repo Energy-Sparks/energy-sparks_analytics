@@ -361,7 +361,7 @@ class ElectricitySimulator
     school_type = @school.school_type.to_sym
 
     case school_type
-    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
+    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary, :nursery, :nursery_on_holidays
       num_intakes = (@school.number_of_pupils / (6 * 30)).ceil
       # 1 head, 2 admin staff per intake classes (+1) + 1 per teacher
       admin_staff = 2 * num_intakes + 1

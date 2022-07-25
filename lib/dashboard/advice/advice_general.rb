@@ -72,7 +72,7 @@ end
 
 class AdviceGasHotWater < AdviceGasBase
   def relevance
-    super == :relevant &&  !heating_only? ? :relevant : :never_relevant
+    super == :relevant && !heating_only? && !@school.no_holidays? ? :relevant : :never_relevant
   end
 end
 

@@ -13,15 +13,23 @@ module BenchmarkMetrics
   BENCHMARK_ELECTRICITY_USAGE_PER_M2 = 50_000.0 / 1_200.0
   BENCHMARK_GAS_USAGE_PER_PUPIL = 0.9 * 115_000.0 / 200.0 # 0.9 is artificial incentive for schools to do better
   BENCHMARK_GAS_USAGE_PER_M2 = 0.9 * 115_000.0 / 1_200.0 # 0.9 is artificial incentive for schools to do better
+  BENCHMARK_NO_HOLIDAY_GAS_USAGE_PER_M2 = BENCHMARK_GAS_USAGE_PER_M2 * 1.1 # arbitrary adjustment for 2 x fewer winter holiday weeks + summer hot water
+  BENCHMARK_NO_HOLIDAY_GAS_USAGE_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * 1.1
+
   EXEMPLAR_GAS_USAGE_PER_M2 = 80.0
+  EXEMPLAR_NO_HOLIDAY_GAS_USAGE_PER_M2 = EXEMPLAR_GAS_USAGE_PER_M2 * 1.1
+  EXEMPLAR_NO_HOLIDAY_GAS_USAGE_PER_PUPIL = 
+
   EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175
   BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2 = 0.01
   LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH = 0.15
   ANNUAL_AVERAGE_DEGREE_DAYS = 2000.0
   AVERAGE_GAS_PROPORTION_OF_HEATING = 0.6
-
-  BENCHMARK_ENERGY_COST_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * GAS_PRICE +
-                                    BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * ELECTRICITY_PRICE
+  AVERAGE_NURSERY_PUPILS = 75.0
+  NO_HOLIDAY_SCHOOL_WEEKS = 50.0
+  AVERAGE_STATE_SCHOOL_WEEKS = 39.0
+  MINIMUM_SCHOOL_BASELOAD_KW = 1.5
+  NO_HOLIDAYS_EXTRA_SCHOOL_DAYS_RATIO = NO_HOLIDAY_SCHOOL_WEEKS / AVERAGE_STATE_SCHOOL_WEEKS
 
   # number less than 1.0 for colder area, > 1.0 for milder areas
   # multiply by this number if normalising school to other schools in different regions
@@ -61,16 +69,42 @@ module BenchmarkMetrics
   # also scales years, so all years normalised to same temperature
   def self.benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date = nil)
     dd_adj = normalise_degree_days(school.temperatures, school.holidays, :gas, asof_date)
-    if benchmark_type == :benchmark
+    val_kwh = if benchmark_type == :benchmark
       BENCHMARK_GAS_USAGE_PER_PUPIL / dd_adj
     else # :exemplar
-      EXEMPLAR_GAS_USAGE_PER_M2 / dd_adj
+      benchmark_gas_usage_kwh_per_m2(school) / dd_adj
     end
+    puts "Got here gas adjust"
+    school.no_holidays ? NO_HOLIDAYS_EXTRA_SCHOOL_DAYS_RATIO * val_kwh : val_kwh
   end
 
   # as above, larger number returned for Scotland, lower for SW
   def self.benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date = nil)
     benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date) * GAS_PRICE
+  end
+
+  def self.benchmark_gas_usage_kwh_per_m2(school)
+    if school.no_holidays?
+      BENCHMARK_NO_HOLIDAY_GAS_USAGE_PER_M2
+    else
+      BENCHMARK_GAS_USAGE_PER_M2
+    end
+  end
+
+  def self.exemplar_gas_usage_kwh_per_m2(school)
+    if school.no_holidays?
+      EXEMPLAR_NO_HOLIDAY_GAS_USAGE_PER_M2
+    else
+      EXEMPLAR_GAS_USAGE_PER_M2
+    end
+  end
+
+  def self.benchmark_gas_usage_kwh_per_pupil(school)
+    if school.no_holidays?
+      BENCHMARK_NO_HOLIDAY_GAS_USAGE_PER_PUPIL
+    else
+      BENCHMARK_GAS_USAGE_PER_PUPIL
+    end
   end
 
   def self.benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school)
@@ -84,13 +118,25 @@ module BenchmarkMetrics
   def self.benchmark_annual_electricity_usage_kwh(school_type, pupils = 1)
     school_type = school_type.to_sym if school_type.instance_of? String
     check_school_type(school_type, 'benchmark electricity usage per pupil')
-
     case school_type
-    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
+    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary, :nursery
       BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * pupils
+    when :nursery_no_holidays
+      calculate_nursery_benchmark_no_holidays_electricity_usage_kwh_per_pupil * pupils
     when :secondary
       RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE * BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * pupils
     end
+  end
+
+  def self.calculate_nursery_benchmark_no_holidays_electricity_usage_kwh_per_pupil
+    pupils = 150 # use 150 pupil primary school as basis of estimate
+    baseload_kw = recommended_baseload_for_pupils(pupils, :nursery)
+    baseload_usage_kwh = baseload_kw * 24 * 365
+    annual_usage_kwh = benchmark_annual_electricity_usage_kwh(:nursery, pupils)
+    non_baseload_usage_kwh = annual_usage_kwh - baseload_usage_kwh
+    weekly_non_baseload_usage_kwh = non_baseload_usage_kwh / AVERAGE_STATE_SCHOOL_WEEKS
+    annual_nursery_no_holiday_usage_kwh = baseload_usage_kwh + weekly_non_baseload_usage_kwh * NO_HOLIDAY_SCHOOL_WEEKS
+    annual_nursery_no_holiday_usage_kwh / pupils
   end
 
   def self.exemplar_£(school, fuel_type, start_date, end_date)
@@ -109,7 +155,7 @@ module BenchmarkMetrics
       BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school.school_type, number_of_pupils)
     when :gas
       floor_area = school.aggregated_heat_meters.meter_floor_area(school, start_date, end_date)
-      BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area
+      exemplar_gas_usage_kwh_per_m2(school) * floor_area
     end
   end
 
@@ -118,11 +164,18 @@ module BenchmarkMetrics
     check_school_type(school_type, 'benchmark electricity usage per pupil')
 
     case school_type
-    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary
+    when :primary, :infant, :junior, :special, :middle, :mixed_primary_and_secondary, :nursery
       EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
+    when :nursery_no_holidays
+      calculate_nursery_exemplar_no_holidays_electricity_usage_kwh_per_pupil * pupils
     when :secondary
       RATIO_PRIMARY_TO_SECONDARY_ELECTRICITY_USAGE * EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL * pupils
     end
+  end
+
+  def self.calculate_nursery_exemplar_no_holidays_electricity_usage_kwh_per_pupil
+    exemplar_factor = exemplar_baseload_for_pupils(1, :nursery)
+    calculate_nursery_benchmark_no_holidays_electricity_usage_kwh_per_pupil * exemplar_factor
   end
 
   def self.recommended_baseload_for_pupils(pupils, school_type)
@@ -130,9 +183,9 @@ module BenchmarkMetrics
     check_school_type(school_type)
 
     case school_type
-    when :primary, :infant, :junior, :special
+    when :primary, :infant, :junior, :special, :nursery_no_holidays, :nursery
       if pupils < 150
-        1.5
+        MINIMUM_SCHOOL_BASELOAD_KW
       elsif pupils < 300
         2.5
       else
@@ -149,7 +202,7 @@ module BenchmarkMetrics
 
   private_class_method def self.check_school_type(school_type, type = 'baseload benckmark')
     raise EnergySparksUnexpectedStateException.new("Nil type of school in #{type} request") if school_type.nil?
-    if !%i[primary infant junior special middle secondary mixed_primary_and_secondary].include?(school_type)
+    if !MeterCollection::SCHOOL_TYPES.include?(school_type)
       raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in #{type} request")
     end
   end
@@ -164,7 +217,7 @@ module BenchmarkMetrics
     servers = 1
     power = 500.0
     case school_type
-    when :primary, :infant, :junior, :special
+    when :primary, :infant, :junior, :special, :nursery_no_holidays, :nursery
       if pupils < 100
         servers = 2
       elsif pupils < 300
@@ -191,9 +244,9 @@ module BenchmarkMetrics
   def self.recommended_baseload_for_floor_area(floor_area, school_type)
     school_type = school_type.to_sym if school_type.instance_of? String
     case school_type
-    when :primary, :infant, :junior, :special
+    when :primary, :infant, :junior, :special, :nursery_no_holidays, :nursery
       if floor_area < 1000
-        1.5
+        MINIMUM_SCHOOL_BASELOAD_KW
       elsif floor_area < 1600
         2.5
       else
