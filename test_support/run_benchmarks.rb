@@ -249,7 +249,6 @@ class RunBenchmarks
   end
 
   def calculate_alerts(school, asof_date)
-    
     AlertAnalysisBase.all_available_alerts.each do |alert_class|
       alert = alert_class.new(school)
       next if alert_class.benchmark_template_variables.empty?

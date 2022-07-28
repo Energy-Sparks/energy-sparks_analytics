@@ -1029,11 +1029,28 @@ module Benchmarking
         but will be a ‘good’ estimate of the year on year change
       )
     end
-    
+
     def storage_heater_comparison
       %q(
         The electricity consumption also excludes storage heaters
         which are compared in a separate comparison
+      )
+    end
+
+    def colder
+      %q(
+        <p>
+          The &apos;colder?&apos; column represents indicates how much colder
+          it was last year than the previous year. The values in
+          the other columns are not adjusted for temperature.
+          A negative value means it was warm last year than the
+          previous year.
+          You might expect higher gas consumption in a colder year
+          but less than the percentage change in coldness as some
+          of a school&apos;s gas is used for hot water and in the kitchens
+          (typically about 40&percnt;)
+          which in general should not be affected by temperature differences.
+        </p>
       )
     end
   end 
@@ -1129,6 +1146,7 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <%= table_introduction('gas') %>
+        <%= colder %>
         <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
 
@@ -1155,6 +1173,7 @@ module Benchmarking
         <p>
           <%= varying_directions([carbon_intensity, day_night_tariffs], false) %>
         </p>
+        <%= colder %>
         <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
 

@@ -410,11 +410,63 @@ module AnalyseHeatingAndHotWater
       (start_date..end_date).each do |date|
         if heating_on?(date) && !weekend?(date)
           kwh_sensitivity = -@models[model_type?(date)].b
-          offset = @models[model_type?(date)].a
+          _offset = @models[model_type?(date)].a
           total_kwh += kwh_sensitivity
         end
       end
       total_kwh
+    end
+
+    # PH was in 2 minds how to do this, whether to include
+    # hot water summer use temperature adjustment
+    # but ultimately decided on balance to only adjust when
+    # the heating was on
+    def heating_change_statistics(previous_year_range, last_year_range)
+      return nil if previous_year_range.first < @amr_data.start_date
+
+      previous_year_average_heating_temperature = average_temperature_when_heating_on(previous_year_range.first, previous_year_range.last)
+      last_year_average_heating_temperature     = average_temperature_when_heating_on(last_year_range.first, last_year_range.last)
+      change_in_average_heating_temperature     = last_year_average_heating_temperature - previous_year_average_heating_temperature
+      impact_1c_change_kwh = -kwh_saving_for_1_C_thermostat_reduction(previous_year_range.first, previous_year_range.last)
+      kwh_impact = impact_1c_change_kwh * change_in_average_heating_temperature
+      last_year_kwh     = @amr_data.kwh_date_range(last_year_range.first, last_year_range.last)
+      previous_year_kwh = @amr_data.kwh_date_range(previous_year_range.first, previous_year_range.last)
+      adjusted_previous_year_kwh = previous_year_kwh + kwh_impact
+
+      {
+        last_year: {
+          average_heating_temperature: last_year_average_heating_temperature,
+          annual_kwh:                  last_year_kwh
+        },
+        previous_year: {
+          average_heating_temperature: previous_year_average_heating_temperature,
+          annual_kwh:                  previous_year_kwh,
+          adjust_kwh:                  kwh_impact,
+          adjusted_annual_kwh:         adjusted_previous_year_kwh
+        },
+        change: {
+          temperature:          change_in_average_heating_temperature,
+          kwh:                  last_year_kwh - previous_year_kwh,
+          adjusted_kwh:         last_year_kwh - adjusted_previous_year_kwh,
+          percent:              (last_year_kwh - previous_year_kwh) / previous_year_kwh,
+          adjusted_percent:     (last_year_kwh - adjusted_previous_year_kwh) / adjusted_previous_year_kwh,
+          impact_1c_change_kwh: impact_1c_change_kwh
+        }
+      }
+    end
+
+    def heating_on_dates(start_date, end_date)
+      (start_date..end_date).map do |date|
+        heating_on?(date) ? date : nil
+      end.compact
+    end
+
+    def average_temperature_when_heating_on(start_date, end_date)
+      heating_on_temperatures = heating_on_dates(start_date, end_date).map do |date|
+        temperatures.average_temperature(date)
+      end
+
+      heating_on_temperatures.sum / heating_on_temperatures.length
     end
 
     def hot_water_poor_insulation_cost_kwh(start_date, end_date, max_non_hotwater_criteria = 50.0)
