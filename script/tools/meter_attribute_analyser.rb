@@ -13,11 +13,13 @@ meter_attributes_by_type = {}
 
 school_name_pattern_match = ['*']
 source_db = :unvalidated_meter_data
-school_names = RunTests.resolve_school_list(source_db, school_name_pattern_match)
+
+school_names = SchoolFactory.instance.school_file_list(source_db, school_name_pattern_match)
 
 school_names.each do |school_name|
   begin
-    school = SchoolFactory.new.load_or_use_cached_meter_collection(:name, school_name, source_db)
+    school = SchoolFactory.instance.load_school(source_db, school_name, cache: false)
+
     school.all_meters.each do |meter|
       meter.meter_attributes.each do |meter_attribute_name, attribute|
         if %i[meter_corrections aggregation function].include?(meter_attribute_name)
