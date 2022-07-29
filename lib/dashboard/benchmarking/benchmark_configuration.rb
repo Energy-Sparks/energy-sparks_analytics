@@ -437,15 +437,14 @@ module Benchmarking
 
           { data: ->{ percent_change(enba_kgn, enba_kg0)}, name: 'unadjusted',    units: :relative_percent_0dp },
           { data: ->{ gsba_adpc },                         name: 'temperature adjusted', units: :relative_percent_0dp },
-          { data: ->{ gsba_ddan },                         name: 'colder?',       units: :relative_percent_0dp },
-         
+  #        { data: ->{ gsba_ddan },                         name: 'colder?',       units: :relative_percent_0dp },
         ],
         column_groups: [
           { name: '',                 span: 1 },
           { name: 'kWh',              span: 3 },
           { name: 'CO2 (kg)',         span: 2 },
           { name: '£',                span: 2 },
-          { name: 'percent changed',  span: 3 },
+          { name: 'percent changed',  span: 2 },
         ],
         where:   ->{ !enba_kgn.nil? && enba_pgap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],

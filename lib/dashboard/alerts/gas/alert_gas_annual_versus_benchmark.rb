@@ -30,8 +30,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
 
   attr_reader :degree_day_adjustment
   attr_reader :last_year_degree_days, :previous_year_degree_days, :degree_days_annual_change
-  attr_reader :temperature_adjusted_last_year_kwh, :temperature_adjusted_percent
-  
+  attr_reader :temperature_adjusted_previous_year_kwh, :temperature_adjusted_percent
+
   attr_reader :one_year_gas_per_pupil_normalised_kwh, :one_year_gas_per_pupil_normalised_£
   attr_reader :one_year_gas_per_floor_area_normalised_kwh, :one_year_gas_per_floor_area_normalised_£
 
@@ -171,13 +171,13 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         units: :relative_percent,
         benchmark_code: 'ddan'
       },
-      temperature_adjusted_last_year_kwh: {
-        description: 'Year on year degree day change',
+      temperature_adjusted_previous_year_kwh: {
+        description: 'Previous year kWh - temperature adjusted',
         units: :kwh,
         benchmark_code: 'kpya'
       },
       temperature_adjusted_percent: {
-        description: 'Year on year degree day change',
+        description: 'Year on year kwh change temperature adjusted',
         units: :relative_percent,
         benchmark_code: 'adpc'
       },
@@ -299,6 +299,10 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
 
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url('AnnualGas')
+  rescue => e
+    puts "Blown up"
+    puts e.message
+    puts e.backtrace
   end
   alias_method :analyse_private, :calculate
 
@@ -336,12 +340,10 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     model = calculate_model(asof_date)
     stats = model.heating_change_statistics(py, ly)
     unpack_temperature_adjusted_stats(stats) unless stats.nil?
-    ap stats
-    stats
   end
 
   def unpack_temperature_adjusted_stats(stats)
-    @temperature_adjusted_last_year_kwh     = stats[:previous_year][:adjusted_annual_kwh]
+    @temperature_adjusted_previous_year_kwh = stats[:previous_year][:adjusted_annual_kwh]
     @temperature_adjusted_percent           = stats[:change][:adjusted_percent]
   end
 
@@ -350,12 +352,12 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
 
     @last_year_degree_days     = @school.temperatures.degree_days_in_date_range(ly.first, ly.last)
     @previous_year_degree_days = @school.temperatures.degree_days_in_date_range(py.first, py.last)
-    
+
     @degree_days_annual_change = (@last_year_degree_days - @previous_year_degree_days) / @previous_year_degree_days
   end
 
   def kwh(date1, date2, data_type = :kwh)
-    amr_data = @school.aggregated_electricity_meters.amr_data
+    amr_data = @school.aggregated_heat_meters.amr_data
     amr_data.kwh_date_range(date1, date2, data_type)
   rescue EnergySparksNotEnoughDataException=> e
     nil

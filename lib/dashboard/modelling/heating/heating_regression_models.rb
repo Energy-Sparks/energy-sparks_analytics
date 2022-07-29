@@ -409,8 +409,11 @@ module AnalyseHeatingAndHotWater
       total_kwh = 0.0
       (start_date..end_date).each do |date|
         if heating_on?(date) && !weekend?(date)
-          kwh_sensitivity = -@models[model_type?(date)].b
-          _offset = @models[model_type?(date)].a
+          model_type = model_type?(date)
+          # deal with schools with perfect holiday/weekend heating management - mainly switched off
+          next if %i[holiday_heating weekend_heating].include?(model_type) && @models[model_type].nil?
+          kwh_sensitivity = -@models[model_type].b
+          _offset = @models[model_type].a
           total_kwh += kwh_sensitivity
         end
       end

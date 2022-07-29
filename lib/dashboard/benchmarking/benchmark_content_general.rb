@@ -1040,16 +1040,13 @@ module Benchmarking
     def colder
       %q(
         <p>
-          The &apos;colder?&apos; column represents indicates how much colder
-          it was last year than the previous year. The values in
-          the other columns are not adjusted for temperature.
-          A negative value means it was warm last year than the
-          previous year.
-          You might expect higher gas consumption in a colder year
-          but less than the percentage change in coldness as some
-          of a school&apos;s gas is used for hot water and in the kitchens
-          (typically about 40&percnt;)
-          which in general should not be affected by temperature differences.
+          The &apos;adjusted&apos; columns are adjusted for difference in
+          temperature between the two years. So for example, if the previous year was colder
+          than last year, then the adjusted previous year gas consumption
+          in kWh is adjusted to last year&apos;s temperatures and would be smaller than
+          the unadjusted previous year value. The adjusted percent change is a better
+          indicator of the work a school might have done to reduce its energy consumption as
+          it&apos;s not dependent on temperature differences between the two years.
         </p>
       )
     end
