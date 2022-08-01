@@ -331,7 +331,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     values.sum / values.length
   end
 
-
   # overridden by gas classes where this value is temperature compensated
   protected def kwh_date(aggregate_meter, date, data_type, adjusted)
     if adjusted

@@ -7,13 +7,13 @@ module Logging
   logger.level = :error
 end
 
-asof_date = Date.new(2022, 5, 22)
+asof_date = Date.new(2022, 7, 29)
 schools = ['*']
 
 overrides = {
   schools:  schools,
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
-  # alerts:   { alerts: [ AlertTurnHeatingOff ], control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving], log: [:invalid_alerts] } }
+  # alerts:   { alerts: [ AlertElectricityUsageDuringCurrentHoliday ], control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving], log: [:invalid_alerts] } }
 }
 
 script = RunAlerts.default_config.deep_merge(overrides)

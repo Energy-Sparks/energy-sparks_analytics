@@ -171,23 +171,25 @@ class Holidays
   end
 
   # NB might have wirtten this somewhere elsewhere?
-  def calculate_statistics(start_date, end_date, lambda, statistics: %i[total average min max count])
-    day_types = %i[holiday weekend schoolday]
-    totals = day_types.map { |dt| [dt, []] }.to_h
-    stats  = day_types.map { |dt| [dt, {}] }.to_h
+  def calculate_statistics(start_date, end_date, lambda, args: nil, classifier: -> (date) { day_type(date) }, statistics: %i[total average min max count])
+    totals = {}
+    stats = {}
 
     (start_date..end_date).each do |date|
-      dt = day_type(date)
-      totals[dt].push(lambda.call(date))
+      dt = classifier.call(date)
+      totals[dt] ||= []
+      result = args.nil? ? lambda.call(date): lambda.call(date, *args)
+      totals[dt].push(result)
     end
 
     totals.each do |daytype, total|
+      stats[daytype] ||= {}
       statistics.each do |statistic_type|
         case statistic_type
         when :total
           stats[daytype][statistic_type] = total.sum
         when :average
-          stats[daytype][statistic_type] = total.sum / total.length
+          stats[daytype][statistic_type] = total.length == 0 ? nil : total.sum / total.length
         when :min
           stats[daytype][statistic_type] = total.min
         when :max

@@ -920,6 +920,18 @@ module Benchmarking
         sort_by: [1],
         type: %i[table chart]
       },
+      electricity_consumption_during_holiday: {
+        benchmark_class: BenchmarkElectricityOnDuringHoliday,
+        name:     'Electricity consumption during current holiday',
+        columns:  [
+          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: ->{ edhl_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
+          { data: ->{ edhl_£sfr },  name: 'Holiday usage to date', units: :£ },
+          { data: ->{ edhl_hnam },  name: 'Holiday', units: String }
+        ],
+        sort_by: [1],
+        type: %i[table chart]
+      },
       change_in_gas_consumption_recent_school_weeks: {
         benchmark_class: BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek,
         name:     'Change in gas consumption since last school week',
