@@ -86,7 +86,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
     if @school.holidays.holiday?(asof_date)
       @relevance = :relevant
 
-      @holiday_period      = @school.holidays.holiday(asof_date)
+      @holiday_period     = @school.holidays.holiday(asof_date)
       @holiday_name       = @holiday_period.title
       holiday_date_range  = @holiday_period.start_date..@holiday_period.end_date
 
