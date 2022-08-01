@@ -1427,7 +1427,7 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkHeatingHotWaterOnDuringHolidayBase < 
+  class BenchmarkHeatingHotWaterOnDuringHolidayBase < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(

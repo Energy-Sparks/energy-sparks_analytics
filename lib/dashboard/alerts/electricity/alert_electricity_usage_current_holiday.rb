@@ -161,7 +161,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   end
 
   def summary_text
-    text =  %q(
+    text =  %(
               Your electricity usage during <%= @holiday_name %> holiday
               up until <%= @asof_date.strftime('%A %e %b %Y') %>
               has cost <%= FormatEnergyUnit.format(:£, @holiday_usage_to_date_£)  %>.
@@ -169,7 +169,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
                 By the end of the holiday this will cost you
                 <%= FormatEnergyUnit.format(:£, @holiday_projected_usage_£) %>
               <% end %>
-              )
+            )
 
     ERB.new(text).result(binding)
   end
