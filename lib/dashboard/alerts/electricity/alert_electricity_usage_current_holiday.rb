@@ -118,10 +118,6 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
     end
 
     @term = :shortterm
-  rescue => e
-    puts "Got here"
-    puts e.message
-    puts e.backtrace
   end
   alias_method :analyse_private, :calculate
 
