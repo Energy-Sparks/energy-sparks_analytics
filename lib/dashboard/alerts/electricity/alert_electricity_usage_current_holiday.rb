@@ -1,10 +1,9 @@
 # only during holidays this alert send messages or for school comparison/benchmark
 class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
-  attr_reader :holiday_name, :summary, :heating_type
+  attr_reader :holiday_name, :summary
   attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh
   attr_reader :holiday_usage_to_date_£,   :holiday_projected_usage_£
   attr_reader :holiday_usage_to_date_co2, :holiday_projected_usage_co2
-  attr_reader :heating_days_so_far_this_holiday, :hotwater_days_so_far_this_holiday
 
   def initialize(school)
     super(school, :holiday_electricity_usage_to_date)
