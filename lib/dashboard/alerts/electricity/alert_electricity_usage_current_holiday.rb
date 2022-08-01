@@ -154,7 +154,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   def calculate_projected_totals(usage_to_date, workdays_days, weekend_days)
     usage_to_date.transform_values do |v|
       # at start of holiday may only have sample weekend or weekday,
-      # so use backup type if missing sample i.e. woorkday if no weekend day sample etc.
+      # so use backup type if missing sample i.e. workday if no weekend day sample etc.
       workdays_days * (v.dig(:workday, :average) || v.dig(:weekend, :average)) +
       weekend_days  * (v.dig(:weekend, :average) || v.dig(:workday, :average))
     end
