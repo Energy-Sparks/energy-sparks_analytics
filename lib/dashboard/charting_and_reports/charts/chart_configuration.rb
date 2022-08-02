@@ -175,6 +175,7 @@ class ChartManager
     alert_daytype_breakdown_storage_heater: {
       inherits_from:      :alert_daytype_breakdown_gas,
       name:               'Breakdown by type of day/time: Storage Heaters',
+      replace_series_label: [[Series::DayType::SCHOOLDAYCLOSED, Series::DayType::STORAGE_HEATER_CHARGE]],
       meter_definition:   :storage_heater_meter
     },
     daytype_breakdown_electricity: {
@@ -436,7 +437,7 @@ class ChartManager
       name:                 'Information on your school’s storage heater electricity consumption',
       inherits_from:        :group_by_week_electricity,
       meter_definition:     :storage_heater_meter,
-      replace_series_label: [['School Day Closed', 'Storage heater charge (school day)']],
+      replace_series_label: [[Series::DayType::SCHOOLDAYCLOSED, Series::DayType::STORAGE_HEATER_CHARGE]],
       y2_axis:              :degreedays
     },
     management_dashboard_group_by_week_storage_heater: {
@@ -447,7 +448,7 @@ class ChartManager
     storage_heater_by_day_of_week: {
       name:               'Storage heater usage by day of the week',
       inherits_from:      :gas_by_day_of_week,
-      replace_series_label: [['School Day Closed', 'Storage heater charge (school day)']],
+      replace_series_label: [[Series::DayType::SCHOOLDAYCLOSED, Series::DayType::STORAGE_HEATER_CHARGE]],
       meter_definition:   :storage_heater_meter
     },
     storage_heater_by_day_of_week_tolerant:  {
@@ -690,6 +691,7 @@ class ChartManager
     alert_group_by_week_storage_heaters: {
       inherits_from:      :alert_group_by_week_gas,
       name:               'By Week: Storage Heaters',
+      replace_series_label: [[Series::DayType::SCHOOLDAYCLOSED, Series::DayType::STORAGE_HEATER_CHARGE]],
       meter_definition:   :storage_heater_meter
     },
     alert_group_by_week_electricity_14_months: {

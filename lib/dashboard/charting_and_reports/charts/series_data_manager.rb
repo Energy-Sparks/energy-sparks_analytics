@@ -580,6 +580,7 @@ module Series
     WEEKEND         = OpenCloseTime.humanize_symbol(OpenCloseTime::WEEKEND)
     SCHOOLDAYOPEN   = OpenCloseTime.humanize_symbol(OpenCloseTime::SCHOOL_OPEN)
     SCHOOLDAYCLOSED = OpenCloseTime.humanize_symbol(OpenCloseTime::SCHOOL_CLOSED)
+    STORAGE_HEATER_CHARGE = 'Storage heater charge (school day)'
 
     def series_names;                   day_type_names; end
     def day_breakdown(d1, d2);          daytype_breakdown(d1, d2); end
