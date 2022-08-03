@@ -50,6 +50,10 @@ class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
   def group_by_week_day_type_chart
     :alert_group_by_week_storage_heaters
   end
+
+  def school_day_closed_key
+    Series::DayType::STORAGE_HEATER_CHARGE
+  end
 end
 
 class AlertSeasonalHeatingSchoolDaysStorageHeaters < AlertSeasonalHeatingSchoolDays
