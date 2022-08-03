@@ -21,8 +21,8 @@ class ScalarkWhCO2CostValues
     end
   end
 
-  def scalar(time_scale, fuel_type, data_type)
-    (value, start_date, end_date) = aggregate_value_with_dates(time_scale, fuel_type, data_type)
+  def scalar(time_scale, fuel_type, data_type, override = nil)
+    (value, start_date, end_date) = aggregate_value_with_dates(time_scale, fuel_type, data_type, override)
     meter = @meter_collection.aggregate_meter(fuel_type)
     floor_area       = meter.meter_floor_area(      @meter_collection, start_date, end_date)
     number_of_pupils = meter.meter_number_of_pupils(@meter_collection, start_date, end_date)

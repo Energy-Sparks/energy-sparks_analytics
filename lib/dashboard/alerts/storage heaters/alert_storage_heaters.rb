@@ -88,7 +88,7 @@ class AlertHeatingOnSchoolDaysStorageHeaters < AlertHeatingOnSchoolDays
   end
 end
 
-class AlertStorageHeatersLongTermTrend < AlertLongTermTrend
+class AlertStorageHeatersLongTermTrend < AlertGasLongTermTrend
   include AlertGasToStorageHeaterSubstitutionMixIn
   include ElectricityCostCo2Mixin
   def initialize(school)
