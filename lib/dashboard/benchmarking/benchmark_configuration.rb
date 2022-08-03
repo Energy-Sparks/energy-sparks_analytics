@@ -945,6 +945,7 @@ module Benchmarking
           { data: ->{ gswc_dif£ },  name: 'Change £', units: :£ },
           { data: ->{ gswc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
+        max_x_value:   100,
         sort_by: [1],
         type: %i[table chart]
       },
@@ -960,6 +961,8 @@ module Benchmarking
           { data: ->{ gphc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         sort_by: [1],
+        max_x_value:   100,
+        # min_x_value:  -5,
         type: %i[table chart]
       },
       change_in_gas_holiday_consumption_previous_years_holiday: {
@@ -973,6 +976,7 @@ module Benchmarking
           { data: ->{ gpyc_pper },  name: 'Previous holiday', units: String },
           { data: ->{ gpyc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
+        max_x_value:   100,
         sort_by: [1],
         type: %i[table chart]
       },
