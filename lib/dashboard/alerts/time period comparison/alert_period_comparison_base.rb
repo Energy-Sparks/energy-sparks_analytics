@@ -150,7 +150,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     # put in a large percent if the usage was zero during the last period
     # fixes St Louis autumn 2019 half term verus zero summer holiday -inf in benchmarking (PH, 17Dec2019)
     # reinstated (PH, 19Sep2020) - King Edwards + 1 other gas school week comparison
-    @difference_percent = previous_period_data[:kwh] == 0.0 ? 1000.0 : (difference_kwh  / previous_period_data[:kwh])
+    @difference_percent = difference_kwh  / previous_period_data[:kwh]
     # @difference_percent = difference_kwh  / previous_period_data[:kwh]
     @abs_difference_percent = @difference_percent.magnitude
 

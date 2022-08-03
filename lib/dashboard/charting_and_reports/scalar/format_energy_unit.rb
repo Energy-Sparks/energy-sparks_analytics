@@ -2,6 +2,7 @@ require 'bigdecimal'
 
 class FormatEnergyUnit
   INFINITY = 'Infinity'.freeze
+  NAN      = 'Uncalculable'.freeze
   ZERO = '0'.freeze
 
   #As part of I18n work the text for this will move to the YML files
@@ -278,6 +279,7 @@ class FormatEnergyUnit
 
   def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)
     return INFINITY unless value.infinite?.nil?
+    return NAN if value.is_a?(Float) && value.nan?
     number = significant_figures_user_type(value, user_numeric_comprehension_level)
     return ZERO if number.zero?
     number_as_string = number.to_s
