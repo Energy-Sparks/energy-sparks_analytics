@@ -512,7 +512,8 @@ class AlertAnalysisBase < ContentBase
       AlertTurnHeatingOff                                     => 'htof',
       AlertSeasonalHeatingSchoolDays                          => 'shsd',
       AlertSeasonalHeatingSchoolDaysStorageHeaters            => 'shsh',
-      AlertTurnHeatingOffStorageHeaters                       => 'tosh'
+      AlertTurnHeatingOffStorageHeaters                       => 'tosh',
+      AlertElectricityUsageDuringCurrentHoliday               => 'edhl'
     }
   end
 

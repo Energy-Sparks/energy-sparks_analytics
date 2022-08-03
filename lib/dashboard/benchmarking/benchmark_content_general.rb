@@ -1457,6 +1457,23 @@ module Benchmarking
     end
   end
 
+  class BenchmarkElectricityOnDuringHoliday < BenchmarkContentBase
+    private def introduction_text
+      text = %q(
+        <p>
+          This chart shows the projected electricity costs for the current holiday.
+          No data for a school is shown once the holiday is over. The projection
+          calculation is based on the consumption patterns during the holiday so far.
+        </p>
+        <p>
+          The data excludes storage heaters and any saving the school might get
+          from solar PV.
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+
   class BenchmarkGasHeatingHotWaterOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
     def fuel; 'gas' end
   end
