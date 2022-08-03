@@ -80,6 +80,7 @@ end
 class Holidays
   include Logging
   attr_reader :holidays
+  MAIN_HOLIDAY_TYPES = %i[autumn_half_term xmas spring_half_term easter summer_half_term summer]
 
   def initialize(holiday_data, country = nil)
     @country = country
@@ -629,7 +630,13 @@ class Holidays
         :summer_half_term
       end
     when 6
-      date.day < 12 ? :summer_half_term : nil
+      if date.day < 12
+        :summer_half_term
+      elsif date.day > 24
+        :summer # Inverness High School: June 2021
+      else
+        nil
+      end
     when 7, 8
       :summer
     when 9
