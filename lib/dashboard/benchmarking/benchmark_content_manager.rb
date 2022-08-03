@@ -17,7 +17,7 @@ module Benchmarking
     end
 
     def benchmark_dates(_page_name)
-      [asof_date, asof_date - 364]
+      [asof_date]
     end
 
     def front_end_content(benchmark_database, page_name, school_ids: nil, filter: nil)

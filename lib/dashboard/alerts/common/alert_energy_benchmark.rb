@@ -570,10 +570,6 @@ class ChangeInEnergyUse < AlertAnalysisBase
       end
     end
 
-    def benchmark_dates(asof_date)
-      [asof_date]
-    end
-
     def enough_data?(fuel_type)
       amr_data = @school.aggregate_meter(fuel_type).amr_data
       p1 = period_dates(@first_period, amr_data)

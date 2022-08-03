@@ -4,7 +4,7 @@ require_relative '../common/alert_floor_area_pupils_mixin.rb'
 
 class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   include AlertFloorAreaMixin
-  attr_reader :last_year_kwh, :last_year_£, :last_year_co2
+  attr_reader :last_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
@@ -40,6 +40,11 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       description: 'Last years electricity consumption - £ including differential tariff',
       units:  {£: :electricity},
       benchmark_code: '£lyr'
+    },
+    previous_year_£: {
+      description: 'Previous years electricity consumption - £ including differential tariff',
+      units:  {£: :electricity},
+      benchmark_code: '£pyr'
     },
     last_year_co2: {
       description: 'Last years electricity CO2 kg',
@@ -145,10 +150,6 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     days_amr_data_with_asof_date(@asof_date) >= 364 ? :enough : :not_enough
   end
 
-  def benchmark_dates(asof_date)
-    [asof_date, asof_date - 364]
-  end
-
   protected def max_days_out_of_date_while_still_relevant
     ManagementSummaryTable::MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON
   end
@@ -158,6 +159,9 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
     @last_year_co2 = kwh(asof_date - 365, asof_date, :co2)
+
+    prev_date = asof_date - 366
+    @previous_year_£  = kwh(prev_date - 365, prev_date, :economic_cost)
 
     @one_year_benchmark_by_pupil_kwh   = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pupils(asof_date - 365, asof_date))
     @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * blended_electricity_£_per_kwh
@@ -215,5 +219,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   def kwh(date1, date2, data_type = :kwh)
     amr_data = @school.aggregated_electricity_meters.amr_data
     amr_data.kwh_date_range(date1, date2, data_type)
+  rescue EnergySparksNotEnoughDataException=> e
+    nil
   end
 end

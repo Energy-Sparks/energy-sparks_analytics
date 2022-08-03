@@ -1029,11 +1029,25 @@ module Benchmarking
         but will be a ‘good’ estimate of the year on year change
       )
     end
-    
+
     def storage_heater_comparison
       %q(
         The electricity consumption also excludes storage heaters
         which are compared in a separate comparison
+      )
+    end
+
+    def colder
+      %q(
+        <p>
+          The &apos;adjusted&apos; columns are adjusted for difference in
+          temperature between the two years. So for example, if the previous year was colder
+          than last year, then the adjusted previous year gas consumption
+          in kWh is adjusted to last year&apos;s temperatures and would be smaller than
+          the unadjusted previous year value. The adjusted percent change is a better
+          indicator of the work a school might have done to reduce its energy consumption as
+          it&apos;s not dependent on temperature differences between the two years.
+        </p>
       )
     end
   end 
@@ -1129,6 +1143,7 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <%= table_introduction('gas') %>
+        <%= colder %>
         <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
 
@@ -1155,6 +1170,7 @@ module Benchmarking
         <p>
           <%= varying_directions([carbon_intensity, day_night_tariffs], false) %>
         </p>
+        <%= colder %>
         <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
 

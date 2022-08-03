@@ -14,7 +14,7 @@ overrides = {
   schools: ['*'],
   cache_school: false,
   benchmarks: {
-    calculate_and_save_variables: false,
+    calculate_and_save_variables: true,
     asof_date:     run_date,
     run_content: { asof_date: run_date }
   }

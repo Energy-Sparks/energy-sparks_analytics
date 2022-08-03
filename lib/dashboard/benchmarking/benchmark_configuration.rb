@@ -424,8 +424,9 @@ module Benchmarking
         name:     'Change in gas consumption since last year',
         columns:  [
           { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
-          
-          { data: ->{ enba_kgn },                          name: 'previous year',  units: :kwh },
+
+          { data: ->{ enba_kgn  },                         name: 'previous year',  units: :kwh },
+          { data: ->{ gsba_kpya },                         name: 'previous year temperature adjusted',  units: :kwh },
           { data: ->{ enba_kg0 },                          name: 'last year',      units: :kwh },
 
           { data: ->{ enba_cgn },                          name: 'previous year',  units: :co2 },
@@ -434,14 +435,16 @@ module Benchmarking
           { data: ->{ enba_pgn },                          name: 'previous year',  units: :£ },
           { data: ->{ enba_pg0 },                          name: 'last year',      units: :£ },
 
-          { data: ->{ percent_change(enba_kgn, enba_kg0)}, name: '',               units: :relative_percent_0dp },
+          { data: ->{ percent_change(enba_kgn, enba_kg0)}, name: 'unadjusted',    units: :relative_percent_0dp },
+          { data: ->{ gsba_adpc },                         name: 'temperature adjusted', units: :relative_percent_0dp },
+  #        { data: ->{ gsba_ddan },                         name: 'colder?',       units: :relative_percent_0dp },
         ],
         column_groups: [
           { name: '',                 span: 1 },
-          { name: 'kWh',              span: 2 },
+          { name: 'kWh',              span: 3 },
           { name: 'CO2 (kg)',         span: 2 },
           { name: '£',                span: 2 },
-          { name: 'percent changed',  span: 1 },
+          { name: 'percent changed',  span: 2 },
         ],
         where:   ->{ !enba_kgn.nil? && enba_pgap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
@@ -453,7 +456,7 @@ module Benchmarking
         name:     'Change in storage heater consumption since last year',
         columns:  [
           { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
-          
+
           { data: ->{ enba_khn },                          name: 'previous year',  units: :kwh },
           { data: ->{ enba_kh0 },                          name: 'last year',      units: :kwh },
           { data: ->{ percent_change(enba_khn, enba_kh0)}, name: 'change',         units: :relative_percent_0dp },
@@ -465,6 +468,7 @@ module Benchmarking
           { data: ->{ enba_phn },                          name: 'previous year',  units: :£ },
           { data: ->{ enba_ph0 },                          name: 'last year',      units: :£ },
           { data: ->{ percent_change(enba_phn, enba_ph0)}, name: 'change',         units: :relative_percent_0dp },
+          { data: ->{ shan_ddan},                          name: 'colder?',        units: :relative_percent_0dp },
         ],
         column_groups: [
           { name: '',                       span: 1 },
@@ -482,7 +486,7 @@ module Benchmarking
         name:     'Change in solar PV production since last year',
         columns:  [
           { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
-          
+
           { data: ->{ enba_ksn },                          name: 'previous year',  units: :kwh },
           { data: ->{ enba_ks0 },                          name: 'last year',      units: :kwh },
           { data: ->{ percent_change(enba_ksn, enba_ks0)}, name: 'change',         units: :relative_percent_0dp },
@@ -522,11 +526,11 @@ module Benchmarking
         name:     'Change in annual electricity consumption',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true, content_class: AdviceElectricityAnnual },
-          { data: ->{ (elba_£lyr - elba_£lyr_last_year) / elba_£lyr_last_year},  name: 'Change in annual electricity usage', units: :relative_percent_0dp, chart_data: true },
+          { data: ->{ (elba_£lyr - elba_£pyr) / elba_£pyr},  name: 'Change in annual electricity usage', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ elba_£lyr },  name: 'Annual electricity £ (this year)', units: :£},
-          { data: ->{ elba_£lyr_last_year },  name: 'Annual electricity £ (last year)', units: :£}
+          { data: ->{ elba_£pyr },  name: 'Annual electricity £ (last year)', units: :£}
         ],
-        where:   ->{ !elba_£lyr_last_year.nil? },
+        where:   ->{ !elba_£pyr.nil? },
         sort_by:  [1], # column 1 i.e. Annual kWh
         type: %i[chart table]
       },
@@ -700,12 +704,12 @@ module Benchmarking
         name:     'Change in annual heating consumption',
         columns:  [
           { data: 'addp_name',      name: 'School name', units: String, chart_data: true, content_class: AdviceGasAnnual },
-          { data: ->{ percent_change([gsba_£lyr_last_year, shan_£lyr_last_year], [gsba_£lyr, shan_£lyr], true) },  name: 'Change in annual gas/storage heater usage', units: :relative_percent_0dp, sense: :positive_is_bad, chart_data: true },
+          { data: ->{ percent_change([gsba_£pyr, shan_£pyr], [gsba_£lyr, shan_£lyr], true) },  name: 'Change in annual gas/storage heater usage', units: :relative_percent_0dp, sense: :positive_is_bad, chart_data: true },
           { data: ->{ gsba_£lyr },  name: 'Annual gas costs £ (this year)', units: :£},
-          { data: ->{ gsba_£lyr_last_year },  name: 'Annual gas costs £ (last year)', units: :£},
+          { data: ->{ gsba_£pyr },  name: 'Annual gas costs £ (last year)', units: :£},
           { data: ->{ shan_£lyr },  name: 'Annual storage heater costs £ (this year)', units: :£},
-          { data: ->{ shan_£lyr_last_year },  name: 'Annual storage heater costs £ (last year)', units: :£},
-          { data: ->{ sum_data([gsba_£lyr, shan_£lyr]) - sum_data([gsba_£lyr_last_year, shan_£lyr_last_year]) },  name: 'Change in heating costs between last 2 years', units: :£}
+          { data: ->{ shan_£pyr},  name: 'Annual storage heater costs £ (last year)', units: :£},
+          { data: ->{ sum_data([gsba_£lyr, shan_£lyr]) - sum_data([gsba_£pyr, shan_£pyr]) },  name: 'Change in heating costs between last 2 years', units: :£}
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
         treat_as_nil:   [0],
