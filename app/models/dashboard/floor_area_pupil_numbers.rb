@@ -43,8 +43,6 @@ class FloorAreaPupilNumbersBase
 
   def calculate_days_weighted_value(field, start_date, end_date)
     start_date = end_date = Date.today if start_date.nil? || end_date.nil?
-puts "Got here #{field} sd #{start_date} #{end_date}"
-ap @area_pupils_history
     start_index = date_index(@area_pupils_history, start_date)
     end_index   = date_index(@area_pupils_history, end_date)
 
