@@ -299,10 +299,6 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
 
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url('AnnualGas')
-  rescue => e
-    puts "Blown up"
-    puts e.message
-    puts e.backtrace
   end
   alias_method :analyse_private, :calculate
 
