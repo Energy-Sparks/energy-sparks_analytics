@@ -40,7 +40,7 @@ module Benchmarking
     ),
     comparison_with_previous_period_infinite: %q(
       <p>
-        An infinite value indicates the consumption in the first period was zero.
+        An infinite or uncalculable value indicates the consumption in the first period was zero.
       </p>
     ),
     es_sources_of_baseload_electricity_consumption: %q(
@@ -84,6 +84,21 @@ module Benchmarking
         
       </p>
     ),
+    temperature_compensation: %q(
+      <p>
+        This comparison compares the latest available data for the most recent
+        holiday with an adjusted figure for the previous holiday, scaling to the
+        same number of days and adjusting for changes in outside temperature.
+        The change in &pound; is the saving or increased cost for the most recent holiday to date.
+      </p>
+    ),
+    holiday_length_normalisation: %q(
+      <p>
+        This comparison compares the latest available data for the most recent holiday
+        with an adjusted figure for the previous holiday, scaling to the same number of days.
+        The change in &pound; is the saving or increased cost for the most recent holiday to date.
+      </p>
+    )
   }
   #=======================================================================================
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
@@ -1366,6 +1381,7 @@ module Benchmarking
         <p>
           This comparison shows the change in consumption between the 2 most recent holidays.
         </p>
+        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
         <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
@@ -1377,12 +1393,13 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <p>
-          This comparison shows the change in consumption the most recent holiday, and
+          This comparison shows the change in consumption between the most recent holiday, and
           the same holiday a year ago. Schools should be looking to reduce holiday usage
           by switching appliances off and generally reducing baseload. An increase
           from year to year suggests a school is not managing to reduce consumption,
           which would help mitigate some of the impacts of climate change.
         </p>
+        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
         <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
@@ -1410,9 +1427,9 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <p>
-          This comparison shows the change in consumption between the 2 most recent holidays.
-          This can be affected by whether the heating was turned on one of the holidays,
-          and not on the other.
+          This comparison shows the change in consumption during the 2 most recent holidays.
+          This can be affected by whether the heating was turned on during one of the holidays,
+          and not during the other.
           Generally, schools don&apos;t need heating during holidays, or at least not
           to heat the whole school if minimally occupied! Using an electric fan heater
           is always more cost effective for a few individuals in the school during holidays
@@ -1421,8 +1438,9 @@ module Benchmarking
         <p>
           You can setup an Energy Sparks
           &apos;alert&apos; to send you an email or text message just before a holiday to remind you to
-          turn heating or hot water off.
+          turn the heating or hot water off.
         </p>
+        <%= CAVEAT_TEXT[:temperature_compensation] %>
         <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
@@ -1434,14 +1452,15 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <p>
-          This comparison shows the change in consumption the most recent holiday, and
+          This comparison shows the change in consumption during the most recent holiday, and
           the same holiday a year ago. Schools should be looking to reduce holiday usage
           by switching heating and hot water off over holidays when it is often unnecessary.
           A significant  increase from year to year suggests a school is not managing to reduce consumption,
           which would help mitigate some of the impacts of climate change. You can setup an Energy Sparks &apos;alert&apos; to
           send you an email or text message just before a holiday to remind you to
-          turn heating or hot water off.
+          turn the heating or hot water off.
         </p>
+        <%= CAVEAT_TEXT[:temperature_compensation] %>
         <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)

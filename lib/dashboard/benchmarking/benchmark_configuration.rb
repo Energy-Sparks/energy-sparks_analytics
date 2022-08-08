@@ -123,6 +123,7 @@ module Benchmarking
           change_in_electricity_consumption_recent_school_weeks
           change_in_electricity_holiday_consumption_previous_holiday
           change_in_electricity_holiday_consumption_previous_years_holiday
+          electricity_consumption_during_holiday
         ]
       },
       {
