@@ -186,7 +186,7 @@ module Benchmarking
     end
 
     def nan_to_infinity(v)
-      v.nan? ? Float::INFINITY : v
+      v.is_a?(Float) && v.nan? ? Float::INFINITY : v
     end
 
     def format_table(table_definition, rows, medium)
