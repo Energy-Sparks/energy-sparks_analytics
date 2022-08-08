@@ -23,7 +23,7 @@ class FloorAreaPupilNumbersBase
   def process_meter_attributes(attributes)
     return nil if attributes.nil?
 
-    user_defined_meter_attributes = attributes.map do |period|
+    attributes.map do |period|
       {
         start_date:         period.fetch(:start_date, DEFAULT_START_DATE),
         end_date:           period.fetch(:end_date,   DEFAULT_END_DATE),
@@ -69,7 +69,7 @@ class FloorAreaPupilNumbers < FloorAreaPupilNumbersBase
   def initialize(floor_area, number_of_pupils, school_attributes)
     @floor_area = floor_area
     @number_of_pupils = number_of_pupils
-    return nil if school_attributes.nil? || school_attributes[:floor_area_pupil_numbers].nil?
+    return if school_attributes.nil? || school_attributes[:floor_area_pupil_numbers].nil?
     super(school_attributes[:floor_area_pupil_numbers], :floor_area, :number_of_pupils)
   end
 
@@ -95,6 +95,8 @@ class FloorAreaPupilNumbers < FloorAreaPupilNumbersBase
       df = defaulted_floor_area_pupils(user_defined_meter_attributes.last[:end_date] + 1, DEFAULT_END_DATE)
       user_defined_meter_attributes.push(df)
     end
+
+    user_defined_meter_attributes
   end
 
   def defaulted_floor_area_pupils(start_date, end_date)

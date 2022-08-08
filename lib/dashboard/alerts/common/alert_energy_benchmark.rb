@@ -3,7 +3,6 @@ require_relative 'alert_floor_area_pupils_mixin.rb'
 # TODO(PH 10Oct2020) needs further work as @attributes doesn't work as mixin only if as a class
 module TemplateVarPromotionMixIn
   def self.execute_variables(template_variables)
-    puts "Executing variables"
     template_variables.select{ |var, val| val.key?(:calc)}.each do |var, val|
       if instance_variable_get("@#{var}").nil?
         d = instance_exec(&val[:calc])
