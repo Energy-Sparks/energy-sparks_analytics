@@ -903,7 +903,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ ephc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ ephc_dif£ },  name: 'Change £', units: :£ },
-          { data: ->{ ephc_cper },  name: 'Most recent holiday', units: String },
+          { data: ->{ partial(ephc_cper, ephc_cptr) },  name: 'Most recent holiday', units: String },
           { data: ->{ ephc_pper },  name: 'Previous holiday', units: String },
           { data: ->{ ephc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
@@ -917,7 +917,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ epyc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ epyc_dif£ },  name: 'Change £', units: :£ },
-          { data: ->{ epyc_cper },  name: 'Most recent holiday', units: String },
+          { data: ->{ partial(epyc_cper, epyc_cptr) },  name: 'Most recent holiday', units: String },
           { data: ->{ epyc_pper },  name: 'Previous holiday', units: String },
           { data: ->{ epyc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
@@ -943,6 +943,7 @@ module Benchmarking
           { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
           { data: ->{ gswc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ gswc_dif£ },  name: 'Change £', units: :£ },
+          { data: ->{ gswc_ciss },  name: '',         units: String, chart_data: true },
           { data: ->{ gswc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
         max_x_value:   100,
@@ -953,10 +954,11 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInGasBetweenLast2Holidays,
         name:     'Change in gas consumption between the 2 most recent holidays',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
-          { data: ->{ gphc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
-          { data: ->{ gphc_dif£ },  name: 'Change £', units: :£ },
-          { data: ->{ gphc_cper },  name: 'Most recent holiday', units: String },
+          { data: 'addp_name',      name: 'School name',    units: :short_school_name, chart_data: true },
+          { data: ->{ gphc_difp },  name: 'Change %',       units: :relative_percent_0dp, chart_data: true },
+          { data: ->{ gphc_dif£ },  name: 'Change £',       units: :£ },
+          { data: ->{ gphc_ciss },  name: '',               units: String, chart_data: true },
+          { data: ->{ partial(gphc_cper, gphc_cptr) },      name: 'Most recent holiday', units: String },
           { data: ->{ gphc_pper },  name: 'Previous holiday', units: String },
           { data: ->{ gphc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
@@ -969,10 +971,11 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInGasBetween2HolidaysYearApart,
         name:     'Change in gas consumption between this holiday and the same the previous year',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: 'addp_name',      name: 'School name',     units: :short_school_name, chart_data: true },
           { data: ->{ gpyc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ gpyc_dif£ },  name: 'Change £', units: :£ },
-          { data: ->{ gpyc_cper },  name: 'Most recent holiday', units: String },
+          { data: ->{ gpyc_ciss },  name: '',         units: String, chart_data: true },
+          { data: ->{ partial(gpyc_cper, gpyc_cptr) },  name: 'Most recent holiday', units: String },
           { data: ->{ gpyc_pper },  name: 'Previous holiday', units: String },
           { data: ->{ gpyc_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],

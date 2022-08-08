@@ -78,7 +78,12 @@ module Benchmarking
       <p>
         This comparison may include COVID lockdown periods which may skew the results.
       </p>
-    )
+    ),
+    holiday_comparison: %q(
+      <p>
+        
+      </p>
+    ),
   }
   #=======================================================================================
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
