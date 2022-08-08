@@ -11,12 +11,12 @@ end
 run_date = Date.new(2022, 8, 5)
 
 overrides = { 
-  schools: ['marshf*', 'little-hor*'],
+  schools: ['*'],
   cache_school: false,
   benchmarks: {
     calculate_and_save_variables: true,
     asof_date: run_date,
-    pages: [:change_in_gas_holiday_consumption_previous_holiday, :change_in_gas_holiday_consumption_previous_years_holiday],
+    no_pages: [:change_in_gas_holiday_consumption_previous_holiday, :change_in_gas_holiday_consumption_previous_years_holiday],
     run_content: { asof_date: run_date }
   }
 }

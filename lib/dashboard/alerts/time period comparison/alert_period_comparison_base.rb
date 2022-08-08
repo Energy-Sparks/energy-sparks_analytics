@@ -257,9 +257,9 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     if current_kwh.zero? && previous_kwh.zero?
       "No consumption during both #{period_type}s"
     elsif previous_kwh.zero?
-      "No consumption in previous #{period_type}"
+      "No consumption during previous #{period_type}"
     elsif current_kwh.zero?
-      "No consumption most recent #{period_type}"
+      "No consumption during most recent #{period_type}"
     else
       nil
     end
