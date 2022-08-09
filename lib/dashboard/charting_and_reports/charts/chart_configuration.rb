@@ -6,7 +6,7 @@ require_relative '../../modelling/solar/solar_pv_panels.rb'
 class ChartManager
   def self.standard_series_label_substitution(type, school_type)
     [
-      ["#{type}:<school_name>", school_type], 
+      ["#{type}:<school_name>", school_type],
       ["#{type}:benchmark",     'benchmark'],
       ["#{type}:exemplar",      'exemplar']
     ]
@@ -577,7 +577,7 @@ class ChartManager
     solar_pv_group_by_month: {
       name:               'Analysis of your school’s solar PV panels',
       inherits_from:      :solar_pv_group_by_week_by_submeter,
-      filter:                   { 
+      filter:                   {
         submeter: [
           SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
           SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
@@ -606,7 +606,7 @@ class ChartManager
       x_axis:             :datetime,
       meter_definition:   :allelectricity,
       series_breakdown:   :submeter,
-      filter:                   { 
+      filter:                   {
         submeter: [
           SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
           SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
@@ -1069,12 +1069,12 @@ class ChartManager
     community_use_test_electricity_community_use_only: {
       name:          'Community use test chart electricity community use only',
       inherits_from: :community_use_test_electricity,
-      community_use:  { filter: :community_only, aggregate: :none } 
+      community_use:  { filter: :community_only, aggregate: :none }
     },
     community_use_test_electricity_school_use_only: {
       name:          'Community use test chart electricity school use only',
       inherits_from: :community_use_test_electricity,
-      community_use:  { filter: :school_only, aggregate: :none } 
+      community_use:  { filter: :school_only, aggregate: :none }
     },
     community_use_test_electricity_community_use_only_aggregated: {
       name:          'Community use test chart electricity community use only aggregated - series name = community',
@@ -1292,7 +1292,7 @@ class ChartManager
     },
     heating_on_by_week_with_breakdown: {
       inherits_from:            :heating_on_off_by_week_with_breakdown_all,
-      filter:                   { 
+      filter:                   {
                                   heating_daytype: [
                                     Series::HeatingDayType::SCHOOLDAYHEATING,
                                     Series::HeatingDayType::HOLIDAYHEATING,
@@ -1306,7 +1306,7 @@ class ChartManager
     },
     heating_on_by_week_with_breakdown_school_day_only: {
       inherits_from:  :heating_on_off_by_week_with_breakdown_all,
-      filter: { 
+      filter: {
                 heating_daytype: [
                   Series::HeatingDayType::SCHOOLDAYHEATING
                 ]
@@ -1314,7 +1314,7 @@ class ChartManager
     },
     hot_water_kitchen_on_off_by_week_with_breakdown: {
       inherits_from:  :heating_on_off_by_week_with_breakdown_all,
-      filter: { 
+      filter: {
                 heating_daytype: [
                   Series::HeatingDayType::SCHOOLDAYHOTWATER,
                   Series::HeatingDayType::WEEKENDHOTWATER,
@@ -1884,7 +1884,7 @@ class ChartManager
     schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted: {
       name:                   'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
       adjust_by_temperature:  { schoolweek: 0 },
- 
+
       #asof_date:              Date.new(2019, 3, 7), # gets overridden by alert
       inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
     },
@@ -2069,7 +2069,7 @@ class ChartManager
       yaxis_units:      :co2
     },
     pupil_dashboard_electricity_benchmark: {
-      name:               'How my school\'s spend on electricity compares with other schools (£)',
+      name:               'How much my school spends on electricity in comparison with other schools (£)',
       inherits_from:      :benchmark,
       meter_definition:   :allelectricity
     },
@@ -2081,7 +2081,7 @@ class ChartManager
         'Electricity costs on your chosen day (in £)'
       ],
       inherits_from:     :electricity_longterm_trend,
-      yaxis_units:      :£   
+      yaxis_units:      :£
     },
     pupil_dashboard_daytype_breakdown_electricity: {
       name:             'When your school used electricity over the past year. School day closed is the electricity used in the evenings and early mornings during term time.',
@@ -2120,7 +2120,7 @@ class ChartManager
       yaxis_units:      :co2
     },
     pupil_dashboard_gas_benchmark: {
-      name:             'How my school\'s spend on gas compares with other schools (£)',
+      name:             'How much my school spends on gas in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
       meter_definition:   :allheat
     },
@@ -2164,7 +2164,7 @@ class ChartManager
       yaxis_units:      :co2
     },
     pupil_dashboard_storage_heaters_benchmark: {
-      name:             'How my school\'s spend on storage heaters compares with other schools (£)',
+      name:             'How much my school spends on storage heating in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
       meter_definition:   :storage_heater_meter
     },
@@ -2190,7 +2190,7 @@ class ChartManager
     },
     #======================================PUPIL DASHBOARD - SOLAR PV========================================
     pupil_dashboard_solar_pv_benchmark: {
-      name:               'How my school\'s spend on electricity compares with other schools (kWh)',
+      name:               'How much my school spends on electricity in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark
     },
     pupil_dashboard_solar_pv_monthly: {
