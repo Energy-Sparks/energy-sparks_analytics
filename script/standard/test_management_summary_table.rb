@@ -10,7 +10,7 @@ module Logging
 end
 
 overrides = {
-  schools:  ['*'],
+  schools:  ['[m-z]*'],
   cache_school: false
 }
 
