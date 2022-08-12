@@ -142,7 +142,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @holidays_kwh         = daytype_breakdown[Series::DayType::HOLIDAY]
     @weekends_kwh         = daytype_breakdown[Series::DayType::WEEKEND]
     @schoolday_open_kwh   = daytype_breakdown[Series::DayType::SCHOOLDAYOPEN]
-    @schoolday_closed_kwh = daytype_breakdown[Series::DayType::SCHOOLDAYCLOSED]
+    @schoolday_closed_kwh = daytype_breakdown[school_day_closed_key]
     community_name        = OpenCloseTime.humanize_symbol(OpenCloseTime::COMMUNITY)
     @community_kwh        = daytype_breakdown[community_name] || 0.0
 
@@ -178,7 +178,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       [Series::DayType::HOLIDAY,          @holidays_kwh,         @holidays_percent,          @holidays_£,         @holidays_co2],
       [Series::DayType::WEEKEND,          @weekends_kwh,         @weekends_percent,          @weekends_£,         @weekends_co2],
       [Series::DayType::SCHOOLDAYOPEN,    @schoolday_open_kwh,   @schoolday_open_percent,    @schoolday_open_£,   @schoolday_open_co2],
-      [Series::DayType::SCHOOLDAYCLOSED,  @schoolday_closed_kwh, @schoolday_closed_percent,  @schoolday_closed_£, @schoolday_closed_co2]
+      [school_day_closed_key,             @schoolday_closed_kwh, @schoolday_closed_percent,  @schoolday_closed_£, @schoolday_closed_co2]
     ]
 
     if @school.community_usage?
@@ -212,6 +212,10 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   def summary_text
     FormatEnergyUnit.format(:£, @out_of_hours_£, :text) + 'pa (' +
     FormatEnergyUnit.format(:percent, @out_of_hours_percent, :text) + ' of annual cost) '
+  end
+
+  def school_day_closed_key
+    Series::DayType::SCHOOLDAYCLOSED
   end
 
   def convert_breakdown_to_html_compliant_array(breakdown)

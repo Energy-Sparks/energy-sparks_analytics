@@ -11,9 +11,9 @@
 require_relative '../gas/alert_gas_only_base.rb'
 require_relative '../common/alert_floor_area_pupils_mixin.rb'
 
-class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
+class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   include AlertFloorAreaMixin
-  attr_reader :last_year_kwh, :last_year_£, :last_year_co2
+  attr_reader :last_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
 
   attr_reader :one_year_benchmark_floor_area_kwh, :one_year_benchmark_floor_area_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
@@ -29,6 +29,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
   attr_reader :one_year_gas_per_pupil_co2, :one_year_gas_per_floor_area_co2
 
   attr_reader :degree_day_adjustment
+  attr_reader :last_year_degree_days, :previous_year_degree_days, :degree_days_annual_change
+  attr_reader :temperature_adjusted_previous_year_kwh, :temperature_adjusted_percent
 
   attr_reader :one_year_gas_per_pupil_normalised_kwh, :one_year_gas_per_pupil_normalised_£
   attr_reader :one_year_gas_per_floor_area_normalised_kwh, :one_year_gas_per_floor_area_normalised_£
@@ -57,6 +59,11 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
         description: 'Last years gas consumption - £ including differential tariff',
         units:  {£: :gas},
         benchmark_code: '£lyr'
+      },
+      previous_year_£: {
+        description: 'Previous years gas consumption - £ including differential tariff',
+        units:  {£: :gas},
+        benchmark_code: '£pyr'
       },
       last_year_co2: {
         description: 'Last years gas CO2 kg',
@@ -149,6 +156,31 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
         units: Float,
         benchmark_code: 'ddaj'
       },
+      last_year_degree_days: {
+        description: 'Regional degree day adjustment; 60% of adjustment for Gas (not 100% heating consumption), 100% of Storage Heaters',
+        units: Float,
+        benchmark_code: 'ddly'
+      },
+      previous_year_degree_days: {
+        description: 'Regional degree day adjustment; 60% of adjustment for Gas (not 100% heating consumption), 100% of Storage Heaters',
+        units: Float,
+        benchmark_code: 'ddpy'
+      },
+      degree_days_annual_change: {
+        description: 'Year on year degree day change',
+        units: :relative_percent,
+        benchmark_code: 'ddan'
+      },
+      temperature_adjusted_previous_year_kwh: {
+        description: 'Previous year kWh - temperature adjusted',
+        units: :kwh,
+        benchmark_code: 'kpya'
+      },
+      temperature_adjusted_percent: {
+        description: 'Year on year kwh change temperature adjusted',
+        units: :relative_percent,
+        benchmark_code: 'adpc'
+      },
       one_year_gas_per_pupil_normalised_kwh: {
         description: 'Per pupil annual gas usage - kwh - temperature normalised (internal use only)',
         units:  {kwh: :gas},
@@ -201,21 +233,23 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     days_amr_data_with_asof_date(@asof_date) >= 364 ? :enough : :not_enough
   end
 
-  def benchmark_dates(asof_date)
-    [asof_date, asof_date - 364]
-  end
-
   protected def max_days_out_of_date_while_still_relevant
     ManagementSummaryTable::MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON
   end
-  
+
   private def calculate(asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
     @degree_day_adjustment = dd_adj(asof_date)
 
+    calculate_annual_change_in_degree_days(asof_date)
+    temperature_adjusted_stats(asof_date)
+
     @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
     @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
     @last_year_co2 = kwh(asof_date - 365, asof_date, :co2)
+
+    prev_date = asof_date - 366
+    @previous_year_£ = kwh(prev_date - 365, prev_date, :economic_cost)
 
     @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
     @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * BenchmarkMetrics::GAS_PRICE
@@ -274,8 +308,54 @@ class AlertGasAnnualVersusBenchmark < AlertGasOnlyBase
     @simple_percent_difference_adjective + ' average'
   end
 
-  private def dd_adj(asof_date)
+  private
+  
+  def dd_adj(asof_date)
     # overriden to full rather than 60% adjustment for storage heaters
     BenchmarkMetrics.normalise_degree_days(@school.temperatures, @school.holidays, :gas, asof_date)
+  end
+
+  def last_year_date_range(asof_date)
+    last_year_start_date = asof_date - 365
+    last_year_start_date..asof_date
+  end
+
+  def previous_year_date_range(asof_date)
+    ly = last_year_date_range(asof_date)
+    previous_year_end_date = ly.first - 1
+    previous_year_start_date = previous_year_end_date - 365
+    previous_year_start_date..previous_year_end_date
+  end
+
+  def years_date_ranges_x2(asof_date)
+    [previous_year_date_range(asof_date), last_year_date_range(asof_date)]
+  end
+
+  def temperature_adjusted_stats(asof_date)
+    py, ly = years_date_ranges_x2(asof_date)
+    model = calculate_model(asof_date)
+    stats = model.heating_change_statistics(py, ly)
+    unpack_temperature_adjusted_stats(stats) unless stats.nil?
+  end
+
+  def unpack_temperature_adjusted_stats(stats)
+    @temperature_adjusted_previous_year_kwh = stats[:previous_year][:adjusted_annual_kwh]
+    @temperature_adjusted_percent           = stats[:change][:adjusted_percent]
+  end
+
+  def calculate_annual_change_in_degree_days(asof_date)
+    py, ly = years_date_ranges_x2(asof_date)
+
+    @last_year_degree_days     = @school.temperatures.degree_days_in_date_range(ly.first, ly.last)
+    @previous_year_degree_days = @school.temperatures.degree_days_in_date_range(py.first, py.last)
+
+    @degree_days_annual_change = (@last_year_degree_days - @previous_year_degree_days) / @previous_year_degree_days
+  end
+
+  def kwh(date1, date2, data_type = :kwh)
+    amr_data = @school.aggregated_heat_meters.amr_data
+    amr_data.kwh_date_range(date1, date2, data_type)
+  rescue EnergySparksNotEnoughDataException=> e
+    nil
   end
 end

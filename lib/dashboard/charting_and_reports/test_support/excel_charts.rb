@@ -205,7 +205,11 @@ class ExcelCharts
 
     subtitle = graph_definition.key?(:subtitle) ? "Subtitle: #{graph_definition[:subtitle]}" : ''
     chart1.set_title(name: clean_text(graph_definition[:title] + subtitle))
+
     chart1.set_y_axis(name: clean_text(graph_definition[:y_axis_label]))
+
+    chart1.set_x_axis(min: graph_definition[:x_min_value]) if graph_definition.key?(:x_min_value)
+    chart1.set_x_axis(max: graph_definition[:x_max_value]) if graph_definition.key?(:x_max_value)
 
     if graph_definition[:chart1_type] == :pie # special case for pie charts, need to swap axis
       main_axisx = x_data_1.keys

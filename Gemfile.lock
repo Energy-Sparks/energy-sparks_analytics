@@ -249,7 +249,7 @@ GEM
     text-table (1.2.4)
     thor (1.2.1)
     thread_safe (0.3.6)
-    tzinfo (1.2.9)
+    tzinfo (1.2.10)
       thread_safe (~> 0.1)
     tzinfo-data (1.2022.1)
       tzinfo (>= 1.0.0)
@@ -295,7 +295,7 @@ DEPENDENCIES
   write_xlsx
 
 RUBY VERSION
-   ruby 2.7.4p191
+   ruby 2.7.6p219
 
 BUNDLED WITH
    2.2.32

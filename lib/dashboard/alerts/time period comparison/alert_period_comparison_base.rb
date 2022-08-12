@@ -45,6 +45,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :change_in_weekly_kwh, :change_in_weekly_£
   attr_reader :change_in_weekly_percent
   attr_reader :summary, :prefix_1, :prefix_2
+  attr_reader :calculation_issue, :truncated_current_period
 
   def self.dynamic_template_variables(fuel_type)
     vars = {
@@ -64,21 +65,24 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       days_in_current_period:    { description: 'No. of days in current period',      units: Integer },
       name_of_current_period:    { description: 'name of current period e.g. Easter', units: String, benchmark_code: 'cper' },
 
-      previous_period_kwh:        { description: 'Previous period kwh',             units:  { kwh: fuel_type } },
-      previous_period_£:          { description: 'Previous period £',               units:  :£  },
+      previous_period_kwh:        { description: 'Previous period kwh (equivalent no. of days to current period)', units:  { kwh: fuel_type } },
+      previous_period_£:          { description: 'Previous period £ (equivalent no. of days to current period)',   units:  :£  },
       previous_period_start_date: { description: 'Previous period start date',      units:  :date  },
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
       name_of_previous_period:    { description: 'name of previous period',         units: String, benchmark_code: 'pper' },
 
       current_period_average_kwh:  { description: 'Current period average daily kwh', units:  { kwh: fuel_type } },
-      previous_period_average_kwh: { description: 'Previous period average daily',    units:  { kwh: fuel_type } },
+      previous_period_average_kwh: { description: 'Previous period average adjusted daily',    units:  { kwh: fuel_type } },
 
       current_holiday_temperatures:     { description: 'Current period temperatures', units:  String  },
       previous_holiday_temperatures:    { description: 'Previous period temperatures', units:  String  },
 
       current_holiday_average_temperature:  { description: 'Current periods average temperature',  units:  :temperature },
       previous_holiday_average_temperature: { description: 'Previous periods average temperature', units:  :temperature },
+
+      calculation_issue:        { description: 'Comparison issue',  units:  String, benchmark_code: 'ciss' },
+      truncated_current_period: { description: 'truncated period',  units:  TrueClass, benchmark_code: 'cptr' },
 
       previous_period_average_kwh_unadjusted: { description: 'Previous period average unadjusted kwh',  units:  { kwh: fuel_type } },
       current_period_kwhs:                    { description: 'Current period kwh values', units:  String  },
@@ -126,6 +130,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   def calculate(asof_date)
     @asof_date ||= asof_date
     configure_models(asof_date)
+    @truncated_current_period = false
+
     current_period, previous_period = last_two_periods(asof_date)
 
     # commented out 1Dec2019, in favour of alert prioritisation control
@@ -140,6 +146,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     previous_period_data_unadjusted = meter_values_period(current_period)
 
     @difference_kwh     = current_period_data[:kwh] - previous_period_data[:kwh]
+    @calculation_issue  = calculate_calculation_issue(current_period_data[:kwh], previous_period_data[:kwh])
     @difference_£       = current_period_data[:£]   - previous_period_data[:£]
     @difference_co2     = current_period_data[:co2] - previous_period_data[:co2]
 
@@ -150,7 +157,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     # put in a large percent if the usage was zero during the last period
     # fixes St Louis autumn 2019 half term verus zero summer holiday -inf in benchmarking (PH, 17Dec2019)
     # reinstated (PH, 19Sep2020) - King Edwards + 1 other gas school week comparison
-    @difference_percent = previous_period_data[:kwh] == 0.0 ? 1000.0 : (difference_kwh  / previous_period_data[:kwh])
+    @difference_percent = calc_percent_difference(difference_kwh, previous_period_data[:kwh])
+
     # @difference_percent = difference_kwh  / previous_period_data[:kwh]
     @abs_difference_percent = @difference_percent.magnitude
 
@@ -168,7 +176,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @previous_period_end_date     = previous_period.end_date
     @days_in_previous_period      = previous_period.days
     @name_of_previous_period      = previous_period_name(previous_period)
-    @previous_period_average_kwh  = @previous_period_kwh / @days_in_previous_period
+    @previous_period_average_kwh  = @previous_period_kwh / @days_in_current_period
 
     current_period_range = @current_period_start_date..@current_period_end_date
     @current_holiday_temperatures,  @current_holiday_average_temperature = weeks_temperatures(current_period_range)
@@ -243,6 +251,23 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     else
       up
     end
+  end
+
+  private def calculate_calculation_issue(current_kwh, previous_kwh)
+    if current_kwh.zero? && previous_kwh.zero?
+      "No consumption during both #{period_type}s"
+    elsif previous_kwh.zero?
+      "No consumption during previous #{period_type}"
+    elsif current_kwh.zero?
+      "No consumption during most recent #{period_type}"
+    else
+      nil
+    end
+  end
+
+  private def calc_percent_difference(difference_kwh, previous_period_kwh)
+    return 0.0 if difference_kwh.zero? && previous_period_kwh.zero?
+    difference_kwh / previous_period_kwh
   end
 
   private def summary_text
@@ -331,7 +356,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     values.sum / values.length
   end
 
-
   # overridden by gas classes where this value is temperature compensated
   protected def kwh_date(aggregate_meter, date, data_type, adjusted)
     if adjusted
@@ -418,7 +442,10 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
     return period if period.start_date >= aggregate_meter.amr_data.start_date && period.end_date <= aggregate_meter.amr_data.end_date
     start_date = [period.start_date, aggregate_meter.amr_data.start_date].max
     end_date = [period.end_date, aggregate_meter.amr_data.end_date].min
-    return SchoolDatePeriod.new(period.type, "#{period.title} truncated to available meter data", start_date, end_date) if end_date >= start_date
+    if end_date >= start_date
+      @truncated_current_period = true
+      return SchoolDatePeriod.new(period.type, "#{period.title} truncated to available meter data", start_date, end_date)
+    end
     nil
   end
 

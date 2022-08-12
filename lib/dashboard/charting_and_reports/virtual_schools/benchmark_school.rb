@@ -19,7 +19,7 @@ class BenchmarkSchool < SyntheticSchool
     benchmark_meter = SyntheticMeter.new(original_meter)
 
     calculator = AverageSchoolCalculator.new(@original_school)
-    benchmark_meter.amr_data = calculator.benchmark_amr_data(type: benchmark_type)
+    benchmark_meter.amr_data = calculator.benchmark_amr_data(benchmark_type: benchmark_type)
 
     benchmark_meter.set_carbon_and_costs
     set_aggregate_meter(fuel_type, benchmark_meter)

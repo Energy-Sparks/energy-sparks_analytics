@@ -3,7 +3,6 @@ require_relative 'alert_floor_area_pupils_mixin.rb'
 # TODO(PH 10Oct2020) needs further work as @attributes doesn't work as mixin only if as a class
 module TemplateVarPromotionMixIn
   def self.execute_variables(template_variables)
-    puts "Executing variables"
     template_variables.select{ |var, val| val.key?(:calc)}.each do |var, val|
       if instance_variable_get("@#{var}").nil?
         d = instance_exec(&val[:calc])
@@ -568,10 +567,6 @@ class ChangeInEnergyUse < AlertAnalysisBase
         fuels_for_non_aggregation_because_of_not_enough_data.push(fuel_type)
         fuels_for_aggregation.delete(fuel_type)
       end
-    end
-
-    def benchmark_dates(asof_date)
-      [asof_date]
     end
 
     def enough_data?(fuel_type)

@@ -53,6 +53,10 @@ module Benchmarking
         addp_area.nil? ? '?' : addp_area.split(' ')[0]
       end
 
+      def partial(holiday_name, partial)
+        partial ? holiday_name + '(partial)' : holiday_name
+      end
+
       def school_name
         addp_name
       end
@@ -177,8 +181,12 @@ module Benchmarking
       elsif sort_col_type == String
         row1[:data][sort_col] <=> row2[:data][sort_col]
       else
-        row1[:data][sort_col].to_f <=> row2[:data][sort_col].to_f
+        nan_to_infinity(row1[:data][sort_col].to_f) <=> nan_to_infinity(row2[:data][sort_col].to_f)
       end
+    end
+
+    def nan_to_infinity(v)
+      v.is_a?(Float) && v.nan? ? Float::INFINITY : v
     end
 
     def format_table(table_definition, rows, medium)
@@ -222,7 +230,7 @@ module Benchmarking
       if medium == :text_and_raw
         data = {
           formatted: value,
-          raw: value,
+          raw: value
         }
         data.merge!(sense) unless sense.nil?
         unless school_id.nil? || drilldown.nil?
@@ -286,7 +294,7 @@ module Benchmarking
 
       graph_definition = {}
       graph_definition[:title]          = config[:name]
-      graph_definition[:x_axis]         = remove_first_column(table.map{ |row| row[chart_column_numbers[0]] })
+      graph_definition[:x_axis]         = remove_first_column(table.map { |row| row[chart_column_numbers[0]] })
       graph_definition[:x_axis_ranges]  = nil
       graph_definition[:x_data]         = create_chart_data(config, table, chart_column_numbers, chart_columns_definitions)
       graph_definition[:chart1_type]    = :bar
@@ -294,10 +302,18 @@ module Benchmarking
       graph_definition[:y_axis_label]   = y_axis_label(chart_columns_definitions)
       graph_definition[:config_name]    = chart_name.to_s
 
-      # clean up NaNs and Infinities so Excel doesn't blow up
-      graph_definition[:x_data].transform_values! do |array|
-        array.map! do |v|
-          v.is_a?(Float) && !v.finite? ? nil : v
+      min_x_value = calculate_min_x_value(graph_definition[:x_data], config)
+      graph_definition[:x_min_value] = min_x_value unless min_x_value.nil?
+
+      max_x_value = calculate_max_x_value(graph_definition[:x_data], config)
+      graph_definition[:x_max_value] = max_x_value unless max_x_value.nil?
+
+      unless Object.const_defined?('Rails')
+        # clean up NaNs and Infinities so Excel doesn't blow up
+        graph_definition[:x_data].transform_values! do |array|
+          array.map! do |v|
+            v.is_a?(Float) && !v.finite? ? nil : v
+          end
         end
       end
 
@@ -340,6 +356,33 @@ module Benchmarking
     def create_chart_data(config, table, chart_column_numbers, chart_columns_definitions)
       data, _y2_data = select_chart_data(config, table, chart_column_numbers, chart_columns_definitions, :y1)
       data
+    end
+
+    def calculate_min_x_value(x_data, config)
+      min_x_value = config[:min_x_value]
+
+      return nil if min_x_value.nil?
+
+      ap x_data
+      min_chart_value = x_data.values.map { |vals| strip_nan(vals).compact.min }.compact.min
+
+      # only set chart range if any value below minimum specified
+      min_chart_value < min_x_value ? min_x_value : nil
+    end
+
+    def calculate_max_x_value(x_data, config)
+      max_x_value = config[:max_x_value]
+
+      return nil if max_x_value.nil?
+
+      max_chart_value = x_data.values.map { |vals| strip_nan(vals).compact.max }.compact.max
+
+      # only set chart range if any value below maximum specified
+      max_chart_value > max_x_value ? max_x_value : nil
+    end
+
+    def strip_nan(arr)
+      arr.reject { |v| v.nil? || !v.is_a?(Float) || v.nan? }
     end
 
     def create_y2_data(config, table, chart_column_numbers, chart_columns_definitions)

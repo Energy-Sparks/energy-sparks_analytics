@@ -80,6 +80,7 @@ end
 class Holidays
   include Logging
   attr_reader :holidays
+  MAIN_HOLIDAY_TYPES = %i[autumn_half_term xmas spring_half_term easter summer_half_term summer]
 
   def initialize(holiday_data, country = nil)
     @country = country
@@ -171,23 +172,25 @@ class Holidays
   end
 
   # NB might have wirtten this somewhere elsewhere?
-  def calculate_statistics(start_date, end_date, lambda, statistics: %i[total average min max count])
-    day_types = %i[holiday weekend schoolday]
-    totals = day_types.map { |dt| [dt, []] }.to_h
-    stats  = day_types.map { |dt| [dt, {}] }.to_h
+  def calculate_statistics(start_date, end_date, lambda, args: nil, classifier: -> (date) { day_type(date) }, statistics: %i[total average min max count])
+    totals = {}
+    stats = {}
 
     (start_date..end_date).each do |date|
-      dt = day_type(date)
-      totals[dt].push(lambda.call(date))
+      dt = classifier.call(date)
+      totals[dt] ||= []
+      result = args.nil? ? lambda.call(date): lambda.call(date, *args)
+      totals[dt].push(result)
     end
 
     totals.each do |daytype, total|
+      stats[daytype] ||= {}
       statistics.each do |statistic_type|
         case statistic_type
         when :total
           stats[daytype][statistic_type] = total.sum
         when :average
-          stats[daytype][statistic_type] = total.sum / total.length
+          stats[daytype][statistic_type] = total.length == 0 ? nil : total.sum / total.length
         when :min
           stats[daytype][statistic_type] = total.min
         when :max
@@ -629,7 +632,13 @@ class Holidays
         :summer_half_term
       end
     when 6
-      date.day < 12 ? :summer_half_term : nil
+      if date.day < 12
+        :summer_half_term
+      elsif date.day > 24
+        :summer # Inverness High School: June 2021
+      else
+        nil
+      end
     when 7, 8
       :summer
     when 9
