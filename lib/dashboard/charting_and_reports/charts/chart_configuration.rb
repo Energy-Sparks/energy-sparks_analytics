@@ -403,7 +403,7 @@ class ChartManager
     # used by front end via targets_service.rb
 
     electricity_co2_last_year_weekly_with_co2_intensity: {
-      name:             'The carbon emissions of your school and the carbon intensity of the National Electricity Grid over the last year',
+      name:             translated_title_for('electricity_co2_last_year_weekly_with_co2_intensity') || 'The carbon emissions of your school and the carbon intensity of the National Electricity Grid over the last year',
       inherits_from:    :group_by_week_electricity,
       yaxis_units:      :co2,
       y2_axis:          :gridcarbon
@@ -418,7 +418,7 @@ class ChartManager
       restrict_y1_axis:  [:co2]
     },
     electricity_co2_last_7_days_with_co2_intensity: {
-      name:             'Variation in the electricity carbon emissions of your school over the last week',
+      name:             translated_title_for('electricity_co2_last_7_days_with_co2_intensity') || 'Variation in the electricity carbon emissions of your school over the last week',
       inherits_from:    :electricity_co2_last_year_weekly_with_co2_intensity,
       x_axis:           :datetime,
       timescale:        :week
@@ -443,7 +443,7 @@ class ChartManager
       yaxis_units:      :£
     },
     storage_heater_group_by_week: {
-      name:                 'Information on your school’s storage heater electricity consumption',
+      name:                 translated_title_for('storage_heater_group_by_week') || 'Information on your school’s storage heater electricity consumption',
       inherits_from:        :group_by_week_electricity,
       meter_definition:     :storage_heater_meter,
       replace_series_label: [[Series::DayType::SCHOOLDAYCLOSED, Series::DayType::STORAGE_HEATER_CHARGE]],
@@ -455,7 +455,7 @@ class ChartManager
       timescale:            :up_to_a_year
     },
     storage_heater_by_day_of_week: {
-      name:               'Storage heater usage by day of the week',
+      name:               translated_title_for('storage_heater_by_day_of_week') || 'Storage heater usage by day of the week',
       inherits_from:      :gas_by_day_of_week,
       replace_series_label: [[Series::DayType::SCHOOLDAYCLOSED, Series::DayType::STORAGE_HEATER_CHARGE]],
       meter_definition:   :storage_heater_meter
@@ -465,12 +465,12 @@ class ChartManager
       timescale:        :up_to_a_year
     },
     storage_heater_group_by_week_long_term: {
-      name:               'Storage heater electricity consumption over a longer time period',
+      name:               translated_title_for('storage_heater_group_by_week_long_term') || 'Storage heater electricity consumption over a longer time period',
       inherits_from:      :storage_heater_group_by_week,
       timescale:          nil
     },
     storage_heater_thermostatic: {
-      name:               'Thermostatic control',
+      name:               translated_title_for('storage_heater_thermostatic') || 'Thermostatic control',
       inherits_from:      :thermostatic,
       humanize_legend:    true,
       meter_definition:   :storage_heater_meter,
@@ -481,7 +481,7 @@ class ChartManager
 =end
     },
     adhoc_test_chart: {
-      name:               'Adhoc chart test',
+      name:               translated_title_for('adhoc_test_chart') || 'Adhoc chart test',
       timescale:          [{ day: 0 }],
       x_axis:             :datetime,
       meter_definition:   :allheat,
@@ -492,7 +492,7 @@ class ChartManager
       asof_date:          Date.new(2019, 2, 18)
     },
     activities_school_day_electricity_cost: {
-      name:               'School day electricity cost',
+      name:               translated_title_for('activities_school_day_electricity_cost') || 'School day electricity cost',
       timescale:          [{ schoolday: 0 }],
       x_axis:             :datetime,
       meter_definition:   :allelectricity,
@@ -503,7 +503,7 @@ class ChartManager
     },
     activities_school_day_gas_cost: {
       inherits_from:      :activities_school_day_electricity_cost,
-      name:               'School day gas cost',
+      name:               translated_title_for('activities_school_day_gas_cost') || 'School day gas cost',
       meter_definition:   :allheat
     },
     activities_weekend_day_electricity_cost: {
@@ -2060,8 +2060,11 @@ class ChartManager
     },
     #======================================PUPIL DASHBOARD - ELECTRICITY=============================================
     pupil_dashboard_group_by_week_electricity_kwh: {
-      name:             'Your school\'s electricity use over a year (in kWh). Each bar shows a week\'s use',
-      drilldown_name:   ['Electricity use in your chosen week (in kWh)', 'Electricity use on your chosen day (in kWh)'],
+      name:             translated_title_for('pupil_dashboard_group_by_week_electricity_kwh') || 'Your school\'s electricity use over a year (in kWh). Each bar shows a week\'s use',
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_electricity_kwh', drilldown_position: 1) || 'Electricity use in your chosen week (in kWh)', 
+        translated_title_for('pupil_dashboard_group_by_week_electricity_kwh', drilldown_position: 2) || 'Electricity use on your chosen day (in kWh)'
+      ],
       inherits_from:    :group_by_week_electricity,
       minimum_days_data_override: 21
     },
@@ -2106,113 +2109,133 @@ class ChartManager
       minimum_days_data_override: 180
     },
     pupil_dashboard_baseload_lastyear: {
-      name:             'Your school\'s electricity baseload. This is power used when the school is empty (kW)',
+      name:             translated_title_for('pupil_dashboard_baseload_lastyear') || 'Your school\'s electricity baseload. This is power used when the school is empty (kW)',
       inherits_from:     :baseload_lastyear,
-      drilldown_name:   ['Electricity power consumption on your chosen day (in kW)'],
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_baseload_lastyear', drilldown_position: 1) || 'Electricity power consumption on your chosen day (in kW)'
+      ],
       minimum_days_data_override: 21
     },
     pupil_dashboard_intraday_line_electricity_last7days: {
-      name:             'Your school\'s electricity use over 7 days (kW)',
+      name:             translated_title_for('pupil_dashboard_intraday_line_electricity_last7days') || 'Your school\'s electricity use over 7 days (kW)',
       inherits_from:     :intraday_line_school_last7days
     },
     #======================================PUPIL DASHBOARD - GAS=============================================
     pupil_dashboard_group_by_week_gas_kwh: {
-      name:             'Your school\'s gas use over a year (in kWh). Each bar shows a week\'s use.',
-      drilldown_name:   ['Gas use in your chosen week (in kWh)', 'Gas use on your chosen day (in kWh)'],
+      name:             translated_title_for('pupil_dashboard_group_by_week_gas_kwh') || 'Your school\'s gas use over a year (in kWh). Each bar shows a week\'s use.',
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_gas_kwh', drilldown_position: 1) || 'Gas use in your chosen week (in kWh)',
+        translated_title_for('pupil_dashboard_group_by_week_gas_kwh', drilldown_position: 2) || 'Gas use on your chosen day (in kWh)'
+      ],
       inherits_from:    :pupil_dashboard_group_by_week_electricity_kwh,
       meter_definition: :allheat
     },
     pupil_dashboard_group_by_week_gas_£: {
-      name:             'Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs.',
-      drilldown_name:   ['Gas costs in your chosen week (in £)', 'Gas costs on your chosen day (in £)'],
+      name:             translated_title_for('pupil_dashboard_group_by_week_gas_£') || 'Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs.',
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_gas_£', drilldown_position: 1) || 'Gas costs in your chosen week (in £)',
+        translated_title_for('pupil_dashboard_group_by_week_gas_£', drilldown_position: 2) || 'Gas costs on your chosen day (in £)'
+      ],
       inherits_from:    :pupil_dashboard_group_by_week_gas_kwh,
       yaxis_units:      :£
     },
     pupil_dashboard_group_by_week_gas_co2: {
-      name:             'Your school\'s carbon emissions from gas use over a year (in kg CO2). Each bar shows a week\'s emissions.',
-      drilldown_name:   ['Gas carbon emissions in your chosen week (in kg CO2)', 'Gas carbon emissions on your chosen day (in kg CO2)'],
+      name:             translated_title_for('pupil_dashboard_group_by_week_gas_co2') || 'Your school\'s carbon emissions from gas use over a year (in kg CO2). Each bar shows a week\'s emissions.',
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_gas_co2', drilldown_position: 1) || 'Gas carbon emissions in your chosen week (in kg CO2)',
+        translated_title_for('pupil_dashboard_group_by_week_gas_co2', drilldown_position: 2) || 'Gas carbon emissions on your chosen day (in kg CO2)'
+      ],
       inherits_from:  :pupil_dashboard_group_by_week_gas_kwh,
       yaxis_units:      :co2
     },
     pupil_dashboard_gas_benchmark: {
-      name:             'How much my school spends on gas in comparison with other schools (£)',
+      name:  translated_title_for('pupil_dashboard_gas_benchmark') || 'How much my school spends on gas in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
       meter_definition:   :allheat
     },
     pupil_dashboard_daytype_breakdown_gas: {
-      name:              'When your school used gas over the past year. School day closed is the gas used in the evenings and early mornings during term time.',
+      name:              translated_title_for('pupil_dashboard_daytype_breakdown_gas') || 'When your school used gas over the past year. School day closed is the gas used in the evenings and early mornings during term time.',
       inherits_from:     :pupil_dashboard_daytype_breakdown_electricity,
       meter_definition:  :allheat
     },
     pupil_dashboard_gas_longterm_trend_£: {
-      name:             'Your school\'s long term gas costs (£). Each bar shows a year\'s costs.',
+      name:             translated_title_for('pupil_dashboard_gas_longterm_trend_£') || 'Your school\'s long term gas costs (£). Each bar shows a year\'s costs.',
       drilldown_name:   [
-        'Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs.',
-        'Gas costs in your chosen week (in £)',
-        'Gas costs on your chosen day (in £)'
+        translated_title_for('pupil_dashboard_gas_longterm_trend_£', drilldown_position: 1) || 'Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs.',
+        translated_title_for('pupil_dashboard_gas_longterm_trend_£', drilldown_position: 2) || 'Gas costs in your chosen week (in £)',
+        translated_title_for('pupil_dashboard_gas_longterm_trend_£', drilldown_position: 3) || 'Gas costs on your chosen day (in £)'
       ],
       inherits_from:     :pupil_dashboard_electricity_longterm_trend_£,
       meter_definition:  :allheat
     },
     pupil_dashboard_intraday_line_gas_last7days: {
-      name:             'Your school\'s gas use over 7 days (kW)',
+      name:             translated_title_for('pupil_dashboard_intraday_line_gas_last7days') || 'Your school\'s gas use over 7 days (kW)',
       inherits_from:     :pupil_dashboard_intraday_line_electricity_last7days,
       meter_definition:  :allheat
     },
     #======================================PUPIL DASHBOARD - STORAGE HEATERS========================================
     pupil_dashboard_group_by_week_storage_heaters_kwh: {
-      name:             'Your school\'s storage heater use over a year (in kWh). Each bar shows a week\'s use.',
-      drilldown_name:   ['Storage heater use in your chosen week (in kWh)', 'Storage heater use on your chosen day (in kWh)'],
+      name:             translated_title_for('pupil_dashboard_group_by_week_storage_heaters_kwh') || 'Your school\'s storage heater use over a year (in kWh). Each bar shows a week\'s use.',
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_storage_heaters_kwh', drilldown_position: 1) || 'Storage heater use in your chosen week (in kWh)',
+        translated_title_for('pupil_dashboard_group_by_week_storage_heaters_kwh', drilldown_position: 2) || 'Storage heater use on your chosen day (in kWh)'
+      ],
       inherits_from:    :pupil_dashboard_group_by_week_electricity_kwh,
       meter_definition: :storage_heater_meter
     },
     pupil_dashboard_group_by_week_storage_heaters_£: {
-      name:             'Your school\'s storage heater costs over a year (in £). Each bar shows a week\'s costs.',
-      drilldown_name:   ['Storage heater costs in your chosen week (in £)', 'Storage heater costs on your chosen day (in £)'],
+      name:             translated_title_for('pupil_dashboard_group_by_week_storage_heaters_£') || 'Your school\'s storage heater costs over a year (in £). Each bar shows a week\'s costs.',
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_storage_heaters_£', drilldown_position: 1) || 'Storage heater costs in your chosen week (in £)',
+        translated_title_for('pupil_dashboard_group_by_week_storage_heaters_£', drilldown_position: 2) || 'Storage heater costs on your chosen day (in £)'
+      ],
       inherits_from:    :pupil_dashboard_group_by_week_storage_heaters_kwh,
       yaxis_units:      :£
     },
     pupil_dashboard_group_by_week_storage_heaters_co2: {
-      name:             'Your school\'s carbon emissions from storage heater use over a year (in kg CO2). Each bar shows a week\'s emissions.',
-      drilldown_name:   ['Storage heater carbon emissions in your chosen week (in kg CO2)', 'Storage heater carbon emissions on your chosen day (in kg CO2)'],
+      name:             translated_title_for('pupil_dashboard_group_by_week_storage_heaters_co2') || 'Your school\'s carbon emissions from storage heater use over a year (in kg CO2). Each bar shows a week\'s emissions.',
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_storage_heaters_co2', drilldown_position: 1) || 'Storage heater carbon emissions in your chosen week (in kg CO2)',
+        translated_title_for('pupil_dashboard_group_by_week_storage_heaters_co2', drilldown_position: 2) || 'Storage heater carbon emissions on your chosen day (in kg CO2)'
+      ],
       inherits_from:    :pupil_dashboard_group_by_week_storage_heaters_kwh,
       yaxis_units:      :co2
     },
     pupil_dashboard_storage_heaters_benchmark: {
-      name:             'How much my school spends on storage heating in comparison with other schools (£)',
+      name:             translated_title_for('pupil_dashboard_storage_heaters_benchmark') || 'How much my school spends on storage heating in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
       meter_definition:   :storage_heater_meter
     },
     pupil_dashboard_daytype_breakdown_storage_heaters: {
-      name:              'When your school used storage heaters over the past year. School day closed is the storage heaters used in the evenings and early mornings during term time.',
+      name:              translated_title_for('pupil_dashboard_daytype_breakdown_storage_heaters') || 'When your school used storage heaters over the past year. School day closed is the storage heaters used in the evenings and early mornings during term time.',
       inherits_from:     :pupil_dashboard_daytype_breakdown_electricity,
       meter_definition:  :storage_heater_meter
     },
     pupil_dashboard_storage_heaters_longterm_trend_£: {
-      name:             'Your school\'s long term storage heaters costs (£). Each bar shows a year\'s costs.',
+      name:             translated_title_for('pupil_dashboard_storage_heaters_longterm_trend_£') || 'Your school\'s long term storage heaters costs (£). Each bar shows a year\'s costs.',
       drilldown_name:   [
-        'Your school\'s storage heaters costs over a year (in £). Each bar shows a week\'s costs.',
-        'Storage heater costs in your chosen week (in £)',
-        'Storage heater costs on your chosen day (in £)'
+        translated_title_for('pupil_dashboard_storage_heaters_longterm_trend_£', drilldown_position: 1) || 'Your school\'s storage heaters costs over a year (in £). Each bar shows a week\'s costs.',
+        translated_title_for('pupil_dashboard_storage_heaters_longterm_trend_£', drilldown_position: 2) || 'Storage heater costs in your chosen week (in £)',
+        translated_title_for('pupil_dashboard_storage_heaters_longterm_trend_£', drilldown_position: 3) || 'Storage heater costs on your chosen day (in £)'
       ],
       inherits_from:     :pupil_dashboard_electricity_longterm_trend_£,
       meter_definition:  :storage_heater_meter
     },
     pupil_dashboard_intraday_line_storage_heaters_last7days: {
-      name:             'Your school\'s storage heaters use over 7 days (kW)',
+      name:             translated_title_for('pupil_dashboard_intraday_line_storage_heaters_last7days') || 'Your school\'s storage heaters use over 7 days (kW)',
       inherits_from:     :pupil_dashboard_intraday_line_electricity_last7days,
       meter_definition:  :storage_heater_meter
     },
     #======================================PUPIL DASHBOARD - SOLAR PV========================================
     pupil_dashboard_solar_pv_benchmark: {
-      name:               'How much my school spends on electricity in comparison with other schools (£)',
+      name:               translated_title_for('pupil_dashboard_solar_pv_benchmark') || 'How much my school spends on electricity in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark
     },
     pupil_dashboard_solar_pv_monthly: {
-      name:               'How my school\'s solar PV panels reduce my school\'s mains electricity consumption (kWh)',
+      name:       translated_title_for('pupil_dashboard_solar_pv_monthly') || 'How my school\'s solar PV panels reduce my school\'s mains electricity consumption (kWh)',
       drilldown_name:   [
-        'Impact of Solar PV in your chosen month (in kWh)',
-        'Impact of Solar PV on your chosen day (in kWh)'
+        translated_title_for('pupil_dashboard_solar_pv_monthly', drilldown_position: 1) || 'Impact of Solar PV in your chosen month (in kWh)',
+        translated_title_for('pupil_dashboard_solar_pv_monthly', drilldown_position: 2) || 'Impact of Solar PV on your chosen day (in kWh)'
       ],
       inherits_from:      :solar_pv_group_by_month_dashboard_overview
     },
