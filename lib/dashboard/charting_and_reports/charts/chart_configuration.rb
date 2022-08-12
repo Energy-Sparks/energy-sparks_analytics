@@ -2069,27 +2069,31 @@ class ChartManager
       name:             translated_title_for('pupil_dashboard_group_by_week_electricity_£') || 'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
       drilldown_name:   [
         translated_title_for('pupil_dashboard_group_by_week_electricity_£', drilldown_position: 1) || 'Electricity costs in your chosen week (in £)', 
-        translated_title_for('pupil_dashboard_group_by_week_electricity_£', drilldown_position: 2) || 'Electricity costs on your chosen day (in £)'],
+        translated_title_for('pupil_dashboard_group_by_week_electricity_£', drilldown_position: 2) || 'Electricity costs on your chosen day (in £)'
+      ],
       inherits_from:    :pupil_dashboard_group_by_week_electricity_kwh,
       yaxis_units:      :£
     },
     pupil_dashboard_group_by_week_electricity_co2: {
-      name:             'Your school\'s carbon emissions from electricity use over a year (in kg CO2). Each bar shows a week\'s emissions.',
-      drilldown_name:   ['Electricity carbon emissions in your chosen week (in kg CO2)', 'Electricity carbon emissions on your chosen day (in kg CO2)'],
+      name:             translated_title_for('pupil_dashboard_group_by_week_electricity_co2') || 'Your school\'s carbon emissions from electricity use over a year (in kg CO2). Each bar shows a week\'s emissions.',
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_electricity_co2', drilldown_position: 1) || 'Electricity carbon emissions in your chosen week (in kg CO2)', 
+        translated_title_for('pupil_dashboard_group_by_week_electricity_co2', drilldown_position: 2) || 'Electricity carbon emissions on your chosen day (in kg CO2)'
+      ],
       inherits_from:  :pupil_dashboard_group_by_week_electricity_kwh,
       yaxis_units:      :co2
     },
     pupil_dashboard_electricity_benchmark: {
-      name:               'How much my school spends on electricity in comparison with other schools (£)',
+      name:               translated_title_for('pupil_dashboard_electricity_benchmark') || 'How much my school spends on electricity in comparison with other schools (£)',
       inherits_from:      :benchmark,
       meter_definition:   :allelectricity
     },
     pupil_dashboard_electricity_longterm_trend_£: {
-      name:             'Your school\'s long term electricity costs (£). Each bar shows a year\'s costs.',
+      name:  translated_title_for('pupil_dashboard_electricity_longterm_trend_£') || 'Your school\'s long term electricity costs (£). Each bar shows a year\'s costs.',
       drilldown_name:   [
-        'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
-        'Electricity costs in your chosen week (in £)',
-        'Electricity costs on your chosen day (in £)'
+        translated_title_for('pupil_dashboard_electricity_longterm_trend_£', drilldown_position: 1) || 'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
+        translated_title_for('pupil_dashboard_electricity_longterm_trend_£', drilldown_position: 2) || 'Electricity costs in your chosen week (in £)',
+        translated_title_for('pupil_dashboard_electricity_longterm_trend_£', drilldown_position: 3) || 'Electricity costs on your chosen day (in £)'
       ],
       inherits_from:     :electricity_longterm_trend,
       yaxis_units:      :£
