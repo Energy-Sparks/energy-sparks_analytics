@@ -12,6 +12,14 @@ class ChartManager
     ]
   end
 
+  def self.translated_title_for(configuration_key, drilldown_position = 0, options = {})
+    title = I18n.t("chart_data.chart_config.#{configuration_key}.title", options.merge(default: nil))
+
+    return unless title && title.is_a?(Array) && ((title.size - 1) <= drilldown_position)
+    
+    title[drilldown_position]
+  end
+
   STANDARD_CHART_CONFIGURATION = {
     #
     # chart config parameters:
@@ -28,7 +36,7 @@ class ChartManager
     # data_types:         an array e.g. [:metereddata, :predictedheat] - assumes :metereddata if not present
     #
     benchmark:  {
-      name:             'Annual Electricity and Gas Consumption Comparison with other schools in your region',
+      name:             translated_title_for('benchmark') || 'Annual Electricity and Gas Consumption Comparison with other schools in your region',
       chart1_type:      :bar,
       chart1_subtype:   :stacked,
       meter_definition: :all,
@@ -41,7 +49,7 @@ class ChartManager
     },
     benchmark_co2: {
       inherits_from:    :benchmark,
-      name:             'School Carbon Emissions from Electricity and Gas Usage',
+      name:             translated_title_for('benchmark_co2') || 'School Carbon Emissions from Electricity and Gas Usage',
       restrict_y1_axis: [:co2],
       yaxis_units:      :co2
     },
@@ -70,7 +78,7 @@ class ChartManager
       yaxis_units:      :£
     },
     last_2_weeks_carbon_emissions: {
-      name:             'Last 2 weeks carbon emissions at your school from electricity and gas',
+      name:             translated_title_for('last_2_weeks_carbon_emissions') || 'Last 2 weeks carbon emissions at your school from electricity and gas',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       timescale:        { week: -1..0 },
@@ -81,7 +89,7 @@ class ChartManager
       yaxis_scaling:    :none
     },
     benchmark_electric:  {
-      name:             'Benchmark Comparison (Annual Electricity Consumption)',
+      name:             translated_title_for('benchmark_electric') || 'Benchmark Comparison (Annual Electricity Consumption)',
       chart1_type:      :bar,
       chart1_subtype:   :stacked,
       meter_definition: :all,
@@ -93,7 +101,7 @@ class ChartManager
       # timescale:        :year
     },
     gas_longterm_trend: {
-      name:             'Gas: long term trends',
+      name:             translated_title_for('gas_longterm_trend') || 'Gas: long term trends',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       meter_definition: :allheat,
@@ -105,7 +113,7 @@ class ChartManager
       reverse_xaxis:    true
     },
     gas_longterm_trend_kwh_with_carbon: {
-      name:             'Your School Gas Carbon Emissions over the last few years',
+      name:             translated_title_for('gas_longterm_trend_kwh_with_carbon') || 'Your School Gas Carbon Emissions over the last few years',
       inherits_from:    :gas_longterm_trend,
       series_breakdown: :none,
       restrict_y1_axis: [:co2],
@@ -118,7 +126,7 @@ class ChartManager
       y2_axis:          :gascarbon
     },
     electricity_longterm_trend: {
-      name:             'Electricity: long term trends',
+      name:             translated_title_for('electricity_longterm_trend') || 'Electricity: long term trends',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       meter_definition: :allelectricity,
@@ -129,7 +137,7 @@ class ChartManager
       reverse_xaxis:    true
     },
     electricity_longterm_trend_kwh_with_carbon: {
-      name:             'Your schools electricity consumption over the last few years',
+      name:             translated_title_for('electricity_longterm_trend_kwh_with_carbon') || 'Your schools electricity consumption over the last few years',
       inherits_from:    :electricity_longterm_trend,
       series_breakdown: :none,
       y2_axis:          :gridcarbon
@@ -150,7 +158,7 @@ class ChartManager
       meter_definition: :allelectricity_unmodified
     },
     daytype_breakdown_gas: {
-      name:             'Breakdown by type of day/time: Gas',
+      name:             translated_title_for('daytype_breakdown_gas') || 'Breakdown by type of day/time: Gas',
       chart1_type:      :pie,
       meter_definition: :allheat,
       x_axis:           :nodatebuckets,
@@ -174,11 +182,11 @@ class ChartManager
     },
     alert_daytype_breakdown_storage_heater: {
       inherits_from:      :alert_daytype_breakdown_gas,
-      name:               'Breakdown by type of day/time: Storage Heaters',
+      name:               translated_title_for('alert_daytype_breakdown_storage_heater') || 'Breakdown by type of day/time: Storage Heaters',
       meter_definition:   :storage_heater_meter
     },
     daytype_breakdown_electricity: {
-      name:             'Breakdown by type of day/time: Electricity',
+      name:             translated_title_for('daytype_breakdown_electricity') || 'Breakdown by type of day/time: Electricity',
       chart1_type:      :pie,
       meter_definition: :allelectricity,
       x_axis:           :nodatebuckets,
@@ -196,7 +204,7 @@ class ChartManager
       inherits_from: :daytype_breakdown_electricity
     },
     group_by_week_electricity: {
-      name:             'By Week: Electricity',
+      name:             translated_title_for('group_by_week_electricity') || 'By Week: Electricity',
       chart1_type:      :column,
       chart1_subtype:   :stacked,
       meter_definition: :allelectricity,
@@ -227,7 +235,7 @@ class ChartManager
 
     # ============================================================================================
     group_by_week_electricity_versus_benchmark: {
-      name:                 'By Week: Electricity - compared with benchmark',
+      name:                 translated_title_for('group_by_week_electricity_versus_benchmark') || 'By Week: Electricity - compared with benchmark',
       chart1_type:          :line,
       series_breakdown:     :none,
       meter_definition:     :allelectricity,
@@ -279,7 +287,7 @@ class ChartManager
       inherits_from:                :targeting_and_tracking_weekly_electricity_one_year_cumulative_line
     },
     targeting_and_tracking_weekly_electricity_to_date_line: {
-      name:             'Weekly progress versus target',
+      name: translated_title_for('targeting_and_tracking_weekly_electricity_to_date_line') || 'Weekly progress versus target',
       replace_series_label: [
         ['Energy:<school_name>: target', 'target'],
         ['Energy:<school_name>', 'actual']
@@ -295,7 +303,7 @@ class ChartManager
       inherits_from:                :group_by_week_electricity
     },
     targeting_and_tracking_weekly_electricity_one_year_line: {
-      name:           'Weekly progress versus target to date',
+      name: translated_title_for('targeting_and_tracking_weekly_electricity_one_year_line') || 'Weekly progress versus target to date',
       target:             {calculation_type: :day, extend_chart_into_future: false, truncate_before_start_date: true},
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
     },
@@ -2055,7 +2063,7 @@ class ChartManager
       minimum_days_data_override: 21
     },
     pupil_dashboard_group_by_week_electricity_£: {
-      name:             'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
+      name:             translated_title_for('pupil_dashboard_group_by_week_electricity_£') || 'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
       drilldown_name:   ['Electricity costs in your chosen week (in £)', 'Electricity costs on your chosen day (in £)'],
       inherits_from:    :pupil_dashboard_group_by_week_electricity_kwh,
       yaxis_units:      :£
@@ -2082,7 +2090,7 @@ class ChartManager
       yaxis_units:      :£   
     },
     pupil_dashboard_daytype_breakdown_electricity: {
-      name:             'When your school used electricity over the past year. School day closed is the electricity used in the evenings and early mornings during term time.',
+      name:             translated_title_for('pupil_dashboard_daytype_breakdown_electricity') || 'When your school used electricity over the past year. School day closed is the electricity used in the evenings and early mornings during term time.',
       timescale:        :year,
       inherits_from:     :daytype_breakdown_electricity,
       yaxis_units:      :£,
