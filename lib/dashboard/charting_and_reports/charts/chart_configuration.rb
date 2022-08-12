@@ -12,10 +12,10 @@ class ChartManager
     ]
   end
 
-  def self.translated_title_for(configuration_key, drilldown_position = 0, options = {})
+  def self.translated_title_for(configuration_key, options: {}, drilldown_position: 0)
     title = I18n.t("chart_data.chart_config.#{configuration_key}.title", options.merge(default: nil))
 
-    return unless title && title.is_a?(Array) && ((title.size - 1) <= drilldown_position)
+    return unless title && title.is_a?(Array) && ((title.size - 1) >= drilldown_position)
     
     title[drilldown_position]
   end
@@ -310,16 +310,16 @@ class ChartManager
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
     },
     targeting_and_tracking_standard_group_by_week_electricity: {
-      name:          'Standard <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
+      name: translated_title_for('targeting_and_tracking_standard_group_by_week_electricity') || 'Standard <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
       inherits_from: :management_dashboard_group_by_week_electricity
     },
     targeting_and_tracking_target_only_group_by_week_electricity: {
-      name:          'Target only <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
+      name: translated_title_for('targeting_and_tracking_target_only_group_by_week_electricity') || 'Target only <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
       target:        {calculation_type: :day, extend_chart_into_future: false, show_target_only: true, truncate_before_start_date: true},
       inherits_from: :targeting_and_tracking_standard_group_by_week_electricity
     },
     targeting_and_tracking_unscaled_target_group_by_week_electricity: {
-      name:               'Unscaled target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
+      name: translated_title_for('targeting_and_tracking_unscaled_target_group_by_week_electricity') || 'Unscaled target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
       meter_definition:   :unscaled_aggregate_target_electricity,
       timescale:          :up_to_a_year, # required as chart manager dynami x axis otherwise accesses school and not target school
       x_axis:             :week,
@@ -2067,7 +2067,9 @@ class ChartManager
     },
     pupil_dashboard_group_by_week_electricity_£: {
       name:             translated_title_for('pupil_dashboard_group_by_week_electricity_£') || 'Your school\'s electricity costs over a year (in £). Each bar shows a week\'s costs.',
-      drilldown_name:   ['Electricity costs in your chosen week (in £)', 'Electricity costs on your chosen day (in £)'],
+      drilldown_name:   [
+        translated_title_for('pupil_dashboard_group_by_week_electricity_£', drilldown_position: 1) || 'Electricity costs in your chosen week (in £)', 
+        translated_title_for('pupil_dashboard_group_by_week_electricity_£', drilldown_position: 2) || 'Electricity costs on your chosen day (in £)'],
       inherits_from:    :pupil_dashboard_group_by_week_electricity_kwh,
       yaxis_units:      :£
     },
