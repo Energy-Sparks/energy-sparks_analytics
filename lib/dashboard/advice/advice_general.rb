@@ -11,22 +11,6 @@ class AdviceGasMeterBreakdownBase < AdviceMeterBreakdownBase
   protected def underlying_meters; @school.heat_meters end
 end
 class AdviceGasOutHours < AdviceGasBase;    end
-class AdviceGasAnnual   < AdviceGasBase;    end
-class AdviceBenchmark   < AdviceBase
-  def alert_asof_date
-    valid_meters.map { |meter| meter.amr_data.end_date }.min
-  end
-  protected def aggregate_meter
-    [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact.first
-  end
-  def valid_alert?
-    super && valid_meters.all?{ |m| m.amr_data.days > 364 }
-  end
-  private
-  def valid_meters
-    [@school.aggregated_electricity_meters, @school.aggregated_heat_meters].compact
-  end
-end
 class AdviceElectricityOutHours < AdviceElectricityBase; end
 class AdviceElectricityLongTerm < AdviceElectricityBase; end
 
@@ -38,8 +22,6 @@ class AdviceGasIntraday < AdviceGasBase
   end
 end
 
-# class AdviceGasBoilerThermostatic     < AdviceBoilerHeatingBase; end
-
 class AdviceGasBoilerFrost < AdviceBoilerHeatingBase
   def rating
     5.0
@@ -49,15 +31,6 @@ end
 class AdviceGasHotWater < AdviceGasBase
   def relevance
     super == :relevant &&  !heating_only? ? :relevant : :never_relevant
-  end
-end
-
-class AdviceStorageHeaters < AdviceElectricityBase
-  def relevance
-    @school.storage_heaters? ? :relevant : :never_relevant
-  end
-  def rating
-    5.0
   end
 end
 

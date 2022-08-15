@@ -28,7 +28,7 @@ module Benchmarking
           { type: :html,                  content: chart_introduction_text },
           { type: :chart_name,            content: chart_name },
           { type: :chart,                 content: chart },
-          { type: :html,                  content: chart_interpretation_text }
+          { type: :html,                  content: chart_interpretation_text },
         ] if charts? && !chart_empty?(chart)
 
         if tables?
@@ -44,6 +44,7 @@ module Benchmarking
             tables.push({type: :table_text,            content: table_text })
           end
 
+          tables.push({ type: :html,                  content: aggregate_text(school_ids, filter, user_type) })
           tables.push({ type: :table_composite,       content: composite })
           tables.push({ type: :html,                  content: table_interpretation_text })
         end
@@ -136,9 +137,26 @@ module Benchmarking
     def run_table(school_ids, filter, medium, user_type = nil)
       benchmark_manager.run_benchmark_table(asof_date, page_name, school_ids, nil, filter, medium, user_type)
     end
+ 
+    def aggregate_text(school_ids, filter, user_type)
+      ''
+    end
 
     def chart_empty?(chart_results)
       chart_results.nil? || !chart_results[:x_data].values.any?{ |data| !data.all?(&:nil?) }
+    end
+
+    def extract_useful_aggregate_table_data(table, column_ids)
+      table.drop(1).map do |row| # skip header row|
+        table_extract_aggregate_row_data(row, column_ids)
+      end.compact
+    end
+
+    def table_extract_aggregate_row_data(row, column_ids)
+      column_ids.map do |column_id|
+        col_index = @chart_table_config[:columns].index { |v| v[:column_id] == column_id }
+        row[col_index]
+      end
     end
   end
 end

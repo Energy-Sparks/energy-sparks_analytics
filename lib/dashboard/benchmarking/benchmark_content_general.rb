@@ -1385,7 +1385,10 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkContentChangeInElectricityBetween2HolidaysYearApart < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    private def introduction_text
+
+    private
+    
+    def introduction_text
       text = %q(
         <p>
           This comparison shows the change in consumption between the most recent holiday, and
@@ -1398,6 +1401,13 @@ module Benchmarking
         <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
+    end
+
+    def aggregate_text(school_ids, filter, user_type)
+      puts "Aggregate text"
+      puts "Data for processing:"
+      ap extract_useful_aggregate_table_data(table, %i[school_name pupils_changed])
+      ''
     end
   end
   #=======================================================================================

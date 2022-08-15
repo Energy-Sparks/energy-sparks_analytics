@@ -13,6 +13,11 @@ module Benchmarking
       y1_axis_column?(column_definition) || y2_axis_column?(column_definition)
     end
 
+    def self.aggregate_column?(column_definition)
+      column_definition?(column_definition, :aggregate_column) &&
+      column_definition[:aggregate_column] == :dont_display_in_table_or_chart
+    end
+
     def self.y1_axis_column?(column_definition)
       column_definition?(column_definition, :chart_data) && !y2_axis_column?(column_definition)
     end
@@ -393,7 +398,7 @@ module Benchmarking
         name:     'Change in electricity consumption since last year',
         columns:  [
           { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
-          
+
           { data: ->{ enba_ken },                          name: 'previous year',  units: :kwh },
           { data: ->{ enba_ke0 },                          name: 'last year',      units: :kwh },
           { data: ->{ percent_change(enba_ken, enba_ke0)}, name: 'change',         units: :relative_percent_0dp },
@@ -915,12 +920,13 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInElectricityBetween2HolidaysYearApart,
         name:     'Change in electricity consumption between this holiday and the same holiday the previous year',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true, column_id: :school_name },
           { data: ->{ epyc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ epyc_dif£ },  name: 'Change £', units: :£ },
           { data: ->{ epyc_cper },  name: 'Most recent holiday', units: String },
           { data: ->{ epyc_pper },  name: 'Previous holiday', units: String },
-          { data: ->{ epyc_ratg },  name: 'rating', units: Float, y2_axis: true }
+          { data: ->{ epyc_pnch },  aggregate_column: :dont_display_in_table_or_chart, units: TrueClass, column_id: :pupils_changed},
+          { data: ->{ epyc_ratg },  name: 'rating', units: Float, y2_axis: true },
         ],
         sort_by: [1],
         type: %i[table chart]

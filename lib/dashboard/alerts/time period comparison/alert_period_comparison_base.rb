@@ -45,6 +45,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :change_in_weekly_kwh, :change_in_weekly_£
   attr_reader :change_in_weekly_percent
   attr_reader :summary, :prefix_1, :prefix_2
+  attr_reader :current_period_floor_area, :previous_period_floor_area, :floor_area_changed
+  attr_reader :current_period_pupils, :previous_period_pupils, :pupils_changed
 
   def self.dynamic_template_variables(fuel_type)
     vars = {
@@ -96,7 +98,14 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
       summary: { description: 'Change in £spend, relative to previous period', units: String },
       prefix_1: { description: 'Change: up or down', units: String },
-      prefix_2: { description: 'Change: increase or reduction', units: String }
+      prefix_2: { description: 'Change: increase or reduction', units: String },
+
+      current_period_floor_area:  { description: 'Weighted average floor area current period',          units: :m2,       benchmark_code: 'cpfa' },
+      previous_period_floor_area: { description: 'Weighted average floor area previous period',         units: :m2,       benchmark_code: 'ppfa' },
+      floor_area_changed:         { description: 'Has floor area changed between periods?',             units: TrueClass, benchmark_code: 'fach' },
+      current_period_pupils:      { description: 'Weighted average number of pupils in current period', units: :pupils,   benchmark_code: 'cpnp' },
+      previous_period_pupils:     { description: 'Weighted average number of pupils in previous period',units: :pupils,   benchmark_code: 'ppnp' },
+      pupils_changed:             { description: 'Has number of pupils changed between periods?',       units: TrueClass, benchmark_code: 'pnch' },
     }
 
     vars.merge(convert_equivalence_template_variables(equivalence_template_variables, { '_test' => vars  }))
@@ -134,6 +143,9 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     raise EnergySparksNotEnoughDataException, "Not enough data in current period: #{period_debug(current_period,  asof_date)}"  unless enough_days_data_for_period(current_period,  asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data in previous period: #{period_debug(previous_period,  asof_date)}" unless enough_days_data_for_period(previous_period, asof_date)
+
+    calculate_floor_area_adjustments(current_period, previous_period)
+    calculate_pupil_number_adjustments(current_period, previous_period)
 
     current_period_data   = meter_values_period(current_period)
     previous_period_data  = normalised_period_data(current_period, previous_period)
@@ -221,37 +233,17 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     ]
   end
 
-  protected def community_use
+  protected
+
+  def community_use
     nil
   end
 
-  private def period_debug(current_period,  asof_date)
-    "#{current_period.nil? ? 'no current period' : current_period}, asof #{asof_date}"
+  def minimum_days_for_period
+    MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD
   end
 
-  private def period_type
-    'period'
-  end
-
-  private def temperature_adjust; false end
-
-  private def prefix(change, up, same, down)
-    if change < 0.0
-      down
-    elsif change == 0.0
-      same
-    else
-      up
-    end
-  end
-
-  private def summary_text
-    FormatEnergyUnit.format(:£, @difference_£, :text) + ' ' +
-    @prefix_2 + ' since last ' + period_type + ', ' +
-    FormatEnergyUnit.format(:relative_percent, @difference_percent, :text)
-  end
-
-  protected def calculate_rating(percentage_difference, financial_difference_£, fuel_type)
+  def calculate_rating(percentage_difference, financial_difference_£, fuel_type)
     # PH removed £10 limit 20Nov2019 at CT request
     # PH reinstated after CT request 21Dec2020
     return 10.0 if financial_difference_£.between?(-MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£, MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£)
@@ -259,31 +251,23 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     calculate_rating_from_range(-ten_rating_range_percent, ten_rating_range_percent, percentage_difference)
   end
 
-  protected def last_two_periods(_asof_date)
+  def last_two_periods(_asof_date)
     raise EnergySparksAbstractBaseClass, "Error: last_two_periods method not implemented for #{self.class.name}"
   end
 
-  protected def fuel_type
+  def fuel_type
     raise EnergySparksAbstractBaseClass, "Error: fuel_type method not implemented for #{self.class.name}"
   end
 
-  private def url_bookmark
-    fuel_type == :electricity ? 'ElectricityChange' : 'GasChange'
-  end
-
-  protected def configure_models(_asof_date)
+  def configure_models(_asof_date)
     # do nothing in case of electricity
   end
 
-  protected def temperature_adjustment(_date, _asof_date)
+  def temperature_adjustment(_date, _asof_date)
     1.0 # no adjustment for electricity, the default
   end
 
-  private def kwh_date_range(meter, start_date, end_date, data_type)
-    super(aggregate_meter, start_date, end_date, data_type, community_use: community_use)
-  end
-
-  protected def meter_values_period(current_period)
+  def meter_values_period(current_period)
     {
       kwh:    kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :kwh),
       £:      kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :£),
@@ -291,7 +275,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     }
   end
 
-  protected def normalised_period_data(current_period, previous_period)
+  def normalised_period_data(current_period, previous_period)
     {
       kwh:    normalise_previous_period_data_to_current_period(current_period, previous_period, :kwh),
       £:      normalise_previous_period_data_to_current_period(current_period, previous_period, :£),
@@ -299,40 +283,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     }
   end
 
-  private def formatted_kwh_period_unadjusted(period, data_type = :kwh)
-    min_days_data_if_meter_start_date_in_holiday = 4
-    values = kwhs_date_range(aggregate_meter, period.first, period.last, data_type, min_days_data_if_meter_start_date_in_holiday, community_use: community_use)
-    formatted_values = "#{values.sum.round(0)} = #{values.map { |kwh| kwh.round(0) }.join('+')}"
-    [formatted_values, values.sum / values.length]
-  end
-
-  # adjust the previous periods electricity/gas usage to the number of days in the current period
-  # by calculating the average weekday usage and average weekend usage, and multiplying
-  # by the same number of days in the current holiday
-  private def normalise_previous_period_data_to_current_period(current_period, previous_period, data_type)
-    current_weekday_dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(current_period, (1..5).to_a)
-    current_weekend_dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(current_period, [0, 6])
-
-    previous_average_weekdays = average_period_value(previous_period, (1..5).to_a, data_type, temperature_adjust)
-    previous_average_weekends = average_period_value(previous_period, [0, 6], data_type, temperature_adjust)
-    
-    current_weekday_dates.length * previous_average_weekdays + current_weekend_dates.length * previous_average_weekends
-  end
-
-  private def normalised_average_weekly_kwh(period, data_type, adjusted)
-    weekday_average = average_period_value(period, (1..5).to_a, data_type, adjusted)
-    weekend_average = average_period_value(period, [0, 6], data_type, adjusted)
-    5.0 * weekday_average + 2.0 * weekend_average
-  end
-
-  private def average_period_value(period, days_of_week, data_type, adjusted)
-    dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(period, days_of_week)
-    values = dates.map { |date| kwh_date(aggregate_meter, date, data_type, adjusted) }.compact
-    values.sum / values.length
-  end
-
   # overridden by gas classes where this value is temperature compensated
-  protected def kwh_date(aggregate_meter, date, data_type, adjusted)
+  def kwh_date(aggregate_meter, date, data_type, adjusted)
     if adjusted
       temperature_adjust_kwh(aggregate_meter, date, data_type)
     else
@@ -340,11 +292,11 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     end
   end
 
-  protected def temperature_adjust_kwh(aggregate_meter, date, data_type)
+  def temperature_adjust_kwh(aggregate_meter, date, data_type)
     raise EnergySparksAbstractBaseClass, "Error: temperature_adjust_kwh method not implemented for #{self.class.name}"
   end
 
-  protected def calculate_time_of_year_relevance(asof_date)
+  def calculate_time_of_year_relevance(asof_date)
     current_period, previous_period = last_two_periods(asof_date)
     # lower relevance just after a holiday, only prioritise when 2 whole weeks of
     # data post holiday, use 9 days as criteria to allow for non-whole weeks post holiday
@@ -359,9 +311,84 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     time_relevance
   end
 
+  def enough_days_data_for_period(period, asof_date)
+    return false if period.nil?
+    period_start = [aggregate_meter.amr_data.start_date,  period.start_date].max
+    period_end   = [aggregate_meter.amr_data.end_date,    period.end_date, asof_date].min
+    enough_days_data(SchoolDatePeriod.weekdays_inclusive(period_start, period_end))
+  end
+
+  private
+
+  def period_debug(current_period,  asof_date)
+    "#{current_period.nil? ? 'no current period' : current_period}, asof #{asof_date}"
+  end
+
+  def period_type
+    'period'
+  end
+
+  def temperature_adjust; false end
+
+  def prefix(change, up, same, down)
+    if change < 0.0
+      down
+    elsif change == 0.0
+      same
+    else
+      up
+    end
+  end
+
+  def summary_text
+    FormatEnergyUnit.format(:£, @difference_£, :text) + ' ' +
+    @prefix_2 + ' since last ' + period_type + ', ' +
+    FormatEnergyUnit.format(:relative_percent, @difference_percent, :text)
+  end
+
+  def url_bookmark
+    fuel_type == :electricity ? 'ElectricityChange' : 'GasChange'
+  end
+
+  def kwh_date_range(meter, start_date, end_date, data_type)
+    super(aggregate_meter, start_date, end_date, data_type, community_use: community_use)
+  end
+
+  def formatted_kwh_period_unadjusted(period, data_type = :kwh)
+    min_days_data_if_meter_start_date_in_holiday = 4
+    values = kwhs_date_range(aggregate_meter, period.first, period.last, data_type, min_days_data_if_meter_start_date_in_holiday, community_use: community_use)
+    formatted_values = "#{values.sum.round(0)} = #{values.map { |kwh| kwh.round(0) }.join('+')}"
+    [formatted_values, values.sum / values.length]
+  end
+
+  # adjust the previous periods electricity/gas usage to the number of days in the current period
+  # by calculating the average weekday usage and average weekend usage, and multiplying
+  # by the same number of days in the current holiday
+  def normalise_previous_period_data_to_current_period(current_period, previous_period, data_type)
+    current_weekday_dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(current_period, (1..5).to_a)
+    current_weekend_dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(current_period, [0, 6])
+
+    previous_average_weekdays = average_period_value(previous_period, (1..5).to_a, data_type, temperature_adjust)
+    previous_average_weekends = average_period_value(previous_period, [0, 6], data_type, temperature_adjust)
+
+    current_weekday_dates.length * previous_average_weekdays + current_weekend_dates.length * previous_average_weekends
+  end
+
+  def normalised_average_weekly_kwh(period, data_type, adjusted)
+    weekday_average = average_period_value(period, (1..5).to_a, data_type, adjusted)
+    weekend_average = average_period_value(period, [0, 6], data_type, adjusted)
+    5.0 * weekday_average + 2.0 * weekend_average
+  end
+
+  def average_period_value(period, days_of_week, data_type, adjusted)
+    dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(period, days_of_week)
+    values = dates.map { |date| kwh_date(aggregate_meter, date, data_type, adjusted) }.compact
+    values.sum / values.length
+  end
+
   # relevant if asof date immediately at end of period or up to
   # 3 weeks after
-  private def time_relevance_deprecated(asof_date)
+  def time_relevance_deprecated(asof_date)
     current_period, _previous_period = last_two_periods(asof_date)
     return :never_relevant if current_period.nil?
     # relevant during period, subject to 'enough_data'
@@ -370,12 +397,12 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     return days_from_end_of_period_to_asof_date.between?(0, DAYS_ALERT_RELEVANT_AFTER_CURRENT_PERIOD) ? :relevant : :never_relevant
   end
 
-  private def enough_periods_data(asof_date)
+  def enough_periods_data(asof_date)
     current_period, previous_period = last_two_periods(asof_date)
     !current_period.nil? && !previous_period.nil? 
   end
 
-  private def enough_days_in_period(period, asof_date)
+  def enough_days_in_period(period, asof_date)
     asof_date.between?(period.start_date, period.end_date) && enough_days_data(asof_date - period.start_date + 1)
   end
 
@@ -385,26 +412,27 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     enough_days_data_for_period(period1, @asof_date) && enough_days_data_for_period(period2, @asof_date) ? :enough : :not_enough
   end
 
-  protected def enough_days_data_for_period(period, asof_date)
-    return false if period.nil?
-    period_start = [aggregate_meter.amr_data.start_date,  period.start_date].max
-    period_end   = [aggregate_meter.amr_data.end_date,    period.end_date, asof_date].min
-    enough_days_data(SchoolDatePeriod.weekdays_inclusive(period_start, period_end))
-  end
-
-  private def enough_days_data(days)
+  def enough_days_data(days)
     days >= MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD
   end
 
-  protected def minimum_days_for_period
-    MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD
-  end
-
   # returns [ formatted string of 7 temperatures, average for week]
-  private def weeks_temperatures(date_range)
+  def weeks_temperatures(date_range)
     temperatures = date_range.to_a.map { |date| @school.temperatures.average_temperature(date) }
     formatted_temperatures = temperatures.map { |temp| FormatEnergyUnit.format(:temperature, temp) }.join(', ')
     [formatted_temperatures, temperatures.sum / temperatures.length]
+  end
+
+  def calculate_floor_area_adjustments(current_period, previous_period)
+    @current_period_floor_area  = @school.floor_area(current_period.start_date, current_period.end_date)
+    @previous_period_floor_area = @school.floor_area(previous_period.start_date, previous_period.end_date)
+    @floor_area_changed = @current_period_floor_area != @previous_period_floor_area
+  end
+
+  def calculate_pupil_number_adjustments(current_period, previous_period)
+    @current_period_pupils  = @school.number_of_pupils(current_period.start_date, current_period.end_date)
+    @previous_period_pupils = @school.number_of_pupils(previous_period.start_date, previous_period.end_date)
+    @pupils_changed = @current_period_pupils != @previous_period_pupils
   end
 end
 
@@ -413,7 +441,7 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
     'holiday'
   end
 
-  protected def truncate_period_to_available_meter_data(period)
+  def truncate_period_to_available_meter_data(period)
     return period if period.start_date >= aggregate_meter.amr_data.start_date && period.end_date <= aggregate_meter.amr_data.end_date
     start_date = [period.start_date, aggregate_meter.amr_data.start_date].max
     end_date = [period.end_date, aggregate_meter.amr_data.end_date].min

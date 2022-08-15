@@ -52,7 +52,7 @@ class DashboardConfiguration
       name:                   'How your school\'s energy consumption compares with other schools',
       content_class:          AdviceBenchmark,
       excel_worksheet_name:   'Benchmark',
-      charts:                 %i[benchmark],
+      charts:                 %i[benchmark benchmark_varying_floor_area_pupils],
       promoted_variables: {
         AlertEnergyAnnualVersusBenchmark => {
           rating:                               :rating,
@@ -79,6 +79,7 @@ class DashboardConfiguration
       excel_worksheet_name:   'ElectricityAnnual',
       charts: %i[
         benchmark_electric_only_£
+        benchmark_electric_only_£_varying_floor_area_pupils
         group_by_week_electricity
         electricity_longterm_trend
         group_by_week_electricity_unlimited
@@ -291,6 +292,7 @@ class DashboardConfiguration
       excel_worksheet_name:   'GasAnnual',
       charts: %i[
         benchmark_gas_only_£
+        benchmark_gas_only_£_varying_floor_area_pupils
         group_by_week_gas
         gas_longterm_trend
         group_by_week_gas_unlimited
@@ -529,6 +531,7 @@ class DashboardConfiguration
       excel_worksheet_name:   'StorageHeaters',
       charts: %i[
         benchmark_storage_heater_only_£
+        benchmark_storage_heater_only_£_varying_floor_area_pupils
         storage_heater_group_by_week
         storage_heater_group_by_week_long_term
         storage_heater_by_day_of_week_tolerant
