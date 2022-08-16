@@ -4,9 +4,9 @@ en:
     adjectives:
       higher: higher
       lower: lower
-      well: well
       ok: ok
       poorly: poorly
+      well: well
     aggregator:
       subttitle: "%{start_date} to %{end_date}"
     chart_configuration:
