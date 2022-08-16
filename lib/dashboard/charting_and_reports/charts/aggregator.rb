@@ -57,7 +57,9 @@ class Aggregator
     xbucketor = multi_school_period_aggregator.results.xbucketor
     if multi_school_period_aggregator.chart_config.daterange_subtitle? &&
        !xbucketor.data_start_date.nil? && !xbucketor.data_end_date.nil?
-       xbucketor.data_start_date.strftime('%e %b %Y') + ' to ' + xbucketor.data_end_date.strftime('%e %b %Y')
+       start_date = xbucketor.data_start_date.strftime('%e %b %Y')
+       end_date = xbucketor.data_end_date.strftime('%e %b %Y')
+       I18n.t('analytics.aggregator.subttitle', start_date: start_date, end_date: end_date, default: nil) || "#{start_date} to #{end_date}"       
     else
       'Internal error: expected subtitle request'
     end
