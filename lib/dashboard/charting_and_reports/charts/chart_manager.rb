@@ -156,10 +156,20 @@ class ChartManager
     end
   end
 
+  def translated_name_for(chart_param)
+    chart_param = chart_param.to_s
+    chart_id = chart_param.split('_drilldown').first
+
+    translated_name = I18n.t("analytics.chart_configuration.#{chart_id}.title", default: nil)
+    return unless translated_name
+
+    drilldown_position = chart_param.scan(/_drilldown/).size
+    translated_name[drilldown_position]
+  end
+
   def configure_graph(aggregator, chart_config, chart_param, calculation_time, provide_advice: true)
     graph_definition = {}
-
-    graph_definition[:title]          = chart_config[:name]
+    graph_definition[:title]          = translated_name_for(chart_param) || chart_config[:name]
 
     graph_definition[:x_axis]         = aggregator.x_axis
     graph_definition[:x_axis_ranges]  = aggregator.x_axis_bucket_date_ranges
