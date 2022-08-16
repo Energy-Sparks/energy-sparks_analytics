@@ -1,4 +1,5 @@
 require 'simplecov'
+require 'pry'
 SimpleCov.start do
   add_group "Models", "app/models"
   add_group "Services", "app/services"

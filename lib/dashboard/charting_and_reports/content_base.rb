@@ -50,6 +50,7 @@ class ContentBase
     formatted_template_variables(:html)
   end
 
+  #only called via the test framework
   def format_variables_as_html
     scalars, tables = variable_list(true, :html, true)
 
@@ -183,9 +184,17 @@ class ContentBase
   end
 
   def front_end_template_data
+    #flatten list of variable names, to ignore groups
     lookup = flatten_template_variables
+
+    #generate hash of unformatted variable values
     raw_data = raw_template_variables
+
+    #generate formatted template variable values
     list = text_template_variables.reject { |type, _value| [:chart, :table, TrueClass].include?(lookup[type][:units]) }
+
+    #generates high/low value versions of some variables
+    #e.g. end up with capital_cost, capital_cost_low, capital_cost_high
     list.merge(convert_range_template_data_to_high_low(list, lookup, raw_data))
   end
 
@@ -233,6 +242,8 @@ class ContentBase
     v1 / v2
   end
 
+  #For variables that indicate a range, then generate _high and _low value versions
+  #of the template data
   private def convert_range_template_data_to_high_low(template_data, lookup, raw_data)
     new_data = {}
     template_data.each do |type, data| # front end want ranges as seperate high/low symbol-value pairs
@@ -250,6 +261,7 @@ class ContentBase
     new_data
   end
 
+  #only used via test framework
   def raw_variables_for_saving
     raw = {}
     unformatted_template_variables.each do |type, data|
@@ -350,7 +362,12 @@ class ContentBase
     [10.0 * [(actual_value - bad_value) / (good_value - bad_value), 0.0].max, 10.0].min.round(1)
   end
 
+  #this is called multiple times during life-time so cache the results
   protected def flatten_template_variables
+    @flattened_variables ||= create_flattened_variables
+  end
+
+  private def create_flattened_variables
     list = {}
     self.class.template_variables.each do |_group_name, variable_group|
       variable_group.each do |type, data|
