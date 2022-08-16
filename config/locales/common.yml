@@ -4,7 +4,7 @@ en:
     energy_units:
       accounting_cost: "£"
       bev_car: km
-      boiler_start_time: boiler start time
+      boiler_start_time: boiler start time [analytics]
       carnivore_dinner: dinners
       co2: kg CO2
       co2t: tonnes CO2

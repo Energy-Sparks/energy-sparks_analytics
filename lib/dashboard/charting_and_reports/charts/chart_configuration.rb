@@ -13,7 +13,10 @@ class ChartManager
   end
 
   def self.translated_title_for(configuration_key, options: {}, drilldown_position: 0)
-    title = I18n.t("chart_data.chart_config.#{configuration_key}.title", options.merge(default: nil))
+    # title = I18n.t("chart_data.chart_config.#{configuration_key}.title", options.merge(default: nil))
+
+    title = I18n.t("chart_config.#{configuration_key}.title", options.merge(default: nil))
+    
 
     return unless title && title.is_a?(Array) && ((title.size - 1) >= drilldown_position)
     

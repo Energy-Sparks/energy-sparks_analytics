@@ -1,0 +1,191 @@
+---
+en:
+  chart_config:
+    pupil_dashboard_electricity_benchmark:
+      title:
+        - How much my school spends on electricity in comparison with other schools (£) [ANALYTICS]
+    activities_school_day_gas_cost:
+      title:
+        - School day gas cost  [ANALYTICS]
+    activities_school_day_electricity_cost:
+      title:
+        - School day electricity cost  [ANALYTICS]
+    adhoc_test_chart:
+      title:
+        - Adhoc chart test  [ANALYTICS]
+    storage_heater_thermostatic:
+      title:
+        - Thermostatic control  [ANALYTICS]
+    storage_heater_by_day_of_week:
+      title:
+        - Storage heater usage by day of the week  [ANALYTICS]
+    storage_heater_group_by_week_long_term:
+      title:
+        - Storage heater electricity consumption over a longer time period  [ANALYTICS]
+    storage_heater_group_by_week:
+      title:
+        - Information on your school’s storage heater electricity consumption  [ANALYTICS]
+    electricity_co2_last_7_days_with_co2_intensity:
+      title:
+        - Variation in the electricity carbon emissions of your school over the last week  [ANALYTICS]
+    electricity_co2_last_year_weekly_with_co2_intensity:
+      title:
+        - The carbon emissions of your school and the carbon intensity of the National Electricity Grid over the last year  [ANALYTICS]
+    pupil_dashboard_solar_pv_monthly:
+      title:
+        - How my school's solar PV panels reduce my school's mains electricity consumption (kWh)  [ANALYTICS]
+        - Impact of Solar PV in your chosen month (in kWh)  [ANALYTICS]
+        - Impact of Solar PV on your chosen day (in kWh)  [ANALYTICS]
+    pupil_dashboard_solar_pv_benchmark:
+      title:
+        - How much my school spends on electricity in comparison with other schools (£)  [ANALYTICS]
+    pupil_dashboard_intraday_line_storage_heaters_last7days:
+      title:
+        - Your school\'s storage heaters use over 7 days (kW)  [ANALYTICS]
+    pupil_dashboard_storage_heaters_longterm_trend_£:
+      title:
+        - Your school's long term storage heaters costs (£). Each bar shows a year's costs.  [ANALYTICS]
+        - Your school's storage heaters costs over a year (in £). Each bar shows a week\'s costs.  [ANALYTICS]
+        - Storage heater costs in your chosen week (in £)  [ANALYTICS]
+        - Storage heater costs on your chosen day (in £)   [ANALYTICS]
+    pupil_dashboard_daytype_breakdown_storage_heaters:
+      title:
+        - When your school used storage heaters over the past year. School day closed is the storage heaters used in the evenings and early mornings during term time.  [ANALYTICS]
+    pupil_dashboard_storage_heaters_benchmark:
+      title:
+        - How much my school spends on storage heating in comparison with other schools (£)   [ANALYTICS]
+    pupil_dashboard_group_by_week_storage_heaters_co2:
+      title:
+        - Your school's carbon emissions from storage heater use over a year (in kg CO2). Each bar shows a week's emissions.   [ANALYTICS]
+        - Storage heater carbon emissions in your chosen week (in kg CO2)   [ANALYTICS]
+        - Storage heater carbon emissions on your chosen day (in kg CO2)    [ANALYTICS]
+    pupil_dashboard_group_by_week_storage_heaters_kwh:
+      title:
+        - Your school's storage heater use over a year (in kWh). Each bar shows a week's use.    [ANALYTICS]
+        - Storage heater use in your chosen week (in kWh)   [ANALYTICS]
+        - Storage heater use on your chosen day (in kWh)   [ANALYTICS]
+    pupil_dashboard_group_by_week_storage_heaters_£:
+      title:
+        - Your school\'s storage heater costs over a year (in £). Each bar shows a week\'s costs.   [ANALYTICS]
+        - Storage heater costs in your chosen week (in £)   [ANALYTICS]
+        - Storage heater costs on your chosen day (in £)   [ANALYTICS]
+    pupil_dashboard_intraday_line_gas_last7days:
+      title:
+        - Your school's gas use over 7 days (kW)  [ANALYTICS]
+    pupil_dashboard_daytype_breakdown_gas:
+      title:
+        - When your school used gas over the past year. School day closed is the gas used in the evenings and early mornings during term time. [ANALYTICS]
+    pupil_dashboard_gas_longterm_trend_£:
+      title:
+        - Your school's long term gas costs (£). Each bar shows a year's costs. [ANALYTICS]
+        - Your school's gas costs over a year (in £). Each bar shows a week's costs. [ANALYTICS]
+        - Gas costs in your chosen week (in £) [ANALYTICS]
+        - Gas costs on your chosen day (in £) [ANALYTICS]
+    pupil_dashboard_gas_benchmark:
+      title:
+        - How much my school spends on gas in comparison with other schools (£) [ANALYTICS]
+    pupil_dashboard_group_by_week_gas_co2:
+      title:
+        - Your school's carbon emissions from gas use over a year (in kg CO2). Each bar shows a week's emissions. [ANALYTICS]
+        - Gas carbon emissions in your chosen week (in kg CO2) [ANALYTICS]
+        - Gas carbon emissions on your chosen day (in kg CO2) [ANALYTICS]
+    pupil_dashboard_group_by_week_gas_£:
+      title:
+        - Your school\'s gas costs over a year (in £). Each bar shows a week\'s costs. [ANALYTICS]
+        - Gas costs in your chosen week (in £) [ANALYTICS]
+        - Gas costs on your chosen day (in £) [ANALYTICS]
+    pupil_dashboard_group_by_week_gas_kwh:
+      title:
+        - Your school's gas use over a year (in kWh). Each bar shows a week's use. [ANALYTICS]
+        - Gas use in your chosen week (in kWh) [ANALYTICS]
+        - Gas use on your chosen day (in kWh) [ANALYTICS]
+    pupil_dashboard_intraday_line_electricity_last7days:
+      title:
+        - Your school\'s electricity use over 7 days (kW) [ANALYTICS]
+    pupil_dashboard_baseload_lastyear:
+      title:
+        - Your school's electricity baseload. This is power used when the school is empty (kW) [ANALYTICS]
+        - Electricity power consumption on your chosen day (in kW) [ANALYTICS]
+    pupil_dashboard_group_by_week_electricity_kwh:
+      title:
+        - Your school's electricity use over a year (in kWh). Each bar shows a week's use [ANALYTICS]
+        - Electricity use in your chosen week (in kWh) [ANALYTICS]
+        - Electricity use on your chosen day (in kWh) [ANALYTICS]
+    pupil_dashboard_electricity_longterm_trend_£:
+      title:
+        - Your school's long term electricity costs (£). Each bar shows a year's costs. [ANALYTICS]
+        - Your school's electricity costs over a year (in £). Each bar shows a week's costs. [ANALYTICS]
+        - Electricity costs in your chosen week (in £) [ANALYTICS]
+        - Electricity costs on your chosen day (in £) [ANALYTICS]
+    pupil_dashboard_electricity_benchmark:
+      title:
+        - How much my school spends on electricity in comparison with other schools (£) [ANALYTICS]
+    pupil_dashboard_group_by_week_electricity_co2:
+      title:
+        - Your school's carbon emissions from electricity use over a year (in kg CO2). Each bar shows a week's emissions. [ANALYTICS]
+        - Electricity carbon emissions in your chosen week (in kg CO2) [ANALYTICS]
+        - Electricity carbon emissions on your chosen day (in kg CO2) [ANALYTICS]
+    pupil_dashboard_daytype_breakdown_gas:
+      title: When your school used gas over the past year. School day closed is the gas used in the evenings and early mornings during term time. [ANALYTICS]
+    pupil_dashboard_group_by_week_electricity_£:
+      title:
+        - Your school's electricity costs over a year (in £). Each bar shows a week's costs. [ANALYTICS]
+        - Electricity costs in your chosen week (in £) [ANALYTICS]
+        - Electricity costs on your chosen day (in £) [ANALYTICS]
+    pupil_dashboard_daytype_breakdown_electricity:
+      title:
+        - When your school used electricity over the past year. School day closed is the electricity used in the evenings and early mornings during term time. [ANALYTICS]
+    benchmark:
+      title:
+        - Annual Electricity and Gas Consumption Comparison with other schools in your region [ANALYTICS]
+    benchmark_co2:
+      title:
+        - School Carbon Emissions from Electricity and Gas Usage [ANALYTICS]
+    last_2_weeks_carbon_emissions:
+      title:
+        - Last 2 weeks carbon emissions at your school from electricity and gas [ANALYTICS]
+    benchmark_electric:
+      title:
+        - Benchmark Comparison (Annual Electricity Consumption) [ANALYTICS]
+    gas_longterm_trend:
+      title:
+        - 'Gas: long term trends' [ANALYTICS]
+    gas_longterm_trend_kwh_with_carbon:
+      title:
+        - Your School Gas Carbon Emissions over the last few years [ANALYTICS]
+    electricity_longterm_trend:
+      title:
+        - 'Electricity: long term trends' [ANALYTICS]
+    electricity_longterm_trend_kwh_with_carbon:
+      title:
+        - Your schools electricity consumption over the last few years [ANALYTICS]
+    daytype_breakdown_gas:
+      title:
+        - 'Breakdown by type of day/time: Gas' [ANALYTICS]
+    alert_daytype_breakdown_storage_heater:
+      title:
+        - 'Breakdown by type of day/time: Storage Heaters' [ANALYTICS]
+    daytype_breakdown_electricity:
+      title:
+        - 'Breakdown by type of day/time: Electricity' [ANALYTICS]
+    group_by_week_electricity:
+      title:
+        - 'By Week: Electricity' [ANALYTICS]
+    group_by_week_electricity_versus_benchmark:
+      title:
+        - 'By Week: Electricity - compared with benchmark' [ANALYTICS]
+    targeting_and_tracking_weekly_electricity_to_date_line:
+      title:
+        - Weekly progress versus target [ANALYTICS]
+    targeting_and_tracking_weekly_electricity_one_year_line:
+      title:
+        - Weekly progress versus target to date [ANALYTICS]
+    targeting_and_tracking_standard_group_by_week_electricity:
+      title:
+        - Standard %{meter_fuel_type} group by week chart (%{total_kwh} kWh) [ANALYTICS]
+    targeting_and_tracking_target_only_group_by_week_electricity:
+      title:
+        - Target only %{meter_fuel_type} group by week chart (%{total_kwh} kWh) [ANALYTICS]
+    targeting_and_tracking_unscaled_target_group_by_week_electricity:
+      title:
+        - Unscaled target %{meter_fuel_type} group by week chart (%{total_kwh} kWh) [ANALYTICS]
