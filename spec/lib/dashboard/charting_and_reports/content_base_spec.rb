@@ -68,7 +68,7 @@ describe ContentBase do
 
   context '#i18n_prefix' do
     it 'returns correct prefix' do
-      expect(CustomAlert.new.i18n_prefix).to eq "custom_alert"
+      expect(CustomAlert.new.i18n_prefix).to eq "analytics.custom_alert"
     end
   end
   context 'when listing variables' do
