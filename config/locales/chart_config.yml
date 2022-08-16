@@ -149,31 +149,31 @@ en:
         - Benchmark Comparison (Annual Electricity Consumption) [ANALYTICS]
     gas_longterm_trend:
       title:
-        - 'Gas: long term trends' [ANALYTICS]
+        - 'Gas: long term trends [ANALYTICS]'
     gas_longterm_trend_kwh_with_carbon:
       title:
         - Your School Gas Carbon Emissions over the last few years [ANALYTICS]
     electricity_longterm_trend:
       title:
-        - 'Electricity: long term trends' [ANALYTICS]
+        - 'Electricity: long term trends [ANALYTICS]'
     electricity_longterm_trend_kwh_with_carbon:
       title:
         - Your schools electricity consumption over the last few years [ANALYTICS]
     daytype_breakdown_gas:
       title:
-        - 'Breakdown by type of day/time: Gas' [ANALYTICS]
+        - 'Breakdown by type of day/time: Gas [ANALYTICS]'
     alert_daytype_breakdown_storage_heater:
       title:
-        - 'Breakdown by type of day/time: Storage Heaters' [ANALYTICS]
+        - 'Breakdown by type of day/time: Storage Heaters [ANALYTICS]'
     daytype_breakdown_electricity:
       title:
-        - 'Breakdown by type of day/time: Electricity' [ANALYTICS]
+        - 'Breakdown by type of day/time: Electricity [ANALYTICS]'
     group_by_week_electricity:
       title:
-        - 'By Week: Electricity' [ANALYTICS]
+        - 'By Week: Electricity [ANALYTICS]'
     group_by_week_electricity_versus_benchmark:
       title:
-        - 'By Week: Electricity - compared with benchmark' [ANALYTICS]
+        - 'By Week: Electricity - compared with benchmark [ANALYTICS]'
     targeting_and_tracking_weekly_electricity_to_date_line:
       title:
         - Weekly progress versus target [ANALYTICS]
