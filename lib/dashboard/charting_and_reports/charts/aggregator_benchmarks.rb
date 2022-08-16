@@ -123,8 +123,8 @@ class AggregatorBenchmarks < AggregatorBase
 
   def scale_by_floor_area(scale_config)
     raise EnergySparksUnexpectedStateException, "Chart configuration scale_by_floor_area setting #{scale_config}" if scale_config[:to] != :to_current_period
-    
-    return unless results[:bucketed_data].include?(scale_config[:buseries_namecket])
+
+    return unless results[:bucketed_data].include?(scale_config[:series_name])
 
     floor_areas = results[:x_axis_bucket_date_ranges].map do |(start_date, end_date)|
       @school.floor_area(start_date, end_date)

@@ -1451,10 +1451,6 @@ module Benchmarking
       )
       ERB.new(text).result(binding)
     end
-
-    def column_index(var_type)
-
-    end
   end
   #=======================================================================================
   class BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek < BenchmarkPeriodChangeBase
