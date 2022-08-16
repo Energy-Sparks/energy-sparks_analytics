@@ -8,6 +8,10 @@ class ContentBase
     @today = ENV['ENERGYSPARKSTODAY'].nil? ? Date.today : Date.parse(ENV['ENERGYSPARKSTODAY'])
   end
 
+  def i18n_prefix
+    self.class.name.underscore
+  end
+
   def relevance
     @relevance
   end

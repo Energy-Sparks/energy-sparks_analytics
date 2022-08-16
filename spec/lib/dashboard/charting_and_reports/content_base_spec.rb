@@ -66,6 +66,11 @@ end
 
 describe ContentBase do
 
+  context '#i18n_prefix' do
+    it 'returns correct prefix' do
+      expect(CustomAlert.new.i18n_prefix).to eq "custom_alert"
+    end
+  end
   context 'when listing variables' do
     describe '#front_end_template_variables' do
       before(:each) do
