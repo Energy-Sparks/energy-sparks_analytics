@@ -79,6 +79,11 @@ module Benchmarking
         This comparison may include COVID lockdown periods which may skew the results.
       </p>
     ),
+    holiday_comparison: %q(
+      <p>
+        
+      </p>
+    ),
     temperature_compensation: %q(
       <p>
         This comparison compares the latest available data for the most recent

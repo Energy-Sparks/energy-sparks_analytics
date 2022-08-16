@@ -1,3 +1,4 @@
+require 'date'
 
 class FloorAreaPupilNumbersBase
   DEFAULT_START_DATE = Date.new(2000, 1, 1)

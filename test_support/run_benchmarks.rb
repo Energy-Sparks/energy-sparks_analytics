@@ -36,7 +36,9 @@ class RunBenchmarks
         asof_date:      Date.new(2022, 1, 20),
         user:          { user_role: :admin }, # { user_role: :analytics, staff_role: nil }, # { user_role: :admin },
         filter:        nil, #->{ addp_area.include?('Bath') } # ->{ addp_area.include?('Sheffield') } # nil || addp_area.include?('Highland') },
+        
       },
+      # pages: [:change_in_gas_holiday_consumption_previous_holiday],
       compare_results: [
         :report_differences,
       ]
@@ -79,8 +81,10 @@ class RunBenchmarks
     composite_tables = []
 
     content_manager = Benchmarking::BenchmarkContentManager.new(config[:asof_date])
-    ap content_manager.structured_pages(user_type: config[:user])
-    content_list = content_manager.available_pages(filter: config[:filter])
+
+    content_list = content_manager.available_pages(filter: config[:filter]) 
+
+    content_list = content_list.select { |t, _c| @control[:pages].include?(t) } unless @control[:pages].nil? || @control[:pages].empty?
 
     content_list.each do |page_name, description|
       puts "Doing: #{page_name} : #{description}"

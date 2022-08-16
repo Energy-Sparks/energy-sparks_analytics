@@ -57,6 +57,10 @@ module Benchmarking
         addp_area.nil? ? '?' : addp_area.split(' ')[0]
       end
 
+      def partial(holiday_name, partial)
+        partial ? holiday_name + '(partial)' : holiday_name
+      end
+
       def school_name
         addp_name
       end
@@ -191,7 +195,7 @@ module Benchmarking
     end
 
     def nan_to_infinity(v)
-      v.nan? ? Float::INFINITY : v
+      v.is_a?(Float) && v.nan? ? Float::INFINITY : v
     end
 
     def format_table(table_definition, rows, medium)
@@ -365,7 +369,7 @@ module Benchmarking
 
     def calculate_min_x_value(x_data, config)
       min_x_value = config[:min_x_value]
-      
+
       return nil if min_x_value.nil?
 
       ap x_data
@@ -377,7 +381,7 @@ module Benchmarking
 
     def calculate_max_x_value(x_data, config)
       max_x_value = config[:max_x_value]
-      
+
       return nil if max_x_value.nil?
 
       max_chart_value = x_data.values.map { |vals| strip_nan(vals).compact.max }.compact.max
@@ -387,7 +391,7 @@ module Benchmarking
     end
 
     def strip_nan(arr)
-      arr.reject { |v| v.nan? }
+      arr.reject { |v| v.nil? || !v.is_a?(Float) || v.nan? }
     end
 
     def create_y2_data(config, table, chart_column_numbers, chart_columns_definitions)
