@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
   s.authors     = ['Philip Haile']
   # s.files         = `git ls-files`.split("\n")
   # s.test_files    = `git ls-files -- rspec/*`.split("\n")
-  s.files = ['config/locales/chart_config_analytics.yml']
   s.require_paths = ["lib"]
   s.required_ruby_version = '>= 2.5.0'
 
