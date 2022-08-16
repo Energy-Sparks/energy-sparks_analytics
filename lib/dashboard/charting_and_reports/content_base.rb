@@ -320,7 +320,7 @@ class ContentBase
     text_template_variables.select { |type, _value| lookup[type][:units] == var_type }
   end
 
-  # returns :enough, :not_enough, :minimum_might_not_be_qaccurate
+  # returns :enough, :not_enough, :minimum_might_not_be_accurate
   # depending on whether there is enough data to provide the alert
   def enough_data
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for enough_data template variable ' + self.class.name)
