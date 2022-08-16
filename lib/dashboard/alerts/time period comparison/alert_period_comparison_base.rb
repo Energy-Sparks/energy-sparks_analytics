@@ -72,7 +72,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
       name_of_previous_period:    { description: 'name of previous period',         units: String, benchmark_code: 'pper' },
-
+      
       current_period_average_kwh:  { description: 'Current period average daily kwh', units:  { kwh: fuel_type } },
       previous_period_average_kwh: { description: 'Previous period average adjusted daily',    units:  { kwh: fuel_type } },
 
@@ -174,8 +174,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @name_of_current_period     = current_period_name(current_period)
     @current_period_average_kwh = @current_period_kwh / @days_in_current_period
 
-    @previous_period_kwh          = previous_period_data[:kwh]
-    @previous_period_£            = previous_period_data[:£]
+    @previous_period_kwh          = previous_period_data[:kwh] * pupil_floor_area_adjustment
+    @previous_period_£            = previous_period_data[:£] * pupil_floor_area_adjustment
     @previous_period_start_date   = previous_period.start_date
     @previous_period_end_date     = previous_period.end_date
     @days_in_previous_period      = previous_period.days
@@ -257,6 +257,14 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def fuel_type
     raise EnergySparksAbstractBaseClass, "Error: fuel_type method not implemented for #{self.class.name}"
+  end
+
+  def pupil_floor_area_adjustment
+    if fuel_type == :gas
+      @current_floor_area / @previous_floor_area
+    else
+      @current_period_pupils / @previous_period_pupils
+    end
   end
 
   def configure_models(_asof_date)

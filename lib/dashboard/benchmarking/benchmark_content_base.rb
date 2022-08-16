@@ -146,17 +146,21 @@ module Benchmarking
       chart_results.nil? || !chart_results[:x_data].values.any?{ |data| !data.all?(&:nil?) }
     end
 
-    def extract_useful_aggregate_table_data(table, column_ids)
-      table.drop(1).map do |row| # skip header row|
+    def extract_useful_aggregate_table_data_deprecated(table_with_header, column_ids)
+      table_with_header.drop(1).map do |row| # skip header row|
         table_extract_aggregate_row_data(row, column_ids)
       end.compact
     end
 
     def table_extract_aggregate_row_data(row, column_ids)
       column_ids.map do |column_id|
-        col_index = @chart_table_config[:columns].index { |v| v[:column_id] == column_id }
-        row[col_index]
-      end
+        col_index = table_column_index(column_id)
+        col_index.nil? ? nil : row[col_index]
+      end.compact
+    end
+
+    def table_column_index(column_id)
+      @chart_table_config[:columns].index { |v| v[:column_id] == column_id }
     end
   end
 end

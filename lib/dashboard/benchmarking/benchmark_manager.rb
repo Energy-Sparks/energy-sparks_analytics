@@ -25,6 +25,10 @@ module Benchmarking
         arr.compact.empty? ? nil : arr.compact[0]
       end
 
+      def referenced(name, ref, number = 1)
+        ref ? "#{name} (*#{number})" : name
+      end
+
       # helper function for config lamda, only sums
       # where corresponding components are non nil
       def paired_sum(data1, data2)
