@@ -59,10 +59,6 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
     calculator.one_years_data? ? :enough : :not_enough
   end
 
-  def timescale
-    'over the last year'
-  end
-
   def analysis_description
     'Seasonal variation in baseload'
   end

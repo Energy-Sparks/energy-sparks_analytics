@@ -235,6 +235,7 @@ class AlertAnalysisBase < ContentBase
     valid_content? && meter_readings_up_to_date_enough?
   end
 
+  #unused method?
   def self.print_all_formatted_template_variable_values
     puts 'Available variables and values:'
     self.template_variables.each do |group_name, variable_group|

@@ -9,7 +9,7 @@ class ContentBase
   end
 
   def i18n_prefix
-    self.class.name.underscore
+    "analytics.#{self.class.name.underscore}"
   end
 
   def relevance

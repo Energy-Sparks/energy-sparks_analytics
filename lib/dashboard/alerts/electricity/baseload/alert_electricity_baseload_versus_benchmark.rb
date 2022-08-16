@@ -170,14 +170,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
     :alert_1_year_baseload
   end
 
-  def timescale
-    'last year'
-  end
-
   def commentary
     [ { type: :html,  content: evaluation_html } ]
   end
-  
+
   def evaluation_html
     text = %(
               <% if average_baseload_last_year_kw < benchmark_per_pupil_kw %>
@@ -185,7 +181,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
                 <%= format_kw(average_baseload_last_year_kw) %> compared with a
                 well managed school of a similar size's
                 <%= format_kw(benchmark_per_pupil_kw) %> and
-                an examplar schools's 
+                an examplar schools's
                 <%= FormatEnergyUnit.format(:kw, @exemplar_per_pupil_kw) %>,
                 but there should still be opportunities to improve further.
               <% else %>
@@ -226,8 +222,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
 
     @one_year_saving_versus_benchmark_kwh = @average_baseload_last_year_kwh - @one_year_benchmark_by_pupil_kwh
     @one_year_saving_versus_benchmark_£   = @one_year_saving_versus_benchmark_kwh * electricity_tariff
-    @one_year_saving_versus_benchmark_co2 = @one_year_saving_versus_benchmark_kwh * blended_co2_per_kwh  
-    @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'
+    @one_year_saving_versus_benchmark_co2 = @one_year_saving_versus_benchmark_kwh * blended_co2_per_kwh
+    @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? I18nHelper.adjective('higher') : I18nHelper.adjective('lower')
 
     @exemplar_per_pupil_kw = BenchmarkMetrics.exemplar_baseload_for_pupils(pupils(asof_date - 365, asof_date), school_type)
 
@@ -238,7 +234,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
     @one_year_saving_versus_exemplar_kwh  = @average_baseload_last_year_kwh - @one_year_exemplar_by_pupil_kwh
     @one_year_saving_versus_exemplar_£    = @one_year_saving_versus_exemplar_kwh * electricity_tariff
     @one_year_saving_versus_exemplar_co2  = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
-    @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? 'higher' : 'lower'
+    @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? I18nHelper.adjective('higher') : I18nHelper.adjective('lower')
 
     @one_year_baseload_per_pupil_kw        = @average_baseload_last_year_kw   / pupils(asof_date - 365, asof_date)
     @one_year_baseload_per_pupil_kwh       = @average_baseload_last_year_kwh  / pupils(asof_date - 365, asof_date)
@@ -268,10 +264,9 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
 
   def summary_text
     if @one_year_saving_versus_exemplar_£ > 0
-      'Your baseload is high, reducing it could save ' +
-      FormatEnergyUnit.format(:£, @one_year_saving_versus_exemplar_£, :text) + 'pa'
+      I18n.t("#{i18n_prefix}.summary.high", saving: FormatEnergyUnit.format(:£, @one_year_saving_versus_exemplar_£, :text))
     else
-      'You are doing well - you are an exemplar school'
+      I18n.t("#{i18n_prefix}.summary.ok")
     end
   end
 

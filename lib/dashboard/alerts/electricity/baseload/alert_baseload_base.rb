@@ -25,6 +25,10 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
     end.to_h
   end
 
+  def timescale
+    I18n.t("#{i18n_prefix}.timescale")
+  end
+
   def commentary
     [ { type: :html,  content: 'No advice yet' } ]
   end

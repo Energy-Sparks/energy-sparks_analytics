@@ -1,0 +1,11 @@
+---
+en:
+  analytics:
+    day_names:
+    - Sunday
+    - Monday
+    - Tuesday
+    - Wednesday
+    - Thursday
+    - Friday
+    - Saturday

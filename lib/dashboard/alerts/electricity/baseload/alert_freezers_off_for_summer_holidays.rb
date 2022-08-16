@@ -88,7 +88,7 @@ class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
   }.freeze
 
   def timescale
-    'at least one summer holiday'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def summer_holiday_analysis_table_html
@@ -122,10 +122,9 @@ class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
 
   def summary_text
     if @annualised_reduction_£ > 0
-      'You have the potential to save ' +
-      FormatEnergyUnit.format(:£, @annualised_reduction_£, :text) + 'pa from more efficient refrigeration'
+      I18n.t("#{i18n_prefix}.summary.high", saving: FormatEnergyUnit.format(:£, @annualised_reduction_£, :text))
     else
-      'Either you don\'t switch your firdges off over summer or they are very efficient'
+      I18n.t("#{i18n_prefix}.summary.ok")
     end
   end
 
@@ -137,7 +136,7 @@ class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
 
     years_no_drop = years_without_significant_drop(years_data)
     @turn_off_rating = calculate_rating_from_range(0, RATING_BASED_ON_YEARS_DATA, years_no_drop.length)
-    
+
     average_drop_value_£(years_data)
     @reduction_rating = calculate_rating_from_range(0, INEFFICIENT_APPLIANCES_KW, @reduction_kw)
   end
@@ -176,16 +175,16 @@ class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
 
   def format_for_table(value, unit, medium)
     return value if medium == :raw || unit == String
-    FormatEnergyUnit.format(unit, value, medium, false, true) 
+    FormatEnergyUnit.format(unit, value, medium, false, true)
   end
-  
+
   def summer_holiday_data
     @analysis_results ||= analysis_periods.map do |period_around_summer_holiday|
       @fridge_analysis.attempt_to_detect_refrigeration_being_turned_off_over_summer_holidays(period_around_summer_holiday, -MINIMUM_SUMMER_DROP_KW)
     end
   end
-  
+
   def summer_holidays_with_drop
-    summer_holiday_data.select{ |result| result[:change_in_baseload_kw] < -MINIMUM_SUMMER_DROP_KW } 
+    summer_holiday_data.select{ |result| result[:change_in_baseload_kw] < -MINIMUM_SUMMER_DROP_KW }
   end
 end
