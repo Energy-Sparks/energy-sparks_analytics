@@ -36,8 +36,8 @@ jobs:
     - name: Run tests
       run: bundle exec rspec
 
-#    - name: Run adult dashboard tests
-#      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/standard_test.rb
+    - name: Run adult dashboard tests
+      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/standard_test.rb
 
     - name: Run adult dashboard tests
       run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_adult_dashboard.rb
