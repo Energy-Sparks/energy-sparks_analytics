@@ -35,10 +35,21 @@ jobs:
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     - name: Run tests
       run: bundle exec rspec
+#    - name: Run adult dashboard tests
+#      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/standard_test.rb
     - name: Run adult dashboard tests
       run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_adult_dashboard.rb
     - name: Run alert tests
       run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_alerts.rb
+    - name: Run alert heating off forcast scenarios tests
+      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_alerts_heating_off_forecast_scenarios.rb
+#    - name: Run all test
+#      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_all
+    - name: Run all short test
+      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_all_short.rb
+    - name: Run benchmarks tests
+      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_benchmarks.rb
+      
     - name: Upload test artifacts
       uses: actions/upload-artifact@v3
       with:
