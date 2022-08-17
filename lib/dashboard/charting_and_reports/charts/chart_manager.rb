@@ -156,10 +156,34 @@ class ChartManager
     end
   end
 
+  def translated_name_for(chart_param)
+    chart_param = chart_param.to_s
+    chart_id = chart_id_for(chart_param)
+
+    translated_titles = translated_titles_for(chart_id)
+    return unless translated_titles
+
+    drilldown_level = drilldown_level_for(chart_param)
+
+    return unless drilldown_level <= translated_titles.size
+    translated_titles[drilldown_level]
+  end
+
+  def drilldown_level_for(chart_param)
+    chart_param.scan(/_drilldown/).size
+  end
+
+  def translated_titles_for(chart_id)
+    I18n.t("analytics.chart_configuration.#{chart_id}.title", default: nil)
+  end
+
+  def chart_id_for(chart_param)
+    chart_param.split('_drilldown').first
+  end
+
   def configure_graph(aggregator, chart_config, chart_param, calculation_time, provide_advice: true)
     graph_definition = {}
-
-    graph_definition[:title]          = chart_config[:name]
+    graph_definition[:title]          = translated_name_for(chart_param) || chart_config[:name]
 
     graph_definition[:x_axis]         = aggregator.x_axis
     graph_definition[:x_axis_ranges]  = aggregator.x_axis_bucket_date_ranges
