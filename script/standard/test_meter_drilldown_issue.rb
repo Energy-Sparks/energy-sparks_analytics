@@ -2,10 +2,10 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
-module Logging
-  @logger = Logger.new('log/meter-drilldown ' + Time.now.strftime('%H %M') + '.log')
-  @logger.level = :debug # :debug
-end
+# module Logging
+#   @logger = Logger.new('log/meter-drilldown ' + Time.now.strftime('%H %M') + '.log')
+#   @logger.level = :debug # :debug
+# end
 
 def run_drilldowns(school, chart_name, column_drilldown_numbers, max_drilldowns)
   chart_manager = ChartManager.new(school)

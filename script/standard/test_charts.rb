@@ -2,10 +2,10 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
-module Logging
-  @logger = Logger.new(File.join('log', 'test charts.log'))
-  logger.level = :error
-end
+# module Logging
+#   @logger = Logger.new(File.join('log', 'test charts.log'))
+#   logger.level = :error
+# end
 
 charts = {
   bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]

@@ -5,10 +5,10 @@ require_rel '../../test_support'
 
 ENV['ENERGYSPARKSMETERCOLLECTIONDIRECTORY'] +=  '\\Community'
 
-module Logging
-  @logger = Logger.new('log/chart-y_axis_manipulation ' + Time.now.strftime('%H %M') + '.log')
-  @logger.level = :debug # :debug
-end
+# module Logging
+#   @logger = Logger.new('log/chart-y_axis_manipulation ' + Time.now.strftime('%H %M') + '.log')
+#   @logger.level = :debug # :debug
+# end
 
 school_name_pattern_match = ['king-j*']
 source_db = :unvalidated_meter_data

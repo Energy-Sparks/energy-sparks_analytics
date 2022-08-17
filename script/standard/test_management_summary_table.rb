@@ -4,10 +4,10 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 require './script/report_config_support.rb'
 
-module Logging
-  @logger = Logger.new(File.join('log', 'management summary table.log'))
-  logger.level = Logger::DEBUG
-end
+# module Logging
+#   @logger = Logger.new(File.join('log', 'management summary table.log'))
+#   logger.level = Logger::DEBUG
+# end
 
 overrides = {
   schools:  ['[m-z]*'],

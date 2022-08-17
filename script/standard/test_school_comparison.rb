@@ -4,10 +4,10 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
-module Logging
-  @logger = Logger.new('log/test-dashboard ' + Time.now.strftime('%H %M') + '.log')
-  logger.level = :debug
-end
+# module Logging
+#   @logger = Logger.new('log/test-dashboard ' + Time.now.strftime('%H %M') + '.log')
+#   logger.level = :debug
+# end
 
 reports = ReportConfigSupport.new
 

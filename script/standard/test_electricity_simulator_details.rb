@@ -4,10 +4,10 @@ require_relative '../lib/dashboard.rb'
 require_rel '../test_support'
 require './script/report_config_support.rb'
 
-module Logging
-  @logger = Logger.new('log/test-electricity-simulator.log')
-  logger.level = :warn
-end
+# module Logging
+#   @logger = Logger.new('log/test-electricity-simulator.log')
+#   logger.level = :warn
+# end
 
 puts "========================================================================================"
 puts  "electrical simulation"
