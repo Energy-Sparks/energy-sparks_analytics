@@ -38,7 +38,8 @@ jobs:
       run: bundle exec rspec
     - name: Run standard test and archive test artifacts
       run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/standard_test.rb
-      uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v3
       with:
-        path: |
-          test_output
+        name: Standard test artifacts
+        path: test_output
+
