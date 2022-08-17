@@ -2,6 +2,64 @@ require 'spec_helper'
 
 describe ChartManager do
 
+  describe '#translated_titles_for' do
+    let(:chart_name)    { :benchmark }
+    let(:chart_config)  { ChartManager::STANDARD_CHART_CONFIGURATION[chart_name] }
+    let(:school)        { nil }
+    let(:chart_manager) { ChartManager.new(school) }
+
+    it 'returns an array of translated titles (main and drilldown) for a given chart config key' do
+      expect(chart_manager.translated_titles_for('benchmark')).to eq(['Annual Electricity and Gas Consumption Comparison with other schools in your region'])
+      expect(chart_manager.translated_titles_for('pupil_dashboard_group_by_week_electricity_kwh')).to eq(["Your school's electricity use over a year (in kWh). Each bar shows a week's use", "Electricity costs in your chosen week (in £)", "Electricity costs on your chosen day (in £)"])
+    end
+  end
+
+  describe '#translated_name_for' do
+    let(:chart_name)    { :benchmark }
+    let(:chart_config)  { ChartManager::STANDARD_CHART_CONFIGURATION[chart_name] }
+    let(:school)        { nil }
+    let(:chart_manager) { ChartManager.new(school) }
+
+    it 'returns an array of translated titles (main and drilldown) for a given chart config key' do
+      expect(chart_manager.translated_name_for('benchmark')).to eq('Annual Electricity and Gas Consumption Comparison with other schools in your region')
+      expect(chart_manager.translated_name_for('pupil_dashboard_group_by_week_electricity_kwh')).to eq("Your school's electricity use over a year (in kWh). Each bar shows a week's use")
+      expect(chart_manager.translated_name_for('pupil_dashboard_group_by_week_electricity_kwh_drilldown')).to eq("Electricity costs in your chosen week (in £)")
+      expect(chart_manager.translated_name_for('pupil_dashboard_group_by_week_electricity_kwh_drilldown_drilldown')).to eq("Electricity costs on your chosen day (in £)")
+      expect(chart_manager.translated_name_for('pupil_dashboard_group_by_week_electricity_kwh_drilldown_drilldown_drilldown')).to eq(nil)
+      expect(chart_manager.translated_name_for('this_config_key_does_not_exist_drilldown_drilldown')).to eq(nil)
+      expect(chart_manager.translated_name_for('this_config_key_does_not_exist_drilldown')).to eq(nil)
+      expect(chart_manager.translated_name_for('this_config_key_does_not_exist')).to eq(nil)
+    end
+  end
+
+  describe '#drilldown_level_for' do
+    let(:chart_name)    { :benchmark }
+    let(:chart_config)  { ChartManager::STANDARD_CHART_CONFIGURATION[chart_name] }
+    let(:school)        { nil }
+    let(:chart_manager) { ChartManager.new(school) }
+
+    it 'returns the drilldown level for a chart parameter' do
+      expect(chart_manager.drilldown_level_for('benchmark')).to eq(0)
+      expect(chart_manager.drilldown_level_for('benchmark_drilldown')).to eq(1)
+      expect(chart_manager.drilldown_level_for('benchmark_drilldown_drilldown')).to eq(2)
+      expect(chart_manager.drilldown_level_for('benchmark_drilldown_drilldown_drilldown')).to eq(3)
+    end
+  end
+
+  describe '#chart_id_for' do
+    let(:chart_name)    { :benchmark }
+    let(:chart_config)  { ChartManager::STANDARD_CHART_CONFIGURATION[chart_name] }
+    let(:school)        { nil }
+    let(:chart_manager) { ChartManager.new(school) }
+
+    it 'returns the top level chart_id for a chart_param by removing any _drilldown text' do
+      expect(chart_manager.chart_id_for('benchmark')).to eq('benchmark')
+      expect(chart_manager.chart_id_for('benchmark_drilldown')).to eq('benchmark')
+      expect(chart_manager.chart_id_for('benchmark_drilldown_drilldown')).to eq('benchmark')
+      expect(chart_manager.chart_id_for('benchmark_drilldown_drilldown_drilldown')).to eq('benchmark')
+    end
+  end
+
   context '#build_chart_config' do
     let(:chart_name)   { :benchmark }
     let(:chart_config) { ChartManager::STANDARD_CHART_CONFIGURATION[chart_name] }
