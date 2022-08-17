@@ -2,10 +2,10 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 
-module Logging
-  @logger = Logger.new(File.join('log', 'logs.log'))
-  logger.level = :error
-end
+# module Logging
+#   @logger = Logger.new(File.join('log', 'logs.log'))
+#   logger.level = :error
+# end
 
 asof_date = Date.new(2022, 7, 29)
 schools = ['*']

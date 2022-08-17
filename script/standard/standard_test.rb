@@ -2,9 +2,9 @@ require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_all './test_support/'
 
-module Logging
-  logger.level = :debug
-end
+# module Logging
+#   logger.level = :debug
+# end
 
 schools = [
   { name: 'cefn-hengoed*',          example_of: 'multiple solar production meters' },

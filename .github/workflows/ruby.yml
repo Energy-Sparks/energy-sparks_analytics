@@ -45,4 +45,3 @@ jobs:
         name: analytics-test-artifacts
         path: |
           test_output
-          log
