@@ -16,6 +16,7 @@ schools = [
   { name: 'newcastle-high*senior*', example_of: 'school with many meters' },
   { name: 'pennyland*',             example_of: 'school with multiple storage heater meters' },
   { name: 'ph-school*',             example_of: 'DCC school with differential tariffs' },
+  { name: 'acme-academy*',          example_of: 'Github actions test data' }
 ]
 
 overrides = { 
