@@ -47,6 +47,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :summary, :prefix_1, :prefix_2
   attr_reader :current_period_floor_area, :previous_period_floor_area, :floor_area_changed
   attr_reader :current_period_pupils, :previous_period_pupils, :pupils_changed
+  attr_reader :calculation_issue, :truncated_current_period
 
   def self.dynamic_template_variables(fuel_type)
     vars = {
@@ -72,7 +73,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
       name_of_previous_period:    { description: 'name of previous period',         units: String, benchmark_code: 'pper' },
-      
+
       current_period_average_kwh:  { description: 'Current period average daily kwh', units:  { kwh: fuel_type } },
       previous_period_average_kwh: { description: 'Previous period average adjusted daily',    units:  { kwh: fuel_type } },
 
@@ -220,6 +221,23 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   end
   alias_method :analyse_private, :calculate
 
+  private def calculate_calculation_issue(current_kwh, previous_kwh)
+    if current_kwh.zero? && previous_kwh.zero?
+      "No consumption during both #{period_type}s"
+    elsif previous_kwh.zero?
+      "No consumption during previous #{period_type}"
+    elsif current_kwh.zero?
+      "No consumption during most recent #{period_type}"
+    else
+      nil
+    end
+  end
+
+  private def calc_percent_difference(difference_kwh, previous_period_kwh)
+    return 0.0 if difference_kwh.zero? && previous_period_kwh.zero?
+    difference_kwh / previous_period_kwh
+  end
+
   def self.equivalence_template_variables
     additional_vars = [
       {
@@ -268,7 +286,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def pupil_floor_area_adjustment
     if fuel_type == :gas
-      @current_floor_area / @previous_floor_area
+      @current_period_floor_area / @previous_period_floor_area
     else
       @current_period_pupils / @previous_period_pupils
     end
@@ -414,7 +432,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def enough_periods_data(asof_date)
     current_period, previous_period = last_two_periods(asof_date)
-    !current_period.nil? && !previous_period.nil? 
+    !current_period.nil? && !previous_period.nil?
   end
 
   def enough_days_in_period(period, asof_date)
@@ -485,4 +503,5 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
   protected def previous_period_name(previous_period); period_name(previous_period) end
 
   protected def period_name(period); period.type.to_s.humanize end
+
 end
