@@ -2,10 +2,17 @@
 en:
   analytics:
     adjectives:
+      about: about
+      above: above
+      below: below
       higher: higher
+      just_above: just above
+      just_below: just below
       lower: lower
       ok: ok
       poorly: poorly
+      significantly_above: significantly above
+      significantly_below: significantly below
       well: well
     aggregator:
       subttitle: "%{start_date} to %{end_date}"
