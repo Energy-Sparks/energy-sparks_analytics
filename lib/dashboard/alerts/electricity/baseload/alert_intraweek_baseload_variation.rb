@@ -78,10 +78,6 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     'Variation in baseload between days of week'
   end
 
-  def timescale
-    'over the last year'
-  end
-
   def commentary
     charts_and_html = []
     charts_and_html.push( { type: :html,  content: evaluation_html } )
@@ -123,15 +119,13 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
     days_kw = calculator.average_intraweek_schoolday_kw(asof_date)
 
-    day_strs = %w[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]
-
     @min_day_kw = days_kw.values.min
     min_day = days_kw.key(@min_day_kw)
-    @min_day_str = day_strs[min_day]
+    @min_day_str = I18nHelper.day_name(min_day)
 
     @max_day_kw = days_kw.values.max
     max_day = days_kw.key(@max_day_kw)
-    @max_day_str = day_strs[max_day]
+    @max_day_str = I18nHelper.day_name(max_day)
 
     @percent_intraday_variation = (@max_day_kw - @min_day_kw) / @min_day_kw
 
@@ -174,11 +168,11 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
   def calculate_adjective
     if rating > 7
-      'well'
+      I18nHelper.adjective('well')
     elsif rating > 4
-      'ok'
+      I18nHelper.adjective('ok')
     else
-      'poorly'
+      I18nHelper.adjective('poorly')
     end
   end
 end

@@ -2,6 +2,7 @@
 require_relative '../alert_electricity_only_base.rb'
 
 class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
+
   MAXBASELOADCHANGE = 1.15
 
   attr_reader :average_baseload_last_year_kw, :average_baseload_last_week_kw
@@ -122,12 +123,8 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
     days_amr_data > 6 * 7 ? :enough : (days_amr_data > 3 * 7 ? :minimum_might_not_be_accurate : :not_enough)
   end
 
-  def timescale
-    'last week compared with average over last year'
-  end
-
   def analysis_description
-    'Recent change in baseload'
+    I18n.t("#{i18n_prefix}.analysis_description")
   end
 
   def commentary

@@ -20,4 +20,12 @@ class Adjective
     found = range_to_adjective_map.keys.find { |range| value.between?(range.first, range.last) }
     range_to_adjective_map[found]
   end
+
+  def self.adjective_for(result, greater_than_value = 0.0)
+    if result > greater_than_value
+      I18nHelper.adjective('higher')
+    else
+      I18nHelper.adjective('lower')
+    end
+  end
 end

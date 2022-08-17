@@ -1,6 +1,12 @@
 ---
 en:
   analytics:
+    adjectives:
+      higher: higher
+      lower: lower
+      ok: ok
+      poorly: poorly
+      well: well
     aggregator:
       subttitle: "%{start_date} to %{end_date}"
     chart_configuration:
