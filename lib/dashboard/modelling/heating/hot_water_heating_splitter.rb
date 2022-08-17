@@ -9,6 +9,7 @@ class HotWaterHeatingSplitter
   def split_heat_and_hot_water(start_date, end_date, meter: @school.aggregated_heat_meters)
     average_hot_water_only_day_kwh_x48 = average_hot_water_day_x48(start_date, end_date, meter: meter)
     average_hot_water_only_day_kwh = average_hot_water_only_day_kwh_x48.sum
+    heating_day_dates = []
 
     heating_days  = AMRData.create_empty_dataset(:heating,    start_date, end_date)
     hotwater_days = AMRData.create_empty_dataset(:hot_water,  start_date, end_date)
@@ -24,6 +25,7 @@ class HotWaterHeatingSplitter
         heating_days_data_kwh_x48 = remove_hot_water_from_heating_data(date, days_data_kwh_x48, average_hot_water_only_day_kwh_x48)
         heating_day = OneDayAMRReading.new(0, date, 'HSIM', nil, DateTime.now, heating_days_data_kwh_x48)
         heating_days.add(date, heating_day)
+        heating_day_dates.push(date)
       end
     end
 
@@ -36,7 +38,8 @@ class HotWaterHeatingSplitter
       hot_water_only_amr:         hotwater_days,
       average_hot_water_day_kwh:  average_hot_water_only_day_kwh_x48.sum,
       error_kwh:                  error,
-      error_percent:              error / total
+      error_percent:              error / total,
+      heating_day_dates:          heating_day_dates
     }
   end
 
@@ -157,7 +160,11 @@ class HotWaterHeatingSplitter
       end
     end
 
-    AMRData.fast_multiply_x48_x_scalar(aggregated_hot_water_days, 1.0 / hot_water_days)
+    if hot_water_days.zero?
+      AMRData.one_day_zero_kwh_x48
+    else
+      AMRData.fast_multiply_x48_x_scalar(aggregated_hot_water_days, 1.0 / hot_water_days)
+    end
   end
 
   def calculate_model(start_date, end_date, meter: @school.aggregated_heat_meters)

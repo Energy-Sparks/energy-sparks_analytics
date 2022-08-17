@@ -7,7 +7,7 @@ module Logging
   logger.level = :info
 end
 
-schools = ['*'] # ['king-james-1-community-academy*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
+schools = ['shrewsbury-high*'] # ['king-james-1-community-academy*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
 
 overrides = {
   schools: schools,

@@ -50,6 +50,14 @@ class AggregatorConfig < OpenStruct
     dig(:yaxis_scaling)
   end
 
+  def scale_y_axis?
+    !dig(:scale_y_axis).nil? && dig(:scale_y_axis) != false
+  end
+
+  def scale_y_axis
+    dig(:scale_y_axis)
+  end
+
   def name
     dig(:name)
   end

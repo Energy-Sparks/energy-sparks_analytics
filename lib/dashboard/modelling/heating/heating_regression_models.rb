@@ -637,6 +637,7 @@ module AnalyseHeatingAndHotWater
     HEATINGOCCUPIEDMODEL = :heating_occupied_all_days
     HEATINGWEEKENDMODEL = :weekend_heating
     HEATINGHOLIDAYMODEL = :holiday_heating
+    SCHOOLDAYHEATINGMODELTYPES = [HEATINGOCCUPIEDMODEL]
     HEATINGMODELTYPES = [HEATINGOCCUPIEDMODEL,  HEATINGWEEKENDMODEL, HEATINGHOLIDAYMODEL].freeze
     ALLMODELTYPES = %i[heating_occupied_all_days weekend_heating holiday_heating
                       summer_occupied_all_days holiday_hotwater_only weekend_hotwater_only none].freeze
@@ -663,6 +664,18 @@ module AnalyseHeatingAndHotWater
 
     def all_heating_model_types
       ALLMODELTYPES
+    end
+
+    def winter_heating_model_types
+      SCHOOLDAYHEATINGMODELTYPES
+    end
+
+    def school_day_heating_model?(model_type)
+      winter_heating_model_types.include?(model_type)
+    end
+
+    def includes_school_day_heating_models?
+      @models.keys.any? { |model_type| school_day_heating_model?(model_type) }
     end
 
     def heating_model?(model_type)
@@ -716,10 +729,20 @@ module AnalyseHeatingAndHotWater
         'Days of meter readings'      =>    [(@amr_data.end_date - @amr_data.start_date + 1).to_i, :integer],
         'Model calculation time (ms)' =>    [(@model_calculation_time * 1000.0).to_i, :integer], 
       }
-      @models.each do |model_type, model|
-        results[model_type] = model.configuration
-      end
+
+      results.merge!(regression_model_configuration)
+
       results
+    end
+
+    def regression_model_configuration
+      @models.transform_values do |model|
+        model.configuration
+      end
+    end
+
+    def models?
+      !@models.empty?
     end
 
     # uses a crude optimum start model to work out the benefit of starting the boiler at a good time
@@ -1424,6 +1447,10 @@ module AnalyseHeatingAndHotWater
 
     def heating_model_for_future_date(date)
       holiday?(date) ? HEATINGHOLIDAYMODEL : weekend?(date) ? HEATINGWEEKENDMODEL : school_day_model(date)
+    end
+
+    def winter_heating_model_types
+      SCHOOLDAYHEATINGMODELTYPES
     end
 
     def average_heating_b_kwh_per_1_C_per_day

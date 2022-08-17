@@ -28,7 +28,7 @@ class ChartManager
     # data_types:         an array e.g. [:metereddata, :predictedheat] - assumes :metereddata if not present
     #
     benchmark:  {
-      name:             'Annual Electricity and Gas Consumption Comparison with other schools in your region',
+      name:             'Annual Electricity and Gas Consumption Comparison',
       chart1_type:      :bar,
       chart1_subtype:   :stacked,
       meter_definition: :all,
@@ -37,7 +37,40 @@ class ChartManager
       yaxis_units:      :£,
       restrict_y1_axis: [:£, :co2],
       yaxis_scaling:    :none,
+
       inject:           :benchmark
+    },
+    benchmark_varying_floor_area_pupils: {
+      name:             'Annual Electricity and Gas Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
+      scale_y_axis:     [
+        { number_of_pupils: { to: :to_current_period, series_name: 'electricity' } },
+        { floor_area:       { to: :to_current_period, series_name: 'gas' } },
+      ],
+      inherits_from:    :benchmark,
+    },
+    benchmark_electric_only_£_varying_floor_area_pupils: {
+      name:             'Annual Electricity Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
+      filter:           { fuel: [ 'electricity' ] },
+      scale_y_axis:     [
+        { number_of_pupils: { to: :to_current_period, series_name: 'electricity' } }
+      ],
+      inherits_from:    :benchmark,
+    },
+    benchmark_gas_only_£_varying_floor_area_pupils: {
+      name:             'Annual Gas Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
+      filter:           { fuel: [ 'gas' ] },
+      scale_y_axis:     [
+        { number_of_pupils: { to: :to_current_period, series_name: 'gas' } }
+      ],
+      inherits_from:    :benchmark,
+    },
+    benchmark_storage_heater_only_£_varying_floor_area_pupils: {
+      name:             'Annual Storage Heater Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
+      inherits_from:    :benchmark,
+      filter:           { fuel: [ 'storage heaters' ] },
+      scale_y_axis:     [
+        { number_of_pupils: { to: :to_current_period, series_name: 'storage heaters' } }
+      ],
     },
     benchmark_co2: {
       inherits_from:    :benchmark,
@@ -55,6 +88,7 @@ class ChartManager
       yaxis_units:      :kwh
     },
     benchmark_electric_only_£: {
+      name:             'Annual Electricity Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'electricity' ] },
       yaxis_units:      :£

@@ -25,6 +25,10 @@ module Benchmarking
         arr.compact.empty? ? nil : arr.compact[0]
       end
 
+      def referenced(name, ref, number = 1)
+        ref ? "#{name} (*#{number})" : name
+      end
+
       # helper function for config lamda, only sums
       # where corresponding components are non nil
       def paired_sum(data1, data2)
@@ -82,7 +86,12 @@ module Benchmarking
     def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       create_and_store_school_map(report, today, school_ids, user_type)
       #@school_name_urn_map = school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
-      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, user_type)
+      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, true, user_type)
+    end
+
+    def run_table_including_aggregate_columns(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
+      ignore_aggregate_columns = false
+      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, ignore_aggregate_columns, user_type)
     end
 
     def drilldown_class(report)
@@ -102,7 +111,7 @@ module Benchmarking
       config[:columns].any?{ |column_definition| column_definition.key?(:content_class) }
     end
 
-    def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
+    def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type)
       results = []
       full_config = self.class.chart_table_config(report)
       config = hide_columns(full_config, user_type)
@@ -118,7 +127,7 @@ module Benchmarking
         row  = DatabaseRow.new(school_id, school_data)
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
-        calculated_row = calculate_row(row, config, chart_columns_only, school_id)
+        calculated_row = calculate_row(row, config, chart_columns_only, school_id, ignore_aggregate_columns)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
@@ -128,7 +137,7 @@ module Benchmarking
     end
 
     def school_map(asof_date, school_ids, user_type)
-      schools = run_benchmark_table_private(asof_date, :school_information, school_ids, false, nil, :raw, user_type)
+      schools = run_benchmark_table_private(asof_date, :school_information, school_ids, false, nil, :raw, true, user_type)
       schools.map do |school_data|
         [
           school_data[2],
@@ -424,9 +433,10 @@ module Benchmarking
       row.instance_exec(&filter)
     end
 
-    def calculate_row(row, report, chart_columns_only, school_id)
+    def calculate_row(row, report, chart_columns_only, school_id, ignore_aggregate_columns = true)
       row_data = report[:columns].map do |column_specification|
         next if chart_columns_only && !self.class.chart_column?(column_specification)
+        next if ignore_aggregate_columns && self.class.aggregate_column?(column_specification)
         calculate_value(row, column_specification, school_id)
       end
       { data: row_data, school_id: school_id }

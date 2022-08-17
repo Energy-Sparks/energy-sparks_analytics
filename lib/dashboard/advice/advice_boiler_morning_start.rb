@@ -1,4 +1,4 @@
-class AdviceGasBoilerMorningStart     < AdviceBoilerHeatingBase
+class AdviceGasBoilerMorningStart < AdviceBoilerHeatingBase
 
   def structured_content(user_type: nil)
     puts "Super content override confused"

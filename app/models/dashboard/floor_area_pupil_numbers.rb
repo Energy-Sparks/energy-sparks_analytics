@@ -4,6 +4,8 @@ class FloorAreaPupilNumbersBase
   DEFAULT_START_DATE = Date.new(2000, 1, 1)
   DEFAULT_END_DATE   = Date.new(2050, 1, 1)
 
+  attr_reader :area_pupils_history
+
   def initialize(school_attributes, floor_area_key, pupil_key)
     return if school_attributes.nil?
     @floor_area_key = floor_area_key
@@ -78,6 +80,14 @@ class FloorAreaPupilNumbers < FloorAreaPupilNumbersBase
     @area_pupils_history.nil? ? @floor_area : calculate_weighted_floor_area(start_date, end_date)
   end
 
+  def floor_area_changes?
+    !@area_pupils_history.nil? && floor_area_changes.count > 1
+  end
+
+  def number_of_pupils_changes?
+    !@area_pupils_history.nil? && number_of_pupils_changes.count > 1
+  end
+
   def number_of_pupils(start_date = nil, end_date = nil)
     @area_pupils_history.nil? ? @number_of_pupils : calculate_weighted_number_of_pupils(start_date, end_date)
   end
@@ -107,6 +117,16 @@ class FloorAreaPupilNumbers < FloorAreaPupilNumbersBase
       floor_area:         @floor_area,
       number_of_pupils:   @number_of_pupils
     }
+  end
+
+  private
+
+  def floor_area_changes
+    @area_pupils_history.map { |period| period[@floor_area_key] }.uniq
+  end
+
+  def number_of_pupils_changes
+    @area_pupils_history.map { |period| period[@pupil_key] }.uniq
   end
 end
 

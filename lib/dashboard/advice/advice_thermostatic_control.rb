@@ -1,11 +1,6 @@
 class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
   include Logging
 
-  def enough_data
-    # aggregate_meter.amr_data.days > 364 && valid_model? ? :enough : :not_enough
-    valid_model? ? :enough : :not_enough
-  end
-
   def raw_content(user_type: nil)
     [
       thermostatic_control(user_type: user_type),
@@ -14,14 +9,14 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
     ].flatten.compact
   end
 
-  private
-
-  def heating_model(model_type: :simple_regression_temperature)
+  def default_model
     # use simple_regression_temperature rather than best model for the explanation
     # otherwise the chart is too complicated for most
     # users to understand if the thermally massive model is used
-    @heating_model ||= calculate_heating_model(model_type: model_type)
+    :simple_regression_temperature
   end
+
+  private
 
   def r2
     heating_model.average_heating_school_day_r2

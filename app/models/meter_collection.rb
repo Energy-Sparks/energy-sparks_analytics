@@ -15,7 +15,7 @@ class MeterCollection
   attr_reader :heat_meters, :electricity_meters, :storage_heater_meters
 
   # From school/building
-  attr_reader :floor_area, :number_of_pupils
+  attr_reader :floor_area, :number_of_pupils, :calculated_floor_area_pupil_numbers
 
   # Currently, but not always
   attr_reader :school, :name, :address, :postcode, :country, :funding_status, :urn, :area_name, :model_cache, :default_energy_purchaser
@@ -384,7 +384,7 @@ class MeterCollection
   end
 
   def school_type
-    @school.nil? ? nil : @school.school_type
+    @school.nil? ? nil : @school.school_type.to_sym
   end
 
   def energysparks_start_date

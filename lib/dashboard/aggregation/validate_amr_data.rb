@@ -154,7 +154,7 @@ class ValidateAMRData
       )
     elsif rule.key?(:readings_start_date)
       fix_start_date = rule[:readings_start_date]
-      logger.debug "Fixing start date to #{fix_start_date}"
+      logger.debug "Fixing start date to #{fix_start_date} for #{@meter_id}"
       substitute_data_x48 = @amr_data.one_days_data_x48(fix_start_date)
       @amr_data.add(fix_start_date, OneDayAMRReading.new(meter_id, fix_start_date, 'FIXS', nil, DateTime.now, substitute_data_x48))
       @amr_data.set_start_date(fix_start_date)

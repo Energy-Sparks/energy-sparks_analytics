@@ -413,17 +413,17 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   protected def electric_comparison_regional
-    compare = comparison('electricity', index_of_data('Regional Average'))
-    generate_html(%{ The electricity usage <%= compare %>: }.gsub(/^  /, ''), binding)
+    compare = comparison('electricity', index_of_data(benchmark_school_name))
+    generate_html(%{ The electricity usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
   protected def gas_comparison_regional
-    compare = comparison('gas', index_of_data('Regional Average'))
+    compare = comparison('gas', index_of_data(benchmark_school_name))
     generate_html(%{ The gas usage <%= compare %>: }.gsub(/^  /, ''), binding)
   end
 
-  protected def storage_heater_comparison_regional
-    compare = comparison('storage heaters', index_of_data('Regional Average'))
+  protected def storage_heater_comparison
+    compare = comparison('storage heaters', index_of_data(benchmark_school_name))
     generate_html(%{ The storage heater usage <%= compare %>: }.gsub(/^  /, ''), binding)
   end
 
@@ -531,9 +531,61 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           temperatures and the remainder (all other appliances including lighting and ICT) which is less seasonal.
         </p>
       <% end %>
+      <%= varying_floor_area_explanation %>
+      <%= varying_pupil_numbers_explanation %>
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+  end
+
+  def varying_floor_area_explanation
+    floor_areas = @school.calculated_floor_area_pupil_numbers
+    return nil unless floor_areas.floor_area_changes?
+
+    return nil if actual_gas_usage == 0.0 && actual_storage_heater_usage == 0.0
+
+    cdr = date_range_of_most_recent_school_chart_value
+    weighted_floor_area = @school.floor_area(cdr.first, cdr.last)
+
+    fa_table = FloorAreaTable.new(floor_areas).table_html
+
+    text = %(
+      <p>
+        The floor area of this school has changed over time:
+        <%= fa_table %>
+        For the purposes of this comparison the exemplar and benchmark schools
+        are scaled to an weighted average floor area for the school for the
+        last year to date which was
+        <%= FormatEnergyUnit.format(:m2, weighted_floor_area.round(0), :html) %>.
+      </p>
+    )
+
+    ERB.new(text).result(binding)
+  end
+
+  def varying_pupil_numbers_explanation
+    pupil_numbers = @school.calculated_floor_area_pupil_numbers
+    return nil unless pupil_numbers.number_of_pupils_changes?
+
+    return nil if actual_electricity_usage == 0.0
+
+    cdr = date_range_of_most_recent_school_chart_value
+    weighted_pupil_numbers = @school.number_of_pupils(cdr.first, cdr.last)
+
+    pn_table = PupilNumbersTable.new(pupil_numbers).table_html
+
+    text = %(
+      <p>
+        The number of pupils at this school has changed over time:
+        <%= pn_table %>
+        For the purposes of this comparison with the exemplar and benchmark schools
+        the values on the chart are scaled to an weighted average number of pupils
+        for the school for the last year to date was
+        <%= FormatEnergyUnit.format(:pupils, weighted_pupil_numbers.round(0), :html) %>.
+      </p>
+    )
+
+    ERB.new(text).result(binding)
   end
 
   def energy_usage_intro(fuel, usage, sentence_end = '.')
@@ -560,20 +612,33 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     @chart_data[:x_data][fuel][index]
   end
 
+  def benchmark_school_name
+    AggregatorBenchmarks::benchmark_school_name
+  end
+
+  def exemplar_school_name
+    AggregatorBenchmarks::exemplar_school_name
+  end
+
+  def benchmark_school_name_split_char
+    AggregatorBenchmarks::SCALESPLITCHAR
+  end
+
+
   def average_regional_electricity_usage
-    actual_fuel_usage('electricity', index_of_data('Regional Average'))
+    actual_fuel_usage('electricity', index_of_data(benchmark_school_name))
   end
 
   def average_regional_gas_usage
-    actual_fuel_usage('gas', index_of_data('Regional Average'))
+    actual_fuel_usage('gas', index_of_data(benchmark_school_name))
   end
 
   def exemplar_electricity_usage
-    actual_fuel_usage('electricity', index_of_data('Exemplar School'))
+    actual_fuel_usage('electricity', index_of_data(exemplar_school_name))
   end
 
   def exemplar_gas_usage
-    actual_fuel_usage('gas', index_of_data('Exemplar School'))
+    actual_fuel_usage('gas', index_of_data(exemplar_school_name))
   end
 
   def percent_gas_of_regional_average
@@ -605,11 +670,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     benchmark_usage_£ = FormatEnergyUnit.format(:£, benchmark_from_chart, :html)
 
     if formatted_usage_£ == benchmark_usage_£ # values same in formatted space
-      'is similar to regional schools which spent ' + benchmark_usage_£
+      'is similar to other well managed schools which spent ' + benchmark_usage_£
     elsif usage_from_chart_£ > benchmark_from_chart
-      'is more than similar regional schools which spent ' + benchmark_usage_£
+      'is more than well managed schools which spent ' + benchmark_usage_£
     else
-      'is less than similar regional schools which spent ' + benchmark_usage_£
+      'is less than well managed schools which spent ' + benchmark_usage_£
     end
   end
 
@@ -620,7 +685,9 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def index_of_data(name)
-    @chart_data[:x_axis].find_index(name)
+    @chart_data[:x_axis].find_index do |v|
+      v.include?(name)
+    end
   end
 
   def index_of_most_recent_date
@@ -629,12 +696,17 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     dr.find_index(last_date)
   end
 
+  def date_range_of_most_recent_school_chart_value
+    date_range.compact.sort { |a, b| a.first <=> b.first }.last
+  end
+
   def date_range
     @chart_data[:x_axis].map do |bar_name|
-      if ['Exemplar School', 'Regional Average', 'National Average'].include?(bar_name)
+      first_part_bar_name = bar_name.split(benchmark_school_name_split_char).first
+      if [exemplar_school_name, benchmark_school_name].include?(first_part_bar_name)
         nil
       else
-        date1, date2 = bar_name.split(' to ')
+        date1, date2 = first_part_bar_name.split(' to ')
         Date.parse(date1)..Date.parse(date2)
       end
     end
@@ -690,9 +762,9 @@ class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
     if formatted_usage_kwh == benchmark_usage_kwh # values same in formatted space
       'is similar to regional schools which spent ' + benchmark_usage_kwh
     elsif usage_from_chart_kwh > benchmark_from_chart
-      'is more than similar regional schools which consumed ' + benchmark_usage_kwh
+      'is more than well managed schools which consumed ' + benchmark_usage_kwh
     else
-      'is less than similar regional schools which consumed ' + benchmark_usage_kwh
+      'is less than well managed schools which consumed ' + benchmark_usage_kwh
     end
   end
 

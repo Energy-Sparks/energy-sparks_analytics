@@ -2,7 +2,7 @@ class AdviceGasBoilerSeasonalControl  < AdviceBoilerHeatingBase
   include Logging
 
   def enough_data
-    aggregate_meter.amr_data.days > 364 && valid_model? ? :enough : :not_enough
+    aggregate_meter.amr_data.days > 364 && super == :enough ? :enough : :not_enough
   end
 
   def raw_content(user_type: nil)

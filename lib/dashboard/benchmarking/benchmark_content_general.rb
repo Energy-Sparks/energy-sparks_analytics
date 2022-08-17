@@ -1358,8 +1358,108 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek < BenchmarkContentBase
+  module BenchmarkPeriodChangeBaseElectricityMixIn
+    def aggregate_variables
+      %i[school_name pupils_changed current_pupils previous_pupils]
+    end
+
+    def current_variable;     :current_pupils   end
+    def previous_variable;    :previous_pupils  end
+    def variable_type;        :pupils           end
+    def has_changed_variable; :pupils_changed   end
+
+    def change_variable_description
+      'number of pupils'
+    end
+
+    def has_possessive
+      'have'
+    end
+  end
+
+  module BenchmarkPeriodChangeBaseGasMixIn
+    def aggregate_variables
+      %i[school_name floor_area_changed current_floor_area previous_floor_area]
+    end
+
+    def current_variable;     :current_floor_area   end
+    def previous_variable;    :previous_floor_area  end
+    def variable_type;        :m2                   end
+    def has_changed_variable; :floor_area_changed   end
+
+    def change_variable_description
+      'floor area'
+    end
+
+    def has_possessive
+      'has'
+    end
+  end
+
+  class BenchmarkPeriodChangeBase < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+
+    private
+
+    def aggregate_text(school_ids, filter, user_type)
+      raw_data = benchmark_manager.run_table_including_aggregate_columns(asof_date, page_name, school_ids, nil, filter, :raw, user_type)
+      rows = raw_data.drop(1) # drop header
+      
+      return '' if rows.empty?
+
+      return '' if no_changes?(rows)
+
+      change_rows = changed_rows(rows)
+
+      text = %(
+        (*1) The comparison has been adjusted because the <%= change_variable_description %>
+        <%= has_possessive %> changed between the two <%= period_types %> for
+        <%= change_rows.map { |row| change_sentence(row) }.join(', and ') %>.
+      )
+      ERB.new(text).result(binding)
+    end
+
+    def changed_variable_column_index
+      table_column_index(has_changed_variable)
+    end
+
+    def changed?(row)
+      row[changed_variable_column_index] == true
+    end
+
+    def changed_rows(rows)
+      rows.select { |row| changed?(row) }
+    end
+
+    def no_changes?(rows)
+      rows.all?{ |row| !changed?(row) }
+    end
+
+    def aggregate_variable_table_column_index_deprecated(var)
+      aggregate_variables.index(var)
+    end
+
+    def change_sentence(row)
+      school_name = row[table_column_index(:school_name)     ].gsub(' (*1)', '')
+      current     = row[table_column_index(current_variable) ].round(0)
+      previous    = row[table_column_index(previous_variable)].round(0)
+
+      text = %(
+        <%= school_name %>
+        from <%= FormatEnergyUnit.format(variable_type, current, :html) %>
+        to <%= FormatEnergyUnit.format(variable_type, previous, :html) %>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek < BenchmarkPeriodChangeBase
+    include BenchmarkPeriodChangeBaseElectricityMixIn
+
+    def period_types
+      'school weeks'
+    end
+
     private def introduction_text
       text = %q(
         <p>
@@ -1374,8 +1474,14 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentChangeInElectricityBetweenLast2Holidays < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
+  class BenchmarkHolidaysChangeBase < BenchmarkPeriodChangeBase
+    def period_types
+      'holidays'
+    end
+  end
+  #=======================================================================================
+  class BenchmarkContentChangeInElectricityBetweenLast2Holidays < BenchmarkHolidaysChangeBase
+    include BenchmarkPeriodChangeBaseElectricityMixIn
     private def introduction_text
       text = %q(
         <p>
@@ -1388,8 +1494,8 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentChangeInElectricityBetween2HolidaysYearApart < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
+  class BenchmarkContentChangeInElectricityBetween2HolidaysYearApart < BenchmarkHolidaysChangeBase
+    include BenchmarkPeriodChangeBaseElectricityMixIn
     private def introduction_text
       text = %q(
         <p>
@@ -1406,8 +1512,9 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
+  class BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek < BenchmarkHolidaysChangeBase
+    include BenchmarkPeriodChangeBaseGasMixIn
+
     private def introduction_text
       text = %q(
         <p>
@@ -1422,8 +1529,9 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentChangeInGasBetweenLast2Holidays < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
+  class BenchmarkContentChangeInGasBetweenLast2Holidays < BenchmarkHolidaysChangeBase
+    include BenchmarkPeriodChangeBaseGasMixIn
+
     private def introduction_text
       text = %q(
         <p>
@@ -1447,8 +1555,9 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentChangeInGasBetween2HolidaysYearApart < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
+  class BenchmarkContentChangeInGasBetween2HolidaysYearApart < BenchmarkHolidaysChangeBase
+    include BenchmarkPeriodChangeBaseGasMixIn
+
     private def introduction_text
       text = %q(
         <p>

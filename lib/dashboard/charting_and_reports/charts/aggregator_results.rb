@@ -53,8 +53,8 @@ class AggregatorResults < OpenStruct
   end
 
   # performs scaling to 200, 1000 pupils or primary/secondary default sized floor areas
-  # TODO(PH, 20Mar2022) - needs convertig following refactor, not used by main stream code
-  # at the moment, but part of the school comparison, averaging infrastructure which isn;t used
+  # TODO(PH, 20Mar2022) - needs converting following refactor, not used by main stream code
+  # at the moment, but part of the school comparison, averaging infrastructure which isn't used
   # by the front end at the moment
   def scale_x_data(chart_config, school)
     # exclude y2_axis values e.g. temperature, degree days

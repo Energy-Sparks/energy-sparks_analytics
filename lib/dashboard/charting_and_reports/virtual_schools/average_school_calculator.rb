@@ -5,12 +5,12 @@ class AverageSchoolCalculator
     @school = school
   end
 
-  def benchmark_amr_data(benchmark_type: :benchmark)
-    calculate_school_amr_data(benchmark_type: benchmark_type)
+  def benchmark_amr_data(meter:, benchmark_type: :benchmark)
+    calculate_school_amr_data(meter: meter, benchmark_type: benchmark_type)
   end
 
-  def normalised_amr_data(benchmark_type:, fuel_type:)
-    calculate_school_amr_data(benchmark_type: benchmark_type, meter: @school.aggregate_meter(fuel_type), pupils: 1)
+  def normalised_amr_data(benchmark_type:, fuel_type:, degreeday_adjustment: false)
+    calculate_school_amr_data(meter: @school.aggregate_meter(fuel_type), benchmark_type: benchmark_type, pupils: 1, floor_area: 1, degreeday_adjustment: degreeday_adjustment)
   end
 
   def self.remap_low_sample_holiday(holiday_type)
@@ -19,20 +19,29 @@ class AverageSchoolCalculator
 
   private
 
-  def calculate_school_amr_data(benchmark_type: :benchmark, meter: @school.aggregated_electricity_meters, pupils: @school.number_of_pupils)
+  def calculate_school_amr_data(meter:, benchmark_type: :benchmark, pupils: @school.number_of_pupils, floor_area: @school.floor_area, degreeday_adjustment: true)
     amr_data = meter.amr_data
     average_amr_data = AMRData.new(benchmark_type)
 
-    interpolators = calculate_interpolators(benchmark_type)
+    interpolators = calculate_interpolators(benchmark_type, meter.fuel_type)
 
     # calculation approx ~20 ms per year
     now = DateTime.now
 
+    scale_by =  if meter.fuel_type == :electricity
+                  pupils
+                elsif degreeday_adjustment
+                  degree_days_to_average_factor_reversed(meter.meter_collection, amr_data.start_date, amr_data.end_date, floor_area)
+                else
+                  floor_area
+                end
+
     (amr_data.start_date..amr_data.end_date).each do |date|
-      avg_kwh_x48_by_school_type = school_type_profiles_to_average_x48(date, benchmark_type, interpolators)
+      avg_kwh_x48_by_school_type = school_type_profiles_to_average_x48(date, benchmark_type, interpolators, meter.fuel_type)
 
       kWh_per_pupil_x48 = AMRData.fast_average_multiple_x48(avg_kwh_x48_by_school_type)
-      kWh_x48 = AMRData.fast_multiply_x48_x_scalar(kWh_per_pupil_x48, pupils)
+      
+      kWh_x48 = AMRData.fast_multiply_x48_x_scalar(kWh_per_pupil_x48, scale_by)
 
       average_amr_data.add(date, OneDayAMRReading.new(meter.mpxn, date, 'CAVG', nil, now, kWh_x48))
     end
@@ -40,14 +49,35 @@ class AverageSchoolCalculator
     average_amr_data
   end
 
-  def school_type_profiles_to_average_x48(date, benchmark_type, interpolators)
+  def degree_days_to_average_factor_reversed(school, start_date, end_date, floor_area)
+    end_date   = [end_date, school.temperatures.end_date].min
+    start_date = [end_date - 365, school.temperatures.start_date].max
+
+    return floor_area if end_date - start_date < 360 # shouldn't happen as temperatures should be backdated a year
+
+    avg_degree_days = BenchmarkMetrics::ANNUAL_AVERAGE_DEGREE_DAYS
+
+    school_degree_days = school.temperatures.degree_days_in_date_range(start_date, end_date)
+
+    # very crude for as really need to scale monthly degree days
+    # versus precalculated national average for each month
+    # school.aggregated_heat_meters.heating_model.heating_on?(date)
+
+    # if a school is colder than average i.e. > school_degree_days increase its consumption from average
+
+    puts "Scale by dd #{school_degree_days / avg_degree_days}"
+
+    floor_area * school_degree_days / avg_degree_days
+  end
+
+  def school_type_profiles_to_average_x48(date, benchmark_type, interpolators, fuel_type)
     daytype = @school.holidays.day_type(date)
 
     if daytype == :holiday
       holiday_type = Holidays.holiday_type(date)
       holiday_type = self.class.remap_low_sample_holiday(holiday_type)
       averaged_school_type_map(@school.school_type).map do |school_type|
-        AverageSchoolData.new.raw_data[:electricity][benchmark_type][school_type.to_sym][:holiday][holiday_type]
+        AverageSchoolData.new.raw_data[fuel_type][benchmark_type][school_type.to_sym][:holiday][holiday_type]
       end
     else
       avg_kwh_x48_by_school_type = interpolators.map do |interpolator|
@@ -56,11 +86,11 @@ class AverageSchoolCalculator
     end
   end
 
-  def calculate_interpolators(benchmark_type)
+  def calculate_interpolators(benchmark_type, fuel_type)
     school_types = averaged_school_type_map(@school.school_type)
     interpolators = school_types.map do |school_type|
       # interpolators take ~3 ms to setup, so fast enough
-      raw_data = AverageSchoolData.new.raw_data[:electricity][benchmark_type][school_type.to_sym]
+      raw_data = AverageSchoolData.new.raw_data[fuel_type][benchmark_type][school_type.to_sym]
       create_14_months_of_interpolations(raw_data)
     end
   end
@@ -93,7 +123,7 @@ class AverageSchoolCalculator
 
   def create_14_months_of_interpolations(average_meter_data)
     %i[schoolday weekend].map do |daytype|
-      extended_months_data = configure_14_months(average_meter_data[daytype], day_type = nil)
+      extended_months_data = configure_14_months(average_meter_data[daytype])
       [
         daytype,
         setup_intraday_interpolators_x48_half_hours_x14_months(extended_months_data)
@@ -101,7 +131,7 @@ class AverageSchoolCalculator
     end.to_h
   end
 
-  def configure_14_months(months_data, _day_type)
+  def configure_14_months(months_data)
     # for interpolation purposes add a month on and start and end of a year
     # so the data wraps around for interpolation, rather than the interpolation
     # being truncated
