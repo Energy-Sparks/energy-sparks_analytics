@@ -30,10 +30,10 @@ class RunAlerts < RunAnalyticsTest
                     methods:              %i[raw_variables_for_saving front_end_template_data html_template_variables],   # %i[ raw_variables_for_saving front_end_template_data front_end_template_chart_data front_end_template_table_data
                     class_methods:        %i[front_end_template_variables],
                   },
-  
+
                   no_outputs: %i[raw_variables_for_saving],
                   log: %i[],
-  
+
                   no_save_priority_variables:  { filename: './TestResults/alert priorities.csv' },
                   no_benchmark:          %i[school alert ], # detail],
                 }
@@ -113,7 +113,7 @@ class RunAlerts < RunAnalyticsTest
   end
 
   def save_formatted_results(type, html)
-    filename = "Alerts - #{type}.hmtl"
+    filename = "Alerts - #{type}.html"
     html_file = HtmlFileWriter.new(filename, results_sub_directory_type: @results_sub_directory_type)
     html_file.write_header_footer('', html, nil)
     html_file.close
@@ -130,7 +130,7 @@ class RunAlerts < RunAnalyticsTest
       comparison = CompareContent2.new(alert_class.name, control, results_sub_directory_type: @results_sub_directory_type)
       name = "#{alert_class.name} #{method}"
       unless @@class_methods_run.include?(name)
-        comparison.save_and_compare(name, method_call_results(alert_class, alert, method)) 
+        comparison.save_and_compare(name, method_call_results(alert_class, alert, method))
         @@class_methods_run.push(name)
       end
     end
@@ -215,7 +215,7 @@ class RunAlerts < RunAnalyticsTest
   def set_forecast(forecast, asof_date)
     return if forecast.nil?
 
-    dates = { 
+    dates = {
       start_date: forecast[:start_date] || asof_date,
       end_date:   forecast[:end_date]   || asof_date + 14
     }
