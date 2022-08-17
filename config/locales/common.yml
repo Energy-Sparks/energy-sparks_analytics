@@ -117,7 +117,7 @@ en:
         - Last weeks half hourly gas consumption (kWh)
       alert_weekend_last_week_gas_datetime_£:
         title:
-        -
+        - 
       baseload:
         title:
         - Baseload kW
@@ -471,7 +471,7 @@ en:
         - 'By Week: Electricity (Meter Breakdown)'
       group_by_week_electricity_school_comparison_line:
         title:
-        -
+        - 
       group_by_week_electricity_simulator:
         title:
         - 'By Week: Electricity (Simulator)'
