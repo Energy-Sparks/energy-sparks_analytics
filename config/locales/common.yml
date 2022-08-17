@@ -258,7 +258,7 @@ en:
         - 'By Day: Electricity'
       electricity_by_day_of_week:
         title:
-        - 'Electricity Use By Day of the Week'
+        - Electricity Use By Day of the Week
       electricity_by_day_of_week_actual_for_simulator_comparison:
         title:
         - Electricity Use By Day of the Week (Actual Usage over last year)
@@ -282,7 +282,7 @@ en:
         - Electricity Use By Month (last 2 years)
       electricity_by_month_year_0_1_finance_advice:
         title:
-        - 'Energy Costs'
+        - Energy Costs
       electricity_co2_last_7_days_with_co2_intensity:
         title:
         - Variation in the electricity carbon emissions of your school over the last week
@@ -435,7 +435,7 @@ en:
         - 'Gas: long term trends'
       gridcarbon_test:
         title:
-        - 'Grid Carbon Y2 axis check'
+        - Grid Carbon Y2 axis check
       group_by_week_carbon:
         title:
         - Calculating your schools total carbon emissions, including transport and food
@@ -672,10 +672,10 @@ en:
         - Intraday (last 7 days) gas
       management_dashboard_group_by_month_solar_pv:
         title:
-        - 'Analysis of your school’s solar PV panels'
+        - Analysis of your school’s solar PV panels
       management_dashboard_group_by_month_solar_pv_unlimited:
         title:
-        - 'Analysis of your school’s solar PV panels'
+        - Analysis of your school’s solar PV panels
       management_dashboard_group_by_week_electricity:
         title:
         - 'By Week: Electricity'
@@ -684,7 +684,7 @@ en:
         - 'By Week: Gas'
       management_dashboard_group_by_week_storage_heater:
         title:
-        - 'Information on your school’s storage heater electricity consumption'
+        - Information on your school’s storage heater electricity consumption
       meter_breakdown_pie_1_year:
         title:
         - 'Breakdown by meter (this year): Gas'
@@ -807,115 +807,115 @@ en:
         - Storage heater costs on your chosen day (in £)
       recent_holiday_electricity_comparison_alert:
         title:
-        - 
+        - Comparison of electricity consumption for recent holidays
       schoolweek_alert_2_previous_holiday_comparison_gas_adjusted:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation
       schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation
       schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted_community_only:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation, community use only
       schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption - unadjusted alert calculation
       schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted_community_only:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption - temperature unadjusted alert calculation, community use only
       seasonal_simple_school_day_non_heating_non_regression:
         title:
-        - 
+        - Thermostatic (School Day) - heating - non-heating separation non regression
       seasonal_simple_school_day_non_heating_regression:
         title:
-        - 
+        - Thermostatic (School Day) - heating - non-heating separation regression
       seasonal_simple_school_day_non_heating_regression_covid_tolerant:
         title:
-        - 
+        - Thermostatic (School Day) - heating - non-heating separation regression, covid tolerant
       solar_pv_group_by_month:
         title:
-        - 
+        - Analysis of your school’s solar PV panels
       solar_pv_group_by_month_dashboard_overview:
         title:
-        - 
+        - Analysis of your school’s solar PV panels
       solar_pv_group_by_week:
         title:
-        - 
+        - Solar PV by week of the year
       solar_pv_group_by_week_by_submeter:
         title:
-        - 
+        - Solar PV by week of the year
       solar_pv_last_7_days_by_submeter:
         title:
-        - 
+        - The last 7 days of your school’s electricity consumption
       storage_heater_by_day_of_week:
         title:
-        - 
+        - Storage heater usage by day of the week
       storage_heater_by_day_of_week_tolerant:
         title:
-        - 
+        - Storage heater usage by day of the week
       storage_heater_group_by_week:
         title:
-        - 
+        - Information on your school’s storage heater electricity consumption
       storage_heater_group_by_week_long_term:
         title:
-        - 
+        - Storage heater electricity consumption over a longer time period
       storage_heater_intraday_current_year:
         title:
-        - 
+        - Storage heater power consumption
       storage_heater_intraday_current_year_kw:
         title:
-        - 
+        - Storage heater intraday profile (kw) for year to date
       storage_heater_thermostatic:
         title:
-        - 
+        - Thermostatic control
       targeting_and_tracking_standard_group_by_week_electricity:
         title:
         - Standard <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_standard_group_by_week_gas:
         title:
-        - 
+        - Standard <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_standard_group_by_week_storage_heater:
         title:
-        - 
+        - Standard <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_synthetic_target_group_by_week_electricity:
         title:
         - Historic and or synthetic target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_synthetic_target_group_by_week_gas:
         title:
-        - 
+        - Historic and or synthetic target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_synthetic_target_group_by_week_storage_heater:
         title:
-        - 
+        - Historic and or synthetic target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_target_only_group_by_week_electricity:
         title:
         - Target only <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_target_only_group_by_week_gas:
         title:
-        - 
+        - Target only <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_target_only_group_by_week_storage_heater:
         title:
-        - 
+        - Target only <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_unscaled_target_group_by_week_electricity:
         title:
         - Unscaled target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_unscaled_target_group_by_week_gas:
         title:
-        - 
+        - Unscaled target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_unscaled_target_group_by_week_storage_heater:
         title:
-        - 
+        - Unscaled target <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)
       targeting_and_tracking_weekly_electricity_one_year_column_deprecated:
         title:
-        - 
+        - targeting_and_tracking_weekly_electricity_one_year_column
       targeting_and_tracking_weekly_electricity_one_year_cumulative_line:
         title:
-        - 
+        - Weekly progress versus target to date
       targeting_and_tracking_weekly_electricity_one_year_line:
         title:
         - Weekly progress versus target to date
       targeting_and_tracking_weekly_electricity_to_date_column_deprecated:
         title:
-        - 
+        - Weekly progress versus target
       targeting_and_tracking_weekly_electricity_to_date_cumulative_line:
         title:
         - Cumulative progress versus target
@@ -924,7 +924,7 @@ en:
         - Weekly progress versus target
       targeting_and_tracking_weekly_gas_one_year_line:
         title:
-        - 
+        - Weekly progress versus target to date
       targeting_and_tracking_weekly_gas_to_date_cumulative_line:
         title:
         - Cumulative progress versus target
@@ -933,103 +933,103 @@ en:
         - Weekly progress versus target
       targeting_and_tracking_weekly_storage_heater_one_year_line:
         title:
-        - 
+        - Weekly progress versus target to date
       targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line:
         title:
-        - 
+        - Cumulative progress versus target
       targeting_and_tracking_weekly_storage_heater_to_date_line:
         title:
-        - 
+        - Weekly progress versus target
       teachers_landing_page_electricity:
         title:
-        - 
+        - Comparison of last 2 weeks electricity consumption
       teachers_landing_page_gas:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption - adjusted for outside temperature
       teachers_landing_page_gas_simple:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption
       teachers_landing_page_storage_heaters:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption - adjusted for outside temperature
       teachers_landing_page_storage_heaters_simple:
         title:
-        - 
+        - Comparison of last 2 weeks gas consumption
       temp_test:
         title:
-        - 
+        - 'By Week: Electricity (Meter Breakdown)'
       temp_test2:
         title:
-        - 
+        - 'By Week: Electricity (Meter Breakdown)'
       thermostatic:
         title:
-        - 
+        - Thermostatic (Temperature v. Daily Consumption - current year)
       thermostatic_control_large_diurnal_range:
         title:
-        - 
+        - Thermostatic Control Large Diurnal Range Assessment
       thermostatic_control_large_diurnal_range_1:
         title:
-        - 
+        - Thermostatic Control Large Diurnal Range Assessment 1
       thermostatic_control_large_diurnal_range_2:
         title:
-        - 
+        - Thermostatic Control Large Diurnal Range Assessment 2
       thermostatic_control_large_diurnal_range_3:
         title:
-        - 
+        - Thermostatic Control Large Diurnal Range Assessment 3
       thermostatic_control_medium_diurnal_range:
         title:
-        - 
+        - Thermostatic Control Medium Diurnal Range Assessment
       thermostatic_model_by_week:
         title:
-        - 
+        - Thermostatic model type by week
       thermostatic_model_categories_pie_chart:
         title:
-        - 
+        - Categorised consumption by model
       thermostatic_non_best:
         title:
-        - 
+        - Thermostatic (Days of minimal consumption)
       thermostatic_non_heating_deprecated:
         title:
-        - 
+        - Thermostatic (Non Heating Season, School Day)
       thermostatic_regression:
         title:
-        - 
+        - Thermostatic (Regression_Model Testing)
       thermostatic_regression_simple_all:
         title:
-        - 
+        - Thermostatic (All Categories) - simple model
       thermostatic_regression_simple_school_day:
         title:
-        - 
+        - Thermostatic (School Day) - simple model
       thermostatic_regression_simple_school_day_non_heating_non_regression:
         title:
-        - 
+        - Thermostatic (School Day) - heating - non-heating separation non regression
       thermostatic_regression_simple_school_day_non_heating_regression:
         title:
-        - 
+        - Thermostatic (School Day) - heating - non-heating separation regression
       thermostatic_regression_simple_school_day_non_heating_regression_covid_tolerant:
         title:
-        - 
+        - Thermostatic (School Day) - heating - non-heating separation regression, covid tolerant
       thermostatic_regression_thermally_massive_all:
         title:
-        - 
+        - Thermostatic (All Categories) - thermally massive model
       thermostatic_regression_thermally_massive_school_day:
         title:
-        - 
+        - Thermostatic (School Day) - thermally massive model
       thermostatic_summer_school_day_holiday_best:
         title:
-        - 
+        - Thermostatic (Summer Weekend and Holiday)
       thermostatic_summer_weekend_best:
         title:
-        - 
+        - Thermostatic (Summer Weekend and Holiday)
       thermostatic_up_to_1_year:
         title:
-        - 
+        - Thermostatic (Temperature v. Daily Consumption)
       thermostatic_winter_holiday_best:
         title:
-        - 
+        - Thermostatic (Winter Holiday)
       thermostatic_winter_weekend_best:
         title:
-        - 
+        - Thermostatic (Winter Weekend)
     energy_units:
       accounting_cost: "£"
       bev_car: km
