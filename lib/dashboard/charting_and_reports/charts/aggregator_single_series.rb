@@ -108,9 +108,13 @@ class AggregatorSingleSeries < AggregatorBase
     logger.info "aggregate_by_day:  aggregated #{count} items"
   end
 
+  def translate_series_item_for(series_key)
+    I18n.t("analytics.aggregator_single_series.#{series_key}") || OpenCloseTime.humanize_symbol(series_key)
+  end
+
   def humanize_symbols(hash)
     if chart_config.series_breakdown == :daytype
-      hash.transform_keys { |k| OpenCloseTime.humanize_symbol(k) }
+      hash.transform_keys { |series_key| translate_series_item_for(series_key) }
     else
       hash
     end

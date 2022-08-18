@@ -1,6 +1,11 @@
 ---
 en:
   analytics:
+    aggregator_single_series:
+      holiday: Holiday
+      weekend: Weekend
+      school_day_open: School Day Open
+      school_day_closed: School Day Closed
     adjectives:
       higher: higher
       lower: lower
