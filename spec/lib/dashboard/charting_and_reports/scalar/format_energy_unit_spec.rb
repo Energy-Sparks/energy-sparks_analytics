@@ -82,4 +82,20 @@ describe FormatEnergyUnit do
       expect(FormatEnergyUnit.format(:datetime, "2000-01-01", :text)).to eq "Saturday  1 Jan 2000 00:00"
     end
   end
+
+  context 'validating units' do
+    it 'identifies known units' do
+      expect(FormatUnit.known_unit?(:£)).to be true
+      expect(FormatUnit.known_unit?(:kwh_per_day)).to be true
+      expect(FormatUnit.known_unit?(:unknown)).to be false
+    end
+    it 'throws exception when units are unknown' do
+      expect {
+        FormatUnit.format(:unknown, 10, :text, false)
+      }.to raise_exception EnergySparksUnexpectedStateException
+    end
+    it 'does not throw exception when not strict' do
+      expect(FormatUnit.format(:unknown, 10, :text, true)).to eq("10")
+    end
+  end
 end

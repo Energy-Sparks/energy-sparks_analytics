@@ -5,82 +5,6 @@ class FormatEnergyUnit
   NAN      = 'Uncalculable'.freeze
   ZERO = '0'.freeze
 
-  #As part of I18n work the text for this will move to the YML files
-  #This has been left here temporarily for the moment as the keys are also used to
-  #identify known units
-  UNIT_DESCRIPTION_TEXT = {
-    kwh:                          'kWh',
-    kwp:                          'kWp',
-    kw:                           'kW',
-    kva:                          'kVA',
-    w:                            'W',
-    kwh_per_day:                  'kWh/day',
-    kwh_per_day_per_c:            'kWh/day/C',
-    co2:                          'kg CO2',
-    co2t:                         'tonnes CO2',
-    m2:                           'm2',
-    pupils:                       'pupils',
-    £:                            '£',
-    £_0dp:                        '£',
-    accounting_cost:              '£',
-    days:                         'days',
-    library_books:                'library books',
-    km:                           'km',
-    litre:                        'litres',
-    fuel_type:                    '',
-    kg:                           'kg',
-    shower:                       'showers',
-    panels:                       'solar PV panels',
-    home:                         'homes',
-    homes_gas:                    'homes (gas usage)',
-    homes_electricity:            'homes (electricity usage)',
-    kettle:                       'kettles',
-    ice_car:                      'km',
-    bev_car:                      'km',
-    tv:                           'tvs',
-    computer_console:             'computer consoles',
-    hour:                         'hours',
-    smartphone:                   'smartphone charges',
-    meters:                       'meters',
-    tree:                         'trees',
-    percent:                      '%',
-    percent_0dp:                  '%',
-    relative_percent:             '%',
-    relative_percent_0dp:         '%',
-    comparison_percent:           '%',
-    r2:                           '',
-    opt_start_standard_deviation: 'standard deviation (hours)',
-    morning_start_time:           'time of day',
-    optimum_start_sensitivity:    'hours/C',
-    boiler_start_time:            'boiler start time',
-    temperature:                  'C',
-    years_range:                  'years',
-    years:                        'years',
-    years_decimal:                'years',
-    £_range:                      '£',
-    £_per_kwh:                    '£/kWh',
-    £_per_kva:                    '£/kVA',
-    kg_co2_per_kwh:               'kg CO2/kWh',
-    date:                         '',
-    date_mmm_yyyy:                '',
-    datetime:                     '',
-    timeofday:                    '',
-    school_name:                  '',
-    short_school_name:            '',
-    gas:                          'gas',
-    electricity:                  'electricity',
-    teaching_assistant:           'teaching assistant',
-    teaching_assistant_hours:     'teaching assistant (hours)',
-    carnivore_dinner:             'dinners',
-    vegetarian_dinner:            'dinners',
-    onshore_wind_turbine_hours:   'onshore wind turbine hours',
-    onshore_wind_turbines:        'onshore wind turbines',
-    offshore_wind_turbine_hours:  'offshore wind turbine hours',
-    offshore_wind_turbines:       'offshore wind turbines',
-    solar_panels_in_a_year:       'solar panels in a year',
-    solar_panels:                 'solar panels'
-  }.freeze
-
   UNIT_DESCRIPTION_HTML = {
     £:              '&pound;',
     m2:             'm<sup>2</sup>',
@@ -104,10 +28,12 @@ class FormatEnergyUnit
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
     return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
 
-    #TODO in what circumstances would we want to only convert some units to strings but
-    #raise an error for others?
-    return value.to_s if convert_missing_types_to_strings && !UNIT_DESCRIPTION_TEXT.key?(unit)
-    check_units(UNIT_DESCRIPTION_TEXT, unit)
+    #From inspection, this only seems to be used via HtmlTableFormatting.format_value
+    #FormatEnergyUnit.format(row_units, val, :html, true, table_format, precision)
+    #This line of code means that any unknown units in the table will be converted to a string
+    #all others will be formatted to the specified precision
+    return value.to_s if convert_missing_types_to_strings && !known_unit?(unit)
+    check_units(unit)
 
     if value.nil? && unit != :temperature
       I18n.t("analytics.energy_units.#{unit}")
@@ -271,8 +197,15 @@ class FormatEnergyUnit
     end
   end
 
-  def self.check_units(unit_description, unit)
-    unless unit_description.key?(unit)
+  def self.known_unit?(unit)
+    #originally used a hash of units (symbol) => unit label
+    #now validate using the translation keys. This achieves same
+    #goal whilst also ensuring we have added the unit to common.yml
+    I18n.t("analytics.energy_units").key?(unit)
+  end
+
+  def self.check_units(unit)
+    unless known_unit?(unit)
       raise EnergySparksUnexpectedStateException.new("Unexpected unit #{unit}")
     end
   end
