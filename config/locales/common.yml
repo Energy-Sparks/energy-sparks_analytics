@@ -478,7 +478,7 @@ en:
         - 'By Week: Electricity (Meter Breakdown)'
       group_by_week_electricity_school_comparison_line:
         title:
-        -
+        - 
       group_by_week_electricity_simulator:
         title:
         - 'By Week: Electricity (Simulator)'
