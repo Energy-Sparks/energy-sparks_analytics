@@ -1,6 +1,7 @@
 require 'bigdecimal'
 
 class FormatEnergyUnit
+  #TODO
   INFINITY = 'Infinity'.freeze
   NAN      = 'Uncalculable'.freeze
   ZERO = '0'.freeze
@@ -76,7 +77,7 @@ class FormatEnergyUnit
   end
 
   def self.format_temperature(value)
-    I18n.t("analytics.energy_units.temperature", value: value.round(1))
+    I18n.t(key_for_unit(:temperature), value: value.round(1))
   end
 
   def self.format_date(value, format)
@@ -121,7 +122,9 @@ class FormatEnergyUnit
     if range.first == range.last
       format_time(range.first)
     else
-      format_time(range.first) + ' to ' + format_time(range.last)
+      I18n.t(key_for_unit(:years_range),
+        low: format_time(range.first),
+        high: format_time(range.last))
     end
   end
 
@@ -184,12 +187,13 @@ class FormatEnergyUnit
     I18n.t("analytics.days", count: days.to_i)
   end
 
-  private_class_method def self.key_for_unit(unit, medium)
-    html_key = html_key_for(unit)
-    if medium == :html && I18n.t("analytics.energy_units").key?(html_key)
-      "analytics.energy_units.#{html_key}"
+  private_class_method def self.key_for_unit(unit, medium=:text)
+    default_key = "analytics.energy_units.#{unit}"
+    if medium == :text
+      default_key
     else
-      "analytics.energy_units.#{unit}"
+      html_key = html_key_for(unit)
+      I18n.t("analytics.energy_units").key?(html_key) ? "analytics.energy_units.#{html_key}" : default_key
     end
   end
 

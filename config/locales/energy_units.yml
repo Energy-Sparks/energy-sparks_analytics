@@ -1,25 +1,6 @@
 ---
 en:
   analytics:
-    units:
-      minutes:
-        one: "%{count} minute"
-        other: "%{count} minutes"
-      hours:
-        one: "%{count} hour"
-        other: "%{count} hours"
-      days:
-        one: "%{count} day"
-        other: "%{count} days"
-      weeks:
-        one: "%{count} week"
-        other: "%{count} weeks"
-      months:
-        one: "%{count} month"
-        other: "%{count} months"
-      years:
-        one: "%{count} year"
-        other: "%{count} years"
     energy_units:
       accounting_cost: "£%{value}"
       bev_car: "%{value} km"
@@ -88,7 +69,7 @@ en:
       w: "%{value} W"
       years: years
       years_decimal: "%{value} years"
-      years_range: years
+      years_range: "%{low} to %{high}"
       "£": "%{sign}£%{value}"
       "£_0dp": "%{sign}£%{value}"
       "£_0dp_html": "%{sign}&pound;%{value}"
@@ -98,3 +79,22 @@ en:
       "£_per_kwh": "%{sign}£%{value}/kWh"
       "£_per_kwh_html": "%{sign}&pound;%{value}/kWh"
       "£_range": "%{low} to %{high}"
+    units:
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+      hours:
+        one: "%{count} hour"
+        other: "%{count} hours"
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
+      months:
+        one: "%{count} month"
+        other: "%{count} months"
+      weeks:
+        one: "%{count} week"
+        other: "%{count} weeks"
+      years:
+        one: "%{count} year"
+        other: "%{count} years"
