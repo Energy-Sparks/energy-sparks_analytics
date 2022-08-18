@@ -123,7 +123,10 @@ class XBucketYearToDate < XBucketAcademicYear
   end
 
   def description(period)
-    period.start_date.strftime("%d %b %Y") + ' to ' + period.end_date.strftime("%d %b %Y")
+    start_date = I18n.l(period.start_date, format: '%d %b %Y')    
+    end_date = I18n.l(period.start_date, format: '%d %b %Y')    
+
+    I18n.t('analytics.x_axis_bucketor.description', start_date: start_date, end_date: end_date, default: nil) || "#{start_date} to #{end_date}"
   end
 end
 

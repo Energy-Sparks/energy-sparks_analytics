@@ -1,11 +1,6 @@
 ---
 en:
   analytics:
-    aggregator_single_series:
-      holiday: Holiday
-      weekend: Weekend
-      school_day_open: School Day Open
-      school_day_closed: School Day Closed
     adjectives:
       higher: higher
       lower: lower
@@ -14,6 +9,11 @@ en:
       well: well
     aggregator:
       subttitle: "%{start_date} to %{end_date}"
+    aggregator_single_series:
+      holiday: Holiday
+      school_day_closed: School Day Closed
+      school_day_open: School Day Open
+      weekend: Weekend
     chart_configuration:
       acc1:
         title:
@@ -1112,3 +1112,5 @@ en:
       "£_per_kva": "£/kVA"
       "£_per_kwh": "£/kWh"
       "£_range": "£"
+    x_axis_bucketor:
+      description: "%{start_date} to %{end_date}"
