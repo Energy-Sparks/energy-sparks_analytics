@@ -85,3 +85,5 @@ jobs:
         name: analytics-test-artifacts
         path: |
           test_output
+          !./test_output/MeterCollections
+
