@@ -1,6 +1,25 @@
 ---
 en:
   analytics:
+    units:
+      minutes:
+        one: "%{count} minute"
+        other: "%{count} minutes"
+      hours:
+        one: "%{count} hour"
+        other: "%{count} hours"
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+      weeks:
+        one: "%{count} week"
+        other: "%{count} weeks"
+      months:
+        one: "%{count} month"
+        other: "%{count} months"
+      years:
+        one: "%{count} year"
+        other: "%{count} years"
     energy_units:
       accounting_cost: "£%{value}"
       bev_car: "%{value} km"
@@ -61,7 +80,7 @@ en:
       solar_panels_in_a_year: "%{value} solar panels in a year"
       teaching_assistant: "%{value} teaching assistant"
       teaching_assistant_hours: "%{value} teaching assistant (hours)"
-      temperature: C
+      temperature: "%{value}C"
       timeofday: ''
       tree: "%{value} trees"
       tv: "%{value} tvs"

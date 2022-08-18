@@ -134,7 +134,11 @@ describe FormatEnergyUnit do
       end
     end
     context ':years' do
-      it 'formats correctly'
+      it 'formats correctly' do
+        expect(FormatUnit.format(:years, 2)).to eq "2 years 0 months"
+        expect(FormatUnit.format(:years, 2.5)).to eq "2 years 6 months"
+        expect(FormatUnit.format(:years, 1)).to eq "12 months"
+      end
     end
     context ':years_decimal' do
       it 'formats correctly' do
@@ -142,7 +146,11 @@ describe FormatEnergyUnit do
       end
     end
     context ':years_range' do
-      it 'formats correctly'
+      it 'formats correctly' do
+        expect(FormatUnit.format(:years_range, 1..1)).to eq "12 months"
+        expect(FormatUnit.format(:years_range, 1..3)).to eq "12 months to 3 years 0 months"
+        expect(FormatUnit.format(:years_range, 1..3.2)).to eq "12 months to 3 years 2 months"
+      end
     end
     context ':timeofday' do
       it 'formats correctly' do
@@ -152,7 +160,26 @@ describe FormatEnergyUnit do
   end
 
   context '#format_time' do
-    it 'formats correctly'
+    it 'handles periods less than a day' do
+        expect(FormatUnit.format_time(0.000002)).to eq "1 minutes"
+        expect(FormatUnit.format_time(0.00002)).to eq "11 minutes"
+        expect(FormatUnit.format_time(0.0002)).to eq "2 hours"
+        expect(FormatUnit.format_time(0.002)).to eq "18 hours"
+    end
+    it 'handles periods less than 3 months' do
+      expect(FormatUnit.format_time(0.01)).to eq "4 days"
+      expect(FormatUnit.format_time(0.1)).to eq "5 weeks"
+      expect(FormatUnit.format_time(0.25)).to eq "3 months"
+    end
+    it 'handles periods of less than 18 months' do
+      expect(FormatUnit.format_time(1.5)).to eq "18 months"
+    end
+    it 'handles periods of less than 5 years' do
+      expect(FormatUnit.format_time(2.0)).to eq "2 years 0 months"
+    end
+    it 'handles longer periods' do
+      expect(FormatUnit.format_time(10)).to eq "10 years"
+    end
   end
 
   context 'money' do

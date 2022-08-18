@@ -36,7 +36,7 @@ class FormatEnergyUnit
     elsif unit == :r2
       sprintf('%.2f', value)
     elsif unit == :temperature
-      "#{value.round(1)}C"
+      format_temperature(value)
     elsif unit == :school_name
       value
     elsif unit == :short_school_name
@@ -75,11 +75,16 @@ class FormatEnergyUnit
     end
   end
 
+  def self.format_temperature(value)
+    I18n.t("analytics.energy_units.temperature", value: value.round(1))
+  end
+
   def self.format_date(value, format)
     date = value.is_a?(String) ? Date.parse(value) : value
     I18n.l(date, format: format)
   end
 
+  #TODO remove string concat
   def self.format_percent(value, unit, user_numeric_comprehension_level, medium)
     user_numeric_comprehension_level = :no_decimals if %i[percent_0dp relative_percent_0dp].include?(unit)
     formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
@@ -87,6 +92,7 @@ class FormatEnergyUnit
     formatted_val
   end
 
+  #TODO remove string concat
   def self.percent_to_1_dp(val, medium = :html)
     if medium == :html
       sprintf('%.1f', val * 100.0) + type_format(:percent, :html)
@@ -95,6 +101,7 @@ class FormatEnergyUnit
     end
   end
 
+  #TODO remove string concat
   # 1.234 => +1,230%, 0.105 => +10%, 0.095 => +9.5%, 0.005 => +0.5%, 0.0005 => +0.0%
   def self.format_comparison_percent(value, medium)
     percent = value * 100.0
@@ -149,27 +156,25 @@ class FormatEnergyUnit
     if years < (1.0 / 365.0) && years > 0.0 # less than a day
       minutes = 24 * 60 * 365.0 * years
       if minutes < 90
-        minutes.round(0).to_s + ' minute' + singular_plural(minutes)
+        I18n.t("analytics.units.minutes", count: minutes.round(0).to_s)
       else
-        (minutes / 60.0).round(0).to_s + ' hours'
+        I18n.t("analytics.units.hours", count: (minutes / 60.0).round(0).to_s)
       end
     elsif years < (3.0 / 12.0) # less than 3 months
       days = (years * 365.0).round(0)
       if days <= 14
-        days.to_s + ' day' + singular_plural(days)
+        I18n.t("analytics.units.days", count: days.to_s)
       else
-        (days / 7.0).round(0).to_s + ' weeks'
+        I18n.t("analytics.units.weeks", count: (days / 7.0).round(0).to_s)
       end
     elsif years <= 1.51
-      months = months_from_years(years)
-      months.to_s + ' month' + singular_plural(months)
+      I18n.t("analytics.units.months", count: months_from_years(years))
     elsif years < 5.0
       y = years.floor
-      years_str = sprintf('%.0f ', y) + 'year' + singular_plural(y)
-      months = months_from_years(years - y)
-      years_str + ' ' + months.to_s + ' month' + singular_plural(months)
+      I18n.t("analytics.units.years", count: y) + " " +
+      I18n.t("analytics.units.months", count: months_from_years(years - y))
     else
-      sprintf('%.0f ', years) + 'year' + singular_plural(years)
+      I18n.t("analytics.units.years", count: sprintf('%.0f', years))
     end
   end
 
@@ -181,10 +186,7 @@ class FormatEnergyUnit
     I18n.t("analytics.days", count: days.to_i)
   end
 
-  def self.singular_plural(value)
-    value == 1.0 ? '' : 's'
-  end
-
+  #TODO remove
   def self.type_format(unit, medium)
     I18n.t(key_for_unit(unit, medium))
   end
