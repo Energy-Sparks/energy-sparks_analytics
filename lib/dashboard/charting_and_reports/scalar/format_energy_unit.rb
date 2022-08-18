@@ -5,12 +5,6 @@ class FormatEnergyUnit
   NAN      = 'Uncalculable'.freeze
   ZERO = '0'.freeze
 
-  UNIT_DESCRIPTION_HTML = {
-    £:              '&pound;',
-    m2:             'm<sup>2</sup>',
-    percent:        '&percnt;'
-  }.freeze
-
   def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
     if unit.is_a?(Hash) && unit.key?(:substitute_nil)
       if value.nil? || value == unit[:substitute_nil]
@@ -95,9 +89,9 @@ class FormatEnergyUnit
 
   def self.percent_to_1_dp(val, medium = :html)
     if medium == :html
-      sprintf('%.1f', val * 100.0) + UNIT_DESCRIPTION_HTML[:percent]
+      sprintf('%.1f', val * 100.0) + type_format(:percent, :html)
     else
-      sprintf('%.1f%', val * 100.0)
+      sprintf('%.1f%%', val * 100.0)
     end
   end
 
@@ -190,11 +184,15 @@ class FormatEnergyUnit
   end
 
   def self.type_format(unit, medium)
-    if medium == :html && UNIT_DESCRIPTION_HTML.key?(unit)
-      UNIT_DESCRIPTION_HTML[unit]
+    if medium == :html && I18n.t("analytics.energy_units").key?(html_key(unit))
+      I18n.t("analytics.energy_units")[html_key(unit)]
     else
       I18n.t("analytics.energy_units.#{unit}")
     end
+  end
+
+  private_class_method def self.html_key(unit)
+    "#{unit}_html".to_sym
   end
 
   def self.known_unit?(unit)

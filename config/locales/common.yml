@@ -1077,6 +1077,7 @@ en:
       library_books: library books
       litre: litres
       m2: m2
+      m2_html: m<sup>2</sup>
       meters: meters
       morning_start_time: time of day
       offshore_wind_turbine_hours: offshore wind turbine hours
@@ -1088,6 +1089,7 @@ en:
       panels: solar PV panels
       percent: "%"
       percent_0dp: "%"
+      percent_html: "&percnt;"
       pupils: pupils
       r2: ''
       relative_percent: "%"
@@ -1111,6 +1113,7 @@ en:
       years_range: years
       "£": "£"
       "£_0dp": "£"
+      "£_html": "&pound;"
       "£_per_kva": "£/kVA"
       "£_per_kwh": "£/kWh"
       "£_range": "£"

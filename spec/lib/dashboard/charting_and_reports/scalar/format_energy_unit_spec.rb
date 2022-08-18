@@ -99,9 +99,14 @@ describe FormatEnergyUnit do
     end
   end
 
-  context 'other scalars' do
-    it 'does what?' do
-      pry
+  context '#percent_to_1_dp' do
+    it 'returns expected results' do
+      expect(FormatUnit.percent_to_1_dp(0.25, :text)).to eq("25.0%")
+      expect(FormatUnit.percent_to_1_dp(0.25, :html)).to eq("25.0&percnt;")
     end
+  end
+
+  context 'other scalars' do
+    it 'does what?'
   end
 end
