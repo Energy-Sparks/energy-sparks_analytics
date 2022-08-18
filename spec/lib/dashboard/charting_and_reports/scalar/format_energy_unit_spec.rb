@@ -98,4 +98,10 @@ describe FormatEnergyUnit do
       expect(FormatUnit.format(:unknown, 10, :text, true)).to eq("10")
     end
   end
+
+  context 'other scalars' do
+    it 'does what?' do
+      pry
+    end
+  end
 end
