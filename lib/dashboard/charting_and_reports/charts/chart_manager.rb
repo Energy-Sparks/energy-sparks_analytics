@@ -184,21 +184,8 @@ class ChartManager
   def configure_graph(aggregator, chart_config, chart_param, calculation_time, provide_advice: true)
     graph_definition = {}
     graph_definition[:title]          = translated_name_for(chart_param) || chart_config[:name]
-
     graph_definition[:x_axis]         = aggregator.x_axis
     graph_definition[:x_axis_ranges]  = aggregator.x_axis_bucket_date_ranges
-
-puts '----'
-puts aggregator.x_axis_bucket_date_ranges.inspect
-puts aggregator.bucketed_data.inspect
-puts aggregator.x_axis_label.inspect
-puts chart_param.inspect
-puts aggregator.data_labels.inspect
-puts aggregator.subtitle.inspect
-puts aggregator.multi_chart_x_axis_ranges.inspect
-puts '----'
-
-
     graph_definition[:x_data]         = aggregator.bucketed_data
     graph_definition[:x_axis_label]   = aggregator.x_axis_label unless aggregator.x_axis_label.nil?
     graph_definition[:chart1_type]    = chart_config[:chart1_type]

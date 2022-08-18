@@ -151,7 +151,7 @@ class XBucketWeek < XBucketBase
     (@first_sunday..data_end_date).step(7) do |date|
       if date + 6 <= data_end_date # make sure it use the final week if partial
         @x_axis_bucket_date_ranges.push([date, date + 6])
-        @x_axis.push(date.strftime(@key_string))
+        @x_axis.push(I18n.l(date, format: @key_string))
       end
     end
   end
