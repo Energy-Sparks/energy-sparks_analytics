@@ -12,7 +12,7 @@ describe FormatEnergyUnit do
       { units: :£,     expected: 113.66216439927433, medium: :raw,  type: Float }
     ].each do |config|
       it "formats value as #{config[:units]} to #{config[:medium]} as expected" do
-        result = FormatEnergyUnit.format(config[:units], value, config[:medium])
+        result = FormatUnit.format(config[:units], value, config[:medium])
         expect(result).to eq config[:expected]
         expect(result.class).to eq config[:type]
       end
@@ -27,7 +27,7 @@ describe FormatEnergyUnit do
       { units: :£,     expected: 113.66216439927433, medium: :raw,  type: Float }
     ].each do |config|
       it "formats value as #{config[:units]} to #{config[:medium]} as expected" do
-        result = FormatEnergyUnit.format(config[:units], value, config[:medium], false, false, :benchmark)
+        result = FormatUnit.format(config[:units], value, config[:medium], false, false, :benchmark)
         expect(result).to eq config[:expected]
         expect(result.class).to eq config[:type]
       end
@@ -42,7 +42,7 @@ describe FormatEnergyUnit do
       { units: :£,     expected: 113.66216439927433, medium: :raw,  type: Float }
     ].each do |config|
       it "formats value as #{config[:units]} to #{config[:medium]} as expected" do
-        result = FormatEnergyUnit.format(config[:units], value, config[:medium], false, false, :energy_expert)
+        result = FormatUnit.format(config[:units], value, config[:medium], false, false, :energy_expert)
         expect(result).to eq config[:expected]
         expect(result.class).to eq config[:type]
       end
@@ -57,7 +57,7 @@ describe FormatEnergyUnit do
       { units: :£,     expected: 113.66216439927433, medium: :raw,  type: Float }
     ].each do |config|
       it "formats value as #{config[:units]} to #{config[:medium]} as expected" do
-        result = FormatEnergyUnit.format(config[:units], value, config[:medium], false, false, :to_pence)
+        result = FormatUnit.format(config[:units], value, config[:medium], false, false, :to_pence)
         expect(result).to eq config[:expected]
         expect(result.class).to eq config[:type]
       end
@@ -99,30 +99,30 @@ describe FormatEnergyUnit do
     context ':date' do
       it 'formats Dates' do
         date = Date.new(2000,1,1)
-        expect(FormatEnergyUnit.format(:date, date, :text)).to eq "Saturday  1 Jan 2000"
+        expect(FormatUnit.format(:date, date, :text)).to eq "Saturday  1 Jan 2000"
       end
       it 'formats String as a date' do
-        expect(FormatEnergyUnit.format(:date, "2000-01-01", :text)).to eq "Saturday  1 Jan 2000"
+        expect(FormatUnit.format(:date, "2000-01-01", :text)).to eq "Saturday  1 Jan 2000"
       end
     end
     context ':datetime' do
       it 'formats Date as a date time' do
         date = Date.new(2000,1,1)
-        expect(FormatEnergyUnit.format(:datetime, date, :text)).to eq "Saturday  1 Jan 2000 00:00"
+        expect(FormatUnit.format(:datetime, date, :text)).to eq "Saturday  1 Jan 2000 00:00"
         date = DateTime.new(2000,1,1,14,40)
-        expect(FormatEnergyUnit.format(:datetime, date, :text)).to eq "Saturday  1 Jan 2000 14:40"
+        expect(FormatUnit.format(:datetime, date, :text)).to eq "Saturday  1 Jan 2000 14:40"
       end
       it 'formats String as a date time' do
-        expect(FormatEnergyUnit.format(:datetime, "2000-01-01", :text)).to eq "Saturday  1 Jan 2000 00:00"
+        expect(FormatUnit.format(:datetime, "2000-01-01", :text)).to eq "Saturday  1 Jan 2000 00:00"
       end
     end
     context ':date_mmm_yyyy' do
       it 'formats Dates' do
         date = Date.new(2000,1,1)
-        expect(FormatEnergyUnit.format(:date_mmm_yyyy, date, :text)).to eq "Jan 2000"
+        expect(FormatUnit.format(:date_mmm_yyyy, date, :text)).to eq "Jan 2000"
       end
       it 'formats String as a date' do
-        expect(FormatEnergyUnit.format(:date_mmm_yyyy, "2000-01-01", :text)).to eq "Jan 2000"
+        expect(FormatUnit.format(:date_mmm_yyyy, "2000-01-01", :text)).to eq "Jan 2000"
       end
     end
     context ':days' do
@@ -154,7 +154,7 @@ describe FormatEnergyUnit do
     end
     context ':timeofday' do
       it 'formats correctly' do
-        expect(FormatEnergyUnit.format(:timeofday, "01:00")).to eq "01:00"
+        expect(FormatUnit.format(:timeofday, "01:00")).to eq "01:00"
       end
     end
   end

@@ -14,6 +14,10 @@ class FormatEnergyUnit
 
   ZERO = '0'.freeze
 
+  def self.percent_to_1_dp(val, medium = :html)
+    I18n.t(key_for_unit(:percent, medium), value: sprintf('%.1f', val * 100.0))
+  end
+
   def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
     if unit.is_a?(Hash) && unit.key?(:substitute_nil)
       if value.nil? || value == unit[:substitute_nil]
@@ -25,7 +29,7 @@ class FormatEnergyUnit
     format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
   end
 
-  def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
+  private_class_method def self.format_private(unit, value, medium, convert_missing_types_to_strings, in_table, user_numeric_comprehension_level)
     return value if medium == :raw || no_recent_or_not_enough_data?(value)
     return '' if value.nil? #  && in_table - PH 20Nov2019 experimental change to tidying blank cells on heads summary table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
@@ -75,7 +79,7 @@ class FormatEnergyUnit
 
   #This is the default formatter used by most of the units, except for the dates,
   #times, money and percentages. Formats the number and then adds the units
-  def self.default_format(unit, value, medium, in_table, user_numeric_comprehension_level)
+  private_class_method def self.default_format(unit, value, medium, in_table, user_numeric_comprehension_level)
     value = scale_num(value, false, user_numeric_comprehension_level)
     if in_table
       value.to_s
@@ -84,16 +88,16 @@ class FormatEnergyUnit
     end
   end
 
-  def self.format_temperature(value)
+  private_class_method def self.format_temperature(value)
     I18n.t(key_for_unit(:temperature), value: value.round(1))
   end
 
-  def self.format_date(value, format)
+  private_class_method def self.format_date(value, format)
     date = value.is_a?(String) ? Date.parse(value) : value
     I18n.l(date, format: format)
   end
 
-  def self.format_percent(value, unit, user_numeric_comprehension_level, medium)
+  private_class_method def self.format_percent(value, unit, user_numeric_comprehension_level, medium)
     user_numeric_comprehension_level = :no_decimals if %i[percent_0dp relative_percent_0dp].include?(unit)
 
     formatted_val = scale_num(value * 100.0, false, user_numeric_comprehension_level)
@@ -105,12 +109,8 @@ class FormatEnergyUnit
     end
   end
 
-  def self.percent_to_1_dp(val, medium = :html)
-    I18n.t(key_for_unit(:percent, medium), value: sprintf('%.1f', val * 100.0))
-  end
-
   # 1.234 => +1,230%, 0.105 => +10%, 0.095 => +9.5%, 0.005 => +0.5%, 0.0005 => +0.0%
-  def self.format_comparison_percent(value, medium)
+  private_class_method def self.format_comparison_percent(value, medium)
     percent = value * 100.0
 
     pct_str = if !percent.infinite?.nil?
@@ -126,7 +126,7 @@ class FormatEnergyUnit
     I18n.t(key_for_unit(:percent, medium), value: pct_str)
   end
 
-  def self.format_years_range(range)
+  private_class_method def self.format_years_range(range)
     if range.first == range.last
       format_time(range.first)
     else
@@ -136,11 +136,11 @@ class FormatEnergyUnit
     end
   end
 
-  def self.shorten_school_name(value)
+  private_class_method def self.shorten_school_name(value)
     value.sub(' School', '').sub('Ysgol ', '')
   end
 
-  def self.format_pound_range(range, medium, user_numeric_comprehension_level)
+  private_class_method def self.format_pound_range(range, medium, user_numeric_comprehension_level)
     if ((range.last - range.first) / range.last).magnitude < 0.05 ||
       (range.first.magnitude < 0.005 && range.last.magnitude < 0.005)
       format_pounds(:£,range.first, medium, user_numeric_comprehension_level)
@@ -187,7 +187,7 @@ class FormatEnergyUnit
     end
   end
 
-  def self.months_from_years(years)
+  private_class_method def self.months_from_years(years)
     (years * 12.0).round(0)
   end
 
@@ -216,7 +216,7 @@ class FormatEnergyUnit
     I18n.t(ENERGY_UNITS).key?(unit)
   end
 
-  def self.check_units(unit)
+  private_class_method def self.check_units(unit)
     unless known_unit?(unit)
       raise EnergySparksUnexpectedStateException.new("Unexpected unit #{unit}")
     end
@@ -258,20 +258,20 @@ class FormatEnergyUnit
     end
   end
 
-  def self.no_recent_or_not_enough_data?(value)
+  private_class_method def self.no_recent_or_not_enough_data?(value)
     [
       ManagementSummaryTable::NO_RECENT_DATA_MESSAGE,
       ManagementSummaryTable::NOT_ENOUGH_DATA_MESSAGE
     ].include?(value)
   end
 
-  def self.significant_figures_user_type(value, user_numeric_comprehension_level)
+  private_class_method def self.significant_figures_user_type(value, user_numeric_comprehension_level)
     return value.round(0) if user_numeric_comprehension_level == :no_decimals
     return value.round(2) if user_numeric_comprehension_level == :to_pence
     significant_figures(value, user_numeric_comprehension_level(user_numeric_comprehension_level))
   end
 
-  def self.significant_figures(value, significant_figures)
+  private_class_method def self.significant_figures(value, significant_figures)
     return 0 if value.nil? || value.zero?
     BigDecimal(value, significant_figures).to_f # value.round(-(Math.log10(value).ceil - significant_figures))
   end

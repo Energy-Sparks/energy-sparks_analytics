@@ -80,20 +80,20 @@ en:
       "£_per_kwh_html": "%{sign}&pound;%{value}/kWh"
       "£_range": "%{low} to %{high}"
     units:
-      infinity: Infinity
-      nan: Uncalculable
       days:
         one: "%{count} day"
         other: "%{count} days"
       hours:
         one: "%{count} hour"
         other: "%{count} hours"
+      infinity: Infinity
       minutes:
         one: "%{count} minute"
         other: "%{count} minutes"
       months:
         one: "%{count} month"
         other: "%{count} months"
+      nan: Uncalculable
       weeks:
         one: "%{count} week"
         other: "%{count} weeks"
