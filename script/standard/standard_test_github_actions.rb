@@ -2,15 +2,15 @@
 # error logging and using an anonymised meter reading file.
 # It requires a test output folder with a meter collections yaml file with 'acme-academy' in the 
 # name (e.g. unvalidated-data-acme-academy.yaml). This needs to be stored in a `MeterCollections` folder, 
-# within your test_ouputs folder, at run time, for example:
+# within your test_ouputs folder at run time, for example:
 #
 # energy-sparks_analytics
 #   - test_ouput
 #     - MeterCollections
 #       - unvalidated-data-acme-academy.yaml
 #
-# To run this test you need to set the ANALYTICSTESTDIR environment variable to points to the output directory 
-# as described above. e.g.
+# To run this test you need to set the ANALYTICSTESTDIR environment variable to point to the test output 
+# directory as described above. e.g.
 #
 # ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_electricity_simulator.rb
 #
