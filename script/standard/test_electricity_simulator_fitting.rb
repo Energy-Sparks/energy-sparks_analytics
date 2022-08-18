@@ -5,10 +5,10 @@ require_rel '../test_support'
 require './script/report_config_support.rb'
 
 # school_name = 'Westfield Primary' 
-# module Logging
-#   @logger = Logger.new('Results/test-simulator-fit ' + Time.now.strftime('%H %M') + '.log')
-#   @logger.level = :debug # :debug
-# end
+module Logging
+  @logger = Logger.new('Results/test-simulator-fit ' + Time.now.strftime('%H %M') + '.log')
+  @logger.level = :debug # :debug
+end
 ENV['AWESOMEPRINT'] = 'off'
 
 puts "========================================================================================"

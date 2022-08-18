@@ -3,10 +3,10 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 ENV['ENERGYSPARKSTESTMODE'] = 'ON'
 
-# module Logging
-#   @logger = Logger.new(File.join('log', 'benchmarks.log'))
-#   logger.level = :error
-# end
+module Logging
+  @logger = Logger.new(File.join('log', 'benchmarks.log'))
+  logger.level = :error
+end
 
 run_date = Date.new(2022, 8, 5)
 

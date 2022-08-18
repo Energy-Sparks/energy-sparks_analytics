@@ -6,10 +6,10 @@ require 'ruby-prof'
 
 profile = false
 
-# module Logging
-#   @logger = Logger.new('log/building simulation ' + Time.now.strftime('%H %M') + '.log')
-#   logger.level = :debug
-# end
+module Logging
+  @logger = Logger.new('log/building simulation ' + Time.now.strftime('%H %M') + '.log')
+  logger.level = :debug
+end
 
 school_name_pattern_match = ['*athampton*']
 source_db = :aggregated_meter_collection # :analytics_db

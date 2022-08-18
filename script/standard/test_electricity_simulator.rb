@@ -11,10 +11,10 @@ require './script/report_config_support.rb'
 
 school_name = 'St Marks Secondary'
 
-# module Logging
-#   @logger = Logger.new('log/test-simulator ' + Time.now.strftime('%H %M') + '.log')
-#   logger.level = :debug # :debug
-# end
+module Logging
+  @logger = Logger.new('log/test-simulator ' + Time.now.strftime('%H %M') + '.log')
+  logger.level = :debug # :debug
+end
 
 reports = ReportConfigSupport.new
 

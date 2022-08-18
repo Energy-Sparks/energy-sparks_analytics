@@ -4,10 +4,10 @@ require_relative '../../lib/dashboard.rb'
 require_rel '../../test_support'
 require './script/report_config_support.rb'
 
-# module Logging
-#   @logger = Logger.new(File.join('log', 'logs.log'))
-#   logger.level = :error
-# end
+module Logging
+  @logger = Logger.new(File.join('log', 'logs.log'))
+  logger.level = :error
+end
 
 run_date = Date.new(2022, 4, 23)
 
