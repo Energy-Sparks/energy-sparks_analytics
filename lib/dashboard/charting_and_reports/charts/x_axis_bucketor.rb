@@ -33,9 +33,9 @@ class XBucketBase
   def compact_date_range_description
     format = '%a%d%b%y'
     if data_start_date != data_end_date
-      data_start_date.strftime(format) + '-' + data_end_date.strftime(format)
+      I18n.l(data_start_date, format: format) + '-' + I18n.l(data_end_date, format: format)
     else
-      data_start_date.strftime(format)
+      I18n.l(data_start_date, format: format)
     end
   end
 
@@ -72,13 +72,13 @@ class XBucketMonth < XBucketBase
   end
 
   def key(date, _halfhour_index)
-    date.strftime("%b %Y")
+    I18n.l(date, format: '%b %Y')
   end
 
   def create_x_axis
     first_day_of_month = data_start_date # .beginning_of_month
     while first_day_of_month <= data_end_date
-      @x_axis.push(first_day_of_month.strftime("%b %Y"))
+      @x_axis.push(I18n.l(first_day_of_month, format: "%b %Y"))
       last_day_of_month = first_day_of_month.beginning_of_month.next_month - 1 # can't use end_of_month as there is a active_support error: undefined method `days_in_month'
       @x_axis_bucket_date_ranges.push([first_day_of_month, last_day_of_month])
       first_day_of_month = first_day_of_month.next_month.beginning_of_month
@@ -98,7 +98,10 @@ class XBucketAcademicYear < XBucketBase
   end
 
   def description(period)
-    'Academic Year ' + period.start_date.strftime("%y") + '/' + period.end_date.strftime("%y")
+    start_year = period.start_date.strftime("%y")
+    end_year = period.end_date.strftime("%y")
+
+    I18n.t('analysis.x_axis_bucketor.academic_year', start_year: start_year, end_year: end_year) || "Academic Year #{start_year}/#{end_year}"
   end
 
   def create_x_axis
@@ -241,11 +244,11 @@ class XBucketDayOfWeek < XBucketBase
   end
 
   def key(date, _halfhour_index)
-    Date::DAYNAMES[date.wday]
+    I18nHelper.day_name(date.wday)
   end
 
   def create_x_axis
-    @x_axis = Date::DAYNAMES
+    @x_axis = I18n.t('analysis.day_names', default: nil) || Date::DAYNAMES
 
     # this bit is a slight fudge as the x_axis doesn't have date buckets, only days of week
     (data_start_date..data_end_date).each do |date|
@@ -261,12 +264,12 @@ class XBucketSingle < XBucketBase
   end
 
   def key(_date, _halfhour_index)
-    'No Dates'
+    I18n.t('analytics.x_axis_bucketor.no_dates', defualt: nil) || 'No Dates'
   end
 
   def create_x_axis
     @x_axis_bucket_date_ranges.push([data_start_date, data_end_date])
-    @x_axis.push('No Dates')
+    @x_axis.push(I18n.t('analytics.x_axis_bucketor.no_dates', default: nil) || 'No Dates')
   end
 
   def index(_date, _halfhour_index)
