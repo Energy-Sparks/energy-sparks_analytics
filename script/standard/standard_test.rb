@@ -3,6 +3,7 @@ require_relative '../../lib/dashboard.rb'
 require_all './test_support/'
 
 module Logging
+  @logger = Logger.new(File.join('log', 'standard test.log'))
   logger.level = :debug
 end
 
@@ -22,7 +23,7 @@ overrides = {
   schools: schools.map{ |sc| sc[:name] },
 }
 
-run_date = Date.new(2022, 2, 1)
+run_date = Date.new(2022, 8, 5)
 
 benchmark_params = {
   benchmarks: {

@@ -157,7 +157,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     previous_period_data_unadjusted = meter_values_period(current_period)
 
     @difference_kwh     = current_period_data[:kwh] - previous_period_data[:kwh]
-    @calculation_issue  = calculate_calculation_issue(current_period_data[:kwh], previous_period_data[:kwh])
     @difference_£       = current_period_data[:£]   - previous_period_data[:£]
     @difference_co2     = current_period_data[:co2] - previous_period_data[:co2]
 
@@ -165,12 +164,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @abs_difference_£   = @difference_£.magnitude
     @abs_difference_co2 = @difference_co2.magnitude
 
-    # put in a large percent if the usage was zero during the last period
-    # fixes St Louis autumn 2019 half term verus zero summer holiday -inf in benchmarking (PH, 17Dec2019)
-    # reinstated (PH, 19Sep2020) - King Edwards + 1 other gas school week comparison
-    @difference_percent = calc_percent_difference(difference_kwh, previous_period_data[:kwh])
-
-    # @difference_percent = difference_kwh  / previous_period_data[:kwh]
+    @difference_percent = difference_kwh  / previous_period_data[:kwh]
     @abs_difference_percent = @difference_percent.magnitude
 
     @current_period_kwh         = current_period_data[:kwh]
@@ -268,7 +262,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def pupil_floor_area_adjustment
     if fuel_type == :gas
-      @current_floor_area / @previous_floor_area
+      @current_period_floor_area / @previous_period_floor_area
     else
       @current_period_pupils / @previous_period_pupils
     end
