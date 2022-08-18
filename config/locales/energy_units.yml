@@ -44,6 +44,7 @@ en:
       onshore_wind_turbines: "%{value} onshore wind turbines"
       opt_start_standard_deviation: "%{value} standard deviation (hours)"
       optimum_start_sensitivity: "%{value} hours/C"
+      p: "%{value}p"
       panels: "%{value} solar PV panels"
       percent: "%"
       percent_0dp: "%"
@@ -78,4 +79,3 @@ en:
       "£_per_kwh": "%{sign}£%{value}/kWh"
       "£_per_kwh_html": "%{sign}&pound;%{value}/kWh"
       "£_range": "%{low} to %{high}"
-      "p": "%{value}p"
