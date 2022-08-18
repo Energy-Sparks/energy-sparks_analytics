@@ -22,22 +22,15 @@ class FormatEnergyUnit
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
     return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
 
-    #From inspection, this only seems to be used via HtmlTableFormatting.format_value
+    #From inspection this only seems to be used via HtmlTableFormatting.format_value
     #FormatEnergyUnit.format(row_units, val, :html, true, table_format, precision)
     #This line of code means that any unknown units in the table will be converted to a string
     #all others will be formatted to the specified precision
     return value.to_s if convert_missing_types_to_strings && !known_unit?(unit)
     check_units(unit)
 
-    if value.nil? && unit != :temperature
-      #TODO with the revise format, this won't work
-      I18n.t("analytics.energy_units.#{unit}")
-    elsif unit == :£ || unit == :£_0dp
-      format_pounds(value, medium, user_numeric_comprehension_level, unit == :£_0dp)
-    elsif unit == :£_per_kwh
-      format_pounds(value, medium, user_numeric_comprehension_level) + '/kWh'
-    elsif unit == :£_per_kva
-      format_pounds(value, medium, user_numeric_comprehension_level) + '/kVA'
+    if %i[£ £_0dp £_per_kwh £_per_kva].include?(unit)
+      format_pounds(unit, value, medium, user_numeric_comprehension_level, unit == :£_0dp)
     elsif unit == :£_range
       format_pound_range(value, medium, user_numeric_comprehension_level)
     elsif unit == :r2
@@ -68,15 +61,11 @@ class FormatEnergyUnit
       value.to_s
     else
       default_format(unit, value, medium, in_table, user_numeric_comprehension_level)
-#      "#{scale_num(value, false, user_numeric_comprehension_level)}" + (in_table ? '' : " #{type_format(unit, medium)}")
     end
   end
 
-  #TODO: this is the fallback which produced, e.g. 1 years, 10 computer consoles, etc
-  #This needs to be changed to:
-  #return number as a string, if in table
-  #return an i18n string using html key if medium = :html
-  #otherwise default key
+  #This is the default formatter used by most of the units, except for the dates,
+  #times, money and percentages. Formats the number and then adds the units
   def self.default_format(unit, value, medium, in_table, user_numeric_comprehension_level)
     value = scale_num(value, false, user_numeric_comprehension_level)
     if in_table
@@ -123,15 +112,6 @@ class FormatEnergyUnit
     pct_str + type_format(:percent, medium)
   end
 
-  def self.format_pound_range(range, medium, user_numeric_comprehension_level)
-    if ((range.last - range.first) / range.last).magnitude < 0.05 ||
-      (range.first.magnitude < 0.005 && range.last.magnitude < 0.005)
-      format_pounds(range.first, medium, user_numeric_comprehension_level)
-    else
-      format_pounds(range.first, medium, user_numeric_comprehension_level) + ' to ' + format_pounds(range.last, medium, user_numeric_comprehension_level)
-    end
-  end
-
   def self.format_years_range(range)
     if range.first == range.last
       format_time(range.first)
@@ -144,13 +124,24 @@ class FormatEnergyUnit
     value.sub(' School', '').sub('Ysgol ', '')
   end
 
-  def self.format_pounds(value, medium, user_numeric_comprehension_level, no_dp = false)
+  def self.format_pound_range(range, medium, user_numeric_comprehension_level)
+    if ((range.last - range.first) / range.last).magnitude < 0.05 ||
+      (range.first.magnitude < 0.005 && range.last.magnitude < 0.005)
+      format_pounds(:£,range.first, medium, user_numeric_comprehension_level)
+    else
+      I18n.t(key_for_unit(:£_range, medium),
+        low: format_pounds(:£,range.first, medium, user_numeric_comprehension_level),
+        high: format_pounds(:£,range.last, medium, user_numeric_comprehension_level))
+    end
+  end
+
+  def self.format_pounds(unit, value, medium, user_numeric_comprehension_level, no_dp = false)
     user_numeric_comprehension_level = :no_decimals if no_dp
     if value.magnitude >= 1.0
       # £-40.00 => -£40.00
-      (value < 0.0 ? '-' : '') + type_format(:£, medium) + scale_num(value.magnitude, true, user_numeric_comprehension_level)
+      I18n.t(key_for_unit(unit, medium), sign: (value < 0.0 ? '-' : ''), value: scale_num(value.magnitude, true, user_numeric_comprehension_level))
     else
-      scale_num(value * 100.0, true, user_numeric_comprehension_level) + 'p'
+      I18n.t(key_for_unit(:p, medium), value: scale_num(value * 100.0, true, user_numeric_comprehension_level))
     end
   end
 

@@ -156,20 +156,45 @@ describe FormatEnergyUnit do
   end
 
   context 'money' do
+    context "pence" do
+      it "formats correctly" do
+        expect(FormatUnit.format(:£, 0.5)).to eq "50p"
+        expect(FormatUnit.format(:£, 0.5, :html)).to eq "50p"
+      end
+    end
     context ":£" do
-      it "formats correctly"
+      it "formats correctly" do
+        expect(FormatUnit.format(:£, 10)).to eq "£10"
+        expect(FormatUnit.format(:£, 10, :html)).to eq "&pound;10"
+      end
     end
     context ":£_0dp" do
-      it "formats correctly"
+      it "formats correctly" do
+        expect(FormatUnit.format(:£_0dp, 10)).to eq "£10"
+        expect(FormatUnit.format(:£_0dp, 10, :html)).to eq "&pound;10"
+      end
     end
+
     context ":£_per_kva" do
-      it "formats correctly"
+      it "formats correctly" do
+        expect(FormatUnit.format(:£_per_kva, 10)).to eq "£10/kVA"
+        expect(FormatUnit.format(:£_per_kva, 10, :html)).to eq "&pound;10/kVA"
+      end
     end
+
     context ":£_per_kwh" do
-      it "formats correctly"
+      it "formats correctly" do
+        expect(FormatUnit.format(:£_per_kwh, 10)).to eq "£10/kWh"
+        expect(FormatUnit.format(:£_per_kwh, 10, :html)).to eq "&pound;10/kWh"
+      end
     end
     context ":£_range" do
-      it "formats correctly"
+      it "formats correctly" do
+        expect(FormatUnit.format(:£_range, 730.0..740.0)).to eq "£730"
+        expect(FormatUnit.format(:£_range, 730.0..2190.0)).to eq "£730 to £2,200"
+        expect(FormatUnit.format(:£_range, -2190.0..2190.0)).to eq "-£2,200 to £2,200"
+        expect(FormatUnit.format(:£_range, 0..2190.0)).to eq "0p to £2,200"
+      end
     end
   end
 
@@ -218,7 +243,15 @@ describe FormatEnergyUnit do
   end
 
   context 'nil values' do
-    it 'formats correctly'
+    it 'formats correctly' do
+      expect(FormatUnit.format(:date, nil)).to eq('')
+    end
+  end
+
+  context 'floats' do
+    it 'formats correctly' do
+      expect(FormatUnit.format(Float, 0.01)).to eq('0.01')
+    end
   end
 
   context 'default formatting of other units' do
