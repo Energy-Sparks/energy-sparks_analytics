@@ -84,24 +84,22 @@ class FormatEnergyUnit
     I18n.l(date, format: format)
   end
 
-  #TODO remove string concat
   def self.format_percent(value, unit, user_numeric_comprehension_level, medium)
     user_numeric_comprehension_level = :no_decimals if %i[percent_0dp relative_percent_0dp].include?(unit)
-    formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
-    formatted_val = '+' + formatted_val if %i[relative_percent relative_percent_0dp].include?(unit) && value > 0.0
-    formatted_val
-  end
 
-  #TODO remove string concat
-  def self.percent_to_1_dp(val, medium = :html)
-    if medium == :html
-      sprintf('%.1f', val * 100.0) + type_format(:percent, :html)
+    formatted_val = scale_num(value * 100.0, false, user_numeric_comprehension_level)
+
+    if %i[relative_percent relative_percent_0dp].include?(unit) && value > 0.0
+      I18n.t(key_for_unit(unit, medium), sign: '+', value: formatted_val)
     else
-      sprintf('%.1f%%', val * 100.0)
+      I18n.t(key_for_unit(unit, medium), sign: '', value: formatted_val)
     end
   end
 
-  #TODO remove string concat
+  def self.percent_to_1_dp(val, medium = :html)
+    I18n.t(key_for_unit(:percent, medium), value: sprintf('%.1f', val * 100.0))
+  end
+
   # 1.234 => +1,230%, 0.105 => +10%, 0.095 => +9.5%, 0.005 => +0.5%, 0.0005 => +0.0%
   def self.format_comparison_percent(value, medium)
     percent = value * 100.0
@@ -116,7 +114,7 @@ class FormatEnergyUnit
                 scale_num(percent)
               end
 
-    pct_str + type_format(:percent, medium)
+    I18n.t(key_for_unit(:percent, medium), value: pct_str)
   end
 
   def self.format_years_range(range)
@@ -184,11 +182,6 @@ class FormatEnergyUnit
 
   private_class_method def self.format_days(days)
     I18n.t("analytics.days", count: days.to_i)
-  end
-
-  #TODO remove
-  def self.type_format(unit, medium)
-    I18n.t(key_for_unit(unit, medium))
   end
 
   private_class_method def self.key_for_unit(unit, medium)

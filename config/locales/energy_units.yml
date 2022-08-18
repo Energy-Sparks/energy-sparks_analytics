@@ -65,13 +65,13 @@ en:
       optimum_start_sensitivity: "%{value} hours/C"
       p: "%{value}p"
       panels: "%{value} solar PV panels"
-      percent: "%"
-      percent_0dp: "%"
-      percent_html: "&percnt;"
+      percent: "%{value}%"
+      percent_0dp: "%{value}%"
+      percent_html: "%{value}&percnt;"
       pupils: "%{value} pupils"
       r2: ''
-      relative_percent: "%"
-      relative_percent_0dp: "%"
+      relative_percent: "%{sign}%{value}%"
+      relative_percent_0dp: "%{sign}%{value}%"
       school_name: ''
       short_school_name: ''
       shower: "%{value} showers"
