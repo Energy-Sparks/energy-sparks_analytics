@@ -412,17 +412,17 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     get_energy_usage('storage heaters', :electricity, index_of_most_recent_date)
   end
 
-  protected def electric_comparison_regional
+  protected def electric_comparison_benchmark
     compare = comparison('electricity', index_of_data(benchmark_school_name))
     generate_html(%{ The electricity usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
-  protected def gas_comparison_regional
+  protected def gas_comparison_benchmark
     compare = comparison('gas', index_of_data(benchmark_school_name))
     generate_html(%{ The gas usage <%= compare %>: }.gsub(/^  /, ''), binding)
   end
 
-  protected def storage_heater_comparison
+  protected def storage_heater_benchmark_comparison
     compare = comparison('storage heaters', index_of_data(benchmark_school_name))
     generate_html(%{ The storage heater usage <%= compare %>: }.gsub(/^  /, ''), binding)
   end
@@ -454,23 +454,23 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
       <p>
         <% if actual_gas_usage > 0 && actual_electricity_usage <= 0 %>
           <%= energy_usage_intro('gas', gas_usage) %>
-          <%= gas_comparison_regional %>
+          <%= gas_comparison_benchmark %>
         <% elsif actual_electricity_usage > 0 && actual_gas_usage <= 0 && actual_storage_heater_usage <= 0 %>
           <%= energy_usage_intro('electricity', electric_usage) %>
-          <%= electric_comparison_regional %>
+          <%= electric_comparison_benchmark %>
         <% elsif actual_electricity_usage > 0 && actual_storage_heater_usage > 0 %>
           <%= energy_usage_intro('storage heating', storage_heater_usage, ',') %>
           plus <%= electric_usage %> for the remaining electrical appliances (lighting. ICT etc.).
-          <%= electric_comparison_regional %>
-          <%= storage_heater_comparison_regional %>
+          <%= electric_comparison_benchmark %>
+          <%= storage_heater_benchmark_comparison %>
         <% elsif actual_storage_heater_usage > 0 %>
           <%= energy_usage_intro('storage heating', storage_heater_usage, ',') %>
-          <%= storage_heater_comparison_regional %>
+          <%= storage_heater_benchmark_comparison %>
         <% else %>
           Your school <%= usage_adjective %> <%= electric_usage %> <%= usage_preposition %> electricity
           and <%= gas_usage %> <%= usage_preposition %> gas last year.
-          <%= electric_comparison_regional %>
-          <%= gas_comparison_regional %>
+          <%= electric_comparison_benchmark %>
+          <%= gas_comparison_benchmark %>
         <% end %>
       </p>
       <%= @body_end %>
@@ -481,11 +481,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     footer_template = %{
       <p>
       <% if actual_gas_usage > 0 %>
-        Your gas usage is <%= percent(percent_gas_of_regional_average) %> of the regional average which
+        Your gas usage is <%= percent(percent_gas_of_benchmark_average) %> of well managed schools which
         <% if actual_gas_usage < exemplar_gas_usage %>
           is very good.
         <% else %>
-          <% if actual_gas_usage < average_regional_gas_usage %>
+          <% if actual_gas_usage < average_benchmark_gas_usage %>
             although good, could be improved
           <% else %>
             is above average, the school should aim to reduce this,
@@ -494,11 +494,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <% end %>
       <% end %>
       <% if actual_electricity_usage > 0 %>
-        Your electricity usage is <%= percent(percent_electricity_of_regional_average) %> of the regional average which
+        Your electricity usage is <%= percent(percent_electricity_of_benchmark_average) %> of well managed schools which
         <% if actual_electricity_usage < exemplar_electricity_usage %>
           is very good.
         <% else %>
-          <% if actual_electricity_usage < average_regional_electricity_usage %>
+          <% if actual_electricity_usage < average_benchmark_electricity_usage %>
             although good, could be improved
           <% else %>
             is above average, the school should aim to reduce this,
@@ -510,9 +510,9 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
       </p>
       <% if actual_gas_usage > 0 %>
         <p>
-          <% if percent_gas_of_regional_average < 0.7 %>
+          <% if percent_gas_of_benchmark_average < 0.7 %>
             Well done you gas usage is very low and you should be congratulated for being an energy efficient school.
-          <% elsif percent_gas_of_regional_average < 0.7 && percent_electricity_of_regional_average < 0.7 %>
+          <% elsif percent_gas_of_benchmark_average < 0.7 && percent_electricity_of_benchmark_average < 0.7 %>
             Well done you energy usage is very low and you should be congratulated for being an energy efficient school.
           <% else %>
             Whether you have old or new school buildings, good energy management and best
@@ -625,11 +625,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
 
-  def average_regional_electricity_usage
+  def average_benchmark_electricity_usage
     actual_fuel_usage('electricity', index_of_data(benchmark_school_name))
   end
 
-  def average_regional_gas_usage
+  def average_benchmark_gas_usage
     actual_fuel_usage('gas', index_of_data(benchmark_school_name))
   end
 
@@ -641,12 +641,12 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     actual_fuel_usage('gas', index_of_data(exemplar_school_name))
   end
 
-  def percent_gas_of_regional_average
-    actual_gas_usage / average_regional_gas_usage
+  def percent_gas_of_benchmark_average
+    actual_gas_usage / average_benchmark_gas_usage
   end
 
-  def percent_electricity_of_regional_average
-    actual_electricity_usage / average_regional_electricity_usage
+  def percent_electricity_of_benchmark_average
+    actual_electricity_usage / average_benchmark_electricity_usage
   end
 
   def pound_gas_saving_versus_exemplar
@@ -760,7 +760,7 @@ class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
     benchmark_usage_kwh = FormatEnergyUnit.format(:kwh, benchmark_from_chart, :html)
 
     if formatted_usage_kwh == benchmark_usage_kwh # values same in formatted space
-      'is similar to regional schools which spent ' + benchmark_usage_kwh
+      'is similar to well managed schools which spent ' + benchmark_usage_kwh
     elsif usage_from_chart_kwh > benchmark_from_chart
       'is more than well managed schools which consumed ' + benchmark_usage_kwh
     else
