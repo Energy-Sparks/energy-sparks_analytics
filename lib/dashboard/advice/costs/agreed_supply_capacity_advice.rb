@@ -5,7 +5,7 @@ class AgreedSupplyCapacityAdvice
 
   def advice
     asc = agreed_supply_capacity
-      
+
     return [] if asc.nil?
 
     text = %(
@@ -22,12 +22,12 @@ class AgreedSupplyCapacityAdvice
         Your current maximum annual capacity usage of <%= asc[:kw] %> kW is significantly
         lower than your agreed limit of <%= asc[:agreed_limit_kw] %> kW
         for meter <%= @meter.mpxn %>.
-        
+
         <% if asc.key?(:annual_saving_£) %>
           By reducing your limit you could save up to
-          <%= FormatEnergyUnit.format_pounds(asc[:annual_saving_£], :html, :approx_accountant) %> per year.
+          <%= FormatEnergyUnit.format_pounds(:£, asc[:annual_saving_£], :html, :approx_accountant) %> per year.
         <% end %>
-        
+
         We suggest you contact your energy manager or energy supplier to discuss reducing the
         limit to save your costs. The main risk of doing this is if your annual usage goes up
         if you are planning on signficantly increasing the size of the school or electricity
@@ -59,7 +59,7 @@ class AgreedSupplyCapacityAdvice
 
       asc.merge!({ annual_cost_£: cost_£, annual_saving_£: saving_£ } )
     end
-    
+
     asc
   end
 
