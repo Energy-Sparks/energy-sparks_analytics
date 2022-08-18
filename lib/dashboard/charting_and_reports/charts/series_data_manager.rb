@@ -488,7 +488,7 @@ module Series
     def day_breakdown(d1, d2);           { single_name => school.temperatures.average_temperature_in_date_range(d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.temperatures.temperature(date, hhi) }; end
     private
-    def single_name; TEMPERATURE end
+    def single_name; I18n.t('analytics.series.temperature', default: TEMPERATURE) end
   end
 
   #=====================================================================================================
@@ -499,7 +499,7 @@ module Series
     def day_breakdown(d1, d2);           { single_name => school.solar_irradiation.average_daytime_irradiance_in_date_range(d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.solar_irradiation.solar_irradiance(date, hhi) }; end
     private
-    def single_name; IRRADIANCE end
+    def single_name; I18n.t('analytics.series.irradiance', default: IRRADIANCE) end
   end
 
   #=====================================================================================================
@@ -510,7 +510,7 @@ module Series
     def day_breakdown(d1, d2);           { single_name => school.grid_carbon_intensity.average_in_date_range(d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.grid_carbon_intensity.grid_carbon_intensity(date, hhi) }; end
     private
-    def single_name; GRIDCARBON end
+    def single_name; I18n.t('analytics.series.gridcarbon', default: GRIDCARBON) end
   end
 
   #=====================================================================================================
@@ -521,7 +521,7 @@ module Series
     def day_breakdown(_d1, _d2);          { single_name => EnergyEquivalences::UK_GAS_CO2_KG_KWH }; end
     def half_hour_breakdown(_date, _hhi); { single_name => EnergyEquivalences::UK_GAS_CO2_KG_KWH }; end
     private
-    def single_name; GASCARBON end
+    def single_name; I18n.t('analytics.series.gascarbon', default: GASCARBON) end
   end
 
   #=====================================================================================================
@@ -669,7 +669,7 @@ module Series
     def day_breakdown(d1, d2);           { single_name => school.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.temperatures.degree_hour(date, hhi, degreeday_base_temperature) }; end
     private
-    def single_name; I18n.t('analytics.series.degreedays') end
+    def single_name; I18n.t('analytics.series.degreedays', default: DEGREEDAYS) end
   end
 
   #=====================================================================================================
@@ -816,10 +816,10 @@ module Series
 
   #=====================================================================================================
   class MultipleFuels < ModelManagerBase
-    ELECTRICITY     = 'electricity'
-    GAS             = 'gas'
-    STORAGEHEATERS  = 'storage heaters'
-    SOLARPV         = 'solar pv (consumed onsite)' # think unused?
+    ELECTRICITY     = :electricity
+    GAS             = :gas
+    STORAGEHEATERS  = :storage_heaters
+    SOLARPV         = :solar_pv_consumed_onsite # think unused?
 
     def series_names
       aggregate_meters.keys

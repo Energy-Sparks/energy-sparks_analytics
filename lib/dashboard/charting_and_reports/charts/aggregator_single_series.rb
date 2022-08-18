@@ -109,7 +109,7 @@ class AggregatorSingleSeries < AggregatorBase
   end
 
   def translate_series_item_for(series_key)
-    item_name = I18n.t("analytics.aggregator_single_series.#{series_key}", default: nil)
+    item_name = I18n.t("analytics.series.#{series_key}", default: nil)
     return item_name if item_name
       
     if chart_config.series_breakdown  == :daytype
