@@ -50,7 +50,7 @@ jobs:
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
     - name: Run standard test
-      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/standard_test_github_action.rb
+      run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/standard_test_github_actions.rb
 
     # - name: Run standard tests
     #   run: ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/standard_test.rb
