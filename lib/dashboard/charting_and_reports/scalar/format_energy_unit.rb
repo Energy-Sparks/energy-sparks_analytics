@@ -1,9 +1,17 @@
 require 'bigdecimal'
 
 class FormatEnergyUnit
-  #TODO
-  INFINITY = 'Infinity'.freeze
-  NAN      = 'Uncalculable'.freeze
+
+  ENERGY_UNITS = 'analytics.energy_units'.freeze
+  INFINITY = 'analytics.units.infinity'.freeze
+  NAN      = 'analytics.units.nan'.freeze
+  MINUTES  = 'analytics.units.minutes'.freeze
+  HOURS    = 'analytics.units.hours'.freeze
+  DAYS     = 'analytics.units.days'.freeze
+  WEEKS    = 'analytics.units.weeks'.freeze
+  MONTHS   = 'analytics.units.months'.freeze
+  YEARS    = 'analytics.units.years'.freeze
+
   ZERO = '0'.freeze
 
   def self.format(unit, value, medium = :text, convert_missing_types_to_strings = false, in_table = false, user_numeric_comprehension_level = :ks2)
@@ -21,7 +29,7 @@ class FormatEnergyUnit
     return value if medium == :raw || no_recent_or_not_enough_data?(value)
     return '' if value.nil? #  && in_table - PH 20Nov2019 experimental change to tidying blank cells on heads summary table
     unit = unit.keys[0] if unit.is_a?(Hash) # if unit = {kwh: :gas} - ignore the :gas for formatting purposes
-    return "#{scale_num(value, false, user_numeric_comprehension_level)}" if unit == Float
+    return scale_num(value, false, user_numeric_comprehension_level).to_s if unit == Float
 
     #From inspection this only seems to be used via HtmlTableFormatting.format_value
     #FormatEnergyUnit.format(row_units, val, :html, true, table_format, precision)
@@ -106,7 +114,7 @@ class FormatEnergyUnit
     percent = value * 100.0
 
     pct_str = if !percent.infinite?.nil?
-                INFINITY
+                I18n.t(INFINITY)
               elsif percent.magnitude < 10.0
                 sprintf('%+.1f', percent)
               elsif percent.magnitude < 150.0
@@ -157,25 +165,25 @@ class FormatEnergyUnit
     if years < (1.0 / 365.0) && years > 0.0 # less than a day
       minutes = 24 * 60 * 365.0 * years
       if minutes < 90
-        I18n.t("analytics.units.minutes", count: minutes.round(0).to_s)
+        I18n.t(MINUTES, count: minutes.round(0).to_s)
       else
-        I18n.t("analytics.units.hours", count: (minutes / 60.0).round(0).to_s)
+        I18n.t(HOURS, count: (minutes / 60.0).round(0).to_s)
       end
     elsif years < (3.0 / 12.0) # less than 3 months
       days = (years * 365.0).round(0)
       if days <= 14
-        I18n.t("analytics.units.days", count: days.to_s)
+        I18n.t(DAYS, count: days.to_s)
       else
-        I18n.t("analytics.units.weeks", count: (days / 7.0).round(0).to_s)
+        I18n.t(WEEKS, count: (days / 7.0).round(0).to_s)
       end
     elsif years <= 1.51
-      I18n.t("analytics.units.months", count: months_from_years(years))
+      I18n.t(MONTHS, count: months_from_years(years))
     elsif years < 5.0
       y = years.floor
-      I18n.t("analytics.units.years", count: y) + " " +
-      I18n.t("analytics.units.months", count: months_from_years(years - y))
+      I18n.t(YEARS, count: y) + " " +
+      I18n.t(MONTHS, count: months_from_years(years - y))
     else
-      I18n.t("analytics.units.years", count: sprintf('%.0f', years))
+      I18n.t(YEARS, count: sprintf('%.0f', years))
     end
   end
 
@@ -184,16 +192,16 @@ class FormatEnergyUnit
   end
 
   private_class_method def self.format_days(days)
-    I18n.t("analytics.days", count: days.to_i)
+    I18n.t(DAYS, count: days.to_i)
   end
 
-  private_class_method def self.key_for_unit(unit, medium=:text)
-    default_key = "analytics.energy_units.#{unit}"
+  private_class_method def self.key_for_unit(unit, medium = :text)
+    default_key = "#{ENERGY_UNITS}.#{unit}".freeze
     if medium == :text
       default_key
     else
       html_key = html_key_for(unit)
-      I18n.t("analytics.energy_units").key?(html_key) ? "analytics.energy_units.#{html_key}" : default_key
+      I18n.t(ENERGY_UNITS).key?(html_key) ? "#{ENERGY_UNITS}.#{html_key}".freeze : default_key
     end
   end
 
@@ -205,7 +213,7 @@ class FormatEnergyUnit
     #originally used a hash of units (symbol) => unit label
     #now validate using the translation keys. This achieves same
     #goal whilst also ensuring we have added the unit to common.yml
-    I18n.t("analytics.energy_units").key?(unit)
+    I18n.t(ENERGY_UNITS).key?(unit)
   end
 
   def self.check_units(unit)
@@ -215,8 +223,8 @@ class FormatEnergyUnit
   end
 
   def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)
-    return INFINITY unless value.infinite?.nil?
-    return NAN if value.is_a?(Float) && value.nan?
+    return I18n.t(INFINITY) unless value.infinite?.nil?
+    return I18n.t(NAN) if value.is_a?(Float) && value.nan?
     number = significant_figures_user_type(value, user_numeric_comprehension_level)
     return ZERO if number.zero?
     number_as_string = number.to_s
@@ -227,7 +235,7 @@ class FormatEnergyUnit
       # add zero pence onto e.g. £23.1 so it becomes £23.10
       after_decimal_point += ZERO
     elsif number.magnitude >= 1000
-      return INFINITY unless number.infinite?.nil?
+      return I18n.t(INFINITY) unless number.infinite?.nil?
       return number.round(0).to_s.reverse!.gsub(/(\d{3})(?=\d)/, '\\1,').reverse! + after_decimal_point
     end
     before_decimal_point + after_decimal_point
@@ -246,7 +254,7 @@ class FormatEnergyUnit
       10
     else
       raise EnergySparksUnexpectedStateException.new('Unexpected nil user_type for user_numeric_comprehension_level') if user_type.nil?
-      raise EnergySparksUnexpectedStateException.new("Unexpected nil user_type #{user_type}for user_numeric_comprehension_level") if user_type.nil?
+      raise EnergySparksUnexpectedStateException.new("Unexpected nil user_type #{user_type} for user_numeric_comprehension_level") if user_type.nil?
     end
   end
 

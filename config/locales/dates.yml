@@ -1,9 +1,5 @@
 ---
 en:
-  analytics:
-    days:
-      one: "%{count} day"
-      other: "%{count} days"
   date:
     abbr_day_names:
     - Sun
@@ -14,7 +10,7 @@ en:
     - Fri
     - Sat
     abbr_month_names:
-    - 
+    -
     - Jan
     - Feb
     - Mar
@@ -36,7 +32,7 @@ en:
     - Friday
     - Saturday
     month_names:
-    - 
+    -
     - January
     - February
     - March

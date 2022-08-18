@@ -279,6 +279,10 @@ describe FormatEnergyUnit do
     it 'formats correctly' do
       expect(FormatUnit.format(Float, 0.01)).to eq('0.01')
     end
+    it 'handles infinity' do
+      expect(FormatUnit.format(Float, Float::NAN)).to eq("Uncalculable")
+      expect(FormatUnit.format(Float, Float::INFINITY)).to eq("Infinity")
+    end
   end
 
   context 'default formatting of other units' do
