@@ -1,21 +1,26 @@
+# This is a copy of the standard_tests.rb test script, adapted so we can run it on Github actions without 
+# error logging and using an anonymised meter reading file.
+# It requires a test output folder with a meter collections yaml file with 'acme-academy' in the 
+# name (e.g. unvalidated-data-acme-academy.yaml). This needs to be stored in a `MeterCollections` folder, 
+# within your test_ouputs folder, at run time, for example:
+#
+# energy-sparks_analytics
+#   - test_ouput
+#     - MeterCollections
+#       - unvalidated-data-acme-academy.yaml
+#
+# To run this test you need to set the ANALYTICSTESTDIR environment variable to points to the output directory 
+# as described above. e.g.
+#
+# ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/test_electricity_simulator.rb
+#
+
 require 'require_all'
 require_relative '../../lib/dashboard.rb'
 require_all './test_support/'
 
-module Logging
-  logger.level = :debug
-end
-
 schools = [
-  { name: 'cefn-hengoed*',          example_of: 'multiple solar production meters' },
-  { name: 'green-lane*',            example_of: 'vanilla primary with electric and gas meters' },
-  { name: 'hugh-sexey*',            example_of: 'sheffield simulated solar PV school' },
-  { name: 'king-james*',            example_of: 'vanilla secondary with electric and gas meters' },
-  { name: 'long-furlong*',          example_of: 'vanilla rbee-lch solar PV school' },
-  { name: 'marksbury*',             example_of: 'vanilla storage heater school' },
-  { name: 'newcastle-high*senior*', example_of: 'school with many meters' },
-  { name: 'pennyland*',             example_of: 'school with multiple storage heater meters' },
-  { name: 'ph-school*',             example_of: 'DCC school with differential tariffs' }
+  { name: 'acme-academy*', example_of: 'Github actions test data' }
 ]
 
 overrides = { 
@@ -27,7 +32,7 @@ run_date = Date.new(2022, 2, 1)
 benchmark_params = {
   benchmarks: {
     calculate_and_save_variables: true,
-    asof_date:     run_date,
+    asof_date: run_date,
     run_content: { asof_date: run_date }
   }
 }
