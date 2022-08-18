@@ -264,7 +264,7 @@ class XBucketSingle < XBucketBase
   end
 
   def key(_date, _halfhour_index)
-    I18n.t('analytics.x_axis_bucketor.no_dates', defualt: nil) || 'No Dates'
+    I18n.t('analytics.x_axis_bucketor.no_dates', default: nil) || 'No Dates'
   end
 
   def create_x_axis
