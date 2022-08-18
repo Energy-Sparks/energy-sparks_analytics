@@ -46,6 +46,7 @@ class AggregatorPostProcess < AggregatorBase
     # move bucketed data to y2 axis if configured that way
     results.y2_axis = {}
     logger.debug "Moving #{chart_config.y2_axis} onto Y2 axis"
+
     pattern_match_y2_axis_names.each do |series_name|
       results.y2_axis[series_name] = results.bucketed_data[series_name]
       results.bucketed_data.delete(series_name)
@@ -55,10 +56,13 @@ class AggregatorPostProcess < AggregatorBase
   # need to deal with case where multiple merged charts and date or school suffix has been added to the end of the series name
   def pattern_match_y2_axis_names
     matched = []
-    Series::ManagerBase.y2_series_types.values.each do |y2_series_name|
+    y2_series_values = Series::ManagerBase.y2_series_i18n_keys.map { |series_key| I18n.t("analytics.series.#{series_key.to_s}") }
+    
+    y2_series_values.each do |y2_series_name|
       base_name_length = y2_series_name.length
       matched += results.bucketed_data.keys.select{ |bucket_name| bucket_name[0...base_name_length] == y2_series_name }
     end
+
     matched
   end
 

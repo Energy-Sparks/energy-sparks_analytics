@@ -82,6 +82,16 @@ module Series
       }
     end
 
+    def self.y2_series_i18n_keys
+      [
+        DegreeDays::I18N_KEY,
+        Temperature::I18N_KEY,
+        Irradiance::I18N_KEY,
+        GridCarbon::I18N_KEY,
+        TargetDegreeDays::I18N_KEY
+      ]
+    end
+
     private
 
     private_class_method def self.factory(school, chart_config, series_breakdown_type)
@@ -472,6 +482,7 @@ module Series
 
   #=====================================================================================================
   class Temperature < ManagerBase
+    I18N_KEY = :temperature
     TEMPERATURE = 'Temperature'
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.temperatures.average_temperature_in_date_range(d1, d2) }; end
@@ -482,6 +493,7 @@ module Series
 
   #=====================================================================================================
   class Irradiance < ManagerBase
+    I18N_KEY = :irradiance
     IRRADIANCE = 'Solar Irradiance'
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.solar_irradiation.average_daytime_irradiance_in_date_range(d1, d2) }; end
@@ -492,6 +504,7 @@ module Series
 
   #=====================================================================================================
   class GridCarbon < ManagerBase
+    I18N_KEY = :gridcarbon
     GRIDCARBON = 'Carbon Intensity of Electricity Grid (kg/kWh)'
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.grid_carbon_intensity.average_in_date_range(d1, d2) }; end
@@ -502,6 +515,7 @@ module Series
 
   #=====================================================================================================
   class GasCarbon < ManagerBase
+    I18N_KEY = :gascarbon
     GASCARBON = 'Carbon Intensity of Gas (kg/kWh)'
     def series_names;                     [single_name]; end
     def day_breakdown(_d1, _d2);          { single_name => EnergyEquivalences::UK_GAS_CO2_KG_KWH }; end
@@ -649,12 +663,13 @@ module Series
 
   #=====================================================================================================
   class DegreeDays < ModelManagerBase
+    I18N_KEY = :degreedays
     DEGREEDAYS = 'Degree Days'
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.temperatures.degree_hour(date, hhi, degreeday_base_temperature) }; end
     private
-    def single_name; DEGREEDAYS end
+    def single_name; I18n.t('analytics.series.degreedays') end
   end
 
   #=====================================================================================================
@@ -865,6 +880,7 @@ module Series
 
   #=====================================================================================================
   class TargetDegreeDays < ModelManagerBase
+    I18N_KEY = :target_degreedays
     TARGETDEGREEDAYS = 'Target degree days'
     def series_names;  [TARGETDEGREEDAYS]; end
 
@@ -876,6 +892,7 @@ module Series
   #=====================================================================================================
   class Cusum < ModelManagerBase
     CUSUM = 'CUSUM'
+
     def series_names;  [CUSUM]; end
 
     def day_breakdown(d1, d2)

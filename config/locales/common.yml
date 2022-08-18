@@ -1,6 +1,13 @@
 ---
 en:
   analytics:
+    series:
+      degreedays: "Degree Days"
+      temperature: "Temperature"
+      irradiance: "Solar Irradiance"
+      gridcarbon: "Carbon Intensity of Electricity Grid (kg/kWh)"
+      gascarbon: "Carbon Intensity of Gas (kg/kWh)"
+      target_degreedays: "Target degree days"
     adjectives:
       higher: higher
       lower: lower
