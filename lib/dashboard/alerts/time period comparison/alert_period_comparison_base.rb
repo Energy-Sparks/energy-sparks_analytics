@@ -72,7 +72,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
       name_of_previous_period:    { description: 'name of previous period',         units: String, benchmark_code: 'pper' },
-      
+
       current_period_average_kwh:  { description: 'Current period average daily kwh', units:  { kwh: fuel_type } },
       previous_period_average_kwh: { description: 'Previous period average adjusted daily',    units:  { kwh: fuel_type } },
 
@@ -82,8 +82,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       current_holiday_average_temperature:  { description: 'Current periods average temperature',  units:  :temperature },
       previous_holiday_average_temperature: { description: 'Previous periods average temperature', units:  :temperature },
 
-      calculation_issue:        { description: 'Comparison issue',  units:  String, benchmark_code: 'ciss' },
-      truncated_current_period: { description: 'truncated period',  units:  TrueClass, benchmark_code: 'cptr' },
+#      calculation_issue:        { description: 'Comparison issue',  units:  String, benchmark_code: 'ciss' },
+#      truncated_current_period: { description: 'truncated period',  units:  TrueClass, benchmark_code: 'cptr' },
 
       previous_period_average_kwh_unadjusted: { description: 'Previous period average unadjusted kwh',  units:  { kwh: fuel_type } },
       current_period_kwhs:                    { description: 'Current period kwh values', units:  String  },
@@ -408,7 +408,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def enough_periods_data(asof_date)
     current_period, previous_period = last_two_periods(asof_date)
-    !current_period.nil? && !previous_period.nil? 
+    !current_period.nil? && !previous_period.nil?
   end
 
   def enough_days_in_period(period, asof_date)
