@@ -30,54 +30,65 @@ class FormatEnergyUnit
     check_units(unit)
 
     if value.nil? && unit != :temperature
+      #TODO with the revise format, this won't work
       I18n.t("analytics.energy_units.#{unit}")
     elsif unit == :£ || unit == :£_0dp
       format_pounds(value, medium, user_numeric_comprehension_level, unit == :£_0dp)
-    elsif unit == :days
-      format_days(value)
     elsif unit == :£_per_kwh
       format_pounds(value, medium, user_numeric_comprehension_level) + '/kWh'
     elsif unit == :£_per_kva
       format_pounds(value, medium, user_numeric_comprehension_level) + '/kVA'
-    elsif unit == :r2
-      sprintf('%.2f', value)
     elsif unit == :£_range
       format_pound_range(value, medium, user_numeric_comprehension_level)
+    elsif unit == :r2
+      sprintf('%.2f', value)
     elsif unit == :temperature
       "#{value.round(1)}C"
     elsif unit == :school_name
       value
     elsif unit == :short_school_name
       shorten_school_name(value)
+    elsif %i[percent percent_0dp relative_percent relative_percent_0dp].include?(unit)
+      format_percent(value, unit, user_numeric_comprehension_level, medium)
+    elsif unit == :comparison_percent
+      format_comparison_percent(value, medium)
     elsif unit == :years_range
       format_years_range(value)
     elsif unit == :years
       format_time(value)
-    elsif %i[percent percent_0dp relative_percent relative_percent_0dp].include?(unit)
-      format_percent(value, unit, user_numeric_comprehension_level, medium)
-    elsif unit == :percent_0dp
-      "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
-    elsif unit == :relative_percent
-      formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
-      formatted_val = '+' + formatted_val if value > 0.0
-      formatted_val
-    elsif unit == :relative_percent_0dp
-      formatted_val = "#{scale_num(value * 100.0, false, user_numeric_comprehension_level)}#{type_format(unit, medium)}"
-      formatted_val = '+' + formatted_val if value > 0.0
-      formatted_val
-    elsif unit == :comparison_percent
-      format_comparison_percent(value, medium)
+    elsif unit == :days
+      format_days(value)
     elsif unit == :date
-      value.is_a?(String) ? Date.parse(value).strftime('%A %e %b %Y') : value.strftime('%A %e %b %Y')
+      format_date(value, '%A %e %b %Y')
     elsif unit == :date_mmm_yyyy
-      value.is_a?(String) ? Date.parse(value).strftime('%b %Y') : value.strftime('%b %Y')
+      format_date(value, '%b %Y')
     elsif unit == :datetime
-      value.is_a?(String) ? DateTime.parse(value).strftime('%A %e %b %Y %H:%M') : value.strftime('%A %e %b %Y %H:%M')
+      format_date(value, '%A %e %b %Y %H:%M')
     elsif unit == :timeofday || unit == :fuel_type
       value.to_s
     else
-      "#{scale_num(value, false, user_numeric_comprehension_level)}" + (in_table ? '' : " #{type_format(unit, medium)}")
+      default_format(unit, value, medium, in_table, user_numeric_comprehension_level)
+#      "#{scale_num(value, false, user_numeric_comprehension_level)}" + (in_table ? '' : " #{type_format(unit, medium)}")
     end
+  end
+
+  #TODO: this is the fallback which produced, e.g. 1 years, 10 computer consoles, etc
+  #This needs to be changed to:
+  #return number as a string, if in table
+  #return an i18n string using html key if medium = :html
+  #otherwise default key
+  def self.default_format(unit, value, medium, in_table, user_numeric_comprehension_level)
+    value = scale_num(value, false, user_numeric_comprehension_level)
+    if in_table
+      value.to_s
+    else
+      I18n.t(key_for_unit(unit, medium), value: value)
+    end
+  end
+
+  def self.format_date(value, format)
+    date = value.is_a?(String) ? Date.parse(value) : value
+    I18n.l(date, format: format)
   end
 
   def self.format_percent(value, unit, user_numeric_comprehension_level, medium)
@@ -176,7 +187,7 @@ class FormatEnergyUnit
   end
 
   private_class_method def self.format_days(days)
-    sprintf('%d', days.to_i) + ' day' + singular_plural(days)
+    I18n.t("analytics.days", count: days.to_i)
   end
 
   def self.singular_plural(value)
@@ -184,14 +195,19 @@ class FormatEnergyUnit
   end
 
   def self.type_format(unit, medium)
-    if medium == :html && I18n.t("analytics.energy_units").key?(html_key(unit))
-      I18n.t("analytics.energy_units")[html_key(unit)]
+    I18n.t(key_for_unit(unit, medium))
+  end
+
+  private_class_method def self.key_for_unit(unit, medium)
+    html_key = html_key_for(unit)
+    if medium == :html && I18n.t("analytics.energy_units").key?(html_key)
+      "analytics.energy_units.#{html_key}"
     else
-      I18n.t("analytics.energy_units.#{unit}")
+      "analytics.energy_units.#{unit}"
     end
   end
 
-  private_class_method def self.html_key(unit)
+  private_class_method def self.html_key_for(unit)
     "#{unit}_html".to_sym
   end
 

@@ -124,7 +124,7 @@ en:
         - Last weeks half hourly gas consumption (kWh)
       alert_weekend_last_week_gas_datetime_£:
         title:
-        - 
+        - Last weeks half hourly gas consumption (£/half hour)
       baseload:
         title:
         - Baseload kW
@@ -1044,72 +1044,72 @@ en:
         title:
         - Thermostatic (Winter Weekend)
     energy_units:
-      accounting_cost: "£"
-      bev_car: km
-      boiler_start_time: boiler start time
-      carnivore_dinner: dinners
-      co2: kg CO2
-      co2t: tonnes CO2
+      accounting_cost: "£%{value}"
+      bev_car: "%{value} km"
+      boiler_start_time: "%{value} boiler start time"
+      carnivore_dinner: "%{value} dinners"
+      co2: "%{value} kg CO2"
+      co2t: "%{value} tonnes CO2"
       comparison_percent: "%"
-      computer_console: computer consoles
+      computer_console: "%{value} computer consoles"
       date: ''
       date_mmm_yyyy: ''
       datetime: ''
       days: days
-      electricity: electricity
+      electricity: "%{value} electricity"
       fuel_type: ''
-      gas: gas
-      home: homes
-      homes_electricity: homes (electricity usage)
-      homes_gas: homes (gas usage)
-      hour: hours
-      ice_car: km
-      kettle: kettles
-      kg: kg
-      kg_co2_per_kwh: kg CO2/kWh
-      km: km
-      kva: kVA
-      kw: kW
-      kwh: kWh
-      kwh_per_day: kWh/day
-      kwh_per_day_per_c: kWh/day/C
-      kwp: kWp
-      library_books: library books
-      litre: litres
-      m2: m2
-      m2_html: m<sup>2</sup>
-      meters: meters
-      morning_start_time: time of day
-      offshore_wind_turbine_hours: offshore wind turbine hours
-      offshore_wind_turbines: offshore wind turbines
-      onshore_wind_turbine_hours: onshore wind turbine hours
-      onshore_wind_turbines: onshore wind turbines
-      opt_start_standard_deviation: standard deviation (hours)
-      optimum_start_sensitivity: hours/C
-      panels: solar PV panels
+      gas: "%{value} gas"
+      home: "%{value} homes"
+      homes_electricity: "%{value} homes (electricity usage)"
+      homes_gas: "%{value} homes (gas usage)"
+      hour: "%{value} hours"
+      ice_car: "%{value} km"
+      kettle: "%{value} kettles"
+      kg: "%{value} kg"
+      kg_co2_per_kwh: "%{value} kg CO2/kWh"
+      km: "%{value} km"
+      kva: "%{value} kVA"
+      kw: "%{value} kW"
+      kwh: "%{value} kWh"
+      kwh_per_day: "%{value} kWh/day"
+      kwh_per_day_per_c: "%{value} kWh/day/C"
+      kwp: "%{value} kWp"
+      library_books: "%{value} library books"
+      litre: "%{value} litres"
+      m2: "%{value} m2"
+      m2_html: "%{value} m<sup>2</sup>"
+      meters: "%{value} meters"
+      morning_start_time: "%{value} time of day"
+      offshore_wind_turbine_hours: "%{value} offshore wind turbine hours"
+      offshore_wind_turbines: "%{value} offshore wind turbines"
+      onshore_wind_turbine_hours: "%{value} onshore wind turbine hours"
+      onshore_wind_turbines: "%{value} onshore wind turbines"
+      opt_start_standard_deviation: "%{value} standard deviation (hours)"
+      optimum_start_sensitivity: "%{value} hours/C"
+      panels: "%{value} solar PV panels"
       percent: "%"
       percent_0dp: "%"
       percent_html: "&percnt;"
-      pupils: pupils
+      pupils: "%{value} pupils"
       r2: ''
       relative_percent: "%"
       relative_percent_0dp: "%"
       school_name: ''
       short_school_name: ''
-      shower: showers
-      smartphone: smartphone charges
-      solar_panels: solar panels
-      solar_panels_in_a_year: solar panels in a year
-      teaching_assistant: teaching assistant
-      teaching_assistant_hours: teaching assistant (hours)
+      shower: "%{value} showers"
+      smartphone: "%{value} smartphone charges"
+      solar_panels: "%{value} solar panels"
+      solar_panels_in_a_year: "%{value} solar panels in a year"
+      teaching_assistant: "%{value} teaching assistant"
+      teaching_assistant_hours: "%{value} teaching assistant (hours)"
       temperature: C
       timeofday: ''
-      tree: trees
-      tv: tvs
-      vegetarian_dinner: dinners
-      w: W
+      tree: "%{value} trees"
+      tv: "%{value} tvs"
+      vegetarian_dinner: "%{value} dinners"
+      w: "%{value} W"
       years: years
-      years_decimal: years
+      years_decimal: "%{value} years"
       years_range: years
       "£": "£"
       "£_0dp": "£"
