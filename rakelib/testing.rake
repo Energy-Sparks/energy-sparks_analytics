@@ -74,4 +74,46 @@ namespace :testing do
       end
     end
   end
+
+  desc 'download and anonymise unvalidated data'
+  task :download_and_anonymise_unvalidated_data do |t, args|
+    # rake testing:download_and_anonymise_unvalidated_data ACCESS_KEY_ID=your_aws_access_key_id SECRET_ACCESS_KEY=your_secret_access_key SCHOOLS=school1,school2...
+    require 'aws-sdk-s3'
+
+    client = Aws::S3::Client.new(
+      access_key_id: ENV['ACCESS_KEY_ID'],
+      secret_access_key: ENV['SECRET_ACCESS_KEY'],
+      region: 'eu-west-2'
+    )
+    bucket = ENV['UNVALIDATED_SCHOOL_CACHE_BUCKET']
+    schools = ENV['SCHOOLS'].split(',')
+    test_dir = ENV['ANALYTICSTESTDIR']
+
+    $stderr.puts "Downloading list of files from #{bucket}"
+    schools.each_with_index do |school, index|
+      resp = client.list_objects_v2({
+          bucket: bucket,
+          prefix: "unvalidated-data-#{school}",
+      })
+      resp.contents.each do |entry|
+        filename = "#{test_dir}/MeterCollections/unvalidated-data-acme-#{index}.yaml"
+        $stderr.puts "Saving data to #{filename}"
+        File.open(filename, 'w') do |file|
+          resp = client.get_object({ bucket: bucket, key: entry.key }, target: file)
+        end
+      end
+    end
+
+    $stderr.puts "Anonymising files"
+    schools.each_with_index do |school, index|
+      file_name = "./#{test_dir}/MeterCollections/unvalidated-data-acme-#{index}.yaml"
+      text = File.read(file_name)
+      text = text.gsub(/.*  :id:.*/, "  :id: 00000#{index+1}")
+      # text = text.gsub(/.*  :name:.*/, "  :name: Acme School #{index}")
+      text = text.gsub(/.*  :address:.*/, "  :address: Acme School #{index}")
+      text = text.gsub(/.*  :urn:.*/, "  :urn: ACME#{index}")
+      text = text.gsub(/.*  :postcode:.*/, "  :postcode: AB#{index} 1CD")
+      File.open(file_name, "w") {|file| file.puts text }
+    end
+  end
 end
