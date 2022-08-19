@@ -1119,7 +1119,3 @@ en:
       "£_per_kva": "£/kVA"
       "£_per_kwh": "£/kWh"
       "£_range": "£"
-    x_axis_bucketor:
-      no_dates: No Dates
-      academic_year: Academic Year %{start_year} / %{end_year}
-      description: "%{start_date} to %{end_date}"
