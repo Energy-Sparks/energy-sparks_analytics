@@ -17,7 +17,7 @@ describe ChartManager do
       expect(I18n.t('chart_configuration').keys.sort - ChartManager::STANDARD_CHART_CONFIGURATION.keys.sort).to eq([])
     end
 
-    it 'checks every configuration key translation key has a title value' do
+    it 'checks every configuration translation key has a title and value' do
       expect(I18n.t('chart_configuration').values).not_to include(nil)
       expect(I18n.t('chart_configuration').values.map(&:keys).flatten.uniq).to eq([:title])
       expect(I18n.t('chart_configuration').values.map(&:values).flatten.uniq).not_to include(nil)
