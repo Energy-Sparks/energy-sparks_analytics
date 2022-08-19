@@ -816,10 +816,16 @@ module Series
 
   #=====================================================================================================
   class MultipleFuels < ModelManagerBase
-    ELECTRICITY     = :electricity
-    GAS             = :gas
-    STORAGEHEATERS  = :storage_heaters
-    SOLARPV         = :solar_pv_consumed_onsite # think unused?
+    # ELECTRICITY     = :electricity
+    # GAS             = :gas
+    # STORAGEHEATERS  = :storage_heaters
+    # SOLARPV         = :solar_pv_consumed_onsite # think unused?
+
+    ELECTRICITY     = 'electricity'
+    GAS             = 'gas'
+    STORAGEHEATERS  = 'storage heaters'
+    SOLARPV         = 'solar pv (consumed onsite)' # think unused?
+
 
     def series_names
       aggregate_meters.keys
