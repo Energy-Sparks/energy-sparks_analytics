@@ -112,6 +112,13 @@ class SolarPVPanels
     end
   end
 
+  def maximum_export_kw(date)
+    config = @solar_pv_panel_config.config_by_date_range.select { |date_range, config| date.between?(date_range.first, date_range.last) }
+    return 0.0 if config.empty?
+
+    config.values.first[:maximum_export_level_kw] || 0.0
+  end
+
   def calculate_days_exported_days_data(date, meter_collection, mains_amr_data, pv_amr_data)
     return nil unless synthetic_data?(date, :override_export)
 
@@ -120,11 +127,14 @@ class SolarPVPanels
     baseload_kw   = yesterday_baseload_kw(date, mains_amr_data)
     unoccupied    = unoccupied?(meter_collection, date)
 
+    max_hh_export_kwh = maximum_export_kw(date) / 2.0
+
     (0..47).each do |hh_i|
       # arguably this could be improved by changing <= 0.0 to something a little less
       # strict in the sense the half hour could be part cloudy, part sunny so
       # there will be some export and some mains consumption
-      if unoccupied && mains_amr_data.kwh(date, hh_i) <= 0.0
+      # PH: 19Aug2022: comment above proved correct, non-zero override now supported
+      if unoccupied && mains_amr_data.kwh(date, hh_i) <= max_hh_export_kwh
         # if unoccupied then assume export is excess of generation over baseload
         export_x48[hh_i] = -1.0 * (pv_output_x48[hh_i] - (baseload_kw / 2.0))
       end
@@ -159,8 +169,10 @@ class SolarPVPanels
     baseload_kw   = yesterday_baseload_kw(date, mains_amr_data)
     unoccupied    = unoccupied?(meter_collection, date)
 
+    max_hh_export_kwh = maximum_export_kw(date) / 2.0
+
     (0..47).each do |hh_i|
-      if unoccupied && mains_amr_data.kwh(date, hh_i) <= 0.0
+      if unoccupied && mains_amr_data.kwh(date, hh_i) <= max_hh_export_kwh
         # if unoccupied and zero then assume consuming baseload
         self_x48[hh_i] = baseload_kw / 2.0
       else
@@ -317,7 +329,7 @@ class SolarPVPanels
     @debug_date_range.each do |date|
       pv_meter_map.each do |type, meter|
         next if meter.nil?
-      
+
         compact_print_day(type, date, meter.amr_data.days_kwh_x48(date))
       end
     end

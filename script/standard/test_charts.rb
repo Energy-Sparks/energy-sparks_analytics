@@ -8,10 +8,11 @@ module Logging
 end
 
 charts = {
-  bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]
+  # bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]
+  solar: %i[solar_pv_single_day_adhoc_test]
 }
 
-charts = RunCharts.standard_charts_for_school
+no_charts = RunCharts.standard_charts_for_school
 
 control = {
   save_to_excel:  true,
@@ -24,7 +25,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }

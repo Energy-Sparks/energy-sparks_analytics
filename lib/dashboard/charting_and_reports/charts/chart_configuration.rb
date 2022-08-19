@@ -648,6 +648,12 @@ class ChartManager
         ]
       },
     },
+    solar_pv_single_day_adhoc_test: {
+      name: 'name adhoc single day solar PV test chart',
+      inherits_from: :solar_pv_last_7_days_by_submeter,
+      timescale:  :day,
+      asof_date:   Date.new(2022, 8, 8)
+    },
     electricity_by_day:  {
       inherits_from:    :group_by_week_electricity,
       name:             'By Day: Electricity',
