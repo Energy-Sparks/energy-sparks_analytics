@@ -1,5 +1,9 @@
 ---
 en:
+  analytics:
+    academic_year: Academic Year %{period_start_date}/%{period_end_date}
+    from_and_to: "%{from_date} to %{to_date}"
+    no_dates: No Dates
   date:
     abbr_day_names:
     - Sun
@@ -10,7 +14,7 @@ en:
     - Fri
     - Sat
     abbr_month_names:
-    -
+    - 
     - Jan
     - Feb
     - Mar
@@ -32,7 +36,7 @@ en:
     - Friday
     - Saturday
     month_names:
-    -
+    - 
     - January
     - February
     - March
@@ -45,7 +49,3 @@ en:
     - October
     - November
     - December
-  analytics:
-    academic_year: Academic Year %{period_start_date}/%{period_end_date}
-    from_and_to: "%{from_date} to %{to_date}"
-    no_dates: No Dates
