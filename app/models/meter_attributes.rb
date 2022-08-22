@@ -338,7 +338,8 @@ class MeterAttributes
         orientation:        MeterAttributeTypes::Integer.define(hint: 'in degrees'),
         tilt:               MeterAttributeTypes::Integer.define,
         shading:            MeterAttributeTypes::Integer.define,
-        fit_£_per_kwh:      MeterAttributeTypes::Float.define
+        fit_£_per_kwh:      MeterAttributeTypes::Float.define,
+        maximum_export_level_kw: MeterAttributeTypes::Float.define
       }
     )
   end

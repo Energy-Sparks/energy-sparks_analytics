@@ -58,7 +58,7 @@ class SolarPVPanelConfiguration
     end_date   = (!period_config.nil? && period_config.key?(:end_date) )  ? period_config[:end_date]   : MAX_DEFAULT_END_DATE
 
     # will need a case statement at some point to parse this properly? TODO(PH,21Mar2019)
-    data_fields = %i[kwp orientation tilt shading fit_£_per_kwh override_generation override_export override_self_consume]
+    data_fields = %i[kwp orientation tilt shading fit_£_per_kwh override_generation override_export override_self_consume maximum_export_level_kw]
     config = period_config.select{ |param, _value| data_fields.include?(param) }
 
     { start_date..end_date => config }
