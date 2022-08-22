@@ -4,6 +4,6 @@ class I18nHelper
   end
 
   def self.day_name(idx)
-    I18n.t("analytics.day_names")[idx]
+    I18n.t("date.day_names")[idx]
   end
 end

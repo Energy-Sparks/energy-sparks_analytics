@@ -134,14 +134,14 @@ class MeterCost
               }
             else
               %{
-                <p>          
+                <p>
                   Energy Sparks currently doesn't have a complete record of your real tariffs
-                  and is using default tariffs between <%= group_missing_tariffs_text %>, 
+                  and is using default tariffs between <%= group_missing_tariffs_text %>,
                   which means your billing won't be accurate. To edit your tariffs go to the
                   'Manage School' drop down menu above and select 'Manage tariffs'.
                   If you would like to help us setup your billing correctly,
                   please get in touch by mailing
-                  <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">mailto:hello@energysparks.uk</a>.                    
+                  <a href="mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20<%= @school.name %>">mailto:hello@energysparks.uk</a>.
                 </p>
               }
             end
@@ -269,7 +269,7 @@ class MeterCost
     days = @meter.amr_data.end_date - start_date + 1
     {
       £:                £,
-      formatted_£:      FormatEnergyUnit.format_pounds(£, :html, :approx_accountant, true),
+      formatted_£:      FormatEnergyUnit.format_pounds(:£, £, :html, :approx_accountant, true),
       days:             days,
       formatted_years:  FormatEnergyUnit.format(:years, days / 365.0, :html)
     }
@@ -338,7 +338,7 @@ class MeterCost
       which cost <%= current_year[:formatted_£] %>,
       compared with <%= previous_year[:formatted_kwh] %> / <%= previous_year[:formatted_£] %>
       during the previous year.
-      This is 
+      This is
       <%= general_usage_change_description(annual_increase_£_abs_html, annual_increase_£) %>,
       and
       <%= general_usage_change_description(annual_increase_kwh_abs_html, annual_increase_kwh) %>

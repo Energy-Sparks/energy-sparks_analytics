@@ -114,6 +114,9 @@ search:
 ## Consider these keys used:
 ignore_unused:
   - 'analytics.alert_*'
+  - 'analytics.energy_units.*'
+  - 'date.*'
+  - 'analytics.units.*'
 # - 'activerecord.attributes.*'
 # - '{devise,kaminari,will_paginate}.*'
 # - 'simple_form.{yes,no}'
