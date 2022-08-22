@@ -10,7 +10,6 @@ class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
   attr_reader :summer_holiday_analysis_table
   attr_reader :holiday_reduction_£, :annualised_reduction_£, :reduction_kw
   attr_reader :reduction_rating, :turn_off_rating
-  attr_reader :summary
 
   def initialize(school)
     super(school, :heatingcomingontooearly)
@@ -111,8 +110,6 @@ class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
 
     @rating = [@turn_off_rating, @reduction_rating].min
 
-    @summary = summary_text
-
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url('HeatingComingOnTooEarly')
   end
@@ -120,7 +117,7 @@ class AlertSummerHolidayRefrigerationAnalysis < AlertElectricityOnlyBase
 
   private
 
-  def summary_text
+  def summary
     if @annualised_reduction_£ > 0
       I18n.t("#{i18n_prefix}.summary.high", saving: FormatEnergyUnit.format(:£, @annualised_reduction_£, :text))
     else
