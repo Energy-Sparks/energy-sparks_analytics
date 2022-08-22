@@ -1,0 +1,6 @@
+---
+en:
+  analytics:
+    annual_cost_with_adjective: "%{cost}pa, %{relative_percent} %{adjective} average"
+    alert_electricity_annual_versus_benchmark:
+      timescale: last year
