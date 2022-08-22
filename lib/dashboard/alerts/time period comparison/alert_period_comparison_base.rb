@@ -47,6 +47,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :summary, :prefix_1, :prefix_2
   attr_reader :current_period_floor_area, :previous_period_floor_area, :floor_area_changed
   attr_reader :current_period_pupils, :previous_period_pupils, :pupils_changed
+  attr_reader :truncated_current_period
 
   def self.dynamic_template_variables(fuel_type)
     vars = {
@@ -60,15 +61,15 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       abs_difference_percent: { description: 'Difference in % between last 2 periods - absolute, positive number only',   units:  :percent },
 
       current_period_kwh:        { description: 'Current period kwh',                 units:  { kwh: fuel_type } },
-      current_period_£:          { description: 'Current period £',                   units:  :£  },
+      current_period_£:          { description: 'Current period £',                   units:  :£, benchmark_code: 'cpp£'},
       current_period_start_date: { description: 'Current period start date',          units:  :date  },
       current_period_end_date:   { description: 'Current period end date',            units:  :date  },
       days_in_current_period:    { description: 'No. of days in current period',      units: Integer },
       name_of_current_period:    { description: 'name of current period e.g. Easter', units: String, benchmark_code: 'cper' },
 
       previous_period_kwh:        { description: 'Previous period kwh (equivalent no. of days to current period)', units:  { kwh: fuel_type } },
-      previous_period_£:          { description: 'Previous period £ (equivalent no. of days to current period)',   units:  :£  },
-      previous_period_start_date: { description: 'Previous period start date',      units:  :date  },
+      previous_period_£:          { description: 'Previous period £ (equivalent no. of days to current period)',   units:  :£, benchmark_code: 'ppp£'},
+      previous_period_start_date: { description: 'Previous period start date',      units:  :date,   },
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
       days_in_previous_period:    { description: 'No. of days in previous period',  units: Integer },
       name_of_previous_period:    { description: 'name of previous period',         units: String, benchmark_code: 'pper' },
@@ -82,8 +83,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       current_holiday_average_temperature:  { description: 'Current periods average temperature',  units:  :temperature },
       previous_holiday_average_temperature: { description: 'Previous periods average temperature', units:  :temperature },
 
-#      calculation_issue:        { description: 'Comparison issue',  units:  String, benchmark_code: 'ciss' },
-#      truncated_current_period: { description: 'truncated period',  units:  TrueClass, benchmark_code: 'cptr' },
+      truncated_current_period: { description: 'truncated period',                        units:  TrueClass, benchmark_code: 'cptr' },
 
       previous_period_average_kwh_unadjusted: { description: 'Previous period average unadjusted kwh',  units:  { kwh: fuel_type } },
       current_period_kwhs:                    { description: 'Current period kwh values', units:  String  },
@@ -163,8 +163,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @abs_difference_kwh = @difference_kwh.magnitude
     @abs_difference_£   = @difference_£.magnitude
     @abs_difference_co2 = @difference_co2.magnitude
-
-    @difference_percent = difference_kwh  / previous_period_data[:kwh]
+    @difference_percent = calculate_percent_with_error(current_period_data[:kwh], previous_period_data[:kwh])
+    
     @abs_difference_percent = @difference_percent.magnitude
 
     @current_period_kwh         = current_period_data[:kwh]
@@ -442,6 +442,18 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @current_period_pupils  = @school.number_of_pupils(current_period.start_date, current_period.end_date)
     @previous_period_pupils = @school.number_of_pupils(previous_period.start_date, previous_period.end_date)
     @pupils_changed = @current_period_pupils != @previous_period_pupils
+  end
+
+  def calculate_percent_with_error(current_value, previous_value)
+    if current_value == 0.0 && previous_value == 0.0
+      0.0 # avoid presenting NaN to user
+    elsif previous_value == 0.0
+      +Float::INFINITY
+    elsif current_value == 0.0
+      -Float::INFINITY
+    else
+      (current_value - previous_value) / previous_value
+    end
   end
 end
 

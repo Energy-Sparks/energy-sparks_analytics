@@ -25,8 +25,12 @@ module Benchmarking
         arr.compact.empty? ? nil : arr.compact[0]
       end
 
-      def referenced(name, ref, number = 1)
-        ref ? "#{name} (*#{number})" : name
+      def referenced(name, changed, percent)
+        change_refs = []
+        change_refs.push(1) if changed
+        change_refs.push(2) if percent ==  Float::INFINITY
+        change_refs.push(3) if percent == -Float::INFINITY
+        change_refs.empty? ? name : "#{name} (* #{change_refs.join(',')})"
       end
 
       # helper function for config lamda, only sums

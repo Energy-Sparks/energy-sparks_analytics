@@ -174,7 +174,7 @@ class ChartManager
   end
 
   def translated_titles_for(chart_id)
-    I18n.t("analytics.chart_configuration.#{chart_id}.title", default: nil)
+    I18n.t("chart_configuration.#{chart_id}.title", default: nil)
   end
 
   def chart_id_for(chart_param)

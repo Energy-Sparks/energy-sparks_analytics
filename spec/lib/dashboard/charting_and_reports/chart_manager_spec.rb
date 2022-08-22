@@ -12,6 +12,17 @@ describe ChartManager do
       expect(chart_manager.translated_titles_for('benchmark')).to eq(['Annual Electricity and Gas Consumption Comparison with other schools in your region'])
       expect(chart_manager.translated_titles_for('pupil_dashboard_group_by_week_electricity_kwh')).to eq(["Your school's electricity use over a year (in kWh). Each bar shows a week's use", "Electricity costs in your chosen week (in £)", "Electricity costs on your chosen day (in £)"])
     end
+
+    it 'checks there is a translation key for every chart configuration key' do
+      expect(I18n.t('chart_configuration').keys.sort - ChartManager::STANDARD_CHART_CONFIGURATION.keys.sort).to eq([])
+    end
+
+    it 'checks every configuration translation key has a title and value' do
+      expect(I18n.t('chart_configuration').values).not_to include(nil)
+      expect(I18n.t('chart_configuration').values.map(&:keys).flatten.uniq).to eq([:title])
+      expect(I18n.t('chart_configuration').values.map(&:values).flatten.uniq).not_to include(nil)
+      expect(I18n.t('chart_configuration').values.map(&:values).flatten.uniq).not_to include([])      
+    end
   end
 
   describe '#translated_name_for' do
