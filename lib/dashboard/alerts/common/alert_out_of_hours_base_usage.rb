@@ -5,7 +5,7 @@ require 'erb'
 class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   include Logging
 
-  attr_reader :fuel, :fuel_description, :fuel_cost
+  attr_reader :fuel, :fuel_cost
   attr_reader :significant_out_of_hours_use
   attr_reader :good_out_of_hours_use_percent, :bad_out_of_hours_use_percent, :out_of_hours_percent
   attr_reader :holidays_kwh, :weekends_kwh, :schoolday_open_kwh, :schoolday_closed_kwh, :community_kwh
@@ -23,7 +23,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
                  good_out_of_hours_use_percent, bad_out_of_hours_use_percent)
     super(school, alert_type)
     @fuel = fuel
-    @fuel_description = fuel.to_s
     @bookmark = bookmark
     @good_out_of_hours_use_percent = good_out_of_hours_use_percent
     @bad_out_of_hours_use_percent = bad_out_of_hours_use_percent
@@ -128,8 +127,12 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     }
   end
 
+  def i18n_prefix
+    "analytics.#{AlertOutOfHoursBaseUsage.name.underscore}"
+  end
+
   def timescale
-    'last year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
@@ -196,8 +199,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
     set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil, @potential_saving_co2)
 
-    @summary = summary_text
-
     @rating = calculate_rating_from_range(good_out_of_hours_use_percent, bad_out_of_hours_use_percent, out_of_hours_percent)
 
     @significant_out_of_hours_use = @rating < 7.0
@@ -209,9 +210,14 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   end
   alias_method :analyse_private, :calculate
 
-  def summary_text
-    FormatEnergyUnit.format(:£, @out_of_hours_£, :text) + 'pa (' +
-    FormatEnergyUnit.format(:percent, @out_of_hours_percent, :text) + ' of annual cost) '
+  def fuel_description
+    I18n.t('analytics.common')[@fuel.to_sym]
+  end
+
+  def summary
+    I18n.t("#{i18n_prefix}.summary",
+      cost: FormatEnergyUnit.format(:£, @out_of_hours_£, :text),
+      percent: FormatEnergyUnit.format(:percent, @out_of_hours_percent, :text))
   end
 
   def school_day_closed_key

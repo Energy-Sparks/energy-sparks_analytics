@@ -7,7 +7,7 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
   attr_reader :annual_electricity_kwh, :annual_gas_kwh, :annual_storage_heater_kwh
   attr_reader :annual_electricity_£, :annual_gas_£, :annual_storage_heater_£
   attr_reader :degree_days_15_5C_domestic
-  attr_reader :school_area, :school_type_name
+  attr_reader :school_area
 
   def initialize(school)
     super(school, :prioritisationdata)
@@ -53,7 +53,7 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
       benchmark_code: 'name'
     },
     school_area: {
-      description: 'School area',
+      description: 'School area (school group name)',
       units: String,
       benchmark_code: 'area'
     },
@@ -122,7 +122,7 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
   # dummy to keep ContentBase constructor happy
   def aggregate_meter
     meters = [@school.aggregated_electricity_meters, @school.aggregated_heat_meters]
-    meters.compact[0] 
+    meters.compact[0]
   end
 
   def maximum_alert_date
@@ -152,12 +152,14 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     @annual_electricity_£     = annual_kwh(@school.aggregated_electricity_meters, :electricity,     asof_date, :£)
     @annual_gas_£             = annual_kwh(@school.aggregated_heat_meters,        :gas,             asof_date, :£)
     @annual_storage_heater_£  = annual_kwh(@school.storage_heater_meter,          :storage_heaters, asof_date, :£)
-    
-    @school_type_name = @school.school_type.to_s.humanize
 
     @degree_days_15_5C_domestic = @school.temperatures.degree_days_this_year(asof_date)
 
     @school_area = @school.area_name
+  end
+
+  def school_type_name
+    I18n.t("analytics.school_types")[@school.school_type]
   end
 
   private def annual_kwh(meter, fuel_type, asof_date, data_type)

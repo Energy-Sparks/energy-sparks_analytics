@@ -8,18 +8,15 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
-  attr_reader :one_year_saving_versus_benchmark_adjective
 
   attr_reader :one_year_exemplar_by_pupil_kwh, :one_year_exemplar_by_pupil_£
   attr_reader :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_£, :one_year_saving_versus_exemplar_co2
-  attr_reader :one_year_saving_versus_exemplar_adjective
 
   attr_reader :one_year_electricity_per_pupil_kwh, :one_year_electricity_per_pupil_£, :one_year_electricity_per_pupil_co2
   attr_reader :one_year_electricity_per_floor_area_kwh, :one_year_electricity_per_floor_area_£
 
   attr_reader :per_pupil_electricity_benchmark_£
-  attr_reader :percent_difference_from_average_per_pupil, :percent_difference_adjective
-  attr_reader :simple_percent_difference_adjective, :summary
+  attr_reader :percent_difference_from_average_per_pupil
 
   def initialize(school)
     super(school, :annualelectricitybenchmark)
@@ -29,7 +26,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     specific = {'Annual electricity usage versus benchmark' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)
   end
-  
+
   TEMPLATE_VARIABLES = {
     last_year_kwh: {
       description: 'Last years electricity consumption - kwh',
@@ -69,7 +66,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     },
     one_year_saving_versus_benchmark_adjective: {
       description: 'Adjective: higher or lower: electricity consumption versus benchmark/average school',
-      units:  String
+      units: String
     },
     one_year_exemplar_by_pupil_kwh: {
       description: 'Last years electricity consumption for exemplar school, normalised by pupil numbers - kwh',
@@ -94,7 +91,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     },
     one_year_saving_versus_exemplar_adjective: {
       description: 'Adjective: higher or lower: electricity consumption versus exemplar school',
-      units:  String
+      units: String
     },
     one_year_electricity_per_pupil_kwh: {
       description: 'Per pupil annual electricity usage - kwh - required for PH analysis, not alerts',
@@ -142,10 +139,6 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     }
   }
 
-  def timescale
-    'last year'
-  end
-
   def enough_data
     days_amr_data_with_asof_date(@asof_date) >= 364 ? :enough : :not_enough
   end
@@ -167,7 +160,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * blended_electricity_£_per_kwh
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_by_pupil_kwh
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * blended_electricity_£_per_kwh
-    @one_year_saving_versus_benchmark_adjective = @one_year_saving_versus_benchmark_kwh > 0.0 ? 'higher' : 'lower'
+
     @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh.magnitude
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£.magnitude
 
@@ -177,7 +170,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_by_pupil_kwh
     @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * blended_electricity_£_per_kwh
     @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
-    @one_year_saving_versus_exemplar_adjective = @one_year_saving_versus_exemplar_kwh > 0.0 ? 'higher' : 'lower'
+
     @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh.magnitude
     @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£.magnitude
     @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_co2.magnitude
@@ -193,10 +186,6 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @per_pupil_electricity_£ = @last_year_£ / pupils(asof_date - 365, asof_date)
     @per_pupil_electricity_benchmark_£ = @one_year_benchmark_by_pupil_£ / pupils(asof_date - 365, asof_date)
     @percent_difference_from_average_per_pupil = percent_change(@per_pupil_electricity_benchmark_£, one_year_electricity_per_pupil_£)
-    @percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
-    @simple_percent_difference_adjective = Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)
-
-    @summary = summary_text
 
     # rating: benchmark value = 4.0, exemplar = 10.0
     percent_from_benchmark_to_exemplar = (@last_year_kwh - @one_year_benchmark_by_pupil_kwh) / (@one_year_exemplar_by_pupil_kwh - @one_year_benchmark_by_pupil_kwh)
@@ -210,10 +199,31 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   end
   alias_method :analyse_private, :calculate
 
-  def summary_text
-    FormatEnergyUnit.format(:£, @last_year_£, :text) + 'pa, ' +
-    FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_pupil, :text) + ' ' +
-    @simple_percent_difference_adjective + ' average'
+  def timescale
+    I18n.t("#{i18n_prefix}.timescale")
+  end
+
+  def one_year_saving_versus_exemplar_adjective
+    Adjective.adjective_for(@one_year_saving_versus_exemplar_kwh)
+  end
+
+  def one_year_saving_versus_benchmark_adjective
+    Adjective.adjective_for(@one_year_saving_versus_benchmark_kwh)
+  end
+
+  def percent_difference_adjective
+    Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
+  end
+
+  def simple_percent_difference_adjective
+    Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)
+  end
+
+  def summary
+    I18n.t("analytics.annual_cost_with_adjective",
+      cost: FormatEnergyUnit.format(:£, @last_year_£, :text),
+      relative_percent: FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_pupil, :text),
+      adjective: simple_percent_difference_adjective)
   end
 
   def kwh(date1, date2, data_type = :kwh)

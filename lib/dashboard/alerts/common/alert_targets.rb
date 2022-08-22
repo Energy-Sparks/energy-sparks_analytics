@@ -1,5 +1,5 @@
 class AlertTargetBase < AlertAnalysisBase
-  attr_reader :relevance, :summary
+  attr_reader :relevance
 
   def initialize(school, type = :electricitylongtermtrend)
     super(school, type)
@@ -18,8 +18,12 @@ class AlertTargetBase < AlertAnalysisBase
     TargetsService.analytics_relevant(aggregate_meter)
   end
 
+  def i18n_prefix
+    "analytics.#{AlertTargetBase.name.underscore}"
+  end
+
   def timescale
-    'at least 1 year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   protected def user_numeric_comprehension_level
@@ -177,7 +181,6 @@ class AlertTargetBase < AlertAnalysisBase
         benchmark_code:   '4wkp',
         units:  :percent
       },
-
       last_week_kwh: {
         description: 'Last week kwh',
         units:  :kwh
@@ -215,7 +218,6 @@ class AlertTargetBase < AlertAnalysisBase
         benchmark_code:   '1wkp',
         units:  :percent
       },
-
       current_target_percent: {
         description: 'current target today e.g. 95%',
         units:  :percent
@@ -398,7 +400,6 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   private def calculate(asof_date)
-    @summary = summary_text
     @rating = calculate_rating_from_range(0.95, 1.05, rating_target_percent)
 
     potential_saving_co2 = previous_year_co2 - current_year_target_co2
@@ -411,8 +412,10 @@ class AlertTargetBase < AlertAnalysisBase
     current_year_percent_of_target
   end
 
-  def summary_text
-    "#{FormatEnergyUnit.format(:percent, current_year_percent_of_target_absolute, :text)} #{current_year_percent_of_target_adjective} target"
+  def summary
+    I18n.t("#{i18n_prefix}.summary",
+      percent: FormatEnergyUnit.format(:percent, current_year_percent_of_target_absolute, :text),
+      above_or_below: current_year_percent_of_target_adjective)
   end
 
   def potential_savings_range
@@ -478,7 +481,7 @@ class AlertTargetBase < AlertAnalysisBase
   end
 
   def percent_adjective(base, current)
-    relative_percent(base, current) > 0.0 ? 'above' : 'below'
+    relative_percent(base, current) > 0.0 ? I18nHelper.adjective('above') : I18nHelper.adjective('below')
   end
 
   def absolute_relative_percent(base, current)

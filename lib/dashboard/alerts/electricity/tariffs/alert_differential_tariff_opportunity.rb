@@ -23,7 +23,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
   end
 
   def timescale
-    'year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
@@ -43,7 +43,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
     differential_tariff_opportunity_table: {
       description: 'Potential opportunity to switch to/from a differential tariff for each electricity meter in a school',
       units: :table,
-      header: ['MPAN', 'Cost Estimate Differential Tariff(year)', 'Cost Estimate Non-Differential Tariff(year)', 
+      header: ['MPAN', 'Cost Estimate Differential Tariff(year)', 'Cost Estimate Non-Differential Tariff(year)',
               'Saving(year)', 'Current Tariff', 'Recommendation'],
       column_types: [Integer, :£, :£, :£, String, String]
     },

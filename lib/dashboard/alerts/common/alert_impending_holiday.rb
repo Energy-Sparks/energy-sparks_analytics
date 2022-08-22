@@ -9,13 +9,12 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   include AlertFloorAreaMixin
 
   attr_reader :saving_kwh, :saving_co2, :daytype_breakdown_table, :total_annual_£, :holidays_percent
-  attr_reader :holiday_short_name, :holiday_long_name, :holiday_length_days
+  attr_reader :holiday_length_days
   attr_reader :holiday_length_weekdays, :holiday_length_weeks
-  attr_reader :holiday_start_date, :holiday_end_date, :holiday_start_date_doy
+  attr_reader :holiday_start_date, :holiday_end_date
   attr_reader :last_year_holiday_gas_kwh, :last_year_holiday_gas_£, :last_year_holiday_gas_co2
   attr_reader :last_year_holiday_electricity_kwh, :last_year_holiday_electricity_£, :last_year_holiday_electricity_co2
   attr_reader :last_year_holiday_energy_costs_£, :last_year_holiday_energy_costs_co2
-  attr_reader :name_of_last_year_holiday
   attr_reader :holiday_floor_area, :holiday_pupils, :last_year_holiday_gas_kwh_per_floor_area, :last_year_holiday_electricity_kwh_per_floor_area
 
   def initialize(school)
@@ -31,7 +30,7 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   end
 
   def timescale
-    @holiday.nil? ? 'Unknown' : ("#{@holiday_length_weeks} week" + (@holiday_length_weeks > 1 ? 's' : ''))
+    @holiday.nil? ? I18n.t("#{i18n_prefix}.timescale_unknown") : I18n.t("#{i18n_prefix}.timescale", count: @holiday_length_weeks)
   end
 
   def enough_data
@@ -236,11 +235,13 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     combine_electricity_and_gas_annual_out_of_hours_data
 
     holiday_information = upcoming_holiday_information(asof_date)
-    @holiday_period = holiday_information[:period]
     set_holiday_variables(holiday_information)
-    last_year_holiday = same_holiday_previous_year(@holiday_period)
-    @name_of_last_year_holiday = Holidays.holiday_month_year_str(last_year_holiday)
-    set_last_year_holiday_consumption_variables(last_year_holiday.start_date, last_year_holiday.end_date, last_year_holiday.nil?)
+    @holiday_period = holiday_information[:period]
+
+    @last_year_holiday = same_holiday_previous_year(@holiday_period)
+
+    set_last_year_holiday_consumption_variables(@last_year_holiday.start_date, @last_year_holiday.end_date, @last_year_holiday.nil?)
+
     potential_saving_kwh = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
     potential_saving_co2 = nil_to_zero(@electricity_potential_saving_co2) + nil_to_zero(@gas_potential_saving_co2)
     set_savings_capital_costs_payback(potential_saving_kwh, 0.0, potential_saving_co2)
@@ -307,19 +308,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       kwh_date_range(meter, start_date, end_date, :economic_cost),
       kwh_date_range(meter, start_date, end_date, :co2)
     ]
-  end
-
-  private def set_holiday_variables(holiday_information)
-    @holiday_short_name       = holiday_information[:short_name]
-    @holiday_long_name        = holiday_information[:long_name]
-    @holiday_type             = holiday_information[:type]
-    @holiday_length_days      = holiday_information[:length_days]
-    @holiday_length_weeks     = holiday_information[:length_weeks]
-    @holiday_mid_date         = holiday_information[:mid_date]
-    @holiday_length_weekdays  = holiday_information[:weekdays]
-    @holiday_start_date       = holiday_information[:start_date]
-    @holiday_end_date         = holiday_information[:end_date]
-    @holiday_start_date_doy   = holiday_information[:start_date].strftime('%A')
   end
 
   def gas?; !@school.aggregated_heat_meters.nil? end
@@ -404,14 +392,28 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     false
   end
 
+  def holiday_short_name
+    determine_holiday_short_name(@holiday_period.title)
+  end
+
+  def holiday_long_name
+    @holiday_period.to_s
+  end
+
+  def holiday_start_date_doy
+    I18n.l(@holiday_period.start_date, format: '%A')
+  end
+
+  def name_of_last_year_holiday
+    @last_year_holiday.nil? ? "" : Holidays.holiday_month_year_str(@last_year_holiday)
+  end
+
   private def upcoming_holiday_information(asof_date)
     holiday_period = @school.holidays.find_next_holiday(asof_date)
     length_days = holiday_period.days
     weekdays = week_days(holiday_period.start_date, holiday_period.end_date)
     mid_date = holiday_period.start_date + (length_days / 2).floor
     {
-      short_name:   determine_holiday_short_name(holiday_period.title),
-      long_name:    holiday_period.to_s,
       type:         @school.holidays.type(mid_date),
       length_days:  length_days,
       weekdays:     weekdays,
@@ -421,6 +423,16 @@ class AlertImpendingHoliday < AlertGasOnlyBase
       end_date:     holiday_period.end_date,
       period:       holiday_period
     }
+  end
+
+  private def set_holiday_variables(holiday_information)
+    @holiday_type             = holiday_information[:type]
+    @holiday_length_days      = holiday_information[:length_days]
+    @holiday_length_weeks     = holiday_information[:length_weeks]
+    @holiday_mid_date         = holiday_information[:mid_date]
+    @holiday_length_weekdays  = holiday_information[:weekdays]
+    @holiday_start_date       = holiday_information[:start_date]
+    @holiday_end_date         = holiday_information[:end_date]
   end
 
   private def same_holiday_previous_year(holiday_period)
