@@ -4,7 +4,7 @@ en:
     alert_energy_annual_versus_benchmark:
       timescale: year
     alert_impending_holiday:
-      timescale_unknown: Unknown
       timescale:
         one: 1 week
         other: "%{count} weeks"
+      timescale_unknown: Unknown

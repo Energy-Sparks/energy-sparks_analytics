@@ -117,6 +117,7 @@ ignore_unused:
   - 'analytics.energy_units.*'
   - 'date.*'
   - 'analytics.units.*'
+  - 'analytics.holidays.*'
 # - 'activerecord.attributes.*'
 # - '{devise,kaminari,will_paginate}.*'
 # - 'simple_form.{yes,no}'

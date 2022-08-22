@@ -1,19 +1,6 @@
 ---
 en:
   analytics:
-    holidays:
-      xmas: Xmas
-      spring_half_term: Spring half term
-      easter: Easter
-      mayday: Mayday
-      summer_half_term: Summer half term
-      summer: Summer
-      autumn_half_term: Autumn half term
-    common:
-      pa: "%{cost}pa"
-      holiday: holiday
-      weekend: weekend
-      school_day: school day
     adjectives:
       about: about
       above: above
@@ -29,3 +16,16 @@ en:
       well: well
     aggregator:
       subttitle: "%{start_date} to %{end_date}"
+    common:
+      holiday: holiday
+      pa: "%{cost}pa"
+      school_day: school day
+      weekend: weekend
+    holidays:
+      autumn_half_term: Autumn half term
+      easter: Easter
+      mayday: Mayday
+      spring_half_term: Spring half term
+      summer: Summer
+      summer_half_term: Summer half term
+      xmas: Xmas
