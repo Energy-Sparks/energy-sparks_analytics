@@ -1,6 +1,6 @@
 class AlertLongTermTrend < AlertAnalysisBase
   attr_reader :this_year_£, :last_year_£, :year_change_£, :relevance
-  attr_reader :percent_change_£, :summary, :prefix_1, :prefix_2
+  attr_reader :percent_change_£
   attr_reader :last_year_£_temp_adj, :year_change_£_temp_adj, :percent_change_£_temp_adj
 
   attr_reader :this_year_co2, :last_year_co2, :year_change_co2, :percent_change_co2
@@ -16,8 +16,12 @@ class AlertLongTermTrend < AlertAnalysisBase
     days_amr_data_with_asof_date(@asof_date) > 2 * 365 ? :enough : :not_enough
   end
 
+  def i18n_prefix
+    "analytics.#{AlertLongTermTrend.name.underscore}"
+  end
+
   def timescale
-    'last 2 years'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def self.long_term_variables(fuel_type)
@@ -127,17 +131,12 @@ class AlertLongTermTrend < AlertAnalysisBase
     @this_year_co2          = scalar.aggregate_value({ year:  0 }, fuel_type, :co2, { asof_date: asof_date})
     @last_year_co2          = scalar.aggregate_value({ year: -1 }, fuel_type, :co2, { asof_date: asof_date})
     @last_year_co2_temp_adj = @last_year_co2 * temperature_compensation_factor
-    
+
     @year_change_co2          = @this_year_co2 - @last_year_co2
     @year_change_co2_temp_adj = @this_year_co2 - @last_year_co2_temp_adj
 
     @percent_change_co2          = @year_change_co2 / @last_year_co2
     @percent_change_co2_temp_adj = @year_change_co2 / @year_change_co2_temp_adj
-
-    @prefix_1 = @year_change_£_temp_adj > 0 ? 'up' : 'down'
-    @prefix_2 = @year_change_£_temp_adj > 0 ? 'increase' : 'reduction'
-
-    @summary  = summary_text
 
     @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_£_temp_adj)
 
@@ -145,10 +144,19 @@ class AlertLongTermTrend < AlertAnalysisBase
   end
   alias_method :analyse_private, :calculate
 
-  def summary_text
-    FormatEnergyUnit.format(:£, @year_change_£_temp_adj, :text) + 'pa ' +
-    @prefix_2 + ' since last year, ' +
-    FormatEnergyUnit.format(:relative_percent, @percent_change_£_temp_adj, :text)
+  def prefix_1
+    @year_change_£_temp_adj > 0 ? I18nHelper.adjective('up') : I18nHelper.adjective('down')
+  end
+
+  def prefix_2
+    @year_change_£_temp_adj > 0 ? I18nHelper.adjective('increase') : I18nHelper.adjective('reduction')
+  end
+
+  def summary
+    I18n.t("#{i18n_prefix}.summary",
+      cost: FormatEnergyUnit.format(:£, @year_change_£_temp_adj, :text),
+      increase_or_reduction: prefix_2,
+      percent: FormatEnergyUnit.format(:relative_percent, @percent_change_£_temp_adj, :text))
   end
 
   def temperature_compensation_factor

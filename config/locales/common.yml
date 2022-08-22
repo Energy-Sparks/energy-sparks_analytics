@@ -2,6 +2,10 @@
 en:
   analytics:
     adjectives:
+      up: up
+      down: down
+      increase: increase
+      reduction: reduction
       about: about
       above: above
       below: below

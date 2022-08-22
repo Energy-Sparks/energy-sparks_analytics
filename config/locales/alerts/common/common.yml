@@ -1,6 +1,9 @@
 ---
 en:
   analytics:
+    alert_long_term_trend:
+      timescale: last 2 years
+      summary: "%{cost}pa %{increase_or_reduction} since last year, %{percent}"
     alert_energy_annual_versus_benchmark:
       timescale: year
     alert_impending_holiday:
