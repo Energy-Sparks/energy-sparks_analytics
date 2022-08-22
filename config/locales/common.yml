@@ -21,6 +21,8 @@ en:
     aggregator:
       subttitle: "%{start_date} to %{end_date}"
     common:
+      electricity: electricity
+      gas: gas
       holiday: holiday
       pa: "%{cost}pa"
       school_day: school day

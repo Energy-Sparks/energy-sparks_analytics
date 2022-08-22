@@ -1,6 +1,9 @@
 ---
 en:
   analytics:
+    alert_out_of_hours_base_usage:
+      timescale: last year
+      summary: "%{cost}pa (%{percent} of annual cost) "
     alert_long_term_trend:
       timescale: last 2 years
       summary: "%{cost}pa %{increase_or_reduction} since last year, %{percent}"
