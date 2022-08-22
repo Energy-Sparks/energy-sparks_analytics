@@ -2,21 +2,21 @@
 en:
   analytics:
     adjectives:
-      up: up
-      down: down
-      increase: increase
-      reduction: reduction
       about: about
       above: above
       below: below
+      down: down
       higher: higher
+      increase: increase
       just_above: just above
       just_below: just below
       lower: lower
       ok: ok
       poorly: poorly
+      reduction: reduction
       significantly_above: significantly above
       significantly_below: significantly below
+      up: up
       well: well
     aggregator:
       subttitle: "%{start_date} to %{end_date}"
@@ -35,3 +35,11 @@ en:
       summer: Summer
       summer_half_term: Summer half term
       xmas: Xmas
+    school_types:
+      primary: Primary
+      secondary: Secondary
+      special: Special
+      infant: Infant
+      junior: Junior
+      middle: Middle
+      mixed_primary_and_secondary: 'Mixed: Primary and Secondary'
