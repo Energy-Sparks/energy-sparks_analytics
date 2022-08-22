@@ -164,7 +164,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @abs_difference_£   = @difference_£.magnitude
     @abs_difference_co2 = @difference_co2.magnitude
     @difference_percent = calculate_percent_with_error(current_period_data[:kwh], previous_period_data[:kwh])
-    
+
     @abs_difference_percent = @difference_percent.magnitude
 
     @current_period_kwh         = current_period_data[:kwh]
@@ -232,6 +232,12 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
         convert_via:        :kwh
       },
     ]
+  end
+
+  def enough_data
+    return :not_enough if @not_enough_data_exception
+    period1, period2 = last_two_periods(@asof_date)
+    enough_days_data_for_period(period1, @asof_date) && enough_days_data_for_period(period2, @asof_date) ? :enough : :not_enough
   end
 
   protected
@@ -413,12 +419,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def enough_days_in_period(period, asof_date)
     asof_date.between?(period.start_date, period.end_date) && enough_days_data(asof_date - period.start_date + 1)
-  end
-
-  def enough_data
-    return :not_enough if @not_enough_data_exception
-    period1, period2 = last_two_periods(@asof_date)
-    enough_days_data_for_period(period1, @asof_date) && enough_days_data_for_period(period2, @asof_date) ? :enough : :not_enough
   end
 
   def enough_days_data(days)
