@@ -63,7 +63,7 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
   end
 
   def timescale
-    'up to a year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   private def calculate(asof_date)

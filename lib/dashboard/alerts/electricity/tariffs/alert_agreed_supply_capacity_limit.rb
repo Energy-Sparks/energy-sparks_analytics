@@ -5,7 +5,6 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
   SAVING_PER_1_KW_ASC_LIMIT_REDUCTION_£_PER_YEAR = 1000.0 / 100.0
   ASC_MARGIN_PERCENT = 0.1
   attr_reader :maximum_kw_meter_period_kw, :asc_limit_kw
-  attr_reader :text_explaining_asc_meters_below_limit, :number_of_meters_wording
 
   def initialize(school)
     super(school, :asclimit)
@@ -22,7 +21,7 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
   end
 
   def timescale
-    'year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
@@ -74,12 +73,11 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
   end
 
   private def calculate(asof_date)
-    opportunities = all_agreed_supply_capacities_with_peak_kw(asof_date)
-    unless opportunities.empty?
-      @text_explaining_asc_meters_below_limit = text_for_all_meters(opportunities)
-      @asc_limit_kw = aggregate_asc_limit_kw(opportunities)
-      @maximum_kw_meter_period_kw = aggregate_peak_kw(opportunities)
-      annual_saving_£ = aggregate_annual_saving_£(opportunities)
+    @opportunities = all_agreed_supply_capacities_with_peak_kw(asof_date)
+    unless @opportunities.empty?
+      @asc_limit_kw = aggregate_asc_limit_kw(@opportunities)
+      @maximum_kw_meter_period_kw = aggregate_peak_kw(@opportunities)
+      annual_saving_£ = aggregate_annual_saving_£(@opportunities)
       set_savings_capital_costs_payback(Range.new(annual_saving_£, annual_saving_£), nil, 0.0)
       @rating = calculate_rating_from_range(400.0, 3000.0, annual_saving_£)
     else
@@ -102,26 +100,33 @@ class AlertMeterASCLimit < AlertElectricityOnlyBase
     asc.nil? ? nil : asc[:asc_limit_kw]
   end
 
+  def text_explaining_asc_meters_below_limit
+    text_for_all_meters(@opportunities)
+  end
+
   private def text_for_all_meters(opportunity_list)
     text = ''
     opportunity_list.each do |mpan, asc_info|
-      text += text_for_one_meter(mpan, asc_info)
+      text += (text_for_one_meter(mpan, asc_info) + " ")
     end
     text
   end
 
   private def text_for_one_meter(mpan, asc_info)
-    "For meter #{mpan} your ASC limit is #{FormatEnergyUnit.format(:kw, asc_info[:asc_limit_kw])} "\
-    "but your peak power consumption is #{FormatEnergyUnit.format(:kw, asc_info[:peak_kw])}. " +
+    I18n.t("#{i18n_prefix}.peak_power_consumption",
+      mpan: mpan,
+      asc_limit: FormatEnergyUnit.format(:kw, asc_info[:asc_limit_kw]),
+      peak_kw: FormatEnergyUnit.format(:kw, asc_info[:peak_kw])) + " " +
     text_for_opportunity_or_risk(asc_info)
   end
 
   private def text_for_opportunity_or_risk(asc_info)
     if asc_info[:close_to_margin]
-      return 'You are very close to the agreed capacity limit, exceeding the list might result in a monthly penalty.'
+      I18n.t("#{i18n_prefix}.close_to_margin")
     else
-      return "There is an opportunity to save #{FormatEnergyUnit.format(:£, asc_info[:annual_saving_£])} per year, "\
-             "or #{FormatEnergyUnit.format(:£, asc_info[:annual_saving_£] * 10.0)} if considered over a 10 year period. "
+      I18n.t("#{i18n_prefix}.opportunity",
+        annual_saving: FormatEnergyUnit.format(:£, asc_info[:annual_saving_£]),
+        ten_year_saving: FormatEnergyUnit.format(:£, asc_info[:annual_saving_£] * 10.0))
     end
   end
 
