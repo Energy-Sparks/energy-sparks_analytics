@@ -218,6 +218,8 @@ class AlertAnalysisBase < ContentBase
   end
 
   def timescale
+    #TODO this probably unneeded as the text returned can be dynamically looked up
+    #from the YAML file based on class name
     raise EnergySparksAbstractBaseClass.new('Error: incorrect attempt to use abstract base class for timeescale template variable ' + self.class.name)
   end
 
@@ -353,7 +355,7 @@ class AlertAnalysisBase < ContentBase
   end
 
   protected def occupancy_description(date)
-    holiday?(date) ? 'holiday' : weekend?(date) ? 'weekend' : 'school day'
+    holiday?(date) ? I18n.t('analytics.common.holiday') : weekend?(date) ? I18n.t('analytics.common.weekend') : I18n.t('analytics.common.school_day')
   end
 
   # returns a list of the last n 'school_days' before and including the asof_date

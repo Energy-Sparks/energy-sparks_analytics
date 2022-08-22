@@ -1,6 +1,11 @@
 ---
 en:
   analytics:
+    common:
+      pa: "%{cost}pa"
+      holiday: holiday
+      weekend: weekend
+      school_day: school day
     adjectives:
       about: about
       above: above
