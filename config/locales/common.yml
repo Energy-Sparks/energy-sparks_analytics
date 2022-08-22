@@ -36,10 +36,10 @@ en:
       summer_half_term: Summer half term
       xmas: Xmas
     school_types:
-      primary: Primary
-      secondary: Secondary
-      special: Special
       infant: Infant
       junior: Junior
       middle: Middle
       mixed_primary_and_secondary: 'Mixed: Primary and Secondary'
+      primary: Primary
+      secondary: Secondary
+      special: Special
