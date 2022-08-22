@@ -1,6 +1,5 @@
 # only during holidays this alert send messages or for school comparison/benchmark
 class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
-  attr_reader :holiday_name, :summary
   attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh
   attr_reader :holiday_usage_to_date_£,   :holiday_projected_usage_£
   attr_reader :holiday_usage_to_date_co2, :holiday_projected_usage_co2
@@ -72,12 +71,12 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
     set_time_of_year_relevance(@relevance == :relevant ? 10.0 : 0.0)
   end
 
-  protected def max_days_out_of_date_while_still_relevant 
+  protected def max_days_out_of_date_while_still_relevant
     14
   end
 
   def timescale
-    'this holiday'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   private
@@ -87,7 +86,6 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
       @relevance = :relevant
 
       @holiday_period     = @school.holidays.holiday(asof_date)
-      @holiday_name       = @holiday_period.title
       holiday_date_range  = @holiday_period.start_date..@holiday_period.end_date
 
       usage_to_date  = calculate_usage_to_date(holiday_date_range)
@@ -103,8 +101,6 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
 
       @holiday_usage_to_date_co2   = totals_to_date[:co2]
       @holiday_projected_usage_co2 = projected_totals[:co2]
-
-      @summary = summary_text
 
       @rating = 0.0
     else
@@ -137,6 +133,10 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
     end.to_h
   end
 
+  def holiday_name
+    @holiday_period.title
+  end
+
   def totals(usage_to_date)
     usage_to_date.transform_values{ |v| v.values.map { |vv| vv[:total] }.compact.sum }
   end
@@ -160,17 +160,19 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
     end
   end
 
-  def summary_text
-    text =  %(
-              Your electricity usage during <%= @holiday_name %> holiday
-              up until <%= @asof_date.strftime('%A %e %b %Y') %>
-              has cost <%= FormatEnergyUnit.format(:£, @holiday_usage_to_date_£)  %>.
-              <% if @today < @holiday_period.end_date %>
-                By the end of the holiday this will cost you
-                <%= FormatEnergyUnit.format(:£, @holiday_projected_usage_£) %>
-              <% end %>
-            )
-
-    ERB.new(text).result(binding)
+  def summary
+    if @today < @holiday_period.end_date
+      I18n.t("#{i18n_prefix}.holiday_cost_to_date",
+        holiday_name: holiday_name,
+        date: I18n.l(@asof_date, format: '%A %e %b %Y'),
+        cost_to_date: FormatEnergyUnit.format(:£, @holiday_usage_to_date_£) ) +
+      I18n.t("#{i18n_prefix}.holiday_predicted_cost",
+        predicted_cost: FormatEnergyUnit.format(:£, @holiday_projected_usage_£))
+    else
+      I18n.t("#{i18n_prefix}.holiday_cost_to_date",
+        holiday_name: holiday_name,
+        date: I18n.l(@asof_date, format: '%A %e %b %Y'),
+        usage_to_date: FormatEnergyUnit.format(:£, @holiday_usage_to_date_£) )
+    end
   end
 end

@@ -1,6 +1,8 @@
 #======================== Change in Daily Electricity Consumption =============
 require_relative 'alert_electricity_only_base.rb'
 
+#NOTE: This is not registered in the application database, so not actually in direct use?
+#REMOVE?
 class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
   MAXDAILYCHANGE = 1.05
 
