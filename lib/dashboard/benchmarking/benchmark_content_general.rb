@@ -1359,10 +1359,6 @@ module Benchmarking
   end
   #=======================================================================================
   module BenchmarkPeriodChangeBaseElectricityMixIn
-    def aggregate_variables
-      %i[school_name pupils_changed current_pupils previous_pupils]
-    end
-
     def current_variable;     :current_pupils   end
     def previous_variable;    :previous_pupils  end
     def variable_type;        :pupils           end
@@ -1375,13 +1371,13 @@ module Benchmarking
     def has_possessive
       'have'
     end
+
+    def fuel_type_description
+      'electricity'
+    end
   end
 
   module BenchmarkPeriodChangeBaseGasMixIn
-    def aggregate_variables
-      %i[school_name floor_area_changed current_floor_area previous_floor_area]
-    end
-
     def current_variable;     :current_floor_area   end
     def previous_variable;    :previous_floor_area  end
     def variable_type;        :m2                   end
@@ -1394,6 +1390,10 @@ module Benchmarking
     def has_possessive
       'has'
     end
+
+    def fuel_type_description
+      'gas'
+    end
   end
 
   class BenchmarkPeriodChangeBase < BenchmarkContentBase
@@ -1404,43 +1404,89 @@ module Benchmarking
     def aggregate_text(school_ids, filter, user_type)
       raw_data = benchmark_manager.run_table_including_aggregate_columns(asof_date, page_name, school_ids, nil, filter, :raw, user_type)
       rows = raw_data.drop(1) # drop header
-      
+
       return '' if rows.empty?
 
-      return '' if no_changes?(rows)
+      floor_area_or_pupils_change_rows = changed_rows(rows, has_changed_variable)
 
-      change_rows = changed_rows(rows)
+      infinite_increase_school_names = school_names_by_calculation_issue(rows, :percent_changed, +Float::INFINITY)
+      infinite_decrease_school_names = school_names_by_calculation_issue(rows, :percent_changed, -Float::INFINITY)
+
+      changed = !floor_area_or_pupils_change_rows.empty? || !infinite_increase_school_names.empty? || !infinite_decrease_school_names.empty?
 
       text = %(
-        (*1) The comparison has been adjusted because the <%= change_variable_description %>
-        <%= has_possessive %> changed between the two <%= period_types %> for
-        <%= change_rows.map { |row| change_sentence(row) }.join(', and ') %>.
+        <% if changed %>
+          <p> 
+            Notes:
+            <ul>
+              <% if !floor_area_or_pupils_change_rows.empty? %>
+                <li>
+                  (*1) the comparison has been adjusted because the <%= change_variable_description %>
+                      <%= has_possessive %> changed between the two <%= period_types %> for
+                      <%= floor_area_or_pupils_change_rows.map { |row| change_sentence(row) }.join(', and ') %>.
+                </li>
+              <% end %>
+              <% if !infinite_increase_school_names.empty? %>
+                <li>
+                  (*2) schools where percentage change
+                      is +Infinity is caused by the <%= fuel_type_description %> consumption
+                      in the previous <%= period_type %> being more than zero
+                      but in the current <%= period_type %> zero
+                </li>
+              <% end %>
+              <% if !infinite_decrease_school_names.empty? %>
+                <li>
+                  (*3) schools where percentage change
+                      is -Infinity is caused by the <%= fuel_type_description %> consumption
+                      in the current <%= period_type %> being zero
+                      but in the previous <%= period_type %> it was more than zero
+                </li>
+              <% end %>
+            </ul>
+          </p>
+        <% end %>
       )
       ERB.new(text).result(binding)
     end
 
-    def changed_variable_column_index
-      table_column_index(has_changed_variable)
+    def list_of_school_names_text(school_name_list)
+      if school_name_list.length <= 2
+        school_name_list.join(' and ')
+      else
+        (school_name_list.first school_name_list.size - 1).join(' ,') + ' and ' + school_name_list.last
+      end 
     end
 
-    def changed?(row)
-      row[changed_variable_column_index] == true
+    def school_names_by_calculation_issue(rows, column_id, value)
+      rows.select { |row| row[table_column_index(column_id)] == value }
     end
 
-    def changed_rows(rows)
-      rows.select { |row| changed?(row) }
+    def school_names(rows)
+      rows.map { |row| remove_references(row[table_column_index(:school_name)]) }
     end
 
-    def no_changes?(rows)
-      rows.all?{ |row| !changed?(row) }
+    def remove_references(school_name)
+      school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')
     end
 
-    def aggregate_variable_table_column_index_deprecated(var)
-      aggregate_variables.index(var)
+    def changed_variable_column_index(change_variable)
+      table_column_index(change_variable)
+    end
+
+    def changed?(row, change_variable)
+      row[changed_variable_column_index(change_variable)] == true
+    end
+
+    def changed_rows(rows, change_variable)
+      rows.select { |row| changed?(row, change_variable) }
+    end
+
+    def no_changes?(rows,  change_variable)
+      rows.all?{ |row| !changed?(row, change_variable) }
     end
 
     def change_sentence(row)
-      school_name = row[table_column_index(:school_name)     ].gsub(' (*1)', '')
+      school_name = remove_references(row[table_column_index(:school_name)])
       current     = row[table_column_index(current_variable) ].round(0)
       previous    = row[table_column_index(previous_variable)].round(0)
 
@@ -1456,8 +1502,12 @@ module Benchmarking
   class BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek < BenchmarkPeriodChangeBase
     include BenchmarkPeriodChangeBaseElectricityMixIn
 
+    def period_type
+      'school week'
+    end
+
     def period_types
-      'school weeks'
+      "#{period_type}s" # pluralize
     end
 
     private def introduction_text
@@ -1475,8 +1525,12 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkHolidaysChangeBase < BenchmarkPeriodChangeBase
+    def period_type
+      'holiday'
+    end
+
     def period_types
-      'holidays'
+      "#{period_type}s" # pluralize
     end
   end
   #=======================================================================================
