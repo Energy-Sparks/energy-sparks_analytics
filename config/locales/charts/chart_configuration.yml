@@ -844,6 +844,9 @@ en:
     solar_pv_last_7_days_by_submeter:
       title:
       - The last 7 days of your school’s electricity consumption
+    solar_pv_single_day_adhoc_test:
+      title:
+      - adhoc single day solar PV test chart
     storage_heater_by_day_of_week:
       title:
       - Storage heater usage by day of the week
