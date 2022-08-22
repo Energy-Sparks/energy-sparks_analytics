@@ -1,6 +1,7 @@
 ---
 en:
   analytics:
+    academic_year: Academic Year %{period_start_date}/%{period_end_date}
     day_names:
     - Sunday
     - Monday
@@ -9,3 +10,5 @@ en:
     - Thursday
     - Friday
     - Saturday
+    from_and_to: "%{from_date} to %{to_date}"
+    no_dates: No Dates
