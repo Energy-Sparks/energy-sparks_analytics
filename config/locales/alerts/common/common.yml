@@ -1,6 +1,9 @@
 ---
 en:
   analytics:
+    alert_target_base:
+      timescale: at least 1 year
+      summary: "%{percent} %{above_or_below} target"
     alert_energy_annual_versus_benchmark:
       timescale: year
     alert_impending_holiday:
