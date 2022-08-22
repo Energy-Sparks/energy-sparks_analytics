@@ -3,9 +3,7 @@ require_relative '../alert_electricity_only_base.rb'
 
 class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation
-  attr_reader :max_day_str, :min_day_str
   attr_reader :annual_cost_kwh, :annual_cost_£, :annual_co2
-  attr_reader :adjective
 
   def initialize(school, report_type = :intraweekbaseload, meter = school.aggregated_electricity_meters)
     super(school, report_type, meter)
@@ -120,12 +118,10 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     days_kw = calculator.average_intraweek_schoolday_kw(asof_date)
 
     @min_day_kw = days_kw.values.min
-    min_day = days_kw.key(@min_day_kw)
-    @min_day_str = I18nHelper.day_name(min_day)
+    @min_day = days_kw.key(@min_day_kw)
 
     @max_day_kw = days_kw.values.max
-    max_day = days_kw.key(@max_day_kw)
-    @max_day_str = I18nHelper.day_name(max_day)
+    @max_day = days_kw.key(@max_day_kw)
 
     @percent_intraday_variation = (@max_day_kw - @min_day_kw) / @min_day_kw
 
@@ -140,8 +136,6 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     set_savings_capital_costs_payback(Range.new(@annual_cost_£, @annual_cost_£), nil, @annual_co2)
 
     @rating = calculate_rating_from_range(0.1, 0.3, @percent_intraday_variation.magnitude)
-
-    @adjective = calculate_adjective
 
     @term = :longterm
   end
@@ -164,6 +158,18 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
         to save costs?
       </p>
     )
+  end
+
+  def min_day_str
+    I18nHelper.day_name(@min_day)
+  end
+
+  def max_day_str
+    I18nHelper.day_name(@max_day)
+  end
+
+  def adjective
+    calculate_adjective
   end
 
   def calculate_adjective

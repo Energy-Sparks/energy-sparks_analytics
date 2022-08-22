@@ -11,11 +11,9 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£, :one_year_saving_versus_benchmark_co2
-  attr_reader :one_year_saving_versus_benchmark_adjective
 
   attr_reader :one_year_exemplar_by_pupil_kwh, :one_year_exemplar_by_pupil_£
   attr_reader :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_£
-  attr_reader :one_year_saving_versus_exemplar_adjective
 
   attr_reader :one_year_baseload_per_pupil_kw, :one_year_baseload_per_pupil_kwh, :one_year_baseload_per_pupil_£
   attr_reader :one_year_baseload_per_floor_area_kw, :one_year_baseload_per_floor_area_kwh, :one_year_baseload_per_floor_area_£
@@ -223,7 +221,6 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
     @one_year_saving_versus_benchmark_kwh = @average_baseload_last_year_kwh - @one_year_benchmark_by_pupil_kwh
     @one_year_saving_versus_benchmark_£   = @one_year_saving_versus_benchmark_kwh * electricity_tariff
     @one_year_saving_versus_benchmark_co2 = @one_year_saving_versus_benchmark_kwh * blended_co2_per_kwh
-    @one_year_saving_versus_benchmark_adjective = Adjective.adjective_for(@one_year_saving_versus_benchmark_kwh, 0.0)
 
     @exemplar_per_pupil_kw = BenchmarkMetrics.exemplar_baseload_for_pupils(pupils(asof_date - 365, asof_date), school_type)
 
@@ -234,7 +231,6 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
     @one_year_saving_versus_exemplar_kwh  = @average_baseload_last_year_kwh - @one_year_exemplar_by_pupil_kwh
     @one_year_saving_versus_exemplar_£    = @one_year_saving_versus_exemplar_kwh * electricity_tariff
     @one_year_saving_versus_exemplar_co2  = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
-    @one_year_saving_versus_exemplar_adjective = Adjective.adjective_for(@one_year_saving_versus_exemplar_kwh, 0.0)
 
     @one_year_baseload_per_pupil_kw        = @average_baseload_last_year_kw   / pupils(asof_date - 365, asof_date)
     @one_year_baseload_per_pupil_kwh       = @average_baseload_last_year_kwh  / pupils(asof_date - 365, asof_date)
@@ -261,6 +257,14 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
     @bookmark_url = add_book_mark_to_base_url('ElectricityBaseload')
   end
   alias_method :analyse_private, :calculate
+
+  def one_year_saving_versus_benchmark_adjective
+    Adjective.adjective_for(@one_year_saving_versus_benchmark_kwh, 0.0)
+  end
+
+  def one_year_saving_versus_exemplar_adjective
+    Adjective.adjective_for(@one_year_saving_versus_exemplar_kwh, 0.0)
+  end
 
   def summary_text
     if @one_year_saving_versus_exemplar_£ > 0
