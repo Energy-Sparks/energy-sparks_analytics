@@ -73,7 +73,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
   end
 
   def timescale
-    'year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
