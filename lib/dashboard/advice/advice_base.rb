@@ -378,7 +378,7 @@ class AdviceBase < ContentBase
         #
         #The net result is that this object will have some values copied from the alert
         #object. And some of its code may not be used
-        create_and_set_attr_reader(to, nil)
+        create_and_set_attr_reader(to, alert.send(from))
       end
     end
   end
