@@ -1,5 +1,7 @@
 require 'simplecov'
 require 'pry'
+require 'rollbar'
+
 SimpleCov.start do
   add_group "Models", "app/models"
   add_group "Services", "app/services"
