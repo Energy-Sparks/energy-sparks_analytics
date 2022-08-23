@@ -13,6 +13,9 @@ end
 class EnergySparksNotEnoughDataException < StandardError
 end
 
+class EnergySparksCalculationException < StandardError
+end
+
 class EnergySparksMeterDataTooOutOfDate < StandardError
 end
 

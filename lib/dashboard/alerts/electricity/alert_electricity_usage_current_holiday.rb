@@ -84,7 +84,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   def calculate(asof_date)
     if @school.holidays.holiday?(asof_date)
       @relevance = :relevant
-
+      @asof_date = asof_date
       @holiday_period     = @school.holidays.holiday(asof_date)
       holiday_date_range  = @holiday_period.start_date..@holiday_period.end_date
 
@@ -105,8 +105,8 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
       @rating = 0.0
     else
       @relevance = :never_relevant
-      @holiday_name = 'Not a holiday'
-
+      @holiday_period = nil
+      @asof_date = nil
       @holiday_usage_to_date_£   = 0.0
       @holiday_projected_usage_£ = 0.0
 
@@ -134,7 +134,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   end
 
   def holiday_name
-    @holiday_period.title
+    @holiday_period.nil? ? nil : @holiday_period.title
   end
 
   def totals(usage_to_date)
@@ -161,6 +161,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   end
 
   def summary
+    return nil if @holiday_period.nil?
     if @today < @holiday_period.end_date
       I18n.t("#{i18n_prefix}.holiday_cost_to_date",
         holiday_name: holiday_name,

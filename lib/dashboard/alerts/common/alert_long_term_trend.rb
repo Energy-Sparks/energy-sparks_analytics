@@ -138,6 +138,9 @@ class AlertLongTermTrend < AlertAnalysisBase
     @percent_change_co2          = @year_change_co2 / @last_year_co2
     @percent_change_co2_temp_adj = @year_change_co2 / @year_change_co2_temp_adj
 
+    #BACKWARDS COMPATIBILITY: previously may have failed here if variable was not set
+    raise_calculation_error_if_missing(year_change_£_temp_adj: year_change_£_temp_adj)
+
     @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_£_temp_adj)
 
     set_savings_capital_costs_payback(Range.new(year_change_£, year_change_£), nil, @year_change_co2)
@@ -145,10 +148,12 @@ class AlertLongTermTrend < AlertAnalysisBase
   alias_method :analyse_private, :calculate
 
   def prefix_1
+    return nil if @year_change_£_temp_adj.nil?
     @year_change_£_temp_adj > 0 ? I18nHelper.adjective('up') : I18nHelper.adjective('down')
   end
 
   def prefix_2
+    return nil if @year_change_£_temp_adj.nil?
     @year_change_£_temp_adj > 0 ? I18nHelper.adjective('increase') : I18nHelper.adjective('reduction')
   end
 

@@ -250,6 +250,8 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
 
     @percent_difference_from_average_per_pupil = percent_change(per_pupil_energy_benchmark_£, @one_year_energy_per_pupil_£)
 
+    #BACKWARDS COMPATIBILITY: previously would have failed here as percent_change can return nil
+    raise_calculation_error_if_missing(percent_difference_from_average_per_pupil: @percent_difference_from_average_per_pupil)
     @trees_co2 = trees
 
     @rating = calculate_rating_from_range(per_pupil_energy_exemplar_£, per_pupil_energy_benchmark_£ * 1.2, @one_year_energy_per_pupil_£)

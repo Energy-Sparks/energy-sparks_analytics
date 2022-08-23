@@ -343,12 +343,41 @@ class AdviceBase < ContentBase
     FormatEnergyUnit.format(:kw, value, :html)
   end
 
+  # This feature allows the advice classes to copy values from one or more underlying
+  # alerts, so they can be presented as variables from this class. These will be stored
+  # by the application, like other objects that extend ContentBase, but it also enables
+  # that data to be made available when formatting content for display to users.
+  # (see, e.g. AdviceBaseload which uses these variables in its ERB templates)
+  #
+  # An alternate approach to implementing this would be for the individual advice classes
+  # to directly request data from the alert objects. This would clarify the dependencies between
+  # the classes, avoiding indirection via the adult_dashboard_configuration class.
   def promote_data
+    #using the configuration in adult_dashboard_configuration.rb
+    #loop through the promoted variables
     self.class.config[:promoted_variables].each do |alert_class, variables|
+      #create the referenced alert
       alert = alert_class.new(@school)
       next unless alert.valid_alert?
+      #execute the alert (this means the same alert may be run >1 against a school)
+      #
+      #any exceptions will have been swallowed up here, so the instance variables
+      #being copied across might not actually have been set. An exception might have been
+      #down to not enough data, or due to a calculation error in the alert
+      #
+      #If the advice class itself is dependent on this information, then there may be
+      #other errors that cause the advice class to fail to run. This is most likely visible
+      #when displaying a page to users.
       alert.analyse(alert_asof_date, true)
       variables.each do |to, from|
+        #For each variable, copy the value from the alert class to this object
+        #as an instance variable. Optionally renaming (from -> to)
+        #
+        #If this object already had that instance variable set. It will be overwritten.
+        #A method with the same name will also be overwritten.
+        #
+        #The net result is that this object will have some values copied from the alert
+        #object. And some of its code may not be used
         create_and_set_attr_reader(to, alert.send(from))
       end
     end
@@ -442,16 +471,30 @@ class AdviceBase < ContentBase
     )
   end
 
+  #This methods will, for the given key:
+  #
+  #Use the key to set an instance variable on this object.
+  # Where necessary a new attr_reader is defined.
+  #If there's already an instance variable then it will be overwritten.
+  #If there's a method on this class with the same name, then it will be overridden
+  #by a new attr_reader.
   def create_and_set_attr_reader(key, value)
+    #check state of this variable
     status = variable_name_status(key)
     case status
     when :function
+      #if we have a method with that name, then set an instance variable with the value
+      #sometimes overrides AdviceBase.rating with rating
       logger.info "promoted variable #{key} already set as function  for #{self.class.name} - overwriting"
       create_var(key, value)
     when :variable
+      #if we don't have that variable set, then set it
+      #sometimes overrides AdviceBase.summary with summary
       logger.info "promoted variable #{key} already defined for #{self.class.name} - overwriting"
       instance_variable_set("@#{key}", value)
     else
+      #otherwise dynamically defined an attr_reader and set the instance variable
+      #this seems to be the common case based on current config
       create_var(key, value)
     end
   end
@@ -461,6 +504,11 @@ class AdviceBase < ContentBase
     instance_variable_set("@#{key}", value)
   end
 
+  #for a given key, determine whether:
+  #
+  # :function = we respond to a method of that name and there's no instance variable set
+  # :variable = there's currently an instance variable defined for that key on this object
+  # nil = no method or instance variable defined
   def variable_name_status(key)
     if respond_to?(key) && !instance_variable_defined?("@#{key.to_s}")
       :function

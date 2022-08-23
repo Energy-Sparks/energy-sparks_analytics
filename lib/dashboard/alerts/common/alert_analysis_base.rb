@@ -50,6 +50,11 @@ class AlertAnalysisBase < ContentBase
     rescue EnergySparksNotEnoughDataException => e
       log_stack_trace(e, false)
       @not_enough_data_exception = true # TODO(PH, 31Jul2019) a mess for the moment, needs rationalising
+    rescue EnergySparksCalculationException => e
+      # LD(2022-08-23) add handler for custom exception so we can highlight problems
+      Rollbar.warning(e, alert_type: self.class.name, asof_date: asof_date)
+      log_stack_trace(e)
+      @calculation_worked = false
     rescue StandardError => e
       log_stack_trace(e)
       @calculation_worked = false
@@ -418,6 +423,24 @@ class AlertAnalysisBase < ContentBase
     365.0 / (asof_date - meter_date_one_year_before(meter, asof_date))
   end
 
+  #TEMPORARY
+  #As part of the localisation refactor some instance variables produced in the calculate
+  #methods were moved to being returned by instance variables.
+  #
+  #This means that previously, where calculating the values of those variables may have caused
+  #an exception (e.g. attempting to determine an adjective for a nil value), the calculate
+  #method may continue and even complete.
+  #
+  #To avoid generating ratings for alerts that may have been previously (silently) failing
+  #for some schools, this method is provided to raise an error for those exceptions
+  #
+  #This is intended to give us some insights into which alerts/schools might be failing and
+  #so we can act on it. E.g. by adding in better preconditions to the calculate method
+  protected def raise_calculation_error_if_missing(variables)
+    missing = variables.entries.select{|k,v| v.nil? }
+    raise EnergySparksCalculationException.new("#{missing.map{|m| m[0]}.join(",")} are missing") if missing.any?
+  end
+
   private
 
   def calculate(asof_date)
@@ -527,4 +550,5 @@ class AlertAnalysisBase < ContentBase
   def self.all_available_alerts
     all_alerts.keys
   end
+
 end
