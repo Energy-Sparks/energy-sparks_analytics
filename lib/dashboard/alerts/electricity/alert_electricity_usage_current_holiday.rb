@@ -134,7 +134,7 @@ class AlertElectricityUsageDuringCurrentHoliday < AlertElectricityOnlyBase
   end
 
   def holiday_name
-    @holiday_period.nil? nil : @holiday_period.title
+    @holiday_period.nil? ? nil : @holiday_period.title
   end
 
   def totals(usage_to_date)
