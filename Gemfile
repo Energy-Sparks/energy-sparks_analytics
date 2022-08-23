@@ -31,6 +31,8 @@ gem 'hashdiff', '~> 1.0.0'
 
 gem 'dotenv'
 
+gem 'rollbar'
+
 group :development do
   gem 'aws-sdk-s3'
   gem 'i18n-tasks', '~> 1.0.10'
