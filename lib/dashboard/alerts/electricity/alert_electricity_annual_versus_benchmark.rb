@@ -187,6 +187,9 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @per_pupil_electricity_benchmark_£ = @one_year_benchmark_by_pupil_£ / pupils(asof_date - 365, asof_date)
     @percent_difference_from_average_per_pupil = percent_change(@per_pupil_electricity_benchmark_£, one_year_electricity_per_pupil_£)
 
+    #BACKWARDS COMPATIBILITY: previously would have failed here as percent_change can return nil
+    raise_calculation_error_if_missing(percent_difference_from_average_per_pupil: @percent_difference_from_average_per_pupil)
+
     # rating: benchmark value = 4.0, exemplar = 10.0
     percent_from_benchmark_to_exemplar = (@last_year_kwh - @one_year_benchmark_by_pupil_kwh) / (@one_year_exemplar_by_pupil_kwh - @one_year_benchmark_by_pupil_kwh)
     uncapped_rating = percent_from_benchmark_to_exemplar * (10.0 - 4.0) + 4.0
@@ -204,18 +207,22 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   end
 
   def one_year_saving_versus_exemplar_adjective
+    return nil if @one_year_saving_versus_exemplar_kwh.nil?
     Adjective.adjective_for(@one_year_saving_versus_exemplar_kwh)
   end
 
   def one_year_saving_versus_benchmark_adjective
+    return nil if @one_year_saving_versus_benchmark_kwh.nil?
     Adjective.adjective_for(@one_year_saving_versus_benchmark_kwh)
   end
 
   def percent_difference_adjective
+    return "" if @percent_difference_from_average_per_pupil.nil?
     Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
   end
 
   def simple_percent_difference_adjective
+    return "" if @percent_difference_from_average_per_pupil.nil?
     Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)
   end
 

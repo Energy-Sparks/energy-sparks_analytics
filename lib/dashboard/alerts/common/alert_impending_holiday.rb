@@ -239,7 +239,6 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     @holiday_period = holiday_information[:period]
 
     @last_year_holiday = same_holiday_previous_year(@holiday_period)
-
     set_last_year_holiday_consumption_variables(@last_year_holiday.start_date, @last_year_holiday.end_date, @last_year_holiday.nil?)
 
     potential_saving_kwh = nil_to_zero(@electricity_potential_saving_£) + nil_to_zero(@gas_potential_saving_£)
@@ -393,15 +392,15 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   end
 
   def holiday_short_name
-    determine_holiday_short_name(@holiday_period.title)
+    @holiday_period.nil? ? nil : determine_holiday_short_name(@holiday_period.title)
   end
 
   def holiday_long_name
-    @holiday_period.to_s
+    @holiday_period.nil? ? nil : @holiday_period.to_s
   end
 
   def holiday_start_date_doy
-    I18n.l(@holiday_period.start_date, format: '%A')
+    @holiday_period.nil? ? nil : I18n.l(@holiday_period.start_date, format: '%A')
   end
 
   def name_of_last_year_holiday

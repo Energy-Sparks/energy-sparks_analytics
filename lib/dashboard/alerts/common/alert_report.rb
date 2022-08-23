@@ -7,6 +7,8 @@
 # - rating:   on this metric out of 10
 # - status:   :good, :ok, :poor (only expecting to report ':poor' alerts, the rest are for information)
 
+#TODO: Remove?
+#Only referenced from new_example_alert.rb which doesnt contain any real code
 class AlertReport
   ALERT_HELP_URL = 'http://blog.energysparks.uk/alerts'.freeze
   MAX_RATING = 10.0
