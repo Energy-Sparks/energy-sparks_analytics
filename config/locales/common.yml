@@ -2,6 +2,9 @@
 en:
   analytics:
     adjectives:
+      unchanged: unchanged
+      reduction: reduction
+      no_change: the same
       about: about
       above: above
       below: below

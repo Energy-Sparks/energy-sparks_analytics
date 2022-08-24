@@ -43,7 +43,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :current_period_weekly_kwh, :current_period_weekly_£, :previous_period_weekly_kwh, :previous_period_weekly_£
   attr_reader :change_in_weekly_kwh, :change_in_weekly_£
   attr_reader :change_in_weekly_percent
-  attr_reader :summary, :prefix_1, :prefix_2
   attr_reader :current_period_floor_area, :previous_period_floor_area, :floor_area_changed
   attr_reader :current_period_pupils, :previous_period_pupils, :pupils_changed
   attr_reader :truncated_current_period
@@ -200,10 +199,6 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @change_in_weekly_£         = @current_period_weekly_£ - @previous_period_weekly_£
     @change_in_weekly_percent   = relative_change(@change_in_weekly_kwh, @previous_period_weekly_kwh)
 
-    @prefix_1 = prefix(@difference_percent, 'up', 'the same', 'down')
-    @prefix_2 = prefix(@difference_percent, 'increase', 'unchanged', 'reduction')
-    @summary  = summary_text
-
     set_equivalence_variables(self.class.equivalence_template_variables)
 
     set_savings_capital_costs_payback(@difference_£, 0.0, @difference_co2)
@@ -232,6 +227,14 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
         convert_via:        :kwh
       },
     ]
+  end
+
+  def prefix_1
+    Adjective.adjective_for_change(@difference_percent, :up, :no_change, :down)
+  end
+
+  def prefix_2
+    Adjective.adjective_for_change(@difference_percent, :increase, :unchanged, :reduction)
   end
 
   def name_of_current_period
@@ -367,20 +370,13 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def temperature_adjust; false end
 
-  def prefix(change, up, same, down)
-    if change < 0.0
-      down
-    elsif change == 0.0
-      same
-    else
-      up
-    end
-  end
-
-  def summary_text
-    FormatEnergyUnit.format(:£, @difference_£, :text) + ' ' +
-    @prefix_2 + ' since last ' + period_type + ', ' +
-    FormatEnergyUnit.format(:relative_percent, @difference_percent, :text)
+  #£130 increase since last holiday, +160%
+  def summary
+    I18n.t("analytics.time_period_comparison",
+      difference: FormatEnergyUnit.format(:£, @difference_£, :text),
+      adjective: prefix_2,
+      period_type: period_type,
+      relative_percent: FormatEnergyUnit.format(:relative_percent, @difference_percent, :text))
   end
 
   def url_bookmark
@@ -488,7 +484,7 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
     I18nHelper.holiday(period.type)
   end
 
-  def truncate_period_to_available_meter_data(period)
+  protected def truncate_period_to_available_meter_data(period)
     return period if period.start_date >= aggregate_meter.amr_data.start_date && period.end_date <= aggregate_meter.amr_data.end_date
     start_date = [period.start_date, aggregate_meter.amr_data.start_date].max
     end_date = [period.end_date, aggregate_meter.amr_data.end_date].min

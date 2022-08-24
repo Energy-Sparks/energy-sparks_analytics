@@ -34,4 +34,14 @@ class Adjective
       I18nHelper.adjective('lower')
     end
   end
+
+  def self.adjective_for_change(change, up, no_change, down)
+    if change < 0.0
+      I18nHelper.adjective(down)
+    elsif change == 0.0
+      I18nHelper.adjective(no_change)
+    else
+      I18nHelper.adjective(up)
+    end
+  end
 end
