@@ -43,7 +43,7 @@ class AlertTurnHeatingOff < AlertGasModelBase
     historic_meter_years: {
       description: 'period of historic analysis up to 12 months available e.g. 6 months',
       units:  :years
-    }, 
+    },
     future_degree_days: {
       description: 'degree days in horizon period',
       units:  :temperature
@@ -96,16 +96,20 @@ class AlertTurnHeatingOff < AlertGasModelBase
       description: 'days since last meter reading date',
       units:  Integer
     },
+    days_ago: {
+      description: 'days since last meter read, including day/days',
+      unit: String
+    },
     days_ago_plural: {
       description: 'set to s if days since last meter reading date > 1 so can say day or days ago',
       units:  String
     }
   }
-  
+
   # ================================== Control Variables =========================================
 
   def timescale
-    'next week'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
@@ -160,10 +164,14 @@ class AlertTurnHeatingOff < AlertGasModelBase
   end
   alias_method :analyse_private, :calculate
 
+  def days_ago
+    FormatUnit.format(:days, @days_since_last_meter_reading_date)
+  end
 
   def set_up_to_dateness_of_meter
     @last_meter_reading_date = aggregate_meter.amr_data.end_date
     @days_since_last_meter_reading_date = (@today - @last_meter_reading_date).to_i
+    #DONT USE
     @days_ago_plural = @days_since_last_meter_reading_date == 1 ? '' : 's'
   end
 
@@ -237,9 +245,9 @@ class AlertTurnHeatingOff < AlertGasModelBase
   def analysis_horizon_date(asof_date)
     case asof_date.wday
     when 0, 6
-      asof_date.next_occurring(:saturday) 
+      asof_date.next_occurring(:saturday)
     when 1..5
-      asof_date.next_occurring(:saturday).next_occurring(:saturday) 
+      asof_date.next_occurring(:saturday).next_occurring(:saturday)
     end
   end
 
