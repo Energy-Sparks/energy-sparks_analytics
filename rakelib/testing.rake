@@ -74,4 +74,51 @@ namespace :testing do
       end
     end
   end
+
+  desc 'download and anonymise unvalidated data'
+  task :download_and_anonymise_unvalidated_data do |t, args|
+    # rake testing:download_and_anonymise_unvalidated_data ACCESS_KEY_ID=your_aws_access_key_id SECRET_ACCESS_KEY=your_secret_access_key SCHOOLS=school1,school2...
+    require 'aws-sdk-s3'
+    require 'require_all'
+    require_relative '../lib/dashboard.rb'
+
+    client = Aws::S3::Client.new(
+      access_key_id: ENV['ACCESS_KEY_ID'],
+      secret_access_key: ENV['SECRET_ACCESS_KEY'],
+      region: 'eu-west-2'
+    )
+    bucket = ENV['UNVALIDATED_SCHOOL_CACHE_BUCKET']
+    schools = ENV['SCHOOLS'].split(',')
+    test_dir = ENV['ANALYTICSTESTDIR']
+
+    $stderr.puts "Downloading list of files from #{bucket}"
+    schools.each_with_index do |school, index|
+      resp = client.list_objects_v2({
+          bucket: bucket,
+          prefix: "unvalidated-data-#{school}",
+      })
+      resp.contents.each do |entry|
+        filename = "#{test_dir}/MeterCollections/unvalidated-data-acme-#{index}.yaml"
+        $stderr.puts "Saving data to #{filename}"
+        File.open(filename, 'w') do |file|
+          resp = client.get_object({ bucket: bucket, key: entry.key }, target: file)
+        end
+      end
+    end
+
+    $stderr.puts "Anonymising files"
+    schools.each_with_index do |school, index|
+      file_name = "./#{test_dir}/MeterCollections/unvalidated-data-acme-#{index}.yaml"
+      $stderr.puts "Anonymising #{filename}"
+      meter_readings = YAML::load_file(file_name)
+      meter_readings[:school_data][:id] = index
+      meter_readings[:school_data][:name] = "Acme School #{index}"
+      meter_readings[:school_data][:address] = "Acme School #{index}"
+      meter_readings[:school_data][:urn] = index
+      meter_readings[:school_data][:postcode] = "AB#{index} 1CD"
+      meter_readings[:school_data][:area_name] = "Bath"
+      meter_readings[:school_data][:location] = ''
+      File.open(file_name, 'w') { |f| YAML.dump(meter_readings, f) }
+    end
+  end
 end
