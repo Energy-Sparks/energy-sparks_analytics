@@ -8,12 +8,12 @@ class AlertHotWaterEfficiency < AlertGasModelBase
   attr_reader :benchmark_gas_better_control_saving_£, :benchmark_point_of_use_electric_saving_£, :electric_hot_water_saving_co2
 
   def initialize(school)
-    super(school, :hotwaterefficiency) 
+    super(school, :hotwaterefficiency)
     @relevance = :never_relevant if @relevance != :never_relevant && heating_only # set before calculation
   end
 
   def timescale
-    'year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
@@ -42,7 +42,7 @@ class AlertHotWaterEfficiency < AlertGasModelBase
       description: 'Current v. Improved Control v. Point of Use Electric cost-benefit table',
       units: :table,
       header: ['Choice', 'Annual kWh', 'Annual Cost £', 'Annual CO2/kg',
-               'Efficiency', 'Saving £', 'Saving £ percent', 'Saving CO2', 
+               'Efficiency', 'Saving £', 'Saving £ percent', 'Saving CO2',
                'Saving CO2 percent', 'Capital Cost', 'Payback (years)'],
       column_types: [String, {kwh: :gas}, :£, :co2,
                       :percent, :£, :percent, :co2,

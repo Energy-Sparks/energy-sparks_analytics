@@ -45,7 +45,7 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
   }.freeze
 
   def timescale
-    'last year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
@@ -74,7 +74,7 @@ class AlertHotWaterInsulationAdvice < AlertGasModelBase
 
   private def calculate_annual_hotwater_poor_insulation_heatloss_estimate(asof_date)
     start_date = model_start_date(asof_date)
-    savings_kwh, savings_percent = 
+    savings_kwh, savings_percent =
       heating_model.hot_water_poor_insulation_cost_kwh(start_date, asof_date)
     @annual_hotwater_poor_insulation_heatloss_estimate_£ = savings_kwh * ConvertKwh.scale_unit_from_kwh(:£, :gas)
     @annual_hotwater_poor_insulation_heatloss_estimate_co2 = savings_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
