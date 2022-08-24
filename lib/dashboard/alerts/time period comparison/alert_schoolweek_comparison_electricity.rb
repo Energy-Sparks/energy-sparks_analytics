@@ -1,8 +1,7 @@
 require_relative './alert_period_comparison_base.rb'
+require "active_support/core_ext/integer/inflections"
 
 class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
-  attr_reader :current_period_start_short_date, :current_period_end_short_date
-  attr_reader :previous_period_start_short_date, :previous_period_end_short_date
   def initialize(school, type = :electricitypreviousschoolweekcomparison)
     super(school, type)
   end
@@ -39,36 +38,32 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
 
   def calculate(asof_date)
     super(asof_date)
-
-    @current_period_start_short_date    = format_date(current_period_start_date)
-    @current_period_end_short_date      = format_date(current_period_end_date)
-    @previous_period_start_short_date   = format_date(previous_period_start_date)
-    @previous_period_end_short_date     = format_date(previous_period_end_date)
   end
   alias_method :analyse_private, :calculate
 
   private def format_date(date)
-    date.strftime('%e') + ordinal(date.day) + date.strftime(' %B')
+    #rely on .ordinalize here so we can hook in custom formatting for Welsh
+    I18n.l(date, format: "#{date.day.ordinalize} %B")
+  end
+
+  def current_period_start_short_date
+    format_date(@current_period_start_date)
+  end
+
+  def current_period_end_short_date
+    format_date(@current_period_end_date)
+  end
+
+  def previous_period_start_short_date
+    format_date(@previous_period_start_date)
+  end
+
+  def previous_period_end_short_date
+    format_date(@previous_period_end_date)
   end
 
   def timescale
     I18n.t("#{i18n_prefix}.timescale")
-  end
-
-  # copied from Active Support - so don't include dependancy in non-rails code
-  private def ordinal(number)
-    abs_number = number.to_i.abs
-
-    if (11..13).include?(abs_number % 100)
-      "th"
-    else
-      case abs_number % 10
-      when 1; "st"
-      when 2; "nd"
-      when 3; "rd"
-      else    "th"
-      end
-    end
   end
 
   protected def period_name(period)
