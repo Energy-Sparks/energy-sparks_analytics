@@ -480,6 +480,10 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
     'holiday'
   end
 
+  def timescale
+    I18n.t("#{i18n_prefix}.timescale")
+  end
+
   protected def period_name(period)
     I18nHelper.holiday(period.type)
   end

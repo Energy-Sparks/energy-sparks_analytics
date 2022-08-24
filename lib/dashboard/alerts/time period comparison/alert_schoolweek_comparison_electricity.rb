@@ -51,6 +51,10 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
     date.strftime('%e') + ordinal(date.day) + date.strftime(' %B')
   end
 
+  def timescale
+    I18n.t("#{i18n_prefix}.timescale")
+  end
+
   # copied from Active Support - so don't include dependancy in non-rails code
   private def ordinal(number)
     abs_number = number.to_i.abs
@@ -67,7 +71,9 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
     end
   end
 
-  def timescale; 'last 2 full school weeks' end
+  protected def period_name(period)
+    I18nHelper.holiday(period.type)
+  end
 
   protected def current_period_name(current_period)
     I18n.t("analytics.common.last_school_week") + " (#{period_name(current_period)})"

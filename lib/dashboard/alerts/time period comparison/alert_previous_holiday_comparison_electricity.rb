@@ -20,8 +20,6 @@ class AlertPreviousHolidayComparisonElectricity < AlertHolidayComparisonBase
     specific.merge(superclass.template_variables)
   end
 
-  def timescale; 'last 2 full school holidays (including current if in holiday)' end
-
   protected def last_two_periods(asof_date)
     date_with_margin_for_enough_data = asof_date - minimum_days_for_period
     current_holiday = @school.holidays.find_previous_or_current_holiday(date_with_margin_for_enough_data, 100, MINIMUM_WEEKDAYS_DATA_FOR_RELEVANT_PERIOD)

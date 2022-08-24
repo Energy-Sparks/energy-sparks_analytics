@@ -1,4 +1,0 @@
----
-en:
-  analytics:
-    time_period_comparison: "%{difference} %{adjective} since last %{period_type}, %{relative_percent}"
