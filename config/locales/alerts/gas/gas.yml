@@ -1,0 +1,7 @@
+---
+en:
+  analytics:
+    alert_gas_annual_versus_benchmark:
+      timescale: last year
+    alert_weekend_gas_consumption_short_term:
+      timescale: last weekend

@@ -20,9 +20,9 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   protected def max_days_out_of_date_while_still_relevant
     21
   end
-  
+
   def timescale
-    'last weekend'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
