@@ -33,6 +33,8 @@ en:
     aggregator:
       subttitle: "%{start_date} to %{end_date}"
     common:
+      gas_boiler: gas boiler
+      storage_heaters: storage_heaters
       electricity: electricity
       gas: gas
       holiday: holiday

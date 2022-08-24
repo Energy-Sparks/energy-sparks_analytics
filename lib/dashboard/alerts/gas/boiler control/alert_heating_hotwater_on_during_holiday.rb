@@ -1,6 +1,6 @@
 # only during holidays this alert send message about heating or hot water
 class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
-  attr_reader :holiday_name, :summary, :fuel_type, :heating_type
+  attr_reader :summary, :fuel_type
   attr_reader :holiday_usage_to_date_kwh, :holiday_projected_usage_kwh
   attr_reader :holiday_usage_to_date_£,   :holiday_projected_usage_£
   attr_reader :holiday_usage_to_date_co2, :holiday_projected_usage_co2
@@ -89,8 +89,12 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
     14
   end
 
+  def i18n_prefix
+    "analytics.#{AlertHeatingHotWaterOnDuringHolidayBase.name.underscore}"
+  end
+
   def timescale
-    'this holiday'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   private
@@ -101,9 +105,8 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
     if @school.holidays.holiday?(asof_date)
       @relevance = :relevant
 
-      holiday_period      = @school.holidays.holiday(asof_date)
-      @holiday_name       = holiday_period.title
-      holiday_date_range  = holiday_period.start_date..holiday_period.end_date
+      @holiday_period      = @school.holidays.holiday(asof_date)
+      holiday_date_range  = @holiday_period.start_date..@holiday_period.end_date
 
       calc = calculate_boiler_usage(holiday_date_range, :kwh, asof_date)
       @holiday_usage_to_date_kwh   = calc[:usage_to_date]
@@ -124,7 +127,6 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
       @rating = 0.0
     else
       @relevance = :never_relevant
-      @holiday_name = 'Not a holiday'
 
       @holiday_usage_to_date_£   = 0.0
       @holiday_projected_usage_£ = 0.0
@@ -138,31 +140,35 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
   end
   alias_method :analyse_private, :calculate
 
+  def holiday_name
+    @holiday_period.nil? ? 'Not a holiday' : @holiday_period.title
+  end
+
   def summary_text
-    text =  if @rating == 0.0
-              %q(
-                Your <%= heating_type %> has been left on over the <%= @holiday_name %> holiday.
-                Up until <%= @asof_date.strftime('%A %e %b %Y') %>
-                <% if @heating_days_so_far_this_holiday == 0 %>
-                  the hot water has been left on on <%= @hotwater_days_so_far_this_holiday %> days 
-                <% elsif @hotwater_days_so_far_this_holiday == 0 %>
-                  the heating has been left on on <%= @heating_days_so_far_this_holiday %> days
-                <% else %>
-                  the hot water has been left on on <%= @hotwater_days_so_far_this_holiday %> days and
-                  the heating on <%= @heating_days_so_far_this_holiday %> days
-                <% end %>
-
-                costing <%= FormatEnergyUnit.format(:£, @holiday_usage_to_date_£, :html) %>,
-                and a projected <%= FormatEnergyUnit.format(:£, @holiday_projected_usage_£, :html) %>
-                by the end of the holiday.
-              )
-            else
-              %q(
-                Well done you have used no gas this holiday.
-              )
-            end
-
-    ERB.new(text).result(binding)
+    if @rating == 0.0
+      if @heating_days_so_far_this_holiday == 0
+        left_on_message = I18n.t("#{i18n_prefix}.only_hotwater",
+          hotwater_days: @hotwater_days_so_far_this_holiday)
+      elsif @hotwater_days_so_far_this_holiday == 0
+        left_on_message = I18n.t("#{i18n_prefix}.only_heating",
+          heating_days: @heating_days_so_far_this_holiday)
+      else
+        left_on_message = I18n.t("#{i18n_prefix}.only_heating",
+          hotwater_days: @hotwater_days_so_far_this_holiday,
+          heating_days: @heating_days_so_far_this_holiday)
+      end
+      I18n.t("#{i18n_prefix}.summary",
+        heating_type: heating_type,
+        holiday_name: holiday_name,
+        date: I18n.l(@asof_date, format: '%A %e %b %Y'),
+        left_on_message: left_on_message,
+        cost: FormatEnergyUnit.format(:£, @holiday_usage_to_date_£, :html),
+        project_cost: FormatEnergyUnit.format(:£, @holiday_projected_usage_£, :html)
+      )
+      else
+        #TODO: message refers to using no gas, but this text also used for storage heaters
+        I18n.t("#{i18n_prefix}.heating_not_on")
+      end
   end
 
   def calculate_boiler_usage(holiday_date_range, data_type, asof_date)
@@ -250,6 +256,6 @@ class AlertGasHeatingHotWaterOnDuringHoliday < AlertHeatingHotWaterOnDuringHolid
   end
 
   def heating_type
-    'gas boiler'
+    I18n.t("analytics.common.gas_boiler")
   end
 end

@@ -10,7 +10,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
 
   attr_reader :one_year_optimum_start_saving_kwh, :one_year_optimum_start_saving_£, :one_year_optimum_start_saving_co2
   attr_reader :percent_of_annual_gas, :avg_week_start_time
-  
+
   def initialize(school)
     super(school, :heatingcomingontooearly)
   end
@@ -64,7 +64,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   }.freeze
 
   def timescale
-    '7 days'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data

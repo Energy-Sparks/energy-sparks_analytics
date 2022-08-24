@@ -1,0 +1,15 @@
+---
+en:
+  analytics:
+    alert_heating_coming_on_too_early:
+      timescale: 7 days
+    alert_heating_hot_water_on_during_holiday_base:
+      timescale: this holiday
+      heating_not_on: Well done you have used no gas this holiday.
+      summary: |
+        Your %{heating_type} has been left on over the %{holiday_name} holiday. Up
+        until %{date} %{left_on_message} costing %{cost}, and a projected %{project_cost} by the end of the holiday.
+      only_hotwater: "the hot water has been left on on %{hotwater_days} days"
+      only_heating: "the heating has been left on on %{heating_days} days"
+      both: "the hot water has been left on on %{hotwater_days} days and
+      the heating on %{heating_days} days"
