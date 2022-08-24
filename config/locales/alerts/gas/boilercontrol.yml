@@ -16,5 +16,5 @@ en:
       timescale: this holiday
     alert_heating_sensitivity_advice:
       timescale: year
-    alert_heating_on_non_school_days:
-      timescale: 1 year
+    alert_optimum_start_analysis:
+      timescale: last year

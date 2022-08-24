@@ -79,6 +79,9 @@ class AlertTurnHeatingOffStorageHeaters < AlertTurnHeatingOff
   end
 end
 
+#NOTE: this doesn't seem to be setup in the application, as its not registered
+#in the database. Should it be removed?
+#Was removed from live system around 2022-04-11 and replaced by above
 class AlertHeatingOnSchoolDaysStorageHeaters < AlertHeatingOnSchoolDays
   include AlertGasToStorageHeaterSubstitutionMixIn
   include ElectricityCostCo2Mixin

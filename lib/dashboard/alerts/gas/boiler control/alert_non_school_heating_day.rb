@@ -3,10 +3,14 @@
 require_relative '../alert_gas_model_base.rb'
 
 # alerts for leaving the heating on for too long over winter holidays and weekends
+#NOTE: this doesn't seem to be setup in the application, as its not registered
+#in the database. Should it be removed?
+#Was removed from live system around 2022-04-11
 class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
 
   attr_reader :number_of_non_heating_days_last_year, :average_number_of_non_heating_days_last_year
   attr_reader :exemplar_number_of_non_heating_days_last_year
+  attr_reader :non_heating_day_adjective
   attr_reader :total_kwh_on_unoccupied_days, :kwh_below_frost_on_unoccupied_days, :one_year_saving_kwh
   attr_reader :below_frost_£, :unoccupied_above_frost_£, :total_on_unoccupied_days_£, :total_on_unoccupied_days_co2
   attr_reader :unoccupied_above_frost_co2
@@ -17,7 +21,7 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
   end
 
   def timescale
-    I18n.t("#{i18n_prefix}.timescale")
+    '1 year'
   end
 
   def self.template_variables
@@ -90,6 +94,7 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
     @number_of_non_heating_days_last_year = days
 
     @average_number_of_non_heating_days_last_year = statistics.average_non_school_day_heating_days
+    @non_heating_day_adjective = statistics.non_school_heating_day_adjective(days)
 
     @kwh_below_frost_on_unoccupied_days, @total_kwh_on_unoccupied_days = calculate_heating_off_statistics(asof_date)
     @one_year_saving_kwh = @total_kwh_on_unoccupied_days - @kwh_below_frost_on_unoccupied_days
@@ -112,10 +117,4 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
     @bookmark_url = add_book_mark_to_base_url('HeatingOnSchoolDays')
   end
   alias_method :analyse_private, :calculate
-
-  def non_heating_day_adjective
-    return "" if @number_of_non_heating_days_last_year.nil?
-    AnalyseHeatingAndHotWater::HeatingModel.non_school_heating_day_adjective(@number_of_non_heating_days_last_year)
-  end
-
 end
