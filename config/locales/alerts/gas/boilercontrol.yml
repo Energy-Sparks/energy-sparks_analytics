@@ -14,3 +14,5 @@ en:
         Your %{heating_type} has been left on over the %{holiday_name} holiday. Up
         until %{date} %{left_on_message} costing %{cost}, and a projected %{project_cost} by the end of the holiday.
       timescale: this holiday
+    alert_heating_sensitivity_advice:
+      timescale: year

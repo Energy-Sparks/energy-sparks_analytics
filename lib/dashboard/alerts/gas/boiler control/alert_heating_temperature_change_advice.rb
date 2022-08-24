@@ -19,7 +19,7 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
   end
 
   def timescale
-    'year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
