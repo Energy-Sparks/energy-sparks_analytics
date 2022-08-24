@@ -14,6 +14,29 @@ module Series
       process_temperature_adjustment_config
     end
 
+    def self.translated_series_item_for(series_key_as_string)
+      i18n_key = Series::ManagerBase.series_translation_key_lookup[series_key_as_string]
+      return series_key_as_string unless i18n_key
+
+      I18n.t("series_data_manager.#{i18n_key}")
+    end
+
+    def self.series_translation_key_lookup
+      {
+        Series::DegreeDays::DEGREEDAYS => Series::DegreeDays::DEGREEDAYS_I18N_KEY,
+        Series::Temperature::TEMPERATURE => Series::Temperature::TEMPERATURE_I18N_KEY,
+        Series::DayType::SCHOOLDAYCLOSED => Series::DayType::SCHOOLDAYCLOSED_I18N_KEY,
+        Series::DayType::SCHOOLDAYOPEN => Series::DayType::SCHOOLDAYOPEN_I18N_KEY,
+        Series::DayType::HOLIDAY => Series::DayType::HOLIDAY_I18N_KEY,
+        Series::DayType::WEEKEND => Series::DayType::WEEKEND_I18N_KEY,
+        Series::HeatingNonHeating::HEATINGDAY => Series::HeatingNonHeating::HEATINGDAY_I18N_KEY,
+        Series::HeatingNonHeating::NONHEATINGDAY => Series::HeatingNonHeating::NONHEATINGDAY_I18N_KEY,
+        Series::HotWater::USEFULHOTWATERUSAGE => Series::HotWater::USEFULHOTWATERUSAGE_I18N_KEY,
+        Series::HotWater::WASTEDHOTWATERUSAGE => Series::HotWater::WASTEDHOTWATERUSAGE_I18N_KEY,
+        Series::MultipleFuels::SOLARPV => Series::MultipleFuels::SOLARPV_I18N_KEY, # 'solar pv (consumed onsite)'
+      }
+    end
+
     def self.factories(school, chart_config)
       series_breakdowns = [chart_config[:series_breakdown], chart_config[:y2_axis]].flatten
       series_breakdowns.map { |sb| factory(school, chart_config, sb) }.compact
@@ -473,6 +496,7 @@ module Series
   #=====================================================================================================
   class Temperature < ManagerBase
     TEMPERATURE = 'Temperature'
+    TEMPERATURE_I18N_KEY = 'temperature'
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.temperatures.average_temperature_in_date_range(d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.temperatures.temperature(date, hhi) }; end
@@ -483,6 +507,7 @@ module Series
   #=====================================================================================================
   class Irradiance < ManagerBase
     IRRADIANCE = 'Solar Irradiance'
+
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.solar_irradiation.average_daytime_irradiance_in_date_range(d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.solar_irradiation.solar_irradiance(date, hhi) }; end
@@ -493,6 +518,7 @@ module Series
   #=====================================================================================================
   class GridCarbon < ManagerBase
     GRIDCARBON = 'Carbon Intensity of Electricity Grid (kg/kWh)'
+
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.grid_carbon_intensity.average_in_date_range(d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.grid_carbon_intensity.grid_carbon_intensity(date, hhi) }; end
@@ -582,6 +608,11 @@ module Series
     SCHOOLDAYCLOSED = OpenCloseTime.humanize_symbol(OpenCloseTime::SCHOOL_CLOSED)
     STORAGE_HEATER_CHARGE = 'Storage heater charge (school day)'
 
+    SCHOOLDAYCLOSED_I18N_KEY = 'school_day_closed'
+    SCHOOLDAYOPEN_I18N_KEY = 'school_day_open'
+    HOLIDAY_I18N_KEY = 'holiday'
+    WEEKEND_I18N_KEY = 'weekend'
+
     def series_names;                   day_type_names; end
     def day_breakdown(d1, d2);          daytype_breakdown(d1, d2); end
     def half_hour_breakdown(date, hhi); daytype_breakdown_halfhour(date, hhi); end
@@ -650,6 +681,8 @@ module Series
   #=====================================================================================================
   class DegreeDays < ModelManagerBase
     DEGREEDAYS = 'Degree Days'
+    DEGREEDAYS_I18N_KEY = 'degree_days'
+
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.temperatures.degrees_days_average_in_range(degreeday_base_temperature, d1, d2) }; end
     def half_hour_breakdown(date, hhi);  { single_name => school.temperatures.degree_hour(date, hhi, degreeday_base_temperature) }; end
@@ -676,6 +709,9 @@ module Series
     HEATINGDAY              = 'Heating on in cold weather'.freeze
     NONHEATINGDAY           = 'Hot Water (& Kitchen)'.freeze
     HEATINGDAYWARMWEATHER   = 'Heating on in warm weather'.freeze
+
+    HEATINGDAY_I18N_KEY = 'heating_day'
+    NONHEATINGDAY_I18N_KEY = 'non_heating_day'
 
     def series_names;  [HEATINGDAYWARMWEATHER, HEATINGDAY, NONHEATINGDAY]; end
 
@@ -745,6 +781,9 @@ module Series
     WASTEDHOTWATERUSAGE = 'Wasted Hot Water Usage'
     HOTWATERSERIESNAMES = [USEFULHOTWATERUSAGE, WASTEDHOTWATERUSAGE]
 
+    USEFULHOTWATERUSAGE_I18N_KEY = 'useful_hot_water_usage' 
+    WASTEDHOTWATERUSAGE_I18N_KEY = 'wasted_hot_water_usage'
+
     def series_names;  HOTWATERSERIESNAMES; end
 
     def day_breakdown(d1, d2)
@@ -801,10 +840,11 @@ module Series
 
   #=====================================================================================================
   class MultipleFuels < ModelManagerBase
-    ELECTRICITY     = 'electricity'
-    GAS             = 'gas'
-    STORAGEHEATERS  = 'storage heaters'
-    SOLARPV         = 'solar pv (consumed onsite)' # think unused?
+    ELECTRICITY      = 'electricity'
+    GAS              = 'gas'
+    STORAGEHEATERS   = 'storage heaters'
+    SOLARPV          = 'solar pv (consumed onsite)' # think unused?
+    SOLARPV_I18N_KEY = 'solar_pv' # think unused?
 
     def series_names
       aggregate_meters.keys

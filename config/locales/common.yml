@@ -1,5 +1,17 @@
 ---
 en:
+  series_data_manager:
+    degree_days: Degree Days
+    temperature: Temperature [translated]
+    school_day_closed: School Day Closed [translated]
+    school_day_open: School Day Open [translated]
+    holiday: Holiday [translated]
+    weekend: Weekend [translated]
+    heating_day: Heating on in cold weather [translated]
+    non_heating_day: Hot Water (& Kitchen) [translated]
+    useful_hot_water_usage: Hot Water Usage [translated]
+    wasted_hot_water_usage: Wasted Hot Water Usage [translated]
+    solar_pv: Solar PV (consumed onsite) [translated]
   analytics:
     adjectives:
       about: about
