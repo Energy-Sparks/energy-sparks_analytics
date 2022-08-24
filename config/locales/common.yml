@@ -2,8 +2,20 @@
 en:
   analytics:
     adjectives:
+      very_poor: very poor
+      poor: poor
+      below_average: below average
+      just_below_average: just below average
+      about_average: about average
+      above_average: above average
+      excellent: excellent
+      perfect: perfect
+      good: good
+      better_than_average: better than average
+      worse_than_average: worse than average
       about: about
       above: above
+      bad: bad
       below: below
       down: down
       higher: higher
