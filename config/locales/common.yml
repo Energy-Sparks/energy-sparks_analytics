@@ -1,17 +1,39 @@
 ---
 en:
   series_data_manager:
-    degree_days: Degree Days
-    temperature: Temperature [translated]
-    school_day_closed: School Day Closed [translated]
-    school_day_open: School Day Open [translated]
-    holiday: Holiday [translated]
-    weekend: Weekend [translated]
-    heating_day: Heating on in cold weather [translated]
-    non_heating_day: Hot Water (& Kitchen) [translated]
-    useful_hot_water_usage: Hot Water Usage [translated]
-    wasted_hot_water_usage: Wasted Hot Water Usage [translated]
-    solar_pv: Solar PV (consumed onsite) [translated]
+    series:
+      degree_days: Degree Days
+      temperature: Temperature [translated]
+      school_day_closed: School Day Closed [translated]
+      school_day_open: School Day Open [translated]
+      holiday: Holiday [translated]
+      weekend: Weekend [translated]
+      heating_day: Heating on in cold weather [translated]
+      non_heating_day: Hot Water (& Kitchen) [translated]
+      useful_hot_water_usage: Hot Water Usage [translated]
+      wasted_hot_water_usage: Wasted Hot Water Usage [translated]
+      solar_pv: Solar PV (consumed onsite) [translated]
+      storage_heater_charge: Storage heater charge (school day)  [translated]
+      solar_irradiance: Solar Irradiance
+      gridcarbon: Carbon Intensity of Electricity Grid (kg/kWh)
+      gascarbon: Carbon Intensity of Gas (kg/kWh)
+      heating_day_warm_weather: Heating on in warm weather
+      electricity: electricity
+      gas: gas
+      storage_heaters: storage heaters
+      solar_pv: solar pv (consumed onsite)
+      predicted_heat: Predicted Heat
+      target_degree_days: Target degree days
+      cusum: CUSUM
+      baseload: BASELOAD
+      peak_kw: Peak (kW)
+      school_day_heating: Heating On School Days
+      holiday_heating: Heating On Holidays
+      weekend_heating: Heating On Weekends
+      school_day_hot_water_kitchen: Hot water/kitchen only On School Days
+      holiday_hot_water_kitchen: Hot water/kitchen only On Holidays
+      weekend_hot_water_kitchen: Hot water/kitchen only On Weekends
+      boiler_off: Boiler Off
   analytics:
     adjectives:
       about: about

@@ -18,7 +18,7 @@ module Series
       i18n_key = Series::ManagerBase.series_translation_key_lookup[series_key_as_string]
       return series_key_as_string unless i18n_key
 
-      I18n.t("series_data_manager.#{i18n_key}")
+      I18n.t("series_data_manager.series.#{i18n_key}")
     end
 
     def self.series_translation_key_lookup
@@ -29,11 +29,32 @@ module Series
         Series::DayType::SCHOOLDAYOPEN => Series::DayType::SCHOOLDAYOPEN_I18N_KEY,
         Series::DayType::HOLIDAY => Series::DayType::HOLIDAY_I18N_KEY,
         Series::DayType::WEEKEND => Series::DayType::WEEKEND_I18N_KEY,
-        Series::HeatingNonHeating::HEATINGDAY => Series::HeatingNonHeating::HEATINGDAY_I18N_KEY,
-        Series::HeatingNonHeating::NONHEATINGDAY => Series::HeatingNonHeating::NONHEATINGDAY_I18N_KEY,
+        Series::DayType::STORAGE_HEATER_CHARGE => Series::DayType::STORAGE_HEATER_CHARGE_I18N_KEY,
         Series::HotWater::USEFULHOTWATERUSAGE => Series::HotWater::USEFULHOTWATERUSAGE_I18N_KEY,
         Series::HotWater::WASTEDHOTWATERUSAGE => Series::HotWater::WASTEDHOTWATERUSAGE_I18N_KEY,
-        Series::MultipleFuels::SOLARPV => Series::MultipleFuels::SOLARPV_I18N_KEY, # 'solar pv (consumed onsite)'
+        Series::MultipleFuels::SOLARPV => Series::MultipleFuels::SOLARPV_I18N_KEY,
+        Series::Irradiance::IRRADIANCE => Series::Irradiance::IRRADIANCE_I18N_KEY,
+        Series::GridCarbon::GRIDCARBON => Series::GridCarbon::GRIDCARBON_I18N_KEY,
+        Series::GasCarbon::GASCARBON => Series::GasCarbon::GASCARBON_I18N_KEY,
+        Series::HeatingNonHeating::HEATINGDAY => Series::HeatingNonHeating::HEATINGDAY_I18N_KEY,
+        Series::HeatingNonHeating::NONHEATINGDAY => Series::HeatingNonHeating::NONHEATINGDAY_I18N_KEY,
+        Series::HeatingNonHeating::HEATINGDAYWARMWEATHER => Series::HeatingNonHeating::HEATINGDAYWARMWEATHER_I18N_KEY,
+        Series::MultipleFuels::ELECTRICITY => Series::MultipleFuels::ELECTRICITY_I18N_KEY,
+        Series::MultipleFuels::GAS => Series::MultipleFuels::GAS_I18N_KEY,
+        Series::MultipleFuels::STORAGEHEATERS => Series::MultipleFuels::STORAGEHEATERS_I18N_KEY,
+        Series::MultipleFuels::SOLARPV => Series::MultipleFuels::SOLARPV_I18N_KEY,
+        Series::PredictedHeat::PREDICTEDHEAT => Series::PredictedHeat::PREDICTEDHEAT_I18N_KEY,
+        Series::TargetDegreeDays::TARGETDEGREEDAYS => Series::TargetDegreeDays::TARGETDEGREEDAYS_I18N_KEY,
+        Series::Cusum::CUSUM => Series::Cusum::CUSUM_I18N_KEY,
+        Series::Baseload::BASELOAD => Series::Baseload::BASELOAD_I18N_KEY,
+        Series::PeakKw::PEAK_KW => Series::PeakKw::PEAK_KW_I18N_KEY,
+        Series::HeatingDayType::SCHOOLDAYHEATING => Series::HeatingDayType::SCHOOLDAYHEATING_I18N_KEY,
+        Series::HeatingDayType::HOLIDAYHEATING => Series::HeatingDayType::HOLIDAYHEATING_I18N_KEY,
+        Series::HeatingDayType::WEEKENDHEATING => Series::HeatingDayType::WEEKENDHEATING_I18N_KEY,
+        Series::HeatingDayType::SCHOOLDAYHOTWATER => Series::HeatingDayType::SCHOOLDAYHOTWATER_I18N_KEY,
+        Series::HeatingDayType::HOLIDAYHOTWATER => Series::HeatingDayType::HOLIDAYHOTWATER_I18N_KEY,
+        Series::HeatingDayType::WEEKENDHOTWATER => Series::HeatingDayType::WEEKENDHOTWATER_I18N_KEY,
+        Series::HeatingDayType::BOILEROFF => Series::HeatingDayType::BOILEROFF_I18N_KEY
       }
     end
 
@@ -507,6 +528,7 @@ module Series
   #=====================================================================================================
   class Irradiance < ManagerBase
     IRRADIANCE = 'Solar Irradiance'
+    IRRADIANCE_I18N_KEY = 'solar_irradiance'
 
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.solar_irradiation.average_daytime_irradiance_in_date_range(d1, d2) }; end
@@ -518,6 +540,7 @@ module Series
   #=====================================================================================================
   class GridCarbon < ManagerBase
     GRIDCARBON = 'Carbon Intensity of Electricity Grid (kg/kWh)'
+    GRIDCARBON_I18N_KEY = 'gridcarbon'
 
     def series_names;                    [single_name]; end
     def day_breakdown(d1, d2);           { single_name => school.grid_carbon_intensity.average_in_date_range(d1, d2) }; end
@@ -529,6 +552,8 @@ module Series
   #=====================================================================================================
   class GasCarbon < ManagerBase
     GASCARBON = 'Carbon Intensity of Gas (kg/kWh)'
+    GASCARBON_I18N_KEY = 'gascarbon'
+
     def series_names;                     [single_name]; end
     def day_breakdown(_d1, _d2);          { single_name => EnergyEquivalences::UK_GAS_CO2_KG_KWH }; end
     def half_hour_breakdown(_date, _hhi); { single_name => EnergyEquivalences::UK_GAS_CO2_KG_KWH }; end
@@ -612,6 +637,7 @@ module Series
     SCHOOLDAYOPEN_I18N_KEY = 'school_day_open'
     HOLIDAY_I18N_KEY = 'holiday'
     WEEKEND_I18N_KEY = 'weekend'
+    STORAGE_HEATER_CHARGE_I18N_KEY = 'storage_heater_charge'
 
     def series_names;                   day_type_names; end
     def day_breakdown(d1, d2);          daytype_breakdown(d1, d2); end
@@ -712,6 +738,7 @@ module Series
 
     HEATINGDAY_I18N_KEY = 'heating_day'
     NONHEATINGDAY_I18N_KEY = 'non_heating_day'
+    HEATINGDAYWARMWEATHER_I18N_KEY = 'heating_day_warm_weather'
 
     def series_names;  [HEATINGDAYWARMWEATHER, HEATINGDAY, NONHEATINGDAY]; end
 
@@ -844,7 +871,11 @@ module Series
     GAS              = 'gas'
     STORAGEHEATERS   = 'storage heaters'
     SOLARPV          = 'solar pv (consumed onsite)' # think unused?
-    SOLARPV_I18N_KEY = 'solar_pv' # think unused?
+
+    ELECTRICITY_I18N_KEY      = 'electricity'
+    GAS_I18N_KEY              = 'gas'
+    STORAGEHEATERS_I18N_KEY   = 'storage_heaters'
+    SOLARPV_I18N_KEY          = 'solar_pv' # think unused?
 
     def series_names
       aggregate_meters.keys
@@ -896,6 +927,8 @@ module Series
   #=====================================================================================================
   class PredictedHeat < ModelManagerBase
     PREDICTEDHEAT = 'Predicted Heat'
+    PREDICTEDHEAT_I18N_KEY = 'predicted_heat'
+    
     def series_names;  [PREDICTEDHEAT]; end
 
     def day_breakdown(d1, d2)
@@ -906,6 +939,8 @@ module Series
   #=====================================================================================================
   class TargetDegreeDays < ModelManagerBase
     TARGETDEGREEDAYS = 'Target degree days'
+    TARGETDEGREEDAYS_I18N_KEY = 'target_degree_days'
+
     def series_names;  [TARGETDEGREEDAYS]; end
 
     def day_breakdown(d1, d2)
@@ -916,6 +951,8 @@ module Series
   #=====================================================================================================
   class Cusum < ModelManagerBase
     CUSUM = 'CUSUM'
+    CUSUM_I18N_KEY = 'cusum'
+
     def series_names;  [CUSUM]; end
 
     def day_breakdown(d1, d2)
@@ -929,6 +966,8 @@ module Series
   #=====================================================================================================
   class Baseload < ManagerBase
     BASELOAD = 'BASELOAD'
+    BASELOAD_I18N_KEY = 'baseload'
+    
     def series_names;  [BASELOAD]; end
 
     def day_breakdown(d1, d2)
@@ -940,6 +979,8 @@ module Series
   #=====================================================================================================
   class PeakKw < ManagerBase
     PEAK_KW = 'Peak (kW)'
+    PEAK_KW_I18N_KEY = 'peak_kw'
+
     def series_names;  [PEAK_KW]; end
 
     def day_breakdown(d1, d2)
@@ -957,6 +998,15 @@ module Series
     WEEKENDHOTWATER   = 'Hot water/kitchen only On Weekends'
     BOILEROFF         = 'Boiler Off'.freeze
     HEATINGDAYTYPESERIESNAMES = [SCHOOLDAYHEATING, HOLIDAYHEATING, WEEKENDHEATING, SCHOOLDAYHOTWATER, HOLIDAYHOTWATER, WEEKENDHOTWATER, BOILEROFF]
+
+    SCHOOLDAYHEATING_I18N_KEY  = 'school_day_heating'
+    HOLIDAYHEATING_I18N_KEY    = 'holiday_heating'
+    WEEKENDHEATING_I18N_KEY    = 'weekend_heating'
+    SCHOOLDAYHOTWATER_I18N_KEY = 'school_day_hot_water_kitchen'
+    HOLIDAYHOTWATER_I18N_KEY   = 'holiday_hot_water_kitchen'
+    WEEKENDHOTWATER_I18N_KEY   = 'weekend_hot_water_kitchen'
+    BOILEROFF_I18N_KEY         = 'boiler_off'
+
 
     def series_names;  HEATINGDAYTYPESERIESNAMES; end
 
