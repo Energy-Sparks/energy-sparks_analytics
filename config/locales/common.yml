@@ -2,7 +2,7 @@
 en:
   series_data_manager:
     series:
-      degree_days: Degree Days
+      degree_days: Degree Days [translated]
       temperature: Temperature [translated]
       school_day_closed: School Day Closed [translated]
       school_day_open: School Day Open [translated]
