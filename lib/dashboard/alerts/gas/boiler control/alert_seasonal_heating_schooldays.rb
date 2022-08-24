@@ -4,7 +4,7 @@ require_relative './alert_heating_day_base.rb'
 
 # alert for leaving heating on in warm weather
 class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
-  attr_reader :percent_of_annual_gas, :percent_of_annual_heating, :warm_weather_heating_days_adjective
+  attr_reader :percent_of_annual_gas, :percent_of_annual_heating
   attr_reader :heating_percent_of_total_gas
 
   def initialize(school, type = :heating_on_days)
@@ -13,7 +13,7 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
   end
 
   def timescale
-    '1 year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def self.template_variables
@@ -67,6 +67,11 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
     @term = :longterm
   end
   alias_method :analyse_private, :calculate
+
+  def warm_weather_heating_days_adjective
+    return "" if @warm_weather_heating_days_all_days_days.nil?
+    AdviceGasBoilerSeasonalControl.warm_weather_on_days_adjective(@warm_weather_heating_days_all_days_days)
+  end
 
   def self.dynamic_template_variables
     heating_types = {
@@ -142,7 +147,6 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
     all_kwh = @cold_and_warm_weather_heating_days_all_days_kwh + @hot_water_and_kitchen_all_days_kwh
     @percent_of_annual_gas = percent(@warm_weather_heating_days_all_days_kwh, all_kwh)
     @percent_of_annual_heating = percent(@warm_weather_heating_days_all_days_kwh, @cold_and_warm_weather_heating_days_all_days_kwh)
-    @warm_weather_heating_days_adjective = AdviceGasBoilerSeasonalControl.warm_weather_on_days_rating(@warm_weather_heating_days_all_days_days)[:adjective]
     @heating_percent_of_total_gas = @cold_and_warm_weather_heating_days_all_days_kwh / all_kwh
   end
 end

@@ -18,3 +18,7 @@ en:
       timescale: year
     alert_optimum_start_analysis:
       timescale: last year
+    alert_seasonal_heating_school_days:
+      timescale: 1 year
+    alert_thermostatic_control:
+      timescale: 1 year

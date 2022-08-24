@@ -12,13 +12,13 @@ class AlertThermostaticControl < AlertGasModelBase
   end
 
   def timescale
-    '1 year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data
     enough_data_for_model_fit ? :enough : :not_enough
   end
-  
+
   def self.template_variables
     specific = {'Thermostatic Control' => TEMPLATE_VARIABLES}
     specific.merge(self.superclass.template_variables)
@@ -68,7 +68,7 @@ class AlertThermostaticControl < AlertGasModelBase
   def thermostatic_chart
     :thermostatic
   end
-  
+
   def r2
     @r2 ||= @heating_model.average_heating_school_day_r2
   end
