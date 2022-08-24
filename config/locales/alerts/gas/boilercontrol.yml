@@ -1,8 +1,6 @@
 ---
 en:
   analytics:
-    alert_turn_heating_off:
-      timescale: next week
     alert_heating_coming_on_too_early:
       timescale: 7 days
     alert_heating_hot_water_on_during_holiday_base:
@@ -22,3 +20,5 @@ en:
       timescale: 1 year
     alert_thermostatic_control:
       timescale: 1 year
+    alert_turn_heating_off:
+      timescale: next week
