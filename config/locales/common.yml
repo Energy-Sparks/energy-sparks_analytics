@@ -14,26 +14,32 @@ en:
       wasted_hot_water_usage: Wasted Hot Water Usage [translated]
       solar_pv: Solar PV (consumed onsite) [translated]
       storage_heater_charge: Storage heater charge (school day)  [translated]
-      solar_irradiance: Solar Irradiance
-      gridcarbon: Carbon Intensity of Electricity Grid (kg/kWh)
-      gascarbon: Carbon Intensity of Gas (kg/kWh)
-      heating_day_warm_weather: Heating on in warm weather
-      electricity: electricity
-      gas: gas
-      storage_heaters: storage heaters
-      solar_pv: solar pv (consumed onsite)
-      predicted_heat: Predicted Heat
-      target_degree_days: Target degree days
-      cusum: CUSUM
-      baseload: BASELOAD
-      peak_kw: Peak (kW)
-      school_day_heating: Heating On School Days
-      holiday_heating: Heating On Holidays
-      weekend_heating: Heating On Weekends
-      school_day_hot_water_kitchen: Hot water/kitchen only On School Days
-      holiday_hot_water_kitchen: Hot water/kitchen only On Holidays
-      weekend_hot_water_kitchen: Hot water/kitchen only On Weekends
-      boiler_off: Boiler Off
+      solar_irradiance: Solar Irradiance [translated]
+      gridcarbon: Carbon Intensity of Electricity Grid (kg/kWh) [translated]
+      gascarbon: Carbon Intensity of Gas (kg/kWh) [translated]
+      heating_day_warm_weather: Heating on in warm weather [translated]
+      electricity: Electricity [translated]
+      gas: Gas [translated]
+      storage_heaters: storage heaters [translated]
+      solar_pv: solar pv (consumed onsite) [translated]
+      predicted_heat: Predicted Heat [translated]
+      target_degree_days: Target degree days [translated]
+      cusum: CUSUM [translated]
+      baseload: BASELOAD [translated]
+      peak_kw: Peak (kW) [translated]
+      school_day_heating: Heating On School Days [translated]
+      holiday_heating: Heating On Holidays [translated]
+      weekend_heating: Heating On Weekends [translated]
+      school_day_hot_water_kitchen: Hot water/kitchen only On School Days [translated]
+      holiday_hot_water_kitchen: Hot water/kitchen only On Holidays [translated]
+      weekend_hot_water_kitchen: Hot water/kitchen only On Weekends [translated]
+      boiler_off: Boiler Off [translated]
+      y2_solar_html: '<span>Brightness<br>of sunshine<br>W/m2</span>'
+      y2_solar_label: 'Solar irradiance (brightness of sunshine)'
+      y2_rating: Rating [translated]
+      exemplar_school: Exemplar School [translated]
+      benchmark_school: Benchmark (Good) School [translated]
+      none: Energy [translated]
   analytics:
     adjectives:
       about: about

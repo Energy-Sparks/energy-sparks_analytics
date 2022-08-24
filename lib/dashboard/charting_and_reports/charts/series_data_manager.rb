@@ -54,7 +54,10 @@ module Series
         Series::HeatingDayType::SCHOOLDAYHOTWATER => Series::HeatingDayType::SCHOOLDAYHOTWATER_I18N_KEY,
         Series::HeatingDayType::HOLIDAYHOTWATER => Series::HeatingDayType::HOLIDAYHOTWATER_I18N_KEY,
         Series::HeatingDayType::WEEKENDHOTWATER => Series::HeatingDayType::WEEKENDHOTWATER_I18N_KEY,
-        Series::HeatingDayType::BOILEROFF => Series::HeatingDayType::BOILEROFF_I18N_KEY
+        Series::HeatingDayType::BOILEROFF => Series::HeatingDayType::BOILEROFF_I18N_KEY,
+        Series::NoBreakdown::NONE => Series::NoBreakdown::NONE_I18N_KEY,
+        AggregatorBenchmarks.exemplar_school_name => 'exemplar_school',
+        AggregatorBenchmarks.benchmark_school_name => 'benchmark_school'  
       }
     end
 
@@ -830,6 +833,8 @@ module Series
   #=====================================================================================================
   class NoBreakdown < ModelManagerBase
     NONE = 'Energy'
+    NONE_I18N_KEY = 'none'
+
     def series_names;  [NONE]; end
 
     def day_breakdown(d1, d2)
