@@ -28,7 +28,7 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
   protected def max_days_out_of_date_while_still_relevant
     21
   end
-  
+
   private def period_type
     'school week'
   end
@@ -70,11 +70,17 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
   def timescale; 'last 2 full school weeks' end
 
   protected def current_period_name(current_period)
-    "last school week (#{current_period.start_date.strftime('%a %d-%m-%Y')} to #{current_period.end_date.strftime('%a %d-%m-%Y')})"
+    I18n.t("analytics.common.last_school_week") + " (#{period_name(current_period)})"
   end
 
   protected def previous_period_name(previous_period)
-    "previous school week (#{previous_period.start_date.strftime('%a %d-%m-%Y')} to #{previous_period.end_date.strftime('%a %d-%m-%Y')})"
+    I18n.t("analytics.common.previous_school_week") + " (#{period_name(previous_period)})"
+  end
+
+  protected def period_name(period)
+    I18n.t('analytics.from_and_to',
+      from_date: I18n.l(period.start_date, format: '%a %d-%m-%Y'),
+      to_date: I18n.l(period.end_date, format: '%a %d-%m-%Y'))
   end
 
   protected def last_two_periods(asof_date)

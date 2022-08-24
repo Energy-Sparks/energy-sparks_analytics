@@ -306,7 +306,7 @@ class Holidays
   end
 
   def self.holiday_month_year_str(holiday)
-    I18n.t("analytics.holiday_year", holiday: I18n.t("analytics.holidays")[holiday.type], year: holiday.start_date.year.to_s)
+    I18n.t("analytics.holiday_year", holiday: I18nHelper.holiday(holiday.type), year: holiday.start_date.year.to_s)
   end
 
   # finds nth holiday before or after date, including/excluding current holiday if date within a holiday

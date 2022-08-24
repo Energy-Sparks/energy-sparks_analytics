@@ -8,7 +8,7 @@ module Logging
 end
 
 asof_date = Date.new(2022, 7, 29)
-schools = ['*']
+schools = ['king*']
 
 overrides = {
   schools:  schools,
