@@ -148,22 +148,22 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
     if @rating == 0.0
       if @heating_days_so_far_this_holiday == 0
         left_on_message = I18n.t("#{i18n_prefix}.only_hotwater",
-          hotwater_days: @hotwater_days_so_far_this_holiday)
+          hotwater_days: FormatUnit.format(:days, @hotwater_days_so_far_this_holiday))
       elsif @hotwater_days_so_far_this_holiday == 0
         left_on_message = I18n.t("#{i18n_prefix}.only_heating",
-          heating_days: @heating_days_so_far_this_holiday)
+          heating_days: FormatUnit.format(:days, @heating_days_so_far_this_holiday))
       else
         left_on_message = I18n.t("#{i18n_prefix}.only_heating",
-          hotwater_days: @hotwater_days_so_far_this_holiday,
-          heating_days: @heating_days_so_far_this_holiday)
+          hotwater_days: FormatUnit.format(:days, @hotwater_days_so_far_this_holiday),
+          heating_days: FormatUnit.format(:days, @heating_days_so_far_this_holiday))
       end
       I18n.t("#{i18n_prefix}.summary",
         heating_type: heating_type,
         holiday_name: holiday_name,
         date: I18n.l(@asof_date, format: '%A %e %b %Y'),
         left_on_message: left_on_message,
-        cost: FormatEnergyUnit.format(:£, @holiday_usage_to_date_£, :html),
-        project_cost: FormatEnergyUnit.format(:£, @holiday_projected_usage_£, :html)
+        cost: FormatUnit.format(:£, @holiday_usage_to_date_£, :html),
+        project_cost: FormatUnit.format(:£, @holiday_projected_usage_£, :html)
       )
       else
         #TODO: message refers to using no gas, but this text also used for storage heaters
