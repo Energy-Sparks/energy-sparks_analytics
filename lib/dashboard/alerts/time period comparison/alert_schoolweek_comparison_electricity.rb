@@ -1,8 +1,7 @@
 require_relative './alert_period_comparison_base.rb'
+require "active_support/core_ext/integer/inflections"
 
 class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
-  attr_reader :current_period_start_short_date, :current_period_end_short_date
-  attr_reader :previous_period_start_short_date, :previous_period_end_short_date
   def initialize(school, type = :electricitypreviousschoolweekcomparison)
     super(school, type)
   end
@@ -28,7 +27,7 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
   protected def max_days_out_of_date_while_still_relevant
     21
   end
-  
+
   private def period_type
     'school week'
   end
@@ -39,42 +38,50 @@ class AlertSchoolWeekComparisonElectricity < AlertPeriodComparisonBase
 
   def calculate(asof_date)
     super(asof_date)
-
-    @current_period_start_short_date    = format_date(current_period_start_date)
-    @current_period_end_short_date      = format_date(current_period_end_date)
-    @previous_period_start_short_date   = format_date(previous_period_start_date)
-    @previous_period_end_short_date     = format_date(previous_period_end_date)
   end
   alias_method :analyse_private, :calculate
 
   private def format_date(date)
-    date.strftime('%e') + ordinal(date.day) + date.strftime(' %B')
+    #rely on .ordinalize here so we can hook in custom formatting for Welsh
+    I18n.l(date, format: "#{date.day.ordinalize} %B")
   end
 
-  # copied from Active Support - so don't include dependancy in non-rails code
-  private def ordinal(number)
-    abs_number = number.to_i.abs
-
-    if (11..13).include?(abs_number % 100)
-      "th"
-    else
-      case abs_number % 10
-      when 1; "st"
-      when 2; "nd"
-      when 3; "rd"
-      else    "th"
-      end
-    end
+  def current_period_start_short_date
+    format_date(@current_period_start_date)
   end
 
-  def timescale; 'last 2 full school weeks' end
+  def current_period_end_short_date
+    format_date(@current_period_end_date)
+  end
+
+  def previous_period_start_short_date
+    format_date(@previous_period_start_date)
+  end
+
+  def previous_period_end_short_date
+    format_date(@previous_period_end_date)
+  end
+
+  def timescale
+    I18n.t("#{i18n_prefix}.timescale")
+  end
+
+  protected def period_name(period)
+    I18nHelper.holiday(period.type)
+  end
 
   protected def current_period_name(current_period)
-    "last school week (#{current_period.start_date.strftime('%a %d-%m-%Y')} to #{current_period.end_date.strftime('%a %d-%m-%Y')})"
+    I18n.t("analytics.common.last_school_week") + " (#{period_name(current_period)})"
   end
 
   protected def previous_period_name(previous_period)
-    "previous school week (#{previous_period.start_date.strftime('%a %d-%m-%Y')} to #{previous_period.end_date.strftime('%a %d-%m-%Y')})"
+    I18n.t("analytics.common.previous_school_week") + " (#{period_name(previous_period)})"
+  end
+
+  protected def period_name(period)
+    I18n.t('analytics.from_and_to',
+      from_date: I18n.l(period.start_date, format: '%a %d-%m-%Y'),
+      to_date: I18n.l(period.end_date, format: '%a %d-%m-%Y'))
   end
 
   protected def last_two_periods(asof_date)

@@ -11,11 +11,13 @@ en:
       just_above: just above
       just_below: just below
       lower: lower
+      no_change: the same
       ok: ok
       poorly: poorly
       reduction: reduction
       significantly_above: significantly above
       significantly_below: significantly below
+      unchanged: unchanged
       up: up
       well: well
     aggregator:
@@ -24,7 +26,9 @@ en:
       electricity: electricity
       gas: gas
       holiday: holiday
+      last_school_week: last school week
       pa: "%{cost}pa"
+      previous_school_week: previous school week
       school_day: school day
       weekend: weekend
     holidays:
