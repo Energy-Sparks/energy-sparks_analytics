@@ -120,6 +120,7 @@ ignore_unused:
   - 'analytics.holidays.*'
   - 'analytics.common.*'
   - 'analytics.school_types.*'
+  - 'analytics.series_data_manager.*'
 # - 'activerecord.attributes.*'
 # - '{devise,kaminari,will_paginate}.*'
 # - 'simple_form.{yes,no}'
