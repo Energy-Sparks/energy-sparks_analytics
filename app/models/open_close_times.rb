@@ -125,16 +125,27 @@ class OpenCloseTimes
 end
 
 class OpenCloseTime
-  SCHOOL_OPEN         = :school_day_open
-  SCHOOL_CLOSED       = :school_day_closed
-  HOLIDAY             = :holiday
-  WEEKEND             = :weekend
-  COMMUNITY           = :community
-  COMMUNITY_BASELOAD  = :community_baseload
+  SCHOOL_OPEN                 = :school_day_open
+  SCHOOL_CLOSED               = :school_day_closed
+  HOLIDAY                     = :holiday
+  WEEKEND                     = :weekend
+  COMMUNITY                   = :community
+  COMMUNITY_BASELOAD          = :community_baseload
+
+  COMMUNITY_I18N_KEY          = 'community'
+  COMMUNITY_BASELOAD_I18N_KEY = 'community_baseload'
 
   def initialize(open_close_time, holidays)
     @open_close_time = open_close_time
     @holidays = holidays
+  end
+
+  def self.community
+    humanize_symbol(COMMUNITY)
+  end
+
+  def self.community_baseload
+    humanize_symbol(COMMUNITY_BASELOAD)
   end
 
   def self.day_of_week_types
