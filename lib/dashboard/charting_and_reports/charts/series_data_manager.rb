@@ -965,7 +965,6 @@ module Series
     WEEKENDHOTWATER_I18N_KEY   = 'weekend_hot_water_kitchen'
     BOILEROFF_I18N_KEY         = 'boiler_off'
 
-
     def series_names;  HEATINGDAYTYPESERIESNAMES; end
 
     def day_breakdown(d1, d2)
