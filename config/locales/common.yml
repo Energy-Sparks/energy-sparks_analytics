@@ -48,6 +48,8 @@ en:
         baseload: BASELOAD
         benchmark_school: Benchmark (Good) School
         boiler_off: Boiler Off
+        community: Community
+        community_baseload: Community Baseload
         cusum: CUSUM
         degree_days: Degree Days
         electricity: Electricity
