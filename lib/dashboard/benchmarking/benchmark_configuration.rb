@@ -13,11 +13,6 @@ module Benchmarking
       y1_axis_column?(column_definition) || y2_axis_column?(column_definition)
     end
 
-    def self.aggregate_column?(column_definition)
-      column_definition?(column_definition, :aggregate_column) &&
-      column_definition[:aggregate_column] == :dont_display_in_table_or_chart
-    end
-
     def self.y1_axis_column?(column_definition)
       column_definition?(column_definition, :chart_data) && !y2_axis_column?(column_definition)
     end

@@ -45,10 +45,13 @@ module Benchmarking
             tables.push({type: :table_text,            content: table_text })
           end
 
+          if self.class == Benchmarking::BenchmarkContentChangeInGasBetween2HolidaysYearApart
+            infinite_rows = composite[:rows].select { |row| !row[1][:raw].infinite?.nil? }
+            puts "There should be at least 14 rows output if all schools selected for this school comparison"
+            ap infinite_rows
+          end
+
           aggregate_test_data = aggregate_text(school_ids, filter, user_type)
-          puts "Aggregate text of length #{aggregate_test_data.length} for #{self.class.name}"
-          puts aggregate_test_data.gsub('  ', '') unless aggregate_test_data.empty?
-          logger.error "Aggregate text of length #{aggregate_test_data.length} for #{self.class.name}"
 
           tables.push({ type: :html,                  content: aggregate_test_data })
           tables.push({ type: :table_composite,       content: composite })

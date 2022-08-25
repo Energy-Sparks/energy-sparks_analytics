@@ -85,7 +85,7 @@ module Benchmarking
     def run_benchmark_chart(today, report, school_ids, chart_columns_only = false, filter = nil, user_type = nil)
       config = self.class.chart_table_config(report)
       table = run_benchmark_table(today, report, school_ids, chart_columns_only, filter, :raw, user_type)
-      create_chart(report, config, table, true)
+      create_chart(report, config, table, true, user_type)
     end
 
     # filter e.g. for area: ->{ addp_area.include?('Highlands') }
@@ -120,7 +120,7 @@ module Benchmarking
     def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type)
       results = []
       full_config = self.class.chart_table_config(report)
-      config = hide_columns(full_config, user_type)
+      config = hide_columns(full_config, user_type, ignore_aggregate_columns)
       school_ids = all_school_ids([today]) if school_ids.nil?
       last_year = today - 364
 
@@ -133,7 +133,7 @@ module Benchmarking
         row  = DatabaseRow.new(school_id, school_data)
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
-        calculated_row = calculate_row(row, config, chart_columns_only, school_id, ignore_aggregate_columns)
+        calculated_row = calculate_row(row, config, chart_columns_only, school_id)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
@@ -152,11 +152,20 @@ module Benchmarking
       end.to_h
     end
 
-    def hide_columns(config, user_type)
+    def hide_columns(config, user_type, ignore_aggregate_columns)
+      # clone to get new config, then filter (reject) for new column definitions
       new_config = config.clone
-      new_config[:columns].delete_if do |column|
+
+      new_config[:columns] = new_config[:columns].reject do |column|
         rating_column?(column) && !ContentBase.analytics_user?(user_type)
       end
+
+      if ignore_aggregate_columns
+        new_config[:columns] = new_config[:columns].reject do |column|
+          column[:aggregate_column] == :dont_display_in_table_or_chart
+        end
+      end
+
       new_config
     end
 
@@ -301,7 +310,9 @@ module Benchmarking
       cell.nil? || (config.key?(:treat_as_nil) && config[:treat_as_nil].include?(cell))
     end
 
-    def create_chart(chart_name, config, table, include_y2 = false)
+    def create_chart(chart_name, config, table, include_y2, user_type)
+      config = hide_columns(config, user_type, true)
+
       # need to extract 1st 2 'chart columns' from table data
       chart_columns_definitions = config[:columns].select {|column_definition| self.class.chart_column?(column_definition)}
       chart_column_numbers = config[:columns].each_with_index.map {|column_definition, index| self.class.chart_column?(column_definition) ? index : nil}
@@ -439,10 +450,9 @@ module Benchmarking
       row.instance_exec(&filter)
     end
 
-    def calculate_row(row, report, chart_columns_only, school_id, ignore_aggregate_columns = true)
+    def calculate_row(row, report, chart_columns_only, school_id)
       row_data = report[:columns].map do |column_specification|
         next if chart_columns_only && !self.class.chart_column?(column_specification)
-        next if ignore_aggregate_columns && self.class.aggregate_column?(column_specification)
         calculate_value(row, column_specification, school_id)
       end
       { data: row_data, school_id: school_id }
