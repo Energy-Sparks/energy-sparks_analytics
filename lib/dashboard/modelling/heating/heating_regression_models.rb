@@ -120,7 +120,7 @@ module AnalyseHeatingAndHotWater
           @override_regression_model = nil
           @reason = nil
           @fitting = nil
-        else 
+        else
           @override_best_model_type = overrides.fetch(:override_best_model_type, nil)
           @override_regression_model = overrides.fetch(:override_model, nil)
           @reason = overrides.fetch(:reason, nil)
@@ -276,21 +276,21 @@ module AnalyseHeatingAndHotWater
     # based on analysis of 31 schools from 16Feb2019
     def self.r2_statistics
       { # r2 range => stats, rating
-        0.0...0.1 => { percent: 0.06,   rating: 'very poor',          rating_value: 0 },
-        0.1...0.2 => { percent: 0.03,   rating: 'very poor',          rating_value: 1 },
-        0.2...0.3 => { percent: 0.03,   rating: 'very poor',          rating_value: 2 },
-        0.3...0.4 => { percent: 0.02,   rating: 'poor',               rating_value: 4 },
-        0.4...0.5 => { percent: 0.13,   rating: 'below average',      rating_value: 5 },
-        0.5...0.6 => { percent: 0.23,   rating: 'just below average', rating_value: 7 },
-        0.6...0.7 => { percent: 0.16,   rating: 'about average',      rating_value: 7 },
-        0.7...0.8 => { percent: 0.23,   rating: 'above average',      rating_value: 8 },
-        0.8...0.9 => { percent: 0.10,   rating: 'excellent',          rating_value: 9 },
-        0.9..1.0  => { percent: 0.00,   rating: 'perfect',            rating_value: 10 }
+        0.0...0.1 => { percent: 0.06,   rating: :very_poor,          rating_value: 0 },
+        0.1...0.2 => { percent: 0.03,   rating: :very_poor,          rating_value: 1 },
+        0.2...0.3 => { percent: 0.03,   rating: :very_poor,          rating_value: 2 },
+        0.3...0.4 => { percent: 0.02,   rating: :poor,               rating_value: 4 },
+        0.4...0.5 => { percent: 0.13,   rating: :below_average,      rating_value: 5 },
+        0.5...0.6 => { percent: 0.23,   rating: :just_below_average, rating_value: 7 },
+        0.6...0.7 => { percent: 0.16,   rating: :about_average,      rating_value: 7 },
+        0.7...0.8 => { percent: 0.23,   rating: :above_average,      rating_value: 8 },
+        0.8...0.9 => { percent: 0.10,   rating: :excellent,          rating_value: 9 },
+        0.9..1.0  => { percent: 0.00,   rating: :perfect,            rating_value: 10 }
       }
     end
 
     def self.r2_rating_adjective(r2)
-      find_r2_rating(r2, :rating)
+      I18nHelper.adjective( find_r2_rating(r2, :rating) )
     end
 
     def self.r2_rating_out_of_10(r2)
@@ -318,19 +318,19 @@ module AnalyseHeatingAndHotWater
     # based on analysis of 31 schools from 16Feb2019
     def self.school_heating_days_statistics
       { # days range => stats, rating
-        0...90    => { percent: 0.10,   rating: 'perfect',              rating_value: 10 },
-        90...100  => { percent: 0.20,   rating: 'excellent',            rating_value: 10 },
-        100...110 => { percent: 0.07,   rating: 'good',                 rating_value: 9 },
-        110...120 => { percent: 0.23,   rating: 'better than average',  rating_value: 7 },
-        120...130 => { percent: 0.23,   rating: 'about average',        rating_value: 4 },
-        130...140 => { percent: 0.10,   rating: 'worse than average',   rating_value: 3 },
-        140...150 => { percent: 0.0,    rating: 'poor',                 rating_value: 2 },
-        150..365  => { percent: 0.10,   rating: 'very poor',            rating_value: 0 },
+        0...90    => { percent: 0.10,   rating: :perfect,              rating_value: 10 },
+        90...100  => { percent: 0.20,   rating: :excellent,            rating_value: 10 },
+        100...110 => { percent: 0.07,   rating: :good,                 rating_value: 9 },
+        110...120 => { percent: 0.23,   rating: :better_than_average,  rating_value: 7 },
+        120...130 => { percent: 0.23,   rating: :about_average,        rating_value: 4 },
+        130...140 => { percent: 0.10,   rating: :worse_than_average,   rating_value: 3 },
+        140...150 => { percent: 0.0,    rating: :poor,                 rating_value: 2 },
+        150..365  => { percent: 0.10,   rating: :very_poor,            rating_value: 0 },
       }
     end
 
     def self.school_heating_day_adjective(days)
-      find_school_day_rating(days, :rating)
+      I18nHelper.adjective( find_school_day_rating(days, :rating) )
     end
 
     def self.school_day_heating_rating_out_of_10(days)
@@ -349,22 +349,22 @@ module AnalyseHeatingAndHotWater
     # based on analysis of 31 schools from 16Feb2019
     def self.non_school_heating_days_statistics
       { # days range => stats, rating
-        0...5     => { percent: 0.07,   rating: 'perfect',              rating_value: 10  },
-        5...10    => { percent: 0.11,   rating: 'excellent',            rating_value:  9  },
-        10...15   => { percent: 0.04,   rating: 'good',                 rating_value:  8  },
-        15...20   => { percent: 0.11,   rating: 'better than average',  rating_value:  7  },
-        20...25   => { percent: 0.29,   rating: 'about average',        rating_value:  6  },
-        25...30   => { percent: 0.14,   rating: 'worse than average',   rating_value:  5  },
-        30...35   => { percent: 0.0,    rating: 'poor',                 rating_value:  4  },
-        35...40   => { percent: 0.07,   rating: 'poor',                 rating_value:  3  },
-        40...50   => { percent: 0.04,   rating: 'very poor',            rating_value:  2  },
-        50...70   => { percent: 0.07,   rating: 'very poor',            rating_value:  1  },
-        70...300  => { percent: 0.07,   rating: 'bad',                  rating_value:  0  }
+        0...5     => { percent: 0.07,   rating: :perfect,              rating_value: 10  },
+        5...10    => { percent: 0.11,   rating: :excellent,            rating_value:  9  },
+        10...15   => { percent: 0.04,   rating: :good,                 rating_value:  8  },
+        15...20   => { percent: 0.11,   rating: :better_than_average,  rating_value:  7  },
+        20...25   => { percent: 0.29,   rating: :about_average,        rating_value:  6  },
+        25...30   => { percent: 0.14,   rating: :worse_than_average,   rating_value:  5  },
+        30...35   => { percent: 0.0,    rating: :poor,                 rating_value:  4  },
+        35...40   => { percent: 0.07,   rating: :poor,                 rating_value:  3  },
+        40...50   => { percent: 0.04,   rating: :very_poor,            rating_value:  2  },
+        50...70   => { percent: 0.07,   rating: :very_poor,            rating_value:  1  },
+        70...300  => { percent: 0.07,   rating: :bad,                  rating_value:  0  }
       }
     end
 
     def self.non_school_heating_day_adjective(days)
-      non_find_school_day_rating(days, :rating)
+      I18nHelper.adjective( non_find_school_day_rating(days, :rating) )
     end
 
     def self.non_school_day_heating_rating_out_of_10(days)
@@ -727,7 +727,7 @@ module AnalyseHeatingAndHotWater
         'School Heating Days'         =>    [number_of_heating_school_days, :integer],
         'Non School Day Heating Days' =>    [number_of_non_school_heating_days, :integer],
         'Days of meter readings'      =>    [(@amr_data.end_date - @amr_data.start_date + 1).to_i, :integer],
-        'Model calculation time (ms)' =>    [(@model_calculation_time * 1000.0).to_i, :integer], 
+        'Model calculation time (ms)' =>    [(@model_calculation_time * 1000.0).to_i, :integer],
       }
 
       results.merge!(regression_model_configuration)
@@ -996,7 +996,7 @@ module AnalyseHeatingAndHotWater
           kitchen_model(date)
         elsif @meter.hot_water_only?
           summer_model(date)
-        else 
+        else
           heating_on?(date) ? winter_model(date) : summer_model(date)
         end
       logger.info "Missing model type for date #{date}" if model_type.nil?
@@ -1320,7 +1320,7 @@ module AnalyseHeatingAndHotWater
     def community_use_model_scaling_factor(date, community_use)
       @community_use_model_scaling_factors ||= calculate_community_use_model_scaling_factors(community_use)
       raise ScalingModelCalculationDoesntCoverAllModelTypes, "Extend sd, ed calc below to cover #{date}" unless @community_use_model_scaling_factors.key?(model_type?(date))
-      @community_use_model_scaling_factors[model_type?(date)] 
+      @community_use_model_scaling_factors[model_type?(date)]
     end
 
     def no_scaling_models

@@ -4,7 +4,7 @@ require_relative '../alert_gas_model_base.rb'
 class AlertOptimumStartAnalysis < AlertGasModelBase
   attr_reader :regression_start_time, :optimum_start_sensitivity, :regression_r2
   attr_reader :average_start_time, :start_time_standard_devation, :average_start_time_hh_mm
-  
+
   def initialize(school)
     super(school, :optimumstartanalysis)
     @relevance = :never_relevant if @relevance != :never_relevant && non_heating_only
@@ -49,7 +49,7 @@ class AlertOptimumStartAnalysis < AlertGasModelBase
   }.freeze
 
   def timescale
-    'last year'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data

@@ -12,7 +12,7 @@ class AlertStorageHeaterAnnualVersusBenchmark < AlertGasAnnualVersusBenchmark
   include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heater_annual_benchmark)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
   end
 
   private def dd_adj(asof_date)
@@ -40,7 +40,7 @@ class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
     super(school, 'electricity', BenchmarkMetrics::PERCENT_STORAGE_HEATER_OUT_OF_HOURS_BENCHMARK,
           :storageheateroutofhours,
           '', :allstorageheater, 0.2, 0.5)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
   end
 
   def breakdown_chart
@@ -61,7 +61,7 @@ class AlertSeasonalHeatingSchoolDaysStorageHeaters < AlertSeasonalHeatingSchoolD
   include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heater_heating_days)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
   end
 
   def heating_on_off_chart
@@ -79,12 +79,15 @@ class AlertTurnHeatingOffStorageHeaters < AlertTurnHeatingOff
   end
 end
 
+#NOTE: this doesn't seem to be setup in the application, as its not registered
+#in the database. Should it be removed?
+#Was removed from live system around 2022-04-11 and replaced by above
 class AlertHeatingOnSchoolDaysStorageHeaters < AlertHeatingOnSchoolDays
   include AlertGasToStorageHeaterSubstitutionMixIn
   include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heater_heating_days)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
   end
 
   def heating_on_off_chart
@@ -97,7 +100,7 @@ class AlertStorageHeatersLongTermTrend < AlertGasLongTermTrend
   include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heater_heating_days)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
   end
 
   def self.template_variables
@@ -152,11 +155,11 @@ class AlertStorageHeaterHeatingOnDuringHoliday < AlertHeatingHotWaterOnDuringHol
   include ElectricityCostCo2Mixin
   def initialize(school)
     super(school, :storage_heaters)
-    @relevance = @school.storage_heaters? ? :relevant : :never_relevant 
+    @relevance = @school.storage_heaters? ? :relevant : :never_relevant
   end
 
   def heating_type
-    'storage_heaters'
+    I18n.t("analytics.common.storage_heaters")
   end
 
   def aggregate_meter

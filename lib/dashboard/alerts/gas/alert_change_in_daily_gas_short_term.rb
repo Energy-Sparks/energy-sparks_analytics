@@ -125,7 +125,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
   end
 
   def timescale
-    'week (school days only)'
+    I18n.t("#{i18n_prefix}.timescale")
   end
 
   def enough_data

@@ -3,6 +3,10 @@ require_relative '../alert_gas_model_base.rb'
 require_relative './alert_heating_day_base.rb'
 
 # alerts for leaving the heating on for too long over winter
+#
+#NOTE: this doesn't seem to be setup in the application, as its not registered
+#in the database. Should it be removed?
+#Was removed from live system around 2022-04-11
 class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
 
   attr_reader :number_of_heating_days_last_year, :average_number_of_heating_days_last_year
