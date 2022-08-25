@@ -11,6 +11,10 @@ class SolarPVPanels
   ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME = 'Electricity consumed from mains'.freeze
   SOLAR_PV_PRODUCTION_METER_NAME = 'Solar PV Production'
 
+  SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME_I18N_KEY = 'electricity_consumed_from_solar_pv'.freeze
+  SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME_I18N_KEY = 'exported_solar_electricity'.freeze
+  ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME_I18N_KEY = 'electricity_consumed_from_mains'.freeze
+
   SUBMETER_TYPES = [
     ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
     SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
