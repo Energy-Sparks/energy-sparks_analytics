@@ -25,6 +25,8 @@ module Benchmarking
         arr.compact.empty? ? nil : arr.compact[0]
       end
 
+      # NB if you change this format, you need to change the decode
+      #    function def remove_references(school_name) in benchmark_content_general.rb
       def referenced(name, changed, percent)
         change_refs = []
         change_refs.push(1) if changed

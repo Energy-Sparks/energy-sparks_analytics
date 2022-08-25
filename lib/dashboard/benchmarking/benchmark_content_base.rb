@@ -1,5 +1,6 @@
 module Benchmarking
   class BenchmarkContentBase
+    include Logging
     attr_reader :benchmark_manager, :asof_date, :page_name, :chart_table_config
     def initialize(benchmark_database, asof_date, page_name, chart_table_config, online=false)
       @benchmark_manager = BenchmarkManager.new(benchmark_database)
@@ -44,12 +45,17 @@ module Benchmarking
             tables.push({type: :table_text,            content: table_text })
           end
 
-          tables.push({ type: :html,                  content: aggregate_text(school_ids, filter, user_type) })
+          aggregate_test_data = aggregate_text(school_ids, filter, user_type)
+          puts "Aggregate text of length #{aggregate_test_data.length} for #{self.class.name}"
+          puts aggregate_test_data.gsub('  ', '') unless aggregate_test_data.empty?
+          logger.error "Aggregate text of length #{aggregate_test_data.length} for #{self.class.name}"
+
+          tables.push({ type: :html,                  content: aggregate_test_data })
           tables.push({ type: :table_composite,       content: composite })
           tables.push({ type: :html,                  content: table_interpretation_text })
         end
 
-        caveats = [{ type: :html,         content: caveat_text}]
+        caveats = [{ type: :html, content: caveat_text}]
       end
 
       [preamble_content, charts, tables, caveats, drilldown(school_ids, user_type)].compact.flatten
