@@ -14,53 +14,6 @@ module Series
       process_temperature_adjustment_config
     end
 
-    def self.translated_series_item_for(series_key_as_string)
-      i18n_key = Series::ManagerBase.series_translation_key_lookup[series_key_as_string]
-      return series_key_as_string unless i18n_key
-
-      I18n.t("series_data_manager.series.#{i18n_key}")
-    end
-
-    def self.series_translation_key_lookup
-      {
-        Series::DegreeDays::DEGREEDAYS => Series::DegreeDays::DEGREEDAYS_I18N_KEY,
-        Series::Temperature::TEMPERATURE => Series::Temperature::TEMPERATURE_I18N_KEY,
-        Series::DayType::SCHOOLDAYCLOSED => Series::DayType::SCHOOLDAYCLOSED_I18N_KEY,
-        Series::DayType::SCHOOLDAYOPEN => Series::DayType::SCHOOLDAYOPEN_I18N_KEY,
-        Series::DayType::HOLIDAY => Series::DayType::HOLIDAY_I18N_KEY,
-        Series::DayType::WEEKEND => Series::DayType::WEEKEND_I18N_KEY,
-        Series::DayType::STORAGE_HEATER_CHARGE => Series::DayType::STORAGE_HEATER_CHARGE_I18N_KEY,
-        Series::HotWater::USEFULHOTWATERUSAGE => Series::HotWater::USEFULHOTWATERUSAGE_I18N_KEY,
-        Series::HotWater::WASTEDHOTWATERUSAGE => Series::HotWater::WASTEDHOTWATERUSAGE_I18N_KEY,
-        Series::MultipleFuels::SOLARPV => Series::MultipleFuels::SOLARPV_I18N_KEY,
-        Series::Irradiance::IRRADIANCE => Series::Irradiance::IRRADIANCE_I18N_KEY,
-        Series::GridCarbon::GRIDCARBON => Series::GridCarbon::GRIDCARBON_I18N_KEY,
-        Series::GasCarbon::GASCARBON => Series::GasCarbon::GASCARBON_I18N_KEY,
-        Series::HeatingNonHeating::HEATINGDAY => Series::HeatingNonHeating::HEATINGDAY_I18N_KEY,
-        Series::HeatingNonHeating::NONHEATINGDAY => Series::HeatingNonHeating::NONHEATINGDAY_I18N_KEY,
-        Series::HeatingNonHeating::HEATINGDAYWARMWEATHER => Series::HeatingNonHeating::HEATINGDAYWARMWEATHER_I18N_KEY,
-        Series::MultipleFuels::ELECTRICITY => Series::MultipleFuels::ELECTRICITY_I18N_KEY,
-        Series::MultipleFuels::GAS => Series::MultipleFuels::GAS_I18N_KEY,
-        Series::MultipleFuels::STORAGEHEATERS => Series::MultipleFuels::STORAGEHEATERS_I18N_KEY,
-        Series::MultipleFuels::SOLARPV => Series::MultipleFuels::SOLARPV_I18N_KEY,
-        Series::PredictedHeat::PREDICTEDHEAT => Series::PredictedHeat::PREDICTEDHEAT_I18N_KEY,
-        Series::TargetDegreeDays::TARGETDEGREEDAYS => Series::TargetDegreeDays::TARGETDEGREEDAYS_I18N_KEY,
-        Series::Cusum::CUSUM => Series::Cusum::CUSUM_I18N_KEY,
-        Series::Baseload::BASELOAD => Series::Baseload::BASELOAD_I18N_KEY,
-        Series::PeakKw::PEAK_KW => Series::PeakKw::PEAK_KW_I18N_KEY,
-        Series::HeatingDayType::SCHOOLDAYHEATING => Series::HeatingDayType::SCHOOLDAYHEATING_I18N_KEY,
-        Series::HeatingDayType::HOLIDAYHEATING => Series::HeatingDayType::HOLIDAYHEATING_I18N_KEY,
-        Series::HeatingDayType::WEEKENDHEATING => Series::HeatingDayType::WEEKENDHEATING_I18N_KEY,
-        Series::HeatingDayType::SCHOOLDAYHOTWATER => Series::HeatingDayType::SCHOOLDAYHOTWATER_I18N_KEY,
-        Series::HeatingDayType::HOLIDAYHOTWATER => Series::HeatingDayType::HOLIDAYHOTWATER_I18N_KEY,
-        Series::HeatingDayType::WEEKENDHOTWATER => Series::HeatingDayType::WEEKENDHOTWATER_I18N_KEY,
-        Series::HeatingDayType::BOILEROFF => Series::HeatingDayType::BOILEROFF_I18N_KEY,
-        Series::NoBreakdown::NONE => Series::NoBreakdown::NONE_I18N_KEY,
-        AggregatorBenchmarks.exemplar_school_name => 'exemplar_school',
-        AggregatorBenchmarks.benchmark_school_name => 'benchmark_school'  
-      }
-    end
-
     def self.factories(school, chart_config)
       series_breakdowns = [chart_config[:series_breakdown], chart_config[:y2_axis]].flatten
       series_breakdowns.map { |sb| factory(school, chart_config, sb) }.compact
