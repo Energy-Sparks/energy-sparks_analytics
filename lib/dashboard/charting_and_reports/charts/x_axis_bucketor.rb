@@ -31,7 +31,7 @@ class XBucketBase
   end
 
   def compact_date_range_description
-    format = '%a%d%b%y'
+    format = '%a %d %b %y'
     if data_start_date != data_end_date
       I18n.l(data_start_date, format: format) + '-' + I18n.l(data_end_date, format: format)
     else
