@@ -98,7 +98,7 @@ class AggregatorMultiSchoolsPeriods < AggregatorBase
 
       if index == 0
         results.x_axis = period_data.results.x_axis.map{ |month_year| month_year[0..2]} # MMM YYYY to MMM
-        time_description = number_of_periods <= 1 ? '' : (':' + time_description)
+        time_description = number_of_periods <= 1 ? '' : time_description
         results.bucketed_data[      time_description] = period_data.results.bucketed_data.values[0]
         results.bucketed_data_count[time_description] = period_data.results.bucketed_data_count.values[0]
       else      
