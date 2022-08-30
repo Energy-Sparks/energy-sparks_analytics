@@ -98,7 +98,7 @@ class AlertTurnHeatingOff < AlertGasModelBase
     },
     days_ago: {
       description: 'days since last meter read, including day/days',
-      unit: String
+      units: String
     },
     days_ago_plural: {
       description: 'set to s if days since last meter reading date > 1 so can say day or days ago',
