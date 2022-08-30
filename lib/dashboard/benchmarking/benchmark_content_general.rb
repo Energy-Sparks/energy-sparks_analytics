@@ -1465,6 +1465,7 @@ module Benchmarking
       rows.map { |row| remove_references(row[table_column_index(:school_name)]) }
     end
 
+    # reverses def referenced(name, changed, percent) in benchmark_manager.rb
     def remove_references(school_name)
       school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')
     end

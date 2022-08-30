@@ -1,5 +1,6 @@
 module Benchmarking
   class BenchmarkContentBase
+    include Logging
     attr_reader :benchmark_manager, :asof_date, :page_name, :chart_table_config
     def initialize(benchmark_database, asof_date, page_name, chart_table_config, online=false)
       @benchmark_manager = BenchmarkManager.new(benchmark_database)
@@ -44,12 +45,20 @@ module Benchmarking
             tables.push({type: :table_text,            content: table_text })
           end
 
-          tables.push({ type: :html,                  content: aggregate_text(school_ids, filter, user_type) })
+#          if self.class == Benchmarking::BenchmarkContentChangeInGasBetween2HolidaysYearApart
+#            infinite_rows = composite[:rows].select { |row| !row[1][:raw].infinite?.nil? }
+#            puts "There should be at least 14 rows output if all schools selected for this school comparison"
+#            ap infinite_rows
+#          end
+
+          aggregate_test_data = aggregate_text(school_ids, filter, user_type)
+
+          tables.push({ type: :html,                  content: aggregate_test_data })
           tables.push({ type: :table_composite,       content: composite })
           tables.push({ type: :html,                  content: table_interpretation_text })
         end
 
-        caveats = [{ type: :html,         content: caveat_text}]
+        caveats = [{ type: :html, content: caveat_text}]
       end
 
       [preamble_content, charts, tables, caveats, drilldown(school_ids, user_type)].compact.flatten
@@ -137,7 +146,7 @@ module Benchmarking
     def run_table(school_ids, filter, medium, user_type = nil)
       benchmark_manager.run_benchmark_table(asof_date, page_name, school_ids, nil, filter, medium, user_type)
     end
- 
+
     def aggregate_text(school_ids, filter, user_type)
       ''
     end

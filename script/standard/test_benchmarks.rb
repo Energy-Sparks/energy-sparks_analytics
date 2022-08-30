@@ -8,16 +8,16 @@ module Logging
   logger.level = :error
 end
 
-run_date = Date.new(2022, 8, 5)
+run_date = Date.new(2022, 8, 14)
 
 overrides = { 
-  schools: ['*'], # ['shrew*', 'bathamp*'],
+  schools: ['shrew*'], # ['shrew*', 'bathamp*'],
   cache_school: false,
   benchmarks: {
-    calculate_and_save_variables: true,
+    calculate_and_save_variables: false,
     asof_date: run_date,
-    no_pages: [:change_in_gas_holiday_consumption_previous_holiday, :change_in_gas_holiday_consumption_previous_years_holiday],
-    run_content: { asof_date: run_date }
+    no_pages: [:change_in_gas_holiday_consumption_previous_years_holiday],
+    run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }
 }
 
