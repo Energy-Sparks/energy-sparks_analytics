@@ -2,6 +2,24 @@ require 'spec_helper'
 
 describe ChartManager do
 
+  describe '#valid_standard_chart_configuration?' do
+    let(:school)        { nil }
+    let(:chart_manager) { ChartManager.new(school) }
+
+    it 'validates the standard chart configuration' do
+      expect(chart_manager.valid_standard_chart_configuration?).to be(true)
+    end
+  end
+
+  describe '#standard_chart_configuration_validation_errors?' do
+    let(:school)        { nil }
+    let(:chart_manager) { ChartManager.new(school) }
+
+    it 'validates the standard chart configuration' do
+      expect(chart_manager.standard_chart_configuration_validation_errors).to eq([])
+    end
+  end
+
   describe '#translated_titles_for' do
     let(:chart_name)    { :benchmark }
     let(:chart_config)  { ChartManager::STANDARD_CHART_CONFIGURATION[chart_name] }

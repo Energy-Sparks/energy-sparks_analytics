@@ -226,6 +226,21 @@ class ChartManager
     valid?(self.class.standard_chart(chart_name))
   end
 
+  def valid_standard_chart_configuration?
+    standard_chart_configuration_validation_errors.empty?
+  end
+
+  def standard_chart_configuration_validation_errors
+    errors = []
+    contract = ChartManagerStandardConfigurationContract.new
+    ChartManager::STANDARD_CHART_CONFIGURATION.each do |k,v|
+      next if contract.call(v).success?
+    
+      errors << { k => contract.call(v).errors.messages.join(', ') }
+    end
+    errors
+  end
+
   private
 
   def self.standard_chart(chart_name)

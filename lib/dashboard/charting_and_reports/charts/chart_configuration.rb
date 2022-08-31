@@ -1,6 +1,7 @@
 require_relative './series_data_manager.rb'
 require_relative './chart_dynamic_x_axis.rb'
 require_relative '../../modelling/solar/solar_pv_panels.rb'
+require 'dry-validation'
 # Chart Manager - aggregates data for graphing - producing 'Charts'
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
@@ -110,6 +111,7 @@ class ChartManager
       timescale:        { week: -1..0 },
       meter_definition: :all,
       x_axis:           :day,
+      x_axis_reformat:  { date: '' },
       series_breakdown: :fuel,
       yaxis_units:      :co2,
       yaxis_scaling:    :none
@@ -120,6 +122,7 @@ class ChartManager
       chart1_subtype:   :stacked,
       meter_definition: :all,
       x_axis:           :year,
+      x_axis_reformat:  { date: '' },
       series_breakdown: :fuel,
       yaxis_units:      :£,
       yaxis_scaling:    :none,
@@ -132,6 +135,7 @@ class ChartManager
       chart1_subtype:   :stacked,
       meter_definition: :allheat,
       x_axis:           :year,
+      x_axis_reformat:  { date: '' },
       series_breakdown: :daytype,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
@@ -601,6 +605,7 @@ class ChartManager
       name:               'Solar PV for last week',
       inherits_from:      :solar_pv_group_by_week_by_submeter,
       x_axis:           :day,
+      x_axis_reformat:  { date: '' },
       timescale:        {workweek: 0}
     },
     pupil_dashboard_solar_pv_one_week_by_day_previous_week: {
@@ -658,6 +663,7 @@ class ChartManager
       inherits_from:    :group_by_week_electricity,
       name:             'By Day: Electricity',
       x_axis:           :day,
+      x_axis_reformat:  { date: '' },
       timescale:        :week
     },
     electricity_by_datetime:  {
@@ -696,6 +702,7 @@ class ChartManager
     temp_test: {
       inherits_from:    :group_by_week_electricity_meter_breakdown,
       x_axis:           :day,
+      x_axis_reformat:  { date: '' },
       timescale:        :week
     },
     temp_test2: {
@@ -954,7 +961,8 @@ class ChartManager
     },
     electricity_cost_1_year_accounting_breakdown_group_by_day: {
       inherits_from:    :electricity_cost_1_year_accounting_breakdown,
-      x_axis:           :day
+      x_axis:           :day,
+      x_axis_reformat:  { date: '' }
     },
     accounting_cost_daytype_breakdown_electricity: {
       name:             '',
@@ -1047,7 +1055,8 @@ class ChartManager
       name:             'Electricity accounting cost breakdown by day for last 2 weeks',
       inherits_from:    :electricity_cost_comparison_1_year_accounting_breakdown_by_week,
       timescale:        [{ day: -13...0 }],
-      x_axis:           :day
+      x_axis:           :day,
+      x_axis_reformat:  { date: '' }
     },
     electricity_1_year_intraday_accounting_breakdown: {
       name:             'Electricity costs for last year by time of day (accounting costs)',
@@ -1172,6 +1181,7 @@ class ChartManager
       timescale:        :year,
       series_breakdown: %i[model_type temperature],
       x_axis:           :day,
+      x_axis_reformat:  { date: '' },
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
@@ -1401,6 +1411,7 @@ class ChartManager
       filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ], heating: false },
       series_breakdown: %i[heating heatingmodeltrendlines degreedays],
       x_axis:           :day,
+      x_axis_reformat:  { date: '' },
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
@@ -1835,6 +1846,7 @@ class ChartManager
       chart1_subtype:   :stacked,
       series_breakdown: :hotwater,
       x_axis:           :day,
+      x_axis_reformat:  { date: '' },
       meter_definition: :allheat,
       yaxis_units:      :kwh
     },
@@ -1900,14 +1912,14 @@ class ChartManager
     last_2_weeks_gas: {
       name:             'Last 2 weeks gas consumption (with temperature)',
       timescale:        { week: -1..0 },
-      x_axis_reformat:  nil,
+      x_axis_reformat:  { date: '' },
       inherits_from:    :last_2_weeks_gas_comparison
     },
     last_2_weeks_gas_degreedays: {
       name:             'Last 2 weeks gas consumption (with degree days)',
       y2_axis:          :degreedays,
       timescale:        { week: -1..0 },
-      x_axis_reformat:  nil,
+      x_axis_reformat:  { date: '' },
       inherits_from:    :last_2_weeks_gas
     },
     last_2_weeks_gas_comparison_temperature_compensated: {
@@ -1990,7 +2002,7 @@ class ChartManager
       adjust_by_temperature:  10.0,
       timescale:        [{ day: -27...0 }],
       y2_axis:          nil,
-      x_axis_reformat:  nil,
+      x_axis_reformat:  { date: '' },
       inherits_from:    :last_2_weeks_gas_comparison
     },
     last_7_days_intraday_gas:  {
@@ -2242,4 +2254,36 @@ class ChartManager
       inherits_from:      :solar_pv_group_by_month_dashboard_overview
     },
   }.freeze
+
+end
+
+class ChartManagerStandardConfigurationContract < Dry::Validation::Contract
+  params do
+    optional(:name).value(:string)
+    optional(:inherits_from).value(:symbol)
+    optional(:x_axis)
+    optional(:x_axis_reformat).value(:hash)
+    optional(:meter_definition).value(:symbol)
+    optional(:drilldown_name).value(array[:string])
+    optional(:chart1_type).value(:symbol)
+  end
+
+  rule(:x_axis_reformat) do
+    x_axis_reformat = values[:x_axis_reformat]
+    if x_axis_reformat.present? && !x_axis_reformat&.key?(:date)
+      key.failure("x_axis_reformat needs to have a date: key value pair")
+    end
+  end
+
+  rule(:x_axis) do
+    x_axis, x_axis_reformat = values[:x_axis], values[:x_axis_reformat]
+
+    key.failure("x_axis_reformat needs to be present if x_axis is a day symbol") if x_axis == :day && x_axis_reformat.nil?
+  end
+
+  rule(:name) do
+    name, inherits_from = values[:name], values[:inherits_from]
+
+    key.failure("inherits_from needs to be present if name is blank") if name.nil? && inherits_from.nil? 
+  end  
 end
