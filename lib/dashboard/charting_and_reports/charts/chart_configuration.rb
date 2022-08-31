@@ -2270,8 +2270,8 @@ class ChartManagerStandardConfigurationContract < Dry::Validation::Contract
 
   rule(:x_axis_reformat) do
     x_axis_reformat = values[:x_axis_reformat]
-    if x_axis_reformat.present? && !x_axis_reformat&.key?(:date)
-      key.failure("x_axis_reformat needs to have a date: key value pair")
+    if !x_axis_reformat.nil? && !x_axis_reformat&.key?(:date)
+        key.failure("x_axis_reformat needs to have a date: key value pair")
     end
   end
 
