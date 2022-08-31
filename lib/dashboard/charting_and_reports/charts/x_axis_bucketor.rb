@@ -244,11 +244,11 @@ class XBucketDayOfWeek < XBucketBase
   end
 
   def key(date, _halfhour_index)
-    Date::DAYNAMES[date.wday]
+    I18n.t('date.day_names')[date.wday]
   end
 
   def create_x_axis
-    @x_axis = Date::DAYNAMES
+    @x_axis = I18n.t('date.day_names')
 
     # this bit is a slight fudge as the x_axis doesn't have date buckets, only days of week
     (data_start_date..data_end_date).each do |date|
