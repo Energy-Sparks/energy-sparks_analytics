@@ -28,7 +28,13 @@ describe ChartManager do
         benchmark:  { name: 'Benchmark', x_axis: :day, x_axis_reformat: '' }
       })
       expect(chart_manager.standard_chart_configuration_validation_errors).to eq([
-        {:benchmark=>"x_axis_reformat needs to have a date: key value pair"}
+        {:benchmark=>"x_axis_reformat needs to have a 'date:' key, x_axis_reformat needs to have a format value"}
+      ])
+      stub_const("ChartManager::STANDARD_CHART_CONFIGURATION", {
+        benchmark:  { name: 'Benchmark', x_axis: :day, x_axis_reformat: { date: '' } }
+      })
+      expect(chart_manager.standard_chart_configuration_validation_errors).to eq([
+        {:benchmark=>"x_axis_reformat needs to have a format value"}
       ])
     end
   end
