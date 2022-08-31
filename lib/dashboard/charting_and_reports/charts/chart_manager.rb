@@ -233,10 +233,12 @@ class ChartManager
   def standard_chart_configuration_validation_errors
     errors = []
     contract = ChartManagerStandardConfigurationContract.new
-    ChartManager::STANDARD_CHART_CONFIGURATION.each do |k,v|
-      next if contract.call(v).success?
+    ChartManager::STANDARD_CHART_CONFIGURATION.each do |chart_name, chart_configuration_values|
+      next if contract.call(chart_configuration_values).success?
     
-      errors << { k => contract.call(v).errors.messages.join(', ') }
+      errors << { 
+        chart_name => contract.call(chart_configuration_values).errors.messages.join(', ')
+      }
     end
     errors
   end
