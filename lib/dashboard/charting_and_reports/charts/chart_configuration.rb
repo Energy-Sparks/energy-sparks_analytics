@@ -2270,8 +2270,9 @@ class ChartManagerStandardConfigurationContract < Dry::Validation::Contract
 
   rule(:x_axis_reformat) do
     x_axis_reformat = values[:x_axis_reformat]
+
     if !x_axis_reformat.nil? && !x_axis_reformat&.key?(:date)
-        key.failure("x_axis_reformat needs to have a date: key value pair")
+      key.failure("x_axis_reformat needs to have a date: key value pair")
     end
   end
 
@@ -2285,5 +2286,5 @@ class ChartManagerStandardConfigurationContract < Dry::Validation::Contract
     name, inherits_from = values[:name], values[:inherits_from]
 
     key.failure("inherits_from needs to be present if name is blank") if name.nil? && inherits_from.nil? 
-  end  
+  end
 end

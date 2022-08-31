@@ -29,7 +29,7 @@ describe ChartManager do
       })
       expect(chart_manager.standard_chart_configuration_validation_errors).to eq([
         {:benchmark=>"x_axis_reformat needs to have a date: key value pair"}
-      ])      
+      ])
     end
   end
 
