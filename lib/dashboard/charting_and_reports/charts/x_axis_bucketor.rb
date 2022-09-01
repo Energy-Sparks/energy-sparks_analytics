@@ -72,7 +72,7 @@ class XBucketMonth < XBucketBase
   end
 
   def key(date, _halfhour_index)
-    date.strftime("%b %Y")
+    I18n.l(date, format: "%b %Y")
   end
 
   def create_x_axis
