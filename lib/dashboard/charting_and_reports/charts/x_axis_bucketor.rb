@@ -228,7 +228,7 @@ class XBucketDay < XBucketBase
     day_format = '%A %-d %b %Y'
     (data_start_date..data_end_date).each do |date|
       @x_axis_bucket_date_ranges.push([date, date])
-      @x_axis.push(I18n.l(date, format: day_format))
+      @x_axis.push(date)
     end
   end
 
