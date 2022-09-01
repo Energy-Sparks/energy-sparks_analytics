@@ -963,7 +963,7 @@ class ChartManager
     electricity_cost_1_year_accounting_breakdown_group_by_day: {
       inherits_from:    :electricity_cost_1_year_accounting_breakdown,
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' }
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT }
     },
     accounting_cost_daytype_breakdown_electricity: {
       name:             '',
