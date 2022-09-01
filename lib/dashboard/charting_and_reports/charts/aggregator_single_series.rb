@@ -84,8 +84,6 @@ class AggregatorSingleSeries < AggregatorBase
       # TODO(PH,17Jun2018) push down and optimise in series_data_manager
       results.xbucketor.x_axis_bucket_date_ranges.each do |date_range|
         
-puts date_range[0]
-
         x_index = results.xbucketor.index(date_range[0], nil)
         (date_range[0]..date_range[1]).each do |date|
           next unless filter.match_filter_by_day(date)
