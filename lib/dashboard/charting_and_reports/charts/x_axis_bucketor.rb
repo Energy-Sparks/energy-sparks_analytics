@@ -144,7 +144,7 @@ class XBucketWeek < XBucketBase
 
   def key(date, _halfhour_index)
     first_sunday_of_bucket = @first_sunday + 7 * ((date - @first_sunday) / 7).floor.to_i
-    I18n.l(first_sunday_of_bucket, format: @key_string)
+    first_sunday_of_bucket.strftime(@key_string)
   end
 
   # overwritten as provide report speed up from 0.52s to 0.44s
@@ -197,7 +197,7 @@ class XBucketDateTime < XBucketBase
 
   def key(date, halfhour_index)
     datetime = DateTimeHelper.datetime(date, halfhour_index)
-    I18n.l(datetime, format: DTKEYFORMAT)
+    datetime.strftime(DTKEYFORMAT)
   end
 
   def index(date, halfhour_index)
