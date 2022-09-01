@@ -22,7 +22,7 @@ describe ChartManager do
     it 'returns errors for a faulty config' do
       stub_const("ChartManager::STANDARD_CHART_CONFIGURATION", { benchmark: { x_axis: :day } })
       expect(chart_manager.standard_chart_configuration_validation_errors).to eq([
-        {:benchmark=>"x_axis_reformat needs to be present if x_axis is a day symbol, inherits_from needs to be present if name is blank"}
+        {:benchmark=>"x_axis_reformat needs to be present if x_axis is a day symbol"}
       ])
       stub_const("ChartManager::STANDARD_CHART_CONFIGURATION", {
         benchmark:  { name: 'Benchmark', x_axis: :day, x_axis_reformat: '' }

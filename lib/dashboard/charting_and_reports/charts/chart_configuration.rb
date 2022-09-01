@@ -13,6 +13,8 @@ class ChartManager
     ]
   end
 
+  DEFAULT_DAY_FORMAT = '%Y-%m-%d'
+
   STANDARD_CHART_CONFIGURATION = {
     #
     # chart config parameters:
@@ -111,7 +113,7 @@ class ChartManager
       timescale:        { week: -1..0 },
       meter_definition: :all,
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       series_breakdown: :fuel,
       yaxis_units:      :co2,
       yaxis_scaling:    :none
@@ -134,7 +136,7 @@ class ChartManager
       chart1_subtype:   :stacked,
       meter_definition: :allheat,
       x_axis:           :year,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       series_breakdown: :daytype,
       yaxis_units:      :kwh,
       yaxis_scaling:    :none,
@@ -604,7 +606,7 @@ class ChartManager
       name:               'Solar PV for last week',
       inherits_from:      :solar_pv_group_by_week_by_submeter,
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       timescale:        {workweek: 0}
     },
     pupil_dashboard_solar_pv_one_week_by_day_previous_week: {
@@ -662,7 +664,7 @@ class ChartManager
       inherits_from:    :group_by_week_electricity,
       name:             'By Day: Electricity',
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       timescale:        :week
     },
     electricity_by_datetime:  {
@@ -701,7 +703,7 @@ class ChartManager
     temp_test: {
       inherits_from:    :group_by_week_electricity_meter_breakdown,
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       timescale:        :week
     },
     temp_test2: {
@@ -1055,7 +1057,7 @@ class ChartManager
       inherits_from:    :electricity_cost_comparison_1_year_accounting_breakdown_by_week,
       timescale:        [{ day: -13...0 }],
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
     },
     electricity_1_year_intraday_accounting_breakdown: {
       name:             'Electricity costs for last year by time of day (accounting costs)',
@@ -1180,7 +1182,7 @@ class ChartManager
       timescale:        :year,
       series_breakdown: %i[model_type temperature],
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
@@ -1410,7 +1412,7 @@ class ChartManager
       filter:           { daytype: [ Series::DayType::SCHOOLDAYOPEN, Series::DayType::SCHOOLDAYCLOSED ], heating: false },
       series_breakdown: %i[heating heatingmodeltrendlines degreedays],
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       yaxis_units:      :kwh,
       yaxis_scaling:    :none
     },
@@ -1845,7 +1847,7 @@ class ChartManager
       chart1_subtype:   :stacked,
       series_breakdown: :hotwater,
       x_axis:           :day,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       meter_definition: :allheat,
       yaxis_units:      :kwh
     },
@@ -1911,14 +1913,14 @@ class ChartManager
     last_2_weeks_gas: {
       name:             'Last 2 weeks gas consumption (with temperature)',
       timescale:        { week: -1..0 },
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       inherits_from:    :last_2_weeks_gas_comparison
     },
     last_2_weeks_gas_degreedays: {
       name:             'Last 2 weeks gas consumption (with degree days)',
       y2_axis:          :degreedays,
       timescale:        { week: -1..0 },
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       inherits_from:    :last_2_weeks_gas
     },
     last_2_weeks_gas_comparison_temperature_compensated: {
@@ -2001,7 +2003,7 @@ class ChartManager
       adjust_by_temperature:  10.0,
       timescale:        [{ day: -27...0 }],
       y2_axis:          nil,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
+      x_axis_reformat:  { date: ChartManager::DEFAULT_DAY_FORMAT },
       inherits_from:    :last_2_weeks_gas_comparison
     },
     last_7_days_intraday_gas:  {
