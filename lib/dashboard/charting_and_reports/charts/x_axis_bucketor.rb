@@ -72,13 +72,13 @@ class XBucketMonth < XBucketBase
   end
 
   def key(date, _halfhour_index)
-    date.strftime("%b %Y")
+    I18n.l(date, format: "%b %Y")
   end
 
   def create_x_axis
     first_day_of_month = data_start_date # .beginning_of_month
     while first_day_of_month <= data_end_date
-      @x_axis.push(first_day_of_month.strftime('%b %Y'))
+      @x_axis.push(I18n.l(first_day_of_month, format: '%b %Y'))
       last_day_of_month = first_day_of_month.beginning_of_month.next_month - 1 # can't use end_of_month as there is a active_support error: undefined method `days_in_month'
       @x_axis_bucket_date_ranges.push([first_day_of_month, last_day_of_month])
       first_day_of_month = first_day_of_month.next_month.beginning_of_month
