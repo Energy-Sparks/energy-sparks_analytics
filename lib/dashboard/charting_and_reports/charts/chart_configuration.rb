@@ -122,7 +122,6 @@ class ChartManager
       chart1_subtype:   :stacked,
       meter_definition: :all,
       x_axis:           :year,
-      x_axis_reformat:  { date: '%A %-d %b %Y' },
       series_breakdown: :fuel,
       yaxis_units:      :£,
       yaxis_scaling:    :none,
