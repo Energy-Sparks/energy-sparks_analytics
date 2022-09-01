@@ -2284,10 +2284,4 @@ class ChartManagerStandardConfigurationContract < Dry::Validation::Contract
 
     key.failure("x_axis_reformat needs to be present if x_axis is a day symbol") if x_axis == :day && x_axis_reformat.nil?
   end
-
-  rule(:name) do
-    name, inherits_from = values[:name], values[:inherits_from]
-
-    key.failure("inherits_from needs to be present if name is blank") if name.nil? && inherits_from.nil? 
-  end
 end
