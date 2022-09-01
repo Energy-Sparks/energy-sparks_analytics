@@ -1,0 +1,93 @@
+---
+AlertOutOfHoursElectricityUsage:breakdown_chart: :alert_daytype_breakdown_electricity
+AlertOutOfHoursElectricityUsage:group_by_week_day_type_chart: :alert_group_by_week_electricity
+AlertOutOfHoursElectricityUsage:fuel: electricity
+AlertOutOfHoursElectricityUsage:fuel_description: electricity
+AlertOutOfHoursElectricityUsage:fuel_cost: 
+AlertOutOfHoursElectricityUsage:total_annual_£: 71061.48222159054
+AlertOutOfHoursElectricityUsage:total_annual_co2: 88479.98289962843
+AlertOutOfHoursElectricityUsage:schoolday_open_kwh: 172067.6333333333
+AlertOutOfHoursElectricityUsage:schoolday_closed_kwh: 181388.2666666666
+AlertOutOfHoursElectricityUsage:holidays_kwh: 71847.09999999999
+AlertOutOfHoursElectricityUsage:weekends_kwh: 42095.399999999994
+AlertOutOfHoursElectricityUsage:community_kwh: 0.0
+AlertOutOfHoursElectricityUsage:total_annual_kwh: 467398.3999999999
+AlertOutOfHoursElectricityUsage:out_of_hours_kwh: 295330.7666666666
+AlertOutOfHoursElectricityUsage:schoolday_open_percent: 0.36813911501052066
+AlertOutOfHoursElectricityUsage:schoolday_closed_percent: 0.3880806324254996
+AlertOutOfHoursElectricityUsage:holidays_percent: 0.15371704310498283
+AlertOutOfHoursElectricityUsage:weekends_percent: 0.09006320945899687
+AlertOutOfHoursElectricityUsage:community_percent: 0.0
+AlertOutOfHoursElectricityUsage:out_of_hours_percent: 0.6318608849894793
+AlertOutOfHoursElectricityUsage:schoolday_open_£: 26160.511176392192
+AlertOutOfHoursElectricityUsage:schoolday_closed_£: 27577.58496164826
+AlertOutOfHoursElectricityUsage:holidays_£: 10923.360925760206
+AlertOutOfHoursElectricityUsage:weekends_£: 6400.025157789893
+AlertOutOfHoursElectricityUsage:community_£: 0.0
+AlertOutOfHoursElectricityUsage:out_of_hours_£: 44900.971045198356
+AlertOutOfHoursElectricityUsage:schoolday_open_co2: 32572.942600815208
+AlertOutOfHoursElectricityUsage:schoolday_closed_co2: 34337.36772068519
+AlertOutOfHoursElectricityUsage:holidays_co2: 13600.881345310327
+AlertOutOfHoursElectricityUsage:weekends_co2: 7968.791232817696
+AlertOutOfHoursElectricityUsage:community_co2: 0.0
+AlertOutOfHoursElectricityUsage:out_of_hours_co2: 55907.04029881322
+AlertOutOfHoursElectricityUsage:good_out_of_hours_use_percent: 0.35
+AlertOutOfHoursElectricityUsage:bad_out_of_hours_use_percent: 0.65
+AlertOutOfHoursElectricityUsage:significant_out_of_hours_use: true
+AlertOutOfHoursElectricityUsage:percent_improvement_to_exemplar: 0.28186088498947937
+AlertOutOfHoursElectricityUsage:potential_saving_kwh: 131741.32666666666
+AlertOutOfHoursElectricityUsage:potential_saving_£: 20029.45226764167
+AlertOutOfHoursElectricityUsage:potential_saving_co2: 24939.04628394327
+AlertOutOfHoursElectricityUsage:summary: "£45,000pa (63% of annual cost) "
+AlertOutOfHoursElectricityUsage:relevance: :relevant
+AlertOutOfHoursElectricityUsage:analysis_date: 2022-02-01
+AlertOutOfHoursElectricityUsage:status: :bad
+AlertOutOfHoursElectricityUsage:rating: 0.6
+AlertOutOfHoursElectricityUsage:term: :longterm
+AlertOutOfHoursElectricityUsage:bookmark_url: https://blog.energysparks.uk/alerts#ElectricityOutOfHours
+AlertOutOfHoursElectricityUsage:max_asofdate: 2022-07-13
+AlertOutOfHoursElectricityUsage:pupils: 961
+AlertOutOfHoursElectricityUsage:floor_area: 5932.0
+AlertOutOfHoursElectricityUsage:school_type: :secondary
+AlertOutOfHoursElectricityUsage:school_name: Acme Academy
+AlertOutOfHoursElectricityUsage:school_activation_date: 
+AlertOutOfHoursElectricityUsage:school_creation_date: 2020-10-08
+AlertOutOfHoursElectricityUsage:urn: 136770
+AlertOutOfHoursElectricityUsage:one_year_saving_£: !ruby/range
+  begin: 20029.45226764167
+  end: 20029.45226764167
+  excl: false
+AlertOutOfHoursElectricityUsage:one_year_saving_£_low: 20029.45226764167
+AlertOutOfHoursElectricityUsage:one_year_saving_£_high: 20029.45226764167
+AlertOutOfHoursElectricityUsage:one_year_saving_co2: 24939.04628394327
+AlertOutOfHoursElectricityUsage:ten_year_saving_co2: 249390.4628394327
+AlertOutOfHoursElectricityUsage:average_one_year_saving_£: 20029.45226764167
+AlertOutOfHoursElectricityUsage:average_ten_year_saving_£: 200294.5226764167
+AlertOutOfHoursElectricityUsage:ten_year_saving_£: !ruby/range
+  begin: 200294.5226764167
+  end: 200294.5226764167
+  excl: false
+AlertOutOfHoursElectricityUsage:ten_year_saving_£_low: 200294.5226764167
+AlertOutOfHoursElectricityUsage:ten_year_saving_£_high: 200294.5226764167
+AlertOutOfHoursElectricityUsage:payback_years: 
+AlertOutOfHoursElectricityUsage:average_payback_years: 0.0
+AlertOutOfHoursElectricityUsage:capital_cost: 
+AlertOutOfHoursElectricityUsage:average_capital_cost: 0.0
+AlertOutOfHoursElectricityUsage:timescale: last year
+AlertOutOfHoursElectricityUsage:time_of_year_relevance: 5.0
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:Holiday:kWh: 71847.09999999999
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:Holiday:Percent: 0.15371704310498283
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:Holiday:£: 10923.360925760206
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:Holiday:co2: 13600.881345310327
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:Weekend:kWh: 42095.399999999994
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:Weekend:Percent: 0.09006320945899687
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:Weekend:£: 6400.025157789893
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:Weekend:co2: 7968.791232817696
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:School Day Open:kWh: 172067.6333333333
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:School Day Open:Percent: 0.36813911501052066
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:School Day Open:£: 26160.511176392192
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:School Day Open:co2: 32572.942600815208
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:School Day Closed:kWh: 181388.2666666666
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:School Day Closed:Percent: 0.3880806324254996
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:School Day Closed:£: 27577.58496164826
+AlertOutOfHoursElectricityUsage:AlertOutOfHoursElectricityUsage:School Day Closed:co2: 34337.36772068519

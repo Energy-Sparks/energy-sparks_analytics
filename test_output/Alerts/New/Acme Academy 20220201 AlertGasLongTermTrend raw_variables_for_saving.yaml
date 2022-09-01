@@ -1,0 +1,57 @@
+---
+AlertGasLongTermTrend:this_year_£: 18969.98667000001
+AlertGasLongTermTrend:last_year_£: 19531.031132521293
+AlertGasLongTermTrend:last_year_£_temp_adj: 18873.55443890018
+AlertGasLongTermTrend:year_change_£: -561.044462521284
+AlertGasLongTermTrend:year_change_£_temp_adj: 96.43223109982864
+AlertGasLongTermTrend:percent_change_£: -0.028725798382814714
+AlertGasLongTermTrend:percent_change_£_temp_adj: 0.004937385560727436
+AlertGasLongTermTrend:this_year_co2: 132789.90669
+AlertGasLongTermTrend:last_year_co2: 136717.2179276491
+AlertGasLongTermTrend:last_year_co2_temp_adj: 132114.8810723013
+AlertGasLongTermTrend:year_change_co2: -3927.31123764909
+AlertGasLongTermTrend:year_change_co2_temp_adj: 675.0256176987023
+AlertGasLongTermTrend:percent_change_co2: -0.02872579838281545
+AlertGasLongTermTrend:percent_change_co2_temp_adj: -5.818018064318924
+AlertGasLongTermTrend:summary: "£96pa increase since last year, +0.49%"
+AlertGasLongTermTrend:prefix_1: up
+AlertGasLongTermTrend:prefix_2: increase
+AlertGasLongTermTrend:degreeday_adjustment: 0.9663368160564578
+AlertGasLongTermTrend:degreedays_this_year: 2194.4275000000007
+AlertGasLongTermTrend:degreedays_last_year: 2270.872291666669
+AlertGasLongTermTrend:relevance: :relevant
+AlertGasLongTermTrend:analysis_date: 2022-02-01
+AlertGasLongTermTrend:status: 
+AlertGasLongTermTrend:rating: 5.8
+AlertGasLongTermTrend:term: 
+AlertGasLongTermTrend:bookmark_url: 
+AlertGasLongTermTrend:max_asofdate: 2022-07-12
+AlertGasLongTermTrend:pupils: 961
+AlertGasLongTermTrend:floor_area: 5932.0
+AlertGasLongTermTrend:school_type: :secondary
+AlertGasLongTermTrend:school_name: Acme Academy
+AlertGasLongTermTrend:school_activation_date: 
+AlertGasLongTermTrend:school_creation_date: 2020-10-08
+AlertGasLongTermTrend:urn: 136770
+AlertGasLongTermTrend:one_year_saving_£: !ruby/range
+  begin: -561.044462521284
+  end: -561.044462521284
+  excl: false
+AlertGasLongTermTrend:one_year_saving_£_low: -561.044462521284
+AlertGasLongTermTrend:one_year_saving_£_high: -561.044462521284
+AlertGasLongTermTrend:one_year_saving_co2: -3927.31123764909
+AlertGasLongTermTrend:ten_year_saving_co2: -39273.1123764909
+AlertGasLongTermTrend:average_one_year_saving_£: -561.044462521284
+AlertGasLongTermTrend:average_ten_year_saving_£: -5610.44462521284
+AlertGasLongTermTrend:ten_year_saving_£: !ruby/range
+  begin: -5610.44462521284
+  end: -5610.44462521284
+  excl: false
+AlertGasLongTermTrend:ten_year_saving_£_low: -5610.44462521284
+AlertGasLongTermTrend:ten_year_saving_£_high: -5610.44462521284
+AlertGasLongTermTrend:payback_years: 
+AlertGasLongTermTrend:average_payback_years: -0.0
+AlertGasLongTermTrend:capital_cost: 
+AlertGasLongTermTrend:average_capital_cost: 0.0
+AlertGasLongTermTrend:timescale: last 2 years
+AlertGasLongTermTrend:time_of_year_relevance: 5.0

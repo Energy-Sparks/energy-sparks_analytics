@@ -1,0 +1,1029 @@
+---
+- :type: :html
+  :content: "\n                    <title>CSS Accordion</title>\n\n                    <style>\n\n
+    \                     input {\n                          display: none;\n                      }\n\n
+    \                     label {\n                          display: block;    \n
+    \                         padding: 8px 22px;\n                          margin:
+    0 0 1px 0;\n                          cursor: pointer;\n                          background:
+    #6AAB95;\n                          border-radius: 3px;\n                          color:
+    #FFF;\n                          transition: ease .5s;\n                      }\n\n
+    \                     label:hover {\n                          background: #4E8774;\n
+    \                     }\n\n                      .content {\n                          background:
+    #FFFFFF;\n                          padding: 10px 25px;\n                          border:
+    1px solid #A7A7A7;\n                          margin: 0 0 1px 0;\n                          border-radius:
+    3px;\n                      }\n\n                      input + label + .content
+    {\n                          display: none;\n                      }\n\n                      input:checked
+    + label + .content {\n                          display: block;\n                      }\n\n
+    \                     .split-para      {\n                        display:block;margin:10px;\n
+    \                     }\n\n                      .split-para span {\n                        display:block;float:right;width:15%;margin-left:10px;\n
+    \                     }\n                      \n                      * {\n                        transition:
+    all .2s ease;\n                      }\n                      \n                      .extra-info
+    {\n                        display: none;\n                        line-height:
+    30px;\n                        font-size: 12px;\n                        position:
+    absolute;\n                        top: 0;\n                        left: 50px;\n
+    \                     }\n                      \n                      .info:hover
+    .extra-info {\n                        display: block;\n                      }\n
+    \                     \n                      .info {\n                        font-size:
+    20px;\n                        padding-left: 5px;\n                        width:
+    20px;\n                        border-radius: 15px;\n                      }\n
+    \                     \n                      .info:hover {\n                        background-color:
+    white;\n                        padding: 0 0 0 5px;\n                        width:
+    315px;\n                        text-align: left !important;\n                      }\n\n
+    \                   </style>\n                "
+- :type: :html
+  :content: "\n      <input type=\"checkbox\" id=\"accordionindex1\" />\n      <label
+    for=\"accordionindex1\"><div class=\"split-para\">Total: <span class='float-right'><span>&pound;74,306
+    (12 months)</span></span></div></label>\n\n      <div class=\"content\">\n    "
+- :type: :html
+  :content: "\n                <p>\n                  Energy Sparks currently doesn't
+    have a complete record of your real tariffs\n                  and is using default
+    tariffs between 14-07-2020 and 13-07-2022,\n                  which means your
+    billing won't be accurate. To edit your tariffs go to the\n                  'Manage
+    School' drop down menu above and select 'Manage tariffs'.\n                  If
+    you would like to help us setup your billing correctly,\n                  please
+    get in touch by mailing\n                  <a href=\"mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20Acme
+    Academy\">mailto:hello@energysparks.uk</a>.\n                </p>\n              "
+- :type: :html
+  :content: "\n      <h2>Comparison of last 2 years costs for this electricity meter</h2>\n
+    \     <p>\n        This first chart compares your monthly consumption over the
+    last 2 years\n      </p>\n    "
+- :type: :chart_name
+  :content: :electricity_cost_comparison_last_2_years_accounting
+  :mpan_mprn: 90000000136770
+- :type: :html
+  :content: "\n      This year this meter consumed 470,000 kWh\n      which cost &pound;74,000,\n
+    \     compared with 420,000 kWh / &pound;67,000\n      during the previous year.\n
+    \     This is\n      \n      an increase on last year of &pound;6,700\n    ,\n
+    \     and\n      \n      an increase on last year of 44,000 kWh\n    \n      in
+    energy consumption.\n    "
+- :type: :html
+  :content: "\n      <h2>Your last year's electricity bill components</h2>\n      <p>\n
+    \     Last year's bill components were as follows:\n      </p>\n    "
+- :type: :chart_name
+  :content: :electricity_cost_1_year_accounting_breakdown
+  :mpan_mprn: 90000000136770
+- :type: :html
+  :content: 'This is the same information in tabular form:'
+- :type: :html
+  :content: "\n    \n      <style>\n        .table_wrapper{\n            display:
+    block;\n            overflow-x: auto;\n            white-space: nowrap;\n        }\n
+    \     </style>\n      <div class=\"table_wrapper\">\n    \n    <table class=\"table
+    table-striped table-sm\">\n      \n        \n        <thead>\n          \n          <tr
+    class=\"thead-dark\">\n            \n              <th scope=\"col\" class=\"text-center\"
+    > Month </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Flat rate <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"The charge per kWh of consumption for the whole day\"></i>\n     </th>\n
+    \           \n              <th scope=\"col\" class=\"text-center\" > \n      00:30
+    to 07:00 <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\" \n      This is the charge for electricity consumed\n      between 00:30
+    and 07:30 per kWh.\n    \"></i>\n     </th>\n            \n              <th scope=\"col\"
+    class=\"text-center\" > \n      07:30 to 00:00 <i class=\"fas fa-info-circle\"
+    data-toggle=\"tooltip\" data-placement=\"top\" title=\" \n      This is the charge
+    for electricity consumed\n      between 07:30 and 00:30 per kWh.\n    \"></i>\n
+    \    </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Climate change levy (2021-22) <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Climate Change Levy: based on your carbon emissions
+    (per kWh of consumption).\n      If you reduce your consumption your CCL will
+    reduce.\"></i>\n     </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Duos green <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Distributed use of system charge: - charge per kWh of usage during these
+    times:  weekdays: 00:00 – 08:00 & 22:00 – 24:00 weekends: all day. To reduce,
+    reduce the schools usage during these times\"></i>\n     </th>\n            \n
+    \             <th scope=\"col\" class=\"text-center\" > \n      Duos amber <i
+    class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Distributed
+    use of system charge: - charge per kWh of usage during these times:  weekdays:
+    08:00 – 16:00 & 19:30 – 22:00 . To reduce, reduce the schools usage during these
+    times\"></i>\n     </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Duos red <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Distributed use of system charge: - charge per kWh of usage during these
+    times:  weekdays: 16:00 – 19:30 . To reduce, reduce the schools usage during these
+    times\"></i>\n     </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Tnuos <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"\n        Transmission Network Use Of System Charge: based on the schools
+    peak consumption on\n        winter weekdays between 17:00 and 19:30 - to reduce
+    make sure as many appliances\n        as possible are turned off during the winter
+    when the school closes for the day.\n      \"></i>\n     </th>\n            \n
+    \             <th scope=\"col\" class=\"text-center\" > \n      Excess availability
+    charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"\n        A 'fine' for going over your 'Agreed Availability Limit' in
+    a month.\n        If you are being 'fined' for more than a few months a year its
+    generally\n        cheaper to ask your energy supplier to increase your 'Agreed
+    Availability Limit'.\n      \"></i>\n     </th>\n            \n              <th
+    scope=\"col\" class=\"text-center\" > \n      Agreed availability charge <i class=\"fas
+    fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"\n        A
+    charge for the cabling to provide an agreed maximum amount of power in KVA\n        of
+    electricity to the school. This can often be reduced via discussions with\n        your
+    energy supplier.\n      \"></i>\n     </th>\n            \n              <th scope=\"col\"
+    class=\"text-center\" > \n      Fixed charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Fixed fee for your energy supply.\"></i>\n     </th>\n
+    \           \n              <th scope=\"col\" class=\"text-center\" > \n      Standing
+    charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Fixed fee for your energy supply.\"></i>\n     </th>\n            \n              <th
+    scope=\"col\" class=\"text-center\" > \n      Site fee <i class=\"fas fa-info-circle\"
+    data-toggle=\"tooltip\" data-placement=\"top\" title=\"Miscellaneous fixed fee.\"></i>\n
+    \    </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Data collection dcda agent charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"\n        The cost of collecting your half hourly
+    meter readings twice a day.\n        Energy Sparks uses this half hourly data
+    to analyse your energy consumption.\n      \"></i>\n     </th>\n            \n
+    \             <th scope=\"col\" class=\"text-center\" > Vat@5% </th>\n            \n
+    \             <th scope=\"col\" class=\"text-center\" > Variance versus last year
+    </th>\n            \n              <th scope=\"col\" class=\"text-center\" > Total
+    </th>\n            \n          </tr>\n        </thead>\n      \n      <tbody>\n
+    \       \n          <tr>\n            \n              \n    <td>Jul 2021 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;715 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;455 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;1,993 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;173 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;100 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;156 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;47 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;299 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;114 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;45 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;19 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;31 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;16 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;171 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;676 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;4,335 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Aug 2021 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;476
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;336
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,463
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;127
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;81
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;99
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;42
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;162
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;20
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;19
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;31
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;2
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;16
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;121
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;11
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,039
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Sep 2021 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,237 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;647 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;3,202 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;269 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;136 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;264 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;88 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;368 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;161 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;45 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;18 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;30 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;2 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;15 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;261 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;43 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;6,744 </td>\n  \n            \n          </tr>\n        \n
+    \         <tr>\n            \n              \n    <td>Oct 2021 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;1,203 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;627 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;3,130 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;263 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;140 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;238 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;101 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;398 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;181 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;45 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;19 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;31 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;2 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;16 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;258 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;59 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;6,652 </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>Nov
+    2021 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,791
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;555
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;4,094
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;318
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;122
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;342
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;153
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;484
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;240
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;18
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;30
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;2
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;15
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;319
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,134
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;8,528
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Dec 2021 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,519 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;462 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;2,670 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;217 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;103 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;212 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;90 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;440 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;210 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;45 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;19 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;31 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;2 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;16 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;224 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">-&pound;317 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;6,260 </td>\n  \n            \n          </tr>\n        \n
+    \         <tr>\n            \n              \n    <td>Jan 2022 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;1,996 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;583 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;3,690 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;295 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;128 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;312 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;111 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;463 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;225 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;45 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;19 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;31 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;2 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;16 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;294 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;3,244 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;8,208 </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>Feb
+    2022 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,475
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;483
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,124
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;249
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;109
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;254
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;106
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;433
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;205
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;17
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;28
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;14
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;252
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;2,853
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;6,794
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Mar 2022 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,674 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;601 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;3,790 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;303 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;126 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;325 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;121 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;490 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;244 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;45 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;19 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;31 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;2 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;16 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;304 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,438 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;8,089 </td>\n  \n            \n          </tr>\n        \n
+    \         <tr>\n            \n              \n    <td>Apr 2022 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;5,156 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;60
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">-&pound;817 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;5,216 </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>May
+    2022 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;5,340
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;62 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">-&pound;716
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;5,402
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Jun 2022 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;4,789 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;60 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">-&pound;319 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;4,849 </td>\n  \n            \n          </tr>\n
+    \       \n          <tr>\n            \n              \n    <td>Jul 2022 (partial)
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;2,149
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;26 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;2,175
+    </td>\n  \n            \n          </tr>\n        \n      </tbody>\n      \n        <tr
+    class=\"table-success\">\n        \n          <th> Total (except Jul 2022 (partial))
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;27,372
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;4,750
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;27,157
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;2,214
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;1,046
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;2,202
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;858
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;3,537
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;1,600
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;405
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;164
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;456
+    </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;14 </th>\n
+    \       \n          <th scope=\"col\" class=\"text-right\"> &pound;137 </th>\n
+    \       \n          <th scope=\"col\" class=\"text-right\"> &pound;2,204 </th>\n
+    \       \n          <th scope=\"col\" class=\"text-right\"> &pound;7,288 </th>\n
+    \       \n          <th scope=\"col\" class=\"text-right\"> &pound;74,115 </th>\n
+    \       \n        </tr>\n      \n    </table>\n    \n      </div>\n    \n  "
+- :type: :html
+  :content: "\n      <p>\n        Last year's bill components were broken down as
+    follows:\n      </p>\n    "
+- :type: :chart_name
+  :content: :pie_chart_1_year_accounting_breakdown
+  :mpan_mprn: 90000000136770
+- :type: :html
+  :content: "\n      </div>\n    "
+- :type: :html
+  :content: "\n      <input type=\"checkbox\" id=\"accordionindex2\" />\n      <label
+    for=\"accordionindex2\"><div class=\"split-para\">Meter 1591058886735 Old building?:
+    <span class='float-right'><span>&pound;15,398 (12 months)</span></span></div></label>\n\n
+    \     <div class=\"content\">\n    "
+- :type: :html
+  :content: "\n                <p>\n                  Energy Sparks currently doesn't
+    have a complete record of your real tariffs\n                  and is using default
+    tariffs between 14-07-2020 and 13-07-2022,\n                  which means your
+    billing won't be accurate. To edit your tariffs go to the\n                  'Manage
+    School' drop down menu above and select 'Manage tariffs'.\n                  If
+    you would like to help us setup your billing correctly,\n                  please
+    get in touch by mailing\n                  <a href=\"mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20Acme
+    Academy\">mailto:hello@energysparks.uk</a>.\n                </p>\n              "
+- :type: :html
+  :content: "\n      <h2>Comparison of last 2 years costs for this electricity meter</h2>\n
+    \     <p>\n        This first chart compares your monthly consumption over the
+    last 2 years\n      </p>\n    "
+- :type: :chart_name
+  :content: :electricity_cost_comparison_last_2_years_accounting
+  :mpan_mprn: 1591058886735
+- :type: :html
+  :content: "\n      This year this meter consumed 100,000 kWh\n      which cost &pound;15,000,\n
+    \     compared with 91,000 kWh / &pound;14,000\n      during the previous year.\n
+    \     This is\n      \n      an increase on last year of &pound;1,400\n    ,\n
+    \     and\n      \n      an increase on last year of 9,000 kWh\n    \n      in
+    energy consumption.\n    "
+- :type: :html
+  :content: "\n      <h2>Your last year's electricity bill components</h2>\n      <p>\n
+    \     Last year's bill components were as follows:\n      </p>\n    "
+- :type: :chart_name
+  :content: :electricity_cost_1_year_accounting_breakdown
+  :mpan_mprn: 1591058886735
+- :type: :html
+  :content: 'This is the same information in tabular form:'
+- :type: :html
+  :content: "\n    \n      <style>\n        .table_wrapper{\n            display:
+    block;\n            overflow-x: auto;\n            white-space: nowrap;\n        }\n
+    \     </style>\n      <div class=\"table_wrapper\">\n    \n    <table class=\"table
+    table-striped table-sm\">\n      \n        \n        <thead>\n          \n          <tr
+    class=\"thead-dark\">\n            \n              <th scope=\"col\" class=\"text-center\"
+    > Month </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Flat rate <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"The charge per kWh of consumption for the whole day\"></i>\n     </th>\n
+    \           \n              <th scope=\"col\" class=\"text-center\" > \n      Standing
+    charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Fixed fee for your energy supply.\"></i>\n     </th>\n            \n              <th
+    scope=\"col\" class=\"text-center\" > Variance versus last year </th>\n            \n
+    \             <th scope=\"col\" class=\"text-center\" > Total </th>\n            \n
+    \         </tr>\n        </thead>\n      \n      <tbody>\n        \n          <tr>\n
+    \           \n              \n    <td>Jul 2021 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;715 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;31 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;196 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;746 </td>\n  \n            \n          </tr>\n
+    \       \n          <tr>\n            \n              \n    <td>Aug 2021 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;476 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;31 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">-&pound;40 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;507 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Sep 2021 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,237
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;30
+    </td>\n  \n            \n              \n    <td class=\"text-right\">-&pound;10
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,267
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Oct 2021 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,203 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;31 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">-&pound;70 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,234 </td>\n  \n            \n          </tr>\n        \n
+    \         <tr>\n            \n              \n    <td>Nov 2021 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;1,791 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;30 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;219 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;1,821 </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>Dec
+    2021 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,519
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;31
+    </td>\n  \n            \n              \n    <td class=\"text-right\">-&pound;54
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,550
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Jan 2022 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,996 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;31 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;869 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;2,027 </td>\n  \n            \n          </tr>\n        \n
+    \         <tr>\n            \n              \n    <td>Feb 2022 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;1,475 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;28 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;640 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;1,503 </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>Mar
+    2022 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,674
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;31
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;283
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,705
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Apr 2022 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,030 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;30 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">-&pound;248 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;1,060 </td>\n  \n            \n          </tr>\n        \n
+    \         <tr>\n            \n              \n    <td>May 2022 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;1,019 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;31 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">-&pound;229 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;1,050 </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>Jun
+    2022 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;854
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;30
+    </td>\n  \n            \n              \n    <td class=\"text-right\">-&pound;29
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;884
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Jul 2022 (partial) </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;395 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;13 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\"> </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;408 </td>\n  \n            \n          </tr>\n        \n
+    \     </tbody>\n      \n        <tr class=\"table-success\">\n        \n          <th>
+    Total (except Jul 2022 (partial)) </th>\n        \n          <th scope=\"col\"
+    class=\"text-right\"> &pound;14,989 </th>\n        \n          <th scope=\"col\"
+    class=\"text-right\"> &pound;365 </th>\n        \n          <th scope=\"col\"
+    class=\"text-right\"> &pound;1,527 </th>\n        \n          <th scope=\"col\"
+    class=\"text-right\"> &pound;15,354 </th>\n        \n        </tr>\n      \n    </table>\n
+    \   \n      </div>\n    \n  "
+- :type: :html
+  :content: "\n      <p>\n        Last year's bill components were broken down as
+    follows:\n      </p>\n    "
+- :type: :chart_name
+  :content: :pie_chart_1_year_accounting_breakdown
+  :mpan_mprn: 1591058886735
+- :type: :html
+  :content: "<h1>Your tariffs</h1>"
+- :type: :html
+  :content: "\n      <h3>\n        Electricity\n        meter\n        MPAN\n        1591058886735
+    (Old building?):\n      </h3>\n    \n      <p>\n        <hr>\n        System Wide
+    Electricity Accounting Tariff:\n        \n      01 Jan 2000 to date\n    \n        \n
+    \        <b>- default example tariff </b>\n        , applied between 14 Jul 2020
+    and 13 Jul 2022\n      </p>\n      <p>\n        \n    \n    <table class=\"table
+    table-striped table-sm\">\n      \n        \n        <thead>\n          \n          <tr
+    class=\"thead-dark\">\n            \n              <th scope=\"col\" class=\"text-center\"
+    > Tariff type </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > Rate </th>\n            \n          </tr>\n        </thead>\n      \n      <tbody>\n
+    \       \n          <tr>\n            \n              \n    <td>Cost per kWh </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">15p/kwh </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>\n      Standing Charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Fixed fee for your energy supply.\"></i>\n     </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;1/day </td>\n
+    \ \n            \n          </tr>\n        \n      </tbody>\n      \n    </table>\n
+    \   \n  \n      </p>\n    "
+- :type: :html
+  :content: "\n      </div>\n    "
+- :type: :html
+  :content: "\n      <input type=\"checkbox\" id=\"accordionindex3\" />\n      <label
+    for=\"accordionindex3\"><div class=\"split-para\">Meter 1580001320420 New building:
+    <span class='float-right'><span>&pound;58,908 (12 months)</span></span></div></label>\n\n
+    \     <div class=\"content\">\n    "
+- :type: :html
+  :content: "\n                <p>\n                  Energy Sparks currently doesn't
+    have a complete record of your real tariffs\n                  and is using default
+    tariffs between 01-04-2022 and 13-07-2022,\n                  which means your
+    billing won't be accurate. To edit your tariffs go to the\n                  'Manage
+    School' drop down menu above and select 'Manage tariffs'.\n                  If
+    you would like to help us setup your billing correctly,\n                  please
+    get in touch by mailing\n                  <a href=\"mailto:hello@energysparks.uk?subject=Meter%20tariff%20information%20for%20Acme
+    Academy\">mailto:hello@energysparks.uk</a>.\n                </p>\n              "
+- :type: :html
+  :content: "\n      <h2>Comparison of last 2 years costs for this electricity meter</h2>\n
+    \     <p>\n        This first chart compares your monthly consumption over the
+    last 2 years\n      </p>\n    "
+- :type: :chart_name
+  :content: :electricity_cost_comparison_last_2_years_accounting
+  :mpan_mprn: 1580001320420
+- :type: :html
+  :content: "\n      This year this meter consumed 370,000 kWh\n      which cost &pound;59,000,\n
+    \     compared with 330,000 kWh / &pound;53,000\n      during the previous year.\n
+    \     This is\n      \n      an increase on last year of &pound;5,400\n    ,\n
+    \     and\n      \n      an increase on last year of 35,000 kWh\n    \n      in
+    energy consumption.\n    "
+- :type: :html
+  :content: "\n      <h2>Your last year's electricity bill components</h2>\n      <p>\n
+    \     Last year's bill components were as follows:\n      </p>\n    "
+- :type: :chart_name
+  :content: :electricity_cost_1_year_accounting_breakdown
+  :mpan_mprn: 1580001320420
+- :type: :html
+  :content: 'This is the same information in tabular form:'
+- :type: :html
+  :content: "\n    \n      <style>\n        .table_wrapper{\n            display:
+    block;\n            overflow-x: auto;\n            white-space: nowrap;\n        }\n
+    \     </style>\n      <div class=\"table_wrapper\">\n    \n    <table class=\"table
+    table-striped table-sm\">\n      \n        \n        <thead>\n          \n          <tr
+    class=\"thead-dark\">\n            \n              <th scope=\"col\" class=\"text-center\"
+    > Month </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Flat rate <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"The charge per kWh of consumption for the whole day\"></i>\n     </th>\n
+    \           \n              <th scope=\"col\" class=\"text-center\" > \n      07:30
+    to 00:00 <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\" \n      This is the charge for electricity consumed\n      between 07:30
+    and 00:30 per kWh.\n    \"></i>\n     </th>\n            \n              <th scope=\"col\"
+    class=\"text-center\" > \n      00:30 to 07:00 <i class=\"fas fa-info-circle\"
+    data-toggle=\"tooltip\" data-placement=\"top\" title=\" \n      This is the charge
+    for electricity consumed\n      between 00:30 and 07:30 per kWh.\n    \"></i>\n
+    \    </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Climate change levy (2021-22) <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Climate Change Levy: based on your carbon emissions
+    (per kWh of consumption).\n      If you reduce your consumption your CCL will
+    reduce.\"></i>\n     </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Duos green <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Distributed use of system charge: - charge per kWh of usage during these
+    times:  weekdays: 00:00 – 08:00 & 22:00 – 24:00 weekends: all day. To reduce,
+    reduce the schools usage during these times\"></i>\n     </th>\n            \n
+    \             <th scope=\"col\" class=\"text-center\" > \n      Duos amber <i
+    class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Distributed
+    use of system charge: - charge per kWh of usage during these times:  weekdays:
+    08:00 – 16:00 & 19:30 – 22:00 . To reduce, reduce the schools usage during these
+    times\"></i>\n     </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Duos red <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Distributed use of system charge: - charge per kWh of usage during these
+    times:  weekdays: 16:00 – 19:30 . To reduce, reduce the schools usage during these
+    times\"></i>\n     </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Tnuos <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"\n        Transmission Network Use Of System Charge: based on the schools
+    peak consumption on\n        winter weekdays between 17:00 and 19:30 - to reduce
+    make sure as many appliances\n        as possible are turned off during the winter
+    when the school closes for the day.\n      \"></i>\n     </th>\n            \n
+    \             <th scope=\"col\" class=\"text-center\" > \n      Agreed availability
+    charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"\n        A charge for the cabling to provide an agreed maximum amount
+    of power in KVA\n        of electricity to the school. This can often be reduced
+    via discussions with\n        your energy supplier.\n      \"></i>\n     </th>\n
+    \           \n              <th scope=\"col\" class=\"text-center\" > \n      Excess
+    availability charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"\n        A 'fine' for going over your 'Agreed Availability Limit' in
+    a month.\n        If you are being 'fined' for more than a few months a year its
+    generally\n        cheaper to ask your energy supplier to increase your 'Agreed
+    Availability Limit'.\n      \"></i>\n     </th>\n            \n              <th
+    scope=\"col\" class=\"text-center\" > \n      Fixed charge <i class=\"fas fa-info-circle\"
+    data-toggle=\"tooltip\" data-placement=\"top\" title=\"Fixed fee for your energy
+    supply.\"></i>\n     </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > \n      Standing charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Fixed fee for your energy supply.\"></i>\n     </th>\n
+    \           \n              <th scope=\"col\" class=\"text-center\" > \n      Site
+    fee <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Miscellaneous fixed fee.\"></i>\n     </th>\n            \n              <th
+    scope=\"col\" class=\"text-center\" > \n      Data collection dcda agent charge
+    <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"\n        The cost of collecting your half hourly meter readings twice
+    a day.\n        Energy Sparks uses this half hourly data to analyse your energy
+    consumption.\n      \"></i>\n     </th>\n            \n              <th scope=\"col\"
+    class=\"text-center\" > Vat@5% </th>\n            \n              <th scope=\"col\"
+    class=\"text-center\" > Variance versus last year </th>\n            \n              <th
+    scope=\"col\" class=\"text-center\" > Total </th>\n            \n          </tr>\n
+    \       </thead>\n      \n      <tbody>\n        \n          <tr>\n            \n
+    \             \n    <td>Jul 2021 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,993
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;455
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;173
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;100
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;156
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;47
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;299
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;114
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;19
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;16 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;171 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;479 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;3,588 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Aug 2021 </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1,463
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;336
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;127
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;81
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;99
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;42
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;162
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;20
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;19
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;16 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;121 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;52 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2,532 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Sep 2021 </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,202
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;647
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;269
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;136
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;264
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;88
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;368
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;161
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;18
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;15 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;261 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;53 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;5,477 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Oct 2021 </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,130
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;627
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;263
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;140
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;238
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;101
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;398
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;181
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;19
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;16 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;258 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;129 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;5,418 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Nov 2021 </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;4,094
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;555
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;318
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;122
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;342
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;153
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;484
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;240
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;18
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;15 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;319 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;915 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;6,706 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Dec 2021 </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;2,670
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;462
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;217
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;103
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;212
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;90
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;440
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;210
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;19
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;16 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;224 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">-&pound;263 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;4,710 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Jan 2022 </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,690
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;583
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;295
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;128
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;312
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;111
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;463
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;225
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;19
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;16 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;294 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2,375 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;6,180 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Feb 2022 </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,124
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;483
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;249
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;109
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;254
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;106
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;433
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;205
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;17
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;1 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;14 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;252 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2,213 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;5,291 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Mar 2022 </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,790
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;601
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;303
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;126
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;325
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;121
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;490
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;45
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;244
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;19
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;2 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;16 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;304 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;1,155 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;6,384 </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>Apr 2022 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;4,127
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">&pound;30 </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">-&pound;569
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;4,157
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>May 2022 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">&pound;4,321 </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;31 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">-&pound;488 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;4,352 </td>\n  \n            \n          </tr>\n
+    \       \n          <tr>\n            \n              \n    <td>Jun 2022 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;3,935 </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;30 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">-&pound;290
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,965
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>Jul 2022 (partial) </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;1,755 </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">0p </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">0p </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0p </td>\n  \n            \n              \n    <td class=\"text-right\">0p
+    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;13
+    </td>\n  \n            \n              \n    <td class=\"text-right\">0p </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0p </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">0p </td>\n  \n            \n
+    \             \n    <td class=\"text-right\"> </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">&pound;1,768 </td>\n  \n            \n          </tr>\n
+    \       \n      </tbody>\n      \n        <tr class=\"table-success\">\n        \n
+    \         <th> Total (except Jul 2022 (partial)) </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;12,383 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;27,157 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;4,750 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;2,214 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;1,046 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;2,202 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;858 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;3,537 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;405 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;1,600 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;164 </th>\n        \n          <th
+    scope=\"col\" class=\"text-right\"> &pound;91 </th>\n        \n          <th scope=\"col\"
+    class=\"text-right\"> &pound;14 </th>\n        \n          <th scope=\"col\" class=\"text-right\">
+    &pound;137 </th>\n        \n          <th scope=\"col\" class=\"text-right\">
+    &pound;2,204 </th>\n        \n          <th scope=\"col\" class=\"text-right\">
+    &pound;5,762 </th>\n        \n          <th scope=\"col\" class=\"text-right\">
+    &pound;58,761 </th>\n        \n        </tr>\n      \n    </table>\n    \n      </div>\n
+    \   \n  "
+- :type: :html
+  :content: "\n      <p>\n        Last year's bill components were broken down as
+    follows:\n      </p>\n    "
+- :type: :chart_name
+  :content: :pie_chart_1_year_accounting_breakdown
+  :mpan_mprn: 1580001320420
+- :type: :html
+  :content: "<h1>Your tariffs</h1>"
+- :type: :html
+  :content: "\n      <h3>\n        Electricity\n        meter\n        MPAN\n        1580001320420
+    (New building):\n      </h3>\n    \n      <p>\n        <hr>\n        System Wide
+    Electricity Accounting Tariff:\n        \n      01 Jan 2000 to date\n    \n        \n
+    \        <b>- default example tariff </b>\n        , applied between 01 Apr 2022
+    and 13 Jul 2022\n      </p>\n      <p>\n        \n    \n    <table class=\"table
+    table-striped table-sm\">\n      \n        \n        <thead>\n          \n          <tr
+    class=\"thead-dark\">\n            \n              <th scope=\"col\" class=\"text-center\"
+    > Tariff type </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+    > Rate </th>\n            \n          </tr>\n        </thead>\n      \n      <tbody>\n
+    \       \n          <tr>\n            \n              \n    <td>Cost per kWh </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">15p/kwh </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>\n      Standing Charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Fixed fee for your energy supply.\"></i>\n     </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">&pound;1/day </td>\n
+    \ \n            \n          </tr>\n        \n      </tbody>\n      \n    </table>\n
+    \   \n  \n      </p>\n    \n      <p>\n        <hr>\n        Philips test:\n        \n
+    \     01 Apr 2020 to 31 Mar 2022\n    \n        \n        \n        , applied
+    between 14 Jul 2020 and 31 Mar 2022\n      </p>\n      <p>\n        \n    \n    <table
+    class=\"table table-striped table-sm\">\n      \n        \n        <thead>\n          \n
+    \         <tr class=\"thead-dark\">\n            \n              <th scope=\"col\"
+    class=\"text-center\" > Tariff type </th>\n            \n              <th scope=\"col\"
+    class=\"text-center\" > Rate </th>\n            \n          </tr>\n        </thead>\n
+    \     \n      <tbody>\n        \n          <tr>\n            \n              \n
+    \   <td>\n      00:30 to 07:00 <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\" \n      This is the charge for electricity consumed\n
+    \     between 00:30 and 07:30 per kWh.\n    \"></i>\n     </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">8p/kwh </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>\n
+    \     07:30 to 00:00 <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\" \n      This is the charge for electricity consumed\n      between 07:30
+    and 00:30 per kWh.\n    \"></i>\n     </td>\n  \n            \n              \n
+    \   <td class=\"text-right\">12p/kwh </td>\n  \n            \n          </tr>\n
+    \       \n          <tr>\n            \n              \n    <td>\n      Duos red
+    <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Distributed use of system charge: - charge per kWh of usage during these
+    times:  weekdays: 16:00 – 19:30 . To reduce, reduce the schools usage during these
+    times\"></i>\n     </td>\n  \n            \n              \n    <td class=\"text-right\">2.50p/kWh
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>\n      Duos amber <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Distributed use of system charge: - charge per
+    kWh of usage during these times:  weekdays: 08:00 – 16:00 & 19:30 – 22:00 . To
+    reduce, reduce the schools usage during these times\"></i>\n     </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">1.50p/kWh </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>\n
+    \     Duos green <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Distributed use of system charge: - charge per kWh of usage during these
+    times:  weekdays: 00:00 – 08:00 & 22:00 – 24:00 weekends: all day. To reduce,
+    reduce the schools usage during these times\"></i>\n     </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">1p/kWh </td>\n  \n            \n
+    \         </tr>\n        \n          <tr>\n            \n              \n    <td>\n
+    \     Tnuos charges <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"\n        Transmission Network Use Of System Charge: based on the schools
+    peak consumption on\n        winter weekdays between 17:00 and 19:30 - to reduce
+    make sure as many appliances\n        as possible are turned off during the winter
+    when the school closes for the day.\n      \"></i>\n     </td>\n  \n            \n
+    \             \n    <td class=\"text-right\">yes </td>\n  \n            \n          </tr>\n
+    \       \n          <tr>\n            \n              \n    <td>\n      Agreed
+    availability charge (45 kVA) <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"\n        A charge for the cabling to provide an
+    agreed maximum amount of power in KVA\n        of electricity to the school. This
+    can often be reduced via discussions with\n        your energy supplier.\n      \"></i>\n
+    \    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;1/kVA
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>\n      Excess availability charge (> 45 kVA) <i class=\"fas
+    fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"\n        A
+    'fine' for going over your 'Agreed Availability Limit' in a month.\n        If
+    you are being 'fined' for more than a few months a year its generally\n        cheaper
+    to ask your energy supplier to increase your 'Agreed Availability Limit'.\n      \"></i>\n
+    \    </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;2/kVA
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>\n      Data collection dcda agent charge <i class=\"fas
+    fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"\n        The
+    cost of collecting your half hourly meter readings twice a day.\n        Energy
+    Sparks uses this half hourly data to analyse your energy consumption.\n      \"></i>\n
+    \    </td>\n  \n            \n              \n    <td class=\"text-right\">50p/day
+    </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+    \             \n    <td>\n      Fixed charge <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Fixed fee for your energy supply.\"></i>\n     </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">60p/day </td>\n
+    \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>\n      Site Fee <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\"
+    data-placement=\"top\" title=\"Miscellaneous fixed fee.\"></i>\n     </td>\n  \n
+    \           \n              \n    <td class=\"text-right\">5p/day </td>\n  \n
+    \           \n          </tr>\n        \n          <tr>\n            \n              \n
+    \   <td>\n      Climate change levy (2020-21) <i class=\"fas fa-info-circle\"
+    data-toggle=\"tooltip\" data-placement=\"top\" title=\"Climate Change Levy: based
+    on your carbon emissions (per kWh of consumption).\n      If you reduce your consumption
+    your CCL will reduce.\"></i>\n     </td>\n  \n            \n              \n    <td
+    class=\"text-right\">0.811p/kWh </td>\n  \n            \n          </tr>\n        \n
+    \         <tr>\n            \n              \n    <td>\n      Climate change levy
+    (2022-23) <i class=\"fas fa-info-circle\" data-toggle=\"tooltip\" data-placement=\"top\"
+    title=\"Climate Change Levy: based on your carbon emissions (per kWh of consumption).\n
+    \     If you reduce your consumption your CCL will reduce.\"></i>\n     </td>\n
+    \ \n            \n              \n    <td class=\"text-right\">0.775p/kWh </td>\n
+    \ \n            \n          </tr>\n        \n      </tbody>\n      \n    </table>\n
+    \   \n  \n      </p>\n    "
+- :type: :html
+  :content: "\n      </div>\n    "
+- :type: :html
+  :content: "\n      <input type=\"checkbox\" id=\"accordionindex4\" />\n      <label
+    for=\"accordionindex4\"><div class=\"split-para\">How Energy Sparks calculates
+    energy costs<span></span></div></label>\n\n      <div class=\"content\">\n    "
+- :type: :html
+  :content: "\n    <p>\n      Energy Sparks calculates electricity and gas costs using
+    2 different\n      methods:\n    </p>\n    <p>\n      1. <strong>Economic Costs</strong>:\n
+    \   </p>\n      <ul>\n        <li>\n          this assumes a simple cost model,
+    with electricity costing 15p/kWh\n          and gas 3p/kWh\n        </li>\n        <li>\n
+    \         generally, this method is used when information is presented to\n          pupils
+    because it is easy to understand, and allows them to do simple maths\n          converting
+    between kWh and &#163;\n        </li>\n        <li>\n          we also use it
+    for economic forecasting, when doing cost benefit\n          analysis for suggested
+    improvements to your energy management, as it better\n          represents future
+    energy prices/tariffs than your current potentially\n          volatile tariffs
+    as these can change from year to year\n        </li>\n      </ul>\n    <p>\n      2.
+    <strong>Accounting Costs</strong>:\n    </p>\n        <ul>\n          <li>\n            These
+    represent your real energy costs and represent all the\n            different
+    types of standing charges applied to your account\n          </li>\n          <li>\n
+    \           To do this we need to know what these tariffs are, sometimes these\n
+    \           can be provided by all schools by a local authority, and sometimes
+    you will\n            need to provide us the information is not available from
+    the Local\n            Authority. MAT or Energy Supplier\n          </li>\n          <li>\n
+    \           We can use this more accurate tariff information to provide more\n
+    \           detailed advice on potential cost savings through tariff changes or
+    meter\n            consolidation\n          </li>\n        </ul>\n  "
+- :type: :html
+  :content: "\n      </div>\n    "

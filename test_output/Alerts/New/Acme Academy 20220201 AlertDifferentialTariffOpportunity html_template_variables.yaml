@@ -1,0 +1,37 @@
+---
+:total_potential_savings_£: "&pound;14,350"
+:total_potential_savings_percent: 20&percnt;
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: ''
+:rating: '0.0'
+:term: ''
+:bookmark_url: ''
+:max_asofdate: Wednesday 13 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m<sup>2</sup>
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "&pound;14,000"
+:one_year_saving_co2: 0 kg CO2
+:ten_year_saving_co2: 0 kg CO2
+:average_one_year_saving_£: "&pound;14,350"
+:average_ten_year_saving_£: "&pound;143,502"
+:ten_year_saving_£: "&pound;140,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: ''
+:average_capital_cost: 0p
+:timescale: year
+:time_of_year_relevance: '5.0'
+:differential_tariff_opportunity_table: |2
+
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr class="thead-dark">            <th scope="col"> MPAN </th>            <th scope="col"> Cost Estimate Differential Tariff(year) </th>            <th scope="col"> Cost Estimate Non-Differential Tariff(year) </th>            <th scope="col"> Saving(year) </th>            <th scope="col"> Current Tariff </th>            <th scope="col"> Recommendation </th>        </tr>
+        </thead>
+        <tbody>          <tr>              <td> 1591058886735 </td>              <td> &pound;12,534 </td>              <td> &pound;15,623 </td>              <td> &pound;3,089 </td>              <td> non-differential </td>              <td> consider changing tariff to a differential tariff </td>          </tr>          <tr>              <td> 1580001320420 </td>              <td> &pound;45,410 </td>              <td> &pound;56,672 </td>              <td> &pound;11,262 </td>              <td> non-differential </td>              <td> consider changing tariff to a differential tariff </td>          </tr>      </tbody>
+      </table>

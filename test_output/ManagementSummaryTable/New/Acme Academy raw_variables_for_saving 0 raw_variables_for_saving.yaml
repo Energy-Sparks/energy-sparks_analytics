@@ -1,0 +1,50 @@
+---
+ManagementSummaryTable:summary_data:
+  :electricity:
+    :start_date: 2019-01-13
+    :end_date: 2022-07-13
+    :year:
+      :recent: true
+      :kwh: 467398.4
+      :co2: 88492.63920000002
+      :£: 71060.41900000002
+      :savings_£: 38266.29400000002
+      :percent_change: 0.10419972726458673
+    :workweek:
+      :recent: false
+      :kwh: 7839.800000000001
+      :co2: 1445.5188
+      :£: 1175.9699999999998
+      :savings_£: n/a
+      :percent_change: n/a
+  :gas:
+    :start_date: 2018-09-01
+    :end_date: 2022-07-12
+    :year:
+      :recent: true
+      :kwh: 579906.7660000002
+      :co2: 121780.42086000001
+      :£: 17397.202979999995
+      :savings_£: 3160.4029799999953
+      :percent_change: -0.19331757844732467
+    :workweek:
+      :recent: false
+      :kwh: 2434.5359999999996
+      :co2: 511.2525599999999
+      :£: 73.03607999999997
+      :savings_£: n/a
+      :percent_change: n/a
+ManagementSummaryTable:ManagementSummaryTable:Electricity:Annual Use (kWh): 467398.4
+ManagementSummaryTable:ManagementSummaryTable:Electricity:Annual CO2 (kg): 88492.63920000002
+ManagementSummaryTable:ManagementSummaryTable:Electricity:Annual Cost: 71060.41900000002
+ManagementSummaryTable:ManagementSummaryTable:Electricity:Change from last year: 0.10419972726458673
+ManagementSummaryTable:ManagementSummaryTable:Electricity:Change in last 4 school weeks: no
+  recent data
+ManagementSummaryTable:ManagementSummaryTable:Electricity:Potential savings: 38266.29400000002
+ManagementSummaryTable:ManagementSummaryTable:Gas:Annual Use (kWh): 579906.7660000002
+ManagementSummaryTable:ManagementSummaryTable:Gas:Annual CO2 (kg): 121780.42086000001
+ManagementSummaryTable:ManagementSummaryTable:Gas:Annual Cost: 17397.202979999995
+ManagementSummaryTable:ManagementSummaryTable:Gas:Change from last year: -0.19331757844732467
+ManagementSummaryTable:ManagementSummaryTable:Gas:Change in last 4 school weeks: no
+  recent data
+ManagementSummaryTable:ManagementSummaryTable:Gas:Potential savings: 3160.4029799999953

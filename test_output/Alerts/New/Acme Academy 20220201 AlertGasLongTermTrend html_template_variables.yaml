@@ -1,0 +1,47 @@
+---
+:this_year_£: "&pound;19,000"
+:last_year_£: "&pound;20,000"
+:last_year_£_temp_adj: "&pound;19,000"
+:year_change_£: "-&pound;560"
+:year_change_£_temp_adj: "&pound;96"
+:percent_change_£: "-2.9%"
+:percent_change_£_temp_adj: "+0.49%"
+:this_year_co2: 130,000 kg CO2
+:last_year_co2: 140,000 kg CO2
+:last_year_co2_temp_adj: 130,000 kg CO2
+:year_change_co2: "-3,900 kg CO2"
+:year_change_co2_temp_adj: 680 kg CO2
+:percent_change_co2: "-2.9%"
+:percent_change_co2_temp_adj: "-580%"
+:summary: "£96pa increase since last year, +0.49%"
+:prefix_1: up
+:prefix_2: increase
+:degreeday_adjustment: '0.97'
+:degreedays_this_year: '2,200'
+:degreedays_last_year: '2,300'
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: ''
+:rating: '5.8'
+:term: ''
+:bookmark_url: ''
+:max_asofdate: Tuesday 12 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m<sup>2</sup>
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "-&pound;560"
+:one_year_saving_co2: "-3,900 kg CO2"
+:ten_year_saving_co2: "-39,000 kg CO2"
+:average_one_year_saving_£: "-&pound;560"
+:average_ten_year_saving_£: "-&pound;5,600"
+:ten_year_saving_£: "-&pound;5,600"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: ''
+:average_capital_cost: 0p
+:timescale: last 2 years
+:time_of_year_relevance: '5.0'

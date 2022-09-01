@@ -1,0 +1,95 @@
+---
+:theoretical_annual_hot_water_requirement_litres: 936,975 litres
+:theoretical_annual_hot_water_requirement_kwh: 27,000 kWh
+:avg_gas_per_pupil_£: "£2.20"
+:benchmark_existing_gas_efficiency: 39%
+:benchmark_gas_better_control_saving_£: "£590"
+:benchmark_point_of_use_electric_saving_£: "-£2,900"
+:electric_hot_water_saving_co2: 9,600 kg CO2
+:existing_gas_annual_kwh: 70,000 kWh
+:gas_better_control_annual_kwh: 50,000 kWh
+:point_of_use_electric_annual_kwh: 34,000 kWh
+:existing_gas_annual_£: "£2,100"
+:gas_better_control_annual_£: "£1,500"
+:point_of_use_electric_annual_£: "£5,000"
+:existing_gas_annual_co2: 15,000 kg CO2
+:gas_better_control_annual_co2: 11,000 kg CO2
+:point_of_use_electric_annual_co2: 5,000 kg CO2
+:existing_gas_efficiency: 39%
+:gas_better_control_efficiency: 55%
+:point_of_use_electric_efficiency: 81%
+:gas_better_control_saving_£: "£590"
+:point_of_use_electric_saving_£: "-£2,900"
+:gas_better_control_saving_£_percent: 28%
+:point_of_use_electric_saving_£_percent: "-140%"
+:gas_better_control_saving_co2: 4,200 kg CO2
+:point_of_use_electric_saving_co2: 9,600 kg CO2
+:gas_better_control_saving_co2_percent: 28%
+:point_of_use_electric_saving_co2_percent: 66%
+:existing_gas_capex: 0p
+:gas_better_control_capex: 0p
+:point_of_use_electric_capex: "£20,000"
+:gas_better_control_payback_years: 0 days
+:point_of_use_electric_payback_years: "-2432 days"
+:school_day_open_daily_kwh: 260 kWh
+:school_day_open_daily_£: "£7.70"
+:school_day_open_annual_kwh: 50,000 kWh
+:school_day_open_annual_£: "£1,500"
+:school_day_closed_daily_kwh: 32 kWh
+:school_day_closed_daily_£: 97p
+:school_day_closed_annual_kwh: 6,300 kWh
+:school_day_closed_annual_£: "£190"
+:weekend_daily_kwh: 4.3 kWh
+:weekend_daily_£: 13p
+:weekend_annual_kwh: 330 kWh
+:weekend_annual_£: "£10"
+:holiday_daily_kwh: 140 kWh
+:holiday_daily_£: "£4.30"
+:holiday_annual_kwh: 13,000 kWh
+:holiday_annual_£: "£390"
+:total_annual_kwh: 70,000 kWh
+:total_annual_£: "£2,100"
+:a: 5,800 kWh/day
+:b: "-340 kWh/day/C"
+:school_days_heating: 145 days
+:school_days_heating_adjective: poor
+:school_days_heating_rating_out_of_10: '2'
+:average_school_heating_days: '115'
+:non_school_days_heating: 30 days
+:non_school_days_heating_adjective: poor
+:non_school_days_heating_rating_out_of_10: '4'
+:average_non_school_day_heating_days: '24'
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: ''
+:rating: '6.2'
+:term: shortterm
+:bookmark_url: https://blog.energysparks.uk/alerts#HotWaterEfficiency
+:max_asofdate: Tuesday 12 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "-£2,900 to £590"
+:one_year_saving_co2: 9,600 kg CO2
+:ten_year_saving_co2: 96,000 kg CO2
+:average_one_year_saving_£: "-£1,200"
+:average_ten_year_saving_£: "-£12,000"
+:ten_year_saving_£: "-£29,000 to £5,900"
+:payback_years: ''
+:average_payback_years: "-4483 days"
+:capital_cost: "£9,600 to £19,000"
+:average_capital_cost: "£14,000"
+:timescale: year
+:time_of_year_relevance: '5.0'
+:one_year_saving_£_high: "-£2,900"
+:one_year_saving_£_low: "£590"
+:ten_year_saving_£_high: "-£29,000"
+:ten_year_saving_£_low: "£5,900"
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: "£9,600"
+:capital_cost_low: "£19,000"

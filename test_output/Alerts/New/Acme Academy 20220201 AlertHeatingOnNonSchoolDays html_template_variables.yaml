@@ -1,0 +1,54 @@
+---
+:number_of_non_heating_days_last_year: 133 days
+:average_number_of_non_heating_days_last_year: 24 days
+:exemplar_number_of_non_heating_days_last_year: 5 days
+:non_heating_day_adjective: bad
+:kwh_below_frost_on_unoccupied_days: 42,000 kWh
+:total_kwh_on_unoccupied_days: 87,000 kWh
+:below_frost_£: "&pound;1,300"
+:total_on_unoccupied_days_£: "&pound;2,600"
+:total_on_unoccupied_days_co2: 18,000 kg CO2
+:unoccupied_above_frost_£: "&pound;1,300"
+:unoccupied_above_frost_co2: 9,400 kg CO2
+:heating_on_off_chart: heating_on_off_by_week_heating_school_non_school_days_only
+:enough_data: :enough
+:a: 5,800 kWh/day
+:b: "-340 kWh/day/C"
+:school_days_heating: 145 days
+:school_days_heating_adjective: poor
+:school_days_heating_rating_out_of_10: '2'
+:average_school_heating_days: '115'
+:non_school_days_heating: 30 days
+:non_school_days_heating_adjective: poor
+:non_school_days_heating_rating_out_of_10: '4'
+:average_non_school_day_heating_days: '24'
+:non_heating_only: false
+:kitchen_only: false
+:hot_water_only: false
+:heating_only: false
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: bad
+:rating: '0'
+:term: longterm
+:bookmark_url: https://blog.energysparks.uk/alerts#HeatingOnSchoolDays
+:max_asofdate: Tuesday 12 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m<sup>2</sup>
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "&pound;1,300"
+:one_year_saving_co2: 9,400 kg CO2
+:ten_year_saving_co2: 94,000 kg CO2
+:average_one_year_saving_£: "&pound;1,300"
+:average_ten_year_saving_£: "&pound;13,000"
+:ten_year_saving_£: "&pound;13,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: ''
+:average_capital_cost: 0p
+:timescale: 1 year
+:time_of_year_relevance: '7.5'

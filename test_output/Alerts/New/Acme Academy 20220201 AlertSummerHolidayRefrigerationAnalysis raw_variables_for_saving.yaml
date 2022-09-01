@@ -1,0 +1,57 @@
+---
+AlertSummerHolidayRefrigerationAnalysis:annualised_reduction_£: 3178.9913043478227
+AlertSummerHolidayRefrigerationAnalysis:holiday_reduction_£: 383.19999999999965
+AlertSummerHolidayRefrigerationAnalysis:reduction_kw: -2.419323671497582
+AlertSummerHolidayRefrigerationAnalysis:reduction_rating: 10.0
+AlertSummerHolidayRefrigerationAnalysis:turn_off_rating: 10.0
+AlertSummerHolidayRefrigerationAnalysis:summary: You have the potential to save £3,200pa
+  from more efficient refrigeration
+AlertSummerHolidayRefrigerationAnalysis:relevance: :relevant
+AlertSummerHolidayRefrigerationAnalysis:analysis_date: 2022-02-01
+AlertSummerHolidayRefrigerationAnalysis:status: 
+AlertSummerHolidayRefrigerationAnalysis:rating: 10.0
+AlertSummerHolidayRefrigerationAnalysis:term: :longterm
+AlertSummerHolidayRefrigerationAnalysis:bookmark_url: https://blog.energysparks.uk/alerts#HeatingComingOnTooEarly
+AlertSummerHolidayRefrigerationAnalysis:max_asofdate: 2022-07-13
+AlertSummerHolidayRefrigerationAnalysis:pupils: 961
+AlertSummerHolidayRefrigerationAnalysis:floor_area: 5932.0
+AlertSummerHolidayRefrigerationAnalysis:school_type: :secondary
+AlertSummerHolidayRefrigerationAnalysis:school_name: Acme Academy
+AlertSummerHolidayRefrigerationAnalysis:school_activation_date: 
+AlertSummerHolidayRefrigerationAnalysis:school_creation_date: 2020-10-08
+AlertSummerHolidayRefrigerationAnalysis:urn: 136770
+AlertSummerHolidayRefrigerationAnalysis:one_year_saving_£: 
+AlertSummerHolidayRefrigerationAnalysis:one_year_saving_co2: 
+AlertSummerHolidayRefrigerationAnalysis:ten_year_saving_co2: 
+AlertSummerHolidayRefrigerationAnalysis:average_one_year_saving_£: 
+AlertSummerHolidayRefrigerationAnalysis:average_ten_year_saving_£: 
+AlertSummerHolidayRefrigerationAnalysis:ten_year_saving_£: 
+AlertSummerHolidayRefrigerationAnalysis:payback_years: 
+AlertSummerHolidayRefrigerationAnalysis:average_payback_years: 
+AlertSummerHolidayRefrigerationAnalysis:capital_cost: !ruby/range
+  begin: 0.0
+  end: 0.0
+  excl: false
+AlertSummerHolidayRefrigerationAnalysis:capital_cost_low: 0.0
+AlertSummerHolidayRefrigerationAnalysis:capital_cost_high: 0.0
+AlertSummerHolidayRefrigerationAnalysis:average_capital_cost: 
+AlertSummerHolidayRefrigerationAnalysis:timescale: at least one summer holiday
+AlertSummerHolidayRefrigerationAnalysis:time_of_year_relevance: 5.0
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2021:Baseload outside holiday (kW): 22.83333333333333
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2021:Baseload in summer holidays (kW): 20.419047619047625
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2021:Change in baseload (kW): -2.414285714285704
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2021:Annualised value of reduction: 3172.371428571415
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2021:Significant change?: Signifcant
+  reduction
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2020:Baseload outside holiday (kW): 23.900000000000002
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2020:Baseload in summer holidays (kW): 22.68095238095238
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2020:Change in baseload (kW): -1.2190476190476218
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2020:Annualised value of reduction: 1601.828571428575
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2020:Significant change?: Signifcant
+  reduction
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2019:Baseload outside holiday (kW): 27.133333333333336
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2019:Baseload in summer holidays (kW): 23.508695652173916
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2019:Change in baseload (kW): -3.6246376811594203
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2019:Annualised value of reduction: 4762.7739130434775
+AlertSummerHolidayRefrigerationAnalysis:AlertSummerHolidayRefrigerationAnalysis:Summer 2019:Significant change?: Signifcant
+  reduction

@@ -1,0 +1,51 @@
+---
+:regression_start_time: 1.2 time of day
+:optimum_start_sensitivity: 0.95 hours/C
+:regression_r2: '0.13'
+:average_start_time: 5.3 time of day
+:average_start_time_hh_mm: '05:15'
+:start_time_standard_devation: 1.4 standard deviation (hours)
+:a: 5,800 kWh/day
+:b: "-340 kWh/day/C"
+:school_days_heating: 145 days
+:school_days_heating_adjective: poor
+:school_days_heating_rating_out_of_10: '2'
+:average_school_heating_days: '115'
+:non_school_days_heating: 30 days
+:non_school_days_heating_adjective: poor
+:non_school_days_heating_rating_out_of_10: '4'
+:average_non_school_day_heating_days: '24'
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: ''
+:rating: '7.5'
+:term: longterm
+:bookmark_url: https://blog.energysparks.uk/alerts#HeatingComingOnTooEarly
+:max_asofdate: Tuesday 12 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: ''
+:one_year_saving_co2: ''
+:ten_year_saving_co2: ''
+:average_one_year_saving_£: ''
+:average_ten_year_saving_£: ''
+:ten_year_saving_£: ''
+:payback_years: ''
+:average_payback_years: ''
+:capital_cost: 0p
+:average_capital_cost: ''
+:timescale: last year
+:time_of_year_relevance: '7.5'
+:one_year_saving_£_high: 
+:one_year_saving_£_low: 
+:ten_year_saving_£_high: 
+:ten_year_saving_£_low: 
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: 0p
+:capital_cost_low: 0p

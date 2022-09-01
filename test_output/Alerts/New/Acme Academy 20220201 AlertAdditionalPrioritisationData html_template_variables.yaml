@@ -1,0 +1,19 @@
+---
+:pupils: '961'
+:floor_area: 5,900 m<sup>2</sup>
+:school_type: secondary
+:school_type_name: Secondary
+:school_name: Acme Academy
+:school_area: Bath
+:urn: '136770'
+:days_to_next_holiday: '18'
+:days_from_last_holiday: '29'
+:average_temperature_last_week: ''
+:average_forecast_temperature_next_week_deprecated: ''
+:annual_electricity_kwh: 450,000 kWh
+:annual_gas_kwh: 630,000 kWh
+:annual_storage_heater_kwh: 0 kWh
+:annual_electricity_£: 68,000 kWh
+:annual_gas_£: 19,000 kWh
+:annual_storage_heater_£: 0 kWh
+:degree_days_15_5C_domestic: '2,200'

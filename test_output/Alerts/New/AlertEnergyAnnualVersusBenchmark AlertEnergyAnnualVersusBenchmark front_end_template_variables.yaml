@@ -1,0 +1,480 @@
+---
+Overall annual energy:
+  :last_year_kwh:
+    :description: Last years energy consumption - kwh
+    :units:
+      :kwh: :electricity
+    :benchmark_code: klyr
+  :last_year_£:
+    :description: Last years energy consumption - £ including differential tariff
+    :units:
+      :£: :electricity
+    :benchmark_code: "£lyr"
+  :last_year_co2:
+    :description: Last years energy CO2 kg
+    :units: :co2
+    :benchmark_code: co2y
+  :last_year_co2_tonnes:
+    :description: Last years energy CO2 tonnes
+    :units: :co2t
+    :benchmark_code: co2t
+  :last_year_electricity_co2:
+    :description: Last years electricity CO2 kg
+    :units: :co2
+    :benchmark_code: co2e
+  :last_year_gas_co2:
+    :description: Last years gas CO2 kg
+    :units: :co2
+    :benchmark_code: co2g
+  :last_year_storage_heater_co2:
+    :description: Last years storage heater CO2 kg
+    :units: :co2
+    :benchmark_code: co2h
+  :last_year_solar_pv_co2:
+    :description: Last years solar CO2 kg
+    :units: :co2
+    :benchmark_code: co2s
+  :one_year_energy_per_pupil_kwh:
+    :description: Per pupil annual energy usage - kwh
+    :units: :kwh
+    :benchmark_code: kpup
+  :one_year_energy_per_pupil_£:
+    :description: Per pupil annual energy usage - £
+    :units: :£
+    :benchmark_code: "£pup"
+  :one_year_energy_per_pupil_co2:
+    :description: Per pupil annual energy usage - co2
+    :units: :co2
+    :benchmark_code: cpup
+  :one_year_energy_per_floor_area_kwh:
+    :description: Per floor area annual energy usage - kwh
+    :units: :kwh
+    :benchmark_code: kfla
+  :one_year_energy_per_floor_area_£:
+    :description: Per floor area annual energy usage - £
+    :units: :£
+    :benchmark_code: "£fla"
+  :one_year_energy_per_floor_area_co2:
+    :description: Per floor area annual energy usage - co2
+    :units: :co2
+    :benchmark_code: cfla
+  :percent_difference_from_average_per_pupil:
+    :description: Percent difference from average
+    :units: :relative_percent
+    :benchmark_code: pp%d
+  :percent_difference_adjective:
+    :description: 'Adjective relative to average: above, signifantly above, about'
+    :units: :string
+  :simple_percent_difference_adjective:
+    :description: 'Adjective relative to average: above, about, below'
+    :units: :string
+  :summary:
+    :description: 'Description: £spend/yr'
+    :units: :string
+  :trees_co2:
+    :description: Number of trees (40 years) equivalence of CO2
+    :units: :tree
+  :recent_fuel_types_for_debug:
+    :description: Debugging information - list of up to date fuel types
+    :units: :string
+  :activation_date:
+    :description: school activation date
+    :units: :date
+    :benchmark_code: sact
+  :solar_type:
+    :description: Solar type - metered or synthetic
+    :units: :string
+    :benchmark_code: solr
+  :current_year_electricity_kwh:
+    :description: current_year electricity in kwh
+    :units: :kwh
+    :benchmark_code: ke0
+  :previous_year_electricity_kwh:
+    :description: previous_year electricity in kwh
+    :units: :kwh
+    :benchmark_code: ken
+  :previous_year_electricity_kwh_relative_percent:
+    :description: previous_year electricity in kwh
+    :units: :kwh
+    :benchmark_code: kenp
+  :current_year_gas_kwh:
+    :description: current_year gas in kwh
+    :units: :kwh
+    :benchmark_code: kg0
+  :previous_year_gas_kwh:
+    :description: previous_year gas in kwh
+    :units: :kwh
+    :benchmark_code: kgn
+  :previous_year_gas_kwh_relative_percent:
+    :description: previous_year gas in kwh
+    :units: :kwh
+    :benchmark_code: kgnp
+  :current_year_storage_heaters_kwh:
+    :description: current_year storage_heaters in kwh
+    :units: :kwh
+    :benchmark_code: kh0
+  :previous_year_storage_heaters_kwh:
+    :description: previous_year storage_heaters in kwh
+    :units: :kwh
+    :benchmark_code: khn
+  :previous_year_storage_heaters_kwh_relative_percent:
+    :description: previous_year storage_heaters in kwh
+    :units: :kwh
+    :benchmark_code: khnp
+  :current_year_solar_pv_kwh:
+    :description: current_year solar_pv in kwh
+    :units: :kwh
+    :benchmark_code: ks0
+  :previous_year_solar_pv_kwh:
+    :description: previous_year solar_pv in kwh
+    :units: :kwh
+    :benchmark_code: ksn
+  :previous_year_solar_pv_kwh_relative_percent:
+    :description: previous_year solar_pv in kwh
+    :units: :kwh
+    :benchmark_code: ksnp
+  :current_year_energy_kwh:
+    :description: current_year energy in kwh
+    :units: :kwh
+    :benchmark_code: kx0
+  :previous_year_energy_kwh:
+    :description: previous_year energy in kwh
+    :units: :kwh
+    :benchmark_code: kxn
+  :previous_year_energy_kwh_relative_percent:
+    :description: previous_year energy in kwh
+    :units: :kwh
+    :benchmark_code: kxnp
+  :current_year_electricity_co2:
+    :description: current_year electricity in co2
+    :units: :co2
+    :benchmark_code: ce0
+  :previous_year_electricity_co2:
+    :description: previous_year electricity in co2
+    :units: :co2
+    :benchmark_code: cen
+  :previous_year_electricity_co2_relative_percent:
+    :description: previous_year electricity in co2
+    :units: :co2
+    :benchmark_code: cenp
+  :current_year_gas_co2:
+    :description: current_year gas in co2
+    :units: :co2
+    :benchmark_code: cg0
+  :previous_year_gas_co2:
+    :description: previous_year gas in co2
+    :units: :co2
+    :benchmark_code: cgn
+  :previous_year_gas_co2_relative_percent:
+    :description: previous_year gas in co2
+    :units: :co2
+    :benchmark_code: cgnp
+  :current_year_storage_heaters_co2:
+    :description: current_year storage_heaters in co2
+    :units: :co2
+    :benchmark_code: ch0
+  :previous_year_storage_heaters_co2:
+    :description: previous_year storage_heaters in co2
+    :units: :co2
+    :benchmark_code: chn
+  :previous_year_storage_heaters_co2_relative_percent:
+    :description: previous_year storage_heaters in co2
+    :units: :co2
+    :benchmark_code: chnp
+  :current_year_solar_pv_co2:
+    :description: current_year solar_pv in co2
+    :units: :co2
+    :benchmark_code: cs0
+  :previous_year_solar_pv_co2:
+    :description: previous_year solar_pv in co2
+    :units: :co2
+    :benchmark_code: csn
+  :previous_year_solar_pv_co2_relative_percent:
+    :description: previous_year solar_pv in co2
+    :units: :co2
+    :benchmark_code: csnp
+  :current_year_energy_co2:
+    :description: current_year energy in co2
+    :units: :co2
+    :benchmark_code: cx0
+  :previous_year_energy_co2:
+    :description: previous_year energy in co2
+    :units: :co2
+    :benchmark_code: cxn
+  :previous_year_energy_co2_relative_percent:
+    :description: previous_year energy in co2
+    :units: :co2
+    :benchmark_code: cxnp
+  :current_year_electricity_£:
+    :description: current_year electricity in £
+    :units: :£
+    :benchmark_code: pe0
+  :previous_year_electricity_£:
+    :description: previous_year electricity in £
+    :units: :£
+    :benchmark_code: pen
+  :previous_year_electricity_£_relative_percent:
+    :description: previous_year electricity in £
+    :units: :£
+    :benchmark_code: penp
+  :current_year_gas_£:
+    :description: current_year gas in £
+    :units: :£
+    :benchmark_code: pg0
+  :previous_year_gas_£:
+    :description: previous_year gas in £
+    :units: :£
+    :benchmark_code: pgn
+  :previous_year_gas_£_relative_percent:
+    :description: previous_year gas in £
+    :units: :£
+    :benchmark_code: pgnp
+  :current_year_storage_heaters_£:
+    :description: current_year storage_heaters in £
+    :units: :£
+    :benchmark_code: ph0
+  :previous_year_storage_heaters_£:
+    :description: previous_year storage_heaters in £
+    :units: :£
+    :benchmark_code: phn
+  :previous_year_storage_heaters_£_relative_percent:
+    :description: previous_year storage_heaters in £
+    :units: :£
+    :benchmark_code: phnp
+  :current_year_energy_£:
+    :description: current_year energy in £
+    :units: :£
+    :benchmark_code: px0
+  :previous_year_energy_£:
+    :description: previous_year energy in £
+    :units: :£
+    :benchmark_code: pxn
+  :previous_year_energy_£_relative_percent:
+    :description: previous_year energy in £
+    :units: :£
+    :benchmark_code: pxnp
+  :activationyear_electricity_kwh:
+    :description: activationyear electricity in kwh
+    :units: :kwh
+    :benchmark_code: kea
+  :activationyear_electricity_kwh_relative_percent:
+    :description: activationyear electricity in kwh
+    :units: :kwh
+    :benchmark_code: keap
+  :activationyear_gas_kwh:
+    :description: activationyear gas in kwh
+    :units: :kwh
+    :benchmark_code: kga
+  :activationyear_gas_kwh_relative_percent:
+    :description: activationyear gas in kwh
+    :units: :kwh
+    :benchmark_code: kgap
+  :activationyear_storage_heaters_kwh:
+    :description: activationyear storage_heaters in kwh
+    :units: :kwh
+    :benchmark_code: kha
+  :activationyear_storage_heaters_kwh_relative_percent:
+    :description: activationyear storage_heaters in kwh
+    :units: :kwh
+    :benchmark_code: khap
+  :activationyear_solar_pv_kwh:
+    :description: activationyear solar_pv in kwh
+    :units: :kwh
+    :benchmark_code: ksa
+  :activationyear_solar_pv_kwh_relative_percent:
+    :description: activationyear solar_pv in kwh
+    :units: :kwh
+    :benchmark_code: ksap
+  :activationyear_energy_kwh:
+    :description: activationyear energy in kwh
+    :units: :kwh
+    :benchmark_code: kxa
+  :activationyear_energy_kwh_relative_percent:
+    :description: activationyear energy in kwh
+    :units: :kwh
+    :benchmark_code: kxap
+  :activationyear_electricity_co2:
+    :description: activationyear electricity in co2
+    :units: :co2
+    :benchmark_code: cea
+  :activationyear_electricity_co2_relative_percent:
+    :description: activationyear electricity in co2
+    :units: :co2
+    :benchmark_code: ceap
+  :activationyear_gas_co2:
+    :description: activationyear gas in co2
+    :units: :co2
+    :benchmark_code: cga
+  :activationyear_gas_co2_relative_percent:
+    :description: activationyear gas in co2
+    :units: :co2
+    :benchmark_code: cgap
+  :activationyear_storage_heaters_co2:
+    :description: activationyear storage_heaters in co2
+    :units: :co2
+    :benchmark_code: cha
+  :activationyear_storage_heaters_co2_relative_percent:
+    :description: activationyear storage_heaters in co2
+    :units: :co2
+    :benchmark_code: chap
+  :activationyear_solar_pv_co2:
+    :description: activationyear solar_pv in co2
+    :units: :co2
+    :benchmark_code: csa
+  :activationyear_solar_pv_co2_relative_percent:
+    :description: activationyear solar_pv in co2
+    :units: :co2
+    :benchmark_code: csap
+  :activationyear_energy_co2:
+    :description: activationyear energy in co2
+    :units: :co2
+    :benchmark_code: cxa
+  :activationyear_energy_co2_relative_percent:
+    :description: activationyear energy in co2
+    :units: :co2
+    :benchmark_code: cxap
+  :activationyear_electricity_£:
+    :description: activationyear electricity in £
+    :units: :£
+    :benchmark_code: pea
+  :activationyear_electricity_£_relative_percent:
+    :description: activationyear electricity in £
+    :units: :£
+    :benchmark_code: peap
+  :activationyear_gas_£:
+    :description: activationyear gas in £
+    :units: :£
+    :benchmark_code: pga
+  :activationyear_gas_£_relative_percent:
+    :description: activationyear gas in £
+    :units: :£
+    :benchmark_code: pgap
+  :activationyear_storage_heaters_£:
+    :description: activationyear storage_heaters in £
+    :units: :£
+    :benchmark_code: pha
+  :activationyear_storage_heaters_£_relative_percent:
+    :description: activationyear storage_heaters in £
+    :units: :£
+    :benchmark_code: phap
+  :activationyear_energy_£:
+    :description: activationyear energy in £
+    :units: :£
+    :benchmark_code: pxa
+  :activationyear_energy_£_relative_percent:
+    :description: activationyear energy in £
+    :units: :£
+    :benchmark_code: pxap
+Common:
+  :relevance:
+    :description: Relevance of a alert to a school at this point in time
+    :units: :relevance
+  :analysis_date:
+    :description: Latest date on which the alert data is based
+    :units: :date
+  :status:
+    :description: 'Status: good, bad, failed'
+    :units: :symbol
+  :rating:
+    :description: Rating out of 10
+    :units: :float
+    :priority_code: RATE
+    :benchmark_code: ratg
+  :term:
+    :description: long term or short term
+    :units: :symbol
+  :bookmark_url:
+    :description: Link to help URL
+    :units: :string
+  :max_asofdate:
+    :description: The latest date on which an alert can be run given the available
+      data
+    :units: :date
+  :pupils:
+    :description: Number of pupils for relevant part of school on this date
+    :units: :integer
+  :floor_area:
+    :description: Floor area of relevant part of school
+    :units: :m2
+  :school_type:
+    :description: Primary or Secondary
+    :units: :school_type
+  :school_name:
+    :description: Name of school
+    :units: :string
+  :school_activation_date:
+    :description: Date school activated on Energy Sparks
+    :units: :date
+  :school_creation_date:
+    :description: Date school created on Energy Sparks
+    :units: :date
+  :urn:
+    :description: School URN
+    :units: :integer
+  :one_year_saving_£_high:
+    :description: Estimated one year saving range high
+    :units: :£
+  :one_year_saving_£_low:
+    :description: Estimated one year saving range low
+    :units: :£
+  :one_year_saving_£:
+    :description: Estimated one year saving range
+    :units: :£_range
+  :one_year_saving_co2:
+    :description: Estimated one year saving co2
+    :units: :co2
+  :ten_year_saving_co2:
+    :description: Estimated ten year saving co2
+    :units: :co2
+  :average_one_year_saving_£:
+    :description: Estimated one year saving range
+    :units: :£
+    :priority_code: 1YRS
+  :average_ten_year_saving_£:
+    :description: Estimated ten year saving range
+    :units: :£
+    :priority_code: 10YR
+  :ten_year_saving_£_high:
+    :description: Estimated ten year saving range - typical capital investment horizon
+      high
+    :units: :£
+  :ten_year_saving_£_low:
+    :description: Estimated ten year saving range - typical capital investment horizon
+      low
+    :units: :£
+  :ten_year_saving_£:
+    :description: Estimated ten year saving range - typical capital investment horizon
+    :units: :£_range
+  :payback_years_high:
+    :description: Payback in years high
+    :units: :years
+  :payback_years_low:
+    :description: Payback in years low
+    :units: :years
+  :payback_years:
+    :description: Payback in years
+    :units: :years_range
+  :average_payback_years:
+    :description: Average payback in years
+    :units: :years
+    :priority_code: PAYB
+  :capital_cost_high:
+    :description: Capital cost high
+    :units: :£
+  :capital_cost_low:
+    :description: Capital cost low
+    :units: :£
+  :capital_cost:
+    :description: Capital cost
+    :units: :£_range
+  :average_capital_cost:
+    :description: Average Capital cost
+    :units: :£
+    :priority_code: CAPC
+  :timescale:
+    :description: Timescale of analysis e.g. week, month, year
+    :units: :string
+  :time_of_year_relevance:
+    :description: 'Rating: 10 = relevant to time of year, 0 = irrelevant, 5 = average/normal'
+    :units: :float
+    :priority_code: TYRL

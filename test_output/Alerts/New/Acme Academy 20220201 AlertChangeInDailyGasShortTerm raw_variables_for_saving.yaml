@@ -1,0 +1,75 @@
+---
+AlertChangeInDailyGasShortTerm:predicted_kwh_this_week: 17458.949067914884
+AlertChangeInDailyGasShortTerm:predicted_kwh_last_week: 23616.028998941358
+AlertChangeInDailyGasShortTerm:predicted_changein_kwh: -6157.079931026474
+AlertChangeInDailyGasShortTerm:predicted_percent_increase_in_usage: -0.26071614035121987
+AlertChangeInDailyGasShortTerm:actual_kwh_this_week: 20185.494000000006
+AlertChangeInDailyGasShortTerm:actual_kwh_last_week: 23727.486
+AlertChangeInDailyGasShortTerm:actual_changein_kwh: -3541.9919999999947
+AlertChangeInDailyGasShortTerm:actual_percent_increase_in_usage: -0.1492780145355473
+AlertChangeInDailyGasShortTerm:this_week_cost: 605.5648200000002
+AlertChangeInDailyGasShortTerm:last_week_cost: 711.82458
+AlertChangeInDailyGasShortTerm:predicted_this_week_cost: 523.7684720374465
+AlertChangeInDailyGasShortTerm:predicted_last_week_cost: 708.4808699682407
+AlertChangeInDailyGasShortTerm:predicted_change_in_cost: -184.71239793079417
+AlertChangeInDailyGasShortTerm:this_week_co2: 4238.953740000001
+AlertChangeInDailyGasShortTerm:last_week_co2: 4982.77206
+AlertChangeInDailyGasShortTerm:predicted_this_week_co2: 3666.3793042621255
+AlertChangeInDailyGasShortTerm:predicted_last_week_co2: 4959.366089777685
+AlertChangeInDailyGasShortTerm:predicted_change_in_co2: -1292.9867855155599
+AlertChangeInDailyGasShortTerm:difference_in_actual_versus_predicted_change_percent: 0.11143812581567258
+AlertChangeInDailyGasShortTerm:signficant_increase_in_gas_consumption: 
+AlertChangeInDailyGasShortTerm:beginning_of_week: 2022-01-26
+AlertChangeInDailyGasShortTerm:beginning_of_last_week: 2022-01-19
+AlertChangeInDailyGasShortTerm:last_2_weeks_gas_consumption_comparison_chart: :alert_last_2_weeks_gas_comparison_temperature_compensated
+AlertChangeInDailyGasShortTerm:enough_data: :enough
+AlertChangeInDailyGasShortTerm:a: 5828.740070229202
+AlertChangeInDailyGasShortTerm:b: -342.9294030535025
+AlertChangeInDailyGasShortTerm:school_days_heating: 145
+AlertChangeInDailyGasShortTerm:school_days_heating_adjective: poor
+AlertChangeInDailyGasShortTerm:school_days_heating_rating_out_of_10: 2
+AlertChangeInDailyGasShortTerm:average_school_heating_days: 115
+AlertChangeInDailyGasShortTerm:non_school_days_heating: 30
+AlertChangeInDailyGasShortTerm:non_school_days_heating_adjective: poor
+AlertChangeInDailyGasShortTerm:non_school_days_heating_rating_out_of_10: 4
+AlertChangeInDailyGasShortTerm:average_non_school_day_heating_days: 24
+AlertChangeInDailyGasShortTerm:non_heating_only: false
+AlertChangeInDailyGasShortTerm:kitchen_only: false
+AlertChangeInDailyGasShortTerm:hot_water_only: false
+AlertChangeInDailyGasShortTerm:heating_only: false
+AlertChangeInDailyGasShortTerm:relevance: :relevant
+AlertChangeInDailyGasShortTerm:analysis_date: 2022-02-01
+AlertChangeInDailyGasShortTerm:status: :good
+AlertChangeInDailyGasShortTerm:rating: 2.2
+AlertChangeInDailyGasShortTerm:term: :shortterm
+AlertChangeInDailyGasShortTerm:bookmark_url: https://blog.energysparks.uk/alerts#GasChange
+AlertChangeInDailyGasShortTerm:max_asofdate: 2022-07-12
+AlertChangeInDailyGasShortTerm:pupils: 961
+AlertChangeInDailyGasShortTerm:floor_area: 5932.0
+AlertChangeInDailyGasShortTerm:school_type: :secondary
+AlertChangeInDailyGasShortTerm:school_name: Acme Academy
+AlertChangeInDailyGasShortTerm:school_activation_date: 
+AlertChangeInDailyGasShortTerm:school_creation_date: 2020-10-08
+AlertChangeInDailyGasShortTerm:urn: 136770
+AlertChangeInDailyGasShortTerm:one_year_saving_£: !ruby/range
+  begin: -6464.933927577796
+  end: -6464.933927577796
+  excl: false
+AlertChangeInDailyGasShortTerm:one_year_saving_£_low: -6464.933927577796
+AlertChangeInDailyGasShortTerm:one_year_saving_£_high: -6464.933927577796
+AlertChangeInDailyGasShortTerm:one_year_saving_co2: -45254.5374930446
+AlertChangeInDailyGasShortTerm:ten_year_saving_co2: -452545.374930446
+AlertChangeInDailyGasShortTerm:average_one_year_saving_£: -6464.933927577796
+AlertChangeInDailyGasShortTerm:average_ten_year_saving_£: -64649.33927577796
+AlertChangeInDailyGasShortTerm:ten_year_saving_£: !ruby/range
+  begin: -64649.33927577796
+  end: -64649.33927577796
+  excl: false
+AlertChangeInDailyGasShortTerm:ten_year_saving_£_low: -64649.33927577796
+AlertChangeInDailyGasShortTerm:ten_year_saving_£_high: -64649.33927577796
+AlertChangeInDailyGasShortTerm:payback_years: 
+AlertChangeInDailyGasShortTerm:average_payback_years: -0.0
+AlertChangeInDailyGasShortTerm:capital_cost: 
+AlertChangeInDailyGasShortTerm:average_capital_cost: 0.0
+AlertChangeInDailyGasShortTerm:timescale: week (school days only)
+AlertChangeInDailyGasShortTerm:time_of_year_relevance: 7.5

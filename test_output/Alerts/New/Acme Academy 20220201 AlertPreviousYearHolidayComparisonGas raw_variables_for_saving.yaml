@@ -1,0 +1,101 @@
+---
+AlertPreviousYearHolidayComparisonGas:difference_kwh: -11143.807807156285
+AlertPreviousYearHolidayComparisonGas:difference_£: -334.31423421468855
+AlertPreviousYearHolidayComparisonGas:difference_co2: -2340.199639502821
+AlertPreviousYearHolidayComparisonGas:abs_difference_kwh: 11143.807807156285
+AlertPreviousYearHolidayComparisonGas:abs_difference_£: 334.31423421468855
+AlertPreviousYearHolidayComparisonGas:abs_difference_co2: 2340.199639502821
+AlertPreviousYearHolidayComparisonGas:difference_percent: -0.3036013027647507
+AlertPreviousYearHolidayComparisonGas:abs_difference_percent: 0.3036013027647507
+AlertPreviousYearHolidayComparisonGas:current_period_kwh: 25561.594000000005
+AlertPreviousYearHolidayComparisonGas:current_period_£: 766.8478200000001
+AlertPreviousYearHolidayComparisonGas:current_period_start_date: 2021-12-18
+AlertPreviousYearHolidayComparisonGas:current_period_end_date: 2022-01-03
+AlertPreviousYearHolidayComparisonGas:days_in_current_period: 17
+AlertPreviousYearHolidayComparisonGas:name_of_current_period: Xmas 2021/2022
+AlertPreviousYearHolidayComparisonGas:previous_period_kwh: 36705.40180715629
+AlertPreviousYearHolidayComparisonGas:previous_period_£: 1101.1620542146886
+AlertPreviousYearHolidayComparisonGas:previous_period_start_date: 2020-12-19
+AlertPreviousYearHolidayComparisonGas:previous_period_end_date: 2021-01-03
+AlertPreviousYearHolidayComparisonGas:days_in_previous_period: 16
+AlertPreviousYearHolidayComparisonGas:name_of_previous_period: Xmas 2020/2021
+AlertPreviousYearHolidayComparisonGas:current_period_average_kwh: 1503.6231764705885
+AlertPreviousYearHolidayComparisonGas:previous_period_average_kwh: 2159.1412827738995
+AlertPreviousYearHolidayComparisonGas:current_holiday_temperatures: 3.3C, 2.9C, 3.9C,
+  0.4C, -0.4C, 4.0C, 5.3C, 2.9C, 2.7C, 5.0C, 6.7C, 6.4C, 11.5C, 11.6C, 11.2C, 10.0C,
+  7.3C
+AlertPreviousYearHolidayComparisonGas:previous_holiday_temperatures: 9.2C, 6.5C, 5.2C,
+  3.6C, 4.7C, 2.4C, 1.8C, 6.3C, 3.9C, 0.8C, 2.7C, 0.9C, 1.0C, 3.3C, 1.4C, 3.9C
+AlertPreviousYearHolidayComparisonGas:current_holiday_average_temperature: 5.559411764705882
+AlertPreviousYearHolidayComparisonGas:previous_holiday_average_temperature: 3.609036458333333
+AlertPreviousYearHolidayComparisonGas:truncated_current_period: false
+AlertPreviousYearHolidayComparisonGas:previous_period_average_kwh_unadjusted: 2472.8012500000004
+AlertPreviousYearHolidayComparisonGas:current_period_kwhs: 25562 = 560+3791+2875+775+856+1389+744+1455+3776+1569+618+599+98+96+164+270+5926
+AlertPreviousYearHolidayComparisonGas:previous_period_kwhs_unadjusted: 39565 = 52+261+370+1128+2166+4609+1829+510+3819+2765+4305+4380+4555+2569+3806+2441
+AlertPreviousYearHolidayComparisonGas:current_period_weekly_kwh: 10404.951333333333
+AlertPreviousYearHolidayComparisonGas:current_period_weekly_£: 312.14854
+AlertPreviousYearHolidayComparisonGas:previous_period_weekly_kwh: 15490.751090925796
+AlertPreviousYearHolidayComparisonGas:previous_period_weekly_£: 464.72253272777385
+AlertPreviousYearHolidayComparisonGas:change_in_weekly_kwh: -5085.799757592464
+AlertPreviousYearHolidayComparisonGas:change_in_weekly_£: -152.57399272777383
+AlertPreviousYearHolidayComparisonGas:change_in_weekly_percent: -0.3283120184257324
+AlertPreviousYearHolidayComparisonGas:comparison_chart: :alert_group_by_week_gas_14_months
+AlertPreviousYearHolidayComparisonGas:summary: "-£330 reduction since last holiday,
+  -30%"
+AlertPreviousYearHolidayComparisonGas:prefix_1: down
+AlertPreviousYearHolidayComparisonGas:prefix_2: reduction
+AlertPreviousYearHolidayComparisonGas:current_period_floor_area: 5932.0
+AlertPreviousYearHolidayComparisonGas:previous_period_floor_area: 5932.0
+AlertPreviousYearHolidayComparisonGas:floor_area_changed: false
+AlertPreviousYearHolidayComparisonGas:current_period_pupils: 961
+AlertPreviousYearHolidayComparisonGas:previous_period_pupils: 961
+AlertPreviousYearHolidayComparisonGas:pupils_changed: false
+AlertPreviousYearHolidayComparisonGas:difference_kwh_tree_co2: 12.663417962677597
+AlertPreviousYearHolidayComparisonGas:difference_co2_ice_car_kwh: 3441.4700580923836
+AlertPreviousYearHolidayComparisonGas:difference_co2_smartphone_kwh: 325027.72770872514
+AlertPreviousYearHolidayComparisonGas:total_previous_period_unadjusted_kwh: 39564.82000000001
+AlertPreviousYearHolidayComparisonGas:total_previous_period_unadjusted_£: 1186.9446
+AlertPreviousYearHolidayComparisonGas:total_previous_period_unadjusted_co2: 8308.6122
+AlertPreviousYearHolidayComparisonGas:previous_period_kwhs_adjusted: 34264 = 212+302+355+1043+2023+4059+1663+545+3540+1950+3804+3572+3766+2181+3092+2156
+AlertPreviousYearHolidayComparisonGas:relevance: :relevant
+AlertPreviousYearHolidayComparisonGas:analysis_date: 2022-02-01
+AlertPreviousYearHolidayComparisonGas:status: 
+AlertPreviousYearHolidayComparisonGas:rating: 10.0
+AlertPreviousYearHolidayComparisonGas:term: :shortterm
+AlertPreviousYearHolidayComparisonGas:bookmark_url: https://blog.energysparks.uk/alerts#GasChange
+AlertPreviousYearHolidayComparisonGas:max_asofdate: 2022-07-12
+AlertPreviousYearHolidayComparisonGas:pupils: 961
+AlertPreviousYearHolidayComparisonGas:floor_area: 5932.0
+AlertPreviousYearHolidayComparisonGas:school_type: :secondary
+AlertPreviousYearHolidayComparisonGas:school_name: Acme Academy
+AlertPreviousYearHolidayComparisonGas:school_activation_date: 
+AlertPreviousYearHolidayComparisonGas:school_creation_date: 2020-10-08
+AlertPreviousYearHolidayComparisonGas:urn: 136770
+AlertPreviousYearHolidayComparisonGas:one_year_saving_£: !ruby/range
+  begin: -334.31423421468855
+  end: -334.31423421468855
+  excl: false
+AlertPreviousYearHolidayComparisonGas:one_year_saving_£_low: -334.31423421468855
+AlertPreviousYearHolidayComparisonGas:one_year_saving_£_high: -334.31423421468855
+AlertPreviousYearHolidayComparisonGas:one_year_saving_co2: -2340.199639502821
+AlertPreviousYearHolidayComparisonGas:ten_year_saving_co2: -23401.99639502821
+AlertPreviousYearHolidayComparisonGas:average_one_year_saving_£: -334.31423421468855
+AlertPreviousYearHolidayComparisonGas:average_ten_year_saving_£: -3343.1423421468853
+AlertPreviousYearHolidayComparisonGas:ten_year_saving_£: !ruby/range
+  begin: -3343.1423421468853
+  end: -3343.1423421468853
+  excl: false
+AlertPreviousYearHolidayComparisonGas:ten_year_saving_£_low: -3343.1423421468853
+AlertPreviousYearHolidayComparisonGas:ten_year_saving_£_high: -3343.1423421468853
+AlertPreviousYearHolidayComparisonGas:payback_years: 
+AlertPreviousYearHolidayComparisonGas:average_payback_years: -0.0
+AlertPreviousYearHolidayComparisonGas:capital_cost: !ruby/range
+  begin: 0.0
+  end: 0.0
+  excl: false
+AlertPreviousYearHolidayComparisonGas:capital_cost_low: 0.0
+AlertPreviousYearHolidayComparisonGas:capital_cost_high: 0.0
+AlertPreviousYearHolidayComparisonGas:average_capital_cost: 0.0
+AlertPreviousYearHolidayComparisonGas:timescale: this holiday, and the same one the
+  previous year
+AlertPreviousYearHolidayComparisonGas:time_of_year_relevance: 0.0

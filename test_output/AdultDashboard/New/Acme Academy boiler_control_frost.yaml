@@ -1,0 +1,887 @@
+---
+- :type: :title
+  :content: Frost
+- :type: :enhanced_title
+  :content:
+    :title: Frost
+    :rating: 
+    :summary: 
+- :type: :html
+  :content: |-
+    <p>
+     'Frost Protection' is a feature built into most school boiler controllers
+     which turns the heating on when it is cold outside in order to prevent
+     frost damage to hot and cold water pipework.
+     </p>
+     <p>
+     A well programmed control will turn the boiler on if a number of conditions are met, typically:
+     </p>
+     <ul>
+     <li>The outside temperature is below 4C (the point at which water starts to freeze and expand)</li>
+     <li>And, the internal temperature is below 8C</li>
+     <li>And, for some controllers if the temperature of the water in the central heating system is below 2C</li>
+     </ul>
+     <p>
+     Typically, this means the 'frost protection' only turns the heating on if it is cold outside, AND
+     the heating has been off for at least 24 hours - as it normally takes this long for a school to
+     cool down and the internal temperature of the school to drop below 8C. So, in general in very cold weather
+     the heating would probably not come on a Saturday, but on a Sunday when the school has cooled down
+     sufficiently.
+     </p>
+     <p>
+     Although 'frost protection' uses energy and therefore it costs money to run, it is cheaper than
+     the damage which might be caused from burst pipes. Some schools don't have frost protection
+     configured for their boilers, and although this saves money for most of the year, it is common
+     for these schools to leave their heating on during winter holidays, which is significantly more expensive
+     than if frost protection is allowed to provide the protection automatically.
+     </p>
+     <p>
+     The graph below which is for the coldest weekend of recent years, attempts to demonstrate whether
+     </p>
+     <ol type="a">
+     <li>Frost protection is configured for your school and</li>
+     <li>whether it is configured correctly and running efficiently</li>
+     </ol>
+     <p>You can check another frosty weekend by clicking the move forward/back frosty day buttons</p>
+- :type: :chart_name
+  :content: :frost
+- :type: :chart
+  :content:
+    :title: 'Frost Protection: cold weekend'
+    :x_axis:
+    - Sat 25-Dec-2021 00:00
+    - Sat 25-Dec-2021 00:30
+    - Sat 25-Dec-2021 01:00
+    - Sat 25-Dec-2021 01:30
+    - Sat 25-Dec-2021 02:00
+    - Sat 25-Dec-2021 02:30
+    - Sat 25-Dec-2021 03:00
+    - Sat 25-Dec-2021 03:30
+    - Sat 25-Dec-2021 04:00
+    - Sat 25-Dec-2021 04:30
+    - Sat 25-Dec-2021 05:00
+    - Sat 25-Dec-2021 05:30
+    - Sat 25-Dec-2021 06:00
+    - Sat 25-Dec-2021 06:30
+    - Sat 25-Dec-2021 07:00
+    - Sat 25-Dec-2021 07:30
+    - Sat 25-Dec-2021 08:00
+    - Sat 25-Dec-2021 08:30
+    - Sat 25-Dec-2021 09:00
+    - Sat 25-Dec-2021 09:30
+    - Sat 25-Dec-2021 10:00
+    - Sat 25-Dec-2021 10:30
+    - Sat 25-Dec-2021 11:00
+    - Sat 25-Dec-2021 11:30
+    - Sat 25-Dec-2021 12:00
+    - Sat 25-Dec-2021 12:30
+    - Sat 25-Dec-2021 13:00
+    - Sat 25-Dec-2021 13:30
+    - Sat 25-Dec-2021 14:00
+    - Sat 25-Dec-2021 14:30
+    - Sat 25-Dec-2021 15:00
+    - Sat 25-Dec-2021 15:30
+    - Sat 25-Dec-2021 16:00
+    - Sat 25-Dec-2021 16:30
+    - Sat 25-Dec-2021 17:00
+    - Sat 25-Dec-2021 17:30
+    - Sat 25-Dec-2021 18:00
+    - Sat 25-Dec-2021 18:30
+    - Sat 25-Dec-2021 19:00
+    - Sat 25-Dec-2021 19:30
+    - Sat 25-Dec-2021 20:00
+    - Sat 25-Dec-2021 20:30
+    - Sat 25-Dec-2021 21:00
+    - Sat 25-Dec-2021 21:30
+    - Sat 25-Dec-2021 22:00
+    - Sat 25-Dec-2021 22:30
+    - Sat 25-Dec-2021 23:00
+    - Sat 25-Dec-2021 23:30
+    - Sun 26-Dec-2021 00:00
+    - Sun 26-Dec-2021 00:30
+    - Sun 26-Dec-2021 01:00
+    - Sun 26-Dec-2021 01:30
+    - Sun 26-Dec-2021 02:00
+    - Sun 26-Dec-2021 02:30
+    - Sun 26-Dec-2021 03:00
+    - Sun 26-Dec-2021 03:30
+    - Sun 26-Dec-2021 04:00
+    - Sun 26-Dec-2021 04:30
+    - Sun 26-Dec-2021 05:00
+    - Sun 26-Dec-2021 05:30
+    - Sun 26-Dec-2021 06:00
+    - Sun 26-Dec-2021 06:30
+    - Sun 26-Dec-2021 07:00
+    - Sun 26-Dec-2021 07:30
+    - Sun 26-Dec-2021 08:00
+    - Sun 26-Dec-2021 08:30
+    - Sun 26-Dec-2021 09:00
+    - Sun 26-Dec-2021 09:30
+    - Sun 26-Dec-2021 10:00
+    - Sun 26-Dec-2021 10:30
+    - Sun 26-Dec-2021 11:00
+    - Sun 26-Dec-2021 11:30
+    - Sun 26-Dec-2021 12:00
+    - Sun 26-Dec-2021 12:30
+    - Sun 26-Dec-2021 13:00
+    - Sun 26-Dec-2021 13:30
+    - Sun 26-Dec-2021 14:00
+    - Sun 26-Dec-2021 14:30
+    - Sun 26-Dec-2021 15:00
+    - Sun 26-Dec-2021 15:30
+    - Sun 26-Dec-2021 16:00
+    - Sun 26-Dec-2021 16:30
+    - Sun 26-Dec-2021 17:00
+    - Sun 26-Dec-2021 17:30
+    - Sun 26-Dec-2021 18:00
+    - Sun 26-Dec-2021 18:30
+    - Sun 26-Dec-2021 19:00
+    - Sun 26-Dec-2021 19:30
+    - Sun 26-Dec-2021 20:00
+    - Sun 26-Dec-2021 20:30
+    - Sun 26-Dec-2021 21:00
+    - Sun 26-Dec-2021 21:30
+    - Sun 26-Dec-2021 22:00
+    - Sun 26-Dec-2021 22:30
+    - Sun 26-Dec-2021 23:00
+    - Sun 26-Dec-2021 23:30
+    - Mon 27-Dec-2021 00:00
+    - Mon 27-Dec-2021 00:30
+    - Mon 27-Dec-2021 01:00
+    - Mon 27-Dec-2021 01:30
+    - Mon 27-Dec-2021 02:00
+    - Mon 27-Dec-2021 02:30
+    - Mon 27-Dec-2021 03:00
+    - Mon 27-Dec-2021 03:30
+    - Mon 27-Dec-2021 04:00
+    - Mon 27-Dec-2021 04:30
+    - Mon 27-Dec-2021 05:00
+    - Mon 27-Dec-2021 05:30
+    - Mon 27-Dec-2021 06:00
+    - Mon 27-Dec-2021 06:30
+    - Mon 27-Dec-2021 07:00
+    - Mon 27-Dec-2021 07:30
+    - Mon 27-Dec-2021 08:00
+    - Mon 27-Dec-2021 08:30
+    - Mon 27-Dec-2021 09:00
+    - Mon 27-Dec-2021 09:30
+    - Mon 27-Dec-2021 10:00
+    - Mon 27-Dec-2021 10:30
+    - Mon 27-Dec-2021 11:00
+    - Mon 27-Dec-2021 11:30
+    - Mon 27-Dec-2021 12:00
+    - Mon 27-Dec-2021 12:30
+    - Mon 27-Dec-2021 13:00
+    - Mon 27-Dec-2021 13:30
+    - Mon 27-Dec-2021 14:00
+    - Mon 27-Dec-2021 14:30
+    - Mon 27-Dec-2021 15:00
+    - Mon 27-Dec-2021 15:30
+    - Mon 27-Dec-2021 16:00
+    - Mon 27-Dec-2021 16:30
+    - Mon 27-Dec-2021 17:00
+    - Mon 27-Dec-2021 17:30
+    - Mon 27-Dec-2021 18:00
+    - Mon 27-Dec-2021 18:30
+    - Mon 27-Dec-2021 19:00
+    - Mon 27-Dec-2021 19:30
+    - Mon 27-Dec-2021 20:00
+    - Mon 27-Dec-2021 20:30
+    - Mon 27-Dec-2021 21:00
+    - Mon 27-Dec-2021 21:30
+    - Mon 27-Dec-2021 22:00
+    - Mon 27-Dec-2021 22:30
+    - Mon 27-Dec-2021 23:00
+    - Mon 27-Dec-2021 23:30
+    :x_axis_ranges:
+    - - &1 !ruby/object:DateTime 2021-12-25 00:00:00.000000000 Z
+      - *1
+    - - &2 !ruby/object:DateTime 2021-12-25 00:30:00.000000000 Z
+      - *2
+    - - &3 !ruby/object:DateTime 2021-12-25 01:00:00.000000000 Z
+      - *3
+    - - &4 !ruby/object:DateTime 2021-12-25 01:30:00.000000000 Z
+      - *4
+    - - &5 !ruby/object:DateTime 2021-12-25 02:00:00.000000000 Z
+      - *5
+    - - &6 !ruby/object:DateTime 2021-12-25 02:30:00.000000000 Z
+      - *6
+    - - &7 !ruby/object:DateTime 2021-12-25 03:00:00.000000000 Z
+      - *7
+    - - &8 !ruby/object:DateTime 2021-12-25 03:30:00.000000000 Z
+      - *8
+    - - &9 !ruby/object:DateTime 2021-12-25 04:00:00.000000000 Z
+      - *9
+    - - &10 !ruby/object:DateTime 2021-12-25 04:30:00.000000000 Z
+      - *10
+    - - &11 !ruby/object:DateTime 2021-12-25 05:00:00.000000000 Z
+      - *11
+    - - &12 !ruby/object:DateTime 2021-12-25 05:30:00.000000000 Z
+      - *12
+    - - &13 !ruby/object:DateTime 2021-12-25 06:00:00.000000000 Z
+      - *13
+    - - &14 !ruby/object:DateTime 2021-12-25 06:30:00.000000000 Z
+      - *14
+    - - &15 !ruby/object:DateTime 2021-12-25 07:00:00.000000000 Z
+      - *15
+    - - &16 !ruby/object:DateTime 2021-12-25 07:30:00.000000000 Z
+      - *16
+    - - &17 !ruby/object:DateTime 2021-12-25 08:00:00.000000000 Z
+      - *17
+    - - &18 !ruby/object:DateTime 2021-12-25 08:30:00.000000000 Z
+      - *18
+    - - &19 !ruby/object:DateTime 2021-12-25 09:00:00.000000000 Z
+      - *19
+    - - &20 !ruby/object:DateTime 2021-12-25 09:30:00.000000000 Z
+      - *20
+    - - &21 !ruby/object:DateTime 2021-12-25 10:00:00.000000000 Z
+      - *21
+    - - &22 !ruby/object:DateTime 2021-12-25 10:30:00.000000000 Z
+      - *22
+    - - &23 !ruby/object:DateTime 2021-12-25 11:00:00.000000000 Z
+      - *23
+    - - &24 !ruby/object:DateTime 2021-12-25 11:30:00.000000000 Z
+      - *24
+    - - &25 !ruby/object:DateTime 2021-12-25 12:00:00.000000000 Z
+      - *25
+    - - &26 !ruby/object:DateTime 2021-12-25 12:30:00.000000000 Z
+      - *26
+    - - &27 !ruby/object:DateTime 2021-12-25 13:00:00.000000000 Z
+      - *27
+    - - &28 !ruby/object:DateTime 2021-12-25 13:30:00.000000000 Z
+      - *28
+    - - &29 !ruby/object:DateTime 2021-12-25 14:00:00.000000000 Z
+      - *29
+    - - &30 !ruby/object:DateTime 2021-12-25 14:30:00.000000000 Z
+      - *30
+    - - &31 !ruby/object:DateTime 2021-12-25 15:00:00.000000000 Z
+      - *31
+    - - &32 !ruby/object:DateTime 2021-12-25 15:30:00.000000000 Z
+      - *32
+    - - &33 !ruby/object:DateTime 2021-12-25 16:00:00.000000000 Z
+      - *33
+    - - &34 !ruby/object:DateTime 2021-12-25 16:30:00.000000000 Z
+      - *34
+    - - &35 !ruby/object:DateTime 2021-12-25 17:00:00.000000000 Z
+      - *35
+    - - &36 !ruby/object:DateTime 2021-12-25 17:30:00.000000000 Z
+      - *36
+    - - &37 !ruby/object:DateTime 2021-12-25 18:00:00.000000000 Z
+      - *37
+    - - &38 !ruby/object:DateTime 2021-12-25 18:30:00.000000000 Z
+      - *38
+    - - &39 !ruby/object:DateTime 2021-12-25 19:00:00.000000000 Z
+      - *39
+    - - &40 !ruby/object:DateTime 2021-12-25 19:30:00.000000000 Z
+      - *40
+    - - &41 !ruby/object:DateTime 2021-12-25 20:00:00.000000000 Z
+      - *41
+    - - &42 !ruby/object:DateTime 2021-12-25 20:30:00.000000000 Z
+      - *42
+    - - &43 !ruby/object:DateTime 2021-12-25 21:00:00.000000000 Z
+      - *43
+    - - &44 !ruby/object:DateTime 2021-12-25 21:30:00.000000000 Z
+      - *44
+    - - &45 !ruby/object:DateTime 2021-12-25 22:00:00.000000000 Z
+      - *45
+    - - &46 !ruby/object:DateTime 2021-12-25 22:30:00.000000000 Z
+      - *46
+    - - &47 !ruby/object:DateTime 2021-12-25 23:00:00.000000000 Z
+      - *47
+    - - &48 !ruby/object:DateTime 2021-12-25 23:30:00.000000000 Z
+      - *48
+    - - &49 !ruby/object:DateTime 2021-12-26 00:00:00.000000000 Z
+      - *49
+    - - &50 !ruby/object:DateTime 2021-12-26 00:30:00.000000000 Z
+      - *50
+    - - &51 !ruby/object:DateTime 2021-12-26 01:00:00.000000000 Z
+      - *51
+    - - &52 !ruby/object:DateTime 2021-12-26 01:30:00.000000000 Z
+      - *52
+    - - &53 !ruby/object:DateTime 2021-12-26 02:00:00.000000000 Z
+      - *53
+    - - &54 !ruby/object:DateTime 2021-12-26 02:30:00.000000000 Z
+      - *54
+    - - &55 !ruby/object:DateTime 2021-12-26 03:00:00.000000000 Z
+      - *55
+    - - &56 !ruby/object:DateTime 2021-12-26 03:30:00.000000000 Z
+      - *56
+    - - &57 !ruby/object:DateTime 2021-12-26 04:00:00.000000000 Z
+      - *57
+    - - &58 !ruby/object:DateTime 2021-12-26 04:30:00.000000000 Z
+      - *58
+    - - &59 !ruby/object:DateTime 2021-12-26 05:00:00.000000000 Z
+      - *59
+    - - &60 !ruby/object:DateTime 2021-12-26 05:30:00.000000000 Z
+      - *60
+    - - &61 !ruby/object:DateTime 2021-12-26 06:00:00.000000000 Z
+      - *61
+    - - &62 !ruby/object:DateTime 2021-12-26 06:30:00.000000000 Z
+      - *62
+    - - &63 !ruby/object:DateTime 2021-12-26 07:00:00.000000000 Z
+      - *63
+    - - &64 !ruby/object:DateTime 2021-12-26 07:30:00.000000000 Z
+      - *64
+    - - &65 !ruby/object:DateTime 2021-12-26 08:00:00.000000000 Z
+      - *65
+    - - &66 !ruby/object:DateTime 2021-12-26 08:30:00.000000000 Z
+      - *66
+    - - &67 !ruby/object:DateTime 2021-12-26 09:00:00.000000000 Z
+      - *67
+    - - &68 !ruby/object:DateTime 2021-12-26 09:30:00.000000000 Z
+      - *68
+    - - &69 !ruby/object:DateTime 2021-12-26 10:00:00.000000000 Z
+      - *69
+    - - &70 !ruby/object:DateTime 2021-12-26 10:30:00.000000000 Z
+      - *70
+    - - &71 !ruby/object:DateTime 2021-12-26 11:00:00.000000000 Z
+      - *71
+    - - &72 !ruby/object:DateTime 2021-12-26 11:30:00.000000000 Z
+      - *72
+    - - &73 !ruby/object:DateTime 2021-12-26 12:00:00.000000000 Z
+      - *73
+    - - &74 !ruby/object:DateTime 2021-12-26 12:30:00.000000000 Z
+      - *74
+    - - &75 !ruby/object:DateTime 2021-12-26 13:00:00.000000000 Z
+      - *75
+    - - &76 !ruby/object:DateTime 2021-12-26 13:30:00.000000000 Z
+      - *76
+    - - &77 !ruby/object:DateTime 2021-12-26 14:00:00.000000000 Z
+      - *77
+    - - &78 !ruby/object:DateTime 2021-12-26 14:30:00.000000000 Z
+      - *78
+    - - &79 !ruby/object:DateTime 2021-12-26 15:00:00.000000000 Z
+      - *79
+    - - &80 !ruby/object:DateTime 2021-12-26 15:30:00.000000000 Z
+      - *80
+    - - &81 !ruby/object:DateTime 2021-12-26 16:00:00.000000000 Z
+      - *81
+    - - &82 !ruby/object:DateTime 2021-12-26 16:30:00.000000000 Z
+      - *82
+    - - &83 !ruby/object:DateTime 2021-12-26 17:00:00.000000000 Z
+      - *83
+    - - &84 !ruby/object:DateTime 2021-12-26 17:30:00.000000000 Z
+      - *84
+    - - &85 !ruby/object:DateTime 2021-12-26 18:00:00.000000000 Z
+      - *85
+    - - &86 !ruby/object:DateTime 2021-12-26 18:30:00.000000000 Z
+      - *86
+    - - &87 !ruby/object:DateTime 2021-12-26 19:00:00.000000000 Z
+      - *87
+    - - &88 !ruby/object:DateTime 2021-12-26 19:30:00.000000000 Z
+      - *88
+    - - &89 !ruby/object:DateTime 2021-12-26 20:00:00.000000000 Z
+      - *89
+    - - &90 !ruby/object:DateTime 2021-12-26 20:30:00.000000000 Z
+      - *90
+    - - &91 !ruby/object:DateTime 2021-12-26 21:00:00.000000000 Z
+      - *91
+    - - &92 !ruby/object:DateTime 2021-12-26 21:30:00.000000000 Z
+      - *92
+    - - &93 !ruby/object:DateTime 2021-12-26 22:00:00.000000000 Z
+      - *93
+    - - &94 !ruby/object:DateTime 2021-12-26 22:30:00.000000000 Z
+      - *94
+    - - &95 !ruby/object:DateTime 2021-12-26 23:00:00.000000000 Z
+      - *95
+    - - &96 !ruby/object:DateTime 2021-12-26 23:30:00.000000000 Z
+      - *96
+    - - &97 !ruby/object:DateTime 2021-12-27 00:00:00.000000000 Z
+      - *97
+    - - &98 !ruby/object:DateTime 2021-12-27 00:30:00.000000000 Z
+      - *98
+    - - &99 !ruby/object:DateTime 2021-12-27 01:00:00.000000000 Z
+      - *99
+    - - &100 !ruby/object:DateTime 2021-12-27 01:30:00.000000000 Z
+      - *100
+    - - &101 !ruby/object:DateTime 2021-12-27 02:00:00.000000000 Z
+      - *101
+    - - &102 !ruby/object:DateTime 2021-12-27 02:30:00.000000000 Z
+      - *102
+    - - &103 !ruby/object:DateTime 2021-12-27 03:00:00.000000000 Z
+      - *103
+    - - &104 !ruby/object:DateTime 2021-12-27 03:30:00.000000000 Z
+      - *104
+    - - &105 !ruby/object:DateTime 2021-12-27 04:00:00.000000000 Z
+      - *105
+    - - &106 !ruby/object:DateTime 2021-12-27 04:30:00.000000000 Z
+      - *106
+    - - &107 !ruby/object:DateTime 2021-12-27 05:00:00.000000000 Z
+      - *107
+    - - &108 !ruby/object:DateTime 2021-12-27 05:30:00.000000000 Z
+      - *108
+    - - &109 !ruby/object:DateTime 2021-12-27 06:00:00.000000000 Z
+      - *109
+    - - &110 !ruby/object:DateTime 2021-12-27 06:30:00.000000000 Z
+      - *110
+    - - &111 !ruby/object:DateTime 2021-12-27 07:00:00.000000000 Z
+      - *111
+    - - &112 !ruby/object:DateTime 2021-12-27 07:30:00.000000000 Z
+      - *112
+    - - &113 !ruby/object:DateTime 2021-12-27 08:00:00.000000000 Z
+      - *113
+    - - &114 !ruby/object:DateTime 2021-12-27 08:30:00.000000000 Z
+      - *114
+    - - &115 !ruby/object:DateTime 2021-12-27 09:00:00.000000000 Z
+      - *115
+    - - &116 !ruby/object:DateTime 2021-12-27 09:30:00.000000000 Z
+      - *116
+    - - &117 !ruby/object:DateTime 2021-12-27 10:00:00.000000000 Z
+      - *117
+    - - &118 !ruby/object:DateTime 2021-12-27 10:30:00.000000000 Z
+      - *118
+    - - &119 !ruby/object:DateTime 2021-12-27 11:00:00.000000000 Z
+      - *119
+    - - &120 !ruby/object:DateTime 2021-12-27 11:30:00.000000000 Z
+      - *120
+    - - &121 !ruby/object:DateTime 2021-12-27 12:00:00.000000000 Z
+      - *121
+    - - &122 !ruby/object:DateTime 2021-12-27 12:30:00.000000000 Z
+      - *122
+    - - &123 !ruby/object:DateTime 2021-12-27 13:00:00.000000000 Z
+      - *123
+    - - &124 !ruby/object:DateTime 2021-12-27 13:30:00.000000000 Z
+      - *124
+    - - &125 !ruby/object:DateTime 2021-12-27 14:00:00.000000000 Z
+      - *125
+    - - &126 !ruby/object:DateTime 2021-12-27 14:30:00.000000000 Z
+      - *126
+    - - &127 !ruby/object:DateTime 2021-12-27 15:00:00.000000000 Z
+      - *127
+    - - &128 !ruby/object:DateTime 2021-12-27 15:30:00.000000000 Z
+      - *128
+    - - &129 !ruby/object:DateTime 2021-12-27 16:00:00.000000000 Z
+      - *129
+    - - &130 !ruby/object:DateTime 2021-12-27 16:30:00.000000000 Z
+      - *130
+    - - &131 !ruby/object:DateTime 2021-12-27 17:00:00.000000000 Z
+      - *131
+    - - &132 !ruby/object:DateTime 2021-12-27 17:30:00.000000000 Z
+      - *132
+    - - &133 !ruby/object:DateTime 2021-12-27 18:00:00.000000000 Z
+      - *133
+    - - &134 !ruby/object:DateTime 2021-12-27 18:30:00.000000000 Z
+      - *134
+    - - &135 !ruby/object:DateTime 2021-12-27 19:00:00.000000000 Z
+      - *135
+    - - &136 !ruby/object:DateTime 2021-12-27 19:30:00.000000000 Z
+      - *136
+    - - &137 !ruby/object:DateTime 2021-12-27 20:00:00.000000000 Z
+      - *137
+    - - &138 !ruby/object:DateTime 2021-12-27 20:30:00.000000000 Z
+      - *138
+    - - &139 !ruby/object:DateTime 2021-12-27 21:00:00.000000000 Z
+      - *139
+    - - &140 !ruby/object:DateTime 2021-12-27 21:30:00.000000000 Z
+      - *140
+    - - &141 !ruby/object:DateTime 2021-12-27 22:00:00.000000000 Z
+      - *141
+    - - &142 !ruby/object:DateTime 2021-12-27 22:30:00.000000000 Z
+      - *142
+    - - &143 !ruby/object:DateTime 2021-12-27 23:00:00.000000000 Z
+      - *143
+    - - &144 !ruby/object:DateTime 2021-12-27 23:30:00.000000000 Z
+      - *144
+    :x_data:
+      Energy:
+      - 36.494
+      - 4.36
+      - 4.36
+      - 4.59
+      - 4.59
+      - 4.36
+      - 34.198
+      - 64.036
+      - 45.903999999999996
+      - 43.61
+      - 15.836000000000002
+      - 4.36
+      - 4.35
+      - 4.808
+      - 4.35
+      - 45.562000000000005
+      - 59.300000000000004
+      - 43.501999999999995
+      - 89.294
+      - 402.736
+      - 324.832
+      - 302.044
+      - 187.974
+      - 210.412
+      - 160.04
+      - 59.300000000000004
+      - 43.73
+      - 66.168
+      - 13.508
+      - 4.58
+      - 4.58
+      - 4.35
+      - 4.35
+      - 34.344
+      - 64.338
+      - 47.852000000000004
+      - 43.272
+      - 43.501999999999995
+      - 125.68599999999999
+      - 4.35
+      - 4.35
+      - 4.58
+      - 4.58
+      - 22.665999999999997
+      - 66.16799999999999
+      - 50.6
+      - 43.501999999999995
+      - 43.272
+      - 8.93
+      - 4.808
+      - 4.35
+      - 95.692
+      - 4.35
+      - 13.966
+      - 251.142
+      - 506.852
+      - 362.9680000000001
+      - 317.298
+      - 290.282
+      - 255.54
+      - 255.54
+      - 255.77
+      - 232.93400000000003
+      - 280.956
+      - 294.522
+      - 276.206
+      - 317.648
+      - 271.918
+      - 239.80200000000002
+      - 209.87
+      - 255.60000000000002
+      - 210.10000000000002
+      - 210.10000000000002
+      - 232.76600000000002
+      - 198.482
+      - 296.874
+      - 257.952
+      - 226.414
+      - 237.57600000000002
+      - 187.034
+      - 209.87
+      - 50.02
+      - 4.35
+      - 4.58
+      - 4.808
+      - 27.246000000000002
+      - 66.398
+      - 47.852000000000004
+      - 40.984
+      - 4.35
+      - 4.58
+      - 4.35
+      - 4.58
+      - 4.58
+      - 4.58
+      - 4.35
+      - 121.12
+      - 89.064
+      - 70.748
+      - 38.694
+      - 27.246000000000002
+      - 4.35
+      - 27.476
+      - 27.246000000000002
+      - 4.35
+      - 439.37
+      - 301.99600000000004
+      - 269.942
+      - 293.562
+      - 254.774
+      - 192.572
+      - 4.36
+      - 27.312
+      - 4.59
+      - 27.312
+      - 4.36
+      - 27.542
+      - 4.36
+      - 34.198
+      - 68.628
+      - 78.038
+      - 36.494
+      - 27.312
+      - 27.542
+      - 4.36
+      - 27.312
+      - 4.36
+      - 27.084000000000003
+      - 4.36
+      - 57.150000000000006
+      - 66.562
+      - 68.626
+      - 20.426
+      - 27.542
+      - 4.132
+      - 27.084000000000003
+      - 4.36
+      - 27.542
+      - 27.312
+      - 4.36
+      - 27.084000000000003
+      - 68.628
+      - 77.808
+      - 27.312
+    :chart1_type: :column
+    :chart1_subtype: 
+    :y_axis_label: kW
+    :config_name: :frost
+    :multi_chart_x_axis_ranges: []
+    :y2_chart_type: :line
+    :y2_data:
+      Temperature:
+      - 3.58
+      - 3.54
+      - 3.49
+      - 3.57
+      - 3.64
+      - 3.84
+      - 4.04
+      - 3.99
+      - 3.94
+      - 3.98
+      - 4.02
+      - 3.94
+      - 3.86
+      - 3.73
+      - 3.6
+      - 3.45
+      - 3.29
+      - 3.09
+      - 2.88
+      - 2.86
+      - 2.83
+      - 2.92
+      - 3.01
+      - 3.1
+      - 3.19
+      - 3.12
+      - 3.05
+      - 2.89
+      - 2.72
+      - 2.61
+      - 2.49
+      - 2.38
+      - 2.27
+      - 2.26
+      - 2.25
+      - 2.09
+      - 1.93
+      - 1.98
+      - 2.02
+      - 1.94
+      - 1.85
+      - 1.93
+      - 2.0
+      - 1.96
+      - 1.91
+      - 1.94
+      - 1.97
+      - 2.04
+      - 2.11
+      - 2.12
+      - 2.13
+      - 2.0
+      - 1.87
+      - 1.91
+      - 1.94
+      - 1.89
+      - 1.83
+      - 1.89
+      - 1.94
+      - 1.9
+      - 1.85
+      - 1.85
+      - 1.85
+      - 1.84
+      - 1.82
+      - 1.88
+      - 1.94
+      - 2.09
+      - 2.23
+      - 2.37
+      - 2.5
+      - 2.48
+      - 2.46
+      - 2.55
+      - 2.64
+      - 2.68
+      - 2.72
+      - 2.94
+      - 3.15
+      - 3.24
+      - 3.33
+      - 3.41
+      - 3.48
+      - 3.53
+      - 3.57
+      - 3.65
+      - 3.72
+      - 3.74
+      - 3.76
+      - 3.72
+      - 3.67
+      - 3.62
+      - 3.57
+      - 3.51
+      - 3.46
+      - 3.65
+      - 3.84
+      - 3.84
+      - 3.84
+      - 3.81
+      - 3.78
+      - 3.84
+      - 3.9
+      - 3.96
+      - 4.01
+      - 4.05
+      - 4.09
+      - 4.15
+      - 4.22
+      - 4.19
+      - 4.16
+      - 4.12
+      - 4.08
+      - 4.15
+      - 4.21
+      - 4.37
+      - 4.53
+      - 4.78
+      - 5.02
+      - 4.96
+      - 4.89
+      - 4.98
+      - 5.08
+      - 5.18
+      - 5.28
+      - 5.44
+      - 5.6
+      - 5.58
+      - 5.56
+      - 5.56
+      - 5.56
+      - 5.64
+      - 5.71
+      - 5.85
+      - 5.98
+      - 6.1
+      - 6.21
+      - 6.27
+      - 6.33
+      - 6.37
+      - 6.41
+      - 6.43
+      - 6.44
+      - 6.37
+    :configuration:
+      :name: 'Frost Protection: cold weekend'
+      :chart1_type: :column
+      :series_breakdown: :none
+      :timescale:
+      - :frostday_3: 0
+      :x_axis: :datetime
+      :meter_definition: :allheat
+      :yaxis_units: :kw
+      :yaxis_scaling: :none
+      :y2_axis: :temperature
+      :y_axis_label: kW
+      :min_combined_school_date: 2018-09-01
+      :max_combined_school_date: 2022-07-12
+    :name: :frost
+    :advice_header: "\n    \n    \n      <p>\n      'Frost Protection' is a feature
+      built into most school boiler controllers\n      which turns the heating on
+      when it is cold outside in order to prevent\n      frost damage to hot and cold
+      water pipework.\n      </p>\n      <p>\n      A well programmed control will
+      turn the boiler on if a number of conditions are met, typically:\n      </p>\n
+      \     <ul>\n        <li>The outside temperature is below 4C (the point at which
+      water starts to freeze and expand)</li>\n        <li>And, the internal temperature
+      is below 8C</li>\n        <li>And, for some controllers if the temperature of
+      the water in the central heating system is below 2C</li>\n      </ul>\n      <p>\n
+      \     Typically, this means the 'frost protection' only turns the heating on
+      if it is cold outside, AND\n      the heating has been off for at least 24 hours
+      - as it normally takes this long for a school to\n      cool down and the internal
+      temperature of the school to drop below 8C. So, in general in very cold weather\n
+      \     the heating would probably not come on a Saturday, but on a Sunday when
+      the school has cooled down\n      sufficiently.\n      </p>\n      <p>\n      Although
+      'frost protection' uses energy and therefore it costs money to run, it is cheaper
+      than\n      the damage which might be caused from burst pipes. Some schools
+      don't have frost protection\n      configured for their boilers, and although
+      this saves money for most of the year, it is common\n      for these schools
+      to leave their heating on during winter holidays, which is significantly more
+      expensive\n      than if frost protection is allowed to provide the protection
+      automatically.\n      </p>\n    \n    \n    \n    <p>\n      The graph below
+      which is for the coldest weekend of recent years, attempts to demonstrate whether\n
+      \     </p>\n      <ol type=\"a\">\n      <li>Frost protection is configured
+      for your school and</li>\n      <li>whether it is configured correctly and running
+      efficiently</li>\n      </ol>\n      <p>You can check another frosty weekend
+      by clicking the move forward/back frosty day buttons</p>\n    \n    \n  "
+    :advice_footer: "\n    \n    \n    <p>\n      The graph shows both the gas consumption
+      (blue bars), and the outside temperature\n      (dark blue line) on a cold weekend
+      (Saturday through to Monday).\n      If frost protection is working the heating
+      (gas consumption) should come on when\n      the temperature drops below 4C
+      - but not immediately on the Saturday as the\n      'thermal mass' of the building
+      will mean the internal temperature stays above 8C\n      for at least 24 hours
+      after the school closed on a Friday.\n    </p>\n    <p>\n      If the outside
+      temperature rises above 4C, the heating should go off. The amount\n      of
+      gas consumption (blue bars) should be about half the consumption of a school\n
+      \     day (e.g. the Monday), as the heating requirement is roughly proportional\n
+      \     to the difference between the inside and outside temperatures, and because\n
+      \     the school is only being heated to 8C rather than the 20C of a school\n
+      \     day then much less energy will be used.\n    </p>\n    <p>\n    Can you
+      see any of these characteristics in the graph above, or the two other example\n
+      \   graphs for your school below?\n    </p>\n    \n    \n      <p>\n      The
+      graphs can be difficult to interpret sometimes, so if you are uncertain about
+      what\n      you are seeing please <a href=\"mailto:hello@energysparks.uk?subject=Boiler
+      Frost Protection&\">contact us</a>\n      and we will look for you, and let
+      you know what we think.\n      </p>\n      <p>\n      A working frost protection
+      system can save a school money:\n      </p>\n      <ul>\n        <li>Without
+      frost protection, a school either risks pipework damage, or\n            is
+      forced to leave their heating on at maximum power over cold weeks and holidays</li>\n
+      \       <li>Sometimes, frost protection is mis-configured, so comes on when
+      the temperature is above 4C outside,\n        or is configured to come on and
+      bring the school up to too high a temperature e.g. 20C.</li>\n      </ul>\n
+      \   \n    \n  "
+    :calculation_time: 0.006140999961644411
+- :type: :html
+  :content: |-
+    <p>
+     The graph shows both the gas consumption (blue bars), and the outside temperature
+     (dark blue line) on a cold weekend (Saturday through to Monday).
+     If frost protection is working the heating (gas consumption) should come on when
+     the temperature drops below 4C - but not immediately on the Saturday as the
+     'thermal mass' of the building will mean the internal temperature stays above 8C
+     for at least 24 hours after the school closed on a Friday.
+     </p>
+     <p>
+     If the outside temperature rises above 4C, the heating should go off. The amount
+     of gas consumption (blue bars) should be about half the consumption of a school
+     day (e.g. the Monday), as the heating requirement is roughly proportional
+     to the difference between the inside and outside temperatures, and because
+     the school is only being heated to 8C rather than the 20C of a school
+     day then much less energy will be used.
+     </p>
+     <p>
+     Can you see any of these characteristics in the graph above, or the two other example
+     graphs for your school below?
+     </p>
+     <p>
+     The graphs can be difficult to interpret sometimes, so if you are uncertain about what
+     you are seeing please <a href="mailto:hello@energysparks.uk?subject=Boiler Frost Protection&">contact us</a>
+     and we will look for you, and let you know what we think.
+     </p>
+     <p>
+     A working frost protection system can save a school money:
+     </p>
+     <ul>
+     <li>Without frost protection, a school either risks pipework damage, or
+     is forced to leave their heating on at maximum power over cold weeks and holidays</li>
+     <li>Sometimes, frost protection is mis-configured, so comes on when the temperature is above 4C outside,
+     or is configured to come on and bring the school up to too high a temperature e.g. 20C.</li>
+     </ul>

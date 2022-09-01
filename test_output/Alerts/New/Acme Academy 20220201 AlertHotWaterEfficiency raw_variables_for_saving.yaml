@@ -1,0 +1,154 @@
+---
+AlertHotWaterEfficiency:summer_hot_water_efficiency_chart: :hotwater_alert
+AlertHotWaterEfficiency:theoretical_annual_hot_water_requirement_litres: 936975
+AlertHotWaterEfficiency:theoretical_annual_hot_water_requirement_kwh: 27328.4375
+AlertHotWaterEfficiency:avg_gas_per_pupil_£: 2.181888734391259
+AlertHotWaterEfficiency:benchmark_existing_gas_efficiency: 0.39100298129456157
+AlertHotWaterEfficiency:benchmark_gas_better_control_saving_£: 593.9671237499997
+AlertHotWaterEfficiency:benchmark_point_of_use_electric_saving_£: -2941.4330512499996
+AlertHotWaterEfficiency:electric_hot_water_saving_co2: 9639.33739125
+AlertHotWaterEfficiency:existing_gas_annual_kwh: 69893.169125
+AlertHotWaterEfficiency:gas_better_control_annual_kwh: 50094.265000000014
+AlertHotWaterEfficiency:point_of_use_electric_annual_kwh: 33588.1875
+AlertHotWaterEfficiency:existing_gas_annual_£: 2096.79507375
+AlertHotWaterEfficiency:gas_better_control_annual_£: 1502.8279500000003
+AlertHotWaterEfficiency:point_of_use_electric_annual_£: 5038.228125
+AlertHotWaterEfficiency:existing_gas_annual_co2: 14677.565516249999
+AlertHotWaterEfficiency:gas_better_control_annual_co2: 10519.795650000002
+AlertHotWaterEfficiency:point_of_use_electric_annual_co2: 5038.228125
+AlertHotWaterEfficiency:existing_gas_efficiency: 0.39100298129456157
+AlertHotWaterEfficiency:gas_better_control_efficiency: 0.5455402429799099
+AlertHotWaterEfficiency:point_of_use_electric_efficiency: 0.813632396806169
+AlertHotWaterEfficiency:gas_better_control_saving_£: 593.9671237499997
+AlertHotWaterEfficiency:point_of_use_electric_saving_£: -2941.4330512499996
+AlertHotWaterEfficiency:gas_better_control_saving_£_percent: 0.2832738073386079
+AlertHotWaterEfficiency:point_of_use_electric_saving_£_percent: -1.4028233316999414
+AlertHotWaterEfficiency:gas_better_control_saving_co2: 4157.769866249997
+AlertHotWaterEfficiency:point_of_use_electric_saving_co2: 9639.33739125
+AlertHotWaterEfficiency:gas_better_control_saving_co2_percent: 0.2832738073386079
+AlertHotWaterEfficiency:point_of_use_electric_saving_co2_percent: 0.6567395240428655
+AlertHotWaterEfficiency:existing_gas_capex: 0.0
+AlertHotWaterEfficiency:gas_better_control_capex: 0.0
+AlertHotWaterEfficiency:point_of_use_electric_capex: 19600.0
+AlertHotWaterEfficiency:gas_better_control_payback_years: 0.0
+AlertHotWaterEfficiency:point_of_use_electric_payback_years: -6.663418700510872
+AlertHotWaterEfficiency:school_day_open_daily_kwh: 256.8936666666667
+AlertHotWaterEfficiency:school_day_open_daily_£: 7.706810000000001
+AlertHotWaterEfficiency:school_day_open_annual_kwh: 50094.265000000014
+AlertHotWaterEfficiency:school_day_open_annual_£: 1502.8279500000003
+AlertHotWaterEfficiency:school_day_closed_daily_kwh: 32.387866666666596
+AlertHotWaterEfficiency:school_day_closed_daily_£: 0.9716359999999978
+AlertHotWaterEfficiency:school_day_closed_annual_kwh: 6315.633999999986
+AlertHotWaterEfficiency:school_day_closed_annual_£: 189.46901999999957
+AlertHotWaterEfficiency:weekend_daily_kwh: 4.2845
+AlertHotWaterEfficiency:weekend_daily_£: 0.128535
+AlertHotWaterEfficiency:weekend_annual_kwh: 334.19100000000003
+AlertHotWaterEfficiency:weekend_annual_£: 10.025730000000001
+AlertHotWaterEfficiency:holiday_daily_kwh: 144.49537500000002
+AlertHotWaterEfficiency:holiday_daily_£: 4.33486125
+AlertHotWaterEfficiency:holiday_annual_kwh: 13149.079125000002
+AlertHotWaterEfficiency:holiday_annual_£: 394.47237375000003
+AlertHotWaterEfficiency:total_annual_kwh: 69893.169125
+AlertHotWaterEfficiency:total_annual_£: 2096.79507375
+AlertHotWaterEfficiency:enough_data: :enough
+AlertHotWaterEfficiency:a: 5828.740070229202
+AlertHotWaterEfficiency:b: -342.9294030535025
+AlertHotWaterEfficiency:school_days_heating: 145
+AlertHotWaterEfficiency:school_days_heating_adjective: poor
+AlertHotWaterEfficiency:school_days_heating_rating_out_of_10: 2
+AlertHotWaterEfficiency:average_school_heating_days: 115
+AlertHotWaterEfficiency:non_school_days_heating: 30
+AlertHotWaterEfficiency:non_school_days_heating_adjective: poor
+AlertHotWaterEfficiency:non_school_days_heating_rating_out_of_10: 4
+AlertHotWaterEfficiency:average_non_school_day_heating_days: 24
+AlertHotWaterEfficiency:non_heating_only: false
+AlertHotWaterEfficiency:kitchen_only: false
+AlertHotWaterEfficiency:hot_water_only: false
+AlertHotWaterEfficiency:heating_only: false
+AlertHotWaterEfficiency:relevance: :relevant
+AlertHotWaterEfficiency:analysis_date: 2022-02-01
+AlertHotWaterEfficiency:status: 
+AlertHotWaterEfficiency:rating: 6.2
+AlertHotWaterEfficiency:term: :shortterm
+AlertHotWaterEfficiency:bookmark_url: https://blog.energysparks.uk/alerts#HotWaterEfficiency
+AlertHotWaterEfficiency:max_asofdate: 2022-07-12
+AlertHotWaterEfficiency:pupils: 961
+AlertHotWaterEfficiency:floor_area: 5932.0
+AlertHotWaterEfficiency:school_type: :secondary
+AlertHotWaterEfficiency:school_name: Acme Academy
+AlertHotWaterEfficiency:school_activation_date: 
+AlertHotWaterEfficiency:school_creation_date: 2020-10-08
+AlertHotWaterEfficiency:urn: 136770
+AlertHotWaterEfficiency:one_year_saving_£: !ruby/range
+  begin: -2941.4330512499996
+  end: 593.9671237499997
+  excl: false
+AlertHotWaterEfficiency:one_year_saving_£_low: -2941.4330512499996
+AlertHotWaterEfficiency:one_year_saving_£_high: 593.9671237499997
+AlertHotWaterEfficiency:one_year_saving_co2: 9639.33739125
+AlertHotWaterEfficiency:ten_year_saving_co2: 96393.37391249998
+AlertHotWaterEfficiency:average_one_year_saving_£: -1173.73296375
+AlertHotWaterEfficiency:average_ten_year_saving_£: -11737.329637499999
+AlertHotWaterEfficiency:ten_year_saving_£: !ruby/range
+  begin: -29414.330512499997
+  end: 5939.671237499997
+  excl: false
+AlertHotWaterEfficiency:ten_year_saving_£_low: -29414.330512499997
+AlertHotWaterEfficiency:ten_year_saving_£_high: 5939.671237499997
+AlertHotWaterEfficiency:payback_years: 
+AlertHotWaterEfficiency:average_payback_years: -12.281328415575056
+AlertHotWaterEfficiency:capital_cost: !ruby/range
+  begin: 9610.0
+  end: 19220.0
+  excl: false
+AlertHotWaterEfficiency:capital_cost_low: 9610.0
+AlertHotWaterEfficiency:capital_cost_high: 19220.0
+AlertHotWaterEfficiency:average_capital_cost: 14415.0
+AlertHotWaterEfficiency:timescale: year
+AlertHotWaterEfficiency:time_of_year_relevance: 5.0
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Annual kWh: 69893.169125
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Annual Cost £: 2096.79507375
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Annual CO2/kg: 14677.565516249999
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Efficiency: 0.39100298129456157
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Saving £: 
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Saving £ percent: 
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Saving CO2: 
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Saving CO2 percent: 
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Capital Cost: 0.0
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Current setup:Payback (years): 
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Annual kWh: 50094.265000000014
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Annual Cost £: 1502.8279500000003
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Annual CO2/kg: 10519.795650000002
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Efficiency: 0.5455402429799099
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Saving £: 593.9671237499997
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Saving £ percent: 0.2832738073386079
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Saving CO2: 4157.769866249997
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Saving CO2 percent: 0.2832738073386079
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Capital Cost: 0.0
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Improved boiler control:Payback (years): 0.0
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Annual kWh: 33588.1875
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Annual Cost £: 5038.228125
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Annual CO2/kg: 5038.228125
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Efficiency: 0.813632396806169
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Saving £: -2941.4330512499996
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Saving £ percent: -1.4028233316999414
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Saving CO2: 9639.33739125
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Saving CO2 percent: 0.6567395240428655
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Capital Cost: 19600.0
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Point of use electric heaters:Payback (years): -6.663418700510872
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:School day (open):Average daily kWh: 256.8936666666667
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:School day (open):Average daily £: 7.706810000000001
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:School day (open):Annual kWh: 50094.265000000014
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:School day (open):Annual £: 1502.8279500000003
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:School day (closed):Average daily kWh: 32.387866666666596
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:School day (closed):Average daily £: 0.9716359999999978
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:School day (closed):Annual kWh: 6315.633999999986
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:School day (closed):Annual £: 189.46901999999957
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Weekends:Average daily kWh: 4.2845
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Weekends:Average daily £: 0.128535
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Weekends:Annual kWh: 334.19100000000003
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Weekends:Annual £: 10.025730000000001
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Holidays:Average daily kWh: 144.49537500000002
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Holidays:Average daily £: 4.33486125
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Holidays:Annual kWh: 13149.079125000002
+AlertHotWaterEfficiency:AlertHotWaterEfficiency:Holidays:Annual £: 394.47237375000003

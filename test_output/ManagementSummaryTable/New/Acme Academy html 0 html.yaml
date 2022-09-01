@@ -1,0 +1,68 @@
+--- "\n    \n    <table class=\"table table-striped table-sm\">\n      \n        \n
+  \       <thead>\n          \n          <tr class=\"thead-dark\">\n            \n
+  \             <th scope=\"col\" class=\"text-center\" >  </th>\n            \n              <th
+  scope=\"col\" class=\"text-center\" > Annual Use (kWh) </th>\n            \n              <th
+  scope=\"col\" class=\"text-center\" > Annual CO2 (kg) </th>\n            \n              <th
+  scope=\"col\" class=\"text-center\" > Annual Cost </th>\n            \n              <th
+  scope=\"col\" class=\"text-center\" > Change from last year </th>\n            \n
+  \             <th scope=\"col\" class=\"text-center\" > Change in last 4 school
+  weeks </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+  > Potential savings </th>\n            \n          </tr>\n        </thead>\n      \n
+  \     <tbody>\n        \n          <tr>\n            \n              \n    <td>Electricity
+  </td>\n  \n            \n              \n    <td class=\"text-right\">470,000 </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">88,000 </td>\n  \n
+  \           \n              \n    <td class=\"text-right\">&pound;71,000 </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">+10&percnt; </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">no recent data </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">&pound;38,000 </td>\n
+  \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+  \   <td>Gas </td>\n  \n            \n              \n    <td class=\"text-right\">580,000
+  </td>\n  \n            \n              \n    <td class=\"text-right\">120,000 </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">&pound;17,000 </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">-19&percnt; </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">no recent data </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">&pound;3,200 </td>\n
+  \ \n            \n          </tr>\n        \n      </tbody>\n      \n    </table>\n
+  \   \n  \n    \n    <table class=\"table table-striped table-sm\">\n      \n        \n
+  \       <thead>\n          \n          <tr class=\"thead-dark\">\n            \n
+  \             <th scope=\"col\" class=\"text-center\" >  </th>\n            \n              <th
+  scope=\"col\" class=\"text-center\" >  </th>\n            \n              <th scope=\"col\"
+  class=\"text-center\" > Use (kWh) </th>\n            \n              <th scope=\"col\"
+  class=\"text-center\" > CO2 (kg) </th>\n            \n              <th scope=\"col\"
+  class=\"text-center\" > Cost </th>\n            \n              <th scope=\"col\"
+  class=\"text-center\" > Potential savings </th>\n            \n              <th
+  scope=\"col\" class=\"text-center\" > % Change </th>\n            \n              <th
+  scope=\"col\" class=\"text-center\" >  </th>\n            \n          </tr>\n        </thead>\n
+  \     \n      <tbody>\n        \n          <tr>\n            \n              \n
+  \   <td>Electricity </td>\n  \n            \n              \n    <td class=\"text-right\">Last
+  week </td>\n  \n            \n              \n    <td class=\"text-right\">7,800
+  </td>\n  \n            \n              \n    <td class=\"text-right\">1,400 </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">&pound;1,200 </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">n/a </td>\n  \n            \n
+  \             \n    <td class=\"text-right\">n/a </td>\n  \n            \n              \n
+  \   <td class=\"text-right\">false </td>\n  \n            \n          </tr>\n        \n
+  \         <tr>\n            \n              \n    <td> </td>\n  \n            \n
+  \             \n    <td class=\"text-right\">Annual </td>\n  \n            \n              \n
+  \   <td class=\"text-right\">470,000 </td>\n  \n            \n              \n    <td
+  class=\"text-right\">88,000 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;71,000
+  </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;38,000
+  </td>\n  \n            \n              \n    <td class=\"text-right\">+10&percnt;
+  </td>\n  \n            \n              \n    <td class=\"text-right\">true </td>\n
+  \ \n            \n          </tr>\n        \n          <tr>\n            \n              \n
+  \   <td>Gas </td>\n  \n            \n              \n    <td class=\"text-right\">Last
+  week </td>\n  \n            \n              \n    <td class=\"text-right\">2,400
+  </td>\n  \n            \n              \n    <td class=\"text-right\">510 </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">&pound;73 </td>\n
+  \ \n            \n              \n    <td class=\"text-right\">n/a </td>\n  \n            \n
+  \             \n    <td class=\"text-right\">n/a </td>\n  \n            \n              \n
+  \   <td class=\"text-right\">false </td>\n  \n            \n          </tr>\n        \n
+  \         <tr>\n            \n              \n    <td> </td>\n  \n            \n
+  \             \n    <td class=\"text-right\">Annual </td>\n  \n            \n              \n
+  \   <td class=\"text-right\">580,000 </td>\n  \n            \n              \n    <td
+  class=\"text-right\">120,000 </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;17,000
+  </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;3,200
+  </td>\n  \n            \n              \n    <td class=\"text-right\">-19&percnt;
+  </td>\n  \n            \n              \n    <td class=\"text-right\">true </td>\n
+  \ \n            \n          </tr>\n        \n      </tbody>\n      \n    </table>\n
+  \   \n  <p style=\"text-align: right;\"><small>Electricity data range: Jan 2019
+  to Jul 2022 Gas data range: Sep 2018 to Jul 2022. <b><u>More information</u></b></small></p>"

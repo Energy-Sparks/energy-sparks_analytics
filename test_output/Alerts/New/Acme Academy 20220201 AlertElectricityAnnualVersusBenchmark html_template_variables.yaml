@@ -1,0 +1,52 @@
+---
+:last_year_kwh: 450,000 kWh
+:last_year_£: "&pound;69,000"
+:previous_year_£: "&pound;62,000"
+:last_year_co2: 87,000 kg CO2
+:one_year_benchmark_by_pupil_kwh: 310,000 kWh
+:one_year_benchmark_by_pupil_£: "&pound;47,000"
+:one_year_saving_versus_benchmark_kwh: 140,000 kWh
+:one_year_saving_versus_benchmark_£: "&pound;21,000"
+:one_year_saving_versus_benchmark_adjective: higher
+:one_year_exemplar_by_pupil_kwh: 220,000 kWh
+:one_year_exemplar_by_pupil_£: "&pound;33,000"
+:one_year_saving_versus_exemplar_kwh: 230,000 kWh
+:one_year_saving_versus_exemplar_£: "&pound;35,000"
+:one_year_saving_versus_exemplar_co2: '44148.40659259853'
+:one_year_saving_versus_exemplar_adjective: higher
+:one_year_electricity_per_pupil_kwh: 470 kWh
+:one_year_electricity_per_pupil_£: "&pound;72"
+:one_year_electricity_per_pupil_co2: 91 kg CO2
+:one_year_electricity_per_floor_area_kwh: 76 kWh
+:one_year_electricity_per_floor_area_£: "&pound;12"
+:per_pupil_electricity_benchmark_£: "&pound;49"
+:percent_difference_from_average_per_pupil: "+45%"
+:percent_difference_adjective: significantly above
+:simple_percent_difference_adjective: above
+:summary: "£69,000pa, +45% above average"
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: bad
+:rating: '0.0'
+:term: longterm
+:bookmark_url: https://blog.energysparks.uk/alerts#AnnualElectricity
+:max_asofdate: Wednesday 13 Jul 2022
+:pupils: '961'
+:floor_area: 5,932 m<sup>2</sup>
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "&pound;35,000"
+:one_year_saving_co2: 44,000 kg CO2
+:ten_year_saving_co2: 440,000 kg CO2
+:average_one_year_saving_£: "&pound;35,000"
+:average_ten_year_saving_£: "&pound;350,000"
+:ten_year_saving_£: "&pound;350,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: 0p
+:average_capital_cost: 0p
+:timescale: last year
+:time_of_year_relevance: '5.0'

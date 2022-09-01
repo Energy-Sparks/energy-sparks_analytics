@@ -1,0 +1,60 @@
+---
+:last_week_end_kwh: 1,200 kWh
+:last_weekend_cost_£: "£36"
+:last_weekend_cost_co2: 250 kg CO2
+:last_year_weekend_gas_kwh: 50,000 kWh
+:last_year_weekend_gas_£: "£1,500"
+:last_year_weekend_gas_co2: 11,000 kg CO2
+:average_weekend_gas_kwh: 960 kWh
+:average_weekend_gas_£: "£29"
+:average_weekend_gas_co2: 200 kg CO2
+:percent_increase_on_average_weekend: 24%
+:projected_percent_of_annual: 9.7%
+:last_5_weeks_average_weekend_kwh: 500 kWh
+:last_5_weeks_average_weekend_£: "£15"
+:last_5_weeks_average_weekend_co2: 100 kg CO2
+:percent_increase_on_last_5_weekends: 140%
+:a: 5,800 kWh/day
+:b: "-340 kWh/day/C"
+:school_days_heating: 145 days
+:school_days_heating_adjective: poor
+:school_days_heating_rating_out_of_10: '2'
+:average_school_heating_days: '115'
+:non_school_days_heating: 30 days
+:non_school_days_heating_adjective: poor
+:non_school_days_heating_rating_out_of_10: '4'
+:average_non_school_day_heating_days: '24'
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: bad
+:rating: '0.0'
+:term: shortterm
+:bookmark_url: https://blog.energysparks.uk/alerts#WeekendGas
+:max_asofdate: Tuesday 12 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "£360"
+:one_year_saving_co2: 2,500 kg CO2
+:ten_year_saving_co2: 25,000 kg CO2
+:average_one_year_saving_£: "£360"
+:average_ten_year_saving_£: "£3,600"
+:ten_year_saving_£: "£3,600"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: 0p
+:average_capital_cost: 0p
+:timescale: last weekend
+:time_of_year_relevance: '7.5'
+:one_year_saving_£_high: "£360"
+:one_year_saving_£_low: "£360"
+:ten_year_saving_£_high: "£3,600"
+:ten_year_saving_£_low: "£3,600"
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: 0p
+:capital_cost_low: 0p

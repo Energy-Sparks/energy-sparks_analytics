@@ -1,0 +1,64 @@
+---
+AlertHeatingOnNonSchoolDays:number_of_non_heating_days_last_year: 133
+AlertHeatingOnNonSchoolDays:average_number_of_non_heating_days_last_year: 24
+AlertHeatingOnNonSchoolDays:exemplar_number_of_non_heating_days_last_year: 5
+AlertHeatingOnNonSchoolDays:non_heating_day_adjective: bad
+AlertHeatingOnNonSchoolDays:kwh_below_frost_on_unoccupied_days: 42336.556000000004
+AlertHeatingOnNonSchoolDays:total_kwh_on_unoccupied_days: 87281.30899999998
+AlertHeatingOnNonSchoolDays:below_frost_£: 1270.09668
+AlertHeatingOnNonSchoolDays:total_on_unoccupied_days_£: 2618.4392699999994
+AlertHeatingOnNonSchoolDays:total_on_unoccupied_days_co2: 18329.074889999996
+AlertHeatingOnNonSchoolDays:unoccupied_above_frost_£: 1348.3425899999993
+AlertHeatingOnNonSchoolDays:unoccupied_above_frost_co2: 9438.398129999994
+AlertHeatingOnNonSchoolDays:heating_on_off_chart: :heating_on_off_by_week_heating_school_non_school_days_only
+AlertHeatingOnNonSchoolDays:enough_data: :enough
+AlertHeatingOnNonSchoolDays:a: 5828.740070229202
+AlertHeatingOnNonSchoolDays:b: -342.9294030535025
+AlertHeatingOnNonSchoolDays:school_days_heating: 145
+AlertHeatingOnNonSchoolDays:school_days_heating_adjective: poor
+AlertHeatingOnNonSchoolDays:school_days_heating_rating_out_of_10: 2
+AlertHeatingOnNonSchoolDays:average_school_heating_days: 115
+AlertHeatingOnNonSchoolDays:non_school_days_heating: 30
+AlertHeatingOnNonSchoolDays:non_school_days_heating_adjective: poor
+AlertHeatingOnNonSchoolDays:non_school_days_heating_rating_out_of_10: 4
+AlertHeatingOnNonSchoolDays:average_non_school_day_heating_days: 24
+AlertHeatingOnNonSchoolDays:non_heating_only: false
+AlertHeatingOnNonSchoolDays:kitchen_only: false
+AlertHeatingOnNonSchoolDays:hot_water_only: false
+AlertHeatingOnNonSchoolDays:heating_only: false
+AlertHeatingOnNonSchoolDays:relevance: :relevant
+AlertHeatingOnNonSchoolDays:analysis_date: 2022-02-01
+AlertHeatingOnNonSchoolDays:status: :bad
+AlertHeatingOnNonSchoolDays:rating: 0
+AlertHeatingOnNonSchoolDays:term: :longterm
+AlertHeatingOnNonSchoolDays:bookmark_url: https://blog.energysparks.uk/alerts#HeatingOnSchoolDays
+AlertHeatingOnNonSchoolDays:max_asofdate: 2022-07-12
+AlertHeatingOnNonSchoolDays:pupils: 961
+AlertHeatingOnNonSchoolDays:floor_area: 5932.0
+AlertHeatingOnNonSchoolDays:school_type: :secondary
+AlertHeatingOnNonSchoolDays:school_name: Acme Academy
+AlertHeatingOnNonSchoolDays:school_activation_date: 
+AlertHeatingOnNonSchoolDays:school_creation_date: 2020-10-08
+AlertHeatingOnNonSchoolDays:urn: 136770
+AlertHeatingOnNonSchoolDays:one_year_saving_£: !ruby/range
+  begin: 1348.3425899999993
+  end: 1348.3425899999993
+  excl: false
+AlertHeatingOnNonSchoolDays:one_year_saving_£_low: 1348.3425899999993
+AlertHeatingOnNonSchoolDays:one_year_saving_£_high: 1348.3425899999993
+AlertHeatingOnNonSchoolDays:one_year_saving_co2: 9438.398129999994
+AlertHeatingOnNonSchoolDays:ten_year_saving_co2: 94383.98129999994
+AlertHeatingOnNonSchoolDays:average_one_year_saving_£: 1348.3425899999993
+AlertHeatingOnNonSchoolDays:average_ten_year_saving_£: 13483.425899999993
+AlertHeatingOnNonSchoolDays:ten_year_saving_£: !ruby/range
+  begin: 13483.425899999993
+  end: 13483.425899999993
+  excl: false
+AlertHeatingOnNonSchoolDays:ten_year_saving_£_low: 13483.425899999993
+AlertHeatingOnNonSchoolDays:ten_year_saving_£_high: 13483.425899999993
+AlertHeatingOnNonSchoolDays:payback_years: 
+AlertHeatingOnNonSchoolDays:average_payback_years: 0.0
+AlertHeatingOnNonSchoolDays:capital_cost: 
+AlertHeatingOnNonSchoolDays:average_capital_cost: 0.0
+AlertHeatingOnNonSchoolDays:timescale: 1 year
+AlertHeatingOnNonSchoolDays:time_of_year_relevance: 7.5

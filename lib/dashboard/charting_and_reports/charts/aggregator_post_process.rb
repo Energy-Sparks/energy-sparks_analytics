@@ -158,7 +158,7 @@ class AggregatorPostProcess < AggregatorBase
   def reformat_x_axis
     format = chart_config.x_axis_reformat
     if format.is_a?(Hash) && format.key?(:date)
-      results.x_axis.map! { |date| date.is_a?(String) ? date : I18n.l(date, format[:date]) }
+      results.x_axis.map! { |date| date.is_a?(String) ? date : I18n.l(date, format: format[:date]) }
     else
       raise EnergySparksBadChartSpecification.new("Unexpected x axis reformat chart configuration #{format}")
     end

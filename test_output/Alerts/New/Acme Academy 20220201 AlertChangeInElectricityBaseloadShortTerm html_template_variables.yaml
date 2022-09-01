@@ -1,0 +1,48 @@
+---
+:average_baseload_last_year_kw: 24 kW
+:average_baseload_last_week_kw: 27 kW
+:change_in_baseload_kw: 2.6 kW
+:last_year_baseload_kwh: 240,000 kWh
+:last_week_baseload_kwh: 4,500 kWh
+:last_week_change_in_baseload_kwh: 430 kWh
+:next_year_change_in_baseload_kwh: 22,000 kWh
+:last_year_baseload_£: "&pound;36,000"
+:last_week_baseload_£: "&pound;690"
+:next_year_change_in_baseload_£: "&pound;3,400"
+:next_year_change_in_baseload_absolute_£: "&pound;3,400"
+:last_year_baseload_co2: 45,000 kg CO2
+:last_week_baseload_co2: 850 kg CO2
+:next_year_change_in_baseload_co2: 4,200 kg CO2
+:next_year_change_in_baseload_absolute_co2: 4,200 kg CO2
+:predicted_percent_increase_in_usage: 11&percnt;
+:predicted_percent_increase_in_usage_absolute: 11&percnt;
+:significant_increase_in_baseload: true
+:saving_in_annual_costs_through_10_percent_baseload_reduction: "&pound;3,600"
+:kw_value_at_10_percent_saving: 22 kW
+:one_year_baseload_chart: alert_1_year_baseload
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: bad
+:rating: '2.2'
+:term: shortterm
+:bookmark_url: https://blog.energysparks.uk/alerts#ElectricityBaseload
+:max_asofdate: Wednesday 13 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m<sup>2</sup>
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "&pound;3,400"
+:one_year_saving_co2: 4,200 kg CO2
+:ten_year_saving_co2: 42,000 kg CO2
+:average_one_year_saving_£: "&pound;3,400"
+:average_ten_year_saving_£: "&pound;34,000"
+:ten_year_saving_£: "&pound;34,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: ''
+:average_capital_cost: 0p
+:timescale: last week compared with average over last year
+:time_of_year_relevance: '5.0'

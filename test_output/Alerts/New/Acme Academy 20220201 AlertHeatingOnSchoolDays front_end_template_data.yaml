@@ -1,0 +1,58 @@
+---
+:number_of_heating_days_last_year: 145 days
+:average_number_of_heating_days_last_year: 115 days
+:exemplar_number_of_heating_days_last_year: 90 days
+:heating_day_adjective: poor
+:one_year_saving_reduced_days_to_average_kwh: 53,000 kWh
+:one_year_saving_reduced_days_to_exemplar_kwh: 110,000 kWh
+:one_year_saving_reduced_days_to_average_£: "£1,600"
+:one_year_saving_reduced_days_to_exemplar_£: "£3,400"
+:one_year_saving_reduced_days_to_average_co2: 11,000 kg CO2
+:one_year_saving_reduced_days_to_exemplar_co2: 24,000 kg CO2
+:one_year_saving_reduced_days_to_average_percent: 8.9%
+:one_year_saving_reduced_days_to_exemplar_percent: 19%
+:total_heating_day_kwh: 590,000 kWh
+:a: 5,800 kWh/day
+:b: "-340 kWh/day/C"
+:school_days_heating: 145 days
+:school_days_heating_adjective: poor
+:school_days_heating_rating_out_of_10: '2'
+:average_school_heating_days: '115'
+:non_school_days_heating: 30 days
+:non_school_days_heating_adjective: poor
+:non_school_days_heating_rating_out_of_10: '4'
+:average_non_school_day_heating_days: '24'
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: bad
+:rating: '2'
+:term: longterm
+:bookmark_url: https://blog.energysparks.uk/alerts#HeatingOnSchoolDays
+:max_asofdate: Tuesday 12 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "£1,600 to £3,400"
+:one_year_saving_co2: 24,000 kg CO2
+:ten_year_saving_co2: 240,000 kg CO2
+:average_one_year_saving_£: "£2,500"
+:average_ten_year_saving_£: "£25,000"
+:ten_year_saving_£: "£16,000 to £34,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: ''
+:average_capital_cost: 0p
+:timescale: 1 year
+:time_of_year_relevance: '2.5'
+:one_year_saving_£_high: "£1,600"
+:one_year_saving_£_low: "£3,400"
+:ten_year_saving_£_high: "£16,000"
+:ten_year_saving_£_low: "£34,000"
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: 
+:capital_cost_low: 

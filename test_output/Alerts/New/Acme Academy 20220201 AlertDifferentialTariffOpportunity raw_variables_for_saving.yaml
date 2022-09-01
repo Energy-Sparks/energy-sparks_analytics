@@ -1,0 +1,51 @@
+---
+AlertDifferentialTariffOpportunity:total_potential_savings_£: 14350.244000000017
+AlertDifferentialTariffOpportunity:total_potential_savings_percent: 0.19849603700755317
+AlertDifferentialTariffOpportunity:relevance: :relevant
+AlertDifferentialTariffOpportunity:analysis_date: 2022-02-01
+AlertDifferentialTariffOpportunity:status: 
+AlertDifferentialTariffOpportunity:rating: 0.0
+AlertDifferentialTariffOpportunity:term: 
+AlertDifferentialTariffOpportunity:bookmark_url: 
+AlertDifferentialTariffOpportunity:max_asofdate: 2022-07-13
+AlertDifferentialTariffOpportunity:pupils: 961
+AlertDifferentialTariffOpportunity:floor_area: 5932.0
+AlertDifferentialTariffOpportunity:school_type: :secondary
+AlertDifferentialTariffOpportunity:school_name: Acme Academy
+AlertDifferentialTariffOpportunity:school_activation_date: 
+AlertDifferentialTariffOpportunity:school_creation_date: 2020-10-08
+AlertDifferentialTariffOpportunity:urn: 136770
+AlertDifferentialTariffOpportunity:one_year_saving_£: !ruby/range
+  begin: 14350.244000000017
+  end: 14350.244000000017
+  excl: false
+AlertDifferentialTariffOpportunity:one_year_saving_£_low: 14350.244000000017
+AlertDifferentialTariffOpportunity:one_year_saving_£_high: 14350.244000000017
+AlertDifferentialTariffOpportunity:one_year_saving_co2: 0.0
+AlertDifferentialTariffOpportunity:ten_year_saving_co2: 0.0
+AlertDifferentialTariffOpportunity:average_one_year_saving_£: 14350.244000000017
+AlertDifferentialTariffOpportunity:average_ten_year_saving_£: 143502.44000000018
+AlertDifferentialTariffOpportunity:ten_year_saving_£: !ruby/range
+  begin: 143502.44000000018
+  end: 143502.44000000018
+  excl: false
+AlertDifferentialTariffOpportunity:ten_year_saving_£_low: 143502.44000000018
+AlertDifferentialTariffOpportunity:ten_year_saving_£_high: 143502.44000000018
+AlertDifferentialTariffOpportunity:payback_years: 
+AlertDifferentialTariffOpportunity:average_payback_years: 0.0
+AlertDifferentialTariffOpportunity:capital_cost: 
+AlertDifferentialTariffOpportunity:average_capital_cost: 0.0
+AlertDifferentialTariffOpportunity:timescale: year
+AlertDifferentialTariffOpportunity:time_of_year_relevance: 5.0
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1591058886735:Cost Estimate Differential Tariff(year): 12534.331999999997
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1591058886735:Cost Estimate Non-Differential Tariff(year): 15622.92799999999
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1591058886735:Saving(year): 3088.595999999994
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1591058886735:Current Tariff: non-differential
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1591058886735:Recommendation: consider
+  changing tariff to a differential tariff
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1580001320420:Cost Estimate Differential Tariff(year): 45410.287999999964
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1580001320420:Cost Estimate Non-Differential Tariff(year): 56671.93599999999
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1580001320420:Saving(year): 11261.648000000023
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1580001320420:Current Tariff: non-differential
+AlertDifferentialTariffOpportunity:AlertDifferentialTariffOpportunity:1580001320420:Recommendation: consider
+  changing tariff to a differential tariff

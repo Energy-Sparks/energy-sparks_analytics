@@ -1,0 +1,80 @@
+---
+:saving_kwh: 25,000 kWh
+:total_annual_£: "£88,000"
+:saving_co2: 61,000 kg CO2
+:holidays_percent: 15%
+:holiday_short_name: Spring half term
+:holiday_long_name: Spring half term 2022 (Sat 19 Feb 2022 to Sun 27 Feb 2022) spring_half_term
+  2021/2022
+:holiday_length_days: '9'
+:holiday_length_weekdays: '5'
+:holiday_length_weeks: '1'
+:holiday_start_date: Saturday 19 Feb 2022
+:holiday_end_date: Sunday 27 Feb 2022
+:holiday_start_date_doy: Saturday
+:meter_fuel_type_availability: both electricity and gas
+:last_year_holiday_gas_kwh: 21,000 kWh
+:last_year_holiday_gas_£: "£640"
+:last_year_holiday_gas_co2: 4,500 kg CO2
+:last_year_holiday_electricity_kwh: 6,500 kWh
+:holiday_floor_area: 5,932 kWh
+:holiday_pupils: 961 kWh
+:last_year_holiday_gas_kwh_per_floor_area: 3.6 kWh
+:last_year_holiday_electricity_kwh_per_floor_area: 6.7 kWh
+:last_year_holiday_electricity_£: "£970"
+:last_year_holiday_electricity_co2: 970 kg CO2
+:last_year_holiday_energy_costs_£: "£1,600"
+:last_year_holiday_energy_costs_co2: 5,500 kg CO2
+:name_of_last_year_holiday: Spring half term 2021
+:electricity_holidays_kwh: 72,000 kWh
+:electricity_total_annual_kwh: 470,000 kWh
+:electricity_holidays_percent: 15%
+:electricity_holidays_£: "£11,000"
+:electricity_total_annual_£: "£71,000"
+:electricity_potential_saving_kwh: 130,000 kWh
+:electricity_potential_saving_£: "£20,000"
+:electricity_potential_saving_co2: 25,000 kg CO2
+:electricity_rating: '0.6'
+:gas_holidays_kwh: 81,000 kWh
+:gas_total_annual_kwh: 580,000 kWh
+:gas_holidays_percent: 14%
+:gas_holidays_£: "£2,400"
+:gas_total_annual_£: "£17,000"
+:gas_potential_saving_kwh: 170,000 kWh
+:gas_potential_saving_£: "£5,100"
+:gas_potential_saving_co2: 36,000 kg CO2
+:gas_rating: '2.7'
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: ''
+:rating: '1.6500000000000001'
+:term: ''
+:bookmark_url: ''
+:max_asofdate: Saturday 22 Jul 2023
+:pupils: '961'
+:floor_area: 5,932 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "£25,000"
+:one_year_saving_co2: 61,000 kg CO2
+:ten_year_saving_co2: 610,000 kg CO2
+:average_one_year_saving_£: "£25,000"
+:average_ten_year_saving_£: "£250,000"
+:ten_year_saving_£: "£250,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: 0p
+:average_capital_cost: 0p
+:timescale: Unknown
+:time_of_year_relevance: '0.0'
+:one_year_saving_£_high: "£25,000"
+:one_year_saving_£_low: "£25,000"
+:ten_year_saving_£_high: "£250,000"
+:ten_year_saving_£_low: "£250,000"
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: 0p
+:capital_cost_low: 0p

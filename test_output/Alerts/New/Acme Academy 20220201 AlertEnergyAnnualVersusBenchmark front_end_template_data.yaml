@@ -1,0 +1,102 @@
+---
+:last_year_kwh: 1,000,000 kWh
+:last_year_£: "£88,000"
+:last_year_co2: 210,000 kg CO2
+:last_year_co2_tonnes: 210 tonnes CO2
+:last_year_electricity_co2: 88,000 kg CO2
+:last_year_gas_co2: 120,000 kg CO2
+:last_year_storage_heater_co2: ''
+:last_year_solar_pv_co2: ''
+:one_year_energy_per_pupil_kwh: 1,100 kWh
+:one_year_energy_per_pupil_£: "£92"
+:one_year_energy_per_pupil_co2: 220 kg CO2
+:one_year_energy_per_floor_area_kwh: 180 kWh
+:one_year_energy_per_floor_area_£: "£15"
+:one_year_energy_per_floor_area_co2: 35 kg CO2
+:percent_difference_from_average_per_pupil: "+89%"
+:percent_difference_adjective: significantly above
+:simple_percent_difference_adjective: above
+:summary: "£88,000pa"
+:trees_co2: 1,000 trees
+:recent_fuel_types_for_debug: electricity,gas
+:activation_date: '2020-10-08'
+:solar_type: ''
+:current_year_electricity_kwh: 470,000 kWh
+:previous_year_electricity_kwh: 420,000 kWh
+:previous_year_electricity_kwh_relative_percent: 0.1 kWh
+:current_year_gas_kwh: 580,000 kWh
+:previous_year_gas_kwh: 720,000 kWh
+:previous_year_gas_kwh_relative_percent: "-0.19 kWh"
+:current_year_energy_kwh: 1,000,000 kWh
+:previous_year_energy_kwh: 1,100,000 kWh
+:previous_year_energy_kwh_relative_percent: "-0.083 kWh"
+:current_year_electricity_co2: 88,000 kg CO2
+:previous_year_electricity_co2: 83,000 kg CO2
+:previous_year_electricity_co2_relative_percent: 0.07 kg CO2
+:current_year_gas_co2: 120,000 kg CO2
+:previous_year_gas_co2: 150,000 kg CO2
+:previous_year_gas_co2_relative_percent: "-0.19 kg CO2"
+:current_year_energy_co2: 210,000 kg CO2
+:previous_year_energy_co2: 230,000 kg CO2
+:previous_year_energy_co2_relative_percent: "-0.1 kg CO2"
+:current_year_electricity_£: "£71,000"
+:previous_year_electricity_£: "£64,000"
+:previous_year_electricity_£_relative_percent: 10p
+:current_year_gas_£: "£17,000"
+:previous_year_gas_£: "£22,000"
+:previous_year_gas_£_relative_percent: "-19p"
+:current_year_energy_£: "£88,000"
+:previous_year_energy_£: "£86,000"
+:previous_year_energy_£_relative_percent: 3p
+:activationyear_electricity_kwh: 460,000 kWh
+:activationyear_electricity_kwh_relative_percent: 0.023 kWh
+:activationyear_gas_kwh: 660,000 kWh
+:activationyear_gas_kwh_relative_percent: "-0.12 kWh"
+:activationyear_energy_kwh: 1,100,000 kWh
+:activationyear_energy_kwh_relative_percent: "-0.064 kWh"
+:activationyear_electricity_co2: 95,000 kg CO2
+:activationyear_electricity_co2_relative_percent: "-0.072 kg CO2"
+:activationyear_gas_co2: 140,000 kg CO2
+:activationyear_gas_co2_relative_percent: "-0.12 kg CO2"
+:activationyear_energy_co2: 230,000 kg CO2
+:activationyear_energy_co2_relative_percent: "-0.1 kg CO2"
+:activationyear_electricity_£: "£69,000"
+:activationyear_electricity_£_relative_percent: 3.40p
+:activationyear_gas_£: "£20,000"
+:activationyear_gas_£_relative_percent: "-12p"
+:activationyear_energy_£: "£89,000"
+:activationyear_energy_£_relative_percent: "-0.17p"
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: ''
+:rating: '0.0'
+:term: ''
+:bookmark_url: ''
+:max_asofdate: Tuesday  1 Feb 2022
+:pupils: '961'
+:floor_area: 5,900 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: ''
+:one_year_saving_co2: ''
+:ten_year_saving_co2: ''
+:average_one_year_saving_£: ''
+:average_ten_year_saving_£: ''
+:ten_year_saving_£: ''
+:payback_years: ''
+:average_payback_years: ''
+:capital_cost: 0p
+:average_capital_cost: ''
+:timescale: year
+:time_of_year_relevance: '5.0'
+:one_year_saving_£_high: 
+:one_year_saving_£_low: 
+:ten_year_saving_£_high: 
+:ten_year_saving_£_low: 
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: 0p
+:capital_cost_low: 0p

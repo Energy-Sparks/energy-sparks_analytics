@@ -1,0 +1,1285 @@
+---
+- :type: :title
+  :content: Your gas use out of school hours
+- :type: :enhanced_title
+  :content:
+    :title: Your gas use out of school hours
+    :rating: 2.7
+    :summary: "£10,000pa (59% of annual cost) "
+- :type: :html
+  :content: |-
+    <p>
+     This chart shows when you have used gas over the past 12 months.
+     59% of your gas usage is out of hours:
+     which is above the average
+     of 50%.
+     The best schools only consume 30% out of hours.
+     Reducing your school's out of hours usage to 30%
+     would save &pound;5,100 (170,000kWh) per year.
+     This saving is equivalent to the gas consumption of 12 homes <button class="btn btn-secondary" data-toggle="popover" data-container="body" data-placement="top" data-title="How we calculate this" data-content="A average uk home uses 14,000 kWh of gas Therefore 170,000 kWh &divide; 14,000 kWh/Homes gas = 12 homes (gas usage) "> See how we calculate this</button>
+     </p>
+- :type: :chart_name
+  :content: :daytype_breakdown_gas_tolerant
+- :type: :chart
+  :content:
+    :title: 'Breakdown by type of day/time: Gas'
+    :x_axis:
+    - No Dates
+    :x_axis_ranges:
+    - - 2021-07-14
+      - 2022-07-12
+    :x_data:
+      Holiday:
+      - 80943.82799999996
+      Weekend:
+      - 25450.427999999996
+      School Day Open:
+      - 236481.14599999986
+      School Day Closed:
+      - 237031.3639999999
+    :chart1_type: :pie
+    :chart1_subtype: 
+    :y_axis_label: kWh
+    :config_name: :daytype_breakdown_gas_tolerant
+    :subtitle: 14 Jul 2021 to 12 Jul 2022
+    :multi_chart_x_axis_ranges: []
+    :configuration:
+      :name: 'Breakdown by type of day/time: Gas'
+      :chart1_type: :pie
+      :meter_definition: :allheat
+      :x_axis: :nodatebuckets
+      :series_breakdown: :daytype
+      :yaxis_units: :kwh
+      :yaxis_scaling: :none
+      :timescale: :up_to_a_year
+      :subtitle: :daterange
+      :y_axis_label: kWh
+      :min_combined_school_date: 2018-09-01
+      :max_combined_school_date: 2022-07-12
+    :name: :daytype_breakdown_gas_tolerant
+    :advice_header: "\n    \n      <p>\n        This chart shows when you have used
+      gas  over the past 12 months.\n        59% of your gas usage is out of hours:\n
+      \       which is above the average\n        of 50%.\n        \n          The
+      best schools only consume 30% out of hours.\n          Reducing your school's
+      out of hours usage to 30%\n          would save &pound;5,100 (170,000kWh) per
+      year.\n          \n          \n            This saving is equivalent to the
+      gas consumption of 12 homes <button class=\"btn btn-secondary\" data-toggle=\"popover\"
+      data-container=\"body\" data-placement=\"top\" data-title=\"How we calculate
+      this\" data-content=\"A average uk home uses 14,000 kWh of gas Therefore 170,000
+      kWh  &divide; 14,000 kWh/Homes gas = 12 homes (gas usage) \"> See how we calculate
+      this</button>\n          \n        \n        \n      </p>\n    \n  "
+    :advice_footer: "\n    \n    <p>\n      This is the breakdown for the most recent
+      12 months:\n    </p>\n    <p>\n      \n    \n    <table class=\"table table-striped
+      table-sm\">\n      \n        \n        <thead>\n          \n          <tr class=\"thead-dark\">\n
+      \           \n              <th scope=\"col\" class=\"text-center\" > Time Of
+      Day </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+      > kWh </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+      > &pound; </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+      > CO2 kg </th>\n            \n              <th scope=\"col\" class=\"text-center\"
+      > Percent </th>\n            \n          </tr>\n        </thead>\n      \n      <tbody>\n
+      \       \n          <tr>\n            \n              \n    <td>Holiday </td>\n
+      \ \n            \n              \n    <td class=\"text-right\">81,000 </td>\n
+      \ \n            \n              \n    <td class=\"text-right\">&pound;2,400
+      </td>\n  \n            \n              \n    <td class=\"text-right\">17,000
+      </td>\n  \n            \n              \n    <td class=\"text-right\">14&percnt;
+      </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+      \             \n    <td>Weekend </td>\n  \n            \n              \n    <td
+      class=\"text-right\">25,000 </td>\n  \n            \n              \n    <td
+      class=\"text-right\">&pound;760 </td>\n  \n            \n              \n    <td
+      class=\"text-right\">5,300 </td>\n  \n            \n              \n    <td
+      class=\"text-right\">4.4&percnt; </td>\n  \n            \n          </tr>\n
+      \       \n          <tr>\n            \n              \n    <td>School Day Open
+      </td>\n  \n            \n              \n    <td class=\"text-right\">240,000
+      </td>\n  \n            \n              \n    <td class=\"text-right\">&pound;7,100
+      </td>\n  \n            \n              \n    <td class=\"text-right\">50,000
+      </td>\n  \n            \n              \n    <td class=\"text-right\">41&percnt;
+      </td>\n  \n            \n          </tr>\n        \n          <tr>\n            \n
+      \             \n    <td>School Day Closed </td>\n  \n            \n              \n
+      \   <td class=\"text-right\">240,000 </td>\n  \n            \n              \n
+      \   <td class=\"text-right\">&pound;7,100 </td>\n  \n            \n              \n
+      \   <td class=\"text-right\">50,000 </td>\n  \n            \n              \n
+      \   <td class=\"text-right\">41&percnt; </td>\n  \n            \n          </tr>\n
+      \       \n      </tbody>\n      \n        <tr class=\"table-success\">\n        \n
+      \         <th> Total </th>\n        \n          <th scope=\"col\" class=\"text-right\">
+      580,000 </th>\n        \n          <th scope=\"col\" class=\"text-right\"> &pound;17,000
+      </th>\n        \n          <th scope=\"col\" class=\"text-right\"> 120,000 </th>\n
+      \       \n          <th scope=\"col\" class=\"text-right\"> 100&percnt; </th>\n
+      \       \n        </tr>\n      \n    </table>\n    \n  \n    </p>\n    \n    \n
+      \ "
+    :calculation_time: 0.0020420001819729805
+- :type: :html
+  :content: |-
+    <p>
+     This is the breakdown for the most recent 12 months:
+     </p>
+     <p>
+     <table class="table table-striped table-sm">
+     <thead>
+     <tr class="thead-dark">
+     <th scope="col" class="text-center" > Time Of Day </th>
+     <th scope="col" class="text-center" > kWh </th>
+     <th scope="col" class="text-center" > &pound; </th>
+     <th scope="col" class="text-center" > CO2 kg </th>
+     <th scope="col" class="text-center" > Percent </th>
+     </tr>
+     </thead>
+     <tbody>
+     <tr>
+     <td>Holiday </td>
+     <td class="text-right">81,000 </td>
+     <td class="text-right">&pound;2,400 </td>
+     <td class="text-right">17,000 </td>
+     <td class="text-right">14&percnt; </td>
+     </tr>
+     <tr>
+     <td>Weekend </td>
+     <td class="text-right">25,000 </td>
+     <td class="text-right">&pound;760 </td>
+     <td class="text-right">5,300 </td>
+     <td class="text-right">4.4&percnt; </td>
+     </tr>
+     <tr>
+     <td>School Day Open </td>
+     <td class="text-right">240,000 </td>
+     <td class="text-right">&pound;7,100 </td>
+     <td class="text-right">50,000 </td>
+     <td class="text-right">41&percnt; </td>
+     </tr>
+     <tr>
+     <td>School Day Closed </td>
+     <td class="text-right">240,000 </td>
+     <td class="text-right">&pound;7,100 </td>
+     <td class="text-right">50,000 </td>
+     <td class="text-right">41&percnt; </td>
+     </tr>
+     </tbody>
+     <tr class="table-success">
+     <th> Total </th>
+     <th scope="col" class="text-right"> 580,000 </th>
+     <th scope="col" class="text-right"> &pound;17,000 </th>
+     <th scope="col" class="text-right"> 120,000 </th>
+     <th scope="col" class="text-right"> 100&percnt; </th>
+     </tr>
+     </table>
+     </p>
+- :type: :html
+  :content: |-
+    <h2> Your gas usage by day of the week </h2>
+     <p>
+     The graph below shows your gas use broken down by
+     day of the week over the last 12 months:
+     </p>
+- :type: :chart_name
+  :content: :gas_by_day_of_week_tolerant
+- :type: :chart
+  :content:
+    :title: Gas Use By Day of the Week
+    :x_axis:
+    - Sunday
+    - Monday
+    - Tuesday
+    - Wednesday
+    - Thursday
+    - Friday
+    - Saturday
+    :x_axis_ranges:
+    - - 2021-07-14
+      - 2021-07-14
+    - - 2021-07-15
+      - 2021-07-15
+    - - 2021-07-16
+      - 2021-07-16
+    - - 2021-07-17
+      - 2021-07-17
+    - - 2021-07-18
+      - 2021-07-18
+    - - 2021-07-19
+      - 2021-07-19
+    - - 2021-07-20
+      - 2021-07-20
+    - - 2021-07-21
+      - 2021-07-21
+    - - 2021-07-22
+      - 2021-07-22
+    - - 2021-07-23
+      - 2021-07-23
+    - - 2021-07-24
+      - 2021-07-24
+    - - 2021-07-25
+      - 2021-07-25
+    - - 2021-07-26
+      - 2021-07-26
+    - - 2021-07-27
+      - 2021-07-27
+    - - 2021-07-28
+      - 2021-07-28
+    - - 2021-07-29
+      - 2021-07-29
+    - - 2021-07-30
+      - 2021-07-30
+    - - 2021-07-31
+      - 2021-07-31
+    - - 2021-08-01
+      - 2021-08-01
+    - - 2021-08-02
+      - 2021-08-02
+    - - 2021-08-03
+      - 2021-08-03
+    - - 2021-08-04
+      - 2021-08-04
+    - - 2021-08-05
+      - 2021-08-05
+    - - 2021-08-06
+      - 2021-08-06
+    - - 2021-08-07
+      - 2021-08-07
+    - - 2021-08-08
+      - 2021-08-08
+    - - 2021-08-09
+      - 2021-08-09
+    - - 2021-08-10
+      - 2021-08-10
+    - - 2021-08-11
+      - 2021-08-11
+    - - 2021-08-12
+      - 2021-08-12
+    - - 2021-08-13
+      - 2021-08-13
+    - - 2021-08-14
+      - 2021-08-14
+    - - 2021-08-15
+      - 2021-08-15
+    - - 2021-08-16
+      - 2021-08-16
+    - - 2021-08-17
+      - 2021-08-17
+    - - 2021-08-18
+      - 2021-08-18
+    - - 2021-08-19
+      - 2021-08-19
+    - - 2021-08-20
+      - 2021-08-20
+    - - 2021-08-21
+      - 2021-08-21
+    - - 2021-08-22
+      - 2021-08-22
+    - - 2021-08-23
+      - 2021-08-23
+    - - 2021-08-24
+      - 2021-08-24
+    - - 2021-08-25
+      - 2021-08-25
+    - - 2021-08-26
+      - 2021-08-26
+    - - 2021-08-27
+      - 2021-08-27
+    - - 2021-08-28
+      - 2021-08-28
+    - - 2021-08-29
+      - 2021-08-29
+    - - 2021-08-30
+      - 2021-08-30
+    - - 2021-08-31
+      - 2021-08-31
+    - - 2021-09-01
+      - 2021-09-01
+    - - 2021-09-02
+      - 2021-09-02
+    - - 2021-09-03
+      - 2021-09-03
+    - - 2021-09-04
+      - 2021-09-04
+    - - 2021-09-05
+      - 2021-09-05
+    - - 2021-09-06
+      - 2021-09-06
+    - - 2021-09-07
+      - 2021-09-07
+    - - 2021-09-08
+      - 2021-09-08
+    - - 2021-09-09
+      - 2021-09-09
+    - - 2021-09-10
+      - 2021-09-10
+    - - 2021-09-11
+      - 2021-09-11
+    - - 2021-09-12
+      - 2021-09-12
+    - - 2021-09-13
+      - 2021-09-13
+    - - 2021-09-14
+      - 2021-09-14
+    - - 2021-09-15
+      - 2021-09-15
+    - - 2021-09-16
+      - 2021-09-16
+    - - 2021-09-17
+      - 2021-09-17
+    - - 2021-09-18
+      - 2021-09-18
+    - - 2021-09-19
+      - 2021-09-19
+    - - 2021-09-20
+      - 2021-09-20
+    - - 2021-09-21
+      - 2021-09-21
+    - - 2021-09-22
+      - 2021-09-22
+    - - 2021-09-23
+      - 2021-09-23
+    - - 2021-09-24
+      - 2021-09-24
+    - - 2021-09-25
+      - 2021-09-25
+    - - 2021-09-26
+      - 2021-09-26
+    - - 2021-09-27
+      - 2021-09-27
+    - - 2021-09-28
+      - 2021-09-28
+    - - 2021-09-29
+      - 2021-09-29
+    - - 2021-09-30
+      - 2021-09-30
+    - - 2021-10-01
+      - 2021-10-01
+    - - 2021-10-02
+      - 2021-10-02
+    - - 2021-10-03
+      - 2021-10-03
+    - - 2021-10-04
+      - 2021-10-04
+    - - 2021-10-05
+      - 2021-10-05
+    - - 2021-10-06
+      - 2021-10-06
+    - - 2021-10-07
+      - 2021-10-07
+    - - 2021-10-08
+      - 2021-10-08
+    - - 2021-10-09
+      - 2021-10-09
+    - - 2021-10-10
+      - 2021-10-10
+    - - 2021-10-11
+      - 2021-10-11
+    - - 2021-10-12
+      - 2021-10-12
+    - - 2021-10-13
+      - 2021-10-13
+    - - 2021-10-14
+      - 2021-10-14
+    - - 2021-10-15
+      - 2021-10-15
+    - - 2021-10-16
+      - 2021-10-16
+    - - 2021-10-17
+      - 2021-10-17
+    - - 2021-10-18
+      - 2021-10-18
+    - - 2021-10-19
+      - 2021-10-19
+    - - 2021-10-20
+      - 2021-10-20
+    - - 2021-10-21
+      - 2021-10-21
+    - - 2021-10-22
+      - 2021-10-22
+    - - 2021-10-23
+      - 2021-10-23
+    - - 2021-10-24
+      - 2021-10-24
+    - - 2021-10-25
+      - 2021-10-25
+    - - 2021-10-26
+      - 2021-10-26
+    - - 2021-10-27
+      - 2021-10-27
+    - - 2021-10-28
+      - 2021-10-28
+    - - 2021-10-29
+      - 2021-10-29
+    - - 2021-10-30
+      - 2021-10-30
+    - - 2021-10-31
+      - 2021-10-31
+    - - 2021-11-01
+      - 2021-11-01
+    - - 2021-11-02
+      - 2021-11-02
+    - - 2021-11-03
+      - 2021-11-03
+    - - 2021-11-04
+      - 2021-11-04
+    - - 2021-11-05
+      - 2021-11-05
+    - - 2021-11-06
+      - 2021-11-06
+    - - 2021-11-07
+      - 2021-11-07
+    - - 2021-11-08
+      - 2021-11-08
+    - - 2021-11-09
+      - 2021-11-09
+    - - 2021-11-10
+      - 2021-11-10
+    - - 2021-11-11
+      - 2021-11-11
+    - - 2021-11-12
+      - 2021-11-12
+    - - 2021-11-13
+      - 2021-11-13
+    - - 2021-11-14
+      - 2021-11-14
+    - - 2021-11-15
+      - 2021-11-15
+    - - 2021-11-16
+      - 2021-11-16
+    - - 2021-11-17
+      - 2021-11-17
+    - - 2021-11-18
+      - 2021-11-18
+    - - 2021-11-19
+      - 2021-11-19
+    - - 2021-11-20
+      - 2021-11-20
+    - - 2021-11-21
+      - 2021-11-21
+    - - 2021-11-22
+      - 2021-11-22
+    - - 2021-11-23
+      - 2021-11-23
+    - - 2021-11-24
+      - 2021-11-24
+    - - 2021-11-25
+      - 2021-11-25
+    - - 2021-11-26
+      - 2021-11-26
+    - - 2021-11-27
+      - 2021-11-27
+    - - 2021-11-28
+      - 2021-11-28
+    - - 2021-11-29
+      - 2021-11-29
+    - - 2021-11-30
+      - 2021-11-30
+    - - 2021-12-01
+      - 2021-12-01
+    - - 2021-12-02
+      - 2021-12-02
+    - - 2021-12-03
+      - 2021-12-03
+    - - 2021-12-04
+      - 2021-12-04
+    - - 2021-12-05
+      - 2021-12-05
+    - - 2021-12-06
+      - 2021-12-06
+    - - 2021-12-07
+      - 2021-12-07
+    - - 2021-12-08
+      - 2021-12-08
+    - - 2021-12-09
+      - 2021-12-09
+    - - 2021-12-10
+      - 2021-12-10
+    - - 2021-12-11
+      - 2021-12-11
+    - - 2021-12-12
+      - 2021-12-12
+    - - 2021-12-13
+      - 2021-12-13
+    - - 2021-12-14
+      - 2021-12-14
+    - - 2021-12-15
+      - 2021-12-15
+    - - 2021-12-16
+      - 2021-12-16
+    - - 2021-12-17
+      - 2021-12-17
+    - - 2021-12-18
+      - 2021-12-18
+    - - 2021-12-19
+      - 2021-12-19
+    - - 2021-12-20
+      - 2021-12-20
+    - - 2021-12-21
+      - 2021-12-21
+    - - 2021-12-22
+      - 2021-12-22
+    - - 2021-12-23
+      - 2021-12-23
+    - - 2021-12-24
+      - 2021-12-24
+    - - 2021-12-25
+      - 2021-12-25
+    - - 2021-12-26
+      - 2021-12-26
+    - - 2021-12-27
+      - 2021-12-27
+    - - 2021-12-28
+      - 2021-12-28
+    - - 2021-12-29
+      - 2021-12-29
+    - - 2021-12-30
+      - 2021-12-30
+    - - 2021-12-31
+      - 2021-12-31
+    - - 2022-01-01
+      - 2022-01-01
+    - - 2022-01-02
+      - 2022-01-02
+    - - 2022-01-03
+      - 2022-01-03
+    - - 2022-01-04
+      - 2022-01-04
+    - - 2022-01-05
+      - 2022-01-05
+    - - 2022-01-06
+      - 2022-01-06
+    - - 2022-01-07
+      - 2022-01-07
+    - - 2022-01-08
+      - 2022-01-08
+    - - 2022-01-09
+      - 2022-01-09
+    - - 2022-01-10
+      - 2022-01-10
+    - - 2022-01-11
+      - 2022-01-11
+    - - 2022-01-12
+      - 2022-01-12
+    - - 2022-01-13
+      - 2022-01-13
+    - - 2022-01-14
+      - 2022-01-14
+    - - 2022-01-15
+      - 2022-01-15
+    - - 2022-01-16
+      - 2022-01-16
+    - - 2022-01-17
+      - 2022-01-17
+    - - 2022-01-18
+      - 2022-01-18
+    - - 2022-01-19
+      - 2022-01-19
+    - - 2022-01-20
+      - 2022-01-20
+    - - 2022-01-21
+      - 2022-01-21
+    - - 2022-01-22
+      - 2022-01-22
+    - - 2022-01-23
+      - 2022-01-23
+    - - 2022-01-24
+      - 2022-01-24
+    - - 2022-01-25
+      - 2022-01-25
+    - - 2022-01-26
+      - 2022-01-26
+    - - 2022-01-27
+      - 2022-01-27
+    - - 2022-01-28
+      - 2022-01-28
+    - - 2022-01-29
+      - 2022-01-29
+    - - 2022-01-30
+      - 2022-01-30
+    - - 2022-01-31
+      - 2022-01-31
+    - - 2022-02-01
+      - 2022-02-01
+    - - 2022-02-02
+      - 2022-02-02
+    - - 2022-02-03
+      - 2022-02-03
+    - - 2022-02-04
+      - 2022-02-04
+    - - 2022-02-05
+      - 2022-02-05
+    - - 2022-02-06
+      - 2022-02-06
+    - - 2022-02-07
+      - 2022-02-07
+    - - 2022-02-08
+      - 2022-02-08
+    - - 2022-02-09
+      - 2022-02-09
+    - - 2022-02-10
+      - 2022-02-10
+    - - 2022-02-11
+      - 2022-02-11
+    - - 2022-02-12
+      - 2022-02-12
+    - - 2022-02-13
+      - 2022-02-13
+    - - 2022-02-14
+      - 2022-02-14
+    - - 2022-02-15
+      - 2022-02-15
+    - - 2022-02-16
+      - 2022-02-16
+    - - 2022-02-17
+      - 2022-02-17
+    - - 2022-02-18
+      - 2022-02-18
+    - - 2022-02-19
+      - 2022-02-19
+    - - 2022-02-20
+      - 2022-02-20
+    - - 2022-02-21
+      - 2022-02-21
+    - - 2022-02-22
+      - 2022-02-22
+    - - 2022-02-23
+      - 2022-02-23
+    - - 2022-02-24
+      - 2022-02-24
+    - - 2022-02-25
+      - 2022-02-25
+    - - 2022-02-26
+      - 2022-02-26
+    - - 2022-02-27
+      - 2022-02-27
+    - - 2022-02-28
+      - 2022-02-28
+    - - 2022-03-01
+      - 2022-03-01
+    - - 2022-03-02
+      - 2022-03-02
+    - - 2022-03-03
+      - 2022-03-03
+    - - 2022-03-04
+      - 2022-03-04
+    - - 2022-03-05
+      - 2022-03-05
+    - - 2022-03-06
+      - 2022-03-06
+    - - 2022-03-07
+      - 2022-03-07
+    - - 2022-03-08
+      - 2022-03-08
+    - - 2022-03-09
+      - 2022-03-09
+    - - 2022-03-10
+      - 2022-03-10
+    - - 2022-03-11
+      - 2022-03-11
+    - - 2022-03-12
+      - 2022-03-12
+    - - 2022-03-13
+      - 2022-03-13
+    - - 2022-03-14
+      - 2022-03-14
+    - - 2022-03-15
+      - 2022-03-15
+    - - 2022-03-16
+      - 2022-03-16
+    - - 2022-03-17
+      - 2022-03-17
+    - - 2022-03-18
+      - 2022-03-18
+    - - 2022-03-19
+      - 2022-03-19
+    - - 2022-03-20
+      - 2022-03-20
+    - - 2022-03-21
+      - 2022-03-21
+    - - 2022-03-22
+      - 2022-03-22
+    - - 2022-03-23
+      - 2022-03-23
+    - - 2022-03-24
+      - 2022-03-24
+    - - 2022-03-25
+      - 2022-03-25
+    - - 2022-03-26
+      - 2022-03-26
+    - - 2022-03-27
+      - 2022-03-27
+    - - 2022-03-28
+      - 2022-03-28
+    - - 2022-03-29
+      - 2022-03-29
+    - - 2022-03-30
+      - 2022-03-30
+    - - 2022-03-31
+      - 2022-03-31
+    - - 2022-04-01
+      - 2022-04-01
+    - - 2022-04-02
+      - 2022-04-02
+    - - 2022-04-03
+      - 2022-04-03
+    - - 2022-04-04
+      - 2022-04-04
+    - - 2022-04-05
+      - 2022-04-05
+    - - 2022-04-06
+      - 2022-04-06
+    - - 2022-04-07
+      - 2022-04-07
+    - - 2022-04-08
+      - 2022-04-08
+    - - 2022-04-09
+      - 2022-04-09
+    - - 2022-04-10
+      - 2022-04-10
+    - - 2022-04-11
+      - 2022-04-11
+    - - 2022-04-12
+      - 2022-04-12
+    - - 2022-04-13
+      - 2022-04-13
+    - - 2022-04-14
+      - 2022-04-14
+    - - 2022-04-15
+      - 2022-04-15
+    - - 2022-04-16
+      - 2022-04-16
+    - - 2022-04-17
+      - 2022-04-17
+    - - 2022-04-18
+      - 2022-04-18
+    - - 2022-04-19
+      - 2022-04-19
+    - - 2022-04-20
+      - 2022-04-20
+    - - 2022-04-21
+      - 2022-04-21
+    - - 2022-04-22
+      - 2022-04-22
+    - - 2022-04-23
+      - 2022-04-23
+    - - 2022-04-24
+      - 2022-04-24
+    - - 2022-04-25
+      - 2022-04-25
+    - - 2022-04-26
+      - 2022-04-26
+    - - 2022-04-27
+      - 2022-04-27
+    - - 2022-04-28
+      - 2022-04-28
+    - - 2022-04-29
+      - 2022-04-29
+    - - 2022-04-30
+      - 2022-04-30
+    - - 2022-05-01
+      - 2022-05-01
+    - - 2022-05-02
+      - 2022-05-02
+    - - 2022-05-03
+      - 2022-05-03
+    - - 2022-05-04
+      - 2022-05-04
+    - - 2022-05-05
+      - 2022-05-05
+    - - 2022-05-06
+      - 2022-05-06
+    - - 2022-05-07
+      - 2022-05-07
+    - - 2022-05-08
+      - 2022-05-08
+    - - 2022-05-09
+      - 2022-05-09
+    - - 2022-05-10
+      - 2022-05-10
+    - - 2022-05-11
+      - 2022-05-11
+    - - 2022-05-12
+      - 2022-05-12
+    - - 2022-05-13
+      - 2022-05-13
+    - - 2022-05-14
+      - 2022-05-14
+    - - 2022-05-15
+      - 2022-05-15
+    - - 2022-05-16
+      - 2022-05-16
+    - - 2022-05-17
+      - 2022-05-17
+    - - 2022-05-18
+      - 2022-05-18
+    - - 2022-05-19
+      - 2022-05-19
+    - - 2022-05-20
+      - 2022-05-20
+    - - 2022-05-21
+      - 2022-05-21
+    - - 2022-05-22
+      - 2022-05-22
+    - - 2022-05-23
+      - 2022-05-23
+    - - 2022-05-24
+      - 2022-05-24
+    - - 2022-05-25
+      - 2022-05-25
+    - - 2022-05-26
+      - 2022-05-26
+    - - 2022-05-27
+      - 2022-05-27
+    - - 2022-05-28
+      - 2022-05-28
+    - - 2022-05-29
+      - 2022-05-29
+    - - 2022-05-30
+      - 2022-05-30
+    - - 2022-05-31
+      - 2022-05-31
+    - - 2022-06-01
+      - 2022-06-01
+    - - 2022-06-02
+      - 2022-06-02
+    - - 2022-06-03
+      - 2022-06-03
+    - - 2022-06-04
+      - 2022-06-04
+    - - 2022-06-05
+      - 2022-06-05
+    - - 2022-06-06
+      - 2022-06-06
+    - - 2022-06-07
+      - 2022-06-07
+    - - 2022-06-08
+      - 2022-06-08
+    - - 2022-06-09
+      - 2022-06-09
+    - - 2022-06-10
+      - 2022-06-10
+    - - 2022-06-11
+      - 2022-06-11
+    - - 2022-06-12
+      - 2022-06-12
+    - - 2022-06-13
+      - 2022-06-13
+    - - 2022-06-14
+      - 2022-06-14
+    - - 2022-06-15
+      - 2022-06-15
+    - - 2022-06-16
+      - 2022-06-16
+    - - 2022-06-17
+      - 2022-06-17
+    - - 2022-06-18
+      - 2022-06-18
+    - - 2022-06-19
+      - 2022-06-19
+    - - 2022-06-20
+      - 2022-06-20
+    - - 2022-06-21
+      - 2022-06-21
+    - - 2022-06-22
+      - 2022-06-22
+    - - 2022-06-23
+      - 2022-06-23
+    - - 2022-06-24
+      - 2022-06-24
+    - - 2022-06-25
+      - 2022-06-25
+    - - 2022-06-26
+      - 2022-06-26
+    - - 2022-06-27
+      - 2022-06-27
+    - - 2022-06-28
+      - 2022-06-28
+    - - 2022-06-29
+      - 2022-06-29
+    - - 2022-06-30
+      - 2022-06-30
+    - - 2022-07-01
+      - 2022-07-01
+    - - 2022-07-02
+      - 2022-07-02
+    - - 2022-07-03
+      - 2022-07-03
+    - - 2022-07-04
+      - 2022-07-04
+    - - 2022-07-05
+      - 2022-07-05
+    - - 2022-07-06
+      - 2022-07-06
+    - - 2022-07-07
+      - 2022-07-07
+    - - 2022-07-08
+      - 2022-07-08
+    - - 2022-07-09
+      - 2022-07-09
+    - - 2022-07-10
+      - 2022-07-10
+    - - 2022-07-11
+      - 2022-07-11
+    - - 2022-07-12
+      - 2022-07-12
+    :x_data:
+      Holiday:
+      - 11939.431000000002
+      - 25498.92899999999
+      - 11224.614999999998
+      - 10001.661999999998
+      - 10163.729
+      - 8604.595
+      - 3510.8669999999997
+      Weekend:
+      - 15370.267999999998
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 0.0
+      - 10080.160000000002
+      School Day Open:
+      - 0.0
+      - 50608.936
+      - 47128.666999999994
+      - 47634.289333333334
+      - 46491.80966666665
+      - 44617.443999999996
+      - 0.0
+      School Day Closed:
+      - 0.0
+      - 53285.823999999986
+      - 47948.427
+      - 44540.43966666667
+      - 46134.255333333334
+      - 45122.41800000001
+      - 0.0
+    :chart1_type: :column
+    :chart1_subtype: :stacked
+    :y_axis_label: kWh
+    :config_name: :gas_by_day_of_week_tolerant
+    :subtitle: 14 Jul 2021 to 12 Jul 2022
+    :multi_chart_x_axis_ranges: []
+    :configuration:
+      :name: Gas Use By Day of the Week
+      :chart1_type: :column
+      :chart1_subtype: :stacked
+      :series_breakdown: :daytype
+      :x_axis: :dayofweek
+      :timescale: :up_to_a_year
+      :meter_definition: :allheat
+      :yaxis_units: :kwh
+      :yaxis_scaling: :none
+      :subtitle: :daterange
+      :y_axis_label: kWh
+      :min_combined_school_date: 2018-09-01
+      :max_combined_school_date: 2022-07-12
+    :name: :gas_by_day_of_week_tolerant
+    :advice_header: "\n    \n    \n      <h2> Your gas usage by day of the week </h2>\n
+      \     <p>\n        The graph below shows your gas use broken down by\n        day
+      of the week over the last 12 months:\n      </p>\n    \n  "
+    :advice_footer: "\n    \n      \n        <p>\n        For most schools there should
+      be no gas usage at weekends. The only reason gas\n        might be used is for
+      frost protection in very cold weather,\n        and averaged across the whole
+      year this should be a very small\n        proportion of weekly usage\n        </p>\n
+      \       <p>\n        For some schools  there is more gas consumption on a Monday
+      and Tuesday than Wednesday,\n        Thursday and Friday, as additional energy
+      is required to heat a school up after the heating\n        is left off at weekends.\n
+      \       This energy is being absorbed into the masonry.\n        </p>\n        <p>\n
+      \       'Thermal mass' describes a material's capacity to absorb, store and
+      release heat.\n        For example, concrete has a high capacity to store heat
+      and is referred to as a\n        'high thermal mass' material. Insulation foam,\n
+      \       by contrast, has very little heat storage capacity\n        and is referred
+      to as having 'low thermal mass'.\n        </p>\n        <p>\n        Can you
+      see this pattern at your school from the graph above?<br>\n        It's still
+      much more efficient to turn the heating off over the weekend,\n        and use
+      a little more energy on Monday and Tuesday than it is to leave\n        the
+      heating on all weekend.\n        </p>\n        <p>\n        If the graph shows
+      \ high weekend gas consumption, ask your caretaker or building manager\n        to
+      check your heating system controls. You may have:\n        </p>\n        <ul>\n
+      \         <li>incorrect or faulty frost protection</li>\n          <li>lack
+      a 7 day timer so it is not possible to  turn the heating off at weekends</li>\n
+      \         <li>incorrect boiler settings</li>\n        </ul>\n        <p>\n        By
+      eliminating weekend gas consumption at your school you could save up to\n        &pound;1,200
+      (41,000kWh) per year.\n        </p>\n      \n    \n  "
+    :calculation_time: 0.00750300008803606
+- :type: :html
+  :content: |-
+    <p>
+     For most schools there should be no gas usage at weekends. The only reason gas
+     might be used is for frost protection in very cold weather,
+     and averaged across the whole year this should be a very small
+     proportion of weekly usage
+     </p>
+     <p>
+     For some schools there is more gas consumption on a Monday and Tuesday than Wednesday,
+     Thursday and Friday, as additional energy is required to heat a school up after the heating
+     is left off at weekends.
+     This energy is being absorbed into the masonry.
+     </p>
+     <p>
+     'Thermal mass' describes a material's capacity to absorb, store and release heat.
+     For example, concrete has a high capacity to store heat and is referred to as a
+     'high thermal mass' material. Insulation foam,
+     by contrast, has very little heat storage capacity
+     and is referred to as having 'low thermal mass'.
+     </p>
+     <p>
+     Can you see this pattern at your school from the graph above?<br>
+     It's still much more efficient to turn the heating off over the weekend,
+     and use a little more energy on Monday and Tuesday than it is to leave
+     the heating on all weekend.
+     </p>
+     <p>
+     If the graph shows high weekend gas consumption, ask your caretaker or building manager
+     to check your heating system controls. You may have:
+     </p>
+     <ul>
+     <li>incorrect or faulty frost protection</li>
+     <li>lack a 7 day timer so it is not possible to turn the heating off at weekends</li>
+     <li>incorrect boiler settings</li>
+     </ul>
+     <p>
+     By eliminating weekend gas consumption at your school you could save up to
+     &pound;1,200 (41,000kWh) per year.
+     </p>
+- :type: :html
+  :content: |-
+    <p>
+     This graph shows how the gas consumption of the school varies on school days when the heating is on in the winter (aggregated across the whole year):
+     </p>
+- :type: :chart_name
+  :content: :gas_heating_season_intraday
+- :type: :chart
+  :content:
+    :title: Intraday Gas Consumption (during heating season)
+    :x_axis:
+    - '0:00'
+    - '0:30'
+    - '1:00'
+    - '1:30'
+    - '2:00'
+    - '2:30'
+    - '3:00'
+    - '3:30'
+    - '4:00'
+    - '4:30'
+    - '5:00'
+    - '5:30'
+    - '6:00'
+    - '6:30'
+    - '7:00'
+    - '7:30'
+    - '8:00'
+    - '8:30'
+    - '9:00'
+    - '9:30'
+    - '10:00'
+    - '10:30'
+    - '11:00'
+    - '11:30'
+    - '12:00'
+    - '12:30'
+    - '13:00'
+    - '13:30'
+    - '14:00'
+    - '14:30'
+    - '15:00'
+    - '15:30'
+    - '16:00'
+    - '16:30'
+    - '17:00'
+    - '17:30'
+    - '18:00'
+    - '18:30'
+    - '19:00'
+    - '19:30'
+    - '20:00'
+    - '20:30'
+    - '21:00'
+    - '21:30'
+    - '22:00'
+    - '22:30'
+    - '23:00'
+    - '23:30'
+    :x_axis_ranges:
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    - - 2021-07-14
+      - 2022-07-12
+    :x_data:
+      Energy:
+      - 2087.5490000000004
+      - 1425.1999999999994
+      - 1389.1630000000002
+      - 1189.7770000000007
+      - 1500.3540000000003
+      - 1494.3530000000005
+      - 1968.3369999999998
+      - 2668.395000000001
+      - 3311.6739999999995
+      - 4291.3110000000015
+      - 8630.649
+      - 14977.282999999996
+      - 19572.63400000001
+      - 20631.21799999999
+      - 31107.265000000003
+      - 25315.748
+      - 22335.154000000006
+      - 21689.339000000007
+      - 20842.72400000001
+      - 19977.762
+      - 19188.560999999998
+      - 18551.014
+      - 18244.886999999995
+      - 17187.063000000002
+      - 16728.973
+      - 16210.293999999998
+      - 15695.633999999995
+      - 15478.532000000007
+      - 12751.475999999999
+      - 12264.672000000004
+      - 2915.1240000000003
+      - 2891.5479999999984
+      - 2985.949999999999
+      - 3124.0429999999988
+      - 3200.0670000000005
+      - 3375.159
+      - 3443.783999999999
+      - 3513.017999999999
+      - 3001.6839999999984
+      - 3075.0939999999982
+      - 634.8659999999998
+      - 649.7319999999996
+      - 609.1579999999998
+      - 729.0429999999998
+      - 943.8959999999998
+      - 735.999
+      - 816.3099999999998
+      - 669.886
+    :chart1_type: :column
+    :chart1_subtype: 
+    :y_axis_label: kWh
+    :config_name: :gas_heating_season_intraday
+    :subtitle: 14 Jul 2021 to 12 Jul 2022
+    :multi_chart_x_axis_ranges: []
+    :configuration:
+      :name: Intraday Gas Consumption (during heating season)
+      :chart1_type: :column
+      :meter_definition: :allheat
+      :timescale: :year
+      :filter:
+        :daytype:
+        - School Day Open
+        - School Day Closed
+        :heating: true
+      :series_breakdown: :none
+      :x_axis: :intraday
+      :yaxis_units: :kwh
+      :yaxis_scaling: :none
+      :subtitle: :daterange
+      :y_axis_label: kWh
+      :min_combined_school_date: 2018-09-01
+      :max_combined_school_date: 2022-07-12
+    :name: :gas_heating_season_intraday
+    :advice_header: "\n    \n      <p>\n      This graph shows how the gas consumption
+      of the school varies on school days when the heating is on in the winter (aggregated
+      across the whole year):\n      </p>\n    \n  "
+    :advice_footer: "\n    \n      <p>\n      It&apos;s a useful graph for determining
+      how well controlled the timing of the boiler is.\n      A well timed boiler
+      should only come on at about 6:00am in the morning\n      to get the school
+      up to temperature by 8:00am, and then turn off again about half\n      an hour
+      before the school closes.\n      </p>\n      <p>\n      Does your school&apos;s
+      boiler in the graph above do this?\n      If it doesn't you might need to speak
+      to your building manager\n      or caretaker and ask why? \n      </p>\n    \n
+      \ "
+    :calculation_time: 0.015521000139415264
+- :type: :html
+  :content: "<p>\n It&apos;s a useful graph for determining how well controlled the
+    timing of the boiler is.\n A well timed boiler should only come on at about 6:00am
+    in the morning\n to get the school up to temperature by 8:00am, and then turn
+    off again about half\n an hour before the school closes.\n </p>\n <p>\n Does your
+    school&apos;s boiler in the graph above do this?\n If it doesn't you might need
+    to speak to your building manager\n or caretaker and ask why? \n </p>"

@@ -1,0 +1,56 @@
+---
+AlertOptimumStartAnalysis:regression_start_time: 1.1996428714137295
+AlertOptimumStartAnalysis:optimum_start_sensitivity: 0.9465246144010234
+AlertOptimumStartAnalysis:regression_r2: 0.13431475779006805
+AlertOptimumStartAnalysis:average_start_time: 5.25796178343949
+AlertOptimumStartAnalysis:average_start_time_hh_mm: !ruby/object:TimeOfDay
+  hour: 5
+  minutes: 15.477707006369403
+  relative_time: !ruby/object:DateTime 1970-01-01 05:15:00.000000000 Z
+AlertOptimumStartAnalysis:start_time_standard_devation: 1.4295475072389894
+AlertOptimumStartAnalysis:enough_data: :enough
+AlertOptimumStartAnalysis:a: 5828.740070229202
+AlertOptimumStartAnalysis:b: -342.9294030535025
+AlertOptimumStartAnalysis:school_days_heating: 145
+AlertOptimumStartAnalysis:school_days_heating_adjective: poor
+AlertOptimumStartAnalysis:school_days_heating_rating_out_of_10: 2
+AlertOptimumStartAnalysis:average_school_heating_days: 115
+AlertOptimumStartAnalysis:non_school_days_heating: 30
+AlertOptimumStartAnalysis:non_school_days_heating_adjective: poor
+AlertOptimumStartAnalysis:non_school_days_heating_rating_out_of_10: 4
+AlertOptimumStartAnalysis:average_non_school_day_heating_days: 24
+AlertOptimumStartAnalysis:non_heating_only: false
+AlertOptimumStartAnalysis:kitchen_only: false
+AlertOptimumStartAnalysis:hot_water_only: false
+AlertOptimumStartAnalysis:heating_only: false
+AlertOptimumStartAnalysis:relevance: :relevant
+AlertOptimumStartAnalysis:analysis_date: 2022-02-01
+AlertOptimumStartAnalysis:status: 
+AlertOptimumStartAnalysis:rating: 7.5
+AlertOptimumStartAnalysis:term: :longterm
+AlertOptimumStartAnalysis:bookmark_url: https://blog.energysparks.uk/alerts#HeatingComingOnTooEarly
+AlertOptimumStartAnalysis:max_asofdate: 2022-07-12
+AlertOptimumStartAnalysis:pupils: 961
+AlertOptimumStartAnalysis:floor_area: 5932.0
+AlertOptimumStartAnalysis:school_type: :secondary
+AlertOptimumStartAnalysis:school_name: Acme Academy
+AlertOptimumStartAnalysis:school_activation_date: 
+AlertOptimumStartAnalysis:school_creation_date: 2020-10-08
+AlertOptimumStartAnalysis:urn: 136770
+AlertOptimumStartAnalysis:one_year_saving_£: 
+AlertOptimumStartAnalysis:one_year_saving_co2: 
+AlertOptimumStartAnalysis:ten_year_saving_co2: 
+AlertOptimumStartAnalysis:average_one_year_saving_£: 
+AlertOptimumStartAnalysis:average_ten_year_saving_£: 
+AlertOptimumStartAnalysis:ten_year_saving_£: 
+AlertOptimumStartAnalysis:payback_years: 
+AlertOptimumStartAnalysis:average_payback_years: 
+AlertOptimumStartAnalysis:capital_cost: !ruby/range
+  begin: 0.0
+  end: 0.0
+  excl: false
+AlertOptimumStartAnalysis:capital_cost_low: 0.0
+AlertOptimumStartAnalysis:capital_cost_high: 0.0
+AlertOptimumStartAnalysis:average_capital_cost: 
+AlertOptimumStartAnalysis:timescale: last year
+AlertOptimumStartAnalysis:time_of_year_relevance: 7.5

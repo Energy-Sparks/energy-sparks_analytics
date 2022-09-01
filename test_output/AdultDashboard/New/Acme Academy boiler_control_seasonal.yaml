@@ -1,0 +1,16 @@
+---
+- :type: :html
+  :content: "<h2>Seasonal Control</h2>"
+- :type: :html
+  :content: "\n      <p>\n        Acme Academy has had its heating on for 18 days\n
+    \       in warm weather in the last year which is poor.\n      </p>\n      <p>\n
+    \       Your school could save up to\n        &pound;600,\n        4,200 kg CO2
+    or\n        20,000 kWh\n        by turning its boiler off in warm weather,\n        for
+    example earlier in the Spring and later in the Autumn.\n      </p>\n    "
+- :type: :chart_name
+  :content: :heating_on_off_by_week
+- :type: :html
+  :content: "\n      The chart above shows when the heating and hot water was on in
+    the last year,\n      including when the heating was left on in warm weather.
+    You can drill-down to\n      individual days by clicking on the bars on the chart.\n
+    \   "

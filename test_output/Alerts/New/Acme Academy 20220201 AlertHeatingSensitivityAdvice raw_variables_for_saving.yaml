@@ -1,0 +1,57 @@
+---
+AlertHeatingSensitivityAdvice:annual_saving_1_C_change_kwh: 53385.84735180567
+AlertHeatingSensitivityAdvice:annual_saving_1_C_change_£: 1601.57542055417
+AlertHeatingSensitivityAdvice:annual_saving_1_C_change_co2: 11211.027943879191
+AlertHeatingSensitivityAdvice:annual_saving_1_C_change_percent: 0.08302476405315976
+AlertHeatingSensitivityAdvice:fabric_boiler_efficiency_kwh_c_per_1000_m2_floor_area_day: -57.81008143181094
+AlertHeatingSensitivityAdvice:enough_data: :enough
+AlertHeatingSensitivityAdvice:a: 5828.740070229202
+AlertHeatingSensitivityAdvice:b: -342.9294030535025
+AlertHeatingSensitivityAdvice:school_days_heating: 145
+AlertHeatingSensitivityAdvice:school_days_heating_adjective: poor
+AlertHeatingSensitivityAdvice:school_days_heating_rating_out_of_10: 2
+AlertHeatingSensitivityAdvice:average_school_heating_days: 115
+AlertHeatingSensitivityAdvice:non_school_days_heating: 30
+AlertHeatingSensitivityAdvice:non_school_days_heating_adjective: poor
+AlertHeatingSensitivityAdvice:non_school_days_heating_rating_out_of_10: 4
+AlertHeatingSensitivityAdvice:average_non_school_day_heating_days: 24
+AlertHeatingSensitivityAdvice:non_heating_only: false
+AlertHeatingSensitivityAdvice:kitchen_only: false
+AlertHeatingSensitivityAdvice:hot_water_only: false
+AlertHeatingSensitivityAdvice:heating_only: false
+AlertHeatingSensitivityAdvice:relevance: :relevant
+AlertHeatingSensitivityAdvice:analysis_date: 2022-02-01
+AlertHeatingSensitivityAdvice:status: 
+AlertHeatingSensitivityAdvice:rating: 5.0
+AlertHeatingSensitivityAdvice:term: 
+AlertHeatingSensitivityAdvice:bookmark_url: 
+AlertHeatingSensitivityAdvice:max_asofdate: 2022-07-12
+AlertHeatingSensitivityAdvice:pupils: 961
+AlertHeatingSensitivityAdvice:floor_area: 5932
+AlertHeatingSensitivityAdvice:school_type: :secondary
+AlertHeatingSensitivityAdvice:school_name: Acme Academy
+AlertHeatingSensitivityAdvice:school_activation_date: 
+AlertHeatingSensitivityAdvice:school_creation_date: 2020-10-08
+AlertHeatingSensitivityAdvice:urn: 136770
+AlertHeatingSensitivityAdvice:one_year_saving_£: !ruby/range
+  begin: 1601.57542055417
+  end: 1601.57542055417
+  excl: false
+AlertHeatingSensitivityAdvice:one_year_saving_£_low: 1601.57542055417
+AlertHeatingSensitivityAdvice:one_year_saving_£_high: 1601.57542055417
+AlertHeatingSensitivityAdvice:one_year_saving_co2: 11211.027943879191
+AlertHeatingSensitivityAdvice:ten_year_saving_co2: 112110.27943879191
+AlertHeatingSensitivityAdvice:average_one_year_saving_£: 1601.57542055417
+AlertHeatingSensitivityAdvice:average_ten_year_saving_£: 16015.7542055417
+AlertHeatingSensitivityAdvice:ten_year_saving_£: !ruby/range
+  begin: 16015.7542055417
+  end: 16015.7542055417
+  excl: false
+AlertHeatingSensitivityAdvice:ten_year_saving_£_low: 16015.7542055417
+AlertHeatingSensitivityAdvice:ten_year_saving_£_high: 16015.7542055417
+AlertHeatingSensitivityAdvice:payback_years: 
+AlertHeatingSensitivityAdvice:average_payback_years: 0.0
+AlertHeatingSensitivityAdvice:capital_cost: 
+AlertHeatingSensitivityAdvice:average_capital_cost: 0.0
+AlertHeatingSensitivityAdvice:timescale: year
+AlertHeatingSensitivityAdvice:time_of_year_relevance: 7.5

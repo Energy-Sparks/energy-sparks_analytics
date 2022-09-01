@@ -1,0 +1,44 @@
+---
+:max_day_kw: 25 kW
+:max_day_str: Thursday
+:min_day_kw: 22 kW
+:min_day_str: Saturday
+:percent_intraday_variation: "+14%"
+:annual_cost_kwh: 9,600 kWh
+:annual_cost_£: "£1,400"
+:annual_co2: 1,500 kg CO2
+:adjective: well
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: ''
+:rating: '7.9'
+:term: longterm
+:bookmark_url: ''
+:max_asofdate: Wednesday 13 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "£1,400"
+:one_year_saving_co2: 1,500 kg CO2
+:ten_year_saving_co2: 15,000 kg CO2
+:average_one_year_saving_£: "£1,400"
+:average_ten_year_saving_£: "£14,000"
+:ten_year_saving_£: "£14,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: ''
+:average_capital_cost: 0p
+:timescale: over the last year
+:time_of_year_relevance: '5.0'
+:one_year_saving_£_high: "£1,400"
+:one_year_saving_£_low: "£1,400"
+:ten_year_saving_£_high: "£14,000"
+:ten_year_saving_£_low: "£14,000"
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: 
+:capital_cost_low: 

@@ -1,0 +1,40 @@
+---
+:winter_kw: 32 kW
+:summer_kw: 19 kW
+:percent_seasonal_variation: "+65%"
+:annual_cost_kwh: 56,000 kWh
+:annual_cost_£: "£8,400"
+:relevance: relevant
+:analysis_date: Tuesday  1 Feb 2022
+:status: ''
+:rating: '0.0'
+:term: longterm
+:bookmark_url: ''
+:max_asofdate: Wednesday 13 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: Thursday  8 Oct 2020
+:urn: '136770'
+:one_year_saving_£: "£8,400"
+:one_year_saving_co2: 11,000 kg CO2
+:ten_year_saving_co2: 110,000 kg CO2
+:average_one_year_saving_£: "£8,400"
+:average_ten_year_saving_£: "£84,000"
+:ten_year_saving_£: "£84,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: ''
+:average_capital_cost: 0p
+:timescale: over the last year
+:time_of_year_relevance: '5.0'
+:one_year_saving_£_high: "£8,400"
+:one_year_saving_£_low: "£8,400"
+:ten_year_saving_£_high: "£84,000"
+:ten_year_saving_£_low: "£84,000"
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: 
+:capital_cost_low: 

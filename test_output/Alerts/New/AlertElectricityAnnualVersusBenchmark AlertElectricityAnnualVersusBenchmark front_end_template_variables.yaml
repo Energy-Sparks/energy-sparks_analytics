@@ -1,0 +1,232 @@
+---
+Annual electricity usage versus benchmark:
+  :last_year_kwh:
+    :description: Last years electricity consumption - kwh
+    :units:
+      :kwh: :electricity
+    :benchmark_code: klyr
+  :last_year_£:
+    :description: Last years electricity consumption - £ including differential tariff
+    :units:
+      :£: :electricity
+    :benchmark_code: "£lyr"
+  :previous_year_£:
+    :description: Previous years electricity consumption - £ including differential
+      tariff
+    :units:
+      :£: :electricity
+    :benchmark_code: "£pyr"
+  :last_year_co2:
+    :description: Last years electricity CO2 kg
+    :units: :co2
+    :benchmark_code: co2y
+  :one_year_benchmark_by_pupil_kwh:
+    :description: Last years electricity consumption for benchmark/average school,
+      normalised by pupil numbers - kwh
+    :units:
+      :kwh: :electricity
+  :one_year_benchmark_by_pupil_£:
+    :description: Last years electricity consumption for benchmark/average school,
+      normalised by pupil numbers - £
+    :units:
+      :£: :electricity
+  :one_year_saving_versus_benchmark_kwh:
+    :description: Annual difference in electricity consumption versus benchmark/average
+      school - kwh (use adjective for sign)
+    :units:
+      :kwh: :electricity
+  :one_year_saving_versus_benchmark_£:
+    :description: Annual difference in electricity consumption versus benchmark/average
+      school - £ (use adjective for sign)
+    :units:
+      :£: :electricity
+  :one_year_saving_versus_benchmark_adjective:
+    :description: 'Adjective: higher or lower: electricity consumption versus benchmark/average
+      school'
+    :units: :string
+  :one_year_exemplar_by_pupil_kwh:
+    :description: Last years electricity consumption for exemplar school, normalised
+      by pupil numbers - kwh
+    :units:
+      :kwh: :electricity
+  :one_year_exemplar_by_pupil_£:
+    :description: Last years electricity consumption for exemplar school, normalised
+      by pupil numbers - £
+    :units:
+      :£: :electricity
+  :one_year_saving_versus_exemplar_kwh:
+    :description: Annual difference in electricity consumption versus exemplar school
+      - kwh (use adjective for sign)
+    :units:
+      :kwh: :electricity
+  :one_year_saving_versus_exemplar_£:
+    :description: Annual difference in electricity consumption versus exemplar school
+      - £ (use adjective for sign)
+    :units:
+      :£: :electricity
+    :benchmark_code: "£esav"
+  :one_year_saving_versus_exemplar_co2:
+    :description: Annual difference in electricity consumption versus exemplar school
+      - co2 (use adjective for sign)
+    :units: :c02
+  :one_year_saving_versus_exemplar_adjective:
+    :description: 'Adjective: higher or lower: electricity consumption versus exemplar
+      school'
+    :units: :string
+  :one_year_electricity_per_pupil_kwh:
+    :description: Per pupil annual electricity usage - kwh - required for PH analysis,
+      not alerts
+    :units:
+      :kwh: :electricity
+    :benchmark_code: kpup
+  :one_year_electricity_per_pupil_£:
+    :description: Per pupil annual electricity usage - £ - required for PH analysis,
+      not alerts
+    :units:
+      :£: :electricity
+    :benchmark_code: "£pup"
+  :one_year_electricity_per_pupil_co2:
+    :description: Per pupil annual electricity usage - co2 - required for PH analysis,
+      not alerts
+    :units: :co2
+    :benchmark_code: cpup
+  :one_year_electricity_per_floor_area_kwh:
+    :description: Per floor area annual electricity usage - kwh - required for PH
+      analysis, not alerts
+    :units:
+      :kwh: :electricity
+  :one_year_electricity_per_floor_area_£:
+    :description: Per floor area annual electricity usage - £ - required for PH analysis,
+      not alerts
+    :units:
+      :£: :electricity
+  :per_pupil_electricity_benchmark_£:
+    :description: Per pupil annual electricity usage - £
+    :units:
+      :£: :electricity
+  :percent_difference_from_average_per_pupil:
+    :description: Percent difference from average
+    :units: :relative_percent
+    :benchmark_code: pp%d
+  :percent_difference_adjective:
+    :description: 'Adjective relative to average: above, signifantly above, about'
+    :units: :string
+  :simple_percent_difference_adjective:
+    :description: 'Adjective relative to average: above, about, below'
+    :units: :string
+  :summary:
+    :description: 'Description: £spend, adj relative to average'
+    :units: :string
+Common:
+  :relevance:
+    :description: Relevance of a alert to a school at this point in time
+    :units: :relevance
+  :analysis_date:
+    :description: Latest date on which the alert data is based
+    :units: :date
+  :status:
+    :description: 'Status: good, bad, failed'
+    :units: :symbol
+  :rating:
+    :description: Rating out of 10
+    :units: :float
+    :priority_code: RATE
+    :benchmark_code: ratg
+  :term:
+    :description: long term or short term
+    :units: :symbol
+  :bookmark_url:
+    :description: Link to help URL
+    :units: :string
+  :max_asofdate:
+    :description: The latest date on which an alert can be run given the available
+      data
+    :units: :date
+  :pupils:
+    :description: Number of pupils for relevant part of school on this date
+    :units: :integer
+  :floor_area:
+    :description: Floor area of relevant part of school
+    :units: :m2
+  :school_type:
+    :description: Primary or Secondary
+    :units: :school_type
+  :school_name:
+    :description: Name of school
+    :units: :string
+  :school_activation_date:
+    :description: Date school activated on Energy Sparks
+    :units: :date
+  :school_creation_date:
+    :description: Date school created on Energy Sparks
+    :units: :date
+  :urn:
+    :description: School URN
+    :units: :integer
+  :one_year_saving_£_high:
+    :description: Estimated one year saving range high
+    :units: :£
+  :one_year_saving_£_low:
+    :description: Estimated one year saving range low
+    :units: :£
+  :one_year_saving_£:
+    :description: Estimated one year saving range
+    :units: :£_range
+  :one_year_saving_co2:
+    :description: Estimated one year saving co2
+    :units: :co2
+  :ten_year_saving_co2:
+    :description: Estimated ten year saving co2
+    :units: :co2
+  :average_one_year_saving_£:
+    :description: Estimated one year saving range
+    :units: :£
+    :priority_code: 1YRS
+  :average_ten_year_saving_£:
+    :description: Estimated ten year saving range
+    :units: :£
+    :priority_code: 10YR
+  :ten_year_saving_£_high:
+    :description: Estimated ten year saving range - typical capital investment horizon
+      high
+    :units: :£
+  :ten_year_saving_£_low:
+    :description: Estimated ten year saving range - typical capital investment horizon
+      low
+    :units: :£
+  :ten_year_saving_£:
+    :description: Estimated ten year saving range - typical capital investment horizon
+    :units: :£_range
+  :payback_years_high:
+    :description: Payback in years high
+    :units: :years
+  :payback_years_low:
+    :description: Payback in years low
+    :units: :years
+  :payback_years:
+    :description: Payback in years
+    :units: :years_range
+  :average_payback_years:
+    :description: Average payback in years
+    :units: :years
+    :priority_code: PAYB
+  :capital_cost_high:
+    :description: Capital cost high
+    :units: :£
+  :capital_cost_low:
+    :description: Capital cost low
+    :units: :£
+  :capital_cost:
+    :description: Capital cost
+    :units: :£_range
+  :average_capital_cost:
+    :description: Average Capital cost
+    :units: :£
+    :priority_code: CAPC
+  :timescale:
+    :description: Timescale of analysis e.g. week, month, year
+    :units: :string
+  :time_of_year_relevance:
+    :description: 'Rating: 10 = relevant to time of year, 0 = irrelevant, 5 = average/normal'
+    :units: :float
+    :priority_code: TYRL

@@ -1,0 +1,111 @@
+---
+AlertImpendingHoliday:saving_kwh: 25113.05997364167
+AlertImpendingHoliday:total_annual_£: 88458.68520159053
+AlertImpendingHoliday:saving_co2: 60524.30022594327
+AlertImpendingHoliday:holidays_percent: 0.1509368552712802
+AlertImpendingHoliday:holiday_short_name: Spring half term
+AlertImpendingHoliday:holiday_long_name: Spring half term 2022 (Sat 19 Feb 2022 to
+  Sun 27 Feb 2022) spring_half_term 2021/2022
+AlertImpendingHoliday:holiday_length_days: 9
+AlertImpendingHoliday:holiday_length_weekdays: 5
+AlertImpendingHoliday:holiday_length_weeks: 1
+AlertImpendingHoliday:holiday_start_date: 2022-02-19
+AlertImpendingHoliday:holiday_end_date: 2022-02-27
+AlertImpendingHoliday:holiday_start_date_doy: Saturday
+AlertImpendingHoliday:meter_fuel_type_availability: both electricity and gas
+AlertImpendingHoliday:last_year_holiday_gas_kwh: 21448.968999999997
+AlertImpendingHoliday:last_year_holiday_gas_£: 643.4690700000002
+AlertImpendingHoliday:last_year_holiday_gas_co2: 4504.283490000002
+AlertImpendingHoliday:last_year_holiday_electricity_kwh: 6480.299999999999
+AlertImpendingHoliday:holiday_floor_area: 5932
+AlertImpendingHoliday:holiday_pupils: 961
+AlertImpendingHoliday:last_year_holiday_gas_kwh_per_floor_area: 3.6158073162508426
+AlertImpendingHoliday:last_year_holiday_electricity_kwh_per_floor_area: 6.743288241415192
+AlertImpendingHoliday:last_year_holiday_electricity_£: 973.7080000000001
+AlertImpendingHoliday:last_year_holiday_electricity_co2: 969.9971999999998
+AlertImpendingHoliday:last_year_holiday_energy_costs_£: 1617.1770700000002
+AlertImpendingHoliday:last_year_holiday_energy_costs_co2: 5474.280690000001
+AlertImpendingHoliday:name_of_last_year_holiday: Spring half term 2021
+AlertImpendingHoliday:electricity_holidays_kwh: 71847.09999999999
+AlertImpendingHoliday:electricity_total_annual_kwh: 467398.3999999999
+AlertImpendingHoliday:electricity_holidays_percent: 0.15371704310498283
+AlertImpendingHoliday:electricity_holidays_£: 10923.360925760206
+AlertImpendingHoliday:electricity_total_annual_£: 71061.48222159054
+AlertImpendingHoliday:electricity_potential_saving_kwh: 131741.32666666666
+AlertImpendingHoliday:electricity_potential_saving_£: 20029.45226764167
+AlertImpendingHoliday:electricity_potential_saving_co2: 24939.04628394327
+AlertImpendingHoliday:electricity_breakdown_chart: :alert_daytype_breakdown_electricity
+AlertImpendingHoliday:electricity_weekly_chart: :alert_group_by_week_electricity
+AlertImpendingHoliday:electricity_rating: 0.6
+AlertImpendingHoliday:gas_holidays_kwh: 80943.82799999996
+AlertImpendingHoliday:gas_total_annual_kwh: 579906.7659999997
+AlertImpendingHoliday:gas_holidays_percent: 0.13958076150468643
+AlertImpendingHoliday:gas_holidays_£: 2428.3148399999986
+AlertImpendingHoliday:gas_total_annual_£: 17397.20297999999
+AlertImpendingHoliday:gas_potential_saving_kwh: 169453.5902
+AlertImpendingHoliday:gas_potential_saving_£: 5083.607706
+AlertImpendingHoliday:gas_potential_saving_co2: 35585.253942
+AlertImpendingHoliday:gas_breakdown_chart: :alert_daytype_breakdown_gas
+AlertImpendingHoliday:gas_weekly_chart: :alert_group_by_week_gas
+AlertImpendingHoliday:gas_rating: 2.7
+AlertImpendingHoliday:non_heating_only: false
+AlertImpendingHoliday:kitchen_only: false
+AlertImpendingHoliday:hot_water_only: false
+AlertImpendingHoliday:heating_only: false
+AlertImpendingHoliday:relevance: :relevant
+AlertImpendingHoliday:analysis_date: 2022-02-01
+AlertImpendingHoliday:status: 
+AlertImpendingHoliday:rating: 1.6500000000000001
+AlertImpendingHoliday:term: 
+AlertImpendingHoliday:bookmark_url: 
+AlertImpendingHoliday:max_asofdate: 2023-07-22
+AlertImpendingHoliday:pupils: 961
+AlertImpendingHoliday:floor_area: 5932
+AlertImpendingHoliday:school_type: :secondary
+AlertImpendingHoliday:school_name: Acme Academy
+AlertImpendingHoliday:school_activation_date: 
+AlertImpendingHoliday:school_creation_date: 2020-10-08
+AlertImpendingHoliday:urn: 136770
+AlertImpendingHoliday:one_year_saving_£: !ruby/range
+  begin: 25113.05997364167
+  end: 25113.05997364167
+  excl: false
+AlertImpendingHoliday:one_year_saving_£_low: 25113.05997364167
+AlertImpendingHoliday:one_year_saving_£_high: 25113.05997364167
+AlertImpendingHoliday:one_year_saving_co2: 60524.30022594327
+AlertImpendingHoliday:ten_year_saving_co2: 605243.0022594327
+AlertImpendingHoliday:average_one_year_saving_£: 25113.05997364167
+AlertImpendingHoliday:average_ten_year_saving_£: 251130.5997364167
+AlertImpendingHoliday:ten_year_saving_£: !ruby/range
+  begin: 251130.5997364167
+  end: 251130.5997364167
+  excl: false
+AlertImpendingHoliday:ten_year_saving_£_low: 251130.5997364167
+AlertImpendingHoliday:ten_year_saving_£_high: 251130.5997364167
+AlertImpendingHoliday:payback_years: 
+AlertImpendingHoliday:average_payback_years: 0.0
+AlertImpendingHoliday:capital_cost: !ruby/range
+  begin: 0.0
+  end: 0.0
+  excl: false
+AlertImpendingHoliday:capital_cost_low: 0.0
+AlertImpendingHoliday:capital_cost_high: 0.0
+AlertImpendingHoliday:average_capital_cost: 0.0
+AlertImpendingHoliday:timescale: Unknown
+AlertImpendingHoliday:time_of_year_relevance: 0.0
+AlertImpendingHoliday:AlertImpendingHoliday:Holiday:Percent: 0.13958076150468643
+AlertImpendingHoliday:AlertImpendingHoliday:Holiday:£: 2428.3148399999986
+AlertImpendingHoliday:AlertImpendingHoliday:Weekend:Percent: 0.043887103052010275
+AlertImpendingHoliday:AlertImpendingHoliday:Weekend:£: 763.5128399999999
+AlertImpendingHoliday:AlertImpendingHoliday:School Day Open:Percent: 0.4077916656002596
+AlertImpendingHoliday:AlertImpendingHoliday:School Day Open:£: 7094.434379999996
+AlertImpendingHoliday:AlertImpendingHoliday:School Day Closed:Percent: 0.40874046984304374
+AlertImpendingHoliday:AlertImpendingHoliday:School Day Closed:£: 7110.940919999997
+AlertImpendingHoliday:AlertImpendingHoliday:Holiday:kWh: 80943.82799999996
+AlertImpendingHoliday:AlertImpendingHoliday:Holiday:co2: 16998.203879999994
+AlertImpendingHoliday:AlertImpendingHoliday:Weekend:kWh: 25450.427999999996
+AlertImpendingHoliday:AlertImpendingHoliday:Weekend:co2: 5344.589879999999
+AlertImpendingHoliday:AlertImpendingHoliday:School Day Open:kWh: 236481.14599999986
+AlertImpendingHoliday:AlertImpendingHoliday:School Day Open:co2: 49661.04065999997
+AlertImpendingHoliday:AlertImpendingHoliday:School Day Closed:kWh: 237031.3639999999
+AlertImpendingHoliday:AlertImpendingHoliday:School Day Closed:co2: 49776.58643999998
