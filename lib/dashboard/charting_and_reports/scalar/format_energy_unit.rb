@@ -1,16 +1,18 @@
 require 'bigdecimal'
 
 class FormatEnergyUnit
+  class InternalErrorNonInfiniteValue < StandardError; end
 
-  ENERGY_UNITS = 'analytics.energy_units'.freeze
-  INFINITY = 'analytics.units.infinity'.freeze
-  NAN      = 'analytics.units.nan'.freeze
-  MINUTES  = 'analytics.units.minutes'.freeze
-  HOURS    = 'analytics.units.hours'.freeze
-  DAYS     = 'analytics.units.days'.freeze
-  WEEKS    = 'analytics.units.weeks'.freeze
-  MONTHS   = 'analytics.units.months'.freeze
-  YEARS    = 'analytics.units.years'.freeze
+  ENERGY_UNITS      = 'analytics.energy_units'.freeze
+  INFINITY          = 'analytics.units.infinity'.freeze
+  NEGATIVE_INFINITY = 'analytics.units.infinity_negative'.freeze
+  NAN               = 'analytics.units.nan'.freeze
+  MINUTES           = 'analytics.units.minutes'.freeze
+  HOURS             = 'analytics.units.hours'.freeze
+  DAYS              = 'analytics.units.days'.freeze
+  WEEKS             = 'analytics.units.weeks'.freeze
+  MONTHS            = 'analytics.units.months'.freeze
+  YEARS             = 'analytics.units.years'.freeze
 
   ZERO = '0'.freeze
 
@@ -114,7 +116,7 @@ class FormatEnergyUnit
     percent = value * 100.0
 
     pct_str = if !percent.infinite?.nil?
-                I18n.t(INFINITY)
+                plus_minus_infinity_value(percent)  
               elsif percent.magnitude < 10.0
                 sprintf('%+.1f', percent)
               elsif percent.magnitude < 150.0
@@ -222,8 +224,18 @@ class FormatEnergyUnit
     end
   end
 
+  private_class_method def self.plus_minus_infinity_value(value)
+    if value == Float::INFINITY
+      I18n.t(INFINITY)
+    elsif value == -Float::INFINITY
+      I18n.t(NEGATIVE_INFINITY)
+    else
+      raise InternalErrorNonInfiniteValue, "Bad value #{value}"
+    end  
+  end
+
   def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)
-    return I18n.t(INFINITY) unless value.infinite?.nil?
+    return plus_minus_infinity_value(value) unless value.infinite?.nil?
     return I18n.t(NAN) if value.is_a?(Float) && value.nan?
     number = significant_figures_user_type(value, user_numeric_comprehension_level)
     return ZERO if number.zero?

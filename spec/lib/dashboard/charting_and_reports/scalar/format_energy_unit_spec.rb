@@ -282,6 +282,7 @@ describe FormatEnergyUnit do
     it 'handles infinity' do
       expect(FormatUnit.format(Float, Float::NAN)).to eq("Uncalculable")
       expect(FormatUnit.format(Float, Float::INFINITY)).to eq("Infinity")
+      expect(FormatUnit.format(Float, -Float::INFINITY)).to eq("-Infinity")
     end
   end
 

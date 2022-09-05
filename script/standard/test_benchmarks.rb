@@ -11,7 +11,7 @@ end
 run_date = Date.new(2022, 8, 14)
 
 overrides = { 
-  schools: ['bish*'], # ['shrew*', 'bathamp*'],
+  schools: ['peas*'], # ['shrew*', 'bathamp*'],
   cache_school: true,
   benchmarks: {
     calculate_and_save_variables: true,
