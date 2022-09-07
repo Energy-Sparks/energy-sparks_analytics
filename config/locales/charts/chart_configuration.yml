@@ -529,6 +529,9 @@ en:
     group_by_week_gas_model_fitting_unlimited:
       title:
       - 'By Week: Gas (all data)'
+    group_by_week_gas_unlimited:
+      title:
+      - 'By Week: Gas (multi-year)'
     group_by_week_gas_versus_benchmark:
       title:
       - 'By Week: Gas - compared with benchmark'
