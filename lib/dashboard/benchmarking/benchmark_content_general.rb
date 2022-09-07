@@ -1401,7 +1401,7 @@ module Benchmarking
 
     private
 
-    def aggregate_text(school_ids, filter, user_type)
+    def footnote(school_ids, filter, user_type)
       raw_data = benchmark_manager.run_table_including_aggregate_columns(asof_date, page_name, school_ids, nil, filter, :raw, user_type)
       rows = raw_data.drop(1) # drop header
 

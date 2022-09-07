@@ -11,6 +11,8 @@ class AdviceGasBoilerMorningStart < AdviceBoilerHeatingBase
     if self.class.analytics_user?(user_type)
       aggregate_html = aggregate_boiler_start_time_analysis_html(user_type)
       charts_and_html += aggregate_html unless aggregate_html.nil?
+      charts_and_html.push( { type: :chart_name, content: :group_by_week_gas_versus_benchmark })
+      charts_and_html.push( { type: :chart_name, content: :intraday_line_school_days_gas_reduced_data_versus_benchmarks })
     end
 
     charts_and_html

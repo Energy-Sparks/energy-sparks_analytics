@@ -12,6 +12,8 @@ charts = {
   solar: %i[solar_pv_single_day_adhoc_test]
 }
 
+charts = { adhoc: %i[group_by_week_gas_versus_benchmark intraday_line_school_days_gas_reduced_data_versus_benchmarks] }
+
 no_charts = RunCharts.standard_charts_for_school
 
 control = {
@@ -25,7 +27,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['king-ja*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }

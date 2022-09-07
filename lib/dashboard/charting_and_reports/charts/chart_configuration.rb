@@ -7,6 +7,7 @@ class ChartManager
   def self.standard_series_label_substitution(type, school_type)
     [
       ["#{type}:<school_name>", school_type],
+      ["#{type}:average",       'average'],
       ["#{type}:benchmark",     'benchmark'],
       ["#{type}:exemplar",      'exemplar']
     ]
@@ -273,6 +274,12 @@ class ChartManager
       benchmark:            { calculation_types: %i[benchmark exemplar], config: { series_breakdown: :none } },
       replace_series_label: standard_series_label_substitution('Energy', 'school')
     },
+    group_by_week_gas_versus_benchmark: {
+      inherits_from: :group_by_week_electricity_versus_benchmark,
+      name:                 'By Week: Gas - compared with benchmark',
+      meter_definition:     :allheat,
+      benchmark:            { calculation_types: %i[average benchmark exemplar], config: { series_breakdown: :none } },
+    },
     group_by_week_electricity_versus_benchmark_line: {
       inherits_from: :group_by_week_electricity_versus_benchmark,
       chart1_type:      :column,
@@ -303,6 +310,13 @@ class ChartManager
       benchmark:                          { calculation_types: %i[benchmark exemplar] },
       change_series_chart_configuration:  { series_names: ['benchmark', 'exemplar'], chart1_type: :line },
       timescale:                          :up_to_a_year
+    },
+    intraday_line_school_days_gas_reduced_data_versus_benchmarks: {
+      inherits_from: :intraday_line_school_days_reduced_data_versus_benchmarks,
+      name:                 'By Week: Gas - compared with benchmark - intraday',
+      meter_definition:     :allheat,
+      benchmark:                          { calculation_types: %i[average benchmark exemplar] },
+      change_series_chart_configuration:  { series_names: ['average', 'benchmark', 'exemplar'], chart1_type: :line },
     },
 
     # ============================================================================================
