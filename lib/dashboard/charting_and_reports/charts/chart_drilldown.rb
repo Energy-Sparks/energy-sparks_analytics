@@ -97,6 +97,8 @@ class ChartManager
   end
 
   def x_axis_drilldown(existing_x_axis_config)
+    return unless existing_x_axis_config
+
     case existing_x_axis_config
     when :year, :academicyear
       :week
