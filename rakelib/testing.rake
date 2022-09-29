@@ -41,6 +41,7 @@ namespace :testing do
   task :clobber do
     if ENV['ANALYTICSTESTDIR']
       Rake::Cleaner.cleanup_files(FileList["#{ENV['ANALYTICSTESTDIR']}/**/*"])
+      FileUtils.mkdir_p(File.join(ENV['ANALYTICSTESTDIR'], 'MeterCollections'))
     end
   end
 
