@@ -30,9 +30,12 @@ class HalfHourlyData < Hash
     end
   end
 
-  def remove!(*dates)
-    dates.each { |date| delete(date) }
-    self
+  def remove_date!(*dates)
+    dates.each do |date|
+      self.delete(date)
+      set_min_max_date(date)
+      @cache_days_totals.delete(date)
+    end
   end
 
   def date_range
