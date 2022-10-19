@@ -30,6 +30,11 @@ class HalfHourlyData < Hash
     end
   end
 
+  def remove!(*dates)
+    dates.each { |date| delete(date) }
+    self
+  end
+
   def date_range
     start_date..end_date
   end
