@@ -31,16 +31,14 @@ class HalfHourlyData < Hash
   end
 
   def remove_dates!(*dates)
-    dates.each do |date|
-      self.delete(date)
-    end
+    dates.each { |date| delete(date) }
 
     reset_min_max_date
     self
   end
 
   def reset_min_max_date
-    @min_date,@max_date  = keys.minmax
+    @min_date,@max_date = keys.minmax
   end
 
   def date_range
