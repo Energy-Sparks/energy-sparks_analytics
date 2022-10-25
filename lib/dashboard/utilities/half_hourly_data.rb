@@ -31,14 +31,11 @@ class HalfHourlyData < Hash
   end
 
   def remove_dates!(*dates)
+    # Removes all key value pairs where the key matches a date in the 'dates' array
     dates.each { |date| delete(date) }
 
     reset_min_max_date
     self
-  end
-
-  def reset_min_max_date
-    @min_date,@max_date = keys.minmax
   end
 
   def date_range
@@ -206,4 +203,12 @@ class HalfHourlyData < Hash
     "#{self.class.name} (days: #{self.keys.count}, object_id: #{"0x00%x" % (object_id << 1)})"
   end
 
+
+  private
+
+  def reset_min_max_date
+    # This method needs to remain private as it should only ever be called by 
+    # the `remove_dates!` method
+    @min_date,@max_date = keys.minmax
+  end
 end
