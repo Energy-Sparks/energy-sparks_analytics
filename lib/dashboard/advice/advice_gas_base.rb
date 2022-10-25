@@ -3,7 +3,7 @@ class AdviceGasBase < AdviceBase
     @school.aggregated_heat_meters
   end
   def relevance
-    @school.aggregated_heat_meters.nil? ? :never_relevant : :relevant
+    aggregate_meter.nil? ? :never_relevant : :relevant
   end
   def non_heating_only?
     aggregate_meter.non_heating_only?

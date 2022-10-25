@@ -11,7 +11,7 @@ class CompareContentResults
 
   def save_and_compare_content(page, content, merge_page = false)
     comparison_content = load_comparison_content(page, merge_page)
-    differences = compare_content(comparison_content, content)
+    differences = compare_content(comparison_content, content, page)
     save_new_content(page, content, merge_page)
     differences
   end
@@ -87,7 +87,7 @@ class CompareContentResults
     YAML::load_file(yaml_filename)
   end
 
-  def compare_content(comparison_content, new_content)
+  def compare_content(comparison_content, new_content, page)
     differences = []
     if comparison_content.length == new_content.length
       comparison_content.each_with_index do |comparison_component, index|
@@ -95,7 +95,7 @@ class CompareContentResults
       end
     else
       differences = new_content
-      puts "Components differ: #{comparison_content.length}/#{new_content.length}"
+      puts "Components differ: old: #{comparison_content.length} v. new: #{new_content.length} for #{page}"
     end
     differences.compact
   end
