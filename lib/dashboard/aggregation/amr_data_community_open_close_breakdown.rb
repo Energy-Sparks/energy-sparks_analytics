@@ -277,7 +277,7 @@ class AMRDataCommunityOpenCloseBreakdown
     if data.first.is_a?(Array)
       AMRData.fast_add_multiple_x48_x_x48(data)
     else
-      data.sum
+      data.sum(0.0) # 0.0 because [].sum => Integer
     end
   end
 end

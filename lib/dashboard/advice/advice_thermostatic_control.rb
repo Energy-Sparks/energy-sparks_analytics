@@ -1,6 +1,10 @@
 class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
   include Logging
 
+  def enough_data
+    valid_model? ? :enough : :not_enough
+  end
+
   def raw_content(user_type: nil)
     [
       thermostatic_control(user_type: user_type),
@@ -73,8 +77,6 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
       { type: :html,        content: chart_explanation },
       { type: :html,        content: hot_water_losses },
       { type: :html,        content: calculate_theoretical_daily_consumption_html },
-      
-
       { type: :html,        content: how_to_improve_thermostatic_control },
       { type: :html,        content: further_reading } 
     ]
@@ -349,5 +351,18 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
     ]
 
     charts_and_html
+  end
+
+  def valid_model?
+    if heating_model.enough_samples_for_good_fit
+      true
+    else
+      logger.info "Not running #{self.class.name} because model doesnt have enough winter samples"
+      false
+    end
+  rescue EnergySparksNotEnoughDataException => e
+    logger.info "Not running #{self.class.name} because model cant be fitted"
+    logger.info e.message
+    false
   end
 end

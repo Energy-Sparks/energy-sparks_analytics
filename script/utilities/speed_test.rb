@@ -1,6 +1,45 @@
 
 require 'benchmark'
 
+
+def create_dates
+  a = {}
+  (Date.new(2010,1,1)..Date.new(2020,1,1)).each do |date|
+    a[date] = 1
+  end
+  a
+end
+
+def slow(dates, date)
+  dates.delete(date)
+  a,b = dates.keys.minmax
+end
+
+def fast(dates, date)
+  dates.delete(date)
+  a = date if date < dates.keys.first
+  b = date if date > dates.keys.last
+end
+
+dates = create_dates
+date = Date.new(2015,1,1)
+
+bm = Benchmark.measure {
+  10000.times do |i|
+    slow(dates, date)
+  end
+}
+puts "slow dates method #{bm.to_s}"
+
+bm = Benchmark.measure {
+  10000.times do |i|
+    fast(dates, date)
+  end
+}
+puts "fast dates method #{bm.to_s}"
+
+exit
+
 puts "Reorg of x48 array for gmt/bst shifting"
 kwh = Array.new(48,0.0)
 bm = Benchmark.measure {
