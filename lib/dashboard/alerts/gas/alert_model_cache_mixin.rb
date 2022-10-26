@@ -14,7 +14,7 @@ module AlertModelCacheMixin
   end
 
   protected def model_start_date(asof_date)
-    asof_date_minus_one_year(asof_date)
+    [asof_date_minus_one_year(asof_date), aggregate_meter.amr_data.start_date].max
   end
 
   protected def one_year_period(asof_date)

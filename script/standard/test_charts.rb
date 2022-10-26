@@ -9,7 +9,7 @@ end
 
 charts = {
   # bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]
-  solar: %i[management_dashboard_group_by_week_electricity]
+  solar: %i[alert_gas_heating_season_intraday ]
 }
 
 no_charts = { adhoc: %i[group_by_week_gas_versus_benchmark intraday_line_school_days_gas_reduced_data_versus_benchmarks] }
@@ -27,7 +27,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['balfour*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['aught*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }

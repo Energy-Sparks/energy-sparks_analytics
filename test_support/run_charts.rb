@@ -303,6 +303,7 @@ class RunAnalyticsTest
       end
     rescue EnergySparksNotEnoughDataException => e
       puts 'Chart failed: not enough data'
+      puts e.backtrace
       @failed_charts.push( { school_name: @school.name, chart_name: chart_name,  message: e.message, backtrace: e.backtrace, type: e.class.name } )
     rescue => e
       puts e.message

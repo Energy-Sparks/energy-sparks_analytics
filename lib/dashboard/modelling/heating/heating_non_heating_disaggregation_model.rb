@@ -43,7 +43,7 @@ module AnalyseHeatingAndHotWater
     # either use a specific model, the 'best' model, or one defined by a meter attribute override
     def self.model_factory(type, heat_meter, model_overrides)
       model = model_factory_private(type, heat_meter, model_overrides)
-      Logging.logger.info "Using #{model.class.type} for heating/non heating model separation for mprn #{heat_meter.mpan_mprn}"
+      Logging.logger.info "Using #{model.class.name} for heating/non heating model separation for mprn #{heat_meter.mpan_mprn}"
       model
     end
 
@@ -73,7 +73,7 @@ module AnalyseHeatingAndHotWater
     end
 
     private
-    
+
     # technically the fixed override model is only a model if overidden
     # its not one of the default models which can be choosen/tested
     def self.all_models
@@ -111,6 +111,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def calculate_max_summer_hotwater_kitchen_kwh(_period)
+      Logging.logger.info "HW separation kWh for fixed model is #{@fix_kwh_per_day}"
       # do nothing
     end
 
@@ -123,7 +124,7 @@ module AnalyseHeatingAndHotWater
     end
 
     private
-    
+
     def calculate_fixed_kwh_per_day(heat_meter, model_overrides)
       if model_overrides.heating_non_heating_day_fixed_kwh_separation
         model_overrides.heating_non_heating_day_fixed_kwh_separation
@@ -154,8 +155,11 @@ module AnalyseHeatingAndHotWater
     private
 
     def model_prediction(avg_temperature)
-      calc = @model_results
-      calc[:a] + avg_temperature * calc[:b] + 2 * calc[:sd]
+      model_calculation(@model_results, avg_temperature)
+    end
+
+    def model_calculation(calc, temperature)
+      calc[:a] + temperature * calc[:b] + 2 * calc[:sd]
     end
 
     def calculate_max_hotwater_only_daily_kwh(period)
@@ -180,12 +184,24 @@ module AnalyseHeatingAndHotWater
         model:        self.class.type
       }
 
+      results[:split_at_18c] = model_calculation(results, 18.0)
+
       if valid_results?(results)
+        Logging.logger.info "HW separation regression model:"
+        format_calculation_results(results).each do |row|
+          Logging.logger.info row
+        end
         results
-      else 
+      else
         log_data(results, boiler_days, "NaN regression results from heat/non-heat separation")
         logger.info 'This is really an error by provides synthetic model for fault tolerance'
         synthesize_heating_only_model_calculation(boiler_days, boiler_off_days)
+      end
+    end
+
+    def format_calculation_results(results)
+      results.map do |field, value|
+        "    #{sprintf('%-15.15s', field)} #{value}"
       end
     end
 
