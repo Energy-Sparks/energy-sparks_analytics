@@ -30,10 +30,17 @@ module AggregationMixin
       return meters.first.amr_data # optimisaton if only 1 meter, then its its own aggregate
     end
     min_date, max_date = combined_amr_data_date_range(meters, ignore_rules)
+
+    #This can happen if there are 2 meter, with non-overlapping date ranges
+    #Without a check, the renaming code is run but we end up with an aggregate meter that
+    #contains no readings and has default dates from HalfHourlyData.new. This can cause errors elsewhere as other
+    #code does not check for the dates or if there are no readings.
+    raise EnergySparksUnexpectedStateException.new("Invalid AMR date range. Minimum date (#{min_date}) after maximum date (#{max_date}) unable to aggregate data") if min_date > max_date
+
     logger.info "Aggregating data between #{min_date} and #{max_date}"
 
     mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
-    
+
     combined_amr_data = aggregate_amr_data_between_dates(meters, type, min_date, max_date, mpan_mprn)
   end
 
@@ -85,7 +92,7 @@ module AggregationMixin
     end
     [start_dates.sort.last, end_dates.sort.first]
   end
-  
+
   private def calculate_carbon_emissions_for_meter(meter, fuel_type)
     if fuel_type == :electricity || fuel_type == :aggregated_electricity # TODO(PH, 6Apr19) remove : aggregated_electricity once analytics meter meta data loading changed
       meter.amr_data.set_carbon_emissions(meter.id, nil, @meter_collection.grid_carbon_intensity)
