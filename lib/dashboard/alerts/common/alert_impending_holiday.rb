@@ -453,7 +453,9 @@ class AlertImpendingHoliday < AlertGasOnlyBase
   private def determine_holiday_short_name(holiday_title)
     holiday_title.gsub(/\s+2\d{3,3}/,'')
   end
+end
 
+class AlertImpendingHolidayBenchmark < AlertImpendingHoliday
   def maximum_alert_date
     @school.holidays.last.start_date
   end
