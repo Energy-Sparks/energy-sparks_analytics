@@ -124,13 +124,11 @@ class AlertHeatingHotWaterOnDuringHolidayBase < AlertGasModelBase
       @heating_days_so_far_this_holiday  = count_days(boiler_usage, :heating)
       @hotwater_days_so_far_this_holiday = count_days(boiler_usage, :hotwater)
 
-      @relevance = if @holiday_usage_to_date_kwh.zero?
-                     :not_relevant
-                   else
-                     :relevant
-                   end
-
-      @rating = 0.0
+      @relevance, @rating = if @holiday_usage_to_date_kwh.zero?
+                              [:not_relevant, 10.0]
+                            else
+                              [:relevant, 0.0]
+                            end
     else
       @relevance = :never_relevant
 
