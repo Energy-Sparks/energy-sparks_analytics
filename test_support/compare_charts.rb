@@ -1,11 +1,11 @@
 class CompareChartResults
   attr_reader :control, :school_name
-  def initialize(control, school_name)
+  def initialize(control, school_name, directory_name: 'Charts')
     @control = control # [ :summary, :quick_comparison, :report_differing_charts, :report_differences ]
     @school_name = school_name
     @identical_result_count = 0
     @differing_results = {} # [chart_name] => differences
-    @directory_name = 'Charts'
+    @directory_name = directory_name
     @missing = []
   end
 

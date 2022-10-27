@@ -249,6 +249,55 @@ class ChartManager
       timescale:        :up_to_a_year
     },
 
+    test_economic_costs_electric_by_week_unlimited_£: {
+      name:             'By Week: Electricity Unlimited £',
+      inherits_from:    :management_dashboard_group_by_week_electricity,
+      yaxis_units:      :£,
+      timescale:        nil
+    },
+    test_economic_costs_electric_by_week_unlimited_co2: {
+      name:             'By Week: Electricity Unlimited co2',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :co2,
+    },
+    test_economic_costs_electric_by_week_unlimited_kwh: {
+      name:             'By Week: Electricity Unlimited kwh',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :kwh,
+    },
+    test_economic_costs_electric_by_week_unlimited_acc£: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      series_breakdown: :daytype,
+      yaxis_units:      :accounting_cost,
+    },
+    test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
+      name:             'By Week: Electricity Unlimited meter breakdown',
+      inherits_from:    :group_by_week_electricity_meter_breakdown,
+      yaxis_units:      :£,
+      timescale:        nil
+    },
+
+    test_economic_costs_gas_by_week_unlimited_£: {
+      name:             'By Week: Gas Unlimited £',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      meter_definition: :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_co2: {
+      name:             'By Week: Gas Unlimited CO2',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_co2,
+      meter_definition:  :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_kwh: {
+      name:             'By Week: Gas Unlimited kWh',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh,
+      meter_definition: :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_kwh_meter_breakdown: {
+      name:             'By Week: Gas Unlimited meter breakdown',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown,
+      meter_definition: :allheat,
+    },
+
     targeting_and_tracking_weekly_electricity_to_date_column_deprecated: {
       name:           :targeting_and_tracking_weekly_electricity_to_date_column.to_s,
       chart1_type:    :column,
