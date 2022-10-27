@@ -66,10 +66,17 @@ class AdviceElectricityRecent < AdviceRecentChangeBase
   def initialize(school)
     super(school, :electricity)
   end
+  # already set to this, but defin explicitly on this class to make clear
+  protected def aggregate_meter
+    @school.aggregated_electricity_meters
+  end
 end
 
 class AdviceGasRecent < AdviceRecentChangeBase
   def initialize(school)
     super(school, :gas)
+  end
+  protected def aggregate_meter
+    @school.aggregated_heat_meters
   end
 end

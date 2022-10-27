@@ -3,6 +3,6 @@ class AdviceElectricityBase < AdviceBase
     @school.aggregated_electricity_meters
   end
   def relevance
-    @school.aggregated_electricity_meters.nil? ? :never_relevant : :relevant
+    aggregate_meter.nil? ? :never_relevant : :relevant
   end
 end

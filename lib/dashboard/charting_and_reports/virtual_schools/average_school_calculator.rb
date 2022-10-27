@@ -17,6 +17,11 @@ class AverageSchoolCalculator
     holiday_type == :mayday ? :easter : holiday_type
   end
 
+  def self.remap_low_sample_holiday2(date)
+    # e.g. Llanmart had single day 19-Sep-2022 holiday
+    date.month == 9 ? :summer : nil
+  end
+
   private
 
   def calculate_school_amr_data(meter:, benchmark_type: :benchmark, pupils: @school.number_of_pupils, floor_area: @school.floor_area, degreeday_adjustment: true)
@@ -40,7 +45,7 @@ class AverageSchoolCalculator
       avg_kwh_x48_by_school_type = school_type_profiles_to_average_x48(date, benchmark_type, interpolators, meter.fuel_type)
 
       kWh_per_pupil_x48 = AMRData.fast_average_multiple_x48(avg_kwh_x48_by_school_type)
-      
+
       kWh_x48 = AMRData.fast_multiply_x48_x_scalar(kWh_per_pupil_x48, scale_by)
 
       average_amr_data.add(date, OneDayAMRReading.new(meter.mpxn, date, 'CAVG', nil, now, kWh_x48))
@@ -76,6 +81,8 @@ class AverageSchoolCalculator
     if daytype == :holiday
       holiday_type = Holidays.holiday_type(date)
       holiday_type = self.class.remap_low_sample_holiday(holiday_type)
+      holiday_type = self.class.remap_low_sample_holiday2(date) if holiday_type.nil?
+
       averaged_school_type_map(@school.school_type).map do |school_type|
         AverageSchoolData.new.raw_data[fuel_type][benchmark_type][school_type.to_sym][:holiday][holiday_type]
       end

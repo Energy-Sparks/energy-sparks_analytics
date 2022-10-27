@@ -369,6 +369,9 @@ class AdviceBase < ContentBase
       #other errors that cause the advice class to fail to run. This is most likely visible
       #when displaying a page to users.
       alert.analyse(alert_asof_date, true)
+
+      next if alert.enough_data == :not_enough
+      
       variables.each do |to, from|
         #For each variable, copy the value from the alert class to this object
         #as an instance variable. Optionally renaming (from -> to)

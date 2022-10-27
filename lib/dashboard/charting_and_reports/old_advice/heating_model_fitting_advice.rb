@@ -651,9 +651,7 @@ class DashboardEnergyAdvice
     def model_results_html
       text = %{
         <h3>Results of model calculations:</h3>
-        <pre>
-          <%= model.non_heating_model.model_results.awesome_inspect %>
-        </pre>
+        <%= HtmlTableFormatting.new(['Variable', 'Value'], model.non_heating_model.model_results.to_a).html %>
       }
       ERB.new(text).result(binding)
     end

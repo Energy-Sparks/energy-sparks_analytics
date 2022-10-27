@@ -1149,7 +1149,7 @@ class ChartManager
       yaxis_units: :£
     },
     alert_gas_heating_season_intraday: {
-      inherits_from: :gas_heating_season_intraday,
+      inherits_from: :gas_heating_season_intraday_up_to_1_year,
       yaxis_units: :£
     },
     gas_intraday_schoolday_last_year: { # used by heating regression fitter

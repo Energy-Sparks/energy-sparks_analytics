@@ -163,7 +163,6 @@ class RunAlerts < RunAnalyticsTest
 
   def log_results(alert, control)
     msg = error_message(alert)
-
     if msg.nil?
       unless alert.make_available_to_users?
         log_result(alert, 'Not make_available_to_users after analysis')
