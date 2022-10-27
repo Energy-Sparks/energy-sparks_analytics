@@ -260,8 +260,6 @@ class DashboardConfiguration
         intraday_line_school_days_reduced_data_versus_benchmarks
         intraday_line_holidays
         intraday_line_weekends
-        intraday_line_school_days_last5weeks
-        intraday_line_school_days_6months
         intraday_line_school_last7days
         baseload_lastyear
       ],
