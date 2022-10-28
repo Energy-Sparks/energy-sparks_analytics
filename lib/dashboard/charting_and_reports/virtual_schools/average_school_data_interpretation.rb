@@ -32,9 +32,9 @@ class AverageSchoolData
     html = %(
       <p>
         A &apos;benchmark&apos; school represents the
-        <%= average_school_percent_html(:benchmark) %> best ranked <%= school.school_type.humanize.downcase %> schools
+        <%= average_school_percent_html(:benchmark) %> best ranked <%= school.school_type.humanize(capitalize: false) %> schools
         and &apos;exemplar&apos; the
-        <%= average_school_percent_html(:exemplar) %> best <%= school.school_type.humanize.downcase %> schools.
+        <%= average_school_percent_html(:exemplar) %> best <%= school.school_type.humanize(capitalize: false) %> schools.
       </p>
     )
     ERB.new(html).result(binding)
