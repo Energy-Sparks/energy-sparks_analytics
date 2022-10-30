@@ -13,12 +13,15 @@ charts = {
     test_economic_costs_electric_by_week_unlimited_co2
     test_economic_costs_electric_by_week_unlimited_kwh
     test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown
+    electricity_cost_1_year_accounting_breakdown
+    test_economic_costs_electric_by_datetime_year_£
   ],
   gas: %i[
     test_economic_costs_gas_by_week_unlimited_£
     test_economic_costs_gas_by_week_unlimited_co2
     test_economic_costs_gas_by_week_unlimited_kwh
     test_economic_costs_gas_by_week_unlimited_kwh_meter_breakdown
+    gas_cost_1_year_accounting_breakdown
   ]
 }
 
@@ -33,7 +36,7 @@ control = {
 }
 
 overrides = {
-  schools:          ['*'],
+  schools:          ['king-james-*'],
   cache_school:     false,
   economic_costs:   { charts: charts, control: control }
 }

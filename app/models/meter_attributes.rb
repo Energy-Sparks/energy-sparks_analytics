@@ -457,6 +457,28 @@ class MeterAttributes
     )
   end
 
+  def self.default_economic_rates
+    MeterAttributeTypes::Hash.define(
+      required: true,
+      structure: {
+        per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
+        rate: MeterAttributeTypes::Float.define(required: true)
+      }
+    )
+  end
+
+  def self.default_economic_rates_by_time_of_day
+    MeterAttributeTypes::Hash.define(
+      required: false,
+      structure: {
+        per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
+        rate: MeterAttributeTypes::Float.define,
+        from: MeterAttributeTypes::TimeOfDay.define,
+        to:   MeterAttributeTypes::TimeOfDay.define
+      }
+    )
+  end
+
   class EconomicTariff < MeterAttributeTypes::AttributeBase
     id :economic_tariff
     key :economic_tariff
@@ -465,38 +487,27 @@ class MeterAttributes
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        name:       MeterAttributeTypes::String.define,
-        rates:      MeterAttributeTypes::Hash.define(
-          required: true,
-          structure: {
-            rate: MeterAttributeTypes::Hash.define(
-              required: true,
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(required: true, allowed_values: [:kwh]),
-                rate: MeterAttributeTypes::Float.define(required: true)
-              }
-            ),
-            daytime_rate: MeterAttributeTypes::Hash.define(
-              required: false,
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
-                rate: MeterAttributeTypes::Float.define,
-                from: MeterAttributeTypes::TimeOfDay.define,
-                to:   MeterAttributeTypes::TimeOfDay.define
-              }
-            ),
-            nighttime_rate: MeterAttributeTypes::Hash.define(
-              required: false,
-              structure: {
-                per:  MeterAttributeTypes::Symbol.define(allowed_values: [:kwh]),
-                rate: MeterAttributeTypes::Float.define,
-                from: MeterAttributeTypes::TimeOfDay.define,
-                to:   MeterAttributeTypes::TimeOfDay.define
-              }
-            )
-          }
-        )
+        name:           MeterAttributeTypes::String.define,
+        rates:          MeterAttributes.default_economic_rates,
+        daytime_rate:   MeterAttributes.default_economic_rates_by_time_of_day,
+        nighttime_rate: MeterAttributes.default_economic_rates_by_time_of_day
+      }
+    )
+  end
 
+  class EconomicTariffChangeOverTime < MeterAttributeTypes::AttributeBase
+    id             :economic_tariff_change_over_time
+    aggregate_over :economic_tariff_change_over_time
+
+    name 'Economic tariff = changes over time'
+
+    structure MeterAttributeTypes::Hash.define(
+      structure: {
+        start_date:     MeterAttributeTypes::Date.define,
+        end_date:       MeterAttributeTypes::Date.define,
+        rates:          MeterAttributes.default_economic_rates,
+        daytime_rate:   MeterAttributes.default_economic_rates_by_time_of_day,
+        nighttime_rate: MeterAttributes.default_economic_rates_by_time_of_day
       }
     )
   end

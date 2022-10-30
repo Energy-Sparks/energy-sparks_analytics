@@ -2,6 +2,107 @@
 require 'benchmark'
 
 
+economic_tariffs = [
+  {
+    start_date: Date.new(2016,1,1),
+    end_date:   Date.new(2020,1,1),
+    rate:       0.12
+  },
+  {
+    start_date: Date.new(2020, 1, 2),
+    end_date:   Date.new(2024, 1, 1),
+    rate:       0.30
+  },
+  {
+    start_date: Date.new(2024, 1, 2),
+    end_date:   Date.new(2050, 1, 1),
+    rate:       0.14
+  }
+]
+
+def find_tariff1(tariffs, date)
+  tariffs.find { |tariff| date >= tariff[:start_date] && date <= tariff[:end_date] }
+end
+
+economic_tariff_test_dates = [
+  Date.new(2017, 1, 1)..Date.new(2018, 1, 1),
+  Date.new(2022, 1, 1)..Date.new(2023, 1, 1)
+]
+
+dates = economic_tariff_test_dates.map(&:to_a).flatten
+
+puts "Dates: #{dates.length}"
+
+loops = 1 * 48
+
+economic_tariffs_before = { economic_tariff: 10.5 }
+bm = Benchmark.measure {
+  loops.times do |i|
+    dates.each do |date|
+      economic_tariffs_before[:economic_tariff]
+    end
+  end
+}
+
+puts "Economic tariff time (current) #{bm.to_s}"
+
+bm = Benchmark.measure {
+  loops.times do |i|
+    dates.each do |date|
+      find_tariff1(economic_tariffs, date)
+    end
+  end
+}
+
+puts "Economic tariff time (hash find) #{bm.to_s}"
+
+cache = {}
+bm = Benchmark.measure {
+  loops.times do |i|
+    dates.each do |date|
+      cache[date] ||= find_tariff1(economic_tariffs, date)
+    end
+  end
+}
+
+puts "Economic tariff time (hash find cache) #{bm.to_s}"
+
+times = dates.map(&:to_time)
+
+cache = {}
+bm = Benchmark.measure {
+  loops.times do |i|
+    times.each do |date|
+      cache[date] ||= find_tariff1(economic_tariffs, date.to_date)
+    end
+  end
+}
+
+puts "Economic tariff time (hash find time cache) #{bm.to_s}"
+
+puts "Economic tariff time (hash find) #{bm.to_s}"
+
+@d1_cache = { start_date: Date.new(2008,1,1), end_date: Date.new(2008,1,1), rate: nil }
+@v1 = 45.0
+
+cache = {}
+bm = Benchmark.measure {
+  loops.times do |i|
+    dates.each do |date|
+      if date >= @d1_cache[:start_date] && date <= @d1_cache[:end_date]
+        @d1_cache[:rate]
+      else
+        @d1_cache = find_tariff1(economic_tariffs, date)
+        puts date if @d1_cache.nil?
+        @d1_cache[:rate]
+      end
+    end
+  end
+}
+
+puts "Economic tariff time (hash find cache fast 1st key) #{bm.to_s}"
+
+exit
 def create_dates
   a = {}
   (Date.new(2010,1,1)..Date.new(2020,1,1)).each do |date|
