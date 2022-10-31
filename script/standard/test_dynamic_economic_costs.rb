@@ -36,7 +36,7 @@ control = {
 }
 
 overrides = {
-  schools:          ['king-james-*'],
+  schools:          ['king-james*'],
   cache_school:     false,
   economic_costs:   { charts: charts, control: control }
 }

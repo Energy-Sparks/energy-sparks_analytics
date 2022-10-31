@@ -457,7 +457,7 @@ class MeterAttributes
     )
   end
 
-  def self.default_economic_rates
+  def self.default_economic_rate
     MeterAttributeTypes::Hash.define(
       required: true,
       structure: {
@@ -467,7 +467,7 @@ class MeterAttributes
     )
   end
 
-  def self.default_economic_rates_by_time_of_day
+  def self.default_economic_rate_by_time_of_day
     MeterAttributeTypes::Hash.define(
       required: false,
       structure: {
@@ -475,6 +475,17 @@ class MeterAttributes
         rate: MeterAttributeTypes::Float.define,
         from: MeterAttributeTypes::TimeOfDay.define,
         to:   MeterAttributeTypes::TimeOfDay.define
+      }
+    )
+  end
+
+  def self.default_economic_rates
+    MeterAttributeTypes::Hash.define(
+      required:       true,
+      structure: {
+        rate:           MeterAttributes.default_economic_rate,
+        daytime_rate:   MeterAttributes.default_economic_rate_by_time_of_day,
+        nighttime_rate: MeterAttributes.default_economic_rate_by_time_of_day
       }
     )
   end
@@ -487,10 +498,8 @@ class MeterAttributes
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        name:           MeterAttributeTypes::String.define,
-        rates:          MeterAttributes.default_economic_rates,
-        daytime_rate:   MeterAttributes.default_economic_rates_by_time_of_day,
-        nighttime_rate: MeterAttributes.default_economic_rates_by_time_of_day
+        name:   MeterAttributeTypes::String.define,
+        rates:  MeterAttributes.default_economic_rates
       }
     )
   end
@@ -503,11 +512,10 @@ class MeterAttributes
 
     structure MeterAttributeTypes::Hash.define(
       structure: {
-        start_date:     MeterAttributeTypes::Date.define,
-        end_date:       MeterAttributeTypes::Date.define,
-        rates:          MeterAttributes.default_economic_rates,
-        daytime_rate:   MeterAttributes.default_economic_rates_by_time_of_day,
-        nighttime_rate: MeterAttributes.default_economic_rates_by_time_of_day
+        name:       MeterAttributeTypes::String.define,
+        start_date: MeterAttributeTypes::Date.define,
+        end_date:   MeterAttributeTypes::Date.define,
+        rates:      MeterAttributes.default_economic_rates
       }
     )
   end
