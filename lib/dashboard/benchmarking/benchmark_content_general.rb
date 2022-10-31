@@ -345,7 +345,7 @@ module Benchmarking
         </p>
         <p>
           In general, with very few exceptions the baseload in the winter
-          should be very slimiar to the summer. In practice many school accidently
+          should be very similar to the summer. In practice many school accidently
           leave electrically powered heating-related equipment on overnight whe
           the school is unoccupied.
         </p>
