@@ -344,8 +344,8 @@ module Benchmarking
           the school is unoccupied.
         </p>
         <p>
-          In general, in general with very few exceptions the baseload in the winter
-          should be very slimiar to the summer. In practice many school accidently
+          In general, with very few exceptions the baseload in the winter
+          should be very similar to the summer. In practice many school accidently
           leave electrically powered heating-related equipment on overnight whe
           the school is unoccupied.
         </p>
@@ -370,7 +370,7 @@ module Benchmarking
           the school is unoccupied.
         </p>
         <p>
-          In general, in general with very few exceptions the baseload shouldn&apos;t
+          In general, with very few exceptions the baseload shouldn&apos;t
           vary between days of the week and even between weekdays and weekends.
         </p>
         <p>

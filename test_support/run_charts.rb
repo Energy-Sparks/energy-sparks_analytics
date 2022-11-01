@@ -79,7 +79,7 @@ class RunAnalyticsTest
     save_to_excel
     write_html
     report_calculation_time(control)
-    CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
+    CompareChartResults.new(control[:compare_results], @school.name, directory_name: @results_sub_directory_type).compare_results(all_charts)
     log_all_results
   end
 
@@ -102,7 +102,7 @@ class RunAnalyticsTest
     end
     save_to_excel if control[:save_to_excel] == true
     report_calculation_time(control)
-    CompareChartResults.new(control[:compare_results], @school.name).compare_results(all_charts)
+    CompareChartResults.new(control[:compare_results], @school.name, directory_name: @results_sub_directory_type).compare_results(all_charts)
     log_all_results
   end
 

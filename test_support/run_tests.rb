@@ -40,6 +40,8 @@ class RunTests
         run_alerts(configuration[:alerts], configuration[:control])
       when :charts
         run_charts(configuration[:charts], configuration[:control])
+      when :economic_costs
+        run_economic_costs(configuration[:charts], configuration[:control])
       when :drilldown
         run_drilldown(configuration)
       when :specific_drilldowns
@@ -409,7 +411,11 @@ class RunTests
     RunCharts.report_failed_charts(failed_charts, control[:report_failed_charts]) if control.key?(:report_failed_charts)
   end
 
-  def run_charts(charts, control)
+  def run_economic_costs(charts, control)
+    run_charts(charts, control, dir_name: 'EconomicCosts')
+  end
+
+  def run_charts(charts, control, dir_name: 'Charts')
     logger.info '=' * 120
     logger.info 'RUNNING CHARTS'
     failed_charts = []
@@ -421,7 +427,7 @@ class RunTests
       reevaluate_log_filename
       school = load_school(school_name)
       start_profiler
-      charts_runner = RunCharts.new(school, results_sub_directory_type: 'Charts')
+      charts_runner = RunCharts.new(school, results_sub_directory_type: dir_name)
       charts_runner.run_structured_chart_list(charts, control)
       stop_profiler('charts')
       failed_charts += charts_runner.failed_charts

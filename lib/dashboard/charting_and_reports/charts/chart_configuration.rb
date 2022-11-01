@@ -249,6 +249,62 @@ class ChartManager
       timescale:        :up_to_a_year
     },
 
+    test_economic_costs_electric_by_week_unlimited_£: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited £',
+      inherits_from:    :management_dashboard_group_by_week_electricity,
+      yaxis_units:      :£,
+      timescale:        nil
+    },
+    test_economic_costs_electric_by_week_unlimited_co2: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited co2',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :co2,
+    },
+    test_economic_costs_electric_by_week_unlimited_kwh: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited kwh',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :kwh,
+    },
+    test_economic_costs_electric_by_week_unlimited_acc£: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      series_breakdown: :daytype,
+      yaxis_units:      :accounting_cost,
+    },
+    test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited meter breakdown',
+      inherits_from:    :group_by_week_electricity_meter_breakdown,
+      yaxis_units:      :£,
+      timescale:        nil
+    },
+    test_economic_costs_electric_by_datetime_year_£: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> £ by datetime - 1 year',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :£,
+      x_axis:           :datetime,
+      timescale:        :year
+    },
+
+    test_economic_costs_gas_by_week_unlimited_£: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      meter_definition: :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_co2: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_co2,
+      meter_definition:  :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_kwh: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh,
+      meter_definition: :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_kwh_meter_breakdown: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown,
+      meter_definition: :allheat,
+    },
+    test_economic_costs_gas_by_datetime_year_£: {
+      inherits_from:    :test_economic_costs_electric_by_datetime_year_£,
+      meter_definition: :allheat
+    },
+
     targeting_and_tracking_weekly_electricity_to_date_column_deprecated: {
       name:           :targeting_and_tracking_weekly_electricity_to_date_column.to_s,
       chart1_type:    :column,

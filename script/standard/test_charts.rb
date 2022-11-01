@@ -27,7 +27,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['aught*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['king-james*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }
