@@ -32,7 +32,9 @@ class Temperatures < HalfHourlyData
     while date >= start_date
       time_of_year_date_this_year = Date.new(date.year, time_of_year.month, time_of_year.day)
       if time_of_year_date_this_year.between?(start_date + days_either_side, end_date - days_either_side)
-        avg_temperatures += (-days_either_side..days_either_side).map { |offset| average_temperature(time_of_year_date_this_year + offset) }
+        avg_temperatures += (-days_either_side..days_either_side).map do |offset|
+                                                                    average_temperature(time_of_year_date_this_year + offset)
+                                                                  end
       end
       date = Date.new(date.year - 1, date.month, date.day)
     end
