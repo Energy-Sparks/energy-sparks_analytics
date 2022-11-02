@@ -2,6 +2,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
   DEGREEDAY_BASE_TEMPERATURE = 15.5
   RECOMMENDED_HEATING_ON_TEMPERATURE = 14.5
   WITHIN_TEMPERATURE_RANGE = 3.0
+  TARGET_TEMPERATURE_DAYS_EITHER_SIDE = 4
 
   def target_degreedays_average_in_date_range(d1, d2)
     d_days = 0.0
@@ -65,7 +66,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     if past_target
       temperatures.average_temperature(target_date)
     else
-      temperatures.average_temperature_for_time_of_year(time_of_year: TimeOfYear.to_toy(synthetic_date), days_either_side: 4)
+      temperatures.average_temperature_for_time_of_year(time_of_year: TimeOfYear.to_toy(synthetic_date), days_either_side: TARGET_TEMPERATURE_DAYS_EITHER_SIDE)
     end
   end
 
