@@ -1,4 +1,4 @@
-class AdviceStorageHeaters < AdviceElectricityBase
+class AdviceStorageHeaters < AdviceBenchmark
   def relevance
     @school.storage_heaters? ? :relevant : :never_relevant
   end

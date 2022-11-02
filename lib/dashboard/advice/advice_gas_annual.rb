@@ -1,4 +1,4 @@
-class AdviceGasAnnual < AdviceGasBase
+class AdviceGasAnnual < AdviceBenchmark
   def aggregate_meter
     @school.aggregated_heat_meters
   end
