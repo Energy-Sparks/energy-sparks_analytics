@@ -1681,4 +1681,22 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+#=======================================================================================
+  class BenchmarkChangeAdhocComparison < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text; '' end
+    private def introduction_text
+      text = %q(
+        <p>
+          This comparison below for gas and storage heaters has the
+          the previous period temperature compensated to the current
+          period's temperatures.
+        </p>
+        <p>
+          Schools' solar PV production has also been removed from the comparison.
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
 end

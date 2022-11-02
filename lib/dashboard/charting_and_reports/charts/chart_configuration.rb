@@ -1940,6 +1940,25 @@ class ChartManager
       meter_definition: :allelectricity,
       y2_axis:          :none
     },
+    layerup_powerdown_11_november_2022_electricity_comparison_alert: {
+      name:             '<%= meter.fuel_type.capitalize %> Comparison: Layer Up Powerdown Day 11 November 2022',
+      inherits_from:    :last_2_school_weeks_electricity_comparison_alert,
+      x_axis:           :day,
+      timescale: [ 
+        { daterange: Date.new(2021, 10, 12)..Date.new(2021, 10, 14) },
+        { daterange: Date.new(2022, 10, 11)..Date.new(2022, 10, 13) }
+      ],
+      meter_definition: :allelectricity,
+      y2_axis:          :none
+    },
+    layerup_powerdown_11_november_2022_gas_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :allheat
+    },
+    layerup_powerdown_11_november_2022_storage_heater_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :storage_heater_meter
+    },
     recent_holiday_electricity_comparison_alert: {
       name:             'Comparison of electricity consumption for recent holidays',
       inherits_from:    :group_by_week_electricity,
@@ -1997,6 +2016,14 @@ class ChartManager
 
       #asof_date:              Date.new(2019, 3, 7), # gets overridden by alert
       inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_storage_heater_adjusted: {
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted,
+      meter_definition: :storage_heater_meter
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_storage_heater_unadjusted: {
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted,
+      meter_definition: :storage_heater_meter
     },
     schoolweek_alert_2_previous_holiday_comparison_gas_adjusted: {
       name:                           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',
