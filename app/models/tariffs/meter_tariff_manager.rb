@@ -17,7 +17,7 @@
 class MeterTariffManager
   include Logging
   MAX_DAYS_BACKDATE_TARIFF = 30
-  attr_reader :accounting_tariffs
+  attr_reader :accounting_tariffs, :economic_tariff
 
   class MissingAccountingTariff                                   < StandardError; end
   class OverlappingAccountingTariffs                              < StandardError; end
