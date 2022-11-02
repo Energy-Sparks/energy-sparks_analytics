@@ -65,7 +65,7 @@ class TargetMeterTemperatureCompensatedDailyDayTypeBase < TargetMeterDailyDayTyp
     if past_target
       temperatures.average_temperature(target_date)
     else
-      temperatures.average_temperature_for_time_of_year(time_of_year: TimeOfYear.to_toy(synthetic_date), days_either_side: 4)
+      temperatures.average_temperature_for_time_of_year(time_of_year: TimeOfYear.to_toy(synthetic_date), days_either_side: 0)
     end
   end
 
