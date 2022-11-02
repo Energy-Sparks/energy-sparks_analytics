@@ -146,8 +146,8 @@ class AccountingTariff < EconomicTariff
     t = if differential?(date)
           {
             rates_x48: {
-              MeterTariff::NIGHTTIME_RATE => weighted_cost(kwh_x48, :nighttime_rate),
-              MeterTariff::DAYTIME_RATE   => weighted_cost(kwh_x48, :daytime_rate),
+              MeterTariff::NIGHTTIME_RATE => weighted_cost(date, kwh_x48, :nighttime_rate),
+              MeterTariff::DAYTIME_RATE   => weighted_cost(date, kwh_x48, :daytime_rate),
             },
             differential: true
           }
