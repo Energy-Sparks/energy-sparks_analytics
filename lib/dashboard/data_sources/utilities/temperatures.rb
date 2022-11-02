@@ -1,6 +1,8 @@
 class Temperatures < HalfHourlyData
   include Logging
 
+  class MissingTemperatureDataError < StandardError; end
+
   FROSTPROTECTIONTEMPERATURE = 4.0
   def initialize(type)
     super(type)
@@ -39,8 +41,9 @@ class Temperatures < HalfHourlyData
     end
 
     if avg_temperatures.length.zero?
-      logger.info "No data for time of year #{time_of_year}, have temperatures between #{start_date} and #{end_date}"
-      nil
+      error_message = "No data for time of year #{time_of_year}, have temperatures between #{start_date} and #{end_date}"
+      logger.info error_message
+      raise MissingTemperatureDataError, error_message
     else
       avg_temperatures.sum / avg_temperatures.length
     end
