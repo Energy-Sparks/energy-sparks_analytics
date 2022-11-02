@@ -31,15 +31,19 @@ class Temperatures < HalfHourlyData
 
     while date >= start_date
       time_of_year_date_this_year = Date.new(date.year, time_of_year.month, time_of_year.day)
+
       if time_of_year_date_this_year.between?(start_date + days_either_side, end_date - days_either_side)
         avg_temperatures += (-days_either_side..days_either_side).map { |offset| average_temperature(time_of_year_date_this_year + offset) }
       end
       date = Date.new(date.year - 1, date.month, date.day)
     end
 
-    logger.info "No data for time of year #{time_of_year}, have temperatures between #{start_date} and #{end_date}" if avg_temperatures.length == 0
-
-    avg_temperatures.sum / avg_temperatures.length
+    if avg_temperatures.length.zero?
+      logger.info "No data for time of year #{time_of_year}, have temperatures between #{start_date} and #{end_date}"
+      nil
+    else
+      avg_temperatures.sum / avg_temperatures.length
+    end
   end
 
   def average_temperature_in_date_range(start_date, end_date)
