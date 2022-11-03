@@ -51,6 +51,7 @@ end
 
 class EconomicTariffChangeOverTime < MeterTariff
   class EconomicTariffsDontCoverWholeDateRange < StandardError; end
+  attr_reader :tariffs
 
   MIN_DEFAULT_START_DATE = Date.new(2008, 1, 1)
   MAX_DEFAULT_END_DATE   = Date.new(2050, 1, 1)
@@ -80,12 +81,12 @@ class EconomicTariffChangeOverTime < MeterTariff
     raise EnergySparksUnexpectedStateException, "Economic tariff not configured for #{date} should have been trapped by check_tariff_configuration method"
   end
 
-  def default_missing_dates(meter,tariffs)
-    tariffs.map do |tariff|
+  def default_missing_dates(meter, tariffs)
+    x = tariffs.map do |tariff|
       tariff[:start_date] = MIN_DEFAULT_START_DATE unless tariff.key?(:start_date)
       tariff[:end_date]   = MAX_DEFAULT_END_DATE   unless tariff.key?(:end_date)
       [tariff[:start_date]..tariff[:end_date], EconomicTariff.new(meter, tariff)]
-    end.to_h
+    end.sort_by { |dr_tariff_pair| dr_tariff_pair[0].first }.to_h
   end
 
   def check_tariff_configuration(tariffs)
@@ -146,8 +147,8 @@ class AccountingTariff < EconomicTariff
     t = if differential?(date)
           {
             rates_x48: {
-              MeterTariff::NIGHTTIME_RATE => weighted_cost(kwh_x48, :nighttime_rate),
-              MeterTariff::DAYTIME_RATE   => weighted_cost(kwh_x48, :daytime_rate),
+              MeterTariff::NIGHTTIME_RATE => weighted_cost(date, kwh_x48, :nighttime_rate),
+              MeterTariff::DAYTIME_RATE   => weighted_cost(date, kwh_x48, :daytime_rate),
             },
             differential: true
           }
