@@ -4,7 +4,7 @@ describe TargetsProgress do
 
   let(:january)                   { Date.new(Date.today.year, 1, 1) }
   let(:february)                  { Date.new(Date.today.year, 2, 1) }
-  let(:months)                    { [:january, :february] }
+  let(:months)                    { [january, february] }
   let(:fuel_type)                 { :electricity }
 
   let(:monthly_usage_kwh)         { [10,20] }
@@ -37,57 +37,57 @@ describe TargetsProgress do
 
   context '#monthly_targets_kwh' do
     it 'returns expected data' do
-      expect(progress.monthly_targets_kwh[:january]).to eq 8
-      expect(progress.monthly_targets_kwh[:february]).to eq 15
+      expect(progress.monthly_targets_kwh[january]).to eq 8
+      expect(progress.monthly_targets_kwh[february]).to eq 15
     end
   end
 
   context '#monthly_usage_kwh' do
     it 'returns expected data' do
-      expect(progress.monthly_usage_kwh[:january]).to eq 10
-      expect(progress.monthly_usage_kwh[:february]).to eq 20
+      expect(progress.monthly_usage_kwh[january]).to eq 10
+      expect(progress.monthly_usage_kwh[february]).to eq 20
     end
   end
 
   context '#monthly_performance' do
     it 'returns expected data' do
-      expect(progress.monthly_performance[:january]).to eq -0.25
-      expect(progress.monthly_performance[:february]).to eq 0.35
+      expect(progress.monthly_performance[january]).to eq -0.25
+      expect(progress.monthly_performance[february]).to eq 0.35
     end
   end
 
   context '#cumulative_usage_kwh' do
     it 'returns expected data' do
-      expect(progress.cumulative_usage_kwh[:january]).to eq 10
-      expect(progress.cumulative_usage_kwh[:february]).to eq 30
+      expect(progress.cumulative_usage_kwh[january]).to eq 10
+      expect(progress.cumulative_usage_kwh[february]).to eq 30
     end
   end
 
   context '#cumulative_targets_kwh' do
     it 'returns expected data' do
-      expect(progress.cumulative_targets_kwh[:january]).to eq 8
-      expect(progress.cumulative_targets_kwh[:february]).to eq 25
+      expect(progress.cumulative_targets_kwh[january]).to eq 8
+      expect(progress.cumulative_targets_kwh[february]).to eq 25
     end
   end
 
   context '#cumulative_performance' do
     it 'returns expected data' do
-      expect(progress.cumulative_performance[:january]).to eql -0.99
-      expect(progress.cumulative_performance[:february]).to eql 0.99
+      expect(progress.cumulative_performance[january]).to eql -0.99
+      expect(progress.cumulative_performance[february]).to eql 0.99
     end
   end
 
   context '#percentage_synthetic' do
     it 'returns expected data' do
-      expect(progress.percentage_synthetic[:january]).to eql 0.0
-      expect(progress.percentage_synthetic[:february]).to eql 0.5
+      expect(progress.percentage_synthetic[january]).to eql 0.0
+      expect(progress.percentage_synthetic[february]).to eql 0.5
     end
   end
 
   context '#partial_months' do
     it 'returns expected data' do
-      expect(progress.partial_months[:january]).to eq false
-      expect(progress.partial_months[:february]).to eq true
+      expect(progress.partial_months[january]).to eq false
+      expect(progress.partial_months[february]).to eq true
     end
   end
 
@@ -105,7 +105,7 @@ describe TargetsProgress do
 
   context '#months' do
     it 'returns expected data' do
-      expect(progress.months).to eq [:january, :february]
+      expect(progress.months).to eq [january, february]
     end
   end
 
