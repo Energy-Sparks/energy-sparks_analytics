@@ -1,8 +1,9 @@
 class TargetsService
   include Logging
-  def initialize(aggregate_school, fuel_type)
+  def initialize(aggregate_school, fuel_type, period: :year)
     @aggregate_school = aggregate_school
     @fuel_type = set_fuel_type(fuel_type)
+    @period = period
   end
 
   def progress
@@ -217,7 +218,7 @@ class TargetsService
   end
 
   def data_headers
-    data[:current_year_date_ranges].map { |r| r.first.strftime('%b') }
+    data[:current_year_date_ranges].map { |r| Date.new(r.first.year, r.first.month, 1) }
   end
 
   def data_series(key)

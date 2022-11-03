@@ -7,6 +7,22 @@ describe TargetsService do
   let(:service)                 { TargetsService.new(meter_collection, fuel_type) }
 
   describe "#progress" do
+    let(:august) { Date.new(2021, 8, 1) }
+
+    let(:months) {[
+        Date.new(2020, 9, 1),
+        Date.new(2020, 10, 1),
+        Date.new(2020, 11, 1),
+        Date.new(2020, 12, 1),
+        Date.new(2021, 1, 1),
+        Date.new(2021, 2, 1),
+        Date.new(2021, 3, 1),
+        Date.new(2021, 4, 1),
+        Date.new(2021, 5, 1),
+        Date.new(2021, 6, 1),
+        Date.new(2021, 7, 1),
+        august
+    ]}
 
     def dates(first, last)
       Date.parse(first)..Date.parse(last)
@@ -52,31 +68,31 @@ describe TargetsService do
 
     context 'with full year of data' do
       it 'returns months' do
-        expect(service.progress.months).to include('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')
+        expect(service.progress.months).to match_array(months)
       end
 
       it 'returns monthly targets' do
-        expect(service.progress.monthly_targets_kwh['Aug']).to eq(2222.22)
+        expect(service.progress.monthly_targets_kwh[august]).to eq(2222.22)
       end
 
       it 'returns monthly usage' do
-        expect(service.progress.monthly_usage_kwh['Aug']).to eq(1111.11)
+        expect(service.progress.monthly_usage_kwh[august]).to eq(1111.11)
       end
 
       it 'returns monthly performance' do
-        expect(service.progress.monthly_performance['Aug']).to eq(77.77)
+        expect(service.progress.monthly_performance[august]).to eq(77.77)
       end
 
       it 'returns cumulative targets' do
-        expect(service.progress.cumulative_targets_kwh['Aug']).to eq(5555.55)
+        expect(service.progress.cumulative_targets_kwh[august]).to eq(5555.55)
       end
 
       it 'returns cumulative usage' do
-        expect(service.progress.cumulative_usage_kwh['Aug']).to eq(4444.44)
+        expect(service.progress.cumulative_usage_kwh[august]).to eq(4444.44)
       end
 
       it 'returns cumulative_performance' do
-        expect(service.progress.cumulative_performance['Aug']).to eq(88.88)
+        expect(service.progress.cumulative_performance[august]).to eq(88.88)
       end
 
       it 'returns fuel type' do
@@ -84,7 +100,7 @@ describe TargetsService do
       end
 
       it 'returns partial months' do
-        expect(service.progress.partial_months['Aug']).to eq(true)
+        expect(service.progress.partial_months[august]).to eq(true)
       end
 
       it 'returns current cumulative performance vs synthetic' do
