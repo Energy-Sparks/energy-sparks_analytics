@@ -1,4 +1,5 @@
 require_relative './alert_period_comparison_base.rb'
+require_relative './alert_schoolweek_comparison_electricity.rb'
 require_relative './../gas/alert_model_cache_mixin.rb'
 # Compares the last two SCHOOL weeks - i.e. when this school is occupied, i.e. skips holidays
 # Unlike the other week/short term comparison alerts, it works completly off chart data
