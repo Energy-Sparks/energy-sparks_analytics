@@ -102,9 +102,7 @@ class HalfHourlyData < Hash
   def missing_dates
     dates = []
     (@min_date..@max_date).each do |date|
-      if !date_missing?(date)
-        dates.push(date)
-      end
+      dates << date if date_missing?(date)
     end
     dates
   end
