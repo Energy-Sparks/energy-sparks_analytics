@@ -312,8 +312,11 @@ class AggregateDataService
     calculate_carbon_emissions_for_meter(combined_meter, fuel_type)
 
     has_differential_meter = any_component_meter_differential?(list_of_meters, fuel_type, combined_meter.amr_data.start_date, combined_meter.amr_data.end_date)
-
-    set_costs_for_combined_meter(combined_meter, list_of_meters, has_differential_meter)
+    economic_tariffs_differ = !all_economic_tariffs_identical?(list_of_meters)
+    
+    logger.info "Aggregation test for non-arameterised aggregation: has differential meters = #{has_differential_meter} differing economic tariffs = #{economic_tariffs_differ}"
+    
+    set_costs_for_combined_meter(combined_meter, list_of_meters, has_differential_meter || economic_tariffs_differ)
 
     logger.info "Creating combined meter data #{combined_amr_data.start_date} to #{combined_amr_data.end_date}"
     logger.info "with floor area #{combined_floor_area} and #{combined_pupils} pupils"
@@ -328,22 +331,28 @@ class AggregateDataService
     false
   end
 
-  def set_costs_for_combined_meter(combined_meter, list_of_meters, has_differential_meter)
+  def all_economic_tariffs_identical?(list_of_meters)
+    return true if list_of_meters.length == 1
+    economic_tariffs = list_of_meters.map { |meter| meter.meter_tariffs.economic_tariff }
+    economic_tariffs.uniq{ |t| [t.tariff, t.tariff]}.count == 1
+  end
+
+  def set_costs_for_combined_meter(combined_meter, list_of_meters, hass_differing_tariffs)
     mpan_mprn = combined_meter.mpan_mprn
     start_date = combined_meter.amr_data.start_date # use combined meter start and end dates to conform with (deprecated) meter aggregation rules
     end_date = combined_meter.amr_data.end_date
 
     logger.info "Creating economic & accounting costs for combined meter #{mpan_mprn} fuel #{combined_meter.fuel_type} with #{list_of_meters.length} meters from #{start_date} to #{end_date}"
 
-    set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differential_meter)
+    set_economic_costs(combined_meter, list_of_meters, start_date, end_date, hass_differing_tariffs)
 
     accounting_costs = AccountingCosts.combine_accounting_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
     combined_meter.amr_data.set_accounting_tariff_schedule(accounting_costs)
   end
 
-  def set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differential_meter)
+  def set_economic_costs(combined_meter, list_of_meters, start_date, end_date, has_differing_tariffs)
     mpan_mprn = combined_meter.mpan_mprn
-    if has_differential_meter # so need pre aggregated economic costs as kwh to £ no longer additive
+    if has_differing_tariffs # so need pre aggregated economic costs as kwh to £ no longer additive
       logger.info 'Creating a multiple economic costs for differential tariff meter'
       economic_costs = EconomicCosts.combine_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
     else

@@ -9,10 +9,7 @@ end
 
 charts = {
   # bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]
-  comp: %i[
-    layerup_powerdown_11_november_2022_electricity_comparison_alert
-    layerup_powerdown_11_november_2022_gas_comparison_alert
-  ]
+  eco: %i[test_economic_costs_gas_by_week_unlimited_£ test_economic_costs_electric_by_week_unlimited_£ ]
 }
 
 no_charts = { adhoc: %i[group_by_week_gas_versus_benchmark intraday_line_school_days_gas_reduced_data_versus_benchmarks] }
@@ -30,7 +27,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['king-james-1-c*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['ralph*', 'king-james-both2*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }
