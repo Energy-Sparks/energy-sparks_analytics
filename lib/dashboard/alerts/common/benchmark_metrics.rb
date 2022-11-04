@@ -20,10 +20,6 @@ module BenchmarkMetrics
   ANNUAL_AVERAGE_DEGREE_DAYS = 2000.0
   AVERAGE_GAS_PROPORTION_OF_HEATING = 0.6
 
-  # BENCHMARK_ENERGY_COST_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * BenchmarkMetrics.pricing.gas_price +
-  #                                   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * ELECTRICITY_PRICE
-
-
   def self.pricing
     if Object.const_defined?('Rails')
       SiteSettings.current_prices
@@ -36,11 +32,6 @@ module BenchmarkMetrics
       )
     end
   end
-
-  # def self.benchmark_energy_cost_per_pupil
-  #   BENCHMARK_GAS_USAGE_PER_PUPIL * BenchmarkMetrics.pricing.BenchmarkMetrics.pricing.gas_price +
-  #   BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * BenchmarkMetrics.pricing.electricity_price
-  # end
 
   # number less than 1.0 for colder area, > 1.0 for milder areas
   # multiply by this number if normalising school to other schools in different regions
