@@ -109,8 +109,8 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     # -1 moves the the date to the previous N school day period
     @beginning_of_last_week, @week_befores_consumption_kwh = schoolday_energy_usage_over_period(@beginning_of_week - 1, days_in_week)
 
-    @last_weeks_consumption_£ = @last_weeks_consumption_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
-    @week_befores_consumption_£ = @week_befores_consumption_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @last_weeks_consumption_£ = @last_weeks_consumption_kwh * BenchmarkMetrics.pricing.electricity_price
+    @week_befores_consumption_£ = @week_befores_consumption_kwh * BenchmarkMetrics.pricing.electricity_price
 
     @last_weeks_consumption_co2   = @last_weeks_consumption_kwh   * blended_co2_per_kwh
     @week_befores_consumption_co2 = @week_befores_consumption_kwh * blended_co2_per_kwh

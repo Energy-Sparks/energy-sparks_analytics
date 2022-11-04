@@ -142,7 +142,7 @@ module AnalyseHeatingAndHotWater
     end
 
     # PH 12Oct2019: perhaps don't want costs in model?
-    private def costs(kwhs, energy_tariff_per_kwh = BenchmarkMetrics::GAS_PRICE)
+    private def costs(kwhs, energy_tariff_per_kwh = BenchmarkMetrics.pricing.gas_price)
       kwhs.transform_values{ |kwh| kwh.nil? ? nil : kwh * energy_tariff_per_kwh }
     end
 

@@ -11,8 +11,8 @@ class RefrigerationAnalysis
     holiday_average_baseload_kw = holiday_baseloads.sum / holiday_baseloads.length
     weekend_average_baseload_kw = weekend_baseloads.sum / weekend_baseloads.length
     change_kw = holiday_average_baseload_kw - weekend_average_baseload_kw
-    annualised_£ = -1 * change_kw * 24 * 365 * BenchmarkMetrics::ELECTRICITY_PRICE
-    holiday_£    = -1 * change_kw * 24 * holiday_baseloads.length * BenchmarkMetrics::ELECTRICITY_PRICE
+    annualised_£ = -1 * change_kw * 24 * 365 * BenchmarkMetrics.pricing.electricity_price
+    holiday_£    = -1 * change_kw * 24 * holiday_baseloads.length * BenchmarkMetrics.pricing.electricity_price
 
     {
       start_date:             period.start_date,

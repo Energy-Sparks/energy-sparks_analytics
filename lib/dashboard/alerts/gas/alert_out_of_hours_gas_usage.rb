@@ -52,7 +52,7 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
   end
 
   def tariff
-    BenchmarkMetrics::GAS_PRICE
+    BenchmarkMetrics.pricing.gas_price
   end
 
   def co2_intensity_per_kwh

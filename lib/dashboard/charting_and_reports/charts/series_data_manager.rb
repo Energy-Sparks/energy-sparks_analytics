@@ -243,8 +243,8 @@ module Series
 
     def scaling_factor_for_model_derived_gas_data(data_type)
       case data_type
-      when :£, :economic_cost;      BenchmarkMetrics::GAS_PRICE
-      when :accounting_cost;        BenchmarkMetrics::GAS_PRICE # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
+      when :£, :economic_cost;      BenchmarkMetrics.pricing.gas_price
+      when :accounting_cost;        BenchmarkMetrics.pricing.gas_price # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
       when :co2;                    EnergyEquivalences::UK_GAS_CO2_KG_KWH
       else;                         1.0 end
     end

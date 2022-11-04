@@ -59,7 +59,7 @@ class AlertHeatingSensitivityAdvice < AlertGasModelBase
     @annual_kwh = kwh(start_date, asof_date)
     @annual_saving_1_C_change_percent = @annual_saving_1_C_change_kwh / @annual_kwh
     @annual_saving_1_C_change_kwh *= (365 / (asof_date - start_date)) # scale to 1 year
-    @annual_saving_1_C_change_£   = @annual_saving_1_C_change_kwh * BenchmarkMetrics::GAS_PRICE
+    @annual_saving_1_C_change_£   = @annual_saving_1_C_change_kwh * BenchmarkMetrics.pricing.gas_price
     @annual_saving_1_C_change_co2 = @annual_saving_1_C_change_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
     set_savings_capital_costs_payback(Range.new(@annual_saving_1_C_change_£, @annual_saving_1_C_change_£), nil, @annual_saving_1_C_change_co2)
 

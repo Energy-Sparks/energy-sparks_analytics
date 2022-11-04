@@ -249,7 +249,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     @previous_year_£ = kwh(prev_date - 365, prev_date, :economic_cost)
 
     @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
-    @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * BenchmarkMetrics::GAS_PRICE
+    @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * BenchmarkMetrics.pricing.gas_price
 
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_floor_area_kwh
     @one_year_saving_versus_benchmark_£   = @last_year_£   - @one_year_benchmark_floor_area_£

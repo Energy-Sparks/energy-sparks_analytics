@@ -55,7 +55,7 @@ class AlertGasOnlyBase < AlertAnalysisBase
   end
 
   protected def gas_cost(kwh)
-    kwh * BenchmarkMetrics::GAS_PRICE
+    kwh * BenchmarkMetrics.pricing.gas_price
   end
 
   protected def gas_co2(kwh)
@@ -77,7 +77,7 @@ class AlertGasOnlyBase < AlertAnalysisBase
   end
 
   def fuel_price
-    BenchmarkMetrics::GAS_PRICE
+    BenchmarkMetrics.pricing.gas_price
   end
 
   def non_heating_only

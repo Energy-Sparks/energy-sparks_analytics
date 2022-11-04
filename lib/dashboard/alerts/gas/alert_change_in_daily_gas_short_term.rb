@@ -152,8 +152,8 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     @predicted_changein_kwh = @predicted_kwh_this_week - @predicted_kwh_last_week
     @predicted_percent_increase_in_usage = @predicted_changein_kwh / @predicted_kwh_last_week
 
-    @predicted_this_week_cost = BenchmarkMetrics::GAS_PRICE * @predicted_kwh_this_week
-    @predicted_last_week_cost = BenchmarkMetrics::GAS_PRICE * @predicted_kwh_last_week
+    @predicted_this_week_cost = BenchmarkMetrics.pricing.gas_price * @predicted_kwh_this_week
+    @predicted_last_week_cost = BenchmarkMetrics.pricing.gas_price * @predicted_kwh_last_week
     @predicted_change_in_cost = @predicted_this_week_cost - @predicted_last_week_cost
 
     @predicted_this_week_co2 = gas_co2(@predicted_kwh_this_week)
@@ -165,8 +165,8 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     @actual_changein_kwh = @actual_kwh_this_week - @actual_kwh_last_week
     @actual_percent_increase_in_usage = @actual_changein_kwh / @actual_kwh_last_week
 
-    @this_week_cost = BenchmarkMetrics::GAS_PRICE * @actual_kwh_this_week
-    @last_week_cost = BenchmarkMetrics::GAS_PRICE * @actual_kwh_last_week
+    @this_week_cost = BenchmarkMetrics.pricing.gas_price * @actual_kwh_this_week
+    @last_week_cost = BenchmarkMetrics.pricing.gas_price * @actual_kwh_last_week
 
     @this_week_co2 = gas_co2(@actual_kwh_this_week)
     @last_week_co2 = gas_co2(@actual_kwh_last_week)

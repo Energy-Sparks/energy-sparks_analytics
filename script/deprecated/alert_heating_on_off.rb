@@ -144,9 +144,9 @@ class AlertHeatingOnOffBase < AlertGasModelBase
     toy_relevance = calculate_time_of_year_relevance(summary_forecast)
     set_time_of_year_relevance(toy_relevance ? 10.0 : 0.0)
 
-    @next_weeks_predicted_consumption_£ = @next_weeks_predicted_consumption_kwh * BenchmarkMetrics::GAS_PRICE
-    @potential_saving_next_week_£ = @potential_saving_next_week_kwh * BenchmarkMetrics::GAS_PRICE
-    @last_5_school_days_consumption_£ = @last_5_school_days_consumption_kwh * BenchmarkMetrics::GAS_PRICE
+    @next_weeks_predicted_consumption_£ = @next_weeks_predicted_consumption_kwh * BenchmarkMetrics.pricing.gas_price
+    @potential_saving_next_week_£ = @potential_saving_next_week_kwh * BenchmarkMetrics.pricing.gas_price
+    @last_5_school_days_consumption_£ = @last_5_school_days_consumption_kwh * BenchmarkMetrics.pricing.gas_price
     @percent_saving_next_week = @next_weeks_predicted_consumption_kwh == 0.0 ? 0.0 : (@potential_saving_next_week_kwh / @next_weeks_predicted_consumption_kwh)
 
     @next_weeks_predicted_consumption_co2 = @next_weeks_predicted_consumption_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
@@ -230,7 +230,7 @@ class AlertHeatingOnOffBase < AlertGasModelBase
       predicted_kwh, saving_kwh = predicted_saving_kwh(date, days_forecast[:average_temperature], reduction)
       next_weeks_predicted_consumption_kwh += predicted_kwh
       saving_kwh *= heat_on_off_weight
-      saving_£ = saving_kwh * BenchmarkMetrics::GAS_PRICE
+      saving_£ = saving_kwh * BenchmarkMetrics.pricing.gas_price
       potential_saving_next_week_kwh += saving_kwh
 
       table.push(

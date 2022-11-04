@@ -163,7 +163,7 @@ class AdviceBaseload < AdviceElectricityBase
     avg = FormatEnergyUnit.format(:kw, stats[:kw], :html)
     pct = FormatEnergyUnit.format(:percent, stats[:percent], :html)
     pct_str = stats[:percent] == 1.0 ? '' : "#{pct},"
-    annual_cost_£ = stats[:kw] * 24.0 * 365.0 * BenchmarkMetrics::ELECTRICITY_PRICE
+    annual_cost_£ = stats[:kw] * 24.0 * 365.0 * BenchmarkMetrics.pricing.electricity_price
     annual_cost_formatted = FormatEnergyUnit.format(:£, annual_cost_£, :html)
     "#{meter.mpxn.to_s + name} (#{avg} average, #{pct_str} #{annual_cost_formatted}/year)"
   end

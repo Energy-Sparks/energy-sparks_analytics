@@ -12,7 +12,7 @@ module AlertGasToStorageHeaterSubstitutionMixIn
   end
 
   def fuel_price
-    BenchmarkMetrics::ELECTRICITY_PRICE
+    BenchmarkMetrics.pricing.electricity_price
   end
 
   def self.fuel_lc

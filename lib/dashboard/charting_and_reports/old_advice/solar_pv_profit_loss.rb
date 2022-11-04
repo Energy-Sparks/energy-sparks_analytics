@@ -160,13 +160,13 @@ class SolarPVProfitLoss
   private def rate(meter_name)
     case meter_name
     when SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
-      BenchmarkMetrics::ELECTRICITY_PRICE
+      BenchmarkMetrics.pricing.electricity_price
     when SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME
-      BenchmarkMetrics::SOLAR_EXPORT_PRICE
+      BenchmarkMetrics::BenchmarkMetrics.pricing.solar_export_price
     when SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
-      BenchmarkMetrics::ELECTRICITY_PRICE
+      BenchmarkMetrics.pricing.electricity_price
     else
-      -1.0 * BenchmarkMetrics::ELECTRICITY_PRICE
+      -1.0 * BenchmarkMetrics.pricing.electricity_price
     end
   end
 end

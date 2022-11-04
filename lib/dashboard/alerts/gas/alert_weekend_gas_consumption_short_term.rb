@@ -140,7 +140,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     @projected_percent_of_annual = @last_week_end_kwh * 52.0 / annual_kwh(aggregate_meter, asof_date)
 
     @last_5_weeks_average_weekend_kwh = average_last_n_weekends_kwh(@weekend_dates, 5)
-    @last_5_weeks_average_weekend_£   = @last_5_weeks_average_weekend_kwh * BenchmarkMetrics::GAS_PRICE
+    @last_5_weeks_average_weekend_£   = @last_5_weeks_average_weekend_kwh * BenchmarkMetrics.pricing.gas_price
     @last_5_weeks_average_weekend_co2 = @last_5_weeks_average_weekend_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
     @percent_increase_on_last_5_weekends = @last_5_weeks_average_weekend_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @last_5_weeks_average_weekend_kwh) / @last_5_weeks_average_weekend_kwh
 

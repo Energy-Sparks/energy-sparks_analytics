@@ -108,7 +108,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
       heating_on_time, recommended_time, temperature, kwh_saving = heating_model.heating_on_time_assessment(date)
       start_times.push(heating_on_time) unless heating_on_time.nil?
       kwh_saving = kwh_saving.nil? ? 0.0 : kwh_saving
-      saving_£ = (kwh_saving.nil? || kwh_saving < 0.0) ? 0.0 : kwh_saving * BenchmarkMetrics::GAS_PRICE
+      saving_£ = (kwh_saving.nil? || kwh_saving < 0.0) ? 0.0 : kwh_saving * BenchmarkMetrics.pricing.gas_price
       saving_co2 = (kwh_saving.nil? || kwh_saving < 0.0) ? 0.0 : kwh_saving * EnergyEquivalences::UK_GAS_CO2_KG_KWH
       timing = heating_on_time.nil? ? 'no heating' : (heating_on_time > recommended_time ? 'on time' : 'too early')
       rating += heating_on_time.nil? ? 0 : (heating_on_time > recommended_time ? -1 : 1)

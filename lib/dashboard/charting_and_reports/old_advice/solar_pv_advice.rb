@@ -37,12 +37,12 @@ class DashboardEnergyAdvice
     end
 
     def annual_solar_pv_consumed_onsite_£_html
-      saving_£ = solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+      saving_£ = solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh * BenchmarkMetrics.pricing.electricity_price
       FormatEnergyUnit.format(:£, saving_£,  :html, false, false, :ks2)
     end
 
     def annual_exported_solar_pv_£_html
-      export_£ = solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics::SOLAR_EXPORT_PRICE
+      export_£ = solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics::BenchmarkMetrics.pricing.solar_export_price
       FormatEnergyUnit.format(:£, export_£,  :html, false, false, :ks2)
     end
 
@@ -303,12 +303,12 @@ class DashboardEnergyAdvice
               <li>
                 In general, the school will save from the free electricity it is
                 consuming from the panels, about <%= annual_solar_pv_consumed_onsite_£_html %>
-                (&#163;<%= BenchmarkMetrics::ELECTRICITY_PRICE %>/kWh x
+                (&#163;<%= BenchmarkMetrics.pricing.electricity_price %>/kWh x
                   <%= annual_solar_pv_consumed_onsite_kwh_html %>)
               </li>
               <li>
                 It will also gain about <%= annual_exported_solar_pv_£_html %> from exported electricity
-                (&#163;<%= BenchmarkMetrics::SOLAR_EXPORT_PRICE %>/kWh)
+                (&#163;<%= BenchmarkMetrics::BenchmarkMetrics.pricing.solar_export_price %>/kWh)
               </li>
               <li>
                 It will also gain from the 'feed-in-tariff', a government subsidy, the
