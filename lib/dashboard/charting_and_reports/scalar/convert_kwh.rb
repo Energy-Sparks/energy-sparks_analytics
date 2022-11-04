@@ -27,7 +27,7 @@ class ConvertKwh
       when :electricity, :storage_heater, :aggregated_electricity
         unit_scale = BenchmarkMetrics.pricing.electricity_price # 15p/kWh long term average
       when :solar_export
-        unit_scale = BenchmarkMetrics::BenchmarkMetrics.pricing.solar_export_price # 5p/kWh
+        unit_scale = BenchmarkMetrics.pricing.solar_export_price # 5p/kWh
       when :gas, :heat # TODO(PH,1Jun2018) - rationalise heat versus gas
         unit_scale = BenchmarkMetrics.pricing.gas_price # 3p/kWh long term average
       when :oil
