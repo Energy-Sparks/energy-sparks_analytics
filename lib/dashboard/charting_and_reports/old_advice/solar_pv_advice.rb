@@ -42,7 +42,7 @@ class DashboardEnergyAdvice
     end
 
     def annual_exported_solar_pv_£_html
-      export_£ = solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics::BenchmarkMetrics.pricing.solar_export_price
+      export_£ = solar_pv_profit_loss.annual_exported_solar_pv_kwh * BenchmarkMetrics.pricing.solar_export_price
       FormatEnergyUnit.format(:£, export_£,  :html, false, false, :ks2)
     end
 
@@ -308,7 +308,7 @@ class DashboardEnergyAdvice
               </li>
               <li>
                 It will also gain about <%= annual_exported_solar_pv_£_html %> from exported electricity
-                (&#163;<%= BenchmarkMetrics::BenchmarkMetrics.pricing.solar_export_price %>/kWh)
+                (&#163;<%= BenchmarkMetrics.pricing.solar_export_price %>/kWh)
               </li>
               <li>
                 It will also gain from the 'feed-in-tariff', a government subsidy, the

@@ -162,7 +162,7 @@ class SolarPVProfitLoss
     when SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
       BenchmarkMetrics.pricing.electricity_price
     when SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME
-      BenchmarkMetrics::BenchmarkMetrics.pricing.solar_export_price
+      BenchmarkMetrics.pricing.solar_export_price
     when SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
       BenchmarkMetrics.pricing.electricity_price
     else
