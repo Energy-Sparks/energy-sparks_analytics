@@ -16,7 +16,6 @@ class CostsBase < HalfHourlyData
     @fuel_type = meter.fuel_type
     @bill_component_types_internal = Hash.new(nil) # only interested in (quick access) to keys, so maintain as hash rather than array
     @post_aggregation_state = false
-    @calculated = {}
   end
 
   def bill_component_types
@@ -215,7 +214,7 @@ class CostsBase < HalfHourlyData
   end
 
   def calculated?(date)
-    @calculated[date] == true
+    !self[date].nil?
   end
 
   def date_exists?(date)

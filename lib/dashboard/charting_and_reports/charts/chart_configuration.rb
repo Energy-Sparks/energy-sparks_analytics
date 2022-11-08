@@ -249,6 +249,62 @@ class ChartManager
       timescale:        :up_to_a_year
     },
 
+    test_economic_costs_electric_by_week_unlimited_£: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited £',
+      inherits_from:    :management_dashboard_group_by_week_electricity,
+      yaxis_units:      :£,
+      timescale:        nil
+    },
+    test_economic_costs_electric_by_week_unlimited_co2: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited co2',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :co2,
+    },
+    test_economic_costs_electric_by_week_unlimited_kwh: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited kwh',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :kwh,
+    },
+    test_economic_costs_electric_by_week_unlimited_acc£: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      series_breakdown: :daytype,
+      yaxis_units:      :accounting_cost,
+    },
+    test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited meter breakdown',
+      inherits_from:    :group_by_week_electricity_meter_breakdown,
+      yaxis_units:      :£,
+      timescale:        nil
+    },
+    test_economic_costs_electric_by_datetime_year_£: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> £ by datetime - 1 year',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :£,
+      x_axis:           :datetime,
+      timescale:        :year
+    },
+
+    test_economic_costs_gas_by_week_unlimited_£: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      meter_definition: :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_co2: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_co2,
+      meter_definition:  :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_kwh: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh,
+      meter_definition: :allheat,
+    },
+    test_economic_costs_gas_by_week_unlimited_kwh_meter_breakdown: {
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown,
+      meter_definition: :allheat,
+    },
+    test_economic_costs_gas_by_datetime_year_£: {
+      inherits_from:    :test_economic_costs_electric_by_datetime_year_£,
+      meter_definition: :allheat
+    },
+
     targeting_and_tracking_weekly_electricity_to_date_column_deprecated: {
       name:           :targeting_and_tracking_weekly_electricity_to_date_column.to_s,
       chart1_type:    :column,
@@ -1884,6 +1940,25 @@ class ChartManager
       meter_definition: :allelectricity,
       y2_axis:          :none
     },
+    layerup_powerdown_11_november_2022_electricity_comparison_alert: {
+      name:             '<%= meter.fuel_type.capitalize %> Comparison: Layer Up Powerdown Day 11 November 2022',
+      inherits_from:    :last_2_school_weeks_electricity_comparison_alert,
+      x_axis:           :day,
+      timescale: [ 
+        { daterange: Date.new(2021, 10, 12)..Date.new(2021, 10, 14) },
+        { daterange: Date.new(2022, 10, 11)..Date.new(2022, 10, 13) }
+      ],
+      meter_definition: :allelectricity,
+      y2_axis:          :none
+    },
+    layerup_powerdown_11_november_2022_gas_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :allheat
+    },
+    layerup_powerdown_11_november_2022_storage_heater_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :storage_heater_meter
+    },
     recent_holiday_electricity_comparison_alert: {
       name:             'Comparison of electricity consumption for recent holidays',
       inherits_from:    :group_by_week_electricity,
@@ -1941,6 +2016,14 @@ class ChartManager
 
       #asof_date:              Date.new(2019, 3, 7), # gets overridden by alert
       inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_storage_heater_adjusted: {
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_adjusted,
+      meter_definition: :storage_heater_meter
+    },
+    schoolweek_alert_2_week_comparison_for_internal_calculation_storage_heater_unadjusted: {
+      inherits_from:          :schoolweek_alert_2_week_comparison_for_internal_calculation_gas_unadjusted,
+      meter_definition: :storage_heater_meter
     },
     schoolweek_alert_2_previous_holiday_comparison_gas_adjusted: {
       name:                           'Comparison of last 2 weeks gas consumption - temperature adjusted alert calculation',

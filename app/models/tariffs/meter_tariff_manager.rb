@@ -17,7 +17,7 @@
 class MeterTariffManager
   include Logging
   MAX_DAYS_BACKDATE_TARIFF = 30
-  attr_reader :accounting_tariffs
+  attr_reader :accounting_tariffs, :economic_tariff
 
   class MissingAccountingTariff                                   < StandardError; end
   class OverlappingAccountingTariffs                              < StandardError; end
@@ -37,15 +37,15 @@ class MeterTariffManager
     t = if differential_tariff_on_date?(date)
           {
             rates_x48: {
-              MeterTariff::NIGHTTIME_RATE => @economic_tariff.weighted_cost(kwh_x48, :nighttime_rate),
-              MeterTariff::DAYTIME_RATE   => @economic_tariff.weighted_cost(kwh_x48, :daytime_rate)
+              MeterTariff::NIGHTTIME_RATE => @economic_tariff.weighted_cost(date, kwh_x48, :nighttime_rate),
+              MeterTariff::DAYTIME_RATE   => @economic_tariff.weighted_cost(date, kwh_x48, :daytime_rate)
             },
             differential: true
           }
         else
           {
             rates_x48: {
-              MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(:rate))
+              MeterTariff::FLAT_RATE => AMRData.fast_multiply_x48_x_scalar(kwh_x48, @economic_tariff.rate(date, :rate))
             },
             differential: false
           }
@@ -176,7 +176,7 @@ class MeterTariffManager
   end
 
   def pre_process_tariff_attributes(meter)
-    @economic_tariff = EconomicTariff.new(meter, meter.attributes(:economic_tariff))
+    @economic_tariff = pre_process_economic_tariffs(meter)
     @accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs), false) || []
     @default_accounting_tariffs = preprocess_accounting_tariffs(meter, meter.attributes(:accounting_tariffs), true) || []
     @accounting_tariffs += preprocess_generic_accounting_tariffs(meter, meter.attributes(:accounting_tariff_generic)) || []
@@ -185,6 +185,16 @@ class MeterTariffManager
     @differential_tariff_override = process_economic_tariff_override(meter.attributes(:economic_tariff_differential_accounting_tariff))
     @indicative_standing_charge = MeterIndicativeStandingCharge.new(meter, meter.attributes(:indicative_standing_charge))
     check_tariffs
+  end
+
+  def pre_process_economic_tariffs(meter)
+    if meter.attributes(:economic_tariff_change_over_time).nil? || meter.attributes(:economic_tariff_change_over_time).empty?
+      # pre October 2022 version of economic tariffs - same value for all time
+      EconomicTariff.new(meter, meter.attributes(:economic_tariff))
+    else
+      # post October 2022 version of economic tariffs - tariffs potentiall change with start, end_date over time
+      EconomicTariffChangeOverTime.new(meter, meter.attributes(:economic_tariff_change_over_time))
+    end
   end
 
   def process_economic_tariff_override(differential_overrides)

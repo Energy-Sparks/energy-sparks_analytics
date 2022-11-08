@@ -4,7 +4,7 @@ class TargetMeter < Dashboard::Meter
   class UnableToFindMatchingProfile < StandardError; end
   class UnableToCalculateTargetDates < StandardError; end
   class MissingGasEstimationAmrData < StandardError; end
-  MAX_MISSING_PROFILES_TO_IGNORE = 4
+  MAX_MISSING_PROFILES_TO_IGNORE = 6
   include Logging
   attr_reader :target, :feedback, :target_dates, :non_scaled_target_meter, :synthetic_meter
 

@@ -152,6 +152,12 @@ module Benchmarking
           gas_meter_consolidation_opportunities
           differential_tariff_opportunity
         ]
+      },
+      {
+        name:       'Event Specific Comparisons',
+        benchmarks: %i[
+          layer_up_powerdown_day_november_2022
+        ]
       }
     ]
 
@@ -307,6 +313,74 @@ module Benchmarking
         ],
         sort_by:  [13],
         type: %i[chart table]
+      },
+      layer_up_powerdown_day_november_2022: {
+        benchmark_class:  BenchmarkChangeAdhocComparison,
+        name:       'Change in energy for layer up power down day November 2022',
+        columns:  [
+          { data: 'addp_name', name: 'School name', units: :short_school_name, chart_data: true},
+
+          # kWh
+
+          { data: ->{ sum_if_complete([lue1_pppk, lug1_pppk, lus1_pppk], [lue1_cppk, lug1_cppk, lus1_cppk]) }, name: 'previous year', units: :kwh },
+          { data: ->{ sum_data([lue1_cppk, lug1_cppk, lus1_cppk]) },                                name: 'current year',  units: :kwh }, 
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([lue1_pppk, lug1_pppk, lus1_pppk], [lue1_cppk, lug1_cppk, lus1_cppk]),
+                                      sum_data([lue1_cppk, lug1_cppk, lus1_cppk]),
+                                      true
+                                    ) },
+            name: 'change', units: :relative_percent_0dp
+          },
+
+          # CO2
+          { data: ->{ sum_if_complete([lue1_pppc, lug1_pppc, lus1_pppc], [lue1_cppc, lug1_cppc, lus1_cppc]) }, name: 'previous year', units: :co2 },
+          { data: ->{ sum_data([lue1_cppc, lug1_cppc, lus1_cppc]) },                                name: 'current year',  units: :co2 }, 
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([lue1_pppc, lug1_pppc, lus1_pppc], [lue1_cppc, lug1_cppc, lus1_cppc]),
+                                      sum_data([lue1_cppc, lug1_cppc, lus1_cppc]),
+                                      true
+                                    ) },
+            name: 'change', units: :relative_percent_0dp
+          },
+
+          # £
+
+          { data: ->{ sum_if_complete([lue1_ppp£, lug1_ppp£, lus1_ppp£], [lue1_cpp£, lug1_cpp£, lus1_cpp£]) }, name: 'previous year', units: :£ },
+          { data: ->{ sum_data([lue1_cpp£, lug1_cpp£, lus1_cpp£]) },                                name: 'current year',  units: :£ }, 
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([lue1_ppp£, lug1_ppp£, lus1_ppp£], [lue1_cpp£, lug1_cpp£, lus1_cpp£]),
+                                      sum_data([lue1_cpp£, lug1_cpp£, lus1_cpp£]),
+                                      true
+                                    ) },
+            name: 'change £', units: :relative_percent_0dp, chart_data: true
+          },
+
+          # Metering
+
+          { data: ->{
+              [
+                lue1_ppp£.nil? ? nil : 'Electricity',
+                lug1_ppp£.nil? ? nil : 'Gas',
+                lus1_ppp£.nil? ? nil : 'Storage Heaters'
+              ].compact.join(', ')
+            },
+            name: 'metering',
+            units: String
+          },
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 3 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 },
+          { name: '',         span: 1 }
+        ],
+        where:   ->{ !sum_data([lue1_ppp£, lug1_ppp£, lus1_ppp£], true).nil? },
+        sort_by:  [9],
+        type: %i[chart table],
       },
       change_in_energy_since_last_year: {
         benchmark_class:  BenchmarkChangeInEnergySinceLastYear,

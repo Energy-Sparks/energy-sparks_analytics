@@ -344,8 +344,8 @@ module Benchmarking
           the school is unoccupied.
         </p>
         <p>
-          In general, in general with very few exceptions the baseload in the winter
-          should be very slimiar to the summer. In practice many school accidently
+          In general, with very few exceptions the baseload in the winter
+          should be very similar to the summer. In practice many school accidently
           leave electrically powered heating-related equipment on overnight whe
           the school is unoccupied.
         </p>
@@ -370,7 +370,7 @@ module Benchmarking
           the school is unoccupied.
         </p>
         <p>
-          In general, in general with very few exceptions the baseload shouldn&apos;t
+          In general, with very few exceptions the baseload shouldn&apos;t
           vary between days of the week and even between weekdays and weekends.
         </p>
         <p>
@@ -1676,6 +1676,24 @@ module Benchmarking
       text = %q(
         <p>
           This comparison shows cost of electricity and gas last year for an upcoming holiday.
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+  end
+#=======================================================================================
+  class BenchmarkChangeAdhocComparison < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text; '' end
+    private def introduction_text
+      text = %q(
+        <p>
+          This comparison below for gas and storage heaters has the
+          the previous period temperature compensated to the current
+          period's temperatures.
+        </p>
+        <p>
+          Schools' solar PV production has also been removed from the comparison.
         </p>
       )
       ERB.new(text).result(binding)
