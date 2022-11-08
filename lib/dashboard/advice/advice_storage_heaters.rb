@@ -1,4 +1,4 @@
-class AdviceStorageHeaters < AdviceElectricityBase
+class AdviceStorageHeaters < AdviceBenchmark
   def relevance
     @school.storage_heaters? ? :relevant : :never_relevant
   end
@@ -14,4 +14,10 @@ class AdviceStorageHeaters < AdviceElectricityBase
   def normalised_benchmark_chart_name
     :benchmark_storage_heater_only_£_varying_floor_area_pupils
   end
+
+  private
+
+  def valid_meters
+    [@school.storage_heater_meter]
+  end    
 end

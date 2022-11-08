@@ -7,6 +7,12 @@ class AdviceElectricityAnnual < AdviceBenchmark
   def normalised_benchmark_chart_name
     :benchmark_electric_only_£_varying_floor_area_pupils
   end
+
+  private
+
+  def valid_meters
+    [@school.aggregated_electricity_meters]
+  end
 end
 
 # require_relative '../charting_and_reports/old_advice/dashboard_analysis_advice.rb'

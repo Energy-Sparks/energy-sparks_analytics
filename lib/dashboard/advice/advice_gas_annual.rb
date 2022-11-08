@@ -1,4 +1,4 @@
-class AdviceGasAnnual < AdviceGasBase
+class AdviceGasAnnual < AdviceBenchmark
   def aggregate_meter
     @school.aggregated_heat_meters
   end
@@ -18,4 +18,10 @@ class AdviceGasAnnual < AdviceGasBase
   def normalised_benchmark_chart_name
     :benchmark_gas_only_£_varying_floor_area_pupils
   end
+
+  private
+
+  def valid_meters
+    [@school.aggregated_heat_meters]
+  end  
 end
