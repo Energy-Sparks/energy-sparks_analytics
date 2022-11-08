@@ -21,7 +21,7 @@ module BenchmarkMetrics
   AVERAGE_GAS_PROPORTION_OF_HEATING = 0.6
 
   def self.pricing
-    if Object.const_defined?('Rails')
+    if Object.const_defined?('Rails') && EnergySparks::FeatureFlags.active?(:use_site_settings_current_prices)
       SiteSettings.current_prices
     else
       OpenStruct.new(

@@ -17,6 +17,14 @@ describe BenchmarkMetrics do
     it 'returns the pricing values as defined in the ES rails application database' do
       stub_const('Rails', true)
       stub_const(
+        "EnergySparks::FeatureFlags",
+        Class.new do
+          def self.active?(feature)
+            true
+          end
+        end
+      )
+      stub_const(
         "SiteSettings",
         Class.new do
           def self.current_prices
