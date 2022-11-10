@@ -7,11 +7,11 @@ require_relative './alert_period_comparison_temperature_adjustment_mixin.rb'
 module AlertLayerUpPowerdown11November2022BasicConfigMixIn
   def basic_configuration
     {
-      name:                   'Layer up power down day November 2022',
+      name:                   'Layer up power down day 11 November 2022',
       max_days_out_of_date:   365,
-      enough_days_data:       3,
-      current_period:         Date.new(2022, 10,  7)..Date.new(2022, 10,  9),
-      previous_period:        Date.new(2021, 11, 12)..Date.new(2021, 11, 14)
+      enough_days_data:       1,
+      current_period:         Date.new(2022, 11, 11)..Date.new(2022, 11, 11),
+      previous_period:        Date.new(2021, 11, 12)..Date.new(2021, 11, 12)
     }
   end
 end
@@ -35,6 +35,13 @@ class AlertLayerUpPowerdown11November2022GasComparison < AlertArbitraryPeriodCom
     {
       comparison_chart:       :layerup_powerdown_11_november_2022_gas_comparison_alert
     }.merge(basic_configuration)
+  end
+
+  def calculate(asof_date)
+    super(asof_date)
+  rescue => e
+    puts e.message
+    puts e.backtrace
   end
 end
 
