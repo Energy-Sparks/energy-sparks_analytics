@@ -1693,10 +1693,62 @@ module Benchmarking
           period's temperatures.
         </p>
         <p>
-          Schools' solar PV production has also been removed from the comparison.
+          Schools' solar PV production has been removed from the comparison.
+        </p>
+        <p>
+          CO2 values for electricity (including where the CO2 is
+          aggregated across electricity, gas, storage heaters) is difficult
+          to compare for short periods as it is dependent on the carbon intensity
+          of the national grid on the days being compared and this could vary by up to
+          300&percnt; from day to day.
         </p>
       )
       ERB.new(text).result(binding)
     end
+
+    # combine content of 4 tables: energy, electricity, gas, storage heaters
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      content1 = super(school_ids: school_ids, filter: filter)
+      content2 = electricity_content(school_ids: school_ids, filter: filter)
+      content3 = gas_content(school_ids: school_ids, filter: filter)
+      content4 = storage_heater_content(school_ids: school_ids, filter: filter)
+      content1 + content2 + content3  + content4
+    end
+
+    private
+
+    def electricity_content(school_ids:, filter:)
+      extra_content(:layer_up_powerdown_day_november_2022_electricity_table, filter: filter)
+    end
+
+    def gas_content(school_ids:, filter:)
+      extra_content(:layer_up_powerdown_day_november_2022_gas_table, filter: filter)
+    end
+
+    def storage_heater_content(school_ids:, filter:)
+      extra_content(:layer_up_powerdown_day_november_2022_storage_heater_table, filter: filter)
+    end
+    
+
+    def extra_content(type, filter:)
+      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
+      db = @benchmark_manager.benchmark_database
+      content_manager.content(db, type, filter: filter)
+    end
+  end
+
+  class BenchmarkChangeAdhocComparisonElectricityTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+  end
+
+  class BenchmarkChangeAdhocComparisonGasTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      'The change columns are calculated using temperature adjusted values:'
+    end
+  end
+
+  class BenchmarkChangeAdhocComparisonStorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
+    include BenchmarkingNoTextMixin
   end
 end

@@ -316,7 +316,7 @@ module Benchmarking
       },
       layer_up_powerdown_day_november_2022: {
         benchmark_class:  BenchmarkChangeAdhocComparison,
-        name:       'Change in energy for layer up power down day November 2022',
+        name:       'Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)',
         columns:  [
           { data: 'addp_name', name: 'School name', units: :short_school_name, chart_data: true},
 
@@ -381,6 +381,107 @@ module Benchmarking
         where:   ->{ !sum_data([lue1_ppp£, lug1_ppp£, lus1_ppp£], true).nil? },
         sort_by:  [9],
         type: %i[chart table],
+      },
+      layer_up_powerdown_day_november_2022_electricity_table: {
+        benchmark_class:  BenchmarkChangeAdhocComparisonElectricityTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Change in electricity for layer up power down day November 2022',
+        columns:  [
+          { data: 'addp_name', name: 'School name', units: :short_school_name },
+
+          # kWh
+          { data: ->{ lue1_pppk }, name: 'previous year', units: :kwh },
+          { data: ->{ lue1_cppk }, name: 'current year',  units: :kwh }, 
+          { data: ->{ percent_change(lue1_pppk, lue1_cppk, true) }, name: 'change', units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ lue1_pppc }, name: 'previous year', units: :co2 },
+          { data: ->{ lue1_cppc }, name: 'current year',  units: :co2 }, 
+          { data: ->{ percent_change(lue1_pppc, lue1_cppc, true) }, name: 'change', units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ lue1_ppp£ }, name: 'previous year', units: :£ },
+          { data: ->{ lue1_cpp£ }, name: 'current year',  units: :£ }, 
+          { data: ->{ percent_change(lue1_ppp£, lue1_cpp£, true) }, name: 'change', units: :relative_percent_0dp },
+
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 4 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 }
+        ],
+        where:   ->{ !lue1_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
+      },
+      layer_up_powerdown_day_november_2022_gas_table: {
+        benchmark_class:  BenchmarkChangeAdhocComparisonGasTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Change in gas for layer up power down day November 2022',
+        columns:  [
+          { data: 'addp_name', name: 'School name', units: :short_school_name },
+
+          # kWh
+          { data: ->{ lug1_pppu }, name: 'previous year (temperature unadjusted)', units: :kwh },
+          { data: ->{ lug1_pppk }, name: 'previous year (temperature adjusted)', units: :kwh },
+          { data: ->{ lug1_cppk }, name: 'current year',  units: :kwh }, 
+          { data: ->{ percent_change(lug1_pppk, lug1_cppk, true) }, name: 'change', units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ lug1_pppc }, name: 'previous year', units: :co2 },
+          { data: ->{ lug1_cppc }, name: 'current year',  units: :co2 }, 
+          { data: ->{ percent_change(lug1_pppc, lug1_cppc, true) }, name: 'change', units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ lug1_ppp£ }, name: 'previous year', units: :£ },
+          { data: ->{ lug1_cpp£ }, name: 'current year',  units: :£ }, 
+          { data: ->{ percent_change(lug1_ppp£, lug1_cpp£, true) }, name: 'change', units: :relative_percent_0dp },
+
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 3 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 }
+        ],
+        where:   ->{ !lug1_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
+      },
+      layer_up_powerdown_day_november_2022_storage_heater_table: {
+        benchmark_class:  BenchmarkChangeAdhocComparisonStorageHeaterTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'Change in gas for layer up power down day November 2022',
+        columns:  [
+          { data: 'addp_name', name: 'School name', units: :short_school_name },
+
+          # kWh
+          { data: ->{ lus1_pppu }, name: 'previous year (temperature unadjusted)', units: :kwh },
+          { data: ->{ lus1_pppk }, name: 'previous year (temperature adjusted)', units: :kwh },
+          { data: ->{ lus1_cppk }, name: 'current year',  units: :kwh }, 
+          { data: ->{ percent_change(lus1_pppk, lus1_cppk, true) }, name: 'change', units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ lus1_pppc }, name: 'previous year', units: :co2 },
+          { data: ->{ lus1_cppc }, name: 'current year',  units: :co2 }, 
+          { data: ->{ percent_change(lus1_pppc, lus1_cppc, true) }, name: 'change', units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ lus1_ppp£ }, name: 'previous year', units: :£ },
+          { data: ->{ lus1_cpp£ }, name: 'current year',  units: :£ }, 
+          { data: ->{ percent_change(lus1_ppp£, lus1_cpp£, true) }, name: 'change', units: :relative_percent_0dp },
+
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 3 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 }
+        ],
+        where:   ->{ !lus1_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
       },
       change_in_energy_since_last_year: {
         benchmark_class:  BenchmarkChangeInEnergySinceLastYear,

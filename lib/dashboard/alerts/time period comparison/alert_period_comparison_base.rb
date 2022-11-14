@@ -41,6 +41,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :previous_holiday_temperatures, :previous_holiday_average_temperature
   attr_reader :current_period_kwhs, :previous_period_kwhs_unadjusted, :previous_period_average_kwh_unadjusted
   attr_reader :current_period_weekly_kwh, :current_period_weekly_£, :previous_period_weekly_kwh, :previous_period_weekly_£
+  attr_reader :previous_period_kwh_unadjusted
   attr_reader :change_in_weekly_kwh, :change_in_weekly_£
   attr_reader :change_in_weekly_percent
   attr_reader :current_period_floor_area, :previous_period_floor_area, :floor_area_changed
@@ -67,6 +68,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       name_of_current_period:    { description: 'name of current period e.g. Easter', units: String, benchmark_code: 'cper' },
 
       previous_period_kwh:        { description: 'Previous period kwh (equivalent no. of days to current period)', units:  { kwh: fuel_type }, benchmark_code: 'pppk' },
+      previous_period_kwh_unadjusted: { description: 'Previous period kwh (equivalent no. of days to current period, unadjusted for temperature)', units:  { kwh: fuel_type }, benchmark_code: 'pppu' },
       previous_period_£:          { description: 'Previous period £ (equivalent no. of days to current period)',   units:  :£,   benchmark_code: 'ppp£'},
       previous_period_co2:        { description: 'Current period co2',                                             units:  :co2, benchmark_code: 'pppc'},
       previous_period_start_date: { description: 'Previous period start date',      units:  :date,   },
@@ -192,8 +194,13 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     previous_period_range = @previous_period_start_date..@previous_period_end_date
     @previous_holiday_temperatures, @previous_holiday_average_temperature = weeks_temperatures(previous_period_range)
 
-    @current_period_kwhs, _avg = formatted_kwh_period_unadjusted(current_period_range)
-    @previous_period_kwhs_unadjusted, @previous_period_average_kwh_unadjusted = formatted_kwh_period_unadjusted(previous_period_range)
+    @current_period_kwhs, _avg, _current_period_kwh = formatted_kwh_period_unadjusted(current_period_range)
+
+    (
+      @previous_period_kwhs_unadjusted,
+      @previous_period_average_kwh_unadjusted,
+      @previous_period_kwh_unadjusted
+    ) = formatted_kwh_period_unadjusted(previous_period_range)
 
     @current_period_weekly_kwh  = normalised_average_weekly_kwh(current_period,   :kwh, false)
     @current_period_weekly_£    = normalised_average_weekly_kwh(current_period,   :£,   false)
@@ -399,7 +406,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     min_days_data_if_meter_start_date_in_holiday = 4
     values = kwhs_date_range(aggregate_meter, period.first, period.last, data_type, min_days_data_if_meter_start_date_in_holiday, community_use: community_use)
     formatted_values = "#{values.sum.round(0)} = #{values.map { |kwh| kwh.round(0) }.join('+')}"
-    [formatted_values, values.sum / values.length]
+    [formatted_values, values.sum / values.length, values.sum]
   end
 
   # adjust the previous periods electricity/gas usage to the number of days in the current period
@@ -423,6 +430,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def average_period_value(period, days_of_week, data_type, adjusted)
     dates = SchoolDatePeriod.matching_dates_in_period_to_day_of_week_list(period, days_of_week)
+    return 0.0 if dates.empty?
+    
     values = dates.map { |date| kwh_date(aggregate_meter, date, data_type, adjusted) }.compact
     values.sum / values.length
   end
