@@ -148,7 +148,7 @@ class HeatingRegressionModelFitter
   def run_standard_chart_with_for_one_meter(chart_name, meter, number_of_meters = 1)
     chart_config = ChartManager::STANDARD_CHART_CONFIGURATION[chart_name].deep_dup
     chart_config[:meter_definition] = meter.id if number_of_meters > 1
-    chart_config[:name] += + ' ' + meter.name + ' ' + meter.mpan_mprn.to_s
+    chart_config[:name] += + ' ' + meter.name  + meter.mpan_mprn.to_s
     chart_results = @chart_manager.run_chart(chart_config, (chart_name.to_s + '_cloned').to_sym)
     chart_results
   end
