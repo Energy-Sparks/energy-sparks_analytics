@@ -145,7 +145,7 @@ class TargetsService
   end
 
   def enough_temperature_data?
-    @fuel_type == :electricity || @aggregate_school.temperatures.days > 365 * 4
+    @fuel_type == :electricity || @aggregate_school.temperatures.days > 365 * 2
   end
 
   #Not used by application currently
