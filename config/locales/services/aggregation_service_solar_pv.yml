@@ -1,0 +1,4 @@
+---
+en:
+  aggregation_service_solar_pv:
+    mains_plus_self_consume: Meter %{meter_mpan_mprn} including onsite solar PV consumption
