@@ -248,9 +248,62 @@ class AggregateDataServiceSolar
   end
 
   def assign_meter_names(pv_meter_map)
+
+# puts '----8<---'
+# puts @meter_collection.all_meters.map { |m| [m.mpan_mprn, m.name] }.inspect
+# puts '----8<---'
+
+
+
     pv_meter_map.each do |meter_type, meter|
-      meter.name = PVMap.meter_type_to_name_map[meter_type] unless not_a_meter?(meter)
+      next if not_a_meter?(meter)
+
+      meter.name = if meter_type == :mains_plus_self_consume
+
+                     mpan_mprn = meter.mpan_mprn
+
+                     # mpan_mprn.to_s.sub!(/^9/, '').to_i 
+
+
+                     meter_name = meter_name_for(mpan_mprn)
+
+                     if meter_name.present?
+                       "#{meter_name} including onsite solar PV consumption (#{mpan_mprn.to_s})"
+                     else
+                       "#{mpan_mprn.to_s} including onsite solar PV consumption"
+                     end
+
+                   else
+                     PVMap.meter_type_to_name_map[meter_type]
+                   end
     end
+  end
+
+  def meter_name_for(mpan_mprn)
+    # @electricity_meters.select do |electricity_meter|
+    #   electricity_meter.mpan_mprn == mpan_mprn.to_i
+    # end&.last&.name
+
+puts '-----'
+puts @meter_collection.all_meters.inspect
+puts mpan_mprn
+puts @meter_collection.all_meters.map { |m| [m.mpan_mprn, m.name] }.inspect
+
+puts '-----'
+
+    mpan_mprn = ('9' + mpan_mprn.to_s).to_i unless mpan_mprn[0] == 9
+
+
+    @meter_collection.all_meters.detect { |meter| meter.mpan_mprn == mpan_mprn }&.name
+
+  end
+
+  def parent_meter_name_for(mpan_mprn)
+    @electricity_meters.select do |electricity_meter|
+
+      ('9' + electricity_meter.mpan_mprn.to_s).include?(mpan_mprn.to_s)
+    
+    end&.first&.name
   end
 
   def make_all_amr_data_positive(amr_data)
