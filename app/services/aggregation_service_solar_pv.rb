@@ -250,13 +250,25 @@ class AggregateDataServiceSolar
   def assign_meter_names(pv_meter_map)
     pv_meter_map.each do |meter_type, meter|
       next if not_a_meter?(meter)
-      
+
+      original_meter_name = original_meter_name_for(mpan_mprn)
       meter.name = if meter_type == :mains_plus_self_consume
-                     I18n.t('aggregation_service_solar_pv.mains_plus_self_consume', meter_mpan_mprn: meter.mpan_mprn)
+                     # I18n.t('aggregation_service_solar_pv.mains_plus_self_consume', meter_mpan_mprn: meter.mpan_mprn, default: nil) ||
+                     if original_meter_name.present?
+                       "#{original_meter_name} including onsite solar PV consumption (#{meter.mpan_mprn})"
+                     else
+                       "#{meter.mpan_mprn} including onsite solar PV consumption"
+                     end
                    else
                      PVMap.meter_type_to_name_map[meter_type] 
                    end
     end
+  end
+
+  def original_meter_name_for(mpan_mprn)
+    @electricity_meters.select do |electricity_meter| 
+      electricity_meter.mpan_mprn == meter.mpan_mprn
+    end&.first&.name
   end
 
   def make_all_amr_data_positive(amr_data)

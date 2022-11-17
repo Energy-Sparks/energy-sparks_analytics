@@ -15,7 +15,7 @@ class MeterCollection
   attr_reader :heat_meters, :electricity_meters, :storage_heater_meters
 
   # From school/building
-  attr_reader :floor_area, :number_of_pupils, :calculated_floor_area_pupil_numbers
+  attr_reader :floor_area, :number_of_pupils, :calculated_floor_area_pupil_numbers, :meter_identifier_lookup
 
   # Currently, but not always
   attr_reader :school, :name, :address, :postcode, :country, :funding_status, :urn, :area_name, :model_cache, :default_energy_purchaser
@@ -177,6 +177,19 @@ class MeterCollection
 
   def to_s
     'Meter Collection:' + name + ':' + all_meters.join(';')
+  end
+
+  def find_meter_by(identifier:)
+    identifier = identifier.to_s # ids coulld be integer or string
+    return @meter_identifier_lookup[identifier] if @meter_identifier_lookup.key?(identifier)
+
+    meter = search_meter_list_for_identifier(all_meters, identifier)
+    unless meter.nil?
+      @meter_identifier_lookup[identifier] = meter
+      return meter
+    end
+
+    nil
   end
 
   def meter?(identifier, search_sub_meters = false)
