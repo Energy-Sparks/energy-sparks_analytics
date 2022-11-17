@@ -65,7 +65,7 @@ class ExistingSolarPVCapacityEstimator
 
   def original_electricity_meter(electricity_meter)
     if electricity_meter.sheffield_simulated_solar_pv_panels?
-      electricity_meter.sub_meters.find { |sub_meter| sub_meter.name == SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME }
+      electricity_meter.sub_meters.find { |sub_meter| sub_meter.name == 'testing 123' } #SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME }
     else
       electricity_meter
     end

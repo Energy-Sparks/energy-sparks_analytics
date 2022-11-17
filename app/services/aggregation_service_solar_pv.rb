@@ -251,13 +251,13 @@ class AggregateDataServiceSolar
     pv_meter_map.each do |meter_type, meter|
       next if not_a_meter?(meter)
 
-      original_meter_name = original_meter_name_for(mpan_mprn)
       meter.name = if meter_type == :mains_plus_self_consume
+                     parent_meter_name = parent_meter_name_for(meter.mpan_mprn)
                      # I18n.t('aggregation_service_solar_pv.mains_plus_self_consume', meter_mpan_mprn: meter.mpan_mprn, default: nil) ||
-                     if original_meter_name.present?
-                       "#{original_meter_name} including onsite solar PV consumption (#{meter.mpan_mprn})"
+                     if parent_meter_name.present?
+                       "Meter #{parent_meter_name} including onsite solar PV consumption (#{meter.mpan_mprn.to_s})"
                      else
-                       "#{meter.mpan_mprn} including onsite solar PV consumption"
+                       "#{meter.mpan_mprn.to_s} including onsite solar PV consumption"
                      end
                    else
                      PVMap.meter_type_to_name_map[meter_type] 
@@ -265,9 +265,10 @@ class AggregateDataServiceSolar
     end
   end
 
-  def original_meter_name_for(mpan_mprn)
-    @electricity_meters.select do |electricity_meter| 
-      electricity_meter.mpan_mprn == meter.mpan_mprn
+  def parent_meter_name_for(mpan_mprn)
+    @electricity_meters.select do |electricity_meter|
+
+      electricity_meter.mpan_mprn == ('9' + mpan_mprn.to_s).to_i
     end&.first&.name
   end
 
