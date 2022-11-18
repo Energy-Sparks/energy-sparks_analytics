@@ -144,29 +144,33 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     this_weeks_school_days = last_n_school_days(asof_date, days_in_week)
     last_weeks_school_days = last_n_school_days(this_weeks_school_days[0] - 1, days_in_week)
 
-    @beginning_of_week = this_weeks_school_days[0]
+    @beginning_of_week      = this_weeks_school_days[0]
     @beginning_of_last_week = last_weeks_school_days[0]
 
-    @predicted_kwh_this_week = @heating_model.predicted_kwh_list_of_dates(this_weeks_school_days, @school.temperatures)
-    @predicted_kwh_last_week = @heating_model.predicted_kwh_list_of_dates(last_weeks_school_days, @school.temperatures)
+    predicted_kwhs_this_week = @heating_model.predicted_kwh_list_of_dates(this_weeks_school_days, @school.temperatures)
+    @predicted_kwh_this_week = predicted_kwhs_this_week.sum
+
+    predicted_kwhs_last_week = @heating_model.predicted_kwh_list_of_dates(last_weeks_school_days, @school.temperatures)
+    @predicted_kwh_last_week = predicted_kwhs_last_week.sum
+
     @predicted_changein_kwh = @predicted_kwh_this_week - @predicted_kwh_last_week
     @predicted_percent_increase_in_usage = @predicted_changein_kwh / @predicted_kwh_last_week
 
-    @predicted_this_week_cost = BenchmarkMetrics::GAS_PRICE * @predicted_kwh_this_week
-    @predicted_last_week_cost = BenchmarkMetrics::GAS_PRICE * @predicted_kwh_last_week
+    @predicted_this_week_cost = predicted_gas_cost(this_weeks_school_days, predicted_kwhs_this_week)
+    @predicted_last_week_cost = predicted_gas_cost(last_weeks_school_days, predicted_kwhs_last_week)
     @predicted_change_in_cost = @predicted_this_week_cost - @predicted_last_week_cost
 
     @predicted_this_week_co2 = gas_co2(@predicted_kwh_this_week)
     @predicted_last_week_co2 = gas_co2(@predicted_kwh_last_week)
     @predicted_change_in_co2 = @predicted_this_week_co2 - @predicted_last_week_co2
 
-    @actual_kwh_this_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(this_weeks_school_days)
-    @actual_kwh_last_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(last_weeks_school_days)
+    @actual_kwh_this_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(this_weeks_school_days, :kwh)
+    @actual_kwh_last_week = @school.aggregated_heat_meters.amr_data.kwh_date_list(last_weeks_school_days, :kwh)
     @actual_changein_kwh = @actual_kwh_this_week - @actual_kwh_last_week
     @actual_percent_increase_in_usage = @actual_changein_kwh / @actual_kwh_last_week
 
-    @this_week_cost = BenchmarkMetrics::GAS_PRICE * @actual_kwh_this_week
-    @last_week_cost = BenchmarkMetrics::GAS_PRICE * @actual_kwh_last_week
+    @this_week_cost = @school.aggregated_heat_meters.amr_data.kwh_date_list(this_weeks_school_days, :£)
+    @last_week_cost = @school.aggregated_heat_meters.amr_data.kwh_date_list(last_weeks_school_days, :£)
 
     @this_week_co2 = gas_co2(@actual_kwh_this_week)
     @last_week_co2 = gas_co2(@actual_kwh_last_week)
@@ -195,4 +199,16 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     @bookmark_url = add_book_mark_to_base_url('GasChange')
   end
   alias_method :analyse_private, :calculate
+
+  # the gas kWhs are temperature compensated and therefore
+  # the cost can't directly be implied from the temperature compensated
+  # values, there for imply the daily tariff from the actual costs
+  def predicted_gas_cost(dates, kwhs)
+    amr_data = aggregate_meter.amr_data
+
+    dates.map.with_index do |date, d|
+      implied_gas_tariff = amr_data.one_day_kwh(date, :£) / amr_data.one_day_kwh(date, :kwh)
+      kwhs[d] * implied_gas_tariff
+    end.sum
+  end
 end

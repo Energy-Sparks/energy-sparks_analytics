@@ -476,4 +476,21 @@ class ContentBase
     logger.info var
     puts var unless Object.const_defined?('Rails')
   end
+
+  # technically usage of a blended rate can be imperfect but sometimes when
+  # estimating savings its the best you can do
+  def blended_rate(datatype = :£)
+    up_to_1_year_ago_start_date = aggregate_meter.amr_data.up_to_1_year_ago
+    end_date = aggregate_meter.amr_data.end_date
+    blended_rate_date_range(up_to_1_year_ago_start_date, end_date, datatype)
+  end
+
+  def blended_rate_date_range(start_date, end_date, datatype)
+    kwh  = aggregate_meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
+    data = aggregate_meter.amr_data.kwh_date_range(start_date, end_date, datatype)
+
+    raise EnergySparksNotEnoughDataException, "zero kWh consumption between #{start_date} and #{end_date}" if kwh == 0.0
+
+    data / kwh
+  end
 end

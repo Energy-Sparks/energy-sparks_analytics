@@ -28,6 +28,14 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
     :alert_daytype_breakdown_gas
   end
 
+  def breakdown_charts
+    {
+      kwh:    :alert_daytype_breakdown_gas_kwh,
+      co2:    :alert_daytype_breakdown_gas_co2,
+      £:      :alert_daytype_breakdown_gas_£
+    }
+  end
+
   def group_by_week_day_type_chart
     :alert_group_by_week_gas
   end
@@ -51,8 +59,8 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
     specific.merge(superclass.template_variables)
   end
 
-  def tariff
-    BenchmarkMetrics::GAS_PRICE
+  def tariff_deprecated
+    # BenchmarkMetrics::GAS_PRICE
   end
 
   def co2_intensity_per_kwh

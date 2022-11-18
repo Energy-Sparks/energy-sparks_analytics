@@ -54,7 +54,7 @@ module AnalyseHeatingAndHotWater
       total_kwh = @hotwater_model.annual_hotwater_kwh_estimate
       {
         annual_kwh:   total_kwh,
-        annual_£:     total_kwh * BenchmarkMetrics::GAS_PRICE,
+        annual_£:     total_kwh * gas_price_£_per_kwh,
         annual_co2:   total_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH,
         capex:        0.0,
         efficiency:   efficiency(total_kwh)
@@ -65,7 +65,7 @@ module AnalyseHeatingAndHotWater
       total_kwh = @hotwater_model.annual_hotwater_kwh_estimate_better_control
       {
         annual_kwh:    total_kwh,
-        annual_£:      total_kwh * BenchmarkMetrics::GAS_PRICE,
+        annual_£:      total_kwh * gas_price_£_per_kwh,
         annual_co2:    total_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH,
         capex:         0.0,
         efficiency:    efficiency(total_kwh)
@@ -76,11 +76,23 @@ module AnalyseHeatingAndHotWater
       @theoretical_hw_kwh, standing_loss_kwh, total_kwh = self.class.annual_point_of_use_electricity_meter_kwh(@school.number_of_pupils)
       {
         annual_kwh:   total_kwh,
-        annual_£:     total_kwh * BenchmarkMetrics::ELECTRICITY_PRICE,
+        annual_£:     total_kwh * electric_price_£_per_kwh,
         annual_co2:   total_kwh * BenchmarkMetrics::LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH,
         capex:        point_of_use_electric_heaters_capex,
         efficiency:   efficiency(total_kwh)
       }
+    end
+
+    private def gas_price_£_per_kwh
+      fuel_price_£_per_kwh(:gas)
+    end
+
+    private def electric_price_£_per_kwh
+      fuel_price_£_per_kwh(:electricity)
+    end
+
+    private def fuel_price_£_per_kwh(fuel_type)
+      YAxisScaling.new.scale_unit_from_kwh(:£, fuel_type, @school)
     end
 
     private def point_of_use_electric_heaters_capex

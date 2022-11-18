@@ -101,7 +101,7 @@ class CostsBase < HalfHourlyData
       @one_day_total_cost = total_x48_costs + @total_standing_charge
       calculate_day_bill_components
     end
-    
+
     def costs_x48
       @costs_x48 ||= AMRData.fast_add_multiple_x48_x_x48(@all_costs_x48.values)
     end
@@ -180,6 +180,16 @@ class CostsBase < HalfHourlyData
     return nil if c.nil?
     one_day_cost = OneDaysCostData.new(c)
     one_day_cost
+  end
+
+  public def calculate_baseload_cost(date, baseload_kw)
+    calculate_x48_kwh_cost(date, AMRData.single_value_kwh_x48(baseload_kw / 2.0))
+  end
+
+  public def calculate_x48_kwh_cost(date, kwh_x48)
+    c = costs(date, meter, kwh_x48)
+    raise EnergySparksUnexpectedStateException, "x48 cost for #{date}" if c.nil?
+    OneDaysCostData.new(c).one_day_total_cost
   end
 
   public def costs_summary

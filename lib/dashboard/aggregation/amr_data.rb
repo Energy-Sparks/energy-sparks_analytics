@@ -110,6 +110,40 @@ class AMRData < HalfHourlyData
     end
   end
 
+  # performance benefit in collatin the information
+  private def calculate_information_date_range(start_date, end_date)
+    kwh = kwh_date_range(start_date, end_date, :kwh)
+    £   = kwh_date_range(start_date, end_date, :£)
+    co2 = kwh_date_range(start_date, end_date, :co2)
+
+    {
+      kwh:                      kwh,
+      co2:                      co2,
+      £:                        £,
+      co2_intensity_kw_per_kwh: co2 / kwh,
+      blended_£_per_kwh:        £ / kwh
+    }
+  end
+
+  def information_date_range(start_date, end_date)
+    @cached_information ||= {}
+    @cached_information[start_date..end_date] ||= calculate_information_date_range(start_date, end_date)
+  end
+
+  def blended_£_per_kwh_date_range(start_date, end_date)
+    @blended_£_per_kwh_date_range[start_date..end_date] ||= calculate_blended_£_per_kwh_date_range(start_date, end_date)
+  end
+
+  def blended_rate(from_unit, to_unit, sd = up_to_1_year_ago, ed = end_date)
+    from_value = kwh_date_range(start_date, end_date, from_unit)
+    to_value   = kwh_date_range(start_date, end_date, to_unit)
+    to_value / from_value
+  end
+
+  private def calculate_blended_£_per_kwh_date_range(sd, ed)
+    blended_rate(:kwh, :£, sd, ed)
+  end
+
   def calculate_solar_pv_co2_x48(date)
     co2_x48 = @carbon_emissions.one_days_data_x48(date)
     num_positive = co2_x48.count?{ |c| c >= 0.0 }
@@ -311,6 +345,16 @@ class AMRData < HalfHourlyData
     total_kwh
   end
 
+  def economics_date_range(date1, date2, community_use: nil)
+    kwh = kwh_date_range(date1, date2, :kwh, community_use: community_use)
+    £ = kwh_date_range(date1, date2, :£, community_use: community_use)
+    {
+      kwh:  kwh,
+      £:    £,
+      rate: kwh == 0.0 ? current_tariff_rate_£_per_kwh : £ / kwh # risk this may end up being infinity
+    }
+  end
+
   def kwh_period(period)
     kwh_date_range(period.start_date, period.end_date)
   end
@@ -450,6 +494,29 @@ class AMRData < HalfHourlyData
 
   def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
     baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / (date2 - date1 + 1)
+  end
+
+  def baseload_£_economic_cost_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
+    total_£ = 0.0
+
+    (date1..date2).each do |date|
+      bl_kw = baseload_kw(date, sheffield_solar_pv)
+      total_£ += @economic_tariff.calculate_baseload_cost(date, bl_kw)
+    end
+
+    total_£
+  end
+
+  def economic_cost_for_x48_kwhs(date, kwh_x48)
+    @economic_tariff.calculate_x48_kwh_cost(date, kwh_x48)
+  end
+
+  def current_tariff_rate_£_per_kwh
+    tariff_for_date_£_per_kwh(end_date)
+  end
+
+  def tariff_for_date_£_per_kwh(date)
+    @economic_tariff.calculate_x48_kwh_cost(date, self.class.single_value_kwh_x48(1 / 48.0))
   end
 
   def baseload_kwh_date_range(date1, date2, sheffield_solar_pv = false)

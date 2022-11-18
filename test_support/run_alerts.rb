@@ -88,7 +88,17 @@ class RunAlerts < RunAnalyticsTest
         log_result(alert, 'Invalid alert before analysis', control[:log].include?(:invalid_alerts))
         next
       end
+=begin
+      if alert.relevance == :never_relevant
+        log_result(alert, 'Never relevant')
+        next
+      end
 
+      if alert.enough_data == :not_enough
+        log_result(alert, 'not enough data')
+        next
+      end
+=end
       RecordTestTimes.instance.record_time(@school.name, 'alerts', alert.class.name){
         alert.analyse(asof_date, true)
       }
@@ -109,6 +119,8 @@ class RunAlerts < RunAnalyticsTest
       save_to_excel if control.dig(:charts, :write_to_excel) == true
 
       unset_forecast
+    rescue => e
+      log_result(alert, "Crashed: #{e.message} #{e.backtrace[0]}")
     end
   end
 

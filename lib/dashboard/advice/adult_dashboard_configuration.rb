@@ -465,9 +465,9 @@ class DashboardConfiguration
         heating_on_off_by_week
       ],
       promoted_variables: {
-        AlertHeatingOnSchoolDays => {
+        AlertSeasonalHeatingSchoolDays => {
           rating:         :rating,
-          one_year_saving_reduced_days_to_exemplar_£: :one_year_saving_reduced_days_to_exemplar_£
+ #         one_year_saving_reduced_days_to_exemplar_£: :one_year_saving_reduced_days_to_exemplar_£
         }
       },
       meter_breakdown: {

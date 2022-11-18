@@ -6,7 +6,7 @@ require_relative '../alert_gas_model_base.rb'
 #NOTE: this doesn't seem to be setup in the application, as its not registered
 #in the database. Should it be removed?
 #Was removed from live system around 2022-04-11
-class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
+class AlertHeatingOnNonSchoolDaysDeprecated < AlertHeatingDaysBase
 
   attr_reader :number_of_non_heating_days_last_year, :average_number_of_non_heating_days_last_year
   attr_reader :exemplar_number_of_non_heating_days_last_year
@@ -99,10 +99,10 @@ class AlertHeatingOnNonSchoolDays < AlertHeatingDaysBase
     @kwh_below_frost_on_unoccupied_days, @total_kwh_on_unoccupied_days = calculate_heating_off_statistics(asof_date)
     @one_year_saving_kwh = @total_kwh_on_unoccupied_days - @kwh_below_frost_on_unoccupied_days
 
-    @below_frost_£ = @kwh_below_frost_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE
-    @unoccupied_above_frost_£ = @one_year_saving_kwh * BenchmarkMetrics::GAS_PRICE
+    @below_frost_£ = @kwh_below_frost_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE  # deprecated
+    @unoccupied_above_frost_£ = @one_year_saving_kwh * BenchmarkMetrics::GAS_PRICE  # deprecated
     @unoccupied_above_frost_co2 = @one_year_saving_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
-    @total_on_unoccupied_days_£   = @total_kwh_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE
+    @total_on_unoccupied_days_£   = @total_kwh_on_unoccupied_days * BenchmarkMetrics::GAS_PRICE  # deprecated
     @total_on_unoccupied_days_co2 = @total_kwh_on_unoccupied_days * EnergyEquivalences::UK_GAS_CO2_KG_KWH
 
     set_savings_capital_costs_payback(Range.new(@unoccupied_above_frost_£ , @unoccupied_above_frost_£), nil, @unoccupied_above_frost_co2)

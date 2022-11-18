@@ -249,13 +249,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     @previous_year_£ = kwh(prev_date - 365, prev_date, :economic_cost)
 
     @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
-    @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * BenchmarkMetrics::GAS_PRICE
+    # benchmark £ using same tariff as school not benchmark tariff
+    @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * defaulted_gas_tariff_£_per_kwh
 
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_floor_area_kwh
     @one_year_saving_versus_benchmark_£   = @last_year_£   - @one_year_benchmark_floor_area_£
 
     @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
-    @one_year_exemplar_floor_area_£     = gas_cost(@one_year_exemplar_floor_area_kwh)
+    @one_year_exemplar_floor_area_£     = @one_year_exemplar_floor_area_kwh * defaulted_gas_tariff_£_per_kwh
     @one_year_exemplar_floor_area_co2   = gas_co2(@one_year_exemplar_floor_area_kwh)
 
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_floor_area_kwh
@@ -330,6 +331,10 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     BenchmarkMetrics.normalise_degree_days(@school.temperatures, @school.holidays, :gas, asof_date)
   end
 
+  def defaulted_gas_tariff_£_per_kwh
+    @last_year_£ / @last_year_kwh
+  end
+
   def last_year_date_range(asof_date)
     last_year_start_date = asof_date - 365
     last_year_start_date..asof_date
@@ -368,8 +373,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   end
 
   def kwh(date1, date2, data_type = :kwh)
-    amr_data = @school.aggregated_heat_meters.amr_data
-    amr_data.kwh_date_range(date1, date2, data_type)
+    aggregate_meter.amr_data.kwh_date_range(date1, date2, data_type)
   rescue EnergySparksNotEnoughDataException=> e
     nil
   end

@@ -11,8 +11,19 @@ module AlertGasToStorageHeaterSubstitutionMixIn
     @school.storage_heater_meter
   end
 
-  def fuel_price
-    BenchmarkMetrics::ELECTRICITY_PRICE
+  def fuel_price_deprecated
+    BenchmarkMetrics::ELECTRICITY_PRICE # deprecated
+  end
+
+  # benchmark some storage heater alerts against gas cost e.g. per floor area
+  # as gas is cheaper and it should be clear to schools that gas is a better choice
+  # from a cost perspective, if the school has gas as well then use that tariff
+  def defaulted_gas_tariff_£_per_kwh
+    if @school.aggregated_heat_meters.nil?
+      BenchmarkMetrics::GAS_PRICE
+    else
+      @school.aggregated_heat_meters.amr_data.blended_rate(:kwh, :£).round(5)
+    end
   end
 
   def self.fuel_lc
@@ -44,7 +55,7 @@ module AlertGasToStorageHeaterSubstitutionMixIn
   end
 
   # needs electricity_cost_co2_mixin.rb
-  def gas_cost(kwh)
+  def gas_cost_deprecated(kwh)
     kwh * blended_electricity_£_per_kwh
   end
 

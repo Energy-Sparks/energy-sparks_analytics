@@ -36,7 +36,7 @@ class ChartYAxisManipulation
 
     current_unit = chart_config[axis_key]
 
-    if chart_config[restriction_key] != nil
+    if !chart_config[restriction_key].nil?
       chart_config[restriction_key] == [current_unit] ? nil : chart_config[restriction_key]
     elsif choices.include?(current_unit)
       return choices
