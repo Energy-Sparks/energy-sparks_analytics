@@ -259,9 +259,11 @@ class AggregateDataServiceSolar
       if meter_type == :mains_plus_self_consume
         school_meter_name = @electricity_meter_names[meter.mpan_mprn]
         meter.name = if school_meter_name.present?
-                       "#{school_meter_name} including onsite solar PV consumption (#{meter.mpan_mprn})"
+                       # "#{school_meter_name} including onsite solar PV consumption (#{meter.mpan_mprn})"
+                       I18n.t('aggregation_service_solar_pv.mains_plus_self_consume_name', meter_name: school_meter_name) + " (#{meter.mpan_mprn})"
                      else
-                       "#{meter.mpan_mprn} including onsite solar PV consumption"                     
+                       # "#{meter.mpan_mprn} including onsite solar PV consumption"
+                       I18n.t('aggregation_service_solar_pv.mains_plus_self_consume_name', meter_name: meter.mpan_mprn.to_s)
                      end
       else
         meter.name = PVMap.meter_type_to_name_map[meter_type]
