@@ -7,7 +7,7 @@ require_relative './alert_heating_day_base.rb'
 #NOTE: this doesn't seem to be setup in the application, as its not registered
 #in the database. Should it be removed?
 #Was removed from live system around 2022-04-11
-class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
+class AlertHeatingOnSchoolDaysDeprecated < AlertHeatingDaysBase
 
   attr_reader :number_of_heating_days_last_year, :average_number_of_heating_days_last_year
   attr_reader :exemplar_number_of_heating_days_last_year
@@ -125,7 +125,7 @@ class AlertHeatingOnSchoolDays < AlertHeatingDaysBase
     @one_year_saving_reduced_days_to_exemplar_kwh, _total_kwh = calculate_heating_on_statistics(asof_date, days, @exemplar_number_of_heating_days_last_year)
     @one_year_saving_reduced_days_to_exemplar_percent = @one_year_saving_reduced_days_to_exemplar_kwh / @total_heating_day_kwh
 
-    @one_year_saving_reduced_days_to_average_£ = gas_cost(@one_year_saving_reduced_days_to_average_kwh)
+    @one_year_saving_reduced_days_to_average_£  = gas_cost(@one_year_saving_reduced_days_to_average_kwh)
     @one_year_saving_reduced_days_to_exemplar_£ = gas_cost(@one_year_saving_reduced_days_to_exemplar_kwh)
 
     @one_year_saving_reduced_days_to_average_co2 = gas_co2(@one_year_saving_reduced_days_to_average_kwh)

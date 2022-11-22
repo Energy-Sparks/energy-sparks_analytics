@@ -114,7 +114,7 @@ class AlertLongTermTrend < AlertAnalysisBase
   end
 
   private def calculate(asof_date)
-    raise EnergySparksNotEnoughDataException, "Not enough data: 2 years of data required, got #{days_amr_data} days" if enough_data == :not_enough
+    raise EnergySparksNotEnoughDataException, "Not enough data: 2 years of data required, got #{days_amr_data.to_i} days" if enough_data == :not_enough
 
     scalar = ScalarkWhCO2CostValues.new(@school)
 

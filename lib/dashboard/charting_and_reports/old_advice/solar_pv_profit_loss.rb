@@ -63,16 +63,19 @@ class SolarPVProfitLoss
   private def calculate_years_kwh(meter)
     end_date = meter.amr_data.end_date
     start_date = [end_date - 365, meter.amr_data.start_date].max
-    kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh).magnitude
-    co2 = meter.amr_data.kwh_date_range(start_date, end_date, :co2).magnitude
     days = end_date - start_date + 1
+
+    info = meter.amr_data.information_date_range(start_date, end_date)
+    
     {
-      start_date:         start_date,
-      end_date:           end_date,
-      kwh:                kwh,
-      co2:                co2,
-      days:               days,
-      period_description: FormatEnergyUnit.format(:years, days / 365.0, :text)
+      start_date:             start_date,
+      end_date:               end_date,
+      kwh:                    info[:kwh].magnitude,
+      co2:                    info[:co2].magnitude,
+      £:                      info[:£].magnitude,
+      tariff_rate_£_per_kwh:  info[:blended_£_per_kwh].magnitude,
+      days:                   days,
+      period_description:     FormatEnergyUnit.format(:years, days / 365.0, :text)
     }
   end
 
@@ -83,23 +86,22 @@ class SolarPVProfitLoss
     end
   end
 
-  private def value_from_profit_loss_tables(row_type, data_type)
+  private def value_from_profit_loss_tables_deprecated(row_type, data_type)
     data = profit_loss_multiple_years.values[0][:data].detect { |row| row[:name].include?(row_type) }
     data[data_type]
   end
 
-  private def profit_loss_multiple_years
-    @profit_loss_multiple_years ||= calculate_profit_loss_multiple_years
+  private def profit_loss_multiple_years_deprecated
+    @profit_loss_multiple_years_deprecated ||= calculate_profit_loss_multiple_years_deprecated
   end
 
-
-  private def calculate_profit_loss_multiple_years
+  private def calculate_profit_loss_multiple_years_deprecated
     results_by_year = {}
     end_date = @meter_collection.aggregated_electricity_meters.amr_data.end_date
     start_date = [end_date - 365, @meter_collection.aggregated_electricity_meters.amr_data.start_date].max
     return nil if end_date - start_date < 365
     while start_date >= @meter_collection.aggregated_electricity_meters.amr_data.start_date
-      results_by_year[formatted_date_range(start_date, end_date)] = annual_profit_loss(start_date, end_date)
+      results_by_year[formatted_date_range(start_date, end_date)] = annual_profit_loss_deprecated(start_date, end_date)
       start_date -= DAYS_IN_YEAR
       end_date -= DAYS_IN_YEAR
     end
@@ -110,7 +112,7 @@ class SolarPVProfitLoss
     start_date.strftime('%d %b %Y') + ' to ' + end_date.strftime('%d %b %Y')
   end
 
-  private def annual_profit_loss(start_date, end_date)
+  private def annual_profit_loss_deprecated(start_date, end_date)
     profit_loss = []
 
     meters = [@meter_collection.aggregated_electricity_meters] + @meter_collection.aggregated_electricity_meters.sub_meters.values
@@ -120,13 +122,15 @@ class SolarPVProfitLoss
     meters.each do |meter|
       next if meter.name == SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
       next unless SolarPVPanels::SUBMETER_TYPES.include?(meter.name) # no storage heaters
+
       kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh).magnitude
+ 
       profit_loss.push(
         {
           name: meter.name,
           kwh:  kwh,
-          rate: rate(meter.name),
-          £:    kwh * rate(meter.name)
+          rate: rate_deprecated(meter, start_date, end_date),
+          £:    kwh * rate_deprecated(meter.name)
         }
       )
       pv_meters = [SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME, SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME]
@@ -157,16 +161,16 @@ class SolarPVProfitLoss
     }
   end
 
-  private def rate(meter_name)
+  private def rate_deprecated(meter_name)
     case meter_name
     when SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME
-      BenchmarkMetrics::ELECTRICITY_PRICE
+      BenchmarkMetrics::ELECTRICITY_PRICE  # deprecated
     when SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME
-      BenchmarkMetrics::SOLAR_EXPORT_PRICE
+      BenchmarkMetrics::SOLAR_EXPORT_PRICE  # deprecated
     when SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
-      BenchmarkMetrics::ELECTRICITY_PRICE
+      BenchmarkMetrics::ELECTRICITY_PRICE  # deprecated
     else
-      -1.0 * BenchmarkMetrics::ELECTRICITY_PRICE
+      -1.0 * BenchmarkMetrics::ELECTRICITY_PRICE  # deprecated
     end
   end
 end

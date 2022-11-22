@@ -233,7 +233,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
 
     available_recent_fuel_types = fuel_types_with_up_to_date_data_in_last_year(asof_date)
     logger.info "Benchmarking versus these recent fuel_types: #{available_recent_fuel_types.join(',')}"
-    raise EnergySparksNotEnoughDataException, 'Zero up to dat meter data (by fuel type)' if available_recent_fuel_types.empty?
+    raise EnergySparksNotEnoughDataException, 'Zero up to date meter data (by fuel type)' if available_recent_fuel_types.empty?
     @recent_fuel_types_for_debug = available_recent_fuel_types.join(',')
 
     @one_year_energy_per_pupil_kwh      = change_in_energy.calculate_normalised_energy({year: 0}, :kwh, :number_of_pupils)

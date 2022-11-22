@@ -39,9 +39,6 @@ class AlertLayerUpPowerdown11November2022GasComparison < AlertArbitraryPeriodCom
 
   def calculate(asof_date)
     super(asof_date)
-  rescue => e
-    puts e.message
-    puts e.backtrace
   end
 end
 

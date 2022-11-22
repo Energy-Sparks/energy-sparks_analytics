@@ -20,8 +20,8 @@ module BenchmarkMetrics
   ANNUAL_AVERAGE_DEGREE_DAYS = 2000.0
   AVERAGE_GAS_PROPORTION_OF_HEATING = 0.6
 
-  BENCHMARK_ENERGY_COST_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * GAS_PRICE +
-                                    BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * ELECTRICITY_PRICE
+  # BENCHMARK_ENERGY_COST_PER_PUPIL = BENCHMARK_GAS_USAGE_PER_PUPIL * GAS_PRICE +
+  #                                  BENCHMARK_ELECTRICITY_USAGE_PER_PUPIL * ELECTRICITY_PRICE
 
   # number less than 1.0 for colder area, > 1.0 for milder areas
   # multiply by this number if normalising school to other schools in different regions
@@ -44,16 +44,28 @@ module BenchmarkMetrics
 
   def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date = nil, list_of_fuels)
     total = 0.0
+
     if list_of_fuels.include?(:electricity)
       total += benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
-    elsif list_of_fuels.include?(:gas) || list_of_fuels.include?(:storage_heater) || list_of_fuels.include?(:storage_heaters)
+    end
+
+    if !(list_of_fuels & %i[gas storage_heater storage_heaters]).empty?
       total += benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date)
     end
+
     total
   end
 
   def self.benchmark_electricity_usage_£_per_pupil(benchmark_type, school)
-    benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school) * ELECTRICITY_PRICE
+    benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school) * electricity_price_£_per_kwh(school)
+  end
+
+  def self.electricity_price_£_per_kwh(school)
+    school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£)
+  end
+
+  def self.gas_price_£_per_kwh(school)
+    school.aggregated_heat_meters.amr_data.blended_rate(:kwh, :£)
   end
 
   # scale benchmark to schools's temperature zone; so result if higher for
@@ -70,7 +82,7 @@ module BenchmarkMetrics
 
   # as above, larger number returned for Scotland, lower for SW
   def self.benchmark_heating_usage_£_per_pupil(benchmark_type, school, asof_date = nil)
-    benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date) * GAS_PRICE
+    benchmark_heating_usage_kwh_per_pupil(benchmark_type, school, asof_date) * gas_price_£_per_kwh(school)
   end
 
   def self.benchmark_electricity_usage_kwh_per_pupil(benchmark_type, school)
@@ -96,9 +108,9 @@ module BenchmarkMetrics
   def self.exemplar_£(school, fuel_type, start_date, end_date)
     case fuel_type
     when :electricity, :storage_heater, :storage_heaters
-      exemplar_kwh(school, fuel_type, start_date, end_date) * BenchmarkMetrics::ELECTRICITY_PRICE
+      exemplar_kwh(school, fuel_type, start_date, end_date) * electricity_price_£_per_kwh(school)
     when :gas
-      exemplar_kwh(school, fuel_type, start_date, end_date) * BenchmarkMetrics::GAS_PRICE
+      exemplar_kwh(school, fuel_type, start_date, end_date) * gas_price_£_per_kwh(school)
     end
   end
 

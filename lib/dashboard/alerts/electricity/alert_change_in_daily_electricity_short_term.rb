@@ -104,23 +104,29 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
   private def calculate(asof_date)
     # super(asof_date)
     days_in_week = 5
+    average_school_days_in_year = 195.0
 
-    @beginning_of_week, @last_weeks_consumption_kwh = schoolday_energy_usage_over_period(asof_date, days_in_week)
-    # -1 moves the the date to the previous N school day period
-    @beginning_of_last_week, @week_befores_consumption_kwh = schoolday_energy_usage_over_period(@beginning_of_week - 1, days_in_week)
+    last_5_school_day_dates     = last_n_school_days(asof_date, days_in_week)
+    previous_5_school_day_dates = last_n_school_days(last_5_school_day_dates[0] - 1, days_in_week)
 
-    @last_weeks_consumption_£ = @last_weeks_consumption_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
-    @week_befores_consumption_£ = @week_befores_consumption_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+    @beginning_of_week      = last_5_school_day_dates[0]
+    @beginning_of_last_week = previous_5_school_day_dates[0]
 
-    @last_weeks_consumption_co2   = @last_weeks_consumption_kwh   * blended_co2_per_kwh
-    @week_befores_consumption_co2 = @week_befores_consumption_kwh * blended_co2_per_kwh
+    @last_weeks_consumption_kwh   = schoolday_energy_usage_dates(last_5_school_day_dates, :kwh)
+    @week_befores_consumption_kwh = schoolday_energy_usage_dates(previous_5_school_day_dates, :kwh)
+
+    @last_weeks_consumption_£   = schoolday_energy_usage_dates(last_5_school_day_dates, :£)
+    @week_befores_consumption_£ = schoolday_energy_usage_dates(previous_5_school_day_dates, :£)
+
+    @last_weeks_consumption_co2   = schoolday_energy_usage_dates(last_5_school_day_dates, :co2)
+    @week_befores_consumption_co2 = schoolday_energy_usage_dates(previous_5_school_day_dates, :co2)
 
     @signifcant_increase_in_electricity_consumption = @last_weeks_consumption_kwh > @week_befores_consumption_kwh * MAXDAILYCHANGE
 
     @percent_change_in_consumption = ((@last_weeks_consumption_kwh - @week_befores_consumption_kwh) / @week_befores_consumption_kwh)
 
-    saving_£    = 195.0 * (@last_weeks_consumption_£   - @week_befores_consumption_£)   / days_in_week
-    saving_co2  = 195.0 * (@last_weeks_consumption_co2 - @week_befores_consumption_co2) / days_in_week
+    saving_£    = average_school_days_in_year * (@last_weeks_consumption_£   - @week_befores_consumption_£)   / days_in_week
+    saving_co2  = average_school_days_in_year * (@last_weeks_consumption_co2 - @week_befores_consumption_co2) / days_in_week
     set_savings_capital_costs_payback(Range.new(saving_£, saving_£), nil, saving_co2)
 
     @rating = calculate_rating_from_range(-0.05, 0.15, @percent_change_in_consumption)
@@ -130,17 +136,9 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
   end
   alias_method :analyse_private, :calculate
 
-  private def schoolday_energy_usage_over_period(asof_date, school_days)
-    list_of_school_days = last_n_school_days(asof_date, school_days)
-    total_kwh = 0.0
-    list_of_school_days.each do |date|
-      total_kwh += days_energy_consumption(date)
-    end
-    [list_of_school_days[0], total_kwh]
-  end
-
-  private def days_energy_consumption(date)
-    amr_data = @school.aggregated_electricity_meters.amr_data
-    amr_data.one_day_kwh(date)
+  private def schoolday_energy_usage_dates(dates, data_type)
+    dates.map do |date|
+      @school.aggregated_electricity_meters.amr_data.one_day_kwh(date, data_type)
+    end.sum
   end
 end

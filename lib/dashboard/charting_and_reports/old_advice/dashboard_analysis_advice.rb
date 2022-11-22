@@ -250,7 +250,7 @@ class DashboardChartAdviceBase
   end
 
   def pounds_to_kwh(pounds, fuel_type_sym)
-    pounds / ConvertKwh.scale_unit_from_kwh(:£, fuel_type_sym)
+    YAxisScaling.new.scale(:£, :kwh, pounds, fuel_type_sym, @school)
   end
 
   def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
@@ -260,8 +260,7 @@ class DashboardChartAdviceBase
   end
 
   def kwh_to_pounds_and_kwh(kwh, fuel_type_sym, data_units = @chart_definition[:yaxis_units])
-    pounds = YAxisScaling.convert(data_units, :£, fuel_type_sym, kwh, false)
-    # logger.info "kwh_to_pounds_and_kwh:  kwh = #{kwh} £ = #{pounds}"
+    pounds = YAxisScaling.new.scale(data_units, :£, kwh, fuel_type, @school)
     '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + FormatEnergyUnit.scale_num(kwh) + 'kWh)'
   end
 
@@ -300,13 +299,13 @@ class DashboardChartAdviceBase
               <td><%= row %></td>
               <% val = value[0] %>
               <% pct = val / total %>
-              <td class="text-right"><%= YAxisScaling.convert(units, :kwh, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(units, :kwh, fuel_type, val, @school) %></td>
               <% if row.match?(/export/i) %>
-                <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val) %></td>
+                <td class="text-right"><%= YAxisScaling.convert(units, :£, :solar_export, val, @school) %></td>
               <% else %>
-                <td class="text-right"><%= YAxisScaling.convert(units, :£, fuel_type, val) %></td>
+                <td class="text-right"><%= YAxisScaling.convert(units, :£, fuel_type, val, @school) %></td>
               <% end %>
-              <td class="text-right"><%= YAxisScaling.convert(units, :co2, fuel_type, val) %></td>
+              <td class="text-right"><%= YAxisScaling.convert(units, :co2, fuel_type, val, @school) %></td>
               <td class="text-right"><%= percent(pct) %></td>
             </tr>
           <% end %>
@@ -314,9 +313,9 @@ class DashboardChartAdviceBase
           <% if totals_row %>
             <tr class="table-success">
               <td><b>Total</b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :kwh, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :£, fuel_type, total) %></b></td>
-              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :co2, fuel_type, total) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :kwh, fuel_type, total, @school) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :£, fuel_type, total, @school) %></b></td>
+              <td class="text-right table-success"><b><%= YAxisScaling.convert(units, :co2, fuel_type, total, @school) %></b></td>
               <td></td>
             </tr>
           <% end %>
@@ -473,6 +472,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           <%= gas_comparison_benchmark %>
         <% end %>
       </p>
+      <p>Monetary values for benchmark and examplar schools are converted using your school&apos;s tariffs.</p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -802,8 +802,8 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     percent_str = percent(percent_value)
     saving_percent = percent_value - @exemplar_percentage
     saving = (in_hours + out_of_hours) * saving_percent * 365.0 / days
-    saving_kwh = ConvertKwh.convert(@chart_definition[:yaxis_units], :kwh, @fuel_type, saving)
-    saving_£ = ConvertKwh.convert(@chart_definition[:yaxis_units], :£, @fuel_type, saving)
+    saving_kwh = YAxisScaling.new.scale(@chart_definition[:yaxis_units], :kwh, saving, @fuel_type, @school)
+    saving_£   = YAxisScaling.new.scale(@chart_definition[:yaxis_units], :£,   saving, @fuel_type, @school)
 
     excluding_storage_heaters = (@school.storage_heaters? && fuel_type_str == 'electricity') ? '(excluding storage heaters)' : ''
 

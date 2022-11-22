@@ -84,9 +84,9 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
 
     @heating_on_times_table, rating_7_day, @avg_week_start_time = heating_on_time_assessment(asof_date)
 
-    @one_year_optimum_start_saving_kwh, @percent_of_annual_gas = heating_model.one_year_saving_from_better_boiler_start_time(asof_date)
-    @one_year_optimum_start_saving_£   = gas_cost(@one_year_optimum_start_saving_kwh)
-    @one_year_optimum_start_saving_co2 = gas_co2( @one_year_optimum_start_saving_kwh)
+    @one_year_optimum_start_saving_kwh, @percent_of_annual_gas = hm_1_year_saving(asof_date, :kwh)
+    @one_year_optimum_start_saving_£, _p                       = hm_1_year_saving(asof_date, :£)
+    @one_year_optimum_start_saving_co2, _p                     = hm_1_year_saving(asof_date, :co2)
 
     set_savings_capital_costs_payback(Range.new(0.0, @one_year_optimum_start_saving_£), Range.new(0.0, 700.0), @one_year_optimum_start_saving_co2)
 
@@ -99,6 +99,12 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   end
   alias_method :analyse_private, :calculate
 
+  private
+
+  def hm_1_year_saving(asof_date, datatype)
+    heating_model.one_year_saving_from_better_boiler_start_time(asof_date, datatype)
+  end
+
   private def heating_on_time_assessment(asof_date, days_countback = 7)
     days_assessment = []
     start_times = []
@@ -108,14 +114,19 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
       heating_on_time, recommended_time, temperature, kwh_saving = heating_model.heating_on_time_assessment(date)
       start_times.push(heating_on_time) unless heating_on_time.nil?
       kwh_saving = kwh_saving.nil? ? 0.0 : kwh_saving
-      saving_£ = (kwh_saving.nil? || kwh_saving < 0.0) ? 0.0 : kwh_saving * BenchmarkMetrics::GAS_PRICE
-      saving_co2 = (kwh_saving.nil? || kwh_saving < 0.0) ? 0.0 : kwh_saving * EnergyEquivalences::UK_GAS_CO2_KG_KWH
+      saving_£   = calculate_saving(date, :£)
+      saving_co2 = calculate_saving(date, :co2)
       timing = heating_on_time.nil? ? 'no heating' : (heating_on_time > recommended_time ? 'on time' : 'too early')
       rating += heating_on_time.nil? ? 0 : (heating_on_time > recommended_time ? -1 : 1)
       days_assessment.push([date, heating_on_time, recommended_time, temperature, timing, kwh_saving, saving_£, saving_co2])
     end
     average_heat_start_time = start_times.empty? ? nil : TimeOfDay.average_time_of_day(start_times)
     [days_assessment, rating, average_heat_start_time]
+  end
+
+  def calculate_saving(date, datatype)
+    _hot, _rt, _t, saving = heating_model.heating_on_time_assessment(date, datatype)
+    (saving.nil? || saving < 0.0) ? 0.0 : saving
   end
 
   def halfhour_index_to_timestring(halfhour_index)

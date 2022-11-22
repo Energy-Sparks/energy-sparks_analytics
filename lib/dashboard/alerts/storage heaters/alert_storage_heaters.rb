@@ -48,6 +48,14 @@ class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
     :alert_daytype_breakdown_storage_heater
   end
 
+  def breakdown_charts
+    {
+      kwh:    :alert_daytype_breakdown_storage_heater_kwh,
+      co2:    :alert_daytype_breakdown_storage_heater_co2,
+      £:      :alert_daytype_breakdown_storage_heater_£
+    }
+  end
+
   def group_by_week_day_type_chart
     :alert_group_by_week_storage_heaters
   end
@@ -83,7 +91,7 @@ end
 #NOTE: this doesn't seem to be setup in the application, as its not registered
 #in the database. Should it be removed?
 #Was removed from live system around 2022-04-11 and replaced by above
-class AlertHeatingOnSchoolDaysStorageHeaters < AlertHeatingOnSchoolDays
+class AlertHeatingOnSchoolDaysStorageHeatersDeprecated < AlertHeatingOnSchoolDaysDeprecated
   include AlertGasToStorageHeaterSubstitutionMixIn
   include ElectricityCostCo2Mixin
   def initialize(school)

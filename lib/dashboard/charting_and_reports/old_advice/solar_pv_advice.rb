@@ -37,7 +37,7 @@ class DashboardEnergyAdvice
     end
 
     def annual_solar_pv_consumed_onsite_£_html
-      saving_£ = solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh * BenchmarkMetrics::ELECTRICITY_PRICE
+      saving_£ = solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh * electricity_price_£_per_kwh
       FormatEnergyUnit.format(:£, saving_£,  :html, false, false, :ks2)
     end
 
@@ -93,6 +93,10 @@ class DashboardEnergyAdvice
         }.gsub(/^  /, '')
         ERB.new(text).result(binding)
       end
+    end
+
+    private def electricity_price_£_per_kwh
+      @school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£).round(5)
     end
   end 
 
@@ -303,7 +307,7 @@ class DashboardEnergyAdvice
               <li>
                 In general, the school will save from the free electricity it is
                 consuming from the panels, about <%= annual_solar_pv_consumed_onsite_£_html %>
-                (&#163;<%= BenchmarkMetrics::ELECTRICITY_PRICE %>/kWh x
+                (&#163;<%= electricity_price_£_per_kwh %>/kWh x
                   <%= annual_solar_pv_consumed_onsite_kwh_html %>)
               </li>
               <li>

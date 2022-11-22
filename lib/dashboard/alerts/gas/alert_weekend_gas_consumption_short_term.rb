@@ -124,12 +124,12 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   private def calculate(asof_date)
     calculate_model(asof_date)
     @weekend_dates = previous_weekend_dates(asof_date)
-    @last_week_end_kwh = kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE)
-    @last_weekend_cost_£ = gas_cost(@last_week_end_kwh)
+    @last_week_end_kwh = kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE, :kwh)
+    @last_weekend_cost_£ = kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE, :£)
     @last_weekend_cost_co2 = @last_week_end_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
 
-    @last_year_weekend_gas_kwh = weekend_gas_consumption_last_year(asof_date)
-    @last_year_weekend_gas_£ = gas_cost(@last_year_weekend_gas_kwh)
+    @last_year_weekend_gas_kwh = weekend_gas_consumption_last_year(asof_date, :kwh)
+    @last_year_weekend_gas_£ = weekend_gas_consumption_last_year(asof_date, :£)
     @last_year_weekend_gas_co2 = @last_year_weekend_gas_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
 
     @average_weekend_gas_kwh = @last_year_weekend_gas_kwh / 52.0
@@ -139,8 +139,8 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     @percent_increase_on_average_weekend = @average_weekend_gas_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @average_weekend_gas_kwh) / @average_weekend_gas_kwh
     @projected_percent_of_annual = @last_week_end_kwh * 52.0 / annual_kwh(aggregate_meter, asof_date)
 
-    @last_5_weeks_average_weekend_kwh = average_last_n_weekends_kwh(@weekend_dates, 5)
-    @last_5_weeks_average_weekend_£   = @last_5_weeks_average_weekend_kwh * BenchmarkMetrics::GAS_PRICE
+    @last_5_weeks_average_weekend_kwh = average_last_n_weekends_kwh(@weekend_dates, :kwh, 5)
+    @last_5_weeks_average_weekend_£   = average_last_n_weekends_kwh(@weekend_dates, :£,   5)
     @last_5_weeks_average_weekend_co2 = @last_5_weeks_average_weekend_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
     @percent_increase_on_last_5_weekends = @last_5_weeks_average_weekend_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @last_5_weeks_average_weekend_kwh) / @last_5_weeks_average_weekend_kwh
 
@@ -172,9 +172,9 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     weekend_dates.sort
   end
 
-  private def average_last_n_weekends_kwh(this_weekend_dates, n = 5)
+  private def average_last_n_weekends_kwh(this_weekend_dates, datatype, n)
     dates = prior_weekend_dates(this_weekend_dates, n)
-    kwh = kwh_usage_outside_frost_period(dates, FROST_PROTECTION_TEMPERATURE)
+    kwh = kwh_usage_outside_frost_period(dates, FROST_PROTECTION_TEMPERATURE, datatype)
     kwh / n
   end
 
@@ -187,21 +187,21 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     dates
   end
 
-  private def weekend_gas_consumption_last_year(asof_date)
+  private def weekend_gas_consumption_last_year(asof_date, datatype)
     start_date = meter_date_one_year_before(aggregate_meter, asof_date)
     annual_kwh = 0.0
     (start_date..asof_date).each do |date|
-      annual_kwh += aggregate_meter.amr_data.one_day_kwh(date) if weekend?(date)
+      annual_kwh += aggregate_meter.amr_data.one_day_kwh(date, datatype) if weekend?(date)
     end
     annual_kwh * scale_up_to_one_year(aggregate_meter, asof_date)
   end
 
-  private def kwh_usage_outside_frost_period(dates, frost_protection_temperature)
+  private def kwh_usage_outside_frost_period(dates, frost_protection_temperature, datatype)
     total_kwh = 0.0
     dates.each do |date|
       (0..47).each do |halfhour_index|
         if @school.temperatures.temperature(date, halfhour_index) > frost_protection_temperature
-          total_kwh += @school.aggregated_heat_meters.amr_data.kwh(date, halfhour_index)
+          total_kwh += @school.aggregated_heat_meters.amr_data.kwh(date, halfhour_index, datatype)
         end
       end
     end

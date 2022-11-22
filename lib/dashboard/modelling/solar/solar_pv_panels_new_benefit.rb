@@ -13,6 +13,8 @@ class SolarPVPanelsNewBenefit
     exported_solar_pv_total           = 0.0
     solar_pv_consumed_onsite_total    = 0.0
     new_mains_consumption_total       = 0.0
+    solar_pv_consumed_onsite_total_£  = 0.0
+    new_mains_consumption_total_£     = 0.0
 
     logger.info "PV date range #{meter_collection.solar_pv.start_date} to #{meter_collection.solar_pv.end_date}"
 
@@ -22,7 +24,14 @@ class SolarPVPanelsNewBenefit
 
       (0..47).each do |hhi|
         pv_kwh_hh = pv_yield_x48[hhi] * kwp / 2.0
-        existing_mains_kwh_hh = electricity_amr.kwh(date, hhi)
+        existing_mains_kwh_hh   = electricity_amr.kwh(date, hhi)
+        existing_mains_kwh_hh_£ = electricity_amr.kwh(date, hhi, :£)
+
+        tariff_£_per_kwh =  if existing_mains_kwh_hh == 0.0
+                              BenchmarkMetrics::ELECTRICITY_PRICE # backup calc if no consumption
+                            else
+                              existing_mains_kwh_hh_£ / existing_mains_kwh_hh
+                            end 
 
         exported_kwh_hh              = [existing_mains_kwh_hh - pv_kwh_hh, 0.0].min.magnitude
         new_mains_consumption_kwh_hh = [existing_mains_kwh_hh - pv_kwh_hh, 0.0].max
@@ -32,14 +41,16 @@ class SolarPVPanelsNewBenefit
         exported_solar_pv_total         += exported_kwh_hh
         solar_pv_consumed_onsite_total  += pv_consumed_onsite_kwh_hh
         new_mains_consumption_total     += new_mains_consumption_kwh_hh
+        new_mains_consumption_total_£   += new_mains_consumption_kwh_hh * tariff_£_per_kwh
       end
     end
  
     {
-      new_mains_consumption:  new_mains_consumption_total,
-      solar_consumed_onsite:  solar_pv_consumed_onsite_total,
-      exported:               exported_solar_pv_total,
-      solar_pv_output:        solar_pv_output_total
+      new_mains_consumption:    new_mains_consumption_total,
+      new_mains_consumption_£:  new_mains_consumption_total_£,
+      solar_consumed_onsite:    solar_pv_consumed_onsite_total,
+      exported:                 exported_solar_pv_total,
+      solar_pv_output:          solar_pv_output_total
     }
   end
 end

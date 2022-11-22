@@ -95,7 +95,7 @@ class AggregatorBenchmarks < AggregatorBase
 
   def scale_by_pupils(scale_config)
     raise EnergySparksUnexpectedStateException, "Chart configuration scale_by_pupils setting #{scale_config}" if scale_config[:to] != :to_current_period
-    
+
     return unless results[:bucketed_data].include?(scale_config[:series_name])
 
     pupils = results[:x_axis_bucket_date_ranges].map do |(start_date, end_date)|
@@ -104,8 +104,8 @@ class AggregatorBenchmarks < AggregatorBase
 
     pupils_scale = pupils.map { |num_pupils| num_pupils / pupils.last }
 
-    results[:bucketed_data][scale_config[:series_name]].each.with_index do |v, i|
-       results[:bucketed_data][scale_config[:series_name]][i] *= pupils_scale[i]
+    results[:bucketed_data][scale_config[:series_name]].each.with_index do |_v, i|
+      results[:bucketed_data][scale_config[:series_name]][i] *= pupils_scale[i]
     end
 
     results[:x_axis].each.with_index do |x_axis_label, i|
@@ -132,8 +132,8 @@ class AggregatorBenchmarks < AggregatorBase
 
     floor_area_scale = floor_areas.map { |fa| fa / floor_areas.last }
 
-    results[:bucketed_data][scale_config[:series_name]].each.with_index do |v, i|
-       results[:bucketed_data][scale_config[:series_name]][i] *= floor_area_scale[i]
+    results[:bucketed_data][scale_config[:series_name]].each.with_index do |_v, i|
+      results[:bucketed_data][scale_config[:series_name]][i] *= floor_area_scale[i]
     end
 
     results[:x_axis].each.with_index do |x_axis_label, i|

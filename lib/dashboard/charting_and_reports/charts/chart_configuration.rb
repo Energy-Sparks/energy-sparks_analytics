@@ -52,6 +52,7 @@ class ChartManager
     benchmark_electric_only_£_varying_floor_area_pupils: {
       name:             'Annual Electricity Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       filter:           { fuel: [ 'electricity' ] },
+      restrict_y1_axis: nil,
       scale_y_axis:     [
         { number_of_pupils: { to: :to_current_period, series_name: 'electricity' } }
       ],
@@ -60,6 +61,7 @@ class ChartManager
     benchmark_gas_only_£_varying_floor_area_pupils: {
       name:             'Annual Gas Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       filter:           { fuel: [ 'gas' ] },
+      restrict_y1_axis: nil,
       scale_y_axis:     [
         { number_of_pupils: { to: :to_current_period, series_name: 'gas' } }
       ],
@@ -69,6 +71,7 @@ class ChartManager
       name:             'Annual Storage Heater Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'storage heaters' ] },
+      restrict_y1_axis: nil,
       scale_y_axis:     [
         { number_of_pupils: { to: :to_current_period, series_name: 'storage heaters' } }
       ],
@@ -86,22 +89,26 @@ class ChartManager
     benchmark_kwh_electric_only: {
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'electricity' ] },
+      restrict_y1_axis: nil,
       yaxis_units:      :kwh
     },
     benchmark_electric_only_£: {
       name:             'Annual Electricity Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'electricity' ] },
+      restrict_y1_axis: nil,
       yaxis_units:      :£
     },
     benchmark_gas_only_£: {
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'gas' ] },
+      restrict_y1_axis: nil,
       yaxis_units:      :£
     },
     benchmark_storage_heater_only_£: {
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'storage heaters' ] },
+      restrict_y1_axis: nil,
       yaxis_units:      :£
     },
     last_2_weeks_carbon_emissions: {
@@ -207,11 +214,35 @@ class ChartManager
     alert_daytype_breakdown_gas: {
       inherits_from: :daytype_breakdown_gas
     },
+    alert_daytype_breakdown_gas_kwh: {
+      inherits_from: :alert_daytype_breakdown_gas,
+      yaxis_units:   :kwh
+    },
+    alert_daytype_breakdown_gas_co2: {
+      inherits_from: :alert_daytype_breakdown_gas,
+      yaxis_units:   :co2
+    },
+    alert_daytype_breakdown_gas_£: {
+      inherits_from: :alert_daytype_breakdown_gas,
+      yaxis_units:   :£,
+    },
     alert_daytype_breakdown_storage_heater: {
       inherits_from:      :alert_daytype_breakdown_gas,
       name:               'Breakdown by type of day/time: Storage Heaters',
       replace_series_label: [[Series::DayType::SCHOOLDAYCLOSED, Series::DayType::STORAGE_HEATER_CHARGE]],
       meter_definition:   :storage_heater_meter
+    },
+    alert_daytype_breakdown_storage_heater_kwh: {
+      inherits_from: :alert_daytype_breakdown_storage_heater,
+      yaxis_units:   :kwh
+    },
+    alert_daytype_breakdown_storage_heater_co2: {
+      inherits_from: :alert_daytype_breakdown_storage_heater,
+      yaxis_units:   :co2
+    },
+    alert_daytype_breakdown_storage_heater_£: {
+      inherits_from: :alert_daytype_breakdown_storage_heater,
+      yaxis_units:   :£,
     },
     daytype_breakdown_electricity: {
       name:             'Breakdown by type of day/time: Electricity',
@@ -230,6 +261,18 @@ class ChartManager
     },
     alert_daytype_breakdown_electricity: {
       inherits_from: :daytype_breakdown_electricity
+    },
+    alert_daytype_breakdown_electricity_kwh: {
+      inherits_from: :alert_daytype_breakdown_electricity,
+      yaxis_units:   :kwh
+    },
+    alert_daytype_breakdown_electricity_co2: {
+      inherits_from: :alert_daytype_breakdown_electricity,
+      yaxis_units:   :co2
+    },
+    alert_daytype_breakdown_electricity_£: {
+      inherits_from: :alert_daytype_breakdown_electricity,
+      yaxis_units:   :£,
     },
     group_by_week_electricity: {
       name:             'By Week: Electricity',
@@ -1292,6 +1335,14 @@ class ChartManager
       name:             'Thermostatic (Temperature v. Daily Consumption - current year)',
       subtitle:         :daterange
     },
+    test_thermostatic_£: {
+      inherits_from:  :thermostatic_regression_simple_school_day,
+      yaxis_units:         :£
+    },
+    test_thermostatic_co2: {
+      inherits_from:  :thermostatic_regression_simple_school_day,
+      yaxis_units:    :co2
+    },
     thermostatic_up_to_1_year: {
       inherits_from:    :thermostatic,
       name:             'Thermostatic (Temperature v. Daily Consumption)',
@@ -2208,6 +2259,7 @@ class ChartManager
     pupil_dashboard_electricity_benchmark: {
       name:               'How much my school spends on electricity in comparison with other schools (£)',
       inherits_from:      :benchmark,
+      restrict_y1_axis:   nil,
       meter_definition:   :allelectricity
     },
     pupil_dashboard_electricity_longterm_trend_£: {
@@ -2259,6 +2311,7 @@ class ChartManager
     pupil_dashboard_gas_benchmark: {
       name:             'How much my school spends on gas in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
+      restrict_y1_axis:   nil,
       meter_definition:   :allheat
     },
     pupil_dashboard_daytype_breakdown_gas: {
@@ -2303,6 +2356,7 @@ class ChartManager
     pupil_dashboard_storage_heaters_benchmark: {
       name:             'How much my school spends on storage heating in comparison with other schools (£)',
       inherits_from:      :pupil_dashboard_electricity_benchmark,
+      restrict_y1_axis:   nil,
       meter_definition:   :storage_heater_meter
     },
     pupil_dashboard_daytype_breakdown_storage_heaters: {

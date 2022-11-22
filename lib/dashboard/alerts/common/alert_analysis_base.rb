@@ -490,11 +490,11 @@ class AlertAnalysisBase < ContentBase
       AlertHeatingSensitivityAdvice                               => 'htsa',
       AlertHotWaterEfficiency                                     => 'hotw',
       AlertImpendingHoliday                                       => 'ihol',
-      AlertHeatingOnNonSchoolDays                                 => 'htns',
+#       AlertHeatingOnNonSchoolDays                                 => 'htns', deprecated
       AlertOutOfHoursElectricityUsage                             => 'eloo',
       AlertOutOfHoursGasUsage                                     => 'gsoo',
       AlertHotWaterInsulationAdvice                               => 'hwia',
-      AlertHeatingOnSchoolDays                                    => 'htsd',
+#      AlertHeatingOnSchoolDays                                    => 'htsd', deprecated
       AlertThermostaticControl                                    => 'httc',
       AlertWeekendGasConsumptionShortTerm                         => 'gswe',
       AlertElectricityMeterConsolidationOpportunity               => 'emtc',
@@ -512,7 +512,7 @@ class AlertAnalysisBase < ContentBase
       AlertStorageHeaterAnnualVersusBenchmark                     => 'shan',
       AlertStorageHeaterThermostatic                              => 'shtc',
       AlertStorageHeaterOutOfHours                                => 'shoo',
-      AlertHeatingOnSchoolDaysStorageHeaters                      => 'shhd',
+#      AlertHeatingOnSchoolDaysStorageHeaters                      => 'shhd', deprecated
       AlertSolarPVBenefitEstimator                                => 'sole',
       AlertElectricityLongTermTrend                               => 'ellt',
       AlertGasLongTermTrend                                       => 'gslt',

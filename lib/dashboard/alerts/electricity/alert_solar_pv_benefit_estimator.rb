@@ -62,6 +62,9 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
   }
 
   def calculate(asof_date)
+    days_data = [aggregate_meter.amr_data.end_date, asof_date].min - aggregate_meter.amr_data.start_date
+    raise EnergySparksNotEnoughDataException, "Only #{days_data.to_i} days meter data" unless days_data > 364
+
     scenarios, optimum_kwp = calculate_range_of_scenarios(asof_date)
 
     @solar_pv_scenario_table  = format_scenarios_into_table(scenarios, :raw)
@@ -182,13 +185,16 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregate_meter.amr_data, @school, start_date, asof_date, kwp)
 
     kwh = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date)
+    £   = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date, :£)
 
     {
       kwp:                          kwp,
       panels:                       number_of_panels(kwp),
       area:                         panel_area_m2(number_of_panels(kwp)),
       existing_annual_kwh:          kwh,
+      existing_annual_£:            £,
       new_mains_consumption_kwh:    kwh_totals[:new_mains_consumption],
+      new_mains_consumption_£:      kwh_totals[:new_mains_consumption_£],
       reduction_in_mains_percent:   (kwh - kwh_totals[:new_mains_consumption]) / kwh,
       solar_consumed_onsite_kwh:    kwh_totals[:solar_consumed_onsite],
       exported_kwh:                 kwh_totals[:exported],
@@ -207,12 +213,9 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
   end
 
   def calculate_economic_benefit(kwh_data)
-    mains_tariff    = BenchmarkMetrics::ELECTRICITY_PRICE
-    export_tariff   = BenchmarkMetrics::SOLAR_EXPORT_PRICE
-
-    new_mains_cost  = kwh_data[:new_mains_consumption_kwh] * mains_tariff
-    old_mains_cost  = kwh_data[:existing_annual_kwh]       * mains_tariff
-    export_income   = kwh_data[:exported_kwh]              * export_tariff
+    new_mains_cost = kwh_data[:new_mains_consumption_£]
+    old_mains_cost = kwh_data[:existing_annual_£]
+    export_income  = kwh_data[:exported_kwh] * BenchmarkMetrics::SOLAR_EXPORT_PRICE
 
     mains_savings   = old_mains_cost - new_mains_cost
     saving          = mains_savings  + export_income
@@ -252,5 +255,19 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
         fit_£_per_kwh:      0.05
       }
     ]
+  end
+
+  def approx_blended_daytime_tariff_£_per_kwh(asof_date)
+    hh_count_4_hours = 8
+    remainder_hh_count = 48 - hh_count_4_hours
+    middle_of_day_4_hours_x48_kwh_weighted = Array.new(hh_count_4_hours / 2, 0.0) + Array.new(8, 1.0 / hh_count_4_hours) + Array.new(hh_count_4_hours / 2, 0.0)
+    costs = []
+
+    full_date_range(asof_date).each do |date|
+      next unless @school.holidays.occupied?(date)
+      costs.push(aggregate_meter.amr_data.economic_cost_for_x48_kwhs(date, middle_of_day_4_hours_x48_kwh_weighted))
+    end
+
+    costs.sum / costs.count
   end
 end
