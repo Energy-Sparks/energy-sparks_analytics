@@ -331,7 +331,6 @@ module Dashboard
     end
 
     def analytics_name
-      # name.present? ? "#{name} (#{mpxn})" : mpxn.to_s
       return mxpn.to_s unless name.present?
 
       bracketed_text = name.include?(mpxn.to_s) ? 'MPAN' : mpxn.to_s
