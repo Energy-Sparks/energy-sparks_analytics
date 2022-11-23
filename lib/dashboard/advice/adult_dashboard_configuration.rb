@@ -467,7 +467,7 @@ class DashboardConfiguration
       promoted_variables: {
         AlertSeasonalHeatingSchoolDays => {
           rating:         :rating,
- #         one_year_saving_reduced_days_to_exemplar_£: :one_year_saving_reduced_days_to_exemplar_£
+          one_year_saving_£: :one_year_saving_£
         }
       },
       meter_breakdown: {
