@@ -202,6 +202,12 @@ class AMRData < HalfHourlyData
     c
   end
 
+  def self.fast_divide_x48_by_x48(a, b)
+    c = one_day_zero_kwh_x48
+    (0..47).each { |x| c[x] = b[x] == 0.0 ? 0.0 : (a[x] / b[x]) }
+    c
+  end
+
   def self.fast_add_x48_x_x48(a, b)
     c = one_day_zero_kwh_x48
     (0..47).each { |x| c[x] = a[x] + b[x] }
@@ -508,7 +514,17 @@ class AMRData < HalfHourlyData
   end
 
   def economic_cost_for_x48_kwhs(date, kwh_x48)
-    @economic_tariff.calculate_x48_kwh_cost(date, kwh_x48)
+    rate_£_per_kwh_x48 = economic_cost_£_per_kwh_x48(date, kwh_x48)
+    res = AMRData.fast_multiply_x48_x_x48(kwh_x48, rate_£_per_kwh_x48)
+    res.sum
+  end
+
+  # calculates a blended rate x 48, based on aggregate data
+  # which could either be parameterised costs or pre-calculated
+  def economic_cost_£_per_kwh_x48(date, kwh_x48)
+    kwh_x48 = days_kwh_x48(date)
+    £_x48 = days_kwh_x48(date, :£)
+    AMRData.fast_divide_x48_by_x48(£_x48, kwh_x48)
   end
 
   def current_tariff_rate_£_per_kwh
