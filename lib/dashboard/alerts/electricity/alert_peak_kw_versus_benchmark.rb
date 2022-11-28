@@ -4,7 +4,6 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :average_school_day_last_year_kw, :average_school_day_last_year_kw_per_pupil
   attr_reader :average_school_day_last_year_kw_per_floor_area, :exemplar_kw
   attr_reader :one_year_saving_versus_exemplar_£, :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_co2
-  attr_reader :midday_electricity_price_£_per_kwh
 
   def initialize(school)
     super(school, :peakelectricbenchmark)
@@ -52,10 +51,6 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
     electricity_intraday_comparison_chart_6_months_apart: {
       description: 'Compares intraday usage 6 months apart',
       units: :chart
-    },
-    midday_electricity_price_£_per_kwh: {
-      description: 'Approx average midday economic tariff £/kWh',
-      units:  :£,
     }
   }
 
@@ -82,10 +77,8 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
 
     # arbitrarily saving is 4 hours of peak usage for every school day of the year
     @one_year_saving_versus_exemplar_kwh = 4.0 * 190.0 * [@average_school_day_last_year_kw_per_floor_area - benchmark_kw_m2, 0.0].max * floor_area(asof_date - 365, asof_date)
-    
-    @midday_electricity_price_£_per_kwh = approx_blended_peak_tariff_£_per_kwh(asof_date)
-    
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * @midday_electricity_price_£_per_kwh
+
+    @one_year_saving_versus_exemplar_£ = saving_rate(type: :peak_kw, kwh: @one_year_saving_versus_exemplar_kwh, meter: aggregate_meter)
     @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
 
     set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil, @one_year_saving_versus_exemplar_co2)
@@ -95,20 +88,6 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
   alias_method :analyse_private, :calculate
 
   private
-
-  def approx_blended_peak_tariff_£_per_kwh(asof_date)
-    hh_count_4_hours = 8
-    remainder_hh_count = 48 - hh_count_4_hours
-    middle_of_day_4_hours_x48_kwh_weighted = Array.new(hh_count_4_hours / 2, 0.0) + Array.new(8, 1.0 / hh_count_4_hours) + Array.new(hh_count_4_hours / 2, 0.0)
-    costs = []
-
-    full_date_range(asof_date).each do |date|
-      next unless @school.holidays.occupied?(date)
-      costs.push(aggregate_meter.amr_data.economic_cost_for_x48_kwhs(date, middle_of_day_4_hours_x48_kwh_weighted))
-    end
-
-    costs.sum / costs.count
-  end
 
   def full_date_range(asof_date)
     start_date = [asof_date - 365, aggregate_meter.amr_data.start_date].max
