@@ -71,6 +71,7 @@ en:
       years_decimal: "%{value} years"
       years_range: "%{low} to %{high}"
       "£": "%{sign}£%{value}"
+      "£current": "%{sign}£%{value}"
       "£_0dp": "%{sign}£%{value}"
       "£_0dp_html": "%{sign}&pound;%{value}"
       "£_html": "%{sign}&pound;%{value}"

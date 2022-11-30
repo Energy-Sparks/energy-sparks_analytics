@@ -103,8 +103,7 @@ module AggregationMixin
 
   private def calculate_costs_for_meter(meter)
     logger.info "Creating economic & accounting costs for #{meter.mpan_mprn} fuel #{meter.fuel_type} from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}"
-    meter.amr_data.set_economic_tariff(meter)
-    meter.amr_data.set_accounting_tariff(meter)
+    meter.amr_data.set_tariffs(meter)
   end
 
   private def calculate_meter_carbon_emissions_and_costs(meter, fuel_type)

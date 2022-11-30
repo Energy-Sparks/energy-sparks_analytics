@@ -314,10 +314,15 @@ class ChartManager
       yaxis_units:      :accounting_cost,
     },
     test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
-      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited meter breakdown',
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Economic Cost Unlimited meter breakdown',
       inherits_from:    :group_by_week_electricity_meter_breakdown,
       yaxis_units:      :£,
       timescale:        nil
+    },
+    test_current_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Current Economic Cost Unlimited meter breakdown',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown,
+      yaxis_units:      :£current,
     },
     test_economic_costs_electric_by_datetime_year_£: {
       name:             'By Week: <%= meter.fuel_type.capitalize %> £ by datetime - 1 year',
@@ -325,6 +330,12 @@ class ChartManager
       yaxis_units:      :£,
       x_axis:           :datetime,
       timescale:        :year
+    },
+
+    test_current_economic_costs_electric_by_week_unlimited_£: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited current £',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :£current,
     },
 
     test_economic_costs_gas_by_week_unlimited_£: {

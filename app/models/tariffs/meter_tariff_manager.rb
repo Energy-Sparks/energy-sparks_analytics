@@ -112,6 +112,11 @@ class MeterTariffManager
     @accounting_tariff_cache[date] ||= calculate_accounting_tariff_for_date(date)
   end
 
+  def economic_tariffs_change_over_time?
+    check_economic_tariff_type
+    @economic_tariff.class == EconomicTariffChangeOverTime
+  end
+
   private
 
   def calculate_accounting_tariff_for_date(date, ignore_defaults = false)
@@ -194,6 +199,13 @@ class MeterTariffManager
     else
       # post October 2022 version of economic tariffs - tariffs potentiall change with start, end_date over time
       EconomicTariffChangeOverTime.new(meter, meter.attributes(:economic_tariff_change_over_time))
+    end
+  end
+
+  def check_economic_tariff_type
+    economic_tariff_classes = [EconomicTariff, EconomicTariffChangeOverTime]
+    unless economic_tariff_classes.include?(@economic_tariff.class)
+      raise EnergySparksUnexpectedStateException, "Economic tariff must one of #{economic_tariff_classes.join(' ')} got #{@economic_tariff.class.name}"
     end
   end
 
