@@ -185,7 +185,8 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregate_meter.amr_data, @school, start_date, asof_date, kwp)
 
     kwh = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date)
-    £   = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date, :£)
+
+    £   = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date, :£current)
 
     {
       kwp:                          kwp,

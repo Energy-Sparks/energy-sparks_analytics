@@ -62,6 +62,7 @@ module Series
     def kwh_cost_or_co2
       case chart_config[:yaxis_units]
       when :£;               :economic_cost
+      when :£current;        :current_economic_cost
       when :accounting_cost; :accounting_cost
       when :co2;             :co2
       else;                  :kwh end
@@ -243,10 +244,11 @@ module Series
 
     def scaling_factor_for_model_derived_gas_data(data_type)
       case data_type
-      when :£, :economic_cost;      meter.amr_data.tariff_for_date_£_per_kwh(date)
-      when :accounting_cost;        meter.amr_data.tariff_for_date_£_per_kwh(date) # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
-      when :co2;                    EnergyEquivalences::UK_GAS_CO2_KG_KWH
-      else;                         1.0 end
+      when :£, :economic_cost;                meter.amr_data.tariff_for_date_£_per_kwh(date)
+      when :£current, :current_economic_cost; meter.amr_data.current_tariff_rate_£_per_kwh
+      when :accounting_cost;                  meter.amr_data.tariff_for_date_£_per_kwh(date) # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
+      when :co2;                              EnergyEquivalences::UK_GAS_CO2_KG_KWH
+      else;                                   1.0 end
     end
 
     def adjustment_temperatures(dates)
@@ -415,6 +417,8 @@ module Series
         kwh
       when :£
         kwh * meter.amr_data.tariff_for_date_£_per_kwh(date)
+      when :£current
+        kwh * meter.amr_data.current_tariff_rate_£_per_kwh
       when :co2
         kwh * meter.amr_data.average_co2_intensity_kwh_kg(date)
       end
