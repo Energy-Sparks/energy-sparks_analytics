@@ -100,7 +100,7 @@ class AlertSeasonalBaseloadVariation < AlertBaseloadBase
     @percent_seasonal_variation = calculator.percent_seasonal_variation(asof_date)
 
     @annual_cost_kwh = calculator.costs_of_baseload_above_minimum_kwh(asof_date, @summer_kw)
-    @annual_cost_£   = @annual_cost_kwh * blended_electricity_£_per_kwh
+    @annual_cost_£   = @annual_cost_kwh * implied_baseload_tariff_rate_£_per_kwh(asof_date)
     @annual_co2      = @annual_cost_kwh * blended_co2_per_kwh
 
     set_savings_capital_costs_payback(Range.new(@annual_cost_£, @annual_cost_£ ), nil, @annual_co2)
