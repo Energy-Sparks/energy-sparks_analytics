@@ -80,16 +80,6 @@ class AggregateDataService
   end
 
   def process_community_usage_open_close_times
-=begin
-    # Centrica
-    # this is kind of complex
-    # some of this can be deferred to later, on the fly if representation simple
-    # some needs processing here e.g. storage heater like floodlighting
-    # probably generate extra community/noncommunity aggregate and perhaps non aggregate meters here
-    puts "Got here process_community_usage_open_close_times"
-    @meter_collection.community_disaggregator = DisaggregateCommunityUsage.new(@meter_collection)
-    @meter_collection.community_disaggregator.disaggregate
-=end
     [
       @meter_collection.aggregated_electricity_meters,
       @meter_collection.aggregated_heat_meters,
@@ -289,7 +279,7 @@ class AggregateDataService
     if combined_meter.nil?
       mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, fuel_type) unless @meter_collection.urn.nil?
 
-      combined_meter = Dashboard::Meter.new(
+      combined_meter = Dashboard::AggregateMeter.new(
         meter_collection: @meter_collection,
         amr_data: combined_amr_data,
         type: fuel_type,
@@ -300,6 +290,8 @@ class AggregateDataService
         has_sheffield_solar_pv: has_sheffield_solar_pv,
         meter_attributes: @meter_collection.pseudo_meter_attributes(Dashboard::Meter.aggregate_pseudo_meter_attribute_key(fuel_type))
       )
+
+      combined_meter.set_constituent_meters(list_of_meters)
 
       combined_meter.add_aggregate_partial_meter_coverage_component(list_of_meters.map{ |m| m.partial_meter_coverage})
     else

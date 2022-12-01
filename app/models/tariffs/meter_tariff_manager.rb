@@ -17,7 +17,7 @@
 class MeterTariffManager
   include Logging
   MAX_DAYS_BACKDATE_TARIFF = 30
-  attr_reader :accounting_tariffs, :economic_tariff
+  attr_reader :accounting_tariffs, :economic_tariff, :meter
 
   class MissingAccountingTariff                                   < StandardError; end
   class OverlappingAccountingTariffs                              < StandardError; end
@@ -29,6 +29,7 @@ class MeterTariffManager
 
   def initialize(meter)
     @mpxn = meter.mpxn
+    @meter = meter # messy when printing object
     pre_process_tariff_attributes(meter)
     backdate_dcc_tariffs(meter)
   end
@@ -115,6 +116,19 @@ class MeterTariffManager
   def economic_tariffs_change_over_time?
     check_economic_tariff_type
     @economic_tariff.class == EconomicTariffChangeOverTime
+  end
+
+  # e.g. aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(Date.new(2022,8,22), Date.new(2022,10,22))
+  def meter_tariffs_differ_within_date_range?(start_date, end_date)
+    @meter.constituent_meters.any? do |meter|
+      meter.meter_tariffs.economic_tariff.tariffs_differ_within_date_range?(start_date, end_date)
+    end
+  end
+
+  def meter_tariffs_changes_between_periods?(period1, period2)
+    @meter.constituent_meters.any? do |meter|
+      meter.meter_tariffs.economic_tariff.meter_tariffs_changes_between_periods?(period1, period2)
+    end
   end
 
   private

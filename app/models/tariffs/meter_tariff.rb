@@ -3,6 +3,9 @@ class MeterTariff
   FLAT_RATE = 'Flat Rate'.freeze
   DAYTIME_RATE = 'Daytime Rate'.freeze
   NIGHTTIME_RATE = 'Nighttime Rate'.freeze
+  MIN_DEFAULT_START_DATE = Date.new(2008, 1, 1)
+  MAX_DEFAULT_END_DATE   = Date.new(2050, 1, 1)
+
   def initialize(meter, tariff)
     @mpxn       = meter.mpxn
     @amr_data   = meter.amr_data
@@ -44,6 +47,38 @@ class MeterTariff
   def self.format_time_range(rate)
     "#{rate[:from]} to #{rate[:to]}".freeze
   end
+
+  def tariffs_by_date_range
+    {
+      MIN_DEFAULT_START_DATE..MAX_DEFAULT_END_DATE => @tariff[:rates]
+    }
+  end
+
+  def tariffs_within_date_range(start_date, end_date)
+    tariffs_by_date_range.select do |dr, rates|
+      start_date.between?(dr.first, dr.last) || end_date.between?(dr.first, dr.last)
+    end
+  end
+
+  def tariffs_differ_within_date_range?(start_date, end_date)
+    trs = tariffs_within_date_range(start_date, end_date)
+    trs.values.uniq.length > 1
+  end
+
+  def meter_tariffs_changes_between_periods?(period1, period2)
+    trs1 = tariffs_within_date_range(period1.first, period1.last)
+    trs2 = tariffs_within_date_range(period2.first, period2.last)
+    # works simplistically where the tariffs differ
+    # but potentially problematic if tariff transition is
+    # identical within both periods but the transition occurs
+    # within differing numbers of days into the transition
+    # - shouldn't happen often as would require for example
+    # - tariff to increase, then decrease, then increase to same
+    #   value as previous high, then decrease to same value as
+    #   previous decrease
+    # two periods
+    trs1.values != trs2.values
+  end
 end
 
 class EconomicTariff < MeterTariff
@@ -52,9 +87,6 @@ end
 class EconomicTariffChangeOverTime < MeterTariff
   class EconomicTariffsDontCoverWholeDateRange < StandardError; end
   attr_reader :tariffs
-
-  MIN_DEFAULT_START_DATE = Date.new(2008, 1, 1)
-  MAX_DEFAULT_END_DATE   = Date.new(2050, 1, 1)
 
   def initialize(meter, tariffs)
     @tariffs = default_missing_dates(meter, tariffs)
@@ -71,6 +103,11 @@ class EconomicTariffChangeOverTime < MeterTariff
     tariff.weighted_cost(nil, kwh_x48, type)
   end
 
+  # returns hash meter attribute representation
+  def tariffs_by_date_range
+    @tariffs.transform_values { |tariff| tariff.tariff[:rates] }
+  end
+
   private
 
   def find_tariff(date)
@@ -82,7 +119,7 @@ class EconomicTariffChangeOverTime < MeterTariff
   end
 
   def default_missing_dates(meter, tariffs)
-    x = tariffs.map do |tariff|
+    tariffs.map do |tariff|
       tariff[:start_date] = MIN_DEFAULT_START_DATE unless tariff.key?(:start_date)
       tariff[:end_date]   = MAX_DEFAULT_END_DATE   unless tariff.key?(:end_date)
       [tariff[:start_date]..tariff[:end_date], EconomicTariff.new(meter, tariff)]
