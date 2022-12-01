@@ -39,6 +39,11 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
 
   private
 
+  def implied_baseload_tariff_rate_£_per_kwh(asof_date = aggregate_meter.amr_data.end_date)
+    kwh_x48 = AMRData.single_value_kwh_x48(1.0 / 48.0)
+    aggregate_meter.amr_data.economic_cost_for_x48_kwhs(asof_date, kwh_x48)
+  end
+
   def valid_calculation(alert, asof_date)
     return false unless alert.valid_alert?
     alert.analyse(asof_date, true)
