@@ -28,12 +28,12 @@ class ContentBase
     []
   end
 
-  def tariff_has_changed_during_period_text(start_date, end_date)
+  def calculate_tariff_has_changed_during_period_text(start_date, end_date)
     changed = aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(start_date, end_date)
     changed ? I18n.t("analytics.tariff_change.change_within_period_caveat") : ''
   end
 
-  def tariff_has_changed_between_periods_text(period1, period2)
+  def calculate_tariff_has_changed_between_periods_text(period1, period2)
     changed = aggregate_meter.meter_tariffs.meter_tariffs_changes_between_periods?(period1, period2)
     changed ? I18n.t("analytics.tariff_change.change_between_periods_caveat") : ''
   end

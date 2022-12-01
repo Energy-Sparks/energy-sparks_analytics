@@ -11,7 +11,7 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
   attr_reader :last_weeks_consumption_co2, :week_befores_consumption_co2
   attr_reader :signifcant_increase_in_electricity_consumption
   attr_reader :beginning_of_week, :beginning_of_last_week
-  attr_reader :percent_change_in_consumption
+  attr_reader :percent_change_in_consumption, :tariff_has_changed_between_periods_text
 
   def initialize(school)
     super(school, :changeinelectricityconsumption)
@@ -79,6 +79,10 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
       description: 'Last 7 days intraday chart line chart',
       units: :chart
     },
+    tariff_has_changed_between_periods_text: {
+      description: 'The £ values use the latest tariff, so if the change is during a change in tariff it may not reflect what the user is expecting, so this provides from caveat test or blank if there is no change',
+      units:  String
+    }
   }.freeze
 
   def week_on_week_electricity_daily_electricity_comparison_chart
@@ -112,11 +116,16 @@ class AlertChangeInDailyElectricityShortTerm < AlertElectricityOnlyBase
     @beginning_of_week      = last_5_school_day_dates[0]
     @beginning_of_last_week = previous_5_school_day_dates[0]
 
+    p1 = Range.new(last_5_school_day_dates.first, last_5_school_day_dates.last)
+    p2 = Range.new(previous_5_school_day_dates.first, previous_5_school_day_dates.last)
+
+    @tariff_has_changed_between_periods_text = calculate_tariff_has_changed_between_periods_text(p1, p2)
+
     @last_weeks_consumption_kwh   = schoolday_energy_usage_dates(last_5_school_day_dates, :kwh)
     @week_befores_consumption_kwh = schoolday_energy_usage_dates(previous_5_school_day_dates, :kwh)
 
-    @last_weeks_consumption_£   = schoolday_energy_usage_dates(last_5_school_day_dates, :£)
-    @week_befores_consumption_£ = schoolday_energy_usage_dates(previous_5_school_day_dates, :£)
+    @last_weeks_consumption_£   = schoolday_energy_usage_dates(last_5_school_day_dates, :£current)
+    @week_befores_consumption_£ = schoolday_energy_usage_dates(previous_5_school_day_dates, :£current)
 
     @last_weeks_consumption_co2   = schoolday_energy_usage_dates(last_5_school_day_dates, :co2)
     @week_befores_consumption_co2 = schoolday_energy_usage_dates(previous_5_school_day_dates, :co2)
