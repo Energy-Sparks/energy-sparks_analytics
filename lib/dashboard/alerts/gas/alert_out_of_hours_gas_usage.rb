@@ -30,9 +30,10 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
 
   def breakdown_charts
     {
-      kwh:    :alert_daytype_breakdown_gas_kwh,
-      co2:    :alert_daytype_breakdown_gas_co2,
-      £:      :alert_daytype_breakdown_gas_£
+      kwh:      :alert_daytype_breakdown_gas_kwh,
+      co2:      :alert_daytype_breakdown_gas_co2,
+      £:        :alert_daytype_breakdown_gas_£,
+      £current: :alert_daytype_breakdown_gas_£current
     }
   end
 

@@ -226,6 +226,10 @@ class ChartManager
       inherits_from: :alert_daytype_breakdown_gas,
       yaxis_units:   :£,
     },
+    alert_daytype_breakdown_gas_£current: {
+      inherits_from: :alert_daytype_breakdown_gas_£,
+      yaxis_units:   :£current,
+    },
     alert_daytype_breakdown_storage_heater: {
       inherits_from:      :alert_daytype_breakdown_gas,
       name:               'Breakdown by type of day/time: Storage Heaters',
@@ -243,6 +247,10 @@ class ChartManager
     alert_daytype_breakdown_storage_heater_£: {
       inherits_from: :alert_daytype_breakdown_storage_heater,
       yaxis_units:   :£,
+    },
+    alert_daytype_breakdown_storage_heater_£current: {
+      inherits_from: :alert_daytype_breakdown_storage_heater_£,
+      yaxis_units:   :£current,
     },
     daytype_breakdown_electricity: {
       name:             'Breakdown by type of day/time: Electricity',
@@ -273,6 +281,10 @@ class ChartManager
     alert_daytype_breakdown_electricity_£: {
       inherits_from: :alert_daytype_breakdown_electricity,
       yaxis_units:   :£,
+    },
+    alert_daytype_breakdown_electricity_£current: {
+      inherits_from: :alert_daytype_breakdown_electricity_£,
+      yaxis_units:   :£current,
     },
     group_by_week_electricity: {
       name:             'By Week: Electricity',

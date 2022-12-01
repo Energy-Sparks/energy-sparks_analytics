@@ -50,9 +50,10 @@ class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
 
   def breakdown_charts
     {
-      kwh:    :alert_daytype_breakdown_storage_heater_kwh,
-      co2:    :alert_daytype_breakdown_storage_heater_co2,
-      £:      :alert_daytype_breakdown_storage_heater_£
+      kwh:      :alert_daytype_breakdown_storage_heater_kwh,
+      co2:      :alert_daytype_breakdown_storage_heater_co2,
+      £:        :alert_daytype_breakdown_storage_heater_£,
+      £current: :alert_daytype_breakdown_storage_heater_£current
     }
   end
 

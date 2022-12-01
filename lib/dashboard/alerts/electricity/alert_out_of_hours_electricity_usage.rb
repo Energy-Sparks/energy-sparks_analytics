@@ -29,9 +29,10 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
 
   def breakdown_charts
     {
-      kwh:    :alert_daytype_breakdown_electricity_kwh,
-      co2:    :alert_daytype_breakdown_electricity_co2,
-      £:      :alert_daytype_breakdown_electricity_£
+      kwh:      :alert_daytype_breakdown_electricity_kwh,
+      co2:      :alert_daytype_breakdown_electricity_co2,
+      £:        :alert_daytype_breakdown_electricity_£,
+      £current: :alert_daytype_breakdown_electricity_£current,
     }
   end
 
