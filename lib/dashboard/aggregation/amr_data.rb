@@ -171,8 +171,23 @@ class AMRData < HalfHourlyData
     to_value / from_value
   end
 
-  private def calculate_blended_£_per_kwh_date_range(sd, ed)
-    blended_rate(:kwh, :£, sd, ed)
+  private def calculate_blended_£_per_kwh_date_range(sd, ed, datatype = :£)
+    blended_rate(:kwh, datatype, sd, ed)
+  end
+
+  # calculates a blended rate x 48, based on aggregate data
+  # which could either be parameterised costs or pre-calculated
+  def economic_cost_£_per_kwh_x48(date)
+    kwh_x48 = days_kwh_x48(date)
+    £_x48 = days_kwh_x48(date, :£)
+    AMRData.fast_divide_x48_by_x48(£_x48, kwh_x48)
+  end
+
+  def current_tariff_rate_£_per_kwh
+    # needs to average rate over up to last year because:
+    # - the latest day might have 0 kWh, and therefore £0 so no implied rate
+    # - for electricity with differential tariffs this is a blended rate - beware
+    @current_tariff_rate_£_per_kwh ||= calculate_blended_£_per_kwh_date_range(up_to_1_year_ago, end_date, :£current)
   end
 
   def calculate_solar_pv_co2_x48(date)
@@ -552,18 +567,6 @@ class AMRData < HalfHourlyData
     rate_£_per_kwh_x48 = economic_cost_£_per_kwh_x48(date)
     res = AMRData.fast_multiply_x48_x_x48(kwh_x48, rate_£_per_kwh_x48)
     res.sum
-  end
-
-  # calculates a blended rate x 48, based on aggregate data
-  # which could either be parameterised costs or pre-calculated
-  def economic_cost_£_per_kwh_x48(date)
-    kwh_x48 = days_kwh_x48(date)
-    £_x48 = days_kwh_x48(date, :£)
-    AMRData.fast_divide_x48_by_x48(£_x48, kwh_x48)
-  end
-
-  def current_tariff_rate_£_per_kwh
-    tariff_for_date_£_per_kwh(end_date)
   end
 
   def baseload_kwh_date_range(date1, date2, sheffield_solar_pv = false)

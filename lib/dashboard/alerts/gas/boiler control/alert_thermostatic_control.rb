@@ -124,7 +124,7 @@ class AlertThermostaticControl < AlertGasModelBase
         actual_kwh = kwh(date, date)
         loss_versus_predicted_kwh = actual_kwh - predicted_kwh
         potential_saving_kwh += loss_versus_predicted_kwh.magnitude # use absolute value for want of any other basis for the moment (PH, 27Aug2019)
-        potential_saving_£ += loss_versus_predicted_kwh.magnitude * aggregate_meter.amr_data.tariff_for_date_£_per_kwh(date)
+        potential_saving_£ += loss_versus_predicted_kwh.magnitude * aggregate_meter.amr_data.current_tariff_rate_£_per_kwh
       end
     end
     [potential_saving_kwh * (1.0 - r2), potential_saving_£ * (1.0 - r2)]

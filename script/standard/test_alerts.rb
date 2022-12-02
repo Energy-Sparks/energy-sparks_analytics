@@ -15,7 +15,7 @@ overrides = {
   cache_school: false,
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
   alerts:   { alerts: [
-    AlertHeatingComingOnTooEarly
+    AlertThermostaticControl
     ],
   control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving], log: [:invalid_alerts] } },
   no_alerts:   { alerts: [ AlertCommunityPreviousHolidayComparisonElectricity ], control: { asof_date: asof_date } }
