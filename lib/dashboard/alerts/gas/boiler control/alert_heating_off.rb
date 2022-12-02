@@ -29,7 +29,7 @@ class AlertTurnHeatingOff < AlertGasModelBase
       units:  :kwh
     },
     last_year_cost_heating_in_warm_weather_£: {
-      description: 'Annual (or less, meter years var) cost last year of leaving heating on in warm weather (£)',
+      description: 'Annual (or less, meter years var) cost last year of leaving heating on in warm weather (£) (historic tariff)',
       units:  :£
     },
     last_year_cost_heating_in_warm_weather_co2: {
