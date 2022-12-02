@@ -369,7 +369,7 @@ class AggregateDataService
     if has_time_variant_economic_tariffs
       mpan_mprn = combined_meter.mpan_mprn
       if has_differing_tariffs # so need pre aggregated economic costs as kwh to £ no longer additive
-        log 'Creating a multiple combined current economic costs for meter'
+        log "Creating a multiple combined current economic costs for meter #{combined_meter.fuel_type}"
         economic_costs = EconomicCosts.combine_current_economic_costs_from_multiple_meters(combined_meter, list_of_meters, start_date, end_date)
       else
         log 'Creating a parameterised combined current economic cost meter'
@@ -415,6 +415,6 @@ class AggregateDataService
 
   def log(message)
     logger.info message
-    # puts message
+     #puts message
   end
 end

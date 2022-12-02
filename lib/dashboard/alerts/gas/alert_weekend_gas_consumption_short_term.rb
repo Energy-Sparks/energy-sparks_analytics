@@ -5,6 +5,7 @@ require_relative 'alert_gas_model_base.rb'
 class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   MAX_COST = 5.0 # £5 limit
   FROST_PROTECTION_TEMPERATURE = 4
+  NUM_WEEKEND_COMPARISON = 5 # don't change without chaging variable names
 
   attr_reader :last_week_end_kwh, :last_weekend_cost_£
   attr_reader :last_year_weekend_gas_kwh, :last_year_weekend_gas_£
@@ -12,6 +13,12 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   attr_reader :percent_increase_on_average_weekend, :projected_percent_of_annual
   attr_reader :last_5_weeks_average_weekend_kwh, :last_5_weeks_average_weekend_£, :percent_increase_on_last_5_weekends
   attr_reader :last_weekend_cost_co2, :last_year_weekend_gas_co2, :average_weekend_gas_co2, :last_5_weeks_average_weekend_co2
+  attr_reader :last_weekend_cost_£current, :last_year_weekend_gas_£current
+  attr_reader :average_weekend_gas_£current, :last_5_weeks_average_weekend_£current
+  attr_reader :last_7_day_intraday_kwh_chart, :last_7_day_intraday_kw_chart, :last_7_day_intraday_£_chart, :last_7_day_intraday_£current_chart
+  attr_reader :has_changed_during_period_text
+  attr_reader :prior_weekend_dates_string
+  attr_reader :weekend_dates_string
 
   def initialize(school)
     super(school, :weekendgasconsumption)
@@ -40,8 +47,12 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       units: { kwh: :gas }
     },
     last_weekend_cost_£: {
-      description: 'Gas consumption last weekend £ (above frost)',
+      description: 'Gas consumption last weekend £ (above frost) (using historic gas tariffs)',
       units: :£
+    },
+    last_weekend_cost_£current: {
+      description: 'Gas consumption last weekend £ (above frost) (using latest gas tariff)',
+      units: :£current
     },
     last_weekend_cost_co2: {
       description: 'Gas consumption last weekend co2 (above frost)',
@@ -52,8 +63,12 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       units: { kwh: :gas }
     },
     last_year_weekend_gas_£: {
-      description: 'Gas consumption last year £ (scaled up to a year if not enough data)',
+      description: 'Gas consumption last year £ (scaled up to a year if not enough data) (using historic gas tariffs)',
       units: :£
+    },
+    last_year_weekend_gas_£current: {
+      description: 'Gas consumption last year £ (scaled up to a year if not enough data) (using latest gas tariff)',
+      units: :£current
     },
     last_year_weekend_gas_co2: {
       description: 'Gas consumption last year co2 (scaled up to a year if not enough data)',
@@ -64,8 +79,12 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       units: { kwh: :gas }
     },
     average_weekend_gas_£: {
-      description: 'Average weekend gas consumption last year £ (scaled up to a year if not enough data)',
+      description: 'Average weekend gas consumption last year £ (scaled up to a year if not enough data) (using historic gas tariffs)',
       units: :£
+    },
+    average_weekend_gas_£current: {
+      description: 'Average weekend gas consumption last year £ (scaled up to a year if not enough data) (using latest gas tariff)',
+      units: :£current
     },
     average_weekend_gas_co2: {
       description: 'Average weekend gas consumption last year CO2 (scaled up to a year if not enough data)',
@@ -84,8 +103,12 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       units: { kwh: :gas }
     },
     last_5_weeks_average_weekend_£: {
-      description: 'Average weekend gas consumption last 5 weeks £',
+      description: 'Average weekend gas consumption last 5 weeks £ (using historic gas tariffs)',
       units: :£
+    },
+    last_5_weeks_average_weekend_£current: {
+      description: 'Average weekend gas consumption last 5 weeks £ (using latest gas tariff)',
+      units: :£current
     },
     last_5_weeks_average_weekend_co2: {
       description: 'Average weekend gas consumption last 5 weeks co2',
@@ -94,6 +117,18 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     percent_increase_on_last_5_weekends: {
       description: 'Increase in last weekends gas consumption as a percentage of the last 5 weeks',
       units: :percent
+    },
+    has_changed_during_period_text: {
+      description: 'Text says whether tariff changes in last 5 weeks of comparison period, or blank',
+      units: String
+    },
+    weekend_dates_string: {
+      description: 'Debug - list of weekend dates',
+      units: String
+    },
+    prior_weekend_dates_string: {
+      description: 'Debug - list of prior weekend dates',
+      units: String
     },
     last_7_day_intraday_kwh_chart: {
       description: 'last 7 days gas consumption chart (intraday) - suggest zoom to user, kWh per half hour',
@@ -104,7 +139,11 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       units: :chart
     },
     last_7_day_intraday_£_chart: {
-      description: 'last 7 days gas consumption chart (intraday) - suggest zoom to user, £ per half hour',
+      description: 'last 7 days gas consumption chart (intraday) - suggest zoom to user, £ per half hour (using historic gas tariffs)',
+      units: :chart
+    },
+    last_7_day_intraday_£current_chart: {
+      description: 'last 7 days gas consumption chart (intraday) - suggest zoom to user, £ per half hour (using latest gas tariff)',
       units: :chart
     }
   }.freeze
@@ -121,40 +160,57 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     :alert_weekend_last_week_gas_datetime_£
   end
 
+  def last_7_day_intraday_£current_chart
+    :alert_weekend_last_week_gas_datetime_£current
+  end
+
   private def calculate(asof_date)
     calculate_model(asof_date)
+
     @weekend_dates = previous_weekend_dates(asof_date)
+    @weekend_dates_string = @weekend_dates.map { |d| d.strftime('%d%b%Y') }.join(',')
+
     @last_week_end_kwh = kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE, :kwh)
     @last_weekend_cost_£ = kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE, :£)
+    @last_weekend_cost_£current = kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE, :£current)
     @last_weekend_cost_co2 = @last_week_end_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
 
     @last_year_weekend_gas_kwh = weekend_gas_consumption_last_year(asof_date, :kwh)
     @last_year_weekend_gas_£ = weekend_gas_consumption_last_year(asof_date, :£)
+    @last_year_weekend_gas_£current = weekend_gas_consumption_last_year(asof_date, :£current)
     @last_year_weekend_gas_co2 = @last_year_weekend_gas_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
 
-    @average_weekend_gas_kwh = @last_year_weekend_gas_kwh / 52.0
-    @average_weekend_gas_£   = @last_year_weekend_gas_£ / 52.0
-    @average_weekend_gas_co2 = @last_year_weekend_gas_co2 / 52.0
+    @average_weekend_gas_kwh      = @last_year_weekend_gas_kwh / 52.0
+    @average_weekend_gas_£        = @last_year_weekend_gas_£ / 52.0
+    @average_weekend_gas_£current = @last_year_weekend_gas_£current / 52.0
+    @average_weekend_gas_co2      = @last_year_weekend_gas_co2 / 52.0
 
     @percent_increase_on_average_weekend = @average_weekend_gas_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @average_weekend_gas_kwh) / @average_weekend_gas_kwh
     @projected_percent_of_annual = @last_week_end_kwh * 52.0 / annual_kwh(aggregate_meter, asof_date)
 
-    @last_5_weeks_average_weekend_kwh = average_last_n_weekends_kwh(@weekend_dates, :kwh, 5)
-    @last_5_weeks_average_weekend_£   = average_last_n_weekends_kwh(@weekend_dates, :£,   5)
+    @last_5_weeks_average_weekend_kwh      = average_last_n_weekends_kwh(@weekend_dates, :kwh, NUM_WEEKEND_COMPARISON)
+    @last_5_weeks_average_weekend_£        = average_last_n_weekends_kwh(@weekend_dates, :£,   NUM_WEEKEND_COMPARISON)
+    @last_5_weeks_average_weekend_£current = average_last_n_weekends_kwh(@weekend_dates, :£current,   NUM_WEEKEND_COMPARISON)
     @last_5_weeks_average_weekend_co2 = @last_5_weeks_average_weekend_kwh * EnergyEquivalences::UK_GAS_CO2_KG_KWH
     @percent_increase_on_last_5_weekends = @last_5_weeks_average_weekend_kwh == 0.0 ? 0.0 : (@last_week_end_kwh - @last_5_weeks_average_weekend_kwh) / @last_5_weeks_average_weekend_kwh
 
+    prior_dates = prior_weekend_dates(@weekend_dates, NUM_WEEKEND_COMPARISON)
+    @prior_weekend_dates_string = prior_dates.sort.map { |d| d.strftime('%d%b') }.join(',') + prior_dates.max.strftime('%Y')
+
+    @has_changed_during_period_text = calculate_tariff_has_changed_during_period_text(prior_dates.min, asof_date)
+    
     increase_rating_on_year = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_average_weekend)
     increase_rating_on_last_5_weeks = calculate_rating_from_range(0.0, 0.20, @percent_increase_on_last_5_weekends)
     of_annual_rating = calculate_rating_from_range(0.02, 0.12, @projected_percent_of_annual)
     combined_rating = increase_rating_on_year * of_annual_rating * increase_rating_on_last_5_weeks / 100.0
 
-    potential_savings_£   = 52.0 * (@last_weekend_cost_£   - @average_weekend_gas_£  )
+    potential_savings_£         = 52.0 * (@last_weekend_cost_£          - @average_weekend_gas_£)
+    potential_savings_£current  = 52.0 * (@last_weekend_cost_£current   - @average_weekend_gas_£current)
     potential_savings_co2 = 52.0 * (@last_weekend_cost_co2 - @average_weekend_gas_co2)
 
-    set_savings_capital_costs_payback(potential_savings_£, 0.0, potential_savings_co2)
+    set_savings_capital_costs_payback(potential_savings_£current, 0.0, potential_savings_co2)
 
-    @rating = @last_weekend_cost_£ < MAX_COST ? 10.0 : combined_rating
+    @rating = @last_weekend_cost_£current < MAX_COST ? 10.0 : combined_rating
 
     @status = @rating < 5.0 ? :bad : :good
 

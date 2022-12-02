@@ -2060,6 +2060,10 @@ class ChartManager
       name:             'Last weeks half hourly gas consumption (£/half hour)',
       yaxis_units:      :£
     },
+    alert_weekend_last_week_gas_datetime_£current: {
+      inherits_from:    :alert_weekend_last_week_gas_datetime_£,
+      yaxis_units:      :£current
+    },
     last_2_weeks_gas: {
       name:             'Last 2 weeks gas consumption (with temperature)',
       timescale:        { week: -1..0 },
