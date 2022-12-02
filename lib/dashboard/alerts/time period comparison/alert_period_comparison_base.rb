@@ -47,21 +47,27 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   attr_reader :current_period_floor_area, :previous_period_floor_area, :floor_area_changed
   attr_reader :current_period_pupils, :previous_period_pupils, :pupils_changed
   attr_reader :truncated_current_period
+  attr_reader :difference_£current, :abs_difference_£current, :current_period_£current, :previous_period_£current
+  attr_reader :current_period_weekly_£current, :previous_period_weekly_£current, :change_in_weekly_£current
+  attr_reader :tariff_has_changed_between_periods_text
 
   def self.dynamic_template_variables(fuel_type)
     vars = {
-      difference_kwh:     { description: 'Difference in kwh between last 2 periods',      units:  { kwh: fuel_type } },
-      difference_£:       { description: 'Difference in £ between last 2 periods',        units:  :£, benchmark_code: 'dif£'},
+      difference_kwh:       { description: 'Difference in kwh between last 2 periods',      units:  { kwh: fuel_type } },
+      difference_£:         { description: 'Difference in £ between last 2 periods (using historic tariffs)',  units:  :£, benchmark_code: 'dif£'},
+      difference_£current:  { description: 'Difference in £ between last 2 periods (using latest tariffs)',    units:  :£, benchmark_code: 'dif$'},
       difference_co2:     { description: 'Difference in co2 kg between last 2 periods', units:  :co2 },
       abs_difference_kwh: { description: 'Difference in kwh between last 2 periods - absolute',    units:  { kwh: fuel_type } },
-      abs_difference_£:   { description: 'Difference in £ between last 2 periods - absolute',      units:  :£},
+      abs_difference_£:        { description: 'Difference in £ between last 2 periods - absolute (using historic tariffs)', units:  :£},
+      abs_difference_£current: { description: 'Difference in £ between last 2 periods - absolute (using latest tariffs)',   units:  :£current},
       abs_difference_co2: { description: 'Difference in co2 kg between last 2 periods - absolute', units:  :co2 },
       difference_percent: { description: 'Difference in % between last 2 periods',   units:  :percent, benchmark_code: 'difp'  },
       abs_difference_percent: { description: 'Difference in % between last 2 periods - absolute, positive number only',   units:  :percent },
 
       current_period_kwh:        { description: 'Current period kwh',                 units:  { kwh: fuel_type }, benchmark_code: 'cppk'},
       current_period_co2:        { description: 'Current period co2',                 units:  :co2, benchmark_code: 'cppc'},
-      current_period_£:          { description: 'Current period £',                   units:  :£, benchmark_code: 'cpp£'},
+      current_period_£:          { description: 'Current period £ (using historic tariffs)', units: :£,        benchmark_code: 'cpp£'},
+      current_period_£current:   { description: 'Current period £ (using latest tariffs)',   units: :£current, benchmark_code: 'cpp$'},
       current_period_start_date: { description: 'Current period start date',          units:  :date  },
       current_period_end_date:   { description: 'Current period end date',            units:  :date  },
       days_in_current_period:    { description: 'No. of days in current period',      units: Integer },
@@ -69,7 +75,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
       previous_period_kwh:        { description: 'Previous period kwh (equivalent no. of days to current period)', units:  { kwh: fuel_type }, benchmark_code: 'pppk' },
       previous_period_kwh_unadjusted: { description: 'Previous period kwh (equivalent no. of days to current period, unadjusted for temperature)', units:  { kwh: fuel_type }, benchmark_code: 'pppu' },
-      previous_period_£:          { description: 'Previous period £ (equivalent no. of days to current period)',   units:  :£,   benchmark_code: 'ppp£'},
+      previous_period_£:          { description: 'Previous period £ (equivalent no. of days to current period) (using historic tariffs)',   units:  :£,         benchmark_code: 'ppp£'},
+      previous_period_£current:   { description: 'Previous period £ (equivalent no. of days to current period) (using latest tariffs)',     units:  :£current,  benchmark_code: 'ppp$'},
       previous_period_co2:        { description: 'Current period co2',                                             units:  :co2, benchmark_code: 'pppc'},
       previous_period_start_date: { description: 'Previous period start date',      units:  :date,   },
       previous_period_end_date:   { description: 'Previous period end date',        units:  :date  },
@@ -91,19 +98,23 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       current_period_kwhs:                    { description: 'Current period kwh values', units:  String  },
       previous_period_kwhs_unadjusted:        { description: 'Previous period unadjusted kwh values', units:  String  },
 
-      current_period_weekly_kwh:  { description: 'Current period normalised average weekly kwh',   units:  { kwh: fuel_type } },
-      current_period_weekly_£:    { description: 'Current period normalised average weekly £',     units:  :£  },
+      current_period_weekly_kwh:      { description: 'Current period normalised average weekly kwh',   units:  { kwh: fuel_type } },
+      current_period_weekly_£:        { description: 'Current period normalised average weekly £ (using historic tariffs)', units:  :£  },
+      current_period_weekly_£current: { description: 'Current period normalised average weekly £ (using current tariffs)',  units:  :£current  },
       previous_period_weekly_kwh: { description: 'Previous period normalised average weekly kwh',  units:  { kwh: fuel_type } },
-      previous_period_weekly_£:   { description: 'Previous period normalised average weekly £',    units:  :£  },
+      previous_period_weekly_£:        { description: 'Previous period normalised average weekly £ (using historic tariffs)',  units:  :£  },
+      previous_period_weekly_£current: { description: 'Previous period normalised average weekly £ (using current tariffs)',   units:  :£current },
       change_in_weekly_kwh:       { description: 'Change in normalised average weekly kwh',        units:  { kwh: fuel_type } },
-      change_in_weekly_£:         { description: 'Change in normalised average weekly £',          units:  :£  },
+      change_in_weekly_£:         { description: 'Change in normalised average weekly £ (using historic tariffs)', units:  :£ },
+      change_in_weekly_£current:  { description: 'Change in normalised average weekly £ (using current tariffs)',  units:  :£current },
       change_in_weekly_percent:   { description: 'Difference in weekly % between last 2 periods',  units:  :percent  },
 
       comparison_chart: { description: 'Relevant comparison chart', units: :chart },
 
-      summary: { description: 'Change in £spend, relative to previous period', units: String },
+      summary:  { description: 'Change in £spend, relative to previous period', units: String },
       prefix_1: { description: 'Change: up or down', units: String },
       prefix_2: { description: 'Change: increase or reduction', units: String },
+      tariff_has_changed_between_periods_text: { description: 'Caveat text if tariff has changed between periods, otherwise blank', units: String },
 
       current_period_floor_area:  { description: 'Weighted average floor area current period',          units: :m2,       benchmark_code: 'cpfa' },
       previous_period_floor_area: { description: 'Weighted average floor area previous period',         units: :m2,       benchmark_code: 'ppfa' },
@@ -151,27 +162,32 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     raise EnergySparksNotEnoughDataException, "Not enough data in current period: #{period_debug(current_period,  asof_date)}"  unless enough_days_data_for_period(current_period,  asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data in previous period: #{period_debug(previous_period,  asof_date)}" unless enough_days_data_for_period(previous_period, asof_date)
 
+    @tariff_has_changed_between_periods_text = calculate_tariff_has_changed_between_periods_text(current_period, previous_period)
+
     calculate_floor_area_adjustments(current_period, previous_period)
     calculate_pupil_number_adjustments(current_period, previous_period)
 
-    current_period_data   = meter_values_period(current_period)
-    previous_period_data  = normalised_period_data(current_period, previous_period)
+    current_period_data             = meter_values_period(current_period)
+    previous_period_data            = normalised_period_data(current_period, previous_period)
     previous_period_data_unadjusted = meter_values_period(current_period)
 
-    @difference_kwh     = current_period_data[:kwh] - previous_period_data[:kwh]
-    @difference_£       = current_period_data[:£]   - previous_period_data[:£]
-    @difference_co2     = current_period_data[:co2] - previous_period_data[:co2]
+    @difference_kwh       = current_period_data[:kwh]       - previous_period_data[:kwh]
+    @difference_£         = current_period_data[:£]         - previous_period_data[:£]
+    @difference_£current  = current_period_data[:£current]  - previous_period_data[:£current]
+    @difference_co2       = current_period_data[:co2]       - previous_period_data[:co2]
 
-    @abs_difference_kwh = @difference_kwh.magnitude
-    @abs_difference_£   = @difference_£.magnitude
-    @abs_difference_co2 = @difference_co2.magnitude
-    @difference_percent = calculate_percent_with_error(current_period_data[:kwh], previous_period_data[:kwh])
+    @abs_difference_kwh       = @difference_kwh.magnitude
+    @abs_difference_£         = @difference_£.magnitude
+    @abs_difference_£current  = @difference_£current.magnitude
+    @abs_difference_co2       = @difference_co2.magnitude
+    @difference_percent       = calculate_percent_with_error(current_period_data[:kwh], previous_period_data[:kwh])
 
     @abs_difference_percent = @difference_percent.magnitude
 
     @current_period             = current_period
     @current_period_kwh         = current_period_data[:kwh]
     @current_period_£           = current_period_data[:£]
+    @current_period_£current    = current_period_data[:£current]
     @current_period_co2         = current_period_data[:co2]
     @current_period_start_date  = current_period.start_date
     @current_period_end_date    = current_period.end_date
@@ -181,6 +197,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     @previous_period              = previous_period
     @previous_period_kwh          = previous_period_data[:kwh] * pupil_floor_area_adjustment
     @previous_period_£            = previous_period_data[:£] * pupil_floor_area_adjustment
+    @previous_period_£current     = previous_period_data[:£current] * pupil_floor_area_adjustment
     @previous_period_co2          = previous_period_data[:co2]
     @previous_period_start_date   = previous_period.start_date
     @previous_period_end_date     = previous_period.end_date
@@ -202,17 +219,21 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       @previous_period_kwh_unadjusted
     ) = formatted_kwh_period_unadjusted(previous_period_range)
 
-    @current_period_weekly_kwh  = normalised_average_weekly_kwh(current_period,   :kwh, false)
-    @current_period_weekly_£    = normalised_average_weekly_kwh(current_period,   :£,   false)
-    @previous_period_weekly_kwh = normalised_average_weekly_kwh(previous_period,  :kwh, temperature_adjust)
-    @previous_period_weekly_£   = normalised_average_weekly_kwh(previous_period,  :£,   temperature_adjust)
-    @change_in_weekly_kwh       = @current_period_weekly_kwh - @previous_period_weekly_kwh
-    @change_in_weekly_£         = @current_period_weekly_£ - @previous_period_weekly_£
+    @current_period_weekly_kwh        = normalised_average_weekly_kwh(current_period,   :kwh,     false)
+    @current_period_weekly_£          = normalised_average_weekly_kwh(current_period,   :£,       false)
+    @current_period_weekly_£current   = normalised_average_weekly_kwh(current_period,   :£current,false)
+    @previous_period_weekly_kwh       = normalised_average_weekly_kwh(previous_period,  :kwh,     temperature_adjust)
+    @previous_period_weekly_£         = normalised_average_weekly_kwh(previous_period,  :£,       temperature_adjust)
+    @previous_period_weekly_£current  = normalised_average_weekly_kwh(previous_period,  :£current,temperature_adjust)
+
+    @change_in_weekly_kwh       = @current_period_weekly_kwh      - @previous_period_weekly_kwh
+    @change_in_weekly_£         = @current_period_weekly_£        - @previous_period_weekly_£
+    @change_in_weekly_£current  = @current_period_weekly_£current - @previous_period_weekly_£current
     @change_in_weekly_percent   = relative_change(@change_in_weekly_kwh, @previous_period_weekly_kwh)
 
     set_equivalence_variables(self.class.equivalence_template_variables)
 
-    set_savings_capital_costs_payback(@difference_£, 0.0, @difference_co2)
+    set_savings_capital_costs_payback(@difference_£current, 0.0, @difference_co2)
     @rating = calculate_rating(@change_in_weekly_percent, @change_in_weekly_£, fuel_type)
 
     @bookmark_url = add_book_mark_to_base_url(url_bookmark)
@@ -319,19 +340,21 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   end
 
   def meter_values_period(current_period)
-    {
-      kwh:    kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :kwh),
-      £:      kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :£),
-      co2:    kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, :co2)
-    }
+    %i[kwh £ £current co2].map do |datatype|
+      [
+        datatype,
+        kwh_date_range(aggregate_meter, current_period.start_date, current_period.end_date, datatype)
+      ]
+    end.to_h
   end
 
   def normalised_period_data(current_period, previous_period)
-    {
-      kwh:    normalise_previous_period_data_to_current_period(current_period, previous_period, :kwh),
-      £:      normalise_previous_period_data_to_current_period(current_period, previous_period, :£),
-      co2:    normalise_previous_period_data_to_current_period(current_period, previous_period, :co2)
-    }
+    %i[kwh £ £current co2].map do |datatype|
+      [
+        datatype,
+        normalise_previous_period_data_to_current_period(current_period, previous_period, datatype)
+      ]
+    end.to_h
   end
 
   # overridden by gas classes where this value is temperature compensated
@@ -388,7 +411,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   #£130 increase since last holiday, +160%
   def summary
     I18n.t("analytics.time_period_comparison",
-      difference: FormatEnergyUnit.format(:£, @difference_£, :text),
+      difference: FormatEnergyUnit.format(:£, @difference_£current, :text),
       adjective: prefix_2,
       period_type: period_type,
       relative_percent: FormatEnergyUnit.format(:relative_percent, @difference_percent, :text))

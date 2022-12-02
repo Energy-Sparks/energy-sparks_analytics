@@ -34,6 +34,9 @@ class ContentBase
   end
 
   def calculate_tariff_has_changed_between_periods_text(period1, period2)
+    period1 = Range.new(period1.start_date, period1.end_date) if period1.is_a?(SchoolDatePeriod)
+    period2 = Range.new(period2.start_date, period2.end_date) if period2.is_a?(SchoolDatePeriod)
+
     changed = aggregate_meter.meter_tariffs.meter_tariffs_changes_between_periods?(period1, period2)
     changed ? I18n.t("analytics.tariff_change.change_between_periods_caveat") : ''
   end

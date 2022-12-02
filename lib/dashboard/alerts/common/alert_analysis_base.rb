@@ -507,6 +507,7 @@ class AlertAnalysisBase < ContentBase
       AlertSchoolWeekComparisonGas                                => 'gswc',
       AlertPreviousHolidayComparisonGas                           => 'gphc',
       AlertPreviousYearHolidayComparisonGas                       => 'gpyc',
+      AlertPreviousYearHolidayComparisonStorageHeater             => 'spyc',
       AlertAdditionalPrioritisationData                           => 'addp',
       AlertElectricityPeakKWVersusBenchmark                       => 'epkb',
       AlertStorageHeaterAnnualVersusBenchmark                     => 'shan',
