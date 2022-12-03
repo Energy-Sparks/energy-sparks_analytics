@@ -4,26 +4,62 @@ class ElectricityBaseloadAnalysis
     @meter = meter
   end
 
-  def average_baseload(date1, date2)
+  def baseload_kwh_date_range(d1, d2)
+    amr_data.baseload_kwh_date_range(d1, d2, @meter.sheffield_simulated_solar_pv_panels?)
+  end
+
+  def baseload_kw(date)
+    amr_data.baseload_kw(date, @meter.sheffield_simulated_solar_pv_panels?)
+  end
+
+  def average_baseload_kw(date1, date2)
     amr_data.average_baseload_kw_date_range(date1, date2, sheffield_solar_pv: @meter.sheffield_simulated_solar_pv_panels?)
   end
 
-  def average_baseload_kw(asof_date)
-    start_date = [asof_date - 364, amr_data.start_date].max
-    average_baseload(start_date, asof_date)
+  def average_annual_baseload_kw(asof_date)
+    start_date, end_date, _scale_to_year = scaled_annual_dates(asof_date)
+    average_baseload_kw(start_date, end_date)
   end
 
   def annual_average_baseload_kwh(asof_date)
-    365.0 * 24.0 * average_baseload_kw(asof_date)
+    365.0 * 24.0 * average_annual_baseload_kw(asof_date)
   end
 
-  def annual_average_baseload_£(asof_date)
-    kwh = annual_average_baseload_kwh(asof_date)
-    kwh * blended_electricity_£_per_kwh
+  def scaled_annual_baseload_cost_£(datatype, asof_date = amr_data.end_date)
+    start_date, end_date, scale_to_year = scaled_annual_dates(asof_date)
+    baseload_economic_cost_date_range_£(start_date, end_date, datatype) * scale_to_year
+  end
+
+  def blended_baseload_tariff_rate_£_per_kwh(datatype, asof_date = amr_data.end_date)
+    scaled_annual_baseload_cost_£(datatype, asof_date) / annual_average_baseload_kwh(asof_date) 
   end
 
   def one_years_data?(asof_date = amr_data.end_date)
     amr_data.days > 364
+  end
+
+  def scaled_annual_dates(asof_date)
+    end_date = [asof_date, amr_data.end_date].min
+    start_date = [end_date - 364, amr_data.start_date].max
+    scale_to_year = 365 / (end_date - start_date + 1)
+
+    [start_date, end_date, scale_to_year.to_f]
+  end
+
+  def baseload_economic_cost_date_range_£(d1, d2, datatype)
+    (d1..d2).map do |date|
+      baseload_economic_cost_£(date, datatype)
+    end.sum
+  end
+
+  def baseload_economic_cost_£(date, datatype)
+    baseload_economic_cost_x48(date, datatype).sum
+  end
+
+  def baseload_economic_cost_x48(date, datatype)
+    blended_rate_£_per_kwh_x48 = amr_data.blended_rate_£_per_kwh_x48(date, datatype)
+    baseload_kwh_x48 = AMRData.single_value_kwh_x48(baseload_kw(date) / 2.0)
+    AMRData.fast_multiply_x48_x_x48(baseload_kwh_x48, blended_rate_£_per_kwh_x48)
   end
 
   def winter_kw(asof_date = amr_data.end_date)

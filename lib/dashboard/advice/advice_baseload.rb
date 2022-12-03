@@ -163,7 +163,7 @@ class AdviceBaseload < AdviceElectricityBase
     avg = FormatEnergyUnit.format(:kw, stats[:kw], :html)
     pct = FormatEnergyUnit.format(:percent, stats[:percent], :html)
     pct_str = stats[:percent] == 1.0 ? '' : "#{pct},"
-    annual_cost_£ = meter.amr_data.baseload_£_economic_cost_date_range(sheffield_solar_pv: meter.sheffield_simulated_solar_pv_panels?)
+    annual_cost_£ = ElectricityBaseloadAnalysis.new(meter).scaled_annual_baseload_cost_£(:£)
     annual_cost_formatted = FormatEnergyUnit.format(:£, annual_cost_£, :html)
     "#{meter.mpxn.to_s + name} (#{avg} average, #{pct_str} #{annual_cost_formatted}/year)"
   end

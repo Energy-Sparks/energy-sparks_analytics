@@ -5,6 +5,7 @@ require_relative '../common/alert_floor_area_pupils_mixin.rb'
 class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   include AlertFloorAreaMixin
   attr_reader :last_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
+  attr_reader :last_year_£current, :previous_year_£current
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
@@ -17,6 +18,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
   attr_reader :per_pupil_electricity_benchmark_£
   attr_reader :percent_difference_from_average_per_pupil
+  attr_reader :tariff_has_changed_during_period_text
 
   def initialize(school)
     super(school, :annualelectricitybenchmark)
@@ -34,14 +36,24 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       benchmark_code: 'klyr'
     },
     last_year_£: {
-      description: 'Last years electricity consumption - £ including differential tariff',
-      units:  {£: :electricity},
+      description: 'Last years electricity consumption - £ including differential tariff (historic tariffs)',
+      units:  :£,
       benchmark_code: '£lyr'
     },
+    last_year_£current: {
+      description: 'Last years electricity consumption - £ including differential tariff  (current tariffs)',
+      units:  :£current,
+      benchmark_code: '$lyr'
+    },
     previous_year_£: {
-      description: 'Previous years electricity consumption - £ including differential tariff',
-      units:  {£: :electricity},
+      description: 'Previous years electricity consumption - £ including differential tariff (historic tariffs)',
+      units:  :£,
       benchmark_code: '£pyr'
+    },
+    previous_year_£current: {
+      description: 'Previous years electricity consumption - £ including differential tariff (current tariffs)',
+      units:  :£current,
+      benchmark_code: '$pyr'
     },
     last_year_co2: {
       description: 'Last years electricity CO2 kg',
@@ -133,6 +145,10 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       description: 'Adjective relative to average: above, about, below',
       units: String
     },
+    tariff_has_changed_during_period_text: {
+      description: 'Caveat text to explain change in £ tariffs during year period, blank if no change',
+      units:  String
+    },
     summary: {
       description: 'Description: £spend, adj relative to average',
       units: String
@@ -149,26 +165,28 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
   private def calculate(asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
-    @last_year_kwh = kwh(asof_date - 365, asof_date, :kwh)
-    @last_year_£   = kwh(asof_date - 365, asof_date, :economic_cost)
-    @last_year_co2 = kwh(asof_date - 365, asof_date, :co2)
+    @last_year_kwh      = kwh(asof_date - 365, asof_date, :kwh)
+    @last_year_£        = kwh(asof_date - 365, asof_date, :£)
+    @last_year_£current = kwh(asof_date - 365, asof_date, :£current)
+    @last_year_co2      = kwh(asof_date - 365, asof_date, :co2)
 
     prev_date = asof_date - 366
-    @previous_year_£  = kwh(prev_date - 365, prev_date, :economic_cost)
+    @previous_year_£        = kwh(prev_date - 365, prev_date, :£)
+    @previous_year_£current = kwh(prev_date - 365, prev_date, :£current)
 
     @one_year_benchmark_by_pupil_kwh   = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pupils(asof_date - 365, asof_date))
-    @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * blended_electricity_£_per_kwh
+    @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * current_blended_rate_£_per_kwh
     @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_by_pupil_kwh
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * blended_electricity_£_per_kwh
+    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * current_blended_rate_£_per_kwh
 
     @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh.magnitude
     @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£.magnitude
 
     @one_year_exemplar_by_pupil_kwh   = BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school_type, pupils(asof_date - 365, asof_date))
-    @one_year_exemplar_by_pupil_£     = @one_year_exemplar_by_pupil_kwh * blended_electricity_£_per_kwh
+    @one_year_exemplar_by_pupil_£     = @one_year_exemplar_by_pupil_kwh * current_blended_rate_£_per_kwh
 
     @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_by_pupil_kwh
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * blended_electricity_£_per_kwh
+    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * current_blended_rate_£_per_kwh
     @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
 
     @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh.magnitude
@@ -176,14 +194,14 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_co2.magnitude
 
     @one_year_electricity_per_pupil_kwh       = @last_year_kwh / pupils(asof_date - 365, asof_date)
-    @one_year_electricity_per_pupil_£         = @last_year_£ / pupils(asof_date - 365, asof_date)
+    @one_year_electricity_per_pupil_£         = @last_year_£current / pupils(asof_date - 365, asof_date)
     @one_year_electricity_per_pupil_co2       = @last_year_co2 / pupils(asof_date - 365, asof_date)
     @one_year_electricity_per_floor_area_kwh  = @last_year_kwh / floor_area(asof_date - 365, asof_date)
-    @one_year_electricity_per_floor_area_£    = @last_year_£ / floor_area(asof_date - 365, asof_date)
+    @one_year_electricity_per_floor_area_£    = @last_year_£current / floor_area(asof_date - 365, asof_date)
 
     set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), capital_cost, @one_year_saving_versus_exemplar_co2)
 
-    @per_pupil_electricity_£ = @last_year_£ / pupils(asof_date - 365, asof_date)
+    @per_pupil_electricity_£ = @last_year_£current / pupils(asof_date - 365, asof_date)
     @per_pupil_electricity_benchmark_£ = @one_year_benchmark_by_pupil_£ / pupils(asof_date - 365, asof_date)
     @percent_difference_from_average_per_pupil = percent_change(@per_pupil_electricity_benchmark_£, one_year_electricity_per_pupil_£)
 
@@ -194,6 +212,8 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     percent_from_benchmark_to_exemplar = (@last_year_kwh - @one_year_benchmark_by_pupil_kwh) / (@one_year_exemplar_by_pupil_kwh - @one_year_benchmark_by_pupil_kwh)
     uncapped_rating = percent_from_benchmark_to_exemplar * (10.0 - 4.0) + 4.0
     @rating = [[uncapped_rating, 10.0].min, 0.0].max.round(2)
+
+    @tariff_has_changed_during_period_text = annual_tariff_change_text(asof_date)
 
     @status = @rating < 6.0 ? :bad : :good
 
@@ -228,7 +248,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
   def summary
     I18n.t("analytics.annual_cost_with_adjective",
-      cost: FormatEnergyUnit.format(:£, @last_year_£, :text),
+      cost: FormatEnergyUnit.format(:£, @last_year_£current, :text),
       relative_percent: FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_pupil, :text),
       adjective: simple_percent_difference_adjective)
   end

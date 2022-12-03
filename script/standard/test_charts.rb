@@ -11,11 +11,13 @@ charts = {
   # bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]
   # eco: %i[test_economic_costs_gas_by_week_unlimited_£ test_economic_costs_electric_by_week_unlimited_£ ],
   # solar: %i[solar_pv_group_by_month solar_pv_last_7_days_by_submeter]
+  #     test_current_economic_costs_electric_by_week_unlimited_£
+  #     test_current_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown
+  #     test_economic_costs_electric_by_week_unlimited_£
+  #     test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown
   economictariffs: %i[
-    test_current_economic_costs_electric_by_week_unlimited_£
-    test_current_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown
-    test_economic_costs_electric_by_week_unlimited_£
-    test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown
+
+    baseload
   ]
 }
 

@@ -28,6 +28,19 @@ class ContentBase
     []
   end
 
+  def historic_blended_rate_£_per_kwh(meter = aggregate_meter)
+    meter.amr_data.historic_tariff_rate_£_per_kwh
+  end
+
+  def current_blended_rate_£_per_kwh(meter = aggregate_meter)
+    meter.amr_data.current_tariff_rate_£_per_kwh
+  end
+
+  def annual_tariff_change_text(asof_date)
+    start_date = meter_date_up_to_one_year_before(aggregate_meter, asof_date)
+    calculate_tariff_has_changed_during_period_text(start_date, asof_date)
+  end
+
   def calculate_tariff_has_changed_during_period_text(start_date, end_date)
     changed = aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(start_date, end_date)
     changed ? I18n.t("analytics.tariff_change.change_within_period_caveat") : ''

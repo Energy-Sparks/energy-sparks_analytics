@@ -186,10 +186,6 @@ class CostsBase < HalfHourlyData
     one_day_cost
   end
 
-  public def calculate_baseload_cost(date, baseload_kw)
-    calculate_x48_kwh_cost(date, AMRData.single_value_kwh_x48(baseload_kw / 2.0))
-  end
-
   public def calculate_x48_kwh_cost(date, kwh_x48)
     c = costs(date, meter, kwh_x48)
     raise EnergySparksUnexpectedStateException, "x48 cost for #{date}" if c.nil?

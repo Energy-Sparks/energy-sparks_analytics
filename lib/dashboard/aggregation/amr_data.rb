@@ -177,9 +177,9 @@ class AMRData < HalfHourlyData
 
   # calculates a blended rate x 48, based on aggregate data
   # which could either be parameterised costs or pre-calculated
-  def economic_cost_£_per_kwh_x48(date)
+  def blended_rate_£_per_kwh_x48(date, datatype = :£)
     kwh_x48 = days_kwh_x48(date)
-    £_x48 = days_kwh_x48(date, :£)
+    £_x48 = days_kwh_x48(date, datatype)
     AMRData.fast_divide_x48_by_x48(£_x48, kwh_x48)
   end
 
@@ -188,6 +188,13 @@ class AMRData < HalfHourlyData
     # - the latest day might have 0 kWh, and therefore £0 so no implied rate
     # - for electricity with differential tariffs this is a blended rate - beware
     @current_tariff_rate_£_per_kwh ||= calculate_blended_£_per_kwh_date_range(up_to_1_year_ago, end_date, :£current)
+  end
+
+  def historic_tariff_rate_£_per_kwh
+    # needs to average rate over up to last year because:
+    # - the latest day might have 0 kWh, and therefore £0 so no implied rate
+    # - for electricity with differential tariffs this is a blended rate - beware
+    @current_tariff_rate_£_per_kwh ||= calculate_blended_£_per_kwh_date_range(up_to_1_year_ago, end_date, :£)
   end
 
   def calculate_solar_pv_co2_x48(date)
@@ -549,10 +556,10 @@ class AMRData < HalfHourlyData
   end
 
   def average_baseload_kw_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
-    baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / (date2 - date1 + 1)
+    baseload_kwh_date_range(date1, date2, sheffield_solar_pv) / (date2 - date1 + 1) / 24.0
   end
 
-  def baseload_£_economic_cost_date_range(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
+  def baseload_£_economic_cost_date_range_deprecated(date1 = up_to_1_year_ago, date2 = end_date, sheffield_solar_pv: false)
     total_£ = 0.0
 
     (date1..date2).each do |date|
@@ -564,17 +571,17 @@ class AMRData < HalfHourlyData
   end
 
   def economic_cost_for_x48_kwhs(date, kwh_x48)
-    rate_£_per_kwh_x48 = economic_cost_£_per_kwh_x48(date)
+    rate_£_per_kwh_x48 = blended_rate_£_per_kwh_x48(date)
     res = AMRData.fast_multiply_x48_x_x48(kwh_x48, rate_£_per_kwh_x48)
     res.sum
   end
 
   def baseload_kwh_date_range(date1, date2, sheffield_solar_pv = false)
-    total = 0.0
+    total_kwh = 0.0
     (date1..date2).each do |date|
-      total += baseload_kw(date, sheffield_solar_pv)
+      total_kwh += baseload_kw(date, sheffield_solar_pv)
     end
-    total
+    total_kwh * 24.0
   end
 
   def self.create_empty_dataset(type, start_date, end_date, reading_type = 'ORIG')

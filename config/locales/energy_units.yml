@@ -45,6 +45,7 @@ en:
       opt_start_standard_deviation: "%{value} standard deviation (hours)"
       optimum_start_sensitivity: "%{value} hours/C"
       p: "%{value}p"
+      p_per_kwh: "%{value}p/kWh"
       panels: "%{value} solar PV panels"
       percent: "%{value}%"
       percent_0dp: "%{value}%"

@@ -159,7 +159,8 @@ class FormatEnergyUnit
       # £-40.00 => -£40.00
       I18n.t(key_for_unit(unit, medium), sign: (value < 0.0 ? '-' : ''), value: scale_num(value.magnitude, true, user_numeric_comprehension_level))
     else
-      I18n.t(key_for_unit(:p, medium), value: scale_num(value * 100.0, true, user_numeric_comprehension_level))
+      u = unit == :£_per_kwh ? :p_per_kwh : :p
+      I18n.t(key_for_unit(u, medium), value: scale_num(value * 100.0, true, user_numeric_comprehension_level))
     end
   end
 

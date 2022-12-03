@@ -168,7 +168,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @fuel_cost         = @total_annual_£ / @total_annual_kwh
     @fuel_cost_current = @total_annual_£current / @total_annual_kwh
 
-    tariff_change_text(asof_date)
+    @tariff_has_changed_during_period_text = annual_tariff_change_text(asof_date)
 
     tariff_£_per_kwh = @total_annual_£ / @total_annual_kwh
 
@@ -285,11 +285,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
     # @table_results = :daytype_breakdown_table # only used for backwards compatibility 17Mar19 - can be removed at some point
     # @chart_results = out_of_hours_energy_consumption  # only used for backwards compatibility 17Mar19 - can be removed at some point
-  end
-
-  def tariff_change_text(asof_date)
-    start_date = meter_date_up_to_one_year_before(aggregate_meter, asof_date)
-    @tariff_has_changed_during_period_text  = calculate_tariff_has_changed_during_period_text(start_date, asof_date)
   end
 
   def school_day_closed_key

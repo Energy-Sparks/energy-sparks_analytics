@@ -936,12 +936,12 @@ module Series
   class Baseload < ManagerBase
     BASELOAD = 'BASELOAD'
     BASELOAD_I18N_KEY = 'baseload'
-    
+
     def series_names;  [BASELOAD]; end
 
     def day_breakdown(d1, d2)
-      kwh = meter.amr_data.baseload_kwh_date_range(d1, d2, meter.sheffield_simulated_solar_pv_panels?)
-      { BASELOAD => kwh }
+      kw = meter.amr_data.average_baseload_kw_date_range(d1, d2, sheffield_solar_pv: meter.sheffield_simulated_solar_pv_panels?)
+      { BASELOAD => kw }
     end
   end
 

@@ -41,9 +41,14 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       benchmark_code: 'ckwh'
     },
     annual_cost_£: {
-      description: 'annual cost of seasonal baseload variation (£)',
+      description: 'annual cost of seasonal baseload variation (£) at historic tariff',
       units:  :£,
       benchmark_code: 'cgbp'
+    },
+    annual_cost_£current: {
+      description: 'annual cost of seasonal baseload variation (£) as latest tariff',
+      units:  :£,
+      benchmark_code: 'c$bp'
     },
     annual_co2: {
       description: 'annual cost of seasonal baseload variation (CO2)',
@@ -69,7 +74,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   end
 
   def enough_data
-    calculator.one_years_data? ? :enough : :not_enough
+    baseload_analysis.one_years_data? ? :enough : :not_enough
   end
 
   def analysis_description
@@ -107,15 +112,12 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
 
   private
 
-  def calculator
-    @calculator ||= ElectricityBaseloadAnalysis.new(@meter)
-  end
-
   def calculate(asof_date)
+    super(asof_date)
     # def 'enough_data' doesn;t know the asof_date
-    raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{asof_date}" unless calculator.one_years_data?(asof_date)
+    raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{asof_date}" unless baseload_analysis.one_years_data?(asof_date)
 
-    days_kw = calculator.average_intraweek_schoolday_kw(asof_date)
+    days_kw = baseload_analysis.average_intraweek_schoolday_kw(asof_date)
 
     @min_day_kw = days_kw.values.min
     @min_day = days_kw.key(@min_day_kw)
@@ -129,11 +131,12 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
       (day_kw - @min_day_kw) * 24.0
     end.sum
 
-    @annual_cost_kwh = week_saving_kwh * 52.0 # ignore holiday calc
-    @annual_cost_£ = @annual_cost_kwh * implied_baseload_tariff_rate_£_per_kwh(asof_date)
-    @annual_co2 = @annual_cost_kwh * blended_co2_per_kwh
+    @annual_cost_kwh      = week_saving_kwh * 52.0 # ignore holiday calc
+    @annual_cost_£        = @annual_cost_kwh * blended_baseload_rate_£_per_kwh
+    @annual_cost_£current = @annual_cost_kwh * blended_baseload_rate_£current_per_kwh
+    @annual_co2           = @annual_cost_kwh * blended_co2_per_kwh
 
-    set_savings_capital_costs_payback(Range.new(@annual_cost_£, @annual_cost_£), nil, @annual_co2)
+    set_savings_capital_costs_payback(Range.new(@annual_cost_£current, @annual_cost_£), nil, @annual_co2)
 
     @rating = calculate_rating_from_range(0.1, 0.3, @percent_intraday_variation.magnitude)
 
