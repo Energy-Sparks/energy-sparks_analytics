@@ -23,7 +23,7 @@ class SolarPVPanelsNewBenefit
   def create_solar_pv_data_fast_summary(electricity_amr, meter_collection, start_date, end_date, kwp)
     logger.info 'Simulating half hourly benefit of new solar pv panels'
 
-    latest_tariff_£_per_kwh_x48 = electricity_amr.economic_cost_£_per_kwh_x48(end_date)
+    latest_tariff_£_per_kwh_x48 = electricity_amr.blended_rate_£_per_kwh_x48(end_date)
 
     solar_pv_output_total             = 0.0
     exported_solar_pv_total           = 0.0

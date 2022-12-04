@@ -84,15 +84,20 @@ module AnalyseHeatingAndHotWater
     end
 
     private def gas_price_£_per_kwh
-      fuel_price_£_per_kwh(:gas)
+      @gas_price_£_per_kwh ||= @school.aggregated_heat_meters.amr_data.blended_rate(:kwh, :£current)
+    end
+
+    # school may have gas only, so estimate using default electricity tariff
+    private def defaulted_electricity_tariff_£_per_kwh
+      if @school.aggregated_electricity_meters.nil?
+        BenchmarkMetrics::ELECTRICITY_PRICE
+      else
+        @school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£current).round(5)
+      end
     end
 
     private def electric_price_£_per_kwh
-      fuel_price_£_per_kwh(:electricity)
-    end
-
-    private def fuel_price_£_per_kwh(fuel_type)
-      YAxisScaling.new.scale_unit_from_kwh(:£, fuel_type, @school)
+      @electric_price_£_per_kwh ||= defaulted_electricity_tariff_£_per_kwh
     end
 
     private def point_of_use_electric_heaters_capex
