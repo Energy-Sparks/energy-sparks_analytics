@@ -9,7 +9,8 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
   attr_reader :change_in_baseload_kw, :kw_value_at_10_percent_saving
   attr_reader :last_year_baseload_kwh, :last_week_baseload_kwh
   attr_reader :last_week_change_in_baseload_kwh, :next_year_change_in_baseload_kwh
-  attr_reader :last_year_baseload_£, :last_week_baseload_£, :next_year_change_in_baseload_£
+  attr_reader :last_year_baseload_£, :last_year_baseload_£current
+  attr_reader :last_week_baseload_£, :last_week_baseload_£current, :next_year_change_in_baseload_£
   attr_reader :saving_in_annual_costs_through_10_percent_baseload_reduction
   attr_reader :predicted_percent_increase_in_usage, :significant_increase_in_baseload
   attr_reader :one_year_baseload_chart
@@ -57,15 +58,23 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
       units:  {kwh: :electricity}
     },
     last_year_baseload_£: {
-      description: 'cost of the baseload electricity consumption last year',
+      description: 'cost of the baseload electricity consumption last year (historic tariffs)',
       units:  :£
+    },
+    last_year_baseload_£current: {
+      description: 'cost of the baseload electricity consumption last year (latest tariffs)',
+      units:  :£current
     },
     last_week_baseload_£: {
-      description: 'cost of the baseload electricity consumption last week',
+      description: 'cost of the baseload electricity consumption last week (historic tariffs)',
       units:  :£
     },
+    last_week_baseload_£current: {
+      description: 'cost of the baseload electricity consumption last week (latest tariffs)',
+      units:  :£current
+    },
     next_year_change_in_baseload_£: {
-      description: 'projected addition cost of change in baseload next year',
+      description: 'projected addition cost of change in baseload next year (current tariffs)',
       units:  :£
     },
     next_year_change_in_baseload_absolute_£: {
@@ -150,9 +159,10 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
   end
 
   def calculate(asof_date)
-    @average_baseload_last_year_kw = average_baseload_kw(asof_date, @meter)
+    super(asof_date)
+    @average_baseload_last_year_kw = average_baseload_kw(asof_date)
     @kw_value_at_10_percent_saving = @average_baseload_last_year_kw * 0.9
-    @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date, @meter)
+    @average_baseload_last_week_kw = average_baseload(asof_date - 7, asof_date)
     @change_in_baseload_kw = @average_baseload_last_week_kw - @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage = (@average_baseload_last_week_kw - @average_baseload_last_year_kw) / @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage_absolute = @predicted_percent_increase_in_usage.magnitude
@@ -160,22 +170,24 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
     hours_in_year = 365.0 * 24.0
     hours_in_week =   7.0 * 24.0
 
-    @last_year_baseload_kwh           = @average_baseload_last_week_kw * hours_in_year
+    @last_year_baseload_kwh           = annual_average_baseload_kwh(asof_date)
     @last_week_baseload_kwh           = @average_baseload_last_week_kw * hours_in_week
     @last_week_change_in_baseload_kwh = @change_in_baseload_kw * hours_in_week
     @next_year_change_in_baseload_kwh = @change_in_baseload_kw * hours_in_year
 
-    @last_year_baseload_£                     = blended_electricity_£_per_kwh * @last_year_baseload_kwh
-    @last_week_baseload_£                     = blended_electricity_£_per_kwh * @last_week_baseload_kwh
-    @next_year_change_in_baseload_£           = blended_electricity_£_per_kwh * @next_year_change_in_baseload_kwh
-    @next_year_change_in_baseload_absolute_£  = @next_year_change_in_baseload_£.magnitude
+    @last_year_baseload_£                    = scaled_annual_baseload_cost_£(:£, asof_date)
+    @last_year_baseload_£current             = scaled_annual_baseload_cost_£(:£current, asof_date)
+    @last_week_baseload_£                    = baseload_analysis.baseload_economic_cost_date_range_£(asof_date - 7, asof_date, :£)
+    @last_week_baseload_£current             = baseload_analysis.baseload_economic_cost_date_range_£(asof_date - 7, asof_date, :£current)
+    @next_year_change_in_baseload_£          = @next_year_change_in_baseload_kwh * blended_baseload_rate_£current_per_kwh
+    @next_year_change_in_baseload_absolute_£ = @next_year_change_in_baseload_£.magnitude
 
-    @last_year_baseload_co2                     = blended_co2_per_kwh * @last_year_baseload_kwh
+    @last_year_baseload_co2                     = annual_average_baseload_co2(asof_date)
     @last_week_baseload_co2                     = blended_co2_per_kwh * @last_week_baseload_kwh
     @next_year_change_in_baseload_co2           = blended_co2_per_kwh * @next_year_change_in_baseload_kwh
     @next_year_change_in_baseload_absolute_co2  = @next_year_change_in_baseload_co2.magnitude
 
-    @saving_in_annual_costs_through_10_percent_baseload_reduction = @last_year_baseload_£ * 0.1
+    @saving_in_annual_costs_through_10_percent_baseload_reduction = @last_year_baseload_£current * 0.1
 
     set_savings_capital_costs_payback(Range.new(@next_year_change_in_baseload_£, @next_year_change_in_baseload_£), nil, @next_year_change_in_baseload_co2)
 
