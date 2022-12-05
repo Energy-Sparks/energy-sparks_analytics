@@ -208,11 +208,11 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
 
   private def calculate(asof_date)
     super(asof_date)
-    @average_baseload_last_year_kw  = average_baseload_kw(asof_date, @meter)
-    @average_baseload_last_year_£        = baseload_analysis.scaled_annual_baseload_cost_£(:£, asof_date)
-    @average_baseload_last_year_£current = baseload_analysis.scaled_annual_baseload_cost_£(:£current, asof_date)
-    @average_baseload_last_year_kwh = annual_average_baseload_kwh(asof_date, @meter)
-    @average_baseload_last_year_co2 = annual_average_baseload_co2(asof_date, @meter)
+    @average_baseload_last_year_kw        = average_baseload_kw(asof_date)
+    @average_baseload_last_year_£         = baseload_analysis.scaled_annual_baseload_cost_£(:£, asof_date)
+    @average_baseload_last_year_£current  = baseload_analysis.scaled_annual_baseload_cost_£(:£current, asof_date)
+    @average_baseload_last_year_kwh       = annual_average_baseload_kwh(asof_date)
+    @average_baseload_last_year_co2       = annual_average_baseload_co2(asof_date)
 
     latest_electricity_tariff = blended_baseload_rate_£current_per_kwh
 
@@ -258,6 +258,9 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
 
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url('ElectricityBaseload')
+  rescue  => e
+    puts e.message
+    puts e.backtrace
   end
   alias_method :analyse_private, :calculate
 
