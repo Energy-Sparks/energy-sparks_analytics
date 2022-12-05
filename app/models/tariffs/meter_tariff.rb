@@ -38,6 +38,10 @@ class MeterTariff
     @tariff[:rates][type][:rate]
   end
 
+  def tariff_on_date(_date)
+    @tariff[:rates]
+  end
+
   def weighted_cost(_date, kwh_x48, type)
     weights = DateTimeHelper.weighted_x48_vector_single_range(times(type), rate(_date, type))
     # NB old style tariffs have exclusive times
@@ -96,6 +100,11 @@ class EconomicTariffChangeOverTime < MeterTariff
   def rate(date, type)
     tariff = find_tariff(date) # allow to blow up if nil returned unexpected to save test which would reduce performance
     tariff.rate(nil, type)
+  end
+
+  def tariff_on_date(date)
+    tariff = find_tariff(date)
+    tariff.tariff[:rates]
   end
 
   def weighted_cost(date, kwh_x48, type)

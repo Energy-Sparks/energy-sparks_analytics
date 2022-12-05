@@ -14,10 +14,10 @@ overrides = {
   schools: ['*'], # ['shrew*', 'bathamp*'],
   cache_school: false,
   benchmarks: {
-    calculate_and_save_variables: true,
+    calculate_and_save_variables: false,
     asof_date: run_date,
-    no_pages: %i[
-      layer_up_powerdown_day_november_2022
+    pages: %i[
+      gas_targets
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }
