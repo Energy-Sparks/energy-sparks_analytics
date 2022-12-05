@@ -258,9 +258,6 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
 
     @term = :longterm
     @bookmark_url = add_book_mark_to_base_url('ElectricityBaseload')
-  rescue  => e
-    puts e.message
-    puts e.backtrace
   end
   alias_method :analyse_private, :calculate
 

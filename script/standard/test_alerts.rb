@@ -15,10 +15,8 @@ overrides = {
   cache_school: false,
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
   alerts:   { alerts: [
-    AlertChangeInElectricityBaseloadShortTerm,
-    AlertElectricityBaseloadVersusBenchmark,
-    AlertIntraweekBaseloadVariation,
-    AlertSeasonalBaseloadVariation
+    AlertOutOfHoursElectricityUsage,
+    AlertOutOfHoursGasUsage
     ],
   control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving], log: [:invalid_alerts] } },
   no_alerts:   { alerts: [ AlertCommunityPreviousHolidayComparisonElectricity ], control: { asof_date: asof_date } }

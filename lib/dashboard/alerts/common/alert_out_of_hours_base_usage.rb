@@ -15,7 +15,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
   attr_reader :holidays_£, :weekends_£, :schoolday_open_£, :schoolday_closed_£, :out_of_hours_£, :community_£
   attr_reader :holidays_£current, :weekends_£current, :schoolday_open_£current, :schoolday_closed_£current, :out_of_hours_£current, :community_£current
   attr_reader :holidays_co2, :weekends_co2, :schoolday_open_co2, :schoolday_closed_co2, :out_of_hours_co2, :community_co2
-  attr_reader :daytype_breakdown_table
+  attr_reader :daytype_breakdown_table, :daytype_breakdown_table_current_£
   attr_reader :percent_improvement_to_exemplar, :potential_saving_kwh, :potential_saving_£, :potential_saving_co2
   attr_reader :total_annual_£, :total_annual_co2, :summary
   attr_reader :tariff_has_changed_during_period_text
@@ -132,7 +132,13 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
         units: String
       },
       daytype_breakdown_table: {
-        description: 'Table broken down by school day in/out hours, weekends, holidays - kWh, percent, £ (annual), CO2',
+        description: 'Table broken down by school day in/out hours, weekends, holidays - kWh, percent, £ (annual), CO2 (historic tariffs)',
+        units: :table,
+        header: [ 'Day type', 'kWh', 'Percent', '£', 'co2' ],
+        column_types: [String, {kwh: fuel}, :percent, :£, :co2 ]
+      },
+      daytype_breakdown_table_current_£: {
+        description: 'Table broken down by school day in/out hours, weekends, holidays - kWh, percent, £ (annual), CO2 (latest tariffs)',
         units: :table,
         header: [ 'Day type', 'kWh', 'Percent', '£', 'co2' ],
         column_types: [String, {kwh: fuel}, :percent, :£, :co2 ]
@@ -163,18 +169,17 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     calculate_£
     calculate_£current
     calculate_co2
-    calculate_table
+    calculate_table_historic_£
+    calculate_table_current_£
 
     @fuel_cost         = @total_annual_£ / @total_annual_kwh
     @fuel_cost_current = @total_annual_£current / @total_annual_kwh
 
     @tariff_has_changed_during_period_text = annual_tariff_change_text(asof_date)
 
-    tariff_£_per_kwh = @total_annual_£ / @total_annual_kwh
-
     @percent_improvement_to_exemplar = [out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
     @potential_saving_kwh = @total_annual_kwh * @percent_improvement_to_exemplar
-    @potential_saving_£ = @potential_saving_kwh * tariff_£_per_kwh
+    @potential_saving_£ = @potential_saving_kwh * @fuel_cost_current
     @potential_saving_co2 = @potential_saving_kwh * co2_intensity_per_kwh
 
     set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil, @potential_saving_co2)
@@ -270,7 +275,21 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @out_of_hours_co2 = @total_annual_co2 - @schoolday_open_co2
   end
 
-  def calculate_table
+  def calculate_table_current_£
+    @daytype_breakdown_table_current_£ = [
+      [Series::DayType::HOLIDAY,          @holidays_kwh,         @holidays_percent,          @holidays_£current,         @holidays_co2],
+      [Series::DayType::WEEKEND,          @weekends_kwh,         @weekends_percent,          @weekends_£current,         @weekends_co2],
+      [Series::DayType::SCHOOLDAYOPEN,    @schoolday_open_kwh,   @schoolday_open_percent,    @schoolday_open_£current,   @schoolday_open_co2],
+      [school_day_closed_key,             @schoolday_closed_kwh, @schoolday_closed_percent,  @schoolday_closed_£current, @schoolday_closed_co2]
+    ]
+
+    if @school.community_usage?
+      community_row = [community_name,  @community_kwh, @community_percent,  @community_£current, @community_co2]
+      @daytype_breakdown_table.push(community_row)
+    end
+  end
+
+  def calculate_table_historic_£
     @daytype_breakdown_table = [
       [Series::DayType::HOLIDAY,          @holidays_kwh,         @holidays_percent,          @holidays_£,         @holidays_co2],
       [Series::DayType::WEEKEND,          @weekends_kwh,         @weekends_percent,          @weekends_£,         @weekends_co2],
@@ -282,9 +301,6 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       community_row = [community_name,  @community_kwh, @community_percent,  @community_£, @community_co2]
       @daytype_breakdown_table.push(community_row)
     end
-
-    # @table_results = :daytype_breakdown_table # only used for backwards compatibility 17Mar19 - can be removed at some point
-    # @chart_results = out_of_hours_energy_consumption  # only used for backwards compatibility 17Mar19 - can be removed at some point
   end
 
   def school_day_closed_key
