@@ -446,7 +446,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <body>
       <% end %>
       <p>
-        <%= @school.name %> is a <%= @school.school_type %> school near <%= address %>
+        <%= @school.name %> is a <%= @school.school_type.humanize.downcase %> school near <%= address %>
         with <%= @school.number_of_pupils %> pupils
         and a floor area of <%= @school.floor_area.round(0) %>m<sup>2</sup>.
       </p>
