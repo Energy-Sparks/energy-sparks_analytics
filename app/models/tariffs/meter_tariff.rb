@@ -42,6 +42,47 @@ class MeterTariff
     @tariff[:rates]
   end
 
+  def self.rates_text(tariffs_by_date, is_differential)
+    rt = {}
+
+    tariffs_by_date.each do |date_range, rates|
+      rt[date_range_text(date_range)] = rate_text(rates, is_differential)
+    end
+
+    rt
+  end
+
+  def self.date_range_text(date_range)
+    start_date_text = date_text(date_range.first)
+    end_date_text   = date_text(date_range.last)
+    
+    return nil if start_date_text.nil? && end_date_text.nil?
+
+    return "to #{end_date_text}" if start_date_text.nil?
+
+    return "from #{start_date_text}" if end_date_text.nil?
+
+    "#{start_date_text} to #{end_date_text}"
+  end
+
+  def self.rate_text(rates, is_differential)
+    flat_rate_text = FormatEnergyUnit.format(:£_per_kwh, rates[:rate][:rate], :text)
+    return flat_rate_text unless rates.key?(:daytime_rate) && is_differential
+
+    dr = FormatEnergyUnit.format(:£_per_kwh, rates[:daytime_rate][:rate], :text)
+    nr = FormatEnergyUnit.format(:£_per_kwh, rates[:nighttime_rate][:rate], :text)
+    "rate: #{flat_rate_text}, differential: (day #{dr}, night #{nr})"
+  end
+
+  def self.date_ranged_rate_text(type, rate)
+    rate_type = type == :daytime_rate ? 'day time' : 'night time'
+  end
+
+  def self.date_text(date)
+    return nil if [MIN_DEFAULT_START_DATE, MAX_DEFAULT_END_DATE].include?(date)
+    date.strftime('%b %Y')
+  end
+
   def weighted_cost(_date, kwh_x48, type)
     weights = DateTimeHelper.weighted_x48_vector_single_range(times(type), rate(_date, type))
     # NB old style tariffs have exclusive times

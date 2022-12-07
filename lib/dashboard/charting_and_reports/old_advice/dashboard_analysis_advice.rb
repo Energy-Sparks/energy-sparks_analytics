@@ -253,6 +253,71 @@ class DashboardChartAdviceBase
     YAxisScaling.new.scale(:£, :kwh, pounds, fuel_type_sym, @school)
   end
 
+  def economic_tariff_changed_text(fuel_type)
+    info = economic_tariff_changed_information(fuel_type)
+
+    return '' if info.nil?
+
+    return '' if info[:percent_change].magnitude < 0.02
+
+    format_economic_tariff_changed_text(info, fuel_type)
+  end
+
+  def percent_change_adjective(pct)
+    pct > 0.0 ? 'increase' : 'reduce'
+  end
+
+  def format_economic_tariff_changed_text(info, fuel_type)
+    date = info[:last_change_date].strftime('%A %d %b %Y')
+    rate_before   = FormatEnergyUnit.format(:£_per_kwh, info[:rate_before_£_per_kwh])
+    rate_after    = FormatEnergyUnit.format(:£_per_kwh, info[:rate_after_£_per_kwh])
+    pct           = FormatEnergyUnit.format(:percent,   info[:percent_change].magnitude)
+    pct_adjective = percent_change_adjective(info[:percent_change])
+
+    "Your #{fuel_type.to_s} tariffs have changed in the last year, the last change was on #{date}, " +
+    "before this date the average tariff was #{rate_before}, and since it is #{rate_after}. " +
+    "This will #{pct_adjective} your #{fuel_type.to_s} costs by #{pct} going forward. "
+  end
+
+  def economic_tariff_changed_information(fuel_type)
+    meter = meter_for_fuel_type(fuel_type)
+    return nil if meter.nil?
+
+    start_date = [meter.amr_data.end_date - 365, meter.amr_data.start_date].max
+    end_date = meter.amr_data.end_date
+
+    changed = meter.meter_tariffs.meter_tariffs_differ_within_date_range?(start_date, end_date)
+
+    changed_dates = meter.meter_tariffs.tariff_change_dates_in_period(start_date, end_date)
+    last_change_date = changed_dates.last
+
+    return nil if changed_dates.empty?
+
+    # meter.meter_tariffs.print_formatted_constitiuent_meter_tariffs(start_date, end_date)
+
+    before = meter.amr_data.blended_£_per_kwh_date_range(start_date,      last_change_date - 1)
+    after = meter.amr_data.blended_£_per_kwh_date_range(last_change_date, end_date)
+    {
+      last_change_date:       last_change_date,
+      rate_before_£_per_kwh:  before,
+      rate_after_£_per_kwh:   after,
+      percent_change:         (after - before) / before
+    }
+  end
+
+  def meter_for_fuel_type(fuel_type)
+    case fuel_type
+    when :electricity
+      @school.aggregated_electricity_meters
+    when :gas
+      @school.aggregated_heat_meters
+    when :storage_heater
+      @school.storage_heater_meter
+    else
+      raise EnergySparksUnexpectedStateException, "Unexpected fuel_type #{fuel_type}"
+    end
+  end
+
   def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
     kwh = pounds_to_kwh(pounds, fuel_type_sym)
     kwh_text = FormatEnergyUnit.scale_num(kwh)
@@ -418,12 +483,12 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   protected def gas_comparison_benchmark
     compare = comparison('gas', index_of_data(benchmark_school_name))
-    generate_html(%{ The gas usage <%= compare %>: }.gsub(/^  /, ''), binding)
+    generate_html(%{ The gas usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
   protected def storage_heater_benchmark_comparison
     compare = comparison('storage heaters', index_of_data(benchmark_school_name))
-    generate_html(%{ The storage heater usage <%= compare %>: }.gsub(/^  /, ''), binding)
+    generate_html(%{ The storage heater usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
   protected def usage_adjective
@@ -446,7 +511,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <body>
       <% end %>
       <p>
-        <%= @school.name %> is a <%= @school.school_type %> school near <%= address %>
+        <%= @school.name %> is a <%= @school.school_type.to_s.humanize %> school near <%= address %>
         with <%= @school.number_of_pupils %> pupils
         and a floor area of <%= @school.floor_area.round(0) %>m<sup>2</sup>.
       </p>
@@ -472,7 +537,10 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           <%= gas_comparison_benchmark %>
         <% end %>
       </p>
-      <p>Monetary values for benchmark and examplar schools are converted using your school&apos;s tariffs.</p>
+      <p>
+        Monetary values for benchmark and exemplar schools are converted using your school&apos;s tariffs.
+        <%= economic_tariff_changed_text(:electricity) + economic_tariff_changed_text(:gas) %>
+      </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 

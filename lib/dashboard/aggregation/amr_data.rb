@@ -162,12 +162,13 @@ class AMRData < HalfHourlyData
   end
 
   def blended_£_per_kwh_date_range(start_date, end_date)
+    @blended_£_per_kwh_date_range ||= {}
     @blended_£_per_kwh_date_range[start_date..end_date] ||= calculate_blended_£_per_kwh_date_range(start_date, end_date)
   end
 
   def blended_rate(from_unit, to_unit, sd = up_to_1_year_ago, ed = end_date)
-    from_value = kwh_date_range(start_date, end_date, from_unit)
-    to_value   = kwh_date_range(start_date, end_date, to_unit)
+    from_value = kwh_date_range(sd, ed, from_unit)
+    to_value   = kwh_date_range(sd, ed, to_unit)
     to_value / from_value
   end
 
