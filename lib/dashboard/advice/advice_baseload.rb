@@ -36,6 +36,7 @@ class AdviceBaseload < AdviceElectricityBase
     charts_and_html.push( { type: :html,           content: statement_of_baseload } )
     charts_and_html.push( { type: :html,           content: explanation_of_baseload } )
     charts_and_html.push( { type: :html,           content: benefit_of_moving_to_exemplar_baseload } )
+    charts_and_html.push( { type: :html,           content: economic_tariff_changed_caveat_text } )
     charts_and_html.push( { type: :chart,          content: baseload_one_year_chart } )
     charts_and_html.push( { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(baseload_one_year_chart[:config_name] ) } )
     charts_and_html.push( { type: :chart_name,     content: baseload_one_year_chart[:config_name] } )
@@ -141,6 +142,10 @@ class AdviceBaseload < AdviceElectricityBase
         trends in your baseload.
       <p>
     }
+  end
+
+  def economic_tariff_changed_caveat_text
+    EconomicTariffsChangeCaveats.new(@school).tariff_text_with_sentence(true, false, savings_use_current_tariff_text: true)
   end
 
   def longterm_chart_trend_should_be_downwards
