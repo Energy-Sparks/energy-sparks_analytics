@@ -215,9 +215,9 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     end
   end
 
-  private def merge_in_relevant_third_party_alert_data(alert_type)
+  private def merge_in_relevant_third_party_alert_data(alert_type, asof_date)
     alert = alert_type.new(@school)
-    alert.calculate(nil)
+    alert.calculate(asof_date)
     assign_third_party_alert_variables(alert_type, alert)
   end
 
@@ -229,8 +229,8 @@ class AlertImpendingHoliday < AlertGasOnlyBase
     # - freezer consolidation, off
     # - reduce baseload
 
-    merge_in_relevant_third_party_alert_data(AlertOutOfHoursElectricityUsage) if electricity?
-    merge_in_relevant_third_party_alert_data(AlertOutOfHoursGasUsage) if gas?
+    merge_in_relevant_third_party_alert_data(AlertOutOfHoursElectricityUsage, asof_date) if electricity?
+    merge_in_relevant_third_party_alert_data(AlertOutOfHoursGasUsage, asof_date) if gas?
 
     combine_electricity_and_gas_annual_out_of_hours_data
 
