@@ -62,6 +62,7 @@ module Series
     def kwh_cost_or_co2
       case chart_config[:yaxis_units]
       when :£;               :economic_cost
+      when :£current;        :current_economic_cost
       when :accounting_cost; :accounting_cost
       when :co2;             :co2
       else;                  :kwh end
@@ -243,10 +244,11 @@ module Series
 
     def scaling_factor_for_model_derived_gas_data(data_type)
       case data_type
-      when :£, :economic_cost;      meter.amr_data.tariff_for_date_£_per_kwh(date)
-      when :accounting_cost;        meter.amr_data.tariff_for_date_£_per_kwh(date) # TODO(PH, 7Apr2019) - not correct, need to look up accounting tariff on day
-      when :co2;                    EnergyEquivalences::UK_GAS_CO2_KG_KWH
-      else;                         1.0 end
+      when :£, :economic_cost;                meter.amr_data.current_tariff_rate_£_per_kwh
+      when :£current, :current_economic_cost; meter.amr_data.current_tariff_rate_£_per_kwh
+      when :accounting_cost;                  raise EnergySparksUnexpectedStateException, 'scaling factor requested for accounting tariff'
+      when :co2;                              EnergyEquivalences::UK_GAS_CO2_KG_KWH
+      else;                                   1.0 end
     end
 
     def adjustment_temperatures(dates)
@@ -413,8 +415,10 @@ module Series
       case kwh_cost_or_co2
       when :kwh
         kwh
-      when :£
-        kwh * meter.amr_data.tariff_for_date_£_per_kwh(date)
+      when :£, :£current
+        # just use currently blended rate as there may not be a rate fopr today
+        # if kWh = 0.0 but model still calculates?
+        kwh * meter.amr_data.current_tariff_rate_£_per_kwh
       when :co2
         kwh * meter.amr_data.average_co2_intensity_kwh_kg(date)
       end
@@ -932,12 +936,12 @@ module Series
   class Baseload < ManagerBase
     BASELOAD = 'BASELOAD'
     BASELOAD_I18N_KEY = 'baseload'
-    
+
     def series_names;  [BASELOAD]; end
 
     def day_breakdown(d1, d2)
-      kwh = meter.amr_data.baseload_kwh_date_range(d1, d2, meter.sheffield_simulated_solar_pv_panels?)
-      { BASELOAD => kwh }
+      kw = meter.amr_data.average_baseload_kw_date_range(d1, d2, sheffield_solar_pv: meter.sheffield_simulated_solar_pv_panels?)
+      { BASELOAD => kw }
     end
   end
 

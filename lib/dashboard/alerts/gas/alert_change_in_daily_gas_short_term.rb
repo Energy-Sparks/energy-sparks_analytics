@@ -15,6 +15,7 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
   attr_reader :signficant_increase_in_gas_consumption
   attr_reader :beginning_of_week, :beginning_of_last_week
   attr_reader :this_week_co2, :last_week_co2, :predicted_this_week_co2, :predicted_last_week_co2, :predicted_change_in_co2
+  attr_reader :tariff_has_changed_between_periods_text
 
   def initialize(school)
     super(school, :changeingasconsumption)
@@ -117,6 +118,10 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
     last_2_weeks_gas_consumption_comparison_chart: {
       description: 'Temperature compensated last 2 weeks has consumption chart',
       units: :chart
+    },
+    tariff_has_changed_between_periods_text: {
+      description: 'The £ values use the latest tariff, so if the change is during a change in tariff it may not reflect what the user is expecting, so this provides from caveat test or blank if there is no change',
+      units:  String
     }
   }.freeze
 
@@ -146,6 +151,11 @@ class AlertChangeInDailyGasShortTerm < AlertGasModelBase
 
     @beginning_of_week      = this_weeks_school_days[0]
     @beginning_of_last_week = last_weeks_school_days[0]
+
+    p1 = Range.new(this_weeks_school_days.first, this_weeks_school_days.last)
+    p2 = Range.new(last_weeks_school_days.first, last_weeks_school_days.last)
+
+    @tariff_has_changed_between_periods_text = calculate_tariff_has_changed_between_periods_text(p1, p2)
 
     predicted_kwhs_this_week = @heating_model.predicted_kwh_list_of_dates(this_weeks_school_days, @school.temperatures)
     @predicted_kwh_this_week = predicted_kwhs_this_week.sum

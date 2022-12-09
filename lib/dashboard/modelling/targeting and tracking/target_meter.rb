@@ -247,8 +247,7 @@ class TargetMeter < Dashboard::Meter
 
   def calculate_costs_for_meter
     logger.info "Creating economic & accounting costs for target #{mpan_mprn} fuel #{fuel_type} from #{amr_data.start_date} to #{amr_data.end_date}"
-    @amr_data.set_economic_tariff(self)
-    @amr_data.set_accounting_tariff(self)
+    @meter.amr_data.set_tariffs(meter)
   end
 
   def debug(var, ap: false)

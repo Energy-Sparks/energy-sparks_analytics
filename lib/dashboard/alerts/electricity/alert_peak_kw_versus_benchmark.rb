@@ -4,7 +4,6 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :average_school_day_last_year_kw, :average_school_day_last_year_kw_per_pupil
   attr_reader :average_school_day_last_year_kw_per_floor_area, :exemplar_kw
   attr_reader :one_year_saving_versus_exemplar_£, :one_year_saving_versus_exemplar_kwh, :one_year_saving_versus_exemplar_co2
-  attr_reader :midday_electricity_price_£_per_kwh
 
   def initialize(school)
     super(school, :peakelectricbenchmark)
@@ -32,7 +31,7 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
       benchmark_code: 'kwfa'
     },
     exemplar_kw: {
-      description: 'Exemplar peak KW for school of same floor area',
+      description: 'Exemplar peak kW for school of same floor area',
       units:  { kw: :electricity},
       benchmark_code: 'kwex'
     },
@@ -52,10 +51,6 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
     electricity_intraday_comparison_chart_6_months_apart: {
       description: 'Compares intraday usage 6 months apart',
       units: :chart
-    },
-    midday_electricity_price_£_per_kwh: {
-      description: 'Approx average midday economic tariff £/kWh',
-      units:  :£,
     }
   }
 
@@ -64,6 +59,7 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
   end
 
   def enough_data
+    # scales result to 1 year
     days_amr_data >= 60 ? :enough : :not_enough
   end
 
@@ -78,15 +74,13 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
     benchmark_kw_m2 = BenchmarkMetrics::BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2
     @exemplar_kw = benchmark_kw_m2 * floor_area(asof_date - 365, asof_date)
 
-    @rating = calculate_rating_from_range(benchmark_kw_m2, 0.02, @average_school_day_last_year_kw_per_floor_area)
+    potential_saving = consumption_above_exemplar_peak(asof_date, @exemplar_kw)
 
-    # arbitrarily saving is 4 hours of peak usage for every school day of the year
-    @one_year_saving_versus_exemplar_kwh = 4.0 * 190.0 * [@average_school_day_last_year_kw_per_floor_area - benchmark_kw_m2, 0.0].max * floor_area(asof_date - 365, asof_date)
-    
-    @midday_electricity_price_£_per_kwh = approx_blended_peak_tariff_£_per_kwh(asof_date)
-    
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * @midday_electricity_price_£_per_kwh
-    @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
+    @one_year_saving_versus_exemplar_kwh  = potential_saving[:kwh]
+    @one_year_saving_versus_exemplar_£    = potential_saving[:£]
+    @one_year_saving_versus_exemplar_co2  = potential_saving[:co2]
+
+    @rating = calculate_rating_from_range(benchmark_kw_m2, 0.02, @average_school_day_last_year_kw_per_floor_area)
 
     set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), nil, @one_year_saving_versus_exemplar_co2)
 
@@ -96,23 +90,40 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
 
   private
 
-  def approx_blended_peak_tariff_£_per_kwh(asof_date)
-    hh_count_4_hours = 8
-    remainder_hh_count = 48 - hh_count_4_hours
-    middle_of_day_4_hours_x48_kwh_weighted = Array.new(hh_count_4_hours / 2, 0.0) + Array.new(8, 1.0 / hh_count_4_hours) + Array.new(hh_count_4_hours / 2, 0.0)
-    costs = []
-
-    full_date_range(asof_date).each do |date|
-      next unless @school.holidays.occupied?(date)
-      costs.push(aggregate_meter.amr_data.economic_cost_for_x48_kwhs(date, middle_of_day_4_hours_x48_kwh_weighted))
-    end
-
-    costs.sum / costs.count
+  def full_date_range(asof_date)
+    start_date = [asof_date - 364, aggregate_meter.amr_data.start_date].max
+    start_date..asof_date
   end
 
-  def full_date_range(asof_date)
-    start_date = [asof_date - 365, aggregate_meter.amr_data.start_date].max
-    start_date..asof_date
+  def scale_to_year(asof_date, val)
+    scale_factor = 365.0 / (full_date_range(asof_date).last - full_date_range(asof_date).first + 1)
+    val * scale_factor
+  end
+
+  def consumption_above_exemplar_peak(asof_date, exemplar_kw)
+    exemplar_kwh = exemplar_kw / 2.0
+
+    totals = { kwh: 0.0, £: 0.0, co2: 0.0 }
+
+    full_date_range(asof_date).each do |date|
+      (0..47).each do |hhi|
+        kwh = aggregate_meter.amr_data.kwh(date, hhi, :kwh)
+        percent_above_exemplar = capped_percent(kwh, exemplar_kwh)
+
+        unless percent_above_exemplar.nil?
+          totals[:kwh]  += percent_above_exemplar * kwh
+          totals[:£]    += percent_above_exemplar * aggregate_meter.amr_data.kwh(date, hhi, :£current)
+          totals[:co2]  += percent_above_exemplar * aggregate_meter.amr_data.kwh(date, hhi, :co2)
+        end
+      end
+    end
+
+    totals.transform_values { |v| scale_to_year(asof_date, v) }
+  end
+
+  def capped_percent(kwh, exemplar_kwh)
+    return nil if kwh <= exemplar_kwh
+    (kwh - exemplar_kwh) / kwh
   end
 
   def average_schoolday_peak_kw(asof_date)

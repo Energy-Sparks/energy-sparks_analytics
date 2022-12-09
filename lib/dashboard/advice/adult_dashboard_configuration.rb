@@ -58,6 +58,7 @@ class DashboardConfiguration
           rating:                               :rating,
           # enough_data:                          :enough_data,
           last_year_£:                          :last_year_£,
+          last_year_£current:                   :last_year_£current,
           last_year_kwh:                        :last_year_kwh,
           last_year_co2:                        :last_year_co2,
           summary:                              :summary
@@ -97,6 +98,7 @@ class DashboardConfiguration
         AlertElectricityAnnualVersusBenchmark => { # need new electricity trend alert!
           rating:                               :rating,
           last_year_£:                          :last_year_£,
+          last_year_£current:                   :last_year_£current,
           percent_difference:                   :percent_difference_from_average_per_pupil,
           percent_difference_adjective:         :percent_difference_adjective,
           simple_percent_difference_adjective:  :simple_percent_difference_adjective,
@@ -301,6 +303,7 @@ class DashboardConfiguration
         AlertGasAnnualVersusBenchmark => { # need new gas trend alert!
           rating:                               :rating,
           last_year_£:                          :last_year_£,
+          last_year_£current:                   :last_year_£current,
           percent_difference:                   :percent_difference_from_average_per_floor_area,
           percent_difference_adjective:         :percent_difference_adjective,
           simple_percent_difference_adjective:  :simple_percent_difference_adjective,
@@ -467,7 +470,7 @@ class DashboardConfiguration
       promoted_variables: {
         AlertSeasonalHeatingSchoolDays => {
           rating:         :rating,
- #         one_year_saving_reduced_days_to_exemplar_£: :one_year_saving_reduced_days_to_exemplar_£
+          one_year_saving_£: :one_year_saving_£
         }
       },
       meter_breakdown: {

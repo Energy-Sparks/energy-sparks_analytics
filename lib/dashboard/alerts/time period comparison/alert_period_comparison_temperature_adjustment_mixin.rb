@@ -69,7 +69,7 @@ module AlertPeriodComparisonTemperatureAdjustmentMixin
 
   private def model_calculation(asof_date)
     @model_asof_date = asof_date
-    @model = model_cache(@school.urn, asof_date)
+    @model = model_cache(aggregate_meter, asof_date)
   end
 
   #

@@ -102,6 +102,10 @@ class CostsBase < HalfHourlyData
       calculate_day_bill_components
     end
 
+    def to_s
+      "OneDaysCostData: Tcost #{one_day_total_cost} skeys: #{standing_charges.empty? ? '' : standing_charges.keys.map(&:to_s).join(',')} scT: #{total_standing_charge&.round(0)}"
+    end
+
     def costs_x48
       @costs_x48 ||= AMRData.fast_add_multiple_x48_x_x48(@all_costs_x48.values)
     end
@@ -176,14 +180,10 @@ class CostsBase < HalfHourlyData
   public def calculate_tariff_for_date(date, meter)
     raise EnergySparksNotEnoughDataException, "Doing costs calculation for date #{date} meter start_date #{meter.amr_data.start_date}" if date < meter.amr_data.start_date
     kwh_x48 = meter.amr_data.days_kwh_x48(date, :kwh)
-    c = costs(date, meter, kwh_x48)
+    c = costs(tariff_date(date), meter, kwh_x48)
     return nil if c.nil?
     one_day_cost = OneDaysCostData.new(c)
     one_day_cost
-  end
-
-  public def calculate_baseload_cost(date, baseload_kw)
-    calculate_x48_kwh_cost(date, AMRData.single_value_kwh_x48(baseload_kw / 2.0))
   end
 
   public def calculate_x48_kwh_cost(date, kwh_x48)
@@ -211,6 +211,10 @@ class CostsBase < HalfHourlyData
       total += one_days_cost_data(date).total_standing_charge
     end
     total
+  end
+
+  private def tariff_date(date)
+    date
   end
 
   private def add_to_list_of_bill_component_types(one_day_cost)
@@ -268,13 +272,28 @@ class EconomicCosts < CostsBase
     Logging.logger.info "Created combined meter economic #{combined_economic_costs.costs_summary}"
     combined_economic_costs
   end
+
+  # TODO(PH, 30Nov2022) merge into code above
+  def self.combine_current_economic_costs_from_multiple_meters(combined_meter, list_of_meters, combined_start_date, combined_end_date)
+    Logging.logger.info "Combining current economic costs from  #{list_of_meters.length} meters from #{combined_start_date} to #{combined_end_date}"
+
+    combined_economic_costs = CurrentEconomicCostsPreAggregated.new(combined_meter)
+
+    (combined_start_date..combined_end_date).each do |date|
+      list_of_meters_on_date = list_of_meters.select { |m| date >= m.amr_data.start_date && date <= m.amr_data.end_date }
+      list_of_days_economic_costs = list_of_meters_on_date.map { |m| m.amr_data.current_economic_tariff.one_days_cost_data(date) }
+      combined_economic_costs.add(date, combined_day_costs(list_of_days_economic_costs))
+    end
+
+    Logging.logger.info "Created current combined meter economic #{combined_economic_costs.costs_summary}"
+    combined_economic_costs
+  end
 end
 
 # parameterised representation of economic costs until after agggregation to reduce memory footprint
 class EconomicCostsParameterised < EconomicCosts
-
   def self.create_costs(meter)
-    EconomicCostsParameterised.new(meter)
+    self.new(meter)
   end
 
   # returns a x48 array of half hourly costs
@@ -290,6 +309,19 @@ class EconomicCostsParameterised < EconomicCosts
   end
 end
 
+class CurrentEconomicCostsParameterised < EconomicCostsParameterised
+  # for current economic tariffs, don't use time varying tariffs
+  # but use the most recent tariff
+  #
+  # slightly problematic for testing if asof_date changed as
+  # will only use latest tariff not asof_date tariff,
+  # perhaps use an '@@asof_date || end_date' to pass down this far?
+  #
+  private def tariff_date(_date)
+    meter.amr_data.end_date
+  end
+end
+
 class EconomicCostsPreAggregated < EconomicCosts
   def one_day_total_cost(date)
     @cache_days_totals[date] = one_days_cost_data(date).one_day_total_cost unless @cache_days_totals.key?(date)
@@ -302,6 +334,14 @@ class EconomicCostsPreAggregated < EconomicCosts
 
   def self.create_costs(meter)
     costs = EconomicCostsPreAggregated.new(meter)
+    costs.calculate_tariff unless parameterised
+    costs
+  end
+end
+
+class CurrentEconomicCostsPreAggregated < EconomicCostsPreAggregated
+  def self.create_costs(meter)
+    costs = CurrentEconomicCostsPreAggregated.new(meter)
     costs.calculate_tariff unless parameterised
     costs
   end

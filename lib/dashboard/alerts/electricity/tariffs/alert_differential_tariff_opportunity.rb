@@ -2,9 +2,6 @@
 require_relative '../alert_electricity_only_base.rb'
 
 class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
-  NIGHTTIME_RATE_£_PER_KWH = 0.12
-  DAYTIME_RATE_£_PER_KWH = 0.16
-  DIFFERENTIAL_DAYTIME_RATE_£_PER_KWH = 0.13
   MINIMUM_ANNUAL_SAVING_BEFORE_MAKING_RECOMMENDATION_£ = 100.0
   attr_reader :total_potential_savings_£, :total_potential_savings_percent
   attr_reader :differential_tariff_opportunity_table
@@ -161,16 +158,25 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
     [rows, total_saving]
   end
 
+  private def latest_economic_tariff_rates(meter, date)
+    meter.meter_tariffs.economic_tariff.tariff_on_date(date)
+  end
+
   private def calculate_differential_and_non_differential_costs(meter, asof_date)
     total_daytime_cost = 0.0
 
+    tariff = latest_economic_tariff_rates(meter, asof_date)
+    flat_rate      = tariff[:rate]
+    daytime_rate   = tariff[:daytime_rate]
+    nighttime_rate = tariff[:nighttime_rate]
+
     total_differential_daytime_cost = 0.0
-    differential_daytime_period = TimeOfDay.new(6, 30)..TimeOfDay.new(24, 0)
-    differential_daytime_rates_x48 = DateTimeHelper.weighted_x48_vector_single_range(differential_daytime_period, DIFFERENTIAL_DAYTIME_RATE_£_PER_KWH)
+    differential_daytime_period = daytime_rate[:from]..daytime_rate[:to]
+    differential_daytime_rates_x48 = DateTimeHelper.weighted_x48_vector_single_range(differential_daytime_period, daytime_rate[:rate])
 
     total_differential_nighttime_cost = 0.0
-    nighttime_period = TimeOfDay.new(0, 0)..TimeOfDay.new(6, 30)
-    nighttime_rates_x48 = DateTimeHelper.weighted_x48_vector_single_range(nighttime_period, NIGHTTIME_RATE_£_PER_KWH)
+    nighttime_period = nighttime_rate[:from]..nighttime_rate[:to]
+    nighttime_rates_x48 = DateTimeHelper.weighted_x48_vector_single_range(nighttime_period, nighttime_rate[:rate])
 
     start_date = meter_date_one_year_before(meter, asof_date)
 
@@ -178,7 +184,7 @@ class AlertDifferentialTariffOpportunity < AlertElectricityOnlyBase
       kwh_x48 = meter.amr_data.days_kwh_x48(date)
       total_differential_nighttime_cost += AMRData.fast_multiply_x48_x_x48(kwh_x48, nighttime_rates_x48).sum
       total_differential_daytime_cost += AMRData.fast_multiply_x48_x_x48(kwh_x48, differential_daytime_rates_x48).sum
-      total_daytime_cost += meter.amr_data.one_day_kwh(date) * DAYTIME_RATE_£_PER_KWH
+      total_daytime_cost += meter.amr_data.one_day_kwh(date) * flat_rate[:rate]
     end
     total_differential_tariff_cost = total_differential_daytime_cost + total_differential_nighttime_cost
 

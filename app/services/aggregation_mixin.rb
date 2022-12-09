@@ -1,6 +1,6 @@
 module AggregationMixin
-  private def create_modified_meter_copy(meter, amr_data, type, identifier, name, pseudo_meter_name)
-    Dashboard::Meter.new(
+  private def create_modified_meter_copy(meter, amr_data, type, identifier, name, pseudo_meter_name, meter_type = Dashboard::Meter )
+    meter_type.new(
       meter_collection: meter_collection,
       amr_data: amr_data,
       type: type,
@@ -17,7 +17,9 @@ module AggregationMixin
   private def create_aggregate_meter(aggregate_meter, meters, fuel_type, identifier, name, pseudo_meter_name)
     aggregate_amr_data = aggregate_amr_data_between_dates(meters, fuel_type, aggregate_meter.amr_data.start_date, aggregate_meter.amr_data.end_date, aggregate_meter.mpxn)
 
-    new_aggregate_meter = create_modified_meter_copy(aggregate_meter, aggregate_amr_data, fuel_type, identifier, name, pseudo_meter_name)
+    new_aggregate_meter = create_modified_meter_copy(aggregate_meter, aggregate_amr_data, fuel_type, identifier, name, pseudo_meter_name, Dashboard::AggregateMeter)
+
+    new_aggregate_meter.set_constituent_meters(meters)
 
     calculate_meter_carbon_emissions_and_costs(new_aggregate_meter, fuel_type)
 
@@ -103,8 +105,7 @@ module AggregationMixin
 
   private def calculate_costs_for_meter(meter)
     logger.info "Creating economic & accounting costs for #{meter.mpan_mprn} fuel #{meter.fuel_type} from #{meter.amr_data.start_date} to #{meter.amr_data.end_date}"
-    meter.amr_data.set_economic_tariff(meter)
-    meter.amr_data.set_accounting_tariff(meter)
+    meter.amr_data.set_tariffs(meter)
   end
 
   private def calculate_meter_carbon_emissions_and_costs(meter, fuel_type)

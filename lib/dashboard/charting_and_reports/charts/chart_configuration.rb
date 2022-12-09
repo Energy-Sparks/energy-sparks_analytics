@@ -226,6 +226,10 @@ class ChartManager
       inherits_from: :alert_daytype_breakdown_gas,
       yaxis_units:   :£,
     },
+    alert_daytype_breakdown_gas_£current: {
+      inherits_from: :alert_daytype_breakdown_gas_£,
+      yaxis_units:   :£current,
+    },
     alert_daytype_breakdown_storage_heater: {
       inherits_from:      :alert_daytype_breakdown_gas,
       name:               'Breakdown by type of day/time: Storage Heaters',
@@ -243,6 +247,10 @@ class ChartManager
     alert_daytype_breakdown_storage_heater_£: {
       inherits_from: :alert_daytype_breakdown_storage_heater,
       yaxis_units:   :£,
+    },
+    alert_daytype_breakdown_storage_heater_£current: {
+      inherits_from: :alert_daytype_breakdown_storage_heater_£,
+      yaxis_units:   :£current,
     },
     daytype_breakdown_electricity: {
       name:             'Breakdown by type of day/time: Electricity',
@@ -273,6 +281,10 @@ class ChartManager
     alert_daytype_breakdown_electricity_£: {
       inherits_from: :alert_daytype_breakdown_electricity,
       yaxis_units:   :£,
+    },
+    alert_daytype_breakdown_electricity_£current: {
+      inherits_from: :alert_daytype_breakdown_electricity_£,
+      yaxis_units:   :£current,
     },
     group_by_week_electricity: {
       name:             'By Week: Electricity',
@@ -314,10 +326,15 @@ class ChartManager
       yaxis_units:      :accounting_cost,
     },
     test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
-      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited meter breakdown',
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Economic Cost Unlimited meter breakdown',
       inherits_from:    :group_by_week_electricity_meter_breakdown,
       yaxis_units:      :£,
       timescale:        nil
+    },
+    test_current_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Current Economic Cost Unlimited meter breakdown',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown,
+      yaxis_units:      :£current,
     },
     test_economic_costs_electric_by_datetime_year_£: {
       name:             'By Week: <%= meter.fuel_type.capitalize %> £ by datetime - 1 year',
@@ -325,6 +342,12 @@ class ChartManager
       yaxis_units:      :£,
       x_axis:           :datetime,
       timescale:        :year
+    },
+
+    test_current_economic_costs_electric_by_week_unlimited_£: {
+      name:             'By Week: <%= meter.fuel_type.capitalize %> Unlimited current £',
+      inherits_from:    :test_economic_costs_electric_by_week_unlimited_£,
+      yaxis_units:      :£current,
     },
 
     test_economic_costs_gas_by_week_unlimited_£: {
@@ -2036,6 +2059,10 @@ class ChartManager
       inherits_from:    :alert_weekend_last_week_gas_datetime_kwh,
       name:             'Last weeks half hourly gas consumption (£/half hour)',
       yaxis_units:      :£
+    },
+    alert_weekend_last_week_gas_datetime_£current: {
+      inherits_from:    :alert_weekend_last_week_gas_datetime_£,
+      yaxis_units:      :£current
     },
     last_2_weeks_gas: {
       name:             'Last 2 weeks gas consumption (with temperature)',

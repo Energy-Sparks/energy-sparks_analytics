@@ -17,7 +17,7 @@
 class MeterTariffManager
   include Logging
   MAX_DAYS_BACKDATE_TARIFF = 30
-  attr_reader :accounting_tariffs, :economic_tariff
+  attr_reader :accounting_tariffs, :economic_tariff, :meter
 
   class MissingAccountingTariff                                   < StandardError; end
   class OverlappingAccountingTariffs                              < StandardError; end
@@ -29,6 +29,7 @@ class MeterTariffManager
 
   def initialize(meter)
     @mpxn = meter.mpxn
+    @meter = meter # messy when printing object
     pre_process_tariff_attributes(meter)
     backdate_dcc_tariffs(meter)
   end
@@ -112,7 +113,81 @@ class MeterTariffManager
     @accounting_tariff_cache[date] ||= calculate_accounting_tariff_for_date(date)
   end
 
+  def economic_tariffs_change_over_time?
+    check_economic_tariff_type
+    @economic_tariff.class == EconomicTariffChangeOverTime
+  end
+
+  # meter => { date_ranges => tariffs }
+  def tariffs_within_date_range(start_date, end_date)
+    start_date, end_date = default_nil_date_ranges(start_date, end_date)
+
+    @meter.constituent_meters.map do |constituent_meter|
+      [
+        constituent_meter,
+        constituent_meter.meter_tariffs.economic_tariff.tariffs_within_date_range(start_date, end_date)
+      ]
+    end.to_h
+  end
+
+  def tariff_change_dates_in_period(start_date, end_date)
+    start_date, end_date = default_nil_date_ranges(start_date, end_date)
+
+    tariff_changes = tariffs_within_date_range(start_date, end_date)
+    date_ranges = tariff_changes.values.map { |tar| tar.keys }.flatten.uniq
+    dates = date_ranges.map { |dr| [dr.first, dr.last] }.flatten.uniq.sort
+
+    reject_dates = [MeterTariff::MIN_DEFAULT_START_DATE, MeterTariff::MAX_DEFAULT_END_DATE]
+    change_dates = dates.reject { |d| reject_dates.include?(d) }
+
+    change_dates_with_in_range = change_dates.reject { |d| d < start_date || d > end_date }
+  end
+
+  def formatted_constituent_meter_tariffs(start_date, end_date)
+    @meter.constituent_meters.map do |constituent_meter|
+      mpxn_str = constituent_meter.mpxn.to_s[0...16].ljust(16)
+      name_str = constituent_meter.name[0...15].ljust(15)
+      meter_description = "#{mpxn_str} #{name_str}"
+      differential_test = (start_date..end_date).any? { |date| constituent_meter.meter_tariffs.differential_tariff_on_date?(date) }
+      tariffs_in_range = constituent_meter.meter_tariffs.economic_tariff.tariffs_within_date_range(start_date, end_date)
+      
+      rs = MeterTariff.rates_text(tariffs_in_range, differential_test)
+
+      rs.map.with_index do |(dr, t), i|
+        [
+          (i == 0 ? meter_description : '')[0...32].ljust(32),
+          (dr.nil? ? '' : dr[0...25]).ljust(25),
+          t
+        ]
+      end
+    end
+  end
+
+  def print_formatted_constitiuent_meter_tariffs(start_date, end_date)
+    data = formatted_constituent_meter_tariffs(start_date, end_date)
+    ap data.map { |r| r.map(&:join) }.flatten
+  end
+
+  # e.g. aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(Date.new(2022,8,22), Date.new(2022,10,22))
+  def meter_tariffs_differ_within_date_range?(start_date, end_date)
+    @meter.constituent_meters.any? do |meter|
+      meter.meter_tariffs.economic_tariff.tariffs_differ_within_date_range?(start_date, end_date)
+    end
+  end
+
+  def meter_tariffs_changes_between_periods?(period1, period2)
+    @meter.constituent_meters.any? do |meter|
+      meter.meter_tariffs.economic_tariff.meter_tariffs_changes_between_periods?(period1, period2)
+    end
+  end
+
   private
+
+  def default_nil_date_ranges(start_date, end_date)
+    start_date = MeterTariff::MIN_DEFAULT_START_DATE if start_date.nil?
+    end_date   = MeterTariff::MAX_DEFAULT_END_DATE   if end_date.nil?
+    [start_date, end_date]
+  end
 
   def calculate_accounting_tariff_for_date(date, ignore_defaults = false)
     override = override_tariff(date)
@@ -194,6 +269,13 @@ class MeterTariffManager
     else
       # post October 2022 version of economic tariffs - tariffs potentiall change with start, end_date over time
       EconomicTariffChangeOverTime.new(meter, meter.attributes(:economic_tariff_change_over_time))
+    end
+  end
+
+  def check_economic_tariff_type
+    economic_tariff_classes = [EconomicTariff, EconomicTariffChangeOverTime]
+    unless economic_tariff_classes.include?(@economic_tariff.class)
+      raise EnergySparksUnexpectedStateException, "Economic tariff must one of #{economic_tariff_classes.join(' ')} got #{@economic_tariff.class.name}"
     end
   end
 

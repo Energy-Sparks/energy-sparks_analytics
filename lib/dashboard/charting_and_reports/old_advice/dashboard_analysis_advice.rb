@@ -418,12 +418,12 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   protected def gas_comparison_benchmark
     compare = comparison('gas', index_of_data(benchmark_school_name))
-    generate_html(%{ The gas usage <%= compare %>: }.gsub(/^  /, ''), binding)
+    generate_html(%{ The gas usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
   protected def storage_heater_benchmark_comparison
     compare = comparison('storage heaters', index_of_data(benchmark_school_name))
-    generate_html(%{ The storage heater usage <%= compare %>: }.gsub(/^  /, ''), binding)
+    generate_html(%{ The storage heater usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
   protected def usage_adjective
@@ -432,6 +432,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
   protected def usage_preposition
     'on'
+  end
+
+  def tariff_text(electricity_usage, gas_usage)
+    preamble = 'Monetary values for benchmark and exemplar schools are converted using your school&apos;s tariffs'
+    EconomicTariffsChangeCaveats.new(@school).tariff_text_with_sentence(electricity_usage, gas_usage, preamble: preamble, charts: true)
   end
 
   def generate_advice
@@ -446,7 +451,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <body>
       <% end %>
       <p>
+<<<<<<< scalar-economic-changes-over-time-fixes
+        <%= @school.name %> is a <%= @school.school_type.to_s.humanize %> school near <%= address %>
+=======
         <%= @school.name %> is a <%= @school.school_type.humanize.downcase %> school near <%= address %>
+>>>>>>> master
         with <%= @school.number_of_pupils %> pupils
         and a floor area of <%= @school.floor_area.round(0) %>m<sup>2</sup>.
       </p>
@@ -472,7 +481,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           <%= gas_comparison_benchmark %>
         <% end %>
       </p>
-      <p>Monetary values for benchmark and examplar schools are converted using your school&apos;s tariffs.</p>
+      <%= tariff_text(actual_electricity_usage > 0, actual_gas_usage > 0) %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 

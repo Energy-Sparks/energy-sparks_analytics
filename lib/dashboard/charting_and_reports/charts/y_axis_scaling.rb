@@ -12,7 +12,7 @@ class YAxisScaling
 
   def initialize
     # rubocop:disable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
-    @@units = %i[kwh kw co2 £ library_books]
+    @@units = %i[kwh kw co2 £ £current library_books]
     @@scaling_factors = %i[none per_pupil per_floor_area per_200_pupils per_1000_pupils]
     # rubocop:enable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
   end

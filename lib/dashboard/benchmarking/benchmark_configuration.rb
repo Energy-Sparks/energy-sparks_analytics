@@ -138,6 +138,7 @@ module Benchmarking
           heating_in_warm_weather
           thermostatic_control
           hot_water_efficiency
+          gas_targets
           change_in_gas_consumption_recent_school_weeks
           change_in_gas_holiday_consumption_previous_holiday
           change_in_gas_holiday_consumption_previous_years_holiday
@@ -905,6 +906,21 @@ module Benchmarking
           { data: ->{ gsoo_aoo£ },  name: 'Annual out of hours cost',     units: :£ },
           { data: ->{ gsoo_esv£ },  name: 'Saving if improve to exemplar',units: :£ },
           { data: ->{ gsoo_ratg },  name: 'rating', units: Float, y2_axis: true }
+        ],
+        sort_by:  [1],
+        type: %i[chart table]
+      },
+      gas_targets: {
+        benchmark_class:  BenchmarkGasTarget,
+        name:     'Progress versus gas target',
+        columns:  [
+          { data:   'addp_name',    name: 'School name', units: String, chart_data: true, content_class: AdviceGasAnnual },
+          { data: ->{ gtga_tptd },  name: 'Percent above or below target since target set', units: :relative_percent, chart_data: true },
+          { data: ->{ gtga_aptd },  name: 'Percent above or below last year',  units: :relative_percent},
+          { data: ->{ gtga_cktd },  name: 'kWh consumption since target set',  units: :kwh},
+          { data: ->{ gtga_tktd },  name: 'target kWh consumption',            units: :kwh},
+          { data: ->{ gtga_uktd },  name: 'last year kWh consumption',         units: :kwh},
+          { data: ->{ gtga_trsd },  name: 'start date for target',             units: :date},
         ],
         sort_by:  [1],
         type: %i[chart table]

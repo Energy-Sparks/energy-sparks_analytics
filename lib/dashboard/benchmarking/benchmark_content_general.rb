@@ -306,6 +306,19 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+    #=======================================================================================
+    class BenchmarkGasTarget < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+  
+      private def introduction_text
+        text = %q(
+          <p>
+            How school is progressing versus the target it has set for this year.
+          </p>
+        )
+        ERB.new(text).result(binding)
+      end
+    end
   #=======================================================================================
   class BenchmarkContentBaseloadPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin

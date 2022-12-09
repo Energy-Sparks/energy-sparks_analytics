@@ -15,17 +15,6 @@ module AlertGasToStorageHeaterSubstitutionMixIn
     BenchmarkMetrics::ELECTRICITY_PRICE # deprecated
   end
 
-  # benchmark some storage heater alerts against gas cost e.g. per floor area
-  # as gas is cheaper and it should be clear to schools that gas is a better choice
-  # from a cost perspective, if the school has gas as well then use that tariff
-  def defaulted_gas_tariff_£_per_kwh
-    if @school.aggregated_heat_meters.nil?
-      BenchmarkMetrics::GAS_PRICE
-    else
-      @school.aggregated_heat_meters.amr_data.blended_rate(:kwh, :£).round(5)
-    end
-  end
-
   def self.fuel_lc
     'storage heater'
   end

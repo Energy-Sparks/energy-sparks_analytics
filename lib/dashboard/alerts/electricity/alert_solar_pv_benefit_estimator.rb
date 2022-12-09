@@ -185,7 +185,8 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregate_meter.amr_data, @school, start_date, asof_date, kwp)
 
     kwh = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date)
-    £   = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date, :£)
+
+    £   = aggregate_meter.amr_data.kwh_date_range(start_date, asof_date, :£current)
 
     {
       kwp:                          kwp,
@@ -255,19 +256,5 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
         fit_£_per_kwh:      0.05
       }
     ]
-  end
-
-  def approx_blended_daytime_tariff_£_per_kwh(asof_date)
-    hh_count_4_hours = 8
-    remainder_hh_count = 48 - hh_count_4_hours
-    middle_of_day_4_hours_x48_kwh_weighted = Array.new(hh_count_4_hours / 2, 0.0) + Array.new(8, 1.0 / hh_count_4_hours) + Array.new(hh_count_4_hours / 2, 0.0)
-    costs = []
-
-    full_date_range(asof_date).each do |date|
-      next unless @school.holidays.occupied?(date)
-      costs.push(aggregate_meter.amr_data.economic_cost_for_x48_kwhs(date, middle_of_day_4_hours_x48_kwh_weighted))
-    end
-
-    costs.sum / costs.count
   end
 end
