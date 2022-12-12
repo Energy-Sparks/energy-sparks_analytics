@@ -221,7 +221,10 @@ class ValidateAMRData
   end
 
   def check_date_exists(date, attribute)
-    raise EnergySparksMeterSpecification.new("Unable to apply #{attribute} correction for meter #{@meter_id}. There is no meter data for #{date}. Check the date and/or for missing readings") unless @amr_data.date_exists?(date)
+    return if @amr_data.date_exists?(date)
+
+    error_message = "Unable to apply #{attribute} correction for meter #{@meter_id}. There is no meter data for #{date}. Check the date and/or for missing readings"
+    raise EnergySparksMeterSpecification.new(error_message)
   end
 
   def extend_start_date(date)
