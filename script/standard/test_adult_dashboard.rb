@@ -14,7 +14,7 @@ overrides = {
   cache_school: false,
   no_adult_dashboard: { control: { user: { user_role: :analytics, staff_role: nil } } },
   adult_dashboard: {
-    control: { 
+    control: {
       pages: %i[boiler_control_morning_start_time],
       no_pages: %i[benchmark electric_annual gas_annual electric_out_of_hours gas_out_of_hours hotwater], # storage_heater
       compare_results: [ :summary, :report_differences],

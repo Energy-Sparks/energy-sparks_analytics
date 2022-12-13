@@ -116,7 +116,7 @@ class FormatEnergyUnit
     percent = value * 100.0
 
     pct_str = if !percent.infinite?.nil?
-                plus_minus_infinity_value(percent)  
+                plus_minus_infinity_value(percent)
               elsif percent.magnitude < 10.0
                 sprintf('%+.1f', percent)
               elsif percent.magnitude < 150.0
@@ -232,7 +232,7 @@ class FormatEnergyUnit
       I18n.t(NEGATIVE_INFINITY)
     else
       raise InternalErrorNonInfiniteValue, "Bad value #{value}"
-    end  
+    end
   end
 
   def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)
