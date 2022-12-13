@@ -1,0 +1,116 @@
+module Baseload
+  class BaseloadBenchmarkingService
+
+    HOURS_IN_YEAR = (24.0 * 365.0).freeze
+
+    # Create a service capable of producing benchmark comparisons for a
+    # given school, based on the data and configuration in their meter
+    # collection
+    #
+    # @param [MeterCollection] meter_collection the school to be benchmarked
+    # @param [Date] asof_date the date to use as the basis for calculations
+    #
+    # @raise [EnergySparksUnexpectedStateException] if the schools doesnt have electricity meters
+    def initialize(meter_collection, asof_date=Time.zone.today)
+      @meter_collection = meter_collection
+      @asof_date = asof_date
+    end
+
+    # Calculate the expected average annual baseload for a "benchmark"
+    # school of the same type and with a similar number of pupils.
+    #
+    # E.g. calculate the baseload for a well performing primary school, or
+    # an exemplar secondary school.
+    #
+    # Details of school type and number of pupils are taken from the meter collection
+    #
+    # Supported comparisons are: :benchmark_school, or :exemplar_school
+    #
+    # @param [Symbol] for the type of benchmark school to be used as comparison
+    def average_baseload_kw(compare: :benchmark_school)
+      pupils = pupils(@asof_date - 365, @asof_date)
+      case compare
+      when :benchmark_school
+        BenchmarkMetrics.recommended_baseload_for_pupils(pupils, school_type)
+      when :exemplar_school
+        BenchmarkMetrics.exemplar_baseload_for_pupils(pupils, school_type)
+      else
+        raise "Invalid comparison"
+      end
+    end
+
+    # Calculate the expected usage for a "benchmark" school of the
+    # same type and with a similar number of pupils, over a year
+    #
+    # Supported comparisons are: :benchmark_school, or :exemplar_school
+    #
+    # The usage returns include kwh, co2 emissions and £ costs.
+    # @param [Symbol] for the type of benchmark school to be used as comparison
+    # @return [CombinedUsageMetric] the calculated usage
+    def baseload_usage(compare: :benchmark_school)
+      benchmarked_by_pupil_kw = average_baseload_kw(compare: compare)
+      by_pupil_kwh = benchmarked_by_pupil_kw * HOURS_IN_YEAR
+      return CombinedUsageMetric.new(
+        metric_id: "baseload_usage_#{compare}".to_sym,
+        kwh: by_pupil_kwh,
+        £: by_pupil_kwh * blended_electricity_£_per_kwh,
+        co2: by_pupil_kwh * blended_co2_per_kwh
+      )
+    end
+
+    # Compare the expected annual usage for this school against a benchmark
+    # school of the given type.
+    #
+    # E.g. if this school moved its baseload to match an exemplar, how much
+    # would its electricity usage reduce, how much would they save, etc.
+    #
+    # Returns the expected estimated savings kwh, cost or co2 savings.
+    #
+    # @param [Symbol] for the type of benchmark school to be used as comparison
+    # @return [CombinedUsageMetric] the estimated savings
+    def estimated_savings(versus: :benchmark_school)
+      average_baseload_last_year_kwh = baseload_calculator.annual_baseload_usage.kwh
+
+      baseload_usage_for_comparison = baseload_usage(compare: versus)
+
+      one_year_saving_versus_comparison_kwh = average_baseload_last_year_kwh - baseload_usage_for_comparison.kwh
+
+      return CombinedUsageMetric.new(
+        metric_id: "estimated_savings_versus_#{versus}".to_sym,
+        kwh: one_year_saving_versus_comparison_kwh,
+        £: one_year_saving_versus_comparison_kwh * blended_electricity_£_per_kwh,
+        co2: one_year_saving_versus_comparison_kwh * blended_co2_per_kwh
+      )
+    end
+
+    private
+
+    def blended_electricity_£_per_kwh
+      rate_calculator.blended_electricity_£_per_kwh
+    end
+
+    def blended_co2_per_kwh
+      rate_calculator.blended_co2_per_kwh
+    end
+
+    def school_type
+      @meter_collection.school_type
+    end
+
+    def aggregate_meter
+      @meter_collection.aggregated_electricity_meters
+    end
+
+    def pupils(start_date = nil, end_date = nil)
+      aggregate_meter.meter_number_of_pupils(@meter_collection, start_date, end_date)
+    end
+
+    def rate_calculator
+      @rate_calculator ||= BlendedRateCalculator.new(aggregate_meter)
+    end
+
+    def baseload_calculator
+      @baseload_calculator ||= BaseloadCalculationService.new(aggregate_meter, @asof_date)
+    end
+  end
+end

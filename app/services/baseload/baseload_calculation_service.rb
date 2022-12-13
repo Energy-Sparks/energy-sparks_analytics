@@ -63,12 +63,12 @@ module Baseload
 
     def average_baseload_last_year_£
       kwh = average_baseload_last_year_kwh
-      kwh * blended_electricity_£_per_kwh
+      kwh * rate_calculator.blended_electricity_£_per_kwh
     end
 
     def average_baseload_last_year_co2
       kwh = average_baseload_last_year_kwh
-      kwh * blended_co2_per_kwh
+      kwh * rate_calculator.blended_co2_per_kwh
     end
 
     def meter_collection
@@ -79,40 +79,9 @@ module Baseload
       @baseload_calculator ||= ElectricityBaseloadAnalysis.new(@meter)
     end
 
-    def aggregate_meter
-      meter_collection.aggregated_electricity_meters
+    def rate_calculator
+      @rate_calculator ||= BlendedRateCalculator.new(@meter.meter_collection.aggregated_electricity_meters)
     end
 
-    # The below code could be factored out of existing alert classes into
-    # supporting calculation classes similar to how the ElectricityBaseloadAnalysis
-    # has been created.
-    #
-    #
-    # Taken from ElectricityCostCo2Mixin
-    def blended_electricity_£_per_kwh
-      @blended_electricity_£_per_kwh ||= blended_rate(:£)
-    end
-
-    # Taken from ElectricityCostCo2Mixin
-    def blended_co2_per_kwh
-      @blended_co2_per_kwh ||= blended_rate(:co2)
-    end
-
-    # Taken from content_base.rb
-    # used by above code
-    def blended_rate(datatype = :£)
-      up_to_1_year_ago_start_date = aggregate_meter.amr_data.up_to_1_year_ago
-      end_date = aggregate_meter.amr_data.end_date
-      blended_rate_date_range(up_to_1_year_ago_start_date, end_date, datatype)
-    end
-
-    # Taken from content_base.rb
-    # used by above code
-    def blended_rate_date_range(start_date, end_date, datatype)
-      kwh  = aggregate_meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
-      data = aggregate_meter.amr_data.kwh_date_range(start_date, end_date, datatype)
-      raise EnergySparksNotEnoughDataException, "zero kWh consumption between #{start_date} and #{end_date}" if kwh == 0.0
-      data / kwh
-    end
   end
 end
