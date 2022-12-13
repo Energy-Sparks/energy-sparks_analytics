@@ -20,6 +20,7 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
   attr_reader :one_year_baseload_per_floor_area_kw, :one_year_baseload_per_floor_area_kwh, :one_year_baseload_per_floor_area_£
   attr_reader :average_baseload_last_year_co2, :one_year_benchmark_by_pupil_co2, :one_year_exemplar_by_pupil_co2
   attr_reader :one_year_saving_versus_exemplar_co2, :one_year_baseload_per_pupil_co2, :one_year_baseload_per_floor_area_co2
+  attr_reader :cost_saving_through_1_kw_reduction_in_baseload_£
 
   def initialize(school, report_type = :baseloadbenchmark, meter = school.aggregated_electricity_meters)
     super(school, report_type, meter)
@@ -90,7 +91,10 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
       description: 'Adjective associated with whether saving is higher of lower than benchmark (higher or lower)',
       units:  String
     },
-
+    cost_saving_through_1_kw_reduction_in_baseload_£: {
+      description: 'cost saving through 1 kW reduction in baseload in next year',
+      units:  :£_per_kw
+    },
     one_year_exemplar_by_pupil_kwh: {
       description: 'Exemplar annual baseload kWh for a school of this number of pupils and type (secondaries have higher baseloads)',
       units:  { kwh: :electricity},
@@ -218,6 +222,8 @@ class AlertElectricityBaseloadVersusBenchmark < AlertBaseloadBase
 
     @benchmark_per_pupil_kw = BenchmarkMetrics.recommended_baseload_for_pupils(pupils(asof_date - 365, asof_date), school_type)
     hours_in_year = 24.0 * 365.0
+
+    @cost_saving_through_1_kw_reduction_in_baseload_£ = blended_baseload_rate_£current_per_kwh * hours_in_year
 
     @one_year_benchmark_by_pupil_kwh   = @benchmark_per_pupil_kw * hours_in_year
     @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * latest_electricity_tariff

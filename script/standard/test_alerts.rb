@@ -18,7 +18,7 @@ overrides = {
     # AlertEnergyAnnualVersusBenchmark
     # AlertSchoolWeekComparisonGas
     # AlertOutOfHoursElectricityUsage
-    AlertChangeInElectricityBaseloadShortTerm
+    AlertElectricityBaseloadVersusBenchmark
     ],
   control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving html_template_variables], log: [:invalid_alerts] } },
   no_alerts:   { alerts: [ AlertCommunityPreviousHolidayComparisonElectricity ], control: { asof_date: asof_date } }
