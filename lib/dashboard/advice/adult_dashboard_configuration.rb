@@ -444,7 +444,8 @@ class DashboardConfiguration
       promoted_variables: {
         AlertHeatingComingOnTooEarly => {
           rating:         :rating,
-          one_year_optimum_start_saving_£: :one_year_optimum_start_saving_£
+          one_year_optimum_start_saving_£:        :one_year_optimum_start_saving_£,
+          one_year_optimum_start_saving_£current: :one_year_optimum_start_saving_£current
         }
       },
       meter_breakdown: {

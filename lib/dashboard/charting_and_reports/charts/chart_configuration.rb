@@ -461,14 +461,16 @@ class ChartManager
       x_axis:                       :week,
       nullify_trailing_zeros:       true,
       timescale:                    :up_to_a_year,
+      restrict_y1_axis:             [:kwh, :co2],
       ignore_single_series_failure: true,
       target:                       {calculation_type: :day, extend_chart_into_future: true, truncate_before_start_date: true},
       inherits_from:                :group_by_week_electricity
     },
     targeting_and_tracking_weekly_electricity_one_year_line: {
-      name:           'Weekly progress versus target to date',
+      name:               'Weekly progress versus target to date',
       target:             {calculation_type: :day, extend_chart_into_future: false, truncate_before_start_date: true},
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line
+      restrict_y1_axis:   [:kwh, :co2],
+      inherits_from:      :targeting_and_tracking_weekly_electricity_to_date_line
     },
     targeting_and_tracking_standard_group_by_week_electricity: {
       name:          'Standard <%= meter.fuel_type %> group by week chart (<%= total_kwh %> kWh)',
@@ -493,15 +495,18 @@ class ChartManager
     },
 
     targeting_and_tracking_weekly_gas_to_date_cumulative_line: {
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
-      meter_definition:   :allheat
+      inherits_from:    :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
+      restrict_y1_axis: [:kwh, :co2],
+      meter_definition: :allheat
     },
     targeting_and_tracking_weekly_gas_to_date_line: {
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line,
+      inherits_from:      :targeting_and_tracking_weekly_electricity_to_date_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :allheat
     },
     targeting_and_tracking_weekly_gas_one_year_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_one_year_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :allheat
     },
     targeting_and_tracking_standard_group_by_week_gas: {
@@ -526,14 +531,17 @@ class ChartManager
 
     targeting_and_tracking_weekly_storage_heater_to_date_cumulative_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_to_date_cumulative_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :storage_heater_meter
     },
     targeting_and_tracking_weekly_storage_heater_to_date_line: {
-      inherits_from: :targeting_and_tracking_weekly_electricity_to_date_line,
+      inherits_from:      :targeting_and_tracking_weekly_electricity_to_date_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :storage_heater_meter
     },
     targeting_and_tracking_weekly_storage_heater_one_year_line: {
       inherits_from: :targeting_and_tracking_weekly_electricity_one_year_line,
+      restrict_y1_axis:   [:kwh, :co2],
       meter_definition:   :storage_heater_meter
     },
     targeting_and_tracking_standard_group_by_week_storage_heater: {

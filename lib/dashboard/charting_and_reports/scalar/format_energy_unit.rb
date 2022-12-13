@@ -44,7 +44,7 @@ class FormatEnergyUnit
     return value.to_s if convert_missing_types_to_strings && !known_unit?(unit)
     check_units(unit)
 
-    if %i[£ £_0dp £_per_kwh £_per_kva £current].include?(unit)
+    if %i[£ £_0dp £_per_kwh £_per_kva £current £_per_kw].include?(unit)
       format_pounds(unit, value, medium, user_numeric_comprehension_level, unit == :£_0dp)
     elsif unit == :£_range
       format_pound_range(value, medium, user_numeric_comprehension_level)
@@ -116,7 +116,7 @@ class FormatEnergyUnit
     percent = value * 100.0
 
     pct_str = if !percent.infinite?.nil?
-                plus_minus_infinity_value(percent)  
+                plus_minus_infinity_value(percent)
               elsif percent.magnitude < 10.0
                 sprintf('%+.1f', percent)
               elsif percent.magnitude < 150.0
@@ -232,7 +232,7 @@ class FormatEnergyUnit
       I18n.t(NEGATIVE_INFINITY)
     else
       raise InternalErrorNonInfiniteValue, "Bad value #{value}"
-    end  
+    end
   end
 
   def self.scale_num(value, in_pounds = false, user_numeric_comprehension_level = :ks2)

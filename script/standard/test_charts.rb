@@ -17,7 +17,7 @@ charts = {
   #     test_economic_costs_electric_by_week_unlimited_kwh_meter_breakdown
   economictariffs: %i[
 
-    group_by_week_electricity_versus_benchmark
+    targeting_and_tracking_weekly_electricity_to_date_line
   ]
 }
 
@@ -36,7 +36,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['king-james-exa*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['caer*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }

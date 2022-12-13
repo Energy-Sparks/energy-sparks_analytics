@@ -1,5 +1,6 @@
 require_relative './alert_period_comparison_base.rb'
 require_relative './alert_schoolweek_comparison_electricity.rb'
+require_relative './alert_period_comparison_temperature_adjustment_mixin.rb'
 require_relative './../gas/alert_model_cache_mixin.rb'
 # Compares the last two SCHOOL weeks - i.e. when this school is occupied, i.e. skips holidays
 # Unlike the other week/short term comparison alerts, it works completly off chart data
@@ -12,7 +13,7 @@ require_relative './../gas/alert_model_cache_mixin.rb'
 #
 class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   include AlertModelCacheMixin
-  # include AlertPeriodComparisonTemperatureAdjustmentMixin
+  include AlertPeriodComparisonTemperatureAdjustmentMixin
   attr_reader :current_week_kwhs, :previous_week_kwhs_unadjusted, :previous_week_kwhs_adjusted
   attr_reader :current_weeks_temperatures, :previous_weeks_temperatures
   attr_reader :current_week_kwh_total, :previous_week_kwh_unadjusted_total,  :previous_week_kwh_total
@@ -45,7 +46,7 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
 
       current_week_kwh_total:             { description: 'Current week total kWh',                units:  :kwh  },
       previous_week_kwh_unadjusted_total: { description: 'Previous week total kWh (unadjusted)' , units:  :kwh, benchmark_code: 'najk'  },
-      previous_week_kwh_total:            { description: 'Previous week total kWh (adjusted)',    units:  :kwh, benchmark_code: 'ajkw'  },
+      previous_week_kwh_total:            { description: 'Previous week total kWh (from chart, adjusted, maybe slightly different from previous_period_kwh which uses better underlying alert compensation )',    units:  :kwh, benchmark_code: 'ajkw'  },
     }
   end
 
@@ -64,9 +65,15 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   end
 
   def calculate(asof_date)
+    @model_asof_date = asof_date
     # this needs to be called first
     calculate_temperature_adjusted_and_unadjusted_gas_from_chart_data(asof_date)
     super(asof_date)
+
+    # this isn't ideal, the temperature compensation of the underlying
+    # period comparison alert is subtely different from that of the
+    # chart calculation, so use the chart's:
+    # @previous_period_kwh = @previous_week_kwh_total
   end
   alias_method :analyse_private, :calculate
 
