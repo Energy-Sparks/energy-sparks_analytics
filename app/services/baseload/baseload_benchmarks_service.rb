@@ -86,11 +86,11 @@ module Baseload
     private
 
     def blended_electricity_£_per_kwh
-      rate_calculator.blended_electricity_£_per_kwh
+      @blended_electricity_£_per_kwh ||= rate_calculator.blended_electricity_£_per_kwh
     end
 
     def blended_co2_per_kwh
-      rate_calculator.blended_co2_per_kwh
+      @blended_co2_per_kwh ||= rate_calculator.blended_co2_per_kwh
     end
 
     def school_type
