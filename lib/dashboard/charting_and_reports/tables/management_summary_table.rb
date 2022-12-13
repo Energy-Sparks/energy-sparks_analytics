@@ -275,12 +275,15 @@ class ManagementSummaryTable < ContentBase
 
   def compare_two_periods(fuel_type, period1, period2, max_days_out_of_date)
     current_period_kwh  = checked_get_aggregate(period1, fuel_type, :kwh)
+    previous_period_kwh = checked_get_aggregate(period2, fuel_type, :kwh)
     current_period_co2  = checked_get_aggregate(period1, fuel_type, :co2)
     current_period_co2  = electricity_co2_with_solar_offset(period1) if @school.solar_pv_panels? && fuel_type == :electricity
     current_period      = checked_get_aggregate(period1, fuel_type, :£)
     previous_period     = checked_get_aggregate(period2, fuel_type, :£)
     out_of_date         = comparison_out_of_date(period1, fuel_type, max_days_out_of_date)
-    percent_change      = (current_period.nil? || previous_period.nil? || out_of_date) ? nil : percent_change_with_zero(current_period, previous_period)
+    
+    valid               = current_period_kwh.nil? || previous_period_kwh.nil? || out_of_date
+    percent_change      = valid ? nil : percent_change_with_zero(current_period_kwh, previous_period_kwh)
 
     {
       kwh:            current_period_kwh,
