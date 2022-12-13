@@ -451,7 +451,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
         <body>
       <% end %>
       <p>
+<<<<<<< scalar-economic-changes-over-time-fixes
         <%= @school.name %> is a <%= @school.school_type.to_s.humanize %> school near <%= address %>
+=======
+        <%= @school.name %> is a <%= @school.school_type.humanize.downcase %> school near <%= address %>
+>>>>>>> master
         with <%= @school.number_of_pupils %> pupils
         and a floor area of <%= @school.floor_area.round(0) %>m<sup>2</sup>.
       </p>

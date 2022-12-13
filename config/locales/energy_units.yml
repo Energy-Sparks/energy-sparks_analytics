@@ -72,7 +72,6 @@ en:
       years_decimal: "%{value} years"
       years_range: "%{low} to %{high}"
       "£": "%{sign}£%{value}"
-      "£current": "%{sign}£%{value}"
       "£_0dp": "%{sign}£%{value}"
       "£_0dp_html": "%{sign}&pound;%{value}"
       "£_html": "%{sign}&pound;%{value}"
@@ -81,6 +80,7 @@ en:
       "£_per_kwh": "%{sign}£%{value}/kWh"
       "£_per_kwh_html": "%{sign}&pound;%{value}/kWh"
       "£_range": "%{low} to %{high}"
+      "£current": "%{sign}£%{value}"
     units:
       days:
         one: "%{count} day"
