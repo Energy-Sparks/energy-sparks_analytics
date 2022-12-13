@@ -8,7 +8,7 @@ module Logging
 end
 
 asof_date = Date.new(2022, 12, 10)
-schools = ['cherry-*'] # ['king-james*', 'wybour*', 'penny*']
+schools = ['king-james-ex*'] # ['king-james*', 'wybour*', 'penny*']
 
 overrides = {
   schools:  schools,
@@ -16,10 +16,11 @@ overrides = {
   alerts:   { alerts: nil, control: { asof_date: asof_date} },
   alerts:   { alerts: [
     # AlertEnergyAnnualVersusBenchmark
-    AlertSchoolWeekComparisonGas
+    # AlertSchoolWeekComparisonGas
     # AlertOutOfHoursElectricityUsage
+    AlertChangeInElectricityBaseloadShortTerm
     ],
-  control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving], log: [:invalid_alerts] } },
+  control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving html_template_variables], log: [:invalid_alerts] } },
   no_alerts:   { alerts: [ AlertCommunityPreviousHolidayComparisonElectricity ], control: { asof_date: asof_date } }
 }
 

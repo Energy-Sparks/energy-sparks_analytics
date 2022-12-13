@@ -44,7 +44,7 @@ class FormatEnergyUnit
     return value.to_s if convert_missing_types_to_strings && !known_unit?(unit)
     check_units(unit)
 
-    if %i[£ £_0dp £_per_kwh £_per_kva £current].include?(unit)
+    if %i[£ £_0dp £_per_kwh £_per_kva £current £_per_kw].include?(unit)
       format_pounds(unit, value, medium, user_numeric_comprehension_level, unit == :£_0dp)
     elsif unit == :£_range
       format_pound_range(value, medium, user_numeric_comprehension_level)
