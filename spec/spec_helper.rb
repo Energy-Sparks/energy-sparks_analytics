@@ -33,8 +33,12 @@ end
 require 'dashboard'
 require 'factory_bot'
 
+#Load the helpers from the support directory
+Dir[File.expand_path(File.join('spec','support', '**', '*.rb'))].each { |f| require_relative f }
+
 #Load YAML files for translations
 I18n.load_path += Dir[File.join('config', 'locales', '**', '*.yml').to_s]
+
 
 # switch off most logging while testing
 module Logging

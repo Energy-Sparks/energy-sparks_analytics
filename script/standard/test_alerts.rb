@@ -7,8 +7,8 @@ module Logging
   logger.level = :debug
 end
 
-asof_date = Date.new(2022, 12, 10)
-schools = ['wybour*'] # ['king-james*', 'wybour*', 'penny*']
+asof_date = Date.new(2022, 2, 1)
+schools = ['*']
 
 
 overrides = {
