@@ -38,6 +38,13 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   attr_reader :percent_difference_from_average_per_floor_area
   attr_reader :tariff_has_changed_during_period_text
 
+  attr_reader :historic_rate_£_per_kwh, :current_rate_£_per_kwh
+
+  attr_reader :one_year_benchmark_floor_area_£current,  :one_year_saving_versus_benchmark_£current
+  attr_reader :one_year_exemplar_floor_area_£current,   :one_year_saving_versus_exemplar_£current
+  attr_reader :one_year_gas_per_pupil_£current, :one_year_gas_per_floor_area_£current
+  attr_reader :one_year_gas_per_pupil_normalised_£current, :one_year_gas_per_floor_area_normalised_£current
+
   def initialize(school, type = :annualgasbenchmark)
     super(school, type)
   end
@@ -64,6 +71,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         units:  :£current,
         benchmark_code: '$lyr'
       },
+      historic_rate_£_per_kwh: {
+        description: 'Blended historic tariff over last year',
+        units:  :£_per_kwh
+      },
+      current_rate_£_per_kwh: {
+        description: 'Blended current tariff over last year i.e. the latest tariff applied to historic kWh comsumption',
+        units:  :£_per_kwh
+      },
       previous_year_£: {
         description: 'Previous years gas consumption - £ including differential tariff  (using historic tariffs)',
         units:  :£,
@@ -84,16 +99,24 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         units:  {kwh: :gas}
       },
       one_year_benchmark_floor_area_£: {
+        description: 'Last years gas consumption for benchmark/average school, normalised by floor area - £ (historic tariff)',
+        units:  :£
+      },
+      one_year_benchmark_floor_area_£current: {
         description: 'Last years gas consumption for benchmark/average school, normalised by floor area - £ (current tariff)',
-        units:  {£: :gas}
+        units:  :£current
       },
       one_year_saving_versus_benchmark_kwh: {
         description: 'Annual difference in gas consumption versus benchmark/average school - kwh (use adjective for sign)',
         units:  {kwh: :gas}
       },
       one_year_saving_versus_benchmark_£: {
-        description: 'Annual difference in gas consumption versus benchmark/average school - £ (use adjective for sign) (current tariff)',
+        description: 'Annual difference in gas consumption versus benchmark/average school - £ (use adjective for sign) (historic tariff)',
         units:  {£: :gas}
+      },
+      one_year_saving_versus_benchmark_£current: {
+        description: 'Annual difference in gas consumption versus benchmark/average school - £ (use adjective for sign) (current tariff)',
+        units:  :£current
       },
       one_year_saving_versus_benchmark_adjective: {
         description: 'Adjective: higher or lower: gas consumption versus benchmark/average school',
@@ -105,9 +128,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         units:  {kwh: :gas}
       },
       one_year_exemplar_floor_area_£: {
-        description: 'Last years gas consumption for exemplar school, normalised by floor area - £ (current tariff)',
-        units:  {£: :gas},
+        description: 'Last years gas consumption for exemplar school, normalised by floor area - £ (historic tariff)',
+        units:  :£,
         benchmark_code: '£exa'
+      },
+      one_year_exemplar_floor_area_£current: {
+        description: 'Last years gas consumption for exemplar school, normalised by floor area - £ (current tariff)',
+        units:  :£current,
+        benchmark_code: '$exa'
       },
       one_year_exemplar_floor_area_co2: {
         description: 'Last years gas consumption for exemplar school, normalised by floor area - CO2 kg',
@@ -118,9 +146,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         units:  {kwh: :gas}
       },
       one_year_saving_versus_exemplar_£: {
-        description: 'Annual difference in gas consumption versus exemplar school - £ (use adjective for sign) (current tariff)',
-        units:  {£: :gas},
+        description: 'Annual difference in gas consumption versus exemplar school - £ (use adjective for sign) (historic tariff)',
+        units:  :£,
         benchmark_code: 's£ex'
+      },
+      one_year_saving_versus_exemplar_£current: {
+        description: 'Annual difference in gas consumption versus exemplar school - £ (use adjective for sign) (current tariff)',
+        units:  :£current,
+        benchmark_code: 's$ex'
       },
       one_year_saving_versus_exemplar_co2: {
         description: 'Annual difference in gas consumption versus exemplar school - CO2 kg (use adjective for sign)',
@@ -137,9 +170,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         benchmark_code: 'kpup'
       },
       one_year_gas_per_pupil_£: {
-        description: 'Per pupil annual gas usage - £ - required for PH analysis, not alerts (current tariff)',
-        units:  {£: :gas},
+        description: 'Per pupil annual gas usage - £ - required for PH analysis, not alerts (historic tariff)',
+        units:  :£,
         benchmark_code: '£pup'
+      },
+      one_year_gas_per_pupil_£current: {
+        description: 'Per pupil annual gas usage - £ - required for PH analysis, not alerts (current tariff)',
+        units:  :£current,
+        benchmark_code: '$pup'
       },
       one_year_gas_per_pupil_co2: {
         description: 'Per pupil annual gas usage - co2 - required for PH analysis, not alerts',
@@ -156,9 +194,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         units:  {kwh: :gas}
       },
       one_year_gas_per_floor_area_£: {
-        description: 'Per floor area annual gas usage - £ - required for PH analysis, not alerts (current tariff)',
-        units:  {£: :gas},
+        description: 'Per floor area annual gas usage - £ - required for PH analysis, not alerts (historic tariff)',
+        units:  :£,
         benchmark_code: 'pfla'
+      },
+      one_year_gas_per_floor_area_£current: {
+        description: 'Per floor area annual gas usage - £ - required for PH analysis, not alerts (current tariff)',
+        units:  :£current,
+        benchmark_code: '$fla'
       },
       degree_day_adjustment: {
         description: 'Regional degree day adjustment; 60% of adjustment for Gas (not 100% heating consumption), 100% of Storage Heaters',
@@ -196,9 +239,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         benchmark_code: 'nkpp'
       },
       one_year_gas_per_pupil_normalised_£: {
-        description: 'Per pupil annual gas usage - £ - temperature normalised (internal use only) (current tariff)',
-        units:  {£: :gas},
+        description: 'Per pupil annual gas usage - £ - temperature normalised (internal use only) (historic tariff)',
+        units:  :£,
         benchmark_code: 'n£pp'
+      },
+      one_year_gas_per_pupil_normalised_£current: {
+        description: 'Per pupil annual gas usage - £ - temperature normalised (internal use only) (current tariff)',
+        units:  :£current,
+        benchmark_code: 'n$pp'
       },
       one_year_gas_per_floor_area_normalised_kwh: {
         description: 'Per floor area annual gas usage - kwh - temperature normalised (internal use only) (current tariff)',
@@ -206,9 +254,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         benchmark_code: 'nkm2'
       },
       one_year_gas_per_floor_area_normalised_£: {
-        description: 'Per floor area annual gas usage - £ - temperature normalised (internal use only) (current tariff)',
-        units:  {£: :gas},
+        description: 'Per floor area annual gas usage - £ - temperature normalised (internal use only) (historic tariff)',
+        units:  :£,
         benchmark_code: 'n£m2'
+      },
+      one_year_gas_per_floor_area_normalised_£current: {
+        description: 'Per floor area annual gas usage - £ - temperature normalised (internal use only) (current tariff)',
+        units:  :£current,
+        benchmark_code: 'n$m2'
       },
       per_floor_area_gas_benchmark_£: {
         description: 'Per floor area annual gas usage - £ (current tariff)',
@@ -232,7 +285,11 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         units:  String
       },
       summary: {
-        description: 'Description: £spend, adj relative to average',
+        description: 'Description: £spend, adj relative to average - historic tariffs',
+        units: String
+      },
+      summary_current: {
+        description: 'Description: £spend, adj relative to average - current tariffs',
         units: String
       }
     }
@@ -262,41 +319,53 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     @last_year_£current = kwh(asof_date - 365, asof_date, :£current)
     @last_year_co2      = kwh(asof_date - 365, asof_date, :co2)
 
+    fa  = floor_area(asof_date - 365, asof_date)
+    pup = pupils(asof_date - 365, asof_date)
+    @historic_rate_£_per_kwh = historic_blended_rate_£_per_kwh
+    @current_rate_£_per_kwh  = current_blended_rate_£_per_kwh
+
     prev_date = asof_date - 366
     @previous_year_£        = kwh(prev_date - 365, prev_date, :£)
     @previous_year_£current = kwh(prev_date - 365, prev_date, :£current)
 
-    @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
+    @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * fa / @degree_day_adjustment
     # benchmark £ using same tariff as school not benchmark tariff
-    @one_year_benchmark_floor_area_£     = @one_year_benchmark_floor_area_kwh * defaulted_gas_tariff_£_per_kwh(:£current)
+    @one_year_benchmark_floor_area_£        = @one_year_benchmark_floor_area_kwh * @historic_rate_£_per_kwh
+    @one_year_benchmark_floor_area_£current = @one_year_benchmark_floor_area_kwh * @current_rate_£_per_kwh
 
-    @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_floor_area_kwh
-    @one_year_saving_versus_benchmark_£   = @last_year_£current   - @one_year_benchmark_floor_area_£
+    @one_year_saving_versus_benchmark_kwh       = @last_year_kwh      - @one_year_benchmark_floor_area_kwh
+    @one_year_saving_versus_benchmark_£         = @last_year_£        - @one_year_benchmark_floor_area_£
+    @one_year_saving_versus_benchmark_£current  = @last_year_£current - @one_year_benchmark_floor_area_£current
 
-    @one_year_exemplar_floor_area_kwh   = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area(asof_date - 365, asof_date) / @degree_day_adjustment
-    @one_year_exemplar_floor_area_£     = @one_year_exemplar_floor_area_kwh * defaulted_gas_tariff_£_per_kwh(:£current)
+    @one_year_exemplar_floor_area_kwh       = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * fa / @degree_day_adjustment
+    @one_year_exemplar_floor_area_£         = @one_year_exemplar_floor_area_kwh * @historic_rate_£_per_kwh
+    @one_year_exemplar_floor_area_£current  = @one_year_exemplar_floor_area_kwh * @current_rate_£_per_kwh  
     @one_year_exemplar_floor_area_co2   = gas_co2(@one_year_exemplar_floor_area_kwh)
 
-    @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_floor_area_kwh
-    @one_year_saving_versus_exemplar_£   = @last_year_£current   - @one_year_exemplar_floor_area_£
-    @one_year_saving_versus_exemplar_co2 = @last_year_co2 - @one_year_exemplar_floor_area_co2
+    @one_year_saving_versus_exemplar_kwh      = @last_year_kwh      - @one_year_exemplar_floor_area_kwh
+    @one_year_saving_versus_exemplar_£        = @last_year_£        - @one_year_exemplar_floor_area_£
+    one_year_saving_versus_exemplar_£current  = @last_year_£current - @one_year_exemplar_floor_area_£current
+    @one_year_saving_versus_exemplar_co2      = @last_year_co2      - @one_year_exemplar_floor_area_co2
 
-    @one_year_gas_per_pupil_kwh       = @last_year_kwh / pupils(asof_date - 365, asof_date)
-    @one_year_gas_per_pupil_£         = @last_year_£current / pupils(asof_date - 365, asof_date)
-    @one_year_gas_per_floor_area_kwh  = @last_year_kwh / floor_area(asof_date - 365, asof_date)
-    @one_year_gas_per_floor_area_£    = @last_year_£current / floor_area(asof_date - 365, asof_date)
+    @one_year_gas_per_pupil_kwh           = @last_year_kwh      / pup
+    @one_year_gas_per_pupil_£             = @last_year_£        / pup
+    @one_year_gas_per_pupil_£current      = @last_year_£current / pup
+    @one_year_gas_per_floor_area_kwh      = @last_year_kwh      / fa
+    @one_year_gas_per_floor_area_£        = @last_year_£        / fa
+    @one_year_gas_per_floor_area_£current = @last_year_£current / fa
 
-    @one_year_gas_per_pupil_co2       = @last_year_co2  / pupils(asof_date - 365, asof_date)
-    @one_year_gas_per_floor_area_co2  = @last_year_co2  / floor_area(asof_date - 365, asof_date)
+    @one_year_gas_per_pupil_co2       = @last_year_co2  / pup
+    @one_year_gas_per_floor_area_co2  = @last_year_co2  / fa
 
-    @one_year_gas_per_pupil_normalised_kwh        = @one_year_gas_per_pupil_kwh * @degree_day_adjustment
-    @one_year_gas_per_pupil_normalised_£          = @one_year_gas_per_pupil_£ * @degree_day_adjustment
-    @one_year_gas_per_floor_area_normalised_kwh   = @one_year_gas_per_floor_area_kwh * @degree_day_adjustment
-    @one_year_gas_per_floor_area_normalised_£     = @one_year_gas_per_floor_area_£ * @degree_day_adjustment
+    @one_year_gas_per_pupil_normalised_kwh          = @one_year_gas_per_pupil_kwh           * @degree_day_adjustment
+    @one_year_gas_per_pupil_normalised_£            = @one_year_gas_per_pupil_£             * @degree_day_adjustment
+    @one_year_gas_per_pupil_normalised_£current     = @one_year_gas_per_pupil_£current      * @degree_day_adjustment
+    @one_year_gas_per_floor_area_normalised_kwh     = @one_year_gas_per_floor_area_kwh      * @degree_day_adjustment
+    @one_year_gas_per_floor_area_normalised_£       = @one_year_gas_per_floor_area_£        * @degree_day_adjustment
+    @one_year_gas_per_floor_area_normalised_£current= @one_year_gas_per_floor_area_£current * @degree_day_adjustment
 
-    @per_floor_area_gas_£ = @last_year_£current / floor_area(asof_date - 365, asof_date)
-    @per_floor_area_gas_benchmark_£ = @one_year_benchmark_floor_area_£ / floor_area(asof_date - 365, asof_date)
-    @percent_difference_from_average_per_floor_area = percent_change(@per_floor_area_gas_benchmark_£, one_year_gas_per_floor_area_£)
+    @per_floor_area_gas_benchmark_£ = @one_year_benchmark_floor_area_£ / fa
+    @percent_difference_from_average_per_floor_area = percent_change(@one_year_benchmark_floor_area_kwh, @last_year_kwh)
 
     #BACKWARDS COMPATIBILITY: previously would have failed here as percent_change can return nil
     raise_calculation_error_if_missing(percent_difference_from_average_per_floor_area: @percent_difference_from_average_per_floor_area)
@@ -322,7 +391,6 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     Adjective.adjective_for(@one_year_saving_versus_exemplar_kwh)
   end
 
-
   def one_year_saving_versus_benchmark_adjective
     return nil if @one_year_saving_versus_benchmark_kwh.nil?
     Adjective.adjective_for(@one_year_saving_versus_benchmark_kwh)
@@ -339,6 +407,13 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   end
 
   def summary
+    I18n.t("analytics.annual_cost_with_adjective",
+      cost: FormatEnergyUnit.format(:£, @last_year_£, :text),
+      relative_percent: FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_floor_area, :text),
+      adjective: simple_percent_difference_adjective)
+  end
+
+  def summary_current
     I18n.t("analytics.annual_cost_with_adjective",
       cost: FormatEnergyUnit.format(:£, @last_year_£current, :text),
       relative_percent: FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_floor_area, :text),

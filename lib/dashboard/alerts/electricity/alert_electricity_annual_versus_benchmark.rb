@@ -201,7 +201,11 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       units:  String
     },
     summary: {
-      description: 'Description: £spend, adj relative to average',
+      description: 'Description: £spend, adj relative to average (historic tariffs)',
+      units: String
+    },
+    summary_current: {
+      description: 'Description: £spend, adj relative to average (current tariffs)',
       units: String
     }
   }
@@ -268,7 +272,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
     @per_pupil_electricity_benchmark_£          = @one_year_benchmark_by_pupil_£ / pup
     @per_pupil_electricity_benchmark_£current   = @one_year_benchmark_by_pupil_£current / pup
-    @percent_difference_from_average_per_pupil  = percent_change(@one_year_benchmark_by_pupil_kwh, @one_year_electricity_per_pupil_kwh)
+    @percent_difference_from_average_per_pupil  = percent_change(@one_year_benchmark_by_pupil_kwh, @last_year_kwh)
 
     #BACKWARDS COMPATIBILITY: previously would have failed here as percent_change can return nil
     raise_calculation_error_if_missing(percent_difference_from_average_per_pupil: @percent_difference_from_average_per_pupil)
@@ -312,6 +316,13 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   end
 
   def summary
+    I18n.t("analytics.annual_cost_with_adjective",
+      cost: FormatEnergyUnit.format(:£, @last_year_£, :text),
+      relative_percent: FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_pupil, :text),
+      adjective: simple_percent_difference_adjective)
+  end
+
+  def summary_current
     I18n.t("analytics.annual_cost_with_adjective",
       cost: FormatEnergyUnit.format(:£, @last_year_£current, :text),
       relative_percent: FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_pupil, :text),
