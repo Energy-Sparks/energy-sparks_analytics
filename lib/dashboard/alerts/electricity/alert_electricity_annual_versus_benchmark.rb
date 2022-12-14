@@ -16,9 +16,17 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   attr_reader :one_year_electricity_per_pupil_kwh, :one_year_electricity_per_pupil_£, :one_year_electricity_per_pupil_co2
   attr_reader :one_year_electricity_per_floor_area_kwh, :one_year_electricity_per_floor_area_£
 
+  attr_reader :one_year_benchmark_by_pupil_£current, :one_year_saving_versus_benchmark_£current
+  attr_reader :one_year_exemplar_by_pupil_£current, :one_year_saving_versus_exemplar_£current
+  attr_reader :one_year_electricity_per_pupil_£current, :one_year_electricity_per_floor_area_£current
+  attr_reader :one_year_electricity_per_floor_area_co2
+  attr_reader :per_pupil_electricity_benchmark_£current
+
   attr_reader :per_pupil_electricity_benchmark_£
   attr_reader :percent_difference_from_average_per_pupil
   attr_reader :tariff_has_changed_during_period_text
+  
+  attr_reader :historic_rate_£_per_kwh, :current_rate_£_per_kwh
 
   def initialize(school)
     super(school, :annualelectricitybenchmark)
@@ -45,6 +53,14 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       units:  :£current,
       benchmark_code: '$lyr'
     },
+    historic_rate_£_per_kwh: {
+      description: 'Blended historic tariff over last year',
+      units:  :£_per_kwh
+    },
+    current_rate_£_per_kwh: {
+      description: 'Blended current tariff over last year i.e. the latest tariff applied to historic kWh comsumption',
+      units:  :£_per_kwh
+    },
     previous_year_£: {
       description: 'Previous years electricity consumption - £ including differential tariff (historic tariffs)',
       units:  :£,
@@ -65,16 +81,24 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       units:  {kwh: :electricity}
     },
     one_year_benchmark_by_pupil_£: {
-      description: 'Last years electricity consumption for benchmark/average school, normalised by pupil numbers - £',
-      units:  {£: :electricity}
+      description: 'Last years electricity consumption for benchmark/average school, normalised by pupil numbers - £ (historic tariffs)',
+      units:  :£
+    },
+    one_year_benchmark_by_pupil_£current: {
+      description: 'Last years electricity consumption for benchmark/average school, normalised by pupil numbers - £ (current tariffs)',
+      units:  :£current
     },
     one_year_saving_versus_benchmark_kwh: {
       description: 'Annual difference in electricity consumption versus benchmark/average school - kwh (use adjective for sign)',
       units:  {kwh: :electricity}
     },
     one_year_saving_versus_benchmark_£: {
-      description: 'Annual difference in electricity consumption versus benchmark/average school - £ (use adjective for sign)',
-      units:  {£: :electricity}
+      description: 'Annual difference in electricity consumption versus benchmark/average school - £ (use adjective for sign) (historic tariffs)',
+      units:  :£
+    },
+    one_year_saving_versus_benchmark_£current: {
+      description: 'Annual difference in electricity consumption versus benchmark/average school - £ (use adjective for sign) (current tariffs)',
+      units:  :£current
     },
     one_year_saving_versus_benchmark_adjective: {
       description: 'Adjective: higher or lower: electricity consumption versus benchmark/average school',
@@ -85,17 +109,26 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       units:  {kwh: :electricity}
     },
     one_year_exemplar_by_pupil_£: {
-      description: 'Last years electricity consumption for exemplar school, normalised by pupil numbers - £',
-      units:  {£: :electricity}
+      description: 'Last years electricity consumption for exemplar school, normalised by pupil numbers - £ (historic tariffs)',
+      units:  :£
+    },
+    one_year_exemplar_by_pupil_£current: {
+      description: 'Last years electricity consumption for exemplar school, normalised by pupil numbers - £ (current tariffs)',
+      units:  :£current
     },
     one_year_saving_versus_exemplar_kwh: {
       description: 'Annual difference in electricity consumption versus exemplar school - kwh (use adjective for sign)',
       units:  {kwh: :electricity}
     },
     one_year_saving_versus_exemplar_£: {
-      description: 'Annual difference in electricity consumption versus exemplar school - £ (use adjective for sign)',
-      units:  {£: :electricity},
+      description: 'Annual difference in electricity consumption versus exemplar school - £ (use adjective for sign) (historic tariffs)',
+      units:  :£,
       benchmark_code: '£esav'
+    },
+    one_year_saving_versus_exemplar_£current: {
+      description: 'Annual difference in electricity consumption versus exemplar school - £ (use adjective for sign) (current tariffs)',
+      units:  :£current,
+      benchmark_code: '$esav'
     },
     one_year_saving_versus_exemplar_co2: {
       description: 'Annual difference in electricity consumption versus exemplar school - co2 (use adjective for sign)',
@@ -111,26 +144,44 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       benchmark_code: 'kpup'
     },
     one_year_electricity_per_pupil_£: {
-      description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts',
-      units:  {£: :electricity},
+      description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts (historic tariffs)',
+      units:  :£,
       benchmark_code: '£pup'
+    },
+    one_year_electricity_per_pupil_£current: {
+      description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts (current tariffs)',
+      units:  :£current,
+      benchmark_code: '$pup'
     },
     one_year_electricity_per_pupil_co2: {
       description: 'Per pupil annual electricity usage - co2 - required for PH analysis, not alerts',
       units:  :co2,
       benchmark_code: 'cpup'
     },
+    one_year_electricity_per_floor_area_co2: {
+      description: 'Per floor area annual electricity usage - co2 - required for PH analysis, not alerts',
+      units:  :co2,
+      benchmark_code: 'c£m2'
+    },
     one_year_electricity_per_floor_area_kwh: {
       description: 'Per floor area annual electricity usage - kwh - required for PH analysis, not alerts',
       units:  {kwh: :electricity}
     },
     one_year_electricity_per_floor_area_£: {
-      description: 'Per floor area annual electricity usage - £ - required for PH analysis, not alerts',
-      units:  {£: :electricity}
+      description: 'Per floor area annual electricity usage - £ - required for PH analysis, not alerts (historic tariffs)',
+      units:  :£
+    },
+    one_year_electricity_per_floor_area_£current: {
+      description: 'Per floor area annual electricity usage - £ - required for PH analysis, not alerts (current tariffs)',
+      units:  :£current
     },
     per_pupil_electricity_benchmark_£: {
-      description: 'Per pupil annual electricity usage - £',
-      units:  {£: :electricity}
+      description: 'Per pupil annual electricity usage - £  (historic tariffs)',
+      units:  :£
+    },
+    per_pupil_electricity_benchmark_£current: {
+      description: 'Per pupil annual electricity usage - £  (current tariffs)',
+      units:  :£current
     },
     percent_difference_from_average_per_pupil: {
       description: 'Percent difference from average',
@@ -150,7 +201,11 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       units:  String
     },
     summary: {
-      description: 'Description: £spend, adj relative to average',
+      description: 'Description: £spend, adj relative to average (historic tariffs)',
+      units: String
+    },
+    summary_current: {
+      description: 'Description: £spend, adj relative to average (current tariffs)',
       units: String
     }
   }
@@ -170,40 +225,54 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @last_year_£current = kwh(asof_date - 365, asof_date, :£current)
     @last_year_co2      = kwh(asof_date - 365, asof_date, :co2)
 
+    fa  = floor_area(asof_date - 365, asof_date)
+    pup = pupils(asof_date - 365, asof_date)
+    @historic_rate_£_per_kwh = historic_blended_rate_£_per_kwh
+    @current_rate_£_per_kwh  = current_blended_rate_£_per_kwh
+
     prev_date = asof_date - 366
     @previous_year_£        = kwh(prev_date - 365, prev_date, :£)
     @previous_year_£current = kwh(prev_date - 365, prev_date, :£current)
 
-    @one_year_benchmark_by_pupil_kwh   = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pupils(asof_date - 365, asof_date))
-    @one_year_benchmark_by_pupil_£     = @one_year_benchmark_by_pupil_kwh * current_blended_rate_£_per_kwh
-    @one_year_saving_versus_benchmark_kwh = @last_year_kwh - @one_year_benchmark_by_pupil_kwh
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_kwh * current_blended_rate_£_per_kwh
+    @one_year_benchmark_by_pupil_kwh            = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pup)
+    @one_year_benchmark_by_pupil_£current       = @one_year_benchmark_by_pupil_kwh * @current_rate_£_per_kwh
+    @one_year_benchmark_by_pupil_£              = @one_year_benchmark_by_pupil_kwh * @historic_rate_£_per_kwh
+    @one_year_saving_versus_benchmark_kwh       = @last_year_kwh - @one_year_benchmark_by_pupil_kwh
+    @one_year_saving_versus_benchmark_£         = @one_year_saving_versus_benchmark_kwh * @historic_rate_£_per_kwh
+    @one_year_saving_versus_benchmark_£current  = @one_year_saving_versus_benchmark_kwh * @current_rate_£_per_kwh
 
-    @one_year_saving_versus_benchmark_kwh = @one_year_saving_versus_benchmark_kwh.magnitude
-    @one_year_saving_versus_benchmark_£ = @one_year_saving_versus_benchmark_£.magnitude
+    @one_year_saving_versus_benchmark_kwh       = @one_year_saving_versus_benchmark_kwh.magnitude
+    @one_year_saving_versus_benchmark_£         = @one_year_saving_versus_benchmark_£.magnitude
+    @one_year_saving_versus_benchmark_£current  = @one_year_saving_versus_benchmark_£current.magnitude
 
-    @one_year_exemplar_by_pupil_kwh   = BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school_type, pupils(asof_date - 365, asof_date))
-    @one_year_exemplar_by_pupil_£     = @one_year_exemplar_by_pupil_kwh * current_blended_rate_£_per_kwh
+    @one_year_exemplar_by_pupil_kwh             = BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school_type, pup)
+    @one_year_exemplar_by_pupil_£               = @one_year_exemplar_by_pupil_kwh * @historic_rate_£_per_kwh
+    @one_year_exemplar_by_pupil_£current        = @one_year_exemplar_by_pupil_kwh * @current_rate_£_per_kwh
 
-    @one_year_saving_versus_exemplar_kwh = @last_year_kwh - @one_year_exemplar_by_pupil_kwh
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_kwh * current_blended_rate_£_per_kwh
-    @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
+    @one_year_saving_versus_exemplar_kwh      = @last_year_kwh - @one_year_exemplar_by_pupil_kwh
+    @one_year_saving_versus_exemplar_£        = @one_year_saving_versus_exemplar_kwh * @historic_rate_£_per_kwh
+    @one_year_saving_versus_exemplar_£current = @one_year_saving_versus_exemplar_kwh * @current_rate_£_per_kwh
+    @one_year_saving_versus_exemplar_co2      = @one_year_saving_versus_exemplar_kwh * blended_co2_per_kwh
 
-    @one_year_saving_versus_exemplar_kwh = @one_year_saving_versus_exemplar_kwh.magnitude
-    @one_year_saving_versus_exemplar_£ = @one_year_saving_versus_exemplar_£.magnitude
-    @one_year_saving_versus_exemplar_co2 = @one_year_saving_versus_exemplar_co2.magnitude
+    @one_year_saving_versus_exemplar_kwh      = @one_year_saving_versus_exemplar_kwh.magnitude
+    @one_year_saving_versus_exemplar_£        = @one_year_saving_versus_exemplar_£.magnitude
+    @one_year_saving_versus_exemplar_£current = @one_year_saving_versus_exemplar_£current.magnitude
+    @one_year_saving_versus_exemplar_co2      = @one_year_saving_versus_exemplar_co2.magnitude
 
-    @one_year_electricity_per_pupil_kwh       = @last_year_kwh / pupils(asof_date - 365, asof_date)
-    @one_year_electricity_per_pupil_£         = @last_year_£current / pupils(asof_date - 365, asof_date)
-    @one_year_electricity_per_pupil_co2       = @last_year_co2 / pupils(asof_date - 365, asof_date)
-    @one_year_electricity_per_floor_area_kwh  = @last_year_kwh / floor_area(asof_date - 365, asof_date)
-    @one_year_electricity_per_floor_area_£    = @last_year_£current / floor_area(asof_date - 365, asof_date)
+    @one_year_electricity_per_pupil_kwh           = @last_year_kwh      / pup
+    @one_year_electricity_per_pupil_£             = @last_year_£        / pup
+    @one_year_electricity_per_pupil_£current      = @last_year_£current / pup
+    @one_year_electricity_per_pupil_co2           = @last_year_co2      / pup
+    @one_year_electricity_per_floor_area_kwh      = @last_year_kwh      / fa
+    @one_year_electricity_per_floor_area_£        = @last_year_£        / fa
+    @one_year_electricity_per_floor_area_£current = @last_year_£current / fa
+    @one_year_electricity_per_floor_area_co2      = @last_year_co2      / fa
 
-    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£, @one_year_saving_versus_exemplar_£), capital_cost, @one_year_saving_versus_exemplar_co2)
+    set_savings_capital_costs_payback(Range.new(@one_year_saving_versus_exemplar_£current, @one_year_saving_versus_exemplar_£current), capital_cost, @one_year_saving_versus_exemplar_co2)
 
-    @per_pupil_electricity_£ = @last_year_£current / pupils(asof_date - 365, asof_date)
-    @per_pupil_electricity_benchmark_£ = @one_year_benchmark_by_pupil_£ / pupils(asof_date - 365, asof_date)
-    @percent_difference_from_average_per_pupil = percent_change(@per_pupil_electricity_benchmark_£, one_year_electricity_per_pupil_£)
+    @per_pupil_electricity_benchmark_£          = @one_year_benchmark_by_pupil_£ / pup
+    @per_pupil_electricity_benchmark_£current   = @one_year_benchmark_by_pupil_£current / pup
+    @percent_difference_from_average_per_pupil  = percent_change(@one_year_benchmark_by_pupil_kwh, @last_year_kwh)
 
     #BACKWARDS COMPATIBILITY: previously would have failed here as percent_change can return nil
     raise_calculation_error_if_missing(percent_difference_from_average_per_pupil: @percent_difference_from_average_per_pupil)
@@ -247,6 +316,13 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   end
 
   def summary
+    I18n.t("analytics.annual_cost_with_adjective",
+      cost: FormatEnergyUnit.format(:£, @last_year_£, :text),
+      relative_percent: FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_pupil, :text),
+      adjective: simple_percent_difference_adjective)
+  end
+
+  def summary_current
     I18n.t("analytics.annual_cost_with_adjective",
       cost: FormatEnergyUnit.format(:£, @last_year_£current, :text),
       relative_percent: FormatEnergyUnit.format(:relative_percent, @percent_difference_from_average_per_pupil, :text),

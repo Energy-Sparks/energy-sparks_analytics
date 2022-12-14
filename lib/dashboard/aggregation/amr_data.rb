@@ -195,7 +195,7 @@ class AMRData < HalfHourlyData
     # needs to average rate over up to last year because:
     # - the latest day might have 0 kWh, and therefore £0 so no implied rate
     # - for electricity with differential tariffs this is a blended rate - beware
-    @current_tariff_rate_£_per_kwh ||= calculate_blended_£_per_kwh_date_range(up_to_1_year_ago, end_date, :£)
+    @historic_tariff_rate_£_per_kwh ||= calculate_blended_£_per_kwh_date_range(up_to_1_year_ago, end_date, :£)
   end
 
   def calculate_solar_pv_co2_x48(date)
