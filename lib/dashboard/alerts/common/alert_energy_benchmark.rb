@@ -363,11 +363,6 @@ class ChangeInEnergyUse < AlertAnalysisBase
         results.merge!(result)
       end
     end
-    # please leave for the moment PH 8Dec2022:
-    unless Object.const_defined?('Rails')
-      puts "Got here:"
-      ap results
-    end
     results
   end
 
