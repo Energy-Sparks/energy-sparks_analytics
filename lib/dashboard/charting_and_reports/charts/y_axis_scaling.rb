@@ -17,7 +17,7 @@ class YAxisScaling
     # rubocop:enable Style/ClassVars, Metrics/LineLength, Lint/UnneededDisable
   end
 
-  def scale_from_kwh(value, unit, scaling_factor_type, fuel_type, meter_collection)
+  def scale_from_kwh_deprecated(value, unit, scaling_factor_type, fuel_type, meter_collection)
     unit_scale = scale_unit_from_kwh(unit, fuel_type, meter_collection)
     factor = scaling_factor(scaling_factor_type, meter_collection)
     value * factor * unit_scale
@@ -91,7 +91,8 @@ class YAxisScaling
       # default conversion to a constant rate
       ConvertKwh.scale_unit_from_kwh(unit, fuel_type)
     else
-      one_year_blended_conversion_from_kwh(unit, fuel_type, meter_collection).round(5)
+      puts "Chart: Blending calc #{1.0 / one_year_blended_conversion_from_kwh(unit, fuel_type, meter_collection)}"
+      one_year_blended_conversion_from_kwh(unit, fuel_type, meter_collection)
     end
   end
 

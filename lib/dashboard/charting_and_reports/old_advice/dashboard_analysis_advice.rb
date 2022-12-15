@@ -188,6 +188,18 @@ class DashboardChartAdviceBase
 
   protected
 
+  def calculate_alert(alert_class, fuel_type, asof_date = nil)
+    aggregate_meter = @school.aggregate_meter(fuel_type)
+    return nil if aggregate_meter.nil?
+    alert = alert_class.new(@school)
+    alert.analyse(asof_date || aggregate_meter.amr_data.end_date)
+    alert
+  rescue => e
+    # PH in 2 minds whether this general catch all should reraise or not?
+    logger.info "Failed to calculate alert #{alert_class.class.name}: #{e.message}"
+    nil
+  end
+
   # copied from heating_regression_model_fitter.rb TODO(PH,17Feb2019) - merge
   def html_table(header, rows, totals_row = nil)
     HtmlTableFormatting.new(header, rows, totals_row).html
@@ -249,18 +261,18 @@ class DashboardChartAdviceBase
     (value * 100.0).round(0).to_s + '%'
   end
 
-  def pounds_to_kwh(pounds, fuel_type_sym)
-    YAxisScaling.new.scale(:£, :kwh, pounds, fuel_type_sym, @school)
+  def pounds_to_kwh(pounds, fuel_type_sym, £_datatype = :£)
+    YAxisScaling.new.scale(£_datatype, :kwh, pounds, fuel_type_sym, @school)
   end
 
-  def pounds_to_pounds_and_kwh(pounds, fuel_type_sym)
-    kwh = pounds_to_kwh(pounds, fuel_type_sym)
+  def pounds_to_pounds_and_kwh(pounds, fuel_type_sym, £_datatype = :£)
+    kwh = pounds_to_kwh(pounds, fuel_type_sym, £_datatype)
     kwh_text = FormatEnergyUnit.scale_num(kwh)
     '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + kwh_text + 'kWh)'
   end
 
-  def kwh_to_pounds_and_kwh(kwh, fuel_type_sym, data_units = @chart_definition[:yaxis_units])
-    pounds = YAxisScaling.new.scale(data_units, :£, kwh, fuel_type, @school)
+  def kwh_to_pounds_and_kwh(kwh, fuel_type_sym, data_units = @chart_definition[:yaxis_units], £_datatype = :£)
+    pounds = YAxisScaling.new.scale(data_units, £_datatype, kwh, fuel_type, @school)
     '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + FormatEnergyUnit.scale_num(kwh) + 'kWh)'
   end
 
@@ -396,11 +408,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   protected def electric_usage
-    get_energy_usage('electricity', :electricity, index_of_most_recent_date)
+    get_energy_usage(:electricity)
   end
 
   protected def gas_usage
-    get_energy_usage('gas', :gas, index_of_most_recent_date)
+    get_energy_usage(:gas)
   end
 
   protected def gas?;             !gas_usage.nil?             end
@@ -408,21 +420,43 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   protected def storage_heaters?; !storage_heater_usage.nil?  end
 
   protected def storage_heater_usage
-    get_energy_usage('storage heaters', :electricity, index_of_most_recent_date)
+    get_energy_usage(:storage_heater)
   end
 
   protected def electric_comparison_benchmark
-    compare = comparison('electricity', index_of_data(benchmark_school_name))
+    compare = comparison(:electricity, :benchmark)
     generate_html(%{ The electricity usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
   protected def gas_comparison_benchmark
-    compare = comparison('gas', index_of_data(benchmark_school_name))
+    gas_tariff_change_text
+    compare = comparison(:gas, :benchmark)
     generate_html(%{ The gas usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
+  def gas_tariff_change_text
+    benchmark_data(:gas, :school, :£)
+    changed = has_changed_by_percent?(benchmark_data(:gas, :school, :£), benchmark_data(:gas, :school, :£current), 0.01)
+
+    # return '' unless changed
+
+    saving_£   = FormatEnergyUnit.format(:£,   benchmark_data(:gas, :exemplar, :£current, true), :html)
+    saving_kwh = FormatEnergyUnit.format(:kwh, benchmark_data(:gas, :exemplar, :kwh,      true), :html)
+    changed_txt = changed ? ' at your current tariff' : ''
+
+    txt = "#{saving_£} (#{saving_kwh})#{changed_txt}"
+    puts txt
+    txt
+  end
+
+  def has_changed_by_percent?(old_value, new_value, percent)
+    return false if old_value.nil? || new_value.nil?
+
+    ((new_value - old_value) / old_value).magnitude > percent
+  end
+
   protected def storage_heater_benchmark_comparison
-    compare = comparison('storage heaters', index_of_data(benchmark_school_name))
+    compare = comparison(:storage_heater, :benchmark)
     generate_html(%{ The storage heater usage <%= compare %>. }.gsub(/^  /, ''), binding)
   end
 
@@ -435,7 +469,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def tariff_text(electricity_usage, gas_usage)
-    preamble = 'Monetary values for benchmark and exemplar schools are converted using your school&apos;s tariffs'
+    preamble = 'Monetary values for benchmark and exemplar schools are converted using your school&apos;s tariffs.'
     EconomicTariffsChangeCaveats.new(@school).tariff_text_with_sentence(electricity_usage, gas_usage, preamble: preamble, charts: true)
   end
 
@@ -495,7 +529,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
           <% else %>
             is above average, the school should aim to reduce this,
           <% end %>
-          which would save you <%= pound_gas_saving_versus_exemplar %> per year if you matched the most energy efficient (exemplar) schools.
+          which would save you <%= pound_gas_saving_versus_exemplar_html %> per year if you matched the most energy efficient (exemplar) schools.
         <% end %>
       <% end %>
       <% if actual_electricity_usage > 0 %>
@@ -601,20 +635,32 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def actual_electricity_usage
-    actual_fuel_usage('electricity', index_of_most_recent_date)
+    actual_fuel_usage(:electricity, :school)
   end
 
   def actual_gas_usage
-    actual_fuel_usage('gas', index_of_most_recent_date)
+    actual_fuel_usage(:gas, :school)
   end
 
   def actual_storage_heater_usage
-    actual_fuel_usage('storage heaters', index_of_most_recent_date)
+    actual_fuel_usage(:storage_heater, :school)
   end
 
-  def actual_fuel_usage(fuel, index)
-    return 0.0 unless @chart_data[:x_data].key?(fuel)
-    @chart_data[:x_data][fuel][index]
+  def fuel_to_s(fuel)
+    case fuel
+    when :electricity
+      fuel.to_s
+    when :gas
+      fuel.to_s
+    when :storage_heater
+      'storage heaters'
+    end
+  end
+
+  def actual_fuel_usage(fuel, benchmark_type)
+    return 0.0 unless @chart_data[:x_data].key?(fuel_to_s(fuel))
+
+    benchmark_data(fuel, benchmark_type, :£)
   end
 
   def benchmark_school_name
@@ -629,76 +675,90 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     AggregatorBenchmarks::SCALESPLITCHAR
   end
 
-
   def average_benchmark_electricity_usage
-    actual_fuel_usage('electricity', index_of_data(benchmark_school_name))
+    actual_fuel_usage(:electricity, :benchmark)
   end
 
   def average_benchmark_gas_usage
-    actual_fuel_usage('gas', index_of_data(benchmark_school_name))
+    actual_fuel_usage(:gas, :benchmark)
   end
 
   def exemplar_electricity_usage
-    actual_fuel_usage('electricity', index_of_data(exemplar_school_name))
+    actual_fuel_usage(:electricity, :exemplar)
   end
 
   def exemplar_gas_usage
-    actual_fuel_usage('gas', index_of_data(exemplar_school_name))
+    actual_fuel_usage(:gas, :exemplar)
   end
 
   def percent_gas_of_benchmark_average
-    actual_gas_usage / average_benchmark_gas_usage
+    1.0 + benchmark_data(:gas, :benchmark, :percent,   true)
   end
 
   def percent_electricity_of_benchmark_average
-    actual_electricity_usage / average_benchmark_electricity_usage
+    1.0 + benchmark_data(:electricity, :benchmark, :percent,   true)
   end
 
-  def pound_gas_saving_versus_exemplar
-    pounds = actual_gas_usage - exemplar_gas_usage
-    pounds_to_pounds_and_kwh(pounds, :gas)
+  def pound_gas_saving_versus_exemplar_html
+    £_html   = FormatEnergyUnit.format(:£,   benchmark_data(:gas, :exemplar, :£,   true),   :html)
+    kwh_html = FormatEnergyUnit.format(:kwh, benchmark_data(:gas, :exemplar, :kwh, true), :html)
+    "#{£_html} (#{kwh_html})"
+  end
+
+  def last_chart_end_date
+    @chart_data[:x_axis_ranges].flatten.sort.last
+  end
+
+  def benchmark_data(fuel_type, benchmark_type, datatype)
+    @alerts ||= {}
+    @alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
+    @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
+  end
+
+  def benchmark_data(fuel_type, benchmark_type, datatype, saving = false)
+    @alerts ||= {}
+    @alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
+
+    if saving
+      @alerts[fuel_type].benchmark_chart_data[benchmark_type][:saving][datatype]
+    else
+      @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
+    end
   end
 
   def pound_electricity_saving_versus_exemplar
-    pounds = actual_electricity_usage - exemplar_electricity_usage
-    pounds_to_pounds_and_kwh(pounds, :electricity)
+    £   = FormatEnergyUnit.format(:£,   benchmark_data(:electricity, :exemplar, :£,   true), :html)
+    kwh = FormatEnergyUnit.format(:kwh, benchmark_data(:electricity, :exemplar, :kwh, true), :html)
+    "#{£} (#{kwh})"
   end
 
   def kwh_electricity_saving_versus_exemplar
     pounds_to_kwh(actual_electricity_usage - exemplar_electricity_usage, :electricity)
   end
 
-  def comparison(type_str, with)
-    usage_from_chart_£ = @chart_data[:x_data][type_str][index_of_most_recent_date]
-    benchmark_from_chart = @chart_data[:x_data][type_str][with]
-    formatted_usage_£ = FormatEnergyUnit.format(:£, usage_from_chart_£, :html)
-    benchmark_usage_£ = FormatEnergyUnit.format(:£, benchmark_from_chart, :html)
+  def comparison(fuel, benchmark_type)
+    school_£    = benchmark_data(fuel, :school,        :£)
+    benchmark_£ = benchmark_data(fuel, benchmark_type, :£)
 
-    if formatted_usage_£ == benchmark_usage_£ # values same in formatted space
-      'is similar to other well managed schools which spent ' + benchmark_usage_£
-    elsif usage_from_chart_£ > benchmark_from_chart
-      'is more than well managed schools which spent ' + benchmark_usage_£
+    school_£_html    = FormatEnergyUnit.format(:£, school_£,    :html)
+    benchmark_£_html = FormatEnergyUnit.format(:£, benchmark_£, :html)
+
+    if school_£_html == benchmark_£_html # values same in formatted space
+      'is similar to other well managed schools which spent ' + benchmark_£_html
+    elsif school_£ > benchmark_£
+      'is more than well managed schools which spent ' + benchmark_£_html
     else
-      'is less than well managed schools which spent ' + benchmark_usage_£
+      'is less than well managed schools which spent ' + benchmark_£_html
     end
   end
 
-  def get_energy_usage(type_str, type_sym, index)
-    return nil unless @chart_data[:x_data].key?(type_str) && @chart_data[:x_data][type_str].sum > 0.0
-    pounds = @chart_data[:x_data][type_str][index]
-    pounds_to_pounds_and_kwh(pounds, type_sym)
-  end
+  def get_energy_usage(fuel)
+    return nil unless @chart_data[:x_data].key?(fuel.to_s) && @chart_data[:x_data][fuel.to_s].sum > 0.0
 
-  def index_of_data(name)
-    @chart_data[:x_axis].find_index do |v|
-      v.include?(name)
-    end
-  end
+    £_html   = FormatEnergyUnit.format(:£,   benchmark_data(fuel, :school, :£),   :html)
+    kwh_html = FormatEnergyUnit.format(:kwh, benchmark_data(fuel, :school, :kwh), :html)
 
-  def index_of_most_recent_date
-    dr = date_range
-    last_date = dr.compact.sort { |a, b| a.first <=> b.first }.last
-    dr.find_index(last_date)
+    "#{£_html} (#{kwh_html})"
   end
 
   def date_range_of_most_recent_school_chart_value
@@ -759,8 +819,6 @@ class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
   end
 
   def comparison(type_str, with)
-    usage_from_chart_kwh = @chart_data[:x_data][type_str][index_of_most_recent_date]
-    benchmark_from_chart = @chart_data[:x_data][type_str][with]
     formatted_usage_kwh = FormatEnergyUnit.format(:kwh, usage_from_chart_kwh, :html)
     benchmark_usage_kwh = FormatEnergyUnit.format(:kwh, benchmark_from_chart, :html)
 

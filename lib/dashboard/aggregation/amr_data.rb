@@ -167,6 +167,15 @@ class AMRData < HalfHourlyData
   end
 
   def blended_rate(from_unit, to_unit, sd = up_to_1_year_ago, ed = end_date)
+    @blended_rate ||= {}
+    key         = [from_unit, to_unit,   sd, ed]
+    reverse_key = [to_unit,   from_unit, sd, ed]
+    return @blended_rate[key]               if @blended_rate.key?(key)
+    return 1.0 / @blended_rate[reverse_key] if @blended_rate.key?(reverse_key)
+    @blended_rate[key] ||= calculate_blended_rate(from_unit, to_unit, sd, ed)
+  end
+
+  private def calculate_blended_rate(from_unit, to_unit, sd, ed)
     from_value = kwh_date_range(sd, ed, from_unit)
     to_value   = kwh_date_range(sd, ed, to_unit)
     to_value / from_value

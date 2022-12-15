@@ -1,8 +1,4 @@
 module AlertGasToStorageHeaterSubstitutionMixIn
-  protected def aggregate_meter
-    @school.storage_heater_meter
-  end
-
   def needs_storage_heater_data?
     true
   end

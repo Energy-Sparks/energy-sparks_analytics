@@ -12,6 +12,7 @@ require_relative '../gas/alert_gas_only_base.rb'
 require_relative '../common/alert_floor_area_pupils_mixin.rb'
 
 class AlertGasAnnualVersusBenchmark < AlertGasModelBase
+  DAYSINYEAR = 363 # 364 days inclusive - consistent with charts which are 7 days * 52 weeks
   include AlertFloorAreaMixin
   attr_reader :last_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
   attr_reader :last_year_£current, :previous_year_£current
@@ -300,7 +301,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   end
 
   def enough_data
-    days_amr_data_with_asof_date(@asof_date) >= 364 ? :enough : :not_enough
+    days_amr_data_with_asof_date(@asof_date) >= DAYSINYEAR ? :enough : :not_enough
   end
 
   protected def max_days_out_of_date_while_still_relevant
@@ -310,23 +311,22 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   private def calculate(asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
     @degree_day_adjustment = dd_adj(asof_date)
-
     calculate_annual_change_in_degree_days(asof_date)
     temperature_adjusted_stats(asof_date)
 
-    @last_year_kwh      = kwh(asof_date - 365, asof_date, :kwh)
-    @last_year_£        = kwh(asof_date - 365, asof_date, :£)
-    @last_year_£current = kwh(asof_date - 365, asof_date, :£current)
-    @last_year_co2      = kwh(asof_date - 365, asof_date, :co2)
+    @last_year_kwh      = kwh(asof_date - DAYSINYEAR, asof_date, :kwh)
+    @last_year_£        = kwh(asof_date - DAYSINYEAR, asof_date, :£)
+    @last_year_£current = kwh(asof_date - DAYSINYEAR, asof_date, :£current)
+    @last_year_co2      = kwh(asof_date - DAYSINYEAR, asof_date, :co2)
 
-    fa  = floor_area(asof_date - 365, asof_date)
-    pup = pupils(asof_date - 365, asof_date)
-    @historic_rate_£_per_kwh = historic_blended_rate_£_per_kwh
-    @current_rate_£_per_kwh  = current_blended_rate_£_per_kwh
+    fa  = floor_area(asof_date - DAYSINYEAR, asof_date)
+    pup = pupils(asof_date - DAYSINYEAR, asof_date)
+    @historic_rate_£_per_kwh = aggregate_meter.amr_data.blended_rate(:kwh, :£,        asof_date - DAYSINYEAR, asof_date)
+    @current_rate_£_per_kwh  = aggregate_meter.amr_data.blended_rate(:kwh, :£current, asof_date - DAYSINYEAR, asof_date)
 
-    prev_date = asof_date - 366
-    @previous_year_£        = kwh(prev_date - 365, prev_date, :£)
-    @previous_year_£current = kwh(prev_date - 365, prev_date, :£current)
+    prev_date = asof_date - DAYSINYEAR - 1
+    @previous_year_£        = kwh(prev_date - DAYSINYEAR, prev_date, :£)
+    @previous_year_£current = kwh(prev_date - DAYSINYEAR, prev_date, :£current)
 
     @one_year_benchmark_floor_area_kwh   = BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * fa / @degree_day_adjustment
     # benchmark £ using same tariff as school not benchmark tariff
@@ -339,12 +339,12 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
 
     @one_year_exemplar_floor_area_kwh       = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * fa / @degree_day_adjustment
     @one_year_exemplar_floor_area_£         = @one_year_exemplar_floor_area_kwh * @historic_rate_£_per_kwh
-    @one_year_exemplar_floor_area_£current  = @one_year_exemplar_floor_area_kwh * @current_rate_£_per_kwh  
+    @one_year_exemplar_floor_area_£current  = @one_year_exemplar_floor_area_kwh * @current_rate_£_per_kwh
     @one_year_exemplar_floor_area_co2   = gas_co2(@one_year_exemplar_floor_area_kwh)
 
     @one_year_saving_versus_exemplar_kwh      = @last_year_kwh      - @one_year_exemplar_floor_area_kwh
     @one_year_saving_versus_exemplar_£        = @last_year_£        - @one_year_exemplar_floor_area_£
-    one_year_saving_versus_exemplar_£current  = @last_year_£current - @one_year_exemplar_floor_area_£current
+    @one_year_saving_versus_exemplar_£current = @last_year_£current - @one_year_exemplar_floor_area_£current
     @one_year_saving_versus_exemplar_co2      = @last_year_co2      - @one_year_exemplar_floor_area_co2
 
     @one_year_gas_per_pupil_kwh           = @last_year_kwh      / pup
@@ -385,6 +385,39 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     @bookmark_url = add_book_mark_to_base_url('AnnualGas')
   end
   alias_method :analyse_private, :calculate
+
+  def benchmark_chart_data
+    @benchmark_chart_data ||= {
+      school: {
+        kwh:      @last_year_kwh,
+        £:        @last_year_£,
+        £current: @last_year_£current
+      },
+      benchmark: {
+        kwh:      @one_year_benchmark_floor_area_kwh,
+        £:        @one_year_benchmark_floor_area_£,
+        £current: @one_year_benchmark_floor_area_£current,
+      
+        saving: {
+          kwh:       @one_year_saving_versus_benchmark_kwh,
+          £:         @one_year_saving_versus_benchmark_£,
+          £current:  @one_year_saving_versus_benchmark_£current,
+          percent:   @percent_difference_from_average_per_floor_area
+        }
+      },
+      exemplar: {
+        kwh:      @one_year_exemplar_floor_area_kwh,
+        £:        @one_year_exemplar_floor_area_£,
+        £current: @one_year_exemplar_floor_area_£current,
+
+        saving: {
+          kwh:       @one_year_saving_versus_exemplar_kwh,
+          £:         @one_year_saving_versus_exemplar_£,
+          £current:  @one_year_saving_versus_exemplar_£current
+        }
+      }
+    }
+  end
 
   def one_year_saving_versus_exemplar_adjective
     return nil if @one_year_saving_versus_exemplar_kwh.nil?
@@ -439,14 +472,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   end
 
   def last_year_date_range(asof_date)
-    last_year_start_date = asof_date - 365
+    last_year_start_date = asof_date - DAYSINYEAR
     last_year_start_date..asof_date
   end
 
   def previous_year_date_range(asof_date)
     ly = last_year_date_range(asof_date)
     previous_year_end_date = ly.first - 1
-    previous_year_start_date = previous_year_end_date - 365
+    previous_year_start_date = previous_year_end_date - DAYSINYEAR
     previous_year_start_date..previous_year_end_date
   end
 

@@ -76,7 +76,7 @@ class AlertGasOnlyBase < AlertAnalysisBase
     Range.new(number_of_toilets * 300.0, number_of_toilets * 600.0)
   end
 
-  protected def aggregate_meter
+  def aggregate_meter
     @school.aggregated_heat_meters
   end
 

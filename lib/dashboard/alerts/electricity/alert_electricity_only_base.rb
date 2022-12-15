@@ -14,12 +14,12 @@ class AlertElectricityOnlyBase < AlertAnalysisBase
     set_time_of_year_relevance(5.0)
   end
 
-  protected
-
   def aggregate_meter
     @school.aggregated_electricity_meters
   end
-  
+
+  protected
+
   def needs_gas_data?
     false
   end
