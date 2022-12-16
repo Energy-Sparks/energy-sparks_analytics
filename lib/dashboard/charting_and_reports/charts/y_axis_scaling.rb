@@ -91,6 +91,7 @@ class YAxisScaling
       # default conversion to a constant rate
       ConvertKwh.scale_unit_from_kwh(unit, fuel_type)
     else
+      puts Thread.current.backtrace
       puts "Chart: Blending calc #{1.0 / one_year_blended_conversion_from_kwh(unit, fuel_type, meter_collection)}"
       one_year_blended_conversion_from_kwh(unit, fuel_type, meter_collection)
     end
