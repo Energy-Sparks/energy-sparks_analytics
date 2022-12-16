@@ -1202,15 +1202,38 @@ class WeeklyAdvice < DashboardChartAdviceBase
             consume 1,500 watts of electricity, to a single more efficient server consuming 500 watts
             would reduce power consumption by 1,000 watts (1.0 kW) on every day of the year.
             This would save 1kW x 24 hours per day x 365 days per year = 8,760 kWh. Each kWh of electricity
-            costs about 15p, so this would save 8,760 x 15p = &pound;1,300 per year. If the new server lasted
-            5 years then that would be a &pound;5,250 saving to the school which is far more than the
+            costs about <%= blended_rate_£current_per_kwh_html %>,
+            so this would save 8,760 x <%= blended_rate_£current_per_kwh_html %> = <%= annual_£current_cost_of_1_kw_html %> per year. If the new server lasted
+            5 years then that would be a <%= annualx5_£current_cost_of_1_kw_html %> saving to the school which is far more than the
             likely &pound;750 cost of the new server!
           </p>
         <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
+    blended_rate_£current_per_kwh
+
     @footer_advice = generate_html(footer_template, binding)
+  end
+
+  def annualx5_£current_cost_of_1_kw_html
+    FormatEnergyUnit.format(:£current, 5.0 * annual_£current_cost_of_1_kw, :html)
+  end
+
+  def annual_£current_cost_of_1_kw_html
+    FormatEnergyUnit.format(:£current, annual_£current_cost_of_1_kw, :html)
+  end
+
+  def annual_£current_cost_of_1_kw
+    blended_rate_£current_per_kwh * 24.0 * 365.0
+  end
+
+  def blended_rate_£current_per_kwh_html
+    FormatEnergyUnit.format(:£_per_kwh, blended_rate_£current_per_kwh, :html)
+  end
+
+  def blended_rate_£current_per_kwh
+    @school.aggregated_electricity_meters.amr_data.current_tariff_rate_£_per_kwh
   end
 end
 #==============================================================================
