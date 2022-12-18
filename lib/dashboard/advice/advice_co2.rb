@@ -50,8 +50,27 @@ class AdviceCarbon < AdviceStructuredOldToNewConversion
     @annual_gas_co2 ||= @school.gas? ? ScalarkWhCO2CostValues.new(@school).aggregate_value(timescale, :gas, :co2) : 0.0
   end
 
-
   class CO2AdviceComponentBase < AdviceOldToNewConversion
+    def tariff_has_changed_html(fuel_type)
+      return '' unless tariff_has_changed?(fuel_type)
+  
+      %(
+        <p>
+          Be careful comparing changes in annual use on the charts
+          where £ is selected for the y-axis as the tariff has changed
+          over the period of the chart.
+        </p>
+      )
+    end
+
+    private
+  
+    def tariff_has_changed?(fuel_type)
+      meter = @school.aggregate_meter((fuel_type))
+      sd = meter.amr_data.start_date
+      ed = meter.amr_data.end_date
+      meter.meter_tariffs.meter_tariffs_differ_within_date_range?(sd, ed)
+    end
   end
 
   class CO2IntroductionAdvice < CO2AdviceComponentBase
@@ -103,9 +122,11 @@ class AdviceCarbon < AdviceStructuredOldToNewConversion
     def initialize(school)
       super(school)
       @summary = 'Your school\'s electricity carbon emissions'
+      
       @content_data = [
         { type: :text,  advice_class: KwhLongTerm, data: KwhLongTerm::LAST_FEW_YEARS_KWH_1 },
         { type: :chart, advice_class: KwhLongTerm, data: :electricity_longterm_trend_kwh_with_carbon_unmodified },
+        { type: :text,  advice_class: KwhLongTerm, data: tariff_has_changed_html(:electricity) },
         { type: :text,  advice_class: KwhLongTerm, data: KwhLongTerm::SUGGEST_SWITCHING_YAXIS_UNITS },
         { type: :text,  advice_class: KwhLongTerm, data: KwhLongTerm::LAST_FEW_YEARS_CO2_QUESTION_2 },
 
@@ -138,6 +159,7 @@ class AdviceCarbon < AdviceStructuredOldToNewConversion
 
         { type: :text,  advice_class: GasCO2LongTerm, data: GasCO2LongTerm::GAS_LONG_TERM_CO2_1 },
         { type: :chart, advice_class: GasCO2LongTerm, data: :gas_longterm_trend_kwh_with_carbon },
+        { type: :text,  advice_class: GasCO2LongTerm, data: tariff_has_changed_html(:gas) },
         { type: :text,  advice_class: GasCO2LongTerm, data: GasCO2LongTerm::GAS_LONG_TERM_CO2_QUESTIONS_2 },
 
         { type: :text,  advice_class: GasCO2LastYear, data: GasCO2LastYear::GAS_LAST_YEAR_CO2_1 },
