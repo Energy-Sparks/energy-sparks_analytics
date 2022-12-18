@@ -117,7 +117,7 @@ module AnalyseHeatingAndHotWater
     private
 
     def gas_price_£_per_kwh
-      YAxisScaling.new.scale_unit_from_kwh(:£, :gas, @meter_collection)
+      @meter_collection.aggregate_meter(:gas).amr_data.current_tariff_rate_£_per_kwh
     end
 
     # PH 12Oct2019: perhaps don't want costs in model?
