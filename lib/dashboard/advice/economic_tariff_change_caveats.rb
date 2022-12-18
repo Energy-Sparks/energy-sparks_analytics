@@ -53,7 +53,7 @@ class EconomicTariffsChangeCaveats
     pct_adjective = percent_change_adjective(info[:percent_change])
     also_text = also_clause ? 'also' : ''
 
-    "Your #{fuel_type.to_s} tariffs have #{also_clause} changed in the last year, the last change was on #{date}, " +
+    "Your #{fuel_type.to_s} tariffs have #{also_text} changed in the last year, the last change was on #{date}, " +
     "before this date the average tariff was #{rate_before}, and since it is #{rate_after}. " +
     "This will #{pct_adjective} your #{fuel_type.to_s} costs by #{pct} going forwards. "
   end
