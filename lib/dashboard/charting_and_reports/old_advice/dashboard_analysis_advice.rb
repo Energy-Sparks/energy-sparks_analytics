@@ -267,6 +267,32 @@ class DashboardChartAdviceBase
     '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + FormatEnergyUnit.scale_num(kwh) + 'kWh)'
   end
 
+  def benchmark_data_deprecated(fuel_type, benchmark_type, datatype)
+    @alerts ||= {}
+    @alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
+    @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
+  end
+
+  def benchmark_data(fuel_type, benchmark_type, datatype, saving = false)
+    @benchmark_alerts ||= {}
+    @benchmark_alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
+
+    if saving
+      @benchmark_alerts[fuel_type].benchmark_chart_data[benchmark_type][:saving][datatype]
+    else
+      @benchmark_alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
+    end
+  end
+
+  def out_of_hours_alert(fuel_type)
+    @out_of_hours_alerts ||= {}
+    @out_of_hours_alerts[fuel_type] ||= AlertAnalysisBase.out_of_hours_alert(@school, fuel_type, last_chart_end_date)
+  end
+
+  def last_chart_end_date
+    @chart_data[:x_axis_ranges].flatten.sort.last
+  end
+
   def html_table_from_graph_data(data, fuel_type = :electricity, totals_row = true, column1_description = '', sort = 0)
     total = 0.0
 
@@ -674,27 +700,6 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     1.0 + benchmark_data(:electricity, :benchmark, :percent,   true)
   end
 
-  def last_chart_end_date
-    @chart_data[:x_axis_ranges].flatten.sort.last
-  end
-
-  def benchmark_data(fuel_type, benchmark_type, datatype)
-    @alerts ||= {}
-    @alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
-    @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
-  end
-
-  def benchmark_data(fuel_type, benchmark_type, datatype, saving = false)
-    @alerts ||= {}
-    @alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
-
-    if saving
-      @alerts[fuel_type].benchmark_chart_data[benchmark_type][:saving][datatype]
-    else
-      @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
-    end
-  end
-
   def pound_electricity_saving_versus_exemplar
     £   = FormatEnergyUnit.format(:£,   benchmark_data(:electricity, :exemplar, :£,   true), :html)
     kwh = FormatEnergyUnit.format(:kwh, benchmark_data(:electricity, :exemplar, :kwh, true), :html)
@@ -840,63 +845,34 @@ class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
       'is less than well managed schools which consumed ' + benchmark_usage_kwh
     end
   end
-
 end
 #==============================================================================
 class FuelDaytypeAdvice < DashboardChartAdviceBase
   attr_reader :fuel_type, :fuel_type_str
-  BENCHMARK_PERCENT = 0.5
-  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type, exemplar_percentage)
+  def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type)
     super(school, chart_definition, chart_data, chart_symbol)
     @fuel_type = fuel_type
     @fuel_type_str = @fuel_type.to_s
-    @exemplar_percentage = exemplar_percentage
-  end
-
-  def random_out_of_hours_equivalence
-    equivalence = EnergyConversionsOutOfHours.random_out_of_hours_to_exemplar_percent_improvement(@school, @fuel_type, @exemplar_percentage)
-    ['This saving is equivalent to ' + equivalence[:adult_dashboard_wording], equivalence[:calculation_description ]]
-  end
-
-  def chart_period
-    FormatEnergyUnit.format(:years, days  / 365.0, :html)
-  end
-
-  def days
-    chart_interpretation = ChartInterpretation.new(@chart_data)
-    chart_interpretation.days
   end
 
   def generate_advice
-    # Centrica TODO
     equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence if days > 360
-    in_hours, out_of_hours = in_out_of_hours_consumption(@chart_data)
-    percent_value = out_of_hours / (in_hours + out_of_hours)
-    percent_str = percent(percent_value)
-    saving_percent = percent_value - @exemplar_percentage
-    saving = (in_hours + out_of_hours) * saving_percent * 365.0 / days
-    saving_kwh = YAxisScaling.new.scale(@chart_definition[:yaxis_units], :kwh, saving, @fuel_type, @school)
-    saving_£   = YAxisScaling.new.scale(@chart_definition[:yaxis_units], :£,   saving, @fuel_type, @school)
+
+
 
     excluding_storage_heaters = (@school.storage_heaters? && fuel_type_str == 'electricity') ? '(excluding storage heaters)' : ''
-
-    # table_info = html_table_from_graph_data(@chart_data[:x_data], @fuel_type, true, 'Time Of Day')
-
-    daytype_breakdown_table = DayTypeBreakDownTable.new(@school, @fuel_type, :up_to_a_year)
-    daytype_breakdown_table_html = daytype_breakdown_table.html
-    grid_intensity = daytype_breakdown_table.uk_electricity_grid_carbon_intensity_kg_per_kwh
 
     header_template = %{
       <%= @body_start %>
         <p>
           This chart shows when you have used <%= @fuel_type_str %> <%= excluding_storage_heaters %> over the past <%= chart_period %>.
-          <%= percent(percent_value) %> of your <%= @fuel_type_str %> usage is out of hours:
-          which is <%= adjective(percent_value, BENCHMARK_PERCENT) %>
-          of <%= percent(BENCHMARK_PERCENT) %>.
-          <% if percent_value > @exemplar_percentage %>
-            The best schools only consume <%= percent(@exemplar_percentage) %> out of hours.
-            Reducing your school's out of hours usage to <%= percent(@exemplar_percentage) %>
-            would save <%= pounds_to_pounds_and_kwh(saving_£, @fuel_type) %> per year.
+          <%= percent(percent_kwh) %> of your <%= @fuel_type_str %> usage is out of hours:
+          which is <%= adjective(percent_kwh, average_percent) %>
+          of <%= percent(average_percent) %>.
+          <% if percent_kwh > exemplar_percentage %>
+            The best schools only consume <%= percent(exemplar_percentage) %> out of hours.
+            Reducing your school's out of hours usage to <%= percent(exemplar_percentage) %>
+            would save <%= saving_versus_well_managed_schools_html %> per year.
             <%# increase loop size to test %>
             <% if days > 360 %>
               <%= equivalence_tool_tip_html(equivalence_saving_description, equivalence_calculation_description) %>
@@ -921,7 +897,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
         This is the breakdown for the most recent <%= chart_period %>:
       </p>
       <p>
-        <%= daytype_breakdown_table_html %>
+        <%= table_html(:£current) %>
       </p>
       <% if @school.storage_heaters? %>
         <p>
@@ -932,6 +908,53 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+  rescue => e
+    puts e.message
+  end
+
+  private
+
+  def percent_kwh
+    out_of_hours_alert(@fuel_type).out_of_hours_percent
+  end
+
+  def average_percent
+    out_of_hours_alert(@fuel_type).out_of_hours_percent
+  end
+
+  def exemplar_percentage
+    out_of_hours_alert(@fuel_type).good_out_of_hours_use_percent
+  end
+
+  def random_out_of_hours_equivalence
+    equivalence = EnergyConversionsOutOfHours.random_out_of_hours_to_exemplar_percent_improvement(@school, @fuel_type, exemplar_percentage)
+    ['This saving is equivalent to ' + equivalence[:adult_dashboard_wording], equivalence[:calculation_description ]]
+  end
+
+  def chart_period
+    FormatEnergyUnit.format(:years, days  / 365.0, :html)
+  end
+
+  def days
+    chart_interpretation = ChartInterpretation.new(@chart_data)
+    chart_interpretation.days
+  end
+
+  def saving_versus_well_managed_schools_html
+    kwh_html = FormatEnergyUnit.format(:kwh,      out_of_hours_alert(fuel_type).potential_saving_kwh, :html)
+    £_html   = FormatEnergyUnit.format(:£current, out_of_hours_alert(fuel_type).potential_saving_£, :html)
+    "#{£_html} (#{kwh_html})"
+  end
+
+  def table_html(datatype)
+    data = out_of_hours_alert(@fuel_type).analysis_table_data(:fuel_type, datatype)
+
+    HtmlTableFormatting.new(
+      data[:header],
+      data[:data],
+      data[:totals],
+      data[:units],
+    ).html
   end
 
   def adjective(percent, percent_benchmark, above_sense = true, the = true)
@@ -949,32 +972,18 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
       'well below' + the_average
     end
   end
-
-  # copied from alerts code, needs rationalising
-  def in_out_of_hours_consumption(breakdown)
-    in_hours = 0.0
-    out_of_hours = 0.0
-    breakdown[:x_data].each do |daytype, consumption|
-      if daytype == Series::DayType::SCHOOLDAYOPEN
-        in_hours += consumption[0]
-      else
-        out_of_hours += consumption[0]
-      end
-    end
-    [in_hours, out_of_hours]
-  end
 end
 
 #==============================================================================
 class ElectricityDaytypeAdvice < FuelDaytypeAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol, :electricity, 0.35)
+    super(school, chart_definition, chart_data, chart_symbol, :electricity)
   end
 end
 #==============================================================================
 class GasDaytypeAdvice < FuelDaytypeAdvice
   def initialize(school, chart_definition, chart_data, chart_symbol)
-    super(school, chart_definition, chart_data, chart_symbol, :gas, 0.3)
+    super(school, chart_definition, chart_data, chart_symbol, :gas)
   end
 end
 #==============================================================================

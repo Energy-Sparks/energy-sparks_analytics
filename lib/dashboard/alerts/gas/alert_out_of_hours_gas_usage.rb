@@ -12,7 +12,7 @@ class AlertOutOfHoursGasUsage < AlertOutOfHoursBaseUsage
           good_out_of_hours_use_percent, bad_out_of_hours_use_percent)
   end
 
-  protected def aggregate_meter
+  def aggregate_meter
     @school.aggregated_heat_meters
   end
 
