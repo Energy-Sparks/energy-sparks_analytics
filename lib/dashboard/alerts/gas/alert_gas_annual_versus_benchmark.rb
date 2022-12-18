@@ -386,6 +386,17 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   end
   alias_method :analyse_private, :calculate
 
+  def saving_table_data
+    cost_saving_header_text = 'Cost saving if matched exemplar'
+    cost_saving_header_text += ' at current tariff' unless @last_year_£ == @last_year_£current
+
+    {
+      units:   [:kwh, :kwh, :kwh, :£current],
+      header:  ['Your school', 'Well managed school', 'Exemplar school', cost_saving_header_text],
+      data:    [[@last_year_kwh, @one_year_benchmark_floor_area_kwh, @one_year_exemplar_floor_area_kwh, @one_year_saving_versus_exemplar_£current]]
+    }
+  end
+
   def benchmark_chart_data
     @benchmark_chart_data ||= {
       school: {
@@ -397,7 +408,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         kwh:      @one_year_benchmark_floor_area_kwh,
         £:        @one_year_benchmark_floor_area_£,
         £current: @one_year_benchmark_floor_area_£current,
-      
+
         saving: {
           kwh:       @one_year_saving_versus_benchmark_kwh,
           £:         @one_year_saving_versus_benchmark_£,

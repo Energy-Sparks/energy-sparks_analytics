@@ -490,15 +490,14 @@ class AlertAnalysisBase < ContentBase
                   else
                     raise UnknownFuelTypeForBenchmarkAlert, "Unknown benchmark fuel type #{fuel_type}"
                   end
-    
-                  
+
     alert = alert_class.new(school)
 
     asof_date = [asof_date, alert.aggregate_meter.amr_data.end_date].min
 
     alert.analyse(asof_date)
 
-    alert       
+    alert
   end
 
   def self.out_of_hours_alert(school, fuel_type, asof_date)

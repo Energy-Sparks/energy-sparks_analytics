@@ -273,14 +273,16 @@ class DashboardChartAdviceBase
     @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
   end
 
-  def benchmark_data(fuel_type, benchmark_type, datatype, saving = false)
+  def benchmark_alert(fuel_type)
     @benchmark_alerts ||= {}
     @benchmark_alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, last_chart_end_date)
+  end
 
+  def benchmark_data(fuel_type, benchmark_type, datatype, saving = false)
     if saving
-      @benchmark_alerts[fuel_type].benchmark_chart_data[benchmark_type][:saving][datatype]
+      benchmark_alert(fuel_type).benchmark_chart_data[benchmark_type][:saving][datatype]
     else
-      @benchmark_alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
+      benchmark_alert(fuel_type).benchmark_chart_data[benchmark_type][datatype]
     end
   end
 
@@ -520,33 +522,38 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
 
     footer_template = %{
       <p>
-      <% if actual_gas_usage > 0 %>
-        Your gas usage is <%= percent(percent_gas_of_benchmark_average) %> of well managed schools which
-        <% if actual_gas_usage < exemplar_gas_usage %>
-          is very good.
-        <% else %>
-          <% if actual_gas_usage < average_benchmark_gas_usage %>
-            although good, could be improved
+        <% if actual_electricity_usage > 0 %>
+          Your electricity usage is <%= percent(percent_electricity_of_benchmark_average) %> of well managed schools which
+          <% if actual_electricity_usage < exemplar_electricity_usage %>
+            is very good.
           <% else %>
-            is above average, the school should aim to reduce this,
+            <% if actual_electricity_usage < average_benchmark_electricity_usage %>
+              although good, could be improved
+            <% else %>
+              is above average, the school should aim to reduce this,
+            <% end %>
+            which would save you <%= £_saving_versus_exemplar_html(:electricity) %> per year if you matched the most energy efficient (exemplar) schools.
+            <% random_equivalence_text(benchmark_data(:electricity, :exemplar, :kwh, true), :electricity) %>
           <% end %>
-          which would save you <%= £_saving_versus_exemplar_html(:gas) %> per year if you matched the most energy efficient (exemplar) schools.
+          <p>
+          This is how your school&apos;s electricity consumption compares:
+            <%= school_well_managed_exemplar_comparison_table_html(:electricity) %>
+          </p>
         <% end %>
-      <% end %>
-      <% if actual_electricity_usage > 0 %>
-        Your electricity usage is <%= percent(percent_electricity_of_benchmark_average) %> of well managed schools which
-        <% if actual_electricity_usage < exemplar_electricity_usage %>
-          is very good.
-        <% else %>
-          <% if actual_electricity_usage < average_benchmark_electricity_usage %>
-            although good, could be improved
+
+        <% if actual_gas_usage > 0 %>
+          Your gas usage is <%= percent(percent_gas_of_benchmark_average) %> of well managed schools which
+          <% if actual_gas_usage < exemplar_gas_usage %>
+            is very good.
           <% else %>
-            is above average, the school should aim to reduce this,
+            <% if actual_gas_usage < average_benchmark_gas_usage %>
+              although good, could be improved
+            <% else %>
+              is above average, the school should aim to reduce this,
+            <% end %>
+            which would save you <%= £_saving_versus_exemplar_html(:gas) %> per year if you matched the most energy efficient (exemplar) schools.
           <% end %>
-          which would save you <%= £_saving_versus_exemplar_html(:electricity) %> per year if you matched the most energy efficient (exemplar) schools.
-          <% random_equivalence_text(benchmark_data(:electricity, :exemplar, :kwh, true), :electricity) %>
         <% end %>
-      <% end %>
       </p>
       <% if actual_gas_usage > 0 %>
         <p>
@@ -562,6 +569,10 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
             applicable to all school buildings.
           <% end %>
         </p>
+        <p>
+          This is how your school&apos;s gas consumption compares:
+          <%= school_well_managed_exemplar_comparison_table_html(:gas) %>
+        </p>
       <% end %>
       <% if actual_storage_heater_usage > 0 %>
         <p>
@@ -576,6 +587,18 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+  end
+
+  def school_well_managed_exemplar_comparison_table_html(fuel_type)
+    data = benchmark_alert(fuel_type).saving_table_data
+
+    HtmlTableFormatting.new(
+      data[:header],
+      data[:data],
+      nil, # no totals
+      data[:units],
+      Array.new(data[:units].length, false)
+    ).html
   end
 
   def varying_floor_area_explanation
@@ -858,8 +881,6 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
   def generate_advice
     equivalence_saving_description, equivalence_calculation_description = random_out_of_hours_equivalence if days > 360
 
-
-
     excluding_storage_heaters = (@school.storage_heaters? && fuel_type_str == 'electricity') ? '(excluding storage heaters)' : ''
 
     header_template = %{
@@ -908,8 +929,6 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
-  rescue => e
-    puts e.message
   end
 
   private
@@ -942,8 +961,8 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
 
   def saving_versus_well_managed_schools_html
     kwh_html = FormatEnergyUnit.format(:kwh,      out_of_hours_alert(fuel_type).potential_saving_kwh, :html)
-    £_html   = FormatEnergyUnit.format(:£current, out_of_hours_alert(fuel_type).potential_saving_£, :html)
-    "#{£_html} (#{kwh_html})"
+    £current_html   = FormatEnergyUnit.format(:£current, out_of_hours_alert(fuel_type).potential_saving_£, :html)
+    "#{£current_html} (#{kwh_html})"
   end
 
   def table_html(datatype)
