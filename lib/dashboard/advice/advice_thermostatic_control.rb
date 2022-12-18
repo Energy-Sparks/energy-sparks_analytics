@@ -44,7 +44,11 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
   end
 
   def annual_loss_£_html
-    FormatEnergyUnit.format(:£, insulation_hotwater_heat_loss_estimate_kwh, :html)
+    FormatEnergyUnit.format(:£, insulation_hotwater_heat_loss_estimate_kwh * latest_blended_tariff_£_per_kwh, :html)
+  end
+
+  def latest_blended_tariff_£_per_kwh
+    aggregate_meter.amr_data.current_tariff_rate_£_per_kwh
   end
 
   def annual_loss_kwh_html
@@ -203,7 +207,7 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
 
   def hot_water_losses
     text = %q(
-      <% if meter.heating_only? %>
+      <% unless meter.heating_only? %>
         <p>
           The second set of data at the bottom of the chart
           is for gas consumption in the summer when the heating
