@@ -60,7 +60,7 @@ class AdviceBaseload < AdviceElectricityBase
 
     charts_and_html += baseload_charts_for_real_meters if @school.electricity_meters.length > 1
 
-    charts_and_html += AdviceBaseloadCommentary.all_background_and_advice_on_reducing_issues(meter)
+    charts_and_html += AdviceBaseloadCommentary.all_background_and_advice_on_reducing_issues(aggregate_meter)
 
     remove_diagnostics_from_html(charts_and_html, user_type)
   end
