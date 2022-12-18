@@ -326,7 +326,26 @@ class DashboardChartAdviceBase
       %()
     end
   end
-  
+
+  def annual_£current_cost_of_1_kw_html
+    FormatEnergyUnit.format(:£current, annual_£current_cost_of_1_kw, :html)
+  end
+
+  def annual_£current_cost_of_1_kw
+    blended_rate_£current_per_kwh * 24.0 * 365.0
+  end
+
+  def blended_rate_£current_per_kwh_html
+    FormatEnergyUnit.format(:£_per_kwh, blended_rate_£current_per_kwh, :html)
+  end
+
+  def blended_rate_£current_per_kwh
+    @school.aggregated_electricity_meters.amr_data.current_tariff_rate_£_per_kwh
+  end
+
+  def annualx5_£current_cost_of_1_kw_html
+    FormatEnergyUnit.format(:£current, 5.0 * annual_£current_cost_of_1_kw, :html)
+  end
 
   def last_chart_end_date
     @chart_data[:x_axis_ranges].flatten.sort.last
@@ -1285,29 +1304,7 @@ class WeeklyAdvice < DashboardChartAdviceBase
       <%= @body_end %>
     }.gsub(/^  /, '')
 
-    blended_rate_£current_per_kwh
-
     @footer_advice = generate_html(footer_template, binding)
-  end
-
-  def annualx5_£current_cost_of_1_kw_html
-    FormatEnergyUnit.format(:£current, 5.0 * annual_£current_cost_of_1_kw, :html)
-  end
-
-  def annual_£current_cost_of_1_kw_html
-    FormatEnergyUnit.format(:£current, annual_£current_cost_of_1_kw, :html)
-  end
-
-  def annual_£current_cost_of_1_kw
-    blended_rate_£current_per_kwh * 24.0 * 365.0
-  end
-
-  def blended_rate_£current_per_kwh_html
-    FormatEnergyUnit.format(:£_per_kwh, blended_rate_£current_per_kwh, :html)
-  end
-
-  def blended_rate_£current_per_kwh
-    @school.aggregated_electricity_meters.amr_data.current_tariff_rate_£_per_kwh
   end
 end
 #==============================================================================
@@ -1656,7 +1653,7 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
       <p>
         Reducing a school's baseload is often the fastest way of reducing a school's energy costs
         and reducing its carbon footprint. For each 1kW reduction in baseload, the school will save
-        &pound;1,050 per year, and reduce its carbon footprint by 2,400 kg.
+        <%= annual_£current_cost_of_1_kw_html %> per year, and reduce its carbon footprint by 2,400 kg.
       </p>
       <p>
         Look carefully at the graph above, how has the baseload changed over time?
@@ -1669,6 +1666,9 @@ class ElectricityBaseloadAdvice < DashboardChartAdviceBase
     }.gsub(/^  /, '')
 
     @footer_advice = generate_html(footer_template, binding)
+  rescue => e
+    puts e.message
+    puts e.backtrace
   end
 end
 

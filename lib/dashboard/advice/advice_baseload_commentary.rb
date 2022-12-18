@@ -12,10 +12,10 @@ class AdviceBaseloadCommentary
     advice.flatten
   end
 
-  def self.all_background_and_advice_on_reducing_issues
+  def self.all_background_and_advice_on_reducing_issues(meter)
     [
       { type: :html, content: '<h2>How to reduce your baseload</h2>' },
-      { type: :html, content: general_advice_html },
+      { type: :html, content: general_advice_html(meter) },
       { type: :html, content: common_causes_html },
       { type: :html, content: what_to_do_html },
       # AlertBaseloadBase.baseload_alerts.map{ |alert_class| alert_class.background_and_advice_on_reducing_issue }
