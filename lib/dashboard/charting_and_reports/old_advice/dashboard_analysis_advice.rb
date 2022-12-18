@@ -261,7 +261,6 @@ class DashboardChartAdviceBase
     (value * 100.0).round(0).to_s + '%'
   end
 
-
   def kwh_to_pounds_and_kwh(kwh, fuel_type_sym, data_units = @chart_definition[:yaxis_units], £_datatype = :£)
     pounds = YAxisScaling.new.scale(data_units, £_datatype, kwh, fuel_type, @school)
     '&pound;' + FormatEnergyUnit.scale_num(pounds) + ' (' + FormatEnergyUnit.scale_num(kwh) + 'kWh)'
@@ -289,6 +288,26 @@ class DashboardChartAdviceBase
   def out_of_hours_alert(fuel_type)
     @out_of_hours_alerts ||= {}
     @out_of_hours_alerts[fuel_type] ||= AlertAnalysisBase.out_of_hours_alert(@school, fuel_type, last_chart_end_date)
+  end
+
+  def meter_tariffs_have_changed?(fuel_type, start_date = nil, end_date = nil)
+    start_date ||= @school.aggregate_meter(fuel_type).amr_data.start_date
+    end_date   ||= @school.aggregate_meter(fuel_type).amr_data.end_date
+    @school.aggregate_meter(fuel_type).meter_tariffs.meter_tariffs_differ_within_date_range?(start_date, end_date)
+  end
+
+  def switch_to_kwh_chart_if_economic_tariffs_changed(fuel_type, start_date = nil, end_date = nil)
+    if meter_tariffs_have_changed?(fuel_type, start_date, end_date)
+      txt = %(
+        Your tariff has changed over the period of the chart above and other charts on this page.
+        Make sure the y-axis is set to kWh by selecting &apos;Change Unit&apos; to kWh so you
+        can see how your <%= fuel_type.to_s %> consumption has changed over time without the
+        impact of the tariff change.
+      )
+      ERB.new(txt).result(binding)
+    else
+      %()
+    end
   end
 
   def last_chart_end_date
@@ -1026,6 +1045,9 @@ class GasLongTermTrend < DashboardChartAdviceBase
     footer_template = %{
       <%= @body_start %>
         <p>
+          <%= switch_to_kwh_chart_if_economic_tariffs_changed(:gas) %>
+        </p>
+        <p>
           Reducing gas consumption can be achieved by turning your school's thermostat down,
           reducing out of hours usage, insulating your buildings or installing a new more efficient
           gas boiler.
@@ -1056,6 +1078,9 @@ class ElectricityLongTermTrend < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
+        <p>
+          <%= switch_to_kwh_chart_if_economic_tariffs_changed(:electricity) %>
+        </p>
         <p>
           Unless the school has had additional buildings added, if you are managing your electricity
           consumption well this should show a downward trend; more modern ICT equipment,

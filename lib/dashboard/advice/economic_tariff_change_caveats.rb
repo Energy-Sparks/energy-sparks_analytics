@@ -85,15 +85,6 @@ class EconomicTariffsChangeCaveats
   end
 
   def meter_for_fuel_type(fuel_type)
-    case fuel_type
-    when :electricity
-      @school.aggregated_electricity_meters
-    when :gas
-      @school.aggregated_heat_meters
-    when :storage_heater
-      @school.storage_heater_meter
-    else
-      raise EnergySparksUnexpectedStateException, "Unexpected fuel_type #{fuel_type}"
-    end
+    @school.aggregate_meter(fuel_type)
   end
 end

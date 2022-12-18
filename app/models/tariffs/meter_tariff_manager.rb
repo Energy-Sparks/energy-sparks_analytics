@@ -114,6 +114,7 @@ class MeterTariffManager
   end
 
   def economic_tariffs_change_over_time?
+    # probably only works on real meters, not aggregate meters
     check_economic_tariff_type
     @economic_tariff.class == EconomicTariffChangeOverTime
   end
@@ -150,7 +151,7 @@ class MeterTariffManager
       meter_description = "#{mpxn_str} #{name_str}"
       differential_test = (start_date..end_date).any? { |date| constituent_meter.meter_tariffs.differential_tariff_on_date?(date) }
       tariffs_in_range = constituent_meter.meter_tariffs.economic_tariff.tariffs_within_date_range(start_date, end_date)
-      
+
       rs = MeterTariff.rates_text(tariffs_in_range, differential_test)
 
       rs.map.with_index do |(dr, t), i|
