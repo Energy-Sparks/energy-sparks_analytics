@@ -310,6 +310,24 @@ class DashboardChartAdviceBase
     end
   end
 
+  def switch_to_kwh_chart_if_economic_tariffs_changed_in_last_2_weeks(fuel_type)
+    end_date = @school.aggregate_meter(fuel_type).amr_data.end_date
+    start_date = [end_date - 7 - 6, @school.aggregate_meter(fuel_type).amr_data.start_date].max
+
+    if meter_tariffs_have_changed?(fuel_type, start_date, end_date)
+      txt = %(
+        Your <%= fuel_type.to_s %> tariff has changed in the last 2 weeks.
+        Make sure the y-axis is set to kWh by selecting &apos;Change Unit&apos; to kWh so you
+        can see how your <%= fuel_type.to_s %> consumption has changed over the
+        last 2 weeks without the impact of the tariff change.
+      )
+      ERB.new(txt).result(binding)
+    else
+      %()
+    end
+  end
+  
+
   def last_chart_end_date
     @chart_data[:x_axis_ranges].flatten.sort.last
   end
@@ -1111,6 +1129,9 @@ class ElectricityShortTermTrend < DashboardChartAdviceBase
 
     footer_template = %{
       <%= @body_start %>
+        <p>
+          <%= switch_to_kwh_chart_if_economic_tariffs_changed_in_last_2_weeks(:electricity) %>
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
@@ -3197,6 +3218,9 @@ class Last2WeeksDailyGasComparisonTemperatureCompensatedAdvice < DashboardChartA
 
     footer_template = %{
       <%= @body_start %>
+        <p>
+          <%= switch_to_kwh_chart_if_economic_tariffs_changed_in_last_2_weeks(:gas) %>
+        </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
 
