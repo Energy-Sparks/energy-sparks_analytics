@@ -123,7 +123,7 @@ class MeterTariffManager
   def tariffs_within_date_range(start_date, end_date)
     start_date, end_date = default_nil_date_ranges(start_date, end_date)
 
-    @meter.constituent_meters.map do |constituent_meter|
+    constituent_meters.map do |constituent_meter|
       [
         constituent_meter,
         constituent_meter.meter_tariffs.economic_tariff.tariffs_within_date_range(start_date, end_date)
@@ -131,21 +131,27 @@ class MeterTariffManager
     end.to_h
   end
 
-  def tariff_change_dates_in_period(start_date, end_date)
+  def last_tariff_change_date(start_date = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
+    change_dates = tariff_change_dates_in_period(start_date, end_date)
+    return nil if change_dates.empty?
+
+    change_dates.last
+  end
+
+  def tariff_change_dates_in_period(start_date  = @meter.amr_data.start_date, end_date = @meter.amr_data.end_date)
     start_date, end_date = default_nil_date_ranges(start_date, end_date)
 
     tariff_changes = tariffs_within_date_range(start_date, end_date)
     date_ranges = tariff_changes.values.map { |tar| tar.keys }.flatten.uniq
     dates = date_ranges.map { |dr| [dr.first, dr.last] }.flatten.uniq.sort
 
-    reject_dates = [MeterTariff::MIN_DEFAULT_START_DATE, MeterTariff::MAX_DEFAULT_END_DATE]
-    change_dates = dates.reject { |d| reject_dates.include?(d) }
+    change_dates = dates.reject { |d| MeterTariff.infinite_date?(d) }
 
     change_dates_with_in_range = change_dates.reject { |d| d < start_date || d > end_date }
   end
 
   def formatted_constituent_meter_tariffs(start_date, end_date)
-    @meter.constituent_meters.map do |constituent_meter|
+    constituent_meters.map do |constituent_meter|
       mpxn_str = constituent_meter.mpxn.to_s[0...16].ljust(16)
       name_str = constituent_meter.name[0...15].ljust(15)
       meter_description = "#{mpxn_str} #{name_str}"
@@ -171,13 +177,13 @@ class MeterTariffManager
 
   # e.g. aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(Date.new(2022,8,22), Date.new(2022,10,22))
   def meter_tariffs_differ_within_date_range?(start_date, end_date)
-    @meter.constituent_meters.any? do |meter|
+    constituent_meters.any? do |meter|
       meter.meter_tariffs.economic_tariff.tariffs_differ_within_date_range?(start_date, end_date)
     end
   end
 
   def meter_tariffs_changes_between_periods?(period1, period2)
-    @meter.constituent_meters.any? do |meter|
+    constituent_meters.any? do |meter|
       meter.meter_tariffs.economic_tariff.meter_tariffs_changes_between_periods?(period1, period2)
     end
   end
@@ -404,6 +410,15 @@ class MeterTariffManager
 
   def weekend?(date)
     date.saturday? || date.sunday?
+  end
+
+  def constituent_meters
+    # defensive just in case aggregation service doesn't set for single fuel type meter school
+    if @meter.constituent_meters.nil? || @meter.constituent_meters.empty?
+      [@meter]
+    else
+      @meter.constituent_meters
+    end
   end
 
   def raise_and_log_error(exception, message)

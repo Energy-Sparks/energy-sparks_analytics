@@ -8,6 +8,14 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
   attr_reader :annual_electricity_£, :annual_gas_£, :annual_storage_heater_£
   attr_reader :degree_days_15_5C_domestic
   attr_reader :school_area
+  attr_reader :electricity_economic_tariff_changed_this_year
+  attr_reader :electricity_economic_tariff_changed_in_the_previous_year
+  attr_reader :electricity_economic_tariff_changed_this_year_percent
+  attr_reader :electricity_economic_tariff_last_changed_date
+  attr_reader :gas_economic_tariff_changed_this_year
+  attr_reader :gas_economic_tariff_changed_in_the_previous_year
+  attr_reader :gas_economic_tariff_changed_this_year_percent
+  attr_reader :gas_economic_tariff_last_changed_date
 
   def initialize(school)
     super(school, :prioritisationdata)
@@ -116,6 +124,46 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
       description: 'Degree days (15.5C base, domestic(i.e. continuous occupation)',
       units: Float,
       benchmark_code: 'ddays'
+    },
+    electricity_economic_tariff_changed_this_year: {
+      description: 'Has the electricity economic changed in the last year',
+      units: TrueClass,
+      benchmark_code: 'etch'
+    },
+    electricity_economic_tariff_changed_in_the_previous_year: {
+      description: 'Has the electricity economic changed in the previous year',
+      units: TrueClass,
+      benchmark_code: 'etcp'
+    },
+    electricity_economic_tariff_changed_this_year_percent: {
+      description: 'Percent most recent electricity economic tariff change compared with average in remainder of this year',
+      units: :percent,
+      benchmark_code: 'etpc'
+    },
+    electricity_economic_tariff_last_changed_date: {
+      description: 'The last date the electricity economic tariff changed for time varying economic tariffs',
+      units: Date,
+      benchmark_code: 'etcd'
+    },
+    gas_economic_tariff_changed_this_year: {
+      description: 'Has the gas economic changed in the last year',
+      units: TrueClass,
+      benchmark_code: 'gtch'
+    },
+    gas_economic_tariff_changed_in_the_previous_year: {
+      description: 'Has the gas economic changed in the previous year',
+      units: TrueClass,
+      benchmark_code: 'gtcp'
+    },
+    gas_economic_tariff_changed_this_year_percent: {
+      description: 'Percent most recent gas economic tariff change compared with average in remainder of this year',
+      units: :percent,
+      benchmark_code: 'gtpc'
+    },
+    gas_economic_tariff_last_changed_date: {
+      description: 'The last date the gas economic tariff changed for time varying economic tariffs',
+      units: Date,
+      benchmark_code: 'gtcd'
     }
   }
 
@@ -138,7 +186,9 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     end
   end
 
-  private def calculate_private(asof_date)
+  private
+
+  def calculate_private(asof_date)
     @days_to_next_holiday = calculate_days_to_next_holiday(asof_date)
     @days_from_last_holiday = calculate_days_to_previous_holiday(asof_date)
     temperatures = AverageHistoricOrForecastTemperatures.new(@school)
@@ -154,6 +204,8 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     @annual_storage_heater_£  = annual_kwh(@school.storage_heater_meter,          :storage_heaters, asof_date, :£)
 
     @degree_days_15_5C_domestic = @school.temperatures.degree_days_this_year(asof_date)
+
+    calculate_economic_tariff_data
 
     @school_area = @school.area_name
   end
@@ -184,5 +236,24 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
     holiday = @school.holidays.find_previous_or_current_holiday(asof_date)
     return 0 if asof_date.between?(holiday.start_date, holiday.end_date)
     (asof_date - holiday.end_date).to_i
+  end
+
+  def calculate_economic_tariff_data
+    calc = AlertEconomicTariffCalculations.new(@school, @school.aggregate_meter(:electricity))
+
+    @electricity_economic_tariff_changed_this_year            = calc.changed_this_year?
+    @electricity_economic_tariff_changed_in_the_previous_year = calc.changed_previous_year?
+    @electricity_economic_tariff_changed_this_year_percent    = calc.last_tariff_change_compared_with_remainder_of_last_year_percent
+    @electricity_economic_tariff_last_changed_date            = calc.last_tariff_change_date
+
+    calc = AlertEconomicTariffCalculations.new(@school, @school.aggregate_meter(:gas))
+
+    @gas_economic_tariff_changed_this_year            = calc.changed_this_year?
+    @gas_economic_tariff_changed_in_the_previous_year = calc.changed_previous_year?
+    @gas_economic_tariff_changed_this_year_percent    = calc.last_tariff_change_compared_with_remainder_of_last_year_percent
+    @gas_economic_tariff_last_changed_date            = calc.last_tariff_change_date
+  rescue => e
+    puts e.message
+    puts e.backtrace
   end
 end

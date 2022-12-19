@@ -78,8 +78,12 @@ class MeterTariff
     rate_type = type == :daytime_rate ? 'day time' : 'night time'
   end
 
+  def self.infinite_date?(date)
+    [MIN_DEFAULT_START_DATE, MAX_DEFAULT_END_DATE].include?(date)
+  end
+
   def self.date_text(date)
-    return nil if [MIN_DEFAULT_START_DATE, MAX_DEFAULT_END_DATE].include?(date)
+    return nil if MeterTariff.infinite_date?(date)
     date.strftime('%b %Y')
   end
 
