@@ -250,8 +250,8 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     @one_year_energy_per_pupil_co2      = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :number_of_pupils)
     @one_year_energy_per_floor_area_co2 = change_in_energy.calculate_normalised_energy({year: 0}, :co2, :floor_area)
 
-    per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school, available_recent_fuel_types)
-    per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school, available_recent_fuel_types)
+    per_pupil_energy_benchmark_£ = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:benchmark, @school, asof_date, available_recent_fuel_types)
+    per_pupil_energy_exemplar_£  = BenchmarkMetrics.benchmark_energy_usage_£_per_pupil(:exemplar, @school, asof_date, available_recent_fuel_types)
 
     @percent_difference_from_average_per_pupil = percent_change(per_pupil_energy_benchmark_£, @one_year_energy_per_pupil_£)
 

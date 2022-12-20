@@ -11,7 +11,7 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
           0.35, 0.65)
   end
 
-  protected def aggregate_meter
+  def aggregate_meter
     @school.aggregated_electricity_meters
   end
 

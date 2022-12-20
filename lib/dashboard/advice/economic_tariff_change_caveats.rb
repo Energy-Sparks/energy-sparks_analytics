@@ -5,19 +5,21 @@ class EconomicTariffsChangeCaveats
 
   def tariff_text_with_sentence(electricity_usage, gas_usage, preamble: '', epilogue: '', charts: false, savings_use_current_tariff_text: false)
     electric_txt    = electricity_usage ? economic_tariff_changed_text(:electricity) : ''
-    gas_txt         = gas_usage         ? economic_tariff_changed_text(:gas) : ''
+    gas_txt         = gas_usage         ? economic_tariff_changed_text(:gas, !electric_txt.empty?) : ''
     any_changed_txt = (electric_txt + gas_txt).strip.length > 0
     txt = %(
       <p>
-        <%= preamble %>
-        <%= electric_txt + gas_txt %>
-        <% if savings_use_current_tariff_text %>
-          Any savings quoted here are estimates using your latest tariff.
-        <% end %>
-        <% if any_changed_txt && charts %>
-          This change will also be visible on the charts if you select &pound; as the y-axis.
-        <% end %>
-        <%= epilogue %>
+        <small>
+          <%= preamble %>
+          <%= electric_txt + gas_txt %>
+          <% if savings_use_current_tariff_text %>
+            Any savings quoted here are estimates using your latest tariff.
+          <% end %>
+          <% if any_changed_txt && charts %>
+            This change will be visible on the charts if you select &pound; as the y-axis.
+          <% end %>
+          <%= epilogue %>
+        </small>
       </p>
     )
     ERB.new(txt).result(binding)
@@ -27,14 +29,14 @@ class EconomicTariffsChangeCaveats
     tariff_text_with_sentence(electricity_usage, gas_usage)
   end
 
-  def economic_tariff_changed_text(fuel_type)
+  def economic_tariff_changed_text(fuel_type, also_clause = false)
     info = economic_tariff_changed_information(fuel_type)
 
     return '' if info.nil?
 
     return '' if info[:percent_change].magnitude < 0.02
 
-    format_economic_tariff_changed_text(info, fuel_type)
+    format_economic_tariff_changed_text(info, fuel_type, also_clause)
   end
 
   private
@@ -43,16 +45,17 @@ class EconomicTariffsChangeCaveats
     pct > 0.0 ? 'increase' : 'reduce'
   end
 
-  def format_economic_tariff_changed_text(info, fuel_type)
+  def format_economic_tariff_changed_text(info, fuel_type, also_clause)
     date = info[:last_change_date].strftime('%A %d %b %Y')
     rate_before   = FormatEnergyUnit.format(:£_per_kwh, info[:rate_before_£_per_kwh])
     rate_after    = FormatEnergyUnit.format(:£_per_kwh, info[:rate_after_£_per_kwh])
     pct           = FormatEnergyUnit.format(:percent,   info[:percent_change].magnitude)
     pct_adjective = percent_change_adjective(info[:percent_change])
+    also_text = also_clause ? 'also' : ''
 
-    "Your #{fuel_type.to_s} tariffs have changed in the last year, the last change was on #{date}, " +
+    "Your #{fuel_type.to_s} tariffs have #{also_text} changed in the last year, the last change was on #{date}, " +
     "before this date the average tariff was #{rate_before}, and since it is #{rate_after}. " +
-    "This will #{pct_adjective} your #{fuel_type.to_s} costs by #{pct} going forward. "
+    "This will #{pct_adjective} your #{fuel_type.to_s} costs by #{pct} going forwards. "
   end
 
   def economic_tariff_changed_information(fuel_type)
@@ -82,15 +85,6 @@ class EconomicTariffsChangeCaveats
   end
 
   def meter_for_fuel_type(fuel_type)
-    case fuel_type
-    when :electricity
-      @school.aggregated_electricity_meters
-    when :gas
-      @school.aggregated_heat_meters
-    when :storage_heater
-      @school.storage_heater_meter
-    else
-      raise EnergySparksUnexpectedStateException, "Unexpected fuel_type #{fuel_type}"
-    end
+    @school.aggregate_meter(fuel_type)
   end
 end

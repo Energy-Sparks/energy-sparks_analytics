@@ -125,7 +125,7 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          This benchmark shows how much each school is spending on energy each year.
+          This benchmark shows how much each school spent on energy last year.
         </p>
       )
     end

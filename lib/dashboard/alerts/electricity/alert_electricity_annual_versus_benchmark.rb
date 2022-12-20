@@ -3,6 +3,7 @@ require_relative '../common/alert_analysis_base.rb'
 require_relative '../common/alert_floor_area_pupils_mixin.rb'
 
 class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
+  DAYSINYEAR = 363 # 364 days inclusive - consistent with charts which are 7 days * 52 weeks
   include AlertFloorAreaMixin
   attr_reader :last_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
   attr_reader :last_year_£current, :previous_year_£current
@@ -211,7 +212,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   }
 
   def enough_data
-    days_amr_data_with_asof_date(@asof_date) >= 364 ? :enough : :not_enough
+    days_amr_data_with_asof_date(@asof_date) >= DAYSINYEAR ? :enough : :not_enough
   end
 
   protected def max_days_out_of_date_while_still_relevant
@@ -220,19 +221,22 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
   private def calculate(asof_date)
     raise EnergySparksNotEnoughDataException, "Not enough data: 1 year of data required, got #{days_amr_data} days" if enough_data == :not_enough
-    @last_year_kwh      = kwh(asof_date - 365, asof_date, :kwh)
-    @last_year_£        = kwh(asof_date - 365, asof_date, :£)
-    @last_year_£current = kwh(asof_date - 365, asof_date, :£current)
-    @last_year_co2      = kwh(asof_date - 365, asof_date, :co2)
+    @last_year_kwh      = kwh(asof_date - DAYSINYEAR, asof_date, :kwh)
+    @last_year_£        = kwh(asof_date - DAYSINYEAR, asof_date, :£)
+    @last_year_£current = kwh(asof_date - DAYSINYEAR, asof_date, :£current)
+    @last_year_co2      = kwh(asof_date - DAYSINYEAR, asof_date, :co2)
 
-    fa  = floor_area(asof_date - 365, asof_date)
-    pup = pupils(asof_date - 365, asof_date)
+    fa  = floor_area(asof_date - DAYSINYEAR, asof_date)
+    pup = pupils(asof_date - DAYSINYEAR, asof_date)
+    @historic_rate_£_per_kwh = aggregate_meter.amr_data.blended_rate(:kwh, :£,        asof_date - DAYSINYEAR, asof_date)
+    @current_rate_£_per_kwh  = aggregate_meter.amr_data.blended_rate(:kwh, :£current, asof_date - DAYSINYEAR, asof_date)
+
     @historic_rate_£_per_kwh = historic_blended_rate_£_per_kwh
     @current_rate_£_per_kwh  = current_blended_rate_£_per_kwh
 
-    prev_date = asof_date - 366
-    @previous_year_£        = kwh(prev_date - 365, prev_date, :£)
-    @previous_year_£current = kwh(prev_date - 365, prev_date, :£current)
+    prev_date = asof_date - DAYSINYEAR - 1
+    @previous_year_£        = kwh(prev_date - DAYSINYEAR, prev_date, :£)
+    @previous_year_£current = kwh(prev_date - DAYSINYEAR, prev_date, :£current)
 
     @one_year_benchmark_by_pupil_kwh            = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pup)
     @one_year_benchmark_by_pupil_£current       = @one_year_benchmark_by_pupil_kwh * @current_rate_£_per_kwh
@@ -290,6 +294,50 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @bookmark_url = add_book_mark_to_base_url('AnnualElectricity')
   end
   alias_method :analyse_private, :calculate
+
+  def saving_table_data
+    cost_saving_header_text = 'Cost saving if matched exemplar'
+    cost_saving_header_text += ' at current tariff' unless @last_year_£ == @last_year_£current
+
+    {
+      units:   [:kwh, :kwh, :kwh, :£current],
+      header:  ['Your school', 'Well managed school', 'Exemplar school', cost_saving_header_text],
+      data:    [[@last_year_kwh, @one_year_benchmark_by_pupil_kwh, @one_year_exemplar_by_pupil_kwh, @one_year_saving_versus_exemplar_£current]]
+    }
+  end
+
+  def benchmark_chart_data
+    @benchmark_chart_data ||= {
+      school: {
+        kwh:      @last_year_kwh,
+        £:        @last_year_£,
+        £current: @last_year_£current
+      },
+      benchmark: {
+        kwh:      @one_year_benchmark_by_pupil_kwh,
+        £:        @one_year_benchmark_by_pupil_£,
+        £current: @one_year_benchmark_by_pupil_£current,
+
+        saving: {
+          kwh:       @one_year_saving_versus_benchmark_kwh,
+          £:         @one_year_saving_versus_benchmark_£,
+          £current:  @one_year_saving_versus_benchmark_£current,
+          percent:   @percent_difference_from_average_per_pupil
+        }
+      },
+      exemplar: {
+        kwh:      @one_year_exemplar_by_pupil_kwh,
+        £:        @one_year_exemplar_by_pupil_£,
+        £current: @one_year_exemplar_by_pupil_£current,
+
+        saving: {
+          kwh:       @one_year_saving_versus_exemplar_kwh,
+          £:         @one_year_saving_versus_exemplar_£,
+          £current:  @one_year_saving_versus_exemplar_£current
+        }
+      }
+    }
+  end
 
   def timescale
     I18n.t("#{i18n_prefix}.timescale")

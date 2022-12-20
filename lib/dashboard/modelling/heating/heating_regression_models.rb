@@ -1188,7 +1188,7 @@ module AnalyseHeatingAndHotWater
         day_type  = holidays.day_type(date)
         heat_type = heating_on_seasonal_type(date)
 
-        %i[kwh £ co2].each do |data_type|
+        %i[kwh £ £current co2].each do |data_type|
           if split_out_hotwater
             bdown = heating_breakdown(date, data_type)
             bdown.each do |heating_type, val|

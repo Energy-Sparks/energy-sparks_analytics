@@ -477,6 +477,51 @@ class AlertAnalysisBase < ContentBase
     matching_alerts.first
   end
 
+  class UnknownFuelTypeForBenchmarkAlert < StandardError; end
+
+  def self.benchmark_alert(school, fuel_type, asof_date)
+    alert_class = case fuel_type
+                  when :electricity
+                    AlertElectricityAnnualVersusBenchmark
+                  when :gas
+                    AlertGasAnnualVersusBenchmark
+                  when :storage_heater
+                    AlertStorageHeaterAnnualVersusBenchmark
+                  else
+                    raise UnknownFuelTypeForBenchmarkAlert, "Unknown benchmark fuel type #{fuel_type}"
+                  end
+
+    alert = alert_class.new(school)
+
+    asof_date = [asof_date, alert.aggregate_meter.amr_data.end_date].min
+
+    alert.analyse(asof_date)
+
+    alert
+  end
+
+  def self.out_of_hours_alert(school, fuel_type, asof_date)
+    alert_class = case fuel_type
+                  when :electricity
+                    AlertOutOfHoursElectricityUsage
+                  when :gas
+                    AlertOutOfHoursGasUsage
+                  when :storage_heater
+                    AlertStorageHeaterOutOfHours
+                  else
+                    raise UnknownFuelTypeForBenchmarkAlert, "Unknown out of hours fuel type #{fuel_type}"
+                  end
+    
+                  
+    alert = alert_class.new(school)
+
+    asof_date = [asof_date, alert.aggregate_meter.amr_data.end_date].min
+
+    alert.analyse(asof_date)
+
+    alert       
+  end
+
   def self.all_alerts
     {
       AlertChangeInDailyElectricityShortTerm                      => 'elst',

@@ -26,9 +26,9 @@ module BenchmarkMetrics
   # number less than 1.0 for colder area, > 1.0 for milder areas
   # multiply by this number if normalising school to other schools in different regions
   # divide by this number if scaling a central UK wide benchmark to a school
-  def self.normalise_degree_days(regional_temperatures, _holidays, fuel_type, asof_date = nil)
+  def self.normalise_degree_days(regional_temperatures, _holidays, fuel_type, asof_date)
     regional_degree_days = regional_temperatures.degree_days_this_year(asof_date)
-    if fuel_type == :gas 
+    if fuel_type == :gas
       scale_percent_towards_1(ANNUAL_AVERAGE_DEGREE_DAYS / regional_degree_days, AVERAGE_GAS_PROPORTION_OF_HEATING)
     elsif fuel_type == :electricity || fuel_type == :storage_heaters
       ANNUAL_AVERAGE_DEGREE_DAYS / regional_degree_days
@@ -42,7 +42,8 @@ module BenchmarkMetrics
     ((percent - 1.0) * scale) + 1.0
   end
 
-  def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date = nil, list_of_fuels)
+  def self.benchmark_energy_usage_£_per_pupil(benchmark_type, school, asof_date, list_of_fuels)
+
     total = 0.0
 
     if list_of_fuels.include?(:electricity)
