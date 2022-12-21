@@ -33,7 +33,7 @@ module Benchmarking
         ] if charts? && !chart_empty?(chart)
 
         if tables?
-          tables = [{ type: :html,                  content: table_introduction_text}]
+          tables = [{ type: :html, content: table_introduction_text}]
 
           #only generate these additional versions of the table if we're not running
           #as part of the application, as they're unused and result in extra memory usage
@@ -47,9 +47,10 @@ module Benchmarking
 
           footnote_text = footnote(school_ids, filter, user_type)
 
-          tables.push({ type: :table_composite,       content: composite })
-          tables.push({ type: :html,                  content: footnote_text })
-          tables.push({ type: :html,                  content: table_interpretation_text })
+          tables.push({ type: :table_composite, content: composite })
+          tables.push({ type: :html,            content: footnote_text })
+          tables.push({ type: :html,            content: table_interpretation_text })
+          tables.push({ type: :html,            content: column_heading_explanation(school_ids, filter, user_type) })
         end
 
         caveats = [{ type: :html, content: caveat_text}]
@@ -164,6 +165,31 @@ module Benchmarking
 
     def table_column_index(column_id)
       @chart_table_config[:columns].index { |v| v[:column_id] == column_id }
+    end
+
+    def raw_data(school_ids, filter, user_type)
+      table_data(school_ids, filter, user_type).drop(1) # drop header
+    end
+
+    def column_headings(school_ids, filter, user_type)
+      table_data(school_ids, filter, user_type)[0]
+    end
+
+    def table_data(school_ids, filter, user_type)
+      table_data ||= {}
+      key = [school_ids, filter, user_type]
+      table_data[key] ||= benchmark_manager.run_table_including_aggregate_columns(asof_date, page_name, school_ids, nil, filter, :raw, user_type)
+    end
+
+    def column_heading_explanation(school_ids, filter, user_type)
+      last_year_columns = column_headings(school_ids, filter, user_type).any?{ |ch| BenchmarkManager.column_heading_refers_to_last_year?(ch) }
+      previous_year_columns = column_headings(school_ids, filter, user_type).any?{ |ch| BenchmarkManager.column_heading_refers_to_last_year?(ch) }
+
+      if last_year_columns || previous_year_columns
+        CAVEAT_TEXT[:this_year_last_year_definition]
+      else
+        ''
+      end
     end
   end
 end

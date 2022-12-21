@@ -3,7 +3,41 @@ require_relative './benchmark_content_general.rb'
 require_relative '../charting_and_reports/tables/management_summary_table.rb'
 
 module Benchmarking
+
   class BenchmarkManager
+
+    COLUMN_HEADINGS = {
+      name:                     'School name',
+      last_year:                'Last year',
+      previous_year:            'Previous year',
+      last_year_£:              'Last year £',
+      last_year_electric_£:     'Last year electricity £',
+      last_year_electric_£_pp:  'Last year electricity £ per pupil',
+      last_year_gas_£:          'Last year gas £',
+      tariff_changed:           :tariff_changed
+    }.freeze
+
+    def self.ch(key)
+      if COLUMN_HEADINGS.key?(key)
+        COLUMN_HEADINGS[key]
+      else
+        raise EnergySparksUnexpectedStateException, "Unexpected key #{key} for benchmark column heading"
+      end
+    end
+
+    def self.column_headings_refer_to(column_heading, key)
+      column_heading.downcase.include?(COLUMN_HEADINGS[key].downcase)
+    end
+
+    def self.column_heading_refers_to_last_year?(column_heading)
+      column_headings_refer_to(column_heading, :last_year)
+    end
+
+    def self.column_heading_refers_to_previous_year?(column_heading)
+      column_headings_refer_to(column_heading, :previous_year)
+    end
+
+
 
     def self.chart_table_config(name)
       config = CHART_TABLE_CONFIG[name]
@@ -162,23 +196,26 @@ module Benchmarking
       }
     ]
 
+    TARIFF_CHANGED_ROW = { data: ->{ addp_etch || addp_gtch }, name: ch(:tariff_changed), units: TrueClass, hidden: true }
+
     CHART_TABLE_CONFIG = {
       annual_energy_costs_per_pupil: {
         benchmark_class:  BenchmarkContentEnergyPerPupil,
         name:     'Annual energy use per pupil',
         columns:  [
-          { data: 'addp_name',              name: 'School name', units: String, chart_data: true, content_class: AdviceBenchmark },
-          { data: ->{ elba_£pup },          name: 'Annual electricity £/pupil', units: :£, chart_data: true },
-          { data: ->{ gsba_£pup },          name: 'Annual gas £/pupil', units: :£, chart_data: true },
-          { data: ->{ shan_£pup },          name: 'Annual storage heater £/pupil', units: :£, chart_data: true },
-          { data: ->{ enba_£pup },          name: 'Annual energy £/pupil', units: :£},
-          { data: ->{ sum_data([elba_£pup, gsba_n£pp, shan_n£pp]) }, name: 'Annual energy £/pupil (temperature compensated)', units: :£},
-          { data: ->{ sum_data([elba_kpup, gsba_kpup, shan_kpup]) }, name: 'Annual energy kWh/pupil', units: :kwh},
-          { data: ->{ sum_data([elba_cpup, gsba_cpup, shan_cpup]) }, name: 'Annual energy kgCO2/pupil', units: :kwh},
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: String, chart_data: true, content_class: AdviceBenchmark },
+          { data: ->{ elba_kpup },          name: 'Last year electricity kWh/pupil', units: :kwh, chart_data: true },
+          { data: ->{ gsba_kpup },          name: 'Last year gas kWh/pupil', units: :kwh, chart_data: true },
+          { data: ->{ shan_kpup },          name: 'Last year storage heater kWh/pupil', units: :kwh, chart_data: true },
+          { data: ->{ enba_kpup },          name: 'Last year energy kWh/pupil', units: :£},
+          { data: ->{ sum_data([elba_£pup, gsba_n£pp, shan_n£pp]) }, name: 'Last year energy £/pupil (temperature compensated)', units: :£},
+          { data: ->{ sum_data([elba_kpup, gsba_kpup, shan_kpup]) }, name: 'Last year energy kWh/pupil', units: :kwh},
+          { data: ->{ sum_data([elba_cpup, gsba_cpup, shan_cpup]) }, name: 'Last year energy kgCO2/pupil', units: :kwh},
           { data: ->{ addp_stpn },          name: 'Type',   units: String },
           { data: ->{ enba_ratg },          name: 'rating', units: Float, y2_axis: true },
+          TARIFF_CHANGED_ROW
         ],
-        where:   ->{ !enba_£pup.nil? },
+        where:   ->{ !enba_kpup.nil? },
         sort_by:  method(:sort_energy_costs),
         type: %i[chart table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark }
@@ -187,7 +224,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentTotalAnnualEnergy,
         name:     'Annual energy costs',
         columns:  [
-          { data: 'addp_name',              name: 'School name', units: String, chart_data: true },
+          { data: 'addp_name',              name: ch(:name), units: String, chart_data: true },
           { data: ->{ elba_£lyr },          name: 'Annual Electricity £', units: :£, chart_data: true },
           { data: ->{ gsba_£lyr },          name: 'Annual Gas £', units: :£, chart_data: true },
           { data: ->{ shan_£lyr },          name: 'Annual Storage Heater £', units: :£, chart_data: true },
@@ -206,7 +243,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentEnergyPerFloorArea,
         name:     'Annual energy use per floor area',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name), units: String, chart_data: true },
           { data: ->{ enba_£fla },  name: 'Annual energy £/floor area', units: :£, chart_data: true },
           { data: ->{ enba_£lyr },  name: 'Annual energy cost £', units: :£},
           { data: ->{ enba_ratg },  name: 'rating', units: Float, y2_axis: true },
@@ -218,7 +255,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInEnergyUseSinceJoined,
         name:     'Change in energy use since the school joined Energy Sparks',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: :short_school_name, chart_data: true },
+          { data: 'addp_name',      name: ch(:name), units: :short_school_name, chart_data: true },
           { data: ->{ enba_sact },  name: 'Energy Sparks join date', units: :date_mmm_yyyy },
           { data: ->{ enba_kxap },  name: 'Energy (total)',   units: :relative_percent_0dp, chart_data: true, content_class: AdviceBenchmark },
           { data: ->{ enba_keap },  name: 'Electricity',      units: :relative_percent_0dp },
@@ -241,7 +278,7 @@ module Benchmarking
         filter_out:       :dont_make_available_directly,
         name:     'breakdown in the change in energy use since the school joined Energy Sparks',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: :short_school_name, chart_data: true },
+          { data: 'addp_name',      name: ch(:name), units: :short_school_name, chart_data: true },
           { data: ->{ enba_sact },  name: 'Energy Sparks join date', units: :date_mmm_yyyy },
 
           { data: ->{ enba_kea }, name: 'Year before joined',       units: :kwh },
@@ -277,7 +314,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInCO2SinceLastYear,
         name:     'Change in annual CO2 emissions since last year',
         columns:  [
-          { data: 'addp_name',      name: 'School name',          units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),          units: String, chart_data: true },
           { data: ->{ enba_cxn },   name: 'CO2 (previous year)',  units: :co2 },
           { data: ->{ enba_cx0 },   name: 'CO2 (last year)',      units: :co2 },
           { data: ->{ enba_cxnp},   name: 'Change in annual CO2', units: :relative_percent_0dp, chart_data: true }
@@ -292,7 +329,7 @@ module Benchmarking
         filter_out:       :dont_make_available_directly,
         name:     'Breakdown of CO2 emissions change since last year',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name), units: String, chart_data: true },
 
           { data: ->{ enba_cen }, name: 'Electricity CO2 (previous year)',                    units: :co2 },
           { data: ->{ enba_ce0 }, name: 'Electricity CO2 (last year)',                        units: :co2 },
@@ -319,7 +356,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeAdhocComparison,
         name:       'Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)',
         columns:  [
-          { data: 'addp_name', name: 'School name', units: :short_school_name, chart_data: true},
+          { data: 'addp_name', name: ch(:name), units: :short_school_name, chart_data: true},
 
           # kWh
 
@@ -388,7 +425,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Change in electricity for layer up power down day November 2022',
         columns:  [
-          { data: 'addp_name', name: 'School name', units: :short_school_name },
+          { data: 'addp_name', name: ch(:name), units: :short_school_name },
 
           # kWh
           { data: ->{ lue1_pppk }, name: 'previous year', units: :kwh },
@@ -421,7 +458,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Change in gas for layer up power down day November 2022',
         columns:  [
-          { data: 'addp_name', name: 'School name', units: :short_school_name },
+          { data: 'addp_name', name: ch(:name), units: :short_school_name },
 
           # kWh
           { data: ->{ lug1_pppu }, name: 'previous year (temperature unadjusted)', units: :kwh },
@@ -455,7 +492,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Change in gas for layer up power down day November 2022',
         columns:  [
-          { data: 'addp_name', name: 'School name', units: :short_school_name },
+          { data: 'addp_name', name: ch(:name), units: :short_school_name },
 
           # kWh
           { data: ->{ lus1_pppu }, name: 'previous year (temperature unadjusted)', units: :kwh },
@@ -488,7 +525,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInEnergySinceLastYear,
         name:     'Change in energy use since last year',
         columns:  [
-          { data: 'addp_name',              name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',              name: ch(:name), units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
           { data: ->{ sum_if_complete([enba_ken, enba_kgn, enba_khn, enba_ksn], 
                                       [enba_ke0, enba_kg0, enba_kh0, enba_ks0]) }, name: 'previous year', units: :kwh },
           { data: ->{ sum_data([enba_ke0, enba_kg0, enba_kh0, enba_ks0]) }, name: 'last year', units: :kwh },
@@ -568,7 +605,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInElectricitySinceLastYear,
         name:     'Change in electricity consumption since last year',
         columns:  [
-          { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: ch(:name), units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_ken },                          name: 'previous year',  units: :kwh },
           { data: ->{ enba_ke0 },                          name: 'last year',      units: :kwh },
@@ -600,7 +637,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInGasSinceLastYear,
         name:     'Change in gas consumption since last year',
         columns:  [
-          { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: ch(:name), units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_kgn  },                         name: 'previous year',  units: :kwh },
           { data: ->{ gsba_kpya },                         name: 'previous year temperature adjusted',  units: :kwh },
@@ -632,7 +669,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInStorageHeatersSinceLastYear,
         name:     'Change in storage heater consumption since last year',
         columns:  [
-          { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: ch(:name), units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_khn },                          name: 'previous year',  units: :kwh },
           { data: ->{ enba_kh0 },                          name: 'last year',      units: :kwh },
@@ -662,7 +699,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInSolarPVSinceLastYear,
         name:     'Change in solar PV production since last year',
         columns:  [
-          { data: 'addp_name',  name: 'School name', units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: ch(:name), units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_ksn },                          name: 'previous year',  units: :kwh },
           { data: ->{ enba_ks0 },                          name: 'last year',      units: :kwh },
@@ -689,9 +726,9 @@ module Benchmarking
         benchmark_class:  BenchmarkContentElectricityPerPupil,
         name:     'Annual electricity use per pupil',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true, content_class: AdviceElectricityAnnual },
-          { data: ->{ elba_£pup },  name: 'Annual electricity £/pupil', units: :£_0dp, chart_data: true },
-          { data: ->{ elba_£lyr },  name: 'Annual electricity £', units: :£},
+          { data: 'addp_name',      name: ch(:name), units: String, chart_data: true, content_class: AdviceElectricityAnnual },
+          { data: ->{ elba_£pup },  name: ch(:last_year_electric_£_pp), units: :£_0dp, chart_data: true },
+          { data: ->{ elba_£lyr },  name: ch(:last_year_electric_£), units: :£},
           { data: ->{ elba_£esav }, name: 'Saving if matched exemplar school', units: :£ },
           { data: ->{ elba_ratg },  name: 'rating', units: Float, y2_axis: true },
         ],
@@ -702,7 +739,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInAnnualElectricityConsumption,
         name:     'Change in annual electricity consumption',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true, content_class: AdviceElectricityAnnual },
+          { data: 'addp_name',      name: ch(:name), units: String, chart_data: true, content_class: AdviceElectricityAnnual },
           { data: ->{ (elba_£lyr - elba_£pyr) / elba_£pyr},  name: 'Change in annual electricity usage', units: :relative_percent_0dp, chart_data: true },
           { data: ->{ elba_£lyr },  name: 'Annual electricity £ (this year)', units: :£},
           { data: ->{ elba_£pyr },  name: 'Annual electricity £ (last year)', units: :£}
@@ -715,7 +752,7 @@ module Benchmarking
         benchmark_class:  BenchmarkRefrigeration,
         name:     'Annual cost of running refrigeration',
         columns:  [
-          { data:   'addp_name',    name: 'School name', units: String, chart_data: true, content_class: AdviceElectricityAnnual },
+          { data:   'addp_name',    name: ch(:name), units: String, chart_data: true, content_class: AdviceElectricityAnnual },
           { data: ->{ free_ann£ },  name: 'Estimate of annual refrigeration cost', units: :£, chart_data: true },
           { data: ->{ free_hol£ },  name: 'Saving over summer holiday', units: :£, chart_data: true },
           { data: ->{ -1.0 * free_kwrd },  name: 'Reduction in kW over summer holiday', units: :kw},
@@ -729,7 +766,7 @@ module Benchmarking
         benchmark_class:  BenchmarkElectricityTarget,
         name:     'Progress versus electricity target',
         columns:  [
-          { data:   'addp_name',    name: 'School name', units: String, chart_data: true, content_class: AdviceElectricityAnnual },
+          { data:   'addp_name',    name: ch(:name), units: String, chart_data: true, content_class: AdviceElectricityAnnual },
           { data: ->{ etga_tptd },  name: 'Percent above or below target since target set', units: :relative_percent, chart_data: true },
           { data: ->{ etga_aptd },  name: 'Percent above or below last year',  units: :relative_percent},
           { data: ->{ etga_cktd },  name: 'kWh consumption since target set',  units: :kwh},
@@ -744,7 +781,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentElectricityOutOfHoursUsage,
         name:     'Electricity out of hours use',
         columns:  [
-          { data: 'addp_name',      name: 'School name',                  units: String, chart_data: true, content_class: AdviceElectricityOutHours   },
+          { data: 'addp_name',      name: ch(:name),                  units: String, chart_data: true, content_class: AdviceElectricityOutHours   },
           { data: ->{ eloo_sdop },  name: 'School Day Open',              units: :percent, chart_data: true },
           { data: ->{ eloo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
           { data: ->{ eloo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
@@ -762,7 +799,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInBaseloadSinceLastYear,
         name:     'Last week\'s baseload versus average of last year (% difference)',
         columns:  [
-          { data: 'addp_name', name: 'School name', units: String, chart_data: true, content_class: AdviceBaseload  },
+          { data: 'addp_name', name: ch(:name), units: String, chart_data: true, content_class: AdviceBaseload  },
           { data: ->{ elbc_bspc }, name: 'Change in baseload last week v. year (%)', units: :percent, chart_data: true},
           { data: ->{ elbc_blly }, name: 'Average baseload last year (kW)', units: :kw},
           { data: ->{ elbc_bllw }, name: 'Average baseload last week (kW)', units: :kw},
@@ -776,7 +813,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentBaseloadPerPupil,
         name:     'Baseload per pupil',
         columns:  [
-          { data: 'addp_name', name: 'School name', units: String, chart_data: true, content_class: AdviceBaseload },
+          { data: 'addp_name', name: ch(:name), units: String, chart_data: true, content_class: AdviceBaseload },
           { data: ->{ elbb_blpp * 1000.0 }, name: 'Baseload per pupil (W)', units: :w, chart_data: true},
           { data: ->{ elbb_lygb },  name: 'Annual cost of baseload', units: :£},
           { data: ->{ elbb_lykw },  name: 'Average baseload kW', units: :w},
@@ -791,7 +828,7 @@ module Benchmarking
         benchmark_class: BenchmarkSeasonalBaseloadVariation,
         name:     'Seasonal baseload variation',
         columns:  [
-          { data: 'addp_name', name: 'School name', units: String, chart_data: true, content_class: AdviceBaseload },
+          { data: 'addp_name', name: ch(:name), units: String, chart_data: true, content_class: AdviceBaseload },
           { data: ->{ sblv_sblp }, name: 'Percent increase on winter baseload over summer', units: :relative_percent, chart_data: true},
           { data: ->{ sblv_smbl },  name: 'Summer baseload kW', units: :kw},
           { data: ->{ sblv_wtbl },  name: 'Winter baseload kW', units: :kw},
@@ -805,7 +842,7 @@ module Benchmarking
         benchmark_class: BenchmarkWeekdayBaseloadVariation,
         name:     'Weekday baseload variation',
         columns:  [
-          { data: 'addp_name', name: 'School name', units: String, chart_data: true, content_class: AdviceBaseload },
+          { data: 'addp_name', name: ch(:name), units: String, chart_data: true, content_class: AdviceBaseload },
           { data: ->{ iblv_sblp }, name: 'Variation in baseload between days of week', units: :relative_percent, chart_data: true},
           { data: ->{ iblv_mnbk },  name: 'Min average weekday baseload kW', units: :kw},
           { data: ->{ iblv_mxbk },  name: 'Max average weekday baseload kW', units: :kw},
@@ -821,7 +858,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentSummerHolidayBaseloadAnalysis,
         name:     'Reduction in baseload in the summer holidays',
         columns:  [
-          { data: 'addp_name',      name: 'School name',      units: String },
+          { data: 'addp_name',      name: ch(:name),      units: String },
           { data: ->{ shol_ann£ },  name: 'Annualised £ value of summer holiday reduction',    units: :£, chart_data: true },
           { data: ->{ shol_hol£ },  name: 'Saving during summer holiday from baseload reduction',  units: :£ },
           { data: ->{ shol_kwrd },  name: 'Reduction in baseload over summer holidays', units: :kw },
@@ -837,7 +874,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentPeakElectricityPerFloorArea,
         name:     'Peak school day electricity comparison kW/floor area',
         columns:  [
-          { data: 'addp_name',      name: 'School name',      units: String, chart_data: true, content_class: AdviceElectricityIntraday },
+          { data: 'addp_name',      name: ch(:name),      units: String, chart_data: true, content_class: AdviceElectricityIntraday },
           { data: ->{ epkb_kwfa * 1000.0 },  name: 'w/floor area',    units: :w, chart_data: true },
           { data: ->{ epkb_kwsc },  name: 'average peak kw',  units: :kw },
           { data: ->{ epkb_kwex },  name: 'exemplar peak kw', units: :kw },
@@ -852,7 +889,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentSolarPVBenefit,
         name:     'Benefit of estimated optimum size solar PV installation',
         columns:  [
-          { data: 'addp_name',      name: 'School name',      units: String, content_class: AdviceSolarPV  },
+          { data: 'addp_name',      name: ch(:name),      units: String, content_class: AdviceSolarPV  },
           { data: ->{ sole_opvk },  name: 'Size: kWp',    units: :kwp},
           { data: ->{ sole_opvy },  name: 'payback (years)',  units: :years },
           { data: ->{ sole_opvp },  name: 'Reduction in mains consumption (%)', units: :percent }
@@ -864,7 +901,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentHeatingPerFloorArea,
         name:     'Annual heating cost per floor area',
         columns:  [
-          { data: 'addp_name',      name: 'School name',    units: String, chart_data: true, content_class: AdviceGasAnnual },
+          { data: 'addp_name',      name: ch(:name),    units: String, chart_data: true, content_class: AdviceGasAnnual },
           { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: 'Annual heating costs per floor area', units: :£, chart_data: true },
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: 'Annual cost £', units: :£},
           { data: ->{ sum_data([gsba_s£ex, shan_s£ex], true) },  name: 'Saving if matched exemplar school', units: :£ },
@@ -880,7 +917,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInAnnualHeatingConsumption,
         name:     'Change in annual heating consumption',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true, content_class: AdviceGasAnnual },
+          { data: 'addp_name',      name: ch(:name), units: String, chart_data: true, content_class: AdviceGasAnnual },
           { data: ->{ percent_change([gsba_£pyr, shan_£pyr], [gsba_£lyr, shan_£lyr], true) },  name: 'Change in annual gas/storage heater usage', units: :relative_percent_0dp, sense: :positive_is_bad, chart_data: true },
           { data: ->{ gsba_£lyr },  name: 'Annual gas costs £ (this year)', units: :£},
           { data: ->{ gsba_£pyr },  name: 'Annual gas costs £ (last year)', units: :£},
@@ -896,7 +933,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentGasOutOfHoursUsage,
         name:     'Gas: out of hours use',
         columns:  [
-          { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true, content_class: AdviceGasOutHours },
+          { data: 'addp_name',      name: ch(:name),                  units: String,   chart_data: true, content_class: AdviceGasOutHours },
           { data: ->{ gsoo_sdop },  name: 'School Day Open',              units: :percent, chart_data: true },
           { data: ->{ gsoo_sdcp },  name: 'School Day Closed',            units: :percent, chart_data: true },
           { data: ->{ gsoo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
@@ -914,7 +951,7 @@ module Benchmarking
         benchmark_class:  BenchmarkGasTarget,
         name:     'Progress versus gas target',
         columns:  [
-          { data:   'addp_name',    name: 'School name', units: String, chart_data: true, content_class: AdviceGasAnnual },
+          { data:   'addp_name',    name: ch(:name), units: String, chart_data: true, content_class: AdviceGasAnnual },
           { data: ->{ gtga_tptd },  name: 'Percent above or below target since target set', units: :relative_percent, chart_data: true },
           { data: ->{ gtga_aptd },  name: 'Percent above or below last year',  units: :relative_percent},
           { data: ->{ gtga_cktd },  name: 'kWh consumption since target set',  units: :kwh},
@@ -929,7 +966,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentStorageHeaterOutOfHoursUsage,
         name:     'Storage heater out of hours use',
         columns:  [
-          { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true, content_class: AdviceStorageHeaters },
+          { data: 'addp_name',      name: ch(:name),                  units: String,   chart_data: true, content_class: AdviceStorageHeaters },
           { data: ->{ shoo_sdop },  name: 'School Day Open',              units: :percent, chart_data: true },
           { data: ->{ shoo_sdcp },  name: 'Overnight charging',           units: :percent, chart_data: true },
           { data: ->{ shoo_holp },  name: 'Holiday',                      units: :percent, chart_data: true },
@@ -944,7 +981,7 @@ module Benchmarking
         benchmark_class:  BenchmarkHeatingComingOnTooEarly,
         name:     'Heating start time (potentially coming on too early in morning)',
         columns:  [
-          { data: 'addp_name',      name: 'School name',                  units: String,   chart_data: true, content_class: AdviceGasBoilerMorningStart },
+          { data: 'addp_name',      name: ch(:name),                  units: String,   chart_data: true, content_class: AdviceGasBoilerMorningStart },
           { data: ->{ hthe_htst },  name: 'Average heating start time (last week)', units: :timeofday, chart_data: true },
           { data: ->{ opts_avhm },  name: 'Average heating start time last year',   units: :timeofday },
           { data: ->{ hthe_oss£ },  name: 'Annual saving if improve to exemplar',units: :£ },
@@ -958,7 +995,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:     'Optimum start analysis',
         columns:  [
-          { data: 'addp_name',      name: 'School name',      units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),      units: String, chart_data: true },
           { data: ->{ opts_avhm },  name: 'Average heating start time last year',    units: :timeofday, chart_data: true },
           { data: ->{ opts_sdst },  name: 'Standard deviation of start time - hours, last year',  units: :opt_start_standard_deviation },
           { data: ->{ opts_ratg },  name: 'Optimum start rating', units: Float },
@@ -1002,7 +1039,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentHeatingInWarmWeather,
         name:     'Gas or storage heater consumption for heating in warm weather',
         columns:  [
-          { data: 'addp_name',      name: 'School name',           units: String, chart_data: true, content_class: AdviceGasBoilerSeasonalControl },
+          { data: 'addp_name',      name: ch(:name),           units: String, chart_data: true, content_class: AdviceGasBoilerSeasonalControl },
           { data: ->{ or_nil([shsd_wpan, shsh_wpan]) },  name: 'Percentage of annual heating consumed in warm weather', units: :percent, chart_data: true },
           { data: ->{ or_nil([shsd_wkwh, shsh_wkwh]) },  name: 'Saving through turning heating off in warm weather (kWh)', units: :kwh },
           { data: ->{ or_nil([shsd_wco2, shsh_wco2]) },  name: 'Saving CO2 kg', units: :co2 },
@@ -1017,7 +1054,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentThermostaticControl,
         name:     'Quality of thermostatic control',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true, content_class: AdviceGasThermostaticControl },
+          { data: 'addp_name',      name: ch(:name),     units: String, chart_data: true, content_class: AdviceGasThermostaticControl },
           { data: ->{ or_nil([httc_r2, shtc_r2]) },    name: 'Thermostatic R2', units: :r2,  chart_data: true },
           { data: ->{ sum_data([httc_sav£, shtc_sav£], true) },  name: 'Saving through improved thermostatic control', units: :£ },
           { data: ->{ httc_ratg },  name: 'rating', units: Float, y2_axis: true }
@@ -1029,7 +1066,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentHotWaterEfficiency,
         name:     'Hot Water Efficiency',
         columns:  [
-          { data: 'addp_name',      name: 'School name', units: String, chart_data: true, content_class: AdviceGasHotWater },
+          { data: 'addp_name',      name: ch(:name), units: String, chart_data: true, content_class: AdviceGasHotWater },
           { data: ->{ hotw_ppyr },  name: 'Cost per pupil', units: :£, chart_data: true},
           { data: ->{ hotw_eff  },  name: 'Efficiency of system', units: :percent},
           { data: ->{ hotw_gsav },  name: 'Saving improving timing', units: :£},
@@ -1043,7 +1080,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentElectricityMeterConsolidation,
         name:     'Opportunities for electricity meter consolidation',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),     units: String, chart_data: true },
           { data: ->{ emtc_sav£ },  name: 'Potential max annual saving £', units: :£,  chart_data: true },
           { data: ->{ emtc_mets },  name: 'Number of electricity meters', units: :meters },
           { data: ->{ emtc_ratg },  name: 'rating', units: Float, y2_axis: true }
@@ -1056,7 +1093,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentGasMeterConsolidation,
         name:     'Opportunities for gas meter consolidation',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),     units: String, chart_data: true },
           { data: ->{ gmtc_sav£ },  name: 'Potential max annual saving £', units: :£,  chart_data: true },
           { data: ->{ gmtc_mets },  name: 'Number of gas meters', units: :meters },
           { data: ->{ gmtc_ratg },  name: 'rating', units: Float, y2_axis: true }
@@ -1069,7 +1106,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentDifferentialTariffOpportunity,
         name:     'Benefit of moving to or away from a differential tariff',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),     units: String, chart_data: true },
           { data: ->{ dtaf_sav£ },  name: 'Potential annual saving £', units: :£,  chart_data: true },
           { data: ->{ dtaf_ratg },  name: 'rating', units: Float, y2_axis: true }
         ],
@@ -1081,7 +1118,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek,
         name:     'Change in electricity consumption since last school week',
         columns:  [
-          { data: ->{ referenced(addp_name, eswc_pnch, eswc_difp) }, name: 'School name', units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, eswc_pnch, eswc_difp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
           { data: ->{ eswc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
           { data: ->{ eswc_dif£ },  name: 'Change £', units: :£_0dp },
           { data: ->{ eswc_pnch },  aggregate_column: :dont_display_in_table_or_chart, units: TrueClass, column_id: :pupils_changed},
@@ -1095,7 +1132,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInElectricityBetweenLast2Holidays,
         name:     'Change in electricity consumption between the 2 most recent holidays',
         columns:  [
-          { data: ->{ referenced(addp_name, ephc_pnch, ephc_difp) }, name: 'School name',     units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, ephc_pnch, ephc_difp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
           { data: ->{ ephc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
           { data: ->{ ephc_dif£ },  name: 'Change £', units: :£_0dp },
           { data: ->{ partial(ephc_cper, ephc_cptr) },  name: 'Most recent holiday', units: String },
@@ -1112,7 +1149,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInElectricityBetween2HolidaysYearApart,
         name:     'Change in electricity consumption between this holiday and the same holiday the previous year',
         columns:  [
-          { data: ->{ referenced(addp_name, epyc_pnch, epyc_difp) }, name: 'School name',     units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, epyc_pnch, epyc_difp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
           { data: ->{ epyc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
           { data: ->{ epyc_dif£ },  name: 'Change £', units: :£_0dp },
           { data: ->{ partial(epyc_cper, epyc_cptr) },  name: 'Most recent holiday', units: String },
@@ -1129,7 +1166,7 @@ module Benchmarking
         benchmark_class: BenchmarkElectricityOnDuringHoliday,
         name:     'Electricity consumption during current holiday',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),     units: String, chart_data: true },
           { data: ->{ edhl_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
           { data: ->{ edhl_£sfr },  name: 'Holiday usage to date', units: :£ },
           { data: ->{ edhl_hnam },  name: 'Holiday', units: String }
@@ -1141,7 +1178,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek,
         name:     'Change in gas consumption since last school week',
         columns:  [
-          { data: ->{ referenced(addp_name, gswc_pnch, gswc_difp) }, name: 'School name',     units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, gswc_pnch, gswc_difp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
           { data: ->{ gswc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
           { data: ->{ gswc_dif£ },  name: 'Change £', units: :£_0dp },
           { data: ->{ gswc_ratg },  name: 'rating', units: Float, y2_axis: true },
@@ -1157,7 +1194,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInGasBetweenLast2Holidays,
         name:     'Change in gas consumption between the 2 most recent holidays',
         columns:  [
-          { data: ->{ referenced(addp_name, gphc_pnch, gphc_difp) }, name: 'School name', units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, gphc_pnch, gphc_difp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
           { data: ->{ gphc_difp },  name: 'Change %', units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
           { data: ->{ gphc_dif£ },  name: 'Change £', units: :£_0dp },
           { data: ->{ partial(gphc_cper, gphc_cptr) },  name: 'Most recent holiday', units: String },
@@ -1176,7 +1213,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInGasBetween2HolidaysYearApart,
         name:     'Change in gas consumption between this holiday and the same the previous year',
         columns:  [
-          { data: ->{ referenced(addp_name, gpyc_pnch, gpyc_difp) }, name: 'School name', units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, gpyc_pnch, gpyc_difp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
           { data: ->{ gpyc_difp },  name: 'Change %',   units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
           { data: ->{ gpyc_dif£ },  name: 'Change £',   units: :£_0dp },
           { data: ->{ partial(gpyc_cper, gpyc_cptr) },  name: 'Most recent holiday', units: String },
@@ -1194,7 +1231,7 @@ module Benchmarking
         benchmark_class: BenchmarkGasHeatingHotWaterOnDuringHoliday,
         name:     'Gas consumption during current holiday',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),     units: String, chart_data: true },
           { data: ->{ hdhl_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
           { data: ->{ hdhl_£sfr },  name: 'Holiday usage to date', units: :£ },
           { data: ->{ hdhl_hnam },  name: 'Holiday', units: String }
@@ -1206,7 +1243,7 @@ module Benchmarking
         benchmark_class: BenchmarkStorageHeatersOnDuringHoliday,
         name:     'Storage heater consumption during current holiday',
         columns:  [
-          { data: 'addp_name',      name: 'School name',     units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),     units: String, chart_data: true },
           { data: ->{ shoh_£pro },  name: 'Projected usage by end of holiday', units: :£, chart_data: true },
           { data: ->{ shoh_£sfr },  name: 'Holiday usage to date', units: :£ },
           { data: ->{ shoh_hnam },  name: 'Holiday', units: String }
@@ -1218,7 +1255,7 @@ module Benchmarking
         benchmark_class: BenchmarkEnergyConsumptionInUpcomingHolidayLastYear,
         name:     'Energy Consumption in upcoming holiday last year',
         columns:  [
-          { data: 'addp_name',      name: 'School name',                units: String, chart_data: true },
+          { data: 'addp_name',      name: ch(:name),                units: String, chart_data: true },
           { data: ->{ ihol_glyr },  name: 'Gas',                        units: :£, chart_data: true  },
           { data: ->{ ihol_elyr },  name: 'Electricity',                units: :£, chart_data: true },
           { data: ->{ ihol_gpfa },  name: 'Gas kWh per floor area',     units: :kwh },
@@ -1236,7 +1273,7 @@ module Benchmarking
           # the ordered and index of these 3 columns is important as hardcoded
           # indexes are used else where in the code [0] etc. to map between id and urn
           # def school_map()
-          { data: 'addp_name',     name: 'School name', units: String,  chart_data: false },
+          { data: 'addp_name',     name: ch(:name), units: String,  chart_data: false },
           { data: 'addp_urn',      name: 'URN',         units: Integer, chart_data: false },
           { data: ->{ school_id }, name: 'school id',   units: Integer, chart_data: false  }
         ],

@@ -98,6 +98,12 @@ module Benchmarking
         with an adjusted figure for the previous holiday, scaling to the same number of days.
         The change in &pound; is the saving or increased cost for the most recent holiday to date.
       </p>
+    ),
+    this_year_last_year_definition:  %q(
+      <p>
+        In school comparisons &apos;last year&apos; is defined as this year to date,
+        &apos;previous year&apos; is defined as the year before.
+      </p>
     )
   }
   #=======================================================================================
@@ -106,15 +112,43 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <p>
-          This benchmark compares the energy consumed per pupil each year in &pound;.
+          This benchmark compares the energy consumed per pupil each year in kWh.
+          Be careful comparing kWh values between different fuel types,
+          <a href="https://en.wikipedia.org/wiki/Primary_energy">
+            technically they aren't directly comparable as they are different types of energy.
+          </a>
         </p>
         <p>
-          This benchmark is best used for economic comparisons.
           <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
         </p>
       )
       ERB.new(text).result(binding)
     end
+
+    def tariff_changed_foot_note(school_ids, filter, user_type)
+      h = column_headings(school_ids, filter, user_type)
+      d = raw_data(school_ids, filter, user_type)
+      ch = BenchmarkManager.ch(:tariff_changed)
+      i = h.index(ch)
+      tariff_changed = d.any? { |row| row[i] }
+
+      if tariff_changed
+        %(
+          <p>
+            (*5) The tariff has changed during the last year for this school.
+                Savings are calculated using the latest tariff but other £ values
+                are calculated using the relevant tariff at the time
+          </p>
+        )
+      else
+        %()
+      end
+    end
+
+    def footnote(school_ids, filter, user_type)
+      tariff_changed_foot_note(school_ids, filter, user_type)
+    end
+
     private def table_introduction_text
       CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
     end
@@ -1480,6 +1514,7 @@ module Benchmarking
 
     # reverses def referenced(name, changed, percent) in benchmark_manager.rb
     def remove_references(school_name)
+      puts "Before #{school_name} After #{school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')}"
       school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')
     end
 
