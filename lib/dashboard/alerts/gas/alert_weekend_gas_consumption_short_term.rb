@@ -19,7 +19,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   attr_reader :has_changed_during_period_text
   attr_reader :prior_weekend_dates_string
   attr_reader :weekend_dates_string
-  attr_reader :frost_protection_half_hours
+  attr_reader :frost_protection_hours
   attr_reader :last_week_end_kwh_including_frost, :last_week_end_£_including_frost
   attr_reader :last_week_end_£current_including_frost, :last_weekend_cost_co2_including_frost 
 
@@ -165,8 +165,8 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
       description: 'last 7 days gas consumption chart (intraday) - suggest zoom to user, £ per half hour (using latest gas tariff)',
       units: :chart
     },
-    frost_protection_half_hours: {
-      description: 'Number of half hours of frost protection, excluded from value provided for weekend kWh usage',
+    frost_protection_hours: {
+      description: 'Number of hours of frost protection, excluded from value provided for weekend kWh usage',
       units: Float
     }
   }.freeze
@@ -196,7 +196,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
     puts "Got here"
     puts @weekend_dates_string
 
-    @last_week_end_kwh, @frost_protection_half_hours, @last_week_end_kwh_including_frost =
+    @last_week_end_kwh, @frost_protection_hours, @last_week_end_kwh_including_frost =
           kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE, :kwh)
     @last_weekend_cost_£, _x, @last_week_end_£_including_frost =
           kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE, :£)
@@ -285,7 +285,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   private def kwh_usage_outside_frost_period(dates, frost_protection_temperature, datatype)
     total_kwh = 0.0
     total_kwh_excluding_frost = 0.0
-    frost_protection_half_hours = 0.0
+    frost_protection_hours = 0.0
 
     dates.each do |date|
       (0..47).each do |halfhour_index|
@@ -293,12 +293,12 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
         if @school.temperatures.temperature(date, halfhour_index) > frost_protection_temperature
           total_kwh_excluding_frost += val
         else
-          frost_protection_half_hours += 0.5
+          frost_protection_hours += 0.5
         end
         total_kwh += val
       end
     end
 
-    [total_kwh_excluding_frost, frost_protection_half_hours, total_kwh]
+    [total_kwh_excluding_frost, frost_protection_hours, total_kwh]
   end
 end
