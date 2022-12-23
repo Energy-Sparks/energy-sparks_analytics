@@ -265,7 +265,7 @@ DEPENDENCIES
   chroma
   dotenv
   factory_bot
-  faraday (> 1.0.1)
+  faraday (= 1.10.2)
   faraday_middleware
   hashdiff (~> 1.0.0)
   html-table
