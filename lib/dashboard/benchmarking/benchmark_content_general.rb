@@ -121,7 +121,7 @@ module Benchmarking
     private def introduction_text
       text = %q(
         <p>
-          This benchmark compares the energy consumed per pupil each year in kWh.
+          This benchmark compares the energy consumed per pupil in the last year in kWh.
           Be careful when comparing kWh values between different fuel types,
           <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
             technically they aren't directly comparable as they are different types of energy.
@@ -161,7 +161,7 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          This benchmark compares the electricity consumed per pupil each year,
+          This benchmark compares the electricity consumed per pupil in the last year,
           in &pound;.
         </p>
         <p>

@@ -48,7 +48,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     annual_cost_£current: {
       description: 'annual cost of seasonal baseload variation (£) as latest tariff',
       units:  :£,
-      benchmark_code: 'c$bp'
+      benchmark_code: 'c€bp'
     },
     annual_co2: {
       description: 'annual cost of seasonal baseload variation (CO2)',

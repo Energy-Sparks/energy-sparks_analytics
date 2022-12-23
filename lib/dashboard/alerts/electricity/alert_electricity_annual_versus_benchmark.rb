@@ -52,7 +52,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     last_year_£current: {
       description: 'Last years electricity consumption - £ including differential tariff  (current tariffs)',
       units:  :£current,
-      benchmark_code: '$lyr'
+      benchmark_code: '€lyr'
     },
     historic_rate_£_per_kwh: {
       description: 'Blended historic tariff over last year',
@@ -70,7 +70,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     previous_year_£current: {
       description: 'Previous years electricity consumption - £ including differential tariff (current tariffs)',
       units:  :£current,
-      benchmark_code: '$pyr'
+      benchmark_code: '€pyr'
     },
     last_year_co2: {
       description: 'Last years electricity CO2 kg',
@@ -129,7 +129,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     one_year_saving_versus_exemplar_£current: {
       description: 'Annual difference in electricity consumption versus exemplar school - £ (use adjective for sign) (current tariffs)',
       units:  :£current,
-      benchmark_code: '$esav'
+      benchmark_code: '€esav'
     },
     one_year_saving_versus_exemplar_co2: {
       description: 'Annual difference in electricity consumption versus exemplar school - co2 (use adjective for sign)',
@@ -147,12 +147,12 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     one_year_electricity_per_pupil_£: {
       description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts (historic tariffs)',
       units:  :£,
-      benchmark_code: '£pup'
+      benchmark_code: '€pup'
     },
     one_year_electricity_per_pupil_£current: {
       description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts (current tariffs)',
       units:  :£current,
-      benchmark_code: '$pup'
+      benchmark_code: '€pup'
     },
     one_year_electricity_per_pupil_co2: {
       description: 'Per pupil annual electricity usage - co2 - required for PH analysis, not alerts',
