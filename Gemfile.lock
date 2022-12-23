@@ -88,10 +88,6 @@ GEM
     extendmatrix (0.4)
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
-    faraday (2.7.2)
-      faraday-net_http (>= 2.0, < 3.1)
-      ruby2_keywords (>= 0.0.4)
-    faraday-net_http (3.0.2)
     ffi (1.15.5)
     ffi (1.15.5-x64-mingw32)
     hashdiff (1.0.1)
@@ -200,7 +196,6 @@ GEM
     ruby-ole (1.2.12.2)
     ruby-prof (1.4.4)
     ruby-sun-times (0.1.5)
-    ruby2_keywords (0.0.5)
     rubyvis (0.6.1)
     rubyzip (2.3.2)
     simplecov (0.21.2)
@@ -244,7 +239,6 @@ DEPENDENCIES
   chroma
   dotenv
   factory_bot
-  faraday (= 2.7.2)
   hashdiff (~> 1.0.0)
   html-table
   i18n-tasks (~> 1.0.10)

@@ -18,7 +18,7 @@ gem 'ruby-sun-times'
 gem 'soda-ruby', require: 'soda'
 gem 'structured_warnings'
 gem 'chroma'
-gem 'faraday', '2.7.2'
+# gem 'faraday', '2.7.2'
 # gem 'faraday_middleware'
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw]
 
