@@ -14,7 +14,7 @@ overrides = {
   schools: ['king-james-e*', 'wyb*', 'batheas*'], # ['shrew*', 'bathamp*'],
   cache_school: false,
   benchmarks: {
-    calculate_and_save_variables: false,
+    calculate_and_save_variables: true,
     asof_date: run_date,
     no_pages: %i[
       annual_energy_costs_per_pupil
