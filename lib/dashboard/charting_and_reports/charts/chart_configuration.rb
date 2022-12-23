@@ -2041,6 +2041,25 @@ class ChartManager
       inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
       meter_definition: :storage_heater_meter
     },
+    autumn_term_2022_electricity_comparison_alert: {
+      name:             '<%= meter.fuel_type.capitalize %> Comparison: Autumn Term 2022',
+      inherits_from:    :last_2_school_weeks_electricity_comparison_alert,
+      x_axis:           :day,
+      timescale: [ 
+        { daterange: Date.new(2021, 9, 6)..Date.new(2021, 12, 17) },
+        { daterange: Date.new(2022, 9, 5)..Date.new(2022, 12, 16) }
+      ],
+      meter_definition: :allelectricity,
+      y2_axis:          :none
+    },
+    autumn_term_2022_gas_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :allheat
+    },
+    autumn_term_2022_storage_heater_comparison_alert: {
+      inherits_from:    :layerup_powerdown_11_november_2022_electricity_comparison_alert,
+      meter_definition: :storage_heater_meter
+    },
     recent_holiday_electricity_comparison_alert: {
       name:             'Comparison of electricity consumption for recent holidays',
       inherits_from:    :group_by_week_electricity,

@@ -99,10 +99,15 @@ module Benchmarking
         The change in &pound; is the saving or increased cost for the most recent holiday to date.
       </p>
     ),
-    this_year_last_year_definition:  %q(
+    last_year_previous_year_definition:  %q(
       <p>
         In school comparisons &apos;last year&apos; is defined as this year to date,
         &apos;previous year&apos; is defined as the year before.
+      </p>
+    ),
+    last_year_definition:  %q(
+      <p>
+        In school comparisons &apos;last year&apos; is defined as this year to date.
       </p>
     )
   }
@@ -113,8 +118,8 @@ module Benchmarking
       text = %q(
         <p>
           This benchmark compares the energy consumed per pupil each year in kWh.
-          Be careful comparing kWh values between different fuel types,
-          <a href="https://en.wikipedia.org/wiki/Primary_energy">
+          Be careful when comparing kWh values between different fuel types,
+          <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
             technically they aren't directly comparable as they are different types of energy.
           </a>
         </p>
@@ -1777,8 +1782,8 @@ module Benchmarking
       extra_content(:layer_up_powerdown_day_november_2022_storage_heater_table, filter: filter)
     end
     
-
     def extra_content(type, filter:)
+      puts "Got here QQQQQ #{self.class.name}"
       content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
       db = @benchmark_manager.benchmark_database
       content_manager.content(db, type, filter: filter)
@@ -1799,4 +1804,37 @@ module Benchmarking
   class BenchmarkChangeAdhocComparisonStorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
   end
+
+  #=======================================================================================
+  class BenchmarkAutumn2022Comparison < BenchmarkChangeAdhocComparison
+    def electricity_content(school_ids:, filter:)
+      puts "Got here PHPH"
+      extra_content(:autumn_term_2021_2022_electricity_table, filter: filter)
+    end
+  
+    def gas_content(school_ids:, filter:)
+      extra_content(:autumn_term_2021_2022_gas_table, filter: filter)
+    end
+  
+    def storage_heater_content(school_ids:, filter:)
+      extra_content(:autumn_term_2021_2022_storage_heater_table, filter: filter)
+    end
+  end
+
+  class BenchmarkAutumn2022ElectricityTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+  end
+
+  class BenchmarkAutumn2022GasTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      'The change columns are calculated using temperature adjusted values:'
+    end
+  end
+
+  class BenchmarkAutumn2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
+    include BenchmarkingNoTextMixin
+  end
 end
+
+

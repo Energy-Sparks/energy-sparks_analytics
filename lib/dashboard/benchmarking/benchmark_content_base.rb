@@ -182,11 +182,14 @@ module Benchmarking
     end
 
     def column_heading_explanation(school_ids, filter, user_type)
-      last_year_columns = column_headings(school_ids, filter, user_type).any?{ |ch| BenchmarkManager.column_heading_refers_to_last_year?(ch) }
-      previous_year_columns = column_headings(school_ids, filter, user_type).any?{ |ch| BenchmarkManager.column_heading_refers_to_last_year?(ch) }
+      cols = column_headings(school_ids, filter, user_type)
+      last_year_columns     = cols.any?{ |ch| BenchmarkManager.column_heading_refers_to_last_year?(ch) }
+      previous_year_columns = cols.any?{ |ch| BenchmarkManager.column_heading_refers_to_previous_year?(ch) }
 
-      if last_year_columns || previous_year_columns
-        CAVEAT_TEXT[:this_year_last_year_definition]
+      if previous_year_columns
+        CAVEAT_TEXT[:last_year_previous_year_definition]
+      elsif last_year_columns
+        CAVEAT_TEXT[:last_year_definition]
       else
         ''
       end
