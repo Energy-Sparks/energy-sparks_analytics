@@ -258,14 +258,14 @@ PLATFORMS
   x64-mingw32
 
 DEPENDENCIES
-  activesupport (~> 6.1)
+  activesupport (= 6.1.7)
   aws-sdk-s3
   benchmark-memory
   bundler-audit
   chroma
   dotenv
   factory_bot
-  faraday
+  faraday (> 1.0.1)
   faraday_middleware
   hashdiff (~> 1.0.0)
   html-table
