@@ -76,7 +76,8 @@ module Benchmarking
         </ul>
       <p>
     ),
-    covid_lockdown: %q(
+    covid_lockdown: %q(),
+    covid_lockdown_deprecated: %q(
       <p>
         This comparison may include COVID lockdown periods which may skew the results.
       </p>
@@ -195,7 +196,7 @@ module Benchmarking
       %q(
         <p>
           This benchmark shows the change in electricity consumption between
-          this year and last year, excluding solar PV and storage heaters.
+          last year and the previous year, excluding solar PV and storage heaters.
         </p>
         <p>
           Schools should be aiming to reduce their electricity consumption by

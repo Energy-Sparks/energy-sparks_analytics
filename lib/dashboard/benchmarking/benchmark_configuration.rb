@@ -1246,7 +1246,7 @@ module Benchmarking
         name:     'Change in annual electricity consumption',
         columns:  [
           { data: 'addp_name',      name: ch(:name), units: String, chart_data: true, content_class: AdviceElectricityAnnual },
-          { data: ->{ (elba_£lyr - elba_£pyr) / elba_£pyr},  name: ch(:change_in_annual_electricity_usage), units: :relative_percent_0dp, chart_data: true },
+          { data: ->{ (elba_klyr - elba_kpyr) / elba_kpyr},  name: ch(:change_in_annual_electricity_usage), units: :relative_percent_0dp, chart_data: true },
           { data: ->{ elba_£lyr },  name: ch(:last_year_electricity_£), units: :£},
           { data: ->{ elba_£pyr },  name: ch(:previous_year_electricity_£), units: :£}
         ],

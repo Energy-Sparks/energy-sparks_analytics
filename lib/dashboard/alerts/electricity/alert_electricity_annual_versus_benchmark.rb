@@ -6,7 +6,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   DAYSINYEAR = 363 # 364 days inclusive - consistent with charts which are 7 days * 52 weeks
   include AlertFloorAreaMixin
   attr_reader :last_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
-  attr_reader :last_year_£current, :previous_year_£current
+  attr_reader :last_year_£current, :previous_year_£current, :previous_year_kwh
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
@@ -61,6 +61,11 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     current_rate_£_per_kwh: {
       description: 'Blended current tariff over last year i.e. the latest tariff applied to historic kWh comsumption',
       units:  :£_per_kwh
+    },
+    previous_year_kwh: {
+      description: 'Previous years electricity consumption kWh',
+      units:  :kwh,
+      benchmark_code: 'kpyr'
     },
     previous_year_£: {
       description: 'Previous years electricity consumption - £ including differential tariff (historic tariffs)',
@@ -235,6 +240,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @current_rate_£_per_kwh  = current_blended_rate_£_per_kwh
 
     prev_date = asof_date - DAYSINYEAR - 1
+    @previous_year_kwh      = kwh(prev_date - DAYSINYEAR, prev_date, :kwh)
     @previous_year_£        = kwh(prev_date - DAYSINYEAR, prev_date, :£)
     @previous_year_£current = kwh(prev_date - DAYSINYEAR, prev_date, :£current)
 
