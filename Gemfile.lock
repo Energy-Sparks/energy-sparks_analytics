@@ -244,7 +244,7 @@ DEPENDENCIES
   chroma
   dotenv
   factory_bot
-  faraday
+  faraday (= 2.7.2)
   hashdiff (~> 1.0.0)
   html-table
   i18n-tasks (~> 1.0.10)
