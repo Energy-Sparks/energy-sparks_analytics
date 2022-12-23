@@ -674,7 +674,7 @@ module Benchmarking
         benchmark_class:  BenchmarkAutumn2022Comparison,
         name:       'Autumn Term 2021 versus 2022 energy use comparison',
         columns:  [
-          { data: 'addp_name', name: ch(:name), units: :short_school_name, chart_data: true},
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name, chart_data: true},
 
           # kWh
 
@@ -726,6 +726,7 @@ module Benchmarking
             name: ch(:metering),
             units: String
           },
+          TARIFF_CHANGED_ROW
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -743,7 +744,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Autumn Term 2021 versus 2022 electricity use comparison',
         columns:  [
-          { data: 'addp_name', name: ch(:name), units: :short_school_name },
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
 
           # kWh
           { data: ->{ a22e_pppk }, name: ch(:previous_year), units: :kwh },
@@ -760,6 +761,7 @@ module Benchmarking
           { data: ->{ a22e_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(a22e_ppp£, a22e_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
+          TARIFF_CHANGED_ROW
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -776,7 +778,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Autumn Term 2021 versus 2022 gas use comparison',
         columns:  [
-          { data: 'addp_name', name: ch(:name), units: :short_school_name },
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
 
           # kWh
           { data: ->{ a22g_pppu }, name: ch(:previous_year_temperature_unadjusted), units: :kwh },
@@ -794,6 +796,7 @@ module Benchmarking
           { data: ->{ a22g_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(a22g_ppp£, a22g_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
+          TARIFF_CHANGED_ROW
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -810,7 +813,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Autumn Term 2021 versus 2022 storage heater use comparison',
         columns:  [
-          { data: 'addp_name', name: ch(:name), units: :short_school_name },
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
 
           # kWh
           { data: ->{ a22s_pppu }, name: ch(:previous_year_temperature_unadjusted), units: :kwh },
@@ -828,6 +831,7 @@ module Benchmarking
           { data: ->{ a22s_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(a22s_ppp£, a22s_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
+          TARIFF_CHANGED_ROW
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -840,6 +844,180 @@ module Benchmarking
         type: %i[table],
       },
 
+      sept_nov_2021_2022_energy_comparison: {
+        benchmark_class:  BenchmarkSeptNov2022Comparison,
+        name:       'September to November 2021 versus 2022 energy use comparison',
+        columns:  [
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name, chart_data: true},
+
+          # kWh
+
+          { data: ->{ sum_if_complete([s22e_pppk, s22g_pppk, s22s_pppk], [s22e_cppk, s22g_cppk, s22s_cppk]) }, name: ch(:previous_year), units: :kwh },
+          { data: ->{ sum_data([s22e_cppk, s22g_cppk, s22s_cppk]) },                                name: ch(:last_year),  units: :kwh }, 
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([s22e_pppk, s22g_pppk, s22s_pppk], [s22e_cppk, s22g_cppk, s22s_cppk]),
+                                      sum_data([s22e_cppk, s22g_cppk, s22s_cppk]),
+                                      true
+                                    ) },
+            name: ch(:change_pct), units: :relative_percent_0dp
+          },
+
+          # CO2
+          { data: ->{ sum_if_complete([s22e_pppc, s22g_pppc, s22s_pppc], [s22e_cppc, s22g_cppc, s22s_cppc]) }, name: ch(:previous_year), units: :co2 },
+          { data: ->{ sum_data([s22e_cppc, s22g_cppc, s22s_cppc]) },                                name: ch(:last_year),  units: :co2 }, 
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([s22e_pppc, s22g_pppc, s22s_pppc], [s22e_cppc, s22g_cppc, s22s_cppc]),
+                                      sum_data([s22e_cppc, s22g_cppc, s22s_cppc]),
+                                      true
+                                    ) },
+            name: ch(:change_pct), units: :relative_percent_0dp
+          },
+
+          # £
+
+          { data: ->{ sum_if_complete([s22e_ppp£, s22g_ppp£, s22s_ppp£], [s22e_cpp£, s22g_cpp£, s22s_cpp£]) }, name: ch(:previous_year), units: :£ },
+          { data: ->{ sum_data([s22e_cpp£, s22g_cpp£, s22s_cpp£]) },                                name: ch(:last_year),  units: :£ }, 
+          {
+            data: ->{ percent_change(
+                                      sum_if_complete([s22e_ppp£, s22g_ppp£, s22s_ppp£], [s22e_cpp£, s22g_cpp£, s22s_cpp£]),
+                                      sum_data([s22e_cpp£, s22g_cpp£, s22s_cpp£]),
+                                      true
+                                    ) },
+            name: ch(:change_£), units: :relative_percent_0dp, chart_data: true
+          },
+
+          # Metering
+
+          { data: ->{
+              [
+                s22e_ppp£.nil? ? nil : 'Electricity',
+                s22g_ppp£.nil? ? nil : 'Gas',
+                s22s_ppp£.nil? ? nil : 'Storage Heaters'
+              ].compact.join(', ')
+            },
+            name: ch(:metering),
+            units: String
+          },
+          TARIFF_CHANGED_ROW
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 3 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 },
+          { name: '',         span: 1 }
+        ],
+        where:   ->{ !sum_data([s22e_ppp£, s22g_ppp£, s22s_ppp£], true).nil? },
+        sort_by:  [9],
+        type: %i[chart table],
+      },
+      sept_nov_2021_2022_electricity_table: {
+        benchmark_class:  BenchmarkSeptNov2022ElectricityTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'September to November 2021 versus 2022 electricity use comparison',
+        columns:  [
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+
+          # kWh
+          { data: ->{ s22e_pppk }, name: ch(:previous_year), units: :kwh },
+          { data: ->{ s22e_cppk }, name: ch(:last_year),  units: :kwh }, 
+          { data: ->{ percent_change(s22e_pppk, s22e_cppk, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ s22e_pppc }, name: ch(:previous_year), units: :co2 },
+          { data: ->{ s22e_cppc }, name: ch(:last_year),  units: :co2 }, 
+          { data: ->{ percent_change(s22e_pppc, s22e_cppc, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ s22e_ppp£ }, name: ch(:previous_year), units: :£ },
+          { data: ->{ s22e_cpp£ }, name: ch(:last_year),  units: :£ }, 
+          { data: ->{ percent_change(s22e_ppp£, s22e_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_ROW
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 4 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 }
+        ],
+        where:   ->{ !s22e_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
+      },
+      sept_nov_2021_2022_gas_table: {
+        benchmark_class:  BenchmarkSeptNov2022GasTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'September to November 2021 versus 2022 gas use comparison',
+        columns:  [
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+
+          # kWh
+          { data: ->{ s22g_pppu }, name: ch(:previous_year_temperature_unadjusted), units: :kwh },
+          { data: ->{ s22g_pppk }, name: ch(:previous_year_temperature_adjusted), units: :kwh },
+          { data: ->{ s22g_cppk }, name: ch(:last_year),  units: :kwh }, 
+          { data: ->{ percent_change(s22g_pppk, s22g_cppk, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ s22g_pppc }, name: ch(:previous_year), units: :co2 },
+          { data: ->{ s22g_cppc }, name: ch(:last_year),  units: :co2 }, 
+          { data: ->{ percent_change(s22g_pppc, s22g_cppc, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ s22g_ppp£ }, name: ch(:previous_year), units: :£ },
+          { data: ->{ s22g_cpp£ }, name: ch(:last_year),  units: :£ }, 
+          { data: ->{ percent_change(s22g_ppp£, s22g_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_ROW
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 3 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 }
+        ],
+        where:   ->{ !s22g_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
+      },
+      sept_nov_2021_2022_storage_heater_table: {
+        benchmark_class:  BenchmarkSeptNov2022StorageHeaterTable,
+        filter_out:     :dont_make_available_directly,
+        name:       'September to November 2021 versus 2022 storage heater use comparison',
+        columns:  [
+          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+
+          # kWh
+          { data: ->{ s22s_pppu }, name: ch(:previous_year_temperature_unadjusted), units: :kwh },
+          { data: ->{ s22s_pppk }, name: ch(:previous_year_temperature_adjusted), units: :kwh },
+          { data: ->{ s22s_cppk }, name: ch(:last_year),  units: :kwh }, 
+          { data: ->{ percent_change(s22s_pppk, s22s_cppk, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          # CO2
+          { data: ->{ s22s_pppc }, name: ch(:previous_year), units: :co2 },
+          { data: ->{ s22s_cppc }, name: ch(:last_year),  units: :co2 }, 
+          { data: ->{ percent_change(s22s_pppc, s22s_cppc, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          # £
+          { data: ->{ s22s_ppp£ }, name: ch(:previous_year), units: :£ },
+          { data: ->{ s22s_cpp£ }, name: ch(:last_year),  units: :£ }, 
+          { data: ->{ percent_change(s22s_ppp£, s22s_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
+
+          TARIFF_CHANGED_ROW
+        ],
+        column_groups: [
+          { name: '',         span: 1 },
+          { name: 'kWh',      span: 3 },
+          { name: 'CO2 (kg)', span: 3 },
+          { name: 'Cost',     span: 3 }
+        ],
+        where:   ->{ !s22s_ppp£.nil? },
+        sort_by:  [9],
+        type: %i[table],
+      },
+      
       change_in_energy_since_last_year: {
         benchmark_class:  BenchmarkChangeInEnergySinceLastYear,
         name:     'Change in energy use since last year',

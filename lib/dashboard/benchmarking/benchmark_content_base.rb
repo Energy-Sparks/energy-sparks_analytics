@@ -194,5 +194,25 @@ module Benchmarking
         ''
       end
     end
+
+    def tariff_changed_foot_note(school_ids, filter, user_type)
+      h = column_headings(school_ids, filter, user_type)
+      d = raw_data(school_ids, filter, user_type)
+      ch = BenchmarkManager.ch(:tariff_changed)
+      i = h.index(ch)
+      tariff_changed = d.any? { |row| row[i] }
+
+      if tariff_changed
+        %(
+          <p>
+            (*5) The tariff has changed during the last year for this school.
+                Savings are calculated using the latest tariff but other £ values
+                are calculated using the relevant tariff at the time
+          </p>
+        )
+      else
+        %()
+      end
+    end
   end
 end

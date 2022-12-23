@@ -1,5 +1,7 @@
 require_relative './benchmark_no_text_mixin.rb'
+require_relative './benchmark_tariff_changed_footnote.rb'
 require_relative './benchmark_content_base.rb'
+
 module Benchmarking
   CAVEAT_TEXT = {
     es_doesnt_have_all_meter_data: %q(
@@ -114,6 +116,8 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+    include BenchmarkingTariffChangedFootnote
+
     private def introduction_text
       text = %q(
         <p>
@@ -128,30 +132,6 @@ module Benchmarking
         </p>
       )
       ERB.new(text).result(binding)
-    end
-
-    def tariff_changed_foot_note(school_ids, filter, user_type)
-      h = column_headings(school_ids, filter, user_type)
-      d = raw_data(school_ids, filter, user_type)
-      ch = BenchmarkManager.ch(:tariff_changed)
-      i = h.index(ch)
-      tariff_changed = d.any? { |row| row[i] }
-
-      if tariff_changed
-        %(
-          <p>
-            (*5) The tariff has changed during the last year for this school.
-                Savings are calculated using the latest tariff but other £ values
-                are calculated using the relevant tariff at the time
-          </p>
-        )
-      else
-        %()
-      end
-    end
-
-    def footnote(school_ids, filter, user_type)
-      tariff_changed_foot_note(school_ids, filter, user_type)
     end
 
     private def table_introduction_text
@@ -1783,7 +1763,6 @@ module Benchmarking
     end
     
     def extra_content(type, filter:)
-      puts "Got here QQQQQ #{self.class.name}"
       content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
       db = @benchmark_manager.benchmark_database
       content_manager.content(db, type, filter: filter)
@@ -1807,8 +1786,9 @@ module Benchmarking
 
   #=======================================================================================
   class BenchmarkAutumn2022Comparison < BenchmarkChangeAdhocComparison
+    include BenchmarkingTariffChangedFootnote
+
     def electricity_content(school_ids:, filter:)
-      puts "Got here PHPH"
       extra_content(:autumn_term_2021_2022_electricity_table, filter: filter)
     end
   
@@ -1823,10 +1803,13 @@ module Benchmarking
 
   class BenchmarkAutumn2022ElectricityTable < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+    include BenchmarkingTariffChangedFootnote
   end
 
   class BenchmarkAutumn2022GasTable < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+    include BenchmarkingTariffChangedFootnote
+
     private def introduction_text
       'The change columns are calculated using temperature adjusted values:'
     end
@@ -1834,7 +1817,43 @@ module Benchmarking
 
   class BenchmarkAutumn2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
+    include BenchmarkingTariffChangedFootnote
   end
+
+  #=======================================================================================
+  class BenchmarkSeptNov2022Comparison < BenchmarkChangeAdhocComparison
+    include BenchmarkingTariffChangedFootnote
+
+    def electricity_content(school_ids:, filter:)
+      extra_content(:sept_nov_2021_2022_electricity_table, filter: filter)
+    end
+  
+    def gas_content(school_ids:, filter:)
+      extra_content(:sept_nov_2021_2022_gas_table, filter: filter)
+    end
+  
+    def storage_heater_content(school_ids:, filter:)
+      extra_content(:sept_nov_2021_2022_storage_heater_table, filter: filter)
+    end
+  end
+
+  class BenchmarkSeptNov2022ElectricityTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    include BenchmarkingTariffChangedFootnote
+  end
+
+  class BenchmarkSeptNov2022GasTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    include BenchmarkingTariffChangedFootnote
+
+    private def introduction_text
+      'The change columns are calculated using temperature adjusted values:'
+    end
+  end
+
+  class BenchmarkSeptNov2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
+    include BenchmarkingNoTextMixin
+    include BenchmarkingTariffChangedFootnote
+  end
+
 end
-
-
