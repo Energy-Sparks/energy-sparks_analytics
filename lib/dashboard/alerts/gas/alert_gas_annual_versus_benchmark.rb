@@ -37,6 +37,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
 
   attr_reader :per_floor_area_gas_benchmark_£
   attr_reader :percent_difference_from_average_per_floor_area
+  attr_reader :percent_difference_from_exemplar_per_floor_area
   attr_reader :tariff_has_changed_during_period_text
 
   attr_reader :historic_rate_£_per_kwh, :current_rate_£_per_kwh
@@ -269,9 +270,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         units:  {£: :gas}
       },
       percent_difference_from_average_per_floor_area: {
-        description: 'Percent difference from average',
+        description: 'Percent difference from average (benchmark)',
         units:  :relative_percent,
         benchmark_code: 'pp%d'
+      },
+      percent_difference_from_exemplar_per_floor_area: {
+        description: 'Percent difference from exemplar',
+        units:  :relative_percent,
+        benchmark_code: 'ep%d'
       },
       percent_difference_adjective: {
         description: 'Adjective relative to average: above, signifantly above, about',
@@ -279,6 +285,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
       },
       simple_percent_difference_adjective:  {
         description: 'Adjective relative to average: above, about, below',
+        units: String
+      },
+      percent_difference_exemplar_adjective: {
+        description: 'Adjective relative to exemplar: above, signifantly above, about',
+        units: String
+      },
+      simple_percent_difference_exemplar_adjective:  {
+        description: 'Adjective relative to exemplar: above, about, below',
         units: String
       },
       tariff_has_changed_during_period_text: {
@@ -366,6 +380,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
 
     @per_floor_area_gas_benchmark_£ = @one_year_benchmark_floor_area_£ / fa
     @percent_difference_from_average_per_floor_area = percent_change(@one_year_benchmark_floor_area_kwh, @last_year_kwh)
+    @percent_difference_from_exemplar_per_floor_area = percent_change(@one_year_exemplar_floor_area_kwh, @last_year_kwh)
 
     #BACKWARDS COMPATIBILITY: previously would have failed here as percent_change can return nil
     raise_calculation_error_if_missing(percent_difference_from_average_per_floor_area: @percent_difference_from_average_per_floor_area)
@@ -424,7 +439,8 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
         saving: {
           kwh:       @one_year_saving_versus_exemplar_kwh,
           £:         @one_year_saving_versus_exemplar_£,
-          £current:  @one_year_saving_versus_exemplar_£current
+          £current:  @one_year_saving_versus_exemplar_£current,
+          percent:   @percent_difference_from_exemplar_per_floor_area
         }
       }
     }
@@ -448,6 +464,16 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   def simple_percent_difference_adjective
     return "" if @percent_difference_from_average_per_floor_area.nil?
     Adjective.relative(@percent_difference_from_average_per_floor_area, :simple_relative_to_1)
+  end
+
+  def percent_difference_exemplar_adjective
+    return "" if @percent_difference_from_exemplar_per_floor_area.nil?
+    Adjective.relative(@percent_difference_from_exemplar_per_floor_area, :relative_to_1)
+  end
+
+  def simple_percent_difference_exemplar_adjective
+    return "" if @percent_difference_from_exemplar_per_floor_area.nil?
+    Adjective.relative(@percent_difference_from_exemplar_per_floor_area, :simple_relative_to_1)
   end
 
   def summary

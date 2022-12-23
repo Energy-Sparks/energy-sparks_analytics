@@ -36,9 +36,9 @@ class DashboardEnergyAdvice
       FormatEnergyUnit.format(:kwh, solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh,  :html, false, false, :approx_accountant)
     end
 
-    def annual_solar_pv_consumed_onsite_£_html
-      saving_£ = solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh * electricity_price_£_per_kwh
-      FormatEnergyUnit.format(:£, saving_£,  :html, false, false, :ks2)
+    def annual_solar_pv_consumed_onsite_£current_html
+      saving_£current = solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh * electricity_price_£current_per_kwh
+      FormatEnergyUnit.format(:£current, saving_£current,  :html, false, false, :ks2)
     end
 
     def annual_exported_solar_pv_£_html
@@ -95,8 +95,12 @@ class DashboardEnergyAdvice
       end
     end
 
-    private def electricity_price_£_per_kwh
-      @school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£).round(5)
+    private def electricity_price_£current_per_kwh
+      @school.aggregated_electricity_meters.amr_data.blended_rate(:kwh, :£current).round(5)
+    end
+
+    private def electricity_price_£current_per_kwh_html
+      FormatEnergyUnit.format(:£_per_kwh, electricity_price_£current_per_kwh, :html)
     end
   end 
 
@@ -306,17 +310,18 @@ class DashboardEnergyAdvice
             <ul>
               <li>
                 In general, the school will save from the free electricity it is
-                consuming from the panels, about <%= annual_solar_pv_consumed_onsite_£_html %>
-                (&#163;<%= electricity_price_£_per_kwh %>/kWh x
+                consuming from the panels, about <%= annual_solar_pv_consumed_onsite_£current_html %>
+                (<%= electricity_price_£current_per_kwh_html %> x
                   <%= annual_solar_pv_consumed_onsite_kwh_html %>)
               </li>
               <li>
                 It will also gain about <%= annual_exported_solar_pv_£_html %> from exported electricity
-                (&#163;<%= BenchmarkMetrics::SOLAR_EXPORT_PRICE %>/kWh)
+                (&#163;<%= BenchmarkMetrics::SOLAR_EXPORT_PRICE %>/kWh) either from the feed-in-tariff
+                if installed before April 2019, or under SEG (Smart Export Guarantee) if installed after.
               </li>
               <li>
-                It will also gain from the 'feed-in-tariff', a government subsidy, the
-                amount of the feed in tariff will depend on when the panels were installed
+                It will also might gain from the government subsidy called 'feed-in-tariff' if the panels were installed before April 2019,
+                the amount of the feed in tariff will depend on when the panels were installed
                 and is typically in the range 5p/kWh to 40 p/kWh x the total 'Photovoltaic
                 production' of <%= annual_solar_pv_kwh_html %>, each year
               </li>

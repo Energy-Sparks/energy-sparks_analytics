@@ -81,7 +81,7 @@ class AdviceBaseloadCommentary
       <p>
         Reducing a school's baseload is often the fastest way of reducing a school's energy costs
         and reducing its carbon footprint. At a well-managed school the baseload should remain the same
-        throughout the year. Every 1 kW of baseload reduced will save a school
+        throughout the year. Every 1 kW of baseload reduced will save your school
         <%= £_saving_1_kw_reduction_in_baseload_html %> per year,
         and reduce its carbon footprint by 1,800 kg.
       </p>
