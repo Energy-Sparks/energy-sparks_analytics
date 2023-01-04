@@ -137,6 +137,7 @@ module Benchmarking
                          :saving_if_moved_to_exemplar => "Saving if moved to exemplar (at latest tariff)",
                       :saving_if_same_all_year_around => "Saving if same all year around (at latest tariff)",
                              :saving_improving_timing => "Saving improving timing",
+                               :saving_optimal_panels => "Annual saving at latest tariff if optimal panel size installed",
                           :saving_over_summer_holiday => "Saving over summer holiday",
         :saving_through_improved_thermostatic_control => "Saving through improved thermostatic control",
 :saving_through_turning_heating_off_in_warm_weather_kwh => "Saving through turning heating off in warm weather (kWh)",
@@ -1417,11 +1418,14 @@ module Benchmarking
         benchmark_class: BenchmarkContentSolarPVBenefit,
         name:     'Benefit of estimated optimum size solar PV installation',
         columns:  [
-          { data: 'addp_name',      name: ch(:name),      units: String, content_class: AdviceSolarPV  },
+          tariff_changed_school_name(AdviceSolarPV),
           { data: ->{ sole_opvk },  name: ch(:size_kwp),    units: :kwp},
           { data: ->{ sole_opvy },  name: ch(:payback_years),  units: :years },
-          { data: ->{ sole_opvp },  name: ch(:reduction_in_mains_consumption_pct), units: :percent }
+          { data: ->{ sole_opvp },  name: ch(:reduction_in_mains_consumption_pct), units: :percent },
+          { data: ->{ sole_opv€ },  name: ch(:saving_optimal_panels), units: :£current },
+          TARIFF_CHANGED_COL
         ],
+        where:   ->{ !sole_opvk.nil? },
         sort_by: [1],
         type: %i[table]
       },

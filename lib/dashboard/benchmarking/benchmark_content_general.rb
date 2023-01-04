@@ -505,6 +505,8 @@ module Benchmarking
             is based on using half hourly electricity consumption at
             each school over the last year and combining it with local half hourly
             solar pv data to work out the benefit of installing solar panels.
+            The payback and savings are calculated using the school&apos;s most recent
+            economic tariff.
             Further detail is provided if you drilldown to a school&apos;s individual
             analysis - where a range of different scenarios of different numbers
             of panels is presented.
