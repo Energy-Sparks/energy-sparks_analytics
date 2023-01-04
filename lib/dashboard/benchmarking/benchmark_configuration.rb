@@ -15,6 +15,7 @@ module Benchmarking
                 :average_heating_start_time_last_year => "Average heating start time last year",
                                      :average_peak_kw => "Average peak kw",
                                 :baseload_per_pupil_w => "Baseload per pupil (W)",
+                                :blended_current_rate => :blended_current_rate,
                                        :co2_last_year => "CO2 (last year)",
                                    :co2_previous_year => "CO2 (previous year)",
                                               :change => "Change",
@@ -34,6 +35,7 @@ module Benchmarking
                                              :colder? => "Colder?",
                                            :community => "Community",
                                 :community_usage_cost => "Community usage cost",
+                          :cost_of_change_in_baseload => 'Next year cost of change in baseload',
                                       :cost_per_pupil => "Cost per pupil",
                    :day_of_week_with_maximum_baseload => "Day of week with maximum baseload",
                    :day_of_week_with_minimum_baseload => "Day of week with minimum baseload",
@@ -109,7 +111,7 @@ module Benchmarking
 :percentage_of_annual_heating_consumed_in_warm_weather => "Percentage of annual heating consumed in warm weather",
                            :potential_annual_saving_£ => "Potential annual saving £",
                        :potential_max_annual_saving_£ => "Potential max annual saving £",
-                                    :potential_saving => "Potential saving",
+                                    :potential_saving => "Potential saving (at latest tariff)",
                                     :previous_holiday => "Previous holiday",
                                        :previous_year => "Previous year",
                   :previous_year_temperature_adjusted => "Previous year (temperature adjusted_",
@@ -132,8 +134,8 @@ module Benchmarking
                        :saving_if_improve_to_exemplar => "Saving if improve to exemplar (at latest tariff)",
                           :saving_if_match_exemplar_£ => "Saving if match exemplar (£)",
                    :saving_if_matched_exemplar_school => "Saving if matched exemplar school",
-                         :saving_if_moved_to_exemplar => "Saving if moved to exemplar",
-                      :saving_if_same_all_year_around => "Saving if same all year around",
+                         :saving_if_moved_to_exemplar => "Saving if moved to exemplar (at latest tariff)",
+                      :saving_if_same_all_year_around => "Saving if same all year around (at latest tariff)",
                              :saving_improving_timing => "Saving improving timing",
                           :saving_over_summer_holiday => "Saving over summer holiday",
         :saving_through_improved_thermostatic_control => "Saving through improved thermostatic control",
@@ -359,7 +361,8 @@ module Benchmarking
       end
     end
 
-    TARIFF_CHANGED_ROW = { data: ->{ addp_etch || addp_gtch }, name: ch(:tariff_changed), units: TrueClass, hidden: true }
+    TARIFF_CHANGED_COL        = { data: ->{ addp_etch || addp_gtch }, name: ch(:tariff_changed), units: TrueClass, hidden: true }
+    BLENDED_BASELOAD_RATE_COL = { data: ->{ elbc_€prk }, name: ch(:blended_current_rate), units: :£_per_kwh, hidden: true }
 
     CHART_TABLE_CONFIG = {
       annual_energy_costs_per_pupil: {
@@ -376,7 +379,7 @@ module Benchmarking
           { data: ->{ sum_data([elba_cpup, gsba_cpup, shan_cpup]) }, name: ch(:last_year_energy_kgco2_pupil), units: :kwh},
           { data: ->{ addp_stpn },          name: ch(:type),   units: String },
           { data: ->{ enba_ratg },          name: ch(:rating), units: Float, y2_axis: true },
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         where:   ->{ !enba_kpup.nil? },
         sort_by:  method(:sort_energy_costs),
@@ -740,7 +743,7 @@ module Benchmarking
             name: ch(:metering),
             units: String
           },
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -775,7 +778,7 @@ module Benchmarking
           { data: ->{ a22e_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(a22e_ppp£, a22e_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -810,7 +813,7 @@ module Benchmarking
           { data: ->{ a22g_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(a22g_ppp£, a22g_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -845,7 +848,7 @@ module Benchmarking
           { data: ->{ a22s_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(a22s_ppp£, a22s_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -914,7 +917,7 @@ module Benchmarking
             name: ch(:metering),
             units: String
           },
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -949,7 +952,7 @@ module Benchmarking
           { data: ->{ s22e_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(s22e_ppp£, s22e_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -984,7 +987,7 @@ module Benchmarking
           { data: ->{ s22g_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(s22g_ppp£, s22g_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -1019,7 +1022,7 @@ module Benchmarking
           { data: ->{ s22s_cpp£ }, name: ch(:last_year),  units: :£ }, 
           { data: ->{ percent_change(s22s_ppp£, s22s_cpp£, true) }, name: ch(:change_pct), units: :relative_percent_0dp },
 
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         column_groups: [
           { name: '',         span: 1 },
@@ -1305,7 +1308,7 @@ module Benchmarking
           { data: ->{ eloo_aoo£ },  name: ch(:last_year_out_of_hours_cost),  units: :£ },
           { data: ->{ eloo_esv€ },  name: ch(:saving_if_improve_to_exemplar),units: :£ },
           { data: ->{ eloo_ratg },  name: ch(:rating),                       units: Float, y2_axis: true },
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -1314,12 +1317,15 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInBaseloadSinceLastYear,
         name:     'Last week\'s baseload versus average of last year (% difference)',
         columns:  [
-          { data: 'addp_name', name: ch(:name), units: String, chart_data: true, content_class: AdviceBaseload  },
+          tariff_changed_school_name(AdviceBaseload),
           { data: ->{ elbc_bspc }, name: ch(:change_in_baseload_last_week_v_year_pct), units: :percent, chart_data: true},
           { data: ->{ elbc_blly }, name: ch(:average_baseload_last_year_kw), units: :kw},
           { data: ->{ elbc_bllw }, name: ch(:average_baseload_last_week_kw), units: :kw},
           { data: ->{ elbc_blch }, name: ch(:change_in_baseload_last_week_v_year_kw), units: :kw},
-          { data: ->{ elbc_ratg },  name: ch(:rating), units: Float, y2_axis: true }
+          { data: ->{ elbc_anc€ }, name: ch(:cost_of_change_in_baseload), units: :£current},
+          { data: ->{ elbc_ratg }, name: ch(:rating), units: Float, y2_axis: true },
+          BLENDED_BASELOAD_RATE_COL,
+          TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -1328,12 +1334,14 @@ module Benchmarking
         benchmark_class: BenchmarkContentBaseloadPerPupil,
         name:     'Baseload per pupil',
         columns:  [
-          { data: 'addp_name', name: ch(:name), units: String, chart_data: true, content_class: AdviceBaseload },
+          tariff_changed_school_name(AdviceBaseload),
           { data: ->{ elbb_blpp * 1000.0 }, name: ch(:baseload_per_pupil_w), units: :w, chart_data: true},
           { data: ->{ elbb_lygb },  name: ch(:last_year_cost_of_baseload), units: :£},
           { data: ->{ elbb_lykw },  name: ch(:average_baseload_kw), units: :w},
           { data: ->{ [0.0, elbb_svex].max },  name: ch(:saving_if_moved_to_exemplar), units: :£},
-          { data: ->{ elbb_ratg },  name: ch(:rating), units: Float, y2_axis: true }
+          { data: ->{ elbb_ratg },  name: ch(:rating), units: Float, y2_axis: true },
+          BLENDED_BASELOAD_RATE_COL,
+          TARIFF_CHANGED_COL
         ],
         where:   ->{ !elbb_blpp.nil? },
         sort_by:  [1],
@@ -1343,12 +1351,14 @@ module Benchmarking
         benchmark_class: BenchmarkSeasonalBaseloadVariation,
         name:     'Seasonal baseload variation',
         columns:  [
-          { data: 'addp_name', name: ch(:name), units: String, chart_data: true, content_class: AdviceBaseload },
+          tariff_changed_school_name(AdviceBaseload),
           { data: ->{ sblv_sblp }, name: ch(:percent_increase_on_winter_baseload_over_summer), units: :relative_percent, chart_data: true},
           { data: ->{ sblv_smbl },  name: ch(:summer_baseload_kw), units: :kw},
           { data: ->{ sblv_wtbl },  name: ch(:winter_baseload_kw), units: :kw},
-          { data: ->{ sblv_cgbp },  name: ch(:saving_if_same_all_year_around), units: :£},
-          { data: ->{ sblv_ratg },  name: ch(:rating), units: Float, y2_axis: true }
+          { data: ->{ sblv_c€bp },  name: ch(:saving_if_same_all_year_around), units: :£},
+          { data: ->{ sblv_ratg },  name: ch(:rating), units: Float, y2_axis: true },
+          BLENDED_BASELOAD_RATE_COL,
+          TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -1357,14 +1367,16 @@ module Benchmarking
         benchmark_class: BenchmarkWeekdayBaseloadVariation,
         name:     'Weekday baseload variation',
         columns:  [
-          { data: 'addp_name', name: ch(:name), units: String, chart_data: true, content_class: AdviceBaseload },
+          tariff_changed_school_name(AdviceBaseload),
           { data: ->{ iblv_sblp },  name: ch(:variation_in_baseload_between_days_of_week), units: :relative_percent, chart_data: true},
           { data: ->{ iblv_mnbk },  name: ch(:min_average_weekday_baseload_kw), units: :kw},
           { data: ->{ iblv_mxbk },  name: ch(:max_average_weekday_baseload_kw), units: :kw},
           { data: ->{ iblv_mnbd },  name: ch(:day_of_week_with_minimum_baseload), units: String},
           { data: ->{ iblv_mxbd },  name: ch(:day_of_week_with_maximum_baseload), units: String},
-          { data: ->{ iblv_cgbp },  name: ch(:potential_saving), units: :£},
-          { data: ->{ iblv_ratg },  name: ch(:rating), units: Float, y2_axis: true }
+          { data: ->{ iblv_c€bp },  name: ch(:potential_saving), units: :£},
+          { data: ->{ iblv_ratg },  name: ch(:rating), units: Float, y2_axis: true },
+          BLENDED_BASELOAD_RATE_COL,
+          TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -1458,7 +1470,7 @@ module Benchmarking
           { data: ->{ gsoo_aoo£ },  name: ch(:last_year_out_of_hours_cost),     units: :£ },
           { data: ->{ gsoo_esv€ },  name: ch(:saving_if_improve_to_exemplar),units: :£ },
           { data: ->{ gsoo_ratg },  name: ch(:rating), units: Float, y2_axis: true },
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -1502,7 +1514,7 @@ module Benchmarking
           { data: ->{ opts_avhm },  name: ch(:average_heating_start_time_last_year),    units: :timeofday },
           { data: ->{ hthe_oss€ },  name: ch(:last_year_saving_if_improve_to_exemplar), units: :£ },
           { data: ->{ hthe_ratg },  name: ch(:rating), units: Float, y2_axis: true },
-          TARIFF_CHANGED_ROW
+          TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
         type: %i[chart table]

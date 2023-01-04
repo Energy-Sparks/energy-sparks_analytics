@@ -250,9 +250,61 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentChangeInBaseloadSinceLastYear < BenchmarkContentBase
+  class BenchmarkBaseloadBase < BenchmarkContentBase   
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      @baseload_impact_html = baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
+      super(school_ids: school_ids, filter: filter)
+    end
+
+    private
+
+    def baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
+      cost_of_1_kw_baseload_range_£ = calculate_cost_of_1_kw_baseload_range_£(school_ids, filter, user_type)
+
+      cost_of_1_kw_baseload_range_£_html = cost_of_1_kw_baseload_range_£.map do |costs_£|
+        FormatEnergyUnit.format(:£, costs_£, :html)
+      end
+
+      text = %q(
+        <p>
+          <% if cost_of_1_kw_baseload_range_£_html.empty? %>
+
+          <% elsif cost_of_1_kw_baseload_range_£_html.length == 1 %>
+            A 1 kW increase in baseload is equivalent to an increase in
+            annual electricity costs of <%= cost_of_1_kw_baseload_range_£_html.first %>.
+          <% else %>
+            A 1 kW increase in baseload is equivalent to an increase in
+            annual electricity costs of between <%= cost_of_1_kw_baseload_range_£_html.first %>
+            and <%= cost_of_1_kw_baseload_range_£_html.last %> depending on your current tariff.
+          <% end %>    
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+
+    def calculate_cost_of_1_kw_baseload_range_£(school_ids, filter, user_type)
+      rates = calculate_blended_rate_range(school_ids, filter, user_type)
+
+      hours_per_year = 24.0 * 365
+      rates.map { |rate| rate * hours_per_year }
+    end
+
+    def calculate_blended_rate_range(school_ids, filter, user_type)
+      col_index = column_headings(school_ids, filter, user_type).index(:blended_current_rate)
+      data = raw_data(school_ids, filter, user_type)
+      return [] if data.nil? || data.empty?
+
+      blended_rate_per_kwhs = data.map { |row| row[col_index] }
+
+      blended_rate_per_kwhs.map { |rate| rate.round(3) }.minmax.uniq
+    end
+  end
+
+  #=======================================================================================
+  class BenchmarkContentChangeInBaseloadSinceLastYear < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
-    private def introduction_text
+
+    def introduction_text
       text = %q(
         <p>
           This benchmark compares a school&apos;s current baseload (electricity
@@ -264,10 +316,7 @@ module Benchmarking
           to send you an alert via an email or a text message if it detects
           this has happened.
         </p>
-        <p>
-          A 1 kW increase in baseload is equivalent to an increase in
-          annual electricity costs of &pound;1,100.
-        </p>
+        <%= @baseload_impact_html %>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
         <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
@@ -300,6 +349,7 @@ module Benchmarking
             <a href="https://energysparks.uk/case-studies"  target="_blank">here</a>
           ).
         </p>
+        <%= @baseload_impact_html %>
       )
       ERB.new(text).result(binding)
     end
@@ -335,7 +385,7 @@ module Benchmarking
       end
     end
   #=======================================================================================
-  class BenchmarkContentBaseloadPerPupil < BenchmarkContentBase
+  class BenchmarkContentBaseloadPerPupil < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
@@ -355,6 +405,7 @@ module Benchmarking
           so should be able to achieve similar electricity consumption
           particularly out of hours.
         </p>
+        <%= @baseload_impact_html %>
         <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
       )
@@ -363,7 +414,7 @@ module Benchmarking
   end
 
   #=======================================================================================
-  class BenchmarkSeasonalBaseloadVariation < BenchmarkContentBase
+  class BenchmarkSeasonalBaseloadVariation < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
@@ -377,6 +428,7 @@ module Benchmarking
           leave electrically powered heating-related equipment on overnight whe
           the school is unoccupied.
         </p>
+        <%= @baseload_impact_html %>
         <p>
           Identifying and turning off or better timing such equipment is a quick way
           of saving electricity and costs.
@@ -389,7 +441,7 @@ module Benchmarking
   end
 
   #=======================================================================================
-  class BenchmarkWeekdayBaseloadVariation < BenchmarkContentBase
+  class BenchmarkWeekdayBaseloadVariation < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
@@ -401,6 +453,7 @@ module Benchmarking
           In general, with very few exceptions the baseload shouldn&apos;t
           vary between days of the week and even between weekdays and weekends.
         </p>
+        <%= @baseload_impact_html %>
         <p>
           If there is a big variation it often suggests that there is an opportunity
           to reduce baseload by find out what is causing the baseload to be higher on
