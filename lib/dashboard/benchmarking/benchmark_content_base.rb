@@ -50,6 +50,7 @@ module Benchmarking
           tables.push({ type: :table_composite, content: composite })
           tables.push({ type: :html,            content: footnote_text })
           tables.push({ type: :html,            content: table_interpretation_text })
+          tables.push({ type: :html,            content: tariff_changed_explanation(school_ids, filter, user_type) })
           tables.push({ type: :html,            content: column_heading_explanation(school_ids, filter, user_type) })
         end
 
@@ -195,14 +196,13 @@ module Benchmarking
       end
     end
 
-    def tariff_changed_foot_note(school_ids, filter, user_type)
-      h = column_headings(school_ids, filter, user_type)
-      d = raw_data(school_ids, filter, user_type)
-      ch = BenchmarkManager.ch(:tariff_changed)
-      i = h.index(ch)
-      tariff_changed = d.any? { |row| row[i] }
+    def includes_tariff_changed_column?(school_ids, filter, user_type)
+      cols = column_headings(school_ids, filter, user_type)
+      cols.any?{ |col_name| col_name == :tariff_changed }
+    end
 
-      if tariff_changed
+    def tariff_changed_explanation(school_ids, filter, user_type)
+      if includes_tariff_changed_column?(school_ids, filter, user_type)
         %(
           <p>
             (*5) The tariff has changed during the last year for this school.
@@ -211,7 +211,7 @@ module Benchmarking
           </p>
         )
       else
-        %()
+        ''
       end
     end
   end

@@ -129,7 +129,7 @@ module Benchmarking
                  :regression_model_optimum_start_time => "Regression model optimum start time",
                                        :saving_co2_kg => "Saving CO2 kg",
 :saving_during_summer_holiday_from_baseload_reduction => "Saving during summer holiday from baseload reduction",
-                       :saving_if_improve_to_exemplar => "Saving if improve to exemplar",
+                       :saving_if_improve_to_exemplar => "Saving if improve to exemplar (at latest tariff)",
                           :saving_if_match_exemplar_£ => "Saving if match exemplar (£)",
                    :saving_if_matched_exemplar_school => "Saving if matched exemplar school",
                          :saving_if_moved_to_exemplar => "Saving if moved to exemplar",
@@ -351,6 +351,14 @@ module Benchmarking
       }
     ]
 
+    def self.tariff_changed_school_name(content_class = nil)
+      if content_class.nil?
+        { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: String, chart_data: true }
+      else
+        { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: String, chart_data: true, content_class: content_class }
+      end
+    end
+
     TARIFF_CHANGED_ROW = { data: ->{ addp_etch || addp_gtch }, name: ch(:tariff_changed), units: TrueClass, hidden: true }
 
     CHART_TABLE_CONFIG = {
@@ -358,7 +366,7 @@ module Benchmarking
         benchmark_class:  BenchmarkContentEnergyPerPupil,
         name:     'Annual energy use per pupil',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: String, chart_data: true, content_class: AdviceBenchmark },
+          tariff_changed_school_name(AdviceBenchmark),
           { data: ->{ elba_kpup },          name: ch(:last_year_electricity_kwh_pupil), units: :kwh, chart_data: true },
           { data: ->{ gsba_kpup },          name: ch(:last_year_gas_kwh_pupil), units: :kwh, chart_data: true },
           { data: ->{ shan_kpup },          name: ch(:last_year_storage_heater_kwh_pupil), units: :kwh, chart_data: true },
@@ -680,7 +688,7 @@ module Benchmarking
         benchmark_class:  BenchmarkAutumn2022Comparison,
         name:       'Autumn Term 2021 versus 2022 energy use comparison',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name, chart_data: true},
+          tariff_changed_school_name,
 
           # kWh
 
@@ -750,7 +758,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Autumn Term 2021 versus 2022 electricity use comparison',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+          tariff_changed_school_name,
 
           # kWh
           { data: ->{ a22e_pppk }, name: ch(:previous_year), units: :kwh },
@@ -784,7 +792,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Autumn Term 2021 versus 2022 gas use comparison',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+          tariff_changed_school_name,
 
           # kWh
           { data: ->{ a22g_pppu }, name: ch(:previous_year_temperature_unadjusted), units: :kwh },
@@ -819,7 +827,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'Autumn Term 2021 versus 2022 storage heater use comparison',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+          tariff_changed_school_name,
 
           # kWh
           { data: ->{ a22s_pppu }, name: ch(:previous_year_temperature_unadjusted), units: :kwh },
@@ -854,7 +862,7 @@ module Benchmarking
         benchmark_class:  BenchmarkSeptNov2022Comparison,
         name:       'September to November 2021 versus 2022 energy use comparison',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name, chart_data: true},
+          tariff_changed_school_name,
 
           # kWh
 
@@ -924,7 +932,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'September to November 2021 versus 2022 electricity use comparison',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+          tariff_changed_school_name,
 
           # kWh
           { data: ->{ s22e_pppk }, name: ch(:previous_year), units: :kwh },
@@ -958,7 +966,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'September to November 2021 versus 2022 gas use comparison',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+          tariff_changed_school_name,
 
           # kWh
           { data: ->{ s22g_pppu }, name: ch(:previous_year_temperature_unadjusted), units: :kwh },
@@ -993,7 +1001,7 @@ module Benchmarking
         filter_out:     :dont_make_available_directly,
         name:       'September to November 2021 versus 2022 storage heater use comparison',
         columns:  [
-          { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: :short_school_name },
+          tariff_changed_school_name,
 
           # kWh
           { data: ->{ s22s_pppu }, name: ch(:previous_year_temperature_unadjusted), units: :kwh },
@@ -1287,16 +1295,17 @@ module Benchmarking
         benchmark_class: BenchmarkContentElectricityOutOfHoursUsage,
         name:     'Electricity out of hours use',
         columns:  [
-          { data: 'addp_name',      name: ch(:name),                  units: String, chart_data: true, content_class: AdviceElectricityOutHours   },
+          tariff_changed_school_name(AdviceElectricityOutHours),
           { data: ->{ eloo_sdop },  name: ch(:school_day_open),              units: :percent, chart_data: true },
           { data: ->{ eloo_sdcp },  name: ch(:school_day_closed),            units: :percent, chart_data: true },
           { data: ->{ eloo_holp },  name: ch(:holiday),                      units: :percent, chart_data: true },
           { data: ->{ eloo_wkep },  name: ch(:weekend),                      units: :percent, chart_data: true },
           { data: ->{ eloo_comp },  name: ch(:community),                    units: :percent, chart_data: true },
           { data: ->{ eloo_com£ },  name: ch(:community_usage_cost),         units: :£ },
-          { data: ->{ eloo_aoo£ },  name: ch(:last_year_out_of_hours_cost),     units: :£ },
-          { data: ->{ eloo_esv£ },  name: ch(:saving_if_improve_to_exemplar),units: :£ },
-          { data: ->{ eloo_ratg },  name: ch(:rating),                       units: Float, y2_axis: true }
+          { data: ->{ eloo_aoo£ },  name: ch(:last_year_out_of_hours_cost),  units: :£ },
+          { data: ->{ eloo_esv€ },  name: ch(:saving_if_improve_to_exemplar),units: :£ },
+          { data: ->{ eloo_ratg },  name: ch(:rating),                       units: Float, y2_axis: true },
+          TARIFF_CHANGED_ROW
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -1439,7 +1448,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentGasOutOfHoursUsage,
         name:     'Gas: out of hours use',
         columns:  [
-          { data: 'addp_name',      name: ch(:name),                  units: String,   chart_data: true, content_class: AdviceGasOutHours },
+          tariff_changed_school_name(AdviceGasOutHours),
           { data: ->{ gsoo_sdop },  name: ch(:school_day_open),              units: :percent, chart_data: true },
           { data: ->{ gsoo_sdcp },  name: ch(:school_day_closed),            units: :percent, chart_data: true },
           { data: ->{ gsoo_holp },  name: ch(:holiday),                      units: :percent, chart_data: true },
@@ -1447,8 +1456,9 @@ module Benchmarking
           { data: ->{ gsoo_comp },  name: ch(:community),                    units: :percent, chart_data: true },
           { data: ->{ gsoo_com£ },  name: ch(:community_usage_cost),         units: :£ },
           { data: ->{ gsoo_aoo£ },  name: ch(:last_year_out_of_hours_cost),     units: :£ },
-          { data: ->{ gsoo_esv£ },  name: ch(:saving_if_improve_to_exemplar),units: :£ },
-          { data: ->{ gsoo_ratg },  name: ch(:rating), units: Float, y2_axis: true }
+          { data: ->{ gsoo_esv€ },  name: ch(:saving_if_improve_to_exemplar),units: :£ },
+          { data: ->{ gsoo_ratg },  name: ch(:rating), units: Float, y2_axis: true },
+          TARIFF_CHANGED_ROW
         ],
         sort_by:  [1],
         type: %i[chart table]
@@ -1487,11 +1497,12 @@ module Benchmarking
         benchmark_class:  BenchmarkHeatingComingOnTooEarly,
         name:     'Heating start time (potentially coming on too early in morning)',
         columns:  [
-          { data: 'addp_name',      name: ch(:name),                  units: String,   chart_data: true, content_class: AdviceGasBoilerMorningStart },
-          { data: ->{ hthe_htst },  name: ch(:average_heating_start_time_last_week), units: :timeofday, chart_data: true },
-          { data: ->{ opts_avhm },  name: ch(:average_heating_start_time_last_year),   units: :timeofday },
-          { data: ->{ hthe_oss£ },  name: ch(:last_year_saving_if_improve_to_exemplar),units: :£ },
-          { data: ->{ hthe_ratg },  name: ch(:rating), units: Float, y2_axis: true }
+          { data: 'addp_name',      name: ch(:name),                                    units: String,   chart_data: true, content_class: AdviceGasBoilerMorningStart },
+          { data: ->{ hthe_htst },  name: ch(:average_heating_start_time_last_week),    units: :timeofday, chart_data: true },
+          { data: ->{ opts_avhm },  name: ch(:average_heating_start_time_last_year),    units: :timeofday },
+          { data: ->{ hthe_oss€ },  name: ch(:last_year_saving_if_improve_to_exemplar), units: :£ },
+          { data: ->{ hthe_ratg },  name: ch(:rating), units: Float, y2_axis: true },
+          TARIFF_CHANGED_ROW
         ],
         sort_by:  [1],
         type: %i[chart table]

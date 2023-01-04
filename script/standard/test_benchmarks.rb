@@ -16,8 +16,9 @@ overrides = {
   benchmarks: {
     calculate_and_save_variables: true,
     asof_date: run_date,
-    no_pages: %i[
-      annual_energy_costs_per_pupil
+    pages: %i[
+      annual_electricity_out_of_hours_use
+      annual_gas_out_of_hours_use
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }

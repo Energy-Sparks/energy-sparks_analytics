@@ -1,5 +1,4 @@
 require_relative './benchmark_no_text_mixin.rb'
-require_relative './benchmark_tariff_changed_footnote.rb'
 require_relative './benchmark_content_base.rb'
 
 module Benchmarking
@@ -82,11 +81,7 @@ module Benchmarking
         This comparison may include COVID lockdown periods which may skew the results.
       </p>
     ),
-    holiday_comparison: %q(
-      <p>
-        
-      </p>
-    ),
+    holiday_comparison: %q(),
     temperature_compensation: %q(
       <p>
         This comparison compares the latest available data for the most recent
@@ -117,7 +112,6 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    include BenchmarkingTariffChangedFootnote
 
     private def introduction_text
       text = %q(
@@ -225,6 +219,7 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkContentElectricityOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+
     private def introduction_text
       text = %q(
         <p>
@@ -577,6 +572,7 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkContentGasOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+
     private def introduction_text
       %q(
         <p>
@@ -1787,8 +1783,6 @@ module Benchmarking
 
   #=======================================================================================
   class BenchmarkAutumn2022Comparison < BenchmarkChangeAdhocComparison
-    include BenchmarkingTariffChangedFootnote
-
     def electricity_content(school_ids:, filter:)
       extra_content(:autumn_term_2021_2022_electricity_table, filter: filter)
     end
@@ -1804,12 +1798,10 @@ module Benchmarking
 
   class BenchmarkAutumn2022ElectricityTable < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    include BenchmarkingTariffChangedFootnote
   end
 
   class BenchmarkAutumn2022GasTable < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    include BenchmarkingTariffChangedFootnote
 
     private def introduction_text
       'The change columns are calculated using temperature adjusted values:'
@@ -1818,12 +1810,10 @@ module Benchmarking
 
   class BenchmarkAutumn2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
-    include BenchmarkingTariffChangedFootnote
   end
 
   #=======================================================================================
   class BenchmarkSeptNov2022Comparison < BenchmarkChangeAdhocComparison
-    include BenchmarkingTariffChangedFootnote
 
     def electricity_content(school_ids:, filter:)
       extra_content(:sept_nov_2021_2022_electricity_table, filter: filter)
@@ -1840,12 +1830,10 @@ module Benchmarking
 
   class BenchmarkSeptNov2022ElectricityTable < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    include BenchmarkingTariffChangedFootnote
   end
 
   class BenchmarkSeptNov2022GasTable < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    include BenchmarkingTariffChangedFootnote
 
     private def introduction_text
       'The change columns are calculated using temperature adjusted values:'
@@ -1854,7 +1842,6 @@ module Benchmarking
 
   class BenchmarkSeptNov2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
-    include BenchmarkingTariffChangedFootnote
   end
 
 end

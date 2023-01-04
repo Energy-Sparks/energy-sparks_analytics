@@ -44,7 +44,7 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
     one_year_optimum_start_saving_£current: {
       description: 'Estimates (up to saving) of benefit of starting boiler later in morning using a crude optimum start and frost model - £ latest tariff',
       units:  :£,
-      benchmark_code: 'oss£'
+      benchmark_code: 'oss€'
     },
     one_year_optimum_start_saving_co2: {
       description: 'Estimates CO2 (up to saving) of benefit of starting boiler later in morning using a crude optimum start and frost model - CO2',
