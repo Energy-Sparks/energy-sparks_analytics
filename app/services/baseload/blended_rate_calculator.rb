@@ -13,6 +13,7 @@ module Baseload
     end
 
     # Taken from ElectricityCostCo2Mixin
+    # TODO: no longer required by new baseload services?
     def blended_electricity_£_per_kwh
       @blended_electricity_£_per_kwh ||= blended_rate(:£)
     end

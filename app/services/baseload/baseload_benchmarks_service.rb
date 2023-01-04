@@ -53,7 +53,7 @@ module Baseload
       return CombinedUsageMetric.new(
         metric_id: "baseload_usage_#{compare}".to_sym,
         kwh: by_pupil_kwh,
-        £: by_pupil_kwh * blended_electricity_£_per_kwh,
+        £: by_pupil_kwh * latest_electricity_tariff,
         co2: by_pupil_kwh * blended_co2_per_kwh
       )
     end
@@ -78,15 +78,15 @@ module Baseload
       return CombinedUsageMetric.new(
         metric_id: "estimated_savings_versus_#{versus}".to_sym,
         kwh: one_year_saving_versus_comparison_kwh,
-        £: one_year_saving_versus_comparison_kwh * blended_electricity_£_per_kwh,
+        £: one_year_saving_versus_comparison_kwh * latest_electricity_tariff,
         co2: one_year_saving_versus_comparison_kwh * blended_co2_per_kwh
       )
     end
 
     private
 
-    def blended_electricity_£_per_kwh
-      @blended_electricity_£_per_kwh ||= rate_calculator.blended_electricity_£_per_kwh
+    def latest_electricity_tariff
+      @latest_electricity_tariff ||= baseload_analysis.blended_baseload_tariff_rate_£_per_kwh(:£current, @asof_date)
     end
 
     def blended_co2_per_kwh
@@ -111,6 +111,10 @@ module Baseload
 
     def baseload_calculator
       @baseload_calculator ||= BaseloadCalculationService.new(aggregate_meter, @asof_date)
+    end
+
+    def baseload_analysis
+      @baseload_analysis ||= ElectricityBaseloadAnalysis.new(aggregate_meter)
     end
   end
 end
