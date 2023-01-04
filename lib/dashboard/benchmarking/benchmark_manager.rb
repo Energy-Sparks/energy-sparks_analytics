@@ -28,11 +28,13 @@ module Benchmarking
 
       # NB if you change this format, you need to change the decode
       #    function def remove_references(school_name) in benchmark_content_general.rb
-      def referenced(name, changed, percent)
+      def referenced(name, changed, percent, tariff_changed = nil)
         @change_refs.push(1) if changed
         @change_refs.push(2) if percent ==  Float::INFINITY
         @change_refs.push(3) if percent == -Float::INFINITY
-        @change_refs.empty? ? name : "#{name} (* #{change_refs.join(',')})"
+        @change_refs.push(6) if !tariff_changed.nil? && tariff_changed
+        
+        @change_refs.empty? ? name : "#{name} (* #{@change_refs.join(',')})"
       end
 
       def tariff_change_reference(name, changed)
@@ -420,10 +422,10 @@ module Benchmarking
 
     def calculate_max_x_value(x_data, config)
       max_x_value = config[:max_x_value]
-
       return nil if max_x_value.nil?
 
       max_chart_value = x_data.values.map { |vals| strip_nan(vals).compact.max }.compact.max
+      return nil if max_chart_value.nil?
 
       # only set chart range if any value below maximum specified
       max_chart_value > max_x_value ? max_x_value : nil

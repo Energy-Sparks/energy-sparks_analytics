@@ -1483,6 +1483,11 @@ module Benchmarking
   class BenchmarkPeriodChangeBase < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      @rate_changed_in_period = calculate_rate_changed_in_period(school_ids, filter, user_type)
+      super(school_ids: school_ids, filter: filter)
+    end
+
     private
 
     def footnote(school_ids, filter, user_type)
@@ -1496,7 +1501,11 @@ module Benchmarking
       infinite_increase_school_names = school_names_by_calculation_issue(rows, :percent_changed, +Float::INFINITY)
       infinite_decrease_school_names = school_names_by_calculation_issue(rows, :percent_changed, -Float::INFINITY)
 
-      changed = !floor_area_or_pupils_change_rows.empty? || !infinite_increase_school_names.empty? || !infinite_decrease_school_names.empty?
+      changed = !floor_area_or_pupils_change_rows.empty? ||
+                !infinite_increase_school_names.empty? ||
+                !infinite_decrease_school_names.empty? ||
+                @rate_changed_in_period
+
 
       text = %(
         <% if changed %>
@@ -1526,11 +1535,30 @@ module Benchmarking
                       but in the previous <%= period_type %> it was more than zero
                 </li>
               <% end %>
+              <% if @rate_changed_in_period %>
+                <li>
+                  (*6) schools where the economic tariff has changed between the two periods,
+                       this is not reflected in the &apos;<%= BenchmarkManager.ch(:change_£current) %>&apos;
+                       column as it is calculated using the most recent tariff.
+                </li>
+              <% end %>
             </ul>
           </p>
         <% end %>
       )
       ERB.new(text).result(binding)
+    end
+
+    def calculate_rate_changed_in_period(school_ids, filter, user_type)
+      col_index = column_headings(school_ids, filter, user_type).index(:tariff_changed_period)
+      return false if col_index.nil?
+
+      data = raw_data(school_ids, filter, user_type)
+      return false if data.nil? || data.empty?
+
+      rate_changed_in_periods = data.map { |row| row[col_index] }
+
+      rate_changed_in_periods.any?
     end
 
     def list_of_school_names_text(school_name_list)

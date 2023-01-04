@@ -17,7 +17,12 @@ overrides = {
     calculate_and_save_variables: true,
     asof_date: run_date,
     pages: %i[
-      solar_pv_benefit_estimate
+      change_in_electricity_consumption_recent_school_weeks
+      change_in_electricity_holiday_consumption_previous_holiday
+      change_in_electricity_holiday_consumption_previous_years_holiday
+      change_in_gas_consumption_recent_school_weeks
+      change_in_gas_holiday_consumption_previous_holiday
+      change_in_gas_holiday_consumption_previous_years_holiday
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }

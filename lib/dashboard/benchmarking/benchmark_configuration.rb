@@ -31,7 +31,9 @@ module Benchmarking
              :change_in_baseload_last_week_v_year_pct => "Change in baseload last week v. year (%)",
               :change_in_baseload_last_week_v_year_kw => "Change in baseload last week v. year (kW)",
         :change_in_heating_costs_between_last_2_years => "Change in heating costs between last 2 years",
-                                            :change_£ => "change £",
+                                            :change_£ => "Change £",
+                                     :change_£current => "Change £ (latest tariff)",
+                                          :change_kwh => "Change kWh",
                                              :colder? => "Colder?",
                                            :community => "Community",
                                 :community_usage_cost => "Community usage cost",
@@ -171,6 +173,7 @@ module Benchmarking
                                   :year_before_joined => "Year before joined",
                     :kwh_consumption_since_target_set => "kWh consumption since target set",
                                       :tariff_changed => :tariff_changed,
+                               :tariff_changed_period => :tariff_changed_period,
                                         :w_floor_area => "w/floor area"
     }.freeze
 
@@ -360,6 +363,10 @@ module Benchmarking
       else
         { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: String, chart_data: true, content_class: content_class }
       end
+    end
+
+    def self.tariff_changed_between_periods(changed)
+      { data: changed, name: ch(:tariff_changed_period), units: TrueClass, hidden: true }
     end
 
     TARIFF_CHANGED_COL        = { data: ->{ addp_etch || addp_gtch }, name: ch(:tariff_changed), units: TrueClass, hidden: true }
@@ -1635,13 +1642,16 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek,
         name:     'Change in electricity consumption since last school week',
         columns:  [
-          { data: ->{ referenced(addp_name, eswc_pnch, eswc_difp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, eswc_pnch, eswc_difp, eswc_cppp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
           { data: ->{ eswc_difp },  name: ch(:change_pct), units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
-          { data: ->{ eswc_dif£ },  name: ch(:change_£), units: :£_0dp },
+          { data: ->{ eswc_dif€ },  name: ch(:change_£current),   units: :£_0dp },
+          { data: ->{ eswc_difk },  name: ch(:change_kwh), units: :kwh },
           { data: ->{ eswc_pnch },  aggregate_column: :dont_display_in_table_or_chart, units: TrueClass, column_id: :pupils_changed},
           { data: ->{ eswc_cpnp },  aggregate_column: :dont_display_in_table_or_chart, units: :pupils, column_id: :current_pupils},
           { data: ->{ eswc_ppnp },  aggregate_column: :dont_display_in_table_or_chart, units: :pupils, column_id: :previous_pupils},
+          tariff_changed_between_periods(->{ eswc_cppp })
         ],
+        where:   ->{ !eswc_difk.nil? },
         sort_by: [1],
         type: %i[table chart]
       },
@@ -1649,15 +1659,17 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInElectricityBetweenLast2Holidays,
         name:     'Change in electricity consumption between the 2 most recent holidays',
         columns:  [
-          { data: ->{ referenced(addp_name, ephc_pnch, ephc_difp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, ephc_pnch, ephc_difp, ephc_cppp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
           { data: ->{ ephc_difp },  name: ch(:change_pct), units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
-          { data: ->{ ephc_dif£ },  name: ch(:change_£), units: :£_0dp },
+          { data: ->{ ephc_dif€ },  name: ch(:change_£current), units: :£_0dp },
+          { data: ->{ ephc_difk },  name: ch(:change_kwh), units: :kwh },
           { data: ->{ partial(ephc_cper, ephc_cptr) },  name: ch(:most_recent_holiday), units: String },
           { data: ->{ ephc_pper },  name: ch(:previous_holiday), units: String },
           { data: ->{ ephc_ratg },  name: ch(:rating), units: Float, y2_axis: true },
           { data: ->{ ephc_pnch },  aggregate_column: :dont_display_in_table_or_chart, units: TrueClass, column_id: :pupils_changed},
           { data: ->{ ephc_cpnp },  aggregate_column: :dont_display_in_table_or_chart, units: :pupils, column_id: :current_pupils},
-          { data: ->{ ephc_ppnp },  aggregate_column: :dont_display_in_table_or_chart, units: :pupils, column_id: :previous_pupils}
+          { data: ->{ ephc_ppnp },  aggregate_column: :dont_display_in_table_or_chart, units: :pupils, column_id: :previous_pupils},
+          tariff_changed_between_periods(->{ ephc_cppp })
         ],
         sort_by: [1],
         type: %i[table chart]
@@ -1666,15 +1678,17 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInElectricityBetween2HolidaysYearApart,
         name:     'Change in electricity consumption between this holiday and the same holiday the previous year',
         columns:  [
-          { data: ->{ referenced(addp_name, epyc_pnch, epyc_difp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, epyc_pnch, epyc_difp, epyc_cppp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
           { data: ->{ epyc_difp },  name: ch(:change_pct), units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
-          { data: ->{ epyc_dif£ },  name: ch(:change_£), units: :£_0dp },
+          { data: ->{ epyc_dif€ },  name: ch(:change_£current), units: :£_0dp },
+          { data: ->{ epyc_difk },  name: ch(:change_kwh), units: :kwh },
           { data: ->{ partial(epyc_cper, epyc_cptr) },  name: ch(:most_recent_holiday), units: String },
           { data: ->{ epyc_pper },  name: ch(:previous_holiday), units: String },
           { data: ->{ epyc_pnch },  aggregate_column: :dont_display_in_table_or_chart, units: TrueClass, column_id: :pupils_changed},
           { data: ->{ epyc_cpnp },  aggregate_column: :dont_display_in_table_or_chart, units: :pupils, column_id: :current_pupils},
           { data: ->{ epyc_ppnp },  aggregate_column: :dont_display_in_table_or_chart, units: :pupils, column_id: :previous_pupils},
           { data: ->{ epyc_ratg },  name: ch(:rating), units: Float, y2_axis: true },
+          tariff_changed_between_periods(->{ epyc_cppp })
         ],
         sort_by: [1],
         type: %i[table chart]
@@ -1695,13 +1709,15 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek,
         name:     'Change in gas consumption since last school week',
         columns:  [
-          { data: ->{ referenced(addp_name, gswc_pnch, gswc_difp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, gswc_pnch, gswc_difp, gswc_cppp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
           { data: ->{ gswc_difp },  name: ch(:change_pct), units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
-          { data: ->{ gswc_dif£ },  name: ch(:change_£), units: :£_0dp },
+          { data: ->{ gswc_dif€ },  name: ch(:change_£current), units: :£_0dp },
+          { data: ->{ gswc_difk },  name: ch(:change_kwh), units: :kwh },
           { data: ->{ gswc_ratg },  name: ch(:rating), units: Float, y2_axis: true },
           { data: ->{ gswc_fach },  aggregate_column: :dont_display_in_table_or_chart, units: TrueClass, column_id: :floor_area_changed},
           { data: ->{ gswc_cpfa },  aggregate_column: :dont_display_in_table_or_chart, units: :m2, column_id: :current_floor_area},
-          { data: ->{ gswc_ppfa },  aggregate_column: :dont_display_in_table_or_chart, units: :m2, column_id: :previous_floor_area}
+          { data: ->{ gswc_ppfa },  aggregate_column: :dont_display_in_table_or_chart, units: :m2, column_id: :previous_floor_area},
+          tariff_changed_between_periods(->{ gswc_cppp })
         ],
         max_x_value:   100,
         sort_by: [1],
@@ -1711,15 +1727,17 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInGasBetweenLast2Holidays,
         name:     'Change in gas consumption between the 2 most recent holidays',
         columns:  [
-          { data: ->{ referenced(addp_name, gphc_pnch, gphc_difp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, gphc_pnch, gphc_difp, gphc_cppp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
           { data: ->{ gphc_difp },  name: ch(:change_pct), units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
-          { data: ->{ gphc_dif£ },  name: ch(:change_£), units: :£_0dp },
+          { data: ->{ gphc_dif€ },  name: ch(:change_£current), units: :£_0dp },
+          { data: ->{ gphc_difk },  name: ch(:change_kwh), units: :kwh },
           { data: ->{ partial(gphc_cper, gphc_cptr) },  name: ch(:most_recent_holiday), units: String },
           { data: ->{ gphc_pper },  name: ch(:previous_holiday), units: String },
           { data: ->{ gphc_ratg },  name: ch(:rating), units: Float, y2_axis: true },
           { data: ->{ gphc_fach },  aggregate_column: :dont_display_in_table_or_chart, units: TrueClass, column_id: :floor_area_changed},
           { data: ->{ gphc_cpfa },  aggregate_column: :dont_display_in_table_or_chart, units: :m2, column_id: :current_floor_area},
           { data: ->{ gphc_ppfa },  aggregate_column: :dont_display_in_table_or_chart, units: :m2, column_id: :previous_floor_area},
+          tariff_changed_between_periods(->{ gphc_cppp })
         ],
         sort_by: [1],
         max_x_value:   100,
@@ -1730,15 +1748,17 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInGasBetween2HolidaysYearApart,
         name:     'Change in gas consumption between this holiday and the same the previous year',
         columns:  [
-          { data: ->{ referenced(addp_name, gpyc_pnch, gpyc_difp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, gpyc_pnch, gpyc_difp, gpyc_cppp) }, name: ch(:name), units: String, chart_data: true, column_id: :school_name },
           { data: ->{ gpyc_difp },  name: ch(:change_pct),   units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
-          { data: ->{ gpyc_dif£ },  name: ch(:change_£),   units: :£_0dp },
+          { data: ->{ gpyc_dif€ },  name: ch(:change_£current),   units: :£_0dp },
+          { data: ->{ gpyc_difk },  name: ch(:change_kwh), units: :kwh },
           { data: ->{ partial(gpyc_cper, gpyc_cptr) },  name: ch(:most_recent_holiday), units: String },
           { data: ->{ gpyc_pper },  name: ch(:previous_holiday), units: String },
           { data: ->{ gpyc_ratg },  name: ch(:rating), units: Float, y2_axis: true },
           { data: ->{ gpyc_fach },  aggregate_column: :dont_display_in_table_or_chart, units: TrueClass,  column_id: :floor_area_changed},
           { data: ->{ gpyc_cpfa },  aggregate_column: :dont_display_in_table_or_chart, units: :m2,        column_id: :current_floor_area},
-          { data: ->{ gpyc_ppfa },  aggregate_column: :dont_display_in_table_or_chart, units: :m2,        column_id: :previous_floor_area}
+          { data: ->{ gpyc_ppfa },  aggregate_column: :dont_display_in_table_or_chart, units: :m2,        column_id: :previous_floor_area},
+          tariff_changed_between_periods(->{ gpyc_cppp })
         ],
         max_x_value:   100,
         sort_by: [1],
