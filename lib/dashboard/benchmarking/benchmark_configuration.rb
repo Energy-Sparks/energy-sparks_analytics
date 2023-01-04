@@ -132,7 +132,7 @@ module Benchmarking
                                        :saving_co2_kg => "Saving CO2 kg",
 :saving_during_summer_holiday_from_baseload_reduction => "Saving during summer holiday from baseload reduction",
                        :saving_if_improve_to_exemplar => "Saving if improve to exemplar (at latest tariff)",
-                          :saving_if_match_exemplar_£ => "Saving if match exemplar (£)",
+                          :saving_if_match_exemplar_£ => "Saving if match exemplar (£ at latest tariff)",
                    :saving_if_matched_exemplar_school => "Saving if matched exemplar school",
                          :saving_if_moved_to_exemplar => "Saving if moved to exemplar (at latest tariff)",
                       :saving_if_same_all_year_around => "Saving if same all year around (at latest tariff)",
@@ -1401,12 +1401,13 @@ module Benchmarking
         benchmark_class: BenchmarkContentPeakElectricityPerFloorArea,
         name:     'Peak school day electricity comparison kW/floor area',
         columns:  [
-          { data: 'addp_name',      name: ch(:name),      units: String, chart_data: true, content_class: AdviceElectricityIntraday },
+          tariff_changed_school_name(AdviceElectricityIntraday),
           { data: ->{ epkb_kwfa * 1000.0 },  name: ch(:w_floor_area),    units: :w, chart_data: true },
           { data: ->{ epkb_kwsc },  name: ch(:average_peak_kw),  units: :kw },
           { data: ->{ epkb_kwex },  name: ch(:exemplar_peak_kw), units: :kw },
           { data: ->{ epkb_tex£ },  name: ch(:saving_if_match_exemplar_£), units: :£ },
-          { data: ->{ epkb_ratg },  name: ch(:rating), units: Float, y2_axis: true }
+          { data: ->{ epkb_ratg },  name: ch(:rating), units: Float, y2_axis: true },
+          TARIFF_CHANGED_COL
         ],
         where:   ->{ !epkb_kwfa.nil? },
         sort_by: [1],

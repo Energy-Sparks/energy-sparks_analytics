@@ -17,10 +17,7 @@ overrides = {
     calculate_and_save_variables: true,
     asof_date: run_date,
     pages: %i[
-      recent_change_in_baseload
-      baseload_per_pupil
-      seasonal_baseload_variation
-      weekday_baseload_variation
+      electricity_peak_kw_per_pupil
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }
