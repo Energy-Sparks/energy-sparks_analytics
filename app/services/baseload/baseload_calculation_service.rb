@@ -32,9 +32,9 @@ module Baseload
     def average_baseload_kw(period: :year)
       case period
       when :year
-        baseload_calculator.average_baseload_kw(@asof_date)
+        baseload_calculator.average_annual_baseload_kw(@asof_date)
       when :week
-        baseload_calculator.average_baseload(@asof_date - 7, @asof_date)
+        baseload_calculator.average_baseload_kw(@asof_date - 7, @asof_date)
       else
         raise "Invalid period"
       end

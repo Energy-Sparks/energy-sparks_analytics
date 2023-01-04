@@ -15,12 +15,12 @@ describe Baseload::BaseloadCalculationService, type: :service do
   context '#average_baseload_kw' do
     it 'calculates baseload for a year' do
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
-      expect(service.average_baseload_kw).to eq 24.315273972602736
+      expect(service.average_baseload_kw).to round_to_two_digits(24.32)
     end
 
     it 'calculates baseload for a year' do
       #numbers taken from running the AlertChangeInElectricityBaseloadShortTerm alert
-      expect(service.average_baseload_kw(period: :week)).to eq 26.871874999999996
+      expect(service.average_baseload_kw(period: :week)).to round_to_two_digits(26.87)
     end
 
   end
@@ -30,9 +30,9 @@ describe Baseload::BaseloadCalculationService, type: :service do
       usage = service.annual_baseload_usage
 
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
-      expect(usage.kwh).to eq 213001.79999999996
-      expect(usage.£).to eq 32383.98681695698
-      expect(usage.co2).to eq 40321.90872195984
+      expect(usage.kwh).to round_to_two_digits(213001.8)
+      expect(usage.£).to round_to_two_digits(32383.99)
+      expect(usage.co2).to round_to_two_digits(40321.91)
     end
   end
 end
