@@ -135,7 +135,7 @@ module Benchmarking
 :saving_during_summer_holiday_from_baseload_reduction => "Saving during summer holiday from baseload reduction",
                        :saving_if_improve_to_exemplar => "Saving if improve to exemplar (at latest tariff)",
                           :saving_if_match_exemplar_£ => "Saving if match exemplar (£ at latest tariff)",
-                   :saving_if_matched_exemplar_school => "Saving if matched exemplar school",
+                   :saving_if_matched_exemplar_school => "Saving if matched exemplar school (using latest tariff)",
                          :saving_if_moved_to_exemplar => "Saving if moved to exemplar (at latest tariff)",
                       :saving_if_same_all_year_around => "Saving if same all year around (at latest tariff)",
                              :saving_improving_timing => "Saving improving timing",
@@ -1440,13 +1440,14 @@ module Benchmarking
         benchmark_class:  BenchmarkContentHeatingPerFloorArea,
         name:     'Annual heating cost per floor area',
         columns:  [
-          { data: 'addp_name',      name: ch(:name),    units: String, chart_data: true, content_class: AdviceGasAnnual },
+          tariff_changed_school_name(AdviceGasAnnual),
           { data: ->{ sum_data([gsba_n£m2, shan_n£m2], true) },  name: ch(:last_year_heating_costs_per_floor_area), units: :£, chart_data: true },
           { data: ->{ sum_data([gsba_£lyr, shan_£lyr], true) },  name: ch(:last_year_cost_£), units: :£},
-          { data: ->{ sum_data([gsba_s£ex, shan_s£ex], true) },  name: ch(:saving_if_matched_exemplar_school), units: :£ },
+          { data: ->{ sum_data([gsba_s€ex, shan_s€ex], true) },  name: ch(:saving_if_matched_exemplar_school), units: :£ },
           { data: ->{ sum_data([gsba_klyr, shan_klyr], true) },  name: ch(:last_year_consumption_kwh), units: :kwh},
           { data: ->{ sum_data([gsba_co2y, shan_co2y], true) / 1000.0 },  name: ch(:last_year_carbon_emissions_tonnes_co2), units: :co2},
-          { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: ch(:rating), units: Float, y2_axis: true }
+          { data: ->{ or_nil([gsba_ratg, shan_ratg]) },  name: ch(:rating), units: Float, y2_axis: true },
+          TARIFF_CHANGED_COL
         ],
         where:   ->{ !gsba_co2y.nil? },
         sort_by:  [1],

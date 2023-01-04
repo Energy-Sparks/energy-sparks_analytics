@@ -588,15 +588,16 @@ module Benchmarking
       )
     end
     protected def table_introduction_text
-      %q(
+      text = %q(
         <p>
-          Schools with negative 'Saving if matched exemplar school' have
+          Schools with negative &apos;<%= BenchmarkManager.ch(:saving_if_matched_exemplar_school) %>&apos; have
           heating consumption below that of the best schools, which is good. For
           schools with storage heaters, heating costs are calculated using
           electricity tariff prices (differential/economy-7 if schools is on such a tariff) versus
           costs of exemplar schools using gas heating or an air source heat pump.
         </p>
        )
+       ERB.new(text).result(binding)
     end
   end
   #=======================================================================================
