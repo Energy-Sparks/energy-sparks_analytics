@@ -31,9 +31,12 @@ class ElectricityBaseloadAnalysis
   end
 
   def blended_baseload_tariff_rate_£_per_kwh(datatype, asof_date = amr_data.end_date)
-    scaled_annual_baseload_cost_£(datatype, asof_date) / annual_average_baseload_kwh(asof_date) 
+    scaled_annual_baseload_cost_£(datatype, asof_date) / annual_average_baseload_kwh(asof_date)
   end
 
+  #FIXME: There's a bug here: the asof_date variable isn't checked
+  #so we're just looking for a years worth of data, not whether
+  #there's a years worth of data before the start date
   def one_years_data?(asof_date = amr_data.end_date)
     amr_data.days > 364
   end
