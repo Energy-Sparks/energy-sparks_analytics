@@ -1,0 +1,50 @@
+module Baseload
+  class IntraweekVariation
+    attr_reader :metric_id
+
+    def initialize(metric_id: :intraweek_baseload_variation, days_kw:)
+      @metric_id = metric_id
+      @days_kw = days_kw
+    end
+
+    #returns day of the week with minimum baseload
+    #consistent with `Day.wday`
+    def min_day
+      @days_kw.key(min_day_kw)
+    end
+
+    #return baseload for day with lowest baseload
+    def min_day_kw
+      @days_kw.values.min
+    end
+
+    #returns day of the week with maximum baseload
+    #consistent with `Day.wday`
+    def max_day
+      @days_kw.key(max_day_kw)
+    end
+
+    #return baseload for day with highest baseload
+    def max_day_kw
+      @days_kw.values.max
+    end
+
+    #return % difference in baseload between highest and lowest days
+    def percent_intraday_variation
+      min = min_day_kw
+      (max_day_kw - min) / min
+    end
+
+    #calculate potential weekly saving if baseload for all days was reduced to the current minimum
+    def week_saving_kwh
+      min = min_day_kw
+      @days_kw.values.map do |day_kw|
+        (day_kw - min) * 24.0
+      end.sum
+    end
+
+    def annual_cost_kwh
+      week_saving_kwh * 52.0 # ignore holiday calc
+    end
+  end
+end
