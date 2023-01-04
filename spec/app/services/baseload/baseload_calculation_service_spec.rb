@@ -31,8 +31,8 @@ describe Baseload::BaseloadCalculationService, type: :service do
 
       #numbers taken from running the AlertElectricityBaseloadVersusBenchmark alert
       expect(usage.kwh).to round_to_two_digits(213001.8)
-      expect(usage.£).to round_to_two_digits(32383.99)
       expect(usage.co2).to round_to_two_digits(40321.91)
+      expect(usage.£).to round_to_two_digits(31818.29)
     end
   end
 end

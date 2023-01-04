@@ -62,8 +62,7 @@ module Baseload
     end
 
     def average_baseload_last_year_£
-      kwh = average_baseload_last_year_kwh
-      kwh * rate_calculator.blended_electricity_£_per_kwh
+      baseload_calculator.scaled_annual_baseload_cost_£(:£, @asof_date)
     end
 
     def average_baseload_last_year_co2
