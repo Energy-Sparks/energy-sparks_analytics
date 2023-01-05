@@ -8,7 +8,8 @@ module Logging
 end
 
 asof_date = Date.new(2022, 12, 10)
-schools = ['leigh-peak*'] # ['king-james*', 'wybour*', 'penny*']
+schools = ['wybour*'] # ['king-james*', 'wybour*', 'penny*']
+
 
 overrides = {
   schools:  schools,

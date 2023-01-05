@@ -25,8 +25,9 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
 
   attr_reader :per_pupil_electricity_benchmark_£
   attr_reader :percent_difference_from_average_per_pupil
+  attr_reader :percent_difference_from_exemplar_per_pupil
   attr_reader :tariff_has_changed_during_period_text
-  
+
   attr_reader :historic_rate_£_per_kwh, :current_rate_£_per_kwh
 
   def initialize(school)
@@ -110,6 +111,10 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       description: 'Adjective: higher or lower: electricity consumption versus benchmark/average school',
       units: String
     },
+    one_year_saving_versus_exemplar_adjective: {
+      description: 'Adjective: higher or lower: electricity consumption versus exemplar school',
+      units: String
+    },
     one_year_exemplar_by_pupil_kwh: {
       description: 'Last years electricity consumption for exemplar school, normalised by pupil numbers - kwh',
       units:  {kwh: :electricity}
@@ -139,10 +144,6 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     one_year_saving_versus_exemplar_co2: {
       description: 'Annual difference in electricity consumption versus exemplar school - co2 (use adjective for sign)',
       units:  :c02,
-    },
-    one_year_saving_versus_exemplar_adjective: {
-      description: 'Adjective: higher or lower: electricity consumption versus exemplar school',
-      units: String
     },
     one_year_electricity_per_pupil_kwh: {
       description: 'Per pupil annual electricity usage - kwh - required for PH analysis, not alerts',
@@ -194,12 +195,25 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       units:  :relative_percent,
       benchmark_code: 'pp%d'
     },
+    percent_difference_from_exemplar_per_pupil: {
+      description: 'Percent difference from exemplar',
+      units:  :relative_percent,
+      benchmark_code: 'ep%d'
+    },
     percent_difference_adjective: {
+      description: 'Adjective relative to average: above, signifantly above, about v. benchmark',
+      units: String
+    },
+    percent_difference_exemplar_adjective: {
       description: 'Adjective relative to average: above, signifantly above, about',
       units: String
     },
     simple_percent_difference_adjective:  {
-      description: 'Adjective relative to average: above, about, below',
+      description: 'Adjective relative to average: above, about, below (v. benchamrk)',
+      units: String
+    },
+    simple_percent_difference_exemplar_adjective:  {
+      description: 'Adjective relative to average: above, about, below (v. exemplar)',
       units: String
     },
     tariff_has_changed_during_period_text: {
@@ -240,6 +254,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @current_rate_£_per_kwh  = current_blended_rate_£_per_kwh
 
     prev_date = asof_date - DAYSINYEAR - 1
+
     @previous_year_kwh      = kwh(prev_date - DAYSINYEAR, prev_date, :kwh)
     @previous_year_£        = kwh(prev_date - DAYSINYEAR, prev_date, :£)
     @previous_year_£current = kwh(prev_date - DAYSINYEAR, prev_date, :£current)
@@ -283,6 +298,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @per_pupil_electricity_benchmark_£          = @one_year_benchmark_by_pupil_£ / pup
     @per_pupil_electricity_benchmark_£current   = @one_year_benchmark_by_pupil_£current / pup
     @percent_difference_from_average_per_pupil  = percent_change(@one_year_benchmark_by_pupil_kwh, @last_year_kwh)
+    @percent_difference_from_exemplar_per_pupil = percent_change(@one_year_exemplar_by_pupil_kwh, @last_year_kwh)
 
     #BACKWARDS COMPATIBILITY: previously would have failed here as percent_change can return nil
     raise_calculation_error_if_missing(percent_difference_from_average_per_pupil: @percent_difference_from_average_per_pupil)
@@ -339,7 +355,8 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
         saving: {
           kwh:       @one_year_saving_versus_exemplar_kwh,
           £:         @one_year_saving_versus_exemplar_£,
-          £current:  @one_year_saving_versus_exemplar_£current
+          £current:  @one_year_saving_versus_exemplar_£current,
+          percent:   @percent_difference_from_exemplar_per_pupil
         }
       }
     }
@@ -359,6 +376,11 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     Adjective.adjective_for(@one_year_saving_versus_benchmark_kwh)
   end
 
+  def one_year_saving_versus_exemplar_adjective
+    return nil if @one_year_saving_versus_exemplar_kwh.nil?
+    Adjective.adjective_for(@one_year_saving_versus_exemplar_kwh)
+  end
+
   def percent_difference_adjective
     return "" if @percent_difference_from_average_per_pupil.nil?
     Adjective.relative(@percent_difference_from_average_per_pupil, :relative_to_1)
@@ -367,6 +389,16 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   def simple_percent_difference_adjective
     return "" if @percent_difference_from_average_per_pupil.nil?
     Adjective.relative(@percent_difference_from_average_per_pupil, :simple_relative_to_1)
+  end
+
+  def percent_difference_exemplar_adjective
+    return "" if @percent_difference_from_exemplar_per_pupil.nil?
+    Adjective.relative(@percent_difference_from_exemplar_per_pupil, :relative_to_1)
+  end
+
+  def simple_percent_difference_exemplar_adjective
+    return "" if @percent_difference_from_exemplar_per_pupil.nil?
+    Adjective.relative(@percent_difference_from_exemplar_per_pupil, :simple_relative_to_1)
   end
 
   def summary

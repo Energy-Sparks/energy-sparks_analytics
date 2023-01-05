@@ -14,7 +14,7 @@ overrides = {
   schools: ['*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],
   cache_school: false,
   benchmarks: {
-    calculate_and_save_variables: false,
+    calculate_and_save_variables: true,
     asof_date: run_date,
     no_pages: %i[
       differential_tariff_opportunity
