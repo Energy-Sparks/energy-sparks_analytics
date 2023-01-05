@@ -16,7 +16,7 @@ module Baseload
     end
 
     def validate_meter_collection(meter_collection)
-      raise EnergySparksUnexpectedStateException, "School does not have electricity meters" if meter_collection.electricity_meters == nil
+      raise EnergySparksUnexpectedStateException, "School does not have electricity meters" if meter_collection.electricity_meters.empty?
     end
 
     def validate_meter(analytics_meter)
