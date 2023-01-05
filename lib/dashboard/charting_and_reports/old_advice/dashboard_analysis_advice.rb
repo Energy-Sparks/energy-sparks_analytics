@@ -860,7 +860,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     £_html   = FormatEnergyUnit.format(:£,   benchmark_data(fuel, :school, :£),   :html)
     kwh_html = FormatEnergyUnit.format(:kwh, benchmark_data(fuel, :school, :kwh), :html)
 
-    "#{£_html} (#{kwh_html}#{tariff_changed_spend_html(fuel)})"
+    "#{£_html}" #  (#{kwh_html}#{tariff_changed_spend_html(fuel)})"
   end
 
   def tariff_changed_signifcantly?(fuel)
