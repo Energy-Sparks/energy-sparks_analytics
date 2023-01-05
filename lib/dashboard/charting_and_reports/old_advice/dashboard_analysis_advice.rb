@@ -1622,7 +1622,6 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
           <p>
           By eliminating weekend gas consumption at your school you could save up to
           <%= kwh_to_pounds_and_kwh(weekend_saving_kwh, :gas) %> per year.
-          Philip
           </p>
         <% else %>
           <p>
