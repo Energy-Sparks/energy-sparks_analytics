@@ -294,7 +294,7 @@ module Benchmarking
       data = raw_data(school_ids, filter, user_type)
       return [] if data.nil? || data.empty?
 
-      blended_rate_per_kwhs = data.map { |row| row[col_index] }
+      blended_rate_per_kwhs = data.map { |row| row[col_index] }.compact
 
       blended_rate_per_kwhs.map { |rate| rate.round(3) }.minmax.uniq
     end
@@ -1475,6 +1475,11 @@ module Benchmarking
           Typically, this should benefit schools with storage heaters, however
           many schools with storage heaters are on a single flat tariff and fail
           to gain from lower overnight prices.
+        </p>
+        <p>
+          Many schools don&apos;t have their differential tariffs configured on
+          Energy Sparks, please get in contact if you think this is the case at
+          your school, so we can provide better analysis for your school.
         </p>
         <p>
           The chart and table below estimate the potential benefit of switching
