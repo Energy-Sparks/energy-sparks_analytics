@@ -11,19 +11,17 @@ end
 run_date = Date.new(2022, 11, 5)
 
 overrides = { 
-  schools: ['king-james-e*', 'wyb*', 'batheas*'], # ['shrew*', 'bathamp*'],
+  schools: ['*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],
   cache_school: false,
   benchmarks: {
     calculate_and_save_variables: true,
     asof_date: run_date,
     no_pages: %i[
-      gas_targets
+      differential_tariff_opportunity
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }
 }
-
-puts "Got here script"
 
 script = RunBenchmarks.default_config.deep_merge(overrides)
 

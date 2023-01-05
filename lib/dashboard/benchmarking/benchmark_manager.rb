@@ -8,6 +8,7 @@ module Benchmarking
       def initialize(school_id, school_data)
         super(school_data)
         @school_id = school_id
+        @change_refs = []
       end
 
       def zero(value)
@@ -27,12 +28,18 @@ module Benchmarking
 
       # NB if you change this format, you need to change the decode
       #    function def remove_references(school_name) in benchmark_content_general.rb
-      def referenced(name, changed, percent)
-        change_refs = []
-        change_refs.push(1) if changed
-        change_refs.push(2) if percent ==  Float::INFINITY
-        change_refs.push(3) if percent == -Float::INFINITY
-        change_refs.empty? ? name : "#{name} (* #{change_refs.join(',')})"
+      def referenced(name, changed, percent, tariff_changed = nil)
+        @change_refs.push(1) if changed
+        @change_refs.push(2) if percent ==  Float::INFINITY
+        @change_refs.push(3) if percent == -Float::INFINITY
+        @change_refs.push(6) if !tariff_changed.nil? && tariff_changed
+        
+        @change_refs.empty? ? name : "#{name} (* #{@change_refs.join(',')})"
+      end
+
+      def tariff_change_reference(name, changed)
+        @change_refs.push(5) if changed
+        @change_refs.empty? ? name : "#{name} (* #{@change_refs.join(',')})"
       end
 
       # helper function for config lamda, only sums
@@ -92,12 +99,13 @@ module Benchmarking
     def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       create_and_store_school_map(report, today, school_ids, user_type)
       #@school_name_urn_map = school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
-      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, true, user_type)
+      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, true, user_type, true)
     end
 
     def run_table_including_aggregate_columns(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       ignore_aggregate_columns = false
-      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, ignore_aggregate_columns, user_type)
+      hide_visible_columns = false
+      run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, ignore_aggregate_columns, user_type, hide_visible_columns)
     end
 
     def drilldown_class(report)
@@ -117,7 +125,7 @@ module Benchmarking
       config[:columns].any?{ |column_definition| column_definition.key?(:content_class) }
     end
 
-    def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type)
+    def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type, hide_visible_columns)
       results = []
       full_config = self.class.chart_table_config(report)
       config = hide_columns(full_config, user_type, ignore_aggregate_columns)
@@ -139,11 +147,11 @@ module Benchmarking
 
       sort_table!(results, config) if config.key?(:sort_by)
 
-      format_table(config, results, medium)
+      format_table(config, results, medium, hide_visible_columns)
     end
 
     def school_map(asof_date, school_ids, user_type)
-      schools = run_benchmark_table_private(asof_date, :school_information, school_ids, false, nil, :raw, true, user_type)
+      schools = run_benchmark_table_private(asof_date, :school_information, school_ids, false, nil, :raw, true, user_type, false)
       schools.map do |school_data|
         [
           school_data[2],
@@ -213,26 +221,27 @@ module Benchmarking
       v.is_a?(Float) && v.nan? ? Float::INFINITY : v
     end
 
-    def format_table(table_definition, rows, medium)
-      header = table_definition[:columns].map{ |column_definition| column_definition[:name] }
-      raw_rows = rows.map{ |d| d[:data] }
+    def format_table(table_definition, rows, medium, hide_visible_columns)
+      header, raw_rows = remove_hidden_columns(table_definition, rows, hide_visible_columns)
       school_ids = rows.map{ |d| d[:school_id] }
+
       case medium
       when :raw
         [header] + raw_rows
       when :text, :text_and_raw
-        formatted_rows = format_rows(raw_rows, table_definition[:columns], medium, school_ids)
+        formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
         { column_groups: table_definition[:column_groups],   header: header, rows: formatted_rows}
       when :html
-        formatted_rows = format_rows(raw_rows, table_definition[:columns], medium, school_ids)
+        formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
         HtmlTableFormatting.new(header, formatted_rows).html(column_groups: table_definition[:column_groups])
       end
     end
 
-    def format_rows(rows, column_definitions, medium, school_ids)
-      column_units    = column_definitions.map{ |column_definition| column_definition[:units] }
-      column_sense    = column_definitions.map{ |column_definition| column_definition.dig(:sense) }
-      content_classes = column_definitions.map{ |column_definition| column_definition.dig(:content_class) }
+    def format_rows(rows, table_definition, medium, school_ids, hide_visible_columns)
+      column_definitions = table_definition[:columns]
+      column_units    = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition[:units] }, hide_visible_columns)
+      column_sense    = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition.dig(:sense) }, hide_visible_columns)
+      content_classes = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition.dig(:content_class) }, hide_visible_columns)
       formatted_rows = rows.each_with_index.map do |row, row_number|
         row.each_with_index.map do |value, index|
           sense = sense_column(column_sense[index])
@@ -244,6 +253,21 @@ module Benchmarking
           end
         end
       end
+    end
+
+    def visible_data(table_definition, data, hide_visible_columns)
+      return data unless hide_visible_columns
+      visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
+      data.select.with_index { |_v, i| visible_columns[i] }
+    end
+
+    def remove_hidden_columns(table_definition, rows, hide_visible_columns)
+      visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
+
+      header    = table_definition[:columns].map{ |column_definition| column_definition[:name] }
+      header    = visible_data(table_definition, header, hide_visible_columns)
+      raw_rows  =  rows.map { |row| visible_data(table_definition, row[:data], hide_visible_columns) }
+      [header, raw_rows]
     end
 
     def sense_column(sense)
@@ -398,10 +422,10 @@ module Benchmarking
 
     def calculate_max_x_value(x_data, config)
       max_x_value = config[:max_x_value]
-
       return nil if max_x_value.nil?
 
       max_chart_value = x_data.values.map { |vals| strip_nan(vals).compact.max }.compact.max
+      return nil if max_chart_value.nil?
 
       # only set chart range if any value below maximum specified
       max_chart_value > max_x_value ? max_x_value : nil

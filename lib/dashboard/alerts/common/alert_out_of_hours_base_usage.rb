@@ -81,17 +81,17 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
 
       schoolday_open_£:         { description: 'Annual school day open cost using historic tariff usage',   units: :£ },
       schoolday_closed_£:       { description: 'Annual school day closed cost using historic tariff usage', units: :£ },
-      holidays_£:               { description: 'Annual holiday cost using historic tariff usage',           units: :£ },
-      weekends_£:               { description: 'Annual weekend cost using historic tariff usage',           units: :£ },
-      community_£:              { description: 'Annual community cost using historic tariff usage',         units: :£ },
-      out_of_hours_£:           { description: 'Annual £ out of hours using historic tariff usage',         units: :£ },
+      holidays_£:               { description: 'Annual holiday cost using historic tariff usage',           units: :£, benchmark_code: 'ahl£' },
+      weekends_£:               { description: 'Annual weekend cost using historic tariff usage',           units: :£, benchmark_code: 'awk£' },
+      community_£:              { description: 'Annual community cost using historic tariff usage',         units: :£, benchmark_code: 'com£' },
+      out_of_hours_£:           { description: 'Annual £ out of hours using historic tariff usage',         units: :£, benchmark_code: 'aoo£' },
 
       schoolday_open_£current:   { description: 'Annual school day open cost using latest tariff usage',   units: :£ },
       schoolday_closed_£current: { description: 'Annual school day closed cost using latest tariff usage', units: :£ },
-      holidays_£current:         { description: 'Annual holiday cost using latest tariff usage',           units: :£, benchmark_code: 'ahl£' },
-      weekends_£current:         { description: 'Annual weekend cost using latest tariff usage',           units: :£, benchmark_code: 'awk£' },
-      community_£current:        { description: 'Annual community cost using latest tariff usage',         units: :£, benchmark_code: 'com£' },
-      out_of_hours_£current:     { description: 'Annual £ out of hours using latest tariff usage',         units: :£, benchmark_code: 'aoo£' },
+      holidays_£current:         { description: 'Annual holiday cost using latest tariff usage',           units: :£, benchmark_code: 'ahl€' },
+      weekends_£current:         { description: 'Annual weekend cost using latest tariff usage',           units: :£, benchmark_code: 'awk€' },
+      community_£current:        { description: 'Annual community cost using latest tariff usage',         units: :£, benchmark_code: 'com€' },
+      out_of_hours_£current:     { description: 'Annual £ out of hours using latest tariff usage',         units: :£, benchmark_code: 'aoo€' },
 
       schoolday_open_co2:         { description: 'Annual school day open emissions',   units: :co2 },
       schoolday_closed_co2:       { description: 'Annual school day closed emissions', units: :co2 },
@@ -109,7 +109,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
         units:  :percent
       },
       bad_out_of_hours_use_percent: {
-        description: 'High out of hours use percent (suggested benachmark comparison)',
+        description: 'High out of hours use percent (suggested benchmark comparison)',
         units:  :percent
       },
       significant_out_of_hours_use: {
@@ -127,7 +127,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
       potential_saving_£: {
         description: 'annual £ reduction if move to examplar out of hours usage',
         units: :£,
-        benchmark_code: 'esv£'
+        benchmark_code: 'esv€'
       },
       potential_saving_co2: {
         description: 'annual co2 kg reduction if move to examplar out of hours usage',
@@ -178,7 +178,7 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     calculate_table_historic_£
     calculate_table_current_£
 
-    average_percent = AVERAGEPERCENTUSEDOUTOFHOURS
+    @average_percent = AVERAGEPERCENTUSEDOUTOFHOURS
 
     @fuel_cost         = @total_annual_£ / @total_annual_kwh
     @fuel_cost_current = @total_annual_£current / @total_annual_kwh
@@ -186,8 +186,8 @@ class AlertOutOfHoursBaseUsage < AlertAnalysisBase
     @tariff_has_changed_during_period_text = annual_tariff_change_text(asof_date)
 
     @percent_improvement_to_exemplar = [out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
-    @potential_saving_kwh = @total_annual_kwh * @percent_improvement_to_exemplar
-    @potential_saving_£ = @potential_saving_kwh * @fuel_cost_current
+    @potential_saving_kwh = @total_annual_kwh     * @percent_improvement_to_exemplar
+    @potential_saving_£   = @potential_saving_kwh * @fuel_cost_current
     @potential_saving_co2 = @potential_saving_kwh * co2_intensity_per_kwh
 
     set_savings_capital_costs_payback(Range.new(@potential_saving_£, @potential_saving_£), nil, @potential_saving_co2)

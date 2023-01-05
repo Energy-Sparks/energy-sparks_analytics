@@ -107,7 +107,7 @@ class AlertEnergyAnnualVersusBenchmark < AlertAnalysisBase
     last_year_£current: {
       description: 'Last years energy consumption - £ including differential tariff (latest tariffs)',
       units:  :£current,
-      benchmark_code: '$lyr'
+      benchmark_code: '€lyr'
     },
     last_year_co2: {
       description: 'Last years energy CO2 kg',
@@ -624,7 +624,7 @@ end
 # see list of symbols and benchmark codes in comments below
 class ChangeInEnergyUseSymbols
   # mappings to benchmark codes for these
-  DATA_TYPES = { kwh: 'k', co2: 'c', £: 'p', £current: '$'}
+  DATA_TYPES = { kwh: 'k', co2: 'c', £: 'p', £current: '€'}
   METER_TYPES = { electricity: 'e', gas: 'g', storage_heaters: 'h', solar_pv: 's' }
 
   def self.template_variables

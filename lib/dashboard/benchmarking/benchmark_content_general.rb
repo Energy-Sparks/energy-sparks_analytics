@@ -1,5 +1,6 @@
 require_relative './benchmark_no_text_mixin.rb'
 require_relative './benchmark_content_base.rb'
+
 module Benchmarking
   CAVEAT_TEXT = {
     es_doesnt_have_all_meter_data: %q(
@@ -74,16 +75,13 @@ module Benchmarking
         </ul>
       <p>
     ),
-    covid_lockdown: %q(
+    covid_lockdown: %q(),
+    covid_lockdown_deprecated: %q(
       <p>
         This comparison may include COVID lockdown periods which may skew the results.
       </p>
     ),
-    holiday_comparison: %q(
-      <p>
-        
-      </p>
-    ),
+    holiday_comparison: %q(),
     temperature_compensation: %q(
       <p>
         This comparison compares the latest available data for the most recent
@@ -98,23 +96,39 @@ module Benchmarking
         with an adjusted figure for the previous holiday, scaling to the same number of days.
         The change in &pound; is the saving or increased cost for the most recent holiday to date.
       </p>
+    ),
+    last_year_previous_year_definition:  %q(
+      <p>
+        In school comparisons &apos;last year&apos; is defined as this year to date,
+        &apos;previous year&apos; is defined as the year before.
+      </p>
+    ),
+    last_year_definition:  %q(
+      <p>
+        In school comparisons &apos;last year&apos; is defined as this year to date.
+      </p>
     )
   }
   #=======================================================================================
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+
     private def introduction_text
       text = %q(
         <p>
-          This benchmark compares the energy consumed per pupil each year in &pound;.
+          This benchmark compares the energy consumed per pupil in the last year in kWh.
+          Be careful when comparing kWh values between different fuel types,
+          <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
+            technically they aren't directly comparable as they are different types of energy.
+          </a>
         </p>
         <p>
-          This benchmark is best used for economic comparisons.
           <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
         </p>
       )
       ERB.new(text).result(binding)
     end
+
     private def table_introduction_text
       CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
     end
@@ -142,7 +156,7 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          This benchmark compares the electricity consumed per pupil each year,
+          This benchmark compares the electricity consumed per pupil in the last year,
           in &pound;.
         </p>
         <p>
@@ -176,7 +190,7 @@ module Benchmarking
       %q(
         <p>
           This benchmark shows the change in electricity consumption between
-          this year and last year, excluding solar PV and storage heaters.
+          last year and the previous year, excluding solar PV and storage heaters.
         </p>
         <p>
           Schools should be aiming to reduce their electricity consumption by
@@ -205,6 +219,7 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkContentElectricityOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+
     private def introduction_text
       text = %q(
         <p>
@@ -235,9 +250,61 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkContentChangeInBaseloadSinceLastYear < BenchmarkContentBase
+  class BenchmarkBaseloadBase < BenchmarkContentBase   
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      @baseload_impact_html = baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
+      super(school_ids: school_ids, filter: filter)
+    end
+
+    private
+
+    def baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
+      cost_of_1_kw_baseload_range_£ = calculate_cost_of_1_kw_baseload_range_£(school_ids, filter, user_type)
+
+      cost_of_1_kw_baseload_range_£_html = cost_of_1_kw_baseload_range_£.map do |costs_£|
+        FormatEnergyUnit.format(:£, costs_£, :html)
+      end
+
+      text = %q(
+        <p>
+          <% if cost_of_1_kw_baseload_range_£_html.empty? %>
+
+          <% elsif cost_of_1_kw_baseload_range_£_html.length == 1 %>
+            A 1 kW increase in baseload is equivalent to an increase in
+            annual electricity costs of <%= cost_of_1_kw_baseload_range_£_html.first %>.
+          <% else %>
+            A 1 kW increase in baseload is equivalent to an increase in
+            annual electricity costs of between <%= cost_of_1_kw_baseload_range_£_html.first %>
+            and <%= cost_of_1_kw_baseload_range_£_html.last %> depending on your current tariff.
+          <% end %>    
+        </p>
+      )
+      ERB.new(text).result(binding)
+    end
+
+    def calculate_cost_of_1_kw_baseload_range_£(school_ids, filter, user_type)
+      rates = calculate_blended_rate_range(school_ids, filter, user_type)
+
+      hours_per_year = 24.0 * 365
+      rates.map { |rate| rate * hours_per_year }
+    end
+
+    def calculate_blended_rate_range(school_ids, filter, user_type)
+      col_index = column_headings(school_ids, filter, user_type).index(:blended_current_rate)
+      data = raw_data(school_ids, filter, user_type)
+      return [] if data.nil? || data.empty?
+
+      blended_rate_per_kwhs = data.map { |row| row[col_index] }.compact
+
+      blended_rate_per_kwhs.map { |rate| rate.round(3) }.minmax.uniq
+    end
+  end
+
+  #=======================================================================================
+  class BenchmarkContentChangeInBaseloadSinceLastYear < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
-    private def introduction_text
+
+    def introduction_text
       text = %q(
         <p>
           This benchmark compares a school&apos;s current baseload (electricity
@@ -249,10 +316,7 @@ module Benchmarking
           to send you an alert via an email or a text message if it detects
           this has happened.
         </p>
-        <p>
-          A 1 kW increase in baseload is equivalent to an increase in
-          annual electricity costs of &pound;1,100.
-        </p>
+        <%= @baseload_impact_html %>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
         <%= CAVEAT_TEXT[:covid_lockdown] %>
       )
@@ -285,6 +349,7 @@ module Benchmarking
             <a href="https://energysparks.uk/case-studies"  target="_blank">here</a>
           ).
         </p>
+        <%= @baseload_impact_html %>
       )
       ERB.new(text).result(binding)
     end
@@ -320,7 +385,7 @@ module Benchmarking
       end
     end
   #=======================================================================================
-  class BenchmarkContentBaseloadPerPupil < BenchmarkContentBase
+  class BenchmarkContentBaseloadPerPupil < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
@@ -340,6 +405,7 @@ module Benchmarking
           so should be able to achieve similar electricity consumption
           particularly out of hours.
         </p>
+        <%= @baseload_impact_html %>
         <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
         <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
       )
@@ -348,7 +414,7 @@ module Benchmarking
   end
 
   #=======================================================================================
-  class BenchmarkSeasonalBaseloadVariation < BenchmarkContentBase
+  class BenchmarkSeasonalBaseloadVariation < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
@@ -362,6 +428,7 @@ module Benchmarking
           leave electrically powered heating-related equipment on overnight whe
           the school is unoccupied.
         </p>
+        <%= @baseload_impact_html %>
         <p>
           Identifying and turning off or better timing such equipment is a quick way
           of saving electricity and costs.
@@ -374,7 +441,7 @@ module Benchmarking
   end
 
   #=======================================================================================
-  class BenchmarkWeekdayBaseloadVariation < BenchmarkContentBase
+  class BenchmarkWeekdayBaseloadVariation < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
@@ -386,6 +453,7 @@ module Benchmarking
           In general, with very few exceptions the baseload shouldn&apos;t
           vary between days of the week and even between weekdays and weekends.
         </p>
+        <%= @baseload_impact_html %>
         <p>
           If there is a big variation it often suggests that there is an opportunity
           to reduce baseload by find out what is causing the baseload to be higher on
@@ -437,6 +505,8 @@ module Benchmarking
             is based on using half hourly electricity consumption at
             each school over the last year and combining it with local half hourly
             solar pv data to work out the benefit of installing solar panels.
+            The payback and savings are calculated using the school&apos;s most recent
+            economic tariff.
             Further detail is provided if you drilldown to a school&apos;s individual
             analysis - where a range of different scenarios of different numbers
             of panels is presented.
@@ -518,21 +588,37 @@ module Benchmarking
       )
     end
     protected def table_introduction_text
-      %q(
+      text = %q(
         <p>
-          Schools with negative 'Saving if matched exemplar school' have
+          Schools with negative &apos;<%= BenchmarkManager.ch(:saving_if_matched_exemplar_school) %>&apos; have
           heating consumption below that of the best schools, which is good. For
           schools with storage heaters, heating costs are calculated using
           electricity tariff prices (differential/economy-7 if schools is on such a tariff) versus
           costs of exemplar schools using gas heating or an air source heat pump.
         </p>
        )
+       ERB.new(text).result(binding)
     end
   end
   #=======================================================================================
   class BenchmarkContentChangeInAnnualHeatingConsumption < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    private def introduction_text
+
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      content1 = super(school_ids: school_ids, filter: filter)
+      content2 = temperature_adjusted_content(school_ids: school_ids, filter: filter)
+      content1 + content2
+    end
+
+    private
+
+    def temperature_adjusted_content(school_ids:, filter:)
+      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
+      db = @benchmark_manager.benchmark_database
+      content_manager.content(db, :change_in_annual_heating_consumption_temperature_adjusted, filter: filter)
+    end
+
+    def introduction_text
       %q(
         <p>
           This benchmark shows the change in the gas and storage heater costs
@@ -554,9 +640,36 @@ module Benchmarking
       ) + CAVEAT_TEXT[:covid_lockdown]
     end
   end
+    #=======================================================================================
+    class BenchmarkContentChangeInAnnualHeatingConsumptionTemperatureAdjusted  < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+  
+      private def introduction_text
+        %q(
+          <p>
+            The previous comparison is not adjusted for temperature changes between
+            the two years.
+          </p>
+
+        )
+      end
+  
+      protected def table_introduction_text
+        %q(
+          <p>
+            This comparison is adjusted for temperature, so the previous year&apos;s
+            temperature adjusted column is adjusted upwards if the previous year was
+            milder than last year, and downwards if it is colder to provide a fairer
+            comparison between the 2 years.
+
+          </p>
+        )
+      end
+    end
   #=======================================================================================
   class BenchmarkContentGasOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin
+
     private def introduction_text
       %q(
         <p>
@@ -1364,6 +1477,11 @@ module Benchmarking
           to gain from lower overnight prices.
         </p>
         <p>
+          Many schools don&apos;t have their differential tariffs configured on
+          Energy Sparks, please get in contact if you think this is the case at
+          your school, so we can provide better analysis for your school.
+        </p>
+        <p>
           The chart and table below estimate the potential benefit of switching
           to or from a differential tariff.
         </p>
@@ -1412,6 +1530,11 @@ module Benchmarking
   class BenchmarkPeriodChangeBase < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      @rate_changed_in_period = calculate_rate_changed_in_period(school_ids, filter, user_type)
+      super(school_ids: school_ids, filter: filter)
+    end
+
     private
 
     def footnote(school_ids, filter, user_type)
@@ -1425,7 +1548,11 @@ module Benchmarking
       infinite_increase_school_names = school_names_by_calculation_issue(rows, :percent_changed, +Float::INFINITY)
       infinite_decrease_school_names = school_names_by_calculation_issue(rows, :percent_changed, -Float::INFINITY)
 
-      changed = !floor_area_or_pupils_change_rows.empty? || !infinite_increase_school_names.empty? || !infinite_decrease_school_names.empty?
+      changed = !floor_area_or_pupils_change_rows.empty? ||
+                !infinite_increase_school_names.empty? ||
+                !infinite_decrease_school_names.empty? ||
+                @rate_changed_in_period
+
 
       text = %(
         <% if changed %>
@@ -1455,11 +1582,30 @@ module Benchmarking
                       but in the previous <%= period_type %> it was more than zero
                 </li>
               <% end %>
+              <% if @rate_changed_in_period %>
+                <li>
+                  (*6) schools where the economic tariff has changed between the two periods,
+                       this is not reflected in the &apos;<%= BenchmarkManager.ch(:change_£current) %>&apos;
+                       column as it is calculated using the most recent tariff.
+                </li>
+              <% end %>
             </ul>
           </p>
         <% end %>
       )
       ERB.new(text).result(binding)
+    end
+
+    def calculate_rate_changed_in_period(school_ids, filter, user_type)
+      col_index = column_headings(school_ids, filter, user_type).index(:tariff_changed_period)
+      return false if col_index.nil?
+
+      data = raw_data(school_ids, filter, user_type)
+      return false if data.nil? || data.empty?
+
+      rate_changed_in_periods = data.map { |row| row[col_index] }
+
+      rate_changed_in_periods.any?
     end
 
     def list_of_school_names_text(school_name_list)
@@ -1480,6 +1626,7 @@ module Benchmarking
 
     # reverses def referenced(name, changed, percent) in benchmark_manager.rb
     def remove_references(school_name)
+      puts "Before #{school_name} After #{school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')}"
       school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')
     end
 
@@ -1742,7 +1889,6 @@ module Benchmarking
       extra_content(:layer_up_powerdown_day_november_2022_storage_heater_table, filter: filter)
     end
     
-
     def extra_content(type, filter:)
       content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
       db = @benchmark_manager.benchmark_database
@@ -1764,4 +1910,68 @@ module Benchmarking
   class BenchmarkChangeAdhocComparisonStorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
   end
+
+  #=======================================================================================
+  class BenchmarkAutumn2022Comparison < BenchmarkChangeAdhocComparison
+    def electricity_content(school_ids:, filter:)
+      extra_content(:autumn_term_2021_2022_electricity_table, filter: filter)
+    end
+  
+    def gas_content(school_ids:, filter:)
+      extra_content(:autumn_term_2021_2022_gas_table, filter: filter)
+    end
+  
+    def storage_heater_content(school_ids:, filter:)
+      extra_content(:autumn_term_2021_2022_storage_heater_table, filter: filter)
+    end
+  end
+
+  class BenchmarkAutumn2022ElectricityTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+  end
+
+  class BenchmarkAutumn2022GasTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      'The change columns are calculated using temperature adjusted values:'
+    end
+  end
+
+  class BenchmarkAutumn2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
+    include BenchmarkingNoTextMixin
+  end
+
+  #=======================================================================================
+  class BenchmarkSeptNov2022Comparison < BenchmarkChangeAdhocComparison
+
+    def electricity_content(school_ids:, filter:)
+      extra_content(:sept_nov_2021_2022_electricity_table, filter: filter)
+    end
+  
+    def gas_content(school_ids:, filter:)
+      extra_content(:sept_nov_2021_2022_gas_table, filter: filter)
+    end
+  
+    def storage_heater_content(school_ids:, filter:)
+      extra_content(:sept_nov_2021_2022_storage_heater_table, filter: filter)
+    end
+  end
+
+  class BenchmarkSeptNov2022ElectricityTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+  end
+
+  class BenchmarkSeptNov2022GasTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      'The change columns are calculated using temperature adjusted values:'
+    end
+  end
+
+  class BenchmarkSeptNov2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
+    include BenchmarkingNoTextMixin
+  end
+
 end

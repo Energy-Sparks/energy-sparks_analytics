@@ -6,7 +6,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
   DAYSINYEAR = 363 # 364 days inclusive - consistent with charts which are 7 days * 52 weeks
   include AlertFloorAreaMixin
   attr_reader :last_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
-  attr_reader :last_year_£current, :previous_year_£current
+  attr_reader :last_year_£current, :previous_year_£current, :previous_year_kwh
 
   attr_reader :one_year_benchmark_by_pupil_kwh, :one_year_benchmark_by_pupil_£
   attr_reader :one_year_saving_versus_benchmark_kwh, :one_year_saving_versus_benchmark_£
@@ -53,7 +53,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     last_year_£current: {
       description: 'Last years electricity consumption - £ including differential tariff  (current tariffs)',
       units:  :£current,
-      benchmark_code: '$lyr'
+      benchmark_code: '€lyr'
     },
     historic_rate_£_per_kwh: {
       description: 'Blended historic tariff over last year',
@@ -63,6 +63,11 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       description: 'Blended current tariff over last year i.e. the latest tariff applied to historic kWh comsumption',
       units:  :£_per_kwh
     },
+    previous_year_kwh: {
+      description: 'Previous years electricity consumption kWh',
+      units:  :kwh,
+      benchmark_code: 'kpyr'
+    },
     previous_year_£: {
       description: 'Previous years electricity consumption - £ including differential tariff (historic tariffs)',
       units:  :£,
@@ -71,7 +76,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     previous_year_£current: {
       description: 'Previous years electricity consumption - £ including differential tariff (current tariffs)',
       units:  :£current,
-      benchmark_code: '$pyr'
+      benchmark_code: '€pyr'
     },
     last_year_co2: {
       description: 'Last years electricity CO2 kg',
@@ -134,7 +139,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     one_year_saving_versus_exemplar_£current: {
       description: 'Annual difference in electricity consumption versus exemplar school - £ (use adjective for sign) (current tariffs)',
       units:  :£current,
-      benchmark_code: '$esav'
+      benchmark_code: '€esav'
     },
     one_year_saving_versus_exemplar_co2: {
       description: 'Annual difference in electricity consumption versus exemplar school - co2 (use adjective for sign)',
@@ -148,12 +153,12 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     one_year_electricity_per_pupil_£: {
       description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts (historic tariffs)',
       units:  :£,
-      benchmark_code: '£pup'
+      benchmark_code: '€pup'
     },
     one_year_electricity_per_pupil_£current: {
       description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts (current tariffs)',
       units:  :£current,
-      benchmark_code: '$pup'
+      benchmark_code: '€pup'
     },
     one_year_electricity_per_pupil_co2: {
       description: 'Per pupil annual electricity usage - co2 - required for PH analysis, not alerts',
@@ -249,6 +254,8 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @current_rate_£_per_kwh  = current_blended_rate_£_per_kwh
 
     prev_date = asof_date - DAYSINYEAR - 1
+
+    @previous_year_kwh      = kwh(prev_date - DAYSINYEAR, prev_date, :kwh)
     @previous_year_£        = kwh(prev_date - DAYSINYEAR, prev_date, :£)
     @previous_year_£current = kwh(prev_date - DAYSINYEAR, prev_date, :£current)
 

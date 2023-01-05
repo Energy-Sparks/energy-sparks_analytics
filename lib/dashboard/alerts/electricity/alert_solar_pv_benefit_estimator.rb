@@ -2,6 +2,7 @@ require 'minimization'
 class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
   attr_reader :optimum_kwp, :optimum_payback_years, :optimum_mains_reduction_percent
   attr_reader :solar_pv_scenario_table, :solar_pv_scenario_table_html
+  attr_reader :one_year_saving_£current
 
   def initialize(school)
     super(school, :solarpvbenefitestimate)
@@ -58,6 +59,11 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
       description: 'Optimum: percent redcution in mains consumption',
       units:  :percent,
       benchmark_code: 'opvp'
+    },
+    one_year_saving_£current: {
+      description: 'Saving at latest tariffs for optimum scenario',
+      units:  :£current,
+      benchmark_code: 'opv€'
     }
   }
 
@@ -75,8 +81,8 @@ class AlertSolarPVBenefitEstimator < AlertElectricityOnlyBase
     optimum_scenario = find_optimum_kwp(scenarios, round_optimum_kwp(optimum_kwp))
     promote_optimum_variables(optimum_scenario)
 
-    one_year_saving = optimum_scenario[:total_annual_saving_£]
-    savings_range = Range.new(one_year_saving, one_year_saving)
+    @one_year_saving_£current = optimum_scenario[:total_annual_saving_£]
+    savings_range = Range.new(@one_year_saving_£current, @one_year_saving_£current)
     set_savings_capital_costs_payback(savings_range, optimum_scenario[:capital_cost_£], optimum_scenario[:total_annual_saving_co2])
 
     @rating = 5.0

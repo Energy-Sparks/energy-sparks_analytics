@@ -3,7 +3,7 @@ require_relative '../alert_electricity_only_base.rb'
 
 class AlertIntraweekBaseloadVariation < AlertBaseloadBase
   attr_reader :max_day_kw, :min_day_kw, :percent_intraday_variation
-  attr_reader :annual_cost_kwh, :annual_cost_£, :annual_co2
+  attr_reader :annual_cost_kwh, :annual_cost_£,  :annual_cost_£current, :annual_co2
 
   def initialize(school, report_type = :intraweekbaseload, meter = school.aggregated_electricity_meters)
     super(school, report_type, meter)
@@ -48,7 +48,7 @@ class AlertIntraweekBaseloadVariation < AlertBaseloadBase
     annual_cost_£current: {
       description: 'annual cost of seasonal baseload variation (£) as latest tariff',
       units:  :£,
-      benchmark_code: 'c$bp'
+      benchmark_code: 'c€bp'
     },
     annual_co2: {
       description: 'annual cost of seasonal baseload variation (CO2)',

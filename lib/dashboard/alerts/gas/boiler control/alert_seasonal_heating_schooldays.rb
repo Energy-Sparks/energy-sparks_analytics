@@ -89,7 +89,7 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
       warm_weather_heating_days_all_days_kwh:       'wkwh',
       warm_weather_heating_days_all_days_co2:       'wco2',
       warm_weather_heating_days_all_days_£:         'w£__',
-      warm_weather_heating_days_all_days_£current:  'w$__',
+      warm_weather_heating_days_all_days_£current:  'w€__',
       warm_weather_heating_days_all_days_days:      'wdys',
     }
 

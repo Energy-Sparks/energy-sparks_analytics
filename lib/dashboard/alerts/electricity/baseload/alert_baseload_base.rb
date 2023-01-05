@@ -22,7 +22,8 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
     },
     blended_baseload_rate_£current_per_kwh: {
       description: 'blended baseload tariff using latest tariff - £ per kWh',
-      units:  :£_per_kwh
+      units:  :£_per_kwh,
+      benchmark_code: '€prk'
     },
     has_changed_during_period_text: {
       description: 'the tariff has changed during the last year text, blank if not',
