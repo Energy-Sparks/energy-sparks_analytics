@@ -965,6 +965,7 @@ class BenchmarkComparisonAdviceSolarSchools < BenchmarkComparisonAdvice
 end
 #==============================================================================
 class FuelDaytypeAdvice < DashboardChartAdviceBase
+  AVERAGE_PERCENT = 0.5
   attr_reader :fuel_type, :fuel_type_str
   def initialize(school, chart_definition, chart_data, chart_symbol, fuel_type)
     super(school, chart_definition, chart_data, chart_symbol)
@@ -1032,7 +1033,7 @@ class FuelDaytypeAdvice < DashboardChartAdviceBase
   end
 
   def average_percent
-    out_of_hours_alert(@fuel_type).out_of_hours_percent
+    AVERAGE_PERCENT
   end
 
   def exemplar_percentage
