@@ -809,12 +809,14 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def comparison(fuel, benchmark_type)
+    tariff_change_saving_to_examplar_html(fuel, benchmark_type)
+=begin
     school_£    = benchmark_data(fuel, :school,        :£)
     benchmark_£ = benchmark_data(fuel, benchmark_type, :£)
 
     school_£_html    = FormatEnergyUnit.format(:£, school_£,    :html)
     benchmark_£_html = FormatEnergyUnit.format(:£, benchmark_£, :html)
-    tc_html = tariff_change_saving_to_examplar_html(fuel)
+    tc_html = tariff_change_saving_to_examplar_html(fuel, benchmark_type)
 
     if school_£_html == benchmark_£_html # values same in formatted space
       'is similar to other well managed schools which spent ' + benchmark_£_html + tc_html
@@ -823,10 +825,14 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     else
       'is less than well managed schools which spent ' + benchmark_£_html + tc_html
     end
+=end
   end
 
-  def tariff_change_saving_to_examplar_html(fuel)
+  def tariff_change_saving_to_examplar_html(fuel, benchmark_type)
     school_comparison_name = benchmark_type == :benchmark ? 'well managed' : 'exemplar'
+
+    school_£    = benchmark_data(fuel, :school,        :£)
+    benchmark_£ = benchmark_data(fuel, benchmark_type, :£)
 
     school_£_html    = FormatEnergyUnit.format(:£, school_£,    :html)
     benchmark_£_html = FormatEnergyUnit.format(:£, benchmark_£, :html)
@@ -861,11 +867,11 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
     has_changed_by_percent?(benchmark_data(fuel, :school, :£), benchmark_data(fuel, :school, :£current), 0.01)
   end
 
-  def tariff_changed_spend_html(fuel)
+  def tariff_changed_spend_html_deprecated(fuel)
     "#{£_html} (#{kwh_html})"
   end
 
-  def tariff_changed_spend_html_deprecated(fuel)
+  def tariff_changed_spend_html(fuel)
     return '' unless tariff_changed_signifcantly?(fuel)
 
     kwh_html = FormatEnergyUnit.format(:£, benchmark_data(fuel, :school, :£current), :html)
