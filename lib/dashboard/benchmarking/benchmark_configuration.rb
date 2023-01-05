@@ -89,7 +89,7 @@ module Benchmarking
                            :last_year_kwh_consumption => "Last year kWh consumption",
                          :last_year_out_of_hours_cost => "Last year out of hours cost",
              :last_year_saving_if_improve_to_exemplar => "Last year saving if improve to exemplar",
-     :last_year_saving_per_1c_reduction_in_thermostat => "Last year saving per 1C reduction in thermostat",
+     :last_year_saving_per_1c_reduction_in_thermostat => "Saving per 1C reduction in thermostat",
                     :last_year_storage_heater_costs_£ => "Last year storage heater costs",
                   :last_year_storage_heater_kwh_pupil => "Last year storage heater  kWh/pupil",
                  :last_year_weekend_and_holiday_costs => "Last year weekend and holiday costs",
