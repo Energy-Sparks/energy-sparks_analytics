@@ -30,7 +30,7 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
   end
 
   protected def max_days_out_of_date_while_still_relevant
-    200
+    21
   end
 
   def self.schoolweek_adjusted_gas_variables
