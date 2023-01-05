@@ -1,9 +1,7 @@
 module Baseload
   class IntraweekVariation
-    attr_reader :metric_id
-
-    def initialize(metric_id: :intraweek_baseload_variation, days_kw:)
-      @metric_id = metric_id
+    #days_kw: { day_num => kw }
+    def initialize(days_kw:)
       @days_kw = days_kw
     end
 

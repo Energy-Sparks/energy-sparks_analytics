@@ -35,7 +35,7 @@ module Baseload
       )
     end
 
-    #Returns the costs over 1 year, above minimum kwh
+    #Returns the costs over 1 year for the usage above the minimum baseload
     def estimated_costs
       raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}" unless enough_data?
 
@@ -45,7 +45,6 @@ module Baseload
       #costs are using the current economic tariff (£current)
       #TODO: confirm whether this is correct
       return CombinedUsageMetric.new(
-        metric_id: :annual_cost_of_seasonal_baseload,
         kwh: annual_cost_kwh,
         £: annual_cost_kwh * blended_baseload_rate_£current_per_kwh,
         co2: annual_cost_kwh * blended_co2_per_kwh

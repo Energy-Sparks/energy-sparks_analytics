@@ -48,7 +48,6 @@ module Baseload
     # @return [CombinedUsageMetric] the calculated usage
     def annual_baseload_usage
       return CombinedUsageMetric.new(
-        metric_id: :average_baseload_last_year,
         kwh: average_baseload_last_year_kwh,
         £: average_baseload_last_year_£,
         co2: average_baseload_last_year_co2

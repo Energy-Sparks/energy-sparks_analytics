@@ -51,7 +51,6 @@ module Baseload
       benchmarked_by_pupil_kw = average_baseload_kw(compare: compare)
       by_pupil_kwh = benchmarked_by_pupil_kw * HOURS_IN_YEAR
       return CombinedUsageMetric.new(
-        metric_id: "baseload_usage_#{compare}".to_sym,
         kwh: by_pupil_kwh,
         £: by_pupil_kwh * latest_electricity_tariff,
         co2: by_pupil_kwh * blended_co2_per_kwh
@@ -76,7 +75,6 @@ module Baseload
       one_year_saving_versus_comparison_kwh = average_baseload_last_year_kwh - baseload_usage_for_comparison.kwh
 
       return CombinedUsageMetric.new(
-        metric_id: "estimated_savings_versus_#{versus}".to_sym,
         kwh: one_year_saving_versus_comparison_kwh,
         £: one_year_saving_versus_comparison_kwh * latest_electricity_tariff,
         co2: one_year_saving_versus_comparison_kwh * blended_co2_per_kwh

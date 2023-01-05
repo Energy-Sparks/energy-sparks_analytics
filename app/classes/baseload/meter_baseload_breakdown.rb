@@ -2,11 +2,8 @@ module Baseload
   # Provides access to results of baseload calculations for
   # a range of meters and additional helper methods
   class MeterBaseloadBreakdown
-    attr_reader :metric_id
-
     # {mpan_mprn: {kw: 0, percent: 0, £: 0} }
-    def initialize(metric_id: :average_baseload_last_year, meter_breakdown:)
-      @metric_id = metric_id
+    def initialize(meter_breakdown:)
       @meter_breakdown = meter_breakdown
     end
 
