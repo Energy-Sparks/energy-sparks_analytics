@@ -603,7 +603,22 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkContentChangeInAnnualHeatingConsumption < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    private def introduction_text
+
+    def content(school_ids: nil, filter: nil, user_type: nil)
+      content1 = super(school_ids: school_ids, filter: filter)
+      content2 = temperature_adjusted_content(school_ids: school_ids, filter: filter)
+      content1 + content2
+    end
+
+    private
+
+    def temperature_adjusted_content(school_ids:, filter:)
+      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
+      db = @benchmark_manager.benchmark_database
+      content_manager.content(db, :change_in_annual_heating_consumption_temperature_adjusted, filter: filter)
+    end
+
+    def introduction_text
       %q(
         <p>
           This benchmark shows the change in the gas and storage heater costs
@@ -625,6 +640,32 @@ module Benchmarking
       ) + CAVEAT_TEXT[:covid_lockdown]
     end
   end
+    #=======================================================================================
+    class BenchmarkContentChangeInAnnualHeatingConsumptionTemperatureAdjusted  < BenchmarkContentBase
+      include BenchmarkingNoTextMixin
+  
+      private def introduction_text
+        %q(
+          <p>
+            The previous comparison is not adjusted for temperature changes between
+            the two years.
+          </p>
+
+        )
+      end
+  
+      protected def table_introduction_text
+        %q(
+          <p>
+            This comparison is adjusted for temperature, so the previous year&apos;s
+            temperature adjusted column is adjusted upwards if the previous year was
+            milder than last year, and downwards if it is colder to provide a fairer
+            comparison between the 2 years.
+
+          </p>
+        )
+      end
+    end
   #=======================================================================================
   class BenchmarkContentGasOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin

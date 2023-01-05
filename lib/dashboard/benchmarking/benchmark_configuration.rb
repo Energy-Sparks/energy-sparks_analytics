@@ -83,14 +83,14 @@ module Benchmarking
                             :last_year_energy_£_pupil => "Last year energy £/pupil",
                           :last_year_energy_kwh_pupil => "Last year energy kWh/pupil",
                         :last_year_energy_kgco2_pupil => "Last year energy kgCO2/pupil",
-                               :last_year_gas_costs_£ => "Last year gas costs £",
+                               :last_year_gas_costs_£ => "Last year gas costs",
                              :last_year_gas_kwh_pupil => "Last year gas kWh",
               :last_year_heating_costs_per_floor_area => "Last year heating costs per floor area",
                            :last_year_kwh_consumption => "Last year kWh consumption",
                          :last_year_out_of_hours_cost => "Last year out of hours cost",
              :last_year_saving_if_improve_to_exemplar => "Last year saving if improve to exemplar",
      :last_year_saving_per_1c_reduction_in_thermostat => "Last year saving per 1C reduction in thermostat",
-                    :last_year_storage_heater_costs_£ => "Last year storage heater costs £",
+                    :last_year_storage_heater_costs_£ => "Last year storage heater costs",
                   :last_year_storage_heater_kwh_pupil => "Last year storage heater  kWh/pupil",
                  :last_year_weekend_and_holiday_costs => "Last year weekend and holiday costs",
                      :max_average_weekday_baseload_kw => "Max average weekday baseload kW",
@@ -116,11 +116,11 @@ module Benchmarking
                                     :potential_saving => "Potential saving (at latest tariff)",
                                     :previous_holiday => "Previous holiday",
                                        :previous_year => "Previous year",
-                  :previous_year_temperature_adjusted => "Previous year (temperature adjusted_",
+                  :previous_year_temperature_adjusted => "Previous year (temperature adjusted)",
                 :previous_year_temperature_unadjusted => "Previous year (temperature unadjusted)",
                          :previous_year_electricity_£ => "Previous year electricity £",
-                           :previous_year_gas_costs_£ => "Previous year gas costs £",
-                :previous_year_storage_heater_costs_£ => "Previous year storage heater costs £",
+                           :previous_year_gas_costs_£ => "Previous year gas costs",
+                :previous_year_storage_heater_costs_£ => "Previous year storage heater costs",
                    :projected_usage_by_end_of_holiday => "Projected usage by end of holiday",
                                               :pupils => "Pupils",
                                               :rating => "rating",
@@ -162,6 +162,7 @@ module Benchmarking
                                   :summer_baseload_kw => "Summer baseload kW",
                               :target_kwh_consumption => "Target kWh consumption",
                                 :temperature_adjusted => "Temperature adjusted",
+                              :temperature_unadjusted => "Temperature unadjusted",
                                      :thermostatic_r2 => "Thermostatic R2",
                                 :total_energy_costs_£ => "Total Energy Costs £",
                                                 :type => "Type",
@@ -1457,14 +1458,52 @@ module Benchmarking
         benchmark_class:  BenchmarkContentChangeInAnnualHeatingConsumption,
         name:     'Change in annual heating consumption',
         columns:  [
-          { data: 'addp_name',      name: ch(:name), units: String, chart_data: true, content_class: AdviceGasAnnual },
+          tariff_changed_school_name(AdviceGasAnnual),
+
           { data: ->{ percent_change([gsba_£pyr, shan_£pyr], [gsba_£lyr, shan_£lyr], true) },  name: ch(:change_in_annual_gas_storage_heater_usage), units: :relative_percent_0dp, sense: :positive_is_bad, chart_data: true },
-          { data: ->{ gsba_£lyr },  name: ch(:last_year_gas_costs_£), units: :£},
+
           { data: ->{ gsba_£pyr },  name: ch(:previous_year_gas_costs_£), units: :£},
-          { data: ->{ shan_£lyr },  name: ch(:last_year_storage_heater_costs_£), units: :£},
+          { data: ->{ gsba_£lyr },  name: ch(:last_year_gas_costs_£), units: :£},
+
           { data: ->{ shan_£pyr },  name: ch(:previous_year_storage_heater_costs_£), units: :£},
-          { data: ->{ sum_data([gsba_£lyr, shan_£lyr]) - sum_data([gsba_£pyr, shan_£pyr]) },  name: ch(:change_in_heating_costs_between_last_2_years), units: :£}
+          { data: ->{ shan_£lyr },  name: ch(:last_year_storage_heater_costs_£), units: :£},
+
+          { data: ->{ sum_data([gsba_£lyr, shan_£lyr]) - sum_data([gsba_£pyr, shan_£pyr]) },  name: ch(:change_in_heating_costs_between_last_2_years), units: :£},
+          TARIFF_CHANGED_COL
         ],
+        where:   ->{ !gsba_£pyr.nil? || !shan_£pyr.nil? },
+        sort_by:  [1], # column 1 i.e. Annual kWh
+        treat_as_nil:   [0],
+        type: %i[chart table]
+      },
+      change_in_annual_heating_consumption_temperature_adjusted: {
+        benchmark_class:  BenchmarkContentChangeInAnnualHeatingConsumptionTemperatureAdjusted,
+        filter_out:     :dont_make_available_directly,
+        name:     'Change in annual heating consumption (temperature adjusted)',
+        columns:  [
+          { data: 'addp_name',      name: ch(:name), units: String, chart_data: true, content_class: AdviceGasAnnual },
+          { data: ->{ percent_change([gsba_kpyr, shan_kpyr], [gsba_klyr, shan_klyr], true) },  name: ch(:temperature_unadjusted), units: :relative_percent_0dp, sense: :positive_is_bad},
+          { data: ->{ percent_change([gsba_kpya, shan_kpya], [gsba_klyr, shan_klyr], true) },  name: ch(:temperature_adjusted), units: :relative_percent_0dp, sense: :positive_is_bad, chart_data: true },
+          
+          { data: ->{ gsba_kpyr },  name: ch(:previous_year_temperature_unadjusted), units: :kwh},
+          { data: ->{ gsba_kpya },  name: ch(:previous_year_temperature_adjusted),   units: :kwh},
+          { data: ->{ gsba_klyr },  name: ch(:last_year),                            units: :kwh},
+
+          { data: ->{ shan_kpyr },  name: ch(:previous_year_temperature_unadjusted), units: :kwh},
+          { data: ->{ shan_kpya },  name: ch(:previous_year_temperature_adjusted),   units: :kwh},         
+          { data: ->{ shan_klyr },  name: ch(:last_year),                            units: :kwh},
+
+          { data: ->{ sum_data([gsba_klyr, shan_klyr]) - sum_data([gsba_kpyr, shan_kpyr]) },  name: ch(:temperature_unadjusted), units: :kwh},
+          { data: ->{ sum_data([gsba_klyr, shan_klyr]) - sum_data([gsba_kpya, shan_kpya]) },  name: ch(:temperature_adjusted),   units: :kwh}
+        ],
+        column_groups: [
+          { name: '',                             span: 1 },
+          { name: 'Percent change (Heating)',     span: 2 },
+          { name: 'Gas (kWh)',                    span: 3 },
+          { name: 'Storage heaters (kWh)',        span: 3 },
+          { name: 'Change in consumption (kWh)',  span: 2 },
+        ],
+        where:   ->{ !gsba_kpyr.nil? || !shan_kpyr.nil? },
         sort_by:  [1], # column 1 i.e. Annual kWh
         treat_as_nil:   [0],
         type: %i[chart table]

@@ -14,7 +14,7 @@ require_relative '../common/alert_floor_area_pupils_mixin.rb'
 class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   DAYSINYEAR = 363 # 364 days inclusive - consistent with charts which are 7 days * 52 weeks
   include AlertFloorAreaMixin
-  attr_reader :last_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
+  attr_reader :last_year_kwh, :previous_year_kwh, :last_year_£, :previous_year_£, :last_year_co2
   attr_reader :last_year_£current, :previous_year_£current
 
   attr_reader :one_year_benchmark_floor_area_kwh, :one_year_benchmark_floor_area_£
@@ -58,9 +58,14 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   def self.gas_benchmark_template_variables
     {
       last_year_kwh: {
-        description: "Last years gas consumption - kwh",
-        units:  {kwh: :gas},
+        description:    "Last years gas consumption - kwh",
+        units:          :kwh,
         benchmark_code: 'klyr'
+      },
+      previous_year_kwh: {
+        description:  "Previous years gas consumption - kwh (unadjusted for temperature)",
+        units:          :kwh,
+        benchmark_code: 'kpyr'
       },
       last_year_£: {
         description: 'Last years gas consumption - £ including differential tariff (using historic tariffs)',
@@ -88,7 +93,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
       previous_year_£current: {
         description: 'Previous years gas consumption - £ including differential tariff  (using latest tariffs)',
         units:  :£current,
-        benchmark_code: '£pyr'
+        benchmark_code: '€pyr'
       },
       last_year_co2: {
         description: 'Last years gas CO2 kg',
@@ -325,6 +330,7 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     @current_rate_£_per_kwh  = aggregate_meter.amr_data.blended_rate(:kwh, :£current, asof_date - DAYSINYEAR, asof_date)
 
     prev_date = asof_date - DAYSINYEAR - 1
+    @previous_year_kwh      = kwh(prev_date - DAYSINYEAR, prev_date, :kwh)
     @previous_year_£        = kwh(prev_date - DAYSINYEAR, prev_date, :£)
     @previous_year_£current = kwh(prev_date - DAYSINYEAR, prev_date, :£current)
 
@@ -520,7 +526,11 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
   end
 
   def kwh(date1, date2, data_type = :kwh)
-    aggregate_meter.amr_data.kwh_date_range(date1, date2, data_type)
+    if aggregate_meter.amr_data.start_date > date1 || aggregate_meter.amr_data.end_date < date2
+      nil
+    else
+      aggregate_meter.amr_data.kwh_date_range(date1, date2, data_type)
+    end
   rescue EnergySparksNotEnoughDataException=> e
     nil
   end
