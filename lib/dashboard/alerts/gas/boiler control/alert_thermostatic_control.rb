@@ -57,7 +57,7 @@ class AlertThermostaticControl < AlertGasModelBase
     potential_saving_£: {
       description: 'Potential savings £ through perfect themostatic control',
       units: :£,
-      benchmark_code: 'sav£'
+      benchmark_code: 'sav€'
     },
     potential_saving_co2: {
       description: 'Potential savings co2 through perfect themostatic control',

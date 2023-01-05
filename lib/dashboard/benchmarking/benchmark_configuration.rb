@@ -1620,7 +1620,7 @@ module Benchmarking
         columns:  [
           { data: 'addp_name',      name: ch(:name),     units: String, chart_data: true, content_class: AdviceGasThermostaticControl },
           { data: ->{ or_nil([httc_r2, shtc_r2]) },    name: ch(:thermostatic_r2), units: :r2,  chart_data: true },
-          { data: ->{ sum_data([httc_sav£, shtc_sav£], true) },  name: ch(:saving_through_improved_thermostatic_control), units: :£ },
+          { data: ->{ sum_data([httc_sav€, shtc_sav€], true) },  name: ch(:saving_through_improved_thermostatic_control), units: :£ },
           { data: ->{ httc_ratg },  name: ch(:rating), units: Float, y2_axis: true }
         ],
         sort_by: [1],
