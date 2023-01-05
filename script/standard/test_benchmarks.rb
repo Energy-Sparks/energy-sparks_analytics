@@ -17,7 +17,7 @@ overrides = {
     calculate_and_save_variables: true,
     asof_date: run_date,
     pages: %i[
-      thermostat_sensitivity
+      heating_in_warm_weather
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }

@@ -1607,7 +1607,7 @@ module Benchmarking
           { data: ->{ or_nil([shsd_wpan, shsh_wpan]) },  name: ch(:percentage_of_annual_heating_consumed_in_warm_weather), units: :percent, chart_data: true },
           { data: ->{ or_nil([shsd_wkwh, shsh_wkwh]) },  name: ch(:saving_through_turning_heating_off_in_warm_weather_kwh), units: :kwh },
           { data: ->{ or_nil([shsd_wco2, shsh_wco2]) },  name: ch(:saving_co2_kg), units: :co2 },
-          { data: ->{ or_nil([shsd_w£__, shsh_w£__]) },  name: ch(:saving_£), units: :£ },
+          { data: ->{ or_nil([shsd_w€__, shsh_w€__]) },  name: ch(:saving_£), units: :£ },
           { data: ->{ or_nil([shsd_wdys, shsh_wdys]) },  name: ch(:number_of_days_heating_on_in_warm_weather), units: :days },
           { data: ->{ or_nil([shsd_ratg, shsh_ratg]) },  name: ch(:rating), units: Float, y2_axis: true }
         ],
