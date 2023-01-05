@@ -14,7 +14,7 @@ module Baseload
 
     # @return [MeterBaseloadBreakdown] the calculated breakdown
     def calculate_breakdown
-      MeterBaseloadBreakdown.new(metric_id: :average_baseload_last_year, meter_breakdown: calculate_percentage_baseload)
+      MeterBaseloadBreakdown.new(meter_breakdown: calculate_percentage_baseload)
     end
 
     private

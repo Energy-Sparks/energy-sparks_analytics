@@ -5,7 +5,7 @@ module Baseload
     attr_reader :metric_id
 
     # {mpan_mprn: {kw: 0, percent: 0, £: 0} }
-    def initialize(metric_id:, meter_breakdown:)
+    def initialize(metric_id: :average_baseload_last_year, meter_breakdown:)
       @metric_id = metric_id
       @meter_breakdown = meter_breakdown
     end
