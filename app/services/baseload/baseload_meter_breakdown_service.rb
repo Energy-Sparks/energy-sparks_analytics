@@ -9,6 +9,7 @@ module Baseload
   # The service could easily be adapted to report based on a different period
   class BaseloadMeterBreakdownService
     def initialize(meter_collection)
+      validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
     end
 
@@ -49,6 +50,10 @@ module Baseload
 
     def electricity_meters
       @meter_collection.electricity_meters
+    end
+
+    def validate_meter_collection(meter_collection)
+      raise EnergySparksUnexpectedStateException, "School does not have electricity meters" if meter_collection.electricity_meters == nil
     end
 
   end

@@ -1,5 +1,5 @@
 module Baseload
-  class IntraweekBaseloadService
+  class IntraweekBaseloadService < BaseService
     # Create a service that can calculate the intraweek baseload variation
     # for a specific meter
     #
@@ -11,6 +11,7 @@ module Baseload
     #
     # @raise [EnergySparksUnexpectedStateException] if meter isn't an electricity meter
     def initialize(analytics_meter, asof_date=Time.zone.today)
+      validate_meter(analytics_meter)
       @meter = analytics_meter
       @asof_date = asof_date
     end
@@ -36,27 +37,14 @@ module Baseload
       return CombinedUsageMetric.new(
         kwh: annual_cost_kwh,
         £: annual_cost_kwh * blended_baseload_rate_£current_per_kwh,
-        co2: annual_cost_kwh * blended_co2_per_kwh
+        co2: annual_cost_kwh * co2_per_kwh
       )
     end
 
     private
 
-    def blended_co2_per_kwh
-      rate_calculator.blended_co2_per_kwh
-    end
-
     def blended_baseload_rate_£current_per_kwh
       baseload_analysis.blended_baseload_tariff_rate_£_per_kwh(:£current, @asof_date)
     end
-
-    def baseload_analysis
-      @baseload_analysis ||= ElectricityBaseloadAnalysis.new(@meter)
-    end
-
-    def rate_calculator
-      @rate_calculator ||= BlendedRateCalculator.new(@meter.meter_collection.aggregated_electricity_meters)
-    end
-
   end
 end

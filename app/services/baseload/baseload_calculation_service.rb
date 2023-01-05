@@ -9,7 +9,7 @@ module Baseload
   #
   # Other sanity checks, e.g. does this school have electricity can
   # be done in the calling code.
-  class BaseloadCalculationService
+  class BaseloadCalculationService < BaseService
     # Create a service that can calculate the baseload for a specific meter
     #
     # To calculate baseload for a whole school provide the aggregate electricity
@@ -20,6 +20,7 @@ module Baseload
     #
     # @raise [EnergySparksUnexpectedStateException] if meter isn't an electricity meter
     def initialize(analytics_meter, asof_date=Time.zone.today)
+      validate_meter(analytics_meter)
       @meter = analytics_meter
       @asof_date = asof_date
     end
@@ -32,9 +33,9 @@ module Baseload
     def average_baseload_kw(period: :year)
       case period
       when :year
-        baseload_calculator.average_annual_baseload_kw(@asof_date)
+        baseload_analysis.average_annual_baseload_kw(@asof_date)
       when :week
-        baseload_calculator.average_baseload_kw(@asof_date - 7, @asof_date)
+        baseload_analysis.average_baseload_kw(@asof_date - 7, @asof_date)
       else
         raise "Invalid period"
       end
@@ -57,28 +58,20 @@ module Baseload
     private
 
     def average_baseload_last_year_kwh
-      @annual_average ||= baseload_calculator.annual_average_baseload_kwh(@asof_date)
+      @annual_average ||= baseload_analysis.annual_average_baseload_kwh(@asof_date)
     end
 
     def average_baseload_last_year_£
-      baseload_calculator.scaled_annual_baseload_cost_£(:£, @asof_date)
+      baseload_analysis.scaled_annual_baseload_cost_£(:£, @asof_date)
     end
 
     def average_baseload_last_year_co2
       kwh = average_baseload_last_year_kwh
-      kwh * rate_calculator.blended_co2_per_kwh
+      kwh * co2_per_kwh
     end
 
     def meter_collection
       @meter.meter_collection
-    end
-
-    def baseload_calculator
-      @baseload_calculator ||= ElectricityBaseloadAnalysis.new(@meter)
-    end
-
-    def rate_calculator
-      @rate_calculator ||= BlendedRateCalculator.new(@meter.meter_collection.aggregated_electricity_meters)
     end
 
   end

@@ -4,7 +4,8 @@
 #creates blended rates, perhaps that should be exposed here?
 module Baseload
 
-  # Calculates rates (£/kwh or co2/kwh) for an aggregate meter
+  # Calculates the conversion rates (£/kwh or co2/kwh) for school
+  # using their tariff information
   #
   # Uses up to a years worth of consumption data
   class BlendedRateCalculator

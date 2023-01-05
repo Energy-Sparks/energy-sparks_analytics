@@ -1,5 +1,5 @@
 module Baseload
-  class BaseloadBenchmarkingService
+  class BaseloadBenchmarkingService < BaseService
 
     HOURS_IN_YEAR = (24.0 * 365.0).freeze
 
@@ -12,7 +12,10 @@ module Baseload
     #
     # @raise [EnergySparksUnexpectedStateException] if the schools doesnt have electricity meters
     def initialize(meter_collection, asof_date=Time.zone.today)
+      validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
+      #baseload analysis always uses the aggregated meter
+      @meter = aggregate_meter
       @asof_date = asof_date
     end
 
@@ -53,7 +56,7 @@ module Baseload
       return CombinedUsageMetric.new(
         kwh: by_pupil_kwh,
         £: by_pupil_kwh * latest_electricity_tariff,
-        co2: by_pupil_kwh * blended_co2_per_kwh
+        co2: by_pupil_kwh * co2_per_kwh
       )
     end
 
@@ -77,7 +80,7 @@ module Baseload
       return CombinedUsageMetric.new(
         kwh: one_year_saving_versus_comparison_kwh,
         £: one_year_saving_versus_comparison_kwh * latest_electricity_tariff,
-        co2: one_year_saving_versus_comparison_kwh * blended_co2_per_kwh
+        co2: one_year_saving_versus_comparison_kwh * co2_per_kwh
       )
     end
 
@@ -85,10 +88,6 @@ module Baseload
 
     def latest_electricity_tariff
       @latest_electricity_tariff ||= baseload_analysis.blended_baseload_tariff_rate_£_per_kwh(:£current, @asof_date)
-    end
-
-    def blended_co2_per_kwh
-      @blended_co2_per_kwh ||= rate_calculator.blended_co2_per_kwh
     end
 
     def school_type
@@ -103,16 +102,8 @@ module Baseload
       aggregate_meter.meter_number_of_pupils(@meter_collection, start_date, end_date)
     end
 
-    def rate_calculator
-      @rate_calculator ||= BlendedRateCalculator.new(aggregate_meter)
-    end
-
     def baseload_calculator
-      @baseload_calculator ||= BaseloadCalculationService.new(aggregate_meter, @asof_date)
-    end
-
-    def baseload_analysis
-      @baseload_analysis ||= ElectricityBaseloadAnalysis.new(aggregate_meter)
+      @baseload_calculator ||= BaseloadCalculationService.new(@meter, @asof_date)
     end
   end
 end
