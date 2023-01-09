@@ -433,6 +433,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   def tariff_changed_significantly(t1_£_per_kwh, t2_£_per_kwh)
     return false if t1_£_per_kwh.nil? || t2_£_per_kwh.nil?
 
+    return false if t1_£_per_kwh.nan? || t2_£_per_kwh.nan?
+
     t1_£_per_kwh.round(2) != t2_£_per_kwh.round(2)
   end 
 
