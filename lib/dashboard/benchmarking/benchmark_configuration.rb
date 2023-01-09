@@ -163,11 +163,13 @@ module Benchmarking
                               :target_kwh_consumption => "Target kWh consumption",
                                 :temperature_adjusted => "Temperature adjusted",
                               :temperature_unadjusted => "Temperature unadjusted",
+                            :temperature_adjusted_kwh => "Temperature adjusted change (kWh)",
                                      :thermostatic_r2 => "Thermostatic R2",
                                 :total_energy_costs_£ => "Total Energy Costs £",
                                                 :type => "Type",
                                                  :urn => "URN",
                                           :unadjusted => "Unadjusted",
+                                      :unadjusted_kwh => "Unadjusted change (kWh)",
           :variation_in_baseload_between_days_of_week => "Variation in baseload between days of week",
                                              :weekend => "Weekend",
                                   :winter_baseload_kw => "Winter baseload kW",
@@ -1173,9 +1175,8 @@ module Benchmarking
           { data: ->{ enba_pgn },                          name: ch(:previous_year),  units: :£ },
           { data: ->{ enba_pg0 },                          name: ch(:last_year),      units: :£ },
 
-          { data: ->{ percent_change(enba_kgn, enba_kg0)}, name: ch(:unadjusted),    units: :relative_percent_0dp },
-          { data: ->{ gsba_adpc },                         name: ch(:temperature_adjusted), units: :relative_percent_0dp },
-  #        { data: ->{ gsba_ddan },                         name: 'Colder?',       units: :relative_percent_0dp },
+          { data: ->{ percent_change(enba_kgn, enba_kg0)}, name: ch(:unadjusted_kwh),    units: :relative_percent_0dp },
+          { data: ->{ gsba_adpc },                         name: ch(:temperature_adjusted_kwh), units: :relative_percent_0dp },
         ],
         column_groups: [
           { name: '',                 span: 1 },
@@ -1195,26 +1196,26 @@ module Benchmarking
         columns:  [
           { data: 'addp_name',  name: ch(:name), units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
 
-          { data: ->{ enba_khn },                          name: ch(:previous_year),  units: :kwh },
+          { data: ->{ enba_khn  },                         name: ch(:previous_year),  units: :kwh },
+          { data: ->{ shan_kpya },                         name: ch(:previous_year_temperature_adjusted),  units: :kwh },
           { data: ->{ enba_kh0 },                          name: ch(:last_year),      units: :kwh },
-          { data: ->{ percent_change(enba_khn, enba_kh0)}, name: ch(:change_pct),         units: :relative_percent_0dp },
 
           { data: ->{ enba_chn },                          name: ch(:previous_year),  units: :co2 },
           { data: ->{ enba_ch0 },                          name: ch(:last_year),      units: :co2 },
-          { data: ->{ percent_change(enba_chn, enba_ch0)}, name: ch(:change_pct),         units: :relative_percent_0dp },
 
           { data: ->{ enba_phn },                          name: ch(:previous_year),  units: :£ },
           { data: ->{ enba_ph0 },                          name: ch(:last_year),      units: :£ },
-          { data: ->{ percent_change(enba_phn, enba_ph0)}, name: ch(:change_pct),         units: :relative_percent_0dp },
-          { data: ->{ shan_ddan},                          name: ch(:colder?),        units: :relative_percent_0dp },
+
+          { data: ->{ percent_change(enba_khn, enba_kh0)}, name: ch(:unadjusted_kwh),    units: :relative_percent_0dp },
+          { data: ->{ shan_adpc },                         name: ch(:temperature_adjusted_kwh), units: :relative_percent_0dp },
         ],
         column_groups: [
           { name: '',                       span: 1 },
           { name: 'kWh',                    span: 3 },
           { name: 'CO2 (kg}',               span: 3 },
-          { name: '£',                      span: 3 },
+          { name: '£',                      span: 4 },
         ],
-        where:   ->{ !enba_khn.nil? && enba_psap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
+        where:   ->{ !enba_khn.nil? && enba_phap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceStorageHeaters }
