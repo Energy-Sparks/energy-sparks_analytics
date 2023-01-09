@@ -11,14 +11,13 @@ end
 run_date = Date.new(2022, 11, 5)
 
 overrides = { 
-  schools: ['k*', 'penny*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],
+  schools: ['crook*', 'hunw*', 'combe*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],
   cache_school: false,
   benchmarks: {
-    calculate_and_save_variables: false,
+    calculate_and_save_variables: true,
     asof_date: run_date,
     pages: %i[
-      change_in_gas_since_last_year
-      change_in_storage_heaters_since_last_year
+      annual_energy_costs_per_pupil
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }
