@@ -373,7 +373,10 @@ module Benchmarking
     end
 
     TARIFF_CHANGED_COL        = { data: ->{ addp_etch || addp_gtch }, name: ch(:tariff_changed), units: TrueClass, hidden: true }
-    BLENDED_BASELOAD_RATE_COL = { data: ->{ elbc_€prk }, name: ch(:blended_current_rate), units: :£_per_kwh, hidden: true }
+
+    def self.blended_baseload_rate_col(variable)
+      { data: variable, name: ch(:blended_current_rate), units: :£_per_kwh, hidden: true }
+    end
 
     CHART_TABLE_CONFIG = {
       annual_energy_costs_per_pupil: {
@@ -1333,7 +1336,7 @@ module Benchmarking
           { data: ->{ elbc_blch }, name: ch(:change_in_baseload_last_week_v_year_kw), units: :kw},
           { data: ->{ elbc_anc€ }, name: ch(:cost_of_change_in_baseload), units: :£current},
           { data: ->{ elbc_ratg }, name: ch(:rating), units: Float, y2_axis: true },
-          BLENDED_BASELOAD_RATE_COL,
+          blended_baseload_rate_col(->{ elbc_€prk }),
           TARIFF_CHANGED_COL
         ],
         where:   ->{ !elbc_bspc.nil? },
@@ -1350,7 +1353,7 @@ module Benchmarking
           { data: ->{ elbb_lykw },  name: ch(:average_baseload_kw), units: :w},
           { data: ->{ [0.0, elbb_svex].max },  name: ch(:saving_if_moved_to_exemplar), units: :£},
           { data: ->{ elbb_ratg },  name: ch(:rating), units: Float, y2_axis: true },
-          BLENDED_BASELOAD_RATE_COL,
+          blended_baseload_rate_col(->{ elbb_€prk }),
           TARIFF_CHANGED_COL
         ],
         where:   ->{ !elbb_blpp.nil? },
@@ -1367,7 +1370,7 @@ module Benchmarking
           { data: ->{ sblv_wtbl },  name: ch(:winter_baseload_kw), units: :kw},
           { data: ->{ sblv_c€bp },  name: ch(:saving_if_same_all_year_around), units: :£},
           { data: ->{ sblv_ratg },  name: ch(:rating), units: Float, y2_axis: true },
-          BLENDED_BASELOAD_RATE_COL,
+          blended_baseload_rate_col(->{ sblv_€prk }),
           TARIFF_CHANGED_COL
         ],
         where:   ->{ !sblv_sblp.nil? },
@@ -1386,7 +1389,7 @@ module Benchmarking
           { data: ->{ iblv_mxbd },  name: ch(:day_of_week_with_maximum_baseload), units: String},
           { data: ->{ iblv_c€bp },  name: ch(:potential_saving), units: :£},
           { data: ->{ iblv_ratg },  name: ch(:rating), units: Float, y2_axis: true },
-          BLENDED_BASELOAD_RATE_COL,
+          blended_baseload_rate_col(->{ iblv_€prk }),
           TARIFF_CHANGED_COL
         ],
         where:   ->{ !iblv_sblp.nil? },

@@ -296,7 +296,7 @@ module Benchmarking
 
       blended_rate_per_kwhs = data.map { |row| row[col_index] }.compact
 
-      blended_rate_per_kwhs.map { |rate| rate.round(3) }.minmax.uniq
+      blended_rate_per_kwhs.map { |rate| rate.round(2) }.minmax.uniq
     end
   end
 
