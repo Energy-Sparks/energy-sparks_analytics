@@ -14,13 +14,10 @@ overrides = {
   schools: ['king-ja*', 'crook*', 'hunw*', 'combe*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],
   cache_school: false,
   benchmarks: {
-    calculate_and_save_variables: true,
+    calculate_and_save_variables: false,
     asof_date: run_date,
     pages: %i[
-      recent_change_in_baseload
-      baseload_per_pupil
-      seasonal_baseload_variation
-      weekday_baseload_variation
+      annual_energy_costs_per_pupil
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }
