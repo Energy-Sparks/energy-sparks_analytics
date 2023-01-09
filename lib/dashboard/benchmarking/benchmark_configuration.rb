@@ -1337,6 +1337,7 @@ module Benchmarking
           BLENDED_BASELOAD_RATE_COL,
           TARIFF_CHANGED_COL
         ],
+        where:   ->{ !elbc_bspc.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },
@@ -1370,6 +1371,7 @@ module Benchmarking
           BLENDED_BASELOAD_RATE_COL,
           TARIFF_CHANGED_COL
         ],
+        where:   ->{ !sblv_sblp.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },
@@ -1388,6 +1390,7 @@ module Benchmarking
           BLENDED_BASELOAD_RATE_COL,
           TARIFF_CHANGED_COL
         ],
+        where:   ->{ !iblv_sblp.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },

@@ -239,19 +239,23 @@ class AlertAdditionalPrioritisationData < AlertAnalysisBase
   end
 
   def calculate_economic_tariff_data
-    calc = AlertEconomicTariffCalculations.new(@school, @school.aggregate_meter(:electricity))
+    unless @school.aggregate_meter(:electricity).nil?
+      calc = AlertEconomicTariffCalculations.new(@school, @school.aggregate_meter(:electricity))
 
-    @electricity_economic_tariff_changed_this_year            = calc.changed_this_year?
-    @electricity_economic_tariff_changed_in_the_previous_year = calc.changed_previous_year?
-    @electricity_economic_tariff_changed_this_year_percent    = calc.last_tariff_change_compared_with_remainder_of_last_year_percent
-    @electricity_economic_tariff_last_changed_date            = calc.last_tariff_change_date
+      @electricity_economic_tariff_changed_this_year            = calc.changed_this_year?
+      @electricity_economic_tariff_changed_in_the_previous_year = calc.changed_previous_year?
+      @electricity_economic_tariff_changed_this_year_percent    = calc.last_tariff_change_compared_with_remainder_of_last_year_percent
+      @electricity_economic_tariff_last_changed_date            = calc.last_tariff_change_date
+    end
 
-    calc = AlertEconomicTariffCalculations.new(@school, @school.aggregate_meter(:gas))
+    unless @school.aggregate_meter(:gas).nil?
+      calc = AlertEconomicTariffCalculations.new(@school, @school.aggregate_meter(:gas))
 
-    @gas_economic_tariff_changed_this_year            = calc.changed_this_year?
-    @gas_economic_tariff_changed_in_the_previous_year = calc.changed_previous_year?
-    @gas_economic_tariff_changed_this_year_percent    = calc.last_tariff_change_compared_with_remainder_of_last_year_percent
-    @gas_economic_tariff_last_changed_date            = calc.last_tariff_change_date
+      @gas_economic_tariff_changed_this_year            = calc.changed_this_year?
+      @gas_economic_tariff_changed_in_the_previous_year = calc.changed_previous_year?
+      @gas_economic_tariff_changed_this_year_percent    = calc.last_tariff_change_compared_with_remainder_of_last_year_percent
+      @gas_economic_tariff_last_changed_date            = calc.last_tariff_change_date
+    end
   rescue => e
     puts e.message
     puts e.backtrace
