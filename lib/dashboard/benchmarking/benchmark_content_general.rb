@@ -889,7 +889,7 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          This benchmark shows what time the boilers having been starting
+          This benchmark shows what time the boilers have been starting
           on average in the last week.
         </p>
         <p>
@@ -906,7 +906,7 @@ module Benchmarking
             <li>
               Monitoring temperature in the school in the early morning - typically
               available via the school&apos;s BMS or boiler controller, or via temperature
-              logger (&pound;20 - or you can borrow one from Energy Sparks)
+              logger (&pound;20)
             </li>
             <li>
               Has the school&apos;s thermostat been correctly located,
