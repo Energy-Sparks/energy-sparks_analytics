@@ -354,6 +354,7 @@ module Benchmarking
           layer_up_powerdown_day_november_2022
           change_in_energy_use_since_joined_energy_sparks
           autumn_term_2021_2022_energy_comparison
+          sept_nov_2021_2022_energy_comparison
         ]
       }
     ]
@@ -791,7 +792,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
+          { name: 'kWh',      span: 3 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -826,7 +827,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
+          { name: 'kWh',      span: 4 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -861,7 +862,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
+          { name: 'kWh',      span: 4 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -965,7 +966,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
+          { name: 'kWh',      span: 3 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -1000,7 +1001,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
+          { name: 'kWh',      span: 4 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -1035,7 +1036,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
+          { name: 'kWh',      span: 4 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
