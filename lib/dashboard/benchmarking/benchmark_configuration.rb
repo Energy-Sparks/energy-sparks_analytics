@@ -388,7 +388,7 @@ module Benchmarking
           { data: ->{ gsba_kpup },          name: ch(:last_year_gas_kwh_pupil), units: :kwh, chart_data: true },
           { data: ->{ shan_kpup },          name: ch(:last_year_storage_heater_kwh_pupil), units: :kwh, chart_data: true },
           { data: ->{ sum_data([elba_kpup, gsba_kpup, shan_kpup]) }, name: ch(:last_year_energy_kwh_pupil), units: :kwh},
-          { data: ->{ sum_data([elba_£pup, gsba_n£pp, shan_n£pp]) }, name: ch(:last_year_energy_£_pupil), units: :£},
+          { data: ->{ sum_data([elba_£pup, gsba_£pup, shan_£pup]) }, name: ch(:last_year_energy_£_pupil), units: :£},
           { data: ->{ sum_data([elba_cpup, gsba_cpup, shan_cpup]) }, name: ch(:last_year_energy_kgco2_pupil), units: :kwh},
           { data: ->{ addp_stpn },          name: ch(:type),   units: String },
           { data: ->{ enba_ratg },          name: ch(:rating), units: Float, y2_axis: true },
