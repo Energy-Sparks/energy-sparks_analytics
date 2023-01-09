@@ -8,16 +8,16 @@ module Logging
   logger.level = :error
 end
 
-run_date = Date.new(2023, 1, 9) # Date.new(2022, 11, 5)
+run_date = Date.new(2022, 11, 5)
 
 overrides = { 
-  schools: ['ysgol-penrhyn-dewi-va*'], # ['king-ja*', 'crook*', 'hunw*', 'combe*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],
+  schools: ['*'], # ['king-ja*', 'crook*', 'hunw*', 'combe*'], # ['king-james-e*', 'wyb*', 'batheas*', 'the-dur*'], # ['shrew*', 'bathamp*'],
   cache_school: false,
   benchmarks: {
-    calculate_and_save_variables: true,
+    calculate_and_save_variables: false,
     asof_date: run_date,
     pages: %i[
-      heating_coming_on_too_early
+      differential_tariff_opportunity
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }

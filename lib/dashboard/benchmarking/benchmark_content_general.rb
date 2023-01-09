@@ -1462,13 +1462,13 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          Electricity is generally charged at a flat rate, for example 15p/kWh
+          Electricity is generally charged at a flat rate, for example 30p/kWh
           whatever the time of day. Your energy company&apos;s costs however
           vary significantly depending on supply and demand at different times
-          of day, from perhaps 4p/kWh overnight to 25p/kWh at peak times.
+          of day, from perhaps 7p/kWh overnight to 45p/kWh at peak times.
           Electricity companies generally offer differential tariff&apos;s
-          (economy 7) which have lower overnight costs (typically 15p/kWh) and
-          slightly higher daytime costs (16p/kWh) to users who have high overnight
+          (economy 7) which have lower overnight costs (typically 30p/kWh) and
+          slightly higher daytime costs (32p/kWh) to users who have high overnight
           consumption to share the benefit of cheaper overnight wholesale costs.
         </p>
         <p>
