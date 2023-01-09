@@ -1806,6 +1806,7 @@ module Benchmarking
   end
 
   class BenchmarkElectricityOnDuringHoliday < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
         <p>
@@ -1823,10 +1824,12 @@ module Benchmarking
   end
 
   class BenchmarkGasHeatingHotWaterOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
+    include BenchmarkingNoTextMixin 
     def fuel; 'gas' end
   end
 
   class BenchmarkStorageHeatersOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
+    include BenchmarkingNoTextMixin
     def fuel; 'storage heeaters' end
   end
   #=======================================================================================
