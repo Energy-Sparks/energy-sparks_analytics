@@ -4,8 +4,13 @@ module Baseload
   class AnnualBaseloadBreakdownService
     def initialize(meter_collection)
       @meter_collection = meter_collection
-      @year_range = find_year_range
     end
+
+    def annual_baseload_breakdowns
+      @annual_baseload_breakdowns ||= calculate_annual_baseload_breakdowns
+    end
+
+    private
 
     def calculate_annual_baseload_breakdowns
       @meter_collection.electricity_meters.each_with_object([]) do |meter, annual_baseload_breakdowns|
@@ -16,11 +21,9 @@ module Baseload
       end
     end
 
-    private
-
     def year_averages_for(meter)
       analysis = ElectricityBaseloadAnalysis.new(meter)
-      @year_range.each_with_object([]) do |year, year_averages|
+      year_range.each_with_object([]) do |year, year_averages|
         average_baseload_kw = average_baseload_kw_for(analysis, year)
 
         year_averages << {
@@ -52,8 +55,8 @@ module Baseload
       nil
     end
 
-    def find_year_range
-      (@meter_collection.energysparks_start_date.year..Date.today.year).to_a
+    def year_range
+      @year_range ||= (@meter_collection.energysparks_start_date.year..Date.today.year).to_a
     end
   end
 end

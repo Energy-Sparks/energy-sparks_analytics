@@ -5,15 +5,13 @@ require 'spec_helper'
 describe Baseload::AnnualBaseloadBreakdownService, type: :service do
   let(:service)        { Baseload::AnnualBaseloadBreakdownService.new(@acme_academy) }
 
-  # using before(:all) here to avoid slow loading of YAML and then
-  # running the aggregation code for each test.
   before(:all) do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context '#calculate_annual_baseload_breakdowns' do
+  context '#annual_baseload_breakdowns' do
     it 'runs the calculation' do
-      expect(service.calculate_annual_baseload_breakdowns).to eq(
+      expect(service.annual_baseload_breakdowns).to eq(
         [
           {
             mpan_mprn: 1_591_058_886_735,
