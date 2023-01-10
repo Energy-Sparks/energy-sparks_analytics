@@ -21,7 +21,7 @@ describe Baseload::AnnualBaseloadBreakdownService, type: :service do
         [
           {
             mpan_mprn: 1_591_058_886_735,
-            year_data: [
+            year_averages: [
               { average_annual_baseload_cost_in_pounds_sterling: nil,
                 average_annual_baseload_kw: 4.780737704918032,
                 average_annual_co2_emissions: nil,
@@ -42,7 +42,7 @@ describe Baseload::AnnualBaseloadBreakdownService, type: :service do
           },
           {
             mpan_mprn: 1_580_001_320_420,
-            year_data: [{ average_annual_baseload_cost_in_pounds_sterling: nil,
+            year_averages: [{ average_annual_baseload_cost_in_pounds_sterling: nil,
                           average_annual_baseload_kw: 20.882445355191255,
                           average_annual_co2_emissions: nil,
                           year: 2020 },

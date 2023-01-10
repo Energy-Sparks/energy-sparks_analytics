@@ -12,12 +12,12 @@ module Baseload
       @meter_collection.electricity_meters.each_with_object([]) do |meter, annual_baseload_breakdowns|
         annual_baseload_breakdowns << {
           mpan_mprn: meter.mpan_mprn,
-          year_data: calculate_year_data_for(meter)
+          year_averages: year_averages_for(meter)
         }
       end
     end
 
-    def calculate_year_data_for(meter)
+    def year_averages_for(meter)
       analysis = ElectricityBaseloadAnalysis.new(meter)
       @year_range.each_with_object([]) do |year, year_calculations|
         year_calculations << {
