@@ -78,13 +78,12 @@ module Benchmarking
                     :last_year_electricity_£_pupil_ct => "Last year electricity £/pupil at current tariff",
                      :last_year_electricity_kwh_pupil => "Last year electricity kWh/pupil",
                              :last_year_energy_cost_£ => "Last year energy cost £",
-    :last_year_energy_£_pupil_temperature_compensated => "Last year energy cost kWh/pupil (temperature compensated)",
                        :last_year_energy_£_floor_area => "Last year energy £/floor area",
                             :last_year_energy_£_pupil => "Last year energy £/pupil",
                           :last_year_energy_kwh_pupil => "Last year energy kWh/pupil",
                         :last_year_energy_kgco2_pupil => "Last year energy kgCO2/pupil",
                                :last_year_gas_costs_£ => "Last year gas costs",
-                             :last_year_gas_kwh_pupil => "Last year gas kWh",
+                             :last_year_gas_kwh_pupil => "Last year gas kWh/pupil",
               :last_year_heating_costs_per_floor_area => "Last year heating costs per floor area",
                            :last_year_kwh_consumption => "Last year kWh consumption",
                          :last_year_out_of_hours_cost => "Last year out of hours cost",
@@ -163,11 +162,13 @@ module Benchmarking
                               :target_kwh_consumption => "Target kWh consumption",
                                 :temperature_adjusted => "Temperature adjusted",
                               :temperature_unadjusted => "Temperature unadjusted",
+                            :temperature_adjusted_kwh => "Temperature adjusted change (kWh)",
                                      :thermostatic_r2 => "Thermostatic R2",
                                 :total_energy_costs_£ => "Total Energy Costs £",
                                                 :type => "Type",
                                                  :urn => "URN",
                                           :unadjusted => "Unadjusted",
+                                      :unadjusted_kwh => "Unadjusted change (kWh)",
           :variation_in_baseload_between_days_of_week => "Variation in baseload between days of week",
                                              :weekend => "Weekend",
                                   :winter_baseload_kw => "Winter baseload kW",
@@ -354,6 +355,7 @@ module Benchmarking
           layer_up_powerdown_day_november_2022
           change_in_energy_use_since_joined_energy_sparks
           autumn_term_2021_2022_energy_comparison
+          sept_nov_2021_2022_energy_comparison
         ]
       }
     ]
@@ -371,7 +373,10 @@ module Benchmarking
     end
 
     TARIFF_CHANGED_COL        = { data: ->{ addp_etch || addp_gtch }, name: ch(:tariff_changed), units: TrueClass, hidden: true }
-    BLENDED_BASELOAD_RATE_COL = { data: ->{ elbc_€prk }, name: ch(:blended_current_rate), units: :£_per_kwh, hidden: true }
+
+    def self.blended_baseload_rate_col(variable)
+      { data: variable, name: ch(:blended_current_rate), units: :£_per_kwh, hidden: true }
+    end
 
     CHART_TABLE_CONFIG = {
       annual_energy_costs_per_pupil: {
@@ -382,9 +387,8 @@ module Benchmarking
           { data: ->{ elba_kpup },          name: ch(:last_year_electricity_kwh_pupil), units: :kwh, chart_data: true },
           { data: ->{ gsba_kpup },          name: ch(:last_year_gas_kwh_pupil), units: :kwh, chart_data: true },
           { data: ->{ shan_kpup },          name: ch(:last_year_storage_heater_kwh_pupil), units: :kwh, chart_data: true },
-          { data: ->{ enba_kpup },          name: ch(:last_year_energy_kwh_pupil), units: :£},
-          { data: ->{ sum_data([elba_£pup, gsba_n£pp, shan_n£pp]) }, name: ch(:last_year_energy_£_pupil_temperature_compensated), units: :£},
           { data: ->{ sum_data([elba_kpup, gsba_kpup, shan_kpup]) }, name: ch(:last_year_energy_kwh_pupil), units: :kwh},
+          { data: ->{ sum_data([elba_£pup, gsba_£pup, shan_£pup]) }, name: ch(:last_year_energy_£_pupil), units: :£},
           { data: ->{ sum_data([elba_cpup, gsba_cpup, shan_cpup]) }, name: ch(:last_year_energy_kgco2_pupil), units: :kwh},
           { data: ->{ addp_stpn },          name: ch(:type),   units: String },
           { data: ->{ enba_ratg },          name: ch(:rating), units: Float, y2_axis: true },
@@ -791,7 +795,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
+          { name: 'kWh',      span: 3 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -826,7 +830,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
+          { name: 'kWh',      span: 4 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -861,7 +865,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
+          { name: 'kWh',      span: 4 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -965,7 +969,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
+          { name: 'kWh',      span: 3 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -1000,7 +1004,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
+          { name: 'kWh',      span: 4 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -1035,7 +1039,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
+          { name: 'kWh',      span: 4 },
           { name: 'CO2 (kg)', span: 3 },
           { name: 'Cost',     span: 3 }
         ],
@@ -1172,9 +1176,8 @@ module Benchmarking
           { data: ->{ enba_pgn },                          name: ch(:previous_year),  units: :£ },
           { data: ->{ enba_pg0 },                          name: ch(:last_year),      units: :£ },
 
-          { data: ->{ percent_change(enba_kgn, enba_kg0)}, name: ch(:unadjusted),    units: :relative_percent_0dp },
-          { data: ->{ gsba_adpc },                         name: ch(:temperature_adjusted), units: :relative_percent_0dp },
-  #        { data: ->{ gsba_ddan },                         name: 'Colder?',       units: :relative_percent_0dp },
+          { data: ->{ percent_change(enba_kgn, enba_kg0)}, name: ch(:unadjusted_kwh),    units: :relative_percent_0dp },
+          { data: ->{ gsba_adpc },                         name: ch(:temperature_adjusted_kwh), units: :relative_percent_0dp },
         ],
         column_groups: [
           { name: '',                 span: 1 },
@@ -1194,26 +1197,26 @@ module Benchmarking
         columns:  [
           { data: 'addp_name',  name: ch(:name), units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
 
-          { data: ->{ enba_khn },                          name: ch(:previous_year),  units: :kwh },
+          { data: ->{ enba_khn  },                         name: ch(:previous_year),  units: :kwh },
+          { data: ->{ shan_kpya },                         name: ch(:previous_year_temperature_adjusted),  units: :kwh },
           { data: ->{ enba_kh0 },                          name: ch(:last_year),      units: :kwh },
-          { data: ->{ percent_change(enba_khn, enba_kh0)}, name: ch(:change_pct),         units: :relative_percent_0dp },
 
           { data: ->{ enba_chn },                          name: ch(:previous_year),  units: :co2 },
           { data: ->{ enba_ch0 },                          name: ch(:last_year),      units: :co2 },
-          { data: ->{ percent_change(enba_chn, enba_ch0)}, name: ch(:change_pct),         units: :relative_percent_0dp },
 
           { data: ->{ enba_phn },                          name: ch(:previous_year),  units: :£ },
           { data: ->{ enba_ph0 },                          name: ch(:last_year),      units: :£ },
-          { data: ->{ percent_change(enba_phn, enba_ph0)}, name: ch(:change_pct),         units: :relative_percent_0dp },
-          { data: ->{ shan_ddan},                          name: ch(:colder?),        units: :relative_percent_0dp },
+
+          { data: ->{ percent_change(enba_khn, enba_kh0)}, name: ch(:unadjusted_kwh),    units: :relative_percent_0dp },
+          { data: ->{ shan_adpc },                         name: ch(:temperature_adjusted_kwh), units: :relative_percent_0dp },
         ],
         column_groups: [
           { name: '',                       span: 1 },
           { name: 'kWh',                    span: 3 },
           { name: 'CO2 (kg}',               span: 3 },
-          { name: '£',                      span: 3 },
+          { name: '£',                      span: 4 },
         ],
-        where:   ->{ !enba_khn.nil? && enba_psap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
+        where:   ->{ !enba_khn.nil? && enba_phap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceStorageHeaters }
@@ -1333,9 +1336,10 @@ module Benchmarking
           { data: ->{ elbc_blch }, name: ch(:change_in_baseload_last_week_v_year_kw), units: :kw},
           { data: ->{ elbc_anc€ }, name: ch(:cost_of_change_in_baseload), units: :£current},
           { data: ->{ elbc_ratg }, name: ch(:rating), units: Float, y2_axis: true },
-          BLENDED_BASELOAD_RATE_COL,
+          blended_baseload_rate_col(->{ elbc_€prk }),
           TARIFF_CHANGED_COL
         ],
+        where:   ->{ !elbc_bspc.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },
@@ -1349,7 +1353,7 @@ module Benchmarking
           { data: ->{ elbb_lykw },  name: ch(:average_baseload_kw), units: :w},
           { data: ->{ [0.0, elbb_svex].max },  name: ch(:saving_if_moved_to_exemplar), units: :£},
           { data: ->{ elbb_ratg },  name: ch(:rating), units: Float, y2_axis: true },
-          BLENDED_BASELOAD_RATE_COL,
+          blended_baseload_rate_col(->{ elbb_€prk }),
           TARIFF_CHANGED_COL
         ],
         where:   ->{ !elbb_blpp.nil? },
@@ -1366,9 +1370,10 @@ module Benchmarking
           { data: ->{ sblv_wtbl },  name: ch(:winter_baseload_kw), units: :kw},
           { data: ->{ sblv_c€bp },  name: ch(:saving_if_same_all_year_around), units: :£},
           { data: ->{ sblv_ratg },  name: ch(:rating), units: Float, y2_axis: true },
-          BLENDED_BASELOAD_RATE_COL,
+          blended_baseload_rate_col(->{ sblv_€prk }),
           TARIFF_CHANGED_COL
         ],
+        where:   ->{ !sblv_sblp.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },
@@ -1384,9 +1389,10 @@ module Benchmarking
           { data: ->{ iblv_mxbd },  name: ch(:day_of_week_with_maximum_baseload), units: String},
           { data: ->{ iblv_c€bp },  name: ch(:potential_saving), units: :£},
           { data: ->{ iblv_ratg },  name: ch(:rating), units: Float, y2_axis: true },
-          BLENDED_BASELOAD_RATE_COL,
+          blended_baseload_rate_col(->{ iblv_€prk }),
           TARIFF_CHANGED_COL
         ],
+        where:   ->{ !iblv_sblp.nil? },
         sort_by:  [1],
         type: %i[chart table]
       },

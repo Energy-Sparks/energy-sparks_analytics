@@ -296,7 +296,7 @@ module Benchmarking
 
       blended_rate_per_kwhs = data.map { |row| row[col_index] }.compact
 
-      blended_rate_per_kwhs.map { |rate| rate.round(3) }.minmax.uniq
+      blended_rate_per_kwhs.map { |rate| rate.round(2) }.minmax.uniq
     end
   end
 
@@ -889,7 +889,7 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          This benchmark shows what time the boilers having been starting
+          This benchmark shows what time the boilers have been starting
           on average in the last week.
         </p>
         <p>
@@ -906,7 +906,7 @@ module Benchmarking
             <li>
               Monitoring temperature in the school in the early morning - typically
               available via the school&apos;s BMS or boiler controller, or via temperature
-              logger (&pound;20 - or you can borrow one from Energy Sparks)
+              logger (&pound;20)
             </li>
             <li>
               Has the school&apos;s thermostat been correctly located,
@@ -1462,13 +1462,13 @@ module Benchmarking
     private def introduction_text
       %q(
         <p>
-          Electricity is generally charged at a flat rate, for example 15p/kWh
+          Electricity is generally charged at a flat rate, for example 30p/kWh
           whatever the time of day. Your energy company&apos;s costs however
           vary significantly depending on supply and demand at different times
-          of day, from perhaps 4p/kWh overnight to 25p/kWh at peak times.
+          of day, from perhaps 7p/kWh overnight to 45p/kWh at peak times.
           Electricity companies generally offer differential tariff&apos;s
-          (economy 7) which have lower overnight costs (typically 15p/kWh) and
-          slightly higher daytime costs (16p/kWh) to users who have high overnight
+          (economy 7) which have lower overnight costs (typically 30p/kWh) and
+          slightly higher daytime costs (32p/kWh) to users who have high overnight
           consumption to share the benefit of cheaper overnight wholesale costs.
         </p>
         <p>
@@ -1806,6 +1806,7 @@ module Benchmarking
   end
 
   class BenchmarkElectricityOnDuringHoliday < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
         <p>
@@ -1823,10 +1824,12 @@ module Benchmarking
   end
 
   class BenchmarkGasHeatingHotWaterOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
+    include BenchmarkingNoTextMixin 
     def fuel; 'gas' end
   end
 
   class BenchmarkStorageHeatersOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
+    include BenchmarkingNoTextMixin
     def fuel; 'storage heeaters' end
   end
   #=======================================================================================

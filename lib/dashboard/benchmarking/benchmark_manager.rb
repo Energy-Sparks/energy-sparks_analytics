@@ -131,13 +131,12 @@ module Benchmarking
       config = hide_columns(full_config, user_type, ignore_aggregate_columns)
       school_ids = all_school_ids([today]) if school_ids.nil?
       last_year = today - 364
-
       school_ids.each do |school_id|
         school_data = @benchmark_database.fetch(today, {}).fetch(school_id)
         # @benchmark_database.@benchmark_database.fetch(last_year){{}}.fetch(school_id)
-        school_data_last_year = @benchmark_database.dig(last_year, school_id)
-        school_data.merge!(dated_attributes('_last_year', school_data_last_year)) unless school_data_last_year.nil?
-        next unless school_data # && school_data_last_year
+        # school_data_last_year = @benchmark_database.dig(last_year, school_id)
+        # school_data.merge!(dated_attributes('_last_year', school_data_last_year)) unless school_data_last_year.nil?
+        next if school_data.nil? || school_data.empty? # && school_data_last_year
         row  = DatabaseRow.new(school_id, school_data)
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
@@ -489,9 +488,12 @@ module Benchmarking
     def calculate_value(row, column_specification, school_id_debug)
       begin
         case column_specification[:data]
-        when String then row.send(column_specification[:data])
-        when Proc then row.instance_exec(&column_specification[:data]) # this calls the configs lambda as if it was inside the class of the database row, given the lambda access to all the row's variables
-        else nil
+        when String
+          row.send(column_specification[:data])
+        when Proc
+          row.instance_exec(&column_specification[:data]) # this calls the configs lambda as if it was inside the class of the database row, given the lambda access to all the row's variables
+        else
+          nil
         end
       rescue StandardError => e
         name = row.instance_exec(& ->{ school_name })
