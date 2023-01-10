@@ -153,7 +153,7 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     one_year_electricity_per_pupil_£: {
       description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts (historic tariffs)',
       units:  :£,
-      benchmark_code: '€pup'
+      benchmark_code: '£pup'
     },
     one_year_electricity_per_pupil_£current: {
       description: 'Per pupil annual electricity usage - £ - required for PH analysis, not alerts (current tariffs)',

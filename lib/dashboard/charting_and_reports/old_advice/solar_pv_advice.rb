@@ -309,21 +309,20 @@ class DashboardEnergyAdvice
             </li>
             <ul>
               <li>
-                In general, the school will save from the free electricity it is
-                consuming from the panels, about <%= annual_solar_pv_consumed_onsite_£current_html %>
-                (<%= electricity_price_£current_per_kwh_html %> x
-                  <%= annual_solar_pv_consumed_onsite_kwh_html %>)
+                The school will have saved about <%= annual_solar_pv_consumed_onsite_£current_html %>
+                from the free electricity it is consuming from the panels
               </li>
               <li>
-                It will also gain about <%= annual_exported_solar_pv_£_html %> from exported electricity
-                (&#163;<%= BenchmarkMetrics::SOLAR_EXPORT_PRICE %>/kWh) either from the feed-in-tariff
-                if installed before April 2019, or under SEG (Smart Export Guarantee) if installed after.
+                If the panels were installed after April 2019 it will also gain
+                about <%= annual_exported_solar_pv_£_html %> from exported electricity
+                under the SEG (Smart Export Guarantee)
               </li>
               <li>
-                It will also might gain from the government subsidy called 'feed-in-tariff' if the panels were installed before April 2019,
-                the amount of the feed in tariff will depend on when the panels were installed
-                and is typically in the range 5p/kWh to 40 p/kWh x the total 'Photovoltaic
-                production' of <%= annual_solar_pv_kwh_html %>, each year
+                If the panels were installed before April 2019 it might also gain from the
+                government subsidy called 'feed-in-tariff'. The amount of the feed in tariff
+                will depend on when the panels were installed and is typically in the range
+                5p/kWh to 40 p/kWh x the total 'Photovoltaic production' of
+                <%= annual_solar_pv_kwh_html %>, each year
               </li>
             </ul>
           </ul>

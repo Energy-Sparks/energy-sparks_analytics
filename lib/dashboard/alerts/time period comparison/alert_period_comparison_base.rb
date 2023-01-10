@@ -112,7 +112,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
       comparison_chart: { description: 'Relevant comparison chart', units: :chart },
 
-      summary:  { description: 'Change in £spend, relative to previous period', units: String },
+      summary:  { description: 'Change in kwh spend, relative to previous period', units: String },
       prefix_1: { description: 'Change: up or down', units: String },
       prefix_2: { description: 'Change: increase or reduction', units: String },
       tariff_has_changed_between_periods_text: { description: 'Caveat text if tariff has changed between periods, otherwise blank', units: String },
@@ -420,7 +420,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   #£130 increase since last holiday, +160%
   def summary
     I18n.t("analytics.time_period_comparison",
-      difference: FormatEnergyUnit.format(:£, @difference_£current, :text),
+      difference: FormatEnergyUnit.format(:kwh, @difference_kwh, :text),
       adjective: prefix_2,
       period_type: period_type,
       relative_percent: FormatEnergyUnit.format(:relative_percent, @difference_percent, :text))
@@ -432,6 +432,8 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
   def tariff_changed_significantly(t1_£_per_kwh, t2_£_per_kwh)
     return false if t1_£_per_kwh.nil? || t2_£_per_kwh.nil?
+
+    return false if t1_£_per_kwh.nan? || t2_£_per_kwh.nan?
 
     t1_£_per_kwh.round(2) != t2_£_per_kwh.round(2)
   end 

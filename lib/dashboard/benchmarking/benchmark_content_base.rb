@@ -201,8 +201,22 @@ module Benchmarking
       cols.any?{ |col_name| col_name == :tariff_changed }
     end
 
+    def tariff_has_changed?(school_ids, filter, user_type)
+      col_index = column_headings(school_ids, filter, user_type).index(:tariff_changed)
+      return false if col_index.nil?
+
+      data = raw_data(school_ids, filter, user_type)
+      return false if data.nil? || data.empty?
+
+      tariff_changes = data.map { |row| row[col_index] }
+
+      tariff_changes.any?
+    end
+
     def tariff_changed_explanation(school_ids, filter, user_type)
-      if includes_tariff_changed_column?(school_ids, filter, user_type)
+
+
+      if includes_tariff_changed_column?(school_ids, filter, user_type) && tariff_has_changed?(school_ids, filter, user_type)
         %(
           <p>
             (*5) The tariff has changed during the last year for this school.
