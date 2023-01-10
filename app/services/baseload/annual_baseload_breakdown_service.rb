@@ -21,17 +21,29 @@ module Baseload
     def year_averages_for(meter)
       analysis = ElectricityBaseloadAnalysis.new(meter)
       @year_range.each_with_object([]) do |year, year_averages|
+        average_baseload_kw = average_baseload_kw_for(analysis, year)
+
         year_averages << {
           year: year,
-          average_annual_baseload_kw: average_baseload_kw_for(analysis, year),
-          average_annual_baseload_cost_in_pounds_sterling: nil,
-          average_annual_co2_emissions: nil
+          average_annual_baseload_kw: average_baseload_kw,
+          average_annual_baseload_cost_in_pounds_sterling: average_annual_baseload_cost_in_pounds_sterling_for(analysis, year),
+          average_annual_co2_emissions: average_annual_co2_emissions_for(average_baseload_kw)
         }
       end
     end
 
+    def average_annual_co2_emissions_for(average_baseload_kw)
+      average_baseload_kw ? average_baseload_kw * EnergyEquivalences::UK_ELECTRIC_GRID_CO2_KG_KWH : nil
+    end
+
     def start_and_end_dates_for(year)
       [Date.parse("01-01-#{year}"), Date.parse("31-12-#{year}")]
+    end
+
+    def average_annual_baseload_cost_in_pounds_sterling_for(analysis, year)
+      analysis.baseload_economic_cost_date_range_£(*start_and_end_dates_for(year), :£current)
+    rescue StandardError
+      nil
     end
 
     def average_baseload_kw_for(analysis, year)
