@@ -33,8 +33,12 @@ end
 require 'dashboard'
 require 'factory_bot'
 
+#Load the helpers from the support directory
+Dir[File.expand_path(File.join('spec','support', '**', '*.rb'))].each { |f| require_relative f }
+
 #Load YAML files for translations
 I18n.load_path += Dir[File.join('config', 'locales', '**', '*.yml').to_s]
+
 
 # switch off most logging while testing
 module Logging
@@ -131,4 +135,12 @@ RSpec.configure do |config|
     FactoryBot.find_definitions
   end
 
+  RSpec::Matchers.define :round_to_two_digits do |expected_float|
+    match do |actual_float|
+      actual_float.round(2) == expected_float
+    end
+    failure_message do |actual_float|
+      "expected: #{expected_float}\nactual: #{actual_float}\nrounded: #{actual_float.round(2) if actual_float}\n"
+    end
+  end
 end
