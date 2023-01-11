@@ -23,7 +23,7 @@ module Baseload
           year: year,
           average_annual_baseload_kw: average_baseload_kw,
           average_annual_baseload_cost_in_pounds_sterling: average_annual_baseload_cost_in_pounds_sterling_for(year),
-          average_annual_co2_emissions: average_annual_co2_emissions_for(average_baseload_kw),
+          average_annual_baseload_kw_co2_emissions: average_annual_baseload_kw_co2_emissions(average_baseload_kw),
           meter_data_available_for_full_year: full_year_for?(year)
         )
       end
@@ -42,7 +42,7 @@ module Baseload
       @co2_per_kwh ||= BlendedRateCalculator.new(@aggregated_electricity_meters).blended_co2_per_kwh
     end
 
-    def average_annual_co2_emissions_for(average_baseload_kw)
+    def average_annual_baseload_kw_co2_emissions(average_baseload_kw)
       return unless average_baseload_kw
 
       average_baseload_kw * co2_per_kwh
