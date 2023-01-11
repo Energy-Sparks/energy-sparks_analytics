@@ -23,11 +23,19 @@ module Baseload
           year: year,
           average_annual_baseload_kw: average_baseload_kw,
           average_annual_baseload_cost_in_pounds_sterling: average_annual_baseload_cost_in_pounds_sterling_for(year),
-          average_annual_co2_emissions: average_annual_co2_emissions_for(average_baseload_kw)
-          # ,
-          # is_full_year: 
+          average_annual_co2_emissions: average_annual_co2_emissions_for(average_baseload_kw),
+          meter_data_available_for_full_year: full_year_for?(year)
         )
       end
+    end
+
+    def full_year_for?(year)
+      amr_data_start_and_end_date_range_covers?(Date.parse("01-01-#{year}")) &&
+        amr_data_start_and_end_date_range_covers?(Date.parse("31-12-#{year}"))
+    end
+
+    def amr_data_start_and_end_date_range_covers?(date)
+      date.between?(amr_data_start_date, amr_data_end_date)
     end
 
     def co2_per_kwh
@@ -56,16 +64,16 @@ module Baseload
       nil
     end
 
-    def start_date
-      @start_date ||= @aggregated_electricity_meters.amr_data.start_date
+    def amr_data_start_date
+      @amr_data_start_date ||= @aggregated_electricity_meters.amr_data.start_date
     end
 
-    def end_date
-      @end_date ||= @aggregated_electricity_meters.amr_data.end_date
+    def amr_data_end_date
+      @amr_data_end_date ||= @aggregated_electricity_meters.amr_data.end_date
     end
 
     def year_range
-      @year_range ||= (start_date.year..end_date.year).to_a
+      @year_range ||= (amr_data_start_date.year..amr_data_end_date.year).to_a
     end
   end
 end
