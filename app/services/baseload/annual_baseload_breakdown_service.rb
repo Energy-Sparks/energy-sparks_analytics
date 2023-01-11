@@ -2,6 +2,8 @@
 
 module Baseload
   class AnnualBaseloadBreakdownService
+    attr_reader :aggregated_electricity_meters
+
     def initialize(meter_collection)
       @aggregated_electricity_meters = meter_collection.aggregated_electricity_meters
       @analysis = ElectricityBaseloadAnalysis.new(@aggregated_electricity_meters)
@@ -14,16 +16,16 @@ module Baseload
     private
 
     def calculate_annual_baseload_breakdowns
-      year_range.each_with_object([]) do |year, year_averages|
+      year_range.each_with_object([]) do |year, breakdowns|
         average_baseload_kw = average_baseload_kw_for(year)
 
-        year_averages << {
+        breakdowns << Baseload::AnnualBaseloadBreakdown.new(
           year: year,
           average_annual_baseload_kw: average_baseload_kw,
           average_annual_baseload_cost_in_pounds_sterling: average_annual_baseload_cost_in_pounds_sterling_for(year),
           average_annual_co2_emissions: average_annual_co2_emissions_for(average_baseload_kw)
           # is_full_year?
-        }
+        )
       end
     end
 
