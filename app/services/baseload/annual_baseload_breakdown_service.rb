@@ -24,14 +24,20 @@ module Baseload
           average_annual_baseload_kw: average_baseload_kw,
           average_annual_baseload_cost_in_pounds_sterling: average_annual_baseload_cost_in_pounds_sterling_for(year),
           average_annual_co2_emissions: average_annual_co2_emissions_for(average_baseload_kw)
-          # is_full_year?
+          # ,
+          # is_full_year: 
         )
       end
     end
 
+    def co2_per_kwh
+      @co2_per_kwh ||= BlendedRateCalculator.new(@aggregated_electricity_meters).blended_co2_per_kwh
+    end
+
     def average_annual_co2_emissions_for(average_baseload_kw)
-      # TODO: Need to finalise a way of calculating average annual co2 emissions for a given meter
-      nil
+      return unless average_baseload_kw
+
+      average_baseload_kw * co2_per_kwh
     end
 
     def start_and_end_dates_for(year)
@@ -50,8 +56,16 @@ module Baseload
       nil
     end
 
+    def start_date
+      @start_date ||= @aggregated_electricity_meters.amr_data.start_date
+    end
+
+    def end_date
+      @end_date ||= @aggregated_electricity_meters.amr_data.end_date
+    end
+
     def year_range
-      @year_range ||= (@aggregated_electricity_meters.amr_data.start_date.year..@aggregated_electricity_meters.amr_data.end_date.year).to_a
+      @year_range ||= (start_date.year..end_date.year).to_a
     end
   end
 end

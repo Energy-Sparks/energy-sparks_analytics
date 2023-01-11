@@ -14,6 +14,7 @@ describe Baseload::AnnualBaseloadBreakdownService, type: :service do
     it 'runs the calculation' do
       annual_baseload_breakdowns = service.annual_baseload_breakdowns
       expect(annual_baseload_breakdowns.size).to eq(4)
+      expect(annual_baseload_breakdowns.map(&:class).uniq).to eq([Baseload::AnnualBaseloadBreakdown])
       expect(annual_baseload_breakdowns[0].as_json).to eq(
         {
           "average_annual_baseload_cost_in_pounds_sterling"=>nil,
@@ -26,7 +27,7 @@ describe Baseload::AnnualBaseloadBreakdownService, type: :service do
         {
           "average_annual_baseload_cost_in_pounds_sterling"=>34416.41494083075,
           "average_annual_baseload_kw"=>26.190163934426238,
-          "average_annual_co2_emissions"=>nil,
+          "average_annual_co2_emissions"=>4.957880166163382,
           "year"=>2020
         }
       )
@@ -34,7 +35,7 @@ describe Baseload::AnnualBaseloadBreakdownService, type: :service do
         {
           "average_annual_baseload_cost_in_pounds_sterling"=>32139.10057231434,
           "average_annual_baseload_kw"=>24.5531506849315,
-          "average_annual_co2_emissions"=>nil,
+          "average_annual_co2_emissions"=>4.647988424296573,
           "year"=>2021
         }
       )
