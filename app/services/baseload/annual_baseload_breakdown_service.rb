@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 module Baseload
-  class AnnualBaseloadBreakdownService < BaseService
+  class AnnualBaseloadBreakdownService
     attr_reader :aggregated_electricity_meters
 
     def initialize(meter_collection)
-      validate_meter_collection(meter_collection)
       @aggregated_electricity_meters = meter_collection.aggregated_electricity_meters
       @analysis = ElectricityBaseloadAnalysis.new(@aggregated_electricity_meters)
     end
