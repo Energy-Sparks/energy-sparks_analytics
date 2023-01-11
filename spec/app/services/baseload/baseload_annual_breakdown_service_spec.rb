@@ -3,8 +3,8 @@
 require 'spec_helper'
 require 'active_support/core_ext'
 
-describe Baseload::AnnualBaseloadBreakdownService, type: :service do
-  let(:service) { Baseload::AnnualBaseloadBreakdownService.new(@acme_academy) }
+describe Baseload::BaseloadAnnualBreakdownService, type: :service do
+  let(:service) { Baseload::BaseloadAnnualBreakdownService.new(@acme_academy) }
 
   before(:all) do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
