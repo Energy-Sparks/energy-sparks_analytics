@@ -36,6 +36,7 @@ class AdviceBaseload < AdviceElectricityBase
     charts_and_html.push( { type: :html,           content: statement_of_baseload } )
     charts_and_html.push( { type: :html,           content: explanation_of_baseload } )
     charts_and_html.push( { type: :html,           content: benefit_of_moving_to_exemplar_baseload } )
+    charts_and_html.push( { type: :html,           content: baseload_percent_of_annual } )
     charts_and_html.push( { type: :html,           content: economic_tariff_changed_caveat_text } )
     charts_and_html.push( { type: :chart,          content: baseload_one_year_chart } )
     charts_and_html.push( { type: :analytics_html, content: AdviceBase.highlighted_dummy_chart_name_html(baseload_one_year_chart[:config_name] ) } )
@@ -120,6 +121,15 @@ class AdviceBaseload < AdviceElectricityBase
           If you matched the baseload of the best performing schools you could save
           <%= format_£(one_year_saving_versus_exemplar_£_local) %> per year.
         <% end %>
+      </p>
+    }
+    ERB.new(text).result(binding)
+  end
+
+  def baseload_percent_of_annual
+    text = %{
+      <p>
+        Your baseload represents <%= FormatEnergyUnit.format(:percent, annual_baseload_percent, :html) %> of your annual consumption.
       </p>
     }
     ERB.new(text).result(binding)

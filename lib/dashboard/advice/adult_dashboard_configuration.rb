@@ -154,6 +154,7 @@ class DashboardConfiguration
           average_baseload_last_year_kw:      :average_baseload_last_year_kw,
           exemplar_per_pupil_kw:              :exemplar_per_pupil_kw,
           benchmark_per_pupil_kw:             :benchmark_per_pupil_kw,
+          annual_baseload_percent:            :annual_baseload_percent,
           summary:                            :summary
         }
       },

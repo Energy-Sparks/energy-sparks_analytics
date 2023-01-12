@@ -1,5 +1,7 @@
 class AlertBaseloadBase < AlertElectricityOnlyBase
   attr_reader :blended_baseload_rate_£_per_kwh, :blended_baseload_rate_£current_per_kwh, :has_changed_during_period_text
+  attr_reader :annual_baseload_percent
+
   def initialize(school, report_type, meter = school.aggregated_electricity_meters)
     super(school, report_type)
     @report_type = report_type
@@ -25,6 +27,11 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
       units:  :£_per_kwh,
       benchmark_code: '€prk'
     },
+    annual_baseload_percent: {
+      description: 'baseload as a percent of annual consumption',
+      units:  :percent,
+      benchmark_code: 'abkp'
+    },
     has_changed_during_period_text: {
       description: 'the tariff has changed during the last year text, blank if not',
       units:  String
@@ -39,6 +46,7 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
   def calculate(asof_date)
     @blended_baseload_rate_£_per_kwh        = baseload_analysis.blended_baseload_tariff_rate_£_per_kwh(:£, asof_date)
     @blended_baseload_rate_£current_per_kwh = baseload_analysis.blended_baseload_tariff_rate_£_per_kwh(:£current, asof_date)
+    @annual_baseload_percent = calculate_annual_baseload_percent(asof_date)
 
     start_date, end_date, _scale_to_year = baseload_analysis.scaled_annual_dates(asof_date)
     changed = aggregate_meter.meter_tariffs.meter_tariffs_differ_within_date_range?(start_date, end_date)
@@ -83,6 +91,10 @@ class AlertBaseloadBase < AlertElectricityOnlyBase
 
   def annual_average_baseload_kwh(asof_date)
     baseload_analysis.annual_average_baseload_kwh(asof_date)
+  end
+
+  def calculate_annual_baseload_percent(asof_date)
+    @calculate_annual_baseload_percent ||= baseload_analysis.baseload_percent_annual_consumption(asof_date)
   end
 
   def annual_average_baseload_co2(asof_date)

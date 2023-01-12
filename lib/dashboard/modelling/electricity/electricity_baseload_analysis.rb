@@ -22,7 +22,17 @@ class ElectricityBaseloadAnalysis
   end
 
   def annual_average_baseload_kwh(asof_date)
-    365.0 * 24.0 * average_annual_baseload_kw(asof_date)
+    @annual_average_baseload_kwh ||= {}
+    @annual_average_baseload_kwh[asof_date] ||= 365.0 * 24.0 * average_annual_baseload_kw(asof_date)
+  end
+
+  def baseload_percent_annual_consumption(asof_date)
+    baseload_kwh = annual_average_baseload_kwh(asof_date)
+
+    start_date, end_date, scale_to_year = scaled_annual_dates(asof_date)
+    kwh = @meter.amr_data.kwh_date_range(start_date, end_date, :kwh) * scale_to_year
+
+    baseload_kwh / kwh
   end
 
   def scaled_annual_baseload_cost_£(datatype, asof_date = amr_data.end_date)
