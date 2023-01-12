@@ -753,7 +753,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def actual_fuel_usage(fuel, benchmark_type)
-    return 0.0 unless @chart_data[:x_data].key?(fuel_to_s(fuel)) && @chart_data[:x_data][fuel.to_s].sum > 0.0
+    return 0.0 unless @chart_data[:x_data].key?(fuel_to_s(fuel)) && @chart_data[:x_data][fuel_to_s(fuel)].sum > 0.0
 
     benchmark_data(fuel, benchmark_type, :£)
   end
