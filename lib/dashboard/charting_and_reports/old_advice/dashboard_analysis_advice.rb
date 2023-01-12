@@ -43,7 +43,7 @@ class DashboardChartAdviceBase
 =begin
     end
 =end
-  
+
   end
 
   def self.advice_factory_group(chart_type, school, chart_definition, charts)
@@ -753,7 +753,7 @@ class BenchmarkComparisonAdvice < DashboardChartAdviceBase
   end
 
   def actual_fuel_usage(fuel, benchmark_type)
-    return 0.0 unless @chart_data[:x_data].key?(fuel_to_s(fuel))
+    return 0.0 unless @chart_data[:x_data].key?(fuel_to_s(fuel)) && @chart_data[:x_data][fuel.to_s].sum > 0.0
 
     benchmark_data(fuel, benchmark_type, :£)
   end
@@ -1257,7 +1257,7 @@ class GasHeatingIntradayAdvice < DashboardChartAdviceBase
         <p>
         Does your school&apos;s boiler in the graph above do this?
         If it doesn't you might need to speak to your building manager
-        or caretaker and ask why? 
+        or caretaker and ask why?
         </p>
       <%= @body_end %>
     }.gsub(/^  /, '')
@@ -1511,7 +1511,7 @@ deprecated PH 22 Jul 2022
 
     logger.debug @school.name
     header_template = %{
-      <% if @add_extra_markup %>        
+      <% if @add_extra_markup %>
           <head><h2>Cusum analysis</h2>
           <body>
       <% end %>
@@ -1568,7 +1568,7 @@ class DayOfWeekAdvice < DashboardChartAdviceBase
     £current = kwh * @school.aggregated_heat_meters.amr_data.current_tariff_rate_£_per_kwh
     kwh_html      = FormatEnergyUnit.format(:kwh,      kwh,      :html)
     £current_html = FormatEnergyUnit.format(:£current, £current, :html)
-    
+
     "#{£current_html} (#{kwh_html})"
   end
 
@@ -2266,7 +2266,7 @@ class HotWaterAdvice < DashboardChartAdviceBase
           <%= advice.introductory_hot_water_text_3_circulatory_inefficiency %>
           <%= advice.introductory_hot_water_text_4_analysis_intro %>
           <%= advice.estimate_of_boiler_efficiency_header %>
-          <%= advice.estimate_of_boiler_efficiency_text_1_chart_explanation %> 
+          <%= advice.estimate_of_boiler_efficiency_text_1_chart_explanation %>
         <% end %>
       <%= @body_end %>
     }.gsub(/^  /, '')
