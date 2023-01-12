@@ -7,6 +7,7 @@ module UsageBreakdown
 
     def out_of_hours_usage_comparison(compare: :benchmark_school)
       # CombinedUsageMetric.new() <- return values for benchmark school 
+    end
 
     def estimated_savings(compare: :benchmark_school)
       # do_comparisons_here
@@ -14,6 +15,7 @@ module UsageBreakdown
       # when exemplar_school 
       # when benchmark_school
       #   CombinedUsageMetric.new() <- return values for benchmark school 
+    end
 
     def calculate
       # extract benchmarking methods from AlertOutOfHoursBaseUsage calculate method here

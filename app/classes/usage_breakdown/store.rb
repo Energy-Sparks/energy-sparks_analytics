@@ -8,8 +8,6 @@ module UsageBreakdown
     # }
     def initialize; end
 
-
-
     def holiday;end
     def school_day_closed;end
     def school_day_open;end
