@@ -35,7 +35,8 @@ class ElectricityBaseloadAnalysis
   end
 
   def one_years_data?(asof_date = amr_data.end_date)
-    amr_data.days > 364
+    start_date = @meter.amr_data.start_date
+    return (asof_date - 364) >= start_date
   end
 
   def scaled_annual_dates(asof_date)
