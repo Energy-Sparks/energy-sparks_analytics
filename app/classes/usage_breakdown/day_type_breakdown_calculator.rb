@@ -1,6 +1,6 @@
 module UsageBreakdown
   class DayTypeBreakdownCalculator
-    def initalize(meter collection:, fuel_type:)
+    def initalize(meter_collection:, fuel_type:)
       @meter_collection = meter_collection
       @fuel_type = fuel_type
     end
