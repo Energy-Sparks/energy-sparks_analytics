@@ -17,7 +17,7 @@ class ElectricityBaseloadAnalysis
   end
 
   def average_baseload_last_week_kw(date)
-    return average_baseload_kw(one_week_ago(date), date)
+    average_baseload_kw(one_week_ago(date), date)
   end
 
   def average_annual_baseload_kw(asof_date)
