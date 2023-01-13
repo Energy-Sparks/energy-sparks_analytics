@@ -56,6 +56,8 @@ class AlertAnalysisBase < ContentBase
       log_stack_trace(e)
       @calculation_worked = false
     rescue StandardError => e
+#      puts e
+#      puts e.backtrace
       log_stack_trace(e)
       @calculation_worked = false
     end
