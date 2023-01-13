@@ -4,10 +4,6 @@ module UsageBreakdown
   class CalculationService
     def initialize; end
 
-    def usage_breakdown_to_table
-      # tabulation and summary of UsageBreakdown.new() goes here
-    end
-
     def calculate
       # code extracted from AlertOutOfHoursBaseUsage calculate method to go here
     end
@@ -21,6 +17,7 @@ module UsageBreakdown
     def calculate_co2; end
 
     def chart_data_for(chart_identifier)
+
       # load
       # wrapper class around chart data
       #   kwh:      :alert_daytype_breakdown_electricity_kwh,
@@ -28,6 +25,5 @@ module UsageBreakdown
       #   £:        :alert_daytype_breakdown_electricity_£,
       #   £current: :alert_daytype_breakdown_electricity_£current,
     end
-    
   end
 end

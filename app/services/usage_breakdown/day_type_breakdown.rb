@@ -18,8 +18,8 @@ module UsageBreakdown
 
     def weekend; end
 
-    def percentage_out_of_hours;
-
+    def percentage_out_of_hours
+      # holiday.percent + school_day_closed.percent + weekend.percent
     end
   end
 end
