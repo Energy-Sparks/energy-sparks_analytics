@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module UsageBreakdown
   class Store
     # {
@@ -8,10 +10,14 @@ module UsageBreakdown
     # }
     def initialize; end
 
-    def holiday;end
-    def school_day_closed;end
-    def school_day_open;end
-    def weekend;end
-    def percentage_out_of_hours;end
+    def holiday; end
+
+    def school_day_closed; end
+
+    def school_day_open; end
+
+    def weekend; end
+
+    def percentage_out_of_hours; end
   end
 end

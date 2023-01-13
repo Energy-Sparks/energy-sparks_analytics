@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module UsageBreakdown
   class CalculationService
     def initialize; end
