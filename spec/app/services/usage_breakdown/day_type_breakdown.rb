@@ -10,8 +10,12 @@ describe UsageBreakdown::DayTypeBreakdown, type: :service do
 
   context '#out_of_hours_percent' do
     it 'calculates the total percentage of out of hours usage' do
-      day_type_breakdown = UsageBreakdown::DayTypeBreakdown.new(school: school)
-      expect(day_type_breakdown.out_of_hours_percent).to eq(0.6318608849894792)
+      day_type_breakdown = UsageBreakdown::DayTypeBreakdown.new(school: school, fuel_type: :electricity)
+      expect(day_type_breakdown.out_of_hours_percent.round(6)).to eq((1 - day_type_breakdown.school_day_open.percent).round(6))
+      expect(day_type_breakdown.average_out_of_hours_percent).to eq(BenchmarkMetrics::AVERAGE_OUT_OF_HOURS_PERCENT)
+      expect(day_type_breakdown.total_annual_pounds_sterling).to eq(71060.41900000001)
+      expect(day_type_breakdown.total_annual_kwh).to eq(467398.3999999999)
+      expect(day_type_breakdown.total_annual_co2).to eq(88492.6392)
     end
   end
 

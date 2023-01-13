@@ -2,16 +2,20 @@
 
 module UsageBreakdown
   class DayTypeBreakdown
-    attr_accessor :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours
+    attr_reader :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours
 
     def initialize(school:, fuel_type: :electricity)
       @school = school
       @fuel_type = fuel_type
-      prepare
+      build_day_type_breakdowns
     end
 
     def out_of_hours_percent
       holidays.percent + school_day_closed.percent + weekends.percent
+    end
+
+    def average_out_of_hours_percent
+      BenchmarkMetrics::AVERAGE_OUT_OF_HOURS_PERCENT
     end
 
     def total_annual_pounds_sterling
@@ -28,14 +32,15 @@ module UsageBreakdown
 
     private
 
-    def prepare
-      build_stores
+    def build_day_type_breakdowns
+      build_stores!
+
       calculate_kwh!
       calculate_pounds_sterling!
       calculate_co2!
     end
 
-    def build_stores
+    def build_stores!
       @holidays = UsageBreakdown::Store.new
       @school_day_closed = UsageBreakdown::Store.new
       @school_day_open = UsageBreakdown::Store.new
@@ -64,7 +69,7 @@ module UsageBreakdown
 
     # Extracted from AlertOutOfHoursBaseUsage#calculate_£
     def calculate_pounds_sterling!
-      daytype_breakdown_pounds_sterling = extract_data_from_chart_data(:£)  
+      daytype_breakdown_pounds_sterling = extract_data_from_chart_data(:pounds_sterling)  
 
       holidays.pounds_sterling         = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::HOLIDAY].first
       weekends.pounds_sterling         = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::WEEKEND].first
@@ -90,30 +95,7 @@ module UsageBreakdown
 
     # Extracted from AlertOutOfHoursBaseUsage::out_of_hours_energy_consumption
     def extract_data_from_chart_data(data_type)
-      chart = ChartManager.new(@school)
-      chart.run_standard_chart(breakdown_charts[@fuel_type][data_type], nil, true)
-    end
-
-    def breakdown_charts
-      # extracted from 
-      # AlertOutOfHoursElectricityUsage::breakdown_charts
-      # AlertOutOfHoursGasUsage::breakdown_charts
-      {
-        electricity:
-          {
-            kwh:      :alert_daytype_breakdown_electricity_kwh,
-            co2:      :alert_daytype_breakdown_electricity_co2,
-            £:        :alert_daytype_breakdown_electricity_£,
-            £current: :alert_daytype_breakdown_electricity_£current,
-          },
-        gas:
-          {
-            kwh:      :alert_daytype_breakdown_gas_kwh,
-            co2:      :alert_daytype_breakdown_gas_co2,
-            £:        :alert_daytype_breakdown_gas_£,
-            £current: :alert_daytype_breakdown_gas_£current
-          }
-      }
+      UsageBreakdown::ChartDataService.extract_data_from_chart_data(@school, @fuel_type, data_type)
     end
   end
 end
