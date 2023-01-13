@@ -6,6 +6,10 @@ class AlertLongTermTrend < AlertAnalysisBase
   attr_reader :this_year_co2, :last_year_co2, :year_change_co2, :percent_change_co2
   attr_reader :last_year_co2_temp_adj, :year_change_co2_temp_adj, :percent_change_co2_temp_adj
   attr_reader :degreeday_adjustment, :degreedays_this_year, :degreedays_last_year
+  
+  attr_reader :this_year_kwh, :last_year_kwh, :last_year_kwh_temp_adj
+  attr_reader :year_change_kwh, :year_change_kwh_temp_adj
+  attr_reader :percent_change_kwh, :percent_change_kwh_temp_adj
 
   def initialize(school, type = :electricitylongtermtrend)
     super(school, type)
@@ -51,6 +55,34 @@ class AlertLongTermTrend < AlertAnalysisBase
         units:  :relative_percent
       },
       percent_change_£_temp_adj: {
+        description: "Change between this year\'s and last year\'s #{fuel_type} consumption % - temperature adjusted (gas, SH)",
+        units:  :relative_percent
+      },
+      this_year_kwh: {
+        description: "This years #{fuel_type} consumption kwh",
+        units:  :kwh
+      },
+      last_year_kwh: {
+        description: "Last years #{fuel_type} consumption kwh",
+        units:  :kwh
+      },
+      last_year_kwh_temp_adj: {
+        description: "Last years #{fuel_type} consumption kwh - temperature adjusted (gas, SH)",
+        units:  :kwh
+      },
+      year_change_kwh: {
+        description: "Change between this year\'s and last year\'s #{fuel_type} consumption kwh",
+        units:  :kwh
+      },
+      year_change_kwh_temp_adj: {
+        description: "Change between this year\'s and last year\'s #{fuel_type} consumption kwh",
+        units:  :kwh
+      },
+      percent_change_kwh: {
+        description: "Change between this year\'s and last year\'s #{fuel_type} consumption %  - temperature adjusted (gas, SH)",
+        units:  :relative_percent
+      },
+      percent_change_kwh_temp_adj: {
         description: "Change between this year\'s and last year\'s #{fuel_type} consumption % - temperature adjusted (gas, SH)",
         units:  :relative_percent
       },
@@ -128,6 +160,16 @@ class AlertLongTermTrend < AlertAnalysisBase
     @percent_change_£           = @year_change_£ / @last_year_£
     @percent_change_£_temp_adj  = @year_change_£_temp_adj / @last_year_£
 
+    @this_year_kwh          = scalar.aggregate_value({ year:  0 }, fuel_type, :kwh,   { asof_date: asof_date})
+    @last_year_kwh          = scalar.aggregate_value({ year: -1 }, fuel_type, :kwh,   { asof_date: asof_date})
+    @last_year_kwh_temp_adj = @last_year_kwh * temperature_compensation_factor
+
+    @year_change_kwh          = @this_year_kwh - @last_year_kwh
+    @year_change_kwh_temp_adj = @this_year_kwh - @last_year_kwh_temp_adj
+
+    @percent_change_kwh           = @year_change_kwh / @last_year_kwh
+    @percent_change_kwh_temp_adj  = @year_change_kwh_temp_adj / @last_year_kwh
+
     @this_year_co2          = scalar.aggregate_value({ year:  0 }, fuel_type, :co2, { asof_date: asof_date})
     @last_year_co2          = scalar.aggregate_value({ year: -1 }, fuel_type, :co2, { asof_date: asof_date})
     @last_year_co2_temp_adj = @last_year_co2 * temperature_compensation_factor
@@ -141,7 +183,7 @@ class AlertLongTermTrend < AlertAnalysisBase
     #BACKWARDS COMPATIBILITY: previously may have failed here if variable was not set
     raise_calculation_error_if_missing(year_change_£_temp_adj: year_change_£_temp_adj)
 
-    @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_£_temp_adj)
+    @rating = calculate_rating_from_range(-0.1, 0.15, percent_change_kwh_temp_adj)
 
     set_savings_capital_costs_payback(Range.new(year_change_£, year_change_£), nil, @year_change_co2)
   end
