@@ -13,4 +13,11 @@ describe UsageBreakdown::DayTypeBreakdown, type: :service do
       expect(day_type_breakdown.out_of_hours_percent).to eq(0)
     end
   end
+
+  context '#calculate_kwh' do
+    it 'summarises kwh for all day types' do
+      day_type_breakdown = UsageBreakdown::DayTypeBreakdown.new(school: school)
+      day_type_breakdown.calculate_kwh
+    end
+  end
 end
