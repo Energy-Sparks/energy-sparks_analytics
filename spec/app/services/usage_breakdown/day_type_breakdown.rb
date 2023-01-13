@@ -8,17 +8,6 @@ describe UsageBreakdown::DayTypeBreakdown, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context '#out_of_hours_percent' do
-    it 'calculates the total percentage of out of hours usage' do
-      day_type_breakdown = UsageBreakdown::DayTypeBreakdown.new(school: school, fuel_type: :electricity)
-      expect(day_type_breakdown.out_of_hours_percent.round(6)).to eq((1 - day_type_breakdown.school_day_open.percent).round(6))
-      expect(day_type_breakdown.average_out_of_hours_percent).to eq(BenchmarkMetrics::AVERAGE_OUT_OF_HOURS_PERCENT)
-      expect(day_type_breakdown.total_annual_pounds_sterling).to eq(71060.41900000001)
-      expect(day_type_breakdown.total_annual_kwh).to eq(467398.3999999999)
-      expect(day_type_breakdown.total_annual_co2).to eq(88492.6392)
-    end
-  end
-
   context '#initialize' do
     it 'builds day type breakdowns for a given school and fuel type' do
       day_type_breakdown = UsageBreakdown::DayTypeBreakdown.new(school: school, fuel_type: :electricity)
@@ -27,6 +16,11 @@ describe UsageBreakdown::DayTypeBreakdown, type: :service do
       expect(day_type_breakdown.school_day_open.as_json).to eq({"co2"=>33246.97816666668, "kwh"=>172067.6333333333, "percent"=>0.36813911501052066, "pounds_sterling"=>26756.202000000005})
       expect(day_type_breakdown.weekends.as_json).to eq({"co2"=>7023.472399999997, "kwh"=>42095.39999999999, "percent"=>0.09006320945899686, "pounds_sterling"=>6305.880000000001})
       expect(day_type_breakdown.out_of_hours.as_json).to eq({"co2"=>55245.66103333332, "kwh"=>295330.7666666666, "percent"=>0.6318608849894793, "pounds_sterling"=>44304.217000000004})
+      expect(day_type_breakdown.out_of_hours_percent.round(6)).to eq((1 - day_type_breakdown.school_day_open.percent).round(6))
+      expect(day_type_breakdown.average_out_of_hours_percent).to eq(BenchmarkMetrics::AVERAGE_OUT_OF_HOURS_PERCENT)
+      expect(day_type_breakdown.total_annual_pounds_sterling).to eq(71060.41900000001)
+      expect(day_type_breakdown.total_annual_kwh).to eq(467398.3999999999)
+      expect(day_type_breakdown.total_annual_co2).to eq(88492.6392)
     end
   end
 end
