@@ -8,7 +8,7 @@ module UsageBreakdown
 
       @school = school
       @fuel_type = fuel_type
-      @aggregated_meter_colection_for_fuel_type = find_aggregate_meter
+      @aggregated_meter_collection = find_aggregate_meter_for_fuel_type
     end
 
     def out_of_hours_usage_comparison(compare: :benchmark_school)
@@ -31,7 +31,7 @@ module UsageBreakdown
 
     # Duplicated from MeterCollection#aggregate_meter
     # TODO: move to a helper class
-    def find_aggregate_meter
+    def find_aggregate_meter_for_fuel_type
       case @fuel_type
       when :electricity
         @school.aggregated_electricity_meters

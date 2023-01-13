@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module UsageBreakdown
-  class Store
+  class DayTypeBreakdown
     # {
     #   :holiday => (kwh, £current, co2, %)
     #   :school_day_closed => (kwh, £current, co2, %)
@@ -18,6 +18,8 @@ module UsageBreakdown
 
     def weekend; end
 
-    def percentage_out_of_hours; end
+    def percentage_out_of_hours;
+
+    end
   end
 end
