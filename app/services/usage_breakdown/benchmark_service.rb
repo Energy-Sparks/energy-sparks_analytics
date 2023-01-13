@@ -2,7 +2,8 @@
 
 module UsageBreakdown
   class BenchmarkService
-    VALID_FUEL_TYPES = %i[electricity gas storage_heater storage_heaters solar_pv].freeze
+    # TODO: storage_heater storage_heaters solar_pv
+    VALID_FUEL_TYPES = %i[electricity gas].freeze
     def initialize(school:, fuel_type:)
       raise 'Invalid fuel type' unless VALID_FUEL_TYPES.include?(fuel_type)
 
@@ -37,10 +38,10 @@ module UsageBreakdown
         @school.aggregated_electricity_meters
       when :gas
         @school.aggregated_heat_meters
-      when :storage_heater, :storage_heaters
-        @school.storage_heater_meter
-      when :solar_pv
-        @school.aggregated_electricity_meters.sub_meters[:generation]
+      # when :storage_heater, :storage_heaters
+      #   @school.storage_heater_meter
+      # when :solar_pv
+      #   @school.aggregated_electricity_meters.sub_meters[:generation]
       end
     end
   end
