@@ -2,7 +2,7 @@
 
 module UsageBreakdown
   class DayTypeBreakdown
-    attr_accessor :holidays, :school_day_closed, :school_day_open, :weekends
+    attr_accessor :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours
 
     def initialize(school:, fuel_type: :electricity)
       @school = school
@@ -10,6 +10,7 @@ module UsageBreakdown
       @holidays = UsageBreakdown::Store.new
       @school_day_closed = UsageBreakdown::Store.new
       @school_day_open = UsageBreakdown::Store.new
+      @out_of_hours = UsageBreakdown::Store.new
       @weekends = UsageBreakdown::Store.new
     end
 
@@ -17,27 +18,27 @@ module UsageBreakdown
       holidays.percent + school_day_closed.percent + weekends.percent
     end
 
-    def calculate_kwh
+    def calculate_kwh!
       daytype_breakdown_kwh = energy_consumption_for(:kwh)
 
-      holidays.kwh             = daytype_breakdown_kwh[Series::DayType::HOLIDAY]
-      weekends.kwh             = daytype_breakdown_kwh[Series::DayType::WEEKEND]
-      school_day_open.kwh      = daytype_breakdown_kwh[Series::DayType::SCHOOLDAYOPEN]
-      # schoolday_closed.kwh    = daytype_breakdown_kwh[school_day_closed_key]
+      holidays.kwh             = daytype_breakdown_kwh[:x_data][Series::DayType::HOLIDAY].first || 0
+      weekends.kwh             = daytype_breakdown_kwh[:x_data][Series::DayType::WEEKEND].first || 0
+      school_day_open.kwh      = daytype_breakdown_kwh[:x_data][Series::DayType::SCHOOLDAYOPEN].first || 0
+      school_day_closed.kwh    = daytype_breakdown_kwh[:x_data][Series::DayType::SCHOOLDAYCLOSED].first || 0
       # @community_kwh        = daytype_breakdown_kwh[community_name] || 0.0
 
-      # # @total_annual_kwh total need to be consistent with £ total for implied tariff calculation
-      # @total_annual_kwh = @holidays_kwh + @weekends_kwh + @schoolday_open_kwh + @schoolday_closed_kwh + @community_kwh
-      # @out_of_hours_kwh = @total_annual_kwh - @schoolday_open_kwh
+      holidays.percent         = @holidays.kwh         / total_annual_kwh
+      weekends.percent         = @weekends.kwh         / total_annual_kwh
+      school_day_open.percent   = @school_day_open.kwh   / total_annual_kwh
+      school_day_closed.percent = @school_day_closed.kwh / total_annual_kwh
+      # # community_percent        = @community_kwh        / @total_annual_kwh
+    
+      out_of_hours.kwh = total_annual_kwh - school_day_open.kwh
+      out_of_hours.percent = holidays.percent + weekends.percent + school_day_closed.percent
+    end
 
-      # # will need adjustment for Centrica - TODO
-      # @out_of_hours_percent = @out_of_hours_kwh / @total_annual_kwh
-
-      # @holidays_percent         = @holidays_kwh         / @total_annual_kwh
-      # @weekends_percent         = @weekends_kwh         / @total_annual_kwh
-      # @schoolday_open_percent   = @schoolday_open_kwh   / @total_annual_kwh
-      # @schoolday_closed_percent = @schoolday_closed_kwh / @total_annual_kwh
-      # @community_percent        = @community_kwh        / @total_annual_kwh
+    def total_annual_kwh
+      holidays.kwh + weekends.kwh + school_day_open.kwh + school_day_closed.kwh # + community.kwh
     end
 
     private
