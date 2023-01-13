@@ -16,6 +16,10 @@ class ElectricityBaseloadAnalysis
     amr_data.average_baseload_kw_date_range(date1, date2, sheffield_solar_pv: @meter.sheffield_simulated_solar_pv_panels?)
   end
 
+  def average_baseload_last_week_kw(date)
+    return average_baseload_kw(one_week_ago(date), date)
+  end
+
   def average_annual_baseload_kw(asof_date)
     start_date, end_date, _scale_to_year = scaled_annual_dates(asof_date)
     average_baseload_kw(start_date, end_date)
@@ -55,6 +59,12 @@ class ElectricityBaseloadAnalysis
     scale_to_year = 365 / (end_date - start_date + 1)
 
     [start_date, end_date, scale_to_year.to_f]
+  end
+
+  #We use 6 rather than 7 days ago because of potential issue with schools
+  #with large intraweek variation in consumption
+  def one_week_ago(date)
+    date - 6
   end
 
   def baseload_economic_cost_date_range_£(d1, d2, datatype)
