@@ -1,0 +1,41 @@
+module Heating
+
+  # Base class for heating services that need to create a heating model
+  class BaseService
+
+    def initialize(meter_collection)
+      @meter_collection = meter_collection
+    end
+
+    #Confirms that we are able to successfully generate a heating model from this school's
+    #data.
+    def enough_data?
+      enough_data_for_model_fit? && heating_model.includes_school_day_heating_models?
+    end
+
+    def validate_meter_collection(meter_collection)
+      raise EnergySparksUnexpectedStateException, "School does not have gas meters" if meter_collection.aggregated_heat_meters.nil?
+      raise EnergySparksUnexpectedStateException, "School does not use gas for heating" if meter_collection.aggregated_heat_meters.non_heating_only?
+    end
+
+    def aggregate_meter
+      @meter_collection.aggregated_heat_meters
+    end
+
+    def enough_data_for_model_fit?
+      heating_model.enough_samples_for_good_fit
+    #TODO NoMethodError?
+    rescue EnergySparksNotEnoughDataException, NoMethodError => e
+      false
+    end
+
+    def heating_model
+      @heating_model ||= create_and_fit_model
+    end
+
+    def create_and_fit_model
+      HeatingModelFactory.new(aggregate_meter, @asof_date).create_model
+    end
+
+  end
+end
