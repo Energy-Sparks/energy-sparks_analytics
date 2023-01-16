@@ -13,6 +13,8 @@ describe Heating::HeatingStartTimeService, type: :service do
 
   context '#average_start_time_last_week' do
     it 'returns the expected data' do
+      puts Time.zone.inspect
+      puts Time.zone.now.inspect
       expect(service.average_start_time_last_week).to eq TimeOfDay.new(6,0)
     end
   end
