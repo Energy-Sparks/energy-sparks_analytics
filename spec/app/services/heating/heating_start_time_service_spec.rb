@@ -13,8 +13,7 @@ describe Heating::HeatingStartTimeService, type: :service do
 
   context '#average_start_time_last_week' do
     it 'returns the expected data' do
-      puts Time.zone.inspect
-      puts Time.zone.now.inspect
+      #FIXME: running locally, this is 6am, 5am on github
       expect(service.average_start_time_last_week).to eq TimeOfDay.new(6,0)
     end
   end
@@ -23,6 +22,7 @@ describe Heating::HeatingStartTimeService, type: :service do
     it 'returns the expected data' do
       start_times = service.last_week_start_times
 
+      #FIXME: running locally, this is 6am, 5am on github
       expect(start_times.average_start_time).to eq TimeOfDay.new(6,0)
       #returns the asof_date plus 7 days before
       expect(start_times.days.length).to eq 8

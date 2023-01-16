@@ -18,7 +18,7 @@ describe Heating::BaseService, type: :service do
         allow(model).to receive(:includes_school_day_heating_models?).and_return(true)
       end
       it 'returns true with enough samples' do
-        expect(Heating::BaseService.new(meter_collection).enough_data?).to be true
+        expect(Heating::BaseService.new(meter_collection, Date.today).enough_data?).to be true
       end
     end
   end
@@ -31,7 +31,7 @@ describe Heating::BaseService, type: :service do
         meter_collection.add_aggregate_heat_meter(meter)
       end
       it 'accepts the school' do
-        Heating::BaseService.new(meter_collection).validate_meter_collection(meter_collection)
+        Heating::BaseService.new(meter_collection, Date.today).validate_meter_collection(meter_collection)
       end
     end
 
@@ -39,7 +39,7 @@ describe Heating::BaseService, type: :service do
       let(:meter_collection) { build(:meter_collection) }
       it 'rejects the school' do
         expect {
-          Heating::BaseService.new(meter_collection).validate_meter_collection(meter_collection)
+          Heating::BaseService.new(meter_collection, Date.today).validate_meter_collection(meter_collection)
         }.to raise_error EnergySparksUnexpectedStateException
       end
     end

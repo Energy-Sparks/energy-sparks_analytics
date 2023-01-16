@@ -10,10 +10,8 @@ module Heating
     #
     # @raise [EnergySparksUnexpectedStateException] if the schools doesnt have gas meters
     # @raise [EnergySparksUnexpectedStateException] if the school does not use gas for heating
-    def initialize(meter_collection, asof_date=Time.zone.today)
-      validate_meter_collection(meter_collection)
-      @meter_collection = meter_collection
-      @asof_date = asof_date
+    def initialize(meter_collection, asof_date=Date.today)
+      super(meter_collection, asof_date)
     end
 
     #Find the average start time over the last week

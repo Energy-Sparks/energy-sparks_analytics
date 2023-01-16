@@ -3,8 +3,10 @@ module Heating
   # Base class for heating services that need to create a heating model
   class BaseService
 
-    def initialize(meter_collection)
+    def initialize(meter_collection, asof_date)
+      validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
+      @asof_date = asof_date
     end
 
     #Confirms that we are able to successfully generate a heating model from this school's
