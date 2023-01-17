@@ -19,7 +19,7 @@ module UsageBreakdown
       school_day_type_breakdown.total_annual_kwh * percent_improvement_to_exemplar
     end
 
-    def estimated_savings          #(compare: :benchmark_school)
+    def potential_saving_pound_sterling          #(compare: :benchmark_school)
       # AlertOutOfHoursBaseUsage#calculate
       # @potential_saving_£   = @potential_saving_kwh * @fuel_cost_current
       school_day_type_breakdown.total_annual_pounds_sterling * percent_improvement_to_exemplar
