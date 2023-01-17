@@ -6,6 +6,7 @@ describe UsageBreakdown::DayTypeBreakdown, type: :service do
 
   before(:all) do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
+    Object.const_set('Rails', true) # Otherwise fails at line 118 (RecordTestTimes) in ChartManager
   end
 
   context '#initialize' do
