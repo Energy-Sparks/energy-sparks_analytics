@@ -2,7 +2,7 @@
 
 module UsageBreakdown
   class DayTypeBreakdown
-    attr_reader :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours
+    attr_reader :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours, :community
 
     def initialize(school:, fuel_type: :electricity)
       @school = school
@@ -11,7 +11,7 @@ module UsageBreakdown
     end
 
     def out_of_hours_percent
-      holidays.percent + school_day_closed.percent + weekends.percent
+      holidays.percent + school_day_closed.percent + weekends.percent + community.percent
     end
 
     def average_out_of_hours_percent
@@ -64,7 +64,7 @@ module UsageBreakdown
       weekends.kwh              = daytype_breakdown_kwh[:x_data][Series::DayType::WEEKEND].first || 0
       school_day_open.kwh       = daytype_breakdown_kwh[:x_data][Series::DayType::SCHOOLDAYOPEN].first || 0
       school_day_closed.kwh     = daytype_breakdown_kwh[:x_data][Series::DayType::SCHOOLDAYCLOSED].first || 0
-      community.kwh             = daytype_breakdown_kwh[community_key] || 0.0
+      community.kwh             = daytype_breakdown_kwh[:x_data][community_key]&.first || 0.0
 
       holidays.percent          = @holidays.kwh          / total_annual_kwh
       weekends.percent          = @weekends.kwh          / total_annual_kwh
@@ -84,7 +84,7 @@ module UsageBreakdown
       weekends.pounds_sterling          = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::WEEKEND].first || 0.0
       school_day_open.pounds_sterling   = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::SCHOOLDAYOPEN].first || 0.0
       school_day_closed.pounds_sterling = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::SCHOOLDAYCLOSED].first || 0.0
-      community.pounds_sterling         = daytype_breakdown_pounds_sterling[:x_data][community_key].first || 0.0
+      community.pounds_sterling         = daytype_breakdown_pounds_sterling[:x_data][community_key]&.first || 0.0
 
       # @total_annual_£ total need to be consistent with kwh total for implied tariff calculation
       out_of_hours.pounds_sterling = total_annual_pounds_sterling - school_day_open.pounds_sterling
@@ -97,7 +97,7 @@ module UsageBreakdown
       weekends.co2          = daytype_breakdown_co2[:x_data][Series::DayType::WEEKEND].first || 0.0
       school_day_open.co2   = daytype_breakdown_co2[:x_data][Series::DayType::SCHOOLDAYOPEN].first || 0.0
       school_day_closed.co2 = daytype_breakdown_co2[:x_data][Series::DayType::SCHOOLDAYCLOSED].first || 0.0
-      community.co2         = daytype_breakdown_co2[:x_data][community_key].first || 0.0  
+      community.co2         = daytype_breakdown_co2[:x_data][community_key]&.first || 0.0  
 
       out_of_hours.co2 = total_annual_co2 - school_day_open.co2
     end
