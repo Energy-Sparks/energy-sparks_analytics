@@ -17,7 +17,7 @@ overrides = {
     calculate_and_save_variables: false,
     asof_date: run_date,
     pages: %i[
-      differential_tariff_opportunity
+      baseload_per_pupil
     ],
     run_content: { asof_date: run_date } # , filter: ->{ !gpyc_difp.nil? && !gpyc_difp.infinite?.nil? } }
   }

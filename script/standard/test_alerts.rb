@@ -10,7 +10,6 @@ end
 asof_date = Date.new(2022, 2, 1)
 schools = ['a*']
 
-
 overrides = {
   schools:  schools,
   cache_school: false,
@@ -27,9 +26,9 @@ overrides = {
     # AlertGasAnnualVersusBenchmark
     # AlertEnergyAnnualVersusBenchmark
     # AlertElectricityPeakKWVersusBenchmark,
-    AlertElectricityBaseloadVersusBenchmark,
-    AlertSeasonalBaseloadVariation,
-    AlertIntraweekBaseloadVariation
+#    AlertElectricityBaseloadVersusBenchmark,
+#    AlertSeasonalBaseloadVariation,
+#    AlertIntraweekBaseloadVariation,
     #AlertGasAnnualVersusBenchmark
     AlertChangeInElectricityBaseloadShortTerm
     ],
