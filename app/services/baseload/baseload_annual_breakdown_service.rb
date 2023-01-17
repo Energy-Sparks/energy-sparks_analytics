@@ -33,12 +33,12 @@ module Baseload
       date.between?(amr_data_start_date, amr_data_end_date)
     end
 
-    def start_and_end_dates_for(year)
-      [Date.parse("01-01-#{year}"), Date.parse("31-12-#{year}")]
+    def asof_date_for(year)
+      Date.parse("31-12-#{year - 1}")
     end
 
     def average_baseload_kw_for(year)
-      ElectricityBaseloadAnalysis.new(aggregated_electricity_meters).average_baseload_kw(*start_and_end_dates_for(year))
+      ElectricityBaseloadAnalysis.new(aggregated_electricity_meters).average_annual_baseload_kw(asof_date_for(year))
     rescue StandardError
       nil
     end
