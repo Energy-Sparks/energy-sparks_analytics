@@ -31,7 +31,12 @@ TBD
 
 ## Running the tests
 
-TBD
+We use RSpec, which is a testing tool for Ruby.  You can read more about RSpec here https://rspec.info/ 
+You can run all tests by running rspec at the command line:
+`bundle exec rspec`
+
+The analytics also has it's own custom test harness
+
 
 ### Break down into end to end tests
 
