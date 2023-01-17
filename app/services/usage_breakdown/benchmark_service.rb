@@ -2,47 +2,51 @@
 
 module UsageBreakdown
   class BenchmarkService
-    # TODO: storage_heater storage_heaters solar_pv
+    # Day type breakdowns are unavailable for storage_heater, storage_heaters, & solar_pv
     VALID_FUEL_TYPES = %i[electricity gas].freeze
     def initialize(school:, fuel_type:)
       raise 'Invalid fuel type' unless VALID_FUEL_TYPES.include?(fuel_type)
 
       @school = school
       @fuel_type = fuel_type
-      @aggregated_meter_collection = find_aggregate_meter_for_fuel_type
     end
 
-    def out_of_hours_usage_comparison(compare: :benchmark_school)
-      # CombinedUsageMetric.new() <- return values for benchmark school
+    def school_day_type_breakdown
+      @day_type_breakdown ||= UsageBreakdown::DayTypeBreakdown.new(school: @school, fuel_type: @fuel_type)
     end
 
-    def estimated_savings(compare: :benchmark_school)
-      # do_comparisons_here
-      # case compare
-      # when exemplar_school
-      # when benchmark_school
-      #   CombinedUsageMetric.new() <- return values for benchmark school
+    def potential_saving_kwh       #(compare: :benchmark_school)
+      school_day_type_breakdown.total_annual_kwh * percent_improvement_to_exemplar
     end
 
-    def calculate
-      # extract benchmarking methods from AlertOutOfHoursBaseUsage calculate method here
+    def estimated_savings          #(compare: :benchmark_school)
+      # AlertOutOfHoursBaseUsage#calculate
+      # @potential_saving_£   = @potential_saving_kwh * @fuel_cost_current
+      school_day_type_breakdown.total_annual_pounds_sterling * percent_improvement_to_exemplar
     end
 
-    private
+    def percent_improvement_to_exemplar
+      # AlertOutOfHoursBaseUsage#calculate
+      # @percent_improvement_to_exemplar = [out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
+      [school_day_type_breakdown.out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
+    end
 
-    # Duplicated from MeterCollection#aggregate_meter
-    # TODO: move to a helper class
-    def find_aggregate_meter_for_fuel_type
-      case @fuel_type
-      when :electricity
-        @school.aggregated_electricity_meters
-      when :gas
-        @school.aggregated_heat_meters
-      # when :storage_heater, :storage_heaters
-      #   @school.storage_heater_meter
-      # when :solar_pv
-      #   @school.aggregated_electricity_meters.sub_meters[:generation]
-      end
+    def good_out_of_hours_use_percent
+      # AlertOutOfHoursElectricityUsage#good_out_of_hours_use_percent = 0.35
+      # AlertOutOfHoursGasUsage#good_out_of_hours_use_percent = 0.3
+      @good_out_of_hours_use_percent ||= case @fuel_type
+                                         when :electricity then 0.35 # TODO: Save these as constants
+                                         when :gas then 0.3
+                                         end
+    end
+    
+    def bad_out_of_hours_use_percent
+      # AlertOutOfHoursElectricityUsage#bad_out_of_hours_use_percent = 0.65
+      # AlertOutOfHoursGasUsage#bad_out_of_hours_use_percent = 0.7
+      @bad_out_of_hours_use_percent ||= case @fuel_type
+                                         when :electricity then 0.65 # TODO: Save these as constants
+                                         when :gas then 0.7
+                                         end
     end
   end
 end

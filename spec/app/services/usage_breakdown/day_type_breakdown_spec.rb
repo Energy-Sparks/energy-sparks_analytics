@@ -6,7 +6,7 @@ describe UsageBreakdown::DayTypeBreakdown, type: :service do
 
   before(:all) do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
-    Object.const_set('Rails', true) # Otherwise fails at line 118 (RecordTestTimes) in ChartManager
+    Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
   end
 
   context '#initialize' do
@@ -38,13 +38,13 @@ describe UsageBreakdown::DayTypeBreakdown, type: :service do
       expect(day_type_breakdown.weekends.percent).to round_to_two_digits(0.09) # 0.09006320945899686
       expect(day_type_breakdown.weekends.pounds_sterling).to round_to_two_digits(6305.88) # 6305.880000000001
 
-      expect(day_type_breakdown.community.kwh).to round_to_two_digits(0) # 
-      expect(day_type_breakdown.community.co2).to round_to_two_digits(0) # 
-      expect(day_type_breakdown.community.percent).to round_to_two_digits(0) # 
-      expect(day_type_breakdown.community.pounds_sterling).to round_to_two_digits(0) # 
+      expect(day_type_breakdown.community.kwh).to round_to_two_digits(0) # 0
+      expect(day_type_breakdown.community.co2).to round_to_two_digits(0) # 0
+      expect(day_type_breakdown.community.percent).to round_to_two_digits(0) # 0
+      expect(day_type_breakdown.community.pounds_sterling).to round_to_two_digits(0) # 0
 
       expect(day_type_breakdown.out_of_hours_percent).to round_to_two_digits(0.63) # 0.6318608849894793
-      expect(day_type_breakdown.average_out_of_hours_percent).to round_to_two_digits(BenchmarkMetrics::AVERAGE_OUT_OF_HOURS_PERCENT) # 
+      expect(day_type_breakdown.average_out_of_hours_percent).to round_to_two_digits(BenchmarkMetrics::AVERAGE_OUT_OF_HOURS_PERCENT) # 0.5
       expect(day_type_breakdown.total_annual_pounds_sterling).to round_to_two_digits(71060.42) # 71060.41900000001
       expect(day_type_breakdown.total_annual_kwh).to round_to_two_digits(467398.40) # 467398.3999999999
       expect(day_type_breakdown.total_annual_co2).to round_to_two_digits(88492.64) # 88492.6392
