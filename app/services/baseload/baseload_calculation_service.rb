@@ -35,7 +35,7 @@ module Baseload
       when :year
         baseload_analysis.average_annual_baseload_kw(@asof_date)
       when :week
-        baseload_analysis.average_baseload_kw(@asof_date - 7, @asof_date)
+        baseload_analysis.average_baseload_last_week_kw(@asof_date)
       else
         raise "Invalid period"
       end
