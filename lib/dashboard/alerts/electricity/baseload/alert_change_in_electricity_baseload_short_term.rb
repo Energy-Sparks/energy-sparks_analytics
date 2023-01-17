@@ -18,7 +18,7 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
   attr_reader :last_year_baseload_co2, :last_week_baseload_co2, :next_year_change_in_baseload_co2, :next_year_change_in_baseload_absolute_co2
   attr_reader :cost_saving_through_1_kw_reduction_in_baseload_£
   attr_reader :next_year_change_in_baseload_£current
-  attr_reader :up_until_date, :from_date 
+  attr_reader :up_until_date, :from_date
 
   def initialize(school, report_type = :baseloadchangeshortterm, meter = school.aggregated_electricity_meters)
     super(school, report_type, meter)
@@ -178,11 +178,13 @@ class AlertChangeInElectricityBaseloadShortTerm < AlertBaseloadBase
   def calculate(asof_date)
     super(asof_date)
     @up_until_date = asof_date
-    @from_date = asof_date - 6
 
     @average_baseload_last_year_kw = average_baseload_kw(asof_date)
     @kw_value_at_10_percent_saving = @average_baseload_last_year_kw * 0.9
-    @average_baseload_last_week_kw = average_baseload(@from_date, asof_date)
+
+    @from_date = baseload_analysis.one_week_ago(asof_date)
+    @average_baseload_last_week_kw = baseload_analysis.average_baseload_last_week_kw(asof_date)
+
     @change_in_baseload_kw = @average_baseload_last_week_kw - @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage = (@average_baseload_last_week_kw - @average_baseload_last_year_kw) / @average_baseload_last_year_kw
     @predicted_percent_increase_in_usage_absolute = @predicted_percent_increase_in_usage.magnitude
