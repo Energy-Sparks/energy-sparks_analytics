@@ -32,11 +32,12 @@ TBD
 ## Running the tests
 
 We use RSpec, which is a testing tool for Ruby.  You can read more about RSpec here https://rspec.info/ 
-You can run all tests by running rspec at the command line:
+You can run all tests by running rspec at the command line with:
 `bundle exec rspec`
 
-The analytics also has it's own custom test harness
-
+The analytics also has it's own custom suite of tests which can be found in the `script/standard` directory.  These can be run at the command line with:
+`ANALYTICSTESTDIR=test_output bundle exec ruby script/standard/{name_of_test_script}.rb`
+where `ANALYTICSTESTDIR` equals the directory that you want all test output to be saved.
 
 ### Break down into end to end tests
 
