@@ -1,0 +1,81 @@
+---
+:fuel: electricity
+:fuel_description: electricity
+:fuel_cost: 15p/kWh
+:fuel_cost_current: 15p/kWh
+:total_annual_£: "£71,000"
+:total_annual_co2: 88,000 kg CO2
+:schoolday_open_kwh: 170,000 kWh
+:schoolday_closed_kwh: 180,000 kWh
+:holidays_kwh: 72,000 kWh
+:weekends_kwh: 42,000 kWh
+:community_kwh: 0 kWh
+:total_annual_kwh: 470,000 kWh
+:out_of_hours_kwh: 300,000 kWh
+:schoolday_open_percent: 37%
+:schoolday_closed_percent: 39%
+:holidays_percent: 15%
+:weekends_percent: 9%
+:community_percent: 0%
+:out_of_hours_percent: 63%
+:schoolday_open_£: "£27,000"
+:schoolday_closed_£: "£27,000"
+:holidays_£: "£11,000"
+:weekends_£: "£6,300"
+:community_£: 0p
+:out_of_hours_£: "£44,000"
+:schoolday_open_£current: "£27,000"
+:schoolday_closed_£current: "£27,000"
+:holidays_£current: "£11,000"
+:weekends_£current: "£6,300"
+:community_£current: 0p
+:out_of_hours_£current: "£44,000"
+:schoolday_open_co2: 33,000 kg CO2
+:schoolday_closed_co2: 36,000 kg CO2
+:holidays_co2: 12,000 kg CO2
+:weekends_co2: 7,000 kg CO2
+:community_co2: 0 kg CO2
+:out_of_hours_co2: 55,000 kg CO2
+:good_out_of_hours_use_percent: 35%
+:average_percent: 50%
+:bad_out_of_hours_use_percent: 65%
+:percent_improvement_to_exemplar: 28%
+:potential_saving_kwh: 130,000 kWh
+:potential_saving_£: "£20,000"
+:potential_saving_co2: 25,000 kg CO2
+:summary: "£44,000pa (63% of annual cost) "
+:tariff_has_changed_during_period_text: ''
+:relevance: relevant
+:analysis_date: Friday 31 Dec 2021
+:status: bad
+:rating: '0.6'
+:term: longterm
+:bookmark_url: https://blog.energysparks.uk/alerts#ElectricityOutOfHours
+:max_asofdate: Wednesday 13 Jul 2022
+:pupils: '961'
+:floor_area: 5,900 m2
+:school_type: secondary
+:school_name: Acme Academy
+:school_activation_date: ''
+:school_creation_date: '2020-10-08'
+:urn: '136770'
+:one_year_saving_£: "£20,000"
+:one_year_saving_co2: 25,000 kg CO2
+:ten_year_saving_co2: 250,000 kg CO2
+:average_one_year_saving_£: "£20,000"
+:average_ten_year_saving_£: "£200,000"
+:ten_year_saving_£: "£200,000"
+:payback_years: ''
+:average_payback_years: 0 days
+:capital_cost: ''
+:average_capital_cost: 0p
+:timescale: last year
+:time_of_year_relevance: '5'
+:one_year_saving_£_high: "£20,000"
+:one_year_saving_£_low: "£20,000"
+:ten_year_saving_£_high: "£200,000"
+:ten_year_saving_£_low: "£200,000"
+:payback_years_high: 
+:payback_years_low: 
+:capital_cost_high: 
+:capital_cost_low: 
