@@ -20,14 +20,12 @@ module UsageBreakdown
     end
 
     def potential_saving_pound_sterling          #(compare: :benchmark_school)
-      # AlertOutOfHoursBaseUsage#calculate
-      # @potential_saving_£   = @potential_saving_kwh * @fuel_cost_current
+      # Code adapted from AlertOutOfHoursBaseUsage#calculate - @potential_saving_£ = @potential_saving_kwh * @fuel_cost_current
       school_day_type_breakdown.total_annual_pounds_sterling * percent_improvement_to_exemplar
     end
 
     def percent_improvement_to_exemplar
-      # AlertOutOfHoursBaseUsage#calculate
-      # @percent_improvement_to_exemplar = [out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
+      # # Code adapted from AlertOutOfHoursBaseUsage#calculate - @percent_improvement_to_exemplar = [out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
       [school_day_type_breakdown.out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
     end
 
@@ -35,18 +33,9 @@ module UsageBreakdown
       # AlertOutOfHoursElectricityUsage#good_out_of_hours_use_percent = 0.35
       # AlertOutOfHoursGasUsage#good_out_of_hours_use_percent = 0.3
       @good_out_of_hours_use_percent ||= case @fuel_type
-                                         when :electricity then 0.35 # TODO: Save these as constants
-                                         when :gas then 0.3
+                                         when :electricity then BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY
+                                         when :gas then BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_GAS
                                          end
-    end
-    
-    def bad_out_of_hours_use_percent
-      # AlertOutOfHoursElectricityUsage#bad_out_of_hours_use_percent = 0.65
-      # AlertOutOfHoursGasUsage#bad_out_of_hours_use_percent = 0.7
-      @bad_out_of_hours_use_percent ||= case @fuel_type
-                                         when :electricity then 0.65 # TODO: Save these as constants
-                                         when :gas then 0.7
-                                         end
-    end
+    end    
   end
 end
