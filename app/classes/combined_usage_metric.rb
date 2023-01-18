@@ -10,10 +10,11 @@
 # relationship. E.g. varying tariffs over time mean that the cost of consumption
 # might not be a simple multiple of the kwh value.
 class CombinedUsageMetric
-  attr_reader :kwh, :£, :co2
-  def initialize(kwh:, £:, co2:)
+  attr_accessor :kwh, :£, :co2, :percent
+  def initialize(kwh: nil, £: nil, co2: nil, percent: nil)
     @kwh = kwh
     @£ = £
     @co2 = co2
+    @percent = percent
   end
 end
