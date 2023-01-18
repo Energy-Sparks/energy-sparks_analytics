@@ -7,7 +7,7 @@ module Logging
   logger.level = :info
 end
 
-schools = ['derby-college-broomfield-hall*', 'halfway*', 'freshford*', 'long-fur*', 'combe*'] # ['king-j*', 'combe-d*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
+schools = ['a*'] # ['king-j*', 'combe-d*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
 
 overrides = {
   schools: schools,
@@ -15,7 +15,7 @@ overrides = {
   no_adult_dashboard: { control: { user: { user_role: :analytics, staff_role: nil } } },
   adult_dashboard: {
     control: {
-      pages: %i[solar_pv_group],
+      pages: %i[boiler_control_morning_start_time],
       no_pages: %i[electric_annual gas_annual gas_out_of_hours hotwater], # storage_heater
       compare_results: [ :summary, :report_differences],
       user: { user_role: :analytics, staff_role: nil }
