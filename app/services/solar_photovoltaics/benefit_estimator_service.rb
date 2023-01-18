@@ -2,7 +2,7 @@
 
 module SolarPhotovoltaics
   class BenefitEstimatorService
-    attr_reader :solar_pv_scenario_table
+    attr_reader :solar_pv_scenario_table, :one_year_saving_£current, :scenarios
 
     def initialize(school:, asof_date: Date.today)
       @school = school
@@ -32,14 +32,14 @@ module SolarPhotovoltaics
       days_data = [aggregated_electricity_meters.amr_data.end_date, calculate_date].min - aggregated_electricity_meters.amr_data.start_date
       raise EnergySparksNotEnoughDataException, "Only #{days_data.to_i} days meter data" unless days_data > 364
 
-      scenarios, optimum_kwp = calculate_range_of_scenarios(calculate_date)
+      @scenarios, optimum_kwp = calculate_range_of_scenarios(calculate_date)
 
-      @solar_pv_scenario_table  = format_scenarios_into_table(scenarios, :raw)
-      html_table_data           = format_scenarios_into_table(scenarios, :html)
+      @solar_pv_scenario_table  = format_scenarios_into_table(@scenarios, :raw)
+      html_table_data           = format_scenarios_into_table(@scenarios, :html)
 
       @solar_pv_scenario_table_html = HtmlTableFormatting.new(scenario_table_text, html_table_data).html
 
-      optimum_scenario = find_optimum_kwp(scenarios, round_optimum_kwp(optimum_kwp))
+      optimum_scenario = find_optimum_kwp(@scenarios, round_optimum_kwp(optimum_kwp))
       promote_optimum_variables(optimum_scenario)
 
       @one_year_saving_£current = optimum_scenario[:total_annual_saving_£]
