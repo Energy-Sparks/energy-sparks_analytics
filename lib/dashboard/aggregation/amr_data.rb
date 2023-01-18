@@ -142,7 +142,7 @@ class AMRData < HalfHourlyData
   end
 
   # performance benefit in collatin the information
-  private def calculate_information_date_range(start_date, end_date)
+  private def calculate_information_date_range_deprecated(start_date, end_date)
     kwh = kwh_date_range(start_date, end_date, :kwh)
     £   = kwh_date_range(start_date, end_date, :£)
     co2 = kwh_date_range(start_date, end_date, :co2)
@@ -156,9 +156,9 @@ class AMRData < HalfHourlyData
     }
   end
 
-  def information_date_range(start_date, end_date)
+  def information_date_range_deprecated(start_date, end_date)
     @cached_information ||= {}
-    @cached_information[start_date..end_date] ||= calculate_information_date_range(start_date, end_date)
+    @cached_information[start_date..end_date] ||= calculate_information_date_range_deprecated(start_date, end_date)
   end
 
   def blended_£_per_kwh_date_range(start_date, end_date)
