@@ -2,7 +2,9 @@
 require_relative '../alert_gas_model_base.rb'
 
 class AlertHeatingComingOnTooEarly < AlertGasModelBase
+  #Also defined in base class?
   FROST_PROTECTION_TEMPERATURE = 4
+  #Unused?
   MAX_HALFHOURS_HEATING_ON = 10
 
   attr_reader :last_year_kwh, :last_year_£
@@ -113,39 +115,6 @@ class AlertHeatingComingOnTooEarly < AlertGasModelBase
   end
 
   private def heating_on_time_assessment(asof_date, days_countback = 7)
-    days_assessment = []
-    start_times = []
-    # days_assessment.push(TEMPLATE_VARIABLES[:heating_on_times_table][:header])
-    rating = []
-    ((asof_date - days_countback)..asof_date).each do |date|
-      heating_on_time, recommended_time, temperature, kwh_saving = heating_model.heating_on_time_assessment(date)
-      start_times.push(heating_on_time) unless heating_on_time.nil?
-      kwh_saving = kwh_saving.nil? ? 0.0 : kwh_saving
-      saving_£   = calculate_saving(date, :£)
-      saving_co2 = calculate_saving(date, :co2)
-      timing = heating_on_time.nil? ? 'no heating' : (heating_on_time > recommended_time ? 'on time' : 'too early')
-      rating.push(heating_on_time > recommended_time) unless heating_on_time.nil?     
-      days_assessment.push([date, heating_on_time, recommended_time, temperature, timing, kwh_saving, saving_£, saving_co2])
-    end
-
-    if rating.empty?
-      overall_rating_percent = 1.0
-    else
-      overall_rating_percent = 1.0 * rating.count { |later_than_recommended| later_than_recommended == true } / rating.length
-    end
-
-    average_heat_start_time = start_times.empty? ? nil : TimeOfDay.average_time_of_day(start_times)
-    [days_assessment, overall_rating_percent, average_heat_start_time]
-  end
-
-  def calculate_saving(date, datatype)
-    _hot, _rt, _t, saving = heating_model.heating_on_time_assessment(date, datatype)
-    (saving.nil? || saving < 0.0) ? 0.0 : saving
-  end
-
-  def halfhour_index_to_timestring(halfhour_index)
-    hour = (halfhour_index / 2).to_s
-    minutes = (halfhour_index / 2).floor.odd? ? '30' : '00'
-    hour + ':' + minutes # hH:MM
+    HeatingStartTimeCalculator.new(heating_model: heating_model).calculate_start_times(asof_date, days_countback)
   end
 end

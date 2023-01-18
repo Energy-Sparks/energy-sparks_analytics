@@ -17,7 +17,7 @@ overrides = {
   alerts:   { alerts: [
     # AlertEnergyAnnualVersusBenchmark
     # AlertSchoolWeekComparisonGas
-    AlertOutOfHoursElectricityUsage
+    AlertOutOfHoursElectricityUsage,
     # AlertElectricityBaseloadVersusBenchmark
     # AlertHeatingComingOnTooEarly
     # AlertPreviousYearHolidayComparisonElectricity
