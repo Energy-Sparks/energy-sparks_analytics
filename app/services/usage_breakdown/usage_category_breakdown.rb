@@ -1,22 +1,25 @@
+# frozen_string_literal: true
+
+# rubocop:disable Metrics/ParameterLists, Naming/MethodName
 module UsageBreakdown
   class UsageCategoryBreakdown
-  	attr_reader :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours, :community
+    attr_reader :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours, :community
 
-  	def initialize(
+    def initialize(
       holidays:,
-  	  school_day_closed:,
-  	  school_day_open:,
-  	  weekends:,
-  	  out_of_hours:,
-  	  community:,
+      school_day_closed:,
+      school_day_open:,
+      weekends:,
+      out_of_hours:,
+      community:,
       fuel_type:
-  	)
-  	  @holidays = holidays
-  	  @school_day_closed = school_day_closed
-  	  @school_day_open = school_day_open
-  	  @weekends = weekends
-  	  @out_of_hours = out_of_hours
-  	  @community = community
+    )
+      @holidays = holidays
+      @school_day_closed = school_day_closed
+      @school_day_open = school_day_open
+      @weekends = weekends
+      @out_of_hours = out_of_hours
+      @community = community
       @fuel_type = fuel_type
     end
 
@@ -28,21 +31,17 @@ module UsageBreakdown
       @holidays.kwh + @weekends.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
     end
 
-    def potential_saving_£          #(compare: :benchmark_school)
-      # Code adapted from AlertOutOfHoursBaseUsage#calculate - @potential_saving_£ = @potential_saving_kwh * @fuel_cost_current
+    def potential_saving_£
+      # Code adapted from AlertOutOfHoursBaseUsage#calculate
       total_annual_£ * percent_improvement_to_exemplar
     end
 
     def total_annual_£
       holidays.£ +
         weekends.£ +
-          school_day_open.£ +
-            school_day_closed.£ +
-              community.£
-    end
-
-    def total_annual_kwh
-      @holidays.kwh + @weekends.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
+        school_day_open.£ +
+        school_day_closed.£ +
+        community.£
     end
 
     def total_annual_co2
@@ -50,11 +49,12 @@ module UsageBreakdown
     end
 
     def percent_improvement_to_exemplar
-      # # Code adapted from AlertOutOfHoursBaseUsage#calculate - @percent_improvement_to_exemplar = [out_of_hours_percent - good_out_of_hours_use_percent, 0.0].max
+      # Code adapted from AlertOutOfHoursBaseUsage#calculate
       [out_of_hours.percent - exemplar_out_of_hours_use_percent, 0.0].max
     end
 
     def exemplar_out_of_hours_use_percent
+      # Code adapted from:
       # AlertOutOfHoursElectricityUsage#good_out_of_hours_use_percent = 0.35
       # AlertOutOfHoursGasUsage#good_out_of_hours_use_percent = 0.3
       case @fuel_type
@@ -64,3 +64,4 @@ module UsageBreakdown
     end
   end
 end
+# rubocop:enable Metrics/ParameterLists, Naming/MethodName

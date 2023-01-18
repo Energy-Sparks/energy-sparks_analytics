@@ -118,6 +118,7 @@ class ChartManager
       RecordTestTimes.instance.record_time(@school.name, 'chart', chart_param){
         calculation_time = Benchmark.realtime {
           aggregator = Aggregator.new(@school, chart_config)
+
           aggregator.aggregate
         }
       }
