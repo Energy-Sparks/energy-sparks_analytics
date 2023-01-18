@@ -408,7 +408,7 @@ module Series
 
     def predicted_amr_data_one_day(date)
       temperature = school.temperatures.average_temperature(date)
-      scale_datatype_from_kwh(heating_model.predicted_kwh(date, temperature))
+      scale_datatype_from_kwh(date, heating_model.predicted_kwh(date, temperature))
     end
 
     def scale_datatype_from_kwh(date, kwh)
@@ -711,7 +711,7 @@ module Series
 
     def day_breakdown(start_date, end_date)
       heating_data = default_breakdown
-  
+
       (start_date..end_date).each do |date|
         begin
           breakdown_data = heating_model.heating_breakdown(date, kwh_cost_or_co2)
@@ -775,7 +775,7 @@ module Series
     WASTEDHOTWATERUSAGE = 'Wasted Hot Water Usage'
     HOTWATERSERIESNAMES = [USEFULHOTWATERUSAGE, WASTEDHOTWATERUSAGE]
 
-    USEFULHOTWATERUSAGE_I18N_KEY = 'useful_hot_water_usage' 
+    USEFULHOTWATERUSAGE_I18N_KEY = 'useful_hot_water_usage'
     WASTEDHOTWATERUSAGE_I18N_KEY = 'wasted_hot_water_usage'
 
     def series_names;  HOTWATERSERIESNAMES; end
@@ -897,7 +897,7 @@ module Series
   class PredictedHeat < ModelManagerBase
     PREDICTEDHEAT = 'Predicted Heat'
     PREDICTEDHEAT_I18N_KEY = 'predicted_heat'
-    
+
     def series_names;  [PREDICTEDHEAT]; end
 
     def day_breakdown(d1, d2)
