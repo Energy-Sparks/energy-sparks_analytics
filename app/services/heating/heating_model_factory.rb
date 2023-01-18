@@ -13,7 +13,6 @@ module Heating
     private
 
     def one_year_period
-      #TODO are the type, title params used for anything other than logging/debug?
       SchoolDatePeriod.new(:service, 'Current Year', model_start_date, @asof_date)
     end
 

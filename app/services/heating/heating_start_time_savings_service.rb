@@ -29,7 +29,7 @@ module Heating
     #
     # @return [CombinedUsageMetric] the estimated savings
     def estimated_savings
-      return CombinedUsageMetric.new(
+      CombinedUsageMetric.new(
         kwh: one_year_saving(:kwh),
         £: one_year_saving(:£current) ,
         co2: one_year_saving(:co2)

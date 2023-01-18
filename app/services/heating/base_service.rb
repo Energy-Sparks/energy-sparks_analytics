@@ -26,7 +26,8 @@ module Heating
 
     def enough_data_for_model_fit?
       heating_model.enough_samples_for_good_fit
-    #TODO NoMethodError?
+    #FIXME: NoMethodError caught here as it was in original code,
+    #but not sure why that's the case. Keeping for now
     rescue EnergySparksNotEnoughDataException, NoMethodError => e
       false
     end
@@ -34,6 +35,9 @@ module Heating
     def heating_model
       @heating_model ||= create_and_fit_model
     end
+
+
+    private
 
     def create_and_fit_model
       HeatingModelFactory.new(aggregate_meter, @asof_date).create_model

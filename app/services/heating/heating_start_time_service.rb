@@ -26,7 +26,7 @@ module Heating
     def last_week_start_times
       days, _rating_percent, average_start_time = calculate_start_times
 
-      days = days.map { |day|
+      days = days.map do |day|
         #unpack the array
         date, heating_start_time, recommended_time, temperature, timing, kwh_saving, saving_£, saving_co2 = day
         OpenStruct.new(
@@ -36,7 +36,7 @@ module Heating
           temperature: temperature,
           saving: CombinedUsageMetric.new(kwh: kwh_saving, £: saving_£, co2: saving_co2)
         )
-      }
+      end
       HeatingStartTimes.new(days: days, average_start_time: average_start_time)
     end
 
