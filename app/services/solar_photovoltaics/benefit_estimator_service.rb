@@ -7,15 +7,20 @@ module SolarPhotovoltaics
     def initialize(school:, asof_date: Date.today)
       @school = school
       raise if @school.solar_pv_panels?
-      raise if !enough_data?
+      raise unless enough_data?
 
       @asof_date = asof_date
     end
 
-    def calculate_benefits!(use_max_meter_date_if_less_than_asof_date: false)
-      @max_asofdate = aggregated_electricity_meters.amr_data.end_date
-      date = use_max_meter_date_if_less_than_asof_date ? [maximum_alert_date, asof_date].min : @asof_date
-      calculate(date) if @analysis_date.nil? || @analysis_date != date # only call once per date
+    def calculate_benefits!
+      # (use_max_meter_date_if_less_than_asof_date: false)
+      # @max_asofdate = aggregated_electricity_meters.amr_data.end_date
+      # date = use_max_meter_date_if_less_than_asof_date ? [maximum_alert_date, asof_date].min : @asof_date
+      date = @asof_date
+
+      calculate_optimum_payback_for(date)
+      calculate_range_of_scenarios_for(date)
+      calculate_savings
     end
 
     private
@@ -28,16 +33,13 @@ module SolarPhotovoltaics
       @aggregated_electricity_meters ||= @school.aggregated_electricity_meters
     end
 
-    def calculate(calculate_date)
-      days_data = [aggregated_electricity_meters.amr_data.end_date, calculate_date].min - aggregated_electricity_meters.amr_data.start_date
-      raise EnergySparksNotEnoughDataException, "Only #{days_data.to_i} days meter data" unless days_data > 364
-
-      @scenarios, optimum_kwp = calculate_range_of_scenarios(calculate_date)
-
+    def calculate_savings
       optimum_scenario = find_optimum_kwp(@scenarios, round_optimum_kwp(optimum_kwp))
-      promote_optimum_variables(optimum_scenario)
-
-      @one_year_saving_£current = optimum_scenario[:total_annual_saving_£]
+      @optimum_kwp                      = optimum_scenario[:kwp]
+      @optimum_payback_years            = optimum_scenario[:payback_years]
+      @optimum_mains_reduction_percent  = optimum_scenario[:reduction_in_mains_percent]
+      @one_year_saving_£current         = optimum_scenario[:total_annual_saving_£]
+      
       savings_range = Range.new(@one_year_saving_£current, @one_year_saving_£current)
       set_savings_capital_costs_payback(
         savings_range,
@@ -46,18 +48,17 @@ module SolarPhotovoltaics
       )
     end
 
-    def calculate_range_of_scenarios(calculate_date)
-      scenarios = []
-      optimum_kwp, optimum_payback_years = optimum_payback(calculate_date)
-      kwp_scenario_including_optimum(optimum_kwp).each do |kwp|
-        kwh_data = calculate_solar_pv_benefit(calculate_date, kwp)
-        £_data = calculate_economic_benefit(kwh_data)
-        
-        scenarios << OpenStruct.new(kwh_data.merge(£_data))
+    def calculate_range_of_scenarios_for(date)
+      @scenarios = []
 
-        # scenarios.push(kwh_data.merge(£_data))
+      kwp_scenario_including_optimum(optimum_kwp).each do |kwp|
+        solar_pv_benefit_results = calculate_solar_pv_benefit(date, kwp)
+        economic_benefit_results = calculate_economic_benefit(solar_pv_benefit_results)
+        
+        @scenarios << OpenStruct.new(
+          solar_pv_benefit_results.merge(economic_benefit_results)
+        )
       end
-      [scenarios, optimum_kwp]
     end
 
     def kwp_scenario_including_optimum(optimum_kwp)
@@ -79,12 +80,6 @@ module SolarPhotovoltaics
       rows.select { |row| row[:kwp] == optimum_kwp }[0]
     end
 
-    def promote_optimum_variables(optimum_scenario)
-      @optimum_kwp                      = optimum_scenario[:kwp]
-      @optimum_payback_years            = optimum_scenario[:payback_years]
-      @optimum_mains_reduction_percent  = optimum_scenario[:reduction_in_mains_percent]
-    end
-
     def set_savings_capital_costs_payback(one_year_saving_£, capital_cost, one_year_saving_co2)
       one_year_saving_£ = Range.new(one_year_saving_£, one_year_saving_£) if one_year_saving_£.is_a?(Float)
 
@@ -103,26 +98,23 @@ module SolarPhotovoltaics
       @average_payback_years = @one_year_saving_£.nil? || @one_year_saving_£ == 0.0 || @average_capital_cost.nil? ? 0.0 : @average_capital_cost / @average_one_year_saving_£
     end
 
-    def optimum_payback(asof_date)
-      optimum = Minimiser.minimize(1, max_possible_kwp) { |kwp| payback(kwp, asof_date) }
-      [optimum.x_minimum, optimum.f_minimum]
+    def calculate_optimum_payback_for(date)
+      optimum = Minimiser.minimize(1, max_possible_kwp) { |kwp| payback(kwp, date) }
+      @optimum_kwp = optimum.x_minimum
+      @optimum_payback_years = optimum.f_minimum
     end
 
-    def payback(kwp, asof_date)
-      kwh_data = calculate_solar_pv_benefit(asof_date, kwp)
+    def payback(kwp, date)
+      kwh_data = calculate_solar_pv_benefit(date, kwp)
       calculate_economic_benefit(kwh_data)[:payback_years]
     end
 
-    def calculate_solar_pv_benefit(asof_date, kwp)
-      start_date = asof_date - 365
+    def calculate_solar_pv_benefit(date, kwp)
+      start_date = date - 365
+      kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregated_electricity_meters.amr_data, @school, start_date, date, kwp)
 
-      pv_panels = SolarPVPanelsNewBenefit.new # (attributes(asof_date, kwp))
-
-      kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregated_electricity_meters.amr_data, @school, start_date, asof_date, kwp)
-
-      kwh = aggregated_electricity_meters.amr_data.kwh_date_range(start_date, asof_date)
-
-      £ = aggregated_electricity_meters.amr_data.kwh_date_range(start_date, asof_date, :£current)
+      kwh = aggregated_electricity_meters.amr_data.kwh_date_range(start_date, date)
+      £ = aggregated_electricity_meters.amr_data.kwh_date_range(start_date, date, :£current)
 
       {
         kwp: kwp,
@@ -136,8 +128,16 @@ module SolarPhotovoltaics
         solar_consumed_onsite_kwh: kwh_totals[:solar_consumed_onsite],
         exported_kwh: kwh_totals[:exported],
         solar_pv_output_kwh: kwh_totals[:solar_pv_output],
-        solar_pv_output_co2: kwh_totals[:solar_pv_output] * ::Baseload::BlendedRateCalculator.new(aggregated_electricity_meters).blended_co2_per_kwh # blended_co2_per_kwh
+        solar_pv_output_co2: kwh_totals[:solar_pv_output] * blended_co2_per_kwh
       }
+    end
+
+    def pv_panels
+      SolarPVPanelsNewBenefit.new
+    end
+
+    def blended_co2_per_kwh
+      @blended_co2_per_kwh ||= ::Baseload::BlendedRateCalculator.new(aggregated_electricity_meters).blended_co2_per_kwh
     end
 
     def calculate_economic_benefit(kwh_data)
@@ -183,7 +183,7 @@ module SolarPhotovoltaics
 
     def max_possible_kwp
       # 25% of floor area, 6m2 panels/kWp
-      (@school.floor_area * 0.25) / 6.0
+      @max_possible_kwp ||= (@school.floor_area * 0.25) / 6.0
     end
   end
 end
