@@ -3,8 +3,8 @@ require 'pp'
 
 require 'spec_helper'
 
-describe SolarPhotovoltaics::PotentialBenefitEstimatorService, type: :service do
-  let(:service) { SolarPhotovoltaics::PotentialBenefitEstimatorService.new(meter_collection: @acme_academy, asof_date: Date.parse('2020-12-31')) }
+describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service do
+  let(:service) { SolarPhotovoltaics::PotentialBenefitsEstimatorService.new(meter_collection: @acme_academy, asof_date: Date.parse('2020-12-31')) }
 
   # using before(:all) here to avoid slow loading of YAML and then
   # running the aggregation code for each test.
@@ -12,8 +12,8 @@ describe SolarPhotovoltaics::PotentialBenefitEstimatorService, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context '#calculate_benefits' do
-    it 'calculates the benefits over a geometric sequence of Capacity kWp up to 256' do
+  context '#calculate' do
+    it 'calculates the potential benefits over a geometric sequence of capacity kWp up to 256 for a school with no solar pv' do
       scenarios = service.calculate
 
       # expect(service.optimum_kwp).to eq(52.5)

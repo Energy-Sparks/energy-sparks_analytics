@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module SolarPhotovoltaics
-  class PotentialBenefitEstimatorService
+  class PotentialBenefitsEstimatorService
     attr_reader :scenarios, :optimum_kwp, :optimum_payback_years, :optimum_mains_reduction_percent
 
     def initialize(meter_collection:, asof_date: Date.today)
