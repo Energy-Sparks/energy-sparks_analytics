@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe UsageBreakdown::UsageBreakdownService, type: :service do
+describe Usage::UsageBreakdownService, type: :service do
   Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
 
   let(:meter_collection)          { @acme_academy }
@@ -11,7 +11,7 @@ describe UsageBreakdown::UsageBreakdownService, type: :service do
 
   context '#usage_breakdown' do
     it 'returns a usage category breakdown with calculated combined usage metrics for holidays, school open days etc' do
-      usage_breakdown_benchmark_service = UsageBreakdown::UsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity)
+      usage_breakdown_benchmark_service = Usage::UsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity)
       day_type_breakdown = usage_breakdown_benchmark_service.usage_breakdown
       expect(day_type_breakdown.holidays.kwh).to round_to_two_digits(71847.1) # 71847.09999999999
       expect(day_type_breakdown.holidays.co2).to round_to_two_digits(12476.78) # 12476.783800000008
@@ -25,10 +25,10 @@ describe UsageBreakdown::UsageBreakdownService, type: :service do
 
       expect(day_type_breakdown.school_day_open.kwh).to round_to_two_digits(172067.63) # 172067.6333333333
       expect(day_type_breakdown.school_day_open.co2).to round_to_two_digits(33246.98) # 33246.97816666668
-      expect(day_type_breakdown.school_day_open.percent).to round_to_two_digits(0.37) # 0.36813911501052066 
+      expect(day_type_breakdown.school_day_open.percent).to round_to_two_digits(0.37) # 0.36813911501052066
       expect(day_type_breakdown.school_day_open.£).to round_to_two_digits(26756.20) # 26756.202000000005
 
-      expect(day_type_breakdown.out_of_hours.kwh).to round_to_two_digits(295330.77) # 295330.7666666666 
+      expect(day_type_breakdown.out_of_hours.kwh).to round_to_two_digits(295330.77) # 295330.7666666666
       expect(day_type_breakdown.out_of_hours.co2).to round_to_two_digits(55245.66) # 55245.66103333332
       expect(day_type_breakdown.out_of_hours.percent).to round_to_two_digits(0.63) # 0.6318608849894793
       expect(day_type_breakdown.out_of_hours.£).to round_to_two_digits(44304.22) # 44304.217000000004

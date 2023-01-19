@@ -15,8 +15,8 @@ overrides = {
   no_adult_dashboard: { control: { user: { user_role: :analytics, staff_role: nil } } },
   adult_dashboard: {
     control: {
-      pages: %i[boiler_control_morning_start_time],
-      no_pages: %i[electric_annual gas_annual gas_out_of_hours hotwater], # storage_heater
+      pages: %i[electric_annual gas_annual underlying_electricity_meters_breakdown underlying_gas_meters_breakdown electric_long_term_progress gas_long_term_progress],
+      no_pages: %i[hotwater], # storage_heater
       compare_results: [ :summary, :report_differences],
       user: { user_role: :analytics, staff_role: nil }
     }
