@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
 module SolarPhotovoltaics
-  class BenefitEstimatorService
+  class PotentialBenefitEstimatorService
     attr_reader :scenarios, :optimum_kwp, :optimum_payback_years, :optimum_mains_reduction_percent
 
-    def initialize(school:, asof_date: Date.today)
-      @school = school
-      raise if @school.solar_pv_panels?
+    def initialize(meter_collection:, asof_date: Date.today)
+      @meter_collection = meter_collection
+      raise if @meter_collection.solar_pv_panels?
       raise unless enough_data?
 
       @asof_date = asof_date
     end
 
-    def calculate_benefits!
+    def calculate
       # (use_max_meter_date_if_less_than_asof_date: false)
       # @max_asofdate = aggregated_electricity_meters.amr_data.end_date
       # date = use_max_meter_date_if_less_than_asof_date ? [maximum_alert_date, asof_date].min : @asof_date
@@ -21,6 +21,7 @@ module SolarPhotovoltaics
       calculate_optimum_payback_for(date)
       calculate_range_of_scenarios_for(date)
       calculate_savings
+      @scenarios
     end
 
     private
@@ -30,7 +31,7 @@ module SolarPhotovoltaics
     end
 
     def aggregated_electricity_meters
-      @aggregated_electricity_meters ||= @school.aggregated_electricity_meters
+      @aggregated_electricity_meters ||= @meter_collection.aggregated_electricity_meters
     end
 
     def calculate_savings
@@ -111,7 +112,7 @@ module SolarPhotovoltaics
 
     def calculate_solar_pv_benefit(date, kwp)
       start_date = date - 365
-      kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregated_electricity_meters.amr_data, @school, start_date, date, kwp)
+      kwh_totals = pv_panels.annual_predicted_pv_totals_fast(aggregated_electricity_meters.amr_data, @meter_collection, start_date, date, kwp)
 
       kwh = aggregated_electricity_meters.amr_data.kwh_date_range(start_date, date)
       £ = aggregated_electricity_meters.amr_data.kwh_date_range(start_date, date, :£current)
@@ -183,7 +184,7 @@ module SolarPhotovoltaics
 
     def max_possible_kwp
       # 25% of floor area, 6m2 panels/kWp
-      @max_possible_kwp ||= (@school.floor_area * 0.25) / 6.0
+      @max_possible_kwp ||= (@meter_collection.floor_area * 0.25) / 6.0
     end
   end
 end
