@@ -8,6 +8,10 @@ module Usage
       @fuel_type = fuel_type
     end
 
+    # Calculates a breakdown of the annual usage over the last twelve months
+    # Broken down by usage during school day open, closed, weekends and holidays
+    #
+    # @return [Usage::UsageCategoryBreakdown] the calculated breakdown
     def usage_breakdown
       calculate_usage_breakdown
     end
