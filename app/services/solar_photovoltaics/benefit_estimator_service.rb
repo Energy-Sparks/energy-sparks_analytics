@@ -2,7 +2,7 @@
 
 module SolarPhotovoltaics
   class BenefitEstimatorService
-    attr_reader :solar_pv_scenario_table, :one_year_saving_£current, :scenarios
+    attr_reader :scenarios, :optimum_kwp, :optimum_payback_years, :optimum_mains_reduction_percent
 
     def initialize(school:, asof_date: Date.today)
       @school = school
@@ -10,7 +10,6 @@ module SolarPhotovoltaics
       raise if !enough_data?
 
       @asof_date = asof_date
-      @benefit_scenarios_collection = []
     end
 
     def calculate_benefits!(use_max_meter_date_if_less_than_asof_date: false)
@@ -53,7 +52,10 @@ module SolarPhotovoltaics
       kwp_scenario_including_optimum(optimum_kwp).each do |kwp|
         kwh_data = calculate_solar_pv_benefit(calculate_date, kwp)
         £_data = calculate_economic_benefit(kwh_data)
-        scenarios.push(kwh_data.merge(£_data))
+        
+        scenarios << OpenStruct.new(kwh_data.merge(£_data))
+
+        # scenarios.push(kwh_data.merge(£_data))
       end
       [scenarios, optimum_kwp]
     end
