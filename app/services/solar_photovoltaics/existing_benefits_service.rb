@@ -9,12 +9,12 @@ module SolarPhotovoltaics
     def calculate
       OpenStruct.new(
         annual_saving_from_solar_pv_percent: solar_pv_profit_loss.annual_saving_from_solar_pv_percent,
-annual_carbon_saving_percent: solar_pv_profit_loss.annual_carbon_saving_percent,
+        annual_carbon_saving_percent: solar_pv_profit_loss.annual_carbon_saving_percent,
         annual_electricity_including_onsite_solar_pv_consumption_kwh: solar_pv_profit_loss.annual_electricity_including_onsite_solar_pv_consumption_kwh,
         annual_consumed_from_national_grid_kwh: solar_pv_profit_loss.annual_consumed_from_national_grid_kwh,
         saving_£current: saving_£current,
         export_£: export_£,
-
+        annual_co2_saving_kg: solar_pv_profit_loss.annual_co2_saving_kg,
         annual_solar_pv_kwh: solar_pv_profit_loss.annual_solar_pv_kwh,
         annual_exported_solar_pv_kwh: solar_pv_profit_loss.annual_exported_solar_pv_kwh,
         annual_solar_pv_consumed_onsite_kwh: solar_pv_profit_loss.annual_solar_pv_consumed_onsite_kwh,
