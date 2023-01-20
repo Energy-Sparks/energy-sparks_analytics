@@ -12,7 +12,7 @@ describe Heating::BoilerSeasonalControlAnalysisService do
   end
 
   context '#create_model' do
-    it ''
+    it '' do
     end
   end
 end
