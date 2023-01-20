@@ -13,12 +13,11 @@
 # For a complete list of options that you can use to customize hooks, see:
 # https://github.com/sds/overcommit#configuration
 #
-# Uncomment the following lines to make the configuration take effect.
-
 PreCommit:
  RuboCop:
    enabled: true
    on_warn: fail # Treat all warnings as failures
+   problem_on_unmodified_line: ignore
 
  TrailingWhitespace:
    enabled: true
