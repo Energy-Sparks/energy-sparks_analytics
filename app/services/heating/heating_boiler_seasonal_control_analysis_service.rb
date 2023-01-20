@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Heating
-  class HeatingBoilerSeasonalControlAnalysisService < BaseService
+  class HeatingBoilerSeasonalControlAnalysisService
     attr_reader :aggregated_heat_meters
 
     def initialize(aggregated_heat_meters:)
@@ -9,21 +9,26 @@ module Heating
     end
 
     def create_model
-      OpenStruct.new(
-        number_days_heating_on_in_warm_weather: number_days_heating_on_in_warm_weather
-      )
+      OpenStruct.new(sum_heating_on_warm_weather_values)
     end
 
     private
 
-    def number_days_heating_on_in_warm_weather
-      aggregate_analysis(:heating_warm_weather, :days)
+    def heating_on_seasonal_analysis_warm_weather_values
+      # Returns an array of hashes with kwh, £, £current, co2, days, and degree days values
+      seasonal_analysis.values.map { |heating_on| heating_on[:heating_warm_weather] }.compact
     end
 
-    def aggregate_analysis(heating_type, value_type)
-      seasonal_analysis.values.map do |by_heating_regime_data|
-        by_heating_regime_data.dig(heating_type, value_type)
-      end.compact.sum
+    def sum_heating_on_warm_weather_values
+      # Returns a single hash with summed values of matching keys in an array of hashes e.g.
+      # an array of hashes such as [{kwh: 12}, {kwh: 6}] will return a hash {kwh: 18}
+      result = Hash.new(0)
+      heating_on_seasonal_analysis_warm_weather_values.each do |subhash|
+        subhash.each do |type, value|
+          result[type] += value
+        end
+      end
+      result
     end
 
     def seasonal_analysis
