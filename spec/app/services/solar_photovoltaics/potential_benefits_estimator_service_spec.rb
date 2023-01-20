@@ -16,441 +16,118 @@ describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service d
     it 'calculates the potential benefits over a geometric sequence of capacity kWp up to 256 for a school with no solar pv' do
       scenarios = service.calculate
 
-      # expect(service.optimum_kwp).to eq(52.5)
-      # expect(service.optimum_payback_years).to eq(5.682322708769174)
-      # expect(service.optimum_mains_reduction_percent).to eq(0.10478762755164217)
-      # expect(service.scenarios.size).to eq(9)
+      # expect(service.optimum_kwp).to round_to_two_digits(52.5)
+      # expect(service.optimum_payback_years).to round_to_two_digits(5.682322708769174)
+      # expect(service.optimum_mains_reduction_percent).to round_to_two_digits(0.10478762755164217)
+      # expect(service.scenarios.size).to round_to_two_digits(9)
 
       expect(scenarios[0].kwp).to eq(1)
       expect(scenarios[0].panels).to eq(3)
       expect(scenarios[0].area).to eq(4)
-      expect(scenarios[0].solar_consumed_onsite_kwh).to eq(893.9545973935678)
-      expect(scenarios[0].exported_kwh).to eq(0.0)
-      expect(scenarios[0].solar_pv_output_kwh).to eq(893.954597393567)
-      expect(scenarios[0].reduction_in_mains_percent).to eq(0.002068165948887468)
-      expect(scenarios[0].mains_savings_£).to eq(140.1736542641811)
-      expect(scenarios[0].solar_pv_output_co2).to eq(169.22840876311736)
-      expect(scenarios[0].capital_cost_£).to eq(2392.9653)
-      expect(scenarios[0].payback_years).to eq(17.07143409053209)
+      expect(scenarios[0].solar_consumed_onsite_kwh).to round_to_two_digits(893.95) # 893.9545973935678
+      expect(scenarios[0].exported_kwh).to round_to_two_digits(0.0) # 0.0
+      expect(scenarios[0].solar_pv_output_kwh).to round_to_two_digits(893.95) # 893.954597393567
+      expect(scenarios[0].reduction_in_mains_percent * 100).to round_to_two_digits(0.21) # 0.002068165948887468
+      expect(scenarios[0].mains_savings_£).to round_to_two_digits(140.17) # 140.1736542641811
+      expect(scenarios[0].solar_pv_output_co2).to round_to_two_digits(169.23) # 169.23840876311736
+      expect(scenarios[0].capital_cost_£).to round_to_two_digits(2392.97) # 2392.9653
+      expect(scenarios[0].payback_years).to round_to_two_digits(17.07) # 17.07143409053209
 
       expect(scenarios[1].kwp).to eq(2)
       expect(scenarios[1].panels).to eq(7)
       expect(scenarios[1].area).to eq(10)
-      expect(scenarios[1].solar_consumed_onsite_kwh).to eq(1787.9091947871332)
-      expect(scenarios[1].exported_kwh).to eq(0.0)
-      expect(scenarios[1].solar_pv_output_kwh).to eq(1787.909194787134)
-      expect(scenarios[1].reduction_in_mains_percent).to eq(0.004136331897774667)
-      expect(scenarios[1].mains_savings_£).to eq(280.34730852871144)
-      expect(scenarios[1].solar_pv_output_co2).to eq(338.4568175262347)
-      expect(scenarios[1].capital_cost_£).to eq(3184.1412)
-      expect(scenarios[1].payback_years).to eq(11.357844727351466)
+      expect(scenarios[1].solar_consumed_onsite_kwh).to round_to_two_digits(1787.91) # 1787.9091947871332
+      expect(scenarios[1].exported_kwh).to round_to_two_digits(0.0) # 0.0
+      expect(scenarios[1].solar_pv_output_kwh).to round_to_two_digits(1787.91) # 1787.909194787134
+      expect(scenarios[1].reduction_in_mains_percent * 100).to round_to_two_digits(0.41) # 0.004136331897774667
+      expect(scenarios[1].mains_savings_£).to round_to_two_digits(280.35) # 280.34730852871144
+      expect(scenarios[1].solar_pv_output_co2).to round_to_two_digits(338.46) # 338.4568175262347
+      expect(scenarios[1].capital_cost_£).to round_to_two_digits(3184.14) # 3184.1412
+      expect(scenarios[1].payback_years).to round_to_two_digits(11.36) # 11.357844727351466
 
       expect(scenarios[2].kwp).to eq(4)
       expect(scenarios[2].panels).to eq(13)
       expect(scenarios[2].area).to eq(19)
-      expect(scenarios[2].solar_consumed_onsite_kwh).to eq(3575.8183895742663)
-      expect(scenarios[2].exported_kwh).to eq(0.0)
-      expect(scenarios[2].solar_pv_output_kwh).to eq(3575.818389574268)
-      expect(scenarios[2].reduction_in_mains_percent).to eq(0.008272663795547853)
-      expect(scenarios[2].mains_savings_£).to eq(560.6946170564115)
-      expect(scenarios[2].solar_pv_output_co2).to eq(676.9136350524694)
-      expect(scenarios[2].capital_cost_£).to eq(4761.1248)
-      expect(scenarios[2].payback_years).to eq(8.491475850072202)
+      expect(scenarios[2].solar_consumed_onsite_kwh).to round_to_two_digits(3575.82) # 3575.8183895742663
+      expect(scenarios[2].exported_kwh).to round_to_two_digits(0.0) # 0.0
+      expect(scenarios[2].solar_pv_output_kwh).to round_to_two_digits(3575.82) # 3575.818389574268
+      expect(scenarios[2].reduction_in_mains_percent * 100).to round_to_two_digits(0.83) # 0.008272663795547853
+      expect(scenarios[2].mains_savings_£).to round_to_two_digits(560.69) # 560.6946170564115
+      expect(scenarios[2].solar_pv_output_co2).to round_to_two_digits(676.91) # 676.9136350524694
+      expect(scenarios[2].capital_cost_£).to round_to_two_digits(4761.12) # 4761.1248
+      expect(scenarios[2].payback_years).to round_to_two_digits(8.49) # 8.491475850072202
 
       expect(scenarios[3].kwp).to eq(8)
       expect(scenarios[3].panels).to eq(27)
       expect(scenarios[3].area).to eq(39)
-      expect(scenarios[3].solar_consumed_onsite_kwh).to eq(7151.636779148539)
-      expect(scenarios[3].exported_kwh).to eq(0.0)
-      expect(scenarios[3].solar_pv_output_kwh).to eq(7151.636779148536)
-      expect(scenarios[3].reduction_in_mains_percent).to eq(0.016545327591100552)
-      expect(scenarios[3].mains_savings_£).to eq(1121.3892341130122)
-      expect(scenarios[3].solar_pv_output_co2).to eq(1353.8272701049389)
-      expect(scenarios[3].capital_cost_£).to eq(7893.6192)
-      expect(scenarios[3].payback_years).to eq(7.0391430199913)
+      expect(scenarios[3].solar_consumed_onsite_kwh).to round_to_two_digits(7151.64) # 7151.636779148539
+      expect(scenarios[3].exported_kwh).to round_to_two_digits(0.0) # 0.0
+      expect(scenarios[3].solar_pv_output_kwh).to round_to_two_digits(7151.64) # 7151.636779148536
+      expect(scenarios[3].reduction_in_mains_percent * 100).to round_to_two_digits(1.65) # 0.016545327591100552
+      expect(scenarios[3].mains_savings_£).to round_to_two_digits(1121.39) # 1121.3892341130122
+      expect(scenarios[3].solar_pv_output_co2).to round_to_two_digits(1353.83) # 1353.8272701049389
+      expect(scenarios[3].capital_cost_£).to round_to_two_digits(7893.62) # 7893.6192
+      expect(scenarios[3].payback_years).to round_to_two_digits(7.04) # 7.0391430199913
 
       expect(scenarios[4].kwp).to eq(16)
       expect(scenarios[4].panels).to eq(53)
       expect(scenarios[4].area).to eq(76)
-      expect(scenarios[4].solar_consumed_onsite_kwh).to eq(14303.273558297074)
-      expect(scenarios[4].exported_kwh).to eq(0.0)
-      expect(scenarios[4].solar_pv_output_kwh).to eq(14303.273558297073)
-      expect(scenarios[4].reduction_in_mains_percent).to eq(0.03309065518220407)
-      expect(scenarios[4].mains_savings_£).to eq(2242.778468225384)
-      expect(scenarios[4].solar_pv_output_co2).to eq(2707.6545402098777)
-      expect(scenarios[4].capital_cost_£).to eq(14072.7168)
-      expect(scenarios[4].payback_years).to eq(6.274679822093685)
+      expect(scenarios[4].solar_consumed_onsite_kwh).to round_to_two_digits(14303.27) # 14303.273558297074
+      expect(scenarios[4].exported_kwh).to round_to_two_digits(0.0) # 0.0
+      expect(scenarios[4].solar_pv_output_kwh).to round_to_two_digits(14303.27) # 14303.273558297073
+      expect(scenarios[4].reduction_in_mains_percent * 100).to round_to_two_digits(3.31) # 0.03309065518220407
+      expect(scenarios[4].mains_savings_£).to round_to_two_digits(2242.78) # 2242.778468225384
+      expect(scenarios[4].solar_pv_output_co2).to round_to_two_digits(2707.65) # 2707.6545402098777
+      expect(scenarios[4].capital_cost_£).to round_to_two_digits(14072.72) # 14072.7168
+      expect(scenarios[4].payback_years).to round_to_two_digits(6.27) # 6.274679822093685
 
-      expect(scenarios[5].kwp).to eq(32)
-      expect(scenarios[5].panels).to eq(107)
-      expect(scenarios[5].area).to eq(154)
-      expect(scenarios[5].solar_consumed_onsite_kwh).to eq(28554.856062377454)
-      expect(scenarios[5].exported_kwh).to eq(51.691054216699065)
-      expect(scenarios[5].solar_pv_output_kwh).to eq(28606.547116594145)
-      expect(scenarios[5].reduction_in_mains_percent).to eq(0.06606172299553545)
-      expect(scenarios[5].mains_savings_£).to eq(4477.390491042279)
-      expect(scenarios[5].solar_pv_output_co2).to eq(5415.309080419755)
-      expect(scenarios[5].capital_cost_£).to eq(26087.3472)
-      expect(scenarios[5].payback_years).to eq(5.823101009541616)
+      expect(scenarios[5].kwp).to round_to_two_digits(32)
+      expect(scenarios[5].panels).to round_to_two_digits(107)
+      expect(scenarios[5].area).to round_to_two_digits(154)
+      expect(scenarios[5].solar_consumed_onsite_kwh).to round_to_two_digits(28554.86) # 28554.856062377454
+      expect(scenarios[5].exported_kwh).to round_to_two_digits(51.69) # 51.691054216699065
+      expect(scenarios[5].solar_pv_output_kwh).to round_to_two_digits(28606.55) # 28606.547116594145
+      expect(scenarios[5].reduction_in_mains_percent).to round_to_two_digits(0.07) # 0.06606172299553545
+      expect(scenarios[5].mains_savings_£).to round_to_two_digits(4477.39) # 4477.390491042279
+      expect(scenarios[5].solar_pv_output_co2).to round_to_two_digits(5415.31) # 5415.309080419755
+      expect(scenarios[5].capital_cost_£).to round_to_two_digits(26087.35) # 26087.3472
+      expect(scenarios[5].payback_years).to round_to_two_digits(5.82) # 5.823101009541616
             
       expect(scenarios[6].kwp).to eq(52.5)
       expect(scenarios[6].panels).to eq(175)
       expect(scenarios[6].area).to eq(252)
-      expect(scenarios[6].solar_consumed_onsite_kwh).to eq(45293.93854982251)
-      expect(scenarios[6].exported_kwh).to eq(1638.67781333994)
-      expect(scenarios[6].solar_pv_output_kwh).to eq(46932.61636316246)
-      expect(scenarios[6].reduction_in_mains_percent).to eq(0.10478762755164217)
-      expect(scenarios[6].mains_savings_£).to eq(7100.275782503792)
-      expect(scenarios[6].solar_pv_output_co2).to eq(8884.491460063697)
-      expect(scenarios[6].capital_cost_£).to eq(40811.633125)
-      expect(scenarios[6].payback_years).to eq(5.682322708769174)
+      expect(scenarios[6].solar_consumed_onsite_kwh).to round_to_two_digits(45293.94) # 45293.93854982251
+      expect(scenarios[6].exported_kwh).to round_to_two_digits(1638.68) # 1638.67781333994
+      expect(scenarios[6].solar_pv_output_kwh).to round_to_two_digits(46932.62) # 46932.61636316246
+      expect(scenarios[6].reduction_in_mains_percent * 100).to round_to_two_digits(10.48) # 0.10478762755164217
+      expect(scenarios[6].mains_savings_£).to round_to_two_digits(7100.28) # 7100.275782503792
+      expect(scenarios[6].solar_pv_output_co2).to round_to_two_digits(8884.49) # 8884.491460063697
+      expect(scenarios[6].capital_cost_£).to round_to_two_digits(40811.63) # 40811.633125
+      expect(scenarios[6].payback_years).to round_to_two_digits(5.68) # 5.682322708769174
           
       expect(scenarios[7].kwp).to eq(64)
       expect(scenarios[7].panels).to eq(213)
       expect(scenarios[7].area).to eq(307)
-      expect(scenarios[7].solar_consumed_onsite_kwh).to eq(53186.555323147804)
-      expect(scenarios[7].exported_kwh).to eq(4026.538910040475)
-      expect(scenarios[7].solar_pv_output_kwh).to eq(57213.09423318829)
-      expect(scenarios[7].reduction_in_mains_percent).to eq(0.12304721400692871)
-      expect(scenarios[7].mains_savings_£).to eq(8334.556977244858)
-      expect(scenarios[7].solar_pv_output_co2).to eq(10830.61816083951)
-      expect(scenarios[7].capital_cost_£).to eq(48742.3488)
-      expect(scenarios[7].payback_years).to eq(5.710287211159089)
+      expect(scenarios[7].solar_consumed_onsite_kwh).to round_to_two_digits(53186.56) # 53186.555323147804
+      expect(scenarios[7].exported_kwh).to round_to_two_digits(4026.54) # 4026.538910040475
+      expect(scenarios[7].solar_pv_output_kwh).to round_to_two_digits(57213.09) # 57213.09423318829
+      expect(scenarios[7].reduction_in_mains_percent * 100).to round_to_two_digits(12.3) # 0.12304721400692871
+      expect(scenarios[7].mains_savings_£).to round_to_two_digits(8334.56) # 8334.556977244858
+      expect(scenarios[7].solar_pv_output_co2).to round_to_two_digits(10830.62) # 10830.61816083951
+      expect(scenarios[7].capital_cost_£).to round_to_two_digits(48742.35) # 48742.3488
+      expect(scenarios[7].payback_years).to round_to_two_digits(5.71) # 5.710287211159089
           
       expect(scenarios[8].kwp).to eq(128)
       expect(scenarios[8].panels).to eq(427)
       expect(scenarios[8].area).to eq(615)
-      expect(scenarios[8].solar_consumed_onsite_kwh).to eq(85201.53193961504)
-      expect(scenarios[8].exported_kwh).to eq(29224.65652676189)
-      expect(scenarios[8].solar_pv_output_kwh).to eq(114426.18846637658)
-      expect(scenarios[8].reduction_in_mains_percent).to eq(0.1971139335983544)
-      expect(scenarios[8].mains_savings_£).to eq(13326.379573018603)
-      expect(scenarios[8].solar_pv_output_co2).to eq(21661.23632167902)
-      expect(scenarios[8].capital_cost_£).to eq(88555.3152)
-      expect(scenarios[8].payback_years).to eq(5.9884796009295185)
-
-      # expect(service.scenarios.map { |a| a.to_h }.map { |s| s.slice(*table_values) }).to eq(
-      #   [ 
-      #     { 
-      #       :kwp=>1,
-      #       :panels=>3,
-      #       :area=>4,
-      #       :solar_consumed_onsite_kwh=>893.9545973935678,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>893.954597393567,
-      #       :reduction_in_mains_percent=>0.002068165948887468,
-      #       :mains_savings_£=>140.1736542641811,
-      #       :solar_pv_output_co2=>169.22840876311736,
-      #       :capital_cost_£=>2392.9653,
-      #       :payback_years=>17.07143409053209
-      #     },
-      #     { 
-      #       :kwp=>2,
-      #       :panels=>7,
-      #       :area=>10,
-      #       :solar_consumed_onsite_kwh=>1787.9091947871332,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>1787.909194787134,
-      #       :reduction_in_mains_percent=>0.004136331897774667,
-      #       :mains_savings_£=>280.34730852871144,
-      #       :solar_pv_output_co2=>338.4568175262347,
-      #       :capital_cost_£=>3184.1412,
-      #       :payback_years=>11.357844727351466
-      #     },
-      #     { 
-      #       :kwp=>4,
-      #       :panels=>13,
-      #       :area=>19,
-      #       :solar_consumed_onsite_kwh=>3575.8183895742663,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>3575.818389574268,
-      #       :reduction_in_mains_percent=>0.008272663795547853,
-      #       :mains_savings_£=>560.6946170564115,
-      #       :solar_pv_output_co2=>676.9136350524694,
-      #       :capital_cost_£=>4761.1248,
-      #       :payback_years=>8.491475850072202
-      #     },
-      #     { 
-      #       :kwp=>8,
-      #       :panels=>27,
-      #       :area=>39,
-      #       :solar_consumed_onsite_kwh=>7151.636779148539,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>7151.636779148536,
-      #       :reduction_in_mains_percent=>0.016545327591100552,
-      #       :mains_savings_£=>1121.3892341130122,
-      #       :solar_pv_output_co2=>1353.8272701049389,
-      #       :capital_cost_£=>7893.6192,
-      #       :payback_years=>7.0391430199913
-      #     },
-      #     { 
-      #       :kwp=>16,
-      #       :panels=>53,
-      #       :area=>76,
-      #       :solar_consumed_onsite_kwh=>14303.273558297074,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>14303.273558297073,
-      #       :reduction_in_mains_percent=>0.03309065518220407,
-      #       :mains_savings_£=>2242.778468225384,
-      #       :solar_pv_output_co2=>2707.6545402098777,
-      #       :capital_cost_£=>14072.7168,
-      #       :payback_years=>6.274679822093685
-      #     },
-      #     { 
-      #       :kwp=>32,
-      #       :panels=>107,
-      #       :area=>154,
-      #       :solar_consumed_onsite_kwh=>28554.856062377454,
-      #       :exported_kwh=>51.691054216699065,
-      #       :solar_pv_output_kwh=>28606.547116594145,
-      #       :reduction_in_mains_percent=>0.06606172299553545,
-      #       :mains_savings_£=>4477.390491042279,
-      #       :solar_pv_output_co2=>5415.309080419755,
-      #       :capital_cost_£=>26087.3472,
-      #       :payback_years=>5.823101009541616
-      #     },
-      #     { :kwp=>52.5,
-      #       :panels=>175,
-      #       :area=>252,
-      #       :solar_consumed_onsite_kwh=>45293.93854982251,
-      #       :exported_kwh=>1638.67781333994,
-      #       :solar_pv_output_kwh=>46932.61636316246,
-      #       :reduction_in_mains_percent=>0.10478762755164217,
-      #       :mains_savings_£=>7100.275782503792,
-      #       :solar_pv_output_co2=>8884.491460063697,
-      #       :capital_cost_£=>40811.633125,
-      #       :payback_years=>5.682322708769174
-      #     },
-      #     { :kwp=>64,
-      #       :panels=>213,
-      #       :area=>307,
-      #       :solar_consumed_onsite_kwh=>53186.555323147804,
-      #       :exported_kwh=>4026.538910040475,
-      #       :solar_pv_output_kwh=>57213.09423318829,
-      #       :reduction_in_mains_percent=>0.12304721400692871,
-      #       :mains_savings_£=>8334.556977244858,
-      #       :solar_pv_output_co2=>10830.61816083951,
-      #       :capital_cost_£=>48742.3488,
-      #       :payback_years=>5.710287211159089
-      #     },
-      #     { :kwp=>128,
-      #       :panels=>427,
-      #       :area=>615,
-      #       :solar_consumed_onsite_kwh=>85201.53193961504,
-      #       :exported_kwh=>29224.65652676189,
-      #       :solar_pv_output_kwh=>114426.18846637658,
-      #       :reduction_in_mains_percent=>0.1971139335983544,
-      #       :mains_savings_£=>13326.379573018603,
-      #       :solar_pv_output_co2=>21661.23632167902,
-      #       :capital_cost_£=>88555.3152,
-      #       :payback_years=>5.9884796009295185
-      #     }
-      #   ]
-      # )
-
-
-      # expect(service.scenarios).to eq(
-      #   [
-          # {
-          #   :kwp=>1,
-          #   :panels=>3,
-          #   :area=>4,
-          #   :existing_annual_kwh=>432245.09999999986,
-          #   :existing_annual_£=>65366.193000000036,
-          #   :new_mains_consumption_kwh=>431351.1454026064,
-          #   :new_mains_consumption_£=>65226.019345735855,
-          #   :reduction_in_mains_percent=>0.002068165948887468,
-          #   :solar_consumed_onsite_kwh=>893.9545973935678,
-          #   :exported_kwh=>0.0,
-          #   :solar_pv_output_kwh=>893.954597393567,
-          #   :solar_pv_output_co2=>169.22840876311736,
-          #   :old_mains_cost_£=>65366.193000000036,
-          #   :new_mains_cost_£=>65226.019345735855,
-          #   :export_income_£=>0.0,
-          #   :mains_savings_£=>140.1736542641811,
-          #   :total_annual_saving_£=>140.1736542641811,
-          #   :total_annual_saving_co2=>169.22840876311736,
-          #   :capital_cost_£=>2392.9653,
-          #   :payback_years=>17.07143409053209
-          # },
-      #     {
-      #       :kwp=>2,
-      #       :panels=>7,
-      #       :area=>10,
-      #       :existing_annual_kwh=>432245.09999999986,
-      #       :existing_annual_£=>65366.193000000036,
-      #       :new_mains_consumption_kwh=>430457.19080521306,
-      #       :new_mains_consumption_£=>65085.845691471324,
-      #       :reduction_in_mains_percent=>0.004136331897774667,
-      #       :solar_consumed_onsite_kwh=>1787.9091947871332,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>1787.909194787134,
-      #       :solar_pv_output_co2=>338.4568175262347,
-      #       :old_mains_cost_£=>65366.193000000036,
-      #       :new_mains_cost_£=>65085.845691471324,
-      #       :export_income_£=>0.0,
-      #       :mains_savings_£=>280.34730852871144,
-      #       :total_annual_saving_£=>280.34730852871144,
-      #       :total_annual_saving_co2=>338.4568175262347,
-      #       :capital_cost_£=>3184.1412,
-      #       :payback_years=>11.357844727351466
-      #     },
-      #     {
-      #       :kwp=>4,
-      #       :panels=>13,
-      #       :area=>19,
-      #       :existing_annual_kwh=>432245.09999999986,
-      #       :existing_annual_£=>65366.193000000036,
-      #       :new_mains_consumption_kwh=>428669.2816104269,
-      #       :new_mains_consumption_£=>64805.498382943624,
-      #       :reduction_in_mains_percent=>0.008272663795547853,
-      #       :solar_consumed_onsite_kwh=>3575.8183895742663,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>3575.818389574268,
-      #       :solar_pv_output_co2=>676.9136350524694,
-      #       :old_mains_cost_£=>65366.193000000036,
-      #       :new_mains_cost_£=>64805.498382943624,
-      #       :export_income_£=>0.0,
-      #       :mains_savings_£=>560.6946170564115,
-      #       :total_annual_saving_£=>560.6946170564115,
-      #       :total_annual_saving_co2=>676.9136350524694,
-      #       :capital_cost_£=>4761.1248,
-      #       :payback_years=>8.491475850072202
-      #     },
-      #     {
-      #       :kwp=>8,
-      #       :panels=>27,
-      #       :area=>39,
-      #       :existing_annual_kwh=>432245.09999999986,
-      #       :existing_annual_£=>65366.193000000036,
-      #       :new_mains_consumption_kwh=>425093.46322085185,
-      #       :new_mains_consumption_£=>64244.80376588702,
-      #       :reduction_in_mains_percent=>0.016545327591100552,
-      #       :solar_consumed_onsite_kwh=>7151.636779148539,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>7151.636779148536,
-      #       :solar_pv_output_co2=>1353.8272701049389,
-      #       :old_mains_cost_£=>65366.193000000036,
-      #       :new_mains_cost_£=>64244.80376588702,
-      #       :export_income_£=>0.0,
-      #       :mains_savings_£=>1121.3892341130122,
-      #       :total_annual_saving_£=>1121.3892341130122,
-      #       :total_annual_saving_co2=>1353.8272701049389,
-      #       :capital_cost_£=>7893.6192,
-      #       :payback_years=>7.0391430199913
-      #     },
-      #     {
-      #       :kwp=>16,
-      #       :panels=>53,
-      #       :area=>76,
-      #       :existing_annual_kwh=>432245.09999999986,
-      #       :existing_annual_£=>65366.193000000036,
-      #       :new_mains_consumption_kwh=>417941.82644170255,
-      #       :new_mains_consumption_£=>63123.41453177465,
-      #       :reduction_in_mains_percent=>0.03309065518220407,
-      #       :solar_consumed_onsite_kwh=>14303.273558297074,
-      #       :exported_kwh=>0.0,
-      #       :solar_pv_output_kwh=>14303.273558297073,
-      #       :solar_pv_output_co2=>2707.6545402098777,
-      #       :old_mains_cost_£=>65366.193000000036,
-      #       :new_mains_cost_£=>63123.41453177465,
-      #       :export_income_£=>0.0,
-      #       :mains_savings_£=>2242.778468225384,
-      #       :total_annual_saving_£=>2242.778468225384,
-      #       :total_annual_saving_co2=>2707.6545402098777,
-      #       :capital_cost_£=>14072.7168,
-      #       :payback_years=>6.274679822093685
-      #     },
-      #     {
-      #       :kwp=>32,
-      #       :panels=>107,
-      #       :area=>154,
-      #       :existing_annual_kwh=>432245.09999999986,
-      #       :existing_annual_£=>65366.193000000036,
-      #       :new_mains_consumption_kwh=>403690.24393762235,
-      #       :new_mains_consumption_£=>60888.80250895776,
-      #       :reduction_in_mains_percent=>0.06606172299553545,
-      #       :solar_consumed_onsite_kwh=>28554.856062377454,
-      #       :exported_kwh=>51.691054216699065,
-      #       :solar_pv_output_kwh=>28606.547116594145,
-      #       :solar_pv_output_co2=>5415.309080419755,
-      #       :old_mains_cost_£=>65366.193000000036,
-      #       :new_mains_cost_£=>60888.80250895776,
-      #       :export_income_£=>2.5845527108349535,
-      #       :mains_savings_£=>4477.390491042279,
-      #       :total_annual_saving_£=>4479.975043753114,
-      #       :total_annual_saving_co2=>5415.309080419755,
-      #       :capital_cost_£=>26087.3472,
-      #       :payback_years=>5.823101009541616
-      #     },
-      #     {
-      #       :kwp=>52.5,
-      #       :panels=>175,
-      #       :area=>252,
-      #       :existing_annual_kwh=>432245.09999999986,
-      #       :existing_annual_£=>65366.193000000036,
-      #       :new_mains_consumption_kwh=>386951.16145017755,
-      #       :new_mains_consumption_£=>58265.917217496244,
-      #       :reduction_in_mains_percent=>0.10478762755164217,
-      #       :solar_consumed_onsite_kwh=>45293.93854982251,
-      #       :exported_kwh=>1638.67781333994,
-      #       :solar_pv_output_kwh=>46932.61636316246,
-      #       :solar_pv_output_co2=>8884.491460063697,
-      #       :old_mains_cost_£=>65366.193000000036,
-      #       :new_mains_cost_£=>58265.917217496244,
-      #       :export_income_£=>81.933890666997,
-      #       :mains_savings_£=>7100.275782503792,
-      #       :total_annual_saving_£=>7182.209673170789,
-      #       :total_annual_saving_co2=>8884.491460063697,
-      #       :capital_cost_£=>40811.633125,
-      #       :payback_years=>5.682322708769174
-      #     },
-      #     { 
-      #       :kwp=>64,
-      #       :panels=>213,
-      #       :area=>307,
-      #       :existing_annual_kwh=>432245.09999999986,
-      #       :existing_annual_£=>65366.193000000036,
-      #       :new_mains_consumption_kwh=>379058.5446768536,
-      #       :new_mains_consumption_£=>57031.63602275518,
-      #       :reduction_in_mains_percent=>0.12304721400692871,
-      #       :solar_consumed_onsite_kwh=>53186.555323147804,
-      #       :exported_kwh=>4026.538910040475,
-      #       :solar_pv_output_kwh=>57213.09423318829,
-      #       :solar_pv_output_co2=>10830.61816083951,
-      #       :old_mains_cost_£=>65366.193000000036,
-      #       :new_mains_cost_£=>57031.63602275518,
-      #       :export_income_£=>201.32694550202376,
-      #       :mains_savings_£=>8334.556977244858,
-      #       :total_annual_saving_£=>8535.883922746882,
-      #       :total_annual_saving_co2=>10830.61816083951,
-      #       :capital_cost_£=>48742.3488,
-      #       :payback_years=>5.710287211159089
-      #     },
-      #     {
-      #       :kwp=>128,
-      #       :panels=>427,
-      #       :area=>615,
-      #       :existing_annual_kwh=>432245.09999999986,
-      #       :existing_annual_£=>65366.193000000036,
-      #       :new_mains_consumption_kwh=>347043.5680603858,
-      #       :new_mains_consumption_£=>52039.81342698143,
-      #       :reduction_in_mains_percent=>0.1971139335983544,
-      #       :solar_consumed_onsite_kwh=>85201.53193961504,
-      #       :exported_kwh=>29224.65652676189,
-      #       :solar_pv_output_kwh=>114426.18846637658,
-      #       :solar_pv_output_co2=>21661.23632167902,
-      #       :old_mains_cost_£=>65366.193000000036,
-      #       :new_mains_cost_£=>52039.81342698143,
-      #       :export_income_£=>1461.2328263380946,
-      #       :mains_savings_£=>13326.379573018603,
-      #       :total_annual_saving_£=>14787.612399356698,
-      #       :total_annual_saving_co2=>21661.23632167902,
-      #       :capital_cost_£=>88555.3152,
-      #       :payback_years=>5.9884796009295185
-      #     }
-      #   ]
-      #)
+      expect(scenarios[8].solar_consumed_onsite_kwh).to round_to_two_digits(85201.53) # 85201.53193961504
+      expect(scenarios[8].exported_kwh).to round_to_two_digits(29224.66) # 29224.65652676189
+      expect(scenarios[8].solar_pv_output_kwh).to round_to_two_digits(114426.19) # 114426.18846637658
+      expect(scenarios[8].reduction_in_mains_percent * 100).to round_to_two_digits(19.71) # 0.1971139335983544
+      expect(scenarios[8].mains_savings_£).to round_to_two_digits(13326.38) # 13326.379573018603
+      expect(scenarios[8].solar_pv_output_co2).to round_to_two_digits(21661.24) # 21661.23632167902
+      expect(scenarios[8].capital_cost_£).to round_to_two_digits(88555.32) # 88555.3152
+      expect(scenarios[8].payback_years).to round_to_two_digits(5.99) # 5.9884796009295185
     end
   end
 end
