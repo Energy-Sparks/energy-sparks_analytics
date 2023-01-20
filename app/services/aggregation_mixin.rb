@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 module AggregationMixin
-  private def create_modified_meter_copy(meter, amr_data, type, identifier, name, pseudo_meter_name, meter_type = Dashboard::Meter )
+  private def create_modified_meter_copy(meter, amr_data, type, identifier, name, pseudo_meter_name, meter_type = Dashboard::Meter)
     meter_type.new(
       meter_collection: meter_collection,
       amr_data: amr_data,
@@ -28,20 +30,24 @@ module AggregationMixin
 
   private def aggregate_amr_data(meters, type, ignore_rules = false)
     if meters.length == 1
-      logger.info "Single meter, so aggregation is a reference to itself not an aggregate meter"
+      logger.info 'Single meter, so aggregation is a reference to itself not an aggregate meter'
       return meters.first.amr_data # optimisaton if only 1 meter, then its its own aggregate
     end
     min_date, max_date = combined_amr_data_date_range(meters, ignore_rules)
 
-    #This can happen if there are 2 meter, with non-overlapping date ranges
-    #Without a check, the renaming code is run but we end up with an aggregate meter that
-    #contains no readings and has default dates from HalfHourlyData.new. This can cause errors elsewhere as other
-    #code does not check for the dates or if there are no readings.
-    raise EnergySparksUnexpectedStateException.new("Invalid AMR date range. Minimum date (#{min_date}) after maximum date (#{max_date}) unable to aggregate data") if min_date > max_date
+    # This can happen if there are 2 meter, with non-overlapping date ranges
+    # Without a check, the renaming code is run but we end up with an aggregate meter that
+    # contains no readings and has default dates from HalfHourlyData.new. This can cause errors elsewhere as other
+    # code does not check for the dates or if there are no readings.
+    if min_date > max_date
+      raise EnergySparksUnexpectedStateException, "Invalid AMR date range. Minimum date (#{min_date}) after maximum date (#{max_date}) unable to aggregate data"
+    end
 
     logger.info "Aggregating data between #{min_date} and #{max_date}"
 
-    mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type) unless @meter_collection.urn.nil?
+    unless @meter_collection.urn.nil?
+      mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, meters[0].fuel_type)
+    end
 
     combined_amr_data = aggregate_amr_data_between_dates(meters, type, min_date, max_date, mpan_mprn)
   end
@@ -69,8 +75,8 @@ module AggregationMixin
 
   def combined_amr_data_date_range_no_rules(meters)
     [
-      meters.map{ |m| m.amr_data.start_date }.max,
-      meters.map{ |m| m.amr_data.end_date   }.min
+      meters.map { |m| m.amr_data.start_date }.max,
+      meters.map { |m| m.amr_data.end_date   }.min
     ]
   end
 
@@ -92,7 +98,7 @@ module AggregationMixin
         end_dates.push(meter.amr_data.end_date)
       end
     end
-    [start_dates.sort.last, end_dates.sort.first]
+    [start_dates.max, end_dates.min]
   end
 
   private def calculate_carbon_emissions_for_meter(meter, fuel_type)

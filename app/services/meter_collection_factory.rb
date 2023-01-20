@@ -1,10 +1,11 @@
-class MeterCollectionFactory
+# frozen_string_literal: true
 
+class MeterCollectionFactory
   def self.build(data)
     new(**data[:schedule_data]).build(**data.slice(:school_data, :amr_data, :pseudo_meter_attributes))
   end
 
-  def initialize(temperatures:, solar_pv:, solar_irradiation: nil, grid_carbon_intensity:, holidays:)
+  def initialize(temperatures:, solar_pv:, grid_carbon_intensity:, holidays:, solar_irradiation: nil)
     @temperatures = temperatures
     @solar_pv = solar_pv
     @solar_irradiation = solar_irradiation
@@ -12,8 +13,7 @@ class MeterCollectionFactory
     @holidays = holidays
   end
 
-  def build(school_data:, amr_data: {electricity_meters: [], heat_meters: []}, pseudo_meter_attributes: {}, meter_attributes_overrides: {})
-
+  def build(school_data:, amr_data: { electricity_meters: [], heat_meters: []}, pseudo_meter_attributes: {}, meter_attributes_overrides: {})
     school = Dashboard::School.new(
       name: school_data[:name],
       id: school_data[:id],
@@ -40,8 +40,7 @@ class MeterCollectionFactory
                                            solar_irradiation: @solar_irradiation,
                                            grid_carbon_intensity: @grid_carbon_intensity,
                                            holidays: @holidays,
-                                           pseudo_meter_attributes: pseudo_meter_attributes
-                                          )
+                                           pseudo_meter_attributes: pseudo_meter_attributes)
 
     add_meters_and_amr_data(meter_collection, amr_data, meter_attributes_overrides)
     meter_collection
@@ -65,7 +64,7 @@ class MeterCollectionFactory
 
   def process_meters(meter_collection, meter_data, meter_attributes_overrides)
     parent_meter = build_meter(meter_collection, meter_data, meter_attributes_overrides)
-    meter_data.fetch(:sub_meters){ [] }.each do |sub_meter_data|
+    meter_data.fetch(:sub_meters) { [] }.each do |sub_meter_data|
       parent_meter.sub_meters.push build_meter(meter_collection, sub_meter_data)
     end
     parent_meter
@@ -80,15 +79,14 @@ class MeterCollectionFactory
       amr_data.add(reading[:reading_date], OneDayAMRReading.new(meter_data[:identifier], reading[:reading_date], reading[:type], reading[:substitute_date], reading[:upload_datetime], reading[:kwh_data_x48]))
     end
     Dashboard::Meter.new(
-      meter_collection:   meter_collection,
-      amr_data:           amr_data,
-      type:               meter_data[:type],
-      identifier:         mpxn,
-      name:               meter_data[:name],
-      external_meter_id:  meter_data[:external_meter_id],
-      dcc_meter:          meter_data[:dcc_meter],
-      meter_attributes:   attributes
+      meter_collection: meter_collection,
+      amr_data: amr_data,
+      type: meter_data[:type],
+      identifier: mpxn,
+      name: meter_data[:name],
+      external_meter_id: meter_data[:external_meter_id],
+      dcc_meter: meter_data[:dcc_meter],
+      meter_attributes: attributes
     )
   end
-
 end

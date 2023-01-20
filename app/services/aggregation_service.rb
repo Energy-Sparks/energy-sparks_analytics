@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This should take a meter collection and populate
 # it with aggregated & validated data
 require 'benchmark/memory'
@@ -32,7 +34,7 @@ class AggregateDataService
   # This is called by the EnergySparks codebase
   def aggregate_heat_and_electricity_meters
     log 'Aggregate Meters'
-    bm = Benchmark.realtime {
+    bm = Benchmark.realtime do
       set_long_gap_boundary_on_all_meters
 
       aggregate_heat_meters
@@ -42,8 +44,8 @@ class AggregateDataService
       process_community_usage_open_close_times
 
       set_post_aggregation_state_on_all_meters
-    }
-    calc_text = "Calculated meter aggregation for |#{sprintf('%-35.35s', @meter_collection.name)}| in |#{bm.round(3)}| seconds"
+    end
+    calc_text = "Calculated meter aggregation for |#{format('%-35.35s', @meter_collection.name)}| in |#{bm.round(3)}| seconds"
 
     puts calc_text unless Object.const_defined?('Rails')
 
@@ -88,7 +90,7 @@ class AggregateDataService
       oc_breakdown = AMRDataCommunityOpenCloseBreakdown.new(meter, @meter_collection.open_close_times)
       meter.amr_data.open_close_breakdown = oc_breakdown
     end
-  end 
+  end
 
   def set_long_gap_boundary_on_all_meters
     @meter_collection.all_meters.each do |meter|
@@ -113,20 +115,16 @@ class AggregateDataService
   def validate_meter_list(list_of_meters)
     log "Validating #{list_of_meters.length} meters"
     list_of_meters.each do |meter|
-      begin
-        validate_meter = ValidateAMRData.new(meter, 50, @meter_collection.holidays, @meter_collection.temperatures)
-        validate_meter.validate
-      rescue => exception
-        add_rollbar_context_if_available(meter, exception)
-        raise
-      end
+      validate_meter = ValidateAMRData.new(meter, 50, @meter_collection.holidays, @meter_collection.temperatures)
+      validate_meter.validate
+    rescue StandardError => e
+      add_rollbar_context_if_available(meter, e)
+      raise
     end
   end
 
   def add_rollbar_context_if_available(meter, exception)
-    if exception.respond_to?(:rollbar_context)
-      exception.rollbar_context ||= { mpan_mprn: meter.id }
-    end
+    exception.rollbar_context ||= { mpan_mprn: meter.id } if exception.respond_to?(:rollbar_context)
   end
 
   def combine_solar_pv_submeters_into_aggregate
@@ -135,29 +133,31 @@ class AggregateDataService
   end
 
   def aggregate_sub_meters_by_type(combined_meter, meters)
-    log "Aggregating sub meters for combined meter #{combined_meter.to_s} and main electricity meters #{meters.map{ |m| m.to_s}.join(' ')}"
-    sub_meter_types = meters.map{ |m| m.sub_meters.keys }.flatten.compact.uniq
+    log "Aggregating sub meters for combined meter #{combined_meter} and main electricity meters #{meters.map(&:to_s).join(' ')}"
+    sub_meter_types = meters.map { |m| m.sub_meters.keys }.flatten.compact.uniq
     log "Aggregating these types of sub meters: #{sub_meter_types}"
 
     sub_meters_grouped_by_type = sub_meter_types.map do |sub_meter_type|
       [
         sub_meter_type,
-        meters.map{ |m| m.sub_meters[sub_meter_type] }.compact
+        meters.map { |m| m.sub_meters[sub_meter_type] }.compact
       ]
     end.to_h
 
     sub_meters_grouped_by_type.each do |sub_meter_type, sub_meters|
       log '---------sub meter aggregation----------' * 2
-      log "    Combining type #{sub_meter_type} for #{sub_meters.map{ |m| m.to_s}.join(' ')}"
+      log "    Combining type #{sub_meter_type} for #{sub_meters.map(&:to_s).join(' ')}"
       AggregateDataServiceSolar.new(@meter_collection).backfill_meters_with_zeros(sub_meters, combined_meter.amr_data.start_date)
       combined_sub_meter = aggregate_meters(nil, sub_meters, sub_meters[0].fuel_type)
       combined_sub_meter.id   = sub_meters[0].id
       combined_sub_meter.name = sub_meters[0].name
       combined_meter.sub_meters[sub_meter_type] = combined_sub_meter
-      combined_sub_meter.name = SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME if sub_meter_type == :mains_consume
+      if sub_meter_type == :mains_consume
+        combined_sub_meter.name = SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME
+      end
     end
-    log "Completed sub meter aggregation for: #{combined_meter.to_s}"
-    combined_meter.sub_meters.each { |t, m| log "   #{t}: #{m.to_s}" }
+    log "Completed sub meter aggregation for: #{combined_meter}"
+    combined_meter.sub_meters.each { |t, m| log "   #{t}: #{m}" }
   end
 
   # if an electricity meter is split up into a storage and non-storage version
@@ -229,30 +229,29 @@ class AggregateDataService
   end
 
   def aggregate_main_meters(combined_meter, list_of_meters, type, copy_amr_data = false)
-    log "Aggregating #{list_of_meters.length} meters and #{list_of_meters.map{ |sm| sm.sub_meters.length}.sum} sub meters"
-    combined_meter = aggregate_meters(combined_meter, list_of_meters, type, copy_amr_data)
+    log "Aggregating #{list_of_meters.length} meters and #{list_of_meters.map { |sm| sm.sub_meters.length}.sum} sub meters"
+    aggregate_meters(combined_meter, list_of_meters, type, copy_amr_data)
     # combine_sub_meters_deprecated(combined_meter, list_of_meters) # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
-    combined_meter
   end
 
   # copy meter and amr data - for pv, storage heater meters about to be disaggregated
   def copy_meter_and_amr_data(meter)
     log "Creating cloned copy of meter #{meter.mpan_mprn}"
     new_meter = nil
-    bm = Benchmark.realtime {
+    bm = Benchmark.realtime do
       new_meter = Dashboard::Meter.new(
         meter_collection: @meter_collection,
-        amr_data:         AMRData.copy_amr_data(meter.amr_data),
-        type:             meter.fuel_type,
-        identifier:       meter.mpan_mprn,
-        name:             meter.name,
-        floor_area:       meter.floor_area,
+        amr_data: AMRData.copy_amr_data(meter.amr_data),
+        type: meter.fuel_type,
+        identifier: meter.mpan_mprn,
+        name: meter.name,
+        floor_area: meter.floor_area,
         number_of_pupils: meter.number_of_pupils,
         meter_attributes: meter.meter_attributes
       )
       calculate_meter_carbon_emissions_and_costs(new_meter, :electricity)
       new_meter.amr_data.set_post_aggregation_state
-    }
+    end
     calc_text = "Copied meter and amr data in #{bm.round(3)} seconds"
     log calc_text
     puts calc_text
@@ -261,6 +260,7 @@ class AggregateDataService
 
   def aggregate_meters(combined_meter, list_of_meters, fuel_type, copy_amr_data = false)
     return nil if list_of_meters.nil? || list_of_meters.empty?
+
     if list_of_meters.length == 1
       meter = list_of_meters.first
       meter = copy_meter_and_amr_data(meter) if copy_amr_data
@@ -272,12 +272,14 @@ class AggregateDataService
 
     combined_amr_data = aggregate_amr_data(list_of_meters, fuel_type)
 
-    has_sheffield_solar_pv = list_of_meters.any?{ |m| m.sheffield_simulated_solar_pv_panels? }
+    has_sheffield_solar_pv = list_of_meters.any?(&:sheffield_simulated_solar_pv_panels?)
 
     combined_name, combined_id, combined_floor_area, combined_pupils = combine_meter_meta_data(list_of_meters)
 
     if combined_meter.nil?
-      mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, fuel_type) unless @meter_collection.urn.nil?
+      unless @meter_collection.urn.nil?
+        mpan_mprn = Dashboard::Meter.synthetic_combined_meter_mpan_mprn_from_urn(@meter_collection.urn, fuel_type)
+      end
 
       combined_meter = Dashboard::AggregateMeter.new(
         meter_collection: @meter_collection,
@@ -293,11 +295,15 @@ class AggregateDataService
 
       combined_meter.set_constituent_meters(list_of_meters)
 
-      combined_meter.add_aggregate_partial_meter_coverage_component(list_of_meters.map{ |m| m.partial_meter_coverage})
+      combined_meter.add_aggregate_partial_meter_coverage_component(list_of_meters.map(&:partial_meter_coverage))
     else
       log "Combined meter #{combined_meter.mpan_mprn} already created"
-      combined_meter.floor_area = combined_floor_area if combined_meter.floor_area.nil? || combined_meter.floor_area == 0
-      combined_meter.number_of_pupils = combined_pupils if combined_meter.number_of_pupils.nil? || combined_meter.number_of_pupils == 0
+      if combined_meter.floor_area.nil? || combined_meter.floor_area.zero?
+        combined_meter.floor_area = combined_floor_area
+      end
+      if combined_meter.number_of_pupils.nil? || combined_meter.number_of_pupils.zero?
+        combined_meter.number_of_pupils = combined_pupils
+      end
       combined_meter.amr_data = combined_amr_data
     end
 
@@ -320,6 +326,7 @@ class AggregateDataService
 
   def any_component_meter_differential?(list_of_meters, fuel_type, combined_meter_start_date, combined_meter_end_date)
     return false if fuel_type == :gas
+
     list_of_meters.each do |meter|
       return true if meter.meter_tariffs.any_differential_tariff?(combined_meter_start_date, combined_meter_end_date)
     end
@@ -328,8 +335,9 @@ class AggregateDataService
 
   def all_economic_tariffs_identical?(list_of_meters)
     return true if list_of_meters.length == 1
+
     economic_tariffs = list_of_meters.map { |meter| meter.meter_tariffs.economic_tariff }
-    economic_tariffs.uniq{ |t| [t.tariff, t.tariff]}.count == 1
+    economic_tariffs.uniq { |t| [t.tariff, t.tariff]}.count == 1
   end
 
   def any_time_variant_economic_tariffs?(list_of_meters)
@@ -384,11 +392,9 @@ class AggregateDataService
   def log_meter_dates(list_of_meters)
     log 'Combining the following meters'
     list_of_meters.each do |meter|
-      log sprintf('%-24.24s %-18.18s %s to %s', meter.display_name, meter.id, meter.amr_data.start_date.to_s, meter.amr_data.end_date)
+      log format('%-24.24s %-18.18s %s to %s', meter.display_name, meter.id, meter.amr_data.start_date.to_s, meter.amr_data.end_date)
       aggregation_rules = meter.attributes(:aggregation)
-      unless aggregation_rules.nil?
-        log "                Meter has aggregation rules #{aggregation_rules}"
-      end
+      log "                Meter has aggregation rules #{aggregation_rules}" unless aggregation_rules.nil?
     end
   end
 
@@ -415,6 +421,6 @@ class AggregateDataService
 
   def log(message)
     logger.info message
-     #puts message
+    # puts message
   end
 end

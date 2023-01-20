@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Baseload
   class IntraweekBaseloadService < BaseService
     # Create a service that can calculate the intraweek baseload variation
@@ -17,24 +19,26 @@ module Baseload
     end
 
     def enough_data?
-      #use custom logic here until bug fixed in ElectricityBaseloadAnalysis.one_years_data?
+      # use custom logic here until bug fixed in ElectricityBaseloadAnalysis.one_years_data?
       start_date = @meter.amr_data.start_date
-      return (@asof_date - 364) >= start_date
+      (@asof_date - 364) >= start_date
     end
 
     def intraweek_variation
-      raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}" unless enough_data?
+      unless enough_data?
+        raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}"
+      end
 
-      return IntraweekVariation.new(
+      IntraweekVariation.new(
         days_kw: baseload_analysis.average_intraweek_schoolday_kw(@asof_date)
       )
     end
 
     def estimated_costs
       annual_cost_kwh = intraweek_variation.annual_cost_kwh
-      #costs are using the current economic tariff (£current)
-      #TODO: confirm whether this is correct
-      return CombinedUsageMetric.new(
+      # costs are using the current economic tariff (£current)
+      # TODO: confirm whether this is correct
+      CombinedUsageMetric.new(
         kwh: annual_cost_kwh,
         £: annual_cost_kwh * blended_baseload_rate_£current_per_kwh,
         co2: annual_cost_kwh * co2_per_kwh

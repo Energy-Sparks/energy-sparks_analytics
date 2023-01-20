@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Centrica
 class DisaggregateCommunityUsage
   include Logging
@@ -9,7 +11,7 @@ class DisaggregateCommunityUsage
     @school = @meter_collection = school
   end
 
-  def can_disaggregate?(fuel_type)
+  def can_disaggregate?(_fuel_type)
     # check community use opening and closing times
     # against normal school open/close times if overlap
     # then return false
@@ -19,7 +21,7 @@ class DisaggregateCommunityUsage
   def self.test_dates
     @@test_dates ||= [
       (Date.new(2022, 1, 1)..Date.new(2022, 1, 14)).to_a,
-      (Date.new(2021, 1, 7)..Date.new(2021, 1, 14)).to_a,
+      (Date.new(2021, 1, 7)..Date.new(2021, 1, 14)).to_a
     ].flatten
   end
 
@@ -29,7 +31,7 @@ class DisaggregateCommunityUsage
   end
 
   def disaggregate_by_fuel_type(fuel_type)
-    puts "Disaggregating for community use"
+    puts 'Disaggregating for community use'
     # there are 2 types of disaggregation
     # whole meter   - the meter aggregation is similar to the normal but
     #               - the fewer meters are aggregated than normal
@@ -42,12 +44,12 @@ class DisaggregateCommunityUsage
     # if a mix of representations occured over time
     # then its likely all processing will be down the partial_meter route
 
-    RecordTestTimes.instance.record_time(@school.name, 'community disaggregation', 'partial'){
+    RecordTestTimes.instance.record_time(@school.name, 'community disaggregation', 'partial') do
       disaggregate_partial_meters(fuel_type)
-    }
-    RecordTestTimes.instance.record_time(@school.name, 'community disaggregation', 'whole'){
+    end
+    RecordTestTimes.instance.record_time(@school.name, 'community disaggregation', 'whole') do
       disaggregate_whole_meters(fuel_type)
-    }
+    end
   end
 
   def community_weight(date, meter)
@@ -60,7 +62,7 @@ class DisaggregateCommunityUsage
     oc.school_usages_types(meter)
   end
 
-  def community_weights_half_hour(date, halfhour_index, meter)
+  def community_weights_half_hour(date, _halfhour_index, meter)
     oc = SchoolOpenCloseTimes.new(@school, SchoolOpenCloseTimes.example_open_close_times, meter)
 
     @one_days_disaggregation ||= {}
@@ -71,7 +73,7 @@ class DisaggregateCommunityUsage
 
   def community_weights(date, meter)
     oc = SchoolOpenCloseTimes.new(@school, SchoolOpenCloseTimes.example_open_close_times, meter)
-    
+
     @one_days_community_aggregates ||= {}
     @one_days_community_aggregates[date] ||= oc.one_day_disaggregation(meter, date).transform_values(&:sum)
     meter.amr_data.days_amr_data(date).set_community_open_close_usage_x48(@one_days_community_aggregates[date])
@@ -83,8 +85,8 @@ class DisaggregateCommunityUsage
   def disaggregate_whole_meters(fuel_type)
     meters = @school.underlying_meters(fuel_type)
 
-    community_use_meters     = meters.select { |m| m.has_exclusive_community_use? }
-    non_community_use_meters = meters.reject { |m| m.has_exclusive_community_use? }
+    community_use_meters     = meters.select(&:has_exclusive_community_use?)
+    non_community_use_meters = meters.reject(&:has_exclusive_community_use?)
 
     aggregate_meter_to_copy = @school.aggregate_meter(fuel_type)
 
@@ -98,7 +100,7 @@ class DisaggregateCommunityUsage
   end
 
   def disaggregate_partial_meters(fuel_type)
-    puts "disaggregate_partial_meters not implemented"
+    puts 'disaggregate_partial_meters not implemented'
 
     meters = @school.underlying_meters(fuel_type)
 
@@ -108,7 +110,6 @@ class DisaggregateCommunityUsage
   end
 
   def disaggregate_meter_for_community_use(meter)
-
     return
 
     amr_data = meter.amr_data

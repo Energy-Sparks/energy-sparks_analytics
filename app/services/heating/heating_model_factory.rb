@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module Heating
   class HeatingModelFactory
-
     def initialize(aggregate_meter, asof_date)
       @aggregate_meter = aggregate_meter
       @asof_date = asof_date
@@ -23,6 +24,5 @@ module Heating
     def one_year_ago
       @asof_date - 364
     end
-
   end
 end

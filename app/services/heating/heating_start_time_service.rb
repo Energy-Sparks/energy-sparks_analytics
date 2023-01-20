@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'ostruct'
 
 module Heating
@@ -14,7 +16,7 @@ module Heating
       super(meter_collection, asof_date)
     end
 
-    #Find the average start time over the last week
+    # Find the average start time over the last week
     def average_start_time_last_week
       _days, _rating, average_heat_start_time = calculate_start_times
       average_heat_start_time
@@ -27,7 +29,7 @@ module Heating
       days, _rating_percent, average_start_time = calculate_start_times
 
       days = days.map do |day|
-        #unpack the array
+        # unpack the array
         date, heating_start_time, recommended_time, temperature, timing, kwh_saving, saving_£, saving_co2 = day
         OpenStruct.new(
           date: date,
@@ -43,14 +45,13 @@ module Heating
     private
 
     def calculate_start_times
-      #[days_assessment, overall_rating_percent, average_heat_start_time]
-      #[date, heating_on_time, recommended_time, temperature, timing, kwh_saving, saving_£, saving_co2]
+      # [days_assessment, overall_rating_percent, average_heat_start_time]
+      # [date, heating_on_time, recommended_time, temperature, timing, kwh_saving, saving_£, saving_co2]
       @heating_start_times = heating_start_time_calculator.calculate_start_times(@asof_date)
     end
 
     def heating_start_time_calculator
       @heating_time_calculator ||= HeatingStartTimeCalculator.new(heating_model: heating_model)
     end
-
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Baseload
   # This illustrates future direction of analytics interfaces, with
   # the application code calling service classes which delegate
@@ -19,7 +21,7 @@ module Baseload
     # @param [Date] asof_date the date to use as the basis for calculations
     #
     # @raise [EnergySparksUnexpectedStateException] if meter isn't an electricity meter
-    def initialize(analytics_meter, asof_date=Time.zone.today)
+    def initialize(analytics_meter, asof_date = Time.zone.today)
       validate_meter(analytics_meter)
       @meter = analytics_meter
       @asof_date = asof_date
@@ -37,7 +39,7 @@ module Baseload
       when :week
         baseload_analysis.average_baseload_last_week_kw(@asof_date)
       else
-        raise "Invalid period"
+        raise 'Invalid period'
       end
     end
 
@@ -48,7 +50,7 @@ module Baseload
     #
     # @return [CombinedUsageMetric] the calculated usage
     def annual_baseload_usage
-      return CombinedUsageMetric.new(
+      CombinedUsageMetric.new(
         kwh: average_baseload_last_year_kwh,
         £: average_baseload_last_year_£,
         co2: average_baseload_last_year_co2
@@ -73,6 +75,5 @@ module Baseload
     def meter_collection
       @meter.meter_collection
     end
-
   end
 end

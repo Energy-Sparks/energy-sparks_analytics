@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Baseload
   class SeasonalBaseloadService < BaseService
     # Create a service that can calculate the seasonal baseload variation
@@ -17,9 +19,9 @@ module Baseload
     end
 
     def enough_data?
-      #use custom logic here until bug fixed in ElectricityBaseloadAnalysis.one_years_data?
+      # use custom logic here until bug fixed in ElectricityBaseloadAnalysis.one_years_data?
       start_date = @meter.amr_data.start_date
-      return (@asof_date - 364) >= start_date
+      (@asof_date - 364) >= start_date
     end
 
     # Calculate seasonal variation in baseload for this meter
@@ -27,25 +29,29 @@ module Baseload
     # @return [Baseload::SeasonalVariation] the calculated variation
     # @raise [EnergySparksNotEnoughDataException] if the meter doesnt have a years worth of data
     def seasonal_variation
-      raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}" unless enough_data?
+      unless enough_data?
+        raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}"
+      end
 
-      return SeasonalVariation.new(
+      SeasonalVariation.new(
         winter_kw: baseload_analysis.winter_kw(@asof_date),
         summer_kw: baseload_analysis.summer_kw(@asof_date),
         percentage: baseload_analysis.percent_seasonal_variation(@asof_date)
       )
     end
 
-    #Returns the costs over 1 year for the usage above the minimum baseload
+    # Returns the costs over 1 year for the usage above the minimum baseload
     def estimated_costs
-      raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}" unless enough_data?
+      unless enough_data?
+        raise EnergySparksNotEnoughDataException, "Needs 1 years amr data for as of date #{@asof_date}"
+      end
 
       summer_kw = baseload_analysis.summer_kw(@asof_date)
       annual_cost_kwh = baseload_analysis.costs_of_baseload_above_minimum_kwh(@asof_date, summer_kw)
 
-      #costs are using the current economic tariff (£current)
-      #TODO: confirm whether this is correct
-      return CombinedUsageMetric.new(
+      # costs are using the current economic tariff (£current)
+      # TODO: confirm whether this is correct
+      CombinedUsageMetric.new(
         kwh: annual_cost_kwh,
         £: annual_cost_kwh * blended_baseload_rate_£current_per_kwh,
         co2: annual_cost_kwh * co2_per_kwh
