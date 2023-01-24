@@ -66,12 +66,14 @@ class SolarPVProfitLoss
     days = end_date - start_date + 1
 
     kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
+    co2 = meter.amr_data.kwh_date_range(start_date, end_date, :co2)
     
     {
       start_date:             start_date,
       end_date:               end_date,
       kwh:                    kwh.magnitude,
       days:                   days,
+      co2:                    co2.magnitude,
       period_description:     FormatEnergyUnit.format(:years, days / 365.0, :text)
     }
   end
