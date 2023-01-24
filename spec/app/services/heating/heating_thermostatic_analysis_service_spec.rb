@@ -14,6 +14,7 @@ describe Heating::HeatingThermostaticAnalysisService do
   context '#create_model' do
     it 'creates a model for results of a heating thermostatic analysis' do
       model = service.create_model
+      expect(model.r2).to eq(0.7329578423502179)
     end
   end
 end
