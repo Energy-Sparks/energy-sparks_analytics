@@ -1,5 +1,15 @@
 AllCops:
   NewCops: enable
+  Exclude:
+    - 'app/models/**/*'
+    - 'config/**/*'
+    - 'InputData/**/*'
+    - 'script/**/*'
+    - 'lib/**/*'
+    - 'log/**/*'
+    - 'rakelib/**/*'
+    - 'test_output/**/*'
+    - 'test_support/**/*'
 Naming/AsciiIdentifiers:
   Enabled: false
 Style/AsciiComments:
