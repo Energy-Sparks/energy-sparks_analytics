@@ -1,0 +1,215 @@
+<!DOCTYPE html><link rel="stylesheet" media="all" href="C:/Users/phili/OneDrive/ESDev/energy-sparks_analytics/InputData/application-1.css" />
+  <link rel="stylesheet" media="screen" href="/Users/phili/OneDrive/ESDev/energy-sparks_analytics/InputData/application-2.css" /><html><title>Acme Academy- adult dashboard</title><h1>Acme Academy- adult dashboard</h1><h1></h1><h2>All school meters aggregated:</h2> 
+      <h2>Thermostatic Control</h2>
+     
+      <p>
+        The thermostatic control at your school is about average (R<sup>2</sup> = 0.67).
+      </p>
+     
+      <h2>Why thermostatic control is important</h2>
+
+      <p>
+        A building with good thermostatic control means
+        the heating system brings the temperature of the
+        building up to the set temperature, and then maintains
+        it at a constant level. The heating required and
+        therefore gas consumption should vary linearly with
+        how cold it is outside i.e. the colder it is outside
+        the higher the gas consumption for heating.
+      </p>
+
+      <p>
+        The heating system can then adjust for internal heat
+        gains due to people, electrical equipment and sunshine
+        warming the building. It can also adjust for losses due
+        to ventilation. Poor thermostatic control is likely to
+        cause poor thermal comfort (occupants feel too hot or too cold),
+        and the thermal comfort is then often maintained by leaving
+        windows open leading to excessive gas consumption and carbon emissions.
+      </p>
+     
+      <h2>Reasons for poor thermostatic control</h2>
+
+      <p>
+        Unfortunately, many schools have poor thermostatic control.
+        This can be due to poorly located boiler thermostats.
+        A common location for a thermostat in schools is
+        in the school hall or entrance lobby whose heating,
+        internal gains and heat losses are not representative
+        of the building as a whole, and particularly classrooms.
+        Halls are often poorly insulated with few radiators
+        which means they never get up to temperature, causing
+        the boiler controller to run the boiler constantly which
+        causes the better insulated classrooms to overheat,
+        and more gas consumption than necessary.
+      </p>
+
+      <p>
+        Poor thermostatic control can also be due to a lack
+        of thermostatic controls in individual rooms,
+        which leads to windows being opened to compensate.
+        If it’s difficult to provide local thermostatic control
+        in each room, for example Thermostatic Radiator Valves (TRVs)
+        can’t be installed on radiators you could ask your boiler
+        engineers whether
+        <strong>’weather compensation’<!╌ technical term don't translate ╌></strong>,
+        which reduces the temperature of the circulating central
+        heating water in milder weather can be configured for your boiler as an alternative.
+      </p>
+     
+      <p>
+        The scatter chart above shows a thermostatic analysis
+        of your school&apos;s heating system. The y axis shows
+        the energy consumption in kWh on any given day.
+        The x axis is the outside temperature.
+      </p>
+
+      <p>
+        If the heating has good thermostatic control then
+        the points at the top of chart when the heating
+        is on should be close to
+        the trend line. This is because the amount of heating
+        required on a single day is linearly proportional to the
+        difference between the inside and outside temperature,
+        and any variation from the trend line would suggest
+        thermostatic control isn&apos;t working too well.
+      </p>
+
+      <p>
+        R<sup>2</sup> is a measure of how close to the trendline the daily
+        heating values are. At your school this is 0.67
+        which is <strong>about average</strong>,
+        a value of 1.0 is perfect,
+        0.0 indicates no relationship between how cold
+        it is outside and how much gas is consumed which
+        would be very bad for the school’s carbon emissions
+        and running costs.
+      </p>
+
+      <p>
+        Two sets of data are provided on the chart.
+        The points associated with the group at the top
+        of the chart are those for winter school day heating.
+        As it gets warmer the daily gas consumption drops.
+      </p>
+     
+      
+        <p>
+          The second set of data at the bottom of the chart
+          is for gas consumption in the summer when the heating
+          is not on; typically, this is from hot water and
+          kitchen consumption. The slope of this line is often
+          an indication of how well insulated the hot water system is;
+          if the consumption increases as it gets colder it
+            suggests a lack of insulation.
+            An estimate of this loss across the last year is
+            &pound;5,800 (190,000 kWh).
+        </p>
+      
+     
+      <h2>How to calculate a theoretical daily gas consumption using the model</h2>
+
+      <p>
+        For energy experts, the formula which defines the trend line is very interesting.
+        It predicts how the gas consumption varies with outside temperature.
+      </p>
+
+      <p>In the example above the formula for heating is:</p>
+
+      <blockquote>predicted_heating_requirement = -326.1 * outside_temperature + 5812</blockquote>
+      
+      <p>
+        So for your school if the average outside temperature is 12C
+        the predicted gas consumption for the school would be
+        -326.1 * 12.0 + 5812 = 1899 kWh for the day.
+        Whereas if the outside temperature was colder at 4C the gas consumption would be
+        -326.1 * 4.0 + 5812 = 4508 kWh.
+        See if you can read these values off the trend line of the graph above
+        (temperatures of 12C and 4C on the x axis and the answer - the predicted daily gas consumption on the y-axis).
+      </p>
+     
+      <h2>How to improve your school’s thermostatic control</h2>
+
+      <p>
+        Measures for improving thermostatic control:
+        <ul>
+          <li>
+            Check the siting of the boiler thermostats
+            – halls and corridors are not good locations
+          </li>
+          <li>
+            Check the thermostat settings or TRV radiator
+            settings every two weeks in the winter to make
+            sure they haven’t been turned up – they should
+            be set to keep classrooms at a recommended 18C
+          </li>
+          <li>
+            Configure
+            <strong>’weather compensation’<!╌ technical term don't translate ╌></strong>
+            on your boiler (ask your boiler engineers)
+          </li>
+        </ul>
+      </p>
+     
+      <h2>Further reading</h2>
+
+      <p>
+        <ul>
+          <li>
+            <a href="https://blog.minitab.com/en/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit" target ="_blank">Explanation of r2</a>
+          </li>
+          <li>
+          <a href="https://www.sustainabilityexchange.ac.uk/files/degree_days_for_energy_management_carbon_trust.pdf" target ="_blank">An explanation of thermostatic control</a>
+             (versus degree days - which is similar to
+              the way Energy Sparks looks at thermostatic control
+              but we use temperature instead of degree days). 
+          </li>
+        </ul>
+      </p>
+     
+      <h2>Using days with large diurnal range to understand thermostatic control</h2>
+
+      <p>
+        An alternative way of looking at the thermostatic control is to
+        look at whether a school&apos;s gas consumption changes on a day when
+        the outside temperature changes significantly. It is common,
+        particularly in Spring for outside temperatures to increase by
+        more than 10C during the day (called a large diurnal temperature range,
+        typically caused by cold ground temperatures after the winter reducing
+        overnight temperatures, and warm Spring sunshine during the day).
+      </ p> 
+
+      <p>
+        In theory if outside temperatures rise by 10C, then the heating loss
+        through a building&apos;s fabric (walls, windows etc.) will more than
+        halve (as the heat loss is proportional to the difference between outside
+        and inside temperatures). If the school has good thermostatic control
+        then you would expect so see a similar drop in gas consumption over the course of the day.
+      </p>
+
+      <p>
+        The chart below shows recent example winter days with a large diurnal range:
+      </p>
+     
+      <p>
+        You can click on the &apos;Explore&apos; buttons on the chart
+        e.g. &apos;Back 1 day with large diurnal range&apos; to examine other
+        days.
+      </p>
+     <h2>Cusum chart (analytics user only)</h2> <h2 style="text-align:left;">Old building (10308607)<span style="float:right;">270,000 kWh &pound;8,100 46&percnt;</span></h2> 
+      <div style="background-color: #cfc ; padding: 10px; border: 1px solid green;">
+        <h3>Chart: thermostatic_up_to_1_year_10308607</h3>
+      </div>
+     <h2 style="text-align:left;">New building (9335373908)<span style="float:right;">230,000 kWh &pound;7,000 40&percnt;</span></h2> 
+      <div style="background-color: #cfc ; padding: 10px; border: 1px solid green;">
+        <h3>Chart: thermostatic_up_to_1_year_9335373908</h3>
+      </div>
+     <h2 style="text-align:left;">Art Block? (10308203)<span style="float:right;">63,000 kWh &pound;1,900 11&percnt;</span></h2> 
+      <div style="background-color: #cfc ; padding: 10px; border: 1px solid green;">
+        <h3>Chart: thermostatic_up_to_1_year_10308203</h3>
+      </div>
+     <h2 style="text-align:left;">Lodge (10307706)<span style="float:right;">16,000 kWh &pound;480 2.8&percnt;</span></h2> 
+      <div style="background-color: #cfc ; padding: 10px; border: 1px solid green;">
+        <h3>Chart: thermostatic_up_to_1_year_10307706</h3>
+      </div>
+    <h2>Chart  inserted here</h2></html>
