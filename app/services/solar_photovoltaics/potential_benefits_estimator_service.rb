@@ -13,7 +13,24 @@ module SolarPhotovoltaics
       @asof_date = asof_date
     end
 
-    def calculate
+    def create_model
+      calculate_potential_benefits_estimates
+
+      OpenStruct.new(
+        optimum_kwp: optimum_kwp,
+        optimum_payback_years: optimum_payback_years,
+        optimum_mains_reduction_percent: optimum_mains_reduction_percent,
+        scenarios: @scenarios
+      )
+    end
+
+    def enough_data?
+      aggregated_electricity_meters.amr_data.days_valid_data > 364
+    end
+
+    private
+
+    def calculate_potential_benefits_estimates
       # (use_max_meter_date_if_less_than_asof_date: false)
       # @max_asofdate = aggregated_electricity_meters.amr_data.end_date
       # date = use_max_meter_date_if_less_than_asof_date ? [maximum_alert_date, asof_date].min : @asof_date
@@ -22,13 +39,6 @@ module SolarPhotovoltaics
       calculate_optimum_payback_for(date)
       calculate_range_of_scenarios_for(date)
       calculate_savings
-      @scenarios
-    end
-
-    private
-
-    def enough_data?
-      aggregated_electricity_meters.amr_data.days_valid_data > 364
     end
 
     def aggregated_electricity_meters

@@ -12,14 +12,16 @@ describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service d
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context '#calculate' do
+  context '#create_model' do
     it 'calculates the potential benefits over a geometric sequence of capacity kWp up to 256 for a school with no solar pv' do
-      scenarios = service.calculate
+      model = service.create_model
 
-      # expect(service.optimum_kwp).to round_to_two_digits(52.5)
-      # expect(service.optimum_payback_years).to round_to_two_digits(5.682322708769174)
-      # expect(service.optimum_mains_reduction_percent).to round_to_two_digits(0.10478762755164217)
-      # expect(service.scenarios.size).to round_to_two_digits(9)
+      expect(model.optimum_kwp).to round_to_two_digits(52.5) # 52.5
+      expect(model.optimum_payback_years).to round_to_two_digits(5.68) # 5.682322708769174
+      expect(model.optimum_mains_reduction_percent).to round_to_two_digits(0.1) # 0.10478762755164217
+      expect(model.scenarios.size).to round_to_two_digits(9)
+
+      scenarios = model.scenarios
 
       expect(scenarios[0].kwp).to eq(1)
       expect(scenarios[0].panels).to eq(3)
