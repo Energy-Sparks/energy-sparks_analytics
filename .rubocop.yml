@@ -10,6 +10,8 @@ AllCops:
     - 'rakelib/**/*'
     - 'test_output/**/*'
     - 'test_support/**/*'
+    - 'spec/app/models/**/*'
+    - 'spec/lib/**/*'
 Naming/AsciiIdentifiers:
   Enabled: false
 Style/AsciiComments:
