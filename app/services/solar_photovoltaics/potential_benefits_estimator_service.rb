@@ -8,7 +8,6 @@ module SolarPhotovoltaics
     def initialize(meter_collection:, asof_date: Date.today)
       @meter_collection = meter_collection
       raise if @meter_collection.solar_pv_panels?
-      raise unless enough_data?
 
       @asof_date = asof_date
     end
@@ -22,10 +21,6 @@ module SolarPhotovoltaics
         optimum_mains_reduction_percent: optimum_mains_reduction_percent,
         scenarios: @scenarios
       )
-    end
-
-    def enough_data?
-      aggregated_electricity_meters.amr_data.days_valid_data > 364
     end
 
     private

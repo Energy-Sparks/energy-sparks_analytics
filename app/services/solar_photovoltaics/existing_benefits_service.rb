@@ -4,6 +4,8 @@ module SolarPhotovoltaics
   class ExistingBenefitsService
     def initialize(meter_collection:)
       @meter_collection = meter_collection
+
+      raise unless @meter_collection.solar_pv_panels?
     end
 
     # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Layout/LineLength
