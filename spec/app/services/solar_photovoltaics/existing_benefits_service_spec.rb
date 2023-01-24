@@ -1,6 +1,4 @@
 # frozen_string_literal: true
-require 'pp'
-
 require 'spec_helper'
 
 describe SolarPhotovoltaics::ExistingBenefitsService, type: :service do
@@ -12,9 +10,9 @@ describe SolarPhotovoltaics::ExistingBenefitsService, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy-with-solar')
   end
 
-  context '#calculate' do
+  context '#create_model' do
     it 'calculates the existing benefits for a school with solar pv' do
-      benefits = service.calculate
+      benefits = service.create_model
       expect(benefits.annual_saving_from_solar_pv_percent).to round_to_two_digits(0.21) # 0.2112828204597476
       expect(benefits.annual_electricity_including_onsite_solar_pv_consumption_kwh).to round_to_two_digits(61057.88) # 61057.88139174447
       expect(benefits.annual_carbon_saving_percent).to round_to_two_digits(0.23) # 0.2324996269349433
