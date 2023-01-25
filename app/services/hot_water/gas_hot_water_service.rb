@@ -9,18 +9,18 @@ module HotWater
     def create_model
       OpenStruct.new(
         investment_choices: investment_choices,
-        hotwater_analysis: hotwater_analysis
+        efficiency_breakdowns: efficiency_breakdowns
       )
     end
 
     private
 
+    # def current_system_efficiency_percent
+    #   investment_data[:existing_gas][:efficiency]
+    # end
+
     def investment_analysis
       @investment_analysis ||= AnalyseHeatingAndHotWater::HotWaterInvestmentAnalysis.new(@meter_collection)
-    end
-
-    def day_type_data
-      HotWaterDayTypeTableFormatting.new(@investment_analysis)
     end
 
     def investment_analysis_annual
@@ -34,16 +34,24 @@ module HotWater
       end
     end
 
-    def current_system_efficiency_percent
-      investment_data[:existing_gas][:efficiency]
+    def hotwater_model
+      investment_analysis.hotwater_model
     end
 
-    def hotwater_model
-      @hotwater_model ||= investment_analysis.hotwater_model
+    def efficiency_breakdowns
+      hotwater_analysis.each_with_object(OpenStruct.new) do |(type, values_for_type), efficiency_breakdown|
+        efficiency_breakdown[type] = build_efficiency_breakdown(values_for_type)
+      end
+    end
+
+    def build_efficiency_breakdown(values_for_type)
+      efficiency_breakdown = OpenStruct.new
+      values_for_type.map { |row, value| efficiency_breakdown[row] = OpenStruct.new(value) }
+      efficiency_breakdown
     end
 
     def hotwater_analysis
-      @hotwater_analysis ||= hotwater_model.daytype_breakdown_statistics
+      hotwater_model.daytype_breakdown_statistics
     end
   end
 end
