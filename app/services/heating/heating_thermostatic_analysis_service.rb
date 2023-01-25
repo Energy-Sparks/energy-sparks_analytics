@@ -2,8 +2,6 @@
 
 module Heating
   class HeatingThermostaticAnalysisService
-    attr_reader :aggregated_heat_meters
-
     def initialize(
       aggregated_heat_meters:,
       average_outside_temperature_high_centigrade: 12.0,
@@ -46,7 +44,7 @@ module Heating
 
     # rubocop:disable Naming/MethodName
     def latest_blended_tariff_£_per_kwh
-      aggregated_heat_meters.amr_data.current_tariff_rate_£_per_kwh
+      @aggregated_heat_meters.amr_data.current_tariff_rate_£_per_kwh
     end
     # rubocop:enable Naming/MethodName
 
@@ -65,11 +63,11 @@ module Heating
     end
 
     def one_year_before_last_meter_date
-      [last_meter_date - 364, aggregated_heat_meters.amr_data.start_date].max
+      [last_meter_date - 364, @aggregated_heat_meters.amr_data.start_date].max
     end
 
     def last_meter_date
-      aggregated_heat_meters.amr_data.end_date
+      @aggregated_heat_meters.amr_data.end_date
     end
 
     def a
@@ -84,9 +82,9 @@ module Heating
       # Use simple_regression_temperature rather than best model for the explanation
       # otherwise the chart is too complicated for most
       # users to understand if the thermally massive model is used
-      start_date = [aggregated_heat_meters.amr_data.end_date - 364, aggregated_heat_meters.amr_data.start_date].max
-      last_year = SchoolDatePeriod.new(:analysis, 'validate amr', start_date, aggregated_heat_meters.amr_data.end_date)
-      aggregated_heat_meters.heating_model(last_year, :simple_regression_temperature)
+      start_date = [@aggregated_heat_meters.amr_data.end_date - 364, @aggregated_heat_meters.amr_data.start_date].max
+      last_year = SchoolDatePeriod.new(:analysis, 'validate amr', start_date, @aggregated_heat_meters.amr_data.end_date)
+      @aggregated_heat_meters.heating_model(last_year, :simple_regression_temperature)
     end
 
     def heating_model
