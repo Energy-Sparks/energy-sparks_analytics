@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module HotWater
   class GasHotWaterService
     def initialize(meter_collection:)
@@ -6,8 +8,8 @@ module HotWater
 
     def create_model
       OpenStruct.new(
-        investment_data: OpenStruct.new(investment_data),
-        hotwater_analysis: OpenStruct.new(hotwater_analysis)
+        investment_choices: investment_choices,
+        hotwater_analysis: hotwater_analysis
       )
     end
 
@@ -21,8 +23,15 @@ module HotWater
       HotWaterDayTypeTableFormatting.new(@investment_analysis)
     end
 
-    def investment_data
-      @investment_data ||= investment_analysis.analyse_annual
+    def investment_analysis_annual
+      # Returns a hash of investment choices: existing gas, gas better control, and point of use electric
+      investment_analysis.analyse_annual
+    end
+
+    def investment_choices
+      investment_analysis_annual.each_with_object(OpenStruct.new) do |(type, values), investment_choices|
+        investment_choices[type] = OpenStruct.new(values)
+      end
     end
 
     def current_system_efficiency_percent
