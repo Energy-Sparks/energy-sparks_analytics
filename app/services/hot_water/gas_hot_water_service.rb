@@ -15,10 +15,6 @@ module HotWater
 
     private
 
-    # def current_system_efficiency_percent
-    #   investment_data[:existing_gas][:efficiency]
-    # end
-
     def investment_analysis
       @investment_analysis ||= AnalyseHeatingAndHotWater::HotWaterInvestmentAnalysis.new(@meter_collection)
     end
