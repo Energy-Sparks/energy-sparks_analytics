@@ -20,7 +20,7 @@ module Costs
     end
 
     def days
-      (end_date - start_date).to_i
+      (end_date - start_date).to_i + 1
     end
 
     private
