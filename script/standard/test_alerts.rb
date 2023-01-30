@@ -7,8 +7,8 @@ module Logging
   logger.level = :debug
 end
 
-asof_date = Date.new(2020, 12, 31)
-schools = ['a*']
+asof_date = Date.new(2023, 1, 30)
+schools = ['j*']
 
 overrides = {
   schools:  schools,
@@ -21,7 +21,10 @@ overrides = {
     # AlertElectricityBaseloadVersusBenchmark
     # AlertHeatingComingOnTooEarly
     # AlertPreviousYearHolidayComparisonElectricity
-    AlertSolarPVBenefitEstimator
+    AlertElectricityAnnualVersusBenchmark,
+    AlertEnergyAnnualVersusBenchmark,
+    AlertGasAnnualVersusBenchmark,
+    AlertStorageHeaterAnnualVersusBenchmark
     # AlertElectricityAnnualVersusBenchmark
     # AlertGasAnnualVersusBenchmark
     # AlertEnergyAnnualVersusBenchmark
