@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+# rubocop:disable Layout/LineLength, Metrics/BlockLength
 describe Costs::MonthlyMeterCollectionCostsService do
   let(:service) { Costs::MonthlyMeterCollectionCostsService.new(meter_collection: @acme_academy) }
 
@@ -11,9 +12,9 @@ describe Costs::MonthlyMeterCollectionCostsService do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context '#create_model' do
+  context '#calculate_costs' do
     it 'creates a model for results of a costs analysis' do
-      model = service.create_model
+      model = service.calculate_costs
       expect(model.map(&:mpan_mprn).sort).to eq([1_580_001_320_420, 1_591_058_886_735])
       expect(model.map(&:meter_name).sort).to eq(['New building', 'Old building?'])
 
@@ -41,3 +42,4 @@ describe Costs::MonthlyMeterCollectionCostsService do
     end
   end
 end
+# rubocop:enable Layout/LineLength, Metrics/BlockLength
