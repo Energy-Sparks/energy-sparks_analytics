@@ -16,6 +16,16 @@ module Usage
       @asof_date = asof_date
     end
 
+    #Do we have enough data to run the calculations?
+    def enough_data?
+      meter_data_checker.one_years_data?
+    end
+
+    #If we don't have enough data, then when will it be available?
+    def data_available_from
+      meter_data_checker.date_when_enough_data_available(365)
+    end
+
     # Calculate the annual usage over a twelve month period
     #
     # The period is specified using the +period+ parameter
@@ -59,22 +69,6 @@ module Usage
       )
     end
 
-    #FIXME
-    #enough data?  -> needs a year
-    #max_days_out_of_date_while_still_relevant == MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON
-    #3*30 days
-
-    #meter_readings_up_to_date_enough
-    #max_days_out_of_date_while_still_relevant.nil? ? true : (days_between_today_and_last_meter_date < max_days_out_of_date_while_still_relevant)
-
-    #so if the data is > 90 days out of date, then you won't see any AnnualUsage advice currently
-    #enforced via valid_alert?
-    #...and on the dashboard you'll get "no recent data"
-
-    # data available from, as per table?
-    # this is one year from the start date
-    # shown only if there's not enough data
-
     private
 
     #:this_year is last 12 months
@@ -106,6 +100,10 @@ module Usage
       amr_data.kwh_date_range(start_date, end_date, data_type)
     rescue EnergySparksNotEnoughDataException=> e
       nil
+    end
+
+    def meter_data_checker
+      @meter_data_checker ||= Meters::MeterDataRangeChecker(aggregate_meter, asof_date)
     end
 
   end
