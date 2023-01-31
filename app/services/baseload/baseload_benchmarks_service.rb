@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 module Baseload
   class BaseloadBenchmarkingService < BaseService
-
-    HOURS_IN_YEAR = (24.0 * 365.0).freeze
+    HOURS_IN_YEAR = (24.0 * 365.0)
 
     # Create a service capable of producing benchmark comparisons for a
     # given school, based on the data and configuration in their meter
@@ -11,10 +12,10 @@ module Baseload
     # @param [Date] asof_date the date to use as the basis for calculations
     #
     # @raise [EnergySparksUnexpectedStateException] if the schools doesnt have electricity meters
-    def initialize(meter_collection, asof_date=Time.zone.today)
+    def initialize(meter_collection, asof_date = Time.zone.today)
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
-      #baseload analysis always uses the aggregated meter
+      # baseload analysis always uses the aggregated meter
       @meter = aggregate_meter
       @asof_date = asof_date
     end
@@ -38,7 +39,7 @@ module Baseload
       when :exemplar_school
         BenchmarkMetrics.exemplar_baseload_for_pupils(pupils, school_type)
       else
-        raise "Invalid comparison"
+        raise 'Invalid comparison'
       end
     end
 
@@ -53,7 +54,7 @@ module Baseload
     def baseload_usage(compare: :benchmark_school)
       benchmarked_by_pupil_kw = average_baseload_kw(compare: compare)
       by_pupil_kwh = benchmarked_by_pupil_kw * HOURS_IN_YEAR
-      return CombinedUsageMetric.new(
+      CombinedUsageMetric.new(
         kwh: by_pupil_kwh,
         £: by_pupil_kwh * latest_electricity_tariff,
         co2: by_pupil_kwh * co2_per_kwh
@@ -77,7 +78,7 @@ module Baseload
 
       one_year_saving_versus_comparison_kwh = average_baseload_last_year_kwh - baseload_usage_for_comparison.kwh
 
-      return CombinedUsageMetric.new(
+      CombinedUsageMetric.new(
         kwh: one_year_saving_versus_comparison_kwh,
         £: one_year_saving_versus_comparison_kwh * latest_electricity_tariff,
         co2: one_year_saving_versus_comparison_kwh * co2_per_kwh
