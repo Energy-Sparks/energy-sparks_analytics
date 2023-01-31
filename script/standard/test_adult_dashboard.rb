@@ -24,7 +24,7 @@ overrides = {
   # adult_dashboard: { control: { pages: %i[boiler_control_thermostatic], user: { user_role: :analytics, staff_role: nil } } }
   # adult_dashboard: { control: { pages: %i[boiler_control_morning_start_time], user: { user_role: :analytics, staff_role: nil } } }
   # adult_dashboard: { control: { pages: %i[electric_target gas_target] } }
-  adult_dashboard: { control: { pages: %i[electricity_profit_loss] } }
+  adult_dashboard: { control: { pages: %i[gas_profit_loss] } }
 
 }
 
