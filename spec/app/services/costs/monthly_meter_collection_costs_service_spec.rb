@@ -10,6 +10,20 @@ describe Costs::MonthlyMeterCollectionCostsService do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
+  context '#enough_data?' do
+    it 'determines if there is enough data' do
+      service = Costs::MonthlyMeterCollectionCostsService.new(meter_collection: @acme_academy, fuel_type: :electricity)
+      expect(service.enough_data?).to eq(true)
+    end
+  end
+
+  context '#data_available_from' do
+    it 'determines when data is available from' do
+      service = Costs::MonthlyMeterCollectionCostsService.new(meter_collection: @acme_academy, fuel_type: :electricity)
+      expect(service.data_available_from).to eq(Date.new(2019, 1, 13))
+    end
+  end
+
   context '#calculate_costs' do
     it 'creates a model for results of a costs analysis for electricity' do
       service = Costs::MonthlyMeterCollectionCostsService.new(meter_collection: @acme_academy, fuel_type: :electricity)

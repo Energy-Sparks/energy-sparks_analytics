@@ -12,6 +12,18 @@ describe Costs::MonthlyMeterCostsService do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
+  context '#enough_data?' do
+    it 'determines if there is enough data' do
+      expect(service.enough_data?).to eq(true)
+    end
+  end
+
+  context '#data_available_from' do
+    it 'determines when data is available from' do
+      expect(service.data_available_from).to eq(Date.new(2018, 9, 1))
+    end
+  end
+
   context '#calculate_costs' do
     it 'creates a model for results of a costs analysis for a specific electricity meter' do
       service = Costs::MonthlyMeterCostsService.new(meter: @acme_academy.electricity_meters.first) # 159105888673

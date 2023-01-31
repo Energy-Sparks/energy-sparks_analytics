@@ -2,6 +2,8 @@
 
 module Costs
   class MonthlyMeterCollectionCostsService
+    include AnalysableMixin
+
     def initialize(meter_collection:, fuel_type:)
       @meter_collection = meter_collection
       @fuel_type = fuel_type
@@ -17,6 +19,13 @@ module Costs
         )
       end
       meter_collection_costs
+    end
+
+    def data_available_from
+      case @fuel_type
+      when :electricity then @meter_collection.aggregated_electricity_meters.amr_data.start_date
+      when :gas then @meter_collection.aggregated_heat_meters.amr_data.start_date
+      end
     end
 
     private

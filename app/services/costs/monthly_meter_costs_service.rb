@@ -2,6 +2,8 @@
 
 module Costs
   class MonthlyMeterCostsService
+    include AnalysableMixin
+
     def initialize(meter:)
       @meter = meter
 
@@ -10,6 +12,10 @@ module Costs
 
     def calculate_costs
       calculate_monthly_cost_breakdowns
+    end
+
+    def data_available_from
+      @meter.amr_data.start_date
     end
 
     private
