@@ -39,6 +39,36 @@ describe Costs::MonthlyMeterCollectionCostsService do
       expect(model.first.meter_monthly_costs_breakdown.last.full_month).to eq(false)
       expect(model.first.meter_monthly_costs_breakdown.last.total).to round_to_two_digits(407.83) # 407.83000000000004
     end
+
+    it 'creates a model for results of a costs analysis for gas' do
+      service = Costs::MonthlyMeterCollectionCostsService.new(meter_collection: @acme_academy, fuel_type: :gas)
+      model = service.calculate_costs
+      expect(model.map(&:mpan_mprn).sort).to eq([10_307_706, 10_308_203, 10_308_607, 9_335_373_908])
+      expect(model.map(&:meter_name).sort).to eq(['Art Block?', 'Lodge', 'New building', 'Old building'])
+
+      expect(model.first.mpan_mprn).to eq(10_308_607)
+      expect(model.first.meter_name).to eq('Old building')
+
+      expect(model.first.meter_monthly_costs_breakdown.count).to eq(47)
+
+      expect(model.first.meter_monthly_costs_breakdown.first.month_start_date).to eq(Date.parse('2018-09-01'))
+      expect(model.first.meter_monthly_costs_breakdown.first.start_date).to eq(Date.parse('2018-09-01'))
+      expect(model.first.meter_monthly_costs_breakdown.first.end_date).to eq(Date.parse('2018-09-30'))
+      expect(model.first.meter_monthly_costs_breakdown.first.bill_component_costs.keys.sort).to eq(%i[flat_rate standing_charge])
+      expect(model.first.meter_monthly_costs_breakdown.first.bill_component_costs[:flat_rate]).to round_to_two_digits(611.75) # 611.74965
+      expect(model.first.meter_monthly_costs_breakdown.first.bill_component_costs[:standing_charge]).to round_to_two_digits(120.0) # 120.0
+      expect(model.first.meter_monthly_costs_breakdown.first.full_month).to eq(true)
+      expect(model.first.meter_monthly_costs_breakdown.first.total).to round_to_two_digits(731.75) # 731.74965
+
+      expect(model.first.meter_monthly_costs_breakdown.last.month_start_date).to eq(Date.parse('2022-07-01'))
+      expect(model.first.meter_monthly_costs_breakdown.last.start_date).to eq(Date.parse('2022-07-01'))
+      expect(model.first.meter_monthly_costs_breakdown.last.end_date).to eq(Date.parse('2022-07-12'))
+      expect(model.first.meter_monthly_costs_breakdown.last.bill_component_costs.keys.sort).to eq(%i[flat_rate standing_charge])
+      expect(model.first.meter_monthly_costs_breakdown.last.bill_component_costs[:flat_rate]).to round_to_two_digits(0) # 0
+      expect(model.first.meter_monthly_costs_breakdown.last.bill_component_costs[:standing_charge]).to round_to_two_digits(48.0) # 48.0
+      expect(model.first.meter_monthly_costs_breakdown.last.full_month).to eq(false)
+      expect(model.first.meter_monthly_costs_breakdown.last.total).to round_to_two_digits(48.0) # 48.0
+    end
   end
 end
 # rubocop:enable Layout/LineLength, Metrics/BlockLength
