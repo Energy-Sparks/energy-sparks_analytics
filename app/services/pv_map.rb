@@ -1,12 +1,14 @@
-require_relative '../../lib/dashboard/utilities/restricted_key_hash.rb'
+# frozen_string_literal: true
+
+require_relative '../../lib/dashboard/utilities/restricted_key_hash'
 # helper class for main solar aggregation service
 # keeps track of the 5 to 7 meters being manipulated
-class PVMap  < RestrictedKeyHash
+class PVMap < RestrictedKeyHash
   MPAN_KEY_MAPPINGS = {
-    export_mpan:      :export,
-    production_mpan:  :generation,
+    export_mpan: :export,
+    production_mpan: :generation,
     production_mpan2: :generation2,
-    production_mpan3: :generation3,
+    production_mpan3: :generation3
   }.freeze
 
   def self.unique_keys
@@ -39,7 +41,7 @@ class PVMap  < RestrictedKeyHash
   end
 
   def self.mpan_maps(mpan_map)
-    mpan_map.select {|k,_v| MPAN_KEY_MAPPINGS.keys.include?(k)}
+    mpan_map.select { |k, _v| MPAN_KEY_MAPPINGS.keys.include?(k)}
   end
 
   def self.attribute_map_meter_type(mpan_meter_type)
@@ -52,11 +54,11 @@ class PVMap  < RestrictedKeyHash
 
   def self.meter_type_to_name_map
     {
-      export:                   SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
-      generation:               SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME,
-      self_consume:             SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME,
-      mains_consume:            SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
-      mains_plus_self_consume:  SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
+      export: SolarPVPanels::SOLAR_PV_EXPORTED_ELECTRIC_METER_NAME,
+      generation: SolarPVPanels::SOLAR_PV_PRODUCTION_METER_NAME,
+      self_consume: SolarPVPanels::SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME,
+      mains_consume: SolarPVPanels::ELECTRIC_CONSUMED_FROM_MAINS_METER_NAME,
+      mains_plus_self_consume: SolarPVPanels::MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV
     }
   end
 
@@ -68,7 +70,7 @@ class PVMap  < RestrictedKeyHash
   end
 
   def number_of_generation_meters
-    self.count{ |k, v| self.class.generation_meters.include?(k) && !v.nil? }
+    count { |k, v| self.class.generation_meters.include?(k) && !v.nil? }
   end
 
   def set_nil_value(list_of_keys)

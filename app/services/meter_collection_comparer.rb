@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Compares 2 meter collections: primarily for testing of feeds or meter validations
 # has various levels of verbosity/detail
 # bespoke implementaton, did review HashDiff gem, but not suitable/specific enough
@@ -28,9 +30,9 @@ class MeterCollectionReconciler
   end
 
   def meters_with_percent_change_above(percent)
-    @meter_reading_comparisons.select { |id, reconciler| reconciler.percent > percent}
+    @meter_reading_comparisons.select { |_id, reconciler| reconciler.percent > percent}
   end
-    
+
   def print_comparison(verbosity = 0)
     if verbosity >= 0
       logger.info "Comparing meters for meter_collection #{@existing_meter_collection.name}"
@@ -50,8 +52,8 @@ class MeterCollectionReconciler
   end
 
   def compare_meters
-    inserted = @existing_meter_list.select { |id, _meter| !@new_meter_list.key?(id) }
-    deleted = @new_meter_list.select { |id, _meter| !@existing_meter_list.key?(id) }
+    inserted = @existing_meter_list.reject { |id, _meter| @new_meter_list.key?(id) }
+    deleted = @new_meter_list.reject { |id, _meter| @existing_meter_list.key?(id) }
     same_ids = @new_meter_list.keys.select { |id| @existing_meter_list.key?(id) }
     same = same_ids.map { |id| [@existing_meter_list[id], @new_meter_list[id]] } # pair of meters
     [deleted.values, inserted.values, same]
@@ -59,8 +61,8 @@ class MeterCollectionReconciler
 
   class MeterReconciler
     include Logging
-    attr_reader :inserted, :deleted, :changed, :id
-    attr_reader :deleted_kwh, :inserted_kwh, :changed_kwh,:percent
+    attr_reader :inserted, :deleted, :changed, :id, :deleted_kwh, :inserted_kwh, :changed_kwh, :percent
+
     def initialize(meter1, meter2)
       @meter1 = meter1
       @meter2 = meter2
@@ -80,7 +82,7 @@ class MeterCollectionReconciler
       logger.info "Comparing amr readings for #{@meter1.id} #{@meter1.name}: #{@deleted.length} deleted #{@inserted.length} inserted #{@changed.length} changed"
       logger.info "Value #{total_meter_readings_kwh(@inserted).round(0)} kwh"
       @deleted_kwh, @inserted_kwh, @changed_kwh = kwh_changes
-      @percent = (@deleted_kwh.magnitude + @inserted_kwh.magnitude + @changed_kwh.magnitude)/total_meter1_kwh
+      @percent = (@deleted_kwh.magnitude + @inserted_kwh.magnitude + @changed_kwh.magnitude) / total_meter1_kwh
     end
 
     def print_comparison(verbosity)
@@ -93,7 +95,7 @@ class MeterCollectionReconciler
       type_count = Hash.new(0)
       kwh_stats = Hash.new(0.0)
       @changed.each do |day1, day2|
-        key = day1.type == day2.type ? day1.type : (day1.type + '=>' + day2.type)
+        key = day1.type == day2.type ? day1.type : "#{day1.type}=>#{day2.type}"
         type_count[key] += 1
         kwh_stats[key] += day1.one_day_kwh - day2.one_day_kwh
       end
@@ -117,8 +119,8 @@ class MeterCollectionReconciler
     def print_one_day_reading(day, decimal_places)
       date = day.date.strftime('%a %d-%m-%Y')
       sub_date = day.substitute_date.nil? ? '              ' : day.substitute_date.strftime('%a %d-%m-%Y')
-      total = sprintf('%6.1f', day.one_day_kwh)
-      halfhour_readings = day.kwh_data_x48.map { |hh_kwh| sprintf('%*.0f', decimal_places, hh_kwh) }
+      total = format('%6.1f', day.one_day_kwh)
+      halfhour_readings = day.kwh_data_x48.map { |hh_kwh| format('%*.0f', decimal_places, hh_kwh) }
       logger.info "        #{date} #{sub_date} #{day.type} #{total}: #{halfhour_readings.join(',')}"
     end
 
@@ -126,7 +128,7 @@ class MeterCollectionReconciler
       change_type_stats, kwh_stats = analyse_change_correction_type_statistics
       change_type_stats.each do |type, count|
         kwh = kwh_stats[type].nan? ? kwh_stats[type] : kwh_stats[type].round(0)
-        logger.info sprintf('      %-10.10s x %4d %6.0fkwh', type, count, kwh)
+        logger.info format('      %-10.10s x %4d %6.0fkwh', type, count, kwh)
       end
     end
 
@@ -134,10 +136,7 @@ class MeterCollectionReconciler
       deleted_kwh, inserted_kwh, changed_kwh = kwh_changes
 
       logger.info "  Comparing amr readings for #{@meter1.id} #{@meter1.name}:"
-      logger.info '    ' +
-                  change_desc(@deleted,  'deleted',  deleted_kwh) +
-                  change_desc(@inserted,  'inserted', inserted_kwh) +
-                  change_desc(@changed,   'changed',  changed_kwh)
+      logger.info "    #{change_desc(@deleted,  'deleted', deleted_kwh)}#{change_desc(@inserted, 'inserted', inserted_kwh)}#{change_desc(@changed, 'changed', changed_kwh)}"
     end
 
     def kwh_changes
