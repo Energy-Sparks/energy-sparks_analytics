@@ -1,56 +1,17 @@
-# Rails/TimeZone:
-#   Enabled: false
-# Style/NumericPredicate:
-#   Enabled: false
-# Rails/DynamicFindBy:
-#   Enabled: false
-# Style/SymbolArray:
-#   Enabled: false
-# Style/IdenticalConditionalBranches:
-#   Enabled: false
-# Rails/Presence:
-#   Enabled: false
-# Style/RescueStandardError:
-#   Enabled: false
-# Style/EmptyMethod:
-#   Enabled: false
-# Style/FormatStringToken:
-#   Enabled: false
-# Layout/MultilineMethodCallBraceLayout:
-#   Enabled: false
-# Layout/MultilineArrayBraceLayout:
-#   Enabled: false
-# Lint/BooleanSymbol:
-#   Enabled: false
-# Metrics/BlockLength:
-#   Enabled: false
-# Performance/HashEachMethods:
-#   Enabled: false
-# Rails/OutputSafety:
-#   Enabled: false
-# Style/DateTime:
-#   Enabled: false
-# Style/InverseMethods:
-#   Enabled: false
-# Style/RedundantReturn:
-#   Enabled: false
-# Rails/InverseOf:
-#   Enabled: false
-# Rails/HasManyOrHasOneDependent:
-#   Enabled: false
-# Layout/SpaceInsideBlockBraces:
-#   Enabled: false
-# Rails/LexicallyScopedActionFilter:
-#   Enabled: false
-# Rails/Blank:
-#   Enabled: false
-# Performance/CompareWithBlock:
-#   Enabled: false
-# Rails/FilePath:
-#   Enabled: false
-
 AllCops:
   NewCops: enable
+  Exclude:
+    - 'app/models/**/*'
+    - 'config/**/*'
+    - 'InputData/**/*'
+    - 'script/**/*'
+    - 'lib/**/*'
+    - 'log/**/*'
+    - 'rakelib/**/*'
+    - 'test_output/**/*'
+    - 'test_support/**/*'
+    - 'spec/app/models/**/*'
+    - 'spec/lib/**/*'
 Naming/AsciiIdentifiers:
   Enabled: false
 Style/AsciiComments:
