@@ -13,7 +13,8 @@ class MeterCollectionFactory
     @holidays = holidays
   end
 
-  def build(school_data:, amr_data: { electricity_meters: [], heat_meters: []}, pseudo_meter_attributes: {}, meter_attributes_overrides: {})
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Layout/LineLength
+  def build(school_data:, amr_data: { electricity_meters: [], heat_meters: [] }, pseudo_meter_attributes: {}, meter_attributes_overrides: {})
     school = Dashboard::School.new(
       name: school_data[:name],
       id: school_data[:id],
@@ -45,6 +46,7 @@ class MeterCollectionFactory
     add_meters_and_amr_data(meter_collection, amr_data, meter_attributes_overrides)
     meter_collection
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Layout/LineLength
 
   private
 

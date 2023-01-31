@@ -228,11 +228,14 @@ class AggregateDataService
     [name, id, floor_area, pupils]
   end
 
+  # rubocop:disable Layout/LineLength
   def aggregate_main_meters(combined_meter, list_of_meters, type, copy_amr_data = false)
-    log "Aggregating #{list_of_meters.length} meters and #{list_of_meters.map { |sm| sm.sub_meters.length}.sum} sub meters"
+    log "Aggregating #{list_of_meters.length} meters and #{list_of_meters.map { |sm| sm.sub_meters.length }.sum} sub meters"
     aggregate_meters(combined_meter, list_of_meters, type, copy_amr_data)
-    # combine_sub_meters_deprecated(combined_meter, list_of_meters) # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
+    # TODO(PH, 15Aug2019) - not sure about the history behind this call, perhaps simulator, but commented out for the moment
+    # combine_sub_meters_deprecated(combined_meter, list_of_meters)
   end
+  # rubocop:enable Layout/LineLength
 
   # copy meter and amr data - for pv, storage heater meters about to be disaggregated
   def copy_meter_and_amr_data(meter)

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Lint/MissingSuper
 module Baseload
   class SeasonalBaseloadService < BaseService
     # Create a service that can calculate the seasonal baseload variation
@@ -12,7 +13,7 @@ module Baseload
     # @param [Date] asof_date the date to use as the basis for calculations
     #
     # @raise [EnergySparksUnexpectedStateException] if meter isn't an electricity meter
-    def initialize(analytics_meter, asof_date=Time.zone.today)
+    def initialize(analytics_meter, asof_date = Time.zone.today)
       validate_meter(analytics_meter)
       @meter = analytics_meter
       @asof_date = asof_date
@@ -65,3 +66,4 @@ module Baseload
     end
   end
 end
+# rubocop:enable Lint/MissingSuper
