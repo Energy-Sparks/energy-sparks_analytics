@@ -54,6 +54,12 @@ describe Usage::AnnualUsageCalculationService, type: :service do
         expect(usage_change.co2).to round_to_two_digits(8776.65)
         expect(usage_change.percent).to round_to_two_digits(0.12)
       end
+      context 'and there isnt enough data' do
+        let(:asof_date)      { Date.new(2021, 1, 1) }
+        it 'returns nil' do
+          expect(service.annual_usage_change_since_last_year).to be_nil
+        end
+      end
     end
     context 'for gas' do
       let(:meter)          { @acme_academy.aggregated_heat_meters }
@@ -64,6 +70,12 @@ describe Usage::AnnualUsageCalculationService, type: :service do
         expect(usage_change.£).to round_to_two_digits(-561.04)
         expect(usage_change.co2).to round_to_two_digits(-3927.31)
         expect(usage_change.percent).to round_to_two_digits(-0.03)
+      end
+      context 'and there isnt enough data' do
+        let(:asof_date)      { Date.new(2019, 1, 1) }
+        it 'returns nil' do
+          expect(service.annual_usage_change_since_last_year).to be_nil
+        end
       end
     end
   end

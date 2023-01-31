@@ -121,8 +121,6 @@ module Usage
 
     #Calculate the co2 per kwh rate for this school, to convert kwh values
     #into co2 emissions
-    #
-    #FIXME is this using the right ranges? rate calculator uses last 12 months
     def co2_per_kwh
       rate_calculator.blended_co2_per_kwh
     end

@@ -11,7 +11,7 @@ module Usage
     # @param [Date] asof_date the date to use as the basis for calculations
     #
     # @raise [EnergySparksUnexpectedStateException] if meter isn't an electricity meter
-    def initialize(analytics_meter, asof_date=Time.zone.today)
+    def initialize(analytics_meter, asof_date=Date.today)
       @meter = analytics_meter
       @asof_date = asof_date
     end
@@ -43,9 +43,11 @@ module Usage
     # other behaviour, then just calculate the individual annual usage and
     # derive as needed.
     #
+    # If there isn't sufficient data (>2 years) then the method will return nil
+    #
     # @return [CombinedUsageMetric] the difference between this year and last year
     def annual_usage_change_since_last_year
-      #FIXME
+      return nil unless has_full_previous_years_worth_of_data?
       this_year = annual_usage(period: :this_year)
       last_year = annual_usage(period: :last_year)
       kwh = this_year.kwh - last_year.kwh
@@ -75,6 +77,8 @@ module Usage
 
     private
 
+    #:this_year is last 12 months
+    #:last_year is previous 12 months
     def dates_for_period(period)
       case period
       when :this_year
@@ -85,6 +89,11 @@ module Usage
       else
         raise "Invalid year"
       end
+    end
+
+    def has_full_previous_years_worth_of_data?
+      start_date, end_date = dates_for_period(:last_year)
+      @meter.amr_data.start_date <= start_date
     end
 
     #Calculate usage values between two dates, returning the
