@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe UsageBreakdown::UsagePeriodComparisonService, type: :service do
+describe Usage::UsagePeriodComparisonService, type: :service do
   let(:service) do
-    UsageBreakdown::UsagePeriodComparisonService.new(
+    Usage::UsagePeriodComparisonService.new(
       meter_collection: @acme_academy,
       fuel_type: :electricity,
       date: Date.new(2021, 1, 31)

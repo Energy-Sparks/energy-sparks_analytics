@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module UsageBreakdown
+module Usage
   class UsagePeriodComparisonService
     def initialize(meter_collection:, fuel_type:, date: Date.today)
       @meter_collection = meter_collection
@@ -8,6 +8,7 @@ module UsageBreakdown
       @date = date
     end
 
+    # rubocop:disable Metrics/MethodLength
     def create_model
       OpenStruct.new(
         current_period_start_date: current_period_start_date,
@@ -22,6 +23,7 @@ module UsageBreakdown
         abs_difference_co2: abs_difference_co2
       )
     end
+    # rubocop:enable Metrics/MethodLength
 
     private
 
@@ -60,7 +62,10 @@ module UsageBreakdown
     end
 
     def aggregate_meter
-      @aggregate_meter ||= fuel_type == :electricity ? @school.aggregated_electricity_meters : @school.aggregated_heat_meters
+      @aggregate_meter ||= case fuel_type
+                           when :electricity then @school.aggregated_electricity_meters
+                           when :gas then @school.aggregated_heat_meters
+                           end
     end
   end
 end
