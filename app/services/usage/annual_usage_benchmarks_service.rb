@@ -18,6 +18,17 @@ module Usage
       @asof_date = asof_date
     end
 
+
+    #Do we have enough data to run the calculations?
+    def enough_data?
+      meter_data_checker.one_years_data?
+    end
+
+    #If we don't have enough data, then when will it be available?
+    def data_available_from
+      meter_data_checker.date_when_enough_data_available(365)
+    end
+
     #Calcualte the annual electricity usage for a benchmark school of the
     #specified type, with a similar number of pupils
     def annual_electricity_usage_kwh(compare: :benchmark_school)
@@ -143,6 +154,10 @@ module Usage
 
     def rate_calculator
       @rate_calculator ||= Costs::BlendedRateCalculator.new(aggregate_meter)
+    end
+
+    def meter_data_checker
+      @meter_data_checker ||= Meters::MeterDataRangeChecker(aggregate_meter, asof_date)
     end
 
     def validate_meter_collection(meter_collection, fuel_type)

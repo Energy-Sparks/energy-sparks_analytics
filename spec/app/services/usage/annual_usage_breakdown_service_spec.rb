@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Usage::UsageBreakdownService, type: :service do
+describe Usage::AnnualUsageBreakdownService, type: :service do
   Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
 
   let(:meter_collection)          { @acme_academy }
@@ -11,7 +11,7 @@ describe Usage::UsageBreakdownService, type: :service do
 
   context '#usage_breakdown' do
     it 'returns a usage category breakdown with calculated combined usage metrics for holidays, school open days etc' do
-      usage_breakdown_benchmark_service = Usage::UsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity)
+      usage_breakdown_benchmark_service = Usage::AnnualUsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity)
       day_type_breakdown = usage_breakdown_benchmark_service.usage_breakdown
       expect(day_type_breakdown.holidays.kwh).to round_to_two_digits(71847.1) # 71847.09999999999
       expect(day_type_breakdown.holidays.co2).to round_to_two_digits(12476.78) # 12476.783800000008

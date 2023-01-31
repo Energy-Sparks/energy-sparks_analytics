@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Usage::UsageCategoryBreakdown, type: :service do
+describe Usage::AnnualUsageCategoryBreakdown, type: :service do
   Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
 
   let(:meter_collection)          { @acme_academy }
@@ -9,7 +9,7 @@ describe Usage::UsageCategoryBreakdown, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  let(:service) { Usage::UsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity).usage_breakdown }
+  let(:service) { Usage::AnnualUsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity).usage_breakdown }
 
   context '#potential_saving_kwh' do
     it 'calculates the potential savings in kwh' do

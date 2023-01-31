@@ -2,7 +2,7 @@
 
 # rubocop:disable Metrics/ClassLength, Metrics/AbcSize
 module Usage
-  class UsageBreakdownService
+  class AnnualUsageBreakdownService
     def initialize(meter_collection:, fuel_type: :electricity)
       @meter_collection = meter_collection
       @fuel_type = fuel_type
@@ -29,7 +29,7 @@ module Usage
     end
 
     def assign_and_return_usage_category_breakdown
-      Usage::UsageCategoryBreakdown.new(
+      Usage::AnnualUsageCategoryBreakdown.new(
         holidays: @holidays,
         school_day_closed: @school_day_closed,
         school_day_open: @school_day_open,
