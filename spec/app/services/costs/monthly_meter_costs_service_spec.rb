@@ -20,7 +20,7 @@ describe Costs::MonthlyMeterCostsService do
 
   context '#data_available_from' do
     it 'determines when data is available from' do
-      expect(service.data_available_from).to eq(Date.new(2018, 9, 1))
+      expect(service.data_available_from).to eq(Date.new(2019, 1, 13))
     end
   end
 
