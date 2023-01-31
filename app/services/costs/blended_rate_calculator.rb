@@ -1,7 +1,7 @@
-#There's other code in the amr_data class that
-#creates blended rates, perhaps that should be exposed here?
+# frozen_string_literal: true
+# There's other code in the amr_data class that
+# creates blended rates, perhaps that should be exposed here?
 module Costs
-
   # Calculates the conversion rates (£/kwh or co2/kwh) for school
   # using their tariff information
   #
@@ -35,9 +35,11 @@ module Costs
     def blended_rate_date_range(start_date, end_date, datatype)
       kwh  = @aggregate_meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
       data = @aggregate_meter.amr_data.kwh_date_range(start_date, end_date, datatype)
-      raise EnergySparksNotEnoughDataException, "zero kWh consumption between #{start_date} and #{end_date}" if kwh == 0.0
+      if kwh == 0.0
+        raise EnergySparksNotEnoughDataException, "zero kWh consumption between #{start_date} and #{end_date}"
+      end
+
       data / kwh
     end
-
   end
 end

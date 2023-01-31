@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Baseload
   # Calculates a breakdown of the baseload for all electricity meters in a school
   #
@@ -20,7 +22,7 @@ module Baseload
 
     private
 
-    #Taken from AdviceBaseload
+    # Taken from AdviceBaseload
     def calculate_percentage_baseload
       average_baseload_last_year = calculate_average_baseload_last_year
 
@@ -28,14 +30,14 @@ module Baseload
 
       average_baseload_last_year.transform_values do |v|
         {
-          kw:       v[:kw],
-          £:        v[:£],
-          percent:  v[:kw] / total_baseload_kw
+          kw: v[:kw],
+          £: v[:£],
+          percent: v[:kw] / total_baseload_kw
         }
       end
     end
 
-    #Taken from AdviceBaseload
+    # Taken from AdviceBaseload
     def calculate_average_baseload_last_year
       electricity_meters.map do |meter|
         [
@@ -53,8 +55,9 @@ module Baseload
     end
 
     def validate_meter_collection(meter_collection)
-      raise EnergySparksUnexpectedStateException, "School does not have electricity meters" if meter_collection.electricity_meters == nil
+      if meter_collection.electricity_meters.nil?
+        raise EnergySparksUnexpectedStateException, 'School does not have electricity meters'
+      end
     end
-
   end
 end

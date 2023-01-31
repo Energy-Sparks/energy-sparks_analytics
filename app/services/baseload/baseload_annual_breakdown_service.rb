@@ -15,7 +15,6 @@ module Baseload
 
     def calculate_annual_baseload_breakdowns
       year_range.each_with_object([]) do |year, breakdowns|
-
         breakdowns << Baseload::AnnualBaseloadBreakdown.new(
           year: year,
           average_annual_baseload_kw: average_baseload_kw_for(year),

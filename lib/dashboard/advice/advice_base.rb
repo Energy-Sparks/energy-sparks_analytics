@@ -204,7 +204,10 @@ class AdviceBase < ContentBase
 
     charts_and_html += debug_content
 
-    charts.each do |chart|
+    #The list of charts can include nils, as run_chart will return
+    #a nil result if there isn't enough data. So call compact to remove the nils
+    #and avoid unnecessary exception throwing/handling/logging
+    charts.compact.each do |chart|
       begin
         chart_content(chart, charts_and_html)
       rescue StandardError => e
@@ -371,7 +374,7 @@ class AdviceBase < ContentBase
       alert.analyse(alert_asof_date, true)
 
       next if alert.enough_data == :not_enough
-      
+
       variables.each do |to, from|
         #For each variable, copy the value from the alert class to this object
         #as an instance variable. Optionally renaming (from -> to)
