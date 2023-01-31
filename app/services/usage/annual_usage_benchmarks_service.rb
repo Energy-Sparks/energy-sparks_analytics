@@ -41,12 +41,13 @@ module Usage
     def annual_usage(compare: :benchmark_school)
       benchmarked_by_pupil_kwh = annual_electricity_usage_kwh(compare: compare)
 
-      #we've estimating future savings, so use £current
+      #we're estimating future savings, so use £current
       benchmark_by_pupil_£current = benchmarked_by_pupil_kwh * current_blended_rate_£_per_kwh
 
-      #Note: the current alert doesn't currently calculate co2 estimates, but
-      #adding in for completeness. Uses same method as for estimating
-      #co2 usage in baseload benchmarking.
+      #Note: the current alert doesn't currently calculate co2 estimates, except for
+      #savings versus exemplar, but adding this in for completeness. Uses same method as
+      #for estimating co2 usage in baseload benchmarking, and for calculating savings vs exemplar
+      #for annual usage
       benchmark_by_pupil_co2 = benchmarked_by_pupil_kwh * co2_per_kwh
 
       CombinedUsageMetric.new(
@@ -59,13 +60,15 @@ module Usage
     # Compare the annual usage for this school against a benchmark
     # school of the given type to estimate potential savings
     #
-    # Returns the expected estimated savings kwh, cost or co2 savings.
+    # Returns the expected estimated savings kwh, cost or co2 savings. The
+    # returned metric also includes the % difference between the kwh consumed
+    # by the benchmark vs actual school.
     #
     # @param [Symbol] for the type of benchmark school to be used as comparison
     # @return [CombinedUsageMetric] the estimated savings
     def estimated_savings(versus: :benchmark_school)
       #calculate kwh used last year for the school
-      last_year_kwh = annual_usage_calculator.annual_usage(period: :last_year).kwh
+      last_year_kwh = annual_usage_calculator.annual_usage(period: :this_year).kwh
 
       #calculate usage for this type of benchmark school
       annual_usage_for_comparison = annual_usage(compare: versus)
@@ -79,30 +82,26 @@ module Usage
         kwh: saving_versus_benchmark_kwh.magnitude,
         £: saving_versus_benchmark_£.magnitude,
         co2: saving_versus_benchmark_co2.magnitude,
-        percent: percent_change(saving_versus_benchmark_kwh, last_year_kwh)
+        percent: percent_change(annual_usage_for_comparison.kwh, last_year_kwh)
       )
     end
 
     private
 
     def benchmark_annual_electricity_usage_kwh
-      pupils = pupils(@asof_date - 365, @asof_date)
-      BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pupils)
+      BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, school_size_calculator.pupils)
     end
 
     def exemplar_annual_electricity_usage_kwh
-      pupils = pupils(@asof_date - 365, @asof_date)
-      BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school_type, pupils)
+      BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school_type, school_size_calculator.pupils)
     end
 
     def benchmark_annual_gas_usage_kwh
-      floor_area = floor_area(@asof_date - DAYSINYEAR, @asof_date)
-      BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * floor_area / degree_day_adjustment
+      BenchmarkMetrics::BENCHMARK_GAS_USAGE_PER_M2 * school_size_calculator.floor_area / degree_day_adjustment
     end
 
     def exemplar_annual_gas_usage_kwh
-      floor_area = floor_area(@asof_date - DAYSINYEAR, @asof_date)
-      BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * floor_area / degree_day_adjustment
+      BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * school_size_calculator.floor_area / degree_day_adjustment
     end
 
     def degree_day_adjustment
@@ -116,7 +115,6 @@ module Usage
     end
 
     #Taken from content_base.rb
-    #TODO: should this be on the rate calculator?
     def current_blended_rate_£_per_kwh
       aggregate_meter.amr_data.current_tariff_rate_£_per_kwh
     end
@@ -129,11 +127,6 @@ module Usage
       rate_calculator.blended_co2_per_kwh
     end
 
-    #FIXME move this class
-    def rate_calculator
-      @rate_calculator ||= Baseload::BlendedRateCalculator.new(aggregate_meter)
-    end
-
     def school_type
       @meter_collection.school_type
     end
@@ -142,16 +135,16 @@ module Usage
       @meter_collection.aggregate_meter(@fuel_type)
     end
 
-    def pupils(start_date = nil, end_date = nil)
-      aggregate_meter.meter_number_of_pupils(@meter_collection, start_date, end_date)
-    end
-
-    def floor_area(start_date = nil, end_date = nil)
-      aggregate_meter.meter_floor_area(@meter_collection, start_date, end_date)
-    end
-
     def annual_usage_calculator
       @usage_calculator ||= AnnualUsageCalculationService.new(aggregate_meter, @asof_date)
+    end
+
+    def school_size_calculator
+      @school_size_calculator ||= Schools::SchoolSizeCalculator.new(@meter_collection, aggregate_meter, @asof_date - DAYSINYEAR, @asof_date)
+    end
+
+    def rate_calculator
+      @rate_calculator ||= Costs::BlendedRateCalculator.new(aggregate_meter)
     end
 
     def validate_meter_collection(meter_collection, fuel_type)

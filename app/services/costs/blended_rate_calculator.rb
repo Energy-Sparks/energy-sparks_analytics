@@ -1,8 +1,6 @@
-#TODO this should sit in a different package as its more general purpose. Move to costs package?
-#
-#TODO there's other code in the amr_data class that
+#There's other code in the amr_data class that
 #creates blended rates, perhaps that should be exposed here?
-module Baseload
+module Costs
 
   # Calculates the conversion rates (£/kwh or co2/kwh) for school
   # using their tariff information

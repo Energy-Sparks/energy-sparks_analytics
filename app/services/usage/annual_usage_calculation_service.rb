@@ -45,6 +45,7 @@ module Usage
     #
     # @return [CombinedUsageMetric] the difference between this year and last year
     def annual_usage_change_since_last_year
+      #FIXME
       this_year = annual_usage(period: :this_year)
       last_year = annual_usage(period: :last_year)
       kwh = this_year.kwh - last_year.kwh
@@ -56,8 +57,8 @@ module Usage
       )
     end
 
+    #FIXME
     #enough data?  -> needs a year
-
     #max_days_out_of_date_while_still_relevant == MAX_DAYS_OUT_OF_DATE_FOR_1_YEAR_COMPARISON
     #3*30 days
 
