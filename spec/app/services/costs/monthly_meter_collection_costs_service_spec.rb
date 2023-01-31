@@ -4,8 +4,6 @@ require 'spec_helper'
 
 # rubocop:disable Layout/LineLength, Metrics/BlockLength
 describe Costs::MonthlyMeterCollectionCostsService do
-  let(:service) { Costs::MonthlyMeterCollectionCostsService.new(meter_collection: @acme_academy) }
-
   # using before(:all) here to avoid slow loading of YAML and then
   # running the aggregation code for each test.
   before(:all) do
@@ -13,7 +11,8 @@ describe Costs::MonthlyMeterCollectionCostsService do
   end
 
   context '#calculate_costs' do
-    it 'creates a model for results of a costs analysis' do
+    it 'creates a model for results of a costs analysis for electricity' do
+      service = Costs::MonthlyMeterCollectionCostsService.new(meter_collection: @acme_academy, fuel_type: :electricity)
       model = service.calculate_costs
       expect(model.map(&:mpan_mprn).sort).to eq([1_580_001_320_420, 1_591_058_886_735])
       expect(model.map(&:meter_name).sort).to eq(['New building', 'Old building?'])
