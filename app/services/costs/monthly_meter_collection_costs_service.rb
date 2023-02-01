@@ -21,12 +21,8 @@ module Costs
       meter_collection_costs
     end
 
-    def data_available_from
-      case @fuel_type
-      when :electricity then @meter_collection.aggregated_electricity_meters.amr_data.start_date
-      when :gas then @meter_collection.aggregated_heat_meters.amr_data.start_date
-      end
-    end
+    # def data_available_from
+    # end
 
     private
 
