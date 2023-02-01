@@ -15,9 +15,8 @@ module Heating
       @average_outside_temperature_low_centigrade = average_outside_temperature_low_centigrade
     end
 
-    def data_available_from
-      aggregate_meter.amr_data.start_date
-    end
+    # def data_available_from
+    # end
 
     # rubocop:disable Metrics/MethodLength
     def create_model
