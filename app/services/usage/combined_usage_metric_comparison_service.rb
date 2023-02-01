@@ -2,20 +2,20 @@
 
 module Usage
   class CombinedUsageMetricComparisonService
-    def initialize(combined_usage_metric_now, combined_usage_metric_previous)
-      raise if combined_usage_metric_now.class != CombinedUsageMetric
+    def initialize(combined_usage_metric_latest, combined_usage_metric_previous)
+      raise if combined_usage_metric_latest.class != CombinedUsageMetric
       raise if combined_usage_metric_previous.class != CombinedUsageMetric
 
-      @combined_usage_metric_now = combined_usage_metric_now
+      @combined_usage_metric_latest = combined_usage_metric_latest
       @combined_usage_metric_previous = combined_usage_metric_previous
     end
 
     def compare
       CombinedUsageMetric.new(
-        kwh: (@combined_usage_metric_previous.kwh || 0) - (@combined_usage_metric_now.kwh || 0),
-        £: (@combined_usage_metric_previous.£ || 0) - (@combined_usage_metric_now.£ || 0),
-        co2: (@combined_usage_metric_previous.co2 || 0) - (@combined_usage_metric_now.co2 || 0),
-        percent: percent_change(@combined_usage_metric_previous.kwh, @combined_usage_metric_now.kwh)
+        kwh: (@combined_usage_metric_previous.kwh || 0) - (@combined_usage_metric_latest.kwh || 0),
+        £: (@combined_usage_metric_previous.£ || 0) - (@combined_usage_metric_latest.£ || 0),
+        co2: (@combined_usage_metric_previous.co2 || 0) - (@combined_usage_metric_latest.co2 || 0),
+        percent: percent_change(@combined_usage_metric_previous.kwh, @combined_usage_metric_latest.kwh)
       )
     end
 
