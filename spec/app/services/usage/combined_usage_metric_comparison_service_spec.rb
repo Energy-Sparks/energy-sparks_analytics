@@ -5,13 +5,13 @@ require 'spec_helper'
 describe Usage::CombinedUsageMetricComparisonService, type: :service do
   context '#subtract' do
     it 'calculates the kwh, £, and co2 difference between two combined usage metric objects, returning a new one' do
-      a = CombinedUsageMetric.new(kwh: 10, £: 12, co2: 14, percent: 20)
-      b = CombinedUsageMetric.new(kwh: 2, £: 2, co2: 2, percent: 10)
-      new_combined_usage_metric = Usage::CombinedUsageMetricComparisonService.new(a, b).subtract
-      expect(new_combined_usage_metric.kwh).to eq(8)
-      expect(new_combined_usage_metric.£).to eq(10)
-      expect(new_combined_usage_metric.co2).to eq(12)
-      expect(new_combined_usage_metric.percent).to eq(-0.5)
+      a = CombinedUsageMetric.new(kwh: 7817.125, £: 1172.56875, co2: 1524.167925)
+      b = CombinedUsageMetric.new(kwh: 8374.275, £: 1256.1412500000001, co2: 1333.136225)
+      new_combined_usage_metric = Usage::CombinedUsageMetricComparisonService.new(a, b).compare
+      expect(new_combined_usage_metric.kwh).to round_to_two_digits(557.15) # 557.1499999999996
+      expect(new_combined_usage_metric.£).to round_to_two_digits(83.57) # 83.57250000000022
+      expect(new_combined_usage_metric.co2).to round_to_two_digits(-191.03) # -191.0317
+      expect(new_combined_usage_metric.percent).to round_to_two_digits(-0.07) # -0.06653113254580244
     end
   end
 end
