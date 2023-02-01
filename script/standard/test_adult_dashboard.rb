@@ -7,7 +7,7 @@ module Logging
   logger.level = :info
 end
 
-schools = ['j*'] # ['king-j*', 'combe-d*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
+schools = ['acme-academy*'] # ['king-j*', 'combe-d*'] # ['ullapool-pv-storage_heaters_not_relevant*'] + SchoolFactory.storage_heater_schools
 
 overrides = {
   schools: schools,
@@ -25,7 +25,6 @@ overrides = {
   # adult_dashboard: { control: { pages: %i[boiler_control_morning_start_time], user: { user_role: :analytics, staff_role: nil } } }
   # adult_dashboard: { control: { pages: %i[electric_target gas_target] } }
   adult_dashboard: { control: { pages: %i[gas_profit_loss] } }
-
 }
 
 script = RunAdultDashboard.default_config.deep_merge(overrides)

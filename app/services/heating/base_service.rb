@@ -25,7 +25,7 @@ module Heating
     end
 
     def aggregate_meter
-      @meter_collection.aggregated_heat_meters
+      @aggregate_meter ||= @meter_collection.aggregated_heat_meters
     end
 
     def enough_data_for_model_fit?
