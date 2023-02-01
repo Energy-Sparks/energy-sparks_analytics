@@ -24,9 +24,7 @@ def analyse_meter(school, meter)
     mprn:         meter.mpxn,
     percent:      pct,
     baseload_kw:  baseload_kw,
-    sheffield_pv:   meter.sheffield_simulated_solar_pv_panels?,
-    school_type:  school.school_type,
-    pupils:       school.number_of_pupils
+    sheffield_pv:   meter.sheffield_simulated_solar_pv_panels?
   }
 end
 
@@ -37,7 +35,7 @@ def save_to_csv(data)
   puts "Saving to #{filename}"
 
   CSV.open(filename, 'w') do |csv|
-    csv << ['name','mprn', 'percent with zero 2300', 'baseload', 'sheff pv', 'type', 'pupils']
+    csv << ['name','mprn', 'percent with zero 2300', 'baseload', 'sheff pv']
     data.each do |row|
       csv << row.values
     end
