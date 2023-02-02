@@ -21,6 +21,8 @@ PreCommit:
 
  TrailingWhitespace:
    enabled: true
+   exclude:
+     - 'test_output/**/*' # Ignore trailing whitespace in generated files
 #    exclude:
 #      - '**/db/structure.sql' # Ignore trailing whitespace in generated files
 #
