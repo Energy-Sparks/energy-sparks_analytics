@@ -18,7 +18,6 @@ module Usage
       @asof_date = asof_date
     end
 
-
     #Do we have enough data to run the calculations?
     def enough_data?
       meter_data_checker.one_years_data?
@@ -163,6 +162,5 @@ module Usage
     def validate_meter_collection(meter_collection, fuel_type)
       raise EnergySparksUnexpectedStateException, "School does not have this fuel type" if meter_collection.aggregate_meter(fuel_type).nil?
     end
-
   end
 end
