@@ -9,7 +9,7 @@ module Baseload
     end
 
     def rate_calculator
-      @rate_calculator ||= BlendedRateCalculator.new(@meter.meter_collection.aggregated_electricity_meters)
+      @rate_calculator ||= Costs::BlendedRateCalculator.new(@meter.meter_collection.aggregated_electricity_meters)
     end
 
     def baseload_analysis

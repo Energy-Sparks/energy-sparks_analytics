@@ -62,7 +62,7 @@ class ElectricityBaseloadAnalysis
   end
 
   #We use 6 rather than 7 days ago because of potential issue with schools
-  #with large intraweek variation in consumption
+  #with large intraweek variation in consumption.
   def one_week_ago(date)
     date - 6
   end

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # rubocop:disable Metrics/ParameterLists, Naming/MethodName
-module UsageBreakdown
-  class UsageCategoryBreakdown
+module Usage
+  class AnnualUsageCategoryBreakdown
     attr_reader :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours, :community
 
     def initialize(

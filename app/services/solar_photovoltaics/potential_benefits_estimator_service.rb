@@ -152,7 +152,7 @@ module SolarPhotovoltaics
     end
 
     def blended_co2_per_kwh
-      @blended_co2_per_kwh ||= ::Baseload::BlendedRateCalculator.new(aggregated_electricity_meters).blended_co2_per_kwh
+      @blended_co2_per_kwh ||= ::Costs::BlendedRateCalculator.new(aggregated_electricity_meters).blended_co2_per_kwh
     end
 
     # rubocop:disable Metrics/MethodLength

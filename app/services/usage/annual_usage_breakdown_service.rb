@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
 # rubocop:disable Metrics/ClassLength, Metrics/AbcSize
-module UsageBreakdown
-  class UsageBreakdownService
+module Usage
+  class AnnualUsageBreakdownService
     def initialize(meter_collection:, fuel_type: :electricity)
       @meter_collection = meter_collection
       @fuel_type = fuel_type
     end
 
+    # Calculates a breakdown of the annual usage over the last twelve months
+    # Broken down by usage during school day open, closed, weekends and holidays
+    #
+    # @return [Usage::UsageCategoryBreakdown] the calculated breakdown
     def usage_breakdown
       calculate_usage_breakdown
     end
@@ -25,7 +29,7 @@ module UsageBreakdown
     end
 
     def assign_and_return_usage_category_breakdown
-      UsageBreakdown::UsageCategoryBreakdown.new(
+      Usage::AnnualUsageCategoryBreakdown.new(
         holidays: @holidays,
         school_day_closed: @school_day_closed,
         school_day_open: @school_day_open,
