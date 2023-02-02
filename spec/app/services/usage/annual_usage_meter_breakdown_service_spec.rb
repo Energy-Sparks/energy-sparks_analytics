@@ -13,10 +13,6 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
-  context '#enough_data' do
-    it 'checks for data'
-  end
-
   context '#calculate_breakdown' do
     def format_unit(unit, val)
       FormatEnergyUnit.format(unit, val, :html, true, true)
@@ -70,14 +66,43 @@ describe Usage::AnnualUsageMeterBreakdownService, type: :service do
           expect(format_unit(:percent, usage_breakdown.total_usage.percent)).to eq "100&percnt;"
         end
       end
-
-      context 'with limited data' do
-        it 'does not include % change by year'
-      end
     end
 
     context 'for gas' do
-      it 'calculates the expected values'
+      let(:fuel_type)      { :gas }
+      context 'with two years data' do
+        it 'calculates the expected values' do
+          usage_breakdown = service.calculate_breakdown
+          expect(usage_breakdown.start_date).to eq(Date.new(2021,7,18))
+          expect(usage_breakdown.end_date).to eq(Date.new(2022,7,9))
+
+          #Lodge
+          percent = usage_breakdown.annual_percent_change(10307706)
+          expect(format_unit(:relative_percent, percent)).to eq "+29%"
+          meter = usage_breakdown.usage(10307706)
+          expect(format_unit(:kwh, meter.kwh)).to eq "16,000"
+          #expect(old_building.kwh).to round_to_two_digits(98392.4)
+          expect(format_unit(:£, meter.£)).to eq "&pound;480"
+          expect(format_unit(:percent,meter.percent)).to eq "2.8&percnt;"
+
+          #Art Block
+          percent = usage_breakdown.annual_percent_change(10308203)
+          expect(format_unit(:relative_percent, percent)).to eq "-23%"
+          meter = usage_breakdown.usage(10308203)
+          expect(format_unit(:kwh, meter.kwh)).to eq "63,000"
+          #expect(old_building.kwh).to round_to_two_digits(98392.4)
+          expect(format_unit(:£, meter.£)).to eq "&pound;1,900"
+          expect(format_unit(:percent,meter.percent)).to eq "11&percnt;"
+
+          #Total
+          percent = usage_breakdown.total_annual_percent_change
+          expect(format_unit(:relative_percent, percent)).to eq "-20%"
+          total = usage_breakdown.total_usage
+          expect(format_unit(:kwh, usage_breakdown.total_usage.kwh)).to eq "580,000"
+          expect(format_unit(:£, usage_breakdown.total_usage.£)).to eq "&pound;17,000"
+          expect(format_unit(:percent, usage_breakdown.total_usage.percent)).to eq "100&percnt;"
+        end
+      end
     end
   end
 end

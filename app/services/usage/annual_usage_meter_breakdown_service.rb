@@ -28,14 +28,6 @@ module Usage
       meter_data_checker.date_when_enough_data_available(DAYS_OF_DATA_REQUIRED)
     end
 
-    #the chart covers up to one year, so last 12 months based on aggregate meter
-    #table currently uses same dates as the chart, but these can be determined directly
-
-    #mpan ->
-       #CombinedUsageMetric £, kwh, % change
-       #% of total consumption
-    #Total?
-    #start and end date used
     def calculate_breakdown
       meter_breakdown = calculate
       total_kwh = total_kwh(meter_breakdown)
@@ -67,17 +59,21 @@ module Usage
         if meter_end_date < meter_start_date
           nil # 'retired' meter before aggregate start date
         else
-          this_year_kwh = meter.amr_data.kwh_date_range(meter_start_date, meter_end_date, :kwh)
-          breakdown[meter.mpan_mprn] = {
-            name: meter.analytics_name,
-            usage: CombinedUsageMetric.new(
-              kwh: this_year_kwh,
-              £: meter.amr_data.kwh_date_range(meter_start_date, meter_end_date, :£)
-            ),
-            annual_change: annual_percent_kwh_change(meter, this_year_kwh)
-          }
+          breakdown[meter.mpan_mprn] = calculate_meter_breakdown(meter, meter_start_date, meter_end_date)
         end
       end
+    end
+
+    def calculate_meter_breakdown(meter, start_date, end_date)
+      this_year_kwh = meter.amr_data.kwh_date_range(start_date, end_date, :kwh)
+      {
+        name: meter.analytics_name,
+        usage: CombinedUsageMetric.new(
+          kwh: this_year_kwh,
+          £: meter.amr_data.kwh_date_range(start_date, end_date, :£)
+        ),
+        annual_change: annual_percent_kwh_change(meter, this_year_kwh)
+      }
     end
 
     def annual_percent_kwh_change(meter, this_year_kwh)
@@ -85,20 +81,18 @@ module Usage
       previous_year_end_date   = this_year_start_date - 1
       previous_year_start_date = previous_year_end_date - 363 # 52 weeks
 
-      whole_aggregate_previous_year = aggregate_meter.amr_data.start_date <= previous_year_start_date
-
-      pct = nil
       # calculate annual change but only if aggregate and individual meter cover whole of previous year
-      if whole_aggregate_previous_year
-        whole_meter_this_year     = whole_meter_in_range(meter, this_year_start_date, end_date)
-        whole_meter_previous_year = whole_meter_in_range(meter, previous_year_start_date, previous_year_end_date)
+      return nil unless aggregate_meter.amr_data.start_date <= previous_year_start_date
 
-        if whole_meter_this_year && whole_meter_previous_year
-          previous_year_kwh = meter.amr_data.kwh_date_range(previous_year_start_date, previous_year_end_date, :kwh)
-          pct = percent_change(this_year_kwh, previous_year_kwh)
-        end
+      whole_meter_this_year     = whole_meter_in_range(meter, this_year_start_date, end_date)
+      whole_meter_previous_year = whole_meter_in_range(meter, previous_year_start_date, previous_year_end_date)
+
+      if whole_meter_this_year && whole_meter_previous_year
+        previous_year_kwh = meter.amr_data.kwh_date_range(previous_year_start_date, previous_year_end_date, :kwh)
+        percent_change(this_year_kwh, previous_year_kwh)
+      else
+        nil
       end
-      pct
     end
 
     def whole_meter_in_range(meter, start_date, end_date)
@@ -177,7 +171,7 @@ module Usage
     end
 
     def meter_data_checker
-      @meter_data_checker ||= Meters::MeterDataRangeChecker(aggregate_meter, @asof_date)
+      @meter_data_checker ||= Meters::MeterDateRangeChecker(aggregate_meter, @asof_date)
     end
 
     def validate_meter_collection

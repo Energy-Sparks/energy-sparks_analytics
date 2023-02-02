@@ -1,7 +1,7 @@
 module Meters
   #Simple utility class for checking the amount of data available for a
   #meter
-  class MeterDataRangeChecker
+  class MeterDateRangeChecker
 
     RECENT_DATA_DAYS = 30
 
@@ -35,7 +35,7 @@ module Meters
     #How many days of data to be have between the date we're
     #checking and the start data of the meter
     def days_of_data
-      @asof_date - @meter.amr_data.start_date + 1
+      (@asof_date - @meter.amr_data.start_date) + 1
     end
 
     #Do we have recent data for the meter?

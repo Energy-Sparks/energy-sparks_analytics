@@ -61,7 +61,7 @@ module Usage
       this_year = annual_usage(period: :this_year)
       last_year = annual_usage(period: :last_year)
       kwh = this_year.kwh - last_year.kwh
-      return CombinedUsageMetric.new(
+      CombinedUsageMetric.new(
         kwh: kwh,
         £: this_year.£ - last_year.£,
         co2: this_year.co2 - last_year.co2,
@@ -103,7 +103,7 @@ module Usage
     end
 
     def meter_data_checker
-      @meter_data_checker ||= Meters::MeterDataRangeChecker(aggregate_meter, asof_date)
+      @meter_data_checker ||= Meters::MeterDateRangeChecker(aggregate_meter, asof_date)
     end
 
   end
