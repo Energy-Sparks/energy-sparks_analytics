@@ -131,7 +131,7 @@ class AMRData < HalfHourlyData
     return co2_x48(date) if type == :co2
   end
 
-  private def co2_x48(date) 
+  private def co2_x48(date)
     if @type == :solar_pv
       @solar_pv_co2_x48_cache ||= {}
       @solar_pv_co2_x48_cache[date] ||= calculate_solar_pv_co2_x48(date)
@@ -259,7 +259,7 @@ class AMRData < HalfHourlyData
 
   def self.single_value_kwh_x48(kwh)
     Array.new(48, kwh)
-  end 
+  end
 
   def self.fast_multiply_x48_x_x48(a, b)
     c = one_day_zero_kwh_x48
@@ -466,6 +466,10 @@ class AMRData < HalfHourlyData
 
   def overnight_baseload_kw(date, data_type = :kwh)
     raise EnergySparksNotEnoughDataException.new("Missing electric data (2) for #{date}") if date_missing?(date)
+    # The values 41 and 47 represent the electricity consumed between 20:30 and midnight.
+    # (i.e. 48 half hour values in a day so 41 * 0.5 = 20.5 => 20:30 in the evening to 47 * 0.5 => 23.5 => 23:30)
+    # This time of day for schools with solar PV panels synthesized by Sheffield PV data should provide a reasonable estimate of baseload.
+    # Sampling in the early morning instead is problematic as other consumers startup (e.g. boiler pumps, often from around 01:00).
     baseload_kw_between_half_hour_indices(date, 41, 47, data_type)
   end
 
