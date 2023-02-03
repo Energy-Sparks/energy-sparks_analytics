@@ -43,8 +43,8 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
       expect(day_type_breakdown.community.percent).to round_to_two_digits(0) # 0
       expect(day_type_breakdown.community.£).to round_to_two_digits(0) # 0
 
-      expect(day_type_breakdown.total_out_of_hours.kwh).to round_to_two_digits(467_398.40) # 467398.3999999999
-      expect(day_type_breakdown.total_out_of_hours.co2).to round_to_two_digits(88_492.64) # 88492.6392
+      expect(day_type_breakdown.total.kwh).to round_to_two_digits(467_398.40) # 467398.3999999999
+      expect(day_type_breakdown.total.co2).to round_to_two_digits(88_492.64) # 88492.6392
 
       exemplar_comparison = day_type_breakdown.potential_savings(versus: :exemplar_school)
       expect(exemplar_comparison.co2).to eq(nil)
