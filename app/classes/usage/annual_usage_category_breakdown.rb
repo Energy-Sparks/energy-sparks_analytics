@@ -23,7 +23,7 @@ module Usage
       @fuel_type = fuel_type
     end
 
-    def total
+    def total_out_of_hours
       CombinedUsageMetric.new(
         kwh: total_annual_kwh,
         co2: total_annual_co2
