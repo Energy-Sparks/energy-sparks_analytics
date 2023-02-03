@@ -7,11 +7,22 @@ module Usage
       @asof_date = asof_date
     end
 
-    def calculate_average_school_day_peak_usage_kw_comparison
-      OpenStruct.new(
-        average_school_day_peak_usage_kw: average_school_day_peak_usage_kw,
-        potential_saving: potential_saving
-      )
+    def average_peak_usage_kw(compare: :exemplar_school)
+      case compare
+      when :exemplar_school then average_school_day_peak_usage_kw
+      # when :benchmark_school then nil
+      else
+        raise 'Invalid comparison'
+      end
+    end
+
+    def estimated_savings(versus: :exemplar_school)
+      case versus
+      when :exemplar_school then consumption_above_exemplar_peak
+      # when :benchmark_school then nil
+      else
+        raise 'Invalid comparison'
+      end
     end
 
     private
@@ -74,11 +85,23 @@ module Usage
     end
 
     def exemplar_kw
-      benchmark_kw_m2 * average_school_day_peak_usage_kw.floor_area
+      benchmark_kw_m2 * floor_area
+    end
+
+    def floor_area
+      aggregated_electricity_meters.meter_floor_area(@meter_collection, start_date, end_date)
+    end
+
+    def start_date
+      @asof_date - 365
+    end
+
+    def end_date
+      @asof_date
     end
 
     def average_school_day_peak_usage_kw
-      @average_school_day_peak_usage_kw ||= meter_collection_peak_usage_calculation.calculate_peak_usage
+      @average_school_day_peak_usage_kw ||= meter_collection_peak_usage_calculation.peak_kw
     end
 
     def meter_collection_peak_usage_calculation
