@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 
+# rubocop:disable Metrics/BlockLength
 describe Usage::PeakUsageBenchmarkingService, type: :service do
   Object.const_set('Rails', true) # Otherwise the test fails at line 118 (RecordTestTimes) in ChartManager
 
@@ -35,3 +36,4 @@ describe Usage::PeakUsageBenchmarkingService, type: :service do
     end
   end
 end
+# rubocop:enable Metrics/BlockLength

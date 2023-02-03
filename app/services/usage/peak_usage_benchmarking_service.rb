@@ -27,10 +27,18 @@ module Usage
 
     private
 
-    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
     def consumption_above_exemplar_peak
-      exemplar_kwh = exemplar_kw / 2.0
+      totals = consumption_above_exemplar_peak_totals
 
+      CombinedUsageMetric.new(
+        kwh: totals[:kwh],
+        £: totals[:£],
+        co2: totals[:co2]
+      )
+    end
+
+    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+    def consumption_above_exemplar_peak_totals
       totals = { kwh: 0.0, £: 0.0, co2: 0.0 }
 
       full_date_range.each do |date|
@@ -46,13 +54,7 @@ module Usage
         end
       end
 
-      totals = totals.transform_values { |v| scale_to_year(v) }
-
-      CombinedUsageMetric.new(
-        kwh: totals[:kwh],
-        £: totals[:£],
-        co2: totals[:co2]
-      )
+      totals.transform_values { |value| scale_to_year(value) }
     end
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 
@@ -82,6 +84,10 @@ module Usage
 
     def exemplar_kw
       benchmark_kw_m2 * floor_area
+    end
+
+    def exemplar_kwh
+      @exemplar_kwh ||= exemplar_kw / 2.0
     end
 
     def floor_area
