@@ -7,28 +7,83 @@ module Usage
       @asof_date = asof_date
     end
 
-    def average_school_day_peak_usage_kw(compare: :benchmark_school)
-      case compare
-      when :benchmark_school
-        ''
-      when :exemplar_school
-        ''
-      else
-        raise 'Invalid comparison'
-      end
+    def calculate_average_school_day_peak_usage_kw_comparison
+      OpenStruct.new(
+        average_school_day_peak_usage_kw: average_school_day_peak_usage_kw,
+        potential_saving: potential_saving
+      )
     end
 
     private
 
-    # rubocop:disable Layout/LineLength
-    def average_school_day_peak_usage_kw_for_meter_collection
-      @average_school_day_peak_usage_kw_for_meter_collection ||= meter_collection_peak_usage_calculation.average_school_day_peak_usage_kw
+    def potential_saving
+      consumption_above_exemplar_peak
     end
-    # rubocop:enable Layout/LineLength
+
+    # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+    def consumption_above_exemplar_peak
+      exemplar_kwh = exemplar_kw / 2.0
+
+      totals = { kwh: 0.0, £: 0.0, co2: 0.0 }
+
+      full_date_range.each do |date|
+        (0..47).each do |hhi|
+          kwh = aggregated_electricity_meters.amr_data.kwh(date, hhi, :kwh)
+          percent_above_exemplar = capped_percent(kwh, exemplar_kwh)
+
+          next if percent_above_exemplar.nil?
+
+          totals[:kwh]  += percent_above_exemplar * kwh
+          totals[:£]    += percent_above_exemplar * aggregated_electricity_meters.amr_data.kwh(date, hhi, :£current)
+          totals[:co2]  += percent_above_exemplar * aggregated_electricity_meters.amr_data.kwh(date, hhi, :co2)
+        end
+      end
+
+      totals = totals.transform_values { |v| scale_to_year(v) }
+
+      CombinedUsageMetric.new(
+        kwh: totals[:kwh],
+        £: totals[:£],
+        co2: totals[:co2]
+      )
+    end
+    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
+
+    def capped_percent(kwh, exemplar_kwh)
+      return nil if kwh <= exemplar_kwh
+
+      (kwh - exemplar_kwh) / kwh
+    end
+
+    def aggregated_electricity_meters
+      @meter_collection.aggregated_electricity_meters
+    end
+
+    def full_date_range
+      start_date = [@asof_date - 364, aggregated_electricity_meters.amr_data.start_date].max
+      start_date..@asof_date
+    end
+
+    def scale_to_year(val)
+      scale_factor = 365.0 / (full_date_range.last - full_date_range.first + 1)
+      val * scale_factor
+    end
+
+    def benchmark_kw_m2
+      BenchmarkMetrics::BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2
+    end
+
+    def exemplar_kw
+      benchmark_kw_m2 * average_school_day_peak_usage_kw.floor_area
+    end
+
+    def average_school_day_peak_usage_kw
+      @average_school_day_peak_usage_kw ||= meter_collection_peak_usage_calculation.calculate_peak_usage
+    end
 
     def meter_collection_peak_usage_calculation
       Usage::PeakUsageCalculationService.new(
-        meter_collection: meter_collection,
+        meter_collection: @meter_collection,
         asof_date: @asof_date
       )
     end

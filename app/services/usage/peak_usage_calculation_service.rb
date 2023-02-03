@@ -11,7 +11,8 @@ module Usage
       OpenStruct.new(
         average_school_day_last_year_kw: average_school_day_last_year_kw,
         average_school_day_last_year_kw_per_pupil: average_school_day_last_year_kw_per_pupil,
-        average_school_day_last_year_kw_per_floor_area: average_school_day_last_year_kw_per_floor_area
+        average_school_day_last_year_kw_per_floor_area: average_school_day_last_year_kw_per_floor_area,
+        floor_area: floor_area
       )
     end
 
