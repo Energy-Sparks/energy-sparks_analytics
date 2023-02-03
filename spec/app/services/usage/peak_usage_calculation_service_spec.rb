@@ -13,8 +13,11 @@ describe Usage::PeakUsageCalculationService, type: :service do
 
   context '#average_school_day_peak_usage_kw' do
     it 'calculates the average school day peak usage in kw from a given asof date' do
-      service = Usage::PeakUsageCalculationService.new(meter_collection: meter_collection, asof_date: Date.today - 365)
-      expect(service.average_school_day_peak_usage_kw).to eq(148.3508591065292)
+      service = Usage::PeakUsageCalculationService.new(
+        meter_collection: meter_collection,
+        asof_date: Date.new(2022, 1, 1)
+      )
+      expect(service.average_school_day_peak_usage_kw).to round_to_two_digits(135.92) # 135.9213058419244
     end
   end
 end
