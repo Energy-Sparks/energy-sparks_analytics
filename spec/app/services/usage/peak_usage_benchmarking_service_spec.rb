@@ -10,6 +10,7 @@ describe Usage::PeakUsageBenchmarkingService, type: :service do
   before(:all) do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
+
   context '#estimated_savings' do
     it 'returns estimated savings when compared against an examplar or benchmark school' do
       service = Usage::PeakUsageBenchmarkingService.new(
@@ -21,6 +22,16 @@ describe Usage::PeakUsageBenchmarkingService, type: :service do
       expect(model.£).to round_to_two_digits(16_440.45) # 16440.45410541508
       expect(model.co2).to round_to_two_digits(21_048.32) # 21048.319799999976
       expect(model.percent).to eq(nil)
+    end
+  end
+
+  context '#average_peak_usage_kw' do
+    it 'returns average peak usage kw when compared against an examplar or benchmark school' do
+      service = Usage::PeakUsageBenchmarkingService.new(
+        meter_collection: meter_collection,
+        asof_date: Date.new(2022, 1, 1)
+      )
+      expect(service.average_peak_usage_kw(compare: :exemplar_school)).to round_to_two_digits(76.6) # 76.60130584192441
     end
   end
 end

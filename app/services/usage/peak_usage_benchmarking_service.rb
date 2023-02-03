@@ -9,7 +9,7 @@ module Usage
 
     def average_peak_usage_kw(compare: :exemplar_school)
       case compare
-      when :exemplar_school then average_school_day_peak_usage_kw
+      when :exemplar_school then average_school_day_peak_usage_kw - exemplar_kw
       # when :benchmark_school then nil
       else
         raise 'Invalid comparison'
@@ -26,10 +26,6 @@ module Usage
     end
 
     private
-
-    def potential_saving
-      consumption_above_exemplar_peak
-    end
 
     # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
     def consumption_above_exemplar_peak
@@ -101,7 +97,7 @@ module Usage
     end
 
     def average_school_day_peak_usage_kw
-      @average_school_day_peak_usage_kw ||= meter_collection_peak_usage_calculation.peak_kw
+      @average_school_day_peak_usage_kw ||= meter_collection_peak_usage_calculation.average_peak_kw
     end
 
     def meter_collection_peak_usage_calculation
