@@ -7,11 +7,43 @@ module Usage
       @asof_date = asof_date
     end
 
-    def average_school_day_peak_usage_kw
-      peak_kws.sum / peak_kws.length
+    def calculate_peak_usage
+      OpenStruct.new(
+        average_school_day_last_year_kw: average_school_day_last_year_kw,
+        average_school_day_last_year_kw_per_pupil: average_school_day_last_year_kw_per_pupil,
+        average_school_day_last_year_kw_per_floor_area: average_school_day_last_year_kw_per_floor_area
+      )
     end
 
     private
+
+    def average_school_day_last_year_kw
+      @average_school_day_last_year_kw ||= peak_kws.sum / peak_kws.length
+    end
+
+    def average_school_day_last_year_kw_per_pupil
+      @average_school_day_last_year_kw_per_pupil ||= average_school_day_last_year_kw / pupils
+    end
+
+    def average_school_day_last_year_kw_per_floor_area
+      @average_school_day_last_year_kw_per_floor_area ||= average_school_day_last_year_kw / floor_area
+    end
+
+    def floor_area
+      aggregated_electricity_meters.meter_floor_area(@meter_collection, start_date, end_date)
+    end
+
+    def pupils
+      aggregated_electricity_meters.meter_number_of_pupils(@meter_collection, start_date, end_date)
+    end
+
+    def start_date
+      @asof_date - 365
+    end
+
+    def end_date
+      @asof_date
+    end
 
     def peak_kws
       @peak_kws ||= calculate_peak_kws
