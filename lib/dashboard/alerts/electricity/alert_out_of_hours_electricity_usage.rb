@@ -8,7 +8,7 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
   def initialize(school)
     super(school, 'electricity', BenchmarkMetrics::PERCENT_ELECTRICITY_OUT_OF_HOURS_BENCHMARK,
           :electricityoutofhours, 'ElectricityOutOfHours', :allelectricity,
-          0.35, 0.65)
+          BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY, 0.65)
   end
 
   def aggregate_meter
