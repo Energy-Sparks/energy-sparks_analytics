@@ -23,18 +23,28 @@ module Usage
       @fuel_type = fuel_type
     end
 
-    def potential_saving_kwh
-      total_annual_kwh * percent_improvement_to_exemplar
+    def total
+      CombinedUsageMetric.new(
+        kwh: total_annual_kwh,
+        co2: total_annual_co2
+      )
     end
 
-    def total_annual_kwh
-      @holidays.kwh + @weekends.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
+    def potential_savings(versus: :exemplar_school)
+      case versus
+      when :exemplar_school
+        CombinedUsageMetric.new(
+          kwh: potential_saving_kwh_exemplar,
+          £: potential_saving_£_exemplar,
+          percent: percent_improvement_to_exemplar
+        )
+      # when :benchmark_school then nil
+      else
+        raise 'Invalid comparison'
+      end
     end
 
-    def potential_saving_£
-      # Code adapted from AlertOutOfHoursBaseUsage#calculate
-      total_annual_£ * percent_improvement_to_exemplar
-    end
+    private
 
     def total_annual_£
       holidays.£ +
@@ -44,8 +54,21 @@ module Usage
         community.£
     end
 
+    def potential_saving_kwh_exemplar
+      total_annual_kwh * percent_improvement_to_exemplar
+    end
+
+    def potential_saving_£_exemplar
+      # Code adapted from AlertOutOfHoursBaseUsage#calculate
+      total_annual_£ * percent_improvement_to_exemplar
+    end
+
     def total_annual_co2
       @holidays.co2 + @weekends.co2 + @school_day_open.co2 + @school_day_closed.co2 + @community.co2
+    end
+
+    def total_annual_kwh
+      @holidays.kwh + @weekends.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
     end
 
     def percent_improvement_to_exemplar
@@ -58,8 +81,8 @@ module Usage
       # AlertOutOfHoursElectricityUsage#good_out_of_hours_use_percent = 0.35
       # AlertOutOfHoursGasUsage#good_out_of_hours_use_percent = 0.3
       case @fuel_type
-      when :electricity then BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY
-      when :gas then BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_GAS
+      when :electricity then BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY
+      when :gas then BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_GAS
       end
     end
   end
