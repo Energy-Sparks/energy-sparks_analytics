@@ -17,9 +17,9 @@ describe Usage::RecentUsageComparisonService, type: :service do
   before(:all) do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
-  context '#create_model' do
-    it 'creates a model for results of a baseload period comparison' do
-      model = service.create_model
+  context '#recent_usage' do
+    it 'creates a resent usage object for results of a baseload period comparison' do
+      model = service.recent_usage
 
       expect(model.last_4_school_weeks.date_range).to eq([Date.new(2022, 6, 12), Date.new(2022, 7, 9)])
       expect(model.last_4_school_weeks.results.kwh).to round_to_two_digits(7817.13) # 7817.125

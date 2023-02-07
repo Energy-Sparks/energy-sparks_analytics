@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Usage
-  class CombinedUsageMetricComparisonService
+  class CombinedUsageMetricComparison
     def initialize(combined_usage_metric_latest, combined_usage_metric_previous)
       raise if combined_usage_metric_latest.class != CombinedUsageMetric
       raise if combined_usage_metric_previous.class != CombinedUsageMetric

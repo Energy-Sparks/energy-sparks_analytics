@@ -8,7 +8,7 @@ module Usage
       @date = date
     end
 
-    def create_model
+    def recent_usage
       OpenStruct.new(
         last_4_school_weeks: last_4_school_weeks,
         previous_4_school_weeks: previous_4_school_weeks,
@@ -78,7 +78,7 @@ module Usage
     end
 
     def calculate_recent_usage
-      Usage::CombinedUsageMetricComparisonService.new(
+      Usage::CombinedUsageMetricComparison.new(
         last_4_school_weeks_results,
         previous_4_school_weeks_results
       ).compare
