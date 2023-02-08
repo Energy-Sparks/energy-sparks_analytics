@@ -1,5 +1,6 @@
 module Usage
   class AnnualUsageBenchmarksService
+    include AnalysableMixin
 
     DAYSINYEAR = 363
 
@@ -156,7 +157,7 @@ module Usage
     end
 
     def meter_data_checker
-      @meter_data_checker ||= Meters::MeterDateRangeChecker(aggregate_meter, asof_date)
+      @meter_data_checker ||= Meters::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
     end
 
     def validate_meter_collection(meter_collection, fuel_type)

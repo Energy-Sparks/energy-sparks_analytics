@@ -1,5 +1,6 @@
 module Usage
   class AnnualUsageCalculationService
+    include AnalysableMixin
     DAYSINYEAR = 363
 
     # Create a service capable of calculating the annual energy usage for a meter
@@ -103,7 +104,7 @@ module Usage
     end
 
     def meter_data_checker
-      @meter_data_checker ||= Meters::MeterDateRangeChecker(aggregate_meter, asof_date)
+      @meter_data_checker ||= Meters::MeterDateRangeChecker.new(@meter, @asof_date)
     end
 
   end
