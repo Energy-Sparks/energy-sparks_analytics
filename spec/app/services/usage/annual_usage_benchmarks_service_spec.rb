@@ -13,6 +13,24 @@ describe Usage::AnnualUsageBenchmarksService, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
+  context '#enough_data?' do
+    context 'for electricity' do
+      context 'with enough data' do
+        it 'returns true' do
+          expect(service.enough_data?).to be true
+        end
+      end
+    end
+    context 'for gas' do
+      let(:fuel_type)        { :gas }
+      context 'with enough data' do
+        it 'returns true' do
+          expect(service.enough_data?).to be true
+        end
+      end
+    end
+  end
+
   context '#annual_usage' do
     context 'for electricity' do
       it 'calculates the expected values for a benchmark school' do

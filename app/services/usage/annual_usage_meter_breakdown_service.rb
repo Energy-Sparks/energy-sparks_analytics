@@ -1,5 +1,6 @@
 module Usage
   class AnnualUsageMeterBreakdownService
+    include AnalysableMixin
 
     DAYS_OF_DATA_REQUIRED = 7
 
@@ -171,7 +172,7 @@ module Usage
     end
 
     def meter_data_checker
-      @meter_data_checker ||= Meters::MeterDateRangeChecker(aggregate_meter, @asof_date)
+      @meter_data_checker ||= Util::MeterDateRangeChecker(aggregate_meter, @asof_date)
     end
 
     def validate_meter_collection
