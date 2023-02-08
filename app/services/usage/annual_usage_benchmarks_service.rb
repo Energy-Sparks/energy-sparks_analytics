@@ -149,7 +149,7 @@ module Usage
     end
 
     def school_size_calculator
-      @school_size_calculator ||= Schools::SchoolSizeCalculator.new(@meter_collection, aggregate_meter, @asof_date - DAYSINYEAR, @asof_date)
+      @school_size_calculator ||= Util::SchoolSizeCalculator.new(@meter_collection, aggregate_meter, @asof_date - DAYSINYEAR, @asof_date)
     end
 
     def rate_calculator
@@ -157,7 +157,7 @@ module Usage
     end
 
     def meter_data_checker
-      @meter_data_checker ||= Meters::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
     end
 
     def validate_meter_collection(meter_collection, fuel_type)

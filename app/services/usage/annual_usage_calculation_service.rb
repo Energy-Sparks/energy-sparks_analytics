@@ -104,7 +104,7 @@ module Usage
     end
 
     def meter_data_checker
-      @meter_data_checker ||= Meters::MeterDateRangeChecker.new(@meter, @asof_date)
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(@meter, @asof_date)
     end
 
   end
