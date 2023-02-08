@@ -3,21 +3,21 @@
 # rubocop:disable Metrics/ParameterLists, Naming/MethodName
 module Usage
   class AnnualUsageCategoryBreakdown
-    attr_reader :holidays, :school_day_closed, :school_day_open, :weekends, :out_of_hours, :community
+    attr_reader :holiday, :school_day_closed, :school_day_open, :weekend, :out_of_hours, :community
 
     def initialize(
-      holidays:,
+      holiday:,
       school_day_closed:,
       school_day_open:,
-      weekends:,
+      weekend:,
       out_of_hours:,
       community:,
       fuel_type:
     )
-      @holidays = holidays
+      @holiday = holiday
       @school_day_closed = school_day_closed
       @school_day_open = school_day_open
-      @weekends = weekends
+      @weekend = weekend
       @out_of_hours = out_of_hours
       @community = community
       @fuel_type = fuel_type
@@ -47,8 +47,8 @@ module Usage
     private
 
     def total_annual_£
-      holidays.£ +
-        weekends.£ +
+      holiday.£ +
+        weekend.£ +
         school_day_open.£ +
         school_day_closed.£ +
         community.£
@@ -64,11 +64,11 @@ module Usage
     end
 
     def total_annual_co2
-      @holidays.co2 + @weekends.co2 + @school_day_open.co2 + @school_day_closed.co2 + @community.co2
+      @holiday.co2 + @weekend.co2 + @school_day_open.co2 + @school_day_closed.co2 + @community.co2
     end
 
     def total_annual_kwh
-      @holidays.kwh + @weekends.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
+      @holiday.kwh + @weekend.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
     end
 
     def percent_improvement_to_exemplar

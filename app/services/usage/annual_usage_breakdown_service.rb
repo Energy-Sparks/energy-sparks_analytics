@@ -30,10 +30,10 @@ module Usage
 
     def assign_and_return_usage_category_breakdown
       Usage::AnnualUsageCategoryBreakdown.new(
-        holidays: @holidays,
+        holiday: @holiday,
         school_day_closed: @school_day_closed,
         school_day_open: @school_day_open,
-        weekends: @weekends,
+        weekend: @weekend,
         out_of_hours: @out_of_hours,
         community: @community,
         fuel_type: @fuel_type
@@ -41,11 +41,11 @@ module Usage
     end
 
     def build_usage_category_usage_metrics!
-      @holidays = CombinedUsageMetric.new
+      @holiday = CombinedUsageMetric.new
       @school_day_closed = CombinedUsageMetric.new
       @school_day_open = CombinedUsageMetric.new
       @out_of_hours = CombinedUsageMetric.new
-      @weekends = CombinedUsageMetric.new
+      @weekend = CombinedUsageMetric.new
       @community = CombinedUsageMetric.new
     end
 
@@ -56,8 +56,8 @@ module Usage
     def calculate_kwh!
       daytype_breakdown_kwh = extract_data_from_chart_data(:kwh)
 
-      @holidays.kwh              = daytype_breakdown_kwh[:x_data][Series::DayType::HOLIDAY].first || 0
-      @weekends.kwh              = daytype_breakdown_kwh[:x_data][Series::DayType::WEEKEND].first || 0
+      @holiday.kwh              = daytype_breakdown_kwh[:x_data][Series::DayType::HOLIDAY].first || 0
+      @weekend.kwh              = daytype_breakdown_kwh[:x_data][Series::DayType::WEEKEND].first || 0
       @school_day_open.kwh       = daytype_breakdown_kwh[:x_data][Series::DayType::SCHOOLDAYOPEN].first || 0
       @school_day_closed.kwh     = daytype_breakdown_kwh[:x_data][Series::DayType::SCHOOLDAYCLOSED].first || 0
       @community.kwh             = daytype_breakdown_kwh[:x_data][community_key]&.first || 0.0
@@ -65,20 +65,20 @@ module Usage
     end
 
     def calculate_percent!
-      @holidays.percent          = @holidays.kwh          / total_annual_kwh
-      @weekends.percent          = @weekends.kwh          / total_annual_kwh
+      @holiday.percent          = @holiday.kwh          / total_annual_kwh
+      @weekend.percent          = @weekend.kwh          / total_annual_kwh
       @school_day_open.percent   = @school_day_open.kwh   / total_annual_kwh
       @school_day_closed.percent = @school_day_closed.kwh / total_annual_kwh
       @community.percent         = @community.kwh         / total_annual_kwh
-      @out_of_hours.percent = @holidays.percent + @weekends.percent + @school_day_closed.percent + @community.percent
+      @out_of_hours.percent = @holiday.percent + @weekend.percent + @school_day_closed.percent + @community.percent
     end
 
     # Extracted from AlertOutOfHoursBaseUsage#calculate_£
     def calculate_pounds_sterling!
       daytype_breakdown_pounds_sterling = extract_data_from_chart_data(:pounds_sterling)
 
-      @holidays.£          = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::HOLIDAY].first || 0.0
-      @weekends.£          = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::WEEKEND].first || 0.0
+      @holiday.£          = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::HOLIDAY].first || 0.0
+      @weekend.£          = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::WEEKEND].first || 0.0
       @school_day_open.£   = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::SCHOOLDAYOPEN].first || 0.0
       @school_day_closed.£ = daytype_breakdown_pounds_sterling[:x_data][Series::DayType::SCHOOLDAYCLOSED].first || 0.0
       @community.£         = daytype_breakdown_pounds_sterling[:x_data][community_key]&.first || 0.0
@@ -90,8 +90,8 @@ module Usage
     def calculate_co2!
       daytype_breakdown_co2 = extract_data_from_chart_data(:co2)
 
-      @holidays.co2          = daytype_breakdown_co2[:x_data][Series::DayType::HOLIDAY].first || 0.0
-      @weekends.co2          = daytype_breakdown_co2[:x_data][Series::DayType::WEEKEND].first || 0.0
+      @holiday.co2          = daytype_breakdown_co2[:x_data][Series::DayType::HOLIDAY].first || 0.0
+      @weekend.co2          = daytype_breakdown_co2[:x_data][Series::DayType::WEEKEND].first || 0.0
       @school_day_open.co2   = daytype_breakdown_co2[:x_data][Series::DayType::SCHOOLDAYOPEN].first || 0.0
       @school_day_closed.co2 = daytype_breakdown_co2[:x_data][Series::DayType::SCHOOLDAYCLOSED].first || 0.0
       @community.co2         = daytype_breakdown_co2[:x_data][community_key]&.first || 0.0
@@ -100,19 +100,19 @@ module Usage
     end
 
     def total_annual_pounds_sterling
-      @holidays.£ +
-        @weekends.£ +
+      @holiday.£ +
+        @weekend.£ +
         @school_day_open.£ +
         @school_day_closed.£ +
         @community.£
     end
 
     def total_annual_kwh
-      @holidays.kwh + @weekends.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
+      @holiday.kwh + @weekend.kwh + @school_day_open.kwh + @school_day_closed.kwh + @community.kwh
     end
 
     def total_annual_co2
-      @holidays.co2 + @weekends.co2 + @school_day_open.co2 + @school_day_closed.co2 + @community.co2
+      @holiday.co2 + @weekend.co2 + @school_day_open.co2 + @school_day_closed.co2 + @community.co2
     end
 
     def extract_data_from_chart_data(data_type)
