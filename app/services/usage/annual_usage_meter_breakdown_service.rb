@@ -1,5 +1,6 @@
 module Usage
   class AnnualUsageMeterBreakdownService
+    include AnalysableMixin
 
     DAYS_OF_DATA_REQUIRED = 7
 
