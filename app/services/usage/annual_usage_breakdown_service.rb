@@ -27,7 +27,7 @@ module Usage
     private
 
     def meter_data_checker
-      @meter_data_checker ||= Meters::MeterDateRangeChecker.new(aggregate_meter, Date.today)
+      @meter_data_checker ||= ::Meters::MeterDateRangeChecker.new(aggregate_meter, Date.today)
     end
 
     def aggregate_meter
