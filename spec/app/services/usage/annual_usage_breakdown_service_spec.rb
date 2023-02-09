@@ -9,6 +9,20 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
+  context '#enough_data?' do
+    it 'returns true if one years worth of data is available' do
+      usage_breakdown_benchmark_service = Usage::AnnualUsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity)
+      expect(usage_breakdown_benchmark_service.enough_data?).to eq(true)
+    end
+  end
+
+  context '#data_available_from' do
+    it 'returns true if one years worth of data is available' do
+      usage_breakdown_benchmark_service = Usage::AnnualUsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity)
+      expect(usage_breakdown_benchmark_service.data_available_from).to eq(nil)
+    end
+  end
+
   context '#usage_breakdown' do
     it 'returns a usage category breakdown with calculated combined usage metrics for holiday, school open days etc' do
       usage_breakdown_benchmark_service = Usage::AnnualUsageBreakdownService.new(meter_collection: meter_collection, fuel_type: :electricity)
