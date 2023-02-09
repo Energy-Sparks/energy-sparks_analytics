@@ -1,4 +1,4 @@
-module Meters
+module Util
   #Simple utility class for checking the amount of data available for a
   #meter
   class MeterDateRangeChecker

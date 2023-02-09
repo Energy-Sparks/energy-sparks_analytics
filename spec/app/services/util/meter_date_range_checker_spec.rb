@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe Meters::MeterDateRangeChecker, type: :service do
+describe Util::MeterDateRangeChecker, type: :service do
 
   let(:end_date)          { Date.today }
   let(:day_count)         { 365 }
   let(:meter)             { build(:meter, amr_data: build(:amr_data, :with_days, end_date: end_date, day_count: day_count)) }
   let(:asof_date)         { Date.today }
-  let(:service)           { Meters::MeterDateRangeChecker.new(meter,asof_date) }
+  let(:service)           { Util::MeterDateRangeChecker.new(meter,asof_date) }
 
   describe '#one_years_data?' do
     context 'with one years data' do

@@ -1,4 +1,4 @@
-module Schools
+module Util
   #For a given school, meter and date range calculate the number of pupils
   #and floor area covered by the meter
   #
