@@ -21,13 +21,17 @@ module Usage
     end
 
     def enough_data?
-      meter_data_checker.one_years_data?
+      meter_date_range_checker.one_years_data?
+    end
+
+    def data_available_from
+      meter_date_range_checker.date_when_one_years_data
     end
 
     private
 
-    def meter_data_checker
-      @meter_data_checker ||= ::Util::MeterDateRangeChecker.new(aggregate_meter, Date.today)
+    def meter_date_range_checker
+      @meter_date_range_checker ||= ::Util::MeterDateRangeChecker.new(aggregate_meter, Date.today)
     end
 
     def aggregate_meter
