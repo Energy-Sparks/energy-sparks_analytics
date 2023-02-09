@@ -3,7 +3,9 @@
 # rubocop:disable Metrics/ClassLength, Metrics/AbcSize
 module Usage
   class AnnualUsageBreakdownService
+    include AnalysableMixin
     def initialize(meter_collection:, fuel_type: :electricity)
+      raise 'Invalid fuel type' unless [:electricity, :gas].include? fuel_type
       @meter_collection = meter_collection
       @fuel_type = fuel_type
     end
@@ -13,10 +15,27 @@ module Usage
     #
     # @return [Usage::UsageCategoryBreakdown] the calculated breakdown
     def usage_breakdown
+      raise 'Not enough data: at least one years worth of meter data is required' unless enough_data?
+
       calculate_usage_breakdown
     end
 
+    def enough_data?
+      meter_data_checker.one_years_data?
+    end
+
     private
+
+    def meter_data_checker
+      @meter_data_checker ||= ::Meters::MeterDateRangeChecker.new(aggregate_meter, Date.today)
+    end
+
+    def aggregate_meter
+      @aggregate_meter ||= case @fuel_type
+                           when :electricity then @meter_collection.aggregated_electricity_meters
+                           when :gas then @meter_collection.aggregated_heat_meters
+                           end
+    end
 
     def calculate_usage_breakdown
       build_usage_category_usage_metrics!
