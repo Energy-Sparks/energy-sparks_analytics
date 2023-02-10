@@ -9,7 +9,7 @@ module Usage
 
     def average_peak_usage_kw(compare: :exemplar_school)
       case compare
-      when :exemplar_school then average_school_day_peak_usage_kw - exemplar_kw
+      when :exemplar_school then exemplar_kw
       # when :benchmark_school then nil
       else
         raise 'Invalid comparison'

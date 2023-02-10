@@ -32,7 +32,7 @@ describe Usage::PeakUsageBenchmarkingService, type: :service do
         meter_collection: meter_collection,
         asof_date: Date.new(2022, 1, 1)
       )
-      expect(service.average_peak_usage_kw(compare: :exemplar_school)).to round_to_two_digits(76.6) # 76.60130584192441
+      expect(service.average_peak_usage_kw(compare: :exemplar_school)).to round_to_two_digits(59.32)
     end
   end
 end
