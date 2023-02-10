@@ -26,7 +26,8 @@ module Usage
     def total
       CombinedUsageMetric.new(
         kwh: total_annual_kwh,
-        co2: total_annual_co2
+        co2: total_annual_co2,
+        £: total_annual_£
       )
     end
 

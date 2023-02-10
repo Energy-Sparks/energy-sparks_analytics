@@ -16,6 +16,7 @@ describe Usage::AnnualUsageCategoryBreakdown, type: :service do
       model = service.total
       expect(model.kwh).to round_to_two_digits(467398.40) # 467398.3999999999
       expect(model.co2).to round_to_two_digits(88492.64) # 88492.6392
+      expect(model.£).to round_to_two_digits(71060.42) # 71060.41900000001
     end
   end
 
