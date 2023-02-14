@@ -31,7 +31,7 @@ module Usage
 
     #Calcualte the annual electricity usage for a benchmark school of the
     #specified type, with a similar number of pupils
-    def annual_electricity_usage_kwh(compare: :benchmark_school)
+    def annual_usage_kwh(compare: :benchmark_school)
       case compare
       when :benchmark_school
         @fuel_type == :electricity ? benchmark_annual_electricity_usage_kwh : benchmark_annual_gas_usage_kwh
@@ -50,7 +50,7 @@ module Usage
     # @param [Symbol] for the type of benchmark school to be used as comparison
     # @return [CombinedUsageMetric] the estimated usage
     def annual_usage(compare: :benchmark_school)
-      benchmarked_by_pupil_kwh = annual_electricity_usage_kwh(compare: compare)
+      benchmarked_by_pupil_kwh = annual_usage_kwh(compare: compare)
 
       #we're estimating future savings, so use £current
       benchmark_by_pupil_£current = benchmarked_by_pupil_kwh * current_blended_rate_£_per_kwh
