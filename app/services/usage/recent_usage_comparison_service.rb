@@ -80,17 +80,17 @@ module Usage
 
     def previous_school_weeks_results
       @previous_school_weeks_results ||= CombinedUsageMetric.new(
-        £: scalar.aggregate_value({ schoolweek: -7..-4 }, @fuel_type, :£) / 4.0,
-        kwh: scalar.aggregate_value({ schoolweek: -7..-4 }, @fuel_type, :kwh) / 4.0,
-        co2: scalar.aggregate_value({ schoolweek: -7..-4 }, @fuel_type, :co2) / 4.0
+        £: scalar.aggregate_value({ schoolweek: previous_range }, @fuel_type, :£) / 4.0,
+        kwh: scalar.aggregate_value({ schoolweek: previous_range }, @fuel_type, :kwh) / 4.0,
+        co2: scalar.aggregate_value({ schoolweek: previous_range }, @fuel_type, :co2) / 4.0
       )
     end
 
     def last_school_weeks_results
       @last_school_weeks_results ||= CombinedUsageMetric.new(
-        £: scalar.aggregate_value({ schoolweek: -3..0 }, @fuel_type, :£) / 4.0,
-        kwh: scalar.aggregate_value({ schoolweek: -3..0 },  @fuel_type, :kwh) / 4.0,
-        co2: scalar.aggregate_value({ schoolweek: -3..0 },  @fuel_type, :co2) / 4.0
+        £: scalar.aggregate_value({ schoolweek: last_range }, @fuel_type, :£) / 4.0,
+        kwh: scalar.aggregate_value({ schoolweek: last_range },  @fuel_type, :kwh) / 4.0,
+        co2: scalar.aggregate_value({ schoolweek: last_range },  @fuel_type, :co2) / 4.0
       )
     end
 
