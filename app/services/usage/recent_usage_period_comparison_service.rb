@@ -11,13 +11,13 @@ module Usage
     def recent_usage(period_range: -3..0)
       OpenStruct.new(
         date_range: date_range_for(period_range),
-        results: results_for(period_range)
+        combined_usage_metric: combined_usage_metric_for(period_range)
       )
     end
 
     private
 
-    def results_for(period_range)
+    def combined_usage_metric_for(period_range)
       CombinedUsageMetric.new(
         £: scalar.aggregate_value({ schoolweek: period_range }, @fuel_type, :£) / 4.0,
         kwh: scalar.aggregate_value({ schoolweek: period_range },  @fuel_type, :kwh) / 4.0,
