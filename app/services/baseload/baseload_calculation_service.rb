@@ -47,14 +47,17 @@ module Baseload
     # average baseload for this school over the last year
     #
     # The usage returns include kwh, co2 emissions and £ costs.
+    # The percent value is % of total annual usage
     #
     # @return [CombinedUsageMetric] the calculated usage
-    def annual_baseload_usage
-      CombinedUsageMetric.new(
+    def annual_baseload_usage(include_percentage: false)
+      metric = CombinedUsageMetric.new(
         kwh: average_baseload_last_year_kwh,
         £: average_baseload_last_year_£,
         co2: average_baseload_last_year_co2
       )
+      metric.percent = baseload_percent_annual_consumption if include_percentage
+      metric
     end
 
     private
@@ -70,6 +73,10 @@ module Baseload
     def average_baseload_last_year_co2
       kwh = average_baseload_last_year_kwh
       kwh * co2_per_kwh
+    end
+
+    def baseload_percent_annual_consumption
+      @baseload_percent_annual_consumption ||= baseload_analysis.baseload_percent_annual_consumption(@asof_date)
     end
 
     def meter_collection

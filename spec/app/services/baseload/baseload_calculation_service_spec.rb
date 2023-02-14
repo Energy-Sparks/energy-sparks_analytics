@@ -33,6 +33,14 @@ describe Baseload::BaseloadCalculationService, type: :service do
       expect(usage.kwh).to round_to_two_digits(213001.8)
       expect(usage.co2).to round_to_two_digits(40321.91)
       expect(usage.£).to round_to_two_digits(31818.29)
+      expect(usage.percent).to be_nil
+    end
+    it 'includes percentage if needed' do
+      usage = service.annual_baseload_usage(include_percentage: true)
+      expect(usage.kwh).to round_to_two_digits(213001.8)
+      expect(usage.co2).to round_to_two_digits(40321.91)
+      expect(usage.£).to round_to_two_digits(31818.29)
+      expect(usage.percent).to round_to_two_digits(0.47)
     end
   end
 end
