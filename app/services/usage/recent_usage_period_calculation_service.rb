@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Usage
-  class RecentUsagePeriodComparisonService
+  class RecentUsagePeriodCalculationService
     def initialize(meter_collection:, fuel_type:, date: Date.today)
       @meter_collection = meter_collection
       @fuel_type = fuel_type

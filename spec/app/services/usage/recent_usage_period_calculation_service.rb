@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 # rubocop:disable Metrics/BlockLength
-describe Usage::RecentUsagePeriodComparisonService, type: :service do
+describe Usage::RecentUsagePeriodCalculationService, type: :service do
   let(:service) do
-    Usage::RecentUsagePeriodComparisonService.new(
+    Usage::RecentUsagePeriodCalculationService.new(
       meter_collection: @acme_academy,
       fuel_type: :electricity,
       date: Date.new(2021, 1, 31)
