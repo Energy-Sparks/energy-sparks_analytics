@@ -99,17 +99,32 @@ class ChartManager
       restrict_y1_axis: nil,
       yaxis_units:      :£
     },
+    benchmark_electric_only_one_year_kwh: {
+      inherits_from:    :benchmark_electric_only_£,
+      timescale:        :year,
+      yaxis_units:      :kwh
+    },
     benchmark_gas_only_£: {
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'gas' ] },
       restrict_y1_axis: nil,
       yaxis_units:      :£
     },
+    benchmark_gas_only_one_year_kwh: {
+      inherits_from:    :benchmark_gas_only_£,
+      timescale:        :year,
+      yaxis_units:      :kwh
+    },
     benchmark_storage_heater_only_£: {
       inherits_from:    :benchmark,
       filter:           { fuel: [ 'storage heaters' ] },
       restrict_y1_axis: nil,
       yaxis_units:      :£
+    },
+    benchmark_storage_heater_only_one_year_kwh: {
+      inherits_from:    :benchmark_storage_heater_only_£,
+      timescale:        :year,
+      yaxis_units:      :kwh
     },
     last_2_weeks_carbon_emissions: {
       name:             'Last 2 weeks carbon emissions at your school from electricity and gas',
@@ -2026,7 +2041,7 @@ class ChartManager
       name:             '<%= meter.fuel_type.capitalize %> Comparison: Layer Up Powerdown Day 11 November 2022',
       inherits_from:    :last_2_school_weeks_electricity_comparison_alert,
       x_axis:           :day,
-      timescale: [ 
+      timescale: [
         { daterange: Date.new(2021, 10, 12)..Date.new(2021, 10, 14) },
         { daterange: Date.new(2022, 10, 11)..Date.new(2022, 10, 13) }
       ],
@@ -2045,7 +2060,7 @@ class ChartManager
       name:             '<%= meter.fuel_type.capitalize %> Comparison: Autumn Term 2022',
       inherits_from:    :last_2_school_weeks_electricity_comparison_alert,
       x_axis:           :day,
-      timescale: [ 
+      timescale: [
         { daterange: Date.new(2021, 9, 6)..Date.new(2021, 12, 17) },
         { daterange: Date.new(2022, 9, 5)..Date.new(2022, 12, 16) }
       ],
