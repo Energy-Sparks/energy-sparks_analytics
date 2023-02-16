@@ -16,7 +16,7 @@ overrides = {
   no_adult_dashboard: { control: { user: { user_role: :analytics, staff_role: nil } } },
   adult_dashboard: {
     control: {
-      pages: %i[underlying_electricity_meters_breakdown underlying_gas_meters_breakdown],
+      pages: %i[boiler_control_seasonal],
       no_pages: %i[hotwater], # storage_heater
       compare_results: [ :summary, :report_differences],
       user: { user_role: :analytics, staff_role: nil }

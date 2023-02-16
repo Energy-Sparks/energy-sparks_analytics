@@ -125,11 +125,13 @@ class AlertSeasonalHeatingSchoolDays < AlertHeatingDaysBase
     end
   end
 
+  #e.g. date, [:schoolday, :weekend, :holiday], [:heating_warm_weather], :kwh
   def seasonal_value(asof_date, day_types, heating_types, data_type)
     total = 0.0
 
     analysis = seasonal_analysis(asof_date)
 
+    #e.g. [[:schoolday, :heating_warm_weather], [:weekend, :heating_warm_weather]]
     analysis_types = day_types.product(heating_types)
 
     analysis_types.each do |(day_type, heating_type)|

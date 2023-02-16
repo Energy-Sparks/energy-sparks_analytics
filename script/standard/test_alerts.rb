@@ -22,20 +22,21 @@ overrides = {
     # AlertHeatingComingOnTooEarly
     # AlertPreviousYearHolidayComparisonElectricity
     # AlertSolarPVBenefitEstimator
-    AlertElectricityAnnualVersusBenchmark,
-    AlertElectricityLongTermTrend,
+    #AlertElectricityAnnualVersusBenchmark,
+    #AlertElectricityLongTermTrend,
     # AlertGasAnnualVersusBenchmark
     # AlertEnergyAnnualVersusBenchmark
     # AlertElectricityPeakKWVersusBenchmark,
     #AlertElectricityBaseloadVersusBenchmark,
     # AlertSeasonalBaseloadVariation,
     # AlertIntraweekBaseloadVariation
-    AlertGasAnnualVersusBenchmark,
-    AlertGasLongTermTrend
+    #AlertGasAnnualVersusBenchmark,
+    #AlertGasLongTermTrend
     # AlertChangeInElectricityBaseloadShortTerm
+    AlertSeasonalHeatingSchoolDays
     ],
   control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving html_template_variables], log: [:invalid_alerts] } },
-  no_alerts:   { alerts: [ AlertCommunityPreviousHolidayComparisonElectricity ], control: { asof_date: asof_date } }
+  no_alerts:   { alerts: [], control: { asof_date: asof_date } }
 }
 
 script = RunAlerts.default_config.deep_merge(overrides)
