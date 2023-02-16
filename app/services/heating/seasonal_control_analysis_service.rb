@@ -20,6 +20,10 @@ module Heating
       enough_data_for_model_fit? && heating_model.includes_school_day_heating_models?
     end
 
+    def data_available_from
+      meter_date_range_checker.date_when_one_years_data
+    end
+
     def seasonal_analysis
       #hash of {kwh:, £:, £current, co2: days:, degree_days:}
       analysis = heating_on_warm_weather_total_consumption
