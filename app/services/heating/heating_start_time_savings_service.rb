@@ -13,6 +13,7 @@ module Heating
     # @raise [EnergySparksUnexpectedStateException] if the schools doesnt have gas meters
     # @raise [EnergySparksUnexpectedStateException] if the school does not use gas for heating
     def initialize(meter_collection, asof_date = Date.today)
+      validate_meter_collection(meter_collection)
       super(meter_collection, asof_date)
     end
 
