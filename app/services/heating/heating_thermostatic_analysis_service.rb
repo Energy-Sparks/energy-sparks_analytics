@@ -2,8 +2,6 @@
 
 module Heating
   class HeatingThermostaticAnalysisService < BaseService
-    include AnalysableMixin
-
     def initialize(
       meter_collection:,
       average_outside_temperature_high_centigrade: 12.0,

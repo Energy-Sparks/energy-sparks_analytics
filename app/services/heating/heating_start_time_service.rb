@@ -17,6 +17,10 @@ module Heating
       super(meter_collection, asof_date)
     end
 
+    def enough_data?
+      meter_date_range_checker.at_least_x_days_data?(ONE_WEEK) && super
+    end
+
     # Find the average start time over the last week
     def average_start_time_last_week
       _days, _rating, average_heat_start_time = calculate_start_times

@@ -12,6 +12,8 @@ module Baseload
   # Other sanity checks, e.g. does this school have electricity can
   # be done in the calling code.
   class BaseloadCalculationService < BaseService
+    include AnalysableMixin
+
     # Create a service that can calculate the baseload for a specific meter
     #
     # To calculate baseload for a whole school provide the aggregate electricity
@@ -21,10 +23,18 @@ module Baseload
     # @param [Date] asof_date the date to use as the basis for calculations
     #
     # @raise [EnergySparksUnexpectedStateException] if meter isn't an electricity meter
-    def initialize(analytics_meter, asof_date = Time.zone.today)
+    def initialize(analytics_meter, asof_date = Date.today)
       validate_meter(analytics_meter)
       @meter = analytics_meter
       @asof_date = asof_date
+    end
+
+    def enough_data?
+      range_checker.at_least_x_days_data?(DEFAULT_DAYS_OF_DATA_REQUIRED)
+    end
+
+    def data_available_from
+      enough_data? ? nil : range_checker.date_when_enough_data_available(DEFAULT_DAYS_OF_DATA_REQUIRED)
     end
 
     # Calculate average baseload for this meter for the specified period
@@ -82,5 +92,10 @@ module Baseload
     def meter_collection
       @meter.meter_collection
     end
+
+    def range_checker
+      meter_date_range_checker(@meter, @asof_date)
+    end
+
   end
 end

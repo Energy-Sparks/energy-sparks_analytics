@@ -3,6 +3,8 @@
 # rubocop:disable Lint/MissingSuper
 module Baseload
   class SeasonalBaseloadService < BaseService
+    include AnalysableMixin
+
     # Create a service that can calculate the seasonal baseload variation
     # for a specific meter
     #
@@ -20,9 +22,11 @@ module Baseload
     end
 
     def enough_data?
-      # use custom logic here until bug fixed in ElectricityBaseloadAnalysis.one_years_data?
-      start_date = @meter.amr_data.start_date
-      (@asof_date - 364) >= start_date
+      range_checker.one_years_data?
+    end
+
+    def data_available_from
+      enough_data? ? nil : range_checker.date_when_one_years_data
     end
 
     # Calculate seasonal variation in baseload for this meter
@@ -64,6 +68,11 @@ module Baseload
     def blended_baseload_rate_£current_per_kwh
       baseload_analysis.blended_baseload_tariff_rate_£_per_kwh(:£current, @asof_date)
     end
+
+    def range_checker
+      meter_date_range_checker(@meter, @asof_date)
+    end
+
   end
 end
 # rubocop:enable Lint/MissingSuper

@@ -3,6 +3,8 @@
 module Heating
   # Base class for heating services that need to create a heating model
   class BaseService
+    ONE_WEEK = 7
+
     def initialize(meter_collection, asof_date)
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
@@ -13,6 +15,12 @@ module Heating
     # data.
     def enough_data?
       enough_data_for_model_fit? && heating_model.includes_school_day_heating_models?
+    end
+
+    # Generally need at least a year of data to fit a model, but
+    # not clear what the minimum might be. So default to returning nil
+    def data_available_from
+      nil
     end
 
     def validate_meter_collection(meter_collection)
@@ -45,5 +53,10 @@ module Heating
     def create_and_fit_model
       HeatingModelFactory.new(aggregate_meter, @asof_date).create_model
     end
+
+    def meter_date_range_checker
+      @meter_date_range_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
+    end
+
   end
 end

@@ -11,17 +11,15 @@ module Heating
   class SeasonalControlAnalysisService < BaseService
     def initialize(meter_collection:)
       validate_meter_collection(meter_collection)
-      @meter_collection = meter_collection
+      super(meter_collection, nil)
     end
 
-    #override enough_data? check from base class
     def enough_data?
-      aggregate_meter.amr_data.days > 364 &&
-      enough_data_for_model_fit? && heating_model.includes_school_day_heating_models?
+      meter_date_range_checker.one_years_data? && super
     end
 
     def data_available_from
-      meter_date_range_checker.date_when_one_years_data
+      enough_data? ? nil : meter_date_range_checker.date_when_one_years_data
     end
 
     def seasonal_analysis

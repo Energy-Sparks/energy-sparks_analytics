@@ -12,8 +12,22 @@ describe Heating::SeasonalControlAnalysisService do
   end
 
   context '#enough_data?' do
-    it 'has enough data' do
-      expect(service.enough_data?).to be true
+    context 'when theres is a years worth' do
+      it 'returns true' do
+        expect( service.enough_data? ).to be true
+        expect( service.data_available_from).to be nil
+      end
+    end
+    context 'when theres is limited data' do
+      #acme academy has gas data starting in 2018-09-01
+      let(:asof_date)      { Date.new(2019, 6, 13) }
+      before(:each) do
+        allow_any_instance_of(AMRData).to receive(:end_date).and_return(asof_date)
+      end
+      it 'returns false' do
+        expect( service.enough_data? ).to be false
+        expect( service.data_available_from).to_not be nil
+      end
     end
   end
 

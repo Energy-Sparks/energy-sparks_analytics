@@ -26,4 +26,18 @@ describe Heating::HeatingStartTimeSavingsService, type: :service do
     end
   end
 
+  context '#enough_data?' do
+    context 'when theres is a years worth' do
+      it 'returns true' do
+        expect( service.enough_data? ).to be true
+      end
+    end
+    context 'when theres is limited data' do
+      #acme academy has gas data starting in 2018-09-01
+      let(:asof_date)      { Date.new(2018, 10, 2) }
+      it 'returns false' do
+        expect( service.enough_data? ).to be false
+      end
+    end
+  end
 end
