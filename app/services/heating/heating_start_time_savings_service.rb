@@ -17,6 +17,10 @@ module Heating
       super(meter_collection, asof_date)
     end
 
+    def enough_data?
+      meter_date_range_checker.at_least_x_days_data?(ONE_WEEK) && super
+    end
+
     # Calculate the percentage of annual gas consumption that would be saved
     # if heating start times were optimised.
     #
