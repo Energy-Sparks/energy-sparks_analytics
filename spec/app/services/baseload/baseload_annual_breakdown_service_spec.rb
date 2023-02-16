@@ -33,4 +33,24 @@ describe Baseload::BaseloadAnnualBreakdownService, type: :service do
       expect(annual_baseload_breakdowns[3].meter_data_available_for_full_year).to eq(false)
     end
   end
+
+  context '#enough_data?' do
+    context 'when theres is a years worth' do
+      it 'returns true' do
+        expect( service.enough_data? ).to be true
+        expect( service.data_available_from).to be nil
+      end
+    end
+    context 'when theres is limited data' do
+      #acme academy has data starting in 2019-01-13
+      let(:asof_date)      { Date.new(2019, 1, 21) }
+      before(:each) do
+        allow_any_instance_of(AMRData).to receive(:end_date).and_return(asof_date)
+      end
+      it 'returns false' do
+        expect( service.enough_data? ).to be false
+        expect( service.data_available_from).to_not be nil
+      end
+    end
+  end
 end

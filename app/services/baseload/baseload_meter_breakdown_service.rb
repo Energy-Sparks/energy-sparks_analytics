@@ -10,9 +10,19 @@ module Baseload
   #
   # The service could easily be adapted to report based on a different period
   class BaseloadMeterBreakdownService
+    include AnalysableMixin
+
     def initialize(meter_collection)
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
+    end
+
+    def enough_data?
+      range_checker.at_least_x_days_data?(BaseService::DEFAULT_DAYS_OF_DATA_REQUIRED)
+    end
+
+    def data_available_from
+      enough_data? ? nil : range_checker.date_when_enough_data_available(BaseService::DEFAULT_DAYS_OF_DATA_REQUIRED)
     end
 
     # @return [MeterBaseloadBreakdown] the calculated breakdown
@@ -59,5 +69,10 @@ module Baseload
         raise EnergySparksUnexpectedStateException, 'School does not have electricity meters'
       end
     end
+
+    def range_checker
+      @range_checker ||= Util::MeterDateRangeChecker.new(@meter_collection.aggregated_electricity_meters)
+    end
+
   end
 end

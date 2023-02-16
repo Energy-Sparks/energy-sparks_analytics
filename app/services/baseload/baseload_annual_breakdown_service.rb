@@ -2,6 +2,8 @@
 
 module Baseload
   class BaseloadAnnualBreakdownService < BaseService
+    include AnalysableMixin
+
     def initialize(meter_collection)
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
@@ -9,6 +11,14 @@ module Baseload
 
     def annual_baseload_breakdowns
       @annual_baseload_breakdowns ||= calculate_annual_baseload_breakdowns
+    end
+
+    def enough_data?
+      range_checker.at_least_x_days_data?(DEFAULT_DAYS_OF_DATA_REQUIRED)
+    end
+
+    def data_available_from
+      enough_data? ? nil : range_checker.date_when_enough_data_available(DEFAULT_DAYS_OF_DATA_REQUIRED)
     end
 
     private
@@ -37,25 +47,30 @@ module Baseload
     end
 
     def average_baseload_kw_for(year)
-      ElectricityBaseloadAnalysis.new(aggregated_electricity_meters).average_annual_baseload_kw(asof_date_for(year))
+      ElectricityBaseloadAnalysis.new(aggregate_meter).average_annual_baseload_kw(asof_date_for(year))
     rescue StandardError
       nil
     end
 
-    def aggregated_electricity_meters
-      @aggregated_electricity_meters ||= @meter_collection.aggregated_electricity_meters
+    def aggregate_meter
+      @aggregate_meter ||= @meter_collection.aggregated_electricity_meters
     end
 
     def amr_data_start_date
-      @amr_data_start_date ||= aggregated_electricity_meters.amr_data.start_date
+      @amr_data_start_date ||= aggregate_meter.amr_data.start_date
     end
 
     def amr_data_end_date
-      @amr_data_end_date ||= aggregated_electricity_meters.amr_data.end_date
+      @amr_data_end_date ||= aggregate_meter.amr_data.end_date
     end
 
     def year_range
       @year_range ||= (amr_data_start_date.year..amr_data_end_date.year).to_a
     end
+
+    def range_checker
+      meter_date_range_checker(aggregate_meter)
+    end
+
   end
 end

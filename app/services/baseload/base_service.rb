@@ -2,6 +2,8 @@
 
 module Baseload
   class BaseService
+    DEFAULT_DAYS_OF_DATA_REQUIRED = 21
+
     # Calculate the co2 per kwh rate for this school, to convert kwh values
     # into co2 emission
     def co2_per_kwh
@@ -26,6 +28,11 @@ module Baseload
       unless analytics_meter.fuel_type == :electricity
         raise EnergySparksUnexpectedStateException, "Meter (mpan: #{analytics_meter.id}, fuel_type: #{analytics_meter.fuel_type}) is not an electricity meter"
       end
+    end
+
+    def meter_date_range_checker(meter, asof_date=nil)
+      #align with ElectricityBaseloadAnalysis.one_years_data?
+      @meter_date_range_checker ||= Util::MeterDateRangeChecker.new(meter, asof_date, days_in_year: 364)
     end
   end
 end
