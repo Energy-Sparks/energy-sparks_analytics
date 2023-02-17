@@ -38,8 +38,12 @@ class ChartManager
       yaxis_units:      :£,
       restrict_y1_axis: [:£, :co2],
       yaxis_scaling:    :none,
-
       inject:           :benchmark
+    },
+    benchmark_one_year:  {
+      name:             'Annual Electricity and Gas Consumption Comparison, Latest year',
+      inherits_from:    :benchmark,
+      timescale:        :year
     },
     benchmark_varying_floor_area_pupils: {
       name:             'Annual Electricity and Gas Consumption Comparison (adjusted for changes in floor area/pupil numbers)',
