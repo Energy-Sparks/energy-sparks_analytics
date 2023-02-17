@@ -104,7 +104,9 @@ class ChartManager
       yaxis_units:      :£
     },
     benchmark_electric_only_one_year_kwh: {
-      inherits_from:    :benchmark_electric_only_£,
+      inherits_from:    :benchmark,
+      meter_definition: :allelectricity,
+      restrict_y1_axis: nil,
       timescale:        :year,
       yaxis_units:      :kwh
     },
@@ -115,7 +117,9 @@ class ChartManager
       yaxis_units:      :£
     },
     benchmark_gas_only_one_year_kwh: {
-      inherits_from:    :benchmark_gas_only_£,
+      inherits_from:    :benchmark,
+      meter_definition: :allheat,
+      restrict_y1_axis: nil,
       timescale:        :year,
       yaxis_units:      :kwh
     },
