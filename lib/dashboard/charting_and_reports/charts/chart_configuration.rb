@@ -2465,5 +2465,16 @@ class ChartManager
       ],
       inherits_from:      :solar_pv_group_by_month_dashboard_overview
     },
+    stacked_all_years:  {
+      name:             'Stacked bar chart, all years of data',
+      chart1_type:      :bar,
+      chart1_subtype:   :stacked,
+      meter_definition: :all,
+      x_axis:           :year,
+      series_breakdown: :fuel,
+      yaxis_units:      :£,
+      restrict_y1_axis: [:£, :co2],
+      yaxis_scaling:    :none
+    }
   }.freeze
 end
