@@ -2,6 +2,8 @@
 
 module Usage
   class PeakUsageBenchmarkingService
+    include AnalysableMixin
+
     def initialize(meter_collection:, asof_date:)
       @meter_collection = meter_collection
       @asof_date = asof_date
@@ -25,7 +27,19 @@ module Usage
       end
     end
 
+    def enough_data?
+      meter_data_checker.one_years_data?
+    end
+
+    def data_available_from
+      meter_data_checker.date_when_enough_data_available(364)
+    end
+
     private
+
+    def meter_data_checker
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
+    end
 
     def consumption_above_exemplar_peak
       totals = consumption_above_exemplar_peak_totals
@@ -43,14 +57,14 @@ module Usage
 
       full_date_range.each do |date|
         (0..47).each do |hhi|
-          kwh = aggregated_electricity_meters.amr_data.kwh(date, hhi, :kwh)
+          kwh = aggregate_meter.amr_data.kwh(date, hhi, :kwh)
           percent_above_exemplar = capped_percent(kwh, exemplar_kwh)
 
           next if percent_above_exemplar.nil?
 
           totals[:kwh]  += percent_above_exemplar * kwh
-          totals[:£]    += percent_above_exemplar * aggregated_electricity_meters.amr_data.kwh(date, hhi, :£current)
-          totals[:co2]  += percent_above_exemplar * aggregated_electricity_meters.amr_data.kwh(date, hhi, :co2)
+          totals[:£]    += percent_above_exemplar * aggregate_meter.amr_data.kwh(date, hhi, :£current)
+          totals[:co2]  += percent_above_exemplar * aggregate_meter.amr_data.kwh(date, hhi, :co2)
         end
       end
 
@@ -64,12 +78,12 @@ module Usage
       (kwh - exemplar_kwh) / kwh
     end
 
-    def aggregated_electricity_meters
+    def aggregate_meter
       @meter_collection.aggregated_electricity_meters
     end
 
     def full_date_range
-      start_date = [@asof_date - 364, aggregated_electricity_meters.amr_data.start_date].max
+      start_date = [@asof_date - 364, aggregate_meter.amr_data.start_date].max
       start_date..@asof_date
     end
 
@@ -91,7 +105,7 @@ module Usage
     end
 
     def floor_area
-      aggregated_electricity_meters.meter_floor_area(@meter_collection, start_date, end_date)
+      aggregate_meter.meter_floor_area(@meter_collection, start_date, end_date)
     end
 
     def start_date
