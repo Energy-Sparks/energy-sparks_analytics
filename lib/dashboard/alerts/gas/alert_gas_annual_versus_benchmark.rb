@@ -352,15 +352,18 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
     # benchmark £ using same tariff as school not benchmark tariff
     @one_year_benchmark_floor_area_£        = @one_year_benchmark_floor_area_kwh * @historic_rate_£_per_kwh
     @one_year_benchmark_floor_area_£current = @one_year_benchmark_floor_area_kwh * @current_rate_£_per_kwh
+    @one_year_benchmark_floor_area_co2 = gas_co2(@one_year_benchmark_floor_area_kwh)
 
     @one_year_saving_versus_benchmark_kwh       = @last_year_kwh      - @one_year_benchmark_floor_area_kwh
     @one_year_saving_versus_benchmark_£         = @last_year_£        - @one_year_benchmark_floor_area_£
     @one_year_saving_versus_benchmark_£current  = @last_year_£current - @one_year_benchmark_floor_area_£current
+    @one_year_savings_versus_benchmark_co2 = @last_year_co2 - @one_year_benchmark_floor_area_co2
 
     @one_year_exemplar_floor_area_kwh       = BenchmarkMetrics::EXEMPLAR_GAS_USAGE_PER_M2 * fa / @degree_day_adjustment
     @one_year_exemplar_floor_area_£         = @one_year_exemplar_floor_area_kwh * @historic_rate_£_per_kwh
     @one_year_exemplar_floor_area_£current  = @one_year_exemplar_floor_area_kwh * @current_rate_£_per_kwh
     @one_year_exemplar_floor_area_co2   = gas_co2(@one_year_exemplar_floor_area_kwh)
+
 
     @one_year_saving_versus_exemplar_kwh      = @last_year_kwh      - @one_year_exemplar_floor_area_kwh
     @one_year_saving_versus_exemplar_£        = @last_year_£        - @one_year_exemplar_floor_area_£
@@ -423,30 +426,35 @@ class AlertGasAnnualVersusBenchmark < AlertGasModelBase
       school: {
         kwh:      @last_year_kwh,
         £:        @last_year_£,
-        £current: @last_year_£current
+        £current: @last_year_£current,
+        co2:      @last_year_co2
       },
       benchmark: {
         kwh:      @one_year_benchmark_floor_area_kwh,
         £:        @one_year_benchmark_floor_area_£,
         £current: @one_year_benchmark_floor_area_£current,
+        co2:      @one_year_benchmark_floor_area_co2,
 
         saving: {
           kwh:       @one_year_saving_versus_benchmark_kwh,
           £:         @one_year_saving_versus_benchmark_£,
           £current:  @one_year_saving_versus_benchmark_£current,
-          percent:   @percent_difference_from_average_per_floor_area
+          percent:   @percent_difference_from_average_per_floor_area,
+          co2:       @one_year_savings_versus_benchmark_co2
         }
       },
       exemplar: {
         kwh:      @one_year_exemplar_floor_area_kwh,
         £:        @one_year_exemplar_floor_area_£,
         £current: @one_year_exemplar_floor_area_£current,
+        co2:      @one_year_exemplar_floor_area_co2,
 
         saving: {
           kwh:       @one_year_saving_versus_exemplar_kwh,
           £:         @one_year_saving_versus_exemplar_£,
           £current:  @one_year_saving_versus_exemplar_£current,
-          percent:   @percent_difference_from_exemplar_per_floor_area
+          percent:   @percent_difference_from_exemplar_per_floor_area,
+          co2:       @one_year_saving_versus_exemplar_co2
         }
       }
     }
