@@ -17,6 +17,10 @@ module HotWater
 
     def enough_data?
       investment_analysis.enough_data?
+    rescue
+      # Rescues from error raised in AnalyseHeatingAndHotWater::HotwaterModel#analyse_hotwater_around_summer_holidays:
+      # 'Meter data does not cover a period starting before and including a sumer holiday - unable to complete hot water efficiency analysis'
+      false
     end
 
     private
