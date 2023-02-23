@@ -2,6 +2,8 @@
 
 module HotWater
   class GasHotWaterService
+    include AnalysableMixin
+
     def initialize(meter_collection:)
       @meter_collection = meter_collection
     end
@@ -11,6 +13,10 @@ module HotWater
         investment_choices: investment_choices,
         efficiency_breakdowns: efficiency_breakdowns
       )
+    end
+
+    def enough_data?
+      investment_analysis.enough_data?
     end
 
     private
