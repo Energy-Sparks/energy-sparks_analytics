@@ -11,6 +11,12 @@ describe HotWater::GasHotWaterService do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
+  context '#enough_data?' do
+    it 'returns true if there is a years worth of data' do
+      expect(service.enough_data?).to eq(true)
+    end
+  end
+
   context '#create_model' do
     it 'creates a model for results of a heating thermostatic analysis' do
       model = service.create_model
