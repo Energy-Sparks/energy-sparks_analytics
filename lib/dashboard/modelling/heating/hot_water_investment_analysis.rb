@@ -32,11 +32,11 @@ module AnalyseHeatingAndHotWater
       payback_years = proposal[:capex] == 0.0 ? 0.0 : (proposal[:capex] / saving_£)
       {
         saving_kwh:         saving_kwh,
-        saving_kwh_percent: saving_kwh_percent,
+        saving_kwh_percent: saving_kwh_percent.clamp(0, Float::INFINITY),
         saving_£:           saving_£,
-        saving_£_percent:   saving_£_percent,
+        saving_£_percent:   saving_£_percent.clamp(0, Float::INFINITY),
         saving_co2:         saving_co2,
-        saving_co2_percent: saving_co2_percent,
+        saving_co2_percent: saving_co2_percent.clamp(0, Float::INFINITY),
         payback_years:      payback_years
       }.merge(proposal)
     end

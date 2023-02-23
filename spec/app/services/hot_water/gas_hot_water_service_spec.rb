@@ -35,7 +35,7 @@ describe HotWater::GasHotWaterService do
       expect(model.investment_choices.point_of_use_electric.saving_kwh).to round_to_two_digits(36_304.98) # 36_304.981624999986
       expect(model.investment_choices.point_of_use_electric.saving_kwh_percent).to round_to_two_digits(0.52) # 0.5194353336600116
       expect(model.investment_choices.point_of_use_electric.saving_£).to round_to_two_digits(-3009.95) # -3009.9529537500025
-      expect(model.investment_choices.point_of_use_electric.saving_£_percent).to round_to_two_digits(-1.44) # -1.4355017290110634
+      expect(model.investment_choices.point_of_use_electric.saving_£_percent).to round_to_two_digits(0) # -1.4355017290110634
       expect(model.investment_choices.point_of_use_electric.saving_co2).to round_to_two_digits(9639.34) # 9639.337391249997
       expect(model.investment_choices.point_of_use_electric.saving_co2_percent).to round_to_two_digits(0.66) # 0.6567395240428654
       expect(model.investment_choices.point_of_use_electric.payback_years).to round_to_two_digits(-6.51) # -6.511729685203551
