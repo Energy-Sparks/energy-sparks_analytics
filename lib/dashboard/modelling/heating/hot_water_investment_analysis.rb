@@ -12,6 +12,7 @@ module AnalyseHeatingAndHotWater
     end
 
     def enough_data?
+      # As per AlertHotWaterEfficiency::enough_data
       @hotwater_model.find_period_before_and_during_summer_holidays(
         @school.holidays, @school.aggregated_heat_meters.amr_data
       ).present?
