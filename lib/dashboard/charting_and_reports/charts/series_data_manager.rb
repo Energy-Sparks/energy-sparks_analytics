@@ -847,6 +847,15 @@ module Series
     SOLARPV_I18N_KEY          = 'solar_pv' # think unused?
 
     def series_names
+      #If the chart config specifies a specific meter then we should only
+      #add series for that fuel type. Otherwise assume all fuel types are
+      #required.
+      #
+      #This was added to allow the benchmarking charts to work with specific
+      #fuel types
+      return [GAS] if @chart_config[:meter_definition] == :allheat
+      return [ELECTRICITY] if @chart_config[:meter_definition] == :allelectricity
+      return [STORAGEHEATERS] if @chart_config[:meter_definition] == :storage_heater_meter
       aggregate_meters.keys
     end
 

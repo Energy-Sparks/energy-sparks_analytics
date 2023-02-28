@@ -33,6 +33,10 @@ class AlertSchoolWeekComparisonGas < AlertSchoolWeekComparisonElectricity
     21
   end
 
+  def comparison_chart
+    :alert_last_2_weeks_gas_comparison_temperature_compensated
+  end
+
   def self.schoolweek_adjusted_gas_variables
     {
       current_week_kwhs:              { description: 'List of current school week kWh values', units:  String },

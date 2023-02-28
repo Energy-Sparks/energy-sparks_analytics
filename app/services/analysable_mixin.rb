@@ -12,7 +12,7 @@ module AnalysableMixin
 
   # This method should return an estimated Date when there ought to be enough data for the analysis (e.g. if the code
   # requires a years worth of data, then it should work out from the relevant amr_data when a year will be available).
-  # If the date can't be determined, or if there are other issues (e.g. we can't generate a model) then it should
+  # If there is enough data, or the date can't be determined, or if there are other issues (e.g. we can't generate a model) then it should
   # return nil.
   def data_available_from
     nil

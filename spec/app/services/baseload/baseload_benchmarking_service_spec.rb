@@ -59,4 +59,20 @@ describe Baseload::BaseloadBenchmarkingService, type: :service do
     end
   end
 
+  context '#enough_data?' do
+    context 'when theres is a years worth' do
+      it 'returns true' do
+        expect( service.enough_data? ).to be true
+        expect( service.data_available_from).to be nil
+      end
+    end
+    context 'when theres is limited data' do
+      #acme academy has data starting in 2019-01-13
+      let(:asof_date)      { Date.new(2019, 1, 21) }
+      it 'returns false' do
+        expect( service.enough_data? ).to be false
+        expect( service.data_available_from).to_not be nil
+      end
+    end
+  end
 end

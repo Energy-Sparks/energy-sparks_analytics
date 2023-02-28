@@ -2,6 +2,8 @@
 
 module Baseload
   class BaseloadBenchmarkingService < BaseService
+    include AnalysableMixin
+
     HOURS_IN_YEAR = (24.0 * 365.0)
 
     # Create a service capable of producing benchmark comparisons for a
@@ -18,6 +20,14 @@ module Baseload
       # baseload analysis always uses the aggregated meter
       @meter = aggregate_meter
       @asof_date = asof_date
+    end
+
+    def enough_data?
+      range_checker.at_least_x_days_data?(DEFAULT_DAYS_OF_DATA_REQUIRED)
+    end
+
+    def data_available_from
+      enough_data? ? nil : range_checker.date_when_enough_data_available(DEFAULT_DAYS_OF_DATA_REQUIRED)
     end
 
     # Calculate the expected average annual baseload for a "benchmark"
@@ -105,6 +115,10 @@ module Baseload
 
     def baseload_calculator
       @baseload_calculator ||= BaseloadCalculationService.new(@meter, @asof_date)
+    end
+
+    def range_checker
+      meter_date_range_checker(@meter, @asof_date)
     end
   end
 end

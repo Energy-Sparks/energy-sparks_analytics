@@ -11,6 +11,13 @@ module AnalyseHeatingAndHotWater
       @theoretical_hw_kwh, _standing_loss_kwh, _total_kwh = self.class.annual_point_of_use_electricity_meter_kwh(@school.number_of_pupils)
     end
 
+    def enough_data?
+      # As per AlertHotWaterEfficiency#enough_data
+      @hotwater_model.find_period_before_and_during_summer_holidays(
+        @school.holidays, @school.aggregated_heat_meters.amr_data
+      ).present?
+    end
+
     def analyse_annual
       current = existing_gas_estimates
       {
