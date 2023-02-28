@@ -2,6 +2,87 @@
 en:
   analytics:
     benchmarking:
+      chart_table_config:
+        annual_electricity_costs_per_pupil: Annual electricity use per pupil
+        annual_electricity_out_of_hours_use: Electricity out of hours use
+        annual_energy_costs: Annual energy costs
+        annual_energy_costs_per_floor_area: Annual energy use per floor area
+        annual_energy_costs_per_pupil: Annual energy use per pupil
+        annual_gas_out_of_hours_use: 'Gas: out of hours use'
+        annual_heating_costs_per_floor_area: Annual heating cost per floor area
+        annual_storage_heater_out_of_hours_use: Storage heater out of hours use
+        autumn_term_2021_2022_electricity_table: Autumn Term 2021 versus 2022 electricity use comparison
+        autumn_term_2021_2022_energy_comparison: Autumn Term 2021 versus 2022 energy use comparison
+        autumn_term_2021_2022_gas_table: Autumn Term 2021 versus 2022 gas use comparison
+        autumn_term_2021_2022_storage_heater_table: Autumn Term 2021 versus 2022 storage heater use comparison
+        baseload_per_pupil: Baseload per pupil
+        change_in_annual_electricity_consumption: Change in annual electricity consumption
+        change_in_annual_heating_consumption: Change in annual heating consumption
+        change_in_annual_heating_consumption_temperature_adjusted: Change in annual heating consumption (temperature adjusted)
+        change_in_co2_emissions_since_last_year: Change in annual CO2 emissions since last year
+        change_in_co2_emissions_since_last_year_full_table: Breakdown of CO2 emissions change since last year
+        change_in_electricity_consumption_recent_school_weeks: Change in electricity consumption since last school week
+        change_in_electricity_holiday_consumption_previous_holiday: Change in electricity consumption between the 2 most recent holidays
+        change_in_electricity_holiday_consumption_previous_years_holiday: Change in electricity consumption between this holiday and the same holiday the previous year
+        change_in_electricity_since_last_year: Change in electricity consumption since last year
+        change_in_energy_since_last_year: Change in energy use since last year
+        change_in_energy_use_since_joined_energy_sparks: Change in energy use since the school joined Energy Sparks
+        change_in_energy_use_since_joined_energy_sparks_full_data: breakdown in the change in energy use since the school joined Energy Sparks
+        change_in_gas_consumption_recent_school_weeks: Change in gas consumption since last school week
+        change_in_gas_holiday_consumption_previous_holiday: Change in gas consumption between the 2 most recent holidays
+        change_in_gas_holiday_consumption_previous_years_holiday: Change in gas consumption between this holiday and the same the previous year
+        change_in_gas_since_last_year: Change in gas consumption since last year
+        change_in_solar_pv_since_last_year: Change in solar PV production since last year
+        change_in_storage_heaters_since_last_year: Change in storage heater consumption since last year
+        column_groups:
+          change_in_consumption_kwh: Change in consumption (kWh)
+          change_since_joined_energy_sparks: Change since joined Energy Sparks
+          co2_kg: CO2 (kg)
+          cost: Cost
+          electricity_consumption: Electricity consumption
+          gas_consumption: Gas consumption
+          gas_kwh: Gas (kWh)
+          gbp: "£"
+          kwh: kWh
+          percent_change_heating: Percent change (Heating)
+          percent_changed: Percent changed
+          solar: Solar
+          solar_pv_production: Solar PV production
+          solar_self_consumption: Solar self consumption
+          storage_heater_consumption: Storage heater consumption
+          storage_heaters_kwh: Storage heaters (kWh)
+          total_energy_consumption: Total energy consumption
+        differential_tariff_opportunity: Benefit of moving to or away from a differential tariff
+        electricity_consumption_during_holiday: Electricity consumption during current holiday
+        electricity_meter_consolidation_opportunities: Opportunities for electricity meter consolidation
+        electricity_peak_kw_per_pupil: Peak school day electricity comparison kW/floor area
+        electricity_targets: Progress versus electricity target
+        gas_consumption_during_holiday: Gas consumption during current holiday
+        gas_meter_consolidation_opportunities: Opportunities for gas meter consolidation
+        gas_targets: Progress versus gas target
+        heating_coming_on_too_early: Heating start time (potentially coming on too early in morning)
+        heating_in_warm_weather: Gas or storage heater consumption for heating in warm weather
+        holiday_usage_last_year: Energy Consumption in upcoming holiday last year
+        hot_water_efficiency: Hot Water Efficiency
+        layer_up_powerdown_day_november_2022: Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)
+        layer_up_powerdown_day_november_2022_electricity_table: Change in electricity for layer up power down day November 2022
+        layer_up_powerdown_day_november_2022_gas_table: Change in gas for layer up power down day November 2022
+        layer_up_powerdown_day_november_2022_storage_heater_table: Change in gas for layer up power down day November 2022
+        optimum_start_analysis: Optimum start analysis
+        recent_change_in_baseload: Last week's baseload versus average of last year (% difference)
+        refrigeration: Last year cost of running refrigeration
+        school_information: School information - used for drilldown, not directly presented to user
+        seasonal_baseload_variation: Seasonal baseload variation
+        sept_nov_2021_2022_electricity_table: September to November 2021 versus 2022 electricity use comparison
+        sept_nov_2021_2022_energy_comparison: September to November 2021 versus 2022 energy use comparison
+        sept_nov_2021_2022_gas_table: September to November 2021 versus 2022 gas use comparison
+        sept_nov_2021_2022_storage_heater_table: September to November 2021 versus 2022 storage heater use comparison
+        solar_pv_benefit_estimate: Benefit of estimated optimum size solar PV installation
+        storage_heater_consumption_during_holiday: Storage heater consumption during current holiday
+        summer_holiday_electricity_analysis: Reduction in baseload in the summer holidays
+        thermostat_sensitivity: Annual saving through 1C reduction in thermostat temperature
+        thermostatic_control: Quality of thermostatic control
+        weekday_baseload_variation: Weekday baseload variation
       chart_table_grouping:
         change_in_energy_use: Change in Energy Use
         electricity_benchmarks: Electricity Benchmarks
