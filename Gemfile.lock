@@ -75,6 +75,8 @@ GEM
     chroma (0.2.0)
     clbustos-rtf (0.4.2)
     coderay (1.1.3)
+    compare-xml (0.66)
+      nokogiri (~> 1.8)
     concurrent-ruby (1.1.10)
     crass (1.0.6)
     daru (0.2.2)
@@ -272,6 +274,7 @@ DEPENDENCIES
   benchmark-memory
   bundler-audit
   chroma
+  compare-xml
   dotenv
   factory_bot
   faraday
@@ -280,6 +283,7 @@ DEPENDENCIES
   html-table
   i18n-tasks (~> 1.0.10)
   interpolate
+  nokogiri
   pry-byebug
   require_all
   rollbar

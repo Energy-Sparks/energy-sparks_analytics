@@ -33,6 +33,10 @@ gem 'dotenv'
 
 gem 'rollbar'
 
+# Used by rspec html matcher
+gem 'nokogiri'
+gem 'compare-xml'
+
 group :development do
   gem 'aws-sdk-s3'
   gem 'i18n-tasks', '~> 1.0.10'

@@ -949,7 +949,7 @@ module Benchmarking
 
     private def introduction_text
       text = '<p>'
-      text =  I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html')
+      text +=  I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html')
       text += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
       text += '</p>'
       ERB.new(text).result(binding)

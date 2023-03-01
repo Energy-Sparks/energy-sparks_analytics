@@ -13,27 +13,25 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
     )
   end
 
-  describe 'introduction_text' do
-    it 'includes text in the introduction text' do
-      expect(benchmark.send(:introduction_text)).to include(
-        I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html')
-      )
+  describe '#content_title' do
+    it 'returns the content title' do
+      html = benchmark.send(:content_title)
+      expect(html).to match_html(<<~HTML)
+        <h1>
+          Annual energy costs
+        </h1>
+      HTML
     end
   end
 
-  describe 'table_introduction_text' do
-    it 'includes table introduction text' do
-      expect(benchmark.send(:table_introduction_text)).to include(
-        I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
-      )
-    end
-  end
-
-  describe 'table_interpretation_text' do
-    it 'includes table introduction text' do
-      expect(benchmark.send(:table_interpretation_text)).to include(
-        I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync_html')
-      )
+  describe '#introduction_text' do
+    it 'formats introduction and any caveat text as html' do
+      html = benchmark.send(:introduction_text)
+      expect(html).to match_html(<<~HTML)
+        <p>
+          This benchmark shows how much each school spent on energy last year.
+        </p>
+      HTML
     end
   end
 end
