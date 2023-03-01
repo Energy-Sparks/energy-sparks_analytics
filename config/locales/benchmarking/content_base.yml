@@ -2,6 +2,34 @@
 en:
   analytics:
     benchmarking:
+      caveat_text:
+        es_data_not_in_sync_html: |-
+          <p>
+            The gas, electricity and storage heater costs are all using the latest
+            data. The total might not be the sum of these 3 in the circumstance
+            where one of the meter's data is out of date, and the total then covers the
+            most recent year where all data is available to us on all the underlying
+            meters, and hence will cover the period of the most out of date of the
+            underlying meters.
+          </p>
+        es_doesnt_have_all_meter_data_html: |-
+          <p>
+            The table provides the information in more detail.
+            Energy Sparks doesn&apos;t have a full set of meter data
+            for some schools, for example rural schools with biomass or oil boilers,
+            so this comparison might not be relevant for all schools. The comparison
+            excludes the benefit of any solar PV which might be installed - so looks
+            at energy consumption only.
+          </p>
+        es_per_pupil_v_per_floor_area_html: |-
+          <p>
+              Generally, per pupil benchmarks are appropriate for electricity
+              (should be proportional to the appliances e.g. ICT in use),
+              but per floor area benchmarks are more appropriate for gas (size of
+              building which needs heating). Overall, <u>energy</u> use comparison
+              on a per pupil basis is probably more appropriate than on a per
+              floor area basis, but this analysis can be useful in some circumstances.
+          </p>
       chart_table_config:
         annual_electricity_costs_per_pupil: Annual electricity use per pupil
         annual_electricity_out_of_hours_use: Electricity out of hours use
@@ -263,34 +291,6 @@ en:
           weekend: Weekend
           winter_baseload_kw: Winter baseload kW
           year_before_joined: Year before joined
-      caveat_text:
-        es_data_not_in_sync_html: |-
-          <p>
-            The gas, electricity and storage heater costs are all using the latest
-            data. The total might not be the sum of these 3 in the circumstance
-            where one of the meter's data is out of date, and the total then covers the
-            most recent year where all data is available to us on all the underlying
-            meters, and hence will cover the period of the most out of date of the
-            underlying meters.
-          </p>
-        es_doesnt_have_all_meter_data_html: |-
-          <p>
-            The table provides the information in more detail.
-            Energy Sparks doesn&apos;t have a full set of meter data
-            for some schools, for example rural schools with biomass or oil boilers,
-            so this comparison might not be relevant for all schools. The comparison
-            excludes the benefit of any solar PV which might be installed - so looks
-            at energy consumption only.
-          </p>
-        es_per_pupil_v_per_floor_area_html: |-
-          <p>
-              Generally, per pupil benchmarks are appropriate for electricity
-              (should be proportional to the appliances e.g. ICT in use),
-              but per floor area benchmarks are more appropriate for gas (size of
-              building which needs heating). Overall, <u>energy</u> use comparison
-              on a per pupil basis is probably more appropriate than on a per
-              floor area basis, but this analysis can be useful in some circumstances.
-          </p>
       content:
         annual_energy_costs:
           introduction_text_html: |-
