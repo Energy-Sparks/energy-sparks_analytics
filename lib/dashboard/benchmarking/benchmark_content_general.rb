@@ -1028,6 +1028,7 @@ module Benchmarking
   #=======================================================================================
   # this benachmark generates 2 charts and 1 table
   class BenchmarkContentChangeInCO2SinceLastYear < BenchmarkContentBase
+    # defined in the benchmark_configuration as change_in_co2_emissions_since_last_year
     include BenchmarkingNoTextMixin
 
     private def introduction_text
@@ -1199,6 +1200,7 @@ module Benchmarking
   end 
   #=======================================================================================
   class BenchmarkChangeInEnergySinceLastYear < BenchmarkAnnualChangeBase
+    # defined in benchmark_configuration as change_in_energy_since_last_year 
     include BenchmarkingNoTextMixin
 
     private def introduction_text
@@ -1260,6 +1262,7 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkChangeInElectricitySinceLastYear < BenchmarkAnnualChangeBase
+    # defined in the benchmark configuration as change_in_electricity_since_last_year
     include BenchmarkingNoTextMixin
 
     # some text duplication with the BenchmarkChangeInEnergySinceLastYear class
@@ -1284,6 +1287,7 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkChangeInGasSinceLastYear < BenchmarkAnnualChangeBase
+    # defined in the benchmark configuration as change_in_gas_since_last_year
     include BenchmarkingNoTextMixin
 
     private def introduction_text
@@ -1298,6 +1302,7 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkChangeInStorageHeatersSinceLastYear < BenchmarkAnnualChangeBase
+    # defined in the benchmark_configuration as change_in_storage_heaters_since_last_year
     include BenchmarkingNoTextMixin
 
     private def introduction_text
@@ -1325,6 +1330,7 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkChangeInSolarPVSinceLastYear < BenchmarkAnnualChangeBase
+    # defined in the benchmark_configuration as change_in_solar_pv_since_last_year
     include BenchmarkingNoTextMixin
 
     private def introduction_text
@@ -1834,6 +1840,7 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkEnergyConsumptionInUpcomingHolidayLastYear < BenchmarkContentBase
+    # defined in the benchmark_configuration as holiday_usage_last_year
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = %q(
