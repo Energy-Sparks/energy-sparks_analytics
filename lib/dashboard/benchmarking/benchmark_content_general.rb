@@ -123,14 +123,14 @@ module Benchmarking
           </a>
         </p>
         <p>
-          <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
+          <%= I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area') %>
         </p>
       )
       ERB.new(text).result(binding)
     end
 
     private def table_introduction_text
-      CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
+      I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data]
     end
   end
   #=======================================================================================
@@ -144,10 +144,10 @@ module Benchmarking
       )
     end
     private def table_introduction_text
-      CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
+      I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data]
     end
     protected def table_interpretation_text
-      CAVEAT_TEXT[:es_data_not_in_sync]
+      I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync]
     end
   end
   #=======================================================================================
@@ -213,7 +213,7 @@ module Benchmarking
           increase in pupil numbers is inexcusable if a school is planning on contributing
           to reducing global carbon emissions.
         </p>
-      ) + CAVEAT_TEXT[:covid_lockdown]
+      ) + I18n.t('analytics.benchmarking.caveat_text.covid_lockdown]
     end
   end
   #=======================================================================================
@@ -244,7 +244,7 @@ module Benchmarking
           that we provide as it might give you more information
           on a school&apos;s out of hours consumption.
         </p>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv] %>
       )
       ERB.new(text).result(binding)
     end
@@ -317,8 +317,8 @@ module Benchmarking
           this has happened.
         </p>
         <%= @baseload_impact_html %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.covid_lockdown] %>
       )
       ERB.new(text).result(binding)
     end
@@ -406,8 +406,8 @@ module Benchmarking
           particularly out of hours.
         </p>
         <%= @baseload_impact_html %>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.es_sources_of_baseload_electricity_consumption ] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv] %>
       )
       ERB.new(text).result(binding)
     end
@@ -433,8 +433,8 @@ module Benchmarking
           Identifying and turning off or better timing such equipment is a quick way
           of saving electricity and costs.
         </p>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.es_sources_of_baseload_electricity_consumption ] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv] %>
       )
       ERB.new(text).result(binding)
     end
@@ -460,8 +460,8 @@ module Benchmarking
           certain days of the week than others, and switch off whatever is causing
           the difference.
         </p>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.es_sources_of_baseload_electricity_consumption ] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv] %>
       )
       ERB.new(text).result(binding)
     end
@@ -637,7 +637,7 @@ module Benchmarking
           to point of use electric hot water, and installing boiler optimum start control
           and weather compensation which require investment will reduce costs further.
         </p>
-      ) + CAVEAT_TEXT[:covid_lockdown]
+      ) + I18n.t('analytics.benchmarking.caveat_text.covid_lockdown]
     end
   end
     #=======================================================================================
@@ -965,7 +965,7 @@ module Benchmarking
         <p>
             This comparison benchmark is an alternative to the more commonly used
             per pupil energy comparison
-            benchmark. <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
+            benchmark. <%= I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area] %>
         </p>
       )
       ERB.new(text).result(binding)
@@ -982,7 +982,7 @@ module Benchmarking
           joined Energy Sparks. So for the year before the school joined Energy Sparks versus
           the latest year.
         </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.covid_lockdown] %>
       )
       ERB.new(text).result(binding)
     end
@@ -1019,7 +1019,7 @@ module Benchmarking
       text = %q(
         <p>
           This table provides a more detailed breakdown of the data provided in the chart
-          and table above. <%= CAVEAT_TEXT[:covid_lockdown] %>
+          and table above. <%= I18n.t('analytics.benchmarking.caveat_text.covid_lockdown] %>
         </p>
       )
       ERB.new(text).result(binding)
@@ -1036,7 +1036,7 @@ module Benchmarking
           This benchmark compares the change in annual CO2 emissions between the last two years.
           All CO2 is expressed in kg (kilograms).
         </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.covid_lockdown] %>
       )
       ERB.new(text).result(binding)
     end
@@ -1231,7 +1231,7 @@ module Benchmarking
             </li>
           </ul>
         </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.covid_lockdown] %>
       )
 
       ERB.new(text).result(binding)
@@ -1276,7 +1276,7 @@ module Benchmarking
             <li><%= storage_heater_comparison %></li>
           </ul>
         </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.covid_lockdown] %>
       )
 
       ERB.new(text).result(binding)
@@ -1290,7 +1290,7 @@ module Benchmarking
       text = %q(
         <%= table_introduction('gas') %>
         <%= colder %>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.covid_lockdown] %>
       )
 
       ERB.new(text).result(binding)
@@ -1317,7 +1317,7 @@ module Benchmarking
           <%= varying_directions([carbon_intensity, day_night_tariffs], false) %>
         </p>
         <%= colder %>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.covid_lockdown] %>
       )
 
       ERB.new(text).result(binding)
@@ -1679,7 +1679,7 @@ module Benchmarking
           increase in electricity consumption going into the winter with
           increased lighting usage and a subsequent reduction in the spring.
         </p>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
     end
@@ -1702,8 +1702,8 @@ module Benchmarking
         <p>
           This comparison shows the change in consumption between the 2 most recent holidays.
         </p>
-        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.holiday_length_normalisation] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
     end
@@ -1720,8 +1720,8 @@ module Benchmarking
           from year to year suggests a school is not managing to reduce consumption,
           which would help mitigate some of the impacts of climate change.
         </p>
-        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.holiday_length_normalisation] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
     end
@@ -1738,7 +1738,7 @@ module Benchmarking
           increase in gas consumption going into the winter as it gets
           colder and a subsequent reduction in the spring.
         </p>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
     end
@@ -1763,8 +1763,8 @@ module Benchmarking
           &apos;alert&apos; to send you an email or text message just before a holiday to remind you to
           turn the heating or hot water off.
         </p>
-        <%= CAVEAT_TEXT[:temperature_compensation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.temperature_compensation] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
     end
@@ -1784,8 +1784,8 @@ module Benchmarking
           send you an email or text message just before a holiday to remind you to
           turn the heating or hot water off.
         </p>
-        <%= CAVEAT_TEXT[:temperature_compensation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.temperature_compensation] %>
+        <%= I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite] %>
       )
       ERB.new(text).result(binding)
     end

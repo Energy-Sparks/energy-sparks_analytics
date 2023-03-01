@@ -23,7 +23,7 @@ module Benchmarking
       composite   = run_table(school_ids, filter, :text_and_raw, user_type) if tables?
 
       if (tables? || charts?) && composite[:rows].empty?
-        tables = { type: :html, content: '<h3>There are no schools to report using this filter for this benchmark</h3>' }
+        tables = { type: :html, content: I18n.t('analytics.benchmarking.no_schools_to_report_html') }
       else
         charts = [
           { type: :html,                  content: chart_introduction_text },
@@ -214,16 +214,8 @@ module Benchmarking
     end
 
     def tariff_changed_explanation(school_ids, filter, user_type)
-
-
       if includes_tariff_changed_column?(school_ids, filter, user_type) && tariff_has_changed?(school_ids, filter, user_type)
-        %(
-          <p>
-            (*5) The tariff has changed during the last year for this school.
-                Savings are calculated using the latest tariff but other £ values
-                are calculated using the relevant tariff at the time
-          </p>
-        )
+        I18n.t('analytics.benchmarking.the_tariff_has_changed_during_the_last_year_html')
       else
         ''
       end
