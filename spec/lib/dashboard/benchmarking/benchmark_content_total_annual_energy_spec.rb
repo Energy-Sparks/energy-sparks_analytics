@@ -24,7 +24,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
   describe 'table_introduction_text' do
     it 'includes table introduction text' do
       expect(benchmark.send(:table_introduction_text)).to include(
-        I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data')
+        I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
       )
     end
   end
@@ -32,7 +32,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
   describe 'table_interpretation_text' do
     it 'includes table introduction text' do
       expect(benchmark.send(:table_interpretation_text)).to include(
-        I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync')
+        I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync_html')
       )
     end
   end
