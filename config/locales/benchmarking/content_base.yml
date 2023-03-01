@@ -1,0 +1,53 @@
+---
+en:
+  analytics:
+    benchmarking:
+      caveat_text:
+        es_data_not_in_sync_html: |-
+          <p>
+            The gas, electricity and storage heater costs are all using the latest
+            data. The total might not be the sum of these 3 in the circumstance
+            where one of the meter's data is out of date, and the total then covers the
+            most recent year where all data is available to us on all the underlying
+            meters, and hence will cover the period of the most out of date of the
+            underlying meters.
+          </p>
+        es_doesnt_have_all_meter_data_html: |-
+          <p>
+            The table provides the information in more detail.
+            Energy Sparks doesn&apos;t have a full set of meter data
+            for some schools, for example rural schools with biomass or oil boilers,
+            so this comparison might not be relevant for all schools. The comparison
+            excludes the benefit of any solar PV which might be installed - so looks
+            at energy consumption only.
+          </p>
+        es_per_pupil_v_per_floor_area_html: |-
+          <p>
+              Generally, per pupil benchmarks are appropriate for electricity
+              (should be proportional to the appliances e.g. ICT in use),
+              but per floor area benchmarks are more appropriate for gas (size of
+              building which needs heating). Overall, <u>energy</u> use comparison
+              on a per pupil basis is probably more appropriate than on a per
+              floor area basis, but this analysis can be useful in some circumstances.
+          </p>
+      content:
+        annual_energy_costs:
+          introduction_text_html: |-
+            <p>
+              This benchmark shows how much each school spent on energy last year.
+            </p>
+        annual_energy_costs_per_floor_area:
+          introduction_text_html: |-
+            <p>
+                This comparison benchmark is an alternative to the more commonly used
+                per pupil energy comparison benchmark.
+            </p>
+        annual_energy_costs_per_pupil:
+          introduction_text_html: |-
+            <p>
+              This benchmark compares the energy consumed per pupil in the last year in kWh.
+              Be careful when comparing kWh values between different fuel types,
+              <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
+                technically they aren't directly comparable as they are different types of energy.
+              </a>
+            </p>
