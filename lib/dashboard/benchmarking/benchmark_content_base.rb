@@ -230,3 +230,4 @@ module Benchmarking
     end
   end
 end
+

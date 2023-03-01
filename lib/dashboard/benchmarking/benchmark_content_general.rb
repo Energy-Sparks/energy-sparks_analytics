@@ -114,40 +114,26 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          This benchmark compares the energy consumed per pupil in the last year in kWh.
-          Be careful when comparing kWh values between different fuel types,
-          <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
-            technically they aren't directly comparable as they are different types of energy.
-          </a>
-        </p>
-        <p>
-          <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
-        </p>
-      )
+      text =  I18n.t('analytics.benchmarking.content.annual_energy_costs_per_pupil.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
       ERB.new(text).result(binding)
     end
 
     private def table_introduction_text
-      CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
+      I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
     end
   end
   #=======================================================================================
   class BenchmarkContentTotalAnnualEnergy < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This benchmark shows how much each school spent on energy last year.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html')
     end
     private def table_introduction_text
-      CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
+      I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
     end
     protected def table_interpretation_text
-      CAVEAT_TEXT[:es_data_not_in_sync]
+      I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync_html')
     end
   end
   #=======================================================================================
@@ -958,16 +944,14 @@ module Benchmarking
 
   #=======================================================================================
   class BenchmarkContentEnergyPerFloorArea < BenchmarkContentBase
+    # config key annual_energy_costs_per_floor_area
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-            This comparison benchmark is an alternative to the more commonly used
-            per pupil energy comparison
-            benchmark. <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
-        </p>
-      )
+      text = '<p>'
+      text =  I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
+      text += '</p>'
       ERB.new(text).result(binding)
     end
   end
