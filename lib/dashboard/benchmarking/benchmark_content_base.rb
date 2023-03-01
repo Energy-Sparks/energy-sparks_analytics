@@ -91,7 +91,11 @@ module Benchmarking
     end
 
     protected def content_title
-      text = %( <h1><%= chart_table_config[:name] %></h1> )
+      text = if chart_table_config[:i18n_key]
+               '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.#{chart_table_config[:i18n_key]}") + '</h1>'
+             else
+               %(<h1><%= chart_table_config[:name] %></h1>)
+             end
       ERB.new(text).result(binding)
     end
 

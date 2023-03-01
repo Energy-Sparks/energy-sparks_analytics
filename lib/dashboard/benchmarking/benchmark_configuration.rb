@@ -383,6 +383,7 @@ module Benchmarking
       annual_energy_costs_per_pupil: {
         benchmark_class:  BenchmarkContentEnergyPerPupil,
         name:     'Annual energy use per pupil',
+        i18n_key: :annual_energy_costs_per_pupil,
         columns:  [
           tariff_changed_school_name(AdviceBenchmark),
           { data: ->{ elba_kpup },          name: ch(:last_year_electricity_kwh_pupil), units: :kwh, chart_data: true },
@@ -402,6 +403,7 @@ module Benchmarking
       },
       annual_energy_costs: {
         benchmark_class:  BenchmarkContentTotalAnnualEnergy,
+        i18n_key: :annual_energy_costs,
         name:     'Annual energy costs',
         columns:  [
           { data: 'addp_name',              name: ch(:name), units: String, chart_data: true },
@@ -421,6 +423,7 @@ module Benchmarking
       },
       annual_energy_costs_per_floor_area: {
         benchmark_class:  BenchmarkContentEnergyPerFloorArea,
+        i18n_key: :annual_energy_costs_per_floor_area,
         name:     'Annual energy use per floor area',
         columns:  [
           { data: 'addp_name',      name: ch(:name), units: String, chart_data: true },
