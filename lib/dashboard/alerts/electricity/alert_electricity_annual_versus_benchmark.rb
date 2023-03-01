@@ -271,6 +271,8 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @one_year_benchmark_by_pupil_kwh            = BenchmarkMetrics.benchmark_annual_electricity_usage_kwh(school_type, pup)
     @one_year_benchmark_by_pupil_£current       = @one_year_benchmark_by_pupil_kwh * @current_rate_£_per_kwh
     @one_year_benchmark_by_pupil_£              = @one_year_benchmark_by_pupil_kwh * @historic_rate_£_per_kwh
+    @one_year_benchmark_by_pupil_co2 = @one_year_benchmark_by_pupil_kwh * blended_co2_per_kwh
+
     @one_year_saving_versus_benchmark_kwh       = @last_year_kwh - @one_year_benchmark_by_pupil_kwh
     @one_year_saving_versus_benchmark_£         = @one_year_saving_versus_benchmark_kwh * @historic_rate_£_per_kwh
     @one_year_saving_versus_benchmark_£current  = @one_year_saving_versus_benchmark_kwh * @current_rate_£_per_kwh
@@ -278,10 +280,12 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
     @one_year_saving_versus_benchmark_kwh       = @one_year_saving_versus_benchmark_kwh.magnitude
     @one_year_saving_versus_benchmark_£         = @one_year_saving_versus_benchmark_£.magnitude
     @one_year_saving_versus_benchmark_£current  = @one_year_saving_versus_benchmark_£current.magnitude
+    @one_year_saving_versus_benchmark_co2 = @one_year_saving_versus_benchmark_kwh  * blended_co2_per_kwh
 
     @one_year_exemplar_by_pupil_kwh             = BenchmarkMetrics.exemplar_annual_electricity_usage_kwh(school_type, pup)
     @one_year_exemplar_by_pupil_£               = @one_year_exemplar_by_pupil_kwh * @historic_rate_£_per_kwh
     @one_year_exemplar_by_pupil_£current        = @one_year_exemplar_by_pupil_kwh * @current_rate_£_per_kwh
+    @one_year_exemplar_by_pupil_co2 = @one_year_exemplar_by_pupil_kwh * blended_co2_per_kwh
 
     @one_year_saving_versus_exemplar_kwh      = @last_year_kwh - @one_year_exemplar_by_pupil_kwh
     @one_year_saving_versus_exemplar_£        = @one_year_saving_versus_exemplar_kwh * @historic_rate_£_per_kwh
@@ -342,30 +346,35 @@ class AlertElectricityAnnualVersusBenchmark < AlertElectricityOnlyBase
       school: {
         kwh:      @last_year_kwh,
         £:        @last_year_£,
-        £current: @last_year_£current
+        £current: @last_year_£current,
+        co2:      @last_year_co2
       },
       benchmark: {
         kwh:      @one_year_benchmark_by_pupil_kwh,
         £:        @one_year_benchmark_by_pupil_£,
         £current: @one_year_benchmark_by_pupil_£current,
+        co2:      @one_year_benchmark_by_pupil_co2,
 
         saving: {
           kwh:       @one_year_saving_versus_benchmark_kwh,
           £:         @one_year_saving_versus_benchmark_£,
           £current:  @one_year_saving_versus_benchmark_£current,
-          percent:   @percent_difference_from_average_per_pupil
+          percent:   @percent_difference_from_average_per_pupil,
+          co2:       @one_year_saving_versus_benchmark_co2
         }
       },
       exemplar: {
         kwh:      @one_year_exemplar_by_pupil_kwh,
         £:        @one_year_exemplar_by_pupil_£,
         £current: @one_year_exemplar_by_pupil_£current,
+        co2:      @one_year_exemplar_by_pupil_co2,
 
         saving: {
           kwh:       @one_year_saving_versus_exemplar_kwh,
           £:         @one_year_saving_versus_exemplar_£,
           £current:  @one_year_saving_versus_exemplar_£current,
-          percent:   @percent_difference_from_exemplar_per_pupil
+          percent:   @percent_difference_from_exemplar_per_pupil,
+          co2:       @one_year_saving_versus_exemplar_co2
         }
       }
     }
