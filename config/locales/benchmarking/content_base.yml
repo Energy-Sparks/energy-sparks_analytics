@@ -2,6 +2,27 @@
 en:
   analytics:
     benchmarking:
+      content:
+        annual_energy_costs_per_floor_area:
+          introduction_text_html: |-
+            <p>
+                This comparison benchmark is an alternative to the more commonly used
+                per pupil energy comparison benchmark.
+            </p>
+        annual_energy_costs_per_pupil:
+          introduction_text_html: |-
+            <p>
+              This benchmark compares the energy consumed per pupil in the last year in kWh.
+              Be careful when comparing kWh values between different fuel types,
+              <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
+                technically they aren't directly comparable as they are different types of energy.
+              </a>
+            </p>
+        annual_energy_costs:
+          introduction_text_html: |-
+            <p>
+              This benchmark shows how much each school spent on energy last year.
+            </p>
       no_schools_to_report_html: '<h3>There are no schools to report using this filter for this benchmark</h3>'
       the_tariff_has_changed_during_the_last_year_html: |-
         <p>
