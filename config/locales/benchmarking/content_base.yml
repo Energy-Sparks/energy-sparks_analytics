@@ -2,6 +2,12 @@
 en:
   analytics:
     benchmarking:
+      chart_table_grouping:
+        total_energy_use_benchmarks: Total Energy Use Benchmarks
+        electricity_benchmarks: Electricity Benchmarks
+        gas_and_storage_heater_benchmarks: Gas and Storage Heater Benchmarks
+        solar_benchmarks: Solar Benchmarks
+        date_limited_comparisons: Date limited comparisons
       caveat_text:
         es_data_not_in_sync_html: |-
           <p>
