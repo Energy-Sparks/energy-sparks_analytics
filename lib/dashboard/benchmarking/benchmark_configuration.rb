@@ -226,18 +226,25 @@ module Benchmarking
       column_definition.key?(key) && column_definition[key]
     end
 
-    def self.structured_pages(user_type_hash, _filter_out = nil)
-      # TODO filter by user type
-      # { user_role: current_user.role.to_sym, staff_role: current_user.staff_role_as_symbol }
-      # { user_role: :guest, staff_role: nil }
-      # user_type_hash[:user_role]
-      CHART_TABLE_GROUPING.each_with_object([]) do |(group_key, benchmark_keys), structured_pages| 
+    def self.structured_pages(user_type_hash = { user_role: :guest }, _filter_out = nil)
+      user_role = user_type_hash[:user_role] || :guest
+
+      CHART_TABLE_GROUPING.each_with_object([]) do |(group_key, benchmark_keys), structured_pages|
+        benchmarks = benchmark_titles_for(benchmark_keys, user_role)
+        next if benchmarks.empty?
+
         structured_pages << {
           name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}"),
-          benchmarks: benchmark_keys.map do |benchmark_key|
-            [benchmark_key, I18n.t("analytics.benchmarking.chart_table_config.#{benchmark_key}")]
-          end.to_h
+          benchmarks: benchmark_titles_for(benchmark_keys, user_role)
         }
+      end
+    end
+
+    def self.benchmark_titles_for(benchmark_keys, user_role)
+      benchmark_keys.each_with_object({}) do |benchmark_key, benchmarks|
+        next if CHART_TABLE_CONFIG[benchmark_key][:admin_only] == true && user_role != :admin
+
+        benchmarks[benchmark_key] = I18n.t("analytics.benchmarking.chart_table_config.#{benchmark_key}")
       end
     end
 
