@@ -1183,7 +1183,6 @@ module Benchmarking
   end 
   #=======================================================================================
   class BenchmarkChangeInEnergySinceLastYear < BenchmarkAnnualChangeBase
-    # defined in benchmark_configuration as change_in_energy_since_last_year 
     include BenchmarkingNoTextMixin
 
     private def introduction_text
@@ -1245,7 +1244,6 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkChangeInElectricitySinceLastYear < BenchmarkAnnualChangeBase
-    # defined in the benchmark configuration as change_in_electricity_since_last_year
     include BenchmarkingNoTextMixin
 
     # some text duplication with the BenchmarkChangeInEnergySinceLastYear class
@@ -1270,7 +1268,6 @@ module Benchmarking
   end
   #=======================================================================================
   class BenchmarkChangeInGasSinceLastYear < BenchmarkAnnualChangeBase
-    # defined in the benchmark configuration as change_in_gas_since_last_year
     include BenchmarkingNoTextMixin
 
     private def introduction_text
