@@ -226,13 +226,13 @@ module Benchmarking
       column_definition.key?(key) && column_definition[key]
     end
 
-    def self.structured_pages(user_type_hash, filter_out = nil)
-        # TODO filter by user_type_hash 
+    def self.structured_pages(user_type_hash, _filter_out = nil)
+      # TODO: filter by user_type_hash
       CHART_TABLE_GROUPING.each_with_object([]) do |(group_key, benchmark_keys), structured_pages|
         structured_pages << {
           name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}"),
-          benchmarks: benchmark_keys.map do |benchmark_key| 
-            [ benchmark_key, I18n.t("analytics.benchmarking.chart_table_config.#{benchmark_key}")]
+          benchmarks: benchmark_keys .map do |benchmark_key|
+            [benchmark_key, I18n.t("analytics.benchmarking.chart_table_config.#{benchmark_key}")]
           end.to_h
         }
       end
