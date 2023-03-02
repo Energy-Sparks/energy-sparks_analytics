@@ -71,6 +71,12 @@ en:
         thermostat_sensitivity: Annual saving through 1C reduction in thermostat temperature
         thermostatic_control: Quality of thermostatic control
         weekday_baseload_variation: Weekday baseload variation
+      chart_table_grouping:
+        date_limited_comparisons: Date limited comparisons
+        electricity_benchmarks: Electricity Benchmarks
+        gas_and_storage_heater_benchmarks: Gas and Storage Heater Benchmarks
+        solar_benchmarks: Solar Benchmarks
+        total_energy_use_benchmarks: Total Energy Use Benchmarks
       content:
         annual_energy_costs:
           introduction_text_html: |-

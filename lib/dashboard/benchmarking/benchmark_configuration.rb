@@ -226,16 +226,14 @@ module Benchmarking
       column_definition.key?(key) && column_definition[key]
     end
 
-    def self.structured_pages(user_type_hash, filter_out = nil)
-      CHART_TABLE_GROUPING.map do |group|
-        visible_benchmarks = if ContentBase.analytics_user?(user_type_hash)
-          group[:benchmarks]
-        else
-          group[:benchmarks].select { |key| !CHART_TABLE_CONFIG[key].fetch(:analytics_user_type, false) }
-        end
-        {
-          name:  group[:name],
-          benchmarks: visible_benchmarks.map{ |key| [key, CHART_TABLE_CONFIG[key][:name]] }.to_h
+    def self.structured_pages(user_type_hash, _filter_out = nil)
+      # TODO: filter by user_type_hash
+      CHART_TABLE_GROUPING.each_with_object([]) do |(group_key, benchmark_keys), structured_pages|
+        structured_pages << {
+          name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}"),
+          benchmarks: benchmark_keys .map do |benchmark_key|
+            [benchmark_key, I18n.t("analytics.benchmarking.chart_table_config.#{benchmark_key}")]
+          end.to_h
         }
       end
     end
@@ -280,75 +278,58 @@ module Benchmarking
       val.nil? ? Float::INFINITY : val
     end
 
-    CHART_TABLE_GROUPING = [
-      {
-        name:       'Energy Cost Benchmarks',
-        benchmarks: %i[
-          annual_energy_costs_per_pupil
-          annual_energy_costs
-          annual_energy_costs_per_floor_area
-        ]
-      },
-      {
-        name:       'Change in Energy Use',
-        benchmarks: %i[
-          change_in_energy_since_last_year
-          change_in_electricity_since_last_year
-          change_in_gas_since_last_year
-          change_in_storage_heaters_since_last_year
-          change_in_solar_pv_since_last_year
-          holiday_usage_last_year
-        ]
-      },
-      {
-        name:       'Electricity Benchmarks',
-        benchmarks: %i[
-          annual_electricity_costs_per_pupil
-          annual_electricity_out_of_hours_use
-          recent_change_in_baseload
-          baseload_per_pupil
-          seasonal_baseload_variation
-          weekday_baseload_variation
-          summer_holiday_electricity_analysis
-          electricity_peak_kw_per_pupil
-          solar_pv_benefit_estimate
-          refrigeration
-          electricity_targets
-          change_in_electricity_consumption_recent_school_weeks
-          change_in_electricity_holiday_consumption_previous_holiday
-          change_in_electricity_holiday_consumption_previous_years_holiday
-          electricity_consumption_during_holiday
-        ]
-      },
-      {
-        name:       'Gas and Storage Heater Benchmarks',
-        benchmarks: %i[
-          annual_heating_costs_per_floor_area
-          annual_gas_out_of_hours_use
-          annual_storage_heater_out_of_hours_use
-          heating_coming_on_too_early
-          thermostat_sensitivity
-          heating_in_warm_weather
-          thermostatic_control
-          hot_water_efficiency
-          gas_targets
-          change_in_gas_consumption_recent_school_weeks
-          change_in_gas_holiday_consumption_previous_holiday
-          change_in_gas_holiday_consumption_previous_years_holiday
-          gas_consumption_during_holiday
-          storage_heater_consumption_during_holiday
-        ]
-      },
-      {
-        name:       'Event Specific Comparisons',
-        benchmarks: %i[
-          layer_up_powerdown_day_november_2022
-          change_in_energy_use_since_joined_energy_sparks
-          autumn_term_2021_2022_energy_comparison
-          sept_nov_2021_2022_energy_comparison
-        ]
-      }
-    ]
+    CHART_TABLE_GROUPING = {
+      total_energy_use_benchmarks: [
+        :annual_energy_costs_per_pupil,
+        :annual_energy_costs,
+        :annual_energy_costs_per_floor_area,
+        :change_in_energy_since_last_year,
+        :holiday_usage_last_year
+      ],
+      electricity_benchmarks: [
+        :change_in_electricity_since_last_year,
+        :annual_electricity_costs_per_pupil,
+        :annual_electricity_out_of_hours_use,
+        :recent_change_in_baseload,
+        :baseload_per_pupil,
+        :seasonal_baseload_variation,
+        :weekday_baseload_variation,
+        :electricity_peak_kw_per_pupil,
+        :electricity_targets,
+        :change_in_electricity_consumption_recent_school_weeks,
+        :change_in_electricity_holiday_consumption_previous_holiday,
+        :change_in_electricity_holiday_consumption_previous_years_holiday,
+        :electricity_consumption_during_holiday
+      ],
+      gas_and_storage_heater_benchmarks: [
+        :change_in_gas_since_last_year,
+        :change_in_storage_heaters_since_last_year,
+        :annual_heating_costs_per_floor_area,
+        :annual_gas_out_of_hours_use,
+        :annual_storage_heater_out_of_hours_use,
+        :heating_coming_on_too_early,
+        :thermostat_sensitivity,
+        :heating_in_warm_weather,
+        :thermostatic_control,
+        :hot_water_efficiency,
+        :gas_targets,
+        :change_in_gas_consumption_recent_school_weeks,
+        :change_in_gas_holiday_consumption_previous_holiday,
+        :change_in_gas_holiday_consumption_previous_years_holiday,
+        :gas_consumption_during_holiday,
+        :storage_heater_consumption_during_holiday
+      ],
+      solar_benchmarks: [
+        :change_in_solar_pv_since_last_year,
+        :solar_pv_benefit_estimate
+      ],
+      date_limited_comparisons: [
+        :layer_up_powerdown_day_november_2022,
+        :change_in_energy_use_since_joined_energy_sparks,
+        :autumn_term_2021_2022_energy_comparison,
+        :sept_nov_2021_2022_energy_comparison
+      ]
+    }
 
     def self.tariff_changed_school_name(content_class = nil)
       if content_class.nil?
