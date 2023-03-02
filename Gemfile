@@ -33,10 +33,6 @@ gem 'dotenv'
 
 gem 'rollbar'
 
-# Used by rspec html matcher
-gem 'nokogiri'
-gem 'compare-xml'
-
 group :development do
   gem 'aws-sdk-s3'
   gem 'i18n-tasks', '~> 1.0.10'
@@ -51,4 +47,8 @@ group :test do
   gem 'bundler-audit', platforms: :ruby
   gem 'factory_bot'
   gem 'simplecov', require: false
+
+  # Used by rspec html matcher
+  gem 'nokogiri'
+  gem 'compare-xml'
 end
