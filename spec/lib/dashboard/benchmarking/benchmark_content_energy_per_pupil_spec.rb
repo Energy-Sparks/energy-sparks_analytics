@@ -21,6 +21,8 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
           Annual energy use per pupil
         </h1>
       HTML
+      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_energy_costs_per_pupil") + '</h1>'
+      expect(html).to match_html(title_html)
     end
   end
 
@@ -44,6 +46,9 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
           floor area basis, but this analysis can be useful in some circumstances.
         </p>
       HTML
+      content_html = I18n.t('analytics.benchmarking.content.annual_energy_costs_per_pupil.introduction_text_html')
+      content_html += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
+      expect(html).to match_html(content_html)
     end
   end
 
@@ -76,6 +81,7 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
           at energy consumption only.
         </p>
       HTML
+      expect(html).to match_html(I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html'))
     end
   end
 

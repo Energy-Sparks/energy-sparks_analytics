@@ -21,6 +21,8 @@ describe Benchmarking::BenchmarkContentEnergyPerFloorArea, type: :service do
           Annual energy use per floor area
         </h1>
       HTML
+      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_energy_costs_per_floor_area") + '</h1>'
+      expect(html).to match_html(title_html)
     end
   end
 
@@ -43,6 +45,10 @@ describe Benchmarking::BenchmarkContentEnergyPerFloorArea, type: :service do
           </p>
         </p>
       HTML
+      content_html = '<p>' + 
+        I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html') +
+        I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html') + '</p>'
+      expect(html).to match_html(content_html)
     end
   end
 

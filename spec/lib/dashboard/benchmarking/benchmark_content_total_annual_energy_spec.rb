@@ -21,6 +21,8 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
           Annual energy costs
         </h1>
       HTML
+      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_energy_costs") + '</h1>'
+      expect(html).to match_html(title_html)
     end
   end
 
@@ -32,6 +34,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
           This benchmark shows how much each school spent on energy last year.
         </p>
       HTML
+      expect(html).to match_html(I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html'))
     end
   end
 
@@ -64,6 +67,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
           at energy consumption only.
         </p>
       HTML
+      expect(html).to match_html(I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html'))
     end
   end
 
@@ -80,6 +84,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
           underlying meters.
         </p>
       HTML
+      expect(html).to match_html(I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync_html'))
     end
   end
 
