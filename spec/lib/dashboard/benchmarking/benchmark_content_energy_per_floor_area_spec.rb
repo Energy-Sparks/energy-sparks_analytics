@@ -18,7 +18,7 @@ describe Benchmarking::BenchmarkContentEnergyPerFloorArea, type: :service do
       html = benchmark.send(:content_title)
       expect(html).to match_html(<<~HTML)
         <h1>
-          Annual energy use per floor area
+          Annual energy cost per floor area
         </h1>
       HTML
       title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_energy_costs_per_floor_area") + '</h1>'

@@ -18,7 +18,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
       html = benchmark.send(:content_title)
       expect(html).to match_html(<<~HTML)
         <h1>
-          Annual energy costs
+          Annual cost of electricity, gas, storage heaters and combined energy
         </h1>
       HTML
       title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_energy_costs") + '</h1>'
