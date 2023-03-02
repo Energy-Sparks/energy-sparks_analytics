@@ -91,7 +91,9 @@ module Benchmarking
     end
 
     protected def content_title
-      text = %( <h1><%= chart_table_config[:name] %></h1> )
+      title = I18n.t("analytics.benchmarking.chart_table_config.#{page_name}", default: "<h1>#{chart_table_config[:name]}</h1>")
+      text = "<h1>#{title}</h1>"
+
       ERB.new(text).result(binding)
     end
 

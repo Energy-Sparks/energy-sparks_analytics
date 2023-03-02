@@ -13,17 +13,76 @@ describe Benchmarking::BenchmarkContentEnergyPerFloorArea, type: :service do
     )
   end
 
-  describe 'introduction_text' do
-    it 'includes introduction text' do
-      expect(benchmark.send(:introduction_text)).to include(
-        I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html')
-      )
+  describe '#content_title' do
+    it 'returns the content title' do
+      html = benchmark.send(:content_title)
+      expect(html).to match_html(<<~HTML)
+        <h1>
+          Annual energy use per floor area
+        </h1>
+      HTML
+      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_energy_costs_per_floor_area") + '</h1>'
+      expect(html).to match_html(title_html)
     end
+  end
 
-    it 'includes caveat text in the introduction text' do
-      expect(benchmark.send(:introduction_text)).to include(
-        I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
-      )
+  describe 'introduction_text' do
+    it 'formats introduction and any caveat text as html' do
+      html = benchmark.send(:introduction_text)
+      expect(html).to match_html(<<~HTML)
+        <p>
+          <p>
+            This comparison benchmark is an alternative to the more commonly used
+            per pupil energy comparison benchmark.
+          </p>
+          <p>
+            Generally, per pupil benchmarks are appropriate for electricity
+            (should be proportional to the appliances e.g. ICT in use),
+            but per floor area benchmarks are more appropriate for gas (size of
+            building which needs heating). Overall, <u>energy</u> use comparison
+            on a per pupil basis is probably more appropriate than on a per
+            floor area basis, but this analysis can be useful in some circumstances.
+          </p>
+        </p>
+      HTML
+      content_html = '<p>' + 
+        I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html') +
+        I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html') + '</p>'
+      expect(html).to match_html(content_html)
+    end
+  end
+
+  describe '#table_interpretation_text' do
+    it 'formats table interpretation text as html' do
+      html = benchmark.send(:table_interpretation_text)
+      expect(html).to match_html(<<~HTML)
+      HTML
+    end
+  end
+
+  describe '#caveat_text' do
+    it 'formats caveat text as html' do
+      html = benchmark.send(:caveat_text)
+      expect(html).to match_html(<<~HTML)
+      HTML
+    end
+  end
+
+  describe '#charts?' do
+    it 'returns if charts are present' do
+      expect(benchmark.send(:charts?)).to eq(true)
+    end
+  end
+
+  describe '#chart_name' do
+    it 'returns a chart name if charts are present' do
+      expect(benchmark.send(:chart_name)).to eq(:annual_energy_costs_per_floor_area)
+    end
+  end
+
+  describe '#tables?' do
+    it 'returns if tables are present' do
+      expect(benchmark.send(:tables?)).to eq(true)
     end
   end
 end

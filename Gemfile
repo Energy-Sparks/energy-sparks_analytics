@@ -47,4 +47,8 @@ group :test do
   gem 'bundler-audit', platforms: :ruby
   gem 'factory_bot'
   gem 'simplecov', require: false
+
+  # Used by rspec html matcher
+  gem 'nokogiri'
+  gem 'compare-xml'
 end
