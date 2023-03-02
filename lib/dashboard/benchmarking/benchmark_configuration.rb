@@ -297,7 +297,6 @@ module Benchmarking
           change_in_gas_since_last_year
           change_in_storage_heaters_since_last_year
           change_in_solar_pv_since_last_year
-          change_in_co2_emissions_since_last_year
           holiday_usage_last_year
         ]
       },
@@ -305,7 +304,6 @@ module Benchmarking
         name:       'Electricity Benchmarks',
         benchmarks: %i[
           annual_electricity_costs_per_pupil
-          change_in_annual_electricity_consumption
           annual_electricity_out_of_hours_use
           recent_change_in_baseload
           baseload_per_pupil
@@ -326,7 +324,6 @@ module Benchmarking
         name:       'Gas and Storage Heater Benchmarks',
         benchmarks: %i[
           annual_heating_costs_per_floor_area
-          change_in_annual_heating_consumption
           annual_gas_out_of_hours_use
           annual_storage_heater_out_of_hours_use
           heating_coming_on_too_early
@@ -340,14 +337,6 @@ module Benchmarking
           change_in_gas_holiday_consumption_previous_years_holiday
           gas_consumption_during_holiday
           storage_heater_consumption_during_holiday
-        ]
-      },
-      {
-        name:       'Metering Potential Cost Savings',
-        benchmarks: %i[
-          electricity_meter_consolidation_opportunities
-          gas_meter_consolidation_opportunities
-          differential_tariff_opportunity
         ]
       },
       {
