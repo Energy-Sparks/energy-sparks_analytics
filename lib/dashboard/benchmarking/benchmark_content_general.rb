@@ -1185,38 +1185,8 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <%= table_introduction('energy') %>
-        <p>
-          Comments:
-          <ul>
-            <li>
-              <%= varying_directions([electric_and_gas_mix, carbon_intensity, day_night_tariffs]) %>
-            </li>
-            <li>
-              <%= only_in_previous_column %>
-            </li>
-  
-            <li> the fuel column is keyed as follows
-              <table  class="table table-striped table-sm">
-                <tr><td>E</td><td>Electricity</td></tr>
-                <tr><td>G</td><td>Gas</td></tr>
-                <tr><td>SH</td><td>Storage heaters</td></tr>
-                <tr><td>S</td><td>Solar: Metered i.e. accurate kWh, CO2</td></tr>
-                <tr><td>s</td><td>Solar: Estimated</td></tr>
-              </table>
-            </li>
-            <li>
-              <%= cost_solar_pv %>
-            </li>
-            <li>
-              the energy CO2 and kWh includes the net of the electricity and solar PV values
-            </li>
-          </ul>
-        </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
-
+      text = I18n.t('analytics.benchmarking.content.change_in_energy_since_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       ERB.new(text).result(binding)
     end
 

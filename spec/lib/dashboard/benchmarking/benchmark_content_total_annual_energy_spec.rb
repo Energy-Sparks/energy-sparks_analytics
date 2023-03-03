@@ -13,6 +13,12 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
     )
   end
 
+  describe '#page' do
+    it 'returns a chart name if charts are present' do
+      expect(benchmark.page_name).to eq(:annual_energy_costs)
+    end
+  end
+
   describe '#content_title' do
     it 'returns the content title' do
       html = benchmark.send(:content_title)
