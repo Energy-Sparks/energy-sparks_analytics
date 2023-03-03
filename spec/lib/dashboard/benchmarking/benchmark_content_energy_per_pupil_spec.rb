@@ -39,11 +39,15 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
         </p>
         <p>
           Generally, per pupil benchmarks are appropriate for electricity
-          (should be proportional to the appliances e.g. ICT in use),
-          but per floor area benchmarks are more appropriate for gas (size of
-          building which needs heating). Overall, <u>energy</u> use comparison
-          on a per pupil basis is probably more appropriate than on a per
-          floor area basis, but this analysis can be useful in some circumstances.
+          (as they should be proportional to the appliances in use),
+          but per floor area benchmarks are more appropriate for gas 
+          (the size of building which needs heating). Overall, energy use
+          comparison on a per pupil basis is probably more appropriate in most cases.
+        </p>
+        <p>
+          Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with 
+          biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison 
+          excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.
         </p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.annual_energy_costs_per_pupil.introduction_text_html')
