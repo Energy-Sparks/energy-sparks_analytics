@@ -33,9 +33,7 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
         <p>
           This benchmark compares the energy consumed per pupil in the last year in kWh.
           Be careful when comparing kWh values between different fuel types,
-          <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
-            technically they aren't directly comparable as they are different types of energy.
-          </a>
+          technically they aren't directly comparable as they are different types of energy.
         </p><p>
           Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the
           appliances in use), but per floor area benchmarks are more appropriate for gas (the size of building
