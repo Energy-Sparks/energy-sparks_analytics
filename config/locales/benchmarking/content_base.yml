@@ -16,6 +16,11 @@ en:
         es_doesnt_have_all_meter_data_html: "<p>\n  Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with \n  biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison \n  excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.\n</p>"
         es_per_pupil_v_per_floor_area_html: "<p>\n   Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the appliances in \n   use), but per floor area benchmarks are more appropriate for gas (the size of building which needs heating). Overall, \n   energy use comparison on a per pupil basis is probably more appropriate in most cases.\n</p>"
         es_per_pupil_v_per_floor_area_useful_html: "<p>\n  Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the appliances in \n  use), but per floor area benchmarks are more appropriate for gas (the size of building which needs heating). Overall, \n  energy use comparison on a per pupil basis is probably more appropriate than on a per floor area basis, but this analysis \n  can be useful in some circumstances.\n</p>"
+        es_exclude_storage_heaters_and_solar_pv_html: |-
+          <p>
+            This breakdown excludes electricity consumed by storage heaters and
+            solar PV.
+          </p>
       chart_table_config:
         annual_electricity_costs_per_pupil: Annual electricity use per pupil with savings potential
         annual_electricity_out_of_hours_use: Electricity used out of school hours
@@ -135,6 +140,50 @@ en:
               the unadjusted previous year value. The adjusted percent change is a better
               indicator of the work a school might have done to reduce its energy consumption as
               it&apos;s not dependent on temperature differences between the two years.
+            </p>
+        holiday_usage_last_year:
+          introduction_text_html: |-
+            <p>
+              This benchmark shows the cost of electricity and gas used last year for the upcoming holidays. 
+              For example, if the next holidays are the Summer holidays 2023, the data shown will be for Summer 2022. 
+              This allows you to identify which schools in your group need to take the most action to cut holiday waste.
+            </p>
+        annual_electricity_out_of_hours_use:
+          introduction_text_html: |-
+            <p>
+              This chart shows the breakdown of when schools are using electricity
+              - school day open: when the school is open to pupils and staff,
+              school day closed: when the school is closed to pupils and staff overnight,
+              weekends and evenings.
+            </p>
+            <p>
+              Most schools are unoccupied for about 85% of the year;
+              between 5:00pm and 7:30am on school days, at weekends
+              and during holidays. Focussing on reducing out of hours
+              usage; turning appliances off, installing efficient
+              appliances often provides schools with a cost-efficient
+              way of reducing their overall consumption.
+            </p>
+            <p>
+              Schools should aim to reduce their out of hours usage
+              below 25% of annual consumption. In comparing schools,
+              it might be helpful for you to look at the 2 additional
+              benchmarks on baseload (out of hours power consumption)
+              that we provide as it might give you more information
+              on a school&apos;s out of hours consumption.
+            </p>
+        annual_electricity_costs_per_pupil:
+          introduction_text_html: |-
+            <p>
+              This benchmark compares the electricity cost per pupil in the last year.
+            </p>
+            <p>
+              There should not be a significant difference between schools as all schools need to use roughly the same amount of ICT equipment, 
+              lighting and refrigeration per pupil. Exceptions might be schools with swimming pools or sports flood lighting which can significantly 
+              increase demand. Special schools also have higher electricity costs per pupil due to lower pupil densities and specialist equipment.
+            </p>
+            <p>
+              The data excludes storage heaters which are reported elsewhere under the 'heating' benchmarks.
             </p>
         change_in_solar_pv_since_last_year:
           introduction_text_html: |-

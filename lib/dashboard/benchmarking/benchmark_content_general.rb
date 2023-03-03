@@ -139,33 +139,7 @@ module Benchmarking
   class BenchmarkContentElectricityPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This benchmark compares the electricity consumed per pupil in the last year,
-          in &pound;.
-        </p>
-        <p>
-          A realistic target for primary schools is to use less than
-          &pound;20 per pupil per year, for middle schools &pound;30
-          and for secondaries &pound;40. There  shouldn't be a
-          significant difference between schools as all schools
-          need to use roughly the same amount of ICT equipment,
-          lighting and refrigeration per pupil. Exceptions might
-          be schools with swimming pools or sports flood lighting
-          which can significantly increase demand.
-        </p>
-        <p>
-          To meet these targets the biggest reductions
-          can often be achieved by focussing on &apos;baseload&apos;
-          ensuring equipment is turned off out of hours, and that the
-          equipment which is left on is as efficient as possible. Energy Sparks
-          has separate comparisons and analysis for baseload.
-        </p>
-        <p>
-          The data excludes storage heaters which are reported elsewhere
-          under the &apos;heating&apos; benchmarks.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.annual_electricity_costs_per_pupil.introduction_text_html')
     end
   end
   #=======================================================================================
@@ -206,31 +180,8 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          This chart shows the breakdown of when schools are using electricity
-          - school day open: when the school is open to pupils and staff,
-          school day closed: when the school is closed to pupils and staff overnight,
-          weekends and evenings.
-        </p>
-        <p>
-          Most schools are unoccupied for about 85% of the year;
-          between 5:00pm and 7:30am on school days, at weekends
-          and during holidays. Focussing on reducing out of hours
-          usage; turning appliances off, installing efficient
-          appliances often provides schools with a cost-efficient
-          way of reducing their overall consumption.
-        </p>
-        <p>
-          Schools should aim to reduce their out of hours usage
-          below 25% of annual consumption. In comparing schools,
-          it might be helpful for you to look at the 2 additional
-          benchmarks on baseload (out of hours power consumption)
-          that we provide as it might give you more information
-          on a school&apos;s out of hours consumption.
-        </p>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.annual_electricity_out_of_hours_use.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv_html')
       ERB.new(text).result(binding)
     end
   end
@@ -1740,11 +1691,8 @@ module Benchmarking
   class BenchmarkEnergyConsumptionInUpcomingHolidayLastYear < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows cost of electricity and gas last year for an upcoming holiday.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.holiday_usage_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       ERB.new(text).result(binding)
     end
   end

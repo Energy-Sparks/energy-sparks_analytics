@@ -57,7 +57,7 @@ describe Benchmarking::BenchmarkChangeInSolarPVSinceLastYear, type: :service do
         </p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.change_in_solar_pv_since_last_year.introduction_text_html')
-      # content_html += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
+      content_html += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       expect(html).to match_html(content_html)
     end
   end
