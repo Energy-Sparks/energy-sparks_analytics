@@ -1227,11 +1227,8 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <%= table_introduction('gas') %>
-        <%= colder %>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_gas_since_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
 
       ERB.new(text).result(binding)
     end
@@ -1241,25 +1238,8 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <%= table_introduction('storage heater') %>
-        <p>
-          The storage heater consumption is a reasonably accurate estimate
-          as for most schools we disaggregate it from mains consumption as
-          storage heaters are typically not separately metered.
-        </p>
-        <p>
-          For some schools the cost values may be overestimated because
-          we don't have information on whether your school&apos;s storage heaters
-          use a lower differential or economy 7 tariff.
-        </p>
-        <p>
-          <%= varying_directions([carbon_intensity, day_night_tariffs], false) %>
-        </p>
-        <%= colder %>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
-
+      text = I18n.t('analytics.benchmarking.content.change_in_storage_heaters_since_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       ERB.new(text).result(binding)
     end
   end
@@ -1268,23 +1248,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <%= table_introduction('solar PV', 'production/generation') %>
-        <p>
-          Where we don't have metered data we used localised estimates;
-          the percentage change should be reasonably accurate
-          but kWh values may be less accurate as we currently assume
-          that the school's panels face south and are inclined at 30 degrees.
-          If your school&apos;s panels have a different set up, the kWh values will vary from our estimates.
-        <p/>
-        <p>
-          The CO2 savings achieved by generating electricity from your solar panels
-          are calculated using the carbon intensity of the national electricity grid.
-          As the grid decarbonises the CO2 offset by the school's solar panels will
-          gradually reduce i.e. the CO2 benefit will diminish.
-        </p>
-      )
-
+      text = I18n.t('analytics.benchmarking.content.change_in_solar_pv_since_last_year.introduction_text_html')
       ERB.new(text).result(binding)
     end
   end

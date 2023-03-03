@@ -120,6 +120,77 @@ en:
                 </li>
               </ul>
             </p>
+        change_in_gas_since_last_year:
+          introduction_text_html: |-
+            <p>
+              This table compares gas use between this year to date
+              (defined as ‘last year’ in the table below) and the corresponding period
+              from the year before (defined as ‘previous year’).
+            </p>
+            <p>
+              The &apos;adjusted&apos; columns are adjusted for difference in
+              temperature between the two years. So for example, if the previous year was colder
+              than last year, then the adjusted previous year gas consumption
+              in kWh is adjusted to last year&apos;s temperatures and would be smaller than
+              the unadjusted previous year value. The adjusted percent change is a better
+              indicator of the work a school might have done to reduce its energy consumption as
+              it&apos;s not dependent on temperature differences between the two years.
+            </p>
+        change_in_solar_pv_since_last_year:
+          introduction_text_html: |-
+            <p>
+              This table compares solar PV production/generation between this year to date
+              (defined as ‘last year’ in the table below) and the corresponding period
+              from the year before (defined as ‘previous year’).
+            </p>
+            <p>
+              Where we don't have metered data we used localised estimates;
+              the percentage change should be reasonably accurate
+              but kWh values may be less accurate as we currently assume
+              that the school's panels face south and are inclined at 30 degrees.
+              If your school&apos;s panels have a different set up, the kWh values will vary from our estimates.
+            <p/>
+            <p>
+              The CO2 savings achieved by generating electricity from your solar panels
+              are calculated using the carbon intensity of the national electricity grid.
+              As the grid decarbonises the CO2 offset by the school's solar panels will
+              gradually reduce i.e. the CO2 benefit will diminish.
+            </p>
+        change_in_storage_heaters_since_last_year:
+          introduction_text_html: |-
+            <p>
+              This table compares storage heater use between this year to date
+              (defined as ‘last year’ in the table below) and the corresponding period
+              from the year before (defined as ‘previous year’).
+            </p>
+            <p>
+              The storage heater consumption is a reasonably accurate estimate
+              as for most schools we disaggregate it from mains consumption as
+              storage heaters are typically not separately metered.
+            </p>
+            <p>
+              For some schools the cost values may be overestimated because
+              we don't have information on whether your school&apos;s storage heaters
+              use a lower differential or economy 7 tariff.
+            </p>
+            <p>
+              The kWh, CO2, £ values can move in opposite directions and by
+              different percentages because the following may vary between
+              the two years:
+              <ul>
+                <li>the carbon intensity of the electricity grid</li>
+                <li>the proportion of electricity consumed between night and day for schools with differential tariffs (economy 7)</li>
+              </ul>
+            </p>
+            <p>
+              The &apos;adjusted&apos; columns are adjusted for difference in
+              temperature between the two years. So for example, if the previous year was colder
+              than last year, then the adjusted previous year gas consumption
+              in kWh is adjusted to last year&apos;s temperatures and would be smaller than
+              the unadjusted previous year value. The adjusted percent change is a better
+              indicator of the work a school might have done to reduce its energy consumption as
+              it&apos;s not dependent on temperature differences between the two years.
+            </p>
         change_in_energy_since_last_year:
           introduction_text_html: |-
             <p>
