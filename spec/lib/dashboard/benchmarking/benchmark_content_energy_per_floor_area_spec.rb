@@ -32,16 +32,13 @@ describe Benchmarking::BenchmarkContentEnergyPerFloorArea, type: :service do
       expect(html).to match_html(<<~HTML)
         <p>
           <p>
-            This comparison benchmark is an alternative to the more commonly used
-            per pupil energy comparison benchmark.
+            This benchmark is an alternative to the more commonly used per pupil energy benchmark.
           </p>
           <p>
-            Generally, per pupil benchmarks are appropriate for electricity
-            (should be proportional to the appliances e.g. ICT in use),
-            but per floor area benchmarks are more appropriate for gas (size of
-            building which needs heating). Overall, <u>energy</u> use comparison
-            on a per pupil basis is probably more appropriate than on a per
-            floor area basis, but this analysis can be useful in some circumstances.
+            Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional
+            to the appliances in use), but per floor area benchmarks are more appropriate for gas (the size
+            of building which needs heating). Overall, energy use comparison on a per pupil basis is probably
+            more appropriate than on a per floor area basis, but this analysis can be useful in some circumstances.
           </p>
         </p>
       HTML

@@ -13,7 +13,13 @@ en:
             underlying meters.
           </p>
         es_doesnt_have_all_meter_data_html: "<p>\n  Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with \n  biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison \n  excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.\n</p>"
-        es_per_pupil_v_per_floor_area_html: "<p>\n  Generally, per pupil benchmarks are appropriate for electricity\n  (as they should be proportional to the appliances in use),\n  but per floor area benchmarks are more appropriate for gas \n  (the size of building which needs heating). Overall, energy use\n  comparison on a per pupil basis is probably more appropriate in most cases.\n</p>"
+        es_per_pupil_v_per_floor_area_html: |-
+          <p>
+            Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the appliances in use),
+            but per floor area benchmarks are more appropriate for gas (the size of building which needs heating). Overall, energy use
+            comparison on a per pupil basis is probably more appropriate than on a per floor area basis, but this analysis can be useful
+            in some circumstances.
+          </p>
       chart_table_config:
         annual_electricity_costs_per_pupil: Annual electricity use per pupil with savings potential
         annual_electricity_out_of_hours_use: Electricity used out of school hours
@@ -70,8 +76,7 @@ en:
         annual_energy_costs_per_floor_area:
           introduction_text_html: |-
             <p>
-                This comparison benchmark is an alternative to the more commonly used
-                per pupil energy comparison benchmark.
+              This benchmark is an alternative to the more commonly used per pupil energy benchmark.
             </p>
         annual_energy_costs_per_pupil:
           introduction_text_html: |-
