@@ -248,7 +248,7 @@ module Benchmarking
 
     def self.benchmark_titles_for(benchmark_keys, user_role)
       benchmark_keys.each_with_object({}) do |benchmark_key, benchmarks|
-        next if CHART_TABLE_CONFIG[benchmark_key][:admin_only] == true && user_role != :admin
+        next if CHART_TABLE_CONFIG[benchmark_key][:admin_only] == true && [:admin, :analyst].exclude?(user_role)
 
         benchmarks[benchmark_key] = I18n.t("analytics.benchmarking.chart_table_config.#{benchmark_key}")
       end
