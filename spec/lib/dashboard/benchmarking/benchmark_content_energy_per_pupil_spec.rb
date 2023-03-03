@@ -36,15 +36,12 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
           <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
             technically they aren't directly comparable as they are different types of energy.
           </a>
-        </p>
-        <p>
-          Generally, per pupil benchmarks are appropriate for electricity
-          (as they should be proportional to the appliances in use),
-          but per floor area benchmarks are more appropriate for gas 
-          (the size of building which needs heating). Overall, energy use
-          comparison on a per pupil basis is probably more appropriate in most cases.
-        </p>
-        <p>
+        </p><p>
+          Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the
+          appliances in use), but per floor area benchmarks are more appropriate for gas (the size of building
+          which needs heating). Overall, energy use comparison on a per pupil basis is probably more appropriate
+          in most cases.
+        </p><p>
           Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with 
           biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison 
           excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.
