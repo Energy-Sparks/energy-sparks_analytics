@@ -1217,21 +1217,8 @@ module Benchmarking
 
     # some text duplication with the BenchmarkChangeInEnergySinceLastYear class
     private def introduction_text
-      text = %q(
-        <%= table_introduction('electricity') %>
-        <p>
-          Comments:
-          <ul>
-            <li><%= varying_directions([carbon_intensity, day_night_tariffs]) %></li>
-            <li><%= only_in_previous_column %></li>
-            <li><%= solar_pv_electric_calc %></li>
-            <li><%= sheffield_estimate %></li>
-            <li><%= storage_heater_comparison %></li>
-          </ul>
-        </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
-
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_since_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       ERB.new(text).result(binding)
     end
   end
