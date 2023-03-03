@@ -182,7 +182,7 @@ module Benchmarking
 
     def self.ch(key)
       if COLUMN_HEADINGS.key?(key)
-        COLUMN_HEADINGS[key]
+        I18n.t("analytics.benchmarking.configuration.column_headings.#{key}")
       else
         raise EnergySparksUnexpectedStateException, "Unexpected key #{key} #{key.class.name} for benchmark column heading"
       end

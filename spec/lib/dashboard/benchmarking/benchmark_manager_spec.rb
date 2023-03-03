@@ -77,4 +77,16 @@ describe Benchmarking::BenchmarkManager, type: :service do
       )
     end
   end
+
+  describe '#ch' do
+    it 'returns the column heading from a given key' do
+      I18n.t('analytics.benchmarking.configuration.column_headings').keys.each do |column_heading_key|
+        expect(
+          Benchmarking::BenchmarkManager.ch(column_heading_key)
+        ).to eq(
+          I18n.t("analytics.benchmarking.configuration.column_headings.#{column_heading_key}")
+        )
+      end
+    end
+  end
 end
