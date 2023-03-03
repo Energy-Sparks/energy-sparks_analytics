@@ -116,22 +116,21 @@ module Benchmarking
     private def introduction_text
       text =  I18n.t('analytics.benchmarking.content.annual_energy_costs_per_pupil.introduction_text_html')
       text += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
       ERB.new(text).result(binding)
-    end
-
-    private def table_introduction_text
-      I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
     end
   end
   #=======================================================================================
   class BenchmarkContentTotalAnnualEnergy < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html')
+      text = I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
+      ERB.new(text).result(binding)
     end
-    private def table_introduction_text
-      I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
-    end
+    # private def table_introduction_text
+    #   I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
+    # end
     protected def table_interpretation_text
       I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync_html')
     end

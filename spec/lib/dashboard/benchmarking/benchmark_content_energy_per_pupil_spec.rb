@@ -52,6 +52,7 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
       HTML
       content_html = I18n.t('analytics.benchmarking.content.annual_energy_costs_per_pupil.introduction_text_html')
       content_html += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
+      content_html += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
       expect(html).to match_html(content_html)
     end
   end
@@ -76,16 +77,7 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
     it 'formats table introduction text as html' do
       html = benchmark.send(:table_introduction_text)
       expect(html).to match_html(<<~HTML)
-        <p>
-          The table provides the information in more detail.
-          Energy Sparks doesn&apos;t have a full set of meter data
-          for some schools, for example rural schools with biomass or oil boilers,
-          so this comparison might not be relevant for all schools. The comparison
-          excludes the benefit of any solar PV which might be installed - so looks
-          at energy consumption only.
-        </p>
       HTML
-      expect(html).to match_html(I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html'))
     end
   end
 
