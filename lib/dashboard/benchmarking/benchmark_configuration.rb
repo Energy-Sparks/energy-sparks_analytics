@@ -230,14 +230,20 @@ module Benchmarking
       user_role = user_type_hash[:user_role] || :guest
 
       CHART_TABLE_GROUPING.each_with_object([]) do |(group_key, benchmark_keys), structured_pages|
-        benchmarks = benchmark_titles_for(benchmark_keys, user_role)
-        next if benchmarks.empty?
-
-        structured_pages << {
-          name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}"),
-          benchmarks: benchmark_titles_for(benchmark_keys, user_role)
-        }
+        structured_page = structured_page_for(group_key, benchmark_keys, user_role)
+        next unless structured_page
+        structured_pages << structured_page
       end
+    end
+
+    def self.structured_page_for(group_key, benchmark_keys, user_role)
+      benchmarks = benchmark_titles_for(benchmark_keys, user_role)
+      return if benchmarks.empty?
+
+      {
+        name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}"),
+        benchmarks: benchmark_titles_for(benchmark_keys, user_role)
+      }
     end
 
     def self.benchmark_titles_for(benchmark_keys, user_role)
