@@ -37,26 +37,13 @@ describe Benchmarking::BenchmarkContentElectricityOutOfHoursUsage, type: :servic
       html = benchmark.send(:introduction_text)
       expect(html).to match_html(<<~HTML)
         <p>
-          This chart shows the breakdown of when schools are using electricity
-          - school day open: when the school is open to pupils and staff,
-          school day closed: when the school is closed to pupils and staff overnight,
-          weekends and evenings.
+          This chart shows the breakdown of when schools are using electricity. School day open is when the school is open
+          to pupils and staff. School day closed is when the school is closed to pupils and staff overnight.
         </p>
         <p>
-          Most schools are unoccupied for about 85% of the year;
-          between 5:00pm and 7:30am on school days, at weekends
-          and during holidays. Focussing on reducing out of hours
-          usage; turning appliances off, installing efficient
-          appliances often provides schools with a cost-efficient
-          way of reducing their overall consumption.
-        </p>
-        <p>
-          Schools should aim to reduce their out of hours usage
-          below 25% of annual consumption. In comparing schools,
-          it might be helpful for you to look at the 2 additional
-          benchmarks on baseload (out of hours power consumption)
-          that we provide as it might give you more information
-          on a school&apos;s out of hours consumption.
+          Most schools are unoccupied for about 85% of the year; between 5:00pm and 7:30am on school days, at weekends and during holidays. 
+          A focus on reducing out of hours electricity usage; turning appliances off and installing efficient appliances often provides schools
+          with a cost-efficient way of reducing their overall consumption. Schools should aim to reduce their out of hours usage below 25% of annual consumption. 
         </p>
         <p>
           This breakdown excludes electricity consumed by storage heaters and
