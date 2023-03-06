@@ -33,7 +33,7 @@ module Benchmarking
         @change_refs.push(2) if percent ==  Float::INFINITY
         @change_refs.push(3) if percent == -Float::INFINITY
         @change_refs.push(6) if !tariff_changed.nil? && tariff_changed
-        
+
         @change_refs.empty? ? name : "#{name} (* #{@change_refs.join(',')})"
       end
 
