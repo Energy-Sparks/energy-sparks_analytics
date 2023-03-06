@@ -13,6 +13,12 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
     )
   end
 
+  describe '#page' do
+    it 'returns a chart name if charts are present' do
+      expect(benchmark.page_name).to eq(:annual_energy_costs)
+    end
+  end
+
   describe '#content_title' do
     it 'returns the content title' do
       html = benchmark.send(:content_title)
@@ -33,8 +39,15 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
         <p>
           This benchmark shows how much each school spent on energy last year.
         </p>
+        <p>
+          Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with 
+          biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison 
+          excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.
+        </p>
       HTML
-      expect(html).to match_html(I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html'))
+      expected_html = I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html') 
+      expected_html += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
+      expect(html).to match_html(expected_html)
     end
   end
 
@@ -58,16 +71,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
     it 'formats table introduction text as html' do
       html = benchmark.send(:table_introduction_text)
       expect(html).to match_html(<<~HTML)
-        <p>
-          The table provides the information in more detail.
-          Energy Sparks doesn&apos;t have a full set of meter data
-          for some schools, for example rural schools with biomass or oil boilers,
-          so this comparison might not be relevant for all schools. The comparison
-          excludes the benefit of any solar PV which might be installed - so looks
-          at energy consumption only.
-        </p>
       HTML
-      expect(html).to match_html(I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html'))
     end
   end
 

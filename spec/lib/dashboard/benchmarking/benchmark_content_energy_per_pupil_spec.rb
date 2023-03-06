@@ -13,6 +13,12 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
     )
   end
 
+  describe '#page' do
+    it 'returns a chart name if charts are present' do
+      expect(benchmark.page_name).to eq(:annual_energy_costs_per_pupil)
+    end
+  end
+
   describe '#content_title' do
     it 'returns the content title' do
       html = benchmark.send(:content_title)
@@ -33,21 +39,21 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
         <p>
           This benchmark compares the energy consumed per pupil in the last year in kWh.
           Be careful when comparing kWh values between different fuel types,
-          <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
-            technically they aren't directly comparable as they are different types of energy.
-          </a>
-        </p>
-        <p>
-          Generally, per pupil benchmarks are appropriate for electricity
-          (should be proportional to the appliances e.g. ICT in use),
-          but per floor area benchmarks are more appropriate for gas (size of
-          building which needs heating). Overall, <u>energy</u> use comparison
-          on a per pupil basis is probably more appropriate than on a per
-          floor area basis, but this analysis can be useful in some circumstances.
+          technically they aren't directly comparable as they are different types of energy.
+        </p><p>
+          Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the
+          appliances in use), but per floor area benchmarks are more appropriate for gas (the size of building
+          which needs heating). Overall, energy use comparison on a per pupil basis is probably more appropriate
+          in most cases.
+        </p><p>
+          Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with 
+          biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison 
+          excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.
         </p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.annual_energy_costs_per_pupil.introduction_text_html')
       content_html += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
+      content_html += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
       expect(html).to match_html(content_html)
     end
   end
@@ -72,16 +78,7 @@ describe Benchmarking::BenchmarkContentEnergyPerPupil, type: :service do
     it 'formats table introduction text as html' do
       html = benchmark.send(:table_introduction_text)
       expect(html).to match_html(<<~HTML)
-        <p>
-          The table provides the information in more detail.
-          Energy Sparks doesn&apos;t have a full set of meter data
-          for some schools, for example rural schools with biomass or oil boilers,
-          so this comparison might not be relevant for all schools. The comparison
-          excludes the benefit of any solar PV which might be installed - so looks
-          at energy consumption only.
-        </p>
       HTML
-      expect(html).to match_html(I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html'))
     end
   end
 
