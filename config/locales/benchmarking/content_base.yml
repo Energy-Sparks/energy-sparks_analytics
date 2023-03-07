@@ -3,6 +3,7 @@ en:
   analytics:
     benchmarking:
       caveat_text:
+        comparison_with_previous_period_infinite: "<p>An infinite or incalculable value indicates the consumption in the first period was zero.</p>"
         covid_lockdown: ''
         es_data_not_in_sync_html: |-
           <p>
@@ -34,7 +35,7 @@ en:
         autumn_term_2021_2022_energy_comparison: Autumn Term 2021 versus 2022 energy use
         baseload_per_pupil: Baseload per pupil
         change_in_electricity_consumption_recent_school_weeks: Recent change in electricity use
-        change_in_electricity_holiday_consumption_previous_holiday: Change in electricity use between the last 2 holidays
+        change_in_electricity_holiday_consumption_previous_holiday: Change in electricity use between the last two holidays
         change_in_electricity_holiday_consumption_previous_years_holiday: Change in electricity use between this holiday and the same holiday last year
         change_in_electricity_since_last_year: Annual change in electricity use
         change_in_energy_since_last_year: Annual change in total energy use
@@ -101,6 +102,14 @@ en:
             </p>
             <p>
               All schools should aim to reduce their electricity baseload per pupil to that of the best schools. Schools perform roughly the same function so should be able to achieve similar electricity consumption, particularly out of hours.
+            </p>
+        change_in_electricity_holiday_consumption_previous_holiday:
+          introduction_text_html: |-
+            <p>
+              This benchmark shows the change in electricity consumption between the two most recent holidays.
+            </p>
+            <p>
+              This comparison compares the latest available data for the most recent holiday with an adjusted figure for the previous holiday, scaling to the same number of days and the latest tariff. The change in £ is the saving or increased cost for the most recent holiday to date.
             </p>
         change_in_electricity_since_last_year:
           introduction_text_html: |-
