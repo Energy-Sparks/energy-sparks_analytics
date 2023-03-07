@@ -324,27 +324,9 @@ module Benchmarking
   class BenchmarkContentBaseloadPerPupil < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          A school&apos;s baseload is the power it consumes out of hours when
-          the school is unoccupied.
-        </p>
-        <p>
-          This is one of the most useful benchmarks for understanding
-          a school&apos;s electricity use, as half of most schools&apos;
-          electricity is consumed out of hours, reducing the baseload will have a big
-          impact on overall electricity consumption.
-        </p>
-        <p>
-          All schools should aim to reduce their electricity baseload per pupil
-          to that of the best schools. Schools perform roughly the same function
-          so should be able to achieve similar electricity consumption
-          particularly out of hours.
-        </p>
-        <%= @baseload_impact_html %>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.baseload_per_pupil.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+
       ERB.new(text).result(binding)
     end
   end
