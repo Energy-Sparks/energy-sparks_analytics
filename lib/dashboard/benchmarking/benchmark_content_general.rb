@@ -363,20 +363,8 @@ module Benchmarking
     class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
       include BenchmarkingNoTextMixin
       private def introduction_text
-        %q(
-          <p>
-            The comparison below shows the benefit of installing solar PV panels
-            at schools which don't already have solar PV panels. This analysis
-            is based on using half hourly electricity consumption at
-            each school over the last year and combining it with local half hourly
-            solar pv data to work out the benefit of installing solar panels.
-            The payback and savings are calculated using the school&apos;s most recent
-            economic tariff.
-            Further detail is provided if you drilldown to a school&apos;s individual
-            analysis - where a range of different scenarios of different numbers
-            of panels is presented.
-          </p>
-        )
+        text = I18n.t('analytics.benchmarking.content.solar_pv_benefit_estimate.introduction_text_html')
+        ERB.new(text).result(binding)      
       end
     end
   #=======================================================================================
