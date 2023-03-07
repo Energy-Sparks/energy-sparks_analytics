@@ -257,3 +257,14 @@ en:
           introduction_text_html: |-
             <p>A school's baseload is the electricity consumed by appliances kept running at all times.</p>
             <p>In general, the baseload in the winter should be very similar to the summer. In practice many schools leave electric heaters on overnight when the school is unoccupied. Identifying and turning off or better timing such equipment is a quick way of saving electricity and costs.</p>
+        weekday_baseload_variation:
+          introduction_text_html: |-
+            <p>
+              A school's baseload is the electricity consumed by appliances kept running at all times.
+            </p>
+            <p>
+              In general, the baseload should not vary between days of the week and between weekdays and weekends.
+            </p>
+            <p>
+              If there is a big variation, find out what is causing the baseload to be higher on certain days of the week, and switch off the equipment or lights causing the difference.
+            </p>
