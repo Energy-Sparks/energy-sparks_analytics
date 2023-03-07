@@ -1456,15 +1456,8 @@ module Benchmarking
     end
 
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison simply shows the change in electricity consumption since the
-          last school week. You should expect a slight but not significant
-          increase in electricity consumption going into the winter with
-          increased lighting usage and a subsequent reduction in the spring.
-        </p>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_consumption_recent_school_weeks.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
