@@ -82,7 +82,7 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
       { type: :html,        content: hot_water_losses },
       { type: :html,        content: calculate_theoretical_daily_consumption_html },
       { type: :html,        content: how_to_improve_thermostatic_control },
-      { type: :html,        content: further_reading } 
+      { type: :html,        content: further_reading }
     ]
 
     charts_and_html
@@ -264,7 +264,7 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
       <p>In the example above the formula for heating is:</p>
 
       <blockquote>predicted_heating_requirement = <%= b.round(1) %> * outside_temperature + <%= a.round(0) %></blockquote>
-      
+
       <p>
         So for your school if the average outside temperature is 12C
         the predicted gas consumption for the school would be
@@ -291,7 +291,7 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
           <a href="https://www.sustainabilityexchange.ac.uk/files/degree_days_for_energy_management_carbon_trust.pdf" target ="_blank">An explanation of thermostatic control</a>
              (versus degree days - which is similar to
               the way Energy Sparks looks at thermostatic control
-              but we use temperature instead of degree days). 
+              but we use temperature instead of degree days).
           </li>
         </ul>
       </p>
@@ -320,7 +320,7 @@ class AdviceGasThermostaticControl  < AdviceBoilerHeatingBase
         more than 10C during the day (called a large diurnal temperature range,
         typically caused by cold ground temperatures after the winter reducing
         overnight temperatures, and warm Spring sunshine during the day).
-      </ p> 
+      </ p>
 
       <p>
         In theory if outside temperatures rise by 10C, then the heating loss
