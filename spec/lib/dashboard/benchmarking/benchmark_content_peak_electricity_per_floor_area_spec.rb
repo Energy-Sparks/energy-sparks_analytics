@@ -37,29 +37,11 @@ describe Benchmarking::BenchmarkContentPeakElectricityPerFloorArea, type: :servi
       html = benchmark.send(:introduction_text)
       expect(html).to match_html(<<~HTML)
         <p>
-          This comparison shows the peak daily school power consumption per floor area.
-          High values compared with other schools might suggest inefficient lighting,
-          appliances or kitchen equipment. The peaks generally occur during the middle
-          of the day. Energy Sparks allows you to drill down to individual school day usage
-          to better understand the intraday characteristics of a school&apos;s electricity
-          consumption.
-        </p>
-        <p>
-          If a school&apos;s electricity consumption is high compared with
-          other schools is probably warrants further investigation. There might be
-          simple low-cost remedies like turning lighting off when it is bright outside,
-          or better management of appliances in a school&apos;s kitchen. Other measures
-          like installing LED lighting might require investment.
-        </p>
-        <p>
-          LED lighting for example can consume as little as 4W/m<sup>2</sup>, whereas older
-          less efficient lighting can consume up to 12W/m<sup>2</sup>.
+          This benchmark shows the peak daily school power consumption per floor area. High values compared with other schools might suggest inefficient lighting, appliances or kitchen equipment. The peaks generally occur during the middle of the day. 
         </p>
       HTML
-      # content_html = '<p>' + 
-      #   I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html') +
-      #   I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_useful_html') + '</p>'
-      # expect(html).to match_html(content_html)
+      content_html = I18n.t('analytics.benchmarking.content.electricity_peak_kw_per_pupil.introduction_text_html')
+      expect(html).to match_html(content_html)
     end
   end
 
