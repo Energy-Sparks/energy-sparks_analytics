@@ -14,16 +14,14 @@ module Costs
 
     def summarise
       return nil unless enough_data?
+      return nil if agreed_availability_charge.nil?
+
       kw = agreed_supply_capacity_requirement_kw
-
-      unless agreed_availability_charge.nil?
-        cost_£ = 12.0 * asc_limit_kw * agreed_availability_charge[:rate]
-        saving_£ = (1.0 - kw / asc_limit_kw) * cost_£
-      end
-
+      cost_£ = 12.0 * asc_limit_kw * agreed_availability_charge[:rate]
+      saving_£ = (1.0 - kw / asc_limit_kw) * cost_£
       AgreedSupplyCapacitySummary.new(
         kw: kw,
-        agreed_limit_kw: accounting_tariff.tariff[:asc_limit_kw],
+        agreed_limit_kw: @accounting_tariff.tariff[:asc_limit_kw],
         annual_cost_£: cost_£,
         annual_saving_£: saving_£
       )

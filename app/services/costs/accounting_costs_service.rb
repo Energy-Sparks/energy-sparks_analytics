@@ -23,7 +23,7 @@ module Costs
       #FIXME end date?
       cost = @meter.amr_data.kwh_date_range(start_date, @meter.amr_data.end_date, :accounting_cost)
       days = @meter.amr_data.end_date - start_date + 1
-      return OpenStruct.new(
+      OpenStruct.new(
         £: cost,
         days: days
       )
