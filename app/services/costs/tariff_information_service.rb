@@ -43,11 +43,6 @@ module Costs
       end
     end
 
-    #return the actual tariff information for the analysed range
-    def tariffs_for_range
-      #FIXME
-    end
-
     private
 
     def calculate_percent_real

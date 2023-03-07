@@ -10,19 +10,13 @@ describe Costs::TariffInformationService do
 
   let(:service)           { Costs::TariffInformationService.new(aggregate_meter, analysis_start_date, analysis_end_date)}
   let(:aggregate_meter)   { @acme_academy.aggregated_electricity_meters }
-  #FIXME?
   let(:analysis_end_date) { aggregate_meter.amr_data.end_date }
   let(:analysis_start_date) { [analysis_end_date - 365 - 364, aggregate_meter.amr_data.start_date].max}
 
   it 'should do something' do
-    meter_cost = MeterCost.new(@acme_academy, aggregate_meter, false, true, analysis_start_date, analysis_end_date)
-    puts meter_cost.percent_real
-    puts meter_cost.incomplete_coverage?
-    #    puts meter_cost.intro_to_meter
-
-    puts service.incomplete_coverage?
-    puts service.percentage_with_real_tariffs
-    puts service.periods_with_missing_tariffs.inspect
-    puts service.periods_with_tariffs.inspect
+    expect(service.incomplete_coverage?).to be false
+    expect(service.percentage_with_real_tariffs).to eq 0.0
+    expect(service.periods_with_missing_tariffs).to eq [ [Date.new(2020,7,14), Date.new(2022,7,13)] ]
+    expect(service.periods_with_tariffs).to eq []
   end
 end
