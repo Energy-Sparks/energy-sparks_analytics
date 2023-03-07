@@ -355,27 +355,6 @@ module Benchmarking
   class BenchmarkContentPeakElectricityPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      # %q(
-      #   <p>
-      #     This comparison shows the peak daily school power consumption per floor area.
-      #     High values compared with other schools might suggest inefficient lighting,
-      #     appliances or kitchen equipment. The peaks generally occur during the middle
-      #     of the day. Energy Sparks allows you to drill down to individual school day usage
-      #     to better understand the intraday characteristics of a school&apos;s electricity
-      #     consumption.
-      #   </p>
-      #   <p>
-      #     If a school&apos;s electricity consumption is high compared with
-      #     other schools is probably warrants further investigation. There might be
-      #     simple low-cost remedies like turning lighting off when it is bright outside,
-      #     or better management of appliances in a school&apos;s kitchen. Other measures
-      #     like installing LED lighting might require investment.
-      #   </p>
-      #   <p>
-      #     LED lighting for example can consume as little as 4W/m<sup>2</sup>, whereas older
-      #     less efficient lighting can consume up to 12W/m<sup>2</sup>.
-      #   </p>
-      # )
       text = I18n.t('analytics.benchmarking.content.electricity_peak_kw_per_pupil.introduction_text_html')
       ERB.new(text).result(binding)      
     end
