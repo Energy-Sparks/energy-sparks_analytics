@@ -251,3 +251,7 @@ en:
             </p>
         holiday_usage_last_year:
           introduction_text_html: "<p>\n  This benchmark shows the cost of electricity and gas used last year for the upcoming holidays. \n  For example, if the next holidays are the Summer holidays 2023, the data shown will be for Summer 2022. \n  This allows you to identify which schools in your group need to take the most action to cut holiday waste.\n</p>"
+        seasonal_baseload_variation:
+          introduction_text_html: |-
+            <p>A school's baseload is the electricity consumed by appliances kept running at all times.</p>
+            <p>In general, the baseload in the winter should be very similar to the summer. In practice many schools leave electric heaters on overnight when the school is unoccupied. Identifying and turning off or better timing such equipment is a quick way of saving electricity and costs.</p>
