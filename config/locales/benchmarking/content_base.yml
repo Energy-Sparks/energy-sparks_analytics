@@ -92,6 +92,12 @@ en:
               Be careful when comparing kWh values between different fuel types,
               technically they aren't directly comparable as they are different types of energy.
             </p>
+        annual_heating_costs_per_floor_area:
+          introduction_text_html: |-
+            <p>This benchmark compares last year’s gas and storage heater costs per floor area (m2).</p>
+            <p>The benchmark is adjusted for regional temperatures over the last year, so that for example schools in Scotland are compared on the same terms as schools in the warmer south west of England.</p>
+            <p>For schools heated by gas, the cost includes gas used for hot water and by the school kitchen.</p>
+            <p>Schools with negative savings potential  have heating consumption below that of the best schools, which is good. For schools with storage heaters, heating costs are calculated using electricity tariff prices including differential/economy-7 tariffs if schools are on such a tariff.</p>
         baseload_per_pupil:
           introduction_text_html: |-
             <p>
