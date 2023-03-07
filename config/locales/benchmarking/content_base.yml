@@ -4,6 +4,8 @@ en:
     benchmarking:
       caveat_text:
         covid_lockdown: ''
+        es_exclude_storage_heaters_and_solar_pv: |-
+          <p>This breakdown excludes electricity consumed by storage heaters and solar PV.</p>
         es_data_not_in_sync_html: |-
           <p>
             The gas, electricity and storage heater costs are all using the latest
@@ -69,6 +71,17 @@ en:
         solar_benchmarks: Solar Benchmarks
         total_energy_use_benchmarks: Total Energy Use Benchmarks
       content:
+        baseload_per_pupil:
+          introduction_text_html: |-
+            <p>
+              A school's baseload is the electricity consumed by appliances kept running at all times.
+            </p>
+            <p>
+              This is one of the most useful benchmarks for understanding a school's electricity use, as 50% of most schools' electricity is consumed out of hours. Reducing the baseload will have a big impact on overall electricity consumption.
+            </p>
+            <p>
+              All schools should aim to reduce their electricity baseload per pupil to that of the best schools. Schools perform roughly the same function so should be able to achieve similar electricity consumption, particularly out of hours.
+            </p>
         annual_electricity_costs_per_pupil:
           introduction_text_html: "<p>\n  This benchmark compares the electricity cost per pupil in the last year.\n</p>\n<p>\n  There should not be a significant difference between schools as all schools need to use roughly the same amount of ICT equipment, \n  lighting and refrigeration per pupil. Exceptions might be schools with swimming pools or sports flood lighting which can significantly \n  increase demand. Special schools also have higher electricity costs per pupil due to lower pupil densities and specialist equipment.\n</p>\n<p>\n  The data excludes storage heaters which are reported elsewhere under the 'heating' benchmarks.\n</p>"
         annual_electricity_out_of_hours_use:

@@ -37,59 +37,21 @@ describe Benchmarking::BenchmarkContentBaseloadPerPupil, type: :service do
       html = benchmark.send(:introduction_text)
       expect(html).to match_html(<<~HTML)
         <p>
-          A school&apos;s baseload is the power it consumes out of hours when
-          the school is unoccupied.
+          A school's baseload is the electricity consumed by appliances kept running at all times.
         </p>
         <p>
-          This is one of the most useful benchmarks for understanding
-          a school&apos;s electricity use, as half of most schools&apos;
-          electricity is consumed out of hours, reducing the baseload will have a big
-          impact on overall electricity consumption.
+          This is one of the most useful benchmarks for understanding a school's electricity use, as 50% of most schools' electricity is consumed out of hours. Reducing the baseload will have a big impact on overall electricity consumption.
         </p>
         <p>
-          All schools should aim to reduce their electricity baseload per pupil
-          to that of the best schools. Schools perform roughly the same function
-          so should be able to achieve similar electricity consumption
-          particularly out of hours.
+          All schools should aim to reduce their electricity baseload per pupil to that of the best schools. Schools perform roughly the same function so should be able to achieve similar electricity consumption, particularly out of hours.
         </p>
         <p>
-          Consumers of out of hours electricity include
-          <ul>
-            <li>
-              Equipment left on rather than being turned off, including
-              photocopiers and ICT equipment
-            </li>
-            <li>
-              ICT servers - can be inefficient, newer ones can often payback their
-              capital costs in electricity savings within a few years, see our
-              <a href="https://energysparks.uk/case_studies/4/link" target ="_blank">case study</a>
-              on this
-            </li>
-            <li>
-              Security lighting - this can be reduced by using PIR movement detectors
-              - often better for security and by moving to more efficient LED lighting
-            </li>
-            <li>
-              Fridges and freezers, particularly inefficient commercial kitchen appliances, which if
-              replaced can provide a very short payback on investment (see
-              our <a href="https://energysparks.uk/case_studies/1/link" target ="_blank">case study</a> on this).
-            </li>
-            <li>
-              Hot water heaters and boilers left on outside school hours - installing a timer or getting
-              the caretaker to switch these off when closing the school at night or on a Friday can
-              make a big difference
-            </li>
-          </ul>
-        <p>
-        <p>
-          This breakdown excludes electricity consumed by storage heaters and
-          solar PV.
+          This breakdown excludes electricity consumed by storage heaters and solar PV.
         </p>
       HTML
-      # content_html = '<p>' + 
-      #   I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html') +
-      #   I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_useful_html') + '</p>'
-      # expect(html).to match_html(content_html)
+      content_html = I18n.t('analytics.benchmarking.content.baseload_per_pupil.introduction_text_html') +
+        I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+      expect(html).to match_html(content_html)
     end
   end
 
