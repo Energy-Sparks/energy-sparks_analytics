@@ -16,6 +16,7 @@ en:
           </p>
         es_doesnt_have_all_meter_data_html: "<p>\n  Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with \n  biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison \n  excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.\n</p>"
         es_exclude_storage_heaters_and_solar_pv: "<p>This breakdown excludes electricity consumed by storage heaters and solar PV.</p>"
+        es_exclude_storage_heaters_and_solar_pv_data_html: "<p>The data excludes storage heaters and any saving the school might get from solar PV.</p>"
         es_exclude_storage_heaters_and_solar_pv_html: |-
           <p>
             This breakdown excludes electricity consumed by storage heaters and
@@ -264,6 +265,8 @@ en:
               indicator of the work a school might have done to reduce its energy consumption as
               it&apos;s not dependent on temperature differences between the two years.
             </p>
+        electricity_consumption_during_holiday:
+          introduction_text_html: "<p>This benchmark shows the projected electricity costs for the current holiday. No data for a school is shown once the holiday is over. The projection calculation is based on the consumption patterns during the holiday so far.</p>"
         electricity_peak_kw_per_pupil:
           introduction_text_html: "<p>This benchmark shows the peak daily school power consumption per floor area. High values compared with other schools might suggest inefficient lighting, appliances or kitchen equipment. The peaks generally occur during the middle of the day.</p>"
         electricity_targets:
