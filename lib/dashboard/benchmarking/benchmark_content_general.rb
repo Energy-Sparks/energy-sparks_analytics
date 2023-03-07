@@ -299,11 +299,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          How school is progressing versus the target it has set for this year.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.electricity_targets.introduction_text_html')
       ERB.new(text).result(binding)
     end
   end
@@ -363,20 +359,8 @@ module Benchmarking
     class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
       include BenchmarkingNoTextMixin
       private def introduction_text
-        %q(
-          <p>
-            The comparison below shows the benefit of installing solar PV panels
-            at schools which don't already have solar PV panels. This analysis
-            is based on using half hourly electricity consumption at
-            each school over the last year and combining it with local half hourly
-            solar pv data to work out the benefit of installing solar panels.
-            The payback and savings are calculated using the school&apos;s most recent
-            economic tariff.
-            Further detail is provided if you drilldown to a school&apos;s individual
-            analysis - where a range of different scenarios of different numbers
-            of panels is presented.
-          </p>
-        )
+        text = I18n.t('analytics.benchmarking.content.solar_pv_benefit_estimate.introduction_text_html')
+        ERB.new(text).result(binding)      
       end
     end
   #=======================================================================================
@@ -1456,15 +1440,8 @@ module Benchmarking
     end
 
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison simply shows the change in electricity consumption since the
-          last school week. You should expect a slight but not significant
-          increase in electricity consumption going into the winter with
-          increased lighting usage and a subsequent reduction in the spring.
-        </p>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_consumption_recent_school_weeks.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
@@ -1482,13 +1459,8 @@ module Benchmarking
   class BenchmarkContentChangeInElectricityBetweenLast2Holidays < BenchmarkHolidaysChangeBase
     include BenchmarkPeriodChangeBaseElectricityMixIn
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows the change in consumption between the 2 most recent holidays.
-        </p>
-        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_holiday_consumption_previous_holiday.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
