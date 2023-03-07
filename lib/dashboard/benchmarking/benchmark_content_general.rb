@@ -299,11 +299,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          How school is progressing versus the target it has set for this year.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.electricity_targets.introduction_text_html')
       ERB.new(text).result(binding)
     end
   end
