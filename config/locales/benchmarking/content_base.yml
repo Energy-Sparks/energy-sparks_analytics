@@ -92,6 +92,11 @@ en:
               Be careful when comparing kWh values between different fuel types,
               technically they aren't directly comparable as they are different types of energy.
             </p>
+        annual_gas_out_of_hours_use:
+          introduction_text_html: |-
+            <p>This chart shows the breakdown of when schools are using gas. School day open is when the school is open to pupils and staff. School day closed is when the school is closed to pupils and staff overnight.</p>
+            <p>Most schools are unoccupied for about 85% of the year; between 5:00pm and 7:30am on school days, at weekends and during holidays. A focus on reducing out of hours gas usage; turning heating and hot water systems off out of hours provides schools with a cost-efficient way of reducing their overall consumption.</p>
+            <p>Schools should aim to reduce their out of hours gas usage below 35% of annual consumption.</p>
         baseload_per_pupil:
           introduction_text_html: |-
             <p>
