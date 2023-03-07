@@ -111,6 +111,8 @@ en:
             <p>
               This comparison compares the latest available data for the most recent holiday with an adjusted figure for the previous holiday, scaling to the same number of days and the latest tariff. The change in £ is the saving or increased cost for the most recent holiday to date.
             </p>
+        change_in_electricity_consumption_recent_school_weeks:
+          introduction_text_html: "<p>This benchmark shows the change in electricity consumption over the last two school weeks. You should expect a small increase in electricity consumption going into the winter with increased lighting usage and a subsequent reduction in the spring.</p>"
         change_in_electricity_since_last_year:
           introduction_text_html: |-
             <p>
@@ -260,12 +262,24 @@ en:
             </p>
         electricity_peak_kw_per_pupil:
           introduction_text_html: "<p>This benchmark shows the peak daily school power consumption per floor area. High values compared with other schools might suggest inefficient lighting, appliances or kitchen equipment. The peaks generally occur during the middle of the day.</p>"
+        electricity_targets:
+          introduction_text_html: "<p>This benchmark shows how a school is progressing against the target it has set for this year.</p>"
         holiday_usage_last_year:
           introduction_text_html: "<p>This benchmark shows the cost of electricity and gas used last year for the upcoming holidays. For example, if the next holidays are the Summer holidays 2023, the data shown will be for Summer 2022. This allows you to identify which schools in your group need to take the most action to cut holiday waste.</p>"
         seasonal_baseload_variation:
           introduction_text_html: |-
             <p>A school's baseload is the electricity consumed by appliances kept running at all times.</p>
             <p>In general, the baseload in the winter should be very similar to the summer. In practice many schools leave electric heaters on overnight when the school is unoccupied. Identifying and turning off or better timing such equipment is a quick way of saving electricity and costs.</p>
+        solar_pv_benefit_estimate:
+          introduction_text_html: |-
+            <p>
+              This benchmark shows the benefit of installing solar PV panels at schools which don't already
+              have solar PV panels fitted. This analysis uses half hourly electricity consumption data for each
+              school over the last year combined with local half hourly solar generation data to work out the
+              benefit of installing solar panels. The payback and savings are calculated using the school's most
+              recent tariff. Further detail is provided if you drill down to a school's individual analysis - where a
+              range of different scenarios for different numbers of panels is presented.
+            </p>
         weekday_baseload_variation:
           introduction_text_html: |-
             <p>
