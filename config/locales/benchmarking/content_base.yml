@@ -14,6 +14,7 @@ en:
             underlying meters.
           </p>
         es_doesnt_have_all_meter_data_html: "<p>\n  Energy Sparks doesn't have a full set of meter data for some schools, for example rural schools with \n  biomass or oil boilers, so a total energy comparison might not be relevant for all schools. This comparison \n  excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.\n</p>"
+        es_exclude_storage_heaters_and_solar_pv: "<p>This breakdown excludes electricity consumed by storage heaters and solar PV.</p>"
         es_exclude_storage_heaters_and_solar_pv_html: |-
           <p>
             This breakdown excludes electricity consumed by storage heaters and
@@ -89,6 +90,17 @@ en:
               This benchmark compares the energy consumed per pupil in the last year in kWh.
               Be careful when comparing kWh values between different fuel types,
               technically they aren't directly comparable as they are different types of energy.
+            </p>
+        baseload_per_pupil:
+          introduction_text_html: |-
+            <p>
+              A school's baseload is the electricity consumed by appliances kept running at all times.
+            </p>
+            <p>
+              This is one of the most useful benchmarks for understanding a school's electricity use, as 50% of most schools' electricity is consumed out of hours. Reducing the baseload will have a big impact on overall electricity consumption.
+            </p>
+            <p>
+              All schools should aim to reduce their electricity baseload per pupil to that of the best schools. Schools perform roughly the same function so should be able to achieve similar electricity consumption, particularly out of hours.
             </p>
         change_in_electricity_since_last_year:
           introduction_text_html: |-
