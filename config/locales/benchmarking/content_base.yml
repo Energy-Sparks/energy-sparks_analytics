@@ -35,7 +35,7 @@ en:
         autumn_term_2021_2022_energy_comparison: Autumn Term 2021 versus 2022 energy use
         baseload_per_pupil: Baseload per pupil
         change_in_electricity_consumption_recent_school_weeks: Recent change in electricity use
-        change_in_electricity_holiday_consumption_previous_holiday: Change in electricity use between the last 2 holidays
+        change_in_electricity_holiday_consumption_previous_holiday: Change in electricity use between the last two holidays
         change_in_electricity_holiday_consumption_previous_years_holiday: Change in electricity use between this holiday and the same holiday last year
         change_in_electricity_since_last_year: Annual change in electricity use
         change_in_energy_since_last_year: Annual change in total energy use
@@ -105,6 +105,14 @@ en:
             </p>
         change_in_electricity_consumption_recent_school_weeks:
           introduction_text_html: "<p>This benchmark shows the change in electricity consumption over the last two school weeks. You should expect a small increase in electricity consumption going into the winter with increased lighting usage and a subsequent reduction in the spring.</p>"
+        change_in_electricity_holiday_consumption_previous_holiday:
+          introduction_text_html: |-
+            <p>
+              This benchmark shows the change in electricity consumption between the two most recent holidays.
+            </p>
+            <p>
+              This comparison compares the latest available data for the most recent holiday with an adjusted figure for the previous holiday, scaling to the same number of days and the latest tariff. The change in £ is the saving or increased cost for the most recent holiday to date.
+            </p>
         change_in_electricity_since_last_year:
           introduction_text_html: |-
             <p>

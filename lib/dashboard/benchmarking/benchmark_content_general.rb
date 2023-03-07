@@ -1459,13 +1459,8 @@ module Benchmarking
   class BenchmarkContentChangeInElectricityBetweenLast2Holidays < BenchmarkHolidaysChangeBase
     include BenchmarkPeriodChangeBaseElectricityMixIn
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows the change in consumption between the 2 most recent holidays.
-        </p>
-        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_holiday_consumption_previous_holiday.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
