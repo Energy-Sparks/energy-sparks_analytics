@@ -58,7 +58,7 @@ class AggregatorBenchmarks < AggregatorBase
     @alerts[fuel_type] ||= AlertAnalysisBase.benchmark_alert(@school, fuel_type, asof_date)
     @alerts[fuel_type].benchmark_chart_data[benchmark_type][datatype]
   end
-end 
+end
 
 =begin
     if benchmark_required?('electricity')
@@ -91,7 +91,7 @@ end
     @current_year_floor_area = school.floor_area(most_recent_start_date, most_recent_end_date)
     @current_year_number_of_pupils = school.number_of_pupils(most_recent_start_date, most_recent_end_date)
 
-    
+
     # scale_school_data if chart_config.scale_y_axis?
 
   def scale_benchmarks_deprecated(benchmark_usage_kwh, fuel_type)

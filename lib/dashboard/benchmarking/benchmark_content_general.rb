@@ -114,73 +114,32 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          This benchmark compares the energy consumed per pupil in the last year in kWh.
-          Be careful when comparing kWh values between different fuel types,
-          <a href="https://en.wikipedia.org/wiki/Primary_energy" target="_blank">
-            technically they aren't directly comparable as they are different types of energy.
-          </a>
-        </p>
-        <p>
-          <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
-        </p>
-      )
+      text =  I18n.t('analytics.benchmarking.content.annual_energy_costs_per_pupil.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
       ERB.new(text).result(binding)
-    end
-
-    private def table_introduction_text
-      CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
     end
   end
   #=======================================================================================
   class BenchmarkContentTotalAnnualEnergy < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This benchmark shows how much each school spent on energy last year.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
+      ERB.new(text).result(binding)
     end
-    private def table_introduction_text
-      CAVEAT_TEXT[:es_doesnt_have_all_meter_data]
-    end
+    # private def table_introduction_text
+    #   I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
+    # end
     protected def table_interpretation_text
-      CAVEAT_TEXT[:es_data_not_in_sync]
+      I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync_html')
     end
   end
   #=======================================================================================
   class BenchmarkContentElectricityPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This benchmark compares the electricity consumed per pupil in the last year,
-          in &pound;.
-        </p>
-        <p>
-          A realistic target for primary schools is to use less than
-          &pound;20 per pupil per year, for middle schools &pound;30
-          and for secondaries &pound;40. There  shouldn't be a
-          significant difference between schools as all schools
-          need to use roughly the same amount of ICT equipment,
-          lighting and refrigeration per pupil. Exceptions might
-          be schools with swimming pools or sports flood lighting
-          which can significantly increase demand.
-        </p>
-        <p>
-          To meet these targets the biggest reductions
-          can often be achieved by focussing on &apos;baseload&apos;
-          ensuring equipment is turned off out of hours, and that the
-          equipment which is left on is as efficient as possible. Energy Sparks
-          has separate comparisons and analysis for baseload.
-        </p>
-        <p>
-          The data excludes storage heaters which are reported elsewhere
-          under the &apos;heating&apos; benchmarks.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.annual_electricity_costs_per_pupil.introduction_text_html')
     end
   end
   #=======================================================================================
@@ -221,31 +180,8 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          This chart shows the breakdown of when schools are using electricity
-          - school day open: when the school is open to pupils and staff,
-          school day closed: when the school is closed to pupils and staff overnight,
-          weekends and evenings.
-        </p>
-        <p>
-          Most schools are unoccupied for about 85% of the year;
-          between 5:00pm and 7:30am on school days, at weekends
-          and during holidays. Focussing on reducing out of hours
-          usage; turning appliances off, installing efficient
-          appliances often provides schools with a cost-efficient
-          way of reducing their overall consumption.
-        </p>
-        <p>
-          Schools should aim to reduce their out of hours usage
-          below 25% of annual consumption. In comparing schools,
-          it might be helpful for you to look at the 2 additional
-          benchmarks on baseload (out of hours power consumption)
-          that we provide as it might give you more information
-          on a school&apos;s out of hours consumption.
-        </p>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.annual_electricity_out_of_hours_use.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv_html')
       ERB.new(text).result(binding)
     end
   end
@@ -363,11 +299,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          How school is progressing versus the target it has set for this year.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.electricity_targets.introduction_text_html')
       ERB.new(text).result(binding)
     end
   end
@@ -388,27 +320,9 @@ module Benchmarking
   class BenchmarkContentBaseloadPerPupil < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          A school&apos;s baseload is the power it consumes out of hours when
-          the school is unoccupied.
-        </p>
-        <p>
-          This is one of the most useful benchmarks for understanding
-          a school&apos;s electricity use, as half of most schools&apos;
-          electricity is consumed out of hours, reducing the baseload will have a big
-          impact on overall electricity consumption.
-        </p>
-        <p>
-          All schools should aim to reduce their electricity baseload per pupil
-          to that of the best schools. Schools perform roughly the same function
-          so should be able to achieve similar electricity consumption
-          particularly out of hours.
-        </p>
-        <%= @baseload_impact_html %>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.baseload_per_pupil.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+
       ERB.new(text).result(binding)
     end
   end
@@ -417,25 +331,8 @@ module Benchmarking
   class BenchmarkSeasonalBaseloadVariation < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          A school&apos;s baseload is the power it consumes out of hours when
-          the school is unoccupied.
-        </p>
-        <p>
-          In general, with very few exceptions the baseload in the winter
-          should be very similar to the summer. In practice many school accidently
-          leave electrically powered heating-related equipment on overnight whe
-          the school is unoccupied.
-        </p>
-        <%= @baseload_impact_html %>
-        <p>
-          Identifying and turning off or better timing such equipment is a quick way
-          of saving electricity and costs.
-        </p>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.seasonal_baseload_variation.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
       ERB.new(text).result(binding)
     end
   end
@@ -444,25 +341,8 @@ module Benchmarking
   class BenchmarkWeekdayBaseloadVariation < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          A school&apos;s baseload is the power it consumes out of hours when
-          the school is unoccupied.
-        </p>
-        <p>
-          In general, with very few exceptions the baseload shouldn&apos;t
-          vary between days of the week and even between weekdays and weekends.
-        </p>
-        <%= @baseload_impact_html %>
-        <p>
-          If there is a big variation it often suggests that there is an opportunity
-          to reduce baseload by find out what is causing the baseload to be higher on
-          certain days of the week than others, and switch off whatever is causing
-          the difference.
-        </p>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.weekday_baseload_variation.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
       ERB.new(text).result(binding)
     end
   end
@@ -471,47 +351,16 @@ module Benchmarking
   class BenchmarkContentPeakElectricityPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This comparison shows the peak daily school power consumption per floor area.
-          High values compared with other schools might suggest inefficient lighting,
-          appliances or kitchen equipment. The peaks generally occur during the middle
-          of the day. Energy Sparks allows you to drill down to individual school day usage
-          to better understand the intraday characteristics of a school&apos;s electricity
-          consumption.
-        </p>
-        <p>
-          If a school&apos;s electricity consumption is high compared with
-          other schools is probably warrants further investigation. There might be
-          simple low-cost remedies like turning lighting off when it is bright outside,
-          or better management of appliances in a school&apos;s kitchen. Other measures
-          like installing LED lighting might require investment.
-        </p>
-        <p>
-          LED lighting for example can consume as little as 4W/m<sup>2</sup>, whereas older
-          less efficient lighting can consume up to 12W/m<sup>2</sup>.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.electricity_peak_kw_per_pupil.introduction_text_html')
+      ERB.new(text).result(binding)      
     end
   end
     #=======================================================================================
     class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
       include BenchmarkingNoTextMixin
       private def introduction_text
-        %q(
-          <p>
-            The comparison below shows the benefit of installing solar PV panels
-            at schools which don't already have solar PV panels. This analysis
-            is based on using half hourly electricity consumption at
-            each school over the last year and combining it with local half hourly
-            solar pv data to work out the benefit of installing solar panels.
-            The payback and savings are calculated using the school&apos;s most recent
-            economic tariff.
-            Further detail is provided if you drilldown to a school&apos;s individual
-            analysis - where a range of different scenarios of different numbers
-            of panels is presented.
-          </p>
-        )
+        text = I18n.t('analytics.benchmarking.content.solar_pv_benefit_estimate.introduction_text_html')
+        ERB.new(text).result(binding)      
       end
     end
   #=======================================================================================
@@ -958,16 +807,14 @@ module Benchmarking
 
   #=======================================================================================
   class BenchmarkContentEnergyPerFloorArea < BenchmarkContentBase
+    # config key annual_energy_costs_per_floor_area
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-            This comparison benchmark is an alternative to the more commonly used
-            per pupil energy comparison
-            benchmark. <%= CAVEAT_TEXT[:es_per_pupil_v_per_floor_area] %>
-        </p>
-      )
+      text = '<p>'
+      text += I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_useful_html')
+      text += '</p>'
       ERB.new(text).result(binding)
     end
   end
@@ -1202,38 +1049,8 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <%= table_introduction('energy') %>
-        <p>
-          Comments:
-          <ul>
-            <li>
-              <%= varying_directions([electric_and_gas_mix, carbon_intensity, day_night_tariffs]) %>
-            </li>
-            <li>
-              <%= only_in_previous_column %>
-            </li>
-  
-            <li> the fuel column is keyed as follows
-              <table  class="table table-striped table-sm">
-                <tr><td>E</td><td>Electricity</td></tr>
-                <tr><td>G</td><td>Gas</td></tr>
-                <tr><td>SH</td><td>Storage heaters</td></tr>
-                <tr><td>S</td><td>Solar: Metered i.e. accurate kWh, CO2</td></tr>
-                <tr><td>s</td><td>Solar: Estimated</td></tr>
-              </table>
-            </li>
-            <li>
-              <%= cost_solar_pv %>
-            </li>
-            <li>
-              the energy CO2 and kWh includes the net of the electricity and solar PV values
-            </li>
-          </ul>
-        </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
-
+      text = I18n.t('analytics.benchmarking.content.change_in_energy_since_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       ERB.new(text).result(binding)
     end
 
@@ -1264,21 +1081,8 @@ module Benchmarking
 
     # some text duplication with the BenchmarkChangeInEnergySinceLastYear class
     private def introduction_text
-      text = %q(
-        <%= table_introduction('electricity') %>
-        <p>
-          Comments:
-          <ul>
-            <li><%= varying_directions([carbon_intensity, day_night_tariffs]) %></li>
-            <li><%= only_in_previous_column %></li>
-            <li><%= solar_pv_electric_calc %></li>
-            <li><%= sheffield_estimate %></li>
-            <li><%= storage_heater_comparison %></li>
-          </ul>
-        </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
-
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_since_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       ERB.new(text).result(binding)
     end
   end
@@ -1287,11 +1091,8 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <%= table_introduction('gas') %>
-        <%= colder %>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_gas_since_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
 
       ERB.new(text).result(binding)
     end
@@ -1301,25 +1102,8 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <%= table_introduction('storage heater') %>
-        <p>
-          The storage heater consumption is a reasonably accurate estimate
-          as for most schools we disaggregate it from mains consumption as
-          storage heaters are typically not separately metered.
-        </p>
-        <p>
-          For some schools the cost values may be overestimated because
-          we don't have information on whether your school&apos;s storage heaters
-          use a lower differential or economy 7 tariff.
-        </p>
-        <p>
-          <%= varying_directions([carbon_intensity, day_night_tariffs], false) %>
-        </p>
-        <%= colder %>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
-
+      text = I18n.t('analytics.benchmarking.content.change_in_storage_heaters_since_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       ERB.new(text).result(binding)
     end
   end
@@ -1328,23 +1112,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <%= table_introduction('solar PV', 'production/generation') %>
-        <p>
-          Where we don't have metered data we used localised estimates;
-          the percentage change should be reasonably accurate
-          but kWh values may be less accurate as we currently assume
-          that the school's panels face south and are inclined at 30 degrees.
-          If your school&apos;s panels have a different set up, the kWh values will vary from our estimates.
-        <p/>
-        <p>
-          The CO2 savings achieved by generating electricity from your solar panels
-          are calculated using the carbon intensity of the national electricity grid.
-          As the grid decarbonises the CO2 offset by the school's solar panels will
-          gradually reduce i.e. the CO2 benefit will diminish.
-        </p>
-      )
-
+      text = I18n.t('analytics.benchmarking.content.change_in_solar_pv_since_last_year.introduction_text_html')
       ERB.new(text).result(binding)
     end
   end
@@ -1672,15 +1440,8 @@ module Benchmarking
     end
 
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison simply shows the change in electricity consumption since the
-          last school week. You should expect a slight but not significant
-          increase in electricity consumption going into the winter with
-          increased lighting usage and a subsequent reduction in the spring.
-        </p>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_consumption_recent_school_weeks.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
@@ -1698,13 +1459,8 @@ module Benchmarking
   class BenchmarkContentChangeInElectricityBetweenLast2Holidays < BenchmarkHolidaysChangeBase
     include BenchmarkPeriodChangeBaseElectricityMixIn
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows the change in consumption between the 2 most recent holidays.
-        </p>
-        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_holiday_consumption_previous_holiday.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
@@ -1712,17 +1468,8 @@ module Benchmarking
   class BenchmarkContentChangeInElectricityBetween2HolidaysYearApart < BenchmarkHolidaysChangeBase
     include BenchmarkPeriodChangeBaseElectricityMixIn
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows the change in consumption between the most recent holiday, and
-          the same holiday a year ago. Schools should be looking to reduce holiday usage
-          by switching appliances off and generally reducing baseload. An increase
-          from year to year suggests a school is not managing to reduce consumption,
-          which would help mitigate some of the impacts of climate change.
-        </p>
-        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_holiday_consumption_previous_years_holiday.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
@@ -1836,11 +1583,8 @@ module Benchmarking
   class BenchmarkEnergyConsumptionInUpcomingHolidayLastYear < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows cost of electricity and gas last year for an upcoming holiday.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.holiday_usage_last_year.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       ERB.new(text).result(binding)
     end
   end

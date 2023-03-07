@@ -226,17 +226,31 @@ module Benchmarking
       column_definition.key?(key) && column_definition[key]
     end
 
-    def self.structured_pages(user_type_hash, filter_out = nil)
-      CHART_TABLE_GROUPING.map do |group|
-        visible_benchmarks = if ContentBase.analytics_user?(user_type_hash)
-          group[:benchmarks]
-        else
-          group[:benchmarks].select { |key| !CHART_TABLE_CONFIG[key].fetch(:analytics_user_type, false) }
-        end
-        {
-          name:  group[:name],
-          benchmarks: visible_benchmarks.map{ |key| [key, CHART_TABLE_CONFIG[key][:name]] }.to_h
-        }
+    def self.structured_pages(user_type_hash = { user_role: :guest }, _filter_out = nil)
+      user_role = user_type_hash[:user_role] || :guest
+
+      CHART_TABLE_GROUPING.each_with_object([]) do |(group_key, benchmark_keys), structured_pages|
+        structured_page = structured_page_for(group_key, benchmark_keys, user_role)
+        next unless structured_page
+        structured_pages << structured_page
+      end
+    end
+
+    def self.structured_page_for(group_key, benchmark_keys, user_role)
+      benchmarks = benchmark_titles_for(benchmark_keys, user_role)
+      return if benchmarks.empty?
+
+      {
+        name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}"),
+        benchmarks: benchmark_titles_for(benchmark_keys, user_role)
+      }
+    end
+
+    def self.benchmark_titles_for(benchmark_keys, user_role)
+      benchmark_keys.each_with_object({}) do |benchmark_key, benchmarks|
+        next if CHART_TABLE_CONFIG[benchmark_key][:admin_only] == true && [:admin, :analyst].exclude?(user_role)
+
+        benchmarks[benchmark_key] = I18n.t("analytics.benchmarking.chart_table_config.#{benchmark_key}")
       end
     end
 
@@ -280,86 +294,58 @@ module Benchmarking
       val.nil? ? Float::INFINITY : val
     end
 
-    CHART_TABLE_GROUPING = [
-      {
-        name:       'Energy Cost Benchmarks',
-        benchmarks: %i[
-          annual_energy_costs_per_pupil
-          annual_energy_costs
-          annual_energy_costs_per_floor_area
-        ]
-      },
-      {
-        name:       'Change in Energy Use',
-        benchmarks: %i[
-          change_in_energy_since_last_year
-          change_in_electricity_since_last_year
-          change_in_gas_since_last_year
-          change_in_storage_heaters_since_last_year
-          change_in_solar_pv_since_last_year
-          change_in_co2_emissions_since_last_year
-          holiday_usage_last_year
-        ]
-      },
-      {
-        name:       'Electricity Benchmarks',
-        benchmarks: %i[
-          annual_electricity_costs_per_pupil
-          change_in_annual_electricity_consumption
-          annual_electricity_out_of_hours_use
-          recent_change_in_baseload
-          baseload_per_pupil
-          seasonal_baseload_variation
-          weekday_baseload_variation
-          summer_holiday_electricity_analysis
-          electricity_peak_kw_per_pupil
-          solar_pv_benefit_estimate
-          refrigeration
-          electricity_targets
-          change_in_electricity_consumption_recent_school_weeks
-          change_in_electricity_holiday_consumption_previous_holiday
-          change_in_electricity_holiday_consumption_previous_years_holiday
-          electricity_consumption_during_holiday
-        ]
-      },
-      {
-        name:       'Gas and Storage Heater Benchmarks',
-        benchmarks: %i[
-          annual_heating_costs_per_floor_area
-          change_in_annual_heating_consumption
-          annual_gas_out_of_hours_use
-          annual_storage_heater_out_of_hours_use
-          heating_coming_on_too_early
-          thermostat_sensitivity
-          heating_in_warm_weather
-          thermostatic_control
-          hot_water_efficiency
-          gas_targets
-          change_in_gas_consumption_recent_school_weeks
-          change_in_gas_holiday_consumption_previous_holiday
-          change_in_gas_holiday_consumption_previous_years_holiday
-          gas_consumption_during_holiday
-          storage_heater_consumption_during_holiday
-        ]
-      },
-      {
-        name:       'Metering Potential Cost Savings',
-        benchmarks: %i[
-          electricity_meter_consolidation_opportunities
-          gas_meter_consolidation_opportunities
-          differential_tariff_opportunity
-        ]
-      },
-      {
-        name:       'Event Specific Comparisons',
-        benchmarks: %i[
-          layer_up_powerdown_day_november_2022
-          change_in_energy_use_since_joined_energy_sparks
-          autumn_term_2021_2022_energy_comparison
-          sept_nov_2021_2022_energy_comparison
-        ]
-      }
-    ]
+    CHART_TABLE_GROUPING = {
+      total_energy_use_benchmarks: [
+        :annual_energy_costs_per_pupil,
+        :annual_energy_costs,
+        :annual_energy_costs_per_floor_area,
+        :change_in_energy_since_last_year,
+        :holiday_usage_last_year
+      ],
+      electricity_benchmarks: [
+        :change_in_electricity_since_last_year,
+        :annual_electricity_costs_per_pupil,
+        :annual_electricity_out_of_hours_use,
+        :recent_change_in_baseload,
+        :baseload_per_pupil,
+        :seasonal_baseload_variation,
+        :weekday_baseload_variation,
+        :electricity_peak_kw_per_pupil,
+        :electricity_targets,
+        :change_in_electricity_consumption_recent_school_weeks,
+        :change_in_electricity_holiday_consumption_previous_holiday,
+        :change_in_electricity_holiday_consumption_previous_years_holiday,
+        :electricity_consumption_during_holiday
+      ],
+      gas_and_storage_heater_benchmarks: [
+        :change_in_gas_since_last_year,
+        :change_in_storage_heaters_since_last_year,
+        :annual_heating_costs_per_floor_area,
+        :annual_gas_out_of_hours_use,
+        :annual_storage_heater_out_of_hours_use,
+        :heating_coming_on_too_early,
+        :thermostat_sensitivity,
+        :heating_in_warm_weather,
+        :thermostatic_control,
+        :hot_water_efficiency,
+        :gas_targets,
+        :change_in_gas_consumption_recent_school_weeks,
+        :change_in_gas_holiday_consumption_previous_holiday,
+        :change_in_gas_holiday_consumption_previous_years_holiday,
+        :gas_consumption_during_holiday,
+        :storage_heater_consumption_during_holiday
+      ],
+      solar_benchmarks: [
+        :change_in_solar_pv_since_last_year,
+        :solar_pv_benefit_estimate
+      ],
+      date_limited_comparisons: [
+        :layer_up_powerdown_day_november_2022,
+        :change_in_energy_use_since_joined_energy_sparks,
+        :autumn_term_2021_2022_energy_comparison,
+        :sept_nov_2021_2022_energy_comparison
+      ]
+    }
 
     def self.tariff_changed_school_name(content_class = nil)
       if content_class.nil?
@@ -398,7 +384,8 @@ module Benchmarking
         where:   ->{ !enba_kpup.nil? },
         sort_by:  method(:sort_energy_costs),
         type: %i[chart table],
-        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark }
+        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark },
+        admin_only: false
       },
       annual_energy_costs: {
         benchmark_class:  BenchmarkContentTotalAnnualEnergy,
@@ -417,7 +404,8 @@ module Benchmarking
           { data: ->{ addp_flra },          name: ch(:floor_area), units: :m2 },
         ],
         sort_by:  [4],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       annual_energy_costs_per_floor_area: {
         benchmark_class:  BenchmarkContentEnergyPerFloorArea,
@@ -429,7 +417,8 @@ module Benchmarking
           { data: ->{ enba_ratg },  name: ch(:rating), units: Float, y2_axis: true },
         ],
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       change_in_energy_use_since_joined_energy_sparks: {
         benchmark_class:  BenchmarkContentChangeInEnergyUseSinceJoined,
@@ -449,7 +438,8 @@ module Benchmarking
         ],
         treat_as_nil:   [ManagementSummaryTable::NO_RECENT_DATA_MESSAGE, ManagementSummaryTable::NOT_ENOUGH_DATA_MESSAGE], # from ManagementSummaryTable:: not referenced because not on path
         sort_by:  [2],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true
       },
       # second chart and table on page defined by change_in_energy_use_since_joined_energy_sparks above
       # not displayed on its own as a separate comparison
@@ -488,7 +478,8 @@ module Benchmarking
           { name: 'Total energy consumption',   span: 1 }
         ],
         sort_by:  [13],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true
       },
       change_in_co2_emissions_since_last_year: {
         benchmark_class:  BenchmarkContentChangeInCO2SinceLastYear,
@@ -500,7 +491,8 @@ module Benchmarking
           { data: ->{ enba_cxnp},   name: ch(:change_in_annual_co2), units: :relative_percent_0dp, chart_data: true }
         ],
         sort_by:  [3],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true
       },
       # second chart and table on page defined by change_in_co2_emissions_since_last_year above
       # not displayed on its own as a separate comparison
@@ -530,7 +522,8 @@ module Benchmarking
           { data: ->{ enba_cxnp},  name: ch(:overall_change), units: :relative_percent_0dp, y2_axis: true },
         ],
         sort_by:  [13],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true
       },
       layer_up_powerdown_day_november_2022: {
         benchmark_class:  BenchmarkChangeAdhocComparison,
@@ -599,6 +592,7 @@ module Benchmarking
         where:   ->{ !sum_data([lue1_ppp£, lug1_ppp£, lus1_ppp£], true).nil? },
         sort_by:  [9],
         type: %i[chart table],
+        admin_only: true
       },
       layer_up_powerdown_day_november_2022_electricity_table: {
         benchmark_class:  BenchmarkChangeAdhocComparisonElectricityTable,
@@ -632,6 +626,7 @@ module Benchmarking
         where:   ->{ !lue1_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true
       },
       layer_up_powerdown_day_november_2022_gas_table: {
         benchmark_class:  BenchmarkChangeAdhocComparisonGasTable,
@@ -666,6 +661,7 @@ module Benchmarking
         where:   ->{ !lug1_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true        
       },
       layer_up_powerdown_day_november_2022_storage_heater_table: {
         benchmark_class:  BenchmarkChangeAdhocComparisonStorageHeaterTable,
@@ -700,6 +696,7 @@ module Benchmarking
         where:   ->{ !lus1_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true        
       },
       autumn_term_2021_2022_energy_comparison: {
         benchmark_class:  BenchmarkAutumn2022Comparison,
@@ -769,6 +766,7 @@ module Benchmarking
         where:   ->{ !sum_data([a22e_ppp£, a22g_ppp£, a22s_ppp£], true).nil? },
         sort_by:  [9],
         type: %i[chart table],
+        admin_only: true
       },
       autumn_term_2021_2022_electricity_table: {
         benchmark_class:  BenchmarkAutumn2022ElectricityTable,
@@ -803,6 +801,7 @@ module Benchmarking
         where:   ->{ !a22e_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true
       },
       autumn_term_2021_2022_gas_table: {
         benchmark_class:  BenchmarkAutumn2022GasTable,
@@ -838,6 +837,7 @@ module Benchmarking
         where:   ->{ !a22g_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true
       },
       autumn_term_2021_2022_storage_heater_table: {
         benchmark_class:  BenchmarkAutumn2022StorageHeaterTable,
@@ -873,8 +873,8 @@ module Benchmarking
         where:   ->{ !a22s_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true
       },
-
       sept_nov_2021_2022_energy_comparison: {
         benchmark_class:  BenchmarkSeptNov2022Comparison,
         name:       'September to November 2021 versus 2022 energy use comparison',
@@ -943,6 +943,7 @@ module Benchmarking
         where:   ->{ !sum_data([s22e_ppp£, s22g_ppp£, s22s_ppp£], true).nil? },
         sort_by:  [9],
         type: %i[chart table],
+        admin_only: true
       },
       sept_nov_2021_2022_electricity_table: {
         benchmark_class:  BenchmarkSeptNov2022ElectricityTable,
@@ -977,6 +978,7 @@ module Benchmarking
         where:   ->{ !s22e_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true
       },
       sept_nov_2021_2022_gas_table: {
         benchmark_class:  BenchmarkSeptNov2022GasTable,
@@ -1012,6 +1014,7 @@ module Benchmarking
         where:   ->{ !s22g_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true
       },
       sept_nov_2021_2022_storage_heater_table: {
         benchmark_class:  BenchmarkSeptNov2022StorageHeaterTable,
@@ -1047,8 +1050,8 @@ module Benchmarking
         where:   ->{ !s22s_ppp£.nil? },
         sort_by:  [9],
         type: %i[table],
+        admin_only: true
       },
-
       change_in_energy_since_last_year: {
         benchmark_class:  BenchmarkChangeInEnergySinceLastYear,
         name:     'Change in energy use since last year',
@@ -1127,7 +1130,8 @@ module Benchmarking
         where:   ->{ !sum_data([enba_ke0, enba_kg0, enba_kh0, enba_ks0], true).nil? },
         sort_by:  method(:sort_by_nil),
         type: %i[table],
-        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark }
+        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark },
+        admin_only: false
       },
       change_in_electricity_since_last_year: {
         benchmark_class:  BenchmarkChangeInElectricitySinceLastYear,
@@ -1159,7 +1163,8 @@ module Benchmarking
         where:   ->{ !enba_ken.nil? && enba_peap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
         type: %i[table],
-        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark }
+        drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark },
+        admin_only: false
       },
       change_in_gas_since_last_year: {
         benchmark_class:  BenchmarkChangeInGasSinceLastYear,
@@ -1190,7 +1195,8 @@ module Benchmarking
         where:   ->{ !enba_kgn.nil? && enba_pgap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
         type: %i[table],
-        drilldown:  { type: :adult_dashboard, content_class: AdviceGasLongTerm }
+        drilldown:  { type: :adult_dashboard, content_class: AdviceGasLongTerm },
+        admin_only: false        
       },
       change_in_storage_heaters_since_last_year: {
         benchmark_class:  BenchmarkChangeInStorageHeatersSinceLastYear,
@@ -1220,7 +1226,8 @@ module Benchmarking
         where:   ->{ !enba_khn.nil? && enba_phap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
         type: %i[table],
-        drilldown:  { type: :adult_dashboard, content_class: AdviceStorageHeaters }
+        drilldown:  { type: :adult_dashboard, content_class: AdviceStorageHeaters },
+        admin_only: false        
       },
       change_in_solar_pv_since_last_year: {
         benchmark_class:  BenchmarkChangeInSolarPVSinceLastYear,
@@ -1247,7 +1254,8 @@ module Benchmarking
         where:   ->{ !enba_ksn.nil? && enba_psap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
         type: %i[table],
-        drilldown:  { type: :adult_dashboard, content_class: AdviceSolarPV }
+        drilldown:  { type: :adult_dashboard, content_class: AdviceSolarPV },
+        admin_only: false        
       },
       annual_electricity_costs_per_pupil: {
         benchmark_class:  BenchmarkContentElectricityPerPupil,
@@ -1262,9 +1270,9 @@ module Benchmarking
           { data: ->{ elba_ratg },  name: ch(:rating), units: Float, y2_axis: true },
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
-
       change_in_annual_electricity_consumption: {
         benchmark_class:  BenchmarkContentChangeInAnnualElectricityConsumption,
         name:     'Change in annual electricity consumption',
@@ -1276,7 +1284,8 @@ module Benchmarking
         ],
         where:   ->{ !elba_£pyr.nil? },
         sort_by:  [1], # column 1 i.e. Annual kWh
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true        
       },
       refrigeration: {
         benchmark_class:  BenchmarkRefrigeration,
@@ -1290,7 +1299,8 @@ module Benchmarking
         analytics_user_type: true,
         where:   ->{ !free_kwrd.nil? },
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true
       },
       electricity_targets: {
         benchmark_class:  BenchmarkElectricityTarget,
@@ -1305,7 +1315,8 @@ module Benchmarking
           { data: ->{ etga_trsd },  name: ch(:start_date_for_target),             units: :date},
         ],
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       annual_electricity_out_of_hours_use: {
         benchmark_class: BenchmarkContentElectricityOutOfHoursUsage,
@@ -1324,7 +1335,8 @@ module Benchmarking
           TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       recent_change_in_baseload: {
         benchmark_class: BenchmarkContentChangeInBaseloadSinceLastYear,
@@ -1342,7 +1354,8 @@ module Benchmarking
         ],
         where:   ->{ !elbc_bspc.nil? },
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       baseload_per_pupil: {
         benchmark_class: BenchmarkContentBaseloadPerPupil,
@@ -1360,7 +1373,8 @@ module Benchmarking
         ],
         where:   ->{ !elbb_blpp.nil? },
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false        
       },
       seasonal_baseload_variation: {
         benchmark_class: BenchmarkSeasonalBaseloadVariation,
@@ -1377,7 +1391,8 @@ module Benchmarking
         ],
         where:   ->{ !sblv_sblp.nil? },
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       weekday_baseload_variation: {
         benchmark_class: BenchmarkWeekdayBaseloadVariation,
@@ -1396,7 +1411,8 @@ module Benchmarking
         ],
         where:   ->{ !iblv_sblp.nil? },
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       summer_holiday_electricity_analysis: {
         benchmark_class: BenchmarkContentSummerHolidayBaseloadAnalysis,
@@ -1412,7 +1428,8 @@ module Benchmarking
         ],
         analytics_user_type: true,
         sort_by: [1],
-        type: %i[table]
+        type: %i[table],
+        admin_only: true        
       },
       electricity_peak_kw_per_pupil: {
         benchmark_class: BenchmarkContentPeakElectricityPerFloorArea,
@@ -1428,7 +1445,8 @@ module Benchmarking
         ],
         where:   ->{ !epkb_kwfa.nil? },
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       solar_pv_benefit_estimate: {
         benchmark_class: BenchmarkContentSolarPVBenefit,
@@ -1443,7 +1461,8 @@ module Benchmarking
         ],
         where:   ->{ !sole_opvk.nil? },
         sort_by: [1],
-        type: %i[table]
+        type: %i[table],
+        admin_only: false        
       },
       annual_heating_costs_per_floor_area: {
         benchmark_class:  BenchmarkContentHeatingPerFloorArea,
@@ -1460,7 +1479,8 @@ module Benchmarking
         ],
         where:   ->{ !gsba_co2y.nil? },
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false        
       },
       change_in_annual_heating_consumption: {
         benchmark_class:  BenchmarkContentChangeInAnnualHeatingConsumption,
@@ -1482,7 +1502,8 @@ module Benchmarking
         where:   ->{ !gsba_£pyr.nil? || !shan_£pyr.nil? },
         sort_by:  [1], # column 1 i.e. Annual kWh
         treat_as_nil:   [0],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true        
       },
       change_in_annual_heating_consumption_temperature_adjusted: {
         benchmark_class:  BenchmarkContentChangeInAnnualHeatingConsumptionTemperatureAdjusted,
@@ -1514,7 +1535,8 @@ module Benchmarking
         where:   ->{ !gsba_kpyr.nil? || !shan_kpyr.nil? },
         sort_by:  [1], # column 1 i.e. Annual kWh
         treat_as_nil:   [0],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true        
       },
       annual_gas_out_of_hours_use: {
         benchmark_class: BenchmarkContentGasOutOfHoursUsage,
@@ -1533,7 +1555,8 @@ module Benchmarking
           TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       gas_targets: {
         benchmark_class:  BenchmarkGasTarget,
@@ -1548,7 +1571,8 @@ module Benchmarking
           { data: ->{ gtga_trsd },  name: ch(:start_date_for_target),             units: :date},
         ],
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       annual_storage_heater_out_of_hours_use: {
         benchmark_class: BenchmarkContentStorageHeaterOutOfHoursUsage,
@@ -1563,7 +1587,8 @@ module Benchmarking
           { data: ->{ shoo_ratg },  name: ch(:rating), units: Float, y2_axis: true }
         ],
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       heating_coming_on_too_early: {
         benchmark_class:  BenchmarkHeatingComingOnTooEarly,
@@ -1577,7 +1602,8 @@ module Benchmarking
           TARIFF_CHANGED_COL
         ],
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       optimum_start_analysis: {
         benchmark_class:  BenchmarkOptimumStartAnalysis,
@@ -1594,7 +1620,8 @@ module Benchmarking
           { data: ->{ hthe_htst },  name: ch(:average_heating_start_time_last_week), units: :timeofday},
         ],
         sort_by: [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: true
       },
       thermostat_sensitivity: {
         benchmark_class:  BenchmarkContentThermostaticSensitivity,
@@ -1605,7 +1632,8 @@ module Benchmarking
           { data: ->{ htsa_ratg },  name: ch(:rating), units: Float, y2_axis: true }
         ],
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       heating_in_warm_weather: {
         benchmark_class:  BenchmarkContentHeatingInWarmWeather,
@@ -1620,7 +1648,8 @@ module Benchmarking
           { data: ->{ or_nil([shsd_ratg, shsh_ratg]) },  name: ch(:rating), units: Float, y2_axis: true }
         ],
         sort_by: [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       thermostatic_control: {
         benchmark_class:  BenchmarkContentThermostaticControl,
@@ -1632,7 +1661,8 @@ module Benchmarking
           { data: ->{ httc_ratg },  name: ch(:rating), units: Float, y2_axis: true }
         ],
         sort_by: [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       hot_water_efficiency: {
         benchmark_class:  BenchmarkContentHotWaterEfficiency,
@@ -1646,7 +1676,8 @@ module Benchmarking
           { data: ->{ hotw_ratg },  name: ch(:rating), units: Float, y2_axis: true }
         ],
         sort_by:  [1],
-        type: %i[chart table]
+        type: %i[chart table],
+        admin_only: false
       },
       electricity_meter_consolidation_opportunities: {
         benchmark_class:  BenchmarkContentElectricityMeterConsolidation,
@@ -1659,7 +1690,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         # sort_by: [{ reverse: 1}],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: true
       },
       gas_meter_consolidation_opportunities: {
         benchmark_class:  BenchmarkContentGasMeterConsolidation,
@@ -1672,7 +1704,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         # sort_by: [{ reverse: 1}],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: true
       },
       differential_tariff_opportunity: {
         benchmark_class:  BenchmarkContentDifferentialTariffOpportunity,
@@ -1684,7 +1717,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         # sort_by: [{ reverse: 1}],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: true
       },
       change_in_electricity_consumption_recent_school_weeks: {
         benchmark_class:  BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek,
@@ -1701,7 +1735,8 @@ module Benchmarking
         ],
         where:   ->{ !eswc_difk.nil? },
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       change_in_electricity_holiday_consumption_previous_holiday: {
         benchmark_class: BenchmarkContentChangeInElectricityBetweenLast2Holidays,
@@ -1720,7 +1755,8 @@ module Benchmarking
           tariff_changed_between_periods(->{ ephc_cppp })
         ],
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       change_in_electricity_holiday_consumption_previous_years_holiday: {
         benchmark_class: BenchmarkContentChangeInElectricityBetween2HolidaysYearApart,
@@ -1739,7 +1775,8 @@ module Benchmarking
           tariff_changed_between_periods(->{ epyc_cppp })
         ],
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       electricity_consumption_during_holiday: {
         benchmark_class: BenchmarkElectricityOnDuringHoliday,
@@ -1751,7 +1788,8 @@ module Benchmarking
           { data: ->{ edhl_hnam },  name: ch(:holiday), units: String }
         ],
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       change_in_gas_consumption_recent_school_weeks: {
         benchmark_class: BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek,
@@ -1769,7 +1807,8 @@ module Benchmarking
         ],
         max_x_value:   100,
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       change_in_gas_holiday_consumption_previous_holiday: {
         benchmark_class: BenchmarkContentChangeInGasBetweenLast2Holidays,
@@ -1790,7 +1829,8 @@ module Benchmarking
         sort_by: [1],
         max_x_value:   100,
         # min_x_value:  -5,
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       change_in_gas_holiday_consumption_previous_years_holiday: {
         benchmark_class: BenchmarkContentChangeInGasBetween2HolidaysYearApart,
@@ -1810,7 +1850,8 @@ module Benchmarking
         ],
         max_x_value:   100,
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       gas_consumption_during_holiday: {
         benchmark_class: BenchmarkGasHeatingHotWaterOnDuringHoliday,
@@ -1822,7 +1863,8 @@ module Benchmarking
           { data: ->{ hdhl_hnam },  name: ch(:holiday), units: String }
         ],
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       storage_heater_consumption_during_holiday: {
         benchmark_class: BenchmarkStorageHeatersOnDuringHoliday,
@@ -1834,7 +1876,8 @@ module Benchmarking
           { data: ->{ shoh_hnam },  name: ch(:holiday), units: String }
         ],
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       holiday_usage_last_year:  {
         benchmark_class: BenchmarkEnergyConsumptionInUpcomingHolidayLastYear,
@@ -1850,7 +1893,8 @@ module Benchmarking
           { data: ->{ ihol_pper },  name: ch(:holiday),                    units: String },
         ],
         sort_by: [1],
-        type: %i[table chart]
+        type: %i[table chart],
+        admin_only: false
       },
       school_information: {
         benchmark_class:  nil,
@@ -1865,7 +1909,8 @@ module Benchmarking
           { data: ->{ school_id }, name: ch(:school_id),   units: Integer, chart_data: false  }
         ],
         sort_by: [1],
-        type: %i[table]
+        type: %i[table],
+        admin_only: true
       },
     }.freeze
   end
