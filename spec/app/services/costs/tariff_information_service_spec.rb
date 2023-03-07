@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Costs::TariffInformationService do
+describe Costs::TariffInformationService, type: :service do
 
   # using before(:all) here to avoid slow loading of YAML and then
   # running the aggregation code for each test.

@@ -3,7 +3,6 @@ module Costs
     include AnalysableMixin
     DAYSINYEAR = 365
 
-    #FIXME provide an asof_date?
     def initialize(analytics_meter)
       @meter = analytics_meter
     end
@@ -15,7 +14,7 @@ module Costs
 
     #If we don't have enough data, then when will it be available?
     def data_available_from
-      meter_data_checker.date_when_enough_data_available(365)
+      enough_data? ? nil : meter_data_checker.date_when_enough_data_available(365)
     end
 
     #return cost, up to one year
