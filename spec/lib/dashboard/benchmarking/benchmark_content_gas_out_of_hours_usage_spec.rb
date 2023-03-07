@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentGasOutOfHoursUsage, type: :service do
           Gas used out of school hours
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_gas_out_of_hours_use") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.annual_gas_out_of_hours_use')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -60,7 +60,6 @@ describe Benchmarking::BenchmarkContentGasOutOfHoursUsage, type: :service do
       HTML
     end
   end
-
 
   describe '#caveat_text' do
     it 'formats caveat text as html' do
