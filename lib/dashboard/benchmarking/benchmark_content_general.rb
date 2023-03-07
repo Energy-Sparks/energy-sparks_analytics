@@ -335,25 +335,8 @@ module Benchmarking
   class BenchmarkSeasonalBaseloadVariation < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          A school&apos;s baseload is the power it consumes out of hours when
-          the school is unoccupied.
-        </p>
-        <p>
-          In general, with very few exceptions the baseload in the winter
-          should be very similar to the summer. In practice many school accidently
-          leave electrically powered heating-related equipment on overnight whe
-          the school is unoccupied.
-        </p>
-        <%= @baseload_impact_html %>
-        <p>
-          Identifying and turning off or better timing such equipment is a quick way
-          of saving electricity and costs.
-        </p>
-        <%= CAVEAT_TEXT[:es_sources_of_baseload_electricity_consumption ] %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.seasonal_baseload_variation.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
       ERB.new(text).result(binding)
     end
   end
