@@ -37,57 +37,22 @@ describe Benchmarking::BenchmarkWeekdayBaseloadVariation, type: :service do
       html = benchmark.send(:introduction_text)
       expect(html).to match_html(<<~HTML)
         <p>
-          A school&apos;s baseload is the power it consumes out of hours when
-          the school is unoccupied.
+          A school's baseload is the electricity consumed by appliances kept running at all times.
         </p>
         <p>
-          In general, with very few exceptions the baseload shouldn&apos;t
-          vary between days of the week and even between weekdays and weekends.
+          In general, the baseload should not vary between days of the week and between weekdays and weekends.
         </p>
         <p>
-          If there is a big variation it often suggests that there is an opportunity
-          to reduce baseload by find out what is causing the baseload to be higher on
-          certain days of the week than others, and switch off whatever is causing
-          the difference.
+          If there is a big variation, find out what is causing the baseload to be higher on certain days of the week, and switch off the equipment or lights causing the difference.
         </p>
-        <p>
-          Consumers of out of hours electricity include
-          <ul>
-            <li>
-              Equipment left on rather than being turned off, including
-              photocopiers and ICT equipment
-            </li>
-            <li>
-              ICT servers - can be inefficient, newer ones can often payback their
-              capital costs in electricity savings within a few years, see our
-              <a href="https://energysparks.uk/case_studies/4/link" target ="_blank">case study</a>
-              on this
-            </li>
-            <li>
-              Security lighting - this can be reduced by using PIR movement detectors
-              - often better for security and by moving to more efficient LED lighting
-            </li>
-            <li>
-              Fridges and freezers, particularly inefficient commercial kitchen appliances, which if
-              replaced can provide a very short payback on investment (see
-              our <a href="https://energysparks.uk/case_studies/1/link" target ="_blank">case study</a> on this).
-            </li>
-            <li>
-              Hot water heaters and boilers left on outside school hours - installing a timer or getting
-              the caretaker to switch these off when closing the school at night or on a Friday can
-              make a big difference
-            </li>
-          </ul>
-        <p>
         <p>
           This breakdown excludes electricity consumed by storage heaters and
           solar PV.
         </p>
       HTML
-      # content_html = '<p>' + 
-      #   I18n.t('analytics.benchmarking.content.annual_energy_costs_per_floor_area.introduction_text_html') +
-      #   I18n.t('analytics.benchmarking.caveat_text.es_per_pupil_v_per_floor_area_useful_html') + '</p>'
-      # expect(html).to match_html(content_html)
+      content_html = I18n.t('analytics.benchmarking.content.weekday_baseload_variation.introduction_text_html')
+      content_html += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+      expect(html).to match_html(content_html)
     end
   end
 
