@@ -1496,17 +1496,8 @@ module Benchmarking
   class BenchmarkContentChangeInElectricityBetween2HolidaysYearApart < BenchmarkHolidaysChangeBase
     include BenchmarkPeriodChangeBaseElectricityMixIn
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows the change in consumption between the most recent holiday, and
-          the same holiday a year ago. Schools should be looking to reduce holiday usage
-          by switching appliances off and generally reducing baseload. An increase
-          from year to year suggests a school is not managing to reduce consumption,
-          which would help mitigate some of the impacts of climate change.
-        </p>
-        <%= CAVEAT_TEXT[:holiday_length_normalisation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_electricity_holiday_consumption_previous_years_holiday.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
