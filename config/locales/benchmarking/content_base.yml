@@ -337,6 +337,8 @@ en:
             <p>
               This benchmark shows the projected storage heater costs for the current holiday. No data for a school is shown once the holiday is over. The projection calculation is based on the consumption patterns during the holiday so far.
             </p>
+        thermostat_sensitivity:
+          introduction_text_html: "<p>This benchmark shows the benefit of reducing the heating set temperature by 1°C.</p> <p>A negative value is indicative of very poor thermostatic control, where Energy Sparks’ modelling cannot make sense of the relationship between the school's gas consumption and outside temperature.</p>"
         weekday_baseload_variation:
           introduction_text_html: |-
             <p>

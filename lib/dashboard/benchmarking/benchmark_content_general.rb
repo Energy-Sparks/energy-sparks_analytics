@@ -522,19 +522,7 @@ module Benchmarking
   class BenchmarkContentThermostaticSensitivity < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This chart and table indicate the benefit at each school
-          of reducing the thermostats temperature setting per 1C
-          of reduction.
-        </p>
-        <p>
-          Occasionally this will result in a negative value, which is indicative
-          or very poor thermostatic control where the internal mathematics cannot
-          make sense of the relationship between the school&apos;s gas consumption and
-          outside temperature.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.thermostat_sensitivity.introduction_text_html')
     end
   end
   #=======================================================================================
