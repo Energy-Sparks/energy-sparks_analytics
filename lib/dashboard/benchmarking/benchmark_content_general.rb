@@ -488,36 +488,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      %q(
-        <p>
-          This chart shows the breakdown of when schools are using gas
-          - school day open: when the school is open to pupils and staff,
-          school day closed: when the school is closed to pupils and
-          staff overnight, weekends and evenings.
-        </p>
-        <p>
-          Most schools are unoccupied for about 85% of the year;
-          between 5:00pm and 7:30am on school days, at weekends
-          and during holidays. Focussing on reducing out of hours
-          usage; turning heating and hot water systems off out of hours
-          provides schools with a cost-efficient
-          way of reducing their overall consumption.
-        </p>
-        <p>
-          Schools should aim to reduce their out of hours usage
-          below 35% of annual consumption. Implementing a policy to reduce
-          weekend and holiday use, and ensuring the boiler doesn&apos;t
-          start too early in the morning should allow most school's
-          to meet this target with no capital investment costs. It shouldn&apos;t
-          be necessary to leave heating on during winter holidays and weekends if
-          the boilers frost protection functions have been configured correctly
-          to come on only when necessary.
-        </p>
-        <p>
-          You can get Energy Sparks to send you a reminder (an &apos;alert&apos;) just before holidays
-          to turn your heating off.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.annual_gas_out_of_hours_use.introduction_text_html')
     end
   end
   #=======================================================================================
