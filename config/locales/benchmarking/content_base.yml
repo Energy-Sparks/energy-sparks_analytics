@@ -299,6 +299,8 @@ en:
           introduction_text_html: "<p>This benchmark shows the peak daily school power consumption per floor area. High values compared with other schools might suggest inefficient lighting, appliances or kitchen equipment. The peaks generally occur during the middle of the day.</p>"
         electricity_targets:
           introduction_text_html: "<p>This benchmark shows how a school is progressing against the target it has set for this year.</p>"
+        gas_targets:
+          introduction_text_html: "<p>This benchmark shows how a school is progressing against the target it has set for this year.</p>"
         heating_coming_on_too_early:
           introduction_text_html: |-
             <p>This benchmark shows what time the boilers have been starting on average in the last week and last year.</p>
