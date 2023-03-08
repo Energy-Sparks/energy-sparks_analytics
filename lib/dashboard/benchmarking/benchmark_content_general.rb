@@ -414,39 +414,7 @@ module Benchmarking
   class BenchmarkContentHeatingPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This benchmark compares the gas and storage heater costs
-          per floor area (m<sup>2</sup>) each year, in &pound;.
-        </p>
-        <p>
-          The benchmark is adjusted for regional temperatures over the
-          last year, so that for example
-          schools in Scotland are compared on the same terms as schools in the
-          warmer south west of England.
-        </p>
-        <p>
-          For schools heated by gas, the cost includes gas used for hot water and
-          by the school kitchen.
-        </p>
-        <p>
-          More modern schools should have lower consumption, however, a well-managed
-          Victorian school which turns its heating off during holidays and weekends
-          often has lower heating and hot water consumption than more modern schools.
-        </p>
-      )
-    end
-    protected def table_introduction_text
-      text = %q(
-        <p>
-          Schools with negative &apos;<%= BenchmarkManager.ch(:saving_if_matched_exemplar_school) %>&apos; have
-          heating consumption below that of the best schools, which is good. For
-          schools with storage heaters, heating costs are calculated using
-          electricity tariff prices (differential/economy-7 if schools is on such a tariff) versus
-          costs of exemplar schools using gas heating or an air source heat pump.
-        </p>
-       )
-       ERB.new(text).result(binding)
+      I18n.t('analytics.benchmarking.content.annual_heating_costs_per_floor_area.introduction_text_html')
     end
   end
   #=======================================================================================
@@ -707,58 +675,7 @@ module Benchmarking
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This benchmark shows what time the boilers have been starting
-          on average in the last week.
-        </p>
-        <p>
-          Generally, if the weather last week was mild then you might
-          expect the heating to be coming on at about 6:30am. In colder
-          weather depending on the fabric (insulation, thermal mass) of
-          the school you might expect the heating to start earlier at
-          perhaps 3:00am. If it&apos;s coming on earlier the school&apos;s boiler
-          control probably warrants further investigation.
-        </p>
-        <p>
-          If the boiler is coming on too early remedies include:
-          <ul>
-            <li>
-              Monitoring temperature in the school in the early morning - typically
-              available via the school&apos;s BMS or boiler controller, or via temperature
-              logger (&pound;20)
-            </li>
-            <li>
-              Has the school&apos;s thermostat been correctly located,
-              if in a cold poorly insulated hall then
-              classrooms might be up to temperature many hours before the hall, so perhaps
-              the thermostat could be relocated, or the hall&apos;s thermostat&apos;s settings
-              could be lowered (16C or less)?
-            </li>
-            <li>
-              Otherwise consider whether the radiator output is high enough to get the
-              school up to temperature quickly? Fan convector radiators should take under
-              30 minutes to get a room up to temperature even in cold weather, undersized
-              traditional radiators can take hours. Is the flow
-              temperature high enough, does the pipework allow adequate distribution of heat,
-              do the radiators have adequate output, have their TRVs been set too low for
-              the main boiler thermostat?
-            </li>
-            <li>
-                If the boiler&apos;s starting time has been set because school users have
-                complained it&apos;s too cold in the morning, consider experimenting
-                with the start time. We generally recommend starting the boiler
-                2 hours early on a Monday, to give the school more time to heat up
-                from the weekend, this may mitigate most of the complaints?
-            </li>
-            <li>
-                If the boiler doesn&apos;t have optimum start control (the controller
-                based on internal and external temperatures works out the optimum
-                time to start the boiler each morning) consider getting one installed
-            </li>
-          </ul>
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.heating_coming_on_too_early.introduction_text_html')
     end
 
     def content(school_ids: nil, filter: nil, user_type: nil)
@@ -794,24 +711,13 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          This benchmark compares the change in annual energy use since the school
-          joined Energy Sparks. So for the year before the school joined Energy Sparks versus
-          the latest year.
-        </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_energy_sparks.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
+
       ERB.new(text).result(binding)
     end
     protected def chart_interpretation_text
-      text = %q(
-        <p>
-          Not all schools will be representated in this data, as we need 1 year&apos;s
-          worth of data before the school joined Energy Sparks and at least 1 year
-          after to do the comparison.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_energy_sparks.chart_interpretation_text_html')
       ERB.new(text).result(binding)
     end
 
@@ -1526,17 +1432,8 @@ module Benchmarking
   class BenchmarkElectricityOnDuringHoliday < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          This chart shows the projected electricity costs for the current holiday.
-          No data for a school is shown once the holiday is over. The projection
-          calculation is based on the consumption patterns during the holiday so far.
-        </p>
-        <p>
-          The data excludes storage heaters and any saving the school might get
-          from solar PV.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.electricity_consumption_during_holiday.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv_data_html')
       ERB.new(text).result(binding)
     end
   end
@@ -1548,6 +1445,9 @@ module Benchmarking
 
   class BenchmarkStorageHeatersOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
     include BenchmarkingNoTextMixin
+    def introduction_text
+      I18n.t('analytics.benchmarking.content.storage_heater_consumption_during_holiday.introduction_text_html')
+    end
     def fuel; 'storage heeaters' end
   end
   #=======================================================================================
@@ -1562,25 +1462,8 @@ module Benchmarking
 #=======================================================================================
   class BenchmarkChangeAdhocComparison < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    private def introduction_text; '' end
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison below for gas and storage heaters has the
-          the previous period temperature compensated to the current
-          period's temperatures.
-        </p>
-        <p>
-          Schools' solar PV production has been removed from the comparison.
-        </p>
-        <p>
-          CO2 values for electricity (including where the CO2 is
-          aggregated across electricity, gas, storage heaters) is difficult
-          to compare for short periods as it is dependent on the carbon intensity
-          of the national grid on the days being compared and this could vary by up to
-          300&percnt; from day to day.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.layer_up_powerdown_day_november_2022.introduction_text_html')
       ERB.new(text).result(binding)
     end
 

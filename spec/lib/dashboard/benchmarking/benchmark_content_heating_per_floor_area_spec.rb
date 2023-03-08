@@ -3,19 +3,19 @@
 require 'spec_helper'
 require 'active_support/core_ext'
 
-describe Benchmarking::BenchmarkAutumn2022Comparison, type: :service do
+describe Benchmarking::BenchmarkContentHeatingPerFloorArea, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkAutumn2022Comparison.new(
+    Benchmarking::BenchmarkContentHeatingPerFloorArea.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
-      :autumn_term_2021_2022_energy_comparison,
-      Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG[:autumn_term_2021_2022_energy_comparison]
+      :annual_heating_costs_per_floor_area,
+      Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG[:annual_heating_costs_per_floor_area]
     )
   end
 
   describe '#page' do
     it 'returns a chart name if charts are present' do
-      expect(benchmark.page_name).to eq(:autumn_term_2021_2022_energy_comparison)
+      expect(benchmark.page_name).to eq(:annual_heating_costs_per_floor_area)
     end
   end
 
@@ -24,35 +24,26 @@ describe Benchmarking::BenchmarkAutumn2022Comparison, type: :service do
       html = benchmark.send(:content_title)
       expect(html).to match_html(<<~HTML)
         <h1>
-          Autumn Term 2021 versus 2022 energy use
+          Annual heating cost per floor area with savings potential
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.autumn_term_2021_2022_energy_comparison") + '</h1>'
+      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_heating_costs_per_floor_area") + '</h1>'
       expect(html).to match_html(title_html)
     end
   end
 
   describe 'introduction_text' do
     it 'formats introduction and any caveat text as html' do
-      # Inherits from BenchmarkChangeAdhocComparison
       html = benchmark.send(:introduction_text)
+      
       expect(html).to match_html(<<~HTML)
-        <p>
-          This comparison below for gas and storage heaters has the
-          the previous period temperature compensated to the current
-          period's temperatures.
-        </p>
-        <p>
-          Schools' solar PV production has been removed from the comparison.
-        </p>
-        <p>
-          CO2 values for electricity (including where the CO2 is
-          aggregated across electricity, gas, storage heaters) is difficult
-          to compare for short periods as it is dependent on the carbon intensity
-          of the national grid on the days being compared and this could vary by up to
-          300&percnt; from day to day.
-        </p>
+        <p>This benchmark compares last year’s gas and storage heater costs per floor area (m2).</p>
+        <p>The benchmark is adjusted for regional temperatures over the last year, so that for example schools in Scotland are compared on the same terms as schools in the warmer south west of England.</p>
+        <p>For schools heated by gas, the cost includes gas used for hot water and by the school kitchen.</p>
+        <p>Schools with negative savings potential  have heating consumption below that of the best schools, which is good. For schools with storage heaters, heating costs are calculated using electricity tariff prices including differential/economy-7 tariffs if schools are on such a tariff.</p>
       HTML
+      content_html = I18n.t('analytics.benchmarking.content.annual_heating_costs_per_floor_area.introduction_text_html')
+      expect(html).to match_html(content_html)
     end
   end
 
@@ -88,7 +79,7 @@ describe Benchmarking::BenchmarkAutumn2022Comparison, type: :service do
 
   describe '#chart_name' do
     it 'returns a chart name if charts are present' do
-      expect(benchmark.send(:chart_name)).to eq(:autumn_term_2021_2022_energy_comparison)
+      expect(benchmark.send(:chart_name)).to eq(:annual_heating_costs_per_floor_area)
     end
   end
 
@@ -96,5 +87,5 @@ describe Benchmarking::BenchmarkAutumn2022Comparison, type: :service do
     it 'returns if tables are present' do
       expect(benchmark.send(:tables?)).to eq(true)
     end
-  end  
+  end
 end
