@@ -740,24 +740,13 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text = %q(
-        <p>
-          This benchmark compares the change in annual energy use since the school
-          joined Energy Sparks. So for the year before the school joined Energy Sparks versus
-          the latest year.
-        </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_energy_sparks.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
+
       ERB.new(text).result(binding)
     end
     protected def chart_interpretation_text
-      text = %q(
-        <p>
-          Not all schools will be representated in this data, as we need 1 year&apos;s
-          worth of data before the school joined Energy Sparks and at least 1 year
-          after to do the comparison.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_energy_sparks.chart_interpretation_text_html')
       ERB.new(text).result(binding)
     end
 
