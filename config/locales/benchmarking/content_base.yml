@@ -193,6 +193,11 @@ en:
                 </li>
               </ul>
             </p>
+        change_in_gas_consumption_recent_school_weeks:
+          introduction_text_html: |-
+            <p>
+              This comparison simply shows the change in gas consumption over the last two school weeks. You might expect an increase in gas consumption going into the winter as it gets colder and a subsequent reduction in the spring.
+            </p>
         change_in_gas_since_last_year:
           introduction_text_html: |-
             <p>
