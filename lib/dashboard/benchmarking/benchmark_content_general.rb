@@ -308,11 +308,7 @@ module Benchmarking
       include BenchmarkingNoTextMixin
   
       private def introduction_text
-        text = %q(
-          <p>
-            How school is progressing versus the target it has set for this year.
-          </p>
-        )
+        text = I18n.t('analytics.benchmarking.content.gas_targets.introduction_text_html')
         ERB.new(text).result(binding)
       end
     end
@@ -559,44 +555,7 @@ module Benchmarking
   class BenchmarkContentThermostaticControl < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          Energy Sparks calculates how good a school&apos;s thermostatic control
-          is by calculating a measure called &apos;R2&apos;. The heating consumption
-          of a school should be linearly proportional to the outside temperature, the colder
-          it is the more energy is required to keep the school warm. The &apos;R2&apos;
-          is a measure of how well correlated this heating consumption is with outside
-          temperature - the closer to 1.0 the better the control. Any value above 0.8
-          is good. If a school has a value below 0.5 it suggests the thermostatic control
-          is very poor and there is a limited relationship between the temperature and
-          the heating used to keep the school warm.
-        </p>
-        <p>
-          There can be many reasons for this control being poor:
-          <ul>
-            <li>
-              A poorly sited thermostat, for example in a corridor or a hall
-            </li>
-            <li>
-              Poor radiator control, the thermostatic valves (TRVs) on each radiator
-              aren&apos;t appropriately set, perhaps set too high, and rather than
-              turning them down, occupants of classrooms open windows to reduce
-              overheating.
-            </li>
-          </ul>
-        </p>
-        <p>
-          Poor thermostat control can make a school an uncomfortable place to
-          inhabit and expensive to run. It also means a school will see
-          less benefit in installing insulation if the heating consumption
-          has little relationship to outside temperature and therefore
-          heat loss.
-        </p>
-        <p>
-          If a school&apos;s thermostatic control is poor and want to improve it,
-          please contact Energy Sparks and we would be happy to provide further advice.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.thermostatic_control.introduction_text_html')
     end
   end
   #=======================================================================================
@@ -1301,24 +1260,8 @@ module Benchmarking
     include BenchmarkPeriodChangeBaseGasMixIn
 
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows the change in consumption during the 2 most recent holidays.
-          This can be affected by whether the heating was turned on during one of the holidays,
-          and not during the other.
-          Generally, schools don&apos;t need heating during holidays, or at least not
-          to heat the whole school if minimally occupied! Using an electric fan heater
-          is always more cost effective for a few individuals in the school during holidays
-          than heating the whole school.
-        </p>
-        <p>
-          You can setup an Energy Sparks
-          &apos;alert&apos; to send you an email or text message just before a holiday to remind you to
-          turn the heating or hot water off.
-        </p>
-        <%= CAVEAT_TEXT[:temperature_compensation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_gas_holiday_consumption_previous_holiday.introduction_text_html')
+      text +=  I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end

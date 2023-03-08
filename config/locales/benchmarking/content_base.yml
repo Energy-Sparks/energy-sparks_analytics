@@ -42,7 +42,7 @@ en:
         change_in_energy_since_last_year: Annual change in total energy use
         change_in_energy_use_since_joined_energy_sparks: Change in energy use since the school joined Energy Sparks
         change_in_gas_consumption_recent_school_weeks: Recent change in gas use
-        change_in_gas_holiday_consumption_previous_holiday: Change in gas use between the last 2 holidays
+        change_in_gas_holiday_consumption_previous_holiday: Change in gas use between the last two holidays
         change_in_gas_holiday_consumption_previous_years_holiday: Change in gas use between this holiday and the same holiday last year
         change_in_gas_since_last_year: Annual change in gas use
         change_in_solar_pv_since_last_year: Annual change in solar PV production and resulting CO2 savings
@@ -223,6 +223,10 @@ en:
             <p>
               This comparison simply shows the change in gas consumption over the last two school weeks. You might expect an increase in gas consumption going into the winter as it gets colder and a subsequent reduction in the spring.
             </p>
+        change_in_gas_holiday_consumption_previous_holiday:
+          introduction_text_html: |-
+            <p>This benchmark shows the change in gas consumption between the two most recent holidays.</p>
+            <p>This comparison compares the latest available data for the most recent holiday with an adjusted figure for the previous holiday, scaling to the same number of days and adjusting for changes in outside temperature and the latest tariff. The change in £ is the saving or increased cost for the most recent holiday to date.</p>
         change_in_gas_since_last_year:
           introduction_text_html: |-
             <p>
@@ -300,6 +304,8 @@ en:
           introduction_text_html: "<p>This benchmark shows the peak daily school power consumption per floor area. High values compared with other schools might suggest inefficient lighting, appliances or kitchen equipment. The peaks generally occur during the middle of the day.</p>"
         electricity_targets:
           introduction_text_html: "<p>This benchmark shows how a school is progressing against the target it has set for this year.</p>"
+        gas_targets:
+          introduction_text_html: "<p>This benchmark shows how a school is progressing against the target it has set for this year.</p>"
         heating_coming_on_too_early:
           introduction_text_html: |-
             <p>This benchmark shows what time the boilers have been starting on average in the last week and last year.</p>
@@ -350,6 +356,14 @@ en:
             </p>
         thermostat_sensitivity:
           introduction_text_html: "<p>This benchmark shows the benefit of reducing the heating set temperature by 1°C.</p> <p>A negative value is indicative of very poor thermostatic control, where Energy Sparks’ modelling cannot make sense of the relationship between the school's gas consumption and outside temperature.</p>"
+        thermostatic_control:
+          introduction_text_html: |-
+            <p>
+              This benchmark provides a measure of the schools’ thermostatic control, and the savings potential if thermostatic control is improved.
+            </p>
+            <p>
+              Energy Sparks calculates the quality of a school's thermostatic control using a measure called 'R2'. The heating consumption of a school should be linearly proportional to the outside temperature, the colder it is the more energy is required to keep the school warm. The 'R2' is a measure of how well correlated this heating consumption is with outside temperature - the closer to 1.0 the better the control. Any value above 0.8 is good. If a school has a value below 0.5 it suggests the thermostatic control is very poor and there is a limited relationship between the temperature and the heating used to keep the school warm.
+            </p>
         weekday_baseload_variation:
           introduction_text_html: |-
             <p>
