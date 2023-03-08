@@ -1106,6 +1106,7 @@ class ChartManager
       timescale:        [{ up_to_a_year: 0 }],
       ignore_single_series_failure: true,
       chart1_subtype:   :stacked,
+      meter_definition:  :allelectricity_unmodified
     },
     pie_chart_1_year_accounting_breakdown: {
       name:             '',
