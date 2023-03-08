@@ -736,58 +736,7 @@ module Benchmarking
   class BenchmarkHeatingComingOnTooEarly < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This benchmark shows what time the boilers have been starting
-          on average in the last week.
-        </p>
-        <p>
-          Generally, if the weather last week was mild then you might
-          expect the heating to be coming on at about 6:30am. In colder
-          weather depending on the fabric (insulation, thermal mass) of
-          the school you might expect the heating to start earlier at
-          perhaps 3:00am. If it&apos;s coming on earlier the school&apos;s boiler
-          control probably warrants further investigation.
-        </p>
-        <p>
-          If the boiler is coming on too early remedies include:
-          <ul>
-            <li>
-              Monitoring temperature in the school in the early morning - typically
-              available via the school&apos;s BMS or boiler controller, or via temperature
-              logger (&pound;20)
-            </li>
-            <li>
-              Has the school&apos;s thermostat been correctly located,
-              if in a cold poorly insulated hall then
-              classrooms might be up to temperature many hours before the hall, so perhaps
-              the thermostat could be relocated, or the hall&apos;s thermostat&apos;s settings
-              could be lowered (16C or less)?
-            </li>
-            <li>
-              Otherwise consider whether the radiator output is high enough to get the
-              school up to temperature quickly? Fan convector radiators should take under
-              30 minutes to get a room up to temperature even in cold weather, undersized
-              traditional radiators can take hours. Is the flow
-              temperature high enough, does the pipework allow adequate distribution of heat,
-              do the radiators have adequate output, have their TRVs been set too low for
-              the main boiler thermostat?
-            </li>
-            <li>
-                If the boiler&apos;s starting time has been set because school users have
-                complained it&apos;s too cold in the morning, consider experimenting
-                with the start time. We generally recommend starting the boiler
-                2 hours early on a Monday, to give the school more time to heat up
-                from the weekend, this may mitigate most of the complaints?
-            </li>
-            <li>
-                If the boiler doesn&apos;t have optimum start control (the controller
-                based on internal and external temperatures works out the optimum
-                time to start the boiler each morning) consider getting one installed
-            </li>
-          </ul>
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.heating_coming_on_too_early.introduction_text_html')
     end
 
     def content(school_ids: nil, filter: nil, user_type: nil)
