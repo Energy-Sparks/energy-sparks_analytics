@@ -284,6 +284,8 @@ en:
               recent tariff. Further detail is provided if you drill down to a school's individual analysis - where a
               range of different scenarios for different numbers of panels is presented.
             </p>
+        thermostat_sensitivity:
+          introduction_text_html: "<p>This benchmark shows the benefit of reducing the heating set temperature by 1°C.</p> <p>A negative value is indicative of very poor thermostatic control, where Energy Sparks’ modelling cannot make sense of the relationship between the school's gas consumption and outside temperature.</p>"
         weekday_baseload_variation:
           introduction_text_html: |-
             <p>
