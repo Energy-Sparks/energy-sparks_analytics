@@ -193,6 +193,10 @@ en:
                 </li>
               </ul>
             </p>
+        change_in_gas_holiday_consumption_previous_years_holiday:
+          introduction_text_html: |-
+            <p>This benchmark shows the change in gas consumption between the most recent holiday, and the same holiday last year.</p>
+            <p>This comparison compares the latest available data for the most recent holiday with an adjusted figure for the previous holiday, scaling to the same number of days and adjusting for changes in outside temperature and the latest tariff. The change in £ is the saving or increased cost for the most recent holiday to date.</p>
         change_in_gas_since_last_year:
           introduction_text_html: |-
             <p>

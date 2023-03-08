@@ -1521,19 +1521,8 @@ module Benchmarking
     include BenchmarkPeriodChangeBaseGasMixIn
 
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison shows the change in consumption during the most recent holiday, and
-          the same holiday a year ago. Schools should be looking to reduce holiday usage
-          by switching heating and hot water off over holidays when it is often unnecessary.
-          A significant  increase from year to year suggests a school is not managing to reduce consumption,
-          which would help mitigate some of the impacts of climate change. You can setup an Energy Sparks &apos;alert&apos; to
-          send you an email or text message just before a holiday to remind you to
-          turn the heating or hot water off.
-        </p>
-        <%= CAVEAT_TEXT[:temperature_compensation] %>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_gas_holiday_consumption_previous_years_holiday.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
