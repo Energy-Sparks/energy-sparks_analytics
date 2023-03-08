@@ -414,39 +414,7 @@ module Benchmarking
   class BenchmarkContentHeatingPerFloorArea < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          This benchmark compares the gas and storage heater costs
-          per floor area (m<sup>2</sup>) each year, in &pound;.
-        </p>
-        <p>
-          The benchmark is adjusted for regional temperatures over the
-          last year, so that for example
-          schools in Scotland are compared on the same terms as schools in the
-          warmer south west of England.
-        </p>
-        <p>
-          For schools heated by gas, the cost includes gas used for hot water and
-          by the school kitchen.
-        </p>
-        <p>
-          More modern schools should have lower consumption, however, a well-managed
-          Victorian school which turns its heating off during holidays and weekends
-          often has lower heating and hot water consumption than more modern schools.
-        </p>
-      )
-    end
-    protected def table_introduction_text
-      text = %q(
-        <p>
-          Schools with negative &apos;<%= BenchmarkManager.ch(:saving_if_matched_exemplar_school) %>&apos; have
-          heating consumption below that of the best schools, which is good. For
-          schools with storage heaters, heating costs are calculated using
-          electricity tariff prices (differential/economy-7 if schools is on such a tariff) versus
-          costs of exemplar schools using gas heating or an air source heat pump.
-        </p>
-       )
-       ERB.new(text).result(binding)
+      I18n.t('analytics.benchmarking.content.annual_heating_costs_per_floor_area.introduction_text_html')
     end
   end
   #=======================================================================================
