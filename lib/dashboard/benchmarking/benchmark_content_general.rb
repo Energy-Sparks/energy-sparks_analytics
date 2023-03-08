@@ -603,41 +603,7 @@ module Benchmarking
   class BenchmarkContentHotWaterEfficiency < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          Hot water in schools is generally provided by a central gas boiler which
-          then continuously circulates the hot water in a loop around the school.
-          Sometimes these gas-based systems are supplemented by more local
-          electrically powered immersion or point of use heaters.
-        </p>
-
-        <p>
-          The circulatory gas-based systems in schools are generally very inefficient.
-          These inefficiencies offer significant cost and carbon emission saving
-          opportunities if addressed.
-        </p>
-
-        <p>
-          These systems are inefficient because they circulate hot water permanently
-          in a loop around the school so hot water is immediately available when
-          someone turns on a tap rather than having to wait for the hot water to come
-          all the way from the boiler room. The circulatory pipework used to do this
-          is often poorly insulated and loses heat. Often these types of systems are
-          only 15% efficient compared with direct point of use water heaters which
-          can be over 90% efficient. Replacing the pipework insulation is generally
-          not a cost-efficient investment.
-        </p>
-        <p>
-          Drilling down to an individual school's hot water analysis provides
-          more detailed information on how a school can reduce its hot water costs.
-        </p>
-        <p>
-          The charts and table below analyse the efficiency of
-          schools&apos; hot water systems and the potential savings from either improving
-          the timing control of existing hot water systems or replacing it
-          completely with point of use electric hot water systems.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.hot_water_efficiency.introduction_text_html')
     end
   end
   #=======================================================================================
