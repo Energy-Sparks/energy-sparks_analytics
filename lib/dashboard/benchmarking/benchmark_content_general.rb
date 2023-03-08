@@ -1555,17 +1555,8 @@ module Benchmarking
   class BenchmarkElectricityOnDuringHoliday < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
-        <p>
-          This chart shows the projected electricity costs for the current holiday.
-          No data for a school is shown once the holiday is over. The projection
-          calculation is based on the consumption patterns during the holiday so far.
-        </p>
-        <p>
-          The data excludes storage heaters and any saving the school might get
-          from solar PV.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.electricity_consumption_during_holiday.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv_data_html')
       ERB.new(text).result(binding)
     end
   end
