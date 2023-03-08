@@ -625,25 +625,7 @@ module Benchmarking
     class BenchmarkContentHeatingInWarmWeather < BenchmarkContentBase
       include BenchmarkingNoTextMixin
       private def introduction_text
-        %q(
-          <p>
-            Schools often forget to turn their heating off in warm weather,
-            about 10% of schools leave their heating on all summer.
-          </p>
-          <p>
-            The chart and table below shows the warm weather heating as a percentage
-            of the school&apos;s annual heating consumption. Schools should aim to keep
-            turn their heating off as much as possible in warm weather, and in mild
-            weather not keep the heating on all day as the large numbers of pupils
-            (high occupation density) and incidental use of electrical equipment
-            should be enough to keep the school warm once it is open for the day.
-          </p>
-          <p>
-            You can set up Energy Sparks email or text alerts which will notify
-            you if the weather forecast for the coming week suggests you should
-            turn off your heating.
-          </p>
-        )
+        I18n.t('analytics.benchmarking.content.heating_in_warm_weather.introduction_text_html')
       end
     end
   #=======================================================================================

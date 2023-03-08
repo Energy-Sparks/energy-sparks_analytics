@@ -268,6 +268,10 @@ en:
           introduction_text_html: "<p>This benchmark shows the peak daily school power consumption per floor area. High values compared with other schools might suggest inefficient lighting, appliances or kitchen equipment. The peaks generally occur during the middle of the day.</p>"
         electricity_targets:
           introduction_text_html: "<p>This benchmark shows how a school is progressing against the target it has set for this year.</p>"
+        heating_in_warm_weather:
+          introduction_text_html: |-
+            <p>Schools often forget to turn their heating off in warm weather, about 10% of schools leave their heating on all summer.</p>
+            <p>This benchmark shows how much of the school’s heating is used in warm weather. Schools should aim to keep their heating off as much as possible in warm weather. In mild weather the large numbers of pupils and electrical equipment should be enough to keep the school warm once it is open for the day.</p>
         holiday_usage_last_year:
           introduction_text_html: "<p>This benchmark shows the cost of electricity and gas used last year for the upcoming holidays. For example, if the next holidays are the Summer holidays 2023, the data shown will be for Summer 2022. This allows you to identify which schools in your group need to take the most action to cut holiday waste.</p>"
         seasonal_baseload_variation:
