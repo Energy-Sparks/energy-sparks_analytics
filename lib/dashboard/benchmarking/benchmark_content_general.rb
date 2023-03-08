@@ -1577,6 +1577,9 @@ module Benchmarking
 
   class BenchmarkStorageHeatersOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
     include BenchmarkingNoTextMixin
+    def introduction_text
+      I18n.t('analytics.benchmarking.content.storage_heater_consumption_during_holiday.introduction_text_html')
+    end
     def fuel; 'storage heeaters' end
   end
   #=======================================================================================

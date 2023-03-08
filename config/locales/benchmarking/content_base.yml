@@ -284,6 +284,11 @@ en:
               recent tariff. Further detail is provided if you drill down to a school's individual analysis - where a
               range of different scenarios for different numbers of panels is presented.
             </p>
+        storage_heater_consumption_during_holiday:
+          introduction_text_html: |-
+            <p>
+              This benchmark shows the projected storage heater costs for the current holiday. No data for a school is shown once the holiday is over. The projection calculation is based on the consumption patterns during the holiday so far.
+            </p>
         weekday_baseload_variation:
           introduction_text_html: |-
             <p>
