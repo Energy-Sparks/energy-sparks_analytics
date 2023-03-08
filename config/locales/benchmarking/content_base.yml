@@ -284,6 +284,14 @@ en:
               recent tariff. Further detail is provided if you drill down to a school's individual analysis - where a
               range of different scenarios for different numbers of panels is presented.
             </p>
+        thermostatic_control:
+          introduction_text_html: |-
+            <p>
+              This benchmark provides a measure of the schools’ thermostatic control, and the savings potential if thermostatic control is improved.
+            </p>
+            <p>
+              Energy Sparks calculates the quality of a school's thermostatic control using a measure called 'R2'. The heating consumption of a school should be linearly proportional to the outside temperature, the colder it is the more energy is required to keep the school warm. The 'R2' is a measure of how well correlated this heating consumption is with outside temperature - the closer to 1.0 the better the control. Any value above 0.8 is good. If a school has a value below 0.5 it suggests the thermostatic control is very poor and there is a limited relationship between the temperature and the heating used to keep the school warm.
+            </p>
         weekday_baseload_variation:
           introduction_text_html: |-
             <p>
