@@ -218,6 +218,11 @@ en:
               joined Energy Sparks. So for the year before the school joined Energy Sparks versus
               the latest year.
             </p>
+        change_in_gas_consumption_recent_school_weeks:
+          introduction_text_html: |-
+            <p>
+              This comparison simply shows the change in gas consumption over the last two school weeks. You might expect an increase in gas consumption going into the winter as it gets colder and a subsequent reduction in the spring.
+            </p>
         change_in_gas_holiday_consumption_previous_holiday:
           introduction_text_html: |-
             <p>This benchmark shows the change in gas consumption between the two most recent holidays.</p>

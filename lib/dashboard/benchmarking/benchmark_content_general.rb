@@ -1250,15 +1250,8 @@ module Benchmarking
     include BenchmarkPeriodChangeBaseGasMixIn
 
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison simply shows the change in gas consumption since the
-          last school week. You might expect an
-          increase in gas consumption going into the winter as it gets
-          colder and a subsequent reduction in the spring.
-        </p>
-        <%= CAVEAT_TEXT[:comparison_with_previous_period_infinite] %>
-      )
+      text = I18n.t('analytics.benchmarking.content.change_in_gas_consumption_recent_school_weeks.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
