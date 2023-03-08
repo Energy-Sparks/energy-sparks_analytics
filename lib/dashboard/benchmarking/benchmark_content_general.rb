@@ -1311,7 +1311,10 @@ module Benchmarking
   end
 
   class BenchmarkGasHeatingHotWaterOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
-    include BenchmarkingNoTextMixin 
+    include BenchmarkingNoTextMixin
+    def introduction_text
+      I18n.t('analytics.benchmarking.content.gas_consumption_during_holiday.introduction_text_html')
+    end
     def fuel; 'gas' end
   end
 
