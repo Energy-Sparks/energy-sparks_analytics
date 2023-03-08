@@ -270,6 +270,23 @@ en:
           introduction_text_html: "<p>This benchmark shows how a school is progressing against the target it has set for this year.</p>"
         holiday_usage_last_year:
           introduction_text_html: "<p>This benchmark shows the cost of electricity and gas used last year for the upcoming holidays. For example, if the next holidays are the Summer holidays 2023, the data shown will be for Summer 2022. This allows you to identify which schools in your group need to take the most action to cut holiday waste.</p>"
+        layer_up_powerdown_day_november_2022:
+          introduction_text_html: |-
+            <p>
+              This comparison below for gas and storage heaters has the
+              the previous period temperature compensated to the current
+              period's temperatures.
+            </p>
+            <p>
+              Schools' solar PV production has been removed from the comparison.
+            </p>
+            <p>
+              CO2 values for electricity (including where the CO2 is
+              aggregated across electricity, gas, storage heaters) is difficult
+              to compare for short periods as it is dependent on the carbon intensity
+              of the national grid on the days being compared and this could vary by up to
+              300&percnt; from day to day.
+            </p>
         seasonal_baseload_variation:
           introduction_text_html: |-
             <p>A school's baseload is the electricity consumed by appliances kept running at all times.</p>

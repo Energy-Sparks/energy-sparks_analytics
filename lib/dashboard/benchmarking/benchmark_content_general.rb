@@ -1591,25 +1591,8 @@ module Benchmarking
 #=======================================================================================
   class BenchmarkChangeAdhocComparison < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    private def introduction_text; '' end
     private def introduction_text
-      text = %q(
-        <p>
-          This comparison below for gas and storage heaters has the
-          the previous period temperature compensated to the current
-          period's temperatures.
-        </p>
-        <p>
-          Schools' solar PV production has been removed from the comparison.
-        </p>
-        <p>
-          CO2 values for electricity (including where the CO2 is
-          aggregated across electricity, gas, storage heaters) is difficult
-          to compare for short periods as it is dependent on the carbon intensity
-          of the national grid on the days being compared and this could vary by up to
-          300&percnt; from day to day.
-        </p>
-      )
+      text = I18n.t('analytics.benchmarking.content.layer_up_powerdown_day_november_2022.introduction_text_html')
       ERB.new(text).result(binding)
     end
 
