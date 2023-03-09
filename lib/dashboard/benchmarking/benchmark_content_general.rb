@@ -17,46 +17,19 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      %q(
-        <p>
-          This experimental analysis attempts to help determine whether
-          a school&apos;s optimum start control is working by looking at
-          the times the boiler has started over the last year.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.optimum_start_analysis.introduction_text_html')
     end
 
     protected def table_introduction_text
-      %q(
-        <p>
-          The &apos;standard deviation&apos; column shows over how many hours
-          the starting time has varied over the last year. If this is more than
-          an hour or so, it might indicate the optimum start control is working,
-          or it could be that someone has made lots of adjustments to the boiler
-          start time during the year.
-        </p>
-        <p>
-          The &apos;Regression model optimum start R2&apos; indicates how well
-          correlated with outside temperature the start time of the boiler was.
-          The closer to 1.0, the more correlated it was and therefore the
-          more likely the optimum start control is working well.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.optimum_start_analysis.table_introduction_text_html')
     end
 
     protected def caveat_text
-      %q(
-        <p>
-          However, these calculations are experimental and might not provide
-          good indicators of how well the optimum start is working for all schools.
-          Drilling down to look at the data for an individual school should provide
-          a better indication.
-        <p>
-      )
+      I18n.t('analytics.benchmarking.content.optimum_start_analysis.caveat_text_html')
     end
   end
 
-  
+
   #=======================================================================================
   class BenchmarkContentChangeInEnergyUseSinceJoinedFullData < BenchmarkContentBase
     include BenchmarkingNoTextMixin
