@@ -66,21 +66,21 @@ en:
         thermostatic_control: Quality of thermostatic control
         weekday_baseload_variation: Weekday baseload variation
       chart_table_grouping:
-        date_limited_comparisons: 
-          title: Date limited comparisons
+        date_limited_comparisons:
           description: These benchmarks compare schools performance across specific date ranges.
-        electricity_benchmarks: 
-          title: Electricity Benchmarks
+          title: Date limited comparisons
+        electricity_benchmarks:
           description: These benchmarks compare schools' electricity consumption, including last year's consumption, recent and long term changes in consumption, baseload and performance against the school's target.
-        gas_and_storage_heater_benchmarks: 
-          title: Gas and Storage Heater Benchmarks
+          title: Electricity Benchmarks
+        gas_and_storage_heater_benchmarks:
           description: These benchmarks compare schools' gas or storage heater consumption, including last year's consumption, recent and long term changes in consumption, the standard of their heating control and performance against the school's target.
-        solar_benchmarks: 
-          title: Solar Benchmarks
+          title: Gas and Storage Heater Benchmarks
+        solar_benchmarks:
           description: These benchmarks compare schools' solar PV production and the benefits of installing solar.
-        total_energy_use_benchmarks: 
-          title: Total Energy Use Benchmarks
+          title: Solar Benchmarks
+        total_energy_use_benchmarks:
           description: These benchmarks compare the combined energy use of a school site
+          title: Total Energy Use Benchmarks
       content:
         annual_electricity_costs_per_pupil:
           introduction_text_html: "<p>\n  This benchmark compares the electricity cost per pupil in the last year.\n</p>\n<p>\n  There should not be a significant difference between schools as all schools need to use roughly the same amount of ICT equipment, \n  lighting and refrigeration per pupil. Exceptions might be schools with swimming pools or sports flood lighting which can significantly \n  increase demand. Special schools also have higher electricity costs per pupil due to lower pupil densities and specialist equipment.\n</p>\n<p>\n  The data excludes storage heaters which are reported elsewhere under the 'heating' benchmarks.\n</p>"
