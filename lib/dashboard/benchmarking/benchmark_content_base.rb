@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
 module Benchmarking
   class BenchmarkContentBase
     include Logging
     attr_reader :benchmark_manager, :asof_date, :page_name, :chart_table_config
-    def initialize(benchmark_database, asof_date, page_name, chart_table_config, online=false)
+
+    def initialize(benchmark_database, asof_date, page_name, chart_table_config, online = false)
       @benchmark_manager = BenchmarkManager.new(benchmark_database)
       @asof_date = asof_date
       @page_name = page_name
@@ -11,7 +14,7 @@ module Benchmarking
     end
 
     def front_end_content(school_ids: nil, filter: nil)
-      content(school_ids, filter).select{ |content_config| %i[html chart_name chart table title].include?(content_config[:type]) }
+      content(school_ids, filter).select { |content_config| %i[html chart_name chart table title].include?(content_config[:type]) }
     end
 
     def content(school_ids: nil, filter: nil, user_type: nil)
@@ -25,24 +28,26 @@ module Benchmarking
       if (tables? || charts?) && composite[:rows].empty?
         tables = { type: :html, content: '<h3>There are no schools to report using this filter for this benchmark</h3>' }
       else
-        charts = [
-          { type: :html,                  content: chart_introduction_text },
-          { type: :chart_name,            content: chart_name },
-          { type: :chart,                 content: chart },
-          { type: :html,                  content: chart_interpretation_text },
-        ] if charts? && !chart_empty?(chart)
+        if charts? && !chart_empty?(chart)
+          charts = [
+            { type: :html,                  content: chart_introduction_text },
+            { type: :chart_name,            content: chart_name },
+            { type: :chart,                 content: chart },
+            { type: :html,                  content: chart_interpretation_text }
+          ]
+        end
 
         if tables?
           tables = [{ type: :html, content: table_introduction_text}]
 
-          #only generate these additional versions of the table if we're not running
-          #as part of the application, as they're unused and result in extra memory usage
-          if !online?
-            table_html  = run_table(school_ids, filter, :html, user_type)
-            tables.push({ type: :table_html,            content: table_html })
+          # only generate these additional versions of the table if we're not running
+          # as part of the application, as they're unused and result in extra memory usage
+          unless online?
+            table_html = run_table(school_ids, filter, :html, user_type)
+            tables.push({ type: :table_html, content: table_html })
 
-            table_text  = run_table(school_ids, filter, :text, user_type)
-            tables.push({type: :table_text,            content: table_text })
+            table_text = run_table(school_ids, filter, :text, user_type)
+            tables.push({type: :table_text, content: table_text })
           end
 
           footnote_text = footnote(school_ids, filter, user_type)
@@ -65,7 +70,7 @@ module Benchmarking
         { type: :analytics_html,        content: '<br>' },
         # { type: :html,                  content: content_title },
         { type: :title,                 content: chart_table_config[:name]},
-        { type: :html,                  content: introduction_text },
+        { type: :html,                  content: introduction_text }
       ]
     end
 
@@ -76,12 +81,13 @@ module Benchmarking
     private def drilldown(school_ids, user_type)
       drilldown_info = benchmark_manager.drilldown_class(@page_name)
       return nil if drilldown_info.nil?
+
       {
-        type:     :drilldown,
-        content:  {
-                    drilldown:  drilldown_info,
-                    school_map: school_map(school_ids, user_type)
-                  }
+        type: :drilldown,
+        content: {
+          drilldown: drilldown_info,
+          school_map: school_map(school_ids, user_type)
+        }
       }
     end
 
@@ -98,31 +104,31 @@ module Benchmarking
     end
 
     protected def introduction_text
-      %q( <h3>Introduction here</h3> )
+      ' <h3>Introduction here</h3> '
     end
 
     protected def introduction_text
-      %q( <h3>Introduction here</h3> )
+      ' <h3>Introduction here</h3> '
     end
 
     protected def chart_introduction_text
-      %q( <h3>Chart Introduction</h3> )
+      ' <h3>Chart Introduction</h3> '
     end
 
     protected def chart_interpretation_text
-      %q( <h3>Chart interpretation</h3> )
+      ' <h3>Chart interpretation</h3> '
     end
 
     protected def table_introduction_text
-      %q( <h3>Table Introduction</h3> )
+      ' <h3>Table Introduction</h3> '
     end
 
     protected def table_interpretation_text
-      %q( <h3>Table interpretation</h3> )
+      ' <h3>Table interpretation</h3> '
     end
 
     protected def caveat_text
-      %q( <h3>Caveat</h3> )
+      ' <h3>Caveat</h3> '
     end
 
     def charts?
@@ -150,7 +156,7 @@ module Benchmarking
     end
 
     def chart_empty?(chart_results)
-      chart_results.nil? || !chart_results[:x_data].values.any?{ |data| !data.all?(&:nil?) }
+      chart_results.nil? || chart_results[:x_data].values.none? { |data| !data.all?(&:nil?) }
     end
 
     def extract_useful_aggregate_table_data_deprecated(table_with_header, column_ids)
@@ -187,13 +193,12 @@ module Benchmarking
     def column_heading_explanation
       return '' unless @chart_table_config[:column_heading_explanation]
 
-
       I18n.t("analytics.benchmarking.configuration.column_heading_explanation.#{@chart_table_config[:column_heading_explanation]}", default: '')
     end
 
     def includes_tariff_changed_column?(school_ids, filter, user_type)
       cols = column_headings(school_ids, filter, user_type)
-      cols.any?{ |col_name| col_name == :tariff_changed }
+      cols.any? { |col_name| col_name == :tariff_changed }
     end
 
     def tariff_has_changed?(school_ids, filter, user_type)
@@ -209,8 +214,6 @@ module Benchmarking
     end
 
     def tariff_changed_explanation(school_ids, filter, user_type)
-
-
       if includes_tariff_changed_column?(school_ids, filter, user_type) && tariff_has_changed?(school_ids, filter, user_type)
         %(
           <p>
@@ -225,4 +228,3 @@ module Benchmarking
     end
   end
 end
-

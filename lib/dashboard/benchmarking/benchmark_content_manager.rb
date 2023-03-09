@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 module Benchmarking
   class BenchmarkContentManager
     attr_reader :asof_date
+
     def initialize(asof_date)
       @asof_date = asof_date
     end
@@ -10,7 +13,7 @@ module Benchmarking
       BenchmarkManager.available_pages({filter_out: :dont_make_available_directly})
     end
 
-    #Used by application
+    # Used by application
     def structured_pages(school_ids: nil, filter: nil, user_type: nil)
       # TODO(PH, 1Nov2019) filter list where not relevant e.g. gas only content for Highland Schools
       BenchmarkManager.structured_pages(user_type)
@@ -25,7 +28,7 @@ module Benchmarking
       content.front_end_content(school_ids: school_ids, filter: filter)
     end
 
-    #Used by application
+    # Used by application
     def content(benchmark_database, page_name, school_ids: nil, filter: nil, user_type: nil, online: false)
       content = content_handler(benchmark_database, page_name, online)
       content.content(school_ids: school_ids, filter: filter, user_type: user_type)

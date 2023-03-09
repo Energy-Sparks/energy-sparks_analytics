@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 module Benchmarking
   class BenchmarkManager
@@ -18,8 +19,9 @@ module Benchmarking
       def percent_change(base, new_val, to_nil_if_sum_zero = false)
         return nil if to_nil_if_sum_zero && sum_data(base) == 0.0
         return 0.0 if sum_data(base) == 0.0
+
         change = (sum_data(new_val) - sum_data(base)) / sum_data(base)
-        (to_nil_if_sum_zero && change == 0.0) ? nil : change
+        to_nil_if_sum_zero && change == 0.0 ? nil : change
       end
 
       def or_nil(arr)
@@ -45,14 +47,14 @@ module Benchmarking
       # helper function for config lamda, only sums
       # where corresponding components are non nil
       def paired_sum(data1, data2)
-        data1.zip(data2).sum{ |pair| pair.any?{ |el| el.nil?} ? 0.0 : pair.sum }
+        data1.zip(data2).sum { |pair| pair.any?(&:nil?) ? 0.0 : pair.sum }
       end
 
       def sum_data(data, to_nil_if_sum_zero = false)
-        data = [data] unless data.is_a?(Array)
+        data = Array(data)
         data.map! { |value| zero(value) } # create array 1st to avoid statsample map/sum bug
         val = data.sum
-        (to_nil_if_sum_zero && val == 0.0) ? nil : val
+        to_nil_if_sum_zero && val == 0.0 ? nil : val
       end
 
       # specialist sum, only adds if 1st 2 vals i.e. electricity & gas present or same
@@ -71,7 +73,7 @@ module Benchmarking
       end
 
       def partial(holiday_name, partial)
-        partial ? holiday_name + '(partial)' : holiday_name
+        partial ? "#{holiday_name}(partial)" : holiday_name
       end
 
       def school_name
@@ -85,7 +87,7 @@ module Benchmarking
       @benchmark_database = benchmark_database
     end
 
-    def self.report_dates(today, report = :annual_gas_per_floor_area_chart)
+    def self.report_dates(today, _report = :annual_gas_per_floor_area_chart)
       [today] # only today would be needed for the example
     end
 
@@ -98,7 +100,7 @@ module Benchmarking
     # filter e.g. for area: ->{ addp_area.include?('Highlands') }
     def run_benchmark_table(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, user_type)
       create_and_store_school_map(report, today, school_ids, user_type)
-      #@school_name_urn_map = school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
+      # @school_name_urn_map = school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
       run_benchmark_table_private(today, report, school_ids, chart_columns_only, filter, medium, true, user_type, true)
     end
 
@@ -115,14 +117,12 @@ module Benchmarking
     private
 
     def create_and_store_school_map(report, today, school_ids, user_type)
-      if benchmark_has_drilldown?(report)
-        @school_name_urn_map ||= school_map(today, school_ids, user_type)
-      end
+      @school_name_urn_map ||= school_map(today, school_ids, user_type) if benchmark_has_drilldown?(report)
     end
 
     def benchmark_has_drilldown?(report)
       config = self.class.chart_table_config(report)
-      config[:columns].any?{ |column_definition| column_definition.key?(:content_class) }
+      config[:columns].any? { |column_definition| column_definition.key?(:content_class) }
     end
 
     def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type, hide_visible_columns)
@@ -137,9 +137,11 @@ module Benchmarking
         # school_data_last_year = @benchmark_database.dig(last_year, school_id)
         # school_data.merge!(dated_attributes('_last_year', school_data_last_year)) unless school_data_last_year.nil?
         next if school_data.nil? || school_data.empty? # && school_data_last_year
-        row  = DatabaseRow.new(school_id, school_data)
+
+        row = DatabaseRow.new(school_id, school_data)
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
+
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
@@ -177,9 +179,10 @@ module Benchmarking
     end
 
     def sort_table!(results, config)
-      if config[:sort_by].is_a?(Array)
+      case config[:sort_by]
+      when Array
         sort_table_by_column!(results, config)
-      elsif config[:sort_by].is_a?(Method)
+      when Method
         results.sort! { |a, b| config[:sort_by].call(a[:data], b[:data]) }
       end
     end
@@ -222,14 +225,14 @@ module Benchmarking
 
     def format_table(table_definition, rows, medium, hide_visible_columns)
       header, raw_rows = remove_hidden_columns(table_definition, rows, hide_visible_columns)
-      school_ids = rows.map{ |d| d[:school_id] }
+      school_ids = rows.map { |d| d[:school_id] }
 
       case medium
       when :raw
         [header] + raw_rows
       when :text, :text_and_raw
         formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
-        { column_groups: table_definition[:column_groups],   header: header, rows: formatted_rows}
+        { column_groups: table_definition[:column_groups], header: header, rows: formatted_rows}
       when :html
         formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
         HtmlTableFormatting.new(header, formatted_rows).html(column_groups: table_definition[:column_groups])
@@ -238,9 +241,9 @@ module Benchmarking
 
     def format_rows(rows, table_definition, medium, school_ids, hide_visible_columns)
       column_definitions = table_definition[:columns]
-      column_units    = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition[:units] }, hide_visible_columns)
-      column_sense    = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition.dig(:sense) }, hide_visible_columns)
-      content_classes = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition.dig(:content_class) }, hide_visible_columns)
+      column_units = visible_data(table_definition, column_definitions.map { |column_definition| column_definition[:units] }, hide_visible_columns)
+      column_sense = visible_data(table_definition, column_definitions.map { |column_definition| column_definition[:sense] }, hide_visible_columns)
+      content_classes = visible_data(table_definition, column_definitions.map { |column_definition| column_definition[:content_class] }, hide_visible_columns)
       formatted_rows = rows.each_with_index.map do |row, row_number|
         row.each_with_index.map do |value, index|
           sense = sense_column(column_sense[index])
@@ -256,6 +259,7 @@ module Benchmarking
 
     def visible_data(table_definition, data, hide_visible_columns)
       return data unless hide_visible_columns
+
       visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
       data.select.with_index { |_v, i| visible_columns[i] }
     end
@@ -263,11 +267,13 @@ module Benchmarking
     def remove_hidden_columns(table_definition, rows, hide_visible_columns)
       visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
 
-      header    = table_definition[:columns].map do |column_definition|
-        I18n.t("analytics.benchmarking.configuration.column_headings.#{column_definition[:name].downcase}") if column_definition[:name]
+      header = table_definition[:columns].map do |column_definition|
+        if column_definition[:name]
+          I18n.t("analytics.benchmarking.configuration.column_headings.#{column_definition[:name].downcase}")
+        end
       end
-      header    = visible_data(table_definition, header, hide_visible_columns)
-      raw_rows  =  rows.map { |row| visible_data(table_definition, row[:data], hide_visible_columns) }
+      header = visible_data(table_definition, header, hide_visible_columns)
+      raw_rows = rows.map { |row| visible_data(table_definition, row[:data], hide_visible_columns) }
       [header, raw_rows]
     end
 
@@ -294,9 +300,9 @@ module Benchmarking
 
     def content_class_urn_info(school_name, content_class)
       {
-        school_name:    school_name,
-        urn:            @school_name_urn_map[school_name],
-        content_class:  content_class
+        school_name: school_name,
+        urn: @school_name_urn_map[school_name],
+        content_class: content_class
       }
     end
 
@@ -322,13 +328,13 @@ module Benchmarking
       end
     end
 
-    def row_has_useful_data(calculated_row, config, chart_columns_only)
+    def row_has_useful_data(calculated_row, config, _chart_columns_only)
       min_non_nulls = 1 + (self.class.y2_axis_column?(config) ? 1 : 0)
       !calculated_row.nil? && !calculated_row[:data].nil? && (items_useful_data(calculated_row, config) > min_non_nulls)
     end
 
     def items_useful_data(row, config)
-      row[:data].count{ |cell| !cell_nil?(cell, config) }
+      row[:data].count { |cell| !cell_nil?(cell, config) }
     end
 
     def cell_nil?(cell, config)
@@ -339,8 +345,8 @@ module Benchmarking
       config = hide_columns(config, user_type, true)
 
       # need to extract 1st 2 'chart columns' from table data
-      chart_columns_definitions = config[:columns].select {|column_definition| self.class.chart_column?(column_definition)}
-      chart_column_numbers = config[:columns].each_with_index.map {|column_definition, index| self.class.chart_column?(column_definition) ? index : nil}
+      chart_columns_definitions = config[:columns].select { |column_definition| self.class.chart_column?(column_definition)}
+      chart_column_numbers = config[:columns].each_with_index.map { |column_definition, index| self.class.chart_column?(column_definition) ? index : nil}
       chart_column_numbers.compact!
 
       graph_definition = {}
@@ -394,6 +400,7 @@ module Benchmarking
                      relative_percent: 'percent', relative_percent_0dp: 'percent',
                      days: 'days', r2: ''}
       return unit_names[unit] if unit_names.key?(unit)
+
       logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
       puts "Unexpected untranslated unit type for benchmark chart #{unit}"
       unit.to_s.humanize.gsub(' 0dp', '')
@@ -441,20 +448,21 @@ module Benchmarking
       y2_data
     end
 
-    def select_chart_data(config, table, chart_column_numbers, chart_columns_definitions, axis)
+    def select_chart_data(_config, table, chart_column_numbers, chart_columns_definitions, axis)
       chart_data = {}
       y2_data = {}
       chart_column_numbers.each_with_index do |chart_column_number, index|
-        next if index == 0 # skip entry as its the school name
-        data = remove_first_column(table.map{ |row| row[chart_column_number] })
+        next if index.zero? # skip entry as its the school name
+
+        data = remove_first_column(table.map { |row| row[chart_column_number] })
         series_name = I18n.t("analytics.benchmarking.configuration.column_headings.#{chart_columns_definitions[index][:name].downcase}")
         if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
           chart_data[series_name] = data
           percent_type = %i[percent relative_percent percent_0dp relative_percent_0dp].include?(chart_columns_definitions[1][:units])
           chart_data[series_name].map! { |val| val.nil? ? nil : val * 100.0 } if percent_type
-          #when benchmark data is stored as json, TimeOfDay is stored as Strings.
-          #for the chart data we want the TimeOfDay objects so they can be converted to relative time
-          #so create objects if needed
+          # when benchmark data is stored as json, TimeOfDay is stored as Strings.
+          # for the chart data we want the TimeOfDay objects so they can be converted to relative time
+          # so create objects if needed
           if chart_columns_definitions[1][:units] == :timeofday
             chart_data[series_name].map! { |val| val.is_a?(String) ? TimeOfDay.parse(val) : val }
           end
@@ -472,12 +480,14 @@ module Benchmarking
 
     def filter_row(row, filter)
       return true if filter.nil?
+
       row.instance_exec(&filter)
     end
 
     def calculate_row(row, report, chart_columns_only, school_id)
       row_data = report[:columns].map do |column_specification|
         next if chart_columns_only && !self.class.chart_column?(column_specification)
+
         calculate_value(row, column_specification, school_id)
       end
       { data: row_data, school_id: school_id }
@@ -488,20 +498,16 @@ module Benchmarking
     end
 
     def calculate_value(row, column_specification, school_id_debug)
-      begin
-        case column_specification[:data]
-        when String
-          row.send(column_specification[:data])
-        when Proc
-          row.instance_exec(&column_specification[:data]) # this calls the configs lambda as if it was inside the class of the database row, given the lambda access to all the row's variables
-        else
-          nil
-        end
-      rescue StandardError => e
-        name = row.instance_exec(& ->{ school_name })
-        logger.info format_rescue_message(e, school_id_debug, column_specification, name)
-        return nil
+      case column_specification[:data]
+      when String
+        row.send(column_specification[:data])
+      when Proc
+        row.instance_exec(&column_specification[:data]) # this calls the configs lambda as if it was inside the class of the database row, given the lambda access to all the row's variables
       end
+    rescue StandardError => e
+      name = row.instance_exec(& -> { school_name })
+      logger.info format_rescue_message(e, school_id_debug, column_specification, name)
+      nil
     end
 
     def format_rescue_message(e, school_id_debug, column_specification, name)

@@ -1,5 +1,7 @@
-require_relative './benchmark_no_text_mixin.rb'
-require_relative './benchmark_content_base.rb'
+# frozen_string_literal: true
+
+require_relative './benchmark_no_text_mixin'
+require_relative './benchmark_content_base'
 
 module Benchmarking
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
@@ -12,8 +14,8 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-#=======================================================================================
-  class BenchmarkOptimumStartAnalysis  < BenchmarkContentBase
+  #=======================================================================================
+  class BenchmarkOptimumStartAnalysis < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 
     private def introduction_text
@@ -29,16 +31,15 @@ module Benchmarking
     end
   end
 
-
   #=======================================================================================
   class BenchmarkContentChangeInEnergyUseSinceJoinedFullData < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      text =  I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_full_data.introduction_text_html')
+      text = I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_full_data.introduction_text_html')
       ERB.new(text).result(binding)
     end
-  end  
+  end
   #=======================================================================================
   class BenchmarkContentTotalAnnualEnergy < BenchmarkContentBase
     include BenchmarkingNoTextMixin
@@ -69,7 +70,7 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkBaseloadBase < BenchmarkContentBase   
+  class BenchmarkBaseloadBase < BenchmarkContentBase
     def content(school_ids: nil, filter: nil, user_type: nil)
       @baseload_impact_html = baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
       super(school_ids: school_ids, filter: filter)
@@ -84,7 +85,7 @@ module Benchmarking
         FormatEnergyUnit.format(:£, costs_£, :html)
       end
 
-      text = %q(
+      text = '
         <p>
           <% if cost_of_1_kw_baseload_range_£_html.empty? %>
 
@@ -95,9 +96,9 @@ module Benchmarking
             A 1 kW increase in baseload is equivalent to an increase in
             annual electricity costs of between <%= cost_of_1_kw_baseload_range_£_html.first %>
             and <%= cost_of_1_kw_baseload_range_£_html.last %> depending on your current tariff.
-          <% end %>    
+          <% end %>
         </p>
-      )
+      '
       ERB.new(text).result(binding)
     end
 
@@ -109,7 +110,7 @@ module Benchmarking
     end
 
     def calculate_blended_rate_range(school_ids, filter, user_type)
-      blended_current_rate_header = I18n.t("analytics.benchmarking.configuration.column_headings.blended_current_rate")
+      blended_current_rate_header = I18n.t('analytics.benchmarking.configuration.column_headings.blended_current_rate')
       col_index = column_headings(school_ids, filter, user_type).index(blended_current_rate_header)
       data = raw_data(school_ids, filter, user_type)
       return [] if data.nil? || data.empty?
@@ -141,15 +142,15 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-    #=======================================================================================
-    class BenchmarkGasTarget < BenchmarkContentBase
-      include BenchmarkingNoTextMixin
-  
-      private def introduction_text
-        text = I18n.t('analytics.benchmarking.content.gas_targets.introduction_text_html')
-        ERB.new(text).result(binding)
-      end
+  #=======================================================================================
+  class BenchmarkGasTarget < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.gas_targets.introduction_text_html')
+      ERB.new(text).result(binding)
     end
+  end
   #=======================================================================================
   class BenchmarkContentBaseloadPerPupil < BenchmarkBaseloadBase
     include BenchmarkingNoTextMixin
@@ -186,24 +187,24 @@ module Benchmarking
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = I18n.t('analytics.benchmarking.content.electricity_peak_kw_per_pupil.introduction_text_html')
-      ERB.new(text).result(binding)      
+      ERB.new(text).result(binding)
     end
   end
-    #=======================================================================================
-    class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
-      include BenchmarkingNoTextMixin
-      private def introduction_text
-        text = I18n.t('analytics.benchmarking.content.solar_pv_benefit_estimate.introduction_text_html')
-        ERB.new(text).result(binding)      
-      end
+  #=======================================================================================
+  class BenchmarkContentSolarPVBenefit < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.solar_pv_benefit_estimate.introduction_text_html')
+      ERB.new(text).result(binding)
     end
-    #=======================================================================================
-    class BenchmarkContentHeatingPerFloorArea < BenchmarkContentBase
-      include BenchmarkingNoTextMixin
-      private def introduction_text
-        I18n.t('analytics.benchmarking.content.annual_heating_costs_per_floor_area.introduction_text_html')
-      end
+  end
+  #=======================================================================================
+  class BenchmarkContentHeatingPerFloorArea < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      I18n.t('analytics.benchmarking.content.annual_heating_costs_per_floor_area.introduction_text_html')
     end
+  end
 
   #=======================================================================================
   class BenchmarkContentGasOutOfHoursUsage < BenchmarkContentBase
@@ -227,13 +228,13 @@ module Benchmarking
       I18n.t('analytics.benchmarking.content.thermostat_sensitivity.introduction_text_html')
     end
   end
-    #=======================================================================================
-    class BenchmarkContentHeatingInWarmWeather < BenchmarkContentBase
-      include BenchmarkingNoTextMixin
-      private def introduction_text
-        I18n.t('analytics.benchmarking.content.heating_in_warm_weather.introduction_text_html')
-      end
+  #=======================================================================================
+  class BenchmarkContentHeatingInWarmWeather < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+    private def introduction_text
+      I18n.t('analytics.benchmarking.content.heating_in_warm_weather.introduction_text_html')
     end
+  end
   #=======================================================================================
   class BenchmarkContentThermostaticControl < BenchmarkContentBase
     include BenchmarkingNoTextMixin
@@ -317,48 +318,48 @@ module Benchmarking
   # shared wording save some translation costs
   class BenchmarkAnnualChangeBase < BenchmarkContentBase
     def table_introduction(fuel_types, direction = 'use')
-      text = %q(
+      text = '
         <p>
           This table compares <%= fuel_types %> <%= direction %> between this year to date
           (defined as ‘last year’ in the table below) and the corresponding period
           from the year before (defined as ‘previous year’).
         </p>
-      )
+      '
 
       ERB.new(text).result(binding)
     end
 
     def varying_directions(list, in_list = true)
-      text = %q(
+      text = "
         <%= in_list ? 't' : 'T'%>he kWh, CO2, £ values can move in opposite directions and by
         different percentages because the following may vary between
         the two years:
         <%= to_bulleted_list(list) %>
-      )
+      "
 
       ERB.new(text).result(binding)
     end
 
     def electric_and_gas_mix
-      %q( the mix of electricity and gas )
+      ' the mix of electricity and gas '
     end
 
     def carbon_intensity
-      %q( the carbon intensity of the electricity grid )
+      ' the carbon intensity of the electricity grid '
     end
 
     def day_night_tariffs
-      %q(
+      '
         the proportion of electricity consumed between night and day for schools
         with differential tariffs (economy 7)
-      )
+      '
     end
 
     def only_in_previous_column
-      %q(
+      "
         data only appears in the 'previous year' column if two years
         of data are available for the school
-      )
+      "
     end
 
     def to_bulleted_list(list)
@@ -372,39 +373,39 @@ module Benchmarking
     end
 
     def cost_solar_pv
-      %q(
+      "
         the cost column for schools with solar PV only represents the cost of consumption
         i.e. mains plus electricity consumed from the solar panels using a long term economic value.
         It doesn't use the electricity or solar PV tariffs for the school
-      )
+      "
     end
 
     def solar_pv_electric_calc
-      %q(
+      '
         the electricity consumption for schools with solar PV is the total
         of electricity consumed from the national grid plus electricity
         consumed from the solar PV (self-consumption)
         but excludes any excess solar PV exported to the grid
-      )
+      '
     end
 
     def sheffield_estimate
-      %q(
+      "
         self-consumption is estimated where we don't have metered solar PV,
         and so the overall electricity consumption will also not be 100% accurate,
         but will be a ‘good’ estimate of the year on year change
-      )
+      "
     end
 
     def storage_heater_comparison
-      %q(
+      '
         The electricity consumption also excludes storage heaters
         which are compared in a separate comparison
-      )
+      '
     end
 
     def colder
-      %q(
+      '
         <p>
           The &apos;adjusted&apos; columns are adjusted for difference in
           temperature between the two years. So for example, if the previous year was colder
@@ -414,9 +415,9 @@ module Benchmarking
           indicator of the work a school might have done to reduce its energy consumption as
           it&apos;s not dependent on temperature differences between the two years.
         </p>
-      )
+      '
     end
-  end 
+  end
   #=======================================================================================
   class BenchmarkChangeInEnergySinceLastYear < BenchmarkAnnualChangeBase
     include BenchmarkingNoTextMixin
@@ -428,10 +429,10 @@ module Benchmarking
     end
 
     def content(school_ids: nil, filter: nil, user_type: nil)
-      content1 = super(school_ids: school_ids, filter: filter)
+      super(school_ids: school_ids, filter: filter)
       # content2 = full_co2_breakdown(school_ids: school_ids, filter: filter)
       # content3 = full_energy_breakdown(school_ids: school_ids, filter: filter)
-      content1 # + content2 + content3
+      # + content2 + content3
     end
 
     private
@@ -491,10 +492,21 @@ module Benchmarking
   end
   #=======================================================================================
   module BenchmarkPeriodChangeBaseElectricityMixIn
-    def current_variable;     :current_pupils   end
-    def previous_variable;    :previous_pupils  end
-    def variable_type;        :pupils           end
-    def has_changed_variable; :pupils_changed   end
+    def current_variable
+      :current_pupils
+    end
+
+    def previous_variable
+      :previous_pupils
+    end
+
+    def variable_type
+      :pupils
+    end
+
+    def has_changed_variable
+      :pupils_changed
+    end
 
     def change_variable_description
       'number of pupils'
@@ -510,10 +522,21 @@ module Benchmarking
   end
 
   module BenchmarkPeriodChangeBaseGasMixIn
-    def current_variable;     :current_floor_area   end
-    def previous_variable;    :previous_floor_area  end
-    def variable_type;        :m2                   end
-    def has_changed_variable; :floor_area_changed   end
+    def current_variable
+      :current_floor_area
+    end
+
+    def previous_variable
+      :previous_floor_area
+    end
+
+    def variable_type
+      :m2
+    end
+
+    def has_changed_variable
+      :floor_area_changed
+    end
 
     def change_variable_description
       'floor area'
@@ -554,10 +577,9 @@ module Benchmarking
                 !infinite_decrease_school_names.empty? ||
                 @rate_changed_in_period
 
-
       text = %(
         <% if changed %>
-          <p> 
+          <p>
             Notes:
             <ul>
               <% if !floor_area_or_pupils_change_rows.empty? %>
@@ -613,8 +635,8 @@ module Benchmarking
       if school_name_list.length <= 2
         school_name_list.join(' and ')
       else
-        (school_name_list.first school_name_list.size - 1).join(' ,') + ' and ' + school_name_list.last
-      end 
+        "#{(school_name_list.first school_name_list.size - 1).join(' ,')} and #{school_name_list.last}"
+      end
     end
 
     def school_names_by_calculation_issue(rows, column_id, value)
@@ -643,13 +665,13 @@ module Benchmarking
       rows.select { |row| changed?(row, change_variable) }
     end
 
-    def no_changes?(rows,  change_variable)
-      rows.all?{ |row| !changed?(row, change_variable) }
+    def no_changes?(rows, change_variable)
+      rows.all? { |row| !changed?(row, change_variable) }
     end
 
     def change_sentence(row)
       school_name = remove_references(row[table_column_index(:school_name)])
-      current     = row[table_column_index(current_variable) ].round(0)
+      current     = row[table_column_index(current_variable)].round(0)
       previous    = row[table_column_index(previous_variable)].round(0)
 
       text = %(
@@ -722,7 +744,7 @@ module Benchmarking
 
     private def introduction_text
       text = I18n.t('analytics.benchmarking.content.change_in_gas_holiday_consumption_previous_holiday.introduction_text_html')
-      text +=  I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
+      text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
   end
@@ -740,13 +762,13 @@ module Benchmarking
   class BenchmarkHeatingHotWaterOnDuringHolidayBase < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      text = %q(
+      text = '
         <p>
           This chart shows the projected <%= fuel %> costs for the current holiday.
           No comparative data will be shown once the holiday is over. The projection
           calculation is based on the consumption patterns during the holiday so far.
         </p>
-      )
+      '
       ERB.new(text).result(binding)
     end
   end
@@ -765,7 +787,10 @@ module Benchmarking
     def introduction_text
       I18n.t('analytics.benchmarking.content.gas_consumption_during_holiday.introduction_text_html')
     end
-    def fuel; 'gas' end
+
+    def fuel
+      'gas'
+    end
   end
 
   class BenchmarkStorageHeatersOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
@@ -773,7 +798,10 @@ module Benchmarking
     def introduction_text
       I18n.t('analytics.benchmarking.content.storage_heater_consumption_during_holiday.introduction_text_html')
     end
-    def fuel; 'storage heeaters' end
+
+    def fuel
+      'storage heeaters'
+    end
   end
   #=======================================================================================
   class BenchmarkEnergyConsumptionInUpcomingHolidayLastYear < BenchmarkContentBase
@@ -784,7 +812,7 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
-#=======================================================================================
+  #=======================================================================================
   class BenchmarkChangeAdhocComparison < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
@@ -798,7 +826,7 @@ module Benchmarking
       content2 = electricity_content(school_ids: school_ids, filter: filter)
       content3 = gas_content(school_ids: school_ids, filter: filter)
       content4 = storage_heater_content(school_ids: school_ids, filter: filter)
-      content1 + content2 + content3  + content4
+      content1 + content2 + content3 + content4
     end
 
     private
@@ -814,7 +842,7 @@ module Benchmarking
     def storage_heater_content(school_ids:, filter:)
       extra_content(:layer_up_powerdown_day_november_2022_storage_heater_table, filter: filter)
     end
-    
+
     def extra_content(type, filter:)
       content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
       db = @benchmark_manager.benchmark_database
@@ -842,11 +870,11 @@ module Benchmarking
     def electricity_content(school_ids:, filter:)
       extra_content(:autumn_term_2021_2022_electricity_table, filter: filter)
     end
-  
+
     def gas_content(school_ids:, filter:)
       extra_content(:autumn_term_2021_2022_gas_table, filter: filter)
     end
-  
+
     def storage_heater_content(school_ids:, filter:)
       extra_content(:autumn_term_2021_2022_storage_heater_table, filter: filter)
     end
@@ -870,15 +898,14 @@ module Benchmarking
 
   #=======================================================================================
   class BenchmarkSeptNov2022Comparison < BenchmarkChangeAdhocComparison
-
     def electricity_content(school_ids:, filter:)
       extra_content(:sept_nov_2021_2022_electricity_table, filter: filter)
     end
-  
+
     def gas_content(school_ids:, filter:)
       extra_content(:sept_nov_2021_2022_gas_table, filter: filter)
     end
-  
+
     def storage_heater_content(school_ids:, filter:)
       extra_content(:sept_nov_2021_2022_storage_heater_table, filter: filter)
     end
@@ -899,5 +926,4 @@ module Benchmarking
   class BenchmarkSeptNov2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
   end
-
 end
