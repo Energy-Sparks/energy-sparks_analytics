@@ -128,9 +128,6 @@ module Benchmarking
       text += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
       ERB.new(text).result(binding)
     end
-    # private def table_introduction_text
-    #   I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
-    # end
     protected def table_interpretation_text
       I18n.t('analytics.benchmarking.caveat_text.es_data_not_in_sync_html')
     end
@@ -140,39 +137,6 @@ module Benchmarking
     include BenchmarkingNoTextMixin
     private def introduction_text
       I18n.t('analytics.benchmarking.content.annual_electricity_costs_per_pupil.introduction_text_html')
-    end
-  end
-  #=======================================================================================
-  class BenchmarkContentChangeInAnnualElectricityConsumption < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      %q(
-        <p>
-          This benchmark shows the change in electricity consumption between
-          last year and the previous year, excluding solar PV and storage heaters.
-        </p>
-        <p>
-          Schools should be aiming to reduce their electricity consumption by
-          about 5% per year because most equipment used by schools is getting
-          more efficient, for example a desktop computer might use 150W, a laptop
-          20W and a tablet 2W. Switching from using desktops to tablets reduces
-          their electricity consumption by a factor of 75. LED lighting can be
-          2 to 3 times for efficient than older florescent lighting.
-        </p>
-        <p>
-          To make a significant contribution to mitigating climate
-          change schools should really be aiming to reduce their electricity
-          consumption by 10% year on year to meet the UK&apos;s climate change obligations
-          - something which is easily achievable
-          through a mixture of behavioural change and tactical investment in
-          more efficient equipment.
-        </p>
-        <p>
-          An increase in electricity consumption, unless there has been a significant
-          increase in pupil numbers is inexcusable if a school is planning on contributing
-          to reducing global carbon emissions.
-        </p>
-      ) + CAVEAT_TEXT[:covid_lockdown]
     end
   end
   #=======================================================================================
@@ -241,57 +205,11 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     def introduction_text
-      text = %q(
-        <p>
-          This benchmark compares a school&apos;s current baseload (electricity
-          consumed when the school is closed) with that of the average
-          of the last year. Schools should be aiming to reduce baseload over time
-          and not increase it as equipment and lighting has become significantly
-          more efficient over the last few years. Any increase should be tracked
-          down as soon as it is discovered. Energy Sparks can be configured
-          to send you an alert via an email or a text message if it detects
-          this has happened.
-        </p>
-        <%= @baseload_impact_html %>
-        <%= CAVEAT_TEXT[:es_exclude_storage_heaters_and_solar_pv] %>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
-      ERB.new(text).result(binding)
-    end
-  end
-  #=======================================================================================
-  class BenchmarkRefrigeration < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
+      text = I18n.t('analytics.benchmarking.content.recent_change_in_baseload.introduction_text_html')
+      text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+      text += I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
 
-    def self.intro
-      text = %q(
-        <p>
-          This benchmark looks at any overnight reduction in electricity consumption
-          during the last summer holidays and assumes this is mainly from refrigeration
-          being turned off, using this information to assess the efficiency of schools&apos
-          refrigeration.
-        </p>
-        <p>
-          The analysis is experimental and can create false positives.
-          If no impact is detected either the school didn&apos;t
-          turn their fridges and freezers off during the summer holidays
-          or they are very efficient with very little reduction.
-        </p>
-        <p>
-          If a potential saving is identified then
-          <a href="https://www.amazon.co.uk/electricity-usage-monitor/s?k=electricity+usage+monitor"  target="_blank">appliance monitors</a>
-          can be used to determine which fridge or freezer is most inefficient and would be economic to replace
-          (please see the case study on Energy Sparks homepage
-            <a href="https://energysparks.uk/case-studies"  target="_blank">here</a>
-          ).
-        </p>
-        <%= @baseload_impact_html %>
-      )
       ERB.new(text).result(binding)
-    end
-
-    private def introduction_text
-      BenchmarkRefrigeration.intro
     end
   end
   #=======================================================================================
@@ -359,126 +277,14 @@ module Benchmarking
         ERB.new(text).result(binding)      
       end
     end
-  #=======================================================================================
-  class BenchmarkContentSummerHolidayBaseloadAnalysis < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      text = %q(
-        <p>
-          This analysis attempts to analyse whether a school
-          has reduced its electricity consumption during the
-          summer holidays.
-        </p>
-        <p>
-          IIt&apos;s a useful way of
-          determining the efficiency appliances which have been switched off.
-          The school will need to know which appliances have been turned off
-          in order for you to understand what contributed to the reduction.
-        </p>
-        <p>
-          The most common reduction is due to some or all of kitchen fridges and
-          freezers being turned off over the summer.
-          Our <a href="https://energysparks.uk/case_studies/1/link" target ="_blank">case study</a>
-          on this demonstrates that it is possible to get a short return on investment
-          replacing old inefficient refrigeration with more efficient modern equipment.
-          It is also good practice to empty and turn off refrigeration over the summer holidays
-          - Energy Sparks can be configured to send an &apos;alert&apos; via email or text
-          just before holidays to remind schools to do this.
-        </p>
-        <p>
-          To further investigate the issue it is worth installing appliance monitors
-          to establish accurately how inefficient equipment is, before making a purchasing decision.
-          Domestic rather than commercial refrigeration generally offers much better value
-          and efficiency.
-        </p>
-      )
-      ERB.new(text).result(binding)
-    end
-    protected def table_introduction_text
-      %q(
-        <p>
-          Large domestic A++ rated fridges
-          and freezers typically use £40 of electricity per year each.
-        </p>
-        <p>
-          This breakdown excludes electricity consumed by storage heaters and solar PV.
-        </p>
-       )
-    end
-  end
-  #=======================================================================================
-  class BenchmarkContentHeatingPerFloorArea < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      I18n.t('analytics.benchmarking.content.annual_heating_costs_per_floor_area.introduction_text_html')
-    end
-  end
-  #=======================================================================================
-  class BenchmarkContentChangeInAnnualHeatingConsumption < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-
-    def content(school_ids: nil, filter: nil, user_type: nil)
-      content1 = super(school_ids: school_ids, filter: filter)
-      content2 = temperature_adjusted_content(school_ids: school_ids, filter: filter)
-      content1 + content2
-    end
-
-    private
-
-    def temperature_adjusted_content(school_ids:, filter:)
-      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
-      db = @benchmark_manager.benchmark_database
-      content_manager.content(db, :change_in_annual_heating_consumption_temperature_adjusted, filter: filter)
-    end
-
-    def introduction_text
-      %q(
-        <p>
-          This benchmark shows the change in the gas and storage heater costs
-          from last year to this year.
-        </p>
-        <p>
-          Schools should aim to reduce their heating and hot water costs
-          each year through better control of boilers and storage radiators;
-          making sure they are switched off when unoccupied. Better management
-          can typically reduce these costs by between 15% and 50%, at little
-          or no cost to a school. Even something as simple as turning the thermostat
-          down 1C can lead to a significant reduction in costs.
-        </p>
-        <p>
-          Upgrading boilers, switching from gas based circulatory hot water systems
-          to point of use electric hot water, and installing boiler optimum start control
-          and weather compensation which require investment will reduce costs further.
-        </p>
-      ) + CAVEAT_TEXT[:covid_lockdown]
-    end
-  end
     #=======================================================================================
-    class BenchmarkContentChangeInAnnualHeatingConsumptionTemperatureAdjusted  < BenchmarkContentBase
+    class BenchmarkContentHeatingPerFloorArea < BenchmarkContentBase
       include BenchmarkingNoTextMixin
-  
       private def introduction_text
-        %q(
-          <p>
-            The previous comparison is not adjusted for temperature changes between
-            the two years.
-          </p>
-
-        )
-      end
-  
-      protected def table_introduction_text
-        %q(
-          <p>
-            This comparison is adjusted for temperature, so the previous year&apos;s
-            temperature adjusted column is adjusted upwards if the previous year was
-            milder than last year, and downwards if it is colder to provide a fairer
-            comparison between the 2 years.
-
-          </p>
-        )
+        I18n.t('analytics.benchmarking.content.annual_heating_costs_per_floor_area.introduction_text_html')
       end
     end
+
   #=======================================================================================
   class BenchmarkContentGasOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin
@@ -491,27 +297,7 @@ module Benchmarking
   class BenchmarkContentStorageHeaterOutOfHoursUsage < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      %q(
-        <p>
-          Storage heaters consume electricity and store heat overnight when
-          electricity is cheaper (assuming the school is on an &apos;economy 7&apos;
-          type differential tariff) and releases the heat during the day.
-        </p>
-        <p>
-          Ensuring heating is turned off over the weekend by installing a 7 day
-          timer can provide very short paybacks - 16 weeks in this
-          <a href="https://cdn-test.energysparks.uk/static-assets/Energy_Sparks_Case_Study_3_-_Stanton_Drew_Storage_Heaters-f124cfe069b2746ab175f139c09eee70fcb558d5604be86811c70fedd67a7a6d.pdf" target ="_blank">case study</a>.
-          Turning off the heaters or turning them down as low as possible to avoid frost damage
-          can save during holidays.
-          We recommend you set a school policy for this. Energy Sparks
-          can provide accurate estimates of the benefits of installing 7-day timers, or
-          switching off during holidays if you drilldown to an individual school&apos;s analysis pages.
-        </p>
-        <p>
-          You can get Energy Sparks to send you a reminder (an &apos;alert&apos;) just before holidays
-          to turn your heating off.
-        </p>
-      )
+      I18n.t('analytics.benchmarking.content.annual_storage_heater_out_of_hours_use.introduction_text_html')
     end
   end
   #=======================================================================================
@@ -519,29 +305,6 @@ module Benchmarking
     include BenchmarkingNoTextMixin
     private def introduction_text
       I18n.t('analytics.benchmarking.content.thermostat_sensitivity.introduction_text_html')
-    end
-  end
-  #=======================================================================================
-  class BenchmarkContentLengthOfHeatingSeasonDeprecated < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      %q(
-        <p>
-          Schools often forget to turn their heating off in warm weather,
-          about 10% of schools leave their heating on all summer.
-        </p>
-        <p>
-          The chart and table below show how many days the heating was
-          left on in the last year and the potential benefit of switching
-          the heating off in warmer weather. Schools should target reducing
-          the length of the heating season to below 90 days.
-        </p>
-        <p>
-          You can set up Energy Sparks email or text alerts which will notify
-          you if the weather forecast for the coming week suggests you should
-          turn off your heating.
-        </p>
-      )
     end
   end
     #=======================================================================================
@@ -630,88 +393,6 @@ module Benchmarking
       content_manager.content(db, :change_in_energy_use_since_joined_energy_sparks_full_data, filter: filter)
     end
   end
-  #=======================================================================================
-  class BenchmarkContentChangeInEnergyUseSinceJoinedFullData < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-
-    private def introduction_text
-      text = %q(
-        <p>
-          This table provides a more detailed breakdown of the data provided in the chart
-          and table above. <%= CAVEAT_TEXT[:covid_lockdown] %>
-        </p>
-      )
-      ERB.new(text).result(binding)
-    end
-  end
-  #=======================================================================================
-  # this benachmark generates 2 charts and 1 table
-  class BenchmarkContentChangeInCO2SinceLastYear < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-
-    private def introduction_text
-      text = %q(
-        <p>
-          This benchmark compares the change in annual CO2 emissions between the last two years.
-          All CO2 is expressed in kg (kilograms).
-        </p>
-        <%= CAVEAT_TEXT[:covid_lockdown] %>
-      )
-      ERB.new(text).result(binding)
-    end
-
-    def content(school_ids: nil, filter: nil, user_type: nil)
-      content1 = super(school_ids: school_ids, filter: filter)
-      content2 = full_co2_breakdown(school_ids: school_ids, filter: filter)
-      content1 + content2
-    end
-
-    private
-
-    def full_co2_breakdown(school_ids:, filter:)
-      content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
-      db = @benchmark_manager.benchmark_database
-      content_manager.content(db, :change_in_co2_emissions_since_last_year_full_table, filter: filter)
-    end
-  end
-  #=======================================================================================
-  class BenchmarkContentChangeInCO2SinceLastYearFullData  < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-
-    private def introduction_text
-      %q(
-        <p>
-          This chart provides a breakdown of the change in CO2 emissions
-          between electricity, gas and solar PV, and allows you to see which
-          has increased and decreased.
-        </p>
-        <p>
-          Generally an increase in solar PV production between last year and the year
-          before, would lead to a reduction in CO2 emissions in the chart below,
-          as the more electricity is produced by a school&apos;s solar PV panels
-          the less CO2 a school emits overall.
-        </p>
-      )
-    end
-
-    protected def table_introduction_text
-      %q(
-        <p>
-          The solar PV CO2 columns in the table below are emissions the school saves from consuming
-          electricity produced by its solar panels, and the benefit to the national grid from exporting
-          surplus electricity. It&apos;s negative because it reduces the school&apos;s overall carbon emissions.
-          The solar CO2 is calculated as the output of the panels times the carbon intensity of the
-          national grid at the time of the output (half hour periods). So for example a reduction
-          in CO2 offset by the school&apos;s panels from one year to the next doesn&apos;t necessarily
-          imply a loss of performance of the panels but potentially a decarbonisation of the grid.
-          As the grid decarbonises solar PV will gradually have a lower impact on reducing a
-          school&apos;s carbon emissions, but conversely the school&apos;s carbon emissions
-          from grid consumption will be lower.
-        </p>
-      )
-    end
-  end
-
   #=======================================================================================
   # shared wording save some translation costs
   class BenchmarkAnnualChangeBase < BenchmarkContentBase
@@ -886,146 +567,6 @@ module Benchmarking
     private def introduction_text
       text = I18n.t('analytics.benchmarking.content.change_in_solar_pv_since_last_year.introduction_text_html')
       ERB.new(text).result(binding)
-    end
-  end
-  #=======================================================================================
-  class BenchmarkOptimumStartAnalysis  < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-
-    private def introduction_text
-      %q(
-        <p>
-          This experimental analysis attempts to help determine whether
-          a school&apos;s optimum start control is working by looking at
-          the times the boiler has started over the last year.
-        </p>
-      )
-    end
-
-    protected def table_introduction_text
-      %q(
-        <p>
-          The &apos;standard deviation&apos; column shows over how many hours
-          the starting time has varied over the last year. If this is more than
-          an hour or so, it might indicate the optimum start control is working,
-          or it could be that someone has made lots of adjustments to the boiler
-          start time during the year.
-        </p>
-        <p>
-          The &apos;Regression model optimum start R2&apos; indicates how well
-          correlated with outside temperature the start time of the boiler was.
-          The closer to 1.0, the more correlated it was and therefore the
-          more likely the optimum start control is working well.
-        </p>
-      )
-    end
-
-    protected def caveat_text
-      %q(
-        <p>
-          However, these calculations are experimental and might not provide
-          good indicators of how well the optimum start is working for all schools.
-          Drilling down to look at the data for an individual school should provide
-          a better indication.
-        <p>
-      )
-    end
-  end
-  #=======================================================================================
-  class BenchmarkContentElectricityMeterConsolidation < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      %q(
-        <p>
-          Electricity meters can have quite high standing charges, between &pound;500
-          and &pound;5,000 per year. If a school has several electricity meters
-          it might be worth consolidating them i.e. getting your local electricity
-          network provider or energy company to reduce the number of meters in a
-          school to reduce annual standing order costs, this consolidation
-          often costs about &pound;1,000.
-        </p>
-        <p>
-          You need to consider how far apart the meters are, if for example they
-          are in the same room or cupboard the change could cost you very little.
-          The choice can also be determined by whether you have storage heaters,
-          historically it would have been cheaper to have them on a separate meter,
-          but with the advent of smart and advanced meters 10 years ago this is
-          less necessary as your energy supplier can read you meters half hourly
-          and can charge the appropriate lower cost for your overnight usage.
-        </p>
-        <p>
-          This is a simple low cost change a school can make, the chart and table below
-          attempt to estimate the potential saving based on some indicative standing charges
-          for your area; you will need to look at your bills to get a more accurate
-          estimate.
-        </p>
-      )
-    end
-
-    def table_introduction_text
-      %q(
-        <p>
-          Opportunities to save money through consolidation will only
-          exist if a school has multiple electricity meters.
-        </p>
-      )
-    end
-  end
-  #=======================================================================================
-  class BenchmarkContentGasMeterConsolidation < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      %q(
-        <p>
-          Gas meters can have quite high standing charges, between &pound;500
-          and &pound;5,000 per year. If a school has a number of gas meters
-          it might be worth consolidating them i.e. getting your local gas
-          network provider or energy company to reduce the number of meters in a
-          school to reduce annual standing order costs, this consolidation
-          often costs about &pound;1,000 but can provide guaranteed annual savings.
-        </p>
-      )
-    end
-
-    def table_introduction_text
-      %q(
-        <p>
-          Opportunities to save money through consolidation will only
-          exist if a school has multiple gas meters.
-        </p>
-      )
-    end
-  end
-  #=======================================================================================
-  class BenchmarkContentDifferentialTariffOpportunity < BenchmarkContentBase
-    include BenchmarkingNoTextMixin
-    private def introduction_text
-      %q(
-        <p>
-          Electricity is generally charged at a flat rate, for example 30p/kWh
-          whatever the time of day. Your energy company&apos;s costs however
-          vary significantly depending on supply and demand at different times
-          of day, from perhaps 7p/kWh overnight to 45p/kWh at peak times.
-          Electricity companies generally offer differential tariff&apos;s
-          (economy 7) which have lower overnight costs (typically 30p/kWh) and
-          slightly higher daytime costs (32p/kWh) to users who have high overnight
-          consumption to share the benefit of cheaper overnight wholesale costs.
-        </p>
-        <p>
-          Typically, this should benefit schools with storage heaters, however
-          many schools with storage heaters are on a single flat tariff and fail
-          to gain from lower overnight prices.
-        </p>
-        <p>
-          Many schools don&apos;t have their differential tariffs configured on
-          Energy Sparks, please get in contact if you think this is the case at
-          your school, so we can provide better analysis for your school.
-        </p>
-        <p>
-          The chart and table below estimate the potential benefit of switching
-          to or from a differential tariff.
-        </p>
-      )
     end
   end
   #=======================================================================================
