@@ -241,7 +241,8 @@ module Benchmarking
       return if benchmarks.empty?
 
       {
-        name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}"),
+        name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}.title"),
+        description: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}.description"),
         benchmarks: benchmark_titles_for(benchmark_keys, user_role)
       }
     end
