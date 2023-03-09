@@ -82,13 +82,6 @@ en:
           description: These benchmarks compare the combined energy use of a school site
           title: Total Energy Use Benchmarks
       content:
-        annual_storage_heater_out_of_hours_use:
-          introduction_text_html:
-            <p>Storage heaters consume electricity and store heat overnight when electricity is cheaper (assuming the school is on an 'economy 7' or differential tariff) and release the heat during the day.</p>
-            <p>Ensuring heating is turned off over the weekend by installing a 7 day timer can provide a very short payback. Turning off the heaters or turning them down as low as possible to avoid frost damage can save during holidays.</p>
-        recent_change_in_baseload:
-          introduction_text_html: |-
-            <p>This benchmark compares a school's current baseload (the electricity consumed by appliances kept running at all times) with their average baseload over the last year. Schools should aim to reduce their electricity baseload over time, particularly as equipment and lighting has become significantly more efficient over the last few years.</p>
         annual_electricity_costs_per_pupil:
           introduction_text_html: "<p>\n  This benchmark compares the electricity cost per pupil in the last year.\n</p>\n<p>\n  There should not be a significant difference between schools as all schools need to use roughly the same amount of ICT equipment, \n  lighting and refrigeration per pupil. Exceptions might be schools with swimming pools or sports flood lighting which can significantly \n  increase demand. Special schools also have higher electricity costs per pupil due to lower pupil densities and specialist equipment.\n</p>\n<p>\n  The data excludes storage heaters which are reported elsewhere under the 'heating' benchmarks.\n</p>"
         annual_electricity_out_of_hours_use:
@@ -121,6 +114,8 @@ en:
             <p>The benchmark is adjusted for regional temperatures over the last year, so that for example schools in Scotland are compared on the same terms as schools in the warmer south west of England.</p>
             <p>For schools heated by gas, the cost includes gas used for hot water and by the school kitchen.</p>
             <p>Schools with negative savings potential  have heating consumption below that of the best schools, which is good. For schools with storage heaters, heating costs are calculated using electricity tariff prices including differential/economy-7 tariffs if schools are on such a tariff.</p>
+        annual_storage_heater_out_of_hours_use:
+          introduction_text_html: "<p>Storage heaters consume electricity and store heat overnight when electricity is cheaper (assuming the school is on an 'economy 7' or differential tariff) and release the heat during the day.</p> <p>Ensuring heating is turned off over the weekend by installing a 7 day timer can provide a very short payback. Turning off the heaters or turning them down as low as possible to avoid frost damage can save during holidays.</p>"
         baseload_per_pupil:
           introduction_text_html: |-
             <p>
@@ -361,6 +356,8 @@ en:
               of the national grid on the days being compared and this could vary by up to
               300&percnt; from day to day.
             </p>
+        recent_change_in_baseload:
+          introduction_text_html: "<p>This benchmark compares a school's current baseload (the electricity consumed by appliances kept running at all times) with their average baseload over the last year. Schools should aim to reduce their electricity baseload over time, particularly as equipment and lighting has become significantly more efficient over the last few years.</p>"
         seasonal_baseload_variation:
           introduction_text_html: |-
             <p>A school's baseload is the electricity consumed by appliances kept running at all times.</p>
