@@ -82,6 +82,9 @@ en:
           description: These benchmarks compare the combined energy use of a school site
           title: Total Energy Use Benchmarks
       configuration:
+        column_heading_explanation:
+          last_year_definition_html: "<p>In school comparisons &apos;last year&apos; is defined as this year to date.</p>"
+          last_year_previous_year_definition_html: "<p>In school comparisons &apos;last year&apos; is defined as this year to date, &apos;previous year&apos; is defined as the year before.</p>"
         column_headings:
           annualised_£_value_of_summer_holiday_reduction: Annualised £ value of summer holiday reduction
           average_baseload_kw: Average baseload kW

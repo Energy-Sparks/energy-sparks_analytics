@@ -5,203 +5,6 @@ require_relative '../charting_and_reports/tables/management_summary_table.rb'
 module Benchmarking
 
   class BenchmarkManager
-
-    COLUMN_HEADINGS = {
-      :annualised_£_value_of_summer_holiday_reduction => "Annualised £ value of summer holiday reduction",
-                                 :average_baseload_kw => "Average baseload kW",
-                       :average_baseload_last_week_kw => "Average baseload last week (kW)",
-                       :average_baseload_last_year_kw => "Average baseload last year (kW)",
-                :average_heating_start_time_last_week => "Average heating start time last week",
-                :average_heating_start_time_last_year => "Average heating start time last year",
-                                     :average_peak_kw => "Average peak kw",
-                                :baseload_per_pupil_w => "Baseload per pupil (W)",
-                                    :baseload_percent => "Baseload as a percent of total usage",
-                                :blended_current_rate => :blended_current_rate,
-                                       :co2_last_year => "CO2 (last year)",
-                                   :co2_previous_year => "CO2 (previous year)",
-                                              :change => "Change",
-                                          :change_pct => "Change %",
-                              :change_excluding_solar => "Change (excluding solar)",
-                                :change_in_annual_co2 => "Change in annual CO2",
-    :change_in_annual_electricity_co2_excluding_solar => "Change in annual electricity CO2 (excluding solar)",
-                  :change_in_annual_electricity_usage => "Change in annual electricity usage",
-                            :change_in_annual_gas_co2 => "Change in annual gas CO2",
-           :change_in_annual_gas_storage_heater_usage => "Change in annual gas/storage heater usage",
-                       :change_in_annual_solar_pv_co2 => "Change in annual solar PV CO2",
-                 :change_in_annual_storage_heater_co2 => "Change in annual storage heater CO2",
-             :change_in_baseload_last_week_v_year_pct => "Change in baseload last week v. year (%)",
-              :change_in_baseload_last_week_v_year_kw => "Change in baseload last week v. year (kW)",
-        :change_in_heating_costs_between_last_2_years => "Change in heating costs between last 2 years",
-                                            :change_£ => "Change £",
-                                     :change_£current => "Change £ (latest tariff)",
-                                          :change_kwh => "Change kWh",
-                                             :colder? => "Colder?",
-                                           :community => "Community",
-                                :community_usage_cost => "Community usage cost",
-                          :cost_of_change_in_baseload => 'Next year cost of change in baseload',
-                                      :cost_per_pupil => "Cost per pupil",
-                   :day_of_week_with_maximum_baseload => "Day of week with maximum baseload",
-                   :day_of_week_with_minimum_baseload => "Day of week with minimum baseload",
-                                :efficiency_of_system => "Efficiency of system",
-                                         :electricity => "Electricity",
-                                  :electricity_cost_ht => "Electricity cost (historic tariff)",
-                                  :electricity_cost_ct => "Electricity cost (current tariff)",
-                           :electricity_co2_last_year => "Electricity CO2 (last year)",
-                       :electricity_co2_previous_year => "Electricity CO2 (previous year)",
-                           :electricity_kwh_per_pupil => "Electricity kWh per pupil per holiday",
-                                        :energy_total => "Energy (total)",
-                             :energy_sparks_join_date => "Energy Sparks join date",
-               :estimate_of_annual_refrigeration_cost => "Estimate of annual refrigeration cost",
-                                           :estimated => "Estimated",
-                                    :exemplar_peak_kw => "Exemplar peak kw",
-                                          :floor_area => "Floor area",
-                                                :fuel => "Fuel",
-                                                 :gas => "Gas",
-                                         :gas_cost_ht => "Gas cost (historic tariff)",
-                                         :gas_cost_ct => "Gas cost (current tariff)",
-                                   :gas_co2_last_year => "Gas CO2 (last year)",
-                               :gas_co2_previous_year => "Gas CO2 (previous year)",
-                              :gas_kwh_per_floor_area => "Gas kWh per floor area per holiday",
-                                             :holiday => "Holiday",
-                               :holiday_usage_to_date => "Holiday usage to date",
-                                           :last_year => "Last year",
-                             :last_year_electricity_£ => "Last year electricity £",
-                          :last_year_electricity_£_ct => "Last year electricity £ at current tariff",
-                          :last_year_energy_co2tonnes => "Last year Energy CO2(tonnes)",
-                                :last_year_energy_kwh => "Last year Energy kWh",
-                                     :last_year_gas_£ => "Last year Gas £",
-                          :last_year_storage_heater_£ => "Last year Storage Heater £",
-               :last_year_carbon_emissions_tonnes_co2 => "Last year carbon emissions (tonnes CO2)",
-                           :last_year_consumption_kwh => "Last year consumption kWh",
-                          :last_year_cost_of_baseload => "Last year cost of baseload",
-                                    :last_year_cost_£ => "Last year cost £",
-                       :last_year_electricity_£_pupil => "Last year electricity £/pupil",
-                    :last_year_electricity_£_pupil_ct => "Last year electricity £/pupil at current tariff",
-                     :last_year_electricity_kwh_pupil => "Last year electricity kWh/pupil",
-                             :last_year_energy_cost_£ => "Last year energy cost £",
-                       :last_year_energy_£_floor_area => "Last year energy £/floor area",
-                            :last_year_energy_£_pupil => "Last year energy £/pupil",
-                          :last_year_energy_kwh_pupil => "Last year energy kWh/pupil",
-                        :last_year_energy_kgco2_pupil => "Last year energy kgCO2/pupil",
-                               :last_year_gas_costs_£ => "Last year gas costs",
-                             :last_year_gas_kwh_pupil => "Last year gas kWh/pupil",
-              :last_year_heating_costs_per_floor_area => "Last year heating costs per floor area",
-                           :last_year_kwh_consumption => "Last year kWh consumption",
-                         :last_year_out_of_hours_cost => "Last year out of hours cost",
-             :last_year_saving_if_improve_to_exemplar => "Last year saving if improve to exemplar",
-     :last_year_saving_per_1c_reduction_in_thermostat => "Saving per 1C reduction in thermostat",
-                    :last_year_storage_heater_costs_£ => "Last year storage heater costs",
-                  :last_year_storage_heater_kwh_pupil => "Last year storage heater  kWh/pupil",
-                 :last_year_weekend_and_holiday_costs => "Last year weekend and holiday costs",
-                     :max_average_weekday_baseload_kw => "Max average weekday baseload kW",
-                                            :metering => "Metering",
-                     :min_average_weekday_baseload_kw => "Min average weekday baseload kW",
-                                 :most_recent_holiday => "Most recent holiday",
-                                                :name => "School",        
-                                      :no_recent_data => "No recent data",
-           :number_of_days_heating_on_in_warm_weather => "Number of days heating on in warm weather",
-                        :number_of_electricity_meters => "Number of electricity meters",
-                                :number_of_gas_meters => "Number of gas meters",
-                                :optimum_start_rating => "Optimum start rating",
-                                      :overall_change => "Overall change",
-                                      :overall_rating => "Overall rating",
-                                  :overnight_charging => "Overnight charging",
-                                       :payback_years => "Payback (years)",
-                    :percent_above_or_below_last_year => "Percent above or below last year",
-      :percent_above_or_below_target_since_target_set => "Percent above or below target since target set",
-     :percent_increase_on_winter_baseload_over_summer => "Percent increase on winter baseload over summer",
-:percentage_of_annual_heating_consumed_in_warm_weather => "Percentage of annual heating consumed in warm weather",
-                           :potential_annual_saving_£ => "Potential annual saving £",
-                       :potential_max_annual_saving_£ => "Potential max annual saving £",
-                                    :potential_saving => "Potential saving (at latest tariff)",
-                                    :previous_holiday => "Previous holiday",
-                                       :previous_year => "Previous year",
-                  :previous_year_temperature_adjusted => "Previous year (temperature adjusted)",
-                :previous_year_temperature_unadjusted => "Previous year (temperature unadjusted)",
-                         :previous_year_electricity_£ => "Previous year electricity £",
-                           :previous_year_gas_costs_£ => "Previous year gas costs",
-                :previous_year_storage_heater_costs_£ => "Previous year storage heater costs",
-                   :projected_usage_by_end_of_holiday => "Projected usage by end of holiday",
-                                              :pupils => "Pupils",
-                                              :rating => "rating",
-:rating_based_on_number_of_recent_years_with_reduction => "Rating based on number of recent years with reduction",
-          :reduction_in_baseload_over_summer_holidays => "Reduction in baseload over summer holidays",
-                 :reduction_in_kw_over_summer_holiday => "Reduction in kW over summer holiday",
-                  :reduction_in_mains_consumption_pct => "Reduction in mains consumption (%)",
-                   :regression_model_optimum_start_r2 => "Regression model optimum start r2",
-:regression_model_optimum_start_sensitivity_to_outside_temperature => "Regression model optimum start sensitivity to outside temperature",
-                 :regression_model_optimum_start_time => "Regression model optimum start time",
-                                       :saving_co2_kg => "Saving CO2 kg",
-:saving_during_summer_holiday_from_baseload_reduction => "Saving during summer holiday from baseload reduction",
-                       :saving_if_improve_to_exemplar => "Saving if improve to exemplar (at latest tariff)",
-                          :saving_if_match_exemplar_£ => "Saving if match exemplar (£ at latest tariff)",
-                   :saving_if_matched_exemplar_school => "Saving if matched exemplar school (using latest tariff)",
-                         :saving_if_moved_to_exemplar => "Saving if moved to exemplar (at latest tariff)",
-                      :saving_if_same_all_year_around => "Saving if same all year around (at latest tariff)",
-                             :saving_improving_timing => "Saving improving timing",
-                               :saving_optimal_panels => "Annual saving at latest tariff if optimal panel size installed",
-                          :saving_over_summer_holiday => "Saving over summer holiday",
-        :saving_through_improved_thermostatic_control => "Saving through improved thermostatic control",
-:saving_through_turning_heating_off_in_warm_weather_kwh => "Saving through turning heating off in warm weather (kWh)",
-                  :saving_with_pou_electric_hot_water => "Saving with POU electric hot water",
-                                            :saving_£ => "Saving £",
-                                   :school_day_closed => "School Day Closed",
-                                     :school_day_open => "School Day Open",
-                                           :school_id => "School id",
-                                         :school_name => "School name",
-                            :size_of_reduction_rating => "Size of reduction rating",
-                                            :size_kwp => "Size: kWp",
-                                            :solar_pv => "Solar PV",
-                              :solar_pv_co2_last_year => "Solar PV CO2 (last year)",
-                          :solar_pv_co2_previous_year => "Solar PV CO2 (previous year)",
-  :standard_deviation_of_start_time__hours_last_year => "Standard deviation of start time - hours, last year",
-                               :start_date_for_target => "Start date for target",
-                        :storage_heater_co2_last_year => "Storage Heater CO2 (last year)",
-                    :storage_heater_co2_previous_year => "Storage Heater CO2 (previous year)",
-                                     :storage_heaters => "Storage heaters",
-                                  :summer_baseload_kw => "Summer baseload kW",
-                              :target_kwh_consumption => "Target kWh consumption",
-                                :temperature_adjusted => "Temperature adjusted",
-                              :temperature_unadjusted => "Temperature unadjusted",
-                            :temperature_adjusted_kwh => "Temperature adjusted change (kWh)",
-                                     :thermostatic_r2 => "Thermostatic R2",
-                                :total_energy_costs_£ => "Total Energy Costs £",
-                                                :type => "Type",
-                                                 :urn => "URN",
-                                          :unadjusted => "Unadjusted",
-                                      :unadjusted_kwh => "Unadjusted change (kWh)",
-          :variation_in_baseload_between_days_of_week => "Variation in baseload between days of week",
-                                             :weekend => "Weekend",
-                                  :winter_baseload_kw => "Winter baseload kW",
-                                  :year_before_joined => "Year before joined",
-                    :kwh_consumption_since_target_set => "kWh consumption since target set",
-                                      :tariff_changed => :tariff_changed,
-                               :tariff_changed_period => :tariff_changed_period,
-                                        :w_floor_area => "w/floor area"
-    }.freeze
-
-    def self.ch(key)
-      if COLUMN_HEADINGS.key?(key)
-        COLUMN_HEADINGS[key]
-      else
-        raise EnergySparksUnexpectedStateException, "Unexpected key #{key} #{key.class.name} for benchmark column heading"
-      end
-    end
-
-    def self.column_headings_refer_to(column_heading, key)
-      return nil if column_heading.nil?
-
-      column_heading.to_s.downcase.include?(COLUMN_HEADINGS[key].to_s.downcase)
-    end
-
-    def self.column_heading_refers_to_last_year?(column_heading)
-      column_headings_refer_to(column_heading, :last_year)
-    end
-
-    def self.column_heading_refers_to_previous_year?(column_heading)
-      column_headings_refer_to(column_heading, :previous_year)
-    end
-
     def self.chart_table_config(name)
       CHART_TABLE_CONFIG[name]
     end
@@ -350,20 +153,20 @@ module Benchmarking
 
     def self.tariff_changed_school_name(content_class = nil)
       if content_class.nil?
-        { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: String, chart_data: true }
+        { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: :name, units: String, chart_data: true }
       else
-        { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: ch(:name), units: String, chart_data: true, content_class: content_class }
+        { data: ->{ tariff_change_reference(addp_name, addp_etch || addp_gtch)}, name: :name, units: String, chart_data: true, content_class: content_class }
       end
     end
 
     def self.tariff_changed_between_periods(changed)
-      { data: changed, name: ch(:tariff_changed_period), units: TrueClass, hidden: true }
+      { data: changed, name: :tariff_changed_period, units: TrueClass, hidden: true }
     end
 
-    TARIFF_CHANGED_COL        = { data: ->{ addp_etch || addp_gtch }, name: ch(:tariff_changed), units: TrueClass, hidden: true }
+    TARIFF_CHANGED_COL        = { data: ->{ addp_etch || addp_gtch }, name: :tariff_changed, units: TrueClass, hidden: true }
 
     def self.blended_baseload_rate_col(variable)
-      { data: variable, name: ch(:blended_current_rate), units: :£_per_kwh, hidden: true }
+      { data: variable, name: :blended_current_rate, units: :£_per_kwh, hidden: true }
     end
 
     CHART_TABLE_CONFIG = {
@@ -386,7 +189,8 @@ module Benchmarking
         sort_by:  method(:sort_energy_costs),
         type: %i[chart table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark },
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       annual_energy_costs: {
         benchmark_class:  BenchmarkContentTotalAnnualEnergy,
@@ -406,7 +210,8 @@ module Benchmarking
         ],
         sort_by:  [4],
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_previous_year_definition_html        
       },
       annual_energy_costs_per_floor_area: {
         benchmark_class:  BenchmarkContentEnergyPerFloorArea,
@@ -419,7 +224,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       change_in_energy_use_since_joined_energy_sparks: {
         benchmark_class:  BenchmarkContentChangeInEnergyUseSinceJoined,
@@ -458,7 +264,7 @@ module Benchmarking
                                       sum_data([lue1_cppk, lug1_cppk, lus1_cppk]),
                                       true
                                     ) },
-            name: ch(:change_pct), units: :relative_percent_0dp
+            name: :change_pct, units: :relative_percent_0dp
           },
 
           # CO2
@@ -470,7 +276,7 @@ module Benchmarking
                                       sum_data([lue1_cppc, lug1_cppc, lus1_cppc]),
                                       true
                                     ) },
-            name: ch(:change_pct), units: :relative_percent_0dp
+            name: :change_pct, units: :relative_percent_0dp
           },
 
           # £
@@ -495,7 +301,7 @@ module Benchmarking
                 lus1_ppp£.nil? ? nil : 'Storage Heaters'
               ].compact.join(', ')
             },
-            name: ch(:metering),
+            name: :metering,
             units: String
           },
         ],
@@ -539,7 +345,7 @@ module Benchmarking
                                       sum_data([a22e_cppc, a22g_cppc, a22s_cppc]),
                                       true
                                     ) },
-            name: ch(:change_pct), units: :relative_percent_0dp
+            name: :change_pct, units: :relative_percent_0dp
           },
 
           # £
@@ -564,7 +370,7 @@ module Benchmarking
                 a22s_ppp£.nil? ? nil : 'Storage Heaters'
               ].compact.join(', ')
             },
-            name: ch(:metering),
+            name: :metering,
             units: String
           },
           TARIFF_CHANGED_COL
@@ -763,7 +569,8 @@ module Benchmarking
         sort_by:  [3],
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark },
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       change_in_gas_since_last_year: {
         benchmark_class:  BenchmarkChangeInGasSinceLastYear,
@@ -801,7 +608,7 @@ module Benchmarking
         benchmark_class:  BenchmarkChangeInStorageHeatersSinceLastYear,
         name:     'Change in storage heater consumption since last year',
         columns:  [
-          { data: 'addp_name',  name: ch(:name), units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
+          { data: 'addp_name',  name: :name, units: :short_school_name, chart_data: true, content_class: AdviceBenchmark },
 
           { data: ->{ enba_khn  },                         name: :previous_year,  units: :kwh },
           { data: ->{ shan_kpya },                         name: :previous_year_temperature_adjusted,  units: :kwh },
@@ -826,7 +633,8 @@ module Benchmarking
         sort_by:  [3],
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceStorageHeaters },
-        admin_only: false        
+        admin_only: false,
+        column_heading_explanation: :last_year_previous_year_definition_html             
       },
       change_in_solar_pv_since_last_year: {
         benchmark_class:  BenchmarkChangeInSolarPVSinceLastYear,
@@ -854,7 +662,7 @@ module Benchmarking
         sort_by:  [3],
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceSolarPV },
-        admin_only: false        
+        admin_only: false  
       },
       annual_electricity_costs_per_pupil: {
         benchmark_class:  BenchmarkContentElectricityPerPupil,
@@ -868,7 +676,8 @@ module Benchmarking
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
         type: %i[table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html        
       },
       electricity_targets: {
         benchmark_class:  BenchmarkElectricityTarget,
@@ -884,7 +693,8 @@ module Benchmarking
         ],
         sort_by:  [1], # column 1 i.e. annual refrigeration costs
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       annual_electricity_out_of_hours_use: {
         benchmark_class: BenchmarkContentElectricityOutOfHoursUsage,
@@ -904,7 +714,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       recent_change_in_baseload: {
         benchmark_class: BenchmarkContentChangeInBaseloadSinceLastYear,
@@ -942,7 +753,8 @@ module Benchmarking
         where:   ->{ !elbb_blpp.nil? },
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false        
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       seasonal_baseload_variation: {
         benchmark_class: BenchmarkSeasonalBaseloadVariation,
@@ -1031,7 +843,8 @@ module Benchmarking
         where:   ->{ !gsba_co2y.nil? },
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false        
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       annual_gas_out_of_hours_use: {
         benchmark_class: BenchmarkContentGasOutOfHoursUsage,
@@ -1051,7 +864,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       gas_targets: {
         benchmark_class:  BenchmarkGasTarget,
@@ -1067,7 +881,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       annual_storage_heater_out_of_hours_use: {
         benchmark_class: BenchmarkContentStorageHeaterOutOfHoursUsage,
@@ -1098,7 +913,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       thermostat_sensitivity: {
         benchmark_class:  BenchmarkContentThermostaticSensitivity,
@@ -1178,7 +994,7 @@ module Benchmarking
         benchmark_class: BenchmarkContentChangeInElectricityBetweenLast2Holidays,
         name:     'Change in electricity consumption between the 2 most recent holidays',
         columns:  [
-          { data: ->{ referenced(addp_name, ephc_pnch, ephc_difp, ephc_cppp) }, name: ch(:name),     units: String, chart_data: true, column_id: :school_name },
+          { data: ->{ referenced(addp_name, ephc_pnch, ephc_difp, ephc_cppp) }, name: :name,     units: String, chart_data: true, column_id: :school_name },
           { data: ->{ ephc_difp },  name: :change_pct, units: :relative_percent_0dp, chart_data: true, column_id: :percent_changed },
           { data: ->{ ephc_dif€ },  name: :change_£current, units: :£_0dp },
           { data: ->{ ephc_difk },  name: :change_kwh, units: :kwh },
