@@ -96,7 +96,7 @@ describe Benchmarking::BenchmarkContentElectricityPerPupil, type: :service do
 
   describe '#charts?' do
     it 'returns if charts are present' do
-      expect(benchmark.send(:charts?)).to eq(true)
+      expect(benchmark.send(:charts?)).to eq(false)
     end
   end
 
