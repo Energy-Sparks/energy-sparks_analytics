@@ -266,7 +266,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
     header = ['Tariff type', 'Rate']
     html_table(header, table)
   end
-  
+
   def add_tooltips_to_table(table)
     table.map do |(tariff_type, rate)|
       [
@@ -294,7 +294,7 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   def if_not_full_tariff_coverage_html(tariff_info)
     html = ''
     contact_us_for_tariff_setup = false
- 
+
     if tariff_info[:start_date] > meter.amr_data.start_date
       contact_us_for_tariff_setup = true
       html += %{

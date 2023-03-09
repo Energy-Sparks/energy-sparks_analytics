@@ -3,19 +3,19 @@
 require 'spec_helper'
 require 'active_support/core_ext'
 
-describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
+describe Benchmarking::BenchmarkContentChangeInElectricityBetweenLast2Holidays, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkSeasonalBaseloadVariation.new(
+    Benchmarking::BenchmarkContentChangeInElectricityBetweenLast2Holidays.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
-      :seasonal_baseload_variation,
-      Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG[:seasonal_baseload_variation]
+      :change_in_electricity_holiday_consumption_previous_holiday,
+      Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG[:change_in_electricity_holiday_consumption_previous_holiday]
     )
   end
 
   describe '#page' do
     it 'returns a chart name if charts are present' do
-      expect(benchmark.page_name).to eq(:seasonal_baseload_variation)
+      expect(benchmark.page_name).to eq(:change_in_electricity_holiday_consumption_previous_holiday)
     end
   end
 
@@ -24,31 +24,30 @@ describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
       html = benchmark.send(:content_title)
       expect(html).to match_html(<<~HTML)
         <h1>
-          Seasonal baseload variation
+          Change in electricity use between the last two holidays
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.seasonal_baseload_variation") + '</h1>'
+      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_electricity_holiday_consumption_previous_holiday") + '</h1>'
       expect(html).to match_html(title_html)
     end
   end
-
 
   describe 'introduction_text' do
     it 'formats introduction and any caveat text as html' do
       html = benchmark.send(:introduction_text)
       expect(html).to match_html(<<~HTML)
         <p>
-          A school's baseload is the electricity consumed by appliances kept running at all times.
+          This benchmark shows the change in electricity consumption between the two most recent holidays.
         </p>
         <p>
-          In general, the baseload in the winter should be very similar to the summer. In practice many schools leave electric heaters on overnight when the school is unoccupied. Identifying and turning off or better timing such equipment is a quick way of saving electricity and costs.
+          This comparison compares the latest available data for the most recent holiday with an adjusted figure for the previous holiday, scaling to the same number of days and the latest tariff. The change in £ is the saving or increased cost for the most recent holiday to date.
         </p>
         <p>
-          This breakdown excludes electricity consumed by storage heaters and solar PV.
+          An infinite or incalculable value indicates the consumption in the first period was zero.
         </p>
       HTML
-      content_html = I18n.t('analytics.benchmarking.content.seasonal_baseload_variation.introduction_text_html')
-      content_html += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+      content_html = I18n.t('analytics.benchmarking.content.change_in_electricity_holiday_consumption_previous_holiday.introduction_text_html')
+      content_html += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       expect(html).to match_html(content_html)
     end
   end
@@ -77,7 +76,7 @@ describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
 
   describe '#chart_name' do
     it 'returns a chart name if charts are present' do
-      expect(benchmark.send(:chart_name)).to eq(:seasonal_baseload_variation)
+      expect(benchmark.send(:chart_name)).to eq(:change_in_electricity_holiday_consumption_previous_holiday)
     end
   end
 

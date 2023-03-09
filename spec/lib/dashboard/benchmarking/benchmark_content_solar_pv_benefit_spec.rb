@@ -3,19 +3,19 @@
 require 'spec_helper'
 require 'active_support/core_ext'
 
-describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
+describe Benchmarking::BenchmarkContentSolarPVBenefit, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkSeasonalBaseloadVariation.new(
+    Benchmarking::BenchmarkContentSolarPVBenefit.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
-      :seasonal_baseload_variation,
-      Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG[:seasonal_baseload_variation]
+      :solar_pv_benefit_estimate,
+      Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG[:solar_pv_benefit_estimate]
     )
   end
 
   describe '#page' do
     it 'returns a chart name if charts are present' do
-      expect(benchmark.page_name).to eq(:seasonal_baseload_variation)
+      expect(benchmark.page_name).to eq(:solar_pv_benefit_estimate)
     end
   end
 
@@ -24,31 +24,28 @@ describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
       html = benchmark.send(:content_title)
       expect(html).to match_html(<<~HTML)
         <h1>
-          Seasonal baseload variation
+          Benefit of solar PV installation
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.seasonal_baseload_variation") + '</h1>'
+      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.solar_pv_benefit_estimate") + '</h1>'
       expect(html).to match_html(title_html)
     end
   end
-
 
   describe 'introduction_text' do
     it 'formats introduction and any caveat text as html' do
       html = benchmark.send(:introduction_text)
       expect(html).to match_html(<<~HTML)
         <p>
-          A school's baseload is the electricity consumed by appliances kept running at all times.
-        </p>
-        <p>
-          In general, the baseload in the winter should be very similar to the summer. In practice many schools leave electric heaters on overnight when the school is unoccupied. Identifying and turning off or better timing such equipment is a quick way of saving electricity and costs.
-        </p>
-        <p>
-          This breakdown excludes electricity consumed by storage heaters and solar PV.
+          This benchmark shows the benefit of installing solar PV panels at schools which don't already
+          have solar PV panels fitted. This analysis uses half hourly electricity consumption data for each
+          school over the last year combined with local half hourly solar generation data to work out the
+          benefit of installing solar panels. The payback and savings are calculated using the school's most
+          recent tariff. Further detail is provided if you drill down to a school's individual analysis - where a
+          range of different scenarios for different numbers of panels is presented.
         </p>
       HTML
-      content_html = I18n.t('analytics.benchmarking.content.seasonal_baseload_variation.introduction_text_html')
-      content_html += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+      content_html = I18n.t('analytics.benchmarking.content.solar_pv_benefit_estimate.introduction_text_html')
       expect(html).to match_html(content_html)
     end
   end
@@ -71,13 +68,13 @@ describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
 
   describe '#charts?' do
     it 'returns if charts are present' do
-      expect(benchmark.send(:charts?)).to eq(true)
+      expect(benchmark.send(:charts?)).to eq(false)
     end
   end
 
   describe '#chart_name' do
     it 'returns a chart name if charts are present' do
-      expect(benchmark.send(:chart_name)).to eq(:seasonal_baseload_variation)
+      expect(benchmark.send(:chart_name)).to eq(:solar_pv_benefit_estimate)
     end
   end
 

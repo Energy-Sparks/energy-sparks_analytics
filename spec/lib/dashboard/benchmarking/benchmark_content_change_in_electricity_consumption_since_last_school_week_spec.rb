@@ -3,19 +3,19 @@
 require 'spec_helper'
 require 'active_support/core_ext'
 
-describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
+describe Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek, type: :service do
   let(:benchmark) do
-    Benchmarking::BenchmarkSeasonalBaseloadVariation.new(
+    Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSchoolWeek.new(
       benchmark_database_hash,
       benchmark_database_hash.keys.first,
-      :seasonal_baseload_variation,
-      Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG[:seasonal_baseload_variation]
+      :change_in_electricity_consumption_recent_school_weeks,
+      Benchmarking::BenchmarkManager::CHART_TABLE_CONFIG[:change_in_electricity_consumption_recent_school_weeks]
     )
   end
 
   describe '#page' do
     it 'returns a chart name if charts are present' do
-      expect(benchmark.page_name).to eq(:seasonal_baseload_variation)
+      expect(benchmark.page_name).to eq(:change_in_electricity_consumption_recent_school_weeks)
     end
   end
 
@@ -23,32 +23,22 @@ describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
     it 'returns the content title' do
       html = benchmark.send(:content_title)
       expect(html).to match_html(<<~HTML)
-        <h1>
-          Seasonal baseload variation
-        </h1>
+        <h1>Recent change in electricity use</h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.seasonal_baseload_variation") + '</h1>'
+      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_electricity_consumption_recent_school_weeks") + '</h1>'
       expect(html).to match_html(title_html)
     end
   end
-
 
   describe 'introduction_text' do
     it 'formats introduction and any caveat text as html' do
       html = benchmark.send(:introduction_text)
       expect(html).to match_html(<<~HTML)
-        <p>
-          A school's baseload is the electricity consumed by appliances kept running at all times.
-        </p>
-        <p>
-          In general, the baseload in the winter should be very similar to the summer. In practice many schools leave electric heaters on overnight when the school is unoccupied. Identifying and turning off or better timing such equipment is a quick way of saving electricity and costs.
-        </p>
-        <p>
-          This breakdown excludes electricity consumed by storage heaters and solar PV.
-        </p>
+        <p>This benchmark shows the change in electricity consumption over the last two school weeks. You should expect a small increase in electricity consumption going into the winter with increased lighting usage and a subsequent reduction in the spring.</p>
+        <p>An infinite or incalculable value indicates the consumption in the first period was zero.</p>
       HTML
-      content_html = I18n.t('analytics.benchmarking.content.seasonal_baseload_variation.introduction_text_html')
-      content_html += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+      content_html = I18n.t('analytics.benchmarking.content.change_in_electricity_consumption_recent_school_weeks.introduction_text_html')
+      content_html += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       expect(html).to match_html(content_html)
     end
   end
@@ -77,7 +67,7 @@ describe Benchmarking::BenchmarkSeasonalBaseloadVariation, type: :service do
 
   describe '#chart_name' do
     it 'returns a chart name if charts are present' do
-      expect(benchmark.send(:chart_name)).to eq(:seasonal_baseload_variation)
+      expect(benchmark.send(:chart_name)).to eq(:change_in_electricity_consumption_recent_school_weeks)
     end
   end
 
