@@ -190,7 +190,7 @@ module Benchmarking
         type: %i[chart table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark },
         admin_only: false,
-        column_heading_explanation: :last_year_previous_year_definition_html
+        column_heading_explanation: :last_year_definition_html
       },
       annual_energy_costs: {
         benchmark_class:  BenchmarkContentTotalAnnualEnergy,
@@ -211,7 +211,7 @@ module Benchmarking
         sort_by:  [4],
         type: %i[chart table],
         admin_only: false,
-        column_heading_explanation: :last_year_previous_year_definition_html        
+        column_heading_explanation: :last_year_definition_html        
       },
       annual_energy_costs_per_floor_area: {
         benchmark_class:  BenchmarkContentEnergyPerFloorArea,
@@ -315,7 +315,8 @@ module Benchmarking
         where:   ->{ !sum_data([lue1_ppp£, lug1_ppp£, lus1_ppp£], true).nil? },
         sort_by:  [9],
         type: %i[chart table],
-        admin_only: true
+        admin_only: true,
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       autumn_term_2021_2022_energy_comparison: {
         benchmark_class:  BenchmarkAutumn2022Comparison,
@@ -385,7 +386,8 @@ module Benchmarking
         where:   ->{ !sum_data([a22e_ppp£, a22g_ppp£, a22s_ppp£], true).nil? },
         sort_by:  [9],
         type: %i[chart table],
-        admin_only: true
+        admin_only: true,
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       sept_nov_2021_2022_energy_comparison: {
         benchmark_class:  BenchmarkSeptNov2022Comparison,
@@ -455,7 +457,8 @@ module Benchmarking
         where:   ->{ !sum_data([s22e_ppp£, s22g_ppp£, s22s_ppp£], true).nil? },
         sort_by:  [9],
         type: %i[chart table],
-        admin_only: true
+        admin_only: true,
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       change_in_energy_since_last_year: {
         benchmark_class:  BenchmarkChangeInEnergySinceLastYear,
@@ -536,7 +539,8 @@ module Benchmarking
         sort_by:  method(:sort_by_nil),
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark },
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       change_in_electricity_since_last_year: {
         benchmark_class:  BenchmarkChangeInElectricitySinceLastYear,
@@ -570,7 +574,7 @@ module Benchmarking
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceBenchmark },
         admin_only: false,
-        column_heading_explanation: :last_year_definition_html
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       change_in_gas_since_last_year: {
         benchmark_class:  BenchmarkChangeInGasSinceLastYear,
@@ -602,7 +606,8 @@ module Benchmarking
         sort_by:  [3],
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceGasLongTerm },
-        admin_only: false        
+        admin_only: false,
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       change_in_storage_heaters_since_last_year: {
         benchmark_class:  BenchmarkChangeInStorageHeatersSinceLastYear,
@@ -662,7 +667,8 @@ module Benchmarking
         sort_by:  [3],
         type: %i[table],
         drilldown:  { type: :adult_dashboard, content_class: AdviceSolarPV },
-        admin_only: false  
+        admin_only: false,
+        column_heading_explanation: :last_year_previous_year_definition_html
       },
       annual_electricity_costs_per_pupil: {
         benchmark_class:  BenchmarkContentElectricityPerPupil,
@@ -734,7 +740,8 @@ module Benchmarking
         where:   ->{ !elbc_bspc.nil? },
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       baseload_per_pupil: {
         benchmark_class: BenchmarkContentBaseloadPerPupil,
@@ -898,7 +905,8 @@ module Benchmarking
         ],
         sort_by:  [1],
         type: %i[chart table],
-        admin_only: false
+        admin_only: false,
+        column_heading_explanation: :last_year_definition_html
       },
       heating_coming_on_too_early: {
         benchmark_class:  BenchmarkHeatingComingOnTooEarly,

@@ -264,7 +264,7 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
      { type: :html, content: ' <h3>Table interpretation</h3> ' },
      { type: :html, content: '' },
      { type: :html,
-       content: "<p>In school comparisons &apos;last year&apos; is defined as this year to date, &apos;previous year&apos; is defined as the year before.</p>" },
+       content: "<p>In school comparisons &apos;last year&apos; is defined as this year to date.</p>" },
      { type: :html, content: ' <h3>Caveat</h3> ' },
      { type: :drilldown,
        content: { drilldown: { type: :adult_dashboard, content_class: AdviceBenchmark },

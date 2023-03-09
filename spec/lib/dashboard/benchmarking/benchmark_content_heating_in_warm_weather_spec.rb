@@ -88,7 +88,7 @@ describe Benchmarking::BenchmarkContentHeatingInWarmWeather, type: :service do
 
   describe '#column_heading_explanation' do
     it 'returns the benchmark column_heading_explanation' do
-      html = benchmark.column_heading_explanation([795], nil, nil)
+      html = benchmark.column_heading_explanation
       expect(html).to match_html(<<~HTML)
       HTML
     end

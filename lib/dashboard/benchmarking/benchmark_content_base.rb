@@ -185,6 +185,9 @@ module Benchmarking
     end
 
     def column_heading_explanation
+      return '' unless @chart_table_config[:column_heading_explanation]
+
+
       I18n.t("analytics.benchmarking.configuration.column_heading_explanation.#{@chart_table_config[:column_heading_explanation]}", default: '')
     end
 
