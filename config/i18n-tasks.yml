@@ -121,7 +121,6 @@ ignore_unused:
   - 'analytics.common.*'
   - 'analytics.school_types.*'
   - 'analytics.series_data_manager.*'
-  - 'analytics.benchmarking.configuration.column_headings.*'
 # - 'activerecord.attributes.*'
 # - '{devise,kaminari,will_paginate}.*'
 # - 'simple_form.{yes,no}'
