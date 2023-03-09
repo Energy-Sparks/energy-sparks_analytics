@@ -263,7 +263,7 @@ module Benchmarking
     def remove_hidden_columns(table_definition, rows, hide_visible_columns)
       visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
 
-      header    = table_definition[:columns].map{ |column_definition| column_definition[:name] }
+      header    = table_definition[:columns].map{ |column_definition| I18n.t("analytics.benchmarking.configuration.column_headings.#{column_definition[:name]}") }
       header    = visible_data(table_definition, header, hide_visible_columns)
       raw_rows  =  rows.map { |row| visible_data(table_definition, row[:data], hide_visible_columns) }
       [header, raw_rows]
@@ -482,7 +482,7 @@ module Benchmarking
     end
 
     def rating_column?(column_specification)
-      column_specification[:name] == 'rating'
+      column_specification[:name] == :rating
     end
 
     def calculate_value(row, column_specification, school_id_debug)
