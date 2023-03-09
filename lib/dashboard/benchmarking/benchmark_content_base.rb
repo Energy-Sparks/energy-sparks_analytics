@@ -51,7 +51,7 @@ module Benchmarking
           tables.push({ type: :html,            content: footnote_text })
           tables.push({ type: :html,            content: table_interpretation_text })
           tables.push({ type: :html,            content: tariff_changed_explanation(school_ids, filter, user_type) })
-          tables.push({ type: :html,            content: column_heading_explanation(school_ids, filter, user_type) })
+          tables.push({ type: :html,            content: column_heading_explanation })
         end
 
         caveats = [{ type: :html, content: caveat_text}]
@@ -184,18 +184,11 @@ module Benchmarking
       table_data[key] ||= benchmark_manager.run_table_including_aggregate_columns(asof_date, page_name, school_ids, nil, filter, :raw, user_type)
     end
 
-    def column_heading_explanation(school_ids, filter, user_type)
-      cols = column_headings(school_ids, filter, user_type)
-      last_year_columns     = cols.any?{ |ch| BenchmarkManager.column_heading_refers_to_last_year?(ch) }
-      previous_year_columns = cols.any?{ |ch| BenchmarkManager.column_heading_refers_to_previous_year?(ch) }
+    def column_heading_explanation
+      return '' unless @chart_table_config[:column_heading_explanation]
 
-      if previous_year_columns
-        CAVEAT_TEXT[:last_year_previous_year_definition]
-      elsif last_year_columns
-        CAVEAT_TEXT[:last_year_definition]
-      else
-        ''
-      end
+
+      I18n.t("analytics.benchmarking.configuration.column_heading_explanation.#{@chart_table_config[:column_heading_explanation]}", default: '')
     end
 
     def includes_tariff_changed_column?(school_ids, filter, user_type)

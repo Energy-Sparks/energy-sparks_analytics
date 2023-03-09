@@ -263,7 +263,9 @@ module Benchmarking
     def remove_hidden_columns(table_definition, rows, hide_visible_columns)
       visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
 
-      header    = table_definition[:columns].map{ |column_definition| column_definition[:name] }
+      header    = table_definition[:columns].map do |column_definition|
+        I18n.t("analytics.benchmarking.configuration.column_headings.#{column_definition[:name].downcase}") if column_definition[:name]
+      end
       header    = visible_data(table_definition, header, hide_visible_columns)
       raw_rows  =  rows.map { |row| visible_data(table_definition, row[:data], hide_visible_columns) }
       [header, raw_rows]
@@ -445,7 +447,7 @@ module Benchmarking
       chart_column_numbers.each_with_index do |chart_column_number, index|
         next if index == 0 # skip entry as its the school name
         data = remove_first_column(table.map{ |row| row[chart_column_number] })
-        series_name = chart_columns_definitions[index][:name]
+        series_name = I18n.t("analytics.benchmarking.configuration.column_headings.#{chart_columns_definitions[index][:name].downcase}")
         if axis == :y1 && self.class.y1_axis_column?(chart_columns_definitions[index])
           chart_data[series_name] = data
           percent_type = %i[percent relative_percent percent_0dp relative_percent_0dp].include?(chart_columns_definitions[1][:units])
@@ -482,7 +484,7 @@ module Benchmarking
     end
 
     def rating_column?(column_specification)
-      column_specification[:name] == 'rating'
+      column_specification[:name] == :rating
     end
 
     def calculate_value(row, column_specification, school_id_debug)

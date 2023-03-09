@@ -82,6 +82,9 @@ en:
           description: These benchmarks compare the combined energy use of a school site
           title: Total Energy Use Benchmarks
       configuration:
+        column_heading_explanation:
+          last_year_definition_html: "<p>In school comparisons &apos;last year&apos; is defined as this year to date.</p>"
+          last_year_previous_year_definition_html: "<p>In school comparisons &apos;last year&apos; is defined as this year to date, &apos;previous year&apos; is defined as the year before.</p>"
         column_headings:
           annualised_£_value_of_summer_holiday_reduction: Annualised £ value of summer holiday reduction
           average_baseload_kw: Average baseload kW
@@ -222,6 +225,7 @@ en:
           saving_through_turning_heating_off_in_warm_weather_kwh: Saving through turning heating off in warm weather (kWh)
           saving_with_pou_electric_hot_water: Saving with POU electric hot water
           saving_£: Saving £
+          school: School
           school_day_closed: School Day Closed
           school_day_open: School Day Open
           school_id: School id
@@ -403,6 +407,12 @@ en:
               joined Energy Sparks. So for the year before the school joined Energy Sparks versus
               the latest year.
             </p>
+        change_in_energy_use_since_joined_full_data:
+          introduction_text_html: |-
+            <p>
+              This table provides a more detailed breakdown of the data provided in the chart
+              and table above.
+            </p>
         change_in_gas_consumption_recent_school_weeks:
           introduction_text_html: |-
             <p>
@@ -528,6 +538,34 @@ en:
               to compare for short periods as it is dependent on the carbon intensity
               of the national grid on the days being compared and this could vary by up to
               300&percnt; from day to day.
+            </p>
+        optimum_start_analysis:
+          caveat_text_html: |-
+            <p>
+              However, these calculations are experimental and might not provide
+              good indicators of how well the optimum start is working for all schools.
+              Drilling down to look at the data for an individual school should provide
+              a better indication.
+            <p>
+          introduction_text_html: |-
+            <p>
+              This experimental analysis attempts to help determine whether
+              a school&apos;s optimum start control is working by looking at
+              the times the boiler has started over the last year.
+            </p>
+          table_introduction_text_html: |-
+            <p>
+              The &apos;standard deviation&apos; column shows over how many hours
+              the starting time has varied over the last year. If this is more than
+              an hour or so, it might indicate the optimum start control is working,
+              or it could be that someone has made lots of adjustments to the boiler
+              start time during the year.
+            </p>
+            <p>
+              The &apos;Regression model optimum start R2&apos; indicates how well
+              correlated with outside temperature the start time of the boiler was.
+              The closer to 1.0, the more correlated it was and therefore the
+              more likely the optimum start control is working well.
             </p>
         recent_change_in_baseload:
           introduction_text_html: "<p>This benchmark compares a school's current baseload (the electricity consumed by appliances kept running at all times) with their average baseload over the last year. Schools should aim to reduce their electricity baseload over time, particularly as equipment and lighting has become significantly more efficient over the last few years.</p>"

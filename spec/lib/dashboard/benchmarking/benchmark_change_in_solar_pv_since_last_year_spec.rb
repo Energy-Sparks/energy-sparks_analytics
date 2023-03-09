@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkChangeInSolarPVSinceLastYear, type: :service do
           Annual change in solar PV production and resulting CO2 savings
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_solar_pv_since_last_year") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_solar_pv_since_last_year')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -122,7 +122,7 @@ describe Benchmarking::BenchmarkChangeInSolarPVSinceLastYear, type: :service do
 
   describe '#column_heading_explanation' do
     it 'returns the benchmark column_heading_explanation' do
-      html = benchmark.column_heading_explanation([795], nil, nil)
+      html = benchmark.column_heading_explanation
       expect(html).to match_html(<<~HTML)
         <p>
           In school comparisons &apos;last year&apos; is defined as this year to date,
@@ -130,5 +130,13 @@ describe Benchmarking::BenchmarkChangeInSolarPVSinceLastYear, type: :service do
         </p>
       HTML
     end
-  end  
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+  end
 end

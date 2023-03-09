@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentChangeInGasBetweenLast2Holidays, type: :s
           Change in gas use between the last two holidays
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_gas_holiday_consumption_previous_holiday") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_gas_holiday_consumption_previous_holiday')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -41,7 +41,7 @@ describe Benchmarking::BenchmarkContentChangeInGasBetweenLast2Holidays, type: :s
         <p>An infinite or incalculable value indicates the consumption in the first period was zero.</p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.change_in_gas_holiday_consumption_previous_holiday.introduction_text_html') +
-        I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
+                     I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       expect(html).to match_html(content_html)
     end
   end
@@ -90,9 +90,17 @@ describe Benchmarking::BenchmarkContentChangeInGasBetweenLast2Holidays, type: :s
 
   describe '#column_heading_explanation' do
     it 'returns the benchmark column_heading_explanation' do
-      html = benchmark.column_heading_explanation([795], nil, nil)
+      html = benchmark.column_heading_explanation
       expect(html).to match_html(<<~HTML)
       HTML
     end
-  end  
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+  end
 end

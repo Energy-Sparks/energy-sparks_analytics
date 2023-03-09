@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkAutumn2022Comparison, type: :service do
           Autumn Term 2021 versus 2022 energy use
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.autumn_term_2021_2022_energy_comparison") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.autumn_term_2021_2022_energy_comparison')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -100,13 +100,21 @@ describe Benchmarking::BenchmarkAutumn2022Comparison, type: :service do
 
   describe '#column_heading_explanation' do
     it 'returns the benchmark column_heading_explanation' do
-      html = benchmark.column_heading_explanation([795], nil, nil)
+      html = benchmark.column_heading_explanation
       expect(html).to match_html(<<~HTML)
         <p>
           In school comparisons &apos;last year&apos; is defined as this year to date,
           &apos;previous year&apos; is defined as the year before.
         </p>
       HTML
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
     end
   end
 end

@@ -2,114 +2,6 @@ require_relative './benchmark_no_text_mixin.rb'
 require_relative './benchmark_content_base.rb'
 
 module Benchmarking
-  CAVEAT_TEXT = {
-    es_doesnt_have_all_meter_data: %q(
-      <p>
-        The table provides the information in more detail.
-        Energy Sparks doesn&apos;t have a full set of meter data
-        for some schools, for example rural schools with biomass or oil boilers,
-        so this comparison might not be relevant for all schools. The comparison
-        excludes the benefit of any solar PV which might be installed - so looks
-        at energy consumption only.
-      </p>
-    ),
-    es_data_not_in_sync: %q(
-      <p>
-        The gas, electricity and storage heater costs are all using the latest
-        data. The total might not be the sum of these 3 in the circumstance
-        where one of the meter's data is out of date, and the total then covers the
-        most recent year where all data is available to us on all the underlying
-        meters, and hence will cover the period of the most out of date of the
-        underlying meters.
-      </p>
-    ),
-    es_per_pupil_v_per_floor_area: %q(
-      <p>
-          Generally, per pupil benchmarks are appropriate for electricity
-          (should be proportional to the appliances e.g. ICT in use),
-          but per floor area benchmarks are more appropriate for gas (size of
-          building which needs heating). Overall, <u>energy</u> use comparison
-          on a per pupil basis is probably more appropriate than on a per
-          floor area basis, but this analysis can be useful in some circumstances.
-      </p>
-    ),
-    es_exclude_storage_heaters_and_solar_pv: %q(
-      <p>
-        This breakdown excludes electricity consumed by storage heaters and
-        solar PV.
-      </p>
-    ),
-    comparison_with_previous_period_infinite: %q(
-      <p>
-        An infinite or uncalculable value indicates the consumption in the first period was zero.
-      </p>
-    ),
-    es_sources_of_baseload_electricity_consumption: %q(
-      <p>
-        Consumers of out of hours electricity include
-        <ul>
-          <li>
-            Equipment left on rather than being turned off, including
-            photocopiers and ICT equipment
-          </li>
-          <li>
-            ICT servers - can be inefficient, newer ones can often payback their
-            capital costs in electricity savings within a few years, see our
-            <a href="https://energysparks.uk/case_studies/4/link" target ="_blank">case study</a>
-            on this
-          </li>
-          <li>
-            Security lighting - this can be reduced by using PIR movement detectors
-            - often better for security and by moving to more efficient LED lighting
-          </li>
-          <li>
-            Fridges and freezers, particularly inefficient commercial kitchen appliances, which if
-            replaced can provide a very short payback on investment (see
-            our <a href="https://energysparks.uk/case_studies/1/link" target ="_blank">case study</a> on this).
-          </li>
-          <li>
-            Hot water heaters and boilers left on outside school hours - installing a timer or getting
-            the caretaker to switch these off when closing the school at night or on a Friday can
-            make a big difference
-          </li>
-        </ul>
-      <p>
-    ),
-    covid_lockdown: %q(),
-    covid_lockdown_deprecated: %q(
-      <p>
-        This comparison may include COVID lockdown periods which may skew the results.
-      </p>
-    ),
-    holiday_comparison: %q(),
-    temperature_compensation: %q(
-      <p>
-        This comparison compares the latest available data for the most recent
-        holiday with an adjusted figure for the previous holiday, scaling to the
-        same number of days and adjusting for changes in outside temperature.
-        The change in &pound; is the saving or increased cost for the most recent holiday to date.
-      </p>
-    ),
-    holiday_length_normalisation: %q(
-      <p>
-        This comparison compares the latest available data for the most recent holiday
-        with an adjusted figure for the previous holiday, scaling to the same number of days.
-        The change in &pound; is the saving or increased cost for the most recent holiday to date.
-      </p>
-    ),
-    last_year_previous_year_definition:  %q(
-      <p>
-        In school comparisons &apos;last year&apos; is defined as this year to date,
-        &apos;previous year&apos; is defined as the year before.
-      </p>
-    ),
-    last_year_definition:  %q(
-      <p>
-        In school comparisons &apos;last year&apos; is defined as this year to date.
-      </p>
-    )
-  }
-  #=======================================================================================
   class BenchmarkContentEnergyPerPupil < BenchmarkContentBase
     include BenchmarkingNoTextMixin
 
@@ -120,6 +12,33 @@ module Benchmarking
       ERB.new(text).result(binding)
     end
   end
+#=======================================================================================
+  class BenchmarkOptimumStartAnalysis  < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      I18n.t('analytics.benchmarking.content.optimum_start_analysis.introduction_text_html')
+    end
+
+    protected def table_introduction_text
+      I18n.t('analytics.benchmarking.content.optimum_start_analysis.table_introduction_text_html')
+    end
+
+    protected def caveat_text
+      I18n.t('analytics.benchmarking.content.optimum_start_analysis.caveat_text_html')
+    end
+  end
+
+
+  #=======================================================================================
+  class BenchmarkContentChangeInEnergyUseSinceJoinedFullData < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      text =  I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_full_data.introduction_text_html')
+      ERB.new(text).result(binding)
+    end
+  end  
   #=======================================================================================
   class BenchmarkContentTotalAnnualEnergy < BenchmarkContentBase
     include BenchmarkingNoTextMixin
@@ -190,7 +109,8 @@ module Benchmarking
     end
 
     def calculate_blended_rate_range(school_ids, filter, user_type)
-      col_index = column_headings(school_ids, filter, user_type).index(:blended_current_rate)
+      blended_current_rate_header = I18n.t("analytics.benchmarking.configuration.column_headings.blended_current_rate")
+      col_index = column_headings(school_ids, filter, user_type).index(blended_current_rate_header)
       data = raw_data(school_ids, filter, user_type)
       return [] if data.nil? || data.empty?
 

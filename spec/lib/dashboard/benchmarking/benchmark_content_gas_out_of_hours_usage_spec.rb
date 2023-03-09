@@ -89,12 +89,20 @@ describe Benchmarking::BenchmarkContentGasOutOfHoursUsage, type: :service do
 
   describe '#column_heading_explanation' do
     it 'returns the benchmark column_heading_explanation' do
-      html = benchmark.column_heading_explanation([795], nil, nil)
+      html = benchmark.column_heading_explanation
       expect(html).to match_html(<<~HTML)
         <p>
           In school comparisons &apos;last year&apos; is defined as this year to date.
         </p>
       HTML
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
     end
   end
 end

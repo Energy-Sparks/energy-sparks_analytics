@@ -25,6 +25,14 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
     end
   end
 
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+  end
+
   def expected_content_base_content
     [{ type: :analytics_html, content: '<br>' },
      { type: :title, content: 'Annual energy use per pupil' },
@@ -264,11 +272,7 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
      { type: :html, content: ' <h3>Table interpretation</h3> ' },
      { type: :html, content: '' },
      { type: :html,
-       content: "\n" \
-         "      <p>\n" \
-         "        In school comparisons &apos;last year&apos; is defined as this year to date.\n" \
-         "      </p>\n" \
-         '    ' },
+       content: '<p>In school comparisons &apos;last year&apos; is defined as this year to date.</p>' },
      { type: :html, content: ' <h3>Caveat</h3> ' },
      { type: :drilldown,
        content: { drilldown: { type: :adult_dashboard, content_class: AdviceBenchmark },
