@@ -82,7 +82,8 @@ module Benchmarking
     end
 
     def calculate_blended_rate_range(school_ids, filter, user_type)
-      col_index = column_headings(school_ids, filter, user_type).index(:blended_current_rate)
+      blended_current_rate_header = I18n.t("analytics.benchmarking.configuration.column_headings.blended_current_rate")
+      col_index = column_headings(school_ids, filter, user_type).index(blended_current_rate_header)
       data = raw_data(school_ids, filter, user_type)
       return [] if data.nil? || data.empty?
 
