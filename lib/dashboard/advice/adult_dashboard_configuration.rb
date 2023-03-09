@@ -18,7 +18,6 @@ class DashboardConfiguration
       solar_pv_group
       underlying_electricity_meters_breakdown
       electricity_profit_loss
-      refrigeration
     ],
     gas_group: %i[
       gas_annual
@@ -164,26 +163,6 @@ class DashboardConfiguration
         charts:             %i[ baseload_lastyear ],
         fuel_type:          :electricity
       }
-    },
-    refrigeration: {
-      name:                   'Experimental refrigeration analysis',
-      content_class:           AdviceRefrigeration,
-      excel_worksheet_name:   'Fridge',
-      charts: %i[
-        baseload_lastyear
-        baseload
-      ],
-      promoted_variables: {
-        AlertSummerHolidayRefrigerationAnalysis => {
-          rating:                 :rating,
-          annualised_reduction_£: :annualised_reduction_£,
-          holiday_reduction_£:    :holiday_reduction_£,
-          reduction_kw:           :reduction_kw,
-          reduction_rating:       :reduction_rating,
-          turn_off_rating:        :turn_off_rating,
-          summary:                :summary
-        }
-      },
     },
     electric_target: {
       name:                   'Setting and tracking targets for your electricity',
