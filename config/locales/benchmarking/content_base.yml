@@ -66,11 +66,21 @@ en:
         thermostatic_control: Quality of thermostatic control
         weekday_baseload_variation: Weekday baseload variation
       chart_table_grouping:
-        date_limited_comparisons: Date limited comparisons
-        electricity_benchmarks: Electricity Benchmarks
-        gas_and_storage_heater_benchmarks: Gas and Storage Heater Benchmarks
-        solar_benchmarks: Solar Benchmarks
-        total_energy_use_benchmarks: Total Energy Use Benchmarks
+        date_limited_comparisons:
+          description: These benchmarks compare schools performance across specific date ranges.
+          title: Date limited comparisons
+        electricity_benchmarks:
+          description: These benchmarks compare schools' electricity consumption, including last year's consumption, recent and long term changes in consumption, baseload and performance against the school's target.
+          title: Electricity Benchmarks
+        gas_and_storage_heater_benchmarks:
+          description: These benchmarks compare schools' gas or storage heater consumption, including last year's consumption, recent and long term changes in consumption, the standard of their heating control and performance against the school's target.
+          title: Gas and Storage Heater Benchmarks
+        solar_benchmarks:
+          description: These benchmarks compare schools' solar PV production and the benefits of installing solar.
+          title: Solar Benchmarks
+        total_energy_use_benchmarks:
+          description: These benchmarks compare the combined energy use of a school site
+          title: Total Energy Use Benchmarks
       configuration:
         column_headings:
           annualised_£_value_of_summer_holiday_reduction: Annualised £ value of summer holiday reduction

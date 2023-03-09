@@ -241,7 +241,8 @@ module Benchmarking
       return if benchmarks.empty?
 
       {
-        name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}"),
+        name: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}.title"),
+        description: I18n.t("analytics.benchmarking.chart_table_grouping.#{group_key}.description"),
         benchmarks: benchmark_titles_for(benchmark_keys, user_role)
       }
     end
@@ -1264,13 +1265,11 @@ module Benchmarking
           { data: 'addp_name',      name: ch(:name), units: String, chart_data: true, content_class: AdviceElectricityAnnual },
           { data: ->{ elba_£pup },  name: ch(:last_year_electricity_£_pupil), units: :£_0dp, chart_data: true },
           { data: ->{ elba_£lyr },  name: ch(:last_year_electricity_£), units: :£},
-          { data: ->{ elba_€pup },  name: ch(:last_year_electricity_£_pupil_ct), units: :£_0dp, chart_data: true },
-          { data: ->{ elba_€lyr },  name: ch(:last_year_electricity_£_ct), units: :£},
           { data: ->{ elba_€esav }, name: ch(:saving_if_matched_exemplar_school), units: :£ },
           { data: ->{ elba_ratg },  name: ch(:rating), units: Float, y2_axis: true },
         ],
         sort_by:  [1], # column 1 i.e. Annual kWh
-        type: %i[chart table],
+        type: %i[table],
         admin_only: false
       },
       change_in_annual_electricity_consumption: {
