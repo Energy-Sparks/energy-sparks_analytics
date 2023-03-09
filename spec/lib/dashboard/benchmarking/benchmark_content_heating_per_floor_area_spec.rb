@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentHeatingPerFloorArea, type: :service do
           Annual heating cost per floor area with savings potential
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_heating_costs_per_floor_area") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.annual_heating_costs_per_floor_area')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -35,7 +35,7 @@ describe Benchmarking::BenchmarkContentHeatingPerFloorArea, type: :service do
   describe 'introduction_text' do
     it 'formats introduction and any caveat text as html' do
       html = benchmark.send(:introduction_text)
-      
+
       expect(html).to match_html(<<~HTML)
         <p>This benchmark compares last year’s gas and storage heater costs per floor area (m2).</p>
         <p>The benchmark is adjusted for regional temperatures over the last year, so that for example schools in Scotland are compared on the same terms as schools in the warmer south west of England.</p>
@@ -97,6 +97,14 @@ describe Benchmarking::BenchmarkContentHeatingPerFloorArea, type: :service do
           In school comparisons &apos;last year&apos; is defined as this year to date.
         </p>
       HTML
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
     end
   end
 end

@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
           Change in energy use since the school joined Energy Sparks
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_energy_use_since_joined_energy_sparks") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_energy_use_since_joined_energy_sparks')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -43,7 +43,7 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
         </p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_energy_sparks.introduction_text_html') +
-        I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
+                     I18n.t('analytics.benchmarking.caveat_text.covid_lockdown')
       expect(html).to match_html(content_html)
     end
   end
@@ -110,6 +110,14 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
       html = benchmark.column_heading_explanation
       expect(html).to match_html(<<~HTML)
       HTML
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
     end
   end
 end

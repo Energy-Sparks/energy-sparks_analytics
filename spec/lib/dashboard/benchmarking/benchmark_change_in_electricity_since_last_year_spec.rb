@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkChangeInElectricitySinceLastYear, type: :service
           Annual change in electricity use
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_electricity_since_last_year") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_electricity_since_last_year')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -148,5 +148,13 @@ describe Benchmarking::BenchmarkChangeInElectricitySinceLastYear, type: :service
         </p>
       HTML
     end
-  end  
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+  end
 end

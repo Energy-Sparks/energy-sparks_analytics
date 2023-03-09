@@ -97,4 +97,12 @@ describe Benchmarking::BenchmarkContentGasOutOfHoursUsage, type: :service do
       HTML
     end
   end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+  end
 end

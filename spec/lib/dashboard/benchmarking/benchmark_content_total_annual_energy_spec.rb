@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
           Annual cost of electricity, gas, storage heaters and combined energy
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_energy_costs") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.annual_energy_costs')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -45,7 +45,7 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
           excludes the benefit of any solar PV which might be installed - so looks at energy consumption only.
         </p>
       HTML
-      expected_html = I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html') 
+      expected_html = I18n.t('analytics.benchmarking.content.annual_energy_costs.introduction_text_html')
       expected_html += I18n.t('analytics.benchmarking.caveat_text.es_doesnt_have_all_meter_data_html')
       expect(html).to match_html(expected_html)
     end
@@ -126,6 +126,14 @@ describe Benchmarking::BenchmarkContentTotalAnnualEnergy, type: :service do
           In school comparisons &apos;last year&apos; is defined as this year to date.
         </p>
       HTML
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
     end
   end
 end

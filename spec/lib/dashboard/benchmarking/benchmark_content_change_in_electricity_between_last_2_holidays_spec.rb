@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetweenLast2Holidays, 
           Change in electricity use between the last two holidays
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_electricity_holiday_consumption_previous_holiday") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_electricity_holiday_consumption_previous_holiday')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -92,5 +92,5 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetweenLast2Holidays, 
       expect(html).to match_html(<<~HTML)
       HTML
     end
-  end  
+  end
 end

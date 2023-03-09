@@ -70,7 +70,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Date limited comparisons',
-            description: "These benchmarks compare schools performance across specific date ranges.",
+            description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
               autumn_term_2021_2022_energy_comparison: 'Autumn Term 2021 versus 2022 energy use',
               change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
@@ -147,7 +147,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
           },
           {
             name: 'Date limited comparisons',
-            description: "These benchmarks compare schools performance across specific date ranges.",
+            description: 'These benchmarks compare schools performance across specific date ranges.',
             benchmarks: {
               autumn_term_2021_2022_energy_comparison: 'Autumn Term 2021 versus 2022 energy use',
               change_in_energy_use_since_joined_energy_sparks: 'Change in energy use since the school joined Energy Sparks',
@@ -160,7 +160,7 @@ describe Benchmarking::BenchmarkManager, type: :service do
     end
 
     it 'returns benchmarks by group for guest user types' do
-      expect(Benchmarking::BenchmarkManager.structured_pages({user_role: :guest})).to eq(
+      expect(Benchmarking::BenchmarkManager.structured_pages({ user_role: :guest })).to eq(
         [
           {
             name: 'Total Energy Use Benchmarks',

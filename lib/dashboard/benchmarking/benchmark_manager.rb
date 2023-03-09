@@ -264,7 +264,7 @@ module Benchmarking
       visible_columns = table_definition[:columns].map { |cd| cd[:hidden] != true }
 
       header    = table_definition[:columns].map do |column_definition|
-        I18n.t("analytics.benchmarking.configuration.column_headings.#{column_definition[:name].downcase}")
+        I18n.t("analytics.benchmarking.configuration.column_headings.#{column_definition[:name].downcase}") if column_definition[:name]
       end
       header    = visible_data(table_definition, header, hide_visible_columns)
       raw_rows  =  rows.map { |row| visible_data(table_definition, row[:data], hide_visible_columns) }

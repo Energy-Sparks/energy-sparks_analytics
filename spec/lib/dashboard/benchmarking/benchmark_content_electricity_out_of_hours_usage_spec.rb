@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentElectricityOutOfHoursUsage, type: :servic
           Electricity used out of school hours
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.annual_electricity_out_of_hours_use") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.annual_electricity_out_of_hours_use')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -124,5 +124,13 @@ describe Benchmarking::BenchmarkContentElectricityOutOfHoursUsage, type: :servic
         </p>
       HTML
     end
-  end  
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+  end
 end

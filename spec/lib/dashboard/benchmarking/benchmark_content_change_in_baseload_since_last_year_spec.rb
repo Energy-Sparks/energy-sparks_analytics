@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentChangeInBaseloadSinceLastYear, type: :ser
           Recent change in baseload
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.recent_change_in_baseload") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.recent_change_in_baseload')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -40,7 +40,7 @@ describe Benchmarking::BenchmarkContentChangeInBaseloadSinceLastYear, type: :ser
         <p>This breakdown excludes electricity consumed by storage heaters and solar PV.</p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.recent_change_in_baseload.introduction_text_html') +
-        I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
+                     I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv')
       expect(html).to match_html(content_html)
     end
   end
@@ -95,6 +95,14 @@ describe Benchmarking::BenchmarkContentChangeInBaseloadSinceLastYear, type: :ser
           In school comparisons &apos;last year&apos; is defined as this year to date.
         </p>
       HTML
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
     end
   end
 end

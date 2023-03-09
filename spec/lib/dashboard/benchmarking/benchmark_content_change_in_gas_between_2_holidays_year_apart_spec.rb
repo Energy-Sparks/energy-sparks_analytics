@@ -27,7 +27,7 @@ describe Benchmarking::BenchmarkContentChangeInGasBetween2HolidaysYearApart, typ
           Change in gas use between this holiday and the same holiday last year
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.change_in_gas_holiday_consumption_previous_years_holiday") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.change_in_gas_holiday_consumption_previous_years_holiday')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
@@ -41,7 +41,7 @@ describe Benchmarking::BenchmarkContentChangeInGasBetween2HolidaysYearApart, typ
         <p>An infinite or incalculable value indicates the consumption in the first period was zero.</p>
       HTML
       content_html = I18n.t('analytics.benchmarking.content.change_in_gas_holiday_consumption_previous_years_holiday.introduction_text_html') +
-        I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
+                     I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       expect(html).to match_html(content_html)
     end
   end
@@ -94,5 +94,13 @@ describe Benchmarking::BenchmarkContentChangeInGasBetween2HolidaysYearApart, typ
       expect(html).to match_html(<<~HTML)
       HTML
     end
-  end  
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
+    end
+  end
 end

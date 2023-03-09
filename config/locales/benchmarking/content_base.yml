@@ -259,6 +259,12 @@ en:
           winter_baseload_kw: Winter baseload kW
           year_before_joined: Year before joined
       content:
+        change_in_energy_use_since_joined_full_data:
+          introduction_text_html: |-
+            <p>
+              This table provides a more detailed breakdown of the data provided in the chart
+              and table above.
+            </p>
         annual_electricity_costs_per_pupil:
           introduction_text_html: "<p>\n  This benchmark compares the electricity cost per pupil in the last year.\n</p>\n<p>\n  There should not be a significant difference between schools as all schools need to use roughly the same amount of ICT equipment, \n  lighting and refrigeration per pupil. Exceptions might be schools with swimming pools or sports flood lighting which can significantly \n  increase demand. Special schools also have higher electricity costs per pupil due to lower pupil densities and specialist equipment.\n</p>\n<p>\n  The data excludes storage heaters which are reported elsewhere under the 'heating' benchmarks.\n</p>"
         annual_electricity_out_of_hours_use:

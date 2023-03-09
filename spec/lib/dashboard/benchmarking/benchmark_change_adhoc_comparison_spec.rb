@@ -27,11 +27,10 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
           Change in energy for layer up power down day 11 November 2022 (compared with 12 Nov 2021)
         </h1>
       HTML
-      title_html = '<h1>' + I18n.t("analytics.benchmarking.chart_table_config.layer_up_powerdown_day_november_2022") + '</h1>'
+      title_html = "<h1>#{I18n.t('analytics.benchmarking.chart_table_config.layer_up_powerdown_day_november_2022')}</h1>"
       expect(html).to match_html(title_html)
     end
   end
-
 
   describe 'introduction_text' do
     it 'formats introduction and any caveat text as html' do
@@ -109,6 +108,14 @@ describe Benchmarking::BenchmarkChangeAdhocComparison, type: :service do
           &apos;previous year&apos; is defined as the year before.
         </p>
       HTML
+    end
+  end
+
+  describe 'content' do
+    it 'creates a content array' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      expect(content.class).to eq(Array)
+      expect(content.size).to be > 0
     end
   end
 end
