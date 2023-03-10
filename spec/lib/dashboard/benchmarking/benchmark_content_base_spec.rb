@@ -15,7 +15,7 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
 
   describe 'introduction_text' do
     it 'creates the introduction_text placeholder text' do
-      expect(benchmark.send(:introduction_text)).to eq(' <h3>Introduction here</h3> ')
+      expect(benchmark.send(:introduction_text)).to eq('<h3>Introduction here</h3>')
     end
   end
 
@@ -36,8 +36,8 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
   def expected_content_base_content
     [{ type: :analytics_html, content: '<br>' },
      { type: :title, content: 'Annual energy use per pupil' },
-     { type: :html, content: ' <h3>Introduction here</h3> ' },
-     { type: :html, content: ' <h3>Chart Introduction</h3> ' },
+     { type: :html, content: '<h3>Introduction here</h3>' },
+     { type: :html, content: '<h3>Chart Introduction</h3>' },
      { type: :chart_name, content: :annual_energy_costs_per_pupil },
      { type: :chart,
        content: { title: 'Annual energy use per pupil',
@@ -52,8 +52,8 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
                   chart1_subtype: :stacked,
                   y_axis_label: 'kWh',
                   config_name: 'annual_energy_costs_per_pupil' } },
-     { type: :html, content: ' <h3>Chart interpretation</h3> ' },
-     { type: :html, content: ' <h3>Table Introduction</h3> ' },
+     { type: :html, content: '<h3>Chart interpretation</h3>' },
+     { type: :html, content: '<h3>Table Introduction</h3>' },
      { type: :table_html,
        content: "\n" \
          "    \n" \
@@ -269,11 +269,11 @@ describe Benchmarking::BenchmarkContentBase, type: :service do
                           { formatted: '125', raw: 125.20212042899767 },
                           { formatted: 'Primary', raw: 'Primary' }]] } },
      { type: :html, content: '' },
-     { type: :html, content: ' <h3>Table interpretation</h3> ' },
+     { type: :html, content: '<h3>Table interpretation</h3>' },
      { type: :html, content: '' },
      { type: :html,
        content: '<p>In school comparisons &apos;last year&apos; is defined as this year to date.</p>' },
-     { type: :html, content: ' <h3>Caveat</h3> ' },
+     { type: :html, content: '<h3>Caveat</h3>' },
      { type: :drilldown,
        content: { drilldown: { type: :adult_dashboard, content_class: AdviceBenchmark },
                   school_map: [{ name: 'School', urn: 'URN' },
