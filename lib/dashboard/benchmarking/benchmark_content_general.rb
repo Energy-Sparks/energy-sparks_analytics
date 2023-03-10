@@ -433,11 +433,13 @@ module Benchmarking
       super(school_ids: school_ids, filter: filter)
     end
 
-    private
-
     def footnote(school_ids, filter, user_type)
       raw_data = benchmark_manager.run_table_including_aggregate_columns(asof_date, page_name, school_ids, nil, filter, :raw, user_type)
       rows = raw_data.drop(1) # drop header
+
+puts '----'
+puts rows.inspect
+puts '----'
 
       return '' if rows.empty?
 
@@ -451,9 +453,17 @@ module Benchmarking
                 !infinite_decrease_school_names.empty? ||
                 @rate_changed_in_period
 
+      return '' unless changed
 
+      footnote_text_for(
+        floor_area_or_pupils_change_rows,
+        infinite_increase_school_names,
+        infinite_decrease_school_names
+      )
+    end
+
+    def footnote_text_for(floor_area_or_pupils_change_rows, infinite_increase_school_names, infinite_decrease_school_names)
       text = %(
-        <% if changed %>
           <p> 
             Notes:
             <ul>
@@ -489,7 +499,6 @@ module Benchmarking
               <% end %>
             </ul>
           </p>
-        <% end %>
       )
       ERB.new(text).result(binding)
     end
@@ -574,6 +583,8 @@ module Benchmarking
       text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
+
+
   end
   #=======================================================================================
   class BenchmarkHolidaysChangeBase < BenchmarkPeriodChangeBase
