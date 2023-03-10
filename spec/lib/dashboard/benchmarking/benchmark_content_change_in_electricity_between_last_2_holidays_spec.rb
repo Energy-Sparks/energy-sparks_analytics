@@ -116,28 +116,13 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetweenLast2Holidays, 
           Notes:
           <ul>
             <li>
-              (*1) the comparison has been adjusted because the number of pupils
-                  have changed between the two holidays for     
-                Acme Academy 1
-                from 650 pupils
-                to 640 pupils
-              , and 
-                Acme Academy 2
-                from 550 pupils
-                to 540 pupils
-              .
+              (*1) the comparison has been adjusted because the number of pupils have changed between the two holidays for Acme Academy 1 and Acme Academy 2.
             </li>
             <li>
-              (*2) schools where percentage change
-                  is +Infinity is caused by the electricity consumption
-                  in the previous holiday being more than zero
-                  but in the current holiday zero
+              (*2) schools where percentage change is +Infinity is caused by the electricity consumption in the previous holiday being more than zero but in the current holiday zero
             </li>
             <li>
-              (*3) schools where percentage change
-                  is -Infinity is caused by the electricity consumption
-                  in the current holiday being zero
-                  but in the previous holiday it was more than zero
+              (*3) schools where percentage change is -Infinity is caused by the electricity consumption in the current holiday being zero but in the previous holiday it was more than zero
             </li>
           </ul>
         </p>

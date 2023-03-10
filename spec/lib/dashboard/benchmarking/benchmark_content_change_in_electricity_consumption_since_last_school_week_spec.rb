@@ -13,6 +13,13 @@ describe Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSc
     )
   end
 
+  let(:rows) {
+    [
+      ["Acme Primary School 1", 0.02384759261493898, 47.429999999999836, 316.1999999999989, false, 650, 640, false],
+      ["Acme Primary School 2", 0.02384759261493898, 47.429999999999836, 316.1999999999989, false, 650, 640, false]
+    ]
+  }
+
   describe '#page' do
     it 'returns a chart name if charts are present' do
       expect(benchmark.page_name).to eq(:change_in_electricity_consumption_recent_school_weeks)
@@ -89,6 +96,28 @@ describe Benchmarking::BenchmarkContentChangeInElectricityConsumptionSinceLastSc
     it 'returns footnote text' do
       content = benchmark.send(:footnote, [795, 629, 634], nil, {})
       expect(content).to match_html('')
+    end
+  end
+
+  describe 'footnote_text_for' do
+    it 'creates the introduction_text placeholder text for floor_area_or_pupils_change_rows' do
+      html = benchmark.footnote_text_for(rows,rows,rows)
+      expect(html).to match_html(<<~HTML)
+        <p>
+          Notes:
+          <ul>
+            <li>
+              (*1) the comparison has been adjusted because the number of pupils have changed between the two school weeks for Acme Primary School 1 and Acme Primary School 2.
+            </li>
+            <li>
+              (*2) schools where percentage change is +Infinity is caused by the electricity consumption in the previous school week being more than zero but in the current school week zero
+            </li>
+            <li>
+              (*3) schools where percentage change is -Infinity is caused by the electricity consumption in the current school week being zero but in the previous school week it was more than zero
+            </li>
+          </ul>
+        </p>
+      HTML
     end
   end
 

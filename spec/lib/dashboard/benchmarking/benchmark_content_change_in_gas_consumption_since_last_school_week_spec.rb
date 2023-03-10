@@ -13,6 +13,13 @@ describe Benchmarking::BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek
     )
   end
 
+  let(:rows) {
+    [
+      ["Acme Primary School 2", -0.09877771200341656, -55.094143277636476, -1836.4714425878847, "Xmas 2022/2023", "Xmas 2021/2022", false, 3007.0, 3007.0, 3010],
+      ["Acme Primary School 1", -0.49206059850480305, -104.5201356349236, -3484.0045211641204, "Xmas 2022/2023", "Xmas 2021/2022", false, 1547.0, 1547.0, 0]
+    ]
+  }
+
   describe '#page' do
     it 'returns a chart name if charts are present' do
       expect(benchmark.page_name).to eq(:change_in_gas_consumption_recent_school_weeks)
@@ -103,6 +110,28 @@ describe Benchmarking::BenchmarkContentChangeInGasConsumptionSinceLastSchoolWeek
     it 'returns footnote text' do
       content = benchmark.send(:footnote, [795, 629, 634], nil, {})
       expect(content).to match_html('')
+    end
+  end
+
+  describe 'footnote_text_for' do
+    it 'creates the introduction_text placeholder text for floor_area_or_pupils_change_rows' do
+      html = benchmark.footnote_text_for(rows,rows,rows)
+      expect(html).to match_html(<<~HTML)
+        <p>
+          Notes:
+          <ul>
+            <li>
+              (*1) the comparison has been adjusted because the floor area has changed between the two holidays for Acme Primary School 1 and Acme Primary School 2.
+            </li>
+            <li>
+              (*2) schools where percentage change is +Infinity is caused by the gas consumption in the previous holiday being more than zero but in the current holiday zero
+            </li>
+            <li>
+              (*3) schools where percentage change is -Infinity is caused by the gas consumption in the current holiday being zero but in the previous holiday it was more than zero
+            </li>
+          </ul>
+        </p>
+      HTML
     end
   end
 
