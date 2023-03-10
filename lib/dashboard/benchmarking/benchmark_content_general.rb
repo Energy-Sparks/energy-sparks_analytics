@@ -75,8 +75,6 @@ module Benchmarking
       super(school_ids: school_ids, filter: filter)
     end
 
-    private
-
     def baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
       cost_of_1_kw_baseload_range_£ = calculate_cost_of_1_kw_baseload_range_£(school_ids, filter, user_type)
 
@@ -98,6 +96,9 @@ module Benchmarking
           <% end %>    
         </p>
       )
+
+
+
       ERB.new(text).result(binding)
     end
 
