@@ -94,6 +94,13 @@ describe Benchmarking::BenchmarkContentHeatingInWarmWeather, type: :service do
     end
   end
 
+  describe 'footnote' do
+    it 'returns footnote text' do
+      content = benchmark.send(:footnote, [795, 629, 634], nil, {})
+      expect(content).to match_html('')
+    end
+  end
+
   describe 'content' do
     it 'creates a content array' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
