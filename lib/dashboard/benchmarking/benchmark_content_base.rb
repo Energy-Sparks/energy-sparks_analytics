@@ -98,27 +98,27 @@ module Benchmarking
     end
 
     protected def introduction_text
-      '<h3></h3>'
+      '<h3>Introduction here</h3>'
     end
 
     protected def chart_introduction_text
-      '<h3></h3>'
+      '<h3>Chart Introduction</h3>'
     end
 
     protected def chart_interpretation_text
-      '<h3></h3>'
+      '<h3>Chart interpretation</h3>'
     end
 
     protected def table_introduction_text
-      '<h3></h3>'
+      '<h3>Table Introduction</h3>'
     end
 
     protected def table_interpretation_text
-      '<h3></h3>'
+      '<h3>Table interpretation</h3>'
     end
 
     protected def caveat_text
-      '<h3></h3>'
+      '<h3>Caveat</h3>'
     end
 
     def charts?
