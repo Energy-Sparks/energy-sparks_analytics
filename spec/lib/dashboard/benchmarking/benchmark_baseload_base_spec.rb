@@ -46,11 +46,4 @@ describe Benchmarking::BenchmarkBaseloadBase, type: :service do
       HTML
     end
   end
-
-  # describe 'content' do
-  #   it 'creates a content hash' do
-  #     expect(benchmark.content(school_ids: [795, 629, 634], filter: nil)).to eq(expected_content_base_content)
-  #   end
-  # end
-
 end
