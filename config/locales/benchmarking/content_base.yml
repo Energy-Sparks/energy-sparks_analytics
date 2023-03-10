@@ -311,6 +311,16 @@ en:
             <p>
               All schools should aim to reduce their electricity baseload per pupil to that of the best schools. Schools perform roughly the same function so should be able to achieve similar electricity consumption, particularly out of hours.
             </p>
+        benchmark_autumn_2022_gas_table:
+          introduction_text: 'The change columns are calculated using temperature adjusted values:'
+        benchmark_baseload_base:
+          baseload_1_kw_change_range_£_html:
+            one_value_html: "<p>A 1 kW increase in baseload is equivalent to an increase in annual electricity costs of %{value_gbp}.</p>"
+            two_value_html: "<p>A 1 kW increase in baseload is equivalent to an increase in annual electricity costs of between %{value_first_gbp} and %{value_last_gbp} depending on your current tariff.</p>"
+        benchmark_change_adhoc_comparison_gas_table:
+          introduction_text: 'The change columns are calculated using temperature adjusted values:'
+        benchmark_sept_nov_2022_gas_table:
+          introduction_text: 'The change columns are calculated using temperature adjusted values:'
         change_in_electricity_consumption_recent_school_weeks:
           introduction_text_html: "<p>This benchmark shows the change in electricity consumption over the last two school weeks. You should expect a small increase in electricity consumption going into the winter with increased lighting usage and a subsequent reduction in the spring.</p>"
         change_in_electricity_holiday_consumption_previous_holiday:

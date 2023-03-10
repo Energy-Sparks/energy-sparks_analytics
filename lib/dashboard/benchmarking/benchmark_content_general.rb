@@ -75,8 +75,6 @@ module Benchmarking
       super(school_ids: school_ids, filter: filter)
     end
 
-    private
-
     def baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
       cost_of_1_kw_baseload_range_£ = calculate_cost_of_1_kw_baseload_range_£(school_ids, filter, user_type)
 
@@ -84,21 +82,20 @@ module Benchmarking
         FormatEnergyUnit.format(:£, costs_£, :html)
       end
 
-      text = %q(
-        <p>
-          <% if cost_of_1_kw_baseload_range_£_html.empty? %>
-
-          <% elsif cost_of_1_kw_baseload_range_£_html.length == 1 %>
-            A 1 kW increase in baseload is equivalent to an increase in
-            annual electricity costs of <%= cost_of_1_kw_baseload_range_£_html.first %>.
-          <% else %>
-            A 1 kW increase in baseload is equivalent to an increase in
-            annual electricity costs of between <%= cost_of_1_kw_baseload_range_£_html.first %>
-            and <%= cost_of_1_kw_baseload_range_£_html.last %> depending on your current tariff.
-          <% end %>    
-        </p>
-      )
-      ERB.new(text).result(binding)
+      if cost_of_1_kw_baseload_range_£_html.empty?
+        '<p></p>'
+      elsif cost_of_1_kw_baseload_range_£_html.length == 1
+        I18n.t(
+          'analytics.benchmarking.content.benchmark_baseload_base.baseload_1_kw_change_range_£_html.one_value_html',
+          value_gbp: cost_of_1_kw_baseload_range_£_html.first
+        )
+      else
+        I18n.t(
+          'analytics.benchmarking.content.benchmark_baseload_base.baseload_1_kw_change_range_£_html.two_value_html',
+          value_first_gbp: cost_of_1_kw_baseload_range_£_html.first,
+          value_last_gbp: cost_of_1_kw_baseload_range_£_html.last
+        )
+      end
     end
 
     def calculate_cost_of_1_kw_baseload_range_£(school_ids, filter, user_type)
@@ -739,16 +736,6 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkHeatingHotWaterOnDuringHolidayBase < BenchmarkContentBase
     include BenchmarkingNoTextMixin
-    private def introduction_text
-      text = %q(
-        <p>
-          This chart shows the projected <%= fuel %> costs for the current holiday.
-          No comparative data will be shown once the holiday is over. The projection
-          calculation is based on the consumption patterns during the holiday so far.
-        </p>
-      )
-      ERB.new(text).result(binding)
-    end
   end
 
   class BenchmarkElectricityOnDuringHoliday < BenchmarkContentBase
@@ -758,6 +745,9 @@ module Benchmarking
       text += I18n.t('analytics.benchmarking.caveat_text.es_exclude_storage_heaters_and_solar_pv_data_html')
       ERB.new(text).result(binding)
     end
+    def fuel
+      I18n.t('analytics.common.electricity')
+    end
   end
 
   class BenchmarkGasHeatingHotWaterOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
@@ -765,7 +755,9 @@ module Benchmarking
     def introduction_text
       I18n.t('analytics.benchmarking.content.gas_consumption_during_holiday.introduction_text_html')
     end
-    def fuel; 'gas' end
+    def fuel
+      I18n.t('analytics.common.gas')
+    end
   end
 
   class BenchmarkStorageHeatersOnDuringHoliday < BenchmarkHeatingHotWaterOnDuringHolidayBase
@@ -773,7 +765,9 @@ module Benchmarking
     def introduction_text
       I18n.t('analytics.benchmarking.content.storage_heater_consumption_during_holiday.introduction_text_html')
     end
-    def fuel; 'storage heeaters' end
+    def fuel
+      I18n.t('analytics.common.storage_heaters')
+    end
   end
   #=======================================================================================
   class BenchmarkEnergyConsumptionInUpcomingHolidayLastYear < BenchmarkContentBase
@@ -829,7 +823,7 @@ module Benchmarking
   class BenchmarkChangeAdhocComparisonGasTable < BenchmarkContentBase
     include BenchmarkingNoTextMixin
     private def introduction_text
-      'The change columns are calculated using temperature adjusted values:'
+      I18n.t('analytics.benchmarking.content.benchmark_change_adhoc_comparison_gas_table.introduction_text')
     end
   end
 
@@ -860,7 +854,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      'The change columns are calculated using temperature adjusted values:'
+      I18n.t('analytics.benchmarking.content.benchmark_autumn_2022_gas_table.introduction_text')
     end
   end
 
@@ -892,7 +886,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
 
     private def introduction_text
-      'The change columns are calculated using temperature adjusted values:'
+      I18n.t('analytics.benchmarking.content.benchmark_sept_nov_2022_gas_table.introduction_text')
     end
   end
 
