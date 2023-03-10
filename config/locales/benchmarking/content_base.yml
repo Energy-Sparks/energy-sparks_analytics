@@ -258,6 +258,13 @@ en:
           weekend: Weekend
           winter_baseload_kw: Winter baseload kW
           year_before_joined: Year before joined
+        no_schools_to_report_for_filter: There are no schools to report using this filter for this benchmark
+        the_tariff_has_changed_during_the_last_year_html: |-
+          <p>
+            (*5) The tariff has changed during the last year for this school.
+                Savings are calculated using the latest tariff but other £ values
+                are calculated using the relevant tariff at the time
+          </p>
       content:
         benchmark_sept_nov_2022_gas_table:
           introduction_text: 'The change columns are calculated using temperature adjusted values:'

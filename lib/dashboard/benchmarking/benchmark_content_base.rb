@@ -23,7 +23,7 @@ module Benchmarking
       composite   = run_table(school_ids, filter, :text_and_raw, user_type) if tables?
 
       if (tables? || charts?) && composite[:rows].empty?
-        tables = { type: :html, content: '<h3>There are no schools to report using this filter for this benchmark</h3>' }
+        tables = { type: :html, content: '<h3>' + I18n.t('analytics.benchmarking.configuration.no_schools_to_report_for_filter') + '</h3>' }
       else
         charts = [
           { type: :html,                  content: chart_introduction_text },
@@ -98,31 +98,27 @@ module Benchmarking
     end
 
     protected def introduction_text
-      %q( <h3>Introduction here</h3> )
-    end
-
-    protected def introduction_text
-      %q( <h3>Introduction here</h3> )
+      '<h3>Introduction here</h3>'
     end
 
     protected def chart_introduction_text
-      %q( <h3>Chart Introduction</h3> )
+      '<h3>Chart Introduction</h3>'
     end
 
     protected def chart_interpretation_text
-      %q( <h3>Chart interpretation</h3> )
+      '<h3>Chart interpretation</h3>'
     end
 
     protected def table_introduction_text
-      %q( <h3>Table Introduction</h3> )
+      '<h3>Table Introduction</h3>'
     end
 
     protected def table_interpretation_text
-      %q( <h3>Table interpretation</h3> )
+      '<h3>Table interpretation</h3>'
     end
 
     protected def caveat_text
-      %q( <h3>Caveat</h3> )
+      '<h3>Caveat</h3>'
     end
 
     def charts?
@@ -187,7 +183,6 @@ module Benchmarking
     def column_heading_explanation
       return '' unless @chart_table_config[:column_heading_explanation]
 
-
       I18n.t("analytics.benchmarking.configuration.column_heading_explanation.#{@chart_table_config[:column_heading_explanation]}", default: '')
     end
 
@@ -209,16 +204,8 @@ module Benchmarking
     end
 
     def tariff_changed_explanation(school_ids, filter, user_type)
-
-
       if includes_tariff_changed_column?(school_ids, filter, user_type) && tariff_has_changed?(school_ids, filter, user_type)
-        %(
-          <p>
-            (*5) The tariff has changed during the last year for this school.
-                Savings are calculated using the latest tariff but other £ values
-                are calculated using the relevant tariff at the time
-          </p>
-        )
+        I18n.t('analytics.benchmarking.configuration.the_tariff_has_changed_during_the_last_year_html')
       else
         ''
       end
