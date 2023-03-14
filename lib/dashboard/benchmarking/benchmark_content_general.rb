@@ -469,7 +469,7 @@ module Benchmarking
     end
 
     def footnote_text_for(floor_area_or_pupils_change_rows, infinite_increase_school_names, infinite_decrease_school_names)
-      text = '<p>Notes:<ul>'
+      text = '<p>' + I18n.t('analytics.benchmarking.content.footnotes.notes') + ':<ul>'
 
       if floor_area_or_pupils_change_rows.present?
         text += change_rows_text(floor_area_or_pupils_change_rows.map { |row| school_name(row) }.sort.to_sentence, period_types) 
