@@ -339,10 +339,15 @@ en:
             two_value_html: "<p>A 1 kW increase in baseload is equivalent to an increase in annual electricity costs of between %{value_first_gbp} and %{value_last_gbp} depending on your current tariff.</p>"
         benchmark_change_adhoc_comparison_gas_table:
           introduction_text: 'The change columns are calculated using temperature adjusted values:'
+        benchmark_holidays_change_base:
+          period_type: holiday
+          period_types: holidays
         benchmark_sept_nov_2022_gas_table:
           introduction_text: 'The change columns are calculated using temperature adjusted values:'
         change_in_electricity_consumption_recent_school_weeks:
           introduction_text_html: "<p>This benchmark shows the change in electricity consumption over the last two school weeks. You should expect a small increase in electricity consumption going into the winter with increased lighting usage and a subsequent reduction in the spring.</p>"
+          period_type: school week
+          period_types: school weeks
         change_in_electricity_holiday_consumption_previous_holiday:
           introduction_text_html: |-
             <p>
