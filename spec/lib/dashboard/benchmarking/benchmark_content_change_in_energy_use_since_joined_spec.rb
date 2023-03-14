@@ -113,6 +113,13 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
     end
   end
 
+  describe 'footnote' do
+    it 'returns footnote text' do
+      content = benchmark.footnote([795, 629, 634], nil, {})
+      expect(content).to eq('')
+    end
+  end
+
   describe 'content' do
     it 'creates a content array' do
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)

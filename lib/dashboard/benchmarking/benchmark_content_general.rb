@@ -393,16 +393,21 @@ module Benchmarking
     def variable_type;        :pupils           end
     def has_changed_variable; :pupils_changed   end
 
-    def change_variable_description
-      'number of pupils'
+    def change_rows_text(schools_to_sentence, period_type_string)
+      I18n.t('analytics.benchmarking.content.footnotes.electricity.change_rows_text',
+        period_type_string: period_type_string,
+        schools_to_sentence: schools_to_sentence
+      )
     end
 
-    def has_possessive
-      'have'
+    def infinite_increase_school_names_text(period_type_string)
+      I18n.t('analytics.benchmarking.content.footnotes.electricity.infinite_increase_school_names_text',
+        period_type_string: period_type_string)
     end
 
-    def fuel_type_description
-      'electricity'
+    def infinite_decrease_school_names_text(period_type_string)
+      I18n.t('analytics.benchmarking.content.footnotes.electricity.infinite_decrease_school_names_text',
+        period_type_string: period_type_string)
     end
   end
 
@@ -412,16 +417,21 @@ module Benchmarking
     def variable_type;        :m2                   end
     def has_changed_variable; :floor_area_changed   end
 
-    def change_variable_description
-      'floor area'
+    def change_rows_text(schools_to_sentence, period_type_string)
+      I18n.t('analytics.benchmarking.content.footnotes.gas.change_rows_text',
+        period_type_string: period_type_string,
+        schools_to_sentence: schools_to_sentence
+      )
     end
 
-    def has_possessive
-      'has'
+    def infinite_increase_school_names_text(period_type_string)
+      I18n.t('analytics.benchmarking.content.footnotes.gas.infinite_increase_school_names_text',
+        period_type_string: period_type_string)
     end
 
-    def fuel_type_description
-      'gas'
+    def infinite_decrease_school_names_text(period_type_string)
+      I18n.t('analytics.benchmarking.content.footnotes.gas.infinite_decrease_school_names_text',
+        period_type_string: period_type_string)
     end
   end
 
@@ -432,8 +442,6 @@ module Benchmarking
       @rate_changed_in_period = calculate_rate_changed_in_period(school_ids, filter, user_type)
       super(school_ids: school_ids, filter: filter)
     end
-
-    private
 
     def footnote(school_ids, filter, user_type)
       raw_data = benchmark_manager.run_table_including_aggregate_columns(asof_date, page_name, school_ids, nil, filter, :raw, user_type)
@@ -451,46 +459,38 @@ module Benchmarking
                 !infinite_decrease_school_names.empty? ||
                 @rate_changed_in_period
 
+      return '' unless changed
 
-      text = %(
-        <% if changed %>
-          <p> 
-            Notes:
-            <ul>
-              <% if !floor_area_or_pupils_change_rows.empty? %>
-                <li>
-                  (*1) the comparison has been adjusted because the <%= change_variable_description %>
-                      <%= has_possessive %> changed between the two <%= period_types %> for
-                      <%= floor_area_or_pupils_change_rows.map { |row| change_sentence(row) }.join(', and ') %>.
-                </li>
-              <% end %>
-              <% if !infinite_increase_school_names.empty? %>
-                <li>
-                  (*2) schools where percentage change
-                      is +Infinity is caused by the <%= fuel_type_description %> consumption
-                      in the previous <%= period_type %> being more than zero
-                      but in the current <%= period_type %> zero
-                </li>
-              <% end %>
-              <% if !infinite_decrease_school_names.empty? %>
-                <li>
-                  (*3) schools where percentage change
-                      is -Infinity is caused by the <%= fuel_type_description %> consumption
-                      in the current <%= period_type %> being zero
-                      but in the previous <%= period_type %> it was more than zero
-                </li>
-              <% end %>
-              <% if @rate_changed_in_period %>
-                <li>
-                  (*6) schools where the economic tariff has changed between the two periods,
-                       this is not reflected in the &apos;<%= BenchmarkManager.ch(:change_£current) %>&apos;
-                       column as it is calculated using the most recent tariff.
-                </li>
-              <% end %>
-            </ul>
-          </p>
-        <% end %>
+      footnote_text_for(
+        floor_area_or_pupils_change_rows,
+        infinite_increase_school_names,
+        infinite_decrease_school_names
       )
+    end
+
+    def footnote_text_for(floor_area_or_pupils_change_rows, infinite_increase_school_names, infinite_decrease_school_names)
+      text = '<p>' + I18n.t('analytics.benchmarking.content.footnotes.notes') + ':<ul>'
+
+      if floor_area_or_pupils_change_rows.present?
+        text += change_rows_text(floor_area_or_pupils_change_rows.map { |row| school_name(row) }.sort.to_sentence, period_types) 
+      end
+
+      if infinite_increase_school_names.present?
+        text += infinite_increase_school_names_text(period_type)
+      end
+
+      if infinite_decrease_school_names.present?
+        text += infinite_decrease_school_names_text(period_type)
+      end
+
+      if @rate_changed_in_period
+        text += I18n.t('analytics.benchmarking.content.footnotes.rate_changed_in_period',
+                       change_gbp_current_header: I18n.t('analytics.benchmarking.configuration.column_headings.change_£current')
+                      )
+      end
+
+      text += '</ul></p>'
+
       ERB.new(text).result(binding)
     end
 
@@ -506,14 +506,6 @@ module Benchmarking
       rate_changed_in_periods.any?
     end
 
-    def list_of_school_names_text(school_name_list)
-      if school_name_list.length <= 2
-        school_name_list.join(' and ')
-      else
-        (school_name_list.first school_name_list.size - 1).join(' ,') + ' and ' + school_name_list.last
-      end 
-    end
-
     def school_names_by_calculation_issue(rows, column_id, value)
       rows.select { |row| row[table_column_index(column_id)] == value }
     end
@@ -524,7 +516,7 @@ module Benchmarking
 
     # reverses def referenced(name, changed, percent) in benchmark_manager.rb
     def remove_references(school_name)
-      puts "Before #{school_name} After #{school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')}"
+      # puts "Before #{school_name} After #{school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')}"
       school_name.gsub(/\(\*[[:blank:]]([[:digit:]]+,*)+\)/, '')
     end
 
@@ -544,17 +536,8 @@ module Benchmarking
       rows.all?{ |row| !changed?(row, change_variable) }
     end
 
-    def change_sentence(row)
-      school_name = remove_references(row[table_column_index(:school_name)])
-      current     = row[table_column_index(current_variable) ].round(0)
-      previous    = row[table_column_index(previous_variable)].round(0)
-
-      text = %(
-        <%= school_name %>
-        from <%= FormatEnergyUnit.format(variable_type, current, :html) %>
-        to <%= FormatEnergyUnit.format(variable_type, previous, :html) %>
-      )
-      ERB.new(text).result(binding)
+    def school_name(row)
+      remove_references(row[table_column_index(:school_name)])
     end
   end
   #=======================================================================================
@@ -574,6 +557,8 @@ module Benchmarking
       text += I18n.t('analytics.benchmarking.caveat_text.comparison_with_previous_period_infinite')
       ERB.new(text).result(binding)
     end
+
+
   end
   #=======================================================================================
   class BenchmarkHolidaysChangeBase < BenchmarkPeriodChangeBase

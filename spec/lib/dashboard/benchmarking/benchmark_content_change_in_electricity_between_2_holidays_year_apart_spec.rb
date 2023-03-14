@@ -13,6 +13,13 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetween2HolidaysYearAp
     )
   end
 
+  let(:rows) {
+    [
+      ["Acme Academy 1", -0.4388582171232559, -188.42794266295016, -1256.1862844196673, "Xmas", "Autumn half term", false, 649, 649, false],
+      ["Acme Academy 2", -0.45664254667205617, -363.1775444789265, -2421.1836298595117, "Xmas", "Autumn half term", false, 438, 438, false]
+    ]
+  } 
+
   describe '#page' do
     it 'returns a chart name if charts are present' do
       expect(benchmark.page_name).to eq(:change_in_electricity_holiday_consumption_previous_years_holiday)
@@ -117,6 +124,28 @@ describe Benchmarking::BenchmarkContentChangeInElectricityBetween2HolidaysYearAp
       content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
       expect(content.class).to eq(Array)
       expect(content.size).to be > 0
+    end
+  end
+
+  describe 'footnote_text_for' do
+    it 'creates the introduction_text placeholder text for floor_area_or_pupils_change_rows' do
+      html = benchmark.footnote_text_for(rows,rows,rows)
+      expect(html).to match_html(<<~HTML)
+        <p> 
+          Notes:
+          <ul>
+            <li>
+              (*1) the comparison has been adjusted because the number of pupils have changed between the two holidays for Acme Academy 1 and Acme Academy 2.
+            </li>
+            <li>
+              (*2) schools where percentage change is +Infinity is caused by the electricity consumption in the previous holiday being more than zero but in the current holiday zero
+            </li>
+            <li>
+              (*3) schools where percentage change is -Infinity is caused by the electricity consumption in the current holiday being zero but in the previous holiday it was more than zero
+            </li>      
+          </ul>
+        </p>
+      HTML
     end
   end
 end
