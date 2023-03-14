@@ -43,6 +43,21 @@ module Costs
       end
     end
 
+    def tariffs
+      group_tariff_by_date_ranges.map do |range, tariff|
+        summary = OpenStruct.new(
+          name: tariff.tariff[:name],
+          fuel_type: tariff.fuel_type,
+          type: tariff.tariff[:type],
+          source: tariff.tariff[:source],
+          start_date: tariff.tariff[:start_date],
+          end_date: tariff.tariff[:end_date],
+          real: !(tariff.tariff[:default] || tariff.tariff[:system_wide]),
+        )
+        [range, summary]
+      end.to_h
+    end
+
     private
 
     def calculate_percent_real
@@ -61,7 +76,6 @@ module Costs
       # non-real default system-wide tariffs
       missing = grouped_periods.select { |period| period[0][1] == real_tariffs }
     end
-
 
     def billing_periods
       @billing_periods ||= calculate_billing_periods
@@ -91,6 +105,26 @@ module Costs
     def billing_calculation_start_date
       twenty_five_months = 30 + 2 * 365 # approx 25 months, covers billing period of comparison chart and table
       [@meter_end_date - twenty_five_months, @meter_start_date].max
+    end
+
+    #Extracted from FormatMeterTariffs
+    def group_tariff_by_date_ranges
+      @tariff_cache = {} # this slice_when is slow, cache lookup to double speed but still slow
+
+      drs = (@meter_start_date..@meter_end_date).to_a.slice_when do |curr, prev|
+        @tariff_cache[curr] ||= accounting_tariff.one_days_cost_data(curr).tariff
+        @tariff_cache[prev] ||= accounting_tariff.one_days_cost_data(prev).tariff
+        @tariff_cache[curr] != @tariff_cache[prev]
+      end
+
+      drs_grouped = drs.map { |ds| ds.first..ds.last }
+
+      drs_grouped.map do |dr|
+        [
+          dr,
+          accounting_tariff.one_days_cost_data(dr.first).tariff
+        ]
+      end.to_h.reverse_each.to_h
     end
 
   end
