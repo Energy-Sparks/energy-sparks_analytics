@@ -296,9 +296,9 @@ module Benchmarking
 
           { data: ->{
               [
-                lue1_ppp£.nil? ? nil : 'Electricity',
-                lug1_ppp£.nil? ? nil : 'Gas',
-                lus1_ppp£.nil? ? nil : 'Storage Heaters'
+                lue1_ppp£.nil? ? nil : :electricity,
+                lug1_ppp£.nil? ? nil : :gas,
+                lus1_ppp£.nil? ? nil : :storage_heaters
               ].compact.join(', ')
             },
             name: :metering,
@@ -366,9 +366,9 @@ module Benchmarking
 
           { data: ->{
               [
-                a22e_ppp£.nil? ? nil : 'Electricity',
-                a22g_ppp£.nil? ? nil : 'Gas',
-                a22s_ppp£.nil? ? nil : 'Storage Heaters'
+                a22e_ppp£.nil? ? nil : :electricity,
+                a22g_ppp£.nil? ? nil : :gas,
+                a22s_ppp£.nil? ? nil : :storage_heaters
               ].compact.join(', ')
             },
             name: :metering,
@@ -437,9 +437,9 @@ module Benchmarking
 
           { data: ->{
               [
-                s22e_ppp£.nil? ? nil : 'Electricity',
-                s22g_ppp£.nil? ? nil : 'Gas',
-                s22s_ppp£.nil? ? nil : 'Storage Heaters'
+                s22e_ppp£.nil? ? nil : :electricity,
+                s22g_ppp£.nil? ? nil : :gas,
+                s22s_ppp£.nil? ? nil : :storage_heaters
               ].compact.join(', ')
             },
             name: :metering,

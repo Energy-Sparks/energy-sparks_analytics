@@ -25,6 +25,11 @@ en:
         es_per_pupil_v_per_floor_area_html: "<p>\n   Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the appliances in \n   use), but per floor area benchmarks are more appropriate for gas (the size of building which needs heating). Overall, \n   energy use comparison on a per pupil basis is probably more appropriate in most cases.\n</p>"
         es_per_pupil_v_per_floor_area_useful_html: "<p>\n  Generally, per pupil benchmarks are appropriate for electricity (as they should be proportional to the appliances in \n  use), but per floor area benchmarks are more appropriate for gas (the size of building which needs heating). Overall, \n  energy use comparison on a per pupil basis is probably more appropriate than on a per floor area basis, but this analysis \n  can be useful in some circumstances.\n</p>"
       chart_table_config:
+        data:
+          metering:
+            electricity: Electricity
+            gas: Gas
+            storage_heaters: Storage heaters
         annual_electricity_costs_per_pupil: Annual electricity use per pupil with savings potential
         annual_electricity_out_of_hours_use: Electricity used out of school hours
         annual_energy_costs: Annual cost of electricity, gas, storage heaters and combined energy
