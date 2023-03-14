@@ -286,9 +286,6 @@ en:
                 are calculated using the relevant tariff at the time
           </p>
       content:
-        benchmark_holidays_change_base:
-          period_type: holiday
-          period_types: holidays
         annual_electricity_costs_per_pupil:
           introduction_text_html: "<p>\n  This benchmark compares the electricity cost per pupil in the last year.\n</p>\n<p>\n  There should not be a significant difference between schools as all schools need to use roughly the same amount of ICT equipment, \n  lighting and refrigeration per pupil. Exceptions might be schools with swimming pools or sports flood lighting which can significantly \n  increase demand. Special schools also have higher electricity costs per pupil due to lower pupil densities and specialist equipment.\n</p>\n<p>\n  The data excludes storage heaters which are reported elsewhere under the 'heating' benchmarks.\n</p>"
         annual_electricity_out_of_hours_use:
@@ -342,12 +339,15 @@ en:
             two_value_html: "<p>A 1 kW increase in baseload is equivalent to an increase in annual electricity costs of between %{value_first_gbp} and %{value_last_gbp} depending on your current tariff.</p>"
         benchmark_change_adhoc_comparison_gas_table:
           introduction_text: 'The change columns are calculated using temperature adjusted values:'
+        benchmark_holidays_change_base:
+          period_type: holiday
+          period_types: holidays
         benchmark_sept_nov_2022_gas_table:
           introduction_text: 'The change columns are calculated using temperature adjusted values:'
         change_in_electricity_consumption_recent_school_weeks:
           introduction_text_html: "<p>This benchmark shows the change in electricity consumption over the last two school weeks. You should expect a small increase in electricity consumption going into the winter with increased lighting usage and a subsequent reduction in the spring.</p>"
           period_type: school week
-          period_types: school weeks 
+          period_types: school weeks
         change_in_electricity_holiday_consumption_previous_holiday:
           introduction_text_html: |-
             <p>
