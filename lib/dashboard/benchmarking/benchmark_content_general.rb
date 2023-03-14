@@ -545,11 +545,11 @@ module Benchmarking
     include BenchmarkPeriodChangeBaseElectricityMixIn
 
     def period_type
-      'school week'
+      I18n.t('analytics.benchmarking.content.change_in_electricity_consumption_recent_school_weeks.period_type')
     end
 
     def period_types
-      "#{period_type}s" # pluralize
+      I18n.t('analytics.benchmarking.content.change_in_electricity_consumption_recent_school_weeks.period_types')
     end
 
     private def introduction_text
@@ -563,11 +563,11 @@ module Benchmarking
   #=======================================================================================
   class BenchmarkHolidaysChangeBase < BenchmarkPeriodChangeBase
     def period_type
-      'holiday'
+      I18n.t('analytics.benchmarking.content.benchmark_holidays_change_base.period_type')
     end
 
     def period_types
-      "#{period_type}s" # pluralize
+      I18n.t('analytics.benchmarking.content.benchmark_holidays_change_base.period_types')
     end
   end
   #=======================================================================================
@@ -778,5 +778,4 @@ module Benchmarking
   class BenchmarkSeptNov2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
   end
-
 end
