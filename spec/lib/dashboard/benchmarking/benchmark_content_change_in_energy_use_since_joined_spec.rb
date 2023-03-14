@@ -126,5 +126,26 @@ describe Benchmarking::BenchmarkContentChangeInEnergyUseSinceJoined, type: :serv
       expect(content.class).to eq(Array)
       expect(content.size).to be > 0
     end
+
+    it 'translates column_groups' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) } #.flatten.map { |c| c[:name] }
+      expect(column_groups).to eq(
+        [
+          [
+            { name: "", span: 2},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.change_since_joined_energy_sparks"), span: 5}
+          ],
+          [
+            { name: "", span: 2},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.electricity_consumption"), span: 3},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.gas_consumption"), span: 3},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.storage_heater_consumption"), span: 3},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.solar_pv_production"), span: 3},
+            { name: I18n.t("analytics.benchmarking.configuration.column_groups.total_energy_consumption"), span: 1}
+          ]
+        ]
+      )
+    end
   end
 end
