@@ -661,7 +661,7 @@ module Benchmarking
           { name: '',                       span: 1 },
           { name: :kwh,                    span: 3 },
           { name: :co2_kg,               span: 3 },
-          { name: 'Solar',                  span: 1 },
+          { name: :solar,                  span: 1 },
         ],
         where:   ->{ !enba_ksn.nil? && enba_psap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],

@@ -241,6 +241,7 @@ module Benchmarking
     end
 
     def translate_column_groups_for(column_groups)
+      return unless column_groups
       translated_column_groups = []
       column_groups.each do |column_group|
          translated_column_groups << {

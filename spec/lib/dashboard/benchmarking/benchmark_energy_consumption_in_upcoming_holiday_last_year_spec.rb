@@ -127,5 +127,11 @@ describe Benchmarking::BenchmarkEnergyConsumptionInUpcomingHolidayLastYear, type
       expect(content.class).to eq(Array)
       expect(content.size).to be > 0
     end
+
+    it 'translates column_groups' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      expect(column_groups).to eq([])
+    end
   end
 end

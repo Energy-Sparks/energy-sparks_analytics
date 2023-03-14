@@ -84,16 +84,18 @@ en:
       configuration:
         column_groups:
           change_since_joined_energy_sparks: Change since joined Energy Sparks
-          cost: Cost
-          kwh: kWh
           co2_kg: CO2 (kg)
-          metering: Metering
-          gbp: £
-          solar_self_consumption: Solar self consumption
+          cost: Cost
           electricity_consumption: Electricity consumption
           gas_consumption: Gas consumption
-          storage_heater_consumption: Storage heater consumption
+          gbp: "£"
+          kwh: kWh
+          metering: Metering
+          percent_changed: Percent changed
+          solar: Solar
           solar_pv_production: Solar PV production
+          solar_self_consumption: Solar self consumption
+          storage_heater_consumption: Storage heater consumption
           total_energy_consumption: Total energy consumption
         column_heading_explanation:
           last_year_definition_html: "<p>In school comparisons &apos;last year&apos; is defined as this year to date.</p>"

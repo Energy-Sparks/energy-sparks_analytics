@@ -122,5 +122,33 @@ describe Benchmarking::BenchmarkSeptNov2022Comparison, type: :service do
       expect(content.class).to eq(Array)
       expect(content.size).to be > 0
     end
+
+    it 'translates column_groups' do
+      content = benchmark.content(school_ids: [795, 629, 634], filter: nil)
+      column_groups = content.select { |c| c[:type] == :table_composite }.map { |c| c.dig(:content, :column_groups) }.compact
+      expect(column_groups).to eq(
+        [
+          [
+            {:name=>"", :span=>1},
+            {:name=>"kWh", :span=>3},
+            {:name=>"CO2 (kg)", :span=>3},
+            {:name=>"Cost", :span=>3},
+            {:name=>"", :span=>1}
+          ],
+          [
+            {:name=>"", :span=>1},
+            {:name=>"kWh", :span=>3},
+            {:name=>"CO2 (kg)", :span=>3},
+            {:name=>"Cost", :span=>3}
+          ],
+          [
+            {:name=>"", :span=>1},
+            {:name=>"kWh", :span=>4},
+            {:name=>"CO2 (kg)", :span=>3},
+            {:name=>"Cost", :span=>3}
+          ]
+        ]
+      )
+    end
   end
 end
