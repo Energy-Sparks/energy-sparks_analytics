@@ -47,6 +47,11 @@ en:
         change_in_gas_since_last_year: Annual change in gas use
         change_in_solar_pv_since_last_year: Annual change in solar PV production and resulting CO2 savings
         change_in_storage_heaters_since_last_year: Annual change in storage heater
+        data:
+          metering:
+            electricity: Electricity
+            gas: Gas
+            storage_heaters: Storage heaters
         electricity_consumption_during_holiday: Electricity use during current holiday
         electricity_peak_kw_per_pupil: Peak school day electricity use
         electricity_targets: Progress against electricity target

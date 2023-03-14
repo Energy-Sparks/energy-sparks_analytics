@@ -128,6 +128,7 @@ module Benchmarking
     def run_benchmark_table_private(today, report, school_ids, chart_columns_only = false, filter = nil, medium = :raw, ignore_aggregate_columns, user_type, hide_visible_columns)
       results = []
       full_config = self.class.chart_table_config(report)
+
       config = hide_columns(full_config, user_type, ignore_aggregate_columns)
       school_ids = all_school_ids([today]) if school_ids.nil?
       last_year = today - 364
@@ -141,6 +142,7 @@ module Benchmarking
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
+        
         results.push(calculated_row) if row_has_useful_data(calculated_row, config, chart_columns_only)
       end
 
@@ -509,7 +511,12 @@ module Benchmarking
         when String
           row.send(column_specification[:data])
         when Proc
-          row.instance_exec(&column_specification[:data]) # this calls the configs lambda as if it was inside the class of the database row, given the lambda access to all the row's variables
+          row_data = row.instance_exec(&column_specification[:data])
+          if row_data.is_a? String
+            I18n.t("analytics.benchmarking.chart_table_config.data.metering.#{row_data}", default: row_data)
+          else
+            row_data
+          end
         else
           nil
         end
