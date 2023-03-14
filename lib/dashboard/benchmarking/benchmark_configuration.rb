@@ -241,7 +241,7 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',                                     span: 2 },
-          { name: 'Change since joined Energy Sparks',    span: 5 },
+          { name: :change_since_joined_energy_sparks,    span: 5 },
         ],
         treat_as_nil:   [ManagementSummaryTable::NO_RECENT_DATA_MESSAGE, ManagementSummaryTable::NOT_ENOUGH_DATA_MESSAGE], # from ManagementSummaryTable:: not referenced because not on path
         sort_by:  [2],
@@ -307,9 +307,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 },
+          { name: :kwh,       span: 3 },
+          { name: :co2_kg,    span: 3 },
+          { name: :cost,      span: 3 },
           { name: '',         span: 1 }
         ],
         where:   ->{ !sum_data([lue1_ppp£, lug1_ppp£, lus1_ppp£], true).nil? },
@@ -378,9 +378,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 },
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 },
           { name: '',         span: 1 }
         ],
         where:   ->{ !sum_data([a22e_ppp£, a22g_ppp£, a22s_ppp£], true).nil? },
@@ -449,9 +449,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 },
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 },
           { name: '',         span: 1 }
         ],
         where:   ->{ !sum_data([s22e_ppp£, s22g_ppp£, s22s_ppp£], true).nil? },
@@ -530,10 +530,10 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 },
-          { name: 'Metering', span: 2 },
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 },
+          { name: :metering, span: 2 },
         ],
         where:   ->{ !sum_data([enba_ke0, enba_kg0, enba_kh0, enba_ks0], true).nil? },
         sort_by:  method(:sort_by_nil),
@@ -563,11 +563,11 @@ module Benchmarking
           { data: ->{ enba_solr == 'synthetic' ? 'Y' : '' }, name: :estimated,  units: String },
         ],
         column_groups: [
-          { name: '',                       span: 1 },
-          { name: 'kWh',                    span: 3 },
-          { name: 'CO2 (kg)',               span: 3 },
-          { name: '£',                      span: 3 },
-          { name: 'Solar self consumption', span: 1 },
+          { name: '',                        span: 1 },
+          { name: :kwh,                      span: 3 },
+          { name: :co2_kg,                   span: 3 },
+          { name: :gbp,                      span: 3 },
+          { name: :solar_self_consumption,   span: 1 },
         ],
         where:   ->{ !enba_ken.nil? && enba_peap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
@@ -597,10 +597,10 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',                 span: 1 },
-          { name: 'kWh',              span: 3 },
-          { name: 'CO2 (kg)',         span: 2 },
-          { name: '£',                span: 2 },
-          { name: 'Percent changed',  span: 2 },
+          { name: :kwh,              span: 3 },
+          { name: :co2_kg,         span: 2 },
+          { name: :gbp,                span: 2 },
+          { name: :percent_changed,  span: 2 },
         ],
         where:   ->{ !enba_kgn.nil? && enba_pgap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
@@ -630,9 +630,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',                       span: 1 },
-          { name: 'kWh',                    span: 3 },
-          { name: 'CO2 (kg}',               span: 3 },
-          { name: '£',                      span: 4 },
+          { name: :kwh,                    span: 3 },
+          { name: :co2_kg,               span: 3 },
+          { name: :gbp,                      span: 4 },
         ],
         where:   ->{ !enba_khn.nil? && enba_phap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
         sort_by:  [3],
@@ -659,8 +659,8 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',                       span: 1 },
-          { name: 'kWh',                    span: 3 },
-          { name: 'CO2 (kg)',               span: 3 },
+          { name: :kwh,                    span: 3 },
+          { name: :co2_kg,               span: 3 },
           { name: 'Solar',                  span: 1 },
         ],
         where:   ->{ !enba_ksn.nil? && enba_psap != ManagementSummaryTable::NO_RECENT_DATA_MESSAGE },
@@ -1198,9 +1198,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !a22e_ppp£.nil? },
         sort_by:  [9],
@@ -1234,9 +1234,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !a22g_ppp£.nil? },
         sort_by:  [9],
@@ -1270,9 +1270,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !a22s_ppp£.nil? },
         sort_by:  [9],
@@ -1304,9 +1304,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !lue1_ppp£.nil? },
         sort_by:  [9],
@@ -1339,9 +1339,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !lug1_ppp£.nil? },
         sort_by:  [9],
@@ -1374,9 +1374,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !lus1_ppp£.nil? },
         sort_by:  [9],
@@ -1415,11 +1415,11 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',                           span: 2 },
-          { name: 'Electricity consumption',    span: 3 },
-          { name: 'Gas consumption',            span: 3 },
-          { name: 'Storage heater consumption', span: 3 },
-          { name: 'Solar PV production',        span: 3 },
-          { name: 'Total energy consumption',   span: 1 }
+          { name: :electricity_consumption,     span: 3 },
+          { name: :gas_consumption,             span: 3 },
+          { name: :storage_heater_consumption,  span: 3 },
+          { name: :solar_pv_production,         span: 3 },
+          { name: :total_energy_consumption,    span: 1 }
         ],
         sort_by:  [13],
         type: %i[chart table],
@@ -1469,9 +1469,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 3 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 3 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !s22e_ppp£.nil? },
         sort_by:  [9],
@@ -1505,9 +1505,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !s22g_ppp£.nil? },
         sort_by:  [9],
@@ -1541,9 +1541,9 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: 'kWh',      span: 4 },
-          { name: 'CO2 (kg)', span: 3 },
-          { name: 'Cost',     span: 3 }
+          { name: :kwh,      span: 4 },
+          { name: :co2_kg, span: 3 },
+          { name: :cost,     span: 3 }
         ],
         where:   ->{ !s22s_ppp£.nil? },
         sort_by:  [9],

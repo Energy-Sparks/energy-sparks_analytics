@@ -82,6 +82,19 @@ en:
           description: These benchmarks compare the combined energy use of a school site
           title: Total Energy Use Benchmarks
       configuration:
+        column_groups:
+          change_since_joined_energy_sparks: Change since joined Energy Sparks
+          cost: Cost
+          kwh: kWh
+          co2_kg: CO2 (kg)
+          metering: Metering
+          gbp: £
+          solar_self_consumption: Solar self consumption
+          electricity_consumption: Electricity consumption
+          gas_consumption: Gas consumption
+          storage_heater_consumption: Storage heater consumption
+          solar_pv_production: Solar PV production
+          total_energy_consumption: Total energy consumption
         column_heading_explanation:
           last_year_definition_html: "<p>In school comparisons &apos;last year&apos; is defined as this year to date.</p>"
           last_year_previous_year_definition_html: "<p>In school comparisons &apos;last year&apos; is defined as this year to date, &apos;previous year&apos; is defined as the year before.</p>"
