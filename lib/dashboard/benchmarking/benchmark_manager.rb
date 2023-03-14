@@ -137,14 +137,8 @@ module Benchmarking
         # @benchmark_database.@benchmark_database.fetch(last_year){{}}.fetch(school_id)
         # school_data_last_year = @benchmark_database.dig(last_year, school_id)
         # school_data.merge!(dated_attributes('_last_year', school_data_last_year)) unless school_data_last_year.nil?
-
-
-
-
         next if school_data.nil? || school_data.empty? # && school_data_last_year
         row  = DatabaseRow.new(school_id, school_data)
-        
-
         next unless filter_row(row, filter)
         next if config.key?(:where) && !filter_row(row, config[:where])
         calculated_row = calculate_row(row, config, chart_columns_only, school_id)
@@ -229,11 +223,8 @@ module Benchmarking
     end
 
     def format_table(table_definition, rows, medium, hide_visible_columns)
-
-
       header, raw_rows = remove_hidden_columns(table_definition, rows, hide_visible_columns)
       school_ids = rows.map{ |d| d[:school_id] }
-
 
       case medium
       when :raw
@@ -268,13 +259,7 @@ module Benchmarking
       column_units    = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition[:units] }, hide_visible_columns)
       column_sense    = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition.dig(:sense) }, hide_visible_columns)
       content_classes = visible_data(table_definition, column_definitions.map{ |column_definition| column_definition.dig(:content_class) }, hide_visible_columns)
-      
-
-
-
       formatted_rows = rows.each_with_index.map do |row, row_number|
-        
-
         row.each_with_index.map do |value, index|
           sense = sense_column(column_sense[index])
           drilldown = content_classes[index]
@@ -509,15 +494,10 @@ module Benchmarking
     end
 
     def calculate_row(row, report, chart_columns_only, school_id)
-
-
-
       row_data = report[:columns].map do |column_specification|
         next if chart_columns_only && !self.class.chart_column?(column_specification)
         calculate_value(row, column_specification, school_id)
       end
-
-
       { data: row_data, school_id: school_id }
     end
 
@@ -526,8 +506,6 @@ module Benchmarking
     end
 
     def calculate_value(row, column_specification, school_id_debug)
-
-
       begin
         case column_specification[:data]
         when String
