@@ -229,11 +229,26 @@ module Benchmarking
         [header] + raw_rows
       when :text, :text_and_raw
         formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
-        { column_groups: table_definition[:column_groups],   header: header, rows: formatted_rows}
+        {
+          column_groups: translate_column_groups_for(table_definition[:column_groups]),
+          header: header,
+          rows: formatted_rows
+        }
       when :html
         formatted_rows = format_rows(raw_rows, table_definition, medium, school_ids, hide_visible_columns)
-        HtmlTableFormatting.new(header, formatted_rows).html(column_groups: table_definition[:column_groups])
+        HtmlTableFormatting.new(header, formatted_rows).html(column_groups: translate_column_groups_for(table_definition[:column_groups]))
       end
+    end
+
+    def translate_column_groups_for(column_groups)
+      translated_column_groups = []
+      column_groups.each do |column_group|
+         translated_column_groups << {
+           name: column_group[:name].present? ? I18n.t("analytics.benchmarking.configuration.column_groups.#{column_group[:name]}"): '',
+           span: column_group[:span]
+         }
+      end
+      translated_column_groups
     end
 
     def format_rows(rows, table_definition, medium, school_ids, hide_visible_columns)
