@@ -406,11 +406,21 @@ module Benchmarking
     end
 
     def y_axis_label_name(unit)
-      unit_names = { kwh: 'kWh', kw: 'kW', co2: 'kg CO2', £: '£', w: 'W', £_0dp: '£',
-                     timeofday: 'Time of day',
-                     percent: 'percent', percent_0dp: 'percent',
-                     relative_percent: 'percent', relative_percent_0dp: 'percent',
-                     days: 'days', r2: ''}
+      unit_names = { 
+        kwh: I18n.t('chart_configuration.y_axis_label_name.kwh'),
+        kw: I18n.t('chart_configuration.y_axis_label_name.kw'),
+        co2: I18n.t('chart_configuration.y_axis_label_name.co2'), 
+        £: I18n.t('chart_configuration.y_axis_label_name.£'), 
+        w: I18n.t('chart_configuration.y_axis_label_name.w'), 
+        £_0dp: I18n.t('chart_configuration.y_axis_label_name.£_0dp'),
+        timeofday: I18n.t('chart_configuration.y_axis_label_name.timeofday'),
+        percent: I18n.t('chart_configuration.y_axis_label_name.percent'),
+        percent_0dp: I18n.t('chart_configuration.y_axis_label_name.percent_0dp'),
+        relative_percent: I18n.t('chart_configuration.y_axis_label_name.relative_percent'),
+        relative_percent_0dp: I18n.t('chart_configuration.y_axis_label_name.relative_percent_0dp'),
+        days: I18n.t('chart_configuration.y_axis_label_name.days'),
+        r2: I18n.t('chart_configuration.y_axis_label_name.r2')
+      }
       return unit_names[unit] if unit_names.key?(unit)
       logger.info "Unexpected untranslated unit type for benchmark chart #{unit}"
       puts "Unexpected untranslated unit type for benchmark chart #{unit}"
@@ -513,7 +523,7 @@ module Benchmarking
         when Proc
           row_data = row.instance_exec(&column_specification[:data])
           if row_data.is_a? String
-            I18n.t("analytics.benchmarking.chart_table_config.data.metering.#{row_data}", default: row_data)
+            row_data.blank? ? '' : I18n.t("analytics.benchmarking.chart_table_config.data.metering.#{row_data}", default: row_data)
           else
             row_data
           end

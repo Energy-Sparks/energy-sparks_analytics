@@ -64,7 +64,7 @@ module Benchmarking
       [
         { type: :analytics_html,        content: '<br>' },
         # { type: :html,                  content: content_title },
-        { type: :title,                 content: chart_table_config[:name]},
+        { type: :title,                 content: I18n.t("analytics.benchmarking.chart_table_config.#{page_name}", default: chart_table_config[:name])},
         { type: :html,                  content: introduction_text },
       ]
     end
