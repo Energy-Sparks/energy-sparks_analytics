@@ -10,6 +10,7 @@ module Heating
   # 12 months of data.
   class SeasonalControlAnalysisService < BaseService
     def initialize(meter_collection:, fuel_type: :gas)
+      raise 'Invalid fuel type' unless %i[gas storage_heater].include? fuel_type
       validate_meter_collection(meter_collection)
       super(meter_collection, nil, fuel_type)
     end
