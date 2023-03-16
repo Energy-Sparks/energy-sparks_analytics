@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe Heating::SeasonalControlAnalysisService do
-  let(:service) { Heating::SeasonalControlAnalysisService.new(meter_collection: @acme_academy) }
+  let(:service) { Heating::SeasonalControlAnalysisService.new(meter_collection: @acme_academy, fuel_type: :gas) }
   let(:service_with_storage_heater) { Heating::SeasonalControlAnalysisService.new(meter_collection: @beta_academy, fuel_type: :storage_heater) }
 
   # using before(:all) here to avoid slow loading of YAML and then
