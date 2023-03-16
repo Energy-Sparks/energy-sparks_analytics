@@ -81,9 +81,11 @@ module Usage
       # Code adapted from:
       # AlertOutOfHoursElectricityUsage#good_out_of_hours_use_percent = 0.35
       # AlertOutOfHoursGasUsage#good_out_of_hours_use_percent = 0.3
+      # AlertStorageHeaterOutOfHours#good_out_of_hours_use_percent = 0.2
       case @fuel_type
       when :electricity then BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY
       when :gas then BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_GAS
+      when :storage_heater then BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER
       end
     end
   end
