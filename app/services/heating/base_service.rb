@@ -5,10 +5,11 @@ module Heating
   class BaseService
     ONE_WEEK = 7
 
-    def initialize(meter_collection, asof_date)
+    def initialize(meter_collection, asof_date, fuel_type = :gas)
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
       @asof_date = asof_date
+      @fuel_type = fuel_type
     end
 
     # Confirms that we are able to successfully generate a heating model from this school's
@@ -24,16 +25,16 @@ module Heating
     end
 
     def validate_meter_collection(meter_collection)
-      if meter_collection.aggregated_heat_meters.nil?
+      if @fuel_type == :gas && meter_collection.aggregated_heat_meters.nil?
         raise EnergySparksUnexpectedStateException, 'School does not have gas meters'
       end
-      if meter_collection.aggregated_heat_meters.non_heating_only?
+      if @fuel_type == :gas && meter_collection.aggregated_heat_meters.non_heating_only?
         raise EnergySparksUnexpectedStateException, 'School does not use gas for heating'
       end
     end
 
     def aggregate_meter
-      @aggregate_meter ||= @meter_collection.aggregated_heat_meters
+      @aggregate_meter ||= @fuel_type == :storage_heater ? @meter_collection.storage_heater_meter : @meter_collection.aggregated_heat_meters
     end
 
     def enough_data_for_model_fit?
