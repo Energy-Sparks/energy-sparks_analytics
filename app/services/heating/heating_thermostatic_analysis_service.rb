@@ -5,12 +5,14 @@ module Heating
     def initialize(
       meter_collection:,
       average_outside_temperature_high_centigrade: 12.0,
-      average_outside_temperature_low_centigrade: 4.0
+      average_outside_temperature_low_centigrade: 4.0,
+      fuel_type: :gas
     )
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
       @average_outside_temperature_high_centigrade = average_outside_temperature_high_centigrade
       @average_outside_temperature_low_centigrade = average_outside_temperature_low_centigrade
+      @fuel_type = fuel_type
     end
 
     # def data_available_from
