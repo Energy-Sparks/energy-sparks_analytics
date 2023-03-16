@@ -8,6 +8,7 @@ module Heating
       average_outside_temperature_low_centigrade: 4.0,
       fuel_type: :gas
     )
+      raise 'Invalid fuel type' unless %i[gas storage_heater].include? fuel_type
       validate_meter_collection(meter_collection)
       @meter_collection = meter_collection
       @average_outside_temperature_high_centigrade = average_outside_temperature_high_centigrade
