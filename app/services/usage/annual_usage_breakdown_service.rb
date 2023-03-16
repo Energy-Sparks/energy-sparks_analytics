@@ -5,7 +5,7 @@ module Usage
   class AnnualUsageBreakdownService
     include AnalysableMixin
     def initialize(meter_collection:, fuel_type: :electricity)
-      raise 'Invalid fuel type' unless [:electricity, :gas].include? fuel_type
+      raise 'Invalid fuel type' unless [:electricity, :gas, :storage_heater].include? fuel_type
       @meter_collection = meter_collection
       @fuel_type = fuel_type
     end
@@ -38,6 +38,7 @@ module Usage
       @aggregate_meter ||= case @fuel_type
                            when :electricity then @meter_collection.aggregated_electricity_meters
                            when :gas then @meter_collection.aggregated_heat_meters
+                           when :storage_heater then @meter_collection.storage_heater_meter
                            end
     end
 
