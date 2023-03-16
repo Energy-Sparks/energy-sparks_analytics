@@ -40,9 +40,16 @@ class AlertStorageHeaterOutOfHours < AlertOutOfHoursGasUsage
   include AlertGasToStorageHeaterSubstitutionMixIn
   include ElectricityCostCo2Mixin
   def initialize(school)
-    super(school, 'electricity', BenchmarkMetrics::PERCENT_STORAGE_HEATER_OUT_OF_HOURS_BENCHMARK,
-          :storageheateroutofhours,
-          '', :allstorageheater, 0.2, 0.5)
+    super(
+      school,
+      'electricity',
+      BenchmarkMetrics::PERCENT_STORAGE_HEATER_OUT_OF_HOURS_BENCHMARK,
+      :storageheateroutofhours,
+      '',
+      :allstorageheater,
+      BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER,
+      BenchmarkMetrics::BAD_OUT_OF_HOURS_USE_PERCENT_STORAGE_HEATER
+    )
     @relevance = @school.storage_heaters? ? :relevant : :never_relevant
   end
 
