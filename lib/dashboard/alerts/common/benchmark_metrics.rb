@@ -138,28 +138,6 @@ module BenchmarkMetrics
     end
   end
 
-  def self.recommended_baseload_for_pupils_deprecated(pupils, school_type)
-    school_type = school_type.to_sym if school_type.instance_of? String
-    check_school_type(school_type)
-
-    case school_type
-    when :primary, :infant, :junior, :special
-      if pupils < 150
-        1.5
-      elsif pupils < 300
-        2.5
-      else
-        2.5 * (pupils / 300)
-      end
-    when :secondary, :middle, :mixed_primary_and_secondary
-      if pupils < 400
-        10
-      else
-        10 + 10 * (pupils - 400) / 400
-      end
-    end
-  end
-
   def self.recommended_baseload_for_pupils(pupils, school_type)
     school_type = school_type.to_sym if school_type.instance_of? String
     check_school_type(school_type)
