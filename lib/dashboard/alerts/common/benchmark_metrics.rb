@@ -154,19 +154,23 @@ module BenchmarkMetrics
     check_school_type(school_type)
 
     case school_type
-    when :primary, :infant, :junior, :special
+    when :primary, :infant, :junior
       if pupils < 150
-        1.5
-      elsif pupils < 300
+        1.0
+      else
+        1.0 + 1.0 * (pupils - 150) / 100
+      end
+    when :special
+      if pupils < 30
         2.5
       else
-        2.5 * (pupils / 300)
+        2.5 + 1.8 * (pupils - 30) / 30
       end
     when :secondary, :middle, :mixed_primary_and_secondary
-      if pupils < 400
+      if pupils < 500
         10
       else
-        10 + 10 * (pupils - 400) / 400
+        10 + 9.5 * (pupils - 500) / 500
       end
     end
   end
