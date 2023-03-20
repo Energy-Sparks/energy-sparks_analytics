@@ -11,8 +11,10 @@ module Usage
 
     def average_peak_usage_kw(compare: :exemplar_school)
       case compare
-      when :exemplar_school then exemplar_kw
-      # when :benchmark_school then nil
+      when :benchmark_school
+        benchmark_kw
+      when :exemplar_school
+        exemplar_kw
       else
         raise 'Invalid comparison'
       end
@@ -20,8 +22,10 @@ module Usage
 
     def estimated_savings(versus: :exemplar_school)
       case versus
-      when :exemplar_school then consumption_above_exemplar_peak
-      # when :benchmark_school then nil
+      when :benchmark_school
+        consumption_above_peak( benchmark_kwh )
+      when :exemplar_school
+        consumption_above_peak( exemplar_kwh )
       else
         raise 'Invalid comparison'
       end
@@ -41,8 +45,9 @@ module Usage
       @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregate_meter, @asof_date)
     end
 
-    def consumption_above_exemplar_peak
-      totals = consumption_above_exemplar_peak_totals
+
+    def consumption_above_peak(peak_kwh)
+      totals = consumption_above_peak_totals(peak_kwh)
 
       CombinedUsageMetric.new(
         kwh: totals[:kwh],
@@ -52,13 +57,13 @@ module Usage
     end
 
     # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-    def consumption_above_exemplar_peak_totals
+    def consumption_above_peak_totals(peak_kwh)
       totals = { kwh: 0.0, £: 0.0, co2: 0.0 }
 
       full_date_range.each do |date|
         (0..47).each do |hhi|
           kwh = aggregate_meter.amr_data.kwh(date, hhi, :kwh)
-          percent_above_exemplar = capped_percent(kwh, exemplar_kwh)
+          percent_above_exemplar = capped_percent(kwh, peak_kwh)
 
           next if percent_above_exemplar.nil?
 
@@ -72,10 +77,10 @@ module Usage
     end
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 
-    def capped_percent(kwh, exemplar_kwh)
-      return nil if kwh <= exemplar_kwh
+    def capped_percent(kwh, peak_kwh)
+      return nil if kwh <= peak_kwh
 
-      (kwh - exemplar_kwh) / kwh
+      (kwh - peak_kwh) / kwh
     end
 
     def aggregate_meter
@@ -92,20 +97,28 @@ module Usage
       val * scale_factor
     end
 
-    def benchmark_kw_m2
-      BenchmarkMetrics::BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2
+    def benchmark_kw
+      BenchmarkMetrics.benchmark_peak_kw(pupils, school_type)
+    end
+
+    def benchmark_kwh
+      @benchmark_kwh ||= benchmark_kw / 2.0
     end
 
     def exemplar_kw
-      benchmark_kw_m2 * floor_area
+      BenchmarkMetrics.exemplar_peak_kw(pupils, school_type)
     end
 
     def exemplar_kwh
       @exemplar_kwh ||= exemplar_kw / 2.0
     end
 
-    def floor_area
-      aggregate_meter.meter_floor_area(@meter_collection, start_date, end_date)
+    def school_type
+      @meter_collection.school_type
+    end
+
+    def pupils
+      aggregate_meter.meter_number_of_pupils(@meter_collection, start_date, end_date)
     end
 
     def start_date
