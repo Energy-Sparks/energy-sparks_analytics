@@ -9,12 +9,11 @@ class AlertOutOfHoursElectricityUsage < AlertOutOfHoursBaseUsage
     super(
       school,
       'electricity',
-      BenchmarkMetrics::PERCENT_ELECTRICITY_OUT_OF_HOURS_BENCHMARK,
       :electricityoutofhours,
       'ElectricityOutOfHours',
       :allelectricity,
-      BenchmarkMetrics::GOOD_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY,
-      BenchmarkMetrics::BAD_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY
+      BenchmarkMetrics::EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY,
+      BenchmarkMetrics::BENCHMARK_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY
     )
   end
 
