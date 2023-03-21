@@ -3,6 +3,8 @@
 # rubocop:disable Naming/VariableName, Metrics/ClassLength
 module SolarPhotovoltaics
   class PotentialBenefitsEstimatorService
+    include AnalysableMixin
+
     attr_reader :scenarios, :optimum_kwp, :optimum_payback_years, :optimum_mains_reduction_percent
 
     def initialize(meter_collection:, asof_date: Date.today)
@@ -23,7 +25,15 @@ module SolarPhotovoltaics
       )
     end
 
+    def enough_data?
+      meter_data_checker.one_years_data?
+    end
+
     private
+
+    def meter_data_checker
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregated_electricity_meters, @asof_date)
+    end
 
     def calculate_potential_benefits_estimates
       # (use_max_meter_date_if_less_than_asof_date: false)

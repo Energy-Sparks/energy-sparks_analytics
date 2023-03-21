@@ -10,6 +10,12 @@ describe SolarPhotovoltaics::ExistingBenefitsService, type: :service do
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy-with-solar')
   end
 
+  context '#enough_data?' do
+    it 'returns true if one years worth of data is available' do
+      expect(service.enough_data?).to eq(true)
+    end
+  end
+
   context '#create_model' do
     it 'calculates the existing benefits for a school with solar pv' do
       benefits = service.create_model

@@ -12,6 +12,12 @@ describe SolarPhotovoltaics::PotentialBenefitsEstimatorService, type: :service d
     @acme_academy = load_unvalidated_meter_collection(school: 'acme-academy')
   end
 
+  context '#enough_data?' do
+    it 'returns true if one years worth of data is available' do
+      expect(service.enough_data?).to eq(true)
+    end
+  end
+
   context '#create_model' do
     it 'calculates the potential benefits over a geometric sequence of capacity kWp up to 256 for a school with no solar pv' do
       model = service.create_model

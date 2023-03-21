@@ -25,7 +25,15 @@ module SolarPhotovoltaics
     end
     # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Layout/LineLength
 
+    def enough_data?
+      meter_data_checker.one_years_data?
+    end
+
     private
+
+    def meter_data_checker
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(@meter_collection.aggregated_electricity_meters, @asof_date)
+    end
 
     # rubocop:disable Naming/MethodName
     def export_£
