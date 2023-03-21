@@ -32,18 +32,29 @@ describe Usage::PeakUsageBenchmarkingService, type: :service do
   end
 
   context '#estimated_savings' do
-    it 'returns estimated savings when compared against an examplar or benchmark school' do
-      model = service.estimated_savings(versus: :exemplar_school)
-      expect(model.kwh).to round_to_two_digits(105_187.78) # 105187.77999999828
-      expect(model.£).to round_to_two_digits(16_440.45) # 16440.45410541508
-      expect(model.co2).to round_to_two_digits(21_048.32) # 21048.319799999976
-      expect(model.percent).to eq(nil)
+    it 'returns estimated savings when compared against an benchmark school' do
+      savings = service.estimated_savings(versus: :benchmark_school)
+      expect(savings.kwh).to round_to_two_digits(22352.35)
+      expect(savings.£).to round_to_two_digits(3516.65)
+      expect(savings.co2).to round_to_two_digits(4500.11)
+      expect(savings.percent).to eq(nil)
+    end
+
+    it 'returns estimated savings when compared against an examplar school' do
+      savings = service.estimated_savings(versus: :exemplar_school)
+      expect(savings.kwh).to round_to_two_digits(33607.53) # 33607.53199999968
+      expect(savings.£).to round_to_two_digits(5288.69) # 5288.687824395379
+      expect(savings.co2).to round_to_two_digits(6727.27) # 6727.269323999998
+      expect(savings.percent).to eq(nil)
     end
   end
 
   context '#average_peak_usage_kw' do
-    it 'returns average peak usage kw when compared against an examplar or benchmark school' do
-      expect(service.average_peak_usage_kw(compare: :exemplar_school)).to round_to_two_digits(59.32)
+    it 'returns average peak usage kw when compared against an examplar school' do
+      expect(service.average_peak_usage_kw(compare: :exemplar_school)).to round_to_two_digits(107.63)
+    end
+    it 'returns average peak usage kw when compared against a benchmark school' do
+      expect(service.average_peak_usage_kw(compare: :benchmark_school)).to round_to_two_digits(120.13)
     end
   end
 end

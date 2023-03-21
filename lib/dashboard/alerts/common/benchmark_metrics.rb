@@ -15,7 +15,6 @@ module BenchmarkMetrics
   BENCHMARK_GAS_USAGE_PER_M2 = 0.9 * 115_000.0 / 1_200.0 # 0.9 is artificial incentive for schools to do better
   EXEMPLAR_GAS_USAGE_PER_M2 = 80.0
   EXEMPLAR_ELECTRICITY_USAGE_PER_PUPIL = 175.0
-  BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2 = 0.01
   LONG_TERM_ELECTRICITY_CO2_KG_PER_KWH = 0.15
   ANNUAL_AVERAGE_DEGREE_DAYS = 2000.0
   AVERAGE_GAS_PROPORTION_OF_HEATING = 0.6
@@ -238,4 +237,39 @@ module BenchmarkMetrics
       raise EnergySparksUnexpectedStateException.new('Nil type of school in baseload floor area request') if school_type.nil?
     end
   end
+
+  #Numbers based on analysis of school data, Feb 2023
+  #https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
+  def self.exemplar_peak_kw(pupils, school_type)
+    school_type = school_type.to_sym if school_type.instance_of? String
+    check_school_type(school_type)
+    case school_type
+    when :primary, :infant, :junior
+      0.078 * pupils
+    when :secondary, :middle, :mixed_primary_and_secondary
+      0.112 * pupils
+    when :special
+      0.251 * pupils
+    else
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request")
+    end
+  end
+
+  #Numbers based on analysis of school data, Feb 2023
+  #https://trello.com/c/OjDRQM2k/2902-revise-approach-for-calculating-peak-kw-benchmark
+  def self.benchmark_peak_kw(pupils, school_type)
+    school_type = school_type.to_sym if school_type.instance_of? String
+    check_school_type(school_type)
+    case school_type
+    when :primary, :infant, :junior
+      0.089 * pupils
+    when :secondary, :middle, :mixed_primary_and_secondary
+      0.125 * pupils
+    when :special
+      0.314 * pupils
+    else
+      raise EnergySparksUnexpectedStateException.new("Unknown type of school #{school_type} in baseload floor area request")
+    end
+  end
+
 end
