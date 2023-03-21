@@ -31,8 +31,12 @@ module SolarPhotovoltaics
 
     private
 
+    def aggregated_electricity_meters
+      @aggregated_electricity_meters ||= @meter_collection.aggregated_electricity_meters
+    end
+
     def meter_data_checker
-      @meter_data_checker ||= Util::MeterDateRangeChecker.new(@meter_collection.aggregated_electricity_meters, @asof_date)
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(aggregated_electricity_meters, aggregated_electricity_meters.amr_data.end_date)
     end
 
     # rubocop:disable Naming/MethodName
