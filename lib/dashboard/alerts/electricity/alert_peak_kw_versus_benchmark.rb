@@ -71,8 +71,8 @@ class AlertElectricityPeakKWVersusBenchmark < AlertElectricityOnlyBase
     @average_school_day_last_year_kw = average_schoolday_peak_kw(asof_date)
     @average_school_day_last_year_kw_per_pupil = @average_school_day_last_year_kw / pupils(asof_date - 365, asof_date)
     @average_school_day_last_year_kw_per_floor_area = @average_school_day_last_year_kw / floor_area(asof_date - 365, asof_date)
-    benchmark_kw_m2 = BenchmarkMetrics::BENCHMARK_ELECTRICITY_PEAK_USAGE_KW_PER_M2
-    @exemplar_kw = benchmark_kw_m2 * floor_area(asof_date - 365, asof_date)
+
+    @exemplar_kw = BenchmarkMetrics.exemplar_peak_kw(pupils(asof_date - 365, asof_date), school_type)
 
     potential_saving = consumption_above_exemplar_peak(asof_date, @exemplar_kw)
 
