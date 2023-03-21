@@ -20,6 +20,8 @@ module BenchmarkMetrics
 
   AVERAGE_OUT_OF_HOURS_PERCENT = 0.5
 
+  #Out of hours metrics recalculated in Feb 2023, see trello
+  #https://trello.com/c/FdBEY5Qz/2903-revise-approach-for-calculating-out-of-hours-usage-benchmark
   EXEMPLAR_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY = 0.5
   BENCHMARK_OUT_OF_HOURS_USE_PERCENT_ELECTRICITY = 0.6
 
