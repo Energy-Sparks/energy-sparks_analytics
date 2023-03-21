@@ -204,6 +204,9 @@ class AMRDataCommunityOpenCloseBreakdown
     open_kwh                = kwh * open_t
     community_kwh           = [(kwh - baseload_kwh) * community_t, 0.0].max
     community_baseload_kwh  = [baseload_kwh * community_t, kwh].min
+    #LD 2023-3-21 dont allocate community baseload if community use has been clipped to zero
+    community_baseload_kwh  = 0.0 if community_kwh == 0.0
+
     closed_kwh              = kwh - open_kwh - community_kwh - community_baseload_kwh
     closed_kwh              = 0.0 if closed_kwh.magnitude < 0.00000001 # remove floating point noise
 
