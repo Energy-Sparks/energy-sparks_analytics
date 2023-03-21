@@ -63,10 +63,13 @@ describe Usage::AnnualUsageBreakdownService, type: :service do
       expect(day_type_breakdown.total.co2).to round_to_two_digits(88_492.64) # 88492.6392
 
       exemplar_comparison = day_type_breakdown.potential_savings(versus: :exemplar_school)
-      expect(exemplar_comparison.co2).to eq(nil)
-      expect(exemplar_comparison.kwh).to round_to_two_digits(131_741.33) # 131741.32666666666
-      expect(exemplar_comparison.percent).to round_to_two_digits(0.28) # 0.28186088498947937
-      expect(exemplar_comparison.£).to round_to_two_digits(20_029.15) # 20029.152587063218
+      expect(exemplar_comparison.co2).to eq(nil) #11667.048848999002
+      expect(exemplar_comparison.kwh).to round_to_two_digits(61631.57) # 61631.56666666665
+      expect(exemplar_comparison.percent).to round_to_two_digits(0.13) # 0.13186088498947934
+      expect(exemplar_comparison.£).to round_to_two_digits(9370.09) # 9370.089737063214
+
+      comparison = day_type_breakdown.potential_savings(versus: :benchmark_school)
+      expect(comparison.percent).to round_to_two_digits(0.03)
     end
 
     it 'returns a usage category breakdown with calculated combined usage metrics for holiday, school open days etc for storage heater' do
