@@ -8,7 +8,7 @@ module Logging
 end
 
 charts = {
-  adhoc: %i[ benchmark_co2 ]
+  adhoc: %i[ management_dashboard_group_by_week_electricity ]
   # bm:   %i[community_use_test_electricity management_dashboard_group_by_week_electricity]
   # eco: %i[test_economic_costs_gas_by_week_unlimited_£ test_economic_costs_electric_by_week_unlimited_£ ],
   # solar: %i[solar_pv_group_by_month solar_pv_last_7_days_by_submeter]
@@ -37,7 +37,7 @@ control = {
 }
 
 overrides = {
-  schools:  ['r*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
+  schools:  ['balf*'], # ['hugh*', 'herst*'], # ['tow*', 'st-julian-s-h*'], # ['chase-lane-target*'], # ['king-ja*', 'marksb*', 'long*'],
   cache_school: false,
   charts:   { charts: charts, control: control }
 }
