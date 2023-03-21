@@ -29,6 +29,11 @@ module SolarPhotovoltaics
       meter_data_checker.one_years_data?
     end
 
+    # If we don't have enough data, then when will it be available?
+    def data_available_from
+      meter_data_checker.date_when_enough_data_available(365)
+    end
+
     private
 
     def aggregated_electricity_meters
