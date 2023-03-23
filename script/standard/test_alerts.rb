@@ -7,8 +7,8 @@ module Logging
   logger.level = :debug
 end
 
-asof_date = Date.new(2022, 2, 1)
-schools = ['*-academy']
+asof_date = Date.new(2023, 3, 6)
+schools = ['welton*']
 
 overrides = {
   schools:  schools,
@@ -33,9 +33,7 @@ overrides = {
     #AlertGasAnnualVersusBenchmark,
     #AlertGasLongTermTrend
     # AlertChangeInElectricityBaseloadShortTerm
-    AlertOutOfHoursElectricityUsage,
-    AlertOutOfHoursGasUsage,
-    AlertStorageHeaterOutOfHours
+    AlertSchoolWeekComparisonGas
     ],
   control: { asof_date: asof_date, outputs: %i[raw_variables_for_saving html_template_variables], log: [:invalid_alerts] } },
   no_alerts:   { alerts: [], control: { asof_date: asof_date } }

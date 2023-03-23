@@ -174,7 +174,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
 
     current_period_data             = meter_values_period(current_period)
     previous_period_data            = normalised_period_data(current_period, previous_period)
-    previous_period_data_unadjusted = meter_values_period(current_period) 
+    previous_period_data_unadjusted = meter_values_period(current_period)
 
     @difference_kwh       = current_period_data[:kwh]       - previous_period_data[:kwh]
     @difference_£         = current_period_data[:£]         - previous_period_data[:£]
@@ -317,9 +317,11 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
   end
 
   def calculate_rating(percentage_difference, financial_difference_£, fuel_type)
-    # PH removed £10 limit 20Nov2019 at CT request
-    # PH reinstated after CT request 21Dec2020
-    return 10.0 if financial_difference_£.between?(-MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£, MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£)
+    # The goal is to not show alerts when the cost saving is negligible.
+    # Defined here as +/- £10. To do that we need to set the rating to nil (rather than 10)
+    # as this will cause the application to ignore the results. A rating of 10 would
+    # mean the application always aims to display the alert results.
+    return nil if financial_difference_£.between?(-MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£, MINIMUM_DIFFERENCE_FOR_NON_10_RATING_£)
     ten_rating_range_percent = fuel_type == :electricity ? 0.10 : 0.15 # more latitude for gas
     calculate_rating_from_range(-ten_rating_range_percent, ten_rating_range_percent, percentage_difference)
   end
@@ -436,7 +438,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
     return false if t1_£_per_kwh.nan? || t2_£_per_kwh.nan?
 
     t1_£_per_kwh.round(2) != t2_£_per_kwh.round(2)
-  end 
+  end
 
   def kwh_date_range(meter, start_date, end_date, data_type)
     super(aggregate_meter, start_date, end_date, data_type, community_use: community_use)
