@@ -3,6 +3,7 @@
 module Usage
   class PeakUsageCalculationService
     include AnalysableMixin
+    DATE_RANGE_DAYS_AGO = 364
 
     def initialize(meter_collection:, asof_date:)
       @meter_collection = meter_collection
@@ -52,7 +53,7 @@ module Usage
     end
 
     def date_range
-      start_date = [@asof_date - 364, aggregate_meter.amr_data.start_date].max
+      start_date = [@asof_date - DATE_RANGE_DAYS_AGO, aggregate_meter.amr_data.start_date].max
       start_date..@asof_date
     end
 
