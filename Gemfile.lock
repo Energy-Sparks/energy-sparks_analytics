@@ -86,7 +86,7 @@ GEM
     dirty-memoize (0.0.4)
     distribution (0.8.0)
     docile (1.4.0)
-    dotenv (2.7.6)
+    dotenv (2.8.1)
     erubi (1.10.0)
     extendmatrix (0.4)
     factory_bot (6.2.1)
