@@ -3,7 +3,7 @@
 # uses the SolarPV, SolarPVOverrides, SolarPVMeterMapping meter attributes for configuration
 class SolarPVPanels
   include Logging
-  attr_reader :meter_attributes_config
+  attr_reader :meter_attributes_config, :real_production_data
 
   MAINS_ELECTRICITY_CONSUMPTION_INCLUDING_ONSITE_PV = 'Electricity consumed including onsite solar pv consumption'.freeze
   SOLAR_PV_ONSITE_ELECTRIC_CONSUMPTION_METER_NAME = 'Electricity consumed from solar pv'.freeze
@@ -25,6 +25,7 @@ class SolarPVPanels
     @solar_pv_panel_config = SolarPVPanelConfiguration.new(meter_attributes_config) unless meter_attributes_config.nil?
     @synthetic_sheffield_solar_pv_yields = synthetic_sheffield_solar_pv_yields
     @debug_date_range = nil # Date.new(2021, 6, 18)..Date.new(2021, 6, 19) # Date.new(2021, 6, 1)..Date.new(2021, 6, 7) || nil
+    @real_production_data = false
   end
 
   def first_installation_date
@@ -117,6 +118,7 @@ class SolarPVPanels
   end
 
   def maximum_export_kw(date)
+    return 0.0 if real_production_data
     config = @solar_pv_panel_config.config_by_date_range.select { |date_range, config| date.between?(date_range.first, date_range.last) }
     return 0.0 if config.empty?
 
@@ -346,6 +348,7 @@ end
 class SolarPVPanelsMeteredProduction < SolarPVPanels
   def initialize
     super(nil, nil)
+    @real_production_data = true
   end
 
   private
