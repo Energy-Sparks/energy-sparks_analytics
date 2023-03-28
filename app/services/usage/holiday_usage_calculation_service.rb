@@ -17,7 +17,7 @@ module Usage
     #@return [CombinedUsageMetric] the calculated usage
     def holiday_usage(school_period:)
       return nil unless has_data_for_period?(school_period)
-      return CombinedUsageMetric.new(
+      CombinedUsageMetric.new(
         kwh: usage_for_period(school_period, :kwh),
         £: usage_for_period(school_period, :£),
         co2: usage_for_period(school_period, :co2)
@@ -39,7 +39,7 @@ module Usage
       usage_for_period = holiday_usage(school_period: school_period)
       previous_period = holiday_period_for_previous_year(school_period)
       usage_for_previous_period = previous_period.nil? ? nil : holiday_usage(school_period: previous_period)
-      return OpenStruct.new(
+      OpenStruct.new(
         usage: usage_for_period,
         previous_holiday_usage: usage_for_previous_period,
         previous_holiday: previous_period
@@ -84,7 +84,7 @@ module Usage
     #@return [Hash] of school_period => OpenStruct
     def school_holiday_calendar_comparison
       academic_year = academic_year_for_comparison
-      holidays_for_academic_year = @holidays.holidays.select{|h| h.academic_year == academic_year }
+      holidays_for_academic_year = @holidays.holidays.select{ |h| h.academic_year == academic_year }
       comparison_periods = holidays_for_academic_year.map do |holiday|
         #use last year holiday if the holiday hasn't started yet
         if holiday.start_date > @asof_date
