@@ -25,7 +25,9 @@ module Costs
       days = @meter.amr_data.end_date - start_date + 1
       OpenStruct.new(
         £: cost,
-        days: days
+        days: days,
+        start_date: start_date,
+        end_date: @meter.amr_data.end_date
       )
     end
 
