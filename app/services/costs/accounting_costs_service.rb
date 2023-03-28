@@ -3,8 +3,10 @@ module Costs
     include AnalysableMixin
     DAYSINYEAR = 365
 
-    def initialize(analytics_meter)
+    def initialize(analytics_meter, end_date = nil)
       @meter = analytics_meter
+      @end_date = end_date || @meter.amr_data.end_date
+      @start_date = [@end_date - DAYSINYEAR, @meter.amr_data.start_date].max
     end
 
     #Do we have enough data to run the calculations?
@@ -19,15 +21,13 @@ module Costs
 
     #return cost, up to one year
     def annual_cost
-      start_date = [@meter.amr_data.end_date - DAYSINYEAR, @meter.amr_data.start_date].max
-      #FIXME end date?
-      cost = @meter.amr_data.kwh_date_range(start_date, @meter.amr_data.end_date, :accounting_cost)
-      days = @meter.amr_data.end_date - start_date + 1
+      cost = @meter.amr_data.kwh_date_range(@start_date, @end_date, :accounting_cost)
+      days = @meter.amr_data.end_date - @start_date + 1
       OpenStruct.new(
         £: cost,
         days: days,
-        start_date: start_date,
-        end_date: @meter.amr_data.end_date
+        start_date: @start_date,
+        end_date: @end_date
       )
     end
 
@@ -35,12 +35,12 @@ module Costs
     #
     #differs from annual usage calculation service as it uses :accounting_cost not :£
     def annual_usage(period: :this_year)
-      start_date, end_date = dates_for_period(period)
+      period_start_date, period_end_date = dates_for_period(period)
       #using £ not £current as this is historical usage
       CombinedUsageMetric.new(
-        kwh: calculate(start_date, end_date, :kwh),
-        £: calculate(start_date, end_date, :accounting_cost),
-        co2: calculate(start_date, end_date, :co2)
+        kwh: calculate(period_start_date, period_end_date, :kwh),
+        £: calculate(period_start_date, period_end_date, :accounting_cost),
+        co2: calculate(period_start_date, period_end_date, :co2)
       )
     end
 
@@ -76,18 +76,18 @@ module Costs
     def dates_for_period(period)
       case period
       when :this_year
-        [@meter.amr_data.end_date - DAYSINYEAR + 1, @meter.amr_data.end_date]
+        [@end_date - DAYSINYEAR + 1, @end_date]
       when :last_year
-        prev_date = @meter.amr_data.end_date - DAYSINYEAR
-        [prev_date - DAYSINYEAR + 1, prev_date]
+        last_year_end_date = @end_date - DAYSINYEAR
+        [last_year_end_date - DAYSINYEAR + 1, last_year_end_date]
       else
         raise "Invalid year"
       end
     end
 
     def has_full_previous_years_worth_of_data?
-      start_date, end_date = dates_for_period(:last_year)
-      @meter.amr_data.start_date <= start_date
+      previous_year_start_date, previous_year_end_date = dates_for_period(:last_year)
+      @start_date <= previous_year_start_date
     end
 
     #Calculate usage values between two dates, returning the
@@ -95,15 +95,15 @@ module Costs
     #
     #Delegates to the AMR data class for this meter whose kwh_date_range
     #method does the same thing.
-    def calculate(start_date, end_date, data_type = :kwh)
+    def calculate(calculation_start_date, calculation_end_date, data_type = :kwh)
       amr_data = @meter.amr_data
-      amr_data.kwh_date_range(start_date, end_date, data_type)
+      amr_data.kwh_date_range(calculation_start_date, calculation_end_date, data_type)
     rescue EnergySparksNotEnoughDataException=> e
       nil
     end
 
     def meter_data_checker
-      @meter_data_checker ||= Util::MeterDateRangeChecker.new(@meter, @meter.amr_data.end_date)
+      @meter_data_checker ||= Util::MeterDateRangeChecker.new(@meter, @end_date)
     end
 
   end
