@@ -19,5 +19,7 @@ describe Costs::AccountingCostsService, type: :service do
     annual_costs = service.annual_cost
     expect(annual_costs.£).to be_within(0.01).of(74306.06)
     expect(annual_costs.days.to_i).to eq 366
+    expect(annual_costs.start_date).to eq Date.new(2021,7,13)
+    expect(annual_costs.end_date).to eq Date.new(2022,7,13)
   end
 end
