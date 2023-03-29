@@ -53,7 +53,7 @@ class ClimateChangeLevy
   private_class_method def self.ccl_key(date_range)
     start_year = date_range.first.strftime('%Y')
     end_year   = date_range.last.strftime('%y')
-    key = "climate_change_levy__#{start_year}_#{end_year})".to_sym
+    key = "climate_change_levy__#{start_year}_#{end_year}".to_sym
   end
 
   private_class_method def self.check_levy_set(fuel_type, date)
