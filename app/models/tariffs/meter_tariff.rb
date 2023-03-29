@@ -1,8 +1,8 @@
 class MeterTariff
   attr_reader :tariff, :fuel_type
-  FLAT_RATE = 'Flat Rate'.freeze
-  DAYTIME_RATE = 'Daytime Rate'.freeze
-  NIGHTTIME_RATE = 'Nighttime Rate'.freeze
+  FLAT_RATE = 'flat_rate'.freeze
+  DAYTIME_RATE = 'daytime_rate'.freeze
+  NIGHTTIME_RATE = 'nighttime_rate'.freeze
   MIN_DEFAULT_START_DATE = Date.new(2008, 1, 1)
   MAX_DEFAULT_END_DATE   = Date.new(2050, 1, 1)
 

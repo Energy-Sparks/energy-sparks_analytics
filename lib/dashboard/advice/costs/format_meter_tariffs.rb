@@ -143,11 +143,11 @@ class FormatMeterTariffs < DashboardChartAdviceBase
   def rate_description(rate_type, costs)
     case rate_type.to_s
     when 'flat_rate'
-      'Flat Rate'
+      'flat_rate'
     when 'commodity_rate'
-      'Commodity Rate'
+      'commodity_rate'
     when 'non_commodity_rate'
-      'Non Commodity Rate'
+      'non_commodity_rate'
     when /^rate[0-9]$/
       time_range_description(costs)
     when 'daytime_rate', 'nighttime_rate'
