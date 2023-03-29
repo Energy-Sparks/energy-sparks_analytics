@@ -13,7 +13,7 @@ module Baseload
   # be done in the calling code.
   class BaseloadCalculationService < BaseService
     include AnalysableMixin
-    KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD = 8760.0 # 365.0 * 24.0
+    KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD = 8760.0 # Number of hours in a year: 365.0 * 24.0 = 8760.0
 
     # Create a service that can calculate the baseload for a specific meter
     #
@@ -38,10 +38,12 @@ module Baseload
       enough_data? ? nil : range_checker.date_when_enough_data_available(DEFAULT_DAYS_OF_DATA_REQUIRED)
     end
 
+    # 
+    # co2_per_kwh = Costs::BlendedRateCalculator.new(@meter.meter_collection.aggregated_electricity_meters).blended_co2_per_kwh
     def saving_through_1_kw_reduction_in_baseload
       CombinedUsageMetric.new(
         kwh: KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD,
-        co2: nil,
+        co2: co2_per_kwh * KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD,
         £: baseload_analysis.blended_baseload_tariff_rate_£_per_kwh(:£current, @asof_date) * KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD
       )
     end
