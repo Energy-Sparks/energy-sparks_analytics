@@ -13,6 +13,7 @@ module Baseload
   # be done in the calling code.
   class BaseloadCalculationService < BaseService
     include AnalysableMixin
+    KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD = 8760.0 # 365.0 * 24.0
 
     # Create a service that can calculate the baseload for a specific meter
     #
@@ -35,6 +36,14 @@ module Baseload
 
     def data_available_from
       enough_data? ? nil : range_checker.date_when_enough_data_available(DEFAULT_DAYS_OF_DATA_REQUIRED)
+    end
+
+    def saving_through_1_kw_reduction_in_baseload
+      CombinedUsageMetric.new(
+        kwh: KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD,
+        co2: nil,
+        £: baseload_analysis.blended_baseload_tariff_rate_£_per_kwh(:£current, @asof_date) * KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD
+      )
     end
 
     # Calculate average baseload for this meter for the specified period
@@ -73,7 +82,7 @@ module Baseload
     private
 
     def average_baseload_last_year_kwh
-      @annual_average ||= baseload_analysis.annual_average_baseload_kwh(@asof_date)
+      @average_baseload_last_year_kwh ||= baseload_analysis.annual_average_baseload_kwh(@asof_date)
     end
 
     def average_baseload_last_year_£
@@ -96,6 +105,5 @@ module Baseload
     def range_checker
       meter_date_range_checker(@meter, @asof_date)
     end
-
   end
 end
