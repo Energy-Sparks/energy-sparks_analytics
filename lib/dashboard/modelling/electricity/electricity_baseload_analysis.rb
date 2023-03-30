@@ -1,5 +1,6 @@
 # mix of electricity baseload analysis
 class ElectricityBaseloadAnalysis
+  HOURS_IN_YEAR = 24.0 * 365.0
   def initialize(meter)
     @meter = meter
   end
@@ -66,6 +67,17 @@ class ElectricityBaseloadAnalysis
   def one_week_ago(date)
     date - 6
   end
+
+  def baseload_co2_carbon_intensity_co2_k2_per_kwh(asof_date = amr_data.end_date)
+    end_date = [asof_date, amr_data.end_date].min
+    start_date = [end_date - 364, amr_data.start_date].max
+    @meter.meter_collection.grid_carbon_intensity.average_in_date_range(start_date, end_date)
+  end
+
+  def one_years_baseload_co2_kg(asof_date = amr_data.end_date)
+    HOURS_IN_YEAR * baseload_co2_carbon_intensity_co2_k2_per_kwh(asof_date)
+  end
+
 
   def baseload_economic_cost_date_range_£(d1, d2, datatype)
     (d1..d2).map do |date|
