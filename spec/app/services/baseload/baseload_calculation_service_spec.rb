@@ -22,7 +22,15 @@ describe Baseload::BaseloadCalculationService, type: :service do
       #numbers taken from running the AlertChangeInElectricityBaseloadShortTerm alert
       expect(service.average_baseload_kw(period: :week)).to round_to_two_digits(25.62)
     end
+  end
 
+  context '#saving_through_1_kw_reduction_in_baseload' do
+    it 'calculates saving through 1 kw reduction in_baseload' do
+      saving = service.saving_through_1_kw_reduction_in_baseload
+      expect(saving.kwh).to eq(Baseload::BaseloadCalculationService::KWH_SAVING_FOR_EACH_ONE_KW_REDUCTION_IN_BASELOAD)
+      expect(saving.£).to round_to_two_digits(1308.57) # 1308.5721093184443
+      expect(saving.co2).to round_to_two_digits(1658.3) # 1658.295471701968
+    end
   end
 
   context '#annual_baseload_usage' do
