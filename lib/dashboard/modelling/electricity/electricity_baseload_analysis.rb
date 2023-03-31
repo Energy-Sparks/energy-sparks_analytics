@@ -94,7 +94,8 @@ class ElectricityBaseloadAnalysis
   def percent_seasonal_variation(asof_date = amr_data.end_date)
     return nil unless one_years_data?
     kw_in_summer = summer_kw(asof_date)
-    (winter_kw(asof_date) - kw_in_summer) /kw_in_summer
+    return 0.0 if kw_in_summer.zero? # Otherwise the division (by zero) below will return Infinity
+    (winter_kw(asof_date) - kw_in_summer) / kw_in_summer
   end
 
   def average_intraweek_schoolday_kw(asof_date = amr_data.end_date)
