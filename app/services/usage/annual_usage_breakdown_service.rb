@@ -151,7 +151,7 @@ module Usage
 
     def extract_data_from_chart_data(data_type)
       chart = ChartManager.new(@meter_collection)
-      chart.run_standard_chart(breakdown_charts[@fuel_type][data_type], nil, true)
+      chart.run_standard_chart(breakdown_charts[@fuel_type][data_type], nil, true, provide_advice: false)
     end
 
     # rubocop:disable Metrics/MethodLength
