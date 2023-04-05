@@ -1,20 +1,35 @@
-# Chart Timescale Management - manages interactive manipulation of chart timescales
+# Chart timescale manipulation
 #
-# - take an existing chart, and allows:
-#   - 'move'      - move whole chart  1 time period               (forward or back)
-#   - 'extend'    - extend time period of x-axis by 1 time period (forward or back)
-#   - 'contract'  - contract time period of x-axis by 1 time period (forward or back)
-#   - 'compare'   - compare with adjascent time period            (forward or back)
+# Given a chart configuration, a meter collection and a type of operation
+# this class can be used to identify whether that operation can be used to
+# change the timescale of a chart.
 #
-# timescales are defined as:
-#   - no timescale as in the benchmark chart - this can't be manipulated
+# Currently supported operations are:
+#
+#   - :move      - move whole chart  1 time period               (forward or back)
+#   - :extend    - extend time period of x-axis by 1 time period (forward or back)
+#   - :contract  - contract time period of x-axis by 1 time period (forward or back)
+#   - :compare   - compare with adjascent time period            (forward or back)
+#
+# Only `:move` is used by the application currently.
+#
+# A timescale is defined using the `:timescale` key in a chart configuration.
+#
+# A chart timescale is optional. When provided it can have a variety of values and
+# formats:
+#
 #   - timescale:        :year                       - a symbol
 #   - timescale:        { week: -1..0 },            - a hash
 #   - timescale:        [{ day: -6...0 }]           - an array
 #   - timescale:        [{ year: 0 }, { year: -1 }] - an array
+#
+# A chart with no timescale cannot be manipulated.
 class ChartManagerTimescaleManipulation
   include Logging
 
+  #@param type [Symbol] the type of operation
+  #@param original_chart_config [Hash] the chart configuration
+  #@param school [MeterCollection] the school data to use when interpreting operations
   def initialize(type, original_chart_config, school)
     @type = type
     @original_chart_config = original_chart_config.deep_dup
@@ -23,6 +38,13 @@ class ChartManagerTimescaleManipulation
     logger.info "Creating time shift manipulator of type #{type}"
   end
 
+  # Factory method for creating a manipulator
+  #
+  # Used by main application
+  #
+  #@param type [Symbol] the type of operation
+  #@param original_chart_config [Hash] the chart configuration
+  #@param school [MeterCollection] the school data to use when interpreting operations
   def self.factory(type, original_chart_config, school)
     case type
     when :move;     ChartManagerTimescaleManipulationMove.new(:move, original_chart_config, school)
@@ -35,18 +57,41 @@ class ChartManagerTimescaleManipulation
     end
   end
 
+  # Read the timescale configuration of the chart config and return
+  # a nearly adjusted version based on the operation to be performed
+  # and the number of times to apply it. E.g `:move`, 1.
+  #
+  # Will throw an exception if the operation cannot be carried out based
+  # on available school data.
+  #
+  #
+  # Used by main application
+  #
+  #@param factor [Integer] the period to adjust the timescale
+  #@raise [EnergySparksNotEnoughDataException] if not enough data
   def adjust_timescale(factor)
     adjust_timescale_private(factor)
   end
 
+  # Checks whether the timescale can be moved forward one period.
+  #
+  # Uses the provided school data to assess whether enough data is available
+  #
+  # Used by main application
   def can_go_forward_in_time_one_period?
     enough_data?(1)
   end
 
+  # Checks whether the timescale can be moved backward one period.
+  #
+  # Uses the provided school data to assess whether enough data is available
+  #
+  # Used by main application
   def can_go_back_in_time_one_period?
     enough_data?(-1)
   end
 
+  #Used by main application
   def chart_suitable_for_timescale_manipulation?
     return false unless @original_chart_config.key?(:timescale) && !@original_chart_config[:timescale].nil? # :benchmark type chart has no defined timescale
     timescale_type, value = timescale_type(@original_chart_config)
@@ -64,10 +109,20 @@ class ChartManagerTimescaleManipulation
     end
   end
 
+
+  # Returns a description of the timescale variable in the chart configuration
+  #
+  # Used by main application
+  def timescale_description
+    description = ChartTimeScaleDescriptions.new(@original_chart_config)
+    description.timescale_description
+  end
+
+  #UNUSED
   def timescale_shift_description(shift_amount)
     return 'no shift' if shift_amount == 0
     direction_description = shift_amount > 0 ? 'forward' : 'back'
-    singular_plural = shift_amount.magnitude > 1 ? 's' : '' 
+    singular_plural = shift_amount.magnitude > 1 ? 's' : ''
     "#{direction_description} #{shift_amount.magnitude} #{timescale_description}#{singular_plural}"
   end
 
@@ -113,25 +168,9 @@ class ChartManagerTimescaleManipulation
     new_timescales
   end
 
-  private def determine_chart_range(chart_config)
-    aggregator = Aggregator.new(@school, chart_config)
-    chart_config, _schools = aggregator.initialise_schools_date_range # get min and max combined meter ranges
-    if chart_config.key?(:min_combined_school_date) || chart_config.key?(:max_combined_school_date)
-      logger.info "METER range = #{chart_config[:min_combined_school_date]} to #{chart_config[:max_combined_school_date]}"
-      [chart_config[:min_combined_school_date], chart_config[:max_combined_school_date]]
-    else
-      raise EnergySparksUnexpectedStateException, 'Unable to determine chart date range'
-    end
-  end
-
   # TODO(PH, 20Sep2019) - potential remove these 4 methods in favour of calling ChartTimeScaleDescriptions direct
   def self.timescale_name(timescale_symbol) # also used by drilldown
     ChartTimeScaleDescriptions.timescale_name(timescale_symbol)
-  end
-
-  public def timescale_description
-    description = ChartTimeScaleDescriptions.new(@original_chart_config)
-    description.timescale_description
   end
 
   def self.interpret_timescale_description(timescale)
@@ -146,6 +185,17 @@ class ChartManagerTimescaleManipulation
 
   def available_periods(chart_config_original = @original_chart_config)
     available_periods_by_type(chart_config_original)
+  end
+
+  private def determine_chart_range(chart_config)
+    aggregator = Aggregator.new(@school, chart_config)
+    chart_config, _schools = aggregator.initialise_schools_date_range # get min and max combined meter ranges
+    if chart_config.key?(:min_combined_school_date) || chart_config.key?(:max_combined_school_date)
+      logger.info "METER range = #{chart_config[:min_combined_school_date]} to #{chart_config[:max_combined_school_date]}"
+      [chart_config[:min_combined_school_date], chart_config[:max_combined_school_date]]
+    else
+      raise EnergySparksUnexpectedStateException, 'Unable to determine chart date range'
+    end
   end
 
   private def factor_multiplier(chart_config_original)
