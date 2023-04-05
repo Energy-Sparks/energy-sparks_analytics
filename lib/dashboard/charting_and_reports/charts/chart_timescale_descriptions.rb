@@ -9,7 +9,7 @@ class ChartTimeScaleDescriptions
 
   def self.timescale_name(timescale_symbol) # also used by drilldown
     #using default rather than falling back to :none
-    I18n.t("#{TIMESCALE_TYPES}.#{timescale_symbol}", default: '')
+    I18n.t("charts.timescale_name.#{timescale_symbol}", default: '')
   end
 
   def self.convert_timescale_to_array(timescale)
