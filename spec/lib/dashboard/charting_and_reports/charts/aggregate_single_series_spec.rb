@@ -8,8 +8,8 @@ require 'spec_helper'
 describe AggregatorSingleSeries do
 
   #Meter date ranges
-  let(:meter_end_date)    { Date.new(2023,1,1) }
   let(:meter_start_date)  { Date.new(2020,1,1) }
+  let(:meter_end_date)    { Date.new(2023,1,1) }
 
   #Setup stubs
   let(:amr_data)    { double('amr-data') }
@@ -66,12 +66,15 @@ describe AggregatorSingleSeries do
     before(:each) do
       allow(amr_data).to receive(:open_close_breakdown).and_return(community_use_breakdown)
       allow(amr_data).to receive(:one_day_kwh).and_return(one_day_kwh_breakdown)
-      #write results into the aggregator_results
-      aggregator.aggregate_period
     end
 
     context 'and timescale is up_to_one_year' do
       let(:timescale)   { :up_to_a_year }
+
+      before(:each) do
+        #write results into the aggregator_results
+        aggregator.aggregate_period
+      end
 
       it 'should populate the result object' do
         expect(aggregator_results.series_manager).to_not be_nil
@@ -136,10 +139,10 @@ describe AggregatorSingleSeries do
       #as a double check of the logic
       context '-- additional date tests' do
         #all dates below taken from real example data
-        let(:meter_end_date)           { Date.new(2023,3,13) }
         let(:meter_start_date)         { Date.new(2020,3,1) }
-        let(:expected_x_axis_end_date) { Date.new(2023,3,11) }
+        let(:meter_end_date)           { Date.new(2023,3,13) }
         let(:expected_x_axis_start_date) { Date.new(2022,3,20) }
+        let(:expected_x_axis_end_date) { Date.new(2023,3,11) }
 
         it 'should populate the x axis' do
           expect(aggregator_results.x_axis_date_ranges.last).to eq expected_x_axis_end_range
@@ -164,17 +167,78 @@ describe AggregatorSingleSeries do
       end
 
       context 'with 3 months of data' do
-        it 'should produce expected date ranges'
+        let(:meter_start_date)  { Date.new(2022,9,1) }
+        let(:meter_end_date)    { Date.new(2023,1,1) }
+
+        #first sunday of range
+        let(:expected_x_axis_start_date) { Date.new(2022,9,4) }
+
+        it 'should populate the x axis' do
+          expect(aggregator_results.x_axis_date_ranges.last).to eq expected_x_axis_end_range
+          expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
+        end
+
       end
     end
 
     context 'and timescale is year' do
       let(:timescale)   { :year }
-      it 'should produce expected date ranges'
+
+      #<SchoolDatePeriod:0x00005578a51c9710 @type=:year_to_date, @title="year to Sun 01 Jan 23", @start_date=Mon, 03 Jan 2022, @end_date=Sun, 01 Jan 2023, @calendar_event_type_id=nil>
+      #<SchoolDatePeriod:0x00005578a51c94e0 @type=:year_to_date, @title="year to Sun 02 Jan 22", @start_date=Mon, 04 Jan 2021, @end_date=Sun, 02 Jan 2022, @calendar_event_type_id=nil>
+      #<SchoolDatePeriod:0x00005578a51c9238 @type=:year_to_date, @title="year to Sun 03 Jan 21", @start_date=Mon, 06 Jan 2020, @end_date=Sun, 03 Jan 2021, @calendar_event_type_id=nil>
+      let(:period_1)   { SchoolDatePeriod.new(:year_to_date, "year to Sun 01 Jan 23", Date.new(2022,1,3), Date.new(2023,1,1))}
+      let(:period_2)   { SchoolDatePeriod.new(:year_to_date, "year to Sun 02 Jan 22", Date.new(2021,1,4), Date.new(2022,1,2))}
+      let(:period_3)   { SchoolDatePeriod.new(:year_to_date, "year to Sun 03 Jan 21", Date.new(2020,1,6), Date.new(2021,1,3))}
+      let(:periods)    { [period_1, period_2, period_3] }
+      let(:holidays)   { double('holidays') }
+      before(:each) do
+        #the YearPeriod uses a completely different approach to calculating periods that
+        #relies on using an instance method, which could be a class method.
+        #so stub this and the necessary data
+        allow(meter_collection).to receive(:holidays).and_return(holidays)
+        allow(holidays).to receive(:years_to_date).and_return(periods)
+
+        #write results into the aggregator_results
+        aggregator.aggregate_period
+      end
+
+      #with data ending on 2023-01-01, and with the graph NOT showing partial final weeks,
+      #then the final range end on Saturday 31st December 2022
+      let(:expected_x_axis_end_date) { Date.new(2022,12,31) }
+      #Sunday 25th December to Saturday
+      let(:expected_x_axis_end_range) {
+        [expected_x_axis_end_date - 6, expected_x_axis_end_date]
+      }
+
+      #with data ending on 2023-01-01, the x_axis date will be the first Sunday
+      #of the period, which is 9th January 2022
+      let(:expected_x_axis_start_date) { Date.new(2022,1,9) }
+      #Sunday to Saturday 15th January 2022
+      let(:expected_x_axis_start_range) {
+        [expected_x_axis_start_date, expected_x_axis_start_date + 6]
+      }
+
+      it 'should populate the x axis' do
+        #currently produces 51 week view...
+        expect(aggregator_results.x_axis.size).to eq 51
+        expect(aggregator_results.x_axis_date_ranges).to_not be_nil
+        expect(aggregator_results.x_axis_date_ranges.last).to eq expected_x_axis_end_range
+        expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
+      end
 
       context 'moving back one year' do
         let(:timescale)   { {year: -1} }
-        it 'should produce expected date ranges'
+        it 'should populate the x axis' do
+          #currently produces 51 week view...
+          expect(aggregator_results.x_axis.size).to eq 51
+          expect(aggregator_results.x_axis_date_ranges).to_not be_nil
+
+          #having moved back a year, the final range should be the previous week from above
+          #so Sunday 2nd January 2022 to Saturday 8th January 2022
+          previous_year_x_axis_end_range = [ expected_x_axis_end_date - 7, expected_x_axis_end_date - 1 ]
+          expect(aggregator_results.x_axis_date_ranges.last).to eq previous_year_x_axis_end_range
+        end
       end
     end
 
