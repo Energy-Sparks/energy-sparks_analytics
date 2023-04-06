@@ -2,6 +2,7 @@
 #                - which include basic data for graphing, comments, alerts
 class ChartManager
   class ChartInheritanceConfigurationTooDeep < StandardError; end
+  class ChartInheritanceError < StandardError; end
   include Logging
 
   attr_reader :school
@@ -50,6 +51,9 @@ class ChartManager
     while chart_config.key?(:inherits_from)
       base_chart_config_param = chart_config[:inherits_from]
       base_chart_config = standard_chart(base_chart_config_param).dup
+
+      raise ChartInheritanceError, "Parent chart #{base_chart_config_param} not found. Name: #{chart_config_original[:name]}" if base_chart_config.nil?
+
       chart_config.delete(:inherits_from)
       chart_config = base_chart_config.merge(chart_config)
       max_inheritance -= 1
@@ -233,7 +237,7 @@ class ChartManager
   end
 
   def resolve_x_axis_grouping(chart_config)
-    if ChartDynamicXAxis.is_dynamic?(chart_config)
+    if ChartDynamicXAxis.is_dynamic?(chart_config) && @school != nil
       ChartDynamicXAxis.new(@school, chart_config).redefined_chart_config
     else
       chart_config
@@ -251,7 +255,7 @@ class ChartManager
     return :no if [meter].flatten.compact.empty?
 
     if chart_config[:series_breakdown] == :submeter
-      return :no if meter.sub_meters.empty? 
+      return :no if meter.sub_meters.empty?
     end
 
     if chart_config[:series_breakdown] == :fuel &&
