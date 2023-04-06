@@ -243,4 +243,94 @@ describe AggregatorSingleSeries do
     end
 
   end
+
+  context 'with a day of week axis and a day type breakdown' do
+    let(:timescale)   { :up_to_a_year }
+    let(:chart_config) {
+      {
+        :chart1_subtype   => :stacked,
+        :chart1_type      => :column,
+        :meter_definition => :allelectricity,
+        :name             => "Electricity Use By Day of the Week",
+        :series_breakdown => :daytype,
+        :subtitle         => :daterange,
+        :timescale        => timescale,
+        :x_axis           => :dayofweek,
+        :yaxis_scaling    => :none,
+        :yaxis_units      => :kwh,
+        :min_combined_school_date => meter_start_date,
+        :max_combined_school_date => meter_end_date
+      }
+    }
+
+    #Community use breakdown set on the amr data by the aggregator
+    #used by series data manager to create day type names
+    let(:community_use_breakdown) { double('community-use-breakdown') }
+    let(:series_names) { [:holiday, :weekend, :school_day_open, :school_day_closed] }
+
+    #return flat line for every day of data
+    #using a hash because the chart config uses a daytype breakdown
+    #if testing other charts, then need to return different data from amr_data stub
+    let(:one_day_kwh_breakdown)  {
+      {school_day_open: 10.0}
+    }
+
+    before(:each) do
+      allow(amr_data).to receive(:open_close_breakdown).and_return(community_use_breakdown)
+      allow(amr_data).to receive(:one_day_kwh).and_return(one_day_kwh_breakdown)
+      #write results into the aggregator_results
+      aggregator.aggregate_period
+    end
+
+    it 'should populate the result object' do
+      expect(aggregator_results.series_manager).to_not be_nil
+      expect(aggregator_results.xbucketor).to_not be_nil
+    end
+
+    it 'should populate the bucketed data' do
+      keys = ["Holiday", "Weekend", "School Day Open", "School Day Closed"]
+      expect(aggregator_results.bucketed_data.keys).to match_array(keys)
+      keys.each do |key|
+        expect(aggregator_results.bucketed_data[key].any?(:nil?)).to eq false
+      end
+      expect(aggregator_results.bucketed_data["School Day Open"].first).to eq 520.0
+      expect(aggregator_results.bucketed_data_count.keys).to match_array(keys)
+    end
+
+    it 'should produce the right series names' do
+      expect(aggregator_results.series_names).to eq series_names
+    end
+
+    #this chart produces one result for each day in the year
+    let(:expected_x_axis_start_date) { Date.new(2022,1,3) }
+    let(:expected_x_axis_start_range) {
+      [expected_x_axis_start_date, expected_x_axis_start_date]
+    }
+
+    #it uses the latest date
+    let(:expected_x_axis_end_date) { Date.new(2023,1,1) }
+    let(:expected_x_axis_end_range) {
+      [expected_x_axis_end_date, expected_x_axis_end_date]
+    }
+
+    it 'should populate the x axis' do
+      #currently produces 364 days
+      expect(aggregator_results.x_axis.size).to eq 7
+      expect(aggregator_results.x_axis).to match_array( ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] )
+      expect(aggregator_results.x_axis_date_ranges.last).to eq expected_x_axis_end_range
+      expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
+    end
+
+    context 'moving back one year' do
+      let(:timescale)   { { up_to_a_year: -1 } }
+
+      it 'should populate the x axis' do
+        expect(aggregator_results.x_axis.size).to eq 7
+        #should end one day before the previous year range
+        previous_year_x_axis_end_range = [ expected_x_axis_start_date - 1, expected_x_axis_start_date - 1 ]
+        expect(aggregator_results.x_axis_date_ranges.last).to eq previous_year_x_axis_end_range
+      end
+    end
+
+  end
 end
