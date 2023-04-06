@@ -161,7 +161,7 @@ end
 
 class YearPeriods < PeriodsBase
   protected def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
-    check_or_create_minimum_period(@meter_collection.holidays.years_to_date(first_meter_date, last_meter_date, false))
+    check_or_create_minimum_period(Holidays.years_to_date(first_meter_date, last_meter_date, false))
   end
 
   def calculate_period_from_offset(offset)
@@ -169,7 +169,7 @@ class YearPeriods < PeriodsBase
   end
 
   protected def calculate_period_from_date(date)
-    @meter_collection.holidays.years_to_date(@first_meter_date, date, false)
+    Holidays.years_to_date(@first_meter_date, date, true)
   end
 end
 

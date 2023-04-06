@@ -184,21 +184,7 @@ describe AggregatorSingleSeries do
     context 'and timescale is year' do
       let(:timescale)   { :year }
 
-      #<SchoolDatePeriod:0x00005578a51c9710 @type=:year_to_date, @title="year to Sun 01 Jan 23", @start_date=Mon, 03 Jan 2022, @end_date=Sun, 01 Jan 2023, @calendar_event_type_id=nil>
-      #<SchoolDatePeriod:0x00005578a51c94e0 @type=:year_to_date, @title="year to Sun 02 Jan 22", @start_date=Mon, 04 Jan 2021, @end_date=Sun, 02 Jan 2022, @calendar_event_type_id=nil>
-      #<SchoolDatePeriod:0x00005578a51c9238 @type=:year_to_date, @title="year to Sun 03 Jan 21", @start_date=Mon, 06 Jan 2020, @end_date=Sun, 03 Jan 2021, @calendar_event_type_id=nil>
-      let(:period_1)   { SchoolDatePeriod.new(:year_to_date, "year to Sun 01 Jan 23", Date.new(2022,1,3), Date.new(2023,1,1))}
-      let(:period_2)   { SchoolDatePeriod.new(:year_to_date, "year to Sun 02 Jan 22", Date.new(2021,1,4), Date.new(2022,1,2))}
-      let(:period_3)   { SchoolDatePeriod.new(:year_to_date, "year to Sun 03 Jan 21", Date.new(2020,1,6), Date.new(2021,1,3))}
-      let(:periods)    { [period_1, period_2, period_3] }
-      let(:holidays)   { double('holidays') }
       before(:each) do
-        #the YearPeriod uses a completely different approach to calculating periods that
-        #relies on using an instance method, which could be a class method.
-        #so stub this and the necessary data
-        allow(meter_collection).to receive(:holidays).and_return(holidays)
-        allow(holidays).to receive(:years_to_date).and_return(periods)
-
         #write results into the aggregator_results
         aggregator.aggregate_period
       end

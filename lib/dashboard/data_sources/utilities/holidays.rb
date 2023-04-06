@@ -386,7 +386,7 @@ class Holidays
     raise EnergySparksBadChartSpecification.new("Badly specified min_days_in_school_week #{min_days_in_school_week} must be > 0") if min_days_in_school_week <= 0
     limit = 2000
     week_count = nth_week_number.magnitude
-    saturday = asof_date.saturday? ? asof_date : nearest_previous_saturday(asof_date)
+    saturday = asof_date.saturday? ? asof_date : self.class.nearest_previous_saturday(asof_date)
     loop do
       break if !min_date.nil? && saturday <= min_date
       monday = saturday - 5
@@ -403,7 +403,7 @@ class Holidays
 
   # was originally included in ActiveSupport code base, may be lost in rails integration
   # not sure whether it includes current Saturday, assume not, so if date is already a Saturday, returns date - 7
-  def nearest_previous_saturday(date)
+  def self.nearest_previous_saturday(date)
     date - (date.wday + 1)
   end
 
@@ -450,7 +450,7 @@ class Holidays
   end
 
   # currently in Class Holidays, but doesn't use holidays, so could be self, mirrors academic_years method above
-  def years_to_date(start_date, end_date, move_to_saturday_boundary)
+  def self.years_to_date(start_date, end_date, move_to_saturday_boundary)
     yrs_to_date = []
 
     last_date_of_period = end_date
@@ -502,7 +502,7 @@ class Holidays
 
     last_date_of_period = end_date
 
-    last_date_of_period = nearest_previous_saturday(last_date_of_period) if move_to_saturday_boundary
+    last_date_of_period = self.class.nearest_previous_saturday(last_date_of_period) if move_to_saturday_boundary
 
     # go backwards
     offset = 0
