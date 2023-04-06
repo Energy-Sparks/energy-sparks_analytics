@@ -10,6 +10,7 @@
 #
 class PeriodsBase
   def initialize(chart_config, meter_collection, first_meter_date, last_meter_date, type)
+    @chart_config = chart_config
     @timescale = chart_config[:timescale]
     @override_meter_end_date = chart_config.key?(:calendar_picker_allow_up_to_1_week_past_last_meter_date)
     @minimum_days_data_override = chart_config[:minimum_days_data_override]
@@ -161,7 +162,13 @@ end
 
 class YearPeriods < PeriodsBase
   protected def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
-    check_or_create_minimum_period(Holidays.years_to_date(first_meter_date, last_meter_date, false))
+    #avoid skipping a week by aligning to saturday boundary
+    if @chart_config.key?(:x_axis) && @chart_config[:x_axis] == :week
+      periods = Holidays.years_to_date(first_meter_date, last_meter_date, true)
+    else
+      periods = Holidays.years_to_date(first_meter_date, last_meter_date, false)
+    end
+    check_or_create_minimum_period(periods)
   end
 
   def calculate_period_from_offset(offset)

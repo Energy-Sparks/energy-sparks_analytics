@@ -129,7 +129,7 @@ describe AggregatorSingleSeries do
 
           #having moved back a year, the final range should be the previous week from above
           #so Sunday 2nd January 2022 to Saturday 8th January 2022
-          previous_year_x_axis_end_range = [ expected_x_axis_end_date - 7, expected_x_axis_end_date - 1 ]
+          previous_year_x_axis_end_range = [ expected_x_axis_start_date - 7, expected_x_axis_start_date - 1 ]
           expect(aggregator_results.x_axis_date_ranges.last).to eq previous_year_x_axis_end_range
         end
       end
@@ -137,7 +137,7 @@ describe AggregatorSingleSeries do
       #this context just replicates the above few specs but substitutes different dates
       #taken from observing the current/expected behaviour on real charts
       #as a double check of the logic
-      context '-- additional date tests' do
+      context '-- additional date tests --' do
         #all dates below taken from real example data
         let(:meter_start_date)         { Date.new(2020,3,1) }
         let(:meter_end_date)           { Date.new(2023,3,13) }
@@ -159,7 +159,7 @@ describe AggregatorSingleSeries do
 
             #having moved back a year, the final range should be the previous week from above
             #so Sunday 2nd January 2022 to Saturday 8th January 2022
-            previous_year_x_axis_end_range = [ expected_x_axis_end_date - 7, expected_x_axis_end_date - 1 ]
+            previous_year_x_axis_end_range = [ expected_x_axis_start_date - 7, expected_x_axis_start_date - 1 ]
             expect(aggregator_results.x_axis_date_ranges.last).to eq previous_year_x_axis_end_range
           end
         end
@@ -199,15 +199,15 @@ describe AggregatorSingleSeries do
 
       #with data ending on 2023-01-01, the x_axis date will be the first Sunday
       #of the period, which is 9th January 2022
-      let(:expected_x_axis_start_date) { Date.new(2022,1,9) }
+      #NOTE: with revised code this becomes a week earlier
+      let(:expected_x_axis_start_date) { Date.new(2022,1,2) }
       #Sunday to Saturday 15th January 2022
       let(:expected_x_axis_start_range) {
         [expected_x_axis_start_date, expected_x_axis_start_date + 6]
       }
 
       it 'should populate the x axis' do
-        #currently produces 51 week view...
-        expect(aggregator_results.x_axis.size).to eq 51
+        expect(aggregator_results.x_axis.size).to eq 52
         expect(aggregator_results.x_axis_date_ranges).to_not be_nil
         expect(aggregator_results.x_axis_date_ranges.last).to eq expected_x_axis_end_range
         expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
@@ -216,13 +216,12 @@ describe AggregatorSingleSeries do
       context 'moving back one year' do
         let(:timescale)   { {year: -1} }
         it 'should populate the x axis' do
-          #currently produces 51 week view...
-          expect(aggregator_results.x_axis.size).to eq 51
+          expect(aggregator_results.x_axis.size).to eq 52
           expect(aggregator_results.x_axis_date_ranges).to_not be_nil
 
           #having moved back a year, the final range should be the previous week from above
           #so Sunday 2nd January 2022 to Saturday 8th January 2022
-          previous_year_x_axis_end_range = [ expected_x_axis_end_date - 7, expected_x_axis_end_date - 1 ]
+          previous_year_x_axis_end_range = [ expected_x_axis_start_date - 7, expected_x_axis_start_date - 1 ]
           expect(aggregator_results.x_axis_date_ranges.last).to eq previous_year_x_axis_end_range
         end
       end
@@ -319,4 +318,5 @@ describe AggregatorSingleSeries do
     end
 
   end
+
 end
