@@ -208,7 +208,18 @@ class ChartManagerTimescaleManipulation
     start_date, end_date = determine_chart_range(chart_config_original)
     timescale_type, value = timescale_type(chart_config_original)
     case timescale_type
-    when :year, :up_to_a_year
+    when :year
+      ((end_date - start_date + 1) / 365.0).floor
+    when :up_to_a_year
+      #if we used this then it would allow dashboard charts to navigate through entire
+      #range. If the final range is very small, e.g. a few days, the charts can look odd
+      #because of the x_axis change.
+      #
+      #But on the other hand it allows the entire range to be explored.
+      #
+      #Small ranges could still be excluded
+      #
+      #Holidays.periods_cadence(start_date, end_date, include_partial_period: true).count
       ((end_date - start_date + 1) / 365.0).floor
     when :academicyear
       @school.holidays.academic_years(start_date, end_date).length

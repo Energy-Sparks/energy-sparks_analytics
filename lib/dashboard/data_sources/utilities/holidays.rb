@@ -460,7 +460,6 @@ class Holidays
     end
 
     # iterate backwards creating a year periods until we run out of AMR data
-
     first_date_of_period = last_date_of_period - 52 * 7 + 1
 
     while first_date_of_period >= start_date
@@ -476,8 +475,15 @@ class Holidays
     yrs_to_date
   end
 
-  def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false)
-    days = end_date - start_date + 1
+  def self.periods_cadence(start_date, end_date, cadence_days: 52.0 * 7.0, include_partial_period: false, move_to_saturday_boundary: false)
+
+    last_date_of_period = end_date
+    # move to previous Saturday, so last date a Saturday - better for getting weekends and holidays on right boundaries
+    if move_to_saturday_boundary
+      last_date_of_period =nearest_previous_saturday(last_date_of_period)
+    end
+
+    days = last_date_of_period - start_date + 1
     periods = days / cadence_days
 
     whole_periods = include_partial_period ? periods.ceil : periods.floor
@@ -485,7 +491,7 @@ class Holidays
     i = -1
     period_index_list = Array.new(whole_periods){ i += 1 }
 
-    period_dates = period_index_list.map { |v| [[end_date - (v + 1) * cadence_days + 1, start_date].max, end_date - v * cadence_days] }
+    period_dates = period_index_list.map { |v| [[last_date_of_period - (v + 1) * cadence_days + 1, start_date].max, last_date_of_period - v * cadence_days] }
 
     cadence = "cadence_#{cadence_days.to_i}_days".to_sym
 

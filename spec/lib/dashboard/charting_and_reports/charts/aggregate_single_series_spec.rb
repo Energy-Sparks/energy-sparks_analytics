@@ -105,7 +105,9 @@ describe AggregatorSingleSeries do
 
       #with data ending on 2023-01-01, the x_axis date will be the first Sunday
       #of the period, which is 9th January 2022
-      let(:expected_x_axis_start_date) { Date.new(2022,1,9) }
+      #NOTE: with revised code this becomes a week earlier
+      let(:expected_x_axis_start_date) { Date.new(2022,1,2) }
+
       #Sunday to Saturday 15th January 2022
       let(:expected_x_axis_start_range) {
         [expected_x_axis_start_date, expected_x_axis_start_date + 6]
@@ -113,7 +115,7 @@ describe AggregatorSingleSeries do
 
       it 'should populate the x axis' do
         #currently produces 51 week view...
-        expect(aggregator_results.x_axis.size).to eq 51
+        expect(aggregator_results.x_axis.size).to eq 52
         expect(aggregator_results.x_axis_date_ranges).to_not be_nil
         expect(aggregator_results.x_axis_date_ranges.last).to eq expected_x_axis_end_range
         expect(aggregator_results.x_axis_date_ranges.first).to eq expected_x_axis_start_range
@@ -124,7 +126,7 @@ describe AggregatorSingleSeries do
 
         it 'should populate the x axis' do
           #currently produces 51 week view...
-          expect(aggregator_results.x_axis.size).to eq 51
+          expect(aggregator_results.x_axis.size).to eq 52
           expect(aggregator_results.x_axis_date_ranges).to_not be_nil
 
           #having moved back a year, the final range should be the previous week from above
@@ -141,7 +143,7 @@ describe AggregatorSingleSeries do
         #all dates below taken from real example data
         let(:meter_start_date)         { Date.new(2020,3,1) }
         let(:meter_end_date)           { Date.new(2023,3,13) }
-        let(:expected_x_axis_start_date) { Date.new(2022,3,20) }
+        let(:expected_x_axis_start_date) { Date.new(2022,3,13) }
         let(:expected_x_axis_end_date) { Date.new(2023,3,11) }
 
         it 'should populate the x axis' do
@@ -154,7 +156,7 @@ describe AggregatorSingleSeries do
 
           it 'should populate the x axis' do
             #currently produces 51 week view...
-            expect(aggregator_results.x_axis.size).to eq 51
+            expect(aggregator_results.x_axis.size).to eq 52
             expect(aggregator_results.x_axis_date_ranges).to_not be_nil
 
             #having moved back a year, the final range should be the previous week from above

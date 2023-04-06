@@ -158,16 +158,17 @@ class PeriodsBase
       raise EnergySparksUnexpectedStateException, "Expected range of type Date or Integer, got #{range.first.class.name}"
     end
   end
+
+  protected def weekly_x_axis?
+    @chart_config.key?(:x_axis) && @chart_config[:x_axis] == :week
+  end
 end
 
 class YearPeriods < PeriodsBase
   protected def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
     #avoid skipping a week by aligning to saturday boundary
-    if @chart_config.key?(:x_axis) && @chart_config[:x_axis] == :week
-      periods = Holidays.years_to_date(first_meter_date, last_meter_date, true)
-    else
-      periods = Holidays.years_to_date(first_meter_date, last_meter_date, false)
-    end
+    move_to_saturday_boundary = weekly_x_axis? ? true : false
+    periods = Holidays.years_to_date(first_meter_date, last_meter_date, move_to_saturday_boundary)
     check_or_create_minimum_period(periods)
   end
 
@@ -183,7 +184,9 @@ end
 # e.g. baseload chart, still display if under a years data
 class UpToAYearPeriods < YearPeriods
   protected def period_list(first_meter_date = @first_meter_date, last_meter_date = @last_meter_date)
-    Holidays.periods_cadence(first_meter_date, last_meter_date, include_partial_period: true)
+    #avoid skipping a week by aligning to saturday boundary
+    move_to_saturday_boundary = weekly_x_axis? ? true : false
+    Holidays.periods_cadence(first_meter_date, last_meter_date, include_partial_period: true, move_to_saturday_boundary: move_to_saturday_boundary)
   end
 end
 
