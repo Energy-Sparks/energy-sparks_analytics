@@ -9,6 +9,14 @@ class TargetsService
   end
 
   def progress
+    #Currently TargetSchool.calculate_target_meter can set the target meter
+    #to nil in certain conditions, which means generating the progress report fails.
+    #Adding this check as a temporary measure to catch this happening then raise
+    #a more appropriate error.
+    if target_meter.nil? && target_school.reason_for_nil_meter(@fuel_type) != nil
+      raise StandardError.new(target_school.reason_for_nil_meter(@fuel_type)[:text])
+      return
+    end
     TargetsProgress.new(
       fuel_type: @fuel_type,
       months: data_headers, # populate table in report

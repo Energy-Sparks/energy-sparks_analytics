@@ -91,6 +91,9 @@ class TargetSchool < MeterCollection
 
     debug "Calculating target meter of type #{fuel_type}".ljust(100, '-')
 
+    #Rather than just setting nil here, the code should just raise exceptions.
+    #Some of these are preconditions that calling code should deal with.
+    #Calculation errors ought to be thrown so they can be tracked and resolved.
     target_meter = if original_meter.nil?
       set_nil_meter_with_reason(fuel_type, NO_PARENT_METER, nil)
     elsif !target_set?(original_meter)
@@ -154,4 +157,3 @@ class TargetSchool < MeterCollection
     puts var if @debug && !Object.const_defined?('Rails')
   end
 end
-
