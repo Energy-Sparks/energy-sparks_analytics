@@ -52,6 +52,7 @@ en:
             electricity: Electricity
             gas: Gas
             storage_heaters: Storage heaters
+        easter_shutdown_2023_energy_comparison: Easter shutdown 2023 comparison
         electricity_consumption_during_holiday: Electricity use during current holiday
         electricity_peak_kw_per_pupil: Peak school day electricity use
         electricity_targets: Progress against electricity target
