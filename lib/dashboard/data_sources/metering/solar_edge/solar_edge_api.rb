@@ -182,7 +182,7 @@ class SolarEdgeAPI
   end
 
   def site_details_url
-    '/sites/list?size=5&searchText=Lyon&sortProperty=name&sortOrder=ASC&api_key=' + @api_key
+    '/sites/list?api_key=' + @api_key
   end
 
   def meter_start_end_dates_url(meter_id)
