@@ -38,7 +38,7 @@ module Benchmarking
       text =  I18n.t('analytics.benchmarking.content.change_in_energy_use_since_joined_full_data.introduction_text_html')
       ERB.new(text).result(binding)
     end
-  end  
+  end
   #=======================================================================================
   class BenchmarkContentTotalAnnualEnergy < BenchmarkContentBase
     include BenchmarkingNoTextMixin
@@ -69,7 +69,7 @@ module Benchmarking
     end
   end
   #=======================================================================================
-  class BenchmarkBaseloadBase < BenchmarkContentBase   
+  class BenchmarkBaseloadBase < BenchmarkContentBase
     def content(school_ids: nil, filter: nil, user_type: nil)
       @baseload_impact_html = baseload_1_kw_change_range_£_html(school_ids, filter, user_type)
       super(school_ids: school_ids, filter: filter)
@@ -141,7 +141,7 @@ module Benchmarking
     #=======================================================================================
     class BenchmarkGasTarget < BenchmarkContentBase
       include BenchmarkingNoTextMixin
-  
+
       private def introduction_text
         text = I18n.t('analytics.benchmarking.content.gas_targets.introduction_text_html')
         ERB.new(text).result(binding)
@@ -183,7 +183,7 @@ module Benchmarking
     include BenchmarkingNoTextMixin
     private def introduction_text
       text = I18n.t('analytics.benchmarking.content.electricity_peak_kw_per_pupil.introduction_text_html')
-      ERB.new(text).result(binding)      
+      ERB.new(text).result(binding)
     end
   end
     #=======================================================================================
@@ -191,7 +191,7 @@ module Benchmarking
       include BenchmarkingNoTextMixin
       private def introduction_text
         text = I18n.t('analytics.benchmarking.content.solar_pv_benefit_estimate.introduction_text_html')
-        ERB.new(text).result(binding)      
+        ERB.new(text).result(binding)
       end
     end
     #=======================================================================================
@@ -313,7 +313,7 @@ module Benchmarking
   #=======================================================================================
   # shared wording save some translation costs
   class BenchmarkAnnualChangeBase < BenchmarkContentBase
-  end 
+  end
   #=======================================================================================
   class BenchmarkChangeInEnergySinceLastYear < BenchmarkAnnualChangeBase
     include BenchmarkingNoTextMixin
@@ -472,7 +472,7 @@ module Benchmarking
       text = '<p>' + I18n.t('analytics.benchmarking.content.footnotes.notes') + ':<ul>'
 
       if floor_area_or_pupils_change_rows.present?
-        text += change_rows_text(floor_area_or_pupils_change_rows.map { |row| school_name(row) }.sort.to_sentence, period_types) 
+        text += change_rows_text(floor_area_or_pupils_change_rows.map { |row| school_name(row) }.sort.to_sentence, period_types)
       end
 
       if infinite_increase_school_names.present?
@@ -693,7 +693,7 @@ module Benchmarking
     def storage_heater_content(school_ids:, filter:)
       extra_content(:layer_up_powerdown_day_november_2022_storage_heater_table, filter: filter)
     end
-    
+
     def extra_content(type, filter:)
       content_manager = Benchmarking::BenchmarkContentManager.new(@asof_date)
       db = @benchmark_manager.benchmark_database
@@ -721,11 +721,11 @@ module Benchmarking
     def electricity_content(school_ids:, filter:)
       extra_content(:autumn_term_2021_2022_electricity_table, filter: filter)
     end
-  
+
     def gas_content(school_ids:, filter:)
       extra_content(:autumn_term_2021_2022_gas_table, filter: filter)
     end
-  
+
     def storage_heater_content(school_ids:, filter:)
       extra_content(:autumn_term_2021_2022_storage_heater_table, filter: filter)
     end
@@ -753,11 +753,11 @@ module Benchmarking
     def electricity_content(school_ids:, filter:)
       extra_content(:sept_nov_2021_2022_electricity_table, filter: filter)
     end
-  
+
     def gas_content(school_ids:, filter:)
       extra_content(:sept_nov_2021_2022_gas_table, filter: filter)
     end
-  
+
     def storage_heater_content(school_ids:, filter:)
       extra_content(:sept_nov_2021_2022_storage_heater_table, filter: filter)
     end
@@ -778,4 +778,37 @@ module Benchmarking
   class BenchmarkSeptNov2022StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
     include BenchmarkingNoTextMixin
   end
+
+  #=======================================================================================
+  class BenchmarkEaster2023ShutdownComparison < BenchmarkChangeAdhocComparison
+
+    def electricity_content(school_ids:, filter:)
+      extra_content(:easter_shutdown_2023_electricity_table, filter: filter)
+    end
+
+    def gas_content(school_ids:, filter:)
+      extra_content(:easter_shutdown_2023_gas_table, filter: filter)
+    end
+
+    def storage_heater_content(school_ids:, filter:)
+      extra_content(:easter_shutdown_2023_storage_heater_table, filter: filter)
+    end
+  end
+
+  class BenchmarkEasterShutdown2023ElectricityTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+  end
+
+  class BenchmarkEasterShutdown2023GasTable < BenchmarkContentBase
+    include BenchmarkingNoTextMixin
+
+    private def introduction_text
+      I18n.t('analytics.benchmarking.content.benchmark_sept_nov_2022_gas_table.introduction_text')
+    end
+  end
+
+  class BenchmarkEasterShutdown2023StorageHeaterTable < BenchmarkChangeAdhocComparisonGasTable
+    include BenchmarkingNoTextMixin
+  end
+
 end

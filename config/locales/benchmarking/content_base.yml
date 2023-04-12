@@ -164,6 +164,9 @@ en:
           holiday: Holiday
           holiday_usage_to_date: Holiday usage to date
           kwh_consumption_since_target_set: kWh consumption since target set
+          last_school_week: Final school week
+          last_school_week_temperature_adjusted: Final school week (temperature adjusted)
+          last_school_week_temperature_unadjusted: Final school week (temperature unadjusted)
           last_year: Last year
           last_year_carbon_emissions_tonnes_co2: Last year carbon emissions (tonnes CO2)
           last_year_consumption_kwh: Last year consumption kWh
