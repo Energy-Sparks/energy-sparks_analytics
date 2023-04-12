@@ -1,6 +1,15 @@
+#Basic client for the Solar Edge Solar PV API
+#
+#Handles both requests to the Solar Edge API and reformatting the
+#results to manage Energy Sparks expectations
+class SolarEdgeAPI
+  class ApiFailure < StandardError; end
+  class NotFound < StandardError; end
+  class NotAllowed < StandardError; end
+  class NotAuthorised < StandardError; end
 
+  BASE_URL = 'https://monitoringapi.solaredge.com'
 
-class SolarEdgeSolarPV
   def initialize(api_key = ENV['ENERGYSPARKSSOLAREDGEAPIKEY'])
     @api_key = api_key
   end
@@ -35,12 +44,12 @@ class SolarEdgeSolarPV
 
     processed_meter_data = select_wanted_data_and_convert_keys(raw_data)
 
-    convert_to_meter_type_to_date_to_kwh_x48(processed_meter_data, start_date, end_date) 
+    convert_to_meter_type_to_date_to_kwh_x48(processed_meter_data, start_date, end_date)
   end
 
   def solar_pv_readings(meter_id, start_date, end_date)
     start_date, end_date = set_dates(meter_id, start_date, end_date)
-    
+
     raw_data = raw_production_meter_readings(meter_id, start_date, end_date)
 
     dt_to_kwh = raw_data.map{ |h| [date(h['date']) , (h['value'] || 0.0) / 1000.0]}.to_h
@@ -85,12 +94,11 @@ class SolarEdgeSolarPV
   end
 
   def convert_to_meter_type_to_date_to_kwh_x48(processed_meter_data, start_date, end_date)
+    converted = {}
     processed_meter_data.map do |meter_type, dt_to_kwh|
-      [
-        meter_type,
-        convert_to_date_to_kwh_x48(dt_to_kwh, start_date, end_date)
-      ]
-    end.to_h
+      converted[meter_type] = convert_to_date_to_kwh_x48(dt_to_kwh, start_date, end_date) unless dt_to_kwh.nil?
+    end
+    converted
   end
 
   def raw_meter_readings(meter_id, start_date, end_date)
@@ -122,10 +130,21 @@ class SolarEdgeSolarPV
     json_query(raw_generation_meter_data_url(meter_id, start_date, end_date))['energy']['values']
   end
 
-  def json_query(url)
-    uri = URI(url)
-    response = Net::HTTP.get(uri)
-    JSON.parse(response)
+  def json_query(path)
+    response = Faraday.get(BASE_URL + path, nil, headers)
+    handle_response(response)
+  end
+
+  def handle_response(response)
+    raise NotAuthorised.new(response.body) if response.status == 401
+    raise NotAllowed.new(response.body) if response.status == 403
+    raise NotFound.new(response.body) if response.status == 404
+    raise ApiFailure.new(response.body) unless response.success?
+    begin
+      JSON.parse(response.body)
+    rescue => e
+      raise ApiFailure.new(e.message)
+    end
   end
 
   def convert_raw_meter_data(raw_data)
@@ -163,21 +182,21 @@ class SolarEdgeSolarPV
   end
 
   def site_details_url
-    'https://monitoringapi.solaredge.com/sites/list?size=5&searchText=Lyon&sortProperty=name&sortOrder=ASC&api_key=' + @api_key
+    '/sites/list?size=5&searchText=Lyon&sortProperty=name&sortOrder=ASC&api_key=' + @api_key
   end
 
   def meter_start_end_dates_url(meter_id)
-    'https://monitoringapi.solaredge.com/site/' + meter_id.to_s + '/dataPeriod?api_key='  + @api_key
+    '/site/' + meter_id.to_s + '/dataPeriod?api_key='  + @api_key
   end
 
   def raw_generation_meter_data_url(meter_id, start_date, end_date)
-    'https://monitoringapi.solaredge.com/site/' + meter_id.to_s + '/energy?timeUnit=QUARTER_OF_AN_HOUR' +
+    '/site/' + meter_id.to_s + '/energy?timeUnit=QUARTER_OF_AN_HOUR' +
     '&endDate=' + end_date.to_s + '&startDate=' + start_date.to_s + '&api_key='  + @api_key
   end
 
   def raw_all_meters_data_url(meter_id, start_date, end_date)
    # https://monitoringapi.solaredge.com/site/1508552/energyDetails?timeUnit=QUARTER_OF_AN_HOUR&&startTime=2020-11-10%2011:00:00&endTime=2020-11-10%2013:00:00&api_key=RLLJ
-    'https://monitoringapi.solaredge.com/site/' + meter_id.to_s + '/energyDetails?timeUnit=QUARTER_OF_AN_HOUR' +
+    '/site/' + meter_id.to_s + '/energyDetails?timeUnit=QUARTER_OF_AN_HOUR' +
      '&startTime=' + solar_edge_url_time(start_date) + '&endTime=' + solar_edge_url_time(end_date + 1) +
      '&api_key='  + @api_key
   end
@@ -192,4 +211,14 @@ class SolarEdgeSolarPV
     end_date   = ed if end_date.nil?
     [start_date, end_date]
   end
+
+  def headers
+    hdr = {
+      'Accept': 'application/json'
+    }
+  end
+end
+
+#Backwards compatibility
+class SolarEdgeSolarPV < SolarEdgeAPI
 end
