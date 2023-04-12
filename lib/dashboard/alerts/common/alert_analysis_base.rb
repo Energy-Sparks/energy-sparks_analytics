@@ -594,7 +594,10 @@ class AlertAnalysisBase < ContentBase
       AlertAutumnTerm20212022StorageHeaterComparison              => 'a22s',
       AlertSeptNov20212022ElectricityComparison                   => 's22e',
       AlertSeptNov20212022GasComparison                           => 's22g',
-      AlertSeptNov20212022StorageHeaterComparison                 => 's22s'
+      AlertSeptNov20212022StorageHeaterComparison                 => 's22s',
+      AlertEaster2023ShutdownElectricityComparison                => 'e23e',
+      AlertEaster2023ShutdownGasComparison                        => 'e23g',
+      AlertEaster2023ShutdownStorageHeaterComparison              => 'e23s'
     }
   end
 
