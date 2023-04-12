@@ -1708,7 +1708,7 @@ module Benchmarking
           # CO2
           { data: ->{ e23s_pppc }, name: :last_school_week, units: :co2 },
           { data: ->{ e23s_cppc }, name: :holiday,  units: :co2 },
-          { data: ->{ percent_change(e23s_pppc, s22s_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ percent_change(e23s_pppc, e23s_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           # £
           { data: ->{ e23s_ppp£ }, name: :last_school_week, units: :£ },
