@@ -97,8 +97,8 @@ def process_on_meter_set(config)
 
   puts "Site details:"
   if config[:site_id]
-    ap site_details
-    ap site_ids
+    ap solar_edge.site_details
+    ap solar_edge.site_ids
   else
     puts "No site details"
   end
