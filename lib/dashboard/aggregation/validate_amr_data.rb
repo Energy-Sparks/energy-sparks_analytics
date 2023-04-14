@@ -22,10 +22,9 @@ class ValidateAMRData
   attr_reader :data_problems, :meter_id
 
   def initialize(meter, max_days_missing_data, holidays, temperatures)
-    @amr_data = meter.amr_data
     @meter = meter
-    @meter_id = @meter.mpan_mprn
-    @type = meter.meter_type
+    @amr_data = meter.amr_data
+    @meter_id = meter.mpan_mprn
     @holidays = holidays
     @temperatures = temperatures
     @max_days_missing_data = max_days_missing_data
@@ -34,16 +33,38 @@ class ValidateAMRData
     @data_problems = {}
   end
 
-  def validate(debug_analysis = false)
+  def validate(debug_analysis: false)
     logger.debug "=" * 150
-    assess_null_data if debug_analysis
     logger.debug "Validating meter data of type #{@meter.meter_type} #{@meter.name} #{@meter.id}"
     logger.debug "Meter data from #{@meter.amr_data.start_date} to #{@meter.amr_data.end_date}"
     logger.debug "DCC Meter #{@meter.dcc_meter}"
-    puts "Before validation #{missing_data} missing items of data" if debug_analysis
+
+    if debug_analysis
+      assess_null_data #does nothing, count not used?
+      puts "Before validation #{missing_data} missing items of data"
+    end
+
+    do_validations
+
+    #only summarise bad data in development
+    if debug_analysis || logger.level >= Logger::INFO
+      @amr_data.summarise_bad_data
+      @amr_data.summarise_bad_data_stdout if debug?
+    end
+    if debug_analysis
+      puts "After validation #{missing_data} missing items of data"
+      ap missing_data_stats
+      assess_null_data #does nothing, count not used?
+    end
+    logger.debug "=" * 150
+  end
+
+  private
+
+  #Carry out a series of validations and corrections to the underlying meter data
+  def do_validations
     remove_final_meter_reading_if_today
     check_temperature_data_covers_gas_meter_data_range
-    # ap(@meter, limit: 5, :color => {:float  => :red})
     process_meter_attributes
     remove_dcc_bad_data_readings if @meter.dcc_meter
     correct_nil_readings
@@ -53,17 +74,7 @@ class ValidateAMRData
     fill_in_missing_data
     correct_holidays_with_adjacent_academic_years
     final_missing_data_set_to_small_negative
-    @amr_data.summarise_bad_data
-    @amr_data.summarise_bad_data_stdout if debug?
-    if debug_analysis
-      puts "After validation #{missing_data} missing items of data"
-      ap missing_data_stats
-      assess_null_data if debug_analysis
-    end
-    logger.debug "=" * 150
   end
-
-  private
 
   def debug?; false && [2380001730739].include?(@meter.mpxn.to_i) end
 
@@ -81,7 +92,7 @@ class ValidateAMRData
   end
 
   def auto_insert_for_gas_if_no_other_rules
-    return unless @type.to_sym == :gas
+    return unless @meter.meter_type.to_sym == :gas
     logger.info "Adding auto insert missing readings as we're a gas meter & no other corrections"
     @meter.insert_correction_rules_first([{ auto_insert_missing_readings: { type: :weekends } }])
   end
@@ -393,7 +404,7 @@ class ValidateAMRData
         updated_one_day_reading.set_type('CMPH')
         @amr_data.add(date, updated_one_day_reading.deep_dup)
       else
-        logger.debug "Unable to override partial/missing data for #{@meter.mpan_mprn} on #{date}"
+        logger.debug "Unable to override partial/missing data for #{@meter_id} on #{date}"
       end
     end
   end
@@ -983,7 +994,7 @@ class ValidateAMRData
       period_of_all_meter_readings = SchoolDatePeriod.new(:validation, 'Validation Period', @amr_data.start_date, @amr_data.end_date)
       @model_cache.create_and_fit_model(:best, period_of_all_meter_readings, true)
     rescue EnergySparksNotEnoughDataException => e
-      logger.info "Unable to calculate model data for heat day substitution for #{@meter.mpan_mprn}"
+      logger.info "Unable to calculate model data for heat day substitution for #{@meter_id}"
       logger.info e.message
       logger.info 'using simplistic substitution without modelling'
       NO_MODEL
