@@ -68,10 +68,15 @@ class ValidateAMRData
     remove_final_meter_reading_if_today
 
     #Raises exception if temperature data missing or doesn't cover entire range of
-    #the gas meter data
+    #the gas meter data, prior to any corrections or adjustments
     check_temperature_data_covers_gas_meter_data_range
 
-    #Apply initial set of corrections specified in the meter attributes
+    #Extracts the :meter_corrections from the meter attributes and stores them
+    #as meter_correction_rules, for later processing. If this is a gas meter,
+    #and there are no other rules, then configures an :auto_insert_missing_readings
+    #rule that will set weekend data to zero
+    #
+    #The corrections are applied in a later step
     process_meter_attributes
 
     #Meter readings from the DCC can include some known values for 'bad data'?
@@ -87,7 +92,9 @@ class ValidateAMRData
     #or substitute the entire day if there are two many gaps
     correct_nil_readings
 
-    #Apply remaining corrections specified in the meter attributes
+    #Apply all of the meter correction attributes configured for the meter
+    #Note: @meter.meter_correction_rules will never be nil, as its initialised
+    #to an empty array and can only be added to
     meter_corrections unless @meter.meter_correction_rules.nil?
 
     #Scans the amr data to look for gaps that are larger than @max_days_missing_data
@@ -118,10 +125,19 @@ class ValidateAMRData
 
   def debug?; false && [2380001730739].include?(@meter.mpxn.to_i) end
 
+  #Attempts to build a heating model from this meter's data. Model is used
+  #to substitute missing gas data
   def heating_model
     @heating_model ||= create_heating_model
   end
 
+  #Finds the meter corrections attributes, then copies them to the
+  #meter_correction_rules for the meter. If there are no
+  #rules and this is a gas meter, then it will automatically add a rule to set
+  #any missing weekend data to zero
+  #
+  #Note: as these rules are only used by this class, the list of rules could
+  #just be a member variable, rather than adding a method/data to Meter
   def process_meter_attributes
     meter_attributes_corrections = @meter.attributes(:meter_corrections)
     if meter_attributes_corrections.nil?
@@ -371,12 +387,23 @@ class ValidateAMRData
     kwh.between?(186227.0864, 186227.0866)
   end
 
+  # A specific built in correction that will substitute any nil readings with
+  # either interpolated values, or substitute entire days if there is too much
+  # missing data
+  #
+  # Applies same correction rules regardless of meter type.
   def correct_nil_readings
     remove_missing_start_end_dates_if_partial_nil
     correct_zero_partial_data(missing_data_value: nil)
     # leave the rest of the validation to fix whole missing days
   end
 
+  #Adjusts the end of the meter data range by up to one day, to exclude
+  #a start or end day that has ANY missing half-hourly readings.
+  #
+  #Only checks for a single day at the start/end, so if the new range still
+  #has missing readings then this might be further adjusted, e.g. by
+  #interpolation or substitution.
   def remove_missing_start_end_dates_if_partial_nil
     if @amr_data.days_kwh_x48(@amr_data.start_date).any?(&:nil?)
       logger.info "Moving meter start date #{@amr_data.start_date} 1 day forward as only partial data on start date"
@@ -391,12 +418,24 @@ class ValidateAMRData
     end
   end
 
+  # Finds days with missing readings, as defined by +missing_data_value+.
+  #
+  # If there are less than +max_missing_readings+ for a given day, then the missing
+  # values are replaced by interpolation.
+  #
+  # If there are more missing readings, then the entire day is substituted. When
+  # the entire day is substituted we just attempt to find a similar nearby day.
+  # There's no special processing for gas data at this point.
+  #
+  # This is called with +missing_data_value+ of +nil+ to remove nil readings, as well
+  # as default value of +0.0+ to apply corrections when data isn't expected to be
+  # zero.
+  #
   # the Frome/Somerset csv feed has a small amount of zero data in its electricity csv feeds
   # sometimes its just a few points, sometimes its a whole day (with BST/GMT offset issues!)
   def correct_zero_partial_data(max_missing_readings: 6, missing_data_value: 0.0)
     # do this is a particular order to avoid substitiing partial data
     # with partial data
-
     missing_dates = remove_readings_with_too_many_missing_partial_readings(max_missing_readings, missing_data_value)
 
     interpolate_partial_missing_data(max_missing_readings, missing_data_value)
@@ -404,6 +443,12 @@ class ValidateAMRData
     substitute_partial_missing_data_with_whole_day(missing_dates)
   end
 
+  # Scans the AMR data to find days in which +missing_data_value+ occurs in the half-hourly
+  # readings. If found and there are less than +max_missing_readings+ then the missing values
+  # are replaced with interpolated values.
+  #
+  # @param Integer max_missing_readings the maximum number of missing readings before day is removed
+  # @param Float missing_data_value the value to check for, or nil
   def interpolate_partial_missing_data(max_missing_readings, missing_data_value)
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if @amr_data.date_exists?(date)
@@ -437,6 +482,15 @@ class ValidateAMRData
     missing = (@amr_data.start_date..@amr_data.end_date).count { |date| @amr_data.date_missing?(date) }
   end
 
+  # Takes an array of dates then attempts to create substitute date for that
+  # data. If a substitute can be found, then this is used to replace the date in the
+  # meter data
+  #
+  # Regardless of meter type, the substitution process used here is what is used for
+  # electricity meters, i.e. it will replace the days with a nearby weekend, weekday or
+  # holiday date.
+  #
+  # @param Array missing_dates an array of Dates to process
   def substitute_partial_missing_data_with_whole_day(missing_dates)
     missing_dates.each do |date|
       date, updated_one_day_reading = substitute_missing_electricity_data(date, 'S')
@@ -449,6 +503,14 @@ class ValidateAMRData
     end
   end
 
+  #Scans the AMR data to find any days that have +missing_data_value+ in the half-hourly
+  #readings. If there are more than +missing_data_value+ the day will be removed
+  #
+  #Returns an array of any days that are removed.
+  #
+  # @param Integer max_missing_readings the maximum number of missing readings before day is removed
+  # @param Float missing_data_value the value to check for, or nil
+  # @return Array a list of the removed days
   def remove_readings_with_too_many_missing_partial_readings(max_missing_readings, missing_data_value)
     missing_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
@@ -462,6 +524,13 @@ class ValidateAMRData
     missing_dates
   end
 
+  #Interpolate over missing readings (identified by +missing_data_value+)
+  #
+  #Interpolation is done by the Interpolate gem
+  #
+  # @param Array days_kwh_x48 an array of x48 half hourly readings
+  # @param Float missing_data_value the float value or nil that identifies a missing reading
+  # @returns Array a new array that consists of original readings plus interpolated values for missing readings
   def interpolate_zero_readings(days_kwh_x48, missing_data_value: 0.0)
     interpolation_data = {}
 
@@ -693,6 +762,14 @@ class ValidateAMRData
     false
   end
 
+  # Scans the AMR data to find gaps. If any large gaps are found then the
+  # meter date range is adjusted so that it starts at the end of the gap.
+  #
+  # A maximum size of the gap is defined by +@max_days_missing_data+ which
+  # is +AggregateDataService::MAX_DAYS_MISSING_DATA+ (50) by default.
+  #
+  # Iterates backwards through the date range so that if there's a recent
+  # gap then we avoid iterating over the full range.
   def check_for_long_gaps_in_data
     gap_count = 0
     first_bad_date = Date.new(2050, 1, 1)
