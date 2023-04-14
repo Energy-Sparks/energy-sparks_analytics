@@ -63,16 +63,56 @@ class ValidateAMRData
 
   #Carry out a series of validations and corrections to the underlying meter data
   def do_validations
+    #Removes data for today as it won't be complete
+    #Also removes any spurious future dates
     remove_final_meter_reading_if_today
+
+    #Raises exception if temperature data missing or doesn't cover entire range of
+    #the gas meter data
     check_temperature_data_covers_gas_meter_data_range
+
+    #Apply initial set of corrections specified in the meter attributes
     process_meter_attributes
+
+    #Meter readings from the DCC can include some known values for 'bad data'?
+    #Remove these individual HH readings, or in some cases entire days of data
+    #in which these values occur
     remove_dcc_bad_data_readings if @meter.dcc_meter
+
+    #Adjusts amr data start/end by one day to ignore days with partial data
+    #(This overlaps with the remove_final_meter_reading_if_today check done
+    #in previous step)
+    #
+    #Then for any nil readings, we either interpolate between gaps in the day
+    #or substitute the entire day if there are two many gaps
     correct_nil_readings
+
+    #Apply remaining corrections specified in the meter attributes
     meter_corrections unless @meter.meter_correction_rules.nil?
+
+    #Scans the amr data to look for gaps that are larger than @max_days_missing_data
+    #If found, then AMR data start date will be moved to the final day of the gap.
+    #Means that if there are any big holes in the data, it will be skipped.
+    #
+    #Ignores gaps which might be filled in the next step
     check_for_long_gaps_in_data
+
     # meter_corrections unless @meter.meter_correction_rules.nil?
+
+    #Tries to find substitute data for all missing days.
+    #Uses different approaches for gas and electricity data.
+    #e.g. gas substitutions looks for days with similar temperature
     fill_in_missing_data
+
+    #Scans again for missing days, but just in holidays. Tries to substitute
+    #with data from similar holiday in previous year. Again electricity and
+    #gas substitutions are slightly different
     correct_holidays_with_adjacent_academic_years
+
+    #One final pass to find missing days. In this case if found the day is
+    #substituted with a fixed value of '0.0123456' for each HH reading and
+    #a flag of 'PROB'
+    #Why not zero?
     final_missing_data_set_to_small_negative
   end
 
