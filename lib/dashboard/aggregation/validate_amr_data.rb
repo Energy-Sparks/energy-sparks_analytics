@@ -153,8 +153,14 @@ class ValidateAMRData
     @meter.insert_correction_rules_first([{ auto_insert_missing_readings: { type: :weekends } }])
   end
 
+  #Applies all the meter corrections configured in the meter attributes.
+  #Relies on +process_meter_attributes+ having been called first to initialise
+  #the list of corrections
+  #
+  #Rules are split into "grouped" rules (defined by +grouped_rule?+) and "single rules".
+  #Single rules are applied first, then the remaining grouped rules.
   def meter_corrections
-    return if @meter.meter_correction_rules.nil?
+    return if @meter.meter_correction_rules.nil? #rules are never nil, but may be empty
 
     single_rules, grouped_rules = split_into_single_and_grouped_rules(@meter.meter_correction_rules)
 
@@ -175,6 +181,9 @@ class ValidateAMRData
     !(%i[override_zero_days_electricity_readings] & rule.keys).empty?
   end
 
+  #Apply a list of meter corrections
+  #
+  #@param Array single_rules an array of meter corrections Hashes
   def apply_single_rules(single_rules)
     single_rules.each do |rule|
       apply_one_meter_correction(rule)
@@ -204,34 +213,58 @@ class ValidateAMRData
     groups
   end
 
+  # Interprets and then applies a single meter correction rule
+  #
+  # Rules are either a Symbol (true for a couple of corrections) or a Hash
+  # The Hash structure provides parameters, e.g. start/end dates and other values
+  # to customise the rule
+  #
+  # See the class definitions in MeterAttributes for structure definitions.
+  # This class only interprets those in the +:meter_corrections+ category.
+  #
+  # Note: there's not currently any defined order in which rules will be applied.
+  # This shouldn't typically be an issue but its possible that in some cases
+  # we may do substitutions to then truncate data
+  #
+  # @param rule either a Symbol or a Hash
   def apply_one_meter_correction(rule)
     logger.debug '-' * 80
     logger.debug "Manually defined meter corrections: #{rule}"
     if rule.is_a?(Symbol) && rule == :set_all_missing_to_zero
       logger.debug 'Setting all missing data to zero'
+      #set any missing days to have zero readings
       set_all_missing_data_to_zero
     elsif rule.is_a?(Symbol) && rule == :correct_zero_partial_data
       logger.debug 'Correcting partially missing (zero) data'
+      #fix dates with missing readings (defined as 0.0), interpolating
+      #missing values, unless there are too many in which case entire day
+      #is substituted
       correct_zero_partial_data
     elsif rule.key?(:rescale_amr_data)
+      #scale HH readings within a date range
       scale_amr_data(
         rule[:rescale_amr_data][:start_date],
         rule[:rescale_amr_data][:end_date],
         rule[:rescale_amr_data][:scale]
       )
     elsif rule.key?(:readings_start_date)
+      #set meter start date
       apply_readings_start_date(rule[:readings_start_date])
     elsif rule.key?(:readings_end_date)
+      #set meter end date
       apply_readings_end_date(rule[:readings_end_date])
     elsif rule.key?(:set_bad_data_to_zero)
+      #overwrite existing data in a range to zero
       zero_data_in_date_range(
         rule[:set_bad_data_to_zero][:start_date],
         rule[:set_bad_data_to_zero][:end_date]
       )
     elsif rule.key?(:set_missing_data_to_zero)
       if rule[:set_missing_data_to_zero].nil?
+        #set all missing days, up until yesterday to have zero readings
         zero_missing_data_in_date_range(nil, nil, true)
       else
+        #set all missing days, within range to have zero readings
         zero_missing_data_in_date_range(
           rule[:set_missing_data_to_zero][:start_date],
           rule[:set_missing_data_to_zero][:end_date],
@@ -242,8 +275,10 @@ class ValidateAMRData
       if (rule[:auto_insert_missing_readings].is_a?(Symbol) && # backwards compatibility
           rule[:auto_insert_missing_readings] == :weekends) ||
           rule[:auto_insert_missing_readings][:type]== :weekends
+        #replace just the missing weekend data in the range to zero
         replace_missing_weekend_data_with_zero
       elsif rule[:auto_insert_missing_readings][:type] == :date_range
+        #replace missing data in the range to zero
         replace_missing_data_with_zero(
           rule[:auto_insert_missing_readings][:start_date],
           rule[:auto_insert_missing_readings][:end_date]
@@ -254,11 +289,15 @@ class ValidateAMRData
       end
     elsif rule.key?(:no_heating_in_summer_set_missing_to_zero)
       logger.debug 'Got missing summer rule'
+      #Sets missing data to zero between the start/end time of year
       set_missing_data_to_zero_on_heating_meter_during_summer(
         rule[:no_heating_in_summer_set_missing_to_zero][:start_toy],
         rule[:no_heating_in_summer_set_missing_to_zero][:end_toy],
       )
     elsif rule.key?(:override_bad_readings)
+      #Doesnt just fill in missing data, because the final override parameter is
+      #set this will remove all existing readings within the specified range and
+      #attempt to substitute them.
       fill_in_missing_data(
         rule[:override_bad_readings][:start_date],
         rule[:override_bad_readings][:end_date],
@@ -266,11 +305,23 @@ class ValidateAMRData
         true
       )
     elsif rule.key?(:extend_meter_readings_for_substitution)
+      #extend the meter date range, to force additional substitutions. That
+      #might happen as part of processing additional rules, or the later
+      #substitutions done in +do_validations+
       extend_start_date(rule[:extend_meter_readings_for_substitution][:start_date]) if rule[:extend_meter_readings_for_substitution].key?(:start_date)
       extend_end_date(  rule[:extend_meter_readings_for_substitution][:end_date])   if rule[:extend_meter_readings_for_substitution].key?(:end_date)
     end
   end
 
+  # Forces the meter start date to the provided date
+  #
+  # Setting the start date on the AMR data will cause all previous readings to be
+  # removed.
+  #
+  # Will throw an exception if the provided date isn't in the current meter date
+  # range
+  #
+  # A status code is applied to the date to indicate why it is being used
   def apply_readings_start_date(fix_start_date)
     check_date_exists(fix_start_date, :readings_start_date)
     logger.debug "Fixing start date to #{fix_start_date} for #{@meter_id}"
@@ -279,6 +330,15 @@ class ValidateAMRData
     @amr_data.set_start_date(fix_start_date)
   end
 
+  # Forces the meter end date to the provided date
+  #
+  # Setting the end date on the AMR data will cause all subsequent readings to be
+  # removed.
+  #
+  # Will throw an exception if the provided date isn't in the current meter date
+  # range
+  #
+  # A status code is applied to the date to indicate why it is being used
   def apply_readings_end_date(fix_end_date)
     check_date_exists(fix_end_date, :readings_end_date)
     logger.debug "Fixing end date to #{fix_end_date}"
@@ -294,11 +354,19 @@ class ValidateAMRData
     raise EnergySparksMeterSpecification.new(error_message)
   end
 
+  #Set the start date for the AMR data to the specified date
+  #
+  #No readings are added at this point, so relies on subsequent meter corrections/validation
+  #behaviour to fill in the blanks
   def extend_start_date(date)
     logger.info "Extending start date to #{date}"
     @amr_data.set_start_date(date)
   end
 
+  #Set the end date for the AMR data to the specified date
+  #
+  #No readings are added at this point, so relies on subsequent meter corrections/validation
+  #behaviour to fill in the blanks
   def extend_end_date(date)
     logger.info "Extending end date to #{date}"
     @amr_data.set_end_date(date)
@@ -547,11 +615,22 @@ class ValidateAMRData
     days_kwh_x48
   end
 
+  # Find all missing days of data between two "times of year" and set their readings to zero
+  #
+  # A "time of year" is a hash with a +:month+ and a +:day_of_month+ value.
+  #
+  # Essentially defines a repeating rule that will be applied to all years of data,
+  # setting readings to zero within the date range defined by the start and end values
+  #
+  # Method name indicates this is normally used to set heat meter data to zero in summer,
+  # but there's nothing specific about the meter type or date range in the substitution
+  # that is done.
   def set_missing_data_to_zero_on_heating_meter_during_summer(start_toy, end_toy)
     logger.info "Setting missing data to zero between #{start_toy} and #{end_toy}"
     set_all_missing_data_to_zero_by_time_of_year(start_toy, end_toy, 'SUMZ')
   end
 
+  #Find all missing days of data and set their readings to zero
   def set_all_missing_data_to_zero
     logger.info "Setting all missing data to zero"
     start_toy = TimeOfYear.new(1, 1) # 1st Jan
@@ -559,10 +638,14 @@ class ValidateAMRData
     set_all_missing_data_to_zero_by_time_of_year(start_toy, end_toy, 'ALLZ')
   end
 
-  # typically is imperial to metric meter readings aren't corrected to kWh properly at source
+  # Scales all readings within a date range by a fixed value
+  #
+  # Typically used to correct where imperial to metric meter readings aren't
+  # corrected to kWh properly at source
   def scale_amr_data(start_date, end_date, scale)
     logger.info "Rescaling data between #{start_date} and #{end_date} by #{scale}"
-    start_date = @amr_data.start_date if @amr_data.start_date > start_date # case where another correction has changed data prior to confiured correction
+    # case where another correction has changed data prior to configured correction
+    start_date = @amr_data.start_date if @amr_data.start_date > start_date
     (start_date..end_date).each do |date|
       if @amr_data.date_exists?(date) && @amr_data.substitution_type(date) != 'S31M'
         new_data_x48 = []
@@ -655,6 +738,14 @@ class ValidateAMRData
     end
   end
 
+  # Finds any days with missing data, then replaces them with a fixed reading
+  # values of 0.0123456 and a 'PROB' status code.
+  #
+  # Currently called at the end of validation to fill in any dates that haven't
+  # been substituted by other methods. Would be dangerous to call at other stages
+  #
+  # Assume these are meant to be followed up, rather than treated as real
+  # substituted data
   def final_missing_data_set_to_small_negative
     missing_dates = []
     (@amr_data.start_date..@amr_data.end_date).each do |date|
@@ -669,8 +760,9 @@ class ValidateAMRData
     end
   end
 
+  #Replace any missing weekend dates with zero data
   def replace_missing_weekend_data_with_zero
-    replaced_dates = []
+    replaced_dates = [] #unused, beyond loop
     (@amr_data.start_date..@amr_data.end_date).each do |date|
       if DateTimeHelper.weekend?(date) && @amr_data.date_missing?(date)
         replaced_dates.push(date)
@@ -681,9 +773,15 @@ class ValidateAMRData
     end
   end
 
+  #Replace missing days within date range to zero
+  #
+  # Note: Other than the status code used, this does the same as +zero_missing_data_in_date_range+
+  #
+  # @param Date start_date set to +nil+ to use meter start date
+  # @param Date end_date set to +nil+ to use meter end date
   def replace_missing_data_with_zero(start_date, end_date)
     logger.info "Replacing missing data between #{start_date} and #{end_date} with zero"
-    replaced_dates = []
+    replaced_dates = [] #unused, beyond loop
     start_date = start_date.nil? ? @amr_data.start_date : start_date
     end_date = end_date.nil? ? @amr_data.end_date : end_date
     (start_date..end_date).each do |date|
@@ -696,6 +794,8 @@ class ValidateAMRData
     end
   end
 
+  #Sets all data within the specified date range to zero. Only sets existing data
+  #to zero, will not fill in any missing data
   def zero_data_in_date_range(start_date, end_date)
     logger.info "Overwriting bad data between #{start_date} and #{end_date} with zero"
     (start_date..end_date).each do |date|
@@ -707,6 +807,14 @@ class ValidateAMRData
     end
   end
 
+  # Sets all missing data within a range to zero
+  #
+  # If the +zero_up_until_yesterday+ parameter is provided without an end date,
+  # then this will populate readings up until yesterday, not the meter end date
+  #
+  # @param Date sd the start date, or nil to use the meter start date
+  # @param Date ed the end date, or nil to use meter end date
+  # @param boolean zero_up_until_yesterday if ed not provided then use yesterday as end
   def zero_missing_data_in_date_range(sd, ed, zero_up_until_yesterday)
     start_date = default_start_date(sd)
     end_date   = default_end_date(ed, zero_up_until_yesterday)
@@ -816,6 +924,17 @@ class ValidateAMRData
     end
   end
 
+  # Substitute data for a given date
+  #
+  # If there are solar panels for the meter, and the date is after they were installed,
+  # then it first attempts to substitute the day with a day of the same type (e.g. weekend, weekday)
+  # and where the solar PV generation was similar.
+  #
+  # If no solar, or no similar day can be found then falls back to just finding
+  # a similar day
+  #
+  #This is potentially called for more than just electricity meters, so method
+  #name is a bit misleading.
   def substitute_missing_electricity_data(date, sub_type_code)
     if @meter.solar_pv_panels? && date >= @meter.first_solar_pv_panel_installation_date
       date, subbed_reading = substitute_missing_solar_mains_meter_data(date, sub_type_code, 's')
@@ -877,6 +996,8 @@ class ValidateAMRData
     @amr_data.substitution_type(substitute_date) == 'ORIG'
   end
 
+  #
+  #
   # :override_zero_days_electricity_readings => [
   #  {
   #   start_date: => # optional, default to 1st meter reading
@@ -894,6 +1015,20 @@ class ValidateAMRData
     override_zero_days_electricity_readings(zero_dates)
   end
 
+  #Process a set of rules to attempt to resolve overlaps in date range and
+  #allow one rule to override another.
+  #
+  #Note: this doesnt seem to be fully used/implemented. Relies on meter attribute
+  #rules having a :default attribute which is not configured so can't be entered
+  #via the front-end, although it is mentioned in the documentation. So all
+  #rules are non_defaults?
+  #
+  #Rule precedence also makes assumptions about how data is provided by application
+  #
+  #Currently probably only safe to use non-overlapping, or completely overlapping
+  #rules
+  #
+  #Returns a set of dates with rule on how they should be processed
   def rule_override_dates(rules, rule_type)
     matching_rules_arr_to_hash = rules.select { |r| r.key?(rule_type) }
     matching_rules = default_rules(matching_rules_arr_to_hash.map { |r| r[rule_type] })
@@ -957,6 +1092,16 @@ class ValidateAMRData
     end
   end
 
+  # Processes a list of dates to substitute the readings.
+  #
+  # Regardless of meter type, the substitution process used here is what is used for
+  # electricity meters, i.e. it will replace the days with a nearby weekend, weekday or
+  # holiday date.
+  #
+  # The symbol associated with each date is used to provide a status code that indicates
+  # why the date was substituted (e.g. because of partial nils, or zeroes for whole day)
+  #
+  # @param Hash zero_days hash of Date => Symbol (:all, :partial)
   def override_zero_days_electricity_readings(zero_days)
     zero_days.keys.each do |date|
       @amr_data.delete(date)
@@ -971,6 +1116,11 @@ class ValidateAMRData
     end
   end
 
+  #Queries the AMR data for existing dates that either contain all zero readings,
+  #or depending on the rule, if there are sufficient zero readings during the night
+  #
+  # @param Hash dates a hash of Date => override (true, :on, :intelligent_solar)
+  # @returns a Hash of Date => Symbol (:all, :partial)
   def identify_zero_or_partially_reading_days(dates)
     dates.map do |date, override|
       if @amr_data.date_exists?(date) && @amr_data.one_days_data_x48(date).all?(&:zero?)
@@ -983,6 +1133,7 @@ class ValidateAMRData
     end.compact.to_h
   end
 
+  #Returns true if more than 10% of the half hourly readings in the night are less than 20 watts
   def has_zero_readings_at_night?(date, margin_watts = 20)
     kw_margin = margin_watts / 1000.0
     night_half_hours = nighttime_half_hours(date)
