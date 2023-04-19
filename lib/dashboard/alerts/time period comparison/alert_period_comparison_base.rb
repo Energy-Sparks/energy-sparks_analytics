@@ -57,7 +57,7 @@ class AlertPeriodComparisonBase < AlertAnalysisBase
       difference_kwh:       { description: 'Difference in kwh between last 2 periods',      units:  { kwh: fuel_type }, benchmark_code: 'difk' },
       difference_£:         { description: 'Difference in £ between last 2 periods (using historic tariffs)',  units:  :£, benchmark_code: 'dif£'},
       difference_£current:  { description: 'Difference in £ between last 2 periods (using latest tariffs)',    units:  :£current, benchmark_code: 'dif€'},
-      difference_co2:     { description: 'Difference in co2 kg between last 2 periods', units:  :co2 },
+      difference_co2:     { description: 'Difference in co2 kg between last 2 periods', units:  :co2, benchmark_code: 'difc' },
       abs_difference_kwh: { description: 'Difference in kwh between last 2 periods - absolute',    units:  { kwh: fuel_type } },
       abs_difference_£:        { description: 'Difference in £ between last 2 periods - absolute (using historic tariffs)', units:  :£},
       abs_difference_£current: { description: 'Difference in £ between last 2 periods - absolute (using latest tariffs)',   units:  :£current},
