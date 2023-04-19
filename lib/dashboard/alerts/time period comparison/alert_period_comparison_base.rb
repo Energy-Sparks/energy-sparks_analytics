@@ -548,6 +548,7 @@ class AlertHolidayComparisonBase < AlertPeriodComparisonBase
   end
 
   protected def truncate_period_to_available_meter_data(period)
+    return nil if period.nil?
     return period if period.start_date >= aggregate_meter.amr_data.start_date && period.end_date <= aggregate_meter.amr_data.end_date
     start_date = [period.start_date, aggregate_meter.amr_data.start_date].max
     end_date = [period.end_date, aggregate_meter.amr_data.end_date].min
