@@ -1558,9 +1558,10 @@ module Benchmarking
           tariff_changed_school_name,
 
           # kWh
-
-          { data: ->{ sum_if_complete([e23e_pppk, e23g_pppk, e23s_pppk], [e23e_cppk, e23g_cppk, e23s_cppk]) }, name: :last_school_week, units: :kwh },
-          { data: ->{ sum_data([e23e_cppk, e23g_cppk, e23s_cppk]) },                                name: :holiday,  units: :kwh },
+          {
+            data: ->{ sum_data([e23e_difk, e23g_difk, e23s_difk]) },
+            name: :change_kwh,  units: :kwh
+          },
           {
             data: ->{ percent_change(
                                       sum_if_complete([e23e_pppk, e23g_pppk, e23s_pppk], [e23e_cppk, e23g_cppk, e23s_cppk]),
@@ -1571,8 +1572,10 @@ module Benchmarking
           },
 
           # CO2
-          { data: ->{ sum_if_complete([e23e_pppc, e23g_pppc, s22s_pppc], [e23e_cppc, e23g_cppc, e23s_cppc]) }, name: :last_school_week, units: :co2 },
-          { data: ->{ sum_data([e23e_cppc, e23g_cppc, e23s_cppc]) },                                name: :holiday,  units: :co2 },
+          {
+            data: ->{ sum_data([e23e_cppc, e23g_cppc, e23s_cppc]) },
+            name: :change_co2,  units: :co2
+          },
           {
             data: ->{ percent_change(
                                       sum_if_complete([e23e_pppc, e23g_pppc, e23s_pppc], [e23e_cppc, e23g_cppc, e23s_cppc]),
@@ -1583,9 +1586,10 @@ module Benchmarking
           },
 
           # £
-
-          { data: ->{ sum_if_complete([e23e_ppp£, e23g_ppp£, e23s_ppp£], [e23e_cpp£, e23g_cpp£, e23s_cpp£]) }, name: :last_school_week, units: :£ },
-          { data: ->{ sum_data([e23e_cpp£, e23g_cpp£, e23s_cpp£]) },                                name: :holiday,  units: :£ },
+          {
+            data: ->{ sum_data([e23e_cpp£, e23g_cpp£, e23s_cpp£]) },
+            name: :change_£current,  units: :£
+          },
           {
             data: ->{ percent_change(
                                       sum_if_complete([e23e_ppp£, e23g_ppp£, e23s_ppp£], [e23e_cpp£, e23g_cpp£, e23s_cpp£]),
@@ -1611,13 +1615,13 @@ module Benchmarking
         ],
         column_groups: [
           { name: '',         span: 1 },
-          { name: :kwh,      span: 3 },
-          { name: :co2_kg, span: 3 },
-          { name: :cost,     span: 3 },
+          { name: :kwh,      span: 2 },
+          { name: :co2_kg, span: 2 },
+          { name: :cost,     span: 2 },
           { name: '',         span: 1 }
         ],
         where:   ->{ !sum_data([e23e_ppp£, e23g_ppp£, e23s_ppp£], true).nil? },
-        sort_by:  [9],
+        sort_by:  [6],
         type: %i[table],
         admin_only: true
       },
@@ -1628,31 +1632,18 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name,
 
-          # kWh
-          { data: ->{ e23e_pppk }, name: :last_school_week, units: :kwh },
-          { data: ->{ e23e_cppk }, name: :holiday,  units: :kwh },
-          { data: ->{ percent_change(e23e_pppk, e23e_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
-
-          # CO2
-          { data: ->{ e23e_pppc }, name: :last_school_week, units: :co2 },
-          { data: ->{ e23e_cppc }, name: :holiday,  units: :co2 },
-          { data: ->{ percent_change(e23e_pppc, e23e_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
-
-          # £
-          { data: ->{ e23e_ppp£ }, name: :last_school_week, units: :£ },
-          { data: ->{ e23e_cpp£ }, name: :holiday,  units: :£ },
-          { data: ->{ percent_change(e23e_ppp£, e23e_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ e23e_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ e23e_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ e23e_dif€ },  name: :change_£current, units: :£_0dp },
+          # percent overall
+          { data: ->{ e23e_difp }, name: :change_pct, units: :relative_percent_0dp },
+          # percent co2
+          { data: ->{ percent_change(e23e_pppc, e23e_cppc, true) }, name: :change_pct_co2, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
         ],
-        column_groups: [
-          { name: '',         span: 1 },
-          { name: :kwh,      span: 3 },
-          { name: :co2_kg, span: 3 },
-          { name: :cost,     span: 3 }
-        ],
         where:   ->{ !e23e_ppp£.nil? },
-        sort_by:  [9],
+        sort_by:  [4],
         type: %i[table],
         admin_only: true
       },
@@ -1663,32 +1654,16 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name,
 
-          # kWh
-          { data: ->{ e23g_pppu }, name: :last_school_week_temperature_unadjusted, units: :kwh },
-          { data: ->{ e23g_pppk }, name: :last_school_week_temperature_adjusted, units: :kwh },
-          { data: ->{ e23g_cppk }, name: :holiday,  units: :kwh },
-          { data: ->{ percent_change(e23g_pppk, e23g_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
-
-          # CO2
-          { data: ->{ e23g_pppc }, name: :last_school_week, units: :co2 },
-          { data: ->{ e23g_cppc }, name: :holiday,  units: :co2 },
-          { data: ->{ percent_change(e23g_pppc, e23g_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
-
-          # £
-          { data: ->{ e23g_ppp£ }, name: :last_school_week, units: :£ },
-          { data: ->{ e23g_cpp£ }, name: :holiday,  units: :£ },
-          { data: ->{ percent_change(e23g_ppp£, e23g_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ e23g_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ e23g_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ e23g_dif€ },  name: :change_£current, units: :£_0dp },
+          # percent
+          { data: ->{ e23g_difp }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
         ],
-        column_groups: [
-          { name: '',         span: 1 },
-          { name: :kwh,      span: 4 },
-          { name: :co2_kg, span: 3 },
-          { name: :cost,     span: 3 }
-        ],
         where:   ->{ !e23g_ppp£.nil? },
-        sort_by:  [9],
+        sort_by:  [4],
         type: %i[table],
         admin_only: true
       },
@@ -1699,32 +1674,18 @@ module Benchmarking
         columns:  [
           tariff_changed_school_name,
 
-          # kWh
-          { data: ->{ e23s_pppu }, name: :last_school_week_temperature_unadjusted, units: :kwh },
-          { data: ->{ e23s_pppk }, name: :last_school_week_temperature_adjusted, units: :kwh },
-          { data: ->{ e23s_cppk }, name: :holiday,  units: :kwh },
-          { data: ->{ percent_change(e23s_pppk, e23s_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
-
-          # CO2
-          { data: ->{ e23s_pppc }, name: :last_school_week, units: :co2 },
-          { data: ->{ e23s_cppc }, name: :holiday,  units: :co2 },
-          { data: ->{ percent_change(e23s_pppc, e23s_cppc, true) }, name: :change_pct, units: :relative_percent_0dp },
-
-          # £
-          { data: ->{ e23s_ppp£ }, name: :last_school_week, units: :£ },
-          { data: ->{ e23s_cpp£ }, name: :holiday,  units: :£ },
-          { data: ->{ percent_change(e23s_ppp£, e23s_cpp£, true) }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ e23s_difk },  name: :change_kwh, units: :kwh },
+          { data: ->{ e23s_difc },  name: :change_co2, units: :co2 },
+          { data: ->{ e23s_dif€ },  name: :change_£current, units: :£_0dp },
+          # percent
+          { data: ->{ e23s_difp }, name: :change_pct, units: :relative_percent_0dp },
+          # percent co2
+          { data: ->{ percent_change(e23s_pppc, e23s_cppc, true) }, name: :change_pct_co2, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
         ],
-        column_groups: [
-          { name: '',         span: 1 },
-          { name: :kwh,      span: 4 },
-          { name: :co2_kg, span: 3 },
-          { name: :cost,     span: 3 }
-        ],
         where:   ->{ !e23s_ppp£.nil? },
-        sort_by:  [9],
+        sort_by:  [4],
         type: %i[table],
         admin_only: true
       }
