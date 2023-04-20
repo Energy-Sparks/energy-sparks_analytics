@@ -30,6 +30,7 @@ module Baseload
     #return % difference in baseload between highest and lowest days
     def percent_intraday_variation
       min = min_day_kw
+      return 0.0 if min.zero?
       (max_day_kw - min) / min
     end
 
