@@ -57,7 +57,7 @@ class AlertAnalysisBase < ContentBase
       @calculation_worked = false
     rescue StandardError => e
       log_stack_trace(e)
-      # Rollbar.error(e, alert_type: self.class.name, asof_date: asof_date, school: @school.name)
+      Rollbar.error(e, alert_type: self.class.name, asof_date: asof_date, school: @school.name)
       @calculation_worked = false
     end
   end
