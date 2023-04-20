@@ -47,18 +47,6 @@ class ElectricityBaseloadAnalysis
 
   def blended_baseload_tariff_rate_£_per_kwh(datatype, asof_date = amr_data.end_date)
     annual_average_baseload_kwh = annual_average_baseload_kwh(asof_date)
-    puts '----*********'
-    puts 'scaled:'
-    puts scaled_annual_baseload_cost_£(datatype, asof_date)
-    puts 'annual:'
-    puts annual_average_baseload_kwh(asof_date)
-    puts 'zero'
-    puts annual_average_baseload_kwh.zero?
-    puts 'nan'
-    puts annual_average_baseload_kwh.nan?
-
-    puts '----*********'
-
     return 0.0 if annual_average_baseload_kwh.zero?
     scaled_annual_baseload_cost_£ = scaled_annual_baseload_cost_£(datatype, asof_date)
     scaled_annual_baseload_cost_£ / annual_average_baseload_kwh
