@@ -1573,7 +1573,7 @@ module Benchmarking
 
           # CO2
           {
-            data: ->{ sum_data([e23e_cppc, e23g_cppc, e23s_cppc]) },
+            data: ->{ sum_data([e23e_difc, e23g_difc, e23s_difc]) },
             name: :change_co2,  units: :co2
           },
           {
@@ -1587,16 +1587,16 @@ module Benchmarking
 
           # £
           {
-            data: ->{ sum_data([e23e_cpp£, e23g_cpp£, e23s_cpp£]) },
+            data: ->{ sum_data([e23e_dif€, e23g_dif€, e23s_dif€]) },
             name: :change_£current,  units: :£
           },
           {
             data: ->{ percent_change(
-                                      sum_if_complete([e23e_ppp£, e23g_ppp£, e23s_ppp£], [e23e_cpp£, e23g_cpp£, e23s_cpp£]),
-                                      sum_data([e23e_cpp£, e23g_cpp£, e23s_cpp£]),
+                                      sum_if_complete([e23e_ppp€, e23g_ppp€, e23s_ppp€], [e23e_cpp€, e23g_cpp€, e23s_cpp€]),
+                                      sum_data([e23e_cpp€, e23g_cpp€, e23s_cpp€]),
                                       true
                                     ) },
-            name: :change_£, units: :relative_percent_0dp, chart_data: true
+            name: :change_pct, units: :relative_percent_0dp, chart_data: true
           },
 
           # Metering
@@ -1635,8 +1635,8 @@ module Benchmarking
           { data: ->{ e23e_difk },  name: :change_kwh, units: :kwh },
           { data: ->{ e23e_difc },  name: :change_co2, units: :co2 },
           { data: ->{ e23e_dif€ },  name: :change_£current, units: :£_0dp },
-          # percent overall
-          { data: ->{ e23e_difp }, name: :change_pct, units: :relative_percent_0dp },
+          #percent
+          { data: ->{ percent_change(e23e_pppk, e23e_cppk, true) }, name: :change_pct_combo, units: :relative_percent_0dp },
           # percent co2
           { data: ->{ percent_change(e23e_pppc, e23e_cppc, true) }, name: :change_pct_co2, units: :relative_percent_0dp },
 
@@ -1658,7 +1658,7 @@ module Benchmarking
           { data: ->{ e23g_difc },  name: :change_co2, units: :co2 },
           { data: ->{ e23g_dif€ },  name: :change_£current, units: :£_0dp },
           # percent
-          { data: ->{ e23g_difp }, name: :change_pct, units: :relative_percent_0dp },
+          { data: ->{ percent_change(e23g_pppk, e23g_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
 
           TARIFF_CHANGED_COL
         ],
@@ -1677,8 +1677,8 @@ module Benchmarking
           { data: ->{ e23s_difk },  name: :change_kwh, units: :kwh },
           { data: ->{ e23s_difc },  name: :change_co2, units: :co2 },
           { data: ->{ e23s_dif€ },  name: :change_£current, units: :£_0dp },
-          # percent
-          { data: ->{ e23s_difp }, name: :change_pct, units: :relative_percent_0dp },
+          #percent
+          { data: ->{ percent_change(e23s_pppk, e23s_cppk, true) }, name: :change_pct, units: :relative_percent_0dp },
           # percent co2
           { data: ->{ percent_change(e23s_pppc, e23s_cppc, true) }, name: :change_pct_co2, units: :relative_percent_0dp },
 
