@@ -36,6 +36,7 @@ class ElectricityBaseloadAnalysis
 
     start_date, end_date, scale_to_year = scaled_annual_dates(asof_date)
     kwh = @meter.amr_data.kwh_date_range(start_date, end_date, :kwh) * scale_to_year
+    return 0.0 if kwh.zero?
 
     baseload_kwh / kwh
   end
