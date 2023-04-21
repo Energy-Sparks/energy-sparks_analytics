@@ -35,13 +35,13 @@ module Util
     def at_least_x_full_weeks_of_data?(weeks)
       # Week starts on a Sunday
       start_date = @meter.amr_data.start_date.sunday? ? @meter.amr_data.start_date : @meter.amr_data.start_date.next_occurring(:sunday)
-      (@asof_date - start_date) >= (weeks * 7)
+      days_of_data(start_date) >= (weeks * 7)
     end
 
     #How many days of data to be have between the date we're
     #checking and the start data of the meter
-    def days_of_data
-      (@asof_date - @meter.amr_data.start_date) + 1
+    def days_of_data(start_date = @meter.amr_data.start_date)
+      (@asof_date - start_date) + 1
     end
 
     #Do we have recent data for the meter?

@@ -8,6 +8,34 @@ describe Util::MeterDateRangeChecker, type: :service do
   let(:asof_date)         { Date.today }
   let(:service)           { Util::MeterDateRangeChecker.new(meter,asof_date) }
 
+  describe '#at_least_x_full_weeks_of_data?' do
+    context 'with at least 2 weeks of data with week starting Sunday' do
+      it 'returns true' do
+        # 01-04-2023 is a Saturday
+        asof_date = Date.parse('01-04-2023')
+        meter2 = build(:meter, amr_data: build(:amr_data, :with_days, end_date: asof_date, day_count: 14))
+        service2 = Util::MeterDateRangeChecker.new(meter2, asof_date)
+        expect(meter2.amr_data.start_date).to eq(Date.parse('2023-03-19'))        
+        expect(meter2.amr_data.start_date.sunday?).to eq(true)
+        expect(meter2.amr_data.end_date.saturday?).to eq(true)
+        expect(service2.days_of_data).to eq(14)        
+        expect(service2.at_least_x_full_weeks_of_data?(2)).to eq(true)
+      end
+
+      it 'returns false' do
+        # 05-04-2023 is a Wednesday
+        asof_date = Date.parse('05-04-2023')
+        meter2 = build(:meter, amr_data: build(:amr_data, :with_days, end_date: asof_date, day_count: 14))
+        service2 = Util::MeterDateRangeChecker.new(meter2, asof_date)
+        expect(meter2.amr_data.start_date).to eq(Date.parse('2023-03-23'))
+        expect(meter2.amr_data.start_date.thursday?).to eq(true)
+        expect(meter2.amr_data.end_date.wednesday?).to eq(true)
+        expect(service2.days_of_data).to eq(14)        
+        expect(service2.at_least_x_full_weeks_of_data?(2)).to eq(false)
+      end
+    end
+  end
+
   describe '#one_years_data?' do
     context 'with one years data' do
       it 'returns true' do
