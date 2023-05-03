@@ -21,7 +21,7 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
   attr_reader :weekend_dates_string
   attr_reader :frost_protection_hours
   attr_reader :last_week_end_kwh_including_frost, :last_week_end_£_including_frost
-  attr_reader :last_week_end_£current_including_frost, :last_weekend_cost_co2_including_frost 
+  attr_reader :last_week_end_£current_including_frost, :last_weekend_cost_co2_including_frost
 
   def initialize(school)
     super(school, :weekendgasconsumption)
@@ -192,9 +192,6 @@ class AlertWeekendGasConsumptionShortTerm < AlertGasModelBase
 
     @weekend_dates = previous_weekend_dates(asof_date)
     @weekend_dates_string = @weekend_dates.map { |d| d.strftime('%d%b%Y') }.join(',')
-
-    puts "Got here"
-    puts @weekend_dates_string
 
     @last_week_end_kwh, @frost_protection_hours, @last_week_end_kwh_including_frost =
           kwh_usage_outside_frost_period(@weekend_dates, FROST_PROTECTION_TEMPERATURE, :kwh)

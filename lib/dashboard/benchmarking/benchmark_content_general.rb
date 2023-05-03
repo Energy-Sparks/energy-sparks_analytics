@@ -793,6 +793,12 @@ module Benchmarking
     def storage_heater_content(school_ids:, filter:)
       extra_content(:easter_shutdown_2023_storage_heater_table, filter: filter)
     end
+
+    private def introduction_text
+      text = I18n.t('analytics.benchmarking.content.easter_shutdown_2023_energy_comparison.introduction_text_html')
+      ERB.new(text).result(binding)
+    end
+
   end
 
   class BenchmarkEasterShutdown2023ElectricityTable < BenchmarkContentBase
